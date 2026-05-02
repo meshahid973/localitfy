@@ -8,7 +8,6 @@ It is built as a desktop app using **Electron**, **React**, **Vite**, and **SQLi
 
 ## Preview
 
-> Add your screenshot here later.
 
 ```md
 ![localitfy preview](./preview.png)
