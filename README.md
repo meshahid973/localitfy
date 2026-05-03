@@ -25,4 +25,4 @@ It lets you import your own songs, play them in a clean OLED-style UI, use cute 
 Download the latest installer from the **Releases** page.
 
 ```txt
-localitfy-setup-x.x.x.exe
+localitfy-setup-0.0.3.exe
