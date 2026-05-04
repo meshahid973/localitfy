@@ -1,28 +1,58 @@
-# localitfy 🎵
+# localitfy
 
-**localitfy** is a Spotify-inspired desktop music player for local music.
+> a Spotify-inspired desktop music player for local music.
 
-It lets you import your own songs, play them in a clean OLED-style UI, use cute album art, view listening stats, and show Discord Rich Presence without needing a streaming service.
+![localitfy showcase](./screenshots/showcasee.gif)
+
+localitfy is a desktop music player made for people who keep their songs locally.
+
+it gives your own music library a cleaner, darker, more modern feel with smooth animations, ambient visuals, cover art, stats, and Discord Rich Presence.
+
+no streaming service needed.  
+no account needed.  
+just your music.
 
 ---
 
-## Features ✨
+## features
 
-- local music library
-- clean dark UI
-- cute pixel-style album art
-- ambient glow effects
-- search bar
+- import and play local songs
+- clean OLED-style interface
+- smooth song change animations
+- ambient cover glow
+- album art system
+- search
 - liked songs
 - listening stats
 - Discord Rich Presence
-- Windows installer
+- theme options
+- auto update support
 
 ---
 
-## Download
+## screenshots
 
-Download the latest installer from the **Releases** page.
+![localitfy screenshot](./screenshots/image.png)
 
-```txt
-localitfy-setup-0.0.3.exe
+---
+
+## download
+
+download the latest version from the releases page:
+
+https://github.com/meshahid973/localitfy/releases
+
+notes
+
+localitfy is still early, so some stuff may break.
+
+right now I am mostly focusing on making the app feel smooth, clean, stable, and actually nice to use before adding too many random features.
+
+nooo buggs this time... surely...
+
+contributors
+
+thanks to:
+
+@todouro
+@yudafao
