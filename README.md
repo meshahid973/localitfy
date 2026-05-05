@@ -12,8 +12,9 @@ localitfy gives your own music library a cleaner, darker, more modern feel with 
 ## features
 
 - import and play local songs
-- OLED-style interface
+- OLED style interface
 - smooth song change animations
+- youtube to mp3 importing method
 - ambient cover glow
 - album art system
 - search
@@ -44,7 +45,7 @@ https://github.com/meshahid973/localitfy/releases
 
 localitfy is still early, so some stuff may break.
 
-right now I am focusing on making the app feel smooth, clean, stable, and actually nice to use before adding too many random features.
+right now I am focusing on making the app feel smooth and cleaner.
 
 nooo buggs this time... surely...
 
