@@ -1,6 +1,6 @@
 # localitfy
 
-> a Spotify-inspired desktop music player for local music.
+> a Spotify-inspired desktop music player for local music. (psssstt no ads too)
 
 ![localitfy showcase](./screenshots/showcasee.gif)
 
@@ -17,6 +17,7 @@ localitfy gives your own music library a cleaner, darker, more modern feel with 
 - ambient cover glow
 - album art system
 - search
+- 0 ads too🤩
 - liked songs
 - listening stats
 - Discord Rich Presence
