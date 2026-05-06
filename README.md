@@ -1,10 +1,10 @@
-# localitfy
+# localtify
 
 > a Spotify-inspired desktop music player for local music. (psssstt no ads too)
 
-![localitfy showcase](./screenshots/showcasee.gif)
+![localtify showcase](./screenshots/showcasee.gif)
 
-localitfy gives your own music library a cleaner, darker, more modern feel with smooth animations, ambient visuals, stats, and Discord Rich Presence.
+localtify gives your own music library a cleaner, darker, more modern feel with smooth animations, ambient visuals, stats, and Discord Rich Presence.
 
 
 ---
@@ -29,7 +29,7 @@ localitfy gives your own music library a cleaner, darker, more modern feel with 
 
 ## screenshots
 
-![localitfy screenshot](./screenshots/image.png)
+![localtify screenshot](./screenshots/image.png)
 
 ---
 
@@ -43,7 +43,7 @@ https://github.com/meshahid973/localitfy/releases
 
 ## notes
 
-localitfy is still early, so some stuff may break.
+localtify is still early, so some stuff may break.
 
 right now I am focusing on making the app feel smooth and cleaner.
 
