@@ -31,7 +31,7 @@ localtify gives your own music library a cleaner, darker, more modern feel with 
 
 ![localtify screenshot](./screenshots/image.png)
 ![localtify screenshot](./screenshots/image2.png)
-
+![localtify screenshot](./screenshots/image3.png)
 ---
 
 ## download
