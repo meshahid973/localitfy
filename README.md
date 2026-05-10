@@ -1,29 +1,31 @@
 # localtify
 
-> a Spotify-inspired desktop music player for local music. (psssstt no ads too)
+> your local music, but prettier.
 
 ![localtify showcase](./screenshots/showcasee.gif)
 
-localtify gives your own music library a cleaner, darker, more modern feel with smooth animations, ambient visuals, stats, and Discord Rich Presence.
+localtify is a Spotify inspired desktop music player made for people who still keep songs on their PC.
 
+It gives your local music library a clean dark interface, smooth animations, ambient visuals, themes, listening stats, and Discord Rich Presence without any subscriptions, or random nonsense getting in the way. > (pssssst no ads too)
 
 ---
 
 ## features
 
-- import and play local songs
-- OLED style interface
-- smooth song change animations
-- youtube to mp3 importing method
-- ambient cover glow
+- play your own local songs
+- import music into your library
+- import songs from YouTube using the built-in YouTube to MP3 method
+- dark OLED-style interface
+- smooth animations when switching songs
+- ambient glow based on the cover art
 - album art system
-- search
-- 0 ads too🤩
+- search and library filtering
 - liked songs
 - listening stats
 - Discord Rich Presence
-- themes
+- custom themes
 - auto updates
+- no ads, obviously
 
 ---
 
@@ -32,11 +34,12 @@ localtify gives your own music library a cleaner, darker, more modern feel with 
 ![localtify screenshot](./screenshots/image.png)
 ![localtify screenshot](./screenshots/image2.png)
 ![localtify screenshot](./screenshots/image3.png)
+
 ---
 
 ## download
 
-download the latest version from the releases page:
+You can download the latest version from the releases page:
 
 https://github.com/meshahid973/localitfy/releases
 
@@ -44,17 +47,17 @@ https://github.com/meshahid973/localitfy/releases
 
 ## notes
 
-localtify is still early, so some stuff may break.
+localtify is still pretty new, so some things might break here and there.
 
-right now I am focusing on making the app feel smooth and cleaner.
+Right now I’m mainly focused on making the app feel smoother, cleaner, faster, and more polished with every update.
 
-nooo buggs this time... surely...
+No bugs this time… hopefully.
 
 ---
 
 ## contributors
 
-thanks to:
+big thanks to:
 
 - @todouro
 - @yudafao
