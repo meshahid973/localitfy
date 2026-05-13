@@ -2,7 +2,7 @@
 
 > your local music, but prettier.
 
-![localtify showcase](./screenshots/showcasee.gif)
+![localtify showcase](./screenshots/showcase.png)
 
 localtify is a Spotify inspired desktop music player made for people who still keep songs on their PC.
 
