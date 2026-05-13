@@ -33,7 +33,7 @@ It gives your local music library a clean dark interface, smooth animations, amb
 
 ![localtify screenshot](./screenshots/image.png)
 ![localtify screenshot](./screenshots/image2.png)
-![localtify screenshot](./screenshots/image3.png)
+![localtify screenshot](./screenshots/edittrack.png)
 
 ---
 
