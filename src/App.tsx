@@ -1,4 +1,4 @@
-import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+﻿import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -623,6 +623,7 @@ type AutoUpdateEvent = {
   totalBytes?: number;
   sizeBytes?: number;
   speedBytesPerSecond?: number;
+  nagStage?: 0 | 1 | 2 | 3;
 };
 
 type UpdatePromptState = {
@@ -639,6 +640,7 @@ type UpdatePromptState = {
   totalBytes?: number;
   sizeBytes?: number;
   speedBytesPerSecond?: number;
+  nagStage?: 0 | 1 | 2 | 3;
 };
 
 const defaultUpdatePrompt: UpdatePromptState = {
@@ -676,7 +678,56 @@ function updateStatusLabel(status: UpdatePromptState["status"]) {
   return "ready";
 }
 
-const APP_VERSION = "0.2.9";
+const UPDATE_LEAVE_ALONE_PREFIX = "localitfy.updateLeaveAloneVersion.";
+
+function updateLeaveAloneKey(version: string) {
+  return `${UPDATE_LEAVE_ALONE_PREFIX}${version || "latest"}`;
+}
+
+function updateWasLeftAlone(version: string) {
+  if (!version) return false;
+  try {
+    return window.localStorage.getItem(updateLeaveAloneKey(version)) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function updateNagTitle(prompt: UpdatePromptState) {
+  const stage = prompt.nagStage || 0;
+
+  if (stage === 1) return "are you seriously not going to update???";
+  if (stage === 2) return "come on, you could already be updated";
+  if (stage === 3) return "okay, final update reminder";
+
+  if (prompt.status === "downloaded") return "restart to finish update";
+  if (prompt.status === "downloading") return "downloading update";
+  if (prompt.status === "latest") return "already up to date";
+  if (prompt.status === "error") return "could not check updates";
+  if (prompt.status === "dev") return "dev mode detected";
+  if (prompt.status === "checking") return "checking for updates";
+  return "localtify update ready";
+}
+
+function updateNagMessage(prompt: UpdatePromptState) {
+  const stage = prompt.nagStage || 0;
+
+  if (stage === 1) {
+    return "The update is still sitting here. Your library stays safe, and the install only happens when you press update.";
+  }
+
+  if (stage === 2) {
+    return "By now you could already be on the latest version. Tiny dramatic reminder, but the choice is still yours.";
+  }
+
+  if (stage === 3) {
+    return "I made a dramatic update reminder. Update now, or press LEAVE ME ALONE and localtify will stop asking for this version.";
+  }
+
+  return prompt.error || prompt.message || "localtify update ready. Your library will be backed up before anything installs.";
+}
+
+const APP_VERSION = "0.3.0";
 const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 const INITIAL_LIBRARY_RENDER_LIMIT = 60;
 const LIBRARY_RENDER_BATCH_SIZE = 60;
@@ -759,14 +810,12 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "Windows integration now feels more native with a proper taskbar identity, tray menu, media keys, lock-screen media info, and thumbnail controls",
-  "Start with Windows is now on by default for this release so localtify is ready after sign-in, and it can still be turned off anytime",
-  "The update popup is safer and cleaner with library-backup status, restart and install, later, skip this version, and view-what-changed actions",
-  "Playlists now feel premium with cover collages, total duration, song count, rename, duplicate, drag ordering, and quicker add-to-playlist actions",
-  "Playlist and library data stay local and save through the database with local fallback protection so mixes do not disappear",
-  "The bottom player is cleaner with a wider progress area, calmer duration labels, centered controls, and better-aligned song and volume sections",
-  "Home shelves and app corners were cleaned up so cards keep their rounded edges and the old right-side gutter/strip stays gone",
-  "Animation and media updates were smoothed without removing ambience, glow, covers, Discord, downloads, or existing player features"
+  "Analytics now focuses on local music stats only: songs, plays, minutes listened, top artists, recent imports, library health, liked percent, and played percent",
+  "The analytics page has a cleaner layout with stable cards, no broken cover square, and no overlapping stat areas",
+  "The volume slider is easier to drag and updates smoothly while you move it",
+  "Library rows, sidebar hover states, rounded cards, and update popup spacing were cleaned up for 0.3.0",
+  "The open-source/about area makes GitHub, bug reports, releases, and contributor links easier to find",
+  "Theme switching and small hover animations were cleaned up without removing ambience, glow, covers, playlists, Discord, or Windows media features"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -2653,6 +2702,9 @@ function MainModeApp() {
   const pendingCustomThemePreviewPatchRef = useRef<Partial<Settings>>({});
   const appRootRef = useRef<HTMLElement | null>(null);
   const updateAnalyticsSeenRef = useRef("");
+  const updateNagTimerRef = useRef<number | null>(null);
+  const updateNagVersionRef = useRef("");
+  const updateNagStatusRef = useRef<"available" | "downloaded">("available");
   const analyticsSessionEndedRef = useRef(false);
   const analyticsViewRef = useRef<View>("home");
   const librarySnapshotSignatureRef = useRef("");
@@ -4051,6 +4103,10 @@ function MainModeApp() {
   const activeSongs = useMemo(() => songs.filter((song) => (song.playCount || 0) > 0), [songs]);
   const neverPlayedSongs = useMemo(() => songs.filter((song) => (song.playCount || 0) <= 0), [songs]);
   const likedPercent = songs.length ? Math.round((likedSongs.length / songs.length) * 100) : 0;
+  const playedPercent = songs.length ? Math.round((activeSongs.length / songs.length) * 100) : 0;
+  const averagePlaysPerSong = songs.length ? Math.round((totalPlays / songs.length) * 10) / 10 : 0;
+  const listenedTimeLabel = totalMinutes >= 60 ? `${Math.round((totalMinutes / 60) * 10) / 10}h` : `${totalMinutes}m`;
+  const libraryLengthLabel = formatTime(totalLibrarySeconds);
 
   const longestSong = useMemo(() => {
     return [...songs].sort((a, b) => (b.duration || 0) - (a.duration || 0))[0] ?? null;
@@ -4101,6 +4157,48 @@ function MainModeApp() {
 
     return [...artistMap.values()].sort((a, b) => b.plays - a.plays || b.songs - a.songs).slice(0, 5);
   }, [songs]);
+
+  const recentImportWeekCount = useMemo(() => {
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+    return songs.filter((song) => {
+      const addedAt = Date.parse(song.dateAdded || "");
+      return Number.isFinite(addedAt) && addedAt >= cutoff;
+    }).length;
+  }, [songs]);
+
+  const missingFileCount = useMemo(() => songs.filter((song) => song.fileExists === false).length, [songs]);
+  const libraryHealthPercent = songs.length ? Math.max(0, Math.round(((songs.length - missingFileCount) / songs.length) * 100)) : 0;
+  const libraryHealthLabel = !songs.length
+    ? "empty"
+    : missingFileCount > 0
+      ? `${libraryHealthPercent}% ok`
+      : "healthy";
+  const analyticsStatCards = useMemo(() => ([
+    { label: "total songs", value: songs.length.toLocaleString(), note: `${libraryArtistCount} artist${libraryArtistCount === 1 ? "" : "s"}` },
+    { label: "total plays", value: totalPlays.toLocaleString(), note: `${averagePlaysPerSong} avg per song` },
+    { label: "minutes listened", value: totalMinutes.toLocaleString(), note: listenedTimeLabel },
+    { label: "most played song", value: mostPlayed ? prettyTitle(mostPlayed.title, 12) : "none yet", note: mostPlayed ? `${mostPlayed.playCount || 0} plays` : "play music first", wide: true },
+    { label: "recent imports", value: recentImportWeekCount.toLocaleString(), note: "last 7 days" },
+    { label: "library health", value: libraryHealthLabel, note: missingFileCount > 0 ? `${missingFileCount} missing file${missingFileCount === 1 ? "" : "s"}` : "all files look available" },
+    { label: "liked percent", value: `${likedPercent}%`, note: `${likedSongs.length} liked` },
+    { label: "played percent", value: `${playedPercent}%`, note: `${activeSongs.length} played` }
+  ]), [
+    songs.length,
+    libraryArtistCount,
+    totalPlays,
+    averagePlaysPerSong,
+    totalMinutes,
+    listenedTimeLabel,
+    mostPlayed,
+    recentImportWeekCount,
+    libraryHealthLabel,
+    missingFileCount,
+    likedPercent,
+    likedSongs.length,
+    playedPercent,
+    activeSongs.length
+  ]);
 
   useEffect(() => {
     if (!ready) return;
@@ -4153,7 +4251,8 @@ function MainModeApp() {
   );
   const volumeRangeStyle = useMemo(
     () => ({
-      "--range-progress": `${clamp(volumeDraft, 0, 100)}%`
+      "--range-progress": `${clamp(volumeDraft, 0, 100)}%`,
+      "--volume-percent": `${clamp(volumeDraft, 0, 100)}%`
     } as CSSProperties),
     [volumeDraft]
   );
@@ -4644,7 +4743,9 @@ function MainModeApp() {
       }
 
       if (payload.type === "available") {
-        if (version && window.localStorage.getItem("localitfy.skippedUpdateVersion") === version) {
+        updateNagVersionRef.current = version;
+        updateNagStatusRef.current = "available";
+        if (version && updateWasLeftAlone(version)) {
           return;
         }
         setUpdatePrompt({
@@ -4681,6 +4782,8 @@ function MainModeApp() {
       }
 
       if (payload.type === "downloaded") {
+        updateNagVersionRef.current = version || updateNagVersionRef.current || "latest";
+        updateNagStatusRef.current = "downloaded";
         setUpdatePrompt((old) => ({
           ...old,
           visible: true,
@@ -4752,9 +4855,18 @@ function MainModeApp() {
   }, [ready, settings.autoUpdateEnabled]);
 
   useEffect(() => {
+    return () => {
+      if (updateNagTimerRef.current) {
+        window.clearTimeout(updateNagTimerRef.current);
+        updateNagTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!updatePrompt.visible) return;
 
-    const signature = [updatePrompt.status, updatePrompt.version || "none"].join(":");
+    const signature = [updatePrompt.status, updatePrompt.version || "none", updatePrompt.nagStage || 0].join(":");
     if (updateAnalyticsSeenRef.current === signature) return;
 
     updateAnalyticsSeenRef.current = signature;
@@ -4765,7 +4877,7 @@ function MainModeApp() {
       current_view: analyticsViewRef.current,
       has_error: Boolean(updatePrompt.error)
     });
-  }, [updatePrompt.visible, updatePrompt.status, updatePrompt.version, updatePrompt.error]);
+  }, [updatePrompt.visible, updatePrompt.status, updatePrompt.version, updatePrompt.error, updatePrompt.nagStage]);
 
   async function askUpdaterToDownload() {
     if (!window.localitfy.downloadUpdate) {
@@ -4854,13 +4966,81 @@ function MainModeApp() {
     setWhatsNewOpen(true);
   }
 
-  function skipAvailableUpdate() {
-    if (updatePrompt.version) {
-      window.localStorage.setItem("localitfy.skippedUpdateVersion", updatePrompt.version);
+  function clearUpdateNagTimer() {
+    if (updateNagTimerRef.current) {
+      window.clearTimeout(updateNagTimerRef.current);
+      updateNagTimerRef.current = null;
     }
+  }
+
+  function showUpdateNag(stage: 1 | 2 | 3, versionInput?: string) {
+    const version = versionInput || updateNagVersionRef.current || updatePrompt.version || "latest";
+    if (updateWasLeftAlone(version)) return;
+
+    updateNagVersionRef.current = version;
+    setUpdatePrompt({
+      visible: true,
+      status: updateNagStatusRef.current,
+      version,
+      percent: updateNagStatusRef.current === "downloaded" ? 100 : 0,
+      nagStage: stage,
+      message: "",
+      error: "",
+      libraryBackedUp: true
+    });
+  }
+
+  function scheduleUpdateNag(versionInput?: string, stageInput?: 1 | 2 | 3, customDelayMs?: number, statusInput?: "available" | "downloaded") {
+    const version = versionInput || updatePrompt.version || updateNagVersionRef.current || "latest";
+    const stage = stageInput || 1;
+
+    if (updateWasLeftAlone(version)) return;
+
+    updateNagVersionRef.current = version;
+    updateNagStatusRef.current = statusInput || updateNagStatusRef.current || "available";
+    clearUpdateNagTimer();
+
+    const delayMs = typeof customDelayMs === "number"
+      ? customDelayMs
+      : stage === 1
+        ? 120_000
+        : 60_000;
+
+    updateNagTimerRef.current = window.setTimeout(() => {
+      updateNagTimerRef.current = null;
+      showUpdateNag(stage, version);
+    }, delayMs);
+  }
+
+  function handleUpdateLater() {
+    const currentStage = updatePrompt.nagStage || 0;
+    const nextStage = currentStage >= 2 ? 3 : currentStage === 1 ? 2 : 1;
+    const nextDelay = currentStage === 0 ? 120_000 : 60_000;
+    const version = updatePrompt.version || updateNagVersionRef.current || "latest";
+    const reminderStatus = updatePrompt.status === "downloaded" ? "downloaded" : "available";
 
     setUpdatePrompt(defaultUpdatePrompt);
-    setStatusText("update skipped");
+    scheduleUpdateNag(version, nextStage, nextDelay, reminderStatus);
+    setStatusText("update reminder snoozed");
+  }
+
+  function leaveUpdateAlone() {
+    const version = updatePrompt.version || updateNagVersionRef.current || "latest";
+
+    try {
+      window.localStorage.setItem(updateLeaveAloneKey(version), "1");
+    } catch {
+      // ignore localStorage errors
+    }
+
+    clearUpdateNagTimer();
+    setUpdatePrompt(defaultUpdatePrompt);
+    setStatusText("update reminder muted");
+    showAppToast("update reminder muted for this version", "info");
+  }
+
+  function skipAvailableUpdate() {
+    handleUpdateLater();
   }
 
   function resetPlayCountTracker() {
@@ -5069,6 +5249,44 @@ function MainModeApp() {
       setWhatsNewOpen(true);
       setQuery("");
       showAppToast("what's new opened", "success");
+      return;
+    }
+
+    if (command === "popup1" || command === "/popup1") {
+      clearUpdateNagTimer();
+      updateNagVersionRef.current = "test";
+      updateNagStatusRef.current = "available";
+      setUpdatePrompt({
+        visible: true,
+        status: "available",
+        version: "test",
+        percent: 0,
+        message: "localtify test update is ready to download.",
+        error: "",
+        libraryBackedUp: true
+      });
+      setQuery("");
+      return;
+    }
+
+    if (command === "popup2" || command === "/popup2") {
+      clearUpdateNagTimer();
+      showUpdateNag(1, updatePrompt.version || updateNagVersionRef.current || "test");
+      setQuery("");
+      return;
+    }
+
+    if (command === "popup3" || command === "/popup3") {
+      clearUpdateNagTimer();
+      showUpdateNag(2, updatePrompt.version || updateNagVersionRef.current || "test");
+      setQuery("");
+      return;
+    }
+
+    if (command === "popup4" || command === "/popup4") {
+      clearUpdateNagTimer();
+      showUpdateNag(3, updatePrompt.version || updateNagVersionRef.current || "test");
+      setQuery("");
       return;
     }
 
@@ -8544,7 +8762,9 @@ function MainModeApp() {
   function previewVolume(value: string | number, input?: HTMLInputElement | null) {
     const safePercent = clamp(Number(value), 0, 100);
     volumeDraftRef.current = safePercent;
+    setVolumeDraft(safePercent);
     paintRangeProgress(input, safePercent);
+    input?.style.setProperty("--volume-percent", `${safePercent}%`);
     if (audioRef.current) {
       audioRef.current.volume = safePercent / 100;
     }
@@ -10576,164 +10796,112 @@ function MainModeApp() {
             )}
 
             {view === "analytics" && (
-              <section className="analyticsLayout analyticsV005">
-                <section className="panel analyticsHeroPanel ambientSurface" style={ambientStyle}>
-                  <div className="analyticsHeroText">
-                    <p className="eyebrow">analytics</p>
-                    <h3>your localtify stats</h3>
+              <section className="analyticsLayout analyticsLocalV030">
+                <section className="panel analyticsLocalHero">
+                  <div className="analyticsLocalHeroCopy">
+                    <p className="eyebrow">local music stats</p>
+                    <h3>listening analytics</h3>
                     <p>
                       {songs.length
-                        ? `${songs.length} local track${songs.length === 1 ? "" : "s"} • ${totalPlays} total play${totalPlays === 1 ? "" : "s"} • ${totalMinutes} minutes listened`
-                        : "import songs and your stats will start appearing here."}
+                        ? `Built from your own library: ${songs.length.toLocaleString()} song${songs.length === 1 ? "" : "s"}, ${totalPlays.toLocaleString()} total play${totalPlays === 1 ? "" : "s"}, and ${totalMinutes.toLocaleString()} minute${totalMinutes === 1 ? "" : "s"} listened.`
+                        : "Import songs and localtify will build this from your local library data."}
                     </p>
                   </div>
 
-                  <div className="analyticsHeroMeter">
-                    <span>{likedPercent}%</span>
-                    <small>library liked</small>
+                  <div className="analyticsLocalHeroStats" aria-label="quick local analytics">
+                    <span><strong>{playedPercent}%</strong><small>played</small></span>
+                    <span><strong>{likedPercent}%</strong><small>liked</small></span>
+                    <span><strong>{libraryHealthLabel}</strong><small>health</small></span>
                   </div>
                 </section>
 
-                <section className="analyticsCardGridV005">
-                  <div className="statCard analyticsBigCard">
-                    <span>most played</span>
-                    <strong>{mostPlayed ? prettyTitle(mostPlayed.title, 6) : "none yet"}</strong>
-                    <small>{mostPlayed ? `${mostPlayed.playCount} plays` : "play something first"}</small>
-                  </div>
-
-                  <div className="statCard">
-                    <span>songs imported</span>
-                    <strong>{songs.length}</strong>
-                    <small>{activeSongs.length} played at least once</small>
-                  </div>
-
-                  <div className="statCard">
-                    <span>liked songs</span>
-                    <strong>{likedSongs.length}</strong>
-                    <small>{likedPercent}% of library</small>
-                  </div>
-
-                  <div className="statCard">
-                    <span>total plays</span>
-                    <strong>{totalPlays}</strong>
-                    <small>{neverPlayedSongs.length} never played</small>
-                  </div>
-
-                  <div className="statCard">
-                    <span>minutes listened</span>
-                    <strong>{totalMinutes}</strong>
-                    <small>{formatTime(totalLibrarySeconds)} library length</small>
-                  </div>
-
-                  <div className="statCard">
-                    <span>average length</span>
-                    <strong>{formatTime(averageSongSeconds)}</strong>
-                    <small>{longestSong ? `longest ${formatTime(longestSong.duration)}` : "no songs yet"}</small>
-                  </div>
+                <section className="analyticsLocalGrid" aria-label="local listening statistics">
+                  {analyticsStatCards.map((card) => (
+                    <article key={card.label} className={`statCard analyticsLocalCard${card.wide ? " analyticsLocalCardWide" : ""}`}>
+                      <span>{card.label}</span>
+                      <strong title={card.value}>{card.value}</strong>
+                      <small>{card.note}</small>
+                    </article>
+                  ))}
                 </section>
 
-                <section className="analyticsSplitGrid">
-                  <section className="panel analyticsChartPanel">
-                    <div className="panelHead">
+                <section className="analyticsLocalSplit">
+                  <section className="panel analyticsLocalPanel">
+                    <div className="panelHead analyticsLocalPanelHead">
                       <div>
-                        <p className="eyebrow">top songs</p>
-                        <h3>repeat chart</h3>
-                      </div>
-                      <span>{topSongs.length ? `${topSongs.length} ranked` : "empty"}</span>
-                    </div>
-
-                    <div className="analyticsBarsV005">
-                      {(topSongs.length ? topSongs : songs.slice(0, 6)).map((song, index) => {
-                        const maxPlays = Math.max(1, ...topSongs.map((item) => item.playCount || 0));
-                        const width = Math.max(6, Math.round(((song.playCount || 0) / maxPlays) * 100));
-
-                        return (
-                          <button key={song.id} className="analyticsBarRow" onClick={() => void selectSong(song.id, true)}>
-                            <span>{String(index + 1).padStart(2, "0")}</span>
-                            <strong>{prettyTitle(song.title, 6)}</strong>
-                            <div className="analyticsBarTrack"><i style={{ width: `${width}%` }} /></div>
-                            <small>{song.playCount || 0} plays</small>
-                          </button>
-                        );
-                      })}
-
-                      {!songs.length ? <p className="softText">your chart will appear after you import and play songs.</p> : null}
-                    </div>
-                  </section>
-
-                  <section className="panel analyticsSidePanel">
-                    <div className="panelHead">
-                      <div>
-                        <p className="eyebrow">artists</p>
+                        <p className="eyebrow">top artists</p>
                         <h3>artist stats</h3>
                       </div>
+                      <span>{topArtists.length ? `${topArtists.length} shown` : "empty"}</span>
                     </div>
 
-                    <div className="topList analyticsArtistList">
+                    <div className="analyticsLocalArtistList">
                       {topArtists.length ? (
-                        topArtists.map((artist, index) => (
-                          <div key={artist.name} className="topRow analyticsArtistRow">
-                            <span>{index + 1}</span>
-                            <strong>{artist.name}</strong>
-                            <small>{artist.plays} plays • {artist.songs} songs</small>
-                          </div>
-                        ))
+                        topArtists.map((artist, index) => {
+                          const maxArtistPlays = Math.max(1, ...topArtists.map((item) => item.plays || 0));
+                          const width = Math.max(5, Math.round(((artist.plays || 0) / maxArtistPlays) * 100));
+
+                          return (
+                            <div key={artist.name} className="analyticsLocalArtistRow">
+                              <span>{String(index + 1).padStart(2, "0")}</span>
+                              <div>
+                                <strong>{artist.name}</strong>
+                                <small>{artist.plays.toLocaleString()} plays • {artist.songs} song{artist.songs === 1 ? "" : "s"}</small>
+                              </div>
+                              <i aria-hidden="true"><b style={{ width: `${width}%` }} /></i>
+                            </div>
+                          );
+                        })
                       ) : (
-                        <p className="softText">artists show here once you import music.</p>
+                        <p className="softText">artists will show here after you import music.</p>
                       )}
                     </div>
                   </section>
-                </section>
 
-                <section className="panel analyticsRecentPanel">
-                  <div className="panelHead">
-                    <div>
-                      <p className="eyebrow">recent imports</p>
-                      <h3>fresh files</h3>
+                  <section className="panel analyticsLocalPanel">
+                    <div className="panelHead analyticsLocalPanelHead">
+                      <div>
+                        <p className="eyebrow">recent imports</p>
+                        <h3>fresh files</h3>
+                      </div>
+                      <span>{recentImportWeekCount} this week</span>
                     </div>
-                  </div>
 
-                  <div className="recentImportStrip">
-                    {(recentlyAdded.length ? recentlyAdded : songs.slice(0, 5)).map((song) => (
-                      <button key={song.id} type="button" className="recentImportCard" onClick={() => void selectSong(song.id, true)}>
-                        <Cover song={song} className="recentImportArt" />
-                        <strong>{prettyTitle(song.title, 5)}</strong>
-                        <small>{formatTime(song.duration)} • {song.playCount || 0} plays</small>
-                      </button>
-                    ))}
-                    {!songs.length ? <p className="softText">nothing imported yet.</p> : null}
-                  </div>
+                    <div className="analyticsLocalRecentList">
+                      {(recentlyAdded.length ? recentlyAdded.slice(0, 6) : songs.slice(0, 6)).map((song) => (
+                        <button key={song.id} type="button" className="analyticsLocalRecentRow" onClick={() => void selectSong(song.id, true)}>
+                          <Cover song={song} className="analyticsLocalRecentArt" />
+                          <div>
+                            <strong>{prettyTitle(song.title, 8)}</strong>
+                            <small>{prettyMeta(song.artist)} • {formatTime(song.duration)}</small>
+                          </div>
+                        </button>
+                      ))}
+                      {!songs.length ? <p className="softText">nothing imported yet.</p> : null}
+                    </div>
+                  </section>
                 </section>
 
-                <section className="panel analyticsHealthPanel">
-                  <div className="panelHead">
+                <section className="panel analyticsLocalPanel analyticsLocalHealthPanel">
+                  <div className="panelHead analyticsLocalPanelHead">
                     <div>
                       <p className="eyebrow">library health</p>
-                      <h3>accurate local stats</h3>
+                      <h3>local data check</h3>
                     </div>
-                    <span>live</span>
+                    <span>from your database</span>
                   </div>
 
-                  <div className="analyticsHealthGrid">
-                    <div>
-                      <strong>{formatTime(totalLibrarySeconds)}</strong>
-                      <small>full library length</small>
-                    </div>
-                    <div>
-                      <strong>{songs.length ? Math.round((totalPlays / songs.length) * 10) / 10 : 0}</strong>
-                      <small>average plays per song</small>
-                    </div>
-                    <div>
-                      <strong>{songs.length ? Math.round((activeSongs.length / songs.length) * 100) : 0}%</strong>
-                      <small>songs played at least once</small>
-                    </div>
-                    <div>
-                      <strong>{neverPlayedSongs.length}</strong>
-                      <small>songs still untouched</small>
-                    </div>
+                  <div className="analyticsLocalHealthGrid">
+                    <div><strong>{playedPercent}%</strong><small>played percent</small></div>
+                    <div><strong>{likedPercent}%</strong><small>liked percent</small></div>
+                    <div><strong>{neverPlayedSongs.length}</strong><small>never played</small></div>
+                    <div><strong>{missingFileCount}</strong><small>missing files</small></div>
+                    <div><strong>{libraryLengthLabel}</strong><small>library length</small></div>
+                    <div><strong>{formatTime(averageSongSeconds)}</strong><small>average length</small></div>
+                    <div><strong>{longestSong ? formatTime(longestSong.duration) : "0:00"}</strong><small>longest track</small></div>
                   </div>
 
-                  <p className="softText">minutes listened uses each song duration multiplied by its stored play count, so the numbers update with your real library data.</p>
+                  <p className="softText">These stats stay local and are calculated from your songs, play counts, durations, likes, playlists, and import dates.</p>
                 </section>
               </section>
             )}
@@ -10968,13 +11136,21 @@ function MainModeApp() {
                   style={volumeRangeStyle}
                   aria-label="volume level"
                   onPointerDown={(event) => {
+                    event.currentTarget.setPointerCapture?.(event.pointerId);
                     volumeDraftRef.current = Number(event.currentTarget.value);
                     setIsVolumeDragging(true);
+                    previewVolume(event.currentTarget.value, event.currentTarget);
                   }}
                   onInput={(event) => previewVolume(event.currentTarget.value, event.currentTarget)}
                   onChange={(event) => previewVolume(event.currentTarget.value, event.currentTarget)}
-                  onPointerUp={(event) => commitVolume(event.currentTarget.value)}
-                  onPointerCancel={(event) => commitVolume(event.currentTarget.value)}
+                  onPointerUp={(event) => {
+                    event.currentTarget.releasePointerCapture?.(event.pointerId);
+                    commitVolume(event.currentTarget.value);
+                  }}
+                  onPointerCancel={(event) => {
+                    event.currentTarget.releasePointerCapture?.(event.pointerId);
+                    commitVolume(event.currentTarget.value);
+                  }}
                   onKeyUp={(event) => commitVolume(event.currentTarget.value)}
                   onBlur={(event) => {
                     if (isVolumeDragging) commitVolume(event.currentTarget.value);
@@ -11053,7 +11229,7 @@ function MainModeApp() {
       {updatePrompt.visible ? (
         <div className="updateToastLayer" onClick={() => setUpdatePrompt(defaultUpdatePrompt)}>
           <section
-            className={`updateToastCard ${updatePrompt.status}`}
+            className={`updateToastCard ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
             onClick={(event) => event.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -11069,22 +11245,8 @@ function MainModeApp() {
 
             <div className="updateToastText">
               <p className="eyebrow">safe desktop update</p>
-              <h3>
-                {updatePrompt.status === "downloaded"
-                  ? "restart to finish update"
-                  : updatePrompt.status === "downloading"
-                    ? "downloading update"
-                    : updatePrompt.status === "latest"
-                      ? "already up to date"
-                      : updatePrompt.status === "error"
-                        ? "could not check updates"
-                        : updatePrompt.status === "dev"
-                          ? "dev mode detected"
-                          : updatePrompt.status === "checking"
-                            ? "checking for updates"
-                            : "localtify update ready"}
-              </h3>
-              <p>{updatePrompt.error || updatePrompt.message || "localtify update ready. Your library will be backed up before anything installs."}</p>
+              <h3>{updateNagTitle(updatePrompt)}</h3>
+              <p>{updateNagMessage(updatePrompt)}</p>
               <div className="updateToastMetaRow">
                 {updatePrompt.version ? <span className="updateVersionPill">version {updatePrompt.version}</span> : null}
                 <span className={`updateSafePill ${updatePrompt.libraryBackedUp ? "ok" : "pending"}`}>
@@ -11102,24 +11264,44 @@ function MainModeApp() {
             <div className="updateToastActions">
               {updatePrompt.status === "available" ? (
                 <>
-                  <button className="updateGhostButton" type="button" onClick={() => setUpdatePrompt(defaultUpdatePrompt)}>
-                    later
-                  </button>
-                  <button className="updateGhostButton" type="button" onClick={openUpdateChangelog}>
-                    view what changed
-                  </button>
-                  <button className="updateGhostButton" type="button" onClick={skipAvailableUpdate}>
-                    skip this version
-                  </button>
-                  <button className="updatePrimaryButton" type="button" onClick={askUpdaterToDownload}>
-                    download update
-                  </button>
+                  {updatePrompt.nagStage === 3 ? (
+                    <>
+                      <button className="updateGhostButton" type="button" onClick={handleUpdateLater}>
+                        okay
+                      </button>
+                      <button className="updatePrimaryButton" type="button" onClick={updatePrompt.status === "downloaded" ? askUpdaterToInstall : askUpdaterToDownload}>
+                        update
+                      </button>
+                      <button className="updateGhostButton updateLeaveAloneButton" type="button" onClick={leaveUpdateAlone}>
+                        LEAVE ME ALONE
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="updateGhostButton" type="button" onClick={handleUpdateLater}>
+                        later
+                      </button>
+                      {updatePrompt.nagStage ? null : (
+                        <button className="updateGhostButton" type="button" onClick={openUpdateChangelog}>
+                          view what changed
+                        </button>
+                      )}
+                      {updatePrompt.nagStage ? null : (
+                        <button className="updateGhostButton" type="button" onClick={skipAvailableUpdate}>
+                          skip this version
+                        </button>
+                      )}
+                      <button className="updatePrimaryButton" type="button" onClick={updatePrompt.status === "downloaded" ? askUpdaterToInstall : askUpdaterToDownload}>
+                        {updatePrompt.nagStage ? "update" : "download update"}
+                      </button>
+                    </>
+                  )}
                 </>
               ) : null}
 
               {updatePrompt.status === "downloaded" ? (
                 <>
-                  <button className="updateGhostButton" type="button" onClick={() => setUpdatePrompt(defaultUpdatePrompt)}>
+                  <button className="updateGhostButton" type="button" onClick={handleUpdateLater}>
                     later
                   </button>
                   <button className="updateGhostButton" type="button" onClick={openUpdateChangelog}>
@@ -11152,7 +11334,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.2.9 focuses on native Windows polish, safer updates, real playlists, protected local data, and a cleaner player/home layout.</p>
+            <p className="whatsNewSubtext">0.3.0 focuses on cleaner local analytics, smaller UI annoyances, open-source polish, and smoother everyday use without removing the app ambience.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>
