@@ -53,14 +53,6 @@ It is built for people who want their local music to feel modern again.
 
 ![home](screenshots/localtify-home.png)
 
-More screenshots can be added later:
-
-```txt
-screenshots/home.png
-screenshots/settings.png
-screenshots/covers.png
-screenshots/playlists.png
-```
 
 ---
 
