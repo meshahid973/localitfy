@@ -10,7 +10,7 @@ No account.
 No subscription.  
 Your songs stay on your PC.
 
-![localtify screenshot](screenshots/localtify-home.png)
+![localtify screenshot](screenshots/showcase.png)
 
 ---
 
