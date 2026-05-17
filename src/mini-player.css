@@ -1,0 +1,623 @@
+/* localtify 0.2.8 cleanup: mini-player.css owns detached mini-player only. */
+/* ========================================================================== 
+   localtify mini-player.css — detached mini-player only + final PIP icon win
+   0.1.3 stability pass
+
+   Goal:
+   - keep the detached mini player smooth and OLED clean
+   - avoid touching Home/Library layout
+   - keep animations transform/opacity based
+   - make the PIP png white because mini-player.css loads last
+========================================================================== */
+
+:root{
+  --mini-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --mini-ease-pop: cubic-bezier(0.2, 1.12, 0.26, 1);
+}
+
+/* Last-loaded safety patch for the main PIP image. This does not move layout. */
+.pipIcon,
+.app .circleButton .pipIcon,
+.app .simpleControls .pipIcon{
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+  object-fit: contain !important;
+  opacity: 0.94 !important;
+  mix-blend-mode: normal !important;
+  filter: brightness(0) invert(1) grayscale(1) contrast(1.08) drop-shadow(0 0 8px rgba(255, 255, 255, 0.12)) !important;
+  transform: translateZ(0) !important;
+  transition:
+    opacity 160ms ease,
+    filter 160ms ease,
+    transform 180ms var(--mini-ease-pop) !important;
+}
+
+.app .circleButton:hover .pipIcon,
+.app .simpleControls button:hover .pipIcon{
+  opacity: 1 !important;
+  filter: brightness(0) invert(1) grayscale(1) contrast(1.12) drop-shadow(0 0 12px rgba(255, 255, 255, 0.24)) !important;
+  transform: translate3d(0, -1px, 0) scale(1.035) !important;
+}
+
+.app .circleButton:active .pipIcon,
+.app .simpleControls button:active .pipIcon{
+  transform: translateZ(0) scale(0.94) !important;
+}
+
+/* ========================================================================== 
+   Detached mini-player window
+========================================================================== */
+
+.miniDetachedRoot{
+  --bg: #000;
+  --bg-2: #050505;
+  --text: #f7f7f2;
+  --text-2: rgba(247, 247, 242, 0.72);
+  --muted: rgba(247, 247, 242, 0.48);
+  --line: rgba(255, 255, 255, 0.095);
+  --line-2: rgba(255, 255, 255, 0.16);
+  --surface: rgba(255, 255, 255, 0.045);
+  --surface-2: rgba(255, 255, 255, 0.075);
+  width: 100vw !important;
+  height: 100vh !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-rows: 34px minmax(0, 1fr) !important;
+  color: var(--text) !important;
+  background:
+    radial-gradient(circle at 50% -18%, rgba(var(--accent-rgb, 100, 240, 164), 0.12), transparent 34%),
+    radial-gradient(circle at 108% 112%, rgba(var(--accent-rgb, 100, 240, 164), 0.08), transparent 36%),
+    #000 !important;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  text-rendering: geometricPrecision !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  isolation: isolate !important;
+  contain: strict !important;
+}
+
+.miniDetachedRoot,
+.miniDetachedRoot *,
+.miniDetachedRoot *::before,
+.miniDetachedRoot *::after{
+  box-sizing: border-box !important;
+}
+
+.miniDetachedRoot button,
+.miniDetachedRoot input{
+  font: inherit !important;
+}
+
+.miniDetachedRoot button{
+  -webkit-app-region: no-drag !important;
+  cursor: pointer !important;
+}
+
+.miniDetachedRoot button:disabled{
+  cursor: not-allowed !important;
+  opacity: 0.48 !important;
+}
+
+/* Title bar */
+
+.miniDetachedRoot .titleBar,
+.miniDetachedRoot .miniTitleBar{
+  height: 34px !important;
+  min-height: 34px !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 0 8px 0 10px !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  background: rgba(0, 0, 0, 0.82) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-app-region: drag !important;
+  backdrop-filter: blur(12px) saturate(1.04) !important;
+}
+
+.miniDetachedRoot .titleDrag{
+  min-width: 0 !important;
+  height: 100% !important;
+  flex: 1 1 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+  -webkit-app-region: drag !important;
+}
+
+.miniDetachedRoot .titleLogo{
+  width: 18px !important;
+  height: 18px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+  color: #06100b !important;
+  background: var(--accent, #64f0a4) !important;
+  border-radius: 7px !important;
+  box-shadow: 0 0 18px rgba(var(--accent-rgb, 100, 240, 164), 0.18) !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+}
+
+.miniDetachedRoot .titleDrag span:last-child{
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.02em !important;
+  text-transform: lowercase !important;
+}
+
+.miniDetachedRoot .windowButtons{
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  -webkit-app-region: no-drag !important;
+}
+
+.miniDetachedRoot .windowButtons button{
+  width: 25px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  transition:
+    transform 150ms var(--mini-ease),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease !important;
+}
+
+.miniDetachedRoot .windowButtons button:hover{
+  transform: translateY(-1px) !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.11) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+.miniDetachedRoot .windowButtons button:active{
+  transform: translateY(0) scale(0.94) !important;
+}
+
+.miniDetachedRoot .windowButtons .closeWin:hover{
+  color: #fff !important;
+  background: rgba(255, 79, 115, 0.72) !important;
+  border-color: rgba(255, 112, 137, 0.82) !important;
+}
+
+/* Card */
+
+.miniDetachedCard{
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 8px !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto !important;
+  gap: 10px !important;
+  align-items: center !important;
+  justify-items: center !important;
+  color: var(--text) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb, 100, 240, 164), 0.085), transparent 36%),
+    rgba(5, 5, 5, 0.94) !important;
+  border: 1px solid rgba(255, 255, 255, 0.105) !important;
+  border-radius: 20px !important;
+  box-shadow:
+    0 22px 68px rgba(0, 0, 0, 0.54),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  isolation: isolate !important;
+  contain: layout paint style !important;
+  transform: translateZ(0) !important;
+  animation: miniDetachedCardIn 360ms var(--mini-ease) both !important;
+}
+
+.miniDetachedCard.ambientSurface::before,
+.miniDetachedCard.ambientSurface::after{
+  content: "" !important;
+  position: absolute !important;
+  inset: -18% !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  transform: translateZ(0) !important;
+}
+
+.miniDetachedCard.ambientSurface::before{
+  opacity: 0.46 !important;
+  background:
+    radial-gradient(circle at var(--ambient-x, 72%) var(--ambient-y, 28%), rgba(var(--ambient-rgb, var(--accent-rgb, 100, 240, 164)), 0.22), transparent 34%),
+    radial-gradient(circle at 18% 88%, rgba(var(--accent-rgb, 100, 240, 164), 0.10), transparent 34%) !important;
+  filter: blur(22px) saturate(1.04) !important;
+}
+
+.miniDetachedCard.ambientSurface::after{
+  inset: 0 !important;
+  opacity: 0.28 !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.055), transparent 36%, rgba(var(--accent-rgb, 100, 240, 164), 0.055)) !important;
+  filter: none !important;
+}
+
+.miniDetachedCard > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.miniDetachedBadge{
+  justify-self: start !important;
+  min-width: 0 !important;
+  padding: 6px 9px !important;
+  color: var(--accent, #64f0a4) !important;
+  background: rgba(var(--accent-rgb, 100, 240, 164), 0.11) !important;
+  border: 1px solid rgba(var(--accent-rgb, 100, 240, 164), 0.22) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 0 22px rgba(var(--accent-rgb, 100, 240, 164), 0.07) !important;
+  font-size: 9px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+
+.miniDetachedArt{
+  width: min(42vh, 138px) !important;
+  height: min(42vh, 138px) !important;
+  max-width: 62vw !important;
+  max-height: 34vh !important;
+  display: block !important;
+  overflow: hidden !important;
+  object-fit: cover !important;
+  border-radius: 22px !important;
+  background:
+    radial-gradient(circle at 45% 28%, rgba(var(--accent-rgb, 100, 240, 164), 0.20), transparent 44%),
+    rgba(255, 255, 255, 0.055) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.5),
+    0 0 42px rgba(var(--ambient-rgb, var(--accent-rgb, 100, 240, 164)), 0.12) !important;
+  transform: translateZ(0) !important;
+  transition:
+    transform 260ms var(--mini-ease),
+    box-shadow 260ms ease,
+    border-color 220ms ease,
+    filter 220ms ease !important;
+}
+
+.miniDetachedRoot[data-playing="on"] .miniDetachedArt{
+  transform: translateZ(0) scale(1.018) !important;
+  box-shadow:
+    0 26px 68px rgba(0, 0, 0, 0.52),
+    0 0 50px rgba(var(--ambient-rgb, var(--accent-rgb, 100, 240, 164)), 0.18) !important;
+}
+
+.miniDetachedMeta{
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 3px !important;
+  text-align: center !important;
+}
+
+.miniDetachedMeta strong{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: #fff !important;
+  font-size: clamp(18px, 6.5vw, 28px) !important;
+  font-weight: 1000 !important;
+  line-height: 0.96 !important;
+  letter-spacing: -0.07em !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  text-transform: lowercase !important;
+}
+
+.miniDetachedMeta p{
+  margin: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: var(--text-2) !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.02em !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  text-transform: lowercase !important;
+}
+
+/* Progress */
+
+.miniDetachedProgress{
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) 38px !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.miniDetachedProgress span{
+  color: rgba(255, 255, 255, 0.64) !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.02em !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.miniDetachedProgress span:first-child{
+  text-align: left !important;
+}
+
+.miniDetachedProgress span:last-child{
+  text-align: right !important;
+}
+
+.miniDetachedProgress input[type="range"],
+.miniDetachedVolume input[type="range"]{
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 18px !important;
+  margin: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+  accent-color: var(--accent, #64f0a4) !important;
+  cursor: pointer !important;
+}
+
+.miniDetachedProgress input[type="range"]::-webkit-slider-runnable-track,
+.miniDetachedVolume input[type="range"]::-webkit-slider-runnable-track{
+  height: 5px !important;
+  border-radius: 999px !important;
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb, 100, 240, 164), 0.76), rgba(var(--accent-rgb, 100, 240, 164), 0.22)),
+    rgba(255, 255, 255, 0.115) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04) !important;
+}
+
+.miniDetachedProgress input[type="range"]::-webkit-slider-thumb,
+.miniDetachedVolume input[type="range"]::-webkit-slider-thumb{
+  width: 14px !important;
+  height: 14px !important;
+  margin-top: -4.5px !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: var(--accent, #64f0a4) !important;
+  box-shadow:
+    0 0 0 3px rgba(0, 0, 0, 0.78),
+    0 0 18px rgba(var(--accent-rgb, 100, 240, 164), 0.34) !important;
+  transition:
+    transform 140ms var(--mini-ease),
+    box-shadow 150ms ease !important;
+}
+
+.miniDetachedProgress input[type="range"]:hover::-webkit-slider-thumb,
+.miniDetachedVolume input[type="range"]:hover::-webkit-slider-thumb{
+  transform: scale(1.12) !important;
+  box-shadow:
+    0 0 0 3px rgba(0, 0, 0, 0.78),
+    0 0 24px rgba(var(--accent-rgb, 100, 240, 164), 0.48) !important;
+}
+
+/* Controls */
+
+.miniDetachedControls{
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.miniDetachedControls button{
+  width: 36px !important;
+  height: 36px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  color: rgba(255, 255, 255, 0.86) !important;
+  background: rgba(255, 255, 255, 0.065) !important;
+  border: 1px solid rgba(255, 255, 255, 0.105) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.26) !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  transform: translateZ(0) !important;
+  transition:
+    transform 170ms var(--mini-ease-pop),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 180ms ease,
+    filter 150ms ease !important;
+}
+
+.miniDetachedControls button:hover{
+  transform: translate3d(0, -2px, 0) scale(1.035) !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.34) !important;
+}
+
+.miniDetachedControls button:active{
+  transform: translateY(0) scale(0.93) !important;
+}
+
+.miniDetachedControls button.main{
+  width: 45px !important;
+  height: 45px !important;
+  color: #06100b !important;
+  background: var(--accent, #64f0a4) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.38),
+    0 0 28px rgba(var(--accent-rgb, 100, 240, 164), 0.26) !important;
+  font-size: 16px !important;
+}
+
+.miniDetachedControls button.main:hover{
+  filter: brightness(1.06) !important;
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.44),
+    0 0 36px rgba(var(--accent-rgb, 100, 240, 164), 0.34) !important;
+}
+
+/* Volume */
+
+.miniDetachedVolume{
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 10px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  border-radius: 999px !important;
+}
+
+.miniDetachedVolume span{
+  color: rgba(255, 255, 255, 0.56) !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+/* Theme compatibility for the mini window. These are light overrides only. */
+
+.miniDetachedRoot[data-theme="mono"]{
+  --accent: #ffffff;
+  --accent-rgb: 255, 255, 255;
+}
+
+.miniDetachedRoot[data-theme="berry"],
+.miniDetachedRoot[data-theme="rose"],
+.miniDetachedRoot[data-theme="bubblegum"],
+.miniDetachedRoot[data-theme="sakura"]{
+  --accent: #ff7ab6;
+  --accent-rgb: 255, 122, 182;
+}
+
+.miniDetachedRoot[data-playing="on"] .miniDetachedBadge::after{
+  content: "" !important;
+  width: 6px !important;
+  height: 6px !important;
+  display: inline-block !important;
+  margin-left: 7px !important;
+  border-radius: 999px !important;
+  background: var(--accent, #64f0a4) !important;
+  box-shadow: 0 0 16px rgba(var(--accent-rgb, 100, 240, 164), 0.54) !important;
+  animation: miniLivePulse 1100ms ease-in-out infinite !important;
+}
+
+@keyframes miniDetachedCardIn{
+  from{
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.982);
+  }
+  to{
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+  }
+}
+
+@keyframes miniLivePulse{
+  0%, 100%{
+    opacity: 0.72;
+    transform: scale(0.9);
+  }
+  50%{
+    opacity: 1;
+    transform: scale(1.22);
+  }
+}
+
+@media (max-height: 360px){
+  .miniDetachedCard{
+    margin: 6px !important;
+    padding: 9px !important;
+    gap: 7px !important;
+    border-radius: 17px !important;
+  }
+
+  .miniDetachedArt{
+    width: min(35vh, 105px) !important;
+    height: min(35vh, 105px) !important;
+    border-radius: 18px !important;
+  }
+
+  .miniDetachedMeta strong{
+    font-size: clamp(16px, 5.5vw, 23px) !important;
+  }
+
+  .miniDetachedControls button{
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .miniDetachedControls button.main{
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .miniDetachedVolume{
+    padding: 6px 9px !important;
+  }
+}
+
+@media (max-width: 300px){
+  .miniDetachedProgress{
+    grid-template-columns: 34px minmax(0, 1fr) 34px !important;
+    gap: 6px !important;
+  }
+
+  .miniDetachedControls{
+    gap: 6px !important;
+  }
+
+  .miniDetachedControls button{
+    width: 31px !important;
+    height: 31px !important;
+  }
+
+  .miniDetachedControls button.main{
+    width: 39px !important;
+    height: 39px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .miniDetachedRoot,
+  .miniDetachedRoot *,
+  .miniDetachedRoot *::before,
+  .miniDetachedRoot *::after,
+  .pipIcon{
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

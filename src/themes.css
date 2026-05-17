@@ -1,0 +1,2596 @@
+/* localtify 0.2.8 cleanup: themes.css defines theme variables/swatches only; player visuals live in player.css. */
+/* localitfy themes.css — theme variables, theme swatches, sidebar theme picker, and hidden theme overrides.
+   Add future themes here instead of growing App.css. Keep this imported after App.css. */
+
+[data-theme="oled"] {
+  --accent: #64f0a4;
+  --accent-rgb: 100, 240, 164;
+  --accent-soft: rgba(100, 240, 164, 0.1);
+  --accent-line: rgba(100, 240, 164, 0.3);
+  --bg: #000;
+  --bg-2: #030303;
+  --bg-3: #070707;
+  --surface: rgba(255, 255, 255, 0.028);
+  --surface-2: rgba(255, 255, 255, 0.046);
+  --surface-3: rgba(255, 255, 255, 0.072);
+}
+
+[data-theme="mint"] {
+  --accent: #8de5bd;
+  --accent-rgb: 141, 229, 189;
+  --accent-soft: rgba(141, 229, 189, 0.12);
+  --accent-line: rgba(141, 229, 189, 0.32);
+}
+
+[data-theme="berry"] {
+  --accent: #ff7eb6;
+  --accent-rgb: 255, 126, 182;
+  --accent-soft: rgba(255, 126, 182, 0.11);
+  --accent-line: rgba(255, 126, 182, 0.3);
+}
+
+[data-theme="aqua"] {
+  --accent: #75ddff;
+  --accent-rgb: 117, 221, 255;
+  --accent-soft: rgba(117, 221, 255, 0.11);
+  --accent-line: rgba(117, 221, 255, 0.3);
+}
+
+[data-theme="sunset"] {
+  --accent: #ffac68;
+  --accent-rgb: 255, 172, 104;
+  --accent-soft: rgba(255, 172, 104, 0.11);
+  --accent-line: rgba(255, 172, 104, 0.3);
+}
+
+[data-theme="lavender"] {
+  --accent: #a987ff;
+  --accent-rgb: 169, 135, 255;
+  --accent-soft: rgba(169, 135, 255, 0.11);
+  --accent-line: rgba(169, 135, 255, 0.3);
+}
+
+[data-theme="mono"] {
+  --accent: #eeeeee;
+  --accent-rgb: 238, 238, 238;
+  --accent-soft: rgba(238, 238, 238, 0.1);
+  --accent-line: rgba(238, 238, 238, 0.22);
+}
+
+[data-theme="oled"] .app,
+[data-theme="oled"] .simpleShell,
+[data-theme="oled"] .loadingScreen {
+  background: linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    #000;
+  background-size: 42px 42px;
+}
+
+[data-theme="oled"] .content {
+  background: linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+    transparent;
+  background-size: 42px 42px;
+}
+
+[data-theme="oled"] .hero,
+[data-theme="oled"] .panel,
+[data-theme="oled"] .editorModal,
+[data-theme="oled"] .simpleHero,
+[data-theme="oled"] .simpleLibraryPanel {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+[data-theme="oled"] .sidebar,
+[data-theme="oled"] .titleBar{
+  background: rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="oled"] .ambientSurface::before {
+  opacity: 0.08;
+}
+
+[data-theme="oled"] .app {
+  background: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    #000;
+  background-size: 42px 42px;
+}
+
+[data-theme="oled"] .ambientSurface::before{
+  opacity: 0.08;
+}
+
+[data-theme="oled"] .coverAura.hasCover::before {
+  opacity: 0.28;
+}
+
+[data-theme="oled"] {
+  --accent: #64f0a8;
+  --accent-rgb: 100, 240, 168;
+  --accent-2: #c9ffe4;
+}
+
+[data-theme="mint"] {
+  --accent: #8ce6bd;
+  --accent-rgb: 140, 230, 189;
+}
+
+[data-theme="berry"] {
+  --accent: #ff82ba;
+  --accent-rgb: 255, 130, 186;
+}
+
+[data-theme="aqua"] {
+  --accent: #78d7ff;
+  --accent-rgb: 120, 215, 255;
+}
+
+[data-theme="sunset"] {
+  --accent: #ffb36f;
+  --accent-rgb: 255, 179, 111;
+}
+
+[data-theme="lavender"] {
+  --accent: #b994ff;
+  --accent-rgb: 185, 148, 255;
+}
+
+[data-theme="mono"] {
+  --accent: #f4f4f4;
+  --accent-rgb: 244, 244, 244;
+}
+
+[data-theme="rose"] {
+  --accent: #ff8aa7;
+  --accent-rgb: 255, 138, 167;
+  --accent-soft: rgba(255, 138, 167, 0.12);
+  --accent-line: rgba(255, 138, 167, 0.34);
+}
+
+[data-theme="cotton"] {
+  --accent: #93d7ff;
+  --accent-rgb: 147, 215, 255;
+  --accent-soft: rgba(147, 215, 255, 0.12);
+  --accent-line: rgba(147, 215, 255, 0.34);
+}
+
+[data-theme="honey"] {
+  --accent: #ffc76b;
+  --accent-rgb: 255, 199, 107;
+  --accent-soft: rgba(255, 199, 107, 0.12);
+  --accent-line: rgba(255, 199, 107, 0.34);
+}
+
+[data-theme="lime"] {
+  --accent: #b7ff67;
+  --accent-rgb: 183, 255, 103;
+  --accent-soft: rgba(183, 255, 103, 0.12);
+  --accent-line: rgba(183, 255, 103, 0.34);
+}
+
+[data-theme="midnight"] {
+  --accent: #7aa7ff;
+  --accent-rgb: 122, 167, 255;
+  --accent-soft: rgba(122, 167, 255, 0.12);
+  --accent-line: rgba(122, 167, 255, 0.34);
+}
+
+[data-theme="mocha"] {
+  --accent: #d8aa7a;
+  --accent-rgb: 216, 170, 122;
+  --accent-soft: rgba(216, 170, 122, 0.12);
+  --accent-line: rgba(216, 170, 122, 0.34);
+}
+
+[data-theme="cherry"] {
+  --accent: #ff5f75;
+  --accent-rgb: 255, 95, 117;
+  --accent-soft: rgba(255, 95, 117, 0.12);
+  --accent-line: rgba(255, 95, 117, 0.34);
+}
+
+[data-theme="ice"] {
+  --accent: #78f1ff;
+  --accent-rgb: 120, 241, 255;
+  --accent-soft: rgba(120, 241, 255, 0.12);
+  --accent-line: rgba(120, 241, 255, 0.34);
+}
+
+[data-theme="matcha"] {
+  --accent: #a8e58b;
+  --accent-rgb: 168, 229, 139;
+  --accent-soft: rgba(168, 229, 139, 0.12);
+  --accent-line: rgba(168, 229, 139, 0.34);
+}
+
+[data-theme="bubblegum"] {
+  --accent: #ff8fff;
+  --accent-rgb: 255, 143, 255;
+  --accent-soft: rgba(255, 143, 255, 0.12);
+  --accent-line: rgba(255, 143, 255, 0.34);
+}
+
+[data-theme-card="oled"] {
+  --card-rgb: 100, 240, 164;
+}
+
+[data-theme-card="mint"] {
+  --card-rgb: 141, 229, 189;
+}
+
+[data-theme-card="berry"] {
+  --card-rgb: 255, 126, 182;
+}
+
+[data-theme-card="aqua"] {
+  --card-rgb: 117, 221, 255;
+}
+
+[data-theme-card="sunset"] {
+  --card-rgb: 255, 172, 104;
+}
+
+[data-theme-card="lavender"] {
+  --card-rgb: 169, 135, 255;
+}
+
+[data-theme-card="mono"] {
+  --card-rgb: 238, 238, 238;
+}
+
+[data-theme-card="rose"] {
+  --card-rgb: 255, 138, 167;
+}
+
+[data-theme-card="cotton"] {
+  --card-rgb: 147, 215, 255;
+}
+
+[data-theme-card="honey"] {
+  --card-rgb: 255, 199, 107;
+}
+
+[data-theme-card="lime"] {
+  --card-rgb: 183, 255, 103;
+}
+
+[data-theme-card="midnight"] {
+  --card-rgb: 122, 167, 255;
+}
+
+[data-theme-card="mocha"] {
+  --card-rgb: 216, 170, 122;
+}
+
+[data-theme-card="cherry"] {
+  --card-rgb: 255, 95, 117;
+}
+
+[data-theme-card="ice"] {
+  --card-rgb: 120, 241, 255;
+}
+
+[data-theme-card="matcha"] {
+  --card-rgb: 168, 229, 139;
+}
+
+[data-theme-card="bubblegum"] {
+  --card-rgb: 255, 143, 255;
+}
+
+[data-theme="oled"] {
+  --accent: #ffffff;
+  --accent-rgb: 255, 255, 255;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-line: rgba(255, 255, 255, 0.2);
+  --bg: #000000;
+  --bg-2: #000000;
+  --bg-3: #050505;
+  --text: #ffffff;
+  --text-2: rgba(255, 255, 255, 0.78);
+  --muted: rgba(255, 255, 255, 0.52);
+  --faint: rgba(255, 255, 255, 0.26);
+  --surface: rgba(255, 255, 255, 0.026);
+  --surface-2: rgba(255, 255, 255, 0.046);
+  --surface-3: rgba(255, 255, 255, 0.072);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.16);
+}
+
+[data-theme="oled"] .ambientSurface {
+  --cover-rgb: 255, 255, 255 !important;
+  --cover-edge-rgb: 255, 255, 255 !important;
+}
+
+[data-theme="oled"] .app,
+[data-theme="oled"] .loadingScreen {
+  background: linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    #000 !important;
+  background-size: 42px 42px !important;
+}
+
+[data-theme="oled"] .hero,
+[data-theme="oled"] .panel,
+[data-theme="oled"] .editorModal,
+[data-theme="oled"] .songRow,
+[data-theme="oled"] .homeAlbumCard,
+[data-theme="oled"] .sidebar,
+[data-theme="oled"] .titleBar{
+  background-color: rgba(0, 0, 0, 0.88) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+
+[data-theme="oled"] .heroMain,
+[data-theme="oled"] .mainAction,
+[data-theme="oled"] .circleButton.main,
+[data-theme="oled"] .navItem.active,
+[data-theme="oled"] .songRow.active,
+[data-theme="oled"] .homeAlbumCard.active {
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16), 0 12px 40px rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="oled"] .heroMain *,
+[data-theme="oled"] .mainAction *,
+[data-theme="oled"] .circleButton.main *,
+[data-theme="oled"] .navItem.active *,
+[data-theme="oled"] .songRow.active *,
+[data-theme="oled"] .homeAlbumCard.active * {
+  color: #000 !important;
+}
+
+[data-theme="oled"] .softButton,
+[data-theme="oled"] .iconAction,
+[data-theme="oled"] .circleButton {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.13) !important;
+}
+
+[data-theme="oled"] .ambientSurface::before,
+[data-theme="oled"] .ambientSurface::after,
+[data-theme="oled"] .coverAura::before,
+[data-theme="oled"] .coverAura::after,
+[data-theme="oled"] .hero::before,
+[data-theme="oled"] .hero::after {
+  filter: grayscale(1) !important;
+  opacity: 0.08 !important;
+}
+
+[data-theme="sakura"] {
+  --accent: #ff9dc8;
+  --accent-rgb: 255, 157, 200;
+  --accent-soft: rgba(255, 157, 200, 0.12);
+  --accent-line: rgba(255, 157, 200, 0.34);
+}
+
+[data-theme="dreamcore"] {
+  --accent: #c8b6ff;
+  --accent-rgb: 200, 182, 255;
+  --accent-soft: rgba(200, 182, 255, 0.12);
+  --accent-line: rgba(200, 182, 255, 0.34);
+}
+
+[data-theme="peach"] {
+  --accent: #ffb38a;
+  --accent-rgb: 255, 179, 138;
+  --accent-soft: rgba(255, 179, 138, 0.12);
+  --accent-line: rgba(255, 179, 138, 0.34);
+}
+
+[data-theme="moon"] {
+  --accent: #e9edf7;
+  --accent-rgb: 233, 237, 247;
+  --accent-soft: rgba(233, 237, 247, 0.1);
+  --accent-line: rgba(233, 237, 247, 0.26);
+}
+
+[data-theme="starlight"] {
+  --accent: #c9d7ff;
+  --accent-rgb: 201, 215, 255;
+  --accent-soft: rgba(201, 215, 255, 0.12);
+  --accent-line: rgba(201, 215, 255, 0.34);
+  --bg: #00020a;
+  --bg-2: #02030c;
+  --bg-3: #050717;
+}
+
+[data-theme="starlight"] .app {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 22% 18%, rgba(130, 166, 255, 0.11), transparent 30%),
+    radial-gradient(circle at 80% 12%, rgba(255, 255, 255, 0.08), transparent 24%),
+    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    #00020a !important;
+  background-size: auto, auto, 42px 42px, 42px 42px, auto !important;
+}
+
+[data-theme="starlight"] .app::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.42;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.75) 0 1px, transparent 1.6px),
+    radial-gradient(circle, rgba(201, 215, 255, 0.5) 0 1px, transparent 1.8px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.35) 0 0.8px, transparent 1.4px);
+  background-size: 110px 110px, 170px 170px, 230px 230px;
+  animation: localitfyStarsDrift 46s linear infinite;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+[data-theme="starlight"] .app > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes localitfyStarsDrift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(90px, 150px, 0); }
+}
+
+[data-theme-card="sakura"] {
+  --card-rgb: 255, 157, 200;
+}
+
+[data-theme-card="dreamcore"] {
+  --card-rgb: 200, 182, 255;
+}
+
+[data-theme-card="peach"] {
+  --card-rgb: 255, 179, 138;
+}
+
+[data-theme-card="moon"] {
+  --card-rgb: 233, 237, 247;
+}
+
+[data-theme-card="starlight"] {
+  --card-rgb: 201, 215, 255;
+}
+
+[data-theme="oled"] .homeAlbumCard:hover,
+[data-theme="oled"] .songRow:hover{
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.34) !important;
+}
+
+[data-theme="oled"] {
+  --bg: #000000;
+  --bg-2: #000000;
+  --bg-3: #000000;
+  --surface: #000000;
+  --surface-2: #030303;
+  --text: #ffffff;
+  --muted: rgba(255, 255, 255, 0.62);
+  --accent: #ffffff;
+  --accent-rgb: 255, 255, 255;
+  --accent-soft: rgba(255, 255, 255, 0.06);
+  --accent-line: rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="oled"] .app,
+[data-theme="oled"] .sidebar,
+[data-theme="oled"] .content{
+  background: #000 !important;
+}
+
+[data-theme="oled"] .hero.ambientSurface::before,
+[data-theme="oled"] .coverAura::before,
+[data-theme="oled"] .coverAura::after {
+  opacity: 0.03 !important;
+  filter: grayscale(1) contrast(1.05) !important;
+}
+
+[data-theme="oled"] .hero.ambientSurface::after {
+  background: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.92) 45%, rgba(0, 0, 0, 0.86) 100%) !important;
+}
+
+[data-theme="oled"] .homeAlbumCard:hover,
+[data-theme="oled"] .songRow:hover {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="oled"] .mainAction,
+[data-theme="oled"] .circleButton.main,
+[data-theme="oled"] .navItem.active {
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+}
+
+[data-theme="oled"] .mainAction *,
+[data-theme="oled"] .circleButton.main *,
+[data-theme="oled"] .navItem.active * {
+  color: #000 !important;
+}
+
+[data-theme="peach"] {
+  --accent: #ffb07a;
+  --accent-rgb: 255, 176, 122;
+  --accent-soft: rgba(255, 176, 122, 0.12);
+  --accent-line: rgba(255, 176, 122, 0.42);
+}
+
+[data-theme="berry"] {
+  --accent: #ff7abc;
+  --accent-rgb: 255, 122, 188;
+  --accent-soft: rgba(255, 122, 188, 0.11);
+  --accent-line: rgba(255, 122, 188, 0.36);
+}
+
+[data-theme="mint"] {
+  --accent: #92f3c4;
+  --accent-rgb: 146, 243, 196;
+  --accent-soft: rgba(146, 243, 196, 0.09);
+  --accent-line: rgba(146, 243, 196, 0.28);
+}
+
+[data-theme="mono"] {
+  --accent: #f4f4f4;
+  --accent-rgb: 244, 244, 244;
+  --accent-soft: rgba(255, 255, 255, 0.055);
+  --accent-line: rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="mono"] .hero.ambientSurface::before,
+[data-theme="mono"] .coverAura::before,
+[data-theme="mono"] .coverAura::after {
+  filter: grayscale(1) !important;
+  opacity: 0.07 !important;
+}
+
+[data-theme="starlight"],
+[data-theme="starry"] {
+  --accent: #cfd9ff;
+  --accent-rgb: 207, 217, 255;
+  --accent-soft: rgba(207, 217, 255, 0.1);
+  --accent-line: rgba(207, 217, 255, 0.32);
+  --bg: #00020a;
+  --bg-2: #01020a;
+  --bg-3: #030514;
+}
+
+[data-theme="starlight"] .app::after,
+[data-theme="starry"] .app::after {
+  opacity: 0.52 !important;
+  animation-duration: 58s !important;
+}
+
+[data-theme="starlight"] .hero.ambientSurface,
+[data-theme="starry"] .hero.ambientSurface {
+  background: radial-gradient(circle at 76% 34%, rgba(207, 217, 255, 0.10), transparent 30%),
+    rgba(0, 0, 0, 0.74) !important;
+}
+
+/* ======================================================================
+   localitfy 0.0.9 — sidebar theme panel rescue + final smoothness pass
+   Added after cleanup so the current UI remains unchanged.
+   Fixes the broken unstyled theme list in the sidebar.
+====================================================================== */
+
+.sidebarThemePanel {
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 14px !important;
+  background: #000 !important;
+  box-shadow: none !important;
+  transform: translateZ(0) !important;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.sidebarThemePanel:hover {
+  border-color: rgba(var(--accent-rgb), 0.34) !important;
+}
+
+.sidebarThemeHeader {
+  width: 100% !important;
+  min-height: 56px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 12px 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--text) !important;
+  background: #000 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.sidebarThemeHeader span {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 3px !important;
+}
+
+.sidebarThemeHeader em {
+  color: var(--accent) !important;
+  font-size: 10px !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+}
+
+.sidebarThemeHeader strong {
+  overflow: hidden !important;
+  color: var(--text) !important;
+  font-size: 14px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.sidebarThemeHeader small {
+  overflow: hidden !important;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.sidebarThemeHeader b {
+  flex: 0 0 auto !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 999px !important;
+  color: var(--accent) !important;
+  background: #050505 !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
+  transition:
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 180ms ease,
+    background-color 180ms ease !important;
+}
+
+.sidebarThemePanel.open .sidebarThemeHeader b {
+  transform: rotate(180deg) !important;
+}
+
+.sidebarThemeBody {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: 1fr !important;
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  transition:
+    grid-template-rows 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 180ms ease,
+    transform 280ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.sidebarThemePanel.collapsed .sidebarThemeBody {
+  grid-template-rows: 0fr !important;
+  opacity: 0 !important;
+  transform: translateY(-5px) !important;
+  pointer-events: none !important;
+}
+
+.sidebarThemeBodyInner {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.sidebarThemeList {
+  max-height: min(330px, calc(100vh - 410px)) !important;
+  min-height: 0 !important;
+  display: grid !important;
+  gap: 7px !important;
+  overflow: auto !important;
+  overflow-x: hidden !important;
+  padding: 0 8px 10px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(var(--accent-rgb), 0.45) transparent !important;
+}
+
+.sidebarThemeList::-webkit-scrollbar {
+  width: 7px !important;
+}
+
+.sidebarThemeList::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.sidebarThemeList::-webkit-scrollbar-thumb {
+  border: 2px solid #000 !important;
+  border-radius: 999px !important;
+  background: rgba(var(--accent-rgb), 0.38) !important;
+}
+
+.sidebarThemeOption {
+  width: 100% !important;
+  min-height: 46px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 5px !important;
+  padding: 10px 11px !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  border-radius: 12px !important;
+  color: var(--text) !important;
+  background: #050505 !important;
+  box-shadow: none !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  filter: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: translateZ(0) !important;
+  transition:
+    transform 170ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 170ms ease,
+    background-color 170ms ease,
+    color 170ms ease !important;
+}
+
+.sidebarThemeOption span {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 3px !important;
+}
+
+.sidebarThemeOption strong,
+.sidebarThemeOption small,
+.sidebarThemeOption em {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.sidebarThemeOption strong {
+  color: rgba(255, 255, 255, 0.94) !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.sidebarThemeOption small {
+  color: rgba(255, 255, 255, 0.58) !important;
+  font-size: 10.5px !important;
+  font-weight: 760 !important;
+  line-height: 1.16 !important;
+}
+
+.sidebarThemeOption em {
+  max-width: 100% !important;
+  color: rgba(255, 255, 255, 0.42) !important;
+  font-size: 10px !important;
+  font-style: normal !important;
+  font-weight: 840 !important;
+  line-height: 1.14 !important;
+  letter-spacing: 0.02em !important;
+  text-align: left !important;
+}
+
+.sidebarThemeOption:hover {
+  transform: translateX(2px) translateY(-1px) translateZ(0) !important;
+  border-color: rgba(var(--accent-rgb), 0.34) !important;
+  background: #090909 !important;
+}
+
+.sidebarThemeOption:active {
+  transform: translateX(2px) scale(0.99) translateZ(0) !important;
+}
+
+.sidebarThemeOption.active {
+  border-color: rgba(var(--accent-rgb), 0.68) !important;
+  background: rgba(var(--accent-rgb), 0.09) !important;
+  box-shadow: inset 3px 0 0 rgba(var(--accent-rgb), 0.95) !important;
+}
+
+[data-theme="oled"] .sidebarThemePanel,
+[data-theme="oled"] .sidebarThemeHeader,
+[data-theme="oled"] .sidebarThemeOption {
+  background: #000 !important;
+}
+
+[data-theme="oled"] .sidebarThemeOption:hover {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  background: #070707 !important;
+}
+
+[data-theme="oled"] .sidebarThemeOption.active {
+  border-color: rgba(255, 255, 255, 0.42) !important;
+  background: #080808 !important;
+  box-shadow: inset 3px 0 0 #fff !important;
+}
+
+/* Keep the settings-page theme gallery styled even after App.css cleanup. */
+.themeShowcaseGrid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.themeShowcaseCard {
+  min-height: 92px !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto auto !important;
+  align-items: center !important;
+  column-gap: 10px !important;
+  row-gap: 2px !important;
+  padding: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 14px !important;
+  color: var(--text) !important;
+  background: #050505 !important;
+  text-align: left !important;
+  transition:
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.themeShowcaseCard:hover {
+  transform: translateY(-2px) translateZ(0) !important;
+  border-color: rgba(var(--accent-rgb), 0.34) !important;
+  background: #090909 !important;
+}
+
+.themeShowcaseCard.active {
+  border-color: rgba(var(--accent-rgb), 0.68) !important;
+  background: rgba(var(--accent-rgb), 0.09) !important;
+  box-shadow: inset 3px 0 0 rgba(var(--accent-rgb), 0.95) !important;
+}
+
+.themeShowcaseCard strong {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: rgba(255, 255, 255, 0.94) !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.themeShowcaseCard small,
+.themeShowcaseCard em {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: rgba(255, 255, 255, 0.56) !important;
+  font-size: 11px !important;
+  font-style: normal !important;
+  font-weight: 760 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.themeShowcaseCard em {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Final smooth animation pass. Scope it to real app controls so it does not hurt performance. */
+.navItem,
+.mainAction,
+.toolButton,
+.heroMain,
+.heroGhost,
+.softButton,
+.simpleAction,
+.simpleGhost,
+.tinyButton,
+.iconAction,
+.circleButton,
+.songRow,
+.homeAlbumCard,
+.statCard,
+.topRow,
+.panel,
+.hero,
+.themeShowcaseCard,
+.pixelCoverChoice,
+.toggleRow,
+.settingChoice{
+  backface-visibility: hidden !important;
+  transform: translateZ(0);
+}
+
+.navItem,
+.mainAction,
+.toolButton,
+.heroMain,
+.heroGhost,
+.softButton,
+.simpleAction,
+.simpleGhost,
+.tinyButton,
+.iconAction,
+.circleButton,
+.songRow,
+.homeAlbumCard,
+.statCard,
+.topRow,
+.themeShowcaseCard,
+.pixelCoverChoice,
+.toggleRow,
+.settingChoice {
+  transition:
+    transform 170ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease,
+    color 170ms ease,
+    opacity 170ms ease !important;
+}
+
+.navItem:hover,
+.mainAction:hover,
+.toolButton:hover,
+.heroMain:hover,
+.heroGhost:hover,
+.softButton:hover,
+.simpleAction:hover,
+.simpleGhost:hover,
+.tinyButton:hover,
+.iconAction:hover,
+.circleButton:hover,
+.songRow:hover,
+.homeAlbumCard:hover,
+.statCard:hover,
+.topRow:hover,
+.themeShowcaseCard:hover,
+.pixelCoverChoice:hover,
+.toggleRow:hover,
+.settingChoice:hover {
+  transform: translateY(-1px) translateZ(0);
+}
+
+.navItem:active,
+.mainAction:active,
+.toolButton:active,
+.heroMain:active,
+.heroGhost:active,
+.softButton:active,
+.simpleAction:active,
+.simpleGhost:active,
+.tinyButton:active,
+.iconAction:active,
+.circleButton:active,
+.homeAlbumCard:active,
+.themeShowcaseCard:active,
+.pixelCoverChoice:active,
+.settingChoice:active {
+  transform: scale(0.985) translateZ(0);
+}
+
+/* ========================================================================== 
+   localitfy 0.0.9 easter eggs — Konami arcade ghost, 3 AM mode,
+   and Miside ambience. Appended as safe overrides so the existing UI stays intact.
+   ========================================================================== */
+
+[data-theme="arcadeGhost"] {
+  --accent: #7cffd6;
+  --accent-rgb: 124, 255, 214;
+  --accent-soft: rgba(124, 255, 214, 0.13);
+  --accent-line: rgba(124, 255, 214, 0.34);
+  --bg: #000;
+  --bg-2: #020202;
+  --bg-3: #060606;
+  --text: #fafff9;
+  --text-2: rgba(250, 255, 249, 0.82);
+  --muted: rgba(250, 255, 249, 0.56);
+  --surface: rgba(124, 255, 214, 0.038);
+  --surface-2: rgba(124, 255, 214, 0.062);
+  --surface-3: rgba(124, 255, 214, 0.09);
+  --line: rgba(124, 255, 214, 0.105);
+  --line-2: rgba(124, 255, 214, 0.2);
+}
+
+[data-theme="arcadeGhost"].app {
+  background:
+    linear-gradient(rgba(124, 255, 214, 0.052) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 255, 214, 0.052) 1px, transparent 1px),
+    radial-gradient(circle at 18% 22%, rgba(124, 255, 214, 0.085), transparent 30%),
+    radial-gradient(circle at 74% 64%, rgba(181, 112, 255, 0.07), transparent 32%),
+    #000;
+  background-size: 26px 26px, 26px 26px, auto, auto, auto;
+}
+
+[data-theme="arcadeGhost"] .logoIcon,
+[data-theme="arcadeGhost"] .titleLogo,
+[data-theme="arcadeGhost"] .mainAction,
+[data-theme="arcadeGhost"] .heroMain,
+[data-theme="arcadeGhost"] .circleButton.main,
+[data-theme="arcadeGhost"] .themeShowcaseCard.active,
+[data-theme="arcadeGhost"] .sidebarThemeOption.active{
+  text-shadow:
+    0 0 7px rgba(124, 255, 214, 0.78),
+    0 0 18px rgba(124, 255, 214, 0.42),
+    0 0 34px rgba(181, 112, 255, 0.22);
+}
+
+[data-theme="arcadeGhost"] .titleLogo {
+  width: 32px;
+  color: transparent !important;
+  position: relative;
+}
+
+[data-theme="arcadeGhost"] .titleLogo::after {
+  content: "♪_♪";
+  position: absolute;
+  inset: 0 auto auto 0;
+  color: var(--accent);
+  letter-spacing: -0.05em;
+}
+
+@keyframes arcadeGhostGrid {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(26px, 26px, 0); }
+}
+
+.sidebarThemePanel {
+  min-height: 0 !important;
+  max-height: min(38vh, 330px) !important;
+  overflow: hidden !important;
+}
+
+.sidebarThemeBodyInner,
+.sidebarThemeList {
+  min-height: 0 !important;
+}
+
+.sidebarThemeList {
+  max-height: min(29vh, 250px) !important;
+  overflow: auto !important;
+  padding-right: 2px !important;
+}
+
+/* Keep buttons/cards smooth without forcing expensive layout or filter animation. */
+button,
+.navItem,
+.mainAction,
+.heroMain,
+.simpleAction,
+.toolButton,
+.heroGhost,
+.softButton,
+.simpleGhost,
+.heroTinyButton,
+.expandLibraryButton,
+.iconAction,
+.circleButton,
+.homeAlbumCard,
+.songRow,
+.topRow,
+.recentImportCard,
+.sidebarThemeOption,
+.settingChoice,
+.toggleRow,
+.editor-tool-buttons button,
+.editor-playlist-list button {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: auto !important;
+  transition-property: transform, background-color, border-color, box-shadow, color, opacity !important;
+  transition-duration: var(--motion-normal) !important;
+  transition-timing-function: var(--motion-ease) !important;
+}
+
+button:hover,
+.navItem:hover,
+.mainAction:hover,
+.heroMain:hover,
+.simpleAction:hover,
+.toolButton:hover,
+.heroGhost:hover,
+.softButton:hover,
+.simpleGhost:hover,
+.heroTinyButton:hover,
+.expandLibraryButton:hover,
+.iconAction:hover,
+.circleButton:hover,
+.homeAlbumCard:hover,
+.songRow:hover,
+.topRow:hover,
+.recentImportCard:hover,
+.sidebarThemeOption:hover,
+.settingChoice:hover,
+.toggleRow:hover {
+  will-change: transform;
+}
+
+@keyframes sidebarThemeIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(-8px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ======================================================================
+   localtify 0.1.3 — smooth theme transition polish
+   Keep this at the END of themes.css so theme switches do not flash.
+====================================================================== */
+
+.app,
+.loadingScreen,
+.simpleShell,
+.content,
+.sidebar,
+.titleBar,
+.panel,
+.simpleHero,
+.simpleLibraryPanel,
+.homeLibraryPanel,
+.hero,
+.homeAlbumCard,
+.songRow,
+.topRow,
+.recentImportCard,
+.statCard,
+.analyticsBigCard,
+.settingsModal,
+.settingsSection,
+.modalHead,
+.themeLivePreview,
+.themeShowcaseCard,
+.sidebarThemeOption,
+.circleButton,
+.iconAction,
+.mainAction,
+.heroMain,
+.softButton,
+.heroGhost,
+.navItem,
+.tabButton,
+.toolButton{
+  transition:
+    background-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 220ms ease,
+    border-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    text-shadow 260ms ease,
+    opacity 180ms ease,
+    filter 240ms ease !important;
+}
+
+/* Accent-driven pieces should recolor smoothly instead of snapping. */
+.logoIcon,
+.simpleBrandLogo,
+.titleLogo,
+.homeAlbumRank,
+.circleButton.main,
+.mainAction,
+.heroMain,
+.simpleAction,
+.themeDot,
+.themeAccentDot,
+.sidebarThemeAccent,
+.themePreviewOrb,
+.themeLivePreview::before,
+.themeShowcaseCard::before,
+.settingChoice.active,
+.toggleRow input:checked + span,
+.simpleProgress input[type="range"]::-webkit-slider-thumb{
+  transition:
+    background-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 220ms ease,
+    box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    text-shadow 260ms ease,
+    opacity 180ms ease !important;
+}
+
+.coverAura::before,
+.coverAura::after,
+.ambientSurface::before,
+.ambientSurface::after,
+.homeAlbumCard::before,
+.homeAlbumCard::after{
+  transition:
+    opacity 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 300ms ease,
+    box-shadow 320ms ease !important;
+}
+
+/* Prevent white/grey flashes while React settles data-theme/custom variables. */
+.app.themeSettling,
+.app.themeSettling .content,
+.app.themeSettling .sidebar,
+.app.themeSettling .titleBar,
+.app.themeSettling .panel,
+.app.themeSettling .homeAlbumCard,
+.app.themeSettling .songRow,
+.app.themeSettling .settingsModal,
+.app.themeSettling .settingsSection{
+  background-image: inherit;
+  animation-play-state: paused !important;
+}
+
+.app.themeSettling .homeAlbumCard,
+.app.themeSettling .songRow,
+.app.themeSettling .themeShowcaseCard,
+.app.themeSettling .sidebarThemeOption{
+  transform: translateZ(0) !important;
+}
+
+/* Live preview should update immediately but softly. */
+.themeLivePreview,
+.themeShowcaseCard,
+.sidebarThemeOption{
+  isolation: isolate;
+}
+
+.themeLivePreview{
+  background:
+    radial-gradient(circle at 25% 18%, rgba(var(--accent-rgb), 0.24), transparent 34%),
+    radial-gradient(circle at 76% 72%, rgba(var(--accent-rgb), 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
+    rgba(0, 0, 0, 0.62) !important;
+  border-color: rgba(var(--accent-rgb), 0.28) !important;
+  box-shadow:
+    0 18px 58px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(var(--accent-rgb), 0.10) inset,
+    0 0 44px rgba(var(--accent-rgb), 0.10) !important;
+}
+
+.themeShowcaseCard.active,
+.sidebarThemeOption.active{
+  border-color: rgba(var(--accent-rgb), 0.72) !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb), 0.32),
+    0 0 34px rgba(var(--accent-rgb), 0.18),
+    0 16px 46px rgba(0, 0, 0, 0.36) !important;
+}
+
+.homeAlbumCard.active,
+.songRow.active{
+  border-color: rgba(var(--accent-rgb), 0.64) !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb), 0.24),
+    0 0 42px rgba(var(--accent-rgb), 0.16),
+    0 18px 54px rgba(0, 0, 0, 0.36) !important;
+}
+
+/* Keep layout stable during theme switching: no margin/grid/position changes here. */
+.app.themeSettling *,
+.app.themeSettling *::before,
+.app.themeSettling *::after{
+  transition-duration: 300ms !important;
+}
+
+.app.reducedMotion *,
+.app.reducedMotion *::before,
+.app.reducedMotion *::after{
+  transition-duration: 1ms !important;
+  animation-duration: 1ms !important;
+}
+
+/* ======================================================================
+   localitfy 0.1.3 — sidebar theme drawer revert + expansion fix
+   ----------------------------------------------------------------------
+   Keeps the theme picker in the sidebar, makes the open drawer use the
+   remaining sidebar height, and fixes the ugly custom-accent on/off button.
+====================================================================== */
+
+.sidebarThemePanel {
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: 72px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.085) !important;
+  border-radius: 16px !important;
+  background: rgba(0, 0, 0, 0.74) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+  transform: translateZ(0) !important;
+  transition:
+    max-height 340ms cubic-bezier(0.16, 1, 0.3, 1),
+    flex-basis 340ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 200ms ease,
+    background-color 200ms ease,
+    box-shadow 240ms ease !important;
+}
+
+.sidebarThemePanel.open {
+  flex: 1 1 auto !important;
+  max-height: none !important;
+  min-height: min(468px, calc(100vh - 324px)) !important;
+  border-color: rgba(var(--accent-rgb), 0.36) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.07), rgba(0, 0, 0, 0.72) 28%),
+    rgba(0, 0, 0, 0.82) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 20px 54px rgba(0, 0, 0, 0.24) !important;
+}
+
+.sidebarThemePanel.collapsed {
+  flex: 0 0 auto !important;
+  max-height: 72px !important;
+}
+
+.sidebarThemeHeader {
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-height: 66px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 13px 13px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--text) !important;
+  background: transparent !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.sidebarThemeHeader span {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 3px !important;
+}
+
+.sidebarThemeHeader em {
+  color: var(--accent) !important;
+  font-size: 10px !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+}
+
+.sidebarThemeHeader strong,
+.sidebarThemeHeader small {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.sidebarThemeHeader strong {
+  color: var(--text) !important;
+  font-size: 14px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.sidebarThemeHeader small {
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+}
+
+.sidebarThemeHeader b {
+  flex: 0 0 auto !important;
+  width: 26px !important;
+  height: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.32) !important;
+  border-radius: 999px !important;
+  color: var(--accent) !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  transition:
+    transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.sidebarThemePanel.open .sidebarThemeHeader b {
+  transform: rotate(180deg) !important;
+  background: rgba(var(--accent-rgb), 0.11) !important;
+  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.12) !important;
+}
+
+.sidebarThemeBody {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  display: grid !important;
+  grid-template-rows: 1fr !important;
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  transition:
+    grid-template-rows 330ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 200ms ease,
+    transform 330ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.sidebarThemePanel.collapsed .sidebarThemeBody {
+  grid-template-rows: 0fr !important;
+  opacity: 0 !important;
+  transform: translateY(-6px) !important;
+  pointer-events: none !important;
+}
+
+.sidebarThemeBodyInner {
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  padding: 0 10px 10px !important;
+}
+
+.sidebarThemePanel.open .sidebarThemeBodyInner {
+  overflow: hidden !important;
+}
+
+.sidebarCustomTheme {
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+  padding: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.sidebarCustomThemeHeader {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+.sidebarCustomThemeHeader strong,
+.sidebarCustomThemeHeader small {
+  display: block !important;
+}
+
+.sidebarCustomThemeHeader strong {
+  color: var(--text) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+}
+
+.sidebarCustomThemeHeader small {
+  margin-top: 2px !important;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+}
+
+.sidebarCustomTheme .tinyToggle {
+  flex: 0 0 58px !important;
+  width: 58px !important;
+  height: 30px !important;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  padding: 0 8px 0 30px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 999px !important;
+  color: rgba(255, 255, 255, 0.66) !important;
+  background: rgba(255, 255, 255, 0.065) !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-transform: lowercase !important;
+  box-shadow: none !important;
+  transition:
+    color 180ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 220ms ease !important;
+}
+
+.sidebarCustomTheme .tinyToggle::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 4px !important;
+  top: 4px !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24) !important;
+  transition:
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 180ms ease !important;
+}
+
+.sidebarCustomTheme .tinyToggle.active {
+  justify-content: flex-start !important;
+  padding: 0 30px 0 8px !important;
+  color: #06100b !important;
+  background: var(--accent) !important;
+  border-color: rgba(var(--accent-rgb), 0.78) !important;
+  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.2) !important;
+}
+
+.sidebarCustomTheme .tinyToggle.active::before {
+  transform: translateX(30px) !important;
+  background: #06100b !important;
+}
+
+.sidebarCustomTheme .tinyToggle:hover {
+  border-color: rgba(var(--accent-rgb), 0.5) !important;
+}
+
+.sidebarCustomColorGrid {
+  display: grid !important;
+  grid-template-columns: 50px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-top: 12px !important;
+}
+
+.sidebarCustomColorGrid.second {
+  display: none !important;
+}
+
+.sidebarColorWheel {
+  width: 50px !important;
+  height: 50px !important;
+  position: relative !important;
+  border-radius: 15px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.58) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 12px 28px rgba(var(--accent-rgb), 0.14) !important;
+}
+
+.sidebarColorWheel input {
+  position: absolute !important;
+  inset: -8px !important;
+  width: 66px !important;
+  height: 66px !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+}
+
+.sidebarColorWheel span {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+}
+
+.sidebarHexInput {
+  min-width: 0 !important;
+  height: 50px !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 14px !important;
+  color: var(--text) !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  outline: none !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.025em !important;
+  text-transform: uppercase !important;
+}
+
+.sidebarHexInput:focus {
+  border-color: rgba(var(--accent-rgb), 0.72) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.14) !important;
+}
+
+.sidebarCustomThemeActions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+}
+
+.sidebarCustomThemeActions button {
+  height: 34px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: var(--text) !important;
+  background: rgba(255, 255, 255, 0.065) !important;
+  font-weight: 900 !important;
+}
+
+.sidebarCustomThemeActions button:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(var(--accent-rgb), 0.44) !important;
+  background: rgba(var(--accent-rgb), 0.12) !important;
+}
+
+.sidebarThemeList {
+  flex: 1 1 auto !important;
+  min-height: 130px !important;
+  max-height: none !important;
+  display: grid !important;
+  gap: 8px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 0 4px 2px 0 !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(var(--accent-rgb), 0.55) transparent !important;
+}
+
+.sidebarThemeList::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.sidebarThemeList::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.sidebarThemeList::-webkit-scrollbar-thumb {
+  border: 2px solid transparent !important;
+  border-radius: 999px !important;
+  background: rgba(var(--accent-rgb), 0.52) !important;
+  background-clip: padding-box !important;
+}
+
+.sidebarThemeOption {
+  min-height: 64px !important;
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 11px !important;
+  border: 1px solid rgba(255, 255, 255, 0.085) !important;
+  border-radius: 13px !important;
+  color: var(--text) !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  text-align: left !important;
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.sidebarThemeOption:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(var(--accent-rgb), 0.36) !important;
+  background: rgba(var(--accent-rgb), 0.08) !important;
+}
+
+.sidebarThemeOption.active {
+  border-color: rgba(var(--accent-rgb), 0.62) !important;
+  background: rgba(var(--accent-rgb), 0.12) !important;
+  box-shadow: inset 3px 0 0 var(--accent) !important;
+}
+
+.sidebarThemeOption strong,
+.sidebarThemeOption small,
+.sidebarThemeOption em {
+  display: block !important;
+}
+
+.sidebarThemeOption strong {
+  color: var(--text) !important;
+  font-size: 13px !important;
+  line-height: 1.05 !important;
+  font-weight: 950 !important;
+}
+
+.sidebarThemeOption small,
+.sidebarThemeOption em {
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  font-style: normal !important;
+  line-height: 1.2 !important;
+}
+
+@media (max-height: 760px) {
+  .sidebarThemePanel.open {
+    min-height: min(390px, calc(100vh - 294px)) !important;
+  }
+
+  .sidebarThemeHeader {
+    min-height: 58px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .sidebarCustomTheme {
+    padding: 10px !important;
+  }
+
+  .sidebarThemeOption {
+    min-height: 56px !important;
+  }
+}
+
+
+/* ======================================================================
+   localitfy 0.1.3 — THEME LAG FIX
+   Put this at the very bottom of themes.css.
+   This removes the expensive repaint storm caused by transitioning
+   thousands of accent-based box-shadows/filters at the same time.
+====================================================================== */
+
+body.localitfyThemePainting .app,
+.app.themeSettling {
+  contain: layout paint style;
+}
+
+body.localitfyThemePainting .app *,
+body.localitfyThemePainting .app *::before,
+body.localitfyThemePainting .app *::after,
+.app.themeSettling *,
+.app.themeSettling *::before,
+.app.themeSettling *::after {
+  transition-property: background-color, border-color, color, opacity, transform !important;
+  transition-duration: 110ms !important;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation-play-state: paused !important;
+}
+
+body.localitfyThemePainting .app .homeAlbumCard,
+body.localitfyThemePainting .app .songRow,
+body.localitfyThemePainting .app .topRow,
+body.localitfyThemePainting .app .recentImportCard,
+body.localitfyThemePainting .app .sidebarThemeOption,
+body.localitfyThemePainting .app .themeShowcaseCard,
+body.localitfyThemePainting .app .settingsSection,
+body.localitfyThemePainting .app .settingChoice,
+body.localitfyThemePainting .app .toggleRow,
+body.localitfyThemePainting .app .circleButton,
+body.localitfyThemePainting .app .iconAction,
+body.localitfyThemePainting .app .mainAction,
+body.localitfyThemePainting .app .heroMain,
+body.localitfyThemePainting .app .softButton,
+.app.themeSettling .homeAlbumCard,
+.app.themeSettling .songRow,
+.app.themeSettling .topRow,
+.app.themeSettling .recentImportCard,
+.app.themeSettling .sidebarThemeOption,
+.app.themeSettling .themeShowcaseCard,
+.app.themeSettling .settingsSection,
+.app.themeSettling .settingChoice,
+.app.themeSettling .toggleRow,
+.app.themeSettling .circleButton,
+.app.themeSettling .iconAction,
+.app.themeSettling .mainAction,
+.app.themeSettling .heroMain,
+.app.themeSettling .softButton {
+  will-change: auto !important;
+  transition-property: transform, background-color, border-color, color, opacity !important;
+  transition-duration: 115ms !important;
+  filter: none !important;
+}
+
+body.localitfyThemePainting .app .ambientSurface::before,
+body.localitfyThemePainting .app .ambientSurface::after,
+body.localitfyThemePainting .app .coverAura::before,
+body.localitfyThemePainting .app .coverAura::after,
+body.localitfyThemePainting .app .homeAlbumCard::before,
+body.localitfyThemePainting .app .homeAlbumCard::after,
+.app.themeSettling .ambientSurface::before,
+.app.themeSettling .ambientSurface::after,
+.app.themeSettling .coverAura::before,
+.app.themeSettling .coverAura::after,
+.app.themeSettling .homeAlbumCard::before,
+.app.themeSettling .homeAlbumCard::after{
+  transition-property: opacity, transform, background-color !important;
+  transition-duration: 120ms !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  will-change: auto !important;
+}
+
+body.localitfyThemePainting .app .heroAmbiencePulse,
+body.localitfyThemePainting .app .secretLayer,
+body.localitfyThemePainting .app .lateNightNoteLayer,
+.app.themeSettling .heroAmbiencePulse,
+.app.themeSettling .secretLayer,
+.app.themeSettling .lateNightNoteLayer {
+  display: none !important;
+}
+
+body.localitfyThemePainting .app .homeAlbumCard.active,
+.app.themeSettling .homeAlbumCard.active {
+  border-color: rgba(var(--accent-rgb), 0.66) !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb), 0.22),
+    0 12px 34px rgba(0, 0, 0, 0.42) !important;
+}
+
+body.localitfyThemePainting .app .sidebarThemeOption.active,
+.app.themeSettling .sidebarThemeOption.active {
+  border-color: rgba(var(--accent-rgb), 0.72) !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb), 0.24),
+    0 10px 28px rgba(0, 0, 0, 0.36) !important;
+}
+
+body.localitfyThemePainting .app .themeLivePreview,
+.app.themeSettling .themeLivePreview {
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(var(--accent-rgb), 0.10) inset !important;
+}
+
+
+
+
+
+@media (prefers-reduced-motion: reduce) {
+  body.localitfyThemePainting .app *,
+  body.localitfyThemePainting .app *::before,
+  body.localitfyThemePainting .app *::after,
+  .app.themeSettling *,
+  .app.themeSettling *::before,
+  .app.themeSettling *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}
+/* ========================================================================== 
+   localtify v0.2.3 — dynamic theme reach layer
+   --------------------------------------------------------------------------
+   Makes every existing theme feed the same app/home hover system. This does
+   not rename old theme variables; it only adds stronger shared variables and
+   corrected same-element selectors for .app[data-theme="..."] cases.
+   ========================================================================== */
+
+[data-theme] {
+  --theme-panel: linear-gradient(180deg, rgba(var(--accent-rgb), 0.045), rgba(255, 255, 255, 0.018)), rgba(0, 0, 0, 0.54);
+  --theme-panel-hover: linear-gradient(145deg, rgba(var(--accent-rgb), 0.085), rgba(255, 255, 255, 0.025)), rgba(0, 0, 0, 0.50);
+  --theme-card: linear-gradient(180deg, rgba(var(--accent-rgb), 0.035), rgba(255, 255, 255, 0.018)), rgba(8, 8, 8, 0.82);
+  --theme-card-hover: linear-gradient(180deg, rgba(var(--accent-rgb), 0.09), rgba(255, 255, 255, 0.026)), rgba(10, 10, 10, 0.78);
+  --theme-row: linear-gradient(90deg, rgba(var(--accent-rgb), 0.032), rgba(255, 255, 255, 0.018)), rgba(255, 255, 255, 0.018);
+  --theme-row-hover: linear-gradient(90deg, rgba(var(--accent-rgb), 0.075), rgba(255, 255, 255, 0.022)), rgba(255, 255, 255, 0.018);
+  --theme-line: rgba(var(--accent-rgb), 0.14);
+  --theme-line-hover: rgba(var(--accent-rgb), 0.32);
+  --theme-ring: rgba(var(--accent-rgb), 0.46);
+  --theme-glow: rgba(var(--accent-rgb), 0.105);
+  --theme-glow-soft: rgba(var(--accent-rgb), 0.065);
+  --theme-grid-line: rgba(var(--accent-rgb), 0.022);
+  --theme-sheen: linear-gradient(115deg, transparent 0%, rgba(var(--accent-rgb), 0.12) 34%, rgba(255,255,255,0.05) 48%, transparent 66%);
+  --theme-hero-bg: radial-gradient(circle at 82% 38%, rgba(var(--accent-rgb), 0.11), transparent 38%), radial-gradient(circle at 22% 0%, rgba(var(--accent-rgb), 0.075), transparent 34%), linear-gradient(90deg, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0.58) 50%, rgba(0, 0, 0, 0.5)), rgba(0,0,0,.68);
+  --theme-hero-hover-bg: radial-gradient(circle at 84% 38%, rgba(var(--accent-rgb), 0.17), transparent 40%), radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb), 0.11), transparent 34%), linear-gradient(90deg, rgba(0,0,0,.82), rgba(0,0,0,.55) 48%, rgba(0,0,0,.42)), rgba(0,0,0,.66);
+}
+
+.app[data-theme="oled"],
+[data-theme="oled"] {
+  --theme-grid-line: rgba(100, 240, 164, 0.026);
+  --theme-glow: rgba(100, 240, 164, 0.13);
+  --theme-glow-soft: rgba(100, 240, 164, 0.075);
+}
+
+.app[data-theme="mint"],
+[data-theme="mint"] {
+  --theme-grid-line: rgba(82, 255, 188, 0.03);
+  --theme-glow: rgba(82, 255, 188, 0.13);
+}
+
+.app[data-theme="berry"],
+[data-theme="berry"] {
+  --theme-grid-line: rgba(255, 130, 186, 0.028);
+  --theme-glow: rgba(255, 130, 186, 0.13);
+}
+
+.app[data-theme="ocean"],
+[data-theme="ocean"] {
+  --theme-grid-line: rgba(87, 201, 255, 0.028);
+  --theme-glow: rgba(87, 201, 255, 0.12);
+}
+
+.app[data-theme="sunset"],
+[data-theme="sunset"] {
+  --theme-grid-line: rgba(255, 171, 87, 0.026);
+  --theme-glow: rgba(255, 171, 87, 0.13);
+}
+
+.app[data-theme="violet"],
+[data-theme="violet"],
+.app[data-theme="purple"],
+[data-theme="purple"] {
+  --theme-grid-line: rgba(178, 132, 255, 0.028);
+  --theme-glow: rgba(178, 132, 255, 0.13);
+}
+
+.app[data-theme="starlight"],
+[data-theme="starlight"] {
+  --theme-grid-line: rgba(190, 210, 255, 0.03);
+  --theme-glow: rgba(190, 210, 255, 0.11);
+}
+
+.app[data-theme="midnight"],
+[data-theme="midnight"] {
+  --theme-grid-line: rgba(var(--accent-rgb), 0.024);
+  --theme-glow: rgba(var(--accent-rgb), 0.115);
+}
+
+.app[data-theme="blood"],
+[data-theme="blood"],
+.app[data-theme="crimson"],
+[data-theme="crimson"] {
+  --theme-grid-line: rgba(var(--accent-rgb), 0.026);
+  --theme-glow: rgba(var(--accent-rgb), 0.13);
+}
+
+.app[data-theme] .content,
+.app[data-theme] .simpleShell {
+  background:
+    linear-gradient(var(--theme-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--theme-grid-line) 1px, transparent 1px),
+    radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb), 0.075), transparent 34%),
+    radial-gradient(circle at 92% 16%, rgba(var(--accent-rgb), 0.05), transparent 30%),
+    var(--bg, #000) !important;
+  background-size: 42px 42px, 42px 42px, auto, auto, auto !important;
+}
+
+.app[data-theme] .hero.ambientSurface,
+.app[data-theme] .simpleHero.ambientSurface {
+  background: var(--theme-hero-bg) !important;
+  border-color: var(--theme-line) !important;
+}
+
+.app[data-theme] .hero.ambientSurface:hover,
+.app[data-theme] .simpleHero.ambientSurface:hover {
+  background: var(--theme-hero-hover-bg) !important;
+  border-color: var(--theme-line-hover) !important;
+}
+
+.app[data-theme] .homeLibraryPanel,
+.app[data-theme] .simpleLibraryPanel,
+.app[data-theme] .panel,
+.app[data-theme] .editorModal,
+.app[data-theme] .converterBox,
+.app[data-theme] .analyticsPanel,
+.app[data-theme] .statCard {
+  background: var(--theme-panel) !important;
+  border-color: var(--theme-line) !important;
+}
+
+.app[data-theme] .homeLibraryPanel:hover,
+.app[data-theme] .simpleLibraryPanel:hover,
+.app[data-theme] .panel:hover,
+.app[data-theme] .editorModal:hover,
+.app[data-theme] .converterBox:hover,
+.app[data-theme] .analyticsPanel:hover,
+.app[data-theme] .statCard:hover {
+  background: var(--theme-panel-hover) !important;
+  border-color: var(--theme-line-hover) !important;
+}
+
+.app[data-theme] .homeAlbumCard {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-line) !important;
+}
+
+.app[data-theme] .homeAlbumCard:hover {
+  background: var(--theme-card-hover) !important;
+  border-color: var(--theme-line-hover) !important;
+}
+
+.app[data-theme] .songRow,
+.app[data-theme] .topRow {
+  background: var(--theme-row) !important;
+  border-color: var(--theme-line) !important;
+}
+
+.app[data-theme] .songRow:hover,
+.app[data-theme] .topRow:hover {
+  background: var(--theme-row-hover) !important;
+  border-color: var(--theme-line-hover) !important;
+}
+
+
+
+
+
+.app[data-theme] .search:focus,
+.app[data-theme] .simpleSearch:focus,
+.app[data-theme] input:focus,
+.app[data-theme] textarea:focus,
+.app[data-theme] select:focus {
+  border-color: var(--theme-ring) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.105), 0 0 34px var(--theme-glow-soft) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme] {
+    --theme-glow: rgba(var(--accent-rgb), 0.055);
+    --theme-glow-soft: rgba(var(--accent-rgb), 0.035);
+  }
+}
+
+/* ========================================================================== 
+   localtify 0.2.3 — shared theme motion + hover variables
+   --------------------------------------------------------------------------
+   One control layer for hover glass, cover aura, tiny button glow, and page easing.
+   Keep future hover changes here so every theme follows the same rules.
+   ========================================================================== */
+
+:root,
+.app,
+.simpleShell{
+  --theme-accent: var(--accent);
+  --motion-ease-page: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-theme: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-lift: cubic-bezier(0.2, 0.85, 0.2, 1);
+  --motion-ease-cover: cubic-bezier(0.16, 1, 0.3, 1);
+  --theme-card-glass: rgba(var(--accent-rgb), 0.028);
+  --theme-card-border: rgba(var(--accent-rgb), 0.10);
+  --theme-card-shadow: 0 10px 34px rgba(0, 0, 0, 0.24);
+  --theme-hover-glass: rgba(var(--accent-rgb), 0.10);
+  --theme-hover-border: rgba(var(--accent-rgb), 0.26);
+  --theme-hover-inset: rgba(var(--accent-rgb), 0.10);
+  --theme-card-hover-glow: rgba(var(--accent-rgb), 0.07);
+  --theme-active-glass: rgba(var(--accent-rgb), 0.16);
+  --theme-active-border: rgba(var(--accent-rgb), 0.38);
+  --theme-drop-glass: rgba(var(--accent-rgb), 0.18);
+  --theme-panel-hover-glass: rgba(var(--accent-rgb), 0.045);
+  --theme-panel-hover-border: rgba(var(--accent-rgb), 0.18);
+  --theme-cover-hover-glow: rgba(var(--accent-rgb), 0.15);
+  --theme-cover-aura-opacity: 0.34;
+  --theme-button-hover-glass: rgba(var(--accent-rgb), 0.105);
+  --theme-button-hover-border: rgba(var(--accent-rgb), 0.28);
+  --theme-button-hover-inset: rgba(var(--accent-rgb), 0.10);
+  --theme-button-hover-glow: rgba(var(--accent-rgb), 0.09);
+}
+
+@supports (background: color-mix(in oklab, white 10%, transparent)){
+  :root,
+  .app,
+  .simpleShell{
+    --theme-card-glass: color-mix(in oklab, var(--theme-accent) 3%, transparent);
+    --theme-card-border: color-mix(in oklab, var(--theme-accent) 11%, transparent);
+    --theme-hover-glass: color-mix(in oklab, var(--theme-accent) 10%, transparent);
+    --theme-hover-border: color-mix(in oklab, var(--theme-accent) 28%, transparent);
+    --theme-hover-inset: color-mix(in oklab, var(--theme-accent) 12%, transparent);
+    --theme-card-hover-glow: color-mix(in oklab, var(--theme-accent) 8%, transparent);
+    --theme-active-glass: color-mix(in oklab, var(--theme-accent) 16%, transparent);
+    --theme-active-border: color-mix(in oklab, var(--theme-accent) 42%, transparent);
+    --theme-drop-glass: color-mix(in oklab, var(--theme-accent) 20%, transparent);
+    --theme-panel-hover-glass: color-mix(in oklab, var(--theme-accent) 5%, transparent);
+    --theme-panel-hover-border: color-mix(in oklab, var(--theme-accent) 21%, transparent);
+    --theme-cover-hover-glow: color-mix(in oklab, var(--theme-accent) 17%, transparent);
+    --theme-button-hover-glass: color-mix(in oklab, var(--theme-accent) 11%, transparent);
+    --theme-button-hover-border: color-mix(in oklab, var(--theme-accent) 30%, transparent);
+    --theme-button-hover-inset: color-mix(in oklab, var(--theme-accent) 13%, transparent);
+    --theme-button-hover-glow: color-mix(in oklab, var(--theme-accent) 10%, transparent);
+  }
+}
+
+[data-theme="oled"]{
+  --theme-card-glass: rgba(var(--accent-rgb), 0.020);
+  --theme-card-border: rgba(var(--accent-rgb), 0.085);
+  --theme-hover-glass: rgba(var(--accent-rgb), 0.080);
+  --theme-hover-border: rgba(var(--accent-rgb), 0.20);
+  --theme-card-hover-glow: rgba(var(--accent-rgb), 0.045);
+  --theme-cover-hover-glow: rgba(var(--accent-rgb), 0.10);
+  --theme-button-hover-glow: rgba(var(--accent-rgb), 0.065);
+}
+
+@supports (background: color-mix(in oklab, white 10%, transparent)){
+  [data-theme="oled"]{
+    --theme-card-glass: color-mix(in oklab, var(--theme-accent) 2%, transparent);
+    --theme-card-border: color-mix(in oklab, var(--theme-accent) 9%, transparent);
+    --theme-hover-glass: color-mix(in oklab, var(--theme-accent) 8%, transparent);
+    --theme-hover-border: color-mix(in oklab, var(--theme-accent) 21%, transparent);
+    --theme-card-hover-glow: color-mix(in oklab, var(--theme-accent) 5%, transparent);
+    --theme-cover-hover-glow: color-mix(in oklab, var(--theme-accent) 11%, transparent);
+    --theme-button-hover-glow: color-mix(in oklab, var(--theme-accent) 7%, transparent);
+  }
+}
+
+[data-theme="berry"],
+[data-theme="rose"],
+[data-theme="sakura"],
+[data-theme="bubblegum"]{
+  --theme-cover-aura-opacity: 0.38;
+}
+
+[data-theme="aqua"],
+[data-theme="ice"],
+[data-theme="midnight"],
+[data-theme="starlight"]{
+  --theme-card-hover-glow: rgba(var(--accent-rgb), 0.085);
+  --theme-cover-hover-glow: rgba(var(--accent-rgb), 0.18);
+}
+
+[data-theme="sunset"],
+[data-theme="honey"],
+[data-theme="peach"],
+[data-theme="mocha"]{
+  --theme-panel-hover-glass: rgba(var(--accent-rgb), 0.055);
+  --theme-cover-hover-glow: rgba(var(--accent-rgb), 0.17);
+}
+
+[data-theme="mono"]{
+  --theme-card-hover-glow: rgba(var(--accent-rgb), 0.045);
+  --theme-cover-hover-glow: rgba(var(--accent-rgb), 0.09);
+  --theme-button-hover-glow: rgba(var(--accent-rgb), 0.055);
+}
+
+
+/* v0.2.3 custom theme reach */
+.app[data-custom-theme="true"]{
+  --active-line: var(--accent-line);
+}
+
+.app[data-custom-theme="true"] .settingsThemeCard.active,
+.app[data-custom-theme="true"] .navItem.active,
+.app[data-custom-theme="true"] .homeAlbumCard:hover,
+.app[data-custom-theme="true"] .songRow:hover{
+  border-color: color-mix(in oklab, var(--accent) 36%, transparent);
+}
+
+/* ======================================================================
+   localtify v0.2.3 — extra themes for the settings theme picker
+   ----------------------------------------------------------------------
+   These are real theme ids used by App.tsx. They only change CSS variables,
+   so the rest of the app keeps working with the existing theme system.
+====================================================================== */
+[data-theme="neonNoir"]{
+  --accent: #37f8ff;
+  --accent-rgb: 55, 248, 255;
+  --accent-soft: rgba(55, 248, 255, .11);
+  --accent-line: rgba(55, 248, 255, .34);
+  --bg: #020607;
+  --bg-2: #030b0d;
+  --bg-3: #071419;
+  --surface: rgba(55, 248, 255, .035);
+  --surface-2: rgba(55, 248, 255, .060);
+  --surface-3: rgba(55, 248, 255, .085);
+  --line: rgba(55, 248, 255, .11);
+  --line-2: rgba(55, 248, 255, .22);
+}
+
+[data-theme="cyberGrape"]{
+  --accent: #a855f7;
+  --accent-rgb: 168, 85, 247;
+  --accent-soft: rgba(168, 85, 247, .12);
+  --accent-line: rgba(168, 85, 247, .36);
+  --bg: #07020d;
+  --bg-2: #0c0418;
+  --bg-3: #130823;
+  --surface: rgba(168, 85, 247, .040);
+  --surface-2: rgba(168, 85, 247, .065);
+  --surface-3: rgba(168, 85, 247, .095);
+  --line: rgba(168, 85, 247, .13);
+  --line-2: rgba(168, 85, 247, .25);
+}
+
+[data-theme="ember"]{
+  --accent: #ff8a3d;
+  --accent-rgb: 255, 138, 61;
+  --accent-soft: rgba(255, 138, 61, .115);
+  --accent-line: rgba(255, 138, 61, .34);
+  --bg: #080302;
+  --bg-2: #100704;
+  --bg-3: #190d07;
+  --surface: rgba(255, 138, 61, .036);
+  --surface-2: rgba(255, 138, 61, .060);
+  --surface-3: rgba(255, 138, 61, .085);
+  --line: rgba(255, 138, 61, .12);
+  --line-2: rgba(255, 138, 61, .24);
+}
+
+[data-theme="forest"]{
+  --accent: #34d399;
+  --accent-rgb: 52, 211, 153;
+  --accent-soft: rgba(52, 211, 153, .105);
+  --accent-line: rgba(52, 211, 153, .30);
+  --bg: #020906;
+  --bg-2: #04110b;
+  --bg-3: #081b12;
+  --surface: rgba(52, 211, 153, .034);
+  --surface-2: rgba(52, 211, 153, .056);
+  --surface-3: rgba(52, 211, 153, .082);
+  --line: rgba(52, 211, 153, .11);
+  --line-2: rgba(52, 211, 153, .22);
+}
+
+[data-theme="ocean"]{
+  --accent: #38bdf8;
+  --accent-rgb: 56, 189, 248;
+  --accent-soft: rgba(56, 189, 248, .11);
+  --accent-line: rgba(56, 189, 248, .34);
+  --bg: #020816;
+  --bg-2: #031024;
+  --bg-3: #061936;
+  --surface: rgba(56, 189, 248, .036);
+  --surface-2: rgba(56, 189, 248, .064);
+  --surface-3: rgba(56, 189, 248, .09);
+  --line: rgba(56, 189, 248, .12);
+  --line-2: rgba(56, 189, 248, .23);
+}
+
+[data-theme="ruby"]{
+  --accent: #fb315d;
+  --accent-rgb: 251, 49, 93;
+  --accent-soft: rgba(251, 49, 93, .11);
+  --accent-line: rgba(251, 49, 93, .34);
+  --bg: #090205;
+  --bg-2: #13040a;
+  --bg-3: #1d0710;
+  --surface: rgba(251, 49, 93, .034);
+  --surface-2: rgba(251, 49, 93, .060);
+  --surface-3: rgba(251, 49, 93, .088);
+  --line: rgba(251, 49, 93, .12);
+  --line-2: rgba(251, 49, 93, .24);
+}
+
+[data-theme="aurora"]{
+  --accent: #5eead4;
+  --accent-rgb: 94, 234, 212;
+  --accent-soft: rgba(94, 234, 212, .11);
+  --accent-line: rgba(94, 234, 212, .32);
+  --highlight: #c084fc;
+  --bg: #020908;
+  --bg-2: #061111;
+  --bg-3: #0b1718;
+  --surface: rgba(94, 234, 212, .035);
+  --surface-2: rgba(192, 132, 252, .052);
+  --surface-3: rgba(94, 234, 212, .080);
+  --line: rgba(94, 234, 212, .12);
+  --line-2: rgba(192, 132, 252, .22);
+}
+
+[data-theme="vanilla"]{
+  --accent: #fff1b8;
+  --accent-rgb: 255, 241, 184;
+  --accent-soft: rgba(255, 241, 184, .10);
+  --accent-line: rgba(255, 241, 184, .28);
+  --bg: #080704;
+  --bg-2: #11100a;
+  --bg-3: #17140c;
+  --surface: rgba(255, 241, 184, .032);
+  --surface-2: rgba(255, 241, 184, .054);
+  --surface-3: rgba(255, 241, 184, .078);
+  --line: rgba(255, 241, 184, .105);
+  --line-2: rgba(255, 241, 184, .20);
+}
+
+[data-theme="vaporwave"]{
+  --accent: #fb6fd9;
+  --accent-rgb: 251, 111, 217;
+  --accent-soft: rgba(251, 111, 217, .12);
+  --accent-line: rgba(251, 111, 217, .36);
+  --highlight: #4dd4ff;
+  --bg: #070313;
+  --bg-2: #100826;
+  --bg-3: #170d34;
+  --surface: rgba(251, 111, 217, .036);
+  --surface-2: rgba(77, 212, 255, .052);
+  --surface-3: rgba(251, 111, 217, .088);
+  --line: rgba(251, 111, 217, .12);
+  --line-2: rgba(77, 212, 255, .21);
+}
+
+[data-theme-card="neonNoir"]{ --card-rgb: 55, 248, 255; }
+[data-theme-card="cyberGrape"]{ --card-rgb: 168, 85, 247; }
+[data-theme-card="ember"]{ --card-rgb: 255, 138, 61; }
+[data-theme-card="forest"]{ --card-rgb: 52, 211, 153; }
+[data-theme-card="ocean"]{ --card-rgb: 56, 189, 248; }
+[data-theme-card="ruby"]{ --card-rgb: 251, 49, 93; }
+[data-theme-card="aurora"]{ --card-rgb: 94, 234, 212; }
+[data-theme-card="vanilla"]{ --card-rgb: 255, 241, 184; }
+[data-theme-card="vaporwave"]{ --card-rgb: 251, 111, 217; }
+
+[data-theme="neonNoir"],
+[data-theme="cyberGrape"],
+[data-theme="ember"],
+[data-theme="forest"],
+[data-theme="ocean"],
+[data-theme="ruby"],
+[data-theme="aurora"],
+[data-theme="vanilla"],
+[data-theme="vaporwave"]{
+  --theme-cover-aura-opacity: .34;
+  --theme-button-hover-glow: rgba(var(--accent-rgb), .085);
+  --theme-cover-hover-glow: rgba(var(--accent-rgb), .16);
+}
+
+@supports (background: color-mix(in oklab, white 10%, transparent)){
+  [data-theme="neonNoir"],
+  [data-theme="cyberGrape"],
+  [data-theme="ember"],
+  [data-theme="forest"],
+  [data-theme="ocean"],
+  [data-theme="ruby"],
+  [data-theme="aurora"],
+  [data-theme="vanilla"],
+  [data-theme="vaporwave"]{
+    --theme-card-glass: color-mix(in oklab, var(--theme-accent) 3%, transparent);
+    --theme-card-border: color-mix(in oklab, var(--theme-accent) 12%, transparent);
+    --theme-hover-glass: color-mix(in oklab, var(--theme-accent) 8%, transparent);
+    --theme-hover-border: color-mix(in oklab, var(--theme-accent) 26%, transparent);
+    --theme-card-hover-glow: color-mix(in oklab, var(--theme-accent) 8%, transparent);
+    --theme-cover-hover-glow: color-mix(in oklab, var(--theme-accent) 15%, transparent);
+    --theme-button-hover-glow: color-mix(in oklab, var(--theme-accent) 9%, transparent);
+  }
+}
+
+/* ======================================================================
+   localtify v0.2.4 — cleaner theme variable layer
+   These final mappings make built-in themes affect sidebar/cards/player.
+====================================================================== */
+.appRoot,
+.localtifyApp,
+[data-custom-theme="false"]{
+  --theme-accent: var(--accent, #8dffce);
+  --theme-accent-2: var(--accent-2, #8ecbff);
+  --theme-highlight: var(--highlight, #c084fc);
+  --theme-progress: var(--progress, var(--accent, #8dffce));
+  --theme-card-glass: color-mix(in oklab, var(--theme-accent) 4%, rgba(255,255,255,.018));
+  --theme-card-border: color-mix(in oklab, var(--theme-accent) 16%, rgba(255,255,255,.07));
+  --theme-hover-glass: color-mix(in oklab, var(--theme-accent) 9%, transparent);
+  --theme-hover-border: color-mix(in oklab, var(--theme-accent) 32%, rgba(255,255,255,.10));
+}
+
+[data-theme="oled"]{ --bg:#030305; --bg-2:#050507; --bg-3:#09090d; --panel:rgba(255,255,255,.035); --surface:rgba(255,255,255,.025); --surface-2:rgba(255,255,255,.050); --surface-3:rgba(255,255,255,.072); --text:#f8fafc; --text-2:#d7dbe4; --muted:#858998; --accent:#f8fafc; --accent-2:#b9c1d0; --highlight:#f4f4f5; --progress:#ffffff; }
+[data-theme="mint"]{ --bg:#03110c; --bg-2:#051812; --bg-3:#0b241b; --panel:rgba(141,255,206,.055); --surface:rgba(141,255,206,.035); --surface-2:rgba(141,255,206,.060); --surface-3:rgba(141,255,206,.090); --text:#effff8; --text-2:#c6f7e5; --muted:#87bba7; --accent:#8dffce; --accent-2:#6ee7b7; --highlight:#b7ffdf; --progress:#8dffce; }
+[data-theme="berry"]{ --bg:#160512; --bg-2:#21071b; --bg-3:#310a28; --panel:rgba(255,114,200,.060); --surface:rgba(255,114,200,.035); --surface-2:rgba(255,114,200,.065); --surface-3:rgba(255,114,200,.095); --text:#fff2fb; --text-2:#ffd3ef; --muted:#bd8cac; --accent:#ff72c8; --accent-2:#fb9bdc; --highlight:#f0abfc; --progress:#ff72c8; }
+[data-theme="aqua"]{ --bg:#021016; --bg-2:#031923; --bg-3:#062332; --panel:rgba(83,215,255,.060); --surface:rgba(83,215,255,.034); --surface-2:rgba(83,215,255,.062); --surface-3:rgba(83,215,255,.092); --text:#effcff; --text-2:#c4f1ff; --muted:#87b9c8; --accent:#53d7ff; --accent-2:#79f2ff; --highlight:#8b5cf6; --progress:#53d7ff; }
+[data-theme="sunset"]{ --bg:#160a03; --bg-2:#211006; --bg-3:#321807; --panel:rgba(255,184,107,.060); --surface:rgba(255,184,107,.035); --surface-2:rgba(255,184,107,.065); --surface-3:rgba(255,184,107,.095); --text:#fff8ed; --text-2:#ffe0bb; --muted:#b99572; --accent:#ffb86b; --accent-2:#fb7185; --highlight:#ffd166; --progress:#ffb86b; }
+[data-theme="lavender"]{ --bg:#0c0618; --bg-2:#120a23; --bg-3:#1b1133; --panel:rgba(192,132,252,.060); --surface:rgba(192,132,252,.035); --surface-2:rgba(192,132,252,.065); --surface-3:rgba(192,132,252,.095); --text:#fbf5ff; --text-2:#e8d7ff; --muted:#a995c5; --accent:#c084fc; --accent-2:#a78bfa; --highlight:#f0abfc; --progress:#c084fc; }
+[data-theme="mono"]{ --bg:#070708; --bg-2:#0d0d0f; --bg-3:#151519; --panel:rgba(244,244,245,.045); --surface:rgba(244,244,245,.028); --surface-2:rgba(244,244,245,.052); --surface-3:rgba(244,244,245,.080); --text:#f4f4f5; --text-2:#d4d4d8; --muted:#8e8e99; --accent:#f4f4f5; --accent-2:#a1a1aa; --highlight:#ffffff; --progress:#f4f4f5; }
+[data-theme="rose"]{ --bg:#17070c; --bg-2:#220a12; --bg-3:#33101b; --panel:rgba(251,113,133,.060); --surface:rgba(251,113,133,.034); --surface-2:rgba(251,113,133,.065); --surface-3:rgba(251,113,133,.095); --text:#fff1f4; --text-2:#ffcbd4; --muted:#b78b92; --accent:#fb7185; --accent-2:#fda4af; --highlight:#f472b6; --progress:#fb7185; }
+[data-theme="cotton"]{ --bg:#06101f; --bg-2:#0a1728; --bg-3:#10213a; --panel:rgba(147,197,253,.060); --surface:rgba(147,197,253,.034); --surface-2:rgba(147,197,253,.064); --surface-3:rgba(147,197,253,.095); --text:#f4f9ff; --text-2:#d8ecff; --muted:#92a9c2; --accent:#93c5fd; --accent-2:#bfdbfe; --highlight:#7dd3fc; --progress:#93c5fd; }
+[data-theme="honey"]{ --bg:#120d02; --bg-2:#1c1504; --bg-3:#2a2007; --panel:rgba(250,204,21,.060); --surface:rgba(250,204,21,.034); --surface-2:rgba(250,204,21,.064); --surface-3:rgba(250,204,21,.095); --text:#fffbe8; --text-2:#fde68a; --muted:#a99555; --accent:#facc15; --accent-2:#fbbf24; --highlight:#fde047; --progress:#facc15; }
+[data-theme="lime"]{ --bg:#061103; --bg-2:#0a1b06; --bg-3:#10280a; --panel:rgba(163,230,53,.060); --surface:rgba(163,230,53,.034); --surface-2:rgba(163,230,53,.064); --surface-3:rgba(163,230,53,.095); --text:#f7ffe9; --text-2:#def7a4; --muted:#95ae6d; --accent:#a3e635; --accent-2:#22c55e; --highlight:#bef264; --progress:#a3e635; }
+[data-theme="midnight"]{ --bg:#020617; --bg-2:#061026; --bg-3:#0b1733; --panel:rgba(96,165,250,.060); --surface:rgba(96,165,250,.034); --surface-2:rgba(96,165,250,.064); --surface-3:rgba(96,165,250,.095); --text:#eff6ff; --text-2:#c7dcff; --muted:#8598b8; --accent:#60a5fa; --accent-2:#818cf8; --highlight:#38bdf8; --progress:#60a5fa; }
+[data-theme="mocha"]{ --bg:#120b07; --bg-2:#1b110b; --bg-3:#271910; --panel:rgba(192,132,87,.060); --surface:rgba(192,132,87,.034); --surface-2:rgba(192,132,87,.064); --surface-3:rgba(192,132,87,.095); --text:#fff7ed; --text-2:#e7c7ac; --muted:#a18773; --accent:#c08457; --accent-2:#d6a174; --highlight:#f59e0b; --progress:#c08457; }
+[data-theme="cherry"]{ --bg:#160208; --bg-2:#21040c; --bg-3:#310713; --panel:rgba(244,63,94,.060); --surface:rgba(244,63,94,.034); --surface-2:rgba(244,63,94,.064); --surface-3:rgba(244,63,94,.095); --text:#fff1f2; --text-2:#fecdd3; --muted:#ad8389; --accent:#f43f5e; --accent-2:#fb7185; --highlight:#ff8fab; --progress:#f43f5e; }
+[data-theme="ice"]{ --bg:#031013; --bg-2:#061a20; --bg-3:#0a2730; --panel:rgba(103,232,249,.060); --surface:rgba(103,232,249,.034); --surface-2:rgba(103,232,249,.064); --surface-3:rgba(103,232,249,.095); --text:#f0fdff; --text-2:#cffafe; --muted:#8eb8be; --accent:#67e8f9; --accent-2:#7dd3fc; --highlight:#22d3ee; --progress:#67e8f9; }
+[data-theme="matcha"]{ --bg:#051009; --bg-2:#08180e; --bg-3:#0e2415; --panel:rgba(134,239,172,.060); --surface:rgba(134,239,172,.034); --surface-2:rgba(134,239,172,.064); --surface-3:rgba(134,239,172,.095); --text:#f0fff4; --text-2:#bbf7d0; --muted:#83aa90; --accent:#86efac; --accent-2:#4ade80; --highlight:#bef264; --progress:#86efac; }
+[data-theme="bubblegum"]{ --bg:#13091a; --bg-2:#1d0c25; --bg-3:#2b1238; --panel:rgba(244,114,208,.060); --surface:rgba(244,114,208,.034); --surface-2:rgba(244,114,208,.064); --surface-3:rgba(244,114,208,.095); --text:#fff2fb; --text-2:#ffd3f3; --muted:#b895b0; --accent:#f472d0; --accent-2:#60a5fa; --highlight:#c084fc; --progress:#f472d0; }
+[data-theme="sakura"]{ --bg:#150811; --bg-2:#210d1a; --bg-3:#311326; --panel:rgba(249,168,212,.060); --surface:rgba(249,168,212,.034); --surface-2:rgba(249,168,212,.064); --surface-3:rgba(249,168,212,.095); --text:#fff5fb; --text-2:#fbcfe8; --muted:#b695a8; --accent:#f9a8d4; --accent-2:#f0abfc; --highlight:#fda4af; --progress:#f9a8d4; }
+[data-theme="dreamcore"]{ --bg:#0a0718; --bg-2:#100c24; --bg-3:#171238; --panel:rgba(167,139,250,.060); --surface:rgba(167,139,250,.034); --surface-2:rgba(167,139,250,.064); --surface-3:rgba(167,139,250,.095); --text:#f8f5ff; --text-2:#ddd6fe; --muted:#9d94bd; --accent:#a78bfa; --accent-2:#67e8f9; --highlight:#f0abfc; --progress:#a78bfa; }
+[data-theme="peach"]{ --bg:#150905; --bg-2:#20100a; --bg-3:#30180e; --panel:rgba(253,186,116,.060); --surface:rgba(253,186,116,.034); --surface-2:rgba(253,186,116,.064); --surface-3:rgba(253,186,116,.095); --text:#fff7ed; --text-2:#fed7aa; --muted:#b29276; --accent:#fdba74; --accent-2:#fb7185; --highlight:#fbbf24; --progress:#fdba74; }
+[data-theme="moon"]{ --bg:#070b13; --bg-2:#0d121d; --bg-3:#151b2a; --panel:rgba(203,213,225,.050); --surface:rgba(203,213,225,.030); --surface-2:rgba(203,213,225,.055); --surface-3:rgba(203,213,225,.085); --text:#f8fafc; --text-2:#d9e2ee; --muted:#8f9cad; --accent:#cbd5e1; --accent-2:#94a3b8; --highlight:#e2e8f0; --progress:#cbd5e1; }
+[data-theme="starlight"]{ --bg:#050617; --bg-2:#090b22; --bg-3:#101438; --panel:rgba(224,231,255,.055); --surface:rgba(224,231,255,.032); --surface-2:rgba(224,231,255,.058); --surface-3:rgba(224,231,255,.090); --text:#f8faff; --text-2:#dce3ff; --muted:#949bbd; --accent:#e0e7ff; --accent-2:#a5b4fc; --highlight:#c4b5fd; --progress:#e0e7ff; }
+[data-theme="neonNoir"]{ --bg:#01070a; --bg-2:#020e12; --bg-3:#04191f; --panel:rgba(55,248,255,.055); --surface:rgba(55,248,255,.032); --surface-2:rgba(55,248,255,.058); --surface-3:rgba(55,248,255,.090); --text:#ecfeff; --text-2:#bffaff; --muted:#72a7ad; --accent:#37f8ff; --accent-2:#22d3ee; --highlight:#a78bfa; --progress:#37f8ff; }
+[data-theme="cyberGrape"]{ --bg:#080012; --bg-2:#110021; --bg-3:#1c0733; --panel:rgba(168,85,247,.060); --surface:rgba(168,85,247,.034); --surface-2:rgba(168,85,247,.064); --surface-3:rgba(168,85,247,.095); --text:#faf5ff; --text-2:#e9d5ff; --muted:#a083b8; --accent:#a855f7; --accent-2:#22d3ee; --highlight:#f0abfc; --progress:#a855f7; }
+[data-theme="ember"]{ --bg:#130402; --bg-2:#1d0804; --bg-3:#2d0d07; --panel:rgba(255,122,47,.060); --surface:rgba(255,122,47,.034); --surface-2:rgba(255,122,47,.064); --surface-3:rgba(255,122,47,.095); --text:#fff4ed; --text-2:#ffd6bd; --muted:#b98d72; --accent:#ff7a2f; --accent-2:#ffd166; --highlight:#ffb703; --progress:#ff7a2f; }
+[data-theme="forest"]{ --bg:#021008; --bg-2:#04180d; --bg-3:#082514; --panel:rgba(52,211,153,.060); --surface:rgba(52,211,153,.034); --surface-2:rgba(52,211,153,.064); --surface-3:rgba(52,211,153,.095); --text:#ecfdf5; --text-2:#c5f3de; --muted:#82ab99; --accent:#34d399; --accent-2:#86efac; --highlight:#22c55e; --progress:#34d399; }
+[data-theme="ocean"]{ --bg:#020b19; --bg-2:#041226; --bg-3:#071d3a; --panel:rgba(56,189,248,.060); --surface:rgba(56,189,248,.034); --surface-2:rgba(56,189,248,.064); --surface-3:rgba(56,189,248,.095); --text:#eff6ff; --text-2:#cdeaff; --muted:#8da9c5; --accent:#38bdf8; --accent-2:#2563eb; --highlight:#67e8f9; --progress:#38bdf8; }
+[data-theme="ruby"]{ --bg:#140107; --bg-2:#21020c; --bg-3:#320414; --panel:rgba(251,49,93,.060); --surface:rgba(251,49,93,.034); --surface-2:rgba(251,49,93,.064); --surface-3:rgba(251,49,93,.095); --text:#fff1f5; --text-2:#ffccd7; --muted:#b2828e; --accent:#fb315d; --accent-2:#ef4444; --highlight:#f9a8d4; --progress:#fb315d; }
+[data-theme="aurora"]{ --bg:#041011; --bg-2:#071719; --bg-3:#0b2224; --panel:rgba(94,234,212,.060); --surface:rgba(94,234,212,.034); --surface-2:rgba(94,234,212,.064); --surface-3:rgba(94,234,212,.095); --text:#f0fdfa; --text-2:#ccfbf1; --muted:#85b7b2; --accent:#5eead4; --accent-2:#c084fc; --highlight:#a78bfa; --progress:#5eead4; }
+[data-theme="vanilla"]{ --bg:#141006; --bg-2:#1d170c; --bg-3:#2a2110; --panel:rgba(255,241,194,.055); --surface:rgba(255,241,194,.032); --surface-2:rgba(255,241,194,.058); --surface-3:rgba(255,241,194,.090); --text:#fffbed; --text-2:#f8e6b8; --muted:#afa17a; --accent:#fff1c2; --accent-2:#f0b35a; --highlight:#fde68a; --progress:#fff1c2; }
+[data-theme="vaporwave"]{ --bg:#09031b; --bg-2:#10062b; --bg-3:#1a0b42; --panel:rgba(251,111,217,.060); --surface:rgba(251,111,217,.034); --surface-2:rgba(251,111,217,.064); --surface-3:rgba(251,111,217,.095); --text:#fff3ff; --text-2:#fbcfe8; --muted:#af91bc; --accent:#fb6fd9; --accent-2:#4dd4ff; --highlight:#a78bfa; --progress:#fb6fd9; }
+[data-theme="ultraviolet"]{ --bg:#080013; --bg-2:#100022; --bg-3:#1b0635; --panel:rgba(139,92,246,.060); --surface:rgba(139,92,246,.034); --surface-2:rgba(139,92,246,.064); --surface-3:rgba(139,92,246,.095); --text:#faf5ff; --text-2:#e9d5ff; --muted:#a391bb; --accent:#8b5cf6; --accent-2:#f0abfc; --highlight:#c084fc; --progress:#8b5cf6; }
+[data-theme="terminal"]{ --bg:#000805; --bg-2:#001008; --bg-3:#02180d; --panel:rgba(34,197,94,.060); --surface:rgba(34,197,94,.034); --surface-2:rgba(34,197,94,.064); --surface-3:rgba(34,197,94,.095); --text:#ecfdf5; --text-2:#bbf7d0; --muted:#76a787; --accent:#22c55e; --accent-2:#bbf7d0; --highlight:#86efac; --progress:#22c55e; }
+[data-theme="candyCloud"]{ --bg:#100617; --bg-2:#190a22; --bg-3:#250f34; --panel:rgba(251,123,220,.060); --surface:rgba(251,123,220,.034); --surface-2:rgba(251,123,220,.064); --surface-3:rgba(251,123,220,.095); --text:#fff6ff; --text-2:#fbd8f5; --muted:#ad94b6; --accent:#fb7bdc; --accent-2:#67e8f9; --highlight:#c084fc; --progress:#fb7bdc; }
+[data-theme="rainstorm"]{ --bg:#020617; --bg-2:#06101d; --bg-3:#0d1a2d; --panel:rgba(56,189,248,.060); --surface:rgba(56,189,248,.034); --surface-2:rgba(56,189,248,.064); --surface-3:rgba(56,189,248,.095); --text:#f1f7ff; --text-2:#cfe8ff; --muted:#879bb5; --accent:#38bdf8; --accent-2:#818cf8; --highlight:#93c5fd; --progress:#38bdf8; }
+[data-theme="lavaLamp"]{ --bg:#130200; --bg-2:#1f0502; --bg-3:#300b04; --panel:rgba(239,68,68,.060); --surface:rgba(239,68,68,.034); --surface-2:rgba(239,68,68,.064); --surface-3:rgba(239,68,68,.095); --text:#fff4ed; --text-2:#fecaca; --muted:#b78979; --accent:#ef4444; --accent-2:#f59e0b; --highlight:#f97316; --progress:#ef4444; }
+[data-theme="softSky"]{ --bg:#07101d; --bg-2:#0b1627; --bg-3:#12213a; --panel:rgba(147,197,253,.060); --surface:rgba(147,197,253,.034); --surface-2:rgba(147,197,253,.064); --surface-3:rgba(147,197,253,.095); --text:#f8fbff; --text-2:#dbeafe; --muted:#92a1b4; --accent:#93c5fd; --accent-2:#e0f2fe; --highlight:#7dd3fc; --progress:#93c5fd; }
+[data-theme="arcadeGhost"]{ --bg:#02070a; --bg-2:#041014; --bg-3:#071b20; --panel:rgba(34,211,238,.060); --surface:rgba(34,211,238,.034); --surface-2:rgba(34,211,238,.064); --surface-3:rgba(34,211,238,.095); --text:#effcff; --text-2:#ccfbf1; --muted:#77a8af; --accent:#22d3ee; --accent-2:#a3e635; --highlight:#f0abfc; --progress:#22d3ee; }
+/* ======================================================================
+   localtify v0.2.4 — complete theme reach
+   Normalizes all built-in themes so settings/sidebar/player/editor use
+   the active theme instead of falling back to black boxes.
+====================================================================== */
+.app,
+.loadingScreen,
+.settingsPage,
+.kopuzSettingsPage{
+  --theme-accent: var(--accent, #8dffce);
+  --theme-accent-2: var(--accent-2, var(--accent, #8dffce));
+  --theme-highlight: var(--highlight, var(--accent-2, var(--accent, #8dffce)));
+  --theme-progress: var(--progress, var(--accent, #8dffce));
+  --theme-bg: var(--bg, #000);
+  --theme-bg-2: var(--bg-2, #060606);
+  --theme-bg-3: var(--bg-3, #111);
+  --theme-panel: color-mix(in oklab, var(--panel, rgba(255,255,255,.04)) 82%, var(--accent, #8dffce) 5%);
+  --theme-surface: color-mix(in oklab, var(--surface, rgba(255,255,255,.035)) 76%, var(--accent, #8dffce) 4%);
+  --theme-surface-2: color-mix(in oklab, var(--surface-2, rgba(255,255,255,.055)) 76%, var(--accent, #8dffce) 6%);
+  --theme-line: color-mix(in oklab, var(--accent, #8dffce) 13%, rgba(255,255,255,.045));
+  --theme-line-strong: color-mix(in oklab, var(--accent, #8dffce) 28%, rgba(255,255,255,.065));
+  --theme-card-glass: color-mix(in oklab, var(--accent, #8dffce) 5%, rgba(255,255,255,.018));
+  --theme-card-border: color-mix(in oklab, var(--accent, #8dffce) 12%, rgba(255,255,255,.05));
+  --theme-hover-glass: color-mix(in oklab, var(--accent, #8dffce) 9%, transparent);
+  --theme-hover-border: color-mix(in oklab, var(--accent, #8dffce) 26%, transparent);
+  --theme-cover-hover-glow: color-mix(in oklab, var(--accent, #8dffce) 14%, transparent);
+  --theme-button-hover-glow: color-mix(in oklab, var(--accent, #8dffce) 8%, transparent);
+  --theme-sidebar-active: color-mix(in oklab, var(--accent, #8dffce) 15%, transparent);
+  --theme-sidebar-hover: color-mix(in oklab, var(--accent, #8dffce) 8%, transparent);
+  --theme-editor-wash: color-mix(in oklab, var(--accent, #8dffce) 6%, var(--bg, #000));
+}
+
+[data-custom-theme="true"] .app,
+.app[data-custom-theme="true"],
+[data-custom-theme="true"] .settingsPage,
+[data-custom-theme="true"].settingsPage{
+  --theme-accent: var(--custom-accent, var(--accent, #8dffce));
+  --theme-accent-2: var(--custom-accent-2, var(--accent-2, var(--theme-accent)));
+  --theme-highlight: var(--custom-highlight, var(--highlight, var(--theme-accent-2)));
+  --theme-progress: var(--custom-progress, var(--progress, var(--theme-accent)));
+}
+
+[data-theme="oled"]{ --bg:#010102; --bg-2:#050506; --bg-3:#0a0a0d; --panel:rgba(255,255,255,.034); --surface:rgba(255,255,255,.026); --surface-2:rgba(255,255,255,.048); --surface-3:rgba(255,255,255,.074); --line:rgba(255,255,255,.070); --line-2:rgba(255,255,255,.13); --text:#f8fafc; --text-2:#dde2eb; --muted:#8a8f9d; --accent:#f8fafc; --accent-2:#aab3c2; --highlight:#ffffff; --progress:#f8fafc; }
+[data-theme="mint"]{ --bg:#020f0a; --bg-2:#051711; --bg-3:#092119; --panel:rgba(141,255,206,.050); --surface:rgba(141,255,206,.032); --surface-2:rgba(141,255,206,.060); --surface-3:rgba(141,255,206,.088); --line:rgba(141,255,206,.11); --line-2:rgba(141,255,206,.22); --text:#f0fff8; --text-2:#c9f8e7; --muted:#86bba6; --accent:#8dffce; --accent-2:#6ee7b7; --highlight:#bbf7d0; --progress:#8dffce; }
+[data-theme="berry"]{ --bg:#130411; --bg-2:#1e071a; --bg-3:#2c0b26; --panel:rgba(255,126,190,.054); --surface:rgba(255,126,190,.034); --surface-2:rgba(255,126,190,.064); --surface-3:rgba(255,126,190,.094); --line:rgba(255,126,190,.12); --line-2:rgba(255,126,190,.24); --text:#fff1fb; --text-2:#ffd0ee; --muted:#bb8dac; --accent:#ff7ebc; --accent-2:#ff9fd3; --highlight:#e879f9; --progress:#ff7ebc; }
+[data-theme="aqua"]{ --bg:#021015; --bg-2:#041923; --bg-3:#072432; --panel:rgba(117,221,255,.054); --surface:rgba(117,221,255,.034); --surface-2:rgba(117,221,255,.064); --surface-3:rgba(117,221,255,.094); --line:rgba(117,221,255,.12); --line-2:rgba(117,221,255,.24); --text:#effcff; --text-2:#c8f2ff; --muted:#86b8c8; --accent:#75ddff; --accent-2:#8cf6ff; --highlight:#818cf8; --progress:#75ddff; }
+[data-theme="sunset"]{ --bg:#150803; --bg-2:#211006; --bg-3:#301707; --panel:rgba(255,179,111,.054); --surface:rgba(255,179,111,.034); --surface-2:rgba(255,179,111,.064); --surface-3:rgba(255,179,111,.094); --line:rgba(255,179,111,.12); --line-2:rgba(255,179,111,.24); --text:#fff7ed; --text-2:#ffdfb8; --muted:#b89472; --accent:#ffb36f; --accent-2:#fb7185; --highlight:#ffd166; --progress:#ffb36f; }
+[data-theme="lavender"]{ --bg:#0b0617; --bg-2:#120a23; --bg-3:#1b1133; --panel:rgba(185,148,255,.054); --surface:rgba(185,148,255,.034); --surface-2:rgba(185,148,255,.064); --surface-3:rgba(185,148,255,.094); --line:rgba(185,148,255,.12); --line-2:rgba(185,148,255,.24); --text:#fbf5ff; --text-2:#e7d7ff; --muted:#a995c5; --accent:#b994ff; --accent-2:#a78bfa; --highlight:#f0abfc; --progress:#b994ff; }
+[data-theme="mono"]{ --bg:#070708; --bg-2:#0d0d0f; --bg-3:#151519; --panel:rgba(244,244,245,.040); --surface:rgba(244,244,245,.026); --surface-2:rgba(244,244,245,.048); --surface-3:rgba(244,244,245,.074); --line:rgba(244,244,245,.08); --line-2:rgba(244,244,245,.16); --text:#f4f4f5; --text-2:#d4d4d8; --muted:#8e8e99; --accent:#f4f4f5; --accent-2:#a1a1aa; --highlight:#ffffff; --progress:#f4f4f5; }
+
+
+/* v0.2.4 full built-in theme depth pass — gives every common theme its own page/sidebar wash. */
+[data-theme="rose"]{ --bg:#13070c; --bg-2:#1c0b12; --bg-3:#2a101a; --panel:rgba(255,138,167,.052); --surface:rgba(255,138,167,.032); --surface-2:rgba(255,138,167,.062); --surface-3:rgba(255,138,167,.092); --line:rgba(255,138,167,.12); --line-2:rgba(255,138,167,.23); --text:#fff4f7; --text-2:#ffd4df; --muted:#b9929d; --accent:#ff8aa7; --accent-2:#ff5f8f; --highlight:#fecdd3; --progress:#ff8aa7; }
+[data-theme="cotton"]{ --bg:#041019; --bg-2:#071826; --bg-3:#0a2234; --panel:rgba(147,215,255,.052); --surface:rgba(147,215,255,.032); --surface-2:rgba(147,215,255,.062); --surface-3:rgba(147,215,255,.092); --line:rgba(147,215,255,.12); --line-2:rgba(147,215,255,.23); --text:#f1fbff; --text-2:#cfefff; --muted:#8fb5c8; --accent:#93d7ff; --accent-2:#bae6fd; --highlight:#bfdbfe; --progress:#93d7ff; }
+[data-theme="honey"]{ --bg:#130c03; --bg-2:#1d1306; --bg-3:#2a1b08; --panel:rgba(255,199,107,.052); --surface:rgba(255,199,107,.032); --surface-2:rgba(255,199,107,.062); --surface-3:rgba(255,199,107,.092); --line:rgba(255,199,107,.12); --line-2:rgba(255,199,107,.23); --text:#fff8e8; --text-2:#ffe6ad; --muted:#b99b68; --accent:#ffc76b; --accent-2:#f59e0b; --highlight:#fde68a; --progress:#ffc76b; }
+[data-theme="lime"]{ --bg:#071103; --bg-2:#0c1906; --bg-3:#12240a; --panel:rgba(183,255,103,.050); --surface:rgba(183,255,103,.030); --surface-2:rgba(183,255,103,.060); --surface-3:rgba(183,255,103,.090); --line:rgba(183,255,103,.12); --line-2:rgba(183,255,103,.23); --text:#f7ffe8; --text-2:#defab5; --muted:#9bb677; --accent:#b7ff67; --accent-2:#84cc16; --highlight:#d9f99d; --progress:#b7ff67; }
+[data-theme="midnight"]{ --bg:#030713; --bg-2:#060d1f; --bg-3:#0a1430; --panel:rgba(122,167,255,.052); --surface:rgba(122,167,255,.032); --surface-2:rgba(122,167,255,.062); --surface-3:rgba(122,167,255,.092); --line:rgba(122,167,255,.12); --line-2:rgba(122,167,255,.23); --text:#f0f6ff; --text-2:#cddcff; --muted:#8d9ec2; --accent:#7aa7ff; --accent-2:#60a5fa; --highlight:#a78bfa; --progress:#7aa7ff; }
+[data-theme="mocha"]{ --bg:#100a06; --bg-2:#19100a; --bg-3:#25170f; --panel:rgba(216,170,122,.052); --surface:rgba(216,170,122,.032); --surface-2:rgba(216,170,122,.062); --surface-3:rgba(216,170,122,.092); --line:rgba(216,170,122,.12); --line-2:rgba(216,170,122,.23); --text:#fff7ef; --text-2:#ead0b4; --muted:#a88e75; --accent:#d8aa7a; --accent-2:#c08457; --highlight:#fed7aa; --progress:#d8aa7a; }
+[data-theme="cherry"]{ --bg:#160406; --bg-2:#22070b; --bg-3:#310b10; --panel:rgba(255,95,117,.052); --surface:rgba(255,95,117,.032); --surface-2:rgba(255,95,117,.062); --surface-3:rgba(255,95,117,.092); --line:rgba(255,95,117,.12); --line-2:rgba(255,95,117,.23); --text:#fff1f3; --text-2:#ffc8d0; --muted:#bd8790; --accent:#ff5f75; --accent-2:#fb7185; --highlight:#fda4af; --progress:#ff5f75; }
+[data-theme="ice"]{ --bg:#021112; --bg-2:#051b1d; --bg-3:#08292c; --panel:rgba(120,241,255,.052); --surface:rgba(120,241,255,.032); --surface-2:rgba(120,241,255,.062); --surface-3:rgba(120,241,255,.092); --line:rgba(120,241,255,.12); --line-2:rgba(120,241,255,.23); --text:#effdff; --text-2:#c8faff; --muted:#86bcc1; --accent:#78f1ff; --accent-2:#a5f3fc; --highlight:#93c5fd; --progress:#78f1ff; }
+[data-theme="matcha"]{ --bg:#071006; --bg-2:#0d190a; --bg-3:#14240f; --panel:rgba(168,229,139,.052); --surface:rgba(168,229,139,.032); --surface-2:rgba(168,229,139,.062); --surface-3:rgba(168,229,139,.092); --line:rgba(168,229,139,.12); --line-2:rgba(168,229,139,.23); --text:#f5fff1; --text-2:#d5f5c8; --muted:#9ab58d; --accent:#a8e58b; --accent-2:#86efac; --highlight:#bbf7d0; --progress:#a8e58b; }
+[data-theme="bubblegum"]{ --bg:#130515; --bg-2:#1e0921; --bg-3:#2b0d31; --panel:rgba(255,143,255,.052); --surface:rgba(255,143,255,.032); --surface-2:rgba(255,143,255,.062); --surface-3:rgba(255,143,255,.092); --line:rgba(255,143,255,.12); --line-2:rgba(255,143,255,.23); --text:#fff2ff; --text-2:#ffd1ff; --muted:#bb8dbb; --accent:#ff8fff; --accent-2:#f472b6; --highlight:#f0abfc; --progress:#ff8fff; }
+[data-theme="sakura"]{ --bg:#14070d; --bg-2:#200b14; --bg-3:#2d101d; --panel:rgba(255,180,205,.052); --surface:rgba(255,180,205,.032); --surface-2:rgba(255,180,205,.062); --surface-3:rgba(255,180,205,.092); --line:rgba(255,180,205,.12); --line-2:rgba(255,180,205,.23); --text:#fff5fa; --text-2:#ffd9e8; --muted:#bd94a5; --accent:#ffb4cd; --accent-2:#fb7185; --highlight:#f9a8d4; --progress:#ffb4cd; }
+[data-theme="dreamcore"]{ --bg:#09071a; --bg-2:#11102a; --bg-3:#1a1840; --panel:rgba(158,129,255,.054); --surface:rgba(158,129,255,.034); --surface-2:rgba(158,129,255,.064); --surface-3:rgba(158,129,255,.094); --line:rgba(158,129,255,.12); --line-2:rgba(158,129,255,.24); --text:#f7f4ff; --text-2:#ded4ff; --muted:#9c93c3; --accent:#9e81ff; --accent-2:#67e8f9; --highlight:#f0abfc; --progress:#9e81ff; }
+[data-theme="peach"]{ --bg:#140a06; --bg-2:#1f1009; --bg-3:#2c170d; --panel:rgba(255,172,135,.052); --surface:rgba(255,172,135,.032); --surface-2:rgba(255,172,135,.062); --surface-3:rgba(255,172,135,.092); --line:rgba(255,172,135,.12); --line-2:rgba(255,172,135,.23); --text:#fff6f0; --text-2:#ffd9c7; --muted:#bd9584; --accent:#ffac87; --accent-2:#fb923c; --highlight:#fdba74; --progress:#ffac87; }
+[data-theme="moon"]{ --bg:#060915; --bg-2:#0b1020; --bg-3:#11182c; --panel:rgba(203,213,225,.046); --surface:rgba(203,213,225,.030); --surface-2:rgba(203,213,225,.056); --surface-3:rgba(203,213,225,.082); --line:rgba(203,213,225,.10); --line-2:rgba(203,213,225,.19); --text:#f8fafc; --text-2:#dbe4f0; --muted:#94a3b8; --accent:#cbd5e1; --accent-2:#60a5fa; --highlight:#a78bfa; --progress:#cbd5e1; }
+[data-theme="starlight"]{ --bg:#030611; --bg-2:#070d1d; --bg-3:#0d172d; --panel:rgba(125,211,252,.050); --surface:rgba(125,211,252,.030); --surface-2:rgba(125,211,252,.058); --surface-3:rgba(125,211,252,.086); --line:rgba(125,211,252,.11); --line-2:rgba(125,211,252,.21); --text:#f1f8ff; --text-2:#d3e7ff; --muted:#8da4c2; --accent:#7dd3fc; --accent-2:#c084fc; --highlight:#f0abfc; --progress:#7dd3fc; }
+[data-theme="arcadeGhost"]{ --bg:#050609; --bg-2:#080b12; --bg-3:#0d1320; --panel:rgba(80,250,123,.046); --surface:rgba(80,250,123,.030); --surface-2:rgba(80,250,123,.056); --surface-3:rgba(80,250,123,.082); --line:rgba(80,250,123,.11); --line-2:rgba(80,250,123,.21); --text:#f3fff6; --text-2:#c5ffd7; --muted:#82ad90; --accent:#50fa7b; --accent-2:#8be9fd; --highlight:#ff79c6; --progress:#50fa7b; }
+/* ======================================================================
+   localtify v0.2.4 — stronger theme variables for full-app tinting
+   This makes themes affect sidebar/content/player/background instead of
+   leaving large areas plain black.
+====================================================================== */
+:root,
+.app{
+  --theme-accent: var(--accent, #8dffce);
+  --theme-accent-2: var(--accent-2, var(--theme-accent));
+  --theme-progress: var(--progress, var(--theme-accent));
+  --theme-highlight: var(--highlight, var(--theme-accent-2));
+  --theme-bg: var(--bg, #050506);
+  --theme-bg-2: var(--bg-2, color-mix(in oklab, var(--theme-bg) 86%, var(--theme-accent) 10%));
+  --theme-panel: var(--panel, color-mix(in oklab, var(--theme-bg) 84%, var(--theme-accent) 8%));
+  --theme-line: color-mix(in oklab, var(--theme-accent) 18%, rgba(255,255,255,.055));
+  --theme-line-strong: color-mix(in oklab, var(--theme-accent) 28%, rgba(255,255,255,.07));
+  --theme-page-bg:
+    linear-gradient(color-mix(in oklab, var(--theme-accent) 3.6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--theme-accent) 3.6%, transparent) 1px, transparent 1px),
+    linear-gradient(180deg, color-mix(in oklab, var(--theme-bg) 82%, var(--theme-accent) 10%), color-mix(in oklab, var(--theme-bg) 92%, var(--theme-accent-2) 5%));
+  --theme-sidebar-bg:
+    linear-gradient(180deg, color-mix(in oklab, var(--theme-bg) 80%, var(--theme-accent) 13%), color-mix(in oklab, var(--theme-bg) 91%, var(--theme-accent-2) 5%));
+  --theme-content-bg:
+    linear-gradient(color-mix(in oklab, var(--theme-accent) 3.25%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--theme-accent) 3.25%, transparent) 1px, transparent 1px),
+    linear-gradient(180deg, color-mix(in oklab, var(--theme-bg) 84%, var(--theme-accent) 9%), color-mix(in oklab, var(--theme-bg) 92%, var(--theme-accent-2) 5%));
+  --theme-player-bg:
+    linear-gradient(180deg, color-mix(in oklab, var(--theme-bg) 78%, var(--theme-accent) 11%), color-mix(in oklab, var(--theme-bg) 91%, var(--theme-accent-2) 5%));
+  --theme-topbar-bg: color-mix(in oklab, var(--theme-bg) 88%, var(--theme-accent) 7%);
+}
+
+/* theme-specific base surfaces */
+.app[data-theme="oled"]{--bg:#020203;--bg-2:#070708;--panel:#0a0a0c;--accent:#ffffff;--accent-2:#d9d9e4;--highlight:#ffffff;--progress:#ffffff;}
+.app[data-theme="mint"]{--bg:#02110b;--bg-2:#061b13;--panel:#092116;--accent:#84ffc6;--accent-2:#b2ffe3;--highlight:#d2ffef;--progress:#84ffc6;}
+.app[data-theme="berry"]{--bg:#16040d;--bg-2:#240817;--panel:#2a0a1d;--accent:#ff6bac;--accent-2:#ff9ccd;--highlight:#ffd0e6;--progress:#ff6bac;}
+.app[data-theme="aqua"]{--bg:#031019;--bg-2:#061b2a;--panel:#082235;--accent:#64dfff;--accent-2:#9cecff;--highlight:#ccf7ff;--progress:#64dfff;}
+.app[data-theme="sunset"]{--bg:#150b02;--bg-2:#241204;--panel:#2a1607;--accent:#ffc466;--accent-2:#ff8d5f;--highlight:#ffe3ae;--progress:#ffc466;}
+.app[data-theme="lavender"]{--bg:#0e071c;--bg-2:#170d2d;--panel:#1d1237;--accent:#c8a3ff;--accent-2:#f2a7ff;--highlight:#eadcff;--progress:#c8a3ff;}
+.app[data-theme="mono"]{--bg:#050506;--bg-2:#101014;--panel:#141419;--accent:#f2f2f5;--accent-2:#b9bcc8;--highlight:#ffffff;--progress:#f2f2f5;}
+.app[data-theme="rose"]{--bg:#130607;--bg-2:#220b0f;--panel:#2a1014;--accent:#ff808f;--accent-2:#ffb1bd;--highlight:#ffd8df;--progress:#ff808f;}
+.app[data-theme="cotton"]{--bg:#06101a;--bg-2:#0a1b2b;--panel:#0e2538;--accent:#9bd8ff;--accent-2:#d7f0ff;--highlight:#ffffff;--progress:#9bd8ff;}
+.app[data-theme="honey"]{--bg:#130e03;--bg-2:#221805;--panel:#2a1f08;--accent:#ffd36e;--accent-2:#ffb35f;--highlight:#fff1bd;--progress:#ffd36e;}
+.app[data-theme="lime"]{--bg:#071302;--bg-2:#102107;--panel:#14280a;--accent:#b9ff5f;--accent-2:#e0ff9b;--highlight:#efffd1;--progress:#b9ff5f;}
+.app[data-theme="midnight"]{--bg:#030713;--bg-2:#071129;--panel:#0a1734;--accent:#7aa7ff;--accent-2:#9d7cff;--highlight:#d5e4ff;--progress:#7aa7ff;}
+.app[data-theme="mocha"]{--bg:#110b07;--bg-2:#1d130d;--panel:#261910;--accent:#c79472;--accent-2:#f0bf92;--highlight:#ffe3c2;--progress:#c79472;}
+.app[data-theme="cherry"]{--bg:#150204;--bg-2:#24060a;--panel:#2c0a10;--accent:#ff4d68;--accent-2:#ff8fa0;--highlight:#ffd0d7;--progress:#ff4d68;}
+.app[data-theme="ice"]{--bg:#021014;--bg-2:#061d24;--panel:#092733;--accent:#8ee9ff;--accent-2:#c7f7ff;--highlight:#ffffff;--progress:#8ee9ff;}
+.app[data-theme="matcha"]{--bg:#061007;--bg-2:#0d1b0e;--panel:#122612;--accent:#91e58f;--accent-2:#c7ffbd;--highlight:#e8ffd9;--progress:#91e58f;}
+.app[data-theme="bubblegum"]{--bg:#130817;--bg-2:#220d29;--panel:#2a1232;--accent:#ff7df1;--accent-2:#ffb5fb;--highlight:#ffd8ff;--progress:#ff7df1;}
+.app[data-theme="sakura"]{--bg:#15080d;--bg-2:#230e16;--panel:#2d121d;--accent:#ff9fc4;--accent-2:#ffd0e2;--highlight:#fff0f6;--progress:#ff9fc4;}
+.app[data-theme="dreamcore"]{--bg:#090817;--bg-2:#14112b;--panel:#1c1636;--accent:#b698ff;--accent-2:#7dffdf;--highlight:#ffe27d;--progress:#7dffdf;}
+.app[data-theme="peach"]{--bg:#160b05;--bg-2:#251408;--panel:#2d190c;--accent:#ffb07a;--accent-2:#ffd0a8;--highlight:#fff0d5;--progress:#ffb07a;}
+.app[data-theme="moon"]{--bg:#060811;--bg-2:#101323;--panel:#15182a;--accent:#d6d9ff;--accent-2:#96a7ff;--highlight:#ffffff;--progress:#d6d9ff;}
+.app[data-theme="starlight"]{--bg:#040511;--bg-2:#0a0c22;--panel:#101331;--accent:#a7d8ff;--accent-2:#f2e28a;--highlight:#ffffff;--progress:#a7d8ff;}
+.app[data-theme="arcade-ghost"]{--bg:#030313;--bg-2:#090a23;--panel:#101133;--accent:#6dfaff;--accent-2:#ff73db;--highlight:#fff06b;--progress:#6dfaff;}
+
+.app,
+.app .content,
+.app .sidebar,
+.app .titleBar{
+  transition: background-color 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease !important;
+}
+
+
+/* v0.2.4 theme variables: every theme now tints the full app surface instead of leaving black areas behind. */
+.app[data-theme] {
+  --theme-window: color-mix(in srgb, var(--accent, #ff6edb) 7%, var(--bg, #050505));
+  --theme-sidebar: color-mix(in srgb, var(--accent, #ff6edb) 10%, var(--bg, #050505));
+  --theme-panel: color-mix(in srgb, var(--accent, #ff6edb) 6%, var(--panel, #090909));
+  --theme-line: color-mix(in srgb, var(--accent, #ff6edb) 24%, transparent);
+}
+
+
+/* ======================================================================
+   localtify v0.2.6 — smooth theme paint without animating expensive blur
+====================================================================== */
+.app,
+.app .content,
+.app .sidebar,
+.app .titleBar,
+.app .panel,
+.app .ambientSurface,
+.app .settingsPanelCard,
+.app .settingsThemeCard,
+.app .settingsChoice,
+.app .settingsActionButton,
+.app .softButton,
+.app .heroMain,
+.app .heroGhost,
+.app .iconAction,
+.app .circleButton,
+.app .songRow,
+.app .homeAlbumCard{
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform;
+  transition-duration: 220ms, 220ms, 180ms, 240ms, 180ms, 240ms;
+  transition-timing-function: ease;
+}
+
+body.localitfyThemePainting .app,
+body.localitfyThemePainting .app .content,
+body.localitfyThemePainting .app .sidebar,
+body.localitfyThemePainting .app .titleBar,
+body.localitfyThemePainting .app .panel,
+body.localitfyThemePainting .app .ambientSurface,
+body.localitfyThemePainting .app .settingsPanelCard,
+body.localitfyThemePainting .app .settingsThemeCard,
+body.localitfyThemePainting .app .settingsChoice,
+body.localitfyThemePainting .app .settingsActionButton,
+body.localitfyThemePainting .app .softButton,
+body.localitfyThemePainting .app .heroMain,
+body.localitfyThemePainting .app .heroGhost,
+body.localitfyThemePainting .app .iconAction,
+body.localitfyThemePainting .app .circleButton,
+body.localitfyThemePainting .app .songRow,
+body.localitfyThemePainting .app .homeAlbumCard{
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform !important;
+  transition-duration: 140ms, 140ms, 120ms, 160ms, 120ms, 160ms !important;
+  transition-timing-function: ease-out !important;
+}
+
+body.localitfyThemePainting .app .coverAura,
+body.localitfyThemePainting .app .heroArt,
+body.localitfyThemePainting .app .homeAlbumArt,
+body.localitfyThemePainting .app .songArt{
+  transition-property: transform, opacity, box-shadow !important;
+  transition-duration: 180ms !important;
+}
+
+.app.themeSettling .ambientSurface,
+.app.themeSettling .hero,
+.app.themeSettling .simpleHero{
+  will-change: background-color, border-color, box-shadow, transform;
+}
+
+
+/* v0.2.6: OLED preset is retired from selectable UI. Legacy variables stay only for old saved settings migration. */
+[data-theme-card="oled"],
+.sidebarThemeOption[data-theme-card="oled"],
+.settingsThemeCard[data-theme-card="oled"]{
+  display: none !important;
+}

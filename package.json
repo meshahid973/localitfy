@@ -1,0 +1,111 @@
+{
+  "name": "localtify",
+  "version": "0.2.9",
+  "private": true,
+  "productName": "localtify",
+  "description": "localtify - local music player",
+  "author": "meshahid973",
+  "main": "electron/main.cjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meshahid973/localitfy.git"
+  },
+  "scripts": {
+    "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
+    "build": "vite build",
+    "dist": "npm run build && electron-builder --win nsis --x64",
+    "publish": "npm run build && electron-builder --win nsis --x64 --publish always",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@animateicons/react": "^0.3.3",
+    "@fontsource/space-grotesk": "^5.2.10",
+    "better-sqlite3": "^12.5.0",
+    "discord-rpc": "^4.0.1",
+    "electron-updater": "^6.6.2",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "fs-extra": "^11.3.2",
+    "lucide-react": "^1.14.0",
+    "posthog-js": "^1.372.10",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "sanitize-filename": "^1.6.3",
+    "yt-dlp-wrap": "^2.3.12",
+    "ytdl-core": "^4.11.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "concurrently": "^9.2.1",
+    "electron": "^41.5.0",
+    "electron-builder": "^26.8.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.10",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.meshahid973.localitfy",
+    "productName": "localtify",
+    "executableName": "localtify",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "pixelart",
+        "to": "pixelart",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "build/icon.ico",
+        "to": "build/icon.ico"
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*",
+      "node_modules/ffmpeg-static/**/*",
+      "node_modules/fluent-ffmpeg/**/*",
+      "node_modules/ytdl-core/**/*",
+      "node_modules/yt-dlp-wrap/**"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "localtify-setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "localtify",
+      "uninstallDisplayName": "localtify",
+      "artifactName": "localtify-setup-${version}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "meshahid973",
+        "repo": "localitfy"
+      }
+    ]
+  }
+}

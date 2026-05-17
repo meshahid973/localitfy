@@ -1,0 +1,62 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/
+.npm/
+
+# Build output
+dist/
+dist-ssr/
+release/
+out/
+.vite/
+*.tsbuildinfo
+
+# Local env / secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Local app/user data
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+userData/
+backups/
+crash-logs/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local AI/dev folders
+.claude/
+.cursor/
+
+# Random local scratch files
+a
+
+# Analytics exports / private data
+analytics/exports/
+analytics/private/
+posthog-export*
