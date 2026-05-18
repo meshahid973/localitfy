@@ -10003,3 +10003,263 @@ body::after,
   transform-style: flat !important;
   perspective: none !important;
 }
+
+
+/* ======================================================================
+   localtify 0.3.0 — readable update / what’s-new popup
+   App.css owns this popup because the original .whatsNewCard bullet styles
+   live here. The blue accent dot is now a slim side mark so it can’t sit on
+   top of the text.
+====================================================================== */
+
+.app .whatsNewCard,
+.whatsNewCard{
+  width: min(720px, calc(100vw - 40px)) !important;
+  max-width: min(720px, calc(100vw - 40px)) !important;
+  border-radius: 28px !important;
+  overflow: hidden !important;
+}
+
+.app .whatsNewCard ul,
+.whatsNewCard ul{
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+  margin: 18px 0 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.app .whatsNewCard li,
+.whatsNewCard li{
+  position: relative !important;
+  display: block !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 12px 14px 12px 18px !important;
+  border: 1px solid rgba(var(--accent-rgb), .18) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
+    color-mix(in oklab, var(--surface, #111017) 88%, var(--accent, #ff4ee8) 5%) !important;
+  color: rgba(255,255,255,.88) !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+  line-height: 1.45 !important;
+  letter-spacing: -.01em !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  text-align: left !important;
+  box-shadow: none !important;
+}
+
+.app .whatsNewCard li::before,
+.whatsNewCard li::before{
+  content: "" !important;
+  position: absolute !important;
+  left: 8px !important;
+  top: 12px !important;
+  bottom: 12px !important;
+  width: 3px !important;
+  height: auto !important;
+  border-radius: 999px !important;
+  transform: none !important;
+  background: linear-gradient(180deg, var(--accent, #ff4ee8), rgba(var(--accent-rgb), .25)) !important;
+  box-shadow: none !important;
+}
+
+.app .whatsNewCard li::after,
+.whatsNewCard li::after{
+  content: none !important;
+  display: none !important;
+}
+
+@media (max-width: 640px){
+  .app .whatsNewCard,
+  .whatsNewCard{
+    width: min(94vw, 720px) !important;
+    border-radius: 22px !important;
+  }
+
+  .app .whatsNewCard li,
+  .whatsNewCard li{
+    padding: 11px 12px 11px 17px !important;
+    font-size: 12.5px !important;
+  }
+}
+
+
+/* ======================================================================
+   localtify 0.3.0 — sidebar hover/active shape repair
+   Owner: App.css controls the app shell/sidebar. This keeps nav hover states
+   contained, rounded, and stable so the row does not jump or clip.
+====================================================================== */
+.app .sidebar,
+.app .sidebar .nav,
+.app .sidebar .navMain,
+.app .sidebar .navUtility{
+  overflow: visible !important;
+}
+
+.app .sidebar .nav{
+  width: 100% !important;
+  box-sizing: border-box !important;
+  gap: 7px !important;
+}
+
+.app .sidebar .navItem{
+  width: 100% !important;
+  min-height: 54px !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  align-items: center !important;
+  justify-content: start !important;
+  gap: 12px !important;
+  padding: 9px 13px !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  transform: none !important;
+  background-clip: padding-box !important;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 160ms ease,
+    box-shadow 200ms ease !important;
+}
+
+.app .sidebar .navItem:hover,
+.app .sidebar .navItem.active,
+.app .sidebar .navItem:active{
+  transform: none !important;
+  border-radius: 16px !important;
+}
+
+.app .sidebar .navItem:hover{
+  background: color-mix(in oklab, var(--accent, #ff65df) 11%, transparent) !important;
+  border-color: color-mix(in oklab, var(--accent, #ff65df) 23%, rgba(255,255,255,.06)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.app .sidebar .navItem.active{
+  background: color-mix(in oklab, var(--accent, #ff65df) 19%, rgba(255,255,255,.025)) !important;
+  border-color: color-mix(in oklab, var(--accent, #ff65df) 42%, rgba(255,255,255,.07)) !important;
+  box-shadow:
+    inset 3px 0 0 var(--accent, #ff65df),
+    inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+.app .sidebar .navIcon{
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.app .sidebar .navItem.active .navIcon,
+.app .sidebar .navItem:hover .navIcon{
+  background: color-mix(in oklab, var(--accent, #ff65df) 14%, rgba(255,255,255,.035)) !important;
+}
+
+.app .sidebar .navText{
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 1px !important;
+  line-height: 1.05 !important;
+}
+
+.app .sidebar .navText strong,
+.app .sidebar .navText small{
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.app .sidebar .navText strong{
+  font-size: 0.91rem !important;
+  line-height: 1.05 !important;
+}
+
+.app .sidebar .navText small{
+  font-size: 0.68rem !important;
+  line-height: 1.05 !important;
+  opacity: .78 !important;
+}
+
+
+/* ======================================================================
+   localtify 0.3.0 — final shell motion cleanup
+   Owner: App.css. Keeps the app shell/nav/update popup stable without moving
+   responsibilities into home.css or player.css.
+====================================================================== */
+.app .sidebar .navItem,
+.app .sidebar .sidebarItem,
+.app .settingsCategoryButton,
+.app .whatsNewClose,
+.app .updatePrimaryButton,
+.app .updateSecondaryButton{
+  transform: translate3d(0,0,0) !important;
+  backface-visibility: hidden !important;
+  transform-origin: center !important;
+}
+
+.app .sidebar .navItem:hover,
+.app .sidebar .sidebarItem:hover,
+.app .settingsCategoryButton:hover{
+  transform: translate3d(0,0,0) !important;
+}
+
+.app .sidebar .navItem,
+.app .sidebar .sidebarItem{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  outline: none !important;
+}
+
+.app .whatsNewCard{
+  overflow: hidden !important;
+  border-radius: 28px !important;
+  contain: layout paint !important;
+}
+
+.app .whatsNewCard li{
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  align-items: center !important;
+  padding-left: 20px !important;
+  overflow: hidden !important;
+}
+
+.app .whatsNewCard li::before{
+  left: 8px !important;
+  top: 11px !important;
+  bottom: 11px !important;
+  width: 3px !important;
+  height: auto !important;
+  border-radius: 999px !important;
+}
+
+.app .pageTransition,
+.app .mainContent,
+.app .content{
+  transform: translate3d(0,0,0);
+}
+
+.app.viewSwitching .content,
+.app.viewSwitching .mainContent,
+.app.viewSwitching .pageTransition{
+  opacity: 1 !important;
+  transform: translate3d(0,0,0) !important;
+}

@@ -2147,3 +2147,190 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
     --player-volume-y: 8px;
   }
 }
+
+/* ========================================================================
+   localtify v0.3.0 — volume slider polish
+   Owner: player.css
+   Keeps the volume control calm and prevents the bright browser knob from
+   looking broken on the player bar.
+======================================================================== */
+.playerBar .volumeWrap{
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.playerBar .volumeWrap input[type="range"]{
+  width: clamp(112px, 9vw, 178px) !important;
+  height: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  accent-color: var(--accent) !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-webkit-slider-runnable-track{
+  height: 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, .075) !important;
+  background:
+    linear-gradient(90deg, var(--accent) var(--volume-percent, 72%), rgba(255,255,255,.16) var(--volume-percent, 72%)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 18px rgba(var(--accent-rgb), .10) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin-top: 4px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: 0 !important;
+  transition: width 150ms ease, height 150ms ease, margin-top 150ms ease, opacity 150ms ease, box-shadow 150ms ease !important;
+}
+
+.playerBar .volumeWrap:hover input[type="range"]::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:focus-visible::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:active::-webkit-slider-thumb{
+  width: 12px !important;
+  height: 12px !important;
+  margin-top: -3px !important;
+  border: 2px solid rgba(255, 255, 255, .92) !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .12), 0 0 18px rgba(var(--accent-rgb), .34) !important;
+  opacity: 1 !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-track{
+  height: 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, .075) !important;
+  background: rgba(255, 255, 255, .16) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-progress{
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-thumb{
+  width: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+.playerBar .volumeWrap:hover input[type="range"]::-moz-range-thumb,
+.playerBar .volumeWrap input[type="range"]:focus-visible::-moz-range-thumb,
+.playerBar .volumeWrap input[type="range"]:active::-moz-range-thumb{
+  width: 12px !important;
+  height: 12px !important;
+  border: 2px solid rgba(255, 255, 255, .92) !important;
+  background: var(--accent) !important;
+  opacity: 1 !important;
+}
+
+/* ========================================================================
+   localtify v0.3.0 — real volume slider drag fix
+   Owner: player.css
+   Keeps the existing player position. Only fixes the hit area + thumb so the
+   controlled React slider can be dragged reliably.
+======================================================================== */
+.playerBar .volumeWrap{
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag !important;
+}
+
+.playerBar .volumeWrap input[type="range"]{
+  position: relative !important;
+  z-index: 3 !important;
+  width: clamp(118px, 9vw, 178px) !important;
+  min-width: 118px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-app-region: no-drag !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-webkit-slider-runnable-track{
+  height: 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, .08) !important;
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent) 0%,
+      var(--accent) var(--volume-percent, var(--range-progress, 72%)),
+      rgba(255,255,255,.16) var(--volume-percent, var(--range-progress, 72%)),
+      rgba(255,255,255,.16) 100%
+    ) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 18px rgba(var(--accent-rgb), .10) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none !important;
+  width: 14px !important;
+  height: 14px !important;
+  margin-top: -4px !important;
+  border: 2px solid rgba(255,255,255,.92) !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .10), 0 0 16px rgba(var(--accent-rgb), .28) !important;
+  opacity: .001 !important;
+  transform: scale(.86) !important;
+  transition: opacity 140ms ease, transform 140ms ease, box-shadow 140ms ease !important;
+}
+
+.playerBar .volumeWrap:hover input[type="range"]::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:focus-visible::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:active::-webkit-slider-thumb{
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-track{
+  height: 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, .08) !important;
+  background: rgba(255,255,255,.16) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-progress{
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-thumb{
+  width: 14px !important;
+  height: 14px !important;
+  border: 2px solid rgba(255,255,255,.92) !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .10), 0 0 16px rgba(var(--accent-rgb), .28) !important;
+  opacity: .001 !important;
+  transform: scale(.86) !important;
+}
+
+.playerBar .volumeWrap:hover input[type="range"]::-moz-range-thumb,
+.playerBar .volumeWrap input[type="range"]:focus-visible::-moz-range-thumb,
+.playerBar .volumeWrap input[type="range"]:active::-moz-range-thumb{
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}

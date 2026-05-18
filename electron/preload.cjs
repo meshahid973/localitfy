@@ -55,6 +55,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   setStartWithWindows: (enabled) => ipcRenderer.invoke("localitfy:set-start-with-windows", { enabled }),
   getStartWithWindows: () => ipcRenderer.invoke("localitfy:get-start-with-windows"),
   getNativeMediaStatus: () => ipcRenderer.invoke("localitfy:native-media-status"),
+  openExternal: (url) => ipcRenderer.invoke("localitfy:open-external", url),
 
   minimizeWindow: () => ipcRenderer.invoke("window:minimize"),
   toggleMaximizeWindow: () => ipcRenderer.invoke("window:toggle-maximize"),

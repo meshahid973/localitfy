@@ -202,6 +202,7 @@ declare global {
       setStartWithWindows?: (enabled: boolean) => Promise<LocalitfyWindowsStartupStatus>;
       getStartWithWindows?: () => Promise<LocalitfyWindowsStartupStatus>;
       getNativeMediaStatus?: () => Promise<any>;
+      openExternal?: (url: string) => Promise<{ ok: boolean; reason?: string }>;
 
       onDownloadProgress: (callback: (payload: LocalitfyDownloadProgressPayload) => void) => () => void;
 

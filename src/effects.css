@@ -402,3 +402,53 @@ body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWr
 body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::after{
   transition-duration: 120ms !important;
 }
+
+
+/* ======================================================================
+   localtify 0.3.0 — final background guard
+   Effects.css is imported late, so this catches any old theme/page grid
+   texture that leaks behind the rounded home shelves.
+====================================================================== */
+
+html body .app[data-theme] .content,
+html body .app .content,
+html body .app .mainContent,
+html body .app .contentScroller,
+html body .app .homeView,
+html body .app .homeShell,
+html body .app .homePage,
+html body .app .homeShelfStack{
+  --theme-grid-line: transparent !important;
+  --page-line: transparent !important;
+  --grid-line: transparent !important;
+  --app-grid-line: transparent !important;
+  background-image: none !important;
+  background-size: auto !important;
+}
+
+html body .app .homeShelfPanel,
+html body .app .homeListenPanel,
+html body .app .homeFreshPanel,
+html body .app .homeLibraryPanel,
+html body .app .simpleLibraryPanel{
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  background-clip: padding-box !important;
+}
+
+html body .app .homeShelfPanel::before,
+html body .app .homeShelfPanel::after,
+html body .app .homeListenPanel::before,
+html body .app .homeListenPanel::after,
+html body .app .homeFreshPanel::before,
+html body .app .homeFreshPanel::after,
+html body .app .homeLibraryPanel::before,
+html body .app .homeLibraryPanel::after,
+html body .app .simpleLibraryPanel::before,
+html body .app .simpleLibraryPanel::after{
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+  opacity: 0 !important;
+}

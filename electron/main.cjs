@@ -41,6 +41,16 @@ const LEGACY_APP_DATA_NAME = "localitfy";
 const SQLITE_FILE_NAME = "localitfy.sqlite";
 const APP_USER_MODEL_ID = "com.meshahid973.localitfy";
 
+function safeExternalUrl(rawUrl) {
+  try {
+    const url = new URL(String(rawUrl || ""));
+    if (!["https:", "http:"].includes(url.protocol)) return "";
+    return url.toString();
+  } catch {
+    return "";
+  }
+}
+
 function uniquePaths(items) {
   const seen = new Set();
   return items.filter((item) => {
@@ -152,7 +162,6 @@ let updaterChecking = false;
 let updaterSilent = true;
 let updateDownloaded = false;
 let lastUpdateInfo = null;
-let lastUpdateBackupPath = "";
 
 let tray = null;
 let allowQuit = false;
@@ -570,6 +579,13 @@ function setupNativeWindowsMediaIpc() {
 
   ipcMain.handle("localitfy:get-start-with-windows", async () => getStartWithWindowsStatus());
 
+  ipcMain.handle("localitfy:open-external", async (_event, rawUrl) => {
+    const url = safeExternalUrl(rawUrl);
+    if (!url) return { ok: false, reason: "invalid-url" };
+    await shell.openExternal(url);
+    return { ok: true };
+  });
+
   ipcMain.handle("localitfy:native-media-status", async () => ({
     ok: true,
     state: nativeMediaState,
@@ -593,7 +609,7 @@ function safeUpdateInfo(info) {
     version: info.version || "latest",
     releaseName: info.releaseName || "",
     releaseDate: info.releaseDate || "",
-    releaseNotes: Array.isArray(info.releaseNotes) ? info.releaseNotes.map((note) => typeof note === "string" ? note : (note?.note || note?.body || "")).filter(Boolean).join("\n") : (typeof info.releaseNotes === "string" ? info.releaseNotes : "")
+    releaseNotes: typeof info.releaseNotes === "string" ? info.releaseNotes : ""
   };
 }
 
@@ -601,8 +617,6 @@ function sendAutoUpdateEvent(payload) {
   const eventPayload = {
     currentVersion: app.getVersion(),
     silent: updaterSilent,
-    backupPath: lastUpdateBackupPath,
-    libraryBackedUp: Boolean(lastUpdateBackupPath),
     ...payload
   };
 
@@ -611,40 +625,6 @@ function sendAutoUpdateEvent(payload) {
   }
 
   return eventPayload;
-}
-
-
-function createUpdateBackup(reason = "before-update") {
-  try {
-    const backupPath = backupDatabase(reason);
-    if (backupPath) {
-      lastUpdateBackupPath = backupPath;
-      sendAutoUpdateEvent({
-        type: "backup",
-        message: "your library has been backed up",
-        backupPath,
-        libraryBackedUp: true
-      });
-      return { ok: true, backupPath };
-    }
-
-    sendAutoUpdateEvent({
-      type: "backup",
-      message: "could not verify a library backup, but your existing library was not changed",
-      backupPath: "",
-      libraryBackedUp: false
-    });
-    return { ok: false, backupPath: "" };
-  } catch (error) {
-    sendAutoUpdateEvent({
-      type: "backup",
-      message: "could not verify a library backup, but your existing library was not changed",
-      backupPath: "",
-      libraryBackedUp: false,
-      error: error?.message || String(error || "backup failed")
-    });
-    return { ok: false, backupPath: "", error: error?.message || String(error || "backup failed") };
-  }
 }
 
 function setupAutoUpdater() {
@@ -669,7 +649,6 @@ function setupAutoUpdater() {
       type: "available",
       version: cleanInfo.version,
       info: cleanInfo,
-      releaseNotes: cleanInfo.releaseNotes,
       message: `${APP_NAME} ${cleanInfo.version} is available`
     });
   });
@@ -693,10 +672,6 @@ function setupAutoUpdater() {
       type: "downloading",
       version: lastUpdateInfo?.version || "latest",
       percent,
-      downloadedBytes: Number(progress?.transferred || progress?.downloaded || 0) || 0,
-      totalBytes: Number(progress?.total || 0) || 0,
-      sizeBytes: Number(progress?.total || 0) || 0,
-      speedBytesPerSecond: Number(progress?.bytesPerSecond || 0) || 0,
       message: `downloading update... ${Math.round(percent)}%`
     });
   });
@@ -710,9 +685,8 @@ function setupAutoUpdater() {
       type: "downloaded",
       version: cleanInfo.version,
       info: cleanInfo,
-      releaseNotes: cleanInfo.releaseNotes,
       percent: 100,
-      message: lastUpdateBackupPath ? "update ready. your library has been backed up. restart to install." : "update downloaded. restart localtify to install it."
+      message: "update downloaded. restart localtify to install it."
     });
   });
 
@@ -762,12 +736,11 @@ async function downloadUpdate() {
 
   try {
     updateDownloaded = false;
-    createUpdateBackup("before-update-download");
     sendAutoUpdateEvent({
       type: "downloading",
       version: lastUpdateInfo?.version || "latest",
       percent: 0,
-      message: lastUpdateBackupPath ? "library backed up. downloading update..." : "starting update download..."
+      message: "starting update download..."
     });
     await autoUpdater.downloadUpdate();
     return true;
@@ -797,8 +770,6 @@ async function installUpdate() {
     });
     return false;
   }
-
-  createUpdateBackup("before-update-install");
 
   setImmediate(() => { autoUpdater.quitAndInstall(false, true); });
   return true;
