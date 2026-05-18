@@ -13395,3 +13395,346 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app .dashboardGrid{
   margin-top: 2px !important;
 }
+
+
+/* ======================================================================
+   localtify 0.3.0 — home shelf corner + square-grid cleanup
+   Home.css owns the home shelves/cards. This removes the last visible grid
+   texture from the home panels and keeps the shelf corners rounded/contained.
+====================================================================== */
+
+.app[data-theme] .content,
+html body .app[data-theme] .content,
+html body .content{
+  --theme-grid-line: transparent !important;
+  --page-line: transparent !important;
+  --grid-line: transparent !important;
+  --app-grid-line: transparent !important;
+  background-image: none !important;
+  background-size: auto !important;
+  background-color: transparent !important;
+}
+
+.app .homeShelfStack,
+.app .homePage,
+.app .homeShell,
+.app .homeView{
+  --theme-grid-line: transparent !important;
+  --page-line: transparent !important;
+  --grid-line: transparent !important;
+  --app-grid-line: transparent !important;
+  background-size: auto !important;
+}
+
+.app .homeShelfPanel,
+.app .homeListenPanel,
+.app .homeFreshPanel,
+.app .homeLibraryPanel,
+.app .simpleLibraryPanel{
+  position: relative !important;
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  background-clip: padding-box !important;
+  isolation: isolate !important;
+  background-image:
+    radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--accent, #ff4ee8) 9%, transparent) 0%, transparent 38%),
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--surface, #111017) 88%, var(--accent, #ff4ee8) 6%),
+      color-mix(in oklab, var(--surface-2, #0b0712) 91%, var(--accent-2, var(--accent, #9d6cff)) 5%)) !important;
+  background-size: auto !important;
+  border-color: color-mix(in oklab, var(--border, rgba(255,255,255,.09)) 76%, var(--accent, #ff4ee8) 16%) !important;
+}
+
+.app .homeShelfPanel::before,
+.app .homeShelfPanel::after,
+.app .homeListenPanel::before,
+.app .homeListenPanel::after,
+.app .homeFreshPanel::before,
+.app .homeFreshPanel::after,
+.app .homeLibraryPanel::before,
+.app .homeLibraryPanel::after,
+.app .simpleLibraryPanel::before,
+.app .simpleLibraryPanel::after{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.app .homeShelfPanel > *,
+.app .homeListenPanel > *,
+.app .homeFreshPanel > *,
+.app .homeLibraryPanel > *,
+.app .simpleLibraryPanel > *{
+  position: relative;
+  z-index: 1;
+}
+
+/* Keep home clean: no play-count labels in the home side widgets. */
+.app .homeGrid .topList .topRow small,
+.app .homeGrid .statsGrid .statCard span{
+  white-space: nowrap;
+}
+
+.app .homeGrid .topList .topRow small{
+  color: rgba(255,255,255,.58) !important;
+}
+
+
+/* ======================================================================
+   localtify 0.3.0 — library page polish / no clipped play-count card
+   Owner: home.css owns library pages and song rows. This removes the plays
+   stat card from the layout, stops library rows jumping on hover, and keeps
+   right-side action buttons inside the rounded row.
+====================================================================== */
+.app .libraryStatsV025,
+.app .libraryStatsV030{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 18px 0 18px !important;
+  overflow: hidden !important;
+}
+
+.app .libraryStatsV025 > div,
+.app .libraryStatsV030 > div{
+  min-width: 0 !important;
+  min-height: 82px !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--surface, #17111f) 84%, var(--accent, #ff65df) 7%),
+      color-mix(in oklab, var(--surface-2, #0d0814) 88%, var(--accent, #ff65df) 4%)) !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #ff65df) 18%, rgba(255,255,255,.06)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.app .libraryPanelV025{
+  overflow: hidden !important;
+  border-radius: 24px !important;
+}
+
+.app .libraryListHeaderV025{
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  padding: 0 18px 0 10px !important;
+  color: color-mix(in oklab, var(--muted, #a7a0b5) 88%, var(--accent, #ff65df) 12%) !important;
+}
+
+.app .libraryFullListV025{
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  padding-right: 2px !important;
+  padding-bottom: 132px !important;
+}
+
+.app .libraryFullListV025 .songRow{
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) max-content 34px 34px 34px !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 15px 12px 18px !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  transform: none !important;
+  background-clip: padding-box !important;
+}
+
+.app .libraryFullListV025 .songRow:hover{
+  transform: none !important;
+  border-color: color-mix(in oklab, var(--accent, #ff65df) 28%, rgba(255,255,255,.075)) !important;
+  background:
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--accent, #ff65df) 11%, transparent),
+      rgba(255,255,255,.026)),
+    color-mix(in oklab, var(--surface, #17111f) 86%, #030303 14%) !important;
+  box-shadow:
+    inset 3px 0 0 color-mix(in oklab, var(--accent, #ff65df) 42%, transparent),
+    0 12px 30px rgba(0,0,0,.14) !important;
+}
+
+.app .libraryFullListV025 .songRow.active{
+  transform: none !important;
+  border-color: color-mix(in oklab, var(--progress, var(--accent, #ff65df)) 48%, rgba(255,255,255,.12)) !important;
+  box-shadow:
+    inset 3px 0 0 var(--progress, var(--accent, #ff65df)),
+    0 12px 30px rgba(0,0,0,.12) !important;
+}
+
+.app .libraryFullListV025 .songButton{
+  min-width: 0 !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+.app .libraryFullListV025 .songMeta{
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.app .libraryFullListV025 .songMeta strong,
+.app .libraryFullListV025 .songMeta small{
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.app .libraryFullListV025 .songDurationInfo{
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-width: 46px !important;
+  color: color-mix(in oklab, var(--text, #fff) 76%, var(--muted, #9ca3af) 24%) !important;
+  font-weight: 800 !important;
+  font-size: .82rem !important;
+}
+
+.app .libraryFullListV025 .iconAction{
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+@media (max-width: 900px){
+  .app .libraryStatsV025,
+  .app .libraryStatsV030{
+    grid-template-columns: 1fr !important;
+  }
+
+  .app .libraryFullListV025 .songRow{
+    grid-template-columns: minmax(0, 1fr) 34px 34px 34px !important;
+  }
+
+  .app .libraryFullListV025 .songDurationInfo{
+    display: none !important;
+  }
+}
+
+
+/* ======================================================================
+   localtify 0.3.0 — final home/library row motion cleanup
+   Owner: home.css. Song rows and home cards stay rounded, do not jump on
+   hover, and do not clip their action buttons.
+====================================================================== */
+.app .homeShelfPanel,
+.app .homeListenPanel,
+.app .homeFreshPanel,
+.app .homeLibraryPanel,
+.app .simpleLibraryPanel,
+.app .libraryPanelV025,
+.app .libraryCard,
+.app .homeAlbumCard,
+.app .coverCard,
+.app .songCard{
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  clip-path: inset(0 round 24px) !important;
+}
+
+.app .songRow,
+.app .libraryFullListV025 .songRow,
+.app .homeSongList .songRow,
+.app .playlistSongRow{
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  clip-path: inset(0 round 18px) !important;
+  transform: translate3d(0,0,0) !important;
+  will-change: auto !important;
+}
+
+.app .songRow:hover,
+.app .libraryFullListV025 .songRow:hover,
+.app .homeSongList .songRow:hover,
+.app .playlistSongRow:hover{
+  transform: translate3d(0,0,0) !important;
+}
+
+.app .songRow .rowActions,
+.app .songRow .songActions,
+.app .songRowActions,
+.app .librarySongActions,
+.app .songRow .iconCluster{
+  position: relative !important;
+  z-index: 2 !important;
+  margin-right: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.app .songRow small:where(.playCount,.playsCount,.songPlayCount),
+.app .homeAlbumCard :where(.playCount,.playsCount,.songPlayCount),
+.app .libraryCard :where(.playCount,.playsCount,.songPlayCount){
+  display: none !important;
+}
+
+/* ======================================================================
+   localtify 0.3.1 — home/library hover stability
+   Owner: home.css. No row jump, no clipped actions, softer cards.
+====================================================================== */
+.app :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanelV025){
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  background-clip: padding-box !important;
+}
+
+.app :where(.songRow,.playlistTrackRow,.playlistSongRow,.libraryFullListV025 .songRow,.homeSongList .songRow){
+  position: relative !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  background-clip: padding-box !important;
+  transform: translate3d(0,0,0) !important;
+}
+
+.app :where(.songRow,.playlistTrackRow,.playlistSongRow,.libraryFullListV025 .songRow,.homeSongList .songRow):hover{
+  transform: translate3d(0,0,0) !important;
+  border-color: color-mix(in srgb, var(--accent) 24%, rgba(255,255,255,.08)) !important;
+  background-image: none !important;
+}
+
+.app :where(.songRow,.playlistTrackRow,.playlistSongRow)::before,
+.app :where(.songRow,.playlistTrackRow,.playlistSongRow)::after{
+  pointer-events: none !important;
+}
+
+.app :where(.songRow .rowActions,.songRow .songActions,.songRowActions,.librarySongActions,.songRow .iconCluster,.playlistTrackActions){
+  position: relative !important;
+  z-index: 3 !important;
+  flex-shrink: 0 !important;
+  min-width: max-content !important;
+  transform: translate3d(0,0,0) !important;
+}
+
+.app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile,.playlistShelfCard,.playlistCard){
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  background-clip: padding-box !important;
+  transform: translate3d(0,0,0) !important;
+}
+
+.app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile,.playlistShelfCard,.playlistCard):hover{
+  transform: translate3d(0,-1px,0) scale(1.002) !important;
+  filter: none !important;
+  background-image: none !important;
+}

@@ -988,3 +988,197 @@ body.localitfyDropCommitted .app:not(.reducedMotion) .songRow{
 body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .playlistTrackRow){
   transition-duration: 120ms;
 }
+
+/* ======================================================================
+   localtify 0.3.1 — softer motion pass
+   Owner: motion.css. No tilt, no random bounce, no layout-shifting hover.
+====================================================================== */
+@media (prefers-reduced-motion: no-preference){
+  .app:not(.reducedMotion):not(.reduceMotion) :where(
+    .mainAction,
+    .heroMain,
+    .simpleAction,
+    .softButton,
+    .heroGhost,
+    .simpleGhost,
+    .toolButton,
+    .tabButton,
+    .navButton,
+    .settingsActionButton,
+    .settingsTinyButton,
+    .aboutActionButton,
+    .updatePrimaryButton,
+    .updateGhostButton,
+    .tinyToggle,
+    .sidebarThemeOption,
+    .iconAction,
+    .songMenuButton,
+    .closeModalButton
+  ){
+    transition-property: background-color, border-color, color, box-shadow, opacity, transform !important;
+    transition-duration: 170ms, 170ms, 150ms, 190ms, 160ms, 160ms !important;
+    transition-timing-function: cubic-bezier(.2, .82, .22, 1) !important;
+  }
+
+  .app:not(.reducedMotion):not(.reduceMotion) :where(
+    .songCard,
+    .libraryCard,
+    .homeAlbumCard,
+    .homeListenCard,
+    .playlistShelfCard,
+    .playlistCard,
+    .coverCard,
+    .coverTile,
+    .settingsPanelCard,
+    .settingsPageCard,
+    .settingSwitchCard,
+    .settingsChoice,
+    .coverSyncChoice,
+    .statCard
+  ){
+    transition-property: background-color, border-color, box-shadow, opacity, transform !important;
+    transition-duration: 190ms, 190ms, 210ms, 170ms, 170ms !important;
+    transition-timing-function: cubic-bezier(.2, .82, .22, 1) !important;
+  }
+
+  .app:not(.reducedMotion):not(.reduceMotion) :where(.songRow, .playlistTrackRow, .playlistSongRow, .libraryRow){
+    transition-property: background-color, border-color, box-shadow, opacity !important;
+    transition-duration: 170ms, 170ms, 190ms, 150ms !important;
+    transition-timing-function: cubic-bezier(.2, .82, .22, 1) !important;
+    transform: translate3d(0,0,0) !important;
+    will-change: auto !important;
+  }
+
+  .app:not(.reducedMotion):not(.reduceMotion) :where(.songRow, .playlistTrackRow, .playlistSongRow, .libraryRow):hover{
+    transform: translate3d(0,0,0) !important;
+    filter: none !important;
+  }
+
+  .app:not(.reducedMotion):not(.reduceMotion) :where(
+    .songCard,
+    .libraryCard,
+    .homeAlbumCard,
+    .homeListenCard,
+    .playlistShelfCard,
+    .playlistCard,
+    .coverCard,
+    .coverTile,
+    .settingsPanelCard,
+    .settingsPageCard,
+    .settingSwitchCard,
+    .settingsChoice,
+    .coverSyncChoice,
+    .statCard
+  ):hover{
+    transform: translate3d(0,-1px,0) scale(1.002) !important;
+    filter: none !important;
+    rotate: 0deg !important;
+  }
+
+  .app:not(.reducedMotion):not(.reduceMotion) :where(
+    .mainAction,
+    .heroMain,
+    .simpleAction,
+    .softButton,
+    .heroGhost,
+    .simpleGhost,
+    .toolButton,
+    .tabButton,
+    .navButton,
+    .settingsActionButton,
+    .settingsTinyButton,
+    .aboutActionButton,
+    .updatePrimaryButton,
+    .updateGhostButton,
+    .tinyToggle,
+    .sidebarThemeOption,
+    .iconAction,
+    .songMenuButton,
+    .closeModalButton,
+    .circleButton
+  ):active{
+    animation: none !important;
+    transform: translate3d(0,1px,0) scale(.985) !important;
+    filter: none !important;
+  }
+
+  .app:not(.reducedMotion):not(.reduceMotion) .sidebar .nav .navItem,
+  .app:not(.reducedMotion):not(.reduceMotion) .navItem{
+    transition-property: background-color, border-color, color, box-shadow, opacity !important;
+    transition-duration: 170ms, 170ms, 150ms, 190ms, 150ms !important;
+    transform: translate3d(0,0,0) !important;
+    will-change: auto !important;
+  }
+
+  .app:not(.reducedMotion):not(.reduceMotion) .sidebar .nav .navItem:hover,
+  .app:not(.reducedMotion):not(.reduceMotion) .navItem:hover,
+  .app:not(.reducedMotion):not(.reduceMotion) .sidebar .nav .navItem.active,
+  .app:not(.reducedMotion):not(.reduceMotion) .navItem.active{
+    transform: translate3d(0,0,0) !important;
+  }
+
+  .updateToastCard,
+  .whatsNewCard,
+  .settingsModal,
+  .editorModal,
+  .coverStudioShell{
+    animation: localtifyV031PopupIn 260ms cubic-bezier(.2,.82,.22,1) both !important;
+  }
+
+  .app :where(
+    .heroArt img,
+    .coverImage,
+    .songArt,
+    .homeListenCover,
+    .homeAlbumArt,
+    .playlistTrackCover,
+    .playlistCoverImage,
+    .playerCover,
+    .playerThumb img,
+    .analyticsLocalRecentArt
+  ){
+    transition-property: opacity, filter, transform !important;
+    transition-duration: 190ms, 190ms, 210ms !important;
+    transition-timing-function: cubic-bezier(.2,.82,.22,1) !important;
+  }
+}
+
+@keyframes localtifyV031PopupIn{
+  from{ opacity: .001; transform: translate3d(0,10px,0) scale(.992); }
+  to{ opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+
+/* softer animated nav icons, still alive but not bouncy */
+@keyframes localtifyIconPop{
+  0%{ transform: translate3d(0,0,0) scale(1); }
+  46%{ transform: translate3d(0,-1px,0) scale(1.035); }
+  100%{ transform: translate3d(0,0,0) scale(1); }
+}
+@keyframes localtifyIconHome{
+  0%,100%{ transform: translate3d(0,0,0) scale(1); }
+  48%{ transform: translate3d(0,-1px,0) scale(1.035); }
+}
+@keyframes localtifyIconLibrary{
+  0%,100%{ transform: translate3d(0,0,0) scale(1); }
+  48%{ transform: translate3d(0,-1px,0) scale(1.025); }
+}
+@keyframes localtifyIconHeart{
+  0%,100%{ transform: scale(1); }
+  48%{ transform: scale(1.055); }
+}
+@keyframes localtifyIconPicture{
+  0%,100%{ transform: scale(1); }
+  48%{ transform: scale(1.035); }
+}
+@keyframes localtifyIconBars{
+  0%,100%{ transform: translateY(0) scaleY(1); }
+  48%{ transform: translateY(-1px) scaleY(1.045); }
+}
+@keyframes localtifyIconDownload{
+  0%,100%{ transform: translateY(0); }
+  48%{ transform: translateY(1px); }
+}
+@keyframes localtifyIconGear{
+  0%,100%{ transform: scale(1); }
+  48%{ transform: scale(1.04); }
+}

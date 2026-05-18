@@ -2594,3 +2594,57 @@ body.localitfyThemePainting .app .songArt{
 .settingsThemeCard[data-theme-card="oled"]{
   display: none !important;
 }
+
+
+/* ======================================================================
+   localtify 0.3.0 — theme switch no-flash guard
+   Owner: themes.css. Theme/color painting can pause expensive movement, but
+   ambience layers should not disappear for a frame.
+====================================================================== */
+body.localitfyThemePainting .app .ambientSurface::before,
+body.localitfyThemePainting .app .ambientSurface::after,
+body.localitfyThemePainting .app .coverAura::before,
+body.localitfyThemePainting .app .coverAura::after,
+body.localitfyThemePainting .app .heroAmbiencePulse,
+.app.themeSettling .ambientSurface::before,
+.app.themeSettling .ambientSurface::after,
+.app.themeSettling .coverAura::before,
+.app.themeSettling .coverAura::after,
+.app.themeSettling .heroAmbiencePulse{
+  visibility: visible !important;
+  display: block !important;
+  opacity: inherit;
+  animation: none !important;
+  will-change: auto !important;
+}
+
+body.localitfyThemePainting .app .heroAmbiencePulse,
+.app.themeSettling .heroAmbiencePulse{
+  opacity: .34 !important;
+  filter: blur(32px) saturate(1.05) !important;
+}
+
+/* ======================================================================
+   localtify 0.3.1 — theme switch no-flash refinement
+   Owner: themes.css. Theme painting should not animate layout or hide covers.
+====================================================================== */
+body.localitfyThemePainting .app,
+body.localitfyThemePainting .app :where(.content,.sidebar,.titleBar,.panel,.ambientSurface,.settingsPanelCard,.settingsThemeCard,.settingsChoice,.settingsActionButton,.softButton,.heroMain,.heroGhost,.iconAction,.circleButton,.songRow,.homeAlbumCard){
+  transition-property: background-color, border-color, color, box-shadow, opacity !important;
+  transition-duration: 150ms, 150ms, 130ms, 170ms, 130ms !important;
+  transition-timing-function: ease-out !important;
+}
+
+body.localitfyThemePainting .app :where(.songRow,.homeAlbumCard,.libraryCard,.songCard,.coverCard,.settingsChoice,.settingSwitchCard),
+.app.themeSettling :where(.songRow,.homeAlbumCard,.libraryCard,.songCard,.coverCard,.settingsChoice,.settingSwitchCard){
+  transform: translate3d(0,0,0) !important;
+  animation: none !important;
+}
+
+body.localitfyThemePainting .app :where(.heroArt img,.coverImage,.songArt,.homeAlbumArt,.homeListenCover,.playerCover,.playerThumb img),
+.app.themeSettling :where(.heroArt img,.coverImage,.songArt,.homeAlbumArt,.homeListenCover,.playerCover,.playerThumb img){
+  visibility: visible !important;
+  opacity: 1;
+  transition-property: opacity, filter !important;
+  transition-duration: 160ms !important;
+}
