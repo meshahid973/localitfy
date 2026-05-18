@@ -41,16 +41,6 @@ const LEGACY_APP_DATA_NAME = "localitfy";
 const SQLITE_FILE_NAME = "localitfy.sqlite";
 const APP_USER_MODEL_ID = "com.meshahid973.localitfy";
 
-function safeExternalUrl(rawUrl) {
-  try {
-    const url = new URL(String(rawUrl || ""));
-    if (!["https:", "http:"].includes(url.protocol)) return "";
-    return url.toString();
-  } catch {
-    return "";
-  }
-}
-
 function uniquePaths(items) {
   const seen = new Set();
   return items.filter((item) => {
@@ -570,21 +560,17 @@ function setupNativeWindowsMediaIpc() {
     const enabled = typeof payload === "boolean" ? payload : Boolean(payload.enabled);
     const status = setStartWithWindows(enabled);
     try {
-      saveSettings({ startWithWindows: Boolean(status.openAtLogin) });
+      // Save the user's chosen value, not the OS readback.
+      // Windows/dev Electron can report openAtLogin=false immediately after setting it,
+      // which made the Settings toggle look like it turned itself back off.
+      saveSettings({ startWithWindows: Boolean(enabled) });
     } catch (error) {
       console.log("[localitfy startup setting save error]", error?.message || error);
     }
-    return status;
+    return { ...status, openAtLogin: Boolean(enabled) };
   });
 
   ipcMain.handle("localitfy:get-start-with-windows", async () => getStartWithWindowsStatus());
-
-  ipcMain.handle("localitfy:open-external", async (_event, rawUrl) => {
-    const url = safeExternalUrl(rawUrl);
-    if (!url) return { ok: false, reason: "invalid-url" };
-    await shell.openExternal(url);
-    return { ok: true };
-  });
 
   ipcMain.handle("localitfy:native-media-status", async () => ({
     ok: true,

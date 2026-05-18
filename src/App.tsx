@@ -91,7 +91,7 @@ type Song = {
 type View = "home" | "library" | "playlists" | "liked" | "covers" | "analytics" | "downloads" | "settings";
 type CoverMood = "all" | "favorites" | "leastUsed" | "cute" | "space" | "dark" | "cozy" | "energy";
 
-type SettingsCategory = "appearance" | "playback" | "discord" | "library" | "covers" | "updates" | "advanced" | "metadata";
+type SettingsCategory = "appearance" | "playback" | "discord" | "library" | "covers" | "updates" | "about" | "advanced" | "metadata";
 
 const settingsCategoryTabs: {
   id: SettingsCategory;
@@ -105,7 +105,7 @@ const settingsCategoryTabs: {
     label: "Appearance",
     description: "Theme, colors, and layout",
     icon: Palette,
-    keywords: "appearance theme themes color colors accent custom dark light layout spacing corners density ambience glow mini player sidebar"
+    keywords: "appearance theme themes color colors accent custom dark light layout spacing corners density ambience glow sidebar"
   },
   {
     id: "playback",
@@ -143,6 +143,13 @@ const settingsCategoryTabs: {
     keywords: "update updates updater version changelog whats new release download install restart github check publish"
   },
   {
+    id: "about",
+    label: "About",
+    description: "Version, diagnostics, and links",
+    icon: SettingsIcon,
+    keywords: "about app info diagnostics debug copy version song count playlist count theme discord startup status github bug report contributors open source"
+  },
+  {
     id: "advanced",
     label: "Advanced",
     description: "Reset and app status",
@@ -160,10 +167,11 @@ function resolveSettingsCategoryFromSearch(value: string): SettingsCategory | nu
   if (!query) return null;
 
   if (/discord|rpc|rich presence|privacy|status style|second line|artwork|buttons?/.test(query)) return "discord";
-  if (/theme|themes|appearance|accent|color|colour|layout|spacing|corner|ambience|glow|mini player|sidebar/.test(query)) return "appearance";
+  if (/theme|themes|appearance|accent|color|colour|layout|spacing|corner|ambience|glow|sidebar/.test(query)) return "appearance";
   if (/playback|player|crossfade|gapless|speed|volume|sleep|repeat|shuffle|queue/.test(query)) return "playback";
   if (/cover|covers|artwork|pixel|pixelart|gallery|random|rescan|favorite|hidden/.test(query)) return "covers";
   if (/update|updates|version|changelog|what'?s new|release|install|download|github/.test(query)) return "updates";
+  if (/about|app info|diagnostic|diagnostics|debug|copy info|version|song count|playlist count|startup|open source|github|contributors|bug report/.test(query)) return "about";
   if (/library|import|songs|playlist|metadata|clean|cleanup|search|folder|queue/.test(query)) return "library";
   if (/advanced|reset|status|diagnostic|maintenance|storage|database/.test(query)) return "advanced";
 
@@ -727,7 +735,7 @@ function updateNagMessage(prompt: UpdatePromptState) {
   return prompt.error || prompt.message || "localtify update ready. Your library will be backed up before anything installs.";
 }
 
-const APP_VERSION = "0.3.0";
+const APP_VERSION = "0.3.1";
 const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 const INITIAL_LIBRARY_RENDER_LIMIT = 60;
 const LIBRARY_RENDER_BATCH_SIZE = 60;
@@ -810,12 +818,13 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "Analytics now focuses on local music stats only: songs, plays, minutes listened, top artists, recent imports, library health, liked percent, and played percent",
-  "The analytics page has a cleaner layout with stable cards, no broken cover square, and no overlapping stat areas",
-  "The volume slider is easier to drag and updates smoothly while you move it",
-  "Library rows, sidebar hover states, rounded cards, and update popup spacing were cleaned up for 0.3.0",
-  "The open-source/about area makes GitHub, bug reports, releases, and contributor links easier to find",
-  "Theme switching and small hover animations were cleaned up without removing ambience, glow, covers, playlists, Discord, or Windows media features"
+  "0.3.1 keeps the app cleaner by removing the mini player option from Settings",
+  "Start with Windows is enabled by default for new installs and now saves more reliably",
+  "0.3.1 adds a small diagnostics area in Settings → About so bug reports are easier to understand",
+  "You can copy app info with the version, song count, playlist count, active theme, Discord status, and startup status",
+  "Animations and button styles are smoother and more consistent without changing the main localtify design",
+  "Sidebar hover, song row hover, popup motion, card corners, and theme switching have been cleaned up",
+  "The app stays focused on local music data and keeps your personal library details private"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -2725,12 +2734,12 @@ function MainModeApp() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsCategory, setSettingsCategory] = useState<SettingsCategory>("appearance");
   const [settingsSearch, setSettingsSearch] = useState("");
+  const [diagnosticsCopied, setDiagnosticsCopied] = useState(false);
   const deferredSettingsSearch = useDeferredValue(settingsSearch);
   const [isViewSwitching, setIsViewSwitching] = useState(false);
   const [customThemeName, setCustomThemeName] = useState("My Custom Theme");
   const [savedCustomThemes, setSavedCustomThemes] = useState<CustomThemePreset[]>(() => readSavedCustomThemePresets());
   const [onboardingOpen, setOnboardingOpen] = useState(() => {
-  console.log("loaded")
     try {
       return window.localStorage.getItem(ONBOARDING_STORAGE_KEY) !== "done";
     } catch {
@@ -2972,8 +2981,8 @@ function MainModeApp() {
   const settingsSearchResultLabel = settingsSearchQuery
     ? visibleSettingsTabs.length
       ? `showing ${visibleSettingsTabs.length} matching section${visibleSettingsTabs.length === 1 ? "" : "s"}`
-      : "no exact section found — Search for settings such as Discord, theme, cover, update, volume, or mini player."
-    : "Search for settings such as Discord, theme, cover, update, volume, or mini player.";
+      : "no exact section found — Search for settings such as Discord, theme, cover, update, or volume."
+    : "Search for settings such as Discord, theme, cover, update, or volume.";
 
   function handleSettingsSearchInput(value: string) {
     setSettingsSearch(value);
@@ -3374,6 +3383,75 @@ function MainModeApp() {
     [arcadeGhostUnlocked, settings.theme]
   );
   const currentTheme = themes.find((theme) => theme.id === effectiveTheme) ?? themes.find((theme) => theme.id === "mint") ?? themes[0];
+
+  const diagnosticsInfo = useMemo(() => {
+    const themeLabel = settings.customThemeEnabled ? `${currentTheme.name} + custom colors` : currentTheme.name;
+    const discordStatus = settings.discordEnabled ? "enabled" : "disabled";
+    const startupStatus = settings.startWithWindows ? "enabled" : "disabled";
+
+    const items = [
+      { label: "app version", value: APP_VERSION },
+      { label: "song count", value: String(songs.length) },
+      { label: "playlist count", value: String(playlists.length) },
+      { label: "theme", value: themeLabel },
+      { label: "Discord status", value: discordStatus },
+      { label: "startup status", value: startupStatus }
+    ];
+
+    return {
+      items,
+      copyText: [
+        `localtify version: ${APP_VERSION}`,
+        `song count: ${songs.length}`,
+        `playlist count: ${playlists.length}`,
+        `theme: ${themeLabel}`,
+        `Discord status: ${discordStatus}`,
+        `startup status: ${startupStatus}`
+      ].join("\n")
+    };
+  }, [
+    currentTheme.name,
+    playlists.length,
+    settings.customThemeEnabled,
+    settings.discordEnabled,
+    settings.startWithWindows,
+    songs.length
+  ]);
+
+  const copyDiagnosticsInfo = useCallback(async () => {
+    const textToCopy = diagnosticsInfo.copyText;
+    let copied = false;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(textToCopy);
+        copied = true;
+      }
+    } catch {
+      copied = false;
+    }
+
+    if (!copied) {
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = textToCopy;
+        textarea.setAttribute("readonly", "true");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.top = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        copied = document.execCommand("copy");
+        document.body.removeChild(textarea);
+      } catch {
+        copied = false;
+      }
+    }
+
+    setDiagnosticsCopied(true);
+    window.setTimeout(() => setDiagnosticsCopied(false), copied ? 1500 : 2200);
+  }, [diagnosticsInfo.copyText]);
+
   const selectedCoverColorSyncMode = normalizeCoverColorSyncMode(
     settings.coverColorSyncMode ?? (settings.showAmbientGradient ? "normal" : "off")
   );
@@ -4004,7 +4082,6 @@ function MainModeApp() {
       theme_id: settings.customThemeEnabled ? "custom" : settings.theme,
       cover_color_sync_mode: settings.coverColorSyncMode,
       compact_player_enabled: settings.compactPlayer,
-      mini_player_enabled: settings.showMiniPlayer,
       simple_mode_enabled: settings.simpleMode,
       reduced_motion_enabled: settings.reducedMotion,
       crossfade_enabled: settings.crossfadeEnabled,
@@ -4032,7 +4109,6 @@ function MainModeApp() {
     settings.theme,
     settings.coverColorSyncMode,
     settings.compactPlayer,
-    settings.showMiniPlayer,
     settings.simpleMode,
     settings.reducedMotion,
     settings.crossfadeEnabled,
@@ -5748,8 +5824,9 @@ function MainModeApp() {
   }, [settings.minimizeToTray]);
 
   useEffect(() => {
+    if (!ready) return;
     window.localitfy.setStartWithWindows?.(settings.startWithWindows).catch(() => undefined);
-  }, [settings.startWithWindows]);
+  }, [ready, settings.startWithWindows]);
 
   useEffect(() => {
     window.localitfy.updateNativeMediaState?.({
@@ -6503,6 +6580,13 @@ function MainModeApp() {
       next.simpleMode = false;
     }
 
+    if (key === "showMiniPlayer") {
+      // Mini player is removed from public settings in v0.3.1. Keep old saved installs disabled.
+      next.showMiniPlayer = false;
+      miniWindowVisibleRef.current = false;
+      window.localitfy.hideMiniWindow?.().catch(() => undefined);
+    }
+
     await persistSettings(next, debounce);
 
     if (!debounce && bootedRef.current) {
@@ -6554,6 +6638,12 @@ function MainModeApp() {
       kickThemeSettle();
     }
 
+    if (Object.prototype.hasOwnProperty.call(patch, "showMiniPlayer")) {
+      next.showMiniPlayer = false;
+      miniWindowVisibleRef.current = false;
+      window.localitfy.hideMiniWindow?.().catch(() => undefined);
+    }
+
     await persistSettings(next, debounce);
   }
 
@@ -6599,7 +6689,6 @@ function MainModeApp() {
     void updateSettingsPatch({
       playerSize: defaultSettings.playerSize,
       compactPlayer: defaultSettings.compactPlayer,
-      showMiniPlayer: defaultSettings.showMiniPlayer,
       showVisualizer: defaultSettings.showVisualizer,
       volume: defaultSettings.volume,
       playbackSpeed: defaultSettings.playbackSpeed
@@ -9376,7 +9465,7 @@ function MainModeApp() {
         ) : (
           <div className="settingsNoSearchResultsV027">
             <strong>Nothing matched</strong>
-            <span>Try words like discord, privacy, theme, cover, update, volume, or mini player.</span>
+            <span>Try words like discord, privacy, theme, cover, update, or volume.</span>
           </div>
         )}
       </aside>
@@ -9543,7 +9632,6 @@ function MainModeApp() {
                   <ToggleRow label="Soft corners" help="Uses rounder cards and buttons." checked={settings.softCorners} onChange={(value) => updateSetting("softCorners", value)} />
                   <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={settings.showFloatingNotes} onChange={(value) => updateSetting("showFloatingNotes", value)} />
                   <ToggleRow label="Animated glow" help="Keeps ambience on, but pauses it during fast screen switches." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
-                  <ToggleRow label="Mini player" help="Shows the detached mini player." checked={settings.showMiniPlayer} onChange={(value) => updateSetting("showMiniPlayer", value)} />
                 </div>
 
                 <div className="coverSyncPicker modalCoverSyncPicker">
@@ -9889,13 +9977,58 @@ function MainModeApp() {
             <div className="settingsPanelCard settingsFullWidthPanel">
               <div className="settingsPanelHeader">
                 <div>
-                  <strong>What’s new in 0.2.9</strong>
+                  <strong>What’s new in 0.3.1</strong>
                   <span>Release notes shown in the update popup.</span>
                 </div>
               </div>
               <ul className="settingsPlainList settingsReleaseList">
                 {whatsNewItems.map((item) => <li key={item}>{item}</li>)}
               </ul>
+            </div>
+          </section>
+        ) : null}
+
+
+
+        {settingsCategory === "about" ? (
+          <section className="settingsCategoryPage" aria-label="About and diagnostics">
+            <div className="settingsCategoryHeader">
+              <div>
+                <p className="eyebrow">about</p>
+                <h4>localtify status</h4>
+              </div>
+              <span>version {APP_VERSION}</span>
+            </div>
+
+            <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsPanel">
+              <div className="settingsPanelHeader settingsDiagnosticsHeader">
+                <div>
+                  <strong>App info</strong>
+                  <span>Copy this when reporting bugs so it is easier to understand your setup.</span>
+                </div>
+                <button className="settingsActionButton settingsCopyInfoButton" type="button" onClick={copyDiagnosticsInfo}>
+                  {diagnosticsCopied ? "copied" : "copy app info"}
+                </button>
+              </div>
+
+              <div className="settingsDiagnosticsGrid">
+                {diagnosticsInfo.items.map((item) => (
+                  <div className="settingsDiagnosticCard" key={item.label}>
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsCopyPanel">
+              <div className="settingsPanelHeader">
+                <div>
+                  <strong>Bug report text</strong>
+                  <span>No song names, file paths, or private library metadata are included.</span>
+                </div>
+              </div>
+              <textarea className="settingsDiagnosticsText" readOnly value={diagnosticsInfo.copyText} aria-label="localtify diagnostics text" />
             </div>
           </section>
         ) : null}
@@ -9975,7 +10108,7 @@ function MainModeApp() {
                 </button>
                 <button className="settingsResetButton" type="button" onClick={resetPlayerLayoutSettings}>
                   <strong>Reset player layout</strong>
-                  <span>Restores player size, mini player, visualizer, volume, and speed.</span>
+                  <span>Restores player size, visualizer, volume, and speed.</span>
                 </button>
                 <button className="settingsResetButton" type="button" onClick={resetLibraryLayoutSettings}>
                   <strong>Reset library layout</strong>
