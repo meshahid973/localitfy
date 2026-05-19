@@ -2052,12 +2052,19 @@ function getSongAmbientStyle(song?: Song | null): CSSProperties | undefined {
 
 const Cover = memo(function Cover({ song, className }: { song: Song | null; className: string }) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
-  const primarySrc = song?.coverUrl || "";
+  const [imageReady, setImageReady] = useState(false);
+
+  const directCover = String(song?.coverUrl || "").trim();
+  const savedCover = String(song?.coverPath || "").trim();
+  const savedCoverSrc = looksLikeDirectImageUrl(savedCover) ? savedCover : "";
   const fallbackAsset = song ? pixelArtForSong(song) : null;
   const backupFallbackAsset = song ? nextPixelArtForSong(song) : null;
   const fallbackSrc = fallbackAsset ? pixelArtUrl(fallbackAsset.file) : "";
   const backupFallbackSrc = backupFallbackAsset ? pixelArtUrl(backupFallbackAsset.file) : "";
-  const sourceCandidates = [primarySrc, fallbackSrc, backupFallbackSrc].filter(Boolean);
+
+  const sourceCandidates = [directCover, savedCoverSrc, fallbackSrc, backupFallbackSrc]
+    .map((source) => source.trim())
+    .filter(Boolean);
   const coverSrc = sourceCandidates.find((source) => !failedSources[source]) || "";
   const hasCover = Boolean(coverSrc);
   const fallback = song ? prettyTitle(song.title, 1).slice(0, 1) || "♪" : "♪";
@@ -2065,27 +2072,39 @@ const Cover = memo(function Cover({ song, className }: { song: Song | null; clas
 
   useEffect(() => {
     setFailedSources({});
-  }, [song?.id, song?.coverUrl]);
+    setImageReady(false);
+  }, [song?.id, song?.coverUrl, song?.coverPath]);
+
+  useEffect(() => {
+    setImageReady(false);
+  }, [coverSrc]);
 
   return (
     <div
-      className={`coverAura ${className} ${hasCover ? "hasCover" : "noCover"}`}
+      className={`coverAura ${className} ${hasCover ? "hasCover" : "noCover"} ${imageReady ? "coverReady" : "coverLoading"}`}
       style={style}
       data-cover-title={song?.title ?? "localtify"}
     >
+      <span className="coverPlaceholder" aria-hidden="true">
+        {fallback}
+      </span>
+
       {hasCover ? (
         <img
           key={coverSrc}
+          className={`coverImage ${imageReady ? "isLoaded" : ""}`}
           src={coverSrc}
           alt=""
           draggable={false}
           loading="lazy"
           decoding="async"
-          onError={() => setFailedSources((old) => ({ ...old, [coverSrc]: true }))}
+          onLoad={() => setImageReady(true)}
+          onError={() => {
+            setImageReady(false);
+            setFailedSources((old) => ({ ...old, [coverSrc]: true }));
+          }}
         />
-      ) : (
-        <span>{fallback}</span>
-      )}
+      ) : null}
     </div>
   );
 });
@@ -2567,6 +2586,7 @@ function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const progressLoopTimeoutRef = useRef<number | null>(null);
   const saveSettingsTimerRef = useRef<number | null>(null);
   const playlistSaveTimerRef = useRef<number | null>(null);
   const playerResizeFrameRef = useRef<number | null>(null);
@@ -2638,6 +2658,8 @@ function MainModeApp() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsCategory, setSettingsCategory] = useState<SettingsCategory>("appearance");
   const [settingsSearch, setSettingsSearch] = useState("");
+  const [isAppBackgrounded, setIsAppBackgrounded] = useState(() => (typeof document === "undefined" ? false : document.hidden));
+  const isAppBackgroundedRef = useRef(isAppBackgrounded);
   const [diagnosticsCopied, setDiagnosticsCopied] = useState(false);
   const deferredSettingsSearch = useDeferredValue(settingsSearch);
   const [isViewSwitching, setIsViewSwitching] = useState(false);
@@ -2776,6 +2798,15 @@ function MainModeApp() {
   const greeting = isThreeAm ? "late night local files" : getGreeting(now.getHours());
 
   useEffect(() => {
+    isAppBackgroundedRef.current = isAppBackgrounded;
+    document.body.classList.toggle("localtifyBackgroundMode", isAppBackgrounded);
+
+    return () => {
+      document.body.classList.remove("localtifyBackgroundMode");
+    };
+  }, [isAppBackgrounded]);
+
+  useEffect(() => {
     const analyticsReady = initLocalitfyAnalytics(APP_VERSION);
 
     if (analyticsReady) {
@@ -2795,7 +2826,10 @@ function MainModeApp() {
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden) {
+      const hidden = document.hidden;
+      setIsAppBackgrounded(hidden);
+
+      if (hidden) {
         trackAppBackgrounded({ reason: "visibility_hidden", current_view: analyticsViewRef.current });
         return;
       }
@@ -2805,10 +2839,12 @@ function MainModeApp() {
     };
 
     const handleFocus = () => {
+      if (!document.hidden) setIsAppBackgrounded(false);
       trackAppActive({ reason: "window_focus", current_view: analyticsViewRef.current });
     };
 
     const handleBlur = () => {
+      if (document.hidden) setIsAppBackgrounded(true);
       trackAppBackgrounded({ reason: "window_blur", current_view: analyticsViewRef.current });
     };
 
@@ -4549,7 +4585,7 @@ function MainModeApp() {
       beatFrameRef.current = null;
     }
 
-    if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || isViewSwitching || isSeeking || isVolumeDragging || document.hidden) {
+    if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || isViewSwitching || isSeeking || isVolumeDragging || isAppBackgrounded) {
       resetBeatVariables();
       return;
     }
@@ -4679,7 +4715,7 @@ function MainModeApp() {
         beatFrameRef.current = null;
       }
     };
-  }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, isViewSwitching, isSeeking, isVolumeDragging]);
+  }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, isViewSwitching, isSeeking, isVolumeDragging, isAppBackgrounded]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000);
@@ -5866,6 +5902,8 @@ function MainModeApp() {
     const tick = (clock: number) => {
       const audio = audioRef.current;
 
+      const backgroundMode = isAppBackgroundedRef.current;
+
       if (audio && !audio.paused) {
         const nextTime = audio.currentTime || 0;
         const nextDuration = Number.isFinite(audio.duration) ? audio.duration : currentDuration;
@@ -5873,19 +5911,20 @@ function MainModeApp() {
         timeRef.current = nextTime;
         if (Number.isFinite(nextDuration) && nextDuration > 0) durationRef.current = nextDuration;
 
-        const uiPaintEveryMs = scrollBusyRef.current || draggedSongIdRef.current || themeSettlingRef.current ? 240 : 90;
-        if (!isSeekingRef.current && clock - lastProgressUiPaintRef.current > uiPaintEveryMs) {
+        const busyUi = scrollBusyRef.current || draggedSongIdRef.current || themeSettlingRef.current;
+        const uiPaintEveryMs = backgroundMode ? 3000 : busyUi ? 240 : 90;
+        if (!backgroundMode && !isSeekingRef.current && clock - lastProgressUiPaintRef.current > uiPaintEveryMs) {
           lastProgressUiPaintRef.current = clock;
           syncProgressDom(nextTime, nextDuration);
         }
 
-        const statePaintEveryMs = scrollBusyRef.current || draggedSongIdRef.current || themeSettlingRef.current ? 1600 : 900;
+        const statePaintEveryMs = backgroundMode ? 8000 : busyUi ? 1600 : 900;
         if (!isSeekingRef.current && clock - lastProgressStatePaintRef.current > statePaintEveryMs) {
           lastProgressStatePaintRef.current = clock;
           setCurrentTime(nextTime);
         }
 
-        if (Number.isFinite(nextDuration) && nextDuration > 0 && Math.abs(nextDuration - lastPaintedDuration) > 0.5) {
+        if (!backgroundMode && Number.isFinite(nextDuration) && nextDuration > 0 && Math.abs(nextDuration - lastPaintedDuration) > 0.5) {
           lastPaintedDuration = nextDuration;
           setCurrentDuration(nextDuration);
           syncProgressDom(nextTime, nextDuration, true);
@@ -5896,9 +5935,17 @@ function MainModeApp() {
           void patchSongLocal(currentSong.id, { playbackPosition: Math.floor(nextTime) });
         }
 
-        if (settings.gaplessPlayback && nextDuration > 0 && nextDuration - nextTime < 20) {
+        if (!backgroundMode && settings.gaplessPlayback && nextDuration > 0 && nextDuration - nextTime < 20) {
           primeNextAudioCache();
         }
+      }
+
+      if (backgroundMode) {
+        progressLoopTimeoutRef.current = window.setTimeout(() => {
+          progressLoopTimeoutRef.current = null;
+          animationFrameRef.current = window.requestAnimationFrame(tick);
+        }, 1000);
+        return;
       }
 
       animationFrameRef.current = window.requestAnimationFrame(tick);
@@ -6023,7 +6070,8 @@ function MainModeApp() {
 
     sendActivity("now");
 
-    const timer = window.setInterval(() => sendActivity("tick"), 15000);
+    const discordRefreshEveryMs = isAppBackgrounded ? 45000 : 15000;
+    const timer = window.setInterval(() => sendActivity("tick"), discordRefreshEveryMs);
 
     return () => {
       alive = false;
@@ -6049,7 +6097,8 @@ function MainModeApp() {
     settings.discordActivityStyle,
     settings.discordTitleCleanup,
     settings.discordSecondLine,
-    pixelArtAssets.length
+    pixelArtAssets.length,
+    isAppBackgrounded
   ]);
 
 
@@ -6227,6 +6276,11 @@ function MainModeApp() {
     if (animationFrameRef.current !== null) {
       window.cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
+    }
+
+    if (progressLoopTimeoutRef.current !== null) {
+      window.clearTimeout(progressLoopTimeoutRef.current);
+      progressLoopTimeoutRef.current = null;
     }
   }
 
@@ -10169,7 +10223,7 @@ function MainModeApp() {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${settings.reducedMotion ? "reducedMotion" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${settings.reducedMotion ? "reducedMotion" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={

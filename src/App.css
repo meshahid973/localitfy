@@ -10312,3 +10312,149 @@ body::after,
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
+
+
+/* v0.3.1 cover loading polish
+   Keeps album art from flashing white or showing broken-image icons while covers load. */
+.coverAura {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(var(--accent-rgb, 227, 78, 232), 0.16), transparent 58%),
+    rgba(8, 5, 12, 0.92);
+  contain: paint;
+}
+
+.coverAura .coverPlaceholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: clamp(1rem, 35%, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  text-transform: lowercase;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), transparent 42%),
+    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb, 227, 78, 232), 0.18), transparent 62%);
+  opacity: 1;
+  transform: scale(1.01);
+  transition: opacity 220ms ease, transform 280ms ease;
+  pointer-events: none;
+}
+
+.coverAura.hasCover.coverReady .coverPlaceholder {
+  opacity: 0;
+  transform: scale(0.985);
+}
+
+.coverAura.noCover .coverPlaceholder {
+  opacity: 1;
+  transform: none;
+}
+
+.coverAura > img.coverImage,
+.coverAura img.coverImage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+  background: transparent;
+  color: transparent;
+  opacity: 0;
+  transform: scale(1.018);
+  transition: opacity 240ms ease, transform 360ms ease;
+  pointer-events: none;
+}
+
+.coverAura > img.coverImage.isLoaded,
+.coverAura img.coverImage.isLoaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.coverAura.coverLoading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.055) 46%, transparent 72%);
+  transform: translateX(-110%);
+  animation: coverLoadSweep 1.15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.coverAura.noCover::after,
+.coverAura.coverReady::after {
+  display: none;
+}
+
+@keyframes coverLoadSweep {
+  to {
+    transform: translateX(110%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coverAura .coverPlaceholder,
+  .coverAura > img.coverImage,
+  .coverAura img.coverImage {
+    transition: opacity 1ms linear;
+    transform: none;
+  }
+
+  .coverAura.coverLoading::after {
+    animation: none;
+  }
+}
+
+/* v0.3.1 background performance guardrails
+   Keeps music playing, but stops expensive visual repaint work while the window is hidden/minimized. */
+body.localtifyBackgroundMode .app,
+.app.appBackgrounded {
+  --background-visual-opacity: 0.35;
+}
+
+body.localtifyBackgroundMode .ambientSurface,
+body.localtifyBackgroundMode .app::before,
+body.localtifyBackgroundMode .app::after,
+body.localtifyBackgroundMode .coverAura,
+body.localtifyBackgroundMode .heroGlow,
+body.localtifyBackgroundMode .heroBackground,
+body.localtifyBackgroundMode .nowPlayingAura,
+body.localtifyBackgroundMode .visualizer,
+.app.appBackgrounded .ambientSurface,
+.app.appBackgrounded .coverAura,
+.app.appBackgrounded .heroGlow,
+.app.appBackgrounded .heroBackground,
+.app.appBackgrounded .nowPlayingAura,
+.app.appBackgrounded .visualizer {
+  animation-play-state: paused;
+}
+
+body.localtifyBackgroundMode .ambientSurface,
+.app.appBackgrounded .ambientSurface {
+  opacity: var(--background-visual-opacity, 0.35);
+}
+
+/* Render far-away heavy sections only when they get near the viewport. */
+.homeShelf,
+.libraryListWrap,
+.analyticsPanel,
+.analyticsGrid,
+.downloadQueuePanel,
+.coverStudioPanel,
+.settingsSection,
+.settingsCard,
+.songListPanel,
+.recentImportsPanel {
+  content-visibility: auto;
+  contain-intrinsic-size: 320px;
+}
