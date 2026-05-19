@@ -90,7 +90,7 @@ type Song = {
 type View = "home" | "library" | "playlists" | "liked" | "covers" | "analytics" | "downloads" | "settings";
 type CoverMood = "all" | "favorites" | "leastUsed" | "cute" | "space" | "dark" | "cozy" | "energy";
 
-type SettingsCategory = "appearance" | "playback" | "discord" | "library" | "covers" | "updates" | "about" | "advanced" | "metadata";
+type SettingsCategory = "appearance" | "playback" | "discord" | "library" | "downloads" | "covers" | "updates" | "about" | "advanced" | "metadata";
 
 const settingsCategoryTabs: {
   id: SettingsCategory;
@@ -126,6 +126,13 @@ const settingsCategoryTabs: {
     description: "Imports, playlists, and metadata",
     icon: LibraryBig,
     keywords: "library import imports songs folders playlists queue metadata cleaner cleanup search rebuild title names artist album file local"
+  },
+  {
+    id: "downloads",
+    label: "Downloads",
+    description: "Queue, quality, and folders",
+    icon: Download,
+    keywords: "downloads download youtube yt-dlp ytdlp queue progress speed eta cancel retry failed clear finished folder quality mp3 flac wav format auto add clean title"
   },
   {
     id: "covers",
@@ -169,7 +176,8 @@ function resolveSettingsCategoryFromSearch(value: string): SettingsCategory | nu
   if (/theme|themes|appearance|accent|color|colour|layout|spacing|corner|ambience|glow|sidebar/.test(query)) return "appearance";
   if (/playback|player|crossfade|gapless|speed|volume|sleep|repeat|shuffle|queue/.test(query)) return "playback";
   if (/cover|covers|artwork|pixel|pixelart|gallery|random|rescan|favorite|hidden/.test(query)) return "covers";
-  if (/update|updates|version|changelog|what'?s new|release|install|download|github/.test(query)) return "updates";
+  if (/download|downloads|youtube|yt-dlp|ytdlp|quality|mp3|flac|wav|folder|queue|retry|cancel/.test(query)) return "downloads";
+  if (/update|updates|version|changelog|what'?s new|release|install|github/.test(query)) return "updates";
   if (/about|app info|diagnostic|diagnostics|debug|copy info|version|song count|playlist count|startup|open source|github|contributors|bug report/.test(query)) return "about";
   if (/library|import|songs|playlist|metadata|clean|cleanup|search|folder|queue/.test(query)) return "library";
   if (/advanced|reset|status|diagnostic|maintenance|storage|database/.test(query)) return "advanced";
@@ -571,6 +579,11 @@ type Settings = {
   skipSilence: boolean;
   minimizeToTray: boolean;
   startWithWindows: boolean;
+  downloadQuality: "best" | "320" | "256" | "192";
+  downloadFormat: "mp3" | "flac" | "wav";
+  downloadAutoAdd: boolean;
+  downloadCleanTitle: boolean;
+  downloadFolder: string;
 };
 
 type CustomThemeColorKey =
@@ -600,6 +613,19 @@ type DownloadResult = {
   filePath?: string;
   filename?: string;
   sizeBytes?: number;
+  error?: string;
+};
+
+type DownloadQueueItem = {
+  id: string;
+  url: string;
+  title: string;
+  status: "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled";
+  progress: number;
+  message: string;
+  speed?: string | null;
+  eta?: string | null;
+  filename?: string;
   error?: string;
 };
 
@@ -805,11 +831,11 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.1 removes the old compact-window path so the app stays simpler and lighter",
+  "0.3.1 improves downloads with a queue, progress, speed, ETA, cancel, retry, and open-in-library actions",
+  "Download settings now include audio quality, MP3/FLAC/WAV format, auto-add, title cleanup, and download folder control",
   "FLAC files can be imported alongside MP3, WAV, OGG, M4A, and AAC",
-  "You can copy app info with the version, song count, playlist count, active theme, Discord status, and startup status",
-  "Animations and button styles are smoother and more consistent without changing the main localtify design",
-  "Sidebar hover, song row hover, popup motion, card corners, and theme switching have been cleaned up",
+  "The old mini-player path has been removed so localtify stays simpler and lighter",
+  "Animations, buttons, sidebar hover, song rows, popup motion, card corners, and theme switching are cleaner",
   "The app stays focused on local music data and keeps your personal library details private"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
@@ -1287,7 +1313,12 @@ const defaultSettings: Settings = {
   rememberPlaybackPosition: true,
   skipSilence: false,
   minimizeToTray: false,
-  startWithWindows: true
+  startWithWindows: true,
+  downloadQuality: "best",
+  downloadFormat: "mp3",
+  downloadAutoAdd: true,
+  downloadCleanTitle: true,
+  downloadFolder: ""
 };
 
 function normalizeUiText(text: string) {
@@ -2552,8 +2583,6 @@ function MainModeApp() {
   const lastQueueHistoryRef = useRef("");
   const toastTimerRef = useRef<number | null>(null);
   const importOverlayTimerRef = useRef<number | null>(null);
-  const downloadProgressFrameRef = useRef<number | null>(null);
-  const pendingDownloadProgressRef = useRef<{ progress: number; message: string } | null>(null);
   const songRef = useRef<Song | null>(null);
   const timeRef = useRef(0);
   const durationRef = useRef(0);
@@ -2724,6 +2753,8 @@ function MainModeApp() {
   const [downloadText, setDownloadText] = useState("");
   const [downloadBusy, setDownloadBusy] = useState(false);
   const [downloadResults, setDownloadResults] = useState<DownloadResult[]>([]);
+  const [downloadQueue, setDownloadQueue] = useState<DownloadQueueItem[]>([]);
+  const [downloadFolderLabel, setDownloadFolderLabel] = useState("");
 
   const [convertBusy, setConvertBusy] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
@@ -5542,37 +5573,53 @@ function MainModeApp() {
       const nextProgress = clamp(Number(payload.progress || 0), 0, 100);
       const nextMessage = payload.message || "working...";
 
-      pendingDownloadProgressRef.current = {
-        progress: nextProgress,
-        message: nextMessage
-      };
+      if (!payload.id && !payload.url) return;
 
-      if (downloadProgressFrameRef.current !== null) return;
+      const itemId = payload.id || payload.url || `download-${Date.now()}`;
 
-      downloadProgressFrameRef.current = window.requestAnimationFrame(() => {
-        const pending = pendingDownloadProgressRef.current;
-        downloadProgressFrameRef.current = null;
+      setDownloadQueue((current) => {
+        const existingIndex = current.findIndex((item) => item.id === itemId || item.url === payload.url);
+        const previous = existingIndex >= 0 ? current[existingIndex] : null;
+        const nextItem: DownloadQueueItem = {
+          id: itemId,
+          url: payload.url || previous?.url || "",
+          title: payload.file || payload.filename || previous?.title || "download",
+          status: payload.status || (nextProgress >= 100 ? "done" : "downloading"),
+          progress: nextProgress,
+          message: nextMessage,
+          speed: payload.speed || previous?.speed,
+          eta: payload.eta || previous?.eta,
+          filename: payload.filename || previous?.filename,
+          error: payload.error || previous?.error
+        };
 
-        if (!pending) return;
+        if (existingIndex === -1) return [...current, nextItem];
 
-        setConvertProgress((current) => {
-          if (pending.progress >= 100 || Math.abs(current - pending.progress) >= 1) {
-            return pending.progress;
-          }
+        const merged = {
+          ...previous,
+          ...nextItem,
+          title: payload.file || payload.filename || previous?.title || nextItem.title,
+          url: payload.url || previous?.url || nextItem.url
+        };
 
-          return current;
-        });
-        setConvertMessage(pending.message);
+        const sameVisualState =
+          Math.abs((previous?.progress || 0) - merged.progress) < 0.75 &&
+          previous?.status === merged.status &&
+          previous?.message === merged.message &&
+          previous?.title === merged.title &&
+          previous?.filename === merged.filename &&
+          previous?.error === merged.error;
+
+        if (sameVisualState) return current;
+
+        const copy = [...current];
+        copy[existingIndex] = merged;
+        return copy;
       });
     });
 
     return () => {
       off();
-      if (downloadProgressFrameRef.current !== null) {
-        window.cancelAnimationFrame(downloadProgressFrameRef.current);
-        downloadProgressFrameRef.current = null;
-      }
-      pendingDownloadProgressRef.current = null;
     };
   }, []);
 
@@ -7352,39 +7399,143 @@ function MainModeApp() {
     }
   }
 
-  async function downloadAudioLinks() {
-    const urls = downloadText
-      .split(/\r?\n/)
+  function parseDownloadUrls(text: string) {
+    return text
+      .split(/\r?\n|,/) 
       .map((url) => url.trim())
       .filter(Boolean);
+  }
+
+  function makeQueuedDownloads(urls: string[]): DownloadQueueItem[] {
+    return urls.map((url, index) => ({
+      id: `${Date.now()}-${index}`,
+      url,
+      title: `download ${index + 1}`,
+      status: "queued",
+      progress: 0,
+      message: "Queued..."
+    }));
+  }
+
+  function syncDownloadFilesToQueue(results: DownloadResult[]) {
+    if (!results.length) return;
+    setDownloadQueue((current) => {
+      const next = [...current];
+      results.forEach((result) => {
+        const index = next.findIndex((item) => item.url === result.url);
+        if (index === -1) return;
+        next[index] = {
+          ...next[index],
+          status: result.ok ? "done" : "failed",
+          progress: 100,
+          message: result.ok ? "Added to library" : "Download failed — retry?",
+          filePath: result.filePath,
+          filename: result.filename,
+          error: result.error,
+          title: result.filename || next[index].title
+        };
+      });
+      return next;
+    });
+  }
+
+  function openDownloadedSongInLibrary(item: DownloadResult | DownloadQueueItem) {
+    const filePath = "filePath" in item ? item.filePath : undefined;
+    if (!filePath) {
+      changeView("library", "unknown");
+      return;
+    }
+
+    const match = songs.find((song) => song.filePath === filePath);
+    if (match) {
+      setCurrentId(match.id);
+      void rememberCurrentSong(match.id);
+      changeView("library", "unknown");
+      setStatusText("opened downloaded song in library");
+    } else {
+      changeView("library", "unknown");
+      setStatusText("download is saved, but auto-add is off");
+    }
+  }
+
+  async function chooseDownloadFolder() {
+    try {
+      const result = await window.localitfy.chooseDownloadFolder?.();
+      if (!result || result.canceled || !result.folder) return;
+      await updateSetting("downloadFolder", result.folder);
+      setDownloadFolderLabel(result.folder);
+      showAppToast("download folder updated", "success");
+    } catch (error) {
+      console.error("[localtify choose download folder failed]", error);
+      showAppToast("could not choose download folder", "error");
+    }
+  }
+
+  async function cancelCurrentDownload() {
+    try {
+      await window.localitfy.cancelDownload?.();
+      setDownloadBusy(false);
+      setStatusText("download cancelled");
+      setDownloadQueue((current) => current.map((item) => (
+        item.status === "queued" || item.status === "downloading" || item.status === "converting"
+          ? { ...item, status: "cancelled", progress: item.progress || 100, message: "Download cancelled" }
+          : item
+      )));
+    } catch (error) {
+      console.error("[localtify cancel download failed]", error);
+      showAppToast("could not cancel download", "error");
+    }
+  }
+
+  async function retryDownload(url: string) {
+    if (!url) return;
+    setDownloadText(url);
+    await downloadAudioLinks(url);
+  }
+
+  async function downloadAudioLinks(overrideText?: string) {
+    const urls = parseDownloadUrls(overrideText || downloadText);
 
     if (!urls.length) {
-      setPlayerError("paste at least one direct audio link first");
+      setPlayerError("paste at least one YouTube link first");
       setStatusText("nothing to download");
       return;
     }
 
     setDownloadBusy(true);
+    setConvertBusy(false);
+    setConvertProgress(0);
+    setConvertMessage("");
     setPlayerError("");
     setStatusText("downloading audio...");
+    setDownloadQueue(makeQueuedDownloads(urls));
 
     try {
       const result = await window.localitfy.downloadAudioUrls({
-        urls
+        urls,
+        options: {
+          quality: settings.downloadQuality,
+          format: settings.downloadFormat,
+          autoAdd: settings.downloadAutoAdd,
+          cleanTitle: settings.downloadCleanTitle,
+          downloadFolder: settings.downloadFolder
+        }
       });
 
       const nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
+      const downloads = result.downloads || [];
 
-      setDownloadResults(result.downloads || []);
+      setDownloadResults(downloads);
+      syncDownloadFilesToQueue(downloads);
+      setDownloadFolderLabel(result.downloadFolder || settings.downloadFolder || "");
       setSongs(nextSongs);
       setLibraryScanMessage(`indexed ${nextSongs.length} tracks instantly`);
 
-      const successCount = (result.downloads || []).filter((item) => item.ok).length;
-      const failCount = (result.downloads || []).filter((item) => !item.ok).length;
+      const successCount = downloads.filter((item) => item.ok).length;
+      const failCount = downloads.filter((item) => !item.ok).length;
 
       if (nextSongs.length && !currentId) {
         const firstSong = nextSongs[0];
-
         if (firstSong) {
           setCurrentId(firstSong.id);
           await rememberCurrentSong(firstSong.id);
@@ -7394,9 +7545,11 @@ function MainModeApp() {
       if (successCount > 0) {
         trackSongsImported(result.changedCount || successCount, "downloads");
         setStatusText(
-          `downloaded ${successCount} audio file${successCount === 1 ? "" : "s"} and imported ${result.changedCount}`
+          settings.downloadAutoAdd
+            ? `downloaded ${successCount} and added ${result.changedCount || 0} to library`
+            : `downloaded ${successCount} file${successCount === 1 ? "" : "s"}`
         );
-        changeView("library", "unknown");
+        if (settings.downloadAutoAdd) changeView("library", "unknown");
       } else {
         trackImportFailed("download_no_audio", "downloads");
         setStatusText("download failed");
@@ -7404,7 +7557,7 @@ function MainModeApp() {
       }
 
       if (failCount > 0) {
-        console.warn("[localitfy download partial failures]", result.downloads);
+        console.warn("[localitfy download partial failures]", downloads);
       }
     } catch (error) {
       console.error("[localitfy download failed]", error);
@@ -9719,6 +9872,88 @@ function MainModeApp() {
           </section>
         ) : null}
 
+        {settingsCategory === "downloads" ? (
+          <section className="settingsContentBlock">
+            <p className="eyebrow">downloads</p>
+            <h2>download settings</h2>
+            <p className="settingsLead">Choose how downloaded audio is saved, named, converted, and imported.</p>
+
+            <div className="settingsGrid twoCols downloadSettingsGridV031">
+              <div className="settingGroup">
+                <h3>Audio quality</h3>
+                <p>Best keeps the source quality when possible. Fixed bitrates are useful if you want smaller MP3 files.</p>
+                <div className="optionGrid compactOptions">
+                  {(["best", "320", "256", "192"] as Settings["downloadQuality"][]).map((quality) => (
+                    <button
+                      key={quality}
+                      className={`settingsChoice ${settings.downloadQuality === quality ? "active" : ""}`}
+                      onClick={() => void updateSetting("downloadQuality", quality)}
+                    >
+                      <strong>{quality === "best" ? "Best" : `${quality}kbps`}</strong>
+                      <span>{quality === "best" ? "highest available" : "smaller file size"}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="settingGroup">
+                <h3>Format</h3>
+                <p>MP3 is best for compatibility. FLAC is bigger but keeps more quality when conversion allows it.</p>
+                <div className="optionGrid compactOptions">
+                  {(["mp3", "flac", "wav"] as Settings["downloadFormat"][]).map((format) => (
+                    <button
+                      key={format}
+                      className={`settingsChoice ${settings.downloadFormat === format ? "active" : ""}`}
+                      onClick={() => void updateSetting("downloadFormat", format)}
+                    >
+                      <strong>{format.toUpperCase()}</strong>
+                      <span>{format === "mp3" ? "recommended" : format === "flac" ? "large quality files" : "huge raw files"}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="settingsCardStack downloadToggleStackV031">
+              <label className="toggleRow">
+                <span>
+                  <strong>Auto-add to library</strong>
+                  <small>Downloaded audio appears in localtify automatically.</small>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={settings.downloadAutoAdd}
+                  onChange={(event) => void updateSetting("downloadAutoAdd", event.currentTarget.checked)}
+                />
+              </label>
+
+              <label className="toggleRow">
+                <span>
+                  <strong>Clean title after download</strong>
+                  <small>Removes common video words like official video/audio from downloaded filenames.</small>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={settings.downloadCleanTitle}
+                  onChange={(event) => void updateSetting("downloadCleanTitle", event.currentTarget.checked)}
+                />
+              </label>
+            </div>
+
+            <div className="settingGroup downloadFolderGroupV031">
+              <h3>Download folder</h3>
+              <p>Choose where localtify saves downloaded songs. Leave it empty to use the default Downloads/localitfy folder.</p>
+              <div className="folderPickerRow">
+                <code>{settings.downloadFolder || downloadFolderLabel || "Default downloads folder"}</code>
+                <button className="softButton" onClick={() => void chooseDownloadFolder()}>choose folder</button>
+                {settings.downloadFolder ? (
+                  <button className="softButton" onClick={() => void updateSetting("downloadFolder", "")}>use default</button>
+                ) : null}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         {settingsCategory === "updates" ? (
           <section className="settingsCategoryPage" aria-label="Update settings">
             <div className="settingsCategoryHeader">
@@ -10863,36 +11098,117 @@ function MainModeApp() {
             )}
 
             {view === "downloads" && (
-              <section className="downloadsLayout">
-                <section className="panel downloadPanel">
-                  <div className="panelHead">
+              <section className="downloadsLayout downloadsLayoutV031">
+                <section className="panel downloadPanel downloadPanelV031">
+                  <div className="panelHead downloadHeroHead">
                     <div>
                       <p className="eyebrow">downloads</p>
-                      <h3>download direct audio links</h3>
+                      <h3>download music</h3>
+                      <p className="softText">Queue links, watch progress, retry failed items, then open finished songs in your library.</p>
                     </div>
 
-                    <button className="softButton" onClick={() => window.localitfy.openDownloadsFolder()}>
-                      open folder
+                    <div className="downloadHeroActions">
+                      <button className="softButton" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
+                        open folder
+                      </button>
+                      <button className="softButton" onClick={() => { changeView("settings", "unknown"); setSettingsCategory("downloads"); }}>
+                        download settings
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="downloadNotice downloadNoticeV031">
+                    Paste YouTube links one per line. localtify will download audio, convert it, and add it to your library unless auto-add is turned off.
+                  </div>
+
+                  <textarea
+                    className="downloadTextarea downloadTextareaV031"
+                    value={downloadText}
+                    onChange={(event) => setDownloadText(event.currentTarget.value)}
+                    placeholder={`paste YouTube links here, one per line...\nhttps://youtube.com/watch?v=...\nhttps://youtu.be/...`}
+                  />
+
+                  <div className="downloadActions downloadActionsV031">
+                    <button className="heroMain" onClick={() => void downloadAudioLinks()} disabled={downloadBusy}>
+                      {downloadBusy ? "downloading..." : "start download"}
+                    </button>
+
+                    {downloadBusy ? (
+                      <button className="heroGhost dangerGhost" onClick={() => void cancelCurrentDownload()}>
+                        cancel download
+                      </button>
+                    ) : (
+                      <button className="heroGhost" onClick={() => setDownloadText("")}>clear links</button>
+                    )}
+
+                    <button
+                      className="heroGhost"
+                      onClick={() => {
+                        setDownloadResults([]);
+                        setDownloadQueue((items) => items.filter((item) => item.status === "queued" || item.status === "downloading" || item.status === "converting"));
+                      }}
+                      disabled={downloadBusy || (!downloadResults.length && !downloadQueue.some((item) => item.status === "done" || item.status === "failed" || item.status === "cancelled"))}
+                    >
+                      clear finished
                     </button>
                   </div>
 
-                  <div className="downloadNotice">
-                    paste direct audio file links only, like youtube links , mp3, wav, m4a, flac, ogg, or aac. one link per line.
-                  </div>
+                  {downloadQueue.length ? (
+                    <div className="downloadQueuePanel">
+                      <div className="panelHead smallPanelHead">
+                        <div>
+                          <p className="eyebrow">queue</p>
+                          <h3>{downloadQueue.length} item{downloadQueue.length === 1 ? "" : "s"}</h3>
+                        </div>
+                        <span>{downloadBusy ? "working" : "ready"}</span>
+                      </div>
 
-                  <div className="converterBox">
+                      <div className="downloadQueueList">
+                        {downloadQueue.map((item, index) => (
+                          <div key={`${item.id}-${index}`} className={`downloadQueueItem ${item.status}`}>
+                            <div className="downloadQueueTop">
+                              <span className="downloadQueueIndex">{String(index + 1).padStart(2, "0")}</span>
+                              <div>
+                                <strong>{item.filename || item.title}</strong>
+                                <p>{item.message}</p>
+                              </div>
+                              <small>{item.progress}%</small>
+                            </div>
+
+                            <div className="downloadQueueTrack"><i style={{ width: `${clamp(item.progress, 0, 100)}%` }} /></div>
+
+                            <div className="downloadQueueMeta">
+                              <span>{item.status}</span>
+                              {item.speed ? <span>{item.speed}</span> : null}
+                              {item.eta ? <span>ETA {item.eta}</span> : null}
+                              {item.error ? <span>{item.error}</span> : null}
+                            </div>
+
+                            <div className="downloadQueueActions">
+                              {item.status === "failed" ? (
+                                <button className="softButton" onClick={() => void retryDownload(item.url)}>retry</button>
+                              ) : null}
+                              {item.status === "done" ? (
+                                <button className="softButton" onClick={() => openDownloadedSongInLibrary(item)}>open in library</button>
+                              ) : null}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="converterBox converterBoxV031">
                     <div>
-                      <strong>convert local video/audio to mp3</strong>
-                      <p>
-                        choose mp4, webm, mkv, mov, wav, m4a, flac, or mp3 files or even youtube video links localtify saves the mp3 in downloads and imports it.
-                      </p>
+                      <strong>convert local files</strong>
+                      <p>Choose mp4, webm, mkv, mov, wav, m4a, flac, or mp3 files. localtify converts and imports them.</p>
                     </div>
 
                     <button className="heroMain" onClick={convertLocalMedia} disabled={convertBusy}>
                       {convertBusy ? "converting..." : "choose files and convert"}
                     </button>
 
-                    {(convertBusy || convertProgress > 0) && (
+                    {convertBusy ? (
                       <div className="converterProgress">
                         <div>
                           <span>{convertMessage || "working..."}</span>
@@ -10903,29 +11219,12 @@ function MainModeApp() {
                           <i style={{ width: `${convertProgress}%` }} />
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  <textarea
-                    className="downloadTextarea"
-                    value={downloadText}
-                    onChange={(event) => setDownloadText(event.currentTarget.value)}
-                    placeholder={`paste any youtube video link here one per line...\nhttps://youtube.com/\nhttps://example.com/another-song.wav`}
-                  />
-
-                  <div className="downloadActions">
-                    <button className="heroMain" onClick={downloadAudioLinks} disabled={downloadBusy}>
-                      {downloadBusy ? "downloading..." : "download and import"}
-                    </button>
-
-                    <button className="heroGhost" onClick={() => setDownloadText("")} disabled={downloadBusy}>
-                      clear links
-                    </button>
+                    ) : null}
                   </div>
 
                   {downloadResults.length ? (
-                    <div className="downloadResults">
-                      <strong>results</strong>
+                    <div className="downloadResults downloadResultsV031">
+                      <strong>finished downloads</strong>
 
                       {downloadResults.map((item, index) => (
                         <div
@@ -10935,9 +11234,15 @@ function MainModeApp() {
                           <span>{item.ok ? "✓" : "!"}</span>
 
                           <div>
-                            <strong>{item.ok ? item.filename || "downloaded audio" : "failed"}</strong>
+                            <strong>{item.ok ? item.filename || "downloaded audio" : "Download failed — retry?"}</strong>
                             <p>{item.ok ? item.url : item.error || item.url || "unknown error"}</p>
                           </div>
+
+                          {item.ok ? (
+                            <button className="softButton" onClick={() => openDownloadedSongInLibrary(item)}>open in library</button>
+                          ) : (
+                            <button className="softButton" onClick={() => void retryDownload(item.url || "")}>retry</button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -11204,7 +11509,7 @@ function MainModeApp() {
                       <button className="updateGhostButton" type="button" onClick={handleUpdateLater}>
                         okay
                       </button>
-                      <button className="updatePrimaryButton" type="button" onClick={updatePrompt.status === "downloaded" ? askUpdaterToInstall : askUpdaterToDownload}>
+                      <button className="updatePrimaryButton" type="button" onClick={askUpdaterToDownload}>
                         update
                       </button>
                       <button className="updateGhostButton updateLeaveAloneButton" type="button" onClick={leaveUpdateAlone}>
@@ -11226,7 +11531,7 @@ function MainModeApp() {
                           skip this version
                         </button>
                       )}
-                      <button className="updatePrimaryButton" type="button" onClick={updatePrompt.status === "downloaded" ? askUpdaterToInstall : askUpdaterToDownload}>
+                      <button className="updatePrimaryButton" type="button" onClick={askUpdaterToDownload}>
                         {updatePrompt.nagStage ? "update" : "download update"}
                       </button>
                     </>
