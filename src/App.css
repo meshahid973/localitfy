@@ -5423,7 +5423,7 @@ input[type="range"]{
    ----------------------------------------------------------------------
    This layer removes the heavy brand card/segmented controls and keeps the
    sidebar closer to Kopuz: large rows, plain icons, active rail, soft hover.
-   It also restores page motion without touching titlebar/player/mini-player.
+   It also restores page motion without touching titlebar/player.
 ====================================================================== */
 
 .app{
@@ -10262,4 +10262,53 @@ body::after,
 .app.viewSwitching .pageTransition{
   opacity: 1 !important;
   transform: translate3d(0,0,0) !important;
+}
+
+/* ========================================================================
+   localtify v0.3.1 — final public-build polish guard
+   Owner: App.css shell + popup only.
+   Keeps surfaces rounded, prevents popup list dots from colliding with text,
+   and stops sidebar hover from nudging the layout.
+======================================================================== */
+.app .navItem,
+.app .sidebar button,
+.app .sidebarNav button{
+  transform: translate3d(0,0,0) !important;
+  will-change: background-color, border-color, color, box-shadow !important;
+  transition: background-color 170ms ease, border-color 170ms ease, color 170ms ease, box-shadow 170ms ease, opacity 170ms ease !important;
+}
+
+.app .navItem:hover,
+.app .sidebar button:hover,
+.app .sidebarNav button:hover,
+.app .navItem:active{
+  transform: translate3d(0,0,0) !important;
+}
+
+.app .whatsNewCard ul,
+.app .updateCard ul,
+.app .updatePopup ul{
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.app .whatsNewCard li,
+.app .updateCard li,
+.app .updatePopup li{
+  position: relative !important;
+  min-height: 42px !important;
+  padding: 12px 14px 12px 44px !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+}
+
+.app .whatsNewCard li::before,
+.app .updateCard li::before,
+.app .updatePopup li::before{
+  left: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }

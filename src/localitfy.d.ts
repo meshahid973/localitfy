@@ -186,11 +186,6 @@ declare global {
       onAutoUpdate?: (callback: (payload: AutoUpdateEvent) => void) => () => void;
       onAutoUpdateEvent?: (callback: (payload: AutoUpdateEvent) => void) => () => void;
 
-      showMiniWindow: () => Promise<boolean>;
-      hideMiniWindow: () => Promise<boolean>;
-      updateMiniWindowState: (payload: any) => Promise<boolean>;
-      getMiniWindowState: () => Promise<any>;
-
       sendPlayerCommand: (command: any) => Promise<boolean>;
 
       minimizeWindow: () => Promise<boolean>;
@@ -205,8 +200,6 @@ declare global {
       openExternal?: (url: string) => Promise<{ ok: boolean; reason?: string }>;
 
       onDownloadProgress: (callback: (payload: LocalitfyDownloadProgressPayload) => void) => () => void;
-
-      onMiniState: (callback: (payload: any) => void) => () => void;
       onPlayerCommand: (callback: (payload: any) => void) => () => void;
     };
   }

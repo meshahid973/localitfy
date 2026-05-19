@@ -131,19 +131,7 @@ function restoreDatabaseFromOldUserDataIfNeeded() {
 }
 
 let mainWindow = null;
-let miniWindow = null;
 let lastAssignedCoverPath = "";
-
-let miniState = {
-  currentSong: null,
-  isPlaying: false,
-  currentTime: 0,
-  duration: 0,
-  volume: 0.75,
-  theme: "oled",
-  repeatMode: "all",
-  isShuffle: false
-};
 
 const UPDATE_CHECK_STARTUP_DELAY_MS = 2200;
 
@@ -1078,14 +1066,14 @@ function listSongsShaped() {
   return getSongs().map(shapeSong);
 }
 
-async function loadRenderer(win, mini = false) {
+async function loadRenderer(win) {
   if (isDev) {
-    await win.loadURL(`http://127.0.0.1:5173/${mini ? "?mini=1" : ""}`);
+    await win.loadURL("http://127.0.0.1:5173/");
     return;
   }
   const indexPath = path.join(__dirname, "../dist/index.html");
   console.log("[localitfy renderer path]", indexPath, "exists:", fs.existsSync(indexPath));
-  await win.loadFile(indexPath, mini ? { query: { mini: "1" } } : undefined);
+  await win.loadFile(indexPath);
 }
 
 function attachWindowDebug(win, label) {
@@ -1226,69 +1214,8 @@ function createWindow() {
   updateTaskbarButtons();
 
   mainWindow.on("closed", () => {
-    if (miniWindow && !miniWindow.isDestroyed()) miniWindow.close();
     mainWindow = null;
   });
-}
-
-function pushMiniState() {
-  if (!miniWindow || miniWindow.isDestroyed()) return;
-  miniWindow.webContents.send("mini:state", miniState);
-}
-
-function createMiniWindow() {
-  if (miniWindow && !miniWindow.isDestroyed()) {
-    miniWindow.show();
-    miniWindow.focus();
-    pushMiniState();
-    return miniWindow;
-  }
-
-  miniWindow = new BrowserWindow({
-    width: 360,
-    height: 540,
-    minWidth: 300,
-    minHeight: 420,
-    maxWidth: 560,
-    maxHeight: 780,
-    title: `${APP_NAME} mini player`,
-    icon: loadAppIcon(),
-    frame: false,
-    backgroundColor: "#050505",
-    alwaysOnTop: true,
-    resizable: true,
-    fullscreenable: false,
-    autoHideMenuBar: true,
-    show: false,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      webSecurity: false
-    }
-  });
-
-  attachWindowDebug(miniWindow, "mini");
-  loadRenderer(miniWindow, true).catch((e) => {
-    console.log("[localitfy mini load error]", e?.stack || e?.message || e);
-  });
-
-  miniWindow.once("ready-to-show", () => {
-    if (miniWindow && !miniWindow.isDestroyed()) {
-      miniWindow.show();
-      pushMiniState();
-    }
-  });
-
-  setTimeout(() => {
-    if (miniWindow && !miniWindow.isDestroyed() && !miniWindow.isVisible()) {
-      miniWindow.show();
-      pushMiniState();
-    }
-  }, 1500);
-
-  miniWindow.on("closed", () => { miniWindow = null; });
-  return miniWindow;
 }
 
 async function openImportDialog(senderWindow) {
@@ -1618,22 +1545,6 @@ app.whenReady().then(() => {
   ipcMain.handle("discord:clear", async () => {
     await clearDiscordActivity().catch(() => undefined);
     return getDiscordStatus();
-  });
-
-  // Mini window
-  ipcMain.handle("mini:show", async () => { createMiniWindow(); return true; });
-  ipcMain.handle("mini:hide", async () => {
-    if (miniWindow && !miniWindow.isDestroyed()) miniWindow.close();
-    miniWindow = null;
-    return true;
-  });
-  ipcMain.handle("mini:get-state", async () => miniState);
-  ipcMain.handle("mini:update-state", async (_event, payload) => {
-    if (payload && typeof payload === "object") {
-      miniState = { ...miniState, ...payload };
-      pushMiniState();
-    }
-    return true;
   });
 
   ipcMain.handle("player:command", async (_event, command) => {

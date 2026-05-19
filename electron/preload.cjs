@@ -43,11 +43,6 @@ contextBridge.exposeInMainWorld("localitfy", {
   backupDatabase: () => ipcRenderer.invoke("db:backup"),
   repairDatabase: () => ipcRenderer.invoke("db:repair"),
 
-  showMiniWindow: () => ipcRenderer.invoke("mini:show"),
-  hideMiniWindow: () => ipcRenderer.invoke("mini:hide"),
-  updateMiniWindowState: (payload) => ipcRenderer.invoke("mini:update-state", payload),
-  getMiniWindowState: () => ipcRenderer.invoke("mini:get-state"),
-
   sendPlayerCommand: (command) => ipcRenderer.invoke("player:command", command),
 
   updateNativeMediaState: (payload) => ipcRenderer.invoke("localitfy:native-media-state", payload),
@@ -55,7 +50,6 @@ contextBridge.exposeInMainWorld("localitfy", {
   setStartWithWindows: (enabled) => ipcRenderer.invoke("localitfy:set-start-with-windows", { enabled }),
   getStartWithWindows: () => ipcRenderer.invoke("localitfy:get-start-with-windows"),
   getNativeMediaStatus: () => ipcRenderer.invoke("localitfy:native-media-status"),
-  openExternal: (url) => ipcRenderer.invoke("localitfy:open-external", url),
 
   minimizeWindow: () => ipcRenderer.invoke("window:minimize"),
   toggleMaximizeWindow: () => ipcRenderer.invoke("window:toggle-maximize"),
@@ -80,15 +74,6 @@ contextBridge.exposeInMainWorld("localitfy", {
 
     return () => {
       ipcRenderer.removeListener("download:progress", handler);
-    };
-  },
-
-  onMiniState: (callback) => {
-    const handler = (_event, payload) => callback(payload);
-    ipcRenderer.on("mini:state", handler);
-
-    return () => {
-      ipcRenderer.removeListener("mini:state", handler);
     };
   },
 

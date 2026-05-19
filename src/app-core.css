@@ -2,7 +2,7 @@
 /* localtify priority ownership cleanup: player/progress rules now live in player.css. */
 /* localtify App.css — main layout/components/motion.
    Theme variables, theme gallery, and theme-only overrides now live in themes.css.
-   Detached mini-player styles live in mini-player.css; settings modal styles live in settings.css. */
+   Settings modal styles live in settings.css. */
 
 :root{
   --panel: rgba(255, 255, 255, 0.035);

@@ -62,7 +62,6 @@ import "./home.css";
 import "./motion.css";
 import "./effects.css";
 import "./player.css";
-import "./mini-player.css";
 
 type Song = {
   id: string;
@@ -547,7 +546,6 @@ type Settings = {
   reducedMotion: boolean;
   showHeroBadge: boolean;
   simpleMode: boolean;
-  showMiniPlayer: boolean;
   lastSongId: string;
 
   discordEnabled: boolean;
@@ -595,17 +593,6 @@ type CustomThemePreset = {
   createdAt?: number;
 };
 
-
-type MiniState = {
-  currentSong: Song | null;
-  isPlaying: boolean;
-  currentTime: number;
-  duration: number;
-  volume: number;
-  theme: ThemeId;
-  repeatMode: "off" | "one" | "all";
-  isShuffle: boolean;
-};
 
 type DownloadResult = {
   ok: boolean;
@@ -818,9 +805,8 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.1 keeps the app cleaner by removing the mini player option from Settings",
-  "Start with Windows is enabled by default for new installs and now saves more reliably",
-  "0.3.1 adds a small diagnostics area in Settings → About so bug reports are easier to understand",
+  "0.3.1 removes the old compact-window path so the app stays simpler and lighter",
+  "FLAC files can be imported alongside MP3, WAV, OGG, M4A, and AAC",
   "You can copy app info with the version, song count, playlist count, active theme, Discord status, and startup status",
   "Animations and button styles are smoother and more consistent without changing the main localtify design",
   "Sidebar hover, song row hover, popup motion, card corners, and theme switching have been cleaned up",
@@ -849,10 +835,8 @@ const V013_RELEASE_DEFAULTS: Partial<Settings> = {
   reducedMotion: false,
   showHeroBadge: true,
   simpleMode: false,
-  showMiniPlayer: false
 };
 
-const IS_MINI_MODE = new URLSearchParams(window.location.search).get("mini") === "1";
 
 const themes = [
   { id: "mint", name: "mint", note: "fresh soft glow", mood: "clean + calm", emoji: "🌿" },
@@ -1279,7 +1263,6 @@ const defaultSettings: Settings = {
   reducedMotion: false,
   showHeroBadge: true,
   simpleMode: false,
-  showMiniPlayer: false,
   lastSongId: "",
 
   discordEnabled: true,
@@ -2549,113 +2532,6 @@ function buildDiscordPreview({
   };
 }
 
-function MiniModeApp() {
-  const [state, setState] = useState<MiniState>({
-    currentSong: null,
-    isPlaying: false,
-    currentTime: 0,
-    duration: 0,
-    volume: 0.75,
-    theme: "mint",
-    repeatMode: "all",
-    isShuffle: false
-  });
-
-  useEffect(() => {
-    let mounted = true;
-
-    window.localitfy.getMiniWindowState().then((payload) => {
-      if (!mounted) return;
-      setState((old) => ({ ...old, ...(payload as MiniState) }));
-    });
-
-    const off = window.localitfy.onMiniState((payload) => {
-      setState((old) => ({ ...old, ...(payload as MiniState) }));
-    });
-
-    return () => {
-      mounted = false;
-      off();
-    };
-  }, []);
-
-  const currentSong = state.currentSong;
-  const progress = state.duration > 0 ? Math.min(100, (state.currentTime / state.duration) * 100) : 0;
-  const ambientStyle = useMemo(() => getSongAmbientStyle(currentSong), [currentSong]);
-
-
-  return (
-    <main className="miniDetachedRoot" data-theme={state.theme} data-playing={state.isPlaying ? "on" : "off"}>
-      <TitleBar mini />
-
-      <section className="miniDetachedCard ambientSurface" style={ambientStyle}>
-        <div className="miniDetachedBadge">detached player</div>
-
-        <Cover song={currentSong} className="miniDetachedArt" />
-
-        <div className="miniDetachedMeta">
-          <strong>{currentSong ? prettyTitle(currentSong.title, 6) : "nothing playing"}</strong>
-          <p>{currentSong ? prettyMeta(currentSong.artist) : "idle"}</p>
-        </div>
-
-        <div className="miniDetachedProgress">
-          <span>{formatTime(state.currentTime)}</span>
-
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value={progress}
-            style={{ "--range-progress": `${clamp(progress, 0, 100)}%` } as CSSProperties}
-            aria-label="detached player progress"
-            onChange={(event) =>
-              window.localitfy.sendPlayerCommand({
-                type: "seekPercent",
-                value: Number(event.currentTarget.value)
-              })
-            }
-          />
-
-          <span>{formatTime(state.duration)}</span>
-        </div>
-
-        <div className="miniDetachedControls">
-          <button onClick={() => window.localitfy.sendPlayerCommand({ type: "shuffle" })}>
-            {state.isShuffle ? "↭*" : "↭"}
-          </button>
-
-          <button onClick={() => window.localitfy.sendPlayerCommand({ type: "prev" })}>⏮</button>
-
-          <button className="main" onClick={() => window.localitfy.sendPlayerCommand({ type: "toggle" })}>
-            {state.isPlaying ? "⏸" : "▶"}
-          </button>
-
-          <button onClick={() => window.localitfy.sendPlayerCommand({ type: "next" })}>⏭</button>
-        </div>
-
-        <div className="miniDetachedVolume">
-          <span>vol</span>
-
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value={Math.round(state.volume * 100)}
-            onChange={(event) =>
-              window.localitfy.sendPlayerCommand({
-                type: "volume",
-                value: Number(event.currentTarget.value) / 100
-              })
-            }
-          />
-        </div>
-      </section>
-    </main>
-  );
-}
-
 function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
@@ -2673,7 +2549,6 @@ function MainModeApp() {
   const positionSaveRef = useRef(0);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
   const bootedRef = useRef(false);
-  const miniWindowVisibleRef = useRef(false);
   const lastQueueHistoryRef = useRef("");
   const toastTimerRef = useRef<number | null>(null);
   const importOverlayTimerRef = useRef<number | null>(null);
@@ -2981,8 +2856,8 @@ function MainModeApp() {
   const settingsSearchResultLabel = settingsSearchQuery
     ? visibleSettingsTabs.length
       ? `showing ${visibleSettingsTabs.length} matching section${visibleSettingsTabs.length === 1 ? "" : "s"}`
-      : "no exact section found — Search for settings such as Discord, theme, cover, update, or volume."
-    : "Search for settings such as Discord, theme, cover, update, or volume.";
+      : "no exact section found — Search for settings such as Discord, theme, cover, update, volume."
+    : "Search for settings such as Discord, theme, cover, update, volume.";
 
   function handleSettingsSearchInput(value: string) {
     setSettingsSearch(value);
@@ -5561,12 +5436,11 @@ function MainModeApp() {
 
       const storedSettings = (payload.settings || {}) as Partial<Settings>;
       const shouldApplyV013Defaults = window.localStorage.getItem(V013_DEFAULTS_KEY) !== "true";
-      const shouldApplyStartWithWindowsDefault = window.localStorage.getItem(START_WITH_WINDOWS_DEFAULT_KEY) !== "true";
+      const shouldApplyStartWithWindowsDefault = typeof storedSettings.startWithWindows === "undefined";
       const nextSettings: Settings = {
         ...defaultSettings,
         ...storedSettings,
-        ...(shouldApplyV013Defaults ? V013_RELEASE_DEFAULTS : {}),
-        showMiniPlayer: false
+        ...(shouldApplyV013Defaults ? V013_RELEASE_DEFAULTS : {})
       };
 
       if (shouldApplyStartWithWindowsDefault) {
@@ -5585,13 +5459,11 @@ function MainModeApp() {
       const shouldPersistBootSettings =
         shouldApplyV013Defaults ||
         shouldApplyStartWithWindowsDefault ||
-        storedSettings.showMiniPlayer === true ||
         typeof storedSettings.startWithWindows === "undefined";
 
       if (shouldPersistBootSettings) {
         if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
         if (shouldApplyStartWithWindowsDefault) window.localStorage.setItem(START_WITH_WINDOWS_DEFAULT_KEY, "true");
-        if (storedSettings.showMiniPlayer === true) window.localitfy.hideMiniWindow().catch(() => undefined);
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
       }
 
@@ -5824,9 +5696,8 @@ function MainModeApp() {
   }, [settings.minimizeToTray]);
 
   useEffect(() => {
-    if (!ready) return;
     window.localitfy.setStartWithWindows?.(settings.startWithWindows).catch(() => undefined);
-  }, [ready, settings.startWithWindows]);
+  }, [settings.startWithWindows]);
 
   useEffect(() => {
     window.localitfy.updateNativeMediaState?.({
@@ -5896,8 +5767,6 @@ function MainModeApp() {
       nextAudioRef.current = null;
 
       window.localitfy.clearDiscordActivity().catch(() => undefined);
-      miniWindowVisibleRef.current = false;
-      window.localitfy.hideMiniWindow().catch(() => undefined);
     };
   }, []);
 
@@ -6136,60 +6005,6 @@ function MainModeApp() {
     pixelArtAssets.length
   ]);
 
-  useEffect(() => {
-    if (!ready) return;
-
-    if (!settings.showMiniPlayer) {
-      if (miniWindowVisibleRef.current) {
-        miniWindowVisibleRef.current = false;
-        window.localitfy.hideMiniWindow().catch(() => undefined);
-      }
-      return;
-    }
-
-    if (!miniWindowVisibleRef.current) {
-      miniWindowVisibleRef.current = true;
-      window.localitfy.showMiniWindow().catch(() => {
-        miniWindowVisibleRef.current = false;
-      });
-    }
-
-    let lastMiniPayloadKey = "";
-
-    const pushState = () => {
-      const payload = {
-        currentSong: songRef.current,
-        isPlaying: playingRef.current,
-        currentTime: timeRef.current,
-        duration: durationRef.current || songRef.current?.duration || 0,
-        volume: volumeRef.current,
-        theme: effectiveTheme,
-        repeatMode,
-        isShuffle
-      };
-
-      const payloadKey = [
-        payload.currentSong?.id || "idle",
-        payload.isPlaying ? "playing" : "paused",
-        Math.floor(payload.currentTime || 0),
-        Math.floor(payload.duration || 0),
-        Math.round((payload.volume || 0) * 100),
-        payload.theme,
-        payload.repeatMode,
-        payload.isShuffle ? "shuffle" : "ordered"
-      ].join("|");
-
-      if (payloadKey === lastMiniPayloadKey) return;
-      lastMiniPayloadKey = payloadKey;
-
-      window.localitfy.updateMiniWindowState(payload).catch(() => undefined);
-    };
-
-    pushState();
-    const timer = window.setInterval(pushState, 900);
-
-    return () => window.clearInterval(timer);
-  }, [ready, settings.showMiniPlayer, effectiveTheme, repeatMode, isShuffle]);
 
   useEffect(() => {
     if (sleepTimerRef.current !== null) {
@@ -6580,13 +6395,6 @@ function MainModeApp() {
       next.simpleMode = false;
     }
 
-    if (key === "showMiniPlayer") {
-      // Mini player is removed from public settings in v0.3.1. Keep old saved installs disabled.
-      next.showMiniPlayer = false;
-      miniWindowVisibleRef.current = false;
-      window.localitfy.hideMiniWindow?.().catch(() => undefined);
-    }
-
     await persistSettings(next, debounce);
 
     if (!debounce && bootedRef.current) {
@@ -6636,12 +6444,6 @@ function MainModeApp() {
       Object.prototype.hasOwnProperty.call(patch, "customThemeProgress")
     ) {
       kickThemeSettle();
-    }
-
-    if (Object.prototype.hasOwnProperty.call(patch, "showMiniPlayer")) {
-      next.showMiniPlayer = false;
-      miniWindowVisibleRef.current = false;
-      window.localitfy.hideMiniWindow?.().catch(() => undefined);
     }
 
     await persistSettings(next, debounce);
@@ -9040,7 +8842,7 @@ function MainModeApp() {
     if (!list.length) {
       return (
         <div className="emptyState">
-          <strong>nothing here yet</strong>
+          <strong>import songs to fill this area</strong>
           <p>import some music and this area will wake up.</p>
         </div>
       );
@@ -9103,7 +8905,7 @@ function MainModeApp() {
     if (!list.length) {
       return (
         <div className="emptyState homeAlbumEmpty">
-          <strong>nothing here yet</strong>
+          <strong>import songs to fill this area</strong>
           <p>import some music and this expanded area turns into a proper home library.</p>
         </div>
       );
@@ -9465,7 +9267,7 @@ function MainModeApp() {
         ) : (
           <div className="settingsNoSearchResultsV027">
             <strong>Nothing matched</strong>
-            <span>Try words like discord, privacy, theme, cover, update, or volume.</span>
+            <span>Try words like discord, privacy, theme, cover, update, volume.</span>
           </div>
         )}
       </aside>
@@ -10479,7 +10281,7 @@ function MainModeApp() {
                       ) : (
                         <div className="emptyState homeShelfEmpty">
                           <strong>no songs yet</strong>
-                          <p>import music and this shelf fills up automatically.</p>
+                          <p>Import songs to start building your local library.</p>
                         </div>
                       )}
                     </div>
@@ -11727,7 +11529,7 @@ function MainModeApp() {
 }
 
 export default function App() {
-  return IS_MINI_MODE ? <MiniModeApp /> : <MainModeApp />;
+  return <MainModeApp />;
 }
 
 

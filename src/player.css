@@ -2334,3 +2334,25 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
   opacity: 1 !important;
   transform: scale(1) !important;
 }
+
+/* ========================================================================
+   localtify v0.3.1 — reliable volume drag hitbox
+   Owner: player.css. Keeps the same position, only improves pointer capture.
+======================================================================== */
+.playerBar .volumeWrap,
+.playerBar .volumeWrap *{
+  -webkit-app-region: no-drag !important;
+}
+
+.playerBar .volumeWrap input[type="range"]{
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.playerBar .volumeWrap::before,
+.playerBar .volumeWrap::after{
+  pointer-events: none !important;
+}

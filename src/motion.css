@@ -1182,3 +1182,32 @@ body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .play
   0%,100%{ transform: scale(1); }
   48%{ transform: scale(1.04); }
 }
+
+/* ========================================================================
+   localtify v0.3.1 — smooth motion cleanup
+   Owner: motion.css only. No tilt, no bounce, no layout movement.
+======================================================================== */
+.navItem,
+.songRow,
+.libraryTrackRow,
+.trackRow,
+.songCard,
+.coverCard,
+.settingsCard,
+.settingSwitchCard,
+.whatsNewCard,
+.updateCard{
+  transition-timing-function: cubic-bezier(.2,.8,.2,1) !important;
+}
+
+.navItem:hover,
+.songRow:hover,
+.libraryTrackRow:hover,
+.trackRow:hover,
+.songCard:hover,
+.coverCard:hover,
+.settingsCard:hover,
+.settingSwitchCard:hover{
+  rotate: 0deg !important;
+  filter: none !important;
+}

@@ -3,7 +3,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const SCHEMA_VERSION = 10;
+const SCHEMA_VERSION = 11;
 const BACKUP_KEEP_LIMIT = 8;
 
 let db = null;
@@ -482,7 +482,16 @@ function migrateSettingsTable(database) {
     return [];
   }
 
-  return addMissingColumns(database, "settings", SETTINGS_COLUMNS);
+  const addedColumns = addMissingColumns(database, "settings", SETTINGS_COLUMNS);
+
+  // v0.3.1 cleanup: remove an old saved setting that no longer has UI.
+  try {
+    database.prepare("DELETE FROM settings WHERE key = ?").run("showMiniPlayer");
+  } catch {
+    // non-critical cleanup only
+  }
+
+  return addedColumns;
 }
 
 function migratePlaylistsTables(database) {
