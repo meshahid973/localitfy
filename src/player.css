@@ -2356,3 +2356,61 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 .playerBar .volumeWrap::after{
   pointer-events: none !important;
 }
+/* ==========================================================================
+   localtify v0.3.2 — transport icon visual centering only
+   --------------------------------------------------------------------------
+   This fixes the icon the screenshot points at: the previous/next transport
+   glyphs inside the bottom player.
+
+   It intentionally does NOT move:
+   - .playerBar
+   - .playerCenter
+   - .controlRow
+   - .progressRow
+   - the play button row
+========================================================================== */
+
+.playerBar .controlRow > .circleButton{
+  display: inline-grid !important;
+  place-items: center !important;
+  justify-content: center !important;
+  align-content: center !important;
+  line-height: 0 !important;
+  text-align: center !important;
+}
+
+.playerBar .controlRow > .circleButton > .playerControlIcon,
+.playerBar .controlRow > .circleButton > svg{
+  position: static !important;
+  display: block !important;
+  margin: 0 auto !important;
+  flex: 0 0 auto !important;
+  inset: auto !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+  transform-box: fill-box !important;
+  transform-origin: center center !important;
+  pointer-events: none !important;
+}
+
+/* Lucide skip icons are optically unbalanced beside a filled 46px play circle.
+   These tiny mirrored nudges fix the visible centering without moving layout. */
+.playerBar .controlRow > .circleButton[aria-label="previous song"] > .playerControlIcon,
+.playerBar .controlRow > .circleButton[aria-label="previous song"] > svg{
+  transform: translateX(-2px) !important;
+}
+
+.playerBar .controlRow > .circleButton[aria-label="next song"] > .playerControlIcon,
+.playerBar .controlRow > .circleButton[aria-label="next song"] > svg{
+  transform: translateX(2px) !important;
+}
+
+/* Keep the filled play/pause glyph centered in its own circle. */
+.playerBar .controlRow > .circleButton.main > .playerControlIcon,
+.playerBar .controlRow > .circleButton.main > svg{
+  transform: none !important;
+}
+
+.playerBar .controlRow > .circleButton.main > .playIcon{
+  transform: translateX(1px) !important;
+}
