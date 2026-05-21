@@ -10458,3 +10458,123 @@ body.localtifyBackgroundMode .ambientSurface,
   content-visibility: auto;
   contain-intrinsic-size: 320px;
 }
+
+/* ========================================================================
+   localtify v0.3.2 — titlebar button centering repair
+   Owner: App.css final override because older App.css titlebar patches load
+   after app-core.css.
+
+   Keeps the custom Electron titlebar, but centers the minimize/maximize/close
+   glyphs properly inside their hitboxes.
+======================================================================== */
+.titleBar{
+  height: 36px !important;
+  min-height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.titleDrag{
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.windowButtons{
+  height: 36px !important;
+  min-height: 36px !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  -webkit-app-region: no-drag !important;
+}
+
+.windowButtons button{
+  width: 46px !important;
+  height: 36px !important;
+  min-width: 46px !important;
+  min-height: 36px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  font-family: "Segoe UI Symbol", "Segoe UI", system-ui, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  transform: none !important;
+  -webkit-app-region: no-drag !important;
+}
+
+.windowButtons button[aria-label="Minimize window"]{
+  font-size: 15px !important;
+  padding-bottom: 2px !important;
+}
+
+.windowButtons button[aria-label="Maximize window"]{
+  font-size: 12px !important;
+  padding-bottom: 1px !important;
+}
+
+.windowButtons .closeWin{
+  font-size: 16px !important;
+  padding-bottom: 1px !important;
+}
+
+.windowButtons button:active{
+  transform: none !important;
+}
+
+
+/* ========================================================================
+   localtify v0.3.2 — theme-aware titlebar surface
+   ------------------------------------------------------------------------
+   Fixes the dead black strip at the top of the app.
+   Scoped to the Electron titlebar only; player/layout/progress are untouched.
+======================================================================== */
+.app .titleBar,
+.app[data-theme] .titleBar,
+.app[data-custom-theme="true"] .titleBar{
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--bg, #050505) 74%, var(--accent, #ff65df) 18%),
+      color-mix(in oklab, var(--bg-2, var(--bg, #050505)) 68%, var(--accent, #ff65df) 22%) 48%,
+      color-mix(in oklab, var(--bg, #050505) 76%, var(--progress, var(--accent, #ff65df)) 16%)
+    ) !important;
+  border-bottom: 1px solid color-mix(in oklab, var(--accent, #ff65df) 36%, rgba(255,255,255,0.07)) !important;
+  box-shadow:
+    inset 0 -1px 0 rgba(var(--accent-rgb, 255, 101, 223), 0.10),
+    0 1px 18px rgba(var(--accent-rgb, 255, 101, 223), 0.08) !important;
+  backdrop-filter: blur(18px) saturate(132%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(132%) !important;
+}
+
+.app .titleDrag{
+  color: color-mix(in oklab, var(--text, #ffffff) 76%, var(--accent, #ff65df) 14%) !important;
+}
+
+.app .titleLogo{
+  color: var(--accent, #ff65df) !important;
+  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb, 255, 101, 223), 0.22)) !important;
+}
+
+.app .windowButtons button{
+  color: color-mix(in oklab, var(--text, #ffffff) 64%, var(--accent, #ff65df) 12%) !important;
+  background: transparent !important;
+}
+
+.app .windowButtons button:hover{
+  color: #ffffff !important;
+  background: color-mix(in oklab, var(--accent, #ff65df) 20%, rgba(255,255,255,0.06)) !important;
+}
+
+.app .windowButtons .closeWin:hover{
+  color: #ffffff !important;
+  background: color-mix(in oklab, #e54868 74%, var(--accent, #ff65df) 18%) !important;
+}
