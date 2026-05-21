@@ -748,7 +748,7 @@ function updateNagMessage(prompt: UpdatePromptState) {
   return prompt.error || prompt.message || "localtify update ready. Your library will be backed up before anything installs.";
 }
 
-const APP_VERSION = "0.3.1";
+const APP_VERSION = "0.3.2";
 const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 const INITIAL_LIBRARY_RENDER_LIMIT = 60;
 const LIBRARY_RENDER_BATCH_SIZE = 60;
@@ -831,11 +831,11 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.1 improves downloads with a queue, progress, speed, ETA, cancel, retry, and open-in-library actions",
-  "Download settings now include audio quality, MP3/FLAC/WAV format, auto-add, title cleanup, and download folder control",
-  "FLAC files can be imported alongside MP3, WAV, OGG, M4A, and AAC",
-  "The old mini-player path has been removed so localtify stays simpler and lighter",
-  "Animations, buttons, sidebar hover, song rows, popup motion, card corners, and theme switching are cleaner",
+  "0.3.2 makes the custom theme color codes visible in settings so you can copy, paste, and tweak exact hex colors",
+  "Appearance settings are better aligned, especially the custom theme editor and color rows",
+  "The theme editor is cleaner on smaller windows and no longer crushes the color controls into weird tiny cards",
+  "Download and import polish from 0.3.1 stays included: queue progress, speed, ETA, cancel, retry, and open-in-library actions",
+  "Animations and hover states stay smooth without adding tilt or noisy UI text",
   "The app stays focused on local music data and keeps your personal library details private"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
@@ -1346,6 +1346,17 @@ function normalizeHexColor(value: string, fallback = "#8dffce") {
   }
 
   return /^#[0-9a-f]{6}$/i.test(withHash) ? withHash.toLowerCase() : fallback;
+}
+
+function normalizeHexInputDraft(value: string) {
+  const raw = String(value || "").trim().replace(/[^0-9a-f#]/gi, "");
+  const withoutHashes = raw.replace(/#/g, "").slice(0, 6);
+  return `#${withoutHashes}`;
+}
+
+function isCompleteHexColorInput(value: string) {
+  const raw = String(value || "").trim();
+  return /^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw);
 }
 
 function normalizeCoverColorSyncMode(value: unknown): CoverColorSyncMode {
@@ -2664,6 +2675,7 @@ function MainModeApp() {
   const deferredSettingsSearch = useDeferredValue(settingsSearch);
   const [isViewSwitching, setIsViewSwitching] = useState(false);
   const [customThemeName, setCustomThemeName] = useState("My Custom Theme");
+  const [customThemeHexDrafts, setCustomThemeHexDrafts] = useState<Partial<Record<CustomThemeColorKey, string>>>({});
   const [savedCustomThemes, setSavedCustomThemes] = useState<CustomThemePreset[]>(() => readSavedCustomThemePresets());
   const [onboardingOpen, setOnboardingOpen] = useState(() => {
     try {
@@ -3663,7 +3675,7 @@ function MainModeApp() {
     }, delay);
   }
 
-  function stageCustomThemeColor(key: CustomThemeColorKey, value: string) {
+  function getCustomThemeFallbackColor(key: CustomThemeColorKey) {
     const fallbackByKey: Record<CustomThemeColorKey, string> = {
       customThemeColor: "#8dffce",
       customThemeColor2: customThemeColor,
@@ -3674,8 +3686,37 @@ function MainModeApp() {
       customThemeProgress: customThemeColor
     };
 
-    const safeColor = normalizeHexColor(value, fallbackByKey[key]);
+    return fallbackByKey[key];
+  }
+
+  function stageCustomThemeColor(key: CustomThemeColorKey, value: string) {
+    const safeColor = normalizeHexColor(value, getCustomThemeFallbackColor(key));
     stageCustomThemePatch({ [key]: safeColor } as Partial<Settings>);
+  }
+
+  function handleCustomThemeNativeColor(key: CustomThemeColorKey, value: string) {
+    const safeColor = normalizeHexColor(value, getCustomThemeFallbackColor(key));
+    setCustomThemeHexDrafts((old) => ({ ...old, [key]: safeColor }));
+    stageCustomThemeColor(key, safeColor);
+  }
+
+  function handleCustomThemeHexDraftChange(key: CustomThemeColorKey, value: string) {
+    const draft = normalizeHexInputDraft(value);
+    setCustomThemeHexDrafts((old) => ({ ...old, [key]: draft }));
+
+    if (isCompleteHexColorInput(draft)) {
+      stageCustomThemeColor(key, draft);
+    }
+  }
+
+  function commitCustomThemeHexDraft(key: CustomThemeColorKey, value: string, fallback: string) {
+    const safeColor = normalizeHexColor(value, fallback);
+    setCustomThemeHexDrafts((old) => {
+      const next = { ...old };
+      delete next[key];
+      return next;
+    });
+    stageCustomThemeColor(key, safeColor);
   }
 
   function commitCustomThemePreview(color: string, delay = CUSTOM_THEME_COMMIT_DELAY_MS) {
@@ -3692,6 +3733,7 @@ function MainModeApp() {
   }
 
   function applyCustomThemePreset(preset: CustomThemePreset) {
+    setCustomThemeHexDrafts({});
     setCustomThemeName(preset.name || "My Custom Theme");
     stageCustomThemePatch(preset.colors, 0);
   }
@@ -9595,21 +9637,44 @@ function MainModeApp() {
               ) : null}
 
               <div className="customThemeTokenGridV027">
-                {customThemeTokens.map((token) => (
-                  <label className="customThemeTokenV027" key={token.key}>
-                    <span className="customThemeColorPreviewV027" style={{ background: token.value }} aria-hidden="true" />
-                    <strong>{token.label}</strong>
-                    <small>{token.help}</small>
-                    <input
-                      className="customThemeNativeColorInputV027"
-                      type="color"
-                      value={token.value}
-                      onInput={(event) => stageCustomThemeColor(token.key, event.currentTarget.value)}
-                      onChange={(event) => stageCustomThemeColor(token.key, event.currentTarget.value)}
-                      aria-label={`${token.label} color`}
-                    />
-                  </label>
-                ))}
+                {customThemeTokens.map((token) => {
+                  const hexDraft = customThemeHexDrafts[token.key] ?? token.value;
+
+                  return (
+                    <div className="customThemeTokenV027" key={token.key}>
+                      <label className="customThemeColorPickerV032" title={`Pick ${token.label.toLowerCase()} color`}>
+                        <span className="customThemeColorPreviewV027" style={{ background: token.value }} aria-hidden="true" />
+                        <input
+                          className="customThemeNativeColorInputV027"
+                          type="color"
+                          value={token.value}
+                          onInput={(event) => handleCustomThemeNativeColor(token.key, event.currentTarget.value)}
+                          onChange={(event) => handleCustomThemeNativeColor(token.key, event.currentTarget.value)}
+                          aria-label={`${token.label} color picker`}
+                        />
+                      </label>
+                      <strong>{token.label}</strong>
+                      <small>{token.help}</small>
+                      <input
+                        className="customThemeHexInputV032"
+                        type="text"
+                        inputMode="text"
+                        spellCheck={false}
+                        autoCapitalize="off"
+                        maxLength={7}
+                        value={hexDraft}
+                        onChange={(event) => handleCustomThemeHexDraftChange(token.key, event.currentTarget.value)}
+                        onBlur={(event) => commitCustomThemeHexDraft(token.key, event.currentTarget.value, token.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.currentTarget.blur();
+                          }
+                        }}
+                        aria-label={`${token.label} hex color code`}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
