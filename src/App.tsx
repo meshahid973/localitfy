@@ -628,6 +628,7 @@ type DownloadQueueItem = {
   message: string;
   speed?: string | null;
   eta?: string | null;
+  filePath?: string;
   filename?: string;
   error?: string;
 };
@@ -717,39 +718,6 @@ function updateWasLeftAlone(version: string) {
   }
 }
 
-function updateNagTitle(prompt: UpdatePromptState) {
-  const stage = prompt.nagStage || 0;
-
-  if (stage === 1) return "are you seriously not going to update???";
-  if (stage === 2) return "come on, you could already be updated";
-  if (stage === 3) return "okay, final update reminder";
-
-  if (prompt.status === "downloaded") return "restart to finish update";
-  if (prompt.status === "downloading") return "downloading update";
-  if (prompt.status === "latest") return "already up to date";
-  if (prompt.status === "error") return "could not check updates";
-  if (prompt.status === "dev") return "installed app required";
-  if (prompt.status === "checking") return "checking for updates";
-  return "localtify update ready";
-}
-
-function updateNagMessage(prompt: UpdatePromptState) {
-  const stage = prompt.nagStage || 0;
-
-  if (stage === 1) {
-    return "The update is still sitting here. Your library stays safe, and the install only happens when you press update.";
-  }
-
-  if (stage === 2) {
-    return "By now you could already be on the latest version. Tiny dramatic reminder, but the choice is still yours.";
-  }
-
-  if (stage === 3) {
-    return "I made a dramatic update reminder. Update now, or press LEAVE ME ALONE and localtify will stop asking for this version.";
-  }
-
-  return prompt.error || prompt.message || "localtify update ready. Your library will be backed up before anything installs.";
-}
 
 
 function updateRibbonTitle(prompt: UpdatePromptState) {
@@ -2175,9 +2143,6 @@ function getSongAmbientSource(song?: Song | null) {
   return stableFallback ? pixelArtUrl(stableFallback.file) : "";
 }
 
-function getSongAmbientStyle(song?: Song | null): CSSProperties | undefined {
-  return getAmbientStyle(getSongAmbientSource(song));
-}
 
 type CoverAverageStyle = CSSProperties & {
   "--cover-rgb"?: string;
@@ -4897,7 +4862,7 @@ function MainModeApp() {
     [volumeDraft]
   );
   const ambientSource = useMemo(() => getSongAmbientSource(currentSong), [currentSong]);
-  const coverAverageStyle = useCoverAverageStyle(ambientSource, effectiveAmbient && effectiveCoverColorSyncMode !== "off");
+  const coverAverageStyle = useCoverAverageStyle(ambientSource, effectiveAmbient);
   const ambientStyle = useMemo(() => {
     const sourceStyle = getAmbientStyle(ambientSource) ?? {};
     return { ...sourceStyle, ...coverAverageStyle } as CSSProperties;
@@ -5671,20 +5636,6 @@ function MainModeApp() {
     setStatusText("update reminder snoozed");
   }
 
-  function leaveUpdateAlone() {
-    const version = updatePrompt.version || updateNagVersionRef.current || "latest";
-
-    try {
-      window.localStorage.setItem(updateLeaveAloneKey(version), "1");
-    } catch {
-      // ignore localStorage errors
-    }
-
-    clearUpdateNagTimer();
-    setUpdatePrompt(defaultUpdatePrompt);
-    setStatusText("update reminder muted");
-    showAppToast("update reminder muted for this version", "info");
-  }
 
   function skipAvailableUpdate() {
     handleUpdateLater();
@@ -9675,7 +9626,7 @@ function MainModeApp() {
   }
 
 
-  function renderSongRows(list: Song[], className: string) {
+  function renderSongRows(list: Song[], className = "songList fullList") {
     return (
       <VirtualSongRows
         list={list}
@@ -11435,7 +11386,7 @@ function MainModeApp() {
                   onDragLeave={handleLibraryAreaDragLeave}
                   onDrop={handleLibraryAreaDrop}
                 >
-                  {visibleSongs.length ? renderSongRows(visibleSongs) : (
+                  {visibleSongs.length ? renderSongRows(visibleSongs, "songList fullList libraryFullListV025") : (
                     <div className="emptyState">
                       {view === "liked" ? "Like a song and it will show up here." : "Import songs to fill your library."}
                     </div>
