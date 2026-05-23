@@ -10578,3 +10578,1112 @@ body.localtifyBackgroundMode .ambientSurface,
   color: #ffffff !important;
   background: color-mix(in oklab, #e54868 74%, var(--accent, #ff65df) 18%) !important;
 }
+
+
+
+/* ========================================================================
+   localtify v0.3.3/v97 — compact acrylic update notice
+   Owner: App.css / update prompt only.
+   Keeps Settings readable and never touches player.css.
+======================================================================== */
+.app .updateToastLayer,
+.updateToastLayer{
+  position: fixed !important;
+  inset: 50px 22px auto auto !important;
+  z-index: 2400 !important;
+  width: min(520px, calc(100vw - var(--sidebar-width, 249px) - 56px)) !important;
+  min-height: 0 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+  padding: 0 !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: none !important;
+}
+
+.app .updateToastCard,
+.updateToastCard{
+  pointer-events: auto !important;
+  width: 100% !important;
+  max-height: min(46vh, 360px) !important;
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) auto !important;
+  align-items: start !important;
+  gap: 12px !important;
+  padding: 13px !important;
+  border-radius: 18px !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e86be8) 38%, rgba(255,255,255,.13)) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb, 232,107,232), .18), transparent 54%),
+    linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.035) 48%, rgba(0,0,0,.18)),
+    color-mix(in oklab, var(--bg-2, #09060d) 78%, var(--accent, #e86be8) 10%) !important;
+  color: var(--text, #f5f5f5) !important;
+  box-shadow:
+    0 24px 76px rgba(0,0,0,.42),
+    0 0 0 1px rgba(var(--accent-rgb, 232,107,232), .08),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(22px) saturate(136%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(136%) !important;
+  animation: localtifyUpdateNoticeIn 210ms cubic-bezier(.2,.85,.2,1) both !important;
+}
+
+.app .updateToastCard::before,
+.updateToastCard::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb, 232,107,232), .18), transparent 38%, rgba(255,255,255,.04)) !important;
+  opacity: .74 !important;
+}
+
+.app .updateToastCard > *,
+.updateToastCard > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.app .updateToastIcon,
+.updateToastIcon{
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+  background: color-mix(in oklab, var(--accent, #e86be8) 18%, rgba(255,255,255,.06)) !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e86be8) 45%, rgba(255,255,255,.14)) !important;
+  color: color-mix(in oklab, var(--accent, #e86be8) 68%, white 32%) !important;
+  box-shadow: 0 0 24px rgba(var(--accent-rgb, 232,107,232), .16) !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+}
+
+.app .updateToastText,
+.updateToastText{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 5px !important;
+}
+
+.app .updateToastText .eyebrow,
+.updateToastText .eyebrow{
+  margin: 0 !important;
+  color: color-mix(in oklab, var(--accent, #e86be8) 82%, white 18%) !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+
+.app .updateToastText h3,
+.updateToastText h3{
+  margin: 0 !important;
+  color: var(--text, #f5f5f5) !important;
+  font-size: 14px !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.02em !important;
+  text-transform: none !important;
+}
+
+.app .updateToastText p:not(.eyebrow),
+.updateToastText p:not(.eyebrow){
+  margin: 0 !important;
+  min-width: 0 !important;
+  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.66)) 92%, var(--text, #fff) 8%) !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  overflow: hidden !important;
+}
+
+.app .updateToastMetaRow,
+.updateToastMetaRow{
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  margin: 2px 0 0 !important;
+  flex-wrap: wrap !important;
+}
+
+.app .updateVersionPill,
+.app .updateSafePill,
+.updateVersionPill,
+.updateSafePill{
+  min-height: 23px !important;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border-radius: 999px !important;
+  background: rgba(0,0,0,.18) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  color: color-mix(in oklab, var(--text, #fff) 72%, var(--muted, #aaa) 28%) !important;
+  font-size: 10.5px !important;
+  font-weight: 850 !important;
+  letter-spacing: .01em !important;
+  white-space: nowrap !important;
+}
+
+.app .updateSafePill.pending,
+.updateSafePill.pending{
+  color: color-mix(in oklab, var(--warning, #ffbd72) 70%, white 30%) !important;
+}
+
+.app .updateSafePill.ok,
+.updateSafePill.ok{
+  color: color-mix(in oklab, var(--accent, #e86be8) 72%, white 28%) !important;
+}
+
+.app .updateToastActions,
+.updateToastActions{
+  grid-column: 1 / -1 !important;
+  margin: 3px 0 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+
+.app .updatePrimaryButton,
+.app .updateGhostButton,
+.updatePrimaryButton,
+.updateGhostButton{
+  height: 31px !important;
+  min-height: 31px !important;
+  border-radius: 10px !important;
+  padding: 0 11px !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  letter-spacing: -.005em !important;
+  white-space: nowrap !important;
+  transform: none !important;
+}
+
+.app .updateGhostButton,
+.updateGhostButton{
+  background: rgba(255,255,255,.052) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  color: color-mix(in oklab, var(--text, #fff) 72%, var(--muted, #aaa) 28%) !important;
+  box-shadow: none !important;
+}
+
+.app .updateGhostButton:hover,
+.updateGhostButton:hover{
+  transform: none !important;
+  background: rgba(255,255,255,.085) !important;
+  border-color: color-mix(in oklab, var(--accent, #e86be8) 35%, rgba(255,255,255,.16)) !important;
+  color: var(--text, #fff) !important;
+}
+
+.app .updatePrimaryButton,
+.updatePrimaryButton{
+  background: color-mix(in oklab, var(--accent, #e86be8) 84%, white 16%) !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e86be8) 72%, white 28%) !important;
+  color: #060407 !important;
+  box-shadow: 0 14px 32px rgba(var(--accent-rgb, 232,107,232), .18) !important;
+}
+
+.app .updatePrimaryButton:hover,
+.updatePrimaryButton:hover{
+  transform: none !important;
+  filter: brightness(1.04) !important;
+}
+
+.app .updateToastClose,
+.updateToastClose{
+  position: static !important;
+  order: 9 !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  border-radius: 10px !important;
+  background: rgba(255,255,255,.052) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  color: var(--muted, rgba(255,255,255,.62)) !important;
+  transform: none !important;
+}
+
+.app .updateProgressTrack,
+.updateProgressTrack{
+  grid-column: 1 / -1 !important;
+  height: 4px !important;
+  margin: 2px 0 0 !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.10) !important;
+  overflow: hidden !important;
+}
+
+.app .updateProgressTrack span,
+.updateProgressTrack span{
+  background: color-mix(in oklab, var(--accent, #e86be8) 82%, white 18%) !important;
+  box-shadow: 0 0 18px rgba(var(--accent-rgb, 232,107,232), .34) !important;
+}
+
+@keyframes localtifyUpdateNoticeIn{
+  from{ opacity: 0; transform: translateY(-7px) scale(.986); }
+  to{ opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 900px){
+  .app .updateToastLayer,
+  .updateToastLayer{
+    inset: 48px 14px auto 14px !important;
+    width: auto !important;
+  }
+}
+
+@media (max-width: 620px){
+  .app .updateToastCard,
+  .updateToastCard{
+    grid-template-columns: 30px minmax(0, 1fr) auto !important;
+    border-radius: 16px !important;
+  }
+
+  .app .updateToastActions,
+  .updateToastActions{
+    justify-content: flex-start !important;
+  }
+}
+
+/* ========================================================================
+   localtify v0.3.3/v98 — Kopuz-style top update ribbon
+   Owner: App.css / update notification only.
+   Do not move or restyle player.css; this only reserves top space when an update is visible.
+======================================================================== */
+.app.updateRibbonVisible .appShell{
+  padding-top: 48px !important;
+}
+
+.app.updateRibbonVisible .content{
+  scroll-padding-top: 60px !important;
+}
+
+.app .topUpdateRibbonLayer,
+.topUpdateRibbonLayer{
+  position: fixed !important;
+  inset: 36px 0 auto 0 !important;
+  z-index: 2300 !important;
+  width: auto !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  pointer-events: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app .topUpdateRibbon,
+.topUpdateRibbon{
+  pointer-events: auto !important;
+  position: relative !important;
+  width: 100vw !important;
+  height: 48px !important;
+  max-height: 48px !important;
+  min-height: 48px !important;
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 0 18px !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  border-top: 1px solid color-mix(in oklab, var(--accent, #e962e9) 28%, rgba(255,255,255,.05)) !important;
+  border-bottom: 1px solid color-mix(in oklab, var(--accent, #e962e9) 42%, rgba(255,255,255,.07)) !important;
+  background:
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--bg, #05010a) 82%, var(--accent, #e962e9) 12%),
+      color-mix(in oklab, var(--bg-2, #08040d) 72%, var(--accent, #e962e9) 18%) 46%,
+      color-mix(in oklab, var(--bg, #05010a) 84%, var(--progress, var(--accent, #e962e9)) 11%)
+    ) !important;
+  color: var(--text, #f6f2fb) !important;
+  box-shadow:
+    0 12px 38px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.055),
+    inset 0 -1px 0 rgba(var(--accent-rgb, 233,98,233), .10) !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(18px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
+  animation: localtifyTopUpdateRibbonIn 180ms cubic-bezier(.2,.85,.2,1) both !important;
+}
+
+.app .topUpdateRibbon::before,
+.topUpdateRibbon::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: 0 !important;
+  background:
+    radial-gradient(circle at 18% -80%, rgba(var(--accent-rgb, 233,98,233), .22), transparent 52%),
+    linear-gradient(90deg, rgba(255,255,255,.045), transparent 35%, rgba(var(--accent-rgb, 233,98,233), .08)) !important;
+  opacity: .86 !important;
+}
+
+.app .topUpdateRibbon > *,
+.topUpdateRibbon > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.app .topUpdateRibbonIcon,
+.topUpdateRibbonIcon{
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  border-radius: 8px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e962e9) 48%, rgba(255,255,255,.16)) !important;
+  background: rgba(var(--accent-rgb, 233,98,233), .14) !important;
+  color: color-mix(in oklab, var(--accent, #e962e9) 72%, white 28%) !important;
+  box-shadow: 0 0 18px rgba(var(--accent-rgb, 233,98,233), .15) !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+.app .topUpdateRibbonText,
+.topUpdateRibbonText{
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, auto) minmax(0, 1fr) !important;
+  align-items: baseline !important;
+  gap: 10px !important;
+}
+
+.app .topUpdateRibbonText .eyebrow,
+.topUpdateRibbonText .eyebrow{
+  margin: 0 !important;
+  color: color-mix(in oklab, var(--accent, #e962e9) 72%, white 28%) !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+.app .topUpdateRibbonText h3,
+.topUpdateRibbonText h3{
+  margin: 0 !important;
+  min-width: 0 !important;
+  color: color-mix(in oklab, var(--text, #fff) 92%, var(--accent, #e962e9) 8%) !important;
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+  font-weight: 850 !important;
+  letter-spacing: .01em !important;
+  text-transform: none !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.app .topUpdateRibbonText p:not(.eyebrow),
+.topUpdateRibbonText p:not(.eyebrow){
+  margin: 0 !important;
+  min-width: 0 !important;
+  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 88%, var(--text, #fff) 12%) !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  font-weight: 720 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.app .topUpdateRibbonMeta,
+.topUpdateRibbonMeta{
+  grid-column: auto !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  flex-wrap: nowrap !important;
+  min-width: max-content !important;
+}
+
+.app .topUpdateRibbon .updateVersionPill,
+.app .topUpdateRibbon .updateSafePill,
+.topUpdateRibbon .updateVersionPill,
+.topUpdateRibbon .updateSafePill{
+  height: 22px !important;
+  min-height: 22px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  background: rgba(0,0,0,.18) !important;
+  border: 1px solid rgba(255,255,255,.095) !important;
+  color: color-mix(in oklab, var(--text, #fff) 76%, var(--accent, #e962e9) 10%) !important;
+  font-size: 10.5px !important;
+  font-weight: 850 !important;
+  white-space: nowrap !important;
+}
+
+.app .topUpdateRibbonActions,
+.topUpdateRibbonActions{
+  grid-column: auto !important;
+  margin: 0 !important;
+  min-width: max-content !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  flex-wrap: nowrap !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.app .topUpdateRibbon .updateGhostButton,
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updateGhostButton,
+.topUpdateRibbon .updateToastClose{
+  height: 29px !important;
+  min-height: 29px !important;
+  min-width: 0 !important;
+  padding: 0 11px !important;
+  border-radius: 10px !important;
+  font-size: 11.5px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  transform: none !important;
+  white-space: nowrap !important;
+}
+
+.app .topUpdateRibbon .updateGhostButton,
+.topUpdateRibbon .updateGhostButton{
+  background: rgba(255,255,255,.045) !important;
+  border: 1px solid rgba(255,255,255,.095) !important;
+  color: color-mix(in oklab, var(--text, #fff) 76%, var(--muted, #aaa) 24%) !important;
+  box-shadow: none !important;
+}
+
+.app .topUpdateRibbon .updateGhostButton:hover,
+.topUpdateRibbon .updateGhostButton:hover{
+  transform: none !important;
+  background: rgba(255,255,255,.075) !important;
+  border-color: color-mix(in oklab, var(--accent, #e962e9) 36%, rgba(255,255,255,.16)) !important;
+  color: var(--text, #fff) !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updatePrimaryButton{
+  background: color-mix(in oklab, var(--accent, #e962e9) 84%, white 16%) !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e962e9) 70%, white 30%) !important;
+  color: #070409 !important;
+  box-shadow: 0 10px 26px rgba(var(--accent-rgb, 233,98,233), .15) !important;
+}
+
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updateToastClose{
+  width: 29px !important;
+  padding: 0 !important;
+  position: static !important;
+  display: grid !important;
+  place-items: center !important;
+  background: rgba(255,255,255,.045) !important;
+  border: 1px solid rgba(255,255,255,.095) !important;
+  color: var(--muted, rgba(255,255,255,.62)) !important;
+}
+
+.app .topUpdateRibbonProgress,
+.topUpdateRibbonProgress{
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  grid-column: auto !important;
+  height: 2px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: rgba(255,255,255,.09) !important;
+  overflow: hidden !important;
+}
+
+.app .topUpdateRibbonProgress span,
+.topUpdateRibbonProgress span{
+  display: block !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  background: color-mix(in oklab, var(--accent, #e962e9) 82%, white 18%) !important;
+  box-shadow: 0 0 16px rgba(var(--accent-rgb, 233,98,233), .36) !important;
+}
+
+@keyframes localtifyTopUpdateRibbonIn{
+  from{ opacity: 0; transform: translateY(-6px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1100px){
+  .app .topUpdateRibbon,
+  .topUpdateRibbon{
+    grid-template-columns: 28px minmax(0, 1fr) auto !important;
+    gap: 10px !important;
+    padding: 0 14px !important;
+  }
+
+  .app .topUpdateRibbonMeta,
+  .topUpdateRibbonMeta{
+    display: none !important;
+  }
+}
+
+@media (max-width: 760px){
+  .app.updateRibbonVisible .appShell{
+    padding-top: 54px !important;
+  }
+
+  .app .topUpdateRibbonLayer,
+  .topUpdateRibbonLayer,
+  .app .topUpdateRibbon,
+  .topUpdateRibbon{
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+  }
+
+  .app .topUpdateRibbonText,
+  .topUpdateRibbonText{
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 2px !important;
+  }
+
+  .app .topUpdateRibbonText .eyebrow,
+  .topUpdateRibbonText .eyebrow,
+  .app .topUpdateRibbonText p:not(.eyebrow),
+  .topUpdateRibbonText p:not(.eyebrow),
+  .app .topUpdateRibbon .updateGhostButton,
+  .topUpdateRibbon .updateGhostButton{
+    display: none !important;
+  }
+}
+
+
+/* ========================================================================
+   localtify v0.3.3/v99 — final Kopuz-style top update ribbon cleanup
+   Owner: App.css / update notification only. Does not touch player.css.
+======================================================================== */
+.app.updateRibbonVisible .appShell{
+  padding-top: 38px !important;
+}
+
+.app.updateRibbonVisible .content{
+  scroll-padding-top: 48px !important;
+}
+
+.app .topUpdateRibbonLayer,
+.topUpdateRibbonLayer{
+  position: fixed !important;
+  inset: 34px 0 auto 0 !important;
+  z-index: 2350 !important;
+  width: 100vw !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app .topUpdateRibbon,
+.topUpdateRibbon{
+  pointer-events: auto !important;
+  width: 100vw !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  display: grid !important;
+  grid-template-columns: 24px minmax(0, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 14px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background:
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--bg, #08030d) 88%, var(--accent, #e65adf) 9%),
+      color-mix(in oklab, var(--bg-2, #100718) 78%, var(--accent, #e65adf) 14%) 52%,
+      color-mix(in oklab, var(--bg, #08030d) 90%, var(--accent-2, var(--accent, #e65adf)) 7%)
+    ) !important;
+  border-bottom: 1px solid rgba(var(--accent-rgb, 230,90,223), .26) !important;
+  color: var(--text, #f8f2ff) !important;
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.20),
+    inset 0 -1px 0 rgba(255,255,255,.035) !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(16px) saturate(132%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(132%) !important;
+}
+
+.app .topUpdateRibbon::before,
+.topUpdateRibbon::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: 0 !important;
+  background:
+    radial-gradient(circle at 14% -140%, rgba(var(--accent-rgb, 230,90,223), .20), transparent 48%),
+    linear-gradient(90deg, rgba(255,255,255,.035), transparent 34%, rgba(var(--accent-rgb, 230,90,223), .045)) !important;
+  opacity: .72 !important;
+}
+
+.app .topUpdateRibbonIcon,
+.topUpdateRibbonIcon{
+  width: 21px !important;
+  height: 21px !important;
+  min-width: 21px !important;
+  border-radius: 7px !important;
+  display: grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  justify-self: center !important;
+  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .28) !important;
+  background: rgba(var(--accent-rgb, 230,90,223), .11) !important;
+  color: color-mix(in oklab, var(--accent, #e65adf) 65%, white 35%) !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+.app .topUpdateRibbonText,
+.topUpdateRibbonText{
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  overflow: hidden !important;
+}
+
+.app .topUpdateRibbonText .eyebrow,
+.topUpdateRibbonText .eyebrow{
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+  color: color-mix(in oklab, var(--accent, #e65adf) 72%, white 28%) !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+.app .topUpdateRibbonText h3,
+.topUpdateRibbonText h3{
+  margin: 0 !important;
+  min-width: 0 !important;
+  color: color-mix(in oklab, var(--text, #fff) 92%, var(--accent, #e65adf) 8%) !important;
+  font-size: 12.5px !important;
+  line-height: 1.1 !important;
+  font-weight: 850 !important;
+  letter-spacing: .005em !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.app .topUpdateRibbonText p:not(.eyebrow),
+.topUpdateRibbonText p:not(.eyebrow){
+  display: none !important;
+}
+
+.app .topUpdateRibbonMeta,
+.topUpdateRibbonMeta{
+  grid-column: auto !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  min-width: max-content !important;
+  flex-wrap: nowrap !important;
+}
+
+.app .topUpdateRibbon .updateVersionPill,
+.app .topUpdateRibbon .updateSafePill,
+.topUpdateRibbon .updateVersionPill,
+.topUpdateRibbon .updateSafePill{
+  height: 22px !important;
+  min-height: 22px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  background: rgba(255,255,255,.055) !important;
+  color: color-mix(in oklab, var(--text, #fff) 78%, var(--muted, #aaa) 22%) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.055) !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  white-space: nowrap !important;
+}
+
+.app .topUpdateRibbon .updateSafePill.pending,
+.topUpdateRibbon .updateSafePill.pending{
+  color: color-mix(in oklab, var(--accent, #e65adf) 64%, white 36%) !important;
+}
+
+.app .topUpdateRibbonActions,
+.topUpdateRibbonActions{
+  grid-column: auto !important;
+  margin: 0 !important;
+  min-width: max-content !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.app .topUpdateRibbon .updateGhostButton,
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updateGhostButton,
+.topUpdateRibbon .updateToastClose{
+  height: 26px !important;
+  min-height: 26px !important;
+  min-width: 0 !important;
+  border-radius: 9px !important;
+  padding: 0 10px !important;
+  font-size: 10.8px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.app .topUpdateRibbon .updateGhostButton,
+.topUpdateRibbon .updateGhostButton{
+  border: 0 !important;
+  background: rgba(255,255,255,.052) !important;
+  color: color-mix(in oklab, var(--text, #fff) 78%, var(--muted, #aaa) 22%) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.055) !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updatePrimaryButton{
+  border: 0 !important;
+  background: color-mix(in oklab, var(--accent, #e65adf) 82%, white 18%) !important;
+  color: #080409 !important;
+  box-shadow: 0 8px 20px rgba(var(--accent-rgb, 230,90,223), .14) !important;
+}
+
+.app .topUpdateRibbon .updateGhostButton:hover,
+.topUpdateRibbon .updateGhostButton:hover,
+.app .topUpdateRibbon .updatePrimaryButton:hover,
+.topUpdateRibbon .updatePrimaryButton:hover{
+  transform: none !important;
+  filter: brightness(1.04) !important;
+}
+
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updateToastClose{
+  width: 26px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  background: rgba(255,255,255,.044) !important;
+  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 86%, var(--text, #fff) 14%) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.052) !important;
+}
+
+.app .topUpdateRibbonProgress,
+.topUpdateRibbonProgress{
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 2px !important;
+  margin: 0 !important;
+  grid-column: auto !important;
+  background: rgba(255,255,255,.08) !important;
+  border-radius: 0 !important;
+}
+
+@media (max-width: 1080px){
+  .app .topUpdateRibbon,
+  .topUpdateRibbon{
+    grid-template-columns: 24px minmax(0, 1fr) auto !important;
+    padding: 0 10px !important;
+  }
+
+  .app .topUpdateRibbonMeta,
+  .topUpdateRibbonMeta{
+    display: none !important;
+  }
+}
+
+@media (max-width: 720px){
+  .app.updateRibbonVisible .appShell{
+    padding-top: 42px !important;
+  }
+
+  .app .topUpdateRibbonLayer,
+  .topUpdateRibbonLayer,
+  .app .topUpdateRibbon,
+  .topUpdateRibbon{
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+  }
+
+  .app .topUpdateRibbonText .eyebrow,
+  .topUpdateRibbonText .eyebrow,
+  .app .topUpdateRibbon .updateGhostButton,
+  .topUpdateRibbon .updateGhostButton{
+    display: none !important;
+  }
+}
+
+
+/* ========================================================================
+   localtify v0.3.3/v100 — update ribbon centering repair
+   Owner: App.css / top update ribbon only. player.css untouched.
+======================================================================== */
+.app.updateRibbonVisible .appShell{
+  padding-top: 42px !important;
+}
+
+.app.updateRibbonVisible .content{
+  scroll-padding-top: 52px !important;
+}
+
+.app .topUpdateRibbonLayer,
+.topUpdateRibbonLayer{
+  position: fixed !important;
+  top: 36px !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  width: 100vw !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  z-index: 2350 !important;
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.app .topUpdateRibbon,
+.topUpdateRibbon{
+  --ribbon-h: 42px;
+  pointer-events: auto !important;
+  position: relative !important;
+  width: 100% !important;
+  height: var(--ribbon-h) !important;
+  min-height: var(--ribbon-h) !important;
+  max-height: var(--ribbon-h) !important;
+  margin: 0 !important;
+  padding: 0 13px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  column-gap: 14px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background:
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--bg, #09030f) 88%, var(--accent, #e65adf) 8%),
+      color-mix(in oklab, var(--bg-2, #14091d) 76%, var(--accent, #e65adf) 13%) 54%,
+      color-mix(in oklab, var(--bg, #09030f) 89%, var(--accent, #e65adf) 7%)
+    ) !important;
+  border-bottom: 1px solid rgba(var(--accent-rgb, 230,90,223), .20) !important;
+  color: var(--text, #fff) !important;
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.025),
+    inset 0 -1px 0 rgba(var(--accent-rgb, 230,90,223), .10) !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(16px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(130%) !important;
+}
+
+.app .topUpdateRibbon::before,
+.topUpdateRibbon::before{
+  opacity: .44 !important;
+  background:
+    radial-gradient(circle at 18% -120%, rgba(var(--accent-rgb, 230,90,223), .16), transparent 46%),
+    linear-gradient(90deg, rgba(255,255,255,.020), transparent 34%, rgba(var(--accent-rgb, 230,90,223), .030)) !important;
+}
+
+.app .topUpdateRibbonMain,
+.topUpdateRibbonMain{
+  min-width: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: 22px minmax(0, 1fr) !important;
+  align-items: center !important;
+  column-gap: 10px !important;
+}
+
+.app .topUpdateRibbonRight,
+.topUpdateRibbonRight{
+  height: 100% !important;
+  min-width: max-content !important;
+  display: inline-grid !important;
+  grid-auto-flow: column !important;
+  align-items: center !important;
+  justify-content: end !important;
+  gap: 8px !important;
+}
+
+.app .topUpdateRibbonIcon,
+.topUpdateRibbonIcon{
+  align-self: center !important;
+  justify-self: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  line-height: 1 !important;
+  transform: none !important;
+}
+
+.app .topUpdateRibbonText,
+.topUpdateRibbonText{
+  height: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  overflow: hidden !important;
+  transform: translateY(0) !important;
+}
+
+.app .topUpdateRibbonText .eyebrow,
+.topUpdateRibbonText .eyebrow,
+.app .topUpdateRibbonText h3,
+.topUpdateRibbonText h3{
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  transform: none !important;
+  line-height: 1 !important;
+}
+
+.app .topUpdateRibbonText .eyebrow,
+.topUpdateRibbonText .eyebrow{
+  font-size: 10px !important;
+  letter-spacing: .13em !important;
+}
+
+.app .topUpdateRibbonText h3,
+.topUpdateRibbonText h3{
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  max-width: min(68vw, 980px) !important;
+}
+
+.app .topUpdateRibbonMeta,
+.topUpdateRibbonMeta,
+.app .topUpdateRibbonActions,
+.topUpdateRibbonActions{
+  height: 100% !important;
+  margin: 0 !important;
+  align-items: center !important;
+  align-content: center !important;
+  justify-content: end !important;
+  align-self: center !important;
+}
+
+.app .topUpdateRibbon .updateVersionPill,
+.app .topUpdateRibbon .updateSafePill,
+.topUpdateRibbon .updateVersionPill,
+.topUpdateRibbon .updateSafePill{
+  height: 22px !important;
+  min-height: 22px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.app .topUpdateRibbon .updateGhostButton,
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updateGhostButton,
+.topUpdateRibbon .updateToastClose{
+  height: 27px !important;
+  min-height: 27px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updateToastClose{
+  width: 27px !important;
+  min-width: 27px !important;
+  padding: 0 !important;
+}
+
+@media (max-width: 980px){
+  .app .topUpdateRibbon,
+  .topUpdateRibbon{
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    column-gap: 8px !important;
+    padding: 0 10px !important;
+  }
+
+  .app .topUpdateRibbonMeta,
+  .topUpdateRibbonMeta{
+    display: none !important;
+  }
+}
+
+@media (max-width: 720px){
+  .app.updateRibbonVisible .appShell{
+    padding-top: 46px !important;
+  }
+
+  .app .topUpdateRibbonLayer,
+  .topUpdateRibbonLayer,
+  .app .topUpdateRibbon,
+  .topUpdateRibbon{
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+  }
+
+  .app .topUpdateRibbonText .eyebrow,
+  .topUpdateRibbonText .eyebrow{
+    display: none !important;
+  }
+
+  .app .topUpdateRibbonText h3,
+  .topUpdateRibbonText h3{
+    max-width: none !important;
+  }
+}

@@ -725,7 +725,7 @@ function updateNagTitle(prompt: UpdatePromptState) {
   if (prompt.status === "downloading") return "downloading update";
   if (prompt.status === "latest") return "already up to date";
   if (prompt.status === "error") return "could not check updates";
-  if (prompt.status === "dev") return "dev mode detected";
+  if (prompt.status === "dev") return "installed app required";
   if (prompt.status === "checking") return "checking for updates";
   return "localtify update ready";
 }
@@ -747,6 +747,21 @@ function updateNagMessage(prompt: UpdatePromptState) {
 
   return prompt.error || prompt.message || "localtify update ready. Your library will be backed up before anything installs.";
 }
+
+
+function updateRibbonTitle(prompt: UpdatePromptState) {
+  const version = prompt.version || APP_VERSION;
+
+  if (prompt.status === "available") return `Update available — Localtify ${version} is available.`;
+  if (prompt.status === "downloaded") return `Update ready — restart to install Localtify ${version}.`;
+  if (prompt.status === "downloading") return `Downloading update — ${Math.round(clamp(prompt.percent, 0, 100))}%`;
+  if (prompt.status === "latest") return "Localtify is up to date.";
+  if (prompt.status === "error") return "Update check failed.";
+  if (prompt.status === "dev") return "Installed app required — auto update only works in the packaged app.";
+  if (prompt.status === "checking") return "Checking for updates...";
+  return "Localtify update";
+}
+
 
 const APP_VERSION = "0.3.3";
 const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
@@ -2880,7 +2895,7 @@ function MainModeApp() {
   const [statusText, setStatusText] = useState("ready to play");
   const [playerError, setPlayerError] = useState("");
   const [updatePrompt, setUpdatePrompt] = useState<UpdatePromptState>(defaultUpdatePrompt);
-  const [lastUpdateCheckedLabel, setLastUpdateCheckedLabel] = useState("not checked yet");
+  const [, setLastUpdateCheckedLabel] = useState("not checked yet");
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [now, setNow] = useState(new Date());
 
@@ -6205,7 +6220,8 @@ function MainModeApp() {
           discordGithubLabel: "Get localtify",
           discordButtonLabels: [discordPrimaryLabel, "Get localtify"],
           discordButtonRetry: true,
-          discordActivityName: "Music",
+          discordActivityName: "localtify",
+          discordActivityType: "listening",
           discordSmallImageMode: "player"
         })
         .catch(() => undefined);
@@ -10175,7 +10191,7 @@ function MainModeApp() {
         ) : null}
 
         {settingsCategory === "updates" ? (
-          <section className="settingsCategoryPage" aria-label="Update settings">
+          <section className="settingsCategoryPage settingsUpdatesPage" aria-label="Update settings">
             <div className="settingsCategoryHeader">
               <div>
                 <p className="eyebrow">updates</p>
@@ -10184,7 +10200,7 @@ function MainModeApp() {
               <span>version {APP_VERSION}</span>
             </div>
 
-            <div className="settingsTwoColumn">
+            <div className="settingsTwoColumn settingsUpdatesGrid">
               <div className="settingsPanelCard settingsUpdatePanel">
                 <div className="settingsPanelHeader">
                   <div>
@@ -10193,19 +10209,22 @@ function MainModeApp() {
                   </div>
                 </div>
 
-                <div className="settingsStatusCards">
-                  <span><strong>{APP_VERSION}</strong><small>Current version</small></span>
-                  <span><strong>{settings.autoUpdateEnabled ? "on" : "off"}</strong><small>Update checks</small></span>
-                  <span><strong>{lastUpdateCheckedLabel}</strong><small>Last checked</small></span>
-                  <span><strong>{updateStatusLabel(updatePrompt.status)}</strong><small>Status</small></span>
-                </div>
-
-                {updatePrompt.status !== "idle" ? (
-                  <div className={`settingsUpdateMessage settingsUpdateMessage-${updatePrompt.status}`}>
-                    <strong>{updatePrompt.status === "error" ? "Update check failed" : updateStatusLabel(updatePrompt.status)}</strong>
-                    <span>{updatePrompt.error || updatePrompt.message || "Update status will appear here."}</span>
+                <div className="settingsUpdateSummary">
+                  <div className="settingsUpdateCurrent">
+                    <span className="settingsUpdateVersionBadge">{APP_VERSION}</span>
+                    <div>
+                      <strong>Current version</strong>
+                      <span>localtify {APP_VERSION}</span>
+                    </div>
                   </div>
-                ) : null}
+
+                  <div className={`settingsUpdateMessage settingsUpdateMessage-${updatePrompt.status}`}>
+                    <strong>{updatePrompt.status === "idle" ? "Ready to check" : updatePrompt.status === "error" ? "Update check failed" : updateStatusLabel(updatePrompt.status)}</strong>
+                    <span>
+                      {updatePrompt.error || updatePrompt.message || (updatePrompt.status === "idle" ? "Check for updates whenever you are ready." : "Update status will appear here.")}
+                    </span>
+                  </div>
+                </div>
 
                 <div className="settingsActionRow settingsUpdateActions">
                   <button className="settingsActionButton" type="button" onClick={manualUpdateCheck} disabled={updatePrompt.status === "checking" || updatePrompt.status === "downloading"}>Check for updates</button>
@@ -10214,7 +10233,7 @@ function MainModeApp() {
                 </div>
               </div>
 
-              <div className="settingsPanelCard">
+              <div className="settingsPanelCard settingsUpdateBehaviorPanel">
                 <div className="settingsPanelHeader">
                   <div>
                     <strong>Update behavior</strong>
@@ -10234,8 +10253,8 @@ function MainModeApp() {
             <div className="settingsPanelCard settingsFullWidthPanel">
               <div className="settingsPanelHeader">
                 <div>
-                  <strong>What’s new in 0.3.1</strong>
-                  <span>Release notes shown in the update popup.</span>
+                  <strong>What’s new in {APP_VERSION}</strong>
+                  <span>Short notes for this release.</span>
                 </div>
               </div>
               <ul className="settingsPlainList settingsReleaseList">
@@ -10389,7 +10408,7 @@ function MainModeApp() {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${settings.reducedMotion ? "reducedMotion" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
@@ -10418,6 +10437,85 @@ function MainModeApp() {
       data-drag-title={draggedSongTitle}
     >
       <TitleBar />
+
+      {updatePrompt.visible ? (
+        <div className="updateToastLayer topUpdateRibbonLayer" role="presentation">
+          <section
+            className={`updateToastCard topUpdateRibbon ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
+            onClick={(event) => event.stopPropagation()}
+            role="status"
+            aria-live="polite"
+            aria-label="localtify update"
+          >
+            <div className="topUpdateRibbonMain">
+              <div className="updateToastIcon topUpdateRibbonIcon" aria-hidden="true">
+                {updatePrompt.status === "downloaded" ? "✓" : updatePrompt.status === "downloading" ? "↓" : updatePrompt.status === "error" ? "!" : "↧"}
+              </div>
+
+              <div className="updateToastText topUpdateRibbonText">
+                <p className="eyebrow">localtify update</p>
+                <h3>{updateRibbonTitle(updatePrompt)}</h3>
+              </div>
+            </div>
+
+            <div className="topUpdateRibbonRight">
+              <div className="updateToastMetaRow topUpdateRibbonMeta" aria-label="update info">
+                <span className="updateVersionPill">version {updatePrompt.version || APP_VERSION}</span>
+                {updatePrompt.status === "available" || updatePrompt.status === "downloaded" || updatePrompt.status === "dev" ? (
+                  <span className={`updateSafePill ${updatePrompt.libraryBackedUp ? "ok" : "pending"}`}>
+                    {updatePrompt.status === "dev" ? "dev mode" : updatePrompt.libraryBackedUp ? "library safe" : "app status"}
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="updateToastActions topUpdateRibbonActions">
+                {updatePrompt.status === "available" ? (
+                  <>
+                    <button className="updateGhostButton" type="button" onClick={openUpdateChangelog}>
+                      view release
+                    </button>
+                    <button className="updateGhostButton" type="button" onClick={skipAvailableUpdate}>
+                      skip
+                    </button>
+                    <button className="updatePrimaryButton" type="button" onClick={askUpdaterToDownload}>
+                      download
+                    </button>
+                  </>
+                ) : null}
+
+                {updatePrompt.status === "downloaded" ? (
+                  <>
+                    <button className="updateGhostButton" type="button" onClick={openUpdateChangelog}>
+                      view release
+                    </button>
+                    <button className="updatePrimaryButton" type="button" onClick={askUpdaterToInstall}>
+                      restart
+                    </button>
+                  </>
+                ) : null}
+
+                {updatePrompt.status === "error" || updatePrompt.status === "latest" || updatePrompt.status === "dev" ? (
+                  <button className="updatePrimaryButton" type="button" onClick={manualUpdateCheck}>
+                    check again
+                  </button>
+                ) : null}
+
+                {updatePrompt.status !== "downloading" ? (
+                  <button className="updateToastClose" type="button" onClick={() => setUpdatePrompt(defaultUpdatePrompt)} aria-label="Dismiss update notice">
+                    ×
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            {updatePrompt.status === "downloading" ? (
+              <div className="updateProgressTrack topUpdateRibbonProgress" aria-label="update progress">
+                <span style={{ width: `${clamp(updatePrompt.percent, 0, 100)}%` }} />
+              </div>
+            ) : null}
+          </section>
+        </div>
+      ) : null}
 
       {secretMode !== "none" ? (
         <div className={`secretLayer ${secretMode}`} key={`${secretMode}-${secretBurst}`} aria-hidden="true">
@@ -11687,115 +11785,13 @@ function MainModeApp() {
         );
       })() : null}
 
-      {updatePrompt.visible ? (
-        <div className="updateToastLayer" onClick={() => setUpdatePrompt(defaultUpdatePrompt)}>
-          <section
-            className={`updateToastCard ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="localtify update"
-          >
-            <button className="updateToastClose" type="button" onClick={() => setUpdatePrompt(defaultUpdatePrompt)}>
-              ×
-            </button>
-
-            <div className="updateToastIcon">
-              {updatePrompt.status === "downloaded" ? "✓" : updatePrompt.status === "downloading" ? "↓" : updatePrompt.status === "error" ? "!" : "↥"}
-            </div>
-
-            <div className="updateToastText">
-              <p className="eyebrow">safe desktop update</p>
-              <h3>{updateNagTitle(updatePrompt)}</h3>
-              <p>{updateNagMessage(updatePrompt)}</p>
-              <div className="updateToastMetaRow">
-                {updatePrompt.version ? <span className="updateVersionPill">version {updatePrompt.version}</span> : null}
-                <span className={`updateSafePill ${updatePrompt.libraryBackedUp ? "ok" : "pending"}`}>
-                  {updatePrompt.libraryBackedUp ? "library has been backed up" : updatePrompt.status === "available" ? "backup before install" : "library stays safe"}
-                </span>
-              </div>
-            </div>
-
-            {updatePrompt.status === "downloading" ? (
-              <div className="updateProgressTrack" aria-label="update progress">
-                <span style={{ width: `${clamp(updatePrompt.percent, 0, 100)}%` }} />
-              </div>
-            ) : null}
-
-            <div className="updateToastActions">
-              {updatePrompt.status === "available" ? (
-                <>
-                  {updatePrompt.nagStage === 3 ? (
-                    <>
-                      <button className="updateGhostButton" type="button" onClick={handleUpdateLater}>
-                        okay
-                      </button>
-                      <button className="updatePrimaryButton" type="button" onClick={askUpdaterToDownload}>
-                        update
-                      </button>
-                      <button className="updateGhostButton updateLeaveAloneButton" type="button" onClick={leaveUpdateAlone}>
-                        LEAVE ME ALONE
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="updateGhostButton" type="button" onClick={handleUpdateLater}>
-                        later
-                      </button>
-                      {updatePrompt.nagStage ? null : (
-                        <button className="updateGhostButton" type="button" onClick={openUpdateChangelog}>
-                          view what changed
-                        </button>
-                      )}
-                      {updatePrompt.nagStage ? null : (
-                        <button className="updateGhostButton" type="button" onClick={skipAvailableUpdate}>
-                          skip this version
-                        </button>
-                      )}
-                      <button className="updatePrimaryButton" type="button" onClick={askUpdaterToDownload}>
-                        {updatePrompt.nagStage ? "update" : "download update"}
-                      </button>
-                    </>
-                  )}
-                </>
-              ) : null}
-
-              {updatePrompt.status === "downloaded" ? (
-                <>
-                  <button className="updateGhostButton" type="button" onClick={handleUpdateLater}>
-                    later
-                  </button>
-                  <button className="updateGhostButton" type="button" onClick={openUpdateChangelog}>
-                    view what changed
-                  </button>
-                  <button className="updatePrimaryButton" type="button" onClick={askUpdaterToInstall}>
-                    restart and install
-                  </button>
-                </>
-              ) : null}
-
-              {updatePrompt.status === "error" || updatePrompt.status === "latest" || updatePrompt.status === "dev" ? (
-                <>
-                  <button className="updateGhostButton" type="button" onClick={() => setUpdatePrompt(defaultUpdatePrompt)}>
-                    close
-                  </button>
-                  <button className="updatePrimaryButton" type="button" onClick={manualUpdateCheck}>
-                    check again
-                  </button>
-                </>
-              ) : null}
-            </div>
-          </section>
-        </div>
-      ) : null}
-
       {whatsNewOpen ? (
         <div className="whatsNewOverlay" onClick={closeWhatsNew}>
           <section className="whatsNewCard" role="dialog" aria-modal="true" aria-labelledby="whatsNewTitle" onClick={(event) => event.stopPropagation()}>
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.0 focuses on cleaner local analytics, smaller UI annoyances, open-source polish, and smoother everyday use without removing the app ambience.</p>
+            <p className="whatsNewSubtext">0.3.3 cleans up onboarding, theme switching, update notices, and the small UI pieces that were confusing people.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>

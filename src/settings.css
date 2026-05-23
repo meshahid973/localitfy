@@ -5026,3 +5026,529 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
+
+
+/* ========================================================================
+   localtify v0.3.3/v97 — polished Updates settings page
+   Owner: settings.css / Updates category only.
+   Keeps updater logic and bottom player untouched.
+======================================================================== */
+.settingsCategoryPage.settingsUpdatesPage{
+  display: grid !important;
+  gap: 18px !important;
+}
+
+.settingsCategoryPage.settingsUpdatesPage .settingsCategoryHeader{
+  min-height: 74px !important;
+  align-items: end !important;
+  padding: 0 2px 6px !important;
+  margin-bottom: 2px !important;
+}
+
+.settingsCategoryPage.settingsUpdatesPage .settingsCategoryHeader > span{
+  min-height: 28px !important;
+  padding: 0 11px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  color: color-mix(in oklab, var(--text, #fff) 78%, var(--accent, #e65adf) 22%) !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 28%, rgba(255,255,255,.10)) !important;
+  background: color-mix(in oklab, var(--surface, rgba(255,255,255,.05)) 82%, var(--accent, #e65adf) 9%) !important;
+}
+
+.settingsUpdatesGrid{
+  grid-template-columns: minmax(0, 1.05fr) minmax(330px, .95fr) !important;
+  gap: 16px !important;
+  align-items: stretch !important;
+}
+
+.settingsUpdatesPage .settingsPanelCard,
+.settingsUpdatesPage .settingsFullWidthPanel{
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 22px !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 24%, rgba(255,255,255,.10)) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(var(--accent-rgb, 230,90,223), .13), transparent 38%),
+    linear-gradient(145deg, rgba(255,255,255,.052), rgba(255,255,255,.025) 48%, rgba(0,0,0,.18)) !important;
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.36),
+    inset 0 1px 0 rgba(255,255,255,.06) !important;
+  backdrop-filter: blur(18px) saturate(125%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(125%) !important;
+}
+
+.settingsUpdatesPage .settingsPanelCard::before,
+.settingsUpdatesPage .settingsFullWidthPanel::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb, 230,90,223), .16), transparent 32%, rgba(255,255,255,.035)) !important;
+  opacity: .56 !important;
+}
+
+.settingsUpdatesPage .settingsPanelCard > *,
+.settingsUpdatesPage .settingsFullWidthPanel > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.settingsUpdatesPage .settingsPanelHeader{
+  align-items: flex-start !important;
+  gap: 14px !important;
+  margin-bottom: 14px !important;
+}
+
+.settingsUpdatesPage .settingsPanelHeader strong{
+  font-size: 18px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.035em !important;
+  color: var(--text, #fff) !important;
+}
+
+.settingsUpdatesPage .settingsPanelHeader span{
+  max-width: 58ch !important;
+  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 88%, var(--text, #fff) 12%) !important;
+}
+
+.settingsUpdatesPage .settingsStatusCards{
+  grid-template-columns: repeat(4, minmax(116px, 1fr)) !important;
+  gap: 10px !important;
+  margin: 16px 0 14px !important;
+}
+
+.settingsUpdatesPage .settingsStatusCards span{
+  min-height: 84px !important;
+  padding: 13px 14px !important;
+  border-radius: 18px !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 25%, rgba(255,255,255,.105)) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.025)),
+    color-mix(in oklab, var(--bg-2, #08060b) 84%, var(--accent, #e65adf) 8%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.052) !important;
+  justify-content: space-between !important;
+}
+
+.settingsUpdatesPage .settingsStatusCards strong{
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: clamp(15px, 1.05vw, 18px) !important;
+  letter-spacing: -.02em !important;
+  color: var(--text, #fff) !important;
+}
+
+.settingsUpdatesPage .settingsStatusCards small{
+  display: block !important;
+  margin-top: 4px !important;
+  color: var(--muted, rgba(255,255,255,.58)) !important;
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+  letter-spacing: .01em !important;
+}
+
+.settingsUpdatesPage .settingsUpdateMessage{
+  margin: 8px 0 14px !important;
+  padding: 14px 15px !important;
+  border-radius: 18px !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 34%, rgba(255,255,255,.10)) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb, 230,90,223), .14), transparent 60%),
+    rgba(255,255,255,.038) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+
+.settingsUpdatesPage .settingsUpdateMessage strong{
+  text-transform: none !important;
+  font-size: 14px !important;
+  letter-spacing: -.01em !important;
+}
+
+.settingsUpdatesPage .settingsUpdateMessage span{
+  max-width: 72ch !important;
+  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 92%, var(--text, #fff) 8%) !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+.settingsUpdatesPage .settingsUpdateMessage-error{
+  border-color: rgba(255,95,138,.42) !important;
+  background: rgba(255,95,138,.085) !important;
+}
+
+.settingsUpdatesPage .settingsUpdateActions{
+  margin-top: 12px !important;
+  gap: 9px !important;
+}
+
+.settingsUpdatesPage .settingsActionButton{
+  min-height: 38px !important;
+  padding: 0 14px !important;
+  border-radius: 14px !important;
+  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 24%, rgba(255,255,255,.12)) !important;
+  background: rgba(255,255,255,.052) !important;
+  color: color-mix(in oklab, var(--text, #fff) 82%, var(--accent, #e65adf) 18%) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.settingsUpdatesPage .settingsActionButton:hover:not(:disabled){
+  transform: translateY(-1px) !important;
+  background: color-mix(in oklab, var(--accent, #e65adf) 16%, rgba(255,255,255,.06)) !important;
+  border-color: color-mix(in oklab, var(--accent, #e65adf) 38%, rgba(255,255,255,.14)) !important;
+}
+
+.settingsUpdateBehaviorPanel .settingsMiniGrid{
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.settingsUpdateBehaviorPanel .toggleRow{
+  min-height: 116px !important;
+  padding: 14px !important;
+  border-radius: 18px !important;
+  align-items: center !important;
+  background: rgba(255,255,255,.044) !important;
+  border-color: color-mix(in oklab, var(--accent, #e65adf) 20%, rgba(255,255,255,.10)) !important;
+}
+
+.settingsUpdatesPage .settingsFullWidthPanel{
+  padding: 18px !important;
+}
+
+.settingsReleaseList{
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 12px 0 0 !important;
+  display: grid !important;
+  gap: 9px !important;
+}
+
+.settingsReleaseList li{
+  position: relative !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  min-height: 42px !important;
+  padding: 12px 14px 12px 36px !important;
+  border-radius: 15px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  background: rgba(255,255,255,.038) !important;
+  color: color-mix(in oklab, var(--text, #fff) 76%, var(--muted, #aaa) 24%) !important;
+  font-size: 13px !important;
+  font-weight: 780 !important;
+  line-height: 1.35 !important;
+}
+
+.settingsReleaseList li::before{
+  content: "" !important;
+  position: absolute !important;
+  left: 14px !important;
+  top: 17px !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: color-mix(in oklab, var(--accent, #e65adf) 86%, white 14%) !important;
+  box-shadow: 0 0 18px rgba(var(--accent-rgb, 230,90,223), .36) !important;
+}
+
+@media (max-width: 1120px){
+  .settingsUpdatesGrid{
+    grid-template-columns: 1fr !important;
+  }
+
+  .settingsUpdatesPage .settingsStatusCards{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px){
+  .settingsUpdateBehaviorPanel .settingsMiniGrid,
+  .settingsUpdatesPage .settingsStatusCards{
+    grid-template-columns: 1fr !important;
+  }
+
+  .settingsUpdatesPage .settingsCategoryHeader{
+    align-items: start !important;
+  }
+}
+
+
+/* ========================================================================
+   localtify v0.3.3/v99 — simplified Updates page, no debug mini-cards
+   Owner: settings.css / Updates category only. Does not touch player.css.
+======================================================================== */
+.settingsCategoryPage.settingsUpdatesPage{
+  gap: 16px !important;
+}
+
+.settingsUpdatesGrid{
+  grid-template-columns: minmax(0, 1fr) minmax(300px, .86fr) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+}
+
+.settingsUpdatesPage .settingsPanelCard,
+.settingsUpdatesPage .settingsFullWidthPanel{
+  border-radius: 21px !important;
+  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .18) !important;
+  background:
+    radial-gradient(circle at 10% -18%, rgba(var(--accent-rgb, 230,90,223), .105), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.020) 58%, rgba(0,0,0,.16)) !important;
+  box-shadow:
+    0 18px 52px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.settingsUpdatesPage .settingsPanelCard::before,
+.settingsUpdatesPage .settingsFullWidthPanel::before{
+  opacity: .28 !important;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb, 230,90,223), .10), transparent 42%) !important;
+}
+
+.settingsUpdatesPage .settingsPanelHeader{
+  margin-bottom: 12px !important;
+}
+
+.settingsUpdatesPage .settingsPanelHeader strong{
+  font-size: 18px !important;
+  letter-spacing: -.035em !important;
+}
+
+.settingsUpdatesPage .settingsPanelHeader span{
+  font-size: 12.5px !important;
+  line-height: 1.35 !important;
+}
+
+.settingsUpdatesPage .settingsStatusCards{
+  display: none !important;
+}
+
+.settingsUpdateSummary{
+  display: grid !important;
+  gap: 11px !important;
+  margin: 8px 0 12px !important;
+}
+
+.settingsUpdateCurrent{
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 58px !important;
+  padding: 12px 13px !important;
+  border-radius: 17px !important;
+  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .14) !important;
+  background: rgba(255,255,255,.036) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.settingsUpdateVersionBadge{
+  min-width: 56px !important;
+  height: 34px !important;
+  padding: 0 11px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  color: #080409 !important;
+  background: color-mix(in oklab, var(--accent, #e65adf) 82%, white 18%) !important;
+  box-shadow: 0 10px 26px rgba(var(--accent-rgb, 230,90,223), .14) !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  letter-spacing: -.015em !important;
+}
+
+.settingsUpdateCurrent div{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 3px !important;
+}
+
+.settingsUpdateCurrent strong{
+  color: var(--text, #fff) !important;
+  font-size: 13px !important;
+  line-height: 1.1 !important;
+}
+
+.settingsUpdateCurrent span:not(.settingsUpdateVersionBadge){
+  color: var(--muted, rgba(255,255,255,.62)) !important;
+  font-size: 12px !important;
+  font-weight: 760 !important;
+}
+
+.settingsUpdatesPage .settingsUpdateMessage{
+  margin: 0 !important;
+  padding: 13px 14px !important;
+  border-radius: 17px !important;
+  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .16) !important;
+  background: color-mix(in oklab, rgba(255,255,255,.045) 82%, var(--accent, #e65adf) 6%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.settingsUpdatesPage .settingsUpdateMessage strong{
+  font-size: 13.5px !important;
+  letter-spacing: -.01em !important;
+}
+
+.settingsUpdatesPage .settingsUpdateMessage span{
+  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 90%, var(--text, #fff) 10%) !important;
+  font-size: 12.5px !important;
+  line-height: 1.38 !important;
+}
+
+.settingsUpdatesPage .settingsUpdateMessage-idle{
+  border-color: rgba(255,255,255,.085) !important;
+  background: rgba(255,255,255,.032) !important;
+}
+
+.settingsUpdatesPage .settingsUpdateActions{
+  margin-top: 10px !important;
+  gap: 8px !important;
+}
+
+.settingsUpdatesPage .settingsActionButton{
+  min-height: 36px !important;
+  padding: 0 13px !important;
+  border-radius: 13px !important;
+  border: 0 !important;
+  background: rgba(255,255,255,.055) !important;
+  color: color-mix(in oklab, var(--text, #fff) 82%, var(--muted, #aaa) 18%) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.07) !important;
+}
+
+.settingsUpdatesPage .settingsActionButton:hover:not(:disabled){
+  transform: translateY(-1px) !important;
+  background: rgba(var(--accent-rgb, 230,90,223), .12) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb, 230,90,223), .22) !important;
+}
+
+.settingsUpdatesPage .settingsActionButton:disabled{
+  opacity: .42 !important;
+  background: rgba(255,255,255,.030) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.045) !important;
+}
+
+.settingsUpdateBehaviorPanel .settingsMiniGrid{
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.settingsUpdateBehaviorPanel .toggleRow{
+  min-height: 100px !important;
+  padding: 13px !important;
+  border-radius: 17px !important;
+  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .13) !important;
+  background: rgba(255,255,255,.036) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.032) !important;
+}
+
+.settingsUpdatesPage .settingsFullWidthPanel{
+  padding: 17px 18px !important;
+}
+
+.settingsReleaseList{
+  gap: 7px !important;
+  margin-top: 10px !important;
+}
+
+.settingsReleaseList li{
+  min-height: 38px !important;
+  padding: 10px 13px 10px 34px !important;
+  border-radius: 13px !important;
+  border: 0 !important;
+  background: rgba(255,255,255,.036) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.055) !important;
+  color: color-mix(in oklab, var(--text, #fff) 78%, var(--muted, #aaa) 22%) !important;
+  font-size: 12.7px !important;
+  font-weight: 770 !important;
+}
+
+.settingsReleaseList li::before{
+  left: 14px !important;
+  top: 15px !important;
+  width: 7px !important;
+  height: 7px !important;
+  box-shadow: 0 0 14px rgba(var(--accent-rgb, 230,90,223), .30) !important;
+}
+
+@media (max-width: 1120px){
+  .settingsUpdatesGrid{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 720px){
+  .settingsUpdateBehaviorPanel .settingsMiniGrid{
+    grid-template-columns: 1fr !important;
+  }
+
+  .settingsUpdateCurrent{
+    align-items: flex-start !important;
+  }
+}
+
+
+/* ========================================================================
+   localtify v0.3.3/v100 — Updates page spacing/position polish
+   Owner: settings.css / Updates category only. player.css untouched.
+======================================================================== */
+.settingsUpdatesPage .settingsCategoryHeader{
+  align-items: center !important;
+}
+
+.settingsUpdatesPage .settingsCategoryHeader > span{
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.settingsUpdatesPage .settingsPanelCard,
+.settingsUpdatesPage .settingsFullWidthPanel{
+  border-color: rgba(var(--accent-rgb, 230,90,223), .13) !important;
+  box-shadow:
+    0 16px 46px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.028) !important;
+}
+
+.settingsUpdateSummary{
+  margin: 6px 0 11px !important;
+}
+
+.settingsUpdateCurrent,
+.settingsUpdatesPage .settingsUpdateMessage{
+  width: 100% !important;
+  align-items: center !important;
+}
+
+.settingsUpdatesPage .settingsUpdateMessage{
+  min-height: 56px !important;
+  display: grid !important;
+  align-content: center !important;
+  gap: 4px !important;
+}
+
+.settingsUpdatesPage .settingsUpdateActions{
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}
+
+.settingsUpdateBehaviorPanel .settingsMiniGrid{
+  align-items: stretch !important;
+}
+
+.settingsUpdateBehaviorPanel .toggleRow{
+  display: grid !important;
+  align-content: center !important;
+}
+
+.settingsReleaseList li{
+  display: flex !important;
+  align-items: center !important;
+}
