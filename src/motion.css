@@ -1199,3 +1199,82 @@ body.localtifyBackgroundMode .coverCard,
 .app.appBackgrounded .coverCard {
   will-change: auto;
 }
+
+
+/* ========================================================================
+   localtify v0.3.3/v99 — update ribbon entrance motion
+   Owner: motion.css / animation only. No layout, no player changes.
+======================================================================== */
+@keyframes localtifyTopUpdateRibbonIn{
+  0%{
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+  62%{
+    opacity: 1;
+    transform: translate3d(0, 2px, 0);
+  }
+  100%{
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .app:not(.reducedMotion):not(.reduceMotion) .topUpdateRibbon{
+    animation: localtifyTopUpdateRibbonIn 360ms cubic-bezier(.18,.92,.2,1.06) both !important;
+    will-change: opacity, transform !important;
+  }
+
+  .app:not(.reducedMotion):not(.reduceMotion) .topUpdateRibbonIcon{
+    animation: localtifyIconPop 420ms cubic-bezier(.18,.92,.2,1.06) 60ms both !important;
+  }
+}
+
+.app.reducedMotion .topUpdateRibbon,
+.app.reduceMotion .topUpdateRibbon,
+.app[data-motion-level="reduced"] .topUpdateRibbon{
+  animation: none !important;
+  transform: none !important;
+}
+
+.app.reducedMotion .topUpdateRibbonIcon,
+.app.reduceMotion .topUpdateRibbonIcon,
+.app[data-motion-level="reduced"] .topUpdateRibbonIcon{
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .topUpdateRibbon,
+  .topUpdateRibbonIcon{
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+
+/* ========================================================================
+   localtify v0.3.3/v100 — update ribbon centered entrance motion
+   Owner: motion.css / animation only. No tilt, no player changes.
+======================================================================== */
+@keyframes localtifyTopUpdateRibbonCenteredIn{
+  0%{
+    opacity: 0;
+    transform: translate3d(0, -7px, 0);
+  }
+  68%{
+    opacity: 1;
+    transform: translate3d(0, 1px, 0);
+  }
+  100%{
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .app:not(.reducedMotion):not(.reduceMotion) .topUpdateRibbon{
+    animation: localtifyTopUpdateRibbonCenteredIn 320ms cubic-bezier(.2,.9,.22,1.04) both !important;
+    will-change: opacity, transform !important;
+  }
+}
