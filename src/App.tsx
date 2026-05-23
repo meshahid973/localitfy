@@ -1,6 +1,9 @@
 ﻿import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent } from "react";
 import type { LucideIcon } from "lucide-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { FastAverageColor } from "fast-average-color";
 import {
   BarChart3,
   Download,
@@ -2176,6 +2179,78 @@ function getSongAmbientStyle(song?: Song | null): CSSProperties | undefined {
   return getAmbientStyle(getSongAmbientSource(song));
 }
 
+type CoverAverageStyle = CSSProperties & {
+  "--cover-rgb"?: string;
+  "--player-ambient-rgb"?: string;
+  "--active-cover-rgb"?: string;
+  "--cover-average"?: string;
+};
+
+const coverAverageColorCache = new Map<string, CoverAverageStyle>();
+const fastAverageColor = typeof window !== "undefined" ? new FastAverageColor() : null;
+
+function buildCoverAverageStyle(hex: string): CoverAverageStyle {
+  const safeHex = normalizeHexColor(hex, "#8dffce");
+  const rgb = hexToRgbString(safeHex, "#8dffce");
+
+  return {
+    "--cover-rgb": rgb,
+    "--player-ambient-rgb": rgb,
+    "--active-cover-rgb": rgb,
+    "--cover-average": safeHex
+  } as CoverAverageStyle;
+}
+
+function useCoverAverageStyle(source: string, enabled: boolean) {
+  const [style, setStyle] = useState<CoverAverageStyle>({});
+  const requestIdRef = useRef(0);
+
+  useEffect(() => {
+    const coverSource = String(source || "").trim();
+
+    if (!enabled || !coverSource || !fastAverageColor) {
+      setStyle({});
+      return;
+    }
+
+    const cached = coverAverageColorCache.get(coverSource);
+    if (cached) {
+      setStyle(cached);
+      return;
+    }
+
+    let cancelled = false;
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+
+    const timer = window.setTimeout(() => {
+      fastAverageColor
+        .getColorAsync(coverSource, {
+          algorithm: "sqrt",
+          mode: "precision"
+        })
+        .then((color) => {
+          if (cancelled || requestIdRef.current !== requestId) return;
+
+          const nextStyle = buildCoverAverageStyle(color.hex);
+          coverAverageColorCache.set(coverSource, nextStyle);
+          setStyle(nextStyle);
+        })
+        .catch(() => {
+          if (cancelled || requestIdRef.current !== requestId) return;
+          setStyle({});
+        });
+    }, 80);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [enabled, source]);
+
+  return style;
+}
+
 const Cover = memo(function Cover({ song, className }: { song: Song | null; className: string }) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
   const [imageReady, setImageReady] = useState(false);
@@ -2477,6 +2552,392 @@ const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
         </button>
       </div>
     </article>
+  );
+});
+
+
+type VirtualSongRowsProps = SongInteractionHandlers & {
+  list: Song[];
+  className: string;
+  currentId: string;
+  isPlaying: boolean;
+  draggedSongId: string;
+  libraryDragOverSongId: string;
+  libraryDropSide: LibraryDropSide;
+  draggedSongTitle: string;
+  onAreaDragOver: (event: DragEvent<HTMLDivElement>) => void;
+  onAreaDragLeave: (event: DragEvent<HTMLDivElement>) => void;
+  onAreaDrop: (event: DragEvent<HTMLDivElement>) => void;
+};
+
+const VirtualSongRows = memo(function VirtualSongRows({
+  list,
+  className,
+  currentId,
+  isPlaying,
+  draggedSongId,
+  libraryDragOverSongId,
+  libraryDropSide,
+  draggedSongTitle,
+  onAreaDragOver,
+  onAreaDragLeave,
+  onAreaDrop,
+  onSelectSong,
+  onTogglePlay,
+  onToggleLike,
+  onOpenEditor,
+  onOpenPlaylistPicker,
+  onOpenSongContextMenu,
+  onStartSongDrag,
+  onDragOverSong,
+  onDragLeaveSong,
+  onDropSong,
+  onDragEnd
+}: VirtualSongRowsProps) {
+  const parentRef = useRef<HTMLDivElement | null>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: list.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 74,
+    overscan: 8,
+    getItemKey: (index) => list[index]?.id || index
+  });
+
+  if (!list.length) {
+    return (
+      <div
+        className={className}
+        onDragOver={onAreaDragOver}
+        onDragLeave={onAreaDragLeave}
+        onDrop={onAreaDrop}
+      >
+        <div className="emptyState">
+          <strong>import songs to fill this area</strong>
+          <p>import some music and this area will wake up.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={parentRef}
+      className={`${className} virtualSongViewport virtualSongRowsViewport`}
+      onDragOver={onAreaDragOver}
+      onDragLeave={onAreaDragLeave}
+      onDrop={onAreaDrop}
+      data-virtual-count={list.length}
+    >
+      <div
+        className="virtualSongCanvas"
+        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+      >
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const song = list[virtualRow.index];
+          if (!song) return null;
+
+          const active = song.id === currentId;
+          const isDragging = draggedSongId === song.id;
+          const isDropTarget = Boolean(draggedSongId && draggedSongId !== song.id && libraryDragOverSongId === song.id);
+
+          return (
+            <div
+              key={virtualRow.key}
+              ref={rowVirtualizer.measureElement}
+              data-index={virtualRow.index}
+              className="virtualSongItem"
+              style={{ transform: `translateY(${virtualRow.start}px)` }}
+            >
+              <SongRowItem
+                song={song}
+                index={virtualRow.index}
+                active={active}
+                isPlaying={isPlaying}
+                isDragging={isDragging}
+                isDropTarget={isDropTarget}
+                libraryDropSide={libraryDropSide}
+                draggedSongTitle={draggedSongTitle}
+                onSelectSong={onSelectSong}
+                onTogglePlay={onTogglePlay}
+                onToggleLike={onToggleLike}
+                onOpenEditor={onOpenEditor}
+                onOpenPlaylistPicker={onOpenPlaylistPicker}
+                onOpenSongContextMenu={onOpenSongContextMenu}
+                onStartSongDrag={onStartSongDrag}
+                onDragOverSong={onDragOverSong}
+                onDragLeaveSong={onDragLeaveSong}
+                onDropSong={onDropSong}
+                onDragEnd={onDragEnd}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+type VirtualHomeSongCardsProps = SongInteractionHandlers & {
+  list: Song[];
+  className: string;
+  currentId: string;
+  isPlaying: boolean;
+  draggedSongId: string;
+  libraryDragOverSongId: string;
+  libraryDropSide: LibraryDropSide;
+  draggedSongTitle: string;
+  onAreaDragOver: (event: DragEvent<HTMLDivElement>) => void;
+  onAreaDragLeave: (event: DragEvent<HTMLDivElement>) => void;
+  onAreaDrop: (event: DragEvent<HTMLDivElement>) => void;
+};
+
+const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
+  list,
+  className,
+  currentId,
+  isPlaying,
+  draggedSongId,
+  libraryDragOverSongId,
+  libraryDropSide,
+  draggedSongTitle,
+  onAreaDragOver,
+  onAreaDragLeave,
+  onAreaDrop,
+  onSelectSong,
+  onTogglePlay,
+  onToggleLike,
+  onOpenEditor,
+  onOpenPlaylistPicker,
+  onOpenSongContextMenu,
+  onStartSongDrag,
+  onPointerStartSongDrag,
+  registerLibrarySongElement,
+  onDragOverSong,
+  onDragLeaveSong,
+  onDropSong,
+  onDragEnd
+}: VirtualHomeSongCardsProps) {
+  const parentRef = useRef<HTMLDivElement | null>(null);
+  const [viewportWidth, setViewportWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    const element = parentRef.current;
+    if (!element) return;
+
+    const updateWidth = () => setViewportWidth(element.clientWidth || 0);
+    updateWidth();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateWidth);
+      return () => window.removeEventListener("resize", updateWidth);
+    }
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  const isSimpleGrid = className.includes("simpleAlbumGrid");
+  const minColumnWidth = isSimpleGrid ? 156 : 168;
+  const gridGap = 14;
+  const columns = Math.max(1, Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap)));
+  const rowCount = Math.max(1, Math.ceil(list.length / columns));
+
+  const rowVirtualizer = useVirtualizer({
+    count: list.length ? rowCount : 0,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 256,
+    overscan: 4,
+    getItemKey: (rowIndex) => {
+      const firstSong = list[rowIndex * columns];
+      return firstSong?.id ? `${firstSong.id}-${columns}` : `${rowIndex}-${columns}`;
+    }
+  });
+
+  if (!list.length) {
+    return (
+      <div
+        className={className}
+        onDragOver={onAreaDragOver}
+        onDragLeave={onAreaDragLeave}
+        onDrop={onAreaDrop}
+      >
+        <div className="emptyState homeAlbumEmpty">
+          <strong>import songs to fill this area</strong>
+          <p>import some music and this expanded area turns into a proper home library.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={parentRef}
+      className={`${className} virtualSongViewport virtualHomeGridViewport`}
+      onDragOver={onAreaDragOver}
+      onDragLeave={onAreaDragLeave}
+      onDrop={onAreaDrop}
+      data-virtual-count={list.length}
+      data-virtual-columns={columns}
+    >
+      <div
+        className="virtualSongCanvas virtualHomeGridCanvas"
+        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+      >
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const rowStartIndex = virtualRow.index * columns;
+          const rowSongs = list.slice(rowStartIndex, rowStartIndex + columns);
+
+          return (
+            <div
+              key={virtualRow.key}
+              ref={rowVirtualizer.measureElement}
+              data-index={virtualRow.index}
+              className="virtualHomeGridRow"
+              style={{
+                transform: `translateY(${virtualRow.start}px)`,
+                gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`
+              }}
+            >
+              {rowSongs.map((song, offset) => {
+                const index = rowStartIndex + offset;
+                const active = song.id === currentId;
+                const isDragging = draggedSongId === song.id;
+                const isDropTarget = Boolean(draggedSongId && draggedSongId !== song.id && libraryDragOverSongId === song.id);
+
+                return (
+                  <HomeAlbumCardItem
+                    key={song.id}
+                    song={song}
+                    index={index}
+                    active={active}
+                    isPlaying={isPlaying}
+                    isDragging={isDragging}
+                    isDropTarget={isDropTarget}
+                    libraryDropSide={libraryDropSide}
+                    draggedSongTitle={draggedSongTitle}
+                    onSelectSong={onSelectSong}
+                    onTogglePlay={onTogglePlay}
+                    onToggleLike={onToggleLike}
+                    onOpenEditor={onOpenEditor}
+                    onOpenPlaylistPicker={onOpenPlaylistPicker}
+                    onOpenSongContextMenu={onOpenSongContextMenu}
+                    onStartSongDrag={onStartSongDrag}
+                    onPointerStartSongDrag={onPointerStartSongDrag}
+                    registerLibrarySongElement={registerLibrarySongElement}
+                    onDragOverSong={onDragOverSong}
+                    onDragLeaveSong={onDragLeaveSong}
+                    onDropSong={onDropSong}
+                    onDragEnd={onDragEnd}
+                  />
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+type VirtualPlaylistTrackListProps = {
+  selectedPlaylistId: string;
+  list: Song[];
+  currentId: string;
+  isPlaying: boolean;
+  draggedSongId: string;
+  playlistDragOverSongId: string;
+  playlistDropSide: LibraryDropSide;
+  onSelectSong: (songId: string) => void;
+  onStartSongDrag: (event: DragEvent<HTMLElement>, songId: string) => void;
+  onDragOverSong: (event: DragEvent<HTMLElement>, songId: string) => void;
+  onDragLeaveSong: (event: DragEvent<HTMLElement>, songId: string) => void;
+  onDropSong: (event: DragEvent<HTMLElement>, songId: string) => void;
+  onDragEnd: () => void;
+  onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, song: Song) => void;
+  onRemoveSong: (playlistId: string, songId: string) => void;
+};
+
+const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
+  selectedPlaylistId,
+  list,
+  currentId,
+  isPlaying,
+  draggedSongId,
+  playlistDragOverSongId,
+  playlistDropSide,
+  onSelectSong,
+  onStartSongDrag,
+  onDragOverSong,
+  onDragLeaveSong,
+  onDropSong,
+  onDragEnd,
+  onOpenContextMenu,
+  onRemoveSong
+}: VirtualPlaylistTrackListProps) {
+  const parentRef = useRef<HTMLDivElement | null>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: list.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 72,
+    overscan: 8,
+    getItemKey: (index) => `${selectedPlaylistId}-${list[index]?.id || index}`
+  });
+
+  if (!selectedPlaylistId || !list.length) {
+    return (
+      <div className="playlistEmptyState">
+        <strong>{selectedPlaylistId ? "This playlist is empty" : "Choose a playlist"}</strong>
+        <p>{selectedPlaylistId ? "Use the + button on a song card or the edit menu to add music here." : "Your playlist songs will show up here."}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={parentRef} className="playlistTrackList virtualPlaylistTrackList" aria-label="playlist songs">
+      <div className="virtualPlaylistTrackCanvas" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const song = list[virtualRow.index];
+          if (!song) return null;
+
+          const active = song.id === currentId;
+          const isDragging = draggedSongId === song.id;
+          const isDropTarget = playlistDragOverSongId === song.id && draggedSongId !== song.id;
+
+          return (
+            <article
+              key={virtualRow.key}
+              ref={rowVirtualizer.measureElement}
+              data-index={virtualRow.index}
+              className={`playlistTrackRow virtualPlaylistTrackRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""}`}
+              data-drop-side={isDropTarget ? playlistDropSide : undefined}
+              style={{ transform: `translateY(${virtualRow.start}px)` }}
+              draggable
+              onDragStart={(event) => onStartSongDrag(event, song.id)}
+              onDragOver={(event) => onDragOverSong(event, song.id)}
+              onDragLeave={(event) => onDragLeaveSong(event, song.id)}
+              onDrop={(event) => onDropSong(event, song.id)}
+              onDragEnd={onDragEnd}
+              onContextMenu={(event) => onOpenContextMenu(event, song)}
+            >
+              <span className="playlistTrackGrip">⋮⋮</span>
+              <button className="playlistTrackMain" type="button" onClick={() => onSelectSong(song.id)}>
+                <span className="playlistTrackIndex">{active && isPlaying ? "▶" : virtualRow.index + 1}</span>
+                <Cover song={song} className="playlistTrackCover" />
+                <span>
+                  <strong>{prettyTitle(song.title, 7)}</strong>
+                  <small>{prettyMeta(song.artist)}</small>
+                </span>
+              </button>
+              <span className="playlistTrackDuration">{formatTime(song.duration)}</span>
+              <button className="iconAction" type="button" onClick={() => onRemoveSong(selectedPlaylistId, song.id)} aria-label="remove from playlist">
+                ×
+              </button>
+            </article>
+          );
+        })}
+      </div>
+    </div>
   );
 });
 
@@ -4416,9 +4877,12 @@ function MainModeApp() {
     });
   }, [ready, songs, likedSongs.length, totalPlays, view, settings.theme, settings.customThemeEnabled, settings.discordEnabled]);
 
-  const progress = currentDuration > 0 ? Math.min(100, (currentTime / currentDuration) * 100) : 0;
+  // Keep playback progress hot-path out of React renders as much as possible.
+  // The animation loop paints the progress DOM directly; React only uses this snapshot when something else renders.
+  const liveCurrentTime = Number.isFinite(timeRef.current) ? timeRef.current : currentTime;
+  const progress = currentDuration > 0 ? Math.min(100, (liveCurrentTime / currentDuration) * 100) : 0;
   const displayedProgress = isSeeking ? seekDraftPercent : progress;
-  const displayedTime = isSeeking && currentDuration > 0 ? (seekDraftPercent / 100) * currentDuration : currentTime;
+  const displayedTime = isSeeking && currentDuration > 0 ? (seekDraftPercent / 100) * currentDuration : liveCurrentTime;
   const progressRangeStyle = useMemo(
     () => ({
       "--range-progress": `${clamp(displayedProgress, 0, 100)}%`
@@ -4432,7 +4896,12 @@ function MainModeApp() {
     } as CSSProperties),
     [volumeDraft]
   );
-  const ambientStyle = useMemo(() => getSongAmbientStyle(currentSong), [currentSong]);
+  const ambientSource = useMemo(() => getSongAmbientSource(currentSong), [currentSong]);
+  const coverAverageStyle = useCoverAverageStyle(ambientSource, effectiveAmbient && effectiveCoverColorSyncMode !== "off");
+  const ambientStyle = useMemo(() => {
+    const sourceStyle = getAmbientStyle(ambientSource) ?? {};
+    return { ...sourceStyle, ...coverAverageStyle } as CSSProperties;
+  }, [ambientSource, coverAverageStyle]);
 
   const syncProgressDom = useCallback((time: number, durationInput?: number, forceInputValue = false) => {
     const duration = Number.isFinite(durationInput || 0) && (durationInput || 0) > 0
@@ -4633,11 +5102,11 @@ function MainModeApp() {
     settings,
     song: currentSong,
     isPlaying,
-    currentTime,
+    currentTime: liveCurrentTime,
     currentDuration: currentDuration || currentSong?.duration || 0,
     totalSongs: songs.length,
     mostPlayed
-  }), [settings, currentSong, isPlaying, currentTime, currentDuration, songs.length, mostPlayed]);
+  }), [settings, currentSong, isPlaying, currentDuration, songs.length, mostPlayed]);
 
 
 
@@ -4709,7 +5178,9 @@ function MainModeApp() {
 
   useEffect(() => {
     songRef.current = currentSong;
-    timeRef.current = currentTime;
+    if (!audioRef.current || audioRef.current.paused || !isPlaying) {
+      timeRef.current = currentTime;
+    }
     durationRef.current = currentDuration;
     playingRef.current = isPlaying;
     volumeRef.current = settings.volume;
@@ -5920,7 +6391,7 @@ function MainModeApp() {
       if (!canSetPosition) return;
 
       const duration = Math.max(0, Number(currentDuration) || 0);
-      const position = clamp(Number(currentTime) || 0, 0, duration || Number.MAX_SAFE_INTEGER);
+      const position = clamp(Number(timeRef.current || currentTime) || 0, 0, duration || Number.MAX_SAFE_INTEGER);
 
       navigator.mediaSession.setPositionState({
         duration: duration || Math.max(position, 1),
@@ -5930,7 +6401,7 @@ function MainModeApp() {
     } catch {
       // Windows media progress is optional; never risk playback for it.
     }
-  }, [currentSong?.id, currentTime, currentDuration, settings.playbackSpeed]);
+  }, [currentSong?.id, currentDuration, settings.playbackSpeed]);
 
   useEffect(() => {
     window.localitfy.setMinimizeToTray?.(settings.minimizeToTray).catch(() => undefined);
@@ -6076,10 +6547,10 @@ function MainModeApp() {
           syncProgressDom(nextTime, nextDuration);
         }
 
-        const statePaintEveryMs = backgroundMode ? 8000 : busyUi ? 1600 : 900;
-        if (!isSeekingRef.current && clock - lastProgressStatePaintRef.current > statePaintEveryMs) {
+        // Do not push every progress tick through React state.
+        // timeRef + direct DOM painting keep the player smooth while the huge app tree stays asleep.
+        if (!isSeekingRef.current && clock - lastProgressStatePaintRef.current > 8000) {
           lastProgressStatePaintRef.current = clock;
-          setCurrentTime(nextTime);
         }
 
         if (!backgroundMode && Number.isFinite(nextDuration) && nextDuration > 0 && Math.abs(nextDuration - lastPaintedDuration) > 0.5) {
@@ -9204,130 +9675,64 @@ function MainModeApp() {
   }
 
 
-  function renderSongRows(list: Song[]) {
-    if (!list.length) {
-      return (
-        <div className="emptyState">
-          <strong>import songs to fill this area</strong>
-          <p>import some music and this area will wake up.</p>
-        </div>
-      );
-    }
-
-    const renderLimit = Math.min(list.length, Math.max(1, libraryRenderLimit));
-    const visibleList = list.length > renderLimit ? list.slice(0, renderLimit) : list;
-
+  function renderSongRows(list: Song[], className: string) {
     return (
-      <>
-        {visibleList.map((song, index) => {
-          const active = song.id === currentId;
-          const isDragging = draggedSongId === song.id;
-          const isDropTarget = Boolean(draggedSongId && draggedSongId !== song.id && libraryDragOverSongId === song.id);
-
-          return (
-            <SongRowItem
-              key={song.id}
-              song={song}
-              index={index}
-              active={active}
-              isPlaying={isPlaying}
-              isDragging={isDragging}
-              isDropTarget={isDropTarget}
-              libraryDropSide={libraryDropSide}
-              draggedSongTitle={draggedSongTitle}
-              onSelectSong={selectSongCardAction}
-              onTogglePlay={togglePlayCardAction}
-              onToggleLike={toggleLikeCardAction}
-              onOpenEditor={openEditorCardAction}
-              onOpenPlaylistPicker={openPlaylistPickerCardAction}
-              onOpenSongContextMenu={openSongContextMenuCardAction}
-              onStartSongDrag={startSongDragCardAction}
-              onDragOverSong={dragOverSongCardAction}
-              onDragLeaveSong={dragLeaveSongCardAction}
-              onDropSong={dropSongCardAction}
-              onDragEnd={endSongDragCardAction}
-            />
-          );
-        })}
-
-        {visibleList.length < list.length ? (
-          <div className="libraryRenderNotice">
-            <span>loaded {visibleList.length} of {list.length} songs</span>
-            <button
-              className="libraryLoadMoreButton"
-              type="button"
-              onClick={() => setLibraryRenderLimit((limit) => Math.min(list.length, limit + LIBRARY_RENDER_BATCH_SIZE))}
-            >
-              load more
-            </button>
-          </div>
-        ) : null}
-      </>
+      <VirtualSongRows
+        list={list}
+        className={className}
+        currentId={currentId}
+        isPlaying={isPlaying}
+        draggedSongId={draggedSongId}
+        libraryDragOverSongId={libraryDragOverSongId}
+        libraryDropSide={libraryDropSide}
+        draggedSongTitle={draggedSongTitle}
+        onAreaDragOver={handleLibraryAreaDragOver}
+        onAreaDragLeave={handleLibraryAreaDragLeave}
+        onAreaDrop={handleLibraryAreaDrop}
+        onSelectSong={selectSongCardAction}
+        onTogglePlay={togglePlayCardAction}
+        onToggleLike={toggleLikeCardAction}
+        onOpenEditor={openEditorCardAction}
+        onOpenPlaylistPicker={openPlaylistPickerCardAction}
+        onOpenSongContextMenu={openSongContextMenuCardAction}
+        onStartSongDrag={startSongDragCardAction}
+        onDragOverSong={dragOverSongCardAction}
+        onDragLeaveSong={dragLeaveSongCardAction}
+        onDropSong={dropSongCardAction}
+        onDragEnd={endSongDragCardAction}
+      />
     );
   }
 
 
-  function renderHomeSongCards(list: Song[]) {
-    if (!list.length) {
-      return (
-        <div className="emptyState homeAlbumEmpty">
-          <strong>import songs to fill this area</strong>
-          <p>import some music and this expanded area turns into a proper home library.</p>
-        </div>
-      );
-    }
-
-    const renderLimit = Math.min(list.length, Math.max(1, libraryRenderLimit));
-    const visibleList = list.length > renderLimit ? list.slice(0, renderLimit) : list;
-
+  function renderHomeSongCards(list: Song[], className: string) {
     return (
-      <>
-        {visibleList.map((song, index) => {
-          const active = song.id === currentId;
-          const isDragging = draggedSongId === song.id;
-          const isDropTarget = Boolean(draggedSongId && draggedSongId !== song.id && libraryDragOverSongId === song.id);
-
-          return (
-            <HomeAlbumCardItem
-              key={song.id}
-              song={song}
-              index={index}
-              active={active}
-              isPlaying={isPlaying}
-              isDragging={isDragging}
-              isDropTarget={isDropTarget}
-              libraryDropSide={libraryDropSide}
-              draggedSongTitle={draggedSongTitle}
-              onSelectSong={selectSongCardAction}
-              onTogglePlay={togglePlayCardAction}
-              onToggleLike={toggleLikeCardAction}
-              onOpenEditor={openEditorCardAction}
-              onOpenPlaylistPicker={openPlaylistPickerCardAction}
-              onOpenSongContextMenu={openSongContextMenuCardAction}
-              onStartSongDrag={startSongDragCardAction}
-              onPointerStartSongDrag={startPointerSongDragCardAction}
-              registerLibrarySongElement={registerLibrarySongElement}
-              onDragOverSong={dragOverSongCardAction}
-              onDragLeaveSong={dragLeaveSongCardAction}
-              onDropSong={dropSongCardAction}
-              onDragEnd={endSongDragCardAction}
-            />
-          );
-        })}
-
-        {visibleList.length < list.length ? (
-          <div className="libraryRenderNotice homeAlbumLoadMore">
-            <span>loaded {visibleList.length} of {list.length} covers</span>
-            <button
-              className="libraryLoadMoreButton"
-              type="button"
-              onClick={() => setLibraryRenderLimit((limit) => Math.min(list.length, limit + LIBRARY_RENDER_BATCH_SIZE))}
-            >
-              load more
-            </button>
-          </div>
-        ) : null}
-      </>
+      <VirtualHomeSongCards
+        list={list}
+        className={className}
+        currentId={currentId}
+        isPlaying={isPlaying}
+        draggedSongId={draggedSongId}
+        libraryDragOverSongId={libraryDragOverSongId}
+        libraryDropSide={libraryDropSide}
+        draggedSongTitle={draggedSongTitle}
+        onAreaDragOver={handleLibraryAreaDragOver}
+        onAreaDragLeave={handleLibraryAreaDragLeave}
+        onAreaDrop={handleLibraryAreaDrop}
+        onSelectSong={selectSongCardAction}
+        onTogglePlay={togglePlayCardAction}
+        onToggleLike={toggleLikeCardAction}
+        onOpenEditor={openEditorCardAction}
+        onOpenPlaylistPicker={openPlaylistPickerCardAction}
+        onOpenSongContextMenu={openSongContextMenuCardAction}
+        onStartSongDrag={startSongDragCardAction}
+        onPointerStartSongDrag={startPointerSongDragCardAction}
+        registerLibrarySongElement={registerLibrarySongElement}
+        onDragOverSong={dragOverSongCardAction}
+        onDragLeaveSong={dragLeaveSongCardAction}
+        onDropSong={dropSongCardAction}
+        onDragEnd={endSongDragCardAction}
+      />
     );
   }
 
@@ -9566,25 +9971,9 @@ function MainModeApp() {
           </div>
         </div>
 
-        {settings.homeExpanded ? (
-          <div
-            className="homeAlbumGrid simpleAlbumGrid"
-            onDragOver={handleLibraryAreaDragOver}
-            onDragLeave={handleLibraryAreaDragLeave}
-            onDrop={handleLibraryAreaDrop}
-          >
-            {renderHomeSongCards(filteredSongs)}
-          </div>
-        ) : (
-          <div
-            className="songList simpleList"
-            onDragOver={handleLibraryAreaDragOver}
-            onDragLeave={handleLibraryAreaDragLeave}
-            onDrop={handleLibraryAreaDrop}
-          >
-            {renderSongRows(filteredSongs)}
-          </div>
-        )}
+        {settings.homeExpanded
+          ? renderHomeSongCards(filteredSongs, "homeAlbumGrid simpleAlbumGrid")
+          : renderSongRows(filteredSongs, "songList simpleList")}
       </section>
     </section>
   );
@@ -10438,15 +10827,27 @@ function MainModeApp() {
     >
       <TitleBar />
 
-      {updatePrompt.visible ? (
-        <div className="updateToastLayer topUpdateRibbonLayer" role="presentation">
-          <section
-            className={`updateToastCard topUpdateRibbon ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
-            onClick={(event) => event.stopPropagation()}
-            role="status"
-            aria-live="polite"
-            aria-label="localtify update"
+      <AnimatePresence initial={false}>
+        {updatePrompt.visible ? (
+          <Motion.div
+            key={`update-ribbon-${updatePrompt.status}-${updatePrompt.version || APP_VERSION}`}
+            className="updateToastLayer topUpdateRibbonLayer"
+            role="presentation"
+            initial={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -12, scaleY: 0.98 }}
+            animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scaleY: 1 }}
+            exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -10, scaleY: 0.985 }}
+            transition={settings.reducedMotion ? { duration: 0.14 } : { type: "spring", stiffness: 430, damping: 34, mass: 0.62 }}
           >
+            <Motion.section
+              className={`updateToastCard topUpdateRibbon ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
+              onClick={(event) => event.stopPropagation()}
+              role="status"
+              aria-live="polite"
+              aria-label="localtify update"
+              initial={settings.reducedMotion ? false : { opacity: 0.92, y: -4 }}
+              animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              transition={settings.reducedMotion ? { duration: 0.14 } : { type: "spring", stiffness: 520, damping: 32, mass: 0.58 }}
+            >
             <div className="topUpdateRibbonMain">
               <div className="updateToastIcon topUpdateRibbonIcon" aria-hidden="true">
                 {updatePrompt.status === "downloaded" ? "✓" : updatePrompt.status === "downloading" ? "↓" : updatePrompt.status === "error" ? "!" : "↧"}
@@ -10513,9 +10914,10 @@ function MainModeApp() {
                 <span style={{ width: `${clamp(updatePrompt.percent, 0, 100)}%` }} />
               </div>
             ) : null}
-          </section>
-        </div>
-      ) : null}
+            </Motion.section>
+          </Motion.div>
+        ) : null}
+      </AnimatePresence>
 
       {secretMode !== "none" ? (
         <div className={`secretLayer ${secretMode}`} key={`${secretMode}-${secretBurst}`} aria-hidden="true">
@@ -10904,25 +11306,9 @@ function MainModeApp() {
                       </div>
                     </div>
 
-                    {settings.homeExpanded ? (
-                      <div
-                        className="homeAlbumGrid"
-                        onDragOver={handleLibraryAreaDragOver}
-                        onDragLeave={handleLibraryAreaDragLeave}
-                        onDrop={handleLibraryAreaDrop}
-                      >
-                        {renderHomeSongCards(filteredSongs)}
-                      </div>
-                    ) : (
-                      <div
-                        className="songList homeSongList"
-                        onDragOver={handleLibraryAreaDragOver}
-                        onDragLeave={handleLibraryAreaDragLeave}
-                        onDrop={handleLibraryAreaDrop}
-                      >
-                        {renderSongRows(filteredSongs)}
-                      </div>
-                    )}
+                    {settings.homeExpanded
+                      ? renderHomeSongCards(filteredSongs, "homeAlbumGrid")
+                      : renderSongRows(filteredSongs, "songList homeSongList")}
                   </section>
 
                   {showHomeSideCards ? (
@@ -11207,47 +11593,23 @@ function MainModeApp() {
                       ) : null}
                     </div>
 
-                    <div className="playlistTrackList" aria-label="playlist songs">
-                      {selectedPlaylist && selectedPlaylistSongs.length ? selectedPlaylistSongs.map((song, index) => {
-                        const active = song.id === currentId;
-                        const isDragging = draggedSongId === song.id;
-                        const isDropTarget = playlistDragOverSongId === song.id && draggedSongId !== song.id;
-
-                        return (
-                          <article
-                            key={`${selectedPlaylist!.id}-${song.id}`}
-                            className={`playlistTrackRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""}`}
-                            data-drop-side={isDropTarget ? playlistDropSide : undefined}
-                            draggable
-                            onDragStart={(event) => startSongDrag(event, song.id)}
-                            onDragOver={(event) => handlePlaylistSongDragOver(event, song.id)}
-                            onDragLeave={(event) => handlePlaylistSongDragLeave(event, song.id)}
-                            onDrop={(event) => handlePlaylistSongDrop(event, song.id)}
-                            onDragEnd={endSongDrag}
-                            onContextMenu={(event) => openSongContextMenu(event, song)}
-                          >
-                            <span className="playlistTrackGrip">⋮⋮</span>
-                            <button className="playlistTrackMain" type="button" onClick={() => void selectSong(song.id, true)}>
-                              <span className="playlistTrackIndex">{active && isPlaying ? "▶" : index + 1}</span>
-                              <Cover song={song} className="playlistTrackCover" />
-                              <span>
-                                <strong>{prettyTitle(song.title, 7)}</strong>
-                                <small>{prettyMeta(song.artist)}</small>
-                              </span>
-                            </button>
-                            <span className="playlistTrackDuration">{formatTime(song.duration)}</span>
-                            <button className="iconAction" type="button" onClick={() => removeSongFromPlaylist(selectedPlaylist!.id, song.id)} aria-label="remove from playlist">
-                              ×
-                            </button>
-                          </article>
-                        );
-                      }) : (
-                        <div className="playlistEmptyState">
-                          <strong>{selectedPlaylist ? "This playlist is empty" : "Choose a playlist"}</strong>
-                          <p>{selectedPlaylist ? "Use the + button on a song card or the edit menu to add music here." : "Your playlist songs will show up here."}</p>
-                        </div>
-                      )}
-                    </div>
+                    <VirtualPlaylistTrackList
+                      selectedPlaylistId={selectedPlaylist?.id || ""}
+                      list={selectedPlaylistSongs}
+                      currentId={currentId}
+                      isPlaying={isPlaying}
+                      draggedSongId={draggedSongId}
+                      playlistDragOverSongId={playlistDragOverSongId}
+                      playlistDropSide={playlistDropSide}
+                      onSelectSong={(songId) => void selectSong(songId, true)}
+                      onStartSongDrag={startSongDrag}
+                      onDragOverSong={handlePlaylistSongDragOver}
+                      onDragLeaveSong={handlePlaylistSongDragLeave}
+                      onDropSong={handlePlaylistSongDrop}
+                      onDragEnd={endSongDrag}
+                      onOpenContextMenu={openSongContextMenu}
+                      onRemoveSong={removeSongFromPlaylist}
+                    />
                   </section>
                 </div>
               </section>
@@ -11410,7 +11772,18 @@ function MainModeApp() {
                 <div className="settingsLayout settingsPageLayoutV027">
                   {renderSettingsRail("page")}
                   <div className="settingsCategoryContent settingsCategoryContentV027">
-                    {renderSettingsCategoryContent()}
+                    <AnimatePresence mode="wait" initial={false}>
+                      <Motion.div
+                        key={`settings-page-${settingsCategory}`}
+                        className="settingsCategoryMotion"
+                        initial={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+                        animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                        exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
+                        transition={settings.reducedMotion ? { duration: 0.1 } : { type: "spring", stiffness: 360, damping: 34, mass: 0.7 }}
+                      >
+                        {renderSettingsCategoryContent()}
+                      </Motion.div>
+                    </AnimatePresence>
                   </div>
                 </div>
               </section>
@@ -11737,7 +12110,18 @@ function MainModeApp() {
             <div className="settingsLayout settingsModalLayoutV027">
               {renderSettingsRail("modal")}
               <div className="settingsCategoryContent settingsCategoryContentV027">
-                {renderSettingsCategoryContent()}
+                <AnimatePresence mode="wait" initial={false}>
+                  <Motion.div
+                    key={`settings-modal-${settingsCategory}`}
+                    className="settingsCategoryMotion"
+                    initial={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+                    animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                    exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
+                    transition={settings.reducedMotion ? { duration: 0.1 } : { type: "spring", stiffness: 360, damping: 34, mass: 0.7 }}
+                  >
+                    {renderSettingsCategoryContent()}
+                  </Motion.div>
+                </AnimatePresence>
               </div>
             </div>
           </div>
