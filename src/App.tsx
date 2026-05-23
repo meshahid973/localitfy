@@ -3183,6 +3183,8 @@ function MainModeApp() {
   const customThemePreviewFrameRef = useRef<number | null>(null);
   const themePaintIdleTimerRef = useRef<number | null>(null);
   const viewSwitchTimerRef = useRef<number | null>(null);
+  const heroReflowTimerRef = useRef<number | null>(null);
+  const heroCoverMotionTimerRef = useRef<number | null>(null);
   const customThemeLivePatchRef = useRef<Partial<Settings>>({});
   const pendingCustomThemePreviewPatchRef = useRef<Partial<Settings>>({});
   const appRootRef = useRef<HTMLElement | null>(null);
@@ -3564,6 +3566,22 @@ function MainModeApp() {
         window.clearTimeout(viewSwitchTimerRef.current);
         viewSwitchTimerRef.current = null;
       }
+
+      if (heroReflowTimerRef.current !== null) {
+        window.clearTimeout(heroReflowTimerRef.current);
+        heroReflowTimerRef.current = null;
+      }
+
+      if (heroCoverMotionTimerRef.current !== null) {
+        window.clearTimeout(heroCoverMotionTimerRef.current);
+        heroCoverMotionTimerRef.current = null;
+      }
+
+      document.body.classList.remove(
+        "localitfyHeroReflowing",
+        "localitfyHeroCoverGrowing",
+        "localitfyHeroCoverShrinking"
+      );
     };
   }, []);
   useEffect(() => {
@@ -3603,7 +3621,6 @@ function MainModeApp() {
   const songIdentityRef = useRef<string | null>(null);
   const songTransitionCounterRef = useRef(0);
   const [nowPlayingTransitionKey, setNowPlayingTransitionKey] = useState("empty:0");
-  const [heroLayoutTick, setHeroLayoutTick] = useState(0);
   const [playlists, setPlaylists] = useState<Playlist[]>(() => readLocalJson<Playlist[]>(PLAYLIST_STORAGE_KEY, []));
   const [playQueue, setPlayQueue] = useState<string[]>(() => readLocalJson<string[]>(QUEUE_STORAGE_KEY, []));
   const [queueHistory, setQueueHistory] = useState<QueueHistoryItem[]>(() => readLocalJson<QueueHistoryItem[]>(QUEUE_HISTORY_STORAGE_KEY, []));
@@ -4424,8 +4441,39 @@ function MainModeApp() {
   }
 
   function setHeroExpanded(nextExpanded: boolean) {
-    setHeroLayoutTick((tick) => tick + 1);
-    void updateSetting("heroExpanded", nextExpanded);
+    if (settings.heroExpanded === nextExpanded) return;
+
+    document.body.classList.add("localitfyHeroReflowing");
+    document.body.classList.remove("localitfyHeroCoverGrowing", "localitfyHeroCoverShrinking");
+
+    if (heroReflowTimerRef.current !== null) {
+      window.clearTimeout(heroReflowTimerRef.current);
+    }
+
+    if (heroCoverMotionTimerRef.current !== null) {
+      window.clearTimeout(heroCoverMotionTimerRef.current);
+      heroCoverMotionTimerRef.current = null;
+    }
+
+    window.requestAnimationFrame(() => {
+      document.body.classList.add(nextExpanded ? "localitfyHeroCoverGrowing" : "localitfyHeroCoverShrinking");
+    });
+
+    heroReflowTimerRef.current = window.setTimeout(() => {
+      document.body.classList.remove("localitfyHeroReflowing");
+      heroReflowTimerRef.current = null;
+    }, 620);
+
+    heroCoverMotionTimerRef.current = window.setTimeout(() => {
+      document.body.classList.remove("localitfyHeroCoverGrowing", "localitfyHeroCoverShrinking");
+      heroCoverMotionTimerRef.current = null;
+    }, 760);
+
+    // Save this setting through the debounced path. That keeps the click
+    // animation away from an immediate disk write while still persisting it.
+    window.requestAnimationFrame(() => {
+      void updateSetting("heroExpanded", nextExpanded, true);
+    });
   }
 
   function toggleHeroExpanded() {
@@ -9820,7 +9868,7 @@ function MainModeApp() {
       </header>
 
       <section
-        className={`simpleHero ambientSurface heroLayoutMotion ${heroLayoutTick % 2 === 0 ? "heroLayoutPulseA" : "heroLayoutPulseB"} ${settings.heroExpanded ? "simpleHeroExpanded" : "simpleHeroCompact"}`}
+        className={`simpleHero ambientSurface heroLayoutMotion ${settings.heroExpanded ? "simpleHeroExpanded" : "simpleHeroCompact"}`}
         style={ambientStyle}
       >
         <div className="heroAmbiencePulse" aria-hidden="true" />
@@ -11089,7 +11137,7 @@ function MainModeApp() {
               {view === "home" && (
               <>
                 <section
-                  className={`hero heroPremium ambientSurface heroLayoutMotion ${heroLayoutTick % 2 === 0 ? "heroLayoutPulseA" : "heroLayoutPulseB"} ${settings.heroExpanded ? "heroExpanded" : "heroCompact"}`}
+                  className={`hero heroPremium ambientSurface heroLayoutMotion ${settings.heroExpanded ? "heroExpanded" : "heroCompact"}`}
                   style={{ ...ambientStyle, "--hero-motion-seed": nowPlayingTransitionKey } as CSSProperties}
                 >
                   <div className="heroAmbiencePulse" aria-hidden="true" />

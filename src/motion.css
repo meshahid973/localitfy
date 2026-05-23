@@ -1200,81 +1200,265 @@ body.localtifyBackgroundMode .coverCard,
   will-change: auto;
 }
 
-
-/* ========================================================================
-   localtify v0.3.3/v99 — update ribbon entrance motion
-   Owner: motion.css / animation only. No layout, no player changes.
-======================================================================== */
-@keyframes localtifyTopUpdateRibbonIn{
-  0%{
-    opacity: 0;
-    transform: translate3d(0, -10px, 0);
-  }
-  62%{
-    opacity: 1;
-    transform: translate3d(0, 2px, 0);
-  }
-  100%{
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
+/* =======================================================================
+   localtify v0.3.3 v102 — Motion package handoff polish
+   -----------------------------------------------------------------------
+   React Motion now owns the heavy enter/exit movement. CSS only gives the
+   affected layers stable compositing and reduced-motion fallbacks.
+======================================================================= */
+.topUpdateRibbonLayer,
+.topUpdateRibbon,
+.settingsCategoryMotion{
+  transform-origin: top center;
+  backface-visibility: hidden;
 }
 
-@media (prefers-reduced-motion: no-preference){
-  .app:not(.reducedMotion):not(.reduceMotion) .topUpdateRibbon{
-    animation: localtifyTopUpdateRibbonIn 360ms cubic-bezier(.18,.92,.2,1.06) both !important;
-    will-change: opacity, transform !important;
-  }
+.app[data-motion-level="smooth"] .topUpdateRibbon,
+.app[data-motion-level="smooth"] .settingsCategoryMotion{
+  will-change: transform, opacity;
+}
 
-  .app:not(.reducedMotion):not(.reduceMotion) .topUpdateRibbonIcon{
-    animation: localtifyIconPop 420ms cubic-bezier(.18,.92,.2,1.06) 60ms both !important;
-  }
+.settingsCategoryMotion{
+  min-width: 0;
+  width: 100%;
 }
 
 .app.reducedMotion .topUpdateRibbon,
+.app.reducedMotion .settingsCategoryMotion,
 .app.reduceMotion .topUpdateRibbon,
-.app[data-motion-level="reduced"] .topUpdateRibbon{
+.app.reduceMotion .settingsCategoryMotion{
   animation: none !important;
-  transform: none !important;
-}
-
-.app.reducedMotion .topUpdateRibbonIcon,
-.app.reduceMotion .topUpdateRibbonIcon,
-.app[data-motion-level="reduced"] .topUpdateRibbonIcon{
-  animation: none !important;
+  transition-duration: 120ms !important;
 }
 
 @media (prefers-reduced-motion: reduce){
   .topUpdateRibbon,
-  .topUpdateRibbonIcon{
+  .settingsCategoryMotion{
     animation: none !important;
-    transform: none !important;
+    transition-duration: 120ms !important;
   }
 }
 
+/* Motion/react handles the ribbon entrance in v102, so avoid double-running
+   older CSS keyframes on the same element. */
+.app[data-motion-level="smooth"] .topUpdateRibbon{
+  animation: none !important;
+}
+/* ======================================================================
+   localtify v0.3.3 v104 — zero-jitter now-playing expand/compact motion
+   ----------------------------------------------------------------------
+   Fixes the compact ⇄ expanded hero transition without touching player.css.
+   The old path animated grid columns, font sizes, cover dimensions and filter
+   blur together, which caused layout + paint spikes. This keeps the visual
+   ambience, but moves the actual transition to cheaper transform/opacity work.
+====================================================================== */
+body.localitfyHeroReflowing .app .homeShelfStack,
+body.localitfyHeroReflowing .app .libraryView,
+body.localitfyHeroReflowing .app .settingsPanel{
+  pointer-events: none !important;
+}
 
-/* ========================================================================
-   localtify v0.3.3/v100 — update ribbon centered entrance motion
-   Owner: motion.css / animation only. No tilt, no player changes.
-======================================================================== */
-@keyframes localtifyTopUpdateRibbonCenteredIn{
-  0%{
-    opacity: 0;
-    transform: translate3d(0, -7px, 0);
+.app .hero.heroPremium.heroLayoutMotion,
+.app .simpleHero.heroLayoutMotion{
+  contain: layout paint style !important;
+  isolation: isolate !important;
+  transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden !important;
+  overflow: clip !important;
+  will-change: min-height, padding, transform !important;
+  transition:
+    min-height 430ms cubic-bezier(.18, 1, .28, 1),
+    padding 430ms cubic-bezier(.18, 1, .28, 1),
+    gap 430ms cubic-bezier(.18, 1, .28, 1),
+    border-color 220ms ease,
+    box-shadow 300ms ease,
+    background-color 260ms ease,
+    transform 430ms cubic-bezier(.18, 1, .28, 1) !important;
+}
+
+/* Kill the extra keyframe pulse that replayed on every toggle and caused the jump. */
+.app .heroLayoutMotion.heroLayoutPulseA,
+.app .heroLayoutMotion.heroLayoutPulseB,
+.app .heroLayoutMotion.heroCompact.heroLayoutPulseA,
+.app .heroLayoutMotion.heroExpanded.heroLayoutPulseA{
+  animation: none !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact{
+  min-height: clamp(252px, 27vh, 326px) !important;
+  grid-template-columns: minmax(0, 1fr) clamp(214px, 17vw, 294px) !important;
+  gap: clamp(24px, 3.5vw, 54px) !important;
+  padding: clamp(28px, 3vw, 46px) clamp(32px, 4.4vw, 64px) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded{
+  min-height: clamp(352px, 39vh, 486px) !important;
+  grid-template-columns: minmax(0, 1fr) clamp(214px, 17vw, 294px) !important;
+  gap: clamp(24px, 3.5vw, 54px) !important;
+  padding: clamp(38px, 4vw, 62px) clamp(34px, 4.6vw, 68px) !important;
+}
+
+/* Text stays the same measured size; only transform changes. No font-size reflow. */
+.app .hero.heroPremium.heroLayoutMotion .heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion .heroText,
+.app .hero.heroPremium.heroLayoutMotion .heroTitle{
+  backface-visibility: hidden !important;
+  transform-origin: left center !important;
+  will-change: transform, opacity !important;
+  transition:
+    transform 430ms cubic-bezier(.18, 1, .28, 1),
+    opacity 220ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTitle{
+  font-size: clamp(56px, 7.2vw, 112px) !important;
+  line-height: .88 !important;
+  letter-spacing: -0.078em !important;
+  max-width: min(1000px, 63vw) !important;
+  filter: none !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTitle{
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTitle{
+  transform: translate3d(0, -4px, 0) scale(1.018) !important;
+}
+
+/* Cover keeps one measured box; expanded state scales it on GPU instead of resizing. */
+.app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
+  width: clamp(214px, 17vw, 294px) !important;
+  height: clamp(214px, 17vw, 294px) !important;
+  aspect-ratio: 1 / 1 !important;
+  align-self: center !important;
+  justify-self: end !important;
+  backface-visibility: hidden !important;
+  transform-origin: center center !important;
+  will-change: transform, opacity !important;
+  transition:
+    transform 430ms cubic-bezier(.18, 1, .28, 1),
+    opacity 220ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap{
+  transform: translate3d(0, 0, 0) scale(.92) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap{
+  transform: translate3d(-8px, -2px, 0) scale(1.04) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroArt,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArt,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArt{
+  width: 100% !important;
+  height: 100% !important;
+  transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden !important;
+  transition:
+    border-radius 260ms ease,
+    box-shadow 260ms ease,
+    opacity 180ms ease !important;
+}
+
+/* Keep ambience/blur, but do not animate expensive blur/filter values. */
+.app .hero.heroPremium.heroLayoutMotion::before,
+.app .hero.heroPremium.heroLayoutMotion::after,
+.app .hero.heroPremium.heroLayoutMotion .heroAmbiencePulse,
+.app .hero.heroPremium.heroLayoutMotion .heroArtWrap::before,
+.app .hero.heroPremium.heroLayoutMotion .heroArtWrap::after{
+  will-change: opacity, transform !important;
+  transition:
+    opacity 260ms ease,
+    transform 430ms cubic-bezier(.18, 1, .28, 1) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap::before{
+  opacity: .20 !important;
+  transform: translate3d(0, 0, 0) scale(1.02) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap::before{
+  opacity: .32 !important;
+  transform: translate3d(0, 0, 0) scale(1.12) !important;
+}
+
+.app .heroLayoutMotion .heroExpandedShelf,
+.app .heroLayoutMotion .heroExpandedShelf > div{
+  animation: none !important;
+  transition:
+    transform 360ms cubic-bezier(.18, 1, .28, 1),
+    opacity 240ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroExpandedShelf{
+  opacity: .92 !important;
+  transform: translate3d(0, 2px, 0) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroExpandedShelf{
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* Simple mode gets the same smooth path. */
+.app .simpleHero.heroLayoutMotion.simpleHeroCompact{
+  min-height: clamp(286px, 40vh, 390px) !important;
+  padding: clamp(24px, 3.2vw, 42px) !important;
+}
+
+.app .simpleHero.heroLayoutMotion.simpleHeroExpanded{
+  min-height: clamp(366px, 50vh, 520px) !important;
+  padding: clamp(34px, 4.4vw, 60px) !important;
+}
+
+.app .simpleHero.heroLayoutMotion .simpleHeroArtSwap,
+.app .simpleHero.heroLayoutMotion .simpleHeroArt{
+  backface-visibility: hidden !important;
+  will-change: transform, opacity !important;
+  transition:
+    transform 430ms cubic-bezier(.18, 1, .28, 1),
+    opacity 220ms ease,
+    box-shadow 260ms ease !important;
+}
+
+.app .simpleHero.heroLayoutMotion.simpleHeroCompact .simpleHeroArt{
+  transform: translate3d(0, 0, 0) scale(.96) !important;
+}
+
+.app .simpleHero.heroLayoutMotion.simpleHeroExpanded .simpleHeroArt{
+  transform: translate3d(0, 0, 0) scale(1.045) !important;
+}
+
+@media (max-width: 1100px){
+  .app .hero.heroPremium.heroLayoutMotion.heroCompact,
+  .app .hero.heroPremium.heroLayoutMotion.heroExpanded{
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: auto !important;
+    transition: padding 320ms cubic-bezier(.18, 1, .28, 1), transform 320ms cubic-bezier(.18, 1, .28, 1) !important;
   }
-  68%{
-    opacity: 1;
-    transform: translate3d(0, 1px, 0);
-  }
-  100%{
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
+
+  .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
+  .app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap,
+  .app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap{
+    justify-self: start !important;
+    width: clamp(160px, 34vw, 240px) !important;
+    height: clamp(160px, 34vw, 240px) !important;
+    transform: translate3d(0, 0, 0) scale(1) !important;
   }
 }
 
-@media (prefers-reduced-motion: no-preference){
-  .app:not(.reducedMotion):not(.reduceMotion) .topUpdateRibbon{
-    animation: localtifyTopUpdateRibbonCenteredIn 320ms cubic-bezier(.2,.9,.22,1.04) both !important;
-    will-change: opacity, transform !important;
-  }
+.app.reducedMotion .hero.heroPremium.heroLayoutMotion,
+.app.reducedMotion .simpleHero.heroLayoutMotion,
+.app.reducedMotion .hero.heroPremium.heroLayoutMotion *,
+.app.reducedMotion .simpleHero.heroLayoutMotion *{
+  animation: none !important;
+  transition-duration: 1ms !important;
 }
