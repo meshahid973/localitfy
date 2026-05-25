@@ -7465,7 +7465,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
    --------------------------------------------------------------------------
    Scope notes:
    - Page transitions are ONLY on .content > .pageTransition.
-   - Titlebar, bottom player, detached mini-player, and settings modal are not targeted.
+   - Titlebar, bottom player, and settings modal are not targeted.
    - Library hover uses theme variables instead of gray/black darkening.
    ========================================================================== */
 
@@ -13737,4 +13737,570 @@ html body .content{
   transform: translate3d(0,-1px,0) scale(1.002) !important;
   filter: none !important;
   background-image: none !important;
+}
+
+/* ========================================================================
+   localtify v0.3.1 — home/library rounded surface guard
+   Owner: home.css for home/library/song-card areas only.
+   Fixes square leaks, clipped hover rows, and sharp section corners.
+======================================================================== */
+.homeSection,
+.homeShelf,
+.localPicksPanel,
+.coverShelf,
+.quickLibraryPanel,
+.libraryOverview,
+.libraryList,
+.libraryPanel,
+.songGrid,
+.analyticsPanel,
+.analyticsHero,
+.playlistPanel{
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  background-clip: padding-box !important;
+}
+
+.songRow,
+.libraryTrackRow,
+.trackRow,
+.homeSongRow,
+.songCard,
+.coverCard,
+.recentCoverCard{
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  background-clip: padding-box !important;
+  contain: paint !important;
+}
+
+.songRow:hover,
+.libraryTrackRow:hover,
+.trackRow:hover,
+.homeSongRow:hover,
+.songCard:hover,
+.coverCard:hover,
+.recentCoverCard:hover{
+  transform: translate3d(0,-1px,0) !important;
+}
+
+/* v0.3.1 download queue polish */
+.downloadsLayoutV031 {
+  width: 100%;
+}
+
+.downloadPanelV031 {
+  overflow: hidden;
+  border-radius: 28px;
+}
+
+.downloadHeroHead,
+.smallPanelHead {
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.downloadHeroActions,
+.downloadActionsV031,
+.downloadQueueActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.downloadSettingsStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 14px;
+}
+
+.downloadSettingsStrip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.downloadNoticeV031 {
+  margin: 12px 0 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(236, 76, 255, 0.18);
+  border-radius: 20px;
+  background: rgba(236, 76, 255, 0.07);
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.45;
+}
+
+.downloadTextareaV031 {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 24px;
+  background: rgba(5, 3, 10, 0.72);
+  color: rgba(255, 255, 255, 0.9);
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.downloadTextareaV031:focus {
+  border-color: rgba(238, 76, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(238, 76, 255, 0.12), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.downloadActionsV031 {
+  margin-top: 16px;
+}
+
+.dangerGhost {
+  color: #ffb3ce;
+  border-color: rgba(255, 93, 140, 0.34);
+  background: rgba(255, 93, 140, 0.08);
+}
+
+.downloadQueuePanel,
+.converterBoxV031,
+.downloadResultsV031 {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.downloadQueueList {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.downloadQueueItem {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: rgba(9, 5, 14, 0.68);
+}
+
+.downloadQueueItem.done {
+  border-color: rgba(79, 255, 174, 0.22);
+}
+
+.downloadQueueItem.failed,
+.downloadQueueItem.cancelled {
+  border-color: rgba(255, 104, 151, 0.24);
+}
+
+.downloadQueueTop {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.downloadQueueIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  background: rgba(236, 76, 255, 0.13);
+  color: rgba(255, 137, 255, 0.92);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.downloadQueueTop strong,
+.downloadResult strong {
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.downloadQueueTop p,
+.downloadResult p,
+.converterBoxV031 p {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.downloadQueueTop small {
+  color: rgba(255, 255, 255, 0.64);
+  font-weight: 900;
+}
+
+.downloadQueueTrack,
+.converterTrack {
+  height: 7px;
+  margin: 12px 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.downloadQueueTrack i,
+.converterTrack i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(236, 76, 255, 0.78), rgba(255, 108, 235, 0.95));
+}
+
+.downloadQueueMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.downloadQueueActions {
+  margin-top: 12px;
+}
+
+.converterBoxV031 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.converterProgress {
+  grid-column: 1 / -1;
+}
+
+.converterProgress > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.downloadResultsV031 {
+  display: grid;
+  gap: 10px;
+}
+
+.downloadResult {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.downloadResult > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: rgba(236, 76, 255, 0.14);
+  font-weight: 900;
+}
+
+.downloadResult.ok > span {
+  color: #88ffc7;
+}
+
+.downloadResult.bad > span {
+  color: #ff98bd;
+}
+
+@media (max-width: 900px) {
+  .downloadHeroHead,
+  .converterBoxV031,
+  .downloadResult {
+    grid-template-columns: 1fr;
+  }
+
+  .downloadQueueTop {
+    grid-template-columns: auto 1fr;
+  }
+
+  .downloadQueueTop small {
+    grid-column: 1 / -1;
+  }
+}
+
+
+/* v0.3.1 cover gallery loading polish */
+.coverGalleryImageButton {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb, 227, 78, 232), 0.14), transparent 64%),
+    rgba(8, 5, 12, 0.9);
+}
+
+.coverGalleryImageShell {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb, 227, 78, 232), 0.14), transparent 64%),
+    rgba(8, 5, 12, 0.92);
+}
+
+.coverGalleryImagePlaceholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: clamp(1.6rem, 18vw, 4rem);
+  font-weight: 850;
+  letter-spacing: -0.08em;
+  text-transform: lowercase;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), transparent 44%),
+    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb, 227, 78, 232), 0.16), transparent 62%);
+  opacity: 1;
+  transition: opacity 220ms ease, transform 280ms ease;
+  pointer-events: none;
+}
+
+.coverGalleryImageShell.isLoaded .coverGalleryImagePlaceholder {
+  opacity: 0;
+  transform: scale(0.985);
+}
+
+.coverGalleryImageShell.isFailed .coverGalleryImagePlaceholder {
+  opacity: 1;
+  transform: none;
+}
+
+.coverGalleryImageShell .coverGalleryImage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  background: transparent;
+  color: transparent;
+  opacity: 0;
+  transform: scale(1.018);
+  transition: opacity 240ms ease, transform 360ms ease;
+  pointer-events: none;
+}
+
+.coverGalleryImageShell .coverGalleryImage.isLoaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.coverGalleryImageShell.isLoading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.055) 46%, transparent 72%);
+  transform: translateX(-110%);
+  animation: coverLoadSweep 1.15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.coverGalleryImageShell.isLoaded::after,
+.coverGalleryImageShell.isFailed::after {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coverGalleryImagePlaceholder,
+  .coverGalleryImageShell .coverGalleryImage {
+    transition: opacity 1ms linear;
+    transform: none;
+  }
+
+  .coverGalleryImageShell.isLoading::after {
+    animation: none;
+  }
+}
+
+/* =======================================================================
+   localtify v0.3.3 v102 — real virtualization containers
+   -----------------------------------------------------------------------
+   Keep the existing visuals, but let React only mount visible playlist rows,
+   cover picker rows, and cover gallery rows.
+======================================================================= */
+.playlistTrackList.virtualPlaylistTrackList{
+  position: relative !important;
+  display: block !important;
+  max-height: min(58vh, 560px) !important;
+  min-height: 220px !important;
+  overflow: auto !important;
+  overflow-x: hidden !important;
+  padding: 0 4px 14px 0 !important;
+  contain: content;
+  scrollbar-gutter: stable;
+}
+
+.virtualPlaylistTrackCanvas{
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.playlistTrackRow.virtualPlaylistTrackRow{
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 4px !important;
+  width: calc(100% - 4px) !important;
+  contain: layout paint style;
+  will-change: transform;
+}
+
+.coverSongList.coverSongListVirtual{
+  position: relative !important;
+  display: block !important;
+  overflow: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 4px !important;
+  contain: content;
+  scrollbar-gutter: stable;
+}
+
+.coverSongVirtualCanvas{
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.coverSongPick.coverSongPickVirtual{
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 4px !important;
+  width: calc(100% - 4px) !important;
+  contain: layout paint style;
+  will-change: transform;
+}
+
+.coverGalleryGrid.coverGalleryGridVirtual{
+  position: relative !important;
+  display: block !important;
+  grid-template-columns: none !important;
+  gap: 0 !important;
+  overflow: auto !important;
+  overflow-x: hidden !important;
+  contain: content;
+  scrollbar-gutter: stable;
+}
+
+.coverGalleryVirtualCanvas{
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.coverGalleryVirtualRow{
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: grid !important;
+  gap: 14px !important;
+  min-width: 0 !important;
+  padding: 2px 4px 16px 2px !important;
+  contain: layout paint style;
+  will-change: transform;
+}
+
+.coverGalleryVirtualRow .coverGalleryCard{
+  min-width: 0 !important;
+  height: 100% !important;
+}
+
+/* localtify v0.3.3 v104 — hero reflow helper
+   The real transition override lives in motion.css, imported after this file.
+   This keeps the rest of home.css untouched and preserves player.css. */
+body.localitfyHeroReflowing .app .homeShelfStack{
+  pointer-events: none !important;
+}
+
+/* =======================================================================
+   localtify v0.3.5 v110 — playlist stability + smooth drag polish
+   -----------------------------------------------------------------------
+   Playlist visuals stay in home.css. This keeps drag/reorder feedback smooth
+   without letting hover state repaint the whole app.
+======================================================================= */
+.app .playlistShelfCard.playing{
+  border-color: rgba(var(--accent-rgb), 0.5) !important;
+  background: rgba(var(--accent-rgb), 0.1) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(var(--accent-rgb), 0.88),
+    0 14px 34px rgba(var(--accent-rgb), 0.1) !important;
+}
+
+.app .playlistShelfCard.playing .playlistShelfDropHint{
+  opacity: 1;
+  transform: translateY(0);
+  color: rgba(255,255,255,.9);
+  border-color: rgba(var(--accent-rgb), .34);
+  background: rgba(var(--accent-rgb), .14);
+}
+
+.app .playlistDropEmpty{
+  min-height: 220px;
+  place-items: center;
+  text-align: center;
+  transition:
+    border-color 180ms cubic-bezier(.2,.82,.22,1),
+    background-color 180ms cubic-bezier(.2,.82,.22,1),
+    box-shadow 200ms cubic-bezier(.2,.82,.22,1),
+    opacity 160ms ease;
+}
+
+body.localitfySongDragging .app .playlistDropEmpty{
+  border-color: rgba(var(--accent-rgb), .34);
+  background: rgba(var(--accent-rgb), .055);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .08);
+}
+
+.app .playlistTrackRow.virtualPlaylistTrackRow{
+  transition-property: background-color, border-color, box-shadow, opacity !important;
+  transition-duration: 150ms, 150ms, 190ms, 140ms !important;
+  transition-timing-function: cubic-bezier(.2,.82,.22,1) !important;
+  will-change: auto !important;
+}
+
+.app .playlistTrackRow.virtualPlaylistTrackRow.songDropTarget{
+  border-color: rgba(var(--accent-rgb), .58) !important;
+  background: rgba(var(--accent-rgb), .095) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--accent-rgb), .12),
+    0 12px 30px rgba(var(--accent-rgb), .1) !important;
+}
+
+.app .playlistTrackRow.virtualPlaylistTrackRow.songDragging{
+  opacity: .44;
+}
+
+.app .playlistTrackRow.virtualPlaylistTrackRow.playing .playlistTrackIndex{
+  color: rgba(var(--accent-rgb), .96);
+}
+
+.app .playlistTrackRow.virtualPlaylistTrackRow .iconAction{
+  justify-self: end;
 }

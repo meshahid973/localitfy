@@ -275,6 +275,13 @@ type Playlist = {
   createdAt: number;
 };
 
+type PlaylistSummary = {
+  playlist: Playlist;
+  previewSongs: Song[];
+  songCount: number;
+  duration: number;
+};
+
 type QueueHistoryItem = {
   id: string;
   songId: string;
@@ -2810,19 +2817,30 @@ const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   );
 });
 
+function readPlaylistDraggedSongId(event: DragEvent<HTMLElement>, fallbackSongId = "") {
+  return (
+    event.dataTransfer.getData("text/localitfy-song-id") ||
+    event.dataTransfer.getData("text/plain") ||
+    fallbackSongId
+  );
+}
+
+function getPlaylistDropSide(event: DragEvent<HTMLElement>): LibraryDropSide {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const centerY = rect.top + rect.height / 2;
+  return event.clientY < centerY ? "before" : "after";
+}
+
 type VirtualPlaylistTrackListProps = {
   selectedPlaylistId: string;
   list: Song[];
   currentId: string;
   isPlaying: boolean;
   draggedSongId: string;
-  playlistDragOverSongId: string;
-  playlistDropSide: LibraryDropSide;
   onSelectSong: (songId: string) => void;
   onStartSongDrag: (event: DragEvent<HTMLElement>, songId: string) => void;
-  onDragOverSong: (event: DragEvent<HTMLElement>, songId: string) => void;
-  onDragLeaveSong: (event: DragEvent<HTMLElement>, songId: string) => void;
-  onDropSong: (event: DragEvent<HTMLElement>, songId: string) => void;
+  onDropSong: (playlistId: string, draggedSongId: string, targetSongId: string, side: LibraryDropSide) => void;
+  onAppendSong: (playlistId: string, draggedSongId: string) => void;
   onDragEnd: () => void;
   onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, song: Song) => void;
   onRemoveSong: (playlistId: string, songId: string) => void;
@@ -2834,18 +2852,16 @@ const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
   currentId,
   isPlaying,
   draggedSongId,
-  playlistDragOverSongId,
-  playlistDropSide,
   onSelectSong,
   onStartSongDrag,
-  onDragOverSong,
-  onDragLeaveSong,
   onDropSong,
+  onAppendSong,
   onDragEnd,
   onOpenContextMenu,
   onRemoveSong
 }: VirtualPlaylistTrackListProps) {
   const parentRef = useRef<HTMLDivElement | null>(null);
+  const [dropTarget, setDropTarget] = useState<{ songId: string; side: LibraryDropSide } | null>(null);
   const rowVirtualizer = useVirtualizer({
     count: list.length,
     getScrollElement: () => parentRef.current,
@@ -2854,11 +2870,39 @@ const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
     getItemKey: (index) => `${selectedPlaylistId}-${list[index]?.id || index}`
   });
 
+  const clearLocalDropTarget = useCallback(() => {
+    setDropTarget((current) => (current ? null : current));
+  }, []);
+
+  const handleEmptyDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
+    const songId = readPlaylistDraggedSongId(event, draggedSongId);
+    if (!selectedPlaylistId || !songId) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = "copy";
+  }, [draggedSongId, selectedPlaylistId]);
+
+  const handleEmptyDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
+    const songId = readPlaylistDraggedSongId(event, draggedSongId);
+    if (!selectedPlaylistId || !songId) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    onAppendSong(selectedPlaylistId, songId);
+    clearLocalDropTarget();
+    onDragEnd();
+  }, [clearLocalDropTarget, draggedSongId, onAppendSong, onDragEnd, selectedPlaylistId]);
+
   if (!selectedPlaylistId || !list.length) {
     return (
-      <div className="playlistEmptyState">
+      <div
+        className={`playlistEmptyState ${selectedPlaylistId ? "playlistDropEmpty" : ""}`}
+        onDragOver={handleEmptyDragOver}
+        onDrop={handleEmptyDrop}
+      >
         <strong>{selectedPlaylistId ? "This playlist is empty" : "Choose a playlist"}</strong>
-        <p>{selectedPlaylistId ? "Use the + button on a song card or the edit menu to add music here." : "Your playlist songs will show up here."}</p>
+        <p>{selectedPlaylistId ? "Drop a song here, or use the + button on any song to add music." : "Your playlist songs will show up here."}</p>
       </div>
     );
   }
@@ -2872,7 +2916,7 @@ const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
 
           const active = song.id === currentId;
           const isDragging = draggedSongId === song.id;
-          const isDropTarget = playlistDragOverSongId === song.id && draggedSongId !== song.id;
+          const isDropTarget = dropTarget?.songId === song.id && draggedSongId !== song.id;
 
           return (
             <article
@@ -2880,14 +2924,48 @@ const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               ref={rowVirtualizer.measureElement}
               data-index={virtualRow.index}
               className={`playlistTrackRow virtualPlaylistTrackRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""}`}
-              data-drop-side={isDropTarget ? playlistDropSide : undefined}
-              style={{ transform: `translateY(${virtualRow.start}px)` }}
+              data-drop-side={isDropTarget ? dropTarget?.side : undefined}
+              style={{
+                transform: `translateY(${virtualRow.start}px)`,
+                "--playlist-stagger": Math.min(virtualRow.index, 12)
+              } as CSSProperties}
               draggable
               onDragStart={(event) => onStartSongDrag(event, song.id)}
-              onDragOver={(event) => onDragOverSong(event, song.id)}
-              onDragLeave={(event) => onDragLeaveSong(event, song.id)}
-              onDrop={(event) => onDropSong(event, song.id)}
-              onDragEnd={onDragEnd}
+              onDragOver={(event) => {
+                const incomingSongId = readPlaylistDraggedSongId(event, draggedSongId);
+                if (!incomingSongId || incomingSongId === song.id) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+                event.dataTransfer.dropEffect = list.some((item) => item.id === incomingSongId) ? "move" : "copy";
+
+                const side = getPlaylistDropSide(event);
+                setDropTarget((current) => (
+                  current?.songId === song.id && current.side === side
+                    ? current
+                    : { songId: song.id, side }
+                ));
+              }}
+              onDragLeave={(event) => {
+                const nextTarget = event.relatedTarget;
+                if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return;
+                setDropTarget((current) => (current?.songId === song.id ? null : current));
+              }}
+              onDrop={(event) => {
+                const incomingSongId = readPlaylistDraggedSongId(event, draggedSongId);
+                if (!incomingSongId || incomingSongId === song.id) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+                const side = getPlaylistDropSide(event);
+                onDropSong(selectedPlaylistId, incomingSongId, song.id, side);
+                clearLocalDropTarget();
+                onDragEnd();
+              }}
+              onDragEnd={() => {
+                clearLocalDropTarget();
+                onDragEnd();
+              }}
               onContextMenu={(event) => onOpenContextMenu(event, song)}
             >
               <span className="playlistTrackGrip">⋮⋮</span>
@@ -3543,8 +3621,6 @@ function MainModeApp() {
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
   const [playlistPickerSong, setPlaylistPickerSong] = useState<Song | null>(null);
-  const [playlistDragOverSongId, setPlaylistDragOverSongId] = useState("");
-  const [playlistDropSide, setPlaylistDropSide] = useState<LibraryDropSide>("after");
   const [playlistDragOverPlaylistId, setPlaylistDragOverPlaylistId] = useState("");
   const [renamingPlaylistId, setRenamingPlaylistId] = useState<string | null>(null);
   const [renamingPlaylistName, setRenamingPlaylistName] = useState("");
@@ -4480,17 +4556,22 @@ function MainModeApp() {
     [selectedPlaylistSongs]
   );
 
-  const playlistSummaries = useMemo(
+  const playlistSummaries = useMemo<PlaylistSummary[]>(
     () => playlists.map((playlist) => {
-      const playlistSongs = playlist.songIds
-        .map((songId) => songsById.get(songId))
-        .filter((song): song is Song => Boolean(song));
+      let duration = 0;
+      let songCount = 0;
+      const previewSongs: Song[] = [];
 
-      return {
-        playlist,
-        songs: playlistSongs,
-        duration: playlistSongs.reduce((total, song) => total + (song.duration || 0), 0)
-      };
+      for (const songId of playlist.songIds) {
+        const song = songsById.get(songId);
+        if (!song) continue;
+
+        songCount += 1;
+        duration += song.duration || 0;
+        if (previewSongs.length < 4) previewSongs.push(song);
+      }
+
+      return { playlist, previewSongs, songCount, duration };
     }),
     [playlists, songsById]
   );
@@ -8227,46 +8308,77 @@ function MainModeApp() {
     }
   }
 
-  function createPlaylist(seedSongId?: string, forcedName?: string) {
+  function normalizePlaylistName(sourceName: string, fallbackName: string) {
+    return (sourceName.trim() || fallbackName).slice(0, 120);
+  }
+
+  function createPlaylist(forcedName?: string) {
     const sourceName = typeof forcedName === "string" ? forcedName : newPlaylistName;
-    const name = sourceName.trim() || `playlist ${playlists.length + 1}`;
+    const fallbackName = `playlist ${playlists.length + 1}`;
+    const name = normalizePlaylistName(sourceName, fallbackName);
     const existingPlaylist = playlists.find(
       (playlist) => playlist.name.trim().toLowerCase() === name.toLowerCase()
     );
 
     if (existingPlaylist) {
-      if (seedSongId) {
-        addSongToPlaylist(existingPlaylist.id, seedSongId);
-        setPlaylistPickerSong(null);
-        setPlaylistPickerName("");
-      } else {
-        setStatusText("playlist already exists");
-        showAppToast("playlist already exists", "info");
-      }
       setSelectedPlaylistId(existingPlaylist.id);
-      return;
+      setStatusText("playlist already exists");
+      showAppToast("playlist already exists", "info");
+      return existingPlaylist.id;
     }
 
-    const startingSongs = seedSongId && songsById.has(seedSongId) ? [seedSongId] : [];
-    const playlist: Playlist = { id: makeLocalId("playlist"), name, songIds: startingSongs, createdAt: Date.now() };
+    const playlist: Playlist = { id: makeLocalId("playlist"), name, songIds: [], createdAt: Date.now() };
 
     setPlaylists((items) => [playlist, ...items]);
     setSelectedPlaylistId(playlist.id);
     if (typeof forcedName === "string") setPlaylistPickerName("");
     else setNewPlaylistName("");
 
-    if (seedSongId) {
+    showAppToast("playlist created", "success");
+    setStatusText(`created playlist: ${name}`);
+    return playlist.id;
+  }
+
+  function createPlaylistWithSong(songId: string, forcedName: string) {
+    const sourceName = forcedName.trim();
+    if (!sourceName || !songsById.has(songId)) return;
+
+    const name = normalizePlaylistName(sourceName, `playlist ${playlists.length + 1}`);
+    const existingPlaylist = playlists.find(
+      (playlist) => playlist.name.trim().toLowerCase() === name.toLowerCase()
+    );
+
+    if (existingPlaylist) {
+      addSongToPlaylist(existingPlaylist.id, songId);
+      setSelectedPlaylistId(existingPlaylist.id);
       setPlaylistPickerSong(null);
-      showAppToast(`added to ${name}`, "success");
-    } else {
-      showAppToast("playlist created", "success");
+      setPlaylistPickerName("");
+      return existingPlaylist.id;
     }
 
-    setStatusText(seedSongId ? `added to ${name}` : `created playlist: ${name}`);
+    const playlist: Playlist = {
+      id: makeLocalId("playlist"),
+      name,
+      songIds: [songId],
+      createdAt: Date.now()
+    };
+
+    setPlaylists((items) => [playlist, ...items]);
+    setSelectedPlaylistId(playlist.id);
+    setPlaylistPickerSong(null);
+    setPlaylistPickerName("");
+    setStatusText(`added to ${name}`);
+    showAppToast(`added to ${name}`, "success");
+    return playlist.id;
   }
 
   function removePlaylist(playlistId: string) {
     const playlist = playlists.find((item) => item.id === playlistId);
+    if (!playlist) return;
+
+    const shouldRemove = window.confirm(`Delete "${playlist.name}"? Songs stay in your library.`);
+    if (!shouldRemove) return;
+
     setPlaylists((items) => items.filter((item) => item.id !== playlistId));
     setSelectedPlaylistId((id) => (id === playlistId ? null : id));
     setActivePlaylistId((id) => (id === playlistId ? null : id));
@@ -8274,7 +8386,8 @@ function MainModeApp() {
       setRenamingPlaylistId(null);
       setRenamingPlaylistName("");
     }
-    setStatusText(playlist ? `removed ${playlist.name}` : "playlist removed");
+    setStatusText(`removed ${playlist.name}`);
+    showAppToast("playlist deleted", "success");
   }
 
   function startRenamePlaylist(playlist: Playlist) {
@@ -8382,6 +8495,11 @@ function MainModeApp() {
     setSelectedPlaylistId(playlistId);
     setStatusText(`added ${prettyTitle(song.title, 4)} to ${playlist.name}`);
     showAppToast("added to playlist", "success");
+
+    if (playlistPickerSong?.id === songId) {
+      setPlaylistPickerSong(null);
+      setPlaylistPickerName("");
+    }
   }
 
   function removeSongFromPlaylist(playlistId: string, songId: string) {
@@ -8395,6 +8513,7 @@ function MainModeApp() {
     );
 
     setStatusText(`removed from ${playlist.name}`);
+    showAppToast("removed from playlist", "success");
   }
 
   function toggleSongPlaylist(playlistId: string, songId: string) {
@@ -8409,49 +8528,31 @@ function MainModeApp() {
     addSongToPlaylist(playlistId, songId);
   }
 
-  function handlePlaylistSongDragOver(event: DragEvent<HTMLElement>, targetSongId: string) {
-    const songId = readDraggedSongId(event);
-    if (!selectedPlaylist || !songId || !songsById.has(songId) || songId === targetSongId) return;
+  function handlePlaylistSongDrop(playlistId: string, songId: string, targetSongId: string, side: LibraryDropSide) {
+    if (!playlistId || !songId || !targetSongId || !songsById.has(songId) || songId === targetSongId) return;
 
-    event.preventDefault();
-    event.stopPropagation();
-    event.dataTransfer.dropEffect = "move";
+    const playlist = playlists.find((item) => item.id === playlistId);
+    if (!playlist) return;
 
-    const side = getLibraryDropSide(event);
-    setPlaylistDragOverSongId(targetSongId);
-    setPlaylistDropSide(side);
-  }
+    const nextIds = playlist.songIds.includes(songId)
+      ? reorderIdList(playlist.songIds, songId, targetSongId, side)
+      : insertIdNearTarget(playlist.songIds, songId, targetSongId, side);
 
-  function handlePlaylistSongDragLeave(event: DragEvent<HTMLElement>, targetSongId: string) {
-    const nextTarget = event.relatedTarget;
-    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return;
-    if (playlistDragOverSongId === targetSongId) setPlaylistDragOverSongId("");
-  }
-
-  function handlePlaylistSongDrop(event: DragEvent<HTMLElement>, targetSongId: string) {
-    const songId = readDraggedSongId(event);
-    if (!selectedPlaylist || !songId || !songsById.has(songId) || songId === targetSongId) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const side = getLibraryDropSide(event);
+    if (nextIds.length === playlist.songIds.length && nextIds.every((id, index) => id === playlist.songIds[index])) {
+      return;
+    }
 
     setPlaylists((items) =>
-      items.map((playlist) => {
-        if (playlist.id !== selectedPlaylist.id) return playlist;
-
-        const nextIds = playlist.songIds.includes(songId)
-          ? reorderIdList(playlist.songIds, songId, targetSongId, side)
-          : insertIdNearTarget(playlist.songIds, songId, targetSongId, side);
-
-        return { ...playlist, songIds: nextIds };
-      })
+      items.map((item) => (item.id === playlistId ? { ...item, songIds: nextIds } : item))
     );
+    setSelectedPlaylistId(playlistId);
+    setStatusText(playlist.songIds.includes(songId) ? "playlist order updated" : `added to ${playlist.name}`);
+    showAppToast(playlist.songIds.includes(songId) ? "playlist order updated" : "added to playlist", "success");
+  }
 
-    setPlaylistDragOverSongId("");
-    endSongDrag();
-    setStatusText("playlist order updated");
+  function handlePlaylistSongAppend(playlistId: string, songId: string) {
+    if (!playlistId || !songId || !songsById.has(songId)) return;
+    addSongToPlaylist(playlistId, songId);
   }
 
   function handlePlaylistShelfDragOver(event: DragEvent<HTMLElement>, playlistId: string) {
@@ -8461,7 +8562,7 @@ function MainModeApp() {
     event.preventDefault();
     event.stopPropagation();
     event.dataTransfer.dropEffect = "copy";
-    setPlaylistDragOverPlaylistId(playlistId);
+    setPlaylistDragOverPlaylistId((current) => (current === playlistId ? current : playlistId));
   }
 
   function handlePlaylistShelfDragLeave(event: DragEvent<HTMLElement>, playlistId: string) {
@@ -8896,6 +8997,7 @@ function MainModeApp() {
     setDraggedSongId("");
     setDraggedSongTitle("");
     clearLibraryDragTarget("after");
+    setPlaylistDragOverPlaylistId("");
     setQueueDropHotSafely(false);
   }
 
@@ -9549,6 +9651,34 @@ function MainModeApp() {
 
   const endSongDragCardAction = useStableCallback(() => {
     endSongDrag();
+  });
+
+  const selectPlaylistSongAction = useStableCallback((songId: string) => {
+    void selectSong(songId, true);
+  });
+
+  const startPlaylistSongDragAction = useStableCallback((event: DragEvent<HTMLElement>, songId: string) => {
+    startSongDrag(event, songId);
+  });
+
+  const dropPlaylistSongAction = useStableCallback((playlistId: string, songId: string, targetSongId: string, side: LibraryDropSide) => {
+    handlePlaylistSongDrop(playlistId, songId, targetSongId, side);
+  });
+
+  const appendPlaylistSongAction = useStableCallback((playlistId: string, songId: string) => {
+    handlePlaylistSongAppend(playlistId, songId);
+  });
+
+  const endPlaylistSongDragAction = useStableCallback(() => {
+    endSongDrag();
+  });
+
+  const openPlaylistSongContextMenuAction = useStableCallback((event: ReactMouseEvent<HTMLElement>, song: Song) => {
+    openSongContextMenu(event, song);
+  });
+
+  const removePlaylistSongAction = useStableCallback((playlistId: string, songId: string) => {
+    removeSongFromPlaylist(playlistId, songId);
   });
 
   async function saveEditor() {
@@ -10793,10 +10923,11 @@ function MainModeApp() {
                     </div>
 
                     <div className="playlistShelfGrid">
-                      {playlistSummaries.length ? playlistSummaries.map(({ playlist, songs: playlistSongs, duration }) => (
+                      {playlistSummaries.length ? playlistSummaries.map(({ playlist, previewSongs, songCount, duration }, index) => (
                         <button
                           key={playlist.id}
-                          className={`playlistShelfCard ${selectedPlaylist?.id === playlist.id ? "active" : ""} ${playlistDragOverPlaylistId === playlist.id ? "dropTarget" : ""}`}
+                          className={`playlistShelfCard ${selectedPlaylist?.id === playlist.id ? "active" : ""} ${activePlaylistId === playlist.id ? "playing" : ""} ${playlistDragOverPlaylistId === playlist.id ? "dropTarget" : ""}`}
+                          style={{ "--playlist-stagger": Math.min(index, 12) } as CSSProperties}
                           type="button"
                           onClick={() => setSelectedPlaylistId(playlist.id)}
                           onDragOver={(event) => handlePlaylistShelfDragOver(event, playlist.id)}
@@ -10804,12 +10935,12 @@ function MainModeApp() {
                           onDrop={(event) => handlePlaylistShelfDrop(event, playlist.id)}
                           title="drop a song here to add it"
                         >
-                          {renderPlaylistCollage(playlistSongs)}
+                          {renderPlaylistCollage(previewSongs)}
                           <span className="playlistShelfMeta">
                             <strong>{playlist.name}</strong>
-                            <small>{playlistSongs.length} song{playlistSongs.length === 1 ? "" : "s"} • {formatTime(duration)}</small>
+                            <small>{songCount} song{songCount === 1 ? "" : "s"} • {formatTime(duration)}</small>
                           </span>
-                          <span className="playlistShelfDropHint">drop song</span>
+                          <span className="playlistShelfDropHint">{activePlaylistId === playlist.id ? "playing" : "drop song"}</span>
                         </button>
                       )) : (
                         <div className="playlistEmptyState">
@@ -10864,16 +10995,13 @@ function MainModeApp() {
                       currentId={currentId}
                       isPlaying={isPlaying}
                       draggedSongId={draggedSongId}
-                      playlistDragOverSongId={playlistDragOverSongId}
-                      playlistDropSide={playlistDropSide}
-                      onSelectSong={(songId) => void selectSong(songId, true)}
-                      onStartSongDrag={startSongDrag}
-                      onDragOverSong={handlePlaylistSongDragOver}
-                      onDragLeaveSong={handlePlaylistSongDragLeave}
-                      onDropSong={handlePlaylistSongDrop}
-                      onDragEnd={endSongDrag}
-                      onOpenContextMenu={openSongContextMenu}
-                      onRemoveSong={removeSongFromPlaylist}
+                      onSelectSong={selectPlaylistSongAction}
+                      onStartSongDrag={startPlaylistSongDragAction}
+                      onDropSong={dropPlaylistSongAction}
+                      onAppendSong={appendPlaylistSongAction}
+                      onDragEnd={endPlaylistSongDragAction}
+                      onOpenContextMenu={openPlaylistSongContextMenuAction}
+                      onRemoveSong={removePlaylistSongAction}
                     />
                   </section>
                 </div>
@@ -11589,7 +11717,7 @@ function MainModeApp() {
                     onClick={() => addSongToPlaylist(playlist.id, playlistPickerSong!.id)}
                   >
                     {renderPlaylistCollage(
-                      playlist.songIds.map((songId) => songsById.get(songId)).filter((song): song is Song => Boolean(song)),
+                      playlist.songIds.slice(0, 4).map((songId) => songsById.get(songId)).filter((song): song is Song => Boolean(song)),
                       "playlistPickerCollage playlistCoverCollage"
                     )}
                     <span>
@@ -11612,7 +11740,7 @@ function MainModeApp() {
               onSubmit={(event) => {
                 event.preventDefault();
                 if (!playlistPickerName.trim()) return;
-                createPlaylist(playlistPickerSong!.id, playlistPickerName);
+                createPlaylistWithSong(playlistPickerSong!.id, playlistPickerName);
               }}
             >
               <input value={playlistPickerName} onChange={(event) => setPlaylistPickerName(event.currentTarget.value)} placeholder="new playlist name" />

@@ -1639,3 +1639,52 @@ body.localitfyHeroReflowing .app .settingsPanel{
     transition-duration: 1ms !important;
   }
 }
+
+/* =======================================================================
+   localtify v0.3.5 v110 — playlist motion pass
+   -----------------------------------------------------------------------
+   Motion-only. No tilt, no rotate, no layout ownership.
+======================================================================= */
+@keyframes localtifyPlaylistShelfIn{
+  0%{
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(.992);
+  }
+  72%{
+    opacity: 1;
+    transform: translate3d(0, -1px, 0) scale(1.002);
+  }
+  100%{
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes localtifyPlaylistRowIn{
+  0%{ opacity: 0; }
+  100%{ opacity: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .app:not(.reducedMotion):not(.reduceMotion) .playlistShelfCard{
+    animation: localtifyPlaylistShelfIn 420ms cubic-bezier(.18,.9,.22,1) both;
+    animation-delay: calc(min(var(--playlist-stagger, 0), 12) * 22ms);
+  }
+
+  .app:not(.reducedMotion):not(.reduceMotion) .playlistTrackRow.virtualPlaylistTrackRow{
+    animation: localtifyPlaylistRowIn 260ms ease both;
+    animation-delay: calc(min(var(--playlist-stagger, 0), 12) * 10ms);
+  }
+
+  body.localitfySongDragging .app .playlistShelfCard,
+  body.localitfySongDragging .app .playlistTrackRow.virtualPlaylistTrackRow{
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .playlistShelfCard,
+  .playlistTrackRow.virtualPlaylistTrackRow{
+    animation: none !important;
+  }
+}
