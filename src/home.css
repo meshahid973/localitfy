@@ -14304,3 +14304,82 @@ body.localitfySongDragging .app .playlistDropEmpty{
 .app .playlistTrackRow.virtualPlaylistTrackRow .iconAction{
   justify-self: end;
 }
+
+
+/* v0.3.5 playlist virtualization + row layout repair
+   The global motion guardrails use !important transforms, so virtual rows need
+   their own important translate value or every playlist song stacks at y=0. */
+.virtualPlaylistTrackRow {
+  transform: translate3d(0, var(--playlist-row-y, 0px), 0) !important;
+  contain: layout paint style;
+  will-change: transform;
+}
+
+.playlistTrackRow {
+  min-height: 72px;
+  align-items: center;
+  grid-template-columns: 28px minmax(0, 1fr) auto 40px;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.playlistTrackMain {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 28px 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.playlistTrackIndex,
+.playlistTrackGrip,
+.playlistTrackDuration {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.playlistTrackCover {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  overflow: hidden;
+}
+
+.playlistTrackText {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.playlistTrackTitle,
+.playlistTrackMeta {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .playlistTrackRow {
+    grid-template-columns: 24px minmax(0, 1fr) 34px;
+  }
+
+  .playlistTrackDuration {
+    display: none;
+  }
+
+  .playlistTrackMain {
+    grid-template-columns: 24px 42px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .playlistTrackCover {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+  }
+}

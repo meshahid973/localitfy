@@ -746,7 +746,7 @@ const updateRibbonEnterSpring = { type: "spring", stiffness: 500, damping: 35, m
 const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, mass: 0.55 } as const;
 
 
-const APP_VERSION = "0.3.3";
+const APP_VERSION = "0.3.5";
 const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 const INITIAL_LIBRARY_RENDER_LIMIT = 60;
 const LIBRARY_RENDER_BATCH_SIZE = 60;
@@ -829,12 +829,12 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.3 makes onboarding clearer for new users with quick steps for importing, playlists, covers, Discord, themes, and downloads",
-  "The Downloads step now explains YouTube-to-MP3, queue progress, speed, ETA, quality, retry, and auto-add to library",
-  "Theme presets now actually repaint the app from Settings instead of only changing the selected label",
-  "Theme colors now drive the app background, sidebar, panels, titlebar, player, buttons, and progress accents",
-  "Custom theme hex editing from 0.3.2 stays included for exact color control",
-  "No player layout changes in this update"
+  "0.3.5 cleans up playlist playback so songs stay inside the playlist you started from",
+  "Playlist rows now keep their spacing instead of stacking text and covers into one messy line",
+  "The home hero now shows the playlist name when a playlist is the active source",
+  "Playlist next and previous now follow playlist order before touching the main library",
+  "Playlist drag/reorder stays smooth without removing Localtify animations",
+  "More small playlist fixes are in place for a less half-finished feel"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -2926,7 +2926,7 @@ const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               className={`playlistTrackRow virtualPlaylistTrackRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""}`}
               data-drop-side={isDropTarget ? dropTarget?.side : undefined}
               style={{
-                transform: `translateY(${virtualRow.start}px)`,
+                "--playlist-row-y": `${virtualRow.start}px`,
                 "--playlist-stagger": Math.min(virtualRow.index, 12)
               } as CSSProperties}
               draggable
@@ -4540,6 +4540,18 @@ function MainModeApp() {
     () => playlists.find((playlist) => playlist.id === activePlaylistId) ?? null,
     [activePlaylistId, playlists]
   );
+
+  const activePlaylistSongs = useMemo(
+    () => activePlaylist?.songIds.map((songId) => songsById.get(songId)).filter((song): song is Song => Boolean(song)) ?? [],
+    [activePlaylist, songsById]
+  );
+
+  const currentPlaybackPlaylist = useMemo(() => {
+    if (!currentSong || !activePlaylist) return null;
+    return activePlaylist.songIds.includes(currentSong.id) ? activePlaylist : null;
+  }, [activePlaylist, currentSong?.id]);
+
+  const currentNowPlayingLabel = currentPlaybackPlaylist ? `now playing ${currentPlaybackPlaylist.name}` : "now playing";
 
   const selectedPlaylist = useMemo(
     () => playlists.find((playlist) => playlist.id === selectedPlaylistId) ?? playlists[0] ?? null,
@@ -6863,6 +6875,18 @@ function MainModeApp() {
     const queuedSong = playQueue[0] ? songsById.get(playQueue[0]) : null;
     if (queuedSong?.url && queuedSong.fileExists !== false) return queuedSong;
 
+    if (activePlaylist && activePlaylistSongs.length) {
+      const playlistIndex = activePlaylistSongs.findIndex((song) => song.id === currentSong.id);
+      if (playlistIndex !== -1) {
+        if (isShuffle && activePlaylistSongs.length > 1) {
+          return activePlaylistSongs.find((song) => song.id !== currentSong.id && song.url && song.fileExists !== false) || null;
+        }
+
+        const playlistNext = activePlaylistSongs[playlistIndex + 1] || (repeatPlaylist || repeatMode === "all" ? activePlaylistSongs[0] : null);
+        return playlistNext?.url && playlistNext.fileExists !== false ? playlistNext : null;
+      }
+    }
+
     const index = currentIndex();
     if (isShuffle && songs.length > 1) {
       return songs.find((song) => song.id !== currentSong.id && song.url && song.fileExists !== false) || null;
@@ -9154,11 +9178,37 @@ function MainModeApp() {
     }
     const ordered = shuffled ? [...playable].sort(() => Math.random() - 0.5) : playable;
     setActivePlaylistId(playlist.id);
+    setSelectedPlaylistId(playlist.id);
     setPlayQueue(ordered.slice(1).map((song) => song.id));
-    await selectSong(ordered[0].id, true);
+    await selectSong(ordered[0].id, true, { playlistId: playlist.id });
+    setStatusText(`${shuffled ? "shuffling" : "playing"} ${playlist.name}`);
   }
 
-  async function selectSong(songId: string, shouldPlay = settings.autoplayOnSelect) {
+  async function playSongFromPlaylist(playlistId: string, songId: string, shouldPlay = true) {
+    const playlist = playlists.find((item) => item.id === playlistId);
+    if (!playlist || !playlist.songIds.includes(songId)) {
+      await selectSong(songId, shouldPlay);
+      return;
+    }
+
+    const orderedSongs = playlist.songIds
+      .map((id) => songsById.get(id))
+      .filter((song): song is Song => Boolean(song));
+    const startIndex = orderedSongs.findIndex((song) => song.id === songId);
+
+    if (startIndex === -1) {
+      await selectSong(songId, shouldPlay);
+      return;
+    }
+
+    setActivePlaylistId(playlist.id);
+    setSelectedPlaylistId(playlist.id);
+    setPlayQueue(orderedSongs.slice(startIndex + 1).map((song) => song.id));
+    await selectSong(songId, shouldPlay, { playlistId: playlist.id });
+    setStatusText(`playing ${playlist.name}`);
+  }
+
+  async function selectSong(songId: string, shouldPlay = settings.autoplayOnSelect, playbackContext?: { playlistId?: string | null; keepPlaylistContext?: boolean }) {
     const targetSong = songsById.get(songId);
     const sameSong = songId === currentId;
     const audio = audioRef.current;
@@ -9194,6 +9244,14 @@ function MainModeApp() {
       setPlayerError("this audio file is missing. reimport it on this pc.");
       setStatusText("file missing");
       return;
+    }
+
+    const shouldKeepPlaylistContext = Boolean(playbackContext?.keepPlaylistContext && activePlaylist?.songIds.includes(targetSong.id));
+
+    if (playbackContext?.playlistId !== undefined) {
+      setActivePlaylistId(playbackContext.playlistId);
+    } else if (!shouldKeepPlaylistContext && activePlaylistId) {
+      setActivePlaylistId(null);
     }
 
     if (sameSong && audio) {
@@ -9311,7 +9369,7 @@ function MainModeApp() {
 
       timeRef.current = 0;
       setCurrentTime(0);
-      void selectSong(currentSong.id, true);
+      void selectSong(currentSong.id, true, currentPlaybackPlaylist ? { playlistId: currentPlaybackPlaylist.id } : undefined);
       return;
     }
 
@@ -9320,19 +9378,34 @@ function MainModeApp() {
       const queuedSong = songsById.get(queuedId);
       setPlayQueue((queue) => queue.slice(1));
       if (queuedSong) {
-        void selectSong(queuedSong.id, forcePlay);
+        const queuedBelongsToPlaylist = Boolean(activePlaylist?.songIds.includes(queuedSong.id));
+        void selectSong(queuedSong.id, forcePlay, queuedBelongsToPlaylist && activePlaylist ? { playlistId: activePlaylist.id } : undefined);
         return;
       }
     }
 
-    if (repeatPlaylist && activePlaylist) {
-      const playlistSongs = activePlaylist.songIds
-        .map((songId) => songsById.get(songId))
-        .filter((song): song is Song => Boolean(song));
-      const playlistIndex = currentSong ? playlistSongs.findIndex((song) => song.id === currentSong.id) : -1;
-      const playlistNext = playlistSongs[(playlistIndex + 1 + playlistSongs.length) % playlistSongs.length];
-      if (playlistNext) {
-        void selectSong(playlistNext.id, forcePlay);
+    if (activePlaylist && currentSong) {
+      const playlistIndex = activePlaylistSongs.findIndex((song) => song.id === currentSong.id);
+
+      if (playlistIndex !== -1) {
+        if (isShuffle && activePlaylistSongs.length > 1) {
+          const otherPlaylistSongs = activePlaylistSongs.filter((song) => song.id !== currentSong.id);
+          const randomPlaylistSong = otherPlaylistSongs[Math.floor(Math.random() * otherPlaylistSongs.length)];
+          if (randomPlaylistSong) void selectSong(randomPlaylistSong.id, forcePlay, { playlistId: activePlaylist.id });
+          return;
+        }
+
+        const playlistNext = activePlaylistSongs[playlistIndex + 1] || (repeatPlaylist || repeatMode === "all" ? activePlaylistSongs[0] : null);
+
+        if (playlistNext && playlistNext.id !== currentSong.id) {
+          setPlayQueue(activePlaylistSongs.slice(activePlaylistSongs.findIndex((song) => song.id === playlistNext.id) + 1).map((song) => song.id));
+          void selectSong(playlistNext.id, forcePlay, { playlistId: activePlaylist.id });
+        } else {
+          setIsPlaying(false);
+          pendingPlayRef.current = false;
+          setStatusText(`${activePlaylist.name} ended`);
+        }
+
         return;
       }
     }
@@ -9374,6 +9447,16 @@ function MainModeApp() {
       audio.currentTime = 0;
       setCurrentTime(0);
       return;
+    }
+
+    if (activePlaylist && currentSong) {
+      const playlistIndex = activePlaylistSongs.findIndex((song) => song.id === currentSong.id);
+
+      if (playlistIndex !== -1) {
+        const playlistPrevious = activePlaylistSongs[playlistIndex - 1] || (repeatPlaylist || repeatMode === "all" ? activePlaylistSongs[activePlaylistSongs.length - 1] : activePlaylistSongs[0]);
+        if (playlistPrevious) void selectSong(playlistPrevious.id, true, { playlistId: activePlaylist.id });
+        return;
+      }
     }
 
     const index = currentIndex();
@@ -9654,7 +9737,7 @@ function MainModeApp() {
   });
 
   const selectPlaylistSongAction = useStableCallback((songId: string) => {
-    void selectSong(songId, true);
+    void playSongFromPlaylist(selectedPlaylist?.id || "", songId, true);
   });
 
   const startPlaylistSongDragAction = useStableCallback((event: DragEvent<HTMLElement>, songId: string) => {
@@ -9920,7 +10003,7 @@ function MainModeApp() {
         </div>
 
         <div className="simpleHeroText nowPlayingCopySwap" key={`simple-copy-${nowPlayingTransitionKey}`}>
-          <small>now playing</small>
+          <small title={currentNowPlayingLabel}>{currentNowPlayingLabel}</small>
           <h2>{currentSong ? prettyTitle(currentSong.title, 7) : "nothing playing"}</h2>
           <p>{currentSong ? prettyMeta(currentSong.artist) : "import a song to begin"}</p>
 
@@ -10538,7 +10621,7 @@ function MainModeApp() {
                 >
                   <div className="heroAmbiencePulse" aria-hidden="true" />
                   <div className="heroText heroTextClean nowPlayingCopySwap" key={`hero-copy-${nowPlayingTransitionKey}`}>
-                    <p className="eyebrow">now playing</p>
+                    <p className="eyebrow" title={currentNowPlayingLabel}>{currentNowPlayingLabel}</p>
 
                     <h3 className="heroTitle" title={currentSong ? currentSong.title : "drop in your music"}>
                       {currentSong ? prettyTitle(currentSong.title, 7) : "drop in your music"}
