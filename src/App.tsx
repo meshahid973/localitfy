@@ -831,10 +831,11 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 const whatsNewItems = [
   "0.3.5 keeps playlist playback inside the playlist you started from",
   "The home hero now says which playlist is playing instead of pretending it came from the normal library",
+  "Hero covers feel more connected to the background with a softer glow and delayed ambience catch-up",
+  "Short song titles no longer explode into awkward giant text, while long titles still clamp cleanly",
+  "Song changes now animate the title, artist, cover, and hero aura more smoothly",
   "Playlist rows and quick-library cards have cleaner text spacing, so titles and artists no longer feel smashed or weirdly separated",
-  "Playlist next and previous follow playlist order before falling back to the main library",
-  "Playlist drag/reorder stays smooth without cutting Localtify's motion or ambience",
-  "A few messy playlist edge cases got cleaned up so the feature feels less half-finished"
+  "Playlist next and previous follow playlist order before falling back to the main library"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -1763,6 +1764,17 @@ function shortenWords(text: string, maxWords = 7) {
 
 function prettyTitle(rawTitle: string, maxWords = 7) {
   return lower(shortenWords(cleanupSongTitle(rawTitle, "heavy"), maxWords));
+}
+
+function heroTitleDensityClass(title: string) {
+  const clean = collapseSpaces(title || "");
+  const letters = clean.replace(/[^a-z0-9]/gi, "");
+
+  if (letters.length <= 5) return "heroTitleTiny";
+  if (letters.length <= 11) return "heroTitleShort";
+  if (letters.length >= 32) return "heroTitleLong";
+
+  return "heroTitleNormal";
 }
 
 function previewTitle(rawTitle: string, cleanup: DiscordTitleCleanup, maxWords = 7) {
@@ -3608,6 +3620,10 @@ function MainModeApp() {
   const currentSong = useMemo(() => {
     return songs.find((song) => song.id === currentId) ?? null;
   }, [songs, currentId]);
+
+  const heroDisplayTitle = currentSong ? prettyTitle(currentSong.title, 9) : "drop in your music";
+  const heroDisplayArtist = currentSong ? prettyMeta(currentSong.artist) : "import songs to start listening";
+  const heroTitleClass = heroTitleDensityClass(heroDisplayTitle);
 
   const songIdentityRef = useRef<string | null>(null);
   const songTransitionCounterRef = useRef(0);
@@ -10616,16 +10632,20 @@ function MainModeApp() {
               {view === "home" && (
               <>
                 <section
-                  className={`hero heroPremium ambientSurface heroLayoutMotion ${settings.heroExpanded ? "heroExpanded" : "heroCompact"}`}
+                  className={`hero heroPremium ambientSurface heroLayoutMotion ${settings.heroExpanded ? "heroExpanded" : "heroCompact"} ${heroTitleClass}`}
                   style={{ ...ambientStyle, "--hero-motion-seed": nowPlayingTransitionKey } as CSSProperties}
                 >
                   <div className="heroAmbiencePulse" aria-hidden="true" />
+                  <div className="heroCoverGhost" key={`hero-ghost-${nowPlayingTransitionKey}`} aria-hidden="true" />
                   <div className="heroText heroTextClean nowPlayingCopySwap" key={`hero-copy-${nowPlayingTransitionKey}`}>
                     <p className="eyebrow" title={currentNowPlayingLabel}>{currentNowPlayingLabel}</p>
 
                     <h3 className="heroTitle" title={currentSong ? currentSong.title : "drop in your music"}>
-                      {currentSong ? prettyTitle(currentSong.title, 7) : "drop in your music"}
+                      {heroDisplayTitle}
                     </h3>
+                    <p className="heroArtistLine" title={currentSong ? currentSong.artist || "unknown artist" : "import songs to start listening"}>
+                      {heroDisplayArtist}
+                    </p>
 
                     {misideModeActive ? (
                       <div className="misideEggNotice" role="status" aria-live="polite">
@@ -11653,7 +11673,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.5 is mostly a playlist and polish update: cleaner playlist playback, better card spacing, smoother playlist reordering, and less weird UI behavior.</p>
+            <p className="whatsNewSubtext">0.3.5 is mostly a playlist, hero, and smoothness update: playlist playback stays in its lane, the home hero feels more alive, and song changes should look less jumpy.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>

@@ -1688,3 +1688,108 @@ body.localitfyHeroReflowing .app .settingsPanel{
     animation: none !important;
   }
 }
+
+/* ========================================================================
+   localtify v0.3.5 — smoother hero song-change motion
+   Song changes should feel like the hero breathes into the next track instead
+   of text/art snapping. Transform + opacity only; no tilt, no layout shifting.
+======================================================================== */
+@keyframes localtifyHeroGhostCatchup{
+  0%{
+    opacity: 0;
+    transform: translate3d(18px, 6px, 0) scale(1.02);
+  }
+  62%{
+    opacity: 0.16;
+    transform: translate3d(-4px, -2px, 0) scale(1.105);
+  }
+  100%{
+    opacity: 0.135;
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+}
+
+@keyframes localtifyHeroTitleSongIn{
+  0%{
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.985);
+  }
+  58%{
+    opacity: 1;
+    transform: translate3d(0, -3px, 0) scale(1.006);
+  }
+  100%{
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes localtifyHeroArtistCrossfade{
+  0%{
+    opacity: 0;
+    transform: translate3d(0, 9px, 0);
+  }
+  100%{
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes localtifyHeroCoverSongIn{
+  0%{
+    opacity: 0.86;
+    transform: translate3d(10px, 4px, 0) scale(0.96);
+  }
+  54%{
+    opacity: 1;
+    transform: translate3d(-3px, -2px, 0) scale(1.018);
+  }
+  100%{
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes localtifyHeroAuraPop{
+  0%{
+    opacity: 0.16;
+    transform: translate3d(0, 0, 0) scale(1.02);
+  }
+  54%{
+    opacity: 0.40;
+    transform: translate3d(0, 0, 0) scale(1.18);
+  }
+  100%{
+    opacity: 0.34;
+    transform: translate3d(0, 0, 0) scale(1.14);
+  }
+}
+
+.app .hero.heroPremium .nowPlayingCopySwap .heroTitle{
+  animation: localtifyHeroTitleSongIn 560ms cubic-bezier(.16, 1, .3, 1) both !important;
+  will-change: transform, opacity !important;
+}
+
+.app .hero.heroPremium .nowPlayingCopySwap .heroArtistLine{
+  animation: localtifyHeroArtistCrossfade 480ms cubic-bezier(.16, 1, .3, 1) 70ms both !important;
+  will-change: transform, opacity !important;
+}
+
+.app .hero.heroPremium .nowPlayingArtSwap .heroArt{
+  animation: localtifyHeroCoverSongIn 620ms cubic-bezier(.16, 1, .3, 1) both !important;
+  will-change: transform, opacity !important;
+}
+
+.app .hero.heroPremium .nowPlayingArtSwap::before{
+  animation: localtifyHeroAuraPop 680ms cubic-bezier(.16, 1, .3, 1) 55ms both !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .app .hero.heroPremium .heroCoverGhost,
+  .app .hero.heroPremium .nowPlayingCopySwap .heroTitle,
+  .app .hero.heroPremium .nowPlayingCopySwap .heroArtistLine,
+  .app .hero.heroPremium .nowPlayingArtSwap .heroArt,
+  .app .hero.heroPremium .nowPlayingArtSwap::before{
+    animation: none !important;
+  }
+}

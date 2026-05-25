@@ -14439,3 +14439,128 @@ body.localitfySongDragging .app .playlistDropEmpty{
 .app .virtualHomeGridViewport .homeAlbumCard{
   align-self: start !important;
 }
+
+/* ========================================================================
+   localtify v0.3.5 — hero cover connection + smarter title sizing
+   Keeps the current hero layout, but makes the artwork/background feel linked
+   and stops tiny titles from becoming comically huge.
+======================================================================== */
+.app .hero.heroPremium{
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: clip !important;
+}
+
+.app .hero.heroPremium .heroCoverGhost{
+  position: absolute !important;
+  top: 8% !important;
+  right: clamp(190px, 15vw, 360px) !important;
+  width: clamp(320px, 38vw, 720px) !important;
+  height: clamp(260px, 32vw, 620px) !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: 42px !important;
+  background:
+    radial-gradient(circle at 52% 50%, rgba(var(--accent-rgb), 0.13), transparent 64%),
+    var(--cover-art-url, none) center / cover no-repeat !important;
+  opacity: 0.135 !important;
+  filter: blur(34px) saturate(1.12) brightness(0.72) !important;
+  transform: translate3d(0, 0, 0) scale(1.08) !important;
+  mix-blend-mode: screen !important;
+  animation: localtifyHeroGhostCatchup 640ms cubic-bezier(.16, 1, .3, 1) 70ms both !important;
+  will-change: opacity, transform !important;
+}
+
+.app[data-ambient="off"] .hero.heroPremium .heroCoverGhost,
+body.isResizingSidebar .app .hero.heroPremium .heroCoverGhost,
+body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
+  display: none !important;
+}
+
+.app .hero.heroPremium .heroTextClean,
+.app .hero.heroPremium .heroArtWrap{
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.app .hero.heroPremium .heroArtistLine{
+  margin: 12px 0 0 !important;
+  max-width: min(760px, 58vw) !important;
+  color: rgba(var(--text-rgb), 0.68) !important;
+  font-size: clamp(14px, 1.1vw, 18px) !important;
+  font-weight: 760 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.12 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-shadow: 0 12px 32px rgba(0, 0, 0, 0.34) !important;
+}
+
+.app .hero.heroPremium.heroTitleTiny .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroTitleTiny .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleTiny .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleTiny .heroTitle{
+  font-size: clamp(54px, 5.45vw, 86px) !important;
+  line-height: .9 !important;
+  letter-spacing: -0.07em !important;
+  max-width: min(760px, 54vw) !important;
+}
+
+.app .hero.heroPremium.heroTitleShort .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroTitleShort .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleShort .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleShort .heroTitle{
+  font-size: clamp(60px, 6.05vw, 98px) !important;
+  line-height: .9 !important;
+  letter-spacing: -0.073em !important;
+  max-width: min(860px, 58vw) !important;
+}
+
+.app .hero.heroPremium.heroTitleNormal .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroTitleNormal .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleNormal .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleNormal .heroTitle{
+  font-size: clamp(58px, 7vw, 112px) !important;
+  max-width: min(1020px, 63vw) !important;
+}
+
+.app .hero.heroPremium.heroTitleLong .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroTitleLong .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleLong .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleLong .heroTitle{
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  font-size: clamp(48px, 5.65vw, 94px) !important;
+  line-height: .9 !important;
+  letter-spacing: -0.066em !important;
+  max-width: min(980px, 61vw) !important;
+  overflow: hidden !important;
+}
+
+.app .hero.heroPremium .heroArtWrap::before{
+  opacity: 0.34 !important;
+  transform: translate3d(0, 0, 0) scale(1.14) !important;
+}
+
+.app .hero.heroPremium .heroArtWrap::after{
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.13),
+    0 18px 42px rgba(0,0,0,0.34),
+    0 0 42px rgba(var(--accent-rgb), 0.16) !important;
+}
+
+@media (max-width: 980px){
+  .app .hero.heroPremium .heroCoverGhost{
+    right: 10% !important;
+    width: 58vw !important;
+    height: 48vw !important;
+    opacity: 0.10 !important;
+  }
+
+  .app .hero.heroPremium .heroArtistLine{
+    max-width: 70vw !important;
+  }
+}
