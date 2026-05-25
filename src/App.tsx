@@ -27,7 +27,7 @@ import {
   Volume2,
   VolumeX
 } from "lucide-react";
-import Onboarding from "./Onboarding.tsx";
+import Onboarding from "./Onboarding";
 import CoverStudio from "./cover";
 import SettingsCategoryContent from "./SettingsCategoryContent";
 import {
@@ -90,6 +90,10 @@ type Song = {
   bitrate?: number;
   sampleRate?: number;
 };
+
+function isPlayableSong(song: Song | null | undefined): song is Song {
+  return Boolean(song && song.url && song.fileExists !== false);
+}
 
 type View = "home" | "library" | "playlists" | "liked" | "covers" | "analytics" | "downloads" | "settings";
 type CoverMood = "all" | "favorites" | "leastUsed" | "cute" | "space" | "dark" | "cozy" | "energy";
@@ -2984,7 +2988,7 @@ const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               <button className="playlistTrackMain" type="button" onClick={() => onSelectSong(song.id)}>
                 <span className="playlistTrackIndex">{active && isPlaying ? "▶" : virtualRow.index + 1}</span>
                 <Cover song={song} className="playlistTrackCover" />
-                <span>
+                <span className="playlistTrackText">
                   <strong>{prettyTitle(song.title, 7)}</strong>
                   <small>{prettyMeta(song.artist)}</small>
                 </span>
@@ -4552,13 +4556,14 @@ function MainModeApp() {
 
   const songsById = useMemo(() => new Map(songs.map((song) => [song.id, song])), [songs]);
   const songIndexById = useMemo(() => new Map(songs.map((song, index) => [song.id, index])), [songs]);
+  const playableSongs = useMemo(() => songs.filter(isPlayableSong), [songs]);
   const activePlaylist = useMemo(
     () => playlists.find((playlist) => playlist.id === activePlaylistId) ?? null,
     [activePlaylistId, playlists]
   );
 
   const activePlaylistSongs = useMemo(
-    () => activePlaylist?.songIds.map((songId) => songsById.get(songId)).filter((song): song is Song => Boolean(song)) ?? [],
+    () => activePlaylist?.songIds.map((songId) => songsById.get(songId)).filter(isPlayableSong) ?? [],
     [activePlaylist, songsById]
   );
 
@@ -4575,7 +4580,7 @@ function MainModeApp() {
   );
 
   const selectedPlaylistSongs = useMemo(
-    () => selectedPlaylist?.songIds.map((songId) => songsById.get(songId)).filter((song): song is Song => Boolean(song)) ?? [],
+    () => selectedPlaylist?.songIds.map((songId) => songsById.get(songId)).filter(isPlayableSong) ?? [],
     [selectedPlaylist, songsById]
   );
 
@@ -4592,7 +4597,7 @@ function MainModeApp() {
 
       for (const songId of playlist.songIds) {
         const song = songsById.get(songId);
-        if (!song) continue;
+        if (!isPlayableSong(song)) continue;
 
         songCount += 1;
         duration += song.duration || 0;
@@ -6797,7 +6802,7 @@ function MainModeApp() {
 
   useEffect(() => {
     if (songs.length && playQueue.some((songId) => !songsById.has(songId))) {
-      setPlayQueue((queue) => queue.filter((songId) => songsById.has(songId)));
+      setPlayQueue((queue) => queue.filter((songId) => isPlayableSong(songsById.get(songId))));
     }
   }, [songs.length, songsById, playQueue]);
 
@@ -6812,7 +6817,7 @@ function MainModeApp() {
 
     if (currentId && songs.some((song) => song.id === currentId)) return;
 
-    const fallbackId = songs[0].id;
+    const fallbackId = (playableSongs[0] ?? songs[0]).id;
     setCurrentId(fallbackId);
     void rememberCurrentSong(fallbackId);
   }, [songs, currentId]);
@@ -6887,29 +6892,29 @@ function MainModeApp() {
   }, [isPlaying, currentSong?.id]);
 
   function getNextPlayableSongForCache() {
-    if (!songs.length || !currentSong) return null;
-    const queuedSong = playQueue[0] ? songsById.get(playQueue[0]) : null;
-    if (queuedSong?.url && queuedSong.fileExists !== false) return queuedSong;
+    if (!playableSongs.length || !currentSong) return null;
+    const queuedSong = playQueue.map((songId) => songsById.get(songId)).find(isPlayableSong) ?? null;
+    if (queuedSong) return queuedSong;
 
     if (activePlaylist && activePlaylistSongs.length) {
       const playlistIndex = activePlaylistSongs.findIndex((song) => song.id === currentSong.id);
       if (playlistIndex !== -1) {
         if (isShuffle && activePlaylistSongs.length > 1) {
-          return activePlaylistSongs.find((song) => song.id !== currentSong.id && song.url && song.fileExists !== false) || null;
+          return activePlaylistSongs.find((song) => song.id !== currentSong.id) || null;
         }
 
         const playlistNext = activePlaylistSongs[playlistIndex + 1] || (repeatPlaylist || repeatMode === "all" ? activePlaylistSongs[0] : null);
-        return playlistNext?.url && playlistNext.fileExists !== false ? playlistNext : null;
+        return playlistNext ?? null;
       }
     }
 
     const index = currentIndex();
-    if (isShuffle && songs.length > 1) {
-      return songs.find((song) => song.id !== currentSong.id && song.url && song.fileExists !== false) || null;
+    if (isShuffle && playableSongs.length > 1) {
+      return playableSongs.find((song) => song.id !== currentSong.id) || null;
     }
 
-    const next = songs[index + 1] || (repeatMode === "all" ? songs[0] : null);
-    return next?.url && next.fileExists !== false ? next : null;
+    const next = playableSongs[index + 1] || (repeatMode === "all" ? playableSongs[0] : null);
+    return next ?? null;
   }
 
   function primeNextAudioCache() {
@@ -9187,7 +9192,7 @@ function MainModeApp() {
   }
 
   async function playPlaylist(playlist: Playlist, shuffled = false) {
-    const playable = playlist.songIds.map((songId) => songsById.get(songId)).filter((song): song is Song => Boolean(song));
+    const playable = playlist.songIds.map((songId) => songsById.get(songId)).filter(isPlayableSong);
     if (!playable.length) {
       setStatusText("playlist is empty");
       return;
@@ -9209,7 +9214,7 @@ function MainModeApp() {
 
     const orderedSongs = playlist.songIds
       .map((id) => songsById.get(id))
-      .filter((song): song is Song => Boolean(song));
+      .filter(isPlayableSong);
     const startIndex = orderedSongs.findIndex((song) => song.id === songId);
 
     if (startIndex === -1) {
@@ -9336,8 +9341,8 @@ function MainModeApp() {
 
   function togglePlay() {
     if (!currentSong) {
-      if (songs[0]) {
-        void selectSong(songs[0].id, true);
+      if (playableSongs[0]) {
+        void selectSong(playableSongs[0].id, true);
       }
 
       return;
@@ -9366,11 +9371,11 @@ function MainModeApp() {
   }
 
   function currentIndex() {
-    return songs.findIndex((song) => song.id === currentId);
+    return playableSongs.findIndex((song) => song.id === currentId);
   }
 
   function playNext(forcePlay = true, trigger: "manual" | "auto" = "manual") {
-    if (!songs.length) return;
+    if (!playableSongs.length) return;
 
     if (trigger === "auto" && repeatMode === "one" && currentSong) {
       const audio = audioRef.current;
@@ -9389,15 +9394,17 @@ function MainModeApp() {
       return;
     }
 
-    const queuedId = playQueue[0];
-    if (queuedId) {
-      const queuedSong = songsById.get(queuedId);
-      setPlayQueue((queue) => queue.slice(1));
+    const queuedIndex = playQueue.findIndex((songId) => isPlayableSong(songsById.get(songId)));
+    if (queuedIndex !== -1) {
+      const queuedSong = songsById.get(playQueue[queuedIndex]);
+      setPlayQueue((queue) => queue.slice(queuedIndex + 1));
       if (queuedSong) {
         const queuedBelongsToPlaylist = Boolean(activePlaylist?.songIds.includes(queuedSong.id));
         void selectSong(queuedSong.id, forcePlay, queuedBelongsToPlaylist && activePlaylist ? { playlistId: activePlaylist.id } : undefined);
         return;
       }
+    } else if (playQueue.length) {
+      setPlayQueue([]);
     }
 
     if (activePlaylist && currentSong) {
@@ -9426,8 +9433,8 @@ function MainModeApp() {
       }
     }
 
-    if (isShuffle && songs.length > 1) {
-      const otherSongs = songs.filter((song) => song.id !== currentId);
+    if (isShuffle && playableSongs.length > 1) {
+      const otherSongs = playableSongs.filter((song) => song.id !== currentId);
       const randomSong = otherSongs[Math.floor(Math.random() * otherSongs.length)];
       if (randomSong) void selectSong(randomSong.id, forcePlay);
       return;
@@ -9436,13 +9443,13 @@ function MainModeApp() {
     const index = currentIndex();
 
     if (index === -1) {
-      void selectSong(songs[0].id, forcePlay);
+      void selectSong(playableSongs[0].id, forcePlay);
       return;
     }
 
-    if (index >= songs.length - 1) {
+    if (index >= playableSongs.length - 1) {
       if (repeatMode === "all") {
-        void selectSong(songs[0].id, forcePlay);
+        void selectSong(playableSongs[0].id, forcePlay);
       } else {
         setIsPlaying(false);
         setStatusText("queue ended");
@@ -9451,11 +9458,11 @@ function MainModeApp() {
       return;
     }
 
-    void selectSong(songs[index + 1].id, forcePlay);
+    void selectSong(playableSongs[index + 1].id, forcePlay);
   }
 
   function playPrevious() {
-    if (!songs.length) return;
+    if (!playableSongs.length) return;
 
     const audio = audioRef.current;
 
@@ -9478,11 +9485,11 @@ function MainModeApp() {
     const index = currentIndex();
 
     if (index <= 0) {
-      void selectSong(songs[songs.length - 1].id, true);
+      void selectSong(playableSongs[playableSongs.length - 1].id, true);
       return;
     }
 
-    void selectSong(songs[index - 1].id, true);
+    void selectSong(playableSongs[index - 1].id, true);
   }
 
   function toggleRepeat() {
@@ -11935,6 +11942,3 @@ function MainModeApp() {
 export default function App() {
   return <MainModeApp />;
 }
-
-
-console.log("theres no reason for you to be here darling")
