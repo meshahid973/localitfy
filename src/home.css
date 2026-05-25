@@ -14383,3 +14383,59 @@ body.localitfySongDragging .app .playlistDropEmpty{
     min-width: 42px;
   }
 }
+
+
+/* ========================================================================
+   localtify v0.3.5 — quick library card text spacing repair
+   Keeps card animation/ambience, but removes the forced title height that made
+   song names and artist names feel weirdly far apart on one-line titles.
+======================================================================== */
+.app .homeAlbumCard .homeAlbumMeta{
+  display: grid !important;
+  align-content: start !important;
+  gap: 4px !important;
+  min-height: 0 !important;
+  margin-top: 10px !important;
+}
+
+.app .homeAlbumCard .homeAlbumMeta strong{
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  min-height: 0 !important;
+  max-height: calc(2 * 1.16em) !important;
+  line-height: 1.16 !important;
+  margin: 0 !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  overflow-wrap: anywhere !important;
+}
+
+.app .homeAlbumCard .homeAlbumMeta small{
+  display: block !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  line-height: 1.16 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.app .homeAlbumCard .homeAlbumStats{
+  min-height: 0 !important;
+  margin-top: 7px !important;
+}
+
+.app .homeAlbumCard .homeAlbumActions{
+  margin-top: 9px !important;
+}
+
+.app .virtualHomeGridRow{
+  align-items: start !important;
+}
+
+.app .virtualHomeGridViewport .homeAlbumCard{
+  align-self: start !important;
+}

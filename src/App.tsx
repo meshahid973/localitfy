@@ -829,12 +829,12 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 cleans up playlist playback so songs stay inside the playlist you started from",
-  "Playlist rows now keep their spacing instead of stacking text and covers into one messy line",
-  "The home hero now shows the playlist name when a playlist is the active source",
-  "Playlist next and previous now follow playlist order before touching the main library",
-  "Playlist drag/reorder stays smooth without removing Localtify animations",
-  "More small playlist fixes are in place for a less half-finished feel"
+  "0.3.5 keeps playlist playback inside the playlist you started from",
+  "The home hero now says which playlist is playing instead of pretending it came from the normal library",
+  "Playlist rows and quick-library cards have cleaner text spacing, so titles and artists no longer feel smashed or weirdly separated",
+  "Playlist next and previous follow playlist order before falling back to the main library",
+  "Playlist drag/reorder stays smooth without cutting Localtify's motion or ambience",
+  "A few messy playlist edge cases got cleaned up so the feature feels less half-finished"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -11653,7 +11653,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.3 cleans up onboarding, theme switching, update notices, and the small UI pieces that were confusing people.</p>
+            <p className="whatsNewSubtext">0.3.5 is mostly a playlist and polish update: cleaner playlist playback, better card spacing, smoother playlist reordering, and less weird UI behavior.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>
