@@ -847,7 +847,7 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 adds a proper idle screensaver mode with a darker anime-style wallpaper feel",
+  "0.3.5 adds a cleaner idle screensaver with the wallpaper as the focus",
   "Type SCREENSAVER in search and the idle screen opens after a short preview delay",
   "The startup screen now feels safer and shows what localtify is preparing instead of leaving a black screen",
   "The visible theme list was cleaned down to five stronger presets: mint berry, bubblegum, berry, midnight, and mono",
@@ -3628,11 +3628,7 @@ function MainModeApp() {
   const currentSong = useMemo(() => {
     return songs.find((song) => song.id === currentId) ?? null;
   }, [songs, currentId]);
-  const screensaverTitle = currentSong?.title || "music paused";
-  const screensaverArtist = currentSong?.artist || "localtify is waiting";
-  const screensaverClock = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  const screensaverCover = currentSong?.coverUrl || currentSong?.coverPath || screensaverImage;
-  const screensaverVisualSource = settings.gifVisualsMode === "everywhere" ? loadingScreenGif : screensaverImage;
+  const screensaverVisualSource = screensaverImage;
 
   function clearScreensaverPreviewTimer() {
     if (screensaverPreviewTimerRef.current !== null) {
@@ -3706,7 +3702,7 @@ function MainModeApp() {
       window.removeEventListener("keydown", handleUserActivity);
       window.removeEventListener("wheel", handleUserActivity);
     };
-  }, [currentSong?.id, isPlaying, screensaverPreviewActive, settings.animeVisuals, settings.animatedBackgrounds, settings.gifVisualsMode]);
+  }, [currentSong?.id, isPlaying, screensaverPreviewActive, settings.animeVisuals, settings.animatedBackgrounds]);
 
   const heroDisplayTitle = currentSong ? prettyTitle(currentSong.title, 9) : "drop in your music";
   const heroDisplayArtist = currentSong ? prettyMeta(currentSong.artist) : "import songs to start listening";
@@ -10632,23 +10628,10 @@ function MainModeApp() {
               animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
               exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.99 }}
               transition={settings.reducedMotion ? { duration: 0.12 } : { type: "spring", stiffness: 130, damping: 20, mass: 0.8 }}
+              style={{ backgroundImage: `url(${screensaverVisualSource})` }}
             >
-              <div className="screensaverArtWrap">
-                <img className="screensaverArt" src={screensaverVisualSource} alt="" draggable={false} />
-                <img className="screensaverCover" src={screensaverCover} alt="" draggable={false} />
-              </div>
-              <div className="screensaverInfo">
-                <span className="eyebrow">localtify idle</span>
-                <h2>{screensaverTitle}</h2>
-                <p>{isPlaying ? "playing now" : `paused · ${screensaverArtist}`}</p>
-                <strong>{screensaverClock}</strong>
-                <small>move your mouse to return</small>
-                <div className="screensaverControls" aria-hidden="true">
-                  <span />
-                  <span />
-                  <span />
-                </div>
-              </div>
+              <div className="screensaverShade" />
+              <div className="screensaverIdleText">am waiting..</div>
             </Motion.div>
           </Motion.div>
         ) : null}
