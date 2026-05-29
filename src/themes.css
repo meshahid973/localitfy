@@ -6572,3 +6572,290 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 .app:not(.animatedBackgrounds)[data-theme="nightTrain"]::before {
   animation: none;
 }
+
+/* localtify v0.3.5 animated theme visibility repair
+   Keeps the effects lightweight: CSS-only layers, no random orbs, no layout work. */
+.app[data-theme="stars"],
+.app[data-theme="vaporGlass"],
+.app[data-theme="nightTrain"] {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.app[data-theme="stars"]::before,
+.app[data-theme="stars"]::after,
+.app[data-theme="vaporGlass"]::before,
+.app[data-theme="vaporGlass"]::after,
+.app[data-theme="nightTrain"]::before,
+.app[data-theme="nightTrain"]::after {
+  content: "" !important;
+  display: block !important;
+  position: fixed !important;
+  inset: 32px 0 86px var(--sidebar-width, 248px) !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateZ(0) !important;
+  will-change: transform, opacity, background-position !important;
+  filter: none !important;
+  mix-blend-mode: screen !important;
+}
+
+.app[data-theme="stars"] .appShell,
+.app[data-theme="vaporGlass"] .appShell,
+.app[data-theme="nightTrain"] .appShell,
+.app[data-theme="stars"] .playerBar,
+.app[data-theme="vaporGlass"] .playerBar,
+.app[data-theme="nightTrain"] .playerBar,
+.app[data-theme="stars"] .titleBar,
+.app[data-theme="vaporGlass"] .titleBar,
+.app[data-theme="nightTrain"] .titleBar {
+  position: relative;
+  z-index: 1;
+}
+
+/* STARS: drifting tiny pixel stars + small sparkle dots in the background only. */
+.app[data-theme="stars"]::before {
+  background-image:
+    radial-gradient(circle, rgba(245, 244, 255, 0.86) 0 1px, transparent 1.25px),
+    radial-gradient(circle, rgba(211, 189, 255, 0.72) 0 1px, transparent 1.25px),
+    radial-gradient(circle, rgba(128, 236, 255, 0.54) 0 1px, transparent 1.2px) !important;
+  background-size: 86px 86px, 132px 132px, 178px 178px !important;
+  background-position: 10px 14px, 42px 58px, 90px 16px !important;
+  opacity: 0.34 !important;
+  animation: localtifyStarsDrift 42s linear infinite !important;
+}
+
+.app[data-theme="stars"]::after {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.92) 0 1px, transparent 1.4px),
+    radial-gradient(circle, rgba(255, 117, 236, 0.72) 0 1px, transparent 1.45px),
+    linear-gradient(90deg, transparent 0 32%, rgba(190, 150, 255, 0.08) 34%, transparent 38% 100%) !important;
+  background-size: 220px 220px, 310px 310px, 460px 100% !important;
+  background-position: 18px 32px, 80px 116px, -220px 0 !important;
+  opacity: 0.24 !important;
+  animation: localtifyStarsSparkle 4.8s ease-in-out infinite, localtifyStarsSweep 24s linear infinite !important;
+}
+
+.app[data-theme="stars"] .heroCard::before,
+.app[data-theme="stars"] .coverAura::before,
+.app[data-theme="stars"] .heroCover::before,
+.app[data-theme="stars"] .nowPlayingCover::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -12px !important;
+  border-radius: inherit !important;
+  pointer-events: none !important;
+  opacity: 0.34 !important;
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 5px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 5px) !important;
+  background-size: 6px 6px !important;
+  mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent) !important;
+  animation: localtifyPixelEdge 5.8s steps(12, end) infinite !important;
+}
+
+/* VAPOR GLASS: slow acrylic reflection sweep, no floating blobs. */
+.app[data-theme="vaporGlass"]::before {
+  background-image:
+    linear-gradient(105deg, transparent 0 24%, rgba(255, 134, 244, 0.11) 31%, rgba(139, 115, 255, 0.08) 38%, transparent 48% 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 36%) !important;
+  background-size: 520px 100%, 100% 100% !important;
+  background-position: -620px 0, 0 0 !important;
+  opacity: 0.56 !important;
+  animation: localtifyVaporSweep 18s cubic-bezier(0.4, 0, 0.2, 1) infinite !important;
+}
+
+.app[data-theme="vaporGlass"]::after {
+  background-image:
+    linear-gradient(90deg, transparent 0, rgba(255, 93, 245, 0.12) 48%, transparent 68%),
+    linear-gradient(180deg, rgba(165, 95, 255, 0.06), transparent 45%) !important;
+  background-size: 780px 100%, 100% 100% !important;
+  background-position: -880px 0, 0 0 !important;
+  opacity: 0.36 !important;
+  animation: localtifyVaporPanelShine 24s ease-in-out infinite !important;
+}
+
+.app[data-theme="vaporGlass"] .panel,
+.app[data-theme="vaporGlass"] .heroCard,
+.app[data-theme="vaporGlass"] .settingsCard,
+.app[data-theme="vaporGlass"] .songCard,
+.app[data-theme="vaporGlass"] .libraryCard,
+.app[data-theme="vaporGlass"] .playlistPanel,
+.app[data-theme="vaporGlass"] .updateSettingsCard {
+  background-image:
+    linear-gradient(115deg, transparent 0 40%, rgba(255, 255, 255, 0.045) 48%, transparent 58% 100%) !important;
+  background-size: 260% 100% !important;
+  animation: localtifyVaporSurfaceSweep 16s ease-in-out infinite !important;
+}
+
+.app[data-theme="vaporGlass"] .navItem.active,
+.app[data-theme="vaporGlass"] .circleButton:hover,
+.app[data-theme="vaporGlass"] .mainAction:hover,
+.app[data-theme="vaporGlass"] .playerButton:hover {
+  box-shadow:
+    0 0 0 1px rgba(255, 115, 245, 0.22),
+    0 0 24px rgba(255, 82, 236, 0.14) !important;
+}
+
+/* NIGHT TRAIN: soft horizontal window-light streaks, cinematic and subtle. */
+.app[data-theme="nightTrain"]::before {
+  background-image:
+    linear-gradient(90deg, transparent 0 18%, rgba(255, 224, 153, 0.1) 22%, transparent 28% 100%),
+    linear-gradient(90deg, transparent 0 44%, rgba(117, 192, 255, 0.08) 47%, transparent 52% 100%) !important;
+  background-size: 640px 100%, 1040px 100% !important;
+  background-position: -680px 0, -1140px 0 !important;
+  opacity: 0.52 !important;
+  animation: localtifyTrainLights 21s linear infinite !important;
+}
+
+.app[data-theme="nightTrain"]::after {
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 74px, rgba(255, 255, 255, 0.035) 75px, transparent 77px),
+    linear-gradient(90deg, transparent 0 12%, rgba(255, 232, 180, 0.055) 16%, transparent 24% 100%) !important;
+  background-size: 100% 220px, 720px 100% !important;
+  background-position: 0 0, -720px 0 !important;
+  opacity: 0.3 !important;
+  animation: localtifyTrainWindowLines 28s linear infinite !important;
+}
+
+.app[data-theme="nightTrain"] .heroCard,
+.app[data-theme="nightTrain"] .panel,
+.app[data-theme="nightTrain"] .playlistPanel,
+.app[data-theme="nightTrain"] .settingsCard,
+.app[data-theme="nightTrain"] .songRow,
+.app[data-theme="nightTrain"] .songCard {
+  background-image:
+    linear-gradient(90deg, rgba(255, 234, 188, 0.035), transparent 34%, rgba(91, 178, 255, 0.025) 68%, transparent) !important;
+  background-size: 180% 100% !important;
+  animation: localtifyTrainPanelGlide 26s linear infinite !important;
+}
+
+@keyframes localtifyStarsDrift {
+  0% { background-position: 10px 14px, 42px 58px, 90px 16px; }
+  100% { background-position: 96px 100px, 174px 190px, 268px 194px; }
+}
+
+@keyframes localtifyStarsSparkle {
+  0%, 100% { opacity: 0.13; }
+  45% { opacity: 0.34; }
+  62% { opacity: 0.2; }
+}
+
+@keyframes localtifyStarsSweep {
+  0% { background-position: 18px 32px, 80px 116px, -460px 0; }
+  100% { background-position: 18px 32px, 80px 116px, 460px 0; }
+}
+
+@keyframes localtifyPixelEdge {
+  0%, 100% { opacity: 0.18; transform: translate3d(0, 0, 0); }
+  50% { opacity: 0.42; transform: translate3d(2px, -1px, 0); }
+}
+
+@keyframes localtifyVaporSweep {
+  0% { background-position: -620px 0, 0 0; opacity: 0.28; }
+  22% { opacity: 0.62; }
+  58%, 100% { background-position: calc(100vw + 620px) 0, 0 0; opacity: 0.2; }
+}
+
+@keyframes localtifyVaporPanelShine {
+  0%, 12% { background-position: -880px 0, 0 0; opacity: 0.16; }
+  44% { opacity: 0.4; }
+  72%, 100% { background-position: calc(100vw + 880px) 0, 0 0; opacity: 0.14; }
+}
+
+@keyframes localtifyVaporSurfaceSweep {
+  0%, 18% { background-position: 160% 0; }
+  58%, 100% { background-position: -120% 0; }
+}
+
+@keyframes localtifyTrainLights {
+  0% { background-position: -720px 0, -1180px 0; }
+  100% { background-position: calc(100vw + 720px) 0, calc(100vw + 1180px) 0; }
+}
+
+@keyframes localtifyTrainWindowLines {
+  0% { background-position: 0 0, -760px 0; }
+  100% { background-position: 0 220px, calc(100vw + 760px) 0; }
+}
+
+@keyframes localtifyTrainPanelGlide {
+  0% { background-position: 120% 0; }
+  100% { background-position: -80% 0; }
+}
+
+.app.reducedMotion[data-theme="stars"]::before,
+.app.reducedMotion[data-theme="stars"]::after,
+.app.reducedMotion[data-theme="vaporGlass"]::before,
+.app.reducedMotion[data-theme="vaporGlass"]::after,
+.app.reducedMotion[data-theme="nightTrain"]::before,
+.app.reducedMotion[data-theme="nightTrain"]::after,
+.app.reducedMotion[data-theme="stars"] .heroCard::before,
+.app.reducedMotion[data-theme="stars"] .coverAura::before,
+.app.reducedMotion[data-theme="stars"] .heroCover::before,
+.app.reducedMotion[data-theme="stars"] .nowPlayingCover::before,
+.app.reducedMotion[data-theme="vaporGlass"] .panel,
+.app.reducedMotion[data-theme="vaporGlass"] .heroCard,
+.app.reducedMotion[data-theme="vaporGlass"] .settingsCard,
+.app.reducedMotion[data-theme="vaporGlass"] .songCard,
+.app.reducedMotion[data-theme="vaporGlass"] .libraryCard,
+.app.reducedMotion[data-theme="vaporGlass"] .playlistPanel,
+.app.reducedMotion[data-theme="vaporGlass"] .updateSettingsCard,
+.app.reducedMotion[data-theme="nightTrain"] .heroCard,
+.app.reducedMotion[data-theme="nightTrain"] .panel,
+.app.reducedMotion[data-theme="nightTrain"] .playlistPanel,
+.app.reducedMotion[data-theme="nightTrain"] .settingsCard,
+.app.reducedMotion[data-theme="nightTrain"] .songRow,
+.app.reducedMotion[data-theme="nightTrain"] .songCard {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app[data-theme="stars"]::before,
+  .app[data-theme="stars"]::after,
+  .app[data-theme="vaporGlass"]::before,
+  .app[data-theme="vaporGlass"]::after,
+  .app[data-theme="nightTrain"]::before,
+  .app[data-theme="nightTrain"]::after,
+  .app[data-theme="stars"] .heroCard::before,
+  .app[data-theme="stars"] .coverAura::before,
+  .app[data-theme="stars"] .heroCover::before,
+  .app[data-theme="stars"] .nowPlayingCover::before,
+  .app[data-theme="vaporGlass"] .panel,
+  .app[data-theme="vaporGlass"] .heroCard,
+  .app[data-theme="vaporGlass"] .settingsCard,
+  .app[data-theme="vaporGlass"] .songCard,
+  .app[data-theme="vaporGlass"] .libraryCard,
+  .app[data-theme="vaporGlass"] .playlistPanel,
+  .app[data-theme="vaporGlass"] .updateSettingsCard,
+  .app[data-theme="nightTrain"] .heroCard,
+  .app[data-theme="nightTrain"] .panel,
+  .app[data-theme="nightTrain"] .playlistPanel,
+  .app[data-theme="nightTrain"] .settingsCard,
+  .app[data-theme="nightTrain"] .songRow,
+  .app[data-theme="nightTrain"] .songCard {
+    animation: none !important;
+  }
+}
+
+.app.staticBackgrounds[data-theme="stars"]::before,
+.app.staticBackgrounds[data-theme="stars"]::after,
+.app.staticBackgrounds[data-theme="vaporGlass"]::before,
+.app.staticBackgrounds[data-theme="vaporGlass"]::after,
+.app.staticBackgrounds[data-theme="nightTrain"]::before,
+.app.staticBackgrounds[data-theme="nightTrain"]::after {
+  animation-play-state: paused !important;
+}
+
+@media (max-width: 860px) {
+  .app[data-theme="stars"]::before,
+  .app[data-theme="stars"]::after,
+  .app[data-theme="vaporGlass"]::before,
+  .app[data-theme="vaporGlass"]::after,
+  .app[data-theme="nightTrain"]::before,
+  .app[data-theme="nightTrain"]::after {
+    inset-left: 0 !important;
+  }
+}
