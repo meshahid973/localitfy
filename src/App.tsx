@@ -563,6 +563,9 @@ type Settings = {
   showAmbientGradient: boolean;
   coverColorSyncMode: CoverColorSyncMode;
   showFloatingNotes: boolean;
+  animeVisuals: boolean;
+  animatedBackgrounds: boolean;
+  gifVisualsMode: "loadingOnly" | "everywhere" | "none";
   animatedGlow: boolean;
   softCorners: boolean;
   denseList: boolean;
@@ -753,6 +756,7 @@ const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, m
 const APP_VERSION = "0.3.5";
 const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
+const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
 const BOOT_MIN_VISIBLE_MS = 1450;
 const BOOT_STEPS = [
   { label: "settings", detail: "theme, volume, Discord, and app preferences" },
@@ -843,15 +847,14 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 keeps playlist playback inside the playlist you started from",
-  "The home hero now says which playlist is playing instead of pretending it came from the normal library",
-  "Hero covers feel more connected to the background with a softer glow and delayed ambience catch-up",
-  "Short song titles no longer explode into awkward giant text, while long titles still clamp cleanly",
-  "Song changes now animate the title, artist, cover, and hero aura more smoothly",
-  "Startup now has a proper animated loading screen instead of a scary black screen",
-  "The loading screen shows what localtify is preparing: settings, library, playlists, covers, player, and UI",
-  "Playlist rows and quick-library cards have cleaner text spacing, so titles and artists no longer feel smashed or weirdly separated",
-  "Playlist next and previous follow playlist order before falling back to the main library"
+  "0.3.5 adds a proper idle screensaver mode with a darker anime-style wallpaper feel",
+  "Type SCREENSAVER in search to preview the idle screen instantly",
+  "The startup screen now feels safer and shows what localtify is preparing instead of leaving a black screen",
+  "The visible theme list was cleaned down to five stronger presets: mint berry, bubblegum, berry, midnight, and mono",
+  "Playlist playback still stays inside the playlist you started from",
+  "Hero covers, titles, and ambience continue to animate more smoothly when songs change",
+  "Quick-library cards and playlist rows keep the tighter title/artist spacing from the 0.3.5 cleanup",
+  "No player layout, Discord, downloads, playlists, blur, or ambience features were removed"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -870,6 +873,9 @@ const V013_RELEASE_DEFAULTS: Partial<Settings> = {
   showAmbientGradient: true,
   coverColorSyncMode: "normal",
   showFloatingNotes: true,
+  animeVisuals: true,
+  animatedBackgrounds: true,
+  gifVisualsMode: "loadingOnly",
   animatedGlow: true,
   softCorners: true,
   denseList: true,
@@ -880,43 +886,11 @@ const V013_RELEASE_DEFAULTS: Partial<Settings> = {
 
 
 const themes = [
-  { id: "mint", name: "mint", note: "fresh soft glow", mood: "clean + calm", emoji: "🌿" },
-  { id: "berry", name: "berry", note: "cute pink", mood: "soft night", emoji: "🍓" },
-  { id: "aqua", name: "aqua", note: "blue neon", mood: "pool glow", emoji: "💧" },
-  { id: "sunset", name: "sunset", note: "warm orange", mood: "late evening", emoji: "🌇" },
-  { id: "lavender", name: "lavender", note: "purple dream", mood: "sleepy cute", emoji: "☂" },
-  { id: "mono", name: "mono", note: "clean white", mood: "simple focus", emoji: "○" },
-  { id: "rose", name: "rose", note: "soft red pink", mood: "cozy blush", emoji: "🌹" },
-  { id: "cotton", name: "cotton", note: "baby blue cute", mood: "cloudy calm", emoji: "☁" },
-  { id: "honey", name: "honey", note: "golden warm", mood: "sweet glow", emoji: "🍯" },
-  { id: "lime", name: "lime", note: "green arcade", mood: "fast neon", emoji: "⚡" },
-  { id: "midnight", name: "midnight", note: "deep blue OLED", mood: "late night", emoji: "🌙" },
-  { id: "mocha", name: "mocha", note: "brown cozy", mood: "coffee room", emoji: "☕" },
-  { id: "cherry", name: "cherry", note: "red candy", mood: "bold cute", emoji: "🍒" },
-  { id: "ice", name: "ice", note: "cyan frost", mood: "cold shine", emoji: "❄" },
-  { id: "matcha", name: "matcha", note: "soft green tea", mood: "relaxed", emoji: "🍵" },
+  { id: "mint", name: "mint berry", note: "black and fresh", mood: "clean + calm", emoji: "🌿" },
   { id: "bubblegum", name: "bubblegum", note: "pink blue pop", mood: "cute UI", emoji: "🫧" },
-  { id: "sakura", name: "sakura", note: "soft blossom", mood: "pink calm", emoji: "🌸" },
-  { id: "dreamcore", name: "dreamcore", note: "cute surreal", mood: "dream room", emoji: "☁" },
-  { id: "peach", name: "peach", note: "warm cute", mood: "soft sunset", emoji: "🍑" },
-  { id: "moon", name: "moon", note: "silver night", mood: "quiet dark", emoji: "☾" },
-  { id: "starlight", name: "starlight", note: "moving stars", mood: "animated sky", emoji: "✦" },
-  { id: "neonNoir", name: "neon noir", note: "dark cyan glow", mood: "clean electric", emoji: "◆" },
-  { id: "cyberGrape", name: "cyber grape", note: "purple neon", mood: "night arcade", emoji: "◈" },
-  { id: "ember", name: "ember", note: "warm fire glow", mood: "soft heat", emoji: "◆" },
-  { id: "forest", name: "forest", note: "deep green", mood: "calm dark", emoji: "▲" },
-  { id: "ocean", name: "ocean", note: "deep blue glass", mood: "smooth cold", emoji: "●" },
-  { id: "ruby", name: "ruby", note: "red velvet", mood: "bold night", emoji: "◆" },
-  { id: "aurora", name: "aurora", note: "green purple haze", mood: "dream glow", emoji: "✦" },
-  { id: "vanilla", name: "vanilla", note: "soft cream", mood: "warm clean", emoji: "○" },
-  { id: "vaporwave", name: "vaporwave", note: "pink blue retro", mood: "late neon", emoji: "◌" },
-  { id: "ultraviolet", name: "ultraviolet", note: "deep purple bloom", mood: "cinematic neon", emoji: "✺" },
-  { id: "terminal", name: "terminal", note: "green console", mood: "hacker OLED", emoji: "▣" },
-  { id: "candyCloud", name: "candy cloud", note: "pink cyan soft", mood: "soft pop", emoji: "◍" },
-  { id: "rainstorm", name: "rainstorm", note: "blue rainy glow", mood: "cold focus", emoji: "◒" },
-  { id: "lavaLamp", name: "lava lamp", note: "red orange haze", mood: "warm motion", emoji: "●" },
-  { id: "softSky", name: "soft sky", note: "calm blue silver", mood: "clean bright", emoji: "○" },
-  { id: "arcadeGhost", name: "arcade ghost", note: "konami secret", mood: "retro glow", emoji: "♪_♪" }
+  { id: "berry", name: "berry", note: "deep purple glow", mood: "soft night", emoji: "🍓" },
+  { id: "midnight", name: "midnight", note: "deep blue OLED", mood: "late night", emoji: "🌙" },
+  { id: "mono", name: "mono", note: "clean white", mood: "simple focus", emoji: "○" }
 ] as const;
 
 const THEME_ID_SET = new Set<string>(themes.map((theme) => theme.id));
@@ -3350,6 +3324,8 @@ function MainModeApp() {
   const [, setLastUpdateCheckedLabel] = useState("not checked yet");
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [now, setNow] = useState(new Date());
+  const [screensaverVisible, setScreensaverVisible] = useState(false);
+  const screensaverTimerRef = useRef<number | null>(null);
 
   const [downloadText, setDownloadText] = useState("");
   const [downloadBusy, setDownloadBusy] = useState(false);
@@ -3641,6 +3617,53 @@ function MainModeApp() {
   const currentSong = useMemo(() => {
     return songs.find((song) => song.id === currentId) ?? null;
   }, [songs, currentId]);
+  const screensaverTitle = currentSong?.title || "music paused";
+  const screensaverArtist = currentSong?.artist || "localtify is waiting";
+  const screensaverClock = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const screensaverCover = currentSong?.coverUrl || currentSong?.coverPath || screensaverImage;
+  const screensaverVisualSource = settings.gifVisualsMode === "everywhere" ? loadingScreenGif : screensaverImage;
+
+  useEffect(() => {
+    const clearScreensaverTimer = () => {
+      if (screensaverTimerRef.current) {
+        window.clearTimeout(screensaverTimerRef.current);
+        screensaverTimerRef.current = null;
+      }
+    };
+
+    const canShowScreensaver = settings.animeVisuals && settings.animatedBackgrounds && !isPlaying;
+
+    const armScreensaverTimer = () => {
+      clearScreensaverTimer();
+      if (!canShowScreensaver) return;
+      screensaverTimerRef.current = window.setTimeout(() => {
+        setScreensaverVisible(true);
+      }, 5 * 60 * 1000);
+    };
+
+    const handleUserActivity = () => {
+      setScreensaverVisible(false);
+      armScreensaverTimer();
+    };
+
+    if (!canShowScreensaver) {
+      setScreensaverVisible(false);
+      clearScreensaverTimer();
+      return clearScreensaverTimer;
+    }
+
+    armScreensaverTimer();
+    window.addEventListener("pointermove", handleUserActivity, { passive: true });
+    window.addEventListener("keydown", handleUserActivity);
+    window.addEventListener("wheel", handleUserActivity, { passive: true });
+
+    return () => {
+      clearScreensaverTimer();
+      window.removeEventListener("pointermove", handleUserActivity);
+      window.removeEventListener("keydown", handleUserActivity);
+      window.removeEventListener("wheel", handleUserActivity);
+    };
+  }, [currentSong?.id, isPlaying, settings.animeVisuals, settings.animatedBackgrounds, settings.gifVisualsMode]);
 
   const heroDisplayTitle = currentSong ? prettyTitle(currentSong.title, 9) : "drop in your music";
   const heroDisplayArtist = currentSong ? prettyMeta(currentSong.artist) : "import songs to start listening";
@@ -5925,6 +5948,14 @@ function MainModeApp() {
       setStatusText("onboarding reset and opened");
       showAppToast("onboarding reset and opened", "success");
       setQuery("");
+      return;
+    }
+
+    if (command === "screensaver" || command === "/screensaver") {
+      setScreensaverVisible(true);
+      setQuery("");
+      setStatusText("screensaver preview opened");
+      showAppToast("screensaver preview opened", "success");
       return;
     }
 
@@ -10386,7 +10417,7 @@ function MainModeApp() {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${settings.animatedBackgrounds ? "animatedBackgrounds" : "staticBackgrounds"} ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
@@ -10398,6 +10429,8 @@ function MainModeApp() {
         } as CSSProperties
       }
       data-theme={effectiveTheme}
+      data-anime-visuals={settings.animeVisuals ? "on" : "off"}
+      data-gif-visuals={settings.gifVisualsMode}
       data-custom-theme={settings.customThemeEnabled ? "true" : "false"}
       data-corners={settings.softCorners ? "soft" : "sharp"}
       data-ambient={effectiveAmbient ? "on" : "off"}
@@ -10537,6 +10570,48 @@ function MainModeApp() {
                 </Motion.div>
               ) : null}
             </Motion.section>
+          </Motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {screensaverVisible ? (
+          <Motion.div
+            className="screensaverOverlay"
+            role="presentation"
+            onPointerMove={() => setScreensaverVisible(false)}
+            onClick={() => setScreensaverVisible(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: settings.reducedMotion ? 0.12 : 0.45, ease: "easeOut" }}
+          >
+            <div className="screensaverBackdrop" style={{ backgroundImage: `url(${screensaverVisualSource})` }} />
+            <div className="screensaverGlow" />
+            <Motion.div
+              className="screensaverPanel"
+              initial={settings.reducedMotion ? false : { opacity: 0, y: 18, scale: 0.982 }}
+              animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+              exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.99 }}
+              transition={settings.reducedMotion ? { duration: 0.12 } : { type: "spring", stiffness: 130, damping: 20, mass: 0.8 }}
+            >
+              <div className="screensaverArtWrap">
+                <img className="screensaverArt" src={screensaverVisualSource} alt="" draggable={false} />
+                <img className="screensaverCover" src={screensaverCover} alt="" draggable={false} />
+              </div>
+              <div className="screensaverInfo">
+                <span className="eyebrow">localtify idle</span>
+                <h2>{screensaverTitle}</h2>
+                <p>{isPlaying ? "playing now" : `paused · ${screensaverArtist}`}</p>
+                <strong>{screensaverClock}</strong>
+                <small>move your mouse to return</small>
+                <div className="screensaverControls" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </div>
+            </Motion.div>
           </Motion.div>
         ) : null}
       </AnimatePresence>
