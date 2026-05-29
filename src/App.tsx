@@ -1,6 +1,6 @@
 ﻿import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
-import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent } from "react";
+import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FastAverageColor } from "fast-average-color";
@@ -753,6 +753,15 @@ const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, m
 const APP_VERSION = "0.3.5";
 const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
+const BOOT_MIN_VISIBLE_MS = 1450;
+const BOOT_STEPS = [
+  { label: "settings", detail: "theme, volume, Discord, and app preferences" },
+  { label: "library", detail: "songs, folders, durations, and saved order" },
+  { label: "playlists", detail: "mixes, song order, covers, and totals" },
+  { label: "covers", detail: "pixel art, album art, and ambience colors" },
+  { label: "player", detail: "queue, last song, progress, and audio state" },
+  { label: "interface", detail: "home, settings, animations, and shortcuts" }
+] as const;
 const INITIAL_LIBRARY_RENDER_LIMIT = 60;
 const LIBRARY_RENDER_BATCH_SIZE = 60;
 const HOME_GRID_RENDER_LIMIT = 60;
@@ -839,6 +848,8 @@ const whatsNewItems = [
   "Hero covers feel more connected to the background with a softer glow and delayed ambience catch-up",
   "Short song titles no longer explode into awkward giant text, while long titles still clamp cleanly",
   "Song changes now animate the title, artist, cover, and hero aura more smoothly",
+  "Startup now has a proper animated loading screen instead of a scary black screen",
+  "The loading screen shows what localtify is preparing: settings, library, playlists, covers, player, and UI",
   "Playlist rows and quick-library cards have cleaner text spacing, so titles and artists no longer feel smashed or weirdly separated",
   "Playlist next and previous follow playlist order before falling back to the main library"
 ];
@@ -3214,6 +3225,8 @@ function MainModeApp() {
   const [bootError, setBootError] = useState<string | null>(null);
   const [bootLogCopied, setBootLogCopied] = useState(false);
   const [bootRetryKey, setBootRetryKey] = useState(0);
+  const [bootStepIndex, setBootStepIndex] = useState(0);
+  const [bootStage, setBootStage] = useState("starting localtify...");
   const [songs, setSongs] = useState<Song[]>([]);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isVolumeDragging, setIsVolumeDragging] = useState(false);
@@ -6156,13 +6169,37 @@ function MainModeApp() {
 
   useEffect(() => {
     let mounted = true;
+    let bootStepTimer: number | null = null;
+    const bootStartedAt = typeof performance !== "undefined" ? performance.now() : Date.now();
+
+    const setBootStep = (index: number, stage?: string) => {
+      if (!mounted) return;
+      setBootStepIndex(Math.max(0, Math.min(index, BOOT_STEPS.length - 1)));
+      if (stage) setBootStage(stage);
+    };
+
+    const waitForMinimumBoot = () => {
+      const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+      const remaining = Math.max(0, BOOT_MIN_VISIBLE_MS - (now - bootStartedAt));
+      return new Promise<void>((resolve) => {
+        window.setTimeout(resolve, remaining);
+      });
+    };
 
     setReady(false);
     setBootError(null);
     setBootLogCopied(false);
+    setBootStepIndex(0);
+    setBootStage("starting localtify...");
 
-    window.localitfy.bootstrap().then((payload) => {
+    bootStepTimer = window.setInterval(() => {
+      setBootStepIndex((step) => Math.min(step + 1, BOOT_STEPS.length - 1));
+    }, 360);
+
+    window.localitfy.bootstrap().then(async (payload) => {
       if (!mounted) return;
+
+      setBootStep(0, "loading settings and theme...");
 
       const storedSettings = (payload.settings || {}) as Partial<Settings>;
       const shouldApplyV013Defaults = window.localStorage.getItem(V013_DEFAULTS_KEY) !== "true";
@@ -6197,12 +6234,16 @@ function MainModeApp() {
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
       }
 
+      setBootStep(1, "loading your library...");
       const nextSongs = applyLibraryOrder(sanitizeSongList(payload.songs || []));
       const validBootSongIds = new Set(nextSongs.map((song) => song.id));
+
+      setBootStep(2, "loading playlists...");
       const localPlaylists = cleanPlaylistList(readLocalJson<Playlist[]>(PLAYLIST_STORAGE_KEY, []), validBootSongIds);
       const databasePlaylists = cleanPlaylistList(payload.playlists || [], validBootSongIds);
       const initialPlaylists = databasePlaylists.length ? databasePlaylists : localPlaylists;
 
+      setBootStep(3, "preparing covers and ambience...");
       const initialSongId =
         nextSettings.rememberLastSong &&
         nextSettings.lastSongId &&
@@ -6210,6 +6251,16 @@ function MainModeApp() {
           ? nextSettings.lastSongId
           : nextSongs[0]?.id || "";
 
+      setBootStep(4, "warming up the player...");
+      await waitForMinimumBoot();
+      if (!mounted) return;
+
+      if (bootStepTimer) {
+        window.clearInterval(bootStepTimer);
+        bootStepTimer = null;
+      }
+
+      setBootStep(5, "opening localtify...");
       setSongs(nextSongs);
       setPlaylists(initialPlaylists);
       setSettings(nextSettings);
@@ -6231,16 +6282,22 @@ function MainModeApp() {
       bootedRef.current = true;
     }).catch((error) => {
       if (!mounted) return;
+      if (bootStepTimer) {
+        window.clearInterval(bootStepTimer);
+        bootStepTimer = null;
+      }
 
       const message = error instanceof Error ? error.message : String(error || "Unknown startup error");
       console.error("localtify startup failed", error);
       setBootError(message);
       setReady(false);
-      trackError("startup_bootstrap_failed", { category: "startup" });
+      setBootStage("startup failed");
+      trackError("startup_bootstrap_failed", message, { category: "startup" });
     });
 
     return () => {
       mounted = false;
+      if (bootStepTimer) window.clearInterval(bootStepTimer);
     };
   }, [loadPixelArtAssets, bootRetryKey]);
 
@@ -9997,6 +10054,7 @@ function MainModeApp() {
 
   if (!ready) {
     const isBootError = Boolean(bootError);
+    const bootArtSrc = `${loadingScreenGif}#boot-${bootRetryKey}`;
 
     return (
       <main className={`loadingScreen bootScreen ${isBootError ? "bootScreenError" : ""}`} aria-label="localtify is loading">
@@ -10004,7 +10062,7 @@ function MainModeApp() {
 
         <section className="bootCard" role={isBootError ? "alert" : "status"} aria-live={isBootError ? "assertive" : "polite"}>
           <div className="bootArtWrap" aria-hidden="true">
-            <img className="bootArt" src={loadingScreenGif} alt="" />
+            <img key={`boot-art-${bootRetryKey}`} className="bootArt" src={bootArtSrc} alt="" loading="eager" decoding="async" />
             <span className="bootArtAura" />
           </div>
 
@@ -10028,7 +10086,21 @@ function MainModeApp() {
             ) : (
               <>
                 <h1>loading your library...</h1>
-                <p>getting songs, covers, playlists, and settings ready</p>
+                <p>{bootStage}</p>
+                <ul className="bootAssetList" aria-label="startup assets">
+                  {BOOT_STEPS.map((step, index) => {
+                    const state = index < bootStepIndex ? "done" : index === bootStepIndex ? "active" : "waiting";
+                    return (
+                      <li key={step.label} className={`bootAssetItem ${state}`}>
+                        <span className="bootAssetDot" aria-hidden="true" />
+                        <span className="bootAssetText">
+                          <strong>{step.label}</strong>
+                          <small>{step.detail}</small>
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
                 <div className="bootProgress" aria-hidden="true"><span /></div>
               </>
             )}
@@ -11955,9 +12027,9 @@ function MainModeApp() {
             setIsPlaying(false);
           }
         }}
-        onLoadedMetadata={(event) => saveDuration(event.currentTarget.duration)}
-        onDurationChange={(event) => saveDuration(event.currentTarget.duration)}
-        onTimeUpdate={(event) => {
+        onLoadedMetadata={(event: SyntheticEvent<HTMLAudioElement>) => saveDuration(event.currentTarget.duration)}
+        onDurationChange={(event: SyntheticEvent<HTMLAudioElement>) => saveDuration(event.currentTarget.duration)}
+        onTimeUpdate={(event: SyntheticEvent<HTMLAudioElement>) => {
           const nextTime = event.currentTarget.currentTime;
           timeRef.current = nextTime;
           tickPlayCountTracker(nextTime);

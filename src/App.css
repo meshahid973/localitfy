@@ -11914,6 +11914,94 @@ body.localtifyBackgroundMode .ambientSurface,
   gap: 12px;
 }
 
+.bootAssetList{
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bootAssetItem{
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  color: color-mix(in srgb, var(--muted, #b6a8c7) 78%, transparent);
+  transform: translate3d(0, 0, 0);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.bootAssetItem.active{
+  color: var(--text, #f5efff);
+  background: color-mix(in srgb, var(--accent, #f16ab6) 13%, rgba(255, 255, 255, 0.055));
+  border-color: color-mix(in srgb, var(--accent, #f16ab6) 24%, rgba(255, 255, 255, 0.07));
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent, #f16ab6) 10%, transparent);
+  transform: translate3d(0, -1px, 0);
+}
+
+.bootAssetItem.done{
+  opacity: 0.72;
+}
+
+.bootAssetDot{
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: none;
+}
+
+.bootAssetItem.active .bootAssetDot{
+  background: var(--accent, #f16ab6);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent, #f16ab6) 55%, transparent);
+  animation: bootAssetPulse 980ms ease-in-out infinite alternate;
+}
+
+.bootAssetItem.done .bootAssetDot{
+  background: color-mix(in srgb, var(--accent-2, #b4f269) 76%, white 8%);
+}
+
+.bootAssetText{
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.bootAssetText strong,
+.bootAssetText small{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bootAssetText strong{
+  font-size: 11px;
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 950;
+}
+
+.bootAssetText small{
+  color: color-mix(in srgb, var(--muted, #b6a8c7) 78%, transparent);
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 780;
+}
+
 .bootBrandRow{
   display: inline-flex;
   align-items: center;
@@ -12034,6 +12122,11 @@ body.localtifyBackgroundMode .ambientSurface,
   100%{ transform: translateX(270%); }
 }
 
+@keyframes bootAssetPulse{
+  from{ transform: scale(0.86); opacity: 0.78; }
+  to{ transform: scale(1.16); opacity: 1; }
+}
+
 @media (max-width: 680px){
   .bootCard{
     grid-template-columns: 1fr;
@@ -12044,6 +12137,10 @@ body.localtifyBackgroundMode .ambientSurface,
 
   .bootArtWrap{
     width: min(176px, 62vw);
+  }
+
+  .bootAssetList{
+    grid-template-columns: 1fr;
   }
 
   .bootBrandRow,
@@ -12061,6 +12158,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .app.reducedMotion .bootCard,
 .app.reducedMotion .bootArtAura,
 .app.reducedMotion .bootArt,
+.app.reducedMotion .bootAssetItem.active .bootAssetDot,
 .app.reducedMotion .bootProgress span{
   animation: none !important;
 }
@@ -12070,6 +12168,7 @@ body.localtifyBackgroundMode .ambientSurface,
   .bootCard,
   .bootArtAura,
   .bootArt,
+  .bootAssetItem.active .bootAssetDot,
   .bootProgress span{
     animation: none !important;
   }
