@@ -530,6 +530,9 @@ type ThemeId =
   | "rainstorm"
   | "lavaLamp"
   | "softSky"
+  | "stars"
+  | "vaporGlass"
+  | "nightTrain"
   | "arcadeGhost";
 type DiscordArtMode = "albumCover" | "randomPixel" | "logo" | "none";
 type DiscordActivityStyle = "clean" | "cute" | "detailed" | "minimal" | "meme";
@@ -849,8 +852,9 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 const whatsNewItems = [
   "0.3.5 adds a cleaner idle screensaver with the wallpaper as the focus",
   "Type SCREENSAVER in search and the idle screen opens after a short preview delay",
+  "Added three lightweight animated themes: stars, vapor glass, and night train",
   "The startup screen now feels safer and shows what localtify is preparing instead of leaving a black screen",
-  "The visible theme list was cleaned down to five stronger presets: mint berry, bubblegum, berry, midnight, and mono",
+  "The visible theme list was cleaned up so duplicate-looking themes do not clutter Settings",
   "Playlist playback still stays inside the playlist you started from",
   "Hero covers, titles, and ambience continue to animate more smoothly when songs change",
   "Quick-library cards and playlist rows keep the tighter title/artist spacing from the 0.3.5 cleanup",
@@ -890,7 +894,10 @@ const themes = [
   { id: "bubblegum", name: "bubblegum", note: "pink blue pop", mood: "cute UI", emoji: "🫧" },
   { id: "berry", name: "berry", note: "deep purple glow", mood: "soft night", emoji: "🍓" },
   { id: "midnight", name: "midnight", note: "deep blue OLED", mood: "late night", emoji: "🌙" },
-  { id: "mono", name: "mono", note: "clean white", mood: "simple focus", emoji: "○" }
+  { id: "mono", name: "mono", note: "clean white", mood: "simple focus", emoji: "○" },
+  { id: "stars", name: "stars", note: "pixel night sky", mood: "sparkly night", emoji: "✦" },
+  { id: "vaporGlass", name: "vapor glass", note: "purple acrylic", mood: "premium glow", emoji: "◈" },
+  { id: "nightTrain", name: "night train", note: "moving window lights", mood: "lofi travel", emoji: "▭" },
 ] as const;
 
 const THEME_ID_SET = new Set<string>(themes.map((theme) => theme.id));
@@ -916,6 +923,9 @@ const THEME_SWATCH_COLORS: Record<ThemeId, string> = {
   ice: "#67e8f9",
   matcha: "#86efac",
   bubblegum: "#f472d0",
+  stars: "#d7d5ff",
+  vaporGlass: "linear-gradient(135deg, #e05dff, #86e7ff)",
+  nightTrain: "linear-gradient(135deg, #8fc7ff, #ffd68b)",
   sakura: "#f9a8d4",
   dreamcore: "#a78bfa",
   peach: "#fdba74",
@@ -1403,6 +1413,9 @@ const THEME_PRESET_COLORS: Record<ThemeId, ThemeVisualPalette> = {
   ice: { accent: "#67e8f9", accent2: "#bae6fd", background: "#02090c", surface: "#081821", text: "#effdff", highlight: "#cffafe" },
   matcha: { accent: "#86efac", accent2: "#bef264", background: "#020804", surface: "#0b180e", text: "#effff3", highlight: "#bbf7d0" },
   bubblegum: { accent: "#f472d0", accent2: "#67e8f9", background: "#0b0310", surface: "#1b1025", text: "#fff3fb", highlight: "#fbcfe8" },
+  stars: { accent: "#d7d5ff", accent2: "#8fdcff", background: "#050610", surface: "#17182d", text: "#f6f3ff", highlight: "#ffffff" },
+  vaporGlass: { accent: "#e05dff", accent2: "#86e7ff", background: "#07020d", surface: "#20122d", text: "#fff5ff", highlight: "#ffd7ff" },
+  nightTrain: { accent: "#8fc7ff", accent2: "#ffd68b", background: "#030711", surface: "#0c182a", text: "#f1f7ff", highlight: "#dbeafe" },
   sakura: { accent: "#f9a8d4", accent2: "#fb7185", background: "#0b0408", surface: "#1c0e16", text: "#fff5fa", highlight: "#fce7f3" },
   dreamcore: { accent: "#a78bfa", accent2: "#f0abfc", background: "#050416", surface: "#121027", text: "#f7f3ff", highlight: "#ddd6fe" },
   peach: { accent: "#fdba74", accent2: "#fb7185", background: "#0b0603", surface: "#1b1008", text: "#fff7ed", highlight: "#fed7aa" },
