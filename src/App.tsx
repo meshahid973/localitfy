@@ -92,7 +92,7 @@ type Song = {
 };
 
 function isPlayableSong(song: Song | null | undefined): song is Song {
-  return Boolean(song && song.url && song.fileExists !== false);
+  return !!song && !!song.url && song.fileExists !== false;
 }
 
 type View = "home" | "library" | "playlists" | "liked" | "covers" | "analytics" | "downloads" | "settings";
@@ -1270,6 +1270,9 @@ const defaultSettings: Settings = {
   showAmbientGradient: true,
   coverColorSyncMode: "normal",
   showFloatingNotes: true,
+  animeVisuals: true,
+  animatedBackgrounds: true,
+  gifVisualsMode: "loadingOnly",
   homeExpanded: true,
   heroExpanded: true,
   animatedGlow: true,
@@ -3325,6 +3328,7 @@ function MainModeApp() {
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [now, setNow] = useState(new Date());
   const [screensaverVisible, setScreensaverVisible] = useState(false);
+  const [screensaverPreviewActive, setScreensaverPreviewActive] = useState(false);
   const screensaverTimerRef = useRef<number | null>(null);
   const screensaverPreviewTimerRef = useRef<number | null>(null);
   const screensaverIgnoreActivityUntilRef = useRef(0);
@@ -3639,11 +3643,13 @@ function MainModeApp() {
 
   function dismissScreensaverFromActivity() {
     if (Date.now() < screensaverIgnoreActivityUntilRef.current) return;
+    setScreensaverPreviewActive(false);
     setScreensaverVisible(false);
   }
 
   function openScreensaverPreview(delayMs = 2000) {
     clearScreensaverPreviewTimer();
+    setScreensaverPreviewActive(true);
     setScreensaverVisible(false);
     setStatusText("screensaver preview opening in 2 seconds");
     showAppToast("screensaver preview opening in 2 seconds", "success");
@@ -3665,13 +3671,14 @@ function MainModeApp() {
       }
     };
 
-    const canShowScreensaver = settings.animeVisuals && settings.animatedBackgrounds && !isPlaying;
+    const canShowScreensaver = screensaverPreviewActive || (settings.animeVisuals && settings.animatedBackgrounds && !isPlaying);
 
     const armScreensaverTimer = () => {
       clearScreensaverTimer();
       if (!canShowScreensaver) return;
       screensaverTimerRef.current = window.setTimeout(() => {
         screensaverIgnoreActivityUntilRef.current = Date.now() + 1000;
+        setScreensaverPreviewActive(false);
         setScreensaverVisible(true);
       }, 5 * 60 * 1000);
     };
@@ -3699,7 +3706,7 @@ function MainModeApp() {
       window.removeEventListener("keydown", handleUserActivity);
       window.removeEventListener("wheel", handleUserActivity);
     };
-  }, [currentSong?.id, isPlaying, settings.animeVisuals, settings.animatedBackgrounds, settings.gifVisualsMode]);
+  }, [currentSong?.id, isPlaying, screensaverPreviewActive, settings.animeVisuals, settings.animatedBackgrounds, settings.gifVisualsMode]);
 
   const heroDisplayTitle = currentSong ? prettyTitle(currentSong.title, 9) : "drop in your music";
   const heroDisplayArtist = currentSong ? prettyMeta(currentSong.artist) : "import songs to start listening";
@@ -3975,10 +3982,7 @@ function MainModeApp() {
       ? selectedThemeId
       : "mint";
   const effectiveTheme: ThemeId = safeTheme;
-  const visibleThemes = useMemo(
-    () => themes.filter((theme) => (theme.id !== "arcadeGhost" || arcadeGhostUnlocked || settings.theme === "arcadeGhost")),
-    [arcadeGhostUnlocked, settings.theme]
-  );
+  const visibleThemes = themes;
   const currentTheme = themes.find((theme) => theme.id === effectiveTheme) ?? themes.find((theme) => theme.id === "mint") ?? themes[0];
   const themePresetStyle = useMemo<CSSProperties>(() => makeThemePresetStyle(effectiveTheme), [effectiveTheme]);
 
@@ -10463,7 +10467,7 @@ function MainModeApp() {
         } as CSSProperties
       }
       data-theme={effectiveTheme}
-      data-anime-visuals={settings.animeVisuals ? "on" : "off"}
+      data-anime-visuals={settings.animeVisuals || screensaverPreviewActive || screensaverVisible ? "on" : "off"}
       data-gif-visuals={settings.gifVisualsMode}
       data-custom-theme={settings.customThemeEnabled ? "true" : "false"}
       data-corners={settings.softCorners ? "soft" : "sharp"}
