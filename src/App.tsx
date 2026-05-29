@@ -848,7 +848,7 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 
 const whatsNewItems = [
   "0.3.5 adds a proper idle screensaver mode with a darker anime-style wallpaper feel",
-  "Type SCREENSAVER in search to preview the idle screen instantly",
+  "Type SCREENSAVER in search and the idle screen opens after a short preview delay",
   "The startup screen now feels safer and shows what localtify is preparing instead of leaving a black screen",
   "The visible theme list was cleaned down to five stronger presets: mint berry, bubblegum, berry, midnight, and mono",
   "Playlist playback still stays inside the playlist you started from",
@@ -3326,6 +3326,8 @@ function MainModeApp() {
   const [now, setNow] = useState(new Date());
   const [screensaverVisible, setScreensaverVisible] = useState(false);
   const screensaverTimerRef = useRef<number | null>(null);
+  const screensaverPreviewTimerRef = useRef<number | null>(null);
+  const screensaverIgnoreActivityUntilRef = useRef(0);
 
   const [downloadText, setDownloadText] = useState("");
   const [downloadBusy, setDownloadBusy] = useState(false);
@@ -3577,6 +3579,11 @@ function MainModeApp() {
         heroCoverMotionTimerRef.current = null;
       }
 
+      if (screensaverPreviewTimerRef.current !== null) {
+        window.clearTimeout(screensaverPreviewTimerRef.current);
+        screensaverPreviewTimerRef.current = null;
+      }
+
       document.body.classList.remove(
         "localitfyHeroReflowing",
         "localitfyHeroCoverGrowing",
@@ -3623,6 +3630,33 @@ function MainModeApp() {
   const screensaverCover = currentSong?.coverUrl || currentSong?.coverPath || screensaverImage;
   const screensaverVisualSource = settings.gifVisualsMode === "everywhere" ? loadingScreenGif : screensaverImage;
 
+  function clearScreensaverPreviewTimer() {
+    if (screensaverPreviewTimerRef.current !== null) {
+      window.clearTimeout(screensaverPreviewTimerRef.current);
+      screensaverPreviewTimerRef.current = null;
+    }
+  }
+
+  function dismissScreensaverFromActivity() {
+    if (Date.now() < screensaverIgnoreActivityUntilRef.current) return;
+    setScreensaverVisible(false);
+  }
+
+  function openScreensaverPreview(delayMs = 2000) {
+    clearScreensaverPreviewTimer();
+    setScreensaverVisible(false);
+    setStatusText("screensaver preview opening in 2 seconds");
+    showAppToast("screensaver preview opening in 2 seconds", "success");
+
+    screensaverIgnoreActivityUntilRef.current = Date.now() + delayMs + 1400;
+    screensaverPreviewTimerRef.current = window.setTimeout(() => {
+      screensaverPreviewTimerRef.current = null;
+      screensaverIgnoreActivityUntilRef.current = Date.now() + 1400;
+      setScreensaverVisible(true);
+      setStatusText("screensaver preview opened");
+    }, delayMs);
+  }
+
   useEffect(() => {
     const clearScreensaverTimer = () => {
       if (screensaverTimerRef.current) {
@@ -3637,11 +3671,13 @@ function MainModeApp() {
       clearScreensaverTimer();
       if (!canShowScreensaver) return;
       screensaverTimerRef.current = window.setTimeout(() => {
+        screensaverIgnoreActivityUntilRef.current = Date.now() + 1000;
         setScreensaverVisible(true);
       }, 5 * 60 * 1000);
     };
 
     const handleUserActivity = () => {
+      if (Date.now() < screensaverIgnoreActivityUntilRef.current) return;
       setScreensaverVisible(false);
       armScreensaverTimer();
     };
@@ -5952,10 +5988,8 @@ function MainModeApp() {
     }
 
     if (command === "screensaver" || command === "/screensaver") {
-      setScreensaverVisible(true);
       setQuery("");
-      setStatusText("screensaver preview opened");
-      showAppToast("screensaver preview opened", "success");
+      openScreensaverPreview(2000);
       return;
     }
 
@@ -10579,7 +10613,7 @@ function MainModeApp() {
           <Motion.div
             className="screensaverOverlay"
             role="presentation"
-            onPointerMove={() => setScreensaverVisible(false)}
+            onPointerMove={dismissScreensaverFromActivity}
             onClick={() => setScreensaverVisible(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
