@@ -11687,3 +11687,394 @@ body.localtifyBackgroundMode .ambientSurface,
     max-width: none !important;
   }
 }
+
+/* v0.3.3 v101 performance: virtualized library/home rendering.
+   Keeps the same cards/rows, but only mounts the items currently visible. */
+.virtualSongViewport {
+  position: relative !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  contain: layout paint style !important;
+  will-change: scroll-position !important;
+  scrollbar-gutter: stable both-edges;
+  -webkit-overflow-scrolling: touch;
+}
+
+.songList.virtualSongViewport {
+  display: block !important;
+  height: clamp(320px, calc(100vh - 380px), 680px);
+  min-height: 260px;
+  padding: 2px 8px 14px 2px !important;
+}
+
+.songList.simpleList.virtualSongViewport {
+  height: clamp(260px, calc(100vh - 430px), 560px);
+}
+
+.homeSongList.virtualSongViewport {
+  height: clamp(320px, calc(100vh - 430px), 640px);
+}
+
+.homeAlbumGrid.virtualSongViewport {
+  display: block !important;
+  height: clamp(420px, calc(100vh - 390px), 740px);
+  min-height: 320px;
+  padding: 2px 8px 18px 2px !important;
+}
+
+.homeAlbumGrid.simpleAlbumGrid.virtualSongViewport {
+  height: clamp(320px, calc(100vh - 430px), 620px);
+}
+
+.virtualSongCanvas {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+}
+
+.virtualSongItem {
+  position: absolute;
+  inset: 0 0 auto 0;
+  width: 100%;
+  padding-bottom: 10px;
+  box-sizing: border-box;
+  contain: layout paint style;
+}
+
+.virtualSongItem .songRow {
+  width: 100%;
+  margin: 0 !important;
+}
+
+.virtualHomeGridCanvas {
+  min-height: 100%;
+}
+
+.virtualHomeGridRow {
+  position: absolute;
+  inset: 0 0 auto 0;
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  align-items: start;
+  padding-bottom: 14px;
+  box-sizing: border-box;
+  contain: layout paint style;
+}
+
+.virtualHomeGridRow .homeAlbumCard {
+  min-width: 0;
+  width: 100%;
+  margin: 0 !important;
+}
+
+.virtualSongViewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.virtualSongViewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.virtualSongViewport::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), .28);
+}
+
+.virtualSongViewport::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--accent-rgb), .42);
+}
+
+.app.reducedMotion .virtualSongViewport,
+.app.reducedMotion .virtualSongItem,
+.app.reducedMotion .virtualHomeGridRow {
+  will-change: auto !important;
+}
+
+/* =======================================================================
+   localtify v0.3.3 v102 — cover-colour cache variables
+   -----------------------------------------------------------------------
+   The renderer now calculates the current cover colour once per cover with
+   fast-average-color, then feeds cheap CSS variables instead of re-reading
+   images during animation frames.
+======================================================================= */
+.app[data-cover-sync]:not([data-cover-sync="off"]){
+  --player-ambient-rgb: var(--cover-rgb, var(--accent-rgb));
+  --active-cover-rgb: var(--cover-rgb, var(--accent-rgb));
+}
+
+.app[data-cover-sync]:not([data-cover-sync="off"]) .ambientSurface::after{
+  --ambient-cover-rgb: var(--cover-rgb, var(--accent-rgb));
+}
+
+.app[data-cover-sync]:not([data-cover-sync="off"]) .heroArtWrap,
+.app[data-cover-sync]:not([data-cover-sync="off"]) .playerBar{
+  --player-ambient-rgb: var(--cover-rgb, var(--accent-rgb));
+}
+
+/* ======================================================================
+   localtify v0.3.5 boot screen
+   Keeps startup from looking like a dead black window while Electron loads.
+   ====================================================================== */
+.loadingScreen.bootScreen{
+  min-height: 100vh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 34px;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+  color: var(--text, #f5efff);
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent, #f16ab6) 20%, transparent), transparent 34%),
+    radial-gradient(circle at 18% 82%, color-mix(in srgb, var(--accent-2, #b4f269) 9%, transparent), transparent 32%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg, #08050d) 96%, #000 4%), #030207) !important;
+}
+
+.bootGlow{
+  position: absolute;
+  inset: -22%;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 44% 40%, color-mix(in srgb, var(--accent, #f16ab6) 18%, transparent), transparent 34%),
+    radial-gradient(circle at 62% 58%, rgba(255, 255, 255, 0.055), transparent 28%);
+  filter: blur(32px);
+  opacity: 0.8;
+  transform: translate3d(0, 0, 0);
+  animation: bootGlowFloat 5.2s var(--motion-smooth, cubic-bezier(0.16, 1, 0.3, 1)) infinite alternate;
+  pointer-events: none;
+}
+
+.bootCard{
+  width: min(680px, calc(100vw - 42px));
+  min-height: 260px;
+  display: grid;
+  grid-template-columns: 184px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  border-radius: 34px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.072), rgba(255, 255, 255, 0.038)),
+    color-mix(in srgb, var(--surface, #17101f) 82%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #f16ab6) 24%, rgba(255, 255, 255, 0.075));
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, 0.54),
+    0 0 54px color-mix(in srgb, var(--accent, #f16ab6) 14%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.095);
+  backdrop-filter: blur(28px) saturate(1.2);
+  animation: bootCardIn 520ms cubic-bezier(0.18, 1.05, 0.2, 1) both;
+}
+
+.bootScreenError .bootCard{
+  border-color: color-mix(in srgb, #ff6fba 36%, rgba(255, 255, 255, 0.09));
+}
+
+.bootArtWrap{
+  position: relative;
+  width: 184px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 31px;
+  overflow: visible;
+}
+
+.bootArtAura{
+  position: absolute;
+  inset: -18px;
+  border-radius: 38px;
+  background: color-mix(in srgb, var(--accent, #f16ab6) 24%, transparent);
+  filter: blur(26px);
+  opacity: 0.55;
+  transform: translate3d(0, 0, 0);
+  animation: bootAuraPulse 1.9s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.bootArt{
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 30px;
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.44),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: translate3d(0, 0, 0);
+  animation: bootArtFloat 2.8s ease-in-out infinite alternate;
+}
+
+.bootCopy{
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.bootBrandRow{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--text, #f5efff) 84%, transparent);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+}
+
+.bootLogo{
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.bootCopy h1{
+  margin: 0;
+  font-size: clamp(30px, 5vw, 52px);
+  line-height: 0.9;
+  letter-spacing: -0.075em;
+  max-width: 10ch;
+}
+
+.bootCopy p{
+  margin: 0;
+  max-width: 36ch;
+  color: color-mix(in srgb, var(--muted, #b6a8c7) 82%, transparent);
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 750;
+}
+
+.bootProgress{
+  width: min(270px, 100%);
+  height: 7px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.bootProgress span{
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--accent, #f16ab6), transparent);
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent, #f16ab6) 52%, transparent));
+  animation: bootProgressSweep 1.05s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.bootActions{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.bootButton{
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  padding: 11px 15px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.07);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.bootButton:hover{
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.105);
+  border-color: color-mix(in srgb, var(--accent, #f16ab6) 30%, rgba(255, 255, 255, 0.12));
+}
+
+.bootButtonPrimary{
+  color: #100914;
+  background: var(--accent, #f16ab6);
+  border-color: color-mix(in srgb, var(--accent, #f16ab6) 74%, white 16%);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--accent, #f16ab6) 22%, transparent);
+}
+
+@keyframes bootCardIn{
+  0%{ opacity: 0; transform: translate3d(0, 18px, 0) scale(0.985); }
+  72%{ opacity: 1; transform: translate3d(0, -2px, 0) scale(1.006); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes bootGlowFloat{
+  from{ transform: translate3d(-1.2%, -0.8%, 0) scale(1); opacity: 0.68; }
+  to{ transform: translate3d(1.4%, 1%, 0) scale(1.03); opacity: 0.92; }
+}
+
+@keyframes bootAuraPulse{
+  from{ opacity: 0.42; transform: scale(0.965); }
+  to{ opacity: 0.70; transform: scale(1.035); }
+}
+
+@keyframes bootArtFloat{
+  from{ transform: translate3d(0, 0, 0) scale(0.992); }
+  to{ transform: translate3d(0, -4px, 0) scale(1.006); }
+}
+
+@keyframes bootProgressSweep{
+  0%{ transform: translateX(-110%); }
+  100%{ transform: translateX(270%); }
+}
+
+@media (max-width: 680px){
+  .bootCard{
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    padding: 22px;
+  }
+
+  .bootArtWrap{
+    width: min(176px, 62vw);
+  }
+
+  .bootBrandRow,
+  .bootActions{
+    margin-inline: auto;
+  }
+
+  .bootCopy h1,
+  .bootCopy p{
+    margin-inline: auto;
+  }
+}
+
+.app.reducedMotion .bootGlow,
+.app.reducedMotion .bootCard,
+.app.reducedMotion .bootArtAura,
+.app.reducedMotion .bootArt,
+.app.reducedMotion .bootProgress span{
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .bootGlow,
+  .bootCard,
+  .bootArtAura,
+  .bootArt,
+  .bootProgress span{
+    animation: none !important;
+  }
+
+  .bootButton:hover{
+    transform: none;
+  }
+}

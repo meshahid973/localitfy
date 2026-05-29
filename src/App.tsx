@@ -752,6 +752,7 @@ const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, m
 
 const APP_VERSION = "0.3.5";
 const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
+const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 const INITIAL_LIBRARY_RENDER_LIMIT = 60;
 const LIBRARY_RENDER_BATCH_SIZE = 60;
 const HOME_GRID_RENDER_LIMIT = 60;
@@ -3210,6 +3211,9 @@ function MainModeApp() {
   const selectSongLastSameSongRef = useRef({ key: "", time: 0 });
 
   const [ready, setReady] = useState(false);
+  const [bootError, setBootError] = useState<string | null>(null);
+  const [bootLogCopied, setBootLogCopied] = useState(false);
+  const [bootRetryKey, setBootRetryKey] = useState(0);
   const [songs, setSongs] = useState<Song[]>([]);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isVolumeDragging, setIsVolumeDragging] = useState(false);
@@ -6153,6 +6157,10 @@ function MainModeApp() {
   useEffect(() => {
     let mounted = true;
 
+    setReady(false);
+    setBootError(null);
+    setBootLogCopied(false);
+
     window.localitfy.bootstrap().then((payload) => {
       if (!mounted) return;
 
@@ -6221,12 +6229,20 @@ function MainModeApp() {
           if (mounted) setPixelArtAssets(getCachedRuntimePixelArtAssets());
         });
       bootedRef.current = true;
+    }).catch((error) => {
+      if (!mounted) return;
+
+      const message = error instanceof Error ? error.message : String(error || "Unknown startup error");
+      console.error("localtify startup failed", error);
+      setBootError(message);
+      setReady(false);
+      trackError("startup_bootstrap_failed", { category: "startup" });
     });
 
     return () => {
       mounted = false;
     };
-  }, [loadPixelArtAssets]);
+  }, [loadPixelArtAssets, bootRetryKey]);
 
   useEffect(() => {
     if (!ready || !isThreeAm) return;
@@ -9952,37 +9968,70 @@ function MainModeApp() {
   }
 
 
+  const retryStartup = () => {
+    setBootError(null);
+    setBootLogCopied(false);
+    setReady(false);
+    setBootRetryKey((value) => value + 1);
+  };
+
+  const copyStartupLog = () => {
+    const body = [
+      "localtify startup error",
+      `version: ${APP_VERSION}`,
+      `message: ${bootError || "unknown error"}`
+    ].join("\n");
+
+    console.error(body);
+    const writeLog = navigator.clipboard?.writeText?.(body);
+    if (writeLog) {
+      void writeLog.then(() => {
+        setBootLogCopied(true);
+      }).catch(() => {
+        setBootLogCopied(true);
+      });
+    } else {
+      setBootLogCopied(true);
+    }
+  };
+
   if (!ready) {
+    const isBootError = Boolean(bootError);
+
     return (
-      <main className="loadingScreen loadingSkeletonScreen" aria-label="localtify is loading">
-        <div className="loadingCard loadingBrandCard">
-          <div className="loadingLogo"><img className="loadingLogoImage" src={localtifyLogo} alt="" aria-hidden="true" /></div>
-          <div>
-            <strong>opening localtify</strong>
-            <span>getting your music ready</span>
-          </div>
-        </div>
+      <main className={`loadingScreen bootScreen ${isBootError ? "bootScreenError" : ""}`} aria-label="localtify is loading">
+        <div className="bootGlow" aria-hidden="true" />
 
-        <section className="loadingSkeletonShell" aria-hidden="true">
-          <div className="loadingSkeletonHero">
-            <div className="skeletonCoverBlock" />
-            <div className="skeletonCopyBlock">
-              <i />
-              <i />
-              <i />
+        <section className="bootCard" role={isBootError ? "alert" : "status"} aria-live={isBootError ? "assertive" : "polite"}>
+          <div className="bootArtWrap" aria-hidden="true">
+            <img className="bootArt" src={loadingScreenGif} alt="" />
+            <span className="bootArtAura" />
+          </div>
+
+          <div className="bootCopy">
+            <div className="bootBrandRow">
+              <img className="bootLogo" src={localtifyLogo} alt="" aria-hidden="true" />
+              <span>localtify</span>
             </div>
-          </div>
 
-          <div className="loadingSkeletonGrid">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div className="loadingSkeletonSong" key={`loading-song-${index}`} style={{ "--stagger": `${index * 36}ms` } as CSSProperties}>
-                <span />
-                <div>
-                  <i />
-                  <i />
+            {isBootError ? (
+              <>
+                <h1>localtify had trouble starting</h1>
+                <p>{bootError}</p>
+                <div className="bootActions">
+                  <button type="button" className="bootButton bootButtonPrimary" onClick={retryStartup}>Retry</button>
+                  <button type="button" className="bootButton" onClick={copyStartupLog}>
+                    {bootLogCopied ? "Copied error" : "Open logs"}
+                  </button>
                 </div>
-              </div>
-            ))}
+              </>
+            ) : (
+              <>
+                <h1>loading your library...</h1>
+                <p>getting songs, covers, playlists, and settings ready</p>
+                <div className="bootProgress" aria-hidden="true"><span /></div>
+              </>
+            )}
           </div>
         </section>
       </main>
