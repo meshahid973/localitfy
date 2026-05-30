@@ -1,4 +1,4 @@
-/* localtify 0.2.8 cleanup: motion.css avoids bottom-player-specific ownership. */
+/* localtify 0.3.5 smooth stars stability V131 — download/file patch label only; APP_VERSION stays 0.3.5. */
 /* localtify motion.css — animation-only layer.
    Keep static layout, colors, player/progress styles, and shared backgrounds in their owner files. */
 
@@ -1792,4 +1792,295 @@ body.localitfyHeroReflowing .app .settingsPanel{
   .app .hero.heroPremium .nowPlayingArtSwap::before{
     animation: none !important;
   }
+}
+
+/* ========================================================================
+   localtify v0.3.5 V130 — proximity interaction layer
+   ------------------------------------------------------------------------
+   JS updates --prox variables on nearby UI only. This keeps existing hover
+   transforms intact by using individual scale/filter properties instead of
+   replacing transform.
+======================================================================== */
+.app:not(.reducedMotion) :where(
+  .localtifyProximityTarget
+){
+  transform-origin: center;
+  scale: var(--prox-scale, 1);
+  filter: brightness(var(--prox-brightness, 1)) saturate(var(--prox-saturate, 1));
+  transition:
+    scale 150ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+  will-change: scale, filter;
+}
+
+.app:not(.reducedMotion) :where(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsThemeCard,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .coverCard,
+  .coverGalleryCard
+).localtifyProximityActive{
+  border-color: rgba(var(--accent-rgb), var(--prox-line, 0.18)) !important;
+  background-color: rgba(var(--accent-rgb), var(--prox-bg, 0.02)) !important;
+  box-shadow:
+    0 var(--prox-card-y, 14px) var(--prox-card-blur, 34px) rgba(0, 0, 0, 0.34),
+    0 0 var(--prox-card-blur, 34px) rgba(var(--accent-rgb), var(--prox-glow, 0.08)),
+    inset 0 1px 0 rgba(255, 255, 255, var(--prox-inset, 0.055)) !important;
+}
+
+.app:not(.reducedMotion) :where(
+  .mainAction,
+  .heroMain,
+  .heroGhost,
+  .softButton,
+  .simpleAction,
+  .simpleGhost,
+  .toolButton,
+  .iconAction,
+  .tabButton,
+  .navButton,
+  .tinyToggle,
+  .songMenuButton,
+  .circleButton,
+  .navItem
+).localtifyProximityActive{
+  border-color: rgba(var(--accent-rgb), var(--prox-line, 0.22)) !important;
+  box-shadow:
+    0 var(--prox-button-y, 7px) var(--prox-button-blur, 18px) rgba(0, 0, 0, 0.28),
+    0 0 var(--prox-button-blur, 18px) rgba(var(--accent-rgb), var(--prox-glow, 0.08)) !important;
+}
+
+.app.reducedMotion .localtifyProximityTarget,
+.app.appBackgrounded .localtifyProximityTarget,
+.app.playerScrubbing .localtifyProximityTarget,
+.app.songDragActive .localtifyProximityTarget{
+  scale: 1 !important;
+  filter: none !important;
+}
+
+/* ========================================================================
+   localtify v0.3.5 V130 — proximity motion repair
+   Real JS proximity now samples nearby points only, so this CSS only styles
+   the tiny active set instead of putting will-change/filter on the library.
+======================================================================== */
+.app:not(.reducedMotion) .localtifyProximityActive{
+  transform-origin: center !important;
+  scale: var(--prox-scale, 1) !important;
+  filter: brightness(var(--prox-brightness, 1)) saturate(var(--prox-saturate, 1)) !important;
+  transition:
+    scale 120ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 120ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease !important;
+  will-change: scale !important;
+}
+
+.app:not(.reducedMotion) :where(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsThemeCard,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .coverCard,
+  .coverGalleryCard
+).localtifyProximityActive{
+  border-color: rgba(var(--accent-rgb), var(--prox-line, 0.18)) !important;
+  background-color: rgba(var(--accent-rgb), var(--prox-bg, 0.02)) !important;
+  box-shadow:
+    0 var(--prox-card-y, 12px) var(--prox-card-blur, 28px) rgba(0, 0, 0, 0.32),
+    0 0 calc(var(--prox-card-blur, 28px) * .72) rgba(var(--accent-rgb), var(--prox-glow, 0.075)),
+    inset 0 1px 0 rgba(255, 255, 255, var(--prox-inset, 0.055)) !important;
+}
+
+.app:not(.reducedMotion) :where(
+  .mainAction,
+  .heroMain,
+  .heroGhost,
+  .softButton,
+  .simpleAction,
+  .simpleGhost,
+  .toolButton,
+  .iconAction,
+  .tabButton,
+  .navButton,
+  .tinyToggle,
+  .songMenuButton,
+  .circleButton,
+  .navItem
+).localtifyProximityActive{
+  border-color: rgba(var(--accent-rgb), var(--prox-line, 0.22)) !important;
+  box-shadow:
+    0 var(--prox-button-y, 6px) var(--prox-button-blur, 15px) rgba(0, 0, 0, 0.26),
+    0 0 calc(var(--prox-button-blur, 15px) * .78) rgba(var(--accent-rgb), var(--prox-glow, 0.08)) !important;
+}
+
+body.localitfyHeroReflowing .localtifyProximityActive,
+body.localitfyHeroCoverGrowing .localtifyProximityActive,
+body.localitfyHeroCoverShrinking .localtifyProximityActive,
+.app.appBackgrounded .localtifyProximityActive,
+.app.playerScrubbing .localtifyProximityActive,
+.app.songDragActive .localtifyProximityActive{
+  scale: 1 !important;
+  filter: none !important;
+  will-change: auto !important;
+}
+
+
+/* ==========================================================================
+   localtify v0.3.5 V131 — smooth-first interaction cleanup
+   --------------------------------------------------------------------------
+   The V130 proximity layer was the main jank source because it ran pointermove
+   sampling and wrote CSS variables to many cards. V131 keeps hover/motion polish
+   from the normal CSS, but fully neutralizes stale proximity classes.
+========================================================================== */
+
+.app .localtifyProximityTarget,
+.app .localtifyProximityActive{
+  scale: 1 !important;
+  filter: none !important;
+  will-change: auto !important;
+}
+
+.app .localtifyProximityActive{
+  background-color: inherit;
+}
+
+/* During the player hero expand/compact reflow, pause only decorative star
+   background animation. Blur/ambience stays rendered; it simply stops ticking
+   for the few frames where layout is changing. */
+body.localitfyHeroReflowing .app[data-theme="stars"] .localtifyStarsLayer,
+body.localitfyHeroReflowing .app[data-theme="stars"] .localtifyStarsNebula,
+body.localitfyHeroCoverGrowing .app[data-theme="stars"] .localtifyStarsLayer,
+body.localitfyHeroCoverShrinking .app[data-theme="stars"] .localtifyStarsLayer{
+  animation-play-state: paused !important;
+}
+
+body.localitfyHeroReflowing .heroLayoutMotion,
+body.localitfyHeroCoverGrowing .heroLayoutMotion,
+body.localitfyHeroCoverShrinking .heroLayoutMotion{
+  will-change: transform, opacity !important;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Keep scrolling and dragging smooth. Decorative card animations are paused only
+   while the user is doing high-frequency input. */
+.app.isScrolling[data-theme="stars"] .localtifyStarsLayerB,
+.app.songDragActive[data-theme="stars"] .localtifyStarsLayer,
+.app.playerScrubbing[data-theme="stars"] .localtifyStarsLayer{
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .app[data-theme="stars"] .localtifyStarsLayer,
+  .app[data-theme="stars"] .localtifyStarsNebula{
+    animation: none !important;
+  }
+}
+
+
+
+/* ========================================================================== 
+   localtify v0.3.5 V132 — low-input-lag JS proximity styling
+   --------------------------------------------------------------------------
+   JS now updates at most a handful of nearby elements. CSS keeps it cheap:
+   transform + tiny background/border changes only. No filter/blur/shimmer.
+========================================================================== */
+.app:not(.reducedMotion) .localtifyProximityTarget.localtifyProximityActive{
+  will-change: transform;
+  transition:
+    transform 72ms linear,
+    border-color 110ms linear,
+    background-color 110ms linear,
+    box-shadow 110ms linear !important;
+}
+
+.app:not(.reducedMotion) :is(
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistShelfCard,
+  .playlistPanel,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .settingsThemeCard,
+  .updateSettingsCard
+).localtifyProximityActive{
+  transform: translate3d(0, var(--prox-card-y, 0px), 0) scale(var(--prox-scale, 1)) !important;
+  border-color: rgba(var(--accent-rgb), var(--prox-line, .16)) !important;
+  background-color: rgba(255, 255, 255, var(--prox-bg, .02)) !important;
+  box-shadow:
+    0 18px calc(36px + var(--prox-glow-size, 0px)) rgba(0, 0, 0, .32),
+    0 0 var(--prox-glow-size, 0px) rgba(var(--accent-rgb), .1),
+    inset 0 1px 0 rgba(255, 255, 255, .045) !important;
+}
+
+.app:not(.reducedMotion) :is(
+  .navItem,
+  .mainAction,
+  .heroMain,
+  .heroGhost,
+  .softButton,
+  .simpleAction,
+  .simpleGhost,
+  .toolButton,
+  .iconAction,
+  .tabButton,
+  .navButton,
+  .tinyToggle,
+  .songMenuButton,
+  .circleButton
+).localtifyProximityActive{
+  transform: translate3d(0, var(--prox-button-y, 0px), 0) scale(var(--prox-scale, 1)) !important;
+  border-color: rgba(var(--accent-rgb), var(--prox-line, .18)) !important;
+  background-color: rgba(var(--accent-rgb), var(--prox-bg, .025)) !important;
+  box-shadow:
+    0 10px calc(20px + var(--prox-glow-size, 0px)) rgba(0, 0, 0, .24),
+    0 0 var(--prox-glow-size, 0px) rgba(var(--accent-rgb), .12) !important;
+}
+
+.app.playerScrubbing .localtifyProximityActive,
+.app.songDragActive .localtifyProximityActive,
+.app.appBackgrounded .localtifyProximityActive,
+body.localitfyHeroReflowing .localtifyProximityActive,
+body.localitfyHeroCoverGrowing .localtifyProximityActive,
+body.localitfyHeroCoverShrinking .localtifyProximityActive{
+  transform: none !important;
+  box-shadow: inherit !important;
+  will-change: auto !important;
+}
+
+body.localitfyHeroReflowing .app[data-theme="stars"] .localtifyStarsLayer,
+body.localitfyHeroCoverGrowing .app[data-theme="stars"] .localtifyStarsLayer,
+body.localitfyHeroCoverShrinking .app[data-theme="stars"] .localtifyStarsLayer,
+.app.isScrolling[data-theme="stars"] .localtifyStarsLayerB,
+.app.songDragActive[data-theme="stars"] .localtifyStarsLayer,
+.app.playerScrubbing[data-theme="stars"] .localtifyStarsLayer{
+  animation-play-state: paused !important;
 }

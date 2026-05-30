@@ -1,4 +1,4 @@
-/* localtify 0.3.5 stars/card/player cleanup V128 — download/file patch label only; app version stays 0.3.5. */
+/* localtify 0.3.5 smooth stars stability V131 — download/file patch label only; APP_VERSION stays 0.3.5. */
 /* localtify settings.css — settings page + settings modal only.
    Home/player/progress styles stay in their own files. */
 
@@ -7049,4 +7049,744 @@ html body .app[data-theme="stars"] .contentScroller{
 )::after{
   background-image: none !important;
   animation-name: none !important;
+}
+
+/* ========================================================================
+   localtify v0.3.5 V130 — stronger drifting stars, no card shine
+   ------------------------------------------------------------------------
+   Stars stay animated and visible as atmosphere behind the UI. Cards do not
+   get the old sweep/shine marks anymore; interaction polish is handled by
+   the proximity layer in motion.css.
+======================================================================== */
+.app[data-theme="stars"]{
+  --localtify-player-top-fade: rgba(215, 103, 255, 0.14);
+  background:
+    radial-gradient(circle at 74% 10%, rgba(143, 220, 255, 0.12), transparent 34%),
+    radial-gradient(circle at 20% 92%, rgba(215, 103, 255, 0.115), transparent 35%),
+    radial-gradient(circle at 52% 118%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.07), transparent 44%),
+    linear-gradient(180deg, #060315 0%, #020108 100%) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsBackdrop{
+  inset: 36px 0 calc(var(--player-size-live, var(--player-size, 108px)) + 6px) var(--sidebar-width, 249px) !important;
+  z-index: 0 !important;
+  opacity: .98 !important;
+  mix-blend-mode: screen !important;
+  contain: paint !important;
+  transform: translate3d(0, 0, 0) !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 34px, #000 calc(100% - 28px), transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 34px, #000 calc(100% - 28px), transparent 100%) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsNebula{
+  opacity: .68 !important;
+  filter: blur(22px) saturate(1.24) !important;
+  animation: localtifyStarsNebulaFloatV130 32s ease-in-out infinite alternate !important;
+}
+
+.app[data-theme="stars"] .localtifyStarParticle{
+  min-width: 1px !important;
+  min-height: 1px !important;
+  opacity: var(--star-opacity, .72) !important;
+  box-shadow:
+    0 0 var(--star-glow, 10px) var(--star-color),
+    0 0 var(--star-glow-soft, 18px) rgba(143, 220, 255, .24) !important;
+  animation:
+    localtifyStarParticleDriftV130 var(--star-drift) ease-in-out var(--star-delay) infinite alternate,
+    localtifyStarParticleTwinkleV130 var(--star-twinkle) steps(6, end) var(--star-delay) infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarParticle.sparkle::after{
+  content: none !important;
+  display: none !important;
+}
+
+.app[data-theme="stars"] .localtifyStarSweep{
+  opacity: .18 !important;
+  animation: localtifyStarSweepDomV130 var(--localtify-stars-sweep-duration, 22s) linear infinite !important;
+}
+
+.app[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+),
+.app.themeMotionBooting[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+){
+  background-image: none !important;
+  animation-name: none !important;
+}
+
+.app[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+)::before,
+.app[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+)::after{
+  background-image: none !important;
+  animation-name: none !important;
+}
+
+@keyframes localtifyStarParticleDriftV130{
+  0%{
+    transform: translate3d(-50%, -50%, 0) scale(.9);
+  }
+  36%{
+    transform: translate3d(calc(-50% + var(--star-drift-mid-x, 14px)), calc(-50% + var(--star-drift-mid-y, -8px)), 0) scale(var(--star-pulse-scale, 1.06));
+  }
+  72%{
+    transform: translate3d(calc(-50% + var(--star-drift-x, 28px)), calc(-50% + var(--star-drift-y, 18px)), 0) scale(1.04);
+  }
+  100%{
+    transform: translate3d(calc(-50% - var(--star-drift-mid-x, 12px)), calc(-50% - var(--star-drift-mid-y, 10px)), 0) scale(.96);
+  }
+}
+
+@keyframes localtifyStarParticleTwinkleV130{
+  0%, 100%{ opacity: var(--star-opacity-low, .24); }
+  15%{ opacity: var(--star-opacity-high, .9); }
+  31%{ opacity: var(--star-opacity-mid, .46); }
+  52%{ opacity: var(--star-opacity, .72); }
+  73%{ opacity: var(--star-opacity-high, .86); }
+  88%{ opacity: var(--star-opacity-mid, .48); }
+}
+
+@keyframes localtifyStarSweepDomV130{
+  0%{ opacity: 0; transform: translate3d(-64vw, -1vh, 0) rotate(-1deg); }
+  18%{ opacity: .2; }
+  48%{ opacity: .14; }
+  100%{ opacity: 0; transform: translate3d(74vw, 3vh, 0) rotate(1deg); }
+}
+
+@keyframes localtifyStarsNebulaFloatV130{
+  0%{ opacity: .48; transform: translate3d(-1.2vw, .8vh, 0) scale(1); }
+  50%{ opacity: .72; transform: translate3d(1.4vw, -1vh, 0) scale(1.035); }
+  100%{ opacity: .58; transform: translate3d(2.2vw, .6vh, 0) scale(1.02); }
+}
+
+/* ========================================================================
+   localtify v0.3.5 V130 — smoother star drift and clean background layering
+   Stars remain animated, but they stay as atmosphere behind the UI. No card
+   sweep/shine marks are allowed here; cards get motion from proximity CSS.
+======================================================================== */
+.app[data-theme="stars"]{
+  --localtify-player-top-fade: rgba(215, 103, 255, 0.13);
+  background:
+    radial-gradient(circle at 72% 8%, rgba(143, 220, 255, 0.13), transparent 34%),
+    radial-gradient(circle at 18% 86%, rgba(215, 103, 255, 0.12), transparent 36%),
+    radial-gradient(circle at 52% 112%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.075), transparent 44%),
+    linear-gradient(180deg, #060313 0%, #020108 100%) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsBackdrop{
+  inset: 36px 0 calc(var(--player-size-live, var(--player-size, 108px)) + 8px) var(--sidebar-width, 249px) !important;
+  z-index: 0 !important;
+  opacity: .96 !important;
+  mix-blend-mode: screen !important;
+  contain: strict !important;
+  pointer-events: none !important;
+  transform: translate3d(0, 0, 0) !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 30px, #000 calc(100% - 34px), transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 30px, #000 calc(100% - 34px), transparent 100%) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsNebula{
+  opacity: .72 !important;
+  filter: blur(20px) saturate(1.22) !important;
+  animation: localtifyStarsNebulaFloatV130 34s ease-in-out infinite alternate !important;
+}
+
+.app[data-theme="stars"] .localtifyStarParticle{
+  opacity: var(--star-opacity, .72) !important;
+  box-shadow:
+    0 0 var(--star-glow, 10px) var(--star-color),
+    0 0 var(--star-glow-soft, 18px) rgba(143, 220, 255, .22) !important;
+  animation:
+    localtifyStarParticleOrbitV130 var(--star-drift) cubic-bezier(.42, 0, .22, 1) var(--star-delay) infinite,
+    localtifyStarParticleTwinkleV130 var(--star-twinkle) steps(7, end) var(--star-delay) infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarParticle.sparkle::after{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -7px !important;
+  pointer-events: none !important;
+  opacity: .42 !important;
+  background:
+    linear-gradient(90deg, transparent 44%, rgba(255,255,255,.86) 49% 51%, transparent 56%),
+    linear-gradient(0deg, transparent 44%, rgba(255,255,255,.7) 49% 51%, transparent 56%) !important;
+  filter: drop-shadow(0 0 6px rgba(215, 213, 255, .28)) !important;
+  transform: scale(.6) rotate(0deg) !important;
+  animation: localtifyStarSparkV130 var(--star-twinkle) ease-in-out var(--star-delay) infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarSweep{
+  opacity: .13 !important;
+  animation: localtifyStarSweepDomV130 var(--localtify-stars-sweep-duration, 22s) linear infinite !important;
+}
+
+.app[data-theme="stars"] .appShell,
+.app[data-theme="stars"] .content,
+.app[data-theme="stars"] .pageTransition{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.app[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+),
+.app[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+)::before,
+.app[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+)::after{
+  background-image: none !important;
+  animation-name: none !important;
+}
+
+@keyframes localtifyStarParticleOrbitV130{
+  0%{
+    transform: translate3d(-50%, -50%, 0) scale(.88);
+  }
+  22%{
+    transform: translate3d(calc(-50% + var(--star-drift-mid-x, 12px)), calc(-50% + var(--star-drift-mid-y, -8px)), 0) scale(var(--star-pulse-scale, 1.06));
+  }
+  48%{
+    transform: translate3d(calc(-50% + var(--star-drift-x, 28px)), calc(-50% + var(--star-drift-y, 18px)), 0) scale(1.03);
+  }
+  72%{
+    transform: translate3d(calc(-50% - (var(--star-drift-mid-x, 12px) * .72)), calc(-50% + (var(--star-drift-y, 18px) * .34)), 0) scale(.98);
+  }
+  100%{
+    transform: translate3d(-50%, -50%, 0) scale(.9);
+  }
+}
+
+@keyframes localtifyStarParticleTwinkleV130{
+  0%, 100%{ opacity: var(--star-opacity-low, .22); }
+  12%{ opacity: var(--star-opacity-high, .92); }
+  26%{ opacity: var(--star-opacity-mid, .48); }
+  43%{ opacity: var(--star-opacity, .72); }
+  61%{ opacity: var(--star-opacity-high, .88); }
+  77%{ opacity: var(--star-opacity-mid, .5); }
+  91%{ opacity: var(--star-opacity-high, .82); }
+}
+
+@keyframes localtifyStarSparkV130{
+  0%, 72%, 100%{ opacity: 0; transform: scale(.48) rotate(0deg); }
+  12%{ opacity: .5; transform: scale(.75) rotate(24deg); }
+  24%{ opacity: .14; transform: scale(.58) rotate(42deg); }
+}
+
+@keyframes localtifyStarSweepDomV130{
+  0%{ opacity: 0; transform: translate3d(-66vw, -2vh, 0) rotate(-1.5deg); }
+  20%{ opacity: .15; }
+  46%{ opacity: .1; }
+  100%{ opacity: 0; transform: translate3d(76vw, 4vh, 0) rotate(1.5deg); }
+}
+
+@keyframes localtifyStarsNebulaFloatV130{
+  0%{ opacity: .48; transform: translate3d(-1.4vw, .8vh, 0) scale(1); }
+  35%{ opacity: .68; transform: translate3d(.9vw, -1.2vh, 0) scale(1.035); }
+  70%{ opacity: .58; transform: translate3d(1.9vw, .4vh, 0) scale(1.018); }
+  100%{ opacity: .74; transform: translate3d(-.4vw, -1vh, 0) scale(1.04); }
+}
+
+
+/* ==========================================================================
+   localtify v0.3.5 V131 — smooth stars stability layer
+   --------------------------------------------------------------------------
+   This is the final override for the broken V124-V130 animated-theme patches.
+   It keeps blur, glass, ambience, cover glow, and motion, but removes the two
+   expensive causes of jank:
+   1) hundreds of per-star DOM animations
+   2) always-on card shimmer/shine during normal runtime
+========================================================================== */
+
+.app[data-theme="stars"]{
+  --localtify-player-top-fade: rgba(215, 103, 255, 0.12);
+  --localtify-stars-panel-bg: rgba(5, 4, 15, 0.54);
+  background:
+    radial-gradient(circle at 74% 10%, rgba(143, 220, 255, 0.12), transparent 34%),
+    radial-gradient(circle at 18% 88%, rgba(215, 103, 255, 0.12), transparent 36%),
+    radial-gradient(circle at 50% 116%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.075), transparent 44%),
+    linear-gradient(180deg, #060315 0%, #020108 100%) !important;
+}
+
+/* Old star implementations used app pseudo-elements plus DOM particles.
+   They were pretty but too much at the same time. V131 uses the single backdrop
+   below, so the old layers are force-muted only for the stars theme. */
+.app[data-theme="stars"]::before,
+.app[data-theme="stars"]::after{
+  content: none !important;
+  display: none !important;
+  animation: none !important;
+  background-image: none !important;
+}
+
+.app[data-theme="stars"] .content{
+  background:
+    radial-gradient(circle at 80% 12%, rgba(143, 220, 255, 0.046), transparent 32%),
+    radial-gradient(circle at 14% 90%, rgba(215, 103, 255, 0.04), transparent 34%),
+    rgba(1, 2, 9, 0.52) !important;
+  background-size: auto !important;
+}
+
+.app[data-theme="stars"] .content::before{
+  display: none !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsBackdrop{
+  position: fixed !important;
+  inset: 36px 0 calc(var(--player-size-live, var(--player-size, 108px)) + 8px) var(--sidebar-width, 249px) !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  contain: strict !important;
+  isolation: isolate !important;
+  opacity: .98 !important;
+  visibility: visible !important;
+  mix-blend-mode: screen !important;
+  transform: translate3d(0, 0, 0) !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 32px, #000 calc(100% - 34px), transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 32px, #000 calc(100% - 34px), transparent 100%) !important;
+}
+
+/* One blurred ambience layer only. This keeps the theme alive without forcing
+   every card to repaint on each tick. */
+.app[data-theme="stars"] .localtifyStarsNebula{
+  position: absolute !important;
+  inset: -18% !important;
+  opacity: .66 !important;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(143, 220, 255, .13), transparent 28%),
+    radial-gradient(circle at 18% 78%, rgba(215, 103, 255, .12), transparent 31%),
+    radial-gradient(circle at 54% 110%, rgba(var(--cover-rgb, var(--accent-rgb)), .09), transparent 43%) !important;
+  filter: blur(22px) saturate(1.18) !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+  animation: localtifyStarsNebulaFloatV131 36s ease-in-out infinite alternate !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayer{
+  position: absolute !important;
+  inset: -12% -14% !important;
+  pointer-events: none !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  transform: translate3d(0, 0, 0) !important;
+  will-change: transform, opacity !important;
+  image-rendering: pixelated;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayerA{
+  opacity: .72 !important;
+  filter: drop-shadow(0 0 4px rgba(215, 213, 255, .32)) !important;
+  background-image:
+    var(--localtify-stars-field-a),
+    radial-gradient(circle at 69% 19%, rgba(143, 220, 255, .09), transparent 24%),
+    radial-gradient(circle at 22% 76%, rgba(215, 213, 255, .075), transparent 28%) !important;
+  animation: localtifyStarsFieldDriftV131 var(--localtify-stars-drift-duration, 82s) linear infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayerB{
+  opacity: .5 !important;
+  filter: drop-shadow(0 0 7px rgba(148, 234, 255, .34)) !important;
+  background-image:
+    var(--localtify-stars-field-b),
+    linear-gradient(105deg, transparent 0 42%, rgba(255,255,255,.12) 49%, rgba(143,220,255,.065) 54%, transparent 64% 100%) !important;
+  background-size: 100% 100%, 54vw 100% !important;
+  background-position: 0 0, -66vw 0 !important;
+  animation:
+    localtifyStarsSparkleV131 var(--localtify-stars-sparkle-duration, 4.3s) steps(5, end) infinite,
+    localtifyStarsSweepV131 var(--localtify-stars-sweep-duration, 26s) linear infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayerC{
+  opacity: .42 !important;
+  filter: drop-shadow(0 0 3px rgba(255, 167, 248, .22)) !important;
+  background-image:
+    var(--localtify-stars-field-c),
+    radial-gradient(circle at 84% 28%, rgba(255, 167, 248, .075), transparent 18%) !important;
+  animation:
+    localtifyStarsSlowDriftV131 calc(var(--localtify-stars-drift-duration, 82s) * 1.25) linear infinite reverse,
+    localtifyStarsTwinkleV131 5.2s steps(6, end) infinite !important;
+}
+
+/* Hide the old particle DOM/classes if an older cached App.tsx briefly renders
+   them. The V131 App.tsx does not create them anymore. */
+.app[data-theme="stars"] .localtifyStarParticle,
+.app[data-theme="stars"] .localtifyStarSweep{
+  display: none !important;
+  animation: none !important;
+}
+
+/* Boot shimmer is allowed only while the theme is warming up. Runtime cards stay
+   clean, which fixes the random shine marks and removes a constant repaint source. */
+.app.themeMotionBooting[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .updateSettingsCard
+){
+  background-image:
+    linear-gradient(112deg, transparent 0 35%, rgba(255,255,255,.07) 46%, rgba(143,220,255,.042) 53%, transparent 65% 100%) !important;
+  background-size: 280% 100% !important;
+  animation: localtifyStarsBootShimmerV131 1100ms ease-in-out infinite !important;
+}
+
+.app.themeMotionReady[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .updateSettingsCard
+),
+.app.themeMotionReady[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .updateSettingsCard
+)::before,
+.app.themeMotionReady[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .updateSettingsCard
+)::after{
+  animation-name: none !important;
+  background-image: none !important;
+}
+
+/* Keep UI above the star field while still letting translucent glass show the
+   stars underneath. */
+.app[data-theme="stars"] .appShell,
+.app[data-theme="stars"] .content,
+.app[data-theme="stars"] .pageTransition{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.app[data-theme="stars"] .titleBar,
+.app[data-theme="stars"] .playerBar,
+.app[data-theme="stars"] .settingsOverlay,
+.app[data-theme="stars"] .toastHost,
+.app[data-theme="stars"] .updateToastLayer,
+.app[data-theme="stars"] .topUpdateRibbonLayer{
+  position: relative !important;
+  z-index: 30 !important;
+}
+
+.app.reducedMotion[data-theme="stars"] .localtifyStarsBackdrop,
+.app:not([data-theme="stars"]) .localtifyStarsBackdrop{
+  display: none !important;
+  animation: none !important;
+}
+
+@keyframes localtifyStarsFieldDriftV131{
+  0%{ transform: translate3d(calc(var(--localtify-stars-drift-x, 4vw) * -1), calc(var(--localtify-stars-drift-y, 2vh) * -.5), 0) scale(1); }
+  50%{ transform: translate3d(var(--localtify-stars-drift-x, 4vw), var(--localtify-stars-drift-y, 2vh), 0) scale(1.015); }
+  100%{ transform: translate3d(calc(var(--localtify-stars-drift-x, 4vw) * -1), calc(var(--localtify-stars-drift-y, 2vh) * -.5), 0) scale(1); }
+}
+
+@keyframes localtifyStarsSlowDriftV131{
+  0%{ transform: translate3d(-2.4vw, .8vh, 0) scale(1); }
+  50%{ transform: translate3d(2.6vw, -1.2vh, 0) scale(1.012); }
+  100%{ transform: translate3d(-2.4vw, .8vh, 0) scale(1); }
+}
+
+@keyframes localtifyStarsSparkleV131{
+  0%, 100%{ opacity: .36; }
+  16%{ opacity: .62; }
+  34%{ opacity: .42; }
+  58%{ opacity: .56; }
+  78%{ opacity: .33; }
+}
+
+@keyframes localtifyStarsTwinkleV131{
+  0%, 100%{ opacity: .28; }
+  14%{ opacity: .5; }
+  31%{ opacity: .36; }
+  55%{ opacity: .48; }
+  76%{ opacity: .3; }
+}
+
+@keyframes localtifyStarsSweepV131{
+  0%{ background-position: 0 0, -68vw 0; opacity: .18; }
+  30%{ opacity: .5; }
+  58%{ opacity: .3; }
+  100%{ background-position: 0 0, 78vw 0; opacity: .12; }
+}
+
+@keyframes localtifyStarsNebulaFloatV131{
+  0%{ opacity: .5; transform: translate3d(-1.2vw, .8vh, 0) scale(1); }
+  38%{ opacity: .68; transform: translate3d(.8vw, -1.1vh, 0) scale(1.03); }
+  72%{ opacity: .58; transform: translate3d(1.8vw, .35vh, 0) scale(1.016); }
+  100%{ opacity: .72; transform: translate3d(-.35vw, -1vh, 0) scale(1.035); }
+}
+
+@keyframes localtifyStarsBootShimmerV131{
+  0%{ background-position: 130% 0; }
+  100%{ background-position: -130% 0; }
+}
+
+
+
+/* ========================================================================
+   localtify v0.3.5 V132 — clean stars, no ambience orbs
+   ------------------------------------------------------------------------
+   Star theme is now only drifting star layers. No big radial side orbs, no
+   nebula blob, no card shine, and no DOM star particles.
+======================================================================== */
+.app[data-theme="stars"]{
+  background: #03040e !important;
+}
+
+.app[data-theme="stars"] .content{
+  background: rgba(1, 2, 9, 0.62) !important;
+  background-image: none !important;
+  background-size: auto !important;
+}
+
+.app[data-theme="stars"] .content::before,
+.app[data-theme="stars"] .content::after,
+.app[data-theme="stars"]::before,
+.app[data-theme="stars"]::after,
+.app[data-theme="stars"] .localtifyStarsNebula{
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+  background: none !important;
+  filter: none !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsBackdrop{
+  z-index: 0 !important;
+  opacity: .9 !important;
+  mix-blend-mode: screen !important;
+  contain: paint !important;
+  background: transparent !important;
+  filter: none !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayer{
+  inset: -10% -12% !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  background-position: 0 0 !important;
+  will-change: transform, opacity !important;
+  filter: none !important;
+  mix-blend-mode: screen !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayerA{
+  opacity: .78 !important;
+  background-image: var(--localtify-stars-field-a) !important;
+  animation: localtifyStarsFieldDriftV132 var(--localtify-stars-drift-duration, 86s) linear infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayerB{
+  opacity: .58 !important;
+  background-image: var(--localtify-stars-field-b) !important;
+  animation:
+    localtifyStarsFieldDriftV132 64s linear infinite reverse,
+    localtifyStarsTwinkleV132 var(--localtify-stars-sparkle-duration, 4.7s) steps(5, end) infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayerC{
+  opacity: .42 !important;
+  background-image: var(--localtify-stars-field-c) !important;
+  animation:
+    localtifyStarsSlowDriftV132 112s linear infinite,
+    localtifyStarsTinySparkleV132 6.2s steps(7, end) infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarParticle,
+.app[data-theme="stars"] .localtifyStarSweep{
+  display: none !important;
+  animation: none !important;
+}
+
+.app.themeMotionReady[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .updateSettingsCard
+),
+.app.themeMotionReady[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .updateSettingsCard
+)::before,
+.app.themeMotionReady[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .updateSettingsCard
+)::after{
+  background-image: none !important;
+  animation-name: none !important;
+}
+
+@keyframes localtifyStarsFieldDriftV132{
+  0%{ transform: translate3d(-4.6vw, -1.1vh, 0) scale(1); }
+  33%{ transform: translate3d(1.8vw, 1.35vh, 0) scale(1.006); }
+  66%{ transform: translate3d(4.2vw, -1.9vh, 0) scale(1.012); }
+  100%{ transform: translate3d(-4.6vw, -1.1vh, 0) scale(1); }
+}
+
+@keyframes localtifyStarsSlowDriftV132{
+  0%{ transform: translate3d(-2.6vw, .8vh, 0) scale(1); }
+  50%{ transform: translate3d(2.2vw, -1.4vh, 0) scale(1.01); }
+  100%{ transform: translate3d(-2.6vw, .8vh, 0) scale(1); }
+}
+
+@keyframes localtifyStarsTwinkleV132{
+  0%, 100%{ opacity: .34; }
+  14%{ opacity: .66; }
+  28%{ opacity: .42; }
+  46%{ opacity: .72; }
+  70%{ opacity: .38; }
+}
+
+@keyframes localtifyStarsTinySparkleV132{
+  0%, 100%{ opacity: .22; }
+  20%{ opacity: .5; }
+  37%{ opacity: .3; }
+  59%{ opacity: .58; }
+  82%{ opacity: .26; }
 }

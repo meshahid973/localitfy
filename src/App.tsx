@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 stars/card/player cleanup V128 — download/file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 smooth input + clean stars V132 — download/file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
@@ -849,14 +849,14 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 keeps the theme picker focused on a cleaner animated stars theme",
-  "Stars now sit behind the library UI instead of drawing sparkle marks across song cards",
-  "The player area now reserves the correct height so the bottom edge does not clip or bleed",
-  "The stars still move, twinkle, drift, and glow without removing blur or ambience",
-  "Vapor glass and night train stay retired; old saved installs move to stars safely",
-  "Startup keeps card motion, row shimmer, cover glow, glassy panels, animated backgrounds, and blur alive",
+  "0.3.5 keeps the stars theme clean: no side ambience orbs, just drifting sparkle layers",
+  "Proximity motion is back, but rebuilt to touch only a few nearby UI elements per frame",
+  "Pointer input stays responsive because proximity pauses instantly during clicks, drags, scrubbing, and hero reflow",
+  "Cards no longer run always-on shine or sweep animations during normal use",
+  "Blur, ambience, cover glow, glass panels, animated backgrounds, and normal UI motion stay enabled",
+  "Vapor glass and night train stay retired; old saved installs still move to stars safely",
   "Playlist playback still stays inside the playlist you started from",
-  "No Discord, downloads, playlists, player controls, blur, or ambience features were removed"
+  "No Discord, downloads, playlists, player controls, blur, cover glow, or ambience features were removed"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -893,7 +893,7 @@ const themes = [
   { id: "berry", name: "berry", note: "deep purple glow", mood: "soft night", emoji: "🍓" },
   { id: "midnight", name: "midnight", note: "deep blue OLED", mood: "late night", emoji: "🌙" },
   { id: "mono", name: "mono", note: "clean white", mood: "simple focus", emoji: "○" },
-  { id: "stars", name: "stars", note: "random sparkle motion", mood: "sparkly night", emoji: "✦" },
+  { id: "stars", name: "stars", note: "drifting sparkle field", mood: "sparkly night", emoji: "✦" },
 ] as const;
 
 const THEME_ID_SET = new Set<string>(themes.map((theme) => theme.id));
@@ -1222,67 +1222,25 @@ function buildRandomStarLayer(seedKey: string, count: number, palette: string[],
 function buildAnimatedThemeVisualStyle(theme: ThemeId, seedKey: string) {
   if (theme !== "stars") return {} as CSSProperties;
 
-  const seed = stableHash(`${seedKey}:stars:v128`);
-  const driftDuration = 58 + seededUnit(seed, 1) * 18;
-  const sparkleDuration = 2.1 + seededUnit(seed, 2) * 1.05;
-  const shimmerDuration = 7.4 + seededUnit(seed, 3) * 2.4;
-  const sweepDuration = 16 + seededUnit(seed, 4) * 6;
+  const seed = stableHash(`${seedKey}:stars:v131`);
+  const driftDuration = 72 + seededUnit(seed, 1) * 24;
+  const sparkleDuration = 3.4 + seededUnit(seed, 2) * 1.8;
+  const shimmerDuration = 8.8 + seededUnit(seed, 3) * 2.2;
+  const sweepDuration = 22 + seededUnit(seed, 4) * 8;
 
   return {
-    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v128:slow`, 54, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.85, 1.95),
-    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v128:sparkle`, 38, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 1.05, 2.65),
-    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v128:tiny`, 42, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.55, 1.2),
+    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v131:slow`, 42, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 2.05),
+    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v131:sparkle`, 24, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.85, 2.55),
+    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v131:tiny`, 34, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.42, 1.2),
     "--localtify-stars-drift-duration": `${driftDuration.toFixed(2)}s`,
     "--localtify-stars-sparkle-duration": `${sparkleDuration.toFixed(2)}s`,
     "--localtify-stars-shimmer-duration": `${shimmerDuration.toFixed(2)}s`,
     "--localtify-stars-sweep-duration": `${sweepDuration.toFixed(2)}s`,
-    "--localtify-stars-drift-x": `${(3.4 + seededUnit(seed, 5) * 3.2).toFixed(2)}vw`,
-    "--localtify-stars-drift-y": `${(1.6 + seededUnit(seed, 6) * 2.1).toFixed(2)}vh`
+    "--localtify-stars-drift-x": `${(3.2 + seededUnit(seed, 5) * 3.4).toFixed(2)}vw`,
+    "--localtify-stars-drift-y": `${(1.4 + seededUnit(seed, 6) * 2.2).toFixed(2)}vh`
   } as CSSProperties;
 }
 
-type AnimatedStarParticle = {
-  id: string;
-  x: number;
-  y: number;
-  size: number;
-  opacity: number;
-  delay: number;
-  drift: number;
-  twinkle: number;
-  color: string;
-  sparkle: boolean;
-};
-
-function buildAnimatedStarParticles(seedKey: string, count = 92): AnimatedStarParticle[] {
-  const seed = stableHash(`${seedKey}:visible-dom-stars:v128`);
-  const palette = [
-    "rgba(255,255,255,0.95)",
-    "rgba(215,213,255,0.92)",
-    "rgba(143,220,255,0.9)",
-    "rgba(255,167,248,0.82)"
-  ];
-
-  return Array.from({ length: count }, (_, index) => {
-    const salt = index * 17;
-    const size = 1 + seededUnit(seed, salt + 3) * 2.45;
-    const twinkle = 2.2 + seededUnit(seed, salt + 7) * 2.8;
-    const drift = 22 + seededUnit(seed, salt + 8) * 32;
-
-    return {
-      id: `star-${index}-${Math.round(seededUnit(seed, salt + 1) * 100000)}`,
-      x: 1.5 + seededUnit(seed, salt + 1) * 97,
-      y: 2 + seededUnit(seed, salt + 2) * 94,
-      size,
-      opacity: 0.34 + seededUnit(seed, salt + 4) * 0.6,
-      delay: -seededUnit(seed, salt + 5) * twinkle,
-      drift,
-      twinkle,
-      color: palette[Math.floor(seededUnit(seed, salt + 6) * palette.length)] || palette[0],
-      sparkle: seededUnit(seed, salt + 9) > 0.82
-    };
-  });
-}
 
 const songSignature = (song?: Song | null) => {
   if (!song) return "localitfy-idle";
@@ -4089,12 +4047,7 @@ function MainModeApp() {
     () => buildAnimatedThemeVisualStyle(effectiveTheme, animatedThemeSeedRef.current),
     [effectiveTheme]
   );
-  const visibleStarParticles = useMemo(
-    () => effectiveTheme === "stars" && !settings.reducedMotion
-      ? buildAnimatedStarParticles(animatedThemeSeedRef.current, 118)
-      : [],
-    [effectiveTheme, settings.reducedMotion]
-  );
+  const showStarBackdrop = effectiveTheme === "stars" && !settings.reducedMotion;
 
   useEffect(() => {
     setThemeMotionReady(false);
@@ -4120,6 +4073,256 @@ function MainModeApp() {
       window.clearTimeout(warmupTimer);
     };
   }, [effectiveTheme, settings.reducedMotion]);
+
+  useEffect(() => {
+    const root = appRootRef.current;
+    if (!root) return;
+
+    const proxProperties = [
+      "--prox",
+      "--prox-scale",
+      "--prox-line",
+      "--prox-bg",
+      "--prox-glow-size",
+      "--prox-card-y",
+      "--prox-button-y",
+      "--prox-x",
+      "--prox-y"
+    ];
+
+    const clearElement = (element: HTMLElement) => {
+      element.classList.remove("localtifyProximityActive", "localtifyProximityTarget");
+      proxProperties.forEach((property) => element.style.removeProperty(property));
+      activeElements.delete(element);
+    };
+
+    const activeElements = new Set<HTMLElement>();
+    const clearAll = () => {
+      Array.from(activeElements).forEach((element) => clearElement(element));
+    };
+
+    clearAll();
+    root
+      .querySelectorAll<HTMLElement>(".localtifyProximityActive, .localtifyProximityTarget")
+      .forEach((element) => clearElement(element));
+
+    if (settings.reducedMotion) return;
+
+    const cardSelector = [
+      ".songCard",
+      ".homeAlbumCard",
+      ".libraryCard",
+      ".libraryCardV025",
+      ".playlistShelfCard",
+      ".playlistPanel",
+      ".settingsPageCard",
+      ".settingsPanelCard",
+      ".settingsCard",
+      ".settingsThemeCard",
+      ".updateSettingsCard"
+    ].join(",");
+
+    const actionSelector = [
+      ".navItem",
+      ".mainAction",
+      ".heroMain",
+      ".heroGhost",
+      ".softButton",
+      ".simpleAction",
+      ".simpleGhost",
+      ".toolButton",
+      ".iconAction",
+      ".tabButton",
+      ".navButton",
+      ".tinyToggle",
+      ".songMenuButton",
+      ".circleButton"
+    ].join(",");
+
+    const targetSelector = `${cardSelector},${actionSelector}`;
+    const blockedSelector = [
+      ".localtifyStarsBackdrop",
+      ".playerBar",
+      ".titleBar",
+      ".updateToastLayer",
+      ".toastHost",
+      ".topUpdateRibbonLayer",
+      ".settingsOverlay input",
+      ".settingsOverlay textarea",
+      ".settingsOverlay select",
+      "input",
+      "textarea",
+      "select",
+      "[contenteditable='true']"
+    ].join(",");
+
+    const sampleOffsets = [
+      [0, 0],
+      [72, 0],
+      [-72, 0],
+      [0, 64],
+      [0, -64]
+    ] as const;
+
+    let frame = 0;
+    let lastX = -9999;
+    let lastY = -9999;
+    let lastEventTarget: EventTarget | null = null;
+    let lastAppliedX = -9999;
+    let lastAppliedY = -9999;
+    let suspendUntil = 0;
+
+    const shouldSuspend = () => {
+      const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+      return Boolean(
+        now < suspendUntil ||
+          isAppBackgrounded ||
+          isSeeking ||
+          isVolumeDragging ||
+          draggedSongId ||
+          document.body.classList.contains("localitfyHeroReflowing") ||
+          document.body.classList.contains("localitfyHeroCoverGrowing") ||
+          document.body.classList.contains("localitfyHeroCoverShrinking") ||
+          root.classList.contains("viewSwitching") ||
+          root.classList.contains("songDragActive") ||
+          root.classList.contains("playerScrubbing")
+      );
+    };
+
+    const addCandidate = (set: Set<HTMLElement>, element: Element | null | undefined) => {
+      const target = element?.closest<HTMLElement>(targetSelector);
+      if (!target || !root.contains(target)) return;
+      if (target.closest(blockedSelector)) return;
+      if (target.offsetWidth < 6 || target.offsetHeight < 6) return;
+      set.add(target);
+    };
+
+    const collectCandidates = () => {
+      const candidates = new Set<HTMLElement>();
+      const viewportWidth = window.innerWidth || 0;
+      const viewportHeight = window.innerHeight || 0;
+
+      if (lastEventTarget instanceof Element) addCandidate(candidates, lastEventTarget);
+
+      for (const [offsetX, offsetY] of sampleOffsets) {
+        const x = lastX + offsetX;
+        const y = lastY + offsetY;
+        if (x < 0 || y < 0 || x > viewportWidth || y > viewportHeight) continue;
+        addCandidate(candidates, document.elementFromPoint(x, y));
+      }
+
+      return Array.from(candidates).slice(0, 6);
+    };
+
+    const updateTargets = () => {
+      frame = 0;
+
+      if (shouldSuspend()) {
+        clearAll();
+        return;
+      }
+
+      if (Math.abs(lastX - lastAppliedX) < 2 && Math.abs(lastY - lastAppliedY) < 2) return;
+      lastAppliedX = lastX;
+      lastAppliedY = lastY;
+
+      const nextActive = new Set<HTMLElement>();
+      const candidates = collectCandidates();
+
+      for (const element of candidates) {
+        const rect = element.getBoundingClientRect();
+        if (rect.width < 6 || rect.height < 6) continue;
+
+        const outsideX = lastX < rect.left ? rect.left - lastX : lastX > rect.right ? lastX - rect.right : 0;
+        const outsideY = lastY < rect.top ? rect.top - lastY : lastY > rect.bottom ? lastY - rect.bottom : 0;
+        const edgeDistance = Math.hypot(outsideX, outsideY);
+        const isAction = element.matches(actionSelector);
+        const reach = isAction ? 82 : clamp(Math.max(rect.width, rect.height) * 0.16 + 76, 96, 138);
+        const raw = clamp(1 - edgeDistance / reach, 0, 1);
+        const proximity = raw * raw * (3 - 2 * raw);
+
+        if (proximity < 0.08) continue;
+
+        const localX = clamp(((lastX - rect.left) / Math.max(1, rect.width)) * 100, 0, 100);
+        const localY = clamp(((lastY - rect.top) / Math.max(1, rect.height)) * 100, 0, 100);
+        const scale = 1 + proximity * (isAction ? 0.018 : 0.012);
+        const lift = proximity * (isAction ? -1.7 : -2.2);
+
+        element.classList.add("localtifyProximityTarget", "localtifyProximityActive");
+        element.style.setProperty("--prox", proximity.toFixed(3));
+        element.style.setProperty("--prox-scale", scale.toFixed(4));
+        element.style.setProperty("--prox-line", (0.09 + proximity * 0.12).toFixed(3));
+        element.style.setProperty("--prox-bg", (proximity * 0.026).toFixed(3));
+        element.style.setProperty("--prox-glow-size", `${(proximity * 14).toFixed(2)}px`);
+        element.style.setProperty("--prox-card-y", `${lift.toFixed(2)}px`);
+        element.style.setProperty("--prox-button-y", `${(lift * 0.82).toFixed(2)}px`);
+        element.style.setProperty("--prox-x", `${localX.toFixed(2)}%`);
+        element.style.setProperty("--prox-y", `${localY.toFixed(2)}%`);
+        nextActive.add(element);
+        activeElements.add(element);
+      }
+
+      activeElements.forEach((element) => {
+        if (!nextActive.has(element)) clearElement(element);
+      });
+    };
+
+    const scheduleUpdate = (event: globalThis.PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      lastEventTarget = event.target;
+      if (!frame) frame = window.requestAnimationFrame(updateTargets);
+    };
+
+    const pauseForClick = () => {
+      suspendUntil = (typeof performance !== "undefined" ? performance.now() : Date.now()) + 180;
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      }
+      clearAll();
+    };
+
+    const handleLeave = () => {
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      }
+      clearAll();
+    };
+
+    window.addEventListener("pointermove", scheduleUpdate, { passive: true });
+    window.addEventListener("pointerdown", pauseForClick, { passive: true, capture: true });
+    window.addEventListener("pointerup", pauseForClick, { passive: true, capture: true });
+    window.addEventListener("pointercancel", handleLeave, { passive: true });
+    window.addEventListener("pointerleave", handleLeave);
+    window.addEventListener("blur", handleLeave);
+    window.addEventListener("scroll", handleLeave, true);
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", scheduleUpdate);
+      window.removeEventListener("pointerdown", pauseForClick, { capture: true });
+      window.removeEventListener("pointerup", pauseForClick, { capture: true });
+      window.removeEventListener("pointercancel", handleLeave);
+      window.removeEventListener("pointerleave", handleLeave);
+      window.removeEventListener("blur", handleLeave);
+      window.removeEventListener("scroll", handleLeave, true);
+      clearAll();
+    };
+  }, [
+    settings.reducedMotion,
+    effectiveTheme,
+    view,
+    settingsCategory,
+    settings.heroExpanded,
+    settings.homeExpanded,
+    isAppBackgrounded,
+    isSeeking,
+    isVolumeDragging,
+    draggedSongId
+  ]);
 
   const diagnosticsInfo = useMemo(() => {
     const themeLabel = settings.customThemeEnabled ? `${currentTheme.name} + custom colors` : currentTheme.name;
@@ -4696,7 +4899,9 @@ function MainModeApp() {
     // Save this setting through the debounced path. That keeps the click
     // animation away from an immediate disk write while still persisting it.
     window.requestAnimationFrame(() => {
-      void updateSetting("heroExpanded", nextExpanded, true);
+      startTransition(() => {
+        void updateSetting("heroExpanded", nextExpanded, true);
+      });
     });
   }
 
@@ -10645,33 +10850,11 @@ function MainModeApp() {
       data-motion-level={settings.reducedMotion ? "reduced" : "smooth"}
       data-drag-title={draggedSongTitle}
     >
-      {visibleStarParticles.length ? (
+      {showStarBackdrop ? (
         <div className="localtifyStarsBackdrop" aria-hidden="true">
-          <div className="localtifyStarsNebula" />
-          {visibleStarParticles.map((star) => (
-            <span
-              key={star.id}
-              className={`localtifyStarParticle ${star.sparkle ? "sparkle" : ""}`}
-              style={
-                {
-                  "--star-x": `${star.x.toFixed(2)}%`,
-                  "--star-y": `${star.y.toFixed(2)}%`,
-                  "--star-size": `${star.size.toFixed(2)}px`,
-                  "--star-opacity": star.opacity.toFixed(2),
-                  "--star-opacity-low": Math.max(0.16, star.opacity * 0.46).toFixed(2),
-                  "--star-opacity-mid": Math.max(0.22, star.opacity * 0.72).toFixed(2),
-                  "--star-opacity-high": Math.min(1, star.opacity * 1.16).toFixed(2),
-                  "--star-glow": `${(star.size * 4.5).toFixed(2)}px`,
-                  "--star-glow-soft": `${(star.size * 9).toFixed(2)}px`,
-                  "--star-delay": `${star.delay.toFixed(2)}s`,
-                  "--star-drift": `${star.drift.toFixed(2)}s`,
-                  "--star-twinkle": `${star.twinkle.toFixed(2)}s`,
-                  "--star-color": star.color
-                } as CSSProperties
-              }
-            />
-          ))}
-          <div className="localtifyStarSweep" />
+          <div className="localtifyStarsLayer localtifyStarsLayerA" />
+          <div className="localtifyStarsLayer localtifyStarsLayerB" />
+          <div className="localtifyStarsLayer localtifyStarsLayerC" />
         </div>
       ) : null}
 
