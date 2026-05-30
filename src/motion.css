@@ -1795,9 +1795,9 @@ body.localitfyHeroReflowing .app .settingsPanel{
 }
 
 /* ========================================================================
-   localtify v0.3.5 V133 — proximity styling owner
+   localtify v0.3.5 V135 — proximity styling owner
    ------------------------------------------------------------------------
-   JS proximity is now isolated in hooks/useProximityMotion.ts. This CSS only
+   JS proximity is isolated in src/useProximityMotion.ts. This CSS only
    paints the variables written by that hook. It uses scale instead of replacing
    transform, so existing hover/entrance animations stay intact.
 ======================================================================== */
@@ -1807,10 +1807,10 @@ body.localitfyHeroReflowing .app .settingsPanel{
   scale: var(--prox-scale, 1) !important;
   will-change: scale, border-color, background-color !important;
   transition:
-    scale 90ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 120ms ease,
-    background-color 120ms ease,
-    box-shadow 120ms ease !important;
+    scale 80ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 105ms ease,
+    background-color 105ms ease,
+    box-shadow 105ms ease !important;
 }
 
 .app:not(.reducedMotion) :is(
@@ -1855,6 +1855,7 @@ body.localitfyHeroReflowing .app .settingsPanel{
 }
 
 .app.reducedMotion .localtifyProximityTarget,
+.app.themeMotionBooting .localtifyProximityTarget,
 .app.appBackgrounded .localtifyProximityTarget,
 .app.playerScrubbing .localtifyProximityTarget,
 .app.songDragActive .localtifyProximityTarget,
@@ -1877,4 +1878,24 @@ body.localitfyHeroCoverShrinking .app[data-theme="stars"] .localtifyStarsLayer,
 .app.playerScrubbing[data-theme="stars"] .localtifyStarsLayer,
 .app.viewSwitching[data-theme="stars"] .localtifyStarsLayer{
   animation-play-state: paused !important;
+}
+
+
+/* ========================================================================
+   localtify v0.3.5 V135 — stop decorative motion from stealing input frames
+   ------------------------------------------------------------------------
+   This does not remove blur, ambience, stars, or normal animations. It only
+   pauses decorative star layers while React is committing a layout interaction.
+======================================================================== */
+
+.app.themeMotionBooting[data-theme="stars"] .localtifyStarsLayer,
+body.localitfyHeroFlipMotion .app[data-theme="stars"] .localtifyStarsLayer,
+body.localitfyHeroFlipPlay .app[data-theme="stars"] .localtifyStarsLayer{
+  animation-play-state: paused !important;
+}
+
+body.localitfyHeroFlipMotion .app:not(.reducedMotion) .localtifyProximityTarget,
+body.localitfyHeroFlipPlay .app:not(.reducedMotion) .localtifyProximityTarget{
+  scale: 1 !important;
+  will-change: auto !important;
 }

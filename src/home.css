@@ -14564,3 +14564,239 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
     max-width: 70vw !important;
   }
 }
+
+/* localtify v0.3.5 bug sweep: playlist rows should never stack text over cover/buttons */
+
+/* localtify v0.3.5 bug sweep: playlist rows should never stack text over cover/buttons */
+.app .playlistTrackRow {
+  min-height: 72px;
+  height: auto;
+  overflow: hidden;
+}
+
+.app .playlistTrackMain {
+  display: grid !important;
+  grid-template-columns: 32px 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.app .playlistTrackGrip,
+.app .playlistTrackIndex,
+.app .playlistTrackCover,
+.app .playlistTrackText,
+.app .playlistTrackDuration {
+  min-width: 0;
+}
+
+.app .playlistTrackGrip,
+.app .playlistTrackIndex {
+  justify-self: center;
+  flex: 0 0 auto;
+}
+
+.app .playlistTrackText {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.app .playlistTrackText strong,
+.app .playlistTrackText small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.15;
+}
+
+.app .playlistTrackText small {
+  opacity: 0.68;
+  margin-top: 0;
+}
+
+.app .playlistTrackDuration {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.app .playlistTrackActions,
+.app .playlistTrackRow > .iconAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 900px) {
+  .app .playlistTrackMain {
+    grid-template-columns: 24px 46px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .app .playlistTrackDuration {
+    display: none;
+  }
+}
+
+/* ====================================================================== 
+   localtify v0.3.5 V130 — smooth hero expand without reducing blur/ambience
+   The old expand animation transitioned layout-heavy values for too long.
+   This keeps the same visual states, but moves the perceived motion onto
+   compositor-friendly transform/opacity so expand does not fight scrolling.
+====================================================================== */
+.app .hero.heroPremium.heroLayoutMotion{
+  contain: layout paint style !important;
+  transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden !important;
+  will-change: transform !important;
+  transition:
+    transform 520ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 260ms ease,
+    box-shadow 380ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 320ms ease !important;
+}
+
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion{
+  pointer-events: none !important;
+  animation: localtifyHeroReflowFloatV130 560ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion .heroText,
+.app .hero.heroPremium.heroLayoutMotion .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
+.app .hero.heroPremium.heroLayoutMotion .heroArtWrap img,
+.app .hero.heroPremium.heroLayoutMotion .coverAura{
+  backface-visibility: hidden !important;
+  will-change: transform, opacity !important;
+  transition:
+    transform 560ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 260ms ease,
+    filter 320ms ease,
+    box-shadow 360ms ease,
+    border-radius 360ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
+body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
+  animation: localtifyHeroArtReflowV130 620ms cubic-bezier(0.16, 1.12, 0.28, 1) both !important;
+}
+
+body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroTitle,
+body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroTitle{
+  animation: localtifyHeroTitleReflowV130 520ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroArtWrap::before{
+  transition:
+    opacity 380ms ease,
+    filter 420ms ease,
+    transform 520ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes localtifyHeroReflowFloatV130{
+  0%{ transform: translate3d(0, 0, 0) scale(.998); }
+  42%{ transform: translate3d(0, -2px, 0) scale(1.004); }
+  100%{ transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes localtifyHeroArtReflowV130{
+  0%{ transform: translate3d(0, 1px, 0) scale(.985); }
+  45%{ transform: translate3d(0, -4px, 0) scale(1.04); }
+  100%{ transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes localtifyHeroTitleReflowV130{
+  0%{ opacity: .9; transform: translate3d(0, 3px, 0) scale(.992); }
+  52%{ opacity: 1; transform: translate3d(0, -2px, 0) scale(1.012); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+
+/* ======================================================================
+   localtify v0.3.5 V135 — smooth hero expand without layout jank
+   ----------------------------------------------------------------------
+   The old hero block animated min-height, grid columns, padding, font-size,
+   width, and height at the same time. That forced layout on every frame and
+   made the expand button feel delayed. App.tsx now does a small FLIP pass on
+   click, so home.css keeps the same visual states but lets the compositor do
+   the expensive-looking movement with transform instead of fighting layout.
+====================================================================== */
+
+.app .hero.heroPremium.heroLayoutMotion{
+  contain: layout paint style !important;
+  transform-origin: left top !important;
+  will-change: transform, opacity, box-shadow !important;
+  transition:
+    transform 540ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 260ms ease,
+    box-shadow 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 360ms ease !important;
+}
+
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion,
+body.localitfyHeroFlipMotion .app .hero.heroPremium.heroLayoutMotion,
+body.localitfyHeroFlipPlay .app .hero.heroPremium.heroLayoutMotion{
+  transition:
+    transform 560ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 220ms ease,
+    box-shadow 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 280ms ease !important;
+}
+
+body.localitfyHeroFlipMotion .app .hero.heroPremium.heroLayoutMotion{
+  transform:
+    translate3d(var(--hero-flip-x, 0px), var(--hero-flip-y, 0px), 0)
+    scale(var(--hero-flip-scale-x, 1), var(--hero-flip-scale-y, 1)) !important;
+}
+
+body.localitfyHeroFlipMotion.localitfyHeroFlipPlay .app .hero.heroPremium.heroLayoutMotion{
+  transform: translate3d(0, 0, 0) scale(1, 1) !important;
+}
+
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroText,
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroTitle,
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroArtistLine,
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroArt,
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .coverAura{
+  will-change: transform, opacity, filter !important;
+}
+
+body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
+body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
+  animation: localtifyHeroArtReflowV135 560ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
+body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
+body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroText,
+body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroText{
+  animation: localtifyHeroCopyReflowV135 460ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion::before,
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion::after,
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroAmbiencePulse,
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroCoverGhost{
+  animation-play-state: paused !important;
+}
+
+@keyframes localtifyHeroArtReflowV135{
+  0%{ transform: translate3d(0, 4px, 0) scale(0.985); }
+  52%{ transform: translate3d(0, -2px, 0) scale(1.018); }
+  100%{ transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes localtifyHeroCopyReflowV135{
+  0%{ opacity: 0.88; transform: translate3d(0, 5px, 0) scale(0.995); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}

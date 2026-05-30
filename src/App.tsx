@@ -1,5 +1,6 @@
-﻿/* localtify 0.3.5 stability cleanup V133 — file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 smooth interaction + proximity V135 — download/file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -31,7 +32,7 @@ import {
 import Onboarding from "./Onboarding";
 import CoverStudio from "./cover";
 import SettingsCategoryContent from "./SettingsCategoryContent";
-import { useProximityMotion } from "./hooks/useProximityMotion";
+import { useProximityMotion } from "./useProximityMotion";
 import {
   initLocalitfyAnalytics,
   trackAppLaunched,
@@ -850,14 +851,13 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 cleans the old animated-theme patch stack and keeps stars as the only animated theme",
-  "Stars now use one stable layered backdrop: drifting, twinkling, and no side ambience orbs",
-  "Proximity motion moved into a small hook that only touches the hovered element and nearby siblings",
-  "Clicks, scrubbing, dragging, view changes, and hero expansion clear proximity instantly to avoid input lag",
-  "Card shine is limited to the short boot shimmer only, then it fully turns off during normal use",
-  "Blur, ambience, cover glow, glass panels, animated backgrounds, and normal UI motion stay enabled",
-  "Vapor glass and night train stay retired; old saved installs still move to stars safely",
-  "No Discord, downloads, playlists, player controls, cover glow, or ambience features were removed"
+  "0.3.5 keeps the stars theme clean while making pointer motion lighter and safer",
+  "Hero expand and compact now update on the click frame instead of waiting behind background work",
+  "The proximity scanner was rebuilt to avoid heavy document scans while the pointer moves",
+  "Decorative motion pauses during hero reflow, scrolling, scrubbing, dragging, and startup warmup only",
+  "Blur, ambience, cover glow, glass panels, animated backgrounds, stars, and normal UI motion stay enabled",
+  "No vapor glass, no night train, no side ambience orbs, and no runtime card shine in the stars theme",
+  "Playlist playback, downloads, Discord, player controls, and cover features were not removed"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -1223,16 +1223,16 @@ function buildRandomStarLayer(seedKey: string, count: number, palette: string[],
 function buildAnimatedThemeVisualStyle(theme: ThemeId, seedKey: string) {
   if (theme !== "stars") return {} as CSSProperties;
 
-  const seed = stableHash(`${seedKey}:stars:v133`);
-  const driftDuration = 76 + seededUnit(seed, 1) * 22;
-  const sparkleDuration = 3.6 + seededUnit(seed, 2) * 1.6;
-  const shimmerDuration = 7.4 + seededUnit(seed, 3) * 1.4;
-  const sweepDuration = 24 + seededUnit(seed, 4) * 7;
+  const seed = stableHash(`${seedKey}:stars:v131`);
+  const driftDuration = 72 + seededUnit(seed, 1) * 24;
+  const sparkleDuration = 3.4 + seededUnit(seed, 2) * 1.8;
+  const shimmerDuration = 8.8 + seededUnit(seed, 3) * 2.2;
+  const sweepDuration = 22 + seededUnit(seed, 4) * 8;
 
   return {
-    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v133:slow`, 34, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.72, 2.05),
-    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v133:sparkle`, 20, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.82, 2.45),
-    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v133:tiny`, 28, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.42, 1.18),
+    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v131:slow`, 42, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 2.05),
+    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v131:sparkle`, 24, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.85, 2.55),
+    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v131:tiny`, 34, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.42, 1.2),
     "--localtify-stars-drift-duration": `${driftDuration.toFixed(2)}s`,
     "--localtify-stars-sparkle-duration": `${sparkleDuration.toFixed(2)}s`,
     "--localtify-stars-shimmer-duration": `${shimmerDuration.toFixed(2)}s`,
@@ -4082,6 +4082,7 @@ function MainModeApp() {
     rootRef: appRootRef,
     disabled: settings.reducedMotion,
     suspended:
+      !themeMotionReady ||
       isAppBackgrounded ||
       isSeeking ||
       isVolumeDragging ||
@@ -4637,8 +4638,17 @@ function MainModeApp() {
   function setHeroExpanded(nextExpanded: boolean) {
     if (settings.heroExpanded === nextExpanded) return;
 
-    document.body.classList.add("localitfyHeroReflowing");
-    document.body.classList.remove("localitfyHeroCoverGrowing", "localitfyHeroCoverShrinking");
+    const body = document.body;
+    const heroBefore = appRootRef.current?.querySelector<HTMLElement>(".hero.heroPremium.heroLayoutMotion") ?? null;
+    const beforeRect = heroBefore?.getBoundingClientRect() ?? null;
+
+    body.classList.add("localitfyHeroReflowing");
+    body.classList.remove(
+      "localitfyHeroCoverGrowing",
+      "localitfyHeroCoverShrinking",
+      "localitfyHeroFlipMotion",
+      "localitfyHeroFlipPlay"
+    );
 
     if (heroReflowTimerRef.current !== null) {
       window.clearTimeout(heroReflowTimerRef.current);
@@ -4649,27 +4659,69 @@ function MainModeApp() {
       heroCoverMotionTimerRef.current = null;
     }
 
+    const nextSettings: Settings = {
+      ...settings,
+      heroExpanded: nextExpanded
+    };
+
+    // Hero expand/compact is a direct click response, not background work.
+    // Force this tiny setting update onto the current frame, then persist it
+    // through the existing debounced settings writer so disk I/O stays away
+    // from the animation.
+    flushSync(() => {
+      setSettings(nextSettings);
+    });
+
+    const heroAfter = appRootRef.current?.querySelector<HTMLElement>(".hero.heroPremium.heroLayoutMotion") ?? heroBefore;
+    const afterRect = heroAfter?.getBoundingClientRect() ?? null;
+
+    if (heroAfter && beforeRect && afterRect && afterRect.width > 1 && afterRect.height > 1) {
+      const flipX = beforeRect.left - afterRect.left;
+      const flipY = beforeRect.top - afterRect.top;
+      const flipScaleX = clamp(beforeRect.width / afterRect.width, 0.76, 1.32);
+      const flipScaleY = clamp(beforeRect.height / afterRect.height, 0.76, 1.32);
+
+      heroAfter.style.setProperty("--hero-flip-x", `${flipX.toFixed(2)}px`);
+      heroAfter.style.setProperty("--hero-flip-y", `${flipY.toFixed(2)}px`);
+      heroAfter.style.setProperty("--hero-flip-scale-x", flipScaleX.toFixed(4));
+      heroAfter.style.setProperty("--hero-flip-scale-y", flipScaleY.toFixed(4));
+      body.classList.add("localitfyHeroFlipMotion");
+    }
+
     window.requestAnimationFrame(() => {
-      document.body.classList.add(nextExpanded ? "localitfyHeroCoverGrowing" : "localitfyHeroCoverShrinking");
+      body.classList.add(nextExpanded ? "localitfyHeroCoverGrowing" : "localitfyHeroCoverShrinking");
+      body.classList.add("localitfyHeroFlipPlay");
     });
 
     heroReflowTimerRef.current = window.setTimeout(() => {
-      document.body.classList.remove("localitfyHeroReflowing");
+      body.classList.remove("localitfyHeroReflowing");
       heroReflowTimerRef.current = null;
-    }, 620);
+    }, 520);
 
     heroCoverMotionTimerRef.current = window.setTimeout(() => {
-      document.body.classList.remove("localitfyHeroCoverGrowing", "localitfyHeroCoverShrinking");
+      body.classList.remove(
+        "localitfyHeroCoverGrowing",
+        "localitfyHeroCoverShrinking",
+        "localitfyHeroFlipMotion",
+        "localitfyHeroFlipPlay"
+      );
+      heroAfter?.style.removeProperty("--hero-flip-x");
+      heroAfter?.style.removeProperty("--hero-flip-y");
+      heroAfter?.style.removeProperty("--hero-flip-scale-x");
+      heroAfter?.style.removeProperty("--hero-flip-scale-y");
       heroCoverMotionTimerRef.current = null;
-    }, 760);
+    }, 680);
 
-    // Save this setting through the debounced path. That keeps the click
-    // animation away from an immediate disk write while still persisting it.
-    window.requestAnimationFrame(() => {
-      startTransition(() => {
-        void updateSetting("heroExpanded", nextExpanded, true);
-      });
-    });
+    if (bootedRef.current) {
+      if (saveSettingsTimerRef.current !== null) {
+        window.clearTimeout(saveSettingsTimerRef.current);
+      }
+
+      saveSettingsTimerRef.current = window.setTimeout(() => {
+        window.localitfy.saveSettings(nextSettings).catch(() => undefined);
+        saveSettingsTimerRef.current = null;
+      }, 180);
+    }
   }
 
   function toggleHeroExpanded() {
@@ -10586,7 +10638,7 @@ function MainModeApp() {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
@@ -12041,7 +12093,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.5 is mostly a playlist and polish update: stars stay clean, proximity feels lighter, card shine only happens during boot, and the app keeps its blur, ambience, cover glow, and motion.</p>
+            <p className="whatsNewSubtext">0.3.5 is mostly a smoothness and polish update: stars stay clean, hero expand reacts instantly, proximity motion is lighter, and the app keeps its blur, ambience, and motion.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>
