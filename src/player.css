@@ -1,6 +1,6 @@
 /* ==========================================================================
    localtify player.css — bottom player owner only
-   Version: 0.2.9
+   Version: 0.2.9 / localtify v0.3.5 player edge V127
 
    This file owns the bottom player:
    - footer.playerBar layout and ambience
@@ -2413,4 +2413,75 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 
 .playerBar .controlRow > .circleButton.main > .playIcon{
   transform: translateX(1px) !important;
+}
+
+
+/* ========================================================================
+   localtify v0.3.5 V127 — bottom player edge cleanup
+   ------------------------------------------------------------------------
+   Fixes the harsh horizontal purple strip shown above the bottom player.
+   This keeps player blur/ambience/cover glow, but contains it so it blends
+   into the app instead of drawing a hard full-width rectangle.
+   Does not move the center controls, play button, progress row, or volume.
+======================================================================== */
+.playerBar{
+  overflow: visible !important;
+  clip-path: inset(-28px 0 0 0) !important;
+  border-top-color: rgba(var(--accent-rgb), 0.16) !important;
+  box-shadow:
+    0 -14px 42px rgba(0, 0, 0, 0.54),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
+}
+
+.playerBar::before{
+  inset: -24px 0 -22px 0 !important;
+  border-radius: 30px 30px 0 0 !important;
+  opacity: .24 !important;
+  background:
+    radial-gradient(ellipse at 50% 8%, rgba(var(--accent-rgb), 0.18), transparent 58%),
+    radial-gradient(circle at 22% 45%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.16), transparent 36%),
+    radial-gradient(circle at 76% 40%, rgba(var(--accent-rgb), 0.11), transparent 42%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+  filter: blur(28px) saturate(1.26) brightness(0.76) !important;
+  transform: translate3d(0, 2px, 0) scale(1.035) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 78%, transparent 100%) !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 78%, transparent 100%) !important;
+}
+
+.playerBar:hover::before{
+  opacity: .29 !important;
+  transform: translate3d(0, 1px, 0) scale(1.045) !important;
+}
+
+.playerBar::after{
+  border-radius: 0 !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.055), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.01)) !important;
+}
+
+.app[data-theme="stars"] .playerBar{
+  border-top-color: rgba(215, 213, 255, 0.18) !important;
+  background:
+    linear-gradient(180deg, rgba(215,213,255,0.032), rgba(143,220,255,0.014)),
+    rgba(2, 3, 12, 0.91) !important;
+}
+
+.app[data-theme="stars"] .playerBar::before{
+  opacity: .22 !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(215, 213, 255, 0.18), transparent 54%),
+    radial-gradient(circle at 20% 48%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.15), transparent 36%),
+    radial-gradient(circle at 76% 32%, rgba(143, 220, 255, 0.11), transparent 44%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+}
+
+@media (max-width: 900px){
+  .playerBar{
+    clip-path: inset(-22px 0 0 0) !important;
+  }
+
+  .playerBar::before{
+    inset: -18px 0 -18px 0 !important;
+  }
 }

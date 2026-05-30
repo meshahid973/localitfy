@@ -1,4 +1,4 @@
-/* localtify 0.3.5 stars DOM overlay visibility fix V126 — download/file patch label only; app version stays 0.3.5. */
+/* localtify 0.3.5 stars/player polish V127 — download/file patch label only; app version stays 0.3.5. */
 /* localtify settings.css — settings page + settings modal only.
    Home/player/progress styles stay in their own files. */
 
@@ -6791,6 +6791,76 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 @keyframes localtifyStarsNebulaFloatV126{
   0%{ opacity: .42; transform: translate3d(-1.4vw, .8vh, 0) scale(1); }
   100%{ opacity: .66; transform: translate3d(1.8vw, -1.1vh, 0) scale(1.035); }
+}
+
+@media (max-width: 860px){
+  .app[data-theme="stars"] .localtifyStarsBackdrop{
+    left: 0 !important;
+  }
+}
+
+
+/* ========================================================================
+   localtify v0.3.5 V127 — visible stars + player edge cleanup
+   ------------------------------------------------------------------------
+   Keeps the app version at 0.3.5. This is intentionally not a static-mode
+   patch: stars, shimmer, glass blur, cover ambience, and card motion remain.
+======================================================================== */
+.app[data-theme="stars"]{
+  --localtify-player-top-fade: rgba(215, 103, 255, 0.18);
+}
+
+.app[data-theme="stars"] .localtifyStarsBackdrop{
+  inset: 36px 0 calc(var(--player-size-live, var(--player-size, 108px)) + 10px) var(--sidebar-width, 248px) !important;
+  z-index: 24 !important;
+  opacity: 1 !important;
+  mix-blend-mode: screen !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 44px, #000 calc(100% - 32px), transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 44px, #000 calc(100% - 32px), transparent 100%) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsNebula{
+  opacity: .78 !important;
+  filter: blur(20px) saturate(1.22) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarParticle{
+  min-width: 1.15px !important;
+  min-height: 1.15px !important;
+  opacity: var(--star-opacity-high, .82) !important;
+  box-shadow:
+    0 0 var(--star-glow, 10px) var(--star-color),
+    0 0 var(--star-glow-soft, 18px) rgba(143, 220, 255, .26) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarParticle.sparkle::after{
+  opacity: .74 !important;
+}
+
+.app[data-theme="stars"] .localtifyStarSweep{
+  opacity: .48 !important;
+}
+
+/* Keep stars visible over the page background, but never over core UI controls. */
+.app[data-theme="stars"] .titleBar,
+.app[data-theme="stars"] .playerBar,
+.app[data-theme="stars"] .settingsOverlay,
+.app[data-theme="stars"] .toastHost,
+.app[data-theme="stars"] .updateToastLayer,
+.app[data-theme="stars"] .topUpdateRibbonLayer{
+  z-index: 40 !important;
+}
+
+.app[data-theme="stars"] .songRow,
+.app[data-theme="stars"] .songCard,
+.app[data-theme="stars"] .homeAlbumCard,
+.app[data-theme="stars"] .libraryCard,
+.app[data-theme="stars"] .playlistPanel,
+.app[data-theme="stars"] .settingsPageCard,
+.app[data-theme="stars"] .settingsPanelCard,
+.app[data-theme="stars"] .settingsCard,
+.app[data-theme="stars"] .updateSettingsCard{
+  background-blend-mode: screen, normal !important;
 }
 
 @media (max-width: 860px){
