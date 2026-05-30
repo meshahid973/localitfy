@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 hero motion replay fix V141 — file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 smooth ownership + proximity V142 — file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
@@ -851,12 +851,12 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 
 const whatsNewItems = [
   "0.3.5 keeps blur, ambience, cover glow, animated stars, glass panels, and normal UI motion enabled",
-  "Hero expand and compact now runs from one local hero-motion state instead of old body patch classes",
-  "The banner, title, cover, Listen now shelf, and recent covers move together without delayed shelf replay",
-  "The compact/expand click path stays instant: no page transition restart, no delayed card entrance replay",
-  "Proximity motion stays scoped to interactive elements and avoids pointer/input lag during clicks",
+  "CSS ownership is tighter: home owns shelves/hero layout, motion owns animation timing, themes owns stars",
+  "Hero compact/expand now runs as one local motion pass without replaying the whole home page",
+  "Listen now and recent covers bounce with the hero instead of fading in late like a reload",
+  "Proximity motion is faster and sampled around the pointer, so nearby cards/buttons react without input lag",
   "The stars theme stays clean: no vapor glass, no night train, no side ambience orbs, and no runtime card shine",
-  "Expensive row/card shimmer stays available at boot without stealing frames after the app is ready",
+  "Boot shimmer stays available for the expensive cards/rows, then shuts off after startup",
   "Playlist playback, downloads, Discord, player controls, and cover features were not removed"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
@@ -1223,16 +1223,16 @@ function buildRandomStarLayer(seedKey: string, count: number, palette: string[],
 function buildAnimatedThemeVisualStyle(theme: ThemeId, seedKey: string) {
   if (theme !== "stars") return {} as CSSProperties;
 
-  const seed = stableHash(`${seedKey}:stars:v131`);
+  const seed = stableHash(`${seedKey}:stars:v142`);
   const driftDuration = 72 + seededUnit(seed, 1) * 24;
   const sparkleDuration = 3.4 + seededUnit(seed, 2) * 1.8;
   const shimmerDuration = 8.8 + seededUnit(seed, 3) * 2.2;
   const sweepDuration = 22 + seededUnit(seed, 4) * 8;
 
   return {
-    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v131:slow`, 42, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 2.05),
-    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v131:sparkle`, 24, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.85, 2.55),
-    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v131:tiny`, 34, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.42, 1.2),
+    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v142:slow`, 42, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 2.05),
+    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v142:sparkle`, 24, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.85, 2.55),
+    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v142:tiny`, 34, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.42, 1.2),
     "--localtify-stars-drift-duration": `${driftDuration.toFixed(2)}s`,
     "--localtify-stars-sparkle-duration": `${sparkleDuration.toFixed(2)}s`,
     "--localtify-stars-shimmer-duration": `${shimmerDuration.toFixed(2)}s`,
@@ -4092,14 +4092,12 @@ function MainModeApp() {
     rootRef: appRootRef,
     disabled: settings.reducedMotion,
     suspended:
-      !themeMotionReady ||
       isAppBackgrounded ||
       isSeeking ||
       isVolumeDragging ||
       Boolean(draggedSongId) ||
-      isViewSwitching ||
-      themeSettling,
-    resetKey: `${effectiveTheme}:${view}:${settingsCategory}`
+      isViewSwitching,
+    resetKey: `${effectiveTheme}:${view}:${settingsCategory}:${themeMotionReady ? "ready" : "boot"}`
   });
 
   const diagnosticsInfo = useMemo(() => {
@@ -4715,7 +4713,7 @@ function MainModeApp() {
   const starParticleStyles = useMemo(
     () =>
       Array.from({ length: 124 }, (_, index) => {
-        const baseSeed = stableHash(`${secretBurst}:${currentSong?.id || "idle"}:localtify-white-stars:${index}`);
+        const baseSeed = stableHash(`${secretBurst}:${currentSong?.id || "idle"}:localtify-white-stars-v142:${index}`);
         const random = (salt: number) => {
           const raw = Math.sin((baseSeed + salt * 7919) * 12.9898) * 43758.5453123;
           return raw - Math.floor(raw);
@@ -12082,7 +12080,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.5 is a smoothness pass: the hero expands without shelf reload vibes, proximity motion stays lighter on clicks, stars stay clean, and blur/ambience/motion are still enabled.</p>
+            <p className="whatsNewSubtext">0.3.5 is a smoothness pass: CSS ownership is cleaner, the hero expands without home-page replay, proximity motion reacts properly around the cursor, stars stay clean, and blur/ambience/motion are still enabled.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>

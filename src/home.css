@@ -14909,3 +14909,78 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
 .app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel){
   transform: translate3d(0, 0, 0) scale(1) !important;
 }
+
+
+/* ========================================================================
+   localtify v0.3.5 V142 — safe home ownership guard
+   ------------------------------------------------------------------------
+   Home.css owns home layout. These rules keep persistent shelves stable while
+   motion.css handles the temporary compact/expand bounce classes.
+======================================================================== */
+
+.app .hero.heroPremium.heroLayoutMotion{
+  contain: layout paint style !important;
+  overflow: clip !important;
+  transform-origin: center top !important;
+  transition:
+    min-height 680ms cubic-bezier(.18, 1.12, .22, 1),
+    max-height 680ms cubic-bezier(.18, 1.12, .22, 1),
+    grid-template-columns 680ms cubic-bezier(.18, 1.12, .22, 1),
+    gap 620ms cubic-bezier(.18, 1.04, .22, 1),
+    padding 620ms cubic-bezier(.18, 1.04, .22, 1),
+    border-color 220ms ease,
+    box-shadow 340ms ease,
+    background-color 320ms ease !important;
+}
+
+.app .homeShelfStack,
+.app .homeShelfPanel,
+.app .homeListenPanel,
+.app .homeFreshPanel,
+.app .homeLibraryPanel{
+  opacity: 1 !important;
+  backface-visibility: hidden !important;
+}
+
+.app .homeShelfStack{
+  transform-origin: center top !important;
+  contain: layout paint style !important;
+}
+
+.app .homeListenPanel,
+.app .homeFreshPanel,
+.app .homeLibraryPanel{
+  contain: layout paint style !important;
+}
+
+.app.homeEntranceSettled.heroMotionActive .homeShelfStack,
+.app.homeEntranceSettled.heroMotionActive .homeShelfStack :where(.homeListenPanel,.homeFreshPanel,.homeLibraryPanel){
+  animation-fill-mode: both !important;
+}
+
+.app.homeEntranceSettled:not(.heroMotionActive) .homeShelfStack,
+.app.homeEntranceSettled:not(.heroMotionActive) .homeShelfStack :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeListenRail,.homeFreshRail,.homeListenCard,.homeFreshCard),
+.app.homeEntranceSettled:not(.heroMotionActive) :where(.homeAlbumGrid,.homeAlbumCard,.homeFreshCard,.homeListenCard){
+  animation: none !important;
+  animation-delay: 0ms !important;
+  animation-fill-mode: none !important;
+}
+
+.app.homeEntranceSettled:not(.heroMotionActive) .homeShelfStack,
+.app.homeEntranceSettled:not(.heroMotionActive) .homeShelfStack :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeListenRail,.homeFreshRail){
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app.heroMotionActive .homeShelfStack,
+.app.heroMotionActive .homeShelfStack :where(.homeListenPanel,.homeFreshPanel,.homeLibraryPanel),
+.app.heroMotionActive .hero.heroPremium.heroLayoutMotion,
+.app.heroMotionActive .hero.heroPremium.heroLayoutMotion :where(.heroTextClean,.heroText,.heroTitle,.heroArtWrap,.heroArt){
+  will-change: transform !important;
+}
+
+.app:not(.heroMotionActive) .homeShelfStack,
+.app:not(.heroMotionActive) .homeShelfStack :where(.homeListenPanel,.homeFreshPanel,.homeLibraryPanel),
+.app:not(.heroMotionActive) .hero.heroPremium.heroLayoutMotion,
+.app:not(.heroMotionActive) .hero.heroPremium.heroLayoutMotion :where(.heroTextClean,.heroText,.heroTitle,.heroArtWrap,.heroArt){
+  will-change: auto !important;
+}

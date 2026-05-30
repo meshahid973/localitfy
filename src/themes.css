@@ -1,4 +1,4 @@
-/* localtify 0.3.5 theme ownership cleanup V133 — file patch label only; APP_VERSION stays 0.3.5. */
+/* localtify 0.3.5 theme ownership cleanup V134 — file patch label only; APP_VERSION stays 0.3.5. */
 /* localtify settings.css — settings page + settings modal only.
    Home/player/progress styles stay in their own files. */
 
@@ -6337,7 +6337,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 /* ========================================================================
-   localtify v0.3.5 V133 — single stars theme owner
+   localtify v0.3.5 V134 — single stars theme owner
    ------------------------------------------------------------------------
    This replaces the older animated-theme patch stack. Keep star
    theme visuals here only: variables, backdrop, boot shimmer, and retired
@@ -6402,7 +6402,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 .app[data-theme="stars"] .content{
-  background: rgba(1, 2, 9, 0.62) !important;
+  background: linear-gradient(180deg, rgba(1, 2, 9, 0.54), rgba(1, 2, 9, 0.68)) !important;
   background-image: none !important;
   background-size: auto !important;
 }
@@ -6427,8 +6427,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   overflow: hidden !important;
   contain: paint !important;
   opacity: 0.9 !important;
-  background: #03040e !important;
-  mix-blend-mode: screen !important;
+  background: linear-gradient(180deg, #03040e 0%, #050312 46%, #02030b 100%) !important;
+  mix-blend-mode: normal !important;
   filter: none !important;
   transform: translateZ(0) !important;
 }
@@ -6442,7 +6442,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   background-position: 0 0 !important;
   mix-blend-mode: screen !important;
   filter: none !important;
-  opacity: 0.65 !important;
+  opacity: 0.68 !important;
   transform: translate3d(0, 0, 0) !important;
   will-change: transform, opacity !important;
 }
@@ -6450,27 +6450,26 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 .app[data-theme="stars"] .localtifyStarsLayerA{
   opacity: 0.78 !important;
   background-image: var(--localtify-stars-field-a) !important;
-  animation: localtifyStarsDriftV133 var(--localtify-stars-drift-duration, 86s) linear infinite !important;
+  animation: localtifyStarsDriftV134 var(--localtify-stars-drift-duration, 92s) linear infinite !important;
 }
 
 .app[data-theme="stars"] .localtifyStarsLayerB{
   opacity: 0.56 !important;
   background-image: var(--localtify-stars-field-b) !important;
   animation:
-    localtifyStarsDriftReverseV133 68s linear infinite,
-    localtifyStarsTwinkleV133 var(--localtify-stars-sparkle-duration, 4.6s) steps(6, end) infinite !important;
+    localtifyStarsDriftReverseV134 68s linear infinite,
+    localtifyStarsTwinkleV134 var(--localtify-stars-sparkle-duration, 4.6s) steps(6, end) infinite !important;
 }
 
 .app[data-theme="stars"] .localtifyStarsLayerC{
   opacity: 0.42 !important;
   background-image: var(--localtify-stars-field-c) !important;
   animation:
-    localtifyStarsSlowDriftV133 118s linear infinite reverse,
-    localtifyStarsTinySparkleV133 6.4s steps(7, end) infinite !important;
+    localtifyStarsSlowDriftV134 118s linear infinite reverse,
+    localtifyStarsTinySparkleV134 6.4s steps(7, end) infinite !important;
 }
 
-/* Expensive shimmer is allowed only during the short animated-theme boot.
-   Once .themeMotionReady is set, the cards are clean and static unless hovered. */
+/* Boot shimmer belongs to the stars theme only. Runtime cards stay clean. */
 .app.themeMotionBooting[data-theme="stars"] :is(
   .songRow,
   .songCard,
@@ -6493,7 +6492,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   opacity: 0.22 !important;
   background: linear-gradient(115deg, transparent 0 36%, rgba(255,255,255,0.18) 48%, transparent 61%) !important;
   transform: translate3d(-120%, 0, 0) !important;
-  animation: localtifyStarsBootShimmerV133 var(--localtify-stars-shimmer-duration, 8s) ease-in-out infinite !important;
+  animation: localtifyStarsBootShimmerV134 var(--localtify-stars-shimmer-duration, 8s) ease-in-out infinite !important;
 }
 
 .app.themeMotionReady[data-theme="stars"] :is(
@@ -6524,26 +6523,26 @@ body.localitfyHeroCoverShrinking .app[data-theme="stars"] .localtifyStarsLayer{
   animation-play-state: paused !important;
 }
 
-@keyframes localtifyStarsDriftV133{
+@keyframes localtifyStarsDriftV134{
   0%{ transform: translate3d(-4.4vw, -1vh, 0) scale(1); }
   33%{ transform: translate3d(1.6vw, 1.2vh, 0) scale(1.005); }
   66%{ transform: translate3d(4vw, -1.7vh, 0) scale(1.01); }
   100%{ transform: translate3d(-4.4vw, -1vh, 0) scale(1); }
 }
 
-@keyframes localtifyStarsDriftReverseV133{
+@keyframes localtifyStarsDriftReverseV134{
   0%{ transform: translate3d(4vw, 1.4vh, 0) scale(1.006); }
   50%{ transform: translate3d(-2.2vw, -1.1vh, 0) scale(1); }
   100%{ transform: translate3d(4vw, 1.4vh, 0) scale(1.006); }
 }
 
-@keyframes localtifyStarsSlowDriftV133{
+@keyframes localtifyStarsSlowDriftV134{
   0%{ transform: translate3d(-2.4vw, 0.8vh, 0) scale(1); }
   50%{ transform: translate3d(2vw, -1.3vh, 0) scale(1.01); }
   100%{ transform: translate3d(-2.4vw, 0.8vh, 0) scale(1); }
 }
 
-@keyframes localtifyStarsTwinkleV133{
+@keyframes localtifyStarsTwinkleV134{
   0%, 100%{ opacity: 0.34; }
   12%{ opacity: 0.72; }
   27%{ opacity: 0.4; }
@@ -6551,7 +6550,7 @@ body.localitfyHeroCoverShrinking .app[data-theme="stars"] .localtifyStarsLayer{
   72%{ opacity: 0.38; }
 }
 
-@keyframes localtifyStarsTinySparkleV133{
+@keyframes localtifyStarsTinySparkleV134{
   0%, 100%{ opacity: 0.22; }
   18%{ opacity: 0.54; }
   39%{ opacity: 0.3; }
@@ -6559,9 +6558,115 @@ body.localitfyHeroCoverShrinking .app[data-theme="stars"] .localtifyStarsLayer{
   84%{ opacity: 0.26; }
 }
 
-@keyframes localtifyStarsBootShimmerV133{
+@keyframes localtifyStarsBootShimmerV134{
   0%{ transform: translate3d(-125%, 0, 0); opacity: 0; }
   15%{ opacity: 0.18; }
   48%{ opacity: 0.24; }
   72%, 100%{ transform: translate3d(125%, 0, 0); opacity: 0; }
+}
+
+
+/* ========================================================================
+   localtify v0.3.5 V142 — stars theme ownership polish
+   ------------------------------------------------------------------------
+   Themes.css owns theme variables and stars only. No side orbs, no vapor
+   glass, no night-train leftovers, no runtime card shimmer.
+======================================================================== */
+
+.app[data-theme="stars"]::before,
+.app[data-theme="stars"]::after,
+.app[data-theme="stars"] .content::before,
+.app[data-theme="stars"] .content::after,
+.app[data-theme="stars"] .localtifyStarsNebula,
+.app[data-theme="stars"] .localtifyStarParticle,
+.app[data-theme="stars"] .localtifyStarSweep,
+.app[data-theme="stars"] .ambientOrb,
+.app[data-theme="stars"] .sideAmbienceOrb{
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+  background: none !important;
+  filter: none !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsBackdrop{
+  inset: 36px 0 0 0 !important;
+  opacity: .92 !important;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(229, 90, 231, .09), transparent 28%),
+    radial-gradient(circle at 84% 16%, rgba(143, 220, 255, .08), transparent 30%),
+    linear-gradient(180deg, #03040e 0%, #050312 48%, #02030b 100%) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayerA{
+  animation: localtifyStarsDriftV142 var(--localtify-stars-drift-duration, 92s) linear infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayerB{
+  animation:
+    localtifyStarsDriftReverseV142 72s linear infinite,
+    localtifyStarsTwinkleV142 var(--localtify-stars-sparkle-duration, 4.4s) steps(7, end) infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsLayerC{
+  animation:
+    localtifyStarsSlowDriftV142 126s linear infinite reverse,
+    localtifyStarsTinySparkleV142 6.2s steps(8, end) infinite !important;
+}
+
+.app.themeMotionReady[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .homeFreshCard,
+  .homeListenCard,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .updateSettingsCard
+)::after{
+  content: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+  background: none !important;
+}
+
+@keyframes localtifyStarsDriftV142{
+  0%{ transform: translate3d(-4.8vw, -1.2vh, 0) scale(1); }
+  28%{ transform: translate3d(-.8vw, .9vh, 0) scale(1.004); }
+  62%{ transform: translate3d(4.5vw, -1.9vh, 0) scale(1.009); }
+  100%{ transform: translate3d(-4.8vw, -1.2vh, 0) scale(1); }
+}
+
+@keyframes localtifyStarsDriftReverseV142{
+  0%{ transform: translate3d(4.4vw, 1.6vh, 0) scale(1.006); }
+  36%{ transform: translate3d(.6vw, -.8vh, 0) scale(1.001); }
+  100%{ transform: translate3d(-3.8vw, 1.3vh, 0) scale(1.006); }
+}
+
+@keyframes localtifyStarsSlowDriftV142{
+  0%{ transform: translate3d(-2.8vw, .8vh, 0) scale(1); }
+  46%{ transform: translate3d(1.4vw, -1.5vh, 0) scale(1.008); }
+  100%{ transform: translate3d(2.8vw, .4vh, 0) scale(1.002); }
+}
+
+@keyframes localtifyStarsTwinkleV142{
+  0%, 100%{ opacity: .32; }
+  11%{ opacity: .78; }
+  25%{ opacity: .38; }
+  47%{ opacity: .88; }
+  73%{ opacity: .42; }
+}
+
+@keyframes localtifyStarsTinySparkleV142{
+  0%, 100%{ opacity: .2; }
+  18%{ opacity: .56; }
+  41%{ opacity: .28; }
+  64%{ opacity: .64; }
+  86%{ opacity: .24; }
 }
