@@ -1,4 +1,4 @@
-/* localtify 0.3.5 stars-only animated theme cleanup V124 — download/file patch label only; app version stays 0.3.5. */
+/* localtify 0.3.5 stars theme visibility + UX fix V125 — download/file patch label only; app version stays 0.3.5. */
 /* localtify settings.css — settings page + settings modal only.
    Home/player/progress styles stay in their own files. */
 
@@ -6337,12 +6337,11 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 /* ========================================================================
-   localtify v0.3.5 V124 — stars-only animated theme
+   localtify v0.3.5 V125 — stars-only animated theme repair
    ------------------------------------------------------------------------
-   Vapor glass and night train were intentionally retired from the visible
-   picker. The star theme keeps blur, ambience, cover glow, and row/card
-   shimmer alive; the optimization is removing the unused animated theme
-   branches and moving the starfield with transform/opacity only.
+   Keeps APP_VERSION at 0.3.5. This patch removes the dead vapor/night train
+   branches, fixes the stars layer being hidden behind .content, and keeps
+   row/card shimmer running during boot without turning off blur or ambience.
 ======================================================================== */
 
 .app[data-theme="stars"]{
@@ -6361,12 +6360,31 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   --progress: #d7d5ff;
   --glow: rgba(145, 135, 255, 0.3);
   --player-bg: rgba(7, 8, 18, 0.9);
+  --grid-line: rgba(215, 213, 255, 0.022);
+  position: relative;
   isolation: isolate;
   overflow: hidden;
   background:
-    radial-gradient(circle at 70% 16%, rgba(143, 220, 255, 0.09), transparent 34%),
+    radial-gradient(circle at 70% 16%, rgba(143, 220, 255, 0.105), transparent 34%),
     radial-gradient(circle at 18% 82%, rgba(215, 213, 255, 0.09), transparent 32%),
+    radial-gradient(circle at 50% 110%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.075), transparent 42%),
     #050610;
+}
+
+/* Home.css imports after themes.css and has a strong .content background.
+   This higher-specificity rule is the actual visibility fix for the stars. */
+.app[data-theme="stars"] .content{
+  background:
+    radial-gradient(circle at 78% 10%, rgba(143, 220, 255, 0.058), transparent 32%),
+    radial-gradient(circle at 16% 86%, rgba(215, 213, 255, 0.046), transparent 34%),
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    rgba(1, 2, 8, 0.54) !important;
+  background-size: auto, auto, 42px 42px, 42px 42px, auto !important;
+}
+
+.app[data-theme="stars"] .content::before{
+  display: none !important;
 }
 
 .app[data-theme="stars"]::before,
@@ -6374,7 +6392,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   content: "";
   display: block;
   position: fixed;
-  inset: 34px -18vw 88px calc(var(--sidebar-width, 249px) - 18vw);
+  inset: 36px -18vw 86px -18vw;
   pointer-events: none;
   visibility: visible;
   z-index: 0;
@@ -6387,31 +6405,32 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 .app[data-theme="stars"]::before{
-  opacity: .58;
+  opacity: .72;
   image-rendering: pixelated;
   filter: drop-shadow(0 0 5px rgba(215, 213, 255, .42));
   background-image:
     var(--localtify-stars-field-a),
     var(--localtify-stars-field-c),
-    radial-gradient(circle at 68% 18%, rgba(143, 220, 255, .075), transparent 24%),
-    radial-gradient(circle at 22% 76%, rgba(215, 213, 255, .07), transparent 26%);
+    radial-gradient(circle at 68% 18%, rgba(143, 220, 255, .092), transparent 24%),
+    radial-gradient(circle at 22% 76%, rgba(215, 213, 255, .082), transparent 26%);
   background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
   animation:
-    localtifyStarsFieldDriftV124 var(--localtify-stars-drift-duration, 68s) linear infinite,
-    localtifyStarsBreathV124 6.4s ease-in-out infinite;
+    localtifyStarsFieldDriftV125 var(--localtify-stars-drift-duration, 62s) linear infinite,
+    localtifyStarsBreathV125 6.2s ease-in-out infinite;
 }
 
 .app[data-theme="stars"]::after{
-  opacity: .44;
-  filter: drop-shadow(0 0 8px rgba(148, 234, 255, .34));
+  opacity: .54;
+  filter: drop-shadow(0 0 8px rgba(148, 234, 255, .36));
   background-image:
     var(--localtify-stars-field-b),
-    linear-gradient(105deg, transparent 0 38%, rgba(255,255,255,.13) 46%, rgba(157, 224, 255, .065) 52%, transparent 61% 100%);
-  background-size: 100% 100%, 56vw 100%;
-  background-position: 0 0, -62vw 0;
+    linear-gradient(105deg, transparent 0 38%, rgba(255,255,255,.14) 46%, rgba(157, 224, 255, .07) 52%, transparent 61% 100%),
+    radial-gradient(circle at 80% 26%, rgba(255, 167, 248, .085), transparent 18%);
+  background-size: 100% 100%, 54vw 100%, 100% 100%;
+  background-position: 0 0, -62vw 0, 0 0;
   animation:
-    localtifyStarsSparkleV124 var(--localtify-stars-sparkle-duration, 2.9s) steps(6, end) infinite,
-    localtifyStarsSweepV124 var(--localtify-stars-sweep-duration, 22s) linear infinite;
+    localtifyStarsSparkleV125 var(--localtify-stars-sparkle-duration, 2.6s) steps(6, end) infinite,
+    localtifyStarsSweepV125 var(--localtify-stars-sweep-duration, 19s) linear infinite;
 }
 
 .app[data-theme="stars"] .appShell,
@@ -6449,11 +6468,12 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   .playerBar
 ){
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.058),
-    0 0 0 1px rgba(215, 213, 255, .092),
-    0 18px 64px rgba(107, 92, 255, .095);
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 0 0 1px rgba(215, 213, 255, .1),
+    0 18px 64px rgba(107, 92, 255, .1);
 }
 
+/* User asked for this specifically: shimmer stays on during boot too. */
 .app[data-theme="stars"] :is(
   .songRow,
   .songCard,
@@ -6464,13 +6484,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   .settingsPanelCard,
   .settingsCard,
   .updateSettingsCard
-){
-  background-image:
-    linear-gradient(112deg, transparent 0 34%, rgba(255,255,255,.072) 45%, rgba(143,220,255,.04) 52%, transparent 64% 100%) !important;
-  background-size: 275% 100% !important;
-  animation: localtifyStarsCardShimmerV124 var(--localtify-stars-shimmer-duration, 8.8s) ease-in-out infinite !important;
-}
-
+),
 .app.themeMotionBooting[data-theme="stars"] :is(
   .songRow,
   .songCard,
@@ -6482,14 +6496,17 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   .settingsCard,
   .updateSettingsCard
 ){
-  animation: localtifyStarsCardShimmerV124 var(--localtify-stars-shimmer-duration, 8.8s) ease-in-out infinite !important;
+  background-image:
+    linear-gradient(112deg, transparent 0 34%, rgba(255,255,255,.074) 45%, rgba(143,220,255,.044) 52%, transparent 64% 100%) !important;
+  background-size: 275% 100% !important;
+  animation: localtifyStarsCardShimmerV125 var(--localtify-stars-shimmer-duration, 8.4s) ease-in-out infinite !important;
 }
 
 .app[data-theme="stars"] :is(.heroArtWrap, .coverSyncPreview, .songCard.isPlaying){
   box-shadow:
-    0 0 0 1px rgba(215, 213, 255, 0.24),
-    0 0 0 3px rgba(143, 220, 255, 0.06),
-    0 24px 64px rgba(130, 120, 255, 0.24);
+    0 0 0 1px rgba(215, 213, 255, 0.25),
+    0 0 0 3px rgba(143, 220, 255, 0.065),
+    0 24px 64px rgba(130, 120, 255, 0.25);
   image-rendering: auto;
 }
 
@@ -6503,28 +6520,29 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   inset: -8px;
   border-radius: inherit;
   pointer-events: none;
-  opacity: .4;
+  opacity: .42;
   background:
-    linear-gradient(90deg, transparent 0 16px, rgba(215,213,255,.3) 16px 18px, transparent 18px 34px),
-    linear-gradient(0deg, transparent 0 14px, rgba(143,220,255,.2) 14px 16px, transparent 16px 32px);
+    linear-gradient(90deg, transparent 0 16px, rgba(215,213,255,.31) 16px 18px, transparent 18px 34px),
+    linear-gradient(0deg, transparent 0 14px, rgba(143,220,255,.21) 14px 16px, transparent 16px 32px);
   background-size: 34px 34px, 32px 32px;
-  mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
   padding: 7px;
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  animation: localtifyStarsPixelEdgeV124 5.8s steps(12, end) infinite;
+  animation: localtifyStarsPixelEdgeV125 5.6s steps(12, end) infinite;
 }
 
 .app.themeMotionBooting[data-theme="stars"]::before{
-  opacity: .54;
-  animation-duration: calc(var(--localtify-stars-drift-duration, 68s) * .92), 6.4s;
+  opacity: .66;
+  animation-duration: calc(var(--localtify-stars-drift-duration, 62s) * .92), 6.2s;
 }
 
 .app.themeMotionBooting[data-theme="stars"]::after{
-  opacity: .4;
+  opacity: .48;
   animation-duration:
-    var(--localtify-stars-sparkle-duration, 2.9s),
-    var(--localtify-stars-sweep-duration, 22s);
+    var(--localtify-stars-sparkle-duration, 2.6s),
+    var(--localtify-stars-sweep-duration, 19s);
 }
 
 .app.themeMotionReady[data-theme="stars"]::before,
@@ -6532,6 +6550,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   will-change: transform, opacity;
 }
 
+/* Old saved background settings should not make the stars freeze. */
 .app.staticBackgrounds[data-theme="stars"]::before,
 .app.staticBackgrounds[data-theme="stars"]::after,
 .app:not(.animatedBackgrounds)[data-theme="stars"]::before,
@@ -6558,7 +6577,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   animation: none !important;
 }
 
-@keyframes localtifyStarsFieldDriftV124{
+@keyframes localtifyStarsFieldDriftV125{
   0%{
     transform: translate3d(calc(var(--localtify-stars-drift-x, 5vw) * -0.36), calc(var(--localtify-stars-drift-y, 2.4vh) * -0.42), 0) scale(1.02);
   }
@@ -6570,44 +6589,44 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-@keyframes localtifyStarsBreathV124{
-  0%,100%{ opacity: .47; }
-  45%{ opacity: .66; }
-  64%{ opacity: .52; }
+@keyframes localtifyStarsBreathV125{
+  0%,100%{ opacity: .56; }
+  45%{ opacity: .76; }
+  64%{ opacity: .62; }
 }
 
-@keyframes localtifyStarsSparkleV124{
-  0%,100%{ opacity: .2; }
-  18%{ opacity: .56; }
-  40%{ opacity: .28; }
-  66%{ opacity: .62; }
-  84%{ opacity: .34; }
+@keyframes localtifyStarsSparkleV125{
+  0%,100%{ opacity: .26; }
+  18%{ opacity: .62; }
+  40%{ opacity: .34; }
+  66%{ opacity: .7; }
+  84%{ opacity: .4; }
 }
 
-@keyframes localtifyStarsSweepV124{
+@keyframes localtifyStarsSweepV125{
   0%{
-    background-position: 0 0, -62vw 0;
+    background-position: 0 0, -62vw 0, 0 0;
     transform: translate3d(1vw, 0, 0) scale(1.01);
   }
   100%{
-    background-position: 0 0, 62vw 0;
+    background-position: 0 0, 62vw 0, 0 0;
     transform: translate3d(-5vw, 2vh, 0) scale(1.01);
   }
 }
 
-@keyframes localtifyStarsCardShimmerV124{
+@keyframes localtifyStarsCardShimmerV125{
   0%, 10%{ background-position: 145% 0; }
   54%{ background-position: -110% 0; }
   100%{ background-position: -110% 0; }
 }
 
-@keyframes localtifyStarsPixelEdgeV124{
+@keyframes localtifyStarsPixelEdgeV125{
   0%, 100%{
-    opacity: .22;
+    opacity: .24;
     transform: translate3d(0, 0, 0);
   }
   50%{
-    opacity: .48;
+    opacity: .5;
     transform: translate3d(2px, -1px, 0);
   }
 }
@@ -6616,5 +6635,14 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   .app[data-theme="stars"]::before,
   .app[data-theme="stars"]::after{
     inset-left: -18vw;
+  }
+
+  .app[data-theme="stars"] .content{
+    background:
+      radial-gradient(circle at 70% 10%, rgba(143, 220, 255, 0.052), transparent 32%),
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      rgba(1, 2, 8, 0.58) !important;
+    background-size: auto, 42px 42px, 42px 42px, auto !important;
   }
 }

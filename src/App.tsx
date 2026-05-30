@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 stars-only animated theme cleanup V124 — download/file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 stars theme visibility + UX fix V125 — download/file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
@@ -849,15 +849,15 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 keeps the animated theme list focused on stars only",
-  "Stars now randomize per launch, sparkle, and drift slowly instead of sitting in the same tiled spots",
-  "Boot motion keeps the row and card shimmer on, including the heavier shimmer pass",
-  "Vapor glass and night train were retired from Settings so the theme picker stays cleaner",
-  "Old installs saved on vapor glass or night train are safely moved to stars on boot",
-  "The startup screen still feels alive without turning off blur, ambience, cover glow, or motion",
+  "0.3.5 keeps the animated theme picker focused on the improved stars theme",
+  "Stars now render behind the app correctly instead of getting hidden by the content background",
+  "The star field randomizes per launch, drifts slowly, sparkles, and adds a soft sweep without becoming static",
+  "Row and card shimmer stays enabled during boot, including the heavier shimmer pass",
+  "Vapor glass and night train were retired from Settings; old saved installs move to stars safely",
+  "Startup keeps blur, ambience, cover glow, glassy panels, animated backgrounds, and motion alive",
+  "Theme switching behaves cleaner and avoids dead visual states from older saved background settings",
   "Playlist playback still stays inside the playlist you started from",
-  "Hero covers, titles, and ambience continue to animate more smoothly when songs change",
-  "No player layout, Discord, downloads, playlists, blur, or ambience features were removed"
+  "No player layout, Discord, downloads, playlists, blur, ambience, or motion features were removed"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -1223,16 +1223,16 @@ function buildRandomStarLayer(seedKey: string, count: number, palette: string[],
 function buildAnimatedThemeVisualStyle(theme: ThemeId, seedKey: string) {
   if (theme !== "stars") return {} as CSSProperties;
 
-  const seed = stableHash(`${seedKey}:stars:v124`);
-  const driftDuration = 64 + seededUnit(seed, 1) * 18;
-  const sparkleDuration = 2.35 + seededUnit(seed, 2) * 1.15;
+  const seed = stableHash(`${seedKey}:stars:v125`);
+  const driftDuration = 58 + seededUnit(seed, 1) * 18;
+  const sparkleDuration = 2.1 + seededUnit(seed, 2) * 1.05;
   const shimmerDuration = 7.4 + seededUnit(seed, 3) * 2.4;
-  const sweepDuration = 18 + seededUnit(seed, 4) * 7;
+  const sweepDuration = 16 + seededUnit(seed, 4) * 6;
 
   return {
-    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v124:slow`, 32, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 1.55),
-    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v124:sparkle`, 20, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.95, 2.15),
-    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v124:tiny`, 18, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.45, 1.0),
+    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v125:slow`, 36, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 1.55),
+    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v125:sparkle`, 24, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.95, 2.15),
+    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v125:tiny`, 22, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.45, 1.0),
     "--localtify-stars-drift-duration": `${driftDuration.toFixed(2)}s`,
     "--localtify-stars-sparkle-duration": `${sparkleDuration.toFixed(2)}s`,
     "--localtify-stars-shimmer-duration": `${shimmerDuration.toFixed(2)}s`,
