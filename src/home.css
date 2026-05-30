@@ -14800,3 +14800,235 @@ body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroCoverGh
   0%{ opacity: 0.88; transform: translate3d(0, 5px, 0) scale(0.995); }
   100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
+
+/* ========================================================================
+   localtify v0.3.5 V136 — hero expand/compact layout ownership
+   ------------------------------------------------------------------------
+   Home owns the hero's final layout states. Motion.css owns the visible
+   animation. This restores the expanded/compact feeling without adding the
+   old bounding-box JS FLIP delay back into App.tsx.
+======================================================================== */
+
+.app .hero.heroPremium.heroLayoutMotion{
+  --hero-layout-ease-v136: cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center top !important;
+  transition:
+    min-height 560ms var(--hero-layout-ease-v136),
+    max-height 560ms var(--hero-layout-ease-v136),
+    grid-template-columns 560ms var(--hero-layout-ease-v136),
+    gap 440ms var(--hero-layout-ease-v136),
+    padding 500ms var(--hero-layout-ease-v136),
+    border-color 260ms ease,
+    box-shadow 520ms var(--hero-layout-ease-v136),
+    background 420ms ease,
+    opacity 220ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion .heroText,
+.app .hero.heroPremium.heroLayoutMotion .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion .heroArtistLine,
+.app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
+.app .hero.heroPremium.heroLayoutMotion .heroArt,
+.app .hero.heroPremium.heroLayoutMotion .coverAura,
+.app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf,
+.app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf > div{
+  transform-origin: center !important;
+  transition:
+    transform 580ms var(--hero-layout-ease-v136),
+    opacity 360ms ease,
+    filter 420ms ease,
+    box-shadow 420ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroExpandedShelf{
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroExpandedShelf{
+  opacity: 0 !important;
+  transform: translate3d(0, -10px, 0) scale(0.985) !important;
+  pointer-events: none !important;
+}
+
+
+/* ========================================================================
+   localtify v0.3.5 V137 — hero panel expansion belongs to home.css
+   ------------------------------------------------------------------------
+   This fixes the feeling where only the album cover grows. The whole now
+   playing banner changes size, padding, text scale, cover placement, and the
+   shelf below glides with it. No blur/ambience features are disabled here.
+======================================================================== */
+
+.app .hero.heroPremium.heroLayoutMotion{
+  --hero-layout-ease-v137: cubic-bezier(0.16, 1, 0.3, 1);
+  --hero-panel-duration-v137: 680ms;
+  contain: layout paint style !important;
+  transform-origin: center top !important;
+  backface-visibility: hidden !important;
+  will-change: min-height, max-height, padding, transform !important;
+  transition:
+    min-height var(--hero-panel-duration-v137) var(--hero-layout-ease-v137),
+    max-height var(--hero-panel-duration-v137) var(--hero-layout-ease-v137),
+    grid-template-columns 640ms var(--hero-layout-ease-v137),
+    gap 620ms var(--hero-layout-ease-v137),
+    padding 640ms var(--hero-layout-ease-v137),
+    border-color 260ms ease,
+    box-shadow 520ms var(--hero-layout-ease-v137),
+    background 420ms ease,
+    transform 520ms var(--hero-layout-ease-v137),
+    opacity 220ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact{
+  min-height: clamp(250px, 25vh, 318px) !important;
+  max-height: clamp(250px, 25vh, 318px) !important;
+  grid-template-columns: minmax(0, 1fr) clamp(176px, 14.5vw, 230px) !important;
+  gap: clamp(22px, 3vw, 42px) !important;
+  padding: clamp(26px, 2.8vw, 42px) clamp(30px, 4.2vw, 58px) !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded{
+  min-height: clamp(360px, 40vh, 520px) !important;
+  max-height: clamp(360px, 40vh, 520px) !important;
+  grid-template-columns: minmax(0, 1fr) clamp(224px, 19vw, 324px) !important;
+  gap: clamp(28px, 4vw, 64px) !important;
+  padding: clamp(38px, 4.4vw, 68px) clamp(38px, 5vw, 76px) !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+  border-color: rgba(var(--accent-rgb), 0.30) !important;
+  box-shadow:
+    0 30px 96px rgba(0, 0, 0, 0.52),
+    0 0 0 1px rgba(var(--accent-rgb), 0.08) inset,
+    0 0 58px rgba(var(--accent-rgb), 0.12) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion .heroText{
+  transform-origin: left center !important;
+  will-change: transform, opacity !important;
+  transition:
+    transform 640ms var(--hero-layout-ease-v137),
+    opacity 360ms ease,
+    filter 420ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText{
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText{
+  transform: translate3d(0, -6px, 0) scale(1.015) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroTitle{
+  transform-origin: left center !important;
+  transition:
+    font-size 680ms var(--hero-layout-ease-v137),
+    line-height 680ms var(--hero-layout-ease-v137),
+    letter-spacing 520ms ease,
+    transform 640ms var(--hero-layout-ease-v137),
+    filter 420ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTitle{
+  max-width: min(900px, 62vw) !important;
+  font-size: clamp(54px, 6.3vw, 96px) !important;
+  line-height: 0.91 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTitle{
+  max-width: min(1040px, 64vw) !important;
+  font-size: clamp(66px, 8.1vw, 132px) !important;
+  line-height: 0.86 !important;
+  letter-spacing: -0.082em !important;
+  transform: translate3d(0, -4px, 0) scale(1.006) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroQuickActions{
+  transition:
+    transform 580ms var(--hero-layout-ease-v137),
+    opacity 260ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroQuickActions{
+  transform: translate3d(0, 3px, 0) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroQuickActions{
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
+  align-self: center !important;
+  justify-self: end !important;
+  aspect-ratio: 1 / 1 !important;
+  transform-origin: center center !important;
+  will-change: width, height, transform !important;
+  transition:
+    width 680ms var(--hero-layout-ease-v137),
+    height 680ms var(--hero-layout-ease-v137),
+    transform 680ms var(--hero-layout-ease-v137),
+    filter 420ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap{
+  width: clamp(176px, 14.5vw, 230px) !important;
+  height: clamp(176px, 14.5vw, 230px) !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap{
+  width: clamp(224px, 19vw, 324px) !important;
+  height: clamp(224px, 19vw, 324px) !important;
+  transform: translate3d(-10px, -2px, 0) scale(1.025) !important;
+}
+
+body.localitfyHeroPanelGrowing .app .homeShelfStack,
+body.localitfyHeroPanelShrinking .app .homeShelfStack{
+  pointer-events: none !important;
+  will-change: transform, opacity !important;
+}
+
+body.localitfyHeroPanelGrowing .app .homeShelfStack{
+  animation: localtifyShelfFollowHeroGrowV137 700ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+body.localitfyHeroPanelShrinking .app .homeShelfStack{
+  animation: localtifyShelfFollowHeroShrinkV137 540ms cubic-bezier(0.18, 0.92, 0.2, 1) both !important;
+}
+
+@keyframes localtifyShelfFollowHeroGrowV137{
+  0%{ opacity: 0.94; transform: translate3d(0, -22px, 0) scale(0.996); }
+  52%{ opacity: 1; transform: translate3d(0, 5px, 0) scale(1.002); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes localtifyShelfFollowHeroShrinkV137{
+  0%{ opacity: 0.98; transform: translate3d(0, 18px, 0) scale(1.002); }
+  68%{ opacity: 1; transform: translate3d(0, -3px, 0) scale(0.998); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@media (max-width: 1100px){
+  .app .hero.heroPremium.heroLayoutMotion.heroCompact,
+  .app .hero.heroPremium.heroLayoutMotion.heroExpanded{
+    max-height: none !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .app .hero.heroPremium.heroLayoutMotion.heroExpanded{
+    min-height: auto !important;
+  }
+}
+
+/* V137: do not lock the hero buttons for the full animation. The shelf can ignore clicks while it moves, but the player button area should still feel instant. */
+body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion,
+body.localitfyHeroPanelGrowing .app .hero.heroPremium.heroLayoutMotion,
+body.localitfyHeroPanelShrinking .app .hero.heroPremium.heroLayoutMotion{
+  pointer-events: auto !important;
+}

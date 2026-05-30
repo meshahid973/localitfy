@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 smooth interaction + proximity V135 — download/file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 hero layout motion V137 — download/file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { AnimatePresence, motion as Motion } from "motion/react";
@@ -852,9 +852,10 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 
 const whatsNewItems = [
   "0.3.5 keeps the stars theme clean while making pointer motion lighter and safer",
-  "Hero expand and compact now update on the click frame instead of waiting behind background work",
-  "The proximity scanner was rebuilt to avoid heavy document scans while the pointer moves",
-  "Decorative motion pauses during hero reflow, scrolling, scrubbing, dragging, and startup warmup only",
+  "Hero expand and compact now animates the whole banner, not just the album cover",
+  "The main hero card, title, buttons, ambience wash, and Listen now shelf move together more smoothly",
+  "The expand button stays instant and does not run heavy bounding-box FLIP reads before the animation starts",
+  "The proximity scanner stays isolated and does not block clicks or pointer input",
   "Blur, ambience, cover glow, glass panels, animated backgrounds, stars, and normal UI motion stay enabled",
   "No vapor glass, no night train, no side ambience orbs, and no runtime card shine in the stars theme",
   "Playlist playback, downloads, Discord, player controls, and cover features were not removed"
@@ -4639,15 +4640,21 @@ function MainModeApp() {
     if (settings.heroExpanded === nextExpanded) return;
 
     const body = document.body;
-    const heroBefore = appRootRef.current?.querySelector<HTMLElement>(".hero.heroPremium.heroLayoutMotion") ?? null;
-    const beforeRect = heroBefore?.getBoundingClientRect() ?? null;
+    const nextSettings: Settings = {
+      ...settings,
+      heroExpanded: nextExpanded
+    };
 
     body.classList.add("localitfyHeroReflowing");
     body.classList.remove(
       "localitfyHeroCoverGrowing",
       "localitfyHeroCoverShrinking",
       "localitfyHeroFlipMotion",
-      "localitfyHeroFlipPlay"
+      "localitfyHeroFlipPlay",
+      "localitfyHeroExpandMotion",
+      "localitfyHeroCompactMotion",
+      "localitfyHeroPanelGrowing",
+      "localitfyHeroPanelShrinking"
     );
 
     if (heroReflowTimerRef.current !== null) {
@@ -4659,58 +4666,38 @@ function MainModeApp() {
       heroCoverMotionTimerRef.current = null;
     }
 
-    const nextSettings: Settings = {
-      ...settings,
-      heroExpanded: nextExpanded
-    };
-
-    // Hero expand/compact is a direct click response, not background work.
-    // Force this tiny setting update onto the current frame, then persist it
-    // through the existing debounced settings writer so disk I/O stays away
-    // from the animation.
+    // V136: no more FLIP bounding-box reads on click. The previous pass measured
+    // the hero before and after state, which could block the button press on big
+    // libraries. This update keeps the direct flush for instant UI response and
+    // lets CSS own the visible expand/compact motion.
     flushSync(() => {
       setSettings(nextSettings);
     });
 
-    const heroAfter = appRootRef.current?.querySelector<HTMLElement>(".hero.heroPremium.heroLayoutMotion") ?? heroBefore;
-    const afterRect = heroAfter?.getBoundingClientRect() ?? null;
-
-    if (heroAfter && beforeRect && afterRect && afterRect.width > 1 && afterRect.height > 1) {
-      const flipX = beforeRect.left - afterRect.left;
-      const flipY = beforeRect.top - afterRect.top;
-      const flipScaleX = clamp(beforeRect.width / afterRect.width, 0.76, 1.32);
-      const flipScaleY = clamp(beforeRect.height / afterRect.height, 0.76, 1.32);
-
-      heroAfter.style.setProperty("--hero-flip-x", `${flipX.toFixed(2)}px`);
-      heroAfter.style.setProperty("--hero-flip-y", `${flipY.toFixed(2)}px`);
-      heroAfter.style.setProperty("--hero-flip-scale-x", flipScaleX.toFixed(4));
-      heroAfter.style.setProperty("--hero-flip-scale-y", flipScaleY.toFixed(4));
-      body.classList.add("localitfyHeroFlipMotion");
-    }
-
     window.requestAnimationFrame(() => {
       body.classList.add(nextExpanded ? "localitfyHeroCoverGrowing" : "localitfyHeroCoverShrinking");
-      body.classList.add("localitfyHeroFlipPlay");
+      body.classList.add(nextExpanded ? "localitfyHeroExpandMotion" : "localitfyHeroCompactMotion");
+      body.classList.add(nextExpanded ? "localitfyHeroPanelGrowing" : "localitfyHeroPanelShrinking");
     });
 
     heroReflowTimerRef.current = window.setTimeout(() => {
       body.classList.remove("localitfyHeroReflowing");
       heroReflowTimerRef.current = null;
-    }, 520);
+    }, 760);
 
     heroCoverMotionTimerRef.current = window.setTimeout(() => {
       body.classList.remove(
         "localitfyHeroCoverGrowing",
         "localitfyHeroCoverShrinking",
         "localitfyHeroFlipMotion",
-        "localitfyHeroFlipPlay"
+        "localitfyHeroFlipPlay",
+        "localitfyHeroExpandMotion",
+        "localitfyHeroCompactMotion",
+        "localitfyHeroPanelGrowing",
+        "localitfyHeroPanelShrinking"
       );
-      heroAfter?.style.removeProperty("--hero-flip-x");
-      heroAfter?.style.removeProperty("--hero-flip-y");
-      heroAfter?.style.removeProperty("--hero-flip-scale-x");
-      heroAfter?.style.removeProperty("--hero-flip-scale-y");
       heroCoverMotionTimerRef.current = null;
-    }, 680);
+    }, 900);
 
     if (bootedRef.current) {
       if (saveSettingsTimerRef.current !== null) {
@@ -12093,7 +12080,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.5 is mostly a smoothness and polish update: stars stay clean, hero expand reacts instantly, proximity motion is lighter, and the app keeps its blur, ambience, and motion.</p>
+            <p className="whatsNewSubtext">0.3.5 is mostly a smoothness and polish update: stars stay clean, hero expand/compact has its motion back, proximity stays lighter, and the app keeps its blur, ambience, and motion.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>
