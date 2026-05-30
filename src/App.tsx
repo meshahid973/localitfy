@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 stars/player polish V127 — download/file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 stars/card/player cleanup V128 — download/file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
@@ -849,12 +849,12 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 keeps the animated theme picker focused on the improved stars theme",
-  "Stars are brighter now: more randomized particles, better sparkle, and a visible slow drift layer",
-  "The bottom player keeps its blur and ambience without the harsh purple strip above it",
-  "The star layer now sits in the app chrome safely instead of fighting the page background",
+  "0.3.5 keeps the theme picker focused on a cleaner animated stars theme",
+  "Stars now sit behind the library UI instead of drawing sparkle marks across song cards",
+  "The player area now reserves the correct height so the bottom edge does not clip or bleed",
+  "The stars still move, twinkle, drift, and glow without removing blur or ambience",
   "Vapor glass and night train stay retired; old saved installs move to stars safely",
-  "Startup keeps blur, ambience, cover glow, glassy panels, animated backgrounds, and motion alive",
+  "Startup keeps card motion, row shimmer, cover glow, glassy panels, animated backgrounds, and blur alive",
   "Playlist playback still stays inside the playlist you started from",
   "No Discord, downloads, playlists, player controls, blur, or ambience features were removed"
 ];
@@ -1222,16 +1222,16 @@ function buildRandomStarLayer(seedKey: string, count: number, palette: string[],
 function buildAnimatedThemeVisualStyle(theme: ThemeId, seedKey: string) {
   if (theme !== "stars") return {} as CSSProperties;
 
-  const seed = stableHash(`${seedKey}:stars:v127`);
+  const seed = stableHash(`${seedKey}:stars:v128`);
   const driftDuration = 58 + seededUnit(seed, 1) * 18;
   const sparkleDuration = 2.1 + seededUnit(seed, 2) * 1.05;
   const shimmerDuration = 7.4 + seededUnit(seed, 3) * 2.4;
   const sweepDuration = 16 + seededUnit(seed, 4) * 6;
 
   return {
-    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v127:slow`, 54, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.85, 1.95),
-    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v127:sparkle`, 38, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 1.05, 2.65),
-    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v127:tiny`, 42, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.55, 1.2),
+    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v128:slow`, 54, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.85, 1.95),
+    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v128:sparkle`, 38, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 1.05, 2.65),
+    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v128:tiny`, 42, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.55, 1.2),
     "--localtify-stars-drift-duration": `${driftDuration.toFixed(2)}s`,
     "--localtify-stars-sparkle-duration": `${sparkleDuration.toFixed(2)}s`,
     "--localtify-stars-shimmer-duration": `${shimmerDuration.toFixed(2)}s`,
@@ -1255,7 +1255,7 @@ type AnimatedStarParticle = {
 };
 
 function buildAnimatedStarParticles(seedKey: string, count = 92): AnimatedStarParticle[] {
-  const seed = stableHash(`${seedKey}:visible-dom-stars:v127`);
+  const seed = stableHash(`${seedKey}:visible-dom-stars:v128`);
   const palette = [
     "rgba(255,255,255,0.95)",
     "rgba(215,213,255,0.92)",
@@ -1279,7 +1279,7 @@ function buildAnimatedStarParticles(seedKey: string, count = 92): AnimatedStarPa
       drift,
       twinkle,
       color: palette[Math.floor(seededUnit(seed, salt + 6) * palette.length)] || palette[0],
-      sparkle: seededUnit(seed, salt + 9) > 0.72
+      sparkle: seededUnit(seed, salt + 9) > 0.82
     };
   });
 }
@@ -4091,7 +4091,7 @@ function MainModeApp() {
   );
   const visibleStarParticles = useMemo(
     () => effectiveTheme === "stars" && !settings.reducedMotion
-      ? buildAnimatedStarParticles(animatedThemeSeedRef.current, 156)
+      ? buildAnimatedStarParticles(animatedThemeSeedRef.current, 118)
       : [],
     [effectiveTheme, settings.reducedMotion]
   );
@@ -12091,7 +12091,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.5 is mostly a playlist, hero, and smoothness update: playlist playback stays in its lane, the home hero feels more alive, and song changes should look less jumpy.</p>
+            <p className="whatsNewSubtext">0.3.5 is mostly a playlist and polish update: stars stay animated without covering song cards, the bottom player edge is cleaner, and the app keeps its blur, ambience, and motion.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>

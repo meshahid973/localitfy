@@ -1,4 +1,4 @@
-/* localtify 0.3.5 stars/player polish V127 — download/file patch label only; app version stays 0.3.5. */
+/* localtify 0.3.5 stars/card/player cleanup V128 — download/file patch label only; app version stays 0.3.5. */
 /* localtify settings.css — settings page + settings modal only.
    Home/player/progress styles stay in their own files. */
 
@@ -6867,4 +6867,186 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   .app[data-theme="stars"] .localtifyStarsBackdrop{
     left: 0 !important;
   }
+}
+
+
+/* ========================================================================
+   localtify v0.3.5 V128 — stars behind UI + no card sparkle marks
+   ------------------------------------------------------------------------
+   Keeps the stars theme animated, but fixes the ugly shine/cross marks that
+   were drawing over cards. Stars now live as page atmosphere behind the UI.
+======================================================================== */
+.app[data-theme="stars"]{
+  background:
+    radial-gradient(circle at 76% 12%, rgba(143, 220, 255, 0.11), transparent 34%),
+    radial-gradient(circle at 18% 88%, rgba(215, 103, 255, 0.10), transparent 34%),
+    linear-gradient(180deg, #060315 0%, #020108 100%) !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsBackdrop{
+  inset: 36px 0 calc(var(--player-size-live, var(--player-size, 108px)) + 4px) var(--sidebar-width, 249px) !important;
+  z-index: 0 !important;
+  opacity: .86 !important;
+  pointer-events: none !important;
+  mix-blend-mode: screen !important;
+  contain: strict !important;
+  isolation: isolate !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 38px, #000 calc(100% - 26px), transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 38px, #000 calc(100% - 26px), transparent 100%) !important;
+}
+
+.app[data-theme="stars"] .appShell{
+  position: relative !important;
+  z-index: 1 !important;
+  isolation: isolate !important;
+}
+
+.app[data-theme="stars"] .content{
+  position: relative !important;
+  z-index: 1 !important;
+  isolation: isolate !important;
+  background:
+    radial-gradient(circle at 54% 0%, rgba(215, 103, 255, 0.055), transparent 32%),
+    linear-gradient(180deg, rgba(10, 5, 25, 0.58), rgba(3, 1, 10, 0.72)) !important;
+  background-image:
+    radial-gradient(circle at 54% 0%, rgba(215, 103, 255, 0.055), transparent 32%),
+    linear-gradient(180deg, rgba(10, 5, 25, 0.58), rgba(3, 1, 10, 0.72)) !important;
+  background-size: auto !important;
+}
+
+.app[data-theme="stars"] .pageTransition,
+.app[data-theme="stars"] .homeView,
+.app[data-theme="stars"] .homePage,
+.app[data-theme="stars"] .homeShell,
+.app[data-theme="stars"] .homeShelfStack,
+.app[data-theme="stars"] .homeShelfPanel,
+.app[data-theme="stars"] .homeListenPanel,
+.app[data-theme="stars"] .homeFreshPanel,
+.app[data-theme="stars"] .homeLibraryPanel,
+.app[data-theme="stars"] .simpleLibraryPanel,
+.app[data-theme="stars"] .libraryPanel{
+  position: relative !important;
+  z-index: 2 !important;
+  isolation: isolate !important;
+}
+
+.app[data-theme="stars"] :is(
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .songCard,
+  .songRow,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCard,
+  .updateSettingsCard
+){
+  position: relative !important;
+  z-index: 3 !important;
+  isolation: isolate !important;
+  background-blend-mode: normal !important;
+}
+
+/* The visible complaint was the cross/spark shine landing on cards.
+   Keep twinkling dots and moving stars, but remove the cross flare. */
+.app[data-theme="stars"] .localtifyStarParticle.sparkle::after{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+.app[data-theme="stars"] .localtifyStarSweep{
+  z-index: 0 !important;
+  opacity: .22 !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 76%, transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 76%, transparent 100%) !important;
+}
+
+.app[data-theme="stars"] .titleBar,
+.app[data-theme="stars"] .playerBar,
+.app[data-theme="stars"] .settingsOverlay,
+.app[data-theme="stars"] .toastHost,
+.app[data-theme="stars"] .updateToastLayer,
+.app[data-theme="stars"] .topUpdateRibbonLayer{
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+@media (max-width: 860px){
+  .app[data-theme="stars"] .localtifyStarsBackdrop{
+    left: 0 !important;
+  }
+}
+
+/* V128 import-order guard: home.css loads after themes.css, so keep this selector stronger. */
+html body .app[data-theme="stars"] .content,
+html body .app[data-theme="stars"] .mainContent,
+html body .app[data-theme="stars"] .contentScroller{
+  background:
+    radial-gradient(circle at 54% 0%, rgba(215, 103, 255, 0.055), transparent 32%),
+    linear-gradient(180deg, rgba(10, 5, 25, 0.58), rgba(3, 1, 10, 0.72)) !important;
+  background-image:
+    radial-gradient(circle at 54% 0%, rgba(215, 103, 255, 0.055), transparent 32%),
+    linear-gradient(180deg, rgba(10, 5, 25, 0.58), rgba(3, 1, 10, 0.72)) !important;
+  background-size: auto !important;
+  background-color: transparent !important;
+}
+
+/* V128 card cleanup: remove the always-on shine sweep from cards only. */
+.app[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+){
+  background-image: none !important;
+  animation-name: none !important;
+}
+
+.app[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+)::before,
+.app[data-theme="stars"] :is(
+  .songRow,
+  .songCard,
+  .homeAlbumCard,
+  .libraryCard,
+  .libraryCardV025,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverCard,
+  .coverGalleryCard,
+  .playlistPanel,
+  .playlistShelfCard,
+  .playlistTrackRow
+)::after{
+  background-image: none !important;
+  animation-name: none !important;
 }

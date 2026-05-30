@@ -1,6 +1,6 @@
 /* ==========================================================================
    localtify player.css — bottom player owner only
-   Version: 0.2.9 / localtify v0.3.5 player edge V127
+   Version: 0.2.9 / localtify v0.3.5 player edge V128
 
    This file owns the bottom player:
    - footer.playerBar layout and ambience
@@ -2483,5 +2483,61 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 
   .playerBar::before{
     inset: -18px 0 -18px 0 !important;
+  }
+}
+
+
+/* ========================================================================
+   localtify v0.3.5 V128 — player row height + clean top edge
+   ------------------------------------------------------------------------
+   The player was taller than the shell grid row, which could make the bottom
+   edge clip and show weird bands. Reserve the real player height instead.
+======================================================================== */
+.appShell{
+  grid-template-rows: minmax(0, 1fr) var(--player-size-live, var(--player-size, 108px)) !important;
+}
+
+.playerBar{
+  align-self: stretch !important;
+  height: var(--player-size-live, var(--player-size, 108px)) !important;
+  min-height: 74px !important;
+  overflow: hidden !important;
+  clip-path: none !important;
+  border-top-color: rgba(var(--accent-rgb), 0.14) !important;
+}
+
+.playerBar::before{
+  inset: -18px 0 -18px 0 !important;
+  opacity: .18 !important;
+  filter: blur(26px) saturate(1.22) brightness(0.72) !important;
+  transform: translate3d(0, 0, 0) scale(1.025) !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 22px, #000 72%, transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px, #000 72%, transparent 100%) !important;
+}
+
+.playerBar::after{
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.035), transparent 38%),
+    rgba(0, 0, 0, 0.68) !important;
+}
+
+.app[data-theme="stars"] .playerBar{
+  background:
+    linear-gradient(180deg, rgba(215, 213, 255, 0.024), rgba(143, 220, 255, 0.010)),
+    rgba(2, 2, 10, 0.94) !important;
+}
+
+.app[data-theme="stars"] .playerBar::before{
+  opacity: .16 !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(215, 213, 255, 0.12), transparent 54%),
+    radial-gradient(circle at 20% 48%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.12), transparent 36%),
+    radial-gradient(circle at 76% 32%, rgba(143, 220, 255, 0.09), transparent 44%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+}
+
+@media (max-width: 900px){
+  .appShell{
+    grid-template-rows: minmax(0, 1fr) var(--player-size-live, var(--player-size, 96px)) !important;
   }
 }
