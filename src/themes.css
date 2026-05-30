@@ -1,4 +1,4 @@
-/* localtify 0.3.5 stars theme visibility + UX fix V125 — download/file patch label only; app version stays 0.3.5. */
+/* localtify 0.3.5 stars DOM overlay visibility fix V126 — download/file patch label only; app version stays 0.3.5. */
 /* localtify settings.css — settings page + settings modal only.
    Home/player/progress styles stay in their own files. */
 
@@ -6634,7 +6634,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 @media (max-width: 860px){
   .app[data-theme="stars"]::before,
   .app[data-theme="stars"]::after{
-    inset-left: -18vw;
+    left: -18vw;
   }
 
   .app[data-theme="stars"] .content{
@@ -6644,5 +6644,157 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
       linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
       rgba(1, 2, 8, 0.58) !important;
     background-size: auto, 42px 42px, 42px 42px, auto !important;
+  }
+}
+
+
+/* ========================================================================
+   localtify v0.3.5 V126 — real visible stars layer
+   ------------------------------------------------------------------------
+   This does not reduce blur/ambience/motion. It adds a real DOM star layer so
+   the stars are not dependent on .app::before or .content background order.
+======================================================================== */
+.app[data-theme="stars"] .localtifyStarsBackdrop{
+  position: fixed !important;
+  inset: 34px 0 86px var(--sidebar-width, 248px) !important;
+  z-index: 12 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  contain: paint !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  mix-blend-mode: screen !important;
+  transform: translate3d(0, 0, 0) !important;
+  isolation: isolate !important;
+}
+
+.app[data-theme="stars"] .localtifyStarsNebula{
+  position: absolute;
+  inset: -16%;
+  opacity: .62;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(143, 220, 255, .12), transparent 28%),
+    radial-gradient(circle at 18% 78%, rgba(215, 213, 255, .13), transparent 30%),
+    radial-gradient(circle at 50% 105%, rgba(var(--cover-rgb, var(--accent-rgb)), .085), transparent 42%);
+  filter: blur(18px) saturate(1.16);
+  transform: translate3d(0, 0, 0);
+  animation: localtifyStarsNebulaFloatV126 26s ease-in-out infinite alternate;
+}
+
+.app[data-theme="stars"] .localtifyStarParticle{
+  position: absolute !important;
+  left: var(--star-x) !important;
+  top: var(--star-y) !important;
+  width: var(--star-size) !important;
+  height: var(--star-size) !important;
+  border-radius: 999px !important;
+  opacity: var(--star-opacity) !important;
+  background: var(--star-color) !important;
+  box-shadow:
+    0 0 var(--star-glow, 10px) var(--star-color),
+    0 0 var(--star-glow-soft, 18px) rgba(143, 220, 255, .18) !important;
+  transform: translate3d(-50%, -50%, 0) scale(1) !important;
+  will-change: transform, opacity !important;
+  image-rendering: pixelated;
+  animation:
+    localtifyStarParticleDriftV126 var(--star-drift) ease-in-out var(--star-delay) infinite alternate,
+    localtifyStarParticleTwinkleV126 var(--star-twinkle) steps(5, end) var(--star-delay) infinite !important;
+}
+
+.app[data-theme="stars"] .localtifyStarParticle.sparkle::after{
+  content: "";
+  position: absolute;
+  inset: -9px;
+  background:
+    linear-gradient(90deg, transparent 42%, var(--star-color) 49% 51%, transparent 58%),
+    linear-gradient(0deg, transparent 42%, var(--star-color) 49% 51%, transparent 58%);
+  opacity: .55;
+  transform: scale(.74);
+  filter: drop-shadow(0 0 7px rgba(215, 213, 255, .42));
+  animation: localtifyStarSparkleCrossV126 var(--star-twinkle) ease-in-out var(--star-delay) infinite;
+}
+
+.app[data-theme="stars"] .localtifyStarSweep{
+  position: absolute;
+  inset: -10% -30%;
+  opacity: .36;
+  background:
+    linear-gradient(105deg, transparent 0 42%, rgba(255,255,255,.18) 49%, rgba(143,220,255,.08) 54%, transparent 63% 100%);
+  filter: blur(.3px);
+  transform: translate3d(-54vw, 0, 0);
+  animation: localtifyStarSweepDomV126 var(--localtify-stars-sweep-duration, 19s) linear infinite;
+}
+
+.app.themeMotionBooting[data-theme="stars"] .localtifyStarsBackdrop{
+  opacity: .92 !important;
+}
+
+.app.themeMotionBooting[data-theme="stars"] .localtifyStarParticle{
+  animation-play-state: running !important;
+}
+
+.app[data-theme="stars"] .appShell,
+.app[data-theme="stars"] .content,
+.app[data-theme="stars"] .pageTransition{
+  position: relative;
+  z-index: 1;
+}
+
+.app[data-theme="stars"] .titleBar,
+.app[data-theme="stars"] .playerBar,
+.app[data-theme="stars"] .settingsOverlay,
+.app[data-theme="stars"] .toastHost,
+.app[data-theme="stars"] .updateToastLayer,
+.app[data-theme="stars"] .topUpdateRibbonLayer{
+  position: relative;
+  z-index: 30 !important;
+}
+
+.app.reducedMotion[data-theme="stars"] .localtifyStarsBackdrop,
+.app:not([data-theme="stars"]) .localtifyStarsBackdrop{
+  display: none !important;
+}
+
+@keyframes localtifyStarParticleDriftV126{
+  0%{
+    transform: translate3d(-50%, -50%, 0) scale(.92);
+  }
+  50%{
+    transform: translate3d(calc(-50% + 12px), calc(-50% - 10px), 0) scale(1.12);
+  }
+  100%{
+    transform: translate3d(calc(-50% - 16px), calc(-50% + 13px), 0) scale(1.02);
+  }
+}
+
+@keyframes localtifyStarParticleTwinkleV126{
+  0%, 100%{ opacity: var(--star-opacity-low, .25); }
+  18%{ opacity: var(--star-opacity, .64); }
+  34%{ opacity: var(--star-opacity-mid, .42); }
+  56%{ opacity: var(--star-opacity-high, .86); }
+  72%{ opacity: var(--star-opacity-mid, .42); }
+}
+
+@keyframes localtifyStarSparkleCrossV126{
+  0%, 100%{ opacity: .18; transform: rotate(0deg) scale(.45); }
+  42%{ opacity: .72; transform: rotate(45deg) scale(1); }
+  64%{ opacity: .34; transform: rotate(90deg) scale(.72); }
+}
+
+@keyframes localtifyStarSweepDomV126{
+  0%{ opacity: 0; transform: translate3d(-58vw, 0, 0); }
+  16%{ opacity: .38; }
+  52%{ opacity: .24; }
+  100%{ opacity: 0; transform: translate3d(70vw, 3vh, 0); }
+}
+
+@keyframes localtifyStarsNebulaFloatV126{
+  0%{ opacity: .42; transform: translate3d(-1.4vw, .8vh, 0) scale(1); }
+  100%{ opacity: .66; transform: translate3d(1.8vw, -1.1vh, 0) scale(1.035); }
+}
+
+@media (max-width: 860px){
+  .app[data-theme="stars"] .localtifyStarsBackdrop{
+    left: 0 !important;
   }
 }

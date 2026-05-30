@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 stars theme visibility + UX fix V125 — download/file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 stars DOM overlay visibility fix V126 — download/file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
@@ -850,7 +850,7 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 
 const whatsNewItems = [
   "0.3.5 keeps the animated theme picker focused on the improved stars theme",
-  "Stars now render behind the app correctly instead of getting hidden by the content background",
+  "Stars now use a real overlay layer, so they stay visible even when home.css paints the content background",
   "The star field randomizes per launch, drifts slowly, sparkles, and adds a soft sweep without becoming static",
   "Row and card shimmer stays enabled during boot, including the heavier shimmer pass",
   "Vapor glass and night train were retired from Settings; old saved installs move to stars safely",
@@ -1223,16 +1223,16 @@ function buildRandomStarLayer(seedKey: string, count: number, palette: string[],
 function buildAnimatedThemeVisualStyle(theme: ThemeId, seedKey: string) {
   if (theme !== "stars") return {} as CSSProperties;
 
-  const seed = stableHash(`${seedKey}:stars:v125`);
+  const seed = stableHash(`${seedKey}:stars:v126`);
   const driftDuration = 58 + seededUnit(seed, 1) * 18;
   const sparkleDuration = 2.1 + seededUnit(seed, 2) * 1.05;
   const shimmerDuration = 7.4 + seededUnit(seed, 3) * 2.4;
   const sweepDuration = 16 + seededUnit(seed, 4) * 6;
 
   return {
-    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v125:slow`, 36, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 1.55),
-    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v125:sparkle`, 24, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.95, 2.15),
-    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v125:tiny`, 22, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.45, 1.0),
+    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v126:slow`, 36, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 1.55),
+    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v126:sparkle`, 24, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.95, 2.15),
+    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v126:tiny`, 22, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.45, 1.0),
     "--localtify-stars-drift-duration": `${driftDuration.toFixed(2)}s`,
     "--localtify-stars-sparkle-duration": `${sparkleDuration.toFixed(2)}s`,
     "--localtify-stars-shimmer-duration": `${shimmerDuration.toFixed(2)}s`,
@@ -1240,6 +1240,49 @@ function buildAnimatedThemeVisualStyle(theme: ThemeId, seedKey: string) {
     "--localtify-stars-drift-x": `${(3.4 + seededUnit(seed, 5) * 3.2).toFixed(2)}vw`,
     "--localtify-stars-drift-y": `${(1.6 + seededUnit(seed, 6) * 2.1).toFixed(2)}vh`
   } as CSSProperties;
+}
+
+type AnimatedStarParticle = {
+  id: string;
+  x: number;
+  y: number;
+  size: number;
+  opacity: number;
+  delay: number;
+  drift: number;
+  twinkle: number;
+  color: string;
+  sparkle: boolean;
+};
+
+function buildAnimatedStarParticles(seedKey: string, count = 92): AnimatedStarParticle[] {
+  const seed = stableHash(`${seedKey}:visible-dom-stars:v126`);
+  const palette = [
+    "rgba(255,255,255,0.95)",
+    "rgba(215,213,255,0.92)",
+    "rgba(143,220,255,0.9)",
+    "rgba(255,167,248,0.82)"
+  ];
+
+  return Array.from({ length: count }, (_, index) => {
+    const salt = index * 17;
+    const size = 1 + seededUnit(seed, salt + 3) * 2.45;
+    const twinkle = 2.2 + seededUnit(seed, salt + 7) * 2.8;
+    const drift = 22 + seededUnit(seed, salt + 8) * 32;
+
+    return {
+      id: `star-${index}-${Math.round(seededUnit(seed, salt + 1) * 100000)}`,
+      x: 1.5 + seededUnit(seed, salt + 1) * 97,
+      y: 2 + seededUnit(seed, salt + 2) * 94,
+      size,
+      opacity: 0.34 + seededUnit(seed, salt + 4) * 0.6,
+      delay: -seededUnit(seed, salt + 5) * twinkle,
+      drift,
+      twinkle,
+      color: palette[Math.floor(seededUnit(seed, salt + 6) * palette.length)] || palette[0],
+      sparkle: seededUnit(seed, salt + 9) > 0.72
+    };
+  });
 }
 
 const songSignature = (song?: Song | null) => {
@@ -4046,6 +4089,12 @@ function MainModeApp() {
   const animatedThemeVisualStyle = useMemo<CSSProperties>(
     () => buildAnimatedThemeVisualStyle(effectiveTheme, animatedThemeSeedRef.current),
     [effectiveTheme]
+  );
+  const visibleStarParticles = useMemo(
+    () => effectiveTheme === "stars" && !settings.reducedMotion
+      ? buildAnimatedStarParticles(animatedThemeSeedRef.current, 96)
+      : [],
+    [effectiveTheme, settings.reducedMotion]
   );
 
   useEffect(() => {
@@ -10597,6 +10646,36 @@ function MainModeApp() {
       data-motion-level={settings.reducedMotion ? "reduced" : "smooth"}
       data-drag-title={draggedSongTitle}
     >
+      {visibleStarParticles.length ? (
+        <div className="localtifyStarsBackdrop" aria-hidden="true">
+          <div className="localtifyStarsNebula" />
+          {visibleStarParticles.map((star) => (
+            <span
+              key={star.id}
+              className={`localtifyStarParticle ${star.sparkle ? "sparkle" : ""}`}
+              style={
+                {
+                  "--star-x": `${star.x.toFixed(2)}%`,
+                  "--star-y": `${star.y.toFixed(2)}%`,
+                  "--star-size": `${star.size.toFixed(2)}px`,
+                  "--star-opacity": star.opacity.toFixed(2),
+                  "--star-opacity-low": Math.max(0.16, star.opacity * 0.46).toFixed(2),
+                  "--star-opacity-mid": Math.max(0.22, star.opacity * 0.72).toFixed(2),
+                  "--star-opacity-high": Math.min(1, star.opacity * 1.16).toFixed(2),
+                  "--star-glow": `${(star.size * 4.5).toFixed(2)}px`,
+                  "--star-glow-soft": `${(star.size * 9).toFixed(2)}px`,
+                  "--star-delay": `${star.delay.toFixed(2)}s`,
+                  "--star-drift": `${star.drift.toFixed(2)}s`,
+                  "--star-twinkle": `${star.twinkle.toFixed(2)}s`,
+                  "--star-color": star.color
+                } as CSSProperties
+              }
+            />
+          ))}
+          <div className="localtifyStarSweep" />
+        </div>
+      ) : null}
+
       <TitleBar />
 
       <AnimatePresence initial={false}>
