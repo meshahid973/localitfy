@@ -1790,7 +1790,6 @@ button:active{
   opacity: 0 !important;
   background: none !important;
   box-shadow: none !important;
-  filter: none !important;
   pointer-events: none !important;
 }
 
@@ -1922,7 +1921,6 @@ button:active{
 
 
 .hero:hover{
-  filter: none !important;
 }
 
 
@@ -3989,7 +3987,6 @@ button:active{
   visibility: hidden !important;
   pointer-events: none !important;
   animation: none !important;
-  filter: none !important;
   background: none !important;
   transform: none !important;
 }
@@ -4152,13 +4149,11 @@ body.localitfySongDragging .homeAlbumCard{
 
 .app.themeSettling .homeAlbumCard{
   box-shadow: none !important;
-  filter: none !important;
 }
 
 body.isResizingSidebar .app .homeAlbumCard{
   transition-duration: 80ms !important;
   box-shadow: none !important;
-  filter: none !important;
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -4185,7 +4180,6 @@ body.isResizingSidebar .app .homeAlbumCard{
 /* Kill the old long strip/glitch feeling and keep ambience cheap. */
 .app.misideMode .hero.heroPremium::before{
   animation: none !important;
-  filter: none !important;
 }
 
 .app.misideMode .heroTitle{
@@ -4193,7 +4187,6 @@ body.isResizingSidebar .app .homeAlbumCard{
     1px 0 rgba(255, 94, 170, 0.16),
     -1px 0 rgba(120, 210, 255, 0.10) !important;
   animation: none !important;
-  filter: none !important;
 }
 
 /* The actual visible easter egg badge. */
@@ -7146,7 +7139,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   animation: none !important;
   background: none !important;
   box-shadow: none !important;
-  filter: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
@@ -7236,7 +7228,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.24),
     inset 0 0 0 1px rgba(var(--accent-rgb), 0.035) !important;
-  filter: none !important;
   transform: translateY(-3px) scale(1.006) translateZ(0) !important;
 }
 
@@ -7266,7 +7257,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow:
     inset 3px 0 0 rgba(var(--accent-rgb), 0.38),
     0 10px 26px rgba(0, 0, 0, 0.18) !important;
-  filter: none !important;
   transform: translateY(-1px) translateZ(0) !important;
 }
 
@@ -7474,7 +7464,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   transform-origin: center 24px !important;
   opacity: 1 !important;
   transform: translate3d(0, 0, 0) !important;
-  filter: none !important;
   animation: localtifyMainPageIn 340ms var(--motion-ease-page, cubic-bezier(0.16, 1, 0.3, 1)) both !important;
   will-change: opacity, transform, filter;
 }
@@ -7860,7 +7849,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   border: 1px solid transparent !important;
   box-shadow: none !important;
   transform: none !important;
-  filter: none !important;
 }
 
 .navIcon{
@@ -7874,7 +7862,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow: none !important;
   font-size: 23px !important;
   transform: none !important;
-  filter: none !important;
 }
 
 .navItem:hover{
@@ -7952,7 +7939,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow:
     0 14px 34px rgba(0,0,0,.34),
     inset 0 1px 0 rgba(255,255,255,.045) !important;
-  filter: none !important;
 }
 
 .homeAlbumCard:hover .songArt{
@@ -8043,7 +8029,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, var(--text, #fff) 4%, transparent),
     0 0 0 0 transparent !important;
-  filter: none !important;
   transform: translateZ(0) !important;
   transition:
     transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -8073,7 +8058,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     inset 2px 0 0 color-mix(in oklab, var(--accent) 44%, transparent),
     inset 0 1px 0 color-mix(in oklab, var(--text, #fff) 5%, transparent),
     0 10px 24px rgba(0,0,0,.18) !important;
-  filter: none !important;
 }
 
 .app .songRow.active{
@@ -8085,7 +8069,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     inset 3px 0 0 color-mix(in oklab, var(--accent) 78%, transparent),
     inset 0 1px 0 color-mix(in oklab, var(--text, #fff) 5%, transparent),
     0 8px 22px rgba(0,0,0,.18) !important;
-  filter: none !important;
 }
 
 .app .songRow.active:hover{
@@ -8126,7 +8109,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow:
     0 7px 18px color-mix(in oklab, var(--accent) 13%, transparent),
     inset 0 1px 0 color-mix(in oklab, var(--text, #fff) 7%, transparent) !important;
-  filter: none !important;
 }
 
 /* Cleaner Kopuz-style sidebar: no brand block, no local/server pill, no icon boxes. */
@@ -8229,8 +8211,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     animation: none !important;
     transition: none !important;
     transform: none !important;
-    filter: none !important;
-  }
+    }
 }
 
 
@@ -8271,14 +8252,12 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background: color-mix(in oklab, var(--theme-accent, var(--accent)) 4%, rgba(0, 0, 0, .50)) !important;
   border: 1px solid color-mix(in oklab, var(--theme-accent, var(--accent)) 13%, rgba(255, 255, 255, .055)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
-  filter: none !important;
 }
 
 .homeLibraryPanel .songRow:hover{
   background: color-mix(in oklab, var(--theme-accent, var(--accent)) 8%, rgba(0, 0, 0, .48)) !important;
   border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 24%, rgba(255,255,255,.075)) !important;
   box-shadow: inset 3px 0 0 color-mix(in oklab, var(--theme-accent, var(--accent)) 44%, transparent) !important;
-  filter: none !important;
 }
 
 .homeLibraryPanel .songRow.active{
@@ -8360,7 +8339,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background: color-mix(in oklab, var(--theme-accent, var(--accent)) 3%, rgba(255,255,255,.026)) !important;
   border: 1px solid color-mix(in oklab, var(--theme-accent, var(--accent)) 9%, rgba(255,255,255,.055)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
-  filter: none !important;
   transform: translateZ(0) !important;
   transition:
     transform 180ms cubic-bezier(.2,.8,.2,1),
@@ -8395,7 +8373,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .app .songButton{
   background: transparent !important;
   box-shadow: none !important;
-  filter: none !important;
 }
 
 .app .songRow:hover .songArt{
@@ -8461,7 +8438,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background-image: none !important;
   border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 10%, rgba(255,255,255,.055)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.022) !important;
-  filter: none !important;
   transform: translate3d(0, 0, 0) !important;
   transition:
     transform 180ms cubic-bezier(.2,.8,.2,1),
@@ -8479,7 +8455,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     inset 2px 0 0 color-mix(in oklab, var(--theme-accent, var(--accent)) 36%, transparent),
     inset 0 1px 0 rgba(255,255,255,.03),
     0 7px 18px rgba(0,0,0,.18) !important;
-  filter: none !important;
   transform: translate3d(0, -1px, 0) !important;
 }
 
@@ -8498,7 +8473,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   border: 0 !important;
   box-shadow: none !important;
   outline: 0 !important;
-  filter: none !important;
 }
 
 .app .songRow:not(.songDropTarget)::before{
@@ -8585,7 +8559,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background-image: none !important;
   border: 0 !important;
   box-shadow: none !important;
-  filter: none !important;
 }
 
 .app .songRow:hover{
@@ -9012,14 +8985,12 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .homeLibraryPanel, .simpleLibraryPanel){
   animation: none !important;
   transition: none !important;
-  filter: none !important;
   box-shadow: none !important;
 }
 
 body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .homeLibraryPanel, .simpleLibraryPanel)::before{
   animation: none !important;
   transition: none !important;
-  filter: none !important;
   box-shadow: none !important;
   opacity: 0 !important;
 }
@@ -9035,7 +9006,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
 }
 
 .isDragging .homeHero{
-  filter: none !important;
   backdrop-filter: none !important;
 }
 
@@ -9381,7 +9351,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
   border-radius: 22px !important;
   transform: translate3d(0, 0, 0) scale(1) !important;
   rotate: 0deg !important;
-  filter: none !important;
   animation: none !important;
   image-rendering: auto !important;
   backface-visibility: hidden !important;
@@ -9389,7 +9358,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
 
 .app .hero.heroPremium .heroArtWrap:hover .heroArt{
   transform: translate3d(0, 0, 0) scale(1) !important;
-  filter: none !important;
 }
 
 /* Remove the awkward duration tile/box from the hero. Player already shows time. */
@@ -9585,7 +9553,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 
 .homeHeroCard:hover .homeHeroImageWrap{
   transform: none !important;
-  filter: none !important;
 }
 
 .homeHeroCard:not(.homeHeroExpanded) .homeHeroMetaChips{
@@ -10966,7 +10933,6 @@ body.localitfyNoSelect *{
 .editorActionsBetter .heroMain:hover:not(:disabled){
   border-radius: 15px !important;
   transform: translate3d(0,-1px,0) !important;
-  filter: none !important;
 }
 
 .editorActionsBetter .softButton:active:not(:disabled),
@@ -11023,7 +10989,6 @@ body.localitfyNoSelect *{
 .app:not(.reducedMotion) .coverTile:hover{
   transform: translate3d(0,-3px,0) scale(1.012) !important;
   rotate: 0deg !important;
-  filter: none !important;
   border-color: color-mix(in oklab, var(--theme-progress, var(--accent)) 26%, rgba(255,255,255,.10)) !important;
   box-shadow:
     0 14px 34px rgba(0,0,0,.24),
@@ -11033,7 +10998,6 @@ body.localitfyNoSelect *{
 .app:not(.reducedMotion) .songRow:hover{
   transform: translate3d(0,-1px,0) scale(1.004) !important;
   rotate: 0deg !important;
-  filter: none !important;
 }
 
 .app:not(.reducedMotion) .homeAlbumCard:hover .homeAlbumArt,
@@ -11092,7 +11056,6 @@ body.localitfyNoSelect *{
   transform: translate3d(0,2px,0) scale(.972) !important;
   border-color: rgba(var(--accent-rgb),0.30) !important;
   box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
-  filter: none !important;
 }
 
 .app .homeAlbumCard.songDropTarget,
@@ -11106,7 +11069,6 @@ body.localitfyNoSelect *{
     0 18px 44px rgba(0,0,0,0.22),
     0 0 0 1px rgba(var(--accent-rgb),0.12) inset,
     0 0 24px rgba(var(--accent-rgb),0.10) !important;
-  filter: none !important;
 }
 
 .app .homeAlbumCard.songDropTarget::after,
@@ -11169,7 +11131,6 @@ body.localitfyNoSelect *{
 .app.songDragActive .songRow:not(.songDragging):not(.songDropTarget):hover{
   transform: translate3d(0,-2px,0) scale(1.006) !important;
   rotate: 0deg !important;
-  filter: none !important;
 }
 
 .app .homeAlbumCard.songDropTarget .homeAlbumArt,
@@ -11177,7 +11138,6 @@ body.localitfyNoSelect *{
 .app .songRow.songDropTarget .songArt{
   transform: translate3d(0,-1px,0) scale(1.028) !important;
   rotate: 0deg !important;
-  filter: none !important;
   transition: transform 170ms var(--drag-ease-out) !important;
 }
 
@@ -11968,7 +11928,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   overflow: hidden !important;
   contain: layout paint style !important;
   transform: translate3d(0,0,0) scale(1) !important;
-  filter: none !important;
   box-shadow: none !important;
   transition:
     transform 135ms cubic-bezier(.2,.8,.2,1),
@@ -11992,7 +11951,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   background: color-mix(in oklab, var(--surface, #111017) 84%, var(--accent, #ff4ee8) 8%) !important;
   border-color: color-mix(in oklab, var(--accent, #ff4ee8) 24%, rgba(255,255,255,.07)) !important;
   box-shadow: 0 8px 20px rgba(0,0,0,.16) !important;
-  filter: none !important;
 }
 
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile).active{
@@ -12006,7 +11964,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile) .homeAlbumArt,
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile) .songArt{
   transform: translate3d(0,0,0) scale(1) !important;
-  filter: none !important;
   box-shadow: none !important;
   transition: transform 150ms cubic-bezier(.2,.8,.2,1), filter 150ms ease !important;
 }
@@ -12049,7 +12006,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 .app :where(.homeAlbumActions button,.homeAlbumPlayBadge,.songAction,.circleButton){
-  filter: none !important;
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -12104,7 +12060,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   border-color: color-mix(in oklab, var(--border, rgba(255,255,255,.09)) 78%, var(--accent, #ff4ee8) 12%) !important;
   box-shadow: 0 10px 26px rgba(0,0,0,.18) !important;
   transform: translate3d(0,0,0) scale(1) !important;
-  filter: none !important;
   contain: layout paint style !important;
   will-change: auto !important;
   transition:
@@ -12131,7 +12086,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   border-color: color-mix(in oklab, var(--border, rgba(255,255,255,.09)) 70%, var(--accent, #ff4ee8) 18%) !important;
   box-shadow: 0 10px 24px rgba(0,0,0,.2) !important;
   transform: translate3d(0,0,0) scale(1) !important;
-  filter: none !important;
 }
 
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile).active{
@@ -12144,7 +12098,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile) .homeAlbumArt,
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile) .songArt{
   transform: translate3d(0,0,0) scale(1) !important;
-  filter: none !important;
   box-shadow: none !important;
   transition: none !important;
 }
@@ -12153,7 +12106,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile):hover .homeAlbumArt,
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile):hover .songArt{
   transform: translate3d(0,0,0) scale(1) !important;
-  filter: none !important;
 }
 
 @supports (content-visibility: auto){
@@ -12197,7 +12149,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   box-shadow:
     inset 0 0 0 1px color-mix(in oklab, var(--accent, #e64be8) 24%, transparent),
     0 14px 36px rgba(0,0,0,.28) !important;
-  filter: none !important;
 }
 
 .app .homeAlbumCard:hover::before,
@@ -12211,7 +12162,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app .homeAlbumCard:hover .coverAura img,
 .app .albumCard:hover .coverAura img{
   transform: none !important;
-  filter: none !important;
 }
 
 /* v0.2.8 home hover + performance cleanup
@@ -12285,7 +12235,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   border-color: rgba(var(--accent-rgb), 0.32) !important;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025) !important;
   transform: translateZ(0) !important;
-  filter: none !important;
 }
 
 .libraryCard:hover img,
@@ -12296,7 +12245,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .coverCard:hover img,
 .coverGalleryCard:hover img {
   transform: none !important;
-  filter: none !important;
 }
 
 /* Long cover/library pages should not paint every card at once. */
@@ -13735,7 +13683,6 @@ html body .content{
 
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile,.playlistShelfCard,.playlistCard):hover{
   transform: translate3d(0,-1px,0) scale(1.002) !important;
-  filter: none !important;
   background-image: none !important;
 }
 
@@ -14645,240 +14592,50 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
   }
 }
 
-/* ====================================================================== 
-   localtify v0.3.5 V130 — smooth hero expand without reducing blur/ambience
-   The old expand animation transitioned layout-heavy values for too long.
-   This keeps the same visual states, but moves the perceived motion onto
-   compositor-friendly transform/opacity so expand does not fight scrolling.
-====================================================================== */
-.app .hero.heroPremium.heroLayoutMotion{
-  contain: layout paint style !important;
-  transform: translate3d(0, 0, 0) !important;
-  backface-visibility: hidden !important;
-  will-change: transform !important;
-  transition:
-    transform 520ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 260ms ease,
-    box-shadow 380ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 320ms ease !important;
-}
-
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion{
-  pointer-events: none !important;
-  animation: localtifyHeroReflowFloatV130 560ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-.app .hero.heroPremium.heroLayoutMotion .heroText,
-.app .hero.heroPremium.heroLayoutMotion .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-.app .hero.heroPremium.heroLayoutMotion .heroArtWrap img,
-.app .hero.heroPremium.heroLayoutMotion .coverAura{
-  backface-visibility: hidden !important;
-  will-change: transform, opacity !important;
-  transition:
-    transform 560ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 260ms ease,
-    filter 320ms ease,
-    box-shadow 360ms ease,
-    border-radius 360ms cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
-  animation: localtifyHeroArtReflowV130 620ms cubic-bezier(0.16, 1.12, 0.28, 1) both !important;
-}
-
-body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroTitle,
-body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroTitle{
-  animation: localtifyHeroTitleReflowV130 520ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion .heroArtWrap::before{
-  transition:
-    opacity 380ms ease,
-    filter 420ms ease,
-    transform 520ms cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-@keyframes localtifyHeroReflowFloatV130{
-  0%{ transform: translate3d(0, 0, 0) scale(.998); }
-  42%{ transform: translate3d(0, -2px, 0) scale(1.004); }
-  100%{ transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyHeroArtReflowV130{
-  0%{ transform: translate3d(0, 1px, 0) scale(.985); }
-  45%{ transform: translate3d(0, -4px, 0) scale(1.04); }
-  100%{ transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyHeroTitleReflowV130{
-  0%{ opacity: .9; transform: translate3d(0, 3px, 0) scale(.992); }
-  52%{ opacity: 1; transform: translate3d(0, -2px, 0) scale(1.012); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
 
 /* ======================================================================
-   localtify v0.3.5 V135 — smooth hero expand without layout jank
+   localtify v0.3.5 V141 — hero/home ownership reset
    ----------------------------------------------------------------------
-   The old hero block animated min-height, grid columns, padding, font-size,
-   width, and height at the same time. That forced layout on every frame and
-   made the expand button feel delayed. App.tsx now does a small FLIP pass on
-   click, so home.css keeps the same visual states but lets the compositor do
-   the expensive-looking movement with transform instead of fighting layout.
+   This replaces the old V130-V139 stacked hero patches. Home.css owns only
+   final layout sizes and shelf stability. Motion.css owns the temporary
+   bounce classes. No body-level hero classes are needed anymore, so compact
+   / expand cannot make the whole home page replay entrance animation.
 ====================================================================== */
 
-.app .hero.heroPremium.heroLayoutMotion{
-  contain: layout paint style !important;
-  transform-origin: left top !important;
-  will-change: transform, opacity, box-shadow !important;
-  transition:
-    transform 540ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 260ms ease,
-    box-shadow 420ms cubic-bezier(0.16, 1, 0.3, 1),
-    background 360ms ease !important;
-}
-
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion,
-body.localitfyHeroFlipMotion .app .hero.heroPremium.heroLayoutMotion,
-body.localitfyHeroFlipPlay .app .hero.heroPremium.heroLayoutMotion{
-  transition:
-    transform 560ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 220ms ease,
-    box-shadow 420ms cubic-bezier(0.16, 1, 0.3, 1),
-    background 280ms ease !important;
-}
-
-body.localitfyHeroFlipMotion .app .hero.heroPremium.heroLayoutMotion{
-  transform:
-    translate3d(var(--hero-flip-x, 0px), var(--hero-flip-y, 0px), 0)
-    scale(var(--hero-flip-scale-x, 1), var(--hero-flip-scale-y, 1)) !important;
-}
-
-body.localitfyHeroFlipMotion.localitfyHeroFlipPlay .app .hero.heroPremium.heroLayoutMotion{
-  transform: translate3d(0, 0, 0) scale(1, 1) !important;
-}
-
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroText,
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroTitle,
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroArtistLine,
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroArt,
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .coverAura{
-  will-change: transform, opacity, filter !important;
-}
-
-body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
-  animation: localtifyHeroArtReflowV135 560ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-body.localitfyHeroCoverGrowing .app .hero.heroPremium.heroLayoutMotion .heroText,
-body.localitfyHeroCoverShrinking .app .hero.heroPremium.heroLayoutMotion .heroText{
-  animation: localtifyHeroCopyReflowV135 460ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion::before,
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion::after,
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroAmbiencePulse,
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroCoverGhost{
-  animation-play-state: paused !important;
-}
-
-@keyframes localtifyHeroArtReflowV135{
-  0%{ transform: translate3d(0, 4px, 0) scale(0.985); }
-  52%{ transform: translate3d(0, -2px, 0) scale(1.018); }
-  100%{ transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyHeroCopyReflowV135{
-  0%{ opacity: 0.88; transform: translate3d(0, 5px, 0) scale(0.995); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-/* ========================================================================
-   localtify v0.3.5 V136 — hero expand/compact layout ownership
-   ------------------------------------------------------------------------
-   Home owns the hero's final layout states. Motion.css owns the visible
-   animation. This restores the expanded/compact feeling without adding the
-   old bounding-box JS FLIP delay back into App.tsx.
-======================================================================== */
-
-.app .hero.heroPremium.heroLayoutMotion{
-  --hero-layout-ease-v136: cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: center top !important;
-  transition:
-    min-height 560ms var(--hero-layout-ease-v136),
-    max-height 560ms var(--hero-layout-ease-v136),
-    grid-template-columns 560ms var(--hero-layout-ease-v136),
-    gap 440ms var(--hero-layout-ease-v136),
-    padding 500ms var(--hero-layout-ease-v136),
-    border-color 260ms ease,
-    box-shadow 520ms var(--hero-layout-ease-v136),
-    background 420ms ease,
-    opacity 220ms ease !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-.app .hero.heroPremium.heroLayoutMotion .heroText,
-.app .hero.heroPremium.heroLayoutMotion .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion .heroArtistLine,
-.app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-.app .hero.heroPremium.heroLayoutMotion .heroArt,
-.app .hero.heroPremium.heroLayoutMotion .coverAura,
-.app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf,
-.app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf > div{
-  transform-origin: center !important;
-  transition:
-    transform 580ms var(--hero-layout-ease-v136),
-    opacity 360ms ease,
-    filter 420ms ease,
-    box-shadow 420ms ease !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroExpandedShelf{
+.app .content > .pageTransition,
+.app .pageTransition{
   opacity: 1 !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
+  transform: none !important;
+  animation: none !important;
+  animation-delay: 0ms !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroExpandedShelf{
-  opacity: 0 !important;
-  transform: translate3d(0, -10px, 0) scale(0.985) !important;
-  pointer-events: none !important;
+.app .content > .pageTransition > *:not(.heroLayoutMotion):not(.homeShelfStack),
+.app .pageTransition > *:not(.heroLayoutMotion):not(.homeShelfStack){
+  animation: none !important;
+  animation-delay: 0ms !important;
 }
-
-
-/* ========================================================================
-   localtify v0.3.5 V137 — hero panel expansion belongs to home.css
-   ------------------------------------------------------------------------
-   This fixes the feeling where only the album cover grows. The whole now
-   playing banner changes size, padding, text scale, cover placement, and the
-   shelf below glides with it. No blur/ambience features are disabled here.
-======================================================================== */
 
 .app .hero.heroPremium.heroLayoutMotion{
-  --hero-layout-ease-v137: cubic-bezier(0.16, 1, 0.3, 1);
-  --hero-panel-duration-v137: 680ms;
+  --hero-v140-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --hero-v140-bounce: cubic-bezier(0.2, 1.35, 0.24, 1);
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: clip !important;
   contain: layout paint style !important;
   transform-origin: center top !important;
   backface-visibility: hidden !important;
-  will-change: min-height, max-height, padding, transform !important;
+  will-change: min-height, max-height, padding, grid-template-columns, gap !important;
   transition:
-    min-height var(--hero-panel-duration-v137) var(--hero-layout-ease-v137),
-    max-height var(--hero-panel-duration-v137) var(--hero-layout-ease-v137),
-    grid-template-columns 640ms var(--hero-layout-ease-v137),
-    gap 620ms var(--hero-layout-ease-v137),
-    padding 640ms var(--hero-layout-ease-v137),
+    min-height 720ms var(--hero-v140-ease),
+    max-height 720ms var(--hero-v140-ease),
+    padding 680ms var(--hero-v140-ease),
+    gap 640ms var(--hero-v140-ease),
+    grid-template-columns 720ms var(--hero-v140-ease),
     border-color 260ms ease,
-    box-shadow 520ms var(--hero-layout-ease-v137),
-    background 420ms ease,
-    transform 520ms var(--hero-layout-ease-v137),
-    opacity 220ms ease !important;
+    box-shadow 560ms var(--hero-v140-ease),
+    background-color 420ms ease,
+    background 420ms ease !important;
 }
 
 .app .hero.heroPremium.heroLayoutMotion.heroCompact{
@@ -14887,16 +14644,18 @@ body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroCoverGh
   grid-template-columns: minmax(0, 1fr) clamp(176px, 14.5vw, 230px) !important;
   gap: clamp(22px, 3vw, 42px) !important;
   padding: clamp(26px, 2.8vw, 42px) clamp(30px, 4.2vw, 58px) !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
+  border-color: rgba(var(--accent-rgb), 0.18) !important;
+  box-shadow:
+    0 18px 70px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
 }
 
 .app .hero.heroPremium.heroLayoutMotion.heroExpanded{
-  min-height: clamp(360px, 40vh, 520px) !important;
-  max-height: clamp(360px, 40vh, 520px) !important;
+  min-height: clamp(372px, 41vh, 536px) !important;
+  max-height: clamp(372px, 41vh, 536px) !important;
   grid-template-columns: minmax(0, 1fr) clamp(224px, 19vw, 324px) !important;
   gap: clamp(28px, 4vw, 64px) !important;
-  padding: clamp(38px, 4.4vw, 68px) clamp(38px, 5vw, 76px) !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
+  padding: clamp(40px, 4.5vw, 70px) clamp(38px, 5vw, 76px) !important;
   border-color: rgba(var(--accent-rgb), 0.30) !important;
   box-shadow:
     0 30px 96px rgba(0, 0, 0, 0.52),
@@ -14905,13 +14664,15 @@ body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroCoverGh
 }
 
 .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-.app .hero.heroPremium.heroLayoutMotion .heroText{
+.app .hero.heroPremium.heroLayoutMotion .heroText,
+.app .hero.heroPremium.heroLayoutMotion .heroQuickActions{
   transform-origin: left center !important;
+  backface-visibility: hidden !important;
   will-change: transform, opacity !important;
   transition:
-    transform 640ms var(--hero-layout-ease-v137),
-    opacity 360ms ease,
-    filter 420ms ease !important;
+    transform 660ms var(--hero-v140-ease),
+    opacity 300ms ease,
+    filter 380ms ease !important;
 }
 
 .app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTextClean,
@@ -14921,21 +14682,22 @@ body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroCoverGh
 
 .app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTextClean,
 .app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText{
-  transform: translate3d(0, -6px, 0) scale(1.015) !important;
+  transform: translate3d(0, -6px, 0) scale(1.014) !important;
 }
 
 .app .hero.heroPremium.heroLayoutMotion .heroTitle{
   transform-origin: left center !important;
+  backface-visibility: hidden !important;
   transition:
-    font-size 680ms var(--hero-layout-ease-v137),
-    line-height 680ms var(--hero-layout-ease-v137),
-    letter-spacing 520ms ease,
-    transform 640ms var(--hero-layout-ease-v137),
-    filter 420ms ease !important;
+    font-size 720ms var(--hero-v140-ease),
+    line-height 720ms var(--hero-v140-ease),
+    letter-spacing 540ms ease,
+    transform 660ms var(--hero-v140-ease),
+    filter 380ms ease !important;
 }
 
 .app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTitle{
-  max-width: min(900px, 62vw) !important;
+  max-width: min(880px, 60vw) !important;
   font-size: clamp(54px, 6.3vw, 96px) !important;
   line-height: 0.91 !important;
   transform: translate3d(0, 0, 0) scale(1) !important;
@@ -14949,69 +14711,157 @@ body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion .heroCoverGh
   transform: translate3d(0, -4px, 0) scale(1.006) !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion .heroQuickActions{
-  transition:
-    transform 580ms var(--hero-layout-ease-v137),
-    opacity 260ms ease !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroQuickActions{
-  transform: translate3d(0, 3px, 0) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroQuickActions{
-  transform: translate3d(0, 0, 0) !important;
-}
-
 .app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
   align-self: center !important;
   justify-self: end !important;
   aspect-ratio: 1 / 1 !important;
   transform-origin: center center !important;
+  backface-visibility: hidden !important;
   will-change: width, height, transform !important;
   transition:
-    width 680ms var(--hero-layout-ease-v137),
-    height 680ms var(--hero-layout-ease-v137),
-    transform 680ms var(--hero-layout-ease-v137),
-    filter 420ms ease !important;
+    width 720ms var(--hero-v140-ease),
+    height 720ms var(--hero-v140-ease),
+    transform 720ms var(--hero-v140-bounce),
+    filter 420ms ease,
+    box-shadow 520ms ease !important;
 }
 
 .app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap{
   width: clamp(176px, 14.5vw, 230px) !important;
   height: clamp(176px, 14.5vw, 230px) !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
+  transform: translate3d(0, 0, 0) scale(0.965) !important;
 }
 
 .app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap{
   width: clamp(224px, 19vw, 324px) !important;
   height: clamp(224px, 19vw, 324px) !important;
-  transform: translate3d(-10px, -2px, 0) scale(1.025) !important;
+  transform: translate3d(-10px, -2px, 0) scale(1.035) !important;
 }
 
+.app .hero.heroPremium.heroLayoutMotion .heroArt,
+.app .hero.heroPremium.heroLayoutMotion .heroArt img,
+.app .hero.heroPremium.heroLayoutMotion .coverAura{
+  width: 100% !important;
+  height: 100% !important;
+  backface-visibility: hidden !important;
+  transition:
+    border-radius 560ms var(--hero-v140-ease),
+    box-shadow 560ms ease,
+    transform 680ms var(--hero-v140-bounce),
+    opacity 300ms ease,
+    filter 420ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArt{
+  border-radius: 22px !important;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArt{
+  border-radius: 26px !important;
+  box-shadow:
+    0 30px 74px rgba(0, 0, 0, 0.48),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+    0 0 44px rgba(var(--accent-rgb), 0.16) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroArtWrap::before{
+  transition:
+    opacity 520ms ease,
+    filter 620ms ease,
+    transform 720ms var(--hero-v140-ease) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap::before{
+  opacity: 0.34 !important;
+  filter: blur(26px) saturate(1.2) brightness(0.72) !important;
+  transform: translate3d(0, 0, 0) scale(1.14) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap::before{
+  opacity: 0.22 !important;
+  filter: blur(20px) saturate(1.08) brightness(0.66) !important;
+  transform: translate3d(0, 0, 0) scale(1.05) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf{
+  transform-origin: left top !important;
+  transition:
+    opacity 380ms ease,
+    transform 620ms var(--hero-v140-bounce) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroExpandedShelf{
+  opacity: 0 !important;
+  transform: translate3d(0, -10px, 0) scale(0.982) !important;
+  pointer-events: none !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroExpandedShelf{
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroTinyButton,
+.app .hero.heroPremium.heroLayoutMotion .heroMain,
+.app .hero.heroPremium.heroLayoutMotion .heroGhost{
+  transition:
+    transform 150ms cubic-bezier(0.2, 1.35, 0.28, 1),
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroTinyButton:hover,
+.app .hero.heroPremium.heroLayoutMotion .heroMain:hover,
+.app .hero.heroPremium.heroLayoutMotion .heroGhost:hover{
+  transform: translate3d(0, -1px, 0) scale(1.02) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroTinyButton:active,
+.app .hero.heroPremium.heroLayoutMotion .heroMain:active,
+.app .hero.heroPremium.heroLayoutMotion .heroGhost:active{
+  transform: translate3d(0, 1px, 0) scale(0.975) !important;
+}
+
+.app .homeShelfStack{
+  contain: layout paint style !important;
+  transform-origin: center top !important;
+  will-change: auto !important;
+}
+
+.app .homeShelfPanel,
+.app .homeListenPanel,
+.app .homeFreshPanel,
+.app .homeLibraryPanel{
+  contain: layout paint style !important;
+}
+
+.app .homeListenCard,
+.app .homeFreshCard,
+.app .homeAlbumCard,
+.app .songCard{
+  backface-visibility: hidden !important;
+}
+
+/* Old global hero patch classes are intentionally inert in V140. If a stale
+   hot-reload leaves one on <body>, it must not freeze stars, block clicks, or
+   restart page/shelf animation. */
+body.localitfyHeroReflowing .app .content > .pageTransition,
+body.localitfyHeroWantsExpanded .app .content > .pageTransition,
+body.localitfyHeroWantsCompact .app .content > .pageTransition,
+body.localitfyHeroPanelGrowing .app .content > .pageTransition,
+body.localitfyHeroPanelShrinking .app .content > .pageTransition,
+body.localitfyHeroReflowing .app .homeShelfStack,
+body.localitfyHeroWantsExpanded .app .homeShelfStack,
+body.localitfyHeroWantsCompact .app .homeShelfStack,
 body.localitfyHeroPanelGrowing .app .homeShelfStack,
 body.localitfyHeroPanelShrinking .app .homeShelfStack{
-  pointer-events: none !important;
-  will-change: transform, opacity !important;
-}
-
-body.localitfyHeroPanelGrowing .app .homeShelfStack{
-  animation: localtifyShelfFollowHeroGrowV137 700ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-body.localitfyHeroPanelShrinking .app .homeShelfStack{
-  animation: localtifyShelfFollowHeroShrinkV137 540ms cubic-bezier(0.18, 0.92, 0.2, 1) both !important;
-}
-
-@keyframes localtifyShelfFollowHeroGrowV137{
-  0%{ opacity: 0.94; transform: translate3d(0, -22px, 0) scale(0.996); }
-  52%{ opacity: 1; transform: translate3d(0, 5px, 0) scale(1.002); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyShelfFollowHeroShrinkV137{
-  0%{ opacity: 0.98; transform: translate3d(0, 18px, 0) scale(1.002); }
-  68%{ opacity: 1; transform: translate3d(0, -3px, 0) scale(0.998); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  animation: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 @media (max-width: 1100px){
@@ -15021,14 +14871,41 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
-  .app .hero.heroPremium.heroLayoutMotion.heroExpanded{
-    min-height: auto !important;
+  .app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
+    justify-self: start !important;
+    width: clamp(160px, 34vw, 240px) !important;
+    height: clamp(160px, 34vw, 240px) !important;
+    transform: translate3d(0, 0, 0) scale(1) !important;
   }
 }
 
-/* V137: do not lock the hero buttons for the full animation. The shelf can ignore clicks while it moves, but the player button area should still feel instant. */
-body.localitfyHeroReflowing .app .hero.heroPremium.heroLayoutMotion,
-body.localitfyHeroPanelGrowing .app .hero.heroPremium.heroLayoutMotion,
-body.localitfyHeroPanelShrinking .app .hero.heroPremium.heroLayoutMotion{
-  pointer-events: auto !important;
+
+/* ======================================================================
+   localtify v0.3.5 V141 — stop delayed home shelf replay
+   ----------------------------------------------------------------------
+   Home.css keeps final shelf/card layout stable. The actual compact/expand
+   bounce is owned by motion.css through .heroMotionExpanding/.heroMotionCompacting.
+   Once App.tsx marks .homeEntranceSettled, persistent home shelves/cards do
+   not run old entrance animations again after a hero toggle.
+====================================================================== */
+
+.app.homeEntranceSettled :where(.homeShelfStack,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel){
+  opacity: 1 !important;
+}
+
+.app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting),
+.app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel),
+.app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeListenRail,.homeFreshRail,.homeListenCard,.homeFreshCard),
+.app.homeEntranceSettled :where(.homeAlbumGrid,.homeAlbumCard):not(.songDragging){
+  animation: none !important;
+  animation-delay: 0ms !important;
+  animation-fill-mode: none !important;
+}
+
+.app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting){
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel){
+  transform: translate3d(0, 0, 0) scale(1) !important;
 }

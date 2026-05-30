@@ -1,6 +1,5 @@
-﻿/* localtify 0.3.5 hero layout motion V137 — download/file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 hero motion replay fix V141 — file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -851,13 +850,13 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 keeps the stars theme clean while making pointer motion lighter and safer",
-  "Hero expand and compact now animates the whole banner, not just the album cover",
-  "The main hero card, title, buttons, ambience wash, and Listen now shelf move together more smoothly",
-  "The expand button stays instant and does not run heavy bounding-box FLIP reads before the animation starts",
-  "The proximity scanner stays isolated and does not block clicks or pointer input",
-  "Blur, ambience, cover glow, glass panels, animated backgrounds, stars, and normal UI motion stay enabled",
-  "No vapor glass, no night train, no side ambience orbs, and no runtime card shine in the stars theme",
+  "0.3.5 keeps blur, ambience, cover glow, animated stars, glass panels, and normal UI motion enabled",
+  "Hero expand and compact now runs from one local hero-motion state instead of old body patch classes",
+  "The banner, title, cover, Listen now shelf, and recent covers move together without delayed shelf replay",
+  "The compact/expand click path stays instant: no page transition restart, no delayed card entrance replay",
+  "Proximity motion stays scoped to interactive elements and avoids pointer/input lag during clicks",
+  "The stars theme stays clean: no vapor glass, no night train, no side ambience orbs, and no runtime card shine",
+  "Expensive row/card shimmer stays available at boot without stealing frames after the app is ready",
   "Playlist playback, downloads, Discord, player controls, and cover features were not removed"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
@@ -3270,6 +3269,8 @@ function MainModeApp() {
   const [bootStage, setBootStage] = useState("starting localtify...");
   const [songs, setSongs] = useState<Song[]>([]);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const [heroMotion, setHeroMotion] = useState<"idle" | "expanding" | "compacting">("idle");
+  const [homeEntranceSettled, setHomeEntranceSettled] = useState(false);
   const [isVolumeDragging, setIsVolumeDragging] = useState(false);
   const [volumeDraft, setVolumeDraft] = useState(() => Math.round(defaultSettings.volume * 100));
   const volumeDraftRef = useRef(Math.round(defaultSettings.volume * 100));
@@ -3655,7 +3656,15 @@ function MainModeApp() {
       document.body.classList.remove(
         "localitfyHeroReflowing",
         "localitfyHeroCoverGrowing",
-        "localitfyHeroCoverShrinking"
+        "localitfyHeroCoverShrinking",
+        "localitfyHeroWantsExpanded",
+        "localitfyHeroWantsCompact",
+        "localitfyHeroFlipMotion",
+        "localitfyHeroFlipPlay",
+        "localitfyHeroExpandMotion",
+        "localitfyHeroCompactMotion",
+        "localitfyHeroPanelGrowing",
+        "localitfyHeroPanelShrinking"
       );
     };
   }, []);
@@ -4090,7 +4099,7 @@ function MainModeApp() {
       Boolean(draggedSongId) ||
       isViewSwitching ||
       themeSettling,
-    resetKey: `${effectiveTheme}:${view}:${settingsCategory}:${settings.heroExpanded}:${settings.homeExpanded}`
+    resetKey: `${effectiveTheme}:${view}:${settingsCategory}`
   });
 
   const diagnosticsInfo = useMemo(() => {
@@ -4639,14 +4648,19 @@ function MainModeApp() {
   function setHeroExpanded(nextExpanded: boolean) {
     if (settings.heroExpanded === nextExpanded) return;
 
-    const body = document.body;
+    const nextMotion = nextExpanded ? "expanding" : "compacting";
     const nextSettings: Settings = {
       ...settings,
       heroExpanded: nextExpanded
     };
 
-    body.classList.add("localitfyHeroReflowing");
-    body.classList.remove(
+    // V141: compact/expand is a local hero animation only.
+    // After the first toggle, permanent home entrance animations are locked
+    // so the Listen now / recent covers shelf cannot replay a delayed fade-in.
+    document.body.classList.remove(
+      "localitfyHeroReflowing",
+      "localitfyHeroWantsExpanded",
+      "localitfyHeroWantsCompact",
       "localitfyHeroCoverGrowing",
       "localitfyHeroCoverShrinking",
       "localitfyHeroFlipMotion",
@@ -4659,6 +4673,7 @@ function MainModeApp() {
 
     if (heroReflowTimerRef.current !== null) {
       window.clearTimeout(heroReflowTimerRef.current);
+      heroReflowTimerRef.current = null;
     }
 
     if (heroCoverMotionTimerRef.current !== null) {
@@ -4666,38 +4681,20 @@ function MainModeApp() {
       heroCoverMotionTimerRef.current = null;
     }
 
-    // V136: no more FLIP bounding-box reads on click. The previous pass measured
-    // the hero before and after state, which could block the button press on big
-    // libraries. This update keeps the direct flush for instant UI response and
-    // lets CSS own the visible expand/compact motion.
-    flushSync(() => {
-      setSettings(nextSettings);
-    });
-
-    window.requestAnimationFrame(() => {
-      body.classList.add(nextExpanded ? "localitfyHeroCoverGrowing" : "localitfyHeroCoverShrinking");
-      body.classList.add(nextExpanded ? "localitfyHeroExpandMotion" : "localitfyHeroCompactMotion");
-      body.classList.add(nextExpanded ? "localitfyHeroPanelGrowing" : "localitfyHeroPanelShrinking");
+    setHomeEntranceSettled(true);
+    setHeroMotion(nextMotion);
+    setSettings((current) => {
+      if (current.heroExpanded === nextExpanded) return current;
+      return {
+        ...current,
+        heroExpanded: nextExpanded
+      };
     });
 
     heroReflowTimerRef.current = window.setTimeout(() => {
-      body.classList.remove("localitfyHeroReflowing");
+      setHeroMotion("idle");
       heroReflowTimerRef.current = null;
-    }, 760);
-
-    heroCoverMotionTimerRef.current = window.setTimeout(() => {
-      body.classList.remove(
-        "localitfyHeroCoverGrowing",
-        "localitfyHeroCoverShrinking",
-        "localitfyHeroFlipMotion",
-        "localitfyHeroFlipPlay",
-        "localitfyHeroExpandMotion",
-        "localitfyHeroCompactMotion",
-        "localitfyHeroPanelGrowing",
-        "localitfyHeroPanelShrinking"
-      );
-      heroCoverMotionTimerRef.current = null;
-    }, 900);
+    }, nextExpanded ? 860 : 700);
 
     if (bootedRef.current) {
       if (saveSettingsTimerRef.current !== null) {
@@ -4707,7 +4704,7 @@ function MainModeApp() {
       saveSettingsTimerRef.current = window.setTimeout(() => {
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
         saveSettingsTimerRef.current = null;
-      }, 180);
+      }, 360);
     }
   }
 
@@ -10620,12 +10617,16 @@ function MainModeApp() {
   }
 
 
+  const heroMotionClass = heroMotion === "expanding" ? "heroMotionExpanding" : heroMotion === "compacting" ? "heroMotionCompacting" : "";
+  const heroMotionAppClass = heroMotion !== "idle" ? `heroMotionActive ${heroMotionClass}` : "";
+  const homeEntranceSettledClass = homeEntranceSettled ? "homeEntranceSettled" : "";
+
   return (
     <main
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
@@ -10648,6 +10649,7 @@ function MainModeApp() {
       data-badge={settings.showHeroBadge ? "on" : "off"}
       data-home-expanded={settings.homeExpanded ? "on" : "off"}
       data-hero-expanded={settings.heroExpanded ? "on" : "off"}
+      data-hero-motion={heroMotion}
       data-status={statusText}
       data-app-version={APP_VERSION}
       data-secret-mode={secretMode}
@@ -11039,7 +11041,7 @@ function MainModeApp() {
               {view === "home" && (
               <>
                 <section
-                  className={`hero heroPremium ambientSurface heroLayoutMotion ${settings.heroExpanded ? "heroExpanded" : "heroCompact"} ${heroTitleClass}`}
+                  className={`hero heroPremium ambientSurface heroLayoutMotion ${settings.heroExpanded ? "heroExpanded" : "heroCompact"} ${heroMotionClass} ${heroTitleClass}`}
                   style={{ ...ambientStyle, "--hero-motion-seed": nowPlayingTransitionKey } as CSSProperties}
                 >
                   <div className="heroAmbiencePulse" aria-hidden="true" />
@@ -11097,7 +11099,7 @@ function MainModeApp() {
                   </div>
                 </section>
 
-                <section className="homeShelfStack" aria-label="home music shelves">
+                <section className={`homeShelfStack ${heroMotionClass}`} aria-label="home music shelves">
                   <section className="homeShelfPanel homeListenPanel">
                     <div className="homeShelfHeader">
                       <div>
@@ -12080,7 +12082,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.5 is mostly a smoothness and polish update: stars stay clean, hero expand/compact has its motion back, proximity stays lighter, and the app keeps its blur, ambience, and motion.</p>
+            <p className="whatsNewSubtext">0.3.5 is a smoothness pass: the hero expands without shelf reload vibes, proximity motion stays lighter on clicks, stars stay clean, and blur/ambience/motion are still enabled.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>

@@ -1,4 +1,4 @@
-/* localtify 0.3.5 motion ownership cleanup V133 — file patch label only; APP_VERSION stays 0.3.5. */
+/* localtify 0.3.5 motion replay fix V141 — file patch label only; APP_VERSION stays 0.3.5. */
 /* localtify motion.css — animation-only layer.
    Keep static layout, colors, player/progress styles, and shared backgrounds in their owner files. */
 
@@ -72,21 +72,7 @@ button:disabled:active{
   transform: none;
 }
 
-/* Page and panel entrance motion. */
-.pageTransition,
-.app .content > .pageTransition{
-  animation: localtifyPageIn 300ms var(--motion-ease) both;
-  will-change: opacity, transform;
-}
-
-.app .content > .pageTransition > *{
-  animation: localtifyPageChildIn 340ms var(--motion-ease) both;
-}
-
-.app .content > .pageTransition > *:nth-child(2){ animation-delay: 24ms; }
-.app .content > .pageTransition > *:nth-child(3){ animation-delay: 48ms; }
-.app .content > .pageTransition > *:nth-child(4){ animation-delay: 72ms; }
-
+/* Page entrance motion is disabled in V139; App/home state changes must not replay a full page animation. */
 .kopuzSettingsPage,
 .settingsShell{
   animation: localtifyPageIn 260ms var(--motion-ease) both;
@@ -376,7 +362,6 @@ body.localitfySongDragging .app .coverAura::before{
 .reducedMotion :where(.pageTransition, .hero, .homeHeroCard, .homeAlbumCard, .songRow, .coverGalleryCard, .skeletonCoverBlock){
   animation: none !important;
   transform: none !important;
-  filter: none !important;
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -392,8 +377,7 @@ body.localitfySongDragging .app .coverAura::before{
   .app :where(.pageTransition, .hero, .homeHeroCard, .homeAlbumCard, .songRow, .coverGalleryCard, .skeletonCoverBlock){
     animation: none !important;
     transform: none !important;
-    filter: none !important;
-  }
+    }
 }
 
 /* ======================================================================
@@ -502,7 +486,6 @@ body.localitfySongDragging .app .coverAura::before{
   100%{ transform: translate3d(0, 0, 0) scale(1); }
 }
 
-.app:not(.reduceMotion) .pageTransition,
 .app:not(.reduceMotion) .settingsPanelCard,
 .app:not(.reduceMotion) .settingsPageCard,
 .app:not(.reduceMotion) .editorModal,
@@ -631,7 +614,6 @@ body.localitfyDropCommitted .app:not(.reducedMotion) .songRow{
     border-color 190ms ease,
     box-shadow 190ms ease,
     color 160ms ease !important;
-  filter: none !important;
 }
 
 .app:not(.reduceMotion) .settingSwitchCard:hover,
@@ -640,7 +622,6 @@ body.localitfyDropCommitted .app:not(.reducedMotion) .songRow{
 .app:not(.reduceMotion) .toggleRow:hover,
 .app:not(.reduceMotion) .rangeRow:hover{
   transform: translate3d(0, -1px, 0) !important;
-  filter: none !important;
 }
 
 .app:not(.reduceMotion) .settingSwitchCard:active,
@@ -683,7 +664,6 @@ body.localitfyDropCommitted .app:not(.reducedMotion) .songRow{
 .app:not(.reducedMotion) .settingSwitchCard:hover,
 .app:not(.reducedMotion) .coverSyncChoice:hover{
   rotate: 0deg !important;
-  filter: none !important;
 }
 
 
@@ -691,7 +671,6 @@ body.localitfyDropCommitted .app:not(.reducedMotion) .songRow{
    Keep bouncy movement, but block tilt/blur/orb hover effects inside settings. */
 .app :where(.settingsPage, .kopuzSettingsPage, .settingsModal) :where(.settingsPanelCard, .settingsPageCard, .settingSwitchCard, .settingsChoice, .coverSyncChoice, .settingsActionButton, .settingsTinyButton, .softButton):hover{
   rotate: 0deg !important;
-  filter: none !important;
 }
 
 .app:not(.reducedMotion) :where(.settingsPage, .kopuzSettingsPage, .settingsModal) :where(.settingSwitchCard, .settingsChoice, .coverSyncChoice, .settingsActionButton, .settingsTinyButton, .softButton):hover{
@@ -717,7 +696,6 @@ body.localitfyDropCommitted .app:not(.reducedMotion) .songRow{
 
 .app:not(.reducedMotion) :where(.homeAlbumCard,.songRow,.songCard,.libraryCard,.coverCard,.coverTile,.settingSwitchCard,.settingsChoice,.coverSyncChoice):hover{
   rotate: 0deg !important;
-  filter: none !important;
 }
 
 @keyframes localtifyButtonSpring{
@@ -1051,8 +1029,7 @@ body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .play
 
   .app:not(.reducedMotion):not(.reduceMotion) :where(.songRow, .playlistTrackRow, .playlistSongRow, .libraryRow):hover{
     transform: translate3d(0,0,0) !important;
-    filter: none !important;
-  }
+    }
 
   .app:not(.reducedMotion):not(.reduceMotion) :where(
     .songCard,
@@ -1071,8 +1048,7 @@ body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .play
     .statCard
   ):hover{
     transform: translate3d(0,-1px,0) scale(1.002) !important;
-    filter: none !important;
-    rotate: 0deg !important;
+      rotate: 0deg !important;
   }
 
   .app:not(.reducedMotion):not(.reduceMotion) :where(
@@ -1099,8 +1075,7 @@ body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .play
   ):active{
     animation: none !important;
     transform: translate3d(0,1px,0) scale(.985) !important;
-    filter: none !important;
-  }
+    }
 
   .app:not(.reducedMotion):not(.reduceMotion) .sidebar .nav .navItem,
   .app:not(.reducedMotion):not(.reduceMotion) .navItem{
@@ -1244,225 +1219,6 @@ body.localtifyBackgroundMode .coverCard,
 .app[data-motion-level="smooth"] .topUpdateRibbon{
   animation: none !important;
 }
-/* ======================================================================
-   localtify v0.3.3 v104 — zero-jitter now-playing expand/compact motion
-   ----------------------------------------------------------------------
-   Fixes the compact ⇄ expanded hero transition without touching player.css.
-   The old path animated grid columns, font sizes, cover dimensions and filter
-   blur together, which caused layout + paint spikes. This keeps the visual
-   ambience, but moves the actual transition to cheaper transform/opacity work.
-====================================================================== */
-body.localitfyHeroReflowing .app .homeShelfStack,
-body.localitfyHeroReflowing .app .libraryView,
-body.localitfyHeroReflowing .app .settingsPanel{
-  pointer-events: none !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion,
-.app .simpleHero.heroLayoutMotion{
-  contain: layout paint style !important;
-  isolation: isolate !important;
-  transform: translate3d(0, 0, 0) !important;
-  backface-visibility: hidden !important;
-  overflow: clip !important;
-  will-change: min-height, padding, transform !important;
-  transition:
-    min-height 430ms cubic-bezier(.18, 1, .28, 1),
-    padding 430ms cubic-bezier(.18, 1, .28, 1),
-    gap 430ms cubic-bezier(.18, 1, .28, 1),
-    border-color 220ms ease,
-    box-shadow 300ms ease,
-    background-color 260ms ease,
-    transform 430ms cubic-bezier(.18, 1, .28, 1) !important;
-}
-
-/* Kill the extra keyframe pulse that replayed on every toggle and caused the jump. */
-.app .heroLayoutMotion.heroLayoutPulseA,
-.app .heroLayoutMotion.heroLayoutPulseB,
-.app .heroLayoutMotion.heroCompact.heroLayoutPulseA,
-.app .heroLayoutMotion.heroExpanded.heroLayoutPulseA{
-  animation: none !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroCompact{
-  min-height: clamp(252px, 27vh, 326px) !important;
-  grid-template-columns: minmax(0, 1fr) clamp(214px, 17vw, 294px) !important;
-  gap: clamp(24px, 3.5vw, 54px) !important;
-  padding: clamp(28px, 3vw, 46px) clamp(32px, 4.4vw, 64px) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded{
-  min-height: clamp(352px, 39vh, 486px) !important;
-  grid-template-columns: minmax(0, 1fr) clamp(214px, 17vw, 294px) !important;
-  gap: clamp(24px, 3.5vw, 54px) !important;
-  padding: clamp(38px, 4vw, 62px) clamp(34px, 4.6vw, 68px) !important;
-}
-
-/* Text stays the same measured size; only transform changes. No font-size reflow. */
-.app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-.app .hero.heroPremium.heroLayoutMotion .heroText,
-.app .hero.heroPremium.heroLayoutMotion .heroTitle{
-  backface-visibility: hidden !important;
-  transform-origin: left center !important;
-  will-change: transform, opacity !important;
-  transition:
-    transform 430ms cubic-bezier(.18, 1, .28, 1),
-    opacity 220ms ease !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTitle{
-  font-size: clamp(56px, 7.2vw, 112px) !important;
-  line-height: .88 !important;
-  letter-spacing: -0.078em !important;
-  max-width: min(1000px, 63vw) !important;
-  filter: none !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTextClean,
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText,
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTitle{
-  transform: translate3d(0, 0, 0) scale(1) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTextClean,
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText,
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTitle{
-  transform: translate3d(0, -4px, 0) scale(1.018) !important;
-}
-
-/* Cover keeps one measured box; expanded state scales it on GPU instead of resizing. */
-.app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
-  width: clamp(214px, 17vw, 294px) !important;
-  height: clamp(214px, 17vw, 294px) !important;
-  aspect-ratio: 1 / 1 !important;
-  align-self: center !important;
-  justify-self: end !important;
-  backface-visibility: hidden !important;
-  transform-origin: center center !important;
-  will-change: transform, opacity !important;
-  transition:
-    transform 430ms cubic-bezier(.18, 1, .28, 1),
-    opacity 220ms ease !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap{
-  transform: translate3d(0, 0, 0) scale(.92) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap{
-  transform: translate3d(-8px, -2px, 0) scale(1.04) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion .heroArt,
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArt,
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArt{
-  width: 100% !important;
-  height: 100% !important;
-  transform: translate3d(0, 0, 0) !important;
-  backface-visibility: hidden !important;
-  transition:
-    border-radius 260ms ease,
-    box-shadow 260ms ease,
-    opacity 180ms ease !important;
-}
-
-/* Keep ambience/blur, but do not animate expensive blur/filter values. */
-.app .hero.heroPremium.heroLayoutMotion::before,
-.app .hero.heroPremium.heroLayoutMotion::after,
-.app .hero.heroPremium.heroLayoutMotion .heroAmbiencePulse,
-.app .hero.heroPremium.heroLayoutMotion .heroArtWrap::before,
-.app .hero.heroPremium.heroLayoutMotion .heroArtWrap::after{
-  will-change: opacity, transform !important;
-  transition:
-    opacity 260ms ease,
-    transform 430ms cubic-bezier(.18, 1, .28, 1) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap::before{
-  opacity: .20 !important;
-  transform: translate3d(0, 0, 0) scale(1.02) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap::before{
-  opacity: .32 !important;
-  transform: translate3d(0, 0, 0) scale(1.12) !important;
-}
-
-.app .heroLayoutMotion .heroExpandedShelf,
-.app .heroLayoutMotion .heroExpandedShelf > div{
-  animation: none !important;
-  transition:
-    transform 360ms cubic-bezier(.18, 1, .28, 1),
-    opacity 240ms ease !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroExpandedShelf{
-  opacity: .92 !important;
-  transform: translate3d(0, 2px, 0) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroExpandedShelf{
-  opacity: 1 !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-/* Simple mode gets the same smooth path. */
-.app .simpleHero.heroLayoutMotion.simpleHeroCompact{
-  min-height: clamp(286px, 40vh, 390px) !important;
-  padding: clamp(24px, 3.2vw, 42px) !important;
-}
-
-.app .simpleHero.heroLayoutMotion.simpleHeroExpanded{
-  min-height: clamp(366px, 50vh, 520px) !important;
-  padding: clamp(34px, 4.4vw, 60px) !important;
-}
-
-.app .simpleHero.heroLayoutMotion .simpleHeroArtSwap,
-.app .simpleHero.heroLayoutMotion .simpleHeroArt{
-  backface-visibility: hidden !important;
-  will-change: transform, opacity !important;
-  transition:
-    transform 430ms cubic-bezier(.18, 1, .28, 1),
-    opacity 220ms ease,
-    box-shadow 260ms ease !important;
-}
-
-.app .simpleHero.heroLayoutMotion.simpleHeroCompact .simpleHeroArt{
-  transform: translate3d(0, 0, 0) scale(.96) !important;
-}
-
-.app .simpleHero.heroLayoutMotion.simpleHeroExpanded .simpleHeroArt{
-  transform: translate3d(0, 0, 0) scale(1.045) !important;
-}
-
-@media (max-width: 1100px){
-  .app .hero.heroPremium.heroLayoutMotion.heroCompact,
-  .app .hero.heroPremium.heroLayoutMotion.heroExpanded{
-    grid-template-columns: minmax(0, 1fr) !important;
-    min-height: auto !important;
-    transition: padding 320ms cubic-bezier(.18, 1, .28, 1), transform 320ms cubic-bezier(.18, 1, .28, 1) !important;
-  }
-
-  .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-  .app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap,
-  .app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap{
-    justify-self: start !important;
-    width: clamp(160px, 34vw, 240px) !important;
-    height: clamp(160px, 34vw, 240px) !important;
-    transform: translate3d(0, 0, 0) scale(1) !important;
-  }
-}
-
-.app.reducedMotion .hero.heroPremium.heroLayoutMotion,
-.app.reducedMotion .simpleHero.heroLayoutMotion,
-.app.reducedMotion .hero.heroPremium.heroLayoutMotion *,
-.app.reducedMotion .simpleHero.heroLayoutMotion *{
-  animation: none !important;
-  transition-duration: 1ms !important;
-}
-
 /* ========================================================================== 
    localtify v0.3.4/v106 — smooth settings category + top update ribbon motion
    Motion-only. No player layout, no colors, no backgrounds.
@@ -1868,303 +1624,193 @@ body.localitfyHeroCoverShrinking .localtifyProximityTarget{
   will-change: auto !important;
 }
 
-/* Keep animated stars, but pause their layers during operations that can feel
-   laggy if the browser is also painting moving backgrounds. */
-body.localitfyHeroReflowing .app[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroCoverGrowing .app[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroCoverShrinking .app[data-theme="stars"] .localtifyStarsLayer,
-.app.isScrolling[data-theme="stars"] .localtifyStarsLayerB,
-.app.songDragActive[data-theme="stars"] .localtifyStarsLayer,
-.app.playerScrubbing[data-theme="stars"] .localtifyStarsLayer,
-.app.viewSwitching[data-theme="stars"] .localtifyStarsLayer{
-  animation-play-state: paused !important;
-}
-
 
 /* ========================================================================
-   localtify v0.3.5 V135 — stop decorative motion from stealing input frames
+   localtify v0.3.5 V140 — local hero motion only
    ------------------------------------------------------------------------
-   This does not remove blur, ambience, stars, or normal animations. It only
-   pauses decorative star layers while React is committing a layout interaction.
+   Motion.css now owns only short-lived classes placed directly on the hero
+   and shelf by App.tsx. No body hero classes. No page transition replay.
+   This keeps blur/ambience/stars alive while fixing the fake reload flash.
 ======================================================================== */
 
-.app.themeMotionBooting[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroFlipMotion .app[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroFlipPlay .app[data-theme="stars"] .localtifyStarsLayer{
-  animation-play-state: paused !important;
-}
-
-body.localitfyHeroFlipMotion .app:not(.reducedMotion) .localtifyProximityTarget,
-body.localitfyHeroFlipPlay .app:not(.reducedMotion) .localtifyProximityTarget{
-  scale: 1 !important;
+.app.heroMotionActive .localtifyProximityTarget,
+.app.heroMotionActive .localtifyProximityTarget.localtifyProximityActive{
+  transition-duration: 48ms, 70ms, 70ms, 70ms !important;
   will-change: auto !important;
 }
 
-/* ========================================================================
-   localtify v0.3.5 V136 — restored expand / compact player motion
-   ------------------------------------------------------------------------
-   The previous motion pass made the hero feel too flat. This block brings the
-   visible expand/compact animation back. It uses transform/opacity keyframes
-   only, so blur, ambience, stars, and cover glow stay alive without blocking
-   button clicks.
-======================================================================== */
-
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion{
-  animation: localtifyHeroExpandReturnV136 720ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion{
-  animation: localtifyHeroCompactReturnV136 560ms cubic-bezier(0.18, 0.92, 0.2, 1) both !important;
-}
-
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .coverAura{
-  animation: localtifyHeroArtExpandReturnV136 760ms cubic-bezier(0.16, 1.08, 0.26, 1) both !important;
-}
-
-body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .coverAura{
-  animation: localtifyHeroArtCompactReturnV136 540ms cubic-bezier(0.18, 0.92, 0.2, 1) both !important;
-}
-
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroText,
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroTitle,
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroArtistLine{
-  animation: localtifyHeroCopyExpandReturnV136 660ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroText,
-body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroTitle,
-body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroArtistLine{
-  animation: localtifyHeroCopyCompactReturnV136 500ms cubic-bezier(0.18, 0.92, 0.2, 1) both !important;
-}
-
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf > div{
-  animation: localtifyHeroShelfExpandReturnV136 620ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf > div:nth-child(1){ animation-delay: 56ms !important; }
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf > div:nth-child(2){ animation-delay: 102ms !important; }
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf > div:nth-child(3){ animation-delay: 148ms !important; }
-
-body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf > div{
-  animation: localtifyHeroShelfCompactReturnV136 360ms cubic-bezier(0.18, 0.92, 0.2, 1) both !important;
-}
-
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion::before,
-body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion::after{
+.app.heroMotionActive .localtifyStarsLayer,
+.app.heroMotionActive[data-theme="stars"] .localtifyStarsLayer,
+.app.heroMotionActive[data-theme="stars"] .localtifyStarsLayerB,
+.app.heroMotionActive[data-theme="stars"] .localtifyStarsLayerC{
   animation-play-state: running !important;
 }
 
-/* V136: no star freeze during expand/compact. The star layers are light now,
-   so keeping them running makes the theme feel alive instead of suddenly flat. */
-body.localitfyHeroReflowing .app[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroCoverGrowing .app[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroCoverShrinking .app[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroExpandMotion .app[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroCompactMotion .app[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroFlipMotion .app[data-theme="stars"] .localtifyStarsLayer,
-body.localitfyHeroFlipPlay .app[data-theme="stars"] .localtifyStarsLayer{
-  animation-play-state: running !important;
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionExpanding{
+  animation: localtifyHeroCardExpandV140 780ms cubic-bezier(0.2, 1.32, 0.22, 1) both !important;
 }
 
-@keyframes localtifyHeroExpandReturnV136{
-  0%{ opacity: 0.96; transform: translate3d(0, 10px, 0) scale(0.982); }
-  42%{ opacity: 1; transform: translate3d(0, -5px, 0) scale(1.012); }
-  72%{ transform: translate3d(0, 1px, 0) scale(0.997); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionCompacting{
+  animation: localtifyHeroCardCompactV140 660ms cubic-bezier(0.18, 0.98, 0.2, 1) both !important;
 }
 
-@keyframes localtifyHeroCompactReturnV136{
-  0%{ opacity: 1; transform: translate3d(0, -3px, 0) scale(1.006); }
-  58%{ transform: translate3d(0, 2px, 0) scale(0.992); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionExpanding::before,
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionCompacting::before{
+  animation: localtifyHeroAmbiencePulseV140 820ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
 
-@keyframes localtifyHeroArtExpandReturnV136{
-  0%{ opacity: 0.9; transform: translate3d(20px, 10px, 0) scale(0.90); filter: saturate(0.95); }
-  48%{ opacity: 1; transform: translate3d(-5px, -5px, 0) scale(1.055); filter: saturate(1.14); }
-  78%{ transform: translate3d(2px, 1px, 0) scale(0.994); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: saturate(1); }
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroTextClean,
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroText,
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroQuickActions{
+  transform: translate3d(0, -12px, 0) scale(1.03) !important;
 }
 
-@keyframes localtifyHeroArtCompactReturnV136{
-  0%{ opacity: 1; transform: translate3d(-4px, -3px, 0) scale(1.028); }
-  72%{ opacity: 0.98; transform: translate3d(5px, 2px, 0) scale(0.978); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .heroTextClean,
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .heroText,
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .heroQuickActions{
+  transform: translate3d(0, 4px, 0) scale(0.992) !important;
 }
 
-@keyframes localtifyHeroCopyExpandReturnV136{
-  0%{ opacity: 0.78; transform: translate3d(0, 18px, 0) scale(0.988); }
-  55%{ opacity: 1; transform: translate3d(0, -4px, 0) scale(1.006); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroTitle{
+  transform: translate3d(0, -9px, 0) scale(1.022) !important;
 }
 
-@keyframes localtifyHeroCopyCompactReturnV136{
-  0%{ opacity: 0.92; transform: translate3d(0, -6px, 0) scale(1.004); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .heroTitle{
+  transform: translate3d(0, 3px, 0) scale(0.992) !important;
 }
 
-@keyframes localtifyHeroShelfExpandReturnV136{
-  0%{ opacity: 0; transform: translate3d(0, 18px, 0) scale(0.965); }
-  56%{ opacity: 1; transform: translate3d(0, -4px, 0) scale(1.012); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroArtWrap,
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .coverAura{
+  transform: translate3d(-13px, -7px, 0) scale(1.065) !important;
 }
 
-@keyframes localtifyHeroShelfCompactReturnV136{
-  0%{ opacity: 0.92; transform: translate3d(0, 0, 0) scale(1); }
-  100%{ opacity: 0; transform: translate3d(0, -10px, 0) scale(0.985); }
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .heroArtWrap,
+.app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .coverAura{
+  transform: translate3d(4px, 3px, 0) scale(0.948) !important;
+}
+
+.app:not(.reducedMotion) .homeShelfStack.heroMotionExpanding{
+  animation: localtifyShelfExpandBounceV140 820ms cubic-bezier(0.2, 1.32, 0.22, 1) both !important;
+}
+
+.app:not(.reducedMotion) .homeShelfStack.heroMotionCompacting{
+  animation: localtifyShelfCompactBounceV140 660ms cubic-bezier(0.18, 0.98, 0.2, 1) both !important;
+}
+
+.app:not(.reducedMotion) .homeShelfStack.heroMotionExpanding .homeListenPanel,
+.app:not(.reducedMotion) .homeShelfStack.heroMotionExpanding .homeFreshPanel,
+.app:not(.reducedMotion) .homeShelfStack.heroMotionExpanding .homeLibraryPanel{
+  animation: localtifyPanelFollowExpandV140 760ms cubic-bezier(0.2, 1.28, 0.22, 1) both !important;
+}
+
+.app:not(.reducedMotion) .homeShelfStack.heroMotionCompacting .homeListenPanel,
+.app:not(.reducedMotion) .homeShelfStack.heroMotionCompacting .homeFreshPanel,
+.app:not(.reducedMotion) .homeShelfStack.heroMotionCompacting .homeLibraryPanel{
+  animation: localtifyPanelFollowCompactV140 620ms cubic-bezier(0.18, 0.98, 0.2, 1) both !important;
+}
+
+.app:not(.reducedMotion) .homeShelfStack.heroMotionExpanding .homeListenPanel{ animation-delay: 0ms !important; }
+.app:not(.reducedMotion) .homeShelfStack.heroMotionExpanding .homeFreshPanel{ animation-delay: 34ms !important; }
+.app:not(.reducedMotion) .homeShelfStack.heroMotionExpanding .homeLibraryPanel{ animation-delay: 58ms !important; }
+
+@keyframes localtifyHeroCardExpandV140{
+  0%{ transform: translate3d(0, 10px, 0) scale(0.992); opacity: 0.99; }
+  44%{ transform: translate3d(0, -5px, 0) scale(1.006); opacity: 1; }
+  72%{ transform: translate3d(0, 2px, 0) scale(0.998); }
+  100%{ transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+}
+
+@keyframes localtifyHeroCardCompactV140{
+  0%{ transform: translate3d(0, -4px, 0) scale(1.004); opacity: 1; }
+  58%{ transform: translate3d(0, 3px, 0) scale(0.996); }
+  100%{ transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+}
+
+@keyframes localtifyHeroAmbiencePulseV140{
+  0%{ opacity: 0.28; transform: translate3d(0, 0, 0) scale(1.16); }
+  46%{ opacity: 0.39; transform: translate3d(0, 0, 0) scale(1.24); }
+  100%{ opacity: 0.34; transform: translate3d(0, 0, 0) scale(1.2); }
+}
+
+@keyframes localtifyShelfExpandBounceV140{
+  0%{ transform: translate3d(0, -10px, 0) scale(0.996); opacity: 1; }
+  48%{ transform: translate3d(0, 5px, 0) scale(1.002); }
+  76%{ transform: translate3d(0, -2px, 0) scale(0.999); }
+  100%{ transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+}
+
+@keyframes localtifyShelfCompactBounceV140{
+  0%{ transform: translate3d(0, 7px, 0) scale(1.002); opacity: 1; }
+  62%{ transform: translate3d(0, -3px, 0) scale(0.998); }
+  100%{ transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+}
+
+@keyframes localtifyPanelFollowExpandV140{
+  0%{ transform: translate3d(0, -8px, 0) scale(0.994); opacity: 0.96; }
+  52%{ transform: translate3d(0, 4px, 0) scale(1.004); opacity: 1; }
+  100%{ transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+}
+
+@keyframes localtifyPanelFollowCompactV140{
+  0%{ transform: translate3d(0, 6px, 0) scale(1.002); opacity: 1; }
+  68%{ transform: translate3d(0, -2px, 0) scale(0.998); }
+  100%{ transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce){
-  body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion,
-  body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion,
-  body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-  body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-  body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .coverAura,
-  body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .coverAura,
-  body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-  body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-  body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroText,
-  body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroText,
-  body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroTitle,
-  body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroTitle,
-  body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroArtistLine,
-  body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroArtistLine,
-  body.localitfyHeroExpandMotion .app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf > div,
-  body.localitfyHeroCompactMotion .app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf > div{
+  .app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding,
+  .app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting,
+  .app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding::before,
+  .app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting::before,
+  .app .homeShelfStack.heroMotionExpanding,
+  .app .homeShelfStack.heroMotionCompacting,
+  .app .homeShelfStack.heroMotionExpanding .homeListenPanel,
+  .app .homeShelfStack.heroMotionExpanding .homeFreshPanel,
+  .app .homeShelfStack.heroMotionExpanding .homeLibraryPanel,
+  .app .homeShelfStack.heroMotionCompacting .homeListenPanel,
+  .app .homeShelfStack.heroMotionCompacting .homeFreshPanel,
+  .app .homeShelfStack.heroMotionCompacting .homeLibraryPanel{
     animation: none !important;
   }
 }
 
 
 /* ========================================================================
-   localtify v0.3.5 V137 — visible full-hero click motion
+   localtify v0.3.5 V141 — no delayed shelf/card entrance replay
    ------------------------------------------------------------------------
-   Motion.css owns the click burst only. Home.css owns final sizes. This makes
-   the entire hero card feel alive when toggling compact/expanded player.
+   The old smooth-mode entrance rules are useful for first boot, but after
+   compact/expand they re-applied when heroMotionExpanding/Compacting was
+   removed. That looked like the home page flashed/reloaded one second later.
+
+   App.tsx now adds .homeEntranceSettled after the first hero toggle. In that
+   settled state, base entrance animations are muted for persistent home
+   shelves/cards only. The actual hero + shelf bounce still runs while the
+   temporary heroMotion classes are present.
 ======================================================================== */
 
-body.localitfyHeroPanelGrowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion{
-  animation: localtifyHeroPanelGrowV137 720ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+.app.homeEntranceSettled[data-motion-level="smooth"] .hero.heroPremium.heroLayoutMotion:not(.heroMotionExpanding):not(.heroMotionCompacting),
+.app.homeEntranceSettled[data-motion-level="smooth"] .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting),
+.app.homeEntranceSettled[data-motion-level="smooth"] .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel),
+.app.homeEntranceSettled[data-motion-level="smooth"] .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeListenRail,.homeFreshRail,.homeListenCard,.homeFreshCard),
+.app.homeEntranceSettled[data-motion-level="smooth"] :where(.homeAlbumGrid,.homeAlbumCard):not(.songDragging){
+  animation: none !important;
+  animation-delay: 0ms !important;
+  animation-fill-mode: none !important;
 }
 
-body.localitfyHeroPanelShrinking .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion{
-  animation: localtifyHeroPanelShrinkV137 560ms cubic-bezier(0.18, 0.92, 0.2, 1) both !important;
+.app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting),
+.app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel),
+.app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeListenRail,.homeFreshRail,.homeListenCard,.homeFreshCard){
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
 }
 
-body.localitfyHeroPanelGrowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion::before,
-body.localitfyHeroPanelShrinking .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion::before{
-  animation: localtifyHeroAmbienceBreathV137 740ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+.app.homeEntranceSettled .homeShelfStack.heroMotionExpanding,
+.app.homeEntranceSettled .homeShelfStack.heroMotionCompacting{
+  will-change: transform !important;
 }
 
-body.localitfyHeroPanelGrowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion::after,
-body.localitfyHeroPanelShrinking .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion::after{
-  animation: localtifyHeroShadeBreathV137 680ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-body.localitfyHeroPanelGrowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroTextClean,
-body.localitfyHeroPanelGrowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroText,
-body.localitfyHeroPanelGrowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroQuickActions{
-  animation: localtifyHeroCopyGrowV137 660ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-body.localitfyHeroPanelShrinking .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroTextClean,
-body.localitfyHeroPanelShrinking .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroText,
-body.localitfyHeroPanelShrinking .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroQuickActions{
-  animation: localtifyHeroCopyShrinkV137 500ms cubic-bezier(0.18, 0.92, 0.2, 1) both !important;
-}
-
-body.localitfyHeroPanelGrowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroTitle{
-  animation: localtifyHeroTitleGrowV137 680ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-
-body.localitfyHeroPanelShrinking .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroTitle{
-  animation: localtifyHeroTitleShrinkV137 520ms cubic-bezier(0.18, 0.92, 0.2, 1) both !important;
-}
-
-body.localitfyHeroPanelGrowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroArtWrap,
-body.localitfyHeroPanelShrinking .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroArtWrap{
-  animation-duration: 700ms !important;
-}
-
-@keyframes localtifyHeroPanelGrowV137{
-  0%{ opacity: 0.98; transform: translate3d(0, 14px, 0) scale(0.988); filter: saturate(0.98); }
-  46%{ opacity: 1; transform: translate3d(0, -5px, 0) scale(1.008); filter: saturate(1.08); }
-  78%{ transform: translate3d(0, 2px, 0) scale(0.998); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: saturate(1); }
-}
-
-@keyframes localtifyHeroPanelShrinkV137{
-  0%{ opacity: 1; transform: translate3d(0, -5px, 0) scale(1.006); }
-  62%{ opacity: 1; transform: translate3d(0, 3px, 0) scale(0.994); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyHeroAmbienceBreathV137{
-  0%{ opacity: 0.28; transform: translate3d(0, 0, 0) scale(1.15); filter: blur(44px) saturate(1.18) brightness(0.54); }
-  45%{ opacity: 0.40; transform: translate3d(0, 0, 0) scale(1.24); filter: blur(50px) saturate(1.34) brightness(0.61); }
-  100%{ opacity: 0.34; transform: translate3d(0, 0, 0) scale(1.20); filter: blur(46px) saturate(1.28) brightness(0.56); }
-}
-
-@keyframes localtifyHeroShadeBreathV137{
-  0%{ opacity: 0.94; }
-  50%{ opacity: 1; }
-  100%{ opacity: 1; }
-}
-
-@keyframes localtifyHeroCopyGrowV137{
-  0%{ opacity: 0.82; transform: translate3d(0, 20px, 0) scale(0.985); }
-  54%{ opacity: 1; transform: translate3d(0, -4px, 0) scale(1.012); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyHeroCopyShrinkV137{
-  0%{ opacity: 0.96; transform: translate3d(0, -7px, 0) scale(1.006); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyHeroTitleGrowV137{
-  0%{ opacity: 0.9; transform: translate3d(0, 18px, 0) scale(0.982); }
-  48%{ opacity: 1; transform: translate3d(0, -5px, 0) scale(1.018); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyHeroTitleShrinkV137{
-  0%{ opacity: 0.98; transform: translate3d(0, -7px, 0) scale(1.01); }
-  72%{ opacity: 1; transform: translate3d(0, 2px, 0) scale(0.995); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@media (prefers-reduced-motion: reduce){
-  body.localitfyHeroPanelGrowing .app .hero.heroPremium.heroLayoutMotion,
-  body.localitfyHeroPanelShrinking .app .hero.heroPremium.heroLayoutMotion,
-  body.localitfyHeroPanelGrowing .app .hero.heroPremium.heroLayoutMotion::before,
-  body.localitfyHeroPanelShrinking .app .hero.heroPremium.heroLayoutMotion::before,
-  body.localitfyHeroPanelGrowing .app .hero.heroPremium.heroLayoutMotion::after,
-  body.localitfyHeroPanelShrinking .app .hero.heroPremium.heroLayoutMotion::after,
-  body.localitfyHeroPanelGrowing .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-  body.localitfyHeroPanelShrinking .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
-  body.localitfyHeroPanelGrowing .app .hero.heroPremium.heroLayoutMotion .heroText,
-  body.localitfyHeroPanelShrinking .app .hero.heroPremium.heroLayoutMotion .heroText,
-  body.localitfyHeroPanelGrowing .app .hero.heroPremium.heroLayoutMotion .heroQuickActions,
-  body.localitfyHeroPanelShrinking .app .hero.heroPremium.heroLayoutMotion .heroQuickActions,
-  body.localitfyHeroPanelGrowing .app .hero.heroPremium.heroLayoutMotion .heroTitle,
-  body.localitfyHeroPanelShrinking .app .hero.heroPremium.heroLayoutMotion .heroTitle{
-    animation: none !important;
-  }
-}
-
-/* V137 safety override: home.css pauses hero ambience during reflow; panel grow/shrink is the intentional click animation, so keep the hero card motion running. */
-body.localitfyHeroPanelGrowing.localitfyHeroReflowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion::before,
-body.localitfyHeroPanelGrowing.localitfyHeroReflowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion::after,
-body.localitfyHeroPanelShrinking.localitfyHeroReflowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion::before,
-body.localitfyHeroPanelShrinking.localitfyHeroReflowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion::after,
-body.localitfyHeroPanelGrowing.localitfyHeroReflowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroAmbiencePulse,
-body.localitfyHeroPanelShrinking.localitfyHeroReflowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroAmbiencePulse,
-body.localitfyHeroPanelGrowing.localitfyHeroReflowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroCoverGhost,
-body.localitfyHeroPanelShrinking.localitfyHeroReflowing .app:not(.reducedMotion) .hero.heroPremium.heroLayoutMotion .heroCoverGhost{
-  animation-play-state: running !important;
+.app.homeEntranceSettled .homeShelfStack.heroMotionExpanding :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel),
+.app.homeEntranceSettled .homeShelfStack.heroMotionCompacting :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel){
+  will-change: transform, opacity !important;
 }
