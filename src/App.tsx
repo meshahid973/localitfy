@@ -1,4 +1,5 @@
-﻿import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+﻿/* localtify 0.3.5 stars-only animated theme cleanup V124 — download/file patch label only; APP_VERSION stays 0.3.5. */
+import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -531,8 +532,6 @@ type ThemeId =
   | "lavaLamp"
   | "softSky"
   | "stars"
-  | "vaporGlass"
-  | "nightTrain"
   | "arcadeGhost";
 type DiscordArtMode = "albumCover" | "randomPixel" | "logo" | "none";
 type DiscordActivityStyle = "clean" | "cute" | "detailed" | "minimal" | "meme";
@@ -850,14 +849,14 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 adds a cleaner idle screensaver with the wallpaper as the focus",
-  "Type SCREENSAVER in search and the idle screen opens after a short preview delay",
-  "Added three lightweight animated themes: stars, vapor glass, and night train",
-  "The startup screen now feels safer and shows what localtify is preparing instead of leaving a black screen",
-  "The visible theme list was cleaned up so duplicate-looking themes do not clutter Settings",
+  "0.3.5 keeps the animated theme list focused on stars only",
+  "Stars now randomize per launch, sparkle, and drift slowly instead of sitting in the same tiled spots",
+  "Boot motion keeps the row and card shimmer on, including the heavier shimmer pass",
+  "Vapor glass and night train were retired from Settings so the theme picker stays cleaner",
+  "Old installs saved on vapor glass or night train are safely moved to stars on boot",
+  "The startup screen still feels alive without turning off blur, ambience, cover glow, or motion",
   "Playlist playback still stays inside the playlist you started from",
   "Hero covers, titles, and ambience continue to animate more smoothly when songs change",
-  "Quick-library cards and playlist rows keep the tighter title/artist spacing from the 0.3.5 cleanup",
   "No player layout, Discord, downloads, playlists, blur, or ambience features were removed"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
@@ -895,15 +894,27 @@ const themes = [
   { id: "berry", name: "berry", note: "deep purple glow", mood: "soft night", emoji: "🍓" },
   { id: "midnight", name: "midnight", note: "deep blue OLED", mood: "late night", emoji: "🌙" },
   { id: "mono", name: "mono", note: "clean white", mood: "simple focus", emoji: "○" },
-  { id: "stars", name: "stars", note: "pixel night sky", mood: "sparkly night", emoji: "✦" },
-  { id: "vaporGlass", name: "vapor glass", note: "purple acrylic", mood: "premium glow", emoji: "◈" },
-  { id: "nightTrain", name: "night train", note: "moving window lights", mood: "lofi travel", emoji: "▭" },
+  { id: "stars", name: "stars", note: "random sparkle motion", mood: "sparkly night", emoji: "✦" },
 ] as const;
 
 const THEME_ID_SET = new Set<string>(themes.map((theme) => theme.id));
+const RETIRED_ANIMATED_THEME_IDS = new Set(["vaporGlass", "nightTrain"]);
+
+function isRetiredAnimatedThemeId(value: unknown) {
+  return RETIRED_ANIMATED_THEME_IDS.has(String(value || ""));
+}
 
 function isThemeId(value: string): value is ThemeId {
   return THEME_ID_SET.has(value);
+}
+
+function normalizeThemeId(value: unknown, fallback: ThemeId = "mint"): ThemeId {
+  const rawTheme = String(value || "").trim();
+
+  if (isRetiredAnimatedThemeId(rawTheme)) return "stars";
+  if (rawTheme === "oled") return "mint";
+
+  return isThemeId(rawTheme) ? rawTheme : fallback;
 }
 
 const THEME_SWATCH_COLORS: Record<ThemeId, string> = {
@@ -924,8 +935,6 @@ const THEME_SWATCH_COLORS: Record<ThemeId, string> = {
   matcha: "#86efac",
   bubblegum: "#f472d0",
   stars: "#d7d5ff",
-  vaporGlass: "linear-gradient(135deg, #e05dff, #86e7ff)",
-  nightTrain: "linear-gradient(135deg, #8fc7ff, #ffd68b)",
   sakura: "#f9a8d4",
   dreamcore: "#a78bfa",
   peach: "#fdba74",
@@ -1191,6 +1200,48 @@ const stableHash = (input: string) => {
   return hash >>> 0;
 };
 
+
+const seededUnit = (seed: number, salt: number) => {
+  const raw = Math.sin((seed + salt * 1009) * 12.9898) * 43758.5453123;
+  return raw - Math.floor(raw);
+};
+
+function buildRandomStarLayer(seedKey: string, count: number, palette: string[], minSize = 0.85, maxSize = 1.75) {
+  const seed = stableHash(seedKey);
+
+  return Array.from({ length: count }, (_, index) => {
+    const x = 1.5 + seededUnit(seed, index * 9 + 1) * 97;
+    const y = 2 + seededUnit(seed, index * 9 + 2) * 96;
+    const size = minSize + seededUnit(seed, index * 9 + 3) * (maxSize - minSize);
+    const fade = 0.36 + seededUnit(seed, index * 9 + 4) * 0.58;
+    const color = palette[Math.floor(seededUnit(seed, index * 9 + 5) * palette.length)] || palette[0];
+
+    return `radial-gradient(circle at ${x.toFixed(2)}% ${y.toFixed(2)}%, rgba(${color}, ${fade.toFixed(2)}) 0 ${size.toFixed(2)}px, transparent ${(size + 1.1).toFixed(2)}px)`;
+  }).join(", ");
+}
+
+function buildAnimatedThemeVisualStyle(theme: ThemeId, seedKey: string) {
+  if (theme !== "stars") return {} as CSSProperties;
+
+  const seed = stableHash(`${seedKey}:stars:v124`);
+  const driftDuration = 64 + seededUnit(seed, 1) * 18;
+  const sparkleDuration = 2.35 + seededUnit(seed, 2) * 1.15;
+  const shimmerDuration = 7.4 + seededUnit(seed, 3) * 2.4;
+  const sweepDuration = 18 + seededUnit(seed, 4) * 7;
+
+  return {
+    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v124:slow`, 32, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 1.55),
+    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v124:sparkle`, 20, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.95, 2.15),
+    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v124:tiny`, 18, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.45, 1.0),
+    "--localtify-stars-drift-duration": `${driftDuration.toFixed(2)}s`,
+    "--localtify-stars-sparkle-duration": `${sparkleDuration.toFixed(2)}s`,
+    "--localtify-stars-shimmer-duration": `${shimmerDuration.toFixed(2)}s`,
+    "--localtify-stars-sweep-duration": `${sweepDuration.toFixed(2)}s`,
+    "--localtify-stars-drift-x": `${(3.4 + seededUnit(seed, 5) * 3.2).toFixed(2)}vw`,
+    "--localtify-stars-drift-y": `${(1.6 + seededUnit(seed, 6) * 2.1).toFixed(2)}vh`
+  } as CSSProperties;
+}
+
 const songSignature = (song?: Song | null) => {
   if (!song) return "localitfy-idle";
   return [song.id, song.title, song.artist, song.album, song.duration, song.filePath]
@@ -1414,8 +1465,6 @@ const THEME_PRESET_COLORS: Record<ThemeId, ThemeVisualPalette> = {
   matcha: { accent: "#86efac", accent2: "#bef264", background: "#020804", surface: "#0b180e", text: "#effff3", highlight: "#bbf7d0" },
   bubblegum: { accent: "#f472d0", accent2: "#67e8f9", background: "#0b0310", surface: "#1b1025", text: "#fff3fb", highlight: "#fbcfe8" },
   stars: { accent: "#d7d5ff", accent2: "#8fdcff", background: "#050610", surface: "#17182d", text: "#f6f3ff", highlight: "#ffffff" },
-  vaporGlass: { accent: "#e05dff", accent2: "#86e7ff", background: "#07020d", surface: "#20122d", text: "#fff5ff", highlight: "#ffd7ff" },
-  nightTrain: { accent: "#8fc7ff", accent2: "#ffd68b", background: "#030711", surface: "#0c182a", text: "#f1f7ff", highlight: "#dbeafe" },
   sakura: { accent: "#f9a8d4", accent2: "#fb7185", background: "#0b0408", surface: "#1c0e16", text: "#fff5fa", highlight: "#fce7f3" },
   dreamcore: { accent: "#a78bfa", accent2: "#f0abfc", background: "#050416", surface: "#121027", text: "#f7f3ff", highlight: "#ddd6fe" },
   peach: { accent: "#fdba74", accent2: "#fb7185", background: "#0b0603", surface: "#1b1008", text: "#fff7ed", highlight: "#fed7aa" },
@@ -3754,6 +3803,7 @@ function MainModeApp() {
   const [libraryDropSide, setLibraryDropSide] = useState<LibraryDropSide>("after");
   const [queueDropHot, setQueueDropHot] = useState(false);
   const [themeSettling, setThemeSettling] = useState(false);
+  const [themeMotionReady, setThemeMotionReady] = useState(false);
   const draggedSongIdRef = useRef("");
   const libraryDragOverSongIdRef = useRef("");
   const libraryDropSideRef = useRef<LibraryDropSide>("after");
@@ -3987,13 +4037,41 @@ function MainModeApp() {
   const selectedThemeId = settings.theme as string;
   const safeTheme: ThemeId = selectedThemeId === "arcadeGhost" && !arcadeGhostUnlocked
     ? "mint"
-    : isThemeId(selectedThemeId)
-      ? selectedThemeId
-      : "mint";
+    : normalizeThemeId(selectedThemeId);
   const effectiveTheme: ThemeId = safeTheme;
   const visibleThemes = themes;
   const currentTheme = themes.find((theme) => theme.id === effectiveTheme) ?? themes.find((theme) => theme.id === "mint") ?? themes[0];
+  const animatedThemeSeedRef = useRef(`localtify-theme-motion-${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const themePresetStyle = useMemo<CSSProperties>(() => makeThemePresetStyle(effectiveTheme), [effectiveTheme]);
+  const animatedThemeVisualStyle = useMemo<CSSProperties>(
+    () => buildAnimatedThemeVisualStyle(effectiveTheme, animatedThemeSeedRef.current),
+    [effectiveTheme]
+  );
+
+  useEffect(() => {
+    setThemeMotionReady(false);
+
+    if (settings.reducedMotion || effectiveTheme !== "stars") {
+      setThemeMotionReady(true);
+      return;
+    }
+
+    let firstFrame = 0;
+    let secondFrame = 0;
+    let warmupTimer = 0;
+
+    firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        warmupTimer = window.setTimeout(() => setThemeMotionReady(true), 260);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+      window.clearTimeout(warmupTimer);
+    };
+  }, [effectiveTheme, settings.reducedMotion]);
 
   const diagnosticsInfo = useMemo(() => {
     const themeLabel = settings.customThemeEnabled ? `${currentTheme.name} + custom colors` : currentTheme.name;
@@ -6292,6 +6370,10 @@ function MainModeApp() {
         nextSettings.startWithWindows = true;
       }
 
+      const shouldRepairAnimatedVisualSettings = nextSettings.animatedBackgrounds !== true || nextSettings.animeVisuals !== true;
+      nextSettings.animatedBackgrounds = true;
+      nextSettings.animeVisuals = true;
+
       nextSettings.coverColorSyncMode = normalizeCoverColorSyncMode(
         storedSettings.coverColorSyncMode ?? (storedSettings.showAmbientGradient === false ? "off" : nextSettings.coverColorSyncMode)
       );
@@ -6299,11 +6381,16 @@ function MainModeApp() {
 
       // Simple Mode was removed in v0.2.8. Keep old installs from booting into it.
       nextSettings.simpleMode = false;
-      if ((nextSettings.theme as string) === "oled") nextSettings.theme = "mint";
+
+      const normalizedBootTheme = normalizeThemeId(nextSettings.theme);
+      const shouldRepairBootTheme = normalizedBootTheme !== nextSettings.theme;
+      nextSettings.theme = normalizedBootTheme;
 
       const shouldPersistBootSettings =
         shouldApplyV013Defaults ||
         shouldApplyStartWithWindowsDefault ||
+        shouldRepairAnimatedVisualSettings ||
+        shouldRepairBootTheme ||
         typeof storedSettings.startWithWindows === "undefined";
 
       if (shouldPersistBootSettings) {
@@ -7275,6 +7362,7 @@ function MainModeApp() {
     };
 
     if (key === "theme") {
+      next.theme = normalizeThemeId(value);
       next.customThemeEnabled = false;
       clearPendingCustomThemeCommit();
       clearCustomThemePreviewStyles();
@@ -7310,6 +7398,11 @@ function MainModeApp() {
       kickThemeSettle();
     }
 
+    if (key === "animatedBackgrounds" || key === "animeVisuals") {
+      next.animatedBackgrounds = true;
+      next.animeVisuals = true;
+    }
+
     if (key === "simpleMode") {
       // Simple Mode was removed in v0.2.8. Do not let old UI/state re-enable it.
       next.simpleMode = false;
@@ -7342,6 +7435,7 @@ function MainModeApp() {
     }
 
     if (patch.theme) {
+      next.theme = normalizeThemeId(patch.theme);
       next.customThemeEnabled = false;
       clearPendingCustomThemeCommit();
       clearCustomThemePreviewStyles();
@@ -7350,6 +7444,11 @@ function MainModeApp() {
     if (patch.customThemeEnabled === false) {
       clearPendingCustomThemeCommit();
       clearCustomThemePreviewStyles();
+    }
+
+    if (Object.prototype.hasOwnProperty.call(patch, "animatedBackgrounds") || Object.prototype.hasOwnProperty.call(patch, "animeVisuals")) {
+      next.animatedBackgrounds = true;
+      next.animeVisuals = true;
     }
 
     if (
@@ -7399,6 +7498,9 @@ function MainModeApp() {
       showAmbientGradient: defaultSettings.showAmbientGradient,
       coverColorSyncMode: defaultSettings.coverColorSyncMode,
       showFloatingNotes: defaultSettings.showFloatingNotes,
+      animeVisuals: true,
+      animatedBackgrounds: true,
+      gifVisualsMode: defaultSettings.gifVisualsMode,
       animatedGlow: defaultSettings.animatedGlow,
       softCorners: defaultSettings.softCorners,
       reducedMotion: defaultSettings.reducedMotion
@@ -10464,7 +10566,7 @@ function MainModeApp() {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${settings.animatedBackgrounds ? "animatedBackgrounds" : "staticBackgrounds"} ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
@@ -10472,6 +10574,7 @@ function MainModeApp() {
           "--player-size": `${clamp(Number(settings.playerSize || 108), 74, 168)}px`,
           "--sidebar-width": `${clamp(Number(settings.sidebarWidth || 249), 184, 340)}px`,
           ...themePresetStyle,
+          ...animatedThemeVisualStyle,
           ...customThemeStyle
         } as CSSProperties
       }
