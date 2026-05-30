@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 smooth input + clean stars V132 — download/file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 stability cleanup V133 — file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
@@ -31,6 +31,7 @@ import {
 import Onboarding from "./Onboarding";
 import CoverStudio from "./cover";
 import SettingsCategoryContent from "./SettingsCategoryContent";
+import { useProximityMotion } from "./hooks/useProximityMotion";
 import {
   initLocalitfyAnalytics,
   trackAppLaunched,
@@ -849,14 +850,14 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 const whatsNewItems = [
-  "0.3.5 keeps the stars theme clean: no side ambience orbs, just drifting sparkle layers",
-  "Proximity motion is back, but rebuilt to touch only a few nearby UI elements per frame",
-  "Pointer input stays responsive because proximity pauses instantly during clicks, drags, scrubbing, and hero reflow",
-  "Cards no longer run always-on shine or sweep animations during normal use",
+  "0.3.5 cleans the old animated-theme patch stack and keeps stars as the only animated theme",
+  "Stars now use one stable layered backdrop: drifting, twinkling, and no side ambience orbs",
+  "Proximity motion moved into a small hook that only touches the hovered element and nearby siblings",
+  "Clicks, scrubbing, dragging, view changes, and hero expansion clear proximity instantly to avoid input lag",
+  "Card shine is limited to the short boot shimmer only, then it fully turns off during normal use",
   "Blur, ambience, cover glow, glass panels, animated backgrounds, and normal UI motion stay enabled",
   "Vapor glass and night train stay retired; old saved installs still move to stars safely",
-  "Playlist playback still stays inside the playlist you started from",
-  "No Discord, downloads, playlists, player controls, blur, cover glow, or ambience features were removed"
+  "No Discord, downloads, playlists, player controls, cover glow, or ambience features were removed"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -1222,16 +1223,16 @@ function buildRandomStarLayer(seedKey: string, count: number, palette: string[],
 function buildAnimatedThemeVisualStyle(theme: ThemeId, seedKey: string) {
   if (theme !== "stars") return {} as CSSProperties;
 
-  const seed = stableHash(`${seedKey}:stars:v131`);
-  const driftDuration = 72 + seededUnit(seed, 1) * 24;
-  const sparkleDuration = 3.4 + seededUnit(seed, 2) * 1.8;
-  const shimmerDuration = 8.8 + seededUnit(seed, 3) * 2.2;
-  const sweepDuration = 22 + seededUnit(seed, 4) * 8;
+  const seed = stableHash(`${seedKey}:stars:v133`);
+  const driftDuration = 76 + seededUnit(seed, 1) * 22;
+  const sparkleDuration = 3.6 + seededUnit(seed, 2) * 1.6;
+  const shimmerDuration = 7.4 + seededUnit(seed, 3) * 1.4;
+  const sweepDuration = 24 + seededUnit(seed, 4) * 7;
 
   return {
-    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v131:slow`, 42, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.7, 2.05),
-    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v131:sparkle`, 24, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.85, 2.55),
-    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v131:tiny`, 34, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.42, 1.2),
+    "--localtify-stars-field-a": buildRandomStarLayer(`${seedKey}:stars:v133:slow`, 34, ["255, 255, 255", "215, 213, 255", "143, 220, 255"], 0.72, 2.05),
+    "--localtify-stars-field-b": buildRandomStarLayer(`${seedKey}:stars:v133:sparkle`, 20, ["255, 255, 255", "255, 167, 248", "148, 234, 255"], 0.82, 2.45),
+    "--localtify-stars-field-c": buildRandomStarLayer(`${seedKey}:stars:v133:tiny`, 28, ["255, 255, 255", "190, 176, 255", "134, 241, 255"], 0.42, 1.18),
     "--localtify-stars-drift-duration": `${driftDuration.toFixed(2)}s`,
     "--localtify-stars-sparkle-duration": `${sparkleDuration.toFixed(2)}s`,
     "--localtify-stars-shimmer-duration": `${shimmerDuration.toFixed(2)}s`,
@@ -3863,6 +3864,7 @@ function MainModeApp() {
 
     const markScrollBusy = () => {
       scrollBusyRef.current = true;
+      appRootRef.current?.classList.add("isScrolling");
 
       const nearBottom = node.scrollTop + node.clientHeight >= node.scrollHeight - 680;
       const activeView = analyticsViewRef.current;
@@ -3882,6 +3884,7 @@ function MainModeApp() {
 
       scrollIdleTimerRef.current = window.setTimeout(() => {
         scrollBusyRef.current = false;
+        appRootRef.current?.classList.remove("isScrolling");
         scrollIdleTimerRef.current = null;
       }, 140);
     };
@@ -3899,6 +3902,7 @@ function MainModeApp() {
       }
 
       scrollBusyRef.current = false;
+      appRootRef.current?.classList.remove("isScrolling");
     };
   }, []);
 
@@ -4074,255 +4078,18 @@ function MainModeApp() {
     };
   }, [effectiveTheme, settings.reducedMotion]);
 
-  useEffect(() => {
-    const root = appRootRef.current;
-    if (!root) return;
-
-    const proxProperties = [
-      "--prox",
-      "--prox-scale",
-      "--prox-line",
-      "--prox-bg",
-      "--prox-glow-size",
-      "--prox-card-y",
-      "--prox-button-y",
-      "--prox-x",
-      "--prox-y"
-    ];
-
-    const clearElement = (element: HTMLElement) => {
-      element.classList.remove("localtifyProximityActive", "localtifyProximityTarget");
-      proxProperties.forEach((property) => element.style.removeProperty(property));
-      activeElements.delete(element);
-    };
-
-    const activeElements = new Set<HTMLElement>();
-    const clearAll = () => {
-      Array.from(activeElements).forEach((element) => clearElement(element));
-    };
-
-    clearAll();
-    root
-      .querySelectorAll<HTMLElement>(".localtifyProximityActive, .localtifyProximityTarget")
-      .forEach((element) => clearElement(element));
-
-    if (settings.reducedMotion) return;
-
-    const cardSelector = [
-      ".songCard",
-      ".homeAlbumCard",
-      ".libraryCard",
-      ".libraryCardV025",
-      ".playlistShelfCard",
-      ".playlistPanel",
-      ".settingsPageCard",
-      ".settingsPanelCard",
-      ".settingsCard",
-      ".settingsThemeCard",
-      ".updateSettingsCard"
-    ].join(",");
-
-    const actionSelector = [
-      ".navItem",
-      ".mainAction",
-      ".heroMain",
-      ".heroGhost",
-      ".softButton",
-      ".simpleAction",
-      ".simpleGhost",
-      ".toolButton",
-      ".iconAction",
-      ".tabButton",
-      ".navButton",
-      ".tinyToggle",
-      ".songMenuButton",
-      ".circleButton"
-    ].join(",");
-
-    const targetSelector = `${cardSelector},${actionSelector}`;
-    const blockedSelector = [
-      ".localtifyStarsBackdrop",
-      ".playerBar",
-      ".titleBar",
-      ".updateToastLayer",
-      ".toastHost",
-      ".topUpdateRibbonLayer",
-      ".settingsOverlay input",
-      ".settingsOverlay textarea",
-      ".settingsOverlay select",
-      "input",
-      "textarea",
-      "select",
-      "[contenteditable='true']"
-    ].join(",");
-
-    const sampleOffsets = [
-      [0, 0],
-      [72, 0],
-      [-72, 0],
-      [0, 64],
-      [0, -64]
-    ] as const;
-
-    let frame = 0;
-    let lastX = -9999;
-    let lastY = -9999;
-    let lastEventTarget: EventTarget | null = null;
-    let lastAppliedX = -9999;
-    let lastAppliedY = -9999;
-    let suspendUntil = 0;
-
-    const shouldSuspend = () => {
-      const now = typeof performance !== "undefined" ? performance.now() : Date.now();
-      return Boolean(
-        now < suspendUntil ||
-          isAppBackgrounded ||
-          isSeeking ||
-          isVolumeDragging ||
-          draggedSongId ||
-          document.body.classList.contains("localitfyHeroReflowing") ||
-          document.body.classList.contains("localitfyHeroCoverGrowing") ||
-          document.body.classList.contains("localitfyHeroCoverShrinking") ||
-          root.classList.contains("viewSwitching") ||
-          root.classList.contains("songDragActive") ||
-          root.classList.contains("playerScrubbing")
-      );
-    };
-
-    const addCandidate = (set: Set<HTMLElement>, element: Element | null | undefined) => {
-      const target = element?.closest<HTMLElement>(targetSelector);
-      if (!target || !root.contains(target)) return;
-      if (target.closest(blockedSelector)) return;
-      if (target.offsetWidth < 6 || target.offsetHeight < 6) return;
-      set.add(target);
-    };
-
-    const collectCandidates = () => {
-      const candidates = new Set<HTMLElement>();
-      const viewportWidth = window.innerWidth || 0;
-      const viewportHeight = window.innerHeight || 0;
-
-      if (lastEventTarget instanceof Element) addCandidate(candidates, lastEventTarget);
-
-      for (const [offsetX, offsetY] of sampleOffsets) {
-        const x = lastX + offsetX;
-        const y = lastY + offsetY;
-        if (x < 0 || y < 0 || x > viewportWidth || y > viewportHeight) continue;
-        addCandidate(candidates, document.elementFromPoint(x, y));
-      }
-
-      return Array.from(candidates).slice(0, 6);
-    };
-
-    const updateTargets = () => {
-      frame = 0;
-
-      if (shouldSuspend()) {
-        clearAll();
-        return;
-      }
-
-      if (Math.abs(lastX - lastAppliedX) < 2 && Math.abs(lastY - lastAppliedY) < 2) return;
-      lastAppliedX = lastX;
-      lastAppliedY = lastY;
-
-      const nextActive = new Set<HTMLElement>();
-      const candidates = collectCandidates();
-
-      for (const element of candidates) {
-        const rect = element.getBoundingClientRect();
-        if (rect.width < 6 || rect.height < 6) continue;
-
-        const outsideX = lastX < rect.left ? rect.left - lastX : lastX > rect.right ? lastX - rect.right : 0;
-        const outsideY = lastY < rect.top ? rect.top - lastY : lastY > rect.bottom ? lastY - rect.bottom : 0;
-        const edgeDistance = Math.hypot(outsideX, outsideY);
-        const isAction = element.matches(actionSelector);
-        const reach = isAction ? 82 : clamp(Math.max(rect.width, rect.height) * 0.16 + 76, 96, 138);
-        const raw = clamp(1 - edgeDistance / reach, 0, 1);
-        const proximity = raw * raw * (3 - 2 * raw);
-
-        if (proximity < 0.08) continue;
-
-        const localX = clamp(((lastX - rect.left) / Math.max(1, rect.width)) * 100, 0, 100);
-        const localY = clamp(((lastY - rect.top) / Math.max(1, rect.height)) * 100, 0, 100);
-        const scale = 1 + proximity * (isAction ? 0.018 : 0.012);
-        const lift = proximity * (isAction ? -1.7 : -2.2);
-
-        element.classList.add("localtifyProximityTarget", "localtifyProximityActive");
-        element.style.setProperty("--prox", proximity.toFixed(3));
-        element.style.setProperty("--prox-scale", scale.toFixed(4));
-        element.style.setProperty("--prox-line", (0.09 + proximity * 0.12).toFixed(3));
-        element.style.setProperty("--prox-bg", (proximity * 0.026).toFixed(3));
-        element.style.setProperty("--prox-glow-size", `${(proximity * 14).toFixed(2)}px`);
-        element.style.setProperty("--prox-card-y", `${lift.toFixed(2)}px`);
-        element.style.setProperty("--prox-button-y", `${(lift * 0.82).toFixed(2)}px`);
-        element.style.setProperty("--prox-x", `${localX.toFixed(2)}%`);
-        element.style.setProperty("--prox-y", `${localY.toFixed(2)}%`);
-        nextActive.add(element);
-        activeElements.add(element);
-      }
-
-      activeElements.forEach((element) => {
-        if (!nextActive.has(element)) clearElement(element);
-      });
-    };
-
-    const scheduleUpdate = (event: globalThis.PointerEvent) => {
-      if (event.pointerType === "touch") return;
-      lastX = event.clientX;
-      lastY = event.clientY;
-      lastEventTarget = event.target;
-      if (!frame) frame = window.requestAnimationFrame(updateTargets);
-    };
-
-    const pauseForClick = () => {
-      suspendUntil = (typeof performance !== "undefined" ? performance.now() : Date.now()) + 180;
-      if (frame) {
-        window.cancelAnimationFrame(frame);
-        frame = 0;
-      }
-      clearAll();
-    };
-
-    const handleLeave = () => {
-      if (frame) {
-        window.cancelAnimationFrame(frame);
-        frame = 0;
-      }
-      clearAll();
-    };
-
-    window.addEventListener("pointermove", scheduleUpdate, { passive: true });
-    window.addEventListener("pointerdown", pauseForClick, { passive: true, capture: true });
-    window.addEventListener("pointerup", pauseForClick, { passive: true, capture: true });
-    window.addEventListener("pointercancel", handleLeave, { passive: true });
-    window.addEventListener("pointerleave", handleLeave);
-    window.addEventListener("blur", handleLeave);
-    window.addEventListener("scroll", handleLeave, true);
-
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame);
-      window.removeEventListener("pointermove", scheduleUpdate);
-      window.removeEventListener("pointerdown", pauseForClick, { capture: true });
-      window.removeEventListener("pointerup", pauseForClick, { capture: true });
-      window.removeEventListener("pointercancel", handleLeave);
-      window.removeEventListener("pointerleave", handleLeave);
-      window.removeEventListener("blur", handleLeave);
-      window.removeEventListener("scroll", handleLeave, true);
-      clearAll();
-    };
-  }, [
-    settings.reducedMotion,
-    effectiveTheme,
-    view,
-    settingsCategory,
-    settings.heroExpanded,
-    settings.homeExpanded,
-    isAppBackgrounded,
-    isSeeking,
-    isVolumeDragging,
-    draggedSongId
-  ]);
+  useProximityMotion({
+    rootRef: appRootRef,
+    disabled: settings.reducedMotion,
+    suspended:
+      isAppBackgrounded ||
+      isSeeking ||
+      isVolumeDragging ||
+      Boolean(draggedSongId) ||
+      isViewSwitching ||
+      themeSettling,
+    resetKey: `${effectiveTheme}:${view}:${settingsCategory}:${settings.heroExpanded}:${settings.homeExpanded}`
+  });
 
   const diagnosticsInfo = useMemo(() => {
     const themeLabel = settings.customThemeEnabled ? `${currentTheme.name} + custom colors` : currentTheme.name;
@@ -10819,7 +10586,7 @@ function MainModeApp() {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
@@ -12274,7 +12041,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.5 is mostly a playlist and polish update: stars stay animated without covering song cards, the bottom player edge is cleaner, and the app keeps its blur, ambience, and motion.</p>
+            <p className="whatsNewSubtext">0.3.5 is mostly a playlist and polish update: stars stay clean, proximity feels lighter, card shine only happens during boot, and the app keeps its blur, ambience, cover glow, and motion.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>
