@@ -1,4 +1,4 @@
-/* localtify 0.3.5 motion replay fix V141 — file patch label only; APP_VERSION stays 0.3.5. */
+/* localtify 0.3.5 motion ownership + audio-hover stability V147 — file patch label only; APP_VERSION stays 0.3.5. */
 /* localtify motion.css — animation-only layer.
    Keep static layout, colors, player/progress styles, and shared backgrounds in their owner files. */
 
@@ -2016,4 +2016,334 @@ body.localitfyHeroCoverShrinking .localtifyProximityTarget{
   0%{ transform: translate3d(0, 7px, 0) scale(1.002); opacity: 1; }
   62%{ transform: translate3d(0, -3px, 0) scale(.998); opacity: 1; }
   100%{ transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+}
+
+/* ========================================================================
+   localtify v0.3.5 V143 — song-change + reorder motion
+   ------------------------------------------------------------------------
+   This layer only animates changed pieces. The hero/card/player layout stays
+   mounted so compact/expand and song changes do not replay the whole home UI.
+======================================================================== */
+@keyframes localtifySongTitleInV143A{
+  0%{ opacity: .02; transform: translate3d(0, 18px, 0) scale(.982); filter: blur(7px); }
+  58%{ opacity: 1; transform: translate3d(0, -3px, 0) scale(1.006); filter: blur(0); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+}
+
+@keyframes localtifySongTitleInV143B{
+  0%{ opacity: .02; transform: translate3d(0, 18px, 0) scale(.982); filter: blur(7px); }
+  58%{ opacity: 1; transform: translate3d(0, -3px, 0) scale(1.006); filter: blur(0); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+}
+
+@keyframes localtifySongArtistInV143A{
+  0%{ opacity: 0; transform: translate3d(0, 10px, 0); filter: blur(5px); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+
+@keyframes localtifySongArtistInV143B{
+  0%{ opacity: 0; transform: translate3d(0, 10px, 0); filter: blur(5px); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+
+@keyframes localtifySongEyebrowInV143A{
+  0%{ opacity: 0; transform: translate3d(0, 6px, 0); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes localtifySongEyebrowInV143B{
+  0%{ opacity: 0; transform: translate3d(0, 6px, 0); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes localtifySongCoverPopV143A{
+  0%{ opacity: .82; transform: translate3d(10px, 5px, 0) scale(.955); filter: saturate(.95) brightness(.92); }
+  46%{ opacity: 1; transform: translate3d(-4px, -3px, 0) scale(1.025); filter: saturate(1.08) brightness(1.03); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: saturate(1) brightness(1); }
+}
+
+@keyframes localtifySongCoverPopV143B{
+  0%{ opacity: .82; transform: translate3d(10px, 5px, 0) scale(.955); filter: saturate(.95) brightness(.92); }
+  46%{ opacity: 1; transform: translate3d(-4px, -3px, 0) scale(1.025); filter: saturate(1.08) brightness(1.03); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: saturate(1) brightness(1); }
+}
+
+@keyframes localtifySongAuraPulseV143A{
+  0%{ opacity: .16; transform: scale(1.01); }
+  54%{ opacity: .38; transform: scale(1.16); }
+  100%{ opacity: .32; transform: scale(1.10); }
+}
+
+@keyframes localtifySongAuraPulseV143B{
+  0%{ opacity: .16; transform: scale(1.01); }
+  54%{ opacity: .38; transform: scale(1.16); }
+  100%{ opacity: .32; transform: scale(1.10); }
+}
+
+.app:not(.reducedMotion) :is(.hero.heroPremium, .simpleHero).nowPlayingSongInitial :where(.nowPlayingTitleSwap,.nowPlayingArtistSwap,.nowPlayingEyebrowSwap),
+.app:not(.reducedMotion) .nowPlayingSongInitial.nowPlayingArtSwap :where(.heroArt,.simpleHeroArt),
+.app:not(.reducedMotion) .heroCoverGhost.nowPlayingSongInitial{
+  animation: none !important;
+}
+
+.app:not(.reducedMotion) :is(.hero.heroPremium, .simpleHero) .nowPlayingTitleSwap.nowPlayingSongOdd{
+  animation: localtifySongTitleInV143A 560ms cubic-bezier(.16, 1, .3, 1) both !important;
+  will-change: transform, opacity, filter !important;
+}
+
+.app:not(.reducedMotion) :is(.hero.heroPremium, .simpleHero) .nowPlayingTitleSwap.nowPlayingSongEven{
+  animation: localtifySongTitleInV143B 560ms cubic-bezier(.16, 1, .3, 1) both !important;
+  will-change: transform, opacity, filter !important;
+}
+
+.app:not(.reducedMotion) :is(.hero.heroPremium, .simpleHero) .nowPlayingArtistSwap.nowPlayingSongOdd{
+  animation: localtifySongArtistInV143A 460ms cubic-bezier(.16, 1, .3, 1) 70ms both !important;
+  will-change: transform, opacity, filter !important;
+}
+
+.app:not(.reducedMotion) :is(.hero.heroPremium, .simpleHero) .nowPlayingArtistSwap.nowPlayingSongEven{
+  animation: localtifySongArtistInV143B 460ms cubic-bezier(.16, 1, .3, 1) 70ms both !important;
+  will-change: transform, opacity, filter !important;
+}
+
+.app:not(.reducedMotion) :is(.hero.heroPremium, .simpleHero) .nowPlayingEyebrowSwap.nowPlayingSongOdd{
+  animation: localtifySongEyebrowInV143A 380ms cubic-bezier(.16, 1, .3, 1) both !important;
+  will-change: transform, opacity !important;
+}
+
+.app:not(.reducedMotion) :is(.hero.heroPremium, .simpleHero) .nowPlayingEyebrowSwap.nowPlayingSongEven{
+  animation: localtifySongEyebrowInV143B 380ms cubic-bezier(.16, 1, .3, 1) both !important;
+  will-change: transform, opacity !important;
+}
+
+.app:not(.reducedMotion) .nowPlayingArtSwap.nowPlayingSongOdd :where(.heroArt,.simpleHeroArt){
+  animation: localtifySongCoverPopV143A 620ms cubic-bezier(.16, 1, .3, 1) both !important;
+  will-change: transform, opacity, filter !important;
+}
+
+.app:not(.reducedMotion) .nowPlayingArtSwap.nowPlayingSongEven :where(.heroArt,.simpleHeroArt){
+  animation: localtifySongCoverPopV143B 620ms cubic-bezier(.16, 1, .3, 1) both !important;
+  will-change: transform, opacity, filter !important;
+}
+
+.app:not(.reducedMotion) .nowPlayingArtSwap.nowPlayingSongOdd::before{
+  animation: localtifySongAuraPulseV143A 680ms cubic-bezier(.16, 1, .3, 1) 45ms both !important;
+}
+
+.app:not(.reducedMotion) .nowPlayingArtSwap.nowPlayingSongEven::before{
+  animation: localtifySongAuraPulseV143B 680ms cubic-bezier(.16, 1, .3, 1) 45ms both !important;
+}
+
+.app:not(.reducedMotion) .heroCoverGhost.nowPlayingSongOdd{
+  animation: localtifyHeroGhostCatchup 680ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+.app:not(.reducedMotion) .heroCoverGhost.nowPlayingSongEven{
+  animation: localtifyHeroGhostCatchup 680ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+.app:not(.reducedMotion) .ambientSurface{
+  transition:
+    background-color 520ms cubic-bezier(.16, 1, .3, 1),
+    border-color 360ms ease,
+    box-shadow 560ms cubic-bezier(.16, 1, .3, 1),
+    opacity 240ms ease !important;
+}
+
+.app.songDragActive :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow){
+  transition:
+    translate 170ms cubic-bezier(.2, .9, .2, 1.08),
+    scale 170ms cubic-bezier(.2, .9, .2, 1.08),
+    opacity 120ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease !important;
+  will-change: translate, scale, opacity !important;
+}
+
+.app.songDragActive :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow).songDragging{
+  translate: 0 -5px !important;
+  scale: 1.012 !important;
+  opacity: .72 !important;
+}
+
+.app.songDragActive :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow).songDropTarget[data-drop-side="before"]{
+  translate: 0 7px !important;
+  scale: 1.004 !important;
+}
+
+.app.songDragActive :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow).songDropTarget[data-drop-side="after"]{
+  translate: 0 -7px !important;
+  scale: 1.004 !important;
+}
+
+@keyframes localtifyDropBounceV143{
+  0%{ translate: 0 -5px; scale: .996; }
+  50%{ translate: 0 3px; scale: 1.004; }
+  100%{ translate: 0 0; scale: 1; }
+}
+
+body.localitfyDropCommitted .app:not(.reducedMotion) :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow){
+  animation: localtifyDropBounceV143 300ms cubic-bezier(.18, 1.18, .22, 1) both !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .app :where(.nowPlayingTitleSwap,.nowPlayingArtistSwap,.nowPlayingEyebrowSwap,.nowPlayingArtSwap,.heroCoverGhost),
+  .app.songDragActive :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow),
+  body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow){
+    animation: none !important;
+    transition-duration: 1ms !important;
+    translate: 0 0 !important;
+    scale: 1 !important;
+    filter: none !important;
+  }
+}
+
+/* ========================================================================
+   localtify v0.3.5 V147 — final audio-safe motion owner
+   ------------------------------------------------------------------------
+   Keeps motion/proximity alive. Fixes the actual lag path: dense rows were
+   repainting shine/filter/large shadows while the audio glow was active.
+   Buttons + cards still get JS proximity. Song rows use compositor motion.
+======================================================================== */
+
+.app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard),
+.app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard) *{
+  filter: none !important;
+}
+
+.app:not(.reducedMotion) :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard){
+  contain: paint !important;
+  backface-visibility: hidden !important;
+  transform-origin: center !important;
+  will-change: auto !important;
+  transition:
+    transform 175ms cubic-bezier(.18, 1.08, .22, 1),
+    scale 175ms cubic-bezier(.18, 1.08, .22, 1),
+    background-color 120ms ease,
+    border-color 120ms ease,
+    opacity 120ms ease,
+    box-shadow 120ms ease !important;
+}
+
+.app:not(.reducedMotion):not(.songDragActive) :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):hover{
+  transform: translate3d(0, -2px, 0) !important;
+  scale: 1.003 !important;
+  background-color: rgba(var(--accent-rgb), .07) !important;
+  border-color: rgba(var(--accent-rgb), .28) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .18) !important;
+}
+
+.app.appAudioPlaying:not(.reducedMotion):not(.songDragActive) :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):hover{
+  transform: translate3d(0, -2px, 0) !important;
+  scale: 1.003 !important;
+  background-color: rgba(var(--accent-rgb), .07) !important;
+  border-color: rgba(var(--accent-rgb), .28) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .16) !important;
+}
+
+/* Kill only the old decorative hover shine on dense non-playing rows.
+   The actual active-song aura from effects.css is allowed to survive. */
+.app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):not(.playing)::before,
+.app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):not(.playing)::after,
+.app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):not(.playing):hover::before,
+.app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):not(.playing):hover::after{
+  animation: none !important;
+  filter: none !important;
+  opacity: 0 !important;
+  box-shadow: none !important;
+}
+
+.app:not(.reducedMotion) :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):hover :where(.songArt,.playlistTrackCover,.homeListenCover){
+  transform: translate3d(0, 0, 0) scale(1.02) !important;
+  transition: transform 175ms cubic-bezier(.18, 1.08, .22, 1) !important;
+  filter: none !important;
+}
+
+/* Keep JS proximity off dense rows, not off buttons/cards. */
+.app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard).localtifyProximityTarget,
+.app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard).localtifyProximityActive{
+  scale: 1 !important;
+  box-shadow: none !important;
+  background-color: inherit !important;
+}
+
+.app:not(.reducedMotion) .localtifyProximityTarget.localtifyProximityActive{
+  transition:
+    scale 64ms cubic-bezier(.16, 1, .3, 1),
+    background-color 72ms ease,
+    border-color 72ms ease,
+    box-shadow 72ms ease !important;
+}
+
+.app:not(.reducedMotion) :is(
+  button,
+  [role="button"],
+  .heroTinyButton,
+  .homeShelfActionButton,
+  .expandLibraryButton,
+  .circleButton,
+  .toolButton,
+  .iconAction,
+  .tabButton,
+  .navButton,
+  .tinyToggle,
+  .settingsTinyButton,
+  .softButton,
+  .simpleAction,
+  .simpleGhost,
+  .mainAction
+).localtifyProximityActive{
+  box-shadow: 0 0 var(--prox-glow-size, 0px) rgba(var(--accent-rgb), .085) !important;
+}
+
+.app:not(.reducedMotion) :is(.homeAlbumCard,.libraryCard,.libraryCardV025,.playlistShelfCard,.coverTile,.coverGalleryCard,.settingsChoice,.settingSwitchCard,.settingsThemeCard).localtifyProximityActive{
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, .22),
+    0 0 calc(var(--prox-glow-size, 0px) * .72) rgba(var(--accent-rgb), .055) !important;
+}
+
+.app:not(.reducedMotion) :is(button,[role="button"],.heroTinyButton,.homeShelfActionButton,.expandLibraryButton,.circleButton,.softButton,.iconAction,.toolButton):active{
+  transition-duration: 0ms !important;
+  scale: .972 !important;
+}
+
+.app :is(button,[role="button"],.heroTinyButton,.homeShelfActionButton,.expandLibraryButton,.circleButton,.softButton,.iconAction,.toolButton){
+  touch-action: manipulation;
+}
+
+.app.songDragActive :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow,.playlistSongRow,.libraryRow){
+  transition:
+    transform 175ms cubic-bezier(.18, 1.16, .22, 1),
+    scale 175ms cubic-bezier(.18, 1.16, .22, 1),
+    opacity 110ms ease,
+    border-color 115ms ease,
+    background-color 115ms ease !important;
+  will-change: transform, scale, opacity !important;
+}
+
+.app.songDragActive :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow,.playlistSongRow,.libraryRow).songDragging{
+  transform: translate3d(0, -5px, 0) !important;
+  scale: 1.012 !important;
+  opacity: .76 !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .24) !important;
+}
+
+.app.songDragActive :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow,.playlistSongRow,.libraryRow).songDropTarget[data-drop-side="before"]{
+  transform: translate3d(var(--drop-push, 0px), 7px, 0) !important;
+  scale: 1.004 !important;
+}
+
+.app.songDragActive :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow,.playlistSongRow,.libraryRow).songDropTarget[data-drop-side="after"]{
+  transform: translate3d(var(--drop-push, 0px), -7px, 0) !important;
+  scale: 1.004 !important;
+}
+
+@keyframes localtifyDropBounceV147{
+  0%{ transform: translate3d(0, -5px, 0) scale(.996); }
+  50%{ transform: translate3d(0, 3px, 0) scale(1.004); }
+  100%{ transform: translate3d(0, 0, 0) scale(1); }
+}
+
+body.localitfyDropCommitted .app:not(.reducedMotion) :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow,.playlistSongRow,.libraryRow){
+  animation: localtifyDropBounceV147 290ms cubic-bezier(.18, 1.18, .22, 1) both !important;
 }

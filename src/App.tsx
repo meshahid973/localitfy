@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 smooth ownership + proximity V142 — file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 audio-reactive performance + proximity stability V147 — file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
@@ -851,12 +851,12 @@ function cleanToastCopy(message: string, kind: AppToastKind) {
 
 const whatsNewItems = [
   "0.3.5 keeps blur, ambience, cover glow, animated stars, glass panels, and normal UI motion enabled",
-  "CSS ownership is tighter: home owns shelves/hero layout, motion owns animation timing, themes owns stars",
-  "Hero compact/expand now runs as one local motion pass without replaying the whole home page",
-  "Listen now and recent covers bounce with the hero instead of fading in late like a reload",
-  "Proximity motion is faster and sampled around the pointer, so nearby cards/buttons react without input lag",
+  "Song changes now animate only the changing title, artist, cover, player info, and ambience instead of remounting the whole hero",
+  "Hero compact/expand stays local and smooth, with the shelves following the motion instead of replaying page entrance animations",
+  "Queue, playlist, and library dragging now uses lighter lift/space/drop motion with no tilt and no heavy shadow spam",
+  "CSS ownership is tighter: home owns shelves/hero layout, motion owns animation timing, themes owns stars, player owns the bottom bar",
+  "Proximity motion stays on buttons and cards, but the audio-reactive glow no longer forces the whole app to repaint",
   "The stars theme stays clean: no vapor glass, no night train, no side ambience orbs, and no runtime card shine",
-  "Boot shimmer stays available for the expensive cards/rows, then shuts off after startup",
   "Playlist playback, downloads, Discord, player controls, and cover features were not removed"
 ];
 const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
@@ -3230,6 +3230,12 @@ function MainModeApp() {
   const beatSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const beatDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const beatSmoothRef = useRef({ bass: 0, mid: 0, energy: 0, phase: 0 });
+  const beatReactiveTargetCacheRef = useRef<{ nodes: HTMLElement[]; refreshedAt: number; songId: string }>({
+    nodes: [],
+    refreshedAt: 0,
+    songId: ""
+  });
+  const beatLastPaintSignatureRef = useRef("");
   const misideTimerRef = useRef<number | null>(null);
   const discordAssetBySongRef = useRef<Record<string, string>>({});
   const lastDiscordAssetKeyRef = useRef<string>("");
@@ -5457,17 +5463,32 @@ function MainModeApp() {
 
     if (!root) return;
 
+    const beatVariableNames = [
+      "--active-song-beat",
+      "--active-song-bass",
+      "--active-song-mid",
+      "--active-song-beat-x",
+      "--active-song-beat-y",
+      "--active-song-glow-opacity",
+      "--active-song-glow-scale",
+      "--active-song-art-scale",
+      "--active-song-ring-opacity",
+      "--active-song-pulse-speed"
+    ];
+
+    const clearBeatVariablesFromNode = (node: HTMLElement) => {
+      beatVariableNames.forEach((name) => node.style.removeProperty(name));
+    };
+
     const resetBeatVariables = () => {
-      root.style.setProperty("--active-song-beat", "0");
-      root.style.setProperty("--active-song-bass", "0");
-      root.style.setProperty("--active-song-mid", "0");
-      root.style.setProperty("--active-song-beat-x", "0px");
-      root.style.setProperty("--active-song-beat-y", "0px");
-      root.style.setProperty("--active-song-glow-opacity", "0.18");
-      root.style.setProperty("--active-song-glow-scale", "1.03");
-      root.style.setProperty("--active-song-art-scale", "1");
-      root.style.setProperty("--active-song-ring-opacity", "0.18");
-      root.style.setProperty("--active-song-pulse-speed", "1280ms");
+      const cache = beatReactiveTargetCacheRef.current;
+
+      clearBeatVariablesFromNode(root);
+      cache.nodes.forEach((node) => clearBeatVariablesFromNode(node));
+      cache.nodes = [];
+      cache.refreshedAt = 0;
+      cache.songId = "";
+      beatLastPaintSignatureRef.current = "";
     };
 
     if (beatFrameRef.current) {
@@ -5510,7 +5531,7 @@ function MainModeApp() {
 
         const analyser = context.createAnalyser();
         analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.78;
+        analyser.smoothingTimeConstant = 0.82;
 
         const source = beatSourceRef.current || context.createMediaElementSource(audio);
         beatSourceRef.current = source;
@@ -5527,23 +5548,66 @@ function MainModeApp() {
       }
     };
 
+    const getBeatTargets = (now: number) => {
+      const cache = beatReactiveTargetCacheRef.current;
+      const songId = currentSong.id;
+      const shouldRefresh =
+        cache.songId !== songId ||
+        now - cache.refreshedAt > 900 ||
+        cache.nodes.some((node) => !root.contains(node));
+
+      if (!shouldRefresh) return cache.nodes;
+
+      cache.nodes.forEach((node) => clearBeatVariablesFromNode(node));
+      cache.nodes = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          [
+            ".hero.heroPremium .heroArtWrap",
+            ".songRow.playing",
+            ".homeAlbumCard.playing",
+            ".homeListenCard.playing",
+            ".homeFreshCard.playing",
+            ".playlistTrackRow.playing",
+            ".playlistSongRow.playing",
+            ".libraryRow.playing"
+          ].join(",")
+        )
+      ).slice(0, 12);
+      cache.refreshedAt = now;
+      cache.songId = songId;
+
+      return cache.nodes;
+    };
+
+    const applyBeatVariables = (nodes: HTMLElement[], variables: Record<string, string>) => {
+      nodes.forEach((node) => {
+        Object.entries(variables).forEach(([name, value]) => node.style.setProperty(name, value));
+      });
+    };
+
     const context = beatAudioContextRef.current;
     if (context?.state === "suspended") {
       void context.resume().catch(() => undefined);
     }
 
     let lastPaint = 0;
+    let hiddenResetDone = false;
 
     const tick = (now: number) => {
       const busyAnimationBudget = scrollBusyRef.current || draggedSongIdRef.current || themeSettlingRef.current;
-      const frameBudgetMs = busyAnimationBudget ? 150 : 72;
+      const frameBudgetMs = busyAnimationBudget ? 170 : 84;
 
       if (document.hidden) {
-        resetBeatVariables();
+        if (!hiddenResetDone) {
+          resetBeatVariables();
+          hiddenResetDone = true;
+        }
         lastPaint = now;
         beatFrameRef.current = window.requestAnimationFrame(tick);
         return;
       }
+
+      hiddenResetDone = false;
 
       if (now - lastPaint >= frameBudgetMs) {
         const analyser = ensureAnalyser();
@@ -5570,26 +5634,45 @@ function MainModeApp() {
         }
 
         const smooth = beatSmoothRef.current;
-        smooth.bass += (bass - smooth.bass) * 0.26;
-        smooth.mid += (mid - smooth.mid) * 0.2;
-        smooth.energy += (energy - smooth.energy) * 0.18;
-        smooth.phase += 0.035 + smooth.bass * 0.035;
+        smooth.bass += (bass - smooth.bass) * 0.2;
+        smooth.mid += (mid - smooth.mid) * 0.17;
+        smooth.energy += (energy - smooth.energy) * 0.16;
+        smooth.phase += 0.032 + smooth.bass * 0.032;
 
         const beat = clamp((smooth.bass * 0.78 + smooth.energy * 0.34 + smooth.mid * 0.18) * safeVolume, 0.04, 1);
         const travel = 5 + beat * 20;
         const x = Math.sin(time * 2.15 + smooth.phase) * travel;
         const y = Math.cos(time * 2.75 + smooth.phase * 0.75) * (travel * 0.72);
+        const opacity = 0.18 + beat * 0.58;
+        const glowScale = 1.03 + beat * 0.16;
+        const artScale = 1 + beat * 0.032;
+        const ringOpacity = 0.16 + beat * 0.42;
+        const pulseSpeed = Math.round(1200 - beat * 520);
+        const paintSignature = [
+          Math.round(beat * 100),
+          Math.round(x),
+          Math.round(y),
+          Math.round(opacity * 100),
+          Math.round(glowScale * 100),
+          Math.round(ringOpacity * 100),
+          pulseSpeed
+        ].join(":");
 
-        root.style.setProperty("--active-song-beat", beat.toFixed(3));
-        root.style.setProperty("--active-song-bass", smooth.bass.toFixed(3));
-        root.style.setProperty("--active-song-mid", smooth.mid.toFixed(3));
-        root.style.setProperty("--active-song-beat-x", `${x.toFixed(2)}px`);
-        root.style.setProperty("--active-song-beat-y", `${y.toFixed(2)}px`);
-        root.style.setProperty("--active-song-glow-opacity", (0.18 + beat * 0.58).toFixed(3));
-        root.style.setProperty("--active-song-glow-scale", (1.03 + beat * 0.16).toFixed(3));
-        root.style.setProperty("--active-song-art-scale", (1 + beat * 0.032).toFixed(3));
-        root.style.setProperty("--active-song-ring-opacity", (0.16 + beat * 0.42).toFixed(3));
-        root.style.setProperty("--active-song-pulse-speed", `${Math.round(1200 - beat * 520)}ms`);
+        if (paintSignature !== beatLastPaintSignatureRef.current) {
+          applyBeatVariables(getBeatTargets(now), {
+            "--active-song-beat": beat.toFixed(3),
+            "--active-song-bass": smooth.bass.toFixed(3),
+            "--active-song-mid": smooth.mid.toFixed(3),
+            "--active-song-beat-x": `${x.toFixed(2)}px`,
+            "--active-song-beat-y": `${y.toFixed(2)}px`,
+            "--active-song-glow-opacity": opacity.toFixed(3),
+            "--active-song-glow-scale": glowScale.toFixed(3),
+            "--active-song-art-scale": artScale.toFixed(3),
+            "--active-song-ring-opacity": ringOpacity.toFixed(3),
+            "--active-song-pulse-speed": `${pulseSpeed}ms`
+          });
+          beatLastPaintSignatureRef.current = paintSignature;
+        }
 
         lastPaint = now;
       }
@@ -9131,47 +9214,40 @@ function MainModeApp() {
         const distanceFromCenter = Math.min(1, Math.abs(clientX - centerX) / halfWidth);
         const distanceFromEdge = side === "before" ? Math.max(0, clientX - rect.left) : Math.max(0, rect.right - clientX);
         const edgePull = 1 - Math.min(1, distanceFromEdge / Math.max(rect.width * 0.42, 1));
-        const pull = 10 + distanceFromCenter * 16 + edgePull * 32;
+        const pull = 10 + distanceFromCenter * 14 + edgePull * 26;
 
         return { side, pull };
       };
 
-      const directElement = document.elementFromPoint(clientX, clientY) as HTMLElement | null;
-      const directCard = directElement?.closest<HTMLElement>("[data-library-song-id]");
-      const directSongId = directCard?.dataset.librarySongId || "";
+      const readCandidate = (element: Element | null): HTMLElement | null => {
+        const card = element instanceof HTMLElement ? element.closest<HTMLElement>("[data-library-song-id]") : null;
+        const songId = card?.dataset.librarySongId || "";
+        if (!card || !songId || songId === sourceSongId) return null;
+        return card;
+      };
 
-      if (directCard && directSongId && directSongId !== sourceSongId) {
-        const rect = directCard.getBoundingClientRect();
-        const { side, pull } = getSideAndPull(rect);
-        return { songId: directSongId, side, pull };
-      }
+      const directElement = document.elementFromPoint(clientX, clientY);
+      let targetCard = readCandidate(directElement);
 
-      let closest: (LibraryDropTarget & { distance: number }) | null = null;
-
-      for (const [songId, element] of librarySongElementRefs.current.entries()) {
-        if (songId === sourceSongId) continue;
-
-        const rect = element.getBoundingClientRect();
-        const expandedLeft = rect.left - 58;
-        const expandedRight = rect.right + 58;
-        const expandedTop = rect.top - 42;
-        const expandedBottom = rect.bottom + 42;
-
-        if (clientX < expandedLeft || clientX > expandedRight || clientY < expandedTop || clientY > expandedBottom) {
-          continue;
-        }
-
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const distance = Math.hypot(clientX - centerX, clientY - centerY);
-        const { side, pull } = getSideAndPull(rect);
-
-        if (!closest || distance < closest.distance) {
-          closest = { songId, side, pull, distance };
+      // Native pointer-drag reordering used to scan every registered song/card
+      // when the pointer sat between elements. That became expensive on large
+      // libraries and made audio playback + dragging feel stuttery. A tiny
+      // elementsFromPoint stack keeps the forgiving target behavior without an
+      // O(song count) loop on every frame.
+      if (!targetCard) {
+        const stack = typeof document.elementsFromPoint === "function" ? document.elementsFromPoint(clientX, clientY).slice(0, 8) : [];
+        for (const element of stack) {
+          targetCard = readCandidate(element);
+          if (targetCard) break;
         }
       }
 
-      return closest ? { songId: closest.songId, side: closest.side, pull: closest.pull } : null;
+      if (!targetCard) return null;
+
+      const targetSongId = targetCard.dataset.librarySongId || "";
+      const rect = targetCard.getBoundingClientRect();
+      const { side, pull } = getSideAndPull(rect);
+      return { songId: targetSongId, side, pull };
     },
     []
   );
@@ -10348,6 +10424,15 @@ function MainModeApp() {
   const repeatButtonTitle = repeatMode === "one" ? "Loop current song is on" : repeatMode === "all" ? "Loop library is on" : "Loop is off";
   const repeatButtonAriaLabel = repeatButtonTitle;
 
+  const nowPlayingMotionNonce = Number(nowPlayingTransitionKey.split(":").pop() || "0");
+  const nowPlayingSongMotionClass =
+    nowPlayingMotionNonce === 0
+      ? "nowPlayingSongInitial"
+      : nowPlayingMotionNonce % 2 === 0
+        ? "nowPlayingSongEven"
+        : "nowPlayingSongOdd";
+
+
   const simpleModeView = (
     <section className="simpleShell">
       <header className="simpleTopbar">
@@ -10376,14 +10461,17 @@ function MainModeApp() {
         style={ambientStyle}
       >
         <div className="heroAmbiencePulse" aria-hidden="true" />
-        <div className="simpleHeroArtSwap" key={`simple-art-${nowPlayingTransitionKey}`}>
+        <div
+          className={`simpleHeroArtSwap nowPlayingArtSwap ${nowPlayingSongMotionClass}`}
+          data-song-motion-key={nowPlayingTransitionKey}
+        >
           <Cover song={currentSong} className="simpleHeroArt" />
         </div>
 
-        <div className="simpleHeroText nowPlayingCopySwap" key={`simple-copy-${nowPlayingTransitionKey}`}>
-          <small title={currentNowPlayingLabel}>{currentNowPlayingLabel}</small>
-          <h2>{currentSong ? prettyTitle(currentSong.title, 7) : "nothing playing"}</h2>
-          <p>{currentSong ? prettyMeta(currentSong.artist) : "import a song to begin"}</p>
+        <div className={`simpleHeroText nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
+          <small className={`nowPlayingEyebrowSwap ${nowPlayingSongMotionClass}`} title={currentNowPlayingLabel}>{currentNowPlayingLabel}</small>
+          <h2 className={`nowPlayingTitleSwap ${nowPlayingSongMotionClass}`}>{currentSong ? prettyTitle(currentSong.title, 7) : "nothing playing"}</h2>
+          <p className={`nowPlayingArtistSwap ${nowPlayingSongMotionClass}`}>{currentSong ? prettyMeta(currentSong.artist) : "import a song to begin"}</p>
 
           <div className="simpleControls">
             <button className="circleButton" onClick={playPrevious} aria-label="previous song">
@@ -10624,7 +10712,7 @@ function MainModeApp() {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isPlaying ? "appAudioPlaying" : "appAudioIdle"} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
@@ -11043,14 +11131,14 @@ function MainModeApp() {
                   style={{ ...ambientStyle, "--hero-motion-seed": nowPlayingTransitionKey } as CSSProperties}
                 >
                   <div className="heroAmbiencePulse" aria-hidden="true" />
-                  <div className="heroCoverGhost" key={`hero-ghost-${nowPlayingTransitionKey}`} aria-hidden="true" />
-                  <div className="heroText heroTextClean nowPlayingCopySwap" key={`hero-copy-${nowPlayingTransitionKey}`}>
-                    <p className="eyebrow" title={currentNowPlayingLabel}>{currentNowPlayingLabel}</p>
+                  <div className={`heroCoverGhost ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey} aria-hidden="true" />
+                  <div className={`heroText heroTextClean nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
+                    <p className={`eyebrow nowPlayingEyebrowSwap ${nowPlayingSongMotionClass}`} title={currentNowPlayingLabel}>{currentNowPlayingLabel}</p>
 
-                    <h3 className="heroTitle" title={currentSong ? currentSong.title : "drop in your music"}>
+                    <h3 className={`heroTitle nowPlayingTitleSwap ${nowPlayingSongMotionClass}`} title={currentSong ? currentSong.title : "drop in your music"}>
                       {heroDisplayTitle}
                     </h3>
-                    <p className="heroArtistLine" title={currentSong ? currentSong.artist || "unknown artist" : "import songs to start listening"}>
+                    <p className={`heroArtistLine nowPlayingArtistSwap ${nowPlayingSongMotionClass}`} title={currentSong ? currentSong.artist || "unknown artist" : "import songs to start listening"}>
                       {heroDisplayArtist}
                     </p>
 
@@ -11091,7 +11179,7 @@ function MainModeApp() {
 
                                       </div>
 
-                  <div className="heroArtWrap nowPlayingArtSwap" key={`hero-art-${nowPlayingTransitionKey}`}>
+                  <div className={`heroArtWrap nowPlayingArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
                     <Cover song={currentSong} className="heroArt" />
 
                   </div>
@@ -11871,15 +11959,15 @@ function MainModeApp() {
             </div>
 
             <div className="playerLeft">
-              <div className="playerArtSwap" key={`player-art-${nowPlayingTransitionKey}`}>
+              <div className={`playerArtSwap nowPlayingPlayerArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
                 <Cover song={currentSong} className="smallArt" />
               </div>
 
-              <div className="playerMeta nowPlayingMiniCopySwap" key={`player-copy-${nowPlayingTransitionKey}`}>
-                <strong title={currentSong ? currentSong.title : ""}>
+              <div className={`playerMeta nowPlayingMiniCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
+                <strong className={`nowPlayingMiniTitleSwap ${nowPlayingSongMotionClass}`} title={currentSong ? currentSong.title : ""}>
                   {currentSong ? prettyTitle(currentSong.title, 7) : "nothing playing"}
                 </strong>
-                <p>{currentSong ? prettyMeta(currentSong.artist) : "import a song to begin"}</p>
+                <p className={`nowPlayingMiniArtistSwap ${nowPlayingSongMotionClass}`}>{currentSong ? prettyMeta(currentSong.artist) : "import a song to begin"}</p>
               </div>
             </div>
 
@@ -12080,7 +12168,7 @@ function MainModeApp() {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.5 is a smoothness pass: CSS ownership is cleaner, the hero expands without home-page replay, proximity motion reacts properly around the cursor, stars stay clean, and blur/ambience/motion are still enabled.</p>
+            <p className="whatsNewSubtext">0.3.5 is a smoothness pass: CSS ownership is cleaner, hero expansion no longer replays the home page, proximity stays responsive, audio glow is scoped, and blur/ambience/motion stay enabled.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>
