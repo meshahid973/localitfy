@@ -651,6 +651,14 @@ type DownloadQueueItem = {
   error?: string;
 };
 
+type SpotifyTrack = {
+  id: string;
+  title: string;
+  artist: string;
+  duration?: number;
+  albumName?: string;
+};
+
 type AutoUpdateEvent = {
   type: "checking" | "available" | "not-available" | "downloading" | "downloaded" | "error" | "dev" | "backup";
   version?: string;
@@ -2210,14 +2218,24 @@ function looksLikeDirectImageUrl(value?: string | null) {
   return /^(?:data:image\/|blob:|https?:\/\/|file:\/\/|\/)/i.test(value);
 }
 
+function isRendererSafeImageUrl(value?: string | null) {
+  if (!value) return false;
+  return /^(?:data:image\/|blob:|https?:\/\/|\/)/i.test(String(value).trim());
+}
+
+function getRendererSafeImageUrl(value?: string | null) {
+  const source = String(value || "").trim();
+  return isRendererSafeImageUrl(source) ? source : "";
+}
+
 function getSongAmbientSource(song?: Song | null) {
   if (!song) return "";
 
-  const directCover = String(song.coverUrl || "").trim();
+  const directCover = getRendererSafeImageUrl(song.coverUrl);
   if (directCover) return directCover;
 
-  const savedCover = String(song.coverPath || "").trim();
-  if (looksLikeDirectImageUrl(savedCover)) return savedCover;
+  const savedCover = getRendererSafeImageUrl(song.coverPath);
+  if (savedCover) return savedCover;
 
   const stableFallback = pixelArtForSong(song);
   return stableFallback ? pixelArtUrl(stableFallback.file) : "";
@@ -2300,9 +2318,9 @@ const Cover = memo(function Cover({ song, className }: { song: Song | null; clas
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
   const [imageReady, setImageReady] = useState(false);
 
-  const directCover = String(song?.coverUrl || "").trim();
+  const directCover = getRendererSafeImageUrl(song?.coverUrl);
   const savedCover = String(song?.coverPath || "").trim();
-  const savedCoverSrc = looksLikeDirectImageUrl(savedCover) ? savedCover : "";
+  const savedCoverSrc = getRendererSafeImageUrl(savedCover);
   const fallbackAsset = song ? pixelArtForSong(song) : null;
   const backupFallbackAsset = song ? nextPixelArtForSong(song) : null;
   const fallbackSrc = fallbackAsset ? pixelArtUrl(fallbackAsset.file) : "";
@@ -3413,6 +3431,17 @@ function MainModeApp() {
   const [convertBusy, setConvertBusy] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
   const [convertMessage, setConvertMessage] = useState("");
+
+  // ── Spotify import ──────────────────────────────────────────
+  const [downloadsTab, setDownloadsTab] = useState<"youtube" | "spotify">("youtube");
+  const [spotifyUrl, setSpotifyUrl] = useState("");
+  const [spotifyTracks, setSpotifyTracks] = useState<SpotifyTrack[]>([]);
+  const [spotifyFetchBusy, setSpotifyFetchBusy] = useState(false);
+  const [spotifyFetchError, setSpotifyFetchError] = useState("");
+  const [spotifySelectedIds, setSpotifySelectedIds] = useState<Set<string>>(new Set());
+  const [spotifyDownloadBusy, setSpotifyDownloadBusy] = useState(false);
+  // ────────────────────────────────────────────────────────────
+
   const [secretMode, setSecretMode] = useState<SecretMode>("none");
   const [secretToast, setSecretToast] = useState("");
   const [secretBurst, setSecretBurst] = useState(0);
@@ -6757,9 +6786,10 @@ function MainModeApp() {
     };
 
     try {
-      const artwork = currentSong?.coverUrl
+      const mediaArtworkSrc = getRendererSafeImageUrl(currentSong?.coverUrl);
+      const artwork = mediaArtworkSrc
         ? ([96, 128, 192, 256, 512].map((size) => ({
-            src: currentSong.coverUrl || "",
+            src: mediaArtworkSrc,
             sizes: `${size}x${size}`,
             type: "image/png"
           })) as MediaImage[])
@@ -7066,8 +7096,11 @@ function MainModeApp() {
       if (payloadKey === lastPayloadKey) return;
       lastPayloadKey = payloadKey;
 
-      window.localitfy
-        .updateDiscordActivity({
+      const localitfyBridge = window.localitfy as any;
+      const sendDiscordActivity = localitfyBridge?.updateDiscordActivity || localitfyBridge?.setDiscordActivity;
+      if (!sendDiscordActivity) return;
+
+      sendDiscordActivity({
           isPlaying: playingRef.current,
           songId: song?.id || "",
           title: song?.title || "",
@@ -8687,6 +8720,115 @@ function MainModeApp() {
       setDownloadBusy(false);
     }
   }
+
+  // ── Spotify import functions ─────────────────────────────────────────────
+  async function fetchSpotifyTracks() {
+    if (!spotifyUrl.trim()) return;
+    setSpotifyFetchBusy(true);
+    setSpotifyFetchError("");
+    setSpotifyTracks([]);
+    setSpotifySelectedIds(new Set());
+
+    try {
+      // Requires window.localitfy.spotifyFetchTracks to be exposed in preload.cjs/main.cjs.
+      // See downloader.cjs for the downloadSpotifyBatch backend implementation.
+      const result = await (window.localitfy as any).spotifyFetchTracks?.(spotifyUrl.trim());
+      if (!result || !Array.isArray(result.tracks) || !result.tracks.length) {
+        setSpotifyFetchError("No tracks found. Make sure the URL is a public Spotify playlist, album, or track link.");
+        return;
+      }
+      const tracks: SpotifyTrack[] = result.tracks.map((t: SpotifyTrack, i: number) => ({
+        ...t,
+        id: t.id || `spt_${i}`
+      }));
+      setSpotifyTracks(tracks);
+      setSpotifySelectedIds(new Set(tracks.map((t) => t.id)));
+      setStatusText(`fetched ${tracks.length} spotify track${tracks.length !== 1 ? "s" : ""}`);
+    } catch (error) {
+      const msg = String((error as Error)?.message || "Failed to fetch Spotify tracks. Check that spotifyFetchTracks is wired in main.cjs.");
+      setSpotifyFetchError(msg);
+      console.error("[localtify spotify fetch failed]", error);
+    } finally {
+      setSpotifyFetchBusy(false);
+    }
+  }
+
+  async function downloadSpotifyTracks() {
+    const selected = spotifyTracks.filter((t) => spotifySelectedIds.has(t.id));
+    if (!selected.length) return;
+
+    setSpotifyDownloadBusy(true);
+    setDownloadBusy(true);
+    setDownloadResults([]);
+    setPlayerError("");
+    setDownloadQueue(
+      selected.map((t, i) => ({
+        id: `spt_${t.id}_${i}`,
+        url: `spotify:search:${t.title}`,
+        title: t.artist ? `${t.artist} — ${t.title}` : t.title,
+        status: "queued" as const,
+        progress: 0,
+        message: "Waiting..."
+      }))
+    );
+    setStatusText(`downloading ${selected.length} spotify track${selected.length !== 1 ? "s" : ""}...`);
+
+    try {
+      // Requires window.localitfy.spotifyDownloadBatch to be exposed in preload.cjs/main.cjs.
+      // The backend handler should call downloadSpotifyBatch() from downloader.cjs.
+      const result = await (window.localitfy as any).spotifyDownloadBatch?.({
+        tracks: selected.map((t) => ({ title: t.title, artist: t.artist })),
+        options: {
+          quality: settings.downloadQuality,
+          format: settings.downloadFormat,
+          autoAdd: settings.downloadAutoAdd,
+          downloadFolder: settings.downloadFolder
+        }
+      });
+
+      if (result) {
+        const nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
+        setSongs(nextSongs);
+        setDownloadFolderLabel(result.downloadFolder || settings.downloadFolder || "");
+
+        const downloads = result.downloads || [];
+        setDownloadResults(downloads);
+        syncDownloadFilesToQueue(downloads);
+
+        const successCount = downloads.filter((d: DownloadResult) => d.ok).length;
+        const failCount = downloads.filter((d: DownloadResult) => !d.ok).length;
+
+        if (nextSongs.length && !currentId) {
+          const firstSong = nextSongs[0];
+          if (firstSong) {
+            setCurrentId(firstSong.id);
+            await rememberCurrentSong(firstSong.id);
+          }
+        }
+
+        if (successCount > 0) {
+          trackSongsImported(result.changedCount || successCount, "downloads");
+          setStatusText(`downloaded ${successCount} spotify track${successCount !== 1 ? "s" : ""}`);
+          if (settings.downloadAutoAdd && nextSongs.length) changeView("library", "unknown");
+        } else {
+          setStatusText("spotify download finished — no tracks added");
+          setPlayerError("no tracks downloaded. check the queue for errors.");
+        }
+
+        if (failCount > 0) {
+          console.warn("[localitfy spotify partial failures]", downloads);
+        }
+      }
+    } catch (error) {
+      console.error("[localitfy spotify download failed]", error);
+      setSpotifyFetchError(String((error as Error)?.message || "Download failed. Check that spotifyDownloadBatch is wired in main.cjs."));
+      setStatusText("spotify download failed");
+    } finally {
+      setSpotifyDownloadBusy(false);
+      setDownloadBusy(false);
+    }
+  }
+  // ────────────────────────────────────────────────────────────────────────
 
   async function convertLocalMedia() {
     setConvertBusy(true);
@@ -11794,8 +11936,8 @@ function MainModeApp() {
                   <div className="panelHead downloadHeroHead">
                     <div>
                       <p className="eyebrow">downloads</p>
-                      <h3>download music</h3>
-                      <p className="softText">Queue links, watch progress, retry failed items, then open finished songs in your library.</p>
+                      <h3>get music</h3>
+                      <p className="softText">Download from YouTube or import from Spotify. Files land in your library automatically.</p>
                     </div>
 
                     <div className="downloadHeroActions">
@@ -11808,42 +11950,180 @@ function MainModeApp() {
                     </div>
                   </div>
 
-                  <div className="downloadNotice downloadNoticeV031">
-                    Paste YouTube links one per line. localtify will download audio, convert it, and add it to your library unless auto-add is turned off.
-                  </div>
-
-                  <textarea
-                    className="downloadTextarea downloadTextareaV031"
-                    value={downloadText}
-                    onChange={(event) => setDownloadText(event.currentTarget.value)}
-                    placeholder={`paste YouTube links here, one per line...\nhttps://youtube.com/watch?v=...\nhttps://youtu.be/...`}
-                  />
-
-                  <div className="downloadActions downloadActionsV031">
-                    <button className="heroMain" onClick={() => void downloadAudioLinks()} disabled={downloadBusy}>
-                      {downloadBusy ? "downloading..." : "start download"}
-                    </button>
-
-                    {downloadBusy ? (
-                      <button className="heroGhost dangerGhost" onClick={() => void cancelCurrentDownload()}>
-                        cancel download
-                      </button>
-                    ) : (
-                      <button className="heroGhost" onClick={() => setDownloadText("")}>clear links</button>
-                    )}
-
+                  {/* ── Source tabs ──────────────────────────────── */}
+                  <div className="downloadTabStrip">
                     <button
-                      className="heroGhost"
-                      onClick={() => {
-                        setDownloadResults([]);
-                        setDownloadQueue((items) => items.filter((item) => item.status === "queued" || item.status === "downloading" || item.status === "converting"));
-                      }}
-                      disabled={downloadBusy || (!downloadResults.length && !downloadQueue.some((item) => item.status === "done" || item.status === "failed" || item.status === "cancelled"))}
+                      className={downloadsTab === "youtube" ? "downloadTab active" : "downloadTab"}
+                      onClick={() => setDownloadsTab("youtube")}
                     >
-                      clear finished
+                      YouTube
+                    </button>
+                    <button
+                      className={downloadsTab === "spotify" ? "downloadTab active spotifyTab" : "downloadTab"}
+                      onClick={() => setDownloadsTab("spotify")}
+                    >
+                      <span className="spotifyTabDot" aria-hidden="true" />
+                      Spotify
                     </button>
                   </div>
 
+                  {/* ── YouTube tab ───────────────────────────────── */}
+                  {downloadsTab === "youtube" && (
+                    <>
+                      <div className="downloadNotice downloadNoticeV031">
+                        Paste YouTube links one per line. localtify will download audio, convert it, and add it to your library unless auto-add is turned off.
+                      </div>
+
+                      <textarea
+                        className="downloadTextarea downloadTextareaV031"
+                        value={downloadText}
+                        onChange={(event) => setDownloadText(event.currentTarget.value)}
+                        placeholder={`paste YouTube links here, one per line...\nhttps://youtube.com/watch?v=...\nhttps://youtu.be/...`}
+                      />
+
+                      <div className="downloadActions downloadActionsV031">
+                        <button className="heroMain" onClick={() => void downloadAudioLinks()} disabled={downloadBusy}>
+                          {downloadBusy ? "downloading..." : "start download"}
+                        </button>
+
+                        {downloadBusy ? (
+                          <button className="heroGhost dangerGhost" onClick={() => void cancelCurrentDownload()}>
+                            cancel download
+                          </button>
+                        ) : (
+                          <button className="heroGhost" onClick={() => setDownloadText("")}>clear links</button>
+                        )}
+
+                        <button
+                          className="heroGhost"
+                          onClick={() => {
+                            setDownloadResults([]);
+                            setDownloadQueue((items) => items.filter((item) => item.status === "queued" || item.status === "downloading" || item.status === "converting"));
+                          }}
+                          disabled={downloadBusy || (!downloadResults.length && !downloadQueue.some((item) => item.status === "done" || item.status === "failed" || item.status === "cancelled"))}
+                        >
+                          clear finished
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  {/* ── Spotify tab ───────────────────────────────── */}
+                  {downloadsTab === "spotify" && (
+                    <>
+                      <div className="downloadNotice downloadNoticeV031 spotifyNotice">
+                        Paste a public Spotify playlist, album, or track link. localtify finds each song on YouTube and downloads the audio — no Spotify premium needed.
+                      </div>
+
+                      <div className="spotifyUrlRow">
+                        <input
+                          type="url"
+                          className="downloadTextarea downloadTextareaV031 spotifyUrlInput"
+                          value={spotifyUrl}
+                          onChange={(e) => { setSpotifyUrl(e.currentTarget.value); setSpotifyFetchError(""); }}
+                          placeholder="https://open.spotify.com/playlist/..."
+                          disabled={spotifyFetchBusy || spotifyDownloadBusy}
+                        />
+                        <button
+                          className="heroMain spotifyFetchButton"
+                          onClick={() => void fetchSpotifyTracks()}
+                          disabled={spotifyFetchBusy || spotifyDownloadBusy || !spotifyUrl.trim()}
+                        >
+                          {spotifyFetchBusy ? "fetching..." : "fetch tracks"}
+                        </button>
+                      </div>
+
+                      {spotifyFetchError ? (
+                        <div className="spotifyError">{spotifyFetchError}</div>
+                      ) : null}
+
+                      {spotifyTracks.length > 0 && (
+                        <div className="spotifyTrackList">
+                          <div className="spotifyTrackListHead">
+                            <strong>{spotifyTracks.length} track{spotifyTracks.length !== 1 ? "s" : ""} found</strong>
+                            <div className="spotifySelectActions">
+                              <button
+                                className="softButton"
+                                onClick={() => setSpotifySelectedIds(new Set(spotifyTracks.map((t) => t.id)))}
+                                disabled={spotifyDownloadBusy}
+                              >
+                                all
+                              </button>
+                              <button
+                                className="softButton"
+                                onClick={() => setSpotifySelectedIds(new Set())}
+                                disabled={spotifyDownloadBusy}
+                              >
+                                none
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="spotifyTrackItems">
+                            {spotifyTracks.map((track, i) => {
+                              const selected = spotifySelectedIds.has(track.id);
+                              return (
+                                <button
+                                  key={track.id}
+                                  className={`spotifyTrackItem${selected ? " selected" : ""}`}
+                                  type="button"
+                                  disabled={spotifyDownloadBusy}
+                                  onClick={() => {
+                                    setSpotifySelectedIds((prev) => {
+                                      const next = new Set(prev);
+                                      if (next.has(track.id)) next.delete(track.id);
+                                      else next.add(track.id);
+                                      return next;
+                                    });
+                                  }}
+                                >
+                                  <span className="spotifyTrackIndex">{String(i + 1).padStart(2, "0")}</span>
+                                  <div className="spotifyTrackMeta">
+                                    <strong>{track.title}</strong>
+                                    {track.artist ? <p>{track.artist}{track.albumName ? ` · ${track.albumName}` : ""}</p> : null}
+                                  </div>
+                                  <span className="spotifyTrackCheck" aria-hidden="true">
+                                    {selected ? "✓" : ""}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <div className="downloadActions downloadActionsV031 spotifyDownloadRow">
+                            <button
+                              className="heroMain spotifyDownloadButton"
+                              onClick={() => void downloadSpotifyTracks()}
+                              disabled={spotifyDownloadBusy || !spotifySelectedIds.size}
+                            >
+                              {spotifyDownloadBusy
+                                ? "downloading..."
+                                : `download ${spotifySelectedIds.size} track${spotifySelectedIds.size !== 1 ? "s" : ""}`}
+                            </button>
+                            {spotifyDownloadBusy ? (
+                              <button className="heroGhost dangerGhost" onClick={() => void cancelCurrentDownload()}>
+                                cancel
+                              </button>
+                            ) : (
+                              <button
+                                className="heroGhost"
+                                onClick={() => {
+                                  setSpotifyTracks([]);
+                                  setSpotifySelectedIds(new Set());
+                                  setSpotifyUrl("");
+                                  setSpotifyFetchError("");
+                                }}
+                              >
+                                clear
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* ── Shared: queue, converter, results ─────────── */}
                   {downloadQueue.length ? (
                     <div className="downloadQueuePanel">
                       <div className="panelHead smallPanelHead">

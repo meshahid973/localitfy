@@ -7,7 +7,9 @@ contextBridge.exposeInMainWorld("localitfy", {
   clearLibrary: () => ipcRenderer.invoke("library:clear"),
 
   downloadAudioUrls: (payload) => ipcRenderer.invoke("download:audio", payload),
-  openDownloadsFolder: () => ipcRenderer.invoke("download:open-folder"),
+  cancelDownload: () => ipcRenderer.invoke("download:cancel"),
+  chooseDownloadFolder: () => ipcRenderer.invoke("download:choose-folder"),
+  openDownloadsFolder: (folder) => ipcRenderer.invoke("download:open-folder", folder),
   pickAndConvertMedia: (payload) => ipcRenderer.invoke("media:convert-pick", payload),
 
   listPixelArt: () => ipcRenderer.invoke("pixel:list"),
@@ -34,18 +36,17 @@ contextBridge.exposeInMainWorld("localitfy", {
   getPlaylists: () => ipcRenderer.invoke("playlists:get"),
   savePlaylists: (playlists) => ipcRenderer.invoke("playlists:save", playlists),
 
-  updateDiscordActivity: (payload) => ipcRenderer.invoke("discord:update", payload),
-  clearDiscordActivity: () => ipcRenderer.invoke("discord:clear"),
+  updateBackupNow: () => ipcRenderer.invoke("database:backup-now"),
+  repairDatabaseNow: () => ipcRenderer.invoke("database:repair-now"),
+  getDatabaseStatus: () => ipcRenderer.invoke("database:status"),
+
+  setDiscordActivity: (payload) => ipcRenderer.invoke("discord:set-activity", payload),
+  updateDiscordActivity: (payload) => ipcRenderer.invoke("discord:set-activity", payload),
+  clearDiscordActivity: () => ipcRenderer.invoke("discord:clear-activity"),
   getDiscordStatus: () => ipcRenderer.invoke("discord:status"),
-  resetDiscordActivity: () => ipcRenderer.invoke("discord:reset"),
+  resetDiscordCache: () => ipcRenderer.invoke("discord:reset-cache"),
+  resetDiscordActivity: () => ipcRenderer.invoke("discord:reset-cache"),
 
-  getDatabaseStatus: () => ipcRenderer.invoke("db:status"),
-  backupDatabase: () => ipcRenderer.invoke("db:backup"),
-  repairDatabase: () => ipcRenderer.invoke("db:repair"),
-
-  sendPlayerCommand: (command) => ipcRenderer.invoke("player:command", command),
-
-  updateNativeMediaState: (payload) => ipcRenderer.invoke("localitfy:native-media-state", payload),
   setMinimizeToTray: (enabled) => ipcRenderer.invoke("localitfy:set-minimize-to-tray", { enabled }),
   setStartWithWindows: (enabled) => ipcRenderer.invoke("localitfy:set-start-with-windows", { enabled }),
   getStartWithWindows: () => ipcRenderer.invoke("localitfy:get-start-with-windows"),
@@ -58,6 +59,9 @@ contextBridge.exposeInMainWorld("localitfy", {
   checkForUpdates: (payload) => ipcRenderer.invoke("localitfy:check-for-updates", payload),
   downloadUpdate: () => ipcRenderer.invoke("localitfy:download-update"),
   installUpdate: () => ipcRenderer.invoke("localitfy:install-update"),
+
+  spotifyFetchTracks: (url) => ipcRenderer.invoke("spotify-fetch-tracks", url),
+  spotifyDownloadBatch: (payload) => ipcRenderer.invoke("spotify-download-batch", payload),
 
   onAutoUpdate: (callback) => {
     const handler = (_event, payload) => callback(payload);
