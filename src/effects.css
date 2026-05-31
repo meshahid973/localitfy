@@ -1,7 +1,7 @@
 /* ========================================================================== 
-   localtify 0.3.5 V147 — effects.css
+   localtify 0.3.5 V148 — effects.css
    Owns music-reactive cover glow, active-song ambience, and cheap visual pulses.
-   Keep layout in App.css/home.css and keep bottom player in player.css.
+   Layout stays in App/home/player/settings CSS. This file must not animate whole rows.
 ========================================================================== */
 
 .app{
@@ -17,7 +17,7 @@
   --active-song-pulse-speed: 1280ms;
 }
 
-/* Hero cover: the aura now stays around the art and follows the current song energy. */
+/* Hero cover: full ambience is allowed here because it is one isolated visual target. */
 .app[data-playing="on"] .hero.heroPremium .heroArtWrap{
   position: relative !important;
   isolation: isolate !important;
@@ -41,7 +41,7 @@
   opacity: var(--active-song-glow-opacity) !important;
   filter: blur(28px) saturate(1.45) brightness(0.76) !important;
   transform: translate3d(var(--active-song-beat-x), var(--active-song-beat-y), 0) scale(var(--active-song-glow-scale)) !important;
-  transition: opacity 92ms linear, transform 92ms linear !important;
+  transition: opacity 96ms linear, transform 96ms linear !important;
   animation: localtifyHeroGlowDrift var(--active-song-pulse-speed) cubic-bezier(0.16, 1, 0.3, 1) infinite !important;
 }
 
@@ -65,157 +65,128 @@
   position: relative !important;
   z-index: 2 !important;
   transform: translate3d(calc(var(--active-song-beat-x) * 0.08), calc(var(--active-song-beat-y) * 0.08), 0) scale(var(--active-song-art-scale)) !important;
-  transition: transform 92ms linear, box-shadow 160ms ease !important;
+  transition: transform 96ms linear, box-shadow 160ms ease !important;
   box-shadow:
     0 28px 74px rgba(0, 0, 0, 0.52),
     0 0 0 1px rgba(255,255,255,0.11) inset,
     0 0 42px rgba(var(--accent-rgb), 0.18) !important;
 }
 
-/* Library + shelves: active song gets a small living aura without re-rendering cards. */
-.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing){
+/* Active rows/cards stay highlighted, but their expensive reactive aura moved to cover art only. */
+.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing){
   position: relative !important;
   isolation: isolate !important;
   overflow: hidden !important;
   contain: paint !important;
-  border-color: rgba(var(--accent-rgb), 0.58) !important;
+  border-color: rgba(var(--accent-rgb), 0.52) !important;
   box-shadow:
-    0 12px 34px rgba(0, 0, 0, 0.28),
-    0 0 0 1px rgba(var(--accent-rgb), 0.16) inset !important;
+    0 10px 26px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(var(--accent-rgb), 0.14) inset !important;
 }
 
-.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing)::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: -34px !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-  will-change: opacity, transform !important;
-  border-radius: inherit !important;
-  opacity: var(--active-song-glow-opacity) !important;
-  background:
-    radial-gradient(circle at calc(18% + var(--active-song-beat-x)) calc(46% + var(--active-song-beat-y)), rgba(var(--accent-rgb), 0.42), transparent 34%),
-    radial-gradient(circle at calc(70% - var(--active-song-beat-x)) calc(38% - var(--active-song-beat-y)), rgba(255,255,255,0.12), transparent 30%),
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.18), transparent 70%) !important;
-  filter: blur(16px) saturate(1.2) !important;
-  transform: translate3d(calc(var(--active-song-beat-x) * 0.28), calc(var(--active-song-beat-y) * 0.28), 0) scale(var(--active-song-glow-scale)) !important;
-  transition: opacity 110ms linear, transform 110ms linear !important;
-  animation: localtifyActiveCardWave var(--active-song-pulse-speed) cubic-bezier(0.16, 1, 0.3, 1) infinite !important;
+/* Kill old row-wide audio auras from earlier patches. The glow below is the replacement. */
+.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::before,
+.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::after{
+  animation: none !important;
+  filter: none !important;
+  opacity: 0 !important;
+  box-shadow: none !important;
 }
 
 .app[data-playing="on"] :is(
   .songRow.playing .songArt.coverAura,
   .homeAlbumCard.playing .homeAlbumArt.coverAura,
   .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura
+  .homeFreshCard.playing .homeFreshCover.coverAura,
+  .playlistTrackRow.playing .playlistTrackCover,
+  .playlistSongRow.playing .playlistTrackCover,
+  .libraryRow.playing .songArt.coverAura
+){
+  position: relative !important;
+  isolation: isolate !important;
+  contain: paint !important;
+  will-change: transform !important;
+  transform: translate3d(calc(var(--active-song-beat-x) * 0.045), calc(var(--active-song-beat-y) * 0.045), 0) scale(var(--active-song-art-scale)) !important;
+  transition: transform 96ms linear !important;
+}
+
+.app[data-playing="on"] :is(
+  .songRow.playing .songArt.coverAura,
+  .homeAlbumCard.playing .homeAlbumArt.coverAura,
+  .homeListenCard.playing .homeListenCover.coverAura,
+  .homeFreshCard.playing .homeFreshCover.coverAura,
+  .playlistTrackRow.playing .playlistTrackCover,
+  .playlistSongRow.playing .playlistTrackCover,
+  .libraryRow.playing .songArt.coverAura
 )::before{
   opacity: var(--active-song-glow-opacity) !important;
-  filter: blur(24px) saturate(1.55) contrast(1.08) !important;
+  filter: blur(22px) saturate(1.5) contrast(1.06) !important;
   transform: translate3d(var(--active-song-beat-x), var(--active-song-beat-y), 0) scale(var(--active-song-glow-scale)) !important;
-  transition: opacity 96ms linear, transform 96ms linear !important;
+  transition: opacity 100ms linear, transform 100ms linear !important;
 }
 
 .app[data-playing="on"] :is(
   .songRow.playing .songArt img,
   .homeAlbumCard.playing .homeAlbumArt img,
   .homeListenCard.playing .homeListenCover img,
-  .homeFreshCard.playing .homeFreshCover img
+  .homeFreshCard.playing .homeFreshCover img,
+  .playlistTrackRow.playing .playlistTrackCover img,
+  .playlistSongRow.playing .playlistTrackCover img,
+  .libraryRow.playing .songArt img
 ){
-  transform: translate3d(calc(var(--active-song-beat-x) * 0.04), calc(var(--active-song-beat-y) * 0.04), 0) scale(var(--active-song-art-scale)) !important;
+  transform: translate3d(calc(var(--active-song-beat-x) * 0.035), calc(var(--active-song-beat-y) * 0.035), 0) scale(var(--active-song-art-scale)) !important;
   transition: transform 96ms linear !important;
 }
 
-
-/* V147 performance note: the blur itself stays, but keyframes only animate
-   opacity/transform now. Animating filter on many hovered/playing rows was the
-   main audio-hover FPS killer. */
 @keyframes localtifyHeroGlowDrift{
-  0%{
-    opacity: calc(var(--active-song-glow-opacity) * 0.68);
-  }
-  18%{
-    opacity: calc(var(--active-song-glow-opacity) * 1.05);
-  }
-  34%{
-    opacity: calc(var(--active-song-glow-opacity) * 0.8);
-  }
-  52%{
-    opacity: calc(var(--active-song-glow-opacity) * 1.14);
-  }
-  70%{
-    opacity: calc(var(--active-song-glow-opacity) * 0.76);
-  }
-  86%{
-    opacity: calc(var(--active-song-glow-opacity) * 1.02);
-  }
-  100%{
-    opacity: calc(var(--active-song-glow-opacity) * 0.68);
-  }
+  0%{ opacity: calc(var(--active-song-glow-opacity) * 0.68); }
+  18%{ opacity: calc(var(--active-song-glow-opacity) * 1.05); }
+  34%{ opacity: calc(var(--active-song-glow-opacity) * 0.8); }
+  52%{ opacity: calc(var(--active-song-glow-opacity) * 1.14); }
+  70%{ opacity: calc(var(--active-song-glow-opacity) * 0.76); }
+  86%{ opacity: calc(var(--active-song-glow-opacity) * 1.02); }
+  100%{ opacity: calc(var(--active-song-glow-opacity) * 0.68); }
 }
 
 @keyframes localtifyHeroRingOrbit{
-  0%{
-    rotate: 0deg;
-    scale: 0.985;
-  }
-  20%{
-    scale: 1.018;
-  }
-  42%{
-    scale: 0.998;
-  }
-  64%{
-    scale: 1.028;
-  }
-  82%{
-    scale: 1.006;
-  }
-  100%{
-    rotate: 360deg;
-    scale: 0.985;
-  }
-}
-
-@keyframes localtifyActiveCardWave{
-  0%{
-    opacity: calc(var(--active-song-glow-opacity) * 0.56);
-  }
-  22%{
-    opacity: calc(var(--active-song-glow-opacity) * 0.9);
-  }
-  45%{
-    opacity: calc(var(--active-song-glow-opacity) * 0.68);
-  }
-  67%{
-    opacity: calc(var(--active-song-glow-opacity) * 1.02);
-  }
-  84%{
-    opacity: calc(var(--active-song-glow-opacity) * 0.72);
-  }
-  100%{
-    opacity: calc(var(--active-song-glow-opacity) * 0.56);
-  }
+  0%{ rotate: 0deg; scale: 0.985; }
+  20%{ scale: 1.018; }
+  42%{ scale: 0.998; }
+  64%{ scale: 1.028; }
+  82%{ scale: 1.006; }
+  100%{ rotate: 360deg; scale: 0.985; }
 }
 
 .app[data-playing="off"] .hero.heroPremium .heroArtWrap,
 .app.reducedMotion .hero.heroPremium .heroArtWrap,
-.app.viewSwitching .hero.heroPremium .heroArtWrap{
+.app.viewSwitching .hero.heroPremium .heroArtWrap,
+.app.songDragActive .hero.heroPremium .heroArtWrap{
   will-change: auto !important;
 }
 
 .app[data-playing="off"] .hero.heroPremium .heroArt,
 .app.reducedMotion .hero.heroPremium .heroArt,
-.app.viewSwitching .hero.heroPremium .heroArt{
+.app.viewSwitching .hero.heroPremium .heroArt,
+.app.songDragActive .hero.heroPremium .heroArt{
   transform: translate3d(0, 0, 0) scale(1) !important;
 }
 
-.app.reducedMotion :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing)::after,
-.app.viewSwitching :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing)::after,
+.app.reducedMotion :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::before,
+.app.reducedMotion :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::after,
+.app.viewSwitching :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::before,
+.app.viewSwitching :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::after,
 .app.reducedMotion .hero.heroPremium .heroArtWrap::before,
 .app.reducedMotion .hero.heroPremium .heroArtWrap::after,
 .app.viewSwitching .hero.heroPremium .heroArtWrap::before,
-.app.viewSwitching .hero.heroPremium .heroArtWrap::after{
+.app.viewSwitching .hero.heroPremium .heroArtWrap::after,
+.app.songDragActive .hero.heroPremium .heroArtWrap::before,
+.app.songDragActive .hero.heroPremium .heroArtWrap::after{
   animation: none !important;
+}
+
+body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::before,
+body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::after{
+  transition-duration: 120ms !important;
 }
 
 /* ========================================================================

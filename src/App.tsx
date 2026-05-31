@@ -4103,7 +4103,7 @@ function MainModeApp() {
       isVolumeDragging ||
       Boolean(draggedSongId) ||
       isViewSwitching,
-    resetKey: `${effectiveTheme}:${view}:${settingsCategory}:${themeMotionReady ? "ready" : "boot"}`
+    resetKey: `${effectiveTheme}:${view}:${settingsCategory}:${themeMotionReady ? "ready" : "boot"}:${isPlaying ? "playing" : "idle"}`
   });
 
   const diagnosticsInfo = useMemo(() => {
@@ -5553,26 +5553,33 @@ function MainModeApp() {
       const songId = currentSong.id;
       const shouldRefresh =
         cache.songId !== songId ||
-        now - cache.refreshedAt > 900 ||
+        now - cache.refreshedAt > 1400 ||
         cache.nodes.some((node) => !root.contains(node));
 
       if (!shouldRefresh) return cache.nodes;
 
       cache.nodes.forEach((node) => clearBeatVariablesFromNode(node));
+      // V148: keep the living audio glow, but never write beat variables to whole rows/cards.
+      // Rows are the hot path while hovering/scrolling; only the visible art/aura nodes get
+      // the reactive variables so hover remains instant while music is playing.
       cache.nodes = Array.from(
         root.querySelectorAll<HTMLElement>(
           [
             ".hero.heroPremium .heroArtWrap",
-            ".songRow.playing",
-            ".homeAlbumCard.playing",
-            ".homeListenCard.playing",
-            ".homeFreshCard.playing",
-            ".playlistTrackRow.playing",
-            ".playlistSongRow.playing",
-            ".libraryRow.playing"
+            ".simpleHero .simpleHeroArtSwap",
+            ".songRow.playing .songArt.coverAura",
+            ".homeAlbumCard.playing .homeAlbumArt.coverAura",
+            ".homeListenCard.playing .homeListenCover.coverAura",
+            ".homeFreshCard.playing .homeFreshCover.coverAura",
+            ".playlistTrackRow.playing .playlistTrackCover",
+            ".playlistSongRow.playing .playlistTrackCover",
+            ".libraryRow.playing .songArt.coverAura"
           ].join(",")
         )
-      ).slice(0, 12);
+      ).filter((node) => {
+        const rect = node.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && rect.bottom >= -180 && rect.top <= window.innerHeight + 180;
+      }).slice(0, 7);
       cache.refreshedAt = now;
       cache.songId = songId;
 
@@ -5595,7 +5602,7 @@ function MainModeApp() {
 
     const tick = (now: number) => {
       const busyAnimationBudget = scrollBusyRef.current || draggedSongIdRef.current || themeSettlingRef.current;
-      const frameBudgetMs = busyAnimationBudget ? 170 : 84;
+      const frameBudgetMs = busyAnimationBudget ? 190 : 96;
 
       if (document.hidden) {
         if (!hiddenResetDone) {
@@ -5649,13 +5656,13 @@ function MainModeApp() {
         const ringOpacity = 0.16 + beat * 0.42;
         const pulseSpeed = Math.round(1200 - beat * 520);
         const paintSignature = [
-          Math.round(beat * 100),
-          Math.round(x),
-          Math.round(y),
-          Math.round(opacity * 100),
-          Math.round(glowScale * 100),
-          Math.round(ringOpacity * 100),
-          pulseSpeed
+          Math.round(beat * 88),
+          Math.round(x / 2),
+          Math.round(y / 2),
+          Math.round(opacity * 80),
+          Math.round(glowScale * 80),
+          Math.round(ringOpacity * 80),
+          Math.round(pulseSpeed / 24)
         ].join(":");
 
         if (paintSignature !== beatLastPaintSignatureRef.current) {
