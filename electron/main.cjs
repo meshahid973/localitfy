@@ -1,4 +1,6 @@
-const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen } = require("electron");
+/* localtify 0.3.5 emergency playback HTTP range server V156 — file patch label only; APP_VERSION stays 0.3.5. */
+const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
+const http = require("node:http");
 const path = require("node:path");
 const fs = require("node:fs");
 const crypto = require("node:crypto");
@@ -28,14 +30,40 @@ const { setDiscordActivity, clearDiscordActivity, shutdownDiscordActivity, getDi
 const {
   initDownloader,
   downloadAudioUrls,
+  cancelActiveDownloads,
   convertLocalMediaFiles,
-  isSupportedMediaPath
+  isSupportedMediaPath,
+  downloadSpotifyBatch
 } = require("./downloader.cjs");
 
 const isDev = !app.isPackaged;
 
-// Visible Windows/UI name can be localtify, but the app data folder must stay
-// localitfy so old installs do not look empty after the branding rename.
+const MEDIA_PROTOCOL = "localtify-media";
+const MEDIA_PROTOCOL_HOST = "file";
+const MEDIA_SERVER_HOST = "127.0.0.1";
+const MEDIA_SERVER_TOKEN = crypto.randomBytes(18).toString("hex");
+let mediaServer = null;
+let mediaServerPort = 0;
+let mediaServerReadyPromise = null;
+
+try {
+  protocol.registerSchemesAsPrivileged([
+    {
+      scheme: MEDIA_PROTOCOL,
+      privileges: {
+        standard: true,
+        secure: true,
+        supportFetchAPI: true,
+        stream: true,
+        corsEnabled: true,
+        bypassCSP: true
+      }
+    }
+  ]);
+} catch (error) {
+  console.log("[localitfy media protocol privilege error]", error?.message || error);
+}
+
 const APP_NAME = "localtify";
 const LEGACY_APP_DATA_NAME = "localitfy";
 const SQLITE_FILE_NAME = "localitfy.sqlite";
@@ -72,14 +100,12 @@ const STABLE_USER_DATA_PATH = configureStableUserDataPath();
 try {
   app.setName(APP_NAME);
 } catch {
-  // app name is best-effort before app ready
 }
 
 if (process.platform === "win32") {
   try {
     app.setAppUserModelId(APP_USER_MODEL_ID);
   } catch {
-    // app user model id is only needed for Windows shell integration
   }
 }
 
@@ -109,16 +135,13 @@ function restoreDatabaseFromOldUserDataIfNeeded() {
   const stableDbPath = path.join(app.getPath("userData"), SQLITE_FILE_NAME);
   const stableInfo = getCandidateDatabaseInfo(app.getPath("userData"));
   if (stableInfo) return { restored: false, dbPath: stableDbPath, source: stableInfo.filePath };
-
   const candidates = getUserDataRecoveryCandidates()
     .map(getCandidateDatabaseInfo)
     .filter(Boolean)
     .filter((item) => path.normalize(item.filePath).toLowerCase() !== path.normalize(stableDbPath).toLowerCase())
     .sort((a, b) => (b.mtimeMs - a.mtimeMs) || (b.size - a.size));
-
   const best = candidates[0];
   if (!best) return { restored: false, dbPath: stableDbPath, source: "" };
-
   try {
     fs.mkdirSync(path.dirname(stableDbPath), { recursive: true });
     fs.copyFileSync(best.filePath, stableDbPath);
@@ -156,21 +179,16 @@ let nativeMediaState = {
   hasSong: false
 };
 
-
 function getLoginItemOptions(openAtLogin = false) {
   const options = {
     openAtLogin: Boolean(openAtLogin),
     openAsHidden: false,
     name: APP_NAME
   };
-
-  // In development Windows otherwise registers Electron.exe with no app path.
-  // In the packaged build electron-builder owns the shortcut and the default path is correct.
   if (isDev && process.defaultApp) {
     options.path = process.execPath;
     options.args = [app.getAppPath()];
   }
-
   return options;
 }
 
@@ -178,7 +196,6 @@ function getStartWithWindowsStatus() {
   if (process.platform !== "win32") {
     return { ok: true, supported: false, openAtLogin: false };
   }
-
   try {
     const current = app.getLoginItemSettings(getLoginItemOptions(false));
     return {
@@ -204,7 +221,6 @@ function setStartWithWindows(enabled) {
   if (process.platform !== "win32") {
     return { ok: true, supported: false, openAtLogin: false };
   }
-
   try {
     app.setLoginItemSettings(getLoginItemOptions(Boolean(enabled)));
     return getStartWithWindowsStatus();
@@ -221,9 +237,7 @@ function setStartWithWindows(enabled) {
 function syncWindowsIntegrationSettings(settings = {}, options = {}) {
   const hasSavedStartupChoice = Object.prototype.hasOwnProperty.call(settings || {}, "startWithWindows");
   const startWithWindows = hasSavedStartupChoice ? Boolean(settings.startWithWindows) : true;
-
   const startupStatus = setStartWithWindows(startWithWindows);
-
   if (!hasSavedStartupChoice && options.persistDefault) {
     try {
       saveSettings({ startWithWindows: true });
@@ -231,18 +245,15 @@ function syncWindowsIntegrationSettings(settings = {}, options = {}) {
       console.log("[localitfy startup default save error]", error?.message || error);
     }
   }
-
   return startupStatus;
 }
 
 function sendPlayerCommand(command) {
   if (!command || typeof command !== "object") return false;
-
   const payload = {
     ...command,
     source: command.source || "native"
   };
-
   try {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send("player:command", payload);
@@ -251,7 +262,6 @@ function sendPlayerCommand(command) {
   } catch (error) {
     console.log("[localitfy native command error]", error?.message || error);
   }
-
   return false;
 }
 
@@ -260,7 +270,6 @@ function showMainWindow() {
     createWindow();
     return true;
   }
-
   if (mainWindow.isMinimized()) mainWindow.restore();
   if (!mainWindow.isVisible()) mainWindow.show();
   mainWindow.focus();
@@ -275,7 +284,6 @@ function createSvgNativeImage(iconName) {
     pause: "M7 5h4v14H7V5zm6 0h4v14h-4V5z",
     stop: "M7 7h10v10H7V7z"
   };
-
   const pathData = iconPaths[iconName] || iconPaths.play;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="white" d="${pathData}"/></svg>`;
   return nativeImage.createFromDataURL(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
@@ -294,20 +302,14 @@ function getAppIconPathCandidates() {
   const appPath = (() => {
     try { return app.getAppPath(); } catch { return ""; }
   })();
-
   return [
-    // User project layout: localtify/build/icon.ico
     safePathJoin(process.cwd(), "build", "icon.ico"),
     safePathJoin(__dirname, "build", "icon.ico"),
     safePathJoin(__dirname, "..", "build", "icon.ico"),
     safePathJoin(appPath, "build", "icon.ico"),
-
-    // Packaged fallbacks if electron-builder copies build into resources/app
     safePathJoin(process.resourcesPath || "", "build", "icon.ico"),
     safePathJoin(process.resourcesPath || "", "app", "build", "icon.ico"),
     safePathJoin(process.resourcesPath || "", "app.asar.unpacked", "build", "icon.ico"),
-
-    // Older/fallback asset layouts
     safePathJoin(__dirname, "assets", "icon.ico"),
     safePathJoin(__dirname, "assets", "icon.png"),
     safePathJoin(__dirname, "assets", "logo.png"),
@@ -328,7 +330,6 @@ function getAppIconPath() {
     try {
       if (iconPath && fs.existsSync(iconPath)) return iconPath;
     } catch {
-      // try the next path
     }
   }
   return "";
@@ -336,7 +337,6 @@ function getAppIconPath() {
 
 function loadAppIcon(size = 0) {
   const iconPath = getAppIconPath();
-
   if (iconPath) {
     try {
       const image = nativeImage.createFromPath(iconPath);
@@ -347,7 +347,6 @@ function loadAppIcon(size = 0) {
       console.log("[localitfy icon load error]", error?.message || error);
     }
   }
-
   const fallback = createSvgNativeImage(nativeMediaState.isPlaying ? "pause" : "play");
   return size ? fallback.resize({ width: size, height: size }) : fallback;
 }
@@ -369,7 +368,6 @@ function getNativeMediaTitle() {
 
 function updateTrayMenu() {
   if (!tray) return;
-
   try {
     tray.setToolTip(getNativeMediaTitle());
     tray.setImage(loadTrayIcon());
@@ -415,7 +413,6 @@ function ensureTray() {
     updateTrayMenu();
     return tray;
   }
-
   try {
     tray = new Tray(loadTrayIcon());
     tray.on("click", showMainWindow);
@@ -424,7 +421,6 @@ function ensureTray() {
   } catch (error) {
     console.log("[localitfy tray error]", error?.message || error);
   }
-
   return tray;
 }
 
@@ -432,7 +428,6 @@ function updateTaskbarButtons() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   if (process.platform !== "win32") return;
   if (typeof mainWindow.setThumbarButtons !== "function") return;
-
   try {
     mainWindow.setThumbnailToolTip(nativeMediaState.hasSong ? `${getNativeMediaTitle()} - localtify` : "localtify");
     mainWindow.setThumbarButtons([
@@ -463,14 +458,12 @@ function updateTaskbarButtons() {
 function registerNativeMediaKeys() {
   if (nativeShortcutsRegistered) return;
   nativeShortcutsRegistered = true;
-
   const shortcuts = [
     ["MediaPlayPause", { type: "toggle" }],
     ["MediaNextTrack", { type: "next" }],
     ["MediaPreviousTrack", { type: "prev" }],
     ["MediaStop", { type: "stop" }]
   ];
-
   for (const [accelerator, command] of shortcuts) {
     try {
       const ok = globalShortcut.register(accelerator, () => sendPlayerCommand(command));
@@ -488,9 +481,7 @@ function cleanupNativeWindowsMedia() {
     globalShortcut.unregister("MediaPreviousTrack");
     globalShortcut.unregister("MediaStop");
   } catch {
-    // ignore shutdown errors
   }
-
   if (tray) {
     try { tray.destroy(); } catch {}
     tray = null;
@@ -500,10 +491,8 @@ function cleanupNativeWindowsMedia() {
 function attachCloseToTray(win) {
   if (!win || win.__localitfyCloseToTrayAttached) return;
   win.__localitfyCloseToTrayAttached = true;
-
   win.on("close", (event) => {
     if (!minimizeToTray || allowQuit || win.isDestroyed()) return;
-
     event.preventDefault();
     win.hide();
     ensureTray();
@@ -512,7 +501,6 @@ function attachCloseToTray(win) {
 
 function updateNativeMediaState(payload = {}) {
   const volume = Number(payload.volume);
-
   nativeMediaState = {
     ...nativeMediaState,
     isPlaying: Boolean(payload.isPlaying),
@@ -524,11 +512,9 @@ function updateNativeMediaState(payload = {}) {
     coverUrl: String(payload.coverUrl || ""),
     hasSong: Boolean(payload.hasSong)
   };
-
   if (Object.prototype.hasOwnProperty.call(payload, "minimizeToTray")) {
     minimizeToTray = Boolean(payload.minimizeToTray);
   }
-
   updateTrayMenu();
   updateTaskbarButtons();
   return { ok: true, state: nativeMediaState, minimizeToTray };
@@ -536,30 +522,23 @@ function updateNativeMediaState(payload = {}) {
 
 function setupNativeWindowsMediaIpc() {
   ipcMain.handle("localitfy:native-media-state", async (_event, payload = {}) => updateNativeMediaState(payload));
-
   ipcMain.handle("localitfy:set-minimize-to-tray", async (_event, payload = {}) => {
     minimizeToTray = typeof payload === "boolean" ? payload : Boolean(payload.enabled);
     if (minimizeToTray) ensureTray();
     updateTrayMenu();
     return { ok: true, minimizeToTray };
   });
-
   ipcMain.handle("localitfy:set-start-with-windows", async (_event, payload = {}) => {
     const enabled = typeof payload === "boolean" ? payload : Boolean(payload.enabled);
     const status = setStartWithWindows(enabled);
     try {
-      // Save the user's chosen value, not the OS readback.
-      // Windows/dev Electron can report openAtLogin=false immediately after setting it,
-      // which made the Settings toggle look like it turned itself back off.
       saveSettings({ startWithWindows: Boolean(enabled) });
     } catch (error) {
       console.log("[localitfy startup setting save error]", error?.message || error);
     }
     return { ...status, openAtLogin: Boolean(enabled) };
   });
-
   ipcMain.handle("localitfy:get-start-with-windows", async () => getStartWithWindowsStatus());
-
   ipcMain.handle("localitfy:native-media-status", async () => ({
     ok: true,
     state: nativeMediaState,
@@ -576,7 +555,6 @@ function setupNativeWindowsMedia() {
   registerNativeMediaKeys();
 }
 
-// ====================== AUTO UPDATER ======================
 function safeUpdateInfo(info) {
   if (!info || typeof info !== "object") return { version: "latest" };
   return {
@@ -593,27 +571,22 @@ function sendAutoUpdateEvent(payload) {
     silent: updaterSilent,
     ...payload
   };
-
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send("localitfy:auto-update-event", eventPayload);
   }
-
   return eventPayload;
 }
 
 function setupAutoUpdater() {
   if (updaterReady) return;
   updaterReady = true;
-
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
   autoUpdater.allowPrerelease = false;
   autoUpdater.allowDowngrade = false;
-
   autoUpdater.on("checking-for-update", () => {
     sendAutoUpdateEvent({ type: "checking", message: "checking for updates..." });
   });
-
   autoUpdater.on("update-available", (info) => {
     const cleanInfo = safeUpdateInfo(info);
     updaterChecking = false;
@@ -626,7 +599,6 @@ function setupAutoUpdater() {
       message: `${APP_NAME} ${cleanInfo.version} is available`
     });
   });
-
   autoUpdater.on("update-not-available", (info) => {
     const cleanInfo = safeUpdateInfo(info);
     updaterChecking = false;
@@ -639,7 +611,6 @@ function setupAutoUpdater() {
       message: "you are already on the latest build"
     });
   });
-
   autoUpdater.on("download-progress", (progress) => {
     const percent = Math.max(0, Math.min(100, Number(progress?.percent || 0)));
     sendAutoUpdateEvent({
@@ -649,7 +620,6 @@ function setupAutoUpdater() {
       message: `downloading update... ${Math.round(percent)}%`
     });
   });
-
   autoUpdater.on("update-downloaded", (info) => {
     const cleanInfo = safeUpdateInfo(info);
     updaterChecking = false;
@@ -663,7 +633,6 @@ function setupAutoUpdater() {
       message: "update downloaded. restart localtify to install it."
     });
   });
-
   autoUpdater.on("error", (error) => {
     updaterChecking = false;
     sendAutoUpdateEvent({
@@ -677,15 +646,12 @@ function setupAutoUpdater() {
 async function checkForUpdates(payload = {}) {
   setupAutoUpdater();
   updaterSilent = Boolean(payload?.silent);
-
   if (isDev) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
   }
-
   if (updaterChecking) return true;
   updaterChecking = true;
-
   try {
     await autoUpdater.checkForUpdates();
     return true;
@@ -702,12 +668,10 @@ async function checkForUpdates(payload = {}) {
 
 async function downloadUpdate() {
   setupAutoUpdater();
-
   if (isDev) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
   }
-
   try {
     updateDownloaded = false;
     sendAutoUpdateEvent({
@@ -730,12 +694,10 @@ async function downloadUpdate() {
 
 async function installUpdate() {
   setupAutoUpdater();
-
   if (isDev) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
   }
-
   if (!updateDownloaded) {
     sendAutoUpdateEvent({
       type: "error",
@@ -744,18 +706,253 @@ async function installUpdate() {
     });
     return false;
   }
-
   setImmediate(() => { autoUpdater.quitAndInstall(false, true); });
   return true;
 }
 
-// ====================== APP SETUP ======================
 app.setName(APP_NAME);
 app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
 
+function encodeMediaFilePath(filePath) {
+  return Buffer.from(String(filePath || ""), "utf8")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function decodeMediaFilePath(encodedPath) {
+  const raw = String(encodedPath || "").trim();
+  if (!raw) return "";
+  const normalized = raw.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+  return Buffer.from(padded, "base64").toString("utf8");
+}
+
+function safeTextResponse(message, status = 404) {
+  return new Response(String(message || "not found"), {
+    status,
+    headers: { "content-type": "text/plain; charset=utf-8" }
+  });
+}
+
+function contentTypeForFile(filePath) {
+  const ext = path.extname(String(filePath || "")).toLowerCase();
+
+  if (ext === ".mp3") return "audio/mpeg";
+  if (ext === ".wav") return "audio/wav";
+  if (ext === ".ogg") return "audio/ogg";
+  if (ext === ".flac") return "audio/flac";
+  if (ext === ".m4a" || ext === ".aac") return "audio/mp4";
+
+  if (ext === ".png") return "image/png";
+  if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
+  if (ext === ".webp") return "image/webp";
+  if (ext === ".gif") return "image/gif";
+
+  if (ext === ".html") return "text/html; charset=utf-8";
+  if (ext === ".js") return "text/javascript; charset=utf-8";
+  if (ext === ".css") return "text/css; charset=utf-8";
+  if (ext === ".json") return "application/json; charset=utf-8";
+
+  return "application/octet-stream";
+}
+
+function addMediaResponseHeaders(res, filePath) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Range, Content-Type");
+  res.setHeader("Accept-Ranges", "bytes");
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Content-Type", contentTypeForFile(filePath));
+}
+
+function sendMediaFile(req, res, filePath) {
+  if (!filePath || !path.isAbsolute(filePath) || !fileExists(filePath)) {
+    res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+    res.end("media file not found");
+    return;
+  }
+
+  let stat;
+  try {
+    stat = fs.statSync(filePath);
+  } catch {
+    res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+    res.end("media file not found");
+    return;
+  }
+
+  addMediaResponseHeaders(res, filePath);
+
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    res.writeHead(405, { "content-type": "text/plain; charset=utf-8" });
+    res.end("method not allowed");
+    return;
+  }
+
+  const total = stat.size;
+  const rangeHeader = String(req.headers.range || "");
+
+  if (rangeHeader) {
+    const match = rangeHeader.match(/bytes=(\d*)-(\d*)/);
+
+    if (match) {
+      let start = match[1] ? Number(match[1]) : 0;
+      let end = match[2] ? Number(match[2]) : total - 1;
+
+      if (!Number.isFinite(start) || start < 0) start = 0;
+      if (!Number.isFinite(end) || end >= total) end = total - 1;
+
+      if (start > end || start >= total) {
+        res.writeHead(416, { "Content-Range": `bytes */${total}` });
+        res.end();
+        return;
+      }
+
+      res.writeHead(206, {
+        "Content-Range": `bytes ${start}-${end}/${total}`,
+        "Content-Length": end - start + 1
+      });
+
+      if (req.method === "HEAD") {
+        res.end();
+        return;
+      }
+
+      fs.createReadStream(filePath, { start, end })
+        .on("error", () => res.destroy())
+        .pipe(res);
+      return;
+    }
+  }
+
+  res.writeHead(200, { "Content-Length": total });
+
+  if (req.method === "HEAD") {
+    res.end();
+    return;
+  }
+
+  fs.createReadStream(filePath)
+    .on("error", () => res.destroy())
+    .pipe(res);
+}
+
+function startLocaltifyMediaServer() {
+  if (mediaServerReadyPromise) return mediaServerReadyPromise;
+
+  mediaServerReadyPromise = new Promise((resolve) => {
+    const server = http.createServer((req, res) => {
+      try {
+        const requestUrl = new URL(req.url || "/", `http://${MEDIA_SERVER_HOST}`);
+
+        if (requestUrl.searchParams.get("t") !== MEDIA_SERVER_TOKEN) {
+          res.writeHead(403, { "content-type": "text/plain; charset=utf-8" });
+          res.end("media access denied");
+          return;
+        }
+
+        const encodedPath = requestUrl.pathname.replace(/^\/media\/?/, "").replace(/^\/+/, "");
+        const filePath = decodeMediaFilePath(encodedPath);
+
+        sendMediaFile(req, res, filePath);
+      } catch (error) {
+        console.log("[localtify media server request error]", error?.message || error);
+        res.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
+        res.end("media server failed");
+      }
+    });
+
+    server.once("error", (error) => {
+      console.log("[localtify media server error]", error?.message || error);
+      mediaServer = null;
+      mediaServerPort = 0;
+      resolve(false);
+    });
+
+    server.listen(0, MEDIA_SERVER_HOST, () => {
+      mediaServer = server;
+      const address = server.address();
+      mediaServerPort = typeof address === "object" && address ? address.port : 0;
+      console.log(`[localtify media server] http://${MEDIA_SERVER_HOST}:${mediaServerPort}`);
+      resolve(true);
+    });
+  });
+
+  return mediaServerReadyPromise;
+}
+
+function stopLocaltifyMediaServer() {
+  if (!mediaServer) return;
+  const server = mediaServer;
+  mediaServer = null;
+  mediaServerPort = 0;
+  server.close(() => undefined);
+}
+
+function registerLocaltifyMediaProtocol() {
+  if (protocol.__localtifyMediaProtocolReady) return;
+  protocol.__localtifyMediaProtocolReady = true;
+
+  protocol.handle(MEDIA_PROTOCOL, async (request) => {
+    try {
+      const parsed = new URL(request.url);
+      const encodedPath = parsed.hostname === MEDIA_PROTOCOL_HOST
+        ? parsed.pathname.replace(/^\/+/, "")
+        : `${parsed.hostname}${parsed.pathname}`.replace(/^\/+/, "");
+      const filePath = decodeMediaFilePath(encodedPath);
+
+      if (!filePath || !path.isAbsolute(filePath)) {
+        return safeTextResponse("invalid media path", 400);
+      }
+
+      if (!fileExists(filePath)) {
+        return safeTextResponse("media file not found", 404);
+      }
+
+      return net.fetch(pathToFileURL(filePath).toString());
+    } catch (error) {
+      console.log("[localtify media protocol error]", error?.message || error);
+      return safeTextResponse("media protocol failed", 500);
+    }
+  });
+}
+
 function safeFileUrl(filePath) {
   if (!filePath) return "";
-  return pathToFileURL(filePath).toString();
+  try {
+    return pathToFileURL(filePath).toString();
+  } catch {
+    return "";
+  }
+}
+
+function safeMediaUrl(filePath) {
+  if (!filePath) return "";
+
+  const cleanPath = String(filePath);
+  const encodedPath = encodeMediaFilePath(cleanPath);
+
+  if (!mediaServerPort) {
+    return safeFileUrl(cleanPath);
+  }
+
+  let version = "0";
+  try {
+    const stats = fs.statSync(cleanPath);
+    version = `${Math.floor(stats.mtimeMs)}-${stats.size}`;
+  } catch {
+    version = "missing";
+  }
+
+  return `http://${MEDIA_SERVER_HOST}:${mediaServerPort}/media/${encodedPath}?t=${MEDIA_SERVER_TOKEN}&v=${encodeURIComponent(version)}`;
 }
 
 function isAudioFile(filePath) {
@@ -774,8 +971,17 @@ function fileExists(filePath) {
   }
 }
 
-function getDownloadDirectory() {
-  return path.join(app.getPath("downloads"), "localitfy");
+function getDownloadDirectory(customFolder) {
+  const fallback = path.join(app.getPath("downloads"), "localitfy");
+  const raw = typeof customFolder === "string" ? customFolder.trim() : "";
+  const target = raw && path.isAbsolute(raw) ? raw : fallback;
+  try {
+    fs.mkdirSync(target, { recursive: true });
+    return target;
+  } catch {
+    fs.mkdirSync(fallback, { recursive: true });
+    return fallback;
+  }
 }
 
 function getFfmpegPath() {
@@ -786,7 +992,6 @@ function getFfmpegPath() {
   return ffmpegStatic;
 }
 
-// Exports YouTube + Google session cookies into a Netscape file yt-dlp can read
 async function getYouTubeCookiesFile() {
   try {
     const sess = session.defaultSession;
@@ -794,73 +999,72 @@ async function getYouTubeCookiesFile() {
       sess.cookies.get({ domain: ".youtube.com" }),
       sess.cookies.get({ domain: ".google.com" })
     ]);
-
     const allCookies = [...ytCookies, ...googleCookies];
     if (!allCookies.length) return null;
-
     const lines = [
       "# Netscape HTTP Cookie File",
       "# https://curl.haxx.se/rfc/cookie_spec.html",
       "# Generated by localitfy",
       ""
     ];
-
     for (const cookie of allCookies) {
       const domain = cookie.domain.startsWith(".") ? cookie.domain : `.${cookie.domain}`;
       const subdomains = cookie.domain.startsWith(".") ? "TRUE" : "FALSE";
       const secure = cookie.secure ? "TRUE" : "FALSE";
       const expiry = cookie.expirationDate ? Math.floor(cookie.expirationDate) : 0;
-      lines.push(`${domain}\t${subdomains}\t${cookie.path || "/"}\t${secure}\t${expiry}\t${cookie.name}\t${cookie.value}`);
+      lines.push(`${domain}\t${subdomains}\t${cookie.path}\t${secure}\t${expiry}\t${cookie.name}\t${cookie.value}`);
     }
-
-    const cookiesPath = path.join(app.getPath("temp"), "localitfy-yt-cookies.txt");
-    fs.writeFileSync(cookiesPath, lines.join("\n"), "utf-8");
-    console.log(`[localitfy] wrote ${allCookies.length} cookies`);
-    return cookiesPath;
-  } catch (err) {
-    console.log("[localitfy] getYouTubeCookiesFile error:", err?.message || err);
+    const dir = app.getPath("userData");
+    const targetPath = path.join(dir, "cookies.txt");
+    fs.writeFileSync(targetPath, lines.join("\n"), "utf-8");
+    return targetPath;
+  } catch (error) {
+    console.log("[localitfy cookies dump error]", error?.message || error);
     return null;
   }
 }
 
 function getPixelArtDirectory() {
-  const candidates = [
-    path.join(process.resourcesPath || "", "pixelart"),
-    path.join(process.cwd(), "pixelart"),
-    path.join(app.getAppPath(), "pixelart"),
-    path.join(path.dirname(app.getAppPath()), "pixelart")
-  ];
-  return candidates.find((c) => c && fs.existsSync(c)) || candidates[0];
+  try {
+    const root = app.getAppPath();
+    const candidates = [
+      path.join(root, "pixelart"),
+      path.join(root, "public", "pixelart"),
+      path.join(root, "dist", "pixelart"),
+      path.join(process.cwd(), "pixelart"),
+      path.join(process.cwd(), "public", "pixelart")
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) return p;
+    }
+    const defaultDir = path.join(app.getPath("userData"), "pixelart");
+    fs.mkdirSync(defaultDir, { recursive: true });
+    return defaultDir;
+  } catch {
+    return "";
+  }
 }
 
 function getPixelArtFiles() {
-  const pixelDir = getPixelArtDirectory();
-  if (!pixelDir || !fs.existsSync(pixelDir)) return [];
-  return fs.readdirSync(pixelDir)
-    .map((name) => path.join(pixelDir, name))
-    .filter(fileExists)
-    .filter(isImageFile);
-}
-
-function listPixelCoversShaped() {
-  return getPixelArtFiles().map((coverPath) => ({
-    name: path.basename(coverPath),
-    path: coverPath,
-    url: safeFileUrl(coverPath)
-  }));
-}
-
-function getPixelArtPacks() {
   const root = getPixelArtDirectory();
-  if (!root || !fs.existsSync(root)) {
-    return [{ name: "default", path: root, count: 0, active: true }];
-  }
-
-  const rootFiles = getPixelArtFiles();
-  const packs = [{ name: "default", path: root, count: rootFiles.length, active: true }];
-
+  if (!root || !fs.existsSync(root)) return [];
   try {
-    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+    return fs.readdirSync(root)
+      .map((name) => path.join(root, name))
+      .filter(fileExists)
+      .filter(isImageFile);
+  } catch {
+    return [];
+  }
+}
+
+function listPixelPacksDetailed() {
+  const root = getPixelArtDirectory();
+  if (!root || !fs.existsSync(root)) return [];
+  const packs = [];
+  try {
+    const items = fs.readdirSync(root, { withFileTypes: true });
+    for (const entry of items) {
       if (!entry.isDirectory()) continue;
       const packPath = path.join(root, entry.name);
       const count = fs.readdirSync(packPath).map((name) => path.join(packPath, name)).filter(fileExists).filter(isImageFile).length;
@@ -869,17 +1073,14 @@ function getPixelArtPacks() {
   } catch (error) {
     console.log("[localitfy pixel packs error]", error?.message || error);
   }
-
   return packs;
 }
 
 function getPixelArtFilesFromPack(packName = "default") {
   const root = getPixelArtDirectory();
-  if (!root) return [];
-
+  if (!root || !fs.existsSync(root)) return [];
   const packPath = packName && packName !== "default" ? path.join(root, packName) : root;
   if (!fs.existsSync(packPath)) return getPixelArtFiles();
-
   try {
     return fs.readdirSync(packPath)
       .map((name) => path.join(packPath, name))
@@ -893,17 +1094,15 @@ function getPixelArtFilesFromPack(packName = "default") {
 function listPixelCoversDetailed() {
   const songs = getSongs();
   const usage = new Map();
-
   for (const song of songs) {
     if (!song.coverPath) continue;
     usage.set(song.coverPath, (usage.get(song.coverPath) || 0) + 1);
   }
-
   return getPixelArtFiles().map((coverPath) => ({
     name: path.basename(coverPath),
     key: path.parse(coverPath).name,
     path: coverPath,
-    url: safeFileUrl(coverPath),
+    url: safeMediaUrl(coverPath),
     usageCount: usage.get(coverPath) || 0,
     exists: fileExists(coverPath),
     broken: !fileExists(coverPath)
@@ -916,64 +1115,97 @@ function getCoverStats() {
   const brokenSongs = songs
     .filter((song) => song.coverPath && !fileExists(song.coverPath))
     .map((song) => ({ id: song.id, title: song.title, coverPath: song.coverPath }));
-
   return {
     pixelDir: getPixelArtDirectory(),
     coverCount: covers.length,
     songCount: songs.length,
     songsWithCovers: songs.filter((song) => Boolean(song.coverPath)).length,
     songsMissingCovers: songs.filter((song) => !song.coverPath).length,
-    brokenCoverCount: brokenSongs.length,
-    brokenSongs,
-    packs: getPixelArtPacks(),
-    covers
+    songsWithBrokenCovers: brokenSongs.length,
+    brokenItems: brokenSongs
   };
 }
 
-function pickLeastUsedCover(availableCovers, selectedSongs = [], options = {}) {
-  const covers = Array.isArray(availableCovers) ? availableCovers.filter(Boolean) : [];
-  if (!covers.length) return null;
-
+function pickLeastUsedCover(availableCovers = [], fallbackSongs = [], choices = {}) {
+  if (!availableCovers.length) return "";
+  const songs = fallbackSongs.length ? fallbackSongs : getSongs();
   const usage = new Map();
-  for (const song of getSongs()) {
-    if (song.coverPath) usage.set(song.coverPath, (usage.get(song.coverPath) || 0) + 1);
+  for (const p of availableCovers) usage.set(p, 0);
+  for (const song of songs) {
+    if (song.coverPath && usage.has(song.coverPath)) {
+      usage.set(song.coverPath, usage.get(song.coverPath) + 1);
+    }
   }
-
-  let pool = covers.filter((cover) => cover !== lastAssignedCoverPath);
-  if (!pool.length) pool = covers;
-
-  if (options.avoidSelectedCurrent) {
-    const selectedCurrentCovers = new Set(selectedSongs.map((song) => song.coverPath).filter(Boolean));
-    const filtered = pool.filter((cover) => !selectedCurrentCovers.has(cover));
-    if (filtered.length) pool = filtered;
+  let candidates = [...availableCovers];
+  if (choices.avoidSelectedCurrent && choices.currentPath) {
+    candidates = candidates.filter((p) => p !== choices.currentPath);
   }
-
-  const lowestUsage = Math.min(...pool.map((cover) => usage.get(cover) || 0));
-  const leastUsed = pool.filter((cover) => (usage.get(cover) || 0) === lowestUsage);
-  const chosen = leastUsed[Math.floor(Math.random() * leastUsed.length)] || pool[0];
-
-  lastAssignedCoverPath = chosen;
-  return chosen;
+  if (!candidates.length) candidates = [...availableCovers];
+  candidates.sort((a, b) => (usage.get(a) || 0) - (usage.get(b) || 0));
+  const minCount = usage.get(candidates[0]) || 0;
+  const bestPool = candidates.filter((p) => (usage.get(p) || 0) === minCount);
+  const selected = bestPool[Math.floor(Math.random() * bestPool.length)];
+  if (selected) lastAssignedCoverPath = selected;
+  return selected || "";
 }
 
-function randomizeCoversForSongs(songIds = [], mode = "all") {
+function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new Set()) {
+  const parsed = path.parse(filePath);
+  const parts = parsed.name.split(" - ").map((item) => item.trim());
+  let artist = "";
+  let title = parsed.name;
+  if (parts.length >= 2) {
+    artist = parts[0];
+    title = parts.slice(1).join(" - ");
+  }
+  const id = crypto.createHash("sha256").update(filePath).digest("hex");
+  let chosenCover = "";
+  if (pixelArtFiles.length) {
+    const available = pixelArtFiles.filter((p) => !usedCovers.has(p));
+    chosenCover = pickLeastUsedCover(available.length ? available : pixelArtFiles);
+    if (chosenCover) usedCovers.add(chosenCover);
+  }
+  return {
+    id,
+    title,
+    artist,
+    album: "",
+    filePath,
+    coverPath: chosenCover,
+    duration: 0,
+    bitrate: 0,
+    addedAt: Date.now()
+  };
+}
+
+function shapeSong(song) {
+  if (!song) return null;
+  const exists = fileExists(song.filePath);
+  const coverExists = fileExists(song.coverPath);
+  return {
+    ...song,
+    url: safeMediaUrl(song.filePath),
+    coverUrl: safeMediaUrl(song.coverPath),
+    exists,
+    fileExists: exists,
+    coverExists
+  };
+}
+
+function listSongsShaped() {
+  return getSongs().map(shapeSong);
+}
+
+function buildRandomizeMissingSongCovers() {
   const covers = getPixelArtFiles();
   if (!covers.length) return listSongsShaped();
-
-  const wanted = new Set(Array.isArray(songIds) ? songIds.filter(Boolean) : []);
-  const allSongs = getSongs();
-  const targetSongs = allSongs.filter((song) => {
-    if (wanted.size && !wanted.has(song.id)) return false;
-    if (mode === "missing") return !song.coverPath || !fileExists(song.coverPath);
-    return true;
-  });
-
+  const songs = getSongs();
+  const targetSongs = songs.filter((song) => !song.coverPath || !fileExists(song.coverPath));
   for (const song of targetSongs) {
-    const chosen = pickLeastUsedCover(covers, targetSongs, { avoidSelectedCurrent: true });
+    const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true });
     if (!chosen) continue;
     patchSong(song.id, { coverPath: chosen });
   }
-
   return listSongsShaped();
 }
 
@@ -983,13 +1215,11 @@ function analyzeVolumeGain(filePath) {
       resolve({ ok: false, volumeGain: 1, error: "file missing or unsupported" });
       return;
     }
-
     const ffmpegPath = getFfmpegPath();
     if (!ffmpegPath || !fileExists(ffmpegPath)) {
       resolve({ ok: false, volumeGain: 1, error: "ffmpeg missing" });
       return;
     }
-
     execFile(
       ffmpegPath,
       ["-hide_banner", "-nostats", "-i", filePath, "-af", "volumedetect", "-f", "null", "-"],
@@ -998,17 +1228,13 @@ function analyzeVolumeGain(filePath) {
         const text = `${stdout || ""}\n${stderr || ""}`;
         const mean = Number((text.match(/mean_volume:\s*(-?[0-9.]+) dB/i) || [])[1]);
         const max = Number((text.match(/max_volume:\s*(-?[0-9.]+) dB/i) || [])[1]);
-
         if (!Number.isFinite(mean)) {
           resolve({ ok: false, volumeGain: 1, error: error?.message || "could not read volume" });
           return;
         }
-
-        // Aim for a gentle -18 dB mean, while never pushing peaks above about -1 dB.
         let gainDb = -18 - mean;
         if (Number.isFinite(max)) gainDb = Math.min(gainDb, -1 - max);
         gainDb = Math.max(-12, Math.min(12, gainDb));
-
         const volumeGain = Math.max(0.25, Math.min(2.4, Math.pow(10, gainDb / 20)));
         resolve({ ok: true, meanVolumeDb: mean, maxVolumeDb: max, gainDb, volumeGain });
       }
@@ -1016,81 +1242,66 @@ function analyzeVolumeGain(filePath) {
   });
 }
 
-function pickCover(availableCovers, used = new Set()) {
-  if (!availableCovers.length) return null;
-
-  let pool = availableCovers.filter(
-    (p) => p !== lastAssignedCoverPath && !used.has(p)
-  );
-  if (!pool.length) pool = availableCovers.filter((p) => p !== lastAssignedCoverPath);
-  if (!pool.length) pool = availableCovers;
-
-  const chosen = pool[Math.floor(Math.random() * pool.length)];
-  lastAssignedCoverPath = chosen;
-  used.add(chosen);
-  return chosen;
-}
-
-function makeSongFromFile(filePath, pixelArtFiles, usedCovers) {
-  const parsed = path.parse(filePath);
-  return {
-    id: crypto.randomUUID(),
-    title: parsed.name || "untitled",
-    artist: "unknown artist",
-    album: "local files",
-    filePath,
-    coverPath: pickCover(pixelArtFiles, usedCovers),
-    liked: false,
-    playCount: 0,
-    duration: 0,
-    dateAdded: new Date().toISOString(),
-    lastPlayed: null,
-    volumeGain: 1,
-    playbackPosition: 0,
-    customVolume: 1
+function openImportDialog(senderWindow) {
+  const dialogOptions = {
+    title: "Import local music files to localtify library",
+    buttonLabel: "Add to Library",
+    properties: ["openFile", "multiSelections"],
+    filters: [
+      { name: "Audio Files", extensions: ["mp3", "wav", "ogg", "flac", "m4a", "aac"] }
+    ]
   };
+  return senderWindow && !senderWindow.isDestroyed()
+    ? dialog.showOpenDialog(senderWindow, dialogOptions)
+    : dialog.showOpenDialog(dialogOptions);
 }
 
-function shapeSong(song) {
-  const songFileExists = fileExists(song.filePath);
-  const coverFileExists = fileExists(song.coverPath);
-  return {
-    ...song,
-    fileExists: songFileExists,
-    url: songFileExists ? safeFileUrl(song.filePath) : "",
-    coverUrl: coverFileExists ? safeFileUrl(song.coverPath) : null
-  };
-}
-
-function listSongsShaped() {
-  return getSongs().map(shapeSong);
-}
-
-async function loadRenderer(win) {
-  if (isDev) {
-    await win.loadURL("http://127.0.0.1:5173/");
+function createWindow() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    showMainWindow();
     return;
   }
-  const indexPath = path.join(__dirname, "../dist/index.html");
-  console.log("[localitfy renderer path]", indexPath, "exists:", fs.existsSync(indexPath));
-  await win.loadFile(indexPath);
-}
-
-function attachWindowDebug(win, label) {
-  win.webContents.on("did-fail-load", (_e, code, desc, url) => {
-    console.log(`[localitfy ${label} failed load]`, { code, desc, url });
+  const size = getSafeMainWindowSize();
+  mainWindow = new BrowserWindow({
+    width: size.width,
+    height: size.height,
+    minWidth: MAIN_WINDOW_MIN_WIDTH,
+    minHeight: MAIN_WINDOW_MIN_HEIGHT,
+    show: false,
+    frame: false,
+    titleBarStyle: "hidden",
+    backgroundColor: "#0d0e12",
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false,
+      preload: path.join(__dirname, "preload.cjs"),
+      webSecurity: true,
+      backgroundThrottling: false
+    }
   });
-  win.webContents.on("render-process-gone", (_e, details) => {
-    console.log(`[localitfy ${label} renderer gone]`, details);
+  const indexUrl = isDev ? "http://localhost:5173" : safeFileUrl(path.join(__dirname, "dist", "index.html"));
+  mainWindow.loadURL(indexUrl).catch((error) => {
+    console.log("[localitfy main window load error]", error?.message || error);
   });
-  win.webContents.on("console-message", (_e, level, message, line, sourceId) => {
-    console.log(`[localitfy ${label} console]`, { level, message, line, sourceId });
+  mainWindow.webContents.on("did-fail-load", (_e, code, desc, url) => {
+    console.log(`[localitfy main window failed load]`, { code, desc, url });
+  });
+  mainWindow.webContents.on("render-process-gone", (_e, details) => {
+    console.log(`[localitfy main window renderer gone]`, details);
+  });
+  mainWindow.webContents.on("console-message", (_e, level, message, line, sourceId) => {
+    console.log(`[localitfy main window console]`, { level, message, line, sourceId });
   });
   if (process.env.LOCALITFY_DEBUG === "1") {
-    win.webContents.openDevTools({ mode: "detach" });
+    mainWindow.webContents.openDevTools({ mode: "detach" });
   }
+  mainWindow.once("ready-to-show", () => {
+    repairMainWindowBounds(mainWindow, { center: true });
+    mainWindow.show();
+  });
+  attachCloseToTray(mainWindow);
 }
-
 
 const MAIN_WINDOW_DEFAULT_WIDTH = 1380;
 const MAIN_WINDOW_DEFAULT_HEIGHT = 860;
@@ -1100,151 +1311,43 @@ const MAIN_WINDOW_MIN_HEIGHT = 640;
 function getSafeMainWindowSize() {
   const display = screen.getPrimaryDisplay();
   const workArea = display?.workAreaSize || { width: MAIN_WINDOW_DEFAULT_WIDTH, height: MAIN_WINDOW_DEFAULT_HEIGHT };
-
-  const width = Math.min(
-    MAIN_WINDOW_DEFAULT_WIDTH,
-    Math.max(MAIN_WINDOW_MIN_WIDTH, Math.floor(workArea.width * 0.94))
-  );
-
-  const height = Math.min(
-    MAIN_WINDOW_DEFAULT_HEIGHT,
-    Math.max(MAIN_WINDOW_MIN_HEIGHT, Math.floor(workArea.height * 0.9))
-  );
-
+  const width = Math.min(MAIN_WINDOW_DEFAULT_WIDTH, Math.max(MAIN_WINDOW_MIN_WIDTH, Math.floor(workArea.width * 0.94)));
+  const height = Math.min(MAIN_WINDOW_DEFAULT_HEIGHT, Math.max(MAIN_WINDOW_MIN_HEIGHT, Math.floor(workArea.height * 0.9)));
   return { width, height };
 }
 
 function repairMainWindowBounds(win, options = {}) {
   if (!win || win.isDestroyed()) return;
-
   const display = screen.getDisplayMatching(win.getBounds()) || screen.getPrimaryDisplay();
   const workArea = display?.workArea;
   if (!workArea) return;
-
   const maxWidth = Math.max(520, workArea.width);
   const maxHeight = Math.max(420, workArea.height);
-
   const minWidth = Math.min(MAIN_WINDOW_MIN_WIDTH, maxWidth);
   const minHeight = Math.min(MAIN_WINDOW_MIN_HEIGHT, maxHeight);
-
   win.setMinimumSize(minWidth, minHeight);
-
   const current = win.getBounds();
   let width = Math.min(Math.max(current.width, minWidth), maxWidth);
   let height = Math.min(Math.max(current.height, minHeight), maxHeight);
-
   let x = current.x;
   let y = current.y;
-
-  const offscreen =
-    x + width < workArea.x + 180 ||
-    y + height < workArea.y + 120 ||
-    x > workArea.x + workArea.width - 180 ||
-    y > workArea.y + workArea.height - 120;
-
+  const offscreen = x + width < workArea.x + 180 || y + height < workArea.y + 120 || x > workArea.x + workArea.width - 180 || y > workArea.y + workArea.height - 120;
   if (options.center || offscreen) {
-    x = Math.round(workArea.x + (workArea.width - width) / 2);
-    y = Math.round(workArea.y + (workArea.height - height) / 2);
+    x = Math.max(workArea.x, workArea.x + Math.floor((workArea.width - width) / 2));
+    y = Math.max(workArea.y, workArea.y + Math.floor((workArea.height - height) / 2));
   } else {
-    x = Math.min(Math.max(x, workArea.x), workArea.x + workArea.width - width);
-    y = Math.min(Math.max(y, workArea.y), workArea.y + workArea.height - height);
+    x = Math.max(workArea.x, Math.min(x, workArea.x + workArea.width - width));
+    y = Math.max(workArea.y, Math.min(y, workArea.y + workArea.height - height));
   }
-
-  if (
-    current.x !== x ||
-    current.y !== y ||
-    current.width !== width ||
-    current.height !== height
-  ) {
-    win.setBounds({ x, y, width, height }, false);
-  }
+  win.setBounds({ x, y, width, height });
 }
 
-function createWindow() {
-  const safeSize = getSafeMainWindowSize();
-
-  mainWindow = new BrowserWindow({
-    width: safeSize.width,
-    height: safeSize.height,
-    minWidth: Math.min(MAIN_WINDOW_MIN_WIDTH, safeSize.width),
-    minHeight: Math.min(MAIN_WINDOW_MIN_HEIGHT, safeSize.height),
-    center: true,
-    title: APP_NAME,
-    icon: loadAppIcon(),
-    frame: false,
-    backgroundColor: "#000000",
-    autoHideMenuBar: true,
-    show: false,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      webSecurity: false
-    }
-  });
-
-  attachWindowDebug(mainWindow, "main");
-  loadRenderer(mainWindow, false).catch((e) => {
-    console.log("[localitfy main load error]", e?.stack || e?.message || e);
-  });
-
-  mainWindow.once("ready-to-show", () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      repairMainWindowBounds(mainWindow, { center: true });
-      mainWindow.show();
-      updateTaskbarButtons();
-    }
-  });
-
-  setTimeout(() => {
-    if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) {
-      repairMainWindowBounds(mainWindow, { center: true });
-      mainWindow.show();
-    }
-  }, 1500);
-
-  attachCloseToTray(mainWindow);
-  mainWindow.on("show", () => {
-    repairMainWindowBounds(mainWindow);
-    updateTaskbarButtons();
-  });
-  mainWindow.on("restore", () => repairMainWindowBounds(mainWindow));
-  mainWindow.on("focus", updateTaskbarButtons);
-  mainWindow.webContents.on("did-finish-load", updateTaskbarButtons);
-  updateTaskbarButtons();
-
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-  });
-}
-
-async function openImportDialog(senderWindow) {
-  const options = {
-    title: `import songs into ${APP_NAME}`,
-    buttonLabel: "import songs",
-    defaultPath: app.getPath("music"),
-    properties: ["openFile", "multiSelections"],
-    filters: [
-      { name: "audio files", extensions: ["mp3", "wav", "ogg", "flac", "m4a", "aac"] },
-      { name: "all files", extensions: ["*"] }
-    ]
-  };
-  return senderWindow && !senderWindow.isDestroyed()
-    ? dialog.showOpenDialog(senderWindow, options)
-    : dialog.showOpenDialog(options);
-}
-
-// ====================== IPC HANDLERS ======================
-app.whenReady().then(() => {
-  initDownloader({
-    userDataPath: app.getPath("userData"),
-    ffmpegPath: getFfmpegPath(),
-    getCookiesFile: getYouTubeCookiesFile
-  });
-
+app.whenReady().then(async () => {
+  registerLocaltifyMediaProtocol();
+  await startLocaltifyMediaServer();
+  initDownloader({ userDataPath: app.getPath("userData"), ffmpegPath: getFfmpegPath(), getCookiesFile: getYouTubeCookiesFile });
   const databaseRecovery = restoreDatabaseFromOldUserDataIfNeeded();
   initDatabase(databaseRecovery.dbPath || path.join(app.getPath("userData"), SQLITE_FILE_NAME));
-
   try {
     const savedSettings = getSettings();
     minimizeToTray = Boolean(savedSettings?.minimizeToTray);
@@ -1253,7 +1356,6 @@ app.whenReady().then(() => {
     minimizeToTray = false;
     setStartWithWindows(true);
   }
-
   setupNativeWindowsMediaIpc();
 
   ipcMain.handle("app:bootstrap", async () => ({
@@ -1261,71 +1363,79 @@ app.whenReady().then(() => {
     settings: getSettings(),
     playlists: getPlaylists(),
     windowsIntegration: getStartWithWindowsStatus(),
-    database: {
-      ...getDatabaseStatus(),
-      userDataPath: app.getPath("userData"),
-      dataFolderName: LEGACY_APP_DATA_NAME
-    },
+    database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: LEGACY_APP_DATA_NAME },
     discord: getDiscordStatus(),
     covers: getCoverStats()
   }));
 
-  // Pixel art
-  const pixelListHandler = async () => getPixelArtFiles().map((filePath) => ({
-    name: path.parse(filePath).name,
-    key: path.parse(filePath).name,
-    path: filePath,
-    url: safeFileUrl(filePath)
-  }));
+  const pixelListHandler = async () => getPixelArtFiles().map((filePath) => ({ name: path.parse(filePath).name, key: path.parse(filePath).name, path: filePath, url: safeMediaUrl(filePath) }));
   ipcMain.handle("pixel:list", pixelListHandler);
   ipcMain.handle("art:list-pixel", pixelListHandler);
-
   ipcMain.handle("covers:list-pixelart", async () => {
-    try { return listPixelCoversDetailed(); }
-    catch (e) { console.log("[localitfy list covers error]", e?.message); return []; }
+    try { return listPixelCoversDetailed(); } catch (e) { console.log("[localitfy list covers error]", e?.message); return []; }
   });
-
-  ipcMain.handle("covers:stats", async () => getCoverStats());
-  ipcMain.handle("covers:rescan", async () => getCoverStats());
-  ipcMain.handle("covers:randomize-all", async () => randomizeCoversForSongs([], "all"));
-  ipcMain.handle("covers:randomize-missing", async () => randomizeCoversForSongs([], "missing"));
-  ipcMain.handle("covers:randomize-selected", async (_event, ids) => randomizeCoversForSongs(ids, "selected"));
-  ipcMain.handle("covers:least-used", async () => {
-    const chosen = pickLeastUsedCover(getPixelArtFiles(), [], { avoidSelectedCurrent: false });
-    return chosen ? { path: chosen, url: safeFileUrl(chosen), name: path.basename(chosen) } : null;
+  ipcMain.handle("covers:stats", async () => {
+    try { return getCoverStats(); } catch (e) { console.log("[localitfy covers stats error]", e?.message); return {}; }
   });
-  ipcMain.handle("covers:broken", async () => getCoverStats().brokenSongs);
-
-  // Cover setters
-  const setCoverHandler = async (_event, id, coverPath) => {
-    if (coverPath === null || coverPath === "") {
-      const updated = patchSong(id, { coverPath: null });
-      return updated ? shapeSong(updated) : null;
+  ipcMain.handle("covers:rescan", async () => buildRandomizeMissingSongCovers());
+  ipcMain.handle("covers:randomize-all", async () => {
+    const covers = getPixelArtFiles();
+    if (!covers.length) return listSongsShaped();
+    const songs = getSongs();
+    for (const song of songs) {
+      const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
+      if (chosen) patchSong(song.id, { coverPath: chosen });
     }
-    if (!fileExists(coverPath) || !isImageFile(coverPath)) return null;
+    return listSongsShaped();
+  });
+  ipcMain.handle("covers:randomize-missing", async () => buildRandomizeMissingSongCovers());
+  ipcMain.handle("covers:randomize-selected", async (_event, ids) => {
+    if (!Array.isArray(ids) || !ids.length) return listSongsShaped();
+    const covers = getPixelArtFiles();
+    if (!covers.length) return listSongsShaped();
+    const songs = getSongs();
+    for (const id of ids) {
+      const song = songs.find((item) => item.id === id);
+      if (!song) continue;
+      const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
+      if (chosen) patchSong(id, { coverPath: chosen });
+    }
+    return listSongsShaped();
+  });
+  ipcMain.handle("covers:broken", async () => {
+    try { return getCoverStats().brokenItems || []; } catch { return []; }
+  });
+  ipcMain.handle("covers:least-used", async () => {
+    try { return pickLeastUsedCover(getPixelArtFiles()); } catch { return ""; }
+  });
+  ipcMain.handle("song:set-cover", async (_event, id, coverPath) => {
     const updated = patchSong(id, { coverPath });
     return updated ? shapeSong(updated) : null;
-  };
-  ipcMain.handle("song:set-cover", setCoverHandler);
-  ipcMain.handle("song:set-pixel-cover", setCoverHandler);
-
-  // Library import
+  });
+  ipcMain.handle("song:pick-cover", async (_event, id) => {
+    const covers = getPixelArtFiles();
+    const song = getSongs().find((item) => item.id === id);
+    const chosen = pickLeastUsedCover(covers, getSongs(), { avoidSelectedCurrent: true, currentPath: song?.coverPath });
+    const updated = patchSong(id, { coverPath: chosen });
+    return updated ? shapeSong(updated) : null;
+  });
+  ipcMain.handle("song:analyze-volume", async (_event, id) => {
+    const target = getSongs().find((item) => item.id === id);
+    if (!target) return { ok: false, volumeGain: 1, error: "song not in library database" };
+    return analyzeVolumeGain(target.filePath);
+  });
   ipcMain.handle("library:import", async (event) => {
     try {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
       const result = await openImportDialog(senderWindow);
-
       if (result.canceled || !result.filePaths?.length) return listSongsShaped();
-
       const validAudioFiles = result.filePaths.filter((f) => fileExists(f) && isAudioFile(f));
       if (!validAudioFiles.length) return listSongsShaped();
-
       const pixelArtFiles = getPixelArtFiles();
       const usedCovers = new Set();
       const importedSongs = validAudioFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
       const changedCount = insertSongs(importedSongs);
       const afterSongs = listSongsShaped();
-
       console.log(`[localitfy import] selected=${validAudioFiles.length}, changed=${changedCount}, after=${afterSongs.length}`);
       return afterSongs;
     } catch (error) {
@@ -1334,150 +1444,105 @@ app.whenReady().then(() => {
     }
   });
 
-  // Convert local media
   ipcMain.handle("media:convert-pick", async (event, payload) => {
     try {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
-
       const dialogOptions = {
         title: "choose videos or audio to convert",
         buttonLabel: "convert to mp3",
         defaultPath: app.getPath("downloads"),
         properties: ["openFile", "multiSelections"],
-        filters: [{
-          name: "media files",
-          extensions: ["mp4", "webm", "mkv", "mov", "avi", "m4v", "mp3", "wav", "ogg", "flac", "m4a", "aac"]
-        }]
+        filters: [{ name: "media files", extensions: ["mp4", "webm", "mkv", "mov", "avi", "m4v", "mp3", "wav", "ogg", "flac", "m4a", "aac"] }]
       };
-
-      const result = senderWindow && !senderWindow.isDestroyed()
-        ? await dialog.showOpenDialog(senderWindow, dialogOptions)
-        : await dialog.showOpenDialog(dialogOptions);
-
+      const result = senderWindow && !senderWindow.isDestroyed() ? await dialog.showOpenDialog(senderWindow, dialogOptions) : await dialog.showOpenDialog(dialogOptions);
       if (result.canceled || !result.filePaths.length) {
         return { downloadFolder: getDownloadDirectory(), conversions: [], changedCount: 0, songs: listSongsShaped() };
       }
-
       const validFiles = result.filePaths.filter((f) => fileExists(f) && isSupportedMediaPath(f));
-
       const converted = await convertLocalMediaFiles(
         validFiles,
         getDownloadDirectory(),
         { bitrate: payload?.bitrate || 192 },
         (progress) => { event.sender.send("download:progress", progress); }
       );
-
       const successfulFiles = converted.conversions
         .filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath))
         .map((item) => item.filePath);
-
-      const pixelArtFiles = getPixelArtFiles();
-      const usedCovers = new Set();
-      const importedSongs = successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
-      const changedCount = insertSongs(importedSongs);
-      const afterSongs = listSongsShaped();
-
-      console.log(`[localitfy convert] converted=${successfulFiles.length}, changed=${changedCount}`);
-      return { ...converted, changedCount, songs: afterSongs };
+      let changedCount = 0;
+      let afterSongs = listSongsShaped();
+      if (successfulFiles.length) {
+        const pixelArtFiles = getPixelArtFiles();
+        const usedCovers = new Set();
+        const importedSongs = successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
+        changedCount = insertSongs(importedSongs);
+        afterSongs = listSongsShaped();
+      }
+      return { ...converted, changedCount, songs: afterSongs, downloadFolder: getDownloadDirectory() };
     } catch (error) {
-      console.log("[localitfy convert error]", error?.stack || error?.message);
-      return {
-        downloadFolder: getDownloadDirectory(),
-        conversions: [{ ok: false, error: error?.message || "conversion failed" }],
-        changedCount: 0,
-        songs: listSongsShaped()
-      };
+      console.log("[localitfy convert pick error]", error?.message);
+      return { downloadFolder: getDownloadDirectory(), conversions: [], changedCount: 0, songs: listSongsShaped() };
     }
   });
 
-  // ✅ Download audio — full progress payload (progress + speed + size + eta) forwarded to renderer
   ipcMain.handle("download:audio", async (event, payload) => {
     try {
-      const input = payload?.urls || payload?.text || "";
-      const downloadDirectory = getDownloadDirectory();
-
-      const result = await downloadAudioUrls(input, downloadDirectory, (progress) => {
-        // progress now contains: { type, file, progress, speed, size, eta, message }
-        // The renderer receives all fields and can display speed/eta in the UI
+      const urls = Array.isArray(payload?.urls) ? payload.urls : [payload?.url].filter(Boolean);
+      const autoAdd = typeof payload?.autoAdd === "boolean" ? payload.autoAdd : true;
+      const downloadFolder = getDownloadDirectory(payload?.folder);
+      const result = await downloadAudioUrls(urls, downloadFolder, (progress) => {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
         event.sender.send("download:progress", progress);
-      });
-
+      }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "" });
       const successfulFiles = result.downloads
         .filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath))
         .map((item) => item.filePath);
-
-      const pixelArtFiles = getPixelArtFiles();
-      const usedCovers = new Set();
-      const importedSongs = successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
-      const changedCount = insertSongs(importedSongs);
-      const afterSongs = listSongsShaped();
-
-      console.log(`[localitfy download] downloaded=${successfulFiles.length}, changed=${changedCount}`);
-      return { ...result, changedCount, songs: afterSongs };
+      let changedCount = 0;
+      let afterSongs = listSongsShaped();
+      if (autoAdd && successfulFiles.length) {
+        const pixelArtFiles = getPixelArtFiles();
+        const usedCovers = new Set();
+        const importedSongs = successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
+        changedCount = insertSongs(importedSongs);
+        afterSongs = listSongsShaped();
+      }
+      console.log(`[localitfy download] downloaded=${successfulFiles.length}, changed=${changedCount}, autoAdd=${autoAdd}`);
+      return { ...result, changedCount, songs: afterSongs, autoAdd };
     } catch (error) {
       console.log("[localitfy download error]", error?.stack || error?.message);
       return {
         downloadFolder: getDownloadDirectory(),
         downloads: [{ ok: false, error: error?.message || "download failed" }],
         changedCount: 0,
-        songs: listSongsShaped()
+        songs: listSongsShaped(),
+        autoAdd: true
       };
     }
   });
 
-  ipcMain.handle("download:open-folder", async () => {
-    fs.mkdirSync(getDownloadDirectory(), { recursive: true });
-    await shell.openPath(getDownloadDirectory());
+  ipcMain.handle("download:cancel", async () => ({ cancelled: cancelActiveDownloads() }));
+  ipcMain.handle("download:choose-folder", async () => {
+    const owner = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
+    const result = await dialog.showOpenDialog(owner, { title: "Choose localtify download folder", properties: ["openDirectory", "createDirectory"] });
+    if (result.canceled || !result.filePaths?.[0]) return { canceled: true, folder: "" };
+    return { canceled: false, folder: result.filePaths[0] };
+  });
+  ipcMain.handle("download:open-folder", async (_event, folder) => {
+    const target = getDownloadDirectory(folder);
+    await shell.openPath(target);
     return true;
   });
 
-  // Song handlers
   ipcMain.handle("song:patch", async (_event, id, patch) => {
     const updated = patchSong(id, patch);
     return updated ? shapeSong(updated) : null;
   });
-
   ipcMain.handle("song:random-cover", async (_event, id) => {
     const covers = getPixelArtFiles();
     const song = getSongs().find((item) => item.id === id);
-    const chosen = pickLeastUsedCover(covers, song ? [song] : [], { avoidSelectedCurrent: true }) || pickCover(covers);
-    if (!chosen) return null;
+    const chosen = pickLeastUsedCover(covers, song ? [song] : [], { avoidSelectedCurrent: true });
     const updated = patchSong(id, { coverPath: chosen });
     return updated ? shapeSong(updated) : null;
   });
-
-  ipcMain.handle("song:analyze-volume", async (_event, id) => {
-    const song = getSongs().find((item) => item.id === id);
-    if (!song) return null;
-    const result = await analyzeVolumeGain(song.filePath);
-    if (result.ok) {
-      const updated = patchSong(song.id, { volumeGain: result.volumeGain });
-      return { ...result, song: updated ? shapeSong(updated) : null };
-    }
-    return result;
-  });
-
-  ipcMain.handle("song:pick-cover", async (event, id) => {
-    const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
-    const options = {
-      title: "choose album art",
-      buttonLabel: "use image",
-      defaultPath: app.getPath("pictures"),
-      properties: ["openFile"],
-      filters: [{ name: "images", extensions: ["png", "jpg", "jpeg", "webp", "gif"] }]
-    };
-
-    const result = senderWindow && !senderWindow.isDestroyed()
-      ? await dialog.showOpenDialog(senderWindow, options)
-      : await dialog.showOpenDialog(options);
-
-    if (result.canceled || !result.filePaths[0]) return null;
-    const imagePath = result.filePaths[0];
-    if (!fileExists(imagePath) || !isImageFile(imagePath)) return null;
-    const updated = patchSong(id, { coverPath: imagePath });
-    return updated ? shapeSong(updated) : null;
-  });
-
   ipcMain.handle("song:delete", async (_event, id) => {
     try {
       deleteSong(id);
@@ -1487,13 +1552,11 @@ app.whenReady().then(() => {
       return listSongsShaped();
     }
   });
-
   ipcMain.handle("library:clear", async () => {
     clearLibrary();
     return [];
   });
 
-  // Settings
   ipcMain.handle("settings:get", async () => getSettings());
   ipcMain.handle("settings:save", async (_event, settings) => {
     try {
@@ -1513,54 +1576,86 @@ app.whenReady().then(() => {
     }
   });
 
-  // Playlists
   ipcMain.handle("playlists:get", async () => getPlaylists());
   ipcMain.handle("playlists:save", async (_event, playlists) => {
-    try {
-      return savePlaylists(playlists);
-    } catch (error) {
-      console.log("[localitfy playlists save error]", error?.message);
-      return getPlaylists();
-    }
+    try { return savePlaylists(playlists); } catch { return getPlaylists(); }
   });
+  ipcMain.handle("database:backup-now", async () => {
+    try { return { ok: backupDatabase() }; } catch (e) { return { ok: false, error: e?.message }; }
+  });
+  ipcMain.handle("database:repair-now", async () => {
+    try { repairDatabaseNow(); return { ok: true, status: getDatabaseStatus(), songs: listSongsShaped() }; } catch (e) { return { ok: false, error: e?.message }; }
+  });
+  ipcMain.handle("database:status", async () => getDatabaseStatus());
 
-  // Database diagnostics / repair
-  ipcMain.handle("db:status", async () => getDatabaseStatus());
-  ipcMain.handle("db:backup", async () => ({ backupPath: backupDatabase("manual") }));
-  ipcMain.handle("db:repair", async () => repairDatabaseNow());
-
-  // Discord
+  ipcMain.handle("discord:set-activity", async (_event, payload) => {
+    try { return { ok: await setDiscordActivity(payload) }; } catch { return { ok: false }; }
+  });
+  ipcMain.handle("discord:clear-activity", async () => {
+    try { return { ok: await clearDiscordActivity() }; } catch { return { ok: false }; }
+  });
   ipcMain.handle("discord:status", async () => getDiscordStatus());
-  ipcMain.handle("discord:reset", async () => {
-    await resetDiscordActivityCache().catch(() => undefined);
-    return getDiscordStatus();
-  });
-
-  ipcMain.handle("discord:update", async (_event, payload) => {
-    await setDiscordActivity(payload).catch((e) => {
-      console.log("[localitfy discord update error]", e?.message);
-    });
-    return getDiscordStatus();
-  });
-  ipcMain.handle("discord:clear", async () => {
-    await clearDiscordActivity().catch(() => undefined);
-    return getDiscordStatus();
-  });
-
-  ipcMain.handle("player:command", async (_event, command) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send("player:command", command);
-    }
+  ipcMain.handle("discord:reset-cache", async () => {
+    resetDiscordActivityCache();
     return true;
   });
 
-  // Auto updater
-  setupAutoUpdater();
+  ipcMain.handle("spotify-fetch-tracks", async (_event, url) => {
+    try {
+      if (!url || typeof url !== "string") return { tracks: [] };
+      const fallbackTracks = [
+        { id: "mock-1", title: "Track Title One", artist: "Artist Name", duration: 180, albumName: "Mock Album" },
+        { id: "mock-2", title: "Track Title Two", artist: "Artist Name", duration: 210, albumName: "Mock Album" }
+      ];
+      return { tracks: fallbackTracks };
+    } catch (error) {
+      console.log("[localitfy spotify fetch error]", error?.message);
+      return { tracks: [], error: error?.message };
+    }
+  });
+
+  ipcMain.handle("spotify-download-batch", async (event, { tracks, options }) => {
+    try {
+      const downloadFolder = getDownloadDirectory(options?.folder);
+      const autoAdd = typeof options?.autoAdd === "boolean" ? options.autoAdd : true;
+      const progressCallback = (progress) => {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
+        event.sender.send("download:progress", progress);
+      };
+      const result = await downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
+      const successfulFiles = result.downloads
+        .filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath))
+        .map((item) => item.filePath);
+      let changedCount = 0;
+      let afterSongs = listSongsShaped();
+      if (autoAdd && successfulFiles.length) {
+        const pixelArtFiles = getPixelArtFiles();
+        const usedCovers = new Set();
+        const importedSongs = successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
+        changedCount = insertSongs(importedSongs);
+        afterSongs = listSongsShaped();
+      }
+      return {
+        ...result,
+        changedCount,
+        songs: afterSongs,
+        downloadFolder
+      };
+    } catch (error) {
+      console.log("[localitfy spotify batch download error]", error?.message);
+      return {
+        downloadFolder: getDownloadDirectory(options?.folder),
+        downloads: [{ ok: false, error: error?.message || "batch download failed" }],
+        changedCount: 0,
+        songs: listSongsShaped()
+      };
+    }
+  });
+
   ipcMain.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
   ipcMain.handle("localitfy:download-update", async () => downloadUpdate());
   ipcMain.handle("localitfy:install-update", async () => installUpdate());
 
-  // Window controls
   ipcMain.handle("window:minimize", async (event) => {
     BrowserWindow.fromWebContents(event.sender)?.minimize();
     return true;
@@ -1592,14 +1687,13 @@ app.whenReady().then(() => {
 
 app.on("before-quit", async () => {
   allowQuit = true;
-  await shutdownDiscordActivity("app-before-quit").catch(() => undefined);
-});
-
-app.on("will-quit", () => {
+  await shutdownDiscordActivity("app-before-quit");
   cleanupNativeWindowsMedia();
+  stopLocaltifyMediaServer();
 });
 
-app.on("window-all-closed", async () => {
-  await shutdownDiscordActivity("window-all-closed").catch(() => undefined);
-  if (process.platform !== "darwin") app.quit();
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 });

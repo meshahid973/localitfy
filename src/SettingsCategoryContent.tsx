@@ -2,84 +2,159 @@ import { memo, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 
 type ThemeId = string;
-type Settings = { [key: string]: any };
+type DownloadQuality = "best" | "320" | "256" | "192";
+type DownloadFormat = "mp3" | "flac" | "wav";
+
+type Settings = {
+  downloadQuality: DownloadQuality;
+  downloadFormat: DownloadFormat;
+  [key: string]: any;
+};
+
+type ThemeOption = {
+  id: string;
+  name: string;
+  note?: string;
+};
+
+type CurrentThemeOption = {
+  name: string;
+  note?: string;
+};
+
+type CustomThemeColorPatch = {
+  customThemeColor: string;
+  [key: string]: string;
+};
+
+type CustomThemePresetOption = {
+  id: string;
+  name: string;
+  note?: string;
+  colors: CustomThemeColorPatch;
+};
+
+type CustomThemeTokenOption = {
+  key: string;
+  label: string;
+  help?: string;
+  value: string;
+};
+
+type ChoiceOption = {
+  id: string;
+  label?: string;
+  name?: string;
+  note?: string;
+};
+
+type PlaylistOption = {
+  id: string;
+  name: string;
+  songIds: string[];
+};
+
+type SongLike = {
+  id?: string;
+  title?: string;
+  artist?: string;
+  [key: string]: any;
+};
+
+type ImportAnimationLike = {
+  active: boolean;
+  [key: string]: any;
+};
+
+type UpdatePromptLike = {
+  [key: string]: any;
+};
+
+type DiagnosticsInfo = {
+  items: Array<{ label: string; value: string | number }>;
+  copyText: string;
+};
+
+type MutableNumberRef = {
+  current: number;
+};
 
 type SettingsCategoryContentProps = {
-  settingsCategory: any;
-  currentTheme: any;
-  settings: any;
-  updateSetting: any;
-  visibleThemes: any;
-  THEME_SWATCH_COLORS: any;
-  effectiveTheme: any;
-  randomizeCustomThemePalette: any;
-  resetCustomThemePalette: any;
-  saveCurrentCustomThemePreset: any;
-  customThemeName: any;
-  setCustomThemeName: any;
-  currentSong: any;
-  BUILT_IN_CUSTOM_THEME_PRESETS: any;
-  applyCustomThemePreset: any;
-  savedCustomThemes: any;
-  removeSavedCustomThemePreset: any;
-  customThemeTokens: any;
-  customThemeHexDrafts: any;
-  handleCustomThemeNativeColor: any;
-  handleCustomThemeHexDraftChange: any;
-  commitCustomThemeHexDraft: any;
-  coverColorSyncOptions: any;
-  selectedCoverColorSyncMode: any;
-  updateCoverColorSyncMode: any;
-  discordPreview: any;
-  discordStyleOptions: any;
-  discordSecondLineOptions: any;
-  discordArtModeOptions: any;
-  discordCleanupOptions: any;
-  songs: any;
-  libraryScanBusy: any;
-  cleanLibraryMetadataAction: any;
-  rebuildSearchIndexAction: any;
-  importSongs: any;
-  importAnimation: any;
-  libraryScanMessage: any;
-  newPlaylistName: any;
-  setNewPlaylistName: any;
-  createPlaylist: any;
-  changeView: any;
-  clearQueue: any;
-  playQueue: any;
-  repeatPlaylist: any;
-  setRepeatPlaylist: any;
-  playlists: any;
-  openPlaylist: any;
-  playPlaylist: any;
-  removePlaylist: any;
-  pixelArtAssets: any;
-  pixelArtBusy: any;
-  randomizeAllCovers: any;
-  rescanPixelArtFolder: any;
-  downloadFolderLabel: any;
-  chooseDownloadFolder: any;
-  APP_VERSION: any;
-  updatePrompt: any;
-  updateStatusLabel: any;
-  manualUpdateCheck: any;
-  askUpdaterToInstall: any;
-  skipAvailableUpdate: any;
-  setWhatsNewOpen: any;
-  whatsNewItems: any;
-  copyDiagnosticsInfo: any;
-  diagnosticsCopied: any;
-  diagnosticsInfo: any;
-  likedSongs: any;
-  libraryRenderLimitRef: any;
-  INITIAL_LIBRARY_RENDER_LIMIT: any;
-  setLibraryRenderLimit: any;
-  resetDiscordSettings: any;
-  resetAppearanceSettings: any;
-  resetPlayerLayoutSettings: any;
-  resetLibraryLayoutSettings: any;
-  resetAllSettingsSafely: any;
+  settingsCategory: string;
+  currentTheme: CurrentThemeOption;
+  settings: Settings;
+  updateSetting: (key: string, value: any) => void | Promise<void>;
+  visibleThemes: ThemeOption[];
+  THEME_SWATCH_COLORS: Record<string, string>;
+  effectiveTheme: string;
+  randomizeCustomThemePalette: () => void;
+  resetCustomThemePalette: () => void;
+  saveCurrentCustomThemePreset: () => void;
+  customThemeName: string;
+  setCustomThemeName: (value: string) => void;
+  currentSong: SongLike | null;
+  BUILT_IN_CUSTOM_THEME_PRESETS: CustomThemePresetOption[];
+  applyCustomThemePreset: (preset: CustomThemePresetOption) => void;
+  savedCustomThemes: CustomThemePresetOption[];
+  removeSavedCustomThemePreset: (id: string) => void;
+  customThemeTokens: CustomThemeTokenOption[];
+  customThemeHexDrafts: Record<string, string>;
+  handleCustomThemeNativeColor: (key: string, value: string) => void;
+  handleCustomThemeHexDraftChange: (key: string, value: string) => void;
+  commitCustomThemeHexDraft: (key: string, draft: string, fallback: string) => void;
+  coverColorSyncOptions: ChoiceOption[];
+  selectedCoverColorSyncMode: string;
+  updateCoverColorSyncMode: (id: string) => void;
+  discordPreview: { badge: string; details: string; state: string };
+  discordStyleOptions: ChoiceOption[];
+  discordSecondLineOptions: ChoiceOption[];
+  discordArtModeOptions: ChoiceOption[];
+  discordCleanupOptions: ChoiceOption[];
+  songs: SongLike[];
+  libraryScanBusy: boolean;
+  cleanLibraryMetadataAction: () => void;
+  rebuildSearchIndexAction: () => void;
+  importSongs: () => void;
+  importAnimation: ImportAnimationLike;
+  libraryScanMessage: string;
+  newPlaylistName: string;
+  setNewPlaylistName: (value: string) => void;
+  createPlaylist: () => void;
+  changeView: (view: string, source?: string) => void;
+  clearQueue: () => void;
+  playQueue: string[];
+  repeatPlaylist: boolean;
+  setRepeatPlaylist: (value: boolean) => void;
+  playlists: PlaylistOption[];
+  openPlaylist: (playlistId: string) => void;
+  playPlaylist: (playlist: PlaylistOption, shuffle: boolean) => void;
+  removePlaylist: (playlistId: string) => void;
+  pixelArtAssets: any[];
+  pixelArtBusy: boolean;
+  randomizeAllCovers: () => void;
+  rescanPixelArtFolder: () => void;
+  downloadFolderLabel: string;
+  chooseDownloadFolder: () => void;
+  APP_VERSION: string;
+  updatePrompt: UpdatePromptLike;
+  updateStatusLabel: (status: string) => string;
+  manualUpdateCheck: () => void;
+  askUpdaterToInstall: () => void;
+  skipAvailableUpdate: () => void;
+  setWhatsNewOpen: (value: boolean) => void;
+  whatsNewItems: string[];
+  copyDiagnosticsInfo: () => void;
+  diagnosticsCopied: boolean;
+  diagnosticsInfo: DiagnosticsInfo;
+  likedSongs: SongLike[];
+  libraryRenderLimitRef: MutableNumberRef;
+  INITIAL_LIBRARY_RENDER_LIMIT: number;
+  setLibraryRenderLimit: (value: number) => void;
+  resetDiscordSettings: () => void;
+  resetAppearanceSettings: () => void;
+  resetPlayerLayoutSettings: () => void;
+  resetLibraryLayoutSettings: () => void;
+  resetAllSettingsSafely: () => void;
 };
 
 function clamp(value: number, min: number, max: number) {

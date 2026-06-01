@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 audio-reactive performance + proximity stability V147 — file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 emergency playback protocol repair V155 — file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
@@ -2041,15 +2041,23 @@ function safeNumber(value: unknown, fallback = 0) {
 
 function sanitizeSongRecord(song: Partial<Song> & Record<string, any>, index: number): Song {
   const metadata = smartSongMetadata(song, index);
+  const sourcePath = String(song.filePath || "");
+  const sourceUrl = String(song.url || "");
+  const backendFileExists =
+    typeof song.fileExists === "boolean"
+      ? song.fileExists
+      : typeof song.exists === "boolean"
+        ? song.exists
+        : undefined;
 
   return {
     id: String(song.id || makeLocalId("song")),
     title: metadata.title,
     artist: metadata.artist,
     album: metadata.album,
-    filePath: String(song.filePath || ""),
-    url: String(song.url || ""),
-    fileExists: song.fileExists,
+    filePath: sourcePath,
+    url: sourceUrl,
+    fileExists: backendFileExists,
     coverPath: song.coverPath ?? null,
     coverUrl: song.coverUrl ?? null,
     liked: Boolean(song.liked),
@@ -2213,10 +2221,6 @@ function getAmbientStyle(coverUrl?: string | null): CSSProperties | undefined {
   } as CSSProperties;
 }
 
-function looksLikeDirectImageUrl(value?: string | null) {
-  if (!value) return false;
-  return /^(?:data:image\/|blob:|https?:\/\/|file:\/\/|\/)/i.test(value);
-}
 
 function isRendererSafeImageUrl(value?: string | null) {
   if (!value) return false;
@@ -7396,7 +7400,7 @@ function MainModeApp() {
     if (code === 1) return "audio loading was cancelled";
     if (code === 2) return "file loading failed. check if the audio still exists";
     if (code === 3) return "audio file could not decode. it may be corrupted";
-    if (code === 4) return "audio format unsupported or file path missing";
+    if (code === 4) return "audio stream unavailable. restart localtify, then reimport if it still happens";
 
     return "audio could not start. try reimporting the file.";
   }
@@ -12670,6 +12674,7 @@ function MainModeApp() {
       <audio
         ref={audioRef}
         preload="auto"
+        crossOrigin="anonymous"
         onCanPlay={handleCanPlay}
         onPlaying={handlePlaying}
         onPlay={() => {
