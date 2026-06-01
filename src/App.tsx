@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 emergency playback protocol repair V155 — file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 Yukari update peek + ribbon motion polish V159 — file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
@@ -75,6 +75,7 @@ type Song = {
   artist: string;
   album: string;
   filePath: string;
+  // Runtime-only. Do not trust old saved URLs from the database.
   url: string;
   fileExists?: boolean;
   coverPath?: string | null;
@@ -93,8 +94,34 @@ type Song = {
   sampleRate?: number;
 };
 
+type PlaybackUrlResult = {
+  ok: boolean;
+  url?: string;
+  filePath?: string;
+  fileExists?: boolean;
+  exists?: boolean;
+  sizeBytes?: number;
+  mtimeMs?: number;
+  cacheTtlMs?: number;
+  error?: string;
+};
+
+type PlaybackUrlCacheEntry = {
+  url: string;
+  checkedAt: number;
+  fileExists: boolean;
+  sizeBytes?: number;
+  mtimeMs?: number;
+};
+
+const PLAYBACK_URL_CACHE_TTL_MS = 20 * 60 * 1000;
+
+function getSongPlaybackSourceKey(song: Pick<Song, "id" | "filePath" | "url"> | null | undefined) {
+  return String(song?.filePath || song?.url || song?.id || "").trim().toLowerCase();
+}
+
 function isPlayableSong(song: Song | null | undefined): song is Song {
-  return !!song && !!song.url && song.fileExists !== false;
+  return !!song && Boolean(song.filePath || song.url) && song.fileExists !== false;
 }
 
 type View = "home" | "library" | "playlists" | "liked" | "covers" | "analytics" | "downloads" | "settings";
@@ -768,6 +795,7 @@ const APP_VERSION = "0.3.5";
 const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
+const yukariUpdateImage = new URL("./assets/yukari.png", import.meta.url).href;
 const BOOT_MIN_VISIBLE_MS = 1450;
 const BOOT_STEPS = [
   { label: "settings", detail: "theme, volume, Discord, and app preferences" },
@@ -2041,8 +2069,11 @@ function safeNumber(value: unknown, fallback = 0) {
 
 function sanitizeSongRecord(song: Partial<Song> & Record<string, any>, index: number): Song {
   const metadata = smartSongMetadata(song, index);
-  const sourcePath = String(song.filePath || "");
-  const sourceUrl = String(song.url || "");
+  const sourcePath = String(song.filePath || song.path || "");
+  const rawRuntimeUrl = String(song.playbackUrl || song.url || "");
+  // If a real file path exists, discard backend/database URLs here.
+  // Playback URLs are generated lazily by the main process from filePath.
+  const sourceUrl = sourcePath ? "" : rawRuntimeUrl;
   const backendFileExists =
     typeof song.fileExists === "boolean"
       ? song.fileExists
@@ -3232,6 +3263,8 @@ function MainModeApp() {
   const sleepTimerRef = useRef<number | null>(null);
   const positionSaveRef = useRef(0);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
+  const playbackUrlCacheRef = useRef<Map<string, PlaybackUrlCacheEntry>>(new Map());
+  const playbackUrlPendingRef = useRef<Map<string, Promise<PlaybackUrlResult>>>(new Map());
   const bootedRef = useRef(false);
   const lastQueueHistoryRef = useRef("");
   const toastTimerRef = useRef<number | null>(null);
@@ -6949,6 +6982,118 @@ function MainModeApp() {
     [getTargetAudioVolume, settings.playbackSpeed, settings.gaplessPlayback]
   );
 
+  const resolvePlaybackUrl = useCallback(
+    async (song: Song | null | undefined, options: { force?: boolean } = {}): Promise<PlaybackUrlResult> => {
+      if (!song) return { ok: false, fileExists: false, error: "missing song" };
+
+      const sourceKey = getSongPlaybackSourceKey(song);
+      const filePath = String(song.filePath || "");
+
+      if (!sourceKey) return { ok: false, fileExists: false, error: "missing file path" };
+      if (song.fileExists === false && !options.force) return { ok: false, fileExists: false, error: "file marked missing" };
+
+      const now = Date.now();
+      const cached = playbackUrlCacheRef.current.get(sourceKey);
+
+      if (!options.force && cached?.url && cached.fileExists && now - cached.checkedAt < PLAYBACK_URL_CACHE_TTL_MS) {
+        return {
+          ok: true,
+          url: cached.url,
+          filePath,
+          fileExists: true,
+          sizeBytes: cached.sizeBytes,
+          mtimeMs: cached.mtimeMs,
+          cacheTtlMs: PLAYBACK_URL_CACHE_TTL_MS
+        };
+      }
+
+      const bridge = window.localitfy as any;
+      const resolver = bridge?.resolvePlaybackUrl;
+
+      if (typeof resolver !== "function") {
+        if (song.url) {
+          return { ok: true, url: song.url, filePath, fileExists: true, cacheTtlMs: PLAYBACK_URL_CACHE_TTL_MS };
+        }
+
+        return { ok: false, filePath, fileExists: undefined, error: "playback resolver unavailable" };
+      }
+
+      const pendingKey = `${sourceKey}:${options.force ? "force" : "normal"}`;
+      const existingPending = playbackUrlPendingRef.current.get(pendingKey);
+      if (existingPending) return existingPending;
+
+      const request = Promise.resolve(
+        resolver({
+          songId: song.id,
+          filePath,
+          fallbackUrl: song.url || "",
+          force: Boolean(options.force)
+        })
+      )
+        .then((result: any): PlaybackUrlResult => {
+          const fileExists =
+            typeof result?.fileExists === "boolean"
+              ? result.fileExists
+              : typeof result?.exists === "boolean"
+                ? result.exists
+                : Boolean(result?.ok);
+
+          if (result?.ok && result?.url && fileExists !== false) {
+            const entry: PlaybackUrlCacheEntry = {
+              url: String(result.url),
+              checkedAt: Date.now(),
+              fileExists: true,
+              sizeBytes: typeof result.sizeBytes === "number" ? result.sizeBytes : undefined,
+              mtimeMs: typeof result.mtimeMs === "number" ? result.mtimeMs : undefined
+            };
+
+            playbackUrlCacheRef.current.set(sourceKey, entry);
+
+            return {
+              ok: true,
+              url: entry.url,
+              filePath: result.filePath || filePath,
+              fileExists: true,
+              sizeBytes: entry.sizeBytes,
+              mtimeMs: entry.mtimeMs,
+              cacheTtlMs: PLAYBACK_URL_CACHE_TTL_MS
+            };
+          }
+
+          playbackUrlCacheRef.current.delete(sourceKey);
+
+          if (fileExists === false && song.id) {
+            setSongs((oldSongs) =>
+              oldSongs.map((item) => (item.id === song.id ? { ...item, fileExists: false, url: "" } : item))
+            );
+          }
+
+          return {
+            ok: false,
+            filePath,
+            fileExists,
+            error: String(result?.error || "could not resolve playback url")
+          };
+        })
+        .catch((error: unknown): PlaybackUrlResult => {
+          playbackUrlCacheRef.current.delete(sourceKey);
+          return {
+            ok: false,
+            filePath,
+            fileExists: undefined,
+            error: error instanceof Error ? error.message : String(error || "could not resolve playback url")
+          };
+        })
+        .finally(() => {
+          playbackUrlPendingRef.current.delete(pendingKey);
+        }) as Promise<PlaybackUrlResult>;
+
+      playbackUrlPendingRef.current.set(pendingKey, request);
+      return request;
+    },
+    []
+  );
+
   useEffect(() => {
     applyAudioQualitySettings();
   }, [applyAudioQualitySettings, currentSong?.id, currentSong?.volumeGain, currentSong?.customVolume]);
@@ -7242,6 +7387,7 @@ function MainModeApp() {
   }, [songs, currentId]);
 
   useEffect(() => {
+    let cancelled = false;
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -7261,7 +7407,9 @@ function MainModeApp() {
       return;
     }
 
-    if (!currentSong.url || currentSong.fileExists === false) {
+    const sourceKey = getSongPlaybackSourceKey(currentSong);
+
+    if (!sourceKey || currentSong.fileExists === false) {
       audio.pause();
       audio.removeAttribute("src");
       audio.load();
@@ -7277,26 +7425,53 @@ function MainModeApp() {
       return;
     }
 
-    if (audio.src !== currentSong.url) {
-      audio.pause();
-      audio.src = currentSong.url;
-      audio.load();
+    setStatusText(`loading ${prettyTitle(currentSong.title, 5)}`);
 
-      const savedPosition = settings.rememberPlaybackPosition
-        ? Math.max(0, Math.min(Number(currentSong.playbackPosition || 0), Math.max(0, (currentSong.duration || 0) - 8)))
-        : 0;
+    void resolvePlaybackUrl(currentSong).then((result) => {
+      if (cancelled) return;
+      if ((songRef.current || currentSong)?.id !== currentSong.id) return;
 
-      if (savedPosition > 3) {
-        audio.currentTime = savedPosition;
+      if (!result.ok || !result.url || result.fileExists === false) {
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+
+        pendingPlayRef.current = false;
+        resetPlayCountTracker();
+
+        setIsPlaying(false);
+        setCurrentTime(0);
+        setCurrentDuration(0);
+        setPlayerError(result.fileExists === false ? "this audio file is missing. reimport it on this pc." : "could not create a playback URL for this song.");
+        setStatusText(result.fileExists === false ? "file missing" : "playback url failed");
+        return;
       }
 
-      setCurrentTime(savedPosition);
-      setCurrentDuration(currentSong.duration || 0);
-      setPlayerError("");
-      setStatusText(`loaded ${prettyTitle(currentSong.title, 5)}`);
-      primeNextAudioCache();
-    }
-  }, [currentSong?.id, currentSong?.url, currentSong?.fileExists, currentSong?.volumeGain, currentSong?.customVolume, settings.rememberPlaybackPosition, applyAudioQualitySettings]);
+      if (audio.src !== result.url) {
+        audio.pause();
+        audio.src = result.url;
+        audio.load();
+
+        const savedPosition = settings.rememberPlaybackPosition
+          ? Math.max(0, Math.min(Number(currentSong.playbackPosition || 0), Math.max(0, (currentSong.duration || 0) - 8)))
+          : 0;
+
+        if (savedPosition > 3) {
+          audio.currentTime = savedPosition;
+        }
+
+        setCurrentTime(savedPosition);
+        setCurrentDuration(currentSong.duration || 0);
+        setPlayerError("");
+        setStatusText(`loaded ${prettyTitle(currentSong.title, 5)}`);
+        primeNextAudioCache();
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentSong?.id, currentSong?.filePath, currentSong?.fileExists, currentSong?.volumeGain, currentSong?.customVolume, settings.rememberPlaybackPosition, applyAudioQualitySettings, resolvePlaybackUrl]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -7339,17 +7514,21 @@ function MainModeApp() {
   function primeNextAudioCache() {
     if (!settings.gaplessPlayback) return;
     const nextSong = getNextPlayableSongForCache();
-    if (!nextSong?.url) return;
+    if (!nextSong || !getSongPlaybackSourceKey(nextSong)) return;
 
-    if (!nextAudioRef.current) {
-      nextAudioRef.current = new Audio();
-      nextAudioRef.current.preload = "auto";
-    }
+    void resolvePlaybackUrl(nextSong).then((result) => {
+      if (!result.ok || !result.url || result.fileExists === false) return;
 
-    if (nextAudioRef.current.src !== nextSong.url) {
-      nextAudioRef.current.src = nextSong.url;
-      nextAudioRef.current.load();
-    }
+      if (!nextAudioRef.current) {
+        nextAudioRef.current = new Audio();
+        nextAudioRef.current.preload = "auto";
+      }
+
+      if (nextAudioRef.current.src !== result.url) {
+        nextAudioRef.current.src = result.url;
+        nextAudioRef.current.load();
+      }
+    });
   }
 
   function stopFade() {
@@ -7414,13 +7593,25 @@ function MainModeApp() {
       return false;
     }
 
-    if (!song.url || song.fileExists === false) {
+    if (!getSongPlaybackSourceKey(song) || song.fileExists === false) {
       pendingPlayRef.current = false;
       resetPlayCountTracker();
 
       setIsPlaying(false);
       setPlayerError("this audio file is missing. reimport it on this pc.");
       setStatusText("file missing");
+      return false;
+    }
+
+    const playbackUrl = await resolvePlaybackUrl(song);
+
+    if (!playbackUrl.ok || !playbackUrl.url || playbackUrl.fileExists === false) {
+      pendingPlayRef.current = false;
+      resetPlayCountTracker();
+
+      setIsPlaying(false);
+      setPlayerError(playbackUrl.fileExists === false ? "this audio file is missing. reimport it on this pc." : "could not create a playback URL for this song.");
+      setStatusText(playbackUrl.fileExists === false ? "file missing" : "playback url failed");
       return false;
     }
 
@@ -7435,8 +7626,8 @@ function MainModeApp() {
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
       volumeRef.current = safeVolume;
 
-      if (audio.src !== song.url) {
-        audio.src = song.url;
+      if (audio.src !== playbackUrl.url) {
+        audio.src = playbackUrl.url;
         audio.load();
       }
 
@@ -8326,6 +8517,12 @@ function MainModeApp() {
   }
 
   async function patchSongLocal(id: string, patch: Partial<Song>) {
+    if (Object.prototype.hasOwnProperty.call(patch, "filePath") || Object.prototype.hasOwnProperty.call(patch, "url")) {
+      const cachedSong = songsById.get(id);
+      const cacheKey = getSongPlaybackSourceKey(cachedSong);
+      if (cacheKey) playbackUrlCacheRef.current.delete(cacheKey);
+    }
+
     setSongs((oldSongs) => oldSongs.map((song) => (song.id === id ? { ...song, ...patch } : song)));
 
     try {
@@ -8459,6 +8656,8 @@ function MainModeApp() {
         previousSongSources
       );
 
+      playbackUrlCacheRef.current.clear();
+      playbackUrlPendingRef.current.clear();
       setSongs(imported);
       setLibraryScanMessage(`indexed ${imported.length} tracks • search, folders, and metadata ready`);
 
@@ -8684,6 +8883,8 @@ function MainModeApp() {
       setDownloadResults(downloads);
       syncDownloadFilesToQueue(downloads);
       setDownloadFolderLabel(result.downloadFolder || settings.downloadFolder || "");
+      playbackUrlCacheRef.current.clear();
+      playbackUrlPendingRef.current.clear();
       setSongs(nextSongs);
       setLibraryScanMessage(`indexed ${nextSongs.length} tracks instantly`);
 
@@ -9790,7 +9991,7 @@ function MainModeApp() {
       return;
     }
 
-    if (!targetSong.url || targetSong.fileExists === false) {
+    if (!getSongPlaybackSourceKey(targetSong) || targetSong.fileExists === false) {
       pendingPlayRef.current = false;
       resetPlayCountTracker();
 
@@ -9889,7 +10090,7 @@ function MainModeApp() {
       return;
     }
 
-    if (!currentSong.url || currentSong.fileExists === false) {
+    if (!getSongPlaybackSourceKey(currentSong) || currentSong.fileExists === false) {
       pendingPlayRef.current = false;
       resetPlayCountTracker();
 
@@ -10918,6 +11119,17 @@ function MainModeApp() {
             exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -16 }}
             transition={settings.reducedMotion ? { duration: 0.12 } : updateRibbonEnterSpring}
           >
+            <Motion.img
+              className={`updateYukariPeek updateYukariPeek-${updatePrompt.status}`}
+              src={yukariUpdateImage}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              initial={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, x: 118, rotate: 2, scale: 0.985 }}
+              animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, rotate: 0, scale: 1 }}
+              exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, x: 96, rotate: 2, scale: 0.985 }}
+              transition={settings.reducedMotion ? { duration: 0.12 } : { type: "spring", stiffness: 260, damping: 24, mass: 0.82, delay: 0.08 }}
+            />
             <Motion.section
               className={`updateToastCard topUpdateRibbon ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
               onClick={(event) => event.stopPropagation()}
@@ -12701,6 +12913,9 @@ function MainModeApp() {
         }}
         onError={() => {
           const audio = audioRef.current;
+          const failedSong = songRef.current || currentSong;
+          const failedCacheKey = getSongPlaybackSourceKey(failedSong);
+          if (failedCacheKey) playbackUrlCacheRef.current.delete(failedCacheKey);
 
           setPlayerError(getAudioErrorText(audio));
           setStatusText("playback error");
