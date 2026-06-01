@@ -17,13 +17,20 @@ declare global {
 
   type LocalitfyDownloadProgressPayload = {
     type: string;
+    id?: string;
+    url?: string;
+    index?: number;
+    total?: number;
+    status?: "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled";
     file?: string;
+    filename?: string;
     progress?: number;
     percent?: number;
-    speed?: string;
-    size?: string;
-    eta?: string;
+    speed?: string | null;
+    size?: string | null;
+    eta?: string | null;
     message?: string;
+    error?: string;
     sizeBytes?: number;
     downloadedBytes?: number;
     totalBytes?: number;
@@ -116,14 +123,24 @@ declare global {
       downloadAudioUrls: (payload: {
         urls?: string[] | string;
         text?: string;
+        options?: {
+          quality?: string;
+          format?: string;
+          autoAdd?: boolean;
+          cleanTitle?: boolean;
+          downloadFolder?: string;
+        };
       }) => Promise<{
         downloadFolder: string;
         downloads: LocalitfyDownloadResult[];
         changedCount: number;
         songs: any[];
+        autoAdd?: boolean;
       }>;
 
-      openDownloadsFolder: () => Promise<boolean>;
+      cancelDownload: () => Promise<{ cancelled: boolean }>;
+      chooseDownloadFolder: () => Promise<{ canceled: boolean; folder: string }>;
+      openDownloadsFolder: (folder?: string) => Promise<boolean>;
 
       pickAndConvertMedia: (payload: {
         bitrate?: number;

@@ -1,4 +1,4 @@
-/* localtify 0.3.5 emergency playback HTTP range server V156 — file patch label only; APP_VERSION stays 0.3.5. */
+/* localtify 0.3.5 runtime playback URL optimization V158 — file patch label only; APP_VERSION stays 0.3.5. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const path = require("node:path");
@@ -42,6 +42,10 @@ const MEDIA_PROTOCOL = "localtify-media";
 const MEDIA_PROTOCOL_HOST = "file";
 const MEDIA_SERVER_HOST = "127.0.0.1";
 const MEDIA_SERVER_TOKEN = crypto.randomBytes(18).toString("hex");
+const MEDIA_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+const MEDIA_TOKEN_MAX_ENTRIES = 2500;
+const mediaTokenToPath = new Map();
+const mediaPathKeyToToken = new Map();
 let mediaServer = null;
 let mediaServerPort = 0;
 let mediaServerReadyPromise = null;
@@ -767,6 +771,83 @@ function addMediaResponseHeaders(res, filePath) {
   res.setHeader("Content-Type", contentTypeForFile(filePath));
 }
 
+function getMediaFileVersion(filePath) {
+  try {
+    const stats = fs.statSync(filePath);
+    return { version: `${Math.floor(stats.mtimeMs)}-${stats.size}`, sizeBytes: stats.size, mtimeMs: stats.mtimeMs };
+  } catch {
+    return { version: "missing", sizeBytes: 0, mtimeMs: 0 };
+  }
+}
+
+function pruneMediaTokens(now = Date.now()) {
+  for (const [token, entry] of mediaTokenToPath) {
+    if (!entry || entry.expiresAt <= now) {
+      mediaTokenToPath.delete(token);
+      if (entry?.pathKey) mediaPathKeyToToken.delete(entry.pathKey);
+    }
+  }
+
+  if (mediaTokenToPath.size <= MEDIA_TOKEN_MAX_ENTRIES) return;
+
+  const overflow = mediaTokenToPath.size - MEDIA_TOKEN_MAX_ENTRIES;
+  let removed = 0;
+
+  for (const [token, entry] of mediaTokenToPath) {
+    mediaTokenToPath.delete(token);
+    if (entry?.pathKey) mediaPathKeyToToken.delete(entry.pathKey);
+    removed += 1;
+    if (removed >= overflow) break;
+  }
+}
+
+function createMediaToken(filePath) {
+  const cleanPath = String(filePath || "");
+  if (!cleanPath || !path.isAbsolute(cleanPath)) return null;
+
+  const now = Date.now();
+  pruneMediaTokens(now);
+
+  const versionInfo = getMediaFileVersion(cleanPath);
+  const pathKey = `${cleanPath}|${versionInfo.version}`;
+  const existingToken = mediaPathKeyToToken.get(pathKey);
+  const existingEntry = existingToken ? mediaTokenToPath.get(existingToken) : null;
+
+  if (existingToken && existingEntry && existingEntry.expiresAt > now) {
+    existingEntry.expiresAt = now + MEDIA_TOKEN_TTL_MS;
+    return { token: existingToken, ...versionInfo };
+  }
+
+  if (existingToken) {
+    mediaTokenToPath.delete(existingToken);
+    mediaPathKeyToToken.delete(pathKey);
+  }
+
+  const token = crypto.randomBytes(18).toString("base64url");
+  mediaTokenToPath.set(token, { filePath: cleanPath, pathKey, expiresAt: now + MEDIA_TOKEN_TTL_MS, ...versionInfo });
+  mediaPathKeyToToken.set(pathKey, token);
+
+  return { token, ...versionInfo };
+}
+
+function resolveMediaToken(token) {
+  const cleanToken = String(token || "").trim();
+  if (!cleanToken) return null;
+
+  const entry = mediaTokenToPath.get(cleanToken);
+  if (!entry) return null;
+
+  const now = Date.now();
+  if (entry.expiresAt <= now) {
+    mediaTokenToPath.delete(cleanToken);
+    if (entry.pathKey) mediaPathKeyToToken.delete(entry.pathKey);
+    return null;
+  }
+
+  entry.expiresAt = now + MEDIA_TOKEN_TTL_MS;
+  return entry.filePath;
+}
+
 function sendMediaFile(req, res, filePath) {
   if (!filePath || !path.isAbsolute(filePath) || !fileExists(filePath)) {
     res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
@@ -859,8 +940,14 @@ function startLocaltifyMediaServer() {
           return;
         }
 
-        const encodedPath = requestUrl.pathname.replace(/^\/media\/?/, "").replace(/^\/+/, "");
-        const filePath = decodeMediaFilePath(encodedPath);
+        const token = decodeURIComponent(requestUrl.pathname.replace(/^\/media\/?/, "").replace(/^\/+/, "").split("/")[0] || "");
+        const filePath = resolveMediaToken(token);
+
+        if (!filePath) {
+          res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+          res.end("media token expired or not found");
+          return;
+        }
 
         sendMediaFile(req, res, filePath);
       } catch (error) {
@@ -938,21 +1025,15 @@ function safeMediaUrl(filePath) {
   if (!filePath) return "";
 
   const cleanPath = String(filePath);
-  const encodedPath = encodeMediaFilePath(cleanPath);
 
   if (!mediaServerPort) {
     return safeFileUrl(cleanPath);
   }
 
-  let version = "0";
-  try {
-    const stats = fs.statSync(cleanPath);
-    version = `${Math.floor(stats.mtimeMs)}-${stats.size}`;
-  } catch {
-    version = "missing";
-  }
+  const tokenInfo = createMediaToken(cleanPath);
+  if (!tokenInfo?.token) return safeFileUrl(cleanPath);
 
-  return `http://${MEDIA_SERVER_HOST}:${mediaServerPort}/media/${encodedPath}?t=${MEDIA_SERVER_TOKEN}&v=${encodeURIComponent(version)}`;
+  return `http://${MEDIA_SERVER_HOST}:${mediaServerPort}/media/${encodeURIComponent(tokenInfo.token)}?t=${MEDIA_SERVER_TOKEN}&v=${encodeURIComponent(tokenInfo.version)}`;
 }
 
 function isAudioFile(filePath) {
@@ -1184,7 +1265,8 @@ function shapeSong(song) {
   const coverExists = fileExists(song.coverPath);
   return {
     ...song,
-    url: safeMediaUrl(song.filePath),
+    // Keep database/bootstrap rows clean. Audio URLs are resolved lazily from filePath by playback:resolve-url.
+    url: "",
     coverUrl: safeMediaUrl(song.coverPath),
     exists,
     fileExists: exists,
@@ -1367,6 +1449,43 @@ app.whenReady().then(async () => {
     discord: getDiscordStatus(),
     covers: getCoverStats()
   }));
+
+  ipcMain.handle("playback:resolve-url", async (_event, payload = {}) => {
+    try {
+      const filePath = String(payload?.filePath || "").trim();
+
+      if (!filePath || !path.isAbsolute(filePath)) {
+        return { ok: false, fileExists: false, error: "invalid audio file path" };
+      }
+
+      if (!isAudioFile(filePath)) {
+        return { ok: false, filePath, fileExists: fileExists(filePath), error: "unsupported audio file type" };
+      }
+
+      if (!fileExists(filePath)) {
+        return { ok: false, filePath, fileExists: false, error: "audio file not found" };
+      }
+
+      const serverReady = await startLocaltifyMediaServer();
+      if (!serverReady || !mediaServerPort) {
+        return { ok: false, filePath, fileExists: true, error: "local media server unavailable" };
+      }
+
+      const versionInfo = getMediaFileVersion(filePath);
+      return {
+        ok: true,
+        filePath,
+        url: safeMediaUrl(filePath),
+        fileExists: true,
+        sizeBytes: versionInfo.sizeBytes,
+        mtimeMs: versionInfo.mtimeMs,
+        cacheTtlMs: MEDIA_TOKEN_TTL_MS
+      };
+    } catch (error) {
+      console.log("[localtify playback resolve error]", error?.message || error);
+      return { ok: false, fileExists: undefined, error: error?.message || "could not resolve playback url" };
+    }
+  });
 
   const pixelListHandler = async () => getPixelArtFiles().map((filePath) => ({ name: path.parse(filePath).name, key: path.parse(filePath).name, path: filePath, url: safeMediaUrl(filePath) }));
   ipcMain.handle("pixel:list", pixelListHandler);
@@ -1584,7 +1703,14 @@ app.whenReady().then(async () => {
     try { return { ok: backupDatabase() }; } catch (e) { return { ok: false, error: e?.message }; }
   });
   ipcMain.handle("database:repair-now", async () => {
-    try { repairDatabaseNow(); return { ok: true, status: getDatabaseStatus(), songs: listSongsShaped() }; } catch (e) { return { ok: false, error: e?.message }; }
+    try {
+      repairDatabaseNow();
+      mediaTokenToPath.clear();
+      mediaPathKeyToToken.clear();
+      return { ok: true, status: getDatabaseStatus(), songs: listSongsShaped() };
+    } catch (e) {
+      return { ok: false, error: e?.message };
+    }
   });
   ipcMain.handle("database:status", async () => getDatabaseStatus());
 

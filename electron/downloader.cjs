@@ -16,6 +16,8 @@ let _userDataPath = null;
 let _ffmpegPath = ffmpegStatic || null;
 let _ytDlpWrap = null;
 let _getCookiesFile = null;
+const activeDownloadProcesses = new Set();
+let activeDownloadCancelled = false;
 
 const MEDIA_EXTENSIONS = new Set([
   ".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac",
@@ -73,40 +75,50 @@ async function getYtDlp() {
   return _ytDlpWrap;
 }
 
+// ====================== DOWNLOAD OPTIONS ======================
+function safeDownloadFormat(value) {
+  const next = String(value || "mp3").toLowerCase();
+  return ["mp3", "flac", "wav", "m4a"].includes(next) ? next : "mp3";
+}
+
+function safeDownloadQuality(value) {
+  const next = String(value || "best").toLowerCase();
+  if (next === "320") return "320K";
+  if (next === "256") return "256K";
+  if (next === "192") return "192K";
+  return "0";
+}
+
+function cleanDownloadedTitle(name) {
+  return sanitizeFilename(name)
+    .replace(/\s*\[(official\s+)?(music\s+)?video\]\s*/gi, " ")
+    .replace(/\s*\((official\s+)?(music\s+)?video\)\s*/gi, " ")
+    .replace(/\s*\[(official\s+)?audio\]\s*/gi, " ")
+    .replace(/\s*\((official\s+)?audio\)\s*/gi, " ")
+    .replace(/\s*lyrics?\s*/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim() || "audio";
+}
+
 // ====================== SPEED ARGS ======================
-// These flags push yt-dlp to use every byte of available bandwidth.
-function getBaseArgs(url, outputTemplate) {
+function getBaseArgs(url, outputTemplate, options = {}) {
+  const format = safeDownloadFormat(options.format);
+  const quality = safeDownloadQuality(options.quality);
+
   return [
     url,
     "--output", outputTemplate,
-
-    // Best audio, prefer m4a/opus (already encoded — no re-encode cost)
     "--format", "bestaudio[ext=m4a]/bestaudio[ext=opus]/bestaudio/best",
     "--extract-audio",
-    "--audio-format", "mp3",
-    "--audio-quality", "192K",
-
-    // ── MAX SPEED FLAGS ────────────────────────────────────────────────────
-    // Download 16 fragments at the same time (DASH/HLS streams are split into
-    // many small pieces — grabbing 16 in parallel saturates the connection)
+    "--audio-format", format,
+    "--audio-quality", quality,
     "--concurrent-fragments", "16",
-
-    // 32 MB network read buffer — reduces kernel context switches
     "--buffer-size", "32M",
-
-    // Each HTTP request fetches 10 MB at a time instead of small chunks
     "--http-chunk-size", "10M",
-
-    // Skip writing the .part temp file — rename happens atomically at the end
-    // instead of renaming every few seconds, saving disk I/O
     "--no-part",
-
-    // Retry fast on transient errors instead of waiting
     "--retries", "5",
     "--fragment-retries", "5",
     "--retry-sleep", "linear=1::2",
-
-    // Skip every unnecessary side-file write
     "--no-write-info-json",
     "--no-write-annotations",
     "--no-write-comments",
@@ -114,91 +126,55 @@ function getBaseArgs(url, outputTemplate) {
     "--no-playlist",
     "--no-warnings",
     "--no-colors",
-
-    // Print progress to stdout in a parseable format so we can read speed/ETA
     "--newline",
   ];
 }
 
 function withFfmpeg(args) {
-  if (_ffmpegPath) {
-    return [...args, "--ffmpeg-location", path.dirname(_ffmpegPath)];
-  }
+  if (_ffmpegPath) return [...args, "--ffmpeg-location", path.dirname(_ffmpegPath)];
   return args;
 }
 
-async function buildStrategies(url, outputTemplate) {
-  const base = getBaseArgs(url, outputTemplate);
+async function buildStrategies(url, outputTemplate, options = {}) {
+  const base = getBaseArgs(url, outputTemplate, options);
   const strategies = [];
 
-  // Strategy 1 — Android + iOS mobile clients (no login, no bot detection)
   strategies.push({
     label: "mobile clients",
-    args: withFfmpeg([
-      ...base,
-      "--extractor-args", "youtube:player_client=android,ios",
-    ])
+    args: withFfmpeg([...base, "--extractor-args", "youtube:player_client=android,ios"])
   });
 
-  // Strategy 2 — TV embedded (good for age-restricted / region-locked)
   strategies.push({
     label: "tv_embedded client",
-    args: withFfmpeg([
-      ...base,
-      "--extractor-args", "youtube:player_client=tv_embedded",
-    ])
+    args: withFfmpeg([...base, "--extractor-args", "youtube:player_client=tv_embedded"])
   });
 
-  // Strategy 3 — Electron session cookies (if user visited YT in-app)
   if (_getCookiesFile) {
     try {
       const cookiesFile = await _getCookiesFile();
       if (cookiesFile && fs.existsSync(cookiesFile)) {
-        strategies.push({
-          label: "session cookies",
-          args: withFfmpeg([...base, "--cookies", cookiesFile])
-        });
+        strategies.push({ label: "session cookies", args: withFfmpeg([...base, "--cookies", cookiesFile]) });
       }
     } catch { /* non-fatal */ }
   }
 
-  // Strategy 4 — installed browser cookies (last resort)
-  const browsers = process.platform === "win32"
-    ? ["chrome", "edge", "firefox"]
-    : ["chrome", "firefox", "chromium"];
-
+  const browsers = process.platform === "win32" ? ["chrome", "edge", "firefox"] : ["chrome", "firefox", "chromium"];
   for (const browser of browsers) {
-    strategies.push({
-      label: `${browser} cookies`,
-      args: withFfmpeg([...base, "--cookies-from-browser", browser])
-    });
+    strategies.push({ label: `${browser} cookies`, args: withFfmpeg([...base, "--cookies-from-browser", browser]) });
   }
 
   return strategies;
 }
 
 // ====================== PROGRESS PARSING ======================
-// yt-dlp prints lines like:
-//   [download]  45.3% of 4.32MiB at   3.21MiB/s ETA 00:01
-// yt-dlp-wrap exposes a "progress" event with { percent, totalSize, currentSpeed, eta }
-// We normalise all of that into a single payload for the renderer.
-
 function formatSpeed(raw) {
-  // raw is a string like "3.21MiB/s" or a number of bytes/s — normalise to a
-  // human-readable "X.XX MB/s" string.
   if (!raw) return null;
-
-  if (typeof raw === "string") {
-    // yt-dlp-wrap already formats it — just clean it up
-    return raw.replace("MiB/s", " MB/s").replace("KiB/s", " KB/s").replace("GiB/s", " GB/s").trim();
-  }
-
-  // numeric bytes/s
+  if (typeof raw === "string") return raw.replace("MiB/s", " MB/s").replace("KiB/s", " KB/s").replace("GiB/s", " GB/s").trim();
   const n = Number(raw);
   if (!isFinite(n) || n <= 0) return null;
   if (n >= 1_073_741_824) return `${(n / 1_073_741_824).toFixed(2)} GB/s`;
-  if (n >= 1_048_576)     return `${(n / 1_048_576).toFixed(2)} MB/s`;
-  if (n >= 1_024)         return `${(n / 1_024).toFixed(1)} KB/s`;
+  if (n >= 1_048_576) return `${(n / 1_048_576).toFixed(2)} MB/s`;
+  if (n >= 1_024) return `${(n / 1_024).toFixed(1)} KB/s`;
   return `${n} B/s`;
 }
 
@@ -208,117 +184,135 @@ function formatSize(raw) {
   const n = Number(raw);
   if (!isFinite(n) || n <= 0) return null;
   if (n >= 1_073_741_824) return `${(n / 1_073_741_824).toFixed(2)} GB`;
-  if (n >= 1_048_576)     return `${(n / 1_048_576).toFixed(1)} MB`;
-  if (n >= 1_024)         return `${(n / 1_024).toFixed(0)} KB`;
+  if (n >= 1_048_576) return `${(n / 1_048_576).toFixed(1)} MB`;
+  if (n >= 1_024) return `${(n / 1_024).toFixed(0)} KB`;
   return `${n} B`;
 }
 
-function buildProgressPayload(label, p) {
-  const percent  = Math.min(100, Math.max(0, Math.floor(p?.percent ?? 0)));
-  const speed    = formatSpeed(p?.currentSpeed);
-  const size     = formatSize(p?.totalSize);
-  const eta      = p?.eta ?? null;
-
-  // Human-readable message shown in the UI
-  let message = `Downloading... ${percent}%`;
+function buildProgressPayload(job, p) {
+  const percent = Math.min(100, Math.max(0, Math.floor(p?.percent ?? 0)));
+  const speed = formatSpeed(p?.currentSpeed);
+  const size = formatSize(p?.totalSize);
+  const eta = p?.eta ?? null;
+  let message = "Downloading audio...";
+  if (percent >= 88) message = `Converting to ${String(job.format || "mp3").toUpperCase()}...`;
   if (speed) message += `  •  ${speed}`;
   if (eta && eta !== "00:00") message += `  •  ETA ${eta}`;
 
   return {
     type: "download",
-    file: label,
+    status: percent >= 88 ? "converting" : "downloading",
+    id: job.id,
+    url: job.url,
+    index: job.index,
+    total: job.total,
+    file: job.file || "track",
     progress: percent,
-    speed,        // e.g. "3.21 MB/s"
-    size,         // e.g. "4.32 MB"
-    eta,          // e.g. "00:02"
+    speed,
+    size,
+    eta,
     message
   };
 }
 
 // ====================== RUN YT-DLP ======================
-function runYtDlp(ytDlp, args, onProgress, label) {
+function runYtDlp(ytDlp, args, onProgress, job) {
   return new Promise((resolve, reject) => {
+    activeDownloadCancelled = false;
     const proc = ytDlp.exec(args);
+    activeDownloadProcesses.add(proc);
 
-    proc.on("progress", (p) => {
-      onProgress?.(buildProgressPayload(label, p));
+    proc.on("progress", (p) => onProgress?.(buildProgressPayload(job, p)));
+    proc.on("error", (err) => {
+      activeDownloadProcesses.delete(proc);
+      reject(new Error(err?.message || String(err)));
     });
-
-    proc.on("error", (err) => reject(new Error(err?.message || String(err))));
-    proc.on("close", resolve);
+    proc.on("close", (code) => {
+      activeDownloadProcesses.delete(proc);
+      if (activeDownloadCancelled) return reject(new Error("Download cancelled"));
+      if (typeof code === "number" && code !== 0) return reject(new Error(`yt-dlp exited with code ${code}`));
+      resolve();
+    });
   });
 }
 
 // ====================== YOUTUBE DOWNLOAD ======================
-async function downloadYouTube(url, destinationDirectory, onProgress) {
+async function downloadYouTube(url, destinationDirectory, onProgress, options = {}, job = {}) {
   try {
     fs.mkdirSync(destinationDirectory, { recursive: true });
 
     const ytDlp = await getYtDlp();
-
-    // %(title)s baked into the template — no separate getVideoInfo() round-trip
+    const format = safeDownloadFormat(options.format);
     const tempId = crypto.randomUUID().slice(0, 8);
     const outputTemplate = path.join(destinationDirectory, `ytdl_${tempId}_%(title)s.%(ext)s`);
 
     onProgress?.({
       type: "download",
+      status: "downloading",
+      id: job.id,
+      url,
+      index: job.index,
+      total: job.total,
       file: "track",
-      progress: 0,
+      progress: 1,
       speed: null,
       size: null,
       eta: null,
-      message: "Starting download..."
+      message: "Downloading audio..."
     });
 
-    const strategies = await buildStrategies(url, outputTemplate);
+    const strategies = await buildStrategies(url, outputTemplate, { ...options, format });
     let lastError = null;
 
     for (const strategy of strategies) {
       try {
         console.log(`[localitfy] trying: ${strategy.label}`);
-        await runYtDlp(ytDlp, strategy.args, onProgress, "track");
+        await runYtDlp(ytDlp, strategy.args, onProgress, { ...job, url, file: "track", format });
         console.log(`[localitfy] success: ${strategy.label}`);
         lastError = null;
         break;
       } catch (err) {
         console.log(`[localitfy] failed "${strategy.label}":`, err?.message);
         lastError = err;
+        if (String(err?.message || "").toLowerCase().includes("cancel")) throw err;
       }
     }
 
-    if (lastError) {
-      throw new Error("Download failed after trying all methods. The video may be private or unavailable.");
-    }
+    if (lastError) throw new Error("Download failed after trying all methods. The video may be private or unavailable.");
 
-    // Locate output file by tempId prefix
     const allFiles = fs.readdirSync(destinationDirectory);
     const downloaded =
-      allFiles.find((f) => f.startsWith(`ytdl_${tempId}_`) && f.endsWith(".mp3")) ??
+      allFiles.find((f) => f.startsWith(`ytdl_${tempId}_`) && f.endsWith(`.${format}`)) ??
       allFiles.find((f) => f.startsWith(`ytdl_${tempId}_`));
 
     if (!downloaded) throw new Error("yt-dlp finished but output file not found");
 
     const rawTitle = downloaded.replace(`ytdl_${tempId}_`, "").replace(/\.[^.]+$/, "");
-    const safeTitle = sanitizeFilename(rawTitle) || "youtube-audio";
-    const ext = path.extname(downloaded);
+    const safeTitle = options.cleanTitle === false ? sanitizeFilename(rawTitle) : cleanDownloadedTitle(rawTitle);
+    const ext = path.extname(downloaded) || `.${format}`;
     const sourcePath = path.join(destinationDirectory, downloaded);
     const finalPath = uniquePath(destinationDirectory, `${safeTitle}${ext}`);
     fs.renameSync(sourcePath, finalPath);
 
     onProgress?.({
       type: "download",
+      status: "done",
+      id: job.id,
+      url,
+      index: job.index,
+      total: job.total,
       file: safeTitle,
       progress: 100,
       speed: null,
       size: null,
       eta: null,
-      message: "Done"
+      message: "Adding to library..."
     });
 
-    return { ok: true, filePath: finalPath, filename: path.basename(finalPath) };
-
+    return { ok: true, url, filePath: finalPath, filename: path.basename(finalPath), format };
   } catch (error) {
-    return { ok: false, url, error: error.message || "YouTube download failed" };
+    const message = error?.message || "YouTube download failed";
+    return { ok: false, url, error: message };
   }
 }
 
@@ -366,28 +360,150 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
   });
 }
 
-// ====================== PUBLIC API ======================
-async function downloadAudioUrls(input, destinationDirectory, onProgress) {
-  const urls = parseUrls(input);
+// ====================== SPOTIFY DOWNLOAD ======================
+// Downloads tracks from a Spotify source by searching YouTube via yt-dlp's
+// ytsearch1: prefix — no Spotify API key or sp_dc cookie required here.
+// The metadata (title, artist) must be fetched upstream (see main.cjs:
+// spotifyFetchTracks IPC handler) and passed in as the `tracks` array.
+//
+// Wire in main.cjs:
+//   ipcMain.handle("spotify-download-batch", async (_event, { tracks, options }) => {
+//     const folder = resolveDownloadFolder(options);
+//     const result = await downloadSpotifyBatch(tracks, folder, progressCallback, options);
+//     // re-scan library, return { songs, downloads, downloadFolder }
+//   });
+// And expose via preload.cjs:
+//   spotifyDownloadBatch: (payload) => ipcRenderer.invoke("spotify-download-batch", payload)
 
-  // Download up to 3 URLs concurrently
-  const CONCURRENCY = 3;
-  const results = new Array(urls.length);
+async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, options = {}) {
+  if (!Array.isArray(tracks) || !tracks.length) {
+    return { downloadFolder: destinationDirectory, downloads: [] };
+  }
 
-  for (let i = 0; i < urls.length; i += CONCURRENCY) {
-    const batch = urls.slice(i, i + CONCURRENCY);
-    const batchResults = await Promise.all(
-      batch.map((url) => {
-        const isYouTube = /youtube\.com\/watch|youtu\.be\//.test(url);
-        return isYouTube
-          ? downloadYouTube(url, destinationDirectory, onProgress)
-          : Promise.resolve({ ok: false, url, error: "Only YouTube URLs are supported" });
-      })
+  fs.mkdirSync(destinationDirectory, { recursive: true });
+
+  const results = [];
+  const total = tracks.length;
+
+  for (let index = 0; index < total; index++) {
+    const track = tracks[index];
+    const { title = "unknown", artist = "" } = track;
+    const id = `spt_${Date.now()}_${index}`;
+
+    // Use yt-dlp's built-in ytsearch1: to find the best YouTube match.
+    const query = artist
+      ? `ytsearch1:${artist} - ${title} audio`
+      : `ytsearch1:${title} audio`;
+
+    onProgress?.({
+      type: "download",
+      status: "queued",
+      id,
+      url: query,
+      index,
+      total,
+      file: title,
+      progress: 0,
+      speed: null,
+      size: null,
+      eta: null,
+      message: `Searching YouTube for "${title}"...`
+    });
+
+    // Emit a "searching" progress tick so the queue item appears active
+    onProgress?.({
+      type: "download",
+      status: "downloading",
+      id,
+      url: query,
+      index,
+      total,
+      file: title,
+      progress: 2,
+      speed: null,
+      size: null,
+      eta: null,
+      message: `Searching: "${artist ? `${artist} — ` : ""}${title}"`
+    });
+
+    // downloadYouTube accepts any yt-dlp-compatible input, including ytsearch1:
+    const dlResult = await downloadYouTube(
+      query,
+      destinationDirectory,
+      onProgress,
+      { ...options, cleanTitle: false },
+      { id, index, total, url: query, file: title, format: safeDownloadFormat(options.format) }
     );
-    batchResults.forEach((r, j) => { results[i + j] = r; });
+
+    if (dlResult.ok && dlResult.filePath && title) {
+      // Rename the downloaded file to "Artist - Title.ext" using Spotify metadata
+      try {
+        const dir = path.dirname(dlResult.filePath);
+        const ext = path.extname(dlResult.filePath);
+        const spotifyName = artist
+          ? sanitizeFilename(`${artist} - ${title}`)
+          : sanitizeFilename(title);
+        const newPath = uniquePath(dir, `${spotifyName}${ext}`);
+        fs.renameSync(dlResult.filePath, newPath);
+        results.push({
+          ...dlResult,
+          filePath: newPath,
+          filename: path.basename(newPath)
+        });
+        continue;
+      } catch {
+        // Rename failed — keep the original filename
+      }
+    }
+
+    results.push(dlResult);
+
+    if (String(dlResult.error || "").toLowerCase().includes("cancel")) break;
   }
 
   return { downloadFolder: destinationDirectory, downloads: results };
+}
+
+// ====================== PUBLIC API ======================
+async function downloadAudioUrls(input, destinationDirectory, onProgress, options = {}) {
+  const urls = parseUrls(input);
+  const results = [];
+
+  for (let index = 0; index < urls.length; index += 1) {
+    const url = urls[index];
+    const id = `${Date.now()}-${index}`;
+    const job = { id, url, index, total: urls.length };
+
+    onProgress?.({ type: "download", status: "queued", id, url, index, total: urls.length, file: "queued track", progress: 0, message: "Queued..." });
+
+    const isYouTube = /youtube\.com\/watch|youtu\.be\//.test(url);
+    const result = isYouTube
+      ? await downloadYouTube(url, destinationDirectory, onProgress, options, job)
+      : { ok: false, url, error: "Only YouTube URLs are supported" };
+
+    if (!result.ok) {
+      onProgress?.({ type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?" });
+    }
+
+    results.push(result);
+    if (String(result.error || "").toLowerCase().includes("cancel")) break;
+  }
+
+  return { downloadFolder: destinationDirectory, downloads: results };
+}
+
+function cancelActiveDownloads() {
+  activeDownloadCancelled = true;
+  let killed = false;
+  for (const proc of activeDownloadProcesses) {
+    try {
+      proc.kill("SIGTERM");
+      killed = true;
+    } catch {
+      try { proc.kill(); killed = true; } catch { /* ignore */ }
+    }
+  }
+  return killed;
 }
 
 async function convertLocalMediaFiles(filePaths, destinationDirectory, options = {}, onProgress) {
@@ -402,7 +518,9 @@ async function convertLocalMediaFiles(filePaths, destinationDirectory, options =
 module.exports = {
   initDownloader,
   downloadAudioUrls,
+  downloadSpotifyBatch,
   convertLocalMediaFiles,
   convertOneToMp3,
-  isSupportedMediaPath
+  isSupportedMediaPath,
+  cancelActiveDownloads
 };

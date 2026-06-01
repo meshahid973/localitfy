@@ -1920,8 +1920,6 @@ button:active{
 }
 
 
-.hero:hover{
-}
 
 
 .hero.ambientSurface{
@@ -12005,8 +12003,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   box-shadow: none !important;
 }
 
-.app :where(.homeAlbumActions button,.homeAlbumPlayBadge,.songAction,.circleButton){
-}
+
 
 @media (prefers-reduced-motion: reduce){
   .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile,.songRow){
@@ -14983,4 +14980,320 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
 .app:not(.heroMotionActive) .hero.heroPremium.heroLayoutMotion,
 .app:not(.heroMotionActive) .hero.heroPremium.heroLayoutMotion :where(.heroTextClean,.heroText,.heroTitle,.heroArtWrap,.heroArt){
   will-change: auto !important;
+}
+
+
+/* ========================================================================
+   localtify v0.3.5 V146 — home ownership guard
+   ------------------------------------------------------------------------
+   Home owns layout/sizing only. Heavy hover, proximity, drag, and song-change
+   timing now live in motion.css, so the home page does not replay entrance
+   animations when compact/expand changes.
+======================================================================== */
+
+.app.homeEntranceSettled :is(.homeHeroSection,.homeSections,.homeSection,.homeShelf,.homePanel,.libraryPanel){
+  animation-name: none !important;
+}
+
+body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf,.homePanel,.libraryPanel,.localPicksPanel,.recentCoversPanel){
+  animation-name: none !important;
+  opacity: 1 !important;
+}
+
+.app:not(.reducedMotion) :is(.homeHeroSection,.homeSection,.homeShelf,.homePanel,.libraryPanel){
+  backface-visibility: hidden;
+  transform-style: flat;
+}
+
+.app:not(.reducedMotion) .homeHeroSection{
+  transition:
+    min-height 360ms cubic-bezier(.18, 1.08, .22, 1),
+    padding 360ms cubic-bezier(.18, 1.08, .22, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.app:not(.reducedMotion) .homeHeroText,
+.app:not(.reducedMotion) .homeHeroActions,
+.app:not(.reducedMotion) .homeHeroCoverWrap{
+  transition:
+    transform 360ms cubic-bezier(.18, 1.08, .22, 1),
+    opacity 220ms ease !important;
+}
+
+.app:not(.reducedMotion) :is(.localPicksPanel,.recentCoversPanel,.quickLibraryPanel,.homeShelf){
+  transition:
+    transform 340ms cubic-bezier(.18, 1.08, .22, 1),
+    opacity 200ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease !important;
+}
+
+.app:not(.reducedMotion).heroMotionExpanding :is(.localPicksPanel,.recentCoversPanel,.quickLibraryPanel,.homeShelf){
+  transform: translate3d(0, 8px, 0) scale(.998) !important;
+}
+
+.app:not(.reducedMotion).heroMotionCollapsing :is(.localPicksPanel,.recentCoversPanel,.quickLibraryPanel,.homeShelf){
+  transform: translate3d(0, -4px, 0) scale(1.001) !important;
+}
+
+
+/* ======================================================
+   SPOTIFY IMPORT — downloads tab (localtify v0.3.5+)
+   ====================================================== */
+
+/* Tab strip */
+.downloadTabStrip {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0 4px;
+}
+
+.downloadTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.downloadTab:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.downloadTab.active {
+  background: rgba(236, 76, 255, 0.13);
+  border-color: rgba(236, 76, 255, 0.36);
+  color: rgba(255, 180, 255, 0.96);
+}
+
+.downloadTab.active.spotifyTab {
+  background: rgba(30, 215, 96, 0.1);
+  border-color: rgba(30, 215, 96, 0.35);
+  color: #1ed760;
+}
+
+.spotifyTabDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* Notice override for Spotify */
+.downloadNotice.spotifyNotice {
+  border-color: rgba(30, 215, 96, 0.22) !important;
+  background: rgba(30, 215, 96, 0.065) !important;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* URL row: input + fetch button side-by-side */
+.spotifyUrlRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+
+.spotifyUrlInput {
+  flex: 1;
+  min-height: 50px !important;
+  resize: none !important;
+}
+
+.spotifyFetchButton {
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+/* Error banner */
+.spotifyError {
+  margin: 10px 0 0;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 93, 140, 0.32);
+  border-radius: 18px;
+  background: rgba(255, 93, 140, 0.07);
+  color: #ffb3ce;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+/* Track list container */
+.spotifyTrackList {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(30, 215, 96, 0.16);
+  border-radius: 24px;
+  background: rgba(30, 215, 96, 0.04);
+}
+
+.spotifyTrackListHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.spotifyTrackListHead strong {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.spotifySelectActions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Scrollable track items */
+.spotifyTrackItems {
+  display: grid;
+  gap: 5px;
+  max-height: 340px;
+  overflow-y: auto;
+  margin-bottom: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(30, 215, 96, 0.25) transparent;
+}
+
+.spotifyTrackItems::-webkit-scrollbar {
+  width: 4px;
+}
+
+.spotifyTrackItems::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.spotifyTrackItems::-webkit-scrollbar-thumb {
+  background: rgba(30, 215, 96, 0.22);
+  border-radius: 4px;
+}
+
+/* Individual track row */
+.spotifyTrackItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  background: rgba(7, 5, 12, 0.55);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 90ms ease, border-color 90ms ease;
+}
+
+.spotifyTrackItem:hover:not(:disabled) {
+  background: rgba(30, 215, 96, 0.05);
+  border-color: rgba(30, 215, 96, 0.18);
+}
+
+.spotifyTrackItem.selected {
+  border-color: rgba(30, 215, 96, 0.3);
+  background: rgba(30, 215, 96, 0.075);
+}
+
+.spotifyTrackItem:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.spotifyTrackIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 11px;
+  font-weight: 900;
+  flex-shrink: 0;
+  transition: background 90ms ease, color 90ms ease;
+}
+
+.spotifyTrackItem.selected .spotifyTrackIndex {
+  background: rgba(30, 215, 96, 0.18);
+  color: #1ed760;
+}
+
+.spotifyTrackMeta {
+  min-width: 0;
+}
+
+.spotifyTrackMeta strong {
+  display: block;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spotifyTrackMeta p {
+  margin: 2px 0 0;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spotifyTrackCheck {
+  width: 18px;
+  text-align: center;
+  color: #1ed760;
+  font-weight: 900;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Download row bottom of track list */
+.spotifyDownloadRow {
+  margin-top: 0 !important;
+}
+
+.spotifyDownloadButton {
+  background: linear-gradient(135deg, rgba(30, 215, 96, 0.9), rgba(24, 185, 82, 0.92)) !important;
+  color: #052612 !important;
+}
+
+.spotifyDownloadButton:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.spotifyDownloadButton:disabled {
+  opacity: 0.5;
+}
+
+@media (max-width: 680px) {
+  .spotifyUrlRow {
+    flex-direction: column;
+  }
+
+  .spotifyFetchButton {
+    width: 100%;
+  }
+
+  .spotifyUrlInput {
+    width: 100%;
+  }
 }

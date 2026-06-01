@@ -16,6 +16,12 @@ const STARTUP_CLEAR_DELAY_MS = 450;
 const CLEAR_BEFORE_SET_DELAY_MS = 180;
 const BUTTON_DOUBLE_PUSH_DELAY_MS = 650;
 
+// Discord activity type 2 = LISTENING.
+// The discord-rpc setActivity helper drops name/type, so Localtify sends
+// a raw SET_ACTIVITY payload below to preserve the music presence header.
+const DISCORD_ACTIVITY_TYPE_LISTENING = 2;
+const DISCORD_ACTIVITY_NAME = APP_NAME;
+
 /*
   IMPORTANT:
   These must be REAL Discord Developer Portal asset keys.
@@ -587,12 +593,12 @@ function buildSecondLine(payload, artist) {
   const cleanArtist = cleanSpaces(artist) || "unknown artist";
 
   if (payload?.discordPrivacyMode) return "from your library";
-  if (mode === "album") return `album: ${getAlbum(payload)}`;
+  if (mode === "album") return getAlbum(payload);
   if (mode === "timeLeft") return getRoundedTimeLeft(payload);
   if (mode === "playCount") return `played ${Math.max(0, safeInteger(payload?.playCount, 0))} times`;
-  if (mode === "appName") return "from localtify";
+  if (mode === "appName") return APP_NAME;
 
-  return `by: ${cleanArtist}`;
+  return cleanArtist;
 }
 
 function buildActivityText(payload) {
@@ -801,13 +807,14 @@ function buildBaseActivity(payload = {}) {
   const now = Date.now();
 
   const activity = {
-    name: limitText(cleanSpaces(payload?.discordActivityName) || "Music", 128),
-    details: limitText(text.details || "Listening to local music"),
+    name: DISCORD_ACTIVITY_NAME,
+    details: limitText(text.details || "Listening to local music", 128),
     instance: false,
-    type: 2
+    type: DISCORD_ACTIVITY_TYPE_LISTENING,
+    activityType: DISCORD_ACTIVITY_TYPE_LISTENING
   };
 
-  const stateText = limitText(text.state || "");
+  const stateText = limitText(text.state || "", 128);
   if (stateText) {
     activity.state = stateText;
   }
@@ -820,7 +827,7 @@ function buildBaseActivity(payload = {}) {
   const smallImageMode = cleanSpaces(payload?.discordSmallImageMode || "player");
   if (smallImageMode !== "none" && DEFAULT_LOGO_ASSET && largeImageKey && largeImageKey !== DEFAULT_LOGO_ASSET) {
     activity.smallImageKey = DEFAULT_LOGO_ASSET;
-    activity.smallImageText = isPlaying ? "playing in localtify" : "paused in localtify";
+    activity.smallImageText = isPlaying ? "listening in localtify" : "paused in localtify";
   }
 
   if (duration > 0 && duration > currentTime) {
@@ -850,10 +857,87 @@ function buildActivityAttempts(payload = {}) {
   }));
 }
 
+function normalizeRpcTimestamp(value) {
+  if (value instanceof Date) return Math.round(value.getTime());
+
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return undefined;
+
+  return Math.round(number);
+}
+
+function buildListeningProtocolActivity(activity = {}) {
+  const protocolActivity = {
+    name: DISCORD_ACTIVITY_NAME,
+    type: DISCORD_ACTIVITY_TYPE_LISTENING,
+    details: limitText(activity.details || "Listening to local music", 128),
+    instance: activity.instance === true
+  };
+
+  const state = limitText(activity.state || "", 128);
+  if (state) protocolActivity.state = state;
+
+  const start = normalizeRpcTimestamp(activity.startTimestamp);
+  const end = normalizeRpcTimestamp(activity.endTimestamp);
+  if (start || end) {
+    protocolActivity.timestamps = {};
+    if (start) protocolActivity.timestamps.start = start;
+    if (end) protocolActivity.timestamps.end = end;
+  }
+
+  if (activity.largeImageKey || activity.largeImageText || activity.smallImageKey || activity.smallImageText) {
+    protocolActivity.assets = {};
+    if (activity.largeImageKey) protocolActivity.assets.large_image = activity.largeImageKey;
+    if (activity.largeImageText) protocolActivity.assets.large_text = limitText(activity.largeImageText, 128);
+    if (activity.smallImageKey) protocolActivity.assets.small_image = activity.smallImageKey;
+    if (activity.smallImageText) protocolActivity.assets.small_text = limitText(activity.smallImageText, 128);
+  }
+
+  if (Array.isArray(activity.buttons) && activity.buttons.length > 0) {
+    protocolActivity.buttons = activity.buttons
+      .slice(0, 2)
+      .map((button) => ({
+        label: limitText(button?.label || "Open", 32),
+        url: cleanSpaces(button?.url || "")
+      }))
+      .filter((button) => button.label && isSafeHttpUrl(button.url));
+
+    if (protocolActivity.buttons.length === 0) {
+      delete protocolActivity.buttons;
+    }
+  }
+
+  return protocolActivity;
+}
+
+async function setListeningActivity(rpcClient, activity) {
+  const protocolActivity = buildListeningProtocolActivity(activity);
+
+  if (rpcClient && typeof rpcClient.request === "function") {
+    return rpcClient.request("SET_ACTIVITY", {
+      pid: process.pid,
+      activity: protocolActivity
+    });
+  }
+
+  if (rpcClient && typeof rpcClient.setActivity === "function") {
+    return rpcClient.setActivity({
+      ...activity,
+      name: DISCORD_ACTIVITY_NAME,
+      type: DISCORD_ACTIVITY_TYPE_LISTENING,
+      activityType: DISCORD_ACTIVITY_TYPE_LISTENING
+    });
+  }
+
+  throw new Error("Discord RPC client is not ready");
+}
+
 function buildImportantSignature(activity, payload) {
   return JSON.stringify({
     song: getSongIdentity(payload),
     playing: payload?.isPlaying === true,
+    activityName: activity.name || DISCORD_ACTIVITY_NAME,
+    activityType: DISCORD_ACTIVITY_TYPE_LISTENING,
     details: activity.details,
     state: activity.state,
     largeImageKey: activity.largeImageKey || "",
@@ -1005,11 +1089,11 @@ async function applyActivityWithRetries(rpcClient, attempts, options = {}) {
         await sleep(CLEAR_BEFORE_SET_DELAY_MS);
       }
 
-      await rpcClient.setActivity(attempt.activity);
+      await setListeningActivity(rpcClient, attempt.activity);
 
       if (attempt.hasButtons && options.doublePush) {
         await sleep(BUTTON_DOUBLE_PUSH_DELAY_MS);
-        await rpcClient.setActivity(attempt.activity);
+        await setListeningActivity(rpcClient, attempt.activity);
       }
 
       return attempt;

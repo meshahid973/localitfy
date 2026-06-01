@@ -1,4 +1,4 @@
-﻿/* localtify 0.3.5 Yukari update peek + ribbon motion polish V159 — file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 Yukari update peek + search/button motion polish V160 — file patch label only; APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";

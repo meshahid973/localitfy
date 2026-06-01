@@ -1,4 +1,75 @@
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
+
+
+function CoverGalleryImage({ src, label }: { src: string; label: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const fallback = String(label || "cover").trim().slice(0, 1).toUpperCase() || "♪";
+
+  useEffect(() => {
+    setLoaded(false);
+    setFailed(false);
+  }, [src]);
+
+  return (
+    <span className={`coverGalleryImageShell ${loaded ? "isLoaded" : "isLoading"} ${failed ? "isFailed" : ""}`}>
+      <span className="coverGalleryImagePlaceholder" aria-hidden="true">
+        {fallback}
+      </span>
+
+      {src && !failed ? (
+        <img
+          className={`coverGalleryImage ${loaded ? "isLoaded" : ""}`}
+          src={src}
+          alt=""
+          width={320}
+          height={320}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            setLoaded(false);
+            setFailed(true);
+          }}
+        />
+      ) : null}
+    </span>
+  );
+}
+
+function useMeasuredWidth<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [width, setWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const update = () => setWidth(element.clientWidth || 0);
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, width] as const;
+}
+
+function chunkItems<T>(items: T[], size: number) {
+  const safeSize = Math.max(1, size);
+  const output: T[][] = [];
+
+  for (let index = 0; index < items.length; index += safeSize) {
+    output.push(items.slice(index, index + safeSize));
+  }
+
+  return output;
+}
 
 type CoverMood = "all" | "favorites" | "leastUsed" | "cute" | "space" | "dark" | "cozy" | "energy";
 
@@ -81,6 +152,191 @@ type CoverStudioProps = {
   togglePixelCoverFavorite: (key: string) => void;
   togglePixelCoverExcluded: (key: string) => void;
 };
+
+
+function VirtualCoverSongList({
+  songs,
+  selectedIds,
+  CoverComponent,
+  prettyTitle,
+  prettyMeta,
+  toggleCoverSongSelection
+}: {
+  songs: SongLike[];
+  selectedIds: string[];
+  CoverComponent: ComponentType<{ song: SongLike | null; className: string }>;
+  prettyTitle: (title: string, words?: number) => string;
+  prettyMeta: (text: string) => string;
+  toggleCoverSongSelection: (songId: string) => void;
+}) {
+  const parentRef = useRef<HTMLDivElement | null>(null);
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const rowVirtualizer = useVirtualizer({
+    count: songs.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 64,
+    overscan: 10,
+    getItemKey: (index) => songs[index]?.id || index
+  });
+
+  if (!songs.length) {
+    return (
+      <div className="emptyState">
+        <strong>no songs yet</strong>
+        <p>Import music first, then choose covers here.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={parentRef} className="coverSongList coverSongListVirtual">
+      <div className="coverSongVirtualCanvas" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const song = songs[virtualRow.index];
+          if (!song) return null;
+
+          const selected = selectedSet.has(song.id);
+
+          return (
+            <button
+              key={virtualRow.key}
+              ref={rowVirtualizer.measureElement}
+              data-index={virtualRow.index}
+              type="button"
+              className={`coverSongPick coverSongPickVirtual ${selected ? "active" : ""}`}
+              onClick={() => toggleCoverSongSelection(song.id)}
+              title={song.title || "unknown song"}
+              style={{ transform: `translateY(${virtualRow.start}px)` }}
+            >
+              <CoverComponent song={song} className="coverSongThumb" />
+              <span>
+                <strong>{prettyTitle(String(song.title || "untitled"), 7)}</strong>
+                <small>{prettyMeta(String(song.artist || "unknown artist"))}</small>
+              </span>
+              <em>{selected ? "✓" : "+"}</em>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function VirtualCoverGalleryGrid({
+  entries,
+  pixelArtBusy,
+  pixelArtUrl,
+  coverMoodName,
+  applyCoverAssetToSelection,
+  togglePixelCoverFavorite,
+  togglePixelCoverExcluded
+}: {
+  entries: CoverGalleryEntryLike[];
+  pixelArtBusy: boolean;
+  pixelArtUrl: (file: string) => string;
+  coverMoodName: (mood: CoverMood) => string;
+  applyCoverAssetToSelection: (asset: RuntimePixelArtAssetLike) => void | Promise<void>;
+  togglePixelCoverFavorite: (key: string) => void;
+  togglePixelCoverExcluded: (key: string) => void;
+}) {
+  const [parentRef, width] = useMeasuredWidth<HTMLDivElement>();
+  const columns = Math.max(1, Math.floor((Math.max(width, 180) + 14) / 172));
+  const rows = useMemo(() => chunkItems(entries, columns), [entries, columns]);
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 286,
+    overscan: 4
+  });
+
+  if (!entries.length) {
+    return (
+      <div className="emptyState">
+        <strong>no covers here</strong>
+        <p>Try another filter or rescan the pixelart folder.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={parentRef} className="coverGalleryGrid coverGalleryGridVirtual">
+      <div className="coverGalleryVirtualCanvas" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const rowEntries = rows[virtualRow.index] || [];
+
+          return (
+            <div
+              key={virtualRow.key}
+              ref={rowVirtualizer.measureElement}
+              data-index={virtualRow.index}
+              className="coverGalleryVirtualRow"
+              style={{ transform: `translateY(${virtualRow.start}px)`, gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+            >
+              {rowEntries.map((entry) => {
+                const imageUrl = entry.asset.url || pixelArtUrl(entry.asset.file);
+                const tags = entry.tags.map(coverMoodName).join(", ");
+
+                return (
+                  <article
+                    key={entry.key}
+                    className={`coverGalleryCard ${entry.favorite ? "favorite" : ""} ${entry.excluded ? "excluded" : ""}`}
+                  >
+                    <button
+                      type="button"
+                      className="coverGalleryImageButton"
+                      onClick={() => void applyCoverAssetToSelection(entry.asset)}
+                      disabled={pixelArtBusy}
+                      title="apply to selected songs"
+                    >
+                      <CoverGalleryImage src={imageUrl} label={entry.asset.label} />
+                    </button>
+
+                    <div className="coverGalleryInfo">
+                      <strong title={entry.asset.label}>{entry.asset.label}</strong>
+                      <small>
+                        {entry.usage} use{entry.usage === 1 ? "" : "s"} • {tags}
+                      </small>
+                    </div>
+
+                    <div className="coverGalleryActions">
+                      <button
+                        type="button"
+                        onClick={() => togglePixelCoverFavorite(entry.key)}
+                        className={`coverStarButton ${entry.favorite ? "active" : ""}`}
+                        title={entry.favorite ? "remove favorite" : "favorite cover"}
+                      >
+                        {entry.favorite ? "★" : "☆"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => togglePixelCoverExcluded(entry.key)}
+                        className={`coverHideButton ${entry.excluded ? "danger active" : ""}`}
+                        title={entry.excluded ? "show cover again" : "hide cover"}
+                      >
+                        {entry.excluded ? "show" : "hide"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="coverApplyButton"
+                        disabled={pixelArtBusy}
+                        onClick={() => void applyCoverAssetToSelection(entry.asset)}
+                        title="apply this cover"
+                      >
+                        apply cover
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function CoverStudio({
   ambientStyle,
@@ -202,35 +458,14 @@ export default function CoverStudio({
             </button>
           </div>
 
-          <div className="coverSongList">
-            {coverPickerSongList.length ? (
-              coverPickerSongList.map((song) => {
-                const selected = coverSelectedSongIds.includes(song.id);
-
-                return (
-                  <button
-                    key={song.id}
-                    type="button"
-                    className={`coverSongPick ${selected ? "active" : ""}`}
-                    onClick={() => toggleCoverSongSelection(song.id)}
-                    title={song.title || "unknown song"}
-                  >
-                    <CoverComponent song={song} className="coverSongThumb" />
-                    <span>
-                      <strong>{prettyTitle(String(song.title || "untitled"), 7)}</strong>
-                      <small>{prettyMeta(String(song.artist || "unknown artist"))}</small>
-                    </span>
-                    <em>{selected ? "✓" : "+"}</em>
-                  </button>
-                );
-              })
-            ) : (
-              <div className="emptyState">
-                <strong>no songs yet</strong>
-                <p>Import music first, then choose covers here.</p>
-              </div>
-            )}
-          </div>
+          <VirtualCoverSongList
+            songs={coverPickerSongList}
+            selectedIds={coverSelectedSongIds}
+            CoverComponent={CoverComponent}
+            prettyTitle={prettyTitle}
+            prettyMeta={prettyMeta}
+            toggleCoverSongSelection={toggleCoverSongSelection}
+          />
         </aside>
 
         <section className="panel coverGalleryPanel">
@@ -252,84 +487,15 @@ export default function CoverStudio({
             </span>
           </div>
 
-          <div className="coverGalleryGrid">
-            {filteredCoverGalleryAssets.length ? (
-              filteredCoverGalleryAssets.map((entry) => {
-                const imageUrl = entry.asset.url || pixelArtUrl(entry.asset.file);
-                const tags = entry.tags.map(coverMoodName).join(", ");
-
-                return (
-                  <article
-                    key={entry.key}
-                    className={`coverGalleryCard ${entry.favorite ? "favorite" : ""} ${
-                      entry.excluded ? "excluded" : ""
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      className="coverGalleryImageButton"
-                      onClick={() => void applyCoverAssetToSelection(entry.asset)}
-                      disabled={pixelArtBusy}
-                      title="apply to selected songs"
-                    >
-                      <img
-                        className="coverGalleryImage"
-                        src={imageUrl}
-                        alt=""
-                        width={320}
-                        height={320}
-                        loading="lazy"
-                        decoding="async"
-                        draggable={false}
-                      />
-                    </button>
-
-                    <div className="coverGalleryInfo">
-                      <strong title={entry.asset.label}>{entry.asset.label}</strong>
-                      <small>
-                        {entry.usage} use{entry.usage === 1 ? "" : "s"} • {tags}
-                      </small>
-                    </div>
-
-                    <div className="coverGalleryActions">
-                      <button
-                        type="button"
-                        onClick={() => togglePixelCoverFavorite(entry.key)}
-                        className={`coverStarButton ${entry.favorite ? "active" : ""}`}
-                        title={entry.favorite ? "remove favorite" : "favorite cover"}
-                      >
-                        {entry.favorite ? "★" : "☆"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => togglePixelCoverExcluded(entry.key)}
-                        className={`coverHideButton ${entry.excluded ? "danger active" : ""}`}
-                        title={entry.excluded ? "show cover again" : "hide cover"}
-                      >
-                        {entry.excluded ? "show" : "hide"}
-                      </button>
-
-                      <button
-                        type="button"
-                        className="coverApplyButton"
-                        disabled={pixelArtBusy}
-                        onClick={() => void applyCoverAssetToSelection(entry.asset)}
-                        title="apply this cover"
-                      >
-                        apply cover
-                      </button>
-                    </div>
-                  </article>
-                );
-              })
-            ) : (
-              <div className="emptyState">
-                <strong>no covers here</strong>
-                <p>Try another filter or rescan the pixelart folder.</p>
-              </div>
-            )}
-          </div>
+          <VirtualCoverGalleryGrid
+            entries={filteredCoverGalleryAssets}
+            pixelArtBusy={pixelArtBusy}
+            pixelArtUrl={pixelArtUrl}
+            coverMoodName={coverMoodName}
+            applyCoverAssetToSelection={applyCoverAssetToSelection}
+            togglePixelCoverFavorite={togglePixelCoverFavorite}
+            togglePixelCoverExcluded={togglePixelCoverExcluded}
+          />
         </section>
       </section>
     </section>
