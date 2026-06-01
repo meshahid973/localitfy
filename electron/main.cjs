@@ -1,4 +1,4 @@
-/* localtify 0.3.5 runtime playback URL optimization V158 — file patch label only; APP_VERSION stays 0.3.5. */
+/* localtify 0.3.5 V168 — packaged renderer load + local media URL repair. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const path = require("node:path");
@@ -717,6 +717,14 @@ async function installUpdate() {
 app.setName(APP_NAME);
 app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
 
+try {
+  // Localtify uses a custom frameless titlebar, so the native menu is not needed.
+  // Doing this early also avoids a little packaged-app startup work.
+  Menu.setApplicationMenu(null);
+} catch (error) {
+  console.log("[localtify menu cleanup error]", error?.message || error);
+}
+
 function encodeMediaFilePath(filePath) {
   return Buffer.from(String(filePath || ""), "utf8")
     .toString("base64")
@@ -1021,17 +1029,29 @@ function safeFileUrl(filePath) {
   }
 }
 
+function safeProtocolMediaUrl(filePath) {
+  if (!filePath) return "";
+  try {
+    return `${MEDIA_PROTOCOL}://${MEDIA_PROTOCOL_HOST}/${encodeMediaFilePath(filePath)}`;
+  } catch {
+    return "";
+  }
+}
+
 function safeMediaUrl(filePath) {
   if (!filePath) return "";
 
   const cleanPath = String(filePath);
 
   if (!mediaServerPort) {
-    return safeFileUrl(cleanPath);
+    // Never hand file:// URLs to the renderer in packaged mode. Chromium blocks
+    // local resources when webSecurity is enabled, which caused the black-screen
+    // packaged build / broken cover-art loads.
+    return safeProtocolMediaUrl(cleanPath);
   }
 
   const tokenInfo = createMediaToken(cleanPath);
-  if (!tokenInfo?.token) return safeFileUrl(cleanPath);
+  if (!tokenInfo?.token) return safeProtocolMediaUrl(cleanPath);
 
   return `http://${MEDIA_SERVER_HOST}:${mediaServerPort}/media/${encodeURIComponent(tokenInfo.token)}?t=${MEDIA_SERVER_TOKEN}&v=${encodeURIComponent(tokenInfo.version)}`;
 }
@@ -1338,6 +1358,32 @@ function openImportDialog(senderWindow) {
     : dialog.showOpenDialog(dialogOptions);
 }
 
+function filePathExistsForRenderer(filePath) {
+  try {
+    return Boolean(filePath) && fs.existsSync(filePath);
+  } catch {
+    return false;
+  }
+}
+
+function getRendererIndexPath() {
+  const candidates = uniquePaths([
+    // Correct packaged path when main.cjs lives inside /electron.
+    path.join(app.getAppPath(), "dist", "index.html"),
+    path.join(__dirname, "..", "dist", "index.html"),
+    // Dev/alternate pack layouts.
+    path.join(__dirname, "dist", "index.html"),
+    path.join(process.resourcesPath || "", "app.asar", "dist", "index.html"),
+    path.join(process.resourcesPath || "", "app", "dist", "index.html")
+  ].filter(Boolean));
+
+  const found = candidates.find(filePathExistsForRenderer);
+  if (found) return found;
+
+  console.log("[localtify renderer index missing] tried", candidates);
+  return candidates[0];
+}
+
 function createWindow() {
   if (mainWindow && !mainWindow.isDestroyed()) {
     showMainWindow();
@@ -1362,10 +1408,17 @@ function createWindow() {
       backgroundThrottling: false
     }
   });
-  const indexUrl = isDev ? "http://localhost:5173" : safeFileUrl(path.join(__dirname, "dist", "index.html"));
-  mainWindow.loadURL(indexUrl).catch((error) => {
-    console.log("[localitfy main window load error]", error?.message || error);
-  });
+  if (isDev) {
+    mainWindow.loadURL("http://localhost:5173").catch((error) => {
+      console.log("[localtify main window dev load error]", error?.message || error);
+    });
+  } else {
+    const indexPath = getRendererIndexPath();
+    console.log("[localtify renderer index]", indexPath);
+    mainWindow.loadFile(indexPath).catch((error) => {
+      console.log("[localtify main window packaged load error]", error?.message || error, indexPath);
+    });
+  }
   mainWindow.webContents.on("did-fail-load", (_e, code, desc, url) => {
     console.log(`[localitfy main window failed load]`, { code, desc, url });
   });
