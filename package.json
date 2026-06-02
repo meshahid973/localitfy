@@ -20,7 +20,8 @@
     "assets:compress": "node scripts/compress-localtify-assets.mjs",
     "assets:compress:dry": "node scripts/compress-localtify-assets.mjs --dry-run",
     "clean:builds": "node scripts/compress-localtify-assets.mjs --clean-build-output",
-    "prebuild": "node scripts/compress-localtify-assets.mjs"
+    "prebuild": "node scripts/compress-localtify-assets.mjs",
+    "chunks:audit": "node -e \"const fs=require('fs'),p='dist/assets'; if(!fs.existsSync(p)){console.log('run npm run build first'); process.exit(0)}; fs.readdirSync(p).map(n=>({n,s:fs.statSync(p+'/'+n).size})).sort((a,b)=>b.s-a.s).slice(0,30).forEach(x=>console.log((x.s/1024).toFixed(1)+' KB  '+x.n))\""
   },
   "dependencies": {
     "better-sqlite3": "^12.5.0",
@@ -30,7 +31,8 @@
     "fs-extra": "^11.3.2",
     "sanitize-filename": "^1.6.3",
     "yt-dlp-wrap": "^2.3.12",
-    "ytdl-core": "^4.11.5"
+    "ytdl-core": "^4.11.5",
+    "ffmpeg-static": "^5.3.0"
   },
   "devDependencies": {
     "@animateicons/react": "^0.3.3",
@@ -43,7 +45,6 @@
     "electron": "^41.5.0",
     "electron-builder": "^26.8.1",
     "fast-average-color": "^9.5.2",
-    "ffmpeg-static": "^5.3.0",
     "lucide-react": "^1.14.0",
     "motion": "^12.40.0",
     "posthog-js": "^1.372.10",
@@ -82,7 +83,22 @@
       "!**/.cache/**/*",
       "!**/.vite/**/*",
       "!**/test/**/*",
-      "!**/tests/**/*"
+      "!**/tests/**/*",
+      "!scripts/**/*",
+      "!analytics/**/*",
+      "!localtify_asset_backups/**/*",
+      "!backups/**/*",
+      "!crash-logs/**/*",
+      "!userData/**/*",
+      "!*.sqlite",
+      "!*.sqlite3",
+      "!*.db",
+      "!*.db-journal",
+      "!**/*.tsbuildinfo",
+      "!**/.DS_Store",
+      "!**/Thumbs.db",
+      "!**/*.bak",
+      "!**/*.tmp"
     ],
     "extraResources": [
       {
@@ -131,6 +147,7 @@
         "owner": "meshahid973",
         "repo": "localitfy"
       }
-    ]
+    ],
+    "compression": "maximum"
   }
 }

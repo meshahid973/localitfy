@@ -1,4 +1,4 @@
-/* localtify 0.3.5 V168 — packaged renderer load + local media URL repair. */
+/* localtify 0.3.6 V193 — Electron responsiveness cleanup. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const path = require("node:path");
@@ -161,6 +161,61 @@ let mainWindow = null;
 let lastAssignedCoverPath = "";
 
 const UPDATE_CHECK_STARTUP_DELAY_MS = 2200;
+const PIXEL_ART_CACHE_TTL_MS = 30_000;
+const FILE_INFO_CACHE_TTL_MS = 4_000;
+const MAIN_TASK_YIELD_MS = 0;
+
+let pixelArtDirectoryCache = { value: "", expiresAt: 0 };
+let pixelArtFilesCache = { value: [], root: "", expiresAt: 0 };
+const fileInfoCache = new Map();
+
+function yieldToMainLoop() {
+  return new Promise((resolve) => {
+    if (typeof setImmediate === "function") setImmediate(resolve);
+    else setTimeout(resolve, MAIN_TASK_YIELD_MS);
+  });
+}
+
+function clearFileInfoCache() {
+  fileInfoCache.clear();
+}
+
+function clearPixelArtCache() {
+  pixelArtDirectoryCache = { value: "", expiresAt: 0 };
+  pixelArtFilesCache = { value: [], root: "", expiresAt: 0 };
+}
+
+function getFileInfoCached(filePath) {
+  const cleanPath = String(filePath || "");
+  if (!cleanPath) return { exists: false, isFile: false, size: 0, mtimeMs: 0 };
+
+  const now = Date.now();
+  const cached = fileInfoCache.get(cleanPath);
+  if (cached && cached.expiresAt > now) return cached.info;
+
+  let info = { exists: false, isFile: false, size: 0, mtimeMs: 0 };
+  try {
+    const stat = fs.statSync(cleanPath);
+    info = { exists: true, isFile: stat.isFile(), size: stat.size, mtimeMs: stat.mtimeMs };
+  } catch {
+    info = { exists: false, isFile: false, size: 0, mtimeMs: 0 };
+  }
+
+  fileInfoCache.set(cleanPath, { info, expiresAt: now + FILE_INFO_CACHE_TTL_MS });
+  if (fileInfoCache.size > 4500) {
+    let removed = 0;
+    for (const [key, entry] of fileInfoCache) {
+      if (entry.expiresAt <= now || removed < 500) {
+        fileInfoCache.delete(key);
+        removed += 1;
+      }
+      if (removed >= 750) break;
+    }
+  }
+
+  return info;
+}
+
 
 let updaterReady = false;
 let updaterChecking = false;
@@ -780,12 +835,9 @@ function addMediaResponseHeaders(res, filePath) {
 }
 
 function getMediaFileVersion(filePath) {
-  try {
-    const stats = fs.statSync(filePath);
-    return { version: `${Math.floor(stats.mtimeMs)}-${stats.size}`, sizeBytes: stats.size, mtimeMs: stats.mtimeMs };
-  } catch {
-    return { version: "missing", sizeBytes: 0, mtimeMs: 0 };
-  }
+  const info = getFileInfoCached(filePath);
+  if (!info.exists || !info.isFile) return { version: "missing", sizeBytes: 0, mtimeMs: 0 };
+  return { version: `${Math.floor(info.mtimeMs)}-${info.size}`, sizeBytes: info.size, mtimeMs: info.mtimeMs };
 }
 
 function pruneMediaTokens(now = Date.now()) {
@@ -863,10 +915,8 @@ function sendMediaFile(req, res, filePath) {
     return;
   }
 
-  let stat;
-  try {
-    stat = fs.statSync(filePath);
-  } catch {
+  const stat = getFileInfoCached(filePath);
+  if (!stat.exists || !stat.isFile) {
     res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
     res.end("media file not found");
     return;
@@ -1065,11 +1115,8 @@ function isImageFile(filePath) {
 }
 
 function fileExists(filePath) {
-  try {
-    return !!filePath && fs.existsSync(filePath) && fs.statSync(filePath).isFile();
-  } catch {
-    return false;
-  }
+  const info = getFileInfoCached(filePath);
+  return Boolean(info.exists && info.isFile);
 }
 
 function getDownloadDirectory(customFolder) {
@@ -1117,7 +1164,8 @@ async function getYouTubeCookiesFile() {
     }
     const dir = app.getPath("userData");
     const targetPath = path.join(dir, "cookies.txt");
-    fs.writeFileSync(targetPath, lines.join("\n"), "utf-8");
+    await fs.promises.mkdir(dir, { recursive: true });
+    await fs.promises.writeFile(targetPath, lines.join("\n"), "utf-8");
     return targetPath;
   } catch (error) {
     console.log("[localitfy cookies dump error]", error?.message || error);
@@ -1125,36 +1173,93 @@ async function getYouTubeCookiesFile() {
   }
 }
 
-function getPixelArtDirectory() {
+function getPixelArtDirectory(options = {}) {
+  const force = Boolean(options.force);
+  const now = Date.now();
+
+  if (!force && pixelArtDirectoryCache.value && pixelArtDirectoryCache.expiresAt > now) {
+    return pixelArtDirectoryCache.value;
+  }
+
   try {
-    const root = app.getAppPath();
-    const candidates = [
-      path.join(root, "pixelart"),
-      path.join(root, "public", "pixelart"),
-      path.join(root, "dist", "pixelart"),
+    const appPath = app.getAppPath();
+    const resourcesPath = process.resourcesPath || "";
+    const executableDir = path.dirname(process.execPath || "");
+    const userDataPixelDir = path.join(app.getPath("userData"), "pixelart");
+
+    const candidates = uniquePaths([
+      // Best production location. Add this through package.json build.extraResources.
+      path.join(resourcesPath, "pixelart"),
+      path.join(executableDir, "resources", "pixelart"),
+
+      // Packaged app.asar locations.
+      path.join(appPath, "dist", "pixelart"),
+      path.join(appPath, "public", "pixelart"),
+      path.join(appPath, "pixelart"),
+      path.join(resourcesPath, "app.asar", "dist", "pixelart"),
+      path.join(resourcesPath, "app.asar", "public", "pixelart"),
+      path.join(resourcesPath, "app.asar", "pixelart"),
+      path.join(resourcesPath, "app", "dist", "pixelart"),
+      path.join(resourcesPath, "app", "public", "pixelart"),
+      path.join(resourcesPath, "app", "pixelart"),
+
+      // Dev locations.
+      path.join(process.cwd(), "public", "pixelart"),
       path.join(process.cwd(), "pixelart"),
-      path.join(process.cwd(), "public", "pixelart")
-    ];
-    for (const p of candidates) {
-      if (fs.existsSync(p)) return p;
+      path.join(process.cwd(), "src", "assets", "pixelart"),
+      userDataPixelDir
+    ]);
+
+    for (const candidatePath of candidates) {
+      try {
+        if (!candidatePath) continue;
+        const candidateInfo = getFileInfoCached(candidatePath);
+        if (!candidateInfo.exists) continue;
+        const hasImages = fs.readdirSync(candidatePath).some((name) => isImageFile(name));
+        if (hasImages) {
+          if (pixelArtDirectoryCache.value !== candidatePath) {
+            console.log(`[localitfy pixelart] using ${candidatePath}`);
+          }
+          pixelArtDirectoryCache = { value: candidatePath, expiresAt: now + PIXEL_ART_CACHE_TTL_MS };
+          return candidatePath;
+        }
+      } catch {
+        // keep trying candidates
+      }
     }
-    const defaultDir = path.join(app.getPath("userData"), "pixelart");
-    fs.mkdirSync(defaultDir, { recursive: true });
-    return defaultDir;
-  } catch {
+
+    fs.mkdirSync(userDataPixelDir, { recursive: true });
+    if (pixelArtDirectoryCache.value !== userDataPixelDir) {
+      console.log(`[localitfy pixelart] no bundled pixelart found, using empty user folder ${userDataPixelDir}`);
+    }
+    pixelArtDirectoryCache = { value: userDataPixelDir, expiresAt: now + PIXEL_ART_CACHE_TTL_MS };
+    return userDataPixelDir;
+  } catch (error) {
+    console.log("[localitfy pixelart directory error]", error?.message || error);
+    pixelArtDirectoryCache = { value: "", expiresAt: now + 5_000 };
     return "";
   }
 }
 
-function getPixelArtFiles() {
-  const root = getPixelArtDirectory();
-  if (!root || !fs.existsSync(root)) return [];
+function getPixelArtFiles(options = {}) {
+  const force = Boolean(options.force);
+  const now = Date.now();
+  const root = getPixelArtDirectory({ force });
+
+  if (!root) return [];
+  if (!force && pixelArtFilesCache.root === root && pixelArtFilesCache.expiresAt > now) {
+    return pixelArtFilesCache.value;
+  }
+
   try {
-    return fs.readdirSync(root)
+    const files = fs.readdirSync(root)
       .map((name) => path.join(root, name))
       .filter(fileExists)
       .filter(isImageFile);
+    pixelArtFilesCache = { value: files, root, expiresAt: now + PIXEL_ART_CACHE_TTL_MS };
+    return files;
   } catch {
+    pixelArtFilesCache = { value: [], root, expiresAt: now + 5_000 };
     return [];
   }
 }
@@ -1279,15 +1384,43 @@ function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new Set()) 
   };
 }
 
-function shapeSong(song) {
+function pickStablePixelCoverForSong(song, pixelArtFiles = null) {
+  const covers = Array.isArray(pixelArtFiles) ? pixelArtFiles : getPixelArtFiles();
+  if (!covers.length) return "";
+
+  const seed = [song?.id, song?.title, song?.artist, song?.album, song?.filePath]
+    .filter(Boolean)
+    .join("::");
+
+  try {
+    const digest = crypto.createHash("sha1").update(seed || "localtify-cover").digest();
+    const index = digest.readUInt32BE(0) % covers.length;
+    return covers[index] || "";
+  } catch {
+    return covers[0] || "";
+  }
+}
+
+function getRuntimeCoverPath(song, pixelArtFiles = null) {
+  const savedCoverPath = String(song?.coverPath || "").trim();
+  if (savedCoverPath && fileExists(savedCoverPath) && isImageFile(savedCoverPath)) return savedCoverPath;
+  return pickStablePixelCoverForSong(song, pixelArtFiles);
+}
+
+function shapeSong(song, pixelArtFiles = null) {
   if (!song) return null;
   const exists = fileExists(song.filePath);
-  const coverExists = fileExists(song.coverPath);
+  const runtimeCoverPath = getRuntimeCoverPath(song, pixelArtFiles);
+  const coverExists = Boolean(runtimeCoverPath && fileExists(runtimeCoverPath));
+
   return {
     ...song,
     // Keep database/bootstrap rows clean. Audio URLs are resolved lazily from filePath by playback:resolve-url.
     url: "",
-    coverUrl: safeMediaUrl(song.coverPath),
+    // Never hand the renderer a raw file:// cover. In packaged builds Chromium blocks it.
+    // If the DB has no coverPath or the old path is broken, use a stable bundled pixel-art fallback at runtime.
+    coverPath: song.coverPath || runtimeCoverPath || "",
+    coverUrl: coverExists ? safeMediaUrl(runtimeCoverPath) : "",
     exists,
     fileExists: exists,
     coverExists
@@ -1295,7 +1428,8 @@ function shapeSong(song) {
 }
 
 function listSongsShaped() {
-  return getSongs().map(shapeSong);
+  const pixelArtFiles = getPixelArtFiles();
+  return getSongs().map((song) => shapeSong(song, pixelArtFiles));
 }
 
 function buildRandomizeMissingSongCovers() {
@@ -1405,7 +1539,7 @@ function createWindow() {
       sandbox: false,
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,
-      backgroundThrottling: false
+      backgroundThrottling: true
     }
   });
   if (isDev) {
@@ -1425,8 +1559,16 @@ function createWindow() {
   mainWindow.webContents.on("render-process-gone", (_e, details) => {
     console.log(`[localitfy main window renderer gone]`, details);
   });
-  mainWindow.webContents.on("console-message", (_e, level, message, line, sourceId) => {
-    console.log(`[localitfy main window console]`, { level, message, line, sourceId });
+  mainWindow.webContents.on("console-message", (_event, ...args) => {
+    const details = args.length === 1 && args[0] && typeof args[0] === "object"
+      ? args[0]
+      : { level: args[0], message: args[1], line: args[2], sourceId: args[3] };
+    console.log(`[localitfy main window console]`, {
+      level: details.level,
+      message: details.message,
+      line: details.line,
+      sourceId: details.sourceId
+    });
   });
   if (process.env.LOCALITFY_DEBUG === "1") {
     mainWindow.webContents.openDevTools({ mode: "detach" });
@@ -1493,15 +1635,17 @@ app.whenReady().then(async () => {
   }
   setupNativeWindowsMediaIpc();
 
-  ipcMain.handle("app:bootstrap", async () => ({
-    songs: listSongsShaped(),
-    settings: getSettings(),
-    playlists: getPlaylists(),
-    windowsIntegration: getStartWithWindowsStatus(),
-    database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: LEGACY_APP_DATA_NAME },
-    discord: getDiscordStatus(),
-    covers: getCoverStats()
-  }));
+  ipcMain.handle("app:bootstrap", async () => {
+    await yieldToMainLoop();
+    return {
+      songs: listSongsShaped(),
+      settings: getSettings(),
+      playlists: getPlaylists(),
+      windowsIntegration: getStartWithWindowsStatus(),
+      database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: LEGACY_APP_DATA_NAME },
+      discord: getDiscordStatus()
+    };
+  });
 
   ipcMain.handle("playback:resolve-url", async (_event, payload = {}) => {
     try {
@@ -1549,8 +1693,14 @@ app.whenReady().then(async () => {
   ipcMain.handle("covers:stats", async () => {
     try { return getCoverStats(); } catch (e) { console.log("[localitfy covers stats error]", e?.message); return {}; }
   });
-  ipcMain.handle("covers:rescan", async () => buildRandomizeMissingSongCovers());
+  ipcMain.handle("covers:rescan", async () => {
+    clearPixelArtCache();
+    clearFileInfoCache();
+    await yieldToMainLoop();
+    return buildRandomizeMissingSongCovers();
+  });
   ipcMain.handle("covers:randomize-all", async () => {
+    await yieldToMainLoop();
     const covers = getPixelArtFiles();
     if (!covers.length) return listSongsShaped();
     const songs = getSongs();
@@ -1560,8 +1710,12 @@ app.whenReady().then(async () => {
     }
     return listSongsShaped();
   });
-  ipcMain.handle("covers:randomize-missing", async () => buildRandomizeMissingSongCovers());
+  ipcMain.handle("covers:randomize-missing", async () => {
+    await yieldToMainLoop();
+    return buildRandomizeMissingSongCovers();
+  });
   ipcMain.handle("covers:randomize-selected", async (_event, ids) => {
+    await yieldToMainLoop();
     if (!Array.isArray(ids) || !ids.length) return listSongsShaped();
     const covers = getPixelArtFiles();
     if (!covers.length) return listSongsShaped();
@@ -1607,6 +1761,7 @@ app.whenReady().then(async () => {
       const usedCovers = new Set();
       const importedSongs = validAudioFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
       const changedCount = insertSongs(importedSongs);
+      clearFileInfoCache();
       const afterSongs = listSongsShaped();
       console.log(`[localitfy import] selected=${validAudioFiles.length}, changed=${changedCount}, after=${afterSongs.length}`);
       return afterSongs;
@@ -1647,6 +1802,7 @@ app.whenReady().then(async () => {
         const usedCovers = new Set();
         const importedSongs = successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
         changedCount = insertSongs(importedSongs);
+        clearFileInfoCache();
         afterSongs = listSongsShaped();
       }
       return { ...converted, changedCount, songs: afterSongs, downloadFolder: getDownloadDirectory() };
@@ -1675,6 +1831,7 @@ app.whenReady().then(async () => {
         const usedCovers = new Set();
         const importedSongs = successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
         changedCount = insertSongs(importedSongs);
+        clearFileInfoCache();
         afterSongs = listSongsShaped();
       }
       console.log(`[localitfy download] downloaded=${successfulFiles.length}, changed=${changedCount}, autoAdd=${autoAdd}`);
@@ -1812,6 +1969,7 @@ app.whenReady().then(async () => {
         const usedCovers = new Set();
         const importedSongs = successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
         changedCount = insertSongs(importedSongs);
+        clearFileInfoCache();
         afterSongs = listSongsShaped();
       }
       return {
