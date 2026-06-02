@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.6 V185 — performance pass: lazy settings + calmer runtime loops. */
+/* localtify 0.3.6 V201 — restore /yukari command + keep search routing fix. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -3346,6 +3346,11 @@ function MainModeApp() {
       "/arcadeghost": { mode: "arcadeGhost", message: "secret theme unlocked: arcade ghost" },
       "/arcade ghost": { mode: "arcadeGhost", message: "secret theme unlocked: arcade ghost" },
       "arcade ghost": { mode: "arcadeGhost", message: "secret theme unlocked: arcade ghost" },
+      "/yukari": { mode: "yukari", message: "yukari peeked in" },
+      "yukari": { mode: "yukari", message: "yukari peeked in" },
+      "/peek": { mode: "yukari", message: "yukari peeked in" },
+      "peek": { mode: "yukari", message: "yukari peeked in" },
+      "/y": { mode: "yukari", message: "yukari peeked in" },
       "/stars": { mode: "stars", message: "star field enabled — type /stars again to hide" },
       "stars": { mode: "stars", message: "star field enabled — type /stars again to hide" },
       "/star": { mode: "stars", message: "star field enabled — type /stars again to hide" },
@@ -3374,7 +3379,21 @@ function MainModeApp() {
       return;
     }
 
-    setQuery(value);
+    const nextQuery = value;
+    setQuery(nextQuery);
+
+    const cleanQuery = nextQuery.trim();
+    if (!cleanQuery) return;
+
+    if (settingsOpen) {
+      setSettingsOpen(false);
+    }
+
+    if (view !== "library" && view !== "liked") {
+      changeView("library", "unknown");
+    }
+
+    setStatusText(cleanQuery.length > 1 ? "searching: " + cleanQuery : "searching songs");
   };
 
   useEffect(() => {

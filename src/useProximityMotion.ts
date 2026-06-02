@@ -1,5 +1,5 @@
-/* localtify 0.3.5 proximity motion V148 — file patch label only; APP_VERSION stays 0.3.5.
-   Strong proximity for buttons/cards, but no dense row scanning while audio is playing.
+/* localtify 0.3.6 proximity motion V185 — cheaper visibility-aware proximity motion.
+   Keeps the same visual feel, but stops scanning/painting while hidden, blurred, or suspended.
    All work is DOM/rAF based: no React state, no blocking click handlers, no hover repaint loop. */
 import { useEffect, type RefObject } from "react";
 
@@ -127,6 +127,7 @@ export function useProximityMotion({ rootRef, disabled = false, suspended = fals
     let lastRefresh = 0;
     let targets: CachedTarget[] = [];
     let pointerInside = false;
+    let visible = !document.hidden;
     const active = new Map<HTMLElement, true>();
 
     const isAudioPlaying = () => root.dataset.playing === "on" || root.classList.contains("appAudioPlaying");
@@ -166,7 +167,7 @@ export function useProximityMotion({ rootRef, disabled = false, suspended = fals
 
     const paint = (now: number) => {
       frame = 0;
-      if (!pointerInside) return;
+      if (!visible || document.hidden || !pointerInside) return;
 
       const playing = isAudioPlaying();
       const radius = playing ? RADIUS_PLAYING : RADIUS_IDLE;
@@ -203,12 +204,12 @@ export function useProximityMotion({ rootRef, disabled = false, suspended = fals
     };
 
     const schedulePaint = () => {
-      if (frame) return;
+      if (frame || !visible || document.hidden) return;
       frame = window.requestAnimationFrame(paint);
     };
 
     const handlePointerMove = (event: PointerEvent) => {
-      if (event.pointerType === "touch") return;
+      if (!visible || document.hidden || event.pointerType === "touch") return;
       pointerInside = true;
       const movedFarEnough = Math.abs(event.clientX - lastX) + Math.abs(event.clientY - lastY) >= 1;
       lastX = event.clientX;
@@ -217,7 +218,7 @@ export function useProximityMotion({ rootRef, disabled = false, suspended = fals
     };
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (event.pointerType === "touch") return;
+      if (!visible || document.hidden || event.pointerType === "touch") return;
       pointerInside = true;
       lastX = event.clientX;
       lastY = event.clientY;
@@ -240,12 +241,20 @@ export function useProximityMotion({ rootRef, disabled = false, suspended = fals
       clearAll();
     };
 
+    const handleVisibilityChange = () => {
+      visible = !document.hidden;
+      pointerInside = false;
+      invalidateTargets();
+      clearAll();
+    };
+
     root.addEventListener("pointermove", handlePointerMove, { passive: true });
     root.addEventListener("pointerdown", handlePointerDown, { passive: true });
     root.addEventListener("pointerleave", handlePointerLeave, { passive: true });
     window.addEventListener("blur", clearAll, { passive: true });
     window.addEventListener("scroll", invalidateTargets, { passive: true, capture: true });
     window.addEventListener("resize", invalidateTargets, { passive: true });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       root.removeEventListener("pointermove", handlePointerMove);
@@ -254,6 +263,7 @@ export function useProximityMotion({ rootRef, disabled = false, suspended = fals
       window.removeEventListener("blur", clearAll);
       window.removeEventListener("scroll", invalidateTargets, true);
       window.removeEventListener("resize", invalidateTargets);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearAll();
     };
   }, [disabled, resetKey, rootRef, suspended]);

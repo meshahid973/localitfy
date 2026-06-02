@@ -5713,3 +5713,329 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   backdrop-filter: blur(12px) saturate(118%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(118%) !important;
 }
+
+/* ======================================================================
+   localtify 0.3.6 V199 — premium settings/update page final polish.
+   Owner: settings.css. No top-bar layout fights, no home.css dumping.
+====================================================================== */
+
+.settingsUpdatesPageV199{
+  gap: 18px;
+}
+
+.settingsUpdatesHeaderV199{
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.settingsUpdatesHeaderV199 small{
+  display: block;
+  margin-top: 8px;
+  max-width: 680px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 760;
+}
+
+.settingsUpdateHeaderBadge{
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(var(--accent-rgb), .26);
+  border-radius: 999px;
+  color: var(--text);
+  background: rgba(255,255,255,.055);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 14px 34px rgba(0,0,0,.22);
+  backdrop-filter: blur(12px) saturate(118%);
+  -webkit-backdrop-filter: blur(12px) saturate(118%);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: -.01em;
+  text-transform: lowercase;
+}
+
+.settingsUpdateHeaderBadge-available,
+.settingsUpdateHeaderBadge-downloaded{
+  border-color: rgba(var(--accent-rgb), .45);
+  background: rgba(var(--accent-rgb), .13);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 16px 42px rgba(var(--accent-rgb), .12);
+}
+
+.settingsUpdateHeaderBadge-error{
+  border-color: rgba(255, 113, 153, .38);
+  background: rgba(255, 86, 132, .12);
+}
+
+.settingsUpdateHeroCardV199{
+  padding: clamp(22px, 2.4vw, 34px);
+  border-radius: 26px;
+  border-color: rgba(var(--accent-rgb), .22);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(var(--accent-rgb), .18), transparent 32%),
+    linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.026) 48%, rgba(0,0,0,.26)),
+    rgba(9, 9, 14, .74);
+  box-shadow: 0 26px 80px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.07);
+  backdrop-filter: blur(18px) saturate(124%);
+  -webkit-backdrop-filter: blur(18px) saturate(124%);
+}
+
+.settingsUpdateHeroCard-available,
+.settingsUpdateHeroCard-downloaded{
+  border-color: rgba(var(--accent-rgb), .38);
+  box-shadow: 0 30px 88px rgba(0,0,0,.44), 0 0 44px rgba(var(--accent-rgb), .09), inset 0 1px 0 rgba(255,255,255,.075);
+}
+
+.settingsUpdateHeroCard-error{
+  border-color: rgba(255, 113, 153, .32);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255, 90, 140, .16), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.025)),
+    rgba(10, 7, 12, .75);
+}
+
+.settingsUpdateHeroTopV199{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  align-items: stretch;
+  gap: 18px;
+}
+
+.settingsUpdateHeroCopyV199{
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+
+.settingsUpdateKickerV199{
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 1000;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.settingsUpdateHeroCopyV199 strong{
+  color: var(--text);
+  font-size: clamp(31px, 3.3vw, 52px);
+  line-height: .92;
+  letter-spacing: -.065em;
+  text-transform: lowercase;
+}
+
+.settingsUpdateHeroCopyV199 small{
+  max-width: 720px;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 760;
+}
+
+.settingsUpdateVersionStackV199{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.settingsUpdateVersionStackV199 > div{
+  min-height: 118px;
+  padding: 16px;
+  display: grid;
+  align-content: end;
+  gap: 7px;
+  border: 1px solid rgba(255,255,255,.095);
+  border-radius: 20px;
+  background: rgba(255,255,255,.052);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055);
+}
+
+.settingsUpdateVersionStackV199 span,
+.settingsUpdateFactsV199 span{
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.settingsUpdateVersionStackV199 strong{
+  color: var(--text);
+  font-size: 23px;
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+
+.settingsUpdateProgressV199{
+  position: relative;
+  height: 34px;
+  margin-top: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(var(--accent-rgb), .26);
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055);
+}
+
+.settingsUpdateProgressV199 > span:first-child{
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), .5), rgba(var(--accent-rgb), .86));
+  box-shadow: 0 0 24px rgba(var(--accent-rgb), .18);
+  transition: width 260ms cubic-bezier(.16,1,.3,1);
+}
+
+.settingsUpdateProgressV199 small{
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.settingsUpdateActionDeckV199{
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.settingsUpdateMainActionV199{
+  min-height: 42px;
+  padding-inline: 15px;
+  border-radius: 15px;
+}
+
+.settingsUpdateMainActionV199.primary{
+  color: #08070d;
+  border-color: transparent;
+  background: var(--accent);
+  box-shadow: 0 18px 44px rgba(var(--accent-rgb), .20), 0 0 24px rgba(var(--accent-rgb), .18);
+}
+
+.settingsUpdateMainActionV199.quiet{
+  color: var(--text-2);
+  border-color: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.038);
+}
+
+.settingsUpdateMainActionV199:hover:not(:disabled){
+  transform: translate3d(0,-2px,0) scale(1.012);
+}
+
+.settingsUpdateMainActionV199:active:not(:disabled){
+  transform: translate3d(0,0,0) scale(.978);
+}
+
+.settingsUpdatesGridV199{
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr);
+  gap: 16px;
+}
+
+.settingsUpdateStatusCardV199,
+.settingsUpdateBehaviorPanelV199,
+.settingsWhatsNewPanelV199{
+  border-color: rgba(255,255,255,.09);
+}
+
+.settingsUpdateFactsV199{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settingsUpdateFactsV199 > div{
+  min-height: 92px;
+  padding: 14px;
+  display: grid;
+  align-content: end;
+  gap: 7px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  background: rgba(255,255,255,.036);
+}
+
+.settingsUpdateFactsV199 strong{
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.08;
+  letter-spacing: -.035em;
+  text-transform: lowercase;
+}
+
+.settingsUpdateTogglesV199{
+  gap: 10px;
+}
+
+.settingsWhatsNewHeaderV199{
+  align-items: center;
+}
+
+.settingsReleaseListV199{
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.settingsReleaseListV199 li{
+  min-height: 42px;
+  padding: 11px 13px;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 15px;
+  color: var(--text-2);
+  background: rgba(255,255,255,.035);
+  font-size: 13px;
+  line-height: 1.42;
+  font-weight: 760;
+}
+
+.settingsReleaseListV199 li > span{
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), .24);
+}
+
+@media (max-width: 980px){
+  .settingsUpdateHeroTopV199,
+  .settingsUpdatesGridV199{
+    grid-template-columns: 1fr;
+  }
+
+  .settingsUpdateVersionStackV199,
+  .settingsUpdateFactsV199{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px){
+  .settingsUpdateVersionStackV199,
+  .settingsUpdateFactsV199{
+    grid-template-columns: 1fr;
+  }
+
+  .settingsUpdateHeaderBadge{
+    width: 100%;
+  }
+
+  .settingsUpdateActionDeckV199{
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

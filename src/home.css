@@ -15646,3 +15646,87 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     --lt-acrylic-blur-light: 6px;
   }
 }
+
+/* ======================================================================
+   localtify v0.3.6 V201 — library cleanup
+   removes the old heavy overview/stat block and makes library rows tighter
+====================================================================== */
+
+.app .libraryStatsV025,
+.app .libraryStatsV030{
+  display: none !important;
+}
+
+.app .libraryPanelV025 .panelHead,
+.app .libraryPanelV025 .libraryPanelHeadV025{
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding-bottom: 14px !important;
+  margin-bottom: 8px !important;
+  border-bottom: 1px solid rgba(255,255,255,.07) !important;
+}
+
+.app .libraryPanelTitleV025 h3{
+  margin: 0 !important;
+  font-size: clamp(1.65rem, 2.8vw, 2.45rem) !important;
+  letter-spacing: -.055em !important;
+}
+
+.app .libraryQuickMetaV201{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+  margin: 8px 0 14px !important;
+  padding: 0 !important;
+}
+
+.app .libraryQuickMetaV201 span{
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 26px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  color: color-mix(in oklab, var(--text, #fff) 72%, var(--muted, #a7a0b5) 28%) !important;
+  background: rgba(255,255,255,.045) !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  font-size: .72rem !important;
+  font-weight: 850 !important;
+  letter-spacing: .02em !important;
+  text-transform: lowercase !important;
+  backdrop-filter: blur(7px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(7px) saturate(112%) !important;
+}
+
+.app .libraryListHeaderV025{
+  margin-top: 2px !important;
+}
+
+.app .libraryFullListV025 .songRow{
+  min-height: 70px !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.009)),
+    rgba(18, 14, 27, .58) !important;
+  backdrop-filter: blur(8px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(112%) !important;
+}
+
+.app .libraryFullListV025 .songRow::before{
+  opacity: .42 !important;
+}
+
+.app .libraryFullListV025 .songRow:hover{
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), .095), rgba(255,255,255,.022)),
+    rgba(22, 17, 32, .64) !important;
+}
+
+.app .libraryFullListV025 .songRow.active{
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), .15), rgba(255,255,255,.026)),
+    rgba(28, 20, 39, .70) !important;
+}
