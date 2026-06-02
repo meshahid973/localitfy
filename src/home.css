@@ -1244,12 +1244,6 @@ button,
 }
 
 
-.animatedGlow .songRow,
-.animatedGlow .homeAlbumCard,
-.animatedGlow .hero{
-  animation-duration: 0s !important;
-}
-
 
 .content,
 .sidebar,
@@ -15131,5 +15125,524 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
   .spotifyUrlInput {
     width: 100%;
+  }
+}
+/* ========================================================================
+   localtify v0.3.6 V190 — integrated lightweight frosted home glass
+   Owner: home.css
+   Scope: home hero, listen shelves, recent covers, library panels, home search.
+   This is intentionally light: small blur, soft saturation, no heavy milky fog.
+======================================================================== */
+
+.homeView{
+  --home-glass-bg: rgba(13, 10, 20, 0.50);
+  --home-glass-bg-strong: rgba(13, 10, 20, 0.58);
+  --home-glass-card: rgba(18, 14, 26, 0.46);
+  --home-glass-card-hover: rgba(22, 17, 31, 0.52);
+  --home-glass-line: rgba(255, 255, 255, 0.085);
+  --home-glass-line-strong: rgba(255, 255, 255, 0.13);
+  --home-glass-highlight: rgba(255, 255, 255, 0.052);
+  --home-glass-shadow: 0 16px 42px rgba(0, 0, 0, 0.22);
+  --home-glass-shadow-soft: 0 10px 26px rgba(0, 0, 0, 0.16);
+  --home-glass-blur: 11px;
+  --home-glass-blur-light: 8px;
+}
+
+/* Big home panels: hero, listen now, recent covers, library surface. */
+.homeView :where(
+  .hero,
+  .simpleHero,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .simpleLibraryPanel,
+  .libraryPanel,
+  .panel.ambientSurface
+){
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  border: 1px solid var(--home-glass-line) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.044), rgba(255, 255, 255, 0.012)),
+    radial-gradient(circle at 82% 18%, rgba(var(--accent-rgb), 0.055), transparent 32%),
+    var(--home-glass-bg) !important;
+  box-shadow:
+    inset 0 1px 0 var(--home-glass-highlight),
+    var(--home-glass-shadow) !important;
+  backdrop-filter: blur(var(--home-glass-blur)) saturate(116%) !important;
+  -webkit-backdrop-filter: blur(var(--home-glass-blur)) saturate(116%) !important;
+}
+
+/* Bring back controlled pseudo sheen after older grid-removal blocks killed it. */
+.homeView :where(
+  .hero,
+  .simpleHero,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .simpleLibraryPanel,
+  .libraryPanel,
+  .panel.ambientSurface
+)::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.014) 26%, transparent 62%),
+    radial-gradient(circle at 16% 10%, rgba(255, 255, 255, 0.052), transparent 24%),
+    radial-gradient(circle at 86% 14%, rgba(var(--accent-rgb), 0.072), transparent 30%) !important;
+  background-size: auto !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+  z-index: 0 !important;
+}
+
+.homeView :where(
+  .hero,
+  .simpleHero,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .simpleLibraryPanel,
+  .libraryPanel,
+  .panel.ambientSurface
+)::after{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 58%, rgba(0, 0, 0, 0.08) 100%) !important;
+  background-size: auto !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+  z-index: 0 !important;
+}
+
+.homeView :where(
+  .hero,
+  .simpleHero,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .simpleLibraryPanel,
+  .libraryPanel,
+  .panel.ambientSurface
+) > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Hero: slightly richer glass, still dark/OLED. */
+.homeView :where(.hero, .simpleHero){
+  border-color: var(--home-glass-line-strong) !important;
+  background:
+    radial-gradient(circle at 82% 20%, rgba(var(--accent-rgb), 0.075), transparent 30%),
+    radial-gradient(circle at 18% 82%, rgba(var(--accent-rgb), 0.035), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.050), rgba(255, 255, 255, 0.014)),
+    var(--home-glass-bg-strong) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.058),
+    0 18px 46px rgba(0, 0, 0, 0.24) !important;
+  backdrop-filter: blur(12px) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(118%) !important;
+}
+
+/* Keep album ambience alive without turning the hero muddy. */
+[data-ambient="on"] .homeView .hero.ambientSurface::before{
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012) 28%, transparent 62%),
+    radial-gradient(circle at 16% 10%, rgba(255, 255, 255, 0.045), transparent 24%),
+    radial-gradient(circle at 86% 14%, rgba(var(--accent-rgb), 0.068), transparent 30%),
+    var(--cover-url, none) !important;
+  background-position: 0 0, 0 0, 0 0, 72% 50% !important;
+  background-size: auto, auto, auto, cover !important;
+  opacity: 0.90 !important;
+  filter: blur(0) saturate(1.04) !important;
+}
+
+[data-ambient="on"] .homeView .hero.ambientSurface:hover::before{
+  opacity: 1 !important;
+  filter: blur(0) saturate(1.08) brightness(1.02) !important;
+  transform: none !important;
+}
+
+/* Shelf cards: lighter blur than panels so the home page stays fast. */
+.homeView :where(
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .localPickCard,
+  .recentCoverCard,
+  .coverCard,
+  .coverTile
+){
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.034), rgba(255, 255, 255, 0.010)),
+    var(--home-glass-card) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.034),
+    var(--home-glass-shadow-soft) !important;
+  backdrop-filter: blur(var(--home-glass-blur-light)) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(var(--home-glass-blur-light)) saturate(112%) !important;
+  transition:
+    transform 180ms var(--soft-hover-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease !important;
+}
+
+.homeView :where(
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .localPickCard,
+  .recentCoverCard,
+  .coverCard,
+  .coverTile
+)::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.048), transparent 38%),
+    radial-gradient(circle at 88% 14%, rgba(var(--accent-rgb), 0.052), transparent 28%) !important;
+  background-size: auto !important;
+  opacity: 0.95 !important;
+  z-index: 0 !important;
+}
+
+.homeView :where(
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .localPickCard,
+  .recentCoverCard,
+  .coverCard,
+  .coverTile
+) > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.homeView :where(
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .localPickCard,
+  .recentCoverCard,
+  .coverCard,
+  .coverTile
+):hover{
+  border-color: rgba(var(--accent-rgb), 0.22) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.046), rgba(255, 255, 255, 0.014)),
+    var(--home-glass-card-hover) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.044),
+    0 14px 32px rgba(0, 0, 0, 0.20),
+    0 0 20px rgba(var(--accent-rgb), 0.050) !important;
+}
+
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard).active{
+  border-color: rgba(var(--accent-rgb), 0.34) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.016)),
+    rgba(28, 22, 38, 0.52) !important;
+  box-shadow:
+    inset 2px 0 0 rgba(var(--accent-rgb), 0.82),
+    inset 0 1px 0 rgba(255, 255, 255, 0.042),
+    0 16px 34px rgba(0, 0, 0, 0.22),
+    0 0 24px rgba(var(--accent-rgb), 0.075) !important;
+}
+
+/* Search bar: match the same glass language without making typing feel laggy. */
+.homeView .search,
+.homeView .searchInput,
+.homeView .searchEasterWrap input{
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.040), rgba(255, 255, 255, 0.012)),
+    rgba(16, 13, 24, 0.42) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+  backdrop-filter: blur(9px) saturate(110%) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(110%) !important;
+}
+
+.homeView .search:focus,
+.homeView .searchInput:focus,
+.homeView .searchEasterWrap input:focus{
+  border-color: rgba(var(--accent-rgb), 0.26) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.050), rgba(255, 255, 255, 0.016)),
+    rgba(18, 14, 28, 0.48) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.040),
+    0 0 0 3px rgba(var(--accent-rgb), 0.070) !important;
+}
+
+/* Preserve drag clarity over glass. */
+.homeView .homeAlbumCard.songDragging{
+  opacity: 0.62 !important;
+  border-style: dashed !important;
+  border-color: rgba(var(--accent-rgb), 0.58) !important;
+  background: rgba(var(--accent-rgb), 0.080) !important;
+}
+
+.homeView .homeAlbumCard.songDropTarget{
+  border-color: rgba(var(--accent-rgb), 0.72) !important;
+  background: rgba(var(--accent-rgb), 0.105) !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb), 0.30),
+    0 0 0 6px rgba(var(--accent-rgb), 0.08),
+    0 18px 44px rgba(0, 0, 0, 0.30) !important;
+}
+
+@media (max-width: 900px){
+  .homeView{
+    --home-glass-blur: 9px;
+    --home-glass-blur-light: 6px;
+  }
+}
+
+/* ======================================================================
+   localtify v0.3.6 — acrylic / translucent home pass
+   stronger than the old glass pass, less transparent, still lightweight
+   owner: home.css only
+====================================================================== */
+
+.homeView{
+  --lt-acrylic-panel-bg: rgba(14, 12, 20, 0.74);
+  --lt-acrylic-panel-bg-strong: rgba(16, 13, 24, 0.80);
+  --lt-acrylic-card-bg: rgba(20, 17, 30, 0.66);
+  --lt-acrylic-card-bg-hover: rgba(24, 20, 36, 0.72);
+  --lt-acrylic-line: rgba(255, 255, 255, 0.095);
+  --lt-acrylic-line-strong: rgba(255, 255, 255, 0.13);
+  --lt-acrylic-highlight: rgba(255, 255, 255, 0.048);
+  --lt-acrylic-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+  --lt-acrylic-shadow-soft: 0 12px 26px rgba(0, 0, 0, 0.17);
+  --lt-acrylic-blur: 10px;
+  --lt-acrylic-blur-light: 7px;
+}
+
+/* big home surfaces */
+.homeView .hero,
+.homeView .homeShelfPanel,
+.homeView .homeListenPanel,
+.homeView .homeFreshPanel,
+.homeView .homeLibraryPanel,
+.homeView .homeAlbumPanel,
+.homeView .panel.ambientSurface{
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  border: 1px solid var(--lt-acrylic-line) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012) 24%, rgba(255,255,255,0.004) 100%),
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.06), transparent 34%),
+    var(--lt-acrylic-panel-bg) !important;
+  box-shadow:
+    inset 0 1px 0 var(--lt-acrylic-highlight),
+    var(--lt-acrylic-shadow) !important;
+  backdrop-filter: blur(var(--lt-acrylic-blur)) saturate(122%) !important;
+  -webkit-backdrop-filter: blur(var(--lt-acrylic-blur)) saturate(122%) !important;
+}
+
+.homeView .hero::before,
+.homeView .homeShelfPanel::before,
+.homeView .homeListenPanel::before,
+.homeView .homeFreshPanel::before,
+.homeView .homeLibraryPanel::before,
+.homeView .homeAlbumPanel::before,
+.homeView .panel.ambientSurface::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.014) 24%, transparent 56%),
+    radial-gradient(circle at 18% 10%, rgba(255,255,255,0.05), transparent 22%),
+    radial-gradient(circle at 84% 16%, rgba(var(--accent-rgb), 0.075), transparent 28%) !important;
+  opacity: 0.95 !important;
+  z-index: 0 !important;
+}
+
+.homeView .hero::after,
+.homeView .homeShelfPanel::after,
+.homeView .homeListenPanel::after,
+.homeView .homeFreshPanel::after,
+.homeView .homeLibraryPanel::after,
+.homeView .homeAlbumPanel::after,
+.homeView .panel.ambientSurface::after{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background: linear-gradient(180deg, transparent 0%, transparent 56%, rgba(0,0,0,0.08) 100%) !important;
+  z-index: 0 !important;
+}
+
+.homeView .hero > *,
+.homeView .homeShelfPanel > *,
+.homeView .homeListenPanel > *,
+.homeView .homeFreshPanel > *,
+.homeView .homeLibraryPanel > *,
+.homeView .homeAlbumPanel > *,
+.homeView .panel.ambientSurface > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* hero slightly stronger acrylic */
+.homeView .hero{
+  background:
+    radial-gradient(circle at 84% 20%, rgba(var(--accent-rgb), 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,0.048), rgba(255,255,255,0.014) 24%, rgba(255,255,255,0.004) 100%),
+    var(--lt-acrylic-panel-bg-strong) !important;
+  border-color: var(--lt-acrylic-line-strong) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.052),
+    0 18px 44px rgba(0,0,0,0.24) !important;
+}
+
+/* shelf cards — more translucent/acrylic, less plain transparent */
+.homeView .homeListenCard,
+.homeView .homeFreshCard,
+.homeView .homeAlbumCard,
+.homeView .songRow{
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  border: 1px solid rgba(255,255,255,0.082) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.012) 30%),
+    var(--lt-acrylic-card-bg) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.034),
+    var(--lt-acrylic-shadow-soft) !important;
+  backdrop-filter: blur(var(--lt-acrylic-blur-light)) saturate(116%) !important;
+  -webkit-backdrop-filter: blur(var(--lt-acrylic-blur-light)) saturate(116%) !important;
+}
+
+.homeView .homeListenCard::before,
+.homeView .homeFreshCard::before,
+.homeView .homeAlbumCard::before,
+.homeView .songRow::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.044), transparent 34%),
+    radial-gradient(circle at 86% 18%, rgba(var(--accent-rgb), 0.055), transparent 22%) !important;
+  opacity: 0.92 !important;
+  z-index: 0 !important;
+}
+
+.homeView .homeListenCard > *,
+.homeView .homeFreshCard > *,
+.homeView .homeAlbumCard > *,
+.homeView .songRow > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.homeView .homeListenCard:hover,
+.homeView .homeFreshCard:hover,
+.homeView .homeAlbumCard:hover,
+.homeView .songRow:hover{
+  border-color: rgba(var(--accent-rgb), 0.20) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015) 30%),
+    var(--lt-acrylic-card-bg-hover) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.036),
+    0 14px 30px rgba(0,0,0,0.18),
+    0 0 18px rgba(var(--accent-rgb), 0.045) !important;
+}
+
+.homeView .homeListenCard.active,
+.homeView .homeFreshCard.active,
+.homeView .homeAlbumCard.active,
+.homeView .songRow.active{
+  border-color: rgba(var(--accent-rgb), 0.30) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.016) 30%),
+    rgba(28, 22, 40, 0.74) !important;
+  box-shadow:
+    inset 2px 0 0 rgba(var(--accent-rgb), 0.78),
+    inset 0 1px 0 rgba(255,255,255,0.038),
+    0 14px 32px rgba(0,0,0,0.19),
+    0 0 20px rgba(var(--accent-rgb), 0.05) !important;
+}
+
+/* search acrylic */
+.homeView .search,
+.searchEasterWrap .search,
+.search{
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.012)),
+    rgba(18, 15, 26, 0.58) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.034) !important;
+  backdrop-filter: blur(8px) saturate(114%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(114%) !important;
+}
+
+.homeView .search:focus,
+.searchEasterWrap .search:focus,
+.search:focus{
+  border-color: rgba(var(--accent-rgb), 0.22) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015)),
+    rgba(20, 16, 30, 0.62) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.036),
+    0 0 0 3px rgba(var(--accent-rgb), 0.055) !important;
+}
+
+/* buttons inside hero keep matching acrylic tone */
+.homeView .heroTinyButton,
+.homeView .heroGhost{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.012)),
+    rgba(24, 20, 34, 0.60) !important;
+  border-color: rgba(255,255,255,0.09) !important;
+  backdrop-filter: blur(8px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(112%) !important;
+}
+
+.homeView .heroTinyButton:hover,
+.homeView .heroGhost:hover{
+  border-color: rgba(var(--accent-rgb), 0.20) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015)),
+    rgba(28, 22, 40, 0.64) !important;
+}
+
+@media (max-width: 900px){
+  .homeView{
+    --lt-acrylic-blur: 8px;
+    --lt-acrylic-blur-light: 6px;
   }
 }
