@@ -3556,3 +3556,176 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
     padding-inline: 10px !important;
   }
 }
+
+/* ======================================================================
+   localtify v0.3.5 V172 — expanded hero size hotfix
+   Tiny override only: expanded mode feels big again, compact mode unchanged.
+   Put this in player.css because player.css loads after home/App CSS.
+====================================================================== */
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded,
+.app .hero.heroPremium.heroExpanded{
+  min-height: clamp(450px, 55vh, 640px) !important;
+  padding: clamp(42px, 4.4vw, 72px) clamp(44px, 5vw, 84px) !important;
+  grid-template-columns: minmax(0, 1fr) clamp(190px, 13vw, 250px) !important;
+  column-gap: clamp(36px, 5vw, 92px) !important;
+  align-items: center !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroText,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroText,
+.app .hero.heroPremium.heroExpanded .heroText,
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroText.heroTextClean,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroText.heroTextClean,
+.app .hero.heroPremium.heroExpanded .heroText.heroTextClean{
+  align-self: center !important;
+  justify-self: start !important;
+  max-width: min(100%, 1040px) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .eyebrow,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .eyebrow,
+.app .hero.heroPremium.heroExpanded .eyebrow{
+  margin: 0 0 22px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  letter-spacing: .19em !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTitle,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTitle,
+.app .hero.heroPremium.heroExpanded .heroTitle{
+  max-width: min(100%, 1060px) !important;
+  margin: 0 0 20px !important;
+  font-size: clamp(76px, 6.25vw, 128px) !important;
+  line-height: .84 !important;
+  letter-spacing: -.092em !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  overflow: hidden !important;
+  text-wrap: balance !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded.heroTitleLong .heroTitle,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded.heroTitleLong .heroTitle,
+.app .hero.heroPremium.heroExpanded.heroTitleLong .heroTitle{
+  font-size: clamp(60px, 5.1vw, 104px) !important;
+  line-height: .87 !important;
+  letter-spacing: -.086em !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtistLine,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtistLine,
+.app .hero.heroPremium.heroExpanded .heroArtistLine{
+  max-width: min(100%, 640px) !important;
+  margin: 0 0 18px !important;
+  font-size: 18px !important;
+  line-height: 1.1 !important;
+  font-weight: 950 !important;
+  opacity: .98 !important;
+  transform: none !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroQuickActions,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroQuickActions,
+.app .hero.heroPremium.heroExpanded .heroQuickActions{
+  position: static !important;
+  inset: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  animation: localtifyHeroActionsSettleV167 360ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTinyButton,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTinyButton,
+.app .hero.heroPremium.heroExpanded .heroTinyButton{
+  min-height: 46px !important;
+  padding: 0 23px !important;
+  border-radius: 999px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap,
+.app .hero.heroPremium.heroExpanded .heroArtWrap{
+  justify-self: end !important;
+  align-self: center !important;
+  width: clamp(190px, 13vw, 250px) !important;
+  height: clamp(190px, 13vw, 250px) !important;
+  max-width: 100% !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt,
+.app .hero.heroPremium.heroExpanded .heroArt{
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+}
+
+@media (max-width: 1280px){
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded,
+  .app .hero.heroPremium.heroExpanded{
+    min-height: clamp(410px, 52vh, 570px) !important;
+    grid-template-columns: minmax(0, 1fr) clamp(160px, 13vw, 210px) !important;
+    column-gap: clamp(26px, 4vw, 62px) !important;
+  }
+
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTitle,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTitle,
+  .app .hero.heroPremium.heroExpanded .heroTitle{
+    font-size: clamp(62px, 6vw, 100px) !important;
+  }
+
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded.heroTitleLong .heroTitle,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded.heroTitleLong .heroTitle,
+  .app .hero.heroPremium.heroExpanded.heroTitleLong .heroTitle{
+    font-size: clamp(52px, 5.2vw, 84px) !important;
+  }
+
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap,
+  .app .hero.heroPremium.heroExpanded .heroArtWrap{
+    width: clamp(160px, 13vw, 210px) !important;
+    height: clamp(160px, 13vw, 210px) !important;
+  }
+}
+
+@media (max-width: 900px){
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded,
+  .app .hero.heroPremium.heroExpanded{
+    min-height: 390px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 34px 30px !important;
+  }
+
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTitle,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTitle,
+  .app .hero.heroPremium.heroExpanded .heroTitle{
+    font-size: clamp(48px, 10vw, 76px) !important;
+  }
+
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap,
+  .app .hero.heroPremium.heroExpanded .heroArtWrap{
+    display: none !important;
+  }
+}
