@@ -429,3 +429,86 @@ html body .app .simpleLibraryPanel::after{
   0%, 100%{ opacity: 0.62; transform: scaleY(0.72); }
   50%{ opacity: 1; transform: scaleY(1); }
 }
+
+/* ======================================================================
+   localtify 0.3.6 V199 — /yukari right-side peek easter egg.
+   Owner: effects.css. Image loads only when the secret is triggered.
+====================================================================== */
+
+.app .secretLayer.yukari{
+  z-index: 2400 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+.app .secretLayer.yukari::before,
+.app .secretLayer.yukari::after{
+  display: none !important;
+  content: none !important;
+}
+
+.app .secretLayer.yukari .secretRibbon{
+  top: auto !important;
+  left: auto !important;
+  right: 22px !important;
+  bottom: 94px !important;
+  transform: none !important;
+  max-width: min(250px, calc(100vw - 42px)) !important;
+  padding: 8px 12px !important;
+  border-color: rgba(var(--accent-rgb), .24) !important;
+  background: rgba(8,8,13,.64) !important;
+  backdrop-filter: blur(12px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
+  animation: yukariSecretBubbleInV199 420ms cubic-bezier(.18,1.12,.24,1) both !important;
+}
+
+.app .yukariSecretPeek{
+  position: fixed !important;
+  right: -124px !important;
+  bottom: clamp(112px, 12vh, 148px) !important;
+  width: clamp(132px, 11vw, 188px) !important;
+  height: auto !important;
+  z-index: 2402 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  filter:
+    drop-shadow(0 26px 42px rgba(0,0,0,.58))
+    drop-shadow(0 0 22px rgba(var(--accent-rgb), .18)) !important;
+  transform-origin: 86% 55% !important;
+  will-change: transform, opacity !important;
+  animation:
+    yukariSecretPeekInV199 760ms cubic-bezier(.18,1.08,.22,1) both,
+    yukariSecretFloatV199 2.8s ease-in-out 760ms infinite alternate !important;
+}
+
+@keyframes yukariSecretPeekInV199{
+  0%{ opacity: 0; transform: translate3d(112px, 10px, 0) rotate(3deg) scale(.985); }
+  62%{ opacity: 1; transform: translate3d(-4px, -2px, 0) rotate(-1deg) scale(1.01); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+}
+
+@keyframes yukariSecretFloatV199{
+  0%{ transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  100%{ transform: translate3d(-2px, -7px, 0) rotate(-.7deg) scale(1.01); }
+}
+
+@keyframes yukariSecretBubbleInV199{
+  0%{ opacity: 0; transform: translate3d(28px, 8px, 0) scale(.96); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@media (max-width: 760px){
+  .app .yukariSecretPeek{
+    right: -104px !important;
+    bottom: 108px !important;
+    width: 124px !important;
+  }
+
+  .app .secretLayer.yukari .secretRibbon{
+    right: 14px !important;
+    bottom: 84px !important;
+  }
+}
