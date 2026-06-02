@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.6 V183 — controller split TS error fix. */
+/* localtify 0.3.6 V184 — medium split imports: controller + view + shared modules. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -70,6 +70,11 @@ import "./motion.css";
 import "./effects.css";
 import "./player.css";
 import LocaltifyAppView, {
+  Cover,
+  VirtualHomeSongCards,
+  VirtualSongRows
+} from "./LocaltifyAppView";
+import {
   APP_VERSION,
   ARCADE_GHOST_UNLOCKED_KEY,
   BOOT_MIN_VISIBLE_MS,
@@ -77,7 +82,6 @@ import LocaltifyAppView, {
   BUILT_IN_CUSTOM_THEME_PRESETS,
   CODERPIXEL_ARTIST_EASTER_EGG,
   CUSTOM_THEME_COMMIT_DELAY_MS,
-  Cover,
   DISCORD_ASSET_KEYS,
   DISCORD_LOGO_ASSET,
   HOME_GRID_RENDER_LIMIT,
@@ -97,9 +101,22 @@ import LocaltifyAppView, {
   THEME_SWATCH_COLORS,
   V013_DEFAULTS_KEY,
   V013_RELEASE_DEFAULTS,
-  VirtualHomeSongCards,
-  VirtualSongRows,
   WHATS_NEW_SEEN_KEY,
+  coverColorSyncOptions,
+  defaultSettings,
+  defaultUpdatePrompt,
+  discordArtModeOptions,
+  discordCleanupOptions,
+  discordSecondLineOptions,
+  discordStyleOptions,
+  loadingScreenGif,
+  localtifyLogo,
+  screensaverImage,
+  settingsCategoryTabs,
+  themes,
+  whatsNewItems
+} from "./localtifyConstants";
+import {
   applyLibraryOrder,
   buildAnimatedThemeVisualStyle,
   buildDiscordPreview,
@@ -112,15 +129,8 @@ import LocaltifyAppView, {
   cleanStringList,
   cleanToastCopy,
   collapseSpaces,
-  coverColorSyncOptions,
   coverMoodName,
   createImportAnimationState,
-  defaultSettings,
-  defaultUpdatePrompt,
-  discordArtModeOptions,
-  discordCleanupOptions,
-  discordSecondLineOptions,
-  discordStyleOptions,
   formatTime,
   friendlyUpdateError,
   getAmbientStyle,
@@ -140,8 +150,6 @@ import LocaltifyAppView, {
   insertIdNearTarget,
   isCompleteHexColorInput,
   isPlayableSong,
-  loadingScreenGif,
-  localtifyLogo,
   lower,
   makeCustomThemeColors,
   makeLocalId,
@@ -165,21 +173,17 @@ import LocaltifyAppView, {
   resolveSettingsCategoryFromSearch,
   sanitizeSongList,
   saveLibraryOrder,
-  screensaverImage,
-  settingsCategoryTabs,
   settingsTabMatchesSearch,
   songSignature,
   stableHash,
   stableSongSourceKey,
-  themes,
   updateStatusLabel,
   updateWasLeftAlone,
   useCoverAverageStyle,
   useStableCallback,
-  whatsNewItems,
   writeLocalJson,
   writeSavedCustomThemePresets
-} from "./LocaltifyAppView";
+} from "./localtifyUtils";
 import type {
   AppToastKind,
   AutoUpdateEvent,
@@ -209,7 +213,7 @@ import type {
   ThemeId,
   UpdatePromptState,
   View
-} from "./LocaltifyAppView";
+} from "./localtifyTypes";
 
 
 

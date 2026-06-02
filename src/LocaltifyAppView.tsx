@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.6 V183 — extracted renderer/view layer TS error fix. */
+/* localtify 0.3.6 V184 — big UI view layer. Shared imports now come through localtifyTypes/constants/utils from App.tsx. */
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
