@@ -1,6 +1,6 @@
 {
   "name": "localtify",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "private": true,
   "productName": "localtify",
   "description": "localtify - local music player",
@@ -13,8 +13,9 @@
   "scripts": {
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
     "build": "vite build",
-    "dist": "npm run build && electron-builder --win nsis --x64",
-    "publish": "npm run build && electron-builder --win nsis --x64 --publish always",
+    "clean:release": "node -e \"require('fs').rmSync('release',{recursive:true,force:true})\"",
+    "dist": "npm run clean:release && npm run build && electron-builder --win nsis --x64",
+    "publish": "npm run clean:release && npm run build && electron-builder --win nsis --x64 --publish always",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
@@ -83,7 +84,9 @@
         "from": "pixelart",
         "to": "pixelart",
         "filter": [
-          "**/*"
+          "**/*",
+          "!**/.DS_Store",
+          "!**/Thumbs.db"
         ]
       },
       {
