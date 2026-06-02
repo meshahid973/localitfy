@@ -3729,3 +3729,99 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
     display: none !important;
   }
 }
+
+/* ========================================================================
+   localtify v0.3.5 V173 — expanded hero cover size fix
+   Tiny final override: expanded mode cover is big again, compact stays clean.
+   Put last in player.css so it beats App/home/player older hero patches.
+======================================================================== */
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded,
+.app .hero.heroPremium.heroExpanded{
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 17vw, 360px) !important;
+  column-gap: clamp(46px, 5.6vw, 112px) !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap,
+.app .hero.heroPremium.heroExpanded .heroArtWrap{
+  width: clamp(280px, 17vw, 360px) !important;
+  height: clamp(280px, 17vw, 360px) !important;
+  justify-self: end !important;
+  align-self: center !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 28px !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap::before,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap::before,
+.app .hero.heroPremium.heroExpanded .heroArtWrap::before{
+  inset: -16% !important;
+  border-radius: 34px !important;
+  opacity: .30 !important;
+  filter: blur(24px) saturate(1.14) brightness(.78) !important;
+  transform: translate3d(0, 0, 0) scale(1.02) !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt,
+.app .hero.heroPremium.heroExpanded .heroArt{
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 25px !important;
+  overflow: hidden !important;
+  object-fit: cover !important;
+  box-shadow:
+    0 26px 64px rgba(0, 0, 0, .42),
+    0 0 0 1px rgba(255, 255, 255, .13),
+    0 0 46px rgba(var(--accent-rgb), .16) !important;
+}
+
+.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt img,
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt img,
+.app .hero.heroPremium.heroExpanded .heroArt img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+@media (max-width: 1280px){
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded,
+  .app .hero.heroPremium.heroExpanded{
+    grid-template-columns: minmax(0, 1fr) clamp(230px, 20vw, 310px) !important;
+    column-gap: clamp(32px, 4.4vw, 70px) !important;
+  }
+
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap,
+  .app .hero.heroPremium.heroExpanded .heroArtWrap{
+    width: clamp(230px, 20vw, 310px) !important;
+    height: clamp(230px, 20vw, 310px) !important;
+  }
+}
+
+@media (max-width: 900px){
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded,
+  .app .hero.heroPremium.heroExpanded{
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap,
+  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap,
+  .app .hero.heroPremium.heroExpanded .heroArtWrap{
+    display: none !important;
+  }
+}
