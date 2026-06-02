@@ -2918,46 +2918,13 @@ button:active{
   
 
 }
+/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-/* Built-in reduced motion setting + OS reduced motion. */
-.app.reducedMotion .heroTitle{
-  animation: none !important;
-}
 
 
-.app.reducedMotion .hero,
-.app.reducedMotion .heroPremium,
-.app.reducedMotion .simpleHero,
-.app.reducedMotion .albumCard,
-.app.reducedMotion .homeAlbumCard,
-.app.reducedMotion .songRow,
-.app.reducedMotion .recentImportCard,
-.app.reducedMotion .topRow,
-.app.reducedMotion button,
-.app.reducedMotion input[type="range"]{
-  transition-duration: 1ms !important;
-}
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
 
-
-@media (prefers-reduced-motion: reduce){
-  .app .heroTitle{
-    animation: none !important;
-  }
-
-  .app .hero,
-.app .heroPremium,
-.app .simpleHero,
-.app .albumCard,
-.app .homeAlbumCard,
-.app .songRow,
-.app .recentImportCard,
-.app .topRow,
-.app button,
-.app input[type="range"]{
-    transition-duration: 1ms !important;
-  }
-}
 
 
 @keyframes localitfyHeroTitleRiseSafe {
@@ -3050,27 +3017,9 @@ button:active{
 .app .nowPlayingDetailsSwap > *:nth-child(3){ animation-delay: 84ms; }
 
 
-@media (prefers-reduced-motion: reduce){
-  .app .heroAmbiencePulse,
-.app .nowPlayingArtSwap,
-.app .simpleHeroArtSwap,
-.app .nowPlayingCopySwap .eyebrow,
-.app .nowPlayingCopySwap .heroTitle,
-.app .simpleHeroText.nowPlayingCopySwap h2,
-.app .nowPlayingCopySwap .heroMetaLine,
-.app .simpleHeroText.nowPlayingCopySwap p,
-.importOverlay,
-.importPanel,
-.importPanel::before,
-.importScannerLine,
-.importScannerGlow,
-.importScannerOrb,
-.importCoverTile,
-.importCoverSkeleton,
-.importLogList span{
-    animation: none !important;
-  }
-}
+
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 
 @keyframes localitfyScannerLine {
@@ -3334,20 +3283,13 @@ button:active{
     transform: translate3d(0, 0, 0) scale(1.018) !important;
   }
 }
+/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-.app.reducedMotion .heroLayoutMotion{
-  animation: none !important;
-  transition-duration: 1ms !important;
-}
 
 
-@media (prefers-reduced-motion: reduce){
-  .app .heroLayoutMotion{
-    animation: none !important;
-    transition-duration: 1ms !important;
-  }
-}
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 
 .app .heroMain{
@@ -3618,20 +3560,13 @@ button:active{
       rgba(0, 0, 0, 0.58) 74%,
       rgba(0, 0, 0, 0.78) 100%) !important;
 }
+/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-.app.reducedMotion .homeAlbumCard{
-  animation: none !important;
-  transition-duration: 1ms !important;
-}
 
 
-@media (prefers-reduced-motion: reduce){
-  .app .homeAlbumCard{
-    animation: none !important;
-    transition-duration: 1ms !important;
-  }
-}
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 
 .app .headerBar{
@@ -3713,18 +3648,13 @@ button:active{
   transform: translate3d(0, 0, 0);
   image-rendering: auto;
 }
+/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-.app.reducedMotion .heroPremium{
-  transition-duration: 1ms !important;
-}
 
 
-@media (prefers-reduced-motion: reduce){
-  .app .heroPremium{
-    transition-duration: 1ms !important;
-  }
-}
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 /* ======================================================================
    localitfy — clean album card hover final override
@@ -4069,12 +3999,9 @@ body.localitfySongDragging .homeAlbumCard{
     background-color 100ms ease !important;
 }
 
-@media (prefers-reduced-motion: reduce){
-  .app .heroArtWrap::before{
-    animation: none !important;
-    transition: none !important;
-  }
-}
+
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 
 /* ======================================================================
@@ -4094,11 +4021,11 @@ body.localitfySongDragging .homeAlbumCard{
     0 0 22px rgba(255, 90, 175, 0.12) !important;
 }
 
-.app.misideMode:not(.reducedMotion) .heroTitle{
+.app.misideMode .heroTitle{
   animation: localitfyMisideTitleGlitch 7.2s steps(2, end) infinite !important;
 }
 
-.app.misideMode:not(.reducedMotion) .heroArt{
+.app.misideMode .heroArt{
   animation: localitfyMisideCoverTick 8.8s steps(1, end) infinite !important;
 }
 
@@ -4154,11 +4081,9 @@ body.isResizingSidebar .app .homeAlbumCard{
   box-shadow: none !important;
 }
 
-@media (prefers-reduced-motion: reduce){
-  .app.misideMode .heroTitle{
-    animation: none !important;
-  }
-}
+
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 
 /* ======================================================================
@@ -4255,11 +4180,9 @@ body.isResizingSidebar .app .homeAlbumCard{
   }
 }
 
-@media (prefers-reduced-motion: reduce){
-  .misideEggNotice{
-    animation: none !important;
-  }
-}
+
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 
 /* ======================================================================
@@ -7083,24 +7006,9 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-@media (prefers-reduced-motion: reduce){
-  .homeAlbumCard,
-.songRow,
-.topRow,
-.hero,
-.simpleHero,
-.panel,
-.softButton,
-.heroGhost,
-.mainAction,
-.heroMain,
-.simpleAction,
-.circleButton:not(.playerBar *),
-.iconAction{
-    transition-duration: 80ms !important;
-    animation-duration: 80ms !important;
-  }
-}
+
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 /* ========================================================================== 
    localtify v0.2.3 — refined Kopuz-style home motion layer
    --------------------------------------------------------------------------
@@ -7409,38 +7317,9 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     0 0 26px rgba(var(--accent-rgb), 0.09) !important;
 }
 
-@media (prefers-reduced-motion: reduce){
-  .hero,
-.simpleHero,
-.heroPremium,
-.homeLibraryPanel,
-.simpleLibraryPanel,
-.homeAlbumCard,
-.songRow,
-.simpleSongRow,
-.topRow,
-.panel.ambientSurface,
-.heroArt,
-.simpleHeroArt,
-.homeAlbumArt,
-.songArt,
-.mainAction,
-.heroMain,
-.simpleAction,
-.heroGhost,
-.simpleGhost,
-.softButton,
-.circleButton:not(.playerBar *),
-.iconAction,
-.songButton{
-    animation: none !important;
-    transition-duration: 80ms !important;
-  }
 
-  .hero:hover{
-    transform: translateZ(0) !important;
-  }
-}
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 @media (max-width: 900px){
   .hero:hover{
@@ -7619,18 +7498,8 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .app .mainAction:hover{
   filter: brightness(1.045) saturate(1.04) !important;
 }
+/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
-@media (prefers-reduced-motion: reduce){
-  .app .content > .pageTransition{
-    animation: none !important;
-    transition-duration: 1ms !important;
-  }
-}
-
-.app.reducedMotion .content > .pageTransition{
-  animation: none !important;
-  transition-duration: 1ms !important;
-}
 
 
 /* ========================================================================== 
@@ -7994,15 +7863,9 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   filter: brightness(1.07) saturate(1.1) !important;
 }
 
-@media (prefers-reduced-motion: reduce){
-  .homeAlbumCard{
-    transition: none !important;
-  }
 
-  .homeAlbumCard:hover{
-    transform: none !important;
-  }
-}
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 /* ======================================================================
    localtify v0.2.4 — row stripe cleanup + cleaner Kopuz motion
@@ -8204,13 +8067,9 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-@media (prefers-reduced-motion: reduce){
-  .app .songRow{
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
-    }
-}
+
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 
 /* ======================================================================
@@ -10188,11 +10047,14 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   will-change: transform;
 }
 
-@media (prefers-reduced-motion: no-preference){
+
+/* localtify v0.3.6 V189: unwrapped motion-on block. */
+
   .homeListenCard{
     animation-duration: 280ms !important;
   }
-}
+
+
 
 /* final home background cleanup */
 .app{
@@ -10761,12 +10623,12 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     box-shadow 260ms ease !important;
 }
 
-.app:not(.reducedMotion) .homeAlbumCard:hover{
+.app .homeAlbumCard:hover{
   transform: translate3d(0, -3px, 0) scale(1.012) !important;
 }
 
-.app:not(.reducedMotion) .homeAlbumCard:hover .coverAura,
-.app:not(.reducedMotion) .homeAlbumCard:hover .homeAlbumArt{
+.app .homeAlbumCard:hover .coverAura,
+.app .homeAlbumCard:hover .homeAlbumArt{
   transform: translate3d(0, -1px, 0) scale(1.028) !important;
 }
 
@@ -10810,14 +10672,8 @@ body.localitfyNoSelect,
 body.localitfyNoSelect *{
   user-select: none !important;
 }
+/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
-.app.reducedMotion .homeAlbumCard:hover,
-.app.reducedMotion .homeAlbumCard:hover .coverAura,
-.app.reducedMotion .homeAlbumCard:hover .homeAlbumArt,
-.app.reducedMotion .homeAlbumCard.songDropTarget,
-.app.reducedMotion .songRow.songDropTarget{
-  transform: none !important;
-}
 
 
 /* ======================================================================
@@ -10979,12 +10835,12 @@ body.localitfyNoSelect *{
   backface-visibility: hidden !important;
 }
 
-.app:not(.reducedMotion) .homeAlbumCard:hover,
-.app:not(.reducedMotion) .libraryCard:hover,
-.app:not(.reducedMotion) .songCard:hover,
-.app:not(.reducedMotion) .homeCard:hover,
-.app:not(.reducedMotion) .coverCard:hover,
-.app:not(.reducedMotion) .coverTile:hover{
+.app .homeAlbumCard:hover,
+.app .libraryCard:hover,
+.app .songCard:hover,
+.app .homeCard:hover,
+.app .coverCard:hover,
+.app .coverTile:hover{
   transform: translate3d(0,-3px,0) scale(1.012) !important;
   rotate: 0deg !important;
   border-color: color-mix(in oklab, var(--theme-progress, var(--accent)) 26%, rgba(255,255,255,.10)) !important;
@@ -10993,16 +10849,16 @@ body.localitfyNoSelect *{
     0 0 22px color-mix(in oklab, var(--theme-progress, var(--accent)) 6%, transparent) !important;
 }
 
-.app:not(.reducedMotion) .songRow:hover{
+.app .songRow:hover{
   transform: translate3d(0,-1px,0) scale(1.004) !important;
   rotate: 0deg !important;
 }
 
-.app:not(.reducedMotion) .homeAlbumCard:hover .homeAlbumArt,
-.app:not(.reducedMotion) .homeAlbumCard:hover .coverAura,
-.app:not(.reducedMotion) .songRow:hover .songArt,
-.app:not(.reducedMotion) .coverCard:hover img,
-.app:not(.reducedMotion) .coverTile:hover img{
+.app .homeAlbumCard:hover .homeAlbumArt,
+.app .homeAlbumCard:hover .coverAura,
+.app .songRow:hover .songArt,
+.app .coverCard:hover img,
+.app .coverTile:hover img{
   transform: translate3d(0,-1px,0) scale(1.026) !important;
   rotate: 0deg !important;
 }
@@ -11161,21 +11017,12 @@ body.localitfyNoSelect *{
   100% { transform: translate3d(0,0,0) scale(1); }
 }
 
-.app:not(.reducedMotion) .homeAlbumCard:not(.songDragging):not(.songDropTarget),
-.app:not(.reducedMotion) .songRow:not(.songDragging):not(.songDropTarget){
+.app .homeAlbumCard:not(.songDragging):not(.songDropTarget),
+.app .songRow:not(.songDragging):not(.songDropTarget){
   animation-duration: 0ms;
 }
+/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
-.app.reducedMotion .homeAlbumCard,
-.app.reducedMotion .songRow,
-.app.reducedMotion .homeAlbumCard.songDropTarget,
-.app.reducedMotion .songRow.songDropTarget,
-.app.reducedMotion .homeAlbumCard.songDropTarget::after,
-.app.reducedMotion .songRow.songDropTarget::after{
-  transition: none !important;
-  animation: none !important;
-  transform: none !important;
-}
 
 /* v0.2.6 drag patch follow-up: match the real data-drop-side attributes. */
 .app .homeAlbumCard.songDropTarget::before,
@@ -12005,12 +11852,9 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 
 
 
-@media (prefers-reduced-motion: reduce){
-  .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile,.songRow){
-    transition: none !important;
-    transform: none !important;
-  }
-}
+
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 /* ========================================================================
    localtify 0.2.9 — absolute no-grid + simple card hover final override
@@ -14069,17 +13913,9 @@ html body .content{
   display: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .coverGalleryImagePlaceholder,
-  .coverGalleryImageShell .coverGalleryImage {
-    transition: opacity 1ms linear;
-    transform: none;
-  }
 
-  .coverGalleryImageShell.isLoading::after {
-    animation: none;
-  }
-}
+/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
+
 
 /* =======================================================================
    localtify v0.3.3 v102 — real virtualization containers
@@ -15000,12 +14836,12 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   opacity: 1 !important;
 }
 
-.app:not(.reducedMotion) :is(.homeHeroSection,.homeSection,.homeShelf,.homePanel,.libraryPanel){
+.app :is(.homeHeroSection,.homeSection,.homeShelf,.homePanel,.libraryPanel){
   backface-visibility: hidden;
   transform-style: flat;
 }
 
-.app:not(.reducedMotion) .homeHeroSection{
+.app .homeHeroSection{
   transition:
     min-height 360ms cubic-bezier(.18, 1.08, .22, 1),
     padding 360ms cubic-bezier(.18, 1.08, .22, 1),
@@ -15014,15 +14850,15 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     box-shadow 180ms ease !important;
 }
 
-.app:not(.reducedMotion) .homeHeroText,
-.app:not(.reducedMotion) .homeHeroActions,
-.app:not(.reducedMotion) .homeHeroCoverWrap{
+.app .homeHeroText,
+.app .homeHeroActions,
+.app .homeHeroCoverWrap{
   transition:
     transform 360ms cubic-bezier(.18, 1.08, .22, 1),
     opacity 220ms ease !important;
 }
 
-.app:not(.reducedMotion) :is(.localPicksPanel,.recentCoversPanel,.quickLibraryPanel,.homeShelf){
+.app :is(.localPicksPanel,.recentCoversPanel,.quickLibraryPanel,.homeShelf){
   transition:
     transform 340ms cubic-bezier(.18, 1.08, .22, 1),
     opacity 200ms ease,
@@ -15030,11 +14866,11 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     background-color 160ms ease !important;
 }
 
-.app:not(.reducedMotion).heroMotionExpanding :is(.localPicksPanel,.recentCoversPanel,.quickLibraryPanel,.homeShelf){
+.app.heroMotionExpanding :is(.localPicksPanel,.recentCoversPanel,.quickLibraryPanel,.homeShelf){
   transform: translate3d(0, 8px, 0) scale(.998) !important;
 }
 
-.app:not(.reducedMotion).heroMotionCollapsing :is(.localPicksPanel,.recentCoversPanel,.quickLibraryPanel,.homeShelf){
+.app.heroMotionCollapsing :is(.localPicksPanel,.recentCoversPanel,.quickLibraryPanel,.homeShelf){
   transform: translate3d(0, -4px, 0) scale(1.001) !important;
 }
 

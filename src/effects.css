@@ -1,5 +1,5 @@
 /* ========================================================================== 
-   localtify 0.3.5 V148 — effects.css
+   localtify 0.3.6 V148 — effects.css
    Owns music-reactive cover glow, active-song ambience, and cheap visual pulses.
    Layout stays in App/home/player/settings CSS. This file must not animate whole rows.
 ========================================================================== */
@@ -156,33 +156,8 @@
   82%{ scale: 1.006; }
   100%{ rotate: 360deg; scale: 0.985; }
 }
+/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
-.app[data-playing="off"] .hero.heroPremium .heroArtWrap,
-.app.reducedMotion .hero.heroPremium .heroArtWrap,
-.app.viewSwitching .hero.heroPremium .heroArtWrap,
-.app.songDragActive .hero.heroPremium .heroArtWrap{
-  will-change: auto !important;
-}
-
-.app[data-playing="off"] .hero.heroPremium .heroArt,
-.app.reducedMotion .hero.heroPremium .heroArt,
-.app.viewSwitching .hero.heroPremium .heroArt,
-.app.songDragActive .hero.heroPremium .heroArt{
-  transform: translate3d(0, 0, 0) scale(1) !important;
-}
-
-.app.reducedMotion :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::before,
-.app.reducedMotion :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::after,
-.app.viewSwitching :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::before,
-.app.viewSwitching :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::after,
-.app.reducedMotion .hero.heroPremium .heroArtWrap::before,
-.app.reducedMotion .hero.heroPremium .heroArtWrap::after,
-.app.viewSwitching .hero.heroPremium .heroArtWrap::before,
-.app.viewSwitching .hero.heroPremium .heroArtWrap::after,
-.app.songDragActive .hero.heroPremium .heroArtWrap::before,
-.app.songDragActive .hero.heroPremium .heroArtWrap::after{
-  animation: none !important;
-}
 
 body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::before,
 body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::after{
@@ -417,4 +392,40 @@ html body .app .simpleLibraryPanel::after{
   background: none !important;
   background-image: none !important;
   opacity: 0 !important;
+}
+
+
+/* ========================================================================== 
+   localtify 0.3.6 V189 — cleaner active-song glow details
+========================================================================== */
+
+.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing){
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb), 0.16) inset,
+    0 12px 32px rgba(0, 0, 0, 0.24),
+    0 0 26px rgba(var(--accent-rgb), 0.075) !important;
+}
+
+.app[data-playing="on"] :is(.songRow.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::after{
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 14% !important;
+  bottom: 14% !important;
+  width: 3px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(var(--accent-rgb),0.95), rgba(var(--accent-rgb),0.28)) !important;
+  box-shadow: 0 0 18px rgba(var(--accent-rgb),0.42) !important;
+  opacity: 0.92 !important;
+  transform-origin: center !important;
+  animation: localtifyActiveLineBreathe 1.8s ease-in-out infinite !important;
+}
+
+.app[data-playing="on"] :is(.songRow.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing) :is(.songArt, .smallArt, .coverAura){
+  filter: saturate(1.1) contrast(1.04) !important;
+}
+
+@keyframes localtifyActiveLineBreathe{
+  0%, 100%{ opacity: 0.62; transform: scaleY(0.72); }
+  50%{ opacity: 1; transform: scaleY(1); }
 }

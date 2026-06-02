@@ -1275,17 +1275,8 @@
     border-bottom: 1px solid rgba(255,255,255,0.075);
   }
 }
+/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
-.app.reducedMotion .settingsPageCard,
-.app.reducedMotion .settingsHero::before,
-.app.reducedMotion .settingsPanelCard,
-.app.reducedMotion .settingsThemeCard,
-.app.reducedMotion .settingSwitchCard,
-.app.reducedMotion .settingsChoice,
-.app.reducedMotion .coverSyncChoice{
-  animation: none !important;
-  transition-duration: 1ms !important;
-}
 
 
 /* ======================================================================
@@ -1314,15 +1305,15 @@
     box-shadow 240ms ease !important;
 }
 
-.app:not(.reducedMotion) .settingsThemeCard:hover,
-.app:not(.reducedMotion) .themeTokenCard:hover{
+.app .settingsThemeCard:hover,
+.app .themeTokenCard:hover{
   transform: translateY(-2px) scale(1.018) !important;
 }
 
-.app:not(.reducedMotion) .settingsChoice:hover,
-.app:not(.reducedMotion) .settingsActionButton:hover,
-.app:not(.reducedMotion) .settingsTinyButton:hover,
-.app:not(.reducedMotion) .cleanToggleLabel:hover{
+.app .settingsChoice:hover,
+.app .settingsActionButton:hover,
+.app .settingsTinyButton:hover,
+.app .cleanToggleLabel:hover{
   transform: translateY(-1px) scale(1.01) !important;
 }
 
@@ -1342,7 +1333,7 @@
     box-shadow 240ms ease !important;
 }
 
-.app:not(.reducedMotion) .settingsCategoryButton:hover{
+.app .settingsCategoryButton:hover{
   transform: translateX(2px);
 }
 
@@ -1351,8 +1342,8 @@
   transition: transform 220ms cubic-bezier(.2,.85,.2,1), opacity 180ms ease, color 180ms ease !important;
 }
 
-.app:not(.reducedMotion) .settingsCategoryButton:hover .settingsCategoryIcon,
-.app:not(.reducedMotion) .settingsCategoryButton.active .settingsCategoryIcon{
+.app .settingsCategoryButton:hover .settingsCategoryIcon,
+.app .settingsCategoryButton.active .settingsCategoryIcon{
   transform: scale(1.08);
 }
 
