@@ -69,3 +69,7 @@ a
 analytics/exports/
 analytics/private/
 posthog-export*a
+
+# Local asset compression backups
+localtify_asset_backups/
+
