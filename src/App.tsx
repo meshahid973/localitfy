@@ -1,6 +1,6 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.6 V184 — medium split imports: controller + view + shared modules. */
-import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+/* localtify 0.3.6 V185 — performance pass: lazy settings + calmer runtime loops. */
+import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -29,9 +29,6 @@ import {
   Volume2,
   VolumeX
 } from "lucide-react";
-import Onboarding from "./Onboarding";
-import CoverStudio from "./cover";
-import SettingsCategoryContent from "./SettingsCategoryContent";
 import { useProximityMotion } from "./useProximityMotion";
 import {
   initLocalitfyAnalytics,
@@ -69,6 +66,7 @@ import "./home.css";
 import "./motion.css";
 import "./effects.css";
 import "./player.css";
+
 import LocaltifyAppView, {
   Cover,
   VirtualHomeSongCards,
@@ -215,8 +213,7 @@ import type {
   View
 } from "./localtifyTypes";
 
-
-
+const SettingsCategoryContent = lazy(() => import("./SettingsCategoryContent"));
 
 function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -7952,8 +7949,19 @@ function MainModeApp() {
 
   function renderSettingsCategoryContent() {
     return (
-      <SettingsCategoryContent
-        settingsCategory={settingsCategory}
+      <Suspense
+        fallback={
+          <div className="settingsPageCard settingsLazyLoading" role="status" aria-live="polite">
+            <div className="settingsSectionTitle">
+              <span>settings</span>
+              <strong>loading this section</strong>
+              <small>only loading the panel you opened, so startup stays lighter.</small>
+            </div>
+          </div>
+        }
+      >
+        <SettingsCategoryContent
+          settingsCategory={settingsCategory}
         currentTheme={currentTheme}
         settings={settings}
         updateSetting={updateSetting}
@@ -8028,7 +8036,8 @@ function MainModeApp() {
         resetPlayerLayoutSettings={resetPlayerLayoutSettings}
         resetLibraryLayoutSettings={resetLibraryLayoutSettings}
         resetAllSettingsSafely={resetAllSettingsSafely}
-      />
+        />
+      </Suspense>
     );
   }
 

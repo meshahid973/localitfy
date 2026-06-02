@@ -1,6 +1,6 @@
 // @ts-nocheck
-/* localtify 0.3.6 V184 — big UI view layer. Shared imports now come through localtifyTypes/constants/utils from App.tsx. */
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+/* localtify 0.3.6 V185 — big UI view layer with lazy heavy pages. */
+import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -29,9 +29,9 @@ import {
   Volume2,
   VolumeX
 } from "lucide-react";
-import Onboarding from "./Onboarding";
-import CoverStudio from "./cover";
-import SettingsCategoryContent from "./SettingsCategoryContent";
+
+const Onboarding = lazy(() => import("./Onboarding"));
+const CoverStudio = lazy(() => import("./cover"));
 
 export type Song = {
   id: string;
@@ -3832,18 +3832,20 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       ) : null}
 
       {onboardingOpen ? (
-        <Onboarding
-          appVersion={APP_VERSION}
-          songsCount={songs.length}
-          currentTheme={settings.customThemeEnabled ? "custom" : settings.theme}
-          discordEnabled={settings.discordEnabled}
-          onChooseTheme={handleOnboardingTheme}
-          onSetDiscordEnabled={handleOnboardingDiscord}
-          onImportMusic={handleOnboardingImportMusic}
-          onOpenDownloads={handleOnboardingDownloads}
-          onStartListening={handleOnboardingStartListening}
-          onSkip={skipOnboarding}
-        />
+        <Suspense fallback={null}>
+          <Onboarding
+            appVersion={APP_VERSION}
+            songsCount={songs.length}
+            currentTheme={settings.customThemeEnabled ? "custom" : settings.theme}
+            discordEnabled={settings.discordEnabled}
+            onChooseTheme={handleOnboardingTheme}
+            onSetDiscordEnabled={handleOnboardingDiscord}
+            onImportMusic={handleOnboardingImportMusic}
+            onOpenDownloads={handleOnboardingDownloads}
+            onStartListening={handleOnboardingStartListening}
+            onSkip={skipOnboarding}
+          />
+        </Suspense>
       ) : null}
 
       {effectiveSimpleMode ? (
@@ -4438,8 +4440,21 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
             )}
 
             {view === "covers" && (
-              <CoverStudio
-                ambientStyle={ambientStyle ?? undefined}
+              <Suspense
+                fallback={
+                  <section className="panel coverStudioLoading" role="status" aria-live="polite">
+                    <div className="panelHead">
+                      <div>
+                        <p className="eyebrow">covers</p>
+                        <h3>loading cover studio</h3>
+                        <p className="softText">cover tools load only when you open them now.</p>
+                      </div>
+                    </div>
+                  </section>
+                }
+              >
+                <CoverStudio
+                  ambientStyle={ambientStyle ?? undefined}
                 pixelArtBusy={pixelArtBusy}
                 selectedCoverSongs={selectedCoverSongs}
                 currentSong={currentSong}
@@ -4465,7 +4480,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 applyCoverAssetToSelection={applyCoverAssetToSelection}
                 togglePixelCoverFavorite={togglePixelCoverFavorite}
                 togglePixelCoverExcluded={togglePixelCoverExcluded}
-              />
+                />
+              </Suspense>
             )}
 
             {view === "analytics" && (
