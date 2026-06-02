@@ -3414,3 +3414,77 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
     display: none !important;
   }
 }
+
+/* ======================================================================
+   localtify v0.3.6 V192 — acrylic bottom player consistency
+   Owner: player.css only
+   Keeps the existing player grid/layout untouched.
+====================================================================== */
+
+.playerBar{
+  --player-track-base: rgba(255,255,255,0.18);
+  border-top: 1px solid rgba(255,255,255,0.105) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.050), rgba(255,255,255,0.012) 34%, rgba(255,255,255,0.004)),
+    linear-gradient(90deg, rgba(var(--cover-rgb, var(--accent-rgb)), 0.10), rgba(14, 10, 20, 0.82) 46%, rgba(var(--accent-rgb), 0.08)),
+    rgba(12, 9, 18, 0.86) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.052),
+    0 -18px 50px rgba(0,0,0,0.42) !important;
+  backdrop-filter: blur(10px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+}
+
+.playerBar::after{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.030), transparent 30%),
+    linear-gradient(90deg, rgba(0,0,0,0.46), rgba(0,0,0,0.20) 50%, rgba(0,0,0,0.36)),
+    radial-gradient(circle at 50% -18%, rgba(255,255,255,0.050), transparent 38%) !important;
+}
+
+.playerBar .smallArt{
+  box-shadow:
+    0 10px 22px rgba(0,0,0,0.26),
+    0 0 0 1px rgba(255,255,255,0.11),
+    0 0 22px rgba(var(--cover-rgb, var(--accent-rgb)), 0.08) !important;
+}
+
+.playerBar .circleButton,
+.playerBar .volumeIconButton,
+.playerBar .repeatButton{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.010)),
+    rgba(255,255,255,0.034) !important;
+  border: 1px solid rgba(255,255,255,0.080) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.036) !important;
+  backdrop-filter: blur(7px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(7px) saturate(112%) !important;
+}
+
+.playerBar .circleButton:hover,
+.playerBar .volumeIconButton:hover,
+.playerBar .repeatButton:hover{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.070), rgba(255,255,255,0.015)),
+    rgba(var(--accent-rgb),0.105) !important;
+  border-color: rgba(var(--accent-rgb),0.23) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.045),
+    0 10px 22px rgba(0,0,0,0.14) !important;
+}
+
+.playerBar .circleButton.main{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0.045)),
+    rgba(var(--accent-rgb),0.92) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 10px 28px rgba(var(--accent-rgb),0.18) !important;
+}
+
+.progressTrack,
+.volumeWrap input[type="range"]{
+  background: rgba(255,255,255,0.13) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
+}

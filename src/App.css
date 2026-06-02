@@ -13958,3 +13958,214 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     padding: 0 8px !important;
   }
 }
+
+/* ======================================================================
+   localtify v0.3.6 V192 — acrylic consistency pass
+   Owner: App.css only
+   Covers: sidebar, global search, update dock, modals, public toasts
+   Does not touch home shelves or bottom-player layout.
+====================================================================== */
+
+.app{
+  --lt-acrylic-surface: rgba(14, 11, 22, 0.78);
+  --lt-acrylic-surface-soft: rgba(20, 16, 30, 0.68);
+  --lt-acrylic-surface-hover: rgba(28, 22, 40, 0.74);
+  --lt-acrylic-border: rgba(255, 255, 255, 0.095);
+  --lt-acrylic-border-strong: rgba(255, 255, 255, 0.135);
+  --lt-acrylic-highlight: rgba(255, 255, 255, 0.045);
+  --lt-acrylic-shadow: 0 16px 42px rgba(0, 0, 0, 0.22);
+  --lt-acrylic-shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+/* Sidebar: acrylic shell, but not a heavy blur wall. */
+.app .sidebar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008)),
+    radial-gradient(circle at 20% 8%, rgba(var(--accent-rgb), 0.10), transparent 30%),
+    rgba(10, 7, 18, 0.82) !important;
+  border-right: 1px solid rgba(255,255,255,0.085) !important;
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,0.035),
+    18px 0 46px rgba(0,0,0,0.22) !important;
+  backdrop-filter: blur(10px) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(118%) !important;
+}
+
+.app .sidebar::before{
+  opacity: 0.72 !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), transparent 30%),
+    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb), 0.12), transparent 34%) !important;
+}
+
+.app .sidebar .navItem,
+.app .sidebar .sidebarItem,
+.app .sidebarAction{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.030), rgba(255,255,255,0.006)),
+    rgba(255,255,255,0.018) !important;
+  border: 1px solid rgba(255,255,255,0.060) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.030) !important;
+}
+
+.app .sidebar .navItem:hover,
+.app .sidebar .sidebarItem:hover,
+.app .sidebarAction:hover{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.040), rgba(255,255,255,0.010)),
+    rgba(var(--accent-rgb), 0.115) !important;
+  border-color: rgba(var(--accent-rgb), 0.23) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.040),
+    0 10px 24px rgba(0,0,0,0.13) !important;
+}
+
+.app .sidebar .navItem.active,
+.app .sidebar .sidebarItem.active,
+.app .sidebar .navItem[aria-current="page"]{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.050), rgba(255,255,255,0.014)),
+    rgba(var(--accent-rgb), 0.20) !important;
+  border-color: rgba(var(--accent-rgb), 0.34) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(var(--accent-rgb), 0.90),
+    inset 0 1px 0 rgba(255,255,255,0.050),
+    0 12px 28px rgba(0,0,0,0.16) !important;
+}
+
+/* Global search: acrylic, not milky. Home can still override with home.css. */
+.app .searchEasterWrap{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.006)),
+    rgba(16, 12, 24, 0.46) !important;
+  border: 1px solid rgba(255,255,255,0.070) !important;
+  border-radius: 999px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.030) !important;
+  backdrop-filter: blur(8px) saturate(114%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(114%) !important;
+}
+
+.app .search{
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.app .searchEasterWrap:focus-within{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.040), rgba(255,255,255,0.010)),
+    rgba(20, 15, 30, 0.58) !important;
+  border-color: rgba(var(--accent-rgb), 0.24) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.038),
+    0 0 0 3px rgba(var(--accent-rgb),0.055),
+    0 14px 34px rgba(0,0,0,0.15) !important;
+}
+
+.app .search:focus{
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Titlebar update dock and small update buttons match the same acrylic language. */
+.app .titleBarUpdateSlot .topUpdateRibbon,
+.titleBarUpdateSlot .topUpdateRibbon{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.010)),
+    rgba(18, 13, 28, 0.74) !important;
+  border: 1px solid rgba(255,255,255,0.095) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.040),
+    0 14px 34px rgba(0,0,0,0.20) !important;
+  backdrop-filter: blur(9px) saturate(116%) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(116%) !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
+.app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
+.app .titleBarUpdateSlot .topUpdateRibbon .updateToastClose,
+.titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
+.titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
+.titleBarUpdateSlot .topUpdateRibbon .updateToastClose{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.040), rgba(255,255,255,0.010)),
+    rgba(255,255,255,0.055) !important;
+  border: 1px solid rgba(255,255,255,0.085) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.035)),
+    rgba(var(--accent-rgb), 0.88) !important;
+  color: rgba(8, 6, 12, 0.94) !important;
+}
+
+/* Toasts and small popups: visible acrylic card, not transparent text floating. */
+.app .appToast,
+.appToast{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.050), rgba(255,255,255,0.014)),
+    rgba(18, 14, 26, 0.82) !important;
+  border: 1px solid rgba(255,255,255,0.11) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.046),
+    0 18px 42px rgba(0,0,0,0.26) !important;
+  backdrop-filter: blur(10px) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(118%) !important;
+}
+
+.app .appToast.success,
+.appToast.success{
+  border-color: rgba(88, 255, 172, 0.24) !important;
+}
+
+.app .appToast.error,
+.appToast.error{
+  border-color: rgba(255, 92, 126, 0.28) !important;
+}
+
+/* Modals / release notes / editor panels: acrylic surface without huge blur cost. */
+.app .editorModal,
+.app .whatsNewCard,
+.editorModal,
+.whatsNewCard{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.014) 28%, rgba(255,255,255,0.006)),
+    radial-gradient(circle at 80% 12%, rgba(var(--accent-rgb), 0.10), transparent 32%),
+    rgba(12, 10, 18, 0.86) !important;
+  border: 1px solid rgba(255,255,255,0.115) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.050),
+    0 28px 76px rgba(0,0,0,0.50) !important;
+  backdrop-filter: blur(12px) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(118%) !important;
+}
+
+.app .whatsNewCard li,
+.whatsNewCard li{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.040), rgba(255,255,255,0.010)),
+    rgba(255,255,255,0.045) !important;
+  border-color: rgba(255,255,255,0.080) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.030) !important;
+}
+
+.app .editorModal input,
+.app .editorModal textarea,
+.editorModal input,
+.editorModal textarea{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.036), rgba(255,255,255,0.010)),
+    rgba(255,255,255,0.048) !important;
+  border-color: rgba(255,255,255,0.090) !important;
+}
+
+.app .editorModal input:focus,
+.app .editorModal textarea:focus,
+.editorModal input:focus,
+.editorModal textarea:focus{
+  border-color: rgba(var(--accent-rgb), 0.32) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.075) !important;
+}

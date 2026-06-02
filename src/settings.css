@@ -5543,3 +5543,173 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   display: flex !important;
   align-items: center !important;
 }
+
+/* ======================================================================
+   localtify v0.3.6 V192 — acrylic settings consistency
+   Owner: settings.css only
+   Uses low blur + stronger tint so the settings page stays smooth.
+====================================================================== */
+
+.settingsPage,
+.settingsModal{
+  --settings-acrylic-bg: rgba(14, 11, 21, 0.74);
+  --settings-acrylic-card: rgba(20, 16, 30, 0.66);
+  --settings-acrylic-card-hover: rgba(26, 21, 38, 0.72);
+  --settings-acrylic-line: rgba(255,255,255,0.090);
+  --settings-acrylic-line-strong: rgba(255,255,255,0.13);
+  --settings-acrylic-shadow: 0 14px 32px rgba(0,0,0,0.18);
+}
+
+.settingsHero,
+.settingsPanelCard,
+.settingsPageCard,
+.settingsCategorySurfaceV027,
+.settingsWideCard,
+.settingsBlockV027,
+.settingsPanelV027,
+.settingsSectionV027,
+.settingsSoftPanelV027,
+.themePickerPanelV027,
+.customThemePanelV027,
+.settingsResetPanelV027,
+.settingsUpdatePanelV027,
+.settingsDiscordPanelV027,
+.settingsSearchCardV027{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.044), rgba(255,255,255,0.012) 30%, rgba(255,255,255,0.004)),
+    radial-gradient(circle at 88% 10%, rgba(var(--accent-rgb),0.075), transparent 28%),
+    var(--settings-acrylic-bg) !important;
+  border: 1px solid var(--settings-acrylic-line) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.040),
+    var(--settings-acrylic-shadow) !important;
+  backdrop-filter: blur(8px) saturate(116%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(116%) !important;
+}
+
+.settingsCategoryRail,
+.settingsCategoryRailV027{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.030), rgba(255,255,255,0.006)),
+    rgba(12, 9, 18, 0.66) !important;
+  border-right: 1px solid rgba(255,255,255,0.075) !important;
+  box-shadow: inset 1px 0 0 rgba(255,255,255,0.030) !important;
+  backdrop-filter: blur(8px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(112%) !important;
+}
+
+.settingSwitchCard,
+.settingsChoice,
+.coverSyncChoice,
+.settingsThemeCard,
+.settingsActionCardV027,
+.settingsMiniActionV027,
+.settingsPlaylistItem,
+.settingsDevBox,
+.settingsPlainList li{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.034), rgba(255,255,255,0.010)),
+    var(--settings-acrylic-card) !important;
+  border: 1px solid rgba(255,255,255,0.078) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.032),
+    0 10px 22px rgba(0,0,0,0.12) !important;
+  backdrop-filter: blur(6px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(6px) saturate(112%) !important;
+}
+
+.settingSwitchCard:hover,
+.settingsChoice:hover,
+.coverSyncChoice:hover,
+.settingsThemeCard:hover,
+.settingsActionCardV027:hover,
+.settingsMiniActionV027:hover,
+.settingsPlaylistItem:hover{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.014)),
+    var(--settings-acrylic-card-hover) !important;
+  border-color: rgba(var(--accent-rgb),0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.040),
+    0 14px 28px rgba(0,0,0,0.16),
+    0 0 18px rgba(var(--accent-rgb),0.045) !important;
+}
+
+.settingsChoice.active,
+.settingsThemeCard.active,
+.coverSyncChoice.active,
+.settingsCategoryButton.active,
+.settingsCategoryButtonV027.active{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.016)),
+    rgba(var(--accent-rgb),0.18) !important;
+  border-color: rgba(var(--accent-rgb),0.32) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.045),
+    inset 3px 0 0 rgba(var(--accent-rgb),0.84),
+    0 14px 28px rgba(0,0,0,0.16) !important;
+}
+
+.settingsCategoryButton,
+.settingsCategoryButtonV027{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.030), rgba(255,255,255,0.006)),
+    rgba(255,255,255,0.022) !important;
+  border: 1px solid rgba(255,255,255,0.060) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.028) !important;
+}
+
+.settingsCategoryButton:hover,
+.settingsCategoryButtonV027:hover{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.040), rgba(255,255,255,0.010)),
+    rgba(var(--accent-rgb),0.11) !important;
+  border-color: rgba(var(--accent-rgb),0.22) !important;
+}
+
+.settingsSearchCardV027 input,
+.settingsSearchBoxV027 input,
+.settingsThemeSelectV027,
+.settingsTextInputV027,
+.themeNameInputV027,
+.settingsField input,
+.settingsInlineInput{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.036), rgba(255,255,255,0.010)),
+    rgba(18,14,26,0.62) !important;
+  border: 1px solid rgba(255,255,255,0.085) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.030) !important;
+  backdrop-filter: blur(6px) saturate(110%) !important;
+  -webkit-backdrop-filter: blur(6px) saturate(110%) !important;
+}
+
+.settingsSearchCardV027 input:focus,
+.settingsSearchBoxV027 input:focus,
+.settingsThemeSelectV027:focus,
+.settingsTextInputV027:focus,
+.themeNameInputV027:focus,
+.settingsField input:focus,
+.settingsInlineInput:focus{
+  border-color: rgba(var(--accent-rgb),0.30) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.036),
+    0 0 0 3px rgba(var(--accent-rgb),0.070) !important;
+}
+
+.settingsOverlay{
+  background: rgba(4, 3, 8, 0.52) !important;
+  backdrop-filter: blur(8px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(112%) !important;
+}
+
+.settingsModal{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.014)),
+    rgba(12, 9, 18, 0.88) !important;
+  border: 1px solid rgba(255,255,255,0.115) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.048),
+    0 28px 74px rgba(0,0,0,0.52) !important;
+  backdrop-filter: blur(12px) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(118%) !important;
+}
