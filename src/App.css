@@ -13635,3 +13635,438 @@ body.localtifyBackgroundMode .ambientSurface,
     padding-inline: 10px !important;
   }
 }
+/* ========================================================================
+   localtify 0.3.5 V181 — real titlebar update dock + player position lock
+   ------------------------------------------------------------------------
+   This block assumes the update ribbon is rendered inside .titleBarUpdateSlot
+   by App_V181_titlebar_update_dock.tsx.
+   It does not touch playback, imports, downloads, updater logic, or player.css.
+======================================================================== */
+
+.app{
+  --localtify-titlebar-height: 36px !important;
+}
+
+/* Titlebar becomes a stable three-column row: logo | update notice | buttons. */
+.app .titleBar:not(.miniTitleBar),
+.titleBar:not(.miniTitleBar){
+  position: relative !important;
+  z-index: 3400 !important;
+  height: var(--localtify-titlebar-height, 36px) !important;
+  min-height: var(--localtify-titlebar-height, 36px) !important;
+  max-height: var(--localtify-titlebar-height, 36px) !important;
+  display: grid !important;
+  grid-template-columns: minmax(118px, clamp(138px, 9.6vw, 206px)) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  -webkit-app-region: drag !important;
+}
+
+.app .titleBar:not(.miniTitleBar) .titleDrag,
+.titleBar:not(.miniTitleBar) .titleDrag{
+  grid-column: 1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  padding-left: 13px !important;
+  padding-right: 8px !important;
+  -webkit-app-region: drag !important;
+}
+
+.app .titleBar:not(.miniTitleBar) .titleDrag span,
+.titleBar:not(.miniTitleBar) .titleDrag span{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.app .titleBar:not(.miniTitleBar) .windowButtons,
+.titleBar:not(.miniTitleBar) .windowButtons{
+  grid-column: 3 !important;
+  justify-self: end !important;
+  height: 100% !important;
+  -webkit-app-region: no-drag !important;
+}
+
+/* The update notice now uses the empty titlebar space instead of making a second row. */
+.app .titleBarUpdateSlot,
+.titleBarUpdateSlot{
+  grid-column: 2 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  align-items: center !important;
+  padding: 0 clamp(8px, 1vw, 18px) !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  -webkit-app-region: drag !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbonLayer,
+.titleBarUpdateSlot .topUpdateRibbonLayer{
+  position: static !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: none !important;
+  -webkit-app-region: drag !important;
+}
+
+/* Yukari stays out of the titlebar. The titlebar should be clean and clickable. */
+.app .titleBarUpdateSlot .updateYukariPeek,
+.titleBarUpdateSlot .updateYukariPeek{
+  display: none !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon,
+.titleBarUpdateSlot .topUpdateRibbon{
+  --ribbon-h: var(--localtify-titlebar-height, 36px) !important;
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: var(--ribbon-h) !important;
+  min-height: var(--ribbon-h) !important;
+  max-height: var(--ribbon-h) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: clamp(8px, 1.1vw, 18px) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: none !important;
+  -webkit-app-region: drag !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon::before,
+.app .titleBarUpdateSlot .topUpdateRibbon::after,
+.titleBarUpdateSlot .topUpdateRibbon::before,
+.titleBarUpdateSlot .topUpdateRibbon::after{
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon > *,
+.titleBarUpdateSlot .topUpdateRibbon > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbonMain,
+.titleBarUpdateSlot .topUpdateRibbonMain{
+  min-width: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: 18px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  -webkit-app-region: drag !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbonIcon,
+.titleBarUpdateSlot .topUpdateRibbonIcon{
+  width: 17px !important;
+  height: 17px !important;
+  min-width: 17px !important;
+  border-radius: 6px !important;
+  display: grid !important;
+  place-items: center !important;
+  color: color-mix(in oklab, var(--accent, #e65adf) 84%, white 8%) !important;
+  background: rgba(var(--accent-rgb, 230,90,223), .12) !important;
+  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .22) !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbonText,
+.titleBarUpdateSlot .topUpdateRibbonText{
+  min-width: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbonText .eyebrow,
+.titleBarUpdateSlot .topUpdateRibbonText .eyebrow{
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  color: color-mix(in oklab, var(--accent, #e65adf) 82%, white 10%) !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  text-shadow: 0 0 12px rgba(var(--accent-rgb, 230,90,223), .18) !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbonText h3,
+.titleBarUpdateSlot .topUpdateRibbonText h3{
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  color: rgba(255,255,255,.88) !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  font-weight: 820 !important;
+  letter-spacing: -.01em !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  text-transform: none !important;
+  transform: none !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbonRight,
+.titleBarUpdateSlot .topUpdateRibbonRight{
+  min-width: 0 !important;
+  height: 100% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbonMeta,
+.titleBarUpdateSlot .topUpdateRibbonMeta,
+.app .titleBarUpdateSlot .topUpdateRibbonActions,
+.titleBarUpdateSlot .topUpdateRibbonActions{
+  height: 100% !important;
+  min-width: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon .updateVersionPill,
+.app .titleBarUpdateSlot .topUpdateRibbon .updateSafePill,
+.titleBarUpdateSlot .topUpdateRibbon .updateVersionPill,
+.titleBarUpdateSlot .topUpdateRibbon .updateSafePill{
+  height: 19px !important;
+  min-height: 19px !important;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  color: rgba(255,255,255,.70) !important;
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  font-weight: 850 !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
+.app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
+.app .titleBarUpdateSlot .topUpdateRibbon .updateToastClose,
+.titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
+.titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
+.titleBarUpdateSlot .topUpdateRibbon .updateToastClose{
+  position: relative !important;
+  z-index: 6 !important;
+  height: 23px !important;
+  min-height: 23px !important;
+  min-width: 0 !important;
+  padding: 0 10px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  font-weight: 850 !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag !important;
+  transform: translateZ(0) !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
+.titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton{
+  color: #08020a !important;
+  background: var(--accent, #e65adf) !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 14px rgba(var(--accent-rgb, 230,90,223), .18) !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
+.app .titleBarUpdateSlot .topUpdateRibbon .updateToastClose,
+.titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
+.titleBarUpdateSlot .topUpdateRibbon .updateToastClose{
+  color: rgba(255,255,255,.78) !important;
+  background: rgba(255,255,255,.055) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  box-shadow: none !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton:hover,
+.app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton:hover,
+.app .titleBarUpdateSlot .topUpdateRibbon .updateToastClose:hover,
+.titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton:hover,
+.titleBarUpdateSlot .topUpdateRibbon .updateGhostButton:hover,
+.titleBarUpdateSlot .topUpdateRibbon .updateToastClose:hover{
+  transform: translate3d(0,-1px,0) !important;
+  filter: brightness(1.045) !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbon .updateToastClose,
+.titleBarUpdateSlot .topUpdateRibbon .updateToastClose{
+  width: 23px !important;
+  min-width: 23px !important;
+  padding: 0 !important;
+}
+
+.app .titleBarUpdateSlot .topUpdateRibbonProgress,
+.titleBarUpdateSlot .topUpdateRibbonProgress{
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 2px !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  border-radius: 999px !important;
+  background: rgba(var(--accent-rgb, 230,90,223), .42) !important;
+}
+
+/* Hard undo every old top-ribbon layout spacer. The update notice is in the
+   titlebar now, so the app grid must stay exactly one titlebar shorter. */
+.app.updateRibbonVisible .appShell,
+.app[data-update-ribbon="true"] .appShell,
+.appShell{
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  top: auto !important;
+  height: calc(100vh - var(--localtify-titlebar-height, 36px)) !important;
+  max-height: calc(100vh - var(--localtify-titlebar-height, 36px)) !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  grid-template-rows: minmax(0, 1fr) var(--player-size-used, var(--player-size-live, var(--player-size, 108px))) !important;
+}
+
+.app.updateRibbonVisible .content,
+.app[data-update-ribbon="true"] .content,
+.app .content{
+  min-height: 0 !important;
+  scroll-padding-top: 18px !important;
+  padding-bottom: clamp(18px, 2vh, 26px) !important;
+}
+
+.app .playerBar,
+.playerBar{
+  grid-row: 2 !important;
+  align-self: stretch !important;
+  min-height: 74px !important;
+  max-height: var(--player-size-used, var(--player-size-live, var(--player-size, 108px))) !important;
+  transform: translate3d(0,0,0) !important;
+}
+
+/* Keep old global/fixed update styles harmless if a stale build still renders
+   the ribbon outside the titlebar for one hot reload. */
+body:has(.titleBarUpdateSlot) .app > .topUpdateRibbonLayer,
+body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
+  display: none !important;
+}
+
+@media (max-width: 1180px){
+  .app .titleBarUpdateSlot .topUpdateRibbonMeta,
+  .titleBarUpdateSlot .topUpdateRibbonMeta{
+    display: none !important;
+  }
+}
+
+@media (max-width: 920px){
+  .app .titleBar:not(.miniTitleBar),
+  .titleBar:not(.miniTitleBar){
+    grid-template-columns: minmax(82px, 118px) minmax(0, 1fr) auto !important;
+  }
+
+  .app .titleBarUpdateSlot .topUpdateRibbonText .eyebrow,
+  .titleBarUpdateSlot .topUpdateRibbonText .eyebrow,
+  .app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
+  .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton{
+    display: none !important;
+  }
+
+  .app .titleBarUpdateSlot .topUpdateRibbonText h3,
+  .titleBarUpdateSlot .topUpdateRibbonText h3{
+    font-size: 10.5px !important;
+  }
+}
+
+@media (max-width: 680px){
+  .app .titleBarUpdateSlot,
+  .titleBarUpdateSlot{
+    padding: 0 6px !important;
+  }
+
+  .app .titleBarUpdateSlot .topUpdateRibbonText,
+  .titleBarUpdateSlot .topUpdateRibbonText{
+    display: none !important;
+  }
+
+  .app .titleBarUpdateSlot .topUpdateRibbon{
+    grid-template-columns: 18px auto !important;
+  }
+
+  .app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
+  .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton{
+    padding: 0 8px !important;
+  }
+}

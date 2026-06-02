@@ -1,7 +1,7 @@
-﻿/* localtify 0.3.5 Yukari update peek + search/button motion polish V160 — file patch label only; APP_VERSION stays 0.3.5. */
+﻿/* localtify 0.3.5 V181 — titlebar update dock. APP_VERSION stays 0.3.5. */
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
-import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
+import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FastAverageColor } from "fast-average-color";
@@ -1185,7 +1185,19 @@ function normalizePixelArtFileName(asset: PixelArtBridgeAsset, index: number) {
   return pathName || `${name || `pixel-${index + 1}`}.jpg`;
 }
 
-const pixelArtUrl = (file: string) => `/pixelart/${encodeURIComponent(file)}`;
+const pixelArtUrl = (file: string) => {
+  const encoded = encodeURIComponent(file);
+  if (typeof window !== "undefined" && window.location?.href) {
+    try {
+      // Use a relative URL so packaged file:// builds look beside dist/index.html,
+      // while dev still resolves to http://localhost:5173/pixelart/...
+      return new URL(`pixelart/${encoded}`, window.location.href).toString();
+    } catch {
+      return `pixelart/${encoded}`;
+    }
+  }
+  return `pixelart/${encoded}`;
+};
 
 const DEFAULT_RUNTIME_PIXEL_ART_ASSETS: RuntimePixelArtAsset[] = PIXEL_ART_LIBRARY.map((asset) => ({
   ...asset,
@@ -1194,8 +1206,10 @@ const DEFAULT_RUNTIME_PIXEL_ART_ASSETS: RuntimePixelArtAsset[] = PIXEL_ART_LIBRA
 
 const PIXEL_ART_CACHE_TTL_MS = 30 * 60 * 1000;
 
+let runtimePixelArtAssetsCache: RuntimePixelArtAsset[] = DEFAULT_RUNTIME_PIXEL_ART_ASSETS;
+
 function getCachedRuntimePixelArtAssets() {
-  return DEFAULT_RUNTIME_PIXEL_ART_ASSETS;
+  return runtimePixelArtAssetsCache.length ? runtimePixelArtAssetsCache : DEFAULT_RUNTIME_PIXEL_ART_ASSETS;
 }
 
 function buildRuntimePixelArtAssets(assets?: PixelArtBridgeAsset[]): RuntimePixelArtAsset[] {
@@ -1224,7 +1238,9 @@ function buildRuntimePixelArtAssets(assets?: PixelArtBridgeAsset[]): RuntimePixe
     })
     .filter((asset) => Boolean(asset.file || asset.path || asset.url));
 
-  return runtimeAssets.length ? runtimeAssets : getCachedRuntimePixelArtAssets();
+  const finalAssets = runtimeAssets.length ? runtimeAssets : DEFAULT_RUNTIME_PIXEL_ART_ASSETS;
+  runtimePixelArtAssetsCache = finalAssets;
+  return finalAssets;
 }
 
 const stableHash = (input: string) => {
@@ -1287,15 +1303,23 @@ const songSignature = (song?: Song | null) => {
     .toLowerCase();
 };
 
-const pixelArtForSong = (song?: Song | null) => {
-  const index = stableHash(songSignature(song)) % PIXEL_ART_LIBRARY.length;
-  return PIXEL_ART_LIBRARY[index];
+const pixelArtForSong = (song?: Song | null): RuntimePixelArtAsset => {
+  const pool = getCachedRuntimePixelArtAssets();
+  const index = stableHash(songSignature(song)) % Math.max(1, pool.length);
+  return pool[index] || DEFAULT_RUNTIME_PIXEL_ART_ASSETS[0];
 };
 
-const nextPixelArtForSong = (song?: Song | null) => {
-  const index = (stableHash(`${songSignature(song)}::next`) + 7) % PIXEL_ART_LIBRARY.length;
-  return PIXEL_ART_LIBRARY[index];
+const nextPixelArtForSong = (song?: Song | null): RuntimePixelArtAsset => {
+  const pool = getCachedRuntimePixelArtAssets();
+  const index = (stableHash(`${songSignature(song)}::next`) + 7) % Math.max(1, pool.length);
+  return pool[index] || DEFAULT_RUNTIME_PIXEL_ART_ASSETS[0];
 };
+
+function runtimePixelArtImageUrl(asset?: RuntimePixelArtAsset | PixelArtAsset | null) {
+  if (!asset) return "";
+  const runtime = asset as RuntimePixelArtAsset;
+  return String(runtime.url || (runtime.file ? pixelArtUrl(runtime.file) : "")).trim();
+}
 
 
 function cleanStringList(value: unknown) {
@@ -2255,7 +2279,7 @@ function getAmbientStyle(coverUrl?: string | null): CSSProperties | undefined {
 
 function isRendererSafeImageUrl(value?: string | null) {
   if (!value) return false;
-  return /^(?:data:image\/|blob:|https?:\/\/|\/)/i.test(String(value).trim());
+  return /^(?:data:image\/|blob:|https?:\/\/|localtify-media:\/\/|\/|pixelart\/)/i.test(String(value).trim());
 }
 
 function getRendererSafeImageUrl(value?: string | null) {
@@ -2273,7 +2297,7 @@ function getSongAmbientSource(song?: Song | null) {
   if (savedCover) return savedCover;
 
   const stableFallback = pixelArtForSong(song);
-  return stableFallback ? pixelArtUrl(stableFallback.file) : "";
+  return runtimePixelArtImageUrl(stableFallback);
 }
 
 
@@ -2349,7 +2373,7 @@ function useCoverAverageStyle(source: string, enabled: boolean) {
   return style;
 }
 
-const Cover = memo(function Cover({ song, className }: { song: Song | null; className: string }) {
+function Cover({ song, className }: { song: Song | null; className: string }) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
   const [imageReady, setImageReady] = useState(false);
 
@@ -2358,8 +2382,8 @@ const Cover = memo(function Cover({ song, className }: { song: Song | null; clas
   const savedCoverSrc = getRendererSafeImageUrl(savedCover);
   const fallbackAsset = song ? pixelArtForSong(song) : null;
   const backupFallbackAsset = song ? nextPixelArtForSong(song) : null;
-  const fallbackSrc = fallbackAsset ? pixelArtUrl(fallbackAsset.file) : "";
-  const backupFallbackSrc = backupFallbackAsset ? pixelArtUrl(backupFallbackAsset.file) : "";
+  const fallbackSrc = runtimePixelArtImageUrl(fallbackAsset);
+  const backupFallbackSrc = runtimePixelArtImageUrl(backupFallbackAsset);
 
   const sourceCandidates = [directCover, savedCoverSrc, fallbackSrc, backupFallbackSrc]
     .map((source) => source.trim())
@@ -2406,7 +2430,7 @@ const Cover = memo(function Cover({ song, className }: { song: Song | null; clas
       ) : null}
     </div>
   );
-});
+}
 
 type SongInteractionHandlers = {
   onSelectSong: (songId: string, shouldPlay?: boolean) => void;
@@ -3121,7 +3145,7 @@ function useStableCallback<T extends (...args: any[]) => any>(callback: T): T {
 }
 
 
-function TitleBar({ mini = false }: { mini?: boolean }) {
+function TitleBar({ mini = false, children }: { mini?: boolean; children?: ReactNode }) {
   function handleTitleDoubleClick() {
     if (!mini) window.localitfy.toggleMaximizeWindow();
   }
@@ -3132,6 +3156,12 @@ function TitleBar({ mini = false }: { mini?: boolean }) {
         <img className="titleLogo titleLogoImage" src={localtifyLogo} alt="" aria-hidden="true" />
         <span>localtify</span>
       </div>
+
+      {!mini && children ? (
+        <div className="titleBarUpdateSlot" aria-label="localtify update notice">
+          {children}
+        </div>
+      ) : null}
 
       <div className="windowButtons">
         <button type="button" onClick={() => window.localitfy.minimizeWindow()} aria-label="Minimize window">─</button>
@@ -5866,28 +5896,21 @@ function MainModeApp() {
 
       if (payload.type === "not-available") {
         if (payload.silent) return;
-        setUpdatePrompt({
-          visible: true,
-          status: "latest",
-          version: payload.currentVersion || "",
-          percent: 100,
-          message: payload.message || "localtify is up to date.",
-          error: ""
-        });
+        setUpdatePrompt(defaultUpdatePrompt);
+        setStatusText("localtify is up to date");
         showAppToast("localtify is up to date", "success");
         return;
       }
 
       if (payload.type === "dev") {
         if (payload.silent) return;
-        setUpdatePrompt({
-          visible: true,
-          status: "dev",
-          version: payload.currentVersion || "dev",
-          percent: 0,
-          message: payload.message || "Update checks work after installing the app.",
-          error: ""
-        });
+
+        // V179: dev/packaged-only update messages must never open the global top ribbon.
+        // The ribbon is reserved for real update states only, so the app does not look broken
+        // while testing with npm run dev.
+        setUpdatePrompt(defaultUpdatePrompt);
+        setStatusText("update checks work in the installed app");
+        showAppToast("Update checks work after installing the app", "work");
         return;
       }
 
@@ -5942,6 +5965,17 @@ function MainModeApp() {
       has_error: Boolean(updatePrompt.error)
     });
   }, [updatePrompt.visible, updatePrompt.status, updatePrompt.version, updatePrompt.error, updatePrompt.nagStage]);
+
+  useEffect(() => {
+    if (!updatePrompt.visible) return;
+    if (updatePrompt.status !== "latest" && updatePrompt.status !== "dev") return;
+
+    const timer = window.setTimeout(() => {
+      setUpdatePrompt(defaultUpdatePrompt);
+    }, updatePrompt.status === "latest" ? 1400 : 2600);
+
+    return () => window.clearTimeout(timer);
+  }, [updatePrompt.visible, updatePrompt.status]);
 
   async function askUpdaterToDownload() {
     if (!window.localitfy.downloadUpdate) {
@@ -11060,13 +11094,17 @@ function MainModeApp() {
   const heroMotionClass = heroMotion === "expanding" ? "heroMotionExpanding" : heroMotion === "compacting" ? "heroMotionCompacting" : "";
   const heroMotionAppClass = heroMotion !== "idle" ? `heroMotionActive ${heroMotionClass}` : "";
   const homeEntranceSettledClass = homeEntranceSettled ? "homeEntranceSettled" : "";
+  const showTopUpdateRibbon =
+    updatePrompt.visible &&
+    updatePrompt.status !== "latest" &&
+    updatePrompt.status !== "dev";
 
   return (
     <main
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${updatePrompt.visible ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isPlaying ? "appAudioPlaying" : "appAudioIdle"} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${showTopUpdateRibbon ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isPlaying ? "appAudioPlaying" : "appAudioIdle"} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
@@ -11106,10 +11144,9 @@ function MainModeApp() {
         </div>
       ) : null}
 
-      <TitleBar />
-
-      <AnimatePresence initial={false}>
-        {updatePrompt.visible ? (
+      <TitleBar>
+        <AnimatePresence initial={false}>
+        {showTopUpdateRibbon ? (
           <Motion.div
             key={`update-ribbon-${updatePrompt.status}-${updatePrompt.version || APP_VERSION}`}
             className="updateToastLayer topUpdateRibbonLayer"
@@ -11242,7 +11279,8 @@ function MainModeApp() {
             </Motion.section>
           </Motion.div>
         ) : null}
-      </AnimatePresence>
+        </AnimatePresence>
+      </TitleBar>
 
       <AnimatePresence>
         {screensaverVisible ? (
