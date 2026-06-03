@@ -15731,162 +15731,27 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     rgba(28, 20, 39, .70) !important;
 }
 
-
 /* ==========================================================================
-   localtify v0.3.6 V205 — home visual customization modes
+   localtify v0.3.6 V209 — true acrylic cards and working visual modes
    Owner: home.css
 ========================================================================== */
 
-/* Card background modes */
-.app[data-card-background="solid"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow){
-  background: rgba(9, 9, 14, 0.88) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.026) !important;
-}
-
-.app[data-card-background="glassy"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow){
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012)),
-    rgba(12, 10, 18, 0.50) !important;
-  backdrop-filter: blur(var(--lt-visual-blur-light, 8px)) saturate(var(--lt-visual-saturation, 116%)) !important;
-  -webkit-backdrop-filter: blur(var(--lt-visual-blur-light, 8px)) saturate(var(--lt-visual-saturation, 116%)) !important;
-}
-
-.app[data-card-background="acrylic"],
-.app:not([data-card-background]) :where(.panel){
-  --lt-card-mode-active: 1;
-}
-
-.app[data-card-background="acrylic"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow),
-.app:not([data-card-background]) :where(.homeShelfPanel,.homeListenCard,.songRow){
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.042), rgba(255,255,255,0.014)),
-    rgba(14, 12, 21, 0.68) !important;
-  backdrop-filter: blur(var(--lt-visual-blur, 13px)) saturate(var(--lt-visual-saturation, 116%)) !important;
-  -webkit-backdrop-filter: blur(var(--lt-visual-blur, 13px)) saturate(var(--lt-visual-saturation, 116%)) !important;
-}
-
-.app[data-card-background="oledFlat"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow){
-  background: #030306 !important;
-  border-color: rgba(255,255,255,0.055) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Home banner type */
-.app[data-home-banner="cleanBlack"] .hero{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.006)),
-    rgba(3,3,7,0.92) !important;
-}
-
-.app[data-home-banner="albumCover"] .hero{
-  background:
-    radial-gradient(circle at 76% 36%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.22), transparent 42%),
-    linear-gradient(90deg, rgba(0,0,0,0.88), rgba(0,0,0,0.60) 54%, rgba(0,0,0,0.48)),
-    var(--cover-url, none) center / cover no-repeat !important;
-}
-
-.app[data-home-banner="none"] .hero{
-  min-height: 170px !important;
-  background: rgba(3,3,7,0.72) !important;
-  box-shadow: none !important;
-}
-
-.app[data-home-banner="none"] .hero .heroArtWrap{
-  display: none !important;
-}
-
-/* Home layout modes */
-.app[data-home-layout="compact"] .hero{
-  min-height: 260px !important;
-  padding-block: 26px !important;
-}
-
-.app[data-home-layout="compact"] .homeShelfPanel{
-  padding-block: 14px !important;
-}
-
-.app[data-home-layout="bigHero"] .hero{
-  min-height: 430px !important;
-}
-
-.app[data-home-layout="bigHero"] .heroArt{
-  width: clamp(164px, 14vw, 220px) !important;
-  height: clamp(164px, 14vw, 220px) !important;
-}
-
-.app[data-home-layout="minimal"] .hero{
-  min-height: 220px !important;
-  background: rgba(3,3,7,0.82) !important;
-}
-
-.app[data-home-layout="minimal"] .homeFreshPanel,
-.app[data-home-layout="minimal"] .homeAlbumPanel{
-  display: none !important;
-}
-
-/* Library row styles */
-.app[data-library-row-style="compactRows"] .songRow{
-  min-height: 54px !important;
-  padding-block: 8px !important;
-}
-
-.app[data-library-row-style="comfyRows"] .songRow,
-.app:not([data-library-row-style]) .songRow{
-  min-height: 70px !important;
-}
-
-.app[data-library-row-style="coverCards"] .songList.fullList{
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
-  gap: 12px !important;
-}
-
-.app[data-library-row-style="coverCards"] .songRow{
-  min-height: 150px !important;
-  align-content: end !important;
-  border-radius: 18px !important;
-}
-
-.app[data-library-row-style="listOnly"] .songRow{
-  min-height: 50px !important;
-  border-color: transparent !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app[data-library-row-style="listOnly"] .songRow:hover{
-  background: rgba(255,255,255,0.035) !important;
-}
-
-
-/* ==========================================================================
-   localtify v0.3.6 V206 — working home/card/library visual modes
-   Owner: home.css
-========================================================================== */
-
-/* Card background modes */
-.app[data-card-background="solid"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow){
+.app[data-card-background="solid"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025){
   background: rgba(10,10,15,.88) !important;
-  border-color: rgba(255,255,255,.06) !important;
+  border-color: rgba(255,255,255,.055) !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-.app[data-card-background="glassy"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow){
+.app[data-card-background="glassy"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025){
   background:
     linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.010)),
-    rgba(16,14,22,.44) !important;
-  border-color: rgba(255,255,255,.065) !important;
+    rgba(12,10,18,var(--lt-glass-alpha,.42)) !important;
+  border-color: rgba(255,255,255,.070) !important;
   box-shadow: none !important;
-  backdrop-filter: blur(var(--lt-visual-blur-light,7px)) saturate(var(--lt-visual-saturation,114%)) !important;
-  -webkit-backdrop-filter: blur(var(--lt-visual-blur-light,7px)) saturate(var(--lt-visual-saturation,114%)) !important;
+  backdrop-filter: blur(var(--lt-visual-blur-light,8px)) saturate(var(--lt-visual-saturation,116%)) !important;
+  -webkit-backdrop-filter: blur(var(--lt-visual-blur-light,8px)) saturate(var(--lt-visual-saturation,116%)) !important;
 }
 
 .app[data-card-background="acrylic"],
@@ -15894,33 +15759,31 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   --lt-card-background-ready: 1;
 }
 
-.app[data-card-background="acrylic"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow),
+.app[data-card-background="acrylic"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025),
 .app:not([data-card-background]) :where(.homeShelfPanel,.homeListenCard,.songRow){
   background:
-    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.012)),
-    rgba(15,13,22,.64) !important;
-  border-color: rgba(255,255,255,.07) !important;
-  backdrop-filter: blur(var(--lt-visual-blur,12px)) saturate(var(--lt-visual-saturation,114%)) !important;
-  -webkit-backdrop-filter: blur(var(--lt-visual-blur,12px)) saturate(var(--lt-visual-saturation,114%)) !important;
+    linear-gradient(180deg, rgba(255,255,255,.060), rgba(255,255,255,.012)),
+    rgba(12,10,18,var(--lt-acrylic-alpha,.30)) !important;
+  border-color: rgba(255,255,255,.085) !important;
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.055) !important;
+  backdrop-filter: blur(var(--lt-visual-blur,14px)) saturate(var(--lt-visual-saturation,116%)) !important;
+  -webkit-backdrop-filter: blur(var(--lt-visual-blur,14px)) saturate(var(--lt-visual-saturation,116%)) !important;
 }
 
-.app[data-card-background="oledFlat"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow){
+.app[data-card-background="oledFlat"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025){
   background: #030305 !important;
-  border-color: rgba(255,255,255,.045) !important;
+  border-color: rgba(255,255,255,.040) !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 /* Home banner modes */
-.app[data-home-banner="dynamic"] .hero,
-.app:not([data-home-banner]) .hero{
-  /* existing hero style stays */
-}
-
 .app[data-home-banner="albumCover"] .hero{
   background:
-    linear-gradient(90deg, rgba(0,0,0,.90), rgba(0,0,0,.62) 50%, rgba(0,0,0,.44)),
+    linear-gradient(90deg, rgba(0,0,0,.86), rgba(0,0,0,.58) 50%, rgba(0,0,0,.36)),
     radial-gradient(circle at 78% 42%, rgba(var(--cover-rgb,var(--accent-rgb)),.18), transparent 44%),
     var(--cover-url, none) center / cover no-repeat !important;
 }
@@ -15933,7 +15796,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 .app[data-home-banner="none"] .hero{
   min-height: 160px !important;
-  background: rgba(3,3,7,.74) !important;
+  background: rgba(3,3,7,.72) !important;
   box-shadow: none !important;
 }
 
@@ -15942,15 +15805,10 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   display: none !important;
 }
 
-/* Home layout modes */
+/* Existing layout toggles stay the main source of truth, but these still work if saved. */
 .app[data-home-layout="compact"] .hero{
   min-height: 250px !important;
   padding-block: 24px !important;
-}
-
-.app[data-home-layout="balanced"] .hero,
-.app:not([data-home-layout]) .hero{
-  /* existing balanced layout */
 }
 
 .app[data-home-layout="bigHero"] .hero{
@@ -15964,7 +15822,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 .app[data-home-layout="minimal"] .hero{
   min-height: 210px !important;
-  background: rgba(3,3,7,.84) !important;
+  background: rgba(3,3,7,.82) !important;
 }
 
 .app[data-home-layout="minimal"] .heroArtWrap,
@@ -15973,7 +15831,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   display: none !important;
 }
 
-/* Library row modes */
+/* Library row modes still work if an old saved setting exists. */
 .app[data-library-row-style="compactRows"] .songRow{
   min-height: 52px !important;
   padding-block: 7px !important;

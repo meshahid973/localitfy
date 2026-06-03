@@ -341,7 +341,7 @@ const BLUR_EFFECT_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
 const MEDIA_CARD_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "solid", label: "Solid", note: "flat cards" },
   { id: "glassy", label: "Glassy", note: "transparent" },
-  { id: "acrylic", label: "Acrylic", note: "acrylic" },
+  { id: "acrylic", label: "Acrylic", note: "see-through blur" },
   { id: "oledFlat", label: "OLED flat", note: "black" }
 ];
 
@@ -374,8 +374,8 @@ const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
 
 const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "flat", label: "Flat", note: "flat" },
-  { id: "coverBlur", label: "Cover blur", note: "cover glow" },
-  { id: "acrylic", label: "Acrylic", note: "acrylic" },
+  { id: "coverBlur", label: "Cover blur", note: "cover tint" },
+  { id: "acrylic", label: "Acrylic", note: "see-through blur" },
   { id: "oledBlack", label: "OLED black", note: "black" }
 ];
 
@@ -513,54 +513,38 @@ return (
           <div className="settingsPanelHeader visualCustomizationHeaderV205">
             <div>
               <strong>Visuals</strong>
-              <span>Quick controls for the home screen, cards, stars, sidebar, and player.</span>
+              <span>Only the visual switches that are not already somewhere else.</span>
             </div>
           </div>
 
           <div className="visualCustomizationGridV205">
             <VisualOptionGroup
               title="Home banner"
-              note="Top area style."
+              note="Home header."
               options={HOME_BANNER_TYPE_OPTIONS}
               value={readSettingChoice(settings, "homeBannerType", "dynamic")}
               onChange={(value) => updateSetting("homeBannerType", value)}
             />
 
             <VisualOptionGroup
-              title="Blur effects"
-              note="Controls glass/blur strength."
+              title="Blur"
+              note="Glass strength."
               options={BLUR_EFFECT_OPTIONS}
               value={readSettingChoice(settings, "blurEffects", "normal")}
               onChange={(value) => updateSetting("blurEffects", value)}
             />
 
             <VisualOptionGroup
-              title="Card background"
-              note="Panel/card surface style."
+              title="Cards"
+              note="Surface style."
               options={MEDIA_CARD_BACKGROUND_OPTIONS}
               value={readSettingChoice(settings, "mediaCardBackground", "acrylic")}
               onChange={(value) => updateSetting("mediaCardBackground", value)}
             />
 
             <VisualOptionGroup
-              title="Home layout"
-              note="Home screen density."
-              options={HOME_LAYOUT_OPTIONS}
-              value={readSettingChoice(settings, "homeLayoutMode", "balanced")}
-              onChange={(value) => updateSetting("homeLayoutMode", value)}
-            />
-
-            <VisualOptionGroup
-              title="Library rows"
-              note="Library list density."
-              options={LIBRARY_ROW_STYLE_OPTIONS}
-              value={readSettingChoice(settings, "libraryRowStyle", "comfyRows")}
-              onChange={(value) => updateSetting("libraryRowStyle", value)}
-            />
-
-            <VisualOptionGroup
               title="Stars"
-              note="Star field strength."
+              note="Background stars."
               options={STAR_INTENSITY_OPTIONS}
               value={readSettingChoice(settings, "starsIntensity", "normal")}
               onChange={(value) => updateSetting("starsIntensity", value)}
@@ -568,15 +552,15 @@ return (
 
             <VisualOptionGroup
               title="Sidebar"
-              note="Sidebar width behavior."
+              note="Width behavior."
               options={SIDEBAR_BEHAVIOR_OPTIONS}
               value={readSettingChoice(settings, "sidebarBehavior", "fixed")}
               onChange={(value) => updateSetting("sidebarBehavior", value)}
             />
 
             <VisualOptionGroup
-              title="Player background"
-              note="Bottom bar style."
+              title="Player"
+              note="Bottom bar."
               options={PLAYER_BACKGROUND_OPTIONS}
               value={readSettingChoice(settings, "playerBackgroundStyle", "coverBlur")}
               onChange={(value) => updateSetting("playerBackgroundStyle", value)}
