@@ -15256,3 +15256,134 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   box-shadow: inherit !important;
 }
 
+
+
+/* localtify v0.3.6 V222 — Spotify public-only UI cleanup */
+.spotifyCookieRow{
+  display: none !important;
+}
+
+.spotifyAuthCard .spotifyAuthDot{
+  background: #1ed760 !important;
+  box-shadow: 0 0 18px rgba(30,215,96,.28) !important;
+}
+
+.spotifyNotice{
+  border-color: rgba(30,215,96,.20) !important;
+}
+
+
+/* localtify 0.3.6 V223 — Spotify OAuth public import copy polish */
+.spotifyAuthCard .spotifyAuthActions{
+  align-items: center;
+}
+
+.spotifyAuthCard.loggedIn .spotifyAuthDot{
+  box-shadow: 0 0 0 4px rgba(45,255,150,.10), 0 0 18px rgba(45,255,150,.24);
+}
+
+
+/* localtify 0.3.6 V227 — hero copy position + Spotify metadata polish
+   Small surgical patch only. Keeps layout, moves hero copy/actions slightly up,
+   and lets fetched Spotify tracks show album art before download.
+*/
+
+.app .hero.heroPremium .heroTextClean{
+  transform: translate3d(0, -22px, 0) !important;
+}
+
+.app .hero.heroPremium .heroArtistLine{
+  margin-top: 6px !important;
+}
+
+.app .hero.heroPremium .heroQuickActions{
+  margin-top: 10px !important;
+  transform: translate3d(0, -2px, 0) !important;
+}
+
+.app .hero.heroPremium.heroCompact .heroQuickActions{
+  margin-top: 8px !important;
+}
+
+.app .hero.heroPremium.heroTitleTiny .heroQuickActions,
+.app .hero.heroPremium.heroTitleShort .heroQuickActions{
+  margin-top: 6px !important;
+}
+
+.spotifyTrackItem{
+  grid-template-columns: 42px minmax(0, 1fr) auto !important;
+}
+
+.spotifyTrackArt{
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.06);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.spotifyTrackArt img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.spotifyTrackMeta p{
+  display: block !important;
+  margin: 3px 0 0 !important;
+  color: rgba(255,255,255,0.58) !important;
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (max-width: 900px){
+  .app .hero.heroPremium .heroTextClean{
+    transform: translate3d(0, -12px, 0) !important;
+  }
+}
+
+
+/* localtify 0.3.6 V229 — Spotify metadata repair visual polish
+   Small surgical patch: hero text sits higher and quick-library expanded mode
+   avoids feeling like a huge empty star box when search results are tiny.
+*/
+
+.app .hero.heroPremium .heroTextClean{
+  transform: translate3d(0, -42px, 0) !important;
+}
+
+.app .hero.heroPremium .heroArtistLine{
+  margin-top: 2px !important;
+  transform: translate3d(0, -2px, 0) !important;
+}
+
+.app .hero.heroPremium .heroQuickActions{
+  margin-top: 8px !important;
+  transform: translate3d(0, -8px, 0) !important;
+}
+
+.app .homeDashboard .homeLibraryPanel.homeLibraryExpanded{
+  min-height: clamp(280px, 42vh, 520px) !important;
+}
+
+.app .homeDashboard .homeLibraryPanel.homeLibraryExpanded .homeAlbumGrid{
+  align-content: start !important;
+}
+
+@media (max-width: 900px){
+  .app .hero.heroPremium .heroTextClean{
+    transform: translate3d(0, -22px, 0) !important;
+  }
+
+  .app .hero.heroPremium .heroQuickActions{
+    transform: translate3d(0, -4px, 0) !important;
+  }
+}
+

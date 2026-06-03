@@ -8,6 +8,56 @@ const crypto = require("node:crypto");
 const { execFile } = require("node:child_process");
 const { pathToFileURL } = require("node:url");
 
+function loadLocaltifyEnv() {
+  const envPath = path.join(process.cwd(), ".env");
+
+  try {
+    require("dotenv").config({ path: envPath });
+  } catch {
+    // dotenv is optional. The manual parser below is the fallback.
+  }
+
+  try {
+    if (!fs.existsSync(envPath)) return;
+
+    const raw = fs.readFileSync(envPath, "utf-8");
+    let injected = 0;
+
+    for (const line of raw.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+
+      const eqIndex = trimmed.indexOf("=");
+      if (eqIndex <= 0) continue;
+
+      const key = trimmed.slice(0, eqIndex).trim();
+      let value = trimmed.slice(eqIndex + 1).trim();
+
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      if (typeof process.env[key] === "undefined") {
+        process.env[key] = value;
+        injected += 1;
+      }
+    }
+
+    if (injected > 0) {
+      console.log(`[localtify env] injected ${injected} value${injected === 1 ? "" : "s"} from .env`);
+    }
+  } catch (error) {
+    console.log("[localtify env] failed to read .env", error?.message || error);
+  }
+}
+
+loadLocaltifyEnv();
+
 const ffmpegStatic = require("ffmpeg-static");
 const { autoUpdater } = require("electron-updater");
 
@@ -1107,6 +1157,134 @@ function safeMediaUrl(filePath) {
   return `http://${MEDIA_SERVER_HOST}:${mediaServerPort}/media/${encodeURIComponent(tokenInfo.token)}?t=${MEDIA_SERVER_TOKEN}&v=${encodeURIComponent(tokenInfo.version)}`;
 }
 
+function safeImageExtensionFromUrlOrType(rawUrl = "", contentType = "") {
+  const cleanType = String(contentType || "").toLowerCase();
+  const cleanUrl = String(rawUrl || "").toLowerCase();
+
+  if (cleanType.includes("png") || cleanUrl.includes(".png")) return ".png";
+  if (cleanType.includes("webp") || cleanUrl.includes(".webp")) return ".webp";
+  if (cleanType.includes("gif") || cleanUrl.includes(".gif")) return ".gif";
+
+  return ".jpg";
+}
+
+function getSpotifyCoverCacheDirectory() {
+  const target = path.join(app.getPath("userData"), "spotify-covers");
+  try {
+    fs.mkdirSync(target, { recursive: true });
+  } catch {
+  }
+  return target;
+}
+
+function downloadHttpsBuffer(urlString, maxBytes = 8 * 1024 * 1024, redirectLimit = 4) {
+  return new Promise((resolve, reject) => {
+    let parsed;
+    try {
+      parsed = new URL(String(urlString || ""));
+    } catch {
+      return reject(new Error("invalid cover url"));
+    }
+
+    if (parsed.protocol !== "https:") {
+      return reject(new Error("cover url must be https"));
+    }
+
+    const req = https.request({
+      hostname: parsed.hostname,
+      port: 443,
+      path: parsed.pathname + parsed.search,
+      method: "GET",
+      timeout: 15000,
+      headers: {
+        "User-Agent": SPOTIFY_BROWSER_UA || "Mozilla/5.0",
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Referer": "https://open.spotify.com/"
+      }
+    }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirectLimit > 0) {
+        res.resume();
+        const nextUrl = new URL(res.headers.location, urlString).toString();
+        downloadHttpsBuffer(nextUrl, maxBytes, redirectLimit - 1).then(resolve, reject);
+        return;
+      }
+
+      if (res.statusCode !== 200) {
+        res.resume();
+        reject(new Error(`cover returned HTTP ${res.statusCode}`));
+        return;
+      }
+
+      const chunks = [];
+      let total = 0;
+
+      res.on("data", (chunk) => {
+        total += chunk.length;
+        if (total > maxBytes) {
+          req.destroy(new Error("cover image too large"));
+          return;
+        }
+        chunks.push(chunk);
+      });
+
+      res.on("end", () => {
+        resolve({
+          buffer: Buffer.concat(chunks),
+          contentType: String(res.headers["content-type"] || "")
+        });
+      });
+    });
+
+    req.on("error", reject);
+    req.on("timeout", () => {
+      req.destroy();
+      reject(new Error("cover download timed out"));
+    });
+    req.end();
+  });
+}
+
+async function cacheSpotifyCoverImage(coverUrl, stableKey = "") {
+  const cleanUrl = String(coverUrl || "").trim();
+  if (!cleanUrl || !/^https:\/\/i\.scdn\.co\//i.test(cleanUrl)) return "";
+
+  try {
+    const hash = crypto.createHash("sha1").update(`${stableKey}::${cleanUrl}`).digest("hex").slice(0, 22);
+    const cacheDir = getSpotifyCoverCacheDirectory();
+
+    for (const ext of [".jpg", ".png", ".webp", ".gif"]) {
+      const existing = path.join(cacheDir, `${hash}${ext}`);
+      if (fileExists(existing)) return existing;
+    }
+
+    const image = await downloadHttpsBuffer(cleanUrl);
+    const ext = safeImageExtensionFromUrlOrType(cleanUrl, image.contentType);
+    const targetPath = path.join(cacheDir, `${hash}${ext}`);
+
+    await fs.promises.writeFile(targetPath, image.buffer);
+    return targetPath;
+  } catch (error) {
+    console.log("[localtify spotify cover cache error]", error?.message || error);
+    return "";
+  }
+}
+
+function bestSpotifyImage(images = []) {
+  if (!Array.isArray(images) || !images.length) return "";
+
+  const sorted = images
+    .filter((image) => image?.url)
+    .slice()
+    .sort((a, b) => {
+      const aw = Number(a?.width || 0);
+      const bw = Number(b?.width || 0);
+      return bw - aw;
+    });
+
+  return String(sorted[0]?.url || "");
+}
+
+
 function isAudioFile(filePath) {
   return /\.(mp3|wav|ogg|flac|m4a|aac)$/i.test(filePath || "");
 }
@@ -1652,12 +1830,14 @@ function parseSpotifyUrl(rawUrl) {
   return null;
 }
 
-function shapeSpotifyTrack(track, fallbackAlbumName = "") {
+function shapeSpotifyTrack(track, fallbackAlbumName = "", fallbackCoverUrl = "") {
   if (!track?.name) return null;
 
   const artists = Array.isArray(track.artists)
     ? track.artists.map((artist) => artist?.name).filter(Boolean).join(", ")
     : "";
+
+  const coverUrl = bestSpotifyImage(track.album?.images) || String(fallbackCoverUrl || "");
 
   return {
     id: String(track.id || `${track.name}-${artists}-${track.duration_ms || 0}`),
@@ -1666,11 +1846,266 @@ function shapeSpotifyTrack(track, fallbackAlbumName = "") {
     artist: artists,
     artists,
     albumName: String(track.album?.name || fallbackAlbumName || ""),
+    coverUrl,
+    albumCoverUrl: coverUrl,
+    spotifyCoverUrl: coverUrl,
     duration: Math.round(Number(track.duration_ms || 0) / 1000),
     durationMs: Number(track.duration_ms || 0),
     spotifyUrl: track.external_urls?.spotify || (track.id ? `https://open.spotify.com/track/${track.id}` : "")
   };
 }
+
+
+function decodeHtmlEntities(value) {
+  return String(value || "")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+function uniqSpotifyIds(ids = []) {
+  const seen = new Set();
+  const out = [];
+  for (const rawId of ids) {
+    const id = String(rawId || "").trim();
+    if (!/^[A-Za-z0-9]{18,24}$/.test(id)) continue;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
+}
+
+async function fetchSpotifyOembed(trackUrl) {
+  const res = await spotifyHttpGet(`https://open.spotify.com/oembed?url=${encodeURIComponent(trackUrl)}`, {
+    Accept: "application/json"
+  });
+
+  if (res.status !== 200) return null;
+
+  try {
+    return JSON.parse(res.body || "{}");
+  } catch {
+    return null;
+  }
+}
+
+async function fetchSpotifyPublicTrackFallback(trackId) {
+  const trackUrl = `https://open.spotify.com/track/${trackId}`;
+
+  // Even when playlist access fails, individual public tracks often still work
+  // through the official API. Try this first so we get real artist + album art.
+  try {
+    const apiTrack = await spotifyApiGet(`/tracks/${trackId}`);
+    const shaped = shapeSpotifyTrack(apiTrack);
+    if (shaped?.name) return shaped;
+  } catch {
+  }
+
+  let title = "";
+  let artist = "";
+  let coverUrl = "";
+
+  try {
+    const oembed = await fetchSpotifyOembed(trackUrl);
+    const rawTitle = decodeHtmlEntities(oembed?.title || "").trim();
+    coverUrl = String(oembed?.thumbnail_url || oembed?.thumbnailUrl || "");
+
+    if (rawTitle) {
+      const dashIndex = rawTitle.indexOf(" - ");
+      title = dashIndex >= 0 ? rawTitle.slice(0, dashIndex).trim() : rawTitle;
+      artist = dashIndex >= 0 ? rawTitle.slice(dashIndex + 3).trim() : "";
+    }
+  } catch {
+  }
+
+  try {
+    const htmlRes = await spotifyHttpGet(trackUrl, { Accept: "text/html" });
+
+    if (htmlRes.status === 200) {
+      const html = htmlRes.body || "";
+
+      if (!title) {
+        const titleMatch =
+          html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) ||
+          html.match(/<title[^>]*>([^<]+)<\/title>/i);
+
+        if (titleMatch?.[1]) {
+          const raw = decodeHtmlEntities(titleMatch[1]).replace(/\s*\|\s*Spotify\s*$/i, "").trim();
+          const dashIndex = raw.indexOf(" - ");
+          title = dashIndex >= 0 ? raw.slice(0, dashIndex).trim() : raw;
+          if (!artist && dashIndex >= 0) artist = raw.slice(dashIndex + 3).trim();
+        }
+      }
+
+      if (!coverUrl) {
+        const imageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+        coverUrl = decodeHtmlEntities(imageMatch?.[1] || "").trim();
+      }
+
+      if (!artist) {
+        const descriptionMatch = html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i);
+        const desc = decodeHtmlEntities(descriptionMatch?.[1] || "").trim();
+        if (desc) artist = desc.split("·")[0].trim();
+      }
+    }
+  } catch {
+  }
+
+  title = title || `Spotify track ${trackId}`;
+  return {
+    id: trackId,
+    title,
+    name: title,
+    artist,
+    artists: artist,
+    albumName: "",
+    coverUrl,
+    albumCoverUrl: coverUrl,
+    spotifyCoverUrl: coverUrl,
+    duration: 0,
+    durationMs: 0,
+    spotifyUrl: trackUrl
+  };
+}
+
+async function fetchSpotifyPublicPlaylistFallback(playlistId) {
+  const playlistUrl = `https://open.spotify.com/playlist/${playlistId}`;
+  let playlistName = "Spotify Playlist";
+  const ids = [];
+
+  try {
+    const oembed = await fetchSpotifyOembed(playlistUrl);
+    const rawName = decodeHtmlEntities(oembed?.title || "").trim();
+    if (rawName) playlistName = rawName.replace(/\s*\|\s*Spotify\s*$/i, "").trim() || playlistName;
+  } catch {
+  }
+
+  const urlsToTry = [
+    playlistUrl,
+    `https://open.spotify.com/embed/playlist/${playlistId}`,
+    `https://open.spotify.com/playlist/${playlistId}?nd=1`
+  ];
+
+  for (const url of urlsToTry) {
+    try {
+      const res = await spotifyHttpGet(url, { Accept: "text/html" });
+      if (res.status !== 200) continue;
+
+      const html = res.body || "";
+
+      const ogTitle =
+        html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) ||
+        html.match(/<title[^>]*>([^<]+)<\/title>/i);
+
+      if (ogTitle?.[1]) {
+        const raw = decodeHtmlEntities(ogTitle[1]).replace(/\s*\|\s*Spotify\s*$/i, "").trim();
+        if (raw && !/^spotify$/i.test(raw)) playlistName = raw;
+      }
+
+      for (const match of html.matchAll(/spotify:track:([A-Za-z0-9]+)/g)) ids.push(match[1]);
+      for (const match of html.matchAll(/open\.spotify\.com\/track\/([A-Za-z0-9]+)/g)) ids.push(match[1]);
+      for (const match of html.matchAll(/\/track\/([A-Za-z0-9]{18,24})/g)) ids.push(match[1]);
+      for (const match of html.matchAll(/"uri"\s*:\s*"spotify:track:([A-Za-z0-9]+)"/g)) ids.push(match[1]);
+
+      if (ids.length) break;
+    } catch (error) {
+      console.log("[localtify spotify fallback page error]", error?.message || error);
+    }
+  }
+
+  const trackIds = uniqSpotifyIds(ids);
+
+  if (!trackIds.length) {
+    throw new Error(
+      "Spotify could not expose tracks for this playlist. Make sure it is public on your profile, not only shareable by link, then try again."
+    );
+  }
+
+  const tracks = [];
+  const limitedIds = trackIds.slice(0, 250);
+
+  for (let index = 0; index < limitedIds.length; index += 8) {
+    const batch = limitedIds.slice(index, index + 8);
+    const shaped = await Promise.all(batch.map((trackId) => fetchSpotifyPublicTrackFallback(trackId).catch(() => null)));
+    for (const track of shaped) {
+      if (track?.name) tracks.push(track);
+    }
+  }
+
+  return {
+    name: playlistName,
+    playlistName,
+    type: "playlist",
+    publicOnly: true,
+    fallback: true,
+    tracks
+  };
+}
+
+async function fetchSpotifyPublicAlbumFallback(albumId) {
+  const albumUrl = `https://open.spotify.com/album/${albumId}`;
+  let albumName = "Spotify Album";
+  const ids = [];
+
+  try {
+    const oembed = await fetchSpotifyOembed(albumUrl);
+    const rawName = decodeHtmlEntities(oembed?.title || "").trim();
+    if (rawName) albumName = rawName.replace(/\s*\|\s*Spotify\s*$/i, "").trim() || albumName;
+  } catch {
+  }
+
+  try {
+    const res = await spotifyHttpGet(`https://open.spotify.com/embed/album/${albumId}`, { Accept: "text/html" });
+    if (res.status === 200) {
+      const html = res.body || "";
+      for (const match of html.matchAll(/spotify:track:([A-Za-z0-9]+)/g)) ids.push(match[1]);
+      for (const match of html.matchAll(/open\.spotify\.com\/track\/([A-Za-z0-9]+)/g)) ids.push(match[1]);
+      for (const match of html.matchAll(/\/track\/([A-Za-z0-9]{18,24})/g)) ids.push(match[1]);
+    }
+  } catch {
+  }
+
+  const trackIds = uniqSpotifyIds(ids);
+  if (!trackIds.length) throw new Error("Spotify could not expose tracks for this album. Try connecting again or use the track links directly.");
+
+  const tracks = [];
+  for (let index = 0; index < trackIds.length; index += 8) {
+    const batch = trackIds.slice(index, index + 8);
+    const shaped = await Promise.all(batch.map((trackId) => fetchSpotifyPublicTrackFallback(trackId).catch(() => null)));
+    for (const track of shaped) {
+      if (track?.name) tracks.push({ ...track, albumName });
+    }
+  }
+
+  return { name: albumName, playlistName: albumName, type: "album", publicOnly: true, fallback: true, tracks };
+}
+
+async function fetchSpotifyPublicFallback(rawUrl, reason = "") {
+  const parsed = parseSpotifyUrl(rawUrl);
+  if (!parsed) throw new Error("Paste a valid Spotify playlist, album, or track link.");
+
+  console.log("[localtify spotify] using public fallback", { type: parsed.type, reason });
+
+  if (parsed.type === "track") {
+    const track = await fetchSpotifyPublicTrackFallback(parsed.id);
+    return { name: track.title, playlistName: track.title, type: "track", publicOnly: true, fallback: true, tracks: [track] };
+  }
+
+  if (parsed.type === "album") {
+    return fetchSpotifyPublicAlbumFallback(parsed.id);
+  }
+
+  if (parsed.type === "playlist") {
+    return fetchSpotifyPublicPlaylistFallback(parsed.id);
+  }
+
+  throw new Error(`Unsupported Spotify link type: ${parsed.type}`);
+}
+
 
 async function fetchSpotifyTracksFromUrl(rawUrl) {
   const parsed = parseSpotifyUrl(rawUrl);
@@ -1680,59 +2115,70 @@ async function fetchSpotifyTracksFromUrl(rawUrl) {
 
   const { type, id } = parsed;
 
-  if (type === "track") {
-    const track = await spotifyApiGet(`/tracks/${id}`);
-    const shaped = shapeSpotifyTrack(track);
-    return { name: shaped?.title || "Spotify Track", playlistName: shaped?.title || "Spotify Track", type: "track", publicOnly: true, tracks: shaped ? [shaped] : [] };
-  }
-
-  if (type === "album") {
-    const album = await spotifyApiGet(`/albums/${id}`);
-    const tracks = [];
-    let next = `/albums/${id}/tracks?limit=50&offset=0`;
-
-    while (next) {
-      const page = await spotifyApiGet(next);
-      for (const track of page.items || []) {
-        const shaped = shapeSpotifyTrack(track, album.name || "");
-        if (shaped) tracks.push(shaped);
-      }
-      next = page.next || null;
+  try {
+    if (type === "track") {
+      const track = await spotifyApiGet(`/tracks/${id}`);
+      const shaped = shapeSpotifyTrack(track);
+      return { name: shaped?.title || "Spotify Track", playlistName: shaped?.title || "Spotify Track", type: "track", publicOnly: true, tracks: shaped ? [shaped] : [] };
     }
 
-    return { name: album.name || "Spotify Album", playlistName: album.name || "Spotify Album", type: "album", publicOnly: true, tracks };
-  }
+    if (type === "album") {
+      const album = await spotifyApiGet(`/albums/${id}`);
+      const tracks = [];
+      let next = `/albums/${id}/tracks?limit=50&offset=0`;
 
-  if (type === "playlist") {
-    const info = await spotifyApiGet(`/playlists/${id}?fields=name,public,owner(display_name)`);
-
-    if (info && info.public === false) {
-      throw new Error("This Spotify playlist is private. Make it public first, then paste the link again.");
-    }
-
-    const tracks = [];
-    let offset = 0;
-
-    while (true) {
-      const page = await spotifyApiGet(`/playlists/${id}/tracks?limit=100&offset=${offset}&fields=items(track(id,name,artists,album(name),duration_ms,is_local,external_urls)),next`);
-      const items = page.items || [];
-
-      for (const item of items) {
-        const track = item?.track;
-        if (!track?.name || track.is_local) continue;
-        const shaped = shapeSpotifyTrack(track);
-        if (shaped) tracks.push(shaped);
+      while (next) {
+        const page = await spotifyApiGet(next);
+        for (const track of page.items || []) {
+          const shaped = shapeSpotifyTrack(track, album.name || "", bestSpotifyImage(album.images));
+          if (shaped) tracks.push(shaped);
+        }
+        next = page.next || null;
       }
 
-      if (!page.next || items.length < 100) break;
-      offset += 100;
+      return { name: album.name || "Spotify Album", playlistName: album.name || "Spotify Album", type: "album", publicOnly: true, tracks };
     }
 
-    return { name: info.name || "Spotify Playlist", playlistName: info.name || "Spotify Playlist", type: "playlist", publicOnly: true, tracks };
-  }
+    if (type === "playlist") {
+      const info = await spotifyApiGet(`/playlists/${id}?fields=name,public,owner(display_name)`);
 
-  throw new Error(`Unsupported Spotify link type: ${type}`);
+      if (info && info.public === false) {
+        throw new Error("This playlist is link-shareable but not public to the Spotify API. Add it to your public profile, or try the fallback fetch again.");
+      }
+
+      const tracks = [];
+      let offset = 0;
+
+      while (true) {
+        const page = await spotifyApiGet(`/playlists/${id}/tracks?limit=100&offset=${offset}&fields=items(track(id,name,artists,album(name,images(url,width,height)),duration_ms,is_local,external_urls)),next`);
+        const items = page.items || [];
+
+        for (const item of items) {
+          const track = item?.track;
+          if (!track?.name || track.is_local) continue;
+          const shaped = shapeSpotifyTrack(track);
+          if (shaped) tracks.push(shaped);
+        }
+
+        if (!page.next || items.length < 100) break;
+        offset += 100;
+      }
+
+      return { name: info.name || "Spotify Playlist", playlistName: info.name || "Spotify Playlist", type: "playlist", publicOnly: true, tracks };
+    }
+
+    throw new Error(`Unsupported Spotify link type: ${type}`);
+  } catch (error) {
+    const message = error?.message || String(error || "");
+    const canFallback =
+      /could not read this link|public profile|private|403|404|not expose|spotify api returned http/i.test(message);
+
+    if (!canFallback) throw error;
+
+    return fetchSpotifyPublicFallback(rawUrl, message);
+  }
 }
+
 // ====================== END SPOTIFY OAUTH PUBLIC IMPORT ======================
 
 
@@ -1948,6 +2394,259 @@ function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new Set()) 
     addedAt: Date.now()
   };
 }
+
+function normalizeForLooseMatch(value = "") {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/\.[a-z0-9]+$/i, "")
+    .replace(/\([^)]*\)|\[[^\]]*\]/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function listAudioFilesInDirectory(directory, options = {}) {
+  const root = String(directory || "");
+  const maxDepth = Number.isFinite(Number(options.maxDepth)) ? Number(options.maxDepth) : 2;
+  const maxFiles = Number.isFinite(Number(options.maxFiles)) ? Number(options.maxFiles) : 1500;
+  const out = [];
+
+  if (!root || !path.isAbsolute(root) || !fs.existsSync(root)) return out;
+
+  const walk = (dir, depth) => {
+    if (out.length >= maxFiles || depth > maxDepth) return;
+
+    let entries = [];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      if (out.length >= maxFiles) break;
+      const fullPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        if (entry.name.startsWith(".") || entry.name === "localitfy-bin" || entry.name === "spotify-covers") continue;
+        walk(fullPath, depth + 1);
+        continue;
+      }
+
+      if (!entry.isFile()) continue;
+      if (!isAudioFile(fullPath)) continue;
+      if (/\.(part|tmp|download|crdownload)$/i.test(entry.name)) continue;
+      out.push(fullPath);
+    }
+  };
+
+  walk(root, 0);
+
+  out.sort((a, b) => {
+    const aInfo = getFileInfoCached(a);
+    const bInfo = getFileInfoCached(b);
+    return (bInfo.mtimeMs || 0) - (aInfo.mtimeMs || 0);
+  });
+
+  return out;
+}
+
+function matchSpotifyTrackForFile(filePath, tracks = []) {
+  const fileKey = normalizeForLooseMatch(path.parse(String(filePath || "")).name);
+  if (!fileKey || !Array.isArray(tracks) || !tracks.length) return null;
+
+  let best = null;
+  let bestScore = 0;
+
+  for (const track of tracks) {
+    const title = normalizeForLooseMatch(track?.title || track?.name || "");
+    const artist = normalizeForLooseMatch(track?.artist || track?.artists || "");
+    const combined = normalizeForLooseMatch(`${artist} ${title}`);
+
+    let score = 0;
+    if (title && fileKey.includes(title)) score += 5;
+    if (artist && fileKey.includes(artist)) score += 3;
+    if (combined && (fileKey.includes(combined) || combined.includes(fileKey))) score += 7;
+
+    const fileWords = new Set(fileKey.split(" ").filter((word) => word.length > 2));
+    const trackWords = new Set(`${artist} ${title}`.split(" ").filter((word) => word.length > 2));
+
+    let overlap = 0;
+    for (const word of trackWords) {
+      if (fileWords.has(word)) overlap += 1;
+    }
+
+    score += overlap;
+
+    if (score > bestScore) {
+      best = track;
+      bestScore = score;
+    }
+  }
+
+  return bestScore >= 3 ? best : null;
+}
+
+async function makeSongFromFileWithMetadata(filePath, tracks = [], pixelArtFiles = [], usedCovers = new Set()) {
+  const baseSong = makeSongFromFile(filePath, pixelArtFiles, usedCovers);
+  const matched = matchSpotifyTrackForFile(filePath, tracks);
+
+  if (!matched) return baseSong;
+
+  const title = String(matched?.title || matched?.name || baseSong.title || "").trim();
+  const artist = String(matched?.artist || matched?.artists || baseSong.artist || "").trim();
+  const album = String(matched?.albumName || matched?.album || baseSong.album || "").trim();
+  const coverUrl = String(matched?.coverUrl || matched?.spotifyCoverUrl || matched?.albumCoverUrl || "").trim();
+  const cachedCoverPath = await cacheSpotifyCoverImage(coverUrl, matched?.id || title || filePath);
+
+  return {
+    ...baseSong,
+    title: title || baseSong.title,
+    artist: artist || baseSong.artist,
+    album: album || baseSong.album || "",
+    coverPath: cachedCoverPath || baseSong.coverPath,
+    duration: Number(matched?.duration || Math.round(Number(matched?.durationMs || 0) / 1000) || baseSong.duration || 0)
+  };
+}
+
+async function importNewAudioFilesFromDirectory(directory, tracks = [], options = {}) {
+  const audioFiles = listAudioFilesInDirectory(directory, options);
+  if (!audioFiles.length) {
+    return { changedCount: 0, importedCount: 0, songs: listSongsShaped(), files: [] };
+  }
+
+  const existingPaths = new Set(
+    getSongs()
+      .map((song) => path.normalize(String(song.filePath || "")).toLowerCase())
+      .filter(Boolean)
+  );
+
+  const newFiles = audioFiles.filter((filePath) => {
+    const key = path.normalize(String(filePath || "")).toLowerCase();
+    return key && !existingPaths.has(key);
+  });
+
+  if (!newFiles.length) {
+    return { changedCount: 0, importedCount: 0, songs: listSongsShaped(), files: [] };
+  }
+
+  const pixelArtFiles = getPixelArtFiles();
+  const usedCovers = new Set();
+  const importedSongs = [];
+
+  for (const filePath of newFiles) {
+    importedSongs.push(await makeSongFromFileWithMetadata(filePath, tracks, pixelArtFiles, usedCovers));
+  }
+
+  const changedCount = insertSongs(importedSongs);
+  clearFileInfoCache();
+
+  console.log("[localtify library refresh] imported new audio files from folder", {
+    folder: directory,
+    found: audioFiles.length,
+    newFiles: newFiles.length,
+    changedCount
+  });
+
+  return {
+    changedCount,
+    importedCount: importedSongs.length,
+    songs: listSongsShaped(),
+    files: newFiles
+  };
+}
+async function repairSpotifyMetadataForFolder(directory, tracks = [], options = {}) {
+  const audioFiles = listAudioFilesInDirectory(directory, options);
+  if (!audioFiles.length || !Array.isArray(tracks) || !tracks.length) {
+    return { changedCount: 0, songs: listSongsShaped() };
+  }
+
+  const songs = getSongs();
+  const byPath = new Map(
+    songs
+      .filter((song) => song?.filePath)
+      .map((song) => [path.normalize(String(song.filePath)).toLowerCase(), song])
+  );
+
+  let changedCount = 0;
+
+  for (const filePath of audioFiles) {
+    const key = path.normalize(String(filePath || "")).toLowerCase();
+    const song = byPath.get(key);
+    if (!song) continue;
+
+    const matched = matchSpotifyTrackForFile(filePath, tracks);
+    if (!matched) continue;
+
+    const title = String(matched?.title || matched?.name || "").trim();
+    const artist = String(matched?.artist || matched?.artists || "").trim();
+    const album = String(matched?.albumName || matched?.album || "").trim();
+    const coverUrl = String(matched?.coverUrl || matched?.spotifyCoverUrl || matched?.albumCoverUrl || "").trim();
+    const cachedCoverPath = await cacheSpotifyCoverImage(coverUrl, matched?.id || title || filePath);
+
+    const patch = {};
+    const currentArtist = String(song.artist || "").trim().toLowerCase();
+    const currentTitle = String(song.title || "").trim().toLowerCase();
+    const currentCover = String(song.coverPath || "").trim();
+
+    if (title && (!song.title || currentTitle === "unknown title" || currentTitle === normalizeForLooseMatch(path.parse(filePath).name))) {
+      patch.title = title;
+    }
+
+    // Always allow Spotify to fix weak filename-derived artists like "slowed",
+    // "unknown artist", or empty artist.
+    if (
+      artist &&
+      (
+        !song.artist ||
+        currentArtist === "unknown artist" ||
+        currentArtist === "unknown" ||
+        currentArtist === "slowed" ||
+        currentArtist === "slow" ||
+        currentArtist === "reverb" ||
+        currentArtist === "nightcore" ||
+        currentArtist === "sped up"
+      )
+    ) {
+      patch.artist = artist;
+    }
+
+    if (album && (!song.album || String(song.album).trim().toLowerCase() === "unknown album")) {
+      patch.album = album;
+    }
+
+    if (cachedCoverPath && (!currentCover || !fileExists(currentCover) || currentCover.includes(`${path.sep}pixelart${path.sep}`))) {
+      patch.coverPath = cachedCoverPath;
+    }
+
+    const duration = Number(matched?.duration || Math.round(Number(matched?.durationMs || 0) / 1000) || 0);
+    if (duration > 0 && !Number(song.duration || 0)) {
+      patch.duration = duration;
+    }
+
+    if (Object.keys(patch).length) {
+      try {
+        patchSong(song.id, patch);
+        changedCount += 1;
+      } catch (error) {
+        console.log("[localtify spotify metadata repair error]", error?.message || error);
+      }
+    }
+  }
+
+  if (changedCount) clearFileInfoCache();
+
+  console.log("[localtify spotify metadata repair]", {
+    folder: directory,
+    checked: audioFiles.length,
+    repaired: changedCount
+  });
+
+  return { changedCount, songs: listSongsShaped() };
+}
+
+
+
 
 function pickStablePixelCoverForSong(song, pixelArtFiles = null) {
   const covers = Array.isArray(pixelArtFiles) ? pixelArtFiles : getPixelArtFiles();
@@ -2399,6 +3098,15 @@ app.whenReady().then(async () => {
         clearFileInfoCache();
         afterSongs = listSongsShaped();
       }
+
+      // Safety net: yt-dlp can finish writing audio files even when the result list
+      // misses one. Scan the chosen download folder once and import any new audio.
+      if (autoAdd) {
+        const refresh = await importNewAudioFilesFromDirectory(downloadFolder);
+        changedCount += refresh.changedCount;
+        afterSongs = refresh.songs;
+      }
+
       console.log(`[localitfy download] downloaded=${successfulFiles.length}, changed=${changedCount}, autoAdd=${autoAdd}`);
       return { ...result, changedCount, songs: afterSongs, autoAdd };
     } catch (error) {
@@ -2449,6 +3157,21 @@ app.whenReady().then(async () => {
   ipcMain.handle("library:clear", async () => {
     clearLibrary();
     return [];
+  });
+
+  ipcMain.handle("library:refresh-download-folder", async (_event, payload = {}) => {
+    const target = getDownloadDirectory(payload?.folder || payload?.downloadFolder || "");
+    const tracks = Array.isArray(payload?.tracks) ? payload.tracks : [];
+    const refresh = await importNewAudioFilesFromDirectory(target, tracks);
+    const repair = tracks.length ? await repairSpotifyMetadataForFolder(target, tracks) : { changedCount: 0, songs: refresh.songs };
+    return {
+      ok: true,
+      downloadFolder: target,
+      changedCount: refresh.changedCount + repair.changedCount,
+      importedCount: refresh.importedCount,
+      repairedCount: repair.changedCount,
+      songs: repair.songs || refresh.songs
+    };
   });
 
   ipcMain.handle("settings:get", async () => getSettings());
@@ -2511,7 +3234,13 @@ app.whenReady().then(async () => {
       return { ok: true, ...result };
     } catch (error) {
       console.log("[localtify spotify fetch error]", error?.message || error);
-      return { ok: false, publicOnly: true, tracks: [], error: error?.message || "Failed to fetch Spotify tracks." };
+      return {
+        ok: false,
+        publicOnly: true,
+        tracks: [],
+        error: error?.message || "Failed to fetch Spotify tracks.",
+        hint: "Spotify has two visibility states: shareable by link and public on profile. If fetch fails, open the playlist menu in Spotify and make it public/add it to profile."
+      };
     }
   };
 
@@ -2582,20 +3311,57 @@ app.whenReady().then(async () => {
       };
 
       const result = await downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
-      const successfulFiles = result.downloads
-        .filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath))
-        .map((item) => item.filePath);
+      const successfulDownloads = (result.downloads || [])
+        .map((item, index) => ({
+          item,
+          track: (item?.filePath ? matchSpotifyTrackForFile(item.filePath, tracks) : null) || tracks[index] || {}
+        }))
+        .filter(({ item }) => item?.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath));
 
       let changedCount = 0;
       let afterSongs = listSongsShaped();
 
-      if (autoAdd && successfulFiles.length) {
+      if (autoAdd && successfulDownloads.length) {
         const pixelArtFiles = getPixelArtFiles();
         const usedCovers = new Set();
-        const importedSongs = successfulFiles.map((filePath) => makeSongFromFile(filePath, pixelArtFiles, usedCovers));
+
+        const importedSongs = [];
+        for (const { item, track } of successfulDownloads) {
+          importedSongs.push(await makeSongFromFileWithMetadata(item.filePath, [track], pixelArtFiles, usedCovers));
+        }
+
         changedCount = insertSongs(importedSongs);
+
+        for (const song of importedSongs) {
+          try {
+            patchSong(song.id, {
+              title: song.title,
+              artist: song.artist,
+              album: song.album,
+              coverPath: song.coverPath,
+              duration: song.duration
+            });
+          } catch (error) {
+            console.log("[localtify spotify metadata patch error]", error?.message || error);
+          }
+        }
+
         clearFileInfoCache();
         afterSongs = listSongsShaped();
+      }
+
+      // Safety net: spotDL/yt-dlp sometimes writes files successfully even when
+      // the batch result misses them. Scan once after the batch and import any
+      // new audio files from the selected download folder. This prevents needing
+      // a full app restart for the library to catch up.
+      if (autoAdd) {
+        const refresh = await importNewAudioFilesFromDirectory(downloadFolder, tracks);
+        changedCount += refresh.changedCount;
+        afterSongs = refresh.songs;
+
+        const repair = await repairSpotifyMetadataForFolder(downloadFolder, tracks);
+        changedCount += repair.changedCount;
+        afterSongs = repair.songs;
       }
 
       for (const item of result.downloads || []) {

@@ -5906,7 +5906,11 @@ function MainModeApp() {
 
       const tracks: SpotifyTrack[] = result.tracks.map((t: SpotifyTrack, i: number) => ({
         ...t,
-        id: t.id || `spt_${i}`
+        id: t.id || `spt_${i}`,
+        title: (t.title || (t as any).name || "unknown track").trim(),
+        artist: (t.artist || (t as any).artists || "").trim(),
+        albumName: (t.albumName || (t as any).album || "").trim(),
+        coverUrl: (t.coverUrl || (t as any).spotifyCoverUrl || (t as any).albumCoverUrl || "").trim()
       }));
 
       setSpotifyTracks(tracks);
@@ -5950,7 +5954,16 @@ function MainModeApp() {
       }
 
       const result = await spotifyDownloadBridge({
-        tracks: selected.map((t) => ({ title: t.title, artist: t.artist })),
+        tracks: selected.map((t) => ({
+          id: t.id,
+          title: t.title,
+          artist: t.artist,
+          albumName: t.albumName,
+          coverUrl: t.coverUrl || (t as any).spotifyCoverUrl || (t as any).albumCoverUrl || "",
+          spotifyUrl: (t as any).spotifyUrl || "",
+          duration: t.duration,
+          durationMs: (t as any).durationMs
+        })),
         options: {
           quality: settings.downloadQuality,
           format: settings.downloadFormat,
@@ -5960,8 +5973,7 @@ function MainModeApp() {
       });
 
       if (result) {
-        const nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
-        setSongs(nextSongs);
+        let nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
         setDownloadFolderLabel(result.downloadFolder || settings.downloadFolder || "");
 
         const downloads = result.downloads || [];
@@ -5970,6 +5982,24 @@ function MainModeApp() {
 
         const successCount = downloads.filter((d: DownloadResult) => d.ok).length;
         const failCount = downloads.filter((d: DownloadResult) => !d.ok).length;
+
+        // Restart-lite safety: after Spotify downloads, reload the real DB library.
+        // Set the song list once with the final refreshed DB rows to avoid a double
+        // home/library render right after download.
+        if ((successCount > 0 || Number(result.changedCount || 0) > 0) && bridge?.bootstrap) {
+          try {
+            const refreshed = await bridge.bootstrap();
+            const refreshedSongs = applyLibraryOrder(sanitizeSongList(refreshed?.songs || []));
+            if (refreshedSongs.length >= nextSongs.length) {
+              nextSongs = refreshedSongs;
+              setLibraryScanMessage(`library refreshed: ${refreshedSongs.length} tracks`);
+            }
+          } catch (refreshError) {
+            console.warn("[localtify spotify library refresh failed]", refreshError);
+          }
+        }
+
+        setSongs(nextSongs);
 
         if (nextSongs.length && !currentId) {
           const firstSong = nextSongs[0];
