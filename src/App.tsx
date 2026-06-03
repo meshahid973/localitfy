@@ -5784,7 +5784,7 @@ function MainModeApp() {
       })
       .catch(() => {
         if (!cancelled) {
-          setSpotifyLoggedIn(false);
+          setSpotifyLoggedIn(true);
         }
       });
 
@@ -5807,9 +5807,10 @@ function MainModeApp() {
       const res = await bridge.spotifyLogin();
       setSpotifyLoggedIn(Boolean(res?.loggedIn));
 
-      if (!res?.loggedIn) {
-        setSpotifyFetchError(res?.error || "Login cancelled or timed out.");
+      if (!res?.ok && !res?.loggedIn) {
+        setSpotifyFetchError(res?.error || "Spotify connection failed.");
       } else {
+        setSpotifyFetchError("");
         setStatusText("connected to spotify");
       }
     } catch (error) {
@@ -5863,7 +5864,7 @@ function MainModeApp() {
     setSpotifyFetchError("");
     setSpotifyShowCookieInput(false);
     setSpotifyCookieDraft("");
-    setStatusText("logged out of spotify");
+    setStatusText("disconnected from spotify");
   }
 
   async function fetchSpotifyTracks() {
@@ -5875,12 +5876,15 @@ function MainModeApp() {
 
     try {
       const bridge = (window.localitfy as any);
-      if (!bridge?.spotifyFetchTracks) {
+      const spotifyFetchBridge = bridge?.spotifyFetch || bridge?.spotifyFetchTracks;
+      if (!spotifyFetchBridge) {
         setSpotifyFetchError("Spotify fetch is not wired in preload/main yet.");
         return;
       }
 
-      const result = await bridge.spotifyFetchTracks(spotifyUrl.trim());
+      const result = bridge?.spotifyFetch
+        ? await spotifyFetchBridge({ url: spotifyUrl.trim() })
+        : await spotifyFetchBridge(spotifyUrl.trim());
       if (result?.error) {
         setSpotifyFetchError(result.error);
         return;
@@ -5929,13 +5933,14 @@ function MainModeApp() {
 
     try {
       const bridge = (window.localitfy as any);
-      if (!bridge?.spotifyDownloadBatch) {
+      const spotifyDownloadBridge = bridge?.spotdlDownloadBatch || bridge?.spotifyDownloadBatch;
+      if (!spotifyDownloadBridge) {
         setSpotifyFetchError("Spotify download is not wired in preload/main yet.");
         setStatusText("spotify download failed");
         return;
       }
 
-      const result = await bridge.spotifyDownloadBatch({
+      const result = await spotifyDownloadBridge({
         tracks: selected.map((t) => ({ title: t.title, artist: t.artist })),
         options: {
           quality: settings.downloadQuality,
@@ -8224,6 +8229,15 @@ function MainModeApp() {
     spotifySelectedIds,
     downloadSpotifyTracks,
     setSpotifyTracks,
+    spotifyLoggedIn,
+    spotifyLoginBusy,
+    spotifyShowCookieInput,
+    setSpotifyShowCookieInput,
+    spotifyCookieDraft,
+    setSpotifyCookieDraft,
+    handleSpotifyLogin,
+    handleSpotifySetCookie,
+    handleSpotifyLogout,
     ready,
     retryDownload,
     openDownloadedSongInLibrary,
