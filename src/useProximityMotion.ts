@@ -1,6 +1,11 @@
-/* localtify 0.3.6 proximity motion V185 — cheaper visibility-aware proximity motion.
-   Keeps the same visual feel, but stops scanning/painting while hidden, blurred, or suspended.
-   All work is DOM/rAF based: no React state, no blocking click handlers, no hover repaint loop. */
+/* localtify 0.3.6 V207 — reduced proximity motion.
+   Goal:
+   - keep the nice "near cursor" feel
+   - stop settings/cards from glowing everywhere
+   - reduce scan targets, active targets, radius, scale, and glow
+   - never touch dense song rows
+   - no React state, no blocking handlers
+*/
 import { useEffect, type RefObject } from "react";
 
 type UseProximityMotionOptions = {
@@ -16,7 +21,7 @@ type CachedTarget = {
   priority: number;
 };
 
-const TARGET_SELECTOR = [
+const BUTTON_SELECTOR = [
   "button",
   "[role='button']",
   ".navItem",
@@ -35,11 +40,12 @@ const TARGET_SELECTOR = [
   ".tabButton",
   ".navButton",
   ".tinyToggle",
-  ".settingsTinyButton",
-  ".settingsChoice",
-  ".settingSwitchCard",
-  ".settingsThemeCard",
-  ".coverSyncChoice",
+  ".settingsTinyButton"
+].join(",");
+
+/* Keep proximity off heavy/card-like areas.
+   Normal CSS hover can handle these without JS scanning/glow. */
+const CARD_SELECTOR = [
   ".coverTile",
   ".coverGalleryCard",
   ".homeAlbumCard",
@@ -48,19 +54,36 @@ const TARGET_SELECTOR = [
   ".playlistShelfCard"
 ].join(",");
 
-const DENSE_ROW_SELECTOR = ".songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard,.homeFreshCard";
-const BUTTON_SELECTOR = "button,[role='button'],.navItem,.mainAction,.heroMain,.heroGhost,.heroTinyButton,.homeShelfActionButton,.expandLibraryButton,.softButton,.simpleAction,.simpleGhost,.toolButton,.iconAction,.songMenuButton,.tabButton,.navButton,.tinyToggle,.settingsTinyButton";
-const CARD_SELECTOR = ".settingsChoice,.settingSwitchCard,.settingsThemeCard,.coverSyncChoice,.coverTile,.coverGalleryCard,.homeAlbumCard,.libraryCard,.libraryCardV025,.playlistShelfCard";
+const TARGET_SELECTOR = `${BUTTON_SELECTOR},${CARD_SELECTOR}`;
 
-const RADIUS_IDLE = 205;
-const RADIUS_PLAYING = 178;
-const MIN_STRENGTH = 0.035;
-const TARGET_REFRESH_IDLE_MS = 620;
-const TARGET_REFRESH_PLAYING_MS = 860;
-const MAX_SCAN_IDLE = 150;
-const MAX_SCAN_PLAYING = 92;
-const MAX_ACTIVE_IDLE = 10;
-const MAX_ACTIVE_PLAYING = 7;
+const SKIP_SELECTOR = [
+  ".songRow",
+  ".playlistTrackRow",
+  ".playlistSongRow",
+  ".libraryRow",
+  ".homeListenCard",
+  ".homeFreshCard",
+  ".settingSwitchCard",
+  ".settingsChoice",
+  ".settingsThemeCard",
+  ".coverSyncChoice",
+  ".toggleRow",
+  ".rangeRow",
+  ".visualOptionButtonV205",
+  ".visualOptionGroupV205",
+  ".settingsResetButton",
+  ".settingsPanelCard"
+].join(",");
+
+const RADIUS_IDLE = 132;
+const RADIUS_PLAYING = 108;
+const MIN_STRENGTH = 0.08;
+const TARGET_REFRESH_IDLE_MS = 980;
+const TARGET_REFRESH_PLAYING_MS = 1280;
+const MAX_SCAN_IDLE = 56;
+const MAX_SCAN_PLAYING = 36;
+const MAX_ACTIVE_IDLE = 4;
+const MAX_ACTIVE_PLAYING = 3;
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -74,13 +97,12 @@ function distanceToRect(x: number, y: number, rect: DOMRect) {
 
 function targetPriority(element: HTMLElement) {
   if (element.matches(BUTTON_SELECTOR)) return 3;
-  if (element.matches(CARD_SELECTOR)) return 2;
   return 1;
 }
 
 function isVisibleTarget(root: HTMLElement, element: HTMLElement) {
   if (!root.contains(element)) return false;
-  if (element.matches(DENSE_ROW_SELECTOR) || element.closest(DENSE_ROW_SELECTOR)) return false;
+  if (element.matches(SKIP_SELECTOR) || element.closest(SKIP_SELECTOR)) return false;
   if (element.hasAttribute("disabled") || element.getAttribute("aria-disabled") === "true") return false;
 
   const style = window.getComputedStyle(element);
@@ -90,11 +112,11 @@ function isVisibleTarget(root: HTMLElement, element: HTMLElement) {
 }
 
 function applyState(element: HTMLElement, strength: number, priority = targetPriority(element)) {
-  const weightedStrength = clamp(strength * (priority >= 3 ? 1.14 : 1), 0, 1);
-  const scale = 1 + weightedStrength * (priority >= 3 ? 0.058 : 0.045);
-  const glow = Math.round(weightedStrength * (priority >= 3 ? 32 : 25));
-  const bg = 0.014 + weightedStrength * (priority >= 3 ? 0.05 : 0.038);
-  const line = 0.12 + weightedStrength * (priority >= 3 ? 0.31 : 0.25);
+  const weightedStrength = clamp(strength * (priority >= 3 ? 1.04 : 0.82), 0, 1);
+  const scale = 1 + weightedStrength * (priority >= 3 ? 0.024 : 0.015);
+  const glow = Math.round(weightedStrength * (priority >= 3 ? 14 : 8));
+  const bg = 0.006 + weightedStrength * (priority >= 3 ? 0.018 : 0.012);
+  const line = 0.08 + weightedStrength * (priority >= 3 ? 0.12 : 0.08);
   const signature = `${Math.round(scale * 10000)}:${glow}:${Math.round(bg * 1000)}:${Math.round(line * 1000)}`;
 
   if (element.dataset.localtifyProxSignature === signature && element.classList.contains("localtifyProximityActive")) return;
@@ -116,7 +138,12 @@ function clearElement(element: HTMLElement) {
   delete element.dataset.localtifyProxSignature;
 }
 
-export function useProximityMotion({ rootRef, disabled = false, suspended = false, resetKey = "" }: UseProximityMotionOptions) {
+export function useProximityMotion({
+  rootRef,
+  disabled = false,
+  suspended = false,
+  resetKey = ""
+}: UseProximityMotionOptions) {
   useEffect(() => {
     const root = rootRef.current;
     if (!root || disabled || suspended) return;
@@ -140,6 +167,11 @@ export function useProximityMotion({ rootRef, disabled = false, suspended = fals
 
       active.forEach((_value, element) => clearElement(element));
       active.clear();
+    };
+
+    const invalidateTargets = () => {
+      lastRefresh = 0;
+      targets = [];
     };
 
     const refreshTargets = (now: number) => {
@@ -180,10 +212,11 @@ export function useProximityMotion({ rootRef, disabled = false, suspended = fals
         if (!root.contains(target.element)) continue;
 
         const distance = distanceToRect(lastX, lastY, target.rect);
-        const proximity = clamp(1 - distance / radius, 0, 1);
-        const strength = proximity * (target.priority >= 3 ? 1.08 : 1);
+        const strength = clamp(1 - distance / radius, 0, 1) * (target.priority >= 3 ? 1 : 0.78);
 
-        if (strength > MIN_STRENGTH) ranked.push({ element: target.element, strength, priority: target.priority });
+        if (strength > MIN_STRENGTH) {
+          ranked.push({ element: target.element, strength, priority: target.priority });
+        }
       }
 
       ranked.sort((a, b) => b.strength * b.priority - a.strength * a.priority);
@@ -210,30 +243,26 @@ export function useProximityMotion({ rootRef, disabled = false, suspended = fals
 
     const handlePointerMove = (event: PointerEvent) => {
       if (!visible || document.hidden || event.pointerType === "touch") return;
+
+      const movedFarEnough = Math.abs(event.clientX - lastX) + Math.abs(event.clientY - lastY) >= 3;
       pointerInside = true;
-      const movedFarEnough = Math.abs(event.clientX - lastX) + Math.abs(event.clientY - lastY) >= 1;
       lastX = event.clientX;
       lastY = event.clientY;
+
       if (movedFarEnough) schedulePaint();
     };
 
     const handlePointerDown = (event: PointerEvent) => {
       if (!visible || document.hidden || event.pointerType === "touch") return;
+
+      const element = (event.target as Element | null)?.closest<HTMLElement>(TARGET_SELECTOR);
+      if (!element || !isVisibleTarget(root, element)) return;
+
       pointerInside = true;
       lastX = event.clientX;
       lastY = event.clientY;
-
-      // Do not run a proximity scan on click. The app action should win instantly.
-      const element = (event.target as Element | null)?.closest<HTMLElement>(TARGET_SELECTOR);
-      if (element && isVisibleTarget(root, element)) {
-        applyState(element, 1);
-        active.set(element, true);
-      }
-    };
-
-    const invalidateTargets = () => {
-      lastRefresh = 0;
-      targets = [];
+      applyState(element, 0.82);
+      active.set(element, true);
     };
 
     const handlePointerLeave = () => {
