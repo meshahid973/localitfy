@@ -215,6 +215,36 @@ import type {
 
 const SettingsCategoryContent = lazy(() => import("./SettingsCategoryContent"));
 
+const VISUAL_CUSTOMIZATION_DEFAULTS = {
+  homeBannerType: "dynamic",
+  blurEffects: "normal",
+  mediaCardBackground: "acrylic",
+  homeLayoutMode: "balanced",
+  libraryRowStyle: "comfyRows",
+  starsIntensity: "normal",
+  sidebarBehavior: "fixed",
+  playerBackgroundStyle: "coverBlur"
+} as const;
+
+function normalizeVisualChoice(value: unknown, allowed: readonly string[], fallback: string) {
+  return typeof value === "string" && allowed.includes(value) ? value : fallback;
+}
+
+function applyVisualCustomizationDefaults<T extends Record<string, any>>(settings: T): T {
+  return {
+    ...settings,
+    homeBannerType: normalizeVisualChoice(settings.homeBannerType, ["dynamic", "albumCover", "cleanBlack", "none"], VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType),
+    blurEffects: normalizeVisualChoice(settings.blurEffects, ["off", "subtle", "normal", "strong"], VISUAL_CUSTOMIZATION_DEFAULTS.blurEffects),
+    mediaCardBackground: normalizeVisualChoice(settings.mediaCardBackground, ["solid", "glassy", "acrylic", "oledFlat"], VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground),
+    homeLayoutMode: normalizeVisualChoice(settings.homeLayoutMode, ["compact", "balanced", "bigHero", "minimal"], VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode),
+    libraryRowStyle: normalizeVisualChoice(settings.libraryRowStyle, ["compactRows", "comfyRows", "coverCards", "listOnly"], VISUAL_CUSTOMIZATION_DEFAULTS.libraryRowStyle),
+    starsIntensity: normalizeVisualChoice(settings.starsIntensity, ["off", "subtle", "normal", "bright"], VISUAL_CUSTOMIZATION_DEFAULTS.starsIntensity),
+    sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
+    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "acrylic", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle)
+  };
+}
+
+
 function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
@@ -298,7 +328,7 @@ function MainModeApp() {
   const [bootStepIndex, setBootStepIndex] = useState(0);
   const [bootStage, setBootStage] = useState("starting localtify...");
   const [songs, setSongs] = useState<Song[]>([]);
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const [settings, setSettings] = useState<Settings>(() => applyVisualCustomizationDefaults(defaultSettings as Settings));
   const [heroMotion, setHeroMotion] = useState<"idle" | "expanding" | "compacting">("idle");
   const [homeEntranceSettled, setHomeEntranceSettled] = useState(false);
   const [isVolumeDragging, setIsVolumeDragging] = useState(false);
@@ -1102,7 +1132,7 @@ function MainModeApp() {
     () => buildAnimatedThemeVisualStyle(effectiveTheme, animatedThemeSeedRef.current),
     [effectiveTheme]
   );
-  const showStarBackdrop = effectiveTheme === "stars" && !settings.reducedMotion;
+  const showStarBackdrop = !settings.reducedMotion && (effectiveTheme === "stars" || (settings.starsIntensity || "normal") !== "off");
 
   useEffect(() => {
     setThemeMotionReady(false);
@@ -3562,11 +3592,11 @@ function MainModeApp() {
       const storedSettings = (payload.settings || {}) as Partial<Settings>;
       const shouldApplyV013Defaults = window.localStorage.getItem(V013_DEFAULTS_KEY) !== "true";
       const shouldApplyStartWithWindowsDefault = typeof storedSettings.startWithWindows === "undefined";
-      const nextSettings: Settings = {
+      const nextSettings: Settings = applyVisualCustomizationDefaults({
         ...defaultSettings,
         ...storedSettings,
         ...(shouldApplyV013Defaults ? V013_RELEASE_DEFAULTS : {})
-      };
+      } as Settings);
 
       if (shouldApplyStartWithWindowsDefault) {
         nextSettings.startWithWindows = true;
@@ -3588,11 +3618,22 @@ function MainModeApp() {
       const shouldRepairBootTheme = normalizedBootTheme !== nextSettings.theme;
       nextSettings.theme = normalizedBootTheme;
 
+      const shouldPersistVisualCustomizationDefaults =
+        nextSettings.homeBannerType !== storedSettings.homeBannerType ||
+        nextSettings.blurEffects !== storedSettings.blurEffects ||
+        nextSettings.mediaCardBackground !== storedSettings.mediaCardBackground ||
+        nextSettings.homeLayoutMode !== storedSettings.homeLayoutMode ||
+        nextSettings.libraryRowStyle !== storedSettings.libraryRowStyle ||
+        nextSettings.starsIntensity !== storedSettings.starsIntensity ||
+        nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior ||
+        nextSettings.playerBackgroundStyle !== storedSettings.playerBackgroundStyle;
+
       const shouldPersistBootSettings =
         shouldApplyV013Defaults ||
         shouldApplyStartWithWindowsDefault ||
         shouldRepairAnimatedVisualSettings ||
         shouldRepairBootTheme ||
+        shouldPersistVisualCustomizationDefaults ||
         typeof storedSettings.startWithWindows === "undefined";
 
       if (shouldPersistBootSettings) {
@@ -4759,6 +4800,19 @@ function MainModeApp() {
         clearCustomThemePreviewStyles();
       }
 
+      kickThemeSettle();
+    }
+
+    if (
+      key === "homeBannerType" ||
+      key === "blurEffects" ||
+      key === "mediaCardBackground" ||
+      key === "homeLayoutMode" ||
+      key === "libraryRowStyle" ||
+      key === "starsIntensity" ||
+      key === "sidebarBehavior" ||
+      key === "playerBackgroundStyle"
+    ) {
       kickThemeSettle();
     }
 
