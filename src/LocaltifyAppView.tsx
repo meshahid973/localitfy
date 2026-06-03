@@ -3559,7 +3559,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       data-card-background={settings.mediaCardBackground || "acrylic"}
       data-home-layout={settings.homeLayoutMode || "balanced"}
       data-library-row-style={settings.libraryRowStyle || "comfyRows"}
-      data-stars-intensity={settings.starsIntensity || "normal"}
+      data-stars-intensity={settings.starsIntensity || "subtle"}
       data-sidebar-behavior={settings.sidebarBehavior || "fixed"}
       data-player-background={settings.playerBackgroundStyle || "coverBlur"}
       data-hero-expanded={settings.heroExpanded ? "on" : "off"}
@@ -3569,6 +3569,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       data-secret-mode={secretMode}
       data-late-night={isThreeAm ? "on" : "off"}
       data-playing={isPlaying ? "on" : "off"}
+      data-app-backgrounded={isAppBackgrounded ? "on" : "off"}
       data-motion-level={settings.reducedMotion ? "reduced" : "smooth"}
       data-drag-title={draggedSongTitle}
     >

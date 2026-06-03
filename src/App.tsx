@@ -221,7 +221,7 @@ const VISUAL_CUSTOMIZATION_DEFAULTS = {
   mediaCardBackground: "acrylic",
   homeLayoutMode: "balanced",
   libraryRowStyle: "comfyRows",
-  starsIntensity: "normal",
+  starsIntensity: "subtle",
   sidebarBehavior: "fixed",
   playerBackgroundStyle: "coverBlur"
 } as const;
@@ -1132,7 +1132,7 @@ function MainModeApp() {
     () => buildAnimatedThemeVisualStyle(effectiveTheme, animatedThemeSeedRef.current),
     [effectiveTheme]
   );
-  const showStarBackdrop = !settings.reducedMotion && (effectiveTheme === "stars" || (settings.starsIntensity || "normal") !== "off");
+  const showStarBackdrop = !settings.reducedMotion && (effectiveTheme === "stars" || (settings.starsIntensity || "subtle") !== "off");
 
   useEffect(() => {
     setThemeMotionReady(false);
@@ -2330,6 +2330,56 @@ function MainModeApp() {
   };
 
   const coverToolsActive = view === "covers" || (view === "settings" && (settingsCategory === "covers" || settingsCategory === "advanced"));
+
+  useEffect(() => {
+    if (!ready || !coverToolsActive) return;
+
+    let cancelled = false;
+    let timeoutId = 0;
+    let idleId: number | null = null;
+
+    const run = () => {
+      loadPixelArtAssets(false)
+        .then((assets) => {
+          if (cancelled) return;
+          if (assets.length) {
+            setPixelArtAssets(assets);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setPixelArtAssets(getCachedRuntimePixelArtAssets());
+          }
+        });
+    };
+
+    const cache = pixelArtCacheRef.current;
+    const cacheFresh = cache.assets.length > 0 && Date.now() - cache.loadedAt < PIXEL_ART_CACHE_TTL_MS;
+
+    if (cacheFresh) {
+      if (cache.assets.length) setPixelArtAssets(cache.assets);
+      return;
+    }
+
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(run, { timeout: 1200 });
+    } else {
+      timeoutId = window.setTimeout(run, 220);
+    }
+
+    return () => {
+      cancelled = true;
+
+      if (idleId !== null && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [ready, coverToolsActive, loadPixelArtAssets]);
+
 
   const coverGalleryAssets = useMemo(() => {
     if (!coverToolsActive) return [];
@@ -3679,14 +3729,9 @@ function MainModeApp() {
         window.localitfy.savePlaylists(localPlaylists).catch(() => undefined);
       }
 
-      loadPixelArtAssets(false)
-        .then((assets) => {
-          if (!mounted) return;
-          setPixelArtAssets(assets);
-        })
-        .catch(() => {
-          if (mounted) setPixelArtAssets(getCachedRuntimePixelArtAssets());
-        });
+      // Pixel art folder scanning is intentionally lazy now.
+      // The cached fallback list is available immediately, and the real folder list loads only
+      // when the user opens cover tools or explicitly randomizes/rescans covers.
       bootedRef.current = true;
     }).catch((error) => {
       if (!mounted) return;
@@ -3707,7 +3752,7 @@ function MainModeApp() {
       mounted = false;
       if (bootStepTimer) window.clearInterval(bootStepTimer);
     };
-  }, [loadPixelArtAssets, bootRetryKey]);
+  }, [bootRetryKey]);
 
   useEffect(() => {
     if (!ready || !isThreeAm) return;

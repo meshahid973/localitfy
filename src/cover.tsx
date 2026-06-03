@@ -28,6 +28,8 @@ function CoverGalleryImage({ src, label }: { src: string; label: string }) {
           height={320}
           loading="lazy"
           decoding="async"
+          fetchPriority="low"
+          referrerPolicy="no-referrer"
           draggable={false}
           onLoad={() => setLoaded(true)}
           onError={() => {
@@ -175,7 +177,7 @@ function VirtualCoverSongList({
     count: songs.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 64,
-    overscan: 10,
+    overscan: 6,
     getItemKey: (index) => songs[index]?.id || index
   });
 
@@ -246,7 +248,7 @@ function VirtualCoverGalleryGrid({
     count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 286,
-    overscan: 4
+    overscan: 2
   });
 
   if (!entries.length) {
