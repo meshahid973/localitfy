@@ -1,7 +1,3 @@
-/* localtify 0.2.9 player ownership cleanup: bottom player/progress/volume styles live only in player.css. */
-/* localtify App.css — patch/feature layer.
-   Core layout/component styles were split into app-core.css for v0.2.8. */
-
 .muted-small{
   display: block;
   margin-top: 3px;
@@ -228,11 +224,6 @@
   width: 100%;
 }
 
-/* ========================================================================== 
-   localitfy 0.1.0 small Spotify-positioning pass
-   Safe CSS-only layout polish: bottom player spans the whole app, sidebar stays
-   clean, hero is less stretched, and cards line up more like a real music app.
-   ========================================================================== */
 
 .appShell{
   grid-template-columns: var(--sidebar-width, 249px) minmax(0, 1fr) !important;
@@ -311,14 +302,6 @@
 
 }
 
-/* ======================================================================
-   localitfy 0.1.1 — bugfix polish
-   - fixes scroll overlay/header bleed
-   - fixes card hover clipping
-   - makes custom theme one-accent only
-   - improves star easter egg spacing/quality
-   - keeps existing layouts and themes intact
-====================================================================== */
 
 /* The large greeting should scroll normally. Sticky made cards slide under it. */
 .headerBar{
@@ -468,42 +451,6 @@
     radial-gradient(circle at 48% 86%, rgba(var(--accent-2-rgb), 0.10), transparent 25%) !important;
 }
 
-.secretLayer.stars::before{
-  opacity: 0.34 !important;
-  background-image:
-    radial-gradient(circle at 9% 14%, rgba(255,255,255,.80) 0 1px, transparent 2px),
-    radial-gradient(circle at 27% 63%, rgba(var(--accent-rgb),.85) 0 1px, transparent 2px),
-    radial-gradient(circle at 55% 31%, rgba(255,255,255,.58) 0 1px, transparent 2px),
-    radial-gradient(circle at 78% 72%, rgba(var(--accent-rgb),.68) 0 1px, transparent 2px),
-    radial-gradient(circle at 92% 44%, rgba(255,255,255,.46) 0 1px, transparent 2px) !important;
-  background-size: 240px 210px !important;
-  animation: localitfyStarDriftSoft 28s linear infinite !important;
-}
-
-.secretLayer .starParticle{
-  left: var(--x) !important;
-  top: var(--y) !important;
-  width: var(--size) !important;
-  height: var(--size) !important;
-  opacity: var(--alpha, .72) !important;
-  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), .55)) !important;
-  animation: localitfyStarFloatV011 var(--duration, 18s) ease-in-out var(--delay, 0ms) infinite alternate !important;
-}
-
-.secretLayer .starParticle::before{
-  content: "✦" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  color: rgba(255,255,255,.86) !important;
-  font-size: var(--size) !important;
-  line-height: 1 !important;
-  text-shadow:
-    0 0 10px rgba(255,255,255,.35),
-    0 0 22px rgba(var(--accent-rgb),.50) !important;
-}
-
 .secretLayer .starParticleLarge::before{
   content: "✧" !important;
   color: var(--accent) !important;
@@ -515,25 +462,6 @@
   border: 1px solid rgba(var(--accent-rgb), 0.28) !important;
   background: rgba(6, 6, 8, 0.58) !important;
   box-shadow: 0 18px 60px rgba(0,0,0,0.32) !important;
-}
-
-@keyframes localitfyStarFloatV011 {
-  0% {
-    transform: translate3d(0, 0, 0) scale(.72);
-    opacity: calc(var(--alpha, .7) * .45);
-  }
-  42% {
-    opacity: var(--alpha, .7);
-  }
-  100% {
-    transform: translate3d(var(--dx, 24px), var(--dy, -24px), 0) scale(1.18);
-    opacity: calc(var(--alpha, .7) * .9);
-  }
-}
-
-@keyframes localitfyStarDriftSoft {
-  from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
-  to { background-position: 240px 210px, -180px 160px, 130px -190px, -220px -120px, 180px 240px; }
 }
 
 /* Safer mobile/tablet behaviour. */
@@ -553,11 +481,6 @@
   }
 }
 
-/* ======================================================================
-   localitfy 0.1.2 — drag-to-play-next + smoother motion polish
-   Safe CSS-only layer. Uses transform/opacity so it feels smoother without
-   expensive layout animations.
-====================================================================== */
 
 :root{
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
@@ -662,10 +585,6 @@
   --accent-2-rgb: var(--accent-2-rgb, var(--accent-rgb));
 }
 
-/* ======================================================================
-   localitfy 0.1.2 — small loading animations
-   lightweight: transform + opacity only, no expensive blur on scroll lists
-====================================================================== */
 
 .appToast{
   position: fixed;
@@ -807,15 +726,6 @@
   }
 }
 
-/* ======================================================================
-   localitfy 0.1.2 — integrated App.css animation polish
-   Hero text lift, cleaner song-change motion, card hover polish, safer
-   player animations, and reduced-motion support.
-
-   This belongs at the bottom of App.css because App.tsx imports App.css
-   before themes.css / motion.css. Selectors are intentionally scoped with
-   .app so these rules stay stable even when later CSS files are loaded.
-====================================================================== */
 
 .app{
   --hero-title-lift: -0.065em;
@@ -909,10 +819,6 @@
   }
 }
 
-/* ======================================================================
-   localitfy 0.1.3 — cinematic song-change + import scanner polish
-   Safe visual-only patch. Works with the App.tsx keys/states added above.
-====================================================================== */
 
 .app{
   --cinematic-ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -1687,13 +1593,6 @@ html{
   transform: translateZ(0);
 }
 
-/* ======================================================================
-   localitfy 0.1.3 — SAFE drag/resize smoothness patch
-   ----------------------------------------------------------------------
-   This fixes the resize/drag lag without touching the reverted hero design.
-   Main change: resize uses live CSS vars instead of re-rendering the app
-   on every pointer move.
-====================================================================== */
 
 .app{
   --player-size-used: var(--player-size-live, var(--player-size, 108px));
@@ -1826,12 +1725,6 @@ body.localitfySongDragging .songRow{
   width: 3px;
 }
 
-/* ======================================================================
-   localitfy 0.1.3 — lag guard for drag/resize
-   ----------------------------------------------------------------------
-   Keeps dragging/resizing responsive by disabling expensive ambient surfaces
-   only while the user is actively dragging/resizing.
-====================================================================== */
 
 body.isResizingSidebar .ambientSurface::before{
   animation: none !important;
@@ -1851,12 +1744,6 @@ body.isResizingSidebar{
   text-rendering: optimizeSpeed;
 }
 
-/* ======================================================================
-   localitfy 0.1.3 — first-run onboarding
-   ----------------------------------------------------------------------
-   Separate React component, app-matching OLED styling, no gradient UI.
-   It only calls the existing import button flow or opens the Downloads tab.
-====================================================================== */
 
 .onboardingLayer{
   position: fixed;
@@ -2082,7 +1969,6 @@ body.isResizingSidebar{
   }
 }
 
-/* ======================================================================\n   localitfy 0.1.3 — onboarding v2\n   Append this at the VERY BOTTOM of App.css.\n   Dark app-style UI, no gradient panels, low-lag transform/opacity motion only.\n====================================================================== */
 
 .onboardingLayer{
   position: fixed;
@@ -2742,10 +2628,6 @@ body.isResizingSidebar{
   }
 }
 
-/* ======================================================================
-   localitfy 0.1.3 — onboarding v2 final polish
-   flat app-style onboarding, working buttons, no gradient UI
-====================================================================== */
 
 .onboardingLayer{
   position: fixed !important;
@@ -3394,13 +3276,6 @@ body.isResizingSidebar{
   }
 }
 
-/* ======================================================================
-   localitfy 0.1.5 — lag-safe interaction + smoother tiny motion pass
-   ----------------------------------------------------------------------
-   This is intentionally override-only. It does not move the player, sidebar,
-   home layout, or settings layout. It only reduces expensive paints during
-   active interactions and smooths common button/card transitions.
-====================================================================== */
 
 .app{
   -webkit-font-smoothing: antialiased;
@@ -3442,15 +3317,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   animation: none !important;
 }
 
-/* ======================================================================
-   localitfy 0.1.5 — flat black customization layer
-   ----------------------------------------------------------------------
-   Purpose:
-   - removes gradient-looking UI from the app chrome
-   - keeps album art/images untouched
-   - creates clean variables for future customization
-   - disables expensive ambient glow layers that caused theme/scroll lag
-====================================================================== */
+
 :root{
   --flat-bg: #000000;
   --flat-bg-soft: #030303;
@@ -3582,11 +3449,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 @keyframes whatsNewPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 980px){   .statusGrid{ grid-template-columns: 1fr; }   }
 
-/* ======================================================================
-   localitfy 0.1.5 — settings open + warning cleanup patch
-   Keeps the settings modal above every app layer and styles the restored
-   playlist/queue controls that are now used in App.tsx.
-====================================================================== */
 
 /* Keep expensive layers contained so motion stays smooth while scrolling. */
 
@@ -3598,15 +3460,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 /* Do not hide ambience/glow during dragging or theme changes. Just keep it contained. */
 
-/* ========================================================================== 
-   localtify 0.2.0 — cover studio base cleanup
-   Fullscreen now playing removed; cover studio styling lives in home.css.
-   ========================================================================== */
-
-/* ========================================================================== 
-   localtify 0.2.0 — final library tools spacing repair
-   Fixes the library tools line/buttons merging together after the split.
-   ========================================================================== */
 
 .libraryUtilityBar{
   width: 100%;
@@ -3685,7 +3538,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   }
 }
 
-/* localtify 0.2.0 — cleaner what's new popup only */
+
 .whatsNewOverlay{
   background: rgba(0, 0, 0, 0.68);
   backdrop-filter: blur(16px) saturate(115%);
@@ -3787,7 +3640,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   border-radius: 13px;
 }
 
-/* localtify 0.2.0 — edit track modal polish, no gradient version */
+
 .editorModalWrap{
   padding: 26px !important;
   align-items: center !important;
@@ -4120,7 +3973,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   }
 }
 
-/* 0.2.0 library shuffle + editor cleanup */
+
 .libraryPanelHead{
   align-items: center;
   gap: 14px;
@@ -4195,8 +4048,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   }
 }
 
-/* v0.20.1 bottom player visualizer restore
-   Kept plain/translucent: no gradient, no extra decoration. */
 
 @media (max-width: 980px){
   
@@ -4208,11 +4059,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   
 }
 
-/* ======================================================================
-   localtify v0.2.3 — Kopuz-inspired App.css shell polish
-   Clean dark glass, smoother motion, themed accents, and preserved ambience.
-   This is intentionally appended: no class names changed, no ambience removed.
-====================================================================== */
 
 .app{
   --kopuz-panel: rgba(255, 255, 255, 0.045);
@@ -4655,13 +4501,6 @@ input[type="range"]{
   }
 }
 
-/* ========================================================================== 
-   localtify v0.2.3 — Kopuz-style sidebar scale + accent glass polish
-   --------------------------------------------------------------------------
-   Bigger left navigation with icon blocks, controlled accent hover, and no
-   gray-heavy library/sidebar hover. Ambience is not removed; this only tunes
-   the shell and navigation behavior.
-   ========================================================================== */
 
 .app{
   --kopuz-sidebar-ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -4923,15 +4762,6 @@ input[type="range"]{
   }
 }
 
-/* ======================================================================
-   localtify 0.2.3 — sidebar no-box cleanup
-   ----------------------------------------------------------------------
-   Fixes the over-boxed Kopuz-style sidebar pass:
-   - removes the fake Local / Server segmented control
-   - removes the boxed brand card
-   - removes boxed/tilted nav icons
-   - keeps larger readable nav rows with accent-tinted hover only
-====================================================================== */
 
 .sidebarModeSwitch{
   display: none !important;
@@ -5133,13 +4963,6 @@ input[type="range"]{
   }
 }
 
-/* ======================================================================
-   localtify v0.2.4 — clean Kopuz sidebar + motion repair
-   ----------------------------------------------------------------------
-   This layer removes the heavy brand card/segmented controls and keeps the
-   sidebar closer to Kopuz: large rows, plain icons, active rail, soft hover.
-   It also restores page motion without touching titlebar/player.
-====================================================================== */
 
 .app{
   --kopuz-sidebar-width: var(--sidebar-width-live, var(--sidebar-width, 236px));
@@ -5407,11 +5230,7 @@ input[type="range"]{
   margin-top: 4px !important;
 }
 
-/* ======================================================================
-   localtify v0.2.4 — lucide icon + bold Space Grotesk polish
-   Keeps the Kopuz-ish clean sidebar, removes emoji/icon-box feeling, and
-   makes the typography heavier without changing app structure.
-====================================================================== */
+
 :root{
   --font-display: "Space Grotesk", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-body: "Space Grotesk", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -5533,11 +5352,7 @@ body{
   flex: 0 0 auto !important;
 }
 
-/* ======================================================================
-   localtify v0.2.4 — static icon/sidebar cleanup
-   Motion is intentionally owned by motion.css. This block only defines shape,
-   color, size, and the filled-lucide look.
-====================================================================== */
+
 :root{
   --font-display: "Space Grotesk", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-body: "Space Grotesk", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -5718,12 +5533,7 @@ body{
   transform: none !important;
 }
 
-/* ======================================================================
-   localtify v0.2.3 — clean lucide sidebar final pass
-   - icons are softer, filled lightly, and not thick/bold
-   - no icon boxes, no heavy glow, no tilt
-   - this is static styling only; page/row motion stays in motion.css/home.css
-====================================================================== */
+
 .app .sidebar .logoWrap{
   display: none !important;
 }
@@ -5823,14 +5633,7 @@ body{
   text-transform: lowercase !important;
 }
 
-/* ======================================================================
-   localtify v0.2.4 — remove bottom visualizer + tighten player position
-   ----------------------------------------------------------------------
-   The visualizer was creating the dotted pill under volume. Keep volume and
-   idle/playing status only, with stable right-side spacing.
-====================================================================== */
 
-/* v0.2.3 Kopuz-style cleanup: settings is now a normal page, player controls are circular, no heavy boxed control backdrop. */
 .app{
   --control-circle: 42px;
   --control-circle-main: 48px;
@@ -5947,7 +5750,7 @@ body{
   transform: translateX(1px);
 }
 
-/* === localtify v0.2.4 background orb removal + theme-owned sidebar === */
+
 /*
   Final background cleanup:
   - no floating ambience/orb blobs behind the app
@@ -6086,13 +5889,8 @@ html{
   max-width: 120% !important;
   max-height: 120% !important;
 }
-/* ======================================================================
-   localtify v0.2.4 — THEME SURFACE PASS / NO BACKGROUND ORBS
-   - every formerly black app area now follows the active theme
-   - sidebar/top/content/player backgrounds are theme-tinted, not black
-   - sidebar icons stay clean white instead of changing with every theme
-   - global ambience/orb effects are removed; album-cover ambience stays
-====================================================================== */
+
+
 :root{
   --theme-accent: var(--accent, #8dffce);
   --theme-accent-2: var(--accent-2, var(--theme-accent));
@@ -6247,15 +6045,6 @@ html{
   transform: scale(1.02) !important;
 }
 
-/* ======================================================================
-   localtify v0.2.4 — FINAL theme-surface fix
-   Purpose:
-   - stop sidebar/main page from staying pure black
-   - make large app surfaces follow the selected theme color
-   - keep sidebar icons white
-   - remove background ambience/orb layers only
-   - keep album/cover ambience available through coverAura
-====================================================================== */
 
 :root{
   --localtify-page-bg: color-mix(in oklab, var(--bg, #050505) 78%, var(--accent, #ff65df) 12%);
@@ -6402,7 +6191,7 @@ button:hover,
   box-shadow: 0 0 12px color-mix(in oklab, var(--accent, #ff65df) 14%, transparent) !important;
 }
 
-/* v0.2.4 polish patch: remove useless hero noise, make theme color reach the whole shell, and keep icons clean. */
+
 .app[data-theme]{
   background:
     linear-gradient(180deg,
@@ -6473,13 +6262,6 @@ button:hover,
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent, #ff6edb) 22%, transparent) !important;
 }
 
-/* ======================================================================
-   localtify v0.2.4 — low-lag theme/color painting patch
-   ----------------------------------------------------------------------
-   Color pickers update CSS variables instantly now. While the user is
-   dragging a color picker, this disables expensive transitions, blur glow,
-   and huge shadow repaints so the app does not freeze/stutter.
-====================================================================== */
 
 body.localitfyThemePainting .app{
   transition: none !important;
@@ -6559,18 +6341,6 @@ body.localitfyThemePainting .app :where(.content, .simpleShell, .songList, .home
   transform: translate3d(0, -1px, 0);
 }
 
-/* ==========================================================================
-   localtify v0.2.4 performance patch — merged from performance.css
-   Keep this at the bottom of App.css so it wins safely.
-========================================================================== */
-
-/* ======================================================================
-   localtify v0.2.4 — import-last performance layer
-   ----------------------------------------------------------------------
-   Keep this file imported LAST in App.tsx. It is intentionally small and
-   safe: no class names changed, no layout migration, only paint/render
-   reduction for big libraries and custom color changes.
-====================================================================== */
 
 .app .content{
   overscroll-behavior: contain;
@@ -6658,12 +6428,6 @@ body.localitfyThemePainting .app *{
   transform: translate3d(0, -1px, 0);
 }
 
-/* ======================================================================
-   localtify v0.2.4 — sidebar line pass
-   Purpose: Kopuz-inspired sidebar structure without adding extra pages.
-   Keeps current nav items only: home, library, liked, covers, analytics,
-   downloads, settings.
-====================================================================== */
 
 .appShell{
   grid-template-columns: var(--sidebar-width-live, var(--sidebar-width, 236px)) minmax(0, 1fr);
@@ -6862,12 +6626,7 @@ body.localitfyThemePainting .app *{
   }
 }
 
-/* ======================================================================
-   v0.2.4 sidebar polish — Kopuz-inspired, localtify-shaped
-   - keeps your current nav items only
-   - fixes the divider fading away
-   - makes icons thicker/cleaner without moving the whole app
-====================================================================== */
+
 .sidebar{
   --sidebar-line: rgba(var(--accent-rgb), 0.16);
   --sidebar-line-soft: rgba(255, 255, 255, 0.075);
@@ -6978,13 +6737,7 @@ body.localitfyThemePainting .app *{
   box-shadow: 0 18px 38px rgba(var(--accent-rgb), 0.26);
 }
 
-/* ======================================================================
-   localtify v0.2.4 — sidebar line + filled icon final pass
-   ----------------------------------------------------------------------
-   This is intentionally late because settings.css/home.css had older sidebar
-   guards. It keeps your current localtify sidebar, fixes the fading divider,
-   and makes the icons feel filled/thicker without adding Kopuz's extra pages.
-====================================================================== */
+
 .app .sidebar{
   --sidebar-solid-line: color-mix(in oklab, var(--accent, #a98cff) 20%, rgba(255,255,255,.10));
   background:
@@ -7052,7 +6805,7 @@ body.localitfyThemePainting .app *{
   mask-image: none !important;
 }
 
-/* localtify v0.2.5 layout guard: keep the main page scrollable */
+
 .appShell .content{
   min-height: 0;
   overflow-y: auto;
@@ -7065,10 +6818,7 @@ body.localitfyThemePainting .app *{
   min-height: 0;
 }
 
-/* ======================================================================
-   localtify v0.2.5 — clean background + faster first paint
-   Removes the tiled grid overlay and keeps a calm theme glow instead.
-====================================================================== */
+
 html{
   background: var(--app-bg-solid, var(--bg, #050505)) !important;
   background-image: none !important;
@@ -7102,7 +6852,7 @@ html{
   contain: layout paint style;
 }
 
-/* v0.2.5 fast clean background pass */
+
 :root{
   --theme-page-bg: radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb, 255, 105, 180), 0.10), transparent 34%),
     radial-gradient(circle at 88% 12%, rgba(var(--accent-2-rgb, 128, 92, 255), 0.10), transparent 34%),
@@ -7144,10 +6894,6 @@ html{
   background-size: auto !important;
 }
 
-/* ==========================================================================
-   localtify v0.2.5 smooth motion support
-   Keeps layout stable while motion.css handles the actual animations.
-   ========================================================================== */
 
 .app{
   --motion-spring: cubic-bezier(0.18, 0.92, 0.2, 1.16);
@@ -7196,7 +6942,7 @@ html{
   box-shadow: 0 18px 42px color-mix(in srgb, var(--accent, #ff65c8) 10%, transparent);
 }
 
-/* v0.2.5 actual class hooks */
+
 .hero,
 .homeShelfPanel,
 .homeLibraryPanel,
@@ -7222,7 +6968,7 @@ html{
   transition-timing-function: var(--motion-smooth);
 }
 
-/* v0.2.5 skeleton loading + Cover Color Sync base variables */
+
 .app[data-cover-sync="off"]{
   --cover-sync-strength: 0;
   --cover-sync-hero-opacity: 0;
@@ -7438,7 +7184,7 @@ html{
   }
 }
 
-/* v0.2.5 clean surface patch: keep ambience, remove the visible blueprint/grid layer. */
+
 .app{
   background-image: none !important;
 }
@@ -7446,11 +7192,8 @@ html{
 .app::before{
   background: none !important;
 }
-/* ======================================================================
-   localtify v0.2.6 — easter egg modes
-   Cheap motion only: opacity/transform/background-color. No hover tilt and
-   no heavy blur animation.
-   ====================================================================== */
+
+
 .app.secret-fast{
   --localtify-motion-speed: 0.62;
 }
@@ -7487,29 +7230,10 @@ html{
   animation: localtifyFastSweep 1100ms linear infinite;
 }
 
-.secretLayer.playBounce .secretAura{
-  background:
-    radial-gradient(circle at 50% calc(100% - 72px), rgba(236, 82, 255, .28), transparent 34%),
-    radial-gradient(circle at 50% 50%, rgba(168, 85, 247, .12), transparent 45%);
-  opacity: .85;
-}
-
 @keyframes localtifyFastSweep{
   0%{ transform: translate3d(-18px, 0, 0); opacity: .45; }
   50%{ transform: translate3d(18px, 0, 0); opacity: .75; }
   100%{ transform: translate3d(-18px, 0, 0); opacity: .45; }
-}
-
-.secretLayer.disco span,
-.secretLayer.fast span,
-.secretLayer.playBounce span{
-  opacity: .55;
-  transform-origin: center;
-  animation: localtifyEggDotBounce 1400ms cubic-bezier(.18,1.35,.35,1) infinite;
-}
-
-.secretLayer.playBounce span{
-  animation-duration: 680ms;
 }
 
 .secretLayer.fast span{
@@ -7569,7 +7293,7 @@ html{
   100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-/* localtify v0.2.6 — keyboard easter egg cleanup */
+
 .secretLayer.night{
   background: transparent !important;
 }
@@ -7596,7 +7320,7 @@ html{
   opacity: 0.16;
 }
 
-/* localtify v0.2.6 — reliable keyboard easter eggs + clean white starfield */
+
 .secretLayer.stars{
   background: transparent !important;
   mix-blend-mode: normal !important;
@@ -7664,11 +7388,7 @@ html{
   animation: none !important;
 }
 
-/* ======================================================================
-   localtify v0.2.6 — ACTUAL working keyboard easter eggs
-   Fixes the old issue where commands were detected but the visual layer
-   faded to opacity: 0 before anything useful happened.
-   ====================================================================== */
+
 .app .secretLayer{
   position: fixed !important;
   inset: 0 !important;
@@ -7882,14 +7602,6 @@ html{
   100%{ opacity: 0; }
 }
 
-/* PPP: visible bottom-center pulse, while the actual play button bounces in player.css. */
-.app .secretLayer.playBounce::before{
-  opacity: .92 !important;
-  background:
-    radial-gradient(circle at 50% calc(100% - 74px), rgba(var(--accent-rgb), .34), transparent 19%),
-    radial-gradient(circle at 50% calc(100% - 74px), rgba(255,255,255,.14), transparent 32%) !important;
-  animation: localtifyPlayPulseWorking 760ms cubic-bezier(.18, 1.55, .28, 1) both !important;
-}
 
 @keyframes localtifyPlayPulseWorking{
   0%{ transform: scale(.78); opacity: 0; }
@@ -7901,10 +7613,7 @@ html{
   display: none !important;
 }
 
-/* ======================================================================
-   localtify v0.2.6 — final easter egg cleanup
-   No ambience orbs. Commands either toggle (night/stars) or fade away.
-   ====================================================================== */
+
 .app .secretLayer{
   position: fixed !important;
   inset: 0 !important;
@@ -7937,17 +7646,6 @@ html{
   inset: 0 !important;
   pointer-events: none !important;
   border-radius: 0 !important;
-}
-
-.app .secretLayer.night::before,
-.app .secretLayer.night::after,
-.app .secretLayer.playBounce::before,
-.app .secretLayer.playBounce::after{
-  display: none !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  filter: none !important;
-  animation: none !important;
 }
 
 .app.secret-night::after{
@@ -8116,10 +7814,7 @@ html{
   100%{ opacity: .66; text-shadow: 0 0 6px rgba(255,255,255,.34); }
 }
 
-/* ======================================================================
-   localtify v0.2.6 — downloads buttons + secret overlay placement cleanup
-   Keeps the theme/blur, removes accidental white outlines and bad sizing.
-====================================================================== */
+
 .titleBar{
   position: relative !important;
   z-index: 6200 !important;
@@ -8281,7 +7976,7 @@ html{
   }
 }
 
-/* === v0.2.6 final readability / theme safety patch === */
+
 /* no grid overlay anywhere: keep theme color + ambience, remove the repeated line pattern */
 .app,
 .app::before,
@@ -8424,8 +8119,7 @@ button svg,
   filter: grayscale(0.25) !important;
 }
 
-/* v0.2.6 performance stability guard
-   Keeps the same look, but stops expensive layout/filter animations from firing during normal UI work. */
+
 .app,
 .app * {
   transition-property: background-color, border-color, color, box-shadow, opacity, transform;
@@ -8480,7 +8174,7 @@ button{
   touch-action: none;
 }
 
-/* v0.2.6 load/perf guard: preserve design, reduce offscreen work. */
+
 .homeAlbumCard,
 .songRow,
 .panel,
@@ -8498,11 +8192,7 @@ button{
   content-visibility: visible;
 }
 
-/* ======================================================================
-   localtify v0.2.6 emergency layout fix
-   Fixes the tiny-window blank gap: when the sidebar is hidden, content and
-   player must move back to column 1 instead of staying in the old sidebar grid.
-====================================================================== */
+
 .compactQuickNav{
   display: none;
 }
@@ -8614,7 +8304,7 @@ button{
   }
 }
 
-/* localtify v0.2.6 cleanup guards */
+
 .secretRibbon,
 .secretDevPanel{
   display: none !important;
@@ -8634,11 +8324,6 @@ button{
   scroll-padding-bottom: 128px !important;
 }
 
-/* ======================================================================
-   localtify v0.2.8 — lighter screen switching
-   While users spam-click pages, pause decorative ambience and avoid expensive
-   hover/glow work. This keeps the feel smooth without removing motion.
-====================================================================== */
 
 .app.viewSwitching .content,
 .app.viewSwitching .mainContent,
@@ -8685,9 +8370,7 @@ button{
   will-change: auto !important;
 }
 
-/* ======================================================================
-   localtify v0.2.8 — logo, no grid background, smoother sidebar icons
-   ====================================================================== */
+
 .app,
 .app::before,
 .app::after,
@@ -8785,7 +8468,7 @@ button{
   100%{ transform: scale(1); }
 }
 
-/* localtify 0.2.9: final sidebar/icon safety + no grid background */
+
 .app,
 .app::before,
 .app::after,
@@ -8916,7 +8599,7 @@ button{
   object-fit: contain !important;
 }
 
-/* 0.2.8 screen-switching performance guard */
+
 .app.viewSwitching .ambientSurface,
 .app.viewSwitching .heroShell,
 .app.viewSwitching .settingsPage,
@@ -8941,9 +8624,7 @@ button{
   will-change: auto;
 }
 
-/* ========================================================================== 
-   localtify 0.2.9 — cleaner public toasts
-========================================================================== */
+
 .app .appToast{
   top: 58px !important;
   right: 22px !important;
@@ -9020,7 +8701,7 @@ button{
   }
 }
 
-/* localtify 0.2.9 — keep global shell clean; music-reactive visuals live in effects.css */
+
 .app,
 .app::before,
 .app::after,
@@ -9037,11 +8718,7 @@ button{
   --grid-line: transparent;
 }
 
-/* ======================================================================
-   localtify v0.2.8 — real narrow-window gap fix
-   Keeps the desktop layout the same, but stops the mobile/tiny-window view
-   from reserving a fake scrollbar gutter and bottom player space.
-====================================================================== */
+
 @media (max-width: 760px){
   html,
   body,
@@ -9112,17 +8789,14 @@ button{
   
 }
 
-/* localtify 0.2.9: keep the player glow stable while live custom colors change */
+
 body.localitfyThemePainting .app .coverAura::before,
 body.localitfyThemePainting .app .ambientSurface::after{
   opacity: .46 !important;
   filter: blur(28px) saturate(1.08) !important;
 }
 
-/* ========================================================================
-   localtify 0.2.9 — app shell grid background removal
-   Keep this near the end of App.css; effects.css has the final override.
-======================================================================== */
+
 .app,
 .appShell,
 .content,
@@ -9152,10 +8826,7 @@ body.localitfyThemePainting .app .ambientSurface::after{
   background-size: auto !important;
 }
 
-/* ========================================================================
-   localtify 0.2.9 — final global grid kill + smoother paint budget
-   This removes leftover graph-paper/grid textures without touching features.
-======================================================================== */
+
 .app,
 .appShell,
 .mainView,
@@ -9229,11 +8900,7 @@ body.localitfyThemePainting .app :where(.homeAlbumCard,.songRow,.libraryCard,.so
   filter: none !important;
 }
 
-/* ========================================================================
-   localtify 0.2.9 — final app surface cleanup + idle paint guard
-   This removes the remaining graph-paper/grid background lines from app
-   surfaces without touching player ownership.
-======================================================================== */
+
 html,
 body,
 #root,
@@ -9339,9 +9006,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   }
 }
 
-/* localtify 0.2.9 — fast section switching + final no-grid safety
-   Keep this at the end of App.css so older duplicated background and page
-   transition rules cannot make navigation feel delayed again. */
+
 .app{
   background-color: var(--app-bg-solid, var(--bg, #000)) !important;
   background-image:
@@ -9411,8 +9076,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   contain-intrinsic-size: 720px;
 }
 
-/* v0.2.8 lag + sidebar cleanup
-   App shell owns the background and sidebar only. No grid texture lives here. */
+
 .app,
 .app::before,
 .app::after,
@@ -9535,7 +9199,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
     #000 !important;
 }
 
-/* v0.2.9 final no-grid / no-tilt guardrail */
+
 html,
 body,
 #root,
@@ -14672,30 +14336,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
    Keep /stars and /yukari. Disable old heavy joke layers and old card proximity.
 ======================================================================== */
 
-/* Old heavy secret modes are removed/hidden. */
-.app.secret-disco,
-.app.secret-pulse,
-.app.secret-vinyl,
-.app.secret-rain,
-.app.secret-night,
-.app.secret-fast,
-.app.secret-playBounce,
-.app.secret-arcadeGhost,
-.secretLayer.disco,
-.secretLayer.pulse,
-.secretLayer.vinyl,
-.secretLayer.rain,
-.secretLayer.night,
-.secretLayer.fast,
-.secretLayer.playBounce,
-.secretLayer.arcadeGhost,
-.lateNightNoteLayer,
-.lateNightWarning,
-.misideEggNotice,
-.misideWhisper{
-  display: none !important;
-  animation: none !important;
-}
 
 /* Proximity motion is buttons/nav/player only now. Never cards/settings/rows. */
 :is(
@@ -14751,5 +14391,71 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 /* Keep button proximity subtle. */
 .localtifyProximityActive:is(button,[role="button"],.navItem,.mainAction,.heroMain,.heroGhost,.softButton,.playerButton,.circleButton){
   transform: scale(var(--prox-scale, 1)) translateZ(0) !important;
+}
+
+
+/* ==========================================================================
+   localtify v0.3.6 V216 — App.css owner cleanup final guard
+   Owner: shell/sidebar/modals/global only.
+   Heavy old joke layers stay disabled; /stars and /yukari stay enabled.
+========================================================================== */
+
+/* App.css should not style bottom-player internals. Leave the real player to player.css. */
+.app .playerBar > :where(.playerLeft,.playerCenter,.playerRight,.controlRow,.progressRow,.volumeWrap){
+  contain: layout style !important;
+}
+
+/* Removed old heavy secret modes. Keep the DOM harmless if stale state appears. */
+.app :where(
+  .secretLayer.arcadeGhost,
+  .lateNightNoteLayer,
+  .lateNightWarning,
+  .misideWhisper,
+  .misideEggNotice
+){
+  display: none !important;
+  animation: none !important;
+  pointer-events: none !important;
+}
+
+/* Keep valid secret layers only. */
+.app .secretLayer:not(.stars):not(.yukari){
+  display: none !important;
+}
+
+/* Stop old proximity classes from affecting cards/settings if stale CSS remains. */
+.app :where(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingSwitchCard,
+  .settingsResetButton,
+  .settingsChoice,
+  .coverSyncChoice,
+  .songRow,
+  .libraryCard,
+  .libraryCardV025,
+  .coverTile,
+  .coverGalleryCard
+).localtifyProximityActive{
+  transform: none !important;
+  box-shadow: inherit !important;
+  background-image: inherit !important;
+}
+
+/* Final sidebar icon safety from V213. */
+.sidebar .navItem::before,
+.sidebar .navItem::after,
+.sidebar .navIcon::before,
+.sidebar .navIcon::after{
+  content: none !important;
+  display: none !important;
+}
+
+.sidebar .navIcon,
+.sidebar .navItem.active .navIcon,
+.sidebar .navItem:hover .navIcon{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 

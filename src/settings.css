@@ -1275,13 +1275,8 @@
     border-bottom: 1px solid rgba(255,255,255,0.075);
   }
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-
-/* ======================================================================
-   localtify v0.2.6 — settings spacing + simple polish on top of current layout
-====================================================================== */
 .app .settingsThemeGrid,
 .app .optionGrid,
 .app .settingsMiniGrid,
@@ -1362,10 +1357,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 
-/* ======================================================================
-   localtify 0.2.6 — settings hover cleanup + cleaner switch cards
-   Keeps the Kopuz-style spacing, but removes the weird blurry hover bloom.
-   ====================================================================== */
 .settingsPage button,
 .kopuzSettingsPage button,
 .settingsModal button,
@@ -1500,14 +1491,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 
-/* ======================================================================
-   localtify v0.2.6 — no-tilt motion + simple settings rows
-   Rules:
-   - no hover tilt / no rotate on cards
-   - bouncy motion only uses translate + scale
-   - settings rows stay title + description + control
-   - no expensive blur changes on hover
-   ====================================================================== */
 .settingsPage,
 .kopuzSettingsPage,
 .settingsModal,
@@ -1684,11 +1667,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-
-/* ======================================================================
-   localtify v0.2.6 — simple settings theme area + no settings ambience
-   Keeps app/home ambience untouched. Settings becomes clean, readable, and flat.
-   ====================================================================== */
 
 .settingsPage,
 .kopuzSettingsPage{
@@ -2082,13 +2060,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-/* ======================================================================
-   localtify v0.2.6 — settings spacing + cover sync cleanup
-   - removes settings-only orb / bloom ambience
-   - fixes Cover Color Sync text wrapping vertically
-   - reduces the big empty gap by making top settings cards stretch evenly
-   - keeps hover simple: slight lift + soft border, no tilt, no blur bloom
-   ====================================================================== */
 
 .settingsPage,
 .kopuzSettingsPage{
@@ -2295,7 +2266,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-/* === v0.2.6 settings theme lock/readability === */
+
 .themePickerLockNoteV026 {
   margin: 8px 0 0 !important;
   color: rgba(255,255,255,.62) !important;
@@ -2309,7 +2280,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   opacity: .55 !important;
 }
 
-/* v0.2.6 settings stability: simple rows, no ambience/orb layers, no heavy hover blur. */
+
 .settingsView,
 .settingsShell,
 .settingsGrid,
@@ -2387,10 +2358,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 
-/* ======================================================================
-   localtify v0.2.6 — settings stability / Discord visibility
-   No orbs, no huge hover blur, no weird spacing.
-====================================================================== */
 .settingsHero::before,
 .settingsPanelCard::before,
 .settingsPageCard::before,
@@ -2434,7 +2401,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   line-height: 1.35 !important;
 }
 
-/* v0.2.6 Discord privacy visibility + icon readability */
+
 .settingsCategoryButton .settingsLucideIcon,
 .settingsCategoryButton svg,
 .cleanSettingsModal svg {
@@ -2456,11 +2423,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 
-/* ======================================================================
-   localtify v0.2.6 quick settings polish
-   Makes settings easier to scan: smaller hero, obvious quick controls, and
-   cleaner mobile spacing.
-====================================================================== */
 .settingsPage,
 .kopuzSettingsPage{
   gap: 14px !important;
@@ -2587,10 +2549,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-/* ======================================================================
-   localtify v0.2.8 — Discord RPC controls in the real Settings page
-   Keeps the controls easy to find without adding another top quick nav.
-====================================================================== */
+
 .settingsDiscordRpcPageCard{
   contain: layout paint;
   scroll-margin-top: 18px;
@@ -2751,11 +2710,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-/* ======================================================================
-   localtify v0.2.7 — settings category sidebar + search
-   This makes the actual Settings screen use the same visible Discord panel,
-   instead of the old one-long-page settings layout.
-====================================================================== */
 
 .settingsPageV027{
   display: grid !important;
@@ -3143,9 +3097,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   filter: none !important;
 }
 
-/* ======================================================================
-   localtify v0.2.7 — settings category polish / public copy cleanup
-   ====================================================================== */
+
 .settingsPageV027,
 .settingsPage{
   max-width: 1480px !important;
@@ -3334,7 +3286,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-/* localtify v0.2.7 — custom theme controls restored in the new Settings page */
+
 .customThemeManagerV027{
   gap: 18px !important;
 }
@@ -3539,7 +3491,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-/* localtify 0.2.7: settings sidebar scroll + public release text layout guard */
+
 .settingsPage,
 .settingsPage::before,
 .settingsPage::after,
@@ -3663,7 +3615,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-/* 0.2.7 update page + safer reset controls */
+
 .settingsUpdatePanel,
 .settingsResetPanel{
   overflow: hidden;
@@ -3813,11 +3765,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-/* ======================================================================
-   localtify 0.2.7 settings cleanup
-   Purpose: remove the heavy outlined/boxed look, make custom theme colors
-   click like real color swatches, and keep the page easier to scan.
-====================================================================== */
+
 .settingsCategorySurfaceV027{
   background: rgba(7, 6, 14, .58) !important;
   border: 0 !important;
@@ -4040,9 +3988,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   min-width: 0 !important;
 }
 
-/* localtify 0.2.9 — cleaner custom theme editor
-   This only touches the Appearance > Custom theme area. It keeps the same JSX/classes,
-   but removes the heavy stacked-box look and makes presets + color tokens easier to scan. */
+
 .settingsCategoryContentV027 .customThemeManagerV027,
 .settingsCategoryPage .customThemeManagerV027{
   position: relative !important;
@@ -4518,7 +4464,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
     grid-template-columns: 1fr !important;
   }
 }
-
 
 
 /* ======================================================================
@@ -5016,7 +4961,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
     text-align: left !important;
   }
 }
-
 
 
 /* ========================================================================
@@ -6576,54 +6520,274 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
+
 /* ==========================================================================
-   localtify v0.3.6 V209 — cleaner Visuals controls
-   Keeps only useful controls and removes the nested-card look.
+   localtify v0.3.6 V217 — settings stability polish
+   Owner: settings.css only.
+   Goal: smaller, calmer, consistent settings. No giant boxes inside boxes.
 ========================================================================== */
 
-.visualCustomizationCardV205{
-  padding: 18px 20px !important;
-  border-color: rgba(255,255,255,.055) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,.008)),
-    rgba(7,7,12,.60) !important;
-  box-shadow: 0 10px 24px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.026) !important;
+.settingsPage,
+.kopuzSettingsPage{
+  width: min(1240px, calc(100% - 24px)) !important;
+  padding: 0 12px 132px !important;
+  gap: 16px !important;
 }
 
-.visualCustomizationCardV205::before,
-.visualCustomizationCardV205::after{
+.settingsHero{
+  min-height: 96px !important;
+  padding: 20px 24px !important;
+  border-radius: 18px !important;
+  border-color: rgba(255,255,255,0.060) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.010)),
+    rgba(7,7,12,0.70) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.035) !important;
+}
+
+.settingsHero::before,
+.settingsHero::after,
+.settingsPanelCard::before,
+.settingsPanelCard::after,
+.settingsPageCard::before,
+.settingsPageCard::after{
   display: none !important;
   content: none !important;
 }
 
-.visualCustomizationHeaderV205{
-  margin-bottom: 12px !important;
+.settingsHero h3{
+  margin: 2px 0 6px !important;
+  font-size: clamp(30px, 3vw, 44px) !important;
+  line-height: .96 !important;
+  letter-spacing: -0.060em !important;
+}
+
+.settingsHero .softText{
+  max-width: 680px !important;
+  font-size: 12px !important;
+  line-height: 1.38 !important;
+  color: rgba(255,255,255,0.64) !important;
+}
+
+.settingsPanelCard,
+.settingsPageCard{
+  padding: 20px !important;
+  border-radius: 18px !important;
+  border-color: rgba(255,255,255,0.060) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.010)),
+    rgba(7,7,12,0.64) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.026) !important;
+  animation: none !important;
+}
+
+.settingsPanelCard:hover,
+.settingsPageCard:hover{
+  transform: none !important;
+  border-color: rgba(var(--accent-rgb),0.14) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.030) !important;
+}
+
+.settingsCategoryContent,
+.settingsCategoryContentV027{
+  padding: 16px 18px 38px !important;
+}
+
+.settingsCategoryHeader{
+  margin-bottom: 14px !important;
   align-items: center !important;
+  gap: 12px !important;
 }
 
-.visualCustomizationHeaderV205 strong{
-  font-size: clamp(19px,1.45vw,25px) !important;
+.settingsCategoryHeader h4{
+  font-size: clamp(24px, 2vw, 32px) !important;
+  line-height: .98 !important;
+  letter-spacing: -0.050em !important;
 }
 
-.visualCustomizationHeaderV205 span{
-  color: rgba(255,255,255,.56) !important;
+.settingsCategoryHeader > span{
+  padding: 5px 9px !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 999px !important;
+  color: rgba(255,255,255,0.58) !important;
+  background: rgba(255,255,255,0.020) !important;
+  font-size: 10px !important;
+  font-weight: 820 !important;
+}
+
+.settingsPanelHeader,
+.settingsSectionTitle{
+  margin-bottom: 14px !important;
+  gap: 10px !important;
+}
+
+.settingsPanelHeader strong,
+.settingsSectionTitle strong{
+  font-size: clamp(17px, 1.4vw, 23px) !important;
+  letter-spacing: -0.035em !important;
+}
+
+.settingsPanelHeader span,
+.settingsPanelHeader small,
+.settingsSectionTitle small{
+  color: rgba(255,255,255,0.58) !important;
   font-size: 11.5px !important;
+  line-height: 1.34 !important;
 }
 
-.settingsPanelBadgeV205{
+/* Category rail: equal spacing and less outline noise. */
+.settingsCategoryRail,
+.settingsCategoryRailV027{
+  padding: 12px !important;
+  gap: 7px !important;
+  border-color: rgba(255,255,255,0.055) !important;
+  background: rgba(255,255,255,0.012) !important;
+}
+
+.settingsCategoryButton,
+.settingsCategoryButtonV027{
+  min-height: 54px !important;
+  padding: 9px 10px !important;
+  border-radius: 14px !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.settingsCategoryButton:hover,
+.settingsCategoryButtonV027:hover{
+  transform: none !important;
+  border-color: rgba(255,255,255,0.060) !important;
+  background: rgba(255,255,255,0.026) !important;
+}
+
+.settingsCategoryButton.active,
+.settingsCategoryButtonV027.active{
+  border-color: rgba(var(--accent-rgb),0.18) !important;
+  background: rgba(var(--accent-rgb),0.070) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.045) !important;
+}
+
+.settingsCategoryIcon{
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 11px !important;
+  background: rgba(var(--accent-rgb),0.080) !important;
+  box-shadow: none !important;
+}
+
+.settingsCategoryCopy strong{
+  font-size: 12.5px !important;
+}
+
+.settingsCategoryCopy span{
+  font-size: 10px !important;
+  line-height: 1.22 !important;
+  color: rgba(255,255,255,0.50) !important;
+}
+
+/* Toggles and options: smaller, consistent, not glowing cards. */
+.settingSwitchCard,
+.toggleRow,
+.rangeRow,
+.settingsChoice,
+.coverSyncChoice,
+.settingsResetButton{
+  min-height: 66px !important;
+  padding: 12px 13px !important;
+  border-radius: 15px !important;
+  border-color: rgba(255,255,255,0.055) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.020), rgba(255,255,255,0.008)),
+    rgba(255,255,255,0.010) !important;
+  box-shadow: none !important;
+}
+
+.settingSwitchCard::before,
+.settingSwitchCard::after,
+.toggleRow::before,
+.toggleRow::after,
+.rangeRow::before,
+.rangeRow::after,
+.settingsChoice::before,
+.settingsChoice::after,
+.coverSyncChoice::before,
+.coverSyncChoice::after,
+.settingsResetButton::before,
+.settingsResetButton::after{
   display: none !important;
+  content: none !important;
+}
+
+.settingSwitchCard:hover,
+.toggleRow:hover,
+.rangeRow:hover,
+.settingsChoice:hover,
+.coverSyncChoice:hover,
+.settingsResetButton:hover{
+  transform: none !important;
+  border-color: rgba(var(--accent-rgb),0.13) !important;
+  background: rgba(255,255,255,0.020) !important;
+  box-shadow: none !important;
+}
+
+.settingSwitchCard strong,
+.toggleRow strong,
+.rangeRow strong,
+.settingsChoice strong,
+.coverSyncChoice strong,
+.settingsResetButton strong{
+  font-size: 13px !important;
+  line-height: 1.12 !important;
+}
+
+.settingSwitchCard small,
+.toggleRow small,
+.rangeRow small,
+.settingsChoice small,
+.coverSyncChoice span,
+.settingsResetButton span{
+  max-width: 34ch !important;
+  color: rgba(255,255,255,0.56) !important;
+  font-size: 10.5px !important;
+  line-height: 1.26 !important;
+}
+
+/* Smaller switches. */
+.settingSwitchCard i,
+.toggleRow input[type="checkbox"]{
+  width: 44px !important;
+  height: 26px !important;
+  box-shadow: none !important;
+}
+
+.settingSwitchCard i::after,
+.toggleRow input[type="checkbox"]::after{
+  width: 19px !important;
+  height: 19px !important;
+  margin: 3.5px !important;
+}
+
+.settingSwitchCard i.on::after,
+.toggleRow input[type="checkbox"]:checked::after{
+  transform: translateX(18px) !important;
+}
+
+/* Visuals section: compact segmented controls, no nested card spam. */
+.visualCustomizationCardV205{
+  padding: 18px 20px !important;
 }
 
 .visualCustomizationGridV205{
   display: grid !important;
   grid-template-columns: repeat(2,minmax(0,1fr)) !important;
-  gap: 0 20px !important;
+  gap: 0 18px !important;
 }
 
 .visualOptionGroupV205{
-  padding: 12px 0 !important;
+  padding: 10px 0 !important;
   border: 0 !important;
-  border-bottom: 1px solid rgba(255,255,255,.052) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.050) !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -6633,21 +6797,18 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   display: flex !important;
   align-items: baseline !important;
   justify-content: space-between !important;
-  gap: 12px !important;
-  margin-bottom: 9px !important;
+  gap: 10px !important;
+  margin-bottom: 8px !important;
 }
 
 .visualOptionGroupHeadV205 strong{
-  font-size: 12.8px !important;
-  line-height: 1.1 !important;
-  color: rgba(255,255,255,.92) !important;
+  font-size: 12.5px !important;
 }
 
 .visualOptionGroupHeadV205 span{
   max-width: 20ch !important;
-  color: rgba(255,255,255,.46) !important;
+  color: rgba(255,255,255,0.46) !important;
   font-size: 10px !important;
-  line-height: 1.2 !important;
   text-align: right !important;
 }
 
@@ -6658,51 +6819,65 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 .visualOptionButtonV205{
-  min-height: 32px !important;
-  padding: 0 11px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1px solid rgba(255,255,255,.055) !important;
+  min-height: 31px !important;
+  padding: 0 10px !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
   border-radius: 999px !important;
-  color: rgba(255,255,255,.70) !important;
+  color: rgba(255,255,255,0.70) !important;
   background: transparent !important;
   box-shadow: none !important;
-  transition:
-    transform 150ms cubic-bezier(.16,1,.3,1),
-    border-color 150ms ease,
-    background 150ms ease,
-    color 150ms ease !important;
-}
-
-.visualOptionButtonV205 strong{
-  color: inherit !important;
-  font-size: 11.5px !important;
-  line-height: 1 !important;
-  white-space: nowrap !important;
 }
 
 .visualOptionButtonV205 span{
   display: none !important;
 }
 
+.visualOptionButtonV205 strong{
+  color: inherit !important;
+  font-size: 11.5px !important;
+}
+
 .visualOptionButtonV205:hover{
-  transform: translateY(-1px) !important;
-  color: rgba(255,255,255,.95) !important;
-  border-color: rgba(var(--accent-rgb),.18) !important;
-  background: rgba(255,255,255,.026) !important;
-  box-shadow: none !important;
+  transform: none !important;
+  color: rgba(255,255,255,0.95) !important;
+  border-color: rgba(var(--accent-rgb),0.18) !important;
+  background: rgba(255,255,255,0.024) !important;
 }
 
 .visualOptionButtonV205.active{
   color: #fff !important;
-  border-color: rgba(var(--accent-rgb),.35) !important;
-  background: rgba(var(--accent-rgb),.105) !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),.055) !important;
+  border-color: rgba(var(--accent-rgb),0.32) !important;
+  background: rgba(var(--accent-rgb),0.095) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.045) !important;
 }
 
-.visualOptionButtonV205:active{
-  transform: translateY(0) scale(.98) !important;
+/* Update page: match the rest of settings. */
+.settingsCategoryPage.settingsUpdatesPage,
+.settingsUpdatesPage{
+  gap: 16px !important;
+}
+
+.updateOverviewCard,
+.updateHeroCard,
+.updateStatusCard,
+.updateActionCard,
+.settingsUpdateBehaviorPanel,
+.updateChangelogCard{
+  border-radius: 18px !important;
+  border-color: rgba(255,255,255,0.060) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.024), rgba(255,255,255,0.008)),
+    rgba(7,7,12,0.64) !important;
+  box-shadow: none !important;
+}
+
+.updateOverviewCard::before,
+.updateHeroCard::before,
+.updateStatusCard::before,
+.updateActionCard::before,
+.updateChangelogCard::before{
+  display: none !important;
+  content: none !important;
 }
 
 @media (max-width: 1120px){
@@ -6711,14 +6886,30 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-@media (max-width: 720px){
+@media (max-width: 760px){
+  .settingsPage,
+  .kopuzSettingsPage{
+    width: 100% !important;
+    padding-inline: 8px !important;
+  }
+
+  .settingsHero,
+  .settingsPanelCard,
+  .settingsPageCard{
+    padding: 16px !important;
+  }
+
+  .settingsCategoryHeader{
+    align-items: flex-start !important;
+  }
+
   .visualOptionGroupHeadV205{
     display: grid !important;
   }
 
   .visualOptionGroupHeadV205 span{
-    max-width: none !important;
     text-align: left !important;
+    max-width: none !important;
   }
 }
 

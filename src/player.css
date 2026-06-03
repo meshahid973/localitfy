@@ -1,17 +1,3 @@
-/* ==========================================================================
-   localtify player.css — bottom player owner only
-   Version: 0.2.9 / localtify v0.3.5 player edge V128
-
-   This file owns the bottom player:
-   - footer.playerBar layout and ambience
-   - album art inside the player
-   - player controls/buttons/icons
-   - progress + volume sliders
-   - resize handle hit-area
-   - drag/drop hint
-   - player responsive rules
-========================================================================== */
-
 .playerBar{
   --player-size-used: var(--player-size-live, var(--player-size, 108px));
   --player-control-size: clamp(34px, calc(var(--player-size-used) * 0.36), 40px);
@@ -788,22 +774,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-/* ==========================================================================
-   localtify v0.2.8 — final player position + cover sync repair
-   --------------------------------------------------------------------------
-   This final block intentionally owns ONLY the bottom player.
-
-   What changed:
-   - player center/progress area sits a little lower, closer to the old player
-   - subtle / normal / strong cover sync now all visibly affect the player
-   - album ambience is smoother and less black
-   - utility icons stay icon-only with no black boxes
-   - play/pause stays as the only filled circle, with a white filled symbol
-========================================================================== */
-
 /* player base: darker OLED shell, but not a dead black strip */
 .playerBar{
   --player-cover-sync-opacity: var(--cover-sync-player-opacity, 0.52);
@@ -1193,18 +1163,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   }
 }
 
-/* ==========================================================================
-   localtify v0.2.8 — smooth player ambience + lower hover alignment
-   --------------------------------------------------------------------------
-   Final override for the current 0.2.8 bottom player only.
-
-   Fixes:
-   - removes the harsh straight ambience line above the player
-   - makes the album glow fade smoothly on hover
-   - moves the left/current-song area a little lower
-   - keeps the center controls/progress lowered but not floating too high
-   - keeps all utility icons transparent and the play button filled
-========================================================================== */
 
 .playerBar{
   --player-center-y: 11px;
@@ -1435,15 +1393,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   }
 }
 
-/* ==========================================================================
-   localtify v0.2.8 — progress-color player fallback when Cover Color Sync is off
-   --------------------------------------------------------------------------
-   User request:
-   - when Cover Color Sync is OFF, do not let the bottom player become a dead
-     black strip
-   - use the custom theme Progress color as the player mood/tint instead
-   - keep this inside player.css only
-========================================================================== */
 
 .app[data-cover-sync="off"] .playerBar,
 .playerBar[data-cover-sync="off"]{
@@ -1583,10 +1532,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   border-color: rgba(var(--progress-rgb, var(--accent-rgb)), 0.26) !important;
 }
 
-/* ========================================================================
-   localtify 0.2.9 — player cover hover removal + light paint cleanup
-   Player ownership stays here only.
-======================================================================== */
 
 /* The bottom-player cover should not lift/zoom/glow harder on hover. */
 .playerBar .playerLeft,
@@ -1654,8 +1599,6 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 }
 
 
-/* localtify 0.2.9 queue drawer
-   Owned by player.css because it belongs to the bottom player and queue controls. */
 .controlRow .queueDrawerButton {
   position: relative;
 }
@@ -2007,7 +1950,6 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 }
 
 
-/* v0.2.9 player alignment cleanup: keep player low and calm without breaking seek */
 .playerBar {
   --player-content-y: 7px;
 }
@@ -2053,15 +1995,6 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 }
 
 
-/* ========================================================================
-   localtify v0.2.9 — player edge containment repair
-
-   Owner: player.css
-   Purpose:
-   - keep the bottom player inside the appShell grid
-   - stop album-art ambience from bleeding into the right edge
-   - keep the glow above the player, but clip the sides cleanly
-======================================================================== */
 .playerBar{
   grid-column: 1 / -1 !important;
   grid-row: 2 !important;
@@ -2106,13 +2039,6 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 }
 
 
-/* ========================================================================
-   localtify v0.2.9 — side area vertical alignment only
-   ------------------------------------------------------------------------
-   User request: do NOT change the center controls/progress position.
-   This only lowers the left album-cover/song area and the right volume area
-   so they visually match the play/progress area.
-======================================================================== */
 .playerBar{
   --player-left-y: 12px;
   --player-volume-y: 12px;
@@ -2602,818 +2528,9 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
   animation: localtifyPlayerCoverInV143B 340ms cubic-bezier(.16, 1, .3, 1) both !important;
   will-change: transform, opacity !important;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
-/* ======================================================================
-   localtify 0.3.6 V166 — FINAL hero controls hard reset
-   ----------------------------------------------------------------------
-   This block intentionally overrides the older V161/V162/V163/V164/V165
-   hero action patches. The controls are back in normal document flow, not
-   pinned to the bottom edge, so they cannot get clipped when the title wraps.
-   No audio, importer, downloader, backend, or JSX changes.
-====================================================================== */
 
-.app{
-  --hero-v166-ease: cubic-bezier(.16, 1, .3, 1);
-  --hero-v166-pop: cubic-bezier(.2, 1.28, .24, 1);
-}
 
-.app .pageTransition.pageTransition-home .hero.heroPremium,
-.app .pageTransition[data-view="home"] .hero.heroPremium{
-  position: relative !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) clamp(136px, 12.8vw, 214px) !important;
-  column-gap: clamp(22px, 3.8vw, 76px) !important;
-  align-items: center !important;
-  min-height: clamp(314px, 31vh, 382px) !important;
-  padding: clamp(30px, 3.25vw, 56px) clamp(32px, 3.75vw, 72px) !important;
-  overflow: hidden !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded{
-  min-height: clamp(338px, 35vh, 430px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText{
-  position: relative !important;
-  inset: auto !important;
-  z-index: 8 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  min-width: 0 !important;
-  width: 100% !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 390px)) !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  gap: 0 !important;
-  overflow: visible !important;
-  align-self: center !important;
-  justify-self: stretch !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .eyebrow.nowPlayingEyebrowSwap,
-.app .pageTransition.pageTransition-home .hero.heroPremium .eyebrow,
-.app .pageTransition[data-view="home"] .hero.heroPremium .eyebrow.nowPlayingEyebrowSwap,
-.app .pageTransition[data-view="home"] .hero.heroPremium .eyebrow{
-  position: relative !important;
-  inset: auto !important;
-  display: block !important;
-  flex: 0 0 auto !important;
-  margin: 0 0 clamp(12px, 1.1vw, 18px) !important;
-  padding: 0 !important;
-  line-height: 1 !important;
-  transform: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle.nowPlayingTitleSwap,
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle.nowPlayingTitleSwap,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
-  position: relative !important;
-  inset: auto !important;
-  z-index: 4 !important;
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  line-clamp: 2 !important;
-  flex: 0 1 auto !important;
-  width: 100% !important;
-  max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 430px)) !important;
-  max-height: 1.86em !important;
-  margin: 0 !important;
-  padding: 0 0 .035em !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: normal !important;
-  word-break: normal !important;
-  overflow-wrap: anywhere !important;
-  line-height: .93 !important;
-  letter-spacing: clamp(-.075em, -.34vw, -.052em) !important;
-  font-size: clamp(42px, 4.25vw, 70px) !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroCompact .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroCompact .heroText.heroTextClean .heroTitle{
-  font-size: clamp(40px, 4.05vw, 64px) !important;
-  max-height: 1.88em !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroTitle{
-  font-size: clamp(44px, 4.45vw, 76px) !important;
-  max-height: 1.86em !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
-  font-size: clamp(34px, 3.42vw, 56px) !important;
-  max-height: 1.9em !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroCompact.heroTitleLong .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroCompact.heroTitleLong .heroText.heroTextClean .heroTitle{
-  font-size: clamp(32px, 3.22vw, 50px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroArtistLine.nowPlayingArtistSwap,
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroArtistLine,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroArtistLine.nowPlayingArtistSwap,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroArtistLine{
-  position: relative !important;
-  inset: auto !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  z-index: 9 !important;
-  display: block !important;
-  flex: 0 0 auto !important;
-  width: min(620px, 100%) !important;
-  max-width: min(620px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 430px)) !important;
-  margin: clamp(14px, 1.35vw, 20px) 0 0 !important;
-  padding: 0 !important;
-  color: rgba(255, 255, 255, .86) !important;
-  line-height: 1.1 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  transform: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroQuickActions,
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroQuickActions,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions{
-  position: relative !important;
-  inset: auto !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  z-index: 12 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  flex-wrap: nowrap !important;
-  flex: 0 0 auto !important;
-  gap: 8px !important;
-  width: fit-content !important;
-  max-width: min(100%, 520px) !important;
-  min-height: 42px !important;
-  margin: clamp(12px, 1vw, 16px) 0 0 !important;
-  padding: 5px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255, 255, 255, .13) !important;
-  color: rgba(255, 255, 255, .92) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .04)),
-    radial-gradient(circle at 18% 8%, rgba(var(--accent-rgb), .26), transparent 58%),
-    rgba(9, 6, 14, .58) !important;
-  box-shadow:
-    0 16px 42px rgba(0, 0, 0, .34),
-    0 0 30px rgba(var(--accent-rgb), .10),
-    inset 0 1px 0 rgba(255, 255, 255, .12),
-    inset 0 -1px 0 rgba(0, 0, 0, .20) !important;
-  backdrop-filter: blur(18px) saturate(1.32) brightness(1.04) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(1.32) brightness(1.04) !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  animation: localtifyHeroActionsSettleV166 320ms var(--hero-v166-pop) both !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions::before,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: -10px !important;
-  z-index: -2 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: .46 !important;
-  background:
-    radial-gradient(circle at 24% 52%, rgba(var(--accent-rgb), .24), transparent 58%),
-    radial-gradient(circle at 88% 30%, rgba(255, 255, 255, .08), transparent 50%) !important;
-  filter: blur(15px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions::after,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: 1px !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: .70 !important;
-  background: linear-gradient(120deg, rgba(255, 255, 255, .13), transparent 24%, transparent 72%, rgba(255, 255, 255, .065)) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton{
-  position: relative !important;
-  isolation: isolate !important;
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 0 !important;
-  min-height: 32px !important;
-  height: 32px !important;
-  padding: 0 14px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255, 255, 255, .13) !important;
-  overflow: hidden !important;
-  color: rgba(255, 255, 255, .91) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .045)),
-    rgba(255, 255, 255, .065) !important;
-  box-shadow:
-    0 8px 22px rgba(0, 0, 0, .20),
-    inset 0 1px 0 rgba(255, 255, 255, .11),
-    inset 0 -1px 0 rgba(0, 0, 0, .16) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  letter-spacing: -.015em !important;
-  line-height: 1 !important;
-  text-transform: lowercase !important;
-  white-space: nowrap !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
-  transform-origin: center !important;
-  transition:
-    transform 145ms var(--hero-v166-ease),
-    color 145ms ease,
-    background-color 145ms ease,
-    border-color 145ms ease,
-    box-shadow 145ms ease,
-    filter 145ms ease !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton::before,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: -1 !important;
-  border-radius: inherit !important;
-  opacity: 0 !important;
-  background: radial-gradient(circle at 50% 20%, rgba(var(--accent-rgb), .28), transparent 68%) !important;
-  transition: opacity 150ms ease !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton::after,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton::after{
-  content: "" !important;
-  position: absolute !important;
-  top: 1px !important;
-  bottom: 1px !important;
-  left: -46% !important;
-  width: 42% !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: 0 !important;
-  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .24), transparent) !important;
-  transform: translate3d(-12px, 0, 0) skewX(-12deg) !important;
-  transition: opacity 150ms ease, left 380ms var(--hero-v166-ease) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton:hover,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton:hover{
-  color: #fff !important;
-  border-color: rgba(var(--accent-rgb), .50) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .055)),
-    rgba(var(--accent-rgb), .14) !important;
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, .26),
-    0 0 28px rgba(var(--accent-rgb), .16),
-    inset 0 1px 0 rgba(255, 255, 255, .14) !important;
-  transform: translate3d(0, -2px, 0) scale(1.035) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton:hover::before,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton:hover::before{
-  opacity: 1 !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton:hover::after,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton:hover::after{
-  left: 112% !important;
-  opacity: 1 !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton:active,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton:active{
-  transform: translate3d(0, 0, 0) scale(.92) !important;
-  filter: brightness(.96) saturate(1.08) !important;
-  transition-duration: 72ms !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton[aria-pressed="true"],
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton[aria-pressed="true"]{
-  color: var(--accent-contrast, #09070c) !important;
-  border-color: rgba(var(--accent-rgb), .38) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .23), rgba(255, 255, 255, .07)),
-    var(--accent) !important;
-  box-shadow:
-    0 12px 32px rgba(var(--accent-rgb), .27),
-    inset 0 1px 0 rgba(255, 255, 255, .24),
-    inset 0 -1px 0 rgba(0, 0, 0, .14) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroArtWrap,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroArtWrap{
-  justify-self: end !important;
-  align-self: center !important;
-  width: clamp(130px, 12.4vw, 206px) !important;
-  max-width: 100% !important;
-  z-index: 2 !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroArt,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroArt{
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1 / 1 !important;
-  object-fit: cover !important;
-}
-
-@keyframes localtifyHeroActionsSettleV166{
-  0%{
-    opacity: .70;
-    transform: translate3d(0, 7px, 0) scale(.97);
-  }
-  68%{
-    opacity: 1;
-    transform: translate3d(0, -1px, 0) scale(1.018);
-  }
-  100%{
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-@media (max-width: 1320px){
-  .app .pageTransition.pageTransition-home .hero.heroPremium,
-  .app .pageTransition[data-view="home"] .hero.heroPremium{
-    grid-template-columns: minmax(0, 1fr) clamp(120px, 12.5vw, 188px) !important;
-    column-gap: clamp(16px, 2.6vw, 42px) !important;
-    padding-inline: clamp(28px, 3.2vw, 54px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean{
-    max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 300px)) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
-    max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 310px)) !important;
-    font-size: clamp(36px, 3.82vw, 58px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
-    font-size: clamp(31px, 3.18vw, 48px) !important;
-  }
-}
-
-@media (max-width: 980px){
-  .app .pageTransition.pageTransition-home .hero.heroPremium,
-  .app .pageTransition[data-view="home"] .hero.heroPremium{
-    grid-template-columns: minmax(0, 1fr) !important;
-    min-height: clamp(318px, 36vh, 390px) !important;
-    padding: 26px !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroArtWrap,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroArtWrap{
-    display: none !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean{
-    max-width: 100% !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
-    max-width: 100% !important;
-    font-size: clamp(34px, 8.0vw, 60px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
-    font-size: clamp(30px, 7.2vw, 50px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroArtistLine,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroArtistLine{
-    max-width: 100% !important;
-  }
-}
-
-@media (max-width: 640px){
-  .app .pageTransition.pageTransition-home .hero.heroPremium,
-  .app .pageTransition[data-view="home"] .hero.heroPremium{
-    padding: 22px !important;
-    min-height: 320px !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
-    font-size: clamp(30px, 9.2vw, 48px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions{
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton{
-    flex: 1 1 0 !important;
-    padding-inline: 10px !important;
-  }
-}
-
-/* ======================================================================
-   localtify v0.3.5 V177 — final expanded hero visual balance
-   ----------------------------------------------------------------------
-   Clean late-loaded override for the home hero only.
-   Goal: big expanded hero text/buttons + NORMAL square album cover.
-   This intentionally fixes the old contain/letterbox/black-bar cover bug.
-====================================================================== */
-
-.app{
-  --hero-v177-ease: cubic-bezier(.16, 1, .3, 1);
-  --hero-v177-pop: cubic-bezier(.2, 1.16, .22, 1);
-}
-
-/* Expanded hero should feel expanded, not just stretched empty space. */
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded,
-.app .hero.heroPremium.heroExpanded{
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) clamp(230px, 16vw, 318px) !important;
-  column-gap: clamp(34px, 5vw, 100px) !important;
-  align-items: center !important;
-  min-height: clamp(430px, 50vh, 590px) !important;
-  padding: clamp(42px, 4.4vw, 72px) clamp(44px, 4.8vw, 88px) !important;
-  overflow: hidden !important;
-}
-
-/* Keep the copy block centered vertically and away from the cover. */
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroText,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroText.heroTextClean,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroText,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroText.heroTextClean,
-.app .hero.heroPremium.heroExpanded .heroText,
-.app .hero.heroPremium.heroExpanded .heroText.heroTextClean{
-  position: relative !important;
-  inset: auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: min(100%, 980px) !important;
-  height: auto !important;
-  min-height: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  gap: 0 !important;
-  overflow: visible !important;
-  transform: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .eyebrow,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .eyebrow,
-.app .hero.heroPremium.heroExpanded .eyebrow{
-  margin: 0 0 clamp(16px, 1.25vw, 22px) !important;
-  font-size: clamp(11px, .78vw, 13px) !important;
-  line-height: 1 !important;
-  letter-spacing: .18em !important;
-}
-
-/* Bigger expanded title, but still protected from long-title disasters. */
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTitle,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroTitle,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTitle.nowPlayingTitleSwap,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTitle.nowPlayingTitleSwap,
-.app .hero.heroPremium.heroExpanded .heroTitle,
-.app .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroTitle,
-.app .hero.heroPremium.heroExpanded .heroTitle.nowPlayingTitleSwap{
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  line-clamp: 2 !important;
-  width: 100% !important;
-  max-width: min(100%, 980px) !important;
-  max-height: 1.72em !important;
-  margin: 0 0 clamp(14px, 1vw, 20px) !important;
-  padding: 0 0 .035em !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  word-break: normal !important;
-  font-size: clamp(64px, 5.45vw, 112px) !important;
-  line-height: .86 !important;
-  letter-spacing: clamp(-.086em, -.36vw, -.058em) !important;
-  transform: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded.heroTitleLong .heroTitle,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded.heroTitleLong .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded.heroTitleLong .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded.heroTitleLong .heroText.heroTextClean .heroTitle,
-.app .hero.heroPremium.heroExpanded.heroTitleLong .heroTitle,
-.app .hero.heroPremium.heroExpanded.heroTitleLong .heroText.heroTextClean .heroTitle{
-  font-size: clamp(50px, 4.55vw, 88px) !important;
-  line-height: .88 !important;
-  max-height: 1.78em !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtistLine,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroArtistLine,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtistLine.nowPlayingArtistSwap,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtistLine,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroArtistLine,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtistLine.nowPlayingArtistSwap,
-.app .hero.heroPremium.heroExpanded .heroArtistLine,
-.app .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroArtistLine,
-.app .hero.heroPremium.heroExpanded .heroArtistLine.nowPlayingArtistSwap{
-  position: relative !important;
-  inset: auto !important;
-  display: block !important;
-  width: min(680px, 100%) !important;
-  margin: 0 0 clamp(16px, 1.2vw, 22px) !important;
-  padding: 0 !important;
-  color: rgba(255, 255, 255, .90) !important;
-  font-size: clamp(16px, 1.05vw, 20px) !important;
-  font-weight: 950 !important;
-  line-height: 1.12 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  transform: none !important;
-}
-
-/* Frosted actions: bigger in expanded mode, but not goofy. */
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroQuickActions,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroQuickActions,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroQuickActions,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroQuickActions,
-.app .hero.heroPremium.heroExpanded .heroQuickActions,
-.app .hero.heroPremium.heroExpanded .heroText.heroTextClean .heroQuickActions{
-  position: relative !important;
-  inset: auto !important;
-  z-index: 12 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 10px !important;
-  width: fit-content !important;
-  max-width: min(100%, 560px) !important;
-  min-height: 52px !important;
-  margin: 0 !important;
-  padding: 6px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255, 255, 255, .16) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .045)),
-    radial-gradient(circle at 20% 8%, rgba(var(--accent-rgb), .30), transparent 58%),
-    rgba(10, 7, 16, .62) !important;
-  box-shadow:
-    0 18px 46px rgba(0, 0, 0, .36),
-    0 0 34px rgba(var(--accent-rgb), .13),
-    inset 0 1px 0 rgba(255, 255, 255, .13),
-    inset 0 -1px 0 rgba(0, 0, 0, .22) !important;
-  backdrop-filter: blur(18px) saturate(1.28) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(1.28) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  transform: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTinyButton,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTinyButton,
-.app .hero.heroPremium.heroExpanded .heroTinyButton{
-  min-height: 40px !important;
-  height: 40px !important;
-  padding: 0 20px !important;
-  border-radius: 999px !important;
-  font-size: 12px !important;
-  font-weight: 950 !important;
-  letter-spacing: -.015em !important;
-  line-height: 1 !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
-  transform-origin: center !important;
-  transition:
-    transform 145ms var(--hero-v177-ease),
-    background-color 145ms ease,
-    border-color 145ms ease,
-    box-shadow 145ms ease,
-    filter 145ms ease !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTinyButton:hover,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTinyButton:hover,
-.app .hero.heroPremium.heroExpanded .heroTinyButton:hover{
-  transform: translate3d(0, -2px, 0) scale(1.03) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTinyButton:active,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTinyButton:active,
-.app .hero.heroPremium.heroExpanded .heroTinyButton:active{
-  transform: translate3d(0, 0, 0) scale(.93) !important;
-  filter: brightness(.96) !important;
-}
-
-/* THE COVER FIX:
-   Make the wrapper itself a normal square. Do not use contain.
-   The img fills the square with cover, so no black/tall letterbox frame. */
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap,
-.app .hero.heroPremium.heroExpanded .heroArtWrap{
-  position: relative !important;
-  justify-self: end !important;
-  align-self: center !important;
-  width: clamp(236px, 15.8vw, 310px) !important;
-  height: clamp(236px, 15.8vw, 310px) !important;
-  min-width: clamp(236px, 15.8vw, 310px) !important;
-  min-height: clamp(236px, 15.8vw, 310px) !important;
-  max-width: clamp(236px, 15.8vw, 310px) !important;
-  max-height: clamp(236px, 15.8vw, 310px) !important;
-  aspect-ratio: 1 / 1 !important;
-  margin: 0 clamp(18px, 2.1vw, 42px) 0 0 !important;
-  padding: 0 !important;
-  border-radius: 30px !important;
-  overflow: hidden !important;
-  background: rgba(255, 255, 255, .035) !important;
-  border: 1px solid rgba(255, 255, 255, .10) !important;
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, .34),
-    0 0 42px rgba(var(--accent-rgb), .10),
-    inset 0 1px 0 rgba(255, 255, 255, .10) !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap::before,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap::after,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap::before,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap::after,
-.app .hero.heroPremium.heroExpanded .heroArtWrap::before,
-.app .hero.heroPremium.heroExpanded .heroArtWrap::after{
-  display: none !important;
-  content: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt.coverAura,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt.coverAura,
-.app .hero.heroPremium.heroExpanded .heroArt,
-.app .hero.heroPremium.heroExpanded .heroArt.coverAura{
-  position: absolute !important;
-  inset: 0 !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  aspect-ratio: 1 / 1 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border-radius: inherit !important;
-  overflow: hidden !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt > img,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt img,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt .coverImage,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt.coverAura > img.coverImage,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt.coverAura img.coverImage,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt > img,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt img,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt .coverImage,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt.coverAura > img.coverImage,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt.coverAura img.coverImage,
-.app .hero.heroPremium.heroExpanded .heroArt > img,
-.app .hero.heroPremium.heroExpanded .heroArt img,
-.app .hero.heroPremium.heroExpanded .heroArt .coverImage,
-.app .hero.heroPremium.heroExpanded .heroArt.coverAura > img.coverImage,
-.app .hero.heroPremium.heroExpanded .heroArt.coverAura img.coverImage{
-  position: absolute !important;
-  inset: 0 !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
-  aspect-ratio: 1 / 1 !important;
-  border-radius: inherit !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  background: transparent !important;
-  opacity: 1 !important;
-  transform: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArt .coverPlaceholder,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArt .coverPlaceholder,
-.app .hero.heroPremium.heroExpanded .heroArt .coverPlaceholder{
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: inherit !important;
-}
-
-/* Keep compact mode clean and smaller. */
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroCompact .heroArtWrap,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroCompact .heroArtWrap,
-.app .hero.heroPremium.heroCompact .heroArtWrap{
-  width: clamp(152px, 11vw, 210px) !important;
-  height: clamp(152px, 11vw, 210px) !important;
-  min-width: clamp(152px, 11vw, 210px) !important;
-  min-height: clamp(152px, 11vw, 210px) !important;
-  aspect-ratio: 1 / 1 !important;
-  border-radius: 28px !important;
-  overflow: hidden !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroCompact .heroArt,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroCompact .heroArt img,
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroCompact .heroArt .coverImage,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroCompact .heroArt,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroCompact .heroArt img,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroCompact .heroArt .coverImage,
-.app .hero.heroPremium.heroCompact .heroArt,
-.app .hero.heroPremium.heroCompact .heroArt img,
-.app .hero.heroPremium.heroCompact .heroArt .coverImage{
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  border-radius: inherit !important;
-}
-
-@media (max-width: 1280px){
-  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
-  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded,
-  .app .hero.heroPremium.heroExpanded{
-    grid-template-columns: minmax(0, 1fr) clamp(210px, 15vw, 270px) !important;
-    column-gap: clamp(24px, 3.8vw, 62px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroTitle,
-  .app .hero.heroPremium.heroExpanded .heroTitle{
-    font-size: clamp(54px, 5.1vw, 88px) !important;
-  }
-}
-
-@media (max-width: 980px){
-  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
-  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded,
-  .app .hero.heroPremium.heroExpanded{
-    grid-template-columns: 1fr !important;
-    min-height: auto !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded .heroArtWrap,
-  .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded .heroArtWrap,
-  .app .hero.heroPremium.heroExpanded .heroArtWrap{
-    display: none !important;
-  }
-}
 
 /* ======================================================================
    localtify v0.3.6 V192 — acrylic bottom player consistency
@@ -3538,144 +2655,6 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
   background: rgb(var(--accent-rgb)) !important;
 }
 
-/* ==========================================================================
-   localtify v0.3.6 V209 — true acrylic player
-   Owner: player.css
-
-   Acrylic is intentionally much more transparent:
-   - lets the app background show through
-   - uses one frosted blur layer
-   - avoids heavy cover wash over controls
-   - keeps buttons readable and icon-only
-========================================================================== */
-
-.app[data-player-background="flat"] .playerBar{
-  background: rgba(5,5,9,.95) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app[data-player-background="flat"] .playerBar::before{
-  opacity: 0 !important;
-}
-
-.app[data-player-background="coverBlur"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.010)),
-    rgba(0,0,0,.82) !important;
-}
-
-.app[data-player-background="coverBlur"] .playerBar::before,
-.app:not([data-player-background]) .playerBar::before{
-  opacity: .22 !important;
-}
-
-/* This is the real frosted-glass mode. */
-.app[data-player-background="acrylic"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.070), rgba(255,255,255,.018)),
-    rgba(8, 7, 14, .24) !important;
-  border-top-color: rgba(255,255,255,.14) !important;
-  box-shadow:
-    0 -12px 36px rgba(0,0,0,.26),
-    inset 0 1px 0 rgba(255,255,255,.09) !important;
-  backdrop-filter: blur(24px) saturate(135%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(135%) !important;
-}
-
-/* In acrylic mode the cover wash is almost off so the bar does not turn opaque again. */
-.app[data-player-background="acrylic"] .playerBar::before{
-  opacity: .035 !important;
-  inset: -16px -12px -10px !important;
-  filter: blur(16px) saturate(1.05) brightness(.86) !important;
-  transform: translateZ(0) scale(1.01) !important;
-}
-
-.app[data-player-background="acrylic"] .playerBar:hover::before{
-  opacity: .055 !important;
-  transform: translateZ(0) scale(1.015) !important;
-}
-
-/* This was the dark layer making acrylic look like normal cover blur. */
-.app[data-player-background="acrylic"] .playerBar::after{
-  background:
-    linear-gradient(90deg, rgba(0,0,0,.20), rgba(0,0,0,.08) 52%, rgba(0,0,0,.14)),
-    linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.004)) !important;
-}
-
-/* Keep player internals clean in acrylic mode. */
-.app[data-player-background="acrylic"] .playerLeft,
-.app[data-player-background="acrylic"] .playerCenter,
-.app[data-player-background="acrylic"] .playerRight,
-.app[data-player-background="acrylic"] .controlRow,
-.app[data-player-background="acrylic"] .progressRow,
-.app[data-player-background="acrylic"] .volumeWrap{
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.app[data-player-background="oledBlack"] .playerBar{
-  background: #000 !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app[data-player-background="oledBlack"] .playerBar::before{
-  opacity: 0 !important;
-}
-
-.app[data-player-background="oledBlack"] .playerBar::after,
-.app[data-player-background="flat"] .playerBar::after{
-  background: linear-gradient(90deg, rgba(0,0,0,.84), rgba(0,0,0,.56) 50%, rgba(0,0,0,.72)) !important;
-}
-
-/* Final player control repair: only the main play button has a filled circle. */
-.playerBar .controlRow > .circleButton:not(.main),
-.playerBar .controlRow > .repeatButton,
-.playerBar .controlRow > .playerButton:not(.main),
-.playerBar .controlRow > .playerControlButton:not(.main),
-.playerBar .controlRow > .volumeIconButton{
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  border: 0 !important;
-  outline: 0 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.playerBar .controlRow > .circleButton:not(.main)::before,
-.playerBar .controlRow > .circleButton:not(.main)::after,
-.playerBar .controlRow > .repeatButton::before,
-.playerBar .controlRow > .repeatButton::after,
-.playerBar .controlRow > .playerButton:not(.main)::before,
-.playerBar .controlRow > .playerButton:not(.main)::after,
-.playerBar .controlRow > .playerControlButton:not(.main)::before,
-.playerBar .controlRow > .playerControlButton:not(.main)::after,
-.playerBar .controlRow > .volumeIconButton::before,
-.playerBar .controlRow > .volumeIconButton::after{
-  content: none !important;
-  display: none !important;
-}
-
-.playerBar .controlRow > .circleButton:not(.main):hover,
-.playerBar .controlRow > .repeatButton:hover,
-.playerBar .controlRow > .playerButton:not(.main):hover,
-.playerBar .controlRow > .playerControlButton:not(.main):hover,
-.playerBar .controlRow > .volumeIconButton:hover{
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  filter: brightness(1.18) !important;
-}
-
-.playerBar .controlRow > .circleButton.main{
-  background: rgb(var(--accent-rgb)) !important;
-  box-shadow: 0 10px 24px rgba(var(--accent-rgb),.22) !important;
-}
 
 /* ==========================================================================
    localtify v0.3.6 V211 — theme-tinted frosted player
@@ -3805,5 +2784,66 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 .playerBar .controlRow > .circleButton.main{
   background: rgb(var(--accent-rgb)) !important;
   box-shadow: 0 10px 24px rgba(var(--accent-rgb),0.22) !important;
+}
+
+
+/* ==========================================================================
+   localtify v0.3.6 V216 — player.css owner cleanup final guard
+   Owner: bottom player only.
+========================================================================== */
+
+/* Secondary controls stay icon-only; main play button stays filled. */
+.playerBar .controlRow > .circleButton:not(.main),
+.playerBar .controlRow > .repeatButton,
+.playerBar .controlRow > .playerButton:not(.main),
+.playerBar .controlRow > .playerControlButton:not(.main),
+.playerBar .controlRow > .volumeIconButton{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  outline: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.playerBar .controlRow > .circleButton:not(.main)::before,
+.playerBar .controlRow > .circleButton:not(.main)::after,
+.playerBar .controlRow > .repeatButton::before,
+.playerBar .controlRow > .repeatButton::after,
+.playerBar .controlRow > .playerButton:not(.main)::before,
+.playerBar .controlRow > .playerButton:not(.main)::after,
+.playerBar .controlRow > .playerControlButton:not(.main)::before,
+.playerBar .controlRow > .playerControlButton:not(.main)::after,
+.playerBar .controlRow > .volumeIconButton::before,
+.playerBar .controlRow > .volumeIconButton::after{
+  content: none !important;
+  display: none !important;
+}
+
+.playerBar .controlRow > .circleButton.main{
+  background: rgb(var(--accent-rgb)) !important;
+}
+
+/* Acrylic stays theme-tinted, not white. */
+.app[data-player-background="acrylic"] .playerBar{
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),0.105), rgba(var(--accent-rgb),0.030)),
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.006)),
+    rgba(5, 4, 10, 0.42) !important;
+  border-top-color: rgba(var(--accent-rgb),0.18) !important;
+  backdrop-filter: blur(28px) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(175%) !important;
+}
+
+.app[data-player-background="acrylic"] .playerBar::before{
+  opacity: 0.018 !important;
+}
+
+.app[data-player-background="acrylic"] .playerBar::after{
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.16), rgba(0,0,0,0.045) 52%, rgba(0,0,0,0.11)),
+    linear-gradient(180deg, rgba(var(--accent-rgb),0.026), rgba(255,255,255,0.004)) !important;
 }
 

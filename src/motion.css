@@ -1,4 +1,3 @@
-/* localtify 0.3.6 motion ownership + audio-hover stability V147 — file patch label only; APP_VERSION stays 0.3.6. */
 /* localtify motion.css — animation-only layer.
    Keep static layout, colors, player/progress styles, and shared backgrounds in their owner files. */
 
@@ -347,19 +346,8 @@ body.localitfySongDragging .app .coverAura::before{
   0%, 100%{ opacity: 0.28; transform: scale(0.99); }
   50%{ opacity: 0.66; transform: scale(1.01); }
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-/* ======================================================================
-   localtify v0.2.5 — bouncy hero expand/compact animation restore
-   ----------------------------------------------------------------------
-   motion.css only owns transform/opacity/filter animation here. Layout
-   sizes still live in home.css.
-====================================================================== */
 .heroLayoutMotion.heroLayoutPulseA,
 .heroLayoutMotion.heroLayoutPulseB{
   animation-duration: 720ms !important;
@@ -435,13 +423,8 @@ body.localitfySongDragging .app .coverAura::before{
   58%{ opacity: 1; transform: translate3d(0, -2px, 0) scale(1.035); }
   100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-/* ======================================================================
-   localtify v0.2.5 — extra smooth app motion
-   Motion-only: transform, opacity, filter. No layout ownership here.
-====================================================================== */
 @keyframes localtifySoftPopIn{
   from{ opacity: 0; transform: translate3d(0, 12px, 0) scale(0.985); filter: blur(6px); }
   to{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: none; }
@@ -499,9 +482,6 @@ body.localitfySongDragging .app .coverAura::before{
 }
 
 
-/* ======================================================================
-   localtify v0.2.6 — micro interactions only
-====================================================================== */
 @keyframes localtifyHeartPop {
   0% { transform: scale(.82) translateZ(0); }
   45% { transform: scale(1.24) translateZ(0); }
@@ -539,9 +519,6 @@ body.localitfySongDragging .app .coverAura::before{
 }
 
 
-
-
-
 body.localitfyDropCommitted .app .homeAlbumCard,
 body.localitfyDropCommitted .app .songRow{
   animation: localtifyDropSettle 360ms cubic-bezier(.2, .9, .2, 1.12) both;
@@ -555,14 +532,8 @@ body.localitfyDropCommitted .app .songRow{
 .app .heroGhost:active{
   animation: localtifySoftWobble 260ms cubic-bezier(.2, .85, .2, 1.2) both;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-
-/* ======================================================================
-   localtify 0.2.6 — final settings motion override
-   motion.css loads after settings.css, so keep settings hover clean here too.
-   ====================================================================== */
 .app .settingSwitchCard,
 .app .settingsChoice,
 .app .coverSyncChoice,
@@ -593,10 +564,6 @@ body.localitfyDropCommitted .app .songRow{
 }
 
 
-/* ======================================================================
-   localtify v0.2.6 — no-tilt animation rules
-   Bouncy = scale + translate only. No rotate/tilt, no hover blur.
-   ====================================================================== */
 @keyframes localtifyHeroCoverBounce{
   0%{ opacity: 0.88; transform: translate3d(14px, 8px, 0) scale(0.95); filter: none; }
   48%{ opacity: 1; transform: translate3d(-4px, -3px, 0) scale(1.045); filter: none; }
@@ -627,8 +594,6 @@ body.localitfyDropCommitted .app .songRow{
 }
 
 
-/* localtify v0.2.6 — settings cleanup guard
-   Keep bouncy movement, but block tilt/blur/orb hover effects inside settings. */
 .app :where(.settingsPage, .kopuzSettingsPage, .settingsModal) :where(.settingsPanelCard, .settingsPageCard, .settingSwitchCard, .settingsChoice, .coverSyncChoice, .settingsActionButton, .settingsTinyButton, .softButton):hover{
   rotate: 0deg !important;
 }
@@ -641,10 +606,7 @@ body.localitfyDropCommitted .app .songRow{
   transform: scale(0.992) !important;
 }
 
-/* ======================================================================
-   localtify v0.2.6 — animation guardrails
-   Buttons/cards bounce lightly; no tilt and no hover blur blooms.
-   ====================================================================== */
+
 .app :where(.homeAlbumCard,.songRow,.songCard,.libraryCard,.coverCard,.coverTile,.settingSwitchCard,.settingsChoice,.coverSyncChoice,.updateToastCard,.softButton,.heroMain,.settingsActionButton){
   transform-style: flat !important;
   perspective: none !important;
@@ -666,18 +628,11 @@ body.localitfyDropCommitted .app .songRow{
 }
 
 
-/* v0.2.6 motion guard: bouncy transforms are fine, expensive filter/layout transitions are not. */
-
-
 .app :is(.songCard, .songRow, .libraryRow, .coverCard, .settingRow, .settingsRow, .rangeRow, .themeButton, .themeTile):hover {
   filter: none;
 }
 
 
-/* ======================================================================
-   localtify v0.2.6 — smoother cheap motion pass
-   Uses only transform/opacity so it feels smoother without repainting blur.
-====================================================================== */
 .app :where(.navItem, .songRow, .homeAlbumCard, .coverGalleryCard, .settingsCategoryButton, .settingsChoice, .softButton, .heroGhost, .iconAction, .circleButton){
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
@@ -714,14 +669,6 @@ body.localitfyDropCommitted .app .songRow{
 }
 
 
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
-/* ======================================================================
-   localtify v0.2.6 — animated hover icons
-   Uses existing lucide-react SVGs, so no new package is required.
-====================================================================== */
 .navLucideIcon,
 .settingsLucideIcon{
   transform-box: fill-box;
@@ -816,10 +763,6 @@ body.localitfyDropCommitted .app .songRow{
 }
 
 
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-/* localtify v0.2.9 — smoother lightweight screen motion */
 @keyframes localtifySoftPageIn{
   0%{ opacity: .72; transform: translate3d(0, 8px, 0) scale(.997); }
   38%{ opacity: 1; transform: translate3d(0, -1px, 0) scale(1.001); }
@@ -838,7 +781,7 @@ body.localitfyDropCommitted .app .songRow{
   --ambient-opacity: .28;
 }
 
-/* v0.2.9 motion guardrail: no tilt/3D rotation anywhere */
+
 * {
   transform-style: flat;
 }
@@ -866,11 +809,6 @@ body.localitfyDropCommitted .app .songRow{
   rotate: 0deg !important;
 }
 
-
-/* localtify v0.2.9 — performance-safe motion polish
-   Motion-only: timing, compositor hints, and no layout/color ownership. */
-
-/* localtify v0.3.6 V189: unwrapped motion-on block. */
 
   :where(
     .panel,
@@ -911,7 +849,6 @@ body.localitfyDropCommitted .app .songRow{
   }
 
 
-
 .app.isScrolling :where(.songRow, .songCard, .libraryCard, .playlistTrackRow),
 .app.songDragActive :where(.songRow, .songCard, .libraryCard, .playlistTrackRow),
 .app.themeSettling :where(.songRow, .songCard, .libraryCard, .playlistTrackRow),
@@ -924,7 +861,6 @@ body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .play
    Owner: motion.css. No tilt, no random bounce, no layout-shifting hover.
 ====================================================================== */
 
-/* localtify v0.3.6 V189: unwrapped motion-on block. */
 
   .app :where(
     .mainAction,
@@ -1072,7 +1008,6 @@ body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .play
   }
 
 
-
 @keyframes localtifyV031PopupIn{
   from{ opacity: .001; transform: translate3d(0,10px,0) scale(.992); }
   to{ opacity: 1; transform: translate3d(0,0,0) scale(1); }
@@ -1152,11 +1087,6 @@ body.localtifyBackgroundMode .coverCard,
   min-width: 0;
   width: 100%;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
 
 
 /* Motion/react handles the ribbon entrance in v102, so avoid double-running
@@ -1318,11 +1248,6 @@ body.localtifyBackgroundMode .coverCard,
     transform: translate3d(0, 0, 0) scale(1);
   }
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
 
 
 /* =======================================================================
@@ -1351,8 +1276,6 @@ body.localtifyBackgroundMode .coverCard,
 }
 
 
-/* localtify v0.3.6 V189: unwrapped motion-on block. */
-
   .app .playlistShelfCard{
     animation: localtifyPlaylistShelfIn 420ms cubic-bezier(.18,.9,.22,1) both;
     animation-delay: calc(min(var(--playlist-stagger, 0), 12) * 22ms);
@@ -1367,11 +1290,6 @@ body.localtifyBackgroundMode .coverCard,
   body.localitfySongDragging .app .playlistTrackRow.virtualPlaylistTrackRow{
     animation: none !important;
   }
-
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
 
 
 /* ========================================================================
@@ -1470,9 +1388,6 @@ body.localtifyBackgroundMode .coverCard,
 }
 
 
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
 /* ========================================================================
    localtify v0.3.5 V135 — proximity styling owner
    ------------------------------------------------------------------------
@@ -1532,8 +1447,6 @@ body.localtifyBackgroundMode .coverCard,
   background-color: rgba(var(--accent-rgb), calc(var(--prox-bg, 0.01) + 0.02)) !important;
   box-shadow: 0 0 var(--prox-glow-size, 0px) rgba(var(--accent-rgb), 0.08) !important;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
 
 
 /* ========================================================================
@@ -1669,10 +1582,6 @@ body.localtifyBackgroundMode .coverCard,
 }
 
 
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
 /* ========================================================================
    localtify v0.3.5 V141 — no delayed shelf/card entrance replay
    ------------------------------------------------------------------------
@@ -1799,7 +1708,6 @@ body.localtifyBackgroundMode .coverCard,
   transition-duration: 0ms !important;
   scale: .972 !important;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
 .app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding{
@@ -2075,9 +1983,6 @@ body.localtifyBackgroundMode .coverCard,
 body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow){
   animation: localtifyDropBounceV143 300ms cubic-bezier(.18, 1.18, .22, 1) both !important;
 }
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
 
 
 /* ========================================================================
@@ -2409,3 +2314,45 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   48%{ transform: translate3d(0, 0, 0) scale(1.075); box-shadow: 0 0 34px rgba(var(--accent-rgb), 0.32); }
   100%{ transform: translate3d(0, 0, 0) scale(1); box-shadow: 0 0 0 rgba(var(--accent-rgb), 0); }
 }
+
+
+/* ==========================================================================
+   localtify v0.3.6 V216 — motion.css owner cleanup final guard
+   Owner: keyframes, transitions, and lightweight animation only.
+========================================================================== */
+
+/* Proximity is now buttons/nav only. If stale classes touch cards, neutralize them. */
+:where(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingSwitchCard,
+  .settingsChoice,
+  .settingsResetButton,
+  .songRow,
+  .libraryCard,
+  .libraryCardV025,
+  .coverTile,
+  .coverGalleryCard
+).localtifyProximityTarget,
+:where(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingSwitchCard,
+  .settingsChoice,
+  .settingsResetButton,
+  .songRow,
+  .libraryCard,
+  .libraryCardV025,
+  .coverTile,
+  .coverGalleryCard
+).localtifyProximityActive{
+  transform: none !important;
+  transition-property: background-color, border-color, box-shadow, color, opacity !important;
+  animation: none !important;
+}
+
+/* No tilt or rotate from old motion blocks. */
+.app :where(button,.navItem,.softButton,.mainAction,.heroMain,.heroGhost,.circleButton){
+  rotate: 0deg !important;
+}
+

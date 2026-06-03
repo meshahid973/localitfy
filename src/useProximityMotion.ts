@@ -1,4 +1,4 @@
-/* localtify 0.3.6 V215 — buttons-only proximity motion.
+/* localtify 0.3.6 V216 — strict buttons-only proximity motion.
    Kept:
    - sidebar/nav buttons
    - main action buttons

@@ -156,7 +156,6 @@
   82%{ scale: 1.006; }
   100%{ rotate: 360deg; scale: 0.985; }
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
 body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::before,
@@ -164,12 +163,6 @@ body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWr
   transition-duration: 120ms !important;
 }
 
-/* ========================================================================
-   localtify 0.2.8 — FINAL global square/grid background killer
-   Keep this at the very end of effects.css.
-   Reason: effects.css loads after home.css, so this wins over the old
-   42px background grid rules that were still leaking through.
-======================================================================== */
 
 html body .app,
 html body .appShell,
@@ -329,7 +322,6 @@ html body .app *{
 }
 
 
-/* localtify v0.2.9 — keep ambience smooth without making the whole page repaint */
 .app[data-playing="on"] .hero.heroPremium .heroArtWrap::before,
 .app[data-playing="on"] .hero.heroPremium .heroArtWrap::after,
 .app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing)::before,
@@ -512,3 +504,23 @@ html body .app .simpleLibraryPanel::after{
     bottom: 84px !important;
   }
 }
+
+
+/* ==========================================================================
+   localtify v0.3.6 V216 — effects.css owner cleanup final guard
+   Owner: active-song glow + lightweight /yukari and /stars effects only.
+========================================================================== */
+
+/* Keep only current light secret layers. */
+.app .secretLayer:not(.stars):not(.yukari){
+  display: none !important;
+  animation: none !important;
+  pointer-events: none !important;
+}
+
+/* Active-song effects should never animate whole rows. */
+.songRow.active::before,
+.songRow.active::after{
+  pointer-events: none !important;
+}
+

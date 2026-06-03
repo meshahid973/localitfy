@@ -1,4 +1,3 @@
-/* localtify 0.2.9 cleanup: home.css avoids owning bottom-player styles. */
 /* localtify priority ownership cleanup: player/progress rules now live in player.css. */
 /* localtify home.css — home page, hero, compact home, and quick-library visuals.
    Split out of App.css so the main stylesheet stays smaller. */
@@ -1244,7 +1243,6 @@ button,
 }
 
 
-
 .content,
 .sidebar,
 .hero,
@@ -1914,8 +1912,6 @@ button:active{
 }
 
 
-
-
 .hero.ambientSurface{
   position: relative !important;
   isolation: isolate !important;
@@ -2108,26 +2104,6 @@ button:active{
   .heroTextClean{
     transform: translateY(-6px) !important;
   }
-}
-
-
-.lateNightMode .hero{
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.48)),
-    rgba(135, 150, 255, 0.026) !important;
-}
-
-
-.misideMode .heroArt{
-  animation: misideGlitchPulse 4.6s steps(2, end) both;
-}
-
-
-.misideMode .heroTitle{
-  text-shadow:
-    1px 0 rgba(255, 80, 160, 0.22),
-    -1px 0 rgba(80, 220, 255, 0.18),
-    0 0 20px rgba(var(--accent-rgb), 0.12);
 }
 
 
@@ -2543,10 +2519,6 @@ button:active{
 }
 
 
-/* ======================================================================
-   localitfy 0.1.2 — library drag reorder polish
-   Drag any numbered song card/row onto another song to reorder the library.
-====================================================================== */
 .homeAlbumCard{
   cursor: grab;
   user-select: none;
@@ -2912,13 +2884,6 @@ button:active{
   
 
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
 
 
 @keyframes localitfyHeroTitleRiseSafe {
@@ -3009,11 +2974,6 @@ button:active{
 .app .nowPlayingDetailsSwap > *:nth-child(2){ animation-delay: 42ms; }
 
 .app .nowPlayingDetailsSwap > *:nth-child(3){ animation-delay: 84ms; }
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
 
 
 @keyframes localitfyScannerLine {
@@ -3277,13 +3237,6 @@ button:active{
     transform: translate3d(0, 0, 0) scale(1.018) !important;
   }
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
 
 
 .app .heroMain{
@@ -3554,13 +3507,6 @@ button:active{
       rgba(0, 0, 0, 0.58) 74%,
       rgba(0, 0, 0, 0.78) 100%) !important;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
 
 
 .app .headerBar{
@@ -3642,12 +3588,6 @@ button:active{
   transform: translate3d(0, 0, 0);
   image-rendering: auto;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
 
 
 /* ======================================================================
@@ -3892,15 +3832,6 @@ button:active{
   transform: scale(1.03) translateZ(0) !important;
 }
 
-/* ======================================================================
-   localitfy 0.1.3 — remove hero strip + lag-safe cover glow
-   ----------------------------------------------------------------------
-   Purpose:
-   - removes the long blurred hero strip/blob
-   - removes the extra "mita is listening..." hero pill
-   - keeps only a small blur behind the album cover itself
-   - avoids animated blur layers that can lag while scrolling/resizing
-====================================================================== */
 
 /* Fully kill the old long hero ambience strip. */
 .app .heroAmbiencePulse{
@@ -3913,10 +3844,6 @@ button:active{
   transform: none !important;
 }
 
-/* Hide the extra MiSide whisper pill in the hero if an older App.tsx still renders it. */
-.app .misideWhisper{
-  display: none !important;
-}
 
 /* Keep the actual hero cover clean and stable. */
 .app .heroArtWrap{
@@ -3969,10 +3896,6 @@ button:active{
   display: none !important;
 }
 
-/* MiSide mode was applying glitch animations to covers. Disable that for smoothness. */
-.app.misideMode .heroArt{
-  animation: none !important;
-}
 
 /* Reduce expensive effects during resize/drag so the UI does not stutter. */
 body.isResizingSidebar .heroArtWrap::before{
@@ -3991,61 +3914,6 @@ body.localitfySongDragging .homeAlbumCard{
     opacity 100ms ease,
     border-color 100ms ease,
     background-color 100ms ease !important;
-}
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
-/* ======================================================================
-   localitfy 0.1.5 — MiSide trigger + smooth home performance patch
-   ----------------------------------------------------------------------
-   Safe home-only overrides. No player layout changes.
-====================================================================== */
-
-.app.misideMode .misideWhisper{
-  display: none !important;
-}
-
-.app.misideMode .heroTitle{
-  text-shadow:
-    1px 0 rgba(255, 90, 175, 0.34),
-    -1px 0 rgba(90, 220, 255, 0.26),
-    0 0 22px rgba(255, 90, 175, 0.12) !important;
-}
-
-.app.misideMode .heroTitle{
-  animation: localitfyMisideTitleGlitch 7.2s steps(2, end) infinite !important;
-}
-
-.app.misideMode .heroArt{
-  animation: localitfyMisideCoverTick 8.8s steps(1, end) infinite !important;
-}
-
-.app.misideMode .hero,
-.app.misideMode .simpleHero{
-  border-color: rgba(255, 95, 175, 0.16) !important;
-}
-
-.app.misideMode .songRow.active{
-  box-shadow:
-    0 0 0 1px rgba(255, 95, 175, 0.16) inset,
-    0 18px 44px rgba(255, 65, 160, 0.08) !important;
-}
-
-@keyframes localitfyMisideTitleGlitch{
-  0%, 88%, 100% { transform: translate3d(0, 0, 0); filter: none; }
-  89% { transform: translate3d(1px, 0, 0); filter: saturate(1.16); }
-  90% { transform: translate3d(-1px, 0, 0); filter: hue-; }
-  91% { transform: translate3d(0, 1px, 0); filter: none; }
-}
-
-@keyframes localitfyMisideCoverTick{
-  0%, 92%, 100% { transform: translate3d(0, 0, 0); filter: none; }
-  93% { transform: translate3d(1px, -1px, 0); filter: saturate(1.18) contrast(1.04); }
-  94% { transform: translate3d(-1px, 1px, 0); filter: hue-; }
-  95% { transform: translate3d(0, 0, 0); filter: none; }
 }
 
 .app .homeAlbumCard{
@@ -4075,113 +3943,6 @@ body.isResizingSidebar .app .homeAlbumCard{
   box-shadow: none !important;
 }
 
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
-/* ======================================================================
-   localitfy 0.1.5 — MiSide easter egg visible + low lag patch
-   ----------------------------------------------------------------------
-   This makes the egg actually visible when title/artist/album/path includes
-   "miside" or "mita", while removing the expensive glitch-strip animation.
-====================================================================== */
-
-.app.misideMode .hero.heroPremium{
-  border-color: rgba(255, 128, 196, 0.34) !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 128, 196, 0.06),
-    0 0 0 1px rgba(255, 128, 196, 0.05) !important;
-}
-
-/* Kill the old long strip/glitch feeling and keep ambience cheap. */
-.app.misideMode .hero.heroPremium::before{
-  animation: none !important;
-}
-
-.app.misideMode .heroTitle{
-  text-shadow:
-    1px 0 rgba(255, 94, 170, 0.16),
-    -1px 0 rgba(120, 210, 255, 0.10) !important;
-  animation: none !important;
-}
-
-/* The actual visible easter egg badge. */
-.misideEggNotice{
-  width: fit-content;
-  max-width: min(360px, 100%);
-  margin: 12px 0 0;
-  padding: 9px 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid rgba(255, 128, 196, 0.42);
-  border-radius: 14px;
-  background: rgba(28, 12, 22, 0.92);
-  color: rgba(255, 235, 246, 0.96);
-  box-shadow:
-    0 12px 34px rgba(0, 0, 0, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  transform: translate3d(0, 0, 0);
-  animation: misideEggPop 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  contain: paint;
-}
-
-.misideEggNotice span:last-child{
-  display: grid;
-  gap: 2px;
-  line-height: 1.1;
-}
-
-.misideEggNotice strong{
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: lowercase;
-}
-
-.misideEggNotice small{
-  color: rgba(255, 186, 222, 0.70);
-  font-size: 10px;
-  font-weight: 850;
-  text-transform: lowercase;
-}
-
-.misideEggDot{
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: #ff79c6;
-  box-shadow: 0 0 0 4px rgba(255, 121, 198, 0.12);
-  flex: 0 0 auto;
-}
-
-.app.misideMode .songCard.active{
-  border-color: rgba(255, 128, 196, 0.58) !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 128, 196, 0.10) !important;
-  animation: none !important;
-}
-
-
-@keyframes misideEggPop{
-  from{
-    opacity: 0;
-    transform: translate3d(0, 8px, 0) scale(0.98);
-  }
-  to{
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
-/* ======================================================================
-   localitfy 0.1.5 — customization-ready home sizing + cover shape
-   ====================================================================== */
 
 .app .homeAlbumGrid{
   gap: var(--section-gap, 14px) !important;
@@ -4214,11 +3975,7 @@ body.isResizingSidebar .app .homeAlbumCard{
 .app .hero{
   will-change: auto;
 }
-/* ======================================================================
-   localitfy 0.1.5 — library drag/reorder stability patch
-   Paste at the VERY BOTTOM of home.css.
-   This only improves song-card dragging/reordering and lowers drag lag.
-====================================================================== */
+
 
 .homeAlbumCard{
   -webkit-user-drag: element;
@@ -4301,7 +4058,7 @@ body.isResizingSidebar .app .homeAlbumCard{
     box-shadow 120ms ease !important;
 }
 
-/* localitfy 0.1.6 drag reorder stability + smoother dynamic drop indicator */
+
 body.localitfyLibraryPointerDragging{
   cursor: grabbing !important;
   user-select: none !important;
@@ -4376,10 +4133,6 @@ body.localitfyLibraryPointerDragging{
   translate: -6px 0;
 }
 
-/* ======================================================================
-   localitfy 0.1.6 — dynamic drag reorder indicator fix
-   Safe scope: library cards/rows only. Does not touch the bottom player.
-====================================================================== */
 
 body.localitfyLibraryPointerDragging{
   cursor: grabbing !important;
@@ -4526,10 +4279,6 @@ body.localitfyLibraryPointerDragging{
   top: auto !important;
 }
 
-/* ======================================================================
-   localitfy 0.1.7 — emergency library-grid selection + drag indicator patch
-   Scope: album grid/cards and song rows only. Bottom player is untouched.
-====================================================================== */
 
 .app .homeAlbumCard{
   cursor: pointer;
@@ -4632,12 +4381,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-/* ==========================================================================
-   localitfy 0.1.8 — library grid fast-click performance guard
-   Keeps the blur/animation style, but prevents the grid from becoming heavy
-   when users rapidly click many songs in album-card view.
-   ========================================================================== */
-
 .app .homeAlbumGrid{
   contain: layout style !important;
 }
@@ -4672,10 +4415,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   transition-duration: 150ms !important;
 }
 
-
-/* ========================================================================== 
-   localtify 0.2.0 — Pixel cover studio page
-   ========================================================================== */
 
 .coverStudioLayout{
   display: grid;
@@ -4952,13 +4691,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-/* ========================================================================== 
-   localtify 0.2.0 — cover studio spacing + safe image sizing patch
-   --------------------------------------------------------------------------
-   Fullscreen now-playing was removed. This keeps the cover tools, gives the
-   gallery breathing room, and prevents very large/custom cover images from
-   blowing up the card layout.
-   ========================================================================== */
 
 .coverStudioLayout{
   display: grid;
@@ -5244,13 +4976,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-/* ========================================================================== 
-   localtify 0.2.0 — cover gallery button visibility + bottom-safe gallery
-   --------------------------------------------------------------------------
-   Fixes the cramped card action row, stops the apply button from becoming
-   "ap...", and gives the gallery enough bottom space so the player bar does
-   not hide the final row of cards.
-   ========================================================================== */
 
 .coverStudioLayout{
   min-height: 100%;
@@ -5410,13 +5135,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-
-/* ========================================================================== 
-   localtify 0.2.0 — cover page cleanup
-   --------------------------------------------------------------------------
-   Fixes the cramped cover cards and makes the cover page copy/layout feel
-   normal without removing blur, glow, or animations.
-   ========================================================================== */
 
 .coverStudioHero{
   grid-template-columns: minmax(420px, 1fr) minmax(260px, 340px) !important;
@@ -5602,11 +5320,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-
-/* ========================================================================== 
-   localtify 0.2.0 — final cover page cleanup
-   Keeps the cover studio readable after splitting Cover.tsx out of App.tsx.
-   ========================================================================== */
 
 .coverStudioLayout{
   width: 100%;
@@ -6110,7 +5823,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-/* localtify 0.2.0 — edit track modal polish, no gradient version */
+
 .editorModalWrap{
   padding: 26px !important;
   align-items: center !important;
@@ -6444,8 +6157,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-
-/* 0.2.0 library shuffle + editor cleanup */
 .libraryPanelHead{
   align-items: center;
   gap: 14px;
@@ -6520,18 +6231,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-/* v0.20.1 bottom player visualizer restore
-   Kept plain/translucent: no gradient, no extra decoration. */
-
-
-
-
-
-
-
-
-
-
 
 @media (max-width: 980px){
   
@@ -6546,16 +6245,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   
 }
 
-
-/* ========================================================================== 
-   localtify v0.2.3 — cleaner app-like home polish
-   --------------------------------------------------------------------------
-   Safe override layer for home.css only.
-   - keeps existing class names
-   - keeps cover ambience / glow / hover effects
-   - borrows the cleaner dark-card + slate/indigo app feel from the reference
-   - avoids touching Electron logic, update logic, settings, or player scripts
-========================================================================== */
 
 :root{
   --home-ref-bg: #000000;
@@ -7001,17 +6690,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-/* ========================================================================== 
-   localtify v0.2.3 — refined Kopuz-style home motion layer
-   --------------------------------------------------------------------------
-   This keeps the clean Kopuz-style glass + motion idea, but removes the heavy
-   all-over ambience. Global page/card/row surfaces now use smooth accent color
-   transitions only. Real ambience is kept small and only around album art and
-   interactive buttons.
-   ========================================================================== */
-
 :root{
   --localtify-kopuz-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --localtify-kopuz-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -7312,23 +6990,12 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
 @media (max-width: 900px){
   .hero:hover{
     transform: translateZ(0) !important;
   }
 }
 
-/* ========================================================================== 
-   localtify 0.2.3 — accent glass hover + main-content page transitions
-   --------------------------------------------------------------------------
-   Scope notes:
-   - Page transitions are ONLY on .content > .pageTransition.
-   - Titlebar, bottom player, and settings modal are not targeted.
-   - Library hover uses theme variables instead of gray/black darkening.
-   ========================================================================== */
 
 .app .content > .pageTransition{
   min-width: 0 !important;
@@ -7492,16 +7159,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .app .mainAction:hover{
   filter: brightness(1.045) saturate(1.04) !important;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
-
-
-/* ========================================================================== 
-   localtify v0.2.3 — final Kopuz-inspired library hover + sidebar guard
-   --------------------------------------------------------------------------
-   Stops the gray hover problem and keeps album-cover ambience stronger than
-   the card ambience. Loaded after App.css, so this wins against older layers.
-   ========================================================================== */
 
 .homeLibraryPanel{
   transition:
@@ -7646,9 +7304,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-/* ======================================================================
-   localtify 0.2.3 — final sidebar no-box overrides
-====================================================================== */
+
 .sidebarModeSwitch{
   display: none !important;
 }
@@ -7775,13 +7431,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-/* ======================================================================
-   localtify v0.2.4 — Kopuz motion tuning for home/library
-   ----------------------------------------------------------------------
-   No gray hover, no heavy ambience on every card. Album art moves more than
-   cards; cards lift softly; buttons get a tiny controlled glow.
-====================================================================== */
-
 .homeAlbumCard{
   transition:
     transform 230ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -7857,17 +7506,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   filter: brightness(1.07) saturate(1.1) !important;
 }
 
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-/* ======================================================================
-   localtify v0.2.4 — row stripe cleanup + cleaner Kopuz motion
-   ----------------------------------------------------------------------
-   Fixes the long horizontal active/hover band visible in list/liked rows.
-   Rows now use quiet accent glass. Covers/buttons still animate, but the
-   full-width brown/gray overlay is removed.
-====================================================================== */
 
 .app .songList{
   gap: 9px !important;
@@ -8062,13 +7700,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
-/* ======================================================================
-   localtify v0.2.4 — bold font/icon final home polish
-====================================================================== */
 .simpleBrand strong{
   font-family: var(--font-display, "Space Grotesk", Inter, system-ui, sans-serif) !important;
   font-weight: 700 !important;
@@ -8092,11 +7723,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   filter: saturate(1.14) contrast(1.06) brightness(1.04) !important;
 }
 
-/* ======================================================================
-   localtify v0.2.4 — home static cleanup
-   This file now only fixes visuals/layout for home/library rows. Motion lives
-   in motion.css so old home hover animations do not fight each other.
-====================================================================== */
+
 .homeLibraryPanel .songRow{
   max-width: 100% !important;
   min-width: 0 !important;
@@ -8158,12 +7785,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   transform: none !important;
 }
 
-/* ======================================================================
-   localtify v0.2.3 — final row stripe + library panel cleanup
-   This block intentionally comes late because home.css is imported after
-   motion/settings in App.tsx. It removes the brown full-width bands and the
-   thick left panel accent while keeping small, smooth hover motion.
-====================================================================== */
+
 .app .homeLibraryPanel{
   border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 10%, rgba(255,255,255,.055)) !important;
   border-left-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 10%, rgba(255,255,255,.055)) !important;
@@ -8274,12 +7896,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   white-space: nowrap !important;
 }
 
-/* ======================================================================
-   localtify v0.2.4 — list stripe + softer hover hotfix
-   ----------------------------------------------------------------------
-   Keeps rows clean, removes the fake full-width dark stripe, and makes cover
-   hover animation subtle instead of zooming hard.
-====================================================================== */
 
 .app .songRow{
   position: relative !important;
@@ -8363,21 +7979,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-/* ======================================================================
-   localtify v0.2.4 — remove bottom visualizer + tighten player position
-   ----------------------------------------------------------------------
-   The visualizer was creating the dotted pill under volume. Keep volume and
-   idle/playing status only, with stable right-side spacing.
-====================================================================== */
-
-
-
-/* ======================================================================
-   localtify v0.2.4 — list row stripe/position cleanup
-   ----------------------------------------------------------------------
-   Stops old full-width stripe overlays from stretching through library and
-   liked-song rows. Rows stay glassy, compact, and theme controlled.
-====================================================================== */
 .app .songRow{
   position: relative !important;
   min-height: 58px !important;
@@ -8436,7 +8037,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-/* v0.2.3 calmer library rows/cards after Kopuz pass */
 .songRow{
   background:
     linear-gradient(90deg, color-mix(in oklab, var(--accent) 5%, transparent), transparent 65%),
@@ -8476,7 +8076,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   filter: brightness(1.06) saturate(1.06) !important;
 }
 
-/* v0.2.4 — theme-aware library hover cleanup: small lift, no heavy zoom, no gray wash. */
+
 .homeView{
   --theme-accent: var(--accent, #8dffce);
   --theme-highlight: var(--highlight, #c084fc);
@@ -8518,9 +8118,8 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   border-color: color-mix(in oklab, var(--theme-accent) 28%, rgba(255,255,255,.09)) !important;
   transform: translateY(-1px) !important;
 }
-/* ======================================================================
-   localtify v0.2.4 — home surfaces follow theme, no page ambience orbs
-====================================================================== */
+
+
 .homePage{
   background: transparent !important;
 }
@@ -8594,12 +8193,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   opacity: .40 !important;
 }
 
-
-/* ======================================================================
-   localtify v0.2.4 — FINAL home.css theme-surface fix
-   This is intentionally at the very end because home.css loads after App.css.
-   It fixes the "why is this still black" issue on home/library pages.
-====================================================================== */
 
 .homeView{
   --localtify-page-bg: color-mix(in oklab, var(--bg, #050505) 78%, var(--accent, #ff65df) 12%);
@@ -8705,7 +8298,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent, #ff65df) 13%, transparent) !important;
 }
 
-/* v0.2.4 home cleanup: no useless hero info, smaller duration, themed panels instead of hard black blocks. */
+
 .homePage{
   background: transparent !important;
 }
@@ -8805,10 +8398,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-/* ======================================================================
-   localtify v0.2.4 — home/library performance patch
-====================================================================== */
-
 .homeAlbumGrid{
   overscroll-behavior: contain;
   scrollbar-gutter: auto;
@@ -8851,7 +8440,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
 }
 
 
-/* v0.2.4 safe visual/performance helpers */
 .homeHero{
   backface-visibility: hidden;
 }
@@ -8861,12 +8449,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
 }
 
 
-/* ======================================================================
-   localtify v0.2.4 — proper home hero + cover ambience restore
-   ----------------------------------------------------------------------
-   Fixes the too-empty right side, brings back cover-based ambience, improves
-   the duration chip, and keeps the actual album cover crisp inside the hero.
-====================================================================== */
 .app .hero.heroPremium{
   position: relative !important;
   isolation: isolate !important;
@@ -9059,17 +8641,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
 }
 
 
-/* ======================================================================
-   localtify v0.2.4 — final hero blur/cover cleanup
-   ----------------------------------------------------------------------
-   Fixes:
-   - the huge cover background no longer appears as a sharp/pixelated block
-   - hero hover no longer shifts/breaks the background
-   - the right cover stays a real album cover, not a stretched banner piece
-   - removes the awkward duration box from the hero
-   - keeps the Kopuz-inspired wide stage without copying it exactly
-====================================================================== */
-
 .app .hero.heroPremium{
   position: relative !important;
   overflow: hidden !important;
@@ -9253,7 +8824,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 
-/* localtify v0.2.5 library and hero polish */
 .content:has(.libraryPanelV025){
   overflow-y: auto !important;
   overflow-x: hidden !important;
@@ -9445,7 +9015,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   }
 }
 
-/* localtify v0.2.5 stability polish: safer card controls and theme-aware hover */
+
 .app .homeAlbumActions .deleteAction{
   display: none !important;
 }
@@ -9508,8 +9078,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   }
 }
 
-/* v0.2.5 unique home shelves
-   A cleaner Kopuz-inspired section without copying the layout or adding artist circles. */
+
 .homeShelfStack{
   display:grid;
   gap:18px;
@@ -9803,10 +9372,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   }
 }
 
-/* ======================================================================
-   localtify v0.2.5 — Listen now shelf cleanup
-   Final override kept in home.css because it loads after App.css.
-====================================================================== */
+
 .homeView{
   background-image:
     radial-gradient(circle at 14% 0%, color-mix(in oklab, var(--accent, #ff65df) 9%, transparent) 0%, transparent 34%),
@@ -10003,7 +9569,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   text-overflow: ellipsis !important;
 }
 
-/* v0.2.5 gridless home + faster visual pass */
+
 :root{
   --theme-page-bg: radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb, 255, 105, 180), 0.10), transparent 34%),
     radial-gradient(circle at 88% 12%, rgba(var(--accent-2-rgb, 128, 92, 255), 0.10), transparent 34%),
@@ -10042,12 +9608,9 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 
-/* localtify v0.3.6 V189: unwrapped motion-on block. */
-
   .homeListenCard{
     animation-duration: 280ms !important;
   }
-
 
 
 /* final home background cleanup */
@@ -10073,10 +9636,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 /* player controls are repeated here because home.css loads after player.css */
 
 
-
-
-
-
 .circleButton.active:not(.playerBar *){
   color: var(--text, #fff) !important;
   border-color: rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.42) !important;
@@ -10084,11 +9643,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   box-shadow: 0 0 20px rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.16) !important;
 }
 
-
-/* ==========================================================================
-   localtify v0.2.5 home motion polish
-   These are visual hooks only. motion.css owns keyframes.
-   ========================================================================== */
 
 .homeHeroCard{
   isolation: isolate;
@@ -10183,7 +9737,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 
-/* v0.2.5 actual home classes */
 .hero{
   isolation: isolate;
   overflow: hidden;
@@ -10233,7 +9786,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 
-/* v0.2.5 Cover Color Sync strength for home, library, and active rows */
 .app[data-cover-sync="off"] .ambientSurface::before{
   opacity: 0 !important;
   animation: none !important;
@@ -10285,12 +9837,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   opacity: min(var(--cover-sync-hero-opacity, 0.18), 0.18) !important;
 }
 
-/* ======================================================================
-   localtify v0.2.5 — final hero expand/compact motion fix
-   ----------------------------------------------------------------------
-   Layout ownership stays in home.css. This block intentionally wins over
-   the older hero cleanup rules that froze the banner at one size.
-====================================================================== */
+
 .app .hero.heroPremium.heroLayoutMotion{
   transform-origin: center top !important;
   will-change: min-height, grid-template-columns, padding, transform !important;
@@ -10504,10 +10051,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   }
 }
 
-/* ======================================================================
-   localtify v0.2.5 — long hero title fit + smoother hero bounce
-   Does not remove cover ambience, blur, or existing hero glow.
-====================================================================== */
+
 .app .hero.heroPremium.heroLayoutMotion .heroTextClean,
 .app .hero.heroPremium.heroLayoutMotion .heroText{
   align-self: center !important;
@@ -10584,9 +10128,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 
-/* ======================================================================
-   localtify v0.2.6 — smoother search, card hover, and drag reorder polish
-====================================================================== */
 .app .search{
   transform-origin: left center;
   transition:
@@ -10666,15 +10207,8 @@ body.localitfyNoSelect,
 body.localitfyNoSelect *{
   user-select: none !important;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-
-/* ======================================================================
-   localtify 0.2.6 — edit track modal shape consistency
-   Keeps the new song customization UI, removes hover shape jumps, and makes
-   like / remove / save buttons use one button language.
-   ====================================================================== */
 .app[data-theme] .editorModal,
 .app[data-theme] .editorModal:hover,
 .editorModal,
@@ -10809,10 +10343,6 @@ body.localitfyNoSelect *{
 }
 
 
-/* ======================================================================
-   localtify v0.2.6 — no tilt anywhere on hover
-   Smooth card hover stays translate + scale only. No rotateX / rotateY.
-   ====================================================================== */
 .app .homeAlbumCard,
 .app .songRow,
 .app .libraryCard,
@@ -10871,10 +10401,7 @@ body.localitfyNoSelect *{
   rotate: 0deg !important;
 }
 
-/* ======================================================================
-   localtify v0.2.6 — smoother drag reorder visuals
-   Better drop target, source ghost, and commit bounce. No tilt/no blur changes.
-   ====================================================================== */
+
 .app{
   --drag-ease-out: cubic-bezier(.17,1.18,.24,1);
   --drag-ease-soft: cubic-bezier(.2,.85,.22,1);
@@ -11015,10 +10542,8 @@ body.localitfyNoSelect *{
 .app .songRow:not(.songDragging):not(.songDropTarget){
   animation-duration: 0ms;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
 
 
-/* v0.2.6 drag patch follow-up: match the real data-drop-side attributes. */
 .app .homeAlbumCard.songDropTarget::before,
 .app .songRow.songDropTarget::before{
   opacity: 0 !important;
@@ -11058,7 +10583,6 @@ body.localitfyNoSelect *{
 }
 
 
-/* === v0.2.6 library cleanup + text clipping fix === */
 /* big headings should never clip descenders like g/y/q */
 .heroTitle,
 .nowPlayingTitle,
@@ -11339,7 +10863,6 @@ body.localitfyNoSelect *{
 }
 
 
-/* v0.2.6 load/perf guard: preserve design, reduce offscreen work. */
 .homeAlbumCard,
 .songRow,
 .panel,
@@ -11358,10 +10881,6 @@ body.localitfyNoSelect *{
 }
 
 
-/* ======================================================================
-   localtify v0.2.8 — cleaner library cards + small perf cleanup
-   Keeps noisy card play-count text gone without adding extra navigation.
-====================================================================== */
 .app .homeAlbumStats{
   justify-content: flex-start !important;
   min-height: 18px !important;
@@ -11406,7 +10925,7 @@ body.localitfyNoSelect *{
   }
 }
 
-/* localtify v0.2.8 — remove the visible background grid lines */
+
 .homePage,
 .homePage::before,
 .homePage::after,
@@ -11421,13 +10940,6 @@ body.localitfyNoSelect *{
 }
 
 
-/* localtify 0.2.9 — active song beat visuals moved to effects.css. */
-
-/* ======================================================================
-   localtify v0.2.8 — home tiny-window overflow fix
-   Fixes the right-side dead space, huge hero art crop, and shelves pushing
-   against the scrollbar on narrow windows.
-====================================================================== */
 @media (max-width: 760px){
   .homeView,
   .homeShelfStack,
@@ -11617,17 +11129,13 @@ body.localitfyNoSelect *{
 }
 
 
-/* localtify 0.2.9: no one-frame album art glow pop while editing theme colors */
 body.localitfyThemePainting .homeHero::before,
 body.localitfyThemePainting .heroCover .coverAura::before{
   opacity: .42 !important;
   filter: blur(30px) saturate(1.08) !important;
 }
 
-/* ========================================================================
-   localtify 0.2.9 — home/library grid background removal
-   Keep this at the very end of home.css.
-======================================================================== */
+
 .homeView,
 .homeShell,
 .homeShelfStack,
@@ -11674,13 +11182,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   background-size: auto !important;
 }
 
-
-/* ========================================================================
-   localtify 0.2.9 — final library hover cleanup + performance pass
-   Fixes the dark vertical hover strip, removes leftover card/grid textures,
-   and keeps library scrolling smoother without changing app features.
-   Keep this at the very end of home.css.
-======================================================================== */
 
 .homeView,
 .homePage,
@@ -11845,16 +11346,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-/* ========================================================================
-   localtify 0.2.9 — absolute no-grid + simple card hover final override
-   Imported after settings.css, so this also cleans settings/library surfaces
-   that older files still textured with square grid lines.
-======================================================================== */
 .app,
 .app :where(.homeView,.homePage,.homeShell,.homeShelfStack,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanel,.mainContent,.content,.contentScroller,.settingsView,.settingsPage,.settingsContent,.settingsBody,.settingsScroll,.settingsShell,.settingsWorkspace,.settingsMain,.settingsStage,.settingsCanvas,.settingsPanel,.settingsPanelShell){
   --grid-line: transparent !important;
@@ -11955,10 +11446,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 
-
-/* localtify 0.2.9 — library hover cleanup + smoother page paint
-   This keeps card hover from turning into a dark block and lets the browser
-   skip work for off-screen cards. */
 .app .homeAlbumCard,
 .app .albumCard,
 .app .songRow,
@@ -11999,8 +11486,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   transform: none !important;
 }
 
-/* v0.2.8 home hover + performance cleanup
-   Home owns library/list/card surfaces. No dark hover takeover, no grid texture. */
+
 .home,
 .home::before,
 .home::after,
@@ -12099,10 +11585,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 
-/* ======================================================================
-   localtify v0.2.9 — playlists
-   Playlist UI belongs to home.css because it is a library/home surface.
-====================================================================== */
 .app .songRow{
   grid-template-columns: minmax(0, 1fr) 72px 38px 38px 38px !important;
 }
@@ -12689,7 +12171,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   }
 }
 
-/* v0.2.9 playlist polish: no card tilt, clean playlist picker states */
+
 .playlistHeroCollage,
 .playlistCard,
 .playlistCard:hover,
@@ -12766,13 +12248,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 
-/* ========================================================================
-   localtify v0.2.9 — home shelf corner and edge repair
-
-   Owner: home.css
-   Fixes the clipped-looking right corners on Listen now / recent covers /
-   quick library without changing app-core layout or player ownership.
-======================================================================== */
 .app .homeView,
 .app .homePage,
 .app .homeShell,
@@ -12826,10 +12301,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   }
 }
 
-/* ========================================================================
-   localtify v0.2.9 — premium playlist experience
-   Ownership: playlist page, playlist shelves, playlist context menu.
-======================================================================== */
+
 .app .playlistHeroActions{
   flex-wrap: wrap;
   align-items: center;
@@ -13102,10 +12574,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 
-/* ========================================================================
-   localtify v0.2.9 — home feed alignment + no-grid cleanup final override
-   Ownership: home feed, shelves, and page presentation only.
-======================================================================== */
 .app .content{
   padding: 20px 24px 14px 26px !important;
   background:
@@ -13906,9 +13374,6 @@ html body .content{
 .coverGalleryImageShell.isFailed::after {
   display: none;
 }
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
 
 
 /* =======================================================================
@@ -15731,141 +15196,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     rgba(28, 20, 39, .70) !important;
 }
 
-/* ==========================================================================
-   localtify v0.3.6 V209 — true acrylic cards and working visual modes
-   Owner: home.css
-========================================================================== */
-
-.app[data-card-background="solid"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025){
-  background: rgba(10,10,15,.88) !important;
-  border-color: rgba(255,255,255,.055) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app[data-card-background="glassy"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025){
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.010)),
-    rgba(12,10,18,var(--lt-glass-alpha,.42)) !important;
-  border-color: rgba(255,255,255,.070) !important;
-  box-shadow: none !important;
-  backdrop-filter: blur(var(--lt-visual-blur-light,8px)) saturate(var(--lt-visual-saturation,116%)) !important;
-  -webkit-backdrop-filter: blur(var(--lt-visual-blur-light,8px)) saturate(var(--lt-visual-saturation,116%)) !important;
-}
-
-.app[data-card-background="acrylic"],
-.app:not([data-card-background]){
-  --lt-card-background-ready: 1;
-}
-
-.app[data-card-background="acrylic"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025),
-.app:not([data-card-background]) :where(.homeShelfPanel,.homeListenCard,.songRow){
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.060), rgba(255,255,255,.012)),
-    rgba(12,10,18,var(--lt-acrylic-alpha,.30)) !important;
-  border-color: rgba(255,255,255,.085) !important;
-  box-shadow:
-    0 10px 28px rgba(0,0,0,.18),
-    inset 0 1px 0 rgba(255,255,255,.055) !important;
-  backdrop-filter: blur(var(--lt-visual-blur,14px)) saturate(var(--lt-visual-saturation,116%)) !important;
-  -webkit-backdrop-filter: blur(var(--lt-visual-blur,14px)) saturate(var(--lt-visual-saturation,116%)) !important;
-}
-
-.app[data-card-background="oledFlat"] :where(.panel,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeAlbumPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025){
-  background: #030305 !important;
-  border-color: rgba(255,255,255,.040) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Home banner modes */
-.app[data-home-banner="albumCover"] .hero{
-  background:
-    linear-gradient(90deg, rgba(0,0,0,.86), rgba(0,0,0,.58) 50%, rgba(0,0,0,.36)),
-    radial-gradient(circle at 78% 42%, rgba(var(--cover-rgb,var(--accent-rgb)),.18), transparent 44%),
-    var(--cover-url, none) center / cover no-repeat !important;
-}
-
-.app[data-home-banner="cleanBlack"] .hero{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,.006)),
-    rgba(3,3,7,.94) !important;
-}
-
-.app[data-home-banner="none"] .hero{
-  min-height: 160px !important;
-  background: rgba(3,3,7,.72) !important;
-  box-shadow: none !important;
-}
-
-.app[data-home-banner="none"] .hero .heroArtWrap,
-.app[data-home-banner="none"] .heroExpandedShelf{
-  display: none !important;
-}
-
-/* Existing layout toggles stay the main source of truth, but these still work if saved. */
-.app[data-home-layout="compact"] .hero{
-  min-height: 250px !important;
-  padding-block: 24px !important;
-}
-
-.app[data-home-layout="bigHero"] .hero{
-  min-height: 430px !important;
-}
-
-.app[data-home-layout="bigHero"] .heroArt{
-  width: clamp(166px, 14vw, 220px) !important;
-  height: clamp(166px, 14vw, 220px) !important;
-}
-
-.app[data-home-layout="minimal"] .hero{
-  min-height: 210px !important;
-  background: rgba(3,3,7,.82) !important;
-}
-
-.app[data-home-layout="minimal"] .heroArtWrap,
-.app[data-home-layout="minimal"] .homeFreshPanel,
-.app[data-home-layout="minimal"] .homeAlbumPanel{
-  display: none !important;
-}
-
-/* Library row modes still work if an old saved setting exists. */
-.app[data-library-row-style="compactRows"] .songRow{
-  min-height: 52px !important;
-  padding-block: 7px !important;
-}
-
-.app[data-library-row-style="comfyRows"] .songRow,
-.app:not([data-library-row-style]) .songRow{
-  min-height: 68px !important;
-}
-
-.app[data-library-row-style="coverCards"] .songList.fullList{
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(210px,1fr)) !important;
-  gap: 12px !important;
-}
-
-.app[data-library-row-style="coverCards"] .songRow{
-  min-height: 138px !important;
-  align-content: end !important;
-  border-radius: 18px !important;
-}
-
-.app[data-library-row-style="listOnly"] .songRow{
-  min-height: 48px !important;
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app[data-library-row-style="listOnly"] .songRow:hover{
-  background: rgba(255,255,255,.035) !important;
-}
 
 /* ==========================================================================
    localtify v0.3.6 V211 — theme-tinted acrylic cards
@@ -15981,5 +15311,28 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+
+/* ==========================================================================
+   localtify v0.3.6 V216 — home.css owner cleanup final guard
+   Owner: home, library, cards, cover pages only.
+========================================================================== */
+
+/* No bottom-player ownership in home.css. */
+.homePage :where(.playerBar,.playerLeft,.playerCenter,.playerRight),
+.libraryPage :where(.playerBar,.playerLeft,.playerCenter,.playerRight){
+  all: revert-layer;
+}
+
+/* Old joke visual modes are not part of home anymore. */
+.app :where(.misideEggNotice,.misideWhisper,.lateNightWarning){
+  display: none !important;
+}
+
+/* Cards/settings should not use proximity glow. */
+:where(.songRow,.libraryCard,.libraryCardV025,.coverTile,.coverGalleryCard,.homeAlbumCard).localtifyProximityActive{
+  transform: none !important;
+  box-shadow: inherit !important;
 }
 
