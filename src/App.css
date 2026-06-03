@@ -14788,3 +14788,516 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   --lt-glass-accent-alpha: 0.075;
 }
 
+/* ==========================================================================
+   localtify v0.3.6 V212 — sidebar hover/slim mode repair
+   Owner: App.css
+
+   Fixes:
+   - hover sidebar mode leaving ugly clipped text/buttons
+   - import button wrapping/cutting in slim mode
+   - active icon outline being too bulky in slim sidebar
+   - smoother width/text animation
+========================================================================== */
+
+.app[data-sidebar-behavior="slim"],
+.app[data-sidebar-behavior="hover"]{
+  --sidebar-width: 88px !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover),
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within){
+  --sidebar-width: 236px !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar,
+.app[data-sidebar-behavior="hover"] .sidebar{
+  width: var(--sidebar-width) !important;
+  min-width: var(--sidebar-width) !important;
+  overflow: hidden !important;
+  padding-inline: 12px !important;
+  transition:
+    width 260ms cubic-bezier(.16,1,.3,1),
+    min-width 260ms cubic-bezier(.16,1,.3,1),
+    padding 260ms cubic-bezier(.16,1,.3,1),
+    background-color 180ms ease,
+    border-color 180ms ease !important;
+  will-change: width, min-width !important;
+}
+
+/* Prevent the content/star field from animating weirdly while sidebar opens. */
+.app[data-sidebar-behavior="hover"] .content{
+  transition: padding 180ms ease !important;
+}
+
+/* Shared text hiding. Keep the icon visible, hide copy only. */
+.app[data-sidebar-behavior="slim"] .logoWrap h1,
+.app[data-sidebar-behavior="slim"] .logoWrap p,
+.app[data-sidebar-behavior="slim"] .navCopy,
+.app[data-sidebar-behavior="slim"] .sidebarLabel,
+.app[data-sidebar-behavior="slim"] .navItem span:not(.navIcon):not(.sidebarIcon):not(.icon),
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap h1,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap p,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navCopy,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebarLabel,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem span:not(.navIcon):not(.sidebarIcon):not(.icon){
+  max-width: 0 !important;
+  opacity: 0 !important;
+  transform: translateX(-8px) !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .logoWrap h1,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .logoWrap p,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .navCopy,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebarLabel,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .navItem span:not(.navIcon):not(.sidebarIcon):not(.icon),
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .logoWrap h1,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .logoWrap p,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .navCopy,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebarLabel,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .navItem span:not(.navIcon):not(.sidebarIcon):not(.icon){
+  max-width: 160px !important;
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+  transition:
+    opacity 170ms ease 70ms,
+    transform 220ms cubic-bezier(.16,1,.3,1) 45ms,
+    max-width 260ms cubic-bezier(.16,1,.3,1) !important;
+}
+
+/* Nav items become clean icon buttons when collapsed. */
+.app[data-sidebar-behavior="slim"] .navItem,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem{
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  justify-content: center !important;
+  border-radius: 15px !important;
+  gap: 0 !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .navItem,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .navItem{
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  margin-inline: 0 !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  place-items: initial !important;
+  justify-content: flex-start !important;
+  gap: 11px !important;
+  border-radius: 13px !important;
+  transition:
+    width 240ms cubic-bezier(.16,1,.3,1),
+    height 200ms ease,
+    padding 220ms cubic-bezier(.16,1,.3,1),
+    border-radius 180ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease !important;
+}
+
+/* Keep active icon clean instead of that giant harsh outline. */
+.app[data-sidebar-behavior="slim"] .navItem.active,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem.active{
+  border-color: rgba(var(--accent-rgb),0.34) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),0.18), rgba(var(--accent-rgb),0.07)),
+    rgba(255,255,255,0.026) !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb),0.08) inset,
+    0 8px 22px rgba(var(--accent-rgb),0.10) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .navItem svg,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem svg{
+  width: 22px !important;
+  height: 22px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Logo should not create clipped text or extra blank area. */
+.app[data-sidebar-behavior="slim"] .logoWrap,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap{
+  justify-content: center !important;
+  gap: 0 !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .logoWrap,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .logoWrap{
+  justify-content: flex-start !important;
+  gap: 12px !important;
+}
+
+/* Import button: no more cropped "impo / song" text in collapsed sidebar. */
+.app[data-sidebar-behavior="slim"] .importButton,
+.app[data-sidebar-behavior="slim"] .sidebarImportButton,
+.app[data-sidebar-behavior="slim"] .importSongsButton,
+.app[data-sidebar-behavior="slim"] .mainAction.import,
+.app[data-sidebar-behavior="slim"] .mainActionImport,
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .importButton,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebarImportButton,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .importSongsButton,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .mainAction.import,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .mainActionImport,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .mainAction{
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 44px !important;
+  padding: 0 !important;
+  margin-inline: auto !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  border-radius: 15px !important;
+  font-size: 0 !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction svg,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .mainAction svg{
+  width: 20px !important;
+  height: 20px !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction span,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .mainAction span{
+  opacity: 0 !important;
+  max-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .mainAction,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .mainAction{
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 44px !important;
+  padding: 0 14px !important;
+  margin-inline: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  border-radius: 14px !important;
+  font-size: 14px !important;
+  transition:
+    width 250ms cubic-bezier(.16,1,.3,1),
+    padding 220ms cubic-bezier(.16,1,.3,1),
+    border-radius 180ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .mainAction span,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .mainAction span{
+  max-width: 120px !important;
+  opacity: 1 !important;
+  transition: opacity 170ms ease 80ms, max-width 240ms cubic-bezier(.16,1,.3,1) !important;
+}
+
+/* Hide footer/current-song copy in collapsed sidebar if it exists. */
+.app[data-sidebar-behavior="slim"] .sidebar :where(.sidebarNowPlaying,.sidebarFooter,.sidebarMeta,.sidebarTrackCopy),
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar :where(.sidebarNowPlaying,.sidebarFooter,.sidebarMeta,.sidebarTrackCopy){
+  opacity: 0 !important;
+  max-width: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   localtify v0.3.6 V213 — sidebar icon cleanup
+   Owner: App.css
+
+   Fixes:
+   - removes the purple square/blob behind sidebar icons
+   - fixes icon/text alignment during expand-on-hover
+   - keeps collapsed sidebar clean
+   - smooth hover expansion without clipped nav text
+========================================================================== */
+
+/* Kill old decorative sidebar/nav pseudo layers that were creating purple blobs. */
+.sidebar .navItem::before,
+.sidebar .navItem::after,
+.sidebar .navIcon::before,
+.sidebar .navIcon::after{
+  content: none !important;
+  display: none !important;
+}
+
+/* Sidebar should animate width only. Keep the content stable. */
+.app[data-sidebar-behavior="slim"],
+.app[data-sidebar-behavior="hover"]{
+  --sidebar-width: 88px !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover),
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within){
+  --sidebar-width: 236px !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar,
+.app[data-sidebar-behavior="hover"] .sidebar{
+  width: var(--sidebar-width) !important;
+  min-width: var(--sidebar-width) !important;
+  overflow: hidden !important;
+  padding-inline: 12px !important;
+  transition:
+    width 260ms cubic-bezier(.16,1,.3,1),
+    min-width 260ms cubic-bezier(.16,1,.3,1),
+    padding 260ms cubic-bezier(.16,1,.3,1),
+    background-color 180ms ease,
+    border-color 180ms ease !important;
+  will-change: width, min-width !important;
+}
+
+/* The icon wrapper must never be the active-state background. */
+.sidebar .navIcon{
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  flex: 0 0 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  color: currentColor !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.sidebar .navIcon svg,
+.sidebar .navLucideIcon{
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+  flex: 0 0 auto !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Expanded row layout: clean Spotify-ish rows, no inner icon tile. */
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .navItem,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .navItem,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navItem{
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 44px !important;
+  margin-inline: 0 !important;
+  padding: 0 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transition:
+    background-color 170ms ease,
+    border-color 170ms ease,
+    color 170ms ease,
+    transform 170ms cubic-bezier(.16,1,.3,1),
+    width 260ms cubic-bezier(.16,1,.3,1),
+    padding 240ms cubic-bezier(.16,1,.3,1) !important;
+}
+
+/* Expanded active row: keep a row tint, not an icon blob. */
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .navItem.active,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .navItem.active,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navItem.active{
+  color: #fff !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),0.135), rgba(var(--accent-rgb),0.065)),
+    rgba(255,255,255,0.020) !important;
+  border-color: rgba(var(--accent-rgb),0.22) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.055) !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .navItem:hover,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .navItem:hover,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navItem:hover{
+  color: #fff !important;
+  transform: translateX(1px) !important;
+  background: rgba(255,255,255,0.050) !important;
+  border-color: rgba(255,255,255,0.075) !important;
+}
+
+/* Collapsed mode: icons only. No purple active square. */
+.app[data-sidebar-behavior="slim"] .sidebar .navItem,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navItem{
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 15px !important;
+  color: rgba(255,255,255,0.66) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 170ms cubic-bezier(.16,1,.3,1) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .navItem:hover,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navItem:hover{
+  color: #fff !important;
+  transform: translateY(-1px) !important;
+  background: rgba(255,255,255,0.040) !important;
+  border-color: rgba(255,255,255,0.065) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .navItem.active,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navItem.active{
+  color: rgb(var(--accent-rgb)) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .navItem.active:hover,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navItem.active:hover{
+  color: #fff !important;
+  background: rgba(var(--accent-rgb),0.080) !important;
+  border-color: rgba(var(--accent-rgb),0.13) !important;
+}
+
+/* Text animation: hide only navText, never the icon wrapper. */
+.app[data-sidebar-behavior="slim"] .sidebar .navText,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navText{
+  width: 0 !important;
+  max-width: 0 !important;
+  opacity: 0 !important;
+  transform: translateX(-8px) !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .navText,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .navText,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navText{
+  width: auto !important;
+  max-width: 160px !important;
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+  white-space: nowrap !important;
+  transition:
+    opacity 170ms ease 70ms,
+    transform 220ms cubic-bezier(.16,1,.3,1) 45ms,
+    max-width 260ms cubic-bezier(.16,1,.3,1) !important;
+}
+
+.sidebar .navText strong,
+.sidebar .navText small{
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Logo collapsed state. */
+.app[data-sidebar-behavior="slim"] .logoWrap,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap{
+  justify-content: center !important;
+  gap: 0 !important;
+}
+
+.app[data-sidebar-behavior="slim"] .logoWrap h1,
+.app[data-sidebar-behavior="slim"] .logoWrap p,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap h1,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap p{
+  max-width: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Import button collapsed state: icon-only, never cropped text. */
+.app[data-sidebar-behavior="slim"] .sidebar .importMainAction,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .importMainAction{
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 44px !important;
+  padding: 0 !important;
+  margin-inline: auto !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  border-radius: 15px !important;
+  font-size: 0 !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .importMainAction .buttonInlineIcon,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .importMainAction .buttonInlineIcon{
+  width: 19px !important;
+  height: 19px !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .importMainAction,
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .importMainAction,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .importMainAction{
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 44px !important;
+  padding: 0 14px !important;
+  margin-inline: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  border-radius: 14px !important;
+  font-size: 14px !important;
+}
+
+/* Prevent active sidebar icon from inheriting old square background rules. */
+.sidebar .navItem.active .navIcon,
+.sidebar .navItem:hover .navIcon,
+.sidebar .navItem.active .navLucideIcon,
+.sidebar .navItem:hover .navLucideIcon{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
