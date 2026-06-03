@@ -257,6 +257,128 @@ function RangeRow({
   );
 }
 
+
+type VisualCustomizationOption = {
+  id: string;
+  label: string;
+  note: string;
+};
+
+function readSettingChoice(settings: Settings, key: string, fallback: string) {
+  const value = settings?.[key];
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function VisualOptionButton({
+  option,
+  active,
+  onClick
+}: {
+  option: VisualCustomizationOption;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={`visualOptionButtonV205 ${active ? "active" : ""}`}
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+    >
+      <strong>{option.label}</strong>
+      <span>{option.note}</span>
+    </button>
+  );
+}
+
+function VisualOptionGroup({
+  title,
+  note,
+  options,
+  value,
+  onChange
+}: {
+  title: string;
+  note: string;
+  options: ReadonlyArray<VisualCustomizationOption>;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="visualOptionGroupV205">
+      <div className="visualOptionGroupHeadV205">
+        <strong>{title}</strong>
+        <span>{note}</span>
+      </div>
+      <div className="visualOptionGridV205">
+        {options.map((option) => (
+          <VisualOptionButton
+            key={option.id}
+            option={option}
+            active={value === option.id}
+            onClick={() => onChange(option.id)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const HOME_BANNER_TYPE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
+  { id: "dynamic", label: "Dynamic", note: "cover tint and ambience" },
+  { id: "albumCover", label: "Album cover", note: "focus the current cover" },
+  { id: "cleanBlack", label: "Clean black", note: "simple OLED hero" },
+  { id: "none", label: "None", note: "quiet header area" }
+];
+
+const BLUR_EFFECT_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
+  { id: "off", label: "Off", note: "fastest and flat" },
+  { id: "subtle", label: "Subtle", note: "light acrylic" },
+  { id: "normal", label: "Normal", note: "balanced blur" },
+  { id: "strong", label: "Strong", note: "more glass depth" }
+];
+
+const MEDIA_CARD_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
+  { id: "solid", label: "Solid", note: "clean dark cards" },
+  { id: "glassy", label: "Glassy", note: "soft transparent cards" },
+  { id: "acrylic", label: "Acrylic", note: "translucent and premium" },
+  { id: "oledFlat", label: "OLED flat", note: "black and minimal" }
+];
+
+const HOME_LAYOUT_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
+  { id: "compact", label: "Compact", note: "less vertical space" },
+  { id: "balanced", label: "Balanced", note: "default localtify feel" },
+  { id: "bigHero", label: "Big hero", note: "larger now playing" },
+  { id: "minimal", label: "Minimal", note: "less home decoration" }
+];
+
+const LIBRARY_ROW_STYLE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
+  { id: "compactRows", label: "Compact rows", note: "more songs on screen" },
+  { id: "comfyRows", label: "Comfy rows", note: "bigger readable rows" },
+  { id: "coverCards", label: "Cover cards", note: "stronger cover focus" },
+  { id: "listOnly", label: "List only", note: "simple and fast" }
+];
+
+const STAR_INTENSITY_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
+  { id: "off", label: "Off", note: "hide stars" },
+  { id: "subtle", label: "Subtle", note: "low sparkle" },
+  { id: "normal", label: "Normal", note: "current style" },
+  { id: "bright", label: "Bright", note: "more visible stars" }
+];
+
+const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
+  { id: "fixed", label: "Fixed", note: "normal sidebar" },
+  { id: "slim", label: "Slim", note: "icons first" },
+  { id: "hover", label: "Expand on hover", note: "small until needed" }
+];
+
+const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
+  { id: "flat", label: "Flat", note: "simple dark bar" },
+  { id: "coverBlur", label: "Cover blur", note: "uses current cover" },
+  { id: "acrylic", label: "Acrylic", note: "clean translucent player" },
+  { id: "oledBlack", label: "OLED black", note: "black and quiet" }
+];
+
 const SettingsCategoryContent = memo(function SettingsCategoryContent({
   settingsCategory,
   currentTheme,
@@ -384,6 +506,82 @@ return (
                 <small>{currentTheme.note}</small>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="settingsPanelCard visualCustomizationCardV205">
+          <div className="settingsPanelHeader visualCustomizationHeaderV205">
+            <div>
+              <strong>Visual customization</strong>
+              <span>Control the home banner, blur, cards, stars, sidebar, and player style.</span>
+            </div>
+            <span className="settingsPanelBadgeV205">new</span>
+          </div>
+
+          <div className="visualCustomizationGridV205">
+            <VisualOptionGroup
+              title="Home banner"
+              note="Choose how the top home area behaves."
+              options={HOME_BANNER_TYPE_OPTIONS}
+              value={readSettingChoice(settings, "homeBannerType", "dynamic")}
+              onChange={(value) => updateSetting("homeBannerType", value)}
+            />
+
+            <VisualOptionGroup
+              title="Blur effects"
+              note="Lower blur can improve performance on weaker PCs."
+              options={BLUR_EFFECT_OPTIONS}
+              value={readSettingChoice(settings, "blurEffects", "normal")}
+              onChange={(value) => updateSetting("blurEffects", value)}
+            />
+
+            <VisualOptionGroup
+              title="Card background"
+              note="Pick the style used by home, library, and panels."
+              options={MEDIA_CARD_BACKGROUND_OPTIONS}
+              value={readSettingChoice(settings, "mediaCardBackground", "acrylic")}
+              onChange={(value) => updateSetting("mediaCardBackground", value)}
+            />
+
+            <VisualOptionGroup
+              title="Home layout"
+              note="Change the density of the home screen."
+              options={HOME_LAYOUT_OPTIONS}
+              value={readSettingChoice(settings, "homeLayoutMode", "balanced")}
+              onChange={(value) => updateSetting("homeLayoutMode", value)}
+            />
+
+            <VisualOptionGroup
+              title="Library rows"
+              note="Choose how songs appear in the library."
+              options={LIBRARY_ROW_STYLE_OPTIONS}
+              value={readSettingChoice(settings, "libraryRowStyle", "comfyRows")}
+              onChange={(value) => updateSetting("libraryRowStyle", value)}
+            />
+
+            <VisualOptionGroup
+              title="Stars"
+              note="Adjust the star background without changing themes."
+              options={STAR_INTENSITY_OPTIONS}
+              value={readSettingChoice(settings, "starsIntensity", "normal")}
+              onChange={(value) => updateSetting("starsIntensity", value)}
+            />
+
+            <VisualOptionGroup
+              title="Sidebar"
+              note="Keep it fixed, slim, or expand it on hover."
+              options={SIDEBAR_BEHAVIOR_OPTIONS}
+              value={readSettingChoice(settings, "sidebarBehavior", "fixed")}
+              onChange={(value) => updateSetting("sidebarBehavior", value)}
+            />
+
+            <VisualOptionGroup
+              title="Player background"
+              note="Choose how the bottom player surface looks."
+              options={PLAYER_BACKGROUND_OPTIONS}
+              value={readSettingChoice(settings, "playerBackgroundStyle", "coverBlur")}
+              onChange={(value) => updateSetting("playerBackgroundStyle", value)}
+            />
           </div>
         </div>
 

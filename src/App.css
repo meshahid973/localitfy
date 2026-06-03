@@ -14565,3 +14565,99 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     display: none !important;
   }
 }
+
+
+/* ==========================================================================
+   localtify v0.3.6 V205 — visual customization support
+   These rules are driven by data attributes added to the root .app.
+========================================================================== */
+
+/* Blur intensity */
+.app[data-blur-effects="off"]{
+  --lt-visual-blur: 0px;
+  --lt-visual-blur-light: 0px;
+  --lt-visual-saturation: 100%;
+}
+
+.app[data-blur-effects="subtle"]{
+  --lt-visual-blur: 8px;
+  --lt-visual-blur-light: 5px;
+  --lt-visual-saturation: 108%;
+}
+
+.app[data-blur-effects="normal"],
+.app:not([data-blur-effects]){
+  --lt-visual-blur: 13px;
+  --lt-visual-blur-light: 8px;
+  --lt-visual-saturation: 116%;
+}
+
+.app[data-blur-effects="strong"]{
+  --lt-visual-blur: 20px;
+  --lt-visual-blur-light: 13px;
+  --lt-visual-saturation: 128%;
+}
+
+/* Star intensity */
+.app[data-stars-intensity="off"] .localtifyStarsBackdrop{
+  display: none !important;
+}
+
+.app[data-stars-intensity="subtle"] .localtifyStarsBackdrop{
+  opacity: 0.38 !important;
+}
+
+.app[data-stars-intensity="normal"] .localtifyStarsBackdrop,
+.app:not([data-stars-intensity]) .localtifyStarsBackdrop{
+  opacity: 0.72 !important;
+}
+
+.app[data-stars-intensity="bright"] .localtifyStarsBackdrop{
+  opacity: 1 !important;
+  filter: saturate(1.15) brightness(1.22) !important;
+}
+
+/* Sidebar behavior */
+.app[data-sidebar-behavior="slim"]{
+  --sidebar-width: 86px !important;
+}
+
+.app[data-sidebar-behavior="hover"]{
+  --sidebar-width: 86px !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover),
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within){
+  --sidebar-width: 236px !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar,
+.app[data-sidebar-behavior="hover"] .sidebar{
+  overflow: hidden !important;
+  transition:
+    width 220ms cubic-bezier(.16,1,.3,1),
+    padding 220ms cubic-bezier(.16,1,.3,1),
+    border-color 180ms ease,
+    background 180ms ease !important;
+}
+
+.app[data-sidebar-behavior="slim"] .logoWrap h1,
+.app[data-sidebar-behavior="slim"] .logoWrap p,
+.app[data-sidebar-behavior="slim"] .navItem span:not(.navIcon),
+.app[data-sidebar-behavior="slim"] .navCopy,
+.app[data-sidebar-behavior="slim"] .sidebarLabel,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap h1,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap p,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem span:not(.navIcon),
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navCopy,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebarLabel{
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.app[data-sidebar-behavior="slim"] .navItem,
+.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem{
+  justify-content: center !important;
+  padding-inline: 0 !important;
+}
+

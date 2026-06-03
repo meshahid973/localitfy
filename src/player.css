@@ -3488,3 +3488,127 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
   background: rgba(255,255,255,0.13) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
 }
+
+
+/* ==========================================================================
+   localtify v0.3.6 — this removes the background circles in the bottom player buttons!
+========================================================================== */
+
+.playerBar .controlRow > .circleButton:not(.main),
+.playerBar .controlRow > .repeatButton,
+.playerBar .controlRow > .playerButton:not(.main),
+.playerBar .controlRow > .playerControlButton:not(.main),
+.playerBar .controlRow > .volumeIconButton{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  outline: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.playerBar .controlRow > .circleButton:not(.main)::before,
+.playerBar .controlRow > .circleButton:not(.main)::after,
+.playerBar .controlRow > .repeatButton::before,
+.playerBar .controlRow > .repeatButton::after,
+.playerBar .controlRow > .playerButton:not(.main)::before,
+.playerBar .controlRow > .playerButton:not(.main)::after,
+.playerBar .controlRow > .playerControlButton:not(.main)::before,
+.playerBar .controlRow > .playerControlButton:not(.main)::after,
+.playerBar .controlRow > .volumeIconButton::before,
+.playerBar .controlRow > .volumeIconButton::after{
+  content: none !important;
+  display: none !important;
+}
+
+.playerBar .controlRow > .circleButton:not(.main):hover,
+.playerBar .controlRow > .repeatButton:hover,
+.playerBar .controlRow > .playerButton:not(.main):hover,
+.playerBar .controlRow > .playerControlButton:not(.main):hover,
+.playerBar .controlRow > .volumeIconButton:hover{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.playerBar .controlRow > .circleButton.main{
+  background: rgb(var(--accent-rgb)) !important;
+}
+
+
+/* ==========================================================================
+   localtify v0.3.6 V205 — player background customization
+   Owner: player.css
+========================================================================== */
+
+.app[data-player-background="flat"] .playerBar{
+  background: rgba(4,4,8,0.94) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-player-background="flat"] .playerBar::before{
+  opacity: 0 !important;
+}
+
+.app[data-player-background="coverBlur"] .playerBar::before,
+.app:not([data-player-background]) .playerBar::before{
+  opacity: 0.22 !important;
+}
+
+.app[data-player-background="acrylic"] .playerBar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012)),
+    rgba(9, 8, 14, 0.72) !important;
+  backdrop-filter: blur(var(--lt-visual-blur, 13px)) saturate(var(--lt-visual-saturation, 116%)) !important;
+  -webkit-backdrop-filter: blur(var(--lt-visual-blur, 13px)) saturate(var(--lt-visual-saturation, 116%)) !important;
+}
+
+.app[data-player-background="acrylic"] .playerBar::before{
+  opacity: 0.12 !important;
+  filter: blur(22px) saturate(1.16) brightness(0.74) !important;
+}
+
+.app[data-player-background="oledBlack"] .playerBar{
+  background: #000 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-player-background="oledBlack"] .playerBar::before{
+  opacity: 0 !important;
+}
+
+/* Keep secondary controls icon-only: no accidental grey circles. */
+.playerBar .controlRow > .circleButton:not(.main),
+.playerBar .controlRow > .repeatButton,
+.playerBar .controlRow > .playerButton:not(.main),
+.playerBar .controlRow > .playerControlButton:not(.main),
+.playerBar .controlRow > .volumeIconButton{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.playerBar .controlRow > .circleButton:not(.main)::before,
+.playerBar .controlRow > .circleButton:not(.main)::after,
+.playerBar .controlRow > .repeatButton::before,
+.playerBar .controlRow > .repeatButton::after,
+.playerBar .controlRow > .playerButton:not(.main)::before,
+.playerBar .controlRow > .playerButton:not(.main)::after,
+.playerBar .controlRow > .playerControlButton:not(.main)::before,
+.playerBar .controlRow > .playerControlButton:not(.main)::after,
+.playerBar .controlRow > .volumeIconButton::before,
+.playerBar .controlRow > .volumeIconButton::after{
+  content: none !important;
+  display: none !important;
+}
+

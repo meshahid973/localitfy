@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.6 V201 — library cleanup + /yukari peek view. */
+/* localtify 0.3.6 V185 — big UI view layer with lazy heavy pages. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -529,7 +529,7 @@ export type DiscordArtMode = "albumCover" | "randomPixel" | "logo" | "none";
 export type DiscordActivityStyle = "clean" | "cute" | "detailed" | "minimal" | "meme";
 export type DiscordTitleCleanup = "off" | "light" | "heavy";
 export type DiscordSecondLine = "artist" | "album" | "timeLeft" | "playCount" | "appName";
-export type SecretMode = "none" | "disco" | "stars" | "pulse" | "vinyl" | "rain" | "night" | "fast" | "playBounce" | "arcadeGhost" | "yukari";
+export type SecretMode = "none" | "disco" | "stars" | "pulse" | "vinyl" | "rain" | "night" | "fast" | "playBounce" | "arcadeGhost";
 export type SecretTriggerMode = Exclude<SecretMode, "none">;
 export type CoverColorSyncMode = "off" | "subtle" | "normal" | "strong";
 
@@ -3554,6 +3554,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       data-notes={effectiveNotes ? "on" : "off"}
       data-badge={settings.showHeroBadge ? "on" : "off"}
       data-home-expanded={settings.homeExpanded ? "on" : "off"}
+      data-home-banner={settings.homeBannerType || "dynamic"}
+      data-blur-effects={settings.blurEffects || "normal"}
+      data-card-background={settings.mediaCardBackground || "acrylic"}
+      data-home-layout={settings.homeLayoutMode || "balanced"}
+      data-library-row-style={settings.libraryRowStyle || "comfyRows"}
+      data-stars-intensity={settings.starsIntensity || "normal"}
+      data-sidebar-behavior={settings.sidebarBehavior || "fixed"}
+      data-player-background={settings.playerBackgroundStyle || "coverBlur"}
       data-hero-expanded={settings.heroExpanded ? "on" : "off"}
       data-hero-motion={heroMotion}
       data-status={statusText}
@@ -3751,16 +3759,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 />
               ))
             : null}
-
-          {secretMode === "yukari" ? (
-            <img
-              className="yukariSecretPeek"
-              src={yukariUpdateImage}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-            />
-          ) : null}
         </div>
       ) : null}
 
@@ -4223,13 +4221,11 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 <div className="panelHead libraryPanelHead libraryPanelHeadV025">
                   <div className="libraryPanelTitleV025">
                     <p className="eyebrow">{view === "liked" ? "liked" : "library"}</p>
-                    <h3>{view === "liked" ? "songs you liked" : "tracks"}</h3>
+                    <h3>{view === "liked" ? "songs you liked" : "overview"}</h3>
                     <span>
                       {view === "liked"
                         ? "All your favourites in one place."
-                        : query.trim()
-                          ? `showing results for "${query.trim()}"`
-                          : "Browse, queue, and shuffle from one clean list."}
+                        : "Browse, queue, and shuffle from one clean list."}
                     </span>
                   </div>
                   <div className="libraryHeaderActions libraryPanelActionsV025 libraryActionsCleanV026">
@@ -4241,13 +4237,26 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   </div>
                 </div>
 
-                {view === "library" ? (
-                  <div className="libraryQuickMetaV201" aria-label="library summary">
-                    <span>{visibleSongs.length} shown</span>
-                    <span>{songs.length} total</span>
-                    <span>{libraryArtistCount} artists</span>
+                {view === "library" && (
+                  <div className="libraryStatsV025" aria-label="library summary">
+                    <div>
+                      <span>tracks</span>
+                      <strong>{songs.length}</strong>
+                    </div>
+                    <div>
+                      <span>albums</span>
+                      <strong>{libraryAlbumCount}</strong>
+                    </div>
+                    <div>
+                      <span>artists</span>
+                      <strong>{libraryArtistCount}</strong>
+                    </div>
+                    <div>
+                      <span>plays</span>
+                      <strong>{totalPlays}</strong>
+                    </div>
                   </div>
-                ) : null}
+                )}
 
                 <div className="libraryListHeaderV025">
                   <span>tracks</span>

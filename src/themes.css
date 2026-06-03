@@ -6541,3 +6541,4 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   48%{ opacity: .2; }
   72%, 100%{ transform: translate3d(125%, 0, 0); opacity: 0; }
 }
+/* localtify v0.3.6 V205: visual customization modes are data-attribute driven in App/home/player/settings CSS. Theme variables remain owned here. */

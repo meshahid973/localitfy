@@ -6576,3 +6576,140 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
+
+/* ==========================================================================
+   localtify v0.3.6 V205 — visual customization settings UI
+   Owner: settings.css
+========================================================================== */
+
+.visualCustomizationCardV205{
+  padding: 20px !important;
+}
+
+.visualCustomizationHeaderV205{
+  align-items: center !important;
+}
+
+.settingsPanelBadgeV205{
+  width: fit-content !important;
+  padding: 6px 10px !important;
+  border: 1px solid rgba(var(--accent-rgb),0.18) !important;
+  border-radius: 999px !important;
+  color: var(--accent) !important;
+  background: rgba(var(--accent-rgb),0.07) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+
+.visualCustomizationGridV205{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.visualOptionGroupV205{
+  min-width: 0 !important;
+  padding: 14px !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 17px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.024), rgba(255,255,255,0.01)),
+    rgba(255,255,255,0.012) !important;
+}
+
+.visualOptionGroupHeadV205{
+  display: grid !important;
+  gap: 3px !important;
+  margin-bottom: 10px !important;
+}
+
+.visualOptionGroupHeadV205 strong{
+  color: var(--text) !important;
+  font-size: 13.5px !important;
+  line-height: 1.1 !important;
+  letter-spacing: -.02em !important;
+}
+
+.visualOptionGroupHeadV205 span{
+  color: rgba(255,255,255,.62) !important;
+  font-size: 10.8px !important;
+  line-height: 1.25 !important;
+  font-weight: 760 !important;
+}
+
+.visualOptionGridV205{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.visualOptionButtonV205{
+  min-height: 58px !important;
+  padding: 10px 11px !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 14px !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  display: grid !important;
+  align-content: center !important;
+  gap: 3px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
+    rgba(255,255,255,0.012) !important;
+  box-shadow: none !important;
+  transition:
+    transform 170ms cubic-bezier(.16,1,.3,1),
+    border-color 170ms ease,
+    background 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+.visualOptionButtonV205 strong{
+  color: var(--text) !important;
+  font-size: 12.5px !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.01em !important;
+}
+
+.visualOptionButtonV205 span{
+  color: rgba(255,255,255,.56) !important;
+  font-size: 10.2px !important;
+  line-height: 1.2 !important;
+  font-weight: 740 !important;
+}
+
+.visualOptionButtonV205:hover{
+  transform: translateY(-1px) !important;
+  border-color: rgba(var(--accent-rgb),0.16) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.012)),
+    rgba(255,255,255,0.016) !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,.13) !important;
+}
+
+.visualOptionButtonV205.active{
+  border-color: rgba(var(--accent-rgb),0.28) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),0.09), rgba(var(--accent-rgb),0.04)),
+    rgba(255,255,255,0.016) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.06) !important;
+}
+
+.visualOptionButtonV205.active strong{
+  color: #fff !important;
+}
+
+@media (max-width: 1180px){
+  .visualCustomizationGridV205{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 680px){
+  .visualOptionGridV205{
+    grid-template-columns: 1fr !important;
+  }
+}
+
