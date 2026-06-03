@@ -1837,7 +1837,10 @@ function shapeSpotifyTrack(track, fallbackAlbumName = "", fallbackCoverUrl = "")
     ? track.artists.map((artist) => artist?.name).filter(Boolean).join(", ")
     : "";
 
-  const coverUrl = bestSpotifyImage(track.album?.images) || String(fallbackCoverUrl || "");
+  const coverUrl =
+    bestSpotifyImage(track.album?.images) ||
+    bestSpotifyImage(track.images) ||
+    String(track.coverUrl || track.spotifyCoverUrl || track.albumCoverUrl || fallbackCoverUrl || "");
 
   return {
     id: String(track.id || `${track.name}-${artists}-${track.duration_ms || 0}`),
@@ -2509,6 +2512,27 @@ async function makeSongFromFileWithMetadata(filePath, tracks = [], pixelArtFiles
   };
 }
 
+async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixelArtFiles = [], usedCovers = new Set()) {
+  const baseSong = makeSongFromFile(filePath, pixelArtFiles, usedCovers);
+
+  const title = String(track?.title || track?.name || "").trim();
+  const artist = String(track?.artist || track?.artists || "").trim();
+  const album = String(track?.albumName || track?.album || "").trim();
+  const coverUrl = String(track?.coverUrl || track?.spotifyCoverUrl || track?.albumCoverUrl || "").trim();
+
+  const cachedCoverPath = await cacheSpotifyCoverImage(coverUrl, track?.id || title || filePath);
+
+  return {
+    ...baseSong,
+    title: title || baseSong.title,
+    artist: artist || baseSong.artist,
+    album: album || baseSong.album || "",
+    coverPath: cachedCoverPath || baseSong.coverPath,
+    duration: Number(track?.duration || Math.round(Number(track?.durationMs || 0) / 1000) || baseSong.duration || 0)
+  };
+}
+
+
 async function importNewAudioFilesFromDirectory(directory, tracks = [], options = {}) {
   const audioFiles = listAudioFilesInDirectory(directory, options);
   if (!audioFiles.length) {
@@ -2615,8 +2639,14 @@ async function repairSpotifyMetadataForFolder(directory, tracks = [], options = 
       patch.album = album;
     }
 
-    if (cachedCoverPath && (!currentCover || !fileExists(currentCover) || currentCover.includes(`${path.sep}pixelart${path.sep}`))) {
-      patch.coverPath = cachedCoverPath;
+    if (cachedCoverPath) {
+      const normalizedCover = currentCover.replace(/\\/g, "/").toLowerCase();
+      const isPixelFallback = normalizedCover.includes("/pixelart/");
+      const isSpotifyCover = normalizedCover.includes("/spotify-covers/");
+
+      if (!currentCover || !fileExists(currentCover) || isPixelFallback || !isSpotifyCover) {
+        patch.coverPath = cachedCoverPath;
+      }
     }
 
     const duration = Number(matched?.duration || Math.round(Number(matched?.durationMs || 0) / 1000) || 0);
@@ -3230,7 +3260,10 @@ app.whenReady().then(async () => {
       const url = typeof payload === "string" ? payload : payload?.url;
       if (!url || typeof url !== "string") return { ok: false, tracks: [], error: "No Spotify URL provided." };
       const result = await fetchSpotifyTracksFromUrl(url.trim());
-      console.log(`[localtify spotify] fetched ${result.tracks.length} public track(s) from ${result.type} "${result.name}"`);
+      console.log(`[localtify spotify] fetched ${result.tracks.length} public track(s) from ${result.type} "${result.name}"`, {
+        withArtists: result.tracks.filter((track) => track?.artist || track?.artists).length,
+        withCovers: result.tracks.filter((track) => track?.coverUrl || track?.spotifyCoverUrl || track?.albumCoverUrl).length
+      });
       return { ok: true, ...result };
     } catch (error) {
       console.log("[localtify spotify fetch error]", error?.message || error);
@@ -3329,7 +3362,11 @@ app.whenReady().then(async () => {
         const importedSongs = [];
         for (const { item, track } of successfulDownloads) {
           importedFilePaths.push(item.filePath);
-          importedSongs.push(await makeSongFromFileWithMetadata(item.filePath, [track], pixelArtFiles, usedCovers));
+
+          // Use the exact Spotify track attached to this download result.
+          // Do not fuzzy-match again here, because yt-dlp filenames can be shortened
+          // or changed and that was causing pixel covers / unknown artist.
+          importedSongs.push(await makeSongFromFileWithExactSpotifyTrack(item.filePath, track, pixelArtFiles, usedCovers));
         }
 
         changedCount = insertSongs(importedSongs);

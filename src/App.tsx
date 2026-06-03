@@ -6072,7 +6072,7 @@ function MainModeApp() {
           try {
             const refreshed = await bridge.bootstrap();
             const refreshedSongs = applyLibraryOrder(sanitizeSongList(refreshed?.songs || []));
-            if (refreshedSongs.length >= nextSongs.length) {
+            if (refreshedSongs.length) {
               nextSongs = refreshedSongs;
               setLibraryScanMessage(`library refreshed: ${refreshedSongs.length} tracks`);
             }
