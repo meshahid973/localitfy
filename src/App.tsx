@@ -74,7 +74,6 @@ import LocaltifyAppView, {
 } from "./LocaltifyAppView";
 import {
   APP_VERSION,
-  ARCADE_GHOST_UNLOCKED_KEY,
   BOOT_MIN_VISIBLE_MS,
   BOOT_STEPS,
   BUILT_IN_CUSTOM_THEME_PRESETS,
@@ -275,7 +274,6 @@ function MainModeApp() {
   const volumeRef = useRef(0.75);
   const lastNonZeroVolumeRef = useRef(0.75);
   const secretBufferRef = useRef("");
-  const konamiBufferRef = useRef<string[]>([]);
   const secretTimeoutRef = useRef<number | null>(null);
   const playButtonBurstTimerRef = useRef<number | null>(null);
   const beatFrameRef = useRef<number | null>(null);
@@ -290,7 +288,6 @@ function MainModeApp() {
     songId: ""
   });
   const beatLastPaintSignatureRef = useRef("");
-  const misideTimerRef = useRef<number | null>(null);
   const discordAssetBySongRef = useRef<Record<string, string>>({});
   const lastDiscordAssetKeyRef = useRef<string>("");
   const contentRef = useRef<HTMLElement | null>(null);
@@ -482,14 +479,8 @@ function MainModeApp() {
   const [secretToast, setSecretToast] = useState("");
   const [secretBurst, setSecretBurst] = useState(0);
   const [playButtonBurst, setPlayButtonBurst] = useState(0);
-  const [misideModeActive, setMisideModeActive] = useState(false);
-  const [arcadeGhostUnlocked, setArcadeGhostUnlocked] = useState(() => {
-    try {
-      return window.localStorage.getItem(ARCADE_GHOST_UNLOCKED_KEY) === "true";
-    } catch {
-      return false;
-    }
-  });
+  const misideModeActive = false;
+  const arcadeGhostUnlocked = false;
 
   const isThreeAm = now.getHours() === 3;
   const greeting = isThreeAm ? "late night local files" : getGreeting(now.getHours());
@@ -1132,7 +1123,7 @@ function MainModeApp() {
     () => buildAnimatedThemeVisualStyle(effectiveTheme, animatedThemeSeedRef.current),
     [effectiveTheme]
   );
-  const showStarBackdrop = !settings.reducedMotion && (effectiveTheme === "stars" || (settings.starsIntensity || "subtle") !== "off");
+  const showStarBackdrop = !settings.reducedMotion && (effectiveTheme === "stars" || (settings.starsIntensity || "normal") !== "off");
 
   useEffect(() => {
     setThemeMotionReady(false);
@@ -1811,16 +1802,6 @@ function MainModeApp() {
       }),
     [secretBurst, currentSong?.id]
   );
-  const misideAlbumSignature = currentSong ? lower(currentSong.album || "") : "";
-  const misideFullSignature = currentSong
-    ? lower(`${currentSong.title} ${currentSong.artist} ${currentSong.album} ${currentSong.filePath} ${currentSong.coverPath || ""}`)
-    : "";
-  const misideLooseAlbumHit =
-    misideAlbumSignature.includes("miside") ||
-    misideAlbumSignature.includes("mi side") ||
-    misideAlbumSignature.includes("mita");
-  const isMisideSong =
-    misideLooseAlbumHit || /(?:^|[^a-z0-9])(?:miside|mi\s*side|mita)(?:[^a-z0-9]|$)/.test(misideFullSignature);
 
   const librarySearchIndex = useMemo(() => songs.map((song) => buildSongSearchEntry(song)), [songs]);
 
@@ -2330,56 +2311,6 @@ function MainModeApp() {
   };
 
   const coverToolsActive = view === "covers" || (view === "settings" && (settingsCategory === "covers" || settingsCategory === "advanced"));
-
-  useEffect(() => {
-    if (!ready || !coverToolsActive) return;
-
-    let cancelled = false;
-    let timeoutId = 0;
-    let idleId: number | null = null;
-
-    const run = () => {
-      loadPixelArtAssets(false)
-        .then((assets) => {
-          if (cancelled) return;
-          if (assets.length) {
-            setPixelArtAssets(assets);
-          }
-        })
-        .catch(() => {
-          if (!cancelled) {
-            setPixelArtAssets(getCachedRuntimePixelArtAssets());
-          }
-        });
-    };
-
-    const cache = pixelArtCacheRef.current;
-    const cacheFresh = cache.assets.length > 0 && Date.now() - cache.loadedAt < PIXEL_ART_CACHE_TTL_MS;
-
-    if (cacheFresh) {
-      if (cache.assets.length) setPixelArtAssets(cache.assets);
-      return;
-    }
-
-    if ("requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(run, { timeout: 1200 });
-    } else {
-      timeoutId = window.setTimeout(run, 220);
-    }
-
-    return () => {
-      cancelled = true;
-
-      if (idleId !== null && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleId);
-      }
-
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-  }, [ready, coverToolsActive, loadPixelArtAssets]);
-
 
   const coverGalleryAssets = useMemo(() => {
     if (!coverToolsActive) return [];
@@ -3195,76 +3126,36 @@ function MainModeApp() {
 
     return true;
   }
-
   const triggerSecret = useCallback((mode: SecretTriggerMode, message: string) => {
-    const persistentMode = mode === "stars" || mode === "night";
-
-    const showMode = () => {
-      setSecretMode(mode);
-      setSecretToast(message);
-      setSecretBurst((value) => value + 1);
-    };
+    const allowedMode: SecretTriggerMode | null = mode === "stars" || mode === "yukari" ? mode : null;
+    if (!allowedMode) return;
 
     if (secretTimeoutRef.current) {
       window.clearTimeout(secretTimeoutRef.current);
       secretTimeoutRef.current = null;
     }
 
-    if (persistentMode && secretMode === mode) {
+    if (allowedMode === "stars" && secretMode === "stars") {
       setSecretMode("none");
       setSecretToast("");
       setSecretBurst((value) => value + 1);
       return;
     }
 
-    if (mode === "arcadeGhost") {
-      setArcadeGhostUnlocked(true);
+    setSecretMode(allowedMode);
+    setSecretToast(message);
+    setSecretBurst((value) => value + 1);
 
-      try {
-        window.localStorage.setItem(ARCADE_GHOST_UNLOCKED_KEY, "true");
-      } catch {
-        // local storage can fail in locked-down environments; the theme still works for this session
-      }
-
-      setSettings((old) => {
-        const next: Settings = { ...old, theme: "arcadeGhost", customThemeEnabled: false };
-        window.localitfy.saveSettings(next).catch(() => undefined);
-        return next;
-      });
-    }
-
-    if (secretMode === mode && !persistentMode) {
-      setSecretMode("none");
-      window.setTimeout(showMode, 18);
-    } else {
-      showMode();
-    }
-
-    if (persistentMode) {
-      secretTimeoutRef.current = window.setTimeout(() => {
-        setSecretToast("");
-        secretTimeoutRef.current = null;
-      }, 2600);
-      return;
-    }
-
-    const secretDuration =
-      mode === "fast" ? 5200 :
-      mode === "playBounce" ? 1500 :
-      mode === "disco" ? 7600 :
-      mode === "arcadeGhost" ? 6200 :
-      5200;
-
+    const duration = allowedMode === "stars" ? 2600 : 5200;
     secretTimeoutRef.current = window.setTimeout(() => {
       setSecretMode("none");
       setSecretToast("");
       secretTimeoutRef.current = null;
-    }, secretDuration);
+    }, duration);
   }, [secretMode]);
 
   function triggerPlayButtonSecret() {
     setPlayButtonBurst((value) => value + 1);
-    triggerSecret("playBounce", "play button mega bounce");
 
     if (!playingRef.current) {
       showAppToast("play button bounce triggered", "info");
@@ -3275,6 +3166,7 @@ function MainModeApp() {
     }
 
     playButtonBurstTimerRef.current = window.setTimeout(() => {
+      setPlayButtonBurst(0);
       playButtonBurstTimerRef.current = null;
     }, 1200);
   }
@@ -3399,14 +3291,6 @@ function MainModeApp() {
       return;
     }
 
-    const compactSecretCommand = command.replace(/\s+/g, "");
-
-    if (compactSecretCommand === "localtify" || compactSecretCommand === "localitfy") {
-      triggerSecret("disco", "localtify stage mode unlocked");
-      setQuery("");
-      return;
-    }
-
     if (command === "/dev" || command === "dev") {
       setQuery("");
       return;
@@ -3417,15 +3301,7 @@ function MainModeApp() {
       setQuery("");
       return;
     }
-
     const secretMap: Record<string, { mode: SecretTriggerMode; message: string }> = {
-      "/disco": { mode: "disco", message: "mini disco floor unlocked" },
-      "disco": { mode: "disco", message: "mini disco floor unlocked" },
-      "/stage": { mode: "disco", message: "stage lights online" },
-      "stage": { mode: "disco", message: "stage lights online" },
-      "/arcadeghost": { mode: "arcadeGhost", message: "secret theme unlocked: arcade ghost" },
-      "/arcade ghost": { mode: "arcadeGhost", message: "secret theme unlocked: arcade ghost" },
-      "arcade ghost": { mode: "arcadeGhost", message: "secret theme unlocked: arcade ghost" },
       "/yukari": { mode: "yukari", message: "yukari peeked in" },
       "yukari": { mode: "yukari", message: "yukari peeked in" },
       "/peek": { mode: "yukari", message: "yukari peeked in" },
@@ -3433,23 +3309,7 @@ function MainModeApp() {
       "/y": { mode: "yukari", message: "yukari peeked in" },
       "/stars": { mode: "stars", message: "star field enabled — type /stars again to hide" },
       "stars": { mode: "stars", message: "star field enabled — type /stars again to hide" },
-      "/star": { mode: "stars", message: "star field enabled — type /stars again to hide" },
-      "/rain": { mode: "rain", message: "soft rain ambience unlocked" },
-      "rain": { mode: "rain", message: "soft rain ambience unlocked" },
-      "/pulse": { mode: "pulse", message: "bass pulse unlocked" },
-      "pulse": { mode: "pulse", message: "bass pulse unlocked" },
-      "/vinyl": { mode: "vinyl", message: "vinyl room unlocked" },
-      "vinyl": { mode: "vinyl", message: "vinyl room unlocked" },
-      "/night": { mode: "night", message: "late night mode enabled" },
-      "night": { mode: "night", message: "late night mode enabled" },
-      "/fast": { mode: "fast", message: "speed mode enabled" },
-      "fast": { mode: "fast", message: "speed mode enabled" },
-      "/localtify": { mode: "disco", message: "localtify stage mode unlocked" },
-      "/localitfy": { mode: "disco", message: "localtify stage mode unlocked" },
-      "localtify secret": { mode: "disco", message: "localtify stage mode unlocked" },
-      "localitfy secret": { mode: "disco", message: "localtify stage mode unlocked" },
-      "localtify easter egg": { mode: "disco", message: "localtify stage mode unlocked" },
-      "localitfy easter egg": { mode: "disco", message: "localtify stage mode unlocked" }
+      "/star": { mode: "stars", message: "star field enabled — type /stars again to hide" }
     };
 
     const secret = secretMap[command];
@@ -3477,63 +3337,8 @@ function MainModeApp() {
   };
 
   useEffect(() => {
-    const konami = ["up", "up", "down", "down", "left", "right", "left", "right", "b", "a"];
-    const arrowRush = ["up", "down", "up", "down", "left", "right"];
-    const arrowStage = ["left", "right", "left", "right"];
-
-    const sequenceEndsWith = (sequence: string[], ending: string[]) => {
-      if (sequence.length < ending.length) return false;
-      return ending.every((value, index) => sequence[sequence.length - ending.length + index] === value);
-    };
-
     const clearSecretTyping = () => {
       secretBufferRef.current = "";
-    };
-
-    const triggerTypedSecret = (compactBuffer: string) => {
-      if (compactBuffer.endsWith("ilovesnakes") || compactBuffer.endsWith("snakegame")) {
-        openSnakeGame();
-        clearSecretTyping();
-        return true;
-      }
-
-      if (
-        compactBuffer.endsWith("localtify") ||
-        compactBuffer.endsWith("localitfy") ||
-        compactBuffer.endsWith("localtifystage") ||
-        compactBuffer.endsWith("localitfystage")
-      ) {
-        triggerSecret("disco", "localtify stage mode unlocked");
-        clearSecretTyping();
-        return true;
-      }
-
-      if (compactBuffer.endsWith("stars") || compactBuffer.endsWith("starfield")) {
-        triggerSecret("stars", "star field enabled");
-        clearSecretTyping();
-        return true;
-      }
-
-      if (compactBuffer.endsWith("night") || compactBuffer.endsWith("latenight")) {
-        triggerSecret("night", "late night mode enabled");
-        clearSecretTyping();
-        return true;
-      }
-
-      if (compactBuffer.endsWith("fast") || compactBuffer.endsWith("speed")) {
-        triggerSecret("fast", "speed mode enabled");
-        clearSecretTyping();
-        return true;
-      }
-
-
-      if (compactBuffer.endsWith("ppp")) {
-        triggerPlayButtonSecret();
-        clearSecretTyping();
-        return true;
-      }
-
-      return false;
     };
 
     const shouldIgnoreSecretTarget = (target: EventTarget | null) => {
@@ -3542,58 +3347,25 @@ function MainModeApp() {
       return tag === "input" || tag === "textarea" || tag === "select" || Boolean(element?.isContentEditable);
     };
 
-    const getSecretKey = (event: KeyboardEvent) => {
-      if (event.code === "ArrowUp") return { arrow: "up", typed: "" };
-      if (event.code === "ArrowDown") return { arrow: "down", typed: "" };
-      if (event.code === "ArrowLeft") return { arrow: "left", typed: "" };
-      if (event.code === "ArrowRight") return { arrow: "right", typed: "" };
-
-      if (event.code === "KeyA") return { arrow: "a", typed: "a" };
-      if (event.code === "KeyB") return { arrow: "b", typed: "b" };
-
-      const typed = event.key.length === 1 ? event.key.toLowerCase() : "";
-      if (/^[a-z0-9]$/.test(typed)) return { arrow: "", typed };
-      return { arrow: "", typed: "" };
-    };
-
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat || shouldIgnoreSecretTarget(event.target)) return;
+      const typed = event.key.length === 1 ? event.key.toLowerCase() : "";
+      if (!/^[a-z0-9]$/.test(typed)) return;
 
-      const { arrow, typed } = getSecretKey(event);
+      secretBufferRef.current = `${secretBufferRef.current}${typed}`.slice(-24);
+      const compactBuffer = secretBufferRef.current.replace(/[^a-z0-9]/g, "");
 
-      if (arrow) {
-        konamiBufferRef.current = [...konamiBufferRef.current, arrow].slice(-konami.length);
-
-        if (konamiBufferRef.current.join("|") === konami.join("|")) {
-          event.preventDefault();
-          triggerSecret("arcadeGhost", "secret theme unlocked: arcade ghost");
-          konamiBufferRef.current = [];
-          clearSecretTyping();
-          return;
-        }
-
-        if (sequenceEndsWith(konamiBufferRef.current, arrowRush)) {
-          event.preventDefault();
-          triggerSecret("fast", "arrow speed mode enabled");
-          konamiBufferRef.current = [];
-          clearSecretTyping();
-          return;
-        }
-
-        if (sequenceEndsWith(konamiBufferRef.current, arrowStage)) {
-          event.preventDefault();
-          triggerSecret("disco", "arrow stage lights online");
-          konamiBufferRef.current = [];
-          clearSecretTyping();
-          return;
-        }
+      if (compactBuffer.endsWith("stars") || compactBuffer.endsWith("starfield")) {
+        event.preventDefault();
+        triggerSecret("stars", "star field enabled");
+        clearSecretTyping();
+        return;
       }
 
-      if (!typed) return;
-
-      secretBufferRef.current = `${secretBufferRef.current}${typed}`.slice(-72);
-      if (triggerTypedSecret(secretBufferRef.current.replace(/[^a-z0-9]/g, ""))) {
+      if (compactBuffer.endsWith("yukari")) {
         event.preventDefault();
+        triggerSecret("yukari", "yukari peeked in");
+        clearSecretTyping();
       }
     };
 
@@ -3729,9 +3501,14 @@ function MainModeApp() {
         window.localitfy.savePlaylists(localPlaylists).catch(() => undefined);
       }
 
-      // Pixel art folder scanning is intentionally lazy now.
-      // The cached fallback list is available immediately, and the real folder list loads only
-      // when the user opens cover tools or explicitly randomizes/rescans covers.
+      loadPixelArtAssets(false)
+        .then((assets) => {
+          if (!mounted) return;
+          setPixelArtAssets(assets);
+        })
+        .catch(() => {
+          if (mounted) setPixelArtAssets(getCachedRuntimePixelArtAssets());
+        });
       bootedRef.current = true;
     }).catch((error) => {
       if (!mounted) return;
@@ -3752,38 +3529,10 @@ function MainModeApp() {
       mounted = false;
       if (bootStepTimer) window.clearInterval(bootStepTimer);
     };
-  }, [bootRetryKey]);
+  }, [loadPixelArtAssets, bootRetryKey]);
+  // Heavy automatic late-night secret effects were removed in V215.
+  // Heavy automatic MiSide/joke visual mode was removed in V215.
 
-  useEffect(() => {
-    if (!ready || !isThreeAm) return;
-
-    const message = settings.volume > 0.8 ? "why are we still awake? volume is high too" : "why are we still awake?";
-    triggerSecret("rain", message);
-  }, [ready, isThreeAm, settings.volume, triggerSecret]);
-
-  useEffect(() => {
-    if (misideTimerRef.current) {
-      window.clearTimeout(misideTimerRef.current);
-      misideTimerRef.current = null;
-    }
-
-    if (!currentSong || !isMisideSong) {
-      setMisideModeActive(false);
-      setSecretToast("");
-      return;
-    }
-
-    setMisideModeActive(true);
-    setSecretToast("mita is listening...");
-    setSecretBurst((value) => value + 1);
-
-    return () => {
-      if (misideTimerRef.current) {
-        window.clearTimeout(misideTimerRef.current);
-        misideTimerRef.current = null;
-      }
-    };
-  }, [currentSong?.id, currentSong?.title, currentSong?.artist, currentSong?.album, currentSong?.filePath, isMisideSong]);
 
   useEffect(() => {
     const off = window.localitfy.onDownloadProgress((payload) => {

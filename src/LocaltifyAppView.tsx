@@ -529,7 +529,7 @@ export type DiscordArtMode = "albumCover" | "randomPixel" | "logo" | "none";
 export type DiscordActivityStyle = "clean" | "cute" | "detailed" | "minimal" | "meme";
 export type DiscordTitleCleanup = "off" | "light" | "heavy";
 export type DiscordSecondLine = "artist" | "album" | "timeLeft" | "playCount" | "appName";
-export type SecretMode = "none" | "disco" | "stars" | "pulse" | "vinyl" | "rain" | "night" | "fast" | "playBounce" | "arcadeGhost";
+export type SecretMode = "none" | "stars" | "yukari";
 export type SecretTriggerMode = Exclude<SecretMode, "none">;
 export type CoverColorSyncMode = "off" | "subtle" | "normal" | "strong";
 
@@ -3532,7 +3532,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${showTopUpdateRibbon ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isPlaying ? "appAudioPlaying" : "appAudioIdle"} ${isThreeAm ? "lateNightMode" : ""} ${misideModeActive ? "misideMode" : ""} ${
+      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${showTopUpdateRibbon ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isPlaying ? "appAudioPlaying" : "appAudioIdle"} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
@@ -3751,6 +3751,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       {secretMode !== "none" ? (
         <div className={`secretLayer ${secretMode}`} key={`${secretMode}-${secretBurst}`} aria-hidden="true">
           {secretToast ? <div className="secretRibbon">{secretToast}</div> : null}
+          {secretMode === "yukari" ? <img className="yukariSecretPeek" src={yukariUpdateImage} alt="" aria-hidden="true" /> : null}
           {secretMode === "stars"
             ? starParticleStyles.map((style, index) => (
                 <span
@@ -3760,19 +3761,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 />
               ))
             : null}
-        </div>
-      ) : null}
-
-
-
-      {isThreeAm && effectiveNotes ? (
-        <div className="lateNightNoteLayer" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
         </div>
       ) : null}
 
@@ -3983,16 +3971,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     <p className={`heroArtistLine nowPlayingArtistSwap ${nowPlayingSongMotionClass}`} title={currentSong ? currentSong.artist || "unknown artist" : "import songs to start listening"}>
                       {heroDisplayArtist}
                     </p>
-
-                    {misideModeActive ? (
-                      <div className="misideEggNotice" role="status" aria-live="polite">
-                        <span className="misideEggDot" aria-hidden="true" />
-                        <span>
-                          <strong>mita is listening...</strong>
-              
-                        </span>
-                      </div>
-                    ) : null}
 
                     {playerError ? <div className="warningBox">{playerError}</div> : null}
                     {isThreeAm && settings.volume > 0.8 ? (

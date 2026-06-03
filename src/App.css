@@ -2,9 +2,6 @@
 /* localtify App.css — patch/feature layer.
    Core layout/component styles were split into app-core.css for v0.2.8. */
 
-/* 0.0.9 usability polish: Home queue, duplicate radar, smoother micro-interactions */
-
-
 .muted-small{
   display: block;
   margin-top: 3px;
@@ -12,7 +9,6 @@
   font-size: 11px;
   line-height: 1.35;
 }
-
 
 @keyframes softPanelIn {
   from {
@@ -25,24 +21,17 @@
   }
 }
 
-
-/* 0.0.9 library utilities placement — queue + duplicate radar moved out of Home */
-
-
 .libraryUtilityRail .compactHead .eyebrow{
   font-size: 9px;
 }
-
 
 .libraryUtilityRail .muted-small{
   font-size: 10px;
 }
 
-
 /* ======================================================================
-   localitfy 0.0.9 — final CSS repair
-   Fixes: stretched library queue/duplicate panels, broken edit modal controls,
-   and hero title vertical alignment. Keep this at the very bottom of App.css.
+   localtify v0.3.6 V215 — retained editor/modal utility styles
+   Kept only because the current edit modal still uses these class names.
 ====================================================================== */
 
 .app{
@@ -51,18 +40,15 @@
 
 /* Keep the library utility tools compact instead of stretching across ultra-wide screens. */
 
-
 .libraryUtilityRail .compactHead .eyebrow{
   font-size: 9px !important;
   letter-spacing: 0.14em !important;
 }
 
-
 .libraryUtilityRail .muted-small{
   font-size: 10px !important;
   line-height: 1.35 !important;
 }
-
 
 /* Edit track modal repair. */
 .modalWrap{
@@ -233,23 +219,6 @@
   align-items: center !important;
 }
 
-
-
-.secretLayer.arcadeGhost::before{
-  opacity: 0.78;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 16px, rgba(124, 255, 214, 0.09) 17px 18px),
-    repeating-linear-gradient(90deg, transparent 0 16px, rgba(181, 112, 255, 0.08) 17px 18px),
-    radial-gradient(circle at 50% 50%, rgba(124, 255, 214, 0.14), transparent 36%);
-  animation: arcadeGhostGrid 1.8s linear infinite;
-}
-
-.secretLayer.arcadeGhost span::before{
-  content: "♪";
-  color: #7cffd6;
-  text-shadow: 0 0 12px rgba(124, 255, 214, 0.76);
-}
-
 .searchEasterWrap{
   position: relative;
   min-width: min(360px, 38vw);
@@ -258,83 +227,6 @@
 .searchEasterWrap .search{
   width: 100%;
 }
-
-
-.lateNightMode .ambientSurface::before{
-  filter: blur(56px) saturate(0.92) brightness(0.72) !important;
-  opacity: 0.18 !important;
-}
-
-.lateNightWarning{
-  border-color: rgba(255, 184, 107, 0.24) !important;
-  color: rgba(255, 231, 205, 0.9) !important;
-  background: rgba(255, 184, 107, 0.075) !important;
-}
-
-.lateNightNoteLayer{
-  position: fixed;
-  inset: 36px 0 88px var(--sidebar-width);
-  z-index: 11;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.lateNightNoteLayer span{
-  position: absolute;
-  bottom: -24px;
-  color: rgba(180, 206, 255, 0.38);
-  font-size: 16px;
-  font-weight: 900;
-  text-shadow: 0 0 18px rgba(117, 221, 255, 0.22);
-  animation: lateNightNoteFloat 7s linear infinite;
-}
-
-.lateNightNoteLayer span::before{
-  content: "♪";
-}
-
-.lateNightNoteLayer span:nth-child(1){ left: 10%; animation-delay: 0s; }
-.lateNightNoteLayer span:nth-child(2){ left: 27%; animation-delay: 1.1s; }
-.lateNightNoteLayer span:nth-child(3){ left: 45%; animation-delay: 2.4s; }
-.lateNightNoteLayer span:nth-child(4){ left: 63%; animation-delay: 0.7s; }
-.lateNightNoteLayer span:nth-child(5){ left: 79%; animation-delay: 3.2s; }
-.lateNightNoteLayer span:nth-child(6){ left: 91%; animation-delay: 4.1s; }
-
-.misideWhisper{
-  width: fit-content;
-  margin-top: 10px;
-  padding: 7px 10px;
-  border: 1px solid rgba(255, 120, 190, 0.22);
-  border-radius: 999px;
-  color: rgba(255, 215, 240, 0.88);
-  background: rgba(255, 80, 160, 0.058);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.03em;
-  animation: misideWhisperIn 520ms ease both;
-}
-
-
-@keyframes lateNightNoteFloat {
-  0% { opacity: 0; transform: translateY(0) translateX(0) scale(0.88); }
-  12% { opacity: 0.62; }
-  100% { opacity: 0; transform: translateY(-80vh) translateX(22px) scale(1.22); }
-}
-
-@keyframes misideGlitchPulse {
-  0%, 100% { filter: none; transform: translate3d(0, 0, 0); }
-  8% { filter: hue-saturate(1.18); transform: translate3d(1px, 0, 0); }
-  10% { filter: hue-saturate(1.12); transform: translate3d(-1px, 0, 0); }
-  13%, 72% { filter: none; transform: translate3d(0, 0, 0); }
-  76% { filter: contrast(1.08) saturate(1.18); transform: translate3d(0, -1px, 0); }
-  78% { filter: none; transform: translate3d(0, 0, 0); }
-}
-
-@keyframes misideWhisperIn {
-  0% { opacity: 0; transform: translateY(6px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
 
 /* ========================================================================== 
    localitfy 0.1.0 small Spotify-positioning pass
@@ -397,10 +289,6 @@
   border-radius: 18px !important;
 }
 
-
-
-
-
 .circleButton:not(.playerBar *){
   width: 38px !important;
   height: 38px !important;
@@ -415,11 +303,9 @@
 @media (max-width: 1300px){
   
 
-
   
 
   
-
 
   
 
@@ -667,7 +553,6 @@
   }
 }
 
-
 /* ======================================================================
    localitfy 0.1.2 — drag-to-play-next + smoother motion polish
    Safe CSS-only layer. Uses transform/opacity so it feels smoother without
@@ -770,18 +655,12 @@
   }
 }
 
-
 /* Safe fallbacks for older theme/settings rules. */
 .app{
   --panel: var(--panel, rgba(255, 255, 255, 0.035));
   --accent-2: var(--accent-2, var(--accent));
   --accent-2-rgb: var(--accent-2-rgb, var(--accent-rgb));
 }
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
 
 /* ======================================================================
    localitfy 0.1.2 — small loading animations
@@ -1424,8 +1303,6 @@
   }
 }
 
-
-
 .app .content{
   overscroll-behavior: contain;
   scroll-behavior: smooth;
@@ -1459,7 +1336,6 @@
 .app .songRow:hover{
   transform: translate3d(2px, 0, 0) !important;
 }
-
 
 /* ======================================================================
    localitfy — drag + theme polish final
@@ -1677,16 +1553,12 @@
   white-space: nowrap;
 }
 
-
-
 .sidebarResizeHandle:hover::after{
   opacity: 1;
   border-color: rgba(var(--accent-rgb), 0.42);
   color: #fff;
   transform: translate3d(0, 0, 0) scale(1);
 }
-
-
 
 body.isResizingSidebar .sidebarResizeHandle span{
   animation: localitfyCuteDragBreath 880ms ease-in-out infinite;
@@ -1815,8 +1687,6 @@ html{
   transform: translateZ(0);
 }
 
-
-
 /* ======================================================================
    localitfy 0.1.3 — SAFE drag/resize smoothness patch
    ----------------------------------------------------------------------
@@ -1838,8 +1708,6 @@ html{
 .content{
   padding-bottom: calc(var(--player-size-used) + 48px) !important;
 }
-
-
 
 .toastStack{
   left: calc(var(--sidebar-width-used) + 22px) !important;
@@ -1874,8 +1742,6 @@ body.isResizingSidebar .ambientSurface::before{
   width: 14px !important;
   right: -7px !important;
 }
-
-
 
 .sidebarResizeHandle::before{
   content: "";
@@ -1960,10 +1826,6 @@ body.localitfySongDragging .songRow{
   width: 3px;
 }
 
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
 /* ======================================================================
    localitfy 0.1.3 — lag guard for drag/resize
    ----------------------------------------------------------------------
@@ -1988,7 +1850,6 @@ body.isResizingSidebar .content{
 body.isResizingSidebar{
   text-rendering: optimizeSpeed;
 }
-
 
 /* ======================================================================
    localitfy 0.1.3 — first-run onboarding
@@ -2220,12 +2081,6 @@ body.isResizingSidebar{
     flex-direction: column;
   }
 }
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
 
 /* ======================================================================\n   localitfy 0.1.3 — onboarding v2\n   Append this at the VERY BOTTOM of App.css.\n   Dark app-style UI, no gradient panels, low-lag transform/opacity motion only.\n====================================================================== */
 
@@ -2887,11 +2742,6 @@ body.isResizingSidebar{
   }
 }
 
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
 /* ======================================================================
    localitfy 0.1.3 — onboarding v2 final polish
    flat app-style onboarding, working buttons, no gradient UI
@@ -3544,11 +3394,6 @@ body.isResizingSidebar{
   }
 }
 
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
 /* ======================================================================
    localitfy 0.1.5 — lag-safe interaction + smoother tiny motion pass
    ----------------------------------------------------------------------
@@ -3596,26 +3441,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   filter: none !important;
   animation: none !important;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
-/* localitfy 0.1.5 — safety overrides for MiSide mode */
-.app.misideMode *{
-  backface-visibility: hidden;
-}
-
-.app.misideMode .songCard{
-  filter: none !important;
-}
-
-.misideWhisper{
-  display: none !important;
-}
 
 /* ======================================================================
    localitfy 0.1.5 — flat black customization layer
@@ -3647,7 +3472,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   --custom-text: var(--flat-text);
   --custom-muted: var(--flat-muted);
 }
-
 
 /* Absolute no-gradient guard for UI chrome. Album art uses <img>, so it stays safe. */
 .app.flatNoGradientUI *:not(img):not(video):not(canvas){
@@ -3724,29 +3548,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   z-index: 4 !important;
 }
 
-.app.flatNoGradientUI .misideEggNotice{
-  display: none !important;
-}
-
-.app.flatNoGradientUI .misideSmallText{
-  margin: 8px 0 0 !important;
-  padding: 0 !important;
-  display: block !important;
-  width: fit-content !important;
-  max-width: 100% !important;
-  font-size: 11px !important;
-  line-height: 1.2 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: lowercase !important;
-  font-weight: 800 !important;
-  color: rgba(var(--accent-rgb), 0.92) !important;
-  background: transparent !important;
-  background-image: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-
 .app.flatNoGradientUI .homeAlbumCard:hover{
   transform: translate3d(0, -1px, 0) !important;
   border-color: rgba(var(--accent-rgb), 0.42) !important;
@@ -3761,14 +3562,9 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   filter: none;
 }
 
-
-/* localitfy 0.1.5 — clean categorized settings + what's new popup */
-
-
 .cleanToggleLabel{ display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); font-size: 12px; font-weight: 800; text-transform: lowercase; }
 .cleanToggleLabel input{ width: 16px; height: 16px; accent-color: rgb(var(--accent-rgb)); }
 .accentTextInput{ width: 120px; height: 40px; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.055); color: #fff; padding: 0 12px; font: inherit; font-weight: 800; }
-
 
 .statusGrid{ display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
 .statusGrid span{ min-height: 74px; padding: 12px; border-radius: 16px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.075); }
@@ -3786,36 +3582,26 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 @keyframes whatsNewPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 980px){   .statusGrid{ grid-template-columns: 1fr; }   }
 
-
 /* ======================================================================
    localitfy 0.1.5 — settings open + warning cleanup patch
    Keeps the settings modal above every app layer and styles the restored
    playlist/queue controls that are now used in App.tsx.
 ====================================================================== */
 
-
 /* Keep expensive layers contained so motion stays smooth while scrolling. */
-
-
 
 /* Stronger glass/backdrop, but it stays static instead of animating blur. */
 
-
-
 /* Better hover motion for app controls, without touching player controls. */
-
 
 /* Accent/theme changes stay animated but stop repainting the whole app too hard. */
 
-
 /* Do not hide ambience/glow during dragging or theme changes. Just keep it contained. */
-
 
 /* ========================================================================== 
    localtify 0.2.0 — cover studio base cleanup
    Fullscreen now playing removed; cover studio styling lives in home.css.
    ========================================================================== */
-
 
 /* ========================================================================== 
    localtify 0.2.0 — final library tools spacing repair
@@ -4334,8 +4120,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   }
 }
 
-
-
 /* 0.2.0 library shuffle + editor cleanup */
 .libraryPanelHead{
   align-items: center;
@@ -4414,25 +4198,12 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 /* v0.20.1 bottom player visualizer restore
    Kept plain/translucent: no gradient, no extra decoration. */
 
-
-
-
-
-
-
-
-
-
-
 @media (max-width: 980px){
   
 
-
   
 
-
   
-
 
   
 }
@@ -4884,11 +4655,6 @@ input[type="range"]{
   }
 }
 
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
-
 /* ========================================================================== 
    localtify v0.2.3 — Kopuz-style sidebar scale + accent glass polish
    --------------------------------------------------------------------------
@@ -4910,7 +4676,6 @@ input[type="range"]{
 .appShell{
   grid-template-columns: minmax(236px, var(--sidebar-width, 260px)) minmax(0, 1fr) !important;
 }
-
 
 .sidebar{
   padding: 16px 14px 14px !important;
@@ -5118,7 +4883,6 @@ input[type="range"]{
   }
 
   
-
 
   .sidebar{
     padding-inline: 10px !important;
@@ -5368,7 +5132,6 @@ input[type="range"]{
     font-size: 23px !important;
   }
 }
-
 
 /* ======================================================================
    localtify v0.2.4 — clean Kopuz sidebar + motion repair
@@ -5638,15 +5401,11 @@ input[type="range"]{
     display: none !important;
   }
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
 
 /* keep import/theme controls under the nav instead of forcing a huge empty gap */
 .sidebar .mainAction{
   margin-top: 4px !important;
 }
-
 
 /* ======================================================================
    localtify v0.2.4 — lucide icon + bold Space Grotesk polish
@@ -5773,7 +5532,6 @@ body{
   stroke: currentColor !important;
   flex: 0 0 auto !important;
 }
-
 
 /* ======================================================================
    localtify v0.2.4 — static icon/sidebar cleanup
@@ -6065,15 +5823,12 @@ body{
   text-transform: lowercase !important;
 }
 
-
 /* ======================================================================
    localtify v0.2.4 — remove bottom visualizer + tighten player position
    ----------------------------------------------------------------------
    The visualizer was creating the dotted pill under volume. Keep volume and
    idle/playing status only, with stable right-side spacing.
 ====================================================================== */
-
-
 
 /* v0.2.3 Kopuz-style cleanup: settings is now a normal page, player controls are circular, no heavy boxed control backdrop. */
 .app{
@@ -6123,13 +5878,11 @@ body{
   fill: color-mix(in oklab, var(--accent) 24%, transparent) !important;
 }
 
-
 .kopuzThemeGrid{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
   gap: 12px;
 }
-
 
 .softButton{
   border-radius: 999px;
@@ -6150,9 +5903,6 @@ body{
 }
 
 /* Player override: no rectangle blob behind the buttons, only small circular controls. */
-
-
-
 
 .circleButton:not(.playerBar *){
   width: var(--control-circle) !important;
@@ -6192,10 +5942,6 @@ body{
   background: color-mix(in oklab, var(--accent) 18%, transparent) !important;
   border-color: color-mix(in oklab, var(--accent) 52%, transparent) !important;
 }
-
-
-
-
 
 .playIcon{
   transform: translateX(1px);
@@ -6309,7 +6055,6 @@ html{
 }
 
 /* Theme editor/settings panels should change with the active theme instead of staying black. */
-
 
 /* Sidebar theme card now uses the same theme-owned background without a random dark box. */
 .sidebarCustomTheme{
@@ -6501,7 +6246,6 @@ html{
   opacity: .40 !important;
   transform: scale(1.02) !important;
 }
-
 
 /* ======================================================================
    localtify v0.2.4 — FINAL theme-surface fix
@@ -6729,9 +6473,6 @@ button:hover,
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent, #ff6edb) 22%, transparent) !important;
 }
 
-
-
-
 /* ======================================================================
    localtify v0.2.4 — low-lag theme/color painting patch
    ----------------------------------------------------------------------
@@ -6749,9 +6490,6 @@ body.localitfyThemePainting .app *{
   transition: none !important;
   will-change: auto !important;
 }
-
-
-
 
 body.localitfyThemePainting .app :where(.content, .simpleShell, .songList, .homeAlbumGrid){
   scrollbar-gutter: auto;
@@ -6879,9 +6617,6 @@ body.localitfyThemePainting .app *{
   will-change: auto !important;
 }
 
-
-
-
 .app.songDragActive .ambientSurface::before{
   filter: none !important;
   opacity: 0.08 !important;
@@ -6922,8 +6657,6 @@ body.localitfyThemePainting .app *{
   background: rgba(var(--accent-rgb), 0.2);
   transform: translate3d(0, -1px, 0);
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
 
 /* ======================================================================
    localtify v0.2.4 — sidebar line pass
@@ -7129,8 +6862,6 @@ body.localitfyThemePainting .app *{
   }
 }
 
-
-
 /* ======================================================================
    v0.2.4 sidebar polish — Kopuz-inspired, localtify-shaped
    - keeps your current nav items only
@@ -7247,7 +6978,6 @@ body.localitfyThemePainting .app *{
   box-shadow: 0 18px 38px rgba(var(--accent-rgb), 0.26);
 }
 
-
 /* ======================================================================
    localtify v0.2.4 — sidebar line + filled icon final pass
    ----------------------------------------------------------------------
@@ -7321,7 +7051,6 @@ body.localitfyThemePainting .app *{
   -webkit-mask-image: none !important;
   mask-image: none !important;
 }
-
 
 /* localtify v0.2.5 layout guard: keep the main page scrollable */
 .appShell .content{
@@ -7415,7 +7144,6 @@ html{
   background-size: auto !important;
 }
 
-
 /* ==========================================================================
    localtify v0.2.5 smooth motion support
    Keeps layout stable while motion.css handles the actual animations.
@@ -7467,9 +7195,6 @@ html{
   border-color: color-mix(in srgb, var(--accent, #ff65c8) 34%, transparent) !important;
   box-shadow: 0 18px 42px color-mix(in srgb, var(--accent, #ff65c8) 10%, transparent);
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
 
 /* v0.2.5 actual class hooks */
 .hero,
@@ -7496,7 +7221,6 @@ html{
 .transportButton{
   transition-timing-function: var(--motion-smooth);
 }
-
 
 /* v0.2.5 skeleton loading + Cover Color Sync base variables */
 .app[data-cover-sync="off"]{
@@ -7731,8 +7455,6 @@ html{
   --localtify-motion-speed: 0.62;
 }
 
-
-
 .app.secret-night::after{
   content: "";
   position: fixed;
@@ -7847,7 +7569,6 @@ html{
   100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-
 /* localtify v0.2.6 — keyboard easter egg cleanup */
 .secretLayer.night{
   background: transparent !important;
@@ -7874,7 +7595,6 @@ html{
 .app.secret-night .coverAura::before{
   opacity: 0.16;
 }
-
 
 /* localtify v0.2.6 — reliable keyboard easter eggs + clean white starfield */
 .secretLayer.stars{
@@ -8101,8 +7821,6 @@ html{
   --localtify-motion-speed: .58;
 }
 
-
-
 .app .secretLayer.fast::before{
   opacity: .64 !important;
   background:
@@ -8178,15 +7896,6 @@ html{
   28%{ transform: scale(1.12); opacity: 1; }
   100%{ transform: scale(1.48); opacity: 0; }
 }
-
-/* DEV/Konami fallback overlay. */
-.app .secretLayer.pulse::before,
-.app .secretLayer.arcadeGhost::before{
-  opacity: .38 !important;
-  background: repeating-linear-gradient(90deg, transparent 0 34px, rgba(var(--accent-rgb), .22) 36px 38px, transparent 40px 78px) !important;
-  animation: localtifyStageGridFixed 1.2s linear infinite !important;
-}
-
 
 .app .secretRibbon:empty{
   display: none !important;
@@ -8343,8 +8052,6 @@ html{
 .app.secret-fast{
   --localtify-motion-speed: .58;
 }
-
-
 
 /* Stars: white twinkling stars only, random across the whole app. */
 .app .secretLayer.stars{
@@ -8773,7 +8480,6 @@ button{
   touch-action: none;
 }
 
-
 /* v0.2.6 load/perf guard: preserve design, reduce offscreen work. */
 .homeAlbumCard,
 .songRow,
@@ -8791,7 +8497,6 @@ button{
 .titleBar{
   content-visibility: visible;
 }
-
 
 /* ======================================================================
    localtify v0.2.6 emergency layout fix
@@ -9236,7 +8941,6 @@ button{
   will-change: auto;
 }
 
-
 /* ========================================================================== 
    localtify 0.2.9 — cleaner public toasts
 ========================================================================== */
@@ -9315,7 +9019,6 @@ button{
     transform: scale(1.12);
   }
 }
-
 
 /* localtify 0.2.9 — keep global shell clean; music-reactive visuals live in effects.css */
 .app,
@@ -9409,7 +9112,6 @@ button{
   
 }
 
-
 /* localtify 0.2.9: keep the player glow stable while live custom colors change */
 body.localitfyThemePainting .app .coverAura::before,
 body.localitfyThemePainting .app .ambientSurface::after{
@@ -9449,7 +9151,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
   background-image: none !important;
   background-size: auto !important;
 }
-
 
 /* ========================================================================
    localtify 0.2.9 — final global grid kill + smoother paint budget
@@ -9637,8 +9338,6 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
     contain-intrinsic-size: 720px;
   }
 }
-
-
 
 /* localtify 0.2.9 — fast section switching + final no-grid safety
    Keep this at the end of App.css so older duplicated background and page
@@ -9829,22 +9528,12 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
     0 12px 30px rgba(var(--accent-rgb), 0.10) !important;
 }
 
-/* No grid texture anywhere, including boot/editor/secret overlays. */
-.loadingScreen,
-.editorModal,
-.secretLayer.arcadeGhost::before,
-.secretLayer.stars::before {
-  background-image: none !important;
-  background-size: auto !important;
-}
-
 .loadingScreen,
 .editorModal {
   background:
     radial-gradient(circle at 50% 100%, rgba(var(--accent-rgb), 0.09), transparent 42%),
     #000 !important;
 }
-
 
 /* v0.2.9 final no-grid / no-tilt guardrail */
 html,
@@ -9941,7 +9630,6 @@ body::after,
   perspective: none !important;
 }
 
-
 /* ======================================================================
    localtify 0.3.0 — readable update / what’s-new popup
    App.css owns this popup because the original .whatsNewCard bullet styles
@@ -10026,7 +9714,6 @@ body::after,
     font-size: 12.5px !important;
   }
 }
-
 
 /* ======================================================================
    localtify 0.3.0 — sidebar hover/active shape repair
@@ -10133,7 +9820,6 @@ body::after,
   line-height: 1.05 !important;
   opacity: .78 !important;
 }
-
 
 /* ======================================================================
    localtify 0.3.0 — final shell motion cleanup
@@ -10250,7 +9936,6 @@ body::after,
   transform: translateY(-50%) !important;
 }
 
-
 /* v0.3.1 cover loading polish
    Keeps album art from flashing white or showing broken-image icons while covers load. */
 .coverAura {
@@ -10338,10 +10023,6 @@ body::after,
     transform: translateX(110%);
   }
 }
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
 
 /* v0.3.1 background performance guardrails
    Keeps music playing, but stops expensive visual repaint work while the window is hidden/minimized. */
@@ -10458,7 +10139,6 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: none !important;
 }
 
-
 /* ========================================================================
    localtify v0.3.2 — theme-aware titlebar surface
    ------------------------------------------------------------------------
@@ -10506,8 +10186,6 @@ body.localtifyBackgroundMode .ambientSurface,
   color: #ffffff !important;
   background: color-mix(in oklab, #e54868 74%, var(--accent, #ff65df) 18%) !important;
 }
-
-
 
 /* ========================================================================
    localtify v0.3.3/v97 — compact acrylic update notice
@@ -11097,7 +10775,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 /* ========================================================================
    localtify v0.3.3/v99 — final Kopuz-style top update ribbon cleanup
    Owner: App.css / update notification only. Does not touch player.css.
@@ -11382,7 +11059,6 @@ body.localtifyBackgroundMode .ambientSurface,
     display: none !important;
   }
 }
-
 
 /* ========================================================================
    localtify v0.3.3/v100 — update ribbon centering repair
@@ -11713,8 +11389,6 @@ body.localtifyBackgroundMode .ambientSurface,
 .virtualSongViewport::-webkit-scrollbar-thumb:hover {
   background: rgba(var(--accent-rgb), .42);
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
 
 /* =======================================================================
    localtify v0.3.3 v102 — cover-colour cache variables
@@ -12077,13 +11751,6 @@ body.localtifyBackgroundMode .ambientSurface,
     margin-inline: auto;
   }
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
-
-
 
 /* v0.3.5 idle screensaver */
 .screensaverOverlay {
@@ -12209,9 +11876,6 @@ body.localtifyBackgroundMode .ambientSurface,
     border-radius: 30px;
   }
 }
-
-
-/* localtify v0.3.6 V189: removed OS motion-off block to keep Localtify motion alive. */
 
 .gifVisualModePicker { margin: 16px 0 4px; display: grid; gap: 8px; }
 .gifVisualModePicker label {
@@ -12401,9 +12065,6 @@ body.localtifyBackgroundMode .ambientSurface,
     display: none !important;
   }
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
-
 
 /* ======================================================================
    localtify 0.3.6 V160 — final tiny motion polish
@@ -12633,8 +12294,6 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: none !important;
   filter: none !important;
 }
-/* localtify v0.3.6 V189: removed built-in motion-off selector block. */
-
 
 /* ======================================================================
    localtify 0.3.6 V164 — final hero action layout repair
@@ -14567,167 +14226,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 }
 
 /* ==========================================================================
-   localtify v0.3.6 V209 — visual customization root wiring
-   Root-only variables + stars/sidebar modes. Surface styling stays in owner files.
-========================================================================== */
-
-.app{
-  --lt-visual-blur: 14px;
-  --lt-visual-blur-light: 8px;
-  --lt-visual-saturation: 116%;
-  --lt-acrylic-alpha: 0.30;
-  --lt-glass-alpha: 0.42;
-}
-
-.app[data-blur-effects="off"]{
-  --lt-visual-blur: 0px;
-  --lt-visual-blur-light: 0px;
-  --lt-visual-saturation: 100%;
-  --lt-acrylic-alpha: 0.72;
-  --lt-glass-alpha: 0.80;
-}
-
-.app[data-blur-effects="subtle"]{
-  --lt-visual-blur: 9px;
-  --lt-visual-blur-light: 5px;
-  --lt-visual-saturation: 110%;
-  --lt-acrylic-alpha: 0.38;
-  --lt-glass-alpha: 0.48;
-}
-
-.app[data-blur-effects="normal"],
-.app:not([data-blur-effects]){
-  --lt-visual-blur: 14px;
-  --lt-visual-blur-light: 8px;
-  --lt-visual-saturation: 116%;
-  --lt-acrylic-alpha: 0.30;
-  --lt-glass-alpha: 0.42;
-}
-
-.app[data-blur-effects="strong"]{
-  --lt-visual-blur: 22px;
-  --lt-visual-blur-light: 14px;
-  --lt-visual-saturation: 126%;
-  --lt-acrylic-alpha: 0.22;
-  --lt-glass-alpha: 0.34;
-}
-
-.app[data-blur-effects="off"] :where(.panel,.sidebar,.playerBar,.settingsPanelCard,.settingsPageCard,.homeShelfPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.search,.visualCustomizationCardV205){
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app .localtifyStarsBackdrop{
-  position: fixed !important;
-  inset: 36px 0 0 0 !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  z-index: 0 !important;
-  opacity: 0.55 !important;
-  background:
-    radial-gradient(circle at 18% 18%, rgba(var(--accent-rgb),0.08), transparent 34%),
-    radial-gradient(circle at 82% 28%, rgba(120,190,255,0.08), transparent 36%),
-    #050511 !important;
-}
-
-.app .localtifyStarsLayer{
-  position: absolute !important;
-  inset: 0 !important;
-  background-repeat: repeat !important;
-  will-change: transform, opacity !important;
-}
-
-.app .localtifyStarsLayerA{
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,.52) 0 1px, transparent 1.8px),
-    radial-gradient(circle, rgba(var(--accent-rgb),.40) 0 .9px, transparent 1.7px) !important;
-  background-size: 92px 92px, 137px 137px !important;
-  animation: localtifyV209StarDriftA 110s linear infinite !important;
-}
-
-.app .localtifyStarsLayerB{
-  opacity: .58 !important;
-  background-image:
-    radial-gradient(circle, rgba(155,210,255,.38) 0 1px, transparent 1.8px),
-    radial-gradient(circle, rgba(255,150,250,.28) 0 .85px, transparent 1.7px) !important;
-  background-size: 122px 122px, 181px 181px !important;
-  animation: localtifyV209StarDriftB 145s linear infinite !important;
-}
-
-.app .localtifyStarsLayerC{
-  opacity: .30 !important;
-  background-image: radial-gradient(circle, rgba(255,255,255,.36) 0 .8px, transparent 1.5px) !important;
-  background-size: 56px 56px !important;
-  animation: localtifyV209StarDriftC 74s linear infinite !important;
-}
-
-.app[data-stars-intensity="off"] .localtifyStarsBackdrop{
-  display: none !important;
-}
-
-.app[data-stars-intensity="subtle"] .localtifyStarsBackdrop{
-  opacity: .28 !important;
-}
-
-.app[data-stars-intensity="normal"] .localtifyStarsBackdrop,
-.app:not([data-stars-intensity]) .localtifyStarsBackdrop{
-  opacity: .55 !important;
-}
-
-.app[data-stars-intensity="bright"] .localtifyStarsBackdrop{
-  opacity: .92 !important;
-  filter: saturate(1.12) brightness(1.16) !important;
-}
-
-@keyframes localtifyV209StarDriftA{
-  from{ transform: translate3d(0,0,0); }
-  to{ transform: translate3d(-140px,-70px,0); }
-}
-
-@keyframes localtifyV209StarDriftB{
-  from{ transform: translate3d(0,0,0); }
-  to{ transform: translate3d(180px,-120px,0); }
-}
-
-@keyframes localtifyV209StarDriftC{
-  from{ transform: translate3d(0,0,0); }
-  to{ transform: translate3d(-90px,80px,0); }
-}
-
-/* Sidebar modes. */
-.app[data-sidebar-behavior="slim"],
-.app[data-sidebar-behavior="hover"]{
-  --sidebar-width: 88px !important;
-}
-
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover),
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within){
-  --sidebar-width: 236px !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar,
-.app[data-sidebar-behavior="hover"] .sidebar{
-  overflow: hidden !important;
-}
-
-.app[data-sidebar-behavior="slim"] .logoWrap h1,
-.app[data-sidebar-behavior="slim"] .logoWrap p,
-.app[data-sidebar-behavior="slim"] .navCopy,
-.app[data-sidebar-behavior="slim"] .sidebarLabel,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap h1,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap p,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navCopy,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebarLabel{
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-.app[data-sidebar-behavior="slim"] .navItem,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem{
-  justify-content: center !important;
-}
-
-/* ==========================================================================
    localtify v0.3.6 V211 — theme-tinted glass variables
    No white acrylic. Glass uses the current theme/accent + dark tint.
 ========================================================================== */
@@ -14786,235 +14284,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   --lt-acrylic-highlight-alpha: 0.045;
   --lt-glass-bg-alpha: 0.50;
   --lt-glass-accent-alpha: 0.075;
-}
-
-/* ==========================================================================
-   localtify v0.3.6 V212 — sidebar hover/slim mode repair
-   Owner: App.css
-
-   Fixes:
-   - hover sidebar mode leaving ugly clipped text/buttons
-   - import button wrapping/cutting in slim mode
-   - active icon outline being too bulky in slim sidebar
-   - smoother width/text animation
-========================================================================== */
-
-.app[data-sidebar-behavior="slim"],
-.app[data-sidebar-behavior="hover"]{
-  --sidebar-width: 88px !important;
-}
-
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover),
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within){
-  --sidebar-width: 236px !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar,
-.app[data-sidebar-behavior="hover"] .sidebar{
-  width: var(--sidebar-width) !important;
-  min-width: var(--sidebar-width) !important;
-  overflow: hidden !important;
-  padding-inline: 12px !important;
-  transition:
-    width 260ms cubic-bezier(.16,1,.3,1),
-    min-width 260ms cubic-bezier(.16,1,.3,1),
-    padding 260ms cubic-bezier(.16,1,.3,1),
-    background-color 180ms ease,
-    border-color 180ms ease !important;
-  will-change: width, min-width !important;
-}
-
-/* Prevent the content/star field from animating weirdly while sidebar opens. */
-.app[data-sidebar-behavior="hover"] .content{
-  transition: padding 180ms ease !important;
-}
-
-/* Shared text hiding. Keep the icon visible, hide copy only. */
-.app[data-sidebar-behavior="slim"] .logoWrap h1,
-.app[data-sidebar-behavior="slim"] .logoWrap p,
-.app[data-sidebar-behavior="slim"] .navCopy,
-.app[data-sidebar-behavior="slim"] .sidebarLabel,
-.app[data-sidebar-behavior="slim"] .navItem span:not(.navIcon):not(.sidebarIcon):not(.icon),
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap h1,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap p,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navCopy,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebarLabel,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem span:not(.navIcon):not(.sidebarIcon):not(.icon){
-  max-width: 0 !important;
-  opacity: 0 !important;
-  transform: translateX(-8px) !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-}
-
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .logoWrap h1,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .logoWrap p,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .navCopy,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebarLabel,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .navItem span:not(.navIcon):not(.sidebarIcon):not(.icon),
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .logoWrap h1,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .logoWrap p,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .navCopy,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebarLabel,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .navItem span:not(.navIcon):not(.sidebarIcon):not(.icon){
-  max-width: 160px !important;
-  opacity: 1 !important;
-  transform: translateX(0) !important;
-  transition:
-    opacity 170ms ease 70ms,
-    transform 220ms cubic-bezier(.16,1,.3,1) 45ms,
-    max-width 260ms cubic-bezier(.16,1,.3,1) !important;
-}
-
-/* Nav items become clean icon buttons when collapsed. */
-.app[data-sidebar-behavior="slim"] .navItem,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem{
-  width: 48px !important;
-  min-width: 48px !important;
-  height: 48px !important;
-  margin-inline: auto !important;
-  padding: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  justify-content: center !important;
-  border-radius: 15px !important;
-  gap: 0 !important;
-}
-
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .navItem,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .navItem{
-  width: 100% !important;
-  min-width: 0 !important;
-  height: 42px !important;
-  margin-inline: 0 !important;
-  padding: 0 12px !important;
-  display: flex !important;
-  place-items: initial !important;
-  justify-content: flex-start !important;
-  gap: 11px !important;
-  border-radius: 13px !important;
-  transition:
-    width 240ms cubic-bezier(.16,1,.3,1),
-    height 200ms ease,
-    padding 220ms cubic-bezier(.16,1,.3,1),
-    border-radius 180ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease !important;
-}
-
-/* Keep active icon clean instead of that giant harsh outline. */
-.app[data-sidebar-behavior="slim"] .navItem.active,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem.active{
-  border-color: rgba(var(--accent-rgb),0.34) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.18), rgba(var(--accent-rgb),0.07)),
-    rgba(255,255,255,0.026) !important;
-  box-shadow:
-    0 0 0 1px rgba(var(--accent-rgb),0.08) inset,
-    0 8px 22px rgba(var(--accent-rgb),0.10) !important;
-}
-
-.app[data-sidebar-behavior="slim"] .navItem svg,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .navItem svg{
-  width: 22px !important;
-  height: 22px !important;
-  flex: 0 0 auto !important;
-}
-
-/* Logo should not create clipped text or extra blank area. */
-.app[data-sidebar-behavior="slim"] .logoWrap,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap{
-  justify-content: center !important;
-  gap: 0 !important;
-}
-
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .logoWrap,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .logoWrap{
-  justify-content: flex-start !important;
-  gap: 12px !important;
-}
-
-/* Import button: no more cropped "impo / song" text in collapsed sidebar. */
-.app[data-sidebar-behavior="slim"] .importButton,
-.app[data-sidebar-behavior="slim"] .sidebarImportButton,
-.app[data-sidebar-behavior="slim"] .importSongsButton,
-.app[data-sidebar-behavior="slim"] .mainAction.import,
-.app[data-sidebar-behavior="slim"] .mainActionImport,
-.app[data-sidebar-behavior="slim"] .sidebar .mainAction,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .importButton,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebarImportButton,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .importSongsButton,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .mainAction.import,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .mainActionImport,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .mainAction{
-  width: 48px !important;
-  min-width: 48px !important;
-  max-width: 48px !important;
-  height: 44px !important;
-  padding: 0 !important;
-  margin-inline: auto !important;
-  display: grid !important;
-  place-items: center !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  border-radius: 15px !important;
-  font-size: 0 !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .mainAction svg,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .mainAction svg{
-  width: 20px !important;
-  height: 20px !important;
-  margin: 0 !important;
-  opacity: 1 !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .mainAction span,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .mainAction span{
-  opacity: 0 !important;
-  max-width: 0 !important;
-  overflow: hidden !important;
-}
-
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .mainAction,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .mainAction{
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  height: 44px !important;
-  padding: 0 14px !important;
-  margin-inline: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  border-radius: 14px !important;
-  font-size: 14px !important;
-  transition:
-    width 250ms cubic-bezier(.16,1,.3,1),
-    padding 220ms cubic-bezier(.16,1,.3,1),
-    border-radius 180ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease !important;
-}
-
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .mainAction span,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .mainAction span{
-  max-width: 120px !important;
-  opacity: 1 !important;
-  transition: opacity 170ms ease 80ms, max-width 240ms cubic-bezier(.16,1,.3,1) !important;
-}
-
-/* Hide footer/current-song copy in collapsed sidebar if it exists. */
-.app[data-sidebar-behavior="slim"] .sidebar :where(.sidebarNowPlaying,.sidebarFooter,.sidebarMeta,.sidebarTrackCopy),
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar :where(.sidebarNowPlaying,.sidebarFooter,.sidebarMeta,.sidebarTrackCopy){
-  opacity: 0 !important;
-  max-width: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
 }
 
 /* ==========================================================================
@@ -15396,5 +14665,91 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 @keyframes localtifyV214StarDriftB{
   from{ transform: translate3d(0,0,0); }
   to{ transform: translate3d(112px,-74px,0); }
+}
+
+/* ========================================================================
+   localtify v0.3.6 V215 — App.css legacy cleanup guard
+   Keep /stars and /yukari. Disable old heavy joke layers and old card proximity.
+======================================================================== */
+
+/* Old heavy secret modes are removed/hidden. */
+.app.secret-disco,
+.app.secret-pulse,
+.app.secret-vinyl,
+.app.secret-rain,
+.app.secret-night,
+.app.secret-fast,
+.app.secret-playBounce,
+.app.secret-arcadeGhost,
+.secretLayer.disco,
+.secretLayer.pulse,
+.secretLayer.vinyl,
+.secretLayer.rain,
+.secretLayer.night,
+.secretLayer.fast,
+.secretLayer.playBounce,
+.secretLayer.arcadeGhost,
+.lateNightNoteLayer,
+.lateNightWarning,
+.misideEggNotice,
+.misideWhisper{
+  display: none !important;
+  animation: none !important;
+}
+
+/* Proximity motion is buttons/nav/player only now. Never cards/settings/rows. */
+:is(
+  .songRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .libraryRow,
+  .libraryCard,
+  .libraryCardV025,
+  .homeAlbumCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverTile,
+  .coverGalleryCard,
+  .settingSwitchCard,
+  .settingsChoice,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsResetButton,
+  .toggleRow,
+  .rangeRow,
+  .visualOptionButtonV205,
+  .visualOptionGroupV205
+).localtifyProximityTarget,
+:is(
+  .songRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .libraryRow,
+  .libraryCard,
+  .libraryCardV025,
+  .homeAlbumCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .coverTile,
+  .coverGalleryCard,
+  .settingSwitchCard,
+  .settingsChoice,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsResetButton,
+  .toggleRow,
+  .rangeRow,
+  .visualOptionButtonV205,
+  .visualOptionGroupV205
+).localtifyProximityActive{
+  transform: none !important;
+  filter: none !important;
+  box-shadow: inherit !important;
+  background-image: inherit !important;
+}
+
+/* Keep button proximity subtle. */
+.localtifyProximityActive:is(button,[role="button"],.navItem,.mainAction,.heroMain,.heroGhost,.softButton,.playerButton,.circleButton){
+  transform: scale(var(--prox-scale, 1)) translateZ(0) !important;
 }
 

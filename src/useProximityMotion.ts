@@ -1,10 +1,15 @@
-/* localtify 0.3.6 V207 — reduced proximity motion.
-   Goal:
-   - keep the nice "near cursor" feel
-   - stop settings/cards from glowing everywhere
-   - reduce scan targets, active targets, radius, scale, and glow
-   - never touch dense song rows
-   - no React state, no blocking handlers
+/* localtify 0.3.6 V215 — buttons-only proximity motion.
+   Kept:
+   - sidebar/nav buttons
+   - main action buttons
+   - player buttons
+
+   Removed:
+   - settings cards
+   - reset buttons
+   - song rows
+   - library cards
+   - cover cards/gallery cards
 */
 import { useEffect, type RefObject } from "react";
 
@@ -22,8 +27,8 @@ type CachedTarget = {
 };
 
 const BUTTON_SELECTOR = [
-  "button",
-  "[role='button']",
+  "button:not(.settingSwitchCard):not(.settingsResetButton):not(.visualOptionButtonV205)",
+  "[role='button']:not(.settingSwitchCard):not(.settingsResetButton):not(.visualOptionButtonV205)",
   ".navItem",
   ".mainAction",
   ".heroMain",
@@ -40,21 +45,13 @@ const BUTTON_SELECTOR = [
   ".tabButton",
   ".navButton",
   ".tinyToggle",
-  ".settingsTinyButton"
+  ".settingsTinyButton",
+  ".playerButton",
+  ".playerControlButton",
+  ".circleButton",
+  ".repeatButton",
+  ".volumeIconButton"
 ].join(",");
-
-/* Keep proximity off heavy/card-like areas.
-   Normal CSS hover can handle these without JS scanning/glow. */
-const CARD_SELECTOR = [
-  ".coverTile",
-  ".coverGalleryCard",
-  ".homeAlbumCard",
-  ".libraryCard",
-  ".libraryCardV025",
-  ".playlistShelfCard"
-].join(",");
-
-const TARGET_SELECTOR = `${BUTTON_SELECTOR},${CARD_SELECTOR}`;
 
 const SKIP_SELECTOR = [
   ".songRow",
@@ -63,6 +60,12 @@ const SKIP_SELECTOR = [
   ".libraryRow",
   ".homeListenCard",
   ".homeFreshCard",
+  ".homeAlbumCard",
+  ".libraryCard",
+  ".libraryCardV025",
+  ".playlistShelfCard",
+  ".coverTile",
+  ".coverGalleryCard",
   ".settingSwitchCard",
   ".settingsChoice",
   ".settingsThemeCard",
@@ -72,18 +75,19 @@ const SKIP_SELECTOR = [
   ".visualOptionButtonV205",
   ".visualOptionGroupV205",
   ".settingsResetButton",
-  ".settingsPanelCard"
+  ".settingsPanelCard",
+  ".settingsPageCard"
 ].join(",");
 
-const RADIUS_IDLE = 132;
-const RADIUS_PLAYING = 108;
-const MIN_STRENGTH = 0.08;
-const TARGET_REFRESH_IDLE_MS = 980;
-const TARGET_REFRESH_PLAYING_MS = 1280;
-const MAX_SCAN_IDLE = 56;
-const MAX_SCAN_PLAYING = 36;
-const MAX_ACTIVE_IDLE = 4;
-const MAX_ACTIVE_PLAYING = 3;
+const RADIUS_IDLE = 104;
+const RADIUS_PLAYING = 88;
+const MIN_STRENGTH = 0.10;
+const TARGET_REFRESH_IDLE_MS = 1200;
+const TARGET_REFRESH_PLAYING_MS = 1600;
+const MAX_SCAN_IDLE = 42;
+const MAX_SCAN_PLAYING = 28;
+const MAX_ACTIVE_IDLE = 3;
+const MAX_ACTIVE_PLAYING = 2;
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -96,8 +100,9 @@ function distanceToRect(x: number, y: number, rect: DOMRect) {
 }
 
 function targetPriority(element: HTMLElement) {
-  if (element.matches(BUTTON_SELECTOR)) return 3;
-  return 1;
+  if (element.closest(".playerBar")) return 3;
+  if (element.matches(".navItem")) return 3;
+  return 2;
 }
 
 function isVisibleTarget(root: HTMLElement, element: HTMLElement) {
@@ -112,11 +117,11 @@ function isVisibleTarget(root: HTMLElement, element: HTMLElement) {
 }
 
 function applyState(element: HTMLElement, strength: number, priority = targetPriority(element)) {
-  const weightedStrength = clamp(strength * (priority >= 3 ? 1.04 : 0.82), 0, 1);
-  const scale = 1 + weightedStrength * (priority >= 3 ? 0.024 : 0.015);
-  const glow = Math.round(weightedStrength * (priority >= 3 ? 14 : 8));
-  const bg = 0.006 + weightedStrength * (priority >= 3 ? 0.018 : 0.012);
-  const line = 0.08 + weightedStrength * (priority >= 3 ? 0.12 : 0.08);
+  const weightedStrength = clamp(strength * (priority >= 3 ? 1 : 0.82), 0, 1);
+  const scale = 1 + weightedStrength * 0.018;
+  const glow = Math.round(weightedStrength * 8);
+  const bg = 0.004 + weightedStrength * 0.012;
+  const line = 0.06 + weightedStrength * 0.08;
   const signature = `${Math.round(scale * 10000)}:${glow}:${Math.round(bg * 1000)}:${Math.round(line * 1000)}`;
 
   if (element.dataset.localtifyProxSignature === signature && element.classList.contains("localtifyProximityActive")) return;
@@ -184,7 +189,7 @@ export function useProximityMotion({
       const viewportH = window.innerHeight || document.documentElement.clientHeight || 0;
       const maxScan = playing ? MAX_SCAN_PLAYING : MAX_SCAN_IDLE;
 
-      targets = Array.from(root.querySelectorAll<HTMLElement>(TARGET_SELECTOR))
+      targets = Array.from(root.querySelectorAll<HTMLElement>(BUTTON_SELECTOR))
         .filter((element) => isVisibleTarget(root, element))
         .map((element) => ({ element, rect: element.getBoundingClientRect(), priority: targetPriority(element) }))
         .filter(({ rect }) => {
@@ -212,7 +217,7 @@ export function useProximityMotion({
         if (!root.contains(target.element)) continue;
 
         const distance = distanceToRect(lastX, lastY, target.rect);
-        const strength = clamp(1 - distance / radius, 0, 1) * (target.priority >= 3 ? 1 : 0.78);
+        const strength = clamp(1 - distance / radius, 0, 1);
 
         if (strength > MIN_STRENGTH) {
           ranked.push({ element: target.element, strength, priority: target.priority });
@@ -244,7 +249,7 @@ export function useProximityMotion({
     const handlePointerMove = (event: PointerEvent) => {
       if (!visible || document.hidden || event.pointerType === "touch") return;
 
-      const movedFarEnough = Math.abs(event.clientX - lastX) + Math.abs(event.clientY - lastY) >= 3;
+      const movedFarEnough = Math.abs(event.clientX - lastX) + Math.abs(event.clientY - lastY) >= 4;
       pointerInside = true;
       lastX = event.clientX;
       lastY = event.clientY;
@@ -255,13 +260,13 @@ export function useProximityMotion({
     const handlePointerDown = (event: PointerEvent) => {
       if (!visible || document.hidden || event.pointerType === "touch") return;
 
-      const element = (event.target as Element | null)?.closest<HTMLElement>(TARGET_SELECTOR);
+      const element = (event.target as Element | null)?.closest<HTMLElement>(BUTTON_SELECTOR);
       if (!element || !isVisibleTarget(root, element)) return;
 
       pointerInside = true;
       lastX = event.clientX;
       lastY = event.clientY;
-      applyState(element, 0.82);
+      applyState(element, 0.72);
       active.set(element, true);
     };
 
