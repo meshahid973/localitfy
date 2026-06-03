@@ -3320,6 +3320,7 @@ app.whenReady().then(async () => {
 
       let changedCount = 0;
       let afterSongs = listSongsShaped();
+      const importedFilePaths = [];
 
       if (autoAdd && successfulDownloads.length) {
         const pixelArtFiles = getPixelArtFiles();
@@ -3327,6 +3328,7 @@ app.whenReady().then(async () => {
 
         const importedSongs = [];
         for (const { item, track } of successfulDownloads) {
+          importedFilePaths.push(item.filePath);
           importedSongs.push(await makeSongFromFileWithMetadata(item.filePath, [track], pixelArtFiles, usedCovers));
         }
 
@@ -3358,6 +3360,7 @@ app.whenReady().then(async () => {
         const refresh = await importNewAudioFilesFromDirectory(downloadFolder, tracks);
         changedCount += refresh.changedCount;
         afterSongs = refresh.songs;
+        if (Array.isArray(refresh.files)) importedFilePaths.push(...refresh.files);
 
         const repair = await repairSpotifyMetadataForFolder(downloadFolder, tracks);
         changedCount += repair.changedCount;
@@ -3368,7 +3371,13 @@ app.whenReady().then(async () => {
         if (item?.ok) event.sender.send("spotdl-track-done", item);
       }
 
-      return { ...result, changedCount, songs: afterSongs, downloadFolder };
+      return {
+        ...result,
+        changedCount,
+        songs: afterSongs,
+        downloadFolder,
+        importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean)))
+      };
     } catch (error) {
       console.log("[localitfy spotify batch download error]", error?.message || error);
       return {

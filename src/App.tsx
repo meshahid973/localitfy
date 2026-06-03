@@ -469,6 +469,8 @@ function MainModeApp() {
   const [downloadsTab, setDownloadsTab] = useState<"youtube" | "spotify">("youtube");
   const [spotifyUrl, setSpotifyUrl] = useState("");
   const [spotifyTracks, setSpotifyTracks] = useState<SpotifyTrack[]>([]);
+  const [spotifySourceName, setSpotifySourceName] = useState("");
+  const [spotifySourceType, setSpotifySourceType] = useState("");
   const [spotifyFetchBusy, setSpotifyFetchBusy] = useState(false);
   const [spotifyFetchError, setSpotifyFetchError] = useState("");
   const [spotifySelectedIds, setSpotifySelectedIds] = useState<Set<string>>(new Set());
@@ -5882,6 +5884,8 @@ function MainModeApp() {
     setSpotifyFetchError("");
     setSpotifyTracks([]);
     setSpotifySelectedIds(new Set());
+    setSpotifySourceName("");
+    setSpotifySourceType("");
 
     try {
       const bridge = (window.localitfy as any);
@@ -5913,6 +5917,11 @@ function MainModeApp() {
         coverUrl: (t.coverUrl || (t as any).spotifyCoverUrl || (t as any).albumCoverUrl || "").trim()
       }));
 
+      const sourceName = String(result.playlistName || result.name || result.title || "").trim();
+      const sourceType = String(result.type || "").trim();
+
+      setSpotifySourceName(sourceName || (sourceType === "album" ? "Spotify Album" : sourceType === "track" ? "Spotify Track" : "Spotify Playlist"));
+      setSpotifySourceType(sourceType || "playlist");
       setSpotifyTracks(tracks);
       setSpotifySelectedIds(new Set(tracks.map((t) => t.id)));
       setStatusText(`fetched ${tracks.length} track${tracks.length !== 1 ? "s" : ""} from spotify`);
@@ -5922,6 +5931,75 @@ function MainModeApp() {
     } finally {
       setSpotifyFetchBusy(false);
     }
+  }
+
+  function normalizeImportedPath(filePath: string) {
+    return String(filePath || "").replace(/\\/g, "/").toLowerCase();
+  }
+
+  function trackMatchesSpotifyTrack(song: Song, track: SpotifyTrack) {
+    const songTitle = lower(song.title || "");
+    const songArtist = lower(song.artist || "");
+    const trackTitle = lower(track.title || (track as any).name || "");
+    const trackArtist = lower(track.artist || (track as any).artists || "");
+
+    if (!songTitle || !trackTitle) return false;
+
+    const titleMatch = songTitle.includes(trackTitle) || trackTitle.includes(songTitle);
+    const artistMatch =
+      !trackArtist ||
+      songArtist.includes(trackArtist) ||
+      trackArtist.includes(songArtist) ||
+      songArtist === "unknown artist" ||
+      songArtist === "slowed";
+
+    return titleMatch && artistMatch;
+  }
+
+  function upsertSpotifyPlaylistFromImport(sourceName: string, importedSongs: Song[]) {
+    const cleanIds = Array.from(new Set(importedSongs.map((song) => song.id).filter(Boolean)));
+    if (!cleanIds.length) return null;
+
+    const safeName = normalizePlaylistName(sourceName, `Spotify import ${new Date().toLocaleDateString()}`);
+    let selectedId: string | null = null;
+    let created = false;
+
+    setPlaylists((items) => {
+      const existing = items.find((playlist) => playlist.name.trim().toLowerCase() === safeName.toLowerCase());
+
+      if (existing) {
+        selectedId = existing.id;
+        const mergedIds = Array.from(new Set([...existing.songIds, ...cleanIds]));
+
+        if (mergedIds.length === existing.songIds.length) {
+          return items;
+        }
+
+        return items.map((playlist) =>
+          playlist.id === existing.id ? { ...playlist, songIds: mergedIds } : playlist
+        );
+      }
+
+      const playlist: Playlist = {
+        id: makeLocalId("playlist"),
+        name: safeName,
+        songIds: cleanIds,
+        createdAt: Date.now()
+      };
+
+      selectedId = playlist.id;
+      created = true;
+      return [playlist, ...items];
+    });
+
+    if (selectedId) {
+      setSelectedPlaylistId(selectedId);
+      setActivePlaylistId(selectedId);
+    }
+
+    setStatusText(`${created ? "created" : "updated"} Spotify playlist: ${safeName}`);
+    showAppToast(`${created ? "created" : "updated"} playlist: ${safeName}`, "success");
+    return selectedId;
   }
 
   async function downloadSpotifyTracks() {
@@ -5964,11 +6042,15 @@ function MainModeApp() {
           duration: t.duration,
           durationMs: (t as any).durationMs
         })),
+        sourceName: spotifySourceName,
+        sourceType: spotifySourceType,
         options: {
           quality: settings.downloadQuality,
           format: settings.downloadFormat,
           autoAdd: settings.downloadAutoAdd,
-          downloadFolder: settings.downloadFolder
+          downloadFolder: settings.downloadFolder,
+          sourceName: spotifySourceName,
+          sourceType: spotifySourceType
         }
       });
 
@@ -6000,6 +6082,32 @@ function MainModeApp() {
         }
 
         setSongs(nextSongs);
+
+        if (settings.downloadAutoAdd && successCount > 0) {
+          const importedPathKeys = new Set(
+            (result.importedFilePaths || downloads.map((item: DownloadResult) => item.filePath))
+              .filter(Boolean)
+              .map((filePath: string) => normalizeImportedPath(filePath))
+          );
+
+          let importedSpotifySongs = nextSongs.filter((song) =>
+            importedPathKeys.has(normalizeImportedPath(song.filePath))
+          );
+
+          if (!importedSpotifySongs.length) {
+            importedSpotifySongs = nextSongs.filter((song) =>
+              selected.some((track) => trackMatchesSpotifyTrack(song, track))
+            );
+          }
+
+          const playlistName =
+            spotifySourceName ||
+            result.playlistName ||
+            result.name ||
+            (spotifySourceType === "album" ? "Spotify Album" : "Spotify Playlist");
+
+          upsertSpotifyPlaylistFromImport(playlistName, importedSpotifySongs);
+        }
 
         if (nextSongs.length && !currentId) {
           const firstSong = nextSongs[0];
