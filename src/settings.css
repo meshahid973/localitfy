@@ -6039,3 +6039,540 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ======================================================================
+   localtify v0.3.6 V204 — settings de-slop cleanup
+   Goal:
+   - less "AI slop" / less decorative over-design
+   - calmer borders and less empty weird space
+   - wider settings page usage
+   - no settings-only ambience orbs / floating particles
+   - softer, cleaner advanced-tab reset section
+   ====================================================================== */
+
+.settingsPage,
+.kopuzSettingsPage{
+  width: min(1400px, calc(100% - 24px)) !important;
+  padding: 0 12px 136px !important;
+  gap: 16px !important;
+}
+
+.settingsCategoryContent,
+.settingsCategoryContentV027{
+  padding: 16px 18px 40px !important;
+}
+
+/* use more of the page and stop the huge dead feeling */
+.settingsLayout{
+  grid-template-columns: 248px minmax(0, 1fr) !important;
+}
+
+/* calmer overall surfaces: much less orb-y / less outlined */
+.settingsHero,
+.settingsPanelCard,
+.settingsPageCard,
+.settingsUpdatePanel,
+.settingsResetPanel,
+.settingsModal,
+.cleanSettingsModal{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.014)),
+    rgba(8,8,14,0.74) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.032) !important;
+  backdrop-filter: blur(12px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(115%) !important;
+}
+
+.settingsHero::before,
+.settingsPanelCard::before,
+.settingsPageCard::before,
+.settingsUpdatePanel::before,
+.settingsResetPanel::before,
+.settingsUpdatePanel::after,
+.settingsResetPanel::after{
+  display: none !important;
+  content: none !important;
+}
+
+.settingsHero{
+  min-height: 96px !important;
+  padding: 20px 24px !important;
+  border-radius: 18px !important;
+}
+
+.settingsHero h3{
+  font-size: clamp(31px, 3.4vw, 46px) !important;
+  letter-spacing: -0.065em !important;
+}
+
+.settingsHero .softText{
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  color: rgba(255,255,255,0.72) !important;
+}
+
+.settingsCategoryHeader{
+  margin-bottom: 14px !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+.settingsCategoryHeader h4{
+  font-size: clamp(25px, 2vw, 34px) !important;
+  letter-spacing: -0.055em !important;
+  line-height: .97 !important;
+}
+
+.settingsCategoryHeader > span{
+  padding: 5px 10px !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.024) !important;
+  color: rgba(255,255,255,0.68) !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+}
+
+.settingsPanelHeader,
+.settingsSectionTitle{
+  margin-bottom: 14px !important;
+}
+
+.settingsPanelHeader strong,
+.settingsSectionTitle strong,
+.settingsPanelHeader h4{
+  font-size: clamp(18px, 1.45vw, 24px) !important;
+  letter-spacing: -0.04em !important;
+}
+
+.settingsPanelHeader span,
+.settingsPanelHeader small,
+.settingsSectionTitle small{
+  font-size: 12px !important;
+  color: rgba(255,255,255,0.7) !important;
+}
+
+/* rail cleaner */
+.settingsCategoryRail,
+.settingsCategoryRailV027{
+  padding: 12px !important;
+  gap: 8px !important;
+  background: rgba(255,255,255,0.014) !important;
+  border-right: 1px solid rgba(255,255,255,0.055) !important;
+}
+
+.settingsCategoryButton{
+  min-height: 58px !important;
+  padding: 10px 11px !important;
+  border-radius: 15px !important;
+  border-color: rgba(255,255,255,0.055) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.012)),
+    rgba(255,255,255,0.014) !important;
+  box-shadow: none !important;
+}
+
+.settingsCategoryButton:hover,
+.settingsCategoryButton.active{
+  transform: translateX(1px) !important;
+  border-color: rgba(var(--accent-rgb),0.16) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),0.06), rgba(var(--accent-rgb),0.03)),
+    rgba(255,255,255,0.016) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03) !important;
+}
+
+.settingsCategoryIcon{
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 12px !important;
+  background: rgba(var(--accent-rgb),0.09) !important;
+}
+
+.settingsCategoryCopy strong{ font-size: 13px !important; }
+.settingsCategoryCopy span{ font-size: 10.5px !important; color: rgba(255,255,255,0.56) !important; }
+
+/* appearance top area uses space better */
+.settingsThemeSelectPanel{
+  grid-template-columns: minmax(320px, .92fr) minmax(220px, 1fr) !important;
+  gap: 14px !important;
+  align-items: center !important;
+}
+
+.settingsSelectField,
+.settingsThemeSelectedPreview,
+.settingsTextFieldV027,
+.customThemePreviewV027{
+  min-height: 72px !important;
+  padding: 14px !important;
+  border-radius: 16px !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.012)),
+    rgba(255,255,255,0.015) !important;
+}
+
+.themePickerLockNoteV026{
+  margin: 0 !important;
+  align-self: center !important;
+  font-size: 11px !important;
+  line-height: 1.34 !important;
+  color: rgba(255,255,255,0.62) !important;
+}
+
+.customThemeManagerV027,
+.customThemeManagerV027.settingsPanelCard{
+  padding: 20px !important;
+}
+
+.customThemeHeaderV027{
+  gap: 14px !important;
+  align-items: center !important;
+}
+
+.settingsHeaderActionsV027,
+.themeEditorQuickActions,
+.simpleThemeActionsV025{
+  gap: 8px !important;
+}
+
+.customThemeBodyV027{
+  grid-template-columns: minmax(240px, .75fr) minmax(330px, 1.25fr) !important;
+  gap: 14px !important;
+}
+
+.customThemePresetRowV027,
+.savedThemeRowV027{
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)) !important;
+  gap: 9px !important;
+}
+
+.customThemePresetButtonV027,
+.savedThemeButtonV027 button{
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 15px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.012)),
+    rgba(255,255,255,0.014) !important;
+  box-shadow: none !important;
+}
+
+.customThemePresetButtonV027:hover,
+.savedThemeButtonV027 button:hover{
+  transform: translateY(-1px) !important;
+  border-color: rgba(var(--accent-rgb),0.14) !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.14) !important;
+}
+
+.customThemePresetButtonV027 small,
+.savedThemeButtonV027 small{
+  color: rgba(255,255,255,0.56) !important;
+}
+
+.customThemeTokenGridV027,
+.customThemeTokenListV025,
+.themeTokenGrid,
+.simpleThemeTokenGridV025{
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.customThemeTokenV027,
+.themeTokenCard,
+.simpleThemeTokenCardV025,
+.customThemeTokenRowV025{
+  min-height: 72px !important;
+  padding: 12px !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
+    rgba(255,255,255,0.012) !important;
+}
+
+.customThemeHexInputV032,
+.settingsSelectField select,
+.settingsTextFieldV027 input,
+.settingsSearchBoxV027 input{
+  border-color: rgba(255,255,255,0.075) !important;
+  background: rgba(0,0,0,0.18) !important;
+  box-shadow: none !important;
+}
+
+/* less outline / less slop in setting cards */
+.settingsTwoColumn,
+.settingsPageGrid,
+.discordSettingsGrid{
+  gap: 14px !important;
+  align-items: start !important;
+}
+
+.settingsSwitchGrid,
+.settingsMiniGrid,
+.coverSyncOptions,
+.optionGrid,
+.discordToggleGrid{
+  gap: 10px !important;
+}
+
+.settingSwitchCard,
+.toggleRow,
+.rangeRow,
+.settingsChoice,
+.coverSyncChoice,
+.settingsResetButton,
+.settingsActionButton,
+.settingsTinyButton,
+.cleanToggleLabel{
+  border-color: rgba(255,255,255,0.055) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.012)),
+    rgba(255,255,255,0.012) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.024) !important;
+}
+
+.settingSwitchCard::after,
+.toggleRow::after,
+.rangeRow::after,
+.settingsChoice::after,
+.coverSyncChoice::after{
+  display: none !important;
+  content: none !important;
+}
+
+.settingSwitchCard,
+.toggleRow,
+.rangeRow,
+.settingsChoice,
+.coverSyncChoice{
+  min-height: 76px !important;
+  padding: 13px 14px !important;
+  border-radius: 16px !important;
+}
+
+.settingSwitchCard:hover,
+.toggleRow:hover,
+.rangeRow:hover,
+.settingsChoice:hover,
+.coverSyncChoice:hover,
+.settingsResetButton:hover,
+.settingsActionButton:hover,
+.settingsTinyButton:hover,
+.cleanToggleLabel:hover{
+  transform: translateY(-1px) !important;
+  border-color: rgba(var(--accent-rgb),0.14) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.014)),
+    rgba(255,255,255,0.015) !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.13), inset 0 1px 0 rgba(255,255,255,0.026) !important;
+}
+
+.settingSwitchCard strong,
+.toggleRow strong,
+.rangeRow strong,
+.settingsChoice strong,
+.coverSyncChoice strong,
+.settingsResetButton strong{
+  font-size: 13.5px !important;
+  line-height: 1.08 !important;
+}
+
+.settingSwitchCard small,
+.toggleRow small,
+.rangeRow small,
+.settingsChoice small,
+.coverSyncChoice span,
+.settingsResetButton span{
+  font-size: 10.8px !important;
+  line-height: 1.28 !important;
+  color: rgba(255,255,255,0.64) !important;
+  max-width: 34ch !important;
+}
+
+.settingsInfoDot,
+.settingSwitchCard small::before,
+.toggleRow small::before,
+.rangeRow small::before{
+  width: 14px !important;
+  height: 14px !important;
+  margin-right: 5px !important;
+  font-size: 8.5px !important;
+  opacity: .72 !important;
+  background: rgba(var(--accent-rgb),0.06) !important;
+  border-color: rgba(var(--accent-rgb),0.2) !important;
+}
+
+.settingSwitchCard i,
+.toggleRow input[type="checkbox"]{
+  width: 46px !important;
+  height: 27px !important;
+  background: rgba(255,255,255,0.12) !important;
+}
+
+.settingSwitchCard i::after,
+.toggleRow input[type="checkbox"]::after{
+  width: 20px !important;
+  height: 20px !important;
+  margin: 3.5px !important;
+}
+
+.settingSwitchCard i.on::after,
+.toggleRow input[type="checkbox"]:checked::after{
+  transform: translateX(19px) !important;
+}
+
+.rangeRow{
+  grid-template-columns: minmax(0, .72fr) minmax(145px, 1fr) !important;
+}
+
+.settingsPage .softButton,
+.settingsTinyButton,
+.settingsActionButton,
+.cleanToggleLabel{
+  min-height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 13px !important;
+  font-size: 12px !important;
+}
+
+/* discord page: calmer and less empty */
+.discordSettingsPage{
+  gap: 14px !important;
+}
+
+.discordHeroCard{
+  grid-template-columns: minmax(220px, .84fr) minmax(0, 1.16fr) !important;
+  gap: 14px !important;
+}
+
+.discordHeroCopy strong{ font-size: 18px !important; }
+.discordHeroCopy span{ font-size: 12px !important; }
+
+/* cover color choices and status choices: less giant glowing outline */
+.settingsChoice.active,
+.coverSyncChoice.active,
+.customThemePresetButtonV027.active{
+  border-color: rgba(var(--accent-rgb),0.22) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),0.08), rgba(var(--accent-rgb),0.04)),
+    rgba(255,255,255,0.015) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.08) !important;
+}
+
+.coverSyncPicker{
+  margin-top: 16px !important;
+  padding-top: 14px !important;
+  border-top-color: rgba(255,255,255,0.06) !important;
+}
+
+.coverSyncHeader strong{ font-size: 14px !important; }
+.coverSyncHeader small{ font-size: 11px !important; }
+
+/* advanced / reset page cleanup: too much hover + too much outline */
+.settingsResetGrid{
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.settingsResetButton{
+  min-height: 86px !important;
+  padding: 14px 15px !important;
+  border-radius: 18px !important;
+  gap: 5px !important;
+}
+
+.settingsResetButton:hover{
+  transform: translateY(-1px) !important;
+  box-shadow: 0 9px 20px rgba(0,0,0,0.14) !important;
+}
+
+.settingsResetButton.danger{
+  border-color: rgba(255,95,138,0.18) !important;
+}
+
+.settingsResetButton.danger:hover{
+  border-color: rgba(255,95,138,0.28) !important;
+  background:
+    linear-gradient(180deg, rgba(255,95,138,0.045), rgba(255,95,138,0.02)),
+    rgba(255,255,255,0.012) !important;
+}
+
+.statusGrid span{
+  border-color: rgba(255,255,255,0.055) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.01)),
+    rgba(255,255,255,0.012) !important;
+  box-shadow: none !important;
+}
+
+/* remove settings-only decorative orbs / particles */
+.settingsPage [data-orb],
+.kopuzSettingsPage [data-orb],
+.settingsPage .floatingNote,
+.kopuzSettingsPage .floatingNote,
+.settingsPage .ambientParticle,
+.kopuzSettingsPage .ambientParticle,
+.settingsPage .softOrbit,
+.kopuzSettingsPage .softOrbit,
+.settingsPage .importScannerOrb,
+.kopuzSettingsPage .importScannerOrb,
+.settingsPage .scannerOrb,
+.kopuzSettingsPage .scannerOrb{
+  display: none !important;
+}
+
+/* smaller empty-space feeling on narrower windows */
+@media (max-width: 1320px){
+  .settingsPage,
+  .kopuzSettingsPage{
+    width: min(1240px, calc(100% - 18px)) !important;
+    padding-inline: 9px !important;
+  }
+
+  .settingsThemeSelectPanel,
+  .customThemeBodyV027,
+  .discordHeroCard,
+  .discordSettingsGrid,
+  .settingsTwoColumn,
+  .settingsPageGrid{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 860px){
+  .settingsPage,
+  .kopuzSettingsPage{
+    width: 100% !important;
+    padding-inline: 8px !important;
+  }
+
+  .settingsHero,
+  .settingsPageCard,
+  .settingsPanelCard{
+    padding: 18px !important;
+  }
+
+  .settingsLayout{
+    grid-template-columns: 1fr !important;
+  }
+
+  .settingsCategoryRail,
+  .settingsCategoryRailV027{
+    grid-auto-flow: column !important;
+    grid-auto-columns: minmax(156px, 1fr) !important;
+  }
+
+  .settingsSwitchGrid,
+  .settingsMiniGrid,
+  .coverSyncOptions,
+  .optionGrid,
+  .customThemeTokenGridV027,
+  .settingsResetGrid{
+    grid-template-columns: 1fr !important;
+  }
+}
+
