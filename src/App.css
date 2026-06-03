@@ -14727,3 +14727,64 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   justify-content: center !important;
 }
 
+/* ==========================================================================
+   localtify v0.3.6 V211 — theme-tinted glass variables
+   No white acrylic. Glass uses the current theme/accent + dark tint.
+========================================================================== */
+
+.app{
+  --lt-visual-blur: 18px;
+  --lt-visual-blur-light: 11px;
+  --lt-visual-saturation: 165%;
+  --lt-acrylic-bg-alpha: 0.48;
+  --lt-acrylic-accent-alpha: 0.080;
+  --lt-acrylic-highlight-alpha: 0.035;
+  --lt-glass-bg-alpha: 0.58;
+  --lt-glass-accent-alpha: 0.050;
+}
+
+.app[data-blur-effects="off"]{
+  --lt-visual-blur: 0px;
+  --lt-visual-blur-light: 0px;
+  --lt-visual-saturation: 100%;
+  --lt-acrylic-bg-alpha: 0.82;
+  --lt-acrylic-accent-alpha: 0.035;
+  --lt-acrylic-highlight-alpha: 0.014;
+  --lt-glass-bg-alpha: 0.86;
+  --lt-glass-accent-alpha: 0.024;
+}
+
+.app[data-blur-effects="subtle"]{
+  --lt-visual-blur: 10px;
+  --lt-visual-blur-light: 6px;
+  --lt-visual-saturation: 130%;
+  --lt-acrylic-bg-alpha: 0.56;
+  --lt-acrylic-accent-alpha: 0.060;
+  --lt-acrylic-highlight-alpha: 0.025;
+  --lt-glass-bg-alpha: 0.66;
+  --lt-glass-accent-alpha: 0.040;
+}
+
+.app[data-blur-effects="normal"],
+.app:not([data-blur-effects]){
+  --lt-visual-blur: 18px;
+  --lt-visual-blur-light: 11px;
+  --lt-visual-saturation: 165%;
+  --lt-acrylic-bg-alpha: 0.48;
+  --lt-acrylic-accent-alpha: 0.080;
+  --lt-acrylic-highlight-alpha: 0.035;
+  --lt-glass-bg-alpha: 0.58;
+  --lt-glass-accent-alpha: 0.050;
+}
+
+.app[data-blur-effects="strong"]{
+  --lt-visual-blur: 28px;
+  --lt-visual-blur-light: 18px;
+  --lt-visual-saturation: 180%;
+  --lt-acrylic-bg-alpha: 0.40;
+  --lt-acrylic-accent-alpha: 0.110;
+  --lt-acrylic-highlight-alpha: 0.045;
+  --lt-glass-bg-alpha: 0.50;
+  --lt-glass-accent-alpha: 0.075;
+}
+

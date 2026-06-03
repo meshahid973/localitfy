@@ -15867,3 +15867,119 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   background: rgba(255,255,255,.035) !important;
 }
 
+/* ==========================================================================
+   localtify v0.3.6 V211 — theme-tinted acrylic cards
+   Owner: home.css
+
+   Fixes the white/grey acrylic problem:
+   - no white rgba wash
+   - uses current accent/theme tint
+   - darker frosted glass so text stays readable
+   - stronger blur without extra heavy layers
+========================================================================== */
+
+.app[data-card-background="acrylic"] :where(
+  .panel,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .homeAlbumPanel,
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .songRow,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistShelfCard,
+  .coverGalleryCard,
+  .coverTile
+){
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), var(--lt-acrylic-accent-alpha,0.080)), rgba(var(--accent-rgb), 0.018)),
+    linear-gradient(180deg, rgba(255,255,255,var(--lt-acrylic-highlight-alpha,0.035)), rgba(255,255,255,0.006)),
+    rgba(5, 4, 10, var(--lt-acrylic-bg-alpha,0.48)) !important;
+  border-color: rgba(var(--accent-rgb),0.145) !important;
+  box-shadow:
+    0 14px 32px rgba(0,0,0,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.065) !important;
+  backdrop-filter: blur(var(--lt-visual-blur,18px)) saturate(var(--lt-visual-saturation,165%)) !important;
+  -webkit-backdrop-filter: blur(var(--lt-visual-blur,18px)) saturate(var(--lt-visual-saturation,165%)) !important;
+}
+
+.app[data-card-background="glassy"] :where(
+  .panel,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .homeAlbumPanel,
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .songRow,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistShelfCard,
+  .coverGalleryCard,
+  .coverTile
+){
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), var(--lt-glass-accent-alpha,0.050)), rgba(var(--accent-rgb),0.010)),
+    rgba(5, 4, 10, var(--lt-glass-bg-alpha,0.58)) !important;
+  border-color: rgba(var(--accent-rgb),0.105) !important;
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.045) !important;
+  backdrop-filter: blur(var(--lt-visual-blur-light,11px)) saturate(var(--lt-visual-saturation,165%)) !important;
+  -webkit-backdrop-filter: blur(var(--lt-visual-blur-light,11px)) saturate(var(--lt-visual-saturation,165%)) !important;
+}
+
+.app[data-card-background="solid"] :where(
+  .panel,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .homeAlbumPanel,
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .songRow,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistShelfCard,
+  .coverGalleryCard,
+  .coverTile
+){
+  background: rgba(8,8,13,0.90) !important;
+  border-color: rgba(255,255,255,0.055) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-card-background="oledFlat"] :where(
+  .panel,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .homeAlbumPanel,
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .songRow,
+  .libraryCard,
+  .libraryCardV025,
+  .playlistShelfCard,
+  .coverGalleryCard,
+  .coverTile
+){
+  background: #020204 !important;
+  border-color: rgba(255,255,255,0.040) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
