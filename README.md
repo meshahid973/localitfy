@@ -2,15 +2,24 @@
 
 > your local music, but prettier.
 
+<p align="center">
+  <img src="screenshots/showcase.png" alt="localtify screenshot" width="820">
+</p>
+
+<p align="center">
+  <a href="https://github.com/meshahid973/localitfy/releases"><img alt="Download" src="https://img.shields.io/badge/download-releases-8dffce?style=for-the-badge&labelColor=050505"></a>
+  <img alt="Windows" src="https://img.shields.io/badge/platform-Windows-7aa2ff?style=for-the-badge&labelColor=050505">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-ffffff?style=for-the-badge&labelColor=050505">
+</p>
+
 localtify is a Windows desktop music player for people who still keep songs on their PC.
 
-It gives your local library a clean dark interface, smooth animations, ambient cover glow, playlists, themes, listening stats, Discord Rich Presence, Windows media controls, and a more polished local music experience without needing an account or subscription.
+It gives your local library a clean dark interface, smooth animations, ambient cover glow, playlists, themes, pixel-art covers, listening stats, Discord Rich Presence, Windows media controls, and a more polished local music experience without needing an account or subscription.
 
 No account.  
 No subscription.  
+No ads between your songs.  
 Your songs stay on your PC.
-
-![localtify screenshot](screenshots/showcase.png)
 
 ---
 
@@ -24,28 +33,55 @@ It is built for people who want their local music to feel modern again.
 
 ---
 
+## Highlights
+
+- **Local-first music player** — import and play songs from your own PC.
+- **Modern desktop UI** — OLED-style dark interface, acrylic surfaces, themes, stars, and smooth motion.
+- **Custom library feel** — playlists, liked songs, search, cover tools, and pixel-art covers.
+- **Windows integration** — media keys, tray controls, startup option, and auto-update support.
+- **Discord Rich Presence** — optional activity sharing with privacy controls.
+- **No account needed** — localtify is made for your files, not a cloud subscription.
+
+---
+
 ## Features
+
+### Music library
 
 - play your own local songs
 - import music into your library
-- clean OLED-style dark interface
-- smooth animations and ambient visuals
-- bottom player with progress, volume, shuffle, repeat, next, and previous controls
+- search your library
+- liked songs
 - playlists with covers, song count, and total duration
 - rename and duplicate playlists
 - add songs to playlists
+- shuffle, repeat, next, previous, volume, and progress controls
+- local playback-first design
+
+### Visuals and customization
+
+- clean OLED-style dark interface
+- smooth animations and ambient visuals
+- bottom player with multiple visual styles
+- acrylic / glass-style surfaces
+- theme customization
+- visual options for blur, cards, stars, sidebar, player, and home banner
+- lightweight stars background with intensity controls
 - pixel-art cover system
 - cover studio tools
-- listening stats
-- liked songs
-- search
+- `/yukari` and `/stars` easter eggs
+
+### Desktop features
+
 - Discord Rich Presence
 - Windows media key support
 - Windows tray menu controls
 - optional startup with Windows
 - update popup and auto-update support
+- listening stats
 - no account needed
-- local-first design
+- no subscription needed
+- local-first privacy
 
 ---
 
@@ -53,17 +89,22 @@ It is built for people who want their local music to feel modern again.
 
 ![home](screenshots/localtify-home.png)
 
-
 ---
 
 ## Download
 
 The easiest way to use localtify is to download the latest Windows installer from the Releases page.
 
-Download the latest installer:
+Download the latest installer from:
 
 ```txt
-localtify-setup-0.2.9.exe
+https://github.com/meshahid973/localitfy/releases
+```
+
+The installer name usually looks like this:
+
+```txt
+localtify-setup-0.3.6.exe
 ```
 
 Then install it, open localtify, and import your songs.
@@ -125,12 +166,12 @@ The installer will be created inside the `release` folder.
 ## Project structure
 
 ```txt
-src/          React app and UI
-electron/     Electron main process, database, preload, updater, Discord, Windows features
-pixelart/     bundled pixel-art cover images
-public/       public static files
-build/        app icons and build resources
-analytics/    local dev helper data; private exports should not be committed
+src/           React app and UI
+electron/      Electron main process, database, preload, updater, Discord, Windows features
+pixelart/      bundled pixel-art cover images
+public/        public static files
+build/         app icons and build resources
+screenshots/   README and release images
 ```
 
 ---
@@ -169,14 +210,14 @@ These names are kept for compatibility with older installs.
 The app has a lot of CSS, so please keep styling in the correct file.
 
 ```txt
-app-core.css      app shell, titlebar, sidebar, layout, update popup
-App.css           older shared styles and remaining app-level styles
+app-core.css      app shell, titlebar, base layout
+App.css           shell/sidebar/modals/global app styles
 home.css          home page, library, song cards, shelves, playlist UI
 player.css        bottom player, progress bar, volume, controls
-settings.css      settings page and settings cards
+settings.css      settings page, settings cards, visual controls
 themes.css        theme variables and theme mappings
 motion.css        animations and transitions only
-effects.css       decorative effects and ambience
+effects.css       active-song glow, ambience, lightweight easter effects
 mini-player.css   detached mini-player window only
 ```
 
@@ -249,7 +290,7 @@ node_modules
 dist
 user data
 downloaded music
-private analytics exports
+private exports
 ```
 
 ---
@@ -271,7 +312,7 @@ release/
 *.log
 logs/
 backups/
-analytics/*.json
+localtify_asset_backups/
 ```
 
 Use `.env.example` for public environment examples.
@@ -319,13 +360,13 @@ git status
 Add the files you want to publish:
 
 ```bash
-git add README.md src electron package.json package-lock.json .gitignore .env.example public pixelart build
+git add README.md src electron package.json package-lock.json .gitignore .env.example public pixelart build screenshots
 ```
 
 Commit the changes:
 
 ```bash
-git commit -m "chore: update localtify source"
+git commit -m "docs: update localtify readme"
 ```
 
 Push to GitHub:
@@ -344,7 +385,7 @@ git push -u origin main
 
 ## How to publish a new app release
 
-Use this when releasing a new version like `0.2.9`.
+Use this when releasing a new version like `0.3.6`.
 
 Make sure the version is correct in `package.json` and inside the app.
 
@@ -371,7 +412,7 @@ For GitHub Releases, upload the installer and update files from the `release` fo
 Usually you need:
 
 ```txt
-localtify-setup-0.2.9.exe
+localtify-setup-0.3.6.exe
 latest.yml
 ```
 
@@ -391,11 +432,16 @@ Before publishing a release, check:
 
 - the app opens
 - songs still load
+- playback works for imported and existing songs
 - playlists still load
 - importing songs works
+- downloaded songs appear in the library
+- covers and pixel-art fallback covers load
+- settings save after restarting the app
 - update popup looks correct
 - tray menu works
 - media keys work
+- Discord Rich Presence works when enabled
 - startup option works
 - app name says localtify
 - icon looks correct
