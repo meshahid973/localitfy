@@ -1,4 +1,4 @@
-/* localtify priority ownership cleanup: player/progress rules now live in player.css. */
+/* localtify 0.3.6 V221 — home styles with restored Spotify auth/import UI. */
 /* localtify home.css — home page, hero, compact home, and quick-library visuals.
    Split out of App.css so the main stylesheet stays smaller. */
 
@@ -14334,264 +14334,184 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 
-/* ======================================================
-   SPOTIFY IMPORT — downloads tab (localtify v0.3.5+)
-   ====================================================== */
+/* ============================================================
+   SPOTIFY IMPORT — downloads tab  (localtify)
+   ============================================================ */
 
-/* Tab strip */
+/* ── Tab strip ───────────────────────────────────────────── */
 .downloadTabStrip {
   display: flex;
   gap: 6px;
   margin: 16px 0 4px;
 }
-
 .downloadTab {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   min-height: 34px;
   padding: 0 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.62);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.62);
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+  transition: background 120ms, border-color 120ms, color 120ms;
 }
+.downloadTab:hover { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.85); }
+.downloadTab.active { background: rgba(236,76,255,0.12); border-color: rgba(236,76,255,0.35); color: rgba(255,180,255,0.96); }
+.downloadTab.active.spotifyTab { background: rgba(30,215,96,0.10); border-color: rgba(30,215,96,0.34); color: #1ed760; }
+.spotifyTabDot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; opacity: .85; }
 
-.downloadTab:hover {
-  background: rgba(255, 255, 255, 0.09);
-  color: rgba(255, 255, 255, 0.85);
+/* ── Auth card ───────────────────────────────────────────── */
+.spotifyAuthCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  margin: 14px 0 0;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  transition: border-color 200ms, background 200ms;
 }
-
-.downloadTab.active {
-  background: rgba(236, 76, 255, 0.13);
-  border-color: rgba(236, 76, 255, 0.36);
-  color: rgba(255, 180, 255, 0.96);
+.spotifyAuthCard.loggedIn {
+  border-color: rgba(30,215,96,0.28);
+  background: rgba(30,215,96,0.06);
 }
+.spotifyAuthLeft { display: flex; align-items: center; gap: 12px; }
+.spotifyAuthDot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,0.25);
+  box-shadow: 0 0 0 0 transparent;
+  transition: background 200ms, box-shadow 200ms;
+}
+.spotifyAuthCard.loggedIn .spotifyAuthDot {
+  background: #1ed760;
+  box-shadow: 0 0 8px rgba(30,215,96,0.55);
+}
+.spotifyAuthLeft strong { display: block; font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.9); }
+.spotifyAuthLeft p { margin: 2px 0 0; font-size: 11.5px; color: rgba(255,255,255,0.48); }
+.spotifyAuthActions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+.spotifyAuthBtn { min-height: 32px !important; padding: 0 14px !important; font-size: 12px !important; }
 
-.downloadTab.active.spotifyTab {
-  background: rgba(30, 215, 96, 0.1);
-  border-color: rgba(30, 215, 96, 0.35);
+/* ── Cookie paste row ────────────────────────────────────── */
+.spotifyCookieRow {
+  margin: 10px 0 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.03);
+}
+.spotifyCookieHelp {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+.spotifyCookieHelp strong { color: rgba(255,255,255,0.8); }
+.spotifyCookieHelp code {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.1);
+  font-family: monospace;
+  font-size: 11px;
   color: #1ed760;
 }
+.spotifyCookieInputRow { display: flex; gap: 10px; align-items: flex-start; }
 
-.spotifyTabDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: currentColor;
-  flex-shrink: 0;
-  opacity: 0.85;
-}
-
-/* Notice override for Spotify */
+/* ── Notice ──────────────────────────────────────────────── */
 .downloadNotice.spotifyNotice {
-  border-color: rgba(30, 215, 96, 0.22) !important;
-  background: rgba(30, 215, 96, 0.065) !important;
-  color: rgba(255, 255, 255, 0.78);
+  border-color: rgba(30,215,96,0.20) !important;
+  background: rgba(30,215,96,0.055) !important;
 }
 
-/* URL row: input + fetch button side-by-side */
-.spotifyUrlRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 14px 0 0;
-}
+/* ── URL row ─────────────────────────────────────────────── */
+.spotifyUrlRow { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0 0; }
+.spotifyUrlInput { flex: 1; min-height: 50px !important; resize: none !important; }
+.spotifyFetchButton { flex-shrink: 0; align-self: stretch; }
 
-.spotifyUrlInput {
-  flex: 1;
-  min-height: 50px !important;
-  resize: none !important;
-}
-
-.spotifyFetchButton {
-  flex-shrink: 0;
-  align-self: stretch;
-}
-
-/* Error banner */
+/* ── Error ───────────────────────────────────────────────── */
 .spotifyError {
   margin: 10px 0 0;
   padding: 12px 16px;
-  border: 1px solid rgba(255, 93, 140, 0.32);
-  border-radius: 18px;
-  background: rgba(255, 93, 140, 0.07);
+  border: 1px solid rgba(255,93,140,0.32);
+  border-radius: 16px;
+  background: rgba(255,93,140,0.07);
   color: #ffb3ce;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.45;
 }
 
-/* Track list container */
+/* ── Track list ──────────────────────────────────────────── */
 .spotifyTrackList {
   margin-top: 16px;
   padding: 16px;
-  border: 1px solid rgba(30, 215, 96, 0.16);
-  border-radius: 24px;
-  background: rgba(30, 215, 96, 0.04);
+  border: 1px solid rgba(30,215,96,0.15);
+  border-radius: 22px;
+  background: rgba(30,215,96,0.04);
 }
-
 .spotifyTrackListHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px;
 }
-
-.spotifyTrackListHead strong {
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.spotifySelectActions {
-  display: flex;
-  gap: 6px;
-}
-
-/* Scrollable track items */
+.spotifyTrackListHead strong { color: rgba(255,255,255,0.88); font-size: 14px; font-weight: 800; }
+.spotifySelectActions { display: flex; gap: 6px; }
 .spotifyTrackItems {
-  display: grid;
-  gap: 5px;
-  max-height: 340px;
-  overflow-y: auto;
+  display: grid; gap: 5px; max-height: 340px; overflow-y: auto;
   margin-bottom: 14px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(30, 215, 96, 0.25) transparent;
+  scrollbar-color: rgba(30,215,96,0.22) transparent;
 }
+.spotifyTrackItems::-webkit-scrollbar { width: 4px; }
+.spotifyTrackItems::-webkit-scrollbar-track { background: transparent; }
+.spotifyTrackItems::-webkit-scrollbar-thumb { background: rgba(30,215,96,0.22); border-radius: 4px; }
 
-.spotifyTrackItems::-webkit-scrollbar {
-  width: 4px;
-}
-
-.spotifyTrackItems::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.spotifyTrackItems::-webkit-scrollbar-thumb {
-  background: rgba(30, 215, 96, 0.22);
-  border-radius: 4px;
-}
-
-/* Individual track row */
 .spotifyTrackItem {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 10px;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
   padding: 9px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  background: rgba(7, 5, 12, 0.55);
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: background 90ms ease, border-color 90ms ease;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 13px;
+  background: rgba(7,5,12,0.55);
+  color: inherit; text-align: left; cursor: pointer;
+  transition: background 90ms, border-color 90ms;
 }
-
-.spotifyTrackItem:hover:not(:disabled) {
-  background: rgba(30, 215, 96, 0.05);
-  border-color: rgba(30, 215, 96, 0.18);
-}
-
-.spotifyTrackItem.selected {
-  border-color: rgba(30, 215, 96, 0.3);
-  background: rgba(30, 215, 96, 0.075);
-}
-
-.spotifyTrackItem:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
+.spotifyTrackItem:hover:not(:disabled) { background: rgba(30,215,96,0.05); border-color: rgba(30,215,96,0.18); }
+.spotifyTrackItem.selected { border-color: rgba(30,215,96,0.30); background: rgba(30,215,96,0.075); }
+.spotifyTrackItem:disabled { opacity: .6; cursor: default; }
 .spotifyTrackIndex {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.48);
-  font-size: 11px;
-  font-weight: 900;
-  flex-shrink: 0;
-  transition: background 90ms ease, color 90ms ease;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 9px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.45);
+  font-size: 11px; font-weight: 900; flex-shrink: 0;
+  transition: background 90ms, color 90ms;
 }
+.spotifyTrackItem.selected .spotifyTrackIndex { background: rgba(30,215,96,0.18); color: #1ed760; }
+.spotifyTrackMeta { min-width: 0; }
+.spotifyTrackMeta strong { display: block; color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spotifyTrackMeta p { margin: 2px 0 0; color: rgba(255,255,255,0.46); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spotifyTrackCheck { width: 18px; text-align: center; color: #1ed760; font-weight: 900; font-size: 14px; flex-shrink: 0; }
 
-.spotifyTrackItem.selected .spotifyTrackIndex {
-  background: rgba(30, 215, 96, 0.18);
-  color: #1ed760;
-}
-
-.spotifyTrackMeta {
-  min-width: 0;
-}
-
-.spotifyTrackMeta strong {
-  display: block;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.spotifyTrackMeta p {
-  margin: 2px 0 0;
-  color: rgba(255, 255, 255, 0.48);
-  font-size: 11.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.spotifyTrackCheck {
-  width: 18px;
-  text-align: center;
-  color: #1ed760;
-  font-weight: 900;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-/* Download row bottom of track list */
-.spotifyDownloadRow {
-  margin-top: 0 !important;
-}
-
+/* ── Download button row ─────────────────────────────────── */
+.spotifyDownloadRow { margin-top: 0 !important; }
 .spotifyDownloadButton {
-  background: linear-gradient(135deg, rgba(30, 215, 96, 0.9), rgba(24, 185, 82, 0.92)) !important;
-  color: #052612 !important;
+  background: linear-gradient(135deg, #1db954, #17a349) !important;
+  color: #042010 !important;
+  font-weight: 900 !important;
 }
-
-.spotifyDownloadButton:hover:not(:disabled) {
-  filter: brightness(1.08);
-}
-
-.spotifyDownloadButton:disabled {
-  opacity: 0.5;
-}
+.spotifyDownloadButton:hover:not(:disabled) { filter: brightness(1.09); }
+.spotifyDownloadButton:disabled { opacity: .5; }
 
 @media (max-width: 680px) {
-  .spotifyUrlRow {
-    flex-direction: column;
-  }
-
-  .spotifyFetchButton {
-    width: 100%;
-  }
-
-  .spotifyUrlInput {
-    width: 100%;
-  }
+  .spotifyUrlRow, .spotifyCookieInputRow { flex-direction: column; }
+  .spotifyFetchButton, .spotifyCookieInputRow button { width: 100%; }
+  .spotifyAuthCard { flex-direction: column; align-items: flex-start; }
 }
+
 /* ========================================================================
    localtify v0.3.6 V190 — integrated lightweight frosted home glass
    Owner: home.css

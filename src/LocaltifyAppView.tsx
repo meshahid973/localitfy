@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.6 V185 — big UI view layer with lazy heavy pages. */
+/* localtify 0.3.6 V221 — current view with restored Spotify auth/import UI. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -3433,6 +3433,15 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     spotifySelectedIds,
     downloadSpotifyTracks,
     setSpotifyTracks,
+    spotifyLoggedIn,
+    spotifyLoginBusy,
+    spotifyShowCookieInput,
+    setSpotifyShowCookieInput,
+    spotifyCookieDraft,
+    setSpotifyCookieDraft,
+    handleSpotifyLogin,
+    handleSpotifySetCookie,
+    handleSpotifyLogout,
     ready,
     retryDownload,
     openDownloadedSongInLibrary,
@@ -4696,8 +4705,79 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   {/* ── Spotify tab ───────────────────────────────── */}
                   {downloadsTab === "spotify" && (
                     <>
+                      {/* ── Auth status card ── */}
+                      <div className={`spotifyAuthCard${spotifyLoggedIn ? " loggedIn" : ""}`}>
+                        <div className="spotifyAuthLeft">
+                          <span className="spotifyAuthDot" aria-hidden="true" />
+                          <div>
+                            <strong>{spotifyLoggedIn ? "Connected to Spotify" : "Not logged in"}</strong>
+                            <p>
+                              {spotifyLoggedIn
+                                ? "Private playlists and higher rate limits are enabled."
+                                : "Public playlists, albums, and tracks work without login."}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="spotifyAuthActions">
+                          {spotifyLoggedIn ? (
+                            <button
+                              className="softButton spotifyAuthBtn"
+                              onClick={() => void handleSpotifyLogout()}
+                              disabled={spotifyLoginBusy}
+                            >
+                              log out
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                className="heroMain spotifyAuthBtn"
+                                onClick={() => void handleSpotifyLogin()}
+                                disabled={spotifyLoginBusy}
+                              >
+                                {spotifyLoginBusy ? "opening..." : "log in"}
+                              </button>
+                              <button
+                                className="softButton spotifyAuthBtn"
+                                onClick={() => setSpotifyShowCookieInput((v) => !v)}
+                                disabled={spotifyLoginBusy}
+                              >
+                                paste cookie
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* ── Manual sp_dc cookie input ── */}
+                      {spotifyShowCookieInput && !spotifyLoggedIn && (
+                        <div className="spotifyCookieRow">
+                          <div className="spotifyCookieHelp">
+                            Open <strong>open.spotify.com</strong> in your browser → DevTools → Application → Cookies → copy the <code>sp_dc</code> value.
+                          </div>
+                          <div className="spotifyCookieInputRow">
+                            <input
+                              className="downloadTextarea downloadTextareaV031 spotifyUrlInput"
+                              type="password"
+                              placeholder="Paste sp_dc cookie value here..."
+                              value={spotifyCookieDraft}
+                              onChange={(e) => setSpotifyCookieDraft(e.currentTarget.value)}
+                              disabled={spotifyLoginBusy}
+                              onKeyDown={(e) => { if (e.key === "Enter") void handleSpotifySetCookie(spotifyCookieDraft); }}
+                            />
+                            <button
+                              className="heroMain spotifyFetchButton"
+                              onClick={() => void handleSpotifySetCookie(spotifyCookieDraft)}
+                              disabled={spotifyLoginBusy || !spotifyCookieDraft.trim()}
+                            >
+                              {spotifyLoginBusy ? "checking..." : "connect"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ── URL fetch ── */}
                       <div className="downloadNotice downloadNoticeV031 spotifyNotice">
-                        Paste a public Spotify playlist, album, or track link. localtify finds each song on YouTube and downloads the audio — no Spotify premium needed.
+                        Paste a Spotify playlist, album, or track link — localtify finds each song on YouTube and downloads the audio.
                       </div>
 
                       <div className="spotifyUrlRow">
@@ -4708,6 +4788,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           onChange={(e) => { setSpotifyUrl(e.currentTarget.value); setSpotifyFetchError(""); }}
                           placeholder="https://open.spotify.com/playlist/..."
                           disabled={spotifyFetchBusy || spotifyDownloadBusy}
+                          onKeyDown={(e) => { if (e.key === "Enter" && spotifyUrl.trim()) void fetchSpotifyTracks(); }}
                         />
                         <button
                           className="heroMain spotifyFetchButton"
@@ -4722,6 +4803,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         <div className="spotifyError">{spotifyFetchError}</div>
                       ) : null}
 
+                      {/* ── Track list ── */}
                       {spotifyTracks.length > 0 && (
                         <div className="spotifyTrackList">
                           <div className="spotifyTrackListHead">
@@ -4767,9 +4849,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                     <strong>{track.title}</strong>
                                     {track.artist ? <p>{track.artist}{track.albumName ? ` · ${track.albumName}` : ""}</p> : null}
                                   </div>
-                                  <span className="spotifyTrackCheck" aria-hidden="true">
-                                    {selected ? "✓" : ""}
-                                  </span>
+                                  <span className="spotifyTrackCheck" aria-hidden="true">{selected ? "✓" : ""}</span>
                                 </button>
                               );
                             })}

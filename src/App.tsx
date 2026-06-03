@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.6 V201 — restore /yukari command + keep search routing fix. */
+/* localtify 0.3.6 V221 — restore Spotify auth/import UI into current App.tsx. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -473,6 +473,10 @@ function MainModeApp() {
   const [spotifyFetchError, setSpotifyFetchError] = useState("");
   const [spotifySelectedIds, setSpotifySelectedIds] = useState<Set<string>>(new Set());
   const [spotifyDownloadBusy, setSpotifyDownloadBusy] = useState(false);
+  const [spotifyLoggedIn, setSpotifyLoggedIn] = useState(false);
+  const [spotifyLoginBusy, setSpotifyLoginBusy] = useState(false);
+  const [spotifyShowCookieInput, setSpotifyShowCookieInput] = useState(false);
+  const [spotifyCookieDraft, setSpotifyCookieDraft] = useState("");
   // ────────────────────────────────────────────────────────────
 
   const [secretMode, setSecretMode] = useState<SecretMode>("none");
@@ -5766,7 +5770,102 @@ function MainModeApp() {
     }
   }
 
-  // ── Spotify import functions ─────────────────────────────────────────────
+  // ── Spotify auth + import functions ──────────────────────────────────────
+  useEffect(() => {
+    if (downloadsTab !== "spotify" || !ready) return;
+
+    let cancelled = false;
+
+    Promise.resolve((window.localitfy as any).spotifyCheck?.())
+      .then((res: any) => {
+        if (!cancelled) {
+          setSpotifyLoggedIn(Boolean(res?.loggedIn));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSpotifyLoggedIn(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [downloadsTab, ready]);
+
+  async function handleSpotifyLogin() {
+    setSpotifyLoginBusy(true);
+    setSpotifyFetchError("");
+
+    try {
+      const bridge = (window.localitfy as any);
+      if (!bridge?.spotifyLogin) {
+        setSpotifyFetchError("Spotify login is not wired in preload/main yet.");
+        return;
+      }
+
+      const res = await bridge.spotifyLogin();
+      setSpotifyLoggedIn(Boolean(res?.loggedIn));
+
+      if (!res?.loggedIn) {
+        setSpotifyFetchError(res?.error || "Login cancelled or timed out.");
+      } else {
+        setStatusText("connected to spotify");
+      }
+    } catch (error) {
+      setSpotifyFetchError(String((error as Error)?.message || "Login failed."));
+    } finally {
+      setSpotifyLoginBusy(false);
+    }
+  }
+
+  async function handleSpotifySetCookie(sp_dc: string) {
+    const value = sp_dc.trim();
+    if (!value) return;
+
+    setSpotifyLoginBusy(true);
+    setSpotifyFetchError("");
+
+    try {
+      const bridge = (window.localitfy as any);
+      if (!bridge?.spotifySetCookie) {
+        setSpotifyFetchError("Spotify cookie login is not wired in preload/main yet.");
+        return;
+      }
+
+      const res = await bridge.spotifySetCookie(value);
+      if (res?.ok) {
+        setSpotifyLoggedIn(true);
+        setSpotifyShowCookieInput(false);
+        setSpotifyCookieDraft("");
+        setStatusText("connected to spotify");
+      } else {
+        setSpotifyFetchError(res?.error || "Invalid sp_dc cookie.");
+      }
+    } catch (error) {
+      setSpotifyFetchError(String((error as Error)?.message || "Cookie save failed."));
+    } finally {
+      setSpotifyLoginBusy(false);
+    }
+  }
+
+  async function handleSpotifyLogout() {
+    try {
+      await (window.localitfy as any).spotifyLogout?.();
+    } catch {
+      // Logout should still clear local UI state even if the backend call fails.
+    }
+
+    setSpotifyLoggedIn(false);
+    setSpotifyTracks([]);
+    setSpotifySelectedIds(new Set());
+    setSpotifyUrl("");
+    setSpotifyFetchError("");
+    setSpotifyShowCookieInput(false);
+    setSpotifyCookieDraft("");
+    setStatusText("logged out of spotify");
+  }
+
   async function fetchSpotifyTracks() {
     if (!spotifyUrl.trim()) return;
     setSpotifyFetchBusy(true);
@@ -5775,23 +5874,33 @@ function MainModeApp() {
     setSpotifySelectedIds(new Set());
 
     try {
-      // Requires window.localitfy.spotifyFetchTracks to be exposed in preload.cjs/main.cjs.
-      // See downloader.cjs for the downloadSpotifyBatch backend implementation.
-      const result = await (window.localitfy as any).spotifyFetchTracks?.(spotifyUrl.trim());
-      if (!result || !Array.isArray(result.tracks) || !result.tracks.length) {
-        setSpotifyFetchError("No tracks found. Make sure the URL is a public Spotify playlist, album, or track link.");
+      const bridge = (window.localitfy as any);
+      if (!bridge?.spotifyFetchTracks) {
+        setSpotifyFetchError("Spotify fetch is not wired in preload/main yet.");
         return;
       }
+
+      const result = await bridge.spotifyFetchTracks(spotifyUrl.trim());
+      if (result?.error) {
+        setSpotifyFetchError(result.error);
+        return;
+      }
+
+      if (!result || !Array.isArray(result.tracks) || !result.tracks.length) {
+        setSpotifyFetchError("No tracks found. Make sure the link is a public Spotify playlist, album, or track.");
+        return;
+      }
+
       const tracks: SpotifyTrack[] = result.tracks.map((t: SpotifyTrack, i: number) => ({
         ...t,
         id: t.id || `spt_${i}`
       }));
+
       setSpotifyTracks(tracks);
       setSpotifySelectedIds(new Set(tracks.map((t) => t.id)));
-      setStatusText(`fetched ${tracks.length} spotify track${tracks.length !== 1 ? "s" : ""}`);
+      setStatusText(`fetched ${tracks.length} track${tracks.length !== 1 ? "s" : ""} from spotify`);
     } catch (error) {
-      const msg = String((error as Error)?.message || "Failed to fetch Spotify tracks. Check that spotifyFetchTracks is wired in main.cjs.");
-      setSpotifyFetchError(msg);
+      setSpotifyFetchError(String((error as Error)?.message || "Failed to fetch Spotify tracks."));
       console.error("[localtify spotify fetch failed]", error);
     } finally {
       setSpotifyFetchBusy(false);
@@ -5816,12 +5925,17 @@ function MainModeApp() {
         message: "Waiting..."
       }))
     );
-    setStatusText(`downloading ${selected.length} spotify track${selected.length !== 1 ? "s" : ""}...`);
+    setStatusText(`downloading ${selected.length} track${selected.length !== 1 ? "s" : ""} from spotify...`);
 
     try {
-      // Requires window.localitfy.spotifyDownloadBatch to be exposed in preload.cjs/main.cjs.
-      // The backend handler should call downloadSpotifyBatch() from downloader.cjs.
-      const result = await (window.localitfy as any).spotifyDownloadBatch?.({
+      const bridge = (window.localitfy as any);
+      if (!bridge?.spotifyDownloadBatch) {
+        setSpotifyFetchError("Spotify download is not wired in preload/main yet.");
+        setStatusText("spotify download failed");
+        return;
+      }
+
+      const result = await bridge.spotifyDownloadBatch({
         tracks: selected.map((t) => ({ title: t.title, artist: t.artist })),
         options: {
           quality: settings.downloadQuality,
@@ -5853,7 +5967,7 @@ function MainModeApp() {
 
         if (successCount > 0) {
           trackSongsImported(result.changedCount || successCount, "downloads");
-          setStatusText(`downloaded ${successCount} spotify track${successCount !== 1 ? "s" : ""}`);
+          setStatusText(`downloaded ${successCount} track${successCount !== 1 ? "s" : ""} from spotify`);
           if (settings.downloadAutoAdd && nextSongs.length) changeView("library", "unknown");
         } else {
           setStatusText("spotify download finished — no tracks added");
@@ -5865,8 +5979,8 @@ function MainModeApp() {
         }
       }
     } catch (error) {
-      console.error("[localitfy spotify download failed]", error);
-      setSpotifyFetchError(String((error as Error)?.message || "Download failed. Check that spotifyDownloadBatch is wired in main.cjs."));
+      console.error("[localtify spotify download failed]", error);
+      setSpotifyFetchError(String((error as Error)?.message || "Download failed."));
       setStatusText("spotify download failed");
     } finally {
       setSpotifyDownloadBusy(false);
