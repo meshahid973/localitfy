@@ -1,6 +1,7 @@
 /* localtify 0.3.6 V193 — Electron responsiveness cleanup. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
+const https = require("node:https");
 const path = require("node:path");
 const fs = require("node:fs");
 const crypto = require("node:crypto");
@@ -1173,6 +1174,570 @@ async function getYouTubeCookiesFile() {
   }
 }
 
+// ====================== SPOTIFY OAUTH PUBLIC IMPORT ======================
+// V223: no sp_dc cookie paste, no browser-cookie extraction, no internal
+// open.spotify.com/get_access_token dependency.
+// Uses Spotify Authorization Code with PKCE. No scopes are requested, so the
+// token can only read public Spotify data normally visible in Spotify apps.
+// Private playlists must be made public first.
+
+const SPOTIFY_BROWSER_UA = process.platform === "win32"
+  ? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+  : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+
+const SPOTIFY_REDIRECT_PORT = Number(process.env.SPOTIFY_REDIRECT_PORT || 43877);
+const SPOTIFY_REDIRECT_URI = String(
+  process.env.SPOTIFY_REDIRECT_URI || `http://127.0.0.1:${SPOTIFY_REDIRECT_PORT}/spotify/callback`
+);
+const SPOTIFY_CLIENT_ID = String(
+  process.env.SPOTIFY_CLIENT_ID ||
+  process.env.VITE_SPOTIFY_CLIENT_ID ||
+  process.env.VITE_PUBLIC_SPOTIFY_CLIENT_ID ||
+  ""
+).trim();
+
+const SPOTIFY_OAUTH_FILE = () => path.join(app.getPath("userData"), "spotify-oauth.json");
+
+let _spotifyToken = null;
+let _spotifyTokenExpiry = 0;
+
+function base64UrlEncode(value) {
+  return Buffer.from(value)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function makeSpotifyCodeVerifier() {
+  return base64UrlEncode(crypto.randomBytes(48));
+}
+
+function makeSpotifyCodeChallenge(verifier) {
+  return base64UrlEncode(crypto.createHash("sha256").update(verifier).digest());
+}
+
+function readSpotifyOAuthToken() {
+  try {
+    const filePath = SPOTIFY_OAUTH_FILE();
+    if (!fs.existsSync(filePath)) return null;
+    const parsed = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    if (!parsed || typeof parsed !== "object") return null;
+    return {
+      accessToken: typeof parsed.accessToken === "string" ? parsed.accessToken : "",
+      refreshToken: typeof parsed.refreshToken === "string" ? parsed.refreshToken : "",
+      expiresAt: Number(parsed.expiresAt || 0)
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeSpotifyOAuthToken(token) {
+  try {
+    const filePath = SPOTIFY_OAUTH_FILE();
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, JSON.stringify(token, null, 2), "utf-8");
+  } catch (error) {
+    console.log("[localtify spotify token save error]", error?.message || error);
+  }
+}
+
+function clearSpotifyOAuthToken() {
+  _spotifyToken = null;
+  _spotifyTokenExpiry = 0;
+  try {
+    fs.unlinkSync(SPOTIFY_OAUTH_FILE());
+  } catch {
+  }
+}
+
+function saveSpotifyOAuthResponse(data = {}, previous = {}) {
+  const expiresIn = Number(data.expires_in || 3600);
+  const next = {
+    accessToken: String(data.access_token || previous.accessToken || ""),
+    refreshToken: String(data.refresh_token || previous.refreshToken || ""),
+    expiresAt: Date.now() + Math.max(60, expiresIn - 90) * 1000
+  };
+
+  if (!next.accessToken) {
+    throw new Error("Spotify did not return an access token.");
+  }
+
+  writeSpotifyOAuthToken(next);
+  _spotifyToken = next.accessToken;
+  _spotifyTokenExpiry = next.expiresAt;
+  return next;
+}
+
+function spotifyHttpGet(urlString, extraHeaders = {}, maxRedirects = 5) {
+  return new Promise((resolve, reject) => {
+    let parsed;
+    try {
+      parsed = new URL(urlString);
+    } catch {
+      return reject(new Error(`Invalid Spotify URL: ${urlString}`));
+    }
+
+    const options = {
+      hostname: parsed.hostname,
+      port: 443,
+      path: parsed.pathname + parsed.search,
+      method: "GET",
+      timeout: 15000,
+      headers: {
+        "User-Agent": SPOTIFY_BROWSER_UA,
+        "Accept": "application/json, text/html, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "https://open.spotify.com",
+        "Referer": "https://open.spotify.com/",
+        "App-Platform": "WebPlayer",
+        ...extraHeaders
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && maxRedirects > 0) {
+        res.resume();
+        return resolve(spotifyHttpGet(new URL(res.headers.location, urlString).toString(), extraHeaders, maxRedirects - 1));
+      }
+
+      let body = "";
+      res.setEncoding("utf8");
+      res.on("data", (chunk) => { body += chunk; });
+      res.on("end", () => resolve({ status: res.statusCode, body }));
+    });
+
+    req.on("error", reject);
+    req.on("timeout", () => {
+      req.destroy();
+      reject(new Error("Spotify request timed out"));
+    });
+    req.end();
+  });
+}
+
+function spotifyHttpPostForm(urlString, formData = {}) {
+  return new Promise((resolve, reject) => {
+    let parsed;
+    try {
+      parsed = new URL(urlString);
+    } catch {
+      return reject(new Error(`Invalid Spotify URL: ${urlString}`));
+    }
+
+    const body = new URLSearchParams(formData).toString();
+
+    const req = https.request({
+      hostname: parsed.hostname,
+      port: 443,
+      path: parsed.pathname + parsed.search,
+      method: "POST",
+      timeout: 15000,
+      headers: {
+        "User-Agent": SPOTIFY_BROWSER_UA,
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Length": Buffer.byteLength(body)
+      }
+    }, (res) => {
+      let responseBody = "";
+      res.setEncoding("utf8");
+      res.on("data", (chunk) => { responseBody += chunk; });
+      res.on("end", () => resolve({ status: res.statusCode, body: responseBody }));
+    });
+
+    req.on("error", reject);
+    req.on("timeout", () => {
+      req.destroy();
+      reject(new Error("Spotify request timed out"));
+    });
+    req.write(body);
+    req.end();
+  });
+}
+
+async function spotifyTokenRequest(formData) {
+  const res = await spotifyHttpPostForm("https://accounts.spotify.com/api/token", formData);
+
+  let data = {};
+  try {
+    data = JSON.parse(res.body || "{}");
+  } catch {
+    data = {};
+  }
+
+  if (res.status !== 200) {
+    const detail = data?.error_description || data?.error || res.body?.slice?.(0, 160) || "";
+    throw new Error(`Spotify OAuth returned HTTP ${res.status}${detail ? ` — ${detail}` : ""}`);
+  }
+
+  return data;
+}
+
+async function exchangeSpotifyAuthorizationCode(code, codeVerifier) {
+  const data = await spotifyTokenRequest({
+    grant_type: "authorization_code",
+    code,
+    redirect_uri: SPOTIFY_REDIRECT_URI,
+    client_id: SPOTIFY_CLIENT_ID,
+    code_verifier: codeVerifier
+  });
+
+  return saveSpotifyOAuthResponse(data);
+}
+
+async function refreshSpotifyAccessToken(previous = readSpotifyOAuthToken()) {
+  if (!previous?.refreshToken) {
+    throw new Error("Spotify is not connected. Press Connect Spotify first.");
+  }
+
+  const data = await spotifyTokenRequest({
+    grant_type: "refresh_token",
+    refresh_token: previous.refreshToken,
+    client_id: SPOTIFY_CLIENT_ID
+  });
+
+  return saveSpotifyOAuthResponse(data, previous);
+}
+
+async function getSpotifyAccessToken() {
+  if (!SPOTIFY_CLIENT_ID) {
+    throw new Error(
+      "Spotify Client ID is missing. Add SPOTIFY_CLIENT_ID to your .env, then register http://127.0.0.1:43877/spotify/callback in the Spotify dashboard."
+    );
+  }
+
+  const now = Date.now();
+  const saved = readSpotifyOAuthToken();
+
+  if (_spotifyToken && now < _spotifyTokenExpiry - 30_000) return _spotifyToken;
+  if (saved?.accessToken && saved.expiresAt && now < saved.expiresAt - 30_000) {
+    _spotifyToken = saved.accessToken;
+    _spotifyTokenExpiry = saved.expiresAt;
+    return saved.accessToken;
+  }
+
+  if (saved?.refreshToken) {
+    const refreshed = await refreshSpotifyAccessToken(saved);
+    return refreshed.accessToken;
+  }
+
+  throw new Error("Spotify is not connected. Press Connect Spotify first.");
+}
+
+function createSpotifyCallbackWaiter(expectedState) {
+  let server = null;
+  let timer = null;
+  let settled = false;
+
+  const promise = new Promise((resolve, reject) => {
+    const finish = (error, value) => {
+      if (settled) return;
+      settled = true;
+
+      if (timer) clearTimeout(timer);
+      timer = null;
+
+      try {
+        if (server) server.close();
+      } catch {
+      }
+
+      if (error) reject(error);
+      else resolve(value);
+    };
+
+    server = http.createServer((req, res) => {
+      try {
+        const requestUrl = new URL(req.url || "/", SPOTIFY_REDIRECT_URI);
+
+        if (requestUrl.pathname !== "/spotify/callback") {
+          res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+          res.end("not found");
+          return;
+        }
+
+        const error = requestUrl.searchParams.get("error");
+        if (error) {
+          res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+          res.end("<html><body style='font-family:sans-serif;background:#08070f;color:white'><h2>Spotify login cancelled.</h2><p>You can close this window.</p></body></html>");
+          finish(new Error(`Spotify login cancelled: ${error}`));
+          return;
+        }
+
+        const state = requestUrl.searchParams.get("state") || "";
+        const code = requestUrl.searchParams.get("code") || "";
+
+        if (!code) {
+          res.writeHead(400, { "content-type": "text/plain; charset=utf-8" });
+          res.end("missing spotify code");
+          finish(new Error("Spotify did not return a login code."));
+          return;
+        }
+
+        if (state !== expectedState) {
+          res.writeHead(400, { "content-type": "text/plain; charset=utf-8" });
+          res.end("spotify state mismatch");
+          finish(new Error("Spotify login state mismatch. Try again."));
+          return;
+        }
+
+        res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+        res.end("<html><body style='font-family:sans-serif;background:#08070f;color:white'><h2>Spotify connected to localtify.</h2><p>You can close this window now.</p></body></html>");
+        finish(null, { code });
+      } catch (error) {
+        finish(error);
+      }
+    });
+
+    server.once("error", (error) => {
+      finish(new Error(`Spotify callback server failed: ${error?.message || error}`));
+    });
+
+    timer = setTimeout(() => {
+      finish(new Error("Spotify login timed out."));
+    }, 5 * 60 * 1000);
+
+    server.listen(SPOTIFY_REDIRECT_PORT, "127.0.0.1");
+  });
+
+  return {
+    promise,
+    cancel: (reason = "Spotify login cancelled.") => {
+      if (!settled) {
+        finish(new Error(reason));
+      }
+    }
+  };
+}
+
+async function loginSpotifyOAuth() {
+  if (!SPOTIFY_CLIENT_ID) {
+    return {
+      ok: false,
+      ready: false,
+      loggedIn: false,
+      publicOnly: true,
+      mode: "oauth-pkce",
+      needsClientId: true,
+      redirectUri: SPOTIFY_REDIRECT_URI,
+      error: "Spotify Client ID missing. Create a Spotify app, add the redirect URI, then set SPOTIFY_CLIENT_ID in .env."
+    };
+  }
+
+  const codeVerifier = makeSpotifyCodeVerifier();
+  const codeChallenge = makeSpotifyCodeChallenge(codeVerifier);
+  const state = base64UrlEncode(crypto.randomBytes(18));
+
+  const authUrl = new URL("https://accounts.spotify.com/authorize");
+  authUrl.searchParams.set("client_id", SPOTIFY_CLIENT_ID);
+  authUrl.searchParams.set("response_type", "code");
+  authUrl.searchParams.set("redirect_uri", SPOTIFY_REDIRECT_URI);
+  authUrl.searchParams.set("code_challenge_method", "S256");
+  authUrl.searchParams.set("code_challenge", codeChallenge);
+  authUrl.searchParams.set("state", state);
+  authUrl.searchParams.set("show_dialog", "false");
+  // No scope parameter on purpose: public Spotify data only.
+
+  const waiter = createSpotifyCallbackWaiter(state);
+  let loginWindow = null;
+
+  try {
+    loginWindow = new BrowserWindow({
+      width: 540,
+      height: 720,
+      title: "Connect Spotify — localtify",
+      parent: mainWindow || undefined,
+      modal: false,
+      autoHideMenuBar: true,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true
+      }
+    });
+
+    loginWindow.setMenu(null);
+    loginWindow.loadURL(authUrl.toString());
+
+    loginWindow.on("closed", () => {
+      waiter.cancel("Spotify login cancelled.");
+    });
+
+    const { code } = await waiter.promise;
+    await exchangeSpotifyAuthorizationCode(code, codeVerifier);
+
+    try {
+      if (loginWindow && !loginWindow.isDestroyed()) loginWindow.close();
+    } catch {
+    }
+
+    return {
+      ok: true,
+      ready: true,
+      loggedIn: true,
+      publicOnly: true,
+      mode: "oauth-pkce",
+      redirectUri: SPOTIFY_REDIRECT_URI,
+      message: "Spotify connected. Public playlists, albums, and tracks can be imported."
+    };
+  } catch (error) {
+    const message = error?.message || "Spotify login failed.";
+    return {
+      ok: false,
+      ready: Boolean(SPOTIFY_CLIENT_ID),
+      loggedIn: false,
+      cancelled: /cancel/i.test(message),
+      publicOnly: true,
+      mode: "oauth-pkce",
+      redirectUri: SPOTIFY_REDIRECT_URI,
+      error: message
+    };
+  } finally {
+    waiter.cancel();
+    try {
+      if (loginWindow && !loginWindow.isDestroyed()) loginWindow.close();
+    } catch {
+    }
+  }
+}
+
+async function spotifyApiGet(endpoint) {
+  const url = endpoint.startsWith("https://") ? endpoint : `https://api.spotify.com/v1${endpoint}`;
+
+  const fetchOnce = async () => {
+    const token = await getSpotifyAccessToken();
+    return spotifyHttpGet(url, { Authorization: `Bearer ${token}`, Accept: "application/json" });
+  };
+
+  let res = await fetchOnce();
+
+  if (res.status === 401) {
+    _spotifyToken = null;
+    _spotifyTokenExpiry = 0;
+    await refreshSpotifyAccessToken();
+    res = await fetchOnce();
+  }
+
+  if (res.status === 403 || res.status === 404) {
+    throw new Error("Spotify could not read this link. Make sure the playlist is public, then copy the link again.");
+  }
+
+  if (res.status === 429) {
+    throw new Error("Spotify rate-limited this request. Wait a little and try again.");
+  }
+
+  if (res.status !== 200) {
+    throw new Error(`Spotify API returned HTTP ${res.status}.`);
+  }
+
+  try {
+    return JSON.parse(res.body);
+  } catch {
+    throw new Error("Could not parse Spotify API response.");
+  }
+}
+
+function parseSpotifyUrl(rawUrl) {
+  const raw = String(rawUrl || "").trim();
+  if (!raw) return null;
+
+  const uriMatch = raw.match(/^spotify:(playlist|album|track):([A-Za-z0-9]+)$/i);
+  if (uriMatch) return { type: uriMatch[1].toLowerCase(), id: uriMatch[2] };
+
+  const urlMatch = raw.match(/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(?:embed\/)?(playlist|album|track)\/([A-Za-z0-9]+)/i);
+  if (urlMatch) return { type: urlMatch[1].toLowerCase(), id: urlMatch[2] };
+
+  return null;
+}
+
+function shapeSpotifyTrack(track, fallbackAlbumName = "") {
+  if (!track?.name) return null;
+
+  const artists = Array.isArray(track.artists)
+    ? track.artists.map((artist) => artist?.name).filter(Boolean).join(", ")
+    : "";
+
+  return {
+    id: String(track.id || `${track.name}-${artists}-${track.duration_ms || 0}`),
+    title: String(track.name || "unknown track"),
+    name: String(track.name || "unknown track"),
+    artist: artists,
+    artists,
+    albumName: String(track.album?.name || fallbackAlbumName || ""),
+    duration: Math.round(Number(track.duration_ms || 0) / 1000),
+    durationMs: Number(track.duration_ms || 0),
+    spotifyUrl: track.external_urls?.spotify || (track.id ? `https://open.spotify.com/track/${track.id}` : "")
+  };
+}
+
+async function fetchSpotifyTracksFromUrl(rawUrl) {
+  const parsed = parseSpotifyUrl(rawUrl);
+  if (!parsed) {
+    throw new Error("Paste a valid Spotify playlist, album, or track link.");
+  }
+
+  const { type, id } = parsed;
+
+  if (type === "track") {
+    const track = await spotifyApiGet(`/tracks/${id}`);
+    const shaped = shapeSpotifyTrack(track);
+    return { name: shaped?.title || "Spotify Track", playlistName: shaped?.title || "Spotify Track", type: "track", publicOnly: true, tracks: shaped ? [shaped] : [] };
+  }
+
+  if (type === "album") {
+    const album = await spotifyApiGet(`/albums/${id}`);
+    const tracks = [];
+    let next = `/albums/${id}/tracks?limit=50&offset=0`;
+
+    while (next) {
+      const page = await spotifyApiGet(next);
+      for (const track of page.items || []) {
+        const shaped = shapeSpotifyTrack(track, album.name || "");
+        if (shaped) tracks.push(shaped);
+      }
+      next = page.next || null;
+    }
+
+    return { name: album.name || "Spotify Album", playlistName: album.name || "Spotify Album", type: "album", publicOnly: true, tracks };
+  }
+
+  if (type === "playlist") {
+    const info = await spotifyApiGet(`/playlists/${id}?fields=name,public,owner(display_name)`);
+
+    if (info && info.public === false) {
+      throw new Error("This Spotify playlist is private. Make it public first, then paste the link again.");
+    }
+
+    const tracks = [];
+    let offset = 0;
+
+    while (true) {
+      const page = await spotifyApiGet(`/playlists/${id}/tracks?limit=100&offset=${offset}&fields=items(track(id,name,artists,album(name),duration_ms,is_local,external_urls)),next`);
+      const items = page.items || [];
+
+      for (const item of items) {
+        const track = item?.track;
+        if (!track?.name || track.is_local) continue;
+        const shaped = shapeSpotifyTrack(track);
+        if (shaped) tracks.push(shaped);
+      }
+
+      if (!page.next || items.length < 100) break;
+      offset += 100;
+    }
+
+    return { name: info.name || "Spotify Playlist", playlistName: info.name || "Spotify Playlist", type: "playlist", publicOnly: true, tracks };
+  }
+
+  throw new Error(`Unsupported Spotify link type: ${type}`);
+}
+// ====================== END SPOTIFY OAUTH PUBLIC IMPORT ======================
+
+
+
+
 function getPixelArtDirectory(options = {}) {
   const force = Boolean(options.force);
   const now = Date.now();
@@ -1936,58 +2501,121 @@ app.whenReady().then(async () => {
     return true;
   });
 
-  ipcMain.handle("spotify-fetch-tracks", async (_event, url) => {
+  // ── Spotify: fetch public track metadata through OAuth PKCE ─────────────
+  const runSpotifyFetch = async (payload = {}) => {
     try {
-      if (!url || typeof url !== "string") return { tracks: [] };
-      const fallbackTracks = [
-        { id: "mock-1", title: "Track Title One", artist: "Artist Name", duration: 180, albumName: "Mock Album" },
-        { id: "mock-2", title: "Track Title Two", artist: "Artist Name", duration: 210, albumName: "Mock Album" }
-      ];
-      return { tracks: fallbackTracks };
+      const url = typeof payload === "string" ? payload : payload?.url;
+      if (!url || typeof url !== "string") return { ok: false, tracks: [], error: "No Spotify URL provided." };
+      const result = await fetchSpotifyTracksFromUrl(url.trim());
+      console.log(`[localtify spotify] fetched ${result.tracks.length} public track(s) from ${result.type} "${result.name}"`);
+      return { ok: true, ...result };
     } catch (error) {
-      console.log("[localitfy spotify fetch error]", error?.message);
-      return { tracks: [], error: error?.message };
+      console.log("[localtify spotify fetch error]", error?.message || error);
+      return { ok: false, publicOnly: true, tracks: [], error: error?.message || "Failed to fetch Spotify tracks." };
     }
+  };
+
+  ipcMain.handle("spotify-fetch", async (_event, payload = {}) => runSpotifyFetch(payload));
+  ipcMain.handle("spotify-fetch-tracks", async (_event, url) => runSpotifyFetch({ url }));
+
+  ipcMain.handle("spotify-check", async () => {
+    const saved = readSpotifyOAuthToken();
+    const hasClientId = Boolean(SPOTIFY_CLIENT_ID);
+    return {
+      ok: hasClientId,
+      ready: hasClientId,
+      loggedIn: Boolean(saved?.refreshToken),
+      publicOnly: true,
+      mode: "oauth-pkce",
+      needsClientId: !hasClientId,
+      redirectUri: SPOTIFY_REDIRECT_URI,
+      error: hasClientId ? "" : "Spotify Client ID missing. Add SPOTIFY_CLIENT_ID and register the redirect URI."
+    };
   });
 
-  ipcMain.handle("spotify-download-batch", async (event, { tracks, options }) => {
+  ipcMain.handle("spotify-login", async () => loginSpotifyOAuth());
+
+  ipcMain.handle("spotify-import-browser", async () => ({
+    ok: false,
+    ready: Boolean(SPOTIFY_CLIENT_ID),
+    loggedIn: Boolean(readSpotifyOAuthToken()?.refreshToken),
+    publicOnly: true,
+    mode: "oauth-pkce",
+    error: "Browser cookie import is disabled. Use Connect Spotify instead. No sp_dc cookie paste is needed."
+  }));
+
+  ipcMain.handle("spotify-set-cookie", async () => ({
+    ok: false,
+    ready: Boolean(SPOTIFY_CLIENT_ID),
+    loggedIn: Boolean(readSpotifyOAuthToken()?.refreshToken),
+    publicOnly: true,
+    mode: "oauth-pkce",
+    error: "Manual Spotify cookies are disabled. Use Connect Spotify instead."
+  }));
+
+  ipcMain.handle("spotify-logout", async () => {
+    clearSpotifyOAuthToken();
+    console.log("[localtify spotify] oauth token cleared");
+    return { ok: true, ready: Boolean(SPOTIFY_CLIENT_ID), loggedIn: false, publicOnly: true, mode: "oauth-pkce" };
+  });
+
+  ipcMain.handle("spotdl-check", async () => ({
+    ok: true,
+    installed: true,
+    engine: "localtify-ytdlp-bridge",
+    message: "Spotify downloads use localtify's bundled yt-dlp bridge after metadata is fetched."
+  }));
+
+  const runSpotifyDownloadBatch = async (event, payload = {}) => {
+    const tracks = Array.isArray(payload?.tracks) ? payload.tracks : [];
+    const options = payload?.options && typeof payload.options === "object" ? payload.options : payload;
+
     try {
-      const downloadFolder = getDownloadDirectory(options?.folder);
+      const downloadFolder = getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder);
       const autoAdd = typeof options?.autoAdd === "boolean" ? options.autoAdd : true;
       const progressCallback = (progress) => {
         if (!mainWindow || mainWindow.isDestroyed()) return;
         event.sender.send("download:progress", progress);
+        if (progress?.status === "done") {
+          event.sender.send("spotdl-track-done", progress);
+        }
       };
+
       const result = await downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
       const successfulFiles = result.downloads
         .filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath))
         .map((item) => item.filePath);
+
       let changedCount = 0;
       let afterSongs = listSongsShaped();
+
       if (autoAdd && successfulFiles.length) {
         const pixelArtFiles = getPixelArtFiles();
         const usedCovers = new Set();
-        const importedSongs = successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers));
+        const importedSongs = successfulFiles.map((filePath) => makeSongFromFile(filePath, pixelArtFiles, usedCovers));
         changedCount = insertSongs(importedSongs);
         clearFileInfoCache();
         afterSongs = listSongsShaped();
       }
-      return {
-        ...result,
-        changedCount,
-        songs: afterSongs,
-        downloadFolder
-      };
+
+      for (const item of result.downloads || []) {
+        if (item?.ok) event.sender.send("spotdl-track-done", item);
+      }
+
+      return { ...result, changedCount, songs: afterSongs, downloadFolder };
     } catch (error) {
-      console.log("[localitfy spotify batch download error]", error?.message);
+      console.log("[localitfy spotify batch download error]", error?.message || error);
       return {
-        downloadFolder: getDownloadDirectory(options?.folder),
+        downloadFolder: getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder),
         downloads: [{ ok: false, error: error?.message || "batch download failed" }],
         changedCount: 0,
         songs: listSongsShaped()
       };
     }
-  });
+  };
+
+  ipcMain.handle("spotify-download-batch", runSpotifyDownloadBatch);
+  ipcMain.handle("spotdl-download-batch", runSpotifyDownloadBatch);
 
   ipcMain.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
   ipcMain.handle("localitfy:download-update", async () => downloadUpdate());

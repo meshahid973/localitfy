@@ -5794,27 +5794,36 @@ function MainModeApp() {
   }, [downloadsTab, ready]);
 
   async function handleSpotifyLogin() {
+    if (spotifyLoginBusy) return;
+
     setSpotifyLoginBusy(true);
     setSpotifyFetchError("");
+    setStatusText("opening spotify login...");
 
     try {
       const bridge = (window.localitfy as any);
       if (!bridge?.spotifyLogin) {
         setSpotifyFetchError("Spotify login is not wired in preload/main yet.");
+        setStatusText("spotify login unavailable");
         return;
       }
 
       const res = await bridge.spotifyLogin();
-      setSpotifyLoggedIn(Boolean(res?.loggedIn));
+      const loggedIn = Boolean(res?.loggedIn);
+      setSpotifyLoggedIn(loggedIn);
 
-      if (!res?.ok && !res?.loggedIn) {
-        setSpotifyFetchError(res?.error || "Spotify connection failed.");
+      if (!res?.ok && !loggedIn) {
+        const message = res?.error || "Spotify login cancelled.";
+        setSpotifyFetchError(message);
+        setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
       } else {
         setSpotifyFetchError("");
         setStatusText("connected to spotify");
       }
     } catch (error) {
-      setSpotifyFetchError(String((error as Error)?.message || "Login failed."));
+      const message = String((error as Error)?.message || "Spotify login failed.");
+      setSpotifyFetchError(message);
+      setStatusText(/cancel/i.test(message) ? "spotify login cancelled" : "spotify connection failed");
     } finally {
       setSpotifyLoginBusy(false);
     }
