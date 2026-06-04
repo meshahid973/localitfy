@@ -15289,3 +15289,780 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     transform: translate3d(0, -3px, 0) !important;
   }
 }
+
+
+/* ======================================================================
+   localtify v0.3.6 V251 — clean hero title rendering + tighter artist stack
+   Scope: main now-playing hero only.
+   Fixes clipped descenders on titles like "edgy" and stops short titles from
+   becoming huge/weird while keeping the premium big-title style.
+====================================================================== */
+
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion .heroTitle{
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  text-wrap: balance !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.058em !important;
+  padding: 0 0 0.18em !important;
+  margin: 0 0 -0.02em !important;
+  max-height: calc(2.04em + 0.24em) !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.app .hero.heroPremium.heroTitleTiny .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroTitleTiny .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleTiny .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleTiny .heroTitle{
+  font-size: clamp(42px, 4.35vw, 70px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.054em !important;
+  max-width: min(720px, 58vw) !important;
+}
+
+.app .hero.heroPremium.heroTitleShort .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroTitleShort .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleShort .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleShort .heroTitle{
+  font-size: clamp(46px, 4.85vw, 78px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.056em !important;
+  max-width: min(820px, 60vw) !important;
+}
+
+.app .hero.heroPremium.heroTitleNormal .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroTitleNormal .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleNormal .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleNormal .heroTitle{
+  font-size: clamp(50px, 5.45vw, 92px) !important;
+  line-height: 1.01 !important;
+  letter-spacing: -0.058em !important;
+  max-width: min(980px, 63vw) !important;
+}
+
+.app .hero.heroPremium.heroTitleLong .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroTitleLong .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleLong .heroTitle,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleLong .heroTitle{
+  font-size: clamp(40px, 4.55vw, 78px) !important;
+  line-height: 1.01 !important;
+  letter-spacing: -0.052em !important;
+  max-width: min(980px, 63vw) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
+  margin: -0.04em 0 8px !important;
+  transform: translate3d(0, -7px, 0) !important;
+  line-height: 1.14 !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean > .heroArtistLine{
+  margin: -0.02em 0 10px !important;
+  transform: translate3d(0, -7px, 0) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
+  transform: translate3d(0, -7px, 0) !important;
+}
+
+@media (max-width: 900px){
+  .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroTitle,
+  .app .hero.heroPremium.heroLayoutMotion .heroTitle{
+    line-height: 1.03 !important;
+    padding-bottom: 0.16em !important;
+    max-width: 100% !important;
+  }
+
+  .app .hero.heroPremium.heroTitleTiny .heroTitle,
+  .app .hero.heroPremium.heroLayoutMotion.heroTitleTiny .heroTitle,
+  .app .hero.heroPremium.heroTitleShort .heroTitle,
+  .app .hero.heroPremium.heroLayoutMotion.heroTitleShort .heroTitle{
+    font-size: clamp(40px, 11vw, 62px) !important;
+  }
+
+  .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine,
+  .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
+    transform: translate3d(0, -5px, 0) !important;
+  }
+}
+
+/* ======================================================================
+   localtify v0.3.6 V252 — cover studio / album cover gallery upgrade
+   Scope: covers page only. Keeps player, playlists, Spotify importer untouched.
+====================================================================== */
+
+.app .coverStudioLayoutV252{
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 0 0 150px;
+  display: grid;
+  gap: 14px;
+}
+
+.app .coverStudioHeroV252{
+  min-height: clamp(238px, 28vh, 340px) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px) !important;
+  align-items: center !important;
+  gap: clamp(18px, 3vw, 42px) !important;
+  padding: clamp(24px, 3vw, 42px) !important;
+  overflow: hidden !important;
+  border-color: rgba(var(--accent-rgb), 0.22) !important;
+  background:
+    radial-gradient(circle at 14% 12%, rgba(var(--accent-rgb), 0.14), transparent 34%),
+    radial-gradient(circle at 92% 46%, rgba(255,255,255,0.055), transparent 28%),
+    linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.018)),
+    rgba(5, 5, 10, 0.70) !important;
+}
+
+.app .coverStudioHeroV252::before{
+  opacity: 0.24 !important;
+  filter: blur(34px) saturate(1.22) !important;
+}
+
+.app .coverStudioHeroV252 .coverStudioHeroText{
+  position: relative !important;
+  z-index: 3 !important;
+  max-width: 760px !important;
+}
+
+.app .coverStudioHeroV252 .coverStudioHeroText h3{
+  margin: 8px 0 10px !important;
+  font-size: clamp(48px, 5.8vw, 86px) !important;
+  line-height: 0.88 !important;
+  letter-spacing: -0.078em !important;
+}
+
+.app .coverStudioHeroV252 .coverStudioHeroText p:not(.eyebrow){
+  max-width: 700px !important;
+  color: rgba(255,255,255,0.64) !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+}
+
+.app .coverStudioHeroV252 .coverStudioHeroActions{
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 9px !important;
+  margin-top: 18px !important;
+}
+
+.app .coverStudioHeroV252 .coverStudioHeroActions button{
+  min-height: 39px !important;
+  padding: 0 15px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  color: rgba(255,255,255,0.86) !important;
+  background: rgba(255,255,255,0.065) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.015em !important;
+}
+
+.app .coverStudioHeroV252 .coverStudioHeroActions .heroMain{
+  color: #120717 !important;
+  border-color: transparent !important;
+  background: var(--accent) !important;
+  box-shadow: 0 16px 40px rgba(var(--accent-rgb), 0.18) !important;
+}
+
+.app .coverStudioFocusCard{
+  position: relative !important;
+  z-index: 3 !important;
+  min-width: 0 !important;
+  padding: 16px !important;
+  display: grid !important;
+  gap: 13px !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.18) !important;
+  background:
+    radial-gradient(circle at 20% 8%, rgba(var(--accent-rgb), 0.12), transparent 44%),
+    linear-gradient(180deg, rgba(255,255,255,0.085), rgba(255,255,255,0.028)),
+    rgba(0,0,0,0.42) !important;
+  box-shadow:
+    0 24px 74px rgba(0,0,0,0.40),
+    inset 0 1px 0 rgba(255,255,255,0.075) !important;
+  backdrop-filter: blur(18px) saturate(124%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(124%) !important;
+}
+
+.app .coverPreviewPair{
+  display: grid !important;
+  grid-template-columns: minmax(86px, 1fr) 30px minmax(86px, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.app .coverPreviewSlot{
+  min-width: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  gap: 8px !important;
+}
+
+.app .coverPreviewSlot > span{
+  color: rgba(255,255,255,0.52) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.13em !important;
+  text-transform: uppercase !important;
+}
+
+.app .coverPreviewSongArt,
+.app .coverPreviewSlot .coverGalleryImageShell,
+.app .coverPreviewEmpty{
+  width: clamp(78px, 8vw, 108px) !important;
+  height: clamp(78px, 8vw, 108px) !important;
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  box-shadow:
+    0 18px 44px rgba(0,0,0,0.42),
+    0 0 0 1px rgba(255,255,255,0.10) inset !important;
+}
+
+.app .coverPreviewSongArt img,
+.app .coverPreviewSlot .coverGalleryImage{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.app .coverPreviewEmpty{
+  display: grid !important;
+  place-items: center !important;
+  color: rgba(255,255,255,0.72) !important;
+  background: rgba(255,255,255,0.055) !important;
+  font-size: 34px !important;
+  font-weight: 900 !important;
+}
+
+.app .coverPreviewArrow{
+  width: 30px !important;
+  height: 30px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  color: rgba(255,255,255,0.72) !important;
+  background: rgba(255,255,255,0.075) !important;
+  font-weight: 900 !important;
+}
+
+.app .coverPreviewText{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 3px !important;
+  text-align: center !important;
+}
+
+.app .coverPreviewText strong{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: rgba(255,255,255,0.94) !important;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.035em !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.app .coverPreviewText small{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: rgba(255,255,255,0.52) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.app .coverPreviewApplyButton{
+  min-height: 40px !important;
+  width: 100% !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  color: #120717 !important;
+  background: var(--accent) !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 18px 42px rgba(var(--accent-rgb),0.16) !important;
+}
+
+.app .coverPreviewApplyButton:disabled{
+  color: rgba(255,255,255,0.42) !important;
+  background: rgba(255,255,255,0.08) !important;
+  box-shadow: none !important;
+}
+
+.app .coverStudioStatsV252{
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.app .coverStudioStatsV252 div{
+  min-height: 72px !important;
+  padding: 13px 14px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255,255,255,0.075) !important;
+  background: rgba(255,255,255,0.035) !important;
+  box-shadow: none !important;
+}
+
+.app .coverStudioStatsV252 strong{
+  display: block !important;
+  color: rgba(255,255,255,0.94) !important;
+  font-size: 26px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.055em !important;
+}
+
+.app .coverStudioStatsV252 span{
+  display: block !important;
+  margin-top: 6px !important;
+  color: rgba(255,255,255,0.52) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  text-transform: lowercase !important;
+}
+
+.app .coverStudioBodyV252{
+  display: grid !important;
+  grid-template-columns: minmax(260px, 350px) minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 14px !important;
+}
+
+.app .coverSelectedSongsPanelV252,
+.app .coverGalleryPanelV252{
+  min-height: min(690px, calc(100vh - 250px)) !important;
+  overflow: hidden !important;
+  contain: layout style !important;
+}
+
+.app .coverSelectedSongsPanelV252{
+  display: grid !important;
+  grid-template-rows: auto auto auto minmax(0, 1fr) !important;
+  gap: 10px !important;
+  padding: 16px !important;
+}
+
+.app .coverGalleryPanelV252{
+  display: grid !important;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) !important;
+  gap: 12px !important;
+  padding: 17px !important;
+}
+
+.app .coverSongSearchWrap,
+.app .coverGalleryToolbar{
+  min-width: 0 !important;
+}
+
+.app .coverGalleryToolbar{
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 9px !important;
+}
+
+.app .coverStudioSearchInput{
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  padding: 0 14px !important;
+  border-radius: 15px !important;
+  border: 1px solid rgba(255,255,255,0.095) !important;
+  outline: none !important;
+  color: rgba(255,255,255,0.92) !important;
+  background: rgba(0,0,0,0.32) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045) !important;
+}
+
+.app .coverStudioSearchInput::placeholder{
+  color: rgba(255,255,255,0.34) !important;
+}
+
+.app .coverStudioSearchInput:focus{
+  border-color: rgba(var(--accent-rgb),0.42) !important;
+  background: rgba(0,0,0,0.42) !important;
+  box-shadow:
+    0 0 0 3px rgba(var(--accent-rgb),0.10),
+    inset 0 1px 0 rgba(255,255,255,0.055) !important;
+}
+
+.app .coverGalleryToolbar button,
+.app .coverSongTools button{
+  min-height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,0.085) !important;
+  color: rgba(255,255,255,0.76) !important;
+  background: rgba(255,255,255,0.055) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+}
+
+.app .coverSongTools{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+}
+
+.app .coverSongList.coverSongListVirtual{
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: auto !important;
+  padding-right: 5px !important;
+  contain: content !important;
+}
+
+.app .coverSongPick.coverSongPickVirtual{
+  left: 0 !important;
+  right: 5px !important;
+  width: calc(100% - 5px) !important;
+  min-height: 58px !important;
+  padding: 7px 9px !important;
+  border-radius: 16px !important;
+}
+
+.app .coverGalleryHeaderV252{
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+}
+
+.app .coverGalleryHeaderV252 h3{
+  margin: 3px 0 0 !important;
+  color: rgba(255,255,255,0.95) !important;
+  font-size: clamp(30px, 3vw, 44px) !important;
+  line-height: 0.95 !important;
+  letter-spacing: -0.065em !important;
+}
+
+.app .coverGalleryHeaderV252 > span{
+  min-height: 30px !important;
+  padding: 7px 10px !important;
+  border-radius: 999px !important;
+  color: rgba(255,255,255,0.62) !important;
+  background: rgba(255,255,255,0.055) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+}
+
+.app .coverGallerySubStatsV252{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+}
+
+.app .coverGallerySubStatsV252 span{
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 7px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  color: rgba(255,255,255,0.48) !important;
+  background: rgba(255,255,255,0.035) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+}
+
+.app .coverGallerySubStatsV252 strong{
+  color: rgba(255,255,255,0.80) !important;
+  font-weight: 950 !important;
+}
+
+.app .coverGalleryPreviewBar{
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: 56px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 11px !important;
+  padding: 10px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(var(--accent-rgb),0.16) !important;
+  background:
+    radial-gradient(circle at 8% 50%, rgba(var(--accent-rgb),0.12), transparent 40%),
+    rgba(255,255,255,0.04) !important;
+}
+
+.app .coverGalleryPreviewBar .coverGalleryImageShell{
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+}
+
+.app .coverGalleryPreviewBar strong,
+.app .coverGalleryPreviewBar small{
+  min-width: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.app .coverGalleryPreviewBar strong{
+  color: rgba(255,255,255,0.91) !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.app .coverGalleryPreviewBar small{
+  margin-top: 2px !important;
+  color: rgba(255,255,255,0.48) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+
+.app .coverGalleryPreviewBar button{
+  min-height: 36px !important;
+  padding: 0 13px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: #120717 !important;
+  background: var(--accent) !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+}
+
+.app .coverGalleryGrid.coverGalleryGridVirtual{
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: auto !important;
+  overflow-x: hidden !important;
+  padding: 0 5px 12px 0 !important;
+  contain: content !important;
+}
+
+.app .coverGalleryVirtualRow{
+  gap: 16px !important;
+  align-items: stretch !important;
+  padding-bottom: 16px !important;
+}
+
+.app .coverGalleryVirtualRow .coverGalleryCard,
+.app .coverGalleryCard{
+  min-height: 306px !important;
+  padding: 11px !important;
+  display: grid !important;
+  grid-template-rows: 164px auto auto !important;
+  gap: 10px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(255,255,255,0.075) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
+    rgba(0,0,0,0.38) !important;
+  box-shadow: none !important;
+  contain: layout paint style !important;
+  transform: translateZ(0) !important;
+}
+
+.app .coverGalleryCard.activePreview{
+  border-color: rgba(var(--accent-rgb),0.48) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb),0.13), transparent 46%),
+    linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.022)),
+    rgba(0,0,0,0.40) !important;
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb),0.10) inset, 0 18px 42px rgba(0,0,0,0.24) !important;
+}
+
+.app .coverGalleryCard.favorite{
+  border-color: rgba(var(--accent-rgb),0.26) !important;
+}
+
+.app .coverGalleryCard.excluded{
+  opacity: 0.58 !important;
+}
+
+.app .coverGalleryImageButton{
+  width: 100% !important;
+  height: 164px !important;
+  min-height: 164px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,0.045) !important;
+  box-shadow:
+    0 16px 38px rgba(0,0,0,0.28),
+    inset 0 0 0 1px rgba(255,255,255,0.055) !important;
+}
+
+.app .coverGalleryImageShell,
+.app .coverGalleryImage,
+.app .coverGalleryImagePlaceholder{
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+.app .coverGalleryImagePlaceholder{
+  display: grid !important;
+  place-items: center !important;
+  color: rgba(255,255,255,0.46) !important;
+  background: rgba(255,255,255,0.045) !important;
+  font-size: 34px !important;
+  font-weight: 950 !important;
+}
+
+.app .coverGalleryImage{
+  object-fit: cover !important;
+  opacity: 0 !important;
+  transform: translateZ(0) scale(1.012) !important;
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(0.16,1,0.3,1) !important;
+}
+
+.app .coverGalleryImage.isLoaded,
+.app .coverGalleryImageShell.isLoaded .coverGalleryImage{
+  opacity: 1 !important;
+  transform: translateZ(0) scale(1) !important;
+}
+
+.app .coverGalleryCard:hover .coverGalleryImage{
+  transform: translateZ(0) scale(1.035) !important;
+}
+
+.app .coverGalleryInfo{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 4px !important;
+}
+
+.app .coverGalleryInfo strong,
+.app .coverGalleryInfo small{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.app .coverGalleryInfo strong{
+  color: rgba(255,255,255,0.92) !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.app .coverGalleryInfo small{
+  color: rgba(255,255,255,0.45) !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+}
+
+.app .coverGalleryActions{
+  display: grid !important;
+  grid-template-columns: 36px minmax(58px, 0.9fr) minmax(46px, 0.8fr) minmax(58px, 1fr) !important;
+  gap: 6px !important;
+  align-items: center !important;
+}
+
+.app .coverGalleryActions button{
+  min-width: 0 !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 9px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,0.075) !important;
+  color: rgba(255,255,255,0.74) !important;
+  background: rgba(255,255,255,0.055) !important;
+  font-size: 10.5px !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+}
+
+.app .coverGalleryActions .coverStarButton{
+  padding: 0 !important;
+  color: rgba(var(--accent-rgb),0.82) !important;
+  font-size: 15px !important;
+}
+
+.app .coverGalleryActions .coverStarButton.active{
+  color: #120717 !important;
+  border-color: transparent !important;
+  background: var(--accent) !important;
+}
+
+.app .coverGalleryActions .coverApplyButton{
+  color: #120717 !important;
+  border-color: transparent !important;
+  background: var(--accent) !important;
+}
+
+.app .coverGalleryActions .coverHideButton.danger.active{
+  color: rgba(255,255,255,0.86) !important;
+  border-color: rgba(255,95,126,0.28) !important;
+  background: rgba(255,95,126,0.13) !important;
+}
+
+.app .coverGalleryActions .coverPreviewButton{
+  color: rgba(255,255,255,0.76) !important;
+}
+
+.app .coverEmptyState{
+  min-height: 220px !important;
+  display: grid !important;
+  place-items: center !important;
+  text-align: center !important;
+  border-radius: 18px !important;
+  border: 1px dashed rgba(255,255,255,0.10) !important;
+  background: rgba(255,255,255,0.025) !important;
+}
+
+@media (max-width: 1180px){
+  .app .coverStudioHeroV252,
+  .app .coverStudioBodyV252{
+    grid-template-columns: 1fr !important;
+  }
+
+  .app .coverStudioFocusCard{
+    max-width: 520px !important;
+  }
+}
+
+@media (max-width: 760px){
+  .app .coverStudioHeroV252{
+    padding: 22px !important;
+  }
+
+  .app .coverStudioHeroV252 .coverStudioHeroText h3{
+    font-size: clamp(42px, 13vw, 62px) !important;
+  }
+
+  .app .coverStudioStatsV252{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .app .coverGalleryPreviewBar{
+    grid-template-columns: 48px minmax(0,1fr) !important;
+  }
+
+  .app .coverGalleryPreviewBar button{
+    grid-column: 1 / -1 !important;
+  }
+
+  .app .coverGalleryActions{
+    grid-template-columns: 36px 1fr 1fr !important;
+  }
+
+  .app .coverGalleryActions .coverApplyButton{
+    grid-column: 1 / -1 !important;
+  }
+}

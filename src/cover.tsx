@@ -1,9 +1,8 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
 
-
-function CoverGalleryImage({ src, label }: { src: string; label: string }) {
+function CoverGalleryImage({ src, label, priority = false }: { src: string; label: string; priority?: boolean }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const fallback = String(label || "cover").trim().slice(0, 1).toUpperCase() || "♪";
@@ -26,9 +25,9 @@ function CoverGalleryImage({ src, label }: { src: string; label: string }) {
           alt=""
           width={320}
           height={320}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
           decoding="async"
-          fetchPriority="low"
+          fetchPriority={priority ? "high" : "low"}
           referrerPolicy="no-referrer"
           draggable={false}
           onLoad={() => setLoaded(true)}
@@ -50,13 +49,21 @@ function useMeasuredWidth<T extends HTMLElement>() {
     const element = ref.current;
     if (!element) return;
 
-    const update = () => setWidth(element.clientWidth || 0);
+    let frame = 0;
+    const update = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => setWidth(element.clientWidth || 0));
+    };
+
     update();
 
     const observer = new ResizeObserver(update);
     observer.observe(element);
 
-    return () => observer.disconnect();
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, []);
 
   return [ref, width] as const;
@@ -73,8 +80,11 @@ function chunkItems<T>(items: T[], size: number) {
   return output;
 }
 
-type CoverMood = "all" | "favorites" | "leastUsed" | "cute" | "space" | "dark" | "cozy" | "energy";
+function normalizeSearch(value: string) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
 
+type CoverMood = "all" | "favorites" | "leastUsed" | "cute" | "space" | "dark" | "cozy" | "energy";
 
 type SongLike = {
   id: string;
@@ -155,6 +165,35 @@ type CoverStudioProps = {
   togglePixelCoverExcluded: (key: string) => void;
 };
 
+function coverEntryMatches(entry: CoverGalleryEntryLike, query: string, coverMoodName: (mood: CoverMood) => string) {
+  if (!query) return true;
+
+  const tagText = entry.tags.map(coverMoodName).join(" ");
+  const searchText = [
+    entry.asset.label,
+    entry.asset.file,
+    entry.asset.discordKey,
+    tagText,
+    entry.favorite ? "favorite starred" : "",
+    entry.excluded ? "hidden excluded" : "visible",
+    `${entry.usage} uses`
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return searchText.includes(query);
+}
+
+function songMatches(song: SongLike, query: string) {
+  if (!query) return true;
+
+  const searchText = [song.title, song.artist, song.album, song.filePath, song.id]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return searchText.includes(query);
+}
 
 function VirtualCoverSongList({
   songs,
@@ -176,16 +215,16 @@ function VirtualCoverSongList({
   const rowVirtualizer = useVirtualizer({
     count: songs.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 64,
-    overscan: 6,
+    estimateSize: () => 66,
+    overscan: 4,
     getItemKey: (index) => songs[index]?.id || index
   });
 
   if (!songs.length) {
     return (
-      <div className="emptyState">
-        <strong>no songs yet</strong>
-        <p>Import music first, then choose covers here.</p>
+      <div className="emptyState coverEmptyState">
+        <strong>no songs found</strong>
+        <p>Try another search, or import music first.</p>
       </div>
     );
   }
@@ -229,6 +268,8 @@ function VirtualCoverGalleryGrid({
   pixelArtBusy,
   pixelArtUrl,
   coverMoodName,
+  activeEntryKey,
+  onPreviewCover,
   applyCoverAssetToSelection,
   togglePixelCoverFavorite,
   togglePixelCoverExcluded
@@ -237,25 +278,27 @@ function VirtualCoverGalleryGrid({
   pixelArtBusy: boolean;
   pixelArtUrl: (file: string) => string;
   coverMoodName: (mood: CoverMood) => string;
+  activeEntryKey: string;
+  onPreviewCover: (entry: CoverGalleryEntryLike) => void;
   applyCoverAssetToSelection: (asset: RuntimePixelArtAssetLike) => void | Promise<void>;
   togglePixelCoverFavorite: (key: string) => void;
   togglePixelCoverExcluded: (key: string) => void;
 }) {
   const [parentRef, width] = useMeasuredWidth<HTMLDivElement>();
-  const columns = Math.max(1, Math.floor((Math.max(width, 180) + 14) / 172));
+  const columns = Math.max(1, Math.floor((Math.max(width, 220) + 16) / 204));
   const rows = useMemo(() => chunkItems(entries, columns), [entries, columns]);
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 286,
-    overscan: 2
+    estimateSize: () => 326,
+    overscan: 3
   });
 
   if (!entries.length) {
     return (
-      <div className="emptyState">
+      <div className="emptyState coverEmptyState">
         <strong>no covers here</strong>
-        <p>Try another filter or rescan the pixelart folder.</p>
+        <p>Try another filter, clear search, or rescan the pixelart folder.</p>
       </div>
     );
   }
@@ -277,11 +320,14 @@ function VirtualCoverGalleryGrid({
               {rowEntries.map((entry) => {
                 const imageUrl = entry.asset.url || pixelArtUrl(entry.asset.file);
                 const tags = entry.tags.map(coverMoodName).join(", ");
+                const activePreview = activeEntryKey === entry.key;
 
                 return (
                   <article
                     key={entry.key}
-                    className={`coverGalleryCard ${entry.favorite ? "favorite" : ""} ${entry.excluded ? "excluded" : ""}`}
+                    className={`coverGalleryCard ${entry.favorite ? "favorite" : ""} ${entry.excluded ? "excluded" : ""} ${activePreview ? "activePreview" : ""}`}
+                    onMouseEnter={() => onPreviewCover(entry)}
+                    onFocus={() => onPreviewCover(entry)}
                   >
                     <button
                       type="button"
@@ -296,7 +342,7 @@ function VirtualCoverGalleryGrid({
                     <div className="coverGalleryInfo">
                       <strong title={entry.asset.label}>{entry.asset.label}</strong>
                       <small>
-                        {entry.usage} use{entry.usage === 1 ? "" : "s"} • {tags}
+                        {entry.usage} use{entry.usage === 1 ? "" : "s"} • {tags || "mixed"}
                       </small>
                     </div>
 
@@ -306,8 +352,18 @@ function VirtualCoverGalleryGrid({
                         onClick={() => togglePixelCoverFavorite(entry.key)}
                         className={`coverStarButton ${entry.favorite ? "active" : ""}`}
                         title={entry.favorite ? "remove favorite" : "favorite cover"}
+                        aria-label={entry.favorite ? "remove favorite" : "favorite cover"}
                       >
                         {entry.favorite ? "★" : "☆"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="coverPreviewButton"
+                        onClick={() => onPreviewCover(entry)}
+                        title="preview this cover"
+                      >
+                        preview
                       </button>
 
                       <button
@@ -326,7 +382,7 @@ function VirtualCoverGalleryGrid({
                         onClick={() => void applyCoverAssetToSelection(entry.asset)}
                         title="apply this cover"
                       >
-                        apply cover
+                        apply
                       </button>
                     </div>
                   </article>
@@ -368,17 +424,54 @@ export default function CoverStudio({
   togglePixelCoverFavorite,
   togglePixelCoverExcluded
 }: CoverStudioProps) {
+  const [coverSearch, setCoverSearch] = useState("");
+  const [songSearch, setSongSearch] = useState("");
+  const [previewEntryKey, setPreviewEntryKey] = useState("");
+  const deferredCoverSearch = normalizeSearch(useDeferredValue(coverSearch));
+  const deferredSongSearch = normalizeSearch(useDeferredValue(songSearch));
+
   const selectedCount = selectedCoverSongs.length || (currentSong ? 1 : 0);
-  const totalShown = filteredCoverGalleryAssets.length;
   const randomizeDisabled = pixelArtBusy || (!selectedCoverSongs.length && !currentSong);
 
+  const visibleGalleryAssets = useMemo(() => {
+    if (!deferredCoverSearch) return filteredCoverGalleryAssets;
+    return filteredCoverGalleryAssets.filter((entry) => coverEntryMatches(entry, deferredCoverSearch, coverMoodName));
+  }, [deferredCoverSearch, filteredCoverGalleryAssets, coverMoodName]);
+
+  const visibleCoverSongs = useMemo(() => {
+    if (!deferredSongSearch) return coverPickerSongList;
+    return coverPickerSongList.filter((song) => songMatches(song, deferredSongSearch));
+  }, [coverPickerSongList, deferredSongSearch]);
+
+  const previewEntry = useMemo(() => {
+    return (
+      visibleGalleryAssets.find((entry) => entry.key === previewEntryKey) ||
+      visibleGalleryAssets.find((entry) => entry.favorite) ||
+      coverStats.least ||
+      visibleGalleryAssets[0] ||
+      null
+    );
+  }, [coverStats.least, previewEntryKey, visibleGalleryAssets]);
+
+  const previewImageUrl = previewEntry ? previewEntry.asset.url || pixelArtUrl(previewEntry.asset.file) : "";
+  const previewTags = previewEntry ? previewEntry.tags.map(coverMoodName).join(", ") : "";
+  const activeTargetSong = selectedCoverSongs[0] || currentSong;
+  const targetExtraCount = Math.max(0, selectedCoverSongs.length - 1);
+  const totalShown = visibleGalleryAssets.length;
+  const totalBeforeSearch = filteredCoverGalleryAssets.length;
+
+  useEffect(() => {
+    if (!previewEntryKey || visibleGalleryAssets.some((entry) => entry.key === previewEntryKey)) return;
+    setPreviewEntryKey("");
+  }, [previewEntryKey, visibleGalleryAssets]);
+
   return (
-    <section className="coverStudioLayout">
-      <section className="panel coverStudioHero ambientSurface" style={ambientStyle ?? undefined}>
+    <section className="coverStudioLayout coverStudioLayoutV252">
+      <section className="panel coverStudioHero coverStudioHeroV252 ambientSurface" style={ambientStyle ?? undefined}>
         <div className="coverStudioHeroText">
-          <p className="eyebrow">pixel cover studio</p>
-          <h3>pixel covers</h3>
-          <p>Pick covers, star the good ones, hide the bad ones, and keep your library looking clean.</p>
+          <p className="eyebrow">cover studio</p>
+          <h3>album covers</h3>
+          <p>Choose a song, preview a pixel cover, then apply it instantly. Search, star, hide, or randomize without leaving the gallery.</p>
 
           <div className="coverStudioHeroActions">
             <button
@@ -391,32 +484,50 @@ export default function CoverStudio({
             </button>
 
             <button type="button" onClick={() => void randomizeSelectedCovers("leastUsed")} disabled={pixelArtBusy}>
-              least used covers
+              least used
             </button>
 
             <button type="button" onClick={() => void rescanPixelArtFolder()} disabled={pixelArtBusy}>
-              rescan folder
+              rescan covers
             </button>
           </div>
         </div>
 
-        <div className="coverStudioStats" aria-label="cover stats">
-          <div>
-            <strong>{coverStats.usableCount ?? totalShown}</strong>
-            <span>usable covers</span>
+        <div className="coverStudioFocusCard" aria-label="cover preview">
+          <div className="coverPreviewPair">
+            <div className="coverPreviewSlot">
+              <span>song</span>
+              <CoverComponent song={activeTargetSong ?? currentSong} className="coverPreviewSongArt" />
+            </div>
+
+            <div className="coverPreviewArrow" aria-hidden="true">→</div>
+
+            <div className="coverPreviewSlot">
+              <span>cover</span>
+              {previewEntry ? (
+                <CoverGalleryImage src={previewImageUrl} label={previewEntry.asset.label} priority />
+              ) : (
+                <div className="coverPreviewEmpty">♪</div>
+              )}
+            </div>
           </div>
-          <div>
-            <strong>{coverStats.usedCount ?? 0}</strong>
-            <span>used covers</span>
+
+          <div className="coverPreviewText">
+            <strong>{previewEntry ? previewEntry.asset.label : "pick a cover"}</strong>
+            <small>
+              {activeTargetSong ? prettyTitle(String(activeTargetSong.title || "selected song"), 6) : "no song selected"}
+              {targetExtraCount ? ` + ${targetExtraCount} more` : ""}
+            </small>
           </div>
-          <div>
-            <strong>{coverStats.favoriteCount ?? 0}</strong>
-            <span>favorites</span>
-          </div>
-          <div>
-            <strong>{coverStats.excludedCount ?? 0}</strong>
-            <span>hidden</span>
-          </div>
+
+          <button
+            type="button"
+            className="coverPreviewApplyButton"
+            disabled={!previewEntry || pixelArtBusy || randomizeDisabled}
+            onClick={() => previewEntry && void applyCoverAssetToSelection(previewEntry.asset)}
+          >
+            apply preview
+          </button>
         </div>
       </section>
 
@@ -439,13 +550,42 @@ export default function CoverStudio({
         })}
       </section>
 
-      <section className="coverStudioBody">
-        <aside className="panel coverSelectedSongsPanel">
+      <section className="coverStudioStats coverStudioStatsV252" aria-label="cover stats">
+        <div>
+          <strong>{coverStats.usableCount ?? totalBeforeSearch}</strong>
+          <span>usable</span>
+        </div>
+        <div>
+          <strong>{coverStats.usedCount ?? 0}</strong>
+          <span>used</span>
+        </div>
+        <div>
+          <strong>{coverStats.favoriteCount ?? 0}</strong>
+          <span>favorites</span>
+        </div>
+        <div>
+          <strong>{coverStats.excludedCount ?? 0}</strong>
+          <span>hidden</span>
+        </div>
+      </section>
+
+      <section className="coverStudioBody coverStudioBodyV252">
+        <aside className="panel coverSelectedSongsPanel coverSelectedSongsPanelV252">
           <div className="panelHead">
             <div>
-              <p className="eyebrow">selected songs</p>
-              <h3>{selectedCoverSongs.length} selected</h3>
+              <p className="eyebrow">album targets</p>
+              <h3>{coverSelectedSongIds.length} selected</h3>
             </div>
+          </div>
+
+          <div className="coverSongSearchWrap">
+            <input
+              className="coverStudioSearchInput"
+              value={songSearch}
+              onChange={(event) => setSongSearch(event.currentTarget.value)}
+              placeholder="search songs..."
+              spellCheck={false}
+            />
           </div>
 
           <div className="coverSongTools">
@@ -461,7 +601,7 @@ export default function CoverStudio({
           </div>
 
           <VirtualCoverSongList
-            songs={coverPickerSongList}
+            songs={visibleCoverSongs}
             selectedIds={coverSelectedSongIds}
             CoverComponent={CoverComponent}
             prettyTitle={prettyTitle}
@@ -470,30 +610,66 @@ export default function CoverStudio({
           />
         </aside>
 
-        <section className="panel coverGalleryPanel">
-          <div className="coverGalleryHeader">
+        <section className="panel coverGalleryPanel coverGalleryPanelV252">
+          <div className="coverGalleryHeader coverGalleryHeaderV252">
             <div>
               <p className="eyebrow">gallery</p>
               <h3>{coverMoodName(coverGalleryMood)}</h3>
             </div>
 
-            <span>{totalShown} shown</span>
+            <span>{totalShown} shown{deferredCoverSearch ? ` / ${totalBeforeSearch}` : ""}</span>
           </div>
 
-          <div className="coverGallerySubStats">
+          <div className="coverGalleryToolbar">
+            <input
+              className="coverStudioSearchInput coverGallerySearchInput"
+              value={coverSearch}
+              onChange={(event) => setCoverSearch(event.currentTarget.value)}
+              placeholder="search covers, moods, favorites..."
+              spellCheck={false}
+            />
+
+            {coverSearch ? (
+              <button type="button" onClick={() => setCoverSearch("")}>
+                clear
+              </button>
+            ) : null}
+          </div>
+
+          <div className="coverGallerySubStats coverGallerySubStatsV252">
             <span>
               least used <strong>{coverStats.least ? coverStats.least.asset.label : "none"}</strong>
             </span>
             <span>
               most used <strong>{coverStats.most ? coverStats.most.asset.label : "none"}</strong>
             </span>
+            <span>
+              preview <strong>{previewEntry ? previewEntry.asset.label : "none"}</strong>
+            </span>
           </div>
 
+          {previewEntry ? (
+            <div className="coverGalleryPreviewBar">
+              <CoverGalleryImage src={previewImageUrl} label={previewEntry.asset.label} priority />
+              <div>
+                <strong>{previewEntry.asset.label}</strong>
+                <small>
+                  {previewEntry.usage} use{previewEntry.usage === 1 ? "" : "s"} • {previewTags || "mixed"}
+                </small>
+              </div>
+              <button type="button" disabled={pixelArtBusy || randomizeDisabled} onClick={() => void applyCoverAssetToSelection(previewEntry.asset)}>
+                apply to selection
+              </button>
+            </div>
+          ) : null}
+
           <VirtualCoverGalleryGrid
-            entries={filteredCoverGalleryAssets}
+            entries={visibleGalleryAssets}
             pixelArtBusy={pixelArtBusy}
             pixelArtUrl={pixelArtUrl}
             coverMoodName={coverMoodName}
+            activeEntryKey={previewEntry?.key || ""}
+            onPreviewCover={(entry) => setPreviewEntryKey(entry.key)}
             applyCoverAssetToSelection={applyCoverAssetToSelection}
             togglePixelCoverFavorite={togglePixelCoverFavorite}
             togglePixelCoverExcluded={togglePixelCoverExcluded}
