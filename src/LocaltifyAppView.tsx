@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.6 V221 — current view with restored Spotify auth/import UI. */
+/* localtify 0.3.6 V251 — faster virtual rendering; keeps current view UI. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -647,7 +647,12 @@ export type SpotifyTrack = {
   title: string;
   artist: string;
   duration?: number;
+  durationMs?: number;
   albumName?: string;
+  coverUrl?: string;
+  albumCoverUrl?: string;
+  spotifyCoverUrl?: string;
+  spotifyUrl?: string;
 };
 
 export type AutoUpdateEvent = {
@@ -760,7 +765,7 @@ export const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 export const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 export const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
 export const yukariUpdateImage = new URL("./assets/yukari.png", import.meta.url).href;
-export const BOOT_MIN_VISIBLE_MS = 1450;
+export const BOOT_MIN_VISIBLE_MS = 650;
 export const BOOT_STEPS = [
   { label: "settings", detail: "theme, volume, Discord, and app preferences" },
   { label: "library", detail: "songs, folders, durations, and saved order" },
@@ -769,9 +774,9 @@ export const BOOT_STEPS = [
   { label: "player", detail: "queue, last song, progress, and audio state" },
   { label: "interface", detail: "home, settings, animations, and shortcuts" }
 ] as const;
-export const INITIAL_LIBRARY_RENDER_LIMIT = 60;
-export const LIBRARY_RENDER_BATCH_SIZE = 60;
-export const HOME_GRID_RENDER_LIMIT = 60;
+export const INITIAL_LIBRARY_RENDER_LIMIT = 42;
+export const LIBRARY_RENDER_BATCH_SIZE = 48;
+export const HOME_GRID_RENDER_LIMIT = 42;
 export const CUSTOM_THEME_COMMIT_DELAY_MS = 680;
 export const WHATS_NEW_SEEN_KEY = "localitfy.whatsNewSeenVersion";
 
@@ -2682,7 +2687,7 @@ export const VirtualSongRows = memo(function VirtualSongRows({
     count: list.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 74,
-    overscan: 8,
+    overscan: 5,
     getItemKey: (index) => list[index]?.id || index
   });
 
@@ -2830,7 +2835,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
     count: list.length ? rowCount : 0,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 256,
-    overscan: 4,
+    overscan: 2,
     getItemKey: (rowIndex) => {
       const firstSong = list[rowIndex * columns];
       return firstSong?.id ? `${firstSong.id}-${columns}` : `${rowIndex}-${columns}`;
@@ -2972,7 +2977,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
     count: list.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 72,
-    overscan: 8,
+    overscan: 5,
     getItemKey: (index) => `${selectedPlaylistId}-${list[index]?.id || index}`
   });
 
@@ -4710,74 +4715,33 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         <div className="spotifyAuthLeft">
                           <span className="spotifyAuthDot" aria-hidden="true" />
                           <div>
-                            <strong>{spotifyLoggedIn ? "Connected to Spotify" : "Not logged in"}</strong>
+                            <strong>{spotifyLoggedIn ? "Spotify connected" : "Spotify public import"}</strong>
                             <p>
-                              {spotifyLoggedIn
-                                ? "Private playlists and higher rate limits are enabled."
-                                : "Public playlists, albums, and tracks work without login."}
+                              Connect once with Spotify. No cookie paste. Only public playlists, albums, and tracks are imported.
                             </p>
                           </div>
                         </div>
                         <div className="spotifyAuthActions">
-                          {spotifyLoggedIn ? (
-                            <button
-                              className="softButton spotifyAuthBtn"
-                              onClick={() => void handleSpotifyLogout()}
-                              disabled={spotifyLoginBusy}
-                            >
-                              log out
-                            </button>
-                          ) : (
-                            <>
-                              <button
-                                className="heroMain spotifyAuthBtn"
-                                onClick={() => void handleSpotifyLogin()}
-                                disabled={spotifyLoginBusy}
-                              >
-                                {spotifyLoginBusy ? "opening..." : "log in"}
-                              </button>
-                              <button
-                                className="softButton spotifyAuthBtn"
-                                onClick={() => setSpotifyShowCookieInput((v) => !v)}
-                                disabled={spotifyLoginBusy}
-                              >
-                                paste cookie
-                              </button>
-                            </>
-                          )}
+                          <button
+                            className="heroMain spotifyAuthBtn"
+                            onClick={() => void handleSpotifyLogin()}
+                            disabled={spotifyLoginBusy}
+                          >
+                            {spotifyLoginBusy ? "opening..." : spotifyLoggedIn ? "reconnect" : "connect spotify"}
+                          </button>
+                          <button
+                            className="softButton spotifyAuthBtn"
+                            onClick={() => void handleSpotifyLogout()}
+                            disabled={spotifyLoginBusy}
+                          >
+                            disconnect
+                          </button>
                         </div>
                       </div>
 
-                      {/* ── Manual sp_dc cookie input ── */}
-                      {spotifyShowCookieInput && !spotifyLoggedIn && (
-                        <div className="spotifyCookieRow">
-                          <div className="spotifyCookieHelp">
-                            Open <strong>open.spotify.com</strong> in your browser → DevTools → Application → Cookies → copy the <code>sp_dc</code> value.
-                          </div>
-                          <div className="spotifyCookieInputRow">
-                            <input
-                              className="downloadTextarea downloadTextareaV031 spotifyUrlInput"
-                              type="password"
-                              placeholder="Paste sp_dc cookie value here..."
-                              value={spotifyCookieDraft}
-                              onChange={(e) => setSpotifyCookieDraft(e.currentTarget.value)}
-                              disabled={spotifyLoginBusy}
-                              onKeyDown={(e) => { if (e.key === "Enter") void handleSpotifySetCookie(spotifyCookieDraft); }}
-                            />
-                            <button
-                              className="heroMain spotifyFetchButton"
-                              onClick={() => void handleSpotifySetCookie(spotifyCookieDraft)}
-                              disabled={spotifyLoginBusy || !spotifyCookieDraft.trim()}
-                            >
-                              {spotifyLoginBusy ? "checking..." : "connect"}
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
                       {/* ── URL fetch ── */}
                       <div className="downloadNotice downloadNoticeV031 spotifyNotice">
-                        Paste a Spotify playlist, album, or track link — localtify finds each song on YouTube and downloads the audio.
+                        Paste a Spotify playlist, album, or track link. If Spotify blocks it, make the playlist public on your profile, not only shareable by link.
                       </div>
 
                       <div className="spotifyUrlRow">
@@ -4844,10 +4808,16 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                     });
                                   }}
                                 >
-                                  <span className="spotifyTrackIndex">{String(i + 1).padStart(2, "0")}</span>
+                                  {(track.coverUrl || track.spotifyCoverUrl || track.albumCoverUrl) ? (
+                                    <span className="spotifyTrackArt" aria-hidden="true">
+                                      <img src={track.coverUrl || track.spotifyCoverUrl || track.albumCoverUrl} alt="" loading="lazy" decoding="async" />
+                                    </span>
+                                  ) : (
+                                    <span className="spotifyTrackIndex">{String(i + 1).padStart(2, "0")}</span>
+                                  )}
                                   <div className="spotifyTrackMeta">
                                     <strong>{track.title}</strong>
-                                    {track.artist ? <p>{track.artist}{track.albumName ? ` · ${track.albumName}` : ""}</p> : null}
+                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` · ${track.albumName}` : ""}</p>
                                   </div>
                                   <span className="spotifyTrackCheck" aria-hidden="true">{selected ? "✓" : ""}</span>
                                 </button>

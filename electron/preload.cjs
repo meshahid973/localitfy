@@ -61,8 +61,37 @@ contextBridge.exposeInMainWorld("localitfy", {
   downloadUpdate: () => ipcRenderer.invoke("localitfy:download-update"),
   installUpdate: () => ipcRenderer.invoke("localitfy:install-update"),
 
-  spotifyFetchTracks: (url) => ipcRenderer.invoke("spotify-fetch-tracks", url),
-  spotifyDownloadBatch: (payload) => ipcRenderer.invoke("spotify-download-batch", payload),
+  /** Spotify public-only import. Public playlists/albums/tracks do not need manual cookies. */
+  /** Check if Spotify OAuth/PKCE is configured and connected. */
+  spotifyCheck: () => ipcRenderer.invoke("spotify-check"),
+  /** Open Spotify OAuth login popup. No sp_dc cookie paste. */
+  spotifyLogin: () => ipcRenderer.invoke("spotify-login"),
+  /** Disabled compatibility method. Use spotifyLogin instead. */
+  spotifyImportBrowser: () => ipcRenderer.invoke("spotify-import-browser"),
+  /** Disabled compatibility method. Use spotifyLogin instead. */
+  spotifySetCookie: (payload) => {
+    const spDc = typeof payload === "string" ? payload : payload?.spDc;
+    return ipcRenderer.invoke("spotify-set-cookie", { spDc });
+  },
+  /** Clear stored Spotify OAuth token. */
+  spotifyLogout: () => ipcRenderer.invoke("spotify-logout"),
+  /** Fetch track list from any public Spotify playlist/album/track URL. */
+  spotifyFetch: (payload) => ipcRenderer.invoke("spotify-fetch", payload),
+  spotifyFetchTracks: (url) => ipcRenderer.invoke("spotify-fetch", { url }),
+  /** Check the local Spotify download bridge. */
+  spotdlCheck: () => ipcRenderer.invoke("spotdl-check"),
+  /** Download Spotify track searches through localtify's download bridge. */
+  spotdlDownloadBatch: (payload) => ipcRenderer.invoke("spotdl-download-batch", payload),
+  spotifyDownloadBatch: (payload) => ipcRenderer.invoke("spotdl-download-batch", payload),
+
+  onSpotdlTrackDone: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("spotdl-track-done", handler);
+
+    return () => {
+      ipcRenderer.removeListener("spotdl-track-done", handler);
+    };
+  },
 
   onAutoUpdate: (callback) => {
     const handler = (_event, payload) => callback(payload);
