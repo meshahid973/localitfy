@@ -12432,27 +12432,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   position: relative;
 }
 
-.app .playlistTrackRow::after{
-  content: "right click for actions";
-  position: absolute;
-  right: 50px;
-  top: 50%;
-  translate: 0 -50%;
-  color: rgba(255, 255, 255, 0.38);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 160ms ease, right 160ms ease;
-}
-
-.app .playlistTrackRow:hover::after{
-  right: 58px;
-  opacity: 1;
-}
-
 .songContextMenuLayer{
   position: fixed;
   inset: 0;
@@ -13542,85 +13521,6 @@ body.localitfySongDragging .app .playlistDropEmpty{
 
 .app .playlistTrackRow.virtualPlaylistTrackRow .iconAction{
   justify-self: end;
-}
-
-
-/* v0.3.5 playlist virtualization + row layout repair
-   The global motion guardrails use !important transforms, so virtual rows need
-   their own important translate value or every playlist song stacks at y=0. */
-.virtualPlaylistTrackRow {
-  transform: translate3d(0, var(--playlist-row-y, 0px), 0) !important;
-  contain: layout paint style;
-  will-change: transform;
-}
-
-.playlistTrackRow {
-  min-height: 72px;
-  align-items: center;
-  grid-template-columns: 28px minmax(0, 1fr) auto 40px;
-  gap: 12px;
-  overflow: hidden;
-}
-
-.playlistTrackMain {
-  min-width: 0;
-  width: 100%;
-  display: grid;
-  grid-template-columns: 28px 46px minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-  overflow: hidden;
-  text-align: left;
-}
-
-.playlistTrackIndex,
-.playlistTrackGrip,
-.playlistTrackDuration {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
-.playlistTrackCover {
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
-  overflow: hidden;
-}
-
-.playlistTrackText {
-  min-width: 0;
-  overflow: hidden;
-}
-
-.playlistTrackTitle,
-.playlistTrackMeta {
-  display: block;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-@media (max-width: 860px) {
-  .playlistTrackRow {
-    grid-template-columns: 24px minmax(0, 1fr) 34px;
-  }
-
-  .playlistTrackDuration {
-    display: none;
-  }
-
-  .playlistTrackMain {
-    grid-template-columns: 24px 42px minmax(0, 1fr);
-    gap: 10px;
-  }
-
-  .playlistTrackCover {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-  }
 }
 
 
@@ -15257,7 +15157,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 
-
 /* localtify v0.3.6 V222 — Spotify public-only UI cleanup */
 .spotifyCookieRow{
   display: none !important;
@@ -15283,107 +15182,85 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 
-/* localtify 0.3.6 V227 — hero copy position + Spotify metadata polish
-   Small surgical patch only. Keeps layout, moves hero copy/actions slightly up,
-   and lets fetched Spotify tracks show album art before download.
-*/
+/* localtify v0.3.6 V232 — playlist row/layout repair */
+.app .playlistHeroActions{gap:8px!important}
+.app .playlistHeroActions .heroMain,.app .playlistHeroActions .softButton{min-height:38px!important;padding-inline:15px!important}
+.app .playlistCreatePanel .playlistCreateForm{max-width:100%!important}
+.app .playlistCreatePanel .mainAction{width:100%!important}
 
-.app .hero.heroPremium .heroTextClean{
-  transform: translate3d(0, -22px, 0) !important;
+.app .playlistShelfCard.active,.app .playlistShelfCard.playing{
+  background:rgba(255,255,255,.045)!important;
+  border-color:rgba(var(--accent-rgb),.22)!important;
+  box-shadow:inset 2px 0 0 rgba(var(--accent-rgb),.75)!important;
 }
+.app .playlistShelfCard::after{display:none!important}
 
-.app .hero.heroPremium .heroArtistLine{
-  margin-top: 6px !important;
+.app .playlistTracksPanel .panelHead{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:start!important;
+  gap:12px!important;
 }
-
-.app .hero.heroPremium .heroQuickActions{
-  margin-top: 10px !important;
-  transform: translate3d(0, -2px, 0) !important;
+.app .playlistManageActions{
+  position:static!important;
+  inset:auto!important;
+  display:flex!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  gap:6px!important;
+  opacity:1!important;
+  transform:none!important;
 }
+.app .playlistManageActions .settingsTinyButton{min-height:30px!important;padding:0 10px!important}
 
-.app .hero.heroPremium.heroCompact .heroQuickActions{
-  margin-top: 8px !important;
+.app .playlistTrackList.virtualPlaylistTrackList{
+  display:block!important;
+  overflow:auto!important;
+  overflow-x:hidden!important;
+  padding:0 4px 14px 0!important;
+  min-height:220px!important;
+  max-height:min(58vh,560px)!important;
 }
-
-.app .hero.heroPremium.heroTitleTiny .heroQuickActions,
-.app .hero.heroPremium.heroTitleShort .heroQuickActions{
-  margin-top: 6px !important;
+.app .virtualPlaylistTrackCanvas{position:relative!important;width:100%!important;min-width:0!important}
+.app .playlistTrackRow.virtualPlaylistTrackRow{
+  position:absolute!important;
+  inset:0 4px auto 0!important;
+  width:calc(100% - 4px)!important;
+  height:64px!important;
+  min-height:64px!important;
+  display:grid!important;
+  grid-template-columns:28px minmax(0,1fr) 58px 34px!important;
+  align-items:center!important;
+  gap:10px!important;
+  padding:8px 10px!important;
+  overflow:hidden!important;
+  transform:translate3d(0,var(--playlist-row-y,0px),0)!important;
 }
-
-.spotifyTrackItem{
-  grid-template-columns: 42px minmax(0, 1fr) auto !important;
+.app .playlistTrackMain{
+  width:100%!important;
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:24px 42px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:10px!important;
+  overflow:hidden!important;
 }
-
-.spotifyTrackArt{
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  background: rgba(255,255,255,0.06);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+.app .playlistTrackCover{width:42px!important;height:42px!important;min-width:42px!important;border-radius:11px!important}
+.app .playlistTrackText,.app .playlistTrackText strong,.app .playlistTrackText small{
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
 }
-
-.spotifyTrackArt img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.app .playlistTrackRow.active{
+  background:rgba(var(--accent-rgb),.075)!important;
+  border-color:rgba(var(--accent-rgb),.24)!important;
+  box-shadow:inset 2px 0 0 rgba(var(--accent-rgb),.82)!important;
 }
-
-.spotifyTrackMeta p{
-  display: block !important;
-  margin: 3px 0 0 !important;
-  color: rgba(255,255,255,0.58) !important;
-  font-size: 11px !important;
-  line-height: 1.25 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-@media (max-width: 900px){
-  .app .hero.heroPremium .heroTextClean{
-    transform: translate3d(0, -12px, 0) !important;
-  }
-}
-
-
-/* localtify 0.3.6 V229 — Spotify metadata repair visual polish
-   Small surgical patch: hero text sits higher and quick-library expanded mode
-   avoids feeling like a huge empty star box when search results are tiny.
-*/
-
-.app .hero.heroPremium .heroTextClean{
-  transform: translate3d(0, -42px, 0) !important;
-}
-
-.app .hero.heroPremium .heroArtistLine{
-  margin-top: 2px !important;
-  transform: translate3d(0, -2px, 0) !important;
-}
-
-.app .hero.heroPremium .heroQuickActions{
-  margin-top: 8px !important;
-  transform: translate3d(0, -8px, 0) !important;
-}
-
-.app .homeDashboard .homeLibraryPanel.homeLibraryExpanded{
-  min-height: clamp(280px, 42vh, 520px) !important;
-}
-
-.app .homeDashboard .homeLibraryPanel.homeLibraryExpanded .homeAlbumGrid{
-  align-content: start !important;
-}
-
-@media (max-width: 900px){
-  .app .hero.heroPremium .heroTextClean{
-    transform: translate3d(0, -22px, 0) !important;
-  }
-
-  .app .hero.heroPremium .heroQuickActions{
-    transform: translate3d(0, -4px, 0) !important;
-  }
-}
-
+.app .playlistTrackRow::after{display:none!important;content:none!important}
+.app .playlistTrackDuration{justify-self:end!important;color:rgba(255,255,255,.58)!important}
+.app .playlistTrackRow>.iconAction{justify-self:end!important}
+.app .hero.heroPremium .heroTextClean{transform:translate3d(0,-38px,0)!important}
+.app .hero.heroPremium .heroArtistLine{margin-top:2px!important;transform:translate3d(0,-2px,0)!important}
+.app .hero.heroPremium .heroQuickActions{margin-top:8px!important;transform:translate3d(0,-8px,0)!important}
