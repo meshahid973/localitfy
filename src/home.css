@@ -6232,20 +6232,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 
-@media (max-width: 980px){
-  
-
-
-  
-
-
-  
-
-
-  
-}
-
-
 :root{
   --home-ref-bg: #000000;
   --home-ref-card: rgba(12, 12, 15, 0.72);
@@ -11807,6 +11793,12 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   padding-right: 4px;
 }
 
+/* ======================================================================
+   localtify v0.3.6 V243 — playlist rows release rewrite
+   Scope: playlist rows/shelf/action layout only.
+   Replaces the old playlist row/shelf blocks with one clean owner section.
+====================================================================== */
+
 .app .playlistShelfCard{
   width: 100%;
   display: grid;
@@ -11815,34 +11807,292 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   gap: 12px;
   text-align: left;
   border: 1px solid rgba(255,255,255,.075);
-  background: rgba(255,255,255,.042);
-  color: rgba(255,255,255,.86);
   border-radius: 18px;
+  background: rgba(255,255,255,.040);
+  color: rgba(255,255,255,.86);
   padding: 10px;
   cursor: pointer;
-  transition:
-    transform 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+  overflow: hidden;
+  isolation: isolate;
+  transform: none;
+  box-shadow: none;
+  transition: background-color 130ms ease, border-color 130ms ease, opacity 130ms ease;
 }
 
 .app .playlistShelfCard:hover{
-  transform: translate3d(0, -1px, 0);
-  background: rgba(255,255,255,.065);
-  border-color: color-mix(in oklab, var(--theme-progress, var(--accent)) 28%, rgba(255,255,255,.1));
+  transform: none;
+  background: rgba(255,255,255,.055);
+  border-color: rgba(255,255,255,.12);
+  box-shadow: none;
 }
 
-.app .playlistShelfCard.active{
-  background: color-mix(in oklab, var(--theme-progress, var(--accent)) 12%, rgba(255,255,255,.055));
-  border-color: color-mix(in oklab, var(--theme-progress, var(--accent)) 42%, rgba(255,255,255,.12));
-  box-shadow: inset 3px 0 0 color-mix(in oklab, var(--theme-progress, var(--accent)) 80%, #fff);
+.app .playlistShelfCard.active,
+.app .playlistShelfCard.playing{
+  background: rgba(var(--accent-rgb), .070);
+  border-color: rgba(var(--accent-rgb), .24);
+  box-shadow: inset 2px 0 0 rgba(var(--accent-rgb), .72);
 }
 
-.app .playlistShelfCard .playlistCoverCollage{
-  width: 58px;
+.app .playlistShelfCard.dropTarget{
+  transform: none;
+  background: rgba(var(--accent-rgb), .085);
+  border-color: rgba(var(--accent-rgb), .38);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .13);
+}
+
+.app .playlistShelfCard::before,
+.app .playlistShelfCard::after{
+  display: none;
+  content: none;
+}
+
+.app .playlistTrackList{
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  min-width: 0;
+}
+
+.app .playlistTrackList.virtualPlaylistTrackList{
+  position: relative;
+  display: block;
+  min-height: 220px;
+  max-height: min(58vh, 560px);
+  overflow: auto;
+  overflow-x: hidden;
+  padding: 0 4px 14px 0;
+  contain: layout paint style;
+  scrollbar-gutter: stable;
+}
+
+.app .virtualPlaylistTrackCanvas{
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.app .playlistTrackRow{
+  min-width: 0;
+  min-height: 64px;
+  height: 64px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 54px 32px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.060);
   border-radius: 14px;
+  background: rgba(255,255,255,.026);
+  color: rgba(255,255,255,.88);
+  transform: translate3d(0,0,0);
+  transition: background-color 110ms ease, border-color 110ms ease, opacity 110ms ease;
+  animation: none;
+  box-shadow: none;
+  filter: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  contain: layout paint style;
 }
+
+.app .playlistTrackRow:hover{
+  transform: translate3d(0,0,0);
+  background: rgba(255,255,255,.034);
+  border-color: rgba(255,255,255,.085);
+  box-shadow: none;
+  filter: none;
+}
+
+.app .playlistTrackRow.active,
+.app .playlistTrackRow.playing{
+  background: rgba(var(--accent-rgb), .060);
+  border-color: rgba(var(--accent-rgb), .22);
+  box-shadow: inset 2px 0 0 rgba(var(--accent-rgb), .70);
+}
+
+.app .playlistTrackRow.songDragging{
+  opacity: .52;
+}
+
+.app .playlistTrackRow.songDropTarget{
+  background: rgba(var(--accent-rgb), .074);
+  border-color: rgba(var(--accent-rgb), .38);
+  box-shadow: none;
+}
+
+.app .playlistTrackRow.songDropTarget[data-drop-side="before"]{
+  box-shadow: inset 0 2px 0 rgba(var(--accent-rgb), .76);
+}
+
+.app .playlistTrackRow.songDropTarget[data-drop-side="after"]{
+  box-shadow: inset 0 -2px 0 rgba(var(--accent-rgb), .76);
+}
+
+.app .playlistTrackRow::before,
+.app .playlistTrackRow::after{
+  display: none;
+  content: none;
+}
+
+.app .playlistTrackRow.virtualPlaylistTrackRow{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 4px;
+  width: calc(100% - 4px);
+  transform: translate3d(0, var(--playlist-row-y, 0px), 0);
+  will-change: transform;
+}
+
+.app .playlistTrackRow.virtualPlaylistTrackRow:hover{
+  transform: translate3d(0, var(--playlist-row-y, 0px), 0);
+}
+
+.app .playlistTrackMain{
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 26px 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+  transition: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.app .playlistTrackMain:hover,
+.app .playlistTrackMain:active,
+.app .playlistTrackMain:focus,
+.app .playlistTrackMain:focus-visible{
+  transform: none;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  filter: none;
+  outline: 0;
+}
+
+.app .playlistTrackCover,
+.app .playlistTrackCover.coverAura{
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 11px;
+  overflow: hidden;
+  transform: none;
+  transition: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.app .playlistTrackCover img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transform: none;
+  transition: none;
+  filter: none;
+}
+
+.app .playlistTrackText{
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.app .playlistTrackText strong,
+.app .playlistTrackText small,
+.app .playlistTrackMain strong,
+.app .playlistTrackMain small{
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.14;
+  margin: 0;
+  text-align: left;
+}
+
+.app .playlistTrackText strong,
+.app .playlistTrackMain strong{
+  color: rgba(255,255,255,.94);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -.015em;
+}
+
+.app .playlistTrackText small,
+.app .playlistTrackMain small{
+  margin-top: 3px;
+  color: rgba(255,255,255,.55);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.app .playlistTrackDuration{
+  justify-self: end;
+  width: 54px;
+  min-width: 54px;
+  color: rgba(255,255,255,.50);
+  font-size: 12px;
+  font-weight: 850;
+  text-align: right;
+}
+
+.app .playlistManageActions{
+  position: static;
+  inset: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+  transform: none;
+  opacity: 1;
+}
+
+.app .playlistManageActions > *{
+  min-height: 30px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px){
+  .app .playlistTrackRow{
+    grid-template-columns: 22px minmax(0, 1fr) 32px;
+    gap: 8px;
+  }
+
+  .app .playlistTrackDuration{
+    display: none;
+  }
+
+  .app .playlistManageActions{
+    justify-content: flex-start;
+  }
+}
+
+
 
 .app .playlistShelfMeta{
   min-width: 0;
@@ -11868,61 +12118,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   align-items: center;
 }
 
-.app .playlistTrackList{
-  display: grid;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.app .playlistTrackRow{
-  display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) 70px 38px;
-  align-items: center;
-  gap: 8px;
-  min-height: 60px;
-  padding: 8px 10px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.068);
-  background: rgba(255,255,255,.038);
-  color: rgba(255,255,255,.86);
-  contain: layout style;
-  transition:
-    transform 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    opacity 160ms ease;
-}
-
-.app .playlistTrackRow.active{
-  background: color-mix(in oklab, var(--theme-progress, var(--accent)) 12%, rgba(255,255,255,.045));
-  border-color: color-mix(in oklab, var(--theme-progress, var(--accent)) 36%, rgba(255,255,255,.12));
-  box-shadow: inset 3px 0 0 var(--theme-progress, var(--accent));
-}
-
-.app .playlistTrackRow.songDragging{
-  opacity: .5;
-  transform: scale(.985);
-}
-
-.app .playlistTrackRow.songDropTarget{
-  transform: translate3d(0, 1px, 0);
-  border-color: color-mix(in oklab, var(--theme-progress, var(--accent)) 48%, rgba(255,255,255,.16));
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--theme-progress, var(--accent)) 24%, transparent);
-}
-
-.app .playlistTrackRow.songDropTarget[data-drop-side="before"]{
-  box-shadow:
-    inset 0 3px 0 color-mix(in oklab, var(--theme-progress, var(--accent)) 82%, #fff),
-    0 0 0 1px color-mix(in oklab, var(--theme-progress, var(--accent)) 24%, transparent);
-}
-
-.app .playlistTrackRow.songDropTarget[data-drop-side="after"]{
-  box-shadow:
-    inset 0 -3px 0 color-mix(in oklab, var(--theme-progress, var(--accent)) 82%, #fff),
-    0 0 0 1px color-mix(in oklab, var(--theme-progress, var(--accent)) 24%, transparent);
-}
-
 .app .playlistTrackGrip{
   color: rgba(255,255,255,.32);
   font-size: 15px;
@@ -11930,60 +12125,11 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   user-select: none;
 }
 
-.app .playlistTrackMain{
-  min-width: 0;
-  display: grid;
-  grid-template-columns: 28px 42px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
-  padding: 0;
-  cursor: pointer;
-}
-
 .app .playlistTrackIndex{
   color: rgba(255,255,255,.46);
   font-size: 12px;
   font-weight: 900;
   text-align: center;
-}
-
-.app .playlistTrackCover{
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.app .playlistTrackMain strong,
-.app .playlistTrackMain small{
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.app .playlistTrackMain strong{
-  color: rgba(255,255,255,.94);
-  font-size: 14px;
-  letter-spacing: -.015em;
-}
-
-.app .playlistTrackMain small{
-  margin-top: 3px;
-  color: rgba(255,255,255,.56);
-  font-size: 12px;
-}
-
-.app .playlistTrackDuration{
-  color: rgba(255,255,255,.48);
-  font-size: 12px;
-  font-weight: 850;
-  text-align: right;
 }
 
 .app .playlistEmptyState{
@@ -12153,14 +12299,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
     display: none !important;
   }
 
-  .app .playlistTrackRow{
-    grid-template-columns: 20px minmax(0, 1fr) 34px;
-  }
-
-  .app .playlistTrackDuration{
-    display: none;
-  }
-
   .app .playlistHeroCopy h3{
     font-size: 38px;
   }
@@ -12318,38 +12456,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   transform: translateY(-2px);
 }
 
-.app .playlistShelfCard{
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-
-.app .playlistShelfCard::after{
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  opacity: 0;
-  background: radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb), 0.18), transparent 42%);
-  transition: opacity 180ms ease;
-}
-
-.app .playlistShelfCard:hover::after,
-.app .playlistShelfCard.active::after,
-.app .playlistShelfCard.dropTarget::after{
-  opacity: 1;
-}
-
-.app .playlistShelfCard.dropTarget{
-  border-color: rgba(var(--accent-rgb), 0.62) !important;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.18), rgba(var(--accent-rgb), 0.06)),
-    rgba(0, 0, 0, 0.42) !important;
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.2) inset,
-    0 18px 42px rgba(var(--accent-rgb), 0.12) !important;
-  transform: translateY(-2px) scale(1.01);
-}
-
 .app .playlistShelfDropHint{
   position: absolute;
   right: 12px;
@@ -12369,12 +12475,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   transition: opacity 180ms ease, transform 180ms ease;
 }
 
-.app .playlistShelfCard.dropTarget .playlistShelfDropHint,
-.app .playlistShelfCard:hover .playlistShelfDropHint{
-  opacity: 1;
-  transform: translateY(0);
-}
-
 .app .playlistTracksHead{
   align-items: flex-start;
   gap: 12px;
@@ -12383,18 +12483,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app .playlistTracksTitleBlock{
   min-width: 0;
   flex: 1 1 auto;
-}
-
-.app .playlistManageActions{
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.app .playlistManageActions .settingsTinyButton{
-  min-height: 32px;
 }
 
 .app .playlistRenameForm{
@@ -12421,10 +12509,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app .playlistRenameForm input:focus{
   border-color: rgba(var(--accent-rgb), 0.56);
   box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.1);
-}
-
-.app .playlistTrackRow{
-  position: relative;
 }
 
 .songContextMenuLayer{
@@ -12534,16 +12618,9 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 @media (max-width: 760px){
-  .app .playlistManageActions{
-    justify-content: flex-start;
-  }
 
   .app .playlistRenameForm input{
     width: 100%;
-  }
-
-  .app .playlistTrackRow::after{
-    display: none;
   }
 }
 
@@ -12921,7 +12998,7 @@ html body .content{
   background-clip: padding-box !important;
 }
 
-.app :where(.songRow,.playlistTrackRow,.playlistSongRow,.libraryFullListV025 .songRow,.homeSongList .songRow){
+.app :where(.songRow,.playlistSongRow,.libraryFullListV025 .songRow,.homeSongList .songRow){
   position: relative !important;
   max-width: 100% !important;
   min-width: 0 !important;
@@ -12932,14 +13009,14 @@ html body .content{
   transform: translate3d(0,0,0) !important;
 }
 
-.app :where(.songRow,.playlistTrackRow,.playlistSongRow,.libraryFullListV025 .songRow,.homeSongList .songRow):hover{
+.app :where(.songRow,.playlistSongRow,.libraryFullListV025 .songRow,.homeSongList .songRow):hover{
   transform: translate3d(0,0,0) !important;
   border-color: color-mix(in srgb, var(--accent) 24%, rgba(255,255,255,.08)) !important;
   background-image: none !important;
 }
 
-.app :where(.songRow,.playlistTrackRow,.playlistSongRow)::before,
-.app :where(.songRow,.playlistTrackRow,.playlistSongRow)::after{
+.app :where(.songRow,.playlistSongRow)::before,
+.app :where(.songRow,.playlistSongRow)::after{
   pointer-events: none !important;
 }
 
@@ -12951,14 +13028,14 @@ html body .content{
   transform: translate3d(0,0,0) !important;
 }
 
-.app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile,.playlistShelfCard,.playlistCard){
+.app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile,.playlistCard){
   border-radius: 22px !important;
   overflow: hidden !important;
   background-clip: padding-box !important;
   transform: translate3d(0,0,0) !important;
 }
 
-.app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile,.playlistShelfCard,.playlistCard):hover{
+.app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile,.playlistCard):hover{
   transform: translate3d(0,-1px,0) scale(1.002) !important;
   background-image: none !important;
 }
@@ -13347,41 +13424,6 @@ html body .content{
 .coverGalleryImageShell.isLoaded::after,
 .coverGalleryImageShell.isFailed::after {
   display: none;
-}
-
-
-/* =======================================================================
-   localtify v0.3.3 v102 — real virtualization containers
-   -----------------------------------------------------------------------
-   Keep the existing visuals, but let React only mount visible playlist rows,
-   cover picker rows, and cover gallery rows.
-======================================================================= */
-.playlistTrackList.virtualPlaylistTrackList{
-  position: relative !important;
-  display: block !important;
-  max-height: min(58vh, 560px) !important;
-  min-height: 220px !important;
-  overflow: auto !important;
-  overflow-x: hidden !important;
-  padding: 0 4px 14px 0 !important;
-  contain: content;
-  scrollbar-gutter: stable;
-}
-
-.virtualPlaylistTrackCanvas{
-  position: relative !important;
-  width: 100% !important;
-  min-width: 0 !important;
-}
-
-.playlistTrackRow.virtualPlaylistTrackRow{
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 4px !important;
-  width: calc(100% - 4px) !important;
-  contain: layout paint style;
-  will-change: transform;
 }
 
 .coverSongList.coverSongListVirtual{
@@ -14862,36 +14904,8 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   background:
     linear-gradient(90deg, rgba(var(--accent-rgb), .15), rgba(255,255,255,.026)),
     rgba(28, 20, 39, .70) !important;
-}
-
-
-/* ==========================================================================
-   localtify v0.3.6 V211 — theme-tinted acrylic cards
-   Owner: home.css
-
-   Fixes the white/grey acrylic problem:
-   - no white rgba wash
-   - uses current accent/theme tint
-   - darker frosted glass so text stays readable
-   - stronger blur without extra heavy layers
-========================================================================== */
-
-.app[data-card-background="acrylic"] :where(
-  .panel,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .homeAlbumPanel,
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryCard,
-  .libraryCardV025,
-  .playlistShelfCard,
-  .coverGalleryCard,
-  .coverTile
+}/* ========================================================================== localtify v0.3.6 V211 — theme-tinted acrylic cards Owner: home.css Fixes the white/grey acrylic problem: - no white rgba wash - uses current accent/theme tint - darker frosted glass so text stays readable - stronger blur without extra heavy layers
+========================================================================== */ .app[data-card-background="acrylic"] :where( .panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .coverGalleryCard, .coverTile
 ){
   background:
     linear-gradient(180deg, rgba(var(--accent-rgb), var(--lt-acrylic-accent-alpha,0.080)), rgba(var(--accent-rgb), 0.018)),
@@ -14905,22 +14919,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   -webkit-backdrop-filter: blur(var(--lt-visual-blur,18px)) saturate(var(--lt-visual-saturation,165%)) !important;
 }
 
-.app[data-card-background="glassy"] :where(
-  .panel,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .homeAlbumPanel,
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryCard,
-  .libraryCardV025,
-  .playlistShelfCard,
-  .coverGalleryCard,
-  .coverTile
+.app[data-card-background="glassy"] :where( .panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .coverGalleryCard, .coverTile
 ){
   background:
     linear-gradient(180deg, rgba(var(--accent-rgb), var(--lt-glass-accent-alpha,0.050)), rgba(var(--accent-rgb),0.010)),
@@ -14933,22 +14932,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   -webkit-backdrop-filter: blur(var(--lt-visual-blur-light,11px)) saturate(var(--lt-visual-saturation,165%)) !important;
 }
 
-.app[data-card-background="solid"] :where(
-  .panel,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .homeAlbumPanel,
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryCard,
-  .libraryCardV025,
-  .playlistShelfCard,
-  .coverGalleryCard,
-  .coverTile
+.app[data-card-background="solid"] :where( .panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .coverGalleryCard, .coverTile
 ){
   background: rgba(8,8,13,0.90) !important;
   border-color: rgba(255,255,255,0.055) !important;
@@ -14957,22 +14941,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   -webkit-backdrop-filter: none !important;
 }
 
-.app[data-card-background="oledFlat"] :where(
-  .panel,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .homeAlbumPanel,
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryCard,
-  .libraryCardV025,
-  .playlistShelfCard,
-  .coverGalleryCard,
-  .coverTile
+.app[data-card-background="oledFlat"] :where( .panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .coverGalleryCard, .coverTile
 ){
   background: #020204 !important;
   border-color: rgba(255,255,255,0.040) !important;
@@ -15029,23 +14998,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   box-shadow: 0 0 0 4px rgba(45,255,150,.10), 0 0 18px rgba(45,255,150,.24);
 }
 
-
-/* localtify v0.3.6 V236 — playlist hover area surgical fix
-   Only touches playlist page rows/actions. No card/home cleanup. */
-.app .playlistShelfCard.active,
-.app .playlistShelfCard.playing{
-  background: rgba(255,255,255,.040) !important;
-  border-color: rgba(var(--accent-rgb),.18) !important;
-  box-shadow: none !important;
-}
-
-.app .playlistShelfCard.active::after,
-.app .playlistShelfCard.playing::after,
-.app .playlistTrackRow::after{
-  display: none !important;
-  content: none !important;
-}
-
 .app .playlistHeroActions{
   display: flex !important;
   flex-wrap: wrap !important;
@@ -15093,92 +15045,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   gap: 10px !important;
 }
 
-.app .playlistManageActions{
-  position: static !important;
-  inset: auto !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 6px !important;
-  transform: none !important;
-  opacity: 1 !important;
-}
-
-.app .playlistManageActions .settingsTinyButton{
-  min-height: 30px !important;
-  padding: 0 10px !important;
-  white-space: nowrap !important;
-}
-
-.app .playlistTrackList.virtualPlaylistTrackList{
-  position: relative !important;
-  display: block !important;
-  min-height: 220px !important;
-  max-height: min(58vh,560px) !important;
-  overflow: auto !important;
-  overflow-x: hidden !important;
-  padding: 0 4px 14px 0 !important;
-  contain: layout paint style !important;
-  scrollbar-gutter: stable !important;
-}
-
-.app .virtualPlaylistTrackCanvas{
-  position: relative !important;
-  width: 100% !important;
-  min-width: 0 !important;
-}
-
-.app .playlistTrackRow.virtualPlaylistTrackRow{
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 4px !important;
-  width: calc(100% - 4px) !important;
-  height: 66px !important;
-  min-height: 66px !important;
-  box-sizing: border-box !important;
-  display: grid !important;
-  grid-template-columns: 24px minmax(0,1fr) 54px 32px !important;
-  align-items: center !important;
-  gap: 10px !important;
-  padding: 8px 10px !important;
-  overflow: hidden !important;
-  border-radius: 14px !important;
-  border: 1px solid rgba(255,255,255,.060) !important;
-  background: rgba(255,255,255,.024) !important;
-  transform: translate3d(0,var(--playlist-row-y,0px),0) !important;
-  transition: border-color 110ms ease, background-color 110ms ease !important;
-  animation: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  contain: layout paint style !important;
-  will-change: transform !important;
-}
-
-.app .playlistTrackRow.virtualPlaylistTrackRow:hover{
-  transform: translate3d(0,var(--playlist-row-y,0px),0) !important;
-  background: rgba(255,255,255,.030) !important;
-  border-color: rgba(255,255,255,.080) !important;
-  box-shadow: none !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app .playlistTrackRow.virtualPlaylistTrackRow.active,
-.app .playlistTrackRow.virtualPlaylistTrackRow.playing{
-  background: rgba(var(--accent-rgb),.055) !important;
-  border-color: rgba(var(--accent-rgb),.20) !important;
-  box-shadow: inset 2px 0 0 rgba(var(--accent-rgb),.62) !important;
-}
-
-.app .playlistTrackRow.virtualPlaylistTrackRow.songDropTarget{
-  background: rgba(var(--accent-rgb),.070) !important;
-  border-color: rgba(var(--accent-rgb),.35) !important;
-}
-
 .app .playlistTrackGrip{
   width: 24px !important;
   min-width: 24px !important;
@@ -15186,40 +15052,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   color: rgba(255,255,255,.30) !important;
   transform: none !important;
   user-select: none !important;
-}
-
-.app .playlistTrackMain{
-  min-width: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  display: grid !important;
-  grid-template-columns: 26px 44px minmax(0,1fr) !important;
-  align-items: center !important;
-  gap: 10px !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  color: inherit !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-  transform: none !important;
-  transition: none !important;
-  text-align: left !important;
-}
-
-.app .playlistTrackMain:hover,
-.app .playlistTrackMain:active,
-.app .playlistTrackMain:focus,
-.app .playlistTrackMain:focus-visible{
-  transform: none !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-  outline: 0 !important;
 }
 
 .app .playlistTrackIndex{
@@ -15231,120 +15063,9 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   font-weight: 900 !important;
 }
 
-.app .playlistTrackCover,
-.app .playlistTrackCover.coverAura{
-  width: 44px !important;
-  min-width: 44px !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  border-radius: 11px !important;
-  overflow: hidden !important;
-  transform: none !important;
-  transition: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-}
-
-.app .playlistTrackCover img{
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  transform: none !important;
-  transition: none !important;
-  filter: none !important;
-}
-
-.app .playlistTrackText{
-  min-width: 0 !important;
-  max-width: 100% !important;
-  width: 100% !important;
-  display: grid !important;
-  align-content: center !important;
-  gap: 3px !important;
-  overflow: hidden !important;
-}
-
-.app .playlistTrackText strong,
-.app .playlistTrackText small,
-.app .playlistTrackMain strong,
-.app .playlistTrackMain small{
-  display: block !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-  line-height: 1.14 !important;
-  margin: 0 !important;
-  text-align: left !important;
-}
-
-.app .playlistTrackText strong,
-.app .playlistTrackMain strong{
-  color: rgba(255,255,255,.94) !important;
-  font-size: 14px !important;
-  font-weight: 900 !important;
-}
-
-.app .playlistTrackText small,
-.app .playlistTrackMain small{
-  margin-top: 3px !important;
-  color: rgba(255,255,255,.55) !important;
-  font-size: 11px !important;
-  font-weight: 750 !important;
-}
-
-.app .playlistTrackDuration{
-  justify-self: end !important;
-  width: 54px !important;
-  min-width: 54px !important;
-  color: rgba(255,255,255,.50) !important;
-  font-size: 12px !important;
-  font-weight: 850 !important;
-  text-align: right !important;
-}
-
-.app .playlistTrackRow > .iconAction{
-  justify-self: end !important;
-  width: 30px !important;
-  min-width: 30px !important;
-  height: 30px !important;
-  border-radius: 10px !important;
-  transform: none !important;
-  transition: background-color 110ms ease, border-color 110ms ease, color 110ms ease !important;
-  box-shadow: none !important;
-}
-
-.app .playlistTrackRow > .iconAction:hover,
-.app .playlistTrackRow > .iconAction:active{
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-.app .playlistTrackRow.virtualPlaylistTrackRow *,
-.app .playlistTrackRow.virtualPlaylistTrackRow:hover *{
-  text-shadow: none !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
 @media (max-width: 900px){
   .app .playlistTracksPanel .panelHead{
     grid-template-columns: 1fr !important;
-  }
-
-  .app .playlistManageActions{
-    justify-content: flex-start !important;
-    flex-wrap: wrap !important;
-  }
-
-  .app .playlistTrackRow.virtualPlaylistTrackRow{
-    grid-template-columns: 22px minmax(0,1fr) 30px !important;
-  }
-
-  .app .playlistTrackDuration{
-    display: none !important;
   }
 }
 
