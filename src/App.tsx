@@ -5937,25 +5937,6 @@ function MainModeApp() {
     return String(filePath || "").replace(/\\/g, "/").toLowerCase();
   }
 
-  function trackMatchesSpotifyTrack(song: Song, track: SpotifyTrack) {
-    const songTitle = lower(song.title || "");
-    const songArtist = lower(song.artist || "");
-    const trackTitle = lower(track.title || (track as any).name || "");
-    const trackArtist = lower(track.artist || (track as any).artists || "");
-
-    if (!songTitle || !trackTitle) return false;
-
-    const titleMatch = songTitle.includes(trackTitle) || trackTitle.includes(songTitle);
-    const artistMatch =
-      !trackArtist ||
-      songArtist.includes(trackArtist) ||
-      trackArtist.includes(songArtist) ||
-      songArtist === "unknown artist" ||
-      songArtist === "slowed";
-
-    return titleMatch && artistMatch;
-  }
-
   function upsertSpotifyPlaylistFromImport(sourceName: string, importedSongs: Song[]) {
     const cleanIds = Array.from(new Set(importedSongs.map((song) => song.id).filter(Boolean)));
     if (!cleanIds.length) return null;
@@ -5969,14 +5950,11 @@ function MainModeApp() {
 
       if (existing) {
         selectedId = existing.id;
-        const mergedIds = Array.from(new Set([...existing.songIds, ...cleanIds]));
 
-        if (mergedIds.length === existing.songIds.length) {
-          return items;
-        }
-
+        // Spotify auto playlists are replaced with the exact imported set.
+        // Do not merge, because merging was keeping old random songs in the playlist.
         return items.map((playlist) =>
-          playlist.id === existing.id ? { ...playlist, songIds: mergedIds } : playlist
+          playlist.id === existing.id ? { ...playlist, songIds: cleanIds } : playlist
         );
       }
 
@@ -5997,8 +5975,8 @@ function MainModeApp() {
       setActivePlaylistId(selectedId);
     }
 
-    setStatusText(`${created ? "created" : "updated"} Spotify playlist: ${safeName}`);
-    showAppToast(`${created ? "created" : "updated"} playlist: ${safeName}`, "success");
+    setStatusText(`${created ? "created" : "fixed"} Spotify playlist: ${safeName}`);
+    showAppToast(`${created ? "created" : "fixed"} playlist: ${safeName}`, "success");
     return selectedId;
   }
 
@@ -6084,24 +6062,23 @@ function MainModeApp() {
         setSongs(nextSongs);
 
         if (settings.downloadAutoAdd && successCount > 0) {
+          const exactImportedIds = new Set<string>(
+            Array.isArray(result.spotifyImportedSongIds) ? result.spotifyImportedSongIds.filter(Boolean) : []
+          );
+
           const importedPathKeys = new Set(
-            (result.importedFilePaths || downloads.map((item: DownloadResult) => item.filePath))
+            (Array.isArray(result.importedFilePaths) ? result.importedFilePaths : [])
               .filter(Boolean)
               .map((filePath: string) => normalizeImportedPath(filePath))
           );
 
-          let importedSpotifySongs = nextSongs.filter((song) =>
-            importedPathKeys.has(normalizeImportedPath(song.filePath))
+          const importedSpotifySongs = nextSongs.filter((song) =>
+            exactImportedIds.has(song.id) || importedPathKeys.has(normalizeImportedPath(song.filePath))
           );
-
-          if (!importedSpotifySongs.length) {
-            importedSpotifySongs = nextSongs.filter((song) =>
-              selected.some((track) => trackMatchesSpotifyTrack(song, track))
-            );
-          }
 
           const playlistName =
             spotifySourceName ||
+            result.spotifySourceName ||
             result.playlistName ||
             result.name ||
             (spotifySourceType === "album" ? "Spotify Album" : "Spotify Playlist");

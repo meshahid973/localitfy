@@ -2519,7 +2519,7 @@ async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixel
   const artist = String(track?.artist || track?.artists || "").trim();
   const album = String(track?.albumName || track?.album || "").trim();
   const coverUrl = String(track?.coverUrl || track?.spotifyCoverUrl || track?.albumCoverUrl || "").trim();
-
+  const duration = Number(track?.duration || Math.round(Number(track?.durationMs || 0) / 1000) || baseSong.duration || 0);
   const cachedCoverPath = await cacheSpotifyCoverImage(coverUrl, track?.id || title || filePath);
 
   return {
@@ -2528,7 +2528,7 @@ async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixel
     artist: artist || baseSong.artist,
     album: album || baseSong.album || "",
     coverPath: cachedCoverPath || baseSong.coverPath,
-    duration: Number(track?.duration || Math.round(Number(track?.durationMs || 0) / 1000) || baseSong.duration || 0)
+    duration
   };
 }
 
@@ -3344,33 +3344,42 @@ app.whenReady().then(async () => {
       };
 
       const result = await downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
+
+      // Spotify imports must be strict. Do NOT scan the whole download folder here,
+      // because that can pull old unrelated local files into the Spotify playlist.
+      // Only files returned by this Spotify batch are allowed into the auto playlist.
       const successfulDownloads = (result.downloads || [])
         .map((item, index) => ({
           item,
-          track: (item?.filePath ? matchSpotifyTrackForFile(item.filePath, tracks) : null) || tracks[index] || {}
+          track: tracks[index] || (item?.filePath ? matchSpotifyTrackForFile(item.filePath, tracks) : null) || {}
         }))
         .filter(({ item }) => item?.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath));
 
       let changedCount = 0;
       let afterSongs = listSongsShaped();
       const importedFilePaths = [];
+      const importedSongIds = [];
 
       if (autoAdd && successfulDownloads.length) {
         const pixelArtFiles = getPixelArtFiles();
         const usedCovers = new Set();
-
         const importedSongs = [];
-        for (const { item, track } of successfulDownloads) {
-          importedFilePaths.push(item.filePath);
 
-          // Use the exact Spotify track attached to this download result.
-          // Do not fuzzy-match again here, because yt-dlp filenames can be shortened
-          // or changed and that was causing pixel covers / unknown artist.
-          importedSongs.push(await makeSongFromFileWithExactSpotifyTrack(item.filePath, track, pixelArtFiles, usedCovers));
+        for (const { item, track } of successfulDownloads) {
+          const filePath = item.filePath;
+          importedFilePaths.push(filePath);
+
+          // Exact file + exact Spotify metadata. This is the important part:
+          // the Spotify cover goes into coverPath, replacing the pixel fallback.
+          const song = await makeSongFromFileWithExactSpotifyTrack(filePath, track, pixelArtFiles, usedCovers);
+          importedSongs.push(song);
+          importedSongIds.push(song.id);
         }
 
         changedCount = insertSongs(importedSongs);
 
+        // insertSongs may ignore existing file paths, so always patch by stable song id.
+        // This repairs re-downloads and old rows with pixel covers / weak artists.
         for (const song of importedSongs) {
           try {
             patchSong(song.id, {
@@ -3389,21 +3398,6 @@ app.whenReady().then(async () => {
         afterSongs = listSongsShaped();
       }
 
-      // Safety net: spotDL/yt-dlp sometimes writes files successfully even when
-      // the batch result misses them. Scan once after the batch and import any
-      // new audio files from the selected download folder. This prevents needing
-      // a full app restart for the library to catch up.
-      if (autoAdd) {
-        const refresh = await importNewAudioFilesFromDirectory(downloadFolder, tracks);
-        changedCount += refresh.changedCount;
-        afterSongs = refresh.songs;
-        if (Array.isArray(refresh.files)) importedFilePaths.push(...refresh.files);
-
-        const repair = await repairSpotifyMetadataForFolder(downloadFolder, tracks);
-        changedCount += repair.changedCount;
-        afterSongs = repair.songs;
-      }
-
       for (const item of result.downloads || []) {
         if (item?.ok) event.sender.send("spotdl-track-done", item);
       }
@@ -3413,7 +3407,10 @@ app.whenReady().then(async () => {
         changedCount,
         songs: afterSongs,
         downloadFolder,
-        importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean)))
+        importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean))),
+        spotifyImportedSongIds: Array.from(new Set(importedSongIds.filter(Boolean))),
+        spotifySourceName: payload?.sourceName || options?.sourceName || "",
+        spotifySourceType: payload?.sourceType || options?.sourceType || ""
       };
     } catch (error) {
       console.log("[localitfy spotify batch download error]", error?.message || error);
@@ -3421,7 +3418,9 @@ app.whenReady().then(async () => {
         downloadFolder: getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder),
         downloads: [{ ok: false, error: error?.message || "batch download failed" }],
         changedCount: 0,
-        songs: listSongsShaped()
+        songs: listSongsShaped(),
+        spotifyImportedSongIds: [],
+        importedFilePaths: []
       };
     }
   };
