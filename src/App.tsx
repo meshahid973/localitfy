@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.6 V221 — restore Spotify auth/import UI into current App.tsx. */
+/* localtify 0.3.6 V244 — restore Spotify auth/import UI into current App.tsx. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -5933,10 +5933,6 @@ function MainModeApp() {
     }
   }
 
-  function normalizeImportedPath(filePath: string) {
-    return String(filePath || "").replace(/\\/g, "/").toLowerCase();
-  }
-
   function upsertSpotifyPlaylistFromImport(sourceName: string, importedSongs: Song[]) {
     const cleanIds = Array.from(new Set(importedSongs.map((song) => song.id).filter(Boolean)));
     if (!cleanIds.length) return null;
@@ -6062,18 +6058,12 @@ function MainModeApp() {
         setSongs(nextSongs);
 
         if (settings.downloadAutoAdd && successCount > 0) {
-          const exactImportedIds = new Set<string>(
-            Array.isArray(result.spotifyImportedSongIds) ? result.spotifyImportedSongIds.filter(Boolean) : []
-          );
-
-          const importedPathKeys = new Set(
-            (Array.isArray(result.importedFilePaths) ? result.importedFilePaths : [])
-              .filter(Boolean)
-              .map((filePath: string) => normalizeImportedPath(filePath))
-          );
-
-          const importedSpotifySongs = nextSongs.filter((song) =>
-            exactImportedIds.has(song.id) || importedPathKeys.has(normalizeImportedPath(song.filePath))
+          const exactImportedIds = Array.from(
+            new Set<string>(
+              Array.isArray(result.spotifyImportedSongIds)
+                ? result.spotifyImportedSongIds.map((id: unknown) => String(id || "").trim()).filter(Boolean)
+                : []
+            )
           );
 
           const playlistName =
@@ -6083,7 +6073,34 @@ function MainModeApp() {
             result.name ||
             (spotifySourceType === "album" ? "Spotify Album" : "Spotify Playlist");
 
-          upsertSpotifyPlaylistFromImport(playlistName, importedSpotifySongs);
+          if (!exactImportedIds.length) {
+            const message = "Spotify import finished, but the backend did not return exact song IDs. Playlist creation skipped to avoid adding random songs.";
+            setSpotifyFetchError(message);
+            showAppToast(message, "error");
+            console.warn("[localtify spotify playlist skipped]", { reason: "missing exact imported song ids", result });
+          } else {
+            const songsById = new Map(nextSongs.map((song) => [song.id, song]));
+            const importedSpotifySongs = exactImportedIds
+              .map((id) => songsById.get(id))
+              .filter((song): song is Song => Boolean(song));
+
+            if (!importedSpotifySongs.length) {
+              const message = "Spotify import finished, but the imported songs were not found after library refresh. Playlist creation skipped.";
+              setSpotifyFetchError(message);
+              showAppToast(message, "error");
+              console.warn("[localtify spotify playlist skipped]", { reason: "imported ids missing after refresh", exactImportedIds });
+            } else {
+              if (importedSpotifySongs.length !== exactImportedIds.length) {
+                console.warn("[localtify spotify playlist partial id match]", {
+                  expected: exactImportedIds.length,
+                  matched: importedSpotifySongs.length,
+                  exactImportedIds
+                });
+              }
+
+              upsertSpotifyPlaylistFromImport(playlistName, importedSpotifySongs);
+            }
+          }
         }
 
         if (nextSongs.length && !currentId) {
