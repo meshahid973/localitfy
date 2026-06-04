@@ -1,3 +1,11 @@
+/* ======================================================================
+   localtify v0.3.6 V242 — safe App.css rewrite
+
+   This file is rebuilt from the working App.css you uploaded.
+   It keeps the actual CSS rules intact and only removes old comments,
+   empty media shells, and patch labels. No required UI sections are cut.
+====================================================================== */
+
 .muted-small{
   display: block;
   margin-top: 3px;
@@ -25,16 +33,11 @@
   font-size: 10px;
 }
 
-/* ======================================================================
-   localtify v0.3.6 V215 — retained editor/modal utility styles
-   Kept only because the current edit modal still uses these class names.
-====================================================================== */
 
 .app{
   --accent-contrast: #06100b;
 }
 
-/* Keep the library utility tools compact instead of stretching across ultra-wide screens. */
 
 .libraryUtilityRail .compactHead .eyebrow{
   font-size: 9px !important;
@@ -46,7 +49,7 @@
   line-height: 1.35 !important;
 }
 
-/* Edit track modal repair. */
+
 .modalWrap{
   position: fixed !important;
   inset: 34px 0 88px 218px !important;
@@ -210,7 +213,7 @@
   padding: 0 16px !important;
 }
 
-/* Move now-playing text slightly upward and prevent the expanded hero from becoming too tall. */
+
 .hero{
   align-items: center !important;
 }
@@ -291,19 +294,7 @@
   height: 43px !important;
 }
 
-@media (max-width: 1300px){
-  
 
-  
-
-  
-
-  
-
-}
-
-
-/* The large greeting should scroll normally. Sticky made cards slide under it. */
 .headerBar{
   position: relative !important;
   top: auto !important;
@@ -328,7 +319,7 @@
   overflow: hidden !important;
 }
 
-/* Sidebar custom theme is now a single real accent color. */
+
 .sidebarCustomTheme{
   overflow: visible !important;
   padding: 12px !important;
@@ -420,7 +411,7 @@
   background: rgba(var(--accent-rgb), 0.12) !important;
 }
 
-/* Make the expanded theme drawer readable instead of cramped. */
+
 .sidebarThemeBody[aria-hidden="false"]{
   max-height: min(62vh, 620px) !important;
   overflow: visible !important;
@@ -437,7 +428,7 @@
   padding-right: 4px !important;
 }
 
-/* Star easter egg: more natural spacing, smoother, less ugly. */
+
 .secretLayer.stars{
   position: fixed !important;
   inset: 0 !important;
@@ -464,7 +455,7 @@
   box-shadow: 0 18px 60px rgba(0,0,0,0.32) !important;
 }
 
-/* Safer mobile/tablet behaviour. */
+
 @media (max-width: 1100px){
   .headerBar{
     flex-direction: column !important;
@@ -578,7 +569,7 @@
   }
 }
 
-/* Safe fallbacks for older theme/settings rules. */
+
 .app{
   --panel: var(--panel, rgba(255, 255, 255, 0.035));
   --accent-2: var(--accent-2, var(--accent));
@@ -738,9 +729,7 @@
   will-change: auto !important;
 }
 
-/* Actual view wrapper used in App.tsx.
-   Important: do not animate this wrapper. The page stays mounted-looking when switching tabs,
-   while song-change/cover animations still run from their own keyed elements. */
+
 .app .pageTransition{
   min-width: 0;
   transform-origin: center 24px;
@@ -769,7 +758,7 @@
     0 18px 44px rgba(var(--accent-rgb), 0.24) !important;
 }
 
-/* Import/loading polish. */
+
 .app .appToast{
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -1179,10 +1168,6 @@
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-/* ======================================================================
-   localitfy final polish patch — title lift, album hover, ambience sides
-   Added after all older overrides so it wins without touching App.tsx.
-====================================================================== */
 
 :root{
   --hero-title-final-lift: -0.115em;
@@ -1190,8 +1175,7 @@
   --album-hover-final-ease: cubic-bezier(0.18, 0.92, 0.22, 1);
 }
 
-/* Redefines the held end-state of the existing song-change animation so
-   the big title stays lifted after the animation finishes. */
+
 @keyframes localitfySongTitleIn {
   0% {
     opacity: 0;
@@ -1217,7 +1201,7 @@
   backface-visibility: hidden;
 }
 
-/* Keep ambience permanently present during scrolling, tab switches, and compact toggles. */
+
 .app .ambientSurface::before{
   opacity: 0.14;
   filter: blur(42px) saturate(1.12) brightness(0.92);
@@ -1243,10 +1227,6 @@
   transform: translate3d(2px, 0, 0) !important;
 }
 
-/* ======================================================================
-   localitfy — drag + theme polish final
-   Clean drag feedback, native drag preview styling, and smooth theme swaps.
-====================================================================== */
 
 .localitfyDragPreview{
   position: fixed;
@@ -1497,12 +1477,6 @@ body.isResizingSidebar .sidebarResizeHandle span{
   50% { opacity: 1; }
 }
 
-/* ======================================================================
-   localitfy — performance-safe polish layer
-   Keeps blur/ambience/motion, but removes the main sources of scroll jank:
-   JS-style wheel repaint pressure, permanent will-change on many controls,
-   and full-page layout invalidation while audio progress updates.
-====================================================================== */
 
 html{
   scroll-behavior: smooth;
@@ -1555,11 +1529,6 @@ html{
   scroll-behavior: auto;
 }
 
-/* ======================================================================
-   localitfy — safe render optimization layer
-   No feature removal: keeps blur, ambience, drag UI, transitions, and hover.
-   Goal: reduce repaints while audio progress and manual scrolling happen.
-====================================================================== */
 
 .app .content{
   overflow-anchor: none;
@@ -3340,7 +3309,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   --custom-muted: var(--flat-muted);
 }
 
-/* Absolute no-gradient guard for UI chrome. Album art uses <img>, so it stays safe. */
+
 .app.flatNoGradientUI *:not(img):not(video):not(canvas){
   background-image: none !important;
 }
@@ -3448,17 +3417,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 @keyframes whatsNewFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes whatsNewPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 980px){   .statusGrid{ grid-template-columns: 1fr; }   }
-
-
-/* Keep expensive layers contained so motion stays smooth while scrolling. */
-
-/* Stronger glass/backdrop, but it stays static instead of animating blur. */
-
-/* Better hover motion for app controls, without touching player controls. */
-
-/* Accent/theme changes stay animated but stop repainting the whole app too hard. */
-
-/* Do not hide ambience/glow during dragging or theme changes. Just keep it contained. */
 
 
 .libraryUtilityBar{
@@ -4049,17 +4007,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 
-@media (max-width: 980px){
-  
-
-  
-
-  
-
-  
-}
-
-
 .app{
   --kopuz-panel: rgba(255, 255, 255, 0.045);
   --kopuz-panel-2: rgba(255, 255, 255, 0.065);
@@ -4242,7 +4189,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   text-shadow: 0 0 18px rgba(var(--accent-rgb), 0.18) !important;
 }
 
-/* Ambience stays alive, but it is smoother and less aggressive on the app shell. */
+
 .ambientSurface{
   border-color: rgba(var(--accent-rgb), 0.15) !important;
   box-shadow:
@@ -4296,7 +4243,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   display: none !important;
 }
 
-/* Cover ambience is preserved and made cleaner. */
+
 .coverAura{
   overflow: visible !important;
   isolation: isolate !important;
@@ -5225,7 +5172,7 @@ input[type="range"]{
   }
 }
 
-/* keep import/theme controls under the nav instead of forcing a huge empty gap */
+
 .sidebar .mainAction{
   margin-top: 4px !important;
 }
@@ -5373,7 +5320,7 @@ body{
   letter-spacing: -0.064em;
 }
 
-/* Sidebar stays clean: no big brand card, no local/server pill, no boxed icons. */
+
 .app .sidebar .logoWrap{
   display: none !important;
 }
@@ -5472,7 +5419,7 @@ body{
   text-transform: lowercase !important;
 }
 
-/* Static list-row fix. No row-sized brown/gray overlays. */
+
 .app .songList{
   overflow-x: hidden !important;
   gap: 8px !important;
@@ -5494,7 +5441,7 @@ body{
   box-shadow: none !important;
 }
 
-/* Kill old full-width overlay stripes while preserving real drag/drop after motion.css. */
+
 .app .songRow:not(.songDropTarget)::before{
   content: none !important;
   display: none !important;
@@ -5511,7 +5458,7 @@ body{
     inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
-/* App/Home now provide layout + color only. motion.css owns movement. */
+
 .app .navItem,
 .app .songRow,
 .app .topRow,
@@ -5705,7 +5652,6 @@ body{
   border-color: color-mix(in oklab, var(--accent) 18%, rgba(255,255,255,.1));
 }
 
-/* Player override: no rectangle blob behind the buttons, only small circular controls. */
 
 .circleButton:not(.playerBar *){
   width: var(--control-circle) !important;
@@ -5750,14 +5696,6 @@ body{
   transform: translateX(1px);
 }
 
-
-/*
-  Final background cleanup:
-  - no floating ambience/orb blobs behind the app
-  - backgrounds are controlled by theme variables, not fixed black/grey
-  - sidebar finally reacts to theme colors
-  - cover artwork/button glow can still exist because those are not page-background orbs
-*/
 
 .app{
   --app-grid-line: color-mix(in oklab, var(--text, #fff) 4%, transparent);
@@ -5831,7 +5769,7 @@ html{
   animation: none !important;
 }
 
-/* Convert all large ambient panels into theme-colored glass, not glowing blobs. */
+
 .ambientSurface{
   isolation: auto !important;
   background:
@@ -5857,9 +5795,7 @@ html{
   box-shadow: none !important;
 }
 
-/* Theme editor/settings panels should change with the active theme instead of staying black. */
 
-/* Sidebar theme card now uses the same theme-owned background without a random dark box. */
 .sidebarCustomTheme{
   background: color-mix(in oklab, var(--bg, #000) 86%, var(--accent, #64f0a4) 5%) !important;
   background-image: none !important;
@@ -5880,7 +5816,7 @@ html{
   transform: translateY(-1px) !important;
 }
 
-/* Keep artwork ambience local to artwork only, not behind whole pages. */
+
 .coverAura{
   pointer-events: none;
 }
@@ -5938,7 +5874,7 @@ html{
   color: var(--text, #f6f4ff) !important;
 }
 
-/* remove the big ambient background orbs only */
+
 .app::before{
   display: none !important;
   opacity: 0 !important;
@@ -5974,7 +5910,7 @@ html{
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--theme-accent) 7%, transparent) !important;
 }
 
-/* white sidebar icons, theme only affects the active item background/border */
+
 .sidebar .navItem{
   background: transparent !important;
   border-color: transparent !important;
@@ -6014,7 +5950,7 @@ html{
   box-shadow: 0 10px 26px color-mix(in oklab, var(--theme-accent) 13%, transparent) !important;
 }
 
-/* controlled panel color, no huge background haze */
+
 .hero{
   background:
     linear-gradient(135deg,
@@ -6033,7 +5969,7 @@ html{
   box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 6%, transparent), 0 16px 40px rgba(0,0,0,.20) !important;
 }
 
-/* keep album cover ambience alive and strong enough */
+
 .coverAura::before{
   display: block !important;
   opacity: .28 !important;
@@ -6075,7 +6011,7 @@ body{
   color: var(--text, #f7f7f7) !important;
 }
 
-/* sidebar must be themed too — no permanent black rail */
+
 .sidebar{
   background:
     linear-gradient(180deg, var(--localtify-sidebar-bg), var(--localtify-sidebar-bg-2)) !important;
@@ -6087,7 +6023,7 @@ body{
   text-shadow: none !important;
 }
 
-/* icons stay white, theme only controls active backgrounds/borders */
+
 .sidebar svg{
   color: #f7f7f7 !important;
   stroke: #f7f7f7 !important;
@@ -6123,7 +6059,7 @@ body{
   box-shadow: none !important;
 }
 
-/* main cards/large black areas follow theme without ambience orbs */
+
 .hero{
   background:
     linear-gradient(135deg, var(--localtify-panel-bg), var(--localtify-panel-bg-2)) !important;
@@ -6140,7 +6076,7 @@ body{
   box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 16px 36px rgba(0,0,0,.20) !important;
 }
 
-/* remove page/background ambience only */
+
 .app::before{
   display: none !important;
   opacity: 0 !important;
@@ -6149,7 +6085,7 @@ body{
   animation: none !important;
 }
 
-/* keep cover ambience: only coverAura is allowed to glow */
+
 .coverAura::before{
   display: block !important;
   opacity: .30 !important;
@@ -6878,7 +6814,7 @@ html{
   animation-duration: 260ms !important;
 }
 
-/* hard remove the old graph-paper grid backgrounds */
+
 .app{
   background: var(--theme-page-bg) !important;
   background-size: auto !important;
@@ -6903,7 +6839,7 @@ html{
   --hover-surface-soft: color-mix(in srgb, var(--surface, #161320) 86%, var(--accent, #ff65c8) 14%);
 }
 
-/* Hard stop for the old grid overlay. The app now relies on soft glow only. */
+
 .app::before{
   background-image: none !important;
 }
@@ -6912,7 +6848,7 @@ html{
   background-image: none !important;
 }
 
-/* Give motion.css room to animate without forcing expensive paints everywhere. */
+
 .homeHeroCard,
 .homeShelfPanel,
 .libraryPanelV025,
@@ -7444,7 +7380,7 @@ html{
   100%{ opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); }
 }
 
-/* LOCALTIFY / arrow stage lights: obvious beams, but no background color change. */
+
 .app .secretLayer.disco::before{
   opacity: .92 !important;
   background:
@@ -7481,7 +7417,7 @@ html{
   to{ background-position: 150px 0, 0 118px; }
 }
 
-/* STARS / starfield: white stars only, spread across the whole app. */
+
 .app .secretLayer.stars{
   background: transparent !important;
   opacity: 1 !important;
@@ -7536,7 +7472,7 @@ html{
   100%{ transform: translate3d(var(--dx, 18px), var(--dy, -18px), 0) scale(1.04); opacity: calc(var(--alpha, .72) * .92); }
 }
 
-/* FAST / arrow speed mode: visibly speeds transitions + adds cheap speed lines. */
+
 .app.secret-fast{
   --localtify-motion-speed: .58;
 }
@@ -7558,7 +7494,7 @@ html{
   to{ transform: translate3d(42px, 0, 0); }
 }
 
-/* NIGHT: dim only. No ambience orbs. */
+
 .app .secretLayer.night{
   background: transparent !important;
 }
@@ -7695,7 +7631,7 @@ html{
   display: none !important;
 }
 
-/* LOCALTIFY + arrow-stage: lights only, no orb bubbles, no background recolor. */
+
 .app .secretLayer.disco::before{
   display: block !important;
   opacity: .74 !important;
@@ -7727,7 +7663,7 @@ html{
   to{ background-position: 154px 0, 0 122px; }
 }
 
-/* Arrow speed: cheap speed lines only. */
+
 .app .secretLayer.fast::before{
   display: block !important;
   opacity: .58 !important;
@@ -7751,7 +7687,7 @@ html{
   --localtify-motion-speed: .58;
 }
 
-/* Stars: white twinkling stars only, random across the whole app. */
+
 .app .secretLayer.stars{
   background: transparent !important;
   opacity: 1 !important;
@@ -7826,7 +7762,7 @@ html{
   z-index: 6201 !important;
 }
 
-/* Stars/effects stay inside the app content, not over the titlebar or player controls. */
+
 .app .secretLayer{
   inset: 36px 0 94px 0 !important;
   z-index: 35 !important;
@@ -7977,7 +7913,6 @@ html{
 }
 
 
-/* no grid overlay anywhere: keep theme color + ambience, remove the repeated line pattern */
 .app,
 .app::before,
 .content,
@@ -7998,7 +7933,7 @@ html{
   display: none !important;
 }
 
-/* selected sidebar items must never turn black */
+
 .sidebar .navItem,
 .sidebar .navItem *,
 .navItem,
@@ -8034,7 +7969,7 @@ html{
   fill: none !important;
 }
 
-/* selected/playing song text must stay readable on every theme */
+
 .songRow.active,
 .songRow.playing,
 .songRow.isActive,
@@ -8085,7 +8020,7 @@ html{
   -webkit-text-fill-color: rgba(255, 255, 255, 0.74) !important;
 }
 
-/* button icon safety */
+
 button svg,
 .circleButton svg,
 .primaryPlayButton svg,
@@ -8102,7 +8037,7 @@ button svg,
   -webkit-text-fill-color: #ffffff !important;
 }
 
-/* custom theme lock note */
+
 .themePickerLockNoteV026 {
   margin: 8px 0 0;
   color: rgba(255, 255, 255, 0.62);
@@ -8881,7 +8816,7 @@ body.localitfyThemePainting .app .ambientSurface::after{
   animation: none !important;
 }
 
-/* Keep the app smooth: only promote things while they actually move. */
+
 .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.homeListenCard,.homeFreshCover,.coverTile,.libraryCard,.songCard){
   will-change: auto !important;
 }
@@ -8895,7 +8830,7 @@ body.localitfyThemePainting .app :where(.homeAlbumCard,.songRow,.libraryCard,.so
   transition-duration: 90ms !important;
 }
 
-/* Avoid GPU-expensive hover filters from older patches. */
+
 .app :where(.homeAlbumCard,.songRow,.libraryCard,.songCard,.homeListenCard,.homeFreshCover,.coverTile):hover{
   filter: none !important;
 }
@@ -8975,7 +8910,7 @@ body,
   animation: none !important;
 }
 
-/* Keep the page tinted by the theme, but never by square grid textures. */
+
 .app,
 .mainContent,
 .content,
@@ -8989,8 +8924,7 @@ body,
   background-size: auto !important;
 }
 
-/* Idle state is applied from App.tsx after a short no-input delay.
-   It pauses decorative work only; playback and controls stay unchanged. */
+
 body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.ambientParticle,.homePulse,.coverSpark,.softOrbit){
   animation-play-state: paused !important;
 }
@@ -9105,7 +9039,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   background: transparent !important;
 }
 
-/* Kill the selected-sidebar rail that was sticking outside the button. */
+
 .sidebar,
 .sideNav,
 .sidebarNav {
@@ -9146,7 +9080,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   border-left-color: rgba(var(--accent-rgb), 0.55) !important;
 }
 
-/* When the user is scrubbing or scrolling, do not repaint every glow/card animation. */
+
 .app.playerScrubbing .ambientSurface,
 .app.playerScrubbing .ambientSurface::before,
 .app.playerScrubbing .ambientSurface::after,
@@ -9169,7 +9103,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   transition-duration: 0s !important;
 }
 
-/* Keep expensive off-screen areas from painting while scrolling long pages. */
+
 .homeSection,
 .coverGalleryCard,
 .libraryCard,
@@ -9180,7 +9114,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   contain-intrinsic-size: 1px 280px;
 }
 
-/* Final sidebar active fix: no left strip outside the rounded button. */
+
 .sideItem.active,
 .sideItem[aria-current="page"],
 .sidebar button.active,
@@ -9294,12 +9228,6 @@ body::after,
   perspective: none !important;
 }
 
-/* ======================================================================
-   localtify 0.3.0 — readable update / what’s-new popup
-   App.css owns this popup because the original .whatsNewCard bullet styles
-   live here. The blue accent dot is now a slim side mark so it can’t sit on
-   top of the text.
-====================================================================== */
 
 .app .whatsNewCard,
 .whatsNewCard{
@@ -9379,11 +9307,7 @@ body::after,
   }
 }
 
-/* ======================================================================
-   localtify 0.3.0 — sidebar hover/active shape repair
-   Owner: App.css controls the app shell/sidebar. This keeps nav hover states
-   contained, rounded, and stable so the row does not jump or clip.
-====================================================================== */
+
 .app .sidebar,
 .app .sidebar .nav,
 .app .sidebar .navMain,
@@ -9485,11 +9409,7 @@ body::after,
   opacity: .78 !important;
 }
 
-/* ======================================================================
-   localtify 0.3.0 — final shell motion cleanup
-   Owner: App.css. Keeps the app shell/nav/update popup stable without moving
-   responsibilities into home.css or player.css.
-====================================================================== */
+
 .app .sidebar .navItem,
 .app .sidebar .sidebarItem,
 .app .settingsCategoryButton,
@@ -9551,12 +9471,7 @@ body::after,
   transform: translate3d(0,0,0) !important;
 }
 
-/* ========================================================================
-   localtify v0.3.1 — final public-build polish guard
-   Owner: App.css shell + popup only.
-   Keeps surfaces rounded, prevents popup list dots from colliding with text,
-   and stops sidebar hover from nudging the layout.
-======================================================================== */
+
 .app .navItem,
 .app .sidebar button,
 .app .sidebarNav button{
@@ -9600,8 +9515,7 @@ body::after,
   transform: translateY(-50%) !important;
 }
 
-/* v0.3.1 cover loading polish
-   Keeps album art from flashing white or showing broken-image icons while covers load. */
+
 .coverAura {
   position: relative;
   overflow: hidden;
@@ -9688,8 +9602,7 @@ body::after,
   }
 }
 
-/* v0.3.1 background performance guardrails
-   Keeps music playing, but stops expensive visual repaint work while the window is hidden/minimized. */
+
 body.localtifyBackgroundMode .app,
 .app.appBackgrounded {
   --background-visual-opacity: 0.35;
@@ -9717,7 +9630,7 @@ body.localtifyBackgroundMode .ambientSurface,
   opacity: var(--background-visual-opacity, 0.35);
 }
 
-/* Render far-away heavy sections only when they get near the viewport. */
+
 .homeShelf,
 .libraryListWrap,
 .analyticsPanel,
@@ -9732,14 +9645,7 @@ body.localtifyBackgroundMode .ambientSurface,
   contain-intrinsic-size: 320px;
 }
 
-/* ========================================================================
-   localtify v0.3.2 — titlebar button centering repair
-   Owner: App.css final override because older App.css titlebar patches load
-   after app-core.css.
 
-   Keeps the custom Electron titlebar, but centers the minimize/maximize/close
-   glyphs properly inside their hitboxes.
-======================================================================== */
 .titleBar{
   height: 36px !important;
   min-height: 36px !important;
@@ -9803,12 +9709,7 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: none !important;
 }
 
-/* ========================================================================
-   localtify v0.3.2 — theme-aware titlebar surface
-   ------------------------------------------------------------------------
-   Fixes the dead black strip at the top of the app.
-   Scoped to the Electron titlebar only; player/layout/progress are untouched.
-======================================================================== */
+
 .app .titleBar,
 .app[data-theme] .titleBar,
 .app[data-custom-theme="true"] .titleBar{
@@ -9851,11 +9752,7 @@ body.localtifyBackgroundMode .ambientSurface,
   background: color-mix(in oklab, #e54868 74%, var(--accent, #ff65df) 18%) !important;
 }
 
-/* ========================================================================
-   localtify v0.3.3/v97 — compact acrylic update notice
-   Owner: App.css / update prompt only.
-   Keeps Settings readable and never touches player.css.
-======================================================================== */
+
 .app .updateToastLayer,
 .updateToastLayer{
   position: fixed !important;
@@ -10124,11 +10021,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* ========================================================================
-   localtify v0.3.3/v98 — Kopuz-style top update ribbon
-   Owner: App.css / update notification only.
-   Do not move or restyle player.css; this only reserves top space when an update is visible.
-======================================================================== */
+
 .app.updateRibbonVisible .appShell{
   padding-top: 48px !important;
 }
@@ -10439,10 +10332,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* ========================================================================
-   localtify v0.3.3/v99 — final Kopuz-style top update ribbon cleanup
-   Owner: App.css / update notification only. Does not touch player.css.
-======================================================================== */
+
 .app.updateRibbonVisible .appShell{
   padding-top: 38px !important;
 }
@@ -10724,10 +10614,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* ========================================================================
-   localtify v0.3.3/v100 — update ribbon centering repair
-   Owner: App.css / top update ribbon only. player.css untouched.
-======================================================================== */
+
 .app.updateRibbonVisible .appShell{
   padding-top: 42px !important;
 }
@@ -10956,8 +10843,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* v0.3.3 v101 performance: virtualized library/home rendering.
-   Keeps the same cards/rows, but only mounts the items currently visible. */
+
 .virtualSongViewport {
   position: relative !important;
   overflow-x: hidden !important;
@@ -11054,13 +10940,7 @@ body.localtifyBackgroundMode .ambientSurface,
   background: rgba(var(--accent-rgb), .42);
 }
 
-/* =======================================================================
-   localtify v0.3.3 v102 — cover-colour cache variables
-   -----------------------------------------------------------------------
-   The renderer now calculates the current cover colour once per cover with
-   fast-average-color, then feeds cheap CSS variables instead of re-reading
-   images during animation frames.
-======================================================================= */
+
 .app[data-cover-sync]:not([data-cover-sync="off"]){
   --player-ambient-rgb: var(--cover-rgb, var(--accent-rgb));
   --active-cover-rgb: var(--cover-rgb, var(--accent-rgb));
@@ -11075,10 +10955,7 @@ body.localtifyBackgroundMode .ambientSurface,
   --player-ambient-rgb: var(--cover-rgb, var(--accent-rgb));
 }
 
-/* ======================================================================
-   localtify v0.3.5 boot screen
-   Keeps startup from looking like a dead black window while Electron loads.
-   ====================================================================== */
+
 .loadingScreen.bootScreen{
   min-height: 100vh;
   width: 100%;
@@ -11416,7 +11293,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* v0.3.5 idle screensaver */
+
 .screensaverOverlay {
   position: fixed;
   inset: 0;
@@ -11562,10 +11439,7 @@ body.localtifyBackgroundMode .ambientSurface,
   outline: none;
 }
 
-/* ========================================================================
-   localtify v0.3.5 / V159 — Yukari update peek + smoother top ribbon motion
-   Owner: App.css / update notification only. No player, library, or import logic.
-======================================================================== */
+
 .app.updateRibbonVisible .content::before{
   content: "" !important;
   position: fixed !important;
@@ -11730,13 +11604,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* ======================================================================
-   localtify 0.3.6 V160 — final tiny motion polish
-   Adds: Yukari update moods, search focus motion, and soft button press.
-   Transform/opacity only. No tilt. No audio/import/downloader changes.
-====================================================================== */
 
-/* 1) Yukari update moods */
 .app .updateYukariPeek-available,
 .updateYukariPeek-available{
   animation: updateYukariIdleBobV160 4.8s ease-in-out 900ms infinite !important;
@@ -11824,7 +11692,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* 2) Search focus motion */
+
 .app .searchEasterWrap{
   position: relative;
   overflow: visible;
@@ -11889,7 +11757,7 @@ body.localtifyBackgroundMode .ambientSurface,
   color: rgba(255, 255, 255, .42);
 }
 
-/* 3) Soft button press — no tilt, no rotate */
+
 .app :where(
   .softButton,
   .circleButton,
@@ -11952,20 +11820,13 @@ body.localtifyBackgroundMode .ambientSurface,
   filter: brightness(.96);
 }
 
-/* Safety: never squish text fields, sliders, or native form controls */
+
 .app :where(input, textarea, select, option):active,
 .app :where(.rangeRow, .slider, .progressTrack, .volumeSlider):active{
   transform: none !important;
   filter: none !important;
 }
 
-/* ======================================================================
-   localtify 0.3.6 V164 — final hero action layout repair
-   ----------------------------------------------------------------------
-   Fixes long two-line titles pushing/covering the artist and compact/covers
-   buttons. Keeps the buttons in the natural hero flow, gives them frosted
-   glass, and makes compact mode safe without touching audio/import code.
-====================================================================== */
 
 .app{
   --hero-actions-ease-v164: cubic-bezier(.16, 1, .3, 1);
@@ -11975,7 +11836,7 @@ body.localtifyBackgroundMode .ambientSurface,
   --hero-actions-shadow-v164: 0 16px 42px rgba(0, 0, 0, .30), 0 0 30px rgba(var(--accent-rgb), .075);
 }
 
-/* The hero is a stable two-column layout: text left, artwork right. */
+
 .app .heroPremium{
   position: relative !important;
   display: grid !important;
@@ -11995,7 +11856,7 @@ body.localtifyBackgroundMode .ambientSurface,
   min-height: clamp(348px, 38vh, 492px) !important;
 }
 
-/* This is the important part: no absolute button dock anymore. */
+
 .app .heroPremium .heroTextClean,
 .app .heroPremium .heroText{
   min-width: 0 !important;
@@ -12021,7 +11882,7 @@ body.localtifyBackgroundMode .ambientSurface,
   z-index: 4 !important;
 }
 
-/* Keep title beautiful, but reserve room below for artist + actions. */
+
 .app .heroPremium .heroTitle,
 .app .heroPremium .nowPlayingTitleSwap{
   position: relative !important;
@@ -12043,7 +11904,7 @@ body.localtifyBackgroundMode .ambientSurface,
   letter-spacing: clamp(-.085em, -.45vw, -.055em) !important;
 }
 
-/* Title sizing by density. This is why compact mode stops eating the buttons. */
+
 .app .heroPremium.heroTitleTiny .heroTitle,
 .app .heroPremium.heroTitleTiny .nowPlayingTitleSwap{
   font-size: clamp(66px, 7vw, 124px) !important;
@@ -12098,7 +11959,7 @@ body.localtifyBackgroundMode .ambientSurface,
   font-size: clamp(46px, 4.85vw, 82px) !important;
 }
 
-/* Artist always lives clearly below the title. */
+
 .app .heroPremium .heroArtistLine,
 .app .heroPremium .nowPlayingArtistSwap{
   position: relative !important;
@@ -12114,7 +11975,7 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: translate3d(0, 0, 0) !important;
 }
 
-/* Final position: clean frosted dock below artist, not random bottom-left. */
+
 .app .heroPremium .heroQuickActions{
   position: relative !important;
   inset: auto !important;
@@ -12174,7 +12035,7 @@ body.localtifyBackgroundMode .ambientSurface,
   background: linear-gradient(120deg, rgba(255, 255, 255, .13), transparent 22%, transparent 72%, rgba(255, 255, 255, .065)) !important;
 }
 
-/* Cute frosted buttons: hover lift + click squish, no tilt. */
+
 .app .heroPremium .heroTinyButton{
   position: relative !important;
   isolation: isolate !important;
@@ -12274,7 +12135,7 @@ body.localtifyBackgroundMode .ambientSurface,
     inset 0 -1px 0 rgba(0, 0, 0, .14) !important;
 }
 
-/* Keep artwork stable and never let the text run under it. */
+
 .app .heroPremium .heroArtWrap{
   justify-self: end !important;
   align-self: center !important;
@@ -12290,7 +12151,7 @@ body.localtifyBackgroundMode .ambientSurface,
   object-fit: cover !important;
 }
 
-/* Older hero pulse classes may still appear; they should not move the rail. */
+
 .app .heroLayoutMotion.heroLayoutPulseA .heroQuickActions,
 .app .heroLayoutMotion.heroLayoutPulseB .heroQuickActions{
   animation: localtifyHeroActionsSettleV164 360ms var(--hero-actions-pop-v164) both !important;
@@ -12311,7 +12172,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* Reset older artist animation end-state so it does not creep into the title. */
+
 @keyframes localitfyCinematicArtistDelay{
   0%, 22%{
     opacity: 0;
@@ -12389,14 +12250,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* ======================================================================
-   localtify 0.3.6 V165 — REAL hero compact/button visibility fix
-   ----------------------------------------------------------------------
-   This wins against later home/motion hero rules by using a more specific
-   selector. The artist + compact/covers dock is locked into the lower-left
-   safety zone, while the title is compacted above it.
-   No audio, imports, downloads, or JSX changes.
-====================================================================== */
 
 .app{
   --hero-v165-left-pad: clamp(34px, 4vw, 76px);
@@ -12406,7 +12259,7 @@ body.localtifyBackgroundMode .ambientSurface,
   --hero-v165-action-pop: cubic-bezier(.18, 1.24, .22, 1);
 }
 
-/* Stable hero shell. Keep the artwork column, but reserve enough room for text controls. */
+
 .app .pageTransition.pageTransition-home .hero.heroPremium,
 .app .pageTransition[data-view="home"] .hero.heroPremium{
   position: relative !important;
@@ -12424,7 +12277,7 @@ body.localtifyBackgroundMode .ambientSurface,
   min-height: clamp(316px, 34vh, 430px) !important;
 }
 
-/* Text column now has a fixed lower safety area for artist + buttons. */
+
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText,
 .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean,
@@ -12455,7 +12308,7 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: none !important;
 }
 
-/* The important fix: the title is always compact enough to leave room below. */
+
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle.nowPlayingTitleSwap,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
 .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle.nowPlayingTitleSwap,
@@ -12512,7 +12365,7 @@ body.localtifyBackgroundMode .ambientSurface,
   font-size: clamp(38px, 3.7vw, 62px) !important;
 }
 
-/* Artist is locked above the buttons instead of being pushed out by the title. */
+
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroArtistLine.nowPlayingArtistSwap,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroArtistLine,
 .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroArtistLine.nowPlayingArtistSwap,
@@ -12534,7 +12387,7 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: none !important;
 }
 
-/* Buttons are guaranteed visible. They no longer depend on title height. */
+
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroQuickActions,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions,
 .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroQuickActions,
@@ -12717,7 +12570,7 @@ body.localtifyBackgroundMode .ambientSurface,
     inset 0 -1px 0 rgba(0, 0, 0, .14) !important;
 }
 
-/* Cover stays right-side and never steals the control area. */
+
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroArtWrap,
 .app .pageTransition[data-view="home"] .hero.heroPremium .heroArtWrap{
   justify-self: end !important;
@@ -12846,19 +12699,13 @@ body.localtifyBackgroundMode .ambientSurface,
     padding-inline: 10px !important;
   }
 }
-/* ========================================================================
-   localtify 0.3.6 V181 — real titlebar update dock + player position lock
-   ------------------------------------------------------------------------
-   This block assumes the update ribbon is rendered inside .titleBarUpdateSlot
-   by App_V181_titlebar_update_dock.tsx.
-   It does not touch playback, imports, downloads, updater logic, or player.css.
-======================================================================== */
+
 
 .app{
   --localtify-titlebar-height: 36px !important;
 }
 
-/* Titlebar becomes a stable three-column row: logo | update notice | buttons. */
+
 .app .titleBar:not(.miniTitleBar),
 .titleBar:not(.miniTitleBar){
   position: relative !important;
@@ -12903,7 +12750,7 @@ body.localtifyBackgroundMode .ambientSurface,
   -webkit-app-region: no-drag !important;
 }
 
-/* The update notice now uses the empty titlebar space instead of making a second row. */
+
 .app .titleBarUpdateSlot,
 .titleBarUpdateSlot{
   grid-column: 2 !important;
@@ -12947,7 +12794,7 @@ body.localtifyBackgroundMode .ambientSurface,
   -webkit-app-region: drag !important;
 }
 
-/* Yukari stays out of the titlebar. The titlebar should be clean and clickable. */
+
 .app .titleBarUpdateSlot .updateYukariPeek,
 .titleBarUpdateSlot .updateYukariPeek{
   display: none !important;
@@ -13195,8 +13042,7 @@ body.localtifyBackgroundMode .ambientSurface,
   background: rgba(var(--accent-rgb, 230,90,223), .42) !important;
 }
 
-/* Hard undo every old top-ribbon layout spacer. The update notice is in the
-   titlebar now, so the app grid must stay exactly one titlebar shorter. */
+
 .app.updateRibbonVisible .appShell,
 .app[data-update-ribbon="true"] .appShell,
 .appShell{
@@ -13228,8 +13074,7 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: translate3d(0,0,0) !important;
 }
 
-/* Keep old global/fixed update styles harmless if a stale build still renders
-   the ribbon outside the titlebar for one hot reload. */
+
 body:has(.titleBarUpdateSlot) .app > .topUpdateRibbonLayer,
 body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   display: none !important;
@@ -13282,13 +13127,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   }
 }
 
-/* ========================================================================
-   localtify v0.3.6 V194 — compact titlebar update pill
-   Fixes the ugly full-width update strip by docking the update notice inside
-   the existing Electron titlebar area. This does not reserve vertical layout
-   space, so Settings/Home/player stop being pushed down by the update UI.
-   Owner: App.css / titlebar update notice only.
-======================================================================== */
 
 .app.updateRibbonVisible .appShell,
 .app.updateRibbonVisible .mainLayout,
@@ -13629,14 +13467,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   }
 }
 
-/* ========================================================================
-   localtify v0.3.6 V195 — update titlebar button cleanup + motion polish
-   Owner: App.css / top update ribbon only
-   Goal: remove noisy status pills, keep real actions clean/clickable,
-   improve hover/press motion without moving the app layout.
-======================================================================== */
 
-/* The update ribbon is a titlebar notice, not a full page banner. */
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
   top: 4px !important;
@@ -13681,7 +13512,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     linear-gradient(90deg, rgba(255,255,255,0.030), transparent 44%) !important;
 }
 
-/* Remove the noisy status pills the user pointed at. Keep the real actions. */
+
 .app .topUpdateRibbonMeta,
 .topUpdateRibbonMeta,
 .app .topUpdateRibbon .updateVersionPill,
@@ -13749,7 +13580,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   -webkit-app-region: no-drag !important;
 }
 
-/* Action buttons: cleaner acrylic buttons + real tiny motion. */
+
 .app .topUpdateRibbon .updatePrimaryButton,
 .app .topUpdateRibbon .updateGhostButton,
 .app .topUpdateRibbon .updateToastClose,
@@ -13843,7 +13674,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   transition-duration: 70ms !important;
 }
 
-/* Progress stays subtle and doesn't make the whole titlebar look like a second window. */
+
 .app .topUpdateRibbonProgress,
 .topUpdateRibbonProgress{
   left: 9px !important;
@@ -13889,10 +13720,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   }
 }
 
-/* ==========================================================================
-   localtify v0.3.6 V211 — theme-tinted glass variables
-   No white acrylic. Glass uses the current theme/accent + dark tint.
-========================================================================== */
 
 .app{
   --lt-visual-blur: 18px;
@@ -13950,18 +13777,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   --lt-glass-accent-alpha: 0.075;
 }
 
-/* ==========================================================================
-   localtify v0.3.6 V213 — sidebar icon cleanup
-   Owner: App.css
 
-   Fixes:
-   - removes the purple square/blob behind sidebar icons
-   - fixes icon/text alignment during expand-on-hover
-   - keeps collapsed sidebar clean
-   - smooth hover expansion without clipped nav text
-========================================================================== */
-
-/* Kill old decorative sidebar/nav pseudo layers that were creating purple blobs. */
 .sidebar .navItem::before,
 .sidebar .navItem::after,
 .sidebar .navIcon::before,
@@ -13970,33 +13786,63 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   display: none !important;
 }
 
-/* Sidebar should animate width only. Keep the content stable. */
+
+
+/* ======================================================================
+   localtify v0.3.6 V247 — hover sidebar smooth slide repair
+   ----------------------------------------------------------------------
+   Hover mode no longer changes the whole app grid width. The content stays
+   parked at the slim rail width, while the sidebar itself expands as a
+   lightweight overlay. This removes the laggy :has() grid reflow and makes
+   the text/button reveal slide in smoothly.
+====================================================================== */
+
 .app[data-sidebar-behavior="slim"],
 .app[data-sidebar-behavior="hover"]{
   --sidebar-width: 88px !important;
+  --sidebar-width-used: 88px !important;
+  --kopuz-sidebar-width: 88px !important;
+  --localtify-sidebar-closed-width: 88px;
+  --localtify-sidebar-open-width: 236px;
 }
 
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover),
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within){
-  --sidebar-width: 236px !important;
+.app[data-sidebar-behavior="hover"] .appShell,
+.app[data-sidebar-behavior="slim"] .appShell{
+  grid-template-columns: 88px minmax(0, 1fr) !important;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebar,
 .app[data-sidebar-behavior="hover"] .sidebar{
-  width: var(--sidebar-width) !important;
-  min-width: var(--sidebar-width) !important;
+  width: var(--localtify-sidebar-closed-width) !important;
+  min-width: var(--localtify-sidebar-closed-width) !important;
+  max-width: var(--localtify-sidebar-closed-width) !important;
   overflow: hidden !important;
   padding-inline: 12px !important;
+  z-index: 42 !important;
+  transform: translate3d(0, 0, 0) !important;
+  transform-origin: left center !important;
+  backface-visibility: hidden !important;
+  contain: layout paint style !important;
   transition:
-    width 260ms cubic-bezier(.16,1,.3,1),
-    min-width 260ms cubic-bezier(.16,1,.3,1),
-    padding 260ms cubic-bezier(.16,1,.3,1),
-    background-color 180ms ease,
-    border-color 180ms ease !important;
-  will-change: width, min-width !important;
+    width 560ms cubic-bezier(.16, 1, .3, 1),
+    min-width 560ms cubic-bezier(.16, 1, .3, 1),
+    max-width 560ms cubic-bezier(.16, 1, .3, 1),
+    box-shadow 360ms ease,
+    border-color 260ms ease,
+    background-color 260ms ease !important;
+  will-change: width, min-width, max-width !important;
 }
 
-/* The icon wrapper must never be the active-state background. */
+.app[data-sidebar-behavior="hover"] .sidebar:hover,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within{
+  width: var(--localtify-sidebar-open-width) !important;
+  min-width: var(--localtify-sidebar-open-width) !important;
+  max-width: var(--localtify-sidebar-open-width) !important;
+  box-shadow:
+    18px 0 48px rgba(0,0,0,.34),
+    inset -1px 0 0 rgba(var(--accent-rgb), .18) !important;
+}
+
 .sidebar .navIcon{
   width: 24px !important;
   height: 24px !important;
@@ -14026,9 +13872,40 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   filter: none !important;
 }
 
-/* Expanded row layout: clean Spotify-ish rows, no inner icon tile. */
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .navItem,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .navItem,
+.app[data-sidebar-behavior="slim"] .sidebar .navItem,
+.app[data-sidebar-behavior="hover"] .sidebar .navItem{
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 15px !important;
+  color: rgba(255,255,255,.66) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  transform: translate3d(0, 0, 0) !important;
+  transition:
+    width 460ms cubic-bezier(.16, 1, .3, 1),
+    min-width 460ms cubic-bezier(.16, 1, .3, 1),
+    padding 440ms cubic-bezier(.16, 1, .3, 1),
+    gap 440ms cubic-bezier(.16, 1, .3, 1),
+    margin 440ms cubic-bezier(.16, 1, .3, 1),
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .navItem,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navItem,
 .app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navItem{
   width: 100% !important;
   min-width: 0 !important;
@@ -14041,115 +13918,84 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   gap: 12px !important;
   border-radius: 14px !important;
   overflow: hidden !important;
+  color: rgba(255,255,255,.78) !important;
   background: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;
-  transition:
-    background-color 170ms ease,
-    border-color 170ms ease,
-    color 170ms ease,
-    transform 170ms cubic-bezier(.16,1,.3,1),
-    width 260ms cubic-bezier(.16,1,.3,1),
-    padding 240ms cubic-bezier(.16,1,.3,1) !important;
-}
-
-/* Expanded active row: keep a row tint, not an icon blob. */
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .navItem.active,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .navItem.active,
-.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navItem.active{
-  color: #fff !important;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.135), rgba(var(--accent-rgb),0.065)),
-    rgba(255,255,255,0.020) !important;
-  border-color: rgba(var(--accent-rgb),0.22) !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.055) !important;
-}
-
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .navItem:hover,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .navItem:hover,
-.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navItem:hover{
-  color: #fff !important;
-  transform: translateX(1px) !important;
-  background: rgba(255,255,255,0.050) !important;
-  border-color: rgba(255,255,255,0.075) !important;
-}
-
-/* Collapsed mode: icons only. No purple active square. */
-.app[data-sidebar-behavior="slim"] .sidebar .navItem,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navItem{
-  width: 48px !important;
-  min-width: 48px !important;
-  height: 48px !important;
-  margin-inline: auto !important;
-  padding: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  justify-content: center !important;
-  gap: 0 !important;
-  border: 1px solid transparent !important;
-  border-radius: 15px !important;
-  color: rgba(255,255,255,0.66) !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  overflow: hidden !important;
-  transition:
-    color 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 170ms cubic-bezier(.16,1,.3,1) !important;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebar .navItem:hover,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navItem:hover{
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navItem:hover{
   color: #fff !important;
-  transform: translateY(-1px) !important;
-  background: rgba(255,255,255,0.040) !important;
-  border-color: rgba(255,255,255,0.065) !important;
+  transform: translate3d(0, -1px, 0) !important;
+  background: rgba(255,255,255,.040) !important;
+  border-color: rgba(255,255,255,.065) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .navItem:hover,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navItem:hover,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navItem:hover{
+  color: #fff !important;
+  transform: translate3d(1px, 0, 0) !important;
+  background: rgba(255,255,255,.050) !important;
+  border-color: rgba(255,255,255,.075) !important;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebar .navItem.active,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navItem.active{
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navItem.active{
   color: rgb(var(--accent-rgb)) !important;
   background: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;
 }
 
-.app[data-sidebar-behavior="slim"] .sidebar .navItem.active:hover,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navItem.active:hover{
+.app[data-sidebar-behavior="hover"] .sidebar:hover .navItem.active,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navItem.active,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navItem.active{
   color: #fff !important;
-  background: rgba(var(--accent-rgb),0.080) !important;
-  border-color: rgba(var(--accent-rgb),0.13) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),.135), rgba(var(--accent-rgb),.065)),
+    rgba(255,255,255,.020) !important;
+  border-color: rgba(var(--accent-rgb),.22) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),.055) !important;
 }
 
-/* Text animation: hide only navText, never the icon wrapper. */
+.app[data-sidebar-behavior="slim"] .sidebar .navItem.active:hover,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navItem.active:hover{
+  color: #fff !important;
+  background: rgba(var(--accent-rgb),.080) !important;
+  border-color: rgba(var(--accent-rgb),.13) !important;
+}
+
 .app[data-sidebar-behavior="slim"] .sidebar .navText,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .navText{
-  width: 0 !important;
+.app[data-sidebar-behavior="hover"] .sidebar .navText{
+  width: auto !important;
   max-width: 0 !important;
   opacity: 0 !important;
-  transform: translateX(-8px) !important;
+  transform: translate3d(-10px, 0, 0) !important;
   overflow: hidden !important;
   pointer-events: none !important;
   white-space: nowrap !important;
+  transition:
+    opacity 220ms ease,
+    transform 440ms cubic-bezier(.16, 1, .3, 1),
+    max-width 500ms cubic-bezier(.16, 1, .3, 1) !important;
 }
 
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .navText,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .navText,
+.app[data-sidebar-behavior="hover"] .sidebar:hover .navText,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText,
 .app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .navText{
   width: auto !important;
   max-width: 160px !important;
   opacity: 1 !important;
-  transform: translateX(0) !important;
+  transform: translate3d(0, 0, 0) !important;
   overflow: hidden !important;
   pointer-events: auto !important;
   white-space: nowrap !important;
   transition:
-    opacity 170ms ease 70ms,
-    transform 220ms cubic-bezier(.16,1,.3,1) 45ms,
-    max-width 260ms cubic-bezier(.16,1,.3,1) !important;
+    opacity 260ms ease 110ms,
+    transform 500ms cubic-bezier(.16, 1, .3, 1) 70ms,
+    max-width 520ms cubic-bezier(.16, 1, .3, 1) 40ms !important;
 }
 
 .sidebar .navText strong,
@@ -14160,50 +14006,88 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   white-space: nowrap !important;
 }
 
-/* Logo collapsed state. */
 .app[data-sidebar-behavior="slim"] .logoWrap,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap{
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .logoWrap{
   justify-content: center !important;
   gap: 0 !important;
 }
 
-.app[data-sidebar-behavior="slim"] .logoWrap h1,
-.app[data-sidebar-behavior="slim"] .logoWrap p,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap h1,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .logoWrap p{
-  max-width: 0 !important;
-  opacity: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
+.app[data-sidebar-behavior="hover"] .sidebar:hover .logoWrap,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .logoWrap,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .logoWrap{
+  justify-content: flex-start !important;
+  gap: 10px !important;
 }
 
-/* Import button collapsed state: icon-only, never cropped text. */
+.app[data-sidebar-behavior="slim"] .logoWrap h1,
+.app[data-sidebar-behavior="slim"] .logoWrap p,
+.app[data-sidebar-behavior="hover"] .logoWrap h1,
+.app[data-sidebar-behavior="hover"] .logoWrap p{
+  max-width: 0 !important;
+  opacity: 0 !important;
+  transform: translate3d(-8px, 0, 0) !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+  transition:
+    opacity 220ms ease,
+    transform 440ms cubic-bezier(.16, 1, .3, 1),
+    max-width 500ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .logoWrap h1,
+.app[data-sidebar-behavior="hover"] .sidebar:hover .logoWrap p,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .logoWrap h1,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .logoWrap p,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .logoWrap h1,
+.app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .logoWrap p{
+  max-width: 150px !important;
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+  pointer-events: auto !important;
+}
+
 .app[data-sidebar-behavior="slim"] .sidebar .importMainAction,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .importMainAction{
+.app[data-sidebar-behavior="hover"] .sidebar .importMainAction{
   width: 48px !important;
   min-width: 48px !important;
   max-width: 48px !important;
   height: 44px !important;
   padding: 0 !important;
   margin-inline: auto !important;
-  display: grid !important;
-  place-items: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
   overflow: hidden !important;
   white-space: nowrap !important;
   border-radius: 15px !important;
   font-size: 0 !important;
+  transform: translate3d(0, 0, 0) !important;
+  transition:
+    width 460ms cubic-bezier(.16, 1, .3, 1),
+    min-width 460ms cubic-bezier(.16, 1, .3, 1),
+    max-width 460ms cubic-bezier(.16, 1, .3, 1),
+    padding 440ms cubic-bezier(.16, 1, .3, 1),
+    gap 440ms cubic-bezier(.16, 1, .3, 1),
+    margin 440ms cubic-bezier(.16, 1, .3, 1),
+    font-size 160ms ease,
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease !important;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebar .importMainAction .buttonInlineIcon,
-.app[data-sidebar-behavior="hover"]:not(:has(.sidebar:hover)):not(:has(.sidebar:focus-within)) .sidebar .importMainAction .buttonInlineIcon{
+.app[data-sidebar-behavior="hover"] .sidebar .importMainAction .buttonInlineIcon{
   width: 19px !important;
   height: 19px !important;
   margin: 0 !important;
   opacity: 1 !important;
+  flex: 0 0 auto !important;
 }
 
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover) .sidebar .importMainAction,
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within) .sidebar .importMainAction,
+.app[data-sidebar-behavior="hover"] .sidebar:hover .importMainAction,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .importMainAction,
 .app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar .importMainAction{
   width: 100% !important;
   min-width: 0 !important;
@@ -14221,7 +14105,22 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   font-size: 14px !important;
 }
 
-/* Prevent active sidebar icon from inheriting old square background rules. */
+.app[data-sidebar-behavior="hover"] .sidebar:hover .importMainAction span,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .importMainAction span{
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+@media (max-width: 900px){
+  .app[data-sidebar-behavior="hover"] .sidebar,
+  .app[data-sidebar-behavior="slim"] .sidebar{
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+  }
+}
+
+
 .sidebar .navItem.active .navIcon,
 .sidebar .navItem:hover .navIcon,
 .sidebar .navItem.active .navLucideIcon,
@@ -14234,16 +14133,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   filter: none !important;
 }
 
-/* ==========================================================================
-   localtify v0.3.6 V214 — lightweight stars
-   Owner: App.css
-
-   Goals:
-   - subtle is the default
-   - no heavy 3-layer star field
-   - pause/reduce when app is backgrounded
-   - keep the vibe without constant visual work
-========================================================================== */
 
 .app[data-stars-intensity="off"] .localtifyStarsBackdrop{
   display: none !important;
@@ -14285,7 +14174,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   animation: localtifyV214StarDriftB 190s linear infinite !important;
 }
 
-/* Third layer is intentionally disabled for performance. */
+
 .app .localtifyStarsLayerC{
   display: none !important;
 }
@@ -14304,7 +14193,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   filter: saturate(1.10) brightness(1.12) !important;
 }
 
-/* Pause/reduce when app is hidden/unfocused/backgrounded. */
+
 .app[data-app-backgrounded="on"] .localtifyStarsBackdrop{
   opacity: .16 !important;
   filter: none !important;
@@ -14315,7 +14204,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   will-change: auto !important;
 }
 
-/* Also pause during view switches / theme settling to avoid extra repaints. */
+
 .app.themeSettling .localtifyStarsLayer,
 .app.viewSwitching .localtifyStarsLayer{
   animation-play-state: paused !important;
@@ -14331,13 +14220,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   to{ transform: translate3d(112px,-74px,0); }
 }
 
-/* ========================================================================
-   localtify v0.3.6 V215 — App.css legacy cleanup guard
-   Keep /stars and /yukari. Disable old heavy joke layers and old card proximity.
-======================================================================== */
 
-
-/* Proximity motion is buttons/nav/player only now. Never cards/settings/rows. */
 :is(
   .songRow,
   .playlistTrackRow,
@@ -14388,24 +14271,17 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   background-image: inherit !important;
 }
 
-/* Keep button proximity subtle. */
+
 .localtifyProximityActive:is(button,[role="button"],.navItem,.mainAction,.heroMain,.heroGhost,.softButton,.playerButton,.circleButton){
   transform: scale(var(--prox-scale, 1)) translateZ(0) !important;
 }
 
 
-/* ==========================================================================
-   localtify v0.3.6 V216 — App.css owner cleanup final guard
-   Owner: shell/sidebar/modals/global only.
-   Heavy old joke layers stay disabled; /stars and /yukari stay enabled.
-========================================================================== */
-
-/* App.css should not style bottom-player internals. Leave the real player to player.css. */
 .app .playerBar > :where(.playerLeft,.playerCenter,.playerRight,.controlRow,.progressRow,.volumeWrap){
   contain: layout style !important;
 }
 
-/* Removed old heavy secret modes. Keep the DOM harmless if stale state appears. */
+
 .app :where(
   .secretLayer.arcadeGhost,
   .lateNightNoteLayer,
@@ -14418,12 +14294,12 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   pointer-events: none !important;
 }
 
-/* Keep valid secret layers only. */
+
 .app .secretLayer:not(.stars):not(.yukari){
   display: none !important;
 }
 
-/* Stop old proximity classes from affecting cards/settings if stale CSS remains. */
+
 .app :where(
   .settingsPanelCard,
   .settingsPageCard,
@@ -14442,7 +14318,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   background-image: inherit !important;
 }
 
-/* Final sidebar icon safety from V213. */
+
 .sidebar .navItem::before,
 .sidebar .navItem::after,
 .sidebar .navIcon::before,
@@ -14459,3 +14335,19 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   box-shadow: none !important;
 }
 
+
+.app .playlistTrackMain,
+.app .playlistTrackMain:hover,
+.app .playlistTrackMain:active,
+.app .playlistTrackMain:focus,
+.app .playlistTrackMain:focus-visible,
+.app .playlistTrackRow > .iconAction,
+.app .playlistTrackRow > .iconAction:hover,
+.app .playlistTrackRow > .iconAction:active{
+  transform: none !important;
+  translate: none !important;
+  scale: none !important;
+  rotate: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
