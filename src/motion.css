@@ -2511,3 +2511,65 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   from{ transform: translate3d(0, -1px, 0) scale(0.996); }
   to{ transform: translate3d(0, 0, 0) scale(1); }
 }
+
+
+/* ======================================================================
+   localtify v0.3.6 V253 — calm cover motion, no star/orb motion
+   Keeps motion smooth by avoiding transform overrides on virtualized rows.
+====================================================================== */
+
+.app .secretLayer.stars,
+.app .secretLayer.stars .starParticle,
+.app .secretLayer.stars .starParticle::before,
+.app .localtifyStarsBackdrop,
+.app .localtifyStarsLayer,
+.app .localtifyStarParticle,
+.app .localtifyStarsNebula,
+.app .ambientOrb,
+.app .sideAmbienceOrb{
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+.app .coverGalleryCard,
+.app .coverGalleryCard:hover,
+.app .coverGalleryCard.activePreview{
+  animation: none !important;
+  transform: translateZ(0) !important;
+  scale: 1 !important;
+  transition:
+    background-color 130ms ease,
+    border-color 130ms ease,
+    opacity 130ms ease !important;
+}
+
+.app .coverGalleryCard:hover .coverGalleryImage,
+.app .coverGalleryImage{
+  transform: translateZ(0) scale(1) !important;
+  transition: opacity 160ms ease !important;
+}
+
+.app .coverGalleryVirtualRow,
+.app .coverGalleryVirtualRow:hover{
+  transform: translate3d(0, var(--cover-gallery-row-y, 0px), 0) !important;
+  animation: none !important;
+}
+
+.app .coverSongPick.coverSongPickVirtual,
+.app .coverSongPick.coverSongPickVirtual:hover,
+.app .coverSongPick.coverSongPickVirtual.active,
+.app .coverSongPick.coverSongPickVirtual.localtifyProximityActive{
+  transform: translate3d(0, var(--cover-song-y, 0px), 0) !important;
+  scale: 1 !important;
+  animation: none !important;
+}
+
+.app .coverPreviewApplyButton:hover:not(:disabled),
+.app .coverGalleryPreviewBar button:hover:not(:disabled),
+.app .coverGalleryActions button:hover:not(:disabled),
+.app .coverSongTools button:hover:not(:disabled),
+.app .coverGalleryToolbar button:hover:not(:disabled){
+  transform: none !important;
+  scale: 1 !important;
+}

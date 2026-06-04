@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.6 V244 — restore Spotify auth/import UI into current App.tsx. */
+/* localtify 0.3.6 V253 — remove stars feature and ambient orb triggers; keeps Spotify/import UI untouched. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -220,7 +220,7 @@ const VISUAL_CUSTOMIZATION_DEFAULTS = {
   mediaCardBackground: "acrylic",
   homeLayoutMode: "balanced",
   libraryRowStyle: "comfyRows",
-  starsIntensity: "subtle",
+  starsIntensity: "off",
   sidebarBehavior: "fixed",
   playerBackgroundStyle: "coverBlur"
 } as const;
@@ -237,7 +237,7 @@ function applyVisualCustomizationDefaults<T extends Record<string, any>>(setting
     mediaCardBackground: normalizeVisualChoice(settings.mediaCardBackground, ["solid", "glassy", "acrylic", "oledFlat"], VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground),
     homeLayoutMode: normalizeVisualChoice(settings.homeLayoutMode, ["compact", "balanced", "bigHero", "minimal"], VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode),
     libraryRowStyle: normalizeVisualChoice(settings.libraryRowStyle, ["compactRows", "comfyRows", "coverCards", "listOnly"], VISUAL_CUSTOMIZATION_DEFAULTS.libraryRowStyle),
-    starsIntensity: normalizeVisualChoice(settings.starsIntensity, ["off", "subtle", "normal", "bright"], VISUAL_CUSTOMIZATION_DEFAULTS.starsIntensity),
+    starsIntensity: normalizeVisualChoice(settings.starsIntensity, ["off", "subtle", "normal", "bright"], "off"),
     sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
     playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "acrylic", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle)
   };
@@ -1129,7 +1129,7 @@ function MainModeApp() {
     () => buildAnimatedThemeVisualStyle(effectiveTheme, animatedThemeSeedRef.current),
     [effectiveTheme]
   );
-  const showStarBackdrop = !settings.reducedMotion && (effectiveTheme === "stars" || (settings.starsIntensity || "normal") !== "off");
+  const showStarBackdrop = false;
 
   useEffect(() => {
     setThemeMotionReady(false);
@@ -1778,36 +1778,7 @@ function MainModeApp() {
     setHeroExpanded(!settings.heroExpanded);
   }
 
-  const starParticleStyles = useMemo(
-    () =>
-      Array.from({ length: 124 }, (_, index) => {
-        const baseSeed = stableHash(`${secretBurst}:${currentSong?.id || "idle"}:localtify-white-stars-v142:${index}`);
-        const random = (salt: number) => {
-          const raw = Math.sin((baseSeed + salt * 7919) * 12.9898) * 43758.5453123;
-          return raw - Math.floor(raw);
-        };
-        const x = random(1) * 100;
-        const y = random(2) * 100;
-        const dx = Math.round((random(3) - 0.5) * 78);
-        const dy = Math.round((random(4) - 0.5) * 58);
-        const size = Math.round(3 + random(5) * 12);
-        const delay = Math.round(-random(6) * 26000);
-        const duration = Math.round(14000 + random(7) * 24000);
-        const alpha = 0.34 + random(8) * 0.62;
-
-        return {
-          "--x": `${x.toFixed(2)}%`,
-          "--y": `${y.toFixed(2)}%`,
-          "--dx": `${dx}px`,
-          "--dy": `${dy}px`,
-          "--size": `${size}px`,
-          "--delay": `${delay}ms`,
-          "--duration": `${duration}ms`,
-          "--alpha": alpha.toFixed(2)
-        } as CSSProperties;
-      }),
-    [secretBurst, currentSong?.id]
-  );
+  const starParticleStyles = useMemo<CSSProperties[]>(() => [], []);
 
   const librarySearchIndex = useMemo(() => songs.map((song) => buildSongSearchEntry(song)), [songs]);
 
@@ -3133,7 +3104,7 @@ function MainModeApp() {
     return true;
   }
   const triggerSecret = useCallback((mode: SecretTriggerMode, message: string) => {
-    const allowedMode: SecretTriggerMode | null = mode === "stars" || mode === "yukari" ? mode : null;
+    const allowedMode: SecretTriggerMode | null = mode === "yukari" ? mode : null;
     if (!allowedMode) return;
 
     if (secretTimeoutRef.current) {
@@ -3141,18 +3112,11 @@ function MainModeApp() {
       secretTimeoutRef.current = null;
     }
 
-    if (allowedMode === "stars" && secretMode === "stars") {
-      setSecretMode("none");
-      setSecretToast("");
-      setSecretBurst((value) => value + 1);
-      return;
-    }
-
     setSecretMode(allowedMode);
     setSecretToast(message);
     setSecretBurst((value) => value + 1);
 
-    const duration = allowedMode === "stars" ? 2600 : 5200;
+    const duration = 5200;
     secretTimeoutRef.current = window.setTimeout(() => {
       setSecretMode("none");
       setSecretToast("");
@@ -3312,10 +3276,7 @@ function MainModeApp() {
       "yukari": { mode: "yukari", message: "yukari peeked in" },
       "/peek": { mode: "yukari", message: "yukari peeked in" },
       "peek": { mode: "yukari", message: "yukari peeked in" },
-      "/y": { mode: "yukari", message: "yukari peeked in" },
-      "/stars": { mode: "stars", message: "star field enabled — type /stars again to hide" },
-      "stars": { mode: "stars", message: "star field enabled — type /stars again to hide" },
-      "/star": { mode: "stars", message: "star field enabled — type /stars again to hide" }
+      "/y": { mode: "yukari", message: "yukari peeked in" }
     };
 
     const secret = secretMap[command];
@@ -3361,12 +3322,6 @@ function MainModeApp() {
       secretBufferRef.current = `${secretBufferRef.current}${typed}`.slice(-24);
       const compactBuffer = secretBufferRef.current.replace(/[^a-z0-9]/g, "");
 
-      if (compactBuffer.endsWith("stars") || compactBuffer.endsWith("starfield")) {
-        event.preventDefault();
-        triggerSecret("stars", "star field enabled");
-        clearSecretTyping();
-        return;
-      }
 
       if (compactBuffer.endsWith("yukari")) {
         event.preventDefault();
@@ -3396,7 +3351,11 @@ function MainModeApp() {
 
     const waitForMinimumBoot = () => {
       const now = typeof performance !== "undefined" ? performance.now() : Date.now();
-      const remaining = Math.max(0, BOOT_MIN_VISIBLE_MS - (now - bootStartedAt));
+      // V251: keep the loading screen visible for polish, but do not force a long wait
+      // after the real bootstrap work has already finished.
+      const fastBootMinimumMs = Math.min(BOOT_MIN_VISIBLE_MS, 520);
+      const remaining = Math.max(0, fastBootMinimumMs - (now - bootStartedAt));
+      if (remaining <= 0) return Promise.resolve();
       return new Promise<void>((resolve) => {
         window.setTimeout(resolve, remaining);
       });
@@ -3410,7 +3369,7 @@ function MainModeApp() {
 
     bootStepTimer = window.setInterval(() => {
       setBootStepIndex((step) => Math.min(step + 1, BOOT_STEPS.length - 1));
-    }, 360);
+    }, 240);
 
     window.localitfy.bootstrap().then(async (payload) => {
       if (!mounted) return;
@@ -8002,7 +7961,7 @@ function MainModeApp() {
               className="simpleSearch"
               value={query}
               onChange={(event) => handleSearchInput(event.currentTarget.value)}
-              placeholder="search songs... try /stars, /localtify"
+              placeholder="search songs... try /localtify"
             />
 
             <button

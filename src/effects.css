@@ -1,98 +1,4 @@
-/* ========================================================================== 
-   localtify 0.3.6 V148 — effects.css
-   Owns music-reactive cover glow, active-song ambience, and cheap visual pulses.
-   Layout stays in App/home/player/settings CSS. This file must not animate whole rows.
-========================================================================== */
-
-.app{
-  --active-song-beat: 0;
-  --active-song-bass: 0;
-  --active-song-mid: 0;
-  --active-song-beat-x: 0px;
-  --active-song-beat-y: 0px;
-  --active-song-glow-opacity: 0.18;
-  --active-song-glow-scale: 1.03;
-  --active-song-art-scale: 1;
-  --active-song-ring-opacity: 0.18;
-  --active-song-pulse-speed: 1280ms;
-}
-
-/* Hero cover: full ambience is allowed here because it is one isolated visual target. */
-.app[data-playing="on"] .hero.heroPremium .heroArtWrap{
-  position: relative !important;
-  isolation: isolate !important;
-  contain: paint !important;
-  overflow: visible !important;
-  will-change: transform;
-}
-
-.app[data-playing="on"] .hero.heroPremium .heroArtWrap::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: -42px !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  will-change: opacity, transform !important;
-  border-radius: 38px !important;
-  background:
-    radial-gradient(circle at calc(50% + var(--active-song-beat-x)) calc(48% + var(--active-song-beat-y)), rgba(var(--accent-rgb), 0.46), transparent 48%),
-    radial-gradient(circle at 50% 55%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.32), transparent 58%),
-    var(--cover-url, none) center / cover no-repeat !important;
-  opacity: var(--active-song-glow-opacity) !important;
-  filter: blur(28px) saturate(1.45) brightness(0.76) !important;
-  transform: translate3d(var(--active-song-beat-x), var(--active-song-beat-y), 0) scale(var(--active-song-glow-scale)) !important;
-  transition: opacity 96ms linear, transform 96ms linear !important;
-  animation: localtifyHeroGlowDrift var(--active-song-pulse-speed) cubic-bezier(0.16, 1, 0.3, 1) infinite !important;
-}
-
-.app[data-playing="on"] .hero.heroPremium .heroArtWrap::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: -18px !important;
-  z-index: 1 !important;
-  pointer-events: none !important;
-  will-change: opacity, transform !important;
-  border-radius: 32px !important;
-  opacity: var(--active-song-ring-opacity) !important;
-  background:
-    conic-gradient(from 120deg, transparent 0deg, rgba(var(--accent-rgb), 0.5) 34deg, transparent 78deg, rgba(255,255,255,0.18) 140deg, transparent 220deg, rgba(var(--accent-rgb), 0.34) 305deg, transparent 360deg) !important;
-  filter: blur(14px) saturate(1.35) !important;
-  transform: translate3d(calc(var(--active-song-beat-x) * -0.42), calc(var(--active-song-beat-y) * -0.42), 0) scale(var(--active-song-art-scale)) !important;
-  animation: localtifyHeroRingOrbit 5.6s linear infinite !important;
-}
-
-.app[data-playing="on"] .hero.heroPremium .heroArt{
-  position: relative !important;
-  z-index: 2 !important;
-  transform: translate3d(calc(var(--active-song-beat-x) * 0.08), calc(var(--active-song-beat-y) * 0.08), 0) scale(var(--active-song-art-scale)) !important;
-  transition: transform 96ms linear, box-shadow 160ms ease !important;
-  box-shadow:
-    0 28px 74px rgba(0, 0, 0, 0.52),
-    0 0 0 1px rgba(255,255,255,0.11) inset,
-    0 0 42px rgba(var(--accent-rgb), 0.18) !important;
-}
-
-/* Active rows/cards stay highlighted, but their expensive reactive aura moved to cover art only. */
-.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing){
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-  contain: paint !important;
-  border-color: rgba(var(--accent-rgb), 0.52) !important;
-  box-shadow:
-    0 10px 26px rgba(0, 0, 0, 0.22),
-    0 0 0 1px rgba(var(--accent-rgb), 0.14) inset !important;
-}
-
-/* Kill old row-wide audio auras from earlier patches. The glow below is the replacement. */
-.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::before,
-.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::after{
-  animation: none !important;
-  filter: none !important;
-  opacity: 0 !important;
-  box-shadow: none !important;
-}
-
+/* localtify v0.3.6 V219 — CSS diet: effects.css owns active glow + light easter effects only. */
 .app[data-playing="on"] :is(
   .songRow.playing .songArt.coverAura,
   .homeAlbumCard.playing .homeAlbumArt.coverAura,
@@ -102,7 +8,7 @@
   .playlistSongRow.playing .playlistTrackCover,
   .libraryRow.playing .songArt.coverAura
 ){
-  position: relative !important;
+position: relative !important;
   isolation: isolate !important;
   contain: paint !important;
   will-change: transform !important;
@@ -119,23 +25,10 @@
   .playlistSongRow.playing .playlistTrackCover,
   .libraryRow.playing .songArt.coverAura
 )::before{
-  opacity: var(--active-song-glow-opacity) !important;
+opacity: var(--active-song-glow-opacity) !important;
   filter: blur(22px) saturate(1.5) contrast(1.06) !important;
   transform: translate3d(var(--active-song-beat-x), var(--active-song-beat-y), 0) scale(var(--active-song-glow-scale)) !important;
   transition: opacity 100ms linear, transform 100ms linear !important;
-}
-
-.app[data-playing="on"] :is(
-  .songRow.playing .songArt img,
-  .homeAlbumCard.playing .homeAlbumArt img,
-  .homeListenCard.playing .homeListenCover img,
-  .homeFreshCard.playing .homeFreshCover img,
-  .playlistTrackRow.playing .playlistTrackCover img,
-  .playlistSongRow.playing .playlistTrackCover img,
-  .libraryRow.playing .songArt img
-){
-  transform: translate3d(calc(var(--active-song-beat-x) * 0.035), calc(var(--active-song-beat-y) * 0.035), 0) scale(var(--active-song-art-scale)) !important;
-  transition: transform 96ms linear !important;
 }
 
 @keyframes localtifyHeroGlowDrift{
@@ -148,153 +41,6 @@
   100%{ opacity: calc(var(--active-song-glow-opacity) * 0.68); }
 }
 
-@keyframes localtifyHeroRingOrbit{
-  0%{ rotate: 0deg; scale: 0.985; }
-  20%{ scale: 1.018; }
-  42%{ scale: 0.998; }
-  64%{ scale: 1.028; }
-  82%{ scale: 1.006; }
-  100%{ rotate: 360deg; scale: 0.985; }
-}
-
-
-body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::before,
-body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::after{
-  transition-duration: 120ms !important;
-}
-
-
-html body .app,
-html body .appShell,
-html body .content,
-html body .mainContent,
-html body .contentScroller,
-html body .simpleShell,
-html body .homeView,
-html body .homeShell,
-html body .homeShelfStack,
-html body .homeShelfPanel,
-html body .homeListenPanel,
-html body .homeFreshPanel,
-html body .homeLibraryPanel,
-html body .simpleLibraryPanel,
-html body .libraryPanel,
-html body .downloadsPage,
-html body .analyticsPage,
-html body .likedPage,
-html body .coverStudioPage,
-html body .settingsPage{
-  --grid-line: transparent !important;
-  --app-grid-line: transparent !important;
-  --page-line: transparent !important;
-  background-size: auto !important;
-  background-repeat: no-repeat !important;
-}
-
-html body .app,
-html body .appShell,
-html body .content,
-html body .mainContent,
-html body .contentScroller,
-html body .simpleShell,
-html body .homeView,
-html body .homeShell{
-  background-image: none !important;
-}
-
-html body .app{
-  background:
-    radial-gradient(circle at 18% 82%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.075), transparent 36%),
-    radial-gradient(circle at 82% 18%, rgba(var(--accent-rgb), 0.055), transparent 34%),
-    var(--bg, #050008) !important;
-}
-
-html body .content,
-html body .mainContent,
-html body .contentScroller,
-html body .simpleShell,
-html body .homeView,
-html body .homeShell{
-  background: transparent !important;
-}
-
-html body :where(
-  .app,
-  .appShell,
-  .content,
-  .mainContent,
-  .contentScroller,
-  .simpleShell,
-  .homeView,
-  .homeShell,
-  .homeShelfStack,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .simpleLibraryPanel,
-  .libraryPanel,
-  .downloadsPage,
-  .analyticsPage,
-  .likedPage,
-  .coverStudioPage,
-  .settingsPage,
-  .panel,
-  .ambientSurface,
-  .shellCard,
-  .glassCard,
-  .glassPanel,
-  .sectionPanel,
-  .sectionSurface,
-  .simpleHero,
-  .libraryHero,
-  .analyticsHero,
-  .downloadsHero,
-  .likedHero,
-  .coverHero,
-  .homeHero
-)::before,
-html body :where(
-  .app,
-  .appShell,
-  .content,
-  .mainContent,
-  .contentScroller,
-  .simpleShell,
-  .homeView,
-  .homeShell,
-  .homeShelfStack,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .simpleLibraryPanel,
-  .libraryPanel,
-  .downloadsPage,
-  .analyticsPage,
-  .likedPage,
-  .coverStudioPage,
-  .settingsPage,
-  .panel,
-  .ambientSurface,
-  .shellCard,
-  .glassCard,
-  .glassPanel,
-  .sectionPanel,
-  .sectionSurface,
-  .simpleHero,
-  .libraryHero,
-  .analyticsHero,
-  .downloadsHero,
-  .likedHero,
-  .coverHero,
-  .homeHero
-)::after{
-  background-image: none !important;
-  background-size: auto !important;
-}
-
-/* keep panel/card ambience, but remove only the square-line layer */
 html body :where(
   .homeShelfPanel,
   .homeListenPanel,
@@ -308,139 +54,30 @@ html body :where(
   .sectionPanel,
   .sectionSurface
 ){
-  background-image:
+background-image:
     radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb), 0.10), transparent 34%),
     linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018)) !important;
   background-size: auto !important;
 }
 
-/* emergency fallback for any old variable-driven grid line */
-html body .app *{
-  --grid-line: transparent !important;
-  --app-grid-line: transparent !important;
-  --page-line: transparent !important;
-}
-
-
-.app[data-playing="on"] .hero.heroPremium .heroArtWrap::before,
-.app[data-playing="on"] .hero.heroPremium .heroArtWrap::after,
-.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing)::before,
-.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing)::after{
-  backface-visibility: hidden !important;
-  transform-style: flat !important;
-  will-change: transform, opacity !important;
-}
-
-body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::before,
-body.localitfyThemePainting .app[data-playing="on"] .hero.heroPremium .heroArtWrap::after{
-  transition-duration: 120ms !important;
-}
-
-
-/* ======================================================================
-   localtify 0.3.0 — final background guard
-   Effects.css is imported late, so this catches any old theme/page grid
-   texture that leaks behind the rounded home shelves.
-====================================================================== */
-
-html body .app[data-theme] .content,
-html body .app .content,
-html body .app .mainContent,
-html body .app .contentScroller,
-html body .app .homeView,
-html body .app .homeShell,
-html body .app .homePage,
-html body .app .homeShelfStack{
-  --theme-grid-line: transparent !important;
-  --page-line: transparent !important;
-  --grid-line: transparent !important;
-  --app-grid-line: transparent !important;
-  background-image: none !important;
-  background-size: auto !important;
-}
-
-html body .app .homeShelfPanel,
-html body .app .homeListenPanel,
-html body .app .homeFreshPanel,
-html body .app .homeLibraryPanel,
-html body .app .simpleLibraryPanel{
-  border-radius: 24px !important;
-  overflow: hidden !important;
-  background-clip: padding-box !important;
-}
-
-html body .app .homeShelfPanel::before,
-html body .app .homeShelfPanel::after,
-html body .app .homeListenPanel::before,
-html body .app .homeListenPanel::after,
-html body .app .homeFreshPanel::before,
-html body .app .homeFreshPanel::after,
-html body .app .homeLibraryPanel::before,
-html body .app .homeLibraryPanel::after,
-html body .app .simpleLibraryPanel::before,
-html body .app .simpleLibraryPanel::after{
-  content: none !important;
-  display: none !important;
-  background: none !important;
-  background-image: none !important;
-  opacity: 0 !important;
-}
-
-
-/* ========================================================================== 
-   localtify 0.3.6 V189 — cleaner active-song glow details
-========================================================================== */
-
-.app[data-playing="on"] :is(.songRow.playing, .homeAlbumCard.playing, .homeListenCard.playing, .homeFreshCard.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing){
-  box-shadow:
-    0 0 0 1px rgba(var(--accent-rgb), 0.16) inset,
-    0 12px 32px rgba(0, 0, 0, 0.24),
-    0 0 26px rgba(var(--accent-rgb), 0.075) !important;
-}
-
-.app[data-playing="on"] :is(.songRow.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing)::after{
-  content: "" !important;
-  position: absolute !important;
-  left: 0 !important;
-  top: 14% !important;
-  bottom: 14% !important;
-  width: 3px !important;
-  border-radius: 999px !important;
-  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(var(--accent-rgb),0.95), rgba(var(--accent-rgb),0.28)) !important;
-  box-shadow: 0 0 18px rgba(var(--accent-rgb),0.42) !important;
-  opacity: 0.92 !important;
-  transform-origin: center !important;
-  animation: localtifyActiveLineBreathe 1.8s ease-in-out infinite !important;
-}
-
 .app[data-playing="on"] :is(.songRow.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing) :is(.songArt, .smallArt, .coverAura){
-  filter: saturate(1.1) contrast(1.04) !important;
+filter: saturate(1.1) contrast(1.04) !important;
 }
-
-@keyframes localtifyActiveLineBreathe{
-  0%, 100%{ opacity: 0.62; transform: scaleY(0.72); }
-  50%{ opacity: 1; transform: scaleY(1); }
-}
-
-/* ======================================================================
-   localtify 0.3.6 V199 — /yukari right-side peek easter egg.
-   Owner: effects.css. Image loads only when the secret is triggered.
-====================================================================== */
 
 .app .secretLayer.yukari{
-  z-index: 2400 !important;
+z-index: 2400 !important;
   pointer-events: none !important;
   overflow: hidden !important;
 }
 
 .app .secretLayer.yukari::before,
 .app .secretLayer.yukari::after{
-  display: none !important;
+display: none !important;
   content: none !important;
 }
 
 .app .secretLayer.yukari .secretRibbon{
-  top: auto !important;
+top: auto !important;
   left: auto !important;
   right: 22px !important;
   bottom: 94px !important;
@@ -455,7 +92,7 @@ html body .app .simpleLibraryPanel::after{
 }
 
 .app .yukariSecretPeek{
-  position: fixed !important;
+position: fixed !important;
   right: -124px !important;
   bottom: clamp(112px, 12vh, 148px) !important;
   width: clamp(132px, 11vw, 188px) !important;
@@ -493,34 +130,69 @@ html body .app .simpleLibraryPanel::after{
 }
 
 @media (max-width: 760px){
-  .app .yukariSecretPeek{
-    right: -104px !important;
+.app .yukariSecretPeek{
+right: -104px !important;
     bottom: 108px !important;
     width: 124px !important;
-  }
-
-  .app .secretLayer.yukari .secretRibbon{
-    right: 14px !important;
-    bottom: 84px !important;
-  }
 }
 
+.app .secretLayer.yukari .secretRibbon{
+right: 14px !important;
+    bottom: 84px !important;
+}
+}
 
-/* ==========================================================================
-   localtify v0.3.6 V216 — effects.css owner cleanup final guard
-   Owner: active-song glow + lightweight /yukari and /stars effects only.
-========================================================================== */
-
-/* Keep only current light secret layers. */
 .app .secretLayer:not(.stars):not(.yukari){
-  display: none !important;
+display: none !important;
   animation: none !important;
   pointer-events: none !important;
 }
 
-/* Active-song effects should never animate whole rows. */
 .songRow.active::before,
 .songRow.active::after{
-  pointer-events: none !important;
+pointer-events: none !important;
 }
 
+
+/* localtify v0.3.6 V253 — no ambient orb/star visuals. */
+.app .secretLayer.stars,
+.app .secretLayer.stars *,
+.app .ambientOrb,
+.app .sideAmbienceOrb,
+.app .localtifyStarsBackdrop,
+.app .localtifyStarsLayer,
+.app .localtifyStarParticle,
+.app .localtifyStarsNebula,
+.app .localtifyStarSweep{
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+html body :where(.panel,.ambientSurface,.glassPanel,.sectionPanel,.sectionSurface){
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.042), rgba(255,255,255,0.018)) !important;
+}
+
+.app[data-theme="stars"],
+.app[data-theme="stars"] .content,
+.app[data-theme="stars"] .appShell{
+  background-image: none !important;
+}
+
+.app[data-theme="stars"]::before,
+.app[data-theme="stars"]::after,
+.app[data-theme="stars"] .content::before,
+.app[data-theme="stars"] .content::after,
+.app[data-theme="stars"] .localtifyStarsBackdrop,
+.app[data-theme="stars"] .localtifyStarsLayer,
+.app[data-theme="stars"] .localtifyStarsNebula,
+.app[data-theme="stars"] .localtifyStarParticle,
+.app[data-theme="stars"] .localtifyStarSweep,
+.app[data-theme="stars"] .ambientOrb,
+.app[data-theme="stars"] .sideAmbienceOrb{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+  background: none !important;
+}

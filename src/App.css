@@ -14351,3 +14351,160 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   filter: none !important;
   text-shadow: none !important;
 }
+
+/* ======================================================================
+   localtify v0.3.6 V248 — hover sidebar closes on mouse leave
+   ----------------------------------------------------------------------
+   Clicking a sidebar button can leave focus inside the sidebar. V247 allowed
+   :focus-within to keep hover mode expanded, so the rail could stay open even
+   after the mouse left. These final overrides make hover mode close whenever
+   the pointer leaves, while keeping the same smooth slide timing.
+====================================================================== */
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover){
+  width: var(--localtify-sidebar-closed-width) !important;
+  min-width: var(--localtify-sidebar-closed-width) !important;
+  max-width: var(--localtify-sidebar-closed-width) !important;
+  box-shadow: none !important;
+  transition:
+    width 520ms cubic-bezier(.16, 1, .3, 1),
+    min-width 520ms cubic-bezier(.16, 1, .3, 1),
+    max-width 520ms cubic-bezier(.16, 1, .3, 1),
+    box-shadow 260ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .navItem{
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  border-radius: 15px !important;
+  transition:
+    width 500ms cubic-bezier(.16, 1, .3, 1),
+    min-width 500ms cubic-bezier(.16, 1, .3, 1),
+    padding 480ms cubic-bezier(.16, 1, .3, 1),
+    gap 460ms cubic-bezier(.16, 1, .3, 1),
+    margin 460ms cubic-bezier(.16, 1, .3, 1),
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 170ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .navText{
+  max-width: 0 !important;
+  opacity: 0 !important;
+  transform: translate3d(-12px, 0, 0) !important;
+  pointer-events: none !important;
+  transition:
+    opacity 140ms ease,
+    transform 360ms cubic-bezier(.16, 1, .3, 1),
+    max-width 430ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .logoWrap{
+  justify-content: center !important;
+  gap: 0 !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .logoWrap h1,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .logoWrap p{
+  max-width: 0 !important;
+  opacity: 0 !important;
+  transform: translate3d(-10px, 0, 0) !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  transition:
+    opacity 130ms ease,
+    transform 340ms cubic-bezier(.16, 1, .3, 1),
+    max-width 420ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .importMainAction{
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 44px !important;
+  padding: 0 !important;
+  margin-inline: auto !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  font-size: 0 !important;
+  transition:
+    width 500ms cubic-bezier(.16, 1, .3, 1),
+    min-width 500ms cubic-bezier(.16, 1, .3, 1),
+    max-width 500ms cubic-bezier(.16, 1, .3, 1),
+    padding 470ms cubic-bezier(.16, 1, .3, 1),
+    gap 450ms cubic-bezier(.16, 1, .3, 1),
+    margin 450ms cubic-bezier(.16, 1, .3, 1),
+    font-size 120ms ease,
+    transform 170ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .importMainAction span{
+  max-width: 0 !important;
+  opacity: 0 !important;
+  transform: translate3d(-10px, 0, 0) !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+  transition:
+    opacity 120ms ease,
+    transform 320ms cubic-bezier(.16, 1, .3, 1),
+    max-width 380ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+
+/* ======================================================================
+   localtify v0.3.6 V253 — remove star feature visuals and ambience orbs
+====================================================================== */
+
+.app .secretLayer.stars,
+.app .secretLayer.stars .secretRibbon,
+.app .secretLayer.stars .starParticle,
+.app .secretLayer.stars .starParticle::before,
+.app .secretLayer.stars .starParticle::after,
+.app .localtifyStarsBackdrop,
+.app .localtifyStarsLayer,
+.app .localtifyStarsLayerA,
+.app .localtifyStarsLayerB,
+.app .localtifyStarsLayerC,
+.app .localtifyStarsNebula,
+.app .localtifyStarParticle,
+.app .localtifyStarSweep,
+.app .ambientOrb,
+.app .sideAmbienceOrb{
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  animation: none !important;
+}
+
+.app::before,
+.app::after,
+.content::before,
+.content::after,
+.ambientSurface::before,
+.ambientSurface::after,
+.panel.ambientSurface::before,
+.panel.ambientSurface::after{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+  background: none !important;
+  filter: none !important;
+}
+
+.app[data-theme="stars"],
+.app[data-theme="stars"] .content{
+  background-image: none !important;
+  background-color: #050010 !important;
+}

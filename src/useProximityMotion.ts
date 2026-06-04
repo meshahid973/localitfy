@@ -1,4 +1,4 @@
-/* localtify 0.3.6 V216 — strict buttons-only proximity motion.
+/* localtify 0.3.6 V253 — strict buttons-only proximity motion; virtual cover rows skipped.
    Kept:
    - sidebar/nav buttons
    - main action buttons
@@ -66,6 +66,11 @@ const SKIP_SELECTOR = [
   ".playlistShelfCard",
   ".coverTile",
   ".coverGalleryCard",
+  ".coverSongPick",
+  ".coverSongPickVirtual",
+  ".coverGalleryImageButton",
+  ".coverPreviewApplyButton",
+  ".coverGalleryPreviewBar",
   ".settingSwitchCard",
   ".settingsChoice",
   ".settingsThemeCard",
@@ -84,8 +89,8 @@ const RADIUS_PLAYING = 88;
 const MIN_STRENGTH = 0.10;
 const TARGET_REFRESH_IDLE_MS = 1200;
 const TARGET_REFRESH_PLAYING_MS = 1600;
-const MAX_SCAN_IDLE = 42;
-const MAX_SCAN_PLAYING = 28;
+const MAX_SCAN_IDLE = 34;
+const MAX_SCAN_PLAYING = 22;
 const MAX_ACTIVE_IDLE = 3;
 const MAX_ACTIVE_PLAYING = 2;
 

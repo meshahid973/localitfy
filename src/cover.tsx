@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+/* localtify 0.3.6 V253 — remove cover stars, clean ambience text, and stabilize cover gallery virtualization. */
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
 
@@ -174,7 +175,6 @@ function coverEntryMatches(entry: CoverGalleryEntryLike, query: string, coverMoo
     entry.asset.file,
     entry.asset.discordKey,
     tagText,
-    entry.favorite ? "favorite starred" : "",
     entry.excluded ? "hidden excluded" : "visible",
     `${entry.usage} uses`
   ]
@@ -241,13 +241,12 @@ function VirtualCoverSongList({
           return (
             <button
               key={virtualRow.key}
-              ref={rowVirtualizer.measureElement}
               data-index={virtualRow.index}
               type="button"
               className={`coverSongPick coverSongPickVirtual ${selected ? "active" : ""}`}
               onClick={() => toggleCoverSongSelection(song.id)}
               title={song.title || "unknown song"}
-              style={{ transform: `translateY(${virtualRow.start}px)` }}
+              style={{ "--cover-song-y": `${virtualRow.start}px`, transform: "translate3d(0, var(--cover-song-y), 0)" } as CSSProperties}
             >
               <CoverComponent song={song} className="coverSongThumb" />
               <span>
@@ -271,7 +270,6 @@ function VirtualCoverGalleryGrid({
   activeEntryKey,
   onPreviewCover,
   applyCoverAssetToSelection,
-  togglePixelCoverFavorite,
   togglePixelCoverExcluded
 }: {
   entries: CoverGalleryEntryLike[];
@@ -281,7 +279,6 @@ function VirtualCoverGalleryGrid({
   activeEntryKey: string;
   onPreviewCover: (entry: CoverGalleryEntryLike) => void;
   applyCoverAssetToSelection: (asset: RuntimePixelArtAssetLike) => void | Promise<void>;
-  togglePixelCoverFavorite: (key: string) => void;
   togglePixelCoverExcluded: (key: string) => void;
 }) {
   const [parentRef, width] = useMeasuredWidth<HTMLDivElement>();
@@ -312,10 +309,9 @@ function VirtualCoverGalleryGrid({
           return (
             <div
               key={virtualRow.key}
-              ref={rowVirtualizer.measureElement}
               data-index={virtualRow.index}
               className="coverGalleryVirtualRow"
-              style={{ transform: `translateY(${virtualRow.start}px)`, gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+              style={{ "--cover-gallery-row-y": `${virtualRow.start}px`, transform: "translate3d(0, var(--cover-gallery-row-y), 0)", gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` } as CSSProperties}
             >
               {rowEntries.map((entry) => {
                 const imageUrl = entry.asset.url || pixelArtUrl(entry.asset.file);
@@ -325,7 +321,7 @@ function VirtualCoverGalleryGrid({
                 return (
                   <article
                     key={entry.key}
-                    className={`coverGalleryCard ${entry.favorite ? "favorite" : ""} ${entry.excluded ? "excluded" : ""} ${activePreview ? "activePreview" : ""}`}
+                    className={`coverGalleryCard ${entry.excluded ? "excluded" : ""} ${activePreview ? "activePreview" : ""}`}
                     onMouseEnter={() => onPreviewCover(entry)}
                     onFocus={() => onPreviewCover(entry)}
                   >
@@ -347,16 +343,6 @@ function VirtualCoverGalleryGrid({
                     </div>
 
                     <div className="coverGalleryActions">
-                      <button
-                        type="button"
-                        onClick={() => togglePixelCoverFavorite(entry.key)}
-                        className={`coverStarButton ${entry.favorite ? "active" : ""}`}
-                        title={entry.favorite ? "remove favorite" : "favorite cover"}
-                        aria-label={entry.favorite ? "remove favorite" : "favorite cover"}
-                      >
-                        {entry.favorite ? "★" : "☆"}
-                      </button>
-
                       <button
                         type="button"
                         className="coverPreviewButton"
@@ -421,7 +407,6 @@ export default function CoverStudio({
   setCoverSelectedSongIds,
   toggleCoverSongSelection,
   applyCoverAssetToSelection,
-  togglePixelCoverFavorite,
   togglePixelCoverExcluded
 }: CoverStudioProps) {
   const [coverSearch, setCoverSearch] = useState("");
@@ -446,7 +431,6 @@ export default function CoverStudio({
   const previewEntry = useMemo(() => {
     return (
       visibleGalleryAssets.find((entry) => entry.key === previewEntryKey) ||
-      visibleGalleryAssets.find((entry) => entry.favorite) ||
       coverStats.least ||
       visibleGalleryAssets[0] ||
       null
@@ -465,13 +449,19 @@ export default function CoverStudio({
     setPreviewEntryKey("");
   }, [previewEntryKey, visibleGalleryAssets]);
 
+  useEffect(() => {
+    if (coverGalleryMood === "favorites") {
+      setCoverGalleryMood("all");
+    }
+  }, [coverGalleryMood, setCoverGalleryMood]);
+
   return (
     <section className="coverStudioLayout coverStudioLayoutV252">
       <section className="panel coverStudioHero coverStudioHeroV252 ambientSurface" style={ambientStyle ?? undefined}>
         <div className="coverStudioHeroText">
           <p className="eyebrow">cover studio</p>
           <h3>album covers</h3>
-          <p>Choose a song, preview a pixel cover, then apply it instantly. Search, star, hide, or randomize without leaving the gallery.</p>
+          <p>Choose a song, preview a pixel cover, then apply it instantly. Search, hide, or randomize without leaving the gallery.</p>
 
           <div className="coverStudioHeroActions">
             <button
@@ -532,7 +522,7 @@ export default function CoverStudio({
       </section>
 
       <section className="coverMoodTabs" aria-label="cover filters">
-        {coverMoodOptions.map((option) => {
+        {coverMoodOptions.filter((option) => option.id !== "favorites").map((option) => {
           const label = option.name || option.label || coverMoodName(option.id);
           const count = coverMoodCounts.get(option.id) ?? 0;
 
@@ -558,10 +548,6 @@ export default function CoverStudio({
         <div>
           <strong>{coverStats.usedCount ?? 0}</strong>
           <span>used</span>
-        </div>
-        <div>
-          <strong>{coverStats.favoriteCount ?? 0}</strong>
-          <span>favorites</span>
         </div>
         <div>
           <strong>{coverStats.excludedCount ?? 0}</strong>
@@ -625,7 +611,7 @@ export default function CoverStudio({
               className="coverStudioSearchInput coverGallerySearchInput"
               value={coverSearch}
               onChange={(event) => setCoverSearch(event.currentTarget.value)}
-              placeholder="search covers, moods, favorites..."
+              placeholder="search covers or moods..."
               spellCheck={false}
             />
 
@@ -671,7 +657,6 @@ export default function CoverStudio({
             activeEntryKey={previewEntry?.key || ""}
             onPreviewCover={(entry) => setPreviewEntryKey(entry.key)}
             applyCoverAssetToSelection={applyCoverAssetToSelection}
-            togglePixelCoverFavorite={togglePixelCoverFavorite}
             togglePixelCoverExcluded={togglePixelCoverExcluded}
           />
         </section>
