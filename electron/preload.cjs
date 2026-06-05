@@ -33,7 +33,6 @@ contextBridge.exposeInMainWorld("localitfy", {
 
   getSettings: () => ipcRenderer.invoke("settings:get"),
   saveSettings: (settings) => ipcRenderer.invoke("settings:save", settings),
-  restartApp: () => ipcRenderer.invoke("app:restart"),
 
   getPlaylists: () => ipcRenderer.invoke("playlists:get"),
   savePlaylists: (playlists) => ipcRenderer.invoke("playlists:save", playlists),
@@ -57,6 +56,8 @@ contextBridge.exposeInMainWorld("localitfy", {
   minimizeWindow: () => ipcRenderer.invoke("window:minimize"),
   toggleMaximizeWindow: () => ipcRenderer.invoke("window:toggle-maximize"),
   closeWindow: () => ipcRenderer.invoke("window:close"),
+  restartApp: () => ipcRenderer.invoke("localitfy:restart-app"),
+  restartLocaltify: () => ipcRenderer.invoke("localitfy:restart-app"),
 
   checkForUpdates: (payload) => ipcRenderer.invoke("localitfy:check-for-updates", payload),
   downloadUpdate: () => ipcRenderer.invoke("localitfy:download-update"),

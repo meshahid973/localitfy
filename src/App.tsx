@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.7 V268 — restartable translucent window + acrylic settings cleanup. */
+/* localtify 0.3.7 V270 — translucent window controls. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -221,13 +221,21 @@ const VISUAL_CUSTOMIZATION_DEFAULTS = {
   homeLayoutMode: "balanced",
   libraryRowStyle: "comfyRows",
   starsIntensity: "off",
-  supportTranslucentWindow: false,
   sidebarBehavior: "fixed",
-  playerBackgroundStyle: "coverBlur"
+  playerBackgroundStyle: "coverBlur",
+  supportTranslucentWindow: false,
+  windowTransparency: 84,
+  windowBlurIntensity: 18
 } as const;
 
 function normalizeVisualChoice(value: unknown, allowed: readonly string[], fallback: string) {
   return typeof value === "string" && allowed.includes(value) ? value : fallback;
+}
+
+function normalizeWindowNumber(value: unknown, fallback: number, min: number, max: number) {
+  const next = Number(value);
+  if (!Number.isFinite(next)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(next)));
 }
 
 function applyVisualCustomizationDefaults<T extends Record<string, any>>(settings: T): T {
@@ -239,9 +247,11 @@ function applyVisualCustomizationDefaults<T extends Record<string, any>>(setting
     homeLayoutMode: normalizeVisualChoice(settings.homeLayoutMode, ["compact", "balanced", "bigHero", "minimal"], VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode),
     libraryRowStyle: normalizeVisualChoice(settings.libraryRowStyle, ["compactRows", "comfyRows", "coverCards", "listOnly"], VISUAL_CUSTOMIZATION_DEFAULTS.libraryRowStyle),
     starsIntensity: "off",
-    supportTranslucentWindow: Boolean(settings.supportTranslucentWindow ?? VISUAL_CUSTOMIZATION_DEFAULTS.supportTranslucentWindow),
     sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
-    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "acrylic", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle)
+    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "acrylic", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
+    supportTranslucentWindow: Boolean(settings.supportTranslucentWindow ?? VISUAL_CUSTOMIZATION_DEFAULTS.supportTranslucentWindow),
+    windowTransparency: normalizeWindowNumber(settings.windowTransparency, VISUAL_CUSTOMIZATION_DEFAULTS.windowTransparency, 35, 98),
+    windowBlurIntensity: normalizeWindowNumber(settings.windowBlurIntensity, VISUAL_CUSTOMIZATION_DEFAULTS.windowBlurIntensity, 0, 44)
   };
 }
 
@@ -397,17 +407,6 @@ function MainModeApp() {
   const [bootStage, setBootStage] = useState("starting localtify...");
   const [songs, setSongs] = useState<Song[]>([]);
   const [settings, setSettings] = useState<Settings>(() => applyVisualCustomizationDefaults(defaultSettings as Settings));
-
-  useEffect(() => {
-    const enabled = Boolean(settings.supportTranslucentWindow);
-    document.documentElement.classList.toggle("localtifyTranslucentWindow", enabled);
-    document.body.classList.toggle("localtifyTranslucentWindow", enabled);
-
-    return () => {
-      document.documentElement.classList.remove("localtifyTranslucentWindow");
-      document.body.classList.remove("localtifyTranslucentWindow");
-    };
-  }, [settings.supportTranslucentWindow]);
   const [heroMotion, setHeroMotion] = useState<"idle" | "expanding" | "compacting">("idle");
   const [homeEntranceSettled, setHomeEntranceSettled] = useState(false);
   const [isVolumeDragging, setIsVolumeDragging] = useState(false);
@@ -3498,6 +3497,10 @@ function MainModeApp() {
         storedSettings.coverColorSyncMode ?? (storedSettings.showAmbientGradient === false ? "off" : nextSettings.coverColorSyncMode)
       );
       nextSettings.showAmbientGradient = nextSettings.coverColorSyncMode !== "off";
+      nextSettings.starsIntensity = "off";
+      nextSettings.supportTranslucentWindow = Boolean(nextSettings.supportTranslucentWindow);
+      nextSettings.windowTransparency = normalizeWindowNumber(nextSettings.windowTransparency, 84, 35, 98);
+      nextSettings.windowBlurIntensity = normalizeWindowNumber(nextSettings.windowBlurIntensity, 18, 0, 44);
 
       // Simple Mode was removed in v0.2.8. Keep old installs from booting into it.
       nextSettings.simpleMode = false;
@@ -3513,9 +3516,11 @@ function MainModeApp() {
         nextSettings.homeLayoutMode !== storedSettings.homeLayoutMode ||
         nextSettings.libraryRowStyle !== storedSettings.libraryRowStyle ||
         nextSettings.starsIntensity !== storedSettings.starsIntensity ||
-        nextSettings.supportTranslucentWindow !== storedSettings.supportTranslucentWindow ||
         nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior ||
-        nextSettings.playerBackgroundStyle !== storedSettings.playerBackgroundStyle;
+        nextSettings.playerBackgroundStyle !== storedSettings.playerBackgroundStyle ||
+        nextSettings.supportTranslucentWindow !== storedSettings.supportTranslucentWindow ||
+        nextSettings.windowTransparency !== storedSettings.windowTransparency ||
+        nextSettings.windowBlurIntensity !== storedSettings.windowBlurIntensity;
 
       const shouldPersistBootSettings =
         shouldApplyV013Defaults ||
@@ -4673,9 +4678,11 @@ function MainModeApp() {
       key === "homeLayoutMode" ||
       key === "libraryRowStyle" ||
       key === "starsIntensity" ||
-      key === "supportTranslucentWindow" ||
       key === "sidebarBehavior" ||
-      key === "playerBackgroundStyle"
+      key === "playerBackgroundStyle" ||
+      key === "supportTranslucentWindow" ||
+      key === "windowTransparency" ||
+      key === "windowBlurIntensity"
     ) {
       kickThemeSettle();
     }
@@ -4692,13 +4699,19 @@ function MainModeApp() {
 
     await persistSettings(next, debounce);
 
+    if (key === "supportTranslucentWindow" && !debounce && bootedRef.current) {
+      showAppToast(value ? "Translucent window mode saved" : "Solid window mode saved", "success");
+      window.setTimeout(() => {
+        window.localitfy?.restartApp?.();
+      }, 650);
+      return;
+    }
+
     if (!debounce && bootedRef.current) {
       if (key === "theme" || key === "customThemeEnabled") {
         showAppToast("Theme changed", "success");
       } else if (String(key).startsWith("discord")) {
         showAppToast("Discord presence updated", "success");
-      } else if (key === "supportTranslucentWindow") {
-        showAppToast("Restarting to apply window glass", "work");
       } else if (key === "autoUpdateEnabled" || key === "autoUpdateNotifyOnly") {
         showAppToast("Settings saved", "success");
       }

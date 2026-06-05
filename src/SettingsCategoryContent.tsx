@@ -1,4 +1,4 @@
-/* localtify 0.3.7 V268 — window glass setting replaces stars, with cleaner acrylic controls. */
+/* localtify 0.3.7 V270 — translucent window controls. */
 import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
@@ -338,6 +338,112 @@ function VisualOptionGroup({
   );
 }
 
+
+function RangeSettingRow({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  suffix = "",
+  onChange
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  suffix?: string;
+  onChange: (value: number) => void | Promise<void>;
+}) {
+  const safeValue = Number.isFinite(Number(value)) ? Number(value) : min;
+  const clampedValue = clamp(safeValue, min, max);
+
+  return (
+    <div className="rangeSettingRowV270">
+      <div className="rangeSettingRowHeadV270">
+        <span>{label}</span>
+        <strong>{clampedValue}{suffix}</strong>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={clampedValue}
+        onChange={(event) => onChange(Number(event.currentTarget.value))}
+      />
+    </div>
+  );
+}
+
+function readNumberSetting(settings: Settings, key: string, fallback: number, min: number, max: number) {
+  const next = Number(settings?.[key]);
+  if (!Number.isFinite(next)) return fallback;
+  return clamp(Math.round(next), min, max);
+}
+
+function TranslucentWindowControl({
+  settings,
+  updateSetting
+}: {
+  settings: Settings;
+  updateSetting: (...args: any[]) => void | Promise<void>;
+}) {
+  const enabled = Boolean(settings.supportTranslucentWindow);
+  const transparency = readNumberSetting(settings, "windowTransparency", 84, 35, 98);
+  const blur = readNumberSetting(settings, "windowBlurIntensity", 18, 0, 44);
+
+  return (
+    <div className={`translucentWindowControlV270 ${enabled ? "active" : ""}`}>
+      <div className="translucentWindowControlHeadV270">
+        <div>
+          <strong>Translucent window</strong>
+          <span>System glass background.</span>
+        </div>
+        <label className="cleanToggleLabel translucentWindowToggleV270">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(event) => updateSetting("supportTranslucentWindow", event.currentTarget.checked)}
+          />
+          <span>{enabled ? "Enabled" : "Off"}</span>
+        </label>
+      </div>
+
+      {enabled ? (
+        <div className="translucentWindowSlidersV270">
+          <RangeSettingRow
+            label="Transparency"
+            value={transparency}
+            min={35}
+            max={98}
+            step={1}
+            suffix="%"
+            onChange={(value) => updateSetting("windowTransparency", value, true)}
+          />
+          <RangeSettingRow
+            label="Background blur"
+            value={blur}
+            min={0}
+            max={44}
+            step={1}
+            suffix="px"
+            onChange={(value) => updateSetting("windowBlurIntensity", value, true)}
+          />
+          <small className="translucentWindowHintV270">
+            Turning this on or off restarts localtify. Sliders save and update the transparent background surface.
+          </small>
+        </div>
+      ) : (
+        <small className="translucentWindowHintV270">
+          Enable this for a transparent Electron window with adjustable background opacity and blur.
+        </small>
+      )}
+    </div>
+  );
+}
+
 const HOME_BANNER_TYPE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "dynamic", label: "Dynamic", note: "cover tint" },
   { id: "albumCover", label: "Album cover", note: "cover focus" },
@@ -355,7 +461,7 @@ const BLUR_EFFECT_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
 const MEDIA_CARD_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "solid", label: "Solid", note: "flat cards" },
   { id: "glassy", label: "Glassy", note: "transparent" },
-  { id: "acrylic", label: "Acrylic", note: "glass" },
+  { id: "acrylic", label: "Acrylic", note: "acrylic" },
   { id: "oledFlat", label: "OLED flat", note: "black" }
 ];
 
@@ -389,7 +495,7 @@ const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
 const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "flat", label: "Flat", note: "flat" },
   { id: "coverBlur", label: "Cover blur", note: "cover glow" },
-  { id: "acrylic", label: "Acrylic", note: "glass" },
+  { id: "acrylic", label: "Acrylic", note: "acrylic" },
   { id: "oledBlack", label: "OLED black", note: "black" }
 ];
 
@@ -592,7 +698,7 @@ return (
           <div className="settingsPanelHeader visualCustomizationHeaderV205">
             <div>
               <strong>Visuals</strong>
-              <span>Quick controls for the home screen, cards, sidebar, player, and window glass.</span>
+              <span>Quick controls for the home screen, cards, window glass, sidebar, and player.</span>
             </div>
           </div>
 
@@ -637,24 +743,7 @@ return (
               onChange={(value) => updateSetting("libraryRowStyle", value)}
             />
 
-            <div className="visualOptionGroupV205 visualTranslucentGroupV268">
-              <div className="visualOptionGroupHeadV205">
-                <strong>Window glass</strong>
-                <span>requires restart</span>
-              </div>
-              <label className={`visualTranslucentToggleV268 ${settings.supportTranslucentWindow ? "active" : ""}`}>
-                <input
-                  type="checkbox"
-                  checked={Boolean(settings.supportTranslucentWindow)}
-                  onChange={(event) => updateSetting("supportTranslucentWindow", event.currentTarget.checked)}
-                />
-                <span className="visualTranslucentSwitchV268" aria-hidden="true" />
-                <span className="visualTranslucentCopyV268">
-                  <strong>Support translucent window</strong>
-                  <small>{settings.supportTranslucentWindow ? "on — localtify restarts when changed" : "off — safer normal window"}</small>
-                </span>
-              </label>
-            </div>
+            <TranslucentWindowControl settings={settings} updateSetting={updateSetting} />
 
             <VisualOptionGroup
               title="Sidebar"
