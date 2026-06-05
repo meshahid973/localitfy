@@ -1,4 +1,4 @@
-/* localtify 0.3.6 V193 — Electron responsiveness cleanup. */
+/* localtify 0.3.7 V254 — packaged Spotify client ID + OAuth callback stability fix. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -9,51 +9,109 @@ const { execFile } = require("node:child_process");
 const { pathToFileURL } = require("node:url");
 
 function loadLocaltifyEnv() {
-  const envPath = path.join(process.cwd(), ".env");
+  const publicSpotifyClientId = "586c22791eb74d73b1c83db88f1d4c52";
 
-  try {
-    require("dotenv").config({ path: envPath });
-  } catch {
-    // dotenv is optional. The manual parser below is the fallback.
-  }
+  const safePath = (...parts) => {
+    try {
+      if (parts.some((part) => !part)) return "";
+      return path.join(...parts);
+    } catch {
+      return "";
+    }
+  };
 
-  try {
-    if (!fs.existsSync(envPath)) return;
+  const appPath = (() => {
+    try {
+      return typeof app.getAppPath === "function" ? app.getAppPath() : "";
+    } catch {
+      return "";
+    }
+  })();
 
-    const raw = fs.readFileSync(envPath, "utf-8");
-    let injected = 0;
+  const resourcePath = (() => {
+    try {
+      return process.resourcesPath || "";
+    } catch {
+      return "";
+    }
+  })();
 
-    for (const line of raw.split(/\r?\n/)) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) continue;
+  const possibleEnvPaths = (() => {
+    const seen = new Set();
+    return [
+      safePath(process.cwd(), ".env"),
+      safePath(process.cwd(), ".env.production"),
+      safePath(appPath, ".env"),
+      safePath(appPath, ".env.production"),
+      safePath(resourcePath, ".env"),
+      safePath(resourcePath, ".env.production"),
+      safePath(resourcePath, "app", ".env"),
+      safePath(resourcePath, "app", ".env.production")
+    ].filter(Boolean).filter((item) => {
+      const key = path.normalize(item).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  })();
 
-      const eqIndex = trimmed.indexOf("=");
-      if (eqIndex <= 0) continue;
-
-      const key = trimmed.slice(0, eqIndex).trim();
-      let value = trimmed.slice(eqIndex + 1).trim();
-
-      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
-
-      if (
-        (value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))
-      ) {
-        value = value.slice(1, -1);
-      }
-
-      if (typeof process.env[key] === "undefined") {
-        process.env[key] = value;
-        injected += 1;
-      }
+  for (const envPath of possibleEnvPaths) {
+    try {
+      require("dotenv").config({ path: envPath, override: false });
+    } catch {
+      // dotenv is optional. The manual parser below is the fallback.
     }
 
-    if (injected > 0) {
-      console.log(`[localtify env] injected ${injected} value${injected === 1 ? "" : "s"} from .env`);
+    try {
+      if (!fs.existsSync(envPath)) continue;
+
+      const raw = fs.readFileSync(envPath, "utf-8");
+      let injected = 0;
+
+      for (const line of raw.split(/\r?\n/)) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+
+        const eqIndex = trimmed.indexOf("=");
+        if (eqIndex <= 0) continue;
+
+        const key = trimmed.slice(0, eqIndex).trim();
+        let value = trimmed.slice(eqIndex + 1).trim();
+
+        if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
+          value = value.slice(1, -1);
+        }
+
+        if (typeof process.env[key] === "undefined") {
+          process.env[key] = value;
+          injected += 1;
+        }
+      }
+
+      if (injected > 0) {
+        console.log(`[localtify env] injected ${injected} value${injected === 1 ? "" : "s"} from ${envPath}`);
+      }
+    } catch (error) {
+      console.log("[localtify env] failed to read env file", envPath, error?.message || error);
     }
-  } catch (error) {
-    console.log("[localtify env] failed to read .env", error?.message || error);
   }
+
+  // Spotify Client ID is public and safe to ship. Never ship a Spotify Client Secret.
+  process.env.SPOTIFY_CLIENT_ID =
+    process.env.SPOTIFY_CLIENT_ID ||
+    process.env.VITE_SPOTIFY_CLIENT_ID ||
+    process.env.VITE_PUBLIC_SPOTIFY_CLIENT_ID ||
+    publicSpotifyClientId;
+
+  process.env.VITE_PUBLIC_SPOTIFY_CLIENT_ID =
+    process.env.VITE_PUBLIC_SPOTIFY_CLIENT_ID ||
+    process.env.SPOTIFY_CLIENT_ID ||
+    publicSpotifyClientId;
 }
 
 loadLocaltifyEnv();
@@ -1371,7 +1429,7 @@ const SPOTIFY_CLIENT_ID = String(
   process.env.SPOTIFY_CLIENT_ID ||
   process.env.VITE_SPOTIFY_CLIENT_ID ||
   process.env.VITE_PUBLIC_SPOTIFY_CLIENT_ID ||
-  ""
+  "586c22791eb74d73b1c83db88f1d4c52"
 ).trim();
 
 const SPOTIFY_OAUTH_FILE = () => path.join(app.getPath("userData"), "spotify-oauth.json");
@@ -1608,9 +1666,10 @@ function createSpotifyCallbackWaiter(expectedState) {
   let server = null;
   let timer = null;
   let settled = false;
+  let finish = null;
 
   const promise = new Promise((resolve, reject) => {
-    const finish = (error, value) => {
+    finish = (error, value) => {
       if (settled) return;
       settled = true;
 
@@ -1621,6 +1680,8 @@ function createSpotifyCallbackWaiter(expectedState) {
         if (server) server.close();
       } catch {
       }
+
+      server = null;
 
       if (error) reject(error);
       else resolve(value);
@@ -1665,16 +1726,18 @@ function createSpotifyCallbackWaiter(expectedState) {
         res.end("<html><body style='font-family:sans-serif;background:#08070f;color:white'><h2>Spotify connected to localtify.</h2><p>You can close this window now.</p></body></html>");
         finish(null, { code });
       } catch (error) {
-        finish(error);
+        if (typeof finish === "function") finish(error);
       }
     });
 
     server.once("error", (error) => {
-      finish(new Error(`Spotify callback server failed: ${error?.message || error}`));
+      if (typeof finish === "function") {
+        finish(new Error(`Spotify callback server failed: ${error?.message || error}`));
+      }
     });
 
     timer = setTimeout(() => {
-      finish(new Error("Spotify login timed out."));
+      if (typeof finish === "function") finish(new Error("Spotify login timed out."));
     }, 5 * 60 * 1000);
 
     server.listen(SPOTIFY_REDIRECT_PORT, "127.0.0.1");
@@ -1683,7 +1746,7 @@ function createSpotifyCallbackWaiter(expectedState) {
   return {
     promise,
     cancel: (reason = "Spotify login cancelled.") => {
-      if (!settled) {
+      if (!settled && typeof finish === "function") {
         finish(new Error(reason));
       }
     }
