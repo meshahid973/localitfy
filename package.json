@@ -1,10 +1,13 @@
 {
   "name": "localtify",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "private": true,
   "productName": "localtify",
-  "description": "localtify - local music player",
-  "author": "meshahid973",
+  "description": "Spotify-style local music player with playlists, downloads, Discord RPC, custom themes, and pixel-art covers.",
+  "author": {
+    "name": "meshahid973",
+    "email": "coderpixelbusiness@gmail.com"
+  },
   "main": "electron/main.cjs",
   "repository": {
     "type": "git",
@@ -21,7 +24,10 @@
     "assets:compress:dry": "node scripts/compress-localtify-assets.mjs --dry-run",
     "clean:builds": "node scripts/compress-localtify-assets.mjs --clean-build-output",
     "prebuild": "node scripts/compress-localtify-assets.mjs",
-    "chunks:audit": "node -e \"const fs=require('fs'),p='dist/assets'; if(!fs.existsSync(p)){console.log('run npm run build first'); process.exit(0)}; fs.readdirSync(p).map(n=>({n,s:fs.statSync(p+'/'+n).size})).sort((a,b)=>b.s-a.s).slice(0,30).forEach(x=>console.log((x.s/1024).toFixed(1)+' KB  '+x.n))\""
+    "chunks:audit": "node -e \"const fs=require('fs'),p='dist/assets'; if(!fs.existsSync(p)){console.log('run npm run build first'); process.exit(0)}; fs.readdirSync(p).map(n=>({n,s:fs.statSync(p+'/'+n).size})).sort((a,b)=>b.s-a.s).slice(0,30).forEach(x=>console.log((x.s/1024).toFixed(1)+' KB  '+x.n))\"",
+    "dist:linux": "npm run clean:release && npm run build && electron-builder --linux AppImage rpm deb --x64 --publish never",
+    "publish:linux": "npm run clean:release && npm run build && electron-builder --linux AppImage rpm deb --x64 --publish always",
+    "dist:linux:appimage": "npm run clean:release && npm run build && electron-builder --linux AppImage --x64 --publish never"
   },
   "dependencies": {
     "better-sqlite3": "^12.5.0",
@@ -149,6 +155,32 @@
         "repo": "localitfy"
       }
     ],
-    "compression": "maximum"
+    "compression": "maximum",
+    "linux": {
+      "icon": "build/icon.png",
+      "category": "AudioVideo",
+      "maintainer": "meshahid973 <coderpixelbusiness@gmail.com>",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "localtify-${version}-${arch}.${ext}"
+    }
   }
 }
