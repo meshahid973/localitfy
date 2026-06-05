@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.6 V251 — faster virtual rendering; keeps current view UI. */
+/* localtify 0.3.7 V255 — Linux support release notes and platform polish. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -760,7 +760,7 @@ export const updateRibbonEnterSpring = { type: "spring", stiffness: 500, damping
 export const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, mass: 0.55 } as const;
 
 
-export const APP_VERSION = "0.3.6";
+export const APP_VERSION = "0.3.7";
 export const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 export const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 export const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
@@ -855,11 +855,11 @@ export function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 export const whatsNewItems = [
-  "0.3.6 starts the big App.tsx split so the renderer is easier to repair without breaking random UI areas",
-  "The main visual shell now lives in its own LocaltifyAppView file while App.tsx keeps the controller, playback, and data logic",
-  "Update UI, player layout, settings, playlists, downloads, Discord, and cover features stay wired through the same existing state",
-  "No tilt was added back, and the blur, ambience, animated stars, cover glow, and normal motion style stay enabled",
-  "This is a foundation update for cleaner future fixes instead of stacking more emergency code into one giant file"
+  "0.3.7 adds official Linux build support with AppImage, RPM, and DEB release targets",
+  "Spotify login now works in packaged builds because the public client ID fallback is built into Electron safely",
+  "Settings now show your desktop platform so Windows and Linux users see the right app controls",
+  "Linux users get clearer install notes for AppImage, Fedora/openSUSE RPM, and Ubuntu/Debian DEB builds",
+  "Windows-only startup controls are hidden on Linux so the settings page no longer shows confusing Windows wording"
 ];
 export const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 export const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -3439,6 +3439,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     downloadSpotifyTracks,
     setSpotifyTracks,
     spotifyLoggedIn,
+    spotifyConnectionReady = true,
+    spotifyNeedsClientId = false,
+    spotifyConnectionMode = "oauth-pkce",
+    spotifyRedirectUri = "http://127.0.0.1:43877/spotify/callback",
+    spotifySourceName = "",
+    spotifySourceType = "",
     spotifyLoginBusy,
     spotifyShowCookieInput,
     setSpotifyShowCookieInput,
@@ -3540,6 +3546,19 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     stopFade,
     stopProgressLoop
   } = props;
+
+  const spotifySelectedCount = spotifySelectedIds?.size || 0;
+  const spotifyTotalDuration = Array.isArray(spotifyTracks)
+    ? spotifyTracks.reduce((total: number, track: any) => total + Number(track?.duration || Math.round(Number(track?.durationMs || 0) / 1000) || 0), 0)
+    : 0;
+  const spotifySourceLabel = String(spotifySourceType || "playlist").trim().toLowerCase();
+  const spotifyConnectionLabel = spotifyNeedsClientId
+    ? "setup needed"
+    : spotifyLoggedIn
+      ? "connected"
+      : spotifyConnectionReady
+        ? "ready to connect"
+        : "not ready";
 
   return (
     <main
@@ -4710,88 +4729,114 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   {/* ── Spotify tab ───────────────────────────────── */}
                   {downloadsTab === "spotify" && (
                     <>
-                      {/* ── Auth status card ── */}
-                      <div className={`spotifyAuthCard${spotifyLoggedIn ? " loggedIn" : ""}`}>
-                        <div className="spotifyAuthLeft">
-                          <span className="spotifyAuthDot" aria-hidden="true" />
-                          <div>
-                            <strong>{spotifyLoggedIn ? "Spotify connected" : "Spotify public import"}</strong>
-                            <p>
-                              Connect once with Spotify. No cookie paste. Only public playlists, albums, and tracks are imported.
-                            </p>
+                      <div className="spotifyFlowPanel spotifyFlowPanelV256">
+                        <div className={`spotifyAuthCard spotifyAuthCardV256${spotifyLoggedIn ? " loggedIn" : ""}${spotifyNeedsClientId ? " needsSetup" : ""}`}>
+                          <div className="spotifyAuthLeft">
+                            <span className="spotifyAuthDot" aria-hidden="true" />
+                            <div>
+                              <span className="spotifyConnectionBadge">{spotifyConnectionLabel}</span>
+                              <strong>{spotifyLoggedIn ? "Spotify is connected" : spotifyNeedsClientId ? "Spotify setup needed" : "Connect Spotify"}</strong>
+                              <p>
+                                {spotifyLoggedIn
+                                  ? "Paste a playlist, album, or track link below. localtify will fetch the tracks first, then you choose what to download."
+                                  : spotifyNeedsClientId
+                                    ? "This build is missing the Spotify Client ID. Rebuild localtify with the packaged client ID fix."
+                                    : "Connect once with Spotify. No cookie paste. Public playlists, albums, and tracks only."}
+                              </p>
+                              <small className="spotifyConnectionMeta">
+                                mode: {spotifyConnectionMode || "oauth-pkce"} · redirect: {spotifyRedirectUri || "127.0.0.1 callback"}
+                              </small>
+                            </div>
+                          </div>
+                          <div className="spotifyAuthActions">
+                            <button
+                              className="heroMain spotifyAuthBtn"
+                              onClick={() => void handleSpotifyLogin()}
+                              disabled={spotifyLoginBusy || spotifyNeedsClientId}
+                            >
+                              {spotifyLoginBusy ? "opening..." : spotifyLoggedIn ? "reconnect" : "connect spotify"}
+                            </button>
+                            <button
+                              className="softButton spotifyAuthBtn"
+                              onClick={() => void handleSpotifyLogout()}
+                              disabled={spotifyLoginBusy || (!spotifyLoggedIn && !spotifyTracks.length)}
+                            >
+                              disconnect
+                            </button>
                           </div>
                         </div>
-                        <div className="spotifyAuthActions">
+
+                        <div className="spotifyFlowSteps" aria-label="Spotify download flow">
+                          <span className={`spotifyFlowStep${spotifyUrl.trim() ? " done" : " active"}`}>1 paste link</span>
+                          <span className={`spotifyFlowStep${spotifyTracks.length ? " done" : spotifyUrl.trim() ? " active" : ""}`}>2 fetch tracks</span>
+                          <span className={`spotifyFlowStep${spotifySelectedCount ? " active" : ""}`}>3 download selected</span>
+                        </div>
+
+                        <div className="downloadNotice downloadNoticeV031 spotifyNotice spotifyNoticeV256">
+                          Paste a Spotify playlist, album, or track link. Private playlists must be public on your profile, not only shareable by link.
+                        </div>
+
+                        <div className="spotifyUrlRow spotifyUrlRowV256">
+                          <input
+                            type="url"
+                            className="downloadTextarea downloadTextareaV031 spotifyUrlInput"
+                            value={spotifyUrl}
+                            onChange={(e) => { setSpotifyUrl(e.currentTarget.value); setSpotifyFetchError(""); }}
+                            placeholder="paste Spotify link → fetch tracks → download selected"
+                            disabled={spotifyFetchBusy || spotifyDownloadBusy || spotifyNeedsClientId}
+                            onKeyDown={(e) => { if (e.key === "Enter" && spotifyUrl.trim()) void fetchSpotifyTracks(); }}
+                          />
                           <button
-                            className="heroMain spotifyAuthBtn"
-                            onClick={() => void handleSpotifyLogin()}
-                            disabled={spotifyLoginBusy}
+                            className="heroMain spotifyFetchButton"
+                            onClick={() => void fetchSpotifyTracks()}
+                            disabled={spotifyFetchBusy || spotifyDownloadBusy || !spotifyUrl.trim() || spotifyNeedsClientId}
                           >
-                            {spotifyLoginBusy ? "opening..." : spotifyLoggedIn ? "reconnect" : "connect spotify"}
-                          </button>
-                          <button
-                            className="softButton spotifyAuthBtn"
-                            onClick={() => void handleSpotifyLogout()}
-                            disabled={spotifyLoginBusy}
-                          >
-                            disconnect
+                            {spotifyFetchBusy ? "fetching..." : spotifyTracks.length ? "refresh tracks" : "fetch tracks"}
                           </button>
                         </div>
+
+                        {spotifyFetchError ? (
+                          <div className={`spotifyError spotifyErrorV256${/public|private|profile/i.test(spotifyFetchError) ? " privateHint" : ""}`}>
+                            <strong>{/public|private|profile/i.test(spotifyFetchError) ? "Playlist visibility problem" : "Spotify needs attention"}</strong>
+                            {spotifyFetchError.split("\n").map((line: string, index: number) => (
+                              line.trim() ? <p key={`${line}-${index}`}>{line}</p> : null
+                            ))}
+                          </div>
+                        ) : null}
                       </div>
 
-                      {/* ── URL fetch ── */}
-                      <div className="downloadNotice downloadNoticeV031 spotifyNotice">
-                        Paste a Spotify playlist, album, or track link. If Spotify blocks it, make the playlist public on your profile, not only shareable by link.
-                      </div>
-
-                      <div className="spotifyUrlRow">
-                        <input
-                          type="url"
-                          className="downloadTextarea downloadTextareaV031 spotifyUrlInput"
-                          value={spotifyUrl}
-                          onChange={(e) => { setSpotifyUrl(e.currentTarget.value); setSpotifyFetchError(""); }}
-                          placeholder="https://open.spotify.com/playlist/..."
-                          disabled={spotifyFetchBusy || spotifyDownloadBusy}
-                          onKeyDown={(e) => { if (e.key === "Enter" && spotifyUrl.trim()) void fetchSpotifyTracks(); }}
-                        />
-                        <button
-                          className="heroMain spotifyFetchButton"
-                          onClick={() => void fetchSpotifyTracks()}
-                          disabled={spotifyFetchBusy || spotifyDownloadBusy || !spotifyUrl.trim()}
-                        >
-                          {spotifyFetchBusy ? "fetching..." : "fetch tracks"}
-                        </button>
-                      </div>
-
-                      {spotifyFetchError ? (
-                        <div className="spotifyError">{spotifyFetchError}</div>
-                      ) : null}
-
-                      {/* ── Track list ── */}
                       {spotifyTracks.length > 0 && (
-                        <div className="spotifyTrackList">
-                          <div className="spotifyTrackListHead">
-                            <strong>{spotifyTracks.length} track{spotifyTracks.length !== 1 ? "s" : ""} found</strong>
+                        <div className="spotifyTrackList spotifyTrackListV256">
+                          <div className="spotifyTrackListHead spotifyTrackListHeadV256">
+                            <div>
+                              <span className="spotifySourceBadge">{spotifySourceLabel || "playlist"}</span>
+                              <strong>{spotifySourceName || `${spotifyTracks.length} Spotify tracks`}</strong>
+                              <p>
+                                {spotifyTracks.length} track{spotifyTracks.length !== 1 ? "s" : ""} found
+                                {spotifyTotalDuration ? ` · ${formatTime(spotifyTotalDuration)}` : ""}
+                                {spotifySelectedCount ? ` · ${spotifySelectedCount} selected` : " · none selected"}
+                              </p>
+                            </div>
                             <div className="spotifySelectActions">
                               <button
                                 className="softButton"
-                                onClick={() => setSpotifySelectedIds(new Set(spotifyTracks.map((t) => t.id)))}
-                                disabled={spotifyDownloadBusy}
+                                onClick={() => setSpotifySelectedIds(new Set(spotifyTracks.map((t: any) => t.id)))}
+                                disabled={spotifyDownloadBusy || spotifySelectedCount === spotifyTracks.length}
                               >
-                                all
+                                select all
                               </button>
                               <button
                                 className="softButton"
                                 onClick={() => setSpotifySelectedIds(new Set())}
-                                disabled={spotifyDownloadBusy}
+                                disabled={spotifyDownloadBusy || !spotifySelectedCount}
                               >
-                                none
+                                clear selection
                               </button>
                             </div>
                           </div>
 
-                          <div className="spotifyTrackItems">
-                            {spotifyTracks.map((track, i) => {
+                          <div className="spotifyTrackItems spotifyTrackItemsV256">
+                            {spotifyTracks.map((track: any, i: number) => {
                               const selected = spotifySelectedIds.has(track.id);
                               return (
                                 <button
@@ -4800,7 +4845,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                   type="button"
                                   disabled={spotifyDownloadBusy}
                                   onClick={() => {
-                                    setSpotifySelectedIds((prev) => {
+                                    setSpotifySelectedIds((prev: Set<string>) => {
                                       const next = new Set(prev);
                                       if (next.has(track.id)) next.delete(track.id);
                                       else next.add(track.id);
@@ -4817,7 +4862,11 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                   )}
                                   <div className="spotifyTrackMeta">
                                     <strong>{track.title}</strong>
-                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` · ${track.albumName}` : ""}</p>
+                                    <p>
+                                      {track.artist || "artist will be matched during download"}
+                                      {track.albumName ? ` · ${track.albumName}` : ""}
+                                      {track.duration || track.durationMs ? ` · ${formatTime(Number(track.duration || Math.round(Number(track.durationMs || 0) / 1000)))}` : ""}
+                                    </p>
                                   </div>
                                   <span className="spotifyTrackCheck" aria-hidden="true">{selected ? "✓" : ""}</span>
                                 </button>
@@ -4825,15 +4874,25 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             })}
                           </div>
 
-                          <div className="downloadActions downloadActionsV031 spotifyDownloadRow">
+                          <div className="downloadActions downloadActionsV031 spotifyDownloadRow spotifyDownloadRowV256">
                             <button
                               className="heroMain spotifyDownloadButton"
                               onClick={() => void downloadSpotifyTracks()}
-                              disabled={spotifyDownloadBusy || !spotifySelectedIds.size}
+                              disabled={spotifyDownloadBusy || !spotifySelectedCount}
                             >
                               {spotifyDownloadBusy
                                 ? "downloading..."
-                                : `download ${spotifySelectedIds.size} track${spotifySelectedIds.size !== 1 ? "s" : ""}`}
+                                : `download selected (${spotifySelectedCount})`}
+                            </button>
+                            <button
+                              className="heroGhost"
+                              onClick={() => {
+                                setSpotifySelectedIds(new Set(spotifyTracks.map((t: any) => t.id)));
+                                void downloadSpotifyTracks(spotifyTracks);
+                              }}
+                              disabled={spotifyDownloadBusy || !spotifyTracks.length}
+                            >
+                              download all
                             </button>
                             {spotifyDownloadBusy ? (
                               <button className="heroGhost dangerGhost" onClick={() => void cancelCurrentDownload()}>

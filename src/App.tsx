@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.6 V253 — remove stars feature and ambient orb triggers; keeps Spotify/import UI untouched. */
+/* localtify 0.3.7 V255 — Linux support platform behavior and packaged Spotify fix wiring. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -244,6 +244,75 @@ function applyVisualCustomizationDefaults<T extends Record<string, any>>(setting
 }
 
 
+type LocaltifyPlatformInfo = {
+  id: "windows" | "linux" | "mac" | "unknown";
+  label: string;
+  releaseLabel: string;
+  startupSettingSupported: boolean;
+  desktopControlsLabel: string;
+  desktopControlsHelp: string;
+  startupSettingLabel: string;
+  startupSettingHelp: string;
+  linuxInstallNotes: string[];
+};
+
+function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
+  const userAgent = typeof navigator !== "undefined" ? String(navigator.userAgent || "").toLowerCase() : "";
+  const platform = typeof navigator !== "undefined" ? String(navigator.platform || "").toLowerCase() : "";
+
+  const isLinux = /linux|x11|wayland/.test(userAgent) || platform.includes("linux");
+  const isMac = /mac os|macintosh|darwin/.test(userAgent) || platform.includes("mac");
+  const isWindows = /windows|win32|win64|wow64/.test(userAgent) || platform.includes("win");
+
+  if (isLinux) {
+    return {
+      id: "linux",
+      label: "Linux",
+      releaseLabel: "AppImage / RPM / DEB",
+      startupSettingSupported: false,
+      desktopControlsLabel: "Linux desktop controls",
+      desktopControlsHelp: "Tray and media keys work where your Linux desktop environment exposes them. Windows startup is hidden here because Linux uses desktop-specific autostart files.",
+      startupSettingLabel: "Start localtify with Linux",
+      startupSettingHelp: "Linux autostart will be added later through a proper desktop-entry flow.",
+      linuxInstallNotes: [
+        "AppImage: chmod +x localtify-0.3.7-x64.AppImage, then run it directly.",
+        "RPM: for Fedora, openSUSE, and RHEL-style distros.",
+        "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
+      ]
+    };
+  }
+
+  if (isMac) {
+    return {
+      id: "mac",
+      label: "macOS",
+      releaseLabel: "macOS build not published yet",
+      startupSettingSupported: false,
+      desktopControlsLabel: "macOS desktop controls",
+      desktopControlsHelp: "macOS support is not part of this release yet. This page keeps Windows-only startup controls hidden.",
+      startupSettingLabel: "Start localtify with macOS",
+      startupSettingHelp: "macOS autostart will be added later when a signed macOS build exists.",
+      linuxInstallNotes: []
+    };
+  }
+
+  return {
+    id: isWindows ? "windows" : "unknown",
+    label: isWindows ? "Windows" : "Unknown desktop",
+    releaseLabel: isWindows ? "NSIS installer" : "Desktop build",
+    startupSettingSupported: isWindows,
+    desktopControlsLabel: isWindows ? "Windows controls" : "Desktop controls",
+    desktopControlsHelp: isWindows
+      ? "Use keyboard media keys, taskbar buttons, tray controls, and Windows now playing."
+      : "Tray and media keys are available where the current desktop environment supports them.",
+    startupSettingLabel: "Start localtify when Windows starts",
+    startupSettingHelp: "Enabled by default so the player is ready after you sign in. You can turn it off anytime.",
+    linuxInstallNotes: []
+  };
+}
+
+
+
 function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
@@ -476,6 +545,10 @@ function MainModeApp() {
   const [spotifySelectedIds, setSpotifySelectedIds] = useState<Set<string>>(new Set());
   const [spotifyDownloadBusy, setSpotifyDownloadBusy] = useState(false);
   const [spotifyLoggedIn, setSpotifyLoggedIn] = useState(false);
+  const [spotifyConnectionReady, setSpotifyConnectionReady] = useState(true);
+  const [spotifyNeedsClientId, setSpotifyNeedsClientId] = useState(false);
+  const [spotifyConnectionMode, setSpotifyConnectionMode] = useState("oauth-pkce");
+  const [spotifyRedirectUri, setSpotifyRedirectUri] = useState("http://127.0.0.1:43877/spotify/callback");
   const [spotifyLoginBusy, setSpotifyLoginBusy] = useState(false);
   const [spotifyShowCookieInput, setSpotifyShowCookieInput] = useState(false);
   const [spotifyCookieDraft, setSpotifyCookieDraft] = useState("");
@@ -1168,13 +1241,19 @@ function MainModeApp() {
     resetKey: `${effectiveTheme}:${view}:${settingsCategory}:${themeMotionReady ? "ready" : "boot"}:${isPlaying ? "playing" : "idle"}`
   });
 
+  const platformInfo = useMemo(() => getLocaltifyPlatformInfo(), []);
+
   const diagnosticsInfo = useMemo(() => {
     const themeLabel = settings.customThemeEnabled ? `${currentTheme.name} + custom colors` : currentTheme.name;
     const discordStatus = settings.discordEnabled ? "enabled" : "disabled";
-    const startupStatus = settings.startWithWindows ? "enabled" : "disabled";
+    const startupStatus = platformInfo.startupSettingSupported
+      ? (settings.startWithWindows ? "enabled" : "disabled")
+      : "not supported on this platform";
 
     const items = [
       { label: "app version", value: APP_VERSION },
+      { label: "platform", value: platformInfo.label },
+      { label: "release package", value: platformInfo.releaseLabel },
       { label: "song count", value: String(songs.length) },
       { label: "playlist count", value: String(playlists.length) },
       { label: "theme", value: themeLabel },
@@ -1186,6 +1265,8 @@ function MainModeApp() {
       items,
       copyText: [
         `localtify version: ${APP_VERSION}`,
+        `platform: ${platformInfo.label}`,
+        `release package: ${platformInfo.releaseLabel}`,
         `song count: ${songs.length}`,
         `playlist count: ${playlists.length}`,
         `theme: ${themeLabel}`,
@@ -1195,6 +1276,9 @@ function MainModeApp() {
     };
   }, [
     currentTheme.name,
+    platformInfo.label,
+    platformInfo.releaseLabel,
+    platformInfo.startupSettingSupported,
     playlists.length,
     settings.customThemeEnabled,
     settings.discordEnabled,
@@ -3378,7 +3462,7 @@ function MainModeApp() {
 
       const storedSettings = (payload.settings || {}) as Partial<Settings>;
       const shouldApplyV013Defaults = window.localStorage.getItem(V013_DEFAULTS_KEY) !== "true";
-      const shouldApplyStartWithWindowsDefault = typeof storedSettings.startWithWindows === "undefined";
+      const shouldApplyStartWithWindowsDefault = platformInfo.startupSettingSupported && typeof storedSettings.startWithWindows === "undefined";
       const nextSettings: Settings = applyVisualCustomizationDefaults({
         ...defaultSettings,
         ...storedSettings,
@@ -3387,6 +3471,10 @@ function MainModeApp() {
 
       if (shouldApplyStartWithWindowsDefault) {
         nextSettings.startWithWindows = true;
+      }
+
+      if (!platformInfo.startupSettingSupported) {
+        nextSettings.startWithWindows = false;
       }
 
       const shouldRepairAnimatedVisualSettings = nextSettings.animatedBackgrounds !== true || nextSettings.animeVisuals !== true;
@@ -3421,7 +3509,7 @@ function MainModeApp() {
         shouldRepairAnimatedVisualSettings ||
         shouldRepairBootTheme ||
         shouldPersistVisualCustomizationDefaults ||
-        typeof storedSettings.startWithWindows === "undefined";
+        (platformInfo.startupSettingSupported && typeof storedSettings.startWithWindows === "undefined");
 
       if (shouldPersistBootSettings) {
         if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
@@ -3675,8 +3763,9 @@ function MainModeApp() {
   }, [settings.minimizeToTray]);
 
   useEffect(() => {
+    if (!platformInfo.startupSettingSupported) return;
     window.localitfy.setStartWithWindows?.(settings.startWithWindows).catch(() => undefined);
-  }, [settings.startWithWindows]);
+  }, [platformInfo.startupSettingSupported, settings.startWithWindows]);
 
   useEffect(() => {
     window.localitfy.updateNativeMediaState?.({
@@ -3690,9 +3779,10 @@ function MainModeApp() {
       coverUrl: currentSong?.coverUrl || "",
       hasSong: Boolean(currentSong),
       minimizeToTray: settings.minimizeToTray,
-      startWithWindows: settings.startWithWindows
+      startWithWindows: platformInfo.startupSettingSupported ? settings.startWithWindows : false,
+      platform: platformInfo.id
     }).catch(() => undefined);
-  }, [currentSong?.id, currentSong?.title, currentSong?.artist, currentSong?.album, currentSong?.coverUrl, isPlaying, settings.volume, settings.minimizeToTray, settings.startWithWindows]);
+  }, [currentSong?.id, currentSong?.title, currentSong?.artist, currentSong?.album, currentSong?.coverUrl, isPlaying, platformInfo.id, platformInfo.startupSettingSupported, settings.volume, settings.minimizeToTray, settings.startWithWindows]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -5732,6 +5822,34 @@ function MainModeApp() {
   }
 
   // ── Spotify auth + import functions ──────────────────────────────────────
+  function updateSpotifyConnectionState(res: any = {}) {
+    const hasReadyValue = Object.prototype.hasOwnProperty.call(res || {}, "ready") || Object.prototype.hasOwnProperty.call(res || {}, "ok");
+    const ready = hasReadyValue ? Boolean(res?.ready ?? res?.ok) : true;
+    const loggedIn = Boolean(res?.loggedIn);
+
+    setSpotifyConnectionReady(ready);
+    setSpotifyNeedsClientId(Boolean(res?.needsClientId));
+    setSpotifyConnectionMode(String(res?.mode || "oauth-pkce"));
+    if (res?.redirectUri) setSpotifyRedirectUri(String(res.redirectUri));
+    setSpotifyLoggedIn(loggedIn);
+
+    return { ready, loggedIn };
+  }
+
+  function formatSpotifyPrivatePlaylistMessage(rawMessage = "", hint = "") {
+    const message = String(rawMessage || "Failed to fetch Spotify tracks.").trim();
+    const cleanHint = String(hint || "").trim();
+    const looksPrivate = /private|public|profile|could not read|could not expose|404|403|blocked/i.test(`${message} ${cleanHint}`);
+
+    if (!looksPrivate) return cleanHint ? `${message}\n\nTip: ${cleanHint}` : message;
+
+    return [
+      "Spotify could not read this playlist.",
+      "Make sure it is public on your Spotify profile, not only shareable by link.",
+      "Open Spotify → playlist menu → add to profile / make public, then paste the link again."
+    ].join("\n");
+  }
+
   useEffect(() => {
     if (downloadsTab !== "spotify" || !ready) return;
 
@@ -5739,14 +5857,15 @@ function MainModeApp() {
 
     Promise.resolve((window.localitfy as any).spotifyCheck?.())
       .then((res: any) => {
-        if (!cancelled) {
-          setSpotifyLoggedIn(Boolean(res?.loggedIn));
-        }
+        if (cancelled) return;
+        updateSpotifyConnectionState(res || { ready: true, loggedIn: false, mode: "oauth-pkce" });
       })
       .catch(() => {
-        if (!cancelled) {
-          setSpotifyLoggedIn(true);
-        }
+        if (cancelled) return;
+        setSpotifyConnectionReady(true);
+        setSpotifyNeedsClientId(false);
+        setSpotifyConnectionMode("oauth-pkce");
+        setSpotifyLoggedIn(false);
       });
 
     return () => {
@@ -5770,16 +5889,17 @@ function MainModeApp() {
       }
 
       const res = await bridge.spotifyLogin();
-      const loggedIn = Boolean(res?.loggedIn);
-      setSpotifyLoggedIn(loggedIn);
+      const state = updateSpotifyConnectionState(res || {});
 
-      if (!res?.ok && !loggedIn) {
-        const message = res?.error || "Spotify login cancelled.";
+      if (!res?.ok && !state.loggedIn) {
+        const message = res?.needsClientId
+          ? "Spotify Client ID is missing in this build. Rebuild localtify with the Spotify Client ID included."
+          : res?.error || "Spotify login cancelled.";
         setSpotifyFetchError(message);
         setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
       } else {
         setSpotifyFetchError("");
-        setStatusText("connected to spotify");
+        setStatusText("spotify connected — paste a link to fetch tracks");
       }
     } catch (error) {
       const message = String((error as Error)?.message || "Spotify login failed.");
@@ -5805,8 +5925,8 @@ function MainModeApp() {
       }
 
       const res = await bridge.spotifySetCookie(value);
+      updateSpotifyConnectionState(res || { ready: true, loggedIn: Boolean(res?.ok) });
       if (res?.ok) {
-        setSpotifyLoggedIn(true);
         setSpotifyShowCookieInput(false);
         setSpotifyCookieDraft("");
         setStatusText("connected to spotify");
@@ -5822,12 +5942,14 @@ function MainModeApp() {
 
   async function handleSpotifyLogout() {
     try {
-      await (window.localitfy as any).spotifyLogout?.();
+      const res = await (window.localitfy as any).spotifyLogout?.();
+      updateSpotifyConnectionState(res || { ready: true, loggedIn: false, mode: "oauth-pkce" });
     } catch {
-      // Logout should still clear local UI state even if the backend call fails.
+      setSpotifyConnectionReady(true);
+      setSpotifyNeedsClientId(false);
+      setSpotifyLoggedIn(false);
     }
 
-    setSpotifyLoggedIn(false);
     setSpotifyTracks([]);
     setSpotifySelectedIds(new Set());
     setSpotifyUrl("");
@@ -5838,32 +5960,56 @@ function MainModeApp() {
   }
 
   async function fetchSpotifyTracks() {
-    if (!spotifyUrl.trim()) return;
+    const cleanUrl = spotifyUrl.trim();
+    if (!cleanUrl) return;
+
     setSpotifyFetchBusy(true);
     setSpotifyFetchError("");
     setSpotifyTracks([]);
     setSpotifySelectedIds(new Set());
     setSpotifySourceName("");
     setSpotifySourceType("");
+    setPlayerError("");
+    setStatusText("fetching spotify tracks...");
 
     try {
       const bridge = (window.localitfy as any);
+      const checkRes = await Promise.resolve(bridge?.spotifyCheck?.()).catch(() => null);
+      if (checkRes) {
+        const connection = updateSpotifyConnectionState(checkRes);
+        if (!connection.ready || checkRes?.needsClientId) {
+          const message = "Spotify is not ready in this build. Rebuild localtify with the Spotify Client ID included.";
+          setSpotifyFetchError(message);
+          setStatusText("spotify setup needed");
+          return;
+        }
+      }
+
       const spotifyFetchBridge = bridge?.spotifyFetch || bridge?.spotifyFetchTracks;
       if (!spotifyFetchBridge) {
         setSpotifyFetchError("Spotify fetch is not wired in preload/main yet.");
+        setStatusText("spotify fetch unavailable");
         return;
       }
 
       const result = bridge?.spotifyFetch
-        ? await spotifyFetchBridge({ url: spotifyUrl.trim() })
-        : await spotifyFetchBridge(spotifyUrl.trim());
+        ? await spotifyFetchBridge({ url: cleanUrl })
+        : await spotifyFetchBridge(cleanUrl);
+
+      if (result?.loggedIn !== undefined || result?.ready !== undefined || result?.mode) {
+        updateSpotifyConnectionState(result);
+      }
+
       if (result?.error) {
-        setSpotifyFetchError(result.error);
+        const message = formatSpotifyPrivatePlaylistMessage(result.error, result.hint);
+        setSpotifyFetchError(message);
+        setStatusText(/public|private|profile/i.test(message) ? "spotify playlist not public" : "spotify fetch failed");
         return;
       }
 
       if (!result || !Array.isArray(result.tracks) || !result.tracks.length) {
         setSpotifyFetchError("No tracks found. Make sure the link is a public Spotify playlist, album, or track.");
+        setStatusText("no spotify tracks found");
         return;
       }
 
@@ -5878,14 +6024,18 @@ function MainModeApp() {
 
       const sourceName = String(result.playlistName || result.name || result.title || "").trim();
       const sourceType = String(result.type || "").trim();
+      const finalSourceType = sourceType || (tracks.length === 1 ? "track" : "playlist");
 
-      setSpotifySourceName(sourceName || (sourceType === "album" ? "Spotify Album" : sourceType === "track" ? "Spotify Track" : "Spotify Playlist"));
-      setSpotifySourceType(sourceType || "playlist");
+      setSpotifySourceName(sourceName || (finalSourceType === "album" ? "Spotify Album" : finalSourceType === "track" ? "Spotify Track" : "Spotify Playlist"));
+      setSpotifySourceType(finalSourceType);
       setSpotifyTracks(tracks);
       setSpotifySelectedIds(new Set(tracks.map((t) => t.id)));
+      setSpotifyFetchError("");
       setStatusText(`fetched ${tracks.length} track${tracks.length !== 1 ? "s" : ""} from spotify`);
     } catch (error) {
-      setSpotifyFetchError(String((error as Error)?.message || "Failed to fetch Spotify tracks."));
+      const message = formatSpotifyPrivatePlaylistMessage(String((error as Error)?.message || "Failed to fetch Spotify tracks."));
+      setSpotifyFetchError(message);
+      setStatusText(/public|private|profile/i.test(message) ? "spotify playlist not public" : "spotify fetch failed");
       console.error("[localtify spotify fetch failed]", error);
     } finally {
       setSpotifyFetchBusy(false);
@@ -5935,9 +6085,15 @@ function MainModeApp() {
     return selectedId;
   }
 
-  async function downloadSpotifyTracks() {
-    const selected = spotifyTracks.filter((t) => spotifySelectedIds.has(t.id));
+  async function downloadSpotifyTracks(trackOverride?: SpotifyTrack[]) {
+    const selected = Array.isArray(trackOverride) && trackOverride.length
+      ? trackOverride
+      : spotifyTracks.filter((t) => spotifySelectedIds.has(t.id));
     if (!selected.length) return;
+
+    if (Array.isArray(trackOverride) && trackOverride.length) {
+      setSpotifySelectedIds(new Set(trackOverride.map((track) => track.id)));
+    }
 
     setSpotifyDownloadBusy(true);
     setDownloadBusy(true);
@@ -8113,6 +8269,7 @@ function MainModeApp() {
         copyDiagnosticsInfo={copyDiagnosticsInfo}
         diagnosticsCopied={diagnosticsCopied}
         diagnosticsInfo={diagnosticsInfo}
+        platformInfo={platformInfo}
         likedSongs={likedSongs}
         libraryRenderLimitRef={libraryRenderLimitRef}
         INITIAL_LIBRARY_RENDER_LIMIT={INITIAL_LIBRARY_RENDER_LIMIT}
@@ -8330,6 +8487,12 @@ function MainModeApp() {
     downloadSpotifyTracks,
     setSpotifyTracks,
     spotifyLoggedIn,
+    spotifyConnectionReady,
+    spotifyNeedsClientId,
+    spotifyConnectionMode,
+    spotifyRedirectUri,
+    spotifySourceName,
+    spotifySourceType,
     spotifyLoginBusy,
     spotifyShowCookieInput,
     setSpotifyShowCookieInput,
