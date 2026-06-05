@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.6 V251 — faster virtual rendering; keeps current view UI. */
+/* localtify 0.3.7 V282 — root transparency classes wired safely. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -3546,15 +3546,19 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${showTopUpdateRibbon ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isPlaying ? "appAudioPlaying" : "appAudioIdle"} ${
+      } ${settings.denseList ? "denseList" : ""} ${
+        settings.translucentWindow ? "windowTranslucent" : "windowOpaque"
+      } ${
+        settings.translucentWindow && settings.transparentAppBackground !== false
+          ? "windowGlassTransparentApp"
+          : "windowGlassSolidApp"
+      } ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${showTopUpdateRibbon ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isPlaying ? "appAudioPlaying" : "appAudioIdle"} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={
         {
           "--player-size": `${clamp(Number(settings.playerSize || 108), 74, 168)}px`,
           "--sidebar-width": `${clamp(Number(settings.sidebarWidth || 249), 184, 340)}px`,
-          "--window-transparency": `${clamp(Number(settings.windowTransparency ?? 84), 35, 98) / 100}`,
-          "--window-blur": `${clamp(Number(settings.windowBlurIntensity ?? 18), 0, 44)}px`,
           ...themePresetStyle,
           ...animatedThemeVisualStyle,
           ...customThemeStyle
@@ -3578,7 +3582,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       data-stars-intensity={settings.starsIntensity || "subtle"}
       data-sidebar-behavior={settings.sidebarBehavior || "fixed"}
       data-player-background={settings.playerBackgroundStyle || "coverBlur"}
-      data-translucent-window={settings.supportTranslucentWindow ? "on" : "off"}
       data-hero-expanded={settings.heroExpanded ? "on" : "off"}
       data-hero-motion={heroMotion}
       data-status={statusText}

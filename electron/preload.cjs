@@ -33,6 +33,10 @@ contextBridge.exposeInMainWorld("localitfy", {
 
   getSettings: () => ipcRenderer.invoke("settings:get"),
   saveSettings: (settings) => ipcRenderer.invoke("settings:save", settings),
+  getWindowTranslucency: () => ipcRenderer.invoke("localitfy:get-window-translucency"),
+  setWindowTranslucency: (payload) => ipcRenderer.invoke("localitfy:set-window-translucency", payload),
+  restartApp: () => ipcRenderer.invoke("localitfy:restart-app"),
+  openDevTools: () => ipcRenderer.invoke("localitfy:open-devtools"),
 
   getPlaylists: () => ipcRenderer.invoke("playlists:get"),
   savePlaylists: (playlists) => ipcRenderer.invoke("playlists:save", playlists),
@@ -56,8 +60,6 @@ contextBridge.exposeInMainWorld("localitfy", {
   minimizeWindow: () => ipcRenderer.invoke("window:minimize"),
   toggleMaximizeWindow: () => ipcRenderer.invoke("window:toggle-maximize"),
   closeWindow: () => ipcRenderer.invoke("window:close"),
-  restartApp: () => ipcRenderer.invoke("localitfy:restart-app"),
-  restartLocaltify: () => ipcRenderer.invoke("localitfy:restart-app"),
 
   checkForUpdates: (payload) => ipcRenderer.invoke("localitfy:check-for-updates", payload),
   downloadUpdate: () => ipcRenderer.invoke("localitfy:download-update"),
@@ -119,6 +121,15 @@ contextBridge.exposeInMainWorld("localitfy", {
 
     return () => {
       ipcRenderer.removeListener("player:command", handler);
+    };
+  },
+
+  onWindowTranslucencyState: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("localitfy:window-translucency-state", handler);
+
+    return () => {
+      ipcRenderer.removeListener("localitfy:window-translucency-state", handler);
     };
   }
 });

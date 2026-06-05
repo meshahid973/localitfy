@@ -1,7 +1,4 @@
-/* localtify 0.3.6 V221 — home styles with restored Spotify auth/import UI. */
-/* localtify home.css — home page, hero, compact home, and quick-library visuals.
-   Split out of App.css so the main stylesheet stays smaller. */
-
+/* localtify 0.3.7 V265 — cleaned home/downloads/cover owner. Removed old comments and obsolete pre-clean-gallery image rules. */
 
 .logoIcon{
   width: 42px;
@@ -15,7 +12,6 @@
   font-weight: 700;
 }
 
-
 .mainAction{
   min-height: 42px;
   padding: 0 18px;
@@ -28,12 +24,10 @@
     filter 120ms ease;
 }
 
-
 .mainAction:hover{
   transform: translateY(-1px);
   filter: brightness(1.045);
 }
-
 
 .heroGhost{
   min-height: 38px;
@@ -49,13 +43,11 @@
     color 120ms ease;
 }
 
-
 .heroGhost:hover{
   transform: translateY(-1px);
   background: var(--surface-3);
   border-color: var(--line-2);
 }
-
 
 .search{
   width: min(290px, 23vw);
@@ -71,17 +63,14 @@
     box-shadow 120ms ease;
 }
 
-
 .search::placeholder{
   color: var(--faint);
 }
-
 
 .search:focus{
   border-color: var(--accent-line);
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.075);
 }
-
 
 .panel{
   border: 1px solid var(--line);
@@ -91,14 +80,12 @@
   backdrop-filter: blur(16px);
 }
 
-
 .panelHead{
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
-
 
 .hero.ambientSurface:hover{
   border-color: rgba(var(--accent-rgb), 0.34);
@@ -107,14 +94,12 @@
     0 0 42px rgba(var(--accent-rgb), 0.11);
 }
 
-
 .hero.ambientSurface:hover::before{
   opacity: 0.24;
   filter: blur(48px) saturate(1.24);
   transform: scale(1.2) translate3d(-10px, -4px, 0);
   background-position: 58% 44%;
 }
-
 
 .hero.ambientSurface:hover::after{
   background: radial-gradient(
@@ -135,7 +120,6 @@
     );
 }
 
-
 .heroTitle{
   max-width: 850px;
   margin: 14px 0 10px;
@@ -149,19 +133,16 @@
   -webkit-line-clamp: 2;
 }
 
-
 .heroMetaLine{
   color: var(--muted);
   line-height: 1.45;
 }
-
 
 .heroArtWrap{
   display: grid;
   place-items: center;
   gap: 10px;
 }
-
 
 .heroArt{
   overflow: hidden;
@@ -173,7 +154,6 @@
     0 18px 48px rgba(0, 0, 0, 0.36);
 }
 
-
 .heroArt{
   width: 172px;
   height: 172px;
@@ -182,13 +162,11 @@
   font-weight: 700;
 }
 
-
 .heroArt img{
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 
 .simpleShell{
   height: calc(100vh - 36px);
@@ -202,7 +180,6 @@
   background-size: 42px 42px;
 }
 
-
 .simpleTopbar{
   display: flex;
   align-items: center;
@@ -210,22 +187,18 @@
   gap: 12px;
 }
 
-
 .simpleBrand{
   justify-content: start;
 }
-
 
 .simpleBrand strong{
   display: block;
   letter-spacing: -0.04em;
 }
 
-
 .simpleBrand small{
   color: var(--muted);
 }
-
 
 .simpleHero{
   min-height: 320px;
@@ -236,18 +209,15 @@
   align-items: center;
 }
 
-
 .simpleHeroArt{
   width: 220px;
   height: 220px;
   border-radius: 14px;
 }
 
-
 .simpleHeroText small{
   color: var(--muted);
 }
-
 
 .simpleHeroText h2{
   margin: 6px 0;
@@ -256,13 +226,11 @@
   letter-spacing: -0.08em;
 }
 
-
 .simpleControls{
   display: flex;
   gap: 10px;
   margin-top: 18px;
 }
-
 
 .simpleProgress{
   display: grid;
@@ -272,18 +240,15 @@
   align-items: center;
 }
 
-
 .simpleProgress span{
   color: var(--muted);
   font-size: 12px;
   text-align: center;
 }
 
-
 .simpleLibraryPanel{
   padding: 16px;
 }
-
 
 @media (max-width: 900px){
 .sidebar{
@@ -293,7 +258,6 @@
 .appShell{
   grid-template-columns: 1fr;
 }
-
 
 .hero{
   grid-template-columns: 1fr;
@@ -345,12 +309,10 @@
 }
 }
 
-
 .songButton:hover .coverAura > img{
   transform: scale(1.025) translateZ(0);
   filter: saturate(1.08) contrast(1.04);
 }
-
 
 .heroArt.coverAura::before{
   inset: -20%;
@@ -358,19 +320,16 @@
   filter: blur(30px) saturate(1.32);
 }
 
-
 .heroArt.coverAura:hover::before{
   opacity: 0.58;
   transform: scale(1.03);
 }
-
 
 .simpleProgress input[type="range"]{
   height: 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.11);
 }
-
 
 .simpleProgress input[type="range"]::-webkit-slider-thumb{
   width: 14px;
@@ -381,12 +340,10 @@
   box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.12);
 }
 
-
 .panel{
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.018)),
     rgba(0, 0, 0, 0.36);
 }
-
 
 .downloadTextarea{
   transition: border-color 120ms ease,
@@ -394,12 +351,10 @@
     box-shadow 120ms ease;
 }
 
-
 .downloadTextarea:focus{
   border-color: var(--accent-line);
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.08);
 }
-
 
 .content{
   background: linear-gradient(var(--grid-line) 1px, transparent 1px),
@@ -408,18 +363,15 @@
   background-size: 42px 42px;
 }
 
-
 .content::before{
   display: none !important;
 }
-
 
 .logoIcon{
   border-radius: 11px;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.2),
     0 12px 24px rgba(var(--accent-rgb), 0.12);
 }
-
 
 .mainAction,
 .heroMain,
@@ -434,14 +386,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-
 .mainAction{
   min-height: 40px;
   border-radius: 999px;
   color: #031007;
   box-shadow: none;
 }
-
 
 .heroGhost,
 .softButton,
@@ -454,7 +404,6 @@
   box-shadow: none;
 }
 
-
 .heroGhost:hover,
 .softButton:hover,
 .simpleGhost:hover,
@@ -464,18 +413,15 @@
   border-color: rgba(255, 255, 255, 0.14);
 }
 
-
 .heroTitle{
   letter-spacing: -0.075em;
   text-wrap: balance;
 }
 
-
 .heroArt{
   background: #111;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
-
 
 .panel{
   border-radius: 15px;
@@ -486,27 +432,18 @@
   box-shadow: none;
 }
 
-
 .panelHead{
   padding-bottom: 2px;
 }
-
 
 .simpleProgress input[type="range"]{
   height: 4px;
 }
 
-
 .search:focus{
   background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.045)),
     rgba(0,0,0,.35);
 }
-
-/* ======================================================================
-   localtify v0.3.6 V245 — hero text stack owner
-   Fixes the now-playing title/artist/buttons position without touching
-   playlist rows, song rows, album cards, panels, or global buttons.
-====================================================================== */
 
 .app .hero.heroPremium .heroText.heroTextClean{
   position: relative !important;
@@ -640,11 +577,9 @@
   }
 }
 
-
 .heroArtWrap{
   justify-self: end;
 }
-
 
 .heroArt{
   width: 144px;
@@ -655,11 +590,9 @@
     0 0 44px rgba(var(--accent-rgb), 0.15);
 }
 
-
 .navItem{
   border-radius: 9px;
 }
-
 
 @media (max-width: 1180px){
 .compactHeaderTools .search{
@@ -676,7 +609,6 @@
 }
 }
 
-
 button,
 .navItem,
 .heroMain,
@@ -689,7 +621,6 @@ button,
   transform: translateZ(0);
   will-change: transform, background, border-color, box-shadow;
 }
-
 
 .panel,
 .editorModal,
@@ -715,14 +646,12 @@ button,
     filter 160ms ease !important;
 }
 
-
 .heroArt{
   position: relative;
   box-shadow: 0 18px 44px rgba(0,0,0,.48),
     0 0 0 1px rgba(255,255,255,.08),
     0 0 32px rgba(var(--accent-rgb), .22) !important;
 }
-
 
 .heroArt::after{
   content: "";
@@ -736,11 +665,9 @@ button,
   opacity: .42;
 }
 
-
 .songRow:hover .songArt{
   transform: translate3d(0, -1px, 0) scale(1.025) !important;
 }
-
 
 @keyframes localitfyToastPop {
   0% { opacity: 0; transform: translate(-50%, -14px) scale(.96); }
@@ -748,11 +675,9 @@ button,
   100% { opacity: 0; transform: translate(-50%, -12px) scale(.98); }
 }
 
-
 .dashboardGrid.homeExpandedGrid{
   grid-template-columns: minmax(0, 1fr) !important;
 }
-
 
 .homeLibraryPanel{
   overflow: hidden;
@@ -765,11 +690,9 @@ button,
     background 220ms ease !important;
 }
 
-
 .homeLibraryCompact{
   min-height: clamp(360px, calc(100vh - 420px), 520px);
 }
-
 
 .homeLibraryExpanded{
   min-height: calc(100vh - 386px);
@@ -783,7 +706,6 @@ button,
   animation: localitfyLibraryDrop 320ms cubic-bezier(.2,.8,.2,1) both;
 }
 
-
 .homeLibraryActions{
   display: flex;
   align-items: center;
@@ -791,12 +713,10 @@ button,
   gap: 10px;
 }
 
-
 .homeLibraryActions span{
   color: var(--muted);
   font-size: 13px;
 }
-
 
 .simpleLibraryTitle{
   min-width: max-content;
@@ -804,13 +724,11 @@ button,
   gap: 2px;
 }
 
-
 .homeSongList{
   transition: max-height 280ms cubic-bezier(.2,.8,.2,1),
     gap 220ms ease,
     padding 220ms ease;
 }
-
 
 .homeLibraryExpanded .homeSongList{
   max-height: calc(100vh - 300px);
@@ -819,7 +737,6 @@ button,
   padding-bottom: 18px;
   gap: 10px;
 }
-
 
 .homeLibraryExpanded .songRow{
   min-height: 76px;
@@ -831,12 +748,10 @@ button,
     rgba(255,255,255,.024);
 }
 
-
 .homeLibraryExpanded .songButton{
   grid-template-columns: 34px 58px minmax(0, 1fr);
   gap: 15px;
 }
-
 
 .homeLibraryExpanded .songArt{
   width: 58px;
@@ -845,29 +760,24 @@ button,
   font-size: 20px;
 }
 
-
 .homeLibraryExpanded .songMeta{
   gap: 4px;
 }
-
 
 .homeLibraryExpanded .songMeta strong{
   font-size: 15px;
   letter-spacing: -.02em;
 }
 
-
 .homeLibraryExpanded .songMeta small{
   font-size: 12px;
 }
-
 
 .homeLibraryExpanded .iconAction{
   width: 38px;
   height: 38px;
   border-radius: 11px;
 }
-
 
 .simpleLibraryExpanded{
   min-height: calc(100vh - 430px);
@@ -877,14 +787,12 @@ button,
   animation: localitfyLibraryDrop 320ms cubic-bezier(.2,.8,.2,1) both;
 }
 
-
 .simpleLibraryExpanded .simpleList{
   max-height: calc(100vh - 520px);
   overflow: auto;
   padding-right: 6px;
   gap: 10px;
 }
-
 
 @media (max-width: 1180px){
 .homeLibraryExpanded .songRow{
@@ -895,7 +803,6 @@ button,
   display: none;
 }
 }
-
 
 @media (max-width: 900px){
 .homeLibraryExpanded{
@@ -933,7 +840,6 @@ button,
 }
 }
 
-
 .hero{
   position: relative;
   overflow: hidden;
@@ -945,11 +851,9 @@ button,
     box-shadow 220ms ease !important;
 }
 
-
 .heroCompact{
   min-height: 210px;
 }
-
 
 .heroExpanded{
   min-height: clamp(330px, 34vh, 430px) !important;
@@ -961,19 +865,16 @@ button,
     inset 0 -1px 0 rgba(var(--accent-rgb), .17) !important;
 }
 
-
 .heroExpanded .heroTitle{
   font-size: clamp(54px, 6.2vw, 94px) !important;
   line-height: .92;
 }
-
 
 .heroExpanded .heroArt{
   width: clamp(150px, 13vw, 210px) !important;
   height: clamp(150px, 13vw, 210px) !important;
   border-radius: 18px !important;
 }
-
 
 .heroTinyButton{
   height: 30px;
@@ -990,20 +891,17 @@ button,
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .055);
 }
 
-
 .heroTinyButton:hover{
   border-color: rgba(var(--accent-rgb), .42);
   background: rgba(var(--accent-rgb), .13);
   color: #fff;
 }
 
-
 .heroTinyButton[aria-pressed="true"]{
   color: #031007;
   background: var(--accent);
   border-color: var(--accent);
 }
-
 
 .heroExpandedShelf{
   display: grid;
@@ -1013,7 +911,6 @@ button,
   animation: localitfyShelfDrop 340ms cubic-bezier(.2,.85,.2,1) both;
 }
 
-
 .heroExpandedShelf > div{
   min-height: 64px;
   padding: 12px;
@@ -1022,7 +919,6 @@ button,
   background: rgba(0, 0, 0, .46);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
 }
-
 
 .heroExpandedShelf span{
   display: block;
@@ -1034,7 +930,6 @@ button,
   text-transform: uppercase;
 }
 
-
 .heroExpandedShelf strong{
   display: block;
   overflow: hidden;
@@ -1044,17 +939,14 @@ button,
   white-space: nowrap;
 }
 
-
 .homeLibraryExpanded{
   min-height: clamp(520px, calc(100vh - 350px), 760px) !important;
   max-height: none !important;
 }
 
-
 [data-hero-expanded="on"] .homeLibraryCompact{
   min-height: clamp(330px, calc(100vh - 550px), 460px) !important;
 }
-
 
 .homeAlbumGrid{
   display: grid;
@@ -1064,11 +956,9 @@ button,
   animation: localitfyGridDrop 330ms cubic-bezier(.2,.85,.2,1) both;
 }
 
-
 .simpleAlbumGrid{
   grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
 }
-
 
 .homeAlbumCard{
   position: relative;
@@ -1084,20 +974,17 @@ button,
     box-shadow 180ms ease;
 }
 
-
 .homeAlbumCard:hover{
   transform: translateY(-3px);
   border-color: rgba(255, 255, 255, .15);
   background: rgba(255, 255, 255, .065);
 }
 
-
 .homeAlbumCard.active{
   border-color: rgba(var(--accent-rgb), .42);
   background: rgba(var(--accent-rgb), .105);
   box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .18);
 }
-
 
 .homeAlbumPlayZone{
   position: relative;
@@ -1109,7 +996,6 @@ button,
   text-align: left;
 }
 
-
 .homeAlbumArt{
   width: 100%;
   aspect-ratio: 1;
@@ -1118,7 +1004,6 @@ button,
   object-fit: cover;
   box-shadow: 0 14px 34px rgba(0, 0, 0, .34);
 }
-
 
 .homeAlbumPlayBadge{
   position: absolute;
@@ -1137,14 +1022,12 @@ button,
   text-transform: lowercase;
 }
 
-
 .homeAlbumPlayBadge{
   right: 8px;
   bottom: 8px;
   padding: 0 10px;
   border: 1px solid rgba(var(--accent-rgb), .28);
 }
-
 
 .homeAlbumRank{
   top: 8px;
@@ -1153,13 +1036,11 @@ button,
   border: 1px solid rgba(255, 255, 255, .1);
 }
 
-
 .homeAlbumMeta{
   display: grid;
   gap: 3px;
   margin-top: 11px;
 }
-
 
 .homeAlbumMeta strong{
   overflow: hidden;
@@ -1170,7 +1051,6 @@ button,
   white-space: nowrap;
 }
 
-
 .homeAlbumMeta small{
   overflow: hidden;
   color: rgba(255, 255, 255, .54);
@@ -1180,7 +1060,6 @@ button,
   white-space: nowrap;
 }
 
-
 .homeAlbumStats{
   display: flex;
   justify-content: space-between;
@@ -1188,13 +1067,11 @@ button,
   margin-top: 10px;
 }
 
-
 .homeAlbumActions{
   display: flex;
   gap: 6px;
   margin-top: 11px;
 }
-
 
 .homeAlbumActions .iconAction{
   width: 32px;
@@ -1202,24 +1079,20 @@ button,
   border-radius: 10px;
 }
 
-
 .homeAlbumEmpty{
   grid-column: 1 / -1;
 }
-
 
 @keyframes localitfyGridDrop {
   from { opacity: .78; transform: translateY(-12px); filter: blur(1px); }
   to { opacity: 1; transform: translateY(0); filter: none; }
 }
 
-
 @media (max-width: 1180px){
 .homeAlbumGrid{
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 }
 }
-
 
 @media (max-width: 900px){
 .heroExpanded{
@@ -1236,7 +1109,6 @@ button,
 }
 }
 
-
 .navItem,
 .mainAction,
 .heroTinyButton,
@@ -1247,7 +1119,6 @@ button,
   transform: translateZ(0);
 }
 
-
 .hero{
   transform: translateZ(0);
   transition: min-height 280ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -1257,24 +1128,20 @@ button,
     box-shadow 180ms ease !important;
 }
 
-
 .heroExpanded{
   min-height: clamp(360px, 42vh, 520px) !important;
   grid-template-columns: minmax(0, 1fr) 260px !important;
   align-items: center !important;
 }
 
-
 .heroCompact{
   min-height: 254px !important;
 }
-
 
 .heroExpanded .heroArt{
   width: clamp(188px, 13vw, 240px) !important;
   height: clamp(188px, 13vw, 240px) !important;
 }
-
 
 .heroTinyButton{
   min-height: 28px !important;
@@ -1285,26 +1152,21 @@ button,
   text-transform: lowercase;
 }
 
-
 .heroExpandedShelf{
   animation: shelfDrop 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
 
 .homeLibraryPanel{
   min-height: 0 !important;
 }
 
-
 .homeLibraryCompact{
   min-height: 360px !important;
 }
 
-
 .homeLibraryExpanded{
   min-height: clamp(520px, 64vh, 760px) !important;
 }
-
 
 .homeAlbumGrid{
   animation: albumGridIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -1312,7 +1174,6 @@ button,
   gap: 16px !important;
   contain: content;
 }
-
 
 .homeAlbumCard{
   background: #080808 !important;
@@ -1322,17 +1183,14 @@ button,
   contain: layout paint;
 }
 
-
 .homeAlbumCard:hover{
   transform: translateY(-4px) translateZ(0) !important;
   background: #101010 !important;
 }
 
-
 .homeAlbumArt{
   aspect-ratio: 1 / 1;
 }
-
 
 .content,
 .sidebar,
@@ -1344,12 +1202,10 @@ button,
   transform: translateZ(0);
 }
 
-
 .content::-webkit-scrollbar{
   width: 0 !important;
   height: 0 !important;
 }
-
 
 .content::-webkit-scrollbar-track{
   background: transparent !important;
@@ -1357,20 +1213,17 @@ button,
   box-shadow: none !important;
 }
 
-
 .content::-webkit-scrollbar-thumb{
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
 }
 
-
 .content::-webkit-scrollbar-thumb:hover{
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
 }
-
 
 button,
 .navItem,
@@ -1384,7 +1237,6 @@ button,
   -webkit-tap-highlight-color: transparent;
   backface-visibility: hidden;
 }
-
 
 button,
 .navItem,
@@ -1402,7 +1254,6 @@ button,
     filter 150ms ease !important;
 }
 
-
 button:hover,
 .navItem:hover,
 .iconAction:hover,
@@ -1412,7 +1263,6 @@ button:hover,
 .expandLibraryButton:hover{
   transform: translateY(-1px) translateZ(0) !important;
 }
-
 
 button:active,
 .navItem:active,
@@ -1424,54 +1274,44 @@ button:active,
   transform: translateY(0) scale(0.985) translateZ(0) !important;
 }
 
-
 .coverAura{
   image-rendering: auto;
   transform: translateZ(0);
 }
 
-
 .coverAura.hasCover img{
   object-fit: cover;
 }
-
 
 .panel{
   border-color: rgba(255, 255, 255, 0.075) !important;
 }
 
-
 .songRow{
   contain: layout paint;
 }
 
-
 .songRow:hover{
   border-color: rgba(var(--accent-rgb), 0.22) !important;
 }
-
 
 .songRow.active{
   border-color: rgba(var(--accent-rgb), 0.42) !important;
   background: rgba(var(--accent-rgb), 0.09) !important;
 }
 
-
 .homeAlbumGrid{
   contain: layout paint style;
 }
-
 
 .homeAlbumCard{
   background: #080808 !important;
   box-shadow: none !important;
 }
 
-
 .homeAlbumCard:hover{
   background: #101010 !important;
 }
-
 
 [data-ambient="on"] .hero.ambientSurface{
   contain: paint;
@@ -1480,7 +1320,6 @@ button:active,
     transform 520ms var(--ambient-smooth-ease),
     filter 520ms var(--ambient-smooth-ease) !important;
 }
-
 
 [data-ambient="on"] .hero.ambientSurface::before{
   display: block !important;
@@ -1502,7 +1341,6 @@ button:active,
     background-position 1100ms var(--ambient-smooth-ease) !important;
 }
 
-
 [data-ambient="on"] .hero.ambientSurface::after{
   display: block !important;
   content: "" !important;
@@ -1516,14 +1354,12 @@ button:active,
     filter 900ms var(--ambient-smooth-ease) !important;
 }
 
-
 [data-ambient="on"] .hero.ambientSurface:hover{
   border-color: rgba(var(--accent-rgb), 0.3) !important;
   box-shadow: 0 26px 86px rgba(0, 0, 0, 0.58),
     0 0 0 1px rgba(var(--accent-rgb), 0.08) inset,
     0 0 54px rgba(var(--accent-rgb), 0.095) !important;
 }
-
 
 [data-ambient="on"] .hero.ambientSurface:hover::before{
   opacity: 0.28 !important;
@@ -1533,18 +1369,15 @@ button:active,
   animation: localitfySmoothHeroGlow 4.8s ease-in-out 220ms infinite alternate !important;
 }
 
-
 [data-ambient="on"] .hero.ambientSurface:hover::after{
   opacity: 1 !important;
   filter: brightness(1.04) saturate(1.06) !important;
 }
 
-
 .hero{
   transform: translateZ(0);
   backface-visibility: hidden;
 }
-
 
 .hero.ambientSurface{
   transition: min-height 560ms var(--expand-smooth-ease),
@@ -1560,17 +1393,14 @@ button:active,
     background 520ms var(--expand-smooth-ease) !important;
 }
 
-
 .heroCompact{
   min-height: 210px !important;
 }
-
 
 .heroExpanded{
   min-height: clamp(330px, 34vh, 430px) !important;
   animation: localitfyHeroExpandSmooth 560ms var(--expand-smooth-ease) both !important;
 }
-
 
 .heroExpanded .heroArt{
   transition: width 520ms var(--expand-smooth-ease),
@@ -1580,13 +1410,11 @@ button:active,
     opacity 360ms ease !important;
 }
 
-
 .heroExpandedShelf{
   overflow: hidden;
   transform-origin: top left;
   animation: localitfyShelfDropSmooth 520ms var(--expand-smooth-ease) both !important;
 }
-
 
 .homeLibraryPanel{
   transition: min-height 620ms var(--expand-smooth-ease),
@@ -1600,11 +1428,9 @@ button:active,
     transform 520ms var(--expand-smooth-ease) !important;
 }
 
-
 .homeLibraryExpanded{
   animation: localitfyLibraryExpandSmooth 620ms var(--expand-smooth-ease) both !important;
 }
-
 
 .homeSongList{
   transition: max-height 620ms var(--expand-smooth-ease),
@@ -1615,7 +1441,6 @@ button:active,
     opacity 340ms ease,
     transform 520ms var(--expand-smooth-ease) !important;
 }
-
 
 .homeAlbumCard{
   transition: min-height 420ms var(--expand-smooth-ease),
@@ -1628,7 +1453,6 @@ button:active,
     transform 170ms ease !important;
 }
 
-
 .expandLibraryButton{
   transition: transform 180ms var(--expand-smooth-ease),
     background 180ms ease,
@@ -1636,7 +1460,6 @@ button:active,
     box-shadow 220ms ease,
     color 180ms ease !important;
 }
-
 
 @keyframes localitfyHeroExpandSmooth {
   from {
@@ -1652,13 +1475,11 @@ button:active,
   }
 }
 
-
 .songRow strong{
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
   unicode-bidi: isolate;
   letter-spacing: -0.01em;
 }
-
 
 .ambientSurface,
 .hero,
@@ -1673,7 +1494,6 @@ button:active,
     padding 520ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-
 .hero:hover{
   border-color: rgba(var(--accent-rgb), 0.28) !important;
   box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.08),
@@ -1681,20 +1501,17 @@ button:active,
     var(--shadow-soft) !important;
 }
 
-
 .hero:hover::after{
   opacity: 0.9 !important;
   transform: translate3d(0, -1px, 0) scale(1.025) !important;
   filter: blur(26px) saturate(1.08) !important;
 }
 
-
 .songRow strong{
   font-family: var(--font-localitfy) !important;
   font-variant-ligatures: none;
   unicode-bidi: isolate;
 }
-
 
 .navItem,
 .mainAction,
@@ -1712,7 +1529,6 @@ button:active,
   transform: translateZ(0);
 }
 
-
 .navItem,
 .mainAction,
 .softButton,
@@ -1727,7 +1543,6 @@ button:active,
     opacity 170ms ease !important;
 }
 
-
 .navItem:hover,
 .mainAction:hover,
 .softButton:hover,
@@ -1736,7 +1551,6 @@ button:active,
 .circleButton:hover:not(.playerBar *){
   transform: translateY(-2px) translateZ(0) !important;
 }
-
 
 .navItem:active,
 .mainAction:active,
@@ -1747,7 +1561,6 @@ button:active,
   transform: scale(0.965) translateZ(0) !important;
 }
 
-
 .homeAlbumCard{
   isolation: isolate;
   transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -1755,7 +1568,6 @@ button:active,
     background-color 220ms ease,
     box-shadow 220ms ease !important;
 }
-
 
 .homeAlbumCard::after{
   content: "";
@@ -1770,25 +1582,21 @@ button:active,
   transition: opacity 220ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-
 .homeAlbumCard:hover::after{
   opacity: 1;
   transform: translateX(36%);
 }
-
 
 .homeAlbumCard > *{
   position: relative;
   z-index: 1;
 }
 
-
 .homeAlbumCard:hover{
   transform: translateY(-5px) scale(1.01) translateZ(0) !important;
   border-color: rgba(var(--accent-rgb), 0.34) !important;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32) !important;
 }
-
 
 .homeAlbumArt{
   image-rendering: auto !important;
@@ -1798,12 +1606,10 @@ button:active,
     box-shadow 240ms ease !important;
 }
 
-
 .homeAlbumCard:hover .homeAlbumArt{
   transform: scale(1.035) translateZ(0) !important;
   filter: saturate(1.08) contrast(1.03) !important;
 }
-
 
 .hero.ambientSurface:hover::before{
   opacity: 0.2 !important;
@@ -1811,28 +1617,23 @@ button:active,
   transform: scale(1.12) translate3d(-8px, -4px, 0) !important;
 }
 
-
 .hero.ambientSurface:hover{
   transform: translateY(-2px) translateZ(0);
 }
-
 
 .nowPlayingCopySwap{
   animation: nowPlayingFadeSlide 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: transform, opacity, filter;
 }
 
-
 .nowPlayingArtSwap{
   display: grid;
   place-items: center;
 }
 
-
 .nowPlayingMiniCopySwap{
   animation-name: nowPlayingMiniSlide;
 }
-
 
 .hero.ambientSurface:hover::before,
 .simpleHero.ambientSurface:hover::before,
@@ -1842,13 +1643,11 @@ button:active,
   transform: translate3d(-12px, -8px, 0) scale(1.08);
 }
 
-
 .heroTitle{
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
   font-variant-ligatures: none;
   text-rendering: geometricPrecision;
 }
-
 
 button{
   transition: transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -1858,16 +1657,13 @@ button{
     opacity 190ms ease;
 }
 
-
 button:hover{
   transform: translateY(-1px) translateZ(0);
 }
 
-
 button:active{
   transform: translateY(0) scale(0.992) translateZ(0);
 }
-
 
 .homeAlbumCard::after{
   opacity: 0 !important;
@@ -1875,7 +1671,6 @@ button:active{
   box-shadow: none !important;
   pointer-events: none !important;
 }
-
 
 .homeAlbumCard{
   isolation: isolate;
@@ -1892,14 +1687,12 @@ button:active{
     box-shadow 220ms ease !important;
 }
 
-
 .homeAlbumCard:hover{
   background: rgba(255, 255, 255, 0.052) !important;
   border-color: rgba(255, 255, 255, 0.135) !important;
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22) !important;
   transform: translateY(-2px) scale(1.006) translateZ(0) !important;
 }
-
 
 .homeAlbumCard.active{
   background: rgba(var(--accent-rgb), 0.075) !important;
@@ -1908,11 +1701,9 @@ button:active{
     0 16px 36px rgba(0, 0, 0, 0.24) !important;
 }
 
-
 .homeAlbumPlayZone{
   transform: translateZ(0);
 }
-
 
 .homeAlbumArt{
   display: block;
@@ -1923,12 +1714,10 @@ button:active{
   will-change: transform;
 }
 
-
 .homeAlbumCard:hover .homeAlbumArt{
   transform: scale(1.018) translateZ(0) !important;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34) !important;
 }
-
 
 .homeAlbumPlayBadge{
   transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -1937,28 +1726,23 @@ button:active{
     opacity 200ms ease !important;
 }
 
-
 .homeAlbumCard:hover .homeAlbumPlayBadge{
   transform: translateY(-1px) translateZ(0) !important;
 }
-
 
 .homeAlbumActions .iconAction:hover{
   background: rgba(255, 255, 255, 0.105) !important;
   transform: translateY(-1px) scale(1.035) translateZ(0) !important;
 }
 
-
 .homeAlbumActions .iconAction:active{
   transform: translateY(0) scale(0.96) translateZ(0) !important;
 }
-
 
 .homeAlbumMeta{
   min-height: 50px;
   align-content: start;
 }
-
 
 .homeAlbumMeta strong{
   display: -webkit-box !important;
@@ -1975,17 +1759,14 @@ button:active{
   text-overflow: ellipsis !important;
 }
 
-
 .homeAlbumMeta small{
   min-height: 14px;
 }
-
 
 .homeAlbumStats{
   align-items: center;
   min-height: 18px;
 }
-
 
 .ambientSurface{
   transition: background 680ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -1995,13 +1776,11 @@ button:active{
     opacity 520ms ease !important;
 }
 
-
 .ambientSurface::before{
   transition: opacity 780ms ease,
     transform 920ms cubic-bezier(0.16, 1, 0.3, 1),
     filter 780ms ease !important;
 }
-
 
 .hero.ambientSurface{
   position: relative !important;
@@ -2013,7 +1792,6 @@ button:active{
     box-shadow 720ms var(--song-change-ease),
     transform 520ms var(--song-change-ease) !important;
 }
-
 
 .hero.ambientSurface::before{
   content: "";
@@ -2028,7 +1806,6 @@ button:active{
     transform 980ms var(--song-change-ease) !important;
 }
 
-
 .hero.ambientSurface::after{
   z-index: -1;
   opacity: 0.28 !important;
@@ -2036,40 +1813,33 @@ button:active{
     radial-gradient(circle at 82% 45%, rgba(var(--accent-rgb), 0.16), transparent 34%) !important;
 }
 
-
 .hero.ambientSurface:hover::before{
   opacity: 0.24 !important;
   filter: saturate(1.12) blur(0) !important;
   transform: scale(1.006) !important;
 }
 
-
 .heroMain{
   animation: localitfySongCopyIn 620ms var(--song-change-ease) both !important;
   will-change: transform, opacity, filter;
 }
-
 
 .nowPlayingCopySwap .eyebrow{
   animation: localitfySongDetailIn 700ms var(--song-change-ease) both !important;
   will-change: transform, opacity;
 }
 
-
 .nowPlayingCopySwap .statCard:nth-child(1){
   animation-delay: 160ms !important;
 }
-
 
 .nowPlayingCopySwap .statCard:nth-child(2){
   animation-delay: 200ms !important;
 }
 
-
 .nowPlayingCopySwap .statCard:nth-child(3){
   animation-delay: 240ms !important;
 }
-
 
 .nowPlayingCopySwap h1{
   animation: localitfySongTitleIn 680ms var(--song-change-ease) both !important;
@@ -2078,16 +1848,13 @@ button:active{
   letter-spacing: -0.065em !important;
 }
 
-
 .nowPlayingArtSwap{
   will-change: transform, opacity, filter;
 }
 
-
 .nowPlayingArtSwap{
   animation: localitfyCoverIn 760ms var(--song-change-ease) both !important;
 }
-
 
 .nowPlayingArtSwap img{
   transform: translateZ(0);
@@ -2096,11 +1863,9 @@ button:active{
     box-shadow 520ms var(--soft-hover-ease) !important;
 }
 
-
 .nowPlayingArtSwap:hover img{
   transform: scale(1.018) translateY(-1px) !important;
 }
-
 
 .homeAlbumCard,
 .songRow,
@@ -2116,19 +1881,16 @@ button:active{
     opacity 220ms ease !important;
 }
 
-
 .homeAlbumCard:hover{
   background: rgba(255, 255, 255, 0.035) !important;
   transform: translate3d(0, -2px, 0) !important;
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.26) !important;
 }
 
-
 .homeAlbumCard::before{
   opacity: 0 !important;
   background: transparent !important;
 }
-
 
 .homeAlbumCard:active,
 .songRow:active,
@@ -2139,24 +1901,20 @@ button:active{
   transform: translate3d(0, 0, 0) scale(0.985) !important;
 }
 
-
 .heroExpanded{
   min-height: clamp(270px, 28vh, 350px) !important;
   padding-block: clamp(24px, 3vh, 38px) !important;
 }
-
 
 .heroExpanded .heroTitle{
   font-size: clamp(46px, 5.5vw, 78px) !important;
   line-height: 0.9 !important;
 }
 
-
 .heroExpanded .heroArt{
   width: clamp(142px, 12vw, 184px) !important;
   height: clamp(142px, 12vw, 184px) !important;
 }
-
 
 @media (max-width: 900px){
   .modalWrap{
@@ -2180,24 +1938,20 @@ button:active{
   }
 }
 
-
 .search{
   height: 40px !important;
   border-radius: 999px !important;
   background: rgba(255, 255, 255, 0.055) !important;
 }
 
-
 .heroExpanded{
   min-height: clamp(270px, 33vh, 380px) !important;
   padding-block: clamp(24px, 3vh, 38px) !important;
 }
 
-
 .heroCompact{
   min-height: clamp(210px, 25vh, 284px) !important;
 }
-
 
 .heroTitle{
   max-width: 800px !important;
@@ -2207,11 +1961,9 @@ button:active{
   letter-spacing: -0.085em !important;
 }
 
-
 .heroMetaLine{
   max-width: 620px !important;
 }
-
 
 .heroExpandedShelf{
   width: min(100%, 500px) !important;
@@ -2220,24 +1972,20 @@ button:active{
   margin-top: 16px !important;
 }
 
-
 .heroExpandedShelf > div{
   min-height: 58px !important;
   padding: 11px 12px !important;
 }
 
-
 .heroArtWrap{
   justify-self: end !important;
 }
-
 
 .heroArt{
   width: clamp(150px, 13vw, 206px) !important;
   height: clamp(150px, 13vw, 206px) !important;
   border-radius: 18px !important;
 }
-
 
 .dashboardGrid{
   width: 100% !important;
@@ -2246,11 +1994,9 @@ button:active{
   margin-top: 14px !important;
 }
 
-
 .homeLibraryPanel{
   border-radius: 18px !important;
 }
-
 
 .homeLibraryExpanded{
   min-height: auto !important;
@@ -2258,11 +2004,9 @@ button:active{
   padding: 16px !important;
 }
 
-
 .homeLibraryExpanded .panelHead{
   margin-bottom: 12px !important;
 }
-
 
 .homeAlbumGrid{
   display: grid !important;
@@ -2271,7 +2015,6 @@ button:active{
   align-items: start !important;
 }
 
-
 .homeAlbumCard{
   min-width: 0 !important;
   min-height: 0 !important;
@@ -2279,13 +2022,11 @@ button:active{
   border-radius: 15px !important;
 }
 
-
 .homeAlbumPlayZone{
   width: 100% !important;
   aspect-ratio: 1 / 1 !important;
   border-radius: 13px !important;
 }
-
 
 .homeAlbumArt{
   width: 100% !important;
@@ -2293,12 +2034,10 @@ button:active{
   border-radius: 13px !important;
 }
 
-
 .homeAlbumMeta{
   margin-top: 10px !important;
   gap: 3px !important;
 }
-
 
 .homeAlbumMeta strong{
   font-size: 14px !important;
@@ -2306,29 +2045,22 @@ button:active{
   letter-spacing: -0.025em !important;
 }
 
-
 .homeAlbumMeta small{
   font-size: 11px !important;
 }
-
 
 .homeAlbumStats{
   margin-top: 8px !important;
 }
 
-
 .homeAlbumActions{
   margin-top: 9px !important;
 }
-
 
 @media (max-width: 1180px){
   .appShell{
     grid-template-columns: minmax(208px, var(--sidebar-width, 236px)) minmax(0, 1fr) !important;
   }
-
-  
-
 
   .heroTitle{
     font-size: clamp(38px, 5.4vw, 66px) !important;
@@ -2338,7 +2070,6 @@ button:active{
     grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)) !important;
   }
 }
-
 
 @media (max-width: 920px){
   .appShell{
@@ -2381,32 +2112,21 @@ button:active{
     justify-self: start !important;
   }
 
-  
-
-
-  
-
-  
 }
 
-
-/* Prevent hover scale/glow from being chopped off inside the library panel. */
 .panel{
   overflow: visible !important;
 }
 
-
 .homeLibraryExpanded{
   padding-bottom: 26px !important;
 }
-
 
 .homeAlbumGrid{
   padding: 6px 7px 40px !important;
   margin: -2px -5px 0 !important;
   contain: layout style !important;
 }
-
 
 .homeAlbumCard{
   overflow: visible !important;
@@ -2420,23 +2140,19 @@ button:active{
     box-shadow 180ms ease !important;
 }
 
-
 .homeAlbumCard:hover{
   transform: translateY(-3px) scale(1.01) translateZ(0) !important;
   z-index: 8 !important;
 }
 
-
 .homeAlbumPlayZone{
   overflow: hidden !important;
 }
-
 
 .homeAlbumActions{
   position: relative !important;
   z-index: 3 !important;
 }
-
 
 .content,
 .panel,
@@ -2453,7 +2169,6 @@ button:active{
   text-rendering: geometricPrecision;
 }
 
-
 .homeAlbumCard{
   cursor: grab;
   user-select: none;
@@ -2467,22 +2182,18 @@ button:active{
     box-shadow 180ms ease !important;
 }
 
-
 .homeAlbumCard:active{
   cursor: grabbing;
 }
-
 
 .homeAlbumCard:hover{
   transform: translate3d(0, -6px, 0) scale(1.012) !important;
 }
 
-
 .homeAlbumCard[draggable="true"]:active{
   opacity: 0.74;
   transform: scale(0.985) translateZ(0) !important;
 }
-
 
 .homeAlbumPlayZone,
 .songButton,
@@ -2493,7 +2204,6 @@ button:active{
 .expandLibraryButton{
   will-change: transform, opacity, box-shadow;
 }
-
 
 .circleButton:not(.playerBar *),
 .iconAction,
@@ -2509,7 +2219,6 @@ button:active{
     opacity 160ms ease !important;
 }
 
-
 .circleButton:hover:not(.playerBar *),
 .iconAction:hover,
 .heroTinyButton:hover,
@@ -2517,14 +2226,12 @@ button:active{
   transform: translateY(-2px) scale(1.035) !important;
 }
 
-
 .circleButton:active:not(.playerBar *),
 .iconAction:active,
 .heroTinyButton:active,
 .expandLibraryButton:active{
   transform: translateY(0) scale(0.96) !important;
 }
-
 
 .homeAlbumArt{
   transform: translateZ(0);
@@ -2535,16 +2242,13 @@ button:active{
     filter 260ms ease !important;
 }
 
-
 .homeAlbumCard:hover .homeAlbumArt{
   transform: scale(1.045) translateZ(0) !important;
 }
 
-
 .homeAlbumCard{
   animation: localitfyCardRise 360ms var(--ease-smooth) both;
 }
-
 
 .homeAlbumCard:nth-child(1){ animation-delay: 8ms; }
 
@@ -2568,7 +2272,6 @@ button:active{
 
 .homeAlbumCard:nth-child(n + 11){ animation-delay: 88ms; }
 
-
 @keyframes localitfyCardRise {
   from {
     opacity: 0.001;
@@ -2580,18 +2283,15 @@ button:active{
   }
 }
 
-
 .homeAlbumCard{
   cursor: grab;
   user-select: none;
   -webkit-user-drag: element;
 }
 
-
 .homeAlbumCard:active{
   cursor: grabbing;
 }
-
 
 .app.songDragActive .homeAlbumCard{
   transition:
@@ -2601,7 +2301,6 @@ button:active{
     background-color 180ms ease,
     box-shadow 180ms ease !important;
 }
-
 
 .homeAlbumCard.songDragging{
   opacity: 0.48 !important;
@@ -2615,7 +2314,6 @@ button:active{
   animation: localitfyCardPickedUp 620ms ease-in-out infinite !important;
 }
 
-
 .homeAlbumCard.songDropTarget{
   opacity: 1 !important;
   border-color: rgba(var(--accent-rgb), 0.72) !important;
@@ -2627,7 +2325,6 @@ button:active{
     0 20px 50px rgba(0, 0, 0, 0.35) !important;
 }
 
-
 .homeAlbumCard.songDropTarget[data-drop-side="before"]{
   box-shadow:
     -8px 0 0 -3px rgba(var(--accent-rgb), 0.95),
@@ -2635,7 +2332,6 @@ button:active{
     0 0 0 6px rgba(var(--accent-rgb), 0.08),
     0 20px 50px rgba(0, 0, 0, 0.35) !important;
 }
-
 
 .homeAlbumCard.songDropTarget[data-drop-side="after"]{
   box-shadow:
@@ -2645,17 +2341,14 @@ button:active{
     0 20px 50px rgba(0, 0, 0, 0.35) !important;
 }
 
-
 .app.songDragActive .homeAlbumCard:not(.songDragging):not(.songDropTarget) .homeAlbumRank{
   animation: localitfyRankWiggle 740ms ease-in-out infinite !important;
 }
-
 
 .app.songDragActive .homeAlbumCard:not(.songDragging):not(.songDropTarget):hover{
   transform: translate3d(0, -4px, 0) scale(1.01) !important;
   border-color: rgba(var(--accent-rgb), 0.38) !important;
 }
-
 
 @keyframes localitfyCardPickedUp {
   0%, 100% {
@@ -2666,18 +2359,15 @@ button:active{
   }
 }
 
-
 .homeAlbumCard{
   animation: localitfySongStagger 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: var(--stagger, 0ms);
 }
 
-
 .homeAlbumCard:hover .coverAura img{
   transform: translateZ(0) scale(1.018);
   transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 
 @keyframes localitfyToastIn {
   0% {
@@ -2690,7 +2380,6 @@ button:active{
   }
 }
 
-
 @keyframes localitfyTinyScannerIn {
   0% {
     opacity: 0;
@@ -2701,7 +2390,6 @@ button:active{
     transform: translate3d(0, 0, 0) scale(1);
   }
 }
-
 
 @keyframes localitfyScannerPulse {
   0%, 100% {
@@ -2714,7 +2402,6 @@ button:active{
   }
 }
 
-
 @keyframes localitfyScannerRing {
   0% {
     opacity: 0.55;
@@ -2725,7 +2412,6 @@ button:active{
     transform: scale(1.55);
   }
 }
-
 
 @keyframes localitfyCoverFade {
   0% {
@@ -2738,7 +2424,6 @@ button:active{
   }
 }
 
-
 @keyframes localitfySongStagger {
   0% {
     opacity: 0;
@@ -2750,8 +2435,6 @@ button:active{
   }
 }
 
-
-/* Main hero song title: slightly lifted, cleaner baseline, still safely clamps. */
 .app .hero .heroTitle{
   margin-top: 13px !important;
   margin-bottom: 8px !important;
@@ -2770,26 +2453,21 @@ button:active{
   animation: localitfyHeroTitleRiseSafe 480ms var(--hero-title-ease) both !important;
 }
 
-
 @supports (text-wrap: balance){
   .app .hero .heroTitle{
     text-wrap: balance;
   }
 }
 
-
 .app .heroTitle br{
   line-height: 0.92 !important;
 }
-
 
 .app .heroMetaLine{
   margin-top: 1px !important;
   transform: translateY(-2px) translateZ(0) !important;
 }
 
-
-/* Hero card motion: premium lift without animating expensive blur/background-position. */
 .app .hero{
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -2800,19 +2478,15 @@ button:active{
     background-color 420ms ease !important;
 }
 
-
 .app .hero:hover{
   transform: translate3d(0, -1px, 0) !important;
 }
 
-
-/* Cover pop only targets the keyed now-playing wrappers, so it does not restart on every card. */
 .app .nowPlayingArtSwap{
   transform: translateZ(0);
   backface-visibility: hidden;
   animation: localitfyCoverSoftPopSafe 460ms var(--hero-title-ease) both !important;
 }
-
 
 .app .heroArt img{
   backface-visibility: hidden;
@@ -2823,19 +2497,15 @@ button:active{
     box-shadow 260ms ease !important;
 }
 
-
 .app .heroArt:hover img{
   transform: scale(1.028) translateZ(0) !important;
 }
-
 
 .app .pageTransition > .hero{
   animation: none !important;
   opacity: 1 !important;
 }
 
-
-/* Cards and rows: stronger polish but avoids layout bugs/clipping. */
 .app .albumCard{
   backface-visibility: hidden;
   transform: translateZ(0);
@@ -2846,7 +2516,6 @@ button:active{
     box-shadow 240ms ease !important;
 }
 
-
 .app .albumCard:hover{
   transform: translate3d(0, -4px, 0) scale(1.009) !important;
   box-shadow:
@@ -2854,18 +2523,14 @@ button:active{
     0 0 0 1px rgba(var(--accent-rgb), 0.16) !important;
 }
 
-
-/* Better title baseline without forcing player text into weird tall boxes. */
 .app .homeAlbumMeta strong{
   line-height: 1.14 !important;
   padding-bottom: 0.04em !important;
 }
 
-
 .app .nowPlayingMiniCopySwap{
   animation: localitfyPlayerInfoSlideSafe 320ms var(--hero-title-ease) both !important;
 }
-
 
 .app .circleButton:not(.playerBar *),
 .app .iconAction,
@@ -2886,7 +2551,6 @@ button:active{
     filter 165ms ease !important;
 }
 
-
 .app .circleButton:hover:not(.playerBar *),
 .app .iconAction:hover,
 .app .heroTinyButton:hover,
@@ -2900,7 +2564,6 @@ button:active{
   transform: translate3d(0, -1px, 0) !important;
 }
 
-
 .app .circleButton:active:not(.playerBar *),
 .app .iconAction:active,
 .app .heroTinyButton:active,
@@ -2912,21 +2575,13 @@ button:active{
   transform: scale(0.965) translateZ(0) !important;
 }
 
-
-/* Mobile guard rails. */
 @media (max-width: 920px){
   .app .hero .heroTitle{
     max-width: 100% !important;
     font-size: clamp(34px, 9vw, 58px) !important;
   }
 
-  
-
-
-  
-
 }
-
 
 @media (max-width: 760px){
   .app .hero .heroTitle{
@@ -2934,13 +2589,7 @@ button:active{
     letter-spacing: -0.062em !important;
   }
 
-  
-
-
-  
-
 }
-
 
 @keyframes localitfyHeroTitleRiseSafe {
   0% {
@@ -2954,7 +2603,6 @@ button:active{
   }
 }
 
-
 @keyframes localitfyPageBlockRiseSafe {
   0% {
     opacity: 0;
@@ -2967,13 +2615,11 @@ button:active{
   }
 }
 
-
 .app .hero.heroPremium{
   position: relative !important;
   overflow: hidden !important;
   isolation: isolate !important;
 }
-
 
 .app .heroAmbiencePulse{
   position: absolute;
@@ -2993,38 +2639,31 @@ button:active{
   animation: localitfyCinematicAmbience 760ms var(--cinematic-ease) both;
 }
 
-
 .app .nowPlayingArtSwap{
   transform-origin: center;
   animation: localitfyCinematicCoverPop 620ms var(--cinematic-pop) both !important;
 }
 
-
 .app .nowPlayingCopySwap .eyebrow{
   animation: localitfyCinematicMetaFade 360ms ease both !important;
 }
-
 
 .app .nowPlayingCopySwap .heroTitle{
   transform-origin: left center;
   animation: localitfyCinematicTitleSlide 520ms var(--cinematic-ease) both !important;
 }
 
-
 .app .nowPlayingCopySwap .heroMetaLine{
   animation: localitfyCinematicArtistDelay 620ms var(--cinematic-ease) both !important;
 }
-
 
 .app .nowPlayingDetailsSwap > *{
   animation: localitfyCinematicDetailRise 520ms var(--cinematic-ease) both;
 }
 
-
 .app .nowPlayingDetailsSwap > *:nth-child(2){ animation-delay: 42ms; }
 
 .app .nowPlayingDetailsSwap > *:nth-child(3){ animation-delay: 84ms; }
-
 
 @keyframes localitfyScannerLine {
   0% { transform: translateY(-88px); opacity: 0; }
@@ -3032,28 +2671,16 @@ button:active{
   100% { transform: translateY(240px); opacity: 0; }
 }
 
-
 @keyframes localitfyScannerOrb {
   0% { transform: translate3d(0, -88px, 0) scale(0.75); opacity: 0; }
   22% { opacity: 1; }
   100% { transform: translate3d(520px, 240px, 0) scale(1.05); opacity: 0; }
 }
 
-
 @keyframes localitfyScannerBreath {
   0%, 100% { opacity: 0.52; transform: scale(0.96); }
   50% { opacity: 0.86; transform: scale(1.08); }
 }
-
-
-/* bring the compact animation from the other code to there */
-
-/* ======================================================================
-   localitfy — restored expand / compact now-playing motion
-   This brings back the old smooth hero reflow while keeping the newer
-   song-change animation classes. It is scoped hard so motion.css does not
-   flatten the expand button animation again.
-   ====================================================================== */
 
 .app .heroLayoutMotion{
   transform-origin: top center;
@@ -3069,13 +2696,11 @@ button:active{
     transform 420ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-
 .app .hero.heroLayoutMotion.heroCompact{
   min-height: clamp(218px, 25vh, 276px) !important;
   grid-template-columns: minmax(0, 1fr) clamp(150px, 12vw, 190px) !important;
   padding: clamp(22px, 2.1vw, 28px) !important;
 }
-
 
 .app .hero.heroLayoutMotion.heroExpanded{
   min-height: clamp(330px, 35vh, 438px) !important;
@@ -3088,11 +2713,9 @@ button:active{
     0 0 58px rgba(var(--accent-rgb), 0.12) !important;
 }
 
-
 .app .simpleHero.heroLayoutMotion.simpleHeroCompact{
   min-height: clamp(250px, 32vh, 320px) !important;
 }
-
 
 .app .simpleHero.heroLayoutMotion.simpleHeroExpanded{
   min-height: clamp(360px, 48vh, 520px) !important;
@@ -3103,21 +2726,17 @@ button:active{
     0 0 46px rgba(var(--accent-rgb), 0.12) !important;
 }
 
-
 .app .heroLayoutMotion.heroLayoutPulseA{
   animation: localitfyHeroReflowSoft 560ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
-
 
 .app .heroLayoutMotion.heroExpanded.heroLayoutPulseA{
   animation-name: localitfyHeroExpandRestore !important;
 }
 
-
 .app .heroLayoutMotion.heroCompact.heroLayoutPulseA{
   animation-name: localitfyHeroCompactRestore !important;
 }
-
 
 .app .heroLayoutMotion .heroTitle{
   transition:
@@ -3127,12 +2746,10 @@ button:active{
     transform 560ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-
 .app .heroLayoutMotion.heroCompact .heroTitle{
   font-size: clamp(42px, 5.4vw, 74px) !important;
   line-height: 0.91 !important;
 }
-
 
 .app .heroLayoutMotion.heroExpanded .heroTitle{
   font-size: clamp(54px, 6.6vw, 98px) !important;
@@ -3140,23 +2757,19 @@ button:active{
   transform: translate3d(0, -3px, 0) !important;
 }
 
-
 .app .heroLayoutMotion .heroArtWrap{
   transition:
     transform 620ms cubic-bezier(0.18, 0.92, 0.22, 1),
     opacity 420ms ease !important;
 }
 
-
 .app .heroLayoutMotion.heroExpanded .heroArtWrap{
   transform: translate3d(-4px, 0, 0) scale(1.035) !important;
 }
 
-
 .app .heroLayoutMotion.heroCompact .heroArtWrap{
   transform: translate3d(0, 0, 0) scale(1) !important;
 }
-
 
 .app .heroLayoutMotion .heroArt{
   transition:
@@ -3167,12 +2780,10 @@ button:active{
     box-shadow 520ms ease !important;
 }
 
-
 .app .heroLayoutMotion.heroCompact .heroArt{
   width: clamp(140px, 12vw, 184px) !important;
   height: clamp(140px, 12vw, 184px) !important;
 }
-
 
 .app .heroLayoutMotion.heroExpanded .heroArt{
   width: clamp(180px, 15vw, 232px) !important;
@@ -3183,13 +2794,11 @@ button:active{
     0 0 42px rgba(var(--accent-rgb), 0.14) !important;
 }
 
-
 .app .heroLayoutMotion .heroExpandedShelf{
   overflow: hidden;
   transform-origin: top left;
   animation: localitfyShelfDropRestore 520ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
-
 
 .app .heroLayoutMotion .heroExpandedShelf > div{
   opacity: 0;
@@ -3197,13 +2806,11 @@ button:active{
   animation: localitfyShelfCardRestore 470ms cubic-bezier(0.18, 0.92, 0.22, 1) forwards !important;
 }
 
-
 .app .heroLayoutMotion .heroExpandedShelf > div:nth-child(1){ animation-delay: 80ms !important; }
 
 .app .heroLayoutMotion .heroExpandedShelf > div:nth-child(2){ animation-delay: 132ms !important; }
 
 .app .heroLayoutMotion .heroExpandedShelf > div:nth-child(3){ animation-delay: 184ms !important; }
-
 
 .app .heroLayoutMotion .heroTinyButton{
   transition:
@@ -3213,7 +2820,6 @@ button:active{
     box-shadow 220ms ease !important;
 }
 
-
 .app .heroLayoutMotion .heroTinyButton:hover{
   transform: translateY(-1px) scale(1.015) !important;
   box-shadow:
@@ -3221,18 +2827,15 @@ button:active{
     0 8px 22px rgba(var(--accent-rgb), 0.10) !important;
 }
 
-
 .app .heroLayoutMotion .heroTinyButton:active{
   transform: translateY(0) scale(0.985) !important;
 }
-
 
 .app .heroLayoutMotion::after{
   transition:
     background 620ms cubic-bezier(0.16, 1, 0.3, 1),
     opacity 420ms ease !important;
 }
-
 
 .app .heroLayoutMotion.heroExpanded::after{
   background:
@@ -3241,12 +2844,10 @@ button:active{
     linear-gradient(90deg, rgba(0, 0, 0, 0.90), rgba(0, 0, 0, 0.60) 47%, rgba(0, 0, 0, 0.38)) !important;
 }
 
-
 @keyframes localitfyHeroReflowSoft {
   0% { opacity: 0.95; transform: translate3d(0, 8px, 0) scale(0.997); }
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
-
 
 @keyframes localitfyHeroExpandRestore {
   0% { opacity: 0.90; transform: translate3d(0, 12px, 0) scale(0.992); }
@@ -3254,12 +2855,10 @@ button:active{
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-
 @keyframes localitfyHeroCompactRestore {
   0% { opacity: 0.94; transform: translate3d(0, -4px, 0) scale(1.002); }
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
-
 
 @media (max-width: 980px){
   .app .hero.heroLayoutMotion.heroCompact{
@@ -3271,11 +2870,9 @@ button:active{
   }
 }
 
-
 .app .heroMain{
   overflow: visible !important;
 }
-
 
 .app .heroTitle{
   line-height: 1.035 !important;
@@ -3289,24 +2886,20 @@ button:active{
   -webkit-font-smoothing: antialiased;
 }
 
-
 .app .heroLayoutMotion.heroCompact .heroTitle{
   line-height: 1.025 !important;
   transform: translate3d(0, var(--hero-title-final-lift), 0) scale(1) !important;
 }
-
 
 .app .heroLayoutMotion.heroExpanded .heroTitle{
   line-height: 1.018 !important;
   transform: translate3d(0, calc(var(--hero-title-final-lift) - 2px), 0) scale(1) !important;
 }
 
-
 .app .heroMetaLine{
   transform: translate3d(0, -4px, 0) !important;
   margin-top: 0 !important;
 }
-
 
 @keyframes localitfyHeroTitleRise {
   0% {
@@ -3319,9 +2912,6 @@ button:active{
   }
 }
 
-
-/* Smooth album-card hover: soft lift, tiny shine, cover zoom, and active-song
-   glow. Uses transform/opacity mostly, so it should stay smooth on big grids. */
 .app .homeAlbumCard{
   position: relative !important;
   isolation: isolate !important;
@@ -3339,7 +2929,6 @@ button:active{
     opacity 240ms ease !important;
 }
 
-
 .app .homeAlbumCard::before{
   content: "" !important;
   position: absolute !important;
@@ -3355,7 +2944,6 @@ button:active{
     opacity 320ms ease,
     transform 520ms var(--album-hover-final-ease) !important;
 }
-
 
 .app .homeAlbumCard::after{
   content: "" !important;
@@ -3380,12 +2968,10 @@ button:active{
     transform 720ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-
 .app .homeAlbumCard > *{
   position: relative;
   z-index: 1;
 }
-
 
 .app .homeAlbumCard:hover{
   background: rgba(255, 255, 255, 0.056) !important;
@@ -3397,18 +2983,15 @@ button:active{
     0 0 30px rgba(var(--accent-rgb), 0.055) !important;
 }
 
-
 .app .homeAlbumCard:hover::before{
   opacity: 1 !important;
   transform: scale(1) translateZ(0) !important;
 }
 
-
 .app .homeAlbumCard:hover::after{
   opacity: 1 !important;
   transform: translate3d(240%, 0, 0) !important;
 }
-
 
 .app .homeAlbumCard.active{
   border-color: rgba(var(--accent-rgb), 0.52) !important;
@@ -3418,7 +3001,6 @@ button:active{
     0 18px 52px rgba(0, 0, 0, 0.34),
     0 0 34px rgba(var(--accent-rgb), 0.09) !important;
 }
-
 
 .app .homeAlbumArt{
   transform: translate3d(0, 0, 0) scale(1) !important;
@@ -3430,13 +3012,11 @@ button:active{
     opacity 260ms ease !important;
 }
 
-
 .app .homeAlbumCard:hover .homeAlbumArt{
   transform: translate3d(0, -1px, 0) scale(1.045) !important;
   filter: saturate(1.08) contrast(1.025) brightness(1.035) !important;
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.38) !important;
 }
-
 
 .app .homeAlbumPlayBadge{
   transition:
@@ -3447,16 +3027,13 @@ button:active{
     box-shadow 280ms ease !important;
 }
 
-
 .app .homeAlbumCard:hover .homeAlbumPlayBadge{
   transform: translate3d(0, -2px, 0) scale(1.035) !important;
 }
 
-
 .app .homeAlbumCard:hover .homeAlbumActions{
   transform: translate3d(0, -1px, 0) !important;
 }
-
 
 .app .homeAlbumActions .iconAction:hover{
   transform: translate3d(0, -2px, 0) scale(1.055) !important;
@@ -3465,9 +3042,6 @@ button:active{
   box-shadow: 0 10px 26px rgba(var(--accent-rgb), 0.10) !important;
 }
 
-
-/* Smoother ambience sides: keeps the album-cover glow, but blends the far
-   left/right edges so the hero does not look like a hard dark rectangle. */
 .app .hero.ambientSurface{
   position: relative !important;
   isolation: isolate !important;
@@ -3477,7 +3051,6 @@ button:active{
     inset 28px 0 64px rgba(0, 0, 0, 0.58),
     inset -34px 0 74px rgba(0, 0, 0, 0.48) !important;
 }
-
 
 .app .hero.ambientSurface::before{
   content: "" !important;
@@ -3497,7 +3070,6 @@ button:active{
     transform 1100ms var(--hero-title-final-ease),
     background-position 1200ms var(--hero-title-final-ease) !important;
 }
-
 
 .app .hero.ambientSurface::after{
   content: "" !important;
@@ -3520,14 +3092,12 @@ button:active{
     background 820ms var(--hero-title-final-ease) !important;
 }
 
-
 .app .hero.ambientSurface:hover::before{
   opacity: 0.25 !important;
   filter: blur(56px) saturate(1.26) brightness(0.86) !important;
   background-position: 68% 44% !important;
   transform: scale(1.22) translate3d(-0.8%, -0.7%, 0) !important;
 }
-
 
 .app .hero.ambientSurface:hover::after{
   background:
@@ -3541,11 +3111,9 @@ button:active{
       rgba(0, 0, 0, 0.78) 100%) !important;
 }
 
-
 .app .headerBar{
   will-change: auto;
 }
-
 
 .app .hero.ambientSurface::before{
   opacity: 0.2;
@@ -3553,13 +3121,10 @@ button:active{
   transform: scale(1.19) translate3d(-0.35%, -0.35%, 0);
 }
 
-
-/* Keep the purple/active strokes from blinking during scroll. */
 .app .panel{
   backface-visibility: hidden;
   transform-style: flat;
 }
-
 
 .app .homeLibraryPanel{
   border-color: rgba(var(--accent-rgb), 0.2) !important;
@@ -3569,7 +3134,6 @@ button:active{
     inset 4px 0 0 rgba(var(--accent-rgb), 0.72) !important;
 }
 
-
 .app .heroPremium{
   border-color: rgba(var(--accent-rgb), 0.18) !important;
   box-shadow:
@@ -3577,13 +3141,10 @@ button:active{
     inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
 }
 
-
-/* Do not use content-visibility:auto for this small card count. It caused pop-in/flicker. */
 .app .homeAlbumGrid{
   contain: layout style;
   content-visibility: visible !important;
 }
-
 
 .app .homeAlbumCard{
   contain: layout paint style;
@@ -3593,7 +3154,6 @@ button:active{
   will-change: transform, opacity;
 }
 
-
 .app .homeAlbumCard{
   transition:
     transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -3602,7 +3162,6 @@ button:active{
     box-shadow 190ms ease !important;
 }
 
-
 .app .homeAlbumCard:hover{
   transform: translate3d(0, -5px, 0) scale(1.01) !important;
   box-shadow:
@@ -3610,11 +3169,9 @@ button:active{
     0 0 0 1px rgba(var(--accent-rgb), 0.075) inset !important;
 }
 
-
 .app .homeAlbumCard:hover .homeAlbumArt{
   transform: scale(1.035) translate3d(0, 0, 0) !important;
 }
-
 
 .app .homeAlbumArt img{
   backface-visibility: hidden;
@@ -3622,11 +3179,6 @@ button:active{
   image-rendering: auto;
 }
 
-
-/* ======================================================================
-   localitfy — clean album card hover final override
-   Requested style: subtle clickable card, no loud glow sweep/gradient hover.
-   ====================================================================== */
 .app .homeAlbumCard{
   position: relative !important;
   isolation: isolate !important;
@@ -3739,13 +3291,6 @@ button:active{
   transform: scale(0.985) translateZ(0) !important;
 }
 
-
-/* ======================================================================
-   localitfy — clean card hover + low-jank grid final override
-   Same visual idea: tiny lift, tiny cover zoom, brighter play chip,
-   stronger border. No heavy background swaps.
-====================================================================== */
-
 .app .homeAlbumGrid{
   contain: layout style;
 }
@@ -3808,12 +3353,6 @@ button:active{
   transition-duration: 120ms !important;
 }
 
-/* ======================================================================
-   localitfy — home/library paint optimization
-   Keeps the same visuals, but stops off-screen cards and rows from costing
-   scroll frames. This should be last in home.css so it wins over older rules.
-====================================================================== */
-
 .homeAlbumGrid{
   contain: layout style !important;
   transform: translateZ(0);
@@ -3865,8 +3404,6 @@ button:active{
   transform: scale(1.03) translateZ(0) !important;
 }
 
-
-/* Fully kill the old long hero ambience strip. */
 .app .heroAmbiencePulse{
   display: none !important;
   opacity: 0 !important;
@@ -3877,8 +3414,6 @@ button:active{
   transform: none !important;
 }
 
-
-/* Keep the actual hero cover clean and stable. */
 .app .heroArtWrap{
   position: relative !important;
   z-index: 3 !important;
@@ -3891,7 +3426,6 @@ button:active{
   z-index: 2 !important;
 }
 
-/* Small album-cover aura ONLY behind the cover, not across the whole hero. */
 .app[data-ambient="on"] .heroArtWrap::before{
   content: "" !important;
   position: absolute !important;
@@ -3910,7 +3444,6 @@ button:active{
   will-change: auto !important;
 }
 
-/* Extra soft accent glow behind the cover. Cheap gradient, no huge image blur. */
 .app[data-ambient="on"] .heroArtWrap::after{
   content: "" !important;
   position: absolute !important;
@@ -3929,13 +3462,10 @@ button:active{
   display: none !important;
 }
 
-
-/* Reduce expensive effects during resize/drag so the UI does not stutter. */
 body.isResizingSidebar .heroArtWrap::before{
   display: none !important;
 }
 
-/* Keep card hover movement light. */
 .app .homeAlbumCard{
   will-change: auto !important;
 }
@@ -3976,7 +3506,6 @@ body.isResizingSidebar .app .homeAlbumCard{
   box-shadow: none !important;
 }
 
-
 .app .homeAlbumGrid{
   gap: var(--section-gap, 14px) !important;
   grid-template-columns: repeat(auto-fill, minmax(clamp(136px, calc(168px * var(--library-card-scale, 1)), 206px), 1fr)) !important;
@@ -4008,7 +3537,6 @@ body.isResizingSidebar .app .homeAlbumCard{
 .app .hero{
   will-change: auto;
 }
-
 
 .homeAlbumCard{
   -webkit-user-drag: element;
@@ -4091,7 +3619,6 @@ body.isResizingSidebar .app .homeAlbumCard{
     box-shadow 120ms ease !important;
 }
 
-
 body.localitfyLibraryPointerDragging{
   cursor: grabbing !important;
   user-select: none !important;
@@ -4165,7 +3692,6 @@ body.localitfyLibraryPointerDragging{
 .homeAlbumCard.songDropTarget[data-drop-side="after"]{
   translate: -6px 0;
 }
-
 
 body.localitfyLibraryPointerDragging{
   cursor: grabbing !important;
@@ -4312,7 +3838,6 @@ body.localitfyLibraryPointerDragging{
   top: auto !important;
 }
 
-
 .app .homeAlbumCard{
   cursor: pointer;
   touch-action: pan-y;
@@ -4413,7 +3938,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   bottom: -10px !important;
 }
 
-
 .app .homeAlbumGrid{
   contain: layout style !important;
 }
@@ -4448,14 +3972,14 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   transition-duration: 150ms !important;
 }
 
-
-
 .coverStudioCleanLayout{
-  width: min(1180px, 100%);
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   display: grid;
-  gap: 12px;
-  padding-bottom: 120px;
+  gap: 10px;
+  padding: 0 clamp(18px, 3vw, 56px) 120px 0;
+  color: var(--home-ref-text);
 }
 
 .coverStudioCleanLayout .ambientSurface::before,
@@ -4468,17 +3992,18 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 .coverStudioCleanHero{
+  width: 100%;
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto minmax(230px, 300px) !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
   align-items: center !important;
-  gap: 16px !important;
+  gap: 14px !important;
   min-width: 0;
-  padding: 18px !important;
+  padding: 14px 16px !important;
   overflow: hidden;
-  border: 1px solid rgba(var(--accent-rgb), 0.18) !important;
-  border-radius: 24px !important;
-  background: rgba(18, 12, 30, 0.74) !important;
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28) !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.16) !important;
+  border-radius: 22px !important;
+  background: rgba(17, 10, 28, 0.70) !important;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.24) !important;
 }
 
 .coverStudioCleanHeroText{
@@ -4486,24 +4011,24 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 .coverStudioCleanHeroText h3{
-  margin: 3px 0 4px !important;
-  font-size: clamp(30px, 3.2vw, 50px) !important;
+  margin: 2px 0 3px !important;
+  font-size: clamp(30px, 3vw, 48px) !important;
   line-height: 0.96 !important;
   letter-spacing: -0.06em !important;
 }
 
 .coverStudioCleanHeroText p:not(.eyebrow){
-  max-width: 560px !important;
+  max-width: 650px !important;
   margin: 0 !important;
   color: var(--muted) !important;
-  font-size: 0.88rem !important;
-  line-height: 1.45 !important;
+  font-size: 0.84rem !important;
+  line-height: 1.35 !important;
 }
 
 .coverStudioCleanActions{
   display: flex !important;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: end;
   gap: 8px !important;
   min-width: 0;
 }
@@ -4511,13 +4036,13 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .coverStudioCleanActions button,
 .coverGalleryToolbarClean button,
 .coverSongToolsClean button,
-.coverRecentPanel button,
-.coverStudioMiniPreview button{
-  min-height: 34px;
+.coverQuickPreview button,
+.coverRecentInline button{
+  min-height: 32px;
   border: 1px solid var(--line);
   border-radius: var(--pill);
   color: var(--text);
-  background: rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.065);
   font-weight: 850;
   transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
 }
@@ -4528,71 +4053,68 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 .coverStudioCleanActions .heroMain,
-.coverStudioMiniPreview button,
-.coverGalleryActionsClean .coverApplyButton{
+.coverQuickPreview button{
   color: #09070d !important;
   border-color: transparent !important;
   background: var(--accent) !important;
-  box-shadow: 0 12px 32px rgba(var(--accent-rgb), 0.18) !important;
+  box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.16) !important;
 }
 
 .coverStudioCleanActions button:hover:not(:disabled),
 .coverGalleryToolbarClean button:hover:not(:disabled),
 .coverSongToolsClean button:hover:not(:disabled),
-.coverRecentPanel button:hover:not(:disabled),
-.coverStudioMiniPreview button:hover:not(:disabled),
-.coverGalleryActionsClean button:hover:not(:disabled){
+.coverQuickPreview button:hover:not(:disabled),
+.coverRecentInline button:hover:not(:disabled){
   transform: translateY(-1px);
-  border-color: rgba(var(--accent-rgb),0.38);
-  background: rgba(var(--accent-rgb),0.13);
+  border-color: rgba(var(--accent-rgb),0.34);
+  background: rgba(var(--accent-rgb),0.12);
 }
 
 .coverStudioMiniPreview{
-  display: grid;
-  grid-template-columns: 52px 20px 52px;
-  grid-template-rows: 52px 34px;
-  grid-template-areas:
-    "song arrow cover"
-    "button button button";
+  display: none !important;
+}
+
+.coverQuickApplyBar{
+  display: flex;
   align-items: center;
-  justify-content: end;
-  gap: 8px 10px;
-  min-width: 230px;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: rgba(0,0,0,0.24);
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 10px;
+  min-width: 0;
 }
 
-.coverStudioMiniPreview > span{
-  grid-area: arrow;
+.coverQuickPreview{
+  min-width: 0;
+  display: inline-grid;
+  grid-template-columns: 38px 16px 38px auto;
+  align-items: center;
+  gap: 7px;
+  padding: 7px;
+  border: 1px solid rgba(255,255,255,0.075);
+  border-radius: 16px;
+  background: rgba(0,0,0,0.18);
+}
+
+.coverQuickPreview > span{
   color: var(--muted);
-  text-align: center;
   font-weight: 900;
+  text-align: center;
 }
 
-.coverStudioMiniPreview button{
-  grid-area: button;
-  width: 100%;
-  padding: 0 12px;
+.coverQuickPreview button{
+  min-height: 30px;
+  padding: 0 11px;
+  font-size: 0.72rem;
+  white-space: nowrap;
 }
 
 .coverStudioMiniSongArt,
-.coverStudioMiniPreview .coverGalleryImageShell,
+.coverQuickPreview .coverGalleryImageShellCleanOnly,
 .coverPreviewEmpty{
-  width: 52px !important;
-  height: 52px !important;
-  border-radius: 14px !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 11px !important;
   overflow: hidden !important;
-}
-
-.coverStudioMiniSongArt{
-  grid-area: song;
-}
-
-.coverStudioMiniPreview .coverGalleryImageShell,
-.coverPreviewEmpty{
-  grid-area: cover;
 }
 
 .coverPreviewEmpty{
@@ -4602,17 +4124,46 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background: rgba(255,255,255,0.055);
 }
 
+.coverRecentInline{
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 7px;
+}
+
+.coverRecentInline strong{
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.coverRecentInline button{
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.coverRecentInline .coverGalleryImageShellCleanOnly{
+  width: 100%;
+  height: 100%;
+}
+
 .coverApplyToast{
   justify-self: start;
-  min-height: 36px;
+  min-height: 34px;
   display: inline-flex;
   align-items: center;
-  padding: 0 14px;
-  border: 1px solid rgba(var(--accent-rgb),0.42);
+  padding: 0 13px;
+  border: 1px solid rgba(var(--accent-rgb),0.38);
   border-radius: var(--pill);
   color: var(--text);
-  background: rgba(var(--accent-rgb),0.14);
-  box-shadow: 0 14px 38px rgba(0,0,0,0.28);
+  background: rgba(var(--accent-rgb),0.13);
+  box-shadow: 0 12px 34px rgba(0,0,0,0.22);
   font-weight: 850;
   animation: coverToastIn 220ms ease both;
 }
@@ -4627,20 +4178,20 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   display: flex !important;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px !important;
+  gap: 7px !important;
   padding: 0 1px;
 }
 
 .coverMoodTabsClean button{
-  min-height: 34px;
+  min-height: 31px;
   display: inline-flex !important;
   align-items: center;
-  gap: 7px;
-  padding: 0 12px;
-  border: 1px solid var(--line);
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,0.085);
   border-radius: var(--pill);
   color: var(--text-2);
-  background: rgba(255,255,255,0.055);
+  background: rgba(255,255,255,0.045);
   font-weight: 850;
   white-space: nowrap;
   transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease, color 140ms ease;
@@ -4649,91 +4200,36 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .coverMoodTabsClean button:hover{
   transform: translateY(-1px);
   color: var(--text);
-  border-color: rgba(var(--accent-rgb),0.36);
-  background: rgba(var(--accent-rgb),0.11);
+  border-color: rgba(var(--accent-rgb),0.30);
+  background: rgba(var(--accent-rgb),0.10);
 }
 
 .coverMoodTabsClean button.active{
   color: var(--text);
-  border-color: rgba(var(--accent-rgb),0.52);
-  background: rgba(var(--accent-rgb),0.15);
+  border-color: rgba(var(--accent-rgb),0.48);
+  background: rgba(var(--accent-rgb),0.14);
 }
 
 .coverMoodTabsClean button strong{
-  min-width: 22px;
-  height: 20px;
+  min-width: 20px;
+  height: 19px;
   display: inline-grid;
   place-items: center;
-  padding: 0 7px;
+  padding: 0 6px;
   border-radius: var(--pill);
   color: #09070d;
   background: var(--accent);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
 }
 
 .coverRecentPanel{
-  display: grid;
-  gap: 10px;
-  padding: 12px !important;
-  border-radius: 20px !important;
-  background: rgba(255,255,255,0.04) !important;
-}
-
-.coverRecentHead{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.coverRecentHead strong{
-  color: var(--text);
-  letter-spacing: -0.02em;
-}
-
-.coverRecentHead span{
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.coverRecentStrip{
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-
-.coverRecentStrip button{
-  flex: 0 0 auto;
-  width: 88px;
-  min-height: auto;
-  display: grid;
-  gap: 7px;
-  padding: 7px;
-  border-radius: 15px;
-  text-align: left;
-}
-
-.coverRecentStrip .coverGalleryImageShell{
-  width: 74px;
-  height: 74px;
-  border-radius: 12px;
-}
-
-.coverRecentStrip span:last-child{
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--text-2);
-  font-size: 0.72rem;
-  font-weight: 800;
+  display: none !important;
 }
 
 .coverStudioCleanBody{
+  width: 100%;
   display: grid !important;
-  grid-template-columns: minmax(235px, 290px) minmax(0, 1fr) !important;
+  grid-template-columns: clamp(230px, 17vw, 280px) minmax(0, 1fr) !important;
   gap: 12px !important;
   align-items: start !important;
 }
@@ -4742,20 +4238,22 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .coverGalleryPanelClean{
   min-width: 0;
   border-radius: 22px !important;
-  background: rgba(14, 9, 24, 0.72) !important;
+  border: 1px solid rgba(255,255,255,0.075) !important;
+  background: rgba(13, 8, 23, 0.64) !important;
+  box-shadow: none !important;
 }
 
 .coverSelectedSongsPanelClean{
   position: sticky;
   top: 0;
-  max-height: calc(100vh - 185px);
-  padding: 13px !important;
+  max-height: calc(100vh - 166px);
+  padding: 12px !important;
   overflow: hidden;
 }
 
 .coverGalleryPanelClean{
-  min-height: min(670px, calc(100vh - 230px));
-  padding: 14px !important;
+  min-height: min(720px, calc(100vh - 190px));
+  padding: 12px !important;
 }
 
 .coverPanelHeadClean,
@@ -4764,61 +4262,61 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 9px;
 }
 
 .coverPanelHeadClean h3,
 .coverGalleryHeaderClean h3{
-  margin: 3px 0 0;
-  font-size: 1.05rem;
+  margin: 2px 0 0;
+  font-size: 1rem;
   letter-spacing: -0.03em;
 }
 
 .coverPanelHeadClean > span,
 .coverGalleryHeaderClean > span{
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 850;
 }
 
 .coverStudioSearchInput{
   width: 100%;
-  min-height: 38px;
-  border: 1px solid rgba(255,255,255,0.085);
+  min-height: 36px;
+  border: 1px solid rgba(255,255,255,0.075);
   border-radius: 13px;
   color: var(--text);
-  background: rgba(0,0,0,0.26);
-  padding: 0 12px;
+  background: rgba(0,0,0,0.22);
+  padding: 0 11px;
   outline: none;
   font-weight: 800;
 }
 
 .coverStudioSearchInput:focus{
-  border-color: rgba(var(--accent-rgb),0.42);
-  background: rgba(0,0,0,0.34);
+  border-color: rgba(var(--accent-rgb),0.38);
+  background: rgba(0,0,0,0.30);
 }
 
 .coverSongToolsClean{
   display: flex !important;
   gap: 7px;
-  margin: 10px 0;
+  margin: 9px 0;
 }
 
 .coverSongToolsClean button{
   flex: 1 1 0;
   padding: 0 9px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .coverSongListClean{
-  max-height: calc(100vh - 350px);
-  min-height: 220px;
+  max-height: calc(100vh - 310px);
+  min-height: 230px;
   overflow: auto;
   padding-right: 4px;
 }
 
 .coverSongVirtualCanvas,
-.coverGalleryVirtualCanvas{
+.coverGalleryVirtualCanvasCleanOnly{
   position: relative;
   min-width: 0;
 }
@@ -4831,25 +4329,25 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   width: 100%;
   min-height: 50px;
   display: grid !important;
-  grid-template-columns: 36px minmax(0, 1fr) 22px;
+  grid-template-columns: 34px minmax(0, 1fr) 20px;
   align-items: center;
-  gap: 9px;
-  padding: 7px 9px;
+  gap: 8px;
+  padding: 7px 8px;
   border: 1px solid transparent;
   border-radius: 12px;
   color: var(--text);
-  background: rgba(255,255,255,0.043);
+  background: rgba(255,255,255,0.036);
   text-align: left;
 }
 
 .coverSongPick:hover{
-  border-color: rgba(var(--accent-rgb),0.28);
-  background: rgba(255,255,255,0.07);
+  border-color: rgba(var(--accent-rgb),0.24);
+  background: rgba(255,255,255,0.06);
 }
 
 .coverSongPick.active{
-  border-color: rgba(var(--accent-rgb),0.55);
-  background: rgba(var(--accent-rgb),0.15);
+  border-color: rgba(var(--accent-rgb),0.50);
+  background: rgba(var(--accent-rgb),0.13);
 }
 
 .coverSongPick span{
@@ -4867,12 +4365,12 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 
 .coverSongPick strong{
   color: var(--text);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
 }
 
 .coverSongPick small{
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
 }
 
 .coverSongPick em{
@@ -4883,8 +4381,8 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 .coverSongThumb{
-  width: 36px !important;
-  height: 36px !important;
+  width: 34px !important;
+  height: 34px !important;
   border-radius: 10px !important;
   object-fit: cover !important;
   overflow: hidden !important;
@@ -4893,60 +4391,61 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .coverGalleryToolbarClean{
   display: flex;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 
 .coverGalleryToolbarClean button{
   padding: 0 13px;
 }
 
-.coverGalleryGridClean{
-  max-height: calc(100vh - 335px);
-  min-height: 450px;
+.coverGalleryGridCleanOnly{
+  max-height: calc(100vh - 322px);
+  min-height: 500px;
   overflow: auto !important;
   overflow-x: hidden !important;
-  padding: 2px 4px 26px 2px !important;
-  scrollbar-gutter: auto;
+  padding: 2px 5px 34px 2px !important;
+  scrollbar-gutter: stable;
 }
 
-.coverGalleryVirtualRow{
+.coverGalleryVirtualRowCleanOnly{
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   display: grid !important;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 
-.coverGalleryCardClean{
+.coverStudioCleanLayout .coverGalleryCardCleanOnly{
+  position: relative;
   min-width: 0;
-  min-height: 212px;
+  min-height: 156px;
   display: grid !important;
-  grid-template-rows: auto auto auto;
+  grid-template-rows: auto minmax(26px, auto);
   align-content: start;
-  gap: 8px;
-  padding: 9px !important;
-  border: 1px solid rgba(255,255,255,0.085);
-  border-radius: 16px;
-  background: rgba(255,255,255,0.045) !important;
+  gap: 7px;
+  padding: 7px !important;
+  border: 1px solid rgba(255,255,255,0.075) !important;
+  border-radius: 15px !important;
+  background: rgba(255,255,255,0.038) !important;
   box-shadow: none !important;
   overflow: hidden !important;
   contain: layout paint style;
 }
 
-.coverGalleryCardClean:hover{
-  border-color: rgba(var(--accent-rgb),0.32);
-  background: rgba(255,255,255,0.065) !important;
+.coverStudioCleanLayout .coverGalleryCardCleanOnly:hover{
+  border-color: rgba(var(--accent-rgb),0.32) !important;
+  background: rgba(255,255,255,0.058) !important;
 }
 
-.coverGalleryCardClean.excluded{
-  opacity: 0.54;
-  filter: grayscale(0.25);
+.coverStudioCleanLayout .coverGalleryCardCleanOnly.excluded{
+  opacity: 0.52;
+  filter: grayscale(0.28);
 }
 
-.coverGalleryImageButton{
+.coverGalleryImageButtonCleanOnly{
   width: 100% !important;
   aspect-ratio: 1 / 1;
   display: block !important;
@@ -4955,9 +4454,14 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   border-radius: 13px !important;
   background: rgba(255,255,255,0.04) !important;
   overflow: hidden !important;
+  box-shadow: none !important;
 }
 
-.coverGalleryImageShell{
+.coverGalleryImageButtonCleanOnly:hover{
+  transform: none !important;
+}
+
+.coverGalleryImageShellCleanOnly{
   position: relative;
   display: block;
   width: 100%;
@@ -4967,7 +4471,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background: rgba(255,255,255,0.045);
 }
 
-.coverGalleryImagePlaceholder{
+.coverGalleryImagePlaceholderCleanOnly{
   position: absolute;
   inset: 0;
   display: grid;
@@ -4976,7 +4480,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   font-weight: 900;
 }
 
-.coverGalleryImage{
+.coverGalleryImageCleanOnly{
   position: relative;
   z-index: 1;
   width: 100% !important;
@@ -4991,69 +4495,105 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   transition: opacity 180ms ease;
 }
 
-.coverGalleryImage.isLoaded{
+.coverGalleryImageCleanOnly.isLoaded{
   opacity: 1;
 }
 
-.coverGalleryInfoClean{
+.coverGalleryInfoCleanOnly{
   min-width: 0;
   display: grid !important;
-  gap: 2px;
+  gap: 1px;
 }
 
-.coverGalleryInfoClean strong,
-.coverGalleryInfoClean small{
+.coverGalleryInfoCleanOnly strong,
+.coverGalleryInfoCleanOnly small{
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.coverGalleryInfoClean strong{
+.coverGalleryInfoCleanOnly strong{
   color: var(--text);
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   letter-spacing: -0.02em;
 }
 
-.coverGalleryInfoClean small{
+.coverGalleryInfoCleanOnly small{
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.62rem;
 }
 
-.coverGalleryActionsClean{
+.coverGalleryActionsCleanOnly{
+  position: absolute !important;
+  top: 7px;
+  right: 7px;
+  width: auto;
   min-width: 0;
-  display: grid !important;
-  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
-  gap: 7px !important;
+  display: flex !important;
+  gap: 5px !important;
+  opacity: 0;
+  transform: translateY(-3px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
 }
 
-.coverGalleryActionsClean button{
+.coverGalleryCardCleanOnly:hover .coverGalleryActionsCleanOnly,
+.coverGalleryCardCleanOnly:focus-within .coverGalleryActionsCleanOnly{
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.coverGalleryActionsCleanOnly button{
   min-width: 0 !important;
-  min-height: 31px;
-  height: 31px;
-  padding: 0 9px !important;
-  border: 1px solid var(--line);
-  border-radius: var(--pill);
-  color: var(--text);
-  background: rgba(255,255,255,0.07);
-  font-size: 0.72rem;
-  font-weight: 850;
+  width: 26px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  border-radius: 999px !important;
+  color: rgba(255,255,255,0.90) !important;
+  background: rgba(6, 5, 10, 0.70) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.28) !important;
+  backdrop-filter: blur(12px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.coverGalleryActionsClean .coverHideButton.danger.active{
-  color: #ffd4dc;
-  border-color: rgba(255,100,130,0.38);
-  background: rgba(255,100,130,0.13);
+.coverGalleryActionsCleanOnly .coverApplyButton{
+  display: none !important;
 }
 
-.coverGalleryActionsClean .coverApplyButton:disabled{
-  color: var(--text-2) !important;
-  border-color: var(--line) !important;
-  background: rgba(255,255,255,0.06) !important;
-  box-shadow: none !important;
+.coverGalleryActionsCleanOnly .coverHideButton:hover{
+  color: #fff !important;
+  border-color: rgba(var(--accent-rgb),0.34) !important;
+  background: rgba(var(--accent-rgb),0.20) !important;
+  transform: translateY(-1px) !important;
+}
+
+.coverGalleryActionsCleanOnly .coverHideButton.danger.active{
+  color: #ffd4dc !important;
+  border-color: rgba(255,100,130,0.34) !important;
+  background: rgba(120,18,45,0.66) !important;
+}
+
+.app[data-card-background="acrylic"] :is(.panel, .settingsPageCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .downloadCard, .playlistHero, .homeShelfPanel){
+  background: rgba(12, 10, 18, 0.48) !important;
+  border-color: rgba(255,255,255,0.105) !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.045) !important;
+  backdrop-filter: blur(18px) saturate(128%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(128%) !important;
+}
+
+.app[data-card-background="solid"] :is(.panel, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .downloadCard){
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .coverEmptyStateClean{
@@ -5088,10 +4628,9 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     justify-content: start;
   }
 
-  .coverStudioMiniPreview{
-    justify-content: start;
-    width: max-content;
-    max-width: 100%;
+  .coverQuickApplyBar{
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .coverStudioCleanBody{
@@ -5107,35 +4646,36 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     max-height: 280px;
   }
 
-  .coverGalleryGridClean{
+  .coverGalleryGridCleanOnly{
     max-height: none;
   }
 }
 
 @media (max-width: 760px){
+  .coverStudioCleanLayout{
+    padding-right: 0;
+  }
+
   .coverStudioCleanHero{
-    padding: 15px !important;
+    padding: 14px !important;
   }
 
   .coverStudioCleanHeroText h3{
     font-size: clamp(28px, 10vw, 40px) !important;
   }
 
-  .coverStudioMiniPreview{
-    grid-template-columns: 48px 18px 48px;
-    grid-template-rows: 48px 34px;
+  .coverQuickPreview{
+    width: 100%;
+    grid-template-columns: 36px 14px 36px minmax(0, 1fr);
   }
 
   .coverStudioMiniSongArt,
-  .coverStudioMiniPreview .coverGalleryImageShell,
+  .coverQuickPreview .coverGalleryImageShellCleanOnly,
   .coverPreviewEmpty{
-    width: 48px !important;
-    height: 48px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 }
-
-
-
 
 .editorModalWrap{
   padding: 26px !important;
@@ -5469,7 +5009,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-
 .libraryPanelHead{
   align-items: center;
   gap: 14px;
@@ -5543,7 +5082,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     margin-left: 0;
   }
 }
-
 
 :root{
   --home-ref-bg: #000000;
@@ -5988,7 +5526,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-
 :root{
   --localtify-kopuz-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --localtify-kopuz-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -5999,7 +5536,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   --localtify-kopuz-cover-glow: rgba(var(--accent-rgb), 0.145);
 }
 
-/* Smooth theme reach, without turning everything into a blurry ambient panel. */
 .hero{
   transition:
     background 520ms var(--localtify-kopuz-ease),
@@ -6011,7 +5547,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     opacity 220ms ease !important;
 }
 
-/* Kill the previous big ambient layers on page surfaces. Album-cover aura stays below. */
 .hero.ambientSurface::before{
   animation: none !important;
   background: none !important;
@@ -6020,7 +5555,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   pointer-events: none !important;
 }
 
-/* Keep drag/drop indicators alive after disabling normal pseudo ambience. */
 .homeAlbumCard[data-drop-side="before"]::before{
   display: block !important;
   opacity: 1 !important;
@@ -6147,7 +5681,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     0 12px 30px rgba(0, 0, 0, 0.22) !important;
 }
 
-/* Keep the ambience where it actually looks premium: album art only, very controlled. */
 .heroArt{
   transition:
     transform 520ms var(--localtify-kopuz-ease),
@@ -6183,7 +5716,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     0 0 24px rgba(var(--accent-rgb), 0.070) !important;
 }
 
-/* Tiny button aura: enough feedback, not a full glow festival. */
 .mainAction,
 .heroMain,
 .simpleAction,
@@ -6199,9 +5731,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .homeAlbumActions .iconAction,
 .homeLibraryActions .softButton,
 .simpleLibraryControls .softButton,
-.coverApplyButton,
-.coverHideButton,
-.coverStarButton,
 .coverMoodTabs button,
 .coverMoodChip{
   transition:
@@ -6225,8 +5754,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .homeAlbumActions .iconAction,
 .homeLibraryActions .softButton,
 .simpleLibraryControls .softButton,
-.coverHideButton,
-.coverStarButton,
 .coverMoodTabs button,
 .coverMoodChip{
   background:
@@ -6247,9 +5774,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .homeAlbumPlayBadge:hover,
 .homeAlbumActions .iconAction:hover,
 .homeLibraryActions .softButton:hover,
-.simpleLibraryControls .softButton:hover,
-.coverHideButton:hover,
-.coverStarButton:hover,
+.simpleLibraryControls .softButton:hover:hover:hover,
 .coverMoodTabs button:hover,
 .coverMoodChip:hover{
   background:
@@ -6288,13 +5813,11 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     0 0 26px rgba(var(--accent-rgb), 0.09) !important;
 }
 
-
 @media (max-width: 900px){
   .hero:hover{
     transform: translateZ(0) !important;
   }
 }
-
 
 .app .content > .pageTransition{
   min-width: 0 !important;
@@ -6459,7 +5982,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   filter: brightness(1.045) saturate(1.04) !important;
 }
 
-
 .homeLibraryPanel{
   transition:
     background 260ms var(--kopuz-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)),
@@ -6554,7 +6076,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     0 0 30px color-mix(in oklab, var(--accent) 9%, transparent) !important;
 }
 
-/* Re-apply the larger icon navigation because home.css loads after App.css. */
 .nav{
   gap: 8px !important;
 }
@@ -6602,7 +6123,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     font-size: 18px !important;
   }
 }
-
 
 .sidebarModeSwitch{
   display: none !important;
@@ -6729,7 +6249,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-
 .homeAlbumCard{
   transition:
     transform 230ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -6805,7 +6324,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   filter: brightness(1.07) saturate(1.1) !important;
 }
 
-
 .app .songList{
   gap: 9px !important;
 }
@@ -6831,7 +6349,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     opacity 180ms ease !important;
 }
 
-/* Kill the old full-width stripe overlays, but keep drag/drop indicators alive. */
 .app .songRow:not(.songDropTarget)::before{
   content: none !important;
   display: none !important;
@@ -6903,7 +6420,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     inset 0 1px 0 color-mix(in oklab, var(--text, #fff) 7%, transparent) !important;
 }
 
-/* Cleaner Kopuz-style sidebar: no brand block, no local/server pill, no icon boxes. */
 .app .sidebar .logoWrap{
   display: none !important;
 }
@@ -6965,7 +6481,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow: inset 3px 0 0 var(--accent) !important;
 }
 
-/* Slightly better page entrance, scoped to the content page only. */
 .app .content > .pageTransition{
   animation: localtifyKopuzSoftPageIn 380ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
@@ -6998,7 +6513,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-
 .simpleBrand strong{
   font-family: var(--font-display, "Space Grotesk", Inter, system-ui, sans-serif) !important;
   font-weight: 700 !important;
@@ -7021,7 +6535,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .songRow:hover .songArt{
   filter: saturate(1.14) contrast(1.06) brightness(1.04) !important;
 }
-
 
 .homeLibraryPanel .songRow{
   max-width: 100% !important;
@@ -7066,7 +6579,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   white-space: nowrap !important;
 }
 
-/* No motion here; motion.css re-enables the small hover movement after import. */
 .songRow,
 .topRow,
 .homeAlbumCard,
@@ -7083,7 +6595,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   animation: none !important;
   transform: none !important;
 }
-
 
 .app .homeLibraryPanel{
   border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 10%, rgba(255,255,255,.055)) !important;
@@ -7133,7 +6644,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow: inset 2px 0 0 color-mix(in oklab, var(--theme-accent, var(--accent)) 65%, transparent), inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
 
-/* Kill every old fake row band/stripe. Drag target pseudos are handled below. */
 .app .songRow:not(.songDropTarget)::before{
   content: none !important;
   display: none !important;
@@ -7173,7 +6683,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   transform: translateY(-1px) !important;
 }
 
-/* Keep drag/drop feedback visible without reintroducing the ugly full stripe. */
 .app .songRow.songDropTarget::before{
   content: "" !important;
   display: block !important;
@@ -7194,7 +6703,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
-
 
 .app .songRow{
   position: relative !important;
@@ -7277,7 +6785,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   filter: brightness(1.02) saturate(1.035) !important;
 }
 
-
 .app .songRow{
   position: relative !important;
   min-height: 58px !important;
@@ -7335,7 +6842,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   filter: brightness(1.015) saturate(1.02) !important;
 }
 
-
 .songRow{
   background:
     linear-gradient(90deg, color-mix(in oklab, var(--accent) 5%, transparent), transparent 65%),
@@ -7374,7 +6880,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   transform: scale(1.025) !important;
   filter: brightness(1.06) saturate(1.06) !important;
 }
-
 
 .homeView{
   --theme-accent: var(--accent, #8dffce);
@@ -7417,7 +6922,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   border-color: color-mix(in oklab, var(--theme-accent) 28%, rgba(255,255,255,.09)) !important;
   transform: translateY(-1px) !important;
 }
-
 
 .homePage{
   background: transparent !important;
@@ -7476,7 +6980,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   border-color: color-mix(in oklab, var(--accent, #8dffce) 44%, rgba(255,255,255,.07)) !important;
 }
 
-/* album covers keep the ambience, but card zoom stays controlled */
 .homeAlbumCard:hover .homeAlbumArt{
   transform: scale(1.025) !important;
   filter: brightness(1.035) saturate(1.08) !important;
@@ -7491,7 +6994,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .homeAlbumCard:hover .coverAura::before{
   opacity: .40 !important;
 }
-
 
 .homeView{
   --localtify-page-bg: color-mix(in oklab, var(--bg, #050505) 78%, var(--accent, #ff65df) 12%);
@@ -7529,7 +7031,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 16px 34px rgba(0,0,0,.20) !important;
 }
 
-/* no gray/black card hover: accent-tinted glass only */
 .homeAlbumCard{
   background: var(--localtify-card-bg) !important;
   border-color: color-mix(in oklab, var(--accent, #ff65df) 13%, rgba(255,255,255,.055)) !important;
@@ -7555,7 +7056,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   border-color: color-mix(in oklab, var(--accent, #ff65df) 46%, rgba(255,255,255,.07)) !important;
 }
 
-/* cover motion stays nice, but the card itself does not over-zoom */
 .homeAlbumCard img{
   transition: transform 190ms cubic-bezier(.2,.8,.2,1), filter 190ms ease, box-shadow 190ms ease !important;
   transform-origin: center !important;
@@ -7567,7 +7067,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow: 0 10px 24px rgba(0,0,0,.28), 0 0 14px color-mix(in oklab, var(--accent, #ff65df) 12%, transparent) !important;
 }
 
-/* remove only the background ambience/orb layers from home panels */
 .hero.ambientSurface::before{
   display: none !important;
   opacity: 0 !important;
@@ -7575,7 +7074,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   animation: none !important;
 }
 
-/* album-cover ambience is still allowed */
 .coverAura::before{
   display: block !important;
   opacity: .30 !important;
@@ -7586,7 +7084,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   opacity: .42 !important;
 }
 
-/* search should sit on themed glass, not black */
 .search{
   background: color-mix(in oklab, var(--surface, #101010) 74%, var(--accent, #ff65df) 6%) !important;
   border-color: color-mix(in oklab, var(--accent, #ff65df) 16%, rgba(255,255,255,.06)) !important;
@@ -7596,7 +7093,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   border-color: color-mix(in oklab, var(--accent, #ff65df) 42%, transparent) !important;
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent, #ff65df) 13%, transparent) !important;
 }
-
 
 .homePage{
   background: transparent !important;
@@ -7696,7 +7192,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent, #ff6edb) 22%, transparent) !important;
 }
 
-
 .homeAlbumGrid{
   overscroll-behavior: contain;
   scrollbar-gutter: auto;
@@ -7738,7 +7233,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
   min-height: 64px;
 }
 
-
 .homeHero{
   backface-visibility: hidden;
 }
@@ -7746,7 +7240,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
 .isDragging .homeHero{
   backdrop-filter: none !important;
 }
-
 
 .app .hero.heroPremium{
   position: relative !important;
@@ -7930,7 +7423,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
   }
 }
 
-
 .app .hero.heroPremium{
   position: relative !important;
   overflow: hidden !important;
@@ -7946,7 +7438,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
     inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
 }
 
-/* Main blurred cover wash across the hero. Stable on hover, so the cursor does not break it. */
 .app[data-ambient="on"] .hero.heroPremium::before{
   content: "" !important;
   position: absolute !important;
@@ -7966,7 +7457,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
   backface-visibility: hidden !important;
 }
 
-/* Dark readability layer. This is what stops the cover wash from looking like a raw image strip. */
 .app .hero.heroPremium::after{
   content: "" !important;
   position: absolute !important;
@@ -8008,7 +7498,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
   z-index: 3 !important;
 }
 
-/* Make the cover an actual cover again: square, crisp, no weird crop/stretch, no hover wobble. */
 .app .hero.heroPremium .heroArtWrap{
   justify-self: end !important;
   align-self: center !important;
@@ -8072,14 +7561,12 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
   transform: translate3d(0, 0, 0) scale(1) !important;
 }
 
-/* Remove the awkward duration tile/box from the hero. Player already shows time. */
 .app .heroExpandedShelf.heroDurationShelf{
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
 }
 
-/* Keep the tiny hero buttons clean, not big boxed UI. */
 .app .hero.heroPremium .heroTinyButton{
   min-height: 32px !important;
   border-radius: 999px !important;
@@ -8096,7 +7583,6 @@ body.localitfyThemePainting .app :where(.homeAlbumCard, .songRow, .topRow, .home
   transform: translate3d(0, -1px, 0) !important;
 }
 
-/* No expensive hero blur while dragging/resizing/theme painting. */
 body.localitfySongDragging .app .hero.heroPremium::before{
   filter: blur(22px) saturate(1.05) brightness(0.56) !important;
   opacity: 0.22 !important;
@@ -8112,7 +7598,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     height: clamp(160px, 38vw, 230px) !important;
   }
 }
-
 
 .content:has(.libraryPanelV025){
   overflow-y: auto !important;
@@ -8305,7 +7790,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   }
 }
 
-
 .app .homeAlbumActions .deleteAction{
   display: none !important;
 }
@@ -8367,7 +7851,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     grid-template-columns: 1fr !important;
   }
 }
-
 
 .homeShelfStack{
   display:grid;
@@ -8662,7 +8145,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   }
 }
 
-
 .homeView{
   background-image:
     radial-gradient(circle at 14% 0%, color-mix(in oklab, var(--accent, #ff65df) 9%, transparent) 0%, transparent 34%),
@@ -8859,7 +8341,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   text-overflow: ellipsis !important;
 }
 
-
 :root{
   --theme-page-bg: radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb, 255, 105, 180), 0.10), transparent 34%),
     radial-gradient(circle at 88% 12%, rgba(var(--accent-2-rgb, 128, 92, 255), 0.10), transparent 34%),
@@ -8897,13 +8378,10 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   will-change: transform;
 }
 
-
   .homeListenCard{
     animation-duration: 280ms !important;
   }
 
-
-/* final home background cleanup */
 .app{
   background-size: auto !important;
 }
@@ -8923,16 +8401,12 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(var(--surface-rgb, 20, 18, 28), 0.54)) !important;
 }
 
-/* player controls are repeated here because home.css loads after player.css */
-
-
 .circleButton.active:not(.playerBar *){
   color: var(--text, #fff) !important;
   border-color: rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.42) !important;
   background: rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.18) !important;
   box-shadow: 0 0 20px rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.16) !important;
 }
-
 
 .homeHeroCard{
   isolation: isolate;
@@ -9026,7 +8500,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   animation: localtifyV025ButtonPop 420ms var(--motion-spring) both;
 }
 
-
 .hero{
   isolation: isolate;
   overflow: hidden;
@@ -9074,7 +8547,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 .heroTinyButton:active::after{
   animation: localtifyV025ButtonPop 420ms var(--motion-spring) both;
 }
-
 
 .app[data-cover-sync="off"] .ambientSurface::before{
   opacity: 0 !important;
@@ -9126,7 +8598,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   filter: blur(24px) saturate(1.02) brightness(0.72) !important;
   opacity: min(var(--cover-sync-hero-opacity, 0.18), 0.18) !important;
 }
-
 
 .app .hero.heroPremium.heroLayoutMotion{
   transform-origin: center top !important;
@@ -9404,7 +8875,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   transform: translate3d(0, 1px, 0) scale(0.97) !important;
 }
 
-
 .app .search{
   transform-origin: left center;
   transition:
@@ -9484,7 +8954,6 @@ body.localitfyNoSelect,
 body.localitfyNoSelect *{
   user-select: none !important;
 }
-
 
 .app[data-theme] .editorModal,
 .app[data-theme] .editorModal:hover,
@@ -9619,7 +9088,6 @@ body.localitfyNoSelect *{
   }
 }
 
-
 .app .homeAlbumCard,
 .app .songRow,
 .app .libraryCard,
@@ -9670,14 +9138,12 @@ body.localitfyNoSelect *{
   rotate: 0deg !important;
 }
 
-/* compact / expanded hero cover stays bouncy, not tilted */
 .app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap,
 .app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap,
 .app .simpleHero.heroLayoutMotion.simpleHeroCompact .simpleHeroArt,
 .app .simpleHero.heroLayoutMotion.simpleHeroExpanded .simpleHeroArt{
   rotate: 0deg !important;
 }
-
 
 .app{
   --drag-ease-out: cubic-bezier(.17,1.18,.24,1);
@@ -9820,7 +9286,6 @@ body.localitfyNoSelect *{
   animation-duration: 0ms;
 }
 
-
 .app .homeAlbumCard.songDropTarget::before,
 .app .songRow.songDropTarget::before{
   opacity: 0 !important;
@@ -9859,8 +9324,6 @@ body.localitfyNoSelect *{
   height: var(--drop-line-width, 8px) !important;
 }
 
-
-/* big headings should never clip descenders like g/y/q */
 .heroTitle,
 .nowPlayingTitle,
 .pageHeader h1,
@@ -9881,7 +9344,6 @@ body.localitfyNoSelect *{
   overflow-wrap: anywhere !important;
 }
 
-/* library should have one clear title, then compact content */
 .libraryPageV025,
 .libraryViewV025,
 .libraryPage {
@@ -9964,7 +9426,6 @@ body.localitfyNoSelect *{
   overflow: hidden !important;
 }
 
-/* compact Kopuz-like list: readable, not huge empty gaps */
 .libraryTrackList,
 .libraryList,
 .tracksList,
@@ -10050,7 +9511,6 @@ body.localitfyNoSelect *{
   -webkit-text-fill-color: rgba(255, 255, 255, 0.48) !important;
 }
 
-/* cards must not leak outside their bounds on hover */
 .songGrid,
 .coverGrid,
 .recentCoversRow,
@@ -10104,7 +9564,6 @@ body.localitfyNoSelect *{
   -webkit-text-fill-color: rgba(255, 255, 255, 0.70) !important;
 }
 
-/* cover stats label background fix */
 .coverStudioStats div,
 .coverStudioStats > div {
   background: rgba(255, 255, 255, 0.055) !important;
@@ -10139,7 +9598,6 @@ body.localitfyNoSelect *{
   }
 }
 
-
 .homeAlbumCard,
 .songRow,
 .panel,
@@ -10156,7 +9614,6 @@ body.localitfyNoSelect *{
 .titleBar{
   content-visibility: visible;
 }
-
 
 .app .homeAlbumStats{
   justify-content: flex-start !important;
@@ -10202,7 +9659,6 @@ body.localitfyNoSelect *{
   }
 }
 
-
 .homePage,
 .homePage::before,
 .homePage::after,
@@ -10215,7 +9671,6 @@ body.localitfyNoSelect *{
   background-image: none !important;
   background-size: auto !important;
 }
-
 
 @media (max-width: 760px){
   .homeView,
@@ -10402,13 +9857,11 @@ body.localitfyNoSelect *{
   }
 }
 
-
 body.localitfyThemePainting .homeHero::before,
 body.localitfyThemePainting .heroCover .coverAura::before{
   opacity: .42 !important;
   filter: blur(30px) saturate(1.08) !important;
 }
-
 
 .homeView,
 .homeShell,
@@ -10455,7 +9908,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   background-image: none !important;
   background-size: auto !important;
 }
-
 
 .homeView,
 .homePage,
@@ -10526,7 +9978,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   animation: none !important;
 }
 
-/* The actual page should stay theme-colored, just without graph-paper lines. */
 .homeView{
   background:
     radial-gradient(circle at 52% 20%, color-mix(in oklab, var(--accent, #ff4ee8) 8%, transparent) 0%, transparent 34%),
@@ -10536,7 +9987,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
       color-mix(in oklab, var(--bg-2, #07050d) 90%, var(--accent-2, var(--accent, #9d6cff)) 4%)) !important;
 }
 
-/* Library card hover: no sliced dark overlay, no harsh side strip, no heavy zoom. */
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile):not(.songDropTarget){
   background-image: none !important;
   overflow: hidden !important;
@@ -10573,7 +10023,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   box-shadow: 0 10px 24px rgba(0,0,0,.18) !important;
 }
 
-/* Keep covers alive, but stop hover from creating a hard rectangular band. */
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile) img,
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile) .homeAlbumArt,
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile) .songArt{
@@ -10590,7 +10039,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   box-shadow: none !important;
 }
 
-/* Drag/drop still keeps its proper indicator line. */
 .app .homeAlbumCard.songDropTarget,
 .app .songRow.songDropTarget{
   contain: layout paint style !important;
@@ -10598,7 +10046,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   border-color: rgba(var(--accent-rgb), .46) !important;
 }
 
-/* Smoother library scrolling: reduce always-on paint work and huge shadows. */
 .app :where(.homeAlbumGrid,.homeFreshRail,.homeListenRail,.songList,.songGrid,.coverGrid,.localPicksGrid){
   contain: layout style !important;
   isolation: isolate !important;
@@ -10613,12 +10060,10 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   perspective: none !important;
 }
 
-/* Old patches sometimes placed glow bands on metadata/actions. Kill those bands only. */
 .app :where(.homeAlbumMeta,.homeAlbumActions,.homeAlbumStats,.songMeta,.songActions){
   background-image: none !important;
   box-shadow: none !important;
 }
-
 
 .app,
 .app :where(.homeView,.homePage,.homeShell,.homeShelfStack,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanel,.mainContent,.content,.contentScroller,.settingsView,.settingsPage,.settingsContent,.settingsBody,.settingsScroll,.settingsShell,.settingsWorkspace,.settingsMain,.settingsStage,.settingsCanvas,.settingsPanel,.settingsPanelShell){
@@ -10636,7 +10081,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   animation: none !important;
 }
 
-/* Put the theme glow back without the grid pattern. */
 .app .homeView,
 .app .homePage,
 .app .homeShell,
@@ -10652,8 +10096,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   background-size: auto !important;
 }
 
-/* User-requested library card fix:
-   no dark-mode takeover, no sliced hover band, no heavy zoom. */
 .app :where(.homeAlbumCard,.libraryCard,.songCard,.localPickCard,.recentCoverCard,.coverCard,.coverTile):not(.songDropTarget){
   background-image: none !important;
   background-color: color-mix(in oklab, var(--surface, #111017) 86%, var(--accent, #ff4ee8) 5%) !important;
@@ -10719,7 +10161,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   }
 }
 
-
 .app .homeAlbumCard,
 .app .albumCard,
 .app .songRow,
@@ -10759,7 +10200,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app .albumCard:hover .coverAura img{
   transform: none !important;
 }
-
 
 .home,
 .home::before,
@@ -10842,7 +10282,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   transform: none !important;
 }
 
-/* Long cover/library pages should not paint every card at once. */
 .libraryCard,
 .libraryCardV025,
 .coverCard,
@@ -10857,7 +10296,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   content-visibility: auto;
   contain-intrinsic-size: 1px 72px;
 }
-
 
 .app .songRow{
   grid-template-columns: minmax(0, 1fr) 72px 38px 38px 38px !important;
@@ -11080,12 +10518,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   overflow: auto;
   padding-right: 4px;
 }
-
-/* ======================================================================
-   localtify v0.3.6 V243 — playlist rows release rewrite
-   Scope: playlist rows/shelf/action layout only.
-   Replaces the old playlist row/shelf blocks with one clean owner section.
-====================================================================== */
 
 .app .playlistShelfCard{
   width: 100%;
@@ -11380,8 +10812,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   }
 }
 
-
-
 .app .playlistShelfMeta{
   min-width: 0;
   display: grid;
@@ -11592,7 +11022,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   }
 }
 
-
 .playlistHeroCollage,
 .playlistCard,
 .playlistCard:hover,
@@ -11668,7 +11097,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   filter: grayscale(0.3);
 }
 
-
 .app .homeView,
 .app .homePage,
 .app .homeShell,
@@ -11721,7 +11149,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
     border-radius: 18px !important;
   }
 }
-
 
 .app .playlistHeroActions{
   flex-wrap: wrap;
@@ -11912,7 +11339,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   }
 }
 
-
 .app .content{
   padding: 20px 24px 14px 26px !important;
   background:
@@ -11986,13 +11412,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   margin-top: 2px !important;
 }
 
-
-/* ======================================================================
-   localtify 0.3.0 — home shelf corner + square-grid cleanup
-   Home.css owns the home shelves/cards. This removes the last visible grid
-   texture from the home panels and keeps the shelf corners rounded/contained.
-====================================================================== */
-
 .app[data-theme] .content,
 html body .app[data-theme] .content,
 html body .content{
@@ -12063,7 +11482,6 @@ html body .content{
   z-index: 1;
 }
 
-/* Keep home clean: no play-count labels in the home side widgets. */
 .app .homeGrid .topList .topRow small,
 .app .homeGrid .statsGrid .statCard span{
   white-space: nowrap;
@@ -12073,13 +11491,6 @@ html body .content{
   color: rgba(255,255,255,.58) !important;
 }
 
-
-/* ======================================================================
-   localtify 0.3.0 — library page polish / no clipped play-count card
-   Owner: home.css owns library pages and song rows. This removes the plays
-   stat card from the layout, stops library rows jumping on hover, and keeps
-   right-side action buttons inside the rounded row.
-====================================================================== */
 .app .libraryStatsV025,
 .app .libraryStatsV030{
   display: grid !important;
@@ -12217,12 +11628,6 @@ html body .content{
   }
 }
 
-
-/* ======================================================================
-   localtify 0.3.0 — final home/library row motion cleanup
-   Owner: home.css. Song rows and home cards stay rounded, do not jump on
-   hover, and do not clip their action buttons.
-====================================================================== */
 .app .homeShelfPanel,
 .app .homeListenPanel,
 .app .homeFreshPanel,
@@ -12276,10 +11681,6 @@ html body .content{
   display: none !important;
 }
 
-/* ======================================================================
-   localtify 0.3.1 — home/library hover stability
-   Owner: home.css. No row jump, no clipped actions, softer cards.
-====================================================================== */
 .app :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanelV025){
   border-radius: 24px !important;
   overflow: hidden !important;
@@ -12328,11 +11729,6 @@ html body .content{
   background-image: none !important;
 }
 
-/* ========================================================================
-   localtify v0.3.1 — home/library rounded surface guard
-   Owner: home.css for home/library/song-card areas only.
-   Fixes square leaks, clipped hover rows, and sharp section corners.
-======================================================================== */
 .homeSection,
 .homeShelf,
 .localPicksPanel,
@@ -12373,18 +11769,6 @@ html body .content{
   transform: translate3d(0,-1px,0) !important;
 }
 
-/* ============================================================
-   localtify v0.3.7 V260 — flat source-aware downloads UI + player visibility fix
-   Owner: home.css
-   Replaces the V259 downloader source theme block without stacking a new patch.
-   Rules:
-   - no ambience orbs
-   - no radial light blobs
-   - YouTube mode uses flat dark red
-   - Spotify mode uses flat dark green
-   - source switching is smooth through background-color, border-color, and shadows
-   - proximity motion stays disabled inside downloads
-   ============================================================ */
 .app[data-download-source="youtube"],
 .app[data-download-source="spotify"]{
   background-image: none !important;
@@ -12478,10 +11862,6 @@ html body .content{
   z-index: 80 !important;
 }
 
-
-/* localtify v0.3.7 V261 — keep bottom-player album art visible on source-themed downloads.
-   The previous flat no-orb block accidentally targeted .coverAura globally.
-   .coverAura is also the real album-cover element inside the player, not just an ambience layer. */
 .app[data-download-source="youtube"] .playerBar .coverAura,
 .app[data-download-source="spotify"] .playerBar .coverAura,
 .app[data-download-source="youtube"] .playerBar .smallArt,
@@ -13191,168 +12571,10 @@ html body .content{
   }
 }
 
-/* v0.3.1 cover gallery loading polish */
-.coverGalleryImageButton {
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb, 227, 78, 232), 0.14), transparent 64%),
-    rgba(8, 5, 12, 0.9);
-}
-
-.coverGalleryImageShell {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb, 227, 78, 232), 0.14), transparent 64%),
-    rgba(8, 5, 12, 0.92);
-}
-
-.coverGalleryImagePlaceholder {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  color: rgba(255, 255, 255, 0.68);
-  font-size: clamp(1.6rem, 18vw, 4rem);
-  font-weight: 850;
-  letter-spacing: -0.08em;
-  text-transform: lowercase;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.055), transparent 44%),
-    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb, 227, 78, 232), 0.16), transparent 62%);
-  opacity: 1;
-  transition: opacity 220ms ease, transform 280ms ease;
-  pointer-events: none;
-}
-
-.coverGalleryImageShell.isLoaded .coverGalleryImagePlaceholder {
-  opacity: 0;
-  transform: scale(0.985);
-}
-
-.coverGalleryImageShell.isFailed .coverGalleryImagePlaceholder {
-  opacity: 1;
-  transform: none;
-}
-
-.coverGalleryImageShell .coverGalleryImage {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  background: transparent;
-  color: transparent;
-  opacity: 0;
-  transform: scale(1.018);
-  transition: opacity 240ms ease, transform 360ms ease;
-  pointer-events: none;
-}
-
-.coverGalleryImageShell .coverGalleryImage.isLoaded {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.coverGalleryImageShell.isLoading::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.055) 46%, transparent 72%);
-  transform: translateX(-110%);
-  animation: coverLoadSweep 1.15s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.coverGalleryImageShell.isLoaded::after,
-.coverGalleryImageShell.isFailed::after {
-  display: none;
-}
-
-.coverSongList.coverSongListVirtual{
-  position: relative !important;
-  display: block !important;
-  overflow: auto !important;
-  overflow-x: hidden !important;
-  padding-right: 4px !important;
-  contain: content;
-  scrollbar-gutter: stable;
-}
-
-.coverSongVirtualCanvas{
-  position: relative !important;
-  width: 100% !important;
-  min-width: 0 !important;
-}
-
-.coverSongPick.coverSongPickVirtual{
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 4px !important;
-  width: calc(100% - 4px) !important;
-  contain: layout paint style;
-  will-change: transform;
-}
-
-.coverGalleryGrid.coverGalleryGridVirtual{
-  position: relative !important;
-  display: block !important;
-  grid-template-columns: none !important;
-  gap: 0 !important;
-  overflow: auto !important;
-  overflow-x: hidden !important;
-  contain: content;
-  scrollbar-gutter: stable;
-}
-
-.coverGalleryVirtualCanvas{
-  position: relative !important;
-  width: 100% !important;
-  min-width: 0 !important;
-}
-
-.coverGalleryVirtualRow{
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  display: grid !important;
-  gap: 14px !important;
-  min-width: 0 !important;
-  padding: 2px 4px 16px 2px !important;
-  contain: layout paint style;
-  will-change: transform;
-}
-
-.coverGalleryVirtualRow .coverGalleryCard{
-  min-width: 0 !important;
-  height: 100% !important;
-}
-
-/* localtify v0.3.3 v104 — hero reflow helper
-   The real transition override lives in motion.css, imported after this file.
-   This keeps the rest of home.css untouched and preserves player.css. */
 body.localitfyHeroReflowing .app .homeShelfStack{
   pointer-events: none !important;
 }
 
-
-/* ========================================================================
-   localtify v0.3.5 — quick library card text spacing repair
-   Keeps card animation/ambience, but removes the forced title height that made
-   song names and artist names feel weirdly far apart on one-line titles.
-======================================================================== */
 .app .homeAlbumCard .homeAlbumMeta{
   display: grid !important;
   align-content: start !important;
@@ -13403,11 +12625,6 @@ body.localitfyHeroReflowing .app .homeShelfStack{
   align-self: start !important;
 }
 
-/* ========================================================================
-   localtify v0.3.5 — hero cover connection + smarter title sizing
-   Keeps the current hero layout, but makes the artwork/background feel linked
-   and stops tiny titles from becoming comically huge.
-======================================================================== */
 .app .hero.heroPremium{
   position: relative !important;
   isolation: isolate !important;
@@ -13506,15 +12723,6 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
     opacity: 0.10 !important;
   }
 }
-
-/* ======================================================================
-   localtify v0.3.5 V141 — hero/home ownership reset
-   ----------------------------------------------------------------------
-   This replaces the old V130-V139 stacked hero patches. Home.css owns only
-   final layout sizes and shelf stability. Motion.css owns the temporary
-   bounce classes. No body-level hero classes are needed anymore, so compact
-   / expand cannot make the whole home page replay entrance animation.
-====================================================================== */
 
 .app .content > .pageTransition,
 .app .pageTransition{
@@ -13750,9 +12958,6 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
   backface-visibility: hidden !important;
 }
 
-/* Old global hero patch classes are intentionally inert in V140. If a stale
-   hot-reload leaves one on <body>, it must not freeze stars, block clicks, or
-   restart page/shelf animation. */
 body.localitfyHeroReflowing .app .content > .pageTransition,
 body.localitfyHeroWantsExpanded .app .content > .pageTransition,
 body.localitfyHeroWantsCompact .app .content > .pageTransition,
@@ -13783,16 +12988,6 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
   }
 }
 
-
-/* ======================================================================
-   localtify v0.3.5 V141 — stop delayed home shelf replay
-   ----------------------------------------------------------------------
-   Home.css keeps final shelf/card layout stable. The actual compact/expand
-   bounce is owned by motion.css through .heroMotionExpanding/.heroMotionCompacting.
-   Once App.tsx marks .homeEntranceSettled, persistent home shelves/cards do
-   not run old entrance animations again after a hero toggle.
-====================================================================== */
-
 .app.homeEntranceSettled :where(.homeShelfStack,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel){
   opacity: 1 !important;
 }
@@ -13813,14 +13008,6 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
 .app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel){
   transform: translate3d(0, 0, 0) scale(1) !important;
 }
-
-
-/* ========================================================================
-   localtify v0.3.5 V142 — safe home ownership guard
-   ------------------------------------------------------------------------
-   Home.css owns home layout. These rules keep persistent shelves stable while
-   motion.css handles the temporary compact/expand bounce classes.
-======================================================================== */
 
 .app .hero.heroPremium.heroLayoutMotion{
   contain: layout paint style !important;
@@ -13887,15 +13074,6 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
   will-change: auto !important;
 }
 
-
-/* ========================================================================
-   localtify v0.3.5 V146 — home ownership guard
-   ------------------------------------------------------------------------
-   Home owns layout/sizing only. Heavy hover, proximity, drag, and song-change
-   timing now live in motion.css, so the home page does not replay entrance
-   animations when compact/expand changes.
-======================================================================== */
-
 .app.homeEntranceSettled :is(.homeHeroSection,.homeSections,.homeSection,.homeShelf,.homePanel,.libraryPanel){
   animation-name: none !important;
 }
@@ -13943,14 +13121,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   transform: translate3d(0, -4px, 0) scale(1.001) !important;
 }
 
-
-/* ========================================================================
-   localtify v0.3.6 V190 — integrated lightweight frosted home glass
-   Owner: home.css
-   Scope: home hero, listen shelves, recent covers, library panels, home search.
-   This is intentionally light: small blur, soft saturation, no heavy milky fog.
-======================================================================== */
-
 .homeView{
   --home-glass-bg: rgba(13, 10, 20, 0.50);
   --home-glass-bg-strong: rgba(13, 10, 20, 0.58);
@@ -13965,7 +13135,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   --home-glass-blur-light: 8px;
 }
 
-/* Big home panels: hero, listen now, recent covers, library surface. */
 .homeView :where(
   .hero,
   .simpleHero,
@@ -13992,7 +13161,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   -webkit-backdrop-filter: blur(var(--home-glass-blur)) saturate(116%) !important;
 }
 
-/* Bring back controlled pseudo sheen after older grid-removal blocks killed it. */
 .homeView :where(
   .hero,
   .simpleHero,
@@ -14060,7 +13228,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   z-index: 1 !important;
 }
 
-/* Hero: slightly richer glass, still dark/OLED. */
 .homeView :where(.hero, .simpleHero){
   border-color: var(--home-glass-line-strong) !important;
   background:
@@ -14075,7 +13242,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   -webkit-backdrop-filter: blur(12px) saturate(118%) !important;
 }
 
-/* Keep album ambience alive without turning the hero muddy. */
 [data-ambient="on"] .homeView .hero.ambientSurface::before{
   background-image:
     linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012) 28%, transparent 62%),
@@ -14094,7 +13260,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   transform: none !important;
 }
 
-/* Shelf cards: lighter blur than panels so the home page stays fast. */
 .homeView :where(
   .homeListenCard,
   .homeFreshCard,
@@ -14190,7 +13355,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     0 0 24px rgba(var(--accent-rgb), 0.075) !important;
 }
 
-/* Search bar: match the same glass language without making typing feel laggy. */
 .homeView .search,
 .homeView .searchInput,
 .homeView .searchEasterWrap input{
@@ -14215,7 +13379,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     0 0 0 3px rgba(var(--accent-rgb), 0.070) !important;
 }
 
-/* Preserve drag clarity over glass. */
 .homeView .homeAlbumCard.songDragging{
   opacity: 0.62 !important;
   border-style: dashed !important;
@@ -14239,12 +13402,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   }
 }
 
-/* ======================================================================
-   localtify v0.3.6 — acrylic / translucent home pass
-   stronger than the old glass pass, less transparent, still lightweight
-   owner: home.css only
-====================================================================== */
-
 .homeView{
   --lt-acrylic-panel-bg: rgba(14, 12, 20, 0.74);
   --lt-acrylic-panel-bg-strong: rgba(16, 13, 24, 0.80);
@@ -14259,7 +13416,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   --lt-acrylic-blur-light: 7px;
 }
 
-/* big home surfaces */
 .homeView .hero,
 .homeView .homeShelfPanel,
 .homeView .homeListenPanel,
@@ -14329,7 +13485,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   z-index: 1 !important;
 }
 
-/* hero slightly stronger acrylic */
 .homeView .hero{
   background:
     radial-gradient(circle at 84% 20%, rgba(var(--accent-rgb), 0.08), transparent 28%),
@@ -14341,7 +13496,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     0 18px 44px rgba(0,0,0,0.24) !important;
 }
 
-/* shelf cards — more translucent/acrylic, less plain transparent */
 .homeView .homeListenCard,
 .homeView .homeFreshCard,
 .homeView .homeAlbumCard,
@@ -14413,7 +13567,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     0 0 20px rgba(var(--accent-rgb), 0.05) !important;
 }
 
-/* search acrylic */
 .homeView .search,
 .searchEasterWrap .search,
 .search{
@@ -14438,7 +13591,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     0 0 0 3px rgba(var(--accent-rgb), 0.055) !important;
 }
 
-/* buttons inside hero keep matching acrylic tone */
 .homeView .heroTinyButton,
 .homeView .heroGhost{
   background:
@@ -14463,11 +13615,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     --lt-acrylic-blur-light: 6px;
   }
 }
-
-/* ======================================================================
-   localtify v0.3.6 V201 — library cleanup
-   removes the old heavy overview/stat block and makes library rows tighter
-====================================================================== */
 
 .app .libraryStatsV025,
 .app .libraryStatsV030{
@@ -14546,36 +13693,23 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   background:
     linear-gradient(90deg, rgba(var(--accent-rgb), .15), rgba(255,255,255,.026)),
     rgba(28, 20, 39, .70) !important;
-}/* ========================================================================== localtify v0.3.6 V211 — theme-tinted acrylic cards Owner: home.css Fixes the white/grey acrylic problem: - no white rgba wash - uses current accent/theme tint - darker frosted glass so text stays readable - stronger blur without extra heavy layers
-========================================================================== */ .app[data-card-background="acrylic"] :where( .panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .coverGalleryCard, .coverTile
-){
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), var(--lt-acrylic-accent-alpha,0.080)), rgba(var(--accent-rgb), 0.018)),
-    linear-gradient(180deg, rgba(255,255,255,var(--lt-acrylic-highlight-alpha,0.035)), rgba(255,255,255,0.006)),
-    rgba(5, 4, 10, var(--lt-acrylic-bg-alpha,0.48)) !important;
-  border-color: rgba(var(--accent-rgb),0.145) !important;
-  box-shadow:
-    0 14px 32px rgba(0,0,0,0.22),
-    inset 0 1px 0 rgba(255,255,255,0.065) !important;
-  backdrop-filter: blur(var(--lt-visual-blur,18px)) saturate(var(--lt-visual-saturation,165%)) !important;
-  -webkit-backdrop-filter: blur(var(--lt-visual-blur,18px)) saturate(var(--lt-visual-saturation,165%)) !important;
+} .app[data-card-background="acrylic"] :where(.panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025){
+  background: rgba(12, 10, 18, 0.48) !important;
+  border-color: rgba(255,255,255,0.105) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.045) !important;
+  backdrop-filter: blur(16px) saturate(126%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(126%) !important;
 }
 
-.app[data-card-background="glassy"] :where( .panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .coverGalleryCard, .coverTile
-){
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), var(--lt-glass-accent-alpha,0.050)), rgba(var(--accent-rgb),0.010)),
-    rgba(5, 4, 10, var(--lt-glass-bg-alpha,0.58)) !important;
-  border-color: rgba(var(--accent-rgb),0.105) !important;
-  box-shadow:
-    0 10px 24px rgba(0,0,0,0.18),
-    inset 0 1px 0 rgba(255,255,255,0.045) !important;
-  backdrop-filter: blur(var(--lt-visual-blur-light,11px)) saturate(var(--lt-visual-saturation,165%)) !important;
-  -webkit-backdrop-filter: blur(var(--lt-visual-blur-light,11px)) saturate(var(--lt-visual-saturation,165%)) !important;
+.app[data-card-background="glassy"] :where(.panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025){
+  background: rgba(10, 9, 15, 0.58) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.040) !important;
+  backdrop-filter: blur(10px) saturate(116%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(116%) !important;
 }
 
-.app[data-card-background="solid"] :where( .panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .coverGalleryCard, .coverTile
-){
+.app[data-card-background="solid"] :where(.panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025){
   background: rgba(8,8,13,0.90) !important;
   border-color: rgba(255,255,255,0.055) !important;
   box-shadow: none !important;
@@ -14583,8 +13717,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   -webkit-backdrop-filter: none !important;
 }
 
-.app[data-card-background="oledFlat"] :where( .panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .coverGalleryCard, .coverTile
-){
+.app[data-card-background="oledFlat"] :where(.panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025){
   background: #020204 !important;
   border-color: rgba(255,255,255,0.040) !important;
   box-shadow: none !important;
@@ -14592,31 +13725,20 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   -webkit-backdrop-filter: none !important;
 }
 
-
-/* ==========================================================================
-   localtify v0.3.6 V216 — home.css owner cleanup final guard
-   Owner: home, library, cards, cover pages only.
-========================================================================== */
-
-/* No bottom-player ownership in home.css. */
 .homePage :where(.playerBar,.playerLeft,.playerCenter,.playerRight),
 .libraryPage :where(.playerBar,.playerLeft,.playerCenter,.playerRight){
   all: revert-layer;
 }
 
-/* Old joke visual modes are not part of home anymore. */
 .app :where(.misideEggNotice,.misideWhisper,.lateNightWarning){
   display: none !important;
 }
 
-/* Cards/settings should not use proximity glow. */
 :where(.songRow,.libraryCard,.libraryCardV025,.coverTile,.coverGalleryCard,.homeAlbumCard).localtifyProximityActive{
   transform: none !important;
   box-shadow: inherit !important;
 }
 
-
-/* localtify v0.3.6 V222 — Spotify public-only UI cleanup */
 .spotifyCookieRow{
   display: none !important;
 }
@@ -14630,8 +13752,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   border-color: rgba(30,215,96,.20) !important;
 }
 
-
-/* localtify 0.3.6 V223 — Spotify OAuth public import copy polish */
 .spotifyAuthCard .spotifyAuthActions{
   align-items: center;
 }
@@ -14710,12 +13830,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     grid-template-columns: 1fr !important;
   }
 }
-
-/* ======================================================================
-   localtify v0.3.6 V246 — hero spacing final
-   Exact target: now-playing hero text only.
-   Fixes title/artist/buttons spacing without touching playlists/cards/panels.
-====================================================================== */
 
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean{
   position: relative !important;
@@ -14834,12 +13948,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   }
 }
 
-/* ======================================================================
-   localtify v0.3.6 V249 — hero artist/action spacing repair
-   Scope: main now-playing hero only.
-   Fixes the artist line sitting too low and keeps action pills tucked under it.
-====================================================================== */
-
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean{
   max-width: min(920px, 64vw) !important;
   transform: translate3d(0, -8px, 0) !important;
@@ -14917,13 +14025,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   }
 }
 
-
-/* ======================================================================
-   localtify v0.3.6 V250 — lift hero artist name closer to title
-   Scope: main now-playing hero only.
-   Keeps the artist directly under the title and keeps action buttons smooth.
-====================================================================== */
-
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroTitle{
   margin-bottom: 2px !important;
 }
@@ -14956,14 +14057,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     transform: translate3d(0, -3px, 0) !important;
   }
 }
-
-
-/* ======================================================================
-   localtify v0.3.6 V251 — clean hero title rendering + tighter artist stack
-   Scope: main now-playing hero only.
-   Fixes clipped descenders on titles like "edgy" and stops short titles from
-   becoming huge/weird while keeping the premium big-title style.
-====================================================================== */
 
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroTitle,
 .app .hero.heroPremium.heroLayoutMotion .heroTitle{
@@ -15061,675 +14154,37 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   }
 }
 
-/* ======================================================================
-   localtify v0.3.6 V252 — cover studio / album cover gallery upgrade
-   Scope: covers page only. Keeps player, playlists, Spotify importer untouched.
-====================================================================== */
-
-.app .coverStudioLayoutV252{
-  width: min(1440px, 100%);
-  margin: 0 auto;
-  padding: 0 0 150px;
-  display: grid;
-  gap: 14px;
-}
-
-.app .coverStudioHeroV252{
-  min-height: clamp(238px, 28vh, 340px) !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px) !important;
-  align-items: center !important;
-  gap: clamp(18px, 3vw, 42px) !important;
-  padding: clamp(24px, 3vw, 42px) !important;
-  overflow: hidden !important;
-  border-color: rgba(var(--accent-rgb), 0.22) !important;
-  background:
-    radial-gradient(circle at 14% 12%, rgba(var(--accent-rgb), 0.14), transparent 34%),
-    radial-gradient(circle at 92% 46%, rgba(255,255,255,0.055), transparent 28%),
-    linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.018)),
-    rgba(5, 5, 10, 0.70) !important;
-}
-
-.app .coverStudioHeroV252::before{
-  opacity: 0.24 !important;
-  filter: blur(34px) saturate(1.22) !important;
-}
-
-.app .coverStudioHeroV252 .coverStudioHeroText{
+.coverStudioCleanLayout .coverGalleryImageShellCleanOnly,
+.coverStudioCleanLayout .coverGalleryImageButtonCleanOnly .coverGalleryImageShellCleanOnly,
+.coverStudioCleanLayout .coverQuickPreview .coverGalleryImageShellCleanOnly,
+.coverStudioCleanLayout .coverRecentInline .coverGalleryImageShellCleanOnly{
   position: relative !important;
-  z-index: 3 !important;
-  max-width: 760px !important;
-}
-
-.app .coverStudioHeroV252 .coverStudioHeroText h3{
-  margin: 8px 0 10px !important;
-  font-size: clamp(48px, 5.8vw, 86px) !important;
-  line-height: 0.88 !important;
-  letter-spacing: -0.078em !important;
-}
-
-.app .coverStudioHeroV252 .coverStudioHeroText p:not(.eyebrow){
-  max-width: 700px !important;
-  color: rgba(255,255,255,0.64) !important;
-  font-size: 14px !important;
-  line-height: 1.45 !important;
-}
-
-.app .coverStudioHeroV252 .coverStudioHeroActions{
-  display: flex !important;
-  align-items: center !important;
-  flex-wrap: wrap !important;
-  gap: 9px !important;
-  margin-top: 18px !important;
-}
-
-.app .coverStudioHeroV252 .coverStudioHeroActions button{
-  min-height: 39px !important;
-  padding: 0 15px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255,255,255,0.10) !important;
-  color: rgba(255,255,255,0.86) !important;
-  background: rgba(255,255,255,0.065) !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.015em !important;
-}
-
-.app .coverStudioHeroV252 .coverStudioHeroActions .heroMain{
-  color: #120717 !important;
-  border-color: transparent !important;
-  background: var(--accent) !important;
-  box-shadow: 0 16px 40px rgba(var(--accent-rgb), 0.18) !important;
-}
-
-.app .coverStudioFocusCard{
-  position: relative !important;
-  z-index: 3 !important;
-  min-width: 0 !important;
-  padding: 16px !important;
-  display: grid !important;
-  gap: 13px !important;
-  border-radius: 24px !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.18) !important;
-  background:
-    radial-gradient(circle at 20% 8%, rgba(var(--accent-rgb), 0.12), transparent 44%),
-    linear-gradient(180deg, rgba(255,255,255,0.085), rgba(255,255,255,0.028)),
-    rgba(0,0,0,0.42) !important;
-  box-shadow:
-    0 24px 74px rgba(0,0,0,0.40),
-    inset 0 1px 0 rgba(255,255,255,0.075) !important;
-  backdrop-filter: blur(18px) saturate(124%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(124%) !important;
-}
-
-.app .coverPreviewPair{
-  display: grid !important;
-  grid-template-columns: minmax(86px, 1fr) 30px minmax(86px, 1fr) !important;
-  align-items: center !important;
-  gap: 10px !important;
-}
-
-.app .coverPreviewSlot{
-  min-width: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  gap: 8px !important;
-}
-
-.app .coverPreviewSlot > span{
-  color: rgba(255,255,255,0.52) !important;
-  font-size: 10px !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.13em !important;
-  text-transform: uppercase !important;
-}
-
-.app .coverPreviewSongArt,
-.app .coverPreviewSlot .coverGalleryImageShell,
-.app .coverPreviewEmpty{
-  width: clamp(78px, 8vw, 108px) !important;
-  height: clamp(78px, 8vw, 108px) !important;
-  border-radius: 22px !important;
-  overflow: hidden !important;
-  box-shadow:
-    0 18px 44px rgba(0,0,0,0.42),
-    0 0 0 1px rgba(255,255,255,0.10) inset !important;
-}
-
-.app .coverPreviewSongArt img,
-.app .coverPreviewSlot .coverGalleryImage{
+  inset: auto !important;
+  display: block !important;
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important;
-}
-
-.app .coverPreviewEmpty{
-  display: grid !important;
-  place-items: center !important;
-  color: rgba(255,255,255,0.72) !important;
-  background: rgba(255,255,255,0.055) !important;
-  font-size: 34px !important;
-  font-weight: 900 !important;
-}
-
-.app .coverPreviewArrow{
-  width: 30px !important;
-  height: 30px !important;
-  display: grid !important;
-  place-items: center !important;
-  border-radius: 999px !important;
-  color: rgba(255,255,255,0.72) !important;
-  background: rgba(255,255,255,0.075) !important;
-  font-weight: 900 !important;
-}
-
-.app .coverPreviewText{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 3px !important;
-  text-align: center !important;
-}
-
-.app .coverPreviewText strong{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  color: rgba(255,255,255,0.94) !important;
-  font-size: 17px !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.035em !important;
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-}
-
-.app .coverPreviewText small{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  color: rgba(255,255,255,0.52) !important;
-  font-size: 12px !important;
-  font-weight: 800 !important;
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-}
-
-.app .coverPreviewApplyButton{
-  min-height: 40px !important;
-  width: 100% !important;
-  border: 0 !important;
-  border-radius: 16px !important;
-  color: #120717 !important;
-  background: var(--accent) !important;
-  font-size: 12px !important;
-  font-weight: 950 !important;
-  box-shadow: 0 18px 42px rgba(var(--accent-rgb),0.16) !important;
-}
-
-.app .coverPreviewApplyButton:disabled{
-  color: rgba(255,255,255,0.42) !important;
-  background: rgba(255,255,255,0.08) !important;
-  box-shadow: none !important;
-}
-
-.app .coverStudioStatsV252{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-}
-
-.app .coverStudioStatsV252 div{
-  min-height: 72px !important;
-  padding: 13px 14px !important;
-  border-radius: 18px !important;
-  border: 1px solid rgba(255,255,255,0.075) !important;
-  background: rgba(255,255,255,0.035) !important;
-  box-shadow: none !important;
-}
-
-.app .coverStudioStatsV252 strong{
-  display: block !important;
-  color: rgba(255,255,255,0.94) !important;
-  font-size: 26px !important;
-  line-height: 1 !important;
-  letter-spacing: -0.055em !important;
-}
-
-.app .coverStudioStatsV252 span{
-  display: block !important;
-  margin-top: 6px !important;
-  color: rgba(255,255,255,0.52) !important;
-  font-size: 11px !important;
-  font-weight: 850 !important;
-  text-transform: lowercase !important;
-}
-
-.app .coverStudioBodyV252{
-  display: grid !important;
-  grid-template-columns: minmax(260px, 350px) minmax(0, 1fr) !important;
-  align-items: stretch !important;
-  gap: 14px !important;
-}
-
-.app .coverSelectedSongsPanelV252,
-.app .coverGalleryPanelV252{
-  min-height: min(690px, calc(100vh - 250px)) !important;
-  overflow: hidden !important;
-  contain: layout style !important;
-}
-
-.app .coverSelectedSongsPanelV252{
-  display: grid !important;
-  grid-template-rows: auto auto auto minmax(0, 1fr) !important;
-  gap: 10px !important;
-  padding: 16px !important;
-}
-
-.app .coverGalleryPanelV252{
-  display: grid !important;
-  grid-template-rows: auto auto auto auto minmax(0, 1fr) !important;
-  gap: 12px !important;
-  padding: 17px !important;
-}
-
-.app .coverSongSearchWrap,
-.app .coverGalleryToolbar{
-  min-width: 0 !important;
-}
-
-.app .coverGalleryToolbar{
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: 9px !important;
-}
-
-.app .coverStudioSearchInput{
-  width: 100% !important;
-  min-width: 0 !important;
-  height: 42px !important;
-  padding: 0 14px !important;
-  border-radius: 15px !important;
-  border: 1px solid rgba(255,255,255,0.095) !important;
-  outline: none !important;
-  color: rgba(255,255,255,0.92) !important;
-  background: rgba(0,0,0,0.32) !important;
-  font-size: 12px !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.01em !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045) !important;
-}
-
-.app .coverStudioSearchInput::placeholder{
-  color: rgba(255,255,255,0.34) !important;
-}
-
-.app .coverStudioSearchInput:focus{
-  border-color: rgba(var(--accent-rgb),0.42) !important;
-  background: rgba(0,0,0,0.42) !important;
-  box-shadow:
-    0 0 0 3px rgba(var(--accent-rgb),0.10),
-    inset 0 1px 0 rgba(255,255,255,0.055) !important;
-}
-
-.app .coverGalleryToolbar button,
-.app .coverSongTools button{
-  min-height: 36px !important;
-  padding: 0 12px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255,255,255,0.085) !important;
-  color: rgba(255,255,255,0.76) !important;
-  background: rgba(255,255,255,0.055) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-}
-
-.app .coverSongTools{
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 7px !important;
-}
-
-.app .coverSongList.coverSongListVirtual{
-  min-height: 0 !important;
-  height: 100% !important;
-  overflow: auto !important;
-  padding-right: 5px !important;
-  contain: content !important;
-}
-
-.app .coverSongPick.coverSongPickVirtual{
-  left: 0 !important;
-  right: 5px !important;
-  width: calc(100% - 5px) !important;
-  min-height: 58px !important;
-  padding: 7px 9px !important;
-  border-radius: 16px !important;
-}
-
-.app .coverGalleryHeaderV252{
-  display: flex !important;
-  align-items: flex-start !important;
-  justify-content: space-between !important;
-  gap: 14px !important;
-}
-
-.app .coverGalleryHeaderV252 h3{
-  margin: 3px 0 0 !important;
-  color: rgba(255,255,255,0.95) !important;
-  font-size: clamp(30px, 3vw, 44px) !important;
-  line-height: 0.95 !important;
-  letter-spacing: -0.065em !important;
-}
-
-.app .coverGalleryHeaderV252 > span{
-  min-height: 30px !important;
-  padding: 7px 10px !important;
-  border-radius: 999px !important;
-  color: rgba(255,255,255,0.62) !important;
-  background: rgba(255,255,255,0.055) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  white-space: nowrap !important;
-}
-
-.app .coverGallerySubStatsV252{
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 7px !important;
-}
-
-.app .coverGallerySubStatsV252 span{
-  min-width: 0 !important;
   max-width: 100% !important;
-  padding: 7px 10px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255,255,255,0.065) !important;
-  color: rgba(255,255,255,0.48) !important;
-  background: rgba(255,255,255,0.035) !important;
-  font-size: 11px !important;
-  font-weight: 850 !important;
-}
-
-.app .coverGallerySubStatsV252 strong{
-  color: rgba(255,255,255,0.80) !important;
-  font-weight: 950 !important;
-}
-
-.app .coverGalleryPreviewBar{
-  min-width: 0 !important;
-  display: grid !important;
-  grid-template-columns: 56px minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: 11px !important;
-  padding: 10px !important;
-  border-radius: 18px !important;
-  border: 1px solid rgba(var(--accent-rgb),0.16) !important;
-  background:
-    radial-gradient(circle at 8% 50%, rgba(var(--accent-rgb),0.12), transparent 40%),
-    rgba(255,255,255,0.04) !important;
-}
-
-.app .coverGalleryPreviewBar .coverGalleryImageShell{
-  width: 52px !important;
-  height: 52px !important;
-  border-radius: 14px !important;
+  max-height: 100% !important;
   overflow: hidden !important;
+  border-radius: inherit !important;
 }
 
-.app .coverGalleryPreviewBar strong,
-.app .coverGalleryPreviewBar small{
-  min-width: 0 !important;
-  display: block !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
+.coverStudioCleanLayout .coverQuickPreview .coverGalleryImageShellCleanOnly{
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
 }
 
-.app .coverGalleryPreviewBar strong{
-  color: rgba(255,255,255,0.91) !important;
-  font-size: 13px !important;
-  font-weight: 950 !important;
-  letter-spacing: -0.025em !important;
-}
-
-.app .coverGalleryPreviewBar small{
-  margin-top: 2px !important;
-  color: rgba(255,255,255,0.48) !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
-}
-
-.app .coverGalleryPreviewBar button{
-  min-height: 36px !important;
-  padding: 0 13px !important;
-  border: 0 !important;
-  border-radius: 999px !important;
-  color: #120717 !important;
-  background: var(--accent) !important;
-  font-size: 11px !important;
-  font-weight: 950 !important;
-  white-space: nowrap !important;
-}
-
-.app .coverGalleryGrid.coverGalleryGridVirtual{
-  min-height: 0 !important;
-  height: 100% !important;
-  overflow: auto !important;
-  overflow-x: hidden !important;
-  padding: 0 5px 12px 0 !important;
-  contain: content !important;
-}
-
-.app .coverGalleryVirtualRow{
-  gap: 16px !important;
-  align-items: stretch !important;
-  padding-bottom: 16px !important;
-}
-
-.app .coverGalleryVirtualRow .coverGalleryCard,
-.app .coverGalleryCard{
-  min-height: 306px !important;
-  padding: 11px !important;
-  display: grid !important;
-  grid-template-rows: 164px auto auto !important;
-  gap: 10px !important;
-  border-radius: 22px !important;
-  border: 1px solid rgba(255,255,255,0.075) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
-    rgba(0,0,0,0.38) !important;
-  box-shadow: none !important;
-  contain: layout paint style !important;
-  transform: translateZ(0) !important;
-}
-
-.app .coverGalleryCard.activePreview{
-  border-color: rgba(var(--accent-rgb),0.48) !important;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb),0.13), transparent 46%),
-    linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.022)),
-    rgba(0,0,0,0.40) !important;
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb),0.10) inset, 0 18px 42px rgba(0,0,0,0.24) !important;
-}
-
-.app .coverGalleryCard.favorite{
-  border-color: rgba(var(--accent-rgb),0.26) !important;
-}
-
-.app .coverGalleryCard.excluded{
-  opacity: 0.58 !important;
-}
-
-.app .coverGalleryImageButton{
-  width: 100% !important;
-  height: 164px !important;
-  min-height: 164px !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border: 0 !important;
-  border-radius: 18px !important;
-  background: rgba(255,255,255,0.045) !important;
-  box-shadow:
-    0 16px 38px rgba(0,0,0,0.28),
-    inset 0 0 0 1px rgba(255,255,255,0.055) !important;
-}
-
-.app .coverGalleryImageShell,
-.app .coverGalleryImage,
-.app .coverGalleryImagePlaceholder{
+.coverStudioCleanLayout .coverGalleryImageCleanOnly{
+  position: relative !important;
+  inset: auto !important;
   width: 100% !important;
   height: 100% !important;
-  display: block !important;
-}
-
-.app .coverGalleryImagePlaceholder{
-  display: grid !important;
-  place-items: center !important;
-  color: rgba(255,255,255,0.46) !important;
-  background: rgba(255,255,255,0.045) !important;
-  font-size: 34px !important;
-  font-weight: 950 !important;
-}
-
-.app .coverGalleryImage{
+  max-width: 100% !important;
+  max-height: 100% !important;
   object-fit: cover !important;
-  opacity: 0 !important;
-  transform: translateZ(0) scale(1.012) !important;
-  transition: opacity 180ms ease, transform 220ms cubic-bezier(0.16,1,0.3,1) !important;
-}
-
-.app .coverGalleryImage.isLoaded,
-.app .coverGalleryImageShell.isLoaded .coverGalleryImage{
-  opacity: 1 !important;
-  transform: translateZ(0) scale(1) !important;
-}
-
-.app .coverGalleryCard:hover .coverGalleryImage{
-  transform: translateZ(0) scale(1.035) !important;
-}
-
-.app .coverGalleryInfo{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 4px !important;
-}
-
-.app .coverGalleryInfo strong,
-.app .coverGalleryInfo small{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-}
-
-.app .coverGalleryInfo strong{
-  color: rgba(255,255,255,0.92) !important;
-  font-size: 13px !important;
-  font-weight: 950 !important;
-  letter-spacing: -0.02em !important;
-}
-
-.app .coverGalleryInfo small{
-  color: rgba(255,255,255,0.45) !important;
-  font-size: 10.5px !important;
-  font-weight: 800 !important;
-}
-
-.app .coverGalleryActions{
-  display: grid !important;
-  grid-template-columns: 36px minmax(58px, 0.9fr) minmax(46px, 0.8fr) minmax(58px, 1fr) !important;
-  gap: 6px !important;
-  align-items: center !important;
-}
-
-.app .coverGalleryActions button{
-  min-width: 0 !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  padding: 0 9px !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,0.075) !important;
-  color: rgba(255,255,255,0.74) !important;
-  background: rgba(255,255,255,0.055) !important;
-  font-size: 10.5px !important;
-  font-weight: 950 !important;
-  white-space: nowrap !important;
-  box-shadow: none !important;
-}
-
-.app .coverGalleryActions .coverStarButton{
-  padding: 0 !important;
-  color: rgba(var(--accent-rgb),0.82) !important;
-  font-size: 15px !important;
-}
-
-.app .coverGalleryActions .coverStarButton.active{
-  color: #120717 !important;
-  border-color: transparent !important;
-  background: var(--accent) !important;
-}
-
-.app .coverGalleryActions .coverApplyButton{
-  color: #120717 !important;
-  border-color: transparent !important;
-  background: var(--accent) !important;
-}
-
-.app .coverGalleryActions .coverHideButton.danger.active{
-  color: rgba(255,255,255,0.86) !important;
-  border-color: rgba(255,95,126,0.28) !important;
-  background: rgba(255,95,126,0.13) !important;
-}
-
-.app .coverGalleryActions .coverPreviewButton{
-  color: rgba(255,255,255,0.76) !important;
-}
-
-.app .coverEmptyState{
-  min-height: 220px !important;
-  display: grid !important;
-  place-items: center !important;
-  text-align: center !important;
-  border-radius: 18px !important;
-  border: 1px dashed rgba(255,255,255,0.10) !important;
-  background: rgba(255,255,255,0.025) !important;
-}
-
-@media (max-width: 1180px){
-  .app .coverStudioHeroV252,
-  .app .coverStudioBodyV252{
-    grid-template-columns: 1fr !important;
-  }
-
-  .app .coverStudioFocusCard{
-    max-width: 520px !important;
-  }
-}
-
-@media (max-width: 760px){
-  .app .coverStudioHeroV252{
-    padding: 22px !important;
-  }
-
-  .app .coverStudioHeroV252 .coverStudioHeroText h3{
-    font-size: clamp(42px, 13vw, 62px) !important;
-  }
-
-  .app .coverStudioStatsV252{
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .app .coverGalleryPreviewBar{
-    grid-template-columns: 48px minmax(0,1fr) !important;
-  }
-
-  .app .coverGalleryPreviewBar button{
-    grid-column: 1 / -1 !important;
-  }
-
-  .app .coverGalleryActions{
-    grid-template-columns: 36px 1fr 1fr !important;
-  }
-
-  .app .coverGalleryActions .coverApplyButton{
-    grid-column: 1 / -1 !important;
-  }
+  display: block !important;
 }

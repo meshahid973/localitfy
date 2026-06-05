@@ -8,9 +8,45 @@ body,
   width: 100%;
   height: 100%;
   margin: 0;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
 }
 
+html,
 body {
   overflow: hidden;
-  background: #000;
 }
+
+body::before,
+body::after,
+#root::before,
+#root::after {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* localtify 0.3.7 V290 — base translucent acrylic backing layer.
+   html/body/root remain transparent so Electron can show the desktop. */
+.app.windowTranslucent {
+  position: relative !important;
+  isolation: isolate !important;
+  background-color: rgba(10, 10, 26, var(--window-canvas-alpha, 0.45)) !important;
+  backdrop-filter: blur(var(--window-canvas-blur, var(--window-glass-blur, 20px))) saturate(125%) !important;
+  -webkit-backdrop-filter: blur(var(--window-canvas-blur, var(--window-glass-blur, 20px))) saturate(125%) !important;
+  transition: background-color 0.15s ease, backdrop-filter 0.15s ease, -webkit-backdrop-filter 0.15s ease !important;
+}
+
+/* localtify 0.3.7 V290 — base acrylic owner.
+   effects.css repeats this at the bottom with higher specificity. */
+.app.windowTranslucent{
+  position: relative !important;
+  isolation: isolate !important;
+  background-color: rgba(10, 10, 26, var(--window-canvas-alpha, 0.45)) !important;
+  backdrop-filter: blur(var(--window-canvas-blur, var(--window-glass-blur, 20px))) saturate(125%) !important;
+  -webkit-backdrop-filter: blur(var(--window-canvas-blur, var(--window-glass-blur, 20px))) saturate(125%) !important;
+  transition: background-color 150ms ease, backdrop-filter 150ms ease, -webkit-backdrop-filter 150ms ease !important;
+}
+

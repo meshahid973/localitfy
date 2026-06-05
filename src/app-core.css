@@ -1,4 +1,4 @@
-/* localtify 0.3.7 V272 — robust translucent window shell controls. */
+/* localtify 0.3.7 V274 — flat shell owner. Removed old ambience/grid patch comments; app background is owned cleanly. */
 
 :root{
   --panel: rgba(255, 255, 255, 0.035);
@@ -7,24 +7,18 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   color: #f5f5f0;
-  background: #000;
+  background: transparent;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-html,
-body,
-#root{
+html{
   width: 100%;
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: transparent !important;
-}
-
-html{
-  background: transparent !important;
+  background: transparent;
 }
 
 *{
@@ -83,59 +77,6 @@ button:disabled{
   background: var(--bg);
   transition: background-color 320ms cubic-bezier(0.16, 1, 0.3, 1), background 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-html body #root .app.app[data-translucent-window="on"]{
-  --window-glass-opacity: var(--window-transparency, 0.84);
-  background: rgb(5 5 12 / var(--window-glass-opacity)) !important;
-  background-color: rgb(5 5 12 / var(--window-glass-opacity)) !important;
-  backdrop-filter: blur(var(--window-blur, 18px)) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(var(--window-blur, 18px)) saturate(150%) !important;
-}
-
-html body #root .app.app[data-translucent-window="on"]::before{
-  content: "" !important;
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  background: rgb(5 5 12 / calc(var(--window-glass-opacity) * 0.42)) !important;
-  backdrop-filter: blur(var(--window-blur, 18px)) saturate(145%) !important;
-  -webkit-backdrop-filter: blur(var(--window-blur, 18px)) saturate(145%) !important;
-}
-
-html body #root .app.app[data-translucent-window="on"] > *{
-  position: relative !important;
-  z-index: 1 !important;
-}
-
-html body #root .app.app[data-translucent-window="on"] .appShell,
-html body #root .app.app[data-translucent-window="on"] .content{
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
-html body #root .app.app[data-translucent-window="on"] .titleBar{
-  background: rgb(12 8 18 / calc(var(--window-glass-opacity) * 0.72)) !important;
-  background-color: rgb(12 8 18 / calc(var(--window-glass-opacity) * 0.72)) !important;
-  backdrop-filter: blur(calc(var(--window-blur, 18px) * 0.8)) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(calc(var(--window-blur, 18px) * 0.8)) saturate(150%) !important;
-}
-
-html body #root .app.app[data-translucent-window="on"] .sidebar{
-  background: rgb(7 6 12 / calc(var(--window-glass-opacity) * 0.76)) !important;
-  background-color: rgb(7 6 12 / calc(var(--window-glass-opacity) * 0.76)) !important;
-  backdrop-filter: blur(calc(var(--window-blur, 18px) * 0.9)) saturate(145%) !important;
-  -webkit-backdrop-filter: blur(calc(var(--window-blur, 18px) * 0.9)) saturate(145%) !important;
-}
-
-html body #root .app.app[data-translucent-window="on"] :is(.panel, .ambientSurface, .glassPanel, .sectionPanel, .settingsPanelCard, .settingsPageCard, .homeListenPanel, .homeShelfPanel, .homeLibraryPanel, .libraryPanel){
-  background: rgb(10 8 16 / calc(var(--window-glass-opacity) * 0.58)) !important;
-  background-color: rgb(10 8 16 / calc(var(--window-glass-opacity) * 0.58)) !important;
-  backdrop-filter: blur(calc(var(--window-blur, 18px) * 0.72)) saturate(136%) !important;
-  -webkit-backdrop-filter: blur(calc(var(--window-blur, 18px) * 0.72)) saturate(136%) !important;
-}
-
 
 .titleBar{
   height: 36px;
@@ -3879,6 +3820,84 @@ body,
 :root{
   --localtify-window-radius: 9px;
   --localtify-content-x: clamp(18px, 2vw, 30px);
+}
+
+
+/* V274: live native window translucency owner. No player layout changes. */
+.app.windowOpaque{
+  --window-glass-blur-safe: 0px;
+  background: var(--bg, #000) !important;
+}
+
+.app.windowTranslucent{
+  --window-glass-blur-safe: clamp(0px, var(--window-glass-blur, 18px), 36px);
+  position: relative !important;
+  isolation: isolate !important;
+  background: transparent !important;
+  transition:
+    background-color 260ms cubic-bezier(.16,1,.3,1),
+    background 260ms cubic-bezier(.16,1,.3,1) !important;
+}
+
+.app.windowTranslucent::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--window-glass-bg, rgba(5,5,15,.38));
+  backdrop-filter: blur(var(--window-glass-blur-safe)) saturate(132%);
+  -webkit-backdrop-filter: blur(var(--window-glass-blur-safe)) saturate(132%);
+  transform: translateZ(0);
+  transition:
+    background-color 220ms cubic-bezier(.16,1,.3,1),
+    backdrop-filter 220ms cubic-bezier(.16,1,.3,1),
+    -webkit-backdrop-filter 220ms cubic-bezier(.16,1,.3,1);
+}
+
+.app.windowTranslucent.windowGlassSolidApp::before{
+  background: rgba(5, 5, 15, .94);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.app.windowTranslucent > *{
+  position: relative;
+  z-index: 1;
+}
+
+.app.windowTranslucent .titleBar,
+.app.windowTranslucent .sidebar,
+.app.windowTranslucent .headerBar,
+.app.windowTranslucent .settingsNavPanel,
+.app.windowTranslucent .settingsPageCard,
+.app.windowTranslucent .settingsPanelCard,
+.app.windowTranslucent .panel,
+.app.windowTranslucent .homeListenPanel,
+.app.windowTranslucent .homeShelfPanel,
+.app.windowTranslucent .homeLibraryPanel,
+.app.windowTranslucent .libraryPanel,
+.app.windowTranslucent .simpleLibraryPanel{
+  background: var(--window-glass-panel-bg, rgba(10, 8, 20, .46)) !important;
+  border-color: rgba(255,255,255,.105) !important;
+  backdrop-filter: blur(calc(var(--window-glass-blur-safe) + 5px)) saturate(132%) !important;
+  -webkit-backdrop-filter: blur(calc(var(--window-glass-blur-safe) + 5px)) saturate(132%) !important;
+}
+
+.app.windowTranslucent .sidebar{
+  background: var(--window-glass-sidebar-bg, rgba(8, 5, 18, .58)) !important;
+}
+
+.app.windowTranslucent .content,
+.app.windowTranslucent .appShell{
+  background: transparent !important;
+}
+
+.app.windowTranslucent .content::before,
+.app.windowTranslucent .content::after,
+.app.windowTranslucent::after{
+  display: none !important;
+  content: none !important;
 }
 
 html,

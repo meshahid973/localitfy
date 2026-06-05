@@ -1,4 +1,4 @@
-/* localtify 0.3.6 V253 — strict buttons-only proximity motion; virtual cover rows skipped.
+/* localtify 0.3.7 V258 — strict buttons-only proximity motion; download panels and virtual rows skipped.
    Kept:
    - sidebar/nav buttons
    - main action buttons
@@ -81,7 +81,28 @@ const SKIP_SELECTOR = [
   ".visualOptionGroupV205",
   ".settingsResetButton",
   ".settingsPanelCard",
-  ".settingsPageCard"
+  ".settingsPageCard",
+  ".downloadsLayout",
+  ".downloadsLayoutV031",
+  ".downloadPanel",
+  ".downloadPanelV031",
+  ".downloadTabStrip",
+  ".downloadTab",
+  ".downloadNoticeV031",
+  ".downloadTextareaV031",
+  ".downloadActionsV031",
+  ".spotifyFlowPanelV256",
+  ".spotifyAuthCardV256",
+  ".spotifyFlowStep",
+  ".spotifyUrlRowV256",
+  ".spotifyFetchButton",
+  ".spotifyTrackListV256",
+  ".spotifyTrackItem",
+  ".spotifyDownloadRowV256",
+  ".spotifyDownloadButton",
+  ".converterBoxV031",
+  ".downloadQueueItem",
+  ".downloadResult"
 ].join(",");
 
 const RADIUS_IDLE = 104;

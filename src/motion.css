@@ -1,5 +1,4 @@
-/* localtify motion.css — animation-only layer.
-   Keep static layout, colors, player/progress styles, and shared backgrounds in their owner files. */
+/* localtify 0.3.7 V265 — lightweight motion owner. Keeps transitions, removes old mass row/card hover animations. */
 
 .app,
 .simpleShell,
@@ -16,26 +15,10 @@
   --motion-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html{
-  scroll-behavior: smooth;
-}
-
 .content,
 .simpleShell,
 .settingsModal{
   overscroll-behavior: contain;
-  scroll-behavior: smooth;
-}
-
-/* Transitions only. No layout, color values, backgrounds, or player/progress ownership here. */
-
-
-.app :where(.navItem, .songRow):hover{
-  transform: translate3d(2px, 0, 0);
-}
-
-.app :where(.homeAlbumCard, .simpleAlbumCard, .albumCard, .coverGalleryCard, .homeShelfPanel, .homeListenCard):hover{
-  transform: translate3d(0, -2px, 0);
 }
 
 .app :where(
@@ -71,7 +54,6 @@ button:disabled:active{
   transform: none;
 }
 
-/* Page entrance motion is disabled in V139; App/home state changes must not replay a full page animation. */
 .kopuzSettingsPage,
 .settingsShell{
   animation: localtifyPageIn 260ms var(--motion-ease) both;
@@ -113,7 +95,6 @@ button:disabled:active{
   will-change: transform, opacity;
 }
 
-/* Song-change motion. */
 .nowPlayingCopySwap{
   animation: localtifyCopyIn 340ms var(--motion-ease) both;
   will-change: opacity, transform;
@@ -128,7 +109,6 @@ button:disabled:active{
   animation: localtifyArtIn 380ms var(--motion-pop) both;
 }
 
-/* Hero expand/collapse should animate with transform only. Layout belongs in home/App CSS. */
 .heroLayoutMotion.heroLayoutPulseA,
 .heroLayoutMotion.heroLayoutPulseB{
   animation: localtifyHeroReflow 440ms var(--motion-ease) both;
@@ -164,7 +144,6 @@ button:disabled:active{
 .heroExpandedShelf > div:nth-child(2){ animation-delay: 102ms; }
 .heroExpandedShelf > div:nth-child(3){ animation-delay: 144ms; }
 
-/* Library/card entrance motion stays cheap and transform-only. */
 .app[data-motion-level="smooth"] .homeHeroCard,
 .app[data-motion-level="smooth"] .hero{
   animation: localtifyPageIn 420ms var(--motion-spring) both;
@@ -177,21 +156,6 @@ button:disabled:active{
   animation-delay: var(--stagger, var(--card-delay, 0ms));
 }
 
-.app[data-motion-level="smooth"] .songRow,
-.libraryFullListV025 .songRow{
-  animation: localtifyRowIn 220ms var(--motion-ease) both;
-  animation-delay: var(--stagger, 0ms);
-}
-
-.coverGalleryCard{
-  animation: localtifyCardIn 260ms var(--motion-ease) both;
-}
-
-.coverGalleryCard:nth-child(2n){ animation-delay: 35ms; }
-.coverGalleryCard:nth-child(3n){ animation-delay: 60ms; }
-.coverGalleryCard:nth-child(4n){ animation-delay: 85ms; }
-.coverGalleryCard:nth-child(5n){ animation-delay: 110ms; }
-
 .homeAlbumCard.songDragging{
   animation: localtifyDragLift 140ms var(--motion-ease) both;
 }
@@ -200,11 +164,6 @@ button:disabled:active{
   animation: localtifyDragPreviewIn 130ms var(--motion-ease) both;
 }
 
-.localitfyDragPreviewOrb{
-  animation: localtifyDragOrb 800ms ease-in-out infinite alternate;
-}
-
-/* Skeleton loading motion is isolated to skeleton elements only. */
 .loadingSkeletonShell{
   animation: localtifySkeletonFloat 420ms var(--motion-spring) both;
   animation-delay: 70ms;
@@ -214,7 +173,6 @@ button:disabled:active{
   animation: localtifySkeletonShimmer 920ms linear infinite;
 }
 
-/* Performance guards during color dragging/import drag. */
 body.localitfyThemePainting .app .coverAura::before,
 body.localitfyThemePainting .app .ambientSurface::before,
 .app.themeSettling .coverAura::before,
@@ -224,7 +182,6 @@ body.localitfySongDragging .app .coverAura::before{
   transition-duration: 80ms;
 }
 
-/* Keyframes used by this file and by home.css final polish hooks. */
 @keyframes localtifyFadeIn{
   from{ opacity: 0; }
   to{ opacity: 1; }
@@ -347,7 +304,6 @@ body.localitfySongDragging .app .coverAura::before{
   50%{ opacity: 0.66; transform: scale(1.01); }
 }
 
-
 .heroLayoutMotion.heroLayoutPulseA,
 .heroLayoutMotion.heroLayoutPulseB{
   animation-duration: 720ms !important;
@@ -424,7 +380,6 @@ body.localitfySongDragging .app .coverAura::before{
   100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-
 @keyframes localtifySoftPopIn{
   from{ opacity: 0; transform: translate3d(0, 12px, 0) scale(0.985); filter: blur(6px); }
   to{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: none; }
@@ -481,7 +436,6 @@ body.localitfySongDragging .app .coverAura::before{
   animation: localtifyTinyBounce 360ms cubic-bezier(0.2, 1.35, 0.28, 1) both;
 }
 
-
 @keyframes localtifyHeartPop {
   0% { transform: scale(.82) translateZ(0); }
   45% { transform: scale(1.24) translateZ(0); }
@@ -518,7 +472,6 @@ body.localitfySongDragging .app .coverAura::before{
   animation: localtifyHeartPop 420ms cubic-bezier(.2, .9, .2, 1.35) both;
 }
 
-
 body.localitfyDropCommitted .app .homeAlbumCard,
 body.localitfyDropCommitted .app .songRow{
   animation: localtifyDropSettle 360ms cubic-bezier(.2, .9, .2, 1.12) both;
@@ -532,7 +485,6 @@ body.localitfyDropCommitted .app .songRow{
 .app .heroGhost:active{
   animation: localtifySoftWobble 260ms cubic-bezier(.2, .85, .2, 1.2) both;
 }
-
 
 .app .settingSwitchCard,
 .app .settingsChoice,
@@ -563,7 +515,6 @@ body.localitfyDropCommitted .app .songRow{
   transform: translate3d(0, 0, 0) scale(0.995) !important;
 }
 
-
 @keyframes localtifyHeroCoverBounce{
   0%{ opacity: 0.88; transform: translate3d(14px, 8px, 0) scale(0.95); filter: none; }
   48%{ opacity: 1; transform: translate3d(-4px, -3px, 0) scale(1.045); filter: none; }
@@ -593,7 +544,6 @@ body.localitfyDropCommitted .app .songRow{
   rotate: 0deg !important;
 }
 
-
 .app :where(.settingsPage, .kopuzSettingsPage, .settingsModal) :where(.settingsPanelCard, .settingsPageCard, .settingSwitchCard, .settingsChoice, .coverSyncChoice, .settingsActionButton, .settingsTinyButton, .softButton):hover{
   rotate: 0deg !important;
 }
@@ -605,7 +555,6 @@ body.localitfyDropCommitted .app .songRow{
 .app :where(.settingsPage, .kopuzSettingsPage, .settingsModal) :where(.settingSwitchCard, .settingsChoice, .coverSyncChoice, .settingsActionButton, .settingsTinyButton, .softButton):active{
   transform: scale(0.992) !important;
 }
-
 
 .app :where(.homeAlbumCard,.songRow,.songCard,.libraryCard,.coverCard,.coverTile,.settingSwitchCard,.settingsChoice,.coverSyncChoice,.updateToastCard,.softButton,.heroMain,.settingsActionButton){
   transform-style: flat !important;
@@ -627,11 +576,9 @@ body.localitfyDropCommitted .app .songRow{
   100% { transform: scale(1) translateZ(0); }
 }
 
-
 .app :is(.songCard, .songRow, .libraryRow, .coverCard, .settingRow, .settingsRow, .rangeRow, .themeButton, .themeTile):hover {
   filter: none;
 }
-
 
 .app :where(.navItem, .songRow, .homeAlbumCard, .coverGalleryCard, .settingsCategoryButton, .settingsChoice, .softButton, .heroGhost, .iconAction, .circleButton){
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -667,7 +614,6 @@ body.localitfyDropCommitted .app .songRow{
   58%{ transform: translate3d(0, -1px, 0) scale(1.006); }
   100%{ transform: translate3d(0, 0, 0) scale(1); }
 }
-
 
 .navLucideIcon,
 .settingsLucideIcon{
@@ -762,7 +708,6 @@ body.localitfyDropCommitted .app .songRow{
   100%{ transform: scale(1); }
 }
 
-
 @keyframes localtifySoftPageIn{
   0%{ opacity: .72; transform: translate3d(0, 8px, 0) scale(.997); }
   38%{ opacity: 1; transform: translate3d(0, -1px, 0) scale(1.001); }
@@ -780,7 +725,6 @@ body.localitfyDropCommitted .app .songRow{
 .app[data-switching="true"]{
   --ambient-opacity: .28;
 }
-
 
 * {
   transform-style: flat;
@@ -808,7 +752,6 @@ body.localitfyDropCommitted .app .songRow{
 .circleButton:hover {
   rotate: 0deg !important;
 }
-
 
   :where(
     .panel,
@@ -848,19 +791,12 @@ body.localitfyDropCommitted .app .songRow{
     will-change: transform, opacity;
   }
 
-
 .app.isScrolling :where(.songRow, .songCard, .libraryCard, .playlistTrackRow),
 .app.songDragActive :where(.songRow, .songCard, .libraryCard, .playlistTrackRow),
 .app.themeSettling :where(.songRow, .songCard, .libraryCard, .playlistTrackRow),
 body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .playlistTrackRow){
   transition-duration: 120ms;
 }
-
-/* ======================================================================
-   localtify 0.3.1 — softer motion pass
-   Owner: motion.css. No tilt, no random bounce, no layout-shifting hover.
-====================================================================== */
-
 
   .app :where(
     .mainAction,
@@ -1007,13 +943,11 @@ body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .play
     transition-timing-function: cubic-bezier(.2,.82,.22,1) !important;
   }
 
-
 @keyframes localtifyV031PopupIn{
   from{ opacity: .001; transform: translate3d(0,10px,0) scale(.992); }
   to{ opacity: 1; transform: translate3d(0,0,0) scale(1); }
 }
 
-/* softer animated nav icons, still alive but not bouncy */
 @keyframes localtifyIconPop{
   0%{ transform: translate3d(0,0,0) scale(1); }
   46%{ transform: translate3d(0,-1px,0) scale(1.035); }
@@ -1048,7 +982,6 @@ body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .play
   48%{ transform: scale(1.04); }
 }
 
-/* v0.3.1 performance polish: no visible change, just less GPU/CPU work when hidden. */
 body.localtifyBackgroundMode *,
 .app.appBackgrounded * {
   animation-play-state: paused;
@@ -1065,12 +998,6 @@ body.localtifyBackgroundMode .coverCard,
   will-change: auto;
 }
 
-/* =======================================================================
-   localtify v0.3.3 v102 — Motion package handoff polish
-   -----------------------------------------------------------------------
-   React Motion now owns the heavy enter/exit movement. CSS only gives the
-   affected layers stable compositing and reduced-motion fallbacks.
-======================================================================= */
 .topUpdateRibbonLayer,
 .topUpdateRibbon,
 .settingsCategoryMotion{
@@ -1088,16 +1015,9 @@ body.localtifyBackgroundMode .coverCard,
   width: 100%;
 }
 
-
-/* Motion/react handles the ribbon entrance in v102, so avoid double-running
-   older CSS keyframes on the same element. */
 .app[data-motion-level="smooth"] .topUpdateRibbon{
   animation: none !important;
 }
-/* ========================================================================== 
-   localtify v0.3.4/v106 — smooth settings category + top update ribbon motion
-   Motion-only. No player layout, no colors, no backgrounds.
-========================================================================== */
 
 .settingsCategoryMotion{
   transform-origin: top center;
@@ -1249,12 +1169,6 @@ body.localtifyBackgroundMode .coverCard,
   }
 }
 
-
-/* =======================================================================
-   localtify v0.3.5 v110 — playlist motion pass
-   -----------------------------------------------------------------------
-   Motion-only. No tilt, no rotate, no layout ownership.
-======================================================================= */
 @keyframes localtifyPlaylistShelfIn{
   0%{
     opacity: 0;
@@ -1275,7 +1189,6 @@ body.localtifyBackgroundMode .coverCard,
   100%{ opacity: 1; }
 }
 
-
   .app .playlistShelfCard{
     animation: localtifyPlaylistShelfIn 420ms cubic-bezier(.18,.9,.22,1) both;
     animation-delay: calc(min(var(--playlist-stagger, 0), 12) * 22ms);
@@ -1291,12 +1204,6 @@ body.localtifyBackgroundMode .coverCard,
     animation: none !important;
   }
 
-
-/* ========================================================================
-   localtify v0.3.5 — smoother hero song-change motion
-   Song changes should feel like the hero breathes into the next track instead
-   of text/art snapping. Transform + opacity only; no tilt, no layout shifting.
-======================================================================== */
 @keyframes localtifyHeroGhostCatchup{
   0%{
     opacity: 0;
@@ -1387,15 +1294,6 @@ body.localtifyBackgroundMode .coverCard,
   animation: localtifyHeroAuraPop 680ms cubic-bezier(.16, 1, .3, 1) 55ms both !important;
 }
 
-
-/* ========================================================================
-   localtify v0.3.5 V135 — proximity styling owner
-   ------------------------------------------------------------------------
-   JS proximity is isolated in src/useProximityMotion.ts. This CSS only
-   paints the variables written by that hook. It uses scale instead of replacing
-   transform, so existing hover/entrance animations stay intact.
-======================================================================== */
-
 .app .localtifyProximityTarget.localtifyProximityActive{
   transform-origin: center !important;
   scale: var(--prox-scale, 1) !important;
@@ -1447,15 +1345,6 @@ body.localtifyBackgroundMode .coverCard,
   background-color: rgba(var(--accent-rgb), calc(var(--prox-bg, 0.01) + 0.02)) !important;
   box-shadow: 0 0 var(--prox-glow-size, 0px) rgba(var(--accent-rgb), 0.08) !important;
 }
-
-
-/* ========================================================================
-   localtify v0.3.5 V140 — local hero motion only
-   ------------------------------------------------------------------------
-   Motion.css now owns only short-lived classes placed directly on the hero
-   and shelf by App.tsx. No body hero classes. No page transition replay.
-   This keeps blur/ambience/stars alive while fixing the fake reload flash.
-======================================================================== */
 
 .app.heroMotionActive .localtifyProximityTarget,
 .app.heroMotionActive .localtifyProximityTarget.localtifyProximityActive{
@@ -1581,20 +1470,6 @@ body.localtifyBackgroundMode .coverCard,
   100%{ transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
 }
 
-
-/* ========================================================================
-   localtify v0.3.5 V141 — no delayed shelf/card entrance replay
-   ------------------------------------------------------------------------
-   The old smooth-mode entrance rules are useful for first boot, but after
-   compact/expand they re-applied when heroMotionExpanding/Compacting was
-   removed. That looked like the home page flashed/reloaded one second later.
-
-   App.tsx now adds .homeEntranceSettled after the first hero toggle. In that
-   settled state, base entrance animations are muted for persistent home
-   shelves/cards only. The actual hero + shelf bounce still runs while the
-   temporary heroMotion classes are present.
-======================================================================== */
-
 .app.homeEntranceSettled[data-motion-level="smooth"] .hero.heroPremium.heroLayoutMotion:not(.heroMotionExpanding):not(.heroMotionCompacting),
 .app.homeEntranceSettled[data-motion-level="smooth"] .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting),
 .app.homeEntranceSettled[data-motion-level="smooth"] .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel),
@@ -1621,14 +1496,6 @@ body.localtifyBackgroundMode .coverCard,
 .app.homeEntranceSettled .homeShelfStack.heroMotionCompacting :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel){
   will-change: transform, opacity !important;
 }
-
-
-/* ========================================================================
-   localtify v0.3.5 V142 — animation ownership + real proximity motion
-   ------------------------------------------------------------------------
-   Motion.css owns only animation timing and pointer proximity. It does not
-   repaint theme backgrounds, player layout, settings layout, or home layout.
-======================================================================== */
 
 .app.heroMotionActive .content > .pageTransition,
 .app.heroMotionActive .content > .pageTransition > *{
@@ -1708,7 +1575,6 @@ body.localtifyBackgroundMode .coverCard,
   transition-duration: 0ms !important;
   scale: .972 !important;
 }
-
 
 .app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding{
   animation: localtifyHeroCardExpandV142 820ms cubic-bezier(.18, 1.35, .22, 1) both !important;
@@ -1816,12 +1682,6 @@ body.localtifyBackgroundMode .coverCard,
   100%{ transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
 }
 
-/* ========================================================================
-   localtify v0.3.5 V143 — song-change + reorder motion
-   ------------------------------------------------------------------------
-   This layer only animates changed pieces. The hero/card/player layout stays
-   mounted so compact/expand and song changes do not replay the whole home UI.
-======================================================================== */
 @keyframes localtifySongTitleInV143A{
   0%{ opacity: .02; transform: translate3d(0, 18px, 0) scale(.982); filter: blur(7px); }
   58%{ opacity: 1; transform: translate3d(0, -3px, 0) scale(1.006); filter: blur(0); }
@@ -1984,15 +1844,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   animation: localtifyDropBounceV143 300ms cubic-bezier(.18, 1.18, .22, 1) both !important;
 }
 
-
-/* ========================================================================
-   localtify v0.3.5 V147 — final audio-safe motion owner
-   ------------------------------------------------------------------------
-   Keeps motion/proximity alive. Fixes the actual lag path: dense rows were
-   repainting shine/filter/large shadows while the audio glow was active.
-   Buttons + cards still get JS proximity. Song rows use compositor motion.
-======================================================================== */
-
 .app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard),
 .app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard) *{
   filter: none !important;
@@ -2028,8 +1879,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   box-shadow: 0 8px 20px rgba(0, 0, 0, .16) !important;
 }
 
-/* Kill only the old decorative hover shine on dense non-playing rows.
-   The actual active-song aura from effects.css is allowed to survive. */
 .app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):not(.playing)::before,
 .app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):not(.playing)::after,
 .app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard):not(.playing):hover::before,
@@ -2046,7 +1895,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   filter: none !important;
 }
 
-/* Keep JS proximity off dense rows, not off buttons/cards. */
 .app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard).localtifyProximityTarget,
 .app :is(.songRow,.playlistTrackRow,.playlistSongRow,.libraryRow,.homeListenCard).localtifyProximityActive{
   scale: 1 !important;
@@ -2134,12 +1982,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
 body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.playlistTrackRow,.playlistSongRow,.libraryRow){
   animation: localtifyDropBounceV147 290ms cubic-bezier(.18, 1.18, .22, 1) both !important;
 }
-
-
-/* ========================================================================== 
-   localtify 0.3.6 V189 — tiny premium details + full-motion cleanup
-   Purpose: keep Localtify's motion alive, then make small interactions feel nicer.
-========================================================================== */
 
 .app,
 .simpleShell,
@@ -2315,13 +2157,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   100%{ transform: translate3d(0, 0, 0) scale(1); box-shadow: 0 0 0 rgba(var(--accent-rgb), 0); }
 }
 
-
-/* ==========================================================================
-   localtify v0.3.6 V216 — motion.css owner cleanup final guard
-   Owner: keyframes, transitions, and lightweight animation only.
-========================================================================== */
-
-/* Proximity is now buttons/nav only. If stale classes touch cards, neutralize them. */
 :where(
   .settingsPanelCard,
   .settingsPageCard,
@@ -2351,19 +2186,9 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   animation: none !important;
 }
 
-/* No tilt or rotate from old motion blocks. */
 .app :where(button,.navItem,.softButton,.mainAction,.heroMain,.heroGhost,.circleButton){
   rotate: 0deg !important;
 }
-
-
-/* ========================================================================
-   localtify v0.3.6 V246 — playlist virtual row de-stack fix
-   ------------------------------------------------------------------------
-   Motion.css is imported after home.css, so broad row-motion resets here were
-   wiping the virtual playlist row translateY and every playlist song rendered
-   at y=0. Keep the virtualizer position as the final transform owner.
-======================================================================== */
 
 .app .playlistTrackRow.virtualPlaylistTrackRow{
   --playlist-row-step: 72px;
@@ -2405,7 +2230,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   scale: 1.004 !important;
 }
 
-/* fallback only for tiny playlists if the renderer did not pass a row index */
 .app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(1){ --playlist-stagger: 0; }
 .app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(2){ --playlist-stagger: 1; }
 .app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(3){ --playlist-stagger: 2; }
@@ -2418,11 +2242,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
 .app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(10){ --playlist-stagger: 9; }
 .app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(11){ --playlist-stagger: 10; }
 .app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(12){ --playlist-stagger: 11; }
-
-/* ======================================================================
-   localtify v0.3.6 V249 — smoother hero expand/collapse motion
-   Scope: hero text/art/action transitions only.
-====================================================================== */
 
 .heroLayoutMotion .heroTextClean,
 .heroLayoutMotion .heroArtWrap,
@@ -2451,11 +2270,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   animation-duration: 420ms !important;
 }
 
-/* ======================================================================
-   localtify v0.3.6 V252 — cover studio motion polish
-   Transform/opacity only, so cover gallery stays smooth while scrolling.
-====================================================================== */
-
 .app .coverStudioHeroV252,
 .app .coverStudioStatsV252 > div,
 .app .coverSelectedSongsPanelV252,
@@ -2464,16 +2278,7 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   animation: localtifyCoverStudioIn 300ms cubic-bezier(0.16,1,0.3,1) both;
 }
 
-.app .coverGalleryCard{
-  transition:
-    transform 180ms cubic-bezier(0.16,1,0.3,1),
-    border-color 180ms ease,
-    background 180ms ease,
-    box-shadow 180ms ease,
-    opacity 180ms ease !important;
-}
-
-.app .coverGalleryCard:hover{
+.app .app .coverGalleryCard:hover{
   transform: translate3d(0, -3px, 0) !important;
 }
 
@@ -2511,12 +2316,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   from{ transform: translate3d(0, -1px, 0) scale(0.996); }
   to{ transform: translate3d(0, 0, 0) scale(1); }
 }
-
-
-/* ======================================================================
-   localtify v0.3.6 V253 — calm cover motion, no star/orb motion
-   Keeps motion smooth by avoiding transform overrides on virtualized rows.
-====================================================================== */
 
 .app .secretLayer.stars,
 .app .secretLayer.stars .starParticle,

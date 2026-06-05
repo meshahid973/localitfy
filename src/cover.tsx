@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-/* localtify 0.3.7 V262 — cleaner cover gallery, recent covers, better empty states, and apply success toast. */
+/* localtify 0.3.7 V264 — isolated cover gallery classes; removes old patch collisions and giant preview image bug. */
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
 
@@ -15,12 +15,12 @@ function CoverGalleryImage({ src, label, priority = false }: { src: string; labe
   }, [src]);
 
   return (
-    <span className={`coverGalleryImageShell ${loaded ? "isLoaded" : "isLoading"} ${failed ? "isFailed" : ""}`}>
-      <span className="coverGalleryImagePlaceholder" aria-hidden="true">{fallback}</span>
+    <span className={`coverGalleryImageShellCleanOnly ${loaded ? "isLoaded" : "isLoading"} ${failed ? "isFailed" : ""}`}>
+      <span className="coverGalleryImagePlaceholderCleanOnly" aria-hidden="true">{fallback}</span>
 
       {src && !failed ? (
         <img
-          className={`coverGalleryImage ${loaded ? "isLoaded" : ""}`}
+          className={`coverGalleryImageCleanOnly ${loaded ? "isLoaded" : ""}`}
           src={src}
           alt=""
           width={260}
@@ -279,12 +279,12 @@ function VirtualCoverGalleryGrid({
   togglePixelCoverExcluded: (key: string) => void;
 }) {
   const [parentRef, width] = useMeasuredWidth<HTMLDivElement>();
-  const columns = Math.max(1, Math.floor((Math.max(width, 220) + 12) / 154));
+  const columns = Math.max(2, Math.floor((Math.max(width, 320) + 10) / 132));
   const rows = useMemo(() => chunkItems(entries, columns), [entries, columns]);
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 236,
+    estimateSize: () => 184,
     overscan: 3
   });
 
@@ -298,8 +298,8 @@ function VirtualCoverGalleryGrid({
   }
 
   return (
-    <div ref={parentRef} className="coverGalleryGrid coverGalleryGridVirtual coverGalleryGridClean">
-      <div className="coverGalleryVirtualCanvas" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
+    <div ref={parentRef} className="coverGalleryGridCleanOnly">
+      <div className="coverGalleryVirtualCanvasCleanOnly" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const rowEntries = rows[virtualRow.index] || [];
 
@@ -307,7 +307,7 @@ function VirtualCoverGalleryGrid({
             <div
               key={virtualRow.key}
               data-index={virtualRow.index}
-              className="coverGalleryVirtualRow"
+              className="coverGalleryVirtualRowCleanOnly"
               style={{ "--cover-gallery-row-y": `${virtualRow.start}px`, transform: "translate3d(0, var(--cover-gallery-row-y), 0)", gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` } as CSSProperties}
             >
               {rowEntries.map((entry) => {
@@ -317,13 +317,13 @@ function VirtualCoverGalleryGrid({
                 return (
                   <article
                     key={entry.key}
-                    className={`coverGalleryCard coverGalleryCardClean ${entry.excluded ? "excluded" : ""}`}
+                    className={`coverGalleryCardCleanOnly ${entry.excluded ? "excluded" : ""}`}
                     onMouseEnter={() => onPreviewCover(entry)}
                     onFocus={() => onPreviewCover(entry)}
                   >
                     <button
                       type="button"
-                      className="coverGalleryImageButton"
+                      className="coverGalleryImageButtonCleanOnly"
                       onClick={() => void onApplyCover(entry)}
                       disabled={pixelArtBusy}
                       title="apply cover"
@@ -331,19 +331,20 @@ function VirtualCoverGalleryGrid({
                       <CoverGalleryImage src={imageUrl} label={entry.asset.label} />
                     </button>
 
-                    <div className="coverGalleryInfo coverGalleryInfoClean">
+                    <div className="coverGalleryInfoCleanOnly">
                       <strong title={entry.asset.label}>{entry.asset.label}</strong>
                       <small>{entry.usage} use{entry.usage === 1 ? "" : "s"}{tags ? ` • ${tags}` : ""}</small>
                     </div>
 
-                    <div className="coverGalleryActions coverGalleryActionsClean">
+                    <div className="coverGalleryActionsCleanOnly">
                       <button
                         type="button"
                         onClick={() => togglePixelCoverExcluded(entry.key)}
                         className={`coverHideButton ${entry.excluded ? "danger active" : ""}`}
+                        aria-label={entry.excluded ? "show cover again" : "hide cover"}
                         title={entry.excluded ? "show cover again" : "hide cover"}
                       >
-                        {entry.excluded ? "show" : "hide"}
+                        <span aria-hidden="true">{entry.excluded ? "↺" : "×"}</span>
                       </button>
 
                       <button
@@ -475,7 +476,7 @@ export default function CoverStudio({
         <div className="coverStudioHeroText coverStudioCleanHeroText">
           <p className="eyebrow">cover studio</p>
           <h3>album covers</h3>
-          <p>Choose songs, pick a cover, and apply it. The gallery is cleaner now with fewer panels and less noise.</p>
+          <p>Pick songs on the left, then click any cover to apply it. Clean gallery, less noise.</p>
         </div>
 
         <div className="coverStudioHeroActions coverStudioCleanActions">
@@ -494,15 +495,6 @@ export default function CoverStudio({
 
           <button type="button" onClick={() => void rescanPixelArtFolder()} disabled={pixelArtBusy}>
             rescan
-          </button>
-        </div>
-
-        <div className="coverStudioMiniPreview" aria-label="cover preview">
-          <CoverComponent song={activeTargetSong ?? currentSong} className="coverStudioMiniSongArt" />
-          <span aria-hidden="true">→</span>
-          {previewEntry ? <CoverGalleryImage src={previewImageUrl} label={previewEntry.asset.label} priority /> : <div className="coverPreviewEmpty">♪</div>}
-          <button type="button" disabled={!previewEntry || pixelArtBusy || randomizeDisabled} onClick={() => previewEntry && void applyEntry(previewEntry)}>
-            apply preview
           </button>
         </div>
       </section>
@@ -527,26 +519,6 @@ export default function CoverStudio({
           );
         })}
       </section>
-
-      {recentCoverEntries.length ? (
-        <section className="panel coverRecentPanel" aria-label="recent covers">
-          <div className="coverRecentHead">
-            <strong>recent covers</strong>
-            <span>{recentCoverEntries.length} recent</span>
-          </div>
-          <div className="coverRecentStrip">
-            {recentCoverEntries.map((entry) => {
-              const imageUrl = entry.asset.url || pixelArtUrl(entry.asset.file);
-              return (
-                <button key={entry.key} type="button" onClick={() => void applyEntry(entry)} title={`apply ${entry.asset.label}`}>
-                  <CoverGalleryImage src={imageUrl} label={entry.asset.label} />
-                  <span>{entry.asset.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
 
       <section className="coverStudioBody coverStudioCleanBody">
         <aside className="panel coverSelectedSongsPanel coverSelectedSongsPanelClean">
@@ -604,6 +576,31 @@ export default function CoverStudio({
             />
 
             {coverSearch ? <button type="button" onClick={() => setCoverSearch("")}>clear</button> : null}
+          </div>
+
+          <div className="coverQuickApplyBar">
+            <div className="coverQuickPreview" aria-label="cover preview">
+              <CoverComponent song={activeTargetSong ?? currentSong} className="coverStudioMiniSongArt" />
+              <span aria-hidden="true">→</span>
+              {previewEntry ? <CoverGalleryImage src={previewImageUrl} label={previewEntry.asset.label} priority /> : <div className="coverPreviewEmpty">♪</div>}
+              <button type="button" disabled={!previewEntry || pixelArtBusy || randomizeDisabled} onClick={() => previewEntry && void applyEntry(previewEntry)}>
+                apply preview
+              </button>
+            </div>
+
+            {recentCoverEntries.length ? (
+              <div className="coverRecentInline" aria-label="recent covers">
+                <strong>recent</strong>
+                {recentCoverEntries.slice(0, 5).map((entry) => {
+                  const imageUrl = entry.asset.url || pixelArtUrl(entry.asset.file);
+                  return (
+                    <button key={entry.key} type="button" onClick={() => void applyEntry(entry)} title={`apply ${entry.asset.label}`}>
+                      <CoverGalleryImage src={imageUrl} label={entry.asset.label} />
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
 
           <VirtualCoverGalleryGrid

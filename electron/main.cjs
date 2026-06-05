@@ -1,4 +1,6 @@
+/* localtify 0.3.7 V290 — locked alpha-composition window lifecycle. */
 /* localtify 0.3.7 V276 — window reload transparency fix, Spotify fallback, Linux-ready desktop behavior. */
+/* localtify 0.3.7 V284 — fixed devtools shortcut and transparent window guard. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -7,6 +9,9 @@ const fs = require("node:fs");
 const crypto = require("node:crypto");
 const { execFile } = require("node:child_process");
 const { pathToFileURL } = require("node:url");
+
+
+
 
 function loadLocaltifyEnv() {
   const publicSpotifyClientId = "586c22791eb74d73b1c83db88f1d4c52";
@@ -271,8 +276,8 @@ let lastAssignedCoverPath = "";
 
 
 const DEFAULT_WINDOW_TRANSLUCENCY = Object.freeze({
-  translucentWindow: false,
-  windowTransparency: 62,
+  translucentWindow: true,
+  windowTransparency: 82,
   windowBlur: 18,
   transparentAppBackground: true
 });
@@ -304,20 +309,37 @@ function getSavedWindowTranslucencySettings() {
 function applyWindowTranslucencyToWindow(win, settings = getSavedWindowTranslucencySettings()) {
   if (!win || win.isDestroyed()) return settings;
   const next = normalizeWindowTranslucencySettings(settings);
+  const CLEAR_WINDOW_BACKGROUND = "#00000000";
 
   try {
-    win.setBackgroundColor("#00000000");
+    // V290: do not reset the native background on every live slider move.
+    // Electron/Windows can drop the alpha swap-chain when the clear brush is
+    // repeatedly applied during renderer repaints. Lock it once, then let CSS
+    // variables handle the live glass/transparency changes.
+    let currentBackground = "";
+    try {
+      if (typeof win.getBackgroundColor === "function") {
+        currentBackground = String(win.getBackgroundColor() || "").toLowerCase();
+      }
+    } catch {
+      currentBackground = "";
+    }
+
+    if (!win.__localtifyClearBackgroundLocked || currentBackground !== CLEAR_WINDOW_BACKGROUND) {
+      win.setBackgroundColor(CLEAR_WINDOW_BACKGROUND);
+      win.__localtifyClearBackgroundLocked = true;
+    }
   } catch (error) {
     console.log("[localtify window background error]", error?.message || error);
   }
 
   try {
-    if (process.platform === "win32" && typeof win.setBackgroundMaterial === "function") {
-      // Native Windows acrylic adds a grey/brown fog over the whole window.
-      // Use pure transparent Electron + CSS glass when the app background is transparent.
-      // Keep acrylic available only for solid-app glass mode.
-      const nativeMaterial = next.translucentWindow && next.transparentAppBackground === false ? "acrylic" : "none";
-      win.setBackgroundMaterial(nativeMaterial);
+    if (process.platform === "win32" && typeof win.setBackgroundMaterial === "function" && !win.__localtifyBackgroundMaterialLocked) {
+      // Native Windows acrylic/mica adds grey fog over Localtify.
+      // Keep the BrowserWindow alpha surface native-clear once, then let the
+      // renderer CSS own the glass tint/blur.
+      win.setBackgroundMaterial("none");
+      win.__localtifyBackgroundMaterialLocked = true;
     }
   } catch (error) {
     console.log("[localtify window material error]", error?.message || error);
@@ -1006,6 +1028,9 @@ async function installUpdate() {
 
 app.setName(APP_NAME);
 app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+if (process.platform === "linux") {
+  app.commandLine.appendSwitch("enable-transparent-visuals");
+}
 
 try {
   // Localtify uses a custom frameless titlebar, so the native menu is not needed.
@@ -3011,9 +3036,9 @@ function createWindow() {
   const isTranslucentWindow = Boolean(windowTranslucency.translucentWindow);
   const nativeWindowOptions = process.platform === "win32"
     ? {
-        // Avoid the native acrylic grey overlay when the app background itself is transparent.
-        // CSS owns the glass tint/blur so the setting sliders stay predictable.
-        backgroundMaterial: isTranslucentWindow && windowTranslucency.transparentAppBackground === false ? "acrylic" : "none"
+        // Native acrylic/mica makes the whole app grey. Localtify uses pure
+        // transparent BrowserWindow + CSS surface tint instead.
+        backgroundMaterial: "none"
       }
     : {};
 
@@ -3038,10 +3063,32 @@ function createWindow() {
       sandbox: false,
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,
-      backgroundThrottling: true
+      backgroundThrottling: false
     }
   });
   applyWindowTranslucencyToWindow(mainWindow, windowTranslucency);
+  mainWindow.webContents.on("before-input-event", (event, input) => {
+    const key = String(input.key || "").toLowerCase();
+    const openDevToolsShortcut =
+      input.type === "keyDown" &&
+      ((input.control && input.shift && key === "i") || key === "f12");
+
+    if (!openDevToolsShortcut) return;
+    event.preventDefault();
+    try {
+      if (mainWindow.webContents.isDevToolsOpened()) {
+        mainWindow.webContents.closeDevTools();
+      } else {
+        mainWindow.webContents.openDevTools({ mode: "detach" });
+      }
+    } catch (error) {
+      console.log("[localtify devtools shortcut error]", error?.message || error);
+    }
+  });
+
+  mainWindow.webContents.once("did-finish-load", () => {
+    applyWindowTranslucencyToWindow(mainWindow, getSavedWindowTranslucencySettings());
+  });
   if (isDev) {
     mainWindow.loadURL("http://localhost:5173").catch((error) => {
       console.log("[localtify main window dev load error]", error?.message || error);

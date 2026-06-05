@@ -11,7 +11,7 @@
   "main": "electron/main.cjs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/meshahid973/localitfy.git"
+    "url": "git+https://github.com/meshahid973/localitfy.git"
   },
   "scripts": {
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
@@ -19,15 +19,15 @@
     "clean:release": "node -e \"require('fs').rmSync('release',{recursive:true,force:true})\"",
     "dist": "npm run clean:release && npm run build && electron-builder --win nsis --x64",
     "publish": "npm run clean:release && npm run build && electron-builder --win nsis --x64 --publish always",
+    "dist:linux": "npm run clean:release && npm run build && electron-builder --linux AppImage rpm deb --x64 --publish never",
+    "publish:linux": "npm run clean:release && npm run build && electron-builder --linux AppImage rpm deb --x64 --publish always",
+    "dist:linux:appimage": "npm run clean:release && npm run build && electron-builder --linux AppImage --x64 --publish never",
     "postinstall": "electron-builder install-app-deps",
     "assets:compress": "node scripts/compress-localtify-assets.mjs",
     "assets:compress:dry": "node scripts/compress-localtify-assets.mjs --dry-run",
     "clean:builds": "node scripts/compress-localtify-assets.mjs --clean-build-output",
     "prebuild": "node scripts/compress-localtify-assets.mjs",
-    "chunks:audit": "node -e \"const fs=require('fs'),p='dist/assets'; if(!fs.existsSync(p)){console.log('run npm run build first'); process.exit(0)}; fs.readdirSync(p).map(n=>({n,s:fs.statSync(p+'/'+n).size})).sort((a,b)=>b.s-a.s).slice(0,30).forEach(x=>console.log((x.s/1024).toFixed(1)+' KB  '+x.n))\"",
-    "dist:linux": "npm run clean:release && npm run build && electron-builder --linux AppImage rpm deb --x64 --publish never",
-    "publish:linux": "npm run clean:release && npm run build && electron-builder --linux AppImage rpm deb --x64 --publish always",
-    "dist:linux:appimage": "npm run clean:release && npm run build && electron-builder --linux AppImage --x64 --publish never"
+    "chunks:audit": "node -e \"const fs=require('fs'),p='dist/assets'; if(!fs.existsSync(p)){console.log('run npm run build first'); process.exit(0)}; fs.readdirSync(p).map(n=>({n,s:fs.statSync(p+'/'+n).size})).sort((a,b)=>b.s-a.s).slice(0,30).forEach(x=>console.log((x.s/1024).toFixed(1)+' KB  '+x.n))\""
   },
   "dependencies": {
     "better-sqlite3": "^12.5.0",
@@ -60,7 +60,7 @@
     "sharp": "^0.34.5",
     "typescript": "^5.9.3",
     "vite": "^8.0.10",
-    "wait-on": "^9.0.3"
+    "wait-on": "^9.0.10"
   },
   "build": {
     "appId": "com.meshahid973.localitfy",
@@ -120,6 +120,10 @@
       {
         "from": "build/icon.ico",
         "to": "build/icon.ico"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "build/icon.png"
       }
     ],
     "asar": true,
@@ -139,23 +143,6 @@
       ],
       "artifactName": "localtify-setup-${version}.${ext}"
     },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "localtify",
-      "uninstallDisplayName": "localtify",
-      "artifactName": "localtify-setup-${version}.${ext}"
-    },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "meshahid973",
-        "repo": "localitfy"
-      }
-    ],
-    "compression": "maximum",
     "linux": {
       "icon": "build/icon.png",
       "category": "AudioVideo",
@@ -181,6 +168,23 @@
         }
       ],
       "artifactName": "localtify-${version}-${arch}.${ext}"
-    }
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "localtify",
+      "uninstallDisplayName": "localtify",
+      "artifactName": "localtify-setup-${version}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "meshahid973",
+        "repo": "localitfy"
+      }
+    ],
+    "compression": "maximum"
   }
 }
