@@ -1,4 +1,178 @@
-/* localtify v0.3.6 V219 — CSS diet: effects.css owns active glow + light easter effects only. */
+/* localtify 0.3.7 V277 — transparent window glass owner.
+   Fixes the grey wash by keeping the Electron window truly transparent and
+   using one lightweight CSS glass layer. No ambience orbs, no player layout changes. */
+
+html,
+body,
+#root{
+  background: transparent !important;
+}
+
+body{
+  overflow: hidden !important;
+}
+
+.app.windowOpaque{
+  background: var(--bg, #050517) !important;
+  background-color: var(--bg, #050517) !important;
+}
+
+.app.windowTranslucent,
+.app.windowTranslucent.windowGlassTransparentApp{
+  position: relative !important;
+  isolation: isolate !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.app.windowTranslucent.windowGlassSolidApp{
+  background: var(--bg, #050517) !important;
+  background-color: var(--bg, #050517) !important;
+}
+
+.app.windowTranslucent::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background:
+    color-mix(in srgb, var(--window-glass-bg, rgba(5, 5, 15, 0.18)) 42%, transparent) !important;
+  backdrop-filter: blur(var(--window-glass-blur, 18px)) saturate(128%) contrast(1.03) !important;
+  -webkit-backdrop-filter: blur(var(--window-glass-blur, 18px)) saturate(128%) contrast(1.03) !important;
+  transform: translateZ(0) !important;
+  transition:
+    background-color 220ms cubic-bezier(.16, 1, .3, 1),
+    background 220ms cubic-bezier(.16, 1, .3, 1),
+    backdrop-filter 220ms cubic-bezier(.16, 1, .3, 1),
+    -webkit-backdrop-filter 220ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+.app.windowTranslucent.windowGlassTransparentApp::before{
+  background:
+    color-mix(in srgb, var(--window-glass-bg, rgba(5, 5, 15, 0.14)) 34%, transparent) !important;
+}
+
+.app.windowTranslucent.windowGlassSolidApp::before{
+  background: rgba(5, 5, 15, 0.94) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app.windowTranslucent > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.app.windowTranslucent .appShell,
+.app.windowTranslucent .content,
+.app.windowTranslucent .contentScroller,
+.app.windowTranslucent .mainView,
+.app.windowTranslucent .pageSurface,
+.app.windowTranslucent .libraryPage,
+.app.windowTranslucent .homePage,
+.app.windowTranslucent .downloadsPage,
+.app.windowTranslucent .settingsPage,
+.app.windowTranslucent .kopuzSettingsPage{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.app.windowTranslucent .appShell::before,
+.app.windowTranslucent .appShell::after,
+.app.windowTranslucent .content::before,
+.app.windowTranslucent .content::after,
+.app.windowTranslucent .contentScroller::before,
+.app.windowTranslucent .contentScroller::after,
+.app.windowTranslucent .mainView::before,
+.app.windowTranslucent .mainView::after,
+.app.windowTranslucent .pageSurface::before,
+.app.windowTranslucent .pageSurface::after{
+  display: none !important;
+  content: none !important;
+  background: transparent !important;
+  opacity: 0 !important;
+  filter: none !important;
+}
+
+/* Keep blur where it actually helps: chrome/sidebar. Avoid the old full-page grey sheet. */
+.app.windowTranslucent .titleBar,
+.app.windowTranslucent .headerBar,
+.app.windowTranslucent .sidebar{
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  backdrop-filter: blur(calc(var(--window-glass-blur, 18px) + 4px)) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(calc(var(--window-glass-blur, 18px) + 4px)) saturate(130%) !important;
+}
+
+.app.windowTranslucent .titleBar,
+.app.windowTranslucent .headerBar{
+  background: rgba(8, 7, 15, 0.38) !important;
+  box-shadow: none !important;
+}
+
+.app.windowTranslucent .sidebar{
+  background: rgba(12, 7, 28, 0.58) !important;
+  box-shadow:
+    inset -1px 0 0 rgba(var(--accent-rgb), 0.20),
+    18px 0 46px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Panels stay readable without turning the whole app into a grey overlay. */
+.app.windowTranslucent :is(
+  .panel,
+  .homeListenPanel,
+  .homeShelfPanel,
+  .homeLibraryPanel,
+  .libraryPanel,
+  .downloadPanel,
+  .coverStudioShellCleanOnly,
+  .cleanSettingsModal
+){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.030), rgba(255,255,255,0.012)),
+    rgba(8, 6, 18, 0.46) !important;
+  border-color: rgba(255, 255, 255, 0.090) !important;
+  backdrop-filter: blur(calc(var(--window-glass-blur, 18px) + 2px)) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(calc(var(--window-glass-blur, 18px) + 2px)) saturate(118%) !important;
+}
+
+/* Settings should be sharp/readable. The old broad blur here caused the grey fog look. */
+.app.windowTranslucent :is(
+  .settingsHero,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsCategoryRail
+){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.012)),
+    rgba(8, 7, 16, 0.68) !important;
+  border-color: rgba(255, 255, 255, 0.082) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 16px 46px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.035) !important;
+}
+
+.app.windowTranslucent .settingsCategoryRail{
+  background: rgba(6, 5, 13, 0.72) !important;
+}
+
+/* Make the transparent mode less foggy on content-heavy pages. */
+.app.windowTranslucent.windowGlassTransparentApp .content{
+  box-shadow: none !important;
+}
+
+.app.windowTranslucent.windowGlassTransparentApp .hero,
+.app.windowTranslucent.windowGlassTransparentApp .homeHero,
+.app.windowTranslucent.windowGlassTransparentApp .homeHeroPanel{
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+
+/* localtify 0.3.7 V276 — effects only: active song feedback + secret overlay safety. No ambient/orb/star surfaces. */
+
 .app[data-playing="on"] :is(
   .songRow.playing .songArt.coverAura,
   .homeAlbumCard.playing .homeAlbumArt.coverAura,
@@ -8,12 +182,11 @@
   .playlistSongRow.playing .playlistTrackCover,
   .libraryRow.playing .songArt.coverAura
 ){
-position: relative !important;
+  position: relative !important;
   isolation: isolate !important;
   contain: paint !important;
-  will-change: transform !important;
-  transform: translate3d(calc(var(--active-song-beat-x) * 0.045), calc(var(--active-song-beat-y) * 0.045), 0) scale(var(--active-song-art-scale)) !important;
-  transition: transform 96ms linear !important;
+  transform: translateZ(0) scale(var(--active-song-art-scale, 1)) !important;
+  transition: transform 120ms linear !important;
 }
 
 .app[data-playing="on"] :is(
@@ -25,74 +198,45 @@ position: relative !important;
   .playlistSongRow.playing .playlistTrackCover,
   .libraryRow.playing .songArt.coverAura
 )::before{
-opacity: var(--active-song-glow-opacity) !important;
-  filter: blur(22px) saturate(1.5) contrast(1.06) !important;
-  transform: translate3d(var(--active-song-beat-x), var(--active-song-beat-y), 0) scale(var(--active-song-glow-scale)) !important;
-  transition: opacity 100ms linear, transform 100ms linear !important;
-}
-
-@keyframes localtifyHeroGlowDrift{
-  0%{ opacity: calc(var(--active-song-glow-opacity) * 0.68); }
-  18%{ opacity: calc(var(--active-song-glow-opacity) * 1.05); }
-  34%{ opacity: calc(var(--active-song-glow-opacity) * 0.8); }
-  52%{ opacity: calc(var(--active-song-glow-opacity) * 1.14); }
-  70%{ opacity: calc(var(--active-song-glow-opacity) * 0.76); }
-  86%{ opacity: calc(var(--active-song-glow-opacity) * 1.02); }
-  100%{ opacity: calc(var(--active-song-glow-opacity) * 0.68); }
-}
-
-html body :where(
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .simpleLibraryPanel,
-  .libraryPanel,
-  .panel,
-  .ambientSurface,
-  .glassPanel,
-  .sectionPanel,
-  .sectionSurface
-){
-background-image:
-    radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb), 0.10), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018)) !important;
-  background-size: auto !important;
+  opacity: min(var(--active-song-glow-opacity, 0.28), 0.34) !important;
+  filter: blur(14px) saturate(1.18) !important;
+  transform: translateZ(0) scale(var(--active-song-glow-scale, 1.01)) !important;
+  transition: opacity 120ms linear, transform 120ms linear !important;
 }
 
 .app[data-playing="on"] :is(.songRow.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing) :is(.songArt, .smallArt, .coverAura){
-filter: saturate(1.1) contrast(1.04) !important;
+  filter: saturate(1.05) contrast(1.02) !important;
 }
 
 .app .secretLayer.yukari{
-z-index: 2400 !important;
+  z-index: 2400 !important;
   pointer-events: none !important;
   overflow: hidden !important;
 }
 
 .app .secretLayer.yukari::before,
 .app .secretLayer.yukari::after{
-display: none !important;
+  display: none !important;
   content: none !important;
 }
 
 .app .secretLayer.yukari .secretRibbon{
-top: auto !important;
+  top: auto !important;
   left: auto !important;
   right: 22px !important;
   bottom: 94px !important;
   transform: none !important;
   max-width: min(250px, calc(100vw - 42px)) !important;
   padding: 8px 12px !important;
-  border-color: rgba(var(--accent-rgb), .24) !important;
-  background: rgba(8,8,13,.64) !important;
-  backdrop-filter: blur(12px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
-  animation: yukariSecretBubbleInV199 420ms cubic-bezier(.18,1.12,.24,1) both !important;
+  border-color: rgba(var(--accent-rgb), .18) !important;
+  background: rgba(8,8,13,.68) !important;
+  backdrop-filter: blur(10px) saturate(116%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(116%) !important;
+  animation: yukariSecretBubbleInV265 320ms cubic-bezier(.18,1.02,.24,1) both !important;
 }
 
 .app .yukariSecretPeek{
-position: fixed !important;
+  position: fixed !important;
   right: -124px !important;
   bottom: clamp(112px, 12vh, 148px) !important;
   width: clamp(132px, 11vw, 188px) !important;
@@ -103,58 +247,35 @@ position: fixed !important;
   -webkit-user-drag: none !important;
   object-fit: contain !important;
   object-position: center !important;
-  filter:
-    drop-shadow(0 26px 42px rgba(0,0,0,.58))
-    drop-shadow(0 0 22px rgba(var(--accent-rgb), .18)) !important;
+  filter: drop-shadow(0 22px 34px rgba(0,0,0,.52)) !important;
   transform-origin: 86% 55% !important;
-  will-change: transform, opacity !important;
-  animation:
-    yukariSecretPeekInV199 760ms cubic-bezier(.18,1.08,.22,1) both,
-    yukariSecretFloatV199 2.8s ease-in-out 760ms infinite alternate !important;
+  animation: yukariSecretPeekInV265 520ms cubic-bezier(.18,1.02,.22,1) both !important;
 }
 
-@keyframes yukariSecretPeekInV199{
-  0%{ opacity: 0; transform: translate3d(112px, 10px, 0) rotate(3deg) scale(.985); }
-  62%{ opacity: 1; transform: translate3d(-4px, -2px, 0) rotate(-1deg) scale(1.01); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+@keyframes yukariSecretPeekInV265{
+  from{ opacity: 0; transform: translate3d(96px, 8px, 0) scale(.985); }
+  to{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-@keyframes yukariSecretFloatV199{
-  0%{ transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-  100%{ transform: translate3d(-2px, -7px, 0) rotate(-.7deg) scale(1.01); }
-}
-
-@keyframes yukariSecretBubbleInV199{
-  0%{ opacity: 0; transform: translate3d(28px, 8px, 0) scale(.96); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+@keyframes yukariSecretBubbleInV265{
+  from{ opacity: 0; transform: translate3d(22px, 6px, 0) scale(.97); }
+  to{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @media (max-width: 760px){
-.app .yukariSecretPeek{
-right: -104px !important;
+  .app .yukariSecretPeek{
+    right: -104px !important;
     bottom: 108px !important;
     width: 124px !important;
-}
+  }
 
-.app .secretLayer.yukari .secretRibbon{
-right: 14px !important;
+  .app .secretLayer.yukari .secretRibbon{
+    right: 14px !important;
     bottom: 84px !important;
-}
-}
-
-.app .secretLayer:not(.stars):not(.yukari){
-display: none !important;
-  animation: none !important;
-  pointer-events: none !important;
+  }
 }
 
-.songRow.active::before,
-.songRow.active::after{
-pointer-events: none !important;
-}
-
-
-/* localtify v0.3.6 V253 — no ambient orb/star visuals. */
+.app .secretLayer:not(.yukari),
 .app .secretLayer.stars,
 .app .secretLayer.stars *,
 .app .ambientOrb,
@@ -167,10 +288,8 @@ pointer-events: none !important;
   display: none !important;
   opacity: 0 !important;
   animation: none !important;
-}
-
-html body :where(.panel,.ambientSurface,.glassPanel,.sectionPanel,.sectionSurface){
-  background-image: linear-gradient(180deg, rgba(255,255,255,0.042), rgba(255,255,255,0.018)) !important;
+  background: none !important;
+  pointer-events: none !important;
 }
 
 .app[data-theme="stars"],
@@ -182,17 +301,15 @@ html body :where(.panel,.ambientSurface,.glassPanel,.sectionPanel,.sectionSurfac
 .app[data-theme="stars"]::before,
 .app[data-theme="stars"]::after,
 .app[data-theme="stars"] .content::before,
-.app[data-theme="stars"] .content::after,
-.app[data-theme="stars"] .localtifyStarsBackdrop,
-.app[data-theme="stars"] .localtifyStarsLayer,
-.app[data-theme="stars"] .localtifyStarsNebula,
-.app[data-theme="stars"] .localtifyStarParticle,
-.app[data-theme="stars"] .localtifyStarSweep,
-.app[data-theme="stars"] .ambientOrb,
-.app[data-theme="stars"] .sideAmbienceOrb{
+.app[data-theme="stars"] .content::after{
   content: none !important;
   display: none !important;
   opacity: 0 !important;
   animation: none !important;
   background: none !important;
+}
+
+.songRow.active::before,
+.songRow.active::after{
+  pointer-events: none !important;
 }

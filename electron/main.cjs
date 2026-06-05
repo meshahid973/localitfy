@@ -1,4 +1,4 @@
-/* localtify 0.3.7 V270 — restartable translucent window settings. */
+/* localtify 0.3.7 V276 — window reload transparency fix, Spotify fallback, Linux-ready desktop behavior. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -268,6 +268,132 @@ function restoreDatabaseFromOldUserDataIfNeeded() {
 
 let mainWindow = null;
 let lastAssignedCoverPath = "";
+
+
+const DEFAULT_WINDOW_TRANSLUCENCY = Object.freeze({
+  translucentWindow: false,
+  windowTransparency: 62,
+  windowBlur: 18,
+  transparentAppBackground: true
+});
+
+function clampTranslucentNumber(value, fallback, min, max) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(number)));
+}
+
+function normalizeWindowTranslucencySettings(settings = {}) {
+  const source = settings && typeof settings === "object" ? settings : {};
+  return {
+    translucentWindow: Boolean(source.translucentWindow ?? DEFAULT_WINDOW_TRANSLUCENCY.translucentWindow),
+    windowTransparency: clampTranslucentNumber(source.windowTransparency, DEFAULT_WINDOW_TRANSLUCENCY.windowTransparency, 12, 88),
+    windowBlur: clampTranslucentNumber(source.windowBlur, DEFAULT_WINDOW_TRANSLUCENCY.windowBlur, 0, 36),
+    transparentAppBackground: source.transparentAppBackground !== false
+  };
+}
+
+function getSavedWindowTranslucencySettings() {
+  try {
+    return normalizeWindowTranslucencySettings(getSettings());
+  } catch {
+    return normalizeWindowTranslucencySettings();
+  }
+}
+
+function applyWindowTranslucencyToWindow(win, settings = getSavedWindowTranslucencySettings()) {
+  if (!win || win.isDestroyed()) return settings;
+  const next = normalizeWindowTranslucencySettings(settings);
+
+  try {
+    win.setBackgroundColor("#00000000");
+  } catch (error) {
+    console.log("[localtify window background error]", error?.message || error);
+  }
+
+  try {
+    if (process.platform === "win32" && typeof win.setBackgroundMaterial === "function") {
+      // Native Windows acrylic adds a grey/brown fog over the whole window.
+      // Use pure transparent Electron + CSS glass when the app background is transparent.
+      // Keep acrylic available only for solid-app glass mode.
+      const nativeMaterial = next.translucentWindow && next.transparentAppBackground === false ? "acrylic" : "none";
+      win.setBackgroundMaterial(nativeMaterial);
+    }
+  } catch (error) {
+    console.log("[localtify window material error]", error?.message || error);
+  }
+
+  try {
+    if (process.platform === "darwin" && typeof win.setVibrancy === "function") {
+      win.setVibrancy(next.translucentWindow ? "dark" : null);
+    }
+  } catch (error) {
+    console.log("[localtify vibrancy error]", error?.message || error);
+  }
+
+  try {
+    win.webContents?.send("localitfy:window-translucency-state", next);
+  } catch {
+  }
+
+  return next;
+}
+
+function restartForWindowTranslucency() {
+  try {
+    allowQuit = true;
+    app.relaunch();
+  } catch (error) {
+    console.log("[localtify relaunch error]", error?.message || error);
+  }
+
+  setTimeout(() => {
+    try { app.exit(0); } catch { process.exit(0); }
+  }, 120);
+}
+
+function reloadMainWindowForTranslucency() {
+  const previousWindow = mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+  const previousBounds = (() => {
+    try { return previousWindow ? previousWindow.getBounds() : null; } catch { return null; }
+  })();
+  const wasMaximized = (() => {
+    try { return Boolean(previousWindow?.isMaximized?.()); } catch { return false; }
+  })();
+  const wasFullScreen = (() => {
+    try { return Boolean(previousWindow?.isFullScreen?.()); } catch { return false; }
+  })();
+
+  try {
+    if (previousWindow) {
+      previousWindow.removeAllListeners("close");
+      previousWindow.destroy();
+    }
+  } catch (error) {
+    console.log("[localtify translucent window reload destroy error]", error?.message || error);
+  }
+
+  mainWindow = null;
+
+  setTimeout(() => {
+    try {
+      createWindow();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        if (previousBounds) {
+          try { mainWindow.setBounds(previousBounds); } catch {}
+        }
+        if (wasMaximized) {
+          try { mainWindow.maximize(); } catch {}
+        }
+        if (wasFullScreen) {
+          try { mainWindow.setFullScreen(true); } catch {}
+        }
+      }
+    } catch (error) {
+      console.log("[localtify translucent window reload error]", error?.message || error);
+    }
+  }, 80);
+}
 
 const UPDATE_CHECK_STARTUP_DELAY_MS = 2200;
 const PIXEL_ART_CACHE_TTL_MS = 30_000;
@@ -2875,44 +3001,37 @@ function getRendererIndexPath() {
   return candidates[0];
 }
 
+function createWindow() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    showMainWindow();
+    return;
+  }
+  const size = getSafeMainWindowSize();
+  const windowTranslucency = getSavedWindowTranslucencySettings();
+  const isTranslucentWindow = Boolean(windowTranslucency.translucentWindow);
+  const nativeWindowOptions = process.platform === "win32"
+    ? {
+        // Avoid the native acrylic grey overlay when the app background itself is transparent.
+        // CSS owns the glass tint/blur so the setting sliders stay predictable.
+        backgroundMaterial: isTranslucentWindow && windowTranslucency.transparentAppBackground === false ? "acrylic" : "none"
+      }
+    : {};
 
-function getTranslucentWindowSettings() {
-  const settings = (() => {
-    try {
-      return getSettings() || {};
-    } catch {
-      return {};
-    }
-  })();
-
-  const clampNumber = (value, fallback, min, max) => {
-    const next = Number(value);
-    if (!Number.isFinite(next)) return fallback;
-    return Math.max(min, Math.min(max, next));
-  };
-
-  return {
-    enabled: Boolean(settings.supportTranslucentWindow),
-    transparency: clampNumber(settings.windowTransparency, 84, 35, 98),
-    blur: clampNumber(settings.windowBlurIntensity, 18, 0, 44)
-  };
-}
-
-function buildMainWindowOptions(size) {
-  const glass = getTranslucentWindowSettings();
-  const transparentWindow = Boolean(glass.enabled);
-
-  const options = {
+  mainWindow = new BrowserWindow({
     width: size.width,
     height: size.height,
     minWidth: MAIN_WINDOW_MIN_WIDTH,
     minHeight: MAIN_WINDOW_MIN_HEIGHT,
     show: false,
     frame: false,
+    // Keep the native window transparent at creation time. The app still looks
+    // opaque when the setting is off because CSS fills the shell background.
+    // This avoids the Windows/Electron problem where transparency cannot be
+    // reliably enabled after a BrowserWindow has already been created.
+    transparent: true,
     titleBarStyle: "hidden",
-    transparent: transparentWindow,
-    backgroundColor: transparentWindow ? "#00000000" : "#0d0e12",
-    hasShadow: true,
+    backgroundColor: "#00000000",
+    ...nativeWindowOptions,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -2921,77 +3040,8 @@ function buildMainWindowOptions(size) {
       webSecurity: true,
       backgroundThrottling: true
     }
-  };
-
-  if (transparentWindow && process.platform === "win32") {
-    options.backgroundMaterial = "acrylic";
-  }
-
-  if (transparentWindow && process.platform === "darwin") {
-    options.vibrancy = "fullscreen-ui";
-    options.visualEffectState = "active";
-  }
-
-  return options;
-}
-
-function applyWindowTransparencyMode(win) {
-  if (!win || win.isDestroyed()) return;
-  const glass = getTranslucentWindowSettings();
-
-  try {
-    win.setBackgroundColor(glass.enabled ? "#00000000" : "#0d0e12");
-  } catch (error) {
-    console.log("[localtify window background error]", error?.message || error);
-  }
-
-  // This updates native material when Electron/OS supports it, but the actual
-  // `transparent` BrowserWindow flag is construction-only. Changing the main
-  // translucent toggle therefore restarts localtify after saving. Sliders do
-  // not restart; they update the renderer CSS live.
-  if (process.platform === "win32" && typeof win.setBackgroundMaterial === "function") {
-    try {
-      win.setBackgroundMaterial(glass.enabled ? "acrylic" : "none");
-    } catch (error) {
-      console.log("[localtify window material error]", error?.message || error);
-    }
-  }
-
-  if (process.platform === "darwin" && typeof win.setVibrancy === "function") {
-    try {
-      win.setVibrancy(glass.enabled ? "fullscreen-ui" : null);
-    } catch (error) {
-      console.log("[localtify window vibrancy error]", error?.message || error);
-    }
-  }
-}
-
-let localtifyRestartQueued = false;
-function restartLocaltifyForWindowMode(reason = "window-mode") {
-  if (localtifyRestartQueued) return;
-  localtifyRestartQueued = true;
-  console.log(`[localtify restart] ${reason}`);
-
-  setTimeout(() => {
-    try {
-      allowQuit = true;
-      app.relaunch();
-      app.exit(0);
-    } catch (error) {
-      console.log("[localtify restart error]", error?.message || error);
-      app.quit();
-    }
-  }, 220);
-}
-
-function createWindow() {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    showMainWindow();
-    return;
-  }
-  const size = getSafeMainWindowSize();
-  mainWindow = new BrowserWindow(buildMainWindowOptions(size));
-  applyWindowTransparencyMode(mainWindow);
+  });
+  applyWindowTranslucencyToWindow(mainWindow, windowTranslucency);
   if (isDev) {
     mainWindow.loadURL("http://localhost:5173").catch((error) => {
       console.log("[localtify main window dev load error]", error?.message || error);
@@ -3092,6 +3142,7 @@ app.whenReady().then(async () => {
       settings: getSettings(),
       playlists: getPlaylists(),
       windowsIntegration: getStartWithWindowsStatus(),
+      windowTranslucency: getSavedWindowTranslucencySettings(),
       database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: LEGACY_APP_DATA_NAME },
       discord: getDiscordStatus()
     };
@@ -3364,12 +3415,6 @@ app.whenReady().then(async () => {
   ipcMain.handle("settings:save", async (_event, settings) => {
     try {
       if (!settings || typeof settings !== "object") return getSettings();
-
-      const previousSettings = getSettings() || {};
-      const previousTranslucent = Boolean(previousSettings.supportTranslucentWindow);
-      const nextHasTranslucentToggle = Object.prototype.hasOwnProperty.call(settings, "supportTranslucentWindow");
-      const nextTranslucent = nextHasTranslucentToggle ? Boolean(settings.supportTranslucentWindow) : previousTranslucent;
-
       if (Object.prototype.hasOwnProperty.call(settings, "startWithWindows")) {
         setStartWithWindows(Boolean(settings.startWithWindows));
       }
@@ -3378,29 +3423,46 @@ app.whenReady().then(async () => {
         if (minimizeToTray) ensureTray();
         updateTrayMenu();
       }
-
-      const saved = saveSettings(settings);
-
-      if (
-        Object.prototype.hasOwnProperty.call(settings, "supportTranslucentWindow") ||
-        Object.prototype.hasOwnProperty.call(settings, "windowTransparency") ||
-        Object.prototype.hasOwnProperty.call(settings, "windowBlurIntensity")
-      ) {
-        applyWindowTransparencyMode(mainWindow);
-      }
-
-      // Electron's `transparent` option cannot be switched on an existing
-      // BrowserWindow. Restart only when the main toggle changes. The blur and
-      // transparency sliders stay live and do not restart the app.
-      if (nextHasTranslucentToggle && nextTranslucent !== previousTranslucent) {
-        restartLocaltifyForWindowMode(nextTranslucent ? "enable-translucent-window" : "disable-translucent-window");
-      }
-
-      return saved;
+      return saveSettings(settings);
     } catch (error) {
       console.log("[localitfy settings save error]", error?.message);
       return getSettings();
     }
+  });
+
+  ipcMain.handle("localitfy:get-window-translucency", async () => getSavedWindowTranslucencySettings());
+  ipcMain.handle("localitfy:set-window-translucency", async (_event, payload = {}) => {
+    try {
+      const current = getSavedWindowTranslucencySettings();
+      const next = normalizeWindowTranslucencySettings({ ...current, ...(payload || {}) });
+      const transparentModeChanged = Boolean(current.translucentWindow) !== Boolean(next.translucentWindow);
+
+      saveSettings({
+        translucentWindow: next.translucentWindow,
+        windowTransparency: next.windowTransparency,
+        windowBlur: next.windowBlur,
+        transparentAppBackground: next.transparentAppBackground
+      });
+
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        applyWindowTranslucencyToWindow(mainWindow, next);
+      }
+
+      return {
+        ok: true,
+        restartRequired: false,
+        windowReloadRequired: false,
+        changedNativeMaterial: transparentModeChanged,
+        ...next
+      };
+    } catch (error) {
+      console.log("[localitfy translucent window save error]", error?.message || error);
+      return { ok: false, error: error?.message || "could not update translucent window", ...getSavedWindowTranslucencySettings() };
+    }
+  });
+  ipcMain.handle("localitfy:restart-app", async () => {
+    restartForWindowTranslucency();
+    return true;
   });
 
   ipcMain.handle("playlists:get", async () => getPlaylists());
@@ -3624,18 +3686,6 @@ app.whenReady().then(async () => {
   });
   ipcMain.handle("window:close", async (event) => {
     BrowserWindow.fromWebContents(event.sender)?.close();
-    return true;
-  });
-
-  ipcMain.handle("localitfy:restart-app", async () => {
-    app.relaunch();
-    app.exit(0);
-    return true;
-  });
-
-  ipcMain.handle("app:restart", async () => {
-    app.relaunch();
-    app.exit(0);
     return true;
   });
 
