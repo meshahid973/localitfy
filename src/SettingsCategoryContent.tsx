@@ -1,4 +1,5 @@
-import { memo, useEffect, useState } from "react";
+/* localtify 0.3.7 V262 — cleaner settings, Linux release notes, and hidden platform-only controls. */
+import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
 type ThemeId = string;
@@ -68,6 +69,18 @@ type ImportAnimationLike = {
 
 type UpdatePromptLike = {
   [key: string]: any;
+};
+
+type PlatformInfoLike = {
+  id?: "windows" | "linux" | "mac" | "unknown";
+  label?: string;
+  releaseLabel?: string;
+  startupSettingSupported?: boolean;
+  desktopControlsLabel?: string;
+  desktopControlsHelp?: string;
+  startupSettingLabel?: string;
+  startupSettingHelp?: string;
+  linuxInstallNotes?: string[];
 };
 
 type DiagnosticsInfo = {
@@ -150,6 +163,7 @@ type SettingsCategoryContentProps = {
   copyDiagnosticsInfo: () => void;
   diagnosticsCopied: boolean;
   diagnosticsInfo: DiagnosticsInfo;
+  platformInfo?: PlatformInfoLike;
   likedSongs: ReadonlyArray<SongLike>;
   libraryRenderLimitRef: MutableNumberRef;
   INITIAL_LIBRARY_RENDER_LIMIT: number;
@@ -379,6 +393,60 @@ const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "oledBlack", label: "OLED black", note: "black" }
 ];
 
+function detectSettingsPlatform(): Required<PlatformInfoLike> {
+  const userAgent = typeof navigator !== "undefined" ? String(navigator.userAgent || "").toLowerCase() : "";
+  const platform = typeof navigator !== "undefined" ? String(navigator.platform || "").toLowerCase() : "";
+  const isLinux = /linux|x11|wayland/.test(userAgent) || platform.includes("linux");
+  const isMac = /mac os|macintosh|darwin/.test(userAgent) || platform.includes("mac");
+  const isWindows = /windows|win32|win64|wow64/.test(userAgent) || platform.includes("win");
+
+  if (isLinux) {
+    return {
+      id: "linux",
+      label: "Linux",
+      releaseLabel: "AppImage / RPM / DEB",
+      startupSettingSupported: false,
+      desktopControlsLabel: "Linux desktop controls",
+      desktopControlsHelp: "Tray and media keys work where your Linux desktop environment exposes them.",
+      startupSettingLabel: "Linux autostart",
+      startupSettingHelp: "Hidden in this release. Linux autostart will use a proper desktop-entry flow later.",
+      linuxInstallNotes: [
+        "AppImage: chmod +x localtify-0.3.7-x64.AppImage, then run it directly.",
+        "RPM: for Fedora, openSUSE, and RHEL-style distros.",
+        "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
+      ]
+    };
+  }
+
+  if (isMac) {
+    return {
+      id: "mac",
+      label: "macOS",
+      releaseLabel: "macOS build not published yet",
+      startupSettingSupported: false,
+      desktopControlsLabel: "macOS desktop controls",
+      desktopControlsHelp: "macOS support is not part of this release yet. Windows startup controls stay hidden.",
+      startupSettingLabel: "Start localtify with macOS",
+      startupSettingHelp: "macOS autostart will be added later when a signed macOS build exists.",
+      linuxInstallNotes: []
+    };
+  }
+
+  return {
+    id: isWindows ? "windows" : "unknown",
+    label: isWindows ? "Windows" : "Unknown desktop",
+    releaseLabel: isWindows ? "NSIS installer" : "Desktop build",
+    startupSettingSupported: isWindows,
+    desktopControlsLabel: isWindows ? "Windows controls" : "Desktop controls",
+    desktopControlsHelp: isWindows
+      ? "Use keyboard media keys, taskbar buttons, tray controls, and Windows now playing."
+      : "Tray and media keys are available where the current desktop environment supports them.",
+    startupSettingLabel: "Start localtify when Windows starts",
+    startupSettingHelp: "Enabled by default so the player is ready after you sign in. You can turn it off anytime.",
+    linuxInstallNotes: []
+  };
+}
+
 const SettingsCategoryContent = memo(function SettingsCategoryContent({
   settingsCategory,
   currentTheme,
@@ -446,6 +514,7 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   copyDiagnosticsInfo,
   diagnosticsCopied,
   diagnosticsInfo,
+  platformInfo,
   likedSongs,
   libraryRenderLimitRef,
   INITIAL_LIBRARY_RENDER_LIMIT,
@@ -456,6 +525,16 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   resetLibraryLayoutSettings,
   resetAllSettingsSafely
 }: SettingsCategoryContentProps) {
+  const fallbackPlatformInfo = useMemo(() => detectSettingsPlatform(), []);
+  const activePlatformInfo = {
+    ...fallbackPlatformInfo,
+    ...(platformInfo || {})
+  } as Required<PlatformInfoLike>;
+  const linuxInstallNotes = activePlatformInfo.linuxInstallNotes?.length
+    ? activePlatformInfo.linuxInstallNotes
+    : fallbackPlatformInfo.linuxInstallNotes;
+  const showLinuxInstallNotes = activePlatformInfo.id === "linux" || linuxInstallNotes.length > 0;
+
 return (
   <>
     {settingsCategory === "appearance" ? (
@@ -1087,7 +1166,7 @@ return (
             <p className="eyebrow">updates</p>
             <h4>updates and version</h4>
           </div>
-          <span>version {APP_VERSION}</span>
+          <span>version {APP_VERSION} • {activePlatformInfo.label}</span>
         </div>
 
         <div className="settingsTwoColumn settingsUpdatesGrid">
@@ -1117,9 +1196,9 @@ return (
             </div>
 
             <div className="settingsActionRow settingsUpdateActions">
-              <button className="settingsActionButton" type="button" onClick={manualUpdateCheck} disabled={updatePrompt.status === "checking" || updatePrompt.status === "downloading"}>Check for updates</button>
-              <button className="settingsActionButton" type="button" onClick={askUpdaterToInstall} disabled={updatePrompt.status !== "downloaded"}>Restart to install</button>
-              <button className="settingsActionButton" type="button" onClick={skipAvailableUpdate} disabled={!updatePrompt.version || updatePrompt.status !== "available"}>Skip this version</button>
+              <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={manualUpdateCheck} disabled={updatePrompt.status === "checking" || updatePrompt.status === "downloading"}>check now</button>
+              <button className="settingsActionButton" type="button" onClick={askUpdaterToInstall} disabled={updatePrompt.status !== "downloaded"}>restart to install</button>
+              <button className="settingsActionButton settingsGhostAction" type="button" onClick={skipAvailableUpdate} disabled={!updatePrompt.version || updatePrompt.status !== "available"}>skip version</button>
             </div>
           </div>
 
@@ -1139,6 +1218,20 @@ return (
             </div>
           </div>
         </div>
+
+        {showLinuxInstallNotes ? (
+          <div className="settingsPanelCard settingsFullWidthPanel settingsLinuxInstallPanel">
+            <div className="settingsPanelHeader">
+              <div>
+                <strong>Linux packages</strong>
+                <span>AppImage is the main universal Linux build. RPM and DEB are extra native installers.</span>
+              </div>
+            </div>
+            <ul className="settingsPlainList settingsReleaseList">
+              {linuxInstallNotes.map((note) => <li key={note}>{note}</li>)}
+            </ul>
+          </div>
+        ) : null}
 
         <div className="settingsPanelCard settingsFullWidthPanel">
           <div className="settingsPanelHeader">
@@ -1163,7 +1256,7 @@ return (
             <p className="eyebrow">about</p>
             <h4>localtify status</h4>
           </div>
-          <span>version {APP_VERSION}</span>
+          <span>version {APP_VERSION} • {activePlatformInfo.label}</span>
         </div>
 
         <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsPanel">
@@ -1187,6 +1280,21 @@ return (
           </div>
         </div>
 
+        <div className="settingsPanelCard settingsFullWidthPanel settingsPlatformPanel">
+          <div className="settingsPanelHeader">
+            <div>
+              <strong>Platform support</strong>
+              <span>Windows and Linux now use separate release packages, icons, and platform controls.</span>
+            </div>
+          </div>
+          <div className="statusGrid">
+            <span><strong>{activePlatformInfo.label}</strong><small>platform</small></span>
+            <span><strong>{activePlatformInfo.releaseLabel}</strong><small>package</small></span>
+            <span><strong>{activePlatformInfo.startupSettingSupported ? "available" : "hidden"}</strong><small>startup setting</small></span>
+            <span><strong>{showLinuxInstallNotes ? "ready" : "standard"}</strong><small>release notes</small></span>
+          </div>
+        </div>
+
         <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsCopyPanel">
           <div className="settingsPanelHeader">
             <div>
@@ -1206,7 +1314,7 @@ return (
             <p className="eyebrow">advanced</p>
             <h4>reset and app status</h4>
           </div>
-          <span>version {APP_VERSION}</span>
+          <span>version {APP_VERSION} • {activePlatformInfo.label}</span>
         </div>
 
         <div className="settingsTwoColumn">
@@ -1245,13 +1353,15 @@ return (
         <div className="settingsPanelCard settingsFullWidthPanel">
           <div className="settingsPanelHeader">
             <div>
-              <strong>Windows controls</strong>
-              <span>Use keyboard media keys, taskbar buttons, tray controls, and Windows now playing.</span>
+              <strong>{activePlatformInfo.desktopControlsLabel}</strong>
+              <span>{activePlatformInfo.desktopControlsHelp}</span>
             </div>
           </div>
           <div className="settingsMiniGrid">
             <ToggleRow label="Keep localtify in tray when closed" help="The X button hides the app instead of quitting. Use Quit from the tray to close it fully." checked={settings.minimizeToTray} onChange={(value) => updateSetting("minimizeToTray", value)} />
-            <ToggleRow label="Start localtify when Windows starts" help="Enabled by default so the player is ready after you sign in. You can turn it off anytime." checked={settings.startWithWindows} onChange={(value) => updateSetting("startWithWindows", value)} />
+            {activePlatformInfo.startupSettingSupported ? (
+              <ToggleRow label={activePlatformInfo.startupSettingLabel} help={activePlatformInfo.startupSettingHelp} checked={settings.startWithWindows} onChange={(value) => updateSetting("startWithWindows", value)} />
+            ) : null}
           </div>
         </div>
 
