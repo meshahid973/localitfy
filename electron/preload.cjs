@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld("localitfy", {
 
   getSettings: () => ipcRenderer.invoke("settings:get"),
   saveSettings: (settings) => ipcRenderer.invoke("settings:save", settings),
+  restartApp: () => ipcRenderer.invoke("app:restart"),
 
   getPlaylists: () => ipcRenderer.invoke("playlists:get"),
   savePlaylists: (playlists) => ipcRenderer.invoke("playlists:save", playlists),

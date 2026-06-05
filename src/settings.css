@@ -1,5 +1,4 @@
-/* localtify settings.css — settings page + settings modal only.
-   Home/player/progress styles stay in their own files. */
+/* localtify 0.3.7 V268 — settings cleanup with window glass toggle replacing stars. */
 
 .settingsPage,
 .kopuzSettingsPage{
@@ -27,23 +26,10 @@
   border: 1px solid rgba(var(--accent-rgb), 0.2);
   border-radius: 20px;
   background:
-    radial-gradient(circle at 14% 12%, rgba(var(--accent-rgb), 0.18), transparent 36%),
     linear-gradient(135deg, rgba(var(--accent-rgb), 0.105), rgba(255,255,255,0.028) 48%, rgba(0,0,0,0.32)),
     rgba(8, 8, 12, 0.78);
   box-shadow: 0 24px 76px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.055);
   backdrop-filter: blur(18px) saturate(125%);
-}
-
-.settingsHero::before{
-  content: "";
-  position: absolute;
-  inset: -35%;
-  pointer-events: none;
-  opacity: 0.34;
-  background: radial-gradient(circle at 72% 38%, rgba(var(--accent-rgb), 0.22), transparent 34%);
-  filter: blur(32px);
-  transform: translate3d(0,0,0);
-  animation: settingsGlowFloat 8s ease-in-out infinite alternate;
 }
 
 .settingsHero > *{
@@ -74,25 +60,18 @@
   border: 1px solid rgba(255,255,255,0.085);
   border-radius: 22px;
   background:
-    radial-gradient(circle at 78% 0%, rgba(var(--accent-rgb), 0.085), transparent 32%),
     linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.024)),
     rgba(7, 7, 12, 0.72);
   box-shadow: 0 18px 54px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.045);
   backdrop-filter: blur(18px) saturate(120%);
-  animation: settingsCardIn 460ms cubic-bezier(0.2, 0.9, 0.18, 1) both;
   transition: transform 220ms cubic-bezier(.2,.9,.18,1), border-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
 }
 
 .settingsPageCard:hover{
-  transform: translateY(-2px);
+  transform: none;
   border-color: rgba(var(--accent-rgb), 0.24);
   box-shadow: 0 24px 70px rgba(0,0,0,0.42), 0 0 38px rgba(var(--accent-rgb),0.07);
 }
-
-.settingsPageCard:nth-of-type(2){ animation-delay: 40ms; }
-.settingsPageCard:nth-of-type(3){ animation-delay: 80ms; }
-.settingsPageGrid:nth-of-type(1) .settingsPageCard{ animation-delay: 110ms; }
-.settingsPageGrid:nth-of-type(2) .settingsPageCard{ animation-delay: 150ms; }
 
 .settingsSectionTitle,
 .settingsPanelHeader,
@@ -182,7 +161,7 @@
 }
 
 .settingsThemeCard:hover{
-  transform: translateY(-3px) scale(1.015);
+  transform: none;
   border-color: rgba(var(--accent-rgb),0.26);
   background: rgba(var(--accent-rgb),0.05);
   box-shadow: 0 14px 34px rgba(0,0,0,0.28), 0 0 26px rgba(var(--accent-rgb),0.07);
@@ -273,7 +252,7 @@
 .settingsPage .softButton:hover,
 .settingsTinyButton:hover,
 .settingsActionButton:hover{
-  transform: translateY(-2px);
+  transform: none;
   border-color: rgba(var(--accent-rgb),0.38);
   background: rgba(var(--accent-rgb),0.1);
   box-shadow: 0 14px 30px rgba(0,0,0,0.28), 0 0 20px rgba(var(--accent-rgb),0.08);
@@ -569,7 +548,7 @@
 }
 
 .themeTokenCard:hover{
-  transform: translateY(-2px);
+  transform: none;
   border-color: rgba(var(--accent-rgb),0.22);
   background: rgba(var(--accent-rgb),0.045);
 }
@@ -742,7 +721,7 @@
 .rangeRow:hover,
 .settingsChoice:hover,
 .coverSyncChoice:hover{
-  transform: translateY(-2px);
+  transform: none;
   border-color: rgba(var(--accent-rgb),0.25);
   background: rgba(var(--accent-rgb),0.052);
   box-shadow: 0 16px 34px rgba(0,0,0,0.26), 0 0 22px rgba(var(--accent-rgb),0.06);
@@ -982,7 +961,6 @@
   font-size: 12px;
 }
 
-/* Settings modal, kept clean in case any old settings button still opens it. */
 .settingsOverlay{
   position: fixed !important;
   inset: 36px 0 92px var(--sidebar-width, 218px) !important;
@@ -1196,11 +1174,6 @@
   to{ opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes settingsGlowFloat{
-  from{ transform: translate3d(-2%, -1%, 0) scale(1); opacity: 0.22; }
-  to{ transform: translate3d(2%, 1%, 0) scale(1.05); opacity: 0.42; }
-}
-
 @media (max-width: 1180px){
   .settingsPageGrid,
   .settingsTwoColumn,
@@ -1275,7 +1248,6 @@
     border-bottom: 1px solid rgba(255,255,255,0.075);
   }
 }
-
 
 .app .settingsThemeGrid,
 .app .optionGrid,
@@ -1355,7 +1327,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   transition-property: background-color, border-color, color, box-shadow, transform !important;
   transition-duration: 120ms !important;
 }
-
 
 .settingsPage button,
 .kopuzSettingsPage button,
@@ -1489,7 +1460,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsChoice strong{
   overflow-wrap: anywhere;
 }
-
 
 .settingsPage,
 .kopuzSettingsPage,
@@ -1648,7 +1618,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   gap: 14px !important;
 }
 
-/* keep focus readable without browser-blue boxes */
 .settingsPage :focus-visible,
 .kopuzSettingsPage :focus-visible,
 .settingsModal :focus-visible,
@@ -1666,7 +1635,6 @@ body.localitfyThemePainting .app .themeTokenCard{
     padding: 15px 15px !important;
   }
 }
-
 
 .settingsPage,
 .kopuzSettingsPage{
@@ -2060,7 +2028,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-
 .settingsPage,
 .kopuzSettingsPage{
   gap: 18px !important;
@@ -2266,7 +2233,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-
 .themePickerLockNoteV026 {
   margin: 8px 0 0 !important;
   color: rgba(255,255,255,.62) !important;
@@ -2279,7 +2245,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   cursor: not-allowed !important;
   opacity: .55 !important;
 }
-
 
 .settingsView,
 .settingsShell,
@@ -2357,7 +2322,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   opacity: .5;
 }
 
-
 .settingsHero::before,
 .settingsPanelCard::before,
 .settingsPageCard::before,
@@ -2401,7 +2365,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   line-height: 1.35 !important;
 }
 
-
 .settingsCategoryButton .settingsLucideIcon,
 .settingsCategoryButton svg,
 .cleanSettingsModal svg {
@@ -2421,7 +2384,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsDiscordPrivacyShortcut .settingsTinyButton {
   white-space: nowrap;
 }
-
 
 .settingsPage,
 .kopuzSettingsPage{
@@ -2548,7 +2510,6 @@ body.localitfyThemePainting .app .themeTokenCard{
     min-height: 62px !important;
   }
 }
-
 
 .settingsDiscordRpcPageCard{
   contain: layout paint;
@@ -2709,7 +2670,6 @@ body.localitfyThemePainting .app .themeTokenCard{
     justify-content: flex-start;
   }
 }
-
 
 .settingsPageV027{
   display: grid !important;
@@ -3097,7 +3057,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   filter: none !important;
 }
 
-
 .settingsPageV027,
 .settingsPage{
   max-width: 1480px !important;
@@ -3285,7 +3244,6 @@ body.localitfyThemePainting .app .themeTokenCard{
     grid-template-columns: 1fr !important;
   }
 }
-
 
 .customThemeManagerV027{
   gap: 18px !important;
@@ -3491,7 +3449,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-
 .settingsPage,
 .settingsPage::before,
 .settingsPage::after,
@@ -3615,7 +3572,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-
 .settingsUpdatePanel,
 .settingsResetPanel{
   overflow: hidden;
@@ -3735,7 +3691,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsResetButton:hover{
-  transform: translateY(-2px);
+  transform: none;
   border-color: color-mix(in srgb, var(--accent, #ed28f0) 58%, var(--border, rgba(255,255,255,.16)));
   background: color-mix(in srgb, var(--surface, #151019) 82%, var(--accent, #ed28f0) 8%);
   box-shadow: 0 18px 46px color-mix(in srgb, var(--accent, #ed28f0) 14%, transparent);
@@ -3764,7 +3720,6 @@ body.localitfyThemePainting .app .themeTokenCard{
     grid-template-columns: 1fr;
   }
 }
-
 
 .settingsCategorySurfaceV027{
   background: rgba(7, 6, 14, .58) !important;
@@ -3965,7 +3920,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-/* correct the color-token label layout used by App.tsx */
 .customThemeTokenV027{
   grid-template-columns: 48px minmax(0, 1fr) !important;
   grid-template-rows: auto auto !important;
@@ -3987,7 +3941,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   grid-row: 2 !important;
   min-width: 0 !important;
 }
-
 
 .settingsCategoryContentV027 .customThemeManagerV027,
 .settingsCategoryPage .customThemeManagerV027{
@@ -4465,11 +4418,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-
-/* ======================================================================
-   localtify 0.3.0 — Settings > About / open-source polish
-   Owner: settings.css. These styles only affect the settings page.
-====================================================================== */
 .aboutSettingsPage{
   gap: 18px;
 }
@@ -4616,10 +4564,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-/* ======================================================================
-   localtify 0.3.1 — settings button/card consistency
-   Owner: settings.css. Keeps settings calm and aligned with shared buttons.
-====================================================================== */
 .settingsPage :where(.settingsPanelCard,.settingsPageCard,.settingSwitchCard,.settingsChoice,.coverSyncChoice,.aboutPlainCard,.aboutOpenSourceHero){
   border-radius: 24px !important;
   overflow: hidden !important;
@@ -4654,11 +4598,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   height: 17px !important;
   flex: 0 0 auto !important;
 }
-
-/* ==========================================================================
-   localtify 0.3.1 — About diagnostics polish
-   Owns Settings → About diagnostics cards and copy box only.
-========================================================================== */
 
 .settingsDiagnosticsPanel,
 .settingsDiagnosticsCopyPanel{
@@ -4754,7 +4693,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-/* v0.3.1 download settings */
 .downloadSettingsGridV031 {
   align-items: stretch;
 }
@@ -4795,10 +4733,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-/* ========================================================================
-   localtify v0.3.2 — custom theme hex visibility + settings alignment
-   Owner: settings.css. This is intentionally scoped to Settings > Appearance.
-======================================================================== */
 .settingsCategoryContentV027 .customThemeHeaderV027,
 .settingsCategoryPage .customThemeHeaderV027{
   display: grid !important;
@@ -4962,12 +4896,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-
-/* ========================================================================
-   localtify v0.3.3/v97 — polished Updates settings page
-   Owner: settings.css / Updates category only.
-   Keeps updater logic and bottom player untouched.
-======================================================================== */
 .settingsCategoryPage.settingsUpdatesPage{
   display: grid !important;
   gap: 18px !important;
@@ -5213,11 +5141,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-
-/* ========================================================================
-   localtify v0.3.3/v99 — simplified Updates page, no debug mini-cards
-   Owner: settings.css / Updates category only. Does not touch player.css.
-======================================================================== */
 .settingsCategoryPage.settingsUpdatesPage{
   gap: 16px !important;
 }
@@ -5427,11 +5350,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-
-/* ========================================================================
-   localtify v0.3.3/v100 — Updates page spacing/position polish
-   Owner: settings.css / Updates category only. player.css untouched.
-======================================================================== */
 .settingsUpdatesPage .settingsCategoryHeader{
   align-items: center !important;
 }
@@ -5487,12 +5405,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   display: flex !important;
   align-items: center !important;
 }
-
-/* ======================================================================
-   localtify v0.3.6 V192 — acrylic settings consistency
-   Owner: settings.css only
-   Uses low blur + stronger tint so the settings page stays smooth.
-====================================================================== */
 
 .settingsPage,
 .settingsModal{
@@ -5657,11 +5569,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   backdrop-filter: blur(12px) saturate(118%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(118%) !important;
 }
-
-/* ======================================================================
-   localtify 0.3.6 V199 — premium settings/update page final polish.
-   Owner: settings.css. No top-bar layout fights, no home.css dumping.
-====================================================================== */
 
 .settingsUpdatesPageV199{
   gap: 18px;
@@ -5984,17 +5891,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-
-/* ======================================================================
-   localtify v0.3.6 V204 — settings de-slop cleanup
-   Goal:
-   - less "AI slop" / less decorative over-design
-   - calmer borders and less empty weird space
-   - wider settings page usage
-   - no settings-only ambience orbs / floating particles
-   - softer, cleaner advanced-tab reset section
-   ====================================================================== */
-
 .settingsPage,
 .kopuzSettingsPage{
   width: min(1400px, calc(100% - 24px)) !important;
@@ -6007,12 +5903,10 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   padding: 16px 18px 40px !important;
 }
 
-/* use more of the page and stop the huge dead feeling */
 .settingsLayout{
   grid-template-columns: 248px minmax(0, 1fr) !important;
 }
 
-/* calmer overall surfaces: much less orb-y / less outlined */
 .settingsHero,
 .settingsPanelCard,
 .settingsPageCard,
@@ -6100,7 +5994,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   color: rgba(255,255,255,0.7) !important;
 }
 
-/* rail cleaner */
 .settingsCategoryRail,
 .settingsCategoryRailV027{
   padding: 12px !important;
@@ -6140,7 +6033,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 .settingsCategoryCopy strong{ font-size: 13px !important; }
 .settingsCategoryCopy span{ font-size: 10.5px !important; color: rgba(255,255,255,0.56) !important; }
 
-/* appearance top area uses space better */
 .settingsThemeSelectPanel{
   grid-template-columns: minmax(320px, .92fr) minmax(220px, 1fr) !important;
   gap: 14px !important;
@@ -6247,7 +6139,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   box-shadow: none !important;
 }
 
-/* less outline / less slop in setting cards */
 .settingsTwoColumn,
 .settingsPageGrid,
 .discordSettingsGrid{
@@ -6383,7 +6274,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   font-size: 12px !important;
 }
 
-/* discord page: calmer and less empty */
 .discordSettingsPage{
   gap: 14px !important;
 }
@@ -6396,7 +6286,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 .discordHeroCopy strong{ font-size: 18px !important; }
 .discordHeroCopy span{ font-size: 12px !important; }
 
-/* cover color choices and status choices: less giant glowing outline */
 .settingsChoice.active,
 .coverSyncChoice.active,
 .customThemePresetButtonV027.active{
@@ -6416,7 +6305,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 .coverSyncHeader strong{ font-size: 14px !important; }
 .coverSyncHeader small{ font-size: 11px !important; }
 
-/* advanced / reset page cleanup: too much hover + too much outline */
 .settingsResetGrid{
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 10px !important;
@@ -6453,7 +6341,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   box-shadow: none !important;
 }
 
-/* remove settings-only decorative orbs / particles */
 .settingsPage [data-orb],
 .kopuzSettingsPage [data-orb],
 .settingsPage .floatingNote,
@@ -6469,7 +6356,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   display: none !important;
 }
 
-/* smaller empty-space feeling on narrower windows */
 @media (max-width: 1320px){
   .settingsPage,
   .kopuzSettingsPage{
@@ -6519,13 +6405,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
     grid-template-columns: 1fr !important;
   }
 }
-
-
-/* ==========================================================================
-   localtify v0.3.6 V217 — settings stability polish
-   Owner: settings.css only.
-   Goal: smaller, calmer, consistent settings. No giant boxes inside boxes.
-========================================================================== */
 
 .settingsPage,
 .kopuzSettingsPage{
@@ -6635,7 +6514,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   line-height: 1.34 !important;
 }
 
-/* Category rail: equal spacing and less outline noise. */
 .settingsCategoryRail,
 .settingsCategoryRailV027{
   padding: 12px !important;
@@ -6686,7 +6564,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   color: rgba(255,255,255,0.50) !important;
 }
 
-/* Toggles and options: smaller, consistent, not glowing cards. */
 .settingSwitchCard,
 .toggleRow,
 .rangeRow,
@@ -6753,7 +6630,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   line-height: 1.26 !important;
 }
 
-/* Smaller switches. */
 .settingSwitchCard i,
 .toggleRow input[type="checkbox"]{
   width: 44px !important;
@@ -6773,7 +6649,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   transform: translateX(18px) !important;
 }
 
-/* Visuals section: compact segmented controls, no nested card spam. */
 .visualCustomizationCardV205{
   padding: 18px 20px !important;
 }
@@ -6851,7 +6726,84 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.045) !important;
 }
 
-/* Update page: match the rest of settings. */
+.visualTranslucentToggleV268{
+  min-height: 42px !important;
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 9px 11px !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: 16px !important;
+  color: rgba(255,255,255,0.78) !important;
+  background: rgba(255,255,255,0.030) !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+
+.visualTranslucentToggleV268 input{
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.visualTranslucentSwitchV268{
+  position: relative !important;
+  width: 40px !important;
+  height: 24px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.12) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.075) !important;
+  transition: background-color 180ms ease, box-shadow 180ms ease !important;
+}
+
+.visualTranslucentSwitchV268::after{
+  content: "" !important;
+  position: absolute !important;
+  left: 3px !important;
+  top: 3px !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.82) !important;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), background-color 180ms ease !important;
+}
+
+.visualTranslucentToggleV268.active{
+  color: #fff !important;
+  border-color: rgba(var(--accent-rgb),0.32) !important;
+  background: rgba(var(--accent-rgb),0.075) !important;
+}
+
+.visualTranslucentToggleV268.active .visualTranslucentSwitchV268{
+  background: rgba(var(--accent-rgb),0.72) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.16) !important;
+}
+
+.visualTranslucentToggleV268.active .visualTranslucentSwitchV268::after{
+  transform: translateX(16px) !important;
+  background: #fff !important;
+}
+
+.visualTranslucentCopyV268{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 2px !important;
+}
+
+.visualTranslucentCopyV268 strong{
+  color: inherit !important;
+  font-size: 11.5px !important;
+  line-height: 1.15 !important;
+}
+
+.visualTranslucentCopyV268 small{
+  color: rgba(255,255,255,0.48) !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+}
+
 .settingsCategoryPage.settingsUpdatesPage,
 .settingsUpdatesPage{
   gap: 16px !important;
@@ -6912,4 +6864,3 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
     max-width: none !important;
   }
 }
-

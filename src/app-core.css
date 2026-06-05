@@ -1,8 +1,4 @@
-/* localtify 0.2.9 cleanup: app-core.css no longer owns bottom-player internals. */
-/* localtify priority ownership cleanup: player/progress rules now live in player.css. */
-/* localtify App.css — main layout/components/motion.
-   Theme variables, theme gallery, and theme-only overrides now live in themes.css.
-   Settings modal styles live in settings.css. */
+/* localtify 0.3.7 V268 — shell owner with optional transparent Electron window support. */
 
 :root{
   --panel: rgba(255, 255, 255, 0.035);
@@ -11,7 +7,7 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   color: #f5f5f0;
-  background: #000;
+  background: transparent;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -22,7 +18,7 @@ html{
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: #000;
+  background: transparent;
 }
 
 *{
@@ -78,10 +74,36 @@ button:disabled{
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: radial-gradient(circle at 52% 95%, rgba(var(--player-ambient-rgb, var(--accent-rgb)), 0.075), transparent 42%),
-    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.11), transparent 30%),
-    var(--bg);
-  background-size: auto, auto, auto;
+  background: var(--bg);
+  transition: background-color 320ms cubic-bezier(0.16, 1, 0.3, 1), background 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.localtifyTranslucentWindow,
+body.localtifyTranslucentWindow,
+body.localtifyTranslucentWindow #root{
+  background: transparent !important;
+}
+
+body.localtifyTranslucentWindow .app{
+  background: rgba(3, 3, 7, 0.58) !important;
+}
+
+body.localtifyTranslucentWindow .titleBar{
+  background: rgba(8, 8, 12, 0.42) !important;
+  border-bottom-color: rgba(255,255,255,0.075) !important;
+  backdrop-filter: blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+}
+
+body.localtifyTranslucentWindow .sidebar{
+  background: rgba(7, 6, 13, 0.52) !important;
+  border-right-color: rgba(255,255,255,0.075) !important;
+  backdrop-filter: blur(24px) saturate(155%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(155%) !important;
+}
+
+body.localtifyTranslucentWindow .content{
+  background: transparent !important;
 }
 
 .titleBar{
@@ -632,8 +654,6 @@ button:disabled{
   color: var(--muted);
 }
 
-
-
 .circleButton:not(.playerBar *){
   width: 36px;
   height: 36px;
@@ -1145,8 +1165,6 @@ input[type="range"]{
   display: none;
 }
 
-
-
 }
 
 .coverAura{
@@ -1213,8 +1231,6 @@ input[type="range"]{
   display: grid;
   place-items: center;
 }
-
-
 
 .songRow{
   will-change: transform, background-color, border-color;
@@ -1838,7 +1854,6 @@ button:active{
   animation-delay: 340ms;
 }
 
-
 .app[data-secret-mode="lofi"] .secretLayer span::before{
   content: "☁";
   color: #9db7ff;
@@ -2126,7 +2141,6 @@ button:active,
   animation: localitfyVinylSpin 4s linear infinite;
 }
 
-
 .secretToast{
   position: fixed !important;
   left: 50% !important;
@@ -2306,12 +2320,6 @@ button:active{
   to { opacity: 1; transform: translateY(0); }
 }
 
-
-
-
-
-
-
 body.isResizingPlayer{
   cursor: ns-resize !important;
   user-select: none !important;
@@ -2377,10 +2385,6 @@ body.isResizingPlayer{
 [data-ambient="off"] .ambientSurface::after{
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.58)) !important;
 }
-
-
-
-
 
 .tinyMuted{
   margin: 0 !important;
@@ -2529,10 +2533,6 @@ body.isResizingPlayer{
     transform: scale(1.19) translate3d(1.5%, -1%, 0);
   }
 }
-
-
-
-
 
 @media (max-width: 980px){
 .appShell{
@@ -3234,8 +3234,6 @@ button:focus-visible{
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.22) !important;
 }
 
-
-
 @keyframes nowPlayingFadeSlide {
   0% {
     opacity: 0;
@@ -3399,8 +3397,6 @@ button:active{
   padding-bottom: calc(var(--player-size, 108px) + 48px) !important;
 }
 
-
-
 .circleButton:not(.playerBar *){
   width: 40px !important;
   height: 40px !important;
@@ -3437,16 +3433,7 @@ button:active{
   background: var(--accent) !important;
 }
 
-
-
-
-
-
-
 @media (max-width: 1060px){
-
-
-
 
 }
 
@@ -3458,8 +3445,6 @@ button:active{
 .sidebar{
   display: none !important;
 }
-
-
 
 }
 
@@ -3474,9 +3459,6 @@ button:active{
   font-size: 17px !important;
 }
 
-/* ========================================================================
-   localtify 0.2.9 — core grid background removal safety
-======================================================================== */
 .app,
 .appShell,
 .content,
@@ -3506,7 +3488,6 @@ button:active{
   background-size: auto !important;
 }
 
-/* v0.2.8 hard stop: app-core must not reintroduce grid backgrounds. */
 .app,
 .content,
 .loadingScreen,
@@ -3525,12 +3506,6 @@ button:active{
     radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.10), transparent 31%),
     var(--bg) !important;
 }
-
-/* =======================================================================
-   localtify 0.2.9 — app-core sidebar + no-grid + smoothness repair
-   Keep this at the bottom of app-core.css.
-   It intentionally uses higher specificity because App.css is imported later.
-   ======================================================================= */
 
 .app,
 .app .content,
@@ -3724,7 +3699,6 @@ button:active{
   will-change: auto !important;
 }
 
-/* v0.2.9 global polish: remove visual grid textures and any tilt leftovers */
 .app,
 .appShell,
 .mainView,
@@ -3788,17 +3762,6 @@ button:active{
   perspective: none !important;
 }
 
-
-/* ========================================================================
-   localtify v0.2.9 — app-shell right-edge ownership repair
-
-   Owner: app-core.css
-   Purpose:
-   - stop the fake right-side gutter/strip caused by old scrollbar reservation
-   - keep appShell/content inside the Electron window bounds
-   - hide the page scrollbar without changing the real scroll container
-   - leave bottom-player visuals to player.css
-======================================================================== */
 html,
 body,
 #root,
@@ -3882,15 +3845,6 @@ body,
   }
 }
 
-
-/* ========================================================================
-   localtify v0.2.9 — stable content edge and rounded-window repair
-
-   Owner: app-core.css
-   Keeps the main scroll surface inside the app grid without a fake right
-   gutter. This also prevents home/settings cards from losing their right
-   corners when the window is resized.
-======================================================================== */
 :root{
   --localtify-window-radius: 9px;
   --localtify-content-x: clamp(18px, 2vw, 30px);
@@ -3941,10 +3895,6 @@ body,
   background: transparent !important;
 }
 
-/* ========================================================================
-   localtify v0.2.9 — polished update popup
-   Ownership: app shell/update modal only.
-======================================================================== */
 .updateToastLayer{
   align-items: end !important;
   justify-content: end !important;
@@ -4158,11 +4108,6 @@ body,
   }
 }
 
-
-/* ========================================================================
-   localtify v0.2.9 — update + changelog popup polish final override
-   Ownership: app shell / update popup / what's new popup only.
-======================================================================== */
 .updateToastCard{
   width: min(500px, calc(100vw - 28px)) !important;
   border-radius: 26px !important;
@@ -4256,11 +4201,6 @@ body,
   box-shadow: 0 14px 32px rgba(var(--accent-rgb), 0.18) !important;
 }
 
-
-/* ========================================================================
-   localtify v0.2.9 — safer update popup polish
-   Owner: app-core.css / update dialog shell only.
-======================================================================== */
 .updateToastLayer {
   padding: clamp(18px, 3vw, 34px) !important;
   align-items: flex-end !important;
@@ -4392,12 +4332,6 @@ body,
   border: 1px solid rgba(255,255,255,0.1) !important;
 }
 
-/* ========================================================================
-   localtify v0.3.0 — analytics tab rebuild
-   Owner: app-core.css
-   Purpose: keep analytics readable, local, and stable without touching the
-   home/library/player ownership rules.
-======================================================================== */
 .analyticsV030{
   width: min(100%, 100%);
   display: grid !important;
@@ -4848,7 +4782,6 @@ body,
   text-overflow: ellipsis !important;
 }
 
-/* What’s-new popup readability guard: prevents dot/bullet marks from sitting on text. */
 .whatsNewCard ul{
   list-style: none !important;
   padding: 0 !important;
@@ -4936,10 +4869,6 @@ body,
   }
 }
 
-/* ========================================================================
-   localtify v0.3.0 — centered update reminder popups
-   Owner: app-core.css / update dialog only.
-======================================================================== */
 .updateToastLayer{
   align-items: center !important;
   justify-content: center !important;
@@ -4988,12 +4917,6 @@ body,
   to{ opacity: 1; transform: translateY(0) scale(1); }
 }
 
-
-/* ========================================================================
-   localtify v0.3.0 — exact update reminder flow polish
-   Owner: app-core.css / update popup only.
-   Keeps the popup centered and makes final-stage actions fit cleanly.
-======================================================================== */
 .updateToastLayer{
   align-items: center !important;
   justify-content: center !important;
@@ -5026,13 +4949,6 @@ body,
   min-width: 116px !important;
 }
 
-/* ========================================================================
-   localtify v0.3.0 — clean local analytics tab
-   Owner: app-core.css
-   Purpose:
-   - analytics is now local music stats only
-   - stable cards, no cover-square visual, no overlap, clean responsive layout
-======================================================================== */
 .analyticsLocalV030{
   width: 100% !important;
   min-width: 0 !important;
@@ -5430,10 +5346,6 @@ body,
   }
 }
 
-/* ======================================================================
-   localtify 0.3.1 — shared button consistency
-   Owner: app-core.css. Maps existing button class names into one visual system.
-====================================================================== */
 .app{
   --button-radius: 15px;
   --button-radius-sm: 999px;

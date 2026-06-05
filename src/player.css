@@ -2656,48 +2656,61 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 }
 
 
-/* ==========================================================================
-   localtify v0.3.6 V211 — theme-tinted frosted player
-   Owner: player.css
 
-   Fix:
-   - no white player wash
-   - theme/accent tint instead
-   - visibly blurred/frosted
-   - still transparent enough to feel acrylic
+/* ========================================================================== 
+   localtify v0.3.7 V268 — final player background modes
+   Owner: player.css only.
+   Keeps the original player grid/position intact; only changes surfaces.
 ========================================================================== */
 
 .app[data-player-background="acrylic"] .playerBar{
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.105), rgba(var(--accent-rgb),0.030)),
-    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.006)),
-    rgba(5, 4, 10, 0.42) !important;
-  border-top-color: rgba(var(--accent-rgb),0.18) !important;
+    linear-gradient(180deg, rgba(255,255,255,0.090), rgba(255,255,255,0.020)),
+    linear-gradient(90deg, rgba(var(--accent-rgb),0.055), rgba(255,255,255,0.018) 48%, rgba(var(--accent-rgb),0.038)),
+    rgba(9, 8, 15, 0.46) !important;
+  border-top-color: rgba(255,255,255,0.16) !important;
   box-shadow:
-    0 -16px 38px rgba(0,0,0,0.26),
-    inset 0 1px 0 rgba(255,255,255,0.070) !important;
-  backdrop-filter: blur(28px) saturate(175%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(175%) !important;
+    0 -14px 42px rgba(0,0,0,0.24),
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -1px 0 rgba(255,255,255,0.035) !important;
+  backdrop-filter: blur(34px) saturate(178%) contrast(1.05) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(178%) contrast(1.05) !important;
 }
 
-/* Keep cover ambience almost off in acrylic so it does not become normal cover blur. */
+body.localtifyTranslucentWindow .app[data-player-background="acrylic"] .playerBar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.115), rgba(255,255,255,0.026)),
+    linear-gradient(90deg, rgba(var(--accent-rgb),0.050), rgba(255,255,255,0.024) 52%, rgba(var(--accent-rgb),0.040)),
+    rgba(10, 9, 16, 0.34) !important;
+  border-top-color: rgba(255,255,255,0.18) !important;
+  box-shadow:
+    0 -12px 36px rgba(0,0,0,0.20),
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    inset 0 -1px 0 rgba(255,255,255,0.045) !important;
+}
+
 .app[data-player-background="acrylic"] .playerBar::before{
-  opacity: 0.018 !important;
-  inset: -12px -12px -8px !important;
-  filter: blur(14px) saturate(1.06) brightness(0.88) !important;
-  transform: translateZ(0) scale(1.006) !important;
+  opacity: 0 !important;
+  background: transparent !important;
+  filter: none !important;
+  transform: none !important;
 }
 
 .app[data-player-background="acrylic"] .playerBar:hover::before{
-  opacity: 0.030 !important;
-  transform: translateZ(0) scale(1.01) !important;
+  opacity: 0 !important;
+  transform: none !important;
 }
 
-/* This dark overlay was killing the frosted effect. Keep it very light. */
 .app[data-player-background="acrylic"] .playerBar::after{
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.16), rgba(0,0,0,0.045) 52%, rgba(0,0,0,0.11)),
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.026), rgba(255,255,255,0.004)) !important;
+    linear-gradient(90deg, rgba(0,0,0,0.22), rgba(0,0,0,0.055) 50%, rgba(0,0,0,0.20)),
+    linear-gradient(180deg, rgba(255,255,255,0.050), rgba(255,255,255,0.006)) !important;
+}
+
+body.localtifyTranslucentWindow .app[data-player-background="acrylic"] .playerBar::after{
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.16), rgba(0,0,0,0.030) 50%, rgba(0,0,0,0.14)),
+    linear-gradient(180deg, rgba(255,255,255,0.060), rgba(255,255,255,0.006)) !important;
 }
 
 .app[data-player-background="acrylic"] .playerLeft,
@@ -2712,14 +2725,13 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
 
 .app[data-player-background="acrylic"] .progressRow input[type="range"],
 .app[data-player-background="acrylic"] .volumeWrap input[type="range"]{
-  background-color: rgba(255,255,255,0.13) !important;
+  background-color: rgba(255,255,255,0.16) !important;
 }
 
 .app[data-player-background="acrylic"] .playerTime{
-  color: rgba(255,255,255,0.76) !important;
+  color: rgba(255,255,255,0.78) !important;
 }
 
-/* Non-acrylic modes stay distinct. */
 .app[data-player-background="coverBlur"] .playerBar{
   background:
     linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.010)),
@@ -2739,7 +2751,6 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
   -webkit-backdrop-filter: none !important;
 }
 
-/* Final player control repair: only the main play button has a filled circle. */
 .playerBar .controlRow > .circleButton:not(.main),
 .playerBar .controlRow > .repeatButton,
 .playerBar .controlRow > .playerButton:not(.main),
@@ -2778,72 +2789,10 @@ body.localtifyIdle .playerBar :where(.playerLeft,.smallArt,.playerCenter,.progre
   background-color: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
-  filter: brightness(1.20) !important;
+  filter: brightness(1.18) !important;
 }
 
 .playerBar .controlRow > .circleButton.main{
   background: rgb(var(--accent-rgb)) !important;
   box-shadow: 0 10px 24px rgba(var(--accent-rgb),0.22) !important;
 }
-
-
-/* ==========================================================================
-   localtify v0.3.6 V216 — player.css owner cleanup final guard
-   Owner: bottom player only.
-========================================================================== */
-
-/* Secondary controls stay icon-only; main play button stays filled. */
-.playerBar .controlRow > .circleButton:not(.main),
-.playerBar .controlRow > .repeatButton,
-.playerBar .controlRow > .playerButton:not(.main),
-.playerBar .controlRow > .playerControlButton:not(.main),
-.playerBar .controlRow > .volumeIconButton{
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  border: 0 !important;
-  outline: 0 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.playerBar .controlRow > .circleButton:not(.main)::before,
-.playerBar .controlRow > .circleButton:not(.main)::after,
-.playerBar .controlRow > .repeatButton::before,
-.playerBar .controlRow > .repeatButton::after,
-.playerBar .controlRow > .playerButton:not(.main)::before,
-.playerBar .controlRow > .playerButton:not(.main)::after,
-.playerBar .controlRow > .playerControlButton:not(.main)::before,
-.playerBar .controlRow > .playerControlButton:not(.main)::after,
-.playerBar .controlRow > .volumeIconButton::before,
-.playerBar .controlRow > .volumeIconButton::after{
-  content: none !important;
-  display: none !important;
-}
-
-.playerBar .controlRow > .circleButton.main{
-  background: rgb(var(--accent-rgb)) !important;
-}
-
-/* Acrylic stays theme-tinted, not white. */
-.app[data-player-background="acrylic"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.105), rgba(var(--accent-rgb),0.030)),
-    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.006)),
-    rgba(5, 4, 10, 0.42) !important;
-  border-top-color: rgba(var(--accent-rgb),0.18) !important;
-  backdrop-filter: blur(28px) saturate(175%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(175%) !important;
-}
-
-.app[data-player-background="acrylic"] .playerBar::before{
-  opacity: 0.018 !important;
-}
-
-.app[data-player-background="acrylic"] .playerBar::after{
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.16), rgba(0,0,0,0.045) 52%, rgba(0,0,0,0.11)),
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.026), rgba(255,255,255,0.004)) !important;
-}
-

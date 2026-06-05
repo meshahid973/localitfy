@@ -1,4 +1,4 @@
-/* localtify 0.3.7 V262 — cleaner settings, Linux release notes, and hidden platform-only controls. */
+/* localtify 0.3.7 V268 — window glass setting replaces stars, with cleaner acrylic controls. */
 import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
@@ -355,7 +355,7 @@ const BLUR_EFFECT_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
 const MEDIA_CARD_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "solid", label: "Solid", note: "flat cards" },
   { id: "glassy", label: "Glassy", note: "transparent" },
-  { id: "acrylic", label: "Acrylic", note: "acrylic" },
+  { id: "acrylic", label: "Acrylic", note: "glass" },
   { id: "oledFlat", label: "OLED flat", note: "black" }
 ];
 
@@ -389,7 +389,7 @@ const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
 const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "flat", label: "Flat", note: "flat" },
   { id: "coverBlur", label: "Cover blur", note: "cover glow" },
-  { id: "acrylic", label: "Acrylic", note: "acrylic" },
+  { id: "acrylic", label: "Acrylic", note: "glass" },
   { id: "oledBlack", label: "OLED black", note: "black" }
 ];
 
@@ -592,7 +592,7 @@ return (
           <div className="settingsPanelHeader visualCustomizationHeaderV205">
             <div>
               <strong>Visuals</strong>
-              <span>Quick controls for the home screen, cards, stars, sidebar, and player.</span>
+              <span>Quick controls for the home screen, cards, sidebar, player, and window glass.</span>
             </div>
           </div>
 
@@ -637,13 +637,24 @@ return (
               onChange={(value) => updateSetting("libraryRowStyle", value)}
             />
 
-            <VisualOptionGroup
-              title="Stars"
-              note="Star field strength."
-              options={STAR_INTENSITY_OPTIONS}
-              value={readSettingChoice(settings, "starsIntensity", "subtle")}
-              onChange={(value) => updateSetting("starsIntensity", value)}
-            />
+            <div className="visualOptionGroupV205 visualTranslucentGroupV268">
+              <div className="visualOptionGroupHeadV205">
+                <strong>Window glass</strong>
+                <span>requires restart</span>
+              </div>
+              <label className={`visualTranslucentToggleV268 ${settings.supportTranslucentWindow ? "active" : ""}`}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(settings.supportTranslucentWindow)}
+                  onChange={(event) => updateSetting("supportTranslucentWindow", event.currentTarget.checked)}
+                />
+                <span className="visualTranslucentSwitchV268" aria-hidden="true" />
+                <span className="visualTranslucentCopyV268">
+                  <strong>Support translucent window</strong>
+                  <small>{settings.supportTranslucentWindow ? "on — localtify restarts when changed" : "off — safer normal window"}</small>
+                </span>
+              </label>
+            </div>
 
             <VisualOptionGroup
               title="Sidebar"
