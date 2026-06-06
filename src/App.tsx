@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 /* localtify 0.3.7 V325 release onboarding showcase. Existing users see onboarding once. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
@@ -563,7 +563,7 @@ function MainModeApp() {
   const [convertProgress, setConvertProgress] = useState(0);
   const [convertMessage, setConvertMessage] = useState("");
 
-  // ── Spotify import ──────────────────────────────────────────
+  // -- Spotify import ------------------------------------------
   const [downloadsTab, setDownloadsTab] = useState<"youtube" | "spotify">("youtube");
   const [spotifyUrl, setSpotifyUrl] = useState("");
   const [spotifyTracks, setSpotifyTracks] = useState<SpotifyTrack[]>([]);
@@ -581,7 +581,7 @@ function MainModeApp() {
   const [spotifyLoginBusy, setSpotifyLoginBusy] = useState(false);
   const [spotifyShowCookieInput, setSpotifyShowCookieInput] = useState(false);
   const [spotifyCookieDraft, setSpotifyCookieDraft] = useState("");
-  // ────────────────────────────────────────────────────────────
+  // ------------------------------------------------------------
 
   const [secretMode, setSecretMode] = useState<SecretMode>("none");
   const [secretToast, setSecretToast] = useState("");
@@ -710,7 +710,7 @@ function MainModeApp() {
   const settingsSearchResultLabel = settingsSearchQuery
     ? visibleSettingsTabs.length
       ? `showing ${visibleSettingsTabs.length} matching section${visibleSettingsTabs.length === 1 ? "" : "s"}`
-      : "no exact section found — Search for settings such as Discord, theme, cover, update, volume."
+      : "no exact section found � Search for settings such as Discord, theme, cover, update, volume."
     : "Search for settings such as Discord, theme, cover, update, volume.";
 
   function handleSettingsSearchInput(value: string) {
@@ -1753,7 +1753,7 @@ function MainModeApp() {
 
     const orb = document.createElement("span");
     orb.className = "localitfyDragPreviewOrb";
-    orb.textContent = song.liked ? "♥" : "♫";
+    orb.textContent = song.liked ? "?" : "?";
 
     const text = document.createElement("span");
     text.className = "localitfyDragPreviewText";
@@ -1762,7 +1762,7 @@ function MainModeApp() {
     title.textContent = prettyTitle(song.title, 7);
 
     const note = document.createElement("small");
-    note.textContent = "drop to reorder · player = queue next";
+    note.textContent = "drop to reorder � player = queue next";
 
     text.append(title, note);
     preview.append(orb, text);
@@ -1797,11 +1797,11 @@ function MainModeApp() {
 
     if (popup) {
       popup.focus();
-      showAppToast("snake game opened 🐍", "success");
+      showAppToast("snake game opened ??", "success");
       return;
     }
 
-    showAppToast("popup blocked — opening snake game here", "info");
+    showAppToast("popup blocked � opening snake game here", "info");
     window.location.href = gameUrl;
   }
 
@@ -2488,7 +2488,7 @@ function MainModeApp() {
     if (view === "albums") return "local albums from metadata and your custom collections";
     if (view === "playlists") return `${playlists.length} playlist${playlists.length === 1 ? "" : "s"}`;
     if (view === "liked") return `${likedSongs.length} liked track${likedSongs.length === 1 ? "" : "s"}`;
-    if (view === "covers") return `${coverStats.usable} usable cover${coverStats.usable === 1 ? "" : "s"} • ${coverStats.favorites} favorite${coverStats.favorites === 1 ? "" : "s"}`;
+    if (view === "covers") return `${coverStats.usable} usable cover${coverStats.usable === 1 ? "" : "s"} � ${coverStats.favorites} favorite${coverStats.favorites === 1 ? "" : "s"}`;
     if (view === "downloads") return "download direct audio links and import them automatically";
     if (view === "settings") return "theme, playback, discord, library, and advanced controls";
     return "your listening numbers and favorite tracks";
@@ -5462,7 +5462,7 @@ function MainModeApp() {
         .filter((item) => Object.keys(item.patch).length > 0);
 
       if (!repairs.length) {
-        setLibraryScanMessage(`library clean • ${songs.length} indexed`);
+        setLibraryScanMessage(`library clean � ${songs.length} indexed`);
         setStatusText("metadata already looks clean");
         showAppToast("metadata already looks clean", "success");
         return;
@@ -5478,7 +5478,7 @@ function MainModeApp() {
         }
       }
 
-      setLibraryScanMessage(`cleaned ${repairs.length} tracks • search rebuilt`);
+      setLibraryScanMessage(`cleaned ${repairs.length} tracks � search rebuilt`);
       setStatusText(`cleaned ${repairs.length} metadata fix${repairs.length === 1 ? "" : "es"}`);
       showAppToast(`cleaned ${repairs.length} metadata fix${repairs.length === 1 ? "" : "es"}`, "success");
     } catch (error) {
@@ -5495,9 +5495,9 @@ function MainModeApp() {
   function rebuildSearchIndexAction() {
     const repairedSongs = applyLibraryOrder(sanitizeSongList(songs));
     setSongs(repairedSongs);
-    setLibraryScanMessage(`search rebuilt • ${repairedSongs.length} tracks indexed`);
+    setLibraryScanMessage(`search rebuilt � ${repairedSongs.length} tracks indexed`);
     setStatusText("fast search index rebuilt");
-    showAppToast(`search rebuilt • ${repairedSongs.length} tracks`, "success");
+    showAppToast(`search rebuilt � ${repairedSongs.length} tracks`, "success");
   }
 
   function shuffleLibrarySongsAction() {
@@ -5572,7 +5572,7 @@ function MainModeApp() {
       playbackUrlCacheRef.current.clear();
       playbackUrlPendingRef.current.clear();
       setSongs(imported);
-      setLibraryScanMessage(`indexed ${imported.length} tracks • search, folders, and metadata ready`);
+      setLibraryScanMessage(`indexed ${imported.length} tracks � search, folders, and metadata ready`);
 
       if (changedSongs.length > 0) {
         void Promise.allSettled(
@@ -5621,7 +5621,7 @@ function MainModeApp() {
           createImportAnimationState({
             active: true,
             phase: "success",
-            message: "library checked — no duplicates added",
+            message: "library checked � no duplicates added",
             count: 0,
             total: imported.length,
             preview: previewSongs
@@ -5652,7 +5652,7 @@ function MainModeApp() {
         createImportAnimationState({
           active: true,
           phase: "error",
-          message: "import failed safely — your library was not deleted",
+          message: "import failed safely � your library was not deleted",
           count: 0,
           total: songs.length,
           preview: songs.slice(0, 8)
@@ -5696,7 +5696,7 @@ function MainModeApp() {
           ...next[index],
           status: result.ok ? "done" : "failed",
           progress: 100,
-          message: result.ok ? "Added to library" : "Download failed — retry?",
+          message: result.ok ? "Added to library" : "Download failed � retry?",
           filePath: result.filePath,
           filename: result.filename,
           error: result.error,
@@ -5839,7 +5839,7 @@ function MainModeApp() {
     }
   }
 
-  // ── Spotify auth + import functions ──────────────────────────────────────
+  // -- Spotify auth + import functions --------------------------------------
   function updateSpotifyConnectionState(res: any = {}) {
     const hasReadyValue = Object.prototype.hasOwnProperty.call(res || {}, "ready") || Object.prototype.hasOwnProperty.call(res || {}, "ok");
     const fallbackAvailable = Boolean(res?.fallbackAvailable || res?.publicOnly || res?.mode === "public-fallback");
@@ -5866,7 +5866,7 @@ function MainModeApp() {
     return [
       "Spotify could not read this playlist.",
       "Make sure it is public on your Spotify profile, not only shareable by link.",
-      "Open Spotify → playlist menu → add to profile / make public, then paste the link again."
+      "Open Spotify ? playlist menu ? add to profile / make public, then paste the link again."
     ].join("\n");
   }
 
@@ -5919,7 +5919,7 @@ function MainModeApp() {
         setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
       } else {
         setSpotifyFetchError("");
-        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready — paste a link" : "spotify connected — paste a link to fetch tracks");
+        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready � paste a link" : "spotify connected � paste a link to fetch tracks");
       }
     } catch (error) {
       const message = String((error as Error)?.message || "Spotify login failed.");
@@ -6123,7 +6123,7 @@ function MainModeApp() {
       selected.map((t, i) => ({
         id: `spt_${t.id}_${i}`,
         url: `spotify:search:${t.title}`,
-        title: t.artist ? `${t.artist} — ${t.title}` : t.title,
+        title: t.artist ? `${t.artist} � ${t.title}` : t.title,
         status: "queued" as const,
         progress: 0,
         message: "Waiting..."
@@ -6251,7 +6251,7 @@ function MainModeApp() {
           setStatusText(`downloaded ${successCount} track${successCount !== 1 ? "s" : ""} from spotify`);
           if (settings.downloadAutoAdd && nextSongs.length) changeView("library", "unknown");
         } else {
-          setStatusText("spotify download finished — no tracks added");
+          setStatusText("spotify download finished � no tracks added");
           setPlayerError("no tracks downloaded. check the queue for errors.");
         }
 
@@ -6268,7 +6268,7 @@ function MainModeApp() {
       setDownloadBusy(false);
     }
   }
-  // ────────────────────────────────────────────────────────────────────────
+  // ------------------------------------------------------------------------
 
   async function convertLocalMedia() {
     setConvertBusy(true);
@@ -7842,7 +7842,7 @@ function MainModeApp() {
       <div className={className} aria-hidden="true">
         {tiles.map((song, index) => (
           <div className={song ? "playlistCoverTile" : "playlistCoverTile empty"} key={song ? `${song.id}-${index}` : `empty-${index}`}>
-            {song ? <Cover song={song} className="playlistCoverImage" /> : <span>♪</span>}
+            {song ? <Cover song={song} className="playlistCoverImage" /> : <span>?</span>}
           </div>
         ))}
       </div>
