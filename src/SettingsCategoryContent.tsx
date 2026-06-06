@@ -1,4 +1,4 @@
-/* localtify 0.3.7 V293 — settings cleanup with window transparency controls removed. */
+/* localtify 0.3.7 V324 release prep. Visual controls stay clean and wired. */
 import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
@@ -577,7 +577,7 @@ return (
           <div className="settingsPanelHeader visualCustomizationHeaderV205">
             <div>
               <strong>Visuals</strong>
-              <span>Quick controls for the home screen, cards, sidebar, and player.</span>
+              <span>Quick controls for home cards sidebar and player.</span>
             </div>
           </div>
 

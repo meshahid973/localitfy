@@ -4489,14 +4489,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background: rgba(120,18,45,0.66) !important;
 }
 
-.app[data-card-background="acrylic"] :is(.panel, .settingsPageCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .downloadCard, .playlistHero, .homeShelfPanel){
-  background: rgba(12, 10, 18, 0.48) !important;
-  border-color: rgba(255,255,255,0.105) !important;
-  box-shadow: 0 18px 44px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.045) !important;
-  backdrop-filter: blur(18px) saturate(128%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(128%) !important;
-}
-
 .app[data-card-background="solid"] :is(.panel, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .downloadCard){
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -13504,12 +13496,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   background:
     linear-gradient(90deg, rgba(var(--accent-rgb), .15), rgba(255,255,255,.026)),
     rgba(28, 20, 39, .70) !important;
-} .app[data-card-background="acrylic"] :where(.panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025){
-  background: rgba(12, 10, 18, 0.48) !important;
-  border-color: rgba(255,255,255,0.105) !important;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.045) !important;
-  backdrop-filter: blur(16px) saturate(126%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(126%) !important;
 }
 
 .app[data-card-background="glassy"] :where(.panel, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025){
@@ -15419,7 +15405,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     width: 100% !important;
   }
 }
-
 
 
 /* localtify v0.3.7 V318 — polished local albums page + album builder */

@@ -1,4 +1,4 @@
-/* localtify 0.3.7 V258 — strict buttons-only proximity motion; download panels and virtual rows skipped.
+/* localtify 0.3.7 V324 — strict buttons-only proximity motion. Heavy panels and album rows skipped.
    Kept:
    - sidebar/nav buttons
    - main action buttons
@@ -64,6 +64,12 @@ const SKIP_SELECTOR = [
   ".libraryCard",
   ".libraryCardV025",
   ".playlistShelfCard",
+  ".albumCardV318",
+  ".albumDetailPanelV318",
+  ".albumTrackRowV318",
+  ".albumBuilderPanelV318",
+  ".albumSongPickerRowV318",
+  ".albumsShelfGridV318",
   ".coverTile",
   ".coverGalleryCard",
   ".coverSongPick",

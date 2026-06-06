@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.6 V184 — shared domain/view types.
+/* localtify 0.3.7 V324 — shared domain/view types.
    These are currently re-exported from LocaltifyAppView so the split is safe.
    After this builds cleanly, the actual type declarations can be moved here without touching App.tsx again. */
 export type {

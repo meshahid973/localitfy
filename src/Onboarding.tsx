@@ -328,7 +328,7 @@ export default function Onboarding({
 
   return (
     <main
-      className={`onboardingLayer onboardingV314 ${stageClass}`}
+      className={`onboardingLayer onboardingV315 ${stageClass}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboardingTitle"

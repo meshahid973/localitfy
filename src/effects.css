@@ -1,4 +1,4 @@
-/* localtify V309 — effects-only owner. No window transparency, no standalone ambience orbs. */
+/* localtify V324 — effects owner. No window transparency. No standalone ambience orbs. Smooth visual settings. */
 
 .app[data-playing="on"] :is(
   .songRow.playing .songArt.coverAura,
@@ -406,121 +406,113 @@
   gap: 16px !important;
 }
 
-/* V322 sidebar behavior fix. The grid column and sidebar now move together. */
-.app[data-sidebar-behavior="fixed"]{
-  --sidebar-width-used: var(--sidebar-width-live, var(--shell-sidebar-width, var(--sidebar-width, 236px))) !important;
+/* V324 sidebar behavior. Hover mode animates the sidebar itself so the page does not jump. */
+.app{
+  --sidebar-fixed-width: var(--sidebar-width-live, var(--shell-sidebar-width, var(--sidebar-width, 249px)));
+  --sidebar-collapsed-width: 88px;
+  --sidebar-expanded-width: clamp(210px, var(--sidebar-fixed-width), 312px);
 }
 
-.app[data-sidebar-behavior="slim"],
-.app[data-sidebar-behavior="hover"]{
-  --sidebar-width: 74px !important;
-  --sidebar-width-live: 74px !important;
-  --shell-sidebar-width: 74px !important;
-  --sidebar-width-used: 74px !important;
+.app[data-sidebar-behavior="fixed"] .appShell{
+  grid-template-columns: var(--sidebar-fixed-width) minmax(0, 1fr) !important;
 }
 
-.app[data-sidebar-behavior="hover"]:has(.sidebar:hover),
-.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within){
-  --sidebar-width: 236px !important;
-  --sidebar-width-live: 236px !important;
-  --shell-sidebar-width: 236px !important;
-  --sidebar-width-used: 236px !important;
+.app[data-sidebar-behavior="fixed"] .sidebar{
+  width: 100% !important;
 }
 
 .app[data-sidebar-behavior="slim"] .appShell,
 .app[data-sidebar-behavior="hover"] .appShell{
-  transition: grid-template-columns 260ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr) !important;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebar,
 .app[data-sidebar-behavior="hover"] .sidebar{
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: none !important;
+  width: var(--sidebar-collapsed-width) !important;
+  min-width: var(--sidebar-collapsed-width) !important;
+  max-width: var(--sidebar-expanded-width) !important;
   overflow: hidden !important;
+  z-index: 48 !important;
+  contain: layout style paint !important;
   will-change: width !important;
   transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 220ms ease !important;
+    width 285ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 190ms ease,
+    border-color 190ms ease,
+    box-shadow 240ms ease !important;
 }
 
 .app[data-sidebar-behavior="hover"] .sidebar:hover,
 .app[data-sidebar-behavior="hover"] .sidebar:focus-within{
-  z-index: 42 !important;
+  width: var(--sidebar-expanded-width) !important;
   box-shadow:
-    inset -1px 0 0 rgba(255, 255, 255, 0.035),
-    18px 0 58px rgba(0, 0, 0, 0.24) !important;
+    18px 0 56px rgba(0, 0, 0, 0.28),
+    inset -1px 0 0 rgba(var(--accent-rgb), 0.16) !important;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebar .nav .navItem,
 .app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .nav .navItem{
-  grid-template-columns: 1fr !important;
-  justify-items: center !important;
+  grid-template-columns: 42px 0 !important;
   justify-content: center !important;
   gap: 0 !important;
   padding-inline: 0 !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  margin-inline: auto !important;
+  transition:
+    width 245ms cubic-bezier(0.16, 1, 0.3, 1),
+    padding 245ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 180ms ease,
+    border-color 180ms ease !important;
 }
 
 .app[data-sidebar-behavior="hover"] .sidebar:hover .nav .navItem,
 .app[data-sidebar-behavior="hover"] .sidebar:focus-within .nav .navItem{
-  grid-template-columns: 34px minmax(0, 1fr) !important;
-  justify-items: stretch !important;
+  width: 100% !important;
+  grid-template-columns: 38px minmax(0, 1fr) !important;
   justify-content: stretch !important;
   gap: 10px !important;
   padding-inline: 10px !important;
+  transition:
+    width 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    padding 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 180ms ease,
+    border-color 180ms ease !important;
 }
 
-.app[data-sidebar-behavior="slim"] .sidebar .nav .navIcon,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .nav .navIcon{
+.app[data-sidebar-behavior="slim"] .sidebar .navIcon,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navIcon{
   margin-inline: auto !important;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebar .navText,
 .app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navText{
-  width: 0 !important;
   max-width: 0 !important;
-  min-width: 0 !important;
   opacity: 0 !important;
-  visibility: hidden !important;
   overflow: hidden !important;
+  visibility: hidden !important;
   transform: translate3d(-8px, 0, 0) !important;
   pointer-events: none !important;
+  white-space: nowrap !important;
   transition:
-    opacity 150ms ease,
-    transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
-    max-width 190ms cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .navText *,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navText *{
-  color: transparent !important;
-  text-shadow: none !important;
+    opacity 145ms ease,
+    transform 210ms cubic-bezier(0.16, 1, 0.3, 1),
+    max-width 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0ms linear 160ms !important;
 }
 
 .app[data-sidebar-behavior="hover"] .sidebar:hover .navText,
 .app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText{
-  width: auto !important;
-  max-width: 168px !important;
-  min-width: 0 !important;
+  max-width: 170px !important;
   opacity: 1 !important;
   visibility: visible !important;
   transform: translate3d(0, 0, 0) !important;
   pointer-events: auto !important;
   transition:
-    opacity 190ms ease 45ms,
-    transform 220ms cubic-bezier(0.16, 1, 0.3, 1) 25ms,
-    max-width 220ms cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:hover .navText strong,
-.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText strong{
-  color: rgba(255, 255, 255, 0.92) !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:hover .navText small,
-.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText small{
-  color: rgba(255, 255, 255, 0.46) !important;
+    opacity 190ms ease 70ms,
+    transform 250ms cubic-bezier(0.16, 1, 0.3, 1) 35ms,
+    max-width 285ms cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0ms linear !important;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebar .sidebarBottom,
@@ -539,12 +531,17 @@
   padding: 0 !important;
   display: inline-grid !important;
   place-items: center !important;
-  justify-content: center !important;
   gap: 0 !important;
   font-size: 0 !important;
   line-height: 0 !important;
   color: transparent !important;
   overflow: hidden !important;
+  transition:
+    width 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    max-width 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    padding 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 180ms ease,
+    box-shadow 180ms ease !important;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebar .importMainAction .buttonInlineIcon,
@@ -555,16 +552,11 @@
   color: #fff !important;
 }
 
-.app[data-sidebar-behavior="hover"] .sidebar:hover .sidebarBottom,
-.app[data-sidebar-behavior="hover"] .sidebar:focus-within .sidebarBottom{
-  display: block !important;
-}
-
 .app[data-sidebar-behavior="hover"] .sidebar:hover .importMainAction,
 .app[data-sidebar-behavior="hover"] .sidebar:focus-within .importMainAction{
   width: 100% !important;
-  max-width: 100% !important;
   min-width: 0 !important;
+  max-width: 100% !important;
   height: 48px !important;
   padding: 0 16px !important;
   display: inline-flex !important;

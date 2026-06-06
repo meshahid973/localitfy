@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.7 V320 album artist and cover fit fix. */
+/* localtify 0.3.7 V324 release prep. Visual settings wired. Sidebar hover smooth. Albums kept stable. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -570,6 +570,15 @@ export type Settings = {
   simpleMode: boolean;
   lastSongId: string;
 
+  homeBannerType: "dynamic" | "albumCover" | "cleanBlack" | "none";
+  mediaCardBackground: "solid" | "glassy" | "oledFlat";
+  homeLayoutMode: "compact" | "balanced" | "bigHero";
+  libraryRowStyle: "compactRows" | "comfyRows" | "coverCards" | "listOnly";
+  sidebarBehavior: "fixed" | "slim" | "hover";
+  playerBackgroundStyle: "flat" | "coverBlur" | "oledBlack";
+  starsIntensity: "off";
+  blurEffects: "normal";
+
   discordEnabled: boolean;
   discordShowPausedIdle: boolean;
   discordPrivacyMode: boolean;
@@ -762,7 +771,7 @@ export const updateRibbonEnterSpring = { type: "spring", stiffness: 500, damping
 export const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, mass: 0.55 } as const;
 
 
-export const APP_VERSION = "0.3.6";
+export const APP_VERSION = "0.3.7";
 export const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 export const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 export const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
@@ -1373,6 +1382,15 @@ export const defaultSettings: Settings = {
   simpleMode: false,
   lastSongId: "",
 
+  homeBannerType: "dynamic",
+  mediaCardBackground: "glassy",
+  homeLayoutMode: "balanced",
+  libraryRowStyle: "comfyRows",
+  sidebarBehavior: "fixed",
+  playerBackgroundStyle: "coverBlur",
+  starsIntensity: "off",
+  blurEffects: "normal",
+
   discordEnabled: true,
   discordShowPausedIdle: true,
   discordPrivacyMode: false,
@@ -1609,7 +1627,7 @@ export const BUILT_IN_CUSTOM_THEME_PRESETS: CustomThemePreset[] = [
     })
   },
   {
-    id: "kopuz-dracula",
+    id: "dracula",
     name: "dracula",
     note: "clean grey violet",
     colors: makeCustomThemeColors({
@@ -4092,7 +4110,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       data-card-background={settings.mediaCardBackground || "glassy"}
       data-home-layout={settings.homeLayoutMode || "balanced"}
       data-library-row-style={settings.libraryRowStyle || "comfyRows"}
-      data-stars-intensity={settings.starsIntensity || "subtle"}
+      data-stars-intensity={settings.starsIntensity || "off"}
       data-sidebar-behavior={settings.sidebarBehavior || "fixed"}
       data-player-background={settings.playerBackgroundStyle || "coverBlur"}
       data-hero-expanded={settings.heroExpanded ? "on" : "off"}
@@ -4760,7 +4778,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     <span>
                       {view === "liked"
                         ? "All your favourites in one place."
-                        : "Browse, queue, and shuffle from one clean list."}
+                        : "Browse queue and shuffle from one clean list."}
                     </span>
                   </div>
                   <div className="libraryHeaderActions libraryPanelActionsV025 libraryActionsCleanV026">
@@ -4798,18 +4816,28 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <span>title</span>
                 </div>
 
-                <div
-                  className="songList fullList libraryFullListV025"
-                  onDragOver={handleLibraryAreaDragOver}
-                  onDragLeave={handleLibraryAreaDragLeave}
-                  onDrop={handleLibraryAreaDrop}
-                >
-                  {visibleSongs.length ? renderSongRows(visibleSongs, "songList fullList libraryFullListV025") : (
+                {visibleSongs.length ? (
+                  settings.libraryRowStyle === "coverCards" ? (
+                    <div className="libraryCoverCardShellV321">
+                      {renderHomeSongCards(visibleSongs, "homeAlbumGrid simpleAlbumGrid libraryCoverCardsGridV321")}
+                    </div>
+                  ) : (
+                    <div
+                      className="songList fullList libraryFullListV025"
+                      onDragOver={handleLibraryAreaDragOver}
+                      onDragLeave={handleLibraryAreaDragLeave}
+                      onDrop={handleLibraryAreaDrop}
+                    >
+                      {renderSongRows(visibleSongs, "songList fullList libraryFullListV025")}
+                    </div>
+                  )
+                ) : (
+                  <div className="songList fullList libraryFullListV025">
                     <div className="emptyState">
                       {view === "liked" ? "Like a song and it will show up here." : "Import songs to fill your library."}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </section>
             )}
 

@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.6 V184 — shared constants, option lists, defaults, assets, and release copy.
+/* localtify 0.3.7 V324 — shared constants, option lists, defaults, assets, and release copy.
    Safe boundary module: values are re-exported from LocaltifyAppView for this pass. */
 export {
   APP_VERSION,
