@@ -625,3 +625,38 @@
 .app[data-player-background="oledBlack"] .playerBar::after{
   display: none !important;
 }
+
+/* localtify 0.3.8 V301 — effects sleep when renderer is busy */
+body.localtifyPerfV301 .app.isScrolling :is(
+  .songRow.playing .songArt.coverAura,
+  .homeAlbumCard.playing .homeAlbumArt.coverAura,
+  .homeListenCard.playing .homeListenCover.coverAura,
+  .homeFreshCard.playing .homeFreshCover.coverAura,
+  .playlistTrackRow.playing .playlistTrackCover,
+  .playlistSongRow.playing .playlistTrackCover,
+  .libraryRow.playing .songArt.coverAura
+)::before{
+  opacity: 0 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+body.localtifyPerfV301 .app.isScrolling :is(
+  .songRow.playing,
+  .playlistTrackRow.playing,
+  .playlistSongRow.playing,
+  .libraryRow.playing
+) :is(.songArt, .smallArt, .coverAura){
+  filter: none !important;
+}
+
+body.localtifyPerfV301.localtifyBackgroundMode .app .heroAmbiencePulse,
+body.localtifyPerfV301.localtifyBackgroundMode .app .coverAura::before,
+body.localtifyPerfV301.localtifyBackgroundMode .app .songArt::before,
+body.localtifyPerfV301.localtifyBackgroundMode .app .homeAlbumArt::before,
+body.localtifyPerfV301.localtifyBackgroundMode .app .homeListenCover::before,
+body.localtifyPerfV301.localtifyBackgroundMode .app .homeFreshCover::before{
+  opacity: 0 !important;
+  animation: none !important;
+  filter: none !important;
+}

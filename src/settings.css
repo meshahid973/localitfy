@@ -6775,3 +6775,208 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 .app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
   transform: translateZ(0);
 }
+
+/* ========================================================================
+   localtify 0.3.8 V300 — settings clarity + alignment triage
+   Goal:
+   - stop blurry settings text caused by transformed/backface-promoted cards
+   - keep the glass look, but reduce text-hosting blur layers
+   - align category buttons, option rows, and setting cards without fake hover lift
+   ======================================================================== */
+
+.settingsPage,
+.settingsShell,
+.settingsLayout,
+.settingsCategoryPage,
+.settingsCategoryContent,
+.settingsCategoryContentV027{
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: geometricPrecision !important;
+}
+
+.settingsPage :where(
+  .settingsHero,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsCategorySurfaceV027,
+  .settingsWideCard,
+  .settingsBlockV027,
+  .settingsPanelV027,
+  .settingsSectionV027,
+  .settingsUpdatePanel,
+  .settingsResetPanel,
+  .settingSwitchCard,
+  .settingsChoice,
+  .coverSyncChoice,
+  .toggleRow,
+  .rangeRow,
+  .settingsResetButton,
+  .visualOptionGroupV205,
+  .visualOptionButtonV205,
+  .aboutPlainCard,
+  .aboutOpenSourceHero
+){
+  transform: none !important;
+  filter: none !important;
+  backface-visibility: visible !important;
+  will-change: auto !important;
+}
+
+.settingsPage :where(
+  .settingsHero,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsCategorySurfaceV027,
+  .settingsWideCard,
+  .settingsBlockV027,
+  .settingsPanelV027,
+  .settingsSectionV027,
+  .settingsUpdatePanel,
+  .settingsResetPanel
+){
+  backdrop-filter: blur(8px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(112%) !important;
+}
+
+.settingsPage :where(
+  h1, h2, h3, h4, h5, h6,
+  p, span, small, strong, label, em, b,
+  button, input, textarea, select
+){
+  text-shadow: none !important;
+  filter: none !important;
+  backface-visibility: visible !important;
+}
+
+.settingsPage :where(
+  .settingsPanelCard:hover,
+  .settingsPageCard:hover,
+  .settingSwitchCard:hover,
+  .settingsChoice:hover,
+  .coverSyncChoice:hover,
+  .toggleRow:hover,
+  .rangeRow:hover,
+  .settingsResetButton:hover,
+  .visualOptionButtonV205:hover
+){
+  transform: none !important;
+}
+
+.settingsCategoryButton,
+.settingsCategoryButtonV027{
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  text-align: left !important;
+}
+
+.settingsCategoryCopy{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 2px !important;
+  align-content: center !important;
+}
+
+.settingsCategoryCopy strong,
+.settingsCategoryCopy span{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.settingsCategoryCopy strong{
+  white-space: nowrap !important;
+}
+
+.settingsCategoryCopy span{
+  display: -webkit-box !important;
+  white-space: normal !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+}
+
+.settingsCategoryHeader,
+.settingsPanelHeader,
+.settingsSectionTitle,
+.themeEditorHead,
+.visualOptionGroupHeadV205{
+  align-items: flex-start !important;
+}
+
+.settingSwitchCard,
+.toggleRow,
+.rangeRow,
+.settingsChoice,
+.coverSyncChoice{
+  display: grid !important;
+  align-items: center !important;
+}
+
+.settingsActionButton,
+.settingsResetButton,
+.visualOptionButtonV205{
+  line-height: 1.1 !important;
+}
+
+@media (max-width: 760px){
+  .settingsCategoryButton,
+  .settingsCategoryButtonV027{
+    grid-template-columns: 32px minmax(0, 1fr) !important;
+  }
+
+  .settingsCategoryCopy span{
+    -webkit-line-clamp: 1 !important;
+    line-clamp: 1 !important;
+  }
+}
+
+/* localtify 0.3.8 V301 — settings clarity + less blur fighting */
+body.localtifyPerfV301 .settingsPage{
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.localtifyPerfV301 .settingsPage :is(
+  h1, h2, h3, h4, h5,
+  strong, span, small, p, label,
+  button, input, textarea, select
+){
+  text-shadow: none !important;
+  filter: none !important;
+  backface-visibility: visible !important;
+}
+
+body.localtifyPerfV301 .settingsPage :is(
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingSwitchCard,
+  .settingsChoice,
+  .coverSyncChoice,
+  .toggleRow,
+  .rangeRow
+){
+  transform: none !important;
+  will-change: auto !important;
+}
+
+body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
+  backdrop-filter: blur(8px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(112%) !important;
+  background-color: rgba(7, 7, 12, 0.82) !important;
+}
+
+body.localtifyPerfV301 .settingsPage :is(
+  .settingsCategoryButton,
+  .settingsTabButton,
+  .settingsChoice,
+  .settingSwitchCard
+){
+  contain: layout paint style;
+}
+
+body.localtifyPerfV301 .settingsPage :is(.settingsCategoryButton, .settingsTabButton){
+  align-items: center !important;
+}

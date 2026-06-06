@@ -12580,3 +12580,105 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
   transform: translateZ(0);
 }
+
+/* localtify 0.3.8 V301 — renderer performance guardrails
+   Keeps the visual identity, but sleeps expensive paint during scroll/drag/heavy views. */
+body.localtifyPerfV301 .app{
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  contain: layout style paint;
+}
+
+body.localtifyPerfV301 .content{
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+body.localtifyPerfV301 .app :is(
+  .homeAlbumCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .downloadQueueItem,
+  .spotifyTrackCard,
+  .albumCard,
+  .albumShelfCard,
+  .libraryCard
+){
+  contain: layout paint style;
+  backface-visibility: hidden;
+}
+
+@supports (content-visibility: auto){
+  body.localtifyPerfV301 .app :is(
+    .homeAlbumCard,
+    .homeListenCard,
+    .homeFreshCard,
+    .playlistTrackRow,
+    .playlistSongRow,
+    .downloadQueueItem,
+    .spotifyTrackCard,
+    .albumCard,
+    .albumShelfCard,
+    .libraryCard
+  ){
+    content-visibility: auto;
+    contain-intrinsic-size: 96px 220px;
+  }
+
+  body.localtifyPerfV301 .app :is(.homeAlbumCard, .albumCard, .albumShelfCard){
+    contain-intrinsic-size: 220px 180px;
+  }
+}
+
+body.localtifyPerfV301 .app.isScrolling :is(
+  .panel,
+  .headerBar,
+  .sidebar,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .homeShelfPanel,
+  .homeHeroCard,
+  .playerBar
+){
+  backdrop-filter: blur(8px) saturate(108%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(108%) !important;
+}
+
+body.localtifyPerfV301 .app.isScrolling :is(
+  .homeAlbumCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .downloadQueueItem,
+  .spotifyTrackCard,
+  .albumCard,
+  .libraryCard,
+  .songRow,
+  .libraryRow
+){
+  transition-duration: 80ms !important;
+  animation: none !important;
+  will-change: auto !important;
+}
+
+body.localtifyPerfV301 .app.isScrolling .homeAlbumCard::before,
+body.localtifyPerfV301 .app.isScrolling .homeAlbumCard::after,
+body.localtifyPerfV301 .app.isScrolling .homeListenCard::before,
+body.localtifyPerfV301 .app.isScrolling .homeListenCard::after,
+body.localtifyPerfV301 .app.isScrolling .homeFreshCard::before,
+body.localtifyPerfV301 .app.isScrolling .homeFreshCard::after,
+body.localtifyPerfV301 .app.isScrolling .albumCard::before,
+body.localtifyPerfV301 .app.isScrolling .albumCard::after,
+body.localtifyPerfV301 .app.isScrolling .libraryCard::before,
+body.localtifyPerfV301 .app.isScrolling .libraryCard::after{
+  opacity: 0 !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+body.localtifyPerfV301 .app :is(.localtifyStarsBackdrop, .localtifyStarsLayer, .ambientOrb, .lightOrb){
+  display: none !important;
+}

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-/* localtify 0.3.7 V264 — isolated cover gallery classes; removes old patch collisions and giant preview image bug. */
+/* localtify 0.3.8 V301 — isolated cover gallery classes with lighter image state updates. */
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
 
@@ -30,7 +30,7 @@ function CoverGalleryImage({ src, label, priority = false }: { src: string; labe
           fetchPriority={priority ? "high" : "low"}
           referrerPolicy="no-referrer"
           draggable={false}
-          onLoad={() => setLoaded(true)}
+          onLoad={() => window.requestAnimationFrame(() => setLoaded(true))}
           onError={() => {
             setLoaded(false);
             setFailed(true);
@@ -52,7 +52,10 @@ function useMeasuredWidth<T extends HTMLElement>() {
     let frame = 0;
     const update = () => {
       window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(() => setWidth(element.clientWidth || 0));
+      frame = window.requestAnimationFrame(() => {
+        const nextWidth = element.clientWidth || 0;
+        setWidth((currentWidth) => (currentWidth === nextWidth ? currentWidth : nextWidth));
+      });
     };
 
     update();

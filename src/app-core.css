@@ -5447,3 +5447,22 @@ line-clamp: 2 !important;
 .app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
   transform: translateZ(0);
 }
+
+/* localtify 0.3.8 V301 — core compositor hints */
+body.localtifyPerfV301{
+  overscroll-behavior: none;
+}
+
+body.localtifyPerfV301 .appShell{
+  contain: layout style paint;
+}
+
+body.localtifyPerfV301 .content{
+  will-change: scroll-position;
+  contain: layout style paint;
+}
+
+body.localtifyPerfV301 .titleBar,
+body.localtifyPerfV301 .sidebar{
+  contain: layout paint style;
+}

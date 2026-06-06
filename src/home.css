@@ -13522,10 +13522,11 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   -webkit-backdrop-filter: none !important;
 }
 
-.homePage :where(.playerBar,.playerLeft,.playerCenter,.playerRight),
-.libraryPage :where(.playerBar,.playerLeft,.playerCenter,.playerRight){
-  all: revert-layer;
-}
+
+/* localtify 0.3.8 V300 — player layout is owned by player.css.
+   Removed the old home/library revert-layer reset because it could fight the
+   bottom player alignment and push the center/progress row out of place. */
+
 
 .app :where(.misideEggNotice,.misideWhisper,.lateNightWarning){
   display: none !important;
@@ -16565,4 +16566,53 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   .albumBuilderSongGridV318{
     grid-template-columns: 1fr;
   }
+}
+
+/* localtify 0.3.8 V301 — home/library paint budget */
+body.localtifyPerfV301 .app :is(
+  .homeShelf,
+  .homeShelfGrid,
+  .homeGrid,
+  .libraryGrid,
+  .albumGrid,
+  .playlistGrid,
+  .downloadGrid,
+  .spotifyTrackGrid
+){
+  contain: layout style paint;
+}
+
+body.localtifyPerfV301 .app.isScrolling .hero.ambientSurface::before,
+body.localtifyPerfV301 .app.isScrolling .hero.ambientSurface::after,
+body.localtifyPerfV301 .app.isScrolling .coverAura::before,
+body.localtifyPerfV301 .app.isScrolling .homeAlbumArt::before,
+body.localtifyPerfV301 .app.isScrolling .homeListenCover::before,
+body.localtifyPerfV301 .app.isScrolling .homeFreshCover::before{
+  opacity: 0 !important;
+  filter: none !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+body.localtifyPerfV301 .app :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow
+){
+  contain: layout paint style;
+}
+
+body.localtifyPerfV301 .app :is(
+  .songRow:hover,
+  .libraryRow:hover,
+  .playlistTrackRow:hover,
+  .playlistSongRow:hover
+){
+  transition-duration: 90ms !important;
+}
+
+body.localtifyPerfV301 .app :is(.songRow, .libraryRow) :is(.songArt, .smallArt, .coverAura){
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }

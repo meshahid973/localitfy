@@ -2570,3 +2570,42 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   background: rgb(var(--accent-rgb)) !important;
   box-shadow: 0 10px 24px rgba(var(--accent-rgb),0.22) !important;
 }
+
+/* localtify 0.3.8 V301 — smoother player paint path */
+body.localtifyPerfV301 .playerBar{
+  contain: layout paint style !important;
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+}
+
+body.localtifyPerfV301 .playerBar :is(
+  .playerLeft,
+  .playerCenter,
+  .playerRight,
+  .controlRow,
+  .progressRow,
+  .volumeWrap
+){
+  will-change: auto !important;
+  backface-visibility: hidden !important;
+}
+
+body.localtifyPerfV301 .playerBar :is(button, input, .circleButton, .playerButton, .volumeIconButton){
+  touch-action: manipulation !important;
+}
+
+body.localtifyPerfV301 .app.isScrolling .playerBar::before,
+body.localtifyPerfV301.localtifyBackgroundMode .playerBar::before{
+  opacity: 0.08 !important;
+  filter: blur(14px) saturate(1.08) brightness(0.72) !important;
+  transform: translateZ(0) scale(1.02) !important;
+}
+
+body.localtifyPerfV301 .app.isScrolling .playerBar:hover::before{
+  opacity: 0.12 !important;
+  filter: blur(16px) saturate(1.1) brightness(0.74) !important;
+}
+
+body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
+  will-change: auto !important;
+}

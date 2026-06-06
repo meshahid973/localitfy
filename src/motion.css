@@ -2420,3 +2420,40 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
     transition-duration: 1ms !important;
   }
 }
+
+/* localtify 0.3.8 V301 — motion budget under load */
+body.localtifyPerfV301 .app.isScrolling :is(
+  .homeAlbumCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .homeShelfPanel,
+  .albumCard,
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .downloadQueueItem,
+  .spotifyTrackCard,
+  .settingsPageCard
+){
+  animation: none !important;
+  transition-property: background-color, border-color, box-shadow, color, opacity !important;
+  transition-duration: 80ms !important;
+}
+
+body.localtifyPerfV301 .app.localtifySongDragging :is(
+  .homeAlbumCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .albumCard,
+  .settingsPageCard,
+  .coverGalleryCard
+){
+  animation: none !important;
+  transition-duration: 60ms !important;
+  will-change: auto !important;
+}
+
+body.localtifyPerfV301.localtifyBackgroundMode .app *{
+  animation-play-state: paused !important;
+}

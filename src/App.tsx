@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.7 V325 release onboarding showcase. Existing users see onboarding once. */
+/* localtify 0.3.8 V301 performance pass. Existing users see onboarding once. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -216,6 +216,39 @@ import type {
 
 const SettingsCategoryContent = lazy(() => import("./SettingsCategoryContent"));
 
+const LOCALTIFY_V301_HEAVY_MOTION_VIEWS = new Set<View>([
+  "library",
+  "liked",
+  "albums",
+  "covers",
+  "downloads"
+]);
+
+const LOCALTIFY_V301_HEAVY_SETTINGS_CATEGORIES = new Set<SettingsCategory>([
+  "covers",
+  "library",
+  "advanced"
+]);
+
+function isLocaltifyV301HeavyMotionSurface(view: View, settingsCategory: SettingsCategory) {
+  if (LOCALTIFY_V301_HEAVY_MOTION_VIEWS.has(view)) return true;
+  return view === "settings" && LOCALTIFY_V301_HEAVY_SETTINGS_CATEGORIES.has(settingsCategory);
+}
+
+function runLocaltifyIdleTask(task: () => void, timeout = 1400) {
+  const requestIdleCallback = (window as typeof window & {
+    requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+  }).requestIdleCallback;
+
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(task, { timeout });
+    return;
+  }
+
+  window.setTimeout(task, 0);
+}
+
+
 const VISUAL_CUSTOMIZATION_DEFAULTS = {
   homeBannerType: "dynamic",
   blurEffects: "normal",
@@ -279,7 +312,7 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
       startupSettingLabel: "Start localtify with Linux",
       startupSettingHelp: "Linux autostart will be added later through a proper desktop-entry flow.",
       linuxInstallNotes: [
-        "AppImage: chmod +x localtify-0.3.7-x64.AppImage, then run it directly.",
+        "AppImage: chmod +x localtify-0.3.8-x64.AppImage, then run it directly.",
         "RPM: for Fedora, openSUSE, and RHEL-style distros.",
         "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
       ]
@@ -323,7 +356,7 @@ function shouldOpenOnboardingForThisRelease() {
     const releaseShowcaseDone = window.localStorage.getItem(ONBOARDING_RELEASE_SHOWCASE_KEY) === "done";
 
     // New users still see onboarding because the normal onboarding key is missing.
-    // Existing users also see the new v0.3.7 onboarding once because the release key is missing.
+    // Existing users also see the new v0.3.8 onboarding once because the release key is missing.
     return !oldOnboardingDone || !releaseShowcaseDone;
   } catch {
     return true;
@@ -396,6 +429,7 @@ function MainModeApp() {
   const lastDiscordAssetKeyRef = useRef<string>("");
   const contentRef = useRef<HTMLElement | null>(null);
   const scrollBusyRef = useRef(false);
+  const scrollBusyFrameRef = useRef<number | null>(null);
   const scrollIdleTimerRef = useRef<number | null>(null);
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
   const themeSettlingTimerRef = useRef<number | null>(null);
@@ -415,6 +449,7 @@ function MainModeApp() {
   const analyticsSessionEndedRef = useRef(false);
   const analyticsViewRef = useRef<View>("home");
   const librarySnapshotSignatureRef = useRef("");
+  const libraryOrderSaveTimerRef = useRef<number | null>(null);
   const rememberCurrentSongTimerRef = useRef<number | null>(null);
   const latestRememberedSongIdRef = useRef("");
   const selectSongBurstTimerRef = useRef<number | null>(null);
@@ -603,6 +638,20 @@ function MainModeApp() {
   }, [isAppBackgrounded]);
 
   useEffect(() => {
+    const body = document.body;
+
+    body.classList.add("localtifyPerfV301", "localtifyGpuFriendly");
+    body.dataset.localtifyPerf = "v301";
+
+    return () => {
+      body.classList.remove("localtifyPerfV301", "localtifyGpuFriendly");
+      if (body.dataset.localtifyPerf === "v301") {
+        delete body.dataset.localtifyPerf;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const analyticsReady = initLocalitfyAnalytics(APP_VERSION);
 
     if (analyticsReady) {
@@ -710,7 +759,7 @@ function MainModeApp() {
   const settingsSearchResultLabel = settingsSearchQuery
     ? visibleSettingsTabs.length
       ? `showing ${visibleSettingsTabs.length} matching section${visibleSettingsTabs.length === 1 ? "" : "s"}`
-      : "no exact section found — Search for settings such as Discord, theme, cover, update, volume."
+      : "no exact section found â€” Search for settings such as Discord, theme, cover, update, volume."
     : "Search for settings such as Discord, theme, cover, update, volume.";
 
   function handleSettingsSearchInput(value: string) {
@@ -1005,8 +1054,27 @@ function MainModeApp() {
   }, [currentSong?.id, currentSong?.filePath, currentSong?.title, currentSong?.artist, currentSong?.coverUrl]);
 
   useEffect(() => {
-    if (!ready || !songs.length) return;
-    saveLibraryOrder(songs);
+    if (!ready || !songs.length) return undefined;
+
+    if (libraryOrderSaveTimerRef.current !== null) {
+      window.clearTimeout(libraryOrderSaveTimerRef.current);
+    }
+
+    libraryOrderSaveTimerRef.current = window.setTimeout(() => {
+      libraryOrderSaveTimerRef.current = null;
+      const snapshot = songs;
+
+      runLocaltifyIdleTask(() => {
+        saveLibraryOrder(snapshot);
+      }, 1600);
+    }, 520);
+
+    return () => {
+      if (libraryOrderSaveTimerRef.current !== null) {
+        window.clearTimeout(libraryOrderSaveTimerRef.current);
+        libraryOrderSaveTimerRef.current = null;
+      }
+    };
   }, [ready, songs]);
 
   useEffect(() => {
@@ -1033,7 +1101,8 @@ function MainModeApp() {
     const node = contentRef.current;
     if (!node) return;
 
-    const markScrollBusy = () => {
+    const paintScrollBusy = () => {
+      scrollBusyFrameRef.current = null;
       scrollBusyRef.current = true;
       appRootRef.current?.classList.add("isScrolling");
 
@@ -1057,7 +1126,12 @@ function MainModeApp() {
         scrollBusyRef.current = false;
         appRootRef.current?.classList.remove("isScrolling");
         scrollIdleTimerRef.current = null;
-      }, 140);
+      }, 150);
+    };
+
+    const markScrollBusy = () => {
+      if (scrollBusyFrameRef.current !== null) return;
+      scrollBusyFrameRef.current = window.requestAnimationFrame(paintScrollBusy);
     };
 
     node.addEventListener("scroll", markScrollBusy, { passive: true });
@@ -1066,6 +1140,11 @@ function MainModeApp() {
     return () => {
       node.removeEventListener("scroll", markScrollBusy);
       node.removeEventListener("wheel", markScrollBusy);
+
+      if (scrollBusyFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollBusyFrameRef.current);
+        scrollBusyFrameRef.current = null;
+      }
 
       if (scrollIdleTimerRef.current !== null) {
         window.clearTimeout(scrollIdleTimerRef.current);
@@ -1196,6 +1275,16 @@ function MainModeApp() {
         appRootRef.current.style.removeProperty("--sidebar-width-live");
       }
 
+      if (libraryOrderSaveTimerRef.current !== null) {
+        window.clearTimeout(libraryOrderSaveTimerRef.current);
+        libraryOrderSaveTimerRef.current = null;
+      }
+
+      if (scrollBusyFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollBusyFrameRef.current);
+        scrollBusyFrameRef.current = null;
+      }
+
       if (scrollIdleTimerRef.current !== null) {
         window.clearTimeout(scrollIdleTimerRef.current);
         scrollIdleTimerRef.current = null;
@@ -1249,11 +1338,15 @@ function MainModeApp() {
     };
   }, [effectiveTheme, settings.reducedMotion]);
 
+  const shouldSuspendProximityMotion = isLocaltifyV301HeavyMotionSurface(view, settingsCategory);
+
   useProximityMotion({
     rootRef: appRootRef,
     disabled: settings.reducedMotion,
     suspended:
       isAppBackgrounded ||
+      !themeMotionReady ||
+      shouldSuspendProximityMotion ||
       isSeeking ||
       isVolumeDragging ||
       Boolean(draggedSongId) ||
@@ -1762,7 +1855,7 @@ function MainModeApp() {
     title.textContent = prettyTitle(song.title, 7);
 
     const note = document.createElement("small");
-    note.textContent = "drop to reorder · player = queue next";
+    note.textContent = "drop to reorder Â· player = queue next";
 
     text.append(title, note);
     preview.append(orb, text);
@@ -1786,6 +1879,46 @@ function MainModeApp() {
   }
 
 
+  useEffect(() => {
+    const handleDevToolsShortcut = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || !event.shiftKey || event.key.toLowerCase() !== "i") return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const bridge = window.localitfy as typeof window.localitfy & {
+        toggleDevTools?: () => Promise<void> | void;
+        openDevTools?: () => Promise<void> | void;
+        showDevTools?: () => Promise<void> | void;
+      };
+
+      const toggleDevTools = bridge?.toggleDevTools || bridge?.openDevTools || bridge?.showDevTools;
+
+      if (typeof toggleDevTools === "function") {
+        void Promise.resolve(toggleDevTools()).catch(() => showAppToast("DevTools bridge failed", "error"));
+        return;
+      }
+
+      try {
+        const maybeRequire = (window as typeof window & { require?: (name: string) => any }).require;
+        const electron = typeof maybeRequire === "function" ? maybeRequire("electron") : null;
+        const ipcRenderer = electron?.ipcRenderer;
+
+        if (ipcRenderer?.send) {
+          ipcRenderer.send("localitfy:toggle-devtools");
+          return;
+        }
+      } catch {
+        // Production builds with contextIsolation may not expose require. Main/preload can still wire the bridge later.
+      }
+
+      showAppToast("DevTools shortcut needs the main/preload bridge", "error");
+    };
+
+    window.addEventListener("keydown", handleDevToolsShortcut, true);
+    return () => window.removeEventListener("keydown", handleDevToolsShortcut, true);
+  }, []);
+
   function openSnakeGame() {
     const gameUrl = new URL("snakegame.html", window.location.href).toString();
 
@@ -1801,7 +1934,7 @@ function MainModeApp() {
       return;
     }
 
-    showAppToast("popup blocked — opening snake game here", "info");
+    showAppToast("popup blocked â€” opening snake game here", "info");
     window.location.href = gameUrl;
   }
 
@@ -2488,7 +2621,7 @@ function MainModeApp() {
     if (view === "albums") return "local albums from metadata and your custom collections";
     if (view === "playlists") return `${playlists.length} playlist${playlists.length === 1 ? "" : "s"}`;
     if (view === "liked") return `${likedSongs.length} liked track${likedSongs.length === 1 ? "" : "s"}`;
-    if (view === "covers") return `${coverStats.usable} usable cover${coverStats.usable === 1 ? "" : "s"} • ${coverStats.favorites} favorite${coverStats.favorites === 1 ? "" : "s"}`;
+    if (view === "covers") return `${coverStats.usable} usable cover${coverStats.usable === 1 ? "" : "s"} â€¢ ${coverStats.favorites} favorite${coverStats.favorites === 1 ? "" : "s"}`;
     if (view === "downloads") return "download direct audio links and import them automatically";
     if (view === "settings") return "theme, playback, discord, library, and advanced controls";
     return "your listening numbers and favorite tracks";
@@ -2625,7 +2758,9 @@ function MainModeApp() {
       beatFrameRef.current = null;
     }
 
-    if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || isViewSwitching || isSeeking || isVolumeDragging || isAppBackgrounded) {
+    const shouldSleepBeatFx = isLocaltifyV301HeavyMotionSurface(view, settingsCategory) || scrollBusyRef.current;
+
+    if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || shouldSleepBeatFx || isViewSwitching || isSeeking || isVolumeDragging || isAppBackgrounded) {
       resetBeatVariables();
       return;
     }
@@ -2824,7 +2959,7 @@ function MainModeApp() {
         beatFrameRef.current = null;
       }
     };
-  }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, isViewSwitching, isSeeking, isVolumeDragging, isAppBackgrounded]);
+  }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, view, settingsCategory, isViewSwitching, isSeeking, isVolumeDragging, isAppBackgrounded]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000);
@@ -5462,7 +5597,7 @@ function MainModeApp() {
         .filter((item) => Object.keys(item.patch).length > 0);
 
       if (!repairs.length) {
-        setLibraryScanMessage(`library clean • ${songs.length} indexed`);
+        setLibraryScanMessage(`library clean â€¢ ${songs.length} indexed`);
         setStatusText("metadata already looks clean");
         showAppToast("metadata already looks clean", "success");
         return;
@@ -5478,7 +5613,7 @@ function MainModeApp() {
         }
       }
 
-      setLibraryScanMessage(`cleaned ${repairs.length} tracks • search rebuilt`);
+      setLibraryScanMessage(`cleaned ${repairs.length} tracks â€¢ search rebuilt`);
       setStatusText(`cleaned ${repairs.length} metadata fix${repairs.length === 1 ? "" : "es"}`);
       showAppToast(`cleaned ${repairs.length} metadata fix${repairs.length === 1 ? "" : "es"}`, "success");
     } catch (error) {
@@ -5495,9 +5630,9 @@ function MainModeApp() {
   function rebuildSearchIndexAction() {
     const repairedSongs = applyLibraryOrder(sanitizeSongList(songs));
     setSongs(repairedSongs);
-    setLibraryScanMessage(`search rebuilt • ${repairedSongs.length} tracks indexed`);
+    setLibraryScanMessage(`search rebuilt â€¢ ${repairedSongs.length} tracks indexed`);
     setStatusText("fast search index rebuilt");
-    showAppToast(`search rebuilt • ${repairedSongs.length} tracks`, "success");
+    showAppToast(`search rebuilt â€¢ ${repairedSongs.length} tracks`, "success");
   }
 
   function shuffleLibrarySongsAction() {
@@ -5572,7 +5707,7 @@ function MainModeApp() {
       playbackUrlCacheRef.current.clear();
       playbackUrlPendingRef.current.clear();
       setSongs(imported);
-      setLibraryScanMessage(`indexed ${imported.length} tracks • search, folders, and metadata ready`);
+      setLibraryScanMessage(`indexed ${imported.length} tracks â€¢ search, folders, and metadata ready`);
 
       if (changedSongs.length > 0) {
         void Promise.allSettled(
@@ -5621,7 +5756,7 @@ function MainModeApp() {
           createImportAnimationState({
             active: true,
             phase: "success",
-            message: "library checked — no duplicates added",
+            message: "library checked â€” no duplicates added",
             count: 0,
             total: imported.length,
             preview: previewSongs
@@ -5652,7 +5787,7 @@ function MainModeApp() {
         createImportAnimationState({
           active: true,
           phase: "error",
-          message: "import failed safely — your library was not deleted",
+          message: "import failed safely â€” your library was not deleted",
           count: 0,
           total: songs.length,
           preview: songs.slice(0, 8)
@@ -5696,7 +5831,7 @@ function MainModeApp() {
           ...next[index],
           status: result.ok ? "done" : "failed",
           progress: 100,
-          message: result.ok ? "Added to library" : "Download failed — retry?",
+          message: result.ok ? "Added to library" : "Download failed â€” retry?",
           filePath: result.filePath,
           filename: result.filename,
           error: result.error,
@@ -5919,7 +6054,7 @@ function MainModeApp() {
         setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
       } else {
         setSpotifyFetchError("");
-        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready — paste a link" : "spotify connected — paste a link to fetch tracks");
+        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready â€” paste a link" : "spotify connected â€” paste a link to fetch tracks");
       }
     } catch (error) {
       const message = String((error as Error)?.message || "Spotify login failed.");
@@ -6123,7 +6258,7 @@ function MainModeApp() {
       selected.map((t, i) => ({
         id: `spt_${t.id}_${i}`,
         url: `spotify:search:${t.title}`,
-        title: t.artist ? `${t.artist} — ${t.title}` : t.title,
+        title: t.artist ? `${t.artist} â€” ${t.title}` : t.title,
         status: "queued" as const,
         progress: 0,
         message: "Waiting..."
@@ -6251,7 +6386,7 @@ function MainModeApp() {
           setStatusText(`downloaded ${successCount} track${successCount !== 1 ? "s" : ""} from spotify`);
           if (settings.downloadAutoAdd && nextSongs.length) changeView("library", "unknown");
         } else {
-          setStatusText("spotify download finished — no tracks added");
+          setStatusText("spotify download finished â€” no tracks added");
           setPlayerError("no tracks downloaded. check the queue for errors.");
         }
 

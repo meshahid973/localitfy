@@ -747,3 +747,23 @@
     font-size: clamp(44px, 9vw, 62px);
   }
 }
+
+/* localtify 0.3.8 V301 — lighter first-run compositor path */
+body.localtifyPerfV301 .onboardingV314,
+body.localtifyPerfV301 .onboardingV315{
+  contain: layout paint style;
+}
+
+body.localtifyPerfV301 .onboardingCoreOrb{
+  filter: saturate(112%) contrast(1.01);
+  box-shadow:
+    0 0 28px rgba(var(--onboarding-accent-rgb), 0.22),
+    0 0 72px rgba(var(--onboarding-accent-rgb), 0.10),
+    inset -18px -20px 32px rgba(0, 0, 0, 0.26),
+    inset 14px 12px 22px rgba(255, 255, 255, 0.10);
+}
+
+body.localtifyPerfV301 .onboardingV314 :is(button, input),
+body.localtifyPerfV301 .onboardingV315 :is(button, input){
+  touch-action: manipulation;
+}
