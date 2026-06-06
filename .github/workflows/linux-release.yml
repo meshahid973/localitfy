@@ -1,0 +1,61 @@
+name: Build Linux release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to upload Linux files to
+        required: true
+        default: v0.3.7
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    name: Build Linux AppImage RPM DEB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout release code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Linux packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm fakeroot dpkg libarchive-tools
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build renderer
+        run: npm run build
+
+      - name: Build Linux packages
+        run: npx electron-builder --linux AppImage deb rpm --x64 --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Show release files
+        run: ls -lah release
+
+      - name: Upload Linux files to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          files: |
+            release/*.AppImage
+            release/*.AppImage.blockmap
+            release/*.deb
+            release/*.rpm
+            release/*.yml
+          fail_on_unmatched_files: false
+          overwrite_files: true
