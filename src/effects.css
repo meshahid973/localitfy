@@ -1,4 +1,4 @@
-/* localtify 0.3.7 V293 — effects only. Window transparency feature removed. */
+/* localtify V309 — effects-only owner. No window transparency, no standalone ambience orbs. */
 
 .app[data-playing="on"] :is(
   .songRow.playing .songArt.coverAura,
@@ -8,7 +8,7 @@
   .playlistTrackRow.playing .playlistTrackCover,
   .playlistSongRow.playing .playlistTrackCover,
   .libraryRow.playing .songArt.coverAura
-) {
+){
   position: relative !important;
   isolation: isolate !important;
   contain: paint !important;
@@ -24,91 +24,31 @@
   .playlistTrackRow.playing .playlistTrackCover,
   .playlistSongRow.playing .playlistTrackCover,
   .libraryRow.playing .songArt.coverAura
-)::before {
+)::before{
   opacity: min(var(--active-song-glow-opacity, 0.28), 0.34) !important;
   filter: blur(14px) saturate(1.18) !important;
   transform: translateZ(0) scale(var(--active-song-glow-scale, 1.01)) !important;
   transition: opacity 120ms linear, transform 120ms linear !important;
 }
 
-.app[data-playing="on"] :is(.songRow.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing) :is(.songArt, .smallArt, .coverAura) {
+.app[data-playing="on"] :is(
+  .songRow.playing,
+  .playlistTrackRow.playing,
+  .playlistSongRow.playing,
+  .libraryRow.playing
+) :is(.songArt, .smallArt, .coverAura){
   filter: saturate(1.05) contrast(1.02) !important;
 }
 
-.app .secretLayer.yukari {
-  z-index: 2400 !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-}
-
-.app .secretLayer.yukari::before,
-.app .secretLayer.yukari::after {
-  display: none !important;
-  content: none !important;
-}
-
-.app .secretLayer.yukari .secretRibbon {
-  top: auto !important;
-  left: auto !important;
-  right: 22px !important;
-  bottom: 94px !important;
-  transform: none !important;
-  max-width: min(250px, calc(100vw - 42px)) !important;
-  padding: 8px 12px !important;
-  border-color: rgba(var(--accent-rgb), .18) !important;
-  background: rgba(8,8,13,.68) !important;
-  backdrop-filter: blur(10px) saturate(116%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(116%) !important;
-  animation: yukariSecretBubbleInV265 320ms cubic-bezier(.18,1.02,.24,1) both !important;
-}
-
-.app .yukariSecretPeek {
-  position: fixed !important;
-  right: -124px !important;
-  bottom: clamp(112px, 12vh, 148px) !important;
-  width: clamp(132px, 11vw, 188px) !important;
-  height: auto !important;
-  z-index: 2402 !important;
-  pointer-events: none !important;
-  user-select: none !important;
-  -webkit-user-drag: none !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  filter: drop-shadow(0 22px 34px rgba(0,0,0,.52)) !important;
-  transform-origin: 86% 55% !important;
-  animation: yukariSecretPeekInV265 520ms cubic-bezier(.18,1.02,.22,1) both !important;
-}
-
-@keyframes yukariSecretPeekInV265 {
-  from { opacity: 0; transform: translate3d(96px, 8px, 0) scale(.985); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes yukariSecretBubbleInV265 {
-  from { opacity: 0; transform: translate3d(22px, 6px, 0) scale(.97); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@media (max-width: 760px) {
-  .app .yukariSecretPeek {
-    right: -104px !important;
-    bottom: 108px !important;
-    width: 124px !important;
-  }
-
-  .app .secretLayer.yukari .secretRibbon {
-    right: 14px !important;
-    bottom: 84px !important;
-  }
+.app .heroAmbiencePulse{
+  display: block;
 }
 
 .app :is(
   .ambientOrb,
   .sideAmbienceOrb,
   .lightOrb,
-  .heroAmbiencePulse,
   .ambientSurfaceGlow,
-  .coverAmbience,
   .orb,
   .localtifyStarsBackdrop,
   .localtifyStarsLayer,
@@ -120,7 +60,7 @@
   .backgroundGradient,
   .appBackdrop,
   .appBackgroundLayer
-) {
+){
   display: none !important;
   opacity: 0 !important;
   background: none !important;
@@ -135,12 +75,79 @@
 .app[data-theme="stars"]::before,
 .app[data-theme="stars"]::after,
 .app[data-theme="stars"] .content::before,
-.app[data-theme="stars"] .content::after {
+.app[data-theme="stars"] .content::after{
   background-image: none !important;
   animation: none !important;
 }
 
 .songRow.active::before,
-.songRow.active::after {
+.songRow.active::after{
   pointer-events: none !important;
+}
+
+.app .secretLayer.yukari{
+  z-index: 2400 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+.app .secretLayer.yukari::before,
+.app .secretLayer.yukari::after{
+  display: none !important;
+  content: none !important;
+}
+
+.app .secretLayer.yukari .secretRibbon{
+  top: auto !important;
+  left: auto !important;
+  right: 22px !important;
+  bottom: 94px !important;
+  transform: none !important;
+  max-width: min(250px, calc(100vw - 42px)) !important;
+  padding: 8px 12px !important;
+  border-color: rgba(var(--accent-rgb), .18) !important;
+  background: rgba(8,8,13,.68) !important;
+  backdrop-filter: blur(10px) saturate(116%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(116%) !important;
+  animation: localtifyYukariBubbleIn 320ms cubic-bezier(.18,1.02,.24,1) both !important;
+}
+
+.app .yukariSecretPeek{
+  position: fixed !important;
+  right: -124px !important;
+  bottom: clamp(112px, 12vh, 148px) !important;
+  width: clamp(132px, 11vw, 188px) !important;
+  height: auto !important;
+  z-index: 2402 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  filter: drop-shadow(0 22px 34px rgba(0,0,0,.52)) !important;
+  transform-origin: 86% 55% !important;
+  animation: localtifyYukariPeekIn 520ms cubic-bezier(.18,1.02,.22,1) both !important;
+}
+
+@keyframes localtifyYukariPeekIn{
+  from{ opacity: 0; transform: translate3d(96px, 8px, 0) scale(.985); }
+  to{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes localtifyYukariBubbleIn{
+  from{ opacity: 0; transform: translate3d(22px, 6px, 0) scale(.97); }
+  to{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@media (max-width: 760px){
+  .app .yukariSecretPeek{
+    right: -104px !important;
+    bottom: 108px !important;
+    width: 124px !important;
+  }
+
+  .app .secretLayer.yukari .secretRibbon{
+    right: 14px !important;
+    bottom: 84px !important;
+  }
 }

@@ -1,5 +1,3 @@
-/* localtify 0.3.7 V265 — cleaned home/downloads/cover owner. Removed old comments and obsolete pre-clean-gallery image rules. */
-
 .logoIcon{
   width: 42px;
   height: 42px;
@@ -619,7 +617,7 @@ button,
 .circleButton:not(.playerBar *),
 .mainAction{
   transform: translateZ(0);
-  will-change: transform, background, border-color, box-shadow;
+
 }
 
 .panel,
@@ -1115,7 +1113,7 @@ button,
 .expandLibraryButton,
 .iconAction,
 .circleButton:not(.playerBar *){
-  will-change: transform;
+
   transform: translateZ(0);
 }
 
@@ -1334,7 +1332,7 @@ button:active,
   transform: scale(1.1) translate3d(0, 0, 0) !important;
   transform-origin: 72% 48% !important;
   pointer-events: none !important;
-  will-change: opacity, filter, transform, background-position;
+
   transition: opacity 760ms var(--ambient-smooth-ease),
     filter 900ms var(--ambient-smooth-ease),
     transform 1100ms var(--ambient-smooth-ease),
@@ -1623,7 +1621,7 @@ button:active,
 
 .nowPlayingCopySwap{
   animation: nowPlayingFadeSlide 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: transform, opacity, filter;
+
 }
 
 .nowPlayingArtSwap{
@@ -1680,7 +1678,7 @@ button:active{
   border-color: rgba(255, 255, 255, 0.075) !important;
   box-shadow: none !important;
   transform: translateZ(0);
-  will-change: transform, border-color, background-color;
+
   transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
     background-color 220ms ease,
     border-color 220ms ease,
@@ -1711,7 +1709,7 @@ button:active{
   transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 260ms ease,
     opacity 220ms ease !important;
-  will-change: transform;
+
 }
 
 .homeAlbumCard:hover .homeAlbumArt{
@@ -1821,12 +1819,12 @@ button:active{
 
 .heroMain{
   animation: localitfySongCopyIn 620ms var(--song-change-ease) both !important;
-  will-change: transform, opacity, filter;
+
 }
 
 .nowPlayingCopySwap .eyebrow{
   animation: localitfySongDetailIn 700ms var(--song-change-ease) both !important;
-  will-change: transform, opacity;
+
 }
 
 .nowPlayingCopySwap .statCard:nth-child(1){
@@ -1847,11 +1845,6 @@ button:active{
   line-height: 0.94 !important;
   letter-spacing: -0.065em !important;
 }
-
-.nowPlayingArtSwap{
-  will-change: transform, opacity, filter;
-}
-
 .nowPlayingArtSwap{
   animation: localitfyCoverIn 760ms var(--song-change-ease) both !important;
 }
@@ -2132,7 +2125,7 @@ button:active{
   overflow: visible !important;
   contain: layout style !important;
   transform-origin: center center !important;
-  will-change: transform, border-color, background-color !important;
+
   transition:
     transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
     background-color 180ms ease,
@@ -2173,17 +2166,13 @@ button:active{
   cursor: grab;
   user-select: none;
   touch-action: manipulation;
-  will-change: transform, opacity, border-color, background;
+
   transition:
     transform 180ms var(--ease-smooth),
     opacity 180ms ease,
     border-color 180ms ease,
     background 180ms ease,
     box-shadow 180ms ease !important;
-}
-
-.homeAlbumCard:active{
-  cursor: grabbing;
 }
 
 .homeAlbumCard:hover{
@@ -2193,16 +2182,6 @@ button:active{
 .homeAlbumCard[draggable="true"]:active{
   opacity: 0.74;
   transform: scale(0.985) translateZ(0) !important;
-}
-
-.homeAlbumPlayZone,
-.songButton,
-.homeAlbumActions button,
-.iconAction,
-.circleButton:not(.playerBar *),
-.heroTinyButton,
-.expandLibraryButton{
-  will-change: transform, opacity, box-shadow;
 }
 
 .circleButton:not(.playerBar *),
@@ -2685,7 +2664,7 @@ button:active{
 .app .heroLayoutMotion{
   transform-origin: top center;
   backface-visibility: hidden;
-  will-change: min-height, transform, opacity;
+
   transition:
     min-height 620ms cubic-bezier(0.16, 1, 0.3, 1),
     grid-template-columns 620ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -3110,11 +3089,6 @@ button:active{
       rgba(0, 0, 0, 0.58) 74%,
       rgba(0, 0, 0, 0.78) 100%) !important;
 }
-
-.app .headerBar{
-  will-change: auto;
-}
-
 .app .hero.ambientSurface::before{
   opacity: 0.2;
   filter: blur(50px) saturate(1.18) brightness(0.9);
@@ -3151,7 +3125,7 @@ button:active{
   content-visibility: visible !important;
   backface-visibility: hidden;
   transform: translate3d(0, 0, 0);
-  will-change: transform, opacity;
+
 }
 
 .app .homeAlbumCard{
@@ -3361,33 +3335,8 @@ button:active{
 .homeAlbumCard{
   backface-visibility: hidden !important;
   transform: translateZ(0);
-  will-change: auto !important;
-}
 
-.homeAlbumCard:hover{
-  will-change: transform !important;
 }
-
-.homeAlbumPlayZone,
-.songButton,
-.homeAlbumActions button,
-.iconAction,
-.circleButton:not(.playerBar *),
-.heroTinyButton,
-.expandLibraryButton{
-  will-change: auto !important;
-}
-
-.homeAlbumPlayZone:hover,
-.songButton:hover,
-.homeAlbumActions button:hover,
-.iconAction:hover,
-.circleButton:hover:not(.playerBar *),
-.heroTinyButton:hover,
-.expandLibraryButton:hover{
-  will-change: transform !important;
-}
-
 @supports (content-visibility: auto){
   .homeAlbumCard:not(.active):not(.songDragging):not(.songDropTarget){
     content-visibility: auto;
@@ -3441,7 +3390,7 @@ button:active{
   transform: translate3d(0, 0, 0) scale(1.08) !important;
   animation: none !important;
   transition: opacity 160ms ease, filter 160ms ease !important;
-  will-change: auto !important;
+
 }
 
 .app[data-ambient="on"] .heroArtWrap::after{
@@ -3465,11 +3414,6 @@ button:active{
 body.isResizingSidebar .heroArtWrap::before{
   display: none !important;
 }
-
-.app .homeAlbumCard{
-  will-change: auto !important;
-}
-
 body.localitfySongDragging .homeAlbumCard{
   box-shadow: none !important;
   transition:
@@ -3532,12 +3476,6 @@ body.isResizingSidebar .app .homeAlbumCard{
 .app[data-density="spacious"] .homeAlbumMeta strong{
   font-size: 14px !important;
 }
-
-.app .homeAlbumCard,
-.app .hero{
-  will-change: auto;
-}
-
 .homeAlbumCard{
   -webkit-user-drag: element;
   user-select: none;
@@ -3546,10 +3484,6 @@ body.isResizingSidebar .app .homeAlbumCard{
 
 .homeAlbumCoverButton{
   -webkit-user-drag: none;
-}
-
-.app.songDragActive .homeAlbumGrid{
-  cursor: grabbing !important;
 }
 
 .homeAlbumCard.songDragging{
@@ -3619,15 +3553,10 @@ body.isResizingSidebar .app .homeAlbumCard{
     box-shadow 120ms ease !important;
 }
 
-body.localitfyLibraryPointerDragging{
-  cursor: grabbing !important;
-  user-select: none !important;
-}
-
 .homeAlbumCard{
   touch-action: none;
   -webkit-user-drag: none;
-  will-change: transform, box-shadow, border-color;
+
 }
 
 .homeAlbumCard img{
@@ -3791,16 +3720,6 @@ body.localitfyLibraryPointerDragging{
     0 20px 50px rgba(0, 0, 0, 0.38) !important;
 }
 
-.app .homeAlbumCard.songDropTarget[data-drop-side="before"]::after{
-  left: calc(var(--drop-line-offset) * -1) !important;
-  right: auto !important;
-}
-
-.app .homeAlbumCard.songDropTarget[data-drop-side="after"]::after{
-  right: calc(var(--drop-line-offset) * -1) !important;
-  left: auto !important;
-}
-
 .app .songRow.songDropTarget{
   transform: translate3d(0, -2px, 0) scale(1.006) !important;
   box-shadow:
@@ -3944,21 +3863,8 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 
 .app .homeAlbumCard{
   contain: layout style !important;
-  will-change: auto !important;
-}
 
-.app .homeAlbumCard:hover{
-  will-change: transform, opacity, border-color, background-color, box-shadow !important;
 }
-
-.app .homeAlbumCard .homeAlbumArt{
-  will-change: auto !important;
-}
-
-.app .homeAlbumCard:hover .homeAlbumArt{
-  will-change: transform, filter, box-shadow !important;
-}
-
 .app .homeAlbumCard .homeAlbumPlayZone{
   touch-action: manipulation !important;
 }
@@ -5527,22 +5433,22 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 :root{
-  --localtify-kopuz-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --localtify-kopuz-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --localtify-kopuz-hover-bg: rgba(var(--accent-rgb), 0.072);
-  --localtify-kopuz-hover-border: rgba(var(--accent-rgb), 0.28);
-  --localtify-kopuz-soft-border: rgba(var(--accent-rgb), 0.13);
-  --localtify-kopuz-button-glow: rgba(var(--accent-rgb), 0.11);
-  --localtify-kopuz-cover-glow: rgba(var(--accent-rgb), 0.145);
+  --localtify-shell-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --localtify-shell-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --localtify-shell-hover-bg: rgba(var(--accent-rgb), 0.072);
+  --localtify-shell-hover-border: rgba(var(--accent-rgb), 0.28);
+  --localtify-shell-soft-border: rgba(var(--accent-rgb), 0.13);
+  --localtify-shell-button-glow: rgba(var(--accent-rgb), 0.11);
+  --localtify-shell-cover-glow: rgba(var(--accent-rgb), 0.145);
 }
 
 .hero{
   transition:
-    background 520ms var(--localtify-kopuz-ease),
+    background 520ms var(--localtify-shell-ease),
     background-color 420ms ease,
     border-color 360ms ease,
-    box-shadow 460ms var(--localtify-kopuz-ease),
-    transform 230ms var(--localtify-kopuz-ease),
+    box-shadow 460ms var(--localtify-shell-ease),
+    transform 230ms var(--localtify-shell-ease),
     filter 320ms ease,
     opacity 220ms ease !important;
 }
@@ -5591,7 +5497,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background:
     linear-gradient(180deg, rgba(var(--accent-rgb), 0.040), rgba(255, 255, 255, 0.014)),
     rgba(0, 0, 0, 0.52) !important;
-  border-color: var(--localtify-kopuz-soft-border) !important;
+  border-color: var(--localtify-shell-soft-border) !important;
   box-shadow:
     0 18px 54px rgba(0, 0, 0, 0.26),
     inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
@@ -5601,7 +5507,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background:
     linear-gradient(180deg, rgba(var(--accent-rgb), 0.074), rgba(255, 255, 255, 0.018)),
     rgba(0, 0, 0, 0.50) !important;
-  border-color: var(--localtify-kopuz-hover-border) !important;
+  border-color: var(--localtify-shell-hover-border) !important;
   box-shadow:
     0 22px 60px rgba(0, 0, 0, 0.30),
     0 0 0 1px rgba(var(--accent-rgb), 0.052) inset !important;
@@ -5683,9 +5589,9 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 
 .heroArt{
   transition:
-    transform 520ms var(--localtify-kopuz-ease),
+    transform 520ms var(--localtify-shell-ease),
     filter 520ms ease,
-    box-shadow 520ms var(--localtify-kopuz-ease) !important;
+    box-shadow 520ms var(--localtify-shell-ease) !important;
   box-shadow:
     0 14px 32px rgba(0, 0, 0, 0.32),
     0 0 20px rgba(var(--accent-rgb), 0.045) !important;
@@ -5697,9 +5603,9 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   filter: blur(22px) saturate(1.08) !important;
   transform: scale(1.045) translateZ(0) !important;
   transition:
-    opacity 520ms var(--localtify-kopuz-ease),
+    opacity 520ms var(--localtify-shell-ease),
     filter 520ms ease,
-    transform 620ms var(--localtify-kopuz-ease) !important;
+    transform 620ms var(--localtify-shell-ease) !important;
 }
 
 .heroArt.coverAura:hover::before{
@@ -5734,7 +5640,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 .coverMoodTabs button,
 .coverMoodChip{
   transition:
-    transform 180ms var(--localtify-kopuz-ease),
+    transform 180ms var(--localtify-shell-ease),
     background 260ms ease,
     border-color 260ms ease,
     box-shadow 260ms ease,
@@ -5782,7 +5688,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     rgba(0, 0, 0, 0.38) !important;
   border-color: rgba(var(--accent-rgb), 0.34) !important;
   box-shadow:
-    0 10px 24px var(--localtify-kopuz-button-glow),
+    0 10px 24px var(--localtify-shell-button-glow),
     inset 0 0 0 1px rgba(var(--accent-rgb), 0.045) !important;
   transform: translateY(-1px) translateZ(0) !important;
   filter: brightness(1.035) !important;
@@ -5825,7 +5731,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   opacity: 1 !important;
   transform: translate3d(0, 0, 0) !important;
   animation: localtifyMainPageIn 340ms var(--motion-ease-page, cubic-bezier(0.16, 1, 0.3, 1)) both !important;
-  will-change: opacity, transform, filter;
+
 }
 
 .app .content > .pageTransition > *{
@@ -5984,10 +5890,10 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 
 .homeLibraryPanel{
   transition:
-    background 260ms var(--kopuz-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+    background 260ms var(--shell-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)),
     border-color 260ms ease,
     box-shadow 260ms ease,
-    transform 260ms var(--kopuz-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)) !important;
+    transform 260ms var(--shell-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)) !important;
 }
 
 .homeLibraryPanel:hover{
@@ -6002,7 +5908,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 
 .homeAlbumCard{
   transition:
-    transform 230ms var(--kopuz-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform 230ms var(--shell-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)),
     background 230ms ease,
     border-color 230ms ease,
     box-shadow 230ms ease,
@@ -6044,7 +5950,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 
 .homeAlbumPlayZone{
   transition:
-    transform 320ms var(--kopuz-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform 320ms var(--shell-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)),
     filter 320ms ease,
     box-shadow 320ms ease,
     opacity 320ms ease !important;
@@ -6349,14 +6255,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
     opacity 180ms ease !important;
 }
 
-.app .songRow:not(.songDropTarget)::before{
-  content: none !important;
-  display: none !important;
-  opacity: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
-}
-
 .app .songRow:hover{
   transform: translate3d(2px, -1px, 0) !important;
   background:
@@ -6482,14 +6380,14 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
 }
 
 .app .content > .pageTransition{
-  animation: localtifyKopuzSoftPageIn 380ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+  animation: localtifyShellSoftPageIn 380ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
 
 .app .content > .pageTransition > *{
-  animation: localtifyKopuzSoftChildIn 440ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+  animation: localtifyShellSoftChildIn 440ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
 
-@keyframes localtifyKopuzSoftPageIn{
+@keyframes localtifyShellSoftPageIn{
   from{
     opacity: 0;
     transform: translate3d(0, 10px, 0) scale(.994);
@@ -6502,7 +6400,7 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   }
 }
 
-@keyframes localtifyKopuzSoftChildIn{
+@keyframes localtifyShellSoftChildIn{
   from{
     opacity: 0;
     transform: translate3d(0, 12px, 0) scale(.996);
@@ -6900,11 +6798,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   box-shadow: 0 12px 28px rgba(0,0,0,.24), 0 0 14px color-mix(in oklab, var(--theme-accent) 7%, transparent) !important;
 }
 
-.homeAlbumCard img{
-  transition: transform 190ms cubic-bezier(.2,.8,.2,1), filter 190ms ease, box-shadow 190ms ease !important;
-  transform-origin: center !important;
-}
-
 .homeAlbumCard:hover img{
   transform: scale(1.025) !important;
   filter: saturate(1.08) brightness(1.04) !important;
@@ -6921,10 +6814,6 @@ body.localitfyLibraryPointerDragging .app .homeAlbumCard .homeAlbumMeta{
   background: color-mix(in oklab, var(--theme-accent) 8.5%, transparent) !important;
   border-color: color-mix(in oklab, var(--theme-accent) 28%, rgba(255,255,255,.09)) !important;
   transform: translateY(-1px) !important;
-}
-
-.homePage{
-  background: transparent !important;
 }
 
 .hero.ambientSurface::before,
@@ -8373,12 +8262,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   background: rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.18) !important;
   box-shadow: 0 0 26px rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.18) !important;
 }
-
 .homeListenCard{
-  will-change: transform;
-}
-
-  .homeListenCard{
     animation-duration: 280ms !important;
   }
 
@@ -8601,7 +8485,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 
 .app .hero.heroPremium.heroLayoutMotion{
   transform-origin: center top !important;
-  will-change: min-height, grid-template-columns, padding, transform !important;
+
   transition:
     min-height 720ms cubic-bezier(0.16, 1, 0.3, 1),
     grid-template-columns 720ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -8640,8 +8524,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     transform 680ms cubic-bezier(0.16, 1, 0.3, 1),
     opacity 380ms ease,
     filter 420ms ease !important;
-}.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText{
-  transform: translate3d(0, 0, 0) scale(1) !important;
 }.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText{
   transform: translate3d(0, -5px, 0) scale(1.012) !important;
 }
@@ -8653,21 +8535,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     letter-spacing 540ms ease,
     transform 680ms cubic-bezier(0.16, 1, 0.3, 1),
     filter 420ms ease !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTitle{
-  max-width: min(880px, 60vw) !important;
-  font-size: clamp(54px, 6.3vw, 96px) !important;
-  line-height: 0.91 !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroTitle{
-  max-width: min(1040px, 64vw) !important;
-  font-size: clamp(66px, 8.1vw, 132px) !important;
-  line-height: 0.86 !important;
-  letter-spacing: -0.082em !important;
-  transform: translate3d(0, -4px, 0) scale(1.006) !important;
 }
 
 .app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
@@ -8703,38 +8570,11 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     transform 680ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArt{
-  border-radius: 22px !important;
-  box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArt{
-  border-radius: 26px !important;
-  box-shadow:
-    0 30px 74px rgba(0, 0, 0, 0.48),
-    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
-    0 0 44px rgba(var(--accent-rgb), 0.16) !important;
-}
-
 .app .hero.heroPremium.heroLayoutMotion .heroArtWrap::before{
   transition:
     opacity 520ms ease,
     filter 620ms ease,
     transform 720ms cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap::before{
-  opacity: 0.34 !important;
-  filter: blur(26px) saturate(1.2) brightness(0.72) !important;
-  transform: translate3d(0, 0, 0) scale(1.14) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap::before{
-  opacity: 0.22 !important;
-  filter: blur(20px) saturate(1.08) brightness(0.66) !important;
-  transform: translate3d(0, 0, 0) scale(1.05) !important;
 }
 
 .app .hero.heroPremium.heroLayoutMotion .heroTinyButton{
@@ -8751,7 +8591,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 
 .app .simpleHero.heroLayoutMotion{
   transform-origin: center top !important;
-  will-change: min-height, transform, padding !important;
+
   transition:
     min-height 720ms cubic-bezier(0.16, 1, 0.3, 1),
     padding 640ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -8948,11 +8788,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 body.localitfyLibraryPointerDragging,
 body.localitfySongDragging{
   cursor: grabbing;
-}
-
-body.localitfyNoSelect,
-body.localitfyNoSelect *{
-  user-select: none !important;
 }
 
 .app[data-theme] .editorModal,
@@ -9164,7 +8999,7 @@ body.localitfyNoSelect *{
     border-color 150ms ease,
     background-color 150ms ease,
     box-shadow 170ms ease !important;
-  will-change: transform, opacity !important;
+
 }
 
 .app .homeAlbumCard.songDragging,
@@ -9643,12 +9478,6 @@ body.localitfyNoSelect *{
 .app .songRow{
   contain: layout style !important;
 }
-
-.app .homeAlbumCard:not(:hover):not(.active):not(.songDragging):not(.songDropTarget),
-.app .songRow:not(:hover):not(.active):not(.songDragging):not(.songDropTarget){
-  will-change: auto !important;
-}
-
 @media (max-width: 720px){
   .app .songRow{
     grid-template-columns: minmax(0, 1fr) 38px 38px !important;
@@ -10050,11 +9879,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   contain: layout style !important;
   isolation: isolate !important;
 }
-
-.app :where(.homeAlbumCard,.songRow,.homeListenCard,.homeFreshCover,.libraryCard,.songCard):not(:hover):not(.active):not(.songDragging):not(.songDropTarget){
-  will-change: auto !important;
-}
-
 .app :where(.homeAlbumCard,.songRow,.homeListenCard,.homeFreshCover,.libraryCard,.songCard){
   backface-visibility: hidden !important;
   perspective: none !important;
@@ -10103,7 +9927,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   box-shadow: 0 10px 26px rgba(0,0,0,.18) !important;
   transform: translate3d(0,0,0) scale(1) !important;
   contain: layout paint style !important;
-  will-change: auto !important;
+
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
@@ -10662,7 +10486,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   right: 4px;
   width: calc(100% - 4px);
   transform: translate3d(0, var(--playlist-row-y, 0px), 0);
-  will-change: transform;
+
 }
 
 .app .playlistTrackRow.virtualPlaylistTrackRow:hover{
@@ -11654,7 +11478,7 @@ html body .content{
   border-radius: 18px !important;
   clip-path: inset(0 round 18px) !important;
   transform: translate3d(0,0,0) !important;
-  will-change: auto !important;
+
 }
 
 .app .songRow:hover,
@@ -12648,7 +12472,7 @@ body.localitfyHeroReflowing .app .homeShelfStack{
   transform: translate3d(0, 0, 0) scale(1.08) !important;
   mix-blend-mode: screen !important;
   animation: localtifyHeroGhostCatchup 640ms cubic-bezier(.16, 1, .3, 1) 70ms both !important;
-  will-change: opacity, transform !important;
+
 }
 
 .app[data-ambient="off"] .hero.heroPremium .heroCoverGhost,
@@ -12747,7 +12571,7 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
   contain: layout paint style !important;
   transform-origin: center top !important;
   backface-visibility: hidden !important;
-  will-change: min-height, max-height, padding, grid-template-columns, gap !important;
+
   transition:
     min-height 720ms var(--hero-v140-ease),
     max-height 720ms var(--hero-v140-ease),
@@ -12786,7 +12610,7 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
 }.app .hero.heroPremium.heroLayoutMotion .heroText{
   transform-origin: left center !important;
   backface-visibility: hidden !important;
-  will-change: transform, opacity !important;
+
   transition:
     transform 660ms var(--hero-v140-ease),
     opacity 300ms ease,
@@ -12829,7 +12653,7 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
   aspect-ratio: 1 / 1 !important;
   transform-origin: center center !important;
   backface-visibility: hidden !important;
-  will-change: width, height, transform !important;
+
   transition:
     width 720ms var(--hero-v140-ease),
     height 720ms var(--hero-v140-ease),
@@ -12941,7 +12765,7 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
 .app .homeShelfStack{
   contain: layout paint style !important;
   transform-origin: center top !important;
-  will-change: auto !important;
+
 }
 
 .app .homeShelfPanel,
@@ -13061,19 +12885,6 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
 .app.homeEntranceSettled:not(.heroMotionActive) .homeShelfStack :where(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeListenRail,.homeFreshRail){
   transform: translate3d(0, 0, 0) scale(1) !important;
 }
-
-.app.heroMotionActive .homeShelfStack,
-.app.heroMotionActive .homeShelfStack :where(.homeListenPanel, .homeFreshPanel, .homeLibraryPanel),
-.app.heroMotionActive .hero.heroPremium.heroLayoutMotion :where(.heroText, .heroTitle, .heroArtWrap, .heroArt){
-  will-change: transform !important;
-}
-
-.app:not(.heroMotionActive) .homeShelfStack,
-.app:not(.heroMotionActive) .homeShelfStack :where(.homeListenPanel, .homeFreshPanel, .homeLibraryPanel),
-.app:not(.heroMotionActive) .hero.heroPremium.heroLayoutMotion :where(.heroText, .heroTitle, .heroArtWrap, .heroArt){
-  will-change: auto !important;
-}
-
 .app.homeEntranceSettled :is(.homeHeroSection,.homeSections,.homeSection,.homeShelf,.homePanel,.libraryPanel){
   animation-name: none !important;
 }
@@ -14187,4 +13998,962 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   max-height: 100% !important;
   object-fit: cover !important;
   display: block !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean{
+  display: grid !important;
+  grid-template-areas:
+    "eyebrow"
+    "title"
+    "artist"
+    "actions"
+    "shelf" !important;
+  grid-auto-rows: max-content !important;
+  align-content: center !important;
+  justify-items: start !important;
+  row-gap: 0 !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .eyebrow{
+  grid-area: eyebrow !important;
+  order: initial !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroTitle{
+  grid-area: title !important;
+  order: initial !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
+  grid-area: artist !important;
+  order: initial !important;
+  position: relative !important;
+  inset: auto !important;
+  display: block !important;
+  transform: none !important;
+  width: min(640px, 100%) !important;
+  max-width: min(640px, 100%) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
+  grid-area: actions !important;
+  order: initial !important;
+  position: relative !important;
+  inset: auto !important;
+  z-index: 14 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  width: auto !important;
+  max-width: min(100%, 640px) !important;
+  margin: 0 !important;
+  padding: 3px !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroExpandedShelf{
+  grid-area: shelf !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact{
+  min-height: clamp(302px, 31vh, 372px) !important;
+  max-height: clamp(302px, 31vh, 372px) !important;
+  padding-block: clamp(36px, 4vh, 52px) !important;
+  overflow: hidden !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText.heroTextClean{
+  align-self: center !important;
+  justify-self: start !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText.heroTextClean > .eyebrow{
+  margin: 0 0 14px !important;
+  transform: none !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText.heroTextClean > .heroTitle{
+  margin: 0 0 10px !important;
+  padding-bottom: 0.14em !important;
+  line-height: 0.94 !important;
+  transform: none !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText.heroTextClean > .heroArtistLine{
+  margin: 0 0 14px !important;
+  padding: 0 !important;
+  line-height: 1.14 !important;
+  transform: none !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText.heroTextClean > .heroQuickActions{
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroTinyButton{
+  min-height: 32px !important;
+  height: 32px !important;
+  padding-inline: 13px !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean > .eyebrow{
+  margin: 0 0 14px !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean > .heroTitle{
+  margin: 0 0 10px !important;
+  padding-bottom: 0.12em !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean > .heroArtistLine{
+  margin: 0 0 14px !important;
+  transform: none !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean > .heroQuickActions{
+  transform: none !important;
+}
+
+.app[data-ambient="on"] .hero.heroPremium > .heroAmbiencePulse{
+  display: block !important;
+  opacity: 0.20 !important;
+  visibility: visible !important;
+}
+
+.app[data-ambient="on"] .hero.heroPremium.heroCompact > .heroAmbiencePulse{
+  opacity: 0.16 !important;
+  filter: blur(28px) saturate(1.18) brightness(0.72) !important;
+}
+
+@media (max-width: 900px){
+  .app .hero.heroPremium.heroLayoutMotion.heroCompact{
+    min-height: 320px !important;
+    max-height: none !important;
+  }
+
+  .app .hero.heroPremium.heroLayoutMotion.heroCompact .heroText.heroTextClean{
+    transform: translate3d(0, 0, 0) !important;
+  }
+
+  .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
+    flex-wrap: wrap !important;
+  }
+}
+
+.app .homeShelfStack .homeListenPanel{
+  overflow: hidden !important;
+}
+
+.app .homeShelfStack .homeListenRail{
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(270px, 1fr)) !important;
+  gap: 12px 16px !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+.app .homeShelfStack .homeListenCard{
+  --listen-card-cover-size: 72px;
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  contain: layout paint !important;
+  content-visibility: visible !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 84px !important;
+  height: 84px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.088) !important;
+  border-radius: 18px !important;
+  color: rgba(255, 255, 255, 0.98) !important;
+  text-align: left !important;
+  background:
+    linear-gradient(90deg, rgba(3, 3, 8, 0.78) 0%, rgba(5, 4, 12, 0.46) 44%, rgba(3, 3, 8, 0.76) 100%),
+    rgba(5, 4, 12, 0.80) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 12px 28px rgba(0, 0, 0, 0.20) !important;
+  transform: translateZ(0) !important;
+  transition:
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 200ms ease !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenBackground{
+  position: absolute !important;
+  inset: -38px -54px !important;
+  z-index: 0 !important;
+  display: block !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  border-radius: inherit !important;
+  opacity: 0.72 !important;
+  transform: scale(1.16) translateZ(0) !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenBackgroundImage{
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  object-fit: cover !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: blur(28px) saturate(1.85) brightness(1.02) contrast(1.10) !important;
+  transform: scale(1.22) translateZ(0) !important;
+  transform-origin: center !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenForeground{
+  position: relative !important;
+  z-index: 5 !important;
+  display: grid !important;
+  grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
+  grid-template-areas: "cover copy time" !important;
+  align-items: center !important;
+  column-gap: 14px !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 10px 15px 10px 10px !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(90deg, rgba(2, 2, 7, 0.72) 0%, rgba(2, 2, 7, 0.28) 38%, rgba(2, 2, 7, 0.72) 100%),
+    radial-gradient(circle at 22% 50%, rgba(255, 255, 255, 0.055), transparent 35%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.050), transparent 56%) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCover,
+.app .homeShelfStack .homeListenCard .coverAura.homeListenCover{
+  grid-area: cover !important;
+  align-self: center !important;
+  justify-self: start !important;
+  display: block !important;
+  flex: 0 0 var(--listen-card-cover-size) !important;
+  width: var(--listen-card-cover-size) !important;
+  min-width: var(--listen-card-cover-size) !important;
+  max-width: var(--listen-card-cover-size) !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  background: rgba(0, 0, 0, 0.48) !important;
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.12) !important;
+  transform: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCover img,
+.app .homeShelfStack .homeListenCard .homeListenCover .coverImage,
+.app .homeShelfStack .homeListenCard .coverAura.homeListenCover img,
+.app .homeShelfStack .homeListenCard .coverAura.homeListenCover .coverImage{
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  object-fit: cover !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCopy{
+  grid-area: copy !important;
+  align-self: center !important;
+  justify-self: stretch !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.82) !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenTitle,
+.app .homeShelfStack .homeListenCard .homeListenCopy strong{
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: rgba(255, 255, 255, 0.99) !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  line-height: 1.12 !important;
+  letter-spacing: -0.028em !important;
+  text-align: left !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenArtist,
+.app .homeShelfStack .homeListenCard .homeListenCopy small{
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: rgba(255, 255, 255, 0.70) !important;
+  font-size: 12px !important;
+  font-weight: 790 !important;
+  line-height: 1.16 !important;
+  text-align: left !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenMeta{
+  grid-area: time !important;
+  align-self: center !important;
+  justify-self: end !important;
+  min-width: max-content !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: rgba(255, 255, 255, 0.74) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-align: right !important;
+  white-space: nowrap !important;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.82) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover{
+  transform: translateY(-2px) translateZ(0) !important;
+  border-color: rgba(var(--accent-rgb), 0.34) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.070),
+    0 16px 34px rgba(0, 0, 0, 0.26),
+    0 0 26px rgba(var(--accent-rgb), 0.08) !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover .homeListenBackground{
+  opacity: 0.86 !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover .homeListenBackgroundImage{
+  filter: blur(32px) saturate(2.08) brightness(1.10) contrast(1.12) !important;
+  transform: scale(1.26) translate3d(1.5%, -1%, 0) !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover .homeListenForeground{
+  background:
+    linear-gradient(90deg, rgba(2, 2, 7, 0.64) 0%, rgba(2, 2, 7, 0.24) 38%, rgba(2, 2, 7, 0.64) 100%),
+    radial-gradient(circle at 18% 50%, rgba(var(--accent-rgb), 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.060), transparent 54%) !important;
+}
+
+.app .homeShelfStack .homeListenCard.active{
+  border-color: rgba(var(--accent-rgb), 0.50) !important;
+  box-shadow:
+    inset 2px 0 0 rgba(var(--accent-rgb), 0.82),
+    inset 0 1px 0 rgba(255, 255, 255, 0.070),
+    0 16px 38px rgba(0, 0, 0, 0.28),
+    0 0 30px rgba(var(--accent-rgb), 0.10) !important;
+}
+
+.app .homeShelfStack .homeListenCard.active .homeListenBackground{
+  opacity: 0.92 !important;
+}
+
+.app .homeShelfStack .homeListenCard.active .homeListenForeground{
+  background:
+    linear-gradient(90deg, rgba(2, 2, 7, 0.62) 0%, rgba(2, 2, 7, 0.22) 40%, rgba(2, 2, 7, 0.62) 100%),
+    radial-gradient(circle at 18% 50%, rgba(var(--accent-rgb), 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.065), transparent 54%) !important;
+}
+
+@media (max-width: 1500px){
+  .app .homeShelfStack .homeListenRail{
+    grid-template-columns: repeat(3, minmax(260px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1040px){
+  .app .homeShelfStack .homeListenRail{
+    grid-template-columns: repeat(2, minmax(240px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 680px){
+  .app .homeShelfStack .homeShelfHeader{
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .app .homeShelfStack .homeListenRail{
+    grid-template-columns: 1fr !important;
+  }
+
+  .app .homeShelfStack .homeListenCard{
+    --listen-card-cover-size: 64px;
+    min-height: 76px !important;
+    height: 76px !important;
+  }
+
+  .app .homeShelfStack .homeListenCard .homeListenForeground{
+    grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
+    padding: 9px 12px 9px 9px !important;
+    column-gap: 12px !important;
+  }
+
+  .app .homeShelfStack .homeListenCard .homeListenCover,
+  .app .homeShelfStack .homeListenCard .coverAura.homeListenCover{
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+  }
+
+  .app .homeShelfStack .homeListenCard .homeListenMeta{
+    display: none !important;
+  }
+}
+
+.app .homeShelfStack .homeListenPanel{
+  padding: clamp(16px, 1.5vw, 22px) !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.020), rgba(255,255,255,.010)),
+    rgba(3, 3, 10, .46) !important;
+  border-color: rgba(255,255,255,.070) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.app .homeShelfStack .homeListenRail{
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(280px, 1fr)) !important;
+  gap: 14px 18px !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+.app .homeShelfStack .homeListenCard{
+  --listen-card-cover-size: 82px;
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  contain: layout paint !important;
+  content-visibility: visible !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 82px !important;
+  height: 82px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 14px !important;
+  color: rgba(255,255,255,.98) !important;
+  text-align: left !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.065), rgba(255,255,255,.032)),
+    rgba(38, 36, 40, .58) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.050),
+    0 12px 26px rgba(0,0,0,.22) !important;
+  transform: translateZ(0) !important;
+  transition:
+    transform 170ms cubic-bezier(.16,1,.3,1),
+    border-color 170ms ease,
+    background-color 170ms ease,
+    box-shadow 190ms ease !important;
+}
+
+.app .homeShelfStack .homeListenCard::before,
+.app .homeShelfStack .homeListenCard::after{
+  content: none !important;
+  display: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenBackground{
+  position: absolute !important;
+  inset: -26px -38px !important;
+  z-index: 0 !important;
+  display: block !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  border-radius: inherit !important;
+  opacity: .52 !important;
+  transform: scale(1.12) translateZ(0) !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenBackgroundImage{
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: blur(24px) saturate(1.50) brightness(.76) contrast(1.02) !important;
+  transform: scale(1.20) translateZ(0) !important;
+  transform-origin: center !important;
+}
+
+.app .homeShelfStack .homeListenCard[data-cover-ambience="off"] .homeListenBackground{
+  opacity: 0 !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenForeground{
+  position: relative !important;
+  z-index: 5 !important;
+  display: grid !important;
+  grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
+  grid-template-areas: "cover copy time" !important;
+  align-items: center !important;
+  column-gap: 18px !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 16px 0 0 !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(90deg,
+      rgba(6, 6, 9, .18) 0%,
+      rgba(6, 6, 9, .48) 28%,
+      rgba(6, 6, 9, .68) 100%),
+    linear-gradient(180deg, rgba(255,255,255,.030), rgba(0,0,0,.100)) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenForeground > *{
+  position: relative !important;
+  z-index: 6 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCover,
+.app .homeShelfStack .homeListenCard .coverAura.homeListenCover{
+  grid-area: cover !important;
+  align-self: stretch !important;
+  justify-self: stretch !important;
+  display: block !important;
+  flex: 0 0 var(--listen-card-cover-size) !important;
+  width: var(--listen-card-cover-size) !important;
+  min-width: var(--listen-card-cover-size) !important;
+  max-width: var(--listen-card-cover-size) !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 13px 0 0 13px !important;
+  overflow: hidden !important;
+  background: rgba(0,0,0,.38) !important;
+  box-shadow:
+    12px 0 30px rgba(0,0,0,.22),
+    inset -1px 0 0 rgba(255,255,255,.075) !important;
+  transform: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCover::before,
+.app .homeShelfStack .homeListenCard .homeListenCover::after,
+.app .homeShelfStack .homeListenCard .coverAura.homeListenCover::before,
+.app .homeShelfStack .homeListenCard .coverAura.homeListenCover::after{
+  content: none !important;
+  display: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCover img,
+.app .homeShelfStack .homeListenCard .homeListenCover .coverImage,
+.app .homeShelfStack .homeListenCard .coverAura.homeListenCover img,
+.app .homeShelfStack .homeListenCard .coverAura.homeListenCover .coverImage{
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  object-fit: cover !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: saturate(1.04) contrast(1.02) !important;
+  transform: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCopy{
+  grid-area: copy !important;
+  align-self: center !important;
+  justify-self: stretch !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  text-shadow: 0 2px 16px rgba(0,0,0,.68) !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenTitle,
+.app .homeShelfStack .homeListenCard .homeListenCopy strong{
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: rgba(255,255,255,.98) !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.026em !important;
+  text-align: left !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenArtist,
+.app .homeShelfStack .homeListenCard .homeListenCopy small{
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: rgba(255,255,255,.62) !important;
+  font-size: 12px !important;
+  font-weight: 780 !important;
+  line-height: 1.12 !important;
+  text-align: left !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenMeta{
+  grid-area: time !important;
+  align-self: center !important;
+  justify-self: end !important;
+  min-width: max-content !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: rgba(255,255,255,.68) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-align: right !important;
+  white-space: nowrap !important;
+  text-shadow: 0 2px 16px rgba(0,0,0,.68) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover{
+  transform: translateY(-2px) translateZ(0) !important;
+  border-color: rgba(255,255,255,.15) !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.082), rgba(255,255,255,.044)),
+    rgba(48,46,50,.62) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.065),
+    0 16px 34px rgba(0,0,0,.28) !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover .homeListenBackground{
+  opacity: .68 !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover .homeListenBackgroundImage{
+  filter: blur(26px) saturate(1.72) brightness(.86) contrast(1.06) !important;
+  transform: scale(1.24) translate3d(1%, -1%, 0) !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover .homeListenCover img,
+.app .homeShelfStack .homeListenCard:hover .homeListenCover .coverImage,
+.app .homeShelfStack .homeListenCard:hover .coverAura.homeListenCover img,
+.app .homeShelfStack .homeListenCard:hover .coverAura.homeListenCover .coverImage{
+  transform: scale(1.025) translateZ(0) !important;
+}
+
+.app .homeShelfStack .homeListenCard.active{
+  border-color: rgba(var(--accent-rgb), .44) !important;
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), .12), rgba(255,255,255,.036)),
+    rgba(43, 40, 48, .64) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(var(--accent-rgb), .76),
+    inset 0 1px 0 rgba(255,255,255,.070),
+    0 16px 36px rgba(0,0,0,.30) !important;
+}
+
+.app .homeShelfStack .homeListenCard.active .homeListenBackground{
+  opacity: .70 !important;
+}
+
+.app .homeShelfStack .homeListenCard.active .homeListenForeground{
+  background:
+    linear-gradient(90deg,
+      rgba(6, 6, 9, .12) 0%,
+      rgba(6, 6, 9, .40) 28%,
+      rgba(6, 6, 9, .62) 100%),
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.085)) !important;
+}
+
+@media (max-width: 1500px){
+  .app .homeShelfStack .homeListenRail{
+    grid-template-columns: repeat(3, minmax(270px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1040px){
+  .app .homeShelfStack .homeListenRail{
+    grid-template-columns: repeat(2, minmax(250px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 680px){
+  .app .homeShelfStack .homeShelfHeader{
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .app .homeShelfStack .homeListenRail{
+    grid-template-columns: 1fr !important;
+  }
+
+  .app .homeShelfStack .homeListenCard{
+    --listen-card-cover-size: 74px;
+    min-height: 74px !important;
+    height: 74px !important;
+  }
+
+  .app .homeShelfStack .homeListenCard .homeListenForeground{
+    grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
+    padding: 0 12px 0 0 !important;
+    column-gap: 13px !important;
+  }
+
+  .app .homeShelfStack .homeListenCard .homeListenMeta{
+    display: none !important;
+  }
+}
+
+/* V309 Listen now final owner: left cover, foreground content, cover blur background. */
+.app .homeShelfStack .homeListenRail{
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(280px, 1fr)) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+}
+
+.app .homeShelfStack .homeListenCard{
+  --listen-card-cover-size: 74px;
+  position: relative !important;
+  isolation: isolate !important;
+  min-height: 74px !important;
+  height: 74px !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  background: rgba(20,19,24,.62) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+  transform: translateZ(0) !important;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms cubic-bezier(.16,1,.3,1) !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenBackground{
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  opacity: .50 !important;
+  background: rgba(10,10,14,.38) !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenBackgroundImage{
+  position: absolute !important;
+  inset: -34% !important;
+  width: 168% !important;
+  height: 168% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  opacity: .72 !important;
+  filter: blur(24px) saturate(1.48) brightness(.78) contrast(1.04) !important;
+  transform: scale(1.18) translateZ(0) !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenForeground{
+  position: relative !important;
+  z-index: 2 !important;
+  height: 100% !important;
+  min-height: inherit !important;
+  display: grid !important;
+  grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
+  grid-template-areas: "cover copy time" !important;
+  align-items: center !important;
+  column-gap: 14px !important;
+  padding: 0 14px 0 0 !important;
+  background:
+    linear-gradient(90deg,
+      rgba(6,6,10,.08) 0,
+      rgba(6,6,10,.44) 30%,
+      rgba(6,6,10,.66) 100%),
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.055)) !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCover{
+  grid-area: cover !important;
+  width: var(--listen-card-cover-size) !important;
+  height: var(--listen-card-cover-size) !important;
+  min-width: var(--listen-card-cover-size) !important;
+  border-radius: 0 16px 16px 0 !important;
+  overflow: hidden !important;
+  align-self: stretch !important;
+  justify-self: start !important;
+  margin: 0 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCover img,
+.app .homeShelfStack .homeListenCard .homeListenCover .coverImage{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  filter: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenCopy{
+  grid-area: copy !important;
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 5px !important;
+  text-align: left !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenTitle,
+.app .homeShelfStack .homeListenCard .homeListenCopy strong{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: rgba(255,255,255,.98) !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  line-height: 1.08 !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenArtist,
+.app .homeShelfStack .homeListenCard .homeListenCopy small{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: rgba(255,255,255,.62) !important;
+  font-size: 12px !important;
+  font-weight: 780 !important;
+  line-height: 1.12 !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenMeta{
+  grid-area: time !important;
+  justify-self: end !important;
+  min-width: max-content !important;
+  color: rgba(255,255,255,.68) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover{
+  transform: translateY(-1px) translateZ(0) !important;
+  border-color: rgba(255,255,255,.15) !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover .homeListenBackground{
+  opacity: .64 !important;
+}
+
+.app .homeShelfStack .homeListenCard.active{
+  border-color: rgba(var(--accent-rgb), .44) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(var(--accent-rgb), .76),
+    inset 0 1px 0 rgba(255,255,255,.070),
+    0 16px 36px rgba(0,0,0,.30) !important;
+}
+
+@media (max-width: 1500px){
+  .app .homeShelfStack .homeListenRail{
+    grid-template-columns: repeat(3, minmax(270px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1040px){
+  .app .homeShelfStack .homeListenRail{
+    grid-template-columns: repeat(2, minmax(250px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 680px){
+  .app .homeShelfStack .homeListenRail{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* V309 low-lag guardrails. */
+.app img{
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
+  transform: translateZ(0);
 }

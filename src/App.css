@@ -1,11 +1,3 @@
-/* ======================================================================
-   localtify v0.3.6 V242 — safe App.css rewrite
-
-   This file is rebuilt from the working App.css you uploaded.
-   It keeps the actual CSS rules intact and only removes old comments,
-   empty media shells, and patch labels. No required UI sections are cut.
-====================================================================== */
-
 .muted-small{
   display: block;
   margin-top: 3px;
@@ -33,11 +25,9 @@
   font-size: 10px;
 }
 
-
 .app{
   --accent-contrast: #06100b;
 }
-
 
 .libraryUtilityRail .compactHead .eyebrow{
   font-size: 9px !important;
@@ -48,7 +38,6 @@
   font-size: 10px !important;
   line-height: 1.35 !important;
 }
-
 
 .modalWrap{
   position: fixed !important;
@@ -213,7 +202,6 @@
   padding: 0 16px !important;
 }
 
-
 .hero{
   align-items: center !important;
 }
@@ -226,7 +214,6 @@
 .searchEasterWrap .search{
   width: 100%;
 }
-
 
 .appShell{
   grid-template-columns: var(--sidebar-width, 249px) minmax(0, 1fr) !important;
@@ -294,7 +281,6 @@
   height: 43px !important;
 }
 
-
 .headerBar{
   position: relative !important;
   top: auto !important;
@@ -318,7 +304,6 @@
 .appShell{
   overflow: hidden !important;
 }
-
 
 .sidebarCustomTheme{
   overflow: visible !important;
@@ -411,7 +396,6 @@
   background: rgba(var(--accent-rgb), 0.12) !important;
 }
 
-
 .sidebarThemeBody[aria-hidden="false"]{
   max-height: min(62vh, 620px) !important;
   overflow: visible !important;
@@ -427,7 +411,6 @@
   overflow-x: hidden !important;
   padding-right: 4px !important;
 }
-
 
 .secretLayer.stars{
   position: fixed !important;
@@ -455,7 +438,6 @@
   box-shadow: 0 18px 60px rgba(0,0,0,0.32) !important;
 }
 
-
 @media (max-width: 1100px){
   .headerBar{
     flex-direction: column !important;
@@ -471,7 +453,6 @@
     max-height: 520px !important;
   }
 }
-
 
 :root{
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
@@ -569,13 +550,11 @@
   }
 }
 
-
 .app{
   --panel: var(--panel, rgba(255, 255, 255, 0.035));
   --accent-2: var(--accent-2, var(--accent));
   --accent-2-rgb: var(--accent-2-rgb, var(--accent-rgb));
 }
-
 
 .appToast{
   position: fixed;
@@ -717,19 +696,12 @@
   }
 }
 
-
 .app{
   --hero-title-lift: -0.065em;
   --hero-title-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --card-hover-ease: cubic-bezier(0.2, 0.85, 0.2, 1);
   --button-pop-ease: cubic-bezier(0.18, 0.92, 0.22, 1);
 }
-
-.app .ambientSurface::before{
-  will-change: auto !important;
-}
-
-
 .app .pageTransition{
   min-width: 0;
   transform-origin: center 24px;
@@ -757,7 +729,6 @@
     0 0 0 7px rgba(var(--accent-rgb), 0.11),
     0 18px 44px rgba(var(--accent-rgb), 0.24) !important;
 }
-
 
 .app .appToast{
   transform: translateZ(0);
@@ -807,7 +778,6 @@
     transform: translate3d(0, 0, 0);
   }
 }
-
 
 .app{
   --cinematic-ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -1168,13 +1138,11 @@
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-
 :root{
   --hero-title-final-lift: -0.115em;
   --hero-title-final-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --album-hover-final-ease: cubic-bezier(0.18, 0.92, 0.22, 1);
 }
-
 
 @keyframes localitfySongTitleIn {
   0% {
@@ -1201,7 +1169,6 @@
   backface-visibility: hidden;
 }
 
-
 .app .ambientSurface::before{
   opacity: 0.14;
   filter: blur(42px) saturate(1.12) brightness(0.92);
@@ -1226,7 +1193,6 @@
 .app .songRow:hover{
   transform: translate3d(2px, 0, 0) !important;
 }
-
 
 .localitfyDragPreview{
   position: fixed;
@@ -1477,7 +1443,6 @@ body.isResizingSidebar .sidebarResizeHandle span{
   50% { opacity: 1; }
 }
 
-
 html{
   scroll-behavior: smooth;
 }
@@ -1490,11 +1455,6 @@ html{
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
-}
-
-.app .pageTransition{
-  min-width: 0;
-  contain: layout style;
 }
 
 .app .songRow{
@@ -1529,7 +1489,6 @@ html{
   scroll-behavior: auto;
 }
 
-
 .app .content{
   overflow-anchor: none;
   overscroll-behavior: contain;
@@ -1561,7 +1520,6 @@ html{
   backface-visibility: hidden;
   transform: translateZ(0);
 }
-
 
 .app{
   --player-size-used: var(--player-size-live, var(--player-size, 108px));
@@ -1694,7 +1652,6 @@ body.localitfySongDragging .songRow{
   width: 3px;
 }
 
-
 body.isResizingSidebar .ambientSurface::before{
   animation: none !important;
   transition: none !important;
@@ -1712,7 +1669,6 @@ body.isResizingSidebar .content{
 body.isResizingSidebar{
   text-rendering: optimizeSpeed;
 }
-
 
 .onboardingLayer{
   position: fixed;
@@ -1937,7 +1893,6 @@ body.isResizingSidebar{
     flex-direction: column;
   }
 }
-
 
 .onboardingLayer{
   position: fixed;
@@ -2597,7 +2552,6 @@ body.isResizingSidebar{
   }
 }
 
-
 .onboardingLayer{
   position: fixed !important;
   inset: 0 !important;
@@ -3245,15 +3199,9 @@ body.isResizingSidebar{
   }
 }
 
-
 .app{
   -webkit-font-smoothing: antialiased;
 }
-
-.app button{
-  will-change: auto !important;
-}
-
 .app button{
   transition:
     transform 150ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -3286,7 +3234,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   animation: none !important;
 }
 
-
 :root{
   --flat-bg: #000000;
   --flat-bg-soft: #030303;
@@ -3308,7 +3255,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   --custom-text: var(--flat-text);
   --custom-muted: var(--flat-muted);
 }
-
 
 .app.flatNoGradientUI *:not(img):not(video):not(canvas){
   background-image: none !important;
@@ -3418,7 +3364,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 @keyframes whatsNewPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 980px){   .statusGrid{ grid-template-columns: 1fr; }   }
 
-
 .libraryUtilityBar{
   width: 100%;
   min-width: 0;
@@ -3495,7 +3440,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
     justify-content: flex-start;
   }
 }
-
 
 .whatsNewOverlay{
   background: rgba(0, 0, 0, 0.68);
@@ -3597,7 +3541,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   justify-content: center;
   border-radius: 13px;
 }
-
 
 .editorModalWrap{
   padding: 26px !important;
@@ -3931,7 +3874,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   }
 }
 
-
 .libraryPanelHead{
   align-items: center;
   gap: 14px;
@@ -4006,20 +3948,19 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   }
 }
 
-
 .app{
-  --kopuz-panel: rgba(255, 255, 255, 0.045);
-  --kopuz-panel-2: rgba(255, 255, 255, 0.065);
-  --kopuz-panel-hover: rgba(255, 255, 255, 0.086);
-  --kopuz-border: rgba(255, 255, 255, 0.095);
-  --kopuz-border-strong: rgba(255, 255, 255, 0.145);
-  --kopuz-accent-panel: rgba(var(--accent-rgb), 0.085);
-  --kopuz-accent-hover: rgba(var(--accent-rgb), 0.145);
-  --kopuz-accent-border: rgba(var(--accent-rgb), 0.26);
-  --kopuz-card-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
-  --kopuz-card-shadow-hover: 0 24px 70px rgba(0, 0, 0, 0.42);
-  --kopuz-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --kopuz-ease-soft: cubic-bezier(0.2, 0.82, 0.2, 1);
+  --shell-panel: rgba(255, 255, 255, 0.045);
+  --shell-panel-2: rgba(255, 255, 255, 0.065);
+  --shell-panel-hover: rgba(255, 255, 255, 0.086);
+  --shell-border: rgba(255, 255, 255, 0.095);
+  --shell-border-strong: rgba(255, 255, 255, 0.145);
+  --shell-accent-panel: rgba(var(--accent-rgb), 0.085);
+  --shell-accent-hover: rgba(var(--accent-rgb), 0.145);
+  --shell-accent-border: rgba(var(--accent-rgb), 0.26);
+  --shell-card-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+  --shell-card-shadow-hover: 0 24px 70px rgba(0, 0, 0, 0.42);
+  --shell-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --shell-ease-soft: cubic-bezier(0.2, 0.82, 0.2, 1);
 }
 
 .app{
@@ -4056,7 +3997,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   transition:
     color 150ms ease,
     background-color 150ms ease,
-    transform 150ms var(--kopuz-ease) !important;
+    transform 150ms var(--shell-ease) !important;
 }
 
 .windowButtons button:hover{
@@ -4099,10 +4040,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   color: rgba(255, 255, 255, 0.47) !important;
 }
 
-.nav{
-  gap: 7px !important;
-}
-
 .navItem{
   height: 41px !important;
   border-radius: 13px !important;
@@ -4113,7 +4050,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
     background-color 180ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease,
-    transform 180ms var(--kopuz-ease) !important;
+    transform 180ms var(--shell-ease) !important;
 }
 
 .navItem:hover{
@@ -4146,7 +4083,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .panel{
-  border-color: var(--kopuz-border) !important;
+  border-color: var(--shell-border) !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.022)),
     rgba(0, 0, 0, 0.32) !important;
@@ -4162,7 +4099,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
     border-color 220ms ease,
     background-color 220ms ease,
     box-shadow 220ms ease,
-    transform 220ms var(--kopuz-ease) !important;
+    transform 220ms var(--shell-ease) !important;
 }
 
 .panel:hover{
@@ -4176,7 +4113,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .headerBar{
-  animation: localtifyKopuzHeaderIn 360ms var(--kopuz-ease) both !important;
+  animation: localtifyShellHeaderIn 360ms var(--shell-ease) both !important;
 }
 
 .headerText h2{
@@ -4189,7 +4126,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   text-shadow: 0 0 18px rgba(var(--accent-rgb), 0.18) !important;
 }
 
-
 .ambientSurface{
   border-color: rgba(var(--accent-rgb), 0.15) !important;
   box-shadow:
@@ -4198,7 +4134,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   transition:
     border-color 420ms ease,
     box-shadow 420ms ease,
-    transform 420ms var(--kopuz-ease),
+    transform 420ms var(--shell-ease),
     background-color 420ms ease !important;
 }
 
@@ -4210,7 +4146,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   transition:
     opacity 520ms ease,
     filter 520ms ease,
-    transform 620ms var(--kopuz-ease),
+    transform 620ms var(--shell-ease),
     background-position 900ms ease !important;
 }
 
@@ -4243,7 +4179,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   display: none !important;
 }
 
-
 .coverAura{
   overflow: visible !important;
   isolation: isolate !important;
@@ -4256,7 +4191,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   transform: scale(0.92) !important;
   transition:
     opacity 260ms ease,
-    transform 300ms var(--kopuz-ease),
+    transform 300ms var(--shell-ease),
     filter 300ms ease !important;
 }
 
@@ -4272,7 +4207,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .coverAura > img{
   transition:
-    transform 260ms var(--kopuz-ease),
+    transform 260ms var(--shell-ease),
     filter 260ms ease,
     opacity 220ms ease !important;
 }
@@ -4298,7 +4233,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
     background-color 180ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease,
-    transform 180ms var(--kopuz-ease) !important;
+    transform 180ms var(--shell-ease) !important;
 }
 
 .songRow{
@@ -4437,7 +4372,7 @@ input[type="range"]{
   background: rgba(var(--accent-rgb), 0.34) !important;
 }
 
-@keyframes localtifyKopuzHeaderIn{
+@keyframes localtifyShellHeaderIn{
   from{
     opacity: 0;
     transform: translate3d(0, 8px, 0) scale(0.992);
@@ -4448,15 +4383,14 @@ input[type="range"]{
   }
 }
 
-
 .app{
-  --kopuz-sidebar-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --kopuz-sidebar-soft: color-mix(in oklab, var(--accent) 5%, transparent);
-  --kopuz-sidebar-hover: color-mix(in oklab, var(--accent) 11%, transparent);
-  --kopuz-sidebar-active: color-mix(in oklab, var(--accent) 16%, transparent);
-  --kopuz-sidebar-line: color-mix(in oklab, var(--accent) 24%, transparent);
-  --kopuz-sidebar-text: color-mix(in oklab, var(--text) 84%, var(--accent) 16%);
-  --kopuz-sidebar-muted: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%);
+  --shell-sidebar-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --shell-sidebar-soft: color-mix(in oklab, var(--accent) 5%, transparent);
+  --shell-sidebar-hover: color-mix(in oklab, var(--accent) 11%, transparent);
+  --shell-sidebar-active: color-mix(in oklab, var(--accent) 16%, transparent);
+  --shell-sidebar-line: color-mix(in oklab, var(--accent) 24%, transparent);
+  --shell-sidebar-text: color-mix(in oklab, var(--text) 84%, var(--accent) 16%);
+  --shell-sidebar-muted: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%);
 }
 
 .appShell{
@@ -4502,7 +4436,7 @@ input[type="range"]{
   min-height: 26px;
   border: 0;
   border-radius: 9px;
-  color: var(--kopuz-sidebar-muted);
+  color: var(--shell-sidebar-muted);
   background: transparent;
   font-size: 10px;
   font-weight: 700;
@@ -4511,12 +4445,12 @@ input[type="range"]{
   transition:
     color 180ms ease,
     background 180ms ease,
-    transform 180ms var(--kopuz-sidebar-ease),
+    transform 180ms var(--shell-sidebar-ease),
     box-shadow 180ms ease;
 }
 
 .sidebarModeTab.active{
-  color: var(--kopuz-sidebar-text);
+  color: var(--shell-sidebar-text);
   background: color-mix(in oklab, var(--accent) 14%, transparent);
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, var(--text) 8%, transparent),
@@ -4524,7 +4458,7 @@ input[type="range"]{
 }
 
 .sidebarModeTab:not(.active):hover{
-  color: var(--kopuz-sidebar-text);
+  color: var(--shell-sidebar-text);
   background: color-mix(in oklab, var(--accent) 8%, transparent);
   transform: translateY(-1px);
 }
@@ -4543,7 +4477,7 @@ input[type="range"]{
   gap: 11px;
   padding: 8px 10px !important;
   border-radius: 15px !important;
-  color: var(--kopuz-sidebar-muted) !important;
+  color: var(--shell-sidebar-muted) !important;
   background: transparent !important;
   border: 1px solid transparent !important;
   text-align: left !important;
@@ -4553,7 +4487,7 @@ input[type="range"]{
     color 220ms ease,
     background 220ms ease,
     border-color 220ms ease,
-    transform 220ms var(--kopuz-sidebar-ease),
+    transform 220ms var(--shell-sidebar-ease),
     box-shadow 220ms ease,
     filter 220ms ease !important;
 }
@@ -4575,7 +4509,7 @@ input[type="range"]{
     color 220ms ease,
     background 220ms ease,
     border-color 220ms ease,
-    transform 220ms var(--kopuz-sidebar-ease),
+    transform 220ms var(--shell-sidebar-ease),
     box-shadow 220ms ease,
     filter 220ms ease;
 }
@@ -4608,9 +4542,9 @@ input[type="range"]{
 }
 
 .navItem:hover{
-  color: var(--kopuz-sidebar-text) !important;
-  background: var(--kopuz-sidebar-hover) !important;
-  border-color: var(--kopuz-sidebar-line) !important;
+  color: var(--shell-sidebar-text) !important;
+  background: var(--shell-sidebar-hover) !important;
+  border-color: var(--shell-sidebar-line) !important;
   transform: translate3d(4px, -1px, 0) !important;
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, var(--text) 7%, transparent),
@@ -4629,7 +4563,7 @@ input[type="range"]{
 
 .navItem.active{
   color: var(--text) !important;
-  background: var(--kopuz-sidebar-active) !important;
+  background: var(--shell-sidebar-active) !important;
   border-color: color-mix(in oklab, var(--accent) 34%, transparent) !important;
   box-shadow:
     inset 3px 0 0 var(--accent),
@@ -4668,8 +4602,6 @@ input[type="range"]{
     grid-template-columns: 88px minmax(0, 1fr) !important;
   }
 
-  
-
   .sidebar{
     padding-inline: 10px !important;
   }
@@ -4707,11 +4639,6 @@ input[type="range"]{
     font-size: 21px;
     font-weight: 700;
   }
-}
-
-
-.sidebarModeSwitch{
-  display: none !important;
 }
 
 .sidebar{
@@ -4910,22 +4837,21 @@ input[type="range"]{
   }
 }
 
-
 .app{
-  --kopuz-sidebar-width: var(--sidebar-width-live, var(--sidebar-width, 236px));
-  --kopuz-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --kopuz-hover-bg: color-mix(in oklab, var(--accent) 9%, transparent);
-  --kopuz-active-bg: color-mix(in oklab, var(--accent) 13%, transparent);
-  --kopuz-hover-line: color-mix(in oklab, var(--accent) 22%, transparent);
-  --kopuz-soft-text: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%);
+  --shell-sidebar-width: var(--sidebar-width-live, var(--sidebar-width, 236px));
+  --shell-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --shell-hover-bg: color-mix(in oklab, var(--accent) 9%, transparent);
+  --shell-active-bg: color-mix(in oklab, var(--accent) 13%, transparent);
+  --shell-hover-line: color-mix(in oklab, var(--accent) 22%, transparent);
+  --shell-soft-text: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%);
 }
 
 .appShell{
-  grid-template-columns: var(--kopuz-sidebar-width) minmax(0, 1fr) !important;
+  grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr) !important;
 }
 
 .sidebar{
-  width: var(--kopuz-sidebar-width) !important;
+  width: var(--shell-sidebar-width) !important;
   padding: 18px 14px 16px !important;
   gap: 18px !important;
   background:
@@ -4959,7 +4885,7 @@ input[type="range"]{
   padding: 9px 12px !important;
   position: relative !important;
   overflow: hidden !important;
-  color: var(--kopuz-soft-text) !important;
+  color: var(--shell-soft-text) !important;
   background: transparent !important;
   border: 1px solid transparent !important;
   border-radius: 12px !important;
@@ -4968,11 +4894,11 @@ input[type="range"]{
   transform: translate3d(0,0,0) !important;
   filter: none !important;
   transition:
-    color 190ms var(--kopuz-motion-ease),
-    background-color 190ms var(--kopuz-motion-ease),
-    border-color 190ms var(--kopuz-motion-ease),
-    box-shadow 210ms var(--kopuz-motion-ease),
-    transform 210ms var(--kopuz-motion-ease) !important;
+    color 190ms var(--shell-motion-ease),
+    background-color 190ms var(--shell-motion-ease),
+    border-color 190ms var(--shell-motion-ease),
+    box-shadow 210ms var(--shell-motion-ease),
+    transform 210ms var(--shell-motion-ease) !important;
 }
 
 .navItem::before{
@@ -4988,8 +4914,8 @@ input[type="range"]{
   transform: scaleY(.45);
   transform-origin: center;
   transition:
-    opacity 190ms var(--kopuz-motion-ease),
-    transform 220ms var(--kopuz-motion-ease);
+    opacity 190ms var(--shell-motion-ease),
+    transform 220ms var(--shell-motion-ease);
 }
 
 .navItem::after{
@@ -5001,7 +4927,7 @@ input[type="range"]{
   background:
     linear-gradient(90deg, color-mix(in oklab, var(--accent) 12%, transparent), transparent 62%),
     radial-gradient(circle at 18% 50%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 32%);
-  transition: opacity 210ms var(--kopuz-motion-ease);
+  transition: opacity 210ms var(--shell-motion-ease);
 }
 
 .navItem > *{
@@ -5027,10 +4953,10 @@ input[type="range"]{
   transform: none !important;
   filter: none !important;
   transition:
-    color 190ms var(--kopuz-motion-ease),
-    opacity 190ms var(--kopuz-motion-ease),
-    text-shadow 190ms var(--kopuz-motion-ease),
-    transform 190ms var(--kopuz-motion-ease) !important;
+    color 190ms var(--shell-motion-ease),
+    opacity 190ms var(--shell-motion-ease),
+    text-shadow 190ms var(--shell-motion-ease),
+    transform 190ms var(--shell-motion-ease) !important;
 }
 
 .navText{
@@ -5058,8 +4984,8 @@ input[type="range"]{
 
 .navItem:hover{
   color: var(--text) !important;
-  background: var(--kopuz-hover-bg) !important;
-  border-color: var(--kopuz-hover-line) !important;
+  background: var(--shell-hover-bg) !important;
+  border-color: var(--shell-hover-line) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
   transform: translate3d(2px, 0, 0) !important;
 }
@@ -5082,7 +5008,7 @@ input[type="range"]{
 
 .navItem.active{
   color: var(--text) !important;
-  background: var(--kopuz-active-bg) !important;
+  background: var(--shell-active-bg) !important;
   border-color: color-mix(in oklab, var(--accent) 28%, transparent) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.045),
@@ -5118,12 +5044,12 @@ input[type="range"]{
 
 .content > .pageTransition{
   transform-origin: 50% 26px !important;
-  animation: localtifyKopuzPageIn 430ms var(--kopuz-motion-ease) both !important;
-  will-change: opacity, transform, filter !important;
+  animation: localtifyShellPageIn 430ms var(--shell-motion-ease) both !important;
+
 }
 
 .content > .pageTransition > *{
-  animation: localtifyKopuzChildIn 500ms var(--kopuz-motion-ease) both !important;
+  animation: localtifyShellChildIn 500ms var(--shell-motion-ease) both !important;
   animation-delay: 34ms !important;
 }
 
@@ -5131,7 +5057,7 @@ input[type="range"]{
 .content > .pageTransition > *:nth-child(3){ animation-delay: 100ms !important; }
 .content > .pageTransition > *:nth-child(4){ animation-delay: 126ms !important; }
 
-@keyframes localtifyKopuzPageIn{
+@keyframes localtifyShellPageIn{
   0%{
     opacity: 0;
     transform: translate3d(0, 12px, 0) scale(.992);
@@ -5144,7 +5070,7 @@ input[type="range"]{
   }
 }
 
-@keyframes localtifyKopuzChildIn{
+@keyframes localtifyShellChildIn{
   0%{
     opacity: 0;
     transform: translate3d(0, 16px, 0) scale(.994);
@@ -5172,11 +5098,9 @@ input[type="range"]{
   }
 }
 
-
 .sidebar .mainAction{
   margin-top: 4px !important;
 }
-
 
 :root{
   --font-display: "Space Grotesk", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -5299,7 +5223,6 @@ body{
   flex: 0 0 auto !important;
 }
 
-
 :root{
   --font-display: "Space Grotesk", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-body: "Space Grotesk", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -5318,11 +5241,6 @@ body{
   font-family: var(--font-display) !important;
   font-weight: 800 !important;
   letter-spacing: -0.064em;
-}
-
-
-.app .sidebar .logoWrap{
-  display: none !important;
 }
 
 .app .sidebar{
@@ -5398,12 +5316,6 @@ body{
   fill-opacity: .36 !important;
 }
 
-.app .navText{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 2px !important;
-}
-
 .app .navText strong{
   font-size: 14px !important;
   line-height: 1.05 !important;
@@ -5418,7 +5330,6 @@ body{
   font-weight: 750 !important;
   text-transform: lowercase !important;
 }
-
 
 .app .songList{
   overflow-x: hidden !important;
@@ -5441,7 +5352,6 @@ body{
   box-shadow: none !important;
 }
 
-
 .app .songRow:not(.songDropTarget)::before{
   content: none !important;
   display: none !important;
@@ -5457,7 +5367,6 @@ body{
     inset 3px 0 0 var(--accent),
     inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
-
 
 .app .navItem,
 .app .songRow,
@@ -5479,7 +5388,6 @@ body{
   animation: none !important;
   transform: none !important;
 }
-
 
 .app .sidebar .logoWrap{
   display: none !important;
@@ -5580,7 +5488,6 @@ body{
   text-transform: lowercase !important;
 }
 
-
 .app{
   --control-circle: 42px;
   --control-circle-main: 48px;
@@ -5628,7 +5535,7 @@ body{
   fill: color-mix(in oklab, var(--accent) 24%, transparent) !important;
 }
 
-.kopuzThemeGrid{
+.settingsThemeGrid{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
   gap: 12px;
@@ -5651,7 +5558,6 @@ body{
   background: color-mix(in oklab, var(--bg) 78%, transparent);
   border-color: color-mix(in oklab, var(--accent) 18%, rgba(255,255,255,.1));
 }
-
 
 .circleButton:not(.playerBar *){
   width: var(--control-circle) !important;
@@ -5695,7 +5601,6 @@ body{
 .playIcon{
   transform: translateX(1px);
 }
-
 
 .app{
   --app-grid-line: color-mix(in oklab, var(--text, #fff) 4%, transparent);
@@ -5769,7 +5674,6 @@ html{
   animation: none !important;
 }
 
-
 .ambientSurface{
   isolation: auto !important;
   background:
@@ -5795,7 +5699,6 @@ html{
   box-shadow: none !important;
 }
 
-
 .sidebarCustomTheme{
   background: color-mix(in oklab, var(--bg, #000) 86%, var(--accent, #64f0a4) 5%) !important;
   background-image: none !important;
@@ -5816,7 +5719,6 @@ html{
   transform: translateY(-1px) !important;
 }
 
-
 .coverAura{
   pointer-events: none;
 }
@@ -5825,7 +5727,6 @@ html{
   max-width: 120% !important;
   max-height: 120% !important;
 }
-
 
 :root{
   --theme-accent: var(--accent, #8dffce);
@@ -5874,7 +5775,6 @@ html{
   color: var(--text, #f6f4ff) !important;
 }
 
-
 .app::before{
   display: none !important;
   opacity: 0 !important;
@@ -5909,7 +5809,6 @@ html{
   border-top: 1px solid var(--theme-line) !important;
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--theme-accent) 7%, transparent) !important;
 }
-
 
 .sidebar .navItem{
   background: transparent !important;
@@ -5950,7 +5849,6 @@ html{
   box-shadow: 0 10px 26px color-mix(in oklab, var(--theme-accent) 13%, transparent) !important;
 }
 
-
 .hero{
   background:
     linear-gradient(135deg,
@@ -5969,7 +5867,6 @@ html{
   box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 6%, transparent), 0 16px 40px rgba(0,0,0,.20) !important;
 }
 
-
 .coverAura::before{
   display: block !important;
   opacity: .28 !important;
@@ -5980,7 +5877,6 @@ html{
   opacity: .40 !important;
   transform: scale(1.02) !important;
 }
-
 
 :root{
   --localtify-page-bg: color-mix(in oklab, var(--bg, #050505) 78%, var(--accent, #ff65df) 12%);
@@ -6011,7 +5907,6 @@ body{
   color: var(--text, #f7f7f7) !important;
 }
 
-
 .sidebar{
   background:
     linear-gradient(180deg, var(--localtify-sidebar-bg), var(--localtify-sidebar-bg-2)) !important;
@@ -6022,7 +5917,6 @@ body{
 .sidebar *{
   text-shadow: none !important;
 }
-
 
 .sidebar svg{
   color: #f7f7f7 !important;
@@ -6059,7 +5953,6 @@ body{
   box-shadow: none !important;
 }
 
-
 .hero{
   background:
     linear-gradient(135deg, var(--localtify-panel-bg), var(--localtify-panel-bg-2)) !important;
@@ -6076,7 +5969,6 @@ body{
   box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 16px 36px rgba(0,0,0,.20) !important;
 }
 
-
 .app::before{
   display: none !important;
   opacity: 0 !important;
@@ -6084,7 +5976,6 @@ body{
   box-shadow: none !important;
   animation: none !important;
 }
-
 
 .coverAura::before{
   display: block !important;
@@ -6126,7 +6017,6 @@ button:hover,
 .importButton:hover{
   box-shadow: 0 0 12px color-mix(in oklab, var(--accent, #ff65df) 14%, transparent) !important;
 }
-
 
 .app[data-theme]{
   background:
@@ -6198,17 +6088,6 @@ button:hover,
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent, #ff6edb) 22%, transparent) !important;
 }
 
-
-body.localitfyThemePainting .app{
-  transition: none !important;
-}
-
-body.localitfyThemePainting .app *{
-  animation: none !important;
-  transition: none !important;
-  will-change: auto !important;
-}
-
 body.localitfyThemePainting .app :where(.content, .simpleShell, .songList, .homeAlbumGrid){
   scrollbar-gutter: auto;
   overscroll-behavior: contain;
@@ -6239,44 +6118,7 @@ body.localitfyThemePainting .app :where(.content, .simpleShell, .songList, .home
     contain-intrinsic-size: 230px 290px;
   }
 
-  
 }
-
-.libraryRenderNotice{
-  grid-column: 1 / -1;
-  width: 100%;
-  min-height: 58px;
-  margin: 8px 0 2px;
-  padding: 13px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: rgba(255, 255, 255, 0.68);
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(var(--accent-rgb), 0.18);
-  border-radius: 14px;
-  contain: layout paint style;
-}
-
-.libraryLoadMoreButton{
-  min-height: 34px;
-  padding: 0 14px;
-  border: 1px solid rgba(var(--accent-rgb), 0.28);
-  border-radius: 999px;
-  color: var(--text);
-  background: rgba(var(--accent-rgb), 0.13);
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.libraryLoadMoreButton:hover{
-  background: rgba(var(--accent-rgb), 0.2);
-  transform: translate3d(0, -1px, 0);
-}
-
 
 .app .content{
   overscroll-behavior: contain;
@@ -6310,7 +6152,6 @@ body.localitfyThemePainting .app :where(.content, .simpleShell, .songList, .home
     contain-intrinsic-size: 230px 290px;
   }
 
-  
 }
 
 body.localitfyThemePainting .app{
@@ -6320,7 +6161,7 @@ body.localitfyThemePainting .app{
 body.localitfyThemePainting .app *{
   animation: none !important;
   transition: none !important;
-  will-change: auto !important;
+
 }
 
 .app.songDragActive .ambientSurface::before{
@@ -6363,7 +6204,6 @@ body.localitfyThemePainting .app *{
   background: rgba(var(--accent-rgb), 0.2);
   transform: translate3d(0, -1px, 0);
 }
-
 
 .appShell{
   grid-template-columns: var(--sidebar-width-live, var(--sidebar-width, 236px)) minmax(0, 1fr);
@@ -6562,7 +6402,6 @@ body.localitfyThemePainting .app *{
   }
 }
 
-
 .sidebar{
   --sidebar-line: rgba(var(--accent-rgb), 0.16);
   --sidebar-line-soft: rgba(255, 255, 255, 0.075);
@@ -6673,7 +6512,6 @@ body.localitfyThemePainting .app *{
   box-shadow: 0 18px 38px rgba(var(--accent-rgb), 0.26);
 }
 
-
 .app .sidebar{
   --sidebar-solid-line: color-mix(in oklab, var(--accent, #a98cff) 20%, rgba(255,255,255,.10));
   background:
@@ -6741,7 +6579,6 @@ body.localitfyThemePainting .app *{
   mask-image: none !important;
 }
 
-
 .appShell .content{
   min-height: 0;
   overflow-y: auto;
@@ -6753,7 +6590,6 @@ body.localitfyThemePainting .app *{
 .appShell .mainArea{
   min-height: 0;
 }
-
 
 html{
   background: var(--app-bg-solid, var(--bg, #050505)) !important;
@@ -6788,7 +6624,6 @@ html{
   contain: layout paint style;
 }
 
-
 :root{
   --theme-page-bg: radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb, 255, 105, 180), 0.10), transparent 34%),
     radial-gradient(circle at 88% 12%, rgba(var(--accent-2-rgb, 128, 92, 255), 0.10), transparent 34%),
@@ -6802,10 +6637,6 @@ html{
   background-repeat: no-repeat !important;
 }
 
-.app::before{
-  background-image: none !important;
-}
-
 .loadingScreen{
   animation-duration: 140ms !important;
 }
@@ -6813,7 +6644,6 @@ html{
 .loadingCard{
   animation-duration: 260ms !important;
 }
-
 
 .app{
   background: var(--theme-page-bg) !important;
@@ -6830,7 +6660,6 @@ html{
   background-size: auto !important;
 }
 
-
 .app{
   --motion-spring: cubic-bezier(0.18, 0.92, 0.2, 1.16);
   --motion-smooth: cubic-bezier(0.16, 1, 0.3, 1);
@@ -6839,7 +6668,6 @@ html{
   --hover-surface-soft: color-mix(in srgb, var(--surface, #161320) 86%, var(--accent, #ff65c8) 14%);
 }
 
-
 .app::before{
   background-image: none !important;
 }
@@ -6847,7 +6675,6 @@ html{
 .content{
   background-image: none !important;
 }
-
 
 .homeHeroCard,
 .homeShelfPanel,
@@ -6878,7 +6705,6 @@ html{
   box-shadow: 0 18px 42px color-mix(in srgb, var(--accent, #ff65c8) 10%, transparent);
 }
 
-
 .hero,
 .homeShelfPanel,
 .homeLibraryPanel,
@@ -6903,7 +6729,6 @@ html{
 .transportButton{
   transition-timing-function: var(--motion-smooth);
 }
-
 
 .app[data-cover-sync="off"]{
   --cover-sync-strength: 0;
@@ -7120,7 +6945,6 @@ html{
   }
 }
 
-
 .app{
   background-image: none !important;
 }
@@ -7128,7 +6952,6 @@ html{
 .app::before{
   background: none !important;
 }
-
 
 .app.secret-fast{
   --localtify-motion-speed: 0.62;
@@ -7229,7 +7052,6 @@ html{
   100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-
 .secretLayer.night{
   background: transparent !important;
 }
@@ -7255,7 +7077,6 @@ html{
 .app.secret-night .coverAura::before{
   opacity: 0.16;
 }
-
 
 .secretLayer.stars{
   background: transparent !important;
@@ -7314,17 +7135,6 @@ html{
   background: rgba(0, 0, 0, 0.28) !important;
 }
 
-.app.secret-night .ambientSurface::before,
-.app.secret-night .ambientSurface::after,
-.app.secret-night .coverAura::before,
-.app.secret-night .coverAura::after,
-.app.secret-night [data-orb]{
-  opacity: 0 !important;
-  display: none !important;
-  animation: none !important;
-}
-
-
 .app .secretLayer{
   position: fixed !important;
   inset: 0 !important;
@@ -7380,7 +7190,6 @@ html{
   100%{ opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); }
 }
 
-
 .app .secretLayer.disco::before{
   opacity: .92 !important;
   background:
@@ -7415,13 +7224,6 @@ html{
 @keyframes localtifyStageGridFixed{
   from{ background-position: 0 0, 0 0; }
   to{ background-position: 150px 0, 0 118px; }
-}
-
-
-.app .secretLayer.stars{
-  background: transparent !important;
-  opacity: 1 !important;
-  mix-blend-mode: normal !important;
 }
 
 .app .secretLayer.stars::before,
@@ -7461,20 +7263,12 @@ html{
   line-height: 1 !important;
   text-shadow: 0 0 8px rgba(255,255,255,.42), 0 0 18px rgba(255,255,255,.16) !important;
 }
-
-.app .secretLayer.stars .starParticle:nth-of-type(3n)::before{ content: "·" !important; }
-.app .secretLayer.stars .starParticle:nth-of-type(5n)::before{ content: "✧" !important; }
 .app .secretLayer.stars .starParticleLarge::before{ font-size: calc(var(--size, 12px) * 1.35) !important; }
 
 @keyframes localtifyWhiteStarDriftWorking{
   0%{ transform: translate3d(0,0,0) scale(.76); opacity: calc(var(--alpha, .72) * .54); }
   48%{ opacity: var(--alpha, .72); }
   100%{ transform: translate3d(var(--dx, 18px), var(--dy, -18px), 0) scale(1.04); opacity: calc(var(--alpha, .72) * .92); }
-}
-
-
-.app.secret-fast{
-  --localtify-motion-speed: .58;
 }
 
 .app .secretLayer.fast::before{
@@ -7493,7 +7287,6 @@ html{
   from{ transform: translate3d(-42px, 0, 0); }
   to{ transform: translate3d(42px, 0, 0); }
 }
-
 
 .app .secretLayer.night{
   background: transparent !important;
@@ -7522,33 +7315,17 @@ html{
   animation: localtifyNightDimWorking 8600ms ease both !important;
 }
 
-.app.secret-night .ambientSurface::before,
-.app.secret-night .ambientSurface::after,
-.app.secret-night .coverAura::before,
-.app.secret-night .coverAura::after,
-.app.secret-night [data-orb]{
-  opacity: 0 !important;
-  display: none !important;
-  animation: none !important;
-}
-
 @keyframes localtifyNightDimWorking{
   0%{ opacity: 0; }
   12%, 88%{ opacity: 1; }
   100%{ opacity: 0; }
 }
 
-
 @keyframes localtifyPlayPulseWorking{
   0%{ transform: scale(.78); opacity: 0; }
   28%{ transform: scale(1.12); opacity: 1; }
   100%{ transform: scale(1.48); opacity: 0; }
 }
-
-.app .secretRibbon:empty{
-  display: none !important;
-}
-
 
 .app .secretLayer{
   position: fixed !important;
@@ -7631,7 +7408,6 @@ html{
   display: none !important;
 }
 
-
 .app .secretLayer.disco::before{
   display: block !important;
   opacity: .74 !important;
@@ -7663,7 +7439,6 @@ html{
   to{ background-position: 154px 0, 0 122px; }
 }
 
-
 .app .secretLayer.fast::before{
   display: block !important;
   opacity: .58 !important;
@@ -7686,7 +7461,6 @@ html{
 .app.secret-fast{
   --localtify-motion-speed: .58;
 }
-
 
 .app .secretLayer.stars{
   background: transparent !important;
@@ -7750,7 +7524,6 @@ html{
   100%{ opacity: .66; text-shadow: 0 0 6px rgba(255,255,255,.34); }
 }
 
-
 .titleBar{
   position: relative !important;
   z-index: 6200 !important;
@@ -7761,7 +7534,6 @@ html{
   position: relative !important;
   z-index: 6201 !important;
 }
-
 
 .app .secretLayer{
   inset: 36px 0 94px 0 !important;
@@ -7912,7 +7684,6 @@ html{
   }
 }
 
-
 .app,
 .app::before,
 .content,
@@ -7932,7 +7703,6 @@ html{
   opacity: 0 !important;
   display: none !important;
 }
-
 
 .sidebar .navItem,
 .sidebar .navItem *,
@@ -7968,7 +7738,6 @@ html{
   stroke: #ffffff !important;
   fill: none !important;
 }
-
 
 .songRow.active,
 .songRow.playing,
@@ -8020,7 +7789,6 @@ html{
   -webkit-text-fill-color: rgba(255, 255, 255, 0.74) !important;
 }
 
-
 button svg,
 .circleButton svg,
 .primaryPlayButton svg,
@@ -8037,7 +7805,6 @@ button svg,
   -webkit-text-fill-color: #ffffff !important;
 }
 
-
 .themePickerLockNoteV026 {
   margin: 8px 0 0;
   color: rgba(255, 255, 255, 0.62);
@@ -8053,7 +7820,6 @@ button svg,
   opacity: 0.55 !important;
   filter: grayscale(0.25) !important;
 }
-
 
 .app,
 .app * {
@@ -8109,7 +7875,6 @@ button{
   touch-action: none;
 }
 
-
 .homeAlbumCard,
 .songRow,
 .panel,
@@ -8126,7 +7891,6 @@ button{
 .titleBar{
   content-visibility: visible;
 }
-
 
 .compactQuickNav{
   display: none;
@@ -8239,7 +8003,6 @@ button{
   }
 }
 
-
 .secretRibbon,
 .secretDevPanel{
   display: none !important;
@@ -8254,11 +8017,9 @@ button{
   transform: translate3d(0, 0, 0) !important;
 }
 
-.settingsPage,
-.kopuzSettingsPage{
+.settingsPage{
   scroll-padding-bottom: 128px !important;
 }
-
 
 .app.viewSwitching .content,
 .app.viewSwitching .mainContent,
@@ -8286,7 +8047,7 @@ button{
 .app.viewSwitching .libraryCard,
 .app.viewSwitching .settingsPanelCard,
 .app.viewSwitching .panel{
-  will-change: auto !important;
+
   filter: none !important;
 }
 
@@ -8297,15 +8058,6 @@ button{
   transform: translate3d(0, -1px, 0) !important;
   box-shadow: 0 14px 38px rgba(0,0,0,.24) !important;
 }
-
-.app:not(.viewSwitching) .songCard,
-.app:not(.viewSwitching) .songRow,
-.app:not(.viewSwitching) .libraryCard,
-.app:not(.viewSwitching) .settingsPanelCard{
-  will-change: auto !important;
-}
-
-
 .app,
 .app::before,
 .app::after,
@@ -8356,7 +8108,7 @@ button{
 .navIcon{
   transform-origin: center;
   transition: transform 260ms cubic-bezier(.22,.9,.28,1), color 220ms ease, opacity 220ms ease, filter 220ms ease;
-  will-change: auto;
+
 }
 
 .navItem:hover .navLucideIcon,
@@ -8402,7 +8154,6 @@ button{
   45%{ transform: scale(1.08); }
   100%{ transform: scale(1); }
 }
-
 
 .app,
 .app::before,
@@ -8534,7 +8285,6 @@ button{
   object-fit: contain !important;
 }
 
-
 .app.viewSwitching .ambientSurface,
 .app.viewSwitching .heroShell,
 .app.viewSwitching .settingsPage,
@@ -8551,15 +8301,6 @@ button{
   filter: none;
   opacity: .18;
 }
-
-.app.viewSwitching .songCard,
-.app.viewSwitching .songRow,
-.app.viewSwitching .libraryCard,
-.app.viewSwitching .settingsPanelCard{
-  will-change: auto;
-}
-
-
 .app .appToast{
   top: 58px !important;
   right: 22px !important;
@@ -8636,7 +8377,6 @@ button{
   }
 }
 
-
 .app,
 .app::before,
 .app::after,
@@ -8652,7 +8392,6 @@ button{
 .app{
   --grid-line: transparent;
 }
-
 
 @media (max-width: 760px){
   html,
@@ -8721,16 +8460,13 @@ button{
     box-sizing: border-box !important;
   }
 
-  
 }
-
 
 body.localitfyThemePainting .app .coverAura::before,
 body.localitfyThemePainting .app .ambientSurface::after{
   opacity: .46 !important;
   filter: blur(28px) saturate(1.08) !important;
 }
-
 
 .app,
 .appShell,
@@ -8760,7 +8496,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
   background-image: none !important;
   background-size: auto !important;
 }
-
 
 .app,
 .appShell,
@@ -8815,26 +8550,14 @@ body.localitfyThemePainting .app .ambientSurface::after{
   background-size: auto !important;
   animation: none !important;
 }
-
-
-.app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.homeListenCard,.homeFreshCover,.coverTile,.libraryCard,.songCard){
-  will-change: auto !important;
-}
-
-.app.songDragActive :where(.homeAlbumCard,.songRow){
-  will-change: transform, opacity !important;
-}
-
 .app.viewSwitching :where(.homeAlbumCard,.songRow,.libraryCard,.songCard,.settingsPanelCard),
 body.localitfyThemePainting .app :where(.homeAlbumCard,.songRow,.libraryCard,.songCard,.settingsPanelCard){
   transition-duration: 90ms !important;
 }
 
-
 .app :where(.homeAlbumCard,.songRow,.libraryCard,.songCard,.homeListenCard,.homeFreshCover,.coverTile):hover{
   filter: none !important;
 }
-
 
 html,
 body,
@@ -8910,7 +8633,6 @@ body,
   animation: none !important;
 }
 
-
 .app,
 .mainContent,
 .content,
@@ -8924,22 +8646,15 @@ body,
   background-size: auto !important;
 }
 
-
 body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.ambientParticle,.homePulse,.coverSpark,.softOrbit){
   animation-play-state: paused !important;
 }
-
-body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.homeListenCard,.homeFreshCover,.coverTile,.settingsCard,.settingSwitchCard){
-  will-change: auto !important;
-}
-
 @supports (content-visibility: auto){
   body.localtifyIdle .app:not(.songDragActive) :where(.homeShelfPanel,.homeLibraryPanel,.simpleLibraryPanel,.settingsPanel,.settingsPanelShell){
     content-visibility: auto;
     contain-intrinsic-size: 720px;
   }
 }
-
 
 .app{
   background-color: var(--app-bg-solid, var(--bg, #000)) !important;
@@ -8982,7 +8697,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   animation: none !important;
   transition: opacity 90ms ease, transform 120ms cubic-bezier(.2,.8,.2,1) !important;
   filter: none !important;
-  will-change: auto !important;
+
 }
 
 .pageTransition{
@@ -9009,7 +8724,6 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   content-visibility: auto;
   contain-intrinsic-size: 720px;
 }
-
 
 .app,
 .app::before,
@@ -9038,7 +8752,6 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
 .mainStage {
   background: transparent !important;
 }
-
 
 .sidebar,
 .sideNav,
@@ -9080,7 +8793,6 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   border-left-color: rgba(var(--accent-rgb), 0.55) !important;
 }
 
-
 .app.playerScrubbing .ambientSurface,
 .app.playerScrubbing .ambientSurface::before,
 .app.playerScrubbing .ambientSurface::after,
@@ -9103,7 +8815,6 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   transition-duration: 0s !important;
 }
 
-
 .homeSection,
 .coverGalleryCard,
 .libraryCard,
@@ -9113,7 +8824,6 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
   content-visibility: auto;
   contain-intrinsic-size: 1px 280px;
 }
-
 
 .sideItem.active,
 .sideItem[aria-current="page"],
@@ -9132,7 +8842,6 @@ body.localtifyIdle .app:not(.songDragActive) :where(.homeAlbumCard,.songRow,.hom
     radial-gradient(circle at 50% 100%, rgba(var(--accent-rgb), 0.09), transparent 42%),
     #000 !important;
 }
-
 
 html,
 body,
@@ -9228,7 +8937,6 @@ body::after,
   perspective: none !important;
 }
 
-
 .app .whatsNewCard,
 .whatsNewCard{
   width: min(720px, calc(100vw - 40px)) !important;
@@ -9306,7 +9014,6 @@ body::after,
     font-size: 12.5px !important;
   }
 }
-
 
 .app .sidebar,
 .app .sidebar .nav,
@@ -9409,7 +9116,6 @@ body::after,
   opacity: .78 !important;
 }
 
-
 .app .sidebar .navItem,
 .app .sidebar .sidebarItem,
 .app .settingsCategoryButton,
@@ -9471,12 +9177,11 @@ body::after,
   transform: translate3d(0,0,0) !important;
 }
 
-
 .app .navItem,
 .app .sidebar button,
 .app .sidebarNav button{
   transform: translate3d(0,0,0) !important;
-  will-change: background-color, border-color, color, box-shadow !important;
+
   transition: background-color 170ms ease, border-color 170ms ease, color 170ms ease, box-shadow 170ms ease, opacity 170ms ease !important;
 }
 
@@ -9514,7 +9219,6 @@ body::after,
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
-
 
 .coverAura {
   position: relative;
@@ -9602,7 +9306,6 @@ body::after,
   }
 }
 
-
 body.localtifyBackgroundMode .app,
 .app.appBackgrounded {
   --background-visual-opacity: 0.35;
@@ -9630,7 +9333,6 @@ body.localtifyBackgroundMode .ambientSurface,
   opacity: var(--background-visual-opacity, 0.35);
 }
 
-
 .homeShelf,
 .libraryListWrap,
 .analyticsPanel,
@@ -9644,7 +9346,6 @@ body.localtifyBackgroundMode .ambientSurface,
   content-visibility: auto;
   contain-intrinsic-size: 320px;
 }
-
 
 .titleBar{
   height: 36px !important;
@@ -9709,7 +9410,6 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: none !important;
 }
 
-
 .app .titleBar,
 .app[data-theme] .titleBar,
 .app[data-custom-theme="true"] .titleBar{
@@ -9751,7 +9451,6 @@ body.localtifyBackgroundMode .ambientSurface,
   color: #ffffff !important;
   background: color-mix(in oklab, #e54868 74%, var(--accent, #ff65df) 18%) !important;
 }
-
 
 .app .updateToastLayer,
 .updateToastLayer{
@@ -10021,7 +9720,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .app.updateRibbonVisible .appShell{
   padding-top: 48px !important;
 }
@@ -10092,12 +9790,6 @@ body.localtifyBackgroundMode .ambientSurface,
     radial-gradient(circle at 18% -80%, rgba(var(--accent-rgb, 233,98,233), .22), transparent 52%),
     linear-gradient(90deg, rgba(255,255,255,.045), transparent 35%, rgba(var(--accent-rgb, 233,98,233), .08)) !important;
   opacity: .86 !important;
-}
-
-.app .topUpdateRibbon > *,
-.topUpdateRibbon > *{
-  position: relative !important;
-  z-index: 1 !important;
 }
 
 .app .topUpdateRibbonIcon,
@@ -10332,7 +10024,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .app.updateRibbonVisible .appShell{
   padding-top: 38px !important;
 }
@@ -10458,11 +10149,6 @@ body.localtifyBackgroundMode .ambientSurface,
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-}
-
-.app .topUpdateRibbonText p:not(.eyebrow),
-.topUpdateRibbonText p:not(.eyebrow){
-  display: none !important;
 }
 
 .app .topUpdateRibbonMeta,
@@ -10613,7 +10299,6 @@ body.localtifyBackgroundMode .ambientSurface,
     display: none !important;
   }
 }
-
 
 .app.updateRibbonVisible .appShell{
   padding-top: 42px !important;
@@ -10843,14 +10528,13 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .virtualSongViewport {
   position: relative !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
   contain: layout paint style !important;
-  will-change: scroll-position !important;
+
   scrollbar-gutter: stable both-edges;
   -webkit-overflow-scrolling: touch;
 }
@@ -10940,7 +10624,6 @@ body.localtifyBackgroundMode .ambientSurface,
   background: rgba(var(--accent-rgb), .42);
 }
 
-
 .app[data-cover-sync]:not([data-cover-sync="off"]){
   --player-ambient-rgb: var(--cover-rgb, var(--accent-rgb));
   --active-cover-rgb: var(--cover-rgb, var(--accent-rgb));
@@ -10954,7 +10637,6 @@ body.localtifyBackgroundMode .ambientSurface,
 .app[data-cover-sync]:not([data-cover-sync="off"]) .playerBar{
   --player-ambient-rgb: var(--cover-rgb, var(--accent-rgb));
 }
-
 
 .loadingScreen.bootScreen{
   min-height: 100vh;
@@ -11293,7 +10975,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .screensaverOverlay {
   position: fixed;
   inset: 0;
@@ -11439,7 +11120,6 @@ body.localtifyBackgroundMode .ambientSurface,
   outline: none;
 }
 
-
 .app.updateRibbonVisible .content::before{
   content: "" !important;
   position: fixed !important;
@@ -11480,12 +11160,6 @@ body.localtifyBackgroundMode .ambientSurface,
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.105), transparent) !important;
   transform: translate3d(-145%,0,0) skewX(-18deg) !important;
   animation: updateRibbonSheenV159 4.8s cubic-bezier(.16,1,.3,1) infinite !important;
-}
-
-.app .topUpdateRibbon > *,
-.topUpdateRibbon > *{
-  position: relative !important;
-  z-index: 1 !important;
 }
 
 .app .topUpdateRibbonIcon,
@@ -11543,7 +11217,7 @@ body.localtifyBackgroundMode .ambientSurface,
     drop-shadow(0 22px 40px rgba(0,0,0,.55))
     drop-shadow(0 0 18px rgba(var(--accent-rgb, 230,90,223), .20)) !important;
   transform-origin: 80% 22% !important;
-  will-change: transform, opacity !important;
+
 }
 
 .app .updateYukariPeek-available,
@@ -11603,7 +11277,6 @@ body.localtifyBackgroundMode .ambientSurface,
     display: none !important;
   }
 }
-
 
 .app .updateYukariPeek-available,
 .updateYukariPeek-available{
@@ -11692,7 +11365,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .app .searchEasterWrap{
   position: relative;
   overflow: visible;
@@ -11757,7 +11429,6 @@ body.localtifyBackgroundMode .ambientSurface,
   color: rgba(255, 255, 255, .42);
 }
 
-
 .app :where(
   .softButton,
   .circleButton,
@@ -11820,13 +11491,11 @@ body.localtifyBackgroundMode .ambientSurface,
   filter: brightness(.96);
 }
 
-
 .app :where(input, textarea, select, option):active,
 .app :where(.rangeRow, .slider, .progressTrack, .volumeSlider):active{
   transform: none !important;
   filter: none !important;
 }
-
 
 .app{
   --hero-actions-ease-v164: cubic-bezier(.16, 1, .3, 1);
@@ -11835,7 +11504,6 @@ body.localtifyBackgroundMode .ambientSurface,
   --hero-actions-border-v164: rgba(255, 255, 255, .115);
   --hero-actions-shadow-v164: 0 16px 42px rgba(0, 0, 0, .30), 0 0 30px rgba(var(--accent-rgb), .075);
 }
-
 
 .app .heroPremium{
   position: relative !important;
@@ -11855,7 +11523,6 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .heroPremium.heroExpanded{
   min-height: clamp(348px, 38vh, 492px) !important;
 }
-
 
 .app .heroPremium .heroTextClean,
 .app .heroPremium .heroText{
@@ -11882,7 +11549,6 @@ body.localtifyBackgroundMode .ambientSurface,
   z-index: 4 !important;
 }
 
-
 .app .heroPremium .heroTitle,
 .app .heroPremium .nowPlayingTitleSwap{
   position: relative !important;
@@ -11903,7 +11569,6 @@ body.localtifyBackgroundMode .ambientSurface,
   line-height: .92 !important;
   letter-spacing: clamp(-.085em, -.45vw, -.055em) !important;
 }
-
 
 .app .heroPremium.heroTitleTiny .heroTitle,
 .app .heroPremium.heroTitleTiny .nowPlayingTitleSwap{
@@ -11959,7 +11624,6 @@ body.localtifyBackgroundMode .ambientSurface,
   font-size: clamp(46px, 4.85vw, 82px) !important;
 }
 
-
 .app .heroPremium .heroArtistLine,
 .app .heroPremium .nowPlayingArtistSwap{
   position: relative !important;
@@ -11974,7 +11638,6 @@ body.localtifyBackgroundMode .ambientSurface,
   line-height: 1.2 !important;
   transform: translate3d(0, 0, 0) !important;
 }
-
 
 .app .heroPremium .heroQuickActions{
   position: relative !important;
@@ -12034,7 +11697,6 @@ body.localtifyBackgroundMode .ambientSurface,
   opacity: .70 !important;
   background: linear-gradient(120deg, rgba(255, 255, 255, .13), transparent 22%, transparent 72%, rgba(255, 255, 255, .065)) !important;
 }
-
 
 .app .heroPremium .heroTinyButton{
   position: relative !important;
@@ -12135,7 +11797,6 @@ body.localtifyBackgroundMode .ambientSurface,
     inset 0 -1px 0 rgba(0, 0, 0, .14) !important;
 }
 
-
 .app .heroPremium .heroArtWrap{
   justify-self: end !important;
   align-self: center !important;
@@ -12150,7 +11811,6 @@ body.localtifyBackgroundMode .ambientSurface,
   aspect-ratio: 1 / 1 !important;
   object-fit: cover !important;
 }
-
 
 .app .heroLayoutMotion.heroLayoutPulseA .heroQuickActions,
 .app .heroLayoutMotion.heroLayoutPulseB .heroQuickActions{
@@ -12171,7 +11831,6 @@ body.localtifyBackgroundMode .ambientSurface,
     transform: translate3d(0, 0, 0) scale(1);
   }
 }
-
 
 @keyframes localitfyCinematicArtistDelay{
   0%, 22%{
@@ -12250,7 +11909,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .app{
   --hero-v165-left-pad: clamp(34px, 4vw, 76px);
   --hero-v165-bottom-safe: clamp(92px, 8.4vw, 118px);
@@ -12258,7 +11916,6 @@ body.localtifyBackgroundMode .ambientSurface,
   --hero-v165-action-ease: cubic-bezier(.16, 1, .3, 1);
   --hero-v165-action-pop: cubic-bezier(.18, 1.24, .22, 1);
 }
-
 
 .app .pageTransition.pageTransition-home .hero.heroPremium,
 .app .pageTransition[data-view="home"] .hero.heroPremium{
@@ -12276,7 +11933,6 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded{
   min-height: clamp(316px, 34vh, 430px) !important;
 }
-
 
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText,
@@ -12307,7 +11963,6 @@ body.localtifyBackgroundMode .ambientSurface,
   line-height: 1.05 !important;
   transform: none !important;
 }
-
 
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle.nowPlayingTitleSwap,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
@@ -12365,7 +12020,6 @@ body.localtifyBackgroundMode .ambientSurface,
   font-size: clamp(38px, 3.7vw, 62px) !important;
 }
 
-
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroArtistLine.nowPlayingArtistSwap,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroArtistLine,
 .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroArtistLine.nowPlayingArtistSwap,
@@ -12386,7 +12040,6 @@ body.localtifyBackgroundMode .ambientSurface,
   text-overflow: ellipsis !important;
   transform: none !important;
 }
-
 
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroQuickActions,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions,
@@ -12570,7 +12223,6 @@ body.localtifyBackgroundMode .ambientSurface,
     inset 0 -1px 0 rgba(0, 0, 0, .14) !important;
 }
 
-
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroArtWrap,
 .app .pageTransition[data-view="home"] .hero.heroPremium .heroArtWrap{
   justify-self: end !important;
@@ -12700,11 +12352,9 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .app{
   --localtify-titlebar-height: 36px !important;
 }
-
 
 .app .titleBar:not(.miniTitleBar),
 .titleBar:not(.miniTitleBar){
@@ -12750,7 +12400,6 @@ body.localtifyBackgroundMode .ambientSurface,
   -webkit-app-region: no-drag !important;
 }
 
-
 .app .titleBarUpdateSlot,
 .titleBarUpdateSlot{
   grid-column: 2 !important;
@@ -12793,7 +12442,6 @@ body.localtifyBackgroundMode .ambientSurface,
   pointer-events: none !important;
   -webkit-app-region: drag !important;
 }
-
 
 .app .titleBarUpdateSlot .updateYukariPeek,
 .titleBarUpdateSlot .updateYukariPeek{
@@ -13042,7 +12690,6 @@ body.localtifyBackgroundMode .ambientSurface,
   background: rgba(var(--accent-rgb, 230,90,223), .42) !important;
 }
 
-
 .app.updateRibbonVisible .appShell,
 .app[data-update-ribbon="true"] .appShell,
 .appShell{
@@ -13073,7 +12720,6 @@ body.localtifyBackgroundMode .ambientSurface,
   max-height: var(--player-size-used, var(--player-size-live, var(--player-size, 108px))) !important;
   transform: translate3d(0,0,0) !important;
 }
-
 
 body:has(.titleBarUpdateSlot) .app > .topUpdateRibbonLayer,
 body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
@@ -13126,7 +12772,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     padding: 0 8px !important;
   }
 }
-
 
 .app.updateRibbonVisible .appShell,
 .app.updateRibbonVisible .mainLayout,
@@ -13467,7 +13112,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   }
 }
 
-
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
   top: 4px !important;
@@ -13501,7 +13145,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   backdrop-filter: blur(8px) saturate(116%) !important;
   -webkit-backdrop-filter: blur(8px) saturate(116%) !important;
   animation: localtifyUpdateRibbonSettleV195 360ms cubic-bezier(.18,.92,.18,1) both !important;
-  will-change: transform, opacity !important;
+
 }
 
 .app .topUpdateRibbon::before,
@@ -13511,7 +13155,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     radial-gradient(circle at 7% 0%, rgba(var(--accent-rgb, 230,90,223), 0.14), transparent 34%),
     linear-gradient(90deg, rgba(255,255,255,0.030), transparent 44%) !important;
 }
-
 
 .app .topUpdateRibbonMeta,
 .topUpdateRibbonMeta,
@@ -13580,7 +13223,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   -webkit-app-region: no-drag !important;
 }
 
-
 .app .topUpdateRibbon .updatePrimaryButton,
 .app .topUpdateRibbon .updateGhostButton,
 .app .topUpdateRibbon .updateToastClose,
@@ -13603,7 +13245,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     border-color 150ms ease,
     box-shadow 150ms ease,
     color 150ms ease !important;
-  will-change: transform !important;
+
   -webkit-app-region: no-drag !important;
 }
 
@@ -13674,7 +13316,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   transition-duration: 70ms !important;
 }
 
-
 .app .topUpdateRibbonProgress,
 .topUpdateRibbonProgress{
   left: 9px !important;
@@ -13719,7 +13360,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     display: none !important;
   }
 }
-
 
 .app{
   --lt-visual-blur: 18px;
@@ -13777,31 +13417,11 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   --lt-glass-accent-alpha: 0.075;
 }
 
-
-.sidebar .navItem::before,
-.sidebar .navItem::after,
-.sidebar .navIcon::before,
-.sidebar .navIcon::after{
-  content: none !important;
-  display: none !important;
-}
-
-
-
-/* ======================================================================
-   localtify v0.3.6 V247 — hover sidebar smooth slide repair
-   ----------------------------------------------------------------------
-   Hover mode no longer changes the whole app grid width. The content stays
-   parked at the slim rail width, while the sidebar itself expands as a
-   lightweight overlay. This removes the laggy :has() grid reflow and makes
-   the text/button reveal slide in smoothly.
-====================================================================== */
-
 .app[data-sidebar-behavior="slim"],
 .app[data-sidebar-behavior="hover"]{
   --sidebar-width: 88px !important;
   --sidebar-width-used: 88px !important;
-  --kopuz-sidebar-width: 88px !important;
+  --shell-sidebar-width: 88px !important;
   --localtify-sidebar-closed-width: 88px;
   --localtify-sidebar-open-width: 236px;
 }
@@ -13830,7 +13450,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     box-shadow 360ms ease,
     border-color 260ms ease,
     background-color 260ms ease !important;
-  will-change: width, min-width, max-width !important;
+
 }
 
 .app[data-sidebar-behavior="hover"] .sidebar:hover,
@@ -14120,7 +13740,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   }
 }
 
-
 .sidebar .navItem.active .navIcon,
 .sidebar .navItem:hover .navIcon,
 .sidebar .navItem.active .navLucideIcon,
@@ -14132,7 +13751,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   box-shadow: none !important;
   filter: none !important;
 }
-
 
 .app[data-stars-intensity="off"] .localtifyStarsBackdrop{
   display: none !important;
@@ -14156,7 +13774,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   inset: 0 !important;
   background-repeat: repeat !important;
   transform: translateZ(0) !important;
-  will-change: transform !important;
+
 }
 
 .app .localtifyStarsLayerA{
@@ -14173,7 +13791,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   background-size: 182px 182px !important;
   animation: localtifyV214StarDriftB 190s linear infinite !important;
 }
-
 
 .app .localtifyStarsLayerC{
   display: none !important;
@@ -14193,7 +13810,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   filter: saturate(1.10) brightness(1.12) !important;
 }
 
-
 .app[data-app-backgrounded="on"] .localtifyStarsBackdrop{
   opacity: .16 !important;
   filter: none !important;
@@ -14201,9 +13817,8 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 .app[data-app-backgrounded="on"] .localtifyStarsLayer{
   animation-play-state: paused !important;
-  will-change: auto !important;
-}
 
+}
 
 .app.themeSettling .localtifyStarsLayer,
 .app.viewSwitching .localtifyStarsLayer{
@@ -14219,7 +13834,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   from{ transform: translate3d(0,0,0); }
   to{ transform: translate3d(112px,-74px,0); }
 }
-
 
 :is(
   .songRow,
@@ -14271,16 +13885,13 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   background-image: inherit !important;
 }
 
-
 .localtifyProximityActive:is(button,[role="button"],.navItem,.mainAction,.heroMain,.heroGhost,.softButton,.playerButton,.circleButton){
   transform: scale(var(--prox-scale, 1)) translateZ(0) !important;
 }
 
-
 .app .playerBar > :where(.playerLeft,.playerCenter,.playerRight,.controlRow,.progressRow,.volumeWrap){
   contain: layout style !important;
 }
-
 
 .app :where(
   .secretLayer.arcadeGhost,
@@ -14294,11 +13905,9 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   pointer-events: none !important;
 }
 
-
 .app .secretLayer:not(.stars):not(.yukari){
   display: none !important;
 }
-
 
 .app :where(
   .settingsPanelCard,
@@ -14318,7 +13927,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   background-image: inherit !important;
 }
 
-
 .sidebar .navItem::before,
 .sidebar .navItem::after,
 .sidebar .navIcon::before,
@@ -14335,7 +13943,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   box-shadow: none !important;
 }
 
-
 .app .playlistTrackMain,
 .app .playlistTrackMain:hover,
 .app .playlistTrackMain:active,
@@ -14351,15 +13958,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   filter: none !important;
   text-shadow: none !important;
 }
-
-/* ======================================================================
-   localtify v0.3.6 V248 — hover sidebar closes on mouse leave
-   ----------------------------------------------------------------------
-   Clicking a sidebar button can leave focus inside the sidebar. V247 allowed
-   :focus-within to keep hover mode expanded, so the rail could stay open even
-   after the mouse left. These final overrides make hover mode close whenever
-   the pointer leaves, while keeping the same smooth slide timing.
-====================================================================== */
 
 .app[data-sidebar-behavior="hover"] .sidebar:not(:hover){
   width: var(--localtify-sidebar-closed-width) !important;
@@ -14461,11 +14059,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     max-width 380ms cubic-bezier(.16, 1, .3, 1) !important;
 }
 
-
-/* ======================================================================
-   localtify v0.3.6 V253 — remove star feature visuals and ambience orbs
-====================================================================== */
-
 .app .secretLayer.stars,
 .app .secretLayer.stars .secretRibbon,
 .app .secretLayer.stars .starParticle,
@@ -14507,4 +14100,14 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .app[data-theme="stars"] .content{
   background-image: none !important;
   background-color: #050010 !important;
+}
+
+/* V309 low-lag guardrails. */
+.app img{
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
+  transform: translateZ(0);
 }

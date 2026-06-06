@@ -1,6 +1,3 @@
-/* localtify 0.3.7 V293 — settings cleanup with window transparency controls removed. */
-
-.settingsPage,
 .settingsPage{
   width: min(1320px, 100%);
   margin: 0 auto;
@@ -139,8 +136,7 @@
   font-weight: 750;
 }
 
-.settingsThemeGrid,
-.kopuzThemeGrid{
+.settingsThemeGrid{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(134px, 1fr));
   gap: 14px;
@@ -946,11 +942,6 @@
   gap: 12px;
 }
 
-.settingsPlaylistItem > span{
-  display: grid;
-  gap: 3px;
-}
-
 .settingsPlaylistItem strong{
   color: var(--text);
   font-size: 14px;
@@ -1196,7 +1187,6 @@
 }
 
 @media (max-width: 840px){
-  .settingsPage,
   .settingsPage{
     padding-inline: 12px;
   }
@@ -1213,8 +1203,7 @@
     align-items: flex-start;
   }
 
-  .settingsThemeGrid,
-  .kopuzThemeGrid{
+  .settingsThemeGrid{
     grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
   }
 
@@ -1636,7 +1625,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-.settingsPage,
 .settingsPage{
   max-width: 1180px;
   gap: 20px;
@@ -1688,8 +1676,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   filter: none !important;
 }
 
-.settingsThemeGrid,
-.kopuzThemeGrid{
+.settingsThemeGrid{
   display: none !important;
 }
 
@@ -2028,7 +2015,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-.settingsPage,
 .settingsPage{
   gap: 18px !important;
 }
@@ -2385,7 +2371,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   white-space: nowrap;
 }
 
-.settingsPage,
 .settingsPage{
   gap: 14px !important;
   padding-bottom: calc(var(--player-size-used, 92px) + 34px) !important;
@@ -2475,7 +2460,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 @media (max-width: 760px){
-  .settingsPage,
   .settingsPage{
     padding: 0 0 calc(var(--player-size-used, 92px) + 24px) !important;
     gap: 12px !important;
@@ -2804,7 +2788,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   gap: 10px !important;
   border-radius: 15px !important;
   transform: translateZ(0);
-  will-change: auto !important;
+
 }
 
 .settingsCategoryRailV027 .settingsCategoryButton:hover,
@@ -2853,7 +2837,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   padding: 16px !important;
   border-radius: 18px !important;
   box-shadow: 0 16px 40px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.035) !important;
-  will-change: auto !important;
+
   contain: layout paint;
 }
 
@@ -2877,7 +2861,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsCategoryContentV027 .toggleRow,
 .settingsCategoryContentV027 .settingRow{
   min-width: 0 !important;
-  will-change: auto !important;
+
 }
 
 .settingsCategoryContentV027 .settingsChoice:hover,
@@ -3200,7 +3184,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 .rangeRow,
 .settingsChoice{
   background-image: none !important;
-  will-change: auto !important;
+
 }
 
 .settingsPanelCard:hover,
@@ -5891,7 +5875,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-.settingsPage,
 .settingsPage{
   width: min(1400px, calc(100% - 24px)) !important;
   padding: 0 12px 136px !important;
@@ -6357,7 +6340,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 @media (max-width: 1320px){
-  .settingsPage,
   .settingsPage{
     width: min(1240px, calc(100% - 18px)) !important;
     padding-inline: 9px !important;
@@ -6374,7 +6356,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 @media (max-width: 860px){
-  .settingsPage,
   .settingsPage{
     width: 100% !important;
     padding-inline: 8px !important;
@@ -6406,7 +6387,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   }
 }
 
-.settingsPage,
 .settingsPage{
   width: min(1240px, calc(100% - 24px)) !important;
   padding: 0 12px 132px !important;
@@ -6726,7 +6706,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
   box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.045) !important;
 }
 
-
 .settingsCategoryPage.settingsUpdatesPage,
 .settingsUpdatesPage{
   gap: 16px !important;
@@ -6762,7 +6741,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 @media (max-width: 760px){
-  .settingsPage,
   .settingsPage{
     width: 100% !important;
     padding-inline: 8px !important;
@@ -6786,4 +6764,14 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
     text-align: left !important;
     max-width: none !important;
   }
+}
+
+/* V309 low-lag guardrails. */
+.app img{
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
+  transform: translateZ(0);
 }

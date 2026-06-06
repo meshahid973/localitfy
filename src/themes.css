@@ -1,5 +1,3 @@
-/* localtify 0.3.7 V265 — themes.css owns theme variables only. Removed copied settings/page patch blocks. */
-
 .app[data-theme="mint"]{
   --bg: #020706;
   --bg-2: #020706;
@@ -1599,7 +1597,7 @@
     var(--stars-b-size, 337px) var(--stars-b-size, 337px),
     var(--stars-c-size, 421px) var(--stars-c-size, 421px) !important;
   transform: translate3d(0, 0, 0) !important;
-  will-change: transform, opacity !important;
+
 }
 
 .app[data-theme="stars"] .localtifyStarsLayerA{

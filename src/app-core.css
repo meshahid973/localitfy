@@ -1,5 +1,3 @@
-/* localtify 0.3.7 V293 — app shell owner. Window transparency feature removed. */
-
 :root{
   --panel: rgba(255, 255, 255, 0.035);
   --accent-2: var(--accent);
@@ -285,7 +283,7 @@ button:disabled{
     box-shadow 260ms ease,
     transform 260ms ease,
     background 260ms ease;
-  will-change: transform;
+
 }
 
 .ambientSurface::before{
@@ -302,7 +300,7 @@ button:disabled{
   pointer-events: none;
   transition: opacity 420ms ease,
     transform 520ms cubic-bezier(0.2, 0.9, 0.2, 1);
-  will-change: opacity, transform;
+
 }
 
 .ambientSurface::after{
@@ -1203,11 +1201,6 @@ input[type="range"]{
   display: grid;
   place-items: center;
 }
-
-.songRow{
-  will-change: transform, background-color, border-color;
-}
-
 .songRow.active{
   box-shadow: inset 2px 0 0 var(--accent),
     0 12px 34px rgba(0, 0, 0, 0.24);
@@ -2265,7 +2258,7 @@ button:active{
 .content{
   scroll-behavior: smooth;
   overscroll-behavior: contain;
-  will-change: scroll-position;
+
 }
 
 .sidebar{
@@ -2339,7 +2332,7 @@ body.isResizingPlayer{
   background-image: var(--cover-url, none) !important;
   background-position: center !important;
   background-size: cover !important;
-  will-change: transform, opacity;
+
 }
 
 [data-ambient="on"] .ambientSurface::after{
@@ -2487,7 +2480,7 @@ body.isResizingPlayer{
   transition: opacity 220ms ease,
     filter 220ms ease,
     transform 220ms ease;
-  will-change: opacity, transform;
+
 }
 
 .ambientSurface::after{
@@ -3110,7 +3103,7 @@ body.isResizingPlayer{
 
 .hero.ambientSurface::before{
   transition: opacity 520ms ease, transform 900ms cubic-bezier(0.16, 1, 0.3, 1), filter 520ms ease !important;
-  will-change: opacity, transform, filter;
+
 }
 
 .hero.ambientSurface:hover::before{
@@ -3404,11 +3397,6 @@ button:active{
   border-color: rgba(var(--accent-rgb), 0.58) !important;
   background: var(--accent) !important;
 }
-
-@media (max-width: 1060px){
-
-}
-
 @media (max-width: 760px){
 .appShell{
   grid-template-columns: 1fr !important;
@@ -3651,26 +3639,13 @@ button:active{
 .app .ambientSurface::before{
   filter: blur(32px) saturate(1.08) brightness(0.92) !important;
   transition: opacity 180ms ease, transform 220ms ease !important;
-  will-change: opacity, transform !important;
+
 }
 
 .app.animatedGlow .ambientSurface::before,
 .app .animatedGlow .ambientSurface::before{
   animation-duration: 14s !important;
 }
-
-.app .songRow,
-.app .songCard,
-.app .coverCard,
-.app .libraryCard,
-.app .panel,
-.app .hero,
-.app .mainAction,
-.app .softButton,
-.app .circleButton:not(.playerBar *){
-  will-change: auto !important;
-}
-
 .app,
 .appShell,
 .mainView,
@@ -3760,7 +3735,7 @@ body,
   min-height: 0 !important;
   overflow: hidden !important;
   display: grid !important;
-  grid-template-columns: var(--sidebar-width-used, var(--kopuz-sidebar-width, var(--sidebar-width-live, var(--sidebar-width, 249px)))) minmax(0, 1fr) !important;
+  grid-template-columns: var(--sidebar-width-used, var(--shell-sidebar-width, var(--sidebar-width-live, var(--sidebar-width, 249px)))) minmax(0, 1fr) !important;
   grid-template-rows: minmax(0, 1fr) var(--player-size-used, var(--player-size-live, var(--player-size, 108px))) !important;
 }
 
@@ -3821,7 +3796,6 @@ body,
   --localtify-window-radius: 9px;
   --localtify-content-x: clamp(18px, 2vw, 30px);
 }
-
 
 html,
 body,
@@ -4741,6 +4715,7 @@ body,
   font-weight: 950 !important;
   line-height: 1.15 !important;
   display: -webkit-box !important;
+line-clamp: 2 !important;
   -webkit-line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
   overflow: hidden !important;
@@ -5461,4 +5436,14 @@ body,
 .app .sidebar .nav .navItem.active{
   transform: translate3d(0,0,0) !important;
   border-color: color-mix(in srgb, var(--accent) 28%, rgba(255,255,255,.08)) !important;
+}
+
+/* V309 low-lag guardrails. */
+.app img{
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
+  transform: translateZ(0);
 }
