@@ -1,7 +1,7 @@
-/* localtify 0.3.7 V275 — settings cleanup with clean translucent window controls. */
+/* localtify 0.3.7 V293 — settings cleanup with window transparency controls removed. */
 
 .settingsPage,
-.kopuzSettingsPage{
+.settingsPage{
   width: min(1320px, 100%);
   margin: 0 auto;
   padding: 0 22px 132px;
@@ -1197,7 +1197,7 @@
 
 @media (max-width: 840px){
   .settingsPage,
-  .kopuzSettingsPage{
+  .settingsPage{
     padding-inline: 12px;
   }
 
@@ -1329,21 +1329,21 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage button,
-.kopuzSettingsPage button,
+.settingsPage button,
 .settingsModal button,
 .cleanSettingsModal button{
   -webkit-tap-highlight-color: transparent;
 }
 
 .settingsPage button:focus,
-.kopuzSettingsPage button:focus,
+.settingsPage button:focus,
 .settingsModal button:focus,
 .cleanSettingsModal button:focus{
   outline: none;
 }
 
 .settingsPage button:focus-visible,
-.kopuzSettingsPage button:focus-visible,
+.settingsPage button:focus-visible,
 .settingsModal button:focus-visible,
 .cleanSettingsModal button:focus-visible{
   outline: 2px solid rgba(var(--accent-rgb), 0.58);
@@ -1462,7 +1462,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage,
-.kopuzSettingsPage,
+.settingsPage,
 .settingsModal,
 .cleanSettingsModal{
   --settings-row-bg: rgba(255,255,255,0.032);
@@ -1619,7 +1619,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage :focus-visible,
-.kopuzSettingsPage :focus-visible,
+.settingsPage :focus-visible,
 .settingsModal :focus-visible,
 .cleanSettingsModal :focus-visible{
   outline: none !important;
@@ -1637,15 +1637,15 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage,
-.kopuzSettingsPage{
+.settingsPage{
   max-width: 1180px;
   gap: 20px;
 }
 
 .settingsPage .ambientSurface::before,
 .settingsPage .ambientSurface::after,
-.kopuzSettingsPage .ambientSurface::before,
-.kopuzSettingsPage .ambientSurface::after,
+.settingsPage .ambientSurface::before,
+.settingsPage .ambientSurface::after,
 .settingsHero::before,
 .settingsPanelCard::before,
 .settingsPanelCard::after,
@@ -2029,7 +2029,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage,
-.kopuzSettingsPage{
+.settingsPage{
   gap: 18px !important;
 }
 
@@ -2386,7 +2386,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage,
-.kopuzSettingsPage{
+.settingsPage{
   gap: 14px !important;
   padding-bottom: calc(var(--player-size-used, 92px) + 34px) !important;
 }
@@ -2476,7 +2476,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 @media (max-width: 760px){
   .settingsPage,
-  .kopuzSettingsPage{
+  .settingsPage{
     padding: 0 0 calc(var(--player-size-used, 92px) + 24px) !important;
     gap: 12px !important;
   }
@@ -5892,7 +5892,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 .settingsPage,
-.kopuzSettingsPage{
+.settingsPage{
   width: min(1400px, calc(100% - 24px)) !important;
   padding: 0 12px 136px !important;
   gap: 16px !important;
@@ -6342,23 +6342,23 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 .settingsPage [data-orb],
-.kopuzSettingsPage [data-orb],
+.settingsPage [data-orb],
 .settingsPage .floatingNote,
-.kopuzSettingsPage .floatingNote,
+.settingsPage .floatingNote,
 .settingsPage .ambientParticle,
-.kopuzSettingsPage .ambientParticle,
+.settingsPage .ambientParticle,
 .settingsPage .softOrbit,
-.kopuzSettingsPage .softOrbit,
+.settingsPage .softOrbit,
 .settingsPage .importScannerOrb,
-.kopuzSettingsPage .importScannerOrb,
+.settingsPage .importScannerOrb,
 .settingsPage .scannerOrb,
-.kopuzSettingsPage .scannerOrb{
+.settingsPage .scannerOrb{
   display: none !important;
 }
 
 @media (max-width: 1320px){
   .settingsPage,
-  .kopuzSettingsPage{
+  .settingsPage{
     width: min(1240px, calc(100% - 18px)) !important;
     padding-inline: 9px !important;
   }
@@ -6375,7 +6375,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 
 @media (max-width: 860px){
   .settingsPage,
-  .kopuzSettingsPage{
+  .settingsPage{
     width: 100% !important;
     padding-inline: 8px !important;
   }
@@ -6407,7 +6407,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 .settingsPage,
-.kopuzSettingsPage{
+.settingsPage{
   width: min(1240px, calc(100% - 24px)) !important;
   padding: 0 12px 132px !important;
   gap: 16px !important;
@@ -6727,204 +6727,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 }
 
 
-/* localtify V275 — clean translucent window control, replaces the old V274 glass block. */
-.visualGlassControlV275{
-  grid-column: span 1 !important;
-  min-height: 0 !important;
-  padding: 0 0 14px !important;
-  display: grid !important;
-  gap: 10px !important;
-  border-bottom: 1px solid rgba(255,255,255,0.055) !important;
-  background: transparent !important;
-}
-
-.visualGlassHeaderV275{
-  min-height: 34px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 14px !important;
-}
-
-.visualGlassHeaderV275 > div{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 2px !important;
-}
-
-.visualGlassHeaderV275 strong{
-  color: var(--text) !important;
-  font-size: 12.5px !important;
-  font-weight: 950 !important;
-  line-height: 1.05 !important;
-  letter-spacing: -0.025em !important;
-}
-
-.visualGlassHeaderV275 span,
-.visualGlassInlineToggleV275 span,
-.visualGlassRangeRowV275 small,
-.visualGlassHintV275{
-  color: rgba(255,255,255,0.52) !important;
-  font-size: 10.5px !important;
-  line-height: 1.35 !important;
-  font-weight: 800 !important;
-}
-
-.visualGlassSwitchV275{
-  flex: 0 0 auto !important;
-  min-height: 30px !important;
-  padding: 4px 9px 4px 4px !important;
-  border: 1px solid rgba(var(--accent-rgb),0.22) !important;
-  border-radius: 999px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  color: var(--text) !important;
-  background: rgba(255,255,255,0.038) !important;
-  cursor: pointer !important;
-  user-select: none !important;
-}
-
-.visualGlassSwitchV275 input{
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-.visualGlassSwitchV275 i{
-  width: 38px !important;
-  height: 22px !important;
-  border-radius: 999px !important;
-  display: block !important;
-  position: relative !important;
-  background: rgba(255,255,255,0.11) !important;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08) !important;
-  transition: background-color 180ms ease, box-shadow 180ms ease !important;
-}
-
-.visualGlassSwitchV275 i::after{
-  content: "" !important;
-  position: absolute !important;
-  top: 3px !important;
-  left: 3px !important;
-  width: 16px !important;
-  height: 16px !important;
-  border-radius: 50% !important;
-  background: rgba(255,255,255,0.92) !important;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.22) !important;
-  transition: transform 190ms cubic-bezier(.2,1.15,.2,1), background-color 180ms ease !important;
-}
-
-.visualGlassSwitchV275 input:checked + i{
-  background: rgba(var(--accent-rgb),0.38) !important;
-  box-shadow: 0 0 18px rgba(var(--accent-rgb),0.11), inset 0 0 0 1px rgba(var(--accent-rgb),0.24) !important;
-}
-
-.visualGlassSwitchV275 input:checked + i::after{
-  transform: translateX(16px) !important;
-  background: var(--accent) !important;
-}
-
-.visualGlassSwitchV275 b{
-  min-width: 20px !important;
-  color: rgba(255,255,255,0.72) !important;
-  font-size: 10.5px !important;
-  font-weight: 950 !important;
-  text-transform: lowercase !important;
-}
-
-.visualGlassInlineToggleV275{
-  width: fit-content !important;
-  min-height: 28px !important;
-  padding: 0 10px !important;
-  border: 1px solid rgba(255,255,255,0.075) !important;
-  border-radius: 999px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  background: rgba(255,255,255,0.026) !important;
-  cursor: pointer !important;
-}
-
-.visualGlassInlineToggleV275 input{
-  width: 13px !important;
-  height: 13px !important;
-  accent-color: var(--accent) !important;
-}
-
-.visualGlassInlineToggleV275:has(input:disabled),
-.visualGlassSliderGridV275[aria-disabled="true"]{
-  opacity: .44 !important;
-}
-
-.visualGlassSliderGridV275{
-  padding: 10px !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  border-radius: 14px !important;
-  display: grid !important;
-  gap: 10px !important;
-  background: rgba(255,255,255,0.023) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.025) !important;
-}
-
-.visualGlassRangeRowV275{
-  display: grid !important;
-  gap: 6px !important;
-}
-
-.visualGlassRangeHeadV275{
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-}
-
-.visualGlassRangeHeadV275 strong{
-  color: rgba(255,255,255,0.86) !important;
-  font-size: 11.5px !important;
-  font-weight: 900 !important;
-}
-
-.visualGlassRangeHeadV275 b{
-  color: var(--accent) !important;
-  font-size: 11px !important;
-  font-weight: 950 !important;
-}
-
-.visualGlassRangeRowV275 input[type="range"]{
-  width: 100% !important;
-  height: 5px !important;
-  border-radius: 999px !important;
-  outline: none !important;
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  background:
-    linear-gradient(90deg, var(--accent) 0 var(--range-progress, 50%), rgba(255,255,255,0.14) var(--range-progress, 50%) 100%) !important;
-}
-
-.visualGlassRangeRowV275 input[type="range"]::-webkit-slider-thumb{
-  width: 15px !important;
-  height: 15px !important;
-  border: 0 !important;
-  border-radius: 999px !important;
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  background: var(--accent) !important;
-  box-shadow: 0 0 0 5px rgba(var(--accent-rgb),0.12), 0 4px 10px rgba(0,0,0,0.24) !important;
-}
-
-.visualGlassRangeRowV275 input[type="range"]:disabled{
-  cursor: not-allowed !important;
-  filter: grayscale(.3) opacity(.55) !important;
-}
-
-.visualGlassHintV275{
-  margin: 0 !important;
-}
-
-
 .settingsCategoryPage.settingsUpdatesPage,
 .settingsUpdatesPage{
   gap: 16px !important;
@@ -6961,7 +6763,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027{
 
 @media (max-width: 760px){
   .settingsPage,
-  .kopuzSettingsPage{
+  .settingsPage{
     width: 100% !important;
     padding-inline: 8px !important;
   }

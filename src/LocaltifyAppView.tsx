@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.7 V282 — root transparency classes wired safely. */
+/* localtify 0.3.7 V293 — remove window transparency root classes. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -3546,13 +3546,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
         settings.compactPlayer ? "compactPlayer" : ""
-      } ${settings.denseList ? "denseList" : ""} ${
-        settings.translucentWindow ? "windowTranslucent" : "windowOpaque"
-      } ${
-        settings.translucentWindow && settings.transparentAppBackground !== false
-          ? "windowGlassTransparentApp"
-          : "windowGlassSolidApp"
-      } ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${showTopUpdateRibbon ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isPlaying ? "appAudioPlaying" : "appAudioIdle"} ${
+      } ${settings.denseList ? "denseList" : ""} ${themeMotionReady ? "themeMotionReady" : "themeMotionBooting"} animatedBackgrounds ${settings.reducedMotion ? "reducedMotion" : ""} ${showTopUpdateRibbon ? "updateRibbonVisible" : ""} ${isViewSwitching ? "viewSwitching" : ""} ${heroMotionAppClass} ${homeEntranceSettledClass} ${isSeeking || isVolumeDragging ? "playerScrubbing" : ""} ${isAppBackgrounded ? "appBackgrounded" : ""} ${scrollBusyRef.current ? "isScrolling" : ""} ${themeSettling ? "themeSettling" : ""} ${draggedSongId ? "songDragActive" : ""} ${isPlaying ? "appAudioPlaying" : "appAudioIdle"} ${
         secretMode !== "none" ? `secretActive secret-${secretMode}` : ""
       }`}
       style={

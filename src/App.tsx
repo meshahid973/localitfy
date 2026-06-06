@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.7 V287 — stable live translucent background, no ambience or light orbs. */
+/* localtify 0.3.7 V293 — remove window transparency feature and clean renderer state. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -222,22 +222,13 @@ const VISUAL_CUSTOMIZATION_DEFAULTS = {
   libraryRowStyle: "comfyRows",
   starsIntensity: "off",
   sidebarBehavior: "fixed",
-  playerBackgroundStyle: "coverBlur",
-  translucentWindow: true,
-  windowTransparency: 82,
-  windowBlur: 18,
-  transparentAppBackground: true
+  playerBackgroundStyle: "coverBlur"
 } as const;
 
 function normalizeVisualChoice(value: unknown, allowed: readonly string[], fallback: string) {
   return typeof value === "string" && allowed.includes(value) ? value : fallback;
 }
 
-function normalizeTranslucentNumber(value: unknown, fallback: number, min: number, max: number) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return fallback;
-  return Math.max(min, Math.min(max, Math.round(number)));
-}
 
 function applyVisualCustomizationDefaults<T extends Record<string, any>>(settings: T): T {
   return {
@@ -249,11 +240,7 @@ function applyVisualCustomizationDefaults<T extends Record<string, any>>(setting
     libraryRowStyle: normalizeVisualChoice(settings.libraryRowStyle, ["compactRows", "comfyRows", "coverCards", "listOnly"], VISUAL_CUSTOMIZATION_DEFAULTS.libraryRowStyle),
     starsIntensity: normalizeVisualChoice(settings.starsIntensity, ["off", "subtle", "normal", "bright"], "off"),
     sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
-    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "acrylic", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
-    translucentWindow: Boolean(settings.translucentWindow ?? VISUAL_CUSTOMIZATION_DEFAULTS.translucentWindow),
-    windowTransparency: normalizeTranslucentNumber(settings.windowTransparency, VISUAL_CUSTOMIZATION_DEFAULTS.windowTransparency, 12, 88),
-    windowBlur: normalizeTranslucentNumber(settings.windowBlur, VISUAL_CUSTOMIZATION_DEFAULTS.windowBlur, 0, 36),
-    transparentAppBackground: settings.transparentAppBackground !== false
+    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "acrylic", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle)
   };
 }
 
@@ -324,329 +311,6 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
     linuxInstallNotes: []
   };
 }
-
-function upsertLocaltifyRuntimeTransparencyStyle(enabled: boolean) {
-  if (typeof document === "undefined") return;
-
-  const styleId = "localtify-runtime-transparent-canvas-v290";
-  let style = document.getElementById(styleId) as HTMLStyleElement | null;
-
-  if (!style) {
-    style = document.createElement("style");
-    style.id = styleId;
-    style.setAttribute("data-localtify", "transparent-canvas-v290");
-    document.head.appendChild(style);
-  }
-
-  if (!enabled) {
-    style.textContent = "";
-    return;
-  }
-
-  style.textContent = `
-/* localtify V290 — final acrylic backing owner. No ambience, no light orbs. */
-html.localtifyWindowTransparent,
-body.localtifyWindowTransparent,
-body.localtifyWindowTransparent #root,
-html,
-body,
-#root{
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
-body.localtifyWindowOpaque{
-  background: #000 !important;
-}
-
-body.localtifyWindowTransparent .app,
-body.localtifyWindowTransparent .app.windowTranslucent,
-body.localtifyWindowTransparent .app.windowGlassTransparentApp,
-.app.windowTranslucent.windowGlassTransparentApp{
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-  background: transparent !important;
-  background-image: none !important;
-  background-color: rgba(7, 5, 15, var(--window-canvas-alpha, 0.42)) !important;
-  backdrop-filter: blur(var(--window-canvas-blur, var(--window-glass-blur, 20px))) saturate(130%) !important;
-  -webkit-backdrop-filter: blur(var(--window-canvas-blur, var(--window-glass-blur, 20px))) saturate(130%) !important;
-  transition:
-    background-color 150ms ease,
-    backdrop-filter 150ms ease,
-    -webkit-backdrop-filter 150ms ease !important;
-}
-
-/* Keep pseudo overlays dead. The real backing is the app background itself,
-   not an orb/ambience layer. */
-body.localtifyWindowTransparent .app::before,
-body.localtifyWindowTransparent .app::after,
-.app.windowTranslucent.windowGlassTransparentApp::before,
-.app.windowTranslucent.windowGlassTransparentApp::after{
-  content: none !important;
-  display: none !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-  pointer-events: none !important;
-}
-
-body.localtifyWindowTransparent .app > *{
-  position: relative !important;
-  z-index: 1 !important;
-}
-
-/* Clear only full-page canvases so the backing layer remains visible. */
-body.localtifyWindowTransparent :is(
-  .appShell,
-  .content,
-  .contentScroller,
-  .mainView,
-  .mainContent,
-  .contentArea,
-  .appContent,
-  .shellContent,
-  .page,
-  .pageShell,
-  .pageSurface,
-  .pageCanvas,
-  .routeCanvas,
-  .viewCanvas,
-  .viewRoot,
-  .homeView,
-  .homePage,
-  .homeShell,
-  .libraryView,
-  .likedView,
-  .analyticsView,
-  .downloadsView,
-  .coversView,
-  .settingsView,
-  .settingsPage,
-  .settingsContent,
-  .settingsBody,
-  .settingsScroll,
-  .settingsShell,
-  .settingsWorkspace,
-  .settingsMain,
-  .settingsStage,
-  .settingsCanvas,
-  .kopuzSettingsPage
-){
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-body.localtifyWindowTransparent :is(
-  .appShell,
-  .content,
-  .contentScroller,
-  .mainView,
-  .mainContent,
-  .contentArea,
-  .appContent,
-  .shellContent,
-  .page,
-  .pageShell,
-  .pageSurface,
-  .pageCanvas,
-  .routeCanvas,
-  .viewCanvas,
-  .viewRoot,
-  .homeView,
-  .settingsView,
-  .settingsContent,
-  .settingsBody,
-  .settingsShell,
-  .kopuzSettingsPage,
-  .headerBar
-)::before,
-body.localtifyWindowTransparent :is(
-  .appShell,
-  .content,
-  .contentScroller,
-  .mainView,
-  .mainContent,
-  .contentArea,
-  .appContent,
-  .shellContent,
-  .page,
-  .pageShell,
-  .pageSurface,
-  .pageCanvas,
-  .routeCanvas,
-  .viewCanvas,
-  .viewRoot,
-  .homeView,
-  .settingsView,
-  .settingsContent,
-  .settingsBody,
-  .settingsShell,
-  .kopuzSettingsPage,
-  .headerBar
-)::after{
-  content: none !important;
-  display: none !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  pointer-events: none !important;
-}
-
-body.localtifyWindowTransparent .headerBar{
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  border-color: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-body.localtifyWindowTransparent .titleBar{
-  background: rgba(4, 4, 9, var(--window-title-alpha, 0.18)) !important;
-  backdrop-filter: blur(var(--window-title-blur, 14px)) saturate(112%) !important;
-  -webkit-backdrop-filter: blur(var(--window-title-blur, 14px)) saturate(112%) !important;
-}
-
-body.localtifyWindowTransparent .sidebar{
-  background: rgba(8, 5, 18, var(--window-sidebar-alpha, 0.32)) !important;
-  backdrop-filter: blur(var(--window-sidebar-blur, 18px)) saturate(116%) !important;
-  -webkit-backdrop-filter: blur(var(--window-sidebar-blur, 18px)) saturate(116%) !important;
-}
-
-body.localtifyWindowTransparent :is(
-  .homeView .hero,
-  .homeView .homeShelfPanel,
-  .homeView .homeListenPanel,
-  .homeView .homeFreshPanel,
-  .homeView .homeLibraryPanel,
-  .homeView .homeAlbumPanel,
-  .settingsHero,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .settingsCategoryRail,
-  .cleanSettingsModal,
-  .libraryPanel,
-  .downloadPanel,
-  .coverStudioShellCleanOnly,
-  .panel
-){
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.008)),
-    rgba(8, 6, 18, var(--window-panel-alpha, 0.32)) !important;
-  border-color: rgba(255,255,255,0.080) !important;
-  box-shadow: 0 14px 34px rgba(0,0,0,var(--window-shadow-alpha, 0.12)), inset 0 1px 0 rgba(255,255,255,0.030) !important;
-  backdrop-filter: blur(var(--window-panel-blur, 14px)) saturate(112%) !important;
-  -webkit-backdrop-filter: blur(var(--window-panel-blur, 14px)) saturate(112%) !important;
-}
-
-body.localtifyWindowTransparent :is(.ambientSurface)::before,
-body.localtifyWindowTransparent :is(.ambientSurface)::after,
-body.localtifyWindowTransparent :is(.homeView .hero, .panel, .settingsHero, .settingsPanelCard, .settingsPageCard)::before,
-body.localtifyWindowTransparent :is(.homeView .hero, .panel, .settingsHero, .settingsPanelCard, .settingsPageCard)::after{
-  content: none !important;
-  display: none !important;
-  opacity: 0 !important;
-  background: none !important;
-  background-image: none !important;
-}
-
-body.localtifyWindowTransparent .homeView .homeListenCard,
-body.localtifyWindowTransparent .homeView .homeFreshCard,
-body.localtifyWindowTransparent .homeView .homeAlbumCard,
-body.localtifyWindowTransparent .homeView .songRow,
-body.localtifyWindowTransparent .songRow,
-body.localtifyWindowTransparent .libraryTrackRow,
-body.localtifyWindowTransparent .trackRow,
-body.localtifyWindowTransparent .songCard,
-body.localtifyWindowTransparent .recentCoverCard,
-body.localtifyWindowTransparent .coverCard,
-body.localtifyWindowTransparent .playlistTrackRow,
-body.localtifyWindowTransparent .playlistSongRow{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.024), rgba(255,255,255,0.008)),
-    rgba(8, 6, 18, var(--window-row-alpha, 0.34)) !important;
-  border-color: rgba(255,255,255,0.075) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-body.localtifyWindowTransparent .search,
-body.localtifyWindowTransparent input,
-body.localtifyWindowTransparent textarea,
-body.localtifyWindowTransparent select{
-  background: rgba(5, 4, 12, var(--window-input-alpha, 0.36)) !important;
-  border-color: rgba(255,255,255,0.09) !important;
-}
-
-body.localtifyWindowTransparent .playerBar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.010)),
-    rgba(0, 0, 0, var(--window-player-alpha, 0.64)) !important;
-  backdrop-filter: blur(var(--window-player-blur, 16px)) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(var(--window-player-blur, 16px)) saturate(120%) !important;
-}
-
-body.localtifyWindowTransparent :is(
-  .ambientOrb,
-  .sideAmbienceOrb,
-  .lightOrb,
-  .heroAmbiencePulse,
-  .ambientSurfaceGlow,
-  .coverAmbience,
-  .orb,
-  .localtifyStarsBackdrop,
-  .localtifyStarsLayer,
-  .localtifyStarParticle,
-  .localtifyStarsNebula,
-  .localtifyStarSweep,
-  .themeBackdrop,
-  .animatedThemeBackdrop,
-  .backgroundGradient,
-  .appBackdrop,
-  .appBackgroundLayer
-){
-  display: none !important;
-  opacity: 0 !important;
-  background: none !important;
-  background-image: none !important;
-  animation: none !important;
-  pointer-events: none !important;
-}
-
-
-/* V290 final runtime ownership: the app element owns the acrylic canvas.
-   This is injected after bundled CSS, so no older reset can cancel blur. */
-body.localtifyWindowTransparent .app.windowTranslucent,
-body.localtifyWindowTransparent .app.windowGlassTransparentApp,
-body.localtifyWindowTransparent .app.windowTranslucent.windowGlassTransparentApp,
-.app.windowTranslucent.windowGlassTransparentApp{
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-  background-image: none !important;
-  background-color: rgba(10, 10, 26, var(--window-canvas-alpha, 0.45)) !important;
-  backdrop-filter: blur(var(--window-canvas-blur, var(--window-glass-blur, 20px))) saturate(125%) !important;
-  -webkit-backdrop-filter: blur(var(--window-canvas-blur, var(--window-glass-blur, 20px))) saturate(125%) !important;
-  transition: background-color 150ms ease, backdrop-filter 150ms ease, -webkit-backdrop-filter 150ms ease !important;
-}
-
-`;
-}
-
-
 
 function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -1669,96 +1333,41 @@ function MainModeApp() {
   const customThemeHighlight = normalizeHexColor(settings.customThemeHighlight, "#c084fc");
   const customThemeProgress = normalizeHexColor(settings.customThemeProgress, customThemeColor);
   const customThemeStyle = useMemo<CSSProperties>(() => {
-    const windowTransparencyValue = normalizeTranslucentNumber(settings.windowTransparency, VISUAL_CUSTOMIZATION_DEFAULTS.windowTransparency, 12, 88);
-    const windowBlurValue = normalizeTranslucentNumber(settings.windowBlur, VISUAL_CUSTOMIZATION_DEFAULTS.windowBlur, 0, 36);
-    // Higher slider value means more transparent. CSS needs alpha/opacity, so invert it here.
-    // Example: 82% transparency => 0.18 surface alpha.
-    const windowSurfaceOpacity = settings.translucentWindow && settings.transparentAppBackground !== false
-      ? Math.max(0.08, Math.min(0.62, 1 - windowTransparencyValue / 100))
-      : 1;
-
-    // V290: keep a real acrylic backing layer. Higher slider = more desktop visible,
-    // but not a fully cut-out transparent window. This is what gives the app depth.
-    const canvasAlpha = Math.max(0.16, Math.min(0.56, windowSurfaceOpacity + 0.18));
-    const titleAlpha = Math.max(0.10, Math.min(0.30, 0.08 + windowSurfaceOpacity * 0.30));
-    const sidebarAlpha = Math.max(0.20, Math.min(0.44, 0.16 + windowSurfaceOpacity * 0.38));
-    const panelAlpha = Math.max(0.22, Math.min(0.48, 0.18 + windowSurfaceOpacity * 0.44));
-    const rowAlpha = Math.max(0.22, Math.min(0.50, 0.18 + windowSurfaceOpacity * 0.42));
-    const inputAlpha = Math.max(0.24, Math.min(0.50, 0.20 + windowSurfaceOpacity * 0.38));
-    const playerAlpha = Math.max(0.54, Math.min(0.76, 0.48 + windowSurfaceOpacity * 0.32));
-    const shadowAlpha = Math.max(0.08, Math.min(0.18, windowSurfaceOpacity * 0.30));
-    const accentGlowAlpha = 0;
-    const accentSoftAlpha = 0;
-    const panelBlur = Math.max(6, Math.min(22, windowBlurValue));
-    const sidebarBlur = Math.max(8, Math.min(26, windowBlurValue + 2));
-    const titleBlur = Math.max(6, Math.min(22, windowBlurValue));
-    const playerBlur = Math.max(8, Math.min(24, windowBlurValue));
-
-    const windowSurfaceStyle = {
-      "--window-transparency": `${windowTransparencyValue}%`,
-      "--window-glass-alpha": windowSurfaceOpacity.toFixed(2),
-      "--window-surface-alpha": windowSurfaceOpacity.toFixed(2),
-      "--window-canvas-alpha": canvasAlpha.toFixed(2),
-      "--window-title-alpha": titleAlpha.toFixed(2),
-      "--window-sidebar-alpha": sidebarAlpha.toFixed(2),
-      "--window-panel-alpha": panelAlpha.toFixed(2),
-      "--window-row-alpha": rowAlpha.toFixed(2),
-      "--window-input-alpha": inputAlpha.toFixed(2),
-      "--window-player-alpha": playerAlpha.toFixed(2),
-      "--window-shadow-alpha": shadowAlpha.toFixed(2),
-      "--window-accent-glow-alpha": accentGlowAlpha.toFixed(2),
-      "--window-accent-soft-alpha": accentSoftAlpha.toFixed(2),
-      "--window-glass-blur": `${windowBlurValue}px`,
-      "--window-canvas-blur": `${windowBlurValue}px`,
-      "--window-panel-blur": `${panelBlur}px`,
-      "--window-sidebar-blur": `${sidebarBlur}px`,
-      "--window-title-blur": `${titleBlur}px`,
-      "--window-player-blur": `${playerBlur}px`,
-      "--window-glass-bg": `rgba(5, 5, 15, ${canvasAlpha.toFixed(2)})`,
-      "--window-glass-sidebar-bg": `rgba(8, 5, 18, ${sidebarAlpha.toFixed(2)})`,
-      "--window-glass-panel-bg": `rgba(10, 8, 20, ${panelAlpha.toFixed(2)})`
-    } as CSSProperties;
-
-    if (!settings.customThemeEnabled) return windowSurfaceStyle;
+    if (!settings.customThemeEnabled) return {};
 
     return {
-        "--bg": customThemeBackground,
-        "--bg-2": customThemeBackground,
-        "--bg-3": customThemeSurface,
-        "--panel": hexToRgbaString(customThemeSurface, "#151528", 0.42),
-        "--surface": hexToRgbaString(customThemeSurface, "#151528", 0.22),
-        "--surface-2": hexToRgbaString(customThemeSurface, "#151528", 0.32),
-        "--surface-3": hexToRgbaString(customThemeSurface, "#151528", 0.48),
-        "--text": customThemeText,
-        "--text-2": hexToRgbaString(customThemeText, "#f5f3ff", 0.78),
-        "--muted": hexToRgbaString(customThemeText, "#f5f3ff", 0.52),
-        "--accent": customThemeColor,
-        "--accent-2": customThemeColor2,
-        "--highlight": customThemeHighlight,
-        "--progress": customThemeProgress,
-        "--accent-rgb": hexToRgbString(customThemeColor, "#8dffce"),
-        "--accent-2-rgb": hexToRgbString(customThemeColor2, "#8ecbff"),
-        "--highlight-rgb": hexToRgbString(customThemeHighlight, "#c084fc"),
-        "--progress-rgb": hexToRgbString(customThemeProgress, "#8dffce"),
-        "--accent-soft": hexToRgbaString(customThemeColor, "#8dffce", 0.14),
-        "--accent-line": hexToRgbaString(customThemeColor, "#8dffce", 0.34),
-        "--theme-accent": customThemeColor,
-        "--theme-accent-2": customThemeColor2,
-        "--theme-highlight": customThemeHighlight,
-        "--theme-progress": customThemeProgress,
-        "--theme-card-glass": hexToRgbaString(customThemeColor, "#8dffce", 0.045),
-        "--theme-card-border": hexToRgbaString(customThemeColor, "#8dffce", 0.16),
-        "--theme-hover-glass": hexToRgbaString(customThemeColor, "#8dffce", 0.09),
-        "--theme-hover-border": hexToRgbaString(customThemeColor, "#8dffce", 0.32),
-        "--card-rgb": hexToRgbString(customThemeColor, "#8dffce"),
-        ...windowSurfaceStyle
-      } as CSSProperties;
+      "--bg": customThemeBackground,
+      "--bg-2": customThemeBackground,
+      "--bg-3": customThemeSurface,
+      "--panel": hexToRgbaString(customThemeSurface, "#151528", 0.42),
+      "--surface": hexToRgbaString(customThemeSurface, "#151528", 0.22),
+      "--surface-2": hexToRgbaString(customThemeSurface, "#151528", 0.32),
+      "--surface-3": hexToRgbaString(customThemeSurface, "#151528", 0.48),
+      "--text": customThemeText,
+      "--text-2": hexToRgbaString(customThemeText, "#f5f3ff", 0.78),
+      "--muted": hexToRgbaString(customThemeText, "#f5f3ff", 0.52),
+      "--accent": customThemeColor,
+      "--accent-2": customThemeColor2,
+      "--highlight": customThemeHighlight,
+      "--progress": customThemeProgress,
+      "--accent-rgb": hexToRgbString(customThemeColor, "#8dffce"),
+      "--accent-2-rgb": hexToRgbString(customThemeColor2, "#8ecbff"),
+      "--highlight-rgb": hexToRgbString(customThemeHighlight, "#c084fc"),
+      "--progress-rgb": hexToRgbString(customThemeProgress, "#8dffce"),
+      "--accent-soft": hexToRgbaString(customThemeColor, "#8dffce", 0.14),
+      "--accent-line": hexToRgbaString(customThemeColor, "#8dffce", 0.34),
+      "--theme-accent": customThemeColor,
+      "--theme-accent-2": customThemeColor2,
+      "--theme-highlight": customThemeHighlight,
+      "--theme-progress": customThemeProgress,
+      "--theme-card-glass": hexToRgbaString(customThemeColor, "#8dffce", 0.045),
+      "--theme-card-border": hexToRgbaString(customThemeColor, "#8dffce", 0.16),
+      "--theme-hover-glass": hexToRgbaString(customThemeColor, "#8dffce", 0.09),
+      "--theme-hover-border": hexToRgbaString(customThemeColor, "#8dffce", 0.32),
+      "--card-rgb": hexToRgbString(customThemeColor, "#8dffce")
+    } as CSSProperties;
   }, [
     settings.customThemeEnabled,
-    settings.translucentWindow,
-    settings.windowTransparency,
-    settings.windowBlur,
-    settings.transparentAppBackground,
     customThemeBackground,
     customThemeSurface,
     customThemeText,
@@ -1768,73 +1377,6 @@ function MainModeApp() {
     customThemeProgress
   ]);
 
-
-  useLayoutEffect(() => {
-    const transparentCanvas =
-      Boolean(settings.translucentWindow) &&
-      settings.transparentAppBackground !== false;
-
-    const glassMode = transparentCanvas
-      ? "transparent"
-      : settings.translucentWindow
-        ? "solid"
-        : "opaque";
-
-    upsertLocaltifyRuntimeTransparencyStyle(transparentCanvas);
-
-    const applyWindowGlassState = () => {
-      const root =
-        appRootRef.current ||
-        (typeof document !== "undefined"
-          ? document.querySelector<HTMLElement>(".app")
-          : null);
-
-      if (typeof document !== "undefined") {
-        document.documentElement.classList.toggle("localtifyWindowTransparent", transparentCanvas);
-        document.documentElement.classList.toggle("localtifyWindowSolidGlass", Boolean(settings.translucentWindow) && !transparentCanvas);
-        document.documentElement.classList.toggle("localtifyWindowOpaque", !settings.translucentWindow);
-
-        document.body.classList.toggle("localtifyWindowTransparent", transparentCanvas);
-        document.body.classList.toggle("localtifyWindowSolidGlass", Boolean(settings.translucentWindow) && !transparentCanvas);
-        document.body.classList.toggle("localtifyWindowOpaque", !settings.translucentWindow);
-        document.body.dataset.windowTranslucent = settings.translucentWindow ? "true" : "false";
-        document.body.dataset.windowGlass = glassMode;
-      }
-
-      if (!root) return;
-
-      root.classList.toggle("windowTranslucent", Boolean(settings.translucentWindow));
-      root.classList.toggle("windowOpaque", !settings.translucentWindow);
-      root.classList.toggle("windowGlassTransparentApp", transparentCanvas);
-      root.classList.toggle("windowGlassSolidApp", Boolean(settings.translucentWindow) && !transparentCanvas);
-      root.dataset.windowTranslucent = settings.translucentWindow ? "true" : "false";
-      root.dataset.windowGlass = glassMode;
-
-      for (const [name, value] of Object.entries(customThemeStyle)) {
-        if (!name.startsWith("--") || value === undefined || value === null) continue;
-        const cleanValue = String(value);
-        root.style.setProperty(name, cleanValue);
-        if (typeof document !== "undefined") {
-          document.documentElement.style.setProperty(name, cleanValue);
-          document.body.style.setProperty(name, cleanValue);
-        }
-      }
-    };
-
-    applyWindowGlassState();
-
-    const frame = window.requestAnimationFrame(applyWindowGlassState);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [
-    customThemeStyle,
-    settings.translucentWindow,
-    settings.transparentAppBackground,
-    settings.windowTransparency,
-    settings.windowBlur
-  ]);
 
   const customThemeTokens = useMemo(
     () =>
@@ -3959,11 +3501,7 @@ function MainModeApp() {
         nextSettings.libraryRowStyle !== storedSettings.libraryRowStyle ||
         nextSettings.starsIntensity !== storedSettings.starsIntensity ||
         nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior ||
-        nextSettings.playerBackgroundStyle !== storedSettings.playerBackgroundStyle ||
-        nextSettings.translucentWindow !== storedSettings.translucentWindow ||
-        nextSettings.windowTransparency !== storedSettings.windowTransparency ||
-        nextSettings.windowBlur !== storedSettings.windowBlur ||
-        nextSettings.transparentAppBackground !== storedSettings.transparentAppBackground;
+        nextSettings.playerBackgroundStyle !== storedSettings.playerBackgroundStyle;
 
       const shouldPersistBootSettings =
         shouldApplyV013Defaults ||
@@ -5034,20 +4572,6 @@ function MainModeApp() {
     setStatusText("paused");
   }
 
-  function syncWindowTranslucencySettings(nextSettings: Settings, restart = false) {
-    const bridge = window.localitfy as any;
-    if (!bridge?.setWindowTranslucency) return;
-
-    bridge.setWindowTranslucency({
-      translucentWindow: Boolean(nextSettings.translucentWindow),
-      windowTransparency: normalizeTranslucentNumber(nextSettings.windowTransparency, VISUAL_CUSTOMIZATION_DEFAULTS.windowTransparency, 12, 88),
-      windowBlur: normalizeTranslucentNumber(nextSettings.windowBlur, VISUAL_CUSTOMIZATION_DEFAULTS.windowBlur, 0, 36),
-      transparentAppBackground: nextSettings.transparentAppBackground !== false,
-      // BrowserWindow is always transparent now, so the toggle can update live.
-      restart: false
-    }).catch(() => undefined);
-  }
-
   async function persistSettings(next: Settings, debounce = false) {
     const shouldTrackThemeChange =
       bootedRef.current &&
@@ -5136,11 +4660,7 @@ function MainModeApp() {
       key === "libraryRowStyle" ||
       key === "starsIntensity" ||
       key === "sidebarBehavior" ||
-      key === "playerBackgroundStyle" ||
-      key === "translucentWindow" ||
-      key === "windowTransparency" ||
-      key === "windowBlur" ||
-      key === "transparentAppBackground"
+      key === "playerBackgroundStyle"
     ) {
       kickThemeSettle();
     }
@@ -5156,15 +4676,6 @@ function MainModeApp() {
     }
 
     await persistSettings(next, debounce);
-
-    if (
-      key === "translucentWindow" ||
-      key === "windowTransparency" ||
-      key === "windowBlur" ||
-      key === "transparentAppBackground"
-    ) {
-      syncWindowTranslucencySettings(next, false);
-    }
 
     if (!debounce && bootedRef.current) {
       if (key === "theme" || key === "customThemeEnabled") {

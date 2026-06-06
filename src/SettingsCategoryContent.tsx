@@ -1,4 +1,4 @@
-/* localtify 0.3.7 V275 — clean translucent window controls, Linux release notes, and hidden platform-only controls. */
+/* localtify 0.3.7 V293 — settings cleanup with window transparency controls removed. */
 import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
@@ -338,118 +338,6 @@ function VisualOptionGroup({
   );
 }
 
-function clampVisualNumber(value: unknown, fallback: number, min: number, max: number) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return fallback;
-  return Math.max(min, Math.min(max, Math.round(number)));
-}
-
-function VisualRangeRow({
-  label,
-  value,
-  min,
-  max,
-  suffix,
-  help,
-  disabled = false,
-  onChange
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  suffix: string;
-  help: string;
-  disabled?: boolean;
-  onChange: (value: number) => void;
-}) {
-  const fill = ((value - min) / (max - min || 1)) * 100;
-
-  return (
-    <label className={`visualGlassRangeRowV275 ${disabled ? "disabled" : ""}`}>
-      <span className="visualGlassRangeHeadV275">
-        <strong>{label}</strong>
-        <b>{value}{suffix}</b>
-      </span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={value}
-        disabled={disabled}
-        style={{ ["--range-progress" as string]: `${clamp(fill, 0, 100)}%` } as CSSProperties}
-        onChange={(event) => onChange(Number(event.currentTarget.value))}
-        aria-label={label}
-      />
-      <small>{help}</small>
-    </label>
-  );
-}
-
-function TranslucentWindowControl({ settings, updateSetting }: { settings: Settings; updateSetting: (...args: any[]) => void | Promise<void> }) {
-  const enabled = Boolean(settings.translucentWindow);
-  const transparency = clampVisualNumber(settings.windowTransparency, 62, 12, 88);
-  const blur = clampVisualNumber(settings.windowBlur, 18, 0, 36);
-  const transparentAppBackground = settings.transparentAppBackground !== false;
-
-  return (
-    <section className={`visualGlassControlV275 ${enabled ? "enabled" : "off"}`} aria-label="Translucent window controls">
-      <div className="visualGlassHeaderV275">
-        <div>
-          <strong>Translucent window</strong>
-          <span>Native Electron glass for the whole app background.</span>
-        </div>
-        <label className="visualGlassSwitchV275" title="Reloads only the app window so Electron can recreate it with transparency.">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(event) => updateSetting("translucentWindow", event.currentTarget.checked)}
-          />
-          <i aria-hidden="true" />
-          <b>{enabled ? "on" : "off"}</b>
-        </label>
-      </div>
-
-      <label className="visualGlassInlineToggleV275">
-        <input
-          type="checkbox"
-          checked={transparentAppBackground}
-          disabled={!enabled}
-          onChange={(event) => updateSetting("transparentAppBackground", event.currentTarget.checked)}
-        />
-        <span>Transparent app background</span>
-      </label>
-
-      <div className="visualGlassSliderGridV275" aria-disabled={!enabled}>
-        <VisualRangeRow
-          label="Transparency"
-          value={transparency}
-          min={12}
-          max={88}
-          suffix="%"
-          disabled={!enabled}
-          help="Higher means more desktop shows through."
-          onChange={(nextValue) => updateSetting("windowTransparency", nextValue, true)}
-        />
-        <VisualRangeRow
-          label="Background blur"
-          value={blur}
-          min={0}
-          max={36}
-          suffix="px"
-          disabled={!enabled}
-          help="Softens the app background glass layer."
-          onChange={(nextValue) => updateSetting("windowBlur", nextValue, true)}
-        />
-      </div>
-
-      <p className="visualGlassHintV275">
-        On/off reloads the app window only. Sliders update live after glass mode is on.
-      </p>
-    </section>
-  );
-}
-
 const HOME_BANNER_TYPE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "dynamic", label: "Dynamic", note: "cover tint" },
   { id: "albumCover", label: "Album cover", note: "cover focus" },
@@ -698,7 +586,7 @@ return (
           <div className="settingsPanelHeader visualCustomizationHeaderV205">
             <div>
               <strong>Visuals</strong>
-              <span>Quick controls for the home screen, cards, window glass, sidebar, and player.</span>
+              <span>Quick controls for the home screen, cards, sidebar, and player.</span>
             </div>
           </div>
 
@@ -742,8 +630,6 @@ return (
               value={readSettingChoice(settings, "libraryRowStyle", "comfyRows")}
               onChange={(value) => updateSetting("libraryRowStyle", value)}
             />
-
-            <TranslucentWindowControl settings={settings} updateSetting={updateSetting} />
 
             <VisualOptionGroup
               title="Sidebar"
