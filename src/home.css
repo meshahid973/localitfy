@@ -14957,3 +14957,1247 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
   transform: translateZ(0);
 }
+
+/* ========================================================================
+   localtify v0.3.7 V316 — Spotify downloads release layout fix
+   Owner: home.css
+   Purpose:
+   - current LocaltifyAppView renders plain Spotify classes, not only V256 classes
+   - restore proper cover sizing, grid/list layout, selected state, and green buttons
+   - no ambience orbs, no heavy filters, no extra renderer code
+======================================================================== */
+
+.app .downloadsLayoutV031{
+  --spotify-green: 30, 215, 96;
+  --spotify-green-soft: rgba(30, 215, 96, 0.12);
+  --spotify-card-bg: rgba(5, 8, 11, 0.72);
+  --spotify-card-bg-hover: rgba(8, 18, 13, 0.86);
+  --spotify-line: rgba(255, 255, 255, 0.08);
+  --spotify-line-strong: rgba(30, 215, 96, 0.24);
+}
+
+.app .downloadsLayoutV031 .downloadPanelV031{
+  width: min(980px, calc(100vw - 220px)) !important;
+  max-width: 980px !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.014)),
+    rgba(4, 3, 10, 0.76) !important;
+}
+
+.app .downloadsLayoutV031 .downloadPanelV031 .downloadHeroHead{
+  align-items: flex-start !important;
+}
+
+.app .downloadsLayoutV031 .downloadPanelV031 .downloadHeroActions{
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 10px !important;
+}
+
+.app .downloadsLayoutV031 .downloadTabStrip{
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 20px 0 0 !important;
+}
+
+.app .downloadsLayoutV031 .downloadTab{
+  min-height: 34px !important;
+  padding: 0 15px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  line-height: 1 !important;
+}
+
+.app .downloadsLayoutV031 .downloadTab.active.spotifyTab{
+  color: #1ed760 !important;
+  border-color: rgba(var(--spotify-green), 0.42) !important;
+  background: rgba(var(--spotify-green), 0.12) !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthCard,
+.app .downloadsLayoutV031 .spotifyAuthCardV256{
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 16px !important;
+  width: 100% !important;
+  margin: 16px 0 0 !important;
+  padding: 16px 18px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(var(--spotify-green), 0.18) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--spotify-green), 0.065), rgba(var(--spotify-green), 0.025)),
+    rgba(4, 11, 8, 0.66) !important;
+  box-shadow: none !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthCard.loggedIn,
+.app .downloadsLayoutV031 .spotifyAuthCardV256.loggedIn{
+  border-color: rgba(var(--spotify-green), 0.32) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--spotify-green), 0.10), rgba(var(--spotify-green), 0.034)),
+    rgba(3, 13, 8, 0.72) !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthLeft{
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthDot{
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 999px !important;
+  background: #1ed760 !important;
+  box-shadow: 0 0 0 5px rgba(var(--spotify-green), 0.10) !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthLeft strong{
+  color: rgba(255,255,255,0.94) !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthLeft p{
+  margin: 3px 0 0 !important;
+  max-width: 58ch !important;
+  color: rgba(255,255,255,0.55) !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthActions{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  flex-wrap: nowrap !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthBtn,
+.app .downloadsLayoutV031 .spotifyFetchButton,
+.app .downloadsLayoutV031 .spotifyDownloadButton{
+  min-height: 44px !important;
+  border-radius: 16px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthBtn.heroMain,
+.app .downloadsLayoutV031 .spotifyFetchButton,
+.app .downloadsLayoutV031 .spotifyDownloadButton{
+  color: #04180c !important;
+  background: linear-gradient(135deg, #1ed760, #26f179) !important;
+  border-color: rgba(var(--spotify-green), 0.46) !important;
+  box-shadow: 0 14px 30px rgba(var(--spotify-green), 0.16) !important;
+}
+
+.app .downloadsLayoutV031 .spotifyAuthBtn.heroMain:hover:not(:disabled),
+.app .downloadsLayoutV031 .spotifyFetchButton:hover:not(:disabled),
+.app .downloadsLayoutV031 .spotifyDownloadButton:hover:not(:disabled){
+  transform: translate3d(0, -1px, 0) scale(1.01) !important;
+  filter: brightness(1.04) !important;
+}
+
+.app .downloadsLayoutV031 .spotifyNotice{
+  margin: 14px 0 0 !important;
+  padding: 13px 16px !important;
+  border-radius: 18px !important;
+  border-color: rgba(var(--spotify-green), 0.20) !important;
+  background: rgba(var(--spotify-green), 0.052) !important;
+  color: rgba(255,255,255,0.74) !important;
+  font-size: 12.5px !important;
+  line-height: 1.45 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyUrlRow,
+.app .downloadsLayoutV031 .spotifyUrlRowV256{
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+  margin: 16px 0 0 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyUrlInput{
+  width: 100% !important;
+  min-height: 58px !important;
+  height: 58px !important;
+  padding: 0 18px !important;
+  resize: none !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  background: rgba(0,0,0,0.52) !important;
+  color: rgba(255,255,255,0.92) !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  line-height: 58px !important;
+  box-shadow: none !important;
+}
+
+.app .downloadsLayoutV031 .spotifyUrlInput:focus{
+  border-color: rgba(var(--spotify-green), 0.38) !important;
+  box-shadow: 0 0 0 3px rgba(var(--spotify-green), 0.08) !important;
+}
+
+.app .downloadsLayoutV031 .spotifyFetchButton{
+  min-width: 150px !important;
+  padding-inline: 20px !important;
+}
+
+.app .downloadsLayoutV031 .spotifyError{
+  margin: 12px 0 0 !important;
+  padding: 13px 16px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 96, 143, 0.36) !important;
+  background: rgba(255, 96, 143, 0.08) !important;
+  color: #ffb3cb !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  line-height: 1.5 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackList,
+.app .downloadsLayoutV031 .spotifyTrackListV256{
+  margin: 16px 0 0 !important;
+  padding: 16px !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(var(--spotify-green), 0.18) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--spotify-green), 0.045), rgba(255,255,255,0.012)),
+    rgba(0,0,0,0.25) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackListHead,
+.app .downloadsLayoutV031 .spotifyTrackListHeadV256{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin: 0 0 12px !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackListHead strong,
+.app .downloadsLayoutV031 .spotifyTrackListHeadV256 strong{
+  color: rgba(255,255,255,0.94) !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.app .downloadsLayoutV031 .spotifySelectActions{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+}
+
+.app .downloadsLayoutV031 .spotifySelectActions .softButton{
+  min-height: 34px !important;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItems,
+.app .downloadsLayoutV031 .spotifyTrackItemsV256{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(240px, 1fr)) !important;
+  gap: 10px !important;
+  max-height: 360px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  margin: 0 0 14px !important;
+  padding: 2px 4px 2px 2px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(var(--spotify-green), 0.36) transparent !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItems::-webkit-scrollbar,
+.app .downloadsLayoutV031 .spotifyTrackItemsV256::-webkit-scrollbar{
+  width: 6px !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItems::-webkit-scrollbar-track,
+.app .downloadsLayoutV031 .spotifyTrackItemsV256::-webkit-scrollbar-track{
+  background: transparent !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItems::-webkit-scrollbar-thumb,
+.app .downloadsLayoutV031 .spotifyTrackItemsV256::-webkit-scrollbar-thumb{
+  background: rgba(var(--spotify-green), 0.32) !important;
+  border-radius: 999px !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItem,
+.app .downloadsLayoutV031 .spotifyTrackItemsV256 .spotifyTrackItem{
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  position: relative !important;
+  isolation: isolate !important;
+  min-width: 0 !important;
+  min-height: 74px !important;
+  width: 100% !important;
+  padding: 10px 12px !important;
+  display: grid !important;
+  grid-template-columns: 54px minmax(0, 1fr) 24px !important;
+  align-items: center !important;
+  gap: 12px !important;
+  border-radius: 18px !important;
+  border: 1px solid var(--spotify-line) !important;
+  background: var(--spotify-card-bg) !important;
+  color: rgba(255,255,255,0.92) !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+  contain: paint !important;
+  box-shadow: inset 0 1px rgba(255,255,255,0.035) !important;
+  transform: translate3d(0,0,0) !important;
+  transition:
+    transform 160ms cubic-bezier(.2,.8,.2,1),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItem::before,
+.app .downloadsLayoutV031 .spotifyTrackItemsV256 .spotifyTrackItem::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  opacity: 0 !important;
+  background: linear-gradient(90deg, rgba(var(--spotify-green), 0.18), rgba(var(--spotify-green), 0.035) 38%, transparent 70%) !important;
+  transition: opacity 160ms ease !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItem:hover:not(:disabled),
+.app .downloadsLayoutV031 .spotifyTrackItemsV256 .spotifyTrackItem:hover:not(:disabled){
+  transform: translate3d(0, -1px, 0) scale(1.006) !important;
+  border-color: rgba(var(--spotify-green), 0.24) !important;
+  background: var(--spotify-card-bg-hover) !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItem:hover:not(:disabled)::before,
+.app .downloadsLayoutV031 .spotifyTrackItemsV256 .spotifyTrackItem:hover:not(:disabled)::before{
+  opacity: 1 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItem.selected,
+.app .downloadsLayoutV031 .spotifyTrackItemsV256 .spotifyTrackItem.selected{
+  border-color: rgba(var(--spotify-green), 0.42) !important;
+  background:
+    linear-gradient(90deg, rgba(var(--spotify-green), 0.16), rgba(255,255,255,0.018)),
+    rgba(5, 12, 9, 0.88) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--spotify-green), 0.10),
+    0 10px 22px rgba(0,0,0,0.12) !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackItem:disabled{
+  opacity: 0.58 !important;
+  cursor: default !important;
+  transform: none !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackArt,
+.app .downloadsLayoutV031 .spotifyTrackIndex{
+  width: 54px !important;
+  height: 54px !important;
+  min-width: 54px !important;
+  border-radius: 14px !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,0.06) !important;
+  color: rgba(255,255,255,0.52) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackArt img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackMeta{
+  min-width: 0 !important;
+  display: block !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackMeta strong{
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: rgba(255,255,255,0.96) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.18 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackMeta p{
+  display: block !important;
+  max-width: 100% !important;
+  margin: 5px 0 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: rgba(255,255,255,0.52) !important;
+  font-size: 11.5px !important;
+  font-weight: 760 !important;
+  line-height: 1.15 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyTrackCheck{
+  width: 24px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #1ed760 !important;
+  font-size: 16px !important;
+  font-weight: 1000 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyDownloadRow{
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 14px 0 0 !important;
+  padding: 0 !important;
+}
+
+.app .downloadsLayoutV031 .spotifyDownloadButton{
+  min-width: 190px !important;
+}
+
+@media (max-width: 980px){
+  .app .downloadsLayoutV031 .downloadPanelV031{
+    width: min(100%, calc(100vw - 44px)) !important;
+  }
+
+  .app .downloadsLayoutV031 .spotifyTrackItems,
+  .app .downloadsLayoutV031 .spotifyTrackItemsV256{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 720px){
+  .app .downloadsLayoutV031 .spotifyAuthCard,
+  .app .downloadsLayoutV031 .spotifyAuthCardV256,
+  .app .downloadsLayoutV031 .spotifyUrlRow,
+  .app .downloadsLayoutV031 .spotifyUrlRowV256{
+    grid-template-columns: 1fr !important;
+  }
+
+  .app .downloadsLayoutV031 .spotifyAuthActions,
+  .app .downloadsLayoutV031 .downloadHeroActions,
+  .app .downloadsLayoutV031 .spotifyDownloadRow{
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .app .downloadsLayoutV031 .spotifyFetchButton,
+  .app .downloadsLayoutV031 .spotifyDownloadButton,
+  .app .downloadsLayoutV031 .spotifyAuthBtn{
+    width: 100% !important;
+  }
+}
+
+
+
+/* localtify v0.3.7 V318 — polished local albums page + album builder */
+.albumsPageV318{
+  display: grid;
+  grid-template-columns: minmax(360px, .84fr) minmax(500px, 1.16fr);
+  grid-template-areas:
+    "hero hero"
+    "shelf detail"
+    "builder builder";
+  gap: 16px;
+  padding-bottom: 14px;
+}
+
+.albumsHeroPanelV318,
+.albumsShelfPanelV318,
+.albumDetailPanelV318,
+.albumBuilderPanelV318{
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(var(--accent-rgb), .16);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.014)), rgba(3, 3, 8, .72);
+  box-shadow: none;
+}
+
+.albumsHeroPanelV318{
+  grid-area: hero;
+  min-height: 210px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: center;
+  padding: clamp(22px, 2.4vw, 34px);
+}
+
+.albumsHeroPanelV318::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.58), rgba(var(--accent-rgb), .08) 46%, rgba(255,255,255,.02)),
+    radial-gradient(circle at 92% 18%, rgba(var(--accent-rgb), .16), transparent 32%);
+  opacity: .88;
+}
+
+.albumsHeroArtClusterV318,
+.albumsHeroCopyV318,
+.albumsHeroStatsV318{
+  position: relative;
+  z-index: 1;
+}
+
+.albumsHeroArtClusterV318{
+  position: absolute;
+  right: clamp(230px, 19vw, 360px);
+  top: 24px;
+  width: 150px;
+  height: 122px;
+  opacity: .92;
+  pointer-events: none;
+}
+
+.albumsHeroMiniCoverV318{
+  position: absolute;
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  box-shadow: 0 18px 34px rgba(0,0,0,.34), 0 0 0 1px rgba(255,255,255,.08);
+}
+
+.albumsHeroMiniCoverV318.cover1{ left: 6px; top: 24px; transform: rotate(-8deg); }
+.albumsHeroMiniCoverV318.cover2{ left: 56px; top: 2px; transform: rotate(7deg); }
+.albumsHeroMiniCoverV318.cover3{ left: 92px; top: 48px; transform: rotate(12deg); }
+.albumsHeroMiniCoverV318.cover4{ left: 36px; top: 66px; transform: rotate(-4deg); opacity: .72; }
+
+.albumsHeroCopyV318{
+  max-width: 820px;
+  display: grid;
+  gap: 10px;
+}
+
+.albumsHeroCopyV318 h3{
+  max-width: 12ch;
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(46px, 5vw, 78px);
+  line-height: .88;
+  letter-spacing: -.085em;
+}
+
+.albumsHeroCopyV318 p:not(.eyebrow){
+  max-width: 54ch;
+  margin: 0;
+  color: rgba(var(--text-rgb), .72);
+  font-size: 15px;
+  line-height: 1.55;
+  font-weight: 760;
+}
+
+.albumsHeroActionsV318{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.albumsHeroActionsV318 .mainAction,
+.albumsHeroActionsV318 .heroGhost{
+  min-height: 42px;
+  padding-inline: 18px;
+}
+
+.albumsHeroStatsV318{
+  justify-self: end;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+  gap: 10px;
+  min-width: min(360px, 31vw);
+}
+
+.albumsHeroStatsV318 span{
+  min-height: 82px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.04);
+  display: grid;
+  align-content: center;
+  gap: 2px;
+}
+
+.albumsHeroStatsV318 strong{
+  color: var(--text);
+  font-size: 34px;
+  line-height: .9;
+  letter-spacing: -.07em;
+}
+
+.albumsHeroStatsV318 small{
+  color: rgba(var(--text-rgb), .55);
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: lowercase;
+}
+
+.albumsShelfPanelV318{
+  grid-area: shelf;
+  min-height: 500px;
+  padding: 16px;
+}
+
+.albumDetailPanelV318{
+  grid-area: detail;
+  min-height: 500px;
+  padding: 14px;
+}
+
+.albumBuilderPanelV318{
+  grid-area: builder;
+  padding: 16px;
+}
+
+.albumsToolbarV318,
+.albumBuilderHeaderV318{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.albumsToolbarV318 h3,
+.albumBuilderHeaderV318 h3{
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: clamp(26px, 2.4vw, 38px);
+  line-height: .9;
+  letter-spacing: -.065em;
+}
+
+.albumsControlsV318{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.albumsControlsV318 input,
+.albumsControlsV318 select,
+.albumBuilderFieldsV318 input,
+.albumBuilderSearchRowV318 input{
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.075);
+  color: var(--text);
+  background: rgba(0,0,0,.36);
+  outline: none;
+  font-weight: 800;
+}
+
+.albumsControlsV318 input{
+  width: min(280px, 21vw);
+  padding: 0 14px;
+}
+
+.albumsControlsV318 select{
+  padding: 0 12px;
+}
+
+.albumsControlsV318 input:focus,
+.albumsControlsV318 select:focus,
+.albumBuilderFieldsV318 input:focus,
+.albumBuilderSearchRowV318 input:focus{
+  border-color: rgba(var(--accent-rgb), .48);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .08);
+}
+
+.albumsGridV318{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 14px;
+  max-height: min(590px, calc(100vh - 420px));
+  overflow: auto;
+  padding: 2px 6px 8px 2px;
+}
+
+.albumCardV318{
+  --album-card-delay: 0ms;
+  position: relative;
+  min-width: 0;
+  min-height: 260px;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 22px;
+  overflow: hidden;
+  color: var(--text);
+  background: rgba(255,255,255,.025);
+  text-align: left;
+  animation: albumCardInV318 240ms cubic-bezier(.16,1,.3,1) both;
+  animation-delay: var(--album-card-delay);
+  transition: transform 180ms cubic-bezier(.18,1,.3,1), border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.albumCardV318:hover,
+.albumCardV318.active{
+  transform: translateY(-3px) scale(1.012);
+  border-color: rgba(var(--accent-rgb), .42);
+  background: rgba(var(--accent-rgb), .055);
+  box-shadow: 0 22px 42px rgba(0,0,0,.28);
+}
+
+.albumCardCoverV318{
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  border-radius: 0;
+}
+
+.albumCardV318 .coverImage{
+  transition: transform 220ms cubic-bezier(.16,1,.3,1), filter 220ms ease;
+}
+
+.albumCardV318:hover .coverImage,
+.albumCardV318.active .coverImage{
+  transform: scale(1.035);
+  filter: saturate(1.08) contrast(1.04);
+}
+
+.albumCardSheenV318{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 45%, rgba(0,0,0,.72));
+  opacity: .92;
+}
+
+.albumCardMetaV318{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+}
+
+.albumCardMetaV318 small,
+.albumCardMetaV318 b{
+  color: rgba(var(--text-rgb), .58);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: lowercase;
+}
+
+.albumCardMetaV318 strong{
+  display: block;
+  min-width: 0;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.05;
+  letter-spacing: -.035em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumCardMetaV318 em{
+  color: rgba(var(--text-rgb), .72);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 820;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumDetailHeroV318{
+  position: relative;
+  min-height: 230px;
+  display: grid;
+  grid-template-columns: 178px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  padding: 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(0,0,0,.36);
+}
+
+.albumDetailHeroV318::before{
+  content: "";
+  position: absolute;
+  inset: -32%;
+  z-index: 0;
+  background-image: var(--album-hero-cover);
+  background-size: cover;
+  background-position: center;
+  filter: blur(44px) saturate(1.28);
+  opacity: .26;
+  transform: scale(1.08);
+}
+
+.albumDetailHeroV318::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, rgba(0,0,0,.78), rgba(0,0,0,.46) 52%, rgba(0,0,0,.62));
+}
+
+.albumDetailCoverV318,
+.albumDetailCopyV318{
+  position: relative;
+  z-index: 2;
+}
+
+.albumDetailCoverV318{
+  width: 178px;
+  height: 178px;
+  border-radius: 24px;
+  box-shadow: 0 28px 54px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.1);
+}
+
+.albumDetailCopyV318{
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+}
+
+.albumDetailCopyV318 h3{
+  max-width: 100%;
+  margin: 5px 0 6px;
+  color: var(--text);
+  font-size: clamp(38px, 4.4vw, 68px);
+  line-height: .88;
+  letter-spacing: -.085em;
+  overflow-wrap: anywhere;
+}
+
+.albumDetailCopyV318 p:not(.eyebrow){
+  margin: 0;
+  color: rgba(var(--text-rgb), .72);
+  font-size: 15px;
+  font-weight: 820;
+}
+
+.albumMetaPillsV318,
+.albumActionRowV318{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.albumMetaPillsV318 span{
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.06);
+  color: rgba(var(--text-rgb), .78);
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.albumActionRowV318 .mainAction,
+.albumActionRowV318 .heroGhost{
+  min-height: 38px;
+  padding-inline: 15px;
+}
+
+.albumActionRowV318 .heroGhost.danger,
+.albumBuilderActionsV318 .heroGhost.danger{
+  border-color: rgba(255,80,130,.26) !important;
+  color: #ffb4cd !important;
+}
+
+.albumTrackListV318{
+  max-height: min(430px, calc(100vh - 570px));
+  min-height: 230px;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 14px 2px 2px;
+}
+
+.albumTrackRowV318{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px 38px 38px 38px;
+  align-items: center;
+  gap: 9px;
+  min-height: 64px;
+  padding: 8px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.055);
+  background: rgba(255,255,255,.026);
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.albumTrackRowV318:hover,
+.albumTrackRowV318.active{
+  transform: translateX(3px);
+  border-color: rgba(var(--accent-rgb), .28);
+  background: rgba(var(--accent-rgb), .07);
+}
+
+.albumTrackMainV318{
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  display: grid;
+  grid-template-columns: 34px 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.albumTrackMainV318 > span:first-child{
+  color: rgba(var(--text-rgb), .48);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.albumTrackCoverV318{
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+}
+
+.albumTrackMainV318 strong{
+  display: block;
+  min-width: 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumTrackMainV318 small{
+  display: block;
+  min-width: 0;
+  margin-top: 2px;
+  color: rgba(var(--text-rgb), .54);
+  font-size: 12px;
+  font-weight: 760;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumTrackDurationV318{
+  color: rgba(var(--text-rgb), .55);
+  font-size: 12px;
+  font-weight: 850;
+  text-align: right;
+}
+
+.albumsEmptyStateV318{
+  min-height: 280px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 10px;
+  color: rgba(var(--text-rgb), .68);
+}
+
+.albumsEmptyStateV318 strong{
+  color: var(--text);
+  font-size: 24px;
+  letter-spacing: -.04em;
+}
+
+.albumsEmptyStateV318 p{
+  max-width: 390px;
+  margin: 0 auto;
+  line-height: 1.55;
+}
+
+.albumDetailEmptyV318{
+  min-height: 440px;
+}
+
+.albumBuilderPanelV318{
+  display: grid;
+  gap: 12px;
+}
+
+.albumBuilderClosedTextV318{
+  margin: 0;
+  color: rgba(var(--text-rgb), .62);
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.albumBuilderBodyV318{
+  display: grid;
+  grid-template-columns: minmax(280px, .72fr) minmax(420px, 1.28fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.albumBuilderFieldsV318{
+  display: grid;
+  gap: 10px;
+}
+
+.albumBuilderFieldsV318 label{
+  display: grid;
+  gap: 7px;
+  color: rgba(var(--text-rgb), .62);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.albumBuilderFieldsV318 input,
+.albumBuilderSearchRowV318 input{
+  width: 100%;
+  padding: 0 14px;
+}
+
+.albumBuilderPickerV318{
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.albumBuilderSearchRowV318{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.albumBuilderSearchRowV318 span{
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.04);
+  color: rgba(var(--text-rgb), .72);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.albumBuilderSongGridV318{
+  max-height: 310px;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.albumBuilderSongGridV318 button{
+  min-width: 0;
+  min-height: 64px;
+  padding: 8px;
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.026);
+  color: var(--text);
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.albumBuilderSongGridV318 button:hover,
+.albumBuilderSongGridV318 button.selected{
+  transform: translateY(-1px);
+  border-color: rgba(var(--accent-rgb), .32);
+  background: rgba(var(--accent-rgb), .075);
+}
+
+.albumBuilderSongCoverV318{
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+}
+
+.albumBuilderSongGridV318 strong,
+.albumBuilderSongGridV318 small{
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumBuilderSongGridV318 strong{
+  color: var(--text);
+  font-size: 13px;
+}
+
+.albumBuilderSongGridV318 small{
+  margin-top: 2px;
+  color: rgba(var(--text-rgb), .55);
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.albumBuilderSongGridV318 b{
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.06);
+  color: rgba(var(--text-rgb), .8);
+}
+
+.albumBuilderSongGridV318 button.selected b{
+  background: var(--accent);
+  color: #06100b;
+}
+
+.albumBuilderFooterV318{
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.albumBuilderPreviewV318{
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.albumBuilderPreviewCoverV318{
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  box-shadow: 0 12px 22px rgba(0,0,0,.25);
+}
+
+.albumBuilderPreviewV318 span{
+  color: rgba(var(--text-rgb), .48);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.albumBuilderActionsV318{
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+@keyframes albumCardInV318{
+  from{ opacity: 0; transform: translateY(8px) scale(.985); }
+  to{ opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 1280px){
+  .albumsPageV318{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "hero"
+      "detail"
+      "shelf"
+      "builder";
+  }
+
+  .albumsGridV318,
+  .albumTrackListV318{
+    max-height: 560px;
+  }
+
+  .albumBuilderBodyV318{
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px){
+  .albumsHeroPanelV318,
+  .albumsToolbarV318,
+  .albumBuilderHeaderV318,
+  .albumBuilderFooterV318{
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .albumsHeroStatsV318{
+    justify-self: stretch;
+    min-width: 0;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .albumsHeroArtClusterV318{
+    display: none;
+  }
+
+  .albumsControlsV318,
+  .albumBuilderSearchRowV318,
+  .albumBuilderActionsV318{
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .albumsControlsV318 input{
+    width: 100%;
+  }
+
+  .albumDetailHeroV318{
+    grid-template-columns: 1fr;
+  }
+
+  .albumTrackRowV318{
+    grid-template-columns: minmax(0, 1fr) 44px 34px 34px 34px;
+  }
+
+  .albumBuilderSongGridV318{
+    grid-template-columns: 1fr;
+  }
+}

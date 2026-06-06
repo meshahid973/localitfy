@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.7 V293 — remove window transparency feature and clean renderer state. */
+/* localtify 0.3.7 V318 — polished local albums view and playback actions. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -72,6 +72,7 @@ import LocaltifyAppView, {
   VirtualHomeSongCards,
   VirtualSongRows
 } from "./LocaltifyAppView";
+import Onboarding from "./Onboarding";
 import {
   APP_VERSION,
   BOOT_MIN_VISIBLE_MS,
@@ -651,17 +652,8 @@ function MainModeApp() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!ready || !onboardingOpen || onboardingDevPreview || songs.length === 0) return;
-
-    try {
-      window.localStorage.setItem(ONBOARDING_STORAGE_KEY, "done");
-    } catch {
-      // localStorage can fail in dev/private contexts; the UI can still continue safely.
-    }
-
-    setOnboardingOpen(false);
-  }, [ready, onboardingOpen, onboardingDevPreview, songs.length]);
+  // V313: onboarding is now a true first-run mini-app.
+  // Do not auto-close it just because songs exist; import completion is handled inside Onboarding.
 
   useEffect(() => {
     if (!ready) return;
@@ -1324,7 +1316,7 @@ function MainModeApp() {
     settings.coverColorSyncMode ?? (settings.showAmbientGradient ? "normal" : "off")
   );
   const effectiveCoverColorSyncMode: CoverColorSyncMode = selectedCoverColorSyncMode;
-  const effectiveAmbient = false;
+  const effectiveAmbient = !isViewSwitching && effectiveCoverColorSyncMode !== "off";
   const effectiveNotes = !isViewSwitching && (settings.showFloatingNotes || isThreeAm);
   const customThemeColor = normalizeHexColor(settings.customThemeColor, "#8dffce");
   const customThemeColor2 = normalizeHexColor(settings.customThemeColor2, customThemeColor);
@@ -2465,13 +2457,14 @@ function MainModeApp() {
     }
 
     if (view === "library") return "";
+    if (view === "albums") return "local albums from metadata and your custom collections";
     if (view === "playlists") return `${playlists.length} playlist${playlists.length === 1 ? "" : "s"}`;
     if (view === "liked") return `${likedSongs.length} liked track${likedSongs.length === 1 ? "" : "s"}`;
     if (view === "covers") return `${coverStats.usable} usable cover${coverStats.usable === 1 ? "" : "s"} • ${coverStats.favorites} favorite${coverStats.favorites === 1 ? "" : "s"}`;
     if (view === "downloads") return "download direct audio links and import them automatically";
     if (view === "settings") return "theme, playback, discord, library, and advanced controls";
     return "your listening numbers and favorite tracks";
-  }, [view, isPlaying, currentSong, songs.length, filteredSongs.length, likedSongs.length, playlists.length, isThreeAm, coverStats.usable, coverStats.favorites]);
+  }, [view, isPlaying, currentSong, songs.length, filteredSongs.length, likedSongs.length, playlists.length, libraryAlbumCount, isThreeAm, coverStats.usable, coverStats.favorites]);
 
   const discordPreview = useMemo(() => buildDiscordPreview({
     settings,
@@ -5825,16 +5818,18 @@ function MainModeApp() {
   // ── Spotify auth + import functions ──────────────────────────────────────
   function updateSpotifyConnectionState(res: any = {}) {
     const hasReadyValue = Object.prototype.hasOwnProperty.call(res || {}, "ready") || Object.prototype.hasOwnProperty.call(res || {}, "ok");
-    const ready = hasReadyValue ? Boolean(res?.ready ?? res?.ok) : true;
+    const fallbackAvailable = Boolean(res?.fallbackAvailable || res?.publicOnly || res?.mode === "public-fallback");
+    const ready = hasReadyValue ? Boolean(res?.ready ?? res?.ok ?? fallbackAvailable) : true;
     const loggedIn = Boolean(res?.loggedIn);
+    const needsClientId = Boolean(res?.needsClientId) && !fallbackAvailable;
 
-    setSpotifyConnectionReady(ready);
-    setSpotifyNeedsClientId(Boolean(res?.needsClientId));
-    setSpotifyConnectionMode(String(res?.mode || "oauth-pkce"));
+    setSpotifyConnectionReady(ready || fallbackAvailable);
+    setSpotifyNeedsClientId(needsClientId);
+    setSpotifyConnectionMode(String(res?.mode || (fallbackAvailable ? "public-fallback" : "oauth-pkce")));
     if (res?.redirectUri) setSpotifyRedirectUri(String(res.redirectUri));
-    setSpotifyLoggedIn(loggedIn);
+    setSpotifyLoggedIn(loggedIn || Boolean(res?.ok && fallbackAvailable));
 
-    return { ready, loggedIn };
+    return { ready: ready || fallbackAvailable, loggedIn: loggedIn || Boolean(res?.ok && fallbackAvailable), fallbackAvailable };
   }
 
   function formatSpotifyPrivatePlaylistMessage(rawMessage = "", hint = "") {
@@ -5892,15 +5887,15 @@ function MainModeApp() {
       const res = await bridge.spotifyLogin();
       const state = updateSpotifyConnectionState(res || {});
 
-      if (!res?.ok && !state.loggedIn) {
+      if (!res?.ok && !state.loggedIn && !state.fallbackAvailable) {
         const message = res?.needsClientId
-          ? "Spotify Client ID is missing in this build. Rebuild localtify with the Spotify Client ID included."
+          ? "Spotify public import fallback is not available in this build. Replace electron/main.cjs with the v315 Spotify public fallback file."
           : res?.error || "Spotify login cancelled.";
         setSpotifyFetchError(message);
         setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
       } else {
         setSpotifyFetchError("");
-        setStatusText("spotify connected — paste a link to fetch tracks");
+        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready — paste a link" : "spotify connected — paste a link to fetch tracks");
       }
     } catch (error) {
       const message = String((error as Error)?.message || "Spotify login failed.");
@@ -5978,8 +5973,8 @@ function MainModeApp() {
       const checkRes = await Promise.resolve(bridge?.spotifyCheck?.()).catch(() => null);
       if (checkRes) {
         const connection = updateSpotifyConnectionState(checkRes);
-        if (!connection.ready || checkRes?.needsClientId) {
-          const message = "Spotify is not ready in this build. Rebuild localtify with the Spotify Client ID included.";
+        if ((!connection.ready || checkRes?.needsClientId) && !connection.fallbackAvailable) {
+          const message = "Spotify public import is not ready in this build. Replace electron/main.cjs with the v315 Spotify public fallback file.";
           setSpotifyFetchError(message);
           setStatusText("spotify setup needed");
           return;
@@ -6599,6 +6594,61 @@ function MainModeApp() {
   function clearQueue() {
     setPlayQueue([]);
     setStatusText("queue cleared");
+  }
+
+  function normalizeAlbumQueueSongIds(songIds: string[]) {
+    const seen = new Set<string>();
+    return songIds
+      .map((songId) => songsById.get(songId))
+      .filter(isPlayableSong)
+      .filter((song) => {
+        if (seen.has(song.id)) return false;
+        seen.add(song.id);
+        return true;
+      })
+      .map((song) => song.id);
+  }
+
+  function playAlbumSongs(songIds: string[], albumTitle = "album") {
+    const ids = normalizeAlbumQueueSongIds(songIds);
+    if (!ids.length) {
+      setStatusText("album has no playable songs");
+      return;
+    }
+
+    setActivePlaylistId(null);
+    setPlayQueue(ids.slice(1));
+    void selectSong(ids[0], true, { playlistId: null });
+    setStatusText(`playing ${albumTitle}`);
+  }
+
+  function shuffleAlbumSongs(songIds: string[], albumTitle = "album") {
+    const ids = normalizeAlbumQueueSongIds(songIds);
+    if (!ids.length) {
+      setStatusText("album has no playable songs");
+      return;
+    }
+
+    const shuffled = [...ids].sort(() => Math.random() - 0.5);
+    setActivePlaylistId(null);
+    setPlayQueue(shuffled.slice(1));
+    void selectSong(shuffled[0], true, { playlistId: null });
+    setStatusText(`shuffling ${albumTitle}`);
+  }
+
+  function queueAlbumSongs(songIds: string[], albumTitle = "album") {
+    const ids = normalizeAlbumQueueSongIds(songIds);
+    if (!ids.length) {
+      setStatusText("album has no playable songs");
+      return;
+    }
+
+    setPlayQueue((queue) => {
+      const albumIdSet = new Set(ids);
+      const cleanedQueue = queue.filter((songId) => !albumIdSet.has(songId));
+      return [...cleanedQueue, ...ids];
+    });
+    setStatusText(`queued ${ids.length} track${ids.length === 1 ? "" : "s"} from ${albumTitle}`);
   }
 
   function readDraggedSongId(event: DragEvent<HTMLElement>) {
@@ -7855,19 +7905,13 @@ function MainModeApp() {
 
   async function handleOnboardingImportMusic() {
     setStatusText("choose local audio to import");
-
-    try {
-      await importSongs();
-    } finally {
-      dismissOnboarding();
-    }
+    await importSongs();
+    setStatusText("onboarding import flow complete");
   }
 
   function handleOnboardingDownloads() {
-    dismissOnboarding();
     changeView("downloads", "onboarding");
-    setStatusText("downloads panel ready");
-    showAppToast("downloads are ready when you need them", "info");
+    setStatusText("downloads will be ready after setup");
   }
 
   function handleOnboardingTheme(themeId: string) {
@@ -7934,6 +7978,15 @@ function MainModeApp() {
 
   if (!ready) {
     const isBootError = Boolean(bootError);
+
+    if (onboardingOpen && !onboardingDevPreview && !isBootError) {
+      return (
+        <main className="onboardingBootBlank" aria-label="localtify is preparing onboarding">
+          <span>localtify</span>
+        </main>
+      );
+    }
+
     const bootArtSrc = `${loadingScreenGif}#boot-${bootRetryKey}`;
 
     return (
@@ -7987,6 +8040,23 @@ function MainModeApp() {
           </div>
         </section>
       </main>
+    );
+  }
+
+  if (onboardingOpen || onboardingDevPreview) {
+    return (
+      <Onboarding
+        appVersion={APP_VERSION}
+        songsCount={songs.length}
+        currentTheme={currentTheme?.id ?? settings.theme}
+        discordEnabled={settings.discordEnabled}
+        onChooseTheme={handleOnboardingTheme}
+        onSetDiscordEnabled={handleOnboardingDiscord}
+        onImportMusic={handleOnboardingImportMusic}
+        onOpenDownloads={handleOnboardingDownloads}
+        onStartListening={handleOnboardingStartListening}
+        onSkip={skipOnboarding}
+      />
     );
   }
 
@@ -8547,6 +8617,9 @@ function MainModeApp() {
     songsById,
     setSongContextMenu,
     queueSong,
+    playAlbumSongs,
+    shuffleAlbumSongs,
+    queueAlbumSongs,
     openPlaylistPicker,
     toggleLike,
     openEditor,

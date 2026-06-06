@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.7 V293 — remove window transparency root classes. */
+/* localtify 0.3.7 V318 — polished albums page with manual local album builder. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -8,6 +8,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { FastAverageColor } from "fast-average-color";
 import {
   BarChart3,
+  Disc3,
   Download,
   FolderPlus,
   Heart,
@@ -88,7 +89,7 @@ export function isPlayableSong(song: Song | null | undefined): song is Song {
   return !!song && Boolean(song.filePath || song.url) && song.fileExists !== false;
 }
 
-export type View = "home" | "library" | "playlists" | "liked" | "covers" | "analytics" | "downloads" | "settings";
+export type View = "home" | "library" | "albums" | "playlists" | "liked" | "covers" | "analytics" | "downloads" | "settings";
 export type CoverMood = "all" | "favorites" | "leastUsed" | "cute" | "space" | "dark" | "cozy" | "energy";
 
 export type SettingsCategory = "appearance" | "playback" | "discord" | "library" | "downloads" | "covers" | "updates" | "about" | "advanced" | "metadata";
@@ -207,6 +208,7 @@ export const navItems: Array<{
 }> = [
   { id: "home", label: "home", hint: "now playing", icon: Home },
   { id: "library", label: "library", hint: "all songs", icon: LibraryBig },
+  { id: "albums", label: "albums", hint: "local albums", icon: Disc3 },
   { id: "playlists", label: "playlists", hint: "your mixes", icon: ListMusic },
   { id: "liked", label: "liked", hint: "favorites", icon: Heart },
   { id: "covers", label: "covers", hint: "pixel art", icon: Images },
@@ -2398,6 +2400,241 @@ export function Cover({ song, className }: { song: Song | null; className: strin
   );
 }
 
+
+export type LocalAlbumEntry = {
+  id: string;
+  title: string;
+  artist: string;
+  albumArtist?: string;
+  year?: string | null;
+  coverSong: Song | null;
+  songs: Song[];
+  trackCount: number;
+  totalDuration: number;
+  latestAdded: number;
+};
+
+const UNKNOWN_ALBUM_NAMES = new Set([
+  "",
+  "local files",
+  "unknown",
+  "unknown album",
+  "untitled",
+  "untitled album",
+  "downloads",
+  "downloaded music"
+]);
+
+function normalizeAlbumValue(value: unknown) {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function albumKeyPart(value: unknown) {
+  return normalizeAlbumValue(value)
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "unknown";
+}
+
+function isUsefulAlbumName(value: unknown) {
+  const normalized = normalizeAlbumValue(value).toLowerCase();
+  return normalized.length > 0 && !UNKNOWN_ALBUM_NAMES.has(normalized);
+}
+
+function getAlbumArtist(song: Song) {
+  return normalizeAlbumValue((song as any).albumArtist || song.artist || "unknown artist") || "unknown artist";
+}
+
+function getAlbumYear(song: Song) {
+  const raw = String((song as any).year || (song as any).date || "").trim();
+  const match = raw.match(/(?:19|20)\d{2}/);
+  return match?.[0] ?? null;
+}
+
+function getSongAddedTime(song: Song) {
+  const addedAt = Date.parse(String(song.dateAdded || ""));
+  return Number.isFinite(addedAt) ? addedAt : 0;
+}
+
+function pickAlbumCoverSong(songs: Song[]) {
+  return songs.find((song) => Boolean(getRendererSafeImageUrl(song.coverUrl) || getRendererSafeImageUrl(song.coverPath))) || songs[0] || null;
+}
+
+export function buildLocalAlbumEntries(inputSongs: Song[]): LocalAlbumEntry[] {
+  const groups = new Map<string, LocalAlbumEntry>();
+
+  inputSongs.forEach((song) => {
+    if (!isPlayableSong(song) || !isUsefulAlbumName(song.album)) return;
+
+    const title = normalizeAlbumValue(song.album);
+    const albumArtist = getAlbumArtist(song);
+    const key = `${albumKeyPart(title)}__${albumKeyPart(albumArtist)}`;
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.songs.push(song);
+      existing.trackCount += 1;
+      existing.totalDuration += Math.max(0, Number(song.duration) || 0);
+      existing.latestAdded = Math.max(existing.latestAdded, getSongAddedTime(song));
+      if (!existing.year) existing.year = getAlbumYear(song);
+      if (!existing.coverSong || getRendererSafeImageUrl(song.coverUrl) || getRendererSafeImageUrl(song.coverPath)) {
+        existing.coverSong = pickAlbumCoverSong(existing.songs);
+      }
+      return;
+    }
+
+    groups.set(key, {
+      id: key,
+      title,
+      artist: prettyMeta(albumArtist),
+      albumArtist,
+      year: getAlbumYear(song),
+      coverSong: song,
+      songs: [song],
+      trackCount: 1,
+      totalDuration: Math.max(0, Number(song.duration) || 0),
+      latestAdded: getSongAddedTime(song)
+    });
+  });
+
+  return [...groups.values()].map((album) => ({
+    ...album,
+    coverSong: pickAlbumCoverSong(album.songs),
+    songs: [...album.songs].sort((a, b) => {
+      const trackA = Number((a as any).track || (a as any).trackNumber || 0);
+      const trackB = Number((b as any).track || (b as any).trackNumber || 0);
+      if (Number.isFinite(trackA) && Number.isFinite(trackB) && trackA !== trackB) return trackA - trackB;
+      return getSongAddedTime(a) - getSongAddedTime(b);
+    })
+  })).sort((a, b) => b.latestAdded - a.latestAdded || a.title.localeCompare(b.title));
+}
+
+function filterAndSortAlbums(albums: LocalAlbumEntry[], query: string, sortMode: string) {
+  const cleanedQuery = normalizeAlbumValue(query).toLowerCase();
+  const filtered = cleanedQuery
+    ? albums.filter((album) => `${album.title} ${album.artist} ${album.year || ""}`.toLowerCase().includes(cleanedQuery))
+    : albums;
+
+  return [...filtered].sort((a, b) => {
+    if (sortMode === "title") return a.title.localeCompare(b.title) || a.artist.localeCompare(b.artist);
+    if (sortMode === "artist") return a.artist.localeCompare(b.artist) || a.title.localeCompare(b.title);
+    if (sortMode === "year") return String(b.year || "0000").localeCompare(String(a.year || "0000")) || a.title.localeCompare(b.title);
+    return b.latestAdded - a.latestAdded || a.title.localeCompare(b.title);
+  });
+}
+
+function albumTrackIds(album: LocalAlbumEntry | null) {
+  return album?.songs.map((song) => song.id).filter(Boolean) ?? [];
+}
+
+type ManualLocalAlbum = {
+  id: string;
+  title: string;
+  artist: string;
+  year?: string;
+  songIds: string[];
+  createdAt: number;
+  updatedAt: number;
+};
+
+const MANUAL_LOCAL_ALBUMS_STORAGE_KEY = "localitfy.manualAlbums.v1";
+
+function cleanManualAlbumTitle(value: unknown) {
+  return normalizeAlbumValue(value).slice(0, 90);
+}
+
+function cleanManualAlbumArtist(value: unknown) {
+  return normalizeAlbumValue(value).slice(0, 90);
+}
+
+function cleanManualAlbumYear(value: unknown) {
+  const match = String(value || "").match(/(?:19|20)\d{2}/);
+  return match?.[0] ?? "";
+}
+
+function normalizeManualLocalAlbums(value: unknown): ManualLocalAlbum[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      const raw = item && typeof item === "object" ? item as any : null;
+      if (!raw) return null;
+
+      const title = cleanManualAlbumTitle(raw.title || raw.name);
+      const artist = cleanManualAlbumArtist(raw.artist || raw.albumArtist || "local album");
+      const songIds = Array.isArray(raw.songIds)
+        ? [...new Set(raw.songIds.map((id: unknown) => String(id || "").trim()).filter(Boolean))]
+        : [];
+
+      if (!title || !songIds.length) return null;
+
+      const createdAt = Number(raw.createdAt) || Date.now();
+      const updatedAt = Number(raw.updatedAt) || createdAt;
+
+      return {
+        id: String(raw.id || makeLocalId("album")).trim() || makeLocalId("album"),
+        title,
+        artist: artist || "local album",
+        year: cleanManualAlbumYear(raw.year),
+        songIds,
+        createdAt,
+        updatedAt
+      } satisfies ManualLocalAlbum;
+    })
+    .filter(Boolean) as ManualLocalAlbum[];
+}
+
+function buildManualAlbumEntries(manualAlbums: ManualLocalAlbum[], songsById: Map<string, Song>): LocalAlbumEntry[] {
+  return manualAlbums
+    .map((album) => {
+      const albumSongs = album.songIds
+        .map((songId) => songsById.get(songId))
+        .filter(isPlayableSong);
+
+      if (!albumSongs.length) return null;
+
+      const latestAdded = Math.max(album.updatedAt || 0, ...albumSongs.map(getSongAddedTime));
+
+      return {
+        id: `manual_${album.id}`,
+        title: album.title,
+        artist: album.artist || "local album",
+        albumArtist: album.artist || "local album",
+        year: album.year || null,
+        coverSong: pickAlbumCoverSong(albumSongs),
+        songs: albumSongs,
+        trackCount: albumSongs.length,
+        totalDuration: albumSongs.reduce((total, song) => total + Math.max(0, Number(song.duration) || 0), 0),
+        latestAdded,
+        source: "manual",
+        manualAlbumId: album.id,
+        createdAt: album.createdAt,
+        updatedAt: album.updatedAt
+      } as LocalAlbumEntry & { source: "manual"; manualAlbumId: string; createdAt: number; updatedAt: number };
+    })
+    .filter(Boolean) as LocalAlbumEntry[];
+}
+
+function albumSongSearchMatches(song: Song, query: string) {
+  const cleaned = normalizeAlbumValue(query).toLowerCase();
+  if (!cleaned) return true;
+  return `${song.title} ${song.artist} ${song.album || ""}`.toLowerCase().includes(cleaned);
+}
+
+function uniquePlayableSongIds(songIds: string[], songsById: Map<string, Song>) {
+  const seen = new Set<string>();
+  return songIds.filter((songId) => {
+    const song = songsById.get(songId);
+    if (!isPlayableSong(song) || seen.has(song.id)) return false;
+    seen.add(song.id);
+    return true;
+  });
+}
+
+
 export type SongInteractionHandlers = {
   onSelectSong: (songId: string, shouldPlay?: boolean) => void;
   onTogglePlay: () => void;
@@ -3492,6 +3729,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     songsById,
     setSongContextMenu,
     queueSong,
+    playAlbumSongs,
+    shuffleAlbumSongs,
+    queueAlbumSongs,
     openPlaylistPicker,
     toggleLike,
     openEditor,
@@ -3539,7 +3779,141 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     resetPlayCountTracker,
     stopFade,
     stopProgressLoop
+
   } = props;
+
+  const [albumSearch, setAlbumSearch] = useState("");
+  const [albumSortMode, setAlbumSortMode] = useState("recent");
+  const [selectedAlbumId, setSelectedAlbumId] = useState("");
+  const [manualAlbums, setManualAlbums] = useState<ManualLocalAlbum[]>(() =>
+    normalizeManualLocalAlbums(readLocalJson(MANUAL_LOCAL_ALBUMS_STORAGE_KEY, []))
+  );
+  const [albumBuilderOpen, setAlbumBuilderOpen] = useState(false);
+  const [albumBuilderMode, setAlbumBuilderMode] = useState<"create" | "edit">("create");
+  const [albumEditingManualId, setAlbumEditingManualId] = useState("");
+  const [albumDraftTitle, setAlbumDraftTitle] = useState("");
+  const [albumDraftArtist, setAlbumDraftArtist] = useState("");
+  const [albumDraftYear, setAlbumDraftYear] = useState("");
+  const [albumDraftSearch, setAlbumDraftSearch] = useState("");
+  const [albumDraftSongIds, setAlbumDraftSongIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    writeLocalJson(MANUAL_LOCAL_ALBUMS_STORAGE_KEY, manualAlbums);
+  }, [manualAlbums]);
+
+  const metadataAlbums = useMemo(() => buildLocalAlbumEntries(songs), [songs]);
+  const manualAlbumEntries = useMemo(() => buildManualAlbumEntries(manualAlbums, songsById), [manualAlbums, songsById]);
+  const localAlbums = useMemo(() => [...manualAlbumEntries, ...metadataAlbums], [manualAlbumEntries, metadataAlbums]);
+  const visibleAlbums = useMemo(
+    () => filterAndSortAlbums(localAlbums, albumSearch, albumSortMode),
+    [localAlbums, albumSearch, albumSortMode]
+  );
+  const selectedAlbum = useMemo(() => {
+    return localAlbums.find((album) => album.id === selectedAlbumId) || visibleAlbums[0] || localAlbums[0] || null;
+  }, [localAlbums, selectedAlbumId, visibleAlbums]);
+
+  useEffect(() => {
+    if (view !== "albums") return;
+    if (selectedAlbumId && localAlbums.some((album) => album.id === selectedAlbumId)) return;
+    setSelectedAlbumId(visibleAlbums[0]?.id || localAlbums[0]?.id || "");
+  }, [view, selectedAlbumId, localAlbums, visibleAlbums]);
+
+  const selectedAlbumIds = albumTrackIds(selectedAlbum);
+  const selectedAlbumIsManual = Boolean((selectedAlbum as any)?.source === "manual" && (selectedAlbum as any)?.manualAlbumId);
+  const albumDraftSelectedSongs = useMemo(() => albumDraftSongIds.map((songId) => songsById.get(songId)).filter(isPlayableSong), [albumDraftSongIds, songsById]);
+  const albumDraftSearchResults = useMemo(() => {
+    const selected = new Set(albumDraftSongIds);
+    return songs
+      .filter(isPlayableSong)
+      .filter((song) => albumSongSearchMatches(song, albumDraftSearch))
+      .sort((a, b) => {
+        const selectedA = selected.has(a.id) ? 0 : 1;
+        const selectedB = selected.has(b.id) ? 0 : 1;
+        if (selectedA !== selectedB) return selectedA - selectedB;
+        return prettyTitle(a.title, 20).localeCompare(prettyTitle(b.title, 20));
+      })
+      .slice(0, 80);
+  }, [songs, albumDraftSearch, albumDraftSongIds]);
+
+  function resetAlbumBuilderDraft() {
+    setAlbumBuilderMode("create");
+    setAlbumEditingManualId("");
+    setAlbumDraftTitle("");
+    setAlbumDraftArtist("");
+    setAlbumDraftYear("");
+    setAlbumDraftSearch("");
+    setAlbumDraftSongIds([]);
+  }
+
+  function openCreateAlbumBuilder(seedSong?: Song | null) {
+    setAlbumBuilderMode("create");
+    setAlbumEditingManualId("");
+    setAlbumDraftTitle(seedSong?.album && isUsefulAlbumName(seedSong.album) ? normalizeAlbumValue(seedSong.album) : "");
+    setAlbumDraftArtist(seedSong?.artist ? prettyMeta(seedSong.artist) : "");
+    setAlbumDraftYear(seedSong ? getAlbumYear(seedSong) || "" : "");
+    setAlbumDraftSearch("");
+    setAlbumDraftSongIds(seedSong ? [seedSong.id] : []);
+    setAlbumBuilderOpen(true);
+  }
+
+  function openEditAlbumBuilder(album: LocalAlbumEntry | null) {
+    if (!album || (album as any).source !== "manual") return;
+    const manualId = String((album as any).manualAlbumId || "");
+    const manual = manualAlbums.find((item) => item.id === manualId);
+    if (!manual) return;
+
+    setAlbumBuilderMode("edit");
+    setAlbumEditingManualId(manual.id);
+    setAlbumDraftTitle(manual.title);
+    setAlbumDraftArtist(manual.artist);
+    setAlbumDraftYear(manual.year || "");
+    setAlbumDraftSearch("");
+    setAlbumDraftSongIds(uniquePlayableSongIds(manual.songIds, songsById));
+    setAlbumBuilderOpen(true);
+  }
+
+  function closeAlbumBuilder() {
+    setAlbumBuilderOpen(false);
+    resetAlbumBuilderDraft();
+  }
+
+  function toggleAlbumDraftSong(songId: string) {
+    setAlbumDraftSongIds((ids) => ids.includes(songId) ? ids.filter((id) => id !== songId) : [...ids, songId]);
+  }
+
+  function saveManualAlbumFromDraft() {
+    const songIds = uniquePlayableSongIds(albumDraftSongIds, songsById);
+    if (!songIds.length) return;
+
+    const firstSong = songsById.get(songIds[0]);
+    const title = cleanManualAlbumTitle(albumDraftTitle || firstSong?.album || firstSong?.title || "new album") || "new album";
+    const artist = cleanManualAlbumArtist(albumDraftArtist || firstSong?.artist || "local album") || "local album";
+    const year = cleanManualAlbumYear(albumDraftYear);
+    const now = Date.now();
+
+    if (albumBuilderMode === "edit" && albumEditingManualId) {
+      setManualAlbums((items) => items.map((item) => item.id === albumEditingManualId
+        ? { ...item, title, artist, year, songIds, updatedAt: now }
+        : item
+      ));
+      setSelectedAlbumId(`manual_${albumEditingManualId}`);
+    } else {
+      const id = makeLocalId("album");
+      setManualAlbums((items) => [{ id, title, artist, year, songIds, createdAt: now, updatedAt: now }, ...items]);
+      setSelectedAlbumId(`manual_${id}`);
+    }
+
+    closeAlbumBuilder();
+  }
+
+  function deleteManualAlbum(album: LocalAlbumEntry | null) {
+    if (!album || (album as any).source !== "manual") return;
+    const manualId = String((album as any).manualAlbumId || "");
+    if (!manualId) return;
+    setManualAlbums((items) => items.filter((item) => item.id !== manualId));
+    setSelectedAlbumId("");
+    if (albumEditingManualId === manualId) closeAlbumBuilder();
+  }
 
   return (
     <main
@@ -3942,6 +4316,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 <h2>
                   {view === "home" && greeting}
                   {view === "library" && "your library"}
+                  {view === "albums" && "albums"}
                   {view === "playlists" && "playlists"}
                   {view === "liked" && "liked songs"}
                   {view === "covers" && "pixel covers"}
@@ -4043,21 +4418,43 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       {homeListenNowSongs.length ? (
                         homeListenNowSongs.map((song, index) => {
                           const active = song.id === currentId;
+                          const listenAmbienceSource = getSongAmbientSource(song);
+                          const listenAmbienceStyle = getAmbientStyle(listenAmbienceSource) ?? {};
+
                           return (
                             <button
                               key={song.id}
                               className={`homeListenCard ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""}`}
+                              data-cover-ambience={listenAmbienceSource ? "on" : "off"}
                               type="button"
                               onClick={() => void selectSong(song.id, true)}
                               title={`play ${song.title}`}
-                              style={{ "--card-delay": `${index * 48}ms` } as CSSProperties}
+                              style={{
+                                "--card-delay": `${index * 48}ms`,
+                                ...listenAmbienceStyle
+                              } as CSSProperties}
                             >
-                              <Cover song={song} className="homeListenCover" />
-                              <span className="homeListenCopy">
-                                <strong>{prettyTitle(song.title, 5)}</strong>
-                                <small>{prettyMeta(song.artist)}</small>
+                              {listenAmbienceSource ? (
+                                <span className="homeListenBackground" aria-hidden="true">
+                                  <img
+                                    className="homeListenBackgroundImage"
+                                    src={listenAmbienceSource}
+                                    alt=""
+                                    loading="lazy"
+                                    decoding="async"
+                                    draggable={false}
+                                  />
+                                </span>
+                              ) : null}
+
+                              <span className="homeListenForeground">
+                                <Cover song={song} className="homeListenCover" />
+                                <span className="homeListenCopy">
+                                  <strong className="homeListenTitle">{prettyTitle(song.title, 5)}</strong>
+                                  <small className="homeListenArtist">{prettyMeta(song.artist)}</small>
+                                </span>
+                                <span className="homeListenMeta">{formatTime(song.duration || 0)}</span>
                               </span>
-                              <span className="homeListenMeta">{formatTime(song.duration || 0)}</span>
                             </button>
                           );
                         })
@@ -4268,6 +4665,209 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </div>
                   )}
                 </div>
+              </section>
+            )}
+
+
+            {view === "albums" && (
+              <section className="albumsPageV318">
+                <section className="albumsHeroPanelV318">
+                  <div className="albumsHeroArtClusterV318" aria-hidden="true">
+                    {(selectedAlbum?.songs || localAlbums[0]?.songs || songs).slice(0, 4).map((song, index) => (
+                      <Cover key={`${song.id}-${index}`} song={song} className={`albumsHeroMiniCoverV318 cover${index + 1}`} />
+                    ))}
+                  </div>
+                  <div className="albumsHeroCopyV318">
+                    <p className="eyebrow">local albums</p>
+                    <h3>albums that actually feel like albums</h3>
+                    <p>
+                      auto-group songs from metadata, or make your own local albums from any songs already in your library.
+                    </p>
+                    <div className="albumsHeroActionsV318">
+                      <button className="mainAction" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>add album</button>
+                      <button className="heroGhost" type="button" onClick={importSongs}>import folder</button>
+                    </div>
+                  </div>
+                  <div className="albumsHeroStatsV318" aria-label="album summary">
+                    <span><strong>{localAlbums.length}</strong><small>albums</small></span>
+                    <span><strong>{manualAlbumEntries.length}</strong><small>made by you</small></span>
+                    <span><strong>{metadataAlbums.length}</strong><small>from tags</small></span>
+                  </div>
+                </section>
+
+                <section className="albumsShelfPanelV318">
+                  <div className="albumsToolbarV318">
+                    <div>
+                      <p className="eyebrow">browse</p>
+                      <h3>album shelf</h3>
+                    </div>
+                    <div className="albumsControlsV318">
+                      <input
+                        value={albumSearch}
+                        onChange={(event) => setAlbumSearch(event.currentTarget.value)}
+                        placeholder="search albums or artists"
+                        aria-label="search albums"
+                      />
+                      <select value={albumSortMode} onChange={(event) => setAlbumSortMode(event.currentTarget.value)} aria-label="sort albums">
+                        <option value="recent">recently added</option>
+                        <option value="title">title</option>
+                        <option value="artist">artist</option>
+                        <option value="year">year</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {visibleAlbums.length ? (
+                    <div className="albumsGridV318">
+                      {visibleAlbums.map((album, index) => {
+                        const isManual = (album as any).source === "manual";
+                        return (
+                          <button
+                            key={album.id}
+                            type="button"
+                            className={`albumCardV318 ${selectedAlbum?.id === album.id ? "active" : ""}`}
+                            onClick={() => setSelectedAlbumId(album.id)}
+                            style={{ "--album-card-delay": `${Math.min(index, 18) * 14}ms` } as CSSProperties}
+                          >
+                            <Cover song={album.coverSong} className="albumCardCoverV318" />
+                            <span className="albumCardSheenV318" aria-hidden="true" />
+                            <span className="albumCardMetaV318">
+                              <small>{isManual ? "custom album" : "metadata album"}</small>
+                              <strong title={album.title}>{prettyTitle(album.title, 6)}</strong>
+                              <em title={album.artist}>{prettyMeta(album.artist)}</em>
+                              <b>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.year ? ` • ${album.year}` : ""}</b>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="albumsEmptyStateV318">
+                      <strong>no albums yet</strong>
+                      <p>Use Add album to make one from your current songs, or import folders with album metadata.</p>
+                      <button className="mainAction" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>add album</button>
+                    </div>
+                  )}
+                </section>
+
+                <section className="albumDetailPanelV318">
+                  {selectedAlbum ? (
+                    <>
+                      <div className="albumDetailHeroV318" style={{ "--album-hero-cover": selectedAlbum.coverSong ? toCssUrl(getSongAmbientSource(selectedAlbum.coverSong)) : "none" } as CSSProperties}>
+                        <Cover song={selectedAlbum.coverSong} className="albumDetailCoverV318" />
+                        <div className="albumDetailCopyV318">
+                          <p className="eyebrow">{selectedAlbumIsManual ? "custom album" : "album"}</p>
+                          <h3 title={selectedAlbum.title}>{selectedAlbum.title}</h3>
+                          <p>{selectedAlbum.artist}</p>
+                          <div className="albumMetaPillsV318">
+                            <span>{selectedAlbum.trackCount} track{selectedAlbum.trackCount === 1 ? "" : "s"}</span>
+                            <span>{formatTime(selectedAlbum.totalDuration)}</span>
+                            {selectedAlbum.year ? <span>{selectedAlbum.year}</span> : null}
+                          </div>
+                          <div className="albumActionRowV318">
+                            <button className="mainAction" type="button" onClick={() => playAlbumSongs?.(selectedAlbumIds, selectedAlbum.title)} disabled={!selectedAlbumIds.length || !playAlbumSongs}>play</button>
+                            <button className="heroGhost" type="button" onClick={() => shuffleAlbumSongs?.(selectedAlbumIds, selectedAlbum.title)} disabled={selectedAlbumIds.length < 2 || !shuffleAlbumSongs}>shuffle</button>
+                            <button className="heroGhost" type="button" onClick={() => queueAlbumSongs?.(selectedAlbumIds, selectedAlbum.title)} disabled={!selectedAlbumIds.length || !queueAlbumSongs}>queue</button>
+                            {selectedAlbumIsManual ? <button className="heroGhost" type="button" onClick={() => openEditAlbumBuilder(selectedAlbum)}>edit</button> : null}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="albumTrackListV318">
+                        {selectedAlbum.songs.map((song, index) => {
+                          const active = song.id === currentId;
+                          return (
+                            <article key={song.id} className={`albumTrackRowV318 ${active ? "active" : ""}`}>
+                              <button type="button" className="albumTrackMainV318" onClick={() => void selectSong(song.id, true)}>
+                                <span>{String(index + 1).padStart(2, "0")}</span>
+                                <Cover song={song} className="albumTrackCoverV318" />
+                                <span>
+                                  <strong title={song.title}>{prettyTitle(song.title, 10)}</strong>
+                                  <small>{prettyMeta(song.artist)}</small>
+                                </span>
+                              </button>
+                              <span className="albumTrackDurationV318">{formatTime(song.duration)}</span>
+                              <button className={`iconAction ${song.liked ? "liked" : ""}`} type="button" onClick={() => toggleLike(song.id)} aria-label="like song">♥</button>
+                              <button className="iconAction" type="button" onClick={() => openPlaylistPicker(song)} aria-label="add to playlist">+</button>
+                              <button className="iconAction" type="button" onClick={() => openEditor(song)} aria-label="edit song">⋯</button>
+                            </article>
+                          );
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="albumsEmptyStateV318 albumDetailEmptyV318">
+                      <strong>choose an album</strong>
+                      <p>Details and track lists show here.</p>
+                    </div>
+                  )}
+                </section>
+
+                <section className={`albumBuilderPanelV318 ${albumBuilderOpen ? "open" : ""}`}>
+                  <div className="albumBuilderHeaderV318">
+                    <div>
+                      <p className="eyebrow">{albumBuilderMode === "edit" ? "edit custom album" : "create"}</p>
+                      <h3>{albumBuilderMode === "edit" ? "edit album" : "add local album"}</h3>
+                    </div>
+                    <button className="heroGhost" type="button" onClick={albumBuilderOpen ? closeAlbumBuilder : () => openCreateAlbumBuilder(currentSong || songs[0] || null)}>
+                      {albumBuilderOpen ? "close" : "open builder"}
+                    </button>
+                  </div>
+
+                  {albumBuilderOpen ? (
+                    <div className="albumBuilderBodyV318">
+                      <div className="albumBuilderFieldsV318">
+                        <label>
+                          <span>album title</span>
+                          <input value={albumDraftTitle} onChange={(event) => setAlbumDraftTitle(event.currentTarget.value)} placeholder="album name" />
+                        </label>
+                        <label>
+                          <span>artist</span>
+                          <input value={albumDraftArtist} onChange={(event) => setAlbumDraftArtist(event.currentTarget.value)} placeholder="album artist" />
+                        </label>
+                        <label>
+                          <span>year</span>
+                          <input value={albumDraftYear} onChange={(event) => setAlbumDraftYear(event.currentTarget.value)} placeholder="optional" inputMode="numeric" />
+                        </label>
+                      </div>
+
+                      <div className="albumBuilderPickerV318">
+                        <div className="albumBuilderSearchRowV318">
+                          <input value={albumDraftSearch} onChange={(event) => setAlbumDraftSearch(event.currentTarget.value)} placeholder="search songs to add" />
+                          <span>{albumDraftSongIds.length} selected</span>
+                        </div>
+                        <div className="albumBuilderSongGridV318">
+                          {albumDraftSearchResults.map((song) => {
+                            const selected = albumDraftSongIds.includes(song.id);
+                            return (
+                              <button key={song.id} type="button" className={selected ? "selected" : ""} onClick={() => toggleAlbumDraftSong(song.id)}>
+                                <Cover song={song} className="albumBuilderSongCoverV318" />
+                                <span>
+                                  <strong>{prettyTitle(song.title, 8)}</strong>
+                                  <small>{prettyMeta(song.artist)}</small>
+                                </span>
+                                <b>{selected ? "✓" : "+"}</b>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="albumBuilderFooterV318">
+                        <div className="albumBuilderPreviewV318">
+                          {albumDraftSelectedSongs.slice(0, 4).map((song) => <Cover key={song.id} song={song} className="albumBuilderPreviewCoverV318" />)}
+                          {!albumDraftSelectedSongs.length ? <span>select songs</span> : null}
+                        </div>
+                        <div className="albumBuilderActionsV318">
+                          {albumBuilderMode === "edit" && selectedAlbumIsManual ? <button className="heroGhost danger" type="button" onClick={() => deleteManualAlbum(selectedAlbum)}>delete</button> : null}
+                          <button className="mainAction" type="button" onClick={saveManualAlbumFromDraft} disabled={!albumDraftSongIds.length}>{albumBuilderMode === "edit" ? "save album" : "create album"}</button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="albumBuilderClosedTextV318">make albums from songs even when the files do not have album metadata.</p>
+                  )}
+                </section>
               </section>
             )}
 
