@@ -151,3 +151,485 @@
     bottom: 84px !important;
   }
 }
+
+/* V321 visual settings owner. Keep this at the end because effects.css is imported last. */
+.app{
+  --v321-panel-bg: rgba(16, 15, 21, 0.72);
+  --v321-panel-border: rgba(255, 255, 255, 0.075);
+  --v321-card-bg: rgba(14, 13, 18, 0.74);
+  --v321-card-border: rgba(255, 255, 255, 0.08);
+  --v321-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --v321-fast: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app[data-card-background="solid"]{
+  --v321-panel-bg: rgba(18, 17, 23, 0.96);
+  --v321-card-bg: rgba(20, 19, 25, 0.96);
+  --v321-card-border: rgba(255, 255, 255, 0.07);
+  --v321-card-shadow: none;
+}
+
+.app[data-card-background="glassy"]{
+  --v321-panel-bg: rgba(17, 15, 22, 0.68);
+  --v321-card-bg: rgba(18, 16, 24, 0.62);
+  --v321-card-border: rgba(255, 255, 255, 0.095);
+  --v321-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 18px 42px rgba(0, 0, 0, 0.22);
+}
+
+.app[data-card-background="oledFlat"]{
+  --v321-panel-bg: rgba(3, 3, 7, 0.98);
+  --v321-card-bg: rgba(4, 4, 9, 0.98);
+  --v321-card-border: rgba(255, 255, 255, 0.055);
+  --v321-card-shadow: none;
+}
+
+.app :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard){
+  background: var(--v321-panel-bg) !important;
+  border-color: var(--v321-panel-border) !important;
+  box-shadow: var(--v321-card-shadow) !important;
+  transition: background-color var(--v321-fast), border-color var(--v321-fast), box-shadow var(--v321-fast), transform var(--v321-fast) !important;
+}
+
+.app[data-card-background="glassy"] :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard){
+  backdrop-filter: blur(16px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
+}
+
+.app[data-card-background="solid"] :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard),
+.app[data-card-background="oledFlat"] :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard){
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-card-background="solid"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .albumCardV318, .albumTrackRowV318, .albumSongPickerRowV318){
+  background: rgba(18, 17, 24, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: none !important;
+}
+
+.app[data-card-background="glassy"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .albumCardV318, .albumTrackRowV318, .albumSongPickerRowV318){
+  background: rgba(19, 17, 25, 0.58) !important;
+  border-color: rgba(255, 255, 255, 0.095) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
+}
+
+.app[data-card-background="oledFlat"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .albumCardV318, .albumTrackRowV318, .albumSongPickerRowV318){
+  background: rgba(2, 2, 6, 0.98) !important;
+  border-color: rgba(255, 255, 255, 0.052) !important;
+  box-shadow: none !important;
+}
+
+.app[data-home-banner="dynamic"] .hero.ambientSurface::before,
+.app[data-home-banner="dynamic"] .hero.ambientSurface::after{
+  display: block !important;
+}
+
+.app[data-home-banner="albumCover"] .hero.ambientSurface{
+  min-height: clamp(300px, 34vh, 440px) !important;
+  overflow: hidden !important;
+  background: rgba(7, 6, 12, 0.84) !important;
+}
+
+.app[data-home-banner="albumCover"] .hero.ambientSurface::before{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -42px !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  opacity: 0.22 !important;
+  background-image: var(--cover-url, none) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  filter: blur(34px) saturate(1.22) brightness(0.76) !important;
+  transform: scale(1.08) translateZ(0) !important;
+}
+
+.app[data-home-banner="albumCover"] .hero.ambientSurface::after{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(90deg, rgba(0,0,0,0.88), rgba(0,0,0,0.55) 48%, rgba(0,0,0,0.28)) !important;
+  opacity: 1 !important;
+}
+
+.app[data-home-banner="albumCover"] .heroArtWrap{
+  display: grid !important;
+  width: clamp(180px, 15vw, 250px) !important;
+  height: clamp(180px, 15vw, 250px) !important;
+}
+
+.app[data-home-banner="cleanBlack"] .hero.ambientSurface{
+  background: #050508 !important;
+  border-color: rgba(255, 255, 255, 0.055) !important;
+  box-shadow: none !important;
+}
+
+.app[data-home-banner="cleanBlack"] .hero.ambientSurface::before,
+.app[data-home-banner="cleanBlack"] .hero.ambientSurface::after,
+.app[data-home-banner="cleanBlack"] .heroAmbiencePulse,
+.app[data-home-banner="cleanBlack"] .heroCoverGhost{
+  display: none !important;
+}
+
+.app[data-home-banner="cleanBlack"] .heroArtWrap{
+  opacity: 0.92 !important;
+  filter: none !important;
+}
+
+.app[data-home-banner="none"] .hero{
+  display: none !important;
+}
+
+.app[data-home-banner="none"] .homeShelfStack{
+  margin-top: 0 !important;
+}
+
+.app[data-home-layout="compact"] .hero{
+  min-height: 230px !important;
+  padding: clamp(22px, 3vw, 40px) !important;
+}
+
+.app[data-home-layout="compact"] .heroTitle{
+  font-size: clamp(38px, 4.8vw, 76px) !important;
+}
+
+.app[data-home-layout="compact"] .homeShelfStack{
+  gap: 14px !important;
+}
+
+.app[data-home-layout="compact"] .homeShelfPanel{
+  padding: 16px !important;
+}
+
+.app[data-home-layout="compact"] .homeListenRail{
+  grid-template-columns: repeat(3, minmax(240px, 1fr)) !important;
+}
+
+.app[data-home-layout="compact"] .homeFreshRail{
+  grid-auto-columns: minmax(150px, 170px) !important;
+}
+
+.app[data-home-layout="balanced"] .hero{
+  min-height: clamp(300px, 34vh, 430px) !important;
+}
+
+.app[data-home-layout="bigHero"] .hero{
+  min-height: clamp(420px, 48vh, 610px) !important;
+  padding: clamp(44px, 6vw, 88px) !important;
+}
+
+.app[data-home-layout="bigHero"] .heroTitle{
+  font-size: clamp(70px, 7.6vw, 132px) !important;
+  max-width: 16ch !important;
+}
+
+.app[data-home-layout="bigHero"] .heroArtWrap{
+  width: clamp(220px, 18vw, 330px) !important;
+  height: clamp(220px, 18vw, 330px) !important;
+}
+
+.app[data-home-layout="bigHero"] .homeShelfStack{
+  gap: 22px !important;
+}
+
+.app[data-home-layout="bigHero"] .homeListenRail{
+  grid-template-columns: repeat(4, minmax(280px, 1fr)) !important;
+}
+
+.app[data-library-row-style="compactRows"] .songRow{
+  min-height: 56px !important;
+  height: 56px !important;
+  padding-block: 5px !important;
+}
+
+.app[data-library-row-style="compactRows"] .songArt{
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.app[data-library-row-style="compactRows"] .songMeta strong{
+  font-size: 13px !important;
+}
+
+.app[data-library-row-style="compactRows"] .songMeta small{
+  font-size: 11px !important;
+}
+
+.app[data-library-row-style="comfyRows"] .songRow{
+  min-height: 74px !important;
+  height: 74px !important;
+}
+
+.app[data-library-row-style="comfyRows"] .songArt{
+  width: 52px !important;
+  height: 52px !important;
+}
+
+.app[data-library-row-style="listOnly"] .songRow{
+  min-height: 50px !important;
+  height: 50px !important;
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, 0.052) !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.app[data-library-row-style="listOnly"] .songArt{
+  display: none !important;
+}
+
+.app[data-library-row-style="listOnly"] .songButton{
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+}
+
+.app[data-library-row-style="coverCards"] .libraryListHeaderV025{
+  display: none !important;
+}
+
+.app[data-library-row-style="coverCards"] .libraryCoverCardShellV321{
+  min-height: 520px !important;
+  overflow: hidden !important;
+}
+
+.app[data-library-row-style="coverCards"] .libraryCoverCardsGridV321{
+  height: min(62vh, 720px) !important;
+  min-height: 520px !important;
+}
+
+.app[data-library-row-style="coverCards"] .libraryCoverCardsGridV321 .virtualHomeGridRow{
+  gap: 16px !important;
+}
+
+/* V322 sidebar behavior fix. The grid column and sidebar now move together. */
+.app[data-sidebar-behavior="fixed"]{
+  --sidebar-width-used: var(--sidebar-width-live, var(--shell-sidebar-width, var(--sidebar-width, 236px))) !important;
+}
+
+.app[data-sidebar-behavior="slim"],
+.app[data-sidebar-behavior="hover"]{
+  --sidebar-width: 74px !important;
+  --sidebar-width-live: 74px !important;
+  --shell-sidebar-width: 74px !important;
+  --sidebar-width-used: 74px !important;
+}
+
+.app[data-sidebar-behavior="hover"]:has(.sidebar:hover),
+.app[data-sidebar-behavior="hover"]:has(.sidebar:focus-within){
+  --sidebar-width: 236px !important;
+  --sidebar-width-live: 236px !important;
+  --shell-sidebar-width: 236px !important;
+  --sidebar-width-used: 236px !important;
+}
+
+.app[data-sidebar-behavior="slim"] .appShell,
+.app[data-sidebar-behavior="hover"] .appShell{
+  transition: grid-template-columns 260ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar,
+.app[data-sidebar-behavior="hover"] .sidebar{
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: hidden !important;
+  will-change: width !important;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 220ms ease !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within{
+  z-index: 42 !important;
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.035),
+    18px 0 58px rgba(0, 0, 0, 0.24) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .nav .navItem,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .nav .navItem{
+  grid-template-columns: 1fr !important;
+  justify-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  padding-inline: 0 !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .nav .navItem,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .nav .navItem{
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  justify-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 10px !important;
+  padding-inline: 10px !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .nav .navIcon,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .nav .navIcon{
+  margin-inline: auto !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .navText,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navText{
+  width: 0 !important;
+  max-width: 0 !important;
+  min-width: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
+  transform: translate3d(-8px, 0, 0) !important;
+  pointer-events: none !important;
+  transition:
+    opacity 150ms ease,
+    transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
+    max-width 190ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .navText *,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navText *{
+  color: transparent !important;
+  text-shadow: none !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .navText,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText{
+  width: auto !important;
+  max-width: 168px !important;
+  min-width: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translate3d(0, 0, 0) !important;
+  pointer-events: auto !important;
+  transition:
+    opacity 190ms ease 45ms,
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1) 25ms,
+    max-width 220ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .navText strong,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText strong{
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .navText small,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText small{
+  color: rgba(255, 255, 255, 0.46) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .sidebarBottom,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .sidebarBottom{
+  display: grid !important;
+  place-items: center !important;
+  padding-inline: 0 !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .importMainAction,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .importMainAction{
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+  overflow: hidden !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .importMainAction .buttonInlineIcon,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .importMainAction .buttonInlineIcon{
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+  color: #fff !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .sidebarBottom,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .sidebarBottom{
+  display: block !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .importMainAction,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .importMainAction{
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 48px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  color: rgba(5, 3, 8, 0.92) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebarResizeHandle,
+.app[data-sidebar-behavior="hover"] .sidebarResizeHandle{
+  display: none !important;
+}
+
+.app[data-player-background="flat"] .playerBar{
+  background: rgba(8, 8, 12, 0.94) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04) !important;
+}
+
+.app[data-player-background="flat"] .playerBar::before,
+.app[data-player-background="flat"] .playerBar::after{
+  display: none !important;
+}
+
+.app[data-player-background="coverBlur"] .playerBar{
+  background: rgba(8, 8, 12, 0.70) !important;
+  border-color: rgba(255,255,255,0.075) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 -18px 54px rgba(0,0,0,0.28) !important;
+}
+
+.app[data-player-background="coverBlur"] .playerBar::before{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -40px !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  background-image: var(--cover-url, none) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  opacity: 0.28 !important;
+  filter: blur(34px) saturate(1.24) brightness(0.66) !important;
+  transform: scale(1.06) translateZ(0) !important;
+}
+
+.app[data-player-background="coverBlur"] .playerBar::after{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  background: linear-gradient(90deg, rgba(0,0,0,0.82), rgba(0,0,0,0.52), rgba(0,0,0,0.82)) !important;
+}
+
+.app[data-player-background="oledBlack"] .playerBar{
+  background: #000 !important;
+  border-color: rgba(255,255,255,0.05) !important;
+  box-shadow: none !important;
+}
+
+.app[data-player-background="oledBlack"] .playerBar::before,
+.app[data-player-background="oledBlack"] .playerBar::after{
+  display: none !important;
+}
