@@ -3569,8 +3569,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       data-badge={settings.showHeroBadge ? "on" : "off"}
       data-home-expanded={settings.homeExpanded ? "on" : "off"}
       data-home-banner={settings.homeBannerType || "dynamic"}
-      data-blur-effects={settings.blurEffects || "normal"}
-      data-card-background={settings.mediaCardBackground || "acrylic"}
+      data-blur-effects="normal"
+      data-card-background={settings.mediaCardBackground || "glassy"}
       data-home-layout={settings.homeLayoutMode || "balanced"}
       data-library-row-style={settings.libraryRowStyle || "comfyRows"}
       data-stars-intensity={settings.starsIntensity || "subtle"}

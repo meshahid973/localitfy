@@ -345,25 +345,17 @@ const HOME_BANNER_TYPE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "none", label: "None", note: "hide hero art" }
 ];
 
-const BLUR_EFFECT_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
-  { id: "off", label: "Off", note: "flat" },
-  { id: "subtle", label: "Subtle", note: "light glass" },
-  { id: "normal", label: "Normal", note: "balanced" },
-  { id: "strong", label: "Strong", note: "more glass" }
-];
 
 const MEDIA_CARD_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "solid", label: "Solid", note: "flat cards" },
-  { id: "glassy", label: "Glassy", note: "transparent" },
-  { id: "acrylic", label: "Acrylic", note: "acrylic" },
+  { id: "glassy", label: "Glassy", note: "soft glass" },
   { id: "oledFlat", label: "OLED flat", note: "black" }
 ];
 
 const HOME_LAYOUT_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "compact", label: "Compact", note: "smaller" },
   { id: "balanced", label: "Balanced", note: "default" },
-  { id: "bigHero", label: "Big hero", note: "larger hero" },
-  { id: "minimal", label: "Minimal", note: "simple" }
+  { id: "bigHero", label: "Big hero", note: "larger hero" }
 ];
 
 const LIBRARY_ROW_STYLE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
@@ -383,7 +375,6 @@ const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
 const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "flat", label: "Flat", note: "flat" },
   { id: "coverBlur", label: "Cover blur", note: "cover glow" },
-  { id: "acrylic", label: "Acrylic", note: "acrylic" },
   { id: "oledBlack", label: "OLED black", note: "black" }
 ];
 
@@ -600,18 +591,10 @@ return (
             />
 
             <VisualOptionGroup
-              title="Blur effects"
-              note="Controls glass/blur strength."
-              options={BLUR_EFFECT_OPTIONS}
-              value={readSettingChoice(settings, "blurEffects", "normal")}
-              onChange={(value) => updateSetting("blurEffects", value)}
-            />
-
-            <VisualOptionGroup
               title="Card background"
               note="Panel/card surface style."
               options={MEDIA_CARD_BACKGROUND_OPTIONS}
-              value={readSettingChoice(settings, "mediaCardBackground", "acrylic")}
+              value={readSettingChoice(settings, "mediaCardBackground", "glassy")}
               onChange={(value) => updateSetting("mediaCardBackground", value)}
             />
 

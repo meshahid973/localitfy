@@ -217,7 +217,7 @@ const SettingsCategoryContent = lazy(() => import("./SettingsCategoryContent"));
 const VISUAL_CUSTOMIZATION_DEFAULTS = {
   homeBannerType: "dynamic",
   blurEffects: "normal",
-  mediaCardBackground: "acrylic",
+  mediaCardBackground: "glassy",
   homeLayoutMode: "balanced",
   libraryRowStyle: "comfyRows",
   starsIntensity: "off",
@@ -234,13 +234,14 @@ function applyVisualCustomizationDefaults<T extends Record<string, any>>(setting
   return {
     ...settings,
     homeBannerType: normalizeVisualChoice(settings.homeBannerType, ["dynamic", "albumCover", "cleanBlack", "none"], VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType),
-    blurEffects: normalizeVisualChoice(settings.blurEffects, ["off", "subtle", "normal", "strong"], VISUAL_CUSTOMIZATION_DEFAULTS.blurEffects),
-    mediaCardBackground: normalizeVisualChoice(settings.mediaCardBackground, ["solid", "glassy", "acrylic", "oledFlat"], VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground),
-    homeLayoutMode: normalizeVisualChoice(settings.homeLayoutMode, ["compact", "balanced", "bigHero", "minimal"], VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode),
+    // Blur strength is no longer exposed as a setting. Keep the app on the stable default.
+    blurEffects: VISUAL_CUSTOMIZATION_DEFAULTS.blurEffects,
+    mediaCardBackground: normalizeVisualChoice(settings.mediaCardBackground, ["solid", "glassy", "oledFlat"], VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground),
+    homeLayoutMode: normalizeVisualChoice(settings.homeLayoutMode, ["compact", "balanced", "bigHero"], VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode),
     libraryRowStyle: normalizeVisualChoice(settings.libraryRowStyle, ["compactRows", "comfyRows", "coverCards", "listOnly"], VISUAL_CUSTOMIZATION_DEFAULTS.libraryRowStyle),
     starsIntensity: normalizeVisualChoice(settings.starsIntensity, ["off", "subtle", "normal", "bright"], "off"),
     sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
-    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "acrylic", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle)
+    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle)
   };
 }
 
