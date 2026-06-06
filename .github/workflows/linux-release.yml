@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   linux:
-    name: Build Linux AppImage RPM DEB
+    name: Build Linux AppImage DEB RPM
     runs-on: ubuntu-latest
 
     steps:
@@ -31,10 +31,23 @@ jobs:
       - name: Install Linux packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y rpm fakeroot dpkg libarchive-tools
+          sudo apt-get install -y \
+            build-essential \
+            python3 \
+            make \
+            g++ \
+            rpm \
+            fakeroot \
+            dpkg \
+            libarchive-tools \
+            squashfs-tools \
+            libfuse2 || sudo apt-get install -y libfuse2t64
 
       - name: Install dependencies
         run: npm install
+
+      - name: Clean old release files
+        run: npm run clean:release
 
       - name: Build renderer
         run: npm run build
@@ -43,9 +56,14 @@ jobs:
         run: npx electron-builder --linux AppImage deb rpm --x64 --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: electron-builder
 
       - name: Show release files
-        run: ls -lah release
+        run: |
+          echo "Release folder:"
+          ls -lah release || true
+          echo "All project files:"
+          find . -maxdepth 3 -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.yml" \) -print
 
       - name: Upload Linux files to GitHub release
         uses: softprops/action-gh-release@v2
