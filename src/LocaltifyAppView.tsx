@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.7 V318 — polished albums page with manual local album builder. */
+/* localtify 0.3.7 V320 album artist and cover fit fix. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -2408,6 +2408,7 @@ export type LocalAlbumEntry = {
   albumArtist?: string;
   year?: string | null;
   coverSong: Song | null;
+  customCoverUrl?: string | null;
   songs: Song[];
   trackCount: number;
   totalDuration: number;
@@ -2461,6 +2462,81 @@ function getSongAddedTime(song: Song) {
 
 function pickAlbumCoverSong(songs: Song[]) {
   return songs.find((song) => Boolean(getRendererSafeImageUrl(song.coverUrl) || getRendererSafeImageUrl(song.coverPath))) || songs[0] || null;
+}
+
+function makeAlbumCoverSong(coverUrl: string, title: string, artist: string, seedSong?: Song | null): Song {
+  const safeCoverUrl = getRendererSafeImageUrl(coverUrl);
+  const base = seedSong || null;
+
+  return {
+    id: `album-cover-${albumKeyPart(title)}-${albumKeyPart(artist)}-${safeCoverUrl.slice(0, 24)}`,
+    title: title || base?.title || "custom album",
+    artist: artist || base?.artist || "local album",
+    album: title || base?.album || "custom album",
+    filePath: base?.filePath || "",
+    url: base?.url || "",
+    fileExists: true,
+    coverPath: null,
+    coverUrl: safeCoverUrl,
+    liked: false,
+    playCount: 0,
+    duration: 0,
+    dateAdded: base?.dateAdded || new Date().toISOString()
+  } as Song;
+}
+
+function pickManualAlbumCoverSong(album: ManualLocalAlbum, albumSongs: Song[]) {
+  const safeCoverUrl = getRendererSafeImageUrl(album.coverUrl);
+  if (safeCoverUrl) return makeAlbumCoverSong(safeCoverUrl, album.title, album.artist, albumSongs[0] || null);
+  return pickAlbumCoverSong(albumSongs);
+}
+
+function resizeAlbumCoverFile(file: File, size = 640): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!file || !String(file.type || "").startsWith("image/")) {
+      reject(new Error("Please choose an image file."));
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Could not prepare cover canvas.");
+
+        const sourceSize = Math.min(image.naturalWidth || image.width, image.naturalHeight || image.height);
+        const sourceX = ((image.naturalWidth || image.width) - sourceSize) / 2;
+        const sourceY = ((image.naturalHeight || image.height) - sourceSize) / 2;
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
+
+        let dataUrl = canvas.toDataURL("image/webp", 0.84);
+        if (!dataUrl.startsWith("data:image/webp")) {
+          dataUrl = canvas.toDataURL("image/jpeg", 0.86);
+        }
+
+        URL.revokeObjectURL(objectUrl);
+        resolve(dataUrl);
+      } catch (error) {
+        URL.revokeObjectURL(objectUrl);
+        reject(error);
+      }
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Could not read that image."));
+    };
+
+    image.src = objectUrl;
+  });
 }
 
 export function buildLocalAlbumEntries(inputSongs: Song[]): LocalAlbumEntry[] {
@@ -2535,6 +2611,7 @@ type ManualLocalAlbum = {
   title: string;
   artist: string;
   year?: string;
+  coverUrl?: string;
   songIds: string[];
   createdAt: number;
   updatedAt: number;
@@ -2568,6 +2645,7 @@ function normalizeManualLocalAlbums(value: unknown): ManualLocalAlbum[] {
       const songIds = Array.isArray(raw.songIds)
         ? [...new Set(raw.songIds.map((id: unknown) => String(id || "").trim()).filter(Boolean))]
         : [];
+      const coverUrl = getRendererSafeImageUrl(raw.coverUrl || raw.coverDataUrl || raw.customCoverUrl || "");
 
       if (!title || !songIds.length) return null;
 
@@ -2579,6 +2657,7 @@ function normalizeManualLocalAlbums(value: unknown): ManualLocalAlbum[] {
         title,
         artist: artist || "local album",
         year: cleanManualAlbumYear(raw.year),
+        coverUrl,
         songIds,
         createdAt,
         updatedAt
@@ -2598,13 +2677,16 @@ function buildManualAlbumEntries(manualAlbums: ManualLocalAlbum[], songsById: Ma
 
       const latestAdded = Math.max(album.updatedAt || 0, ...albumSongs.map(getSongAddedTime));
 
+      const customCoverUrl = getRendererSafeImageUrl(album.coverUrl);
+
       return {
         id: `manual_${album.id}`,
         title: album.title,
         artist: album.artist || "local album",
         albumArtist: album.artist || "local album",
         year: album.year || null,
-        coverSong: pickAlbumCoverSong(albumSongs),
+        customCoverUrl: customCoverUrl || null,
+        coverSong: pickManualAlbumCoverSong(album, albumSongs),
         songs: albumSongs,
         trackCount: albumSongs.length,
         totalDuration: albumSongs.reduce((total, song) => total + Math.max(0, Number(song.duration) || 0), 0),
@@ -2632,6 +2714,27 @@ function uniquePlayableSongIds(songIds: string[], songsById: Map<string, Song>) 
     seen.add(song.id);
     return true;
   });
+}
+
+function uniqueCleanArtistsFromSongs(inputSongs: Song[]) {
+  const seen = new Set<string>();
+  return inputSongs
+    .map((song) => prettyMeta(song.artist || ""))
+    .map((artist) => artist.trim())
+    .filter((artist) => artist && artist.toLowerCase() !== "unknown artist")
+    .filter((artist) => {
+      const key = artist.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function suggestAlbumArtistFromSongs(inputSongs: Song[]) {
+  const artists = uniqueCleanArtistsFromSongs(inputSongs);
+  if (artists.length === 0) return "local album";
+  if (artists.length === 1) return artists[0];
+  return "various artists";
 }
 
 
@@ -3794,8 +3897,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const [albumDraftTitle, setAlbumDraftTitle] = useState("");
   const [albumDraftArtist, setAlbumDraftArtist] = useState("");
   const [albumDraftYear, setAlbumDraftYear] = useState("");
+  const [albumDraftCoverUrl, setAlbumDraftCoverUrl] = useState("");
   const [albumDraftSearch, setAlbumDraftSearch] = useState("");
   const [albumDraftSongIds, setAlbumDraftSongIds] = useState<string[]>([]);
+  const albumCoverInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     writeLocalJson(MANUAL_LOCAL_ALBUMS_STORAGE_KEY, manualAlbums);
@@ -3821,6 +3926,18 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const selectedAlbumIds = albumTrackIds(selectedAlbum);
   const selectedAlbumIsManual = Boolean((selectedAlbum as any)?.source === "manual" && (selectedAlbum as any)?.manualAlbumId);
   const albumDraftSelectedSongs = useMemo(() => albumDraftSongIds.map((songId) => songsById.get(songId)).filter(isPlayableSong), [albumDraftSongIds, songsById]);
+  const albumDraftArtistNames = useMemo(() => uniqueCleanArtistsFromSongs(albumDraftSelectedSongs), [albumDraftSelectedSongs]);
+  const albumDraftArtistSuggestion = useMemo(() => suggestAlbumArtistFromSongs(albumDraftSelectedSongs), [albumDraftSelectedSongs]);
+  const albumDraftHasVariousArtists = albumDraftArtistNames.length > 1;
+  const albumDraftArtistPreview = albumDraftArtistNames.length
+    ? albumDraftArtistNames.slice(0, 3).join(" + ") + (albumDraftArtistNames.length > 3 ? ` + ${albumDraftArtistNames.length - 3} more` : "")
+    : "pick songs to read artists";
+  const albumDraftPreviewCoverSong = useMemo(() => {
+    const safeCover = getRendererSafeImageUrl(albumDraftCoverUrl);
+    const seedSong = albumDraftSelectedSongs[0] || null;
+    if (safeCover) return makeAlbumCoverSong(safeCover, albumDraftTitle || "new album", albumDraftArtist || "local album", seedSong);
+    return seedSong || null;
+  }, [albumDraftArtist, albumDraftCoverUrl, albumDraftSelectedSongs, albumDraftTitle]);
   const albumDraftSearchResults = useMemo(() => {
     const selected = new Set(albumDraftSongIds);
     return songs
@@ -3841,6 +3958,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setAlbumDraftTitle("");
     setAlbumDraftArtist("");
     setAlbumDraftYear("");
+    setAlbumDraftCoverUrl("");
     setAlbumDraftSearch("");
     setAlbumDraftSongIds([]);
   }
@@ -3851,6 +3969,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setAlbumDraftTitle(seedSong?.album && isUsefulAlbumName(seedSong.album) ? normalizeAlbumValue(seedSong.album) : "");
     setAlbumDraftArtist(seedSong?.artist ? prettyMeta(seedSong.artist) : "");
     setAlbumDraftYear(seedSong ? getAlbumYear(seedSong) || "" : "");
+    setAlbumDraftCoverUrl("");
     setAlbumDraftSearch("");
     setAlbumDraftSongIds(seedSong ? [seedSong.id] : []);
     setAlbumBuilderOpen(true);
@@ -3867,6 +3986,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setAlbumDraftTitle(manual.title);
     setAlbumDraftArtist(manual.artist);
     setAlbumDraftYear(manual.year || "");
+    setAlbumDraftCoverUrl(getRendererSafeImageUrl(manual.coverUrl));
     setAlbumDraftSearch("");
     setAlbumDraftSongIds(uniquePlayableSongIds(manual.songIds, songsById));
     setAlbumBuilderOpen(true);
@@ -3881,25 +4001,50 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setAlbumDraftSongIds((ids) => ids.includes(songId) ? ids.filter((id) => id !== songId) : [...ids, songId]);
   }
 
+  function openAlbumCoverPicker() {
+    albumCoverInputRef.current?.click();
+  }
+
+  async function handleAlbumCoverFile(event: any) {
+    const file = event.currentTarget.files?.[0] || null;
+    event.currentTarget.value = "";
+    if (!file) return;
+
+    try {
+      setStatusText?.("preparing album cover...");
+      const coverUrl = await resizeAlbumCoverFile(file);
+      setAlbumDraftCoverUrl(coverUrl);
+      setStatusText?.("album cover selected");
+    } catch (error) {
+      console.error("[localitfy album cover picker]", error);
+      setStatusText?.("album cover failed");
+    }
+  }
+
+  function clearAlbumDraftCover() {
+    setAlbumDraftCoverUrl("");
+    setStatusText?.("album cover reset");
+  }
+
   function saveManualAlbumFromDraft() {
     const songIds = uniquePlayableSongIds(albumDraftSongIds, songsById);
     if (!songIds.length) return;
 
     const firstSong = songsById.get(songIds[0]);
     const title = cleanManualAlbumTitle(albumDraftTitle || firstSong?.album || firstSong?.title || "new album") || "new album";
-    const artist = cleanManualAlbumArtist(albumDraftArtist || firstSong?.artist || "local album") || "local album";
+    const artist = cleanManualAlbumArtist(albumDraftArtist || albumDraftArtistSuggestion || firstSong?.artist || "local album") || "local album";
     const year = cleanManualAlbumYear(albumDraftYear);
     const now = Date.now();
 
     if (albumBuilderMode === "edit" && albumEditingManualId) {
       setManualAlbums((items) => items.map((item) => item.id === albumEditingManualId
-        ? { ...item, title, artist, year, songIds, updatedAt: now }
+        ? { ...item, title, artist, year, coverUrl: getRendererSafeImageUrl(albumDraftCoverUrl), songIds, updatedAt: now }
         : item
       ));
       setSelectedAlbumId(`manual_${albumEditingManualId}`);
     } else {
       const id = makeLocalId("album");
-      setManualAlbums((items) => [{ id, title, artist, year, songIds, createdAt: now, updatedAt: now }, ...items]);
+      setManualAlbums((items) => [{ id, title, artist, year, coverUrl: getRendererSafeImageUrl(albumDraftCoverUrl), songIds, createdAt: now, updatedAt: now }, ...items]);
       setSelectedAlbumId(`manual_${id}`);
     }
 
@@ -4679,9 +4824,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   </div>
                   <div className="albumsHeroCopyV318">
                     <p className="eyebrow">local albums</p>
-                    <h3>albums that actually feel like albums</h3>
+                    <h3>your albums your way</h3>
                     <p>
-                      auto-group songs from metadata, or make your own local albums from any songs already in your library.
+                      group albums from file tags or build your own from songs you already have.
                     </p>
                     <div className="albumsHeroActionsV318">
                       <button className="mainAction" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>add album</button>
@@ -4732,10 +4877,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             <Cover song={album.coverSong} className="albumCardCoverV318" />
                             <span className="albumCardSheenV318" aria-hidden="true" />
                             <span className="albumCardMetaV318">
-                              <small>{isManual ? "custom album" : "metadata album"}</small>
+                              <small>{isManual ? "your album" : "from file tags"}</small>
                               <strong title={album.title}>{prettyTitle(album.title, 6)}</strong>
                               <em title={album.artist}>{prettyMeta(album.artist)}</em>
-                              <b>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.year ? ` • ${album.year}` : ""}</b>
+                              <b>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.year ? ` ${album.year}` : ""}</b>
                             </span>
                           </button>
                         );
@@ -4744,7 +4889,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   ) : (
                     <div className="albumsEmptyStateV318">
                       <strong>no albums yet</strong>
-                      <p>Use Add album to make one from your current songs, or import folders with album metadata.</p>
+                      <p>Use add album to build one from songs you already have.</p>
                       <button className="mainAction" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>add album</button>
                     </div>
                   )}
@@ -4798,7 +4943,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   ) : (
                     <div className="albumsEmptyStateV318 albumDetailEmptyV318">
                       <strong>choose an album</strong>
-                      <p>Details and track lists show here.</p>
+                      <p>Pick an album to see the songs here.</p>
                     </div>
                   )}
                 </section>
@@ -4817,13 +4962,39 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   {albumBuilderOpen ? (
                     <div className="albumBuilderBodyV318">
                       <div className="albumBuilderFieldsV318">
+                        <div className="albumBuilderCoverPickerV319">
+                          <Cover song={albumDraftPreviewCoverSong} className="albumBuilderCoverPreviewV319" />
+                          <div className="albumBuilderCoverCopyV319">
+                            <strong>album cover</strong>
+                            <span>{albumDraftCoverUrl ? "cover ready" : albumDraftPreviewCoverSong ? "using a song cover" : "choose a cover image"}</span>
+                            <div className="albumBuilderCoverActionsV319">
+                              <button className="heroGhost" type="button" onClick={openAlbumCoverPicker}>choose image</button>
+                              {albumDraftCoverUrl ? <button className="heroGhost" type="button" onClick={clearAlbumDraftCover}>use song cover</button> : null}
+                            </div>
+                          </div>
+                          <input
+                            ref={albumCoverInputRef}
+                            className="albumCoverFileInputV319"
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                            onChange={handleAlbumCoverFile}
+                          />
+                        </div>
                         <label>
                           <span>album title</span>
                           <input value={albumDraftTitle} onChange={(event) => setAlbumDraftTitle(event.currentTarget.value)} placeholder="album name" />
                         </label>
                         <label>
-                          <span>artist</span>
-                          <input value={albumDraftArtist} onChange={(event) => setAlbumDraftArtist(event.currentTarget.value)} placeholder="album artist" />
+                          <span>album artist</span>
+                          <input value={albumDraftArtist} onChange={(event) => setAlbumDraftArtist(event.currentTarget.value)} placeholder={albumDraftHasVariousArtists ? "various artists" : "artist name"} />
+                          <div className="albumBuilderArtistToolsV320">
+                            <small>{albumDraftArtistPreview}</small>
+                            {albumDraftArtistNames.length ? (
+                              <button className="heroGhost" type="button" onClick={() => setAlbumDraftArtist(albumDraftArtistSuggestion)}>
+                                use suggestion
+                              </button>
+                            ) : null}
+                          </div>
                         </label>
                         <label>
                           <span>year</span>
@@ -4833,7 +5004,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                       <div className="albumBuilderPickerV318">
                         <div className="albumBuilderSearchRowV318">
-                          <input value={albumDraftSearch} onChange={(event) => setAlbumDraftSearch(event.currentTarget.value)} placeholder="search songs to add" />
+                          <input value={albumDraftSearch} onChange={(event) => setAlbumDraftSearch(event.currentTarget.value)} placeholder="search songs" />
                           <span>{albumDraftSongIds.length} selected</span>
                         </div>
                         <div className="albumBuilderSongGridV318">
@@ -4855,8 +5026,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                       <div className="albumBuilderFooterV318">
                         <div className="albumBuilderPreviewV318">
-                          {albumDraftSelectedSongs.slice(0, 4).map((song) => <Cover key={song.id} song={song} className="albumBuilderPreviewCoverV318" />)}
-                          {!albumDraftSelectedSongs.length ? <span>select songs</span> : null}
+                          <Cover song={albumDraftPreviewCoverSong} className="albumBuilderPreviewCoverV318" />
+                          <span>{albumDraftSongIds.length ? `${albumDraftSongIds.length} selected cover fits square` : "choose songs for this album"}</span>
                         </div>
                         <div className="albumBuilderActionsV318">
                           {albumBuilderMode === "edit" && selectedAlbumIsManual ? <button className="heroGhost danger" type="button" onClick={() => deleteManualAlbum(selectedAlbum)}>delete</button> : null}
@@ -4865,7 +5036,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       </div>
                     </div>
                   ) : (
-                    <p className="albumBuilderClosedTextV318">make albums from songs even when the files do not have album metadata.</p>
+                    <p className="albumBuilderClosedTextV318">build albums from any songs in your library.</p>
                   )}
                 </section>
               </section>
