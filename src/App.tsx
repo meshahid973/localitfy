@@ -414,6 +414,7 @@ function MainModeApp() {
   const secretTimeoutRef = useRef<number | null>(null);
   const playButtonBurstTimerRef = useRef<number | null>(null);
   const beatFrameRef = useRef<number | null>(null);
+  const beatFrameTimerRef = useRef<number | null>(null);
   const beatAudioContextRef = useRef<AudioContext | null>(null);
   const beatAnalyserRef = useRef<AnalyserNode | null>(null);
   const beatSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
@@ -640,12 +641,12 @@ function MainModeApp() {
   useEffect(() => {
     const body = document.body;
 
-    body.classList.add("localtifyPerfV301", "localtifyGpuFriendly");
-    body.dataset.localtifyPerf = "v301";
+    body.classList.add("localtifyPerfV301", "localtifyPerfV303", "localtifyGpuFriendly");
+    body.dataset.localtifyPerf = "v303";
 
     return () => {
-      body.classList.remove("localtifyPerfV301", "localtifyGpuFriendly");
-      if (body.dataset.localtifyPerf === "v301") {
+      body.classList.remove("localtifyPerfV301", "localtifyPerfV303", "localtifyGpuFriendly");
+      if (body.dataset.localtifyPerf === "v303" || body.dataset.localtifyPerf === "v301") {
         delete body.dataset.localtifyPerf;
       }
     };
@@ -2740,6 +2741,7 @@ function MainModeApp() {
 
     const clearBeatVariablesFromNode = (node: HTMLElement) => {
       beatVariableNames.forEach((name) => node.style.removeProperty(name));
+      delete node.dataset.localtifyBeatSignature;
     };
 
     const resetBeatVariables = () => {
@@ -2753,12 +2755,21 @@ function MainModeApp() {
       beatLastPaintSignatureRef.current = "";
     };
 
-    if (beatFrameRef.current) {
-      window.cancelAnimationFrame(beatFrameRef.current);
-      beatFrameRef.current = null;
-    }
+    const clearBeatTimers = () => {
+      if (beatFrameRef.current !== null) {
+        window.cancelAnimationFrame(beatFrameRef.current);
+        beatFrameRef.current = null;
+      }
 
-    const shouldSleepBeatFx = isLocaltifyV301HeavyMotionSurface(view, settingsCategory) || scrollBusyRef.current;
+      if (beatFrameTimerRef.current !== null) {
+        window.clearTimeout(beatFrameTimerRef.current);
+        beatFrameTimerRef.current = null;
+      }
+    };
+
+    clearBeatTimers();
+
+    const shouldSleepBeatFx = isLocaltifyV301HeavyMotionSurface(view, settingsCategory);
 
     if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || shouldSleepBeatFx || isViewSwitching || isSeeking || isVolumeDragging || isAppBackgrounded) {
       resetBeatVariables();
@@ -2770,11 +2781,11 @@ function MainModeApp() {
       const safeEnd = clamp(Math.floor(end), safeStart + 1, data.length);
       let total = 0;
 
-      for (let index = safeStart; index < safeEnd; index += 1) {
+      for (let index = safeStart; index < safeEnd; index += 2) {
         total += data[index] || 0;
       }
 
-      return total / Math.max(1, safeEnd - safeStart) / 255;
+      return total / Math.max(1, Math.ceil((safeEnd - safeStart) / 2)) / 255;
     };
 
     const ensureAnalyser = () => {
@@ -2790,12 +2801,12 @@ function MainModeApp() {
       if (!AudioContextCtor) return null;
 
       try {
-        const context = beatAudioContextRef.current || new AudioContextCtor();
+        const context = beatAudioContextRef.current || new AudioContextCtor({ latencyHint: "playback" });
         beatAudioContextRef.current = context;
 
         const analyser = context.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.82;
+        analyser.fftSize = 128;
+        analyser.smoothingTimeConstant = 0.88;
 
         const source = beatSourceRef.current || context.createMediaElementSource(audio);
         beatSourceRef.current = source;
@@ -2817,20 +2828,22 @@ function MainModeApp() {
       const songId = currentSong.id;
       const shouldRefresh =
         cache.songId !== songId ||
-        now - cache.refreshedAt > 1400 ||
+        now - cache.refreshedAt > 8000 ||
         cache.nodes.some((node) => !root.contains(node));
 
       if (!shouldRefresh) return cache.nodes;
 
       cache.nodes.forEach((node) => clearBeatVariablesFromNode(node));
-      // V148: keep the living audio glow, but never write beat variables to whole rows/cards.
-      // Rows are the hot path while hovering/scrolling; only the visible art/aura nodes get
-      // the reactive variables so hover remains instant while music is playing.
+
+      // V303: do not run getBoundingClientRect() here. The performance recording showed
+      // style recalculation spikes inside the analyser tick, and layout reads make that worse.
+      // Keep the reactive glow on a tiny set of likely-visible art nodes only.
       cache.nodes = Array.from(
         root.querySelectorAll<HTMLElement>(
           [
-            ".hero.heroPremium .heroArtWrap",
+            ".playerBar .smallArt",
             ".simpleHero .simpleHeroArtSwap",
+            ".hero.heroPremium .heroArtWrap",
             ".songRow.playing .songArt.coverAura",
             ".homeAlbumCard.playing .homeAlbumArt.coverAura",
             ".homeListenCard.playing .homeListenCover.coverAura",
@@ -2840,20 +2853,24 @@ function MainModeApp() {
             ".libraryRow.playing .songArt.coverAura"
           ].join(",")
         )
-      ).filter((node) => {
-        const rect = node.getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0 && rect.bottom >= -180 && rect.top <= window.innerHeight + 180;
-      }).slice(0, 7);
+      ).filter((node) => root.contains(node)).slice(0, 4);
       cache.refreshedAt = now;
       cache.songId = songId;
 
       return cache.nodes;
     };
 
-    const applyBeatVariables = (nodes: HTMLElement[], variables: Record<string, string>) => {
-      nodes.forEach((node) => {
-        Object.entries(variables).forEach(([name, value]) => node.style.setProperty(name, value));
-      });
+    const applyBeatVariables = (nodes: HTMLElement[], variables: Record<string, string>, signature: string) => {
+      for (const node of nodes) {
+        if (node.dataset.localtifyBeatSignature === signature) continue;
+        node.dataset.localtifyBeatSignature = signature;
+
+        for (const [name, value] of Object.entries(variables)) {
+          if (node.style.getPropertyValue(name) !== value) {
+            node.style.setProperty(name, value);
+          }
+        }
+      }
     };
 
     const context = beatAudioContextRef.current;
@@ -2863,22 +2880,37 @@ function MainModeApp() {
 
     let lastPaint = 0;
     let hiddenResetDone = false;
+    let busyResetDone = false;
+
+    const scheduleBeatTick = (delayMs: number) => {
+      if (beatFrameTimerRef.current !== null) {
+        window.clearTimeout(beatFrameTimerRef.current);
+      }
+
+      beatFrameTimerRef.current = window.setTimeout(() => {
+        beatFrameTimerRef.current = null;
+        beatFrameRef.current = window.requestAnimationFrame(tick);
+      }, delayMs);
+    };
 
     const tick = (now: number) => {
-      const busyAnimationBudget = scrollBusyRef.current || draggedSongIdRef.current || themeSettlingRef.current;
-      const frameBudgetMs = busyAnimationBudget ? 190 : 96;
+      const runtimeBusy = scrollBusyRef.current || Boolean(draggedSongIdRef.current) || themeSettlingRef.current || isSeekingRef.current;
 
-      if (document.hidden) {
-        if (!hiddenResetDone) {
+      if (document.hidden || runtimeBusy) {
+        if (!hiddenResetDone || !busyResetDone) {
           resetBeatVariables();
-          hiddenResetDone = true;
         }
+        hiddenResetDone = document.hidden;
+        busyResetDone = runtimeBusy;
         lastPaint = now;
-        beatFrameRef.current = window.requestAnimationFrame(tick);
+        scheduleBeatTick(document.hidden ? 900 : 420);
         return;
       }
 
       hiddenResetDone = false;
+      busyResetDone = false;
+
+      const frameBudgetMs = view === "home" ? 220 : 320;
 
       if (now - lastPaint >= frameBudgetMs) {
         const analyser = ensureAnalyser();
@@ -2894,8 +2926,8 @@ function MainModeApp() {
         if (analyser && data) {
           analyser.getByteFrequencyData(data);
 
-          bass = averageRange(data, 1, 12);
-          mid = averageRange(data, 12, 42);
+          bass = averageRange(data, 1, 8);
+          mid = averageRange(data, 8, 28);
           energy = averageRange(data, 1, data.length);
         } else {
           const wave = (Math.sin(time * 6.4) + Math.sin(time * 12.8) * 0.35 + Math.sin(time * 3.2) * 0.2 + 1.55) / 3.1;
@@ -2905,59 +2937,56 @@ function MainModeApp() {
         }
 
         const smooth = beatSmoothRef.current;
-        smooth.bass += (bass - smooth.bass) * 0.2;
-        smooth.mid += (mid - smooth.mid) * 0.17;
-        smooth.energy += (energy - smooth.energy) * 0.16;
-        smooth.phase += 0.032 + smooth.bass * 0.032;
+        smooth.bass += (bass - smooth.bass) * 0.16;
+        smooth.mid += (mid - smooth.mid) * 0.13;
+        smooth.energy += (energy - smooth.energy) * 0.12;
+        smooth.phase += 0.024 + smooth.bass * 0.024;
 
-        const beat = clamp((smooth.bass * 0.78 + smooth.energy * 0.34 + smooth.mid * 0.18) * safeVolume, 0.04, 1);
-        const travel = 5 + beat * 20;
-        const x = Math.sin(time * 2.15 + smooth.phase) * travel;
-        const y = Math.cos(time * 2.75 + smooth.phase * 0.75) * (travel * 0.72);
-        const opacity = 0.18 + beat * 0.58;
-        const glowScale = 1.03 + beat * 0.16;
-        const artScale = 1 + beat * 0.032;
-        const ringOpacity = 0.16 + beat * 0.42;
-        const pulseSpeed = Math.round(1200 - beat * 520);
+        const beat = clamp((smooth.bass * 0.72 + smooth.energy * 0.28 + smooth.mid * 0.14) * safeVolume, 0.04, 0.82);
+        const travel = 4 + beat * 14;
+        const x = Math.sin(time * 1.65 + smooth.phase) * travel;
+        const y = Math.cos(time * 2.05 + smooth.phase * 0.75) * (travel * 0.62);
+        const opacity = 0.16 + beat * 0.42;
+        const glowScale = 1.02 + beat * 0.105;
+        const artScale = 1 + beat * 0.02;
+        const ringOpacity = 0.12 + beat * 0.28;
+        const pulseSpeed = Math.round(1280 - beat * 420);
         const paintSignature = [
-          Math.round(beat * 88),
-          Math.round(x / 2),
-          Math.round(y / 2),
-          Math.round(opacity * 80),
-          Math.round(glowScale * 80),
-          Math.round(ringOpacity * 80),
-          Math.round(pulseSpeed / 24)
+          Math.round(beat * 42),
+          Math.round(x / 4),
+          Math.round(y / 4),
+          Math.round(opacity * 34),
+          Math.round(glowScale * 34),
+          Math.round(ringOpacity * 34),
+          Math.round(pulseSpeed / 64)
         ].join(":");
 
         if (paintSignature !== beatLastPaintSignatureRef.current) {
           applyBeatVariables(getBeatTargets(now), {
-            "--active-song-beat": beat.toFixed(3),
-            "--active-song-bass": smooth.bass.toFixed(3),
-            "--active-song-mid": smooth.mid.toFixed(3),
-            "--active-song-beat-x": `${x.toFixed(2)}px`,
-            "--active-song-beat-y": `${y.toFixed(2)}px`,
-            "--active-song-glow-opacity": opacity.toFixed(3),
-            "--active-song-glow-scale": glowScale.toFixed(3),
+            "--active-song-beat": beat.toFixed(2),
+            "--active-song-bass": smooth.bass.toFixed(2),
+            "--active-song-mid": smooth.mid.toFixed(2),
+            "--active-song-beat-x": `${x.toFixed(1)}px`,
+            "--active-song-beat-y": `${y.toFixed(1)}px`,
+            "--active-song-glow-opacity": opacity.toFixed(2),
+            "--active-song-glow-scale": glowScale.toFixed(2),
             "--active-song-art-scale": artScale.toFixed(3),
-            "--active-song-ring-opacity": ringOpacity.toFixed(3),
+            "--active-song-ring-opacity": ringOpacity.toFixed(2),
             "--active-song-pulse-speed": `${pulseSpeed}ms`
-          });
+          }, paintSignature);
           beatLastPaintSignatureRef.current = paintSignature;
         }
 
         lastPaint = now;
       }
 
-      beatFrameRef.current = window.requestAnimationFrame(tick);
+      scheduleBeatTick(frameBudgetMs);
     };
 
     beatFrameRef.current = window.requestAnimationFrame(tick);
 
     return () => {
-      if (beatFrameRef.current) {
-        window.cancelAnimationFrame(beatFrameRef.current);
-        beatFrameRef.current = null;
-      }
+      clearBeatTimers();
     };
   }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, view, settingsCategory, isViewSwitching, isSeeking, isVolumeDragging, isAppBackgrounded]);
 

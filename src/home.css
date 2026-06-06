@@ -16616,3 +16616,38 @@ body.localtifyPerfV301 .app :is(.songRow, .libraryRow) :is(.songArt, .smallArt, 
   transform: translateZ(0);
   backface-visibility: hidden;
 }
+
+/* localtify 0.3.8 V303 — cover studio DOM/style recalculation guardrails */
+.app .coverGalleryViewport,
+.app .coverGalleryVirtualCanvas,
+.app .coverSongListClean,
+.app .coverSongVirtualCanvas{
+  contain: strict !important;
+  content-visibility: auto !important;
+  contain-intrinsic-size: 720px 980px !important;
+}
+
+.app .coverGalleryCard,
+.app .coverGalleryImageButtonCleanOnly,
+.app .coverGalleryImageShellCleanOnly,
+.app .coverGalleryImagePlaceholderCleanOnly,
+.app .coverGalleryImageCleanOnly,
+.app .coverSongPick.coverSongPickVirtual{
+  contain: layout paint style !important;
+}
+
+.app .coverGalleryImagePlaceholderCleanOnly{
+  pointer-events: none !important;
+  transform: none !important;
+  filter: none !important;
+  text-rendering: geometricPrecision;
+}
+
+body.localtifyPerfV303 .app.isScrolling .coverGalleryImagePlaceholderCleanOnly,
+body.localtifyPerfV303 .app.isScrolling .coverGalleryImageCleanOnly,
+body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
+  transition: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}

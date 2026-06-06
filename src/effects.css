@@ -660,3 +660,62 @@ body.localtifyPerfV301.localtifyBackgroundMode .app .homeFreshCover::before{
   animation: none !important;
   filter: none !important;
 }
+
+/* localtify 0.3.8 V303 — profiler fix: sleep expensive paint while scrolling/audio analyser is busy */
+body.localtifyPerfV303 .app.isScrolling :is(
+  .heroAmbiencePulse,
+  .coverAura::before,
+  .songArt::before,
+  .homeAlbumArt::before,
+  .homeListenCover::before,
+  .homeFreshCover::before,
+  .playlistTrackCover::before,
+  .playlistSongRow .playlistTrackCover::before,
+  .playerBar::before
+){
+  opacity: 0 !important;
+  filter: none !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+body.localtifyPerfV303 .app.isScrolling :is(
+  .coverGalleryCard,
+  .coverGalleryImageButtonCleanOnly,
+  .coverSongPick,
+  .homeAlbumCard,
+  .homeFreshCard,
+  .homeListenCard,
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .settingsPageCard,
+  .settingsPanelCard
+){
+  transition-property: background-color, border-color, color, opacity !important;
+  transition-duration: 90ms !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+body.localtifyPerfV303 .app.isScrolling :is(
+  .coverGalleryImageCleanOnly,
+  .coverGalleryImagePlaceholderCleanOnly,
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .localtifyStarsLayer,
+  .localtifyStarsBackdrop
+){
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+}
+
+body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::before,
+body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::after{
+  opacity: 0 !important;
+  filter: none !important;
+  transition: none !important;
+}
