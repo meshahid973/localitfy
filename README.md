@@ -1,46 +1,103 @@
+<div align="center">
+
 # localtify
 
-> your local music, but prettier.
+### your local music, but prettier.
 
-<p align="center">
-  <img src="screenshots/showcase.png" alt="localtify screenshot" width="820">
-</p>
+A cute local music player for people who still keep songs on their PC.
 
-<p align="center">
-  <a href="https://github.com/meshahid973/localitfy/releases"><img alt="Download" src="https://img.shields.io/badge/download-releases-8dffce?style=for-the-badge&labelColor=050505"></a>
-  <img alt="Windows" src="https://img.shields.io/badge/platform-Windows-7aa2ff?style=for-the-badge&labelColor=050505">
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-ffffff?style=for-the-badge&labelColor=050505">
-</p>
+<br />
 
-localtify is a Windows desktop music player for people who still keep songs on their PC.
+<img src="screenshots/showcase.png" alt="localtify screenshot" width="840">
 
-It gives your local library a clean dark interface, smooth animations, ambient cover glow, playlists, themes, pixel-art covers, listening stats, Discord Rich Presence, Windows media controls, and a more polished local music experience without needing an account or subscription.
+<br />
+<br />
 
-No account.  
-No subscription.  
-No ads between your songs.  
-Your songs stay on your PC.
+<a href="https://github.com/meshahid973/localitfy/releases">
+  <img alt="Download localtify" src="https://img.shields.io/badge/download-latest%20release-8dffce?style=for-the-badge&labelColor=050505">
+</a>
+<img alt="Windows" src="https://img.shields.io/badge/Windows-supported-7aa2ff?style=for-the-badge&labelColor=050505">
+<img alt="Linux" src="https://img.shields.io/badge/Linux-supported-facc15?style=for-the-badge&labelColor=050505">
+<img alt="License" src="https://img.shields.io/badge/license-MIT-ffffff?style=for-the-badge&labelColor=050505">
+
+<br />
+<br />
+
+<strong>No account.</strong> <strong>No subscription.</strong> <strong>No ads between your songs.</strong> <strong>Your music stays on your computer.</strong>
+
+</div>
 
 ---
 
 ## What is localtify?
 
-localtify is a Spotify-inspired music player, but for your own local files.
+localtify is a Spotify inspired desktop music player for your own local files.
 
-You import the songs you already have on your computer, and localtify turns them into a proper music library with covers, playlists, stats, smooth animations, a bottom player, and Windows desktop integration.
+You import the songs you already have, and localtify turns them into a proper music library with albums, playlists, covers, themes, stats, Discord Rich Presence, desktop controls, and a smooth dark interface.
 
-It is built for people who want their local music to feel modern again.
+It is made for people who like owning their music and want their local library to feel modern again.
 
 ---
 
-## Highlights
+## What is new in v0.3.7?
 
-- **Local-first music player** — import and play songs from your own PC.
-- **Modern desktop UI** — OLED-style dark interface, acrylic surfaces, themes, stars, and smooth motion.
-- **Custom library feel** — playlists, liked songs, search, cover tools, and pixel-art covers.
-- **Windows integration** — media keys, tray controls, startup option, and auto-update support.
-- **Discord Rich Presence** — optional activity sharing with privacy controls.
-- **No account needed** — localtify is made for your files, not a cloud subscription.
+v0.3.7 is a big release.
+
+Linux is now supported, and the main new feature is the **Albums** section, suggested in the Issues area by [@Crocodile73](https://github.com/Crocodile73).
+
+The first time setup screen was also fully rebuilt, the app was cleaned up for release, and several performance fixes were made.
+
+### v0.3.7 highlights
+
+| Area        | What changed                                                                          |
+| ----------- | ------------------------------------------------------------------------------------- |
+| Albums      | New Albums page, album details, custom albums, album covers, play, shuffle, and queue |
+| Linux       | AppImage, DEB, and RPM builds are now supported                                       |
+| Onboarding  | New first time setup screen for new users and existing users once                     |
+| Spotify     | Fixed packaged app issues with missing client ID errors                               |
+| UI          | Cleaner sidebar hover, visual settings, album cards, and downloads layout             |
+| Performance | CSS cleanup, old patch cleanup, and lighter motion behavior                           |
+
+---
+
+## Download
+
+Get the latest version from the Releases page:
+
+<p>
+  <a href="https://github.com/meshahid973/localitfy/releases">
+    <img alt="Download localtify" src="https://img.shields.io/badge/download-localtify-8dffce?style=for-the-badge&labelColor=050505">
+  </a>
+</p>
+
+### Windows
+
+Download the Windows installer from the latest release.
+
+The file usually looks like this:
+
+```txt
+localtify-setup-0.3.7.exe
+```
+
+Install it, open localtify, and import your songs.
+
+### Linux
+
+Linux builds are available from the Releases page.
+
+| Format      | Good for                             |
+| ----------- | ------------------------------------ |
+| `.AppImage` | Most Linux distros                   |
+| `.deb`      | Ubuntu, Debian, Linux Mint           |
+| `.rpm`      | Fedora, openSUSE, RHEL style distros |
+
+For AppImage, you may need to make it executable first:
+
+```bash
+chmod +x localtify-0.3.7-x86_64.AppImage
+./localtify-0.3.7-x86_64.AppImage
+```
 
 ---
 
@@ -48,66 +105,61 @@ It is built for people who want their local music to feel modern again.
 
 ### Music library
 
-- play your own local songs
-- import music into your library
-- search your library
-- liked songs
-- playlists with covers, song count, and total duration
-- rename and duplicate playlists
-- add songs to playlists
-- shuffle, repeat, next, previous, volume, and progress controls
-- local playback-first design
+* play your own local songs
+* import music into your library
+* search your songs
+* like songs
+* create playlists
+* add songs to playlists
+* shuffle and repeat
+* queue songs
+* use a clean bottom player
+* keep everything local
 
-### Visuals and customization
+### Albums
 
-- clean OLED-style dark interface
-- smooth animations and ambient visuals
-- bottom player with multiple visual styles
-- acrylic / glass-style surfaces
-- theme customization
-- visual options for blur, cards, stars, sidebar, player, and home banner
-- lightweight stars background with intensity controls
-- pixel-art cover system
-- cover studio tools
-- `/yukari` and `/stars` easter eggs
+* automatic albums from song metadata
+* custom albums made from songs in your library
+* custom album title, artist, year, and cover
+* album detail pages
+* play album
+* shuffle album
+* queue album
+* support for different artists in one album
+* proper cover fitting for album cards
+
+### Visuals
+
+* clean dark interface
+* themes
+* custom theme colors
+* pixel art covers
+* cover studio tools
+* album cover glow in some areas
+* smooth sidebar hover
+* visual settings for the home page, cards, sidebar, library, and player
+* cute little easter eggs like `/yukari` and `/stars`
 
 ### Desktop features
 
-- Discord Rich Presence
-- Windows media key support
-- Windows tray menu controls
-- optional startup with Windows
-- update popup and auto-update support
-- listening stats
-- no account needed
-- no subscription needed
-- local-first privacy
+* Discord Rich Presence
+* privacy controls for Discord activity
+* media key support
+* tray controls
+* startup option on Windows
+* update popup
+* auto update support
+* listening stats
+* Windows installer
+* Linux AppImage, DEB, and RPM builds
 
 ---
 
 ## Screenshots
 
-![home](screenshots/localtify-home.png)
-
----
-
-## Download
-
-The easiest way to use localtify is to download the latest Windows installer from the Releases page.
-
-Download the latest installer from:
-
-```txt
-https://github.com/meshahid973/localitfy/releases
-```
-
-The installer name usually looks like this:
-
-```txt
-localtify-setup-0.3.6.exe
-```
-
-Then install it, open localtify, and import your songs.
+<p align="center">
+  <img src="screenshots/localtify-home.png" alt="localtify home screen" width="840">
+</p>
 
 ---
 
@@ -115,10 +167,11 @@ Then install it, open localtify, and import your songs.
 
 You need:
 
-- Node.js
-- npm
-- Git
-- Windows is recommended for the full desktop features
+* Node.js
+* npm
+* Git
+
+Windows is recommended for the full desktop experience, but Linux builds are now supported too.
 
 Clone the repo:
 
@@ -133,13 +186,21 @@ Install dependencies:
 npm install
 ```
 
-Create your local environment file:
+Create your local environment file.
 
-```bash
-copy .env.example .env
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-You can leave the values empty for normal local development.
+On macOS or Linux:
+
+```bash
+cp .env.example .env
+```
+
+You can leave most values empty for normal development.
 
 Run localtify in development mode:
 
@@ -159,7 +220,27 @@ Build the Windows installer:
 npm run dist
 ```
 
-The installer will be created inside the `release` folder.
+Build Linux packages:
+
+```bash
+npm run dist:linux
+```
+
+The finished app files will be created inside the `release` folder.
+
+---
+
+## Common commands
+
+| Command                 | What it does                             |
+| ----------------------- | ---------------------------------------- |
+| `npm run dev`           | Starts localtify in development mode     |
+| `npm run build`         | Builds the renderer                      |
+| `npm run dist`          | Builds the Windows installer             |
+| `npm run publish`       | Builds and publishes the Windows release |
+| `npm run dist:linux`    | Builds Linux AppImage, DEB, and RPM      |
+| `npm run publish:linux` | Builds and publishes Linux release files |
+| `npm run chunks:audit`  | Shows the biggest built frontend files   |
 
 ---
 
@@ -167,8 +248,8 @@ The installer will be created inside the `release` folder.
 
 ```txt
 src/           React app and UI
-electron/      Electron main process, database, preload, updater, Discord, Windows features
-pixelart/      bundled pixel-art cover images
+electron/      Electron main process, preload, database, updater, Discord, desktop features
+pixelart/      bundled pixel art cover images
 public/        public static files
 build/         app icons and build resources
 screenshots/   README and release images
@@ -176,24 +257,26 @@ screenshots/   README and release images
 
 ---
 
-## Development notes
+## Tech stack
 
 localtify uses:
 
-- Electron
-- React
-- TypeScript
-- Vite
-- SQLite with better-sqlite3
-- Discord RPC
-- electron-builder
+* Electron
+* React
+* TypeScript
+* Vite
+* SQLite with better-sqlite3
+* Discord RPC
+* electron-updater
+* electron-builder
 
-Some internal names still use `localitfy` because that was the original project and repo name.  
+Some internal names still use `localitfy` because that was the original project and repo name.
+
 The visible app name is `localtify`.
 
-Please do not rename internal bridge names, IPC names, app IDs, or app data paths unless you are doing a proper migration.
+Please do not rename internal bridge names, IPC names, app IDs, or app data paths unless it is part of a proper migration.
 
-Important internal names include:
+Important internal names:
 
 ```txt
 window.localitfy
@@ -201,38 +284,39 @@ localitfy:* IPC channels
 com.meshahid973.localitfy
 ```
 
-These names are kept for compatibility with older installs.
+These are kept for compatibility with older installs.
 
 ---
 
 ## CSS ownership
 
-The app has a lot of CSS, so please keep styling in the correct file.
+localtify has a lot of CSS, so please keep styles in the correct file.
+
+| File              | What it owns                                      |
+| ----------------- | ------------------------------------------------- |
+| `app-core.css`    | app shell, titlebar, base layout                  |
+| `App.css`         | older shared app level styles                     |
+| `home.css`        | home page, library, albums, playlists, song cards |
+| `player.css`      | bottom player, progress bar, volume, controls     |
+| `settings.css`    | settings page and settings cards                  |
+| `themes.css`      | theme variables and theme mappings                |
+| `motion.css`      | animations and transitions                        |
+| `effects.css`     | active song glow and small visual effects         |
+| `mini-player.css` | detached mini player window                       |
+
+Simple guide:
 
 ```txt
-app-core.css      app shell, titlebar, base layout
-App.css           shell/sidebar/modals/global app styles
-home.css          home page, library, song cards, shelves, playlist UI
-player.css        bottom player, progress bar, volume, controls
-settings.css      settings page, settings cards, visual controls
-themes.css        theme variables and theme mappings
-motion.css        animations and transitions only
-effects.css       active-song glow, ambience, lightweight easter effects
-mini-player.css   detached mini-player window only
+player issue      -> player.css
+settings issue    -> settings.css
+home card bug     -> home.css
+album page bug    -> home.css
+theme variable    -> themes.css
+animation issue   -> motion.css
+mini player bug   -> mini-player.css
 ```
 
-Please avoid random fixes at the bottom of unrelated CSS files.
-
-Use this rule:
-
-```txt
-player issue   -> player.css
-settings issue -> settings.css
-home card bug  -> home.css
-theme variable -> themes.css
-animation      -> motion.css
-mini-player    -> mini-player.css
-```
+Please avoid random fixes at the bottom of unrelated CSS files. It makes future bugs harder to fix.
 
 ---
 
@@ -240,19 +324,23 @@ mini-player    -> mini-player.css
 
 Pull requests are welcome.
 
+You do not need to be a perfect developer to help. Small fixes, bug reports, screenshots, UI polish, and documentation improvements are all useful.
+
 Good things to work on:
 
-- UI polish
-- playlist improvements
-- player improvements
-- performance fixes
-- Windows integration
-- bug fixes
-- accessibility improvements
-- cleaner settings pages
-- better empty states
-- safer update flow
-- code cleanup
+* UI polish
+* albums improvements
+* playlist improvements
+* player improvements
+* performance fixes
+* Linux testing
+* Windows integration
+* bug fixes
+* accessibility improvements
+* cleaner settings pages
+* better empty states
+* safer update flow
+* code cleanup
 
 Before opening a pull request, run:
 
@@ -263,11 +351,15 @@ npm run build
 
 When making a pull request, please include:
 
-- what changed
-- why it changed
-- screenshots if the UI changed
-- how you tested it
-- whether it affects the database, settings, updater, playlists, or app data path
+```txt
+What changed:
+Why it changed:
+How you tested it:
+Screenshots:
+Anything risky:
+```
+
+If your change affects the database, settings, updater, playlists, preload, IPC, or app data path, please say that clearly.
 
 ---
 
@@ -275,11 +367,11 @@ When making a pull request, please include:
 
 localtify is built around local music.
 
-Your songs stay on your PC.  
-You do not need an account.  
+Your songs stay on your computer.
+You do not need an account.
 Discord activity is optional and can be turned off in settings.
 
-Do not commit private files such as:
+Please do not commit private files such as:
 
 ```txt
 .env
@@ -319,37 +411,7 @@ Use `.env.example` for public environment examples.
 
 ---
 
-## Common commands
-
-Run dev mode:
-
-```bash
-npm run dev
-```
-
-Build frontend:
-
-```bash
-npm run build
-```
-
-Build Windows installer:
-
-```bash
-npm run dist
-```
-
-Publish release build:
-
-```bash
-npm run publish
-```
-
----
-
-## How to publish changes
-
-This is the normal flow for pushing source code changes to GitHub.
+## How to publish source changes
 
 Check what changed:
 
@@ -357,7 +419,7 @@ Check what changed:
 git status
 ```
 
-Add the files you want to publish:
+Add the files you want to push:
 
 ```bash
 git add README.md src electron package.json package-lock.json .gitignore .env.example public pixelart build screenshots
@@ -375,7 +437,7 @@ Push to GitHub:
 git push
 ```
 
-For the first push from a new local folder, use:
+For the first push from a new local folder:
 
 ```bash
 git push -u origin main
@@ -385,9 +447,14 @@ git push -u origin main
 
 ## How to publish a new app release
 
-Use this when releasing a new version like `0.3.6`.
+Use this when releasing a new version like `0.3.7`.
 
-Make sure the version is correct in `package.json` and inside the app.
+Make sure the version is correct in:
+
+```txt
+package.json
+the app version shown inside localtify
+```
 
 Build the app:
 
@@ -401,28 +468,19 @@ Build the Windows installer:
 npm run dist
 ```
 
-The release files will be inside:
-
-```txt
-release/
-```
-
-For GitHub Releases, upload the installer and update files from the `release` folder.
-
-Usually you need:
-
-```txt
-localtify-setup-0.3.6.exe
-latest.yml
-```
-
-If you use the publish script:
+Publish the Windows release:
 
 ```bash
 npm run publish
 ```
 
-Make sure the GitHub release looks correct after publishing.
+Build Linux packages:
+
+```bash
+npm run dist:linux
+```
+
+Linux release builds can also be created through GitHub Actions.
 
 ---
 
@@ -430,33 +488,36 @@ Make sure the GitHub release looks correct after publishing.
 
 Before publishing a release, check:
 
-- the app opens
-- songs still load
-- playback works for imported and existing songs
-- playlists still load
-- importing songs works
-- downloaded songs appear in the library
-- covers and pixel-art fallback covers load
-- settings save after restarting the app
-- update popup looks correct
-- tray menu works
-- media keys work
-- Discord Rich Presence works when enabled
-- startup option works
-- app name says localtify
-- icon looks correct
-- `npm run build` passes
-- installer builds successfully
-- `.env`, `node_modules`, `dist`, and `release` are not committed
+* the app opens
+* songs still load
+* playback works for imported and existing songs
+* albums open properly
+* custom albums save properly
+* playlists still load
+* importing songs works
+* downloaded songs appear in the library
+* covers and pixel art fallback covers load
+* settings save after restarting the app
+* update popup looks correct
+* tray menu works
+* media keys work
+* Discord Rich Presence works when enabled
+* startup option works on Windows
+* Linux packages build successfully
+* app name says localtify
+* icon looks correct
+* `npm run build` passes
+* installer builds successfully
+* `.env`, `node_modules`, `dist`, and `release` are not committed
 
 ---
 
 ## Known notes
 
-- Dev mode may show Electron in some Windows places because it runs through Electron directly.
-- The packaged installer should show localtify properly.
-- If Windows caches the old icon or name, unpin the old shortcut and pin the newly installed app again.
-- Some Windows SmartScreen warnings can happen because the app is not code-signed yet.
+* Dev mode may show Electron in some Windows places because it runs through Electron directly.
+* The packaged installer should show localtify properly.
+* If Windows caches an old icon or name, unpin the old shortcut and pin the newly installed app again.
+* Some Windows SmartScreen warnings can happen because the app is not code signed yet.
 
 ---
 
@@ -470,7 +531,11 @@ MIT License
 
 Made by [@meshahid973](https://github.com/meshahid973)
 
+Thanks to everyone who reports bugs, opens issues, tests releases, and suggests features.
+
 Contributors:
 
-- @todouro
-- @yudafao
+* [@todouro](https://github.com/todouro)
+* [@yudafao](https://github.com/yudafao)
+
+Special thanks to [@Crocodile73](https://github.com/Crocodile73) for suggesting the Albums section.
