@@ -46,6 +46,58 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Make Linux icon if missing
+        run: |
+          mkdir -p build
+          node - <<'NODE'
+          const fs = require("fs");
+          const sharp = require("sharp");
+
+          async function main() {
+            if (fs.existsSync("build/icon.png")) {
+              console.log("build/icon.png already exists");
+              return;
+            }
+
+            const svg = `
+              <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#20ff79"/>
+                    <stop offset="52%" stop-color="#16d86a"/>
+                    <stop offset="100%" stop-color="#090b10"/>
+                  </linearGradient>
+                  <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#000000" flood-opacity="0.45"/>
+                  </filter>
+                </defs>
+
+                <rect width="512" height="512" rx="116" fill="#050609"/>
+                <rect x="34" y="34" width="444" height="444" rx="96" fill="url(#bg)"/>
+                <circle cx="256" cy="256" r="178" fill="rgba(0,0,0,0.15)"/>
+
+                <g filter="url(#shadow)" fill="#06100b">
+                  <path d="M304 132c0-15 13-27 28-24l42 8c13 2 22 14 22 27v154c0 52-42 92-96 92c-47 0-84-30-84-68c0-39 37-69 84-69c15 0 29 3 42 9V186l-38-c0-39 37-69 84-69c15 0 297v165h-52V132z"/>
+                  <circle cx="212" cy="321" r="62"/>
+                </g>
+
+                <g fill="#ffffff">
+                  <path d="M294 116c0-15 13-27 28-24l42 8c13 2 22 14 22 27v154c0 52-42 92-96 92c-47 0-84-30-84-68c0-39 37-69 84-69c15 0 29 3 42 9V170l-38-7v165h-52V116z"/>
+                  <circle cx="202" cy="305" r="62"/>
+                </g>
+              </svg>
+            `;
+
+            await sharp(Buffer.from(svg)).resize(512, 512).png().toFile("build/icon.png");
+            console.log("created build/icon.png");
+          }
+
+          main().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
       - name: Clean old release files
         run: npm run clean:release
 
@@ -62,8 +114,8 @@ jobs:
         run: |
           echo "Release folder:"
           ls -lah release || true
-          echo "All project files:"
-          find . -maxdepth 3 -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.yml" \) -print
+          echo "Linux files:"
+          find release -maxdepth 2 -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.yml" \) -print
 
       - name: Upload Linux files to GitHub release
         uses: softprops/action-gh-release@v2
