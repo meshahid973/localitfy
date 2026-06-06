@@ -11,7 +11,14 @@ type ThemeChoice = {
   name: string;
   note: string;
   color: string;
+  shadow: string;
   icon: string;
+};
+
+type StepMeta = {
+  id: string;
+  label: string;
+  title: string;
 };
 
 type OnboardingProps = {
@@ -28,15 +35,70 @@ type OnboardingProps = {
 };
 
 const THEME_CHOICES: ThemeChoice[] = [
-  { id: "mint", name: "mint", note: "default green glow", color: "#8dffce", icon: "✦" },
-  { id: "mono", name: "mono", note: "clean white focus", color: "#f4f4f5", icon: "○" },
-  { id: "berry", name: "berry", note: "purple pink night", color: "#ff72c8", icon: "♥" },
-  { id: "midnight", name: "midnight", note: "blue OLED calm", color: "#60a5fa", icon: "☾" },
-  { id: "terminal", name: "terminal", note: "green console", color: "#46ff96", icon: "▣" },
-  { id: "softSky", name: "soft sky", note: "blue silver", color: "#93c5fd", icon: "☁" }
+  {
+    id: "mint",
+    name: "mint",
+    note: "fresh dark green glow",
+    color: "#8dffce",
+    shadow: "rgba(141, 255, 206, 0.28)",
+    icon: "✦"
+  },
+  {
+    id: "mono",
+    name: "mono",
+    note: "clean black and white",
+    color: "#f4f4f5",
+    shadow: "rgba(244, 244, 245, 0.18)",
+    icon: "○"
+  },
+  {
+    id: "berry",
+    name: "berry",
+    note: "pink purple night",
+    color: "#ff72c8",
+    shadow: "rgba(255, 114, 200, 0.28)",
+    icon: "♥"
+  },
+  {
+    id: "midnight",
+    name: "midnight",
+    note: "blue OLED calm",
+    color: "#7dd3fc",
+    shadow: "rgba(125, 211, 252, 0.24)",
+    icon: "☾"
+  },
+  {
+    id: "terminal",
+    name: "terminal",
+    note: "green console focus",
+    color: "#46ff96",
+    shadow: "rgba(70, 255, 150, 0.26)",
+    icon: "▣"
+  },
+  {
+    id: "softSky",
+    name: "soft sky",
+    note: "soft blue silver",
+    color: "#93c5fd",
+    shadow: "rgba(147, 197, 253, 0.22)",
+    icon: "☁"
+  }
 ];
 
-const STEP_COPY = ["start", "look", "library", "downloads", "ready"] as const;
+const STEPS: StepMeta[] = [
+  { id: "welcome", label: "welcome", title: "local music, cleaner" },
+  { id: "style", label: "style", title: "pick a look" },
+  { id: "library", label: "library", title: "add your songs" },
+  { id: "downloads", label: "downloads", title: "downloads tab" },
+  { id: "finish", label: "finish", title: "ready" }
+];
+
+const SUPPORTED_FILES = ["mp3", "flac", "wav", "ogg", "m4a", "aac"];
+
+function normalizeThemeId(themeId: string | undefined) {
+  if (!themeId || themeId === "oled" || themeId === "custom") return "mint";
+  return themeId;
+}
 
 export default function Onboarding({
   appVersion,
@@ -53,18 +115,28 @@ export default function Onboarding({
   const [step, setStep] = useState<OnboardingStep>(0);
   const [busyAction, setBusyAction] = useState<OnboardingAction>(null);
 
-  const selectedTheme = useMemo(() => {
-    return THEME_CHOICES.find((theme) => theme.id === (currentTheme === "oled" ? "mint" : currentTheme)) ?? THEME_CHOICES[0];
-  }, [currentTheme]);
+  const currentThemeId = normalizeThemeId(currentTheme);
 
-  const progress = ((step + 1) / STEP_COPY.length) * 100;
+  const selectedTheme = useMemo(() => {
+    return THEME_CHOICES.find((theme) => theme.id === currentThemeId) ?? THEME_CHOICES[0];
+  }, [currentThemeId]);
+
+  const progress = ((step + 1) / STEPS.length) * 100;
   const busy = busyAction !== null;
 
+  const shellStyle = {
+    "--onboarding-accent": selectedTheme.color,
+    "--onboarding-shadow": selectedTheme.shadow,
+    "--onboarding-progress": `${progress}%`
+  } as CustomStyle;
+
   function goNext() {
-    setStep((current) => Math.min(current + 1, STEP_COPY.length - 1) as OnboardingStep);
+    if (busy) return;
+    setStep((current) => Math.min(current + 1, STEPS.length - 1) as OnboardingStep);
   }
 
   function goBack() {
+    if (busy) return;
     setStep((current) => Math.max(current - 1, 0) as OnboardingStep);
   }
 
@@ -78,12 +150,26 @@ export default function Onboarding({
     onSetDiscordEnabled(!discordEnabled);
   }
 
+  async function importMusic() {
+    if (busy) return;
+    setBusyAction("import");
+
+    try {
+      await Promise.resolve(onImportMusic());
+    } catch (error) {
+      console.error("[localitfy onboarding import]", error);
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
   function openDownloads() {
     if (busy) return;
     setBusyAction("downloads");
 
     try {
       onOpenDownloads();
+      onSkip();
     } catch (error) {
       console.error("[localitfy onboarding downloads]", error);
       setBusyAction(null);
@@ -99,92 +185,93 @@ export default function Onboarding({
   function startListening() {
     if (busy) return;
     setBusyAction("start");
+
     if (onStartListening) {
       onStartListening();
-    } else {
-      onSkip();
+      return;
     }
-  }
 
-  function importMusic() {
-    if (busy) return;
-    setBusyAction("import");
-
-    Promise.resolve(onImportMusic()).catch((error) => {
-      console.error("[localitfy onboarding import]", error);
-      setBusyAction(null);
-    });
+    onSkip();
   }
 
   return (
     <section className="onboardingLayer" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
-      <div className="onboardingCard localitfyOnboarding" style={{ "--onboarding-accent": selectedTheme.color } as CustomStyle}>
+      <div className="localitfyOnboarding" style={shellStyle}>
+        <div className="onboardingAmbient" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+
         <div className="onboardingMainPane">
           <header className="onboardingTop">
-            <div className="onboardingLogo" aria-hidden="true">♪</div>
+            <div className="onboardingLogo" aria-hidden="true">
+              <span>♪</span>
+            </div>
 
             <div className="onboardingTitleBlock">
-              <p className="eyebrow">localtify setup</p>
-              <h2 id="onboardingTitle">set up your music in a minute</h2>
+              <p className="onboardingKicker">localtify setup</p>
+              <h2 id="onboardingTitle">make it yours first</h2>
               <span>
-                version {appVersion} • {songsCount} track{songsCount === 1 ? "" : "s"} found
+                v{appVersion} • {songsCount} track{songsCount === 1 ? "" : "s"} in your library
               </span>
             </div>
           </header>
 
-          <div className="onboardingProgress" aria-label={`setup progress ${step + 1} of ${STEP_COPY.length}`}>
-            <div className="onboardingProgressTrack">
-              <span style={{ width: `${progress}%` }} />
+          <div className="onboardingProgress" aria-label={`setup progress ${step + 1} of ${STEPS.length}`}>
+            <div className="onboardingProgressText">
+              <strong>{STEPS[step].title}</strong>
+              <small>{step + 1} / {STEPS.length}</small>
             </div>
-            <small>{step + 1} of {STEP_COPY.length}</small>
+            <div className="onboardingProgressTrack">
+              <span />
+            </div>
           </div>
 
           <nav className="onboardingStepTabs" aria-label="onboarding steps">
-            {STEP_COPY.map((label, index) => (
+            {STEPS.map((item, index) => (
               <button
-                key={label}
+                key={item.id}
                 type="button"
                 className={index === step ? "active" : index < step ? "done" : ""}
-                onClick={() => setStep(index as OnboardingStep)}
+                onClick={() => !busy && setStep(index as OnboardingStep)}
                 disabled={busy}
               >
                 <b>{index + 1}</b>
-                <span>{label}</span>
+                <span>{item.label}</span>
               </button>
             ))}
           </nav>
 
-          <div className="onboardingScreenWrap">
+          <main className="onboardingScreenWrap">
             {step === 0 ? (
-              <section className="onboardingScreen isVisible">
-                <p className="onboardingKicker">quick tour</p>
-                <h3>This is not just a normal music list.</h3>
+              <section className="onboardingScreen">
+                <p className="onboardingKicker">quick start</p>
+                <h3>Your local music, but with a real app around it.</h3>
                 <p className="onboardingIntro">
-                  localtify keeps your music local, then adds playlists, pixel covers, downloads, themes, Discord activity, and a cleaner player around it.
+                  Import songs, build playlists, customize covers, download audio into your library, and keep your music stored locally.
                 </p>
 
                 <div className="onboardingFeatureGrid">
-                  <span><b>01</b> import local songs</span>
-                  <span><b>02</b> make playlists</span>
-                  <span><b>03</b> edit covers</span>
-                  <span><b>04</b> download audio</span>
-                  <span><b>05</b> change themes</span>
-                  <span><b>06</b> Discord presence</span>
+                  <span><b>Local library</b><small>metadata, search, likes, queue</small></span>
+                  <span><b>Pixel covers</b><small>custom cover gallery and randomizer</small></span>
+                  <span><b>Downloads</b><small>queue, progress, retry, auto-add</small></span>
+                  <span><b>Discord</b><small>optional rich presence controls</small></span>
                 </div>
               </section>
             ) : null}
 
             {step === 1 ? (
-              <section className="onboardingScreen isVisible">
+              <section className="onboardingScreen">
                 <p className="onboardingKicker">appearance</p>
-                <h3>Pick a theme first.</h3>
+                <h3>Choose a starter theme.</h3>
                 <p className="onboardingIntro">
-                  This changes the app colors instantly. Later you can go to Settings → Appearance and edit exact hex codes for a custom theme.
+                  This is only the starting look. You can still edit custom theme colors and player style later in Settings.
                 </p>
 
                 <div className="onboardingThemeGrid">
                   {THEME_CHOICES.map((theme) => {
-                    const active = currentTheme === theme.id || (currentTheme === "custom" && theme.id === selectedTheme.id);
+                    const active = currentThemeId === theme.id;
 
                     return (
                       <button
@@ -193,7 +280,10 @@ export default function Onboarding({
                         className={active ? "onboardingThemeChoice active" : "onboardingThemeChoice"}
                         onClick={() => chooseTheme(theme.id)}
                         disabled={busy}
-                        style={{ "--theme-accent": theme.color } as CustomStyle}
+                        style={{
+                          "--theme-accent": theme.color,
+                          "--theme-shadow": theme.shadow
+                        } as CustomStyle}
                       >
                         <span className="themeDot">{theme.icon}</span>
                         <strong>{theme.name}</strong>
@@ -206,32 +296,33 @@ export default function Onboarding({
             ) : null}
 
             {step === 2 ? (
-              <section className="onboardingScreen isVisible">
+              <section className="onboardingScreen">
                 <p className="onboardingKicker">library</p>
-                <h3>Add songs, then organize them.</h3>
+                <h3>Add music without breaking your folder setup.</h3>
                 <p className="onboardingIntro">
-                  Import MP3, FLAC, WAV, OGG, M4A, and AAC files. After importing, you can search, like songs, make playlists, change metadata, and assign pixel covers.
+                  localtify can import common audio files, keep your library searchable, and let you edit covers and metadata later.
                 </p>
 
+                <div className="onboardingFormatList" aria-label="supported audio formats">
+                  {SUPPORTED_FILES.map((fileType) => (
+                    <span key={fileType}>{fileType}</span>
+                  ))}
+                </div>
+
                 <div className="onboardingChoices">
-                  <button
-                    className="onboardingChoice primary"
-                    type="button"
-                    onClick={importMusic}
-                    disabled={busy}
-                  >
+                  <button className="onboardingChoice primary" type="button" onClick={importMusic} disabled={busy}>
                     <span className="onboardingChoiceIcon">♫</span>
                     <span>
-                      <strong>{busyAction === "import" ? "opening file picker..." : "import songs"}</strong>
+                      <strong>{busyAction === "import" ? "opening picker..." : "import songs"}</strong>
                       <small>Choose audio files from your PC.</small>
                     </span>
                   </button>
 
                   <button className="onboardingChoice" type="button" onClick={goNext} disabled={busy}>
-                    <span className="onboardingChoiceIcon">▣</span>
+                    <span className="onboardingChoiceIcon">→</span>
                     <span>
-                      <strong>explain downloads</strong>
-                      <small>Show where YouTube-to-MP3 is.</small>
+                      <strong>skip import for now</strong>
+                      <small>Continue setup and add songs later.</small>
                     </span>
                   </button>
                 </div>
@@ -245,7 +336,7 @@ export default function Onboarding({
                 >
                   <span>
                     <strong>Discord activity</strong>
-                    <small>{discordEnabled ? "Your activity can appear on Discord." : "Off by default. Turn it on only if you want."}</small>
+                    <small>{discordEnabled ? "Enabled. You can customize privacy and text later." : "Off by default. Turn it on only if you want."}</small>
                   </span>
                   <b>{discordEnabled ? "on" : "off"}</b>
                 </button>
@@ -253,33 +344,29 @@ export default function Onboarding({
             ) : null}
 
             {step === 3 ? (
-              <section className="onboardingScreen isVisible">
+              <section className="onboardingScreen">
                 <p className="onboardingKicker">downloads</p>
-                <h3>YouTube-to-MP3 is in Downloads.</h3>
+                <h3>Downloads are built into the app.</h3>
                 <p className="onboardingIntro">
-                  Open Downloads, paste a link, choose quality, and localtify shows queue progress, speed, ETA, retry, cancel, and open-in-library actions. Use it for audio you own or have permission to save.
+                  Paste links in Downloads, choose quality, watch progress, and let completed songs land in your library automatically.
                 </p>
 
-                <div className="onboardingFeatureGrid">
-                  <span><b>01</b> paste links</span>
-                  <span><b>02</b> pick quality</span>
-                  <span><b>03</b> watch progress</span>
-                  <span><b>04</b> see speed + ETA</span>
-                  <span><b>05</b> retry failed</span>
-                  <span><b>06</b> auto-add to library</span>
+                <div className="onboardingDownloadCard">
+                  <div>
+                    <small>flow</small>
+                    <strong>paste link → download → library</strong>
+                  </div>
+                  <span>queue</span>
+                  <span>speed</span>
+                  <span>retry</span>
                 </div>
 
                 <div className="onboardingChoices">
-                  <button
-                    className="onboardingChoice primary"
-                    type="button"
-                    onClick={openDownloads}
-                    disabled={busy}
-                  >
+                  <button className="onboardingChoice primary" type="button" onClick={openDownloads} disabled={busy}>
                     <span className="onboardingChoiceIcon">↓</span>
                     <span>
                       <strong>{busyAction === "downloads" ? "opening downloads..." : "open downloads"}</strong>
-                      <small>Go straight to the downloads page.</small>
+                      <small>Close setup and go to Downloads.</small>
                     </span>
                   </button>
 
@@ -295,26 +382,26 @@ export default function Onboarding({
             ) : null}
 
             {step === 4 ? (
-              <section className="onboardingScreen isVisible">
+              <section className="onboardingScreen">
                 <p className="onboardingKicker">ready</p>
-                <h3>You can change everything later.</h3>
+                <h3>You are ready to listen.</h3>
                 <p className="onboardingIntro">
-                  Settings has separate pages for appearance, playback, Discord, library, downloads, covers, updates, and advanced options.
+                  You can change theme, player behavior, downloads, Discord, covers, updates, and advanced settings whenever you want.
                 </p>
 
                 <div className="onboardingSummaryGrid">
                   <span><b>{selectedTheme.name}</b><small>theme</small></span>
                   <span><b>{discordEnabled ? "on" : "off"}</b><small>Discord</small></span>
                   <span><b>{songsCount}</b><small>tracks</small></span>
-                  <span><b>Settings</b><small>change later</small></span>
+                  <span><b>settings</b><small>change later</small></span>
                 </div>
               </section>
             ) : null}
-          </div>
+          </main>
 
           <footer className="onboardingFooter">
             <button className="onboardingSkip" type="button" onClick={skipOnboarding} disabled={busy}>
-              {busyAction === "skip" ? "closing..." : "skip"}
+              {busyAction === "skip" ? "closing..." : "skip setup"}
             </button>
 
             <div className="onboardingFooterActions">
@@ -324,7 +411,7 @@ export default function Onboarding({
                 </button>
               ) : null}
 
-              {step < STEP_COPY.length - 1 ? (
+              {step < STEPS.length - 1 ? (
                 <button className="onboardingContinue" type="button" onClick={goNext} disabled={busy}>
                   continue
                 </button>
@@ -348,26 +435,31 @@ export default function Onboarding({
             <div className="previewLogo">♪</div>
             <div>
               <strong>localtify</strong>
-              <small>local library • downloads • themes</small>
+              <small>offline first music player</small>
             </div>
           </div>
 
           <div className="previewHeroCard">
-            <small>current setup</small>
-            <strong>{songsCount > 0 ? "library ready" : "add your first songs"}</strong>
-            <span>{selectedTheme.name} theme • downloads are one tab away</span>
+            <small>now playing</small>
+            <strong>{songsCount > 0 ? "your library is ready" : "add your first track"}</strong>
+            <span>{selectedTheme.name} theme • local files • pixel covers</span>
           </div>
 
-          <div className="previewLibraryGrid">
-            <span />
+          <div className="previewShelf">
             <span />
             <span />
             <span />
           </div>
 
-          <div className="previewDiscordCard">
-            <b>{discordEnabled ? "Discord on" : "private by default"}</b>
-            <small>{discordEnabled ? "change text/art later" : "enable from setup or Settings"}</small>
+          <div className="previewMiniCards">
+            <span>
+              <b>{songsCount}</b>
+              <small>tracks</small>
+            </span>
+            <span>
+              <b>{discordEnabled ? "on" : "off"}</b>
+              <small>Discord</small>
+            </span>
           </div>
 
           <div className="previewPlayerBar">
