@@ -1,19 +1,58 @@
 # Contributing to localtify
 
-Thanks for wanting to help with localtify.
+<p align="center">
+  <strong>Thanks for wanting to help localtify.</strong>
+</p>
 
-localtify is still growing, so small fixes, UI polish, cleanup, and bug reports are all useful. You do not need to be a perfect developer to contribute. Just try to keep changes clear, tested, and easy to review.
+<p align="center">
+  A local music player built for people who want their own music library to feel clean, fast, and personal.
+</p>
+
+<p align="center">
+  <img alt="Beginner friendly" src="https://img.shields.io/badge/beginner-friendly-8dffce?style=for-the-badge&labelColor=050505">
+  <img alt="Built with Electron" src="https://img.shields.io/badge/electron-react-68d8ff?style=for-the-badge&labelColor=050505">
+  <img alt="Local first" src="https://img.shields.io/badge/local-first-ffffff?style=for-the-badge&labelColor=050505">
+</p>
 
 ---
 
-## Before you start
+## Welcome
 
-Please keep these things in mind:
+localtify is still growing, so every helpful contribution matters.
 
-- localtify is a Windows desktop app built with Electron, React, TypeScript, Vite, and SQLite.
-- The visible app name is `localtify`.
-- Some internal names still use the old spelling `localitfy` for compatibility.
-- Do not rename internal IPC names, preload APIs, app IDs, or app data paths unless the change is a planned migration.
+You do not need to be a perfect developer to help. Small fixes, bug reports, UI polish, better wording, screenshots, and documentation improvements are all useful.
+
+The main goal is simple.
+
+Make a clear change, test it, and explain what you did.
+
+---
+
+## What localtify uses
+
+| Area        | Tech             |
+| ----------- | ---------------- |
+| Desktop app | Electron         |
+| UI          | React            |
+| Language    | TypeScript       |
+| Build tool  | Vite             |
+| Local data  | SQLite           |
+| Styling     | CSS              |
+| Updates     | electron-builder |
+
+The public app name is:
+
+```txt
+localtify
+```
+
+Some internal names still use the older spelling:
+
+```txt
+localitfy
+```
+
+That spelling is kept for compatibility. Please do not rename it unless there is a proper migration plan.
 
 Important internal names:
 
@@ -23,40 +62,52 @@ localitfy:* IPC channels
 com.meshahid973.localitfy
 ```
 
-Changing these randomly can break old installs, saved data, settings, updates, or the preload bridge.
+Changing these randomly can break existing installs, saved settings, app data, updates, or the preload bridge.
 
 ---
 
-## How to set up the project
+## Quick start
 
-Fork the repo, then clone your fork:
+### 1. Fork the repo
+
+Click **Fork** on GitHub.
+
+### 2. Clone your fork
 
 ```bash
 git clone https://github.com/meshahid973/localitfy.git
 cd localitfy
 ```
 
-Install dependencies:
+### 3. Install dependencies
 
 ```bash
 npm install
 ```
 
-Create a local environment file:
+### 4. Create your local environment file
 
-```bash
-copy .env.example .env
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-You can leave the values empty for normal development.
+On macOS or Linux:
 
-Start the app:
+```bash
+cp .env.example .env
+```
+
+For normal development, you can leave most values empty.
+
+### 5. Start the app
 
 ```bash
 npm run dev
 ```
 
-Build the app to make sure your changes do not break anything:
+### 6. Build before opening a pull request
 
 ```bash
 npm run build
@@ -64,9 +115,9 @@ npm run build
 
 ---
 
-## Making changes
+## Making a change
 
-Create a new branch before editing:
+Create a new branch before editing files.
 
 ```bash
 git checkout -b fix/your-change-name
@@ -77,93 +128,137 @@ Good branch names:
 ```txt
 fix/player-alignment
 fix/settings-spacing
-feature/playlist-cover
+fix/download-card-layout
+feature/album-cover-picker
 docs/update-readme
 refactor/player-css
 ```
 
-Try to keep your change focused. A small clean pull request is easier to review than a huge one that changes everything.
+Try to keep your pull request focused on one thing. A small clean change is much easier to review than one huge pull request that edits the whole app.
 
 ---
 
-## CSS ownership
+## Good first contributions
 
-localtify has a lot of CSS, so please edit the correct file.
+If you are new, these are good places to start.
 
-```txt
-app-core.css      app shell, sidebar, titlebar, layout, update popup
-App.css           older shared app-level styles
-home.css          home page, library, song cards, shelves, playlist UI
-player.css        bottom player, progress bar, volume, player controls
-settings.css      settings page and settings cards
-themes.css        theme variables and theme mappings
-motion.css        animations and transitions
-effects.css       ambience and decorative effects
-mini-player.css   detached mini-player window
-```
+<table>
+  <tr>
+    <td><strong>UI fixes</strong></td>
+    <td>Fix spacing, alignment, button states, hover states, or empty screens.</td>
+  </tr>
+  <tr>
+    <td><strong>Docs</strong></td>
+    <td>Improve README text, setup steps, screenshots, or wording.</td>
+  </tr>
+  <tr>
+    <td><strong>Bug reports</strong></td>
+    <td>Report crashes, broken layouts, confusing behavior, or missing details.</td>
+  </tr>
+  <tr>
+    <td><strong>Accessibility</strong></td>
+    <td>Improve labels, focus states, keyboard support, or contrast.</td>
+  </tr>
+  <tr>
+    <td><strong>CSS cleanup</strong></td>
+    <td>Move styles to the right file and remove old patchy rules.</td>
+  </tr>
+</table>
+
+---
+
+## CSS guide
+
+localtify has many CSS files. Please edit the file that owns the thing you are fixing.
+
+| File              | What it owns                                         |
+| ----------------- | ---------------------------------------------------- |
+| `app-core.css`    | App shell, sidebar, titlebar, layout, update popup   |
+| `App.css`         | Older shared app level styles                        |
+| `home.css`        | Home page, library, albums, playlists, song cards    |
+| `player.css`      | Bottom player, progress bar, volume, player controls |
+| `settings.css`    | Settings page and settings cards                     |
+| `themes.css`      | Theme variables and theme mappings                   |
+| `motion.css`      | Animations and transitions                           |
+| `effects.css`     | Small visual effects and decorative effects          |
+| `mini-player.css` | Detached mini-player window                          |
 
 Simple rule:
 
-```txt
-player bug      -> player.css
-settings bug    -> settings.css
-home card bug   -> home.css
-theme change    -> themes.css
-animation bug   -> motion.css
-mini-player bug -> mini-player.css
-```
+| If you are fixing | Edit this first   |
+| ----------------- | ----------------- |
+| Player issue      | `player.css`      |
+| Settings issue    | `settings.css`    |
+| Home page issue   | `home.css`        |
+| Album page issue  | `home.css`        |
+| Theme issue       | `themes.css`      |
+| Animation issue   | `motion.css`      |
+| Mini-player issue | `mini-player.css` |
 
-Please avoid dumping random fixes at the bottom of unrelated CSS files.
+Please do not add random fixes at the bottom of unrelated CSS files. It makes future bugs harder to fix.
 
 ---
 
-## Database and data safety
+## Database and user data
 
-Be extra careful with anything that touches:
+Be careful with anything that touches user data.
+
+Important areas:
 
 ```txt
 electron/db.cjs
 playlist saving
 settings saving
+song metadata
 app data path
 migrations
 backups
 ```
 
-Do not change the app data folder name unless it is part of a proper migration. Users should not lose their library, playlists, covers, or settings after an update.
+Users should not lose their library, playlists, covers, or settings after an update.
 
-If your pull request changes the database, explain:
+If your change touches the database, explain:
 
-- what changed
-- why it changed
-- whether it needs a migration
-- how you tested old user data
+```txt
+What changed
+Why it changed
+Whether it needs a migration
+How you tested old user data
+```
+
+Do not change the app data folder name unless it is part of a proper migration.
 
 ---
 
 ## Pull request checklist
 
-Before opening a pull request, please check:
+Before opening a pull request, please check this:
 
-- the app starts with `npm run dev`
-- the app builds with `npm run build`
-- no private files are committed
-- UI changes include screenshots if possible
-- database/settings/updater changes are explained clearly
+* `npm run dev` starts the app
+* `npm run build` works
+* no private files are committed
+* UI changes include screenshots if possible
+* database changes are explained clearly
+* settings changes are explained clearly
+* updater, preload, IPC, and app data changes are mentioned clearly
 
-When opening a pull request, include:
+Use this format in your pull request:
 
-- what you changed
-- why you changed it
-- how you tested it
-- screenshots if the UI changed
-- whether it affects database, settings, playlists, updater, preload, or app data path
+```txt
+What changed:
+Why it changed:
+How I tested it:
+Screenshots:
+Anything risky:
+```
+
+If you are new, do not worry about writing a perfect pull request. Just explain your change in normal words.
 
 ---
 
 ## Files you should not commit
 
-Do not commit private or generated files:
+Do not commit private files, generated files, or local user data.
 
 ```txt
 .env
@@ -182,42 +277,78 @@ downloaded music
 private analytics exports
 ```
 
-Use `.env.example` for public environment examples.
+Use `.env.example` for public example values.
 
 ---
 
-## Good first contributions
+## Things to avoid
 
-Good areas to help with:
+Please avoid:
 
-- fixing small UI bugs
-- improving settings layout
-- polishing the bottom player
-- improving empty states
-- improving playlist UI
-- fixing typos
-- cleaning CSS ownership problems
-- improving documentation
-- adding screenshots to docs
-- accessibility improvements
+* renaming `localitfy` internal APIs without discussion
+* changing IPC names randomly
+* removing features without asking
+* rewriting huge parts of the app in one pull request
+* mixing unrelated fixes together
+* adding heavy animations that make the app lag
+* committing private keys, tokens, logs, or local database files
 
 ---
 
-## Code style
+## Testing tips
 
-There is no giant rulebook right now. Just keep things simple:
+When testing UI changes, check these pages:
 
-- use clear names
-- avoid huge unrelated rewrites
-- avoid breaking existing IPC names
-- avoid removing features without discussion
-- keep UI changes consistent with the localtify style
-- test before opening a pull request
+```txt
+Home
+Library
+Albums
+Downloads
+Settings
+Bottom player
+Sidebar collapsed
+Sidebar expanded
+```
+
+If your change affects playback, test:
+
+```txt
+Play
+Pause
+Next
+Previous
+Shuffle
+Repeat
+Queue
+Volume
+```
+
+If your change affects imports or downloads, test with a small file first.
+
+---
+
+## Reporting bugs
+
+A good bug report includes:
+
+```txt
+What you expected to happen
+What actually happened
+Steps to reproduce it
+Screenshots or screen recordings
+Error messages from the terminal
+Your operating system
+Your localtify version
+```
+
+Screenshots help a lot. Terminal logs also help a lot.
 
 ---
 
 ## Need help?
 
-Open an issue or pull request with as much detail as you can.
+Open an issue if you are stuck or unsure.
 
-Screenshots, error messages, and steps to reproduce make bugs much easier to fix.
+You can also open a pull request even if your change is not perfect yet. Just say what you need help with.
+
+Thanks for helping localtify improve.
