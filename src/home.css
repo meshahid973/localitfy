@@ -16651,3 +16651,47 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
   box-shadow: none !important;
   filter: none !important;
 }
+
+/* localtify 0.3.8 V307 — safe containment only, no frozen cards or disabled visuals. */
+.coverGalleryGridCleanOnly,
+.coverGalleryVirtualCanvasCleanOnly,
+.coverSongListVirtual,
+.coverSongVirtualCanvas{
+  contain: layout paint style;
+  isolation: isolate;
+}
+
+.coverGalleryVirtualRowCleanOnly,
+.coverGalleryCardCleanOnly,
+.coverSongPickVirtual{
+  contain: layout paint;
+}
+
+.coverGalleryImageShellCleanOnly,
+.coverGalleryImageButtonCleanOnly,
+.coverGalleryImagePlaceholderCleanOnly,
+.coverGalleryImageCleanOnly{
+  contain: paint;
+}
+
+.homeListenCard,
+.homeFreshCard,
+.homeAlbumCard{
+  contain: layout paint;
+}
+
+/* localtify 0.3.8 V307 — prevent home/listen/recent cards from freezing under content-visibility. */
+.homeListenGrid,
+.homeListenCard,
+.homeFreshCard,
+.homeAlbumCard,
+.homeShelfPanel,
+.homeListenPanel,
+.homeFreshPanel,
+.homeLibraryPanel,
+.localPicksGrid,
+.recentCoversGrid,
+.localPickCard,
+.recentCoverCard{
+  content-visibility: visible !important;
+}

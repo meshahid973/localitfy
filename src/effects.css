@@ -719,3 +719,23 @@ body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::after{
   filter: none !important;
   transition: none !important;
 }
+
+/* localtify 0.3.8 V307 — preserve blur/glow; keep compositor hints cheap. */
+.app :is(
+  .heroArt.coverAura,
+  .homeListenCover.coverAura,
+  .homeFreshCover.coverAura,
+  .homeAlbumArt.coverAura,
+  .playerBar .smallArt
+){
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.app :is(
+  .heroAmbiencePulse,
+  .homeListenBackground,
+  .homeListenBackgroundImage
+){
+  pointer-events: none;
+}

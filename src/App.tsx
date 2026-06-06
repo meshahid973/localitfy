@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.8 V301 performance pass. Existing users see onboarding once. */
+/* localtify 0.3.8 V307 measured perf repair. Visuals preserved; hotspots optimized. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -432,6 +432,8 @@ function MainModeApp() {
   const scrollBusyRef = useRef(false);
   const scrollBusyFrameRef = useRef<number | null>(null);
   const scrollIdleTimerRef = useRef<number | null>(null);
+  const rendererQuietUntilRef = useRef(0);
+  const progressDomSignatureRef = useRef("");
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
   const themeSettlingTimerRef = useRef<number | null>(null);
   const customThemeCommitTimerRef = useRef<number | null>(null);
@@ -641,16 +643,25 @@ function MainModeApp() {
   useEffect(() => {
     const body = document.body;
 
-    body.classList.add("localtifyPerfV301", "localtifyPerfV303", "localtifyGpuFriendly");
-    body.dataset.localtifyPerf = "v303";
+    body.classList.add("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyGpuFriendly");
+    body.dataset.localtifyPerf = "v307";
 
     return () => {
-      body.classList.remove("localtifyPerfV301", "localtifyPerfV303", "localtifyGpuFriendly");
-      if (body.dataset.localtifyPerf === "v303" || body.dataset.localtifyPerf === "v301") {
+      body.classList.remove("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyGpuFriendly");
+      if (["v307", "v305", "v304", "v303", "v301"].includes(String(body.dataset.localtifyPerf || ""))) {
         delete body.dataset.localtifyPerf;
       }
     };
   }, []);
+
+  useEffect(() => {
+    const body = document.body;
+    body.classList.toggle("localtifyAudioPlaying", Boolean(isPlaying));
+
+    return () => {
+      body.classList.remove("localtifyAudioPlaying");
+    };
+  }, [isPlaying]);
 
   useEffect(() => {
     const analyticsReady = initLocalitfyAnalytics(APP_VERSION);
@@ -963,10 +974,19 @@ function MainModeApp() {
       }, 5 * 60 * 1000);
     };
 
+    let lastPointerMoveAt = 0;
+
     const handleUserActivity = () => {
       if (Date.now() < screensaverIgnoreActivityUntilRef.current) return;
       setScreensaverVisible(false);
       armScreensaverTimer();
+    };
+
+    const handlePointerMoveActivity = () => {
+      const now = Date.now();
+      if (!screensaverVisible && now - lastPointerMoveAt < 1400) return;
+      lastPointerMoveAt = now;
+      handleUserActivity();
     };
 
     if (!canShowScreensaver) {
@@ -976,17 +996,19 @@ function MainModeApp() {
     }
 
     armScreensaverTimer();
-    window.addEventListener("pointermove", handleUserActivity, { passive: true });
+    window.addEventListener("pointerdown", handleUserActivity, { passive: true });
     window.addEventListener("keydown", handleUserActivity);
     window.addEventListener("wheel", handleUserActivity, { passive: true });
+    window.addEventListener("pointermove", handlePointerMoveActivity, { passive: true });
 
     return () => {
       clearScreensaverTimer();
-      window.removeEventListener("pointermove", handleUserActivity);
+      window.removeEventListener("pointerdown", handleUserActivity);
       window.removeEventListener("keydown", handleUserActivity);
       window.removeEventListener("wheel", handleUserActivity);
+      window.removeEventListener("pointermove", handlePointerMoveActivity);
     };
-  }, [currentSong?.id, isPlaying, screensaverPreviewActive, settings.animeVisuals, settings.animatedBackgrounds]);
+  }, [currentSong?.id, isPlaying, screensaverPreviewActive, screensaverVisible, settings.animeVisuals, settings.animatedBackgrounds]);
 
   const heroDisplayTitle = currentSong ? prettyTitle(currentSong.title, 9) : "drop in your music";
   const heroDisplayArtist = currentSong ? prettyMeta(currentSong.artist) : "import songs to start listening";
@@ -1105,7 +1127,8 @@ function MainModeApp() {
     const paintScrollBusy = () => {
       scrollBusyFrameRef.current = null;
       scrollBusyRef.current = true;
-      appRootRef.current?.classList.add("isScrolling");
+      rendererQuietUntilRef.current = performance.now() + 900;
+      appRootRef.current?.classList.add("isScrolling", "localtifyInteractionBusy");
 
       const nearBottom = node.scrollTop + node.clientHeight >= node.scrollHeight - 680;
       const activeView = analyticsViewRef.current;
@@ -1125,9 +1148,9 @@ function MainModeApp() {
 
       scrollIdleTimerRef.current = window.setTimeout(() => {
         scrollBusyRef.current = false;
-        appRootRef.current?.classList.remove("isScrolling");
+        appRootRef.current?.classList.remove("isScrolling", "localtifyInteractionBusy");
         scrollIdleTimerRef.current = null;
-      }, 150);
+      }, playingRef.current ? 520 : 320);
     };
 
     const markScrollBusy = () => {
@@ -1136,11 +1159,9 @@ function MainModeApp() {
     };
 
     node.addEventListener("scroll", markScrollBusy, { passive: true });
-    node.addEventListener("wheel", markScrollBusy, { passive: true });
 
     return () => {
       node.removeEventListener("scroll", markScrollBusy);
-      node.removeEventListener("wheel", markScrollBusy);
 
       if (scrollBusyFrameRef.current !== null) {
         window.cancelAnimationFrame(scrollBusyFrameRef.current);
@@ -1153,7 +1174,7 @@ function MainModeApp() {
       }
 
       scrollBusyRef.current = false;
-      appRootRef.current?.classList.remove("isScrolling");
+      appRootRef.current?.classList.remove("isScrolling", "localtifyInteractionBusy");
     };
   }, []);
 
@@ -1274,6 +1295,7 @@ function MainModeApp() {
       if (appRootRef.current) {
         appRootRef.current.style.removeProperty("--player-size-live");
         appRootRef.current.style.removeProperty("--sidebar-width-live");
+        appRootRef.current.classList.remove("isScrolling", "localtifyInteractionBusy");
       }
 
       if (libraryOrderSaveTimerRef.current !== null) {
@@ -2438,23 +2460,37 @@ function MainModeApp() {
       : durationRef.current || currentDuration || currentSong?.duration || 0;
     const safeTime = clamp(Number(time) || 0, 0, Math.max(0, duration || 0));
     const safeProgress = duration > 0 ? clamp((safeTime / duration) * 100, 0, 100) : 0;
+    const progressBucket = Math.floor(safeProgress * 2) / 2;
+    const timeBucket = Math.floor(safeTime);
+    const durationBucket = Math.floor(duration || 0);
     const progressText = formatTime(safeTime);
     const durationText = formatTime(duration || 0);
+    const domSignature = `${progressBucket}:${timeBucket}:${durationBucket}:${forceInputValue ? "force" : "normal"}`;
+
+    if (!forceInputValue && progressDomSignatureRef.current === domSignature) {
+      return;
+    }
+
+    progressDomSignatureRef.current = domSignature;
 
     progressInputRefs.current.forEach((input) => {
       if (!input) return;
-      input.style.setProperty("--range-progress", `${safeProgress}%`);
+      const nextProgress = `${progressBucket}%`;
+      if (input.style.getPropertyValue("--range-progress") !== nextProgress) {
+        input.style.setProperty("--range-progress", nextProgress);
+      }
       if (forceInputValue || !isSeekingRef.current) {
-        input.value = String(safeProgress);
+        const nextValue = String(progressBucket);
+        if (input.value !== nextValue) input.value = nextValue;
       }
     });
 
     progressTimeLabelRefs.current.forEach((label) => {
-      if (label) label.textContent = progressText;
+      if (label && label.textContent !== progressText) label.textContent = progressText;
     });
 
     progressDurationLabelRefs.current.forEach((label) => {
-      if (label) label.textContent = durationText;
+      if (label && label.textContent !== durationText) label.textContent = durationText;
     });
   }, [currentDuration, currentSong?.duration]);
 
@@ -2643,13 +2679,20 @@ function MainModeApp() {
   useEffect(() => {
     const body = document.body;
     let idleTimer: number | null = null;
-    let pointerFrame: number | null = null;
+    let activityTimer: number | null = null;
     const passiveOptions: AddEventListenerOptions = { passive: true };
 
     const clearIdleTimer = () => {
       if (idleTimer !== null) {
         window.clearTimeout(idleTimer);
         idleTimer = null;
+      }
+    };
+
+    const clearActivityTimer = () => {
+      if (activityTimer !== null) {
+        window.clearTimeout(activityTimer);
+        activityTimer = null;
       }
     };
 
@@ -2664,17 +2707,17 @@ function MainModeApp() {
     };
 
     const scheduleActive = () => {
-      if (pointerFrame !== null) return;
-
-      pointerFrame = window.requestAnimationFrame(() => {
-        pointerFrame = null;
+      if (activityTimer !== null) return;
+      activityTimer = window.setTimeout(() => {
+        activityTimer = null;
         markActive();
-      });
+      }, 90);
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
         clearIdleTimer();
+        clearActivityTimer();
         markIdle();
         return;
       }
@@ -2684,7 +2727,6 @@ function MainModeApp() {
 
     markActive();
 
-    window.addEventListener("pointermove", scheduleActive, passiveOptions);
     window.addEventListener("pointerdown", scheduleActive, passiveOptions);
     window.addEventListener("wheel", scheduleActive, passiveOptions);
     window.addEventListener("keydown", scheduleActive);
@@ -2692,12 +2734,7 @@ function MainModeApp() {
 
     return () => {
       clearIdleTimer();
-
-      if (pointerFrame !== null) {
-        window.cancelAnimationFrame(pointerFrame);
-      }
-
-      window.removeEventListener("pointermove", scheduleActive, passiveOptions);
+      clearActivityTimer();
       window.removeEventListener("pointerdown", scheduleActive, passiveOptions);
       window.removeEventListener("wheel", scheduleActive, passiveOptions);
       window.removeEventListener("keydown", scheduleActive);
@@ -2843,17 +2880,10 @@ function MainModeApp() {
           [
             ".playerBar .smallArt",
             ".simpleHero .simpleHeroArtSwap",
-            ".hero.heroPremium .heroArtWrap",
-            ".songRow.playing .songArt.coverAura",
-            ".homeAlbumCard.playing .homeAlbumArt.coverAura",
-            ".homeListenCard.playing .homeListenCover.coverAura",
-            ".homeFreshCard.playing .homeFreshCover.coverAura",
-            ".playlistTrackRow.playing .playlistTrackCover",
-            ".playlistSongRow.playing .playlistTrackCover",
-            ".libraryRow.playing .songArt.coverAura"
+            ".hero.heroPremium .heroArtWrap"
           ].join(",")
         )
-      ).filter((node) => root.contains(node)).slice(0, 4);
+      ).filter((node) => root.contains(node)).slice(0, 2);
       cache.refreshedAt = now;
       cache.songId = songId;
 
@@ -2894,7 +2924,7 @@ function MainModeApp() {
     };
 
     const tick = (now: number) => {
-      const runtimeBusy = scrollBusyRef.current || Boolean(draggedSongIdRef.current) || themeSettlingRef.current || isSeekingRef.current;
+      const runtimeBusy = scrollBusyRef.current || performance.now() < rendererQuietUntilRef.current || Boolean(draggedSongIdRef.current) || themeSettlingRef.current || isSeekingRef.current;
 
       if (document.hidden || runtimeBusy) {
         if (!hiddenResetDone || !busyResetDone) {
@@ -2910,7 +2940,7 @@ function MainModeApp() {
       hiddenResetDone = false;
       busyResetDone = false;
 
-      const frameBudgetMs = view === "home" ? 220 : 320;
+      const frameBudgetMs = view === "home" ? 520 : 760;
 
       if (now - lastPaint >= frameBudgetMs) {
         const analyser = ensureAnalyser();
@@ -4179,10 +4209,22 @@ function MainModeApp() {
 
     let lastPaintedDuration = currentDuration || 0;
 
-    const tick = (clock: number) => {
-      const audio = audioRef.current;
+    const scheduleProgressTick = (delayMs: number) => {
+      if (progressLoopTimeoutRef.current !== null) {
+        window.clearTimeout(progressLoopTimeoutRef.current);
+      }
 
+      progressLoopTimeoutRef.current = window.setTimeout(() => {
+        progressLoopTimeoutRef.current = null;
+        animationFrameRef.current = window.requestAnimationFrame(tick);
+      }, delayMs);
+    };
+
+    const tick = (clock: number) => {
+      animationFrameRef.current = null;
+      const audio = audioRef.current;
       const backgroundMode = isAppBackgroundedRef.current;
+      const busyUi = scrollBusyRef.current || performance.now() < rendererQuietUntilRef.current || Boolean(draggedSongIdRef.current) || themeSettlingRef.current;
 
       if (audio && !audio.paused) {
         const nextTime = audio.currentTime || 0;
@@ -4191,16 +4233,15 @@ function MainModeApp() {
         timeRef.current = nextTime;
         if (Number.isFinite(nextDuration) && nextDuration > 0) durationRef.current = nextDuration;
 
-        const busyUi = scrollBusyRef.current || draggedSongIdRef.current || themeSettlingRef.current;
-        const uiPaintEveryMs = backgroundMode ? 3000 : busyUi ? 240 : 90;
+        const uiPaintEveryMs = backgroundMode ? 3000 : busyUi ? 520 : 160;
         if (!backgroundMode && !isSeekingRef.current && clock - lastProgressUiPaintRef.current > uiPaintEveryMs) {
           lastProgressUiPaintRef.current = clock;
           syncProgressDom(nextTime, nextDuration);
         }
 
-        // Do not push every progress tick through React state.
-        // timeRef + direct DOM painting keep the player smooth while the huge app tree stays asleep.
-        if (!isSeekingRef.current && clock - lastProgressStatePaintRef.current > 8000) {
+        // Keep playback position out of React's hot path. The DOM progress gets painted
+        // directly and React state only changes when the actual song duration changes.
+        if (!isSeekingRef.current && clock - lastProgressStatePaintRef.current > 12000) {
           lastProgressStatePaintRef.current = clock;
         }
 
@@ -4210,28 +4251,20 @@ function MainModeApp() {
           syncProgressDom(nextTime, nextDuration, true);
         }
 
-        if (settings.rememberPlaybackPosition && currentSong?.id && Date.now() - positionSaveRef.current > 12000) {
+        if (settings.rememberPlaybackPosition && currentSong?.id && Date.now() - positionSaveRef.current > 16000) {
           positionSaveRef.current = Date.now();
           void patchSongLocal(currentSong.id, { playbackPosition: Math.floor(nextTime) });
         }
 
-        if (!backgroundMode && settings.gaplessPlayback && nextDuration > 0 && nextDuration - nextTime < 20) {
-          primeNextAudioCache();
+        if (!backgroundMode && !busyUi && settings.gaplessPlayback && nextDuration > 0 && nextDuration - nextTime < 20) {
+          window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
         }
       }
 
-      if (backgroundMode) {
-        progressLoopTimeoutRef.current = window.setTimeout(() => {
-          progressLoopTimeoutRef.current = null;
-          animationFrameRef.current = window.requestAnimationFrame(tick);
-        }, 1000);
-        return;
-      }
-
-      animationFrameRef.current = window.requestAnimationFrame(tick);
+      scheduleProgressTick(backgroundMode ? 1000 : busyUi ? 360 : 120);
     };
 
-    animationFrameRef.current = window.requestAnimationFrame(tick);
+    scheduleProgressTick(80);
 
     return () => stopProgressLoop();
   }, [isPlaying, currentSong?.id, currentDuration, settings.rememberPlaybackPosition, settings.gaplessPlayback, syncProgressDom]);
@@ -4480,7 +4513,6 @@ function MainModeApp() {
 
       pendingPlayRef.current = false;
       resetPlayCountTracker();
-
       setIsPlaying(false);
       setCurrentTime(0);
       setCurrentDuration(0);
@@ -4528,7 +4560,7 @@ function MainModeApp() {
         setCurrentDuration(currentSong.duration || 0);
         setPlayerError("");
         setStatusText(`loaded ${prettyTitle(currentSong.title, 5)}`);
-        primeNextAudioCache();
+        window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
       }
     });
 
@@ -4660,7 +4692,6 @@ function MainModeApp() {
     if (!getSongPlaybackSourceKey(song) || song.fileExists === false) {
       pendingPlayRef.current = false;
       resetPlayCountTracker();
-
       setIsPlaying(false);
       setPlayerError("this audio file is missing. reimport it on this pc.");
       setStatusText("file missing");
@@ -4672,7 +4703,6 @@ function MainModeApp() {
     if (!playbackUrl.ok || !playbackUrl.url || playbackUrl.fileExists === false) {
       pendingPlayRef.current = false;
       resetPlayCountTracker();
-
       setIsPlaying(false);
       setPlayerError(playbackUrl.fileExists === false ? "this audio file is missing. reimport it on this pc." : "could not create a playback URL for this song.");
       setStatusText(playbackUrl.fileExists === false ? "file missing" : "playback url failed");
@@ -4707,7 +4737,7 @@ function MainModeApp() {
         audio.volume = safeVolume;
       }
 
-      primeNextAudioCache();
+      window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
 
       setIsPlaying(true);
       setPlayerError("");
@@ -4717,7 +4747,6 @@ function MainModeApp() {
     } catch {
       pendingPlayRef.current = false;
       resetPlayCountTracker();
-
       setIsPlaying(false);
       setPlayerError(getAudioErrorText(audio));
       setStatusText(reason === "manual" ? "playback failed" : "audio not ready");
@@ -7547,7 +7576,6 @@ function MainModeApp() {
     if (!getSongPlaybackSourceKey(currentSong) || currentSong.fileExists === false) {
       pendingPlayRef.current = false;
       resetPlayCountTracker();
-
       setIsPlaying(false);
       setPlayerError("this audio file is missing. reimport it on this pc.");
       setStatusText("file missing");

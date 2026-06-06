@@ -2457,3 +2457,22 @@ body.localtifyPerfV301 .app.localtifySongDragging :is(
 body.localtifyPerfV301.localtifyBackgroundMode .app *{
   animation-play-state: paused !important;
 }
+
+/* localtify 0.3.8 V307 — keep motion, but avoid layout-triggering animation properties. */
+.app :is(
+  .hero.heroPremium.heroLayoutMotion,
+  .homeShelfStack,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel
+){
+  will-change: transform, opacity;
+}
+
+body.localtifyPerfV307 .app :is(
+  .localtifyProximityTarget,
+  .localtifyProximityActive
+){
+  transform: translateZ(0) scale(var(--prox-scale, 1));
+}

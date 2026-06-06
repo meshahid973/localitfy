@@ -1,45 +1,40 @@
 // @ts-nocheck
-import { useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-/* localtify 0.3.8 V301 — isolated cover gallery classes with lighter image state updates. */
+import { memo, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+/* localtify 0.3.8 V307 — cover studio stable render. */
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
 
-function CoverGalleryImage({ src, label, priority = false }: { src: string; label: string; priority?: boolean }) {
-  const [loaded, setLoaded] = useState(false);
+const CoverGalleryImage = memo(function CoverGalleryImage({ src, label, priority = false }: { src: string; label: string; priority?: boolean }) {
   const [failed, setFailed] = useState(false);
   const fallback = String(label || "cover").trim().slice(0, 1).toUpperCase() || "♪";
 
   useEffect(() => {
-    setLoaded(false);
     setFailed(false);
   }, [src]);
 
   return (
-    <span className={`coverGalleryImageShellCleanOnly ${loaded ? "isLoaded" : "isLoading"} ${failed ? "isFailed" : ""}`}>
+    <span className={`coverGalleryImageShellCleanOnly isLoaded ${failed ? "isFailed" : ""}`}>
       <span className="coverGalleryImagePlaceholderCleanOnly" aria-hidden="true">{fallback}</span>
 
       {src && !failed ? (
         <img
-          className={`coverGalleryImageCleanOnly ${loaded ? "isLoaded" : ""}`}
+          className="coverGalleryImageCleanOnly isLoaded"
           src={src}
           alt=""
-          width={260}
-          height={260}
+          width={220}
+          height={220}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           fetchPriority={priority ? "high" : "low"}
           referrerPolicy="no-referrer"
           draggable={false}
-          onLoad={() => window.requestAnimationFrame(() => setLoaded(true))}
-          onError={() => {
-            setLoaded(false);
-            setFailed(true);
-          }}
+          onError={() => setFailed(true)}
         />
       ) : null}
     </span>
   );
-}
+});
+
 
 function useMeasuredWidth<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
@@ -50,11 +45,14 @@ function useMeasuredWidth<T extends HTMLElement>() {
     if (!element) return;
 
     let frame = 0;
+    let lastWidth = 0;
     const update = () => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
         const nextWidth = element.clientWidth || 0;
-        setWidth((currentWidth) => (currentWidth === nextWidth ? currentWidth : nextWidth));
+        if (Math.abs(nextWidth - lastWidth) < 8) return;
+        lastWidth = nextWidth;
+        setWidth(nextWidth);
       });
     };
 
@@ -218,7 +216,7 @@ function VirtualCoverSongList({
     count: songs.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 56,
-    overscan: 5,
+    overscan: 1,
     getItemKey: (index) => songs[index]?.id || index
   });
 
@@ -288,7 +286,7 @@ function VirtualCoverGalleryGrid({
     count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 184,
-    overscan: 3
+    overscan: 1
   });
 
   if (!entries.length) {
@@ -321,7 +319,6 @@ function VirtualCoverGalleryGrid({
                   <article
                     key={entry.key}
                     className={`coverGalleryCardCleanOnly ${entry.excluded ? "excluded" : ""}`}
-                    onMouseEnter={() => onPreviewCover(entry)}
                     onFocus={() => onPreviewCover(entry)}
                   >
                     <button
