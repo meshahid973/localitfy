@@ -12579,7 +12579,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   transform: translateZ(0);
 }
 
-/* localtify 0.3.7 V311 — onboarding owner. Old onboarding CSS replaced. */
+/* localtify 0.3.7 V312 — onboarding owner. Flat no-ambience version. */
 .onboardingLayer{
   position: fixed;
   inset: 0;
@@ -12589,18 +12589,11 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   padding: clamp(16px, 2.4vw, 34px);
   overflow: auto;
   color: var(--text, #f7f3ff);
-  background:
-    radial-gradient(circle at 18% 14%, rgba(var(--accent-rgb, 229, 90, 231), 0.18), transparent 30%),
-    radial-gradient(circle at 86% 28%, rgba(110, 158, 255, 0.12), transparent 34%),
-    linear-gradient(135deg, rgba(6, 3, 12, 0.96), rgba(9, 3, 17, 0.98));
-  backdrop-filter: blur(24px) saturate(125%);
-  -webkit-backdrop-filter: blur(24px) saturate(125%);
-  animation: onboardingLayerEnter 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  background: #05030b;
 }
 
 .localitfyOnboarding{
   --onboarding-accent: var(--accent, #e55ae7);
-  --onboarding-shadow: rgba(var(--accent-rgb, 229, 90, 231), 0.28);
   position: relative;
   width: min(1180px, calc(100vw - 34px));
   min-height: min(760px, calc(100vh - 42px));
@@ -12609,56 +12602,8 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 30px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.076), rgba(255, 255, 255, 0.026)),
-    rgba(5, 4, 10, 0.92);
-  box-shadow:
-    0 34px 120px rgba(0, 0, 0, 0.72),
-    0 0 0 1px rgba(var(--accent-rgb, 229, 90, 231), 0.08) inset;
+  background: #0b0a10;
   isolation: isolate;
-  animation: onboardingPanelEnter 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.onboardingAmbient{
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.onboardingAmbient span{
-  position: absolute;
-  display: block;
-  width: 42vmax;
-  height: 42vmax;
-  border-radius: 999px;
-  opacity: 0.36;
-  background: radial-gradient(circle, var(--onboarding-shadow), transparent 64%);
-  filter: blur(28px);
-  transform: translate3d(0, 0, 0);
-  animation: onboardingGlowDrift 4600ms ease-in-out infinite alternate;
-}
-
-.onboardingAmbient span:nth-child(1){
-  left: -16vmax;
-  top: -18vmax;
-}
-
-.onboardingAmbient span:nth-child(2){
-  right: -18vmax;
-  top: 10vmax;
-  animation-duration: 5600ms;
-  animation-delay: 420ms;
-}
-
-.onboardingAmbient span:nth-child(3){
-  left: 26%;
-  bottom: -24vmax;
-  width: 30vmax;
-  height: 30vmax;
-  opacity: 0.22;
-  animation-duration: 6200ms;
 }
 
 .onboardingMainPane,
@@ -12674,6 +12619,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   flex-direction: column;
   padding: clamp(22px, 3vw, 38px);
   border-right: 1px solid rgba(255, 255, 255, 0.075);
+  background: #0b0a10;
 }
 
 .onboardingTop{
@@ -12692,9 +12638,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   border-radius: 18px;
   color: #050507;
   background: var(--onboarding-accent);
-  box-shadow:
-    0 18px 48px var(--onboarding-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.38);
 }
 
 .onboardingLogo span{
@@ -12779,9 +12722,8 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   width: var(--onboarding-progress, 20%);
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--onboarding-accent), color-mix(in srgb, var(--onboarding-accent), white 22%));
-  box-shadow: 0 0 28px var(--onboarding-shadow);
-  transition: width 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--onboarding-accent);
+  transition: width 220ms ease;
 }
 
 .onboardingStepTabs{
@@ -12805,18 +12747,13 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   font: inherit;
   font-weight: 880;
   text-align: left;
-  transition:
-    color 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 }
 
 .onboardingStepTabs button:hover:not(:disabled){
   color: #fff;
   border-color: rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.07);
-  transform: translate3d(0, -1px, 0);
 }
 
 .onboardingStepTabs button.active{
@@ -12869,11 +12806,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   padding: clamp(20px, 2.5vw, 34px);
   border: 1px solid rgba(255, 255, 255, 0.085);
   border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.022)),
-    rgba(0, 0, 0, 0.28);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  animation: onboardingScreenEnter 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  background: #100e16;
 }
 
 .onboardingScreen h3{
@@ -12948,28 +12881,19 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   border: 1px solid rgba(255, 255, 255, 0.075);
   border-radius: 19px;
   color: #fff;
-  background:
-    radial-gradient(circle at 24% 16%, color-mix(in srgb, var(--theme-accent, var(--onboarding-accent)), transparent 64%), transparent 42%),
-    rgba(255, 255, 255, 0.045);
+  background: rgba(255, 255, 255, 0.045);
   text-align: left;
-  transition:
-    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 180ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 .onboardingThemeChoice:hover:not(:disabled){
-  transform: translate3d(0, -2px, 0);
   border-color: color-mix(in srgb, var(--theme-accent, var(--onboarding-accent)), transparent 38%);
-  box-shadow: 0 16px 44px var(--theme-shadow, var(--onboarding-shadow));
+  background: rgba(255, 255, 255, 0.065);
 }
 
 .onboardingThemeChoice.active{
   border-color: color-mix(in srgb, var(--theme-accent, var(--onboarding-accent)), transparent 22%);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--theme-accent, var(--onboarding-accent)), transparent 52%) inset,
-    0 18px 48px var(--theme-shadow, var(--onboarding-shadow));
+  background: color-mix(in srgb, var(--theme-accent, var(--onboarding-accent)), transparent 90%);
 }
 
 .themeDot{
@@ -13008,11 +12932,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   color: #fff;
   background: rgba(255, 255, 255, 0.045);
   text-align: left;
-  transition:
-    transform 170ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 170ms ease,
-    background-color 170ms ease,
-    box-shadow 170ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 .onboardingChoice{
@@ -13027,7 +12947,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 .onboardingChoice:hover:not(:disabled),
 .onboardingDiscordToggle:hover:not(:disabled){
-  transform: translate3d(0, -1px, 0);
   border-color: color-mix(in srgb, var(--onboarding-accent), transparent 42%);
   background: rgba(255, 255, 255, 0.065);
 }
@@ -13035,7 +12954,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .onboardingChoice.primary{
   border-color: color-mix(in srgb, var(--onboarding-accent), transparent 34%);
   background: color-mix(in srgb, var(--onboarding-accent), transparent 88%);
-  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.24);
 }
 
 .onboardingChoiceIcon{
@@ -13133,9 +13051,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   padding: 15px;
   border: 1px solid color-mix(in srgb, var(--onboarding-accent), transparent 78%);
   border-radius: 20px;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--onboarding-accent), transparent 86%), rgba(255, 255, 255, 0.035)),
-    rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .onboardingDownloadCard div{
@@ -13199,12 +13115,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   font: inherit;
   font-size: 13px;
   font-weight: 950;
-  transition:
-    transform 170ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 170ms ease,
-    border-color 170ms ease,
-    color 170ms ease,
-    box-shadow 170ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 
 .onboardingSkip,
@@ -13218,13 +13129,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   border: 1px solid var(--onboarding-accent);
   color: #050507;
   background: var(--onboarding-accent);
-  box-shadow: 0 18px 45px var(--onboarding-shadow);
-}
-
-.onboardingSkip:hover:not(:disabled),
-.onboardingBack:hover:not(:disabled),
-.onboardingContinue:hover:not(:disabled){
-  transform: translate3d(0, -1px, 0);
 }
 
 .onboardingSkip:hover:not(:disabled),
@@ -13234,10 +13138,14 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   background: rgba(255, 255, 255, 0.075);
 }
 
+.onboardingContinue:hover:not(:disabled){
+  border-color: color-mix(in srgb, var(--onboarding-accent), white 18%);
+  background: color-mix(in srgb, var(--onboarding-accent), white 10%);
+}
+
 .localitfyOnboarding button:disabled{
   cursor: not-allowed;
   opacity: 0.58;
-  transform: none;
 }
 
 .onboardingPreviewPane{
@@ -13246,9 +13154,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   flex-direction: column;
   gap: 16px;
   padding: clamp(22px, 2.6vw, 32px);
-  background:
-    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--onboarding-accent), transparent 84%), transparent 38%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
+  background: #11151a;
 }
 
 .previewWindowDots{
@@ -13281,7 +13187,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   border-radius: 15px;
   color: #050507;
   background: var(--onboarding-accent);
-  box-shadow: 0 14px 34px var(--onboarding-shadow);
   font-size: 22px;
   font-weight: 1000;
 }
@@ -13314,9 +13219,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .previewMiniCards span{
   border: 1px solid rgba(255, 255, 255, 0.075);
   border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.028)),
-    rgba(0, 0, 0, 0.24);
+  background: rgba(0, 0, 0, 0.24);
 }
 
 .previewHeroCard{
@@ -13327,7 +13230,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   gap: 7px;
   padding: 18px;
   overflow: hidden;
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.24);
 }
 
 .previewHeroCard small{
@@ -13360,9 +13262,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .previewShelf span{
   height: 90px;
   border-radius: 20px;
-  background:
-    radial-gradient(circle at 28% 24%, var(--onboarding-shadow), transparent 42%),
-    rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.055);
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
@@ -13458,52 +13358,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   border-radius: 999px;
   color: #050507;
   background: var(--onboarding-accent);
-  box-shadow: 0 14px 34px var(--onboarding-shadow);
   font-style: normal;
-}
-
-@keyframes onboardingLayerEnter{
-  from{
-    opacity: 0;
-  }
-
-  to{
-    opacity: 1;
-  }
-}
-
-@keyframes onboardingPanelEnter{
-  from{
-    opacity: 0;
-    transform: translate3d(0, 18px, 0) scale(0.985);
-  }
-
-  to{
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-@keyframes onboardingScreenEnter{
-  from{
-    opacity: 0;
-    transform: translate3d(0, 12px, 0);
-  }
-
-  to{
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes onboardingGlowDrift{
-  from{
-    transform: translate3d(-2%, -1%, 0) scale(0.96);
-  }
-
-  to{
-    transform: translate3d(3%, 2%, 0) scale(1.04);
-  }
 }
 
 @media (max-width: 980px){

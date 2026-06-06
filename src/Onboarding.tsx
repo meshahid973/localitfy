@@ -11,7 +11,6 @@ type ThemeChoice = {
   name: string;
   note: string;
   color: string;
-  shadow: string;
   icon: string;
 };
 
@@ -38,9 +37,8 @@ const THEME_CHOICES: ThemeChoice[] = [
   {
     id: "mint",
     name: "mint",
-    note: "fresh dark green glow",
+    note: "fresh dark green",
     color: "#8dffce",
-    shadow: "rgba(141, 255, 206, 0.28)",
     icon: "✦"
   },
   {
@@ -48,7 +46,6 @@ const THEME_CHOICES: ThemeChoice[] = [
     name: "mono",
     note: "clean black and white",
     color: "#f4f4f5",
-    shadow: "rgba(244, 244, 245, 0.18)",
     icon: "○"
   },
   {
@@ -56,7 +53,6 @@ const THEME_CHOICES: ThemeChoice[] = [
     name: "berry",
     note: "pink purple night",
     color: "#ff72c8",
-    shadow: "rgba(255, 114, 200, 0.28)",
     icon: "♥"
   },
   {
@@ -64,7 +60,6 @@ const THEME_CHOICES: ThemeChoice[] = [
     name: "midnight",
     note: "blue OLED calm",
     color: "#7dd3fc",
-    shadow: "rgba(125, 211, 252, 0.24)",
     icon: "☾"
   },
   {
@@ -72,7 +67,6 @@ const THEME_CHOICES: ThemeChoice[] = [
     name: "terminal",
     note: "green console focus",
     color: "#46ff96",
-    shadow: "rgba(70, 255, 150, 0.26)",
     icon: "▣"
   },
   {
@@ -80,7 +74,6 @@ const THEME_CHOICES: ThemeChoice[] = [
     name: "soft sky",
     note: "soft blue silver",
     color: "#93c5fd",
-    shadow: "rgba(147, 197, 253, 0.22)",
     icon: "☁"
   }
 ];
@@ -126,7 +119,6 @@ export default function Onboarding({
 
   const shellStyle = {
     "--onboarding-accent": selectedTheme.color,
-    "--onboarding-shadow": selectedTheme.shadow,
     "--onboarding-progress": `${progress}%`
   } as CustomStyle;
 
@@ -197,12 +189,6 @@ export default function Onboarding({
   return (
     <section className="onboardingLayer" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
       <div className="localitfyOnboarding" style={shellStyle}>
-        <div className="onboardingAmbient" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-
         <div className="onboardingMainPane">
           <header className="onboardingTop">
             <div className="onboardingLogo" aria-hidden="true">
@@ -282,7 +268,6 @@ export default function Onboarding({
                         disabled={busy}
                         style={{
                           "--theme-accent": theme.color,
-                          "--theme-shadow": theme.shadow
                         } as CustomStyle}
                       >
                         <span className="themeDot">{theme.icon}</span>
