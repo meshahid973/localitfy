@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.3.7 V318 — polished local albums view and playback actions. */
+/* localtify 0.3.7 V325 release onboarding showcase. Existing users see onboarding once. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -64,6 +64,7 @@ import "./themes.css";
 import "./settings.css";
 import "./home.css";
 import "./motion.css";
+import "./onboarding-first-run.css";
 import "./player.css";
 import "./effects.css";
 
@@ -314,6 +315,39 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
   };
 }
 
+const ONBOARDING_RELEASE_SHOWCASE_KEY = `localitfy.onboarding.release-showcase.${APP_VERSION}`;
+
+function shouldOpenOnboardingForThisRelease() {
+  try {
+    const oldOnboardingDone = window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === "done";
+    const releaseShowcaseDone = window.localStorage.getItem(ONBOARDING_RELEASE_SHOWCASE_KEY) === "done";
+
+    // New users still see onboarding because the normal onboarding key is missing.
+    // Existing users also see the new v0.3.7 onboarding once because the release key is missing.
+    return !oldOnboardingDone || !releaseShowcaseDone;
+  } catch {
+    return true;
+  }
+}
+
+function markOnboardingSeenForThisRelease() {
+  try {
+    window.localStorage.setItem(ONBOARDING_STORAGE_KEY, "done");
+    window.localStorage.setItem(ONBOARDING_RELEASE_SHOWCASE_KEY, "done");
+  } catch {
+    // Storage can fail in locked-down environments. Never block the player.
+  }
+}
+
+function resetOnboardingForThisRelease() {
+  try {
+    window.localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+    window.localStorage.removeItem(ONBOARDING_RELEASE_SHOWCASE_KEY);
+  } catch {
+    // Ignore reset storage errors.
+  }
+}
+
 function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
@@ -413,13 +447,7 @@ function MainModeApp() {
   const [customThemeName, setCustomThemeName] = useState("My Custom Theme");
   const [customThemeHexDrafts, setCustomThemeHexDrafts] = useState<Partial<Record<CustomThemeColorKey, string>>>({});
   const [savedCustomThemes, setSavedCustomThemes] = useState<CustomThemePreset[]>(() => readSavedCustomThemePresets());
-  const [onboardingOpen, setOnboardingOpen] = useState(() => {
-    try {
-      return window.localStorage.getItem(ONBOARDING_STORAGE_KEY) !== "done";
-    } catch {
-      return true;
-    }
-  });
+  const [onboardingOpen, setOnboardingOpen] = useState(() => shouldOpenOnboardingForThisRelease());
   const [onboardingDevPreview, setOnboardingDevPreview] = useState(false);
   const [pixelArtAssets, setPixelArtAssets] = useState<RuntimePixelArtAsset[]>(() => getCachedRuntimePixelArtAssets());
   const [coverGalleryMood, setCoverGalleryMood] = useState<CoverMood>("all");
@@ -3268,11 +3296,7 @@ function MainModeApp() {
       command === "onboardingreset" ||
       command === "/onboardingreset"
     ) {
-      try {
-        window.localStorage.removeItem(ONBOARDING_STORAGE_KEY);
-      } catch {
-        // ignore storage errors in dev preview
-      }
+      resetOnboardingForThisRelease();
 
       openOnboardingDevPreview();
       setStatusText("onboarding reset and opened");
@@ -7888,11 +7912,7 @@ function MainModeApp() {
   }
 
   function dismissOnboarding() {
-    try {
-      window.localStorage.setItem(ONBOARDING_STORAGE_KEY, "done");
-    } catch {
-      // ignore storage errors so onboarding never blocks the player
-    }
+    markOnboardingSeenForThisRelease();
 
     setOnboardingDevPreview(false);
     setOnboardingOpen(false);
