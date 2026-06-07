@@ -1,4 +1,4 @@
-/* localtify 0.3.8 V309 — album folder importer foundation. */
+/* localtify 0.3.8 V310 — startup/service deferral perf pass. Visuals preserved. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -116,9 +116,6 @@ function loadLocaltifyEnv() {
 
 loadLocaltifyEnv();
 
-const ffmpegStatic = require("ffmpeg-static");
-const { autoUpdater } = require("electron-updater");
-
 const {
   initDatabase,
   getSongs,
@@ -135,15 +132,72 @@ const {
   getDatabaseStatus
 } = require("./db.cjs");
 
-const { setDiscordActivity, clearDiscordActivity, shutdownDiscordActivity, getDiscordStatus, resetDiscordActivityCache } = require("./rpc.cjs");
-const {
-  initDownloader,
-  downloadAudioUrls,
-  cancelActiveDownloads,
-  convertLocalMediaFiles,
-  isSupportedMediaPath,
-  downloadSpotifyBatch
-} = require("./downloader.cjs");
+// V310: keep launch light. These modules are useful, but they are not needed to
+// paint the first window. Load them only when the user opens downloads,
+// Spotify/download tools, Discord RPC, or updates.
+let ffmpegStaticCache;
+let autoUpdaterCache = null;
+let autoUpdaterLoadFailed = false;
+let rpcModuleCache = null;
+let downloaderModuleCache = null;
+let downloaderReady = false;
+
+function requireLocaltifyModule(modulePath, label) {
+  try {
+    return require(modulePath);
+  } catch (error) {
+    console.log(`[localtify lazy-load error] ${label || modulePath}`, error?.message || error);
+    return null;
+  }
+}
+
+function getFfmpegStaticPathLazy() {
+  if (typeof ffmpegStaticCache !== "undefined") return ffmpegStaticCache;
+  ffmpegStaticCache = requireLocaltifyModule("ffmpeg-static", "ffmpeg-static") || null;
+  return ffmpegStaticCache;
+}
+
+function getAutoUpdaterLazy() {
+  if (autoUpdaterCache || autoUpdaterLoadFailed) return autoUpdaterCache;
+  const updaterModule = requireLocaltifyModule("electron-updater", "electron-updater");
+  autoUpdaterCache = updaterModule?.autoUpdater || null;
+  autoUpdaterLoadFailed = !autoUpdaterCache;
+  return autoUpdaterCache;
+}
+
+function getRpcModuleLazy() {
+  if (rpcModuleCache) return rpcModuleCache;
+  rpcModuleCache = requireLocaltifyModule("./rpc.cjs", "discord rpc") || {};
+  return rpcModuleCache;
+}
+
+function getDiscordStatusSafe() {
+  try {
+    const rpc = getRpcModuleLazy();
+    return typeof rpc.getDiscordStatus === "function" ? rpc.getDiscordStatus() : { ok: false, loaded: false };
+  } catch {
+    return { ok: false, loaded: false };
+  }
+}
+
+function getDownloaderModuleLazy() {
+  if (downloaderModuleCache) return downloaderModuleCache;
+  downloaderModuleCache = requireLocaltifyModule("./downloader.cjs", "downloader") || {};
+  return downloaderModuleCache;
+}
+
+function ensureDownloaderReady() {
+  const downloader = getDownloaderModuleLazy();
+  if (!downloaderReady && typeof downloader.initDownloader === "function") {
+    downloader.initDownloader({
+      userDataPath: app.getPath("userData"),
+      ffmpegPath: getFfmpegPath(),
+      getCookiesFile: getYouTubeCookiesFile
+    });
+    downloaderReady = true;
+  }
+  return downloader;
+}
 
 const isDev = !app.isPackaged;
 
@@ -872,7 +926,12 @@ function sendAutoUpdateEvent(payload) {
 }
 
 function setupAutoUpdater() {
-  if (updaterReady) return;
+  const autoUpdater = getAutoUpdaterLazy();
+  if (!autoUpdater) {
+    sendAutoUpdateEvent({ type: "error", message: "updater unavailable", error: "electron-updater could not load" });
+    return null;
+  }
+  if (updaterReady) return autoUpdater;
   updaterReady = true;
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
@@ -935,10 +994,12 @@ function setupAutoUpdater() {
       error: error?.message || String(error || "unknown updater error")
     });
   });
+  return autoUpdater;
 }
 
 async function checkForUpdates(payload = {}) {
-  setupAutoUpdater();
+  const autoUpdater = setupAutoUpdater();
+  if (!autoUpdater) return false;
   updaterSilent = Boolean(payload?.silent);
   if (isDev) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
@@ -961,7 +1022,8 @@ async function checkForUpdates(payload = {}) {
 }
 
 async function downloadUpdate() {
-  setupAutoUpdater();
+  const autoUpdater = setupAutoUpdater();
+  if (!autoUpdater) return false;
   if (isDev) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
@@ -987,7 +1049,8 @@ async function downloadUpdate() {
 }
 
 async function installUpdate() {
-  setupAutoUpdater();
+  const autoUpdater = setupAutoUpdater();
+  if (!autoUpdater) return false;
   if (isDev) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
@@ -1567,6 +1630,7 @@ function getDownloadDirectory(customFolder) {
 }
 
 function getFfmpegPath() {
+  const ffmpegStatic = getFfmpegStaticPathLazy();
   if (!ffmpegStatic) return null;
   if (app.isPackaged && ffmpegStatic.includes("app.asar")) {
     return ffmpegStatic.replace("app.asar", "app.asar.unpacked");
@@ -3879,7 +3943,6 @@ function repairMainWindowBounds(win, options = {}) {
 app.whenReady().then(async () => {
   registerLocaltifyMediaProtocol();
   await startLocaltifyMediaServer();
-  initDownloader({ userDataPath: app.getPath("userData"), ffmpegPath: getFfmpegPath(), getCookiesFile: getYouTubeCookiesFile });
   const databaseRecovery = restoreDatabaseFromOldUserDataIfNeeded();
   initDatabase(databaseRecovery.dbPath || path.join(app.getPath("userData"), SQLITE_FILE_NAME));
   try {
@@ -3914,7 +3977,7 @@ app.whenReady().then(async () => {
       windowsIntegration: getStartWithWindowsStatus(),
       windowTranslucency: getSavedWindowTranslucencySettings(),
       database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: LEGACY_APP_DATA_NAME },
-      discord: getDiscordStatus()
+      discord: getDiscordStatusSafe()
     };
   });
 
@@ -4087,8 +4150,8 @@ app.whenReady().then(async () => {
       if (result.canceled || !result.filePaths.length) {
         return { downloadFolder: getDownloadDirectory(), conversions: [], changedCount: 0, songs: listSongsShaped() };
       }
-      const validFiles = result.filePaths.filter((f) => fileExists(f) && isSupportedMediaPath(f));
-      const converted = await convertLocalMediaFiles(
+      const validFiles = result.filePaths.filter((f) => fileExists(f) && (ensureDownloaderReady().isSupportedMediaPath?.(f) ?? false));
+      const converted = await ensureDownloaderReady().convertLocalMediaFiles(
         validFiles,
         getDownloadDirectory(),
         { bitrate: payload?.bitrate || 192 },
@@ -4119,7 +4182,7 @@ app.whenReady().then(async () => {
       const urls = Array.isArray(payload?.urls) ? payload.urls : [payload?.url].filter(Boolean);
       const autoAdd = typeof payload?.autoAdd === "boolean" ? payload.autoAdd : true;
       const downloadFolder = getDownloadDirectory(payload?.folder);
-      const result = await downloadAudioUrls(urls, downloadFolder, (progress) => {
+      const result = await ensureDownloaderReady().downloadAudioUrls(urls, downloadFolder, (progress) => {
         if (!mainWindow || mainWindow.isDestroyed()) return;
         event.sender.send("download:progress", progress);
       }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "" });
@@ -4159,7 +4222,7 @@ app.whenReady().then(async () => {
     }
   });
 
-  ipcMain.handle("download:cancel", async () => ({ cancelled: cancelActiveDownloads() }));
+  ipcMain.handle("download:cancel", async () => ({ cancelled: Boolean(ensureDownloaderReady().cancelActiveDownloads?.()) }));
   ipcMain.handle("download:choose-folder", async () => {
     const owner = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
     const result = await dialog.showOpenDialog(owner, { title: "Choose localtify download folder", properties: ["openDirectory", "createDirectory"] });
@@ -4286,14 +4349,25 @@ app.whenReady().then(async () => {
   ipcMain.handle("database:status", async () => getDatabaseStatus());
 
   ipcMain.handle("discord:set-activity", async (_event, payload) => {
-    try { return { ok: await setDiscordActivity(payload) }; } catch { return { ok: false }; }
+    try {
+      const rpc = getRpcModuleLazy();
+      return { ok: typeof rpc.setDiscordActivity === "function" ? await rpc.setDiscordActivity(payload) : false };
+    } catch {
+      return { ok: false };
+    }
   });
   ipcMain.handle("discord:clear-activity", async () => {
-    try { return { ok: await clearDiscordActivity() }; } catch { return { ok: false }; }
+    try {
+      const rpc = getRpcModuleLazy();
+      return { ok: typeof rpc.clearDiscordActivity === "function" ? await rpc.clearDiscordActivity() : false };
+    } catch {
+      return { ok: false };
+    }
   });
-  ipcMain.handle("discord:status", async () => getDiscordStatus());
+  ipcMain.handle("discord:status", async () => getDiscordStatusSafe());
   ipcMain.handle("discord:reset-cache", async () => {
-    resetDiscordActivityCache();
+    const rpc = getRpcModuleLazy();
+    if (typeof rpc.resetDiscordActivityCache === "function") rpc.resetDiscordActivityCache();
     return true;
   });
 
@@ -4393,7 +4467,7 @@ app.whenReady().then(async () => {
         }
       };
 
-      const result = await downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
+      const result = await ensureDownloaderReady().downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
 
       // Spotify imports must be strict. Do NOT scan the whole download folder here,
       // because that can pull old unrelated local files into the Spotify playlist.
@@ -4513,7 +4587,10 @@ app.whenReady().then(async () => {
 
 app.on("before-quit", async () => {
   allowQuit = true;
-  await shutdownDiscordActivity("app-before-quit");
+  const rpc = rpcModuleCache;
+  if (rpc && typeof rpc.shutdownDiscordActivity === "function") {
+    await rpc.shutdownDiscordActivity("app-before-quit");
+  }
   cleanupNativeWindowsMedia();
   stopLocaltifyMediaServer();
 });

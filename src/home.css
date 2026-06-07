@@ -17172,3 +17172,52 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
     grid-template-columns: 1fr;
   }
 }
+
+/* localtify 0.3.8 V310 — safe compositor/layout containment.
+   Visuals stay intact: no blur/glow/animation is removed here. */
+body.localtifyPerfV310 .app :is(
+  .panel,
+  .ambientSurface,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .albumFolderImportPanel,
+  .albumFolderImportPreview,
+  .albumFolderImportCard,
+  .albumCardV318,
+  .albumDetailPanelV318,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .downloadQueuePanel,
+  .downloadsPanel
+){
+  contain: layout style;
+}
+
+body.localtifyPerfV310 .app :is(
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .coverGalleryCardCleanOnly,
+  .coverSongPickVirtual
+){
+  contain: layout style;
+}
+
+body.localtifyPerfV310 .app :is(
+  .ambientSurface::before,
+  .playerBar::before,
+  .coverAura::before,
+  .heroArt,
+  .homeListenCover,
+  .homeFreshCover,
+  .homeAlbumArt
+){
+  backface-visibility: hidden;
+}

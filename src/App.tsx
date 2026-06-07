@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.8 V309 album folder import foundation. */
+/* localtify 0.3.8 V310 album folder import foundation. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -643,12 +643,12 @@ function MainModeApp() {
   useEffect(() => {
     const body = document.body;
 
-    body.classList.add("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyGpuFriendly");
-    body.dataset.localtifyPerf = "v307";
+    body.classList.add("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyGpuFriendly");
+    body.dataset.localtifyPerf = "v310";
 
     return () => {
-      body.classList.remove("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyGpuFriendly");
-      if (["v307", "v305", "v304", "v303", "v301"].includes(String(body.dataset.localtifyPerf || ""))) {
+      body.classList.remove("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyGpuFriendly");
+      if (["v310", "v307", "v305", "v304", "v303", "v301"].includes(String(body.dataset.localtifyPerf || ""))) {
         delete body.dataset.localtifyPerf;
       }
     };
@@ -664,13 +664,17 @@ function MainModeApp() {
   }, [isPlaying]);
 
   useEffect(() => {
-    const analyticsReady = initLocalitfyAnalytics(APP_VERSION);
+    let analyticsLaunchCancelled = false;
+    const analyticsLaunchTimer = window.setTimeout(() => {
+      if (analyticsLaunchCancelled) return;
+      const analyticsReady = initLocalitfyAnalytics(APP_VERSION);
 
-    if (analyticsReady) {
-      trackAppLaunched({ initial_view: analyticsViewRef.current });
-      trackAppActive({ reason: "launch", current_view: analyticsViewRef.current });
-      trackAcquisitionSource({ source: "direct_app_launch", initial_view: analyticsViewRef.current });
-    }
+      if (analyticsReady) {
+        trackAppLaunched({ initial_view: analyticsViewRef.current });
+        trackAppActive({ reason: "launch", current_view: analyticsViewRef.current });
+        trackAcquisitionSource({ source: "direct_app_launch", initial_view: analyticsViewRef.current });
+      }
+    }, 950);
 
     const finishAnalyticsSession = (reason: "beforeunload" | "unmount") => {
       if (analyticsSessionEndedRef.current) return;
@@ -730,6 +734,8 @@ function MainModeApp() {
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
+      analyticsLaunchCancelled = true;
+      window.clearTimeout(analyticsLaunchTimer);
       finishAnalyticsSession("unmount");
       window.clearInterval(heartbeatTimer);
       window.removeEventListener("beforeunload", handleBeforeUnload);
@@ -2235,16 +2241,24 @@ function MainModeApp() {
 
   useEffect(() => {
     if (!ready) return;
+    let cancelled = false;
 
-    trackAudienceSnapshot(analyticsAudienceSnapshot);
-    trackMarketingSnapshot(analyticsAudienceSnapshot);
-    trackPlaylistSnapshot({
-      playlist_count: analyticsAudienceSnapshot.playlist_count,
-      playlist_song_total: analyticsAudienceSnapshot.playlist_song_total,
-      has_playlists: analyticsAudienceSnapshot.has_playlists,
-      user_stage: analyticsAudienceSnapshot.user_stage,
-      audience_segment: analyticsAudienceSnapshot.audience_segment
-    });
+    runLocaltifyIdleTask(() => {
+      if (cancelled) return;
+      trackAudienceSnapshot(analyticsAudienceSnapshot);
+      trackMarketingSnapshot(analyticsAudienceSnapshot);
+      trackPlaylistSnapshot({
+        playlist_count: analyticsAudienceSnapshot.playlist_count,
+        playlist_song_total: analyticsAudienceSnapshot.playlist_song_total,
+        has_playlists: analyticsAudienceSnapshot.has_playlists,
+        user_stage: analyticsAudienceSnapshot.user_stage,
+        audience_segment: analyticsAudienceSnapshot.audience_segment
+      });
+    }, 2600);
+
+    return () => {
+      cancelled = true;
+    };
   }, [ready, analyticsAudienceSnapshot]);
 
   const showHomeSideCards = settings.showRightColumn && !settings.homeExpanded;
@@ -2413,19 +2427,21 @@ function MainModeApp() {
     if (librarySnapshotSignatureRef.current === signature) return;
     librarySnapshotSignatureRef.current = signature;
 
-    trackLibrarySnapshot({
-      song_count: songs.length,
-      liked_count: likedSongs.length,
-      played_song_count: playedSongCount,
-      never_played_count: Math.max(0, songs.length - playedSongCount),
-      total_plays: totalPlays,
-      album_count: albumCount,
-      artist_count: artistCount,
-      current_view: view,
-      theme_id: settings.theme,
-      custom_theme_enabled: settings.customThemeEnabled,
-      discord_enabled: settings.discordEnabled
-    });
+    runLocaltifyIdleTask(() => {
+      trackLibrarySnapshot({
+        song_count: songs.length,
+        liked_count: likedSongs.length,
+        played_song_count: playedSongCount,
+        never_played_count: Math.max(0, songs.length - playedSongCount),
+        total_plays: totalPlays,
+        album_count: albumCount,
+        artist_count: artistCount,
+        current_view: view,
+        theme_id: settings.theme,
+        custom_theme_enabled: settings.customThemeEnabled,
+        discord_enabled: settings.discordEnabled
+      });
+    }, 2200);
   }, [ready, songs, likedSongs.length, totalPlays, view, settings.theme, settings.customThemeEnabled, settings.discordEnabled]);
 
   // Keep playback progress hot-path out of React renders as much as possible.
