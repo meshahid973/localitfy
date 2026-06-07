@@ -6980,3 +6980,164 @@ body.localtifyPerfV301 .settingsPage :is(
 body.localtifyPerfV301 .settingsPage :is(.settingsCategoryButton, .settingsTabButton){
   align-items: center !important;
 }
+
+
+/* localtify 0.3.8 V316 — settings toggle polish.
+   Inspired by morph switches, implemented CSS-only so we do not add GSAP/MorphSVG
+   or extra runtime work. Works with existing .settingSwitchCard i and .toggleRow checkbox markup. */
+.settingsPage :where(.settingSwitchCard i, .toggleRow input[type="checkbox"]){
+  --lt-toggle-off: rgba(255,255,255,0.12);
+  --lt-toggle-off-hover: rgba(255,255,255,0.16);
+  --lt-toggle-on: rgba(var(--accent-rgb),0.72);
+  --lt-toggle-dot: rgba(255,255,255,0.96);
+  --lt-toggle-dot-on: #fff;
+  width: 46px !important;
+  height: 26px !important;
+  min-width: 46px !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(circle at 22% 50%, rgba(255,255,255,0.10), transparent 35%),
+    var(--lt-toggle-off) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.09),
+    inset 0 -1px 0 rgba(0,0,0,0.18) !important;
+  transform: translateZ(0);
+  transition:
+    background-color 220ms ease,
+    background 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 180ms cubic-bezier(.22,1,.36,1) !important;
+}
+
+.settingsPage :where(.settingSwitchCard:hover i, .toggleRow:hover input[type="checkbox"]){
+  background:
+    radial-gradient(circle at 24% 50%, rgba(255,255,255,0.14), transparent 36%),
+    var(--lt-toggle-off-hover) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+}
+
+.settingsPage :where(.settingSwitchCard i::after, .toggleRow input[type="checkbox"]::after){
+  content: "" !important;
+  width: 20px !important;
+  height: 20px !important;
+  margin: 2px !important;
+  border-radius: 999px !important;
+  display: block !important;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255,255,255,0.92), transparent 28%),
+    var(--lt-toggle-dot) !important;
+  box-shadow:
+    0 5px 12px rgba(0,0,0,0.34),
+    inset 0 -1px 0 rgba(0,0,0,0.10) !important;
+  transform: translate3d(0,0,0) scale(1);
+  transition:
+    transform 300ms cubic-bezier(.18,1.45,.28,1),
+    background 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.settingsPage :where(.settingSwitchCard:active i::after, .toggleRow:active input[type="checkbox"]::after){
+  transform: translate3d(1px,0,0) scaleX(1.18) scaleY(.92) !important;
+}
+
+.settingsPage :where(.settingSwitchCard i.on, .toggleRow input[type="checkbox"]:checked){
+  border-color: rgba(var(--accent-rgb),0.46) !important;
+  background:
+    radial-gradient(circle at 78% 50%, rgba(255,255,255,0.16), transparent 36%),
+    linear-gradient(90deg, rgba(var(--accent-rgb),0.72), rgba(var(--accent-rgb),0.92)) !important;
+  box-shadow:
+    0 0 18px rgba(var(--accent-rgb),0.18),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+.settingsPage :where(.settingSwitchCard i.on::after, .toggleRow input[type="checkbox"]:checked::after){
+  transform: translate3d(20px,0,0) scale(1) !important;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255,255,255,0.96), transparent 28%),
+    var(--lt-toggle-dot-on) !important;
+}
+
+.settingsPage :where(.settingSwitchCard:active i.on::after, .toggleRow:active input[type="checkbox"]:checked::after){
+  transform: translate3d(18px,0,0) scaleX(1.18) scaleY(.92) !important;
+}
+
+/* Choice buttons get a light radio-dot feeling without changing React markup. */
+.settingsPage .settingsChoice{
+  position: relative;
+}
+
+.settingsPage .settingsChoice::before{
+  content: "";
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.055);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  transform: translateZ(0) scale(1);
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 240ms cubic-bezier(.18,1.45,.28,1);
+}
+
+.settingsPage .settingsChoice:hover::before{
+  border-color: rgba(var(--accent-rgb),0.34);
+  transform: translateZ(0) scale(1.06);
+}
+
+.settingsPage :where(.settingsChoice.active, .settingsChoice.isActive)::before{
+  border-color: rgba(var(--accent-rgb),0.54);
+  background:
+    radial-gradient(circle at 50% 50%, #fff 0 31%, transparent 34%),
+    var(--accent);
+  box-shadow:
+    0 0 16px rgba(var(--accent-rgb),0.18),
+    inset 0 1px 0 rgba(255,255,255,0.16);
+}
+
+
+
+/* localtify 0.3.8 V323 — Settings/About release-quality cleanup. */
+.aboutSettingsPage,
+.settingsDiagnosticsPanel,
+.settingsDiagnosticsCopyPanel{
+  contain: layout paint style;
+}
+
+.settingsDiagnosticsGrid{
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
+}
+
+.settingsDiagnosticCard{
+  min-width: 0 !important;
+}
+
+.settingsDiagnosticCard strong{
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.settingsDiagnosticsText{
+  min-height: 170px !important;
+  max-height: 360px !important;
+  overflow: auto !important;
+}
+
+.settingsCopyInfoButton{
+  min-width: 142px !important;
+}
+
+/* Keep the V316 toggle polish from breaking compact setting rows. */
+.settingsPage :where(.settingSwitchCard, .toggleRow){
+  min-width: 0 !important;
+}
+
+.settingsPage :where(.settingSwitchCard i, .toggleRow input[type="checkbox"]){
+  flex: 0 0 auto !important;
+}

@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.8 V310 album folder import foundation. */
+/* localtify 0.3.8 V320/V323 final bug sweep + diagnostics cleanup. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -480,6 +480,7 @@ function MainModeApp() {
   const [isAppBackgrounded, setIsAppBackgrounded] = useState(() => (typeof document === "undefined" ? false : document.hidden));
   const isAppBackgroundedRef = useRef(isAppBackgrounded);
   const [diagnosticsCopied, setDiagnosticsCopied] = useState(false);
+  const [performanceStatus, setPerformanceStatus] = useState<any | null>(null);
   const deferredSettingsSearch = useDeferredValue(settingsSearch);
   const [isViewSwitching, setIsViewSwitching] = useState(false);
   const [customThemeName, setCustomThemeName] = useState("My Custom Theme");
@@ -1161,7 +1162,7 @@ function MainModeApp() {
       scrollBusyFrameRef.current = null;
       scrollBusyRef.current = true;
       rendererQuietUntilRef.current = performance.now() + 900;
-      appRootRef.current?.classList.add("isScrolling", "localtifyInteractionBusy");
+      appRootRef.current?.classList.add("isScrolling");
 
       const nearBottom = node.scrollTop + node.clientHeight >= node.scrollHeight - 680;
       const activeView = analyticsViewRef.current;
@@ -1181,7 +1182,7 @@ function MainModeApp() {
 
       scrollIdleTimerRef.current = window.setTimeout(() => {
         scrollBusyRef.current = false;
-        appRootRef.current?.classList.remove("isScrolling", "localtifyInteractionBusy");
+        appRootRef.current?.classList.remove("isScrolling");
         scrollIdleTimerRef.current = null;
       }, playingRef.current ? 520 : 320);
     };
@@ -1207,7 +1208,7 @@ function MainModeApp() {
       }
 
       scrollBusyRef.current = false;
-      appRootRef.current?.classList.remove("isScrolling", "localtifyInteractionBusy");
+      appRootRef.current?.classList.remove("isScrolling");
     };
   }, []);
 
@@ -1328,7 +1329,7 @@ function MainModeApp() {
       if (appRootRef.current) {
         appRootRef.current.style.removeProperty("--player-size-live");
         appRootRef.current.style.removeProperty("--sidebar-width-live");
-        appRootRef.current.classList.remove("isScrolling", "localtifyInteractionBusy");
+        appRootRef.current.classList.remove("isScrolling");
       }
 
       if (libraryOrderSaveTimerRef.current !== null) {
@@ -1412,22 +1413,65 @@ function MainModeApp() {
 
   const platformInfo = useMemo(() => getLocaltifyPlatformInfo(), []);
 
+  useEffect(() => {
+    if (!ready || !window.localitfy?.getPerformanceStatus) return;
+
+    let cancelled = false;
+
+    runLocaltifyIdleTask(() => {
+      window.localitfy
+        .getPerformanceStatus?.()
+        .then((status: any) => {
+          if (!cancelled && status?.ok) setPerformanceStatus(status);
+        })
+        .catch(() => undefined);
+    }, 1800);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ready]);
+
   const diagnosticsInfo = useMemo(() => {
     const themeLabel = settings.customThemeEnabled ? `${currentTheme.name} + custom colors` : currentTheme.name;
     const discordStatus = settings.discordEnabled ? "enabled" : "disabled";
     const startupStatus = platformInfo.startupSettingSupported
       ? (settings.startWithWindows ? "enabled" : "disabled")
       : "not supported on this platform";
+    const libraryAlbumCount = new Set(
+      songs
+        .map((song) => String(song.album || "").trim().toLowerCase())
+        .filter((album) => album && album !== "unknown album")
+    ).size;
+    const downloadFolderStatus = downloadFolderLabel || settings.downloadFolder || "default downloads folder";
+    const updateStatus = updatePrompt.visible
+      ? updateStatusLabel(updatePrompt)
+      : updatePrompt.lastCheckedAt
+        ? "checked"
+        : "not checked this session";
+    const electronVersion = String(performanceStatus?.electronVersion || "not reported yet");
+    const chromeVersion = String(performanceStatus?.chromeVersion || "not reported yet");
+    const packageSupport = platformInfo.id === "windows"
+      ? "Windows: full support"
+      : platformInfo.id === "linux"
+        ? "Linux: AppImage / DEB / RPM supported"
+        : platformInfo.id === "mac"
+          ? "macOS: not officially supported yet"
+          : "desktop support: unknown platform";
 
     const items = [
       { label: "app version", value: APP_VERSION },
       { label: "platform", value: platformInfo.label },
-      { label: "release package", value: platformInfo.releaseLabel },
+      { label: "Electron", value: electronVersion },
+      { label: "Chromium", value: chromeVersion },
       { label: "song count", value: String(songs.length) },
       { label: "playlist count", value: String(playlists.length) },
-      { label: "theme", value: themeLabel },
-      { label: "Discord status", value: discordStatus },
-      { label: "startup status", value: startupStatus }
+      { label: "album count", value: String(libraryAlbumCount) },
+      { label: "downloads folder", value: downloadFolderStatus },
+      { label: "Discord RPC", value: discordStatus },
+      { label: "update status", value: updateStatus },
+      { label: "startup status", value: startupStatus },
+      { label: "platform support", value: packageSupport }
     ];
 
     return {
@@ -1436,23 +1480,35 @@ function MainModeApp() {
         `localtify version: ${APP_VERSION}`,
         `platform: ${platformInfo.label}`,
         `release package: ${platformInfo.releaseLabel}`,
+        `electron: ${electronVersion}`,
+        `chromium: ${chromeVersion}`,
         `song count: ${songs.length}`,
         `playlist count: ${playlists.length}`,
+        `album count: ${libraryAlbumCount}`,
+        `downloads folder: ${downloadFolderStatus}`,
         `theme: ${themeLabel}`,
-        `Discord status: ${discordStatus}`,
-        `startup status: ${startupStatus}`
+        `Discord RPC: ${discordStatus}`,
+        `update status: ${updateStatus}`,
+        `startup status: ${startupStatus}`,
+        `platform support: ${packageSupport}`
       ].join("\n")
     };
   }, [
     currentTheme.name,
+    downloadFolderLabel,
+    performanceStatus?.chromeVersion,
+    performanceStatus?.electronVersion,
+    platformInfo.id,
     platformInfo.label,
     platformInfo.releaseLabel,
     platformInfo.startupSettingSupported,
     playlists.length,
     settings.customThemeEnabled,
     settings.discordEnabled,
+    settings.downloadFolder,
     settings.startWithWindows,
-    songs.length
+    songs,
+    updatePrompt
   ]);
 
   const copyDiagnosticsInfo = useCallback(async () => {
@@ -6026,8 +6082,22 @@ function MainModeApp() {
         }
       });
 
-      const nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
+      let nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
       const downloads = result.downloads || [];
+      const successCount = downloads.filter((item) => item.ok).length;
+      const failCount = downloads.filter((item) => !item.ok).length;
+
+      // V320: after a successful download, refresh from the real database rows once.
+      // This prevents the old bug where a downloaded file finished but did not appear in Library.
+      if ((successCount > 0 || Number(result.changedCount || 0) > 0) && window.localitfy?.bootstrap) {
+        try {
+          const refreshed = await window.localitfy.bootstrap();
+          const refreshedSongs = applyLibraryOrder(sanitizeSongList(refreshed?.songs || []));
+          if (refreshedSongs.length) nextSongs = refreshedSongs;
+        } catch (refreshError) {
+          console.warn("[localtify download library refresh failed]", refreshError);
+        }
+      }
 
       setDownloadResults(downloads);
       syncDownloadFilesToQueue(downloads);
@@ -6035,10 +6105,7 @@ function MainModeApp() {
       playbackUrlCacheRef.current.clear();
       playbackUrlPendingRef.current.clear();
       setSongs(nextSongs);
-      setLibraryScanMessage(`indexed ${nextSongs.length} tracks instantly`);
-
-      const successCount = downloads.filter((item) => item.ok).length;
-      const failCount = downloads.filter((item) => !item.ok).length;
+      setLibraryScanMessage(`library refreshed: ${nextSongs.length} tracks`);
 
       if (nextSongs.length && !currentId) {
         const firstSong = nextSongs[0];

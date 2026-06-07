@@ -308,6 +308,21 @@ declare global {
       setStartWithWindows?: (enabled: boolean) => Promise<LocalitfyWindowsStartupStatus>;
       getStartWithWindows?: () => Promise<LocalitfyWindowsStartupStatus>;
       getNativeMediaStatus?: () => Promise<any>;
+      openDevTools?: (payload?: any) => Promise<any>;
+      toggleDevTools?: () => Promise<any>;
+      getPerformanceStatus?: () => Promise<{
+        ok: boolean;
+        appVersion?: string;
+        electronVersion?: string;
+        chromeVersion?: string;
+        nodeVersion?: string;
+        platform?: string;
+        arch?: string;
+        isPackaged?: boolean;
+        gpuFeatureStatus?: Record<string, any>;
+        window?: Record<string, any>;
+      }>;
+      getGpuStatus?: () => Promise<any>;
       openExternal?: (url: string) => Promise<{ ok: boolean; reason?: string }>;
 
       onAlbumFolderImportProgress?: (callback: (payload: LocalitfyAlbumFolderProgressPayload) => void) => () => void;

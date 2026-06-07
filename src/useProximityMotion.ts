@@ -1,4 +1,4 @@
-/* localtify 0.3.8 V319 — stabilized physical proximity motion.
+/* localtify 0.3.8 V320 — stabilized physical proximity motion.
    Only sidebar / player / hero controls get velocity motion.
    Home cards and big lists stay out of the pointer hot path.
 */
@@ -64,8 +64,13 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
+function isInsideAllowedMotionZone(element: HTMLElement) {
+  return Boolean(element.closest(".sidebar, .playerBar, .hero"));
+}
+
 function isUsableTarget(root: HTMLElement, element: HTMLElement | null) {
   if (!element || !root.contains(element)) return false;
+  if (!isInsideAllowedMotionZone(element)) return false;
   if (element.matches(SKIP_SELECTOR) || element.closest(SKIP_SELECTOR)) return false;
   if (element.hasAttribute("disabled") || element.getAttribute("aria-disabled") === "true") return false;
   return true;
@@ -132,7 +137,7 @@ function applyState(element: HTMLElement, payload: MotionPayload) {
   if (element.dataset.localtifyProxSignature === signature && element.classList.contains("localtifyProximityActive")) return;
 
   element.dataset.localtifyProxSignature = signature;
-  element.classList.add("localtifyProximityTarget", "localtifyProximityActive", "localtifyVelocityMotion", "localtifyVelocityMotionV319");
+  element.classList.add("localtifyProximityTarget", "localtifyProximityActive", "localtifyVelocityMotion", "localtifyVelocityMotionV320");
   element.style.setProperty("--prox-scale", payload.scale.toFixed(4));
   element.style.setProperty("--prox-stretch-x", payload.stretchX.toFixed(4));
   element.style.setProperty("--prox-stretch-y", payload.stretchY.toFixed(4));
@@ -147,7 +152,7 @@ function clearElement(element: HTMLElement) {
     "localtifyVelocityMotionV312",
     "localtifyVelocityMotionV316",
     "localtifyVelocityMotionV318",
-    "localtifyVelocityMotionV319"
+    "localtifyVelocityMotionV320"
   );
   element.style.removeProperty("--prox-scale");
   element.style.removeProperty("--prox-stretch-x");

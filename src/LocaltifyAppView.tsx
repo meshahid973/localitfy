@@ -4036,9 +4036,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       if (!result || result.canceled) {
         setAlbumFolderImportPreview(null);
         setAlbumFolderImportProgress(null);
-        setAlbumFolderImportMessage("");
+        setAlbumFolderImportMessage("folder picker cancelled");
         setStatusText?.("album import cancelled");
-        setLibraryScanMessage?.("");
+        setLibraryScanMessage?.("album import cancelled");
         return;
       }
 
@@ -4058,7 +4058,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
         total: result.albums?.length || 0,
         message: result.message || `Found ${result.albums?.length || 0} album folders.`
       });
-      setAlbumFolderImportMessage(result.message || `Found ${result.albums?.length || 0} album folders.`);
+      setAlbumFolderImportMessage(result.message || (result.albums?.length ? `Found ${result.albums.length} album folders.` : "No album folders found in that folder."));
       setStatusText?.(result.message || "album folders ready to import");
       setLibraryScanMessage?.(`${result.albums?.length || 0} album folder${(result.albums?.length || 0) === 1 ? "" : "s"} ready`);
     } catch (error: any) {

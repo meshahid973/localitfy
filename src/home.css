@@ -17223,10 +17223,7 @@ body.localtifyPerfV310 .app :is(
 }
 
 
-/* localtify 0.3.8 V316 — home card INP repair.
-   Removed the experimental sticky scroll-state/header morph completely.
-   This keeps glass/blur/ambience, but makes active/click states cheaper by avoiding
-   layout-affecting work and keeping the click feedback compositor-friendly. */
+/* localtify 0.3.8 V320 — header removed-scroll-experiment experiment removed. */
 .homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard){
   contain: layout paint style;
   transform: translateZ(0);
@@ -17266,9 +17263,7 @@ body.localtifyPerfV310 .app :is(
 }
 
 
-/* localtify 0.3.8 V317 — header stays at the top of the page, not sticky.
-   This removes the follow-scroll header behavior while keeping transitions smooth.
-   No scroll-state container queries, no JS, no setting reduction. */
+/* localtify 0.3.8 V320 — header removed-scroll-experiment experiment removed. */
 .content > .headerBar,
 .headerBar{
   position: relative !important;
@@ -17447,4 +17442,58 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
     transition: none !important;
     will-change: auto;
   }
+}
+
+
+/* localtify 0.3.8 V320 — final bug sweep guards. */
+.content > .headerBar,
+.headerBar{
+  position: relative !important;
+  top: auto !important;
+  z-index: 12 !important;
+  container-type: normal !important;
+}
+
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard){
+  contain: layout paint style;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition:
+    transform 170ms cubic-bezier(.22,1,.36,1),
+    border-color 140ms ease,
+    opacity 140ms ease !important;
+}
+
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard).active{
+  transform: translate3d(0, -1px, 0) scale(1.004);
+  outline: 1px solid rgba(var(--accent-rgb), 0.28);
+  outline-offset: -1px;
+  transition:
+    transform 140ms cubic-bezier(.22,1,.36,1),
+    border-color 120ms ease,
+    opacity 120ms ease !important;
+}
+
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard):active{
+  transform: translate3d(0, 0, 0) scale(0.992) !important;
+  transition-duration: 80ms !important;
+}
+
+/* keep the hero album-cover ambience blurred after focus/alt-tab repaint */
+.app.localtifyHeroFocusRepair .hero.heroPremium::before,
+.app.localtifyHeroFocusRepair .hero.heroPremium::after,
+.app.localtifyHeroFocusRepair .heroAmbiencePulse,
+.hero.heroPremium::before,
+.hero.heroPremium::after,
+.heroAmbiencePulse{
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* scrollbar-safe masks for current/future masked scroll areas */
+:is(.content,.homeSongList,.songList,.albumFolderPreviewGridV309,.albumsGridV318,.settingsContentColumn){
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-size: calc(100% - 10px) 100%;
+  -webkit-mask-size: calc(100% - 10px) 100%;
 }
