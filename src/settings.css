@@ -7668,3 +7668,1456 @@ body.localtifyPerfV301 .settingsPage :is(.settingsCategoryButton, .settingsTabBu
   }
 }
 
+
+
+/* localtify 0.3.8 V331 — modern feedback popup + settings search launcher.
+   Visual polish only: no ambience orbs, no light orbs, no heavy animated background. */
+.feedbackPromptOverlayV331{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.44), rgba(0,0,0,0.72)),
+    rgba(2, 2, 8, 0.62);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+}
+
+.feedbackPromptCardV331{
+  width: min(680px, calc(100vw - 34px));
+  max-height: min(790px, calc(100vh - 48px));
+  overflow: auto;
+  scrollbar-gutter: stable;
+  border: 1px solid rgba(var(--accent-rgb), 0.23);
+  border-radius: 30px;
+  padding: 20px;
+  color: rgba(255,255,255,0.94);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.022)),
+    linear-gradient(145deg, rgba(15, 15, 21, 0.96), rgba(5, 5, 10, 0.94));
+  box-shadow:
+    0 30px 90px rgba(0,0,0,0.62),
+    0 0 0 1px rgba(255,255,255,0.045) inset,
+    0 18px 60px rgba(var(--accent-rgb), 0.10);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.feedbackPromptTopV331{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.feedbackPromptBrandV331{
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.feedbackPromptBrandV331 > span:last-child{
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.feedbackPromptBrandV331 em{
+  color: rgba(var(--accent-rgb), 0.92);
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.feedbackPromptBrandV331 strong{
+  color: rgba(255,255,255,0.84);
+  font-size: 0.92rem;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.feedbackPromptLogoV331{
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  border: 1px solid rgba(var(--accent-rgb),0.28);
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb),0.25), rgba(255,255,255,0.075)),
+    rgba(255,255,255,0.055);
+  box-shadow:
+    0 14px 32px rgba(0,0,0,0.32),
+    inset 0 1px 0 rgba(255,255,255,0.09);
+}
+
+.feedbackPromptLogoV331 img{
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.feedbackPromptCloseV331{
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  color: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.06);
+  font: inherit;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 180ms cubic-bezier(.22,1,.36,1),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.feedbackPromptCloseV331:hover{
+  transform: translateY(-1px) scale(1.02);
+  color: #fff;
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(var(--accent-rgb),0.28);
+}
+
+.feedbackPromptCopyV331{
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,0.075);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),0.075), rgba(255,255,255,0.025)),
+    rgba(255,255,255,0.035);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055);
+}
+
+.feedbackPromptBadgeV331{
+  width: max-content;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: rgba(var(--accent-rgb),0.96);
+  background: rgba(var(--accent-rgb),0.10);
+  border: 1px solid rgba(var(--accent-rgb),0.18);
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.feedbackPromptCopyV331 h2{
+  margin: 0;
+  letter-spacing: -0.055em;
+  font-size: clamp(2.1rem, 5vw, 3.35rem);
+  line-height: 0.94;
+}
+
+.feedbackPromptCopyV331 p{
+  margin: 0;
+  color: rgba(255,255,255,0.70);
+  font-size: 0.96rem;
+  line-height: 1.66;
+}
+
+.feedbackCategoryRowV331{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.feedbackCategoryButtonV331{
+  min-height: 44px;
+  border: 1px solid rgba(255,255,255,0.095);
+  border-radius: 15px;
+  padding: 0 11px;
+  color: rgba(255,255,255,0.74);
+  background: rgba(255,255,255,0.052);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 180ms cubic-bezier(.22,1,.36,1),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 180ms ease;
+}
+
+.feedbackCategoryButtonV331:hover{
+  transform: translateY(-1px);
+  color: #fff;
+  border-color: rgba(var(--accent-rgb),0.26);
+}
+
+.feedbackCategoryButtonV331.active{
+  color: #fff;
+  border-color: rgba(var(--accent-rgb),0.42);
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb),0.34), rgba(var(--accent-rgb),0.16)),
+    rgba(255,255,255,0.055);
+  box-shadow:
+    0 12px 28px rgba(var(--accent-rgb),0.12),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+.feedbackTextareaWrapV331{
+  display: grid;
+  gap: 8px;
+}
+
+.feedbackTextareaWrapV331 span{
+  color: rgba(255,255,255,0.82);
+  font-size: 0.74rem;
+  font-weight: 950;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.feedbackTextareaWrapV331 textarea{
+  min-height: 160px;
+  resize: vertical;
+  border: 1px solid rgba(255,255,255,0.105);
+  border-radius: 22px;
+  padding: 15px 16px;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018)),
+    rgba(0,0,0,0.26);
+  outline: none;
+  font: inherit;
+  line-height: 1.5;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(.22,1,.36,1);
+}
+
+.feedbackTextareaWrapV331 textarea:focus{
+  transform: translateY(-1px);
+  border-color: rgba(var(--accent-rgb),0.42);
+  background: rgba(0,0,0,0.30);
+  box-shadow:
+    0 0 0 3px rgba(var(--accent-rgb),0.12),
+    inset 0 1px 0 rgba(255,255,255,0.055);
+}
+
+.feedbackTextareaWrapV331 small{
+  color: rgba(255,255,255,0.46);
+  font-size: 0.76rem;
+  text-align: right;
+}
+
+.feedbackStatusV331{
+  margin-top: 12px;
+  border-radius: 17px;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.feedbackStatusV331.success{
+  color: rgba(210,255,225,0.96);
+  background: rgba(45,210,104,0.12);
+  border: 1px solid rgba(45,210,104,0.20);
+}
+
+.feedbackStatusV331.error{
+  color: rgba(255,215,215,0.96);
+  background: rgba(255,70,70,0.12);
+  border: 1px solid rgba(255,70,70,0.22);
+}
+
+.feedbackPromptActionsV331{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.feedbackMaybeButtonV331,
+.feedbackSendButtonV331,
+.feedbackSettingsButtonV331{
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font: inherit;
+  font-weight: 950;
+  cursor: pointer;
+  transition:
+    transform 180ms cubic-bezier(.22,1,.36,1),
+    opacity 160ms ease,
+    box-shadow 180ms ease,
+    background-color 160ms ease;
+}
+
+.feedbackMaybeButtonV331{
+  color: rgba(255,255,255,0.74);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.07);
+}
+
+.feedbackSendButtonV331{
+  color: #06110a;
+  background:
+    linear-gradient(135deg, #fff, rgba(255,255,255,0.72) 18%, var(--accent));
+  box-shadow: 0 16px 34px rgba(var(--accent-rgb),0.25);
+}
+
+.feedbackMaybeButtonV331:hover,
+.feedbackSendButtonV331:hover,
+.feedbackSettingsButtonV331:hover{
+  transform: translateY(-1px);
+}
+
+.feedbackMaybeButtonV331:disabled,
+.feedbackSendButtonV331:disabled{
+  cursor: not-allowed;
+  opacity: 0.54;
+  transform: none;
+}
+
+.feedbackSettingsCardV331{
+  overflow: hidden;
+  position: relative;
+}
+
+.feedbackSettingsHeaderV331{
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.feedbackSettingsIconV331{
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb),0.10);
+  border: 1px solid rgba(var(--accent-rgb),0.18);
+}
+
+.feedbackSettingsButtonV331{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  text-align: left;
+  color: #fff;
+  border: 1px solid rgba(var(--accent-rgb),0.22);
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb),0.20), rgba(255,255,255,0.055)),
+    rgba(255,255,255,0.045);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055);
+}
+
+.feedbackSettingsButtonV331 span{
+  display: grid;
+  gap: 4px;
+}
+
+.feedbackSettingsButtonV331 strong{
+  font-size: 0.98rem;
+}
+
+.feedbackSettingsButtonV331 small{
+  color: rgba(255,255,255,0.58);
+  font-size: 0.80rem;
+  font-weight: 750;
+}
+
+.feedbackSettingsButtonV331 em{
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: rgba(var(--accent-rgb),0.96);
+  background: rgba(var(--accent-rgb),0.10);
+  border: 1px solid rgba(var(--accent-rgb),0.18);
+  font-style: normal;
+  font-size: 0.70rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 720px){
+  .feedbackPromptOverlayV331{
+    padding: 14px;
+  }
+
+  .feedbackPromptCardV331{
+    border-radius: 23px;
+    padding: 16px;
+  }
+
+  .feedbackCategoryRowV331{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .feedbackPromptActionsV331{
+    flex-direction: column-reverse;
+  }
+
+  .feedbackMaybeButtonV331,
+  .feedbackSendButtonV331{
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .feedbackPromptCloseV331,
+  .feedbackCategoryButtonV331,
+  .feedbackMaybeButtonV331,
+  .feedbackSendButtonV331,
+  .feedbackSettingsButtonV331,
+  .feedbackTextareaWrapV331 textarea{
+    transition: none !important;
+  }
+}
+
+
+/* localtify 0.3.8 V332 — feedback modal refinement.
+   Cleaner, darker, better aligned, less glass-heavy, and the footer never falls out of view. */
+.feedbackPromptOverlayV331{
+  padding: 22px !important;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(var(--accent-rgb), 0.08), transparent 36%),
+    rgba(0, 0, 0, 0.78) !important;
+  backdrop-filter: blur(8px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(112%) !important;
+}
+
+.feedbackPromptCardV331{
+  width: min(560px, calc(100vw - 34px)) !important;
+  max-height: min(690px, calc(100vh - 44px)) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  border-radius: 24px !important;
+  padding: 18px !important;
+  border: 1px solid rgba(255,255,255,0.105) !important;
+  background:
+    linear-gradient(180deg, rgba(20, 20, 27, 0.985), rgba(8, 8, 13, 0.985)) !important;
+  box-shadow:
+    0 28px 80px rgba(0,0,0,0.74),
+    0 0 0 1px rgba(var(--accent-rgb),0.08) inset !important;
+}
+
+.feedbackPromptTopV331{
+  margin-bottom: 13px !important;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.065);
+}
+
+.feedbackPromptBrandV331{
+  gap: 10px !important;
+}
+
+.feedbackPromptLogoV331{
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 12px !important;
+  background: rgba(var(--accent-rgb),0.13) !important;
+  box-shadow: none !important;
+}
+
+.feedbackPromptLogoV331 img{
+  width: 22px !important;
+  height: 22px !important;
+}
+
+.feedbackPromptBrandV331 em{
+  font-size: 0.64rem !important;
+  letter-spacing: 0.16em !important;
+}
+
+.feedbackPromptBrandV331 strong{
+  font-size: 0.84rem !important;
+  color: rgba(255,255,255,0.78) !important;
+}
+
+.feedbackPromptCloseV331{
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.055) !important;
+  box-shadow: none !important;
+}
+
+.feedbackPromptCopyV331{
+  gap: 9px !important;
+  margin-bottom: 14px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.feedbackPromptBadgeV331{
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: rgba(var(--accent-rgb),0.95) !important;
+  font-size: 0.64rem !important;
+  letter-spacing: 0.16em !important;
+}
+
+.feedbackPromptCopyV331 h2{
+  max-width: 12ch;
+  font-size: clamp(2rem, 4.2vw, 2.9rem) !important;
+  line-height: 0.96 !important;
+  letter-spacing: -0.06em !important;
+}
+
+.feedbackPromptCopyV331 p{
+  max-width: 58ch;
+  color: rgba(255,255,255,0.69) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.58 !important;
+}
+
+.feedbackCategoryRowV331{
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  margin: 2px 0 12px !important;
+}
+
+.feedbackCategoryButtonV331{
+  min-height: 38px !important;
+  border-radius: 13px !important;
+  padding: 0 10px !important;
+  background: rgba(255,255,255,0.045) !important;
+  font-size: 0.72rem !important;
+  box-shadow: none !important;
+}
+
+.feedbackCategoryButtonV331.active{
+  background: rgba(var(--accent-rgb),0.18) !important;
+  border-color: rgba(var(--accent-rgb),0.48) !important;
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb),0.13) inset !important;
+}
+
+.feedbackTextareaWrapV331{
+  gap: 7px !important;
+}
+
+.feedbackTextareaWrapV331 span{
+  font-size: 0.66rem !important;
+  letter-spacing: 0.16em !important;
+}
+
+.feedbackTextareaWrapV331 textarea{
+  min-height: 118px !important;
+  max-height: 210px;
+  border-radius: 18px !important;
+  padding: 13px 14px !important;
+  background: rgba(0,0,0,0.28) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045) !important;
+}
+
+.feedbackTextareaWrapV331 textarea:focus{
+  transform: none !important;
+}
+
+.feedbackTextareaWrapV331 small{
+  font-size: 0.70rem !important;
+}
+
+.feedbackStatusV331{
+  margin-top: 10px !important;
+  border-radius: 14px !important;
+  padding: 9px 11px !important;
+}
+
+.feedbackPromptActionsV331{
+  position: sticky;
+  bottom: -18px;
+  z-index: 2;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 9px !important;
+  margin: 14px -18px -18px !important;
+  padding: 13px 18px 18px !important;
+  border-top: 1px solid rgba(255,255,255,0.065);
+  background:
+    linear-gradient(180deg, rgba(11,11,16,0.58), rgba(8,8,13,0.98) 34%, rgba(8,8,13,0.99));
+  backdrop-filter: blur(8px) saturate(112%);
+  -webkit-backdrop-filter: blur(8px) saturate(112%);
+}
+
+.feedbackMaybeButtonV331,
+.feedbackSendButtonV331{
+  min-width: 116px !important;
+  min-height: 42px !important;
+  border-radius: 14px !important;
+  padding: 11px 15px !important;
+}
+
+.feedbackMaybeButtonV331{
+  background: rgba(255,255,255,0.075) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+.feedbackSendButtonV331{
+  color: #071009 !important;
+  background: linear-gradient(135deg, #fff, var(--accent)) !important;
+  box-shadow: 0 14px 30px rgba(var(--accent-rgb),0.22) !important;
+}
+
+.feedbackSettingsButtonV331 small{
+  line-height: 1.35;
+}
+
+@media (max-width: 720px){
+  .feedbackPromptOverlayV331{
+    padding: 12px !important;
+  }
+
+  .feedbackPromptCardV331{
+    max-height: calc(100vh - 24px) !important;
+    border-radius: 20px !important;
+    padding: 15px !important;
+  }
+
+  .feedbackPromptCopyV331 h2{
+    max-width: none;
+    font-size: clamp(1.85rem, 10vw, 2.45rem) !important;
+  }
+
+  .feedbackCategoryRowV331{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .feedbackPromptActionsV331{
+    bottom: -15px;
+    margin: 12px -15px -15px !important;
+    padding: 12px 15px 15px !important;
+  }
+}
+
+
+.feedbackPromptActionsV331{
+  isolation: isolate;
+}
+
+.feedbackSendButtonV331{
+  position: relative !important;
+  overflow: hidden !important;
+  color: #031207 !important;
+  border: 1px solid rgba(103, 255, 156, 0.42) !important;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.72), transparent 24%),
+    linear-gradient(135deg, #84ff9e 0%, #2ee86f 45%, #12b956 100%) !important;
+  box-shadow:
+    0 0 0 1px rgba(119,255,166,0.12),
+    0 14px 32px rgba(36, 238, 106, 0.30),
+    0 0 34px rgba(36, 238, 106, 0.18),
+    inset 0 1px 0 rgba(255,255,255,0.50) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.28) !important;
+  opacity: 1 !important;
+  transform: translateZ(0);
+}
+
+.feedbackSendButtonV331::before{
+  content: "";
+  position: absolute;
+  inset: -42%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 25% 22%, rgba(255,255,255,0.56), transparent 18%),
+    linear-gradient(120deg, transparent 28%, rgba(255,255,255,0.42) 48%, transparent 68%);
+  opacity: 0.55;
+  transform: translate3d(-36%,0,0) rotate(10deg);
+  transition: transform 520ms cubic-bezier(.22,1,.36,1), opacity 180ms ease;
+}
+
+.feedbackSendButtonV331:hover:not(:disabled){
+  transform: translate3d(0,-1px,0) scale(1.012) !important;
+  box-shadow:
+    0 0 0 1px rgba(119,255,166,0.16),
+    0 18px 42px rgba(36, 238, 106, 0.38),
+    0 0 48px rgba(36, 238, 106, 0.24),
+    inset 0 1px 0 rgba(255,255,255,0.58) !important;
+}
+
+.feedbackSendButtonV331:hover:not(:disabled)::before{
+  opacity: 0.78;
+  transform: translate3d(22%,0,0) rotate(10deg);
+}
+
+.feedbackSendButtonV331:active:not(:disabled){
+  transform: translate3d(0,1px,0) scale(0.985) !important;
+  box-shadow:
+    0 8px 20px rgba(36, 238, 106, 0.28),
+    0 0 28px rgba(36, 238, 106, 0.18),
+    inset 0 2px 8px rgba(0,0,0,0.12) !important;
+}
+
+.feedbackSendButtonV331:focus-visible{
+  outline: 2px solid rgba(126,255,170,0.86) !important;
+  outline-offset: 3px !important;
+}
+
+.feedbackSendButtonV331:disabled{
+  color: rgba(195, 255, 212, 0.30) !important;
+  border-color: rgba(90, 255, 148, 0.10) !important;
+  background:
+    linear-gradient(135deg, rgba(38, 135, 72, 0.20), rgba(8, 30, 16, 0.36)) !important;
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.04) !important;
+  opacity: 0.72 !important;
+  cursor: not-allowed !important;
+}
+
+.feedbackSendButtonV331:disabled::before{
+  opacity: 0 !important;
+}
+
+.feedbackStatusV331.success{
+  color: rgba(219,255,230,0.98) !important;
+  background:
+    linear-gradient(135deg, rgba(31, 216, 96, 0.16), rgba(22, 143, 73, 0.10)) !important;
+  border: 1px solid rgba(103,255,156,0.24) !important;
+  box-shadow: 0 0 26px rgba(36,238,106,0.10) !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .feedbackSendButtonV331,
+  .feedbackSendButtonV331::before{
+    transition: none !important;
+  }
+}
+
+
+/* localtify 0.3.8 V334 — feedback send polish without light orbs.
+   Green ambience is contained around the button/card footer, not a giant orb behind the modal.
+   Typing feedback is smooth/focused, not a typewriter effect. */
+.feedbackPromptActionsV331{
+  position: relative;
+  isolation: isolate;
+  align-items: center;
+}
+
+.feedbackPromptActionsV331::before{
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  width: 154px;
+  height: 38px;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 8px, 0) scale(0.92);
+  background: linear-gradient(90deg, rgba(54, 245, 112, 0), rgba(54, 245, 112, 0.18), rgba(54, 245, 112, 0));
+  filter: blur(10px);
+  transition:
+    opacity 340ms cubic-bezier(.22, 1, .36, 1),
+    transform 340ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.feedbackPromptActionsV331:has(.feedbackSendButtonV331.isReady)::before{
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.feedbackTextareaWrapV331{
+  position: relative;
+}
+
+.feedbackTextareaWrapV331 textarea{
+  caret-color: #42ff86;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 220ms cubic-bezier(.22,1,.36,1),
+    transform 180ms cubic-bezier(.22,1,.36,1),
+    color 160ms ease !important;
+}
+
+.feedbackTextareaWrapV331 textarea::selection{
+  color: #06110a;
+  background: rgba(92,255,148,0.82);
+}
+
+.feedbackTextareaWrapV331.isTyping textarea{
+  color: rgba(255,255,255,0.96);
+  border-color: rgba(255,255,255,0.24);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.010)),
+    rgba(0,0,0,0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.045),
+    0 0 0 1px rgba(255,255,255,0.018);
+}
+
+.feedbackTextareaWrapV331.isReady textarea{
+  border-color: rgba(84,255,139,0.48);
+  box-shadow:
+    0 0 0 3px rgba(84,255,139,0.10),
+    0 12px 30px rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.feedbackTextareaWrapV331.isTyping::after{
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 34px;
+  height: 1px;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0.55;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.34), transparent);
+  transform: scaleX(0.72);
+  transform-origin: 50% 50%;
+  transition:
+    opacity 180ms ease,
+    transform 260ms cubic-bezier(.22,1,.36,1),
+    background 220ms ease;
+}
+
+.feedbackTextareaWrapV331.isReady::after{
+  opacity: 0.95;
+  transform: scaleX(1);
+  background: linear-gradient(90deg, transparent, rgba(75,255,132,0.72), transparent);
+}
+
+.feedbackSendButtonV331{
+  min-width: 118px;
+  min-height: 46px;
+  position: relative !important;
+  overflow: hidden !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.42) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025)),
+    rgba(255,255,255,0.035) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.055),
+    0 10px 24px rgba(0,0,0,0.18) !important;
+  opacity: 1 !important;
+  transform: translateZ(0);
+  transition:
+    color 180ms ease,
+    border-color 220ms ease,
+    background 260ms cubic-bezier(.22,1,.36,1),
+    box-shadow 300ms cubic-bezier(.22,1,.36,1),
+    transform 180ms cubic-bezier(.22,1,.36,1) !important;
+}
+
+.feedbackSendButtonV331::before{
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(135deg, rgba(153,255,180,0.88), rgba(38,235,96,0.96) 44%, rgba(20,177,79,0.98));
+  transition: opacity 300ms cubic-bezier(.22,1,.36,1);
+}
+
+.feedbackSendButtonV331::after{
+  content: "";
+  position: absolute;
+  inset: -60% -34%;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(115deg, transparent 32%, rgba(255,255,255,0.55) 48%, transparent 64%);
+  transform: translate3d(-48%, 0, 0) rotate(8deg);
+  transition:
+    opacity 190ms ease,
+    transform 720ms cubic-bezier(.22,1,.36,1);
+}
+
+.feedbackSendButtonV331.isReady{
+  color: #041008 !important;
+  border-color: rgba(95,255,149,0.52) !important;
+  box-shadow:
+    0 0 0 1px rgba(92,255,148,0.10),
+    0 10px 24px rgba(35,220,95,0.18),
+    0 0 26px rgba(35,220,95,0.13),
+    inset 0 1px 0 rgba(255,255,255,0.22) !important;
+}
+
+.feedbackSendButtonV331.isReady::before{
+  opacity: 1;
+}
+
+.feedbackSendButtonV331.isReady::after{
+  opacity: 0.52;
+  transform: translate3d(46%, 0, 0) rotate(8deg);
+}
+
+.feedbackSendButtonV331:hover:not(:disabled){
+  transform: translate3d(0,-1px,0) scale(1.012) !important;
+}
+
+.feedbackSendButtonV331.isReady:hover:not(:disabled){
+  box-shadow:
+    0 0 0 1px rgba(92,255,148,0.14),
+    0 13px 30px rgba(35,220,95,0.22),
+    0 0 34px rgba(35,220,95,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.28) !important;
+}
+
+.feedbackSendButtonV331:active:not(:disabled){
+  transform: translate3d(0,1px,0) scale(0.985) !important;
+}
+
+.feedbackSendButtonV331:disabled{
+  cursor: not-allowed !important;
+}
+
+.feedbackSendTextV334,
+.feedbackSendSparkV334{
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  transform: translateZ(0);
+  transition:
+    transform 260ms cubic-bezier(.22,1,.36,1),
+    opacity 180ms ease,
+    filter 220ms ease;
+}
+
+.feedbackSendTextV334{
+  letter-spacing: -0.015em;
+}
+
+.feedbackSendSparkV334{
+  opacity: 0;
+  width: 0;
+  margin-left: -8px;
+  transform: translate3d(-8px, 8px, 0) rotate(-16deg) scale(0.7);
+}
+
+.feedbackSendButtonV331.isReady .feedbackSendTextV334{
+  transform: translate3d(-1px,0,0);
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,0.26));
+}
+
+.feedbackSendButtonV331.isReady .feedbackSendSparkV334{
+  opacity: 1;
+  width: 14px;
+  margin-left: 0;
+  transform: translate3d(0,0,0) rotate(0deg) scale(1);
+}
+
+.feedbackSendButtonV331.isReady:hover .feedbackSendTextV334{
+  transform: translate3d(-3px,0,0);
+}
+
+.feedbackSendButtonV331.isReady:hover .feedbackSendSparkV334{
+  transform: translate3d(2px,-2px,0) rotate(8deg) scale(1.08);
+}
+
+.feedbackSendButtonV331.isSending .feedbackSendSparkV334{
+  width: 14px;
+  opacity: 1;
+  animation: localtifyFeedbackSendOrbitV334 820ms linear infinite;
+}
+
+@keyframes localtifyFeedbackSendOrbitV334{
+  0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(2px,-2px,0) rotate(180deg) scale(0.92); }
+  100% { transform: translate3d(0,0,0) rotate(360deg) scale(1); }
+}
+
+.feedbackStatusV331.success{
+  color: rgba(220,255,232,0.98) !important;
+  background:
+    linear-gradient(135deg, rgba(31,216,96,0.16), rgba(12,83,41,0.12)) !important;
+  border: 1px solid rgba(90,255,148,0.24) !important;
+  box-shadow:
+    0 0 0 1px rgba(90,255,148,0.035),
+    inset 0 1px 0 rgba(255,255,255,0.045) !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .feedbackPromptActionsV331::before,
+  .feedbackTextareaWrapV331 textarea,
+  .feedbackTextareaWrapV331::after,
+  .feedbackSendButtonV331,
+  .feedbackSendButtonV331::before,
+  .feedbackSendButtonV331::after,
+  .feedbackSendTextV334,
+  .feedbackSendSparkV334{
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+
+/* localtify 0.3.8 V335 — feedback modal fit and readability polish.
+   Fixes the tiny scroll issue, improves body text weight/readability,
+   and cleans up the green Send button layout without adding orbs. */
+.feedbackPromptOverlayV331{
+  padding: 14px !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+.feedbackPromptCardV331{
+  width: min(600px, calc(100vw - 28px)) !important;
+  max-height: min(720px, calc(100vh - 28px)) !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto auto minmax(112px, 1fr) auto auto !important;
+  gap: 0 !important;
+  padding: 18px 18px 16px !important;
+  border-radius: 24px !important;
+  scrollbar-gutter: auto !important;
+}
+
+.feedbackPromptTopV331{
+  margin-bottom: 12px !important;
+  padding-bottom: 11px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.075) !important;
+}
+
+.feedbackPromptBrandV331{
+  gap: 10px !important;
+}
+
+.feedbackPromptLogoV331{
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 9px !important;
+}
+
+.feedbackPromptBrandV331 em{
+  font-size: 0.68rem !important;
+  letter-spacing: 0.135em !important;
+}
+
+.feedbackPromptBrandV331 strong{
+  font-size: 0.88rem !important;
+  font-weight: 950 !important;
+}
+
+.feedbackPromptCloseV331{
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 14px !important;
+}
+
+.feedbackPromptCopyV331{
+  padding: 0 !important;
+  margin: 0 0 14px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.feedbackPromptBadgeV331{
+  margin-bottom: 8px !important;
+  font-size: 0.68rem !important;
+  letter-spacing: 0.14em !important;
+  font-weight: 950 !important;
+  color: rgba(255,255,255,0.82) !important;
+}
+
+.feedbackPromptCopyV331 h2{
+  max-width: 12ch;
+  margin: 0 0 10px !important;
+  font-size: clamp(2.05rem, 5.2vw, 3.1rem) !important;
+  line-height: 0.94 !important;
+  letter-spacing: -0.075em !important;
+  font-weight: 950 !important;
+}
+
+.feedbackPromptCopyV331 p{
+  max-width: 100% !important;
+  margin: 0 0 9px !important;
+  color: rgba(255,255,255,0.78) !important;
+  font-size: clamp(0.86rem, 1.32vw, 0.96rem) !important;
+  line-height: 1.48 !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.018em !important;
+}
+
+.feedbackPromptCopyV331 p:last-child{
+  margin-bottom: 0 !important;
+  color: rgba(255,255,255,0.82) !important;
+  font-weight: 900 !important;
+}
+
+.feedbackCategoryRowV331{
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 0 12px !important;
+}
+
+.feedbackCategoryButtonV331{
+  min-height: 38px !important;
+  padding: 9px 10px !important;
+  border-radius: 13px !important;
+  font-size: 0.78rem !important;
+  font-weight: 950 !important;
+}
+
+.feedbackTextareaWrapV331{
+  margin: 0 !important;
+  min-height: 0 !important;
+}
+
+.feedbackTextareaWrapV331 > span{
+  margin-bottom: 7px !important;
+  font-size: 0.72rem !important;
+  font-weight: 950 !important;
+  color: rgba(255,255,255,0.84) !important;
+}
+
+.feedbackTextareaWrapV331 textarea{
+  min-height: 112px !important;
+  height: 100% !important;
+  max-height: 150px !important;
+  padding: 14px 15px !important;
+  border-radius: 17px !important;
+  line-height: 1.48 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.012em !important;
+  resize: none !important;
+}
+
+.feedbackTextareaWrapV331 small{
+  margin-top: 6px !important;
+  font-size: 0.72rem !important;
+  font-weight: 850 !important;
+}
+
+.feedbackStatusV331{
+  margin-top: 8px !important;
+  padding: 9px 11px !important;
+  border-radius: 14px !important;
+}
+
+.feedbackPromptActionsV331{
+  margin-top: 10px !important;
+  padding-top: 11px !important;
+  border-top: 1px solid rgba(255,255,255,0.065) !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  min-height: 58px !important;
+}
+
+.feedbackPromptActionsV331::before{
+  display: none !important;
+}
+
+.feedbackMaybeButtonV331,
+.feedbackSendButtonV331{
+  min-height: 44px !important;
+  border-radius: 14px !important;
+  padding: 11px 17px !important;
+  font-size: 0.94rem !important;
+  font-weight: 950 !important;
+}
+
+.feedbackSendButtonV331{
+  min-width: 118px !important;
+  padding-inline: 21px 19px !important;
+  border-radius: 15px !important;
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.055) !important;
+}
+
+.feedbackSendButtonV331.isReady{
+  box-shadow:
+    0 0 0 1px rgba(92,255,148,0.12),
+    0 10px 24px rgba(35,220,95,0.19),
+    0 0 20px rgba(35,220,95,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.24) !important;
+}
+
+.feedbackSendButtonV331.isReady:hover:not(:disabled){
+  box-shadow:
+    0 0 0 1px rgba(92,255,148,0.14),
+    0 12px 26px rgba(35,220,95,0.22),
+    0 0 24px rgba(35,220,95,0.13),
+    inset 0 1px 0 rgba(255,255,255,0.30) !important;
+}
+
+.feedbackSendButtonV331::after{
+  inset: -56% -42% !important;
+}
+
+.feedbackSendTextV334{
+  white-space: nowrap;
+}
+
+.feedbackSendSparkV334{
+  flex: 0 0 13px !important;
+  width: 13px !important;
+  margin-left: 0 !important;
+  font-size: 0.82rem !important;
+  line-height: 1 !important;
+}
+
+.feedbackSendButtonV331.isLocked .feedbackSendSparkV334{
+  width: 0 !important;
+  flex-basis: 0 !important;
+  margin-left: -8px !important;
+}
+
+@media (max-height: 760px){
+  .feedbackPromptCardV331{
+    width: min(570px, calc(100vw - 24px)) !important;
+    max-height: calc(100vh - 22px) !important;
+    padding: 15px 16px 14px !important;
+    border-radius: 22px !important;
+    grid-template-rows: auto auto auto auto minmax(96px, 1fr) auto auto !important;
+  }
+
+  .feedbackPromptTopV331{
+    margin-bottom: 10px !important;
+    padding-bottom: 9px !important;
+  }
+
+  .feedbackPromptCopyV331{
+    margin-bottom: 12px !important;
+  }
+
+  .feedbackPromptCopyV331 h2{
+    font-size: clamp(1.82rem, 5vw, 2.55rem) !important;
+    margin-bottom: 8px !important;
+  }
+
+  .feedbackPromptCopyV331 p{
+    font-size: 0.82rem !important;
+    line-height: 1.40 !important;
+    margin-bottom: 7px !important;
+  }
+
+  .feedbackCategoryRowV331{
+    margin-bottom: 10px !important;
+  }
+
+  .feedbackTextareaWrapV331 textarea{
+    min-height: 96px !important;
+    max-height: 118px !important;
+  }
+
+  .feedbackPromptActionsV331{
+    min-height: 52px !important;
+    margin-top: 8px !important;
+    padding-top: 9px !important;
+  }
+}
+
+@media (max-width: 620px){
+  .feedbackPromptCardV331{
+    width: calc(100vw - 22px) !important;
+  }
+
+  .feedbackCategoryRowV331{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .feedbackPromptActionsV331{
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .feedbackMaybeButtonV331,
+  .feedbackSendButtonV331{
+    width: 100% !important;
+  }
+}
+
+
+/* localtify 0.3.8 V336 — feedback send button hard fix.
+   Fixes the split half-green / half-dark Send button by removing layered pseudo
+   fills and making the button itself own the full green surface. No light orb. */
+.feedbackPromptActionsV331{
+  overflow: visible !important;
+}
+
+.feedbackPromptActionsV331::before{
+  content: none !important;
+  display: none !important;
+}
+
+.feedbackSendButtonV331{
+  min-width: 124px !important;
+  min-height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  padding: 0 22px !important;
+  color: rgba(255,255,255,0.42) !important;
+  background: rgba(255,255,255,0.055) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.055),
+    0 10px 24px rgba(0,0,0,0.18) !important;
+  opacity: 1 !important;
+  transform: translateZ(0) !important;
+  transition:
+    transform 180ms cubic-bezier(.22,1,.36,1),
+    color 180ms ease,
+    border-color 220ms ease,
+    background 260ms cubic-bezier(.22,1,.36,1),
+    box-shadow 260ms cubic-bezier(.22,1,.36,1),
+    opacity 160ms ease !important;
+}
+
+.feedbackSendButtonV331::before,
+.feedbackSendButtonV331::after{
+  content: none !important;
+  display: none !important;
+}
+
+.feedbackSendButtonV331.isReady{
+  color: #041008 !important;
+  border-color: rgba(92,255,148,0.58) !important;
+  background:
+    linear-gradient(135deg, #8dffa8 0%, #3bf07b 48%, #18c95f 100%) !important;
+  box-shadow:
+    0 0 0 1px rgba(92,255,148,0.13),
+    0 12px 26px rgba(35,220,95,0.22),
+    0 0 18px rgba(35,220,95,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.34),
+    inset 0 -1px 0 rgba(0,0,0,0.12) !important;
+}
+
+.feedbackSendButtonV331:hover:not(:disabled){
+  transform: translate3d(0,-1px,0) scale(1.01) !important;
+}
+
+.feedbackSendButtonV331.isReady:hover:not(:disabled){
+  background:
+    linear-gradient(135deg, #a0ffb7 0%, #46f984 48%, #1fd968 100%) !important;
+  box-shadow:
+    0 0 0 1px rgba(92,255,148,0.16),
+    0 14px 30px rgba(35,220,95,0.26),
+    0 0 22px rgba(35,220,95,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.40),
+    inset 0 -1px 0 rgba(0,0,0,0.12) !important;
+}
+
+.feedbackSendButtonV331:active:not(:disabled){
+  transform: translate3d(0,1px,0) scale(0.985) !important;
+}
+
+.feedbackSendButtonV331:disabled,
+.feedbackSendButtonV331.isLocked{
+  color: rgba(255,255,255,0.32) !important;
+  border-color: rgba(255,255,255,0.075) !important;
+  background: rgba(255,255,255,0.045) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 8px 18px rgba(0,0,0,0.14) !important;
+  cursor: not-allowed !important;
+}
+
+.feedbackSendTextV334{
+  position: relative !important;
+  z-index: 1 !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  transform: translateZ(0) !important;
+  transition:
+    transform 220ms cubic-bezier(.22,1,.36,1),
+    letter-spacing 220ms ease,
+    color 180ms ease !important;
+}
+
+.feedbackSendButtonV331.isReady .feedbackSendTextV334{
+  color: #041008 !important;
+  letter-spacing: -0.01em !important;
+  transform: translate3d(-1px,0,0) !important;
+}
+
+.feedbackSendButtonV331.isReady:hover .feedbackSendTextV334{
+  transform: translate3d(-2px,0,0) !important;
+}
+
+.feedbackSendSparkV334{
+  position: relative !important;
+  z-index: 1 !important;
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  margin-left: -7px !important;
+  opacity: 0 !important;
+  color: #041008 !important;
+  font-size: 0.82rem !important;
+  line-height: 1 !important;
+  transform: translate3d(-6px,5px,0) rotate(-12deg) scale(0.78) !important;
+  transition:
+    width 220ms cubic-bezier(.22,1,.36,1),
+    margin-left 220ms cubic-bezier(.22,1,.36,1),
+    opacity 160ms ease,
+    transform 240ms cubic-bezier(.22,1,.36,1) !important;
+}
+
+.feedbackSendButtonV331.isReady .feedbackSendSparkV334{
+  flex-basis: 12px !important;
+  width: 12px !important;
+  margin-left: 0 !important;
+  opacity: 0.82 !important;
+  transform: translate3d(0,0,0) rotate(0deg) scale(1) !important;
+}
+
+.feedbackSendButtonV331.isReady:hover .feedbackSendSparkV334{
+  opacity: 1 !important;
+  transform: translate3d(2px,-2px,0) rotate(8deg) scale(1.06) !important;
+}
+
+.feedbackSendButtonV331.isSending .feedbackSendSparkV334{
+  opacity: 1 !important;
+  flex-basis: 12px !important;
+  width: 12px !important;
+  margin-left: 0 !important;
+  animation: localtifyFeedbackSendOrbitV334 820ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .feedbackSendButtonV331,
+  .feedbackSendTextV334,
+  .feedbackSendSparkV334{
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
