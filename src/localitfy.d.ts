@@ -197,6 +197,20 @@ declare global {
     releaseNotes?: string;
   };
 
+
+  type LocalitfyFeedbackPayload = {
+    category: "bug" | "ui" | "feature" | "other";
+    message: string;
+    appVersion?: string;
+    platform?: string;
+    diagnostics?: Record<string, any>;
+  };
+
+  type LocalitfyFeedbackResult = {
+    ok: boolean;
+    error?: string;
+  };
+
   interface Window {
     localitfy: {
       bootstrap: () => Promise<{
@@ -323,6 +337,7 @@ declare global {
         window?: Record<string, any>;
       }>;
       getGpuStatus?: () => Promise<any>;
+      sendFeedback?: (payload: LocalitfyFeedbackPayload) => Promise<LocalitfyFeedbackResult>;
       openExternal?: (url: string) => Promise<{ ok: boolean; reason?: string }>;
 
       onAlbumFolderImportProgress?: (callback: (payload: LocalitfyAlbumFolderProgressPayload) => void) => () => void;

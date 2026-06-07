@@ -352,6 +352,28 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
 
 const ONBOARDING_RELEASE_SHOWCASE_KEY = `localitfy.onboarding.release-showcase.${APP_VERSION}`;
 
+const FEEDBACK_PROMPT_SEEN_KEY = "localitfy.feedbackPrompt.seen.v1";
+const FEEDBACK_PROMPT_DELAY_MS = 60_000;
+const FEEDBACK_PROMPT_RETRY_DELAY_MS = 15_000;
+const FEEDBACK_MESSAGE_MAX_LENGTH = 1_500;
+const FEEDBACK_PROMPT_COPY = {
+  title: "Thanks for using localtify!",
+  body:
+    "really it has been amazing for users like you to keep using the app which make me want to update the app even more, why did this popup come? Well as you may know or may also have experienced localtify has few here and there visual or ui bugs in the app and that probably has made you angry. or maybe you really want a feature to be added.",
+  footer:
+    "Which is why below me theres a message box where you can send bug reports and suggestions. and I will be actively reviewing them!"
+} as const;
+
+const FEEDBACK_CATEGORY_OPTIONS = [
+  { id: "bug", label: "Bug" },
+  { id: "ui", label: "UI issue" },
+  { id: "feature", label: "Feature request" },
+  { id: "other", label: "Other" }
+] as const;
+
+type FeedbackCategoryId = typeof FEEDBACK_CATEGORY_OPTIONS[number]["id"];
+
+
 function shouldOpenOnboardingForThisRelease() {
   try {
     const oldOnboardingDone = window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === "done";
@@ -483,6 +505,27 @@ function MainModeApp() {
   const isAppBackgroundedRef = useRef(isAppBackgrounded);
   const [diagnosticsCopied, setDiagnosticsCopied] = useState(false);
   const [performanceStatus, setPerformanceStatus] = useState<any | null>(null);
+  const feedbackPromptBlockersRef = useRef({
+    onboardingOpen: false,
+    settingsOpen: false,
+    whatsNewOpen: false,
+    editorOpen: false,
+    playlistPickerOpen: false,
+    deleteOpen: false,
+    importBusy: false,
+    downloadBusy: false,
+    spotifyDownloadBusy: false,
+    libraryScanBusy: false
+  });
+  const [feedbackPromptOpen, setFeedbackPromptOpen] = useState(false);
+  const [feedbackPromptManualOpen, setFeedbackPromptManualOpen] = useState(false);
+  const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategoryId>("bug");
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [feedbackSendBusy, setFeedbackSendBusy] = useState(false);
+  const [feedbackStatus, setFeedbackStatus] = useState<{
+    kind: "idle" | "success" | "error";
+    message: string;
+  }>({ kind: "idle", message: "" });
   const deferredSettingsSearch = useDeferredValue(settingsSearch);
   const [isViewSwitching, setIsViewSwitching] = useState(false);
   const [customThemeName, setCustomThemeName] = useState("My Custom Theme");
@@ -8546,6 +8589,185 @@ function MainModeApp() {
     }
   };
 
+  useEffect(() => {
+    feedbackPromptBlockersRef.current = {
+      onboardingOpen,
+      settingsOpen,
+      whatsNewOpen,
+      editorOpen: Boolean(editorSong),
+      playlistPickerOpen: Boolean(playlistPickerSong),
+      deleteOpen: Boolean(deleteTarget),
+      importBusy: Boolean(importAnimation?.visible) || libraryScanBusy,
+      downloadBusy,
+      spotifyDownloadBusy,
+      libraryScanBusy
+    };
+  }, [
+    deleteTarget,
+    downloadBusy,
+    editorSong,
+    importAnimation?.visible,
+    libraryScanBusy,
+    onboardingOpen,
+    playlistPickerSong,
+    settingsOpen,
+    spotifyDownloadBusy,
+    whatsNewOpen
+  ]);
+
+  function feedbackPromptWasSeen() {
+    try {
+      return window.localStorage.getItem(FEEDBACK_PROMPT_SEEN_KEY) === "done";
+    } catch {
+      return true;
+    }
+  }
+
+  function markFeedbackPromptSeen() {
+    try {
+      window.localStorage.setItem(FEEDBACK_PROMPT_SEEN_KEY, "done");
+    } catch {
+      // Ignore storage failures. The popup must never break the player.
+    }
+  }
+
+  function feedbackPromptIsBlocked() {
+    const blockers = feedbackPromptBlockersRef.current;
+
+    return (
+      blockers.onboardingOpen ||
+      blockers.settingsOpen ||
+      blockers.whatsNewOpen ||
+      blockers.editorOpen ||
+      blockers.playlistPickerOpen ||
+      blockers.deleteOpen ||
+      blockers.importBusy ||
+      blockers.downloadBusy ||
+      blockers.spotifyDownloadBusy ||
+      blockers.libraryScanBusy
+    );
+  }
+
+  const openFeedbackPrompt = useCallback((manual = false) => {
+    setFeedbackPromptManualOpen(manual);
+    setFeedbackStatus({ kind: "idle", message: "" });
+    setFeedbackPromptOpen(true);
+  }, []);
+
+  const closeFeedbackPrompt = useCallback((markSeen = true) => {
+    if (markSeen) markFeedbackPromptSeen();
+    setFeedbackPromptOpen(false);
+    setFeedbackPromptManualOpen(false);
+    setFeedbackSendBusy(false);
+    setFeedbackStatus({ kind: "idle", message: "" });
+  }, []);
+
+  useEffect(() => {
+    if (!ready || feedbackPromptWasSeen()) return;
+
+    let cancelled = false;
+    let timer: number | null = null;
+
+    const clearTimer = () => {
+      if (timer !== null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+    };
+
+    const attemptOpen = () => {
+      if (cancelled || feedbackPromptWasSeen()) return;
+
+      if (feedbackPromptIsBlocked()) {
+        timer = window.setTimeout(attemptOpen, FEEDBACK_PROMPT_RETRY_DELAY_MS);
+        return;
+      }
+
+      openFeedbackPrompt(false);
+    };
+
+    timer = window.setTimeout(attemptOpen, FEEDBACK_PROMPT_DELAY_MS);
+
+    return () => {
+      cancelled = true;
+      clearTimer();
+    };
+  }, [openFeedbackPrompt, ready]);
+
+  const submitFeedbackPrompt = useCallback(async () => {
+    const message = feedbackMessage.trim();
+
+    if (message.length < 4) {
+      setFeedbackStatus({ kind: "error", message: "Write a little more so the feedback is useful." });
+      return;
+    }
+
+    if (!window.localitfy?.sendFeedback) {
+      setFeedbackStatus({ kind: "error", message: "Feedback bridge is not ready in this build." });
+      return;
+    }
+
+    setFeedbackSendBusy(true);
+    setFeedbackStatus({ kind: "idle", message: "" });
+
+    try {
+      const result = await window.localitfy.sendFeedback({
+        category: feedbackCategory,
+        message,
+        appVersion: APP_VERSION,
+        platform: platformInfo.label,
+        diagnostics: {
+          appVersion: APP_VERSION,
+          platform: platformInfo.label,
+          electronVersion: performanceStatus?.electronVersion || "",
+          chromeVersion: performanceStatus?.chromeVersion || "",
+          songCount: songs.length,
+          playlistCount: playlists.length,
+          downloadsFolder: downloadFolderLabel || settings.downloadFolder || "default downloads folder",
+          discordRpc: settings.discordEnabled ? "enabled" : "disabled",
+          updateStatus: updatePrompt.visible ? updateStatusLabel(updatePrompt) : "not visible"
+        }
+      });
+
+      if (!result?.ok) {
+        setFeedbackStatus({
+          kind: "error",
+          message: result?.error || "Could not send feedback right now."
+        });
+        return;
+      }
+
+      markFeedbackPromptSeen();
+      setFeedbackStatus({ kind: "success", message: "Sent. Thank you — I will review it." });
+      setFeedbackMessage("");
+
+      window.setTimeout(() => {
+        setFeedbackPromptOpen(false);
+        setFeedbackPromptManualOpen(false);
+        setFeedbackStatus({ kind: "idle", message: "" });
+      }, 900);
+    } catch (error) {
+      setFeedbackStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Could not send feedback right now."
+      });
+    } finally {
+      setFeedbackSendBusy(false);
+    }
+  }, [
+    downloadFolderLabel,
+    feedbackCategory,
+    feedbackMessage,
+    performanceStatus?.chromeVersion,
+    performanceStatus?.electronVersion,
+    platformInfo.label,
+    playlists.length,
+    settings.discordEnabled,
+    settings.downloadFolder,
+    songs.length,
+    updatePrompt
+  ]);
+
   if (!ready) {
     const isBootError = Boolean(bootError);
 
@@ -8831,6 +9053,143 @@ function MainModeApp() {
   }
 
 
+
+
+
+  function renderFeedbackSettingsCard() {
+    if (settingsCategory !== "advanced") return null;
+
+    return (
+      <section className="settingsPageCard feedbackSettingsCardV329" aria-label="Send feedback">
+        <div className="settingsSectionTitle">
+          <span>feedback</span>
+          <strong>Send feedback</strong>
+          <small>Report bugs, UI issues, or feature ideas directly from localtify.</small>
+        </div>
+
+        <button
+          type="button"
+          className="feedbackSettingsButtonV329 localtifyProximityTarget"
+          onClick={() => openFeedbackPrompt(true)}
+        >
+          <span>
+            <strong>Open feedback box</strong>
+            <small>This opens the same suggestion popup anytime from settings.</small>
+          </span>
+          <em>send</em>
+        </button>
+      </section>
+    );
+  }
+
+  function renderFeedbackPrompt() {
+    if (!feedbackPromptOpen) return null;
+
+    const remaining = FEEDBACK_MESSAGE_MAX_LENGTH - feedbackMessage.length;
+
+    return (
+      <AnimatePresence>
+        <Motion.div
+          className="feedbackPromptOverlayV329"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="feedbackPromptTitleV329"
+        >
+          <Motion.div
+            className="feedbackPromptCardV329"
+            initial={{ opacity: 0, y: 18, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.97 }}
+            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="feedbackPromptTopV329">
+              <span className="feedbackPromptLogoV329" aria-hidden="true">
+                <img src={localtifyLogo} alt="" />
+              </span>
+              <button
+                type="button"
+                className="feedbackPromptCloseV329"
+                onClick={() => closeFeedbackPrompt(!feedbackPromptManualOpen)}
+                aria-label="Close feedback popup"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="feedbackPromptCopyV329">
+              <h2 id="feedbackPromptTitleV329">{FEEDBACK_PROMPT_COPY.title}</h2>
+              <p>{FEEDBACK_PROMPT_COPY.body}</p>
+              <p>{FEEDBACK_PROMPT_COPY.footer}</p>
+            </div>
+
+            <div className="feedbackCategoryRowV329" role="group" aria-label="Feedback type">
+              {FEEDBACK_CATEGORY_OPTIONS.map((option) => {
+                const active = feedbackCategory === option.id;
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={`feedbackCategoryButtonV329 ${active ? "active" : ""}`}
+                    onClick={() => setFeedbackCategory(option.id)}
+                    aria-pressed={active}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <label className="feedbackTextareaWrapV329">
+              <span>Your message</span>
+              <textarea
+                value={feedbackMessage}
+                onChange={(event) => {
+                  const next = event.target.value.slice(0, FEEDBACK_MESSAGE_MAX_LENGTH);
+                  setFeedbackMessage(next);
+                  if (feedbackStatus.kind !== "idle") setFeedbackStatus({ kind: "idle", message: "" });
+                }}
+                placeholder="Tell me what broke, what looks weird, or what feature you want..."
+                maxLength={FEEDBACK_MESSAGE_MAX_LENGTH}
+                disabled={feedbackSendBusy}
+              />
+              <small>{remaining} characters left</small>
+            </label>
+
+            {feedbackStatus.message ? (
+              <div className={`feedbackStatusV329 ${feedbackStatus.kind}`} role="status">
+                {feedbackStatus.message}
+              </div>
+            ) : null}
+
+            <div className="feedbackPromptActionsV329">
+              <button
+                type="button"
+                className="feedbackMaybeButtonV329"
+                onClick={() => closeFeedbackPrompt(!feedbackPromptManualOpen)}
+                disabled={feedbackSendBusy}
+              >
+                Maybe later
+              </button>
+              <button
+                type="button"
+                className="feedbackSendButtonV329 localtifyProximityTarget"
+                onClick={submitFeedbackPrompt}
+                disabled={feedbackSendBusy || feedbackMessage.trim().length < 4}
+              >
+                {feedbackSendBusy ? "Sending..." : "Send"}
+              </button>
+            </div>
+          </Motion.div>
+        </Motion.div>
+      </AnimatePresence>
+    );
+  }
+
   function renderSidebarBehaviorRestoreCard() {
     if (settingsCategory !== "appearance") return null;
 
@@ -9001,6 +9360,7 @@ function MainModeApp() {
         />
         </Suspense>
         {renderSidebarBehaviorRestoreCard()}
+        {renderFeedbackSettingsCard()}
       </>
     );
   }
@@ -9327,7 +9687,12 @@ function MainModeApp() {
     stopProgressLoop
   };
 
-  return <LocaltifyAppView {...localtifyAppViewProps} />;
+  return (
+    <>
+      <LocaltifyAppView {...localtifyAppViewProps} />
+      {renderFeedbackPrompt()}
+    </>
+  );
 }
 
 export default function App() {

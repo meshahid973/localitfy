@@ -59,6 +59,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   toggleDevTools: () => ipcRenderer.invoke("localitfy:toggle-devtools"),
   getPerformanceStatus: () => ipcRenderer.invoke("localitfy:performance-status"),
   getGpuStatus: () => ipcRenderer.invoke("localitfy:gpu-status"),
+  sendFeedback: (payload) => ipcRenderer.invoke("feedback:send", payload),
 
   minimizeWindow: () => ipcRenderer.invoke("window:minimize"),
   toggleMaximizeWindow: () => ipcRenderer.invoke("window:toggle-maximize"),

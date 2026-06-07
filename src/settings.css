@@ -7343,3 +7343,328 @@ body.localtifyPerfV301 .settingsPage :is(.settingsCategoryButton, .settingsTabBu
     grid-template-columns: 1fr;
   }
 }
+
+
+/* localtify 0.3.8 V329 — feedback prompt and settings launcher.
+   No ambience orbs, no heavy animated background. Premium glass only. */
+.feedbackPromptOverlayV329{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb), 0.16), transparent 34%),
+    rgba(2, 2, 8, 0.68);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+}
+
+.feedbackPromptCardV329{
+  width: min(620px, calc(100vw - 32px));
+  max-height: min(760px, calc(100vh - 48px));
+  overflow: auto;
+  border: 1px solid rgba(var(--accent-rgb), 0.24);
+  border-radius: 28px;
+  padding: 22px;
+  color: rgba(255, 255, 255, 0.94);
+  background:
+    linear-gradient(145deg, rgba(18, 12, 28, 0.94), rgba(9, 7, 18, 0.92)),
+    rgba(12, 10, 20, 0.94);
+  box-shadow:
+    0 26px 80px rgba(0, 0, 0, 0.52),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 38px rgba(var(--accent-rgb), 0.12);
+}
+
+.feedbackPromptTopV329{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.feedbackPromptLogoV329{
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.24), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.12);
+}
+
+.feedbackPromptLogoV329 img{
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.feedbackPromptCloseV329{
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 13px;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  font: inherit;
+  font-size: 22px;
+  line-height: 1;
+  transition:
+    transform 180ms cubic-bezier(.22, 1, .36, 1),
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.feedbackPromptCloseV329:hover{
+  transform: translateY(-1px);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(var(--accent-rgb), 0.26);
+}
+
+.feedbackPromptCopyV329{
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.feedbackPromptCopyV329 h2{
+  margin: 0;
+  letter-spacing: -0.045em;
+  font-size: clamp(2rem, 5vw, 3.1rem);
+  line-height: 0.95;
+}
+
+.feedbackPromptCopyV329 p{
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.98rem;
+  line-height: 1.62;
+}
+
+.feedbackCategoryRowV329{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.feedbackCategoryButtonV329{
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.055);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  transition:
+    transform 180ms cubic-bezier(.22, 1, .36, 1),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.feedbackCategoryButtonV329:hover{
+  transform: translateY(-1px);
+  color: #fff;
+  border-color: rgba(var(--accent-rgb), 0.26);
+}
+
+.feedbackCategoryButtonV329.active{
+  color: #fff;
+  border-color: rgba(var(--accent-rgb), 0.42);
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.36), rgba(var(--accent-rgb), 0.18));
+  box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.13);
+}
+
+.feedbackTextareaWrapV329{
+  display: grid;
+  gap: 8px;
+}
+
+.feedbackTextareaWrapV329 span{
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+}
+
+.feedbackTextareaWrapV329 textarea{
+  min-height: 150px;
+  resize: vertical;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 20px;
+  padding: 15px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.22);
+  outline: none;
+  font: inherit;
+  line-height: 1.5;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.feedbackTextareaWrapV329 textarea:focus{
+  border-color: rgba(var(--accent-rgb), 0.40);
+  background: rgba(0, 0, 0, 0.28);
+  box-shadow:
+    0 0 0 3px rgba(var(--accent-rgb), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.feedbackTextareaWrapV329 small{
+  color: rgba(255, 255, 255, 0.44);
+  font-size: 0.76rem;
+  text-align: right;
+}
+
+.feedbackStatusV329{
+  margin-top: 12px;
+  border-radius: 16px;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.feedbackStatusV329.success{
+  color: rgba(210, 255, 225, 0.96);
+  background: rgba(45, 210, 104, 0.12);
+  border: 1px solid rgba(45, 210, 104, 0.20);
+}
+
+.feedbackStatusV329.error{
+  color: rgba(255, 215, 215, 0.96);
+  background: rgba(255, 70, 70, 0.12);
+  border: 1px solid rgba(255, 70, 70, 0.22);
+}
+
+.feedbackPromptActionsV329{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.feedbackMaybeButtonV329,
+.feedbackSendButtonV329,
+.feedbackSettingsButtonV329{
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 180ms cubic-bezier(.22, 1, .36, 1),
+    opacity 160ms ease,
+    box-shadow 180ms ease;
+}
+
+.feedbackMaybeButtonV329{
+  color: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.feedbackSendButtonV329{
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb), 0.72));
+  box-shadow: 0 16px 34px rgba(var(--accent-rgb), 0.24);
+}
+
+.feedbackMaybeButtonV329:hover,
+.feedbackSendButtonV329:hover,
+.feedbackSettingsButtonV329:hover{
+  transform: translateY(-1px);
+}
+
+.feedbackMaybeButtonV329:disabled,
+.feedbackSendButtonV329:disabled{
+  cursor: not-allowed;
+  opacity: 0.54;
+  transform: none;
+}
+
+.feedbackSettingsCardV329{
+  overflow: hidden;
+}
+
+.feedbackSettingsButtonV329{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  text-align: left;
+  color: #fff;
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.22), rgba(255, 255, 255, 0.055)),
+    rgba(255, 255, 255, 0.045);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.feedbackSettingsButtonV329 span{
+  display: grid;
+  gap: 4px;
+}
+
+.feedbackSettingsButtonV329 strong{
+  font-size: 0.98rem;
+}
+
+.feedbackSettingsButtonV329 small{
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.80rem;
+  font-weight: 700;
+}
+
+.feedbackSettingsButtonV329 em{
+  font-style: normal;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+@media (max-width: 720px){
+  .feedbackPromptOverlayV329{
+    padding: 14px;
+  }
+
+  .feedbackPromptCardV329{
+    border-radius: 22px;
+    padding: 18px;
+  }
+
+  .feedbackPromptActionsV329{
+    flex-direction: column-reverse;
+  }
+
+  .feedbackMaybeButtonV329,
+  .feedbackSendButtonV329{
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .feedbackPromptCloseV329,
+  .feedbackCategoryButtonV329,
+  .feedbackMaybeButtonV329,
+  .feedbackSendButtonV329,
+  .feedbackSettingsButtonV329{
+    transition: none !important;
+  }
+}
+
