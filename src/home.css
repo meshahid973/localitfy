@@ -17221,3 +17221,114 @@ body.localtifyPerfV310 .app :is(
 ){
   backface-visibility: hidden;
 }
+
+
+/* localtify 0.3.8 V316 — home card INP repair.
+   Removed the experimental sticky scroll-state/header morph completely.
+   This keeps glass/blur/ambience, but makes active/click states cheaper by avoiding
+   layout-affecting work and keeping the click feedback compositor-friendly. */
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard){
+  contain: layout paint style;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transform-origin: 50% 50%;
+  transition:
+    transform 180ms cubic-bezier(.22, 1, .36, 1),
+    border-color 140ms ease,
+    opacity 140ms ease !important;
+}
+
+/* Don't animate background/box-shadow during click selection. Those are the expensive parts
+   DevTools reports as INP presentation delay on button.homeFreshCard.active. */
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard).active{
+  transition:
+    transform 150ms cubic-bezier(.22, 1, .36, 1),
+    border-color 120ms ease,
+    opacity 120ms ease !important;
+  transform: translate3d(0, -1px, 0) scale(1.004);
+  outline: 1px solid rgba(var(--accent-rgb), 0.28);
+  outline-offset: -1px;
+}
+
+/* A cheap active glow overlay instead of repainting the whole card background on every click. */
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard).active::after{
+  opacity: 1 !important;
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), 0.12), transparent 42%),
+    radial-gradient(circle at 12% 50%, rgba(var(--accent-rgb), 0.12), transparent 32%) !important;
+  transform: translateZ(0);
+}
+
+/* Make the press physical, but only with transform. No filter, no blur toggle, no layout. */
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard):active{
+  transform: translate3d(0, 0, 0) scale(0.992) !important;
+  transition-duration: 80ms !important;
+}
+
+
+/* localtify 0.3.8 V317 — header stays at the top of the page, not sticky.
+   This removes the follow-scroll header behavior while keeping transitions smooth.
+   No scroll-state container queries, no JS, no setting reduction. */
+.content > .headerBar,
+.headerBar{
+  position: relative !important;
+  top: auto !important;
+  inset-block-start: auto !important;
+  z-index: 12 !important;
+  container-type: normal !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout style;
+  will-change: auto;
+}
+
+.headerText,
+.headerText h2,
+.headerTools,
+.compactHeaderTools,
+.searchEasterWrap,
+.search{
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+.headerText h2{
+  transition:
+    color 180ms ease,
+    opacity 180ms ease,
+    transform 220ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.headerTools,
+.compactHeaderTools{
+  transition:
+    opacity 180ms ease,
+    transform 220ms cubic-bezier(.22, 1, .36, 1),
+    gap 180ms ease;
+}
+
+.searchEasterWrap .search,
+.headerTools .search,
+.compactHeaderTools .search{
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 180ms ease,
+    transform 220ms cubic-bezier(.22, 1, .36, 1) !important;
+}
+
+.searchEasterWrap .search:focus,
+.headerTools .search:focus,
+.compactHeaderTools .search:focus{
+  transform: translateZ(0) scale(1.006);
+}
+
+/* Avoid expensive sticky/repaint behavior during scroll. The top header is normal document flow. */
+.content.isScrolling > .headerBar,
+.app.isScrolling .headerBar{
+  position: relative !important;
+  top: auto !important;
+  transform: translateZ(0);
+}
+
