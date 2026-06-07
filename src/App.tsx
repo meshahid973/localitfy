@@ -1,5 +1,6 @@
 // @ts-nocheck
-/* localtify 0.3.8 V324 analytics cleanup + visual settings trim. */
+/* localtify 0.3.8 V326 downloads + Spotify reliability polish. */
+/* localtify 0.3.8 V327 sidebar behavior restore. */
 /* localtify 0.3.8 V320/V323 final bug sweep + diagnostics cleanup. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
@@ -6022,32 +6023,135 @@ function MainModeApp() {
       id: `${Date.now()}-${index}`,
       url,
       title: `download ${index + 1}`,
+      source: "youtube",
       status: "queued",
       progress: 0,
       message: "Queued..."
     }));
   }
 
-  function syncDownloadFilesToQueue(results: DownloadResult[]) {
+  function friendlyDownloadError(error: unknown, fallback = "Download failed. Try again or check the link.") {
+    const raw = String(error || "").trim();
+    const lowerMessage = raw.toLowerCase();
+
+    if (!raw) return fallback;
+    if (/private|permission|forbidden|403|unavailable|not available|members-only|login/.test(lowerMessage)) {
+      return "This source looks private or unavailable. Try a public link.";
+    }
+    if (/copyright|blocked|restricted|region|geo/.test(lowerMessage)) {
+      return "This source is blocked or region restricted.";
+    }
+    if (/network|timeout|timed out|socket|econn|dns|connection/.test(lowerMessage)) {
+      return "Network problem while downloading. Check your connection and retry.";
+    }
+    if (/rate|429|too many|captcha|bot/.test(lowerMessage)) {
+      return "The source rate-limited or blocked the request. Wait a bit, then retry.";
+    }
+    if (/ffmpeg|convert|conversion/.test(lowerMessage)) {
+      return "Downloaded, but conversion failed. Check FFmpeg/download setup.";
+    }
+    if (/no audio|audio only|format/.test(lowerMessage)) {
+      return "No usable audio format was found for this link.";
+    }
+
+    return raw.length > 170 ? `${raw.slice(0, 167)}...` : raw;
+  }
+
+  function findDownloadedSongMatch(result: DownloadResult, librarySongs: Song[]) {
+    const filePath = String(result.filePath || "").trim().toLowerCase();
+    const filename = String(result.filename || "").trim().toLowerCase();
+
+    if (filePath) {
+      const exact = librarySongs.find((song) => String(song.filePath || "").trim().toLowerCase() === filePath);
+      if (exact) return exact;
+    }
+
+    if (filename) {
+      return librarySongs.find((song) => {
+        const songPath = String(song.filePath || "").trim().toLowerCase();
+        return songPath.endsWith(filename);
+      }) || null;
+    }
+
+    return null;
+  }
+
+  function enrichDownloadResultsWithLibraryMatches(results: DownloadResult[], librarySongs: Song[]) {
+    return results.map((result) => {
+      const match = result.ok ? findDownloadedSongMatch(result, librarySongs) : null;
+      const importedToLibrary = Boolean(match);
+      const cleanedError = result.ok ? "" : friendlyDownloadError(result.error || result.url || "Download failed.");
+
+      return {
+        ...result,
+        importedToLibrary,
+        librarySongId: match?.id || "",
+        error: cleanedError || result.error,
+        statusLabel: result.ok
+          ? importedToLibrary
+            ? "Added to library"
+            : "Downloaded, not imported"
+          : "Failed — retry available"
+      };
+    });
+  }
+
+  function syncDownloadFilesToQueue(results: DownloadResult[], librarySongs: Song[] = songs) {
     if (!results.length) return;
+
+    const enrichedResults = enrichDownloadResultsWithLibraryMatches(results, librarySongs);
+
     setDownloadQueue((current) => {
       const next = [...current];
-      results.forEach((result) => {
-        const index = next.findIndex((item) => item.url === result.url);
+      enrichedResults.forEach((result) => {
+        const index = next.findIndex((item) =>
+          item.url === result.url ||
+          (result.filename && item.filename === result.filename) ||
+          (result.filePath && item.filePath === result.filePath)
+        );
+
         if (index === -1) return;
+
         next[index] = {
           ...next[index],
           status: result.ok ? "done" : "failed",
           progress: 100,
-          message: result.ok ? "Added to library" : "Download failed — retry?",
+          message: result.ok
+            ? result.importedToLibrary
+              ? "Added to library"
+              : "Downloaded, but not imported"
+            : friendlyDownloadError(result.error || "Download failed."),
           filePath: result.filePath,
           filename: result.filename,
-          error: result.error,
+          error: result.ok ? "" : friendlyDownloadError(result.error || "Download failed."),
+          importedToLibrary: result.importedToLibrary,
+          librarySongId: result.librarySongId,
+          statusLabel: result.statusLabel,
           title: result.filename || next[index].title
         };
       });
       return next;
     });
+  }
+
+  function clearFailedDownloads() {
+    setDownloadQueue((items) => items.filter((item) => item.status !== "failed" && item.status !== "cancelled"));
+    setDownloadResults((items) => items.filter((item: any) => item.ok));
+    setSpotifyTracks((items) => items.map((track: any) => (
+      track.downloadStatus === "failed"
+        ? { ...track, downloadStatus: "ready", downloadError: "", downloadMessage: "Ready" }
+        : track
+    )));
+    setSpotifyFetchError("");
+    setStatusText("cleared failed downloads");
+    showAppToast("cleared failed downloads", "success");
+  }
+
+  function clearFinishedDownloads() {
+    setDownloadQueue((items) => items.filter((item) => item.status === "queued" || item.status === "downloading" || item.status === "converting"));
+    setDownloadResults((items) => items.filter((item: any) => !item.ok));
+    setStatusText("cleared finished downloads");
+    showAppToast("cleared finished downloads", "success");
   }
 
   function openDownloadedSongInLibrary(item: DownloadResult | DownloadQueueItem) {
@@ -6098,10 +6202,29 @@ function MainModeApp() {
     }
   }
 
-  async function retryDownload(url: string) {
+  async function retryDownload(url: string, source: "youtube" | "spotify" | "auto" = "auto", spotifyTrackId = "") {
     if (!url) return;
+
+    if (source === "spotify" || url.startsWith("spotify:")) {
+      const track = spotifyTracks.find((item: any) => item.id === spotifyTrackId) ||
+        spotifyTracks.find((item: any) => url.toLowerCase().includes(String(item.title || "").toLowerCase()));
+      if (track) {
+        await downloadSpotifyTracks([track]);
+        return;
+      }
+
+      setDownloadsTab("spotify");
+      setSpotifyFetchError("Could not match this failed queue item back to a Spotify track. Fetch the playlist again, then retry the track.");
+      return;
+    }
+
     setDownloadText(url);
     await downloadAudioLinks(url);
+  }
+
+  async function retrySpotifyTrack(track: SpotifyTrack) {
+    if (!track?.id) return;
+    await downloadSpotifyTracks([track]);
   }
 
   async function downloadAudioLinks(overrideText?: string) {
@@ -6150,8 +6273,9 @@ function MainModeApp() {
         }
       }
 
-      setDownloadResults(downloads);
-      syncDownloadFilesToQueue(downloads);
+      const enrichedDownloads = enrichDownloadResultsWithLibraryMatches(downloads, nextSongs);
+      setDownloadResults(enrichedDownloads);
+      syncDownloadFilesToQueue(enrichedDownloads, nextSongs);
       setDownloadFolderLabel(result.downloadFolder || settings.downloadFolder || "");
       playbackUrlCacheRef.current.clear();
       playbackUrlPendingRef.current.clear();
@@ -6168,10 +6292,20 @@ function MainModeApp() {
 
       if (successCount > 0) {
         trackSongsImported(result.changedCount || successCount, "downloads");
+        const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
+        const notImportedCount = enrichedDownloads.filter((item: any) => item.ok && !item.importedToLibrary).length;
         setStatusText(
           settings.downloadAutoAdd
-            ? `downloaded ${successCount} and added ${result.changedCount || 0} to library`
+            ? notImportedCount > 0
+              ? `downloaded ${successCount}; ${notImportedCount} not imported`
+              : `downloaded ${successCount} and added ${importedCount || result.changedCount || successCount} to library`
             : `downloaded ${successCount} file${successCount === 1 ? "" : "s"}`
+        );
+        showAppToast(
+          notImportedCount > 0
+            ? `${notImportedCount} downloaded file${notImportedCount === 1 ? "" : "s"} not imported`
+            : `added ${importedCount || successCount} to library`,
+          notImportedCount > 0 ? "info" : "success"
         );
         if (settings.downloadAutoAdd) changeView("library", "unknown");
       } else {
@@ -6473,10 +6607,18 @@ function MainModeApp() {
     setDownloadBusy(true);
     setDownloadResults([]);
     setPlayerError("");
+    setSpotifyFetchError("");
+    setSpotifyTracks((items) => items.map((track: any) => (
+      selected.some((selectedTrack) => selectedTrack.id === track.id)
+        ? { ...track, downloadStatus: "queued", downloadError: "", downloadMessage: "Queued" }
+        : track
+    )));
     setDownloadQueue(
       selected.map((t, i) => ({
         id: `spt_${t.id}_${i}`,
-        url: `spotify:search:${t.title}`,
+        spotifyTrackId: t.id,
+        source: "spotify",
+        url: `spotify:search:${t.artist ? `${t.artist} ` : ""}${t.title}`,
         title: t.artist ? `${t.artist} — ${t.title}` : t.title,
         status: "queued" as const,
         progress: 0,
@@ -6522,9 +6664,6 @@ function MainModeApp() {
         setDownloadFolderLabel(result.downloadFolder || settings.downloadFolder || "");
 
         const downloads = result.downloads || [];
-        setDownloadResults(downloads);
-        syncDownloadFilesToQueue(downloads);
-
         const successCount = downloads.filter((d: DownloadResult) => d.ok).length;
         const failCount = downloads.filter((d: DownloadResult) => !d.ok).length;
 
@@ -6543,6 +6682,39 @@ function MainModeApp() {
             console.warn("[localtify spotify library refresh failed]", refreshError);
           }
         }
+
+        const enrichedDownloads = enrichDownloadResultsWithLibraryMatches(downloads, nextSongs);
+        setDownloadResults(enrichedDownloads);
+        syncDownloadFilesToQueue(enrichedDownloads, nextSongs);
+
+        setSpotifyTracks((items) => items.map((track: any) => {
+          const selectedIndex = selected.findIndex((selectedTrack) => selectedTrack.id === track.id);
+          if (selectedIndex === -1) return track;
+
+          const resultForTrack: any = enrichedDownloads[selectedIndex] || downloads[selectedIndex] || null;
+          if (!resultForTrack) {
+            return {
+              ...track,
+              downloadStatus: "failed",
+              downloadError: "No result returned for this track.",
+              downloadMessage: "No result returned"
+            };
+          }
+
+          return {
+            ...track,
+            downloadStatus: resultForTrack.ok ? "done" : "failed",
+            downloadError: resultForTrack.ok ? "" : friendlyDownloadError(resultForTrack.error || "Spotify download failed."),
+            downloadMessage: resultForTrack.ok
+              ? resultForTrack.importedToLibrary
+                ? "Added to library"
+                : "Downloaded, not imported"
+              : "Failed — retry available",
+            downloadedFilePath: resultForTrack.filePath || "",
+            importedToLibrary: Boolean(resultForTrack.importedToLibrary),
+            librarySongId: resultForTrack.librarySongId || ""
+          };
+        }));
 
         setSongs(nextSongs);
 
@@ -6601,21 +6773,46 @@ function MainModeApp() {
         }
 
         if (successCount > 0) {
-          trackSongsImported(result.changedCount || successCount, "downloads");
-          setStatusText(`downloaded ${successCount} track${successCount !== 1 ? "s" : ""} from spotify`);
+          const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
+          const notImportedCount = enrichedDownloads.filter((item: any) => item.ok && !item.importedToLibrary).length;
+          trackSongsImported(result.changedCount || importedCount || successCount, "downloads");
+          setStatusText(
+            failCount > 0
+              ? `spotify finished: ${successCount} done, ${failCount} failed`
+              : notImportedCount > 0
+                ? `spotify finished: ${successCount} downloaded, ${notImportedCount} not imported`
+                : `spotify finished: ${importedCount || successCount} added to library`
+          );
+          showAppToast(
+            failCount > 0
+              ? `Spotify: ${successCount} done, ${failCount} failed`
+              : `Spotify added ${importedCount || successCount} to library`,
+            failCount > 0 ? "info" : "success"
+          );
           if (settings.downloadAutoAdd && nextSongs.length) changeView("library", "unknown");
         } else {
           setStatusText("spotify download finished — no tracks added");
           setPlayerError("no tracks downloaded. check the queue for errors.");
+          showAppToast("Spotify download failed — retry from the queue", "error");
         }
 
         if (failCount > 0) {
-          console.warn("[localitfy spotify partial failures]", downloads);
+          const firstFailure = enrichedDownloads.find((item: any) => !item.ok);
+          setSpotifyFetchError(firstFailure ? friendlyDownloadError(firstFailure.error || "Some Spotify tracks failed.") : "Some Spotify tracks failed. Retry failed items from the queue.");
+          console.warn("[localtify spotify partial failures]", enrichedDownloads);
+        } else {
+          setSpotifyFetchError("");
         }
       }
     } catch (error) {
+      const message = friendlyDownloadError((error as Error)?.message || "Spotify download failed.");
       console.error("[localtify spotify download failed]", error);
-      setSpotifyFetchError(String((error as Error)?.message || "Download failed."));
+      setSpotifyFetchError(message);
+      setSpotifyTracks((items) => items.map((track: any) => (
+        selected.some((selectedTrack) => selectedTrack.id === track.id)
+          ? { ...track, downloadStatus: "failed", downloadError: message, downloadMessage: "Failed — retry available" }
+          : track
+      )));
       setStatusText("spotify download failed");
     } finally {
       setSpotifyDownloadBusy(false);
@@ -8633,20 +8830,98 @@ function MainModeApp() {
     );
   }
 
+
+  function renderSidebarBehaviorRestoreCard() {
+    if (settingsCategory !== "appearance") return null;
+
+    const sidebarModeOptions: Array<{
+      id: "fixed" | "slim" | "hover";
+      label: string;
+      note: string;
+      preview: string;
+    }> = [
+      {
+        id: "fixed",
+        label: "Fixed",
+        note: "Full sidebar always visible.",
+        preview: "steady"
+      },
+      {
+        id: "slim",
+        label: "Slim",
+        note: "Icons only, more room for the app.",
+        preview: "compact"
+      },
+      {
+        id: "hover",
+        label: "Hover open",
+        note: "Slim normally, slides open when hovered.",
+        preview: "slide"
+      }
+    ];
+
+    return (
+      <section className="settingsPageCard sidebarBehaviorRestoreCardV327" aria-label="Sidebar behavior">
+        <div className="settingsSectionTitle sidebarBehaviorTitleV327">
+          <span>layout</span>
+          <strong>Sidebar behavior</strong>
+          <small>Bring back fixed, slim, or hover-open sidebar without restoring the noisy visual settings panel.</small>
+        </div>
+
+        <div className="sidebarBehaviorPreviewV327" data-mode={settings.sidebarBehavior || "fixed"} aria-hidden="true">
+          <span className="sidebarPreviewRailV327">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="sidebarPreviewPanelV327">
+            <b />
+            <b />
+            <b />
+          </span>
+        </div>
+
+        <div className="sidebarBehaviorChoicesV327" role="group" aria-label="Choose sidebar behavior">
+          {sidebarModeOptions.map((option) => {
+            const active = (settings.sidebarBehavior || "fixed") === option.id;
+
+            return (
+              <button
+                key={option.id}
+                type="button"
+                className={`sidebarBehaviorChoiceV327 ${active ? "active" : ""}`}
+                onClick={() => updateSetting("sidebarBehavior", option.id)}
+                aria-pressed={active}
+              >
+                <span className="sidebarChoiceDotV327" aria-hidden="true" />
+                <span className="sidebarChoiceCopyV327">
+                  <strong>{option.label}</strong>
+                  <small>{option.note}</small>
+                </span>
+                <em>{option.preview}</em>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
+
   function renderSettingsCategoryContent() {
     return (
-      <Suspense
-        fallback={
-          <div className="settingsPageCard settingsLazyLoading" role="status" aria-live="polite">
-            <div className="settingsSectionTitle">
-              <span>settings</span>
-              <strong>loading this section</strong>
-              <small>only loading the panel you opened, so startup stays lighter.</small>
+      <>
+        <Suspense
+          fallback={
+            <div className="settingsPageCard settingsLazyLoading" role="status" aria-live="polite">
+              <div className="settingsSectionTitle">
+                <span>settings</span>
+                <strong>loading this section</strong>
+                <small>only loading the panel you opened, so startup stays lighter.</small>
+              </div>
             </div>
-          </div>
-        }
-      >
-        <SettingsCategoryContent
+          }
+        >
+          <SettingsCategoryContent
           settingsCategory={settingsCategory}
         currentTheme={currentTheme}
         settings={settings}
@@ -8724,7 +8999,9 @@ function MainModeApp() {
         resetLibraryLayoutSettings={resetLibraryLayoutSettings}
         resetAllSettingsSafely={resetAllSettingsSafely}
         />
-      </Suspense>
+        </Suspense>
+        {renderSidebarBehaviorRestoreCard()}
+      </>
     );
   }
 
@@ -8952,6 +9229,9 @@ function MainModeApp() {
     handleSpotifyLogout,
     ready,
     retryDownload,
+    retrySpotifyTrack,
+    clearFailedDownloads,
+    clearFinishedDownloads,
     openDownloadedSongInLibrary,
     convertLocalMedia,
     convertBusy,

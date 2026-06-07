@@ -7158,3 +7158,188 @@ body.localtifyPerfV301 .settingsPage :is(.settingsCategoryButton, .settingsTabBu
   color: rgba(var(--accent-rgb), 0.74);
 }
 
+
+/* localtify 0.3.8 V327 — restore the useful sidebar behavior setting only.
+   V324 hid the noisy micro visual settings panel; this card is added from App.tsx
+   so fixed/slim/hover is visible again without bringing back every no-op option. */
+.sidebarBehaviorRestoreCardV327{
+  display: grid !important;
+  gap: 16px !important;
+  overflow: hidden !important;
+}
+
+.sidebarBehaviorTitleV327 small{
+  max-width: 62ch !important;
+}
+
+.sidebarBehaviorPreviewV327{
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+  padding: 12px;
+  border: 1px solid rgba(var(--accent-rgb),0.13);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 18% 28%, rgba(var(--accent-rgb),0.18), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,0.055), rgba(255,255,255,0.014));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.sidebarPreviewRailV327,
+.sidebarPreviewPanelV327{
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.sidebarPreviewRailV327{
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  transition: width 360ms cubic-bezier(.16,1,.3,1), transform 360ms cubic-bezier(.16,1,.3,1);
+}
+
+.sidebarPreviewRailV327 i{
+  width: 28px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb),0.35);
+  box-shadow: 0 0 18px rgba(var(--accent-rgb),0.15);
+}
+
+.sidebarPreviewPanelV327{
+  display: grid;
+  align-content: center;
+  gap: 9px;
+  padding: 14px;
+}
+
+.sidebarPreviewPanelV327 b{
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+}
+
+.sidebarPreviewPanelV327 b:nth-child(2){ width: 72%; }
+.sidebarPreviewPanelV327 b:nth-child(3){ width: 46%; }
+
+.sidebarBehaviorPreviewV327[data-mode="slim"]{
+  grid-template-columns: 56px minmax(0, 1fr);
+}
+
+.sidebarBehaviorPreviewV327[data-mode="hover"] .sidebarPreviewRailV327{
+  animation: sidebarPreviewSlideV327 2.4s cubic-bezier(.16,1,.3,1) infinite;
+}
+
+@keyframes sidebarPreviewSlideV327{
+  0%, 100%{ transform: translate3d(0,0,0); width: 48px; }
+  44%, 64%{ transform: translate3d(0,0,0); width: 74px; }
+}
+
+.sidebarBehaviorChoicesV327{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+}
+
+.sidebarBehaviorChoiceV327{
+  min-height: 86px;
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  grid-template-areas:
+    "dot copy"
+    "tag copy";
+  gap: 6px 10px;
+  align-items: start;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 17px;
+  color: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.035);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 220ms cubic-bezier(.22,1,.36,1),
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.sidebarBehaviorChoiceV327:hover{
+  transform: translateY(-2px);
+  border-color: rgba(var(--accent-rgb),0.24);
+  background: rgba(var(--accent-rgb),0.075);
+}
+
+.sidebarBehaviorChoiceV327.active{
+  color: #fff;
+  border-color: rgba(var(--accent-rgb),0.42);
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),0.16), rgba(var(--accent-rgb),0.065));
+  box-shadow:
+    0 14px 34px rgba(0,0,0,0.20),
+    inset 0 0 0 1px rgba(var(--accent-rgb),0.09);
+}
+
+.sidebarChoiceDotV327{
+  grid-area: dot;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.055);
+  margin-top: 2px;
+}
+
+.sidebarBehaviorChoiceV327.active .sidebarChoiceDotV327{
+  border-color: rgba(var(--accent-rgb),0.54);
+  background:
+    radial-gradient(circle at center, #fff 0 30%, transparent 33%),
+    var(--accent);
+  box-shadow: 0 0 16px rgba(var(--accent-rgb),0.24);
+}
+
+.sidebarChoiceCopyV327{
+  grid-area: copy;
+  min-width: 0;
+}
+
+.sidebarChoiceCopyV327 strong{
+  display: block;
+  font-size: 12.5px;
+  letter-spacing: -0.015em;
+}
+
+.sidebarChoiceCopyV327 small{
+  display: block;
+  margin-top: 3px;
+  color: rgba(255,255,255,0.54);
+  font-size: 10.5px;
+  line-height: 1.28;
+}
+
+.sidebarBehaviorChoiceV327 em{
+  grid-area: tag;
+  align-self: end;
+  justify-self: start;
+  padding: 3px 6px;
+  border-radius: 999px;
+  color: rgba(var(--accent-rgb),0.92);
+  background: rgba(var(--accent-rgb),0.10);
+  font-size: 9.5px;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+@media (max-width: 880px){
+  .sidebarBehaviorChoicesV327{
+    grid-template-columns: 1fr;
+  }
+}

@@ -17497,3 +17497,365 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   mask-size: calc(100% - 10px) 100%;
   -webkit-mask-size: calc(100% - 10px) 100%;
 }
+
+
+/* localtify 0.3.8 V326 — downloads and Spotify reliability polish */
+.downloadQueueHeaderActions{
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tinyDownloadAction{
+  min-height: 30px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+}
+
+.spotifyErrorV326{
+  display: grid;
+  gap: 3px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 120, 120, 0.22);
+  border-radius: 14px;
+  color: rgba(255,255,255,0.9);
+  background: linear-gradient(180deg, rgba(255,80,100,0.10), rgba(255,255,255,0.035));
+}
+
+.spotifyErrorV326 strong{
+  font-size: 12px;
+  letter-spacing: -0.01em;
+}
+
+.spotifyErrorV326 span{
+  color: rgba(255,255,255,0.68);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.spotifyTrackItemV326{
+  grid-template-columns: 48px minmax(0, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.spotifyTrackItemV326.done{
+  border-color: rgba(var(--accent-rgb), 0.28) !important;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.08), rgba(255,255,255,0.035)) !important;
+}
+
+.spotifyTrackItemV326.failed{
+  border-color: rgba(255, 96, 122, 0.28) !important;
+  background: linear-gradient(90deg, rgba(255, 96, 122, 0.10), rgba(255,255,255,0.032)) !important;
+}
+
+.spotifyTrackTitleLine{
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.spotifySourceBadge,
+.spotifyTrackStatus{
+  min-height: 19px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.spotifySourceBadge{
+  color: #031007;
+  background: #1ed760;
+}
+
+.spotifyTrackStatus{
+  color: rgba(255,255,255,0.72);
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.055);
+}
+
+.spotifyTrackStatus.done,
+.spotifyTrackStatus.downloaded{
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb),0.24);
+  background: rgba(var(--accent-rgb),0.09);
+}
+
+.spotifyTrackStatus.failed{
+  color: #ff6f8d;
+  border-color: rgba(255, 111, 141, 0.25);
+  background: rgba(255, 111, 141, 0.10);
+}
+
+.spotifyTrackMeta small{
+  display: block;
+  margin-top: 3px;
+  color: rgba(255,255,255,0.50);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.spotifyTrackMeta .spotifyTrackError{
+  color: #ff8ba1;
+}
+
+.spotifyRetryButton{
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 11px;
+  border: 1px solid rgba(255,255,255,0.11);
+  border-radius: 999px;
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.07);
+  font-size: 11px;
+  font-weight: 900;
+  transition:
+    transform 160ms cubic-bezier(.22,1,.36,1),
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.spotifyRetryButton:hover{
+  transform: translateY(-1px);
+  border-color: rgba(var(--accent-rgb),0.28);
+  background: rgba(var(--accent-rgb),0.12);
+}
+
+.downloadResultV326{
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.downloadResultV326.warn{
+  border-color: rgba(255, 193, 110, 0.24) !important;
+  background: linear-gradient(90deg, rgba(255, 193, 110, 0.09), rgba(255,255,255,0.032)) !important;
+}
+
+.downloadResultV326.warn > span{
+  color: #ffc16e !important;
+  background: rgba(255, 193, 110, 0.12) !important;
+}
+
+/* localtify 0.3.8 V327 — restore sidebar fixed / slim / hover-open behavior.
+   This is a real working layout setting again, not a hidden/no-op visual option. */
+.app{
+  --sidebar-slim-width: 78px;
+  --sidebar-hover-open-width: clamp(218px, var(--sidebar-width, 249px), 320px);
+  --sidebar-slide-ease: cubic-bezier(.16, 1, .3, 1);
+}
+
+.app .appShell,
+.app .sidebar,
+.app .sidebar .navItem,
+.app .sidebar .navText,
+.app .sidebar .sidebarBottom,
+.app .sidebar .mainAction,
+.app .sidebar .sidebarResizeHandle{
+  transition:
+    grid-template-columns 360ms var(--sidebar-slide-ease),
+    width 360ms var(--sidebar-slide-ease),
+    min-width 360ms var(--sidebar-slide-ease),
+    max-width 360ms var(--sidebar-slide-ease),
+    transform 360ms var(--sidebar-slide-ease),
+    opacity 220ms ease,
+    padding 260ms var(--sidebar-slide-ease),
+    border-color 260ms ease,
+    background 260ms ease,
+    box-shadow 260ms ease !important;
+}
+
+.app[data-sidebar-behavior="fixed"] .appShell{
+  grid-template-columns: minmax(184px, var(--sidebar-width, 249px)) minmax(0, 1fr) !important;
+}
+
+.app[data-sidebar-behavior="fixed"] .sidebar{
+  width: var(--sidebar-width-live, var(--sidebar-width, 249px)) !important;
+  min-width: 184px !important;
+  max-width: 340px !important;
+  overflow: hidden !important;
+}
+
+.app[data-sidebar-behavior="fixed"] .sidebar .navText,
+.app[data-sidebar-behavior="fixed"] .sidebar .mainAction span:not(.buttonInlineIcon),
+.app[data-sidebar-behavior="fixed"] .sidebar .buttonInlineIcon + *{
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .appShell{
+  grid-template-columns: var(--sidebar-slim-width) minmax(0, 1fr) !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar{
+  width: var(--sidebar-slim-width) !important;
+  min-width: var(--sidebar-slim-width) !important;
+  max-width: var(--sidebar-slim-width) !important;
+  padding-inline: 10px !important;
+  overflow: hidden !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .navItem{
+  grid-template-columns: 1fr !important;
+  justify-items: center !important;
+  gap: 0 !important;
+  padding-inline: 8px !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .navText{
+  opacity: 0 !important;
+  width: 0 !important;
+  max-width: 0 !important;
+  transform: translate3d(-12px, 0, 0) !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .sidebarResizeHandle{
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction{
+  width: 54px !important;
+  min-width: 54px !important;
+  padding-inline: 0 !important;
+  justify-content: center !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction .buttonInlineIcon{
+  margin: 0 !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction .buttonInlineIcon + *,
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction span:not(.buttonInlineIcon){
+  display: none !important;
+}
+
+.app[data-sidebar-behavior="hover"] .appShell{
+  grid-template-columns: var(--sidebar-slim-width) minmax(0, 1fr) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar{
+  width: var(--sidebar-slim-width) !important;
+  min-width: var(--sidebar-slim-width) !important;
+  max-width: var(--sidebar-hover-open-width) !important;
+  padding-inline: 10px !important;
+  overflow: hidden !important;
+  z-index: 90 !important;
+  transform: translate3d(0, 0, 0) !important;
+  will-change: width, transform;
+  box-shadow:
+    8px 0 34px rgba(0,0,0,0),
+    inset -1px 0 0 rgba(var(--accent-rgb),0.16) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within{
+  width: var(--sidebar-hover-open-width) !important;
+  min-width: var(--sidebar-hover-open-width) !important;
+  padding-inline: 12px !important;
+  border-color: rgba(var(--accent-rgb),0.26) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.105), rgba(0,0,0,0.18) 38%, rgba(0,0,0,0.36)),
+    var(--localtify-sidebar-bg, rgba(12, 8, 20, .96)) !important;
+  box-shadow:
+    22px 0 70px rgba(0,0,0,0.46),
+    0 0 0 1px rgba(var(--accent-rgb),0.16) inset,
+    inset -1px 0 0 rgba(var(--accent-rgb),0.34) !important;
+  backdrop-filter: blur(20px) saturate(124%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(124%) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar .navItem{
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  justify-items: stretch !important;
+  transform: translate3d(0,0,0) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navItem{
+  grid-template-columns: 1fr !important;
+  justify-items: center !important;
+  gap: 0 !important;
+  padding-inline: 8px !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar .navText,
+.app[data-sidebar-behavior="hover"] .sidebar .mainAction .buttonInlineIcon + *,
+.app[data-sidebar-behavior="hover"] .sidebar .mainAction span:not(.buttonInlineIcon){
+  opacity: 0 !important;
+  transform: translate3d(-16px, 0, 0) scale(.98) !important;
+  pointer-events: none !important;
+  filter: blur(2px) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .navText,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText,
+.app[data-sidebar-behavior="hover"] .sidebar:hover .mainAction .buttonInlineIcon + *,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .mainAction .buttonInlineIcon + *,
+.app[data-sidebar-behavior="hover"] .sidebar:hover .mainAction span:not(.buttonInlineIcon),
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .mainAction span:not(.buttonInlineIcon){
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+  pointer-events: auto !important;
+  filter: blur(0) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar .sidebarBottom{
+  transform: translate3d(0, 8px, 0) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .sidebarBottom,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .sidebarBottom{
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction{
+  width: 54px !important;
+  min-width: 54px !important;
+  padding-inline: 0 !important;
+  justify-content: center !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar .sidebarResizeHandle{
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar .navItem:hover{
+  transform: translate3d(3px, 0, 0) !important;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navItem:hover{
+  transform: translate3d(0, -1px, 0) scale(1.035) !important;
+}
+
+@media (max-width: 920px){
+  .app[data-sidebar-behavior="fixed"] .appShell,
+  .app[data-sidebar-behavior="slim"] .appShell,
+  .app[data-sidebar-behavior="hover"] .appShell{
+    grid-template-columns: 76px minmax(0, 1fr) !important;
+  }
+
+  .app[data-sidebar-behavior="fixed"] .sidebar,
+  .app[data-sidebar-behavior="slim"] .sidebar,
+  .app[data-sidebar-behavior="hover"] .sidebar{
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+  }
+}
