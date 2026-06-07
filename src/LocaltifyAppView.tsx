@@ -1,4 +1,5 @@
 // @ts-nocheck
+/* localtify 0.3.8 V324 lightweight analytics view. */
 /* localtify 0.3.8 V309 album folder import foundation. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
@@ -3777,6 +3778,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     likedPercent,
     libraryHealthLabel,
     analyticsStatCards,
+    analyticsRecapCards,
     topArtists,
     recentImportWeekCount,
     recentlyAdded,
@@ -5547,28 +5549,39 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
             )}
 
             {view === "analytics" && (
-              <section className="analyticsLayout analyticsLocalV030">
-                <section className="panel analyticsLocalHero">
-                  <div className="analyticsLocalHeroCopy">
-                    <p className="eyebrow">local music stats</p>
-                    <h3>listening analytics</h3>
+              <section className="analyticsLiteV324">
+                <section className="panel analyticsLiteHeroV324">
+                  <div className="analyticsLiteHeroCopyV324">
+                    <p className="eyebrow">local recap</p>
+                    <h3>monthly and yearly recap</h3>
                     <p>
                       {songs.length
-                        ? `Built from your own library: ${songs.length.toLocaleString()} song${songs.length === 1 ? "" : "s"}, ${totalPlays.toLocaleString()} total play${totalPlays === 1 ? "" : "s"}, and ${totalMinutes.toLocaleString()} minute${totalMinutes === 1 ? "" : "s"} listened.`
-                        : "Import songs and localtify will build this from your local library data."}
+                        ? "A lighter recap page built from your local library, import dates, play counts, likes, and file health. No heavy charts."
+                        : "Import music and localtify will build a simple monthly and yearly recap here."}
                     </p>
                   </div>
 
-                  <div className="analyticsLocalHeroStats" aria-label="quick local analytics">
-                    <span><strong>{playedPercent}%</strong><small>played</small></span>
-                    <span><strong>{likedPercent}%</strong><small>liked</small></span>
+                  <div className="analyticsLiteHeroStatsV324" aria-label="recap summary">
+                    <span><strong>{songs.length.toLocaleString()}</strong><small>songs</small></span>
+                    <span><strong>{totalPlays.toLocaleString()}</strong><small>plays</small></span>
                     <span><strong>{libraryHealthLabel}</strong><small>health</small></span>
                   </div>
                 </section>
 
-                <section className="analyticsLocalGrid" aria-label="local listening statistics">
+                <section className="analyticsRecapGridV324" aria-label="monthly and yearly recap cards">
+                  {(analyticsRecapCards || []).map((card) => (
+                    <article key={card.label} className="analyticsRecapCardV324">
+                      <span>{card.label}</span>
+                      <strong title={card.value}>{card.value}</strong>
+                      <small>{card.note}</small>
+                      <em>{card.meta}</em>
+                    </article>
+                  ))}
+                </section>
+
+                <section className="analyticsLiteGridV324" aria-label="lightweight local stats">
                   {analyticsStatCards.map((card) => (
-                    <article key={card.label} className={`statCard analyticsLocalCard${card.wide ? " analyticsLocalCardWide" : ""}`}>
+                    <article key={card.label} className="analyticsLiteStatV324">
                       <span>{card.label}</span>
                       <strong title={card.value}>{card.value}</strong>
                       <small>{card.note}</small>
@@ -5576,83 +5589,33 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   ))}
                 </section>
 
-                <section className="analyticsLocalSplit">
-                  <section className="panel analyticsLocalPanel">
-                    <div className="panelHead analyticsLocalPanelHead">
-                      <div>
-                        <p className="eyebrow">top artists</p>
-                        <h3>artist stats</h3>
-                      </div>
-                      <span>{topArtists.length ? `${topArtists.length} shown` : "empty"}</span>
-                    </div>
-
-                    <div className="analyticsLocalArtistList">
-                      {topArtists.length ? (
-                        topArtists.map((artist, index) => {
-                          const maxArtistPlays = Math.max(1, ...topArtists.map((item) => item.plays || 0));
-                          const width = Math.max(5, Math.round(((artist.plays || 0) / maxArtistPlays) * 100));
-
-                          return (
-                            <div key={artist.name} className="analyticsLocalArtistRow">
-                              <span>{String(index + 1).padStart(2, "0")}</span>
-                              <div>
-                                <strong>{artist.name}</strong>
-                                <small>{artist.plays.toLocaleString()} plays • {artist.songs} song{artist.songs === 1 ? "" : "s"}</small>
-                              </div>
-                              <i aria-hidden="true"><b style={{ width: `${width}%` }} /></i>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <p className="softText">artists will show here after you import music.</p>
-                      )}
-                    </div>
-                  </section>
-
-                  <section className="panel analyticsLocalPanel">
-                    <div className="panelHead analyticsLocalPanelHead">
-                      <div>
-                        <p className="eyebrow">recent imports</p>
-                        <h3>fresh files</h3>
-                      </div>
-                      <span>{recentImportWeekCount} this week</span>
-                    </div>
-
-                    <div className="analyticsLocalRecentList">
-                      {(recentlyAdded.length ? recentlyAdded.slice(0, 6) : songs.slice(0, 6)).map((song) => (
-                        <button key={song.id} type="button" className="analyticsLocalRecentRow" onClick={() => void selectSong(song.id, true)}>
-                          <Cover song={song} className="analyticsLocalRecentArt" />
-                          <div>
-                            <strong>{prettyTitle(song.title, 8)}</strong>
-                            <small>{prettyMeta(song.artist)} • {formatTime(song.duration)}</small>
-                          </div>
-                        </button>
-                      ))}
-                      {!songs.length ? <p className="softText">nothing imported yet.</p> : null}
-                    </div>
-                  </section>
-                </section>
-
-                <section className="panel analyticsLocalPanel analyticsLocalHealthPanel">
-                  <div className="panelHead analyticsLocalPanelHead">
+                <section className="panel analyticsLitePanelV324">
+                  <div className="panelHead analyticsLitePanelHeadV324">
                     <div>
-                      <p className="eyebrow">library health</p>
-                      <h3>local data check</h3>
+                      <p className="eyebrow">recap ready</p>
+                      <h3>simple enough for monthly or yearly posts</h3>
                     </div>
-                    <span>from your database</span>
+                    <span>{recentImportWeekCount} imported this week</span>
                   </div>
 
-                  <div className="analyticsLocalHealthGrid">
-                    <div><strong>{playedPercent}%</strong><small>played percent</small></div>
-                    <div><strong>{likedPercent}%</strong><small>liked percent</small></div>
-                    <div><strong>{neverPlayedSongs.length}</strong><small>never played</small></div>
-                    <div><strong>{missingFileCount}</strong><small>missing files</small></div>
-                    <div><strong>{libraryLengthLabel}</strong><small>library length</small></div>
-                    <div><strong>{formatTime(averageSongSeconds)}</strong><small>average length</small></div>
-                    <div><strong>{longestSong ? formatTime(longestSong.duration) : "0:00"}</strong><small>longest track</small></div>
+                  <div className="analyticsLiteCopyGridV324">
+                    <div>
+                      <strong>Monthly recap</strong>
+                      <p>Use the monthly card for new tracks, added duration, and artists imported this month.</p>
+                    </div>
+                    <div>
+                      <strong>Yearly recap</strong>
+                      <p>Use the yearly card for yearly imports, album count, and total listening context.</p>
+                    </div>
+                    <div>
+                      <strong>All-time recap</strong>
+                      <p>Use all-time plays and listened time for a quick wrapped-style summary.</p>
+                    </div>
                   </div>
 
-                  <p className="softText">These stats stay local and are calculated from your songs, play counts, durations, likes, playlists, and import dates.</p>
+                  <p className="softText analyticsLiteNoteV324">
+                    Recaps use local library data only. Exact monthly play history can be added later when localtify stores dated play events.
+                  </p>
                 </section>
               </section>
             )}

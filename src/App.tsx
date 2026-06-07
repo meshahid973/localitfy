@@ -1,4 +1,5 @@
 // @ts-nocheck
+/* localtify 0.3.8 V324 analytics cleanup + visual settings trim. */
 /* localtify 0.3.8 V320/V323 final bug sweep + diagnostics cleanup. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
@@ -2429,60 +2430,103 @@ function MainModeApp() {
     return picked.slice(0, 10);
   }, [recentlyAdded, songs]);
 
-  const topArtists = useMemo(() => {
-    const artistMap = new Map<string, { name: string; plays: number; songs: number }>();
-
-    songs.forEach((song) => {
-      const name = prettyMeta(song.artist);
-      const current = artistMap.get(name) ?? { name, plays: 0, songs: 0 };
-      current.plays += song.playCount || 0;
-      current.songs += 1;
-      artistMap.set(name, current);
-    });
-
-    return [...artistMap.values()].sort((a, b) => b.plays - a.plays || b.songs - a.songs).slice(0, 5);
-  }, [songs]);
-
   const recentImportWeekCount = useMemo(() => {
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
-    return songs.filter((song) => {
+    let count = 0;
+    for (const song of songs) {
       const addedAt = Date.parse(song.dateAdded || "");
-      return Number.isFinite(addedAt) && addedAt >= cutoff;
-    }).length;
+      if (Number.isFinite(addedAt) && addedAt >= cutoff) count += 1;
+    }
+
+    return count;
   }, [songs]);
 
-  const missingFileCount = useMemo(() => songs.filter((song) => song.fileExists === false).length, [songs]);
+  const missingFileCount = useMemo(() => {
+    let count = 0;
+    for (const song of songs) {
+      if (song.fileExists === false) count += 1;
+    }
+    return count;
+  }, [songs]);
+
   const libraryHealthPercent = songs.length ? Math.max(0, Math.round(((songs.length - missingFileCount) / songs.length) * 100)) : 0;
   const libraryHealthLabel = !songs.length
     ? "empty"
     : missingFileCount > 0
       ? `${libraryHealthPercent}% ok`
       : "healthy";
+
+  const analyticsRecapCards = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const yearStart = new Date(now.getFullYear(), 0, 1).getTime();
+
+    let monthImports = 0;
+    let yearImports = 0;
+    let monthSeconds = 0;
+    let yearSeconds = 0;
+    const monthArtists = new Set<string>();
+    const yearArtists = new Set<string>();
+    const yearAlbums = new Set<string>();
+
+    for (const song of songs) {
+      const addedAt = Date.parse(song.dateAdded || "");
+      if (!Number.isFinite(addedAt)) continue;
+
+      if (addedAt >= monthStart) {
+        monthImports += 1;
+        monthSeconds += Math.max(0, Number(song.duration) || 0);
+        const artist = String(song.artist || "").trim().toLowerCase();
+        if (artist && artist !== "unknown artist") monthArtists.add(artist);
+      }
+
+      if (addedAt >= yearStart) {
+        yearImports += 1;
+        yearSeconds += Math.max(0, Number(song.duration) || 0);
+        const artist = String(song.artist || "").trim().toLowerCase();
+        const album = String(song.album || "").trim().toLowerCase();
+        if (artist && artist !== "unknown artist") yearArtists.add(artist);
+        if (album && album !== "unknown album") yearAlbums.add(album);
+      }
+    }
+
+    return [
+      {
+        label: "monthly recap",
+        value: monthImports ? `${monthImports.toLocaleString()} new` : "no new songs",
+        note: monthImports ? `${formatTime(monthSeconds)} added this month` : "import music this month to build a recap",
+        meta: `${monthArtists.size} artist${monthArtists.size === 1 ? "" : "s"}`
+      },
+      {
+        label: "yearly recap",
+        value: yearImports ? `${yearImports.toLocaleString()} added` : "year is quiet",
+        note: yearImports ? `${formatTime(yearSeconds)} imported this year` : "your yearly recap starts with imports",
+        meta: `${yearAlbums.size} album${yearAlbums.size === 1 ? "" : "s"}`
+      },
+      {
+        label: "all-time recap",
+        value: listenedTimeLabel,
+        note: `${totalPlays.toLocaleString()} play${totalPlays === 1 ? "" : "s"} across ${songs.length.toLocaleString()} song${songs.length === 1 ? "" : "s"}`,
+        meta: mostPlayed ? `top: ${prettyTitle(mostPlayed.title, 7)}` : "play music to build this"
+      }
+    ];
+  }, [songs, listenedTimeLabel, totalPlays, mostPlayed]);
+
   const analyticsStatCards = useMemo(() => ([
-    { label: "total songs", value: songs.length.toLocaleString(), note: `${libraryArtistCount} artist${libraryArtistCount === 1 ? "" : "s"}` },
-    { label: "total plays", value: totalPlays.toLocaleString(), note: `${averagePlaysPerSong} avg per song` },
-    { label: "minutes listened", value: totalMinutes.toLocaleString(), note: listenedTimeLabel },
-    { label: "most played song", value: mostPlayed ? prettyTitle(mostPlayed.title, 12) : "none yet", note: mostPlayed ? `${mostPlayed.playCount || 0} plays` : "play music first", wide: true },
-    { label: "recent imports", value: recentImportWeekCount.toLocaleString(), note: "last 7 days" },
-    { label: "library health", value: libraryHealthLabel, note: missingFileCount > 0 ? `${missingFileCount} missing file${missingFileCount === 1 ? "" : "s"}` : "all files look available" },
-    { label: "liked percent", value: `${likedPercent}%`, note: `${likedSongs.length} liked` },
-    { label: "played percent", value: `${playedPercent}%`, note: `${activeSongs.length} played` }
+    { label: "songs", value: songs.length.toLocaleString(), note: `${libraryArtistCount} artist${libraryArtistCount === 1 ? "" : "s"}` },
+    { label: "plays", value: totalPlays.toLocaleString(), note: `${averagePlaysPerSong} avg per song` },
+    { label: "listened", value: listenedTimeLabel, note: `${totalMinutes.toLocaleString()} minute${totalMinutes === 1 ? "" : "s"}` },
+    { label: "health", value: libraryHealthLabel, note: missingFileCount > 0 ? `${missingFileCount} missing` : "files available" }
   ]), [
     songs.length,
     libraryArtistCount,
     totalPlays,
     averagePlaysPerSong,
-    totalMinutes,
     listenedTimeLabel,
-    mostPlayed,
-    recentImportWeekCount,
+    totalMinutes,
     libraryHealthLabel,
-    missingFileCount,
-    likedPercent,
-    likedSongs.length,
-    playedPercent,
-    activeSongs.length
+    missingFileCount
   ]);
 
   useEffect(() => {
@@ -5075,6 +5119,13 @@ function MainModeApp() {
       showAmbientGradient: defaultSettings.showAmbientGradient,
       coverColorSyncMode: defaultSettings.coverColorSyncMode,
       showFloatingNotes: defaultSettings.showFloatingNotes,
+      homeBannerType: VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType,
+      blurEffects: VISUAL_CUSTOMIZATION_DEFAULTS.blurEffects,
+      mediaCardBackground: VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground,
+      homeLayoutMode: VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode,
+      starsIntensity: VISUAL_CUSTOMIZATION_DEFAULTS.starsIntensity,
+      sidebarBehavior: VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior,
+      playerBackgroundStyle: VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle,
       animeVisuals: true,
       animatedBackgrounds: true,
       gifVisualsMode: defaultSettings.gifVisualsMode,
@@ -8848,7 +8899,8 @@ function MainModeApp() {
     likedPercent,
     libraryHealthLabel,
     analyticsStatCards,
-    topArtists,
+    analyticsRecapCards,
+    topArtists: [],
     recentImportWeekCount,
     recentlyAdded,
     neverPlayedSongs,

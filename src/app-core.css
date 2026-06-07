@@ -5466,3 +5466,270 @@ body.localtifyPerfV301 .titleBar,
 body.localtifyPerfV301 .sidebar{
   contain: layout paint style;
 }
+
+/* localtify 0.3.8 V324 — lightweight analytics / recap page.
+   Replaces the old heavy local analytics layout with simple recap cards. */
+.analyticsLiteV324{
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 14px !important;
+  padding-bottom: 24px !important;
+}
+
+.analyticsLiteHeroV324,
+.analyticsLitePanelV324,
+.analyticsRecapCardV324,
+.analyticsLiteStatV324{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.042), rgba(255,255,255,.018)),
+    rgba(8,8,10,.70) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.22) !important;
+  backdrop-filter: blur(12px) saturate(114%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(114%) !important;
+  contain: layout paint style;
+}
+
+.analyticsLiteHeroV324{
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: clamp(16px, 2.6vw, 28px) !important;
+  align-items: center !important;
+  padding: clamp(20px, 2.8vw, 30px) !important;
+  border-radius: 24px !important;
+}
+
+.analyticsLiteHeroCopyV324{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 9px !important;
+}
+
+.analyticsLiteHeroCopyV324 h3{
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: clamp(36px, 5vw, 68px) !important;
+  line-height: .9 !important;
+  letter-spacing: -.07em !important;
+  font-weight: 950 !important;
+}
+
+.analyticsLiteHeroCopyV324 p:not(.eyebrow){
+  max-width: 720px !important;
+  margin: 0 !important;
+  color: var(--muted) !important;
+  font-size: 13.5px !important;
+  line-height: 1.5 !important;
+  font-weight: 760 !important;
+}
+
+.analyticsLiteHeroStatsV324{
+  min-width: min(330px, 34vw) !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  gap: 8px !important;
+}
+
+.analyticsLiteHeroStatsV324 span,
+.analyticsRecapCardV324,
+.analyticsLiteStatV324{
+  border-radius: 18px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  background: rgba(255,255,255,.035) !important;
+}
+
+.analyticsLiteHeroStatsV324 span{
+  min-width: 0 !important;
+  min-height: 78px !important;
+  display: grid !important;
+  align-content: center !important;
+  gap: 4px !important;
+  padding: 12px !important;
+}
+
+.analyticsLiteHeroStatsV324 strong,
+.analyticsRecapCardV324 strong,
+.analyticsLiteStatV324 strong{
+  min-width: 0 !important;
+  max-width: 100% !important;
+  color: var(--text) !important;
+  line-height: .96 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.055em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.analyticsLiteHeroStatsV324 strong{
+  font-size: clamp(19px, 2vw, 30px) !important;
+}
+
+.analyticsLiteHeroStatsV324 small,
+.analyticsRecapCardV324 span,
+.analyticsLiteStatV324 span,
+.analyticsRecapCardV324 small,
+.analyticsLiteStatV324 small,
+.analyticsRecapCardV324 em{
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+  font-weight: 820 !important;
+  font-style: normal !important;
+}
+
+.analyticsRecapGridV324{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.analyticsRecapCardV324{
+  min-height: 150px !important;
+  display: grid !important;
+  align-content: space-between !important;
+  gap: 8px !important;
+  padding: 17px !important;
+}
+
+.analyticsRecapCardV324 span,
+.analyticsLiteStatV324 span{
+  color: var(--accent) !important;
+  font-weight: 950 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  font-size: 10px !important;
+}
+
+.analyticsRecapCardV324 strong{
+  font-size: clamp(25px, 3vw, 42px) !important;
+}
+
+.analyticsRecapCardV324 em{
+  width: fit-content !important;
+  max-width: 100% !important;
+  padding: 5px 8px !important;
+  border-radius: 999px !important;
+  color: rgba(var(--accent-rgb), .92) !important;
+  background: rgba(var(--accent-rgb), .10) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.analyticsLiteGridV324{
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.analyticsLiteStatV324{
+  min-height: 106px !important;
+  display: grid !important;
+  align-content: space-between !important;
+  gap: 8px !important;
+  padding: 15px !important;
+}
+
+.analyticsLiteStatV324 strong{
+  font-size: clamp(22px, 2.4vw, 34px) !important;
+}
+
+.analyticsLitePanelV324{
+  padding: 18px !important;
+  border-radius: 22px !important;
+}
+
+.analyticsLitePanelHeadV324{
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 14px !important;
+  border-bottom: 1px solid rgba(255,255,255,.075) !important;
+}
+
+.analyticsLitePanelHeadV324 h3{
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: clamp(22px, 2vw, 32px) !important;
+  line-height: .95 !important;
+  letter-spacing: -.055em !important;
+}
+
+.analyticsLitePanelHeadV324 > span{
+  flex: 0 0 auto !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  background: rgba(255,255,255,.04) !important;
+  padding: 7px 10px !important;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+}
+
+.analyticsLiteCopyGridV324{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.analyticsLiteCopyGridV324 > div{
+  min-width: 0 !important;
+  min-height: 98px !important;
+  display: grid !important;
+  gap: 6px !important;
+  align-content: start !important;
+  padding: 14px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  background: rgba(255,255,255,.032) !important;
+}
+
+.analyticsLiteCopyGridV324 strong{
+  color: var(--text) !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+}
+
+.analyticsLiteCopyGridV324 p,
+.analyticsLiteNoteV324{
+  margin: 0 !important;
+  color: var(--muted) !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  font-weight: 750 !important;
+}
+
+.analyticsLiteNoteV324{
+  margin-top: 12px !important;
+}
+
+@media (max-width: 1040px){
+  .analyticsLiteHeroV324,
+  .analyticsRecapGridV324,
+  .analyticsLiteCopyGridV324{
+    grid-template-columns: 1fr !important;
+  }
+
+  .analyticsLiteHeroStatsV324{
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .analyticsLiteGridV324{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px){
+  .analyticsLiteHeroStatsV324,
+  .analyticsLiteGridV324{
+    grid-template-columns: 1fr !important;
+  }
+}
+

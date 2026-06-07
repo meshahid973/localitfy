@@ -7141,3 +7141,20 @@ body.localtifyPerfV301 .settingsPage :is(.settingsCategoryButton, .settingsTabBu
 .settingsPage :where(.settingSwitchCard i, .toggleRow input[type="checkbox"]){
   flex: 0 0 auto !important;
 }
+
+/* localtify 0.3.8 V324 — remove noisy/no-op visual settings.
+   The actual working appearance controls stay: theme, custom colors, cover color sync,
+   ambient/glow/anime/reduced-motion basics. The old V205 micro-layout panel is hidden. */
+.settingsPage :where(.visualCustomizationCardV205){
+  display: none !important;
+}
+
+.settingsPage :where(.visualOptionGroupV205, .visualOptionGridV205, .visualOptionButtonV205){
+  display: none !important;
+}
+
+.settingsPage :where(.settingsCategoryMotion-appearance) .settingsSectionTitle small::after{
+  content: "  Visual micro-options that barely changed the app were removed for 0.3.8.";
+  color: rgba(var(--accent-rgb), 0.74);
+}
+
