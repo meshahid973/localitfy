@@ -9121,3 +9121,542 @@ body.localtifyPerfV301 .settingsPage :is(.settingsCategoryButton, .settingsTabBu
   }
 }
 
+
+/* localtify 0.3.8 V337 — feedback success/error polish + webhook status. */
+.feedbackSettingsCardV331.feedbackReady{
+  border-color: rgba(90,255,148,0.22) !important;
+}
+
+.feedbackSettingsCardV331.feedbackNotReady{
+  border-color: rgba(255,184,107,0.18) !important;
+}
+
+.feedbackWebhookStatusV337{
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 14px;
+  padding: 12px 13px;
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.035);
+}
+
+.feedbackWebhookStatusV337 strong{
+  color: rgba(255,255,255,0.92);
+  font-size: 0.92rem;
+  letter-spacing: -0.02em;
+}
+
+.feedbackWebhookStatusV337 small{
+  color: rgba(255,255,255,0.58);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  font-weight: 760;
+}
+
+.feedbackWebhookStatusV337 em{
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 3px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: rgba(220,255,232,0.96);
+  background: rgba(90,255,148,0.11);
+  border: 1px solid rgba(90,255,148,0.18);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feedbackWebhookStatusV337.ready{
+  border-color: rgba(90,255,148,0.22);
+  background: rgba(28,164,76,0.095);
+}
+
+.feedbackWebhookStatusV337.notReady{
+  border-color: rgba(255,184,107,0.22);
+  background: rgba(120,70,18,0.12);
+}
+
+.feedbackPromptCardV331.feedbackSendingV337{
+  cursor: progress;
+}
+
+.feedbackPromptCardV331.feedbackSentV337{
+  border-color: rgba(90,255,148,0.34) !important;
+  animation: localtifyFeedbackSentPopV337 520ms cubic-bezier(.22,1,.36,1) both;
+}
+
+.feedbackPromptCardV331.feedbackSentV337 .feedbackPromptTopV331::after{
+  content: "sent";
+  margin-left: auto;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: #041008;
+  background: linear-gradient(135deg, #8dffa8, #18c95f);
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feedbackStatusV331.success{
+  position: relative;
+  overflow: hidden;
+  color: rgba(225,255,234,0.98) !important;
+  background: linear-gradient(135deg, rgba(32,220,96,0.18), rgba(13,84,42,0.14)) !important;
+  border: 1px solid rgba(90,255,148,0.28) !important;
+}
+
+.feedbackStatusV331.success::before{
+  content: "✓";
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border-radius: 999px;
+  color: #041008;
+  background: #52ff8e;
+  box-shadow: 0 0 18px rgba(82,255,142,0.24);
+}
+
+.feedbackSendButtonV331.isSending{
+  pointer-events: none;
+  opacity: 0.92 !important;
+}
+
+@keyframes localtifyFeedbackSentPopV337{
+  0% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-2px) scale(1.006); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+
+/* localtify 0.3.8 V339 — custom theme studio redesign.
+   CSS-only polish because the theme UI lives in SettingsCategoryContent.
+   Goal: make custom themes feel guided, not like a scary color-token dump. */
+.customThemeStudioV025,
+.themeEditorCard,
+.simpleThemeEditorGridV025,
+.customThemeEditorBodyV025{
+  position: relative;
+}
+
+.customThemeStudioV025,
+.themeEditorCard{
+  overflow: hidden !important;
+  border-color: rgba(var(--accent-rgb), .18) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.02)),
+    rgba(8,8,14,.84) !important;
+  box-shadow:
+    0 18px 54px rgba(0,0,0,.32),
+    inset 0 1px 0 rgba(255,255,255,.042) !important;
+}
+
+.simpleThemeEditorHeadV025,
+.themeEditorHead{
+  align-items: stretch !important;
+  padding: 16px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 20px !important;
+  background: rgba(255,255,255,.028) !important;
+}
+
+.simpleThemeEditorHeadV025 .settingsSectionTitle,
+.themeEditorHead .settingsSectionTitle{
+  margin: 0 !important;
+}
+
+.simpleThemeEditorHeadV025 .settingsSectionTitle::before,
+.themeEditorHead .settingsSectionTitle::before{
+  content: "step 1 · choose the vibe";
+  width: fit-content;
+  margin-bottom: 7px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.82);
+  background: rgba(var(--accent-rgb), .12);
+  border: 1px solid rgba(var(--accent-rgb), .18);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.simpleThemeActionsV025,
+.themeEditorQuickActions{
+  min-width: 0 !important;
+  align-content: center !important;
+}
+
+.simpleThemeActionsV025 .settingsTinyButton,
+.themeEditorQuickActions .settingsTinyButton,
+.themeEditorQuickActions .settingsActionButton{
+  min-height: 40px !important;
+  border-radius: 13px !important;
+}
+
+.customThemeTopV025{
+  grid-template-columns: minmax(240px, .72fr) minmax(360px, 1.28fr) !important;
+  gap: 14px !important;
+}
+
+.themeNameField,
+.settingsField{
+  border-radius: 18px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.018)),
+    rgba(255,255,255,.028) !important;
+}
+
+.themeNameField::before{
+  content: "step 2 · name it";
+  width: fit-content;
+  margin-bottom: 2px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.78);
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.075);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.customThemePreviewV025,
+.simpleThemePreviewV025,
+.themeEditorPreview{
+  position: relative;
+  overflow: hidden !important;
+  min-height: 188px !important;
+  border-radius: 22px !important;
+  border-color: rgba(var(--accent-rgb), .20) !important;
+  background:
+    radial-gradient(circle at 85% 10%, rgba(var(--accent-rgb), .18), transparent 36%),
+    linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.018)),
+    rgba(0,0,0,.24) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 14px 34px rgba(0,0,0,.20) !important;
+}
+
+.customThemePreviewV025::before,
+.simpleThemePreviewV025::before,
+.themeEditorPreview::before{
+  content: "live preview";
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  z-index: 2;
+  padding: 6px 8px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.82);
+  background: rgba(0,0,0,.25);
+  border: 1px solid rgba(255,255,255,.085);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.themePreviewNowV025,
+.themePreviewCard{
+  min-height: 94px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), .12), rgba(255,255,255,.026)),
+    rgba(0,0,0,.26) !important;
+}
+
+.themePreviewPlayerV025,
+.themePreviewPlayer{
+  min-height: 74px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  background: rgba(0,0,0,.30) !important;
+}
+
+.customThemePresetSectionV025{
+  padding: 16px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 20px !important;
+  background: rgba(255,255,255,.026) !important;
+}
+
+.customThemePresetHeaderV025::before{
+  content: "step 3 · start from a preset";
+  display: inline-flex;
+  width: fit-content;
+  margin: 0 0 8px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.78);
+  background: rgba(var(--accent-rgb), .10);
+  border: 1px solid rgba(var(--accent-rgb), .16);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.customThemePresetHeaderV025{
+  display: grid !important;
+  gap: 4px !important;
+}
+
+.customThemePresetGridV025,
+.savedThemeListV025{
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.customThemePresetButtonV025,
+.savedThemeItemV025 button{
+  min-height: 72px !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--preset-accent, var(--accent)) 14%, rgba(255,255,255,.035)), rgba(255,255,255,.024)),
+    rgba(255,255,255,.026) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.customThemeTokenListV025,
+.themeTokenGrid,
+.simpleThemeTokenGridV025{
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.customThemeTokenListV025::before,
+.themeTokenGrid::before,
+.simpleThemeTokenGridV025::before{
+  content: "step 4 · fine tune only what you need";
+  grid-column: 1 / -1;
+  width: fit-content;
+  margin-bottom: 2px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.78);
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.075);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.themeTokenCard,
+.simpleThemeTokenCardV025,
+.customThemeTokenRowV025{
+  min-height: 76px !important;
+  grid-template-columns: 42px minmax(0,1fr) auto !important;
+  gap: 12px !important;
+  padding: 13px 14px !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.030) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.030) !important;
+}
+
+.themeTokenCard:hover,
+.simpleThemeTokenCardV025:hover,
+.customThemeTokenRowV025:hover{
+  transform: translate3d(0,-1px,0) !important;
+  border-color: rgba(var(--accent-rgb), .24) !important;
+  background: rgba(255,255,255,.042) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.038) !important;
+}
+
+.themeColorInput{
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 12px !important;
+}
+
+.themeTokenCopy strong{
+  font-size: 13px !important;
+}
+
+.themeTokenCopy small{
+  font-size: 11px !important;
+}
+
+.themeTokenCard code,
+.simpleThemeTokenCardV025 code,
+.customThemeTokenRowV025 code{
+  min-width: 82px;
+  text-align: center;
+  color: rgba(255,255,255,.78) !important;
+  background: rgba(0,0,0,.24) !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+}
+
+.accentTextInput,
+.settingsInlineInput,
+.themeNameField input{
+  min-height: 42px !important;
+  border-radius: 12px !important;
+}
+
+@media (max-width: 980px){
+  .customThemeTopV025{
+    grid-template-columns: 1fr !important;
+  }
+
+  .themeEditorHead,
+  .simpleThemeEditorHeadV025{
+    display: grid !important;
+  }
+}
+
+
+/* localtify 0.3.8 V340 — smoother crossfade audio polish.
+   Small UI polish only; the real audio logic lives in App.tsx. */
+.settingSwitchCard:has(strong),
+.toggleRow:has(strong){
+  scroll-margin-top: 18px;
+}
+
+.settingsPage :where(.settingSwitchCard, .toggleRow) strong{
+  text-wrap: balance;
+}
+
+
+
+/* localtify 0.3.8 V341 — playback always starts at beginning.
+   Crossfade is still available, but normal song starts ignore saved resume position. */
+.settingsPage :where(.toggleRow, .settingSwitchCard) small{
+  text-wrap: pretty;
+}
+
+/* localtify 0.3.8 V342 — fixed musical crossfade curve.
+   Audio now keeps the outgoing song full briefly, drops it faster, and fades
+   the incoming song in smoothly. Resume-position playback stays disabled. */
+.settingsPage :where(.settingSwitchCard, .toggleRow) small{
+  text-wrap: pretty;
+}
+
+
+/* localtify 0.3.8 V343 — playback lab and crossfade preview. */
+.playbackLabCardV343{
+  display: grid;
+  gap: 14px;
+  overflow: hidden;
+  border-color: rgba(var(--accent-rgb), 0.18) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
+    rgba(8,8,14,.84) !important;
+}
+
+.playbackModeGridV343{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.playbackModeChoiceV343{
+  min-height: 92px;
+  padding: 14px;
+  border-radius: 17px;
+  border: 1px solid rgba(255,255,255,.082);
+  display: grid;
+  align-content: end;
+  gap: 6px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.016)),
+    rgba(255,255,255,.026);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.034);
+  transition:
+    transform 180ms cubic-bezier(.22,1,.36,1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 220ms ease;
+}
+
+.playbackModeChoiceV343:hover{
+  transform: translate3d(0,-1px,0);
+  border-color: rgba(var(--accent-rgb), .24);
+}
+
+.playbackModeChoiceV343.active{
+  border-color: rgba(var(--accent-rgb), .42);
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), .18), rgba(255,255,255,.025)),
+    rgba(255,255,255,.035);
+  box-shadow:
+    0 12px 28px rgba(var(--accent-rgb), .10),
+    inset 0 1px 0 rgba(255,255,255,.048);
+}
+
+.playbackModeChoiceV343 strong{
+  font-size: 1.02rem;
+  font-weight: 950;
+  letter-spacing: -.035em;
+}
+
+.playbackModeChoiceV343 small{
+  color: var(--text-2);
+  font-size: .78rem;
+  line-height: 1.35;
+  font-weight: 760;
+}
+
+.playbackEffectSlidersV343{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+}
+
+.playbackEffectSlidersV343 label{
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 17px;
+  border: 1px solid rgba(255,255,255,.075);
+  background: rgba(255,255,255,.026);
+}
+
+.playbackEffectSlidersV343 label > span{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.playbackEffectSlidersV343 strong{
+  color: var(--text);
+  font-size: .88rem;
+  font-weight: 900;
+}
+
+.playbackEffectSlidersV343 em{
+  min-width: 48px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), .10);
+  border: 1px solid rgba(var(--accent-rgb), .16);
+  text-align: center;
+  font-style: normal;
+  font-size: .74rem;
+  font-weight: 950;
+}
+
+.playbackEffectSlidersV343 input[type="range"]{
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+@media (max-width: 760px){
+  .playbackModeGridV343,
+  .playbackEffectSlidersV343{
+    grid-template-columns: 1fr;
+  }
+}
+

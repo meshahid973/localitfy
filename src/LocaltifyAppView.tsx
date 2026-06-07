@@ -3825,6 +3825,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     handleSpotifyLogout,
     ready,
     retryDownload,
+    retrySpotifyTrack,
+    clearFailedDownloads,
+    clearFinishedDownloads,
     openDownloadedSongInLibrary,
     convertLocalMedia,
     convertBusy,
@@ -3900,6 +3903,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setDeleteTarget,
     removeSong,
     audioRef,
+    handleAudioTimeUpdate,
+    handleAudioPause,
+    handleAudioEnded,
     handleCanPlay,
     handlePlaying,
     pendingPlayRef,
@@ -3917,9 +3923,27 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setStatusText,
     resetPlayCountTracker,
     stopFade,
+    stopCrossfadeAuto,
     stopProgressLoop
 
   } = props;
+
+  function downloadStatusLabel(status: string) {
+    if (status === "done") return "done";
+    if (status === "failed") return "failed";
+    if (status === "cancelled") return "cancelled";
+    if (status === "converting") return "converting";
+    if (status === "downloading") return "downloading";
+    return "queued";
+  }
+
+  function spotifyTrackStatusLabel(track: any, selected: boolean) {
+    if (track.downloadStatus === "done") return track.importedToLibrary === false ? "downloaded" : "done";
+    if (track.downloadStatus === "failed") return "failed";
+    if (track.downloadStatus === "queued") return "queued";
+    if (track.downloadStatus === "downloading") return "downloading";
+    return selected ? "ready" : "not selected";
+  }
 
   const [albumSearch, setAlbumSearch] = useState("");
   const [albumSortMode, setAlbumSortMode] = useState("recent");
@@ -5549,39 +5573,62 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
             )}
 
             {view === "analytics" && (
-              <section className="analyticsLiteV324">
-                <section className="panel analyticsLiteHeroV324">
-                  <div className="analyticsLiteHeroCopyV324">
+              <section className="analyticsStudioV339" aria-label="lightweight listening recap">
+                <section className="analyticsHeroV339">
+                  <div className="analyticsHeroCopyV339">
                     <p className="eyebrow">local recap</p>
-                    <h3>monthly and yearly recap</h3>
+                    <h3>your listening, cleaned up</h3>
                     <p>
                       {songs.length
-                        ? "A lighter recap page built from your local library, import dates, play counts, likes, and file health. No heavy charts."
-                        : "Import music and localtify will build a simple monthly and yearly recap here."}
+                        ? "Fast recap cards for monthly, yearly, and all-time library stats. No heavy charts, no huge tables, just the parts worth sharing."
+                        : "Import songs and localtify will build a lightweight recap here."}
                     </p>
                   </div>
 
-                  <div className="analyticsLiteHeroStatsV324" aria-label="recap summary">
-                    <span><strong>{songs.length.toLocaleString()}</strong><small>songs</small></span>
-                    <span><strong>{totalPlays.toLocaleString()}</strong><small>plays</small></span>
-                    <span><strong>{libraryHealthLabel}</strong><small>health</small></span>
+                  <div className="analyticsHeroMeterV339" aria-label="library readiness">
+                    <span style={{ "--meter": `${playedPercent}%` } as CSSProperties}>
+                      <strong>{playedPercent}%</strong>
+                      <small>played</small>
+                    </span>
+                    <span style={{ "--meter": `${likedPercent}%` } as CSSProperties}>
+                      <strong>{likedPercent}%</strong>
+                      <small>liked</small>
+                    </span>
+                    <span style={{ "--meter": `${libraryHealthLabel === "healthy" ? 100 : Math.max(0, 100 - missingFileCount * 8)}%` } as CSSProperties}>
+                      <strong>{libraryHealthLabel}</strong>
+                      <small>health</small>
+                    </span>
                   </div>
                 </section>
 
-                <section className="analyticsRecapGridV324" aria-label="monthly and yearly recap cards">
-                  {(analyticsRecapCards || []).map((card) => (
-                    <article key={card.label} className="analyticsRecapCardV324">
-                      <span>{card.label}</span>
-                      <strong title={card.value}>{card.value}</strong>
-                      <small>{card.note}</small>
-                      <em>{card.meta}</em>
-                    </article>
-                  ))}
+                <section className="analyticsRecapGridV339" aria-label="recap cards">
+                  {(analyticsRecapCards || []).map((card, index) => {
+                    const progress =
+                      index === 0
+                        ? Math.min(100, Math.max(8, recentImportWeekCount * 12))
+                        : index === 1
+                          ? Math.min(100, Math.max(10, songs.length ? 64 : 10))
+                          : Math.min(100, Math.max(10, playedPercent));
+
+                    return (
+                      <article
+                        key={card.label}
+                        className={`analyticsRecapCardV339 recap-${index}`}
+                        style={{ "--recap-progress": `${progress}%` } as CSSProperties}
+                      >
+                        <span>{card.label}</span>
+                        <strong title={card.value}>{card.value}</strong>
+                        <small>{card.note}</small>
+                        <em>{card.meta}</em>
+                        <i aria-hidden="true" />
+                      </article>
+                    );
+                  })}
                 </section>
 
-                <section className="analyticsLiteGridV324" aria-label="lightweight local stats">
+                <section className="analyticsSnapshotV339" aria-label="quick stats">
                   {analyticsStatCards.map((card) => (
-                    <article key={card.label} className="analyticsLiteStatV324">
+                    <article key={card.label} className="analyticsSnapshotCardV339">
                       <span>{card.label}</span>
                       <strong title={card.value}>{card.value}</strong>
                       <small>{card.note}</small>
@@ -5589,33 +5636,48 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   ))}
                 </section>
 
-                <section className="panel analyticsLitePanelV324">
-                  <div className="panelHead analyticsLitePanelHeadV324">
-                    <div>
-                      <p className="eyebrow">recap ready</p>
-                      <h3>simple enough for monthly or yearly posts</h3>
-                    </div>
-                    <span>{recentImportWeekCount} imported this week</span>
+                <section className="analyticsMiniBoardV339" aria-label="recap helper">
+                  <div className="analyticsMiniCardV339">
+                    <span>this week</span>
+                    <strong>{recentImportWeekCount.toLocaleString()}</strong>
+                    <small>new import{recentImportWeekCount === 1 ? "" : "s"}</small>
                   </div>
 
-                  <div className="analyticsLiteCopyGridV324">
-                    <div>
-                      <strong>Monthly recap</strong>
-                      <p>Use the monthly card for new tracks, added duration, and artists imported this month.</p>
-                    </div>
-                    <div>
-                      <strong>Yearly recap</strong>
-                      <p>Use the yearly card for yearly imports, album count, and total listening context.</p>
-                    </div>
-                    <div>
-                      <strong>All-time recap</strong>
-                      <p>Use all-time plays and listened time for a quick wrapped-style summary.</p>
-                    </div>
+                  <div className="analyticsMiniCardV339">
+                    <span>library length</span>
+                    <strong>{libraryLengthLabel}</strong>
+                    <small>{averageSongSeconds ? `${formatTime(averageSongSeconds)} average track` : "import songs to calculate"}</small>
                   </div>
 
-                  <p className="softText analyticsLiteNoteV324">
-                    Recaps use local library data only. Exact monthly play history can be added later when localtify stores dated play events.
-                  </p>
+                  <div className="analyticsMiniCardV339">
+                    <span>needs attention</span>
+                    <strong>{(missingFileCount + neverPlayedSongs.length).toLocaleString()}</strong>
+                    <small>{missingFileCount ? `${missingFileCount} missing file${missingFileCount === 1 ? "" : "s"}` : `${neverPlayedSongs.length} never played`}</small>
+                  </div>
+
+                  <div className="analyticsMiniCardV339">
+                    <span>longest track</span>
+                    <strong>{longestSong ? formatTime(longestSong.duration || 0) : "—"}</strong>
+                    <small>{longestSong ? prettyTitle(longestSong.title, 5) : "no songs yet"}</small>
+                  </div>
+                </section>
+
+                <section className="analyticsSharePanelV339">
+                  <div>
+                    <p className="eyebrow">recap ready</p>
+                    <h3>built for monthly or yearly posts</h3>
+                    <p>
+                      Use the three recap cards above for a clean localtify wrapped-style summary. It stays lightweight by using already-loaded local library data only.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="softButton analyticsShareButtonV339"
+                    onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.map((card) => `${card.label}: ${card.value}`).join(" • ")}`)}
+                    disabled={!songs.length}
+                  >
+                    copy recap line
+                  </button>
                 </section>
               </section>
             )}
@@ -5719,13 +5781,17 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                         <button
                           className="heroGhost"
-                          onClick={() => {
-                            setDownloadResults([]);
-                            setDownloadQueue((items) => items.filter((item) => item.status === "queued" || item.status === "downloading" || item.status === "converting"));
-                          }}
-                          disabled={downloadBusy || (!downloadResults.length && !downloadQueue.some((item) => item.status === "done" || item.status === "failed" || item.status === "cancelled"))}
+                          onClick={() => clearFinishedDownloads?.()}
+                          disabled={downloadBusy || !downloadQueue.some((item) => item.status === "done")}
                         >
                           clear finished
+                        </button>
+                        <button
+                          className="heroGhost"
+                          onClick={() => clearFailedDownloads?.()}
+                          disabled={downloadBusy || !downloadQueue.some((item) => item.status === "failed" || item.status === "cancelled")}
+                        >
+                          clear failed
                         </button>
                       </div>
                     </>
@@ -5788,7 +5854,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       </div>
 
                       {spotifyFetchError ? (
-                        <div className="spotifyError">{spotifyFetchError}</div>
+                        <div className="spotifyError spotifyErrorV326">
+                          <strong>Spotify needs attention</strong>
+                          <span>{spotifyFetchError}</span>
+                        </div>
                       ) : null}
 
                       {/* ── Track list ── */}
@@ -5817,10 +5886,15 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           <div className="spotifyTrackItems">
                             {spotifyTracks.map((track, i) => {
                               const selected = spotifySelectedIds.has(track.id);
+                              const statusLabel = spotifyTrackStatusLabel(track, selected);
+                              const failed = track.downloadStatus === "failed";
+                              const done = track.downloadStatus === "done";
+                              const coverUrl = track.coverUrl || track.spotifyCoverUrl || track.albumCoverUrl;
+
                               return (
                                 <button
                                   key={track.id}
-                                  className={`spotifyTrackItem${selected ? " selected" : ""}`}
+                                  className={`spotifyTrackItem spotifyTrackItemV326${selected ? " selected" : ""}${failed ? " failed" : ""}${done ? " done" : ""}`}
                                   type="button"
                                   disabled={spotifyDownloadBusy}
                                   onClick={() => {
@@ -5832,18 +5906,44 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                     });
                                   }}
                                 >
-                                  {(track.coverUrl || track.spotifyCoverUrl || track.albumCoverUrl) ? (
+                                  {coverUrl ? (
                                     <span className="spotifyTrackArt" aria-hidden="true">
-                                      <img src={track.coverUrl || track.spotifyCoverUrl || track.albumCoverUrl} alt="" loading="lazy" decoding="async" />
+                                      <img src={coverUrl} alt="" loading="lazy" decoding="async" />
                                     </span>
                                   ) : (
                                     <span className="spotifyTrackIndex">{String(i + 1).padStart(2, "0")}</span>
                                   )}
                                   <div className="spotifyTrackMeta">
-                                    <strong>{track.title}</strong>
+                                    <div className="spotifyTrackTitleLine">
+                                      <strong>{track.title}</strong>
+                                      <span className="spotifySourceBadge">Spotify</span>
+                                      <span className={`spotifyTrackStatus ${statusLabel.replace(/\s+/g, "-")}`}>{statusLabel}</span>
+                                    </div>
                                     <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` · ${track.albumName}` : ""}</p>
+                                    {track.downloadMessage ? <small>{track.downloadMessage}</small> : null}
+                                    {track.downloadError ? <small className="spotifyTrackError">{track.downloadError}</small> : null}
                                   </div>
                                   <span className="spotifyTrackCheck" aria-hidden="true">{selected ? "✓" : ""}</span>
+                                  {failed ? (
+                                    <span
+                                      className="spotifyRetryButton"
+                                      role="button"
+                                      tabIndex={0}
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        void retrySpotifyTrack?.(track);
+                                      }}
+                                      onKeyDown={(event) => {
+                                        if (event.key === "Enter" || event.key === " ") {
+                                          event.preventDefault();
+                                          event.stopPropagation();
+                                          void retrySpotifyTrack?.(track);
+                                        }
+                                      }}
+                                    >
+                                      retry
+                                    </span>
+                                  ) : null}
                                 </button>
                               );
                             })}
@@ -5890,40 +5990,73 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           <p className="eyebrow">queue</p>
                           <h3>{downloadQueue.length} item{downloadQueue.length === 1 ? "" : "s"}</h3>
                         </div>
-                        <span>{downloadBusy ? "working" : "ready"}</span>
+                        <div className="downloadQueueHeaderActions">
+                          <span>{downloadBusy ? "working" : "ready"}</span>
+                          <button
+                            className="softButton tinyDownloadAction"
+                            onClick={() => clearFinishedDownloads?.()}
+                            disabled={downloadBusy || !downloadQueue.some((item) => item.status === "done")}
+                          >
+                            clear done
+                          </button>
+                          <button
+                            className="softButton tinyDownloadAction"
+                            onClick={() => clearFailedDownloads?.()}
+                            disabled={downloadBusy || !downloadQueue.some((item) => item.status === "failed" || item.status === "cancelled")}
+                          >
+                            clear failed
+                          </button>
+                        </div>
                       </div>
 
                       <div className="downloadQueueList">
-                        {downloadQueue.map((item, index) => (
-                          <div key={`${item.id}-${index}`} className={`downloadQueueItem ${item.status}`}>
-                            <div className="downloadQueueTop">
-                              <span className="downloadQueueIndex">{String(index + 1).padStart(2, "0")}</span>
-                              <div>
-                                <strong>{item.filename || item.title}</strong>
-                                <p>{item.message}</p>
+                        {downloadQueue.map((item, index) => {
+                          const done = item.status === "done";
+                          const failed = item.status === "failed" || item.status === "cancelled";
+                          const downloadedNotImported = done && item.importedToLibrary === false;
+                          const sourceLabel = item.source === "spotify" ? "Spotify" : "YouTube";
+
+                          return (
+                            <div
+                              key={`${item.id}-${index}`}
+                              className={`downloadQueueItem downloadQueueItemV338 ${item.status}${done ? " compactDone" : ""}${downloadedNotImported ? " notImported" : ""}`}
+                            >
+                              <div className="downloadQueueTop">
+                                <span className="downloadQueueIndex">{String(index + 1).padStart(2, "0")}</span>
+                                <div>
+                                  <strong>{item.filename || item.title}</strong>
+                                  <p>{item.message || downloadStatusLabel(item.status)}</p>
+                                </div>
+                                <small>{done ? "100%" : `${item.progress}%`}</small>
                               </div>
-                              <small>{item.progress}%</small>
-                            </div>
 
-                            <div className="downloadQueueTrack"><i style={{ width: `${clamp(item.progress, 0, 100)}%` }} /></div>
-
-                            <div className="downloadQueueMeta">
-                              <span>{item.status}</span>
-                              {item.speed ? <span>{item.speed}</span> : null}
-                              {item.eta ? <span>ETA {item.eta}</span> : null}
-                              {item.error ? <span>{item.error}</span> : null}
-                            </div>
-
-                            <div className="downloadQueueActions">
-                              {item.status === "failed" ? (
-                                <button className="softButton" onClick={() => void retryDownload(item.url)}>retry</button>
+                              {!done || downloadedNotImported ? (
+                                <div className="downloadQueueTrack"><i style={{ width: `${clamp(item.progress, 0, 100)}%` }} /></div>
                               ) : null}
-                              {item.status === "done" ? (
-                                <button className="softButton" onClick={() => openDownloadedSongInLibrary(item)}>open in library</button>
-                              ) : null}
+
+                              <div className="downloadQueueMeta">
+                                <span className="downloadSourceBadgeV338">{sourceLabel}</span>
+                                <span>{item.statusLabel || downloadStatusLabel(item.status)}</span>
+                                {item.speed ? <span>{item.speed}</span> : null}
+                                {item.eta ? <span>ETA {item.eta}</span> : null}
+                                {downloadedNotImported ? <span className="downloadWarnBadgeV338">downloaded, not imported</span> : null}
+                                {item.error ? <span className="downloadErrorBadgeV338">{item.error}</span> : null}
+                              </div>
+
+                              <div className="downloadQueueActions">
+                                {failed ? (
+                                  <button className="softButton" onClick={() => void retryDownload(item.url, item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                                ) : null}
+                                {done && item.importedToLibrary !== false ? (
+                                  <button className="softButton" onClick={() => openDownloadedSongInLibrary(item)}>open in library</button>
+                                ) : null}
+                                {downloadedNotImported ? (
+                                  <button className="softButton" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>open folder</button>
+                                ) : null}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ) : null}
@@ -5956,25 +6089,39 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     <div className="downloadResults downloadResultsV031">
                       <strong>finished downloads</strong>
 
-                      {downloadResults.map((item, index) => (
-                        <div
-                          key={`${item.url || item.filename || index}`}
-                          className={item.ok ? "downloadResult ok" : "downloadResult bad"}
-                        >
-                          <span>{item.ok ? "✓" : "!"}</span>
+                      {downloadResults.map((item: any, index) => {
+                        const imported = item.importedToLibrary !== false;
+                        const failed = !item.ok;
+                        return (
+                          <div
+                            key={`${item.url || item.filename || index}`}
+                            className={failed ? "downloadResult bad downloadResultV326" : imported ? "downloadResult ok downloadResultV326" : "downloadResult warn downloadResultV326"}
+                          >
+                            <span>{failed ? "!" : imported ? "✓" : "↓"}</span>
 
-                          <div>
-                            <strong>{item.ok ? item.filename || "downloaded audio" : "Download failed — retry?"}</strong>
-                            <p>{item.ok ? item.url : item.error || item.url || "unknown error"}</p>
+                            <div>
+                              <strong>{failed ? "Download failed" : imported ? "Added to library" : "Downloaded, not imported"}</strong>
+                              <p>
+                                {failed
+                                  ? item.error || item.url || "unknown error"
+                                  : imported
+                                    ? item.filename || item.url || "downloaded audio"
+                                    : "The file downloaded, but Localtify did not find it in the library. Check auto-add and the downloads folder."}
+                              </p>
+                              {!failed && imported ? <small className="downloadResultAddedV338">added to library</small> : null}
+                              {!failed && !imported ? <small className="downloadResultWarnV338">downloaded, not imported</small> : null}
+                            </div>
+
+                            {failed ? (
+                              <button className="softButton" onClick={() => void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                            ) : imported ? (
+                              <button className="softButton" onClick={() => openDownloadedSongInLibrary(item)}>open in library</button>
+                            ) : (
+                              <button className="softButton" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>open folder</button>
+                            )}
                           </div>
-
-                          {item.ok ? (
-                            <button className="softButton" onClick={() => openDownloadedSongInLibrary(item)}>open in library</button>
-                          ) : (
-                            <button className="softButton" onClick={() => void retryDownload(item.url || "")}>retry</button>
-                          )}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : null}
                 </section>
@@ -6437,6 +6584,11 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
           setIsPlaying(true);
         }}
         onPause={() => {
+          if (typeof handleAudioPause === "function") {
+            handleAudioPause();
+            return;
+          }
+
           if (!audioRef.current?.ended) {
             setIsPlaying(false);
           }
@@ -6444,11 +6596,21 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
         onLoadedMetadata={(event: SyntheticEvent<HTMLAudioElement>) => saveDuration(event.currentTarget.duration)}
         onDurationChange={(event: SyntheticEvent<HTMLAudioElement>) => saveDuration(event.currentTarget.duration)}
         onTimeUpdate={(event: SyntheticEvent<HTMLAudioElement>) => {
+          if (typeof handleAudioTimeUpdate === "function") {
+            handleAudioTimeUpdate(event);
+            return;
+          }
+
           const nextTime = event.currentTarget.currentTime;
           timeRef.current = nextTime;
           tickPlayCountTracker(nextTime);
         }}
         onEnded={() => {
+          if (typeof handleAudioEnded === "function") {
+            handleAudioEnded();
+            return;
+          }
+
           const endedSong = songRef.current || currentSong;
           markSongCompletedForPlayCount(endedSong);
           if (endedSong?.id) void patchSongLocal(endedSong.id, { playbackPosition: 0 });
@@ -6468,6 +6630,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
           resetPlayCountTracker();
 
           stopFade();
+          if (typeof stopCrossfadeAuto === "function") stopCrossfadeAuto();
           stopProgressLoop();
 
           window.localitfy.clearDiscordActivity().catch(() => undefined);

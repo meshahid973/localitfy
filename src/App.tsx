@@ -373,6 +373,16 @@ const FEEDBACK_CATEGORY_OPTIONS = [
 
 type FeedbackCategoryId = typeof FEEDBACK_CATEGORY_OPTIONS[number]["id"];
 
+function shouldOpenFeedbackPromptFromSettingsSearch(value: string) {
+  const query = normalizeSettingsSearch(value);
+  return /(^|\b)(feedback|send feedback|suggestion|suggestions|bug report|report bug|ui bug|ui issue|feature request)(\b|$)/.test(query);
+}
+
+function shouldOpenFeedbackPromptFromGlobalSearch(value: string) {
+  const query = value.trim().toLowerCase();
+  return query === "/feedback" || query === "/suggestion" || query === "/suggestions" || query === "/bug" || query === "/bugreport" || query === "/reportbug";
+}
+
 
 function shouldOpenOnboardingForThisRelease() {
   try {
@@ -407,6 +417,18 @@ function resetOnboardingForThisRelease() {
 
 function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const crossfadeIntervalRef = useRef<number | null>(null);
+  const crossfadeAutoStartedRef = useRef(false);
+  const crossfadeAutoTargetRef = useRef("");
+  const crossfadeMainPauseGuardRef = useRef(false);
+  const crossfadeLastStartAtRef = useRef(0);
+  const crossfadeHandoffClearTimerRef = useRef<number | null>(null);
+  const crossfadeHandoffRef = useRef<{
+    songId: string;
+    url: string;
+    time: number;
+    volume: number;
+  } | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const progressLoopTimeoutRef = useRef<number | null>(null);
@@ -442,6 +464,11 @@ function MainModeApp() {
   const beatAudioContextRef = useRef<AudioContext | null>(null);
   const beatAnalyserRef = useRef<AnalyserNode | null>(null);
   const beatSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const audioEffectDryGainRef = useRef<GainNode | null>(null);
+  const audioEffectWetGainRef = useRef<GainNode | null>(null);
+  const audioEffectDelayRef = useRef<DelayNode | null>(null);
+  const audioEffectFeedbackGainRef = useRef<GainNode | null>(null);
+  const audioEffectFilterRef = useRef<BiquadFilterNode | null>(null);
   const beatDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const beatSmoothRef = useRef({ bass: 0, mid: 0, energy: 0, phase: 0 });
   const beatReactiveTargetCacheRef = useRef<{ nodes: HTMLElement[]; refreshedAt: number; songId: string }>({
@@ -526,6 +553,16 @@ function MainModeApp() {
     kind: "idle" | "success" | "error";
     message: string;
   }>({ kind: "idle", message: "" });
+  const [feedbackConfigStatus, setFeedbackConfigStatus] = useState<{
+    ok?: boolean;
+    configured?: boolean;
+    valid?: boolean;
+    envName?: string;
+    status?: string;
+    label?: string;
+    message?: string;
+  } | null>(null);
+  const feedbackLastSentAtRef = useRef(0);
   const deferredSettingsSearch = useDeferredValue(settingsSearch);
   const [isViewSwitching, setIsViewSwitching] = useState(false);
   const [customThemeName, setCustomThemeName] = useState("My Custom Theme");
@@ -850,11 +887,23 @@ function MainModeApp() {
   const settingsSearchResultLabel = settingsSearchQuery
     ? visibleSettingsTabs.length
       ? `showing ${visibleSettingsTabs.length} matching section${visibleSettingsTabs.length === 1 ? "" : "s"}`
-      : "no exact section found — Search for settings such as Discord, theme, cover, update, volume."
-    : "Search for settings such as Discord, theme, cover, update, volume.";
+      : "no exact section found — Search for settings such as Discord, theme, cover, update, volume, feedback."
+    : "Search for settings such as Discord, theme, cover, update, volume, feedback.";
 
   function handleSettingsSearchInput(value: string) {
     setSettingsSearch(value);
+
+    if (shouldOpenFeedbackPromptFromSettingsSearch(value)) {
+      setSettingsCategory("advanced");
+
+      if (!feedbackPromptOpen) {
+        setFeedbackPromptManualOpen(true);
+        setFeedbackStatus({ kind: "idle", message: "" });
+        setFeedbackPromptOpen(true);
+      }
+
+      return;
+    }
 
     const nextCategory = resolveSettingsCategoryFromSearch(value);
     if (nextCategory && nextCategory !== settingsCategory) {
@@ -1002,6 +1051,11 @@ function MainModeApp() {
   const currentSong = useMemo(() => {
     return songs.find((song) => song.id === currentId) ?? null;
   }, [songs, currentId]);
+  const [crossfadePreviewSongId, setCrossfadePreviewSongId] = useState("");
+  const visualCurrentSong = useMemo(() => {
+    if (!crossfadePreviewSongId) return currentSong;
+    return songs.find((song) => song.id === crossfadePreviewSongId) ?? currentSong;
+  }, [crossfadePreviewSongId, songs, currentSong]);
   const screensaverVisualSource = screensaverImage;
 
   function clearScreensaverPreviewTimer() {
@@ -1089,8 +1143,8 @@ function MainModeApp() {
     };
   }, [currentSong?.id, isPlaying, screensaverPreviewActive, screensaverVisible, settings.animeVisuals, settings.animatedBackgrounds]);
 
-  const heroDisplayTitle = currentSong ? prettyTitle(currentSong.title, 9) : "drop in your music";
-  const heroDisplayArtist = currentSong ? prettyMeta(currentSong.artist) : "import songs to start listening";
+  const heroDisplayTitle = visualCurrentSong ? prettyTitle(visualCurrentSong.title, 9) : "drop in your music";
+  const heroDisplayArtist = visualCurrentSong ? prettyMeta(visualCurrentSong.artist) : "import songs to start listening";
   const heroTitleClass = heroTitleDensityClass(heroDisplayTitle);
 
   const songIdentityRef = useRef<string | null>(null);
@@ -1149,11 +1203,11 @@ function MainModeApp() {
   const queueDropHotRef = useRef(false);
   const themeSettlingRef = useRef(false);
   const songIdentity = useMemo(() => {
-    if (!currentSong) return "empty";
-    return [currentSong.id, currentSong.filePath, currentSong.title, currentSong.artist, currentSong.coverUrl]
+    if (!visualCurrentSong) return "empty";
+    return [visualCurrentSong.id, visualCurrentSong.filePath, visualCurrentSong.title, visualCurrentSong.artist, visualCurrentSong.coverUrl]
       .filter(Boolean)
       .join("::");
-  }, [currentSong?.id, currentSong?.filePath, currentSong?.title, currentSong?.artist, currentSong?.coverUrl]);
+  }, [visualCurrentSong?.id, visualCurrentSong?.filePath, visualCurrentSong?.title, visualCurrentSong?.artist, visualCurrentSong?.coverUrl]);
 
   useEffect(() => {
     if (!ready || !songs.length) return undefined;
@@ -1477,6 +1531,36 @@ function MainModeApp() {
     };
   }, [ready]);
 
+  useEffect(() => {
+    if (!ready || !window.localitfy?.getFeedbackStatus) return;
+
+    let cancelled = false;
+
+    runLocaltifyIdleTask(() => {
+      window.localitfy
+        .getFeedbackStatus?.()
+        .then((status: any) => {
+          if (!cancelled) setFeedbackConfigStatus(status || null);
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setFeedbackConfigStatus({
+              ok: false,
+              configured: false,
+              valid: false,
+              status: "unknown",
+              label: "Feedback status unavailable",
+              message: "The feedback status bridge did not respond."
+            });
+          }
+        });
+    }, 1200);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ready]);
+
   const diagnosticsInfo = useMemo(() => {
     const themeLabel = settings.customThemeEnabled ? `${currentTheme.name} + custom colors` : currentTheme.name;
     const discordStatus = settings.discordEnabled ? "enabled" : "disabled";
@@ -1494,6 +1578,11 @@ function MainModeApp() {
       : updatePrompt.lastCheckedAt
         ? "checked"
         : "not checked this session";
+    const feedbackWebhookStatus = feedbackConfigStatus?.configured
+      ? feedbackConfigStatus.valid
+        ? "enabled"
+        : "configured but invalid"
+      : "not configured";
     const electronVersion = String(performanceStatus?.electronVersion || "not reported yet");
     const chromeVersion = String(performanceStatus?.chromeVersion || "not reported yet");
     const packageSupport = platformInfo.id === "windows"
@@ -1515,6 +1604,7 @@ function MainModeApp() {
       { label: "downloads folder", value: downloadFolderStatus },
       { label: "Discord RPC", value: discordStatus },
       { label: "update status", value: updateStatus },
+      { label: "feedback webhook", value: feedbackWebhookStatus },
       { label: "startup status", value: startupStatus },
       { label: "platform support", value: packageSupport }
     ];
@@ -1534,6 +1624,7 @@ function MainModeApp() {
         `theme: ${themeLabel}`,
         `Discord RPC: ${discordStatus}`,
         `update status: ${updateStatus}`,
+        `feedback webhook: ${feedbackWebhookStatus}`,
         `startup status: ${startupStatus}`,
         `platform support: ${packageSupport}`
       ].join("\n")
@@ -1543,6 +1634,8 @@ function MainModeApp() {
     downloadFolderLabel,
     performanceStatus?.chromeVersion,
     performanceStatus?.electronVersion,
+    feedbackConfigStatus?.configured,
+    feedbackConfigStatus?.valid,
     platformInfo.id,
     platformInfo.label,
     platformInfo.releaseLabel,
@@ -2401,19 +2494,25 @@ function MainModeApp() {
   const totalPlays = useMemo(() => songs.reduce((total, song) => total + song.playCount, 0), [songs]);
 
   const libraryAlbumCount = useMemo(() => {
-    const names = songs
-      .map((song) => String(song.album || "").trim().toLowerCase())
-      .filter(Boolean);
+    const names = new Set<string>();
 
-    return new Set(names).size;
+    for (const song of songs) {
+      const album = String(song.album || "").trim().toLowerCase();
+      if (album) names.add(album);
+    }
+
+    return names.size;
   }, [songs]);
 
   const libraryArtistCount = useMemo(() => {
-    const names = songs
-      .map((song) => String(song.artist || "").trim().toLowerCase())
-      .filter(Boolean);
+    const names = new Set<string>();
 
-    return new Set(names).size;
+    for (const song of songs) {
+      const artist = String(song.artist || "").trim().toLowerCase();
+      if (artist) names.add(artist);
+    }
+
+    return names.size;
   }, [songs]);
 
   const totalMinutes = useMemo(() => {
@@ -2439,7 +2538,15 @@ function MainModeApp() {
   const libraryLengthLabel = formatTime(totalLibrarySeconds);
 
   const longestSong = useMemo(() => {
-    return [...songs].sort((a, b) => (b.duration || 0) - (a.duration || 0))[0] ?? null;
+    let longest: Song | null = null;
+
+    for (const song of songs) {
+      if (!longest || (song.duration || 0) > (longest.duration || 0)) {
+        longest = song;
+      }
+    }
+
+    return longest;
   }, [songs]);
 
   const recentlyAdded = useMemo(() => {
@@ -3035,11 +3142,9 @@ function MainModeApp() {
         const source = beatSourceRef.current || context.createMediaElementSource(audio);
         beatSourceRef.current = source;
 
-        source.connect(analyser);
-        analyser.connect(context.destination);
-
         beatAnalyserRef.current = analyser;
         beatDataRef.current = new Uint8Array(analyser.frequencyBinCount);
+        syncAudioEffectGraph(audio);
 
         return analyser;
       } catch {
@@ -3661,6 +3766,17 @@ function MainModeApp() {
   const handleSearchInput = (value: string) => {
     const command = value.trim().toLowerCase();
 
+    if (shouldOpenFeedbackPromptFromGlobalSearch(value)) {
+      setQuery("");
+      setSettingsOpen(false);
+      setFeedbackPromptManualOpen(true);
+      setFeedbackCategory("bug");
+      setFeedbackStatus({ kind: "idle", message: "" });
+      setFeedbackPromptOpen(true);
+      setStatusText("feedback box opened");
+      return;
+    }
+
     if (
       command === "onboardingtrue" ||
       command === "/onboardingtrue" ||
@@ -4221,6 +4337,7 @@ function MainModeApp() {
   useEffect(() => {
     return () => {
       stopFade();
+      stopCrossfadeAuto();
       stopProgressLoop();
 
       if (saveSettingsTimerRef.current !== null) {
@@ -4237,6 +4354,119 @@ function MainModeApp() {
       window.localitfy.clearDiscordActivity().catch(() => undefined);
     };
   }, []);
+
+  function getAudioEffectMode() {
+    return String((settings as any).audioEffectMode || "normal") as "normal" | "nightcore" | "daycore";
+  }
+
+  function getAudioEffectAmount() {
+    return clamp(Number((settings as any).audioEffectAmount ?? 50), 0, 100);
+  }
+
+  function getAudioReverbAmount() {
+    return clamp(Number((settings as any).audioReverbAmount ?? 0), 0, 100);
+  }
+
+  function getEffectivePlaybackRate() {
+    const baseRate = clamp(Number(settings.playbackSpeed) || 1, 0.5, 2);
+    const mode = getAudioEffectMode();
+    const amount = getAudioEffectAmount() / 100;
+
+    if (mode === "nightcore") return clamp(baseRate * (1.08 + amount * 0.14), 0.5, 2);
+    if (mode === "daycore") return clamp(baseRate * (0.96 - amount * 0.14), 0.5, 2);
+
+    return baseRate;
+  }
+
+  function applyPlaybackRateSettings(audio: HTMLAudioElement | null | undefined) {
+    if (!audio) return;
+
+    const mode = getAudioEffectMode();
+    const rate = getEffectivePlaybackRate();
+
+    audio.playbackRate = rate;
+
+    // Nightcore/daycore should change pitch too, not just tempo.
+    try {
+      (audio as any).preservesPitch = mode === "normal";
+      (audio as any).mozPreservesPitch = mode === "normal";
+      (audio as any).webkitPreservesPitch = mode === "normal";
+    } catch {
+      // Older Chromium builds can ignore pitch flags safely.
+    }
+  }
+
+  function syncAudioEffectGraph(audio: HTMLAudioElement | null | undefined) {
+    if (!audio || audio !== audioRef.current) return;
+
+    const reverbAmount = getAudioReverbAmount() / 100;
+    const needsGraph = reverbAmount > 0.01 || Boolean(beatSourceRef.current) || Boolean(beatAnalyserRef.current);
+
+    if (!needsGraph) return;
+
+    const AudioContextCtor =
+      window.AudioContext ||
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+
+    if (!AudioContextCtor) return;
+
+    try {
+      const context = beatAudioContextRef.current || new AudioContextCtor({ latencyHint: "playback" });
+      beatAudioContextRef.current = context;
+
+      if (context.state === "suspended") {
+        void context.resume().catch(() => undefined);
+      }
+
+      const source = beatSourceRef.current || context.createMediaElementSource(audio);
+      beatSourceRef.current = source;
+
+      const dryGain = audioEffectDryGainRef.current || context.createGain();
+      const wetGain = audioEffectWetGainRef.current || context.createGain();
+      const delayNode = audioEffectDelayRef.current || context.createDelay(0.75);
+      const feedbackGain = audioEffectFeedbackGainRef.current || context.createGain();
+      const filterNode = audioEffectFilterRef.current || context.createBiquadFilter();
+
+      audioEffectDryGainRef.current = dryGain;
+      audioEffectWetGainRef.current = wetGain;
+      audioEffectDelayRef.current = delayNode;
+      audioEffectFeedbackGainRef.current = feedbackGain;
+      audioEffectFilterRef.current = filterNode;
+
+      try { source.disconnect(); } catch {}
+      try { dryGain.disconnect(); } catch {}
+      try { wetGain.disconnect(); } catch {}
+      try { delayNode.disconnect(); } catch {}
+      try { feedbackGain.disconnect(); } catch {}
+      try { filterNode.disconnect(); } catch {}
+      try { beatAnalyserRef.current?.disconnect(); } catch {}
+
+      dryGain.gain.value = 1;
+      source.connect(dryGain);
+      dryGain.connect(context.destination);
+
+      if (reverbAmount > 0.01) {
+        delayNode.delayTime.value = 0.055 + reverbAmount * 0.145;
+        feedbackGain.gain.value = Math.min(0.46, 0.08 + reverbAmount * 0.32);
+        wetGain.gain.value = Math.min(0.38, reverbAmount * 0.34);
+        filterNode.type = "lowpass";
+        filterNode.frequency.value = 5200 - reverbAmount * 2200;
+
+        source.connect(delayNode);
+        delayNode.connect(feedbackGain);
+        feedbackGain.connect(delayNode);
+        delayNode.connect(filterNode);
+        filterNode.connect(wetGain);
+        wetGain.connect(context.destination);
+      }
+
+      if (beatAnalyserRef.current) {
+        source.connect(beatAnalyserRef.current);
+      }
+    } catch {
+      // If WebAudio setup fails, keep normal HTMLAudio playback alive.
+    }
+  }
 
   const getTargetAudioVolume = useCallback(
     (song: Song | null = songRef.current) => {
@@ -4255,12 +4485,20 @@ function MainModeApp() {
 
       audio.muted = false;
       audio.volume = safeVolume;
-      audio.playbackRate = clamp(Number(settings.playbackSpeed) || 1, 0.5, 2);
+      applyPlaybackRateSettings(audio);
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
+      syncAudioEffectGraph(audio);
       volumeRef.current = safeVolume;
       return safeVolume;
     },
-    [getTargetAudioVolume, settings.playbackSpeed, settings.gaplessPlayback]
+    [
+      getTargetAudioVolume,
+      settings.playbackSpeed,
+      settings.gaplessPlayback,
+      (settings as any).audioEffectMode,
+      (settings as any).audioEffectAmount,
+      (settings as any).audioReverbAmount
+    ]
   );
 
   const resolvePlaybackUrl = useCallback(
@@ -4438,10 +4676,9 @@ function MainModeApp() {
           syncProgressDom(nextTime, nextDuration, true);
         }
 
-        if (settings.rememberPlaybackPosition && currentSong?.id && Date.now() - positionSaveRef.current > 16000) {
-          positionSaveRef.current = Date.now();
-          void patchSongLocal(currentSong.id, { playbackPosition: Math.floor(nextTime) });
-        }
+        // V341: Localtify now always starts songs from the beginning.
+        // Do not keep writing resume positions during normal playback.
+        positionSaveRef.current = Date.now();
 
         if (!backgroundMode && !busyUi && settings.gaplessPlayback && nextDuration > 0 && nextDuration - nextTime < 20) {
           window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
@@ -4454,7 +4691,7 @@ function MainModeApp() {
     scheduleProgressTick(80);
 
     return () => stopProgressLoop();
-  }, [isPlaying, currentSong?.id, currentDuration, settings.rememberPlaybackPosition, settings.gaplessPlayback, syncProgressDom]);
+  }, [isPlaying, currentSong?.id, currentDuration, settings.gaplessPlayback, syncProgressDom]);
 
   const discordSettingsRef = useRef(settings);
 
@@ -4680,6 +4917,7 @@ function MainModeApp() {
     applyAudioQualitySettings(audio, currentSong);
 
     if (!currentSong) {
+      stopCrossfadeAuto();
       audio.pause();
       audio.removeAttribute("src");
       audio.load();
@@ -4694,6 +4932,7 @@ function MainModeApp() {
     const sourceKey = getSongPlaybackSourceKey(currentSong);
 
     if (!sourceKey || currentSong.fileExists === false) {
+      stopCrossfadeAuto();
       audio.pause();
       audio.removeAttribute("src");
       audio.load();
@@ -4730,20 +4969,51 @@ function MainModeApp() {
         return;
       }
 
+      const handoff = crossfadeHandoffRef.current;
+      const canUseHandoff = handoff?.songId === currentSong.id && handoff.url === result.url;
+
+      if (canUseHandoff) {
+        clearCrossfadeHandoffSoon(currentSong.id);
+
+        try {
+          if (audio.src !== result.url) {
+            audio.src = result.url;
+          }
+
+          audio.currentTime = Math.max(0, handoff.time || 0);
+          audio.volume = clamp(handoff.volume || getTargetAudioVolume(currentSong), 0, 1);
+          volumeRef.current = audio.volume;
+
+          if (isPlaying || pendingPlayRef.current) {
+            void audio.play().catch(() => undefined);
+          }
+        } catch {
+          // normal playback recovery will handle it
+        }
+
+        setCurrentTime(Math.max(0, handoff.time || 0));
+        setCurrentDuration(currentSong.duration || 0);
+        setPlayerError("");
+        setStatusText(`playing ${prettyTitle(currentSong.title, 5)}`);
+        window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
+        return;
+      }
+
       if (audio.src !== result.url) {
+        stopCrossfadeAuto();
         audio.pause();
         audio.src = result.url;
         audio.load();
 
-        const savedPosition = settings.rememberPlaybackPosition
-          ? Math.max(0, Math.min(Number(currentSong.playbackPosition || 0), Math.max(0, (currentSong.duration || 0) - 8)))
-          : 0;
+        const savedPosition = 0;
 
-        if (savedPosition > 3) {
-          audio.currentTime = savedPosition;
+        try {
+          audio.currentTime = 0;
+        } catch {
+          // ignore seek reset errors
         }
 
-        setCurrentTime(savedPosition);
+        setCurrentTime(0);
         setCurrentDuration(currentSong.duration || 0);
         setPlayerError("");
         setStatusText(`loaded ${prettyTitle(currentSong.title, 5)}`);
@@ -4754,7 +5024,7 @@ function MainModeApp() {
     return () => {
       cancelled = true;
     };
-  }, [currentSong?.id, currentSong?.filePath, currentSong?.fileExists, currentSong?.volumeGain, currentSong?.customVolume, settings.rememberPlaybackPosition, applyAudioQualitySettings, resolvePlaybackUrl]);
+  }, [currentSong?.id, currentSong?.filePath, currentSong?.fileExists, currentSong?.volumeGain, currentSong?.customVolume, applyAudioQualitySettings, resolvePlaybackUrl]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -4812,6 +5082,433 @@ function MainModeApp() {
         nextAudioRef.current.load();
       }
     });
+  }
+
+  function getAutoCrossfadeSeconds() {
+    // V342: end-of-song transitions should feel like a real 3 second crossfade.
+    // Existing shorter settings are respected for manual fade-in, but auto-next uses at least 3s.
+    return clamp(Math.max(3, Number(settings.crossfadeSeconds || 3)), 3, 6);
+  }
+
+  function clearCrossfadeHandoffSoon(songId: string, delayMs = 1400) {
+    if (crossfadeHandoffClearTimerRef.current !== null) {
+      window.clearTimeout(crossfadeHandoffClearTimerRef.current);
+      crossfadeHandoffClearTimerRef.current = null;
+    }
+
+    crossfadeHandoffClearTimerRef.current = window.setTimeout(() => {
+      if (crossfadeHandoffRef.current?.songId === songId) {
+        crossfadeHandoffRef.current = null;
+      }
+
+      crossfadeHandoffClearTimerRef.current = null;
+    }, delayMs);
+  }
+
+  function stopCrossfadeAuto() {
+    if (crossfadeIntervalRef.current !== null) {
+      window.clearInterval(crossfadeIntervalRef.current);
+      crossfadeIntervalRef.current = null;
+    }
+
+    if (crossfadeHandoffClearTimerRef.current !== null) {
+      window.clearTimeout(crossfadeHandoffClearTimerRef.current);
+      crossfadeHandoffClearTimerRef.current = null;
+    }
+
+    crossfadeAutoStartedRef.current = false;
+    crossfadeAutoTargetRef.current = "";
+    crossfadeMainPauseGuardRef.current = false;
+    setCrossfadePreviewSongId("");
+
+    const nextAudio = nextAudioRef.current;
+    if (nextAudio) {
+      try {
+        nextAudio.pause();
+        nextAudio.currentTime = 0;
+        nextAudio.volume = 0;
+      } catch {
+        // ignore audio cleanup errors
+      }
+    }
+  }
+
+  function getAutoTransitionTarget() {
+    if (!playableSongs.length || !currentSong) return null;
+
+    if (repeatMode === "one") {
+      return {
+        song: currentSong,
+        playlistId: currentPlaybackPlaylist?.id || activePlaylist?.id || null,
+        kind: "repeat-one" as const
+      };
+    }
+
+    const queuedIndex = playQueue.findIndex((songId) => isPlayableSong(songsById.get(songId)));
+    if (queuedIndex !== -1) {
+      const queuedSong = songsById.get(playQueue[queuedIndex]);
+      if (queuedSong) {
+        return {
+          song: queuedSong,
+          playlistId: activePlaylist?.songIds.includes(queuedSong.id) ? activePlaylist.id : null,
+          kind: "queue" as const,
+          queuedIndex
+        };
+      }
+    }
+
+    if (activePlaylist && currentSong) {
+      const playlistIndex = activePlaylistSongs.findIndex((song) => song.id === currentSong.id);
+
+      if (playlistIndex !== -1) {
+        if (isShuffle && activePlaylistSongs.length > 1) {
+          const otherPlaylistSongs = activePlaylistSongs.filter((song) => song.id !== currentSong.id);
+          const randomPlaylistSong = otherPlaylistSongs[Math.floor(Math.random() * otherPlaylistSongs.length)];
+          if (randomPlaylistSong) {
+            return {
+              song: randomPlaylistSong,
+              playlistId: activePlaylist.id,
+              kind: "playlist-shuffle" as const
+            };
+          }
+        }
+
+        const playlistNext = activePlaylistSongs[playlistIndex + 1] || (repeatPlaylist || repeatMode === "all" ? activePlaylistSongs[0] : null);
+
+        if (playlistNext && playlistNext.id !== currentSong.id) {
+          return {
+            song: playlistNext,
+            playlistId: activePlaylist.id,
+            kind: "playlist" as const,
+            playlistIndex: activePlaylistSongs.findIndex((song) => song.id === playlistNext.id)
+          };
+        }
+
+        return null;
+      }
+    }
+
+    if (isShuffle && playableSongs.length > 1) {
+      const otherSongs = playableSongs.filter((song) => song.id !== currentId);
+      const randomSong = otherSongs[Math.floor(Math.random() * otherSongs.length)];
+
+      if (randomSong) {
+        return {
+          song: randomSong,
+          playlistId: null,
+          kind: "library-shuffle" as const
+        };
+      }
+    }
+
+    const index = currentIndex();
+
+    if (index === -1) {
+      const firstSong = playableSongs[0];
+      return firstSong ? { song: firstSong, playlistId: null, kind: "library" as const } : null;
+    }
+
+    const nextSong = playableSongs[index + 1] || (repeatMode === "all" ? playableSongs[0] : null);
+
+    return nextSong
+      ? {
+          song: nextSong,
+          playlistId: null,
+          kind: "library" as const
+        }
+      : null;
+  }
+
+  function commitAutoTransitionTarget(target: ReturnType<typeof getAutoTransitionTarget>) {
+    if (!target?.song) return;
+
+    if (target.kind === "queue" && typeof target.queuedIndex === "number") {
+      setPlayQueue((queue) => queue.slice(target.queuedIndex + 1));
+    } else if (playQueue.length && target.kind !== "queue") {
+      const hasPlayableQueuedSong = playQueue.some((songId) => isPlayableSong(songsById.get(songId)));
+      if (!hasPlayableQueuedSong) setPlayQueue([]);
+    }
+
+    if (target.kind === "playlist" && activePlaylist) {
+      const nextIndex = activePlaylistSongs.findIndex((song) => song.id === target.song.id);
+      setPlayQueue(nextIndex >= 0 ? activePlaylistSongs.slice(nextIndex + 1).map((song) => song.id) : []);
+    }
+
+    if (target.playlistId !== undefined) {
+      setActivePlaylistId(target.playlistId);
+    } else if (activePlaylistId && !target.playlistId) {
+      setActivePlaylistId(null);
+    }
+  }
+
+  async function takeOverMainAudioFromCrossfade(target: ReturnType<typeof getAutoTransitionTarget>, nextAudio: HTMLAudioElement, safeVolume: number) {
+    const audio = audioRef.current;
+    if (!audio || !target?.song) return;
+
+    const handoffTime = Number.isFinite(nextAudio.currentTime) ? nextAudio.currentTime : 0;
+    const handoffUrl = nextAudio.src;
+
+    crossfadeHandoffRef.current = {
+      songId: target.song.id,
+      url: handoffUrl,
+      time: handoffTime,
+      volume: safeVolume
+    };
+
+    crossfadeMainPauseGuardRef.current = true;
+
+    try {
+      if (audio.src !== handoffUrl) {
+        audio.src = handoffUrl;
+      }
+
+      audio.currentTime = Math.max(0, handoffTime);
+      audio.volume = 0;
+      audio.muted = false;
+      applyPlaybackRateSettings(audio);
+      audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
+      syncAudioEffectGraph(audio);
+
+      await audio.play();
+
+      commitAutoTransitionTarget(target);
+
+      pendingPlayRef.current = true;
+      armPlayCount(target.song.id, Math.max(0, handoffTime));
+      setCurrentId(target.song.id);
+      setCrossfadePreviewSongId("");
+      void rememberCurrentSong(target.song.id);
+      setCurrentTime(Math.max(0, handoffTime));
+      timeRef.current = Math.max(0, handoffTime);
+      setCurrentDuration(target.song.duration || nextAudio.duration || 0);
+      setIsPlaying(true);
+      setPlayerError("");
+      setStatusText(`crossfading into ${prettyTitle(target.song.title, 5)}`);
+
+      const blendMs = 420;
+      const blendStart = performance.now();
+
+      window.setTimeout(() => {
+        const blendTimer = window.setInterval(() => {
+          const progressValue = clamp((performance.now() - blendStart) / blendMs, 0, 1);
+          const eased = 1 - Math.pow(1 - progressValue, 2.6);
+
+          audio.volume = clamp(safeVolume * eased, 0, 1);
+          nextAudio.volume = clamp(safeVolume * (1 - eased), 0, 1);
+
+          if (progressValue >= 1) {
+            window.clearInterval(blendTimer);
+            audio.volume = safeVolume;
+
+            try {
+              nextAudio.pause();
+              nextAudio.currentTime = 0;
+              nextAudio.volume = 0;
+            } catch {
+              // ignore cleanup errors
+            }
+
+            crossfadeMainPauseGuardRef.current = false;
+            clearCrossfadeHandoffSoon(target.song.id, 450);
+          }
+        }, 16);
+      }, 0);
+    } catch {
+      // Keep the already-playing hidden audio alive briefly so users do not hear a hard stop,
+      // then let the normal playback state-sync recover.
+      commitAutoTransitionTarget(target);
+      setCurrentId(target.song.id);
+      setCrossfadePreviewSongId("");
+      void rememberCurrentSong(target.song.id);
+      setIsPlaying(true);
+      crossfadeMainPauseGuardRef.current = false;
+
+      window.setTimeout(() => {
+        try {
+          nextAudio.pause();
+          nextAudio.currentTime = 0;
+          nextAudio.volume = 0;
+        } catch {
+          // ignore cleanup errors
+        }
+      }, 950);
+    }
+  }
+
+  async function startAutoCrossfadeToNext() {
+    const audio = audioRef.current;
+    const current = songRef.current || currentSong;
+
+    if (
+      !audio ||
+      !current ||
+      !isPlaying ||
+      isSeekingRef.current ||
+      crossfadeAutoStartedRef.current ||
+      performance.now() - crossfadeLastStartAtRef.current < 900 ||
+      settings.reducedMotion ||
+      !settings.crossfadeEnabled
+    ) {
+      return;
+    }
+
+    const target = getAutoTransitionTarget();
+    if (!target?.song || (target.kind !== "repeat-one" && target.song.id === current.id)) return;
+
+    crossfadeAutoStartedRef.current = true;
+    crossfadeAutoTargetRef.current = target.song.id;
+    crossfadeLastStartAtRef.current = performance.now();
+
+    const playbackUrl = await resolvePlaybackUrl(target.song);
+
+    if (!playbackUrl.ok || !playbackUrl.url || playbackUrl.fileExists === false) {
+      crossfadeAutoStartedRef.current = false;
+      crossfadeAutoTargetRef.current = "";
+      setCrossfadePreviewSongId("");
+      try {
+        audio.volume = getTargetAudioVolume(current);
+      } catch {
+        // ignore volume restore errors
+      }
+      return;
+    }
+
+    if (!nextAudioRef.current) {
+      nextAudioRef.current = new Audio();
+      nextAudioRef.current.preload = "auto";
+      nextAudioRef.current.crossOrigin = "anonymous";
+    }
+
+    const nextAudio = nextAudioRef.current;
+    const safeVolume = getTargetAudioVolume(target.song);
+    const crossfadeMs = getAutoCrossfadeSeconds() * 1000;
+    const startVolume = audio.volume || getTargetAudioVolume(current);
+
+    try {
+      if (nextAudio.src !== playbackUrl.url) {
+        nextAudio.src = playbackUrl.url;
+        nextAudio.load();
+      }
+
+      nextAudio.muted = false;
+      nextAudio.volume = 0;
+      applyPlaybackRateSettings(nextAudio);
+
+      await nextAudio.play();
+
+      setCrossfadePreviewSongId(target.song.id);
+      stopFade();
+
+      const startTime = performance.now();
+
+      if (crossfadeIntervalRef.current !== null) {
+        window.clearInterval(crossfadeIntervalRef.current);
+      }
+
+      crossfadeIntervalRef.current = window.setInterval(() => {
+        const elapsed = performance.now() - startTime;
+        const rawProgress = clamp(elapsed / crossfadeMs, 0, 1);
+
+        // V342 curve:
+        // - outgoing track stays full for a tiny moment, then drops faster
+        // - incoming track rises slower and smoother so the transition feels musical
+        const outgoingHold = 0.16;
+        const outgoingProgress = rawProgress <= outgoingHold
+          ? 0
+          : clamp((rawProgress - outgoingHold) / (1 - outgoingHold), 0, 1);
+        const outgoingFactor = 1 - Math.pow(outgoingProgress, 0.72);
+        const incomingFactor = Math.pow(rawProgress, 1.48);
+
+        audio.volume = clamp(startVolume * outgoingFactor, 0, 1);
+        nextAudio.volume = clamp(safeVolume * incomingFactor, 0, 1);
+
+        if (rawProgress >= 1) {
+          if (crossfadeIntervalRef.current !== null) {
+            window.clearInterval(crossfadeIntervalRef.current);
+            crossfadeIntervalRef.current = null;
+          }
+
+          audio.volume = 0;
+          nextAudio.volume = safeVolume;
+
+          markSongCompletedForPlayCount(current);
+          if (current.id) void patchSongLocal(current.id, { playbackPosition: 0 });
+
+          crossfadeAutoStartedRef.current = false;
+          crossfadeAutoTargetRef.current = "";
+
+          void takeOverMainAudioFromCrossfade(target, nextAudio, safeVolume);
+          window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
+        }
+      }, 16);
+    } catch {
+      crossfadeAutoStartedRef.current = false;
+      crossfadeAutoTargetRef.current = "";
+      crossfadeMainPauseGuardRef.current = false;
+      setCrossfadePreviewSongId("");
+      try {
+        audio.volume = getTargetAudioVolume(current);
+      } catch {
+        // ignore volume restore errors
+      }
+      try {
+        nextAudio.pause();
+        nextAudio.volume = 0;
+      } catch {
+        // ignore cleanup errors
+      }
+    }
+  }
+
+  function handleAudioTimeUpdate(event: SyntheticEvent<HTMLAudioElement>) {
+    const audio = event.currentTarget;
+    const nextTime = audio.currentTime;
+    const duration = Number.isFinite(audio.duration) ? audio.duration : durationRef.current || currentDuration || 0;
+
+    timeRef.current = nextTime;
+    tickPlayCountTracker(nextTime);
+
+    if (duration > 0) {
+      const crossfadeWindow = getAutoCrossfadeSeconds();
+      const remaining = duration - nextTime;
+
+      if (
+        remaining > 0 &&
+        remaining <= crossfadeWindow &&
+        nextTime > 5 &&
+        !audio.paused &&
+        !settings.reducedMotion &&
+        settings.crossfadeEnabled
+      ) {
+        void startAutoCrossfadeToNext();
+      }
+    }
+  }
+
+  function handleAudioPause() {
+    if (crossfadeAutoStartedRef.current || crossfadeMainPauseGuardRef.current || crossfadeHandoffRef.current) {
+      return;
+    }
+
+    if (!audioRef.current?.ended) {
+      setIsPlaying(false);
+    }
+  }
+
+  function handleAudioEnded() {
+    if (crossfadeAutoStartedRef.current || crossfadeHandoffRef.current) {
+      // The hidden next audio is already taking over. Do not double-skip.
+      return;
+    }
+
+    const endedSong = songRef.current || currentSong;
+    markSongCompletedForPlayCount(endedSong);
+
+    if (endedSong?.id) {
+      void patchSongLocal(endedSong.id, { playbackPosition: 0 });
+    }
+
+    playNext(true, "auto");
   }
 
   function stopFade() {
@@ -4901,10 +5598,22 @@ function MainModeApp() {
 
       const safeVolume = getTargetAudioVolume(song);
 
+      const handoffActive = crossfadeHandoffRef.current?.songId === song.id;
+      const continuingCrossfadePlayback =
+        handoffActive ||
+        (
+          reason === "state-sync" &&
+          audio.src === playbackUrl.url &&
+          !audio.paused &&
+          Number.isFinite(audio.currentTime) &&
+          audio.currentTime > 0.05
+        );
+
       audio.muted = false;
-      audio.volume = settings.reducedMotion || !settings.crossfadeEnabled ? safeVolume : 0;
-      audio.playbackRate = clamp(Number(settings.playbackSpeed) || 1, 0.5, 2);
+      audio.volume = continuingCrossfadePlayback || settings.reducedMotion || !settings.crossfadeEnabled ? safeVolume : 0;
+      applyPlaybackRateSettings(audio);
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
+      syncAudioEffectGraph(audio);
       volumeRef.current = safeVolume;
 
       if (audio.src !== playbackUrl.url) {
@@ -4918,10 +5627,14 @@ function MainModeApp() {
 
       pendingPlayRef.current = false;
 
-      if (!settings.reducedMotion && settings.crossfadeEnabled && safeVolume > 0) {
+      if (!continuingCrossfadePlayback && !settings.reducedMotion && settings.crossfadeEnabled && safeVolume > 0) {
         fadeAudio(safeVolume, Math.max(120, Number(settings.crossfadeSeconds || 1.6) * 1000));
       } else {
         audio.volume = safeVolume;
+      }
+
+      if (handoffActive) {
+        clearCrossfadeHandoffSoon(song.id, 650);
       }
 
       window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
@@ -4946,6 +5659,7 @@ function MainModeApp() {
     const audio = audioRef.current;
 
     pendingPlayRef.current = false;
+    stopCrossfadeAuto();
 
     if (!audio) {
       setIsPlaying(false);
@@ -6078,13 +6792,22 @@ function MainModeApp() {
     const lowerMessage = raw.toLowerCase();
 
     if (!raw) return fallback;
-    if (/private|permission|forbidden|403|unavailable|not available|members-only|login/.test(lowerMessage)) {
+    if (/invalid url|unsupported url|not a url|url/i.test(lowerMessage) && /invalid|unsupported|malformed|empty/.test(lowerMessage)) {
+      return "Invalid URL. Paste a normal YouTube/Spotify link and retry.";
+    }
+    if (/yt-dlp|ytdlp|youtube-dl|no such file|not installed|spawn/.test(lowerMessage)) {
+      return "yt-dlp could not run. Check the bundled downloader setup, then retry.";
+    }
+    if (/eacces|eperm|permission|access denied|forbidden|403|folder|directory|write|readonly|read-only/.test(lowerMessage)) {
+      return "Permission or folder error. Choose a writable downloads folder and retry.";
+    }
+    if (/private|unavailable|not available|members-only|login|required|age restricted|sign in/.test(lowerMessage)) {
       return "This source looks private or unavailable. Try a public link.";
     }
     if (/copyright|blocked|restricted|region|geo/.test(lowerMessage)) {
       return "This source is blocked or region restricted.";
     }
-    if (/network|timeout|timed out|socket|econn|dns|connection/.test(lowerMessage)) {
+    if (/network|timeout|timed out|socket|econn|dns|connection|internet|fetch failed/.test(lowerMessage)) {
       return "Network problem while downloading. Check your connection and retry.";
     }
     if (/rate|429|too many|captcha|bot/.test(lowerMessage)) {
@@ -6093,8 +6816,8 @@ function MainModeApp() {
     if (/ffmpeg|convert|conversion/.test(lowerMessage)) {
       return "Downloaded, but conversion failed. Check FFmpeg/download setup.";
     }
-    if (/no audio|audio only|format/.test(lowerMessage)) {
-      return "No usable audio format was found for this link.";
+    if (/no audio|audio only|format|no formats|requested format|unable to extract|extractor/.test(lowerMessage)) {
+      return "No usable audio was found for this link.";
     }
 
     return raw.length > 170 ? `${raw.slice(0, 167)}...` : raw;
@@ -6246,7 +6969,13 @@ function MainModeApp() {
   }
 
   async function retryDownload(url: string, source: "youtube" | "spotify" | "auto" = "auto", spotifyTrackId = "") {
-    if (!url) return;
+    if (!url) {
+      showAppToast("No URL saved for this failed item", "error");
+      return;
+    }
+
+    setStatusText("retrying failed download...");
+    showAppToast("retrying failed download", "info");
 
     if (source === "spotify" || url.startsWith("spotify:")) {
       const track = spotifyTracks.find((item: any) => item.id === spotifyTrackId) ||
@@ -6363,8 +7092,26 @@ function MainModeApp() {
     } catch (error) {
       console.error("[localitfy download failed]", error);
       trackImportFailed("download_failed", "downloads");
-      setPlayerError("download failed. check the terminal for details.");
+      const message = friendlyDownloadError((error as Error)?.message || "Download failed.");
+      const failedDownloads = urls.map((url) => ({
+        ok: false,
+        url,
+        error: message,
+        statusLabel: "Failed — retry available"
+      })) as any[];
+
+      setDownloadResults(failedDownloads);
+      setDownloadQueue((items) => items.map((item) => ({
+        ...item,
+        status: "failed",
+        progress: 100,
+        message,
+        error: message,
+        statusLabel: "Failed — retry available"
+      })));
+      setPlayerError(message);
       setStatusText("download failed");
+      showAppToast("Download failed — retry from the queue", "error");
     } finally {
       setDownloadBusy(false);
     }
@@ -6674,8 +7421,11 @@ function MainModeApp() {
       const bridge = (window.localitfy as any);
       const spotifyDownloadBridge = bridge?.spotdlDownloadBatch || bridge?.spotifyDownloadBatch;
       if (!spotifyDownloadBridge) {
-        setSpotifyFetchError("Spotify download is not wired in preload/main yet.");
+        const message = "Spotify download is not wired in preload/main yet.";
+        setSpotifyFetchError(message);
+        setDownloadQueue((items) => items.map((item) => ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" })));
         setStatusText("spotify download failed");
+        showAppToast("Spotify download bridge missing", "error");
         return;
       }
 
@@ -6856,7 +7606,25 @@ function MainModeApp() {
           ? { ...track, downloadStatus: "failed", downloadError: message, downloadMessage: "Failed — retry available" }
           : track
       )));
+      const failedDownloads = selected.map((track) => ({
+        ok: false,
+        url: `spotify:search:${track.artist ? `${track.artist} ` : ""}${track.title}`,
+        source: "spotify",
+        spotifyTrackId: track.id,
+        error: message,
+        statusLabel: "Failed — retry available"
+      })) as any[];
+      setDownloadResults(failedDownloads);
+      setDownloadQueue((items) => items.map((item) => ({
+        ...item,
+        status: "failed",
+        progress: 100,
+        message,
+        error: message,
+        statusLabel: "Failed — retry available"
+      })));
       setStatusText("spotify download failed");
+      showAppToast("Spotify download failed — retry from the queue", "error");
     } finally {
       setSpotifyDownloadBusy(false);
       setDownloadBusy(false);
@@ -7854,6 +8622,12 @@ function MainModeApp() {
     const targetSong = songsById.get(songId);
     const sameSong = songId === currentId;
     const audio = audioRef.current;
+
+    if (!sameSong) {
+      stopCrossfadeAuto();
+      crossfadeHandoffRef.current = null;
+      setCrossfadePreviewSongId("");
+    }
     const nowMs = performance.now();
     const sameSongKey = `${songId}:${shouldPlay ? "play" : "select"}`;
 
@@ -7897,7 +8671,10 @@ function MainModeApp() {
     }
 
     if (sameSong && audio) {
+      stopCrossfadeAuto();
+      crossfadeHandoffRef.current = null;
       audio.currentTime = 0;
+      timeRef.current = 0;
       setCurrentTime(0);
 
       if (shouldPlay) {
@@ -7970,6 +8747,7 @@ function MainModeApp() {
     }
 
     if (isPlaying) {
+      stopCrossfadeAuto();
       setIsPlaying(false);
       return;
     }
@@ -7995,6 +8773,7 @@ function MainModeApp() {
   }
 
   function playNext(forcePlay = true, trigger: "manual" | "auto" = "manual") {
+    if (trigger === "manual") stopCrossfadeAuto();
     if (!playableSongs.length) return;
 
     if (trigger === "auto" && repeatMode === "one" && currentSong) {
@@ -8082,6 +8861,7 @@ function MainModeApp() {
   }
 
   function playPrevious() {
+    stopCrossfadeAuto();
     if (!playableSongs.length) return;
 
     const audio = audioRef.current;
@@ -8171,9 +8951,7 @@ function MainModeApp() {
     syncProgressDom(nextTime, duration, true);
     setCurrentTime(nextTime);
 
-    if (settings.rememberPlaybackPosition && currentSong?.id) {
-      void patchSongLocal(currentSong.id, { playbackPosition: Math.floor(nextTime) });
-    }
+    // V341: seeking is temporary only. Next play still starts at 0:00.
   }
 
   function paintRangeProgress(input: HTMLInputElement | null | undefined, percent: number) {
@@ -8702,6 +9480,17 @@ function MainModeApp() {
       return;
     }
 
+    if (message.length > FEEDBACK_MESSAGE_MAX_LENGTH) {
+      setFeedbackStatus({ kind: "error", message: "That feedback is too long. Keep it under 1500 characters." });
+      return;
+    }
+
+    const now = Date.now();
+    if (now - feedbackLastSentAtRef.current < 10_000) {
+      setFeedbackStatus({ kind: "error", message: "Hold on a few seconds before sending another report." });
+      return;
+    }
+
     if (!window.localitfy?.sendFeedback) {
       setFeedbackStatus({ kind: "error", message: "Feedback bridge is not ready in this build." });
       return;
@@ -8725,27 +9514,40 @@ function MainModeApp() {
           playlistCount: playlists.length,
           downloadsFolder: downloadFolderLabel || settings.downloadFolder || "default downloads folder",
           discordRpc: settings.discordEnabled ? "enabled" : "disabled",
-          updateStatus: updatePrompt.visible ? updateStatusLabel(updatePrompt) : "not visible"
+          updateStatus: updatePrompt.visible ? updateStatusLabel(updatePrompt) : "not visible",
+          feedbackWebhook: feedbackConfigStatus?.configured
+            ? feedbackConfigStatus.valid
+              ? "enabled"
+              : "configured but invalid"
+            : "not configured"
         }
       });
 
       if (!result?.ok) {
-        setFeedbackStatus({
-          kind: "error",
-          message: result?.error || "Could not send feedback right now."
-        });
+        const code = String((result as any)?.code || "");
+        const message =
+          code === "webhook_missing"
+            ? "Discord feedback is not configured. Add LOCALTIFY_FEEDBACK_WEBHOOK_URL in your env."
+            : code === "webhook_invalid"
+              ? "Discord webhook URL is invalid. Use a real discord.com/api/webhooks URL."
+              : code === "webhook_failed"
+                ? result?.error || "Discord did not accept the feedback. Check the webhook."
+                : result?.error || "Could not send feedback right now.";
+
+        setFeedbackStatus({ kind: "error", message });
         return;
       }
 
+      feedbackLastSentAtRef.current = Date.now();
       markFeedbackPromptSeen();
-      setFeedbackStatus({ kind: "success", message: "Sent. Thank you — I will review it." });
+      setFeedbackStatus({ kind: "success", message: "Sent successfully — thanks, I’ll review this." });
       setFeedbackMessage("");
 
       window.setTimeout(() => {
         setFeedbackPromptOpen(false);
         setFeedbackPromptManualOpen(false);
         setFeedbackStatus({ kind: "idle", message: "" });
-      }, 900);
+      }, 1500);
     } catch (error) {
       setFeedbackStatus({
         kind: "error",
@@ -8757,6 +9559,8 @@ function MainModeApp() {
   }, [
     downloadFolderLabel,
     feedbackCategory,
+    feedbackConfigStatus?.configured,
+    feedbackConfigStatus?.valid,
     feedbackMessage,
     performanceStatus?.chromeVersion,
     performanceStatus?.electronVersion,
@@ -8980,7 +9784,7 @@ function MainModeApp() {
               className="simpleSearch"
               value={query}
               onChange={(event) => handleSearchInput(event.currentTarget.value)}
-              placeholder="search songs... try /localtify"
+              placeholder="search songs... try /feedback"
             />
 
             <button
@@ -9059,38 +9863,56 @@ function MainModeApp() {
   function renderFeedbackSettingsCard() {
     if (settingsCategory !== "advanced") return null;
 
+    const feedbackReady = Boolean(feedbackConfigStatus?.configured && feedbackConfigStatus?.valid);
+    const feedbackStatusLabel = feedbackConfigStatus
+      ? feedbackConfigStatus.label || (feedbackReady ? "Discord feedback enabled" : "Discord feedback not configured")
+      : "Checking feedback status...";
+    const feedbackStatusMessage = feedbackConfigStatus?.message ||
+      (feedbackReady ? "Feedback will be delivered to your Discord channel." : "Add LOCALTIFY_FEEDBACK_WEBHOOK_URL to enable Discord delivery.");
+
     return (
-      <section className="settingsPageCard feedbackSettingsCardV329" aria-label="Send feedback">
-        <div className="settingsSectionTitle">
-          <span>feedback</span>
-          <strong>Send feedback</strong>
-          <small>Report bugs, UI issues, or feature ideas directly from localtify.</small>
+      <section className={`settingsPageCard feedbackSettingsCardV331 ${feedbackReady ? "feedbackReady" : "feedbackNotReady"}`} aria-label="Send feedback">
+        <div className="feedbackSettingsHeaderV331">
+          <span className="feedbackSettingsIconV331" aria-hidden="true">✦</span>
+          <div className="settingsSectionTitle">
+            <span>feedback</span>
+            <strong>Send feedback</strong>
+            <small>Report bugs, UI issues, or feature ideas directly from localtify. You can also type “feedback” in settings search or “/feedback” in the song search.</small>
+          </div>
+        </div>
+
+        <div className={`feedbackWebhookStatusV337 ${feedbackReady ? "ready" : "notReady"}`}>
+          <strong>{feedbackStatusLabel}</strong>
+          <small>{feedbackStatusMessage}</small>
+          {feedbackConfigStatus?.envName ? <em>{feedbackConfigStatus.envName}</em> : null}
         </div>
 
         <button
           type="button"
-          className="feedbackSettingsButtonV329 localtifyProximityTarget"
+          className="feedbackSettingsButtonV331 localtifyProximityTarget"
           onClick={() => openFeedbackPrompt(true)}
         >
           <span>
             <strong>Open feedback box</strong>
-            <small>This opens the same suggestion popup anytime from settings.</small>
+            <small>{feedbackReady ? "Send a short report straight to the feedback channel." : "You can test the popup UI, but delivery needs the webhook env."}</small>
           </span>
-          <em>send</em>
+          <em>open</em>
         </button>
       </section>
     );
   }
 
+
   function renderFeedbackPrompt() {
     if (!feedbackPromptOpen) return null;
 
     const remaining = FEEDBACK_MESSAGE_MAX_LENGTH - feedbackMessage.length;
+    const feedbackReady = feedbackMessage.trim().length >= 4;
 
     return (
       <AnimatePresence>
         <Motion.div
-          className="feedbackPromptOverlayV329"
+          className="feedbackPromptOverlayV331"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -9100,19 +9922,26 @@ function MainModeApp() {
           aria-labelledby="feedbackPromptTitleV329"
         >
           <Motion.div
-            className="feedbackPromptCardV329"
+            className={`feedbackPromptCardV331 ${feedbackStatus.kind === "success" ? "feedbackSentV337" : ""} ${feedbackSendBusy ? "feedbackSendingV337" : ""}`}
             initial={{ opacity: 0, y: 18, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.97 }}
             transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="feedbackPromptTopV329">
-              <span className="feedbackPromptLogoV329" aria-hidden="true">
-                <img src={localtifyLogo} alt="" />
-              </span>
+            <div className="feedbackPromptTopV331">
+              <div className="feedbackPromptBrandV331">
+                <span className="feedbackPromptLogoV331" aria-hidden="true">
+                  <img src={localtifyLogo} alt="" />
+                </span>
+                <span>
+                  <em>localtify feedback</em>
+                  <strong>bug reports + suggestions</strong>
+                </span>
+              </div>
+
               <button
                 type="button"
-                className="feedbackPromptCloseV329"
+                className="feedbackPromptCloseV331"
                 onClick={() => closeFeedbackPrompt(!feedbackPromptManualOpen)}
                 aria-label="Close feedback popup"
               >
@@ -9120,13 +9949,14 @@ function MainModeApp() {
               </button>
             </div>
 
-            <div className="feedbackPromptCopyV329">
+            <div className="feedbackPromptCopyV331">
+              <span className="feedbackPromptBadgeV331">quick check-in</span>
               <h2 id="feedbackPromptTitleV329">{FEEDBACK_PROMPT_COPY.title}</h2>
               <p>{FEEDBACK_PROMPT_COPY.body}</p>
               <p>{FEEDBACK_PROMPT_COPY.footer}</p>
             </div>
 
-            <div className="feedbackCategoryRowV329" role="group" aria-label="Feedback type">
+            <div className="feedbackCategoryRowV331" role="group" aria-label="Feedback type">
               {FEEDBACK_CATEGORY_OPTIONS.map((option) => {
                 const active = feedbackCategory === option.id;
 
@@ -9134,17 +9964,20 @@ function MainModeApp() {
                   <button
                     key={option.id}
                     type="button"
-                    className={`feedbackCategoryButtonV329 ${active ? "active" : ""}`}
-                    onClick={() => setFeedbackCategory(option.id)}
+                    className={`feedbackCategoryButtonV331 ${active ? "active" : ""}`}
+                    onClick={() => {
+                      setFeedbackCategory(option.id);
+                      if (feedbackStatus.kind !== "idle") setFeedbackStatus({ kind: "idle", message: "" });
+                    }}
                     aria-pressed={active}
                   >
-                    {option.label}
+                    <span>{option.label}</span>
                   </button>
                 );
               })}
             </div>
 
-            <label className="feedbackTextareaWrapV329">
+            <label className={`feedbackTextareaWrapV331 ${feedbackMessage.trim().length > 0 ? "isTyping" : ""} ${feedbackReady ? "isReady" : ""}`}>
               <span>Your message</span>
               <textarea
                 value={feedbackMessage}
@@ -9161,15 +9994,15 @@ function MainModeApp() {
             </label>
 
             {feedbackStatus.message ? (
-              <div className={`feedbackStatusV329 ${feedbackStatus.kind}`} role="status">
+              <div className={`feedbackStatusV331 ${feedbackStatus.kind}`} role="status">
                 {feedbackStatus.message}
               </div>
             ) : null}
 
-            <div className="feedbackPromptActionsV329">
+            <div className="feedbackPromptActionsV331">
               <button
                 type="button"
-                className="feedbackMaybeButtonV329"
+                className="feedbackMaybeButtonV331"
                 onClick={() => closeFeedbackPrompt(!feedbackPromptManualOpen)}
                 disabled={feedbackSendBusy}
               >
@@ -9177,16 +10010,91 @@ function MainModeApp() {
               </button>
               <button
                 type="button"
-                className="feedbackSendButtonV329 localtifyProximityTarget"
+                className={`feedbackSendButtonV331 localtifyProximityTarget ${feedbackReady ? "isReady" : "isLocked"} ${feedbackSendBusy ? "isSending" : ""}`}
                 onClick={submitFeedbackPrompt}
-                disabled={feedbackSendBusy || feedbackMessage.trim().length < 4}
+                disabled={feedbackSendBusy || feedbackStatus.kind === "success" || !feedbackReady}
               >
-                {feedbackSendBusy ? "Sending..." : "Send"}
+                <span className="feedbackSendTextV334">{feedbackStatus.kind === "success" ? "Sent" : feedbackSendBusy ? "Sending..." : "Send"}</span>
+                <span className="feedbackSendSparkV334" aria-hidden="true">↗</span>
               </button>
             </div>
           </Motion.div>
         </Motion.div>
       </AnimatePresence>
+    );
+  }
+
+
+  function renderAudioEffectsCard() {
+    if (settingsCategory !== "playback") return null;
+
+    const effectMode = getAudioEffectMode();
+    const effectAmount = getAudioEffectAmount();
+    const reverbAmount = getAudioReverbAmount();
+
+    const modeOptions: Array<{
+      id: "normal" | "nightcore" | "daycore";
+      label: string;
+      note: string;
+    }> = [
+      { id: "normal", label: "Normal", note: "Original pitch and speed." },
+      { id: "nightcore", label: "Nightcore", note: "Faster, brighter, higher pitch." },
+      { id: "daycore", label: "Daycore", note: "Slower, deeper, lower pitch." }
+    ];
+
+    return (
+      <section className="settingsPageCard playbackLabCardV343" aria-label="Playback lab">
+        <div className="settingsSectionTitle">
+          <span>playback lab</span>
+          <strong>Nightcore, daycore, and room reverb</strong>
+          <small>Quick sound effects users can actually see. These apply live while music plays.</small>
+        </div>
+
+        <div className="playbackModeGridV343">
+          {modeOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={`playbackModeChoiceV343 ${effectMode === option.id ? "active" : ""}`}
+              onClick={() => void updateSetting("audioEffectMode" as any, option.id as any, true)}
+              aria-pressed={effectMode === option.id}
+            >
+              <strong>{option.label}</strong>
+              <small>{option.note}</small>
+            </button>
+          ))}
+        </div>
+
+        <div className="playbackEffectSlidersV343">
+          <label>
+            <span>
+              <strong>Effect strength</strong>
+              <em>{effectAmount}%</em>
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={effectAmount}
+              onChange={(event) => void updateSetting("audioEffectAmount" as any, Number(event.currentTarget.value) as any, true)}
+            />
+          </label>
+
+          <label>
+            <span>
+              <strong>Reverb amount</strong>
+              <em>{reverbAmount}%</em>
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={reverbAmount}
+              onChange={(event) => void updateSetting("audioReverbAmount" as any, Number(event.currentTarget.value) as any, true)}
+            />
+          </label>
+        </div>
+      </section>
     );
   }
 
@@ -9359,6 +10267,7 @@ function MainModeApp() {
         resetAllSettingsSafely={resetAllSettingsSafely}
         />
         </Suspense>
+        {renderAudioEffectsCard()}
         {renderSidebarBehaviorRestoreCard()}
         {renderFeedbackSettingsCard()}
       </>
@@ -9456,7 +10365,7 @@ function MainModeApp() {
     nowPlayingTransitionKey,
     nowPlayingSongMotionClass,
     currentNowPlayingLabel,
-    currentSong,
+    currentSong: visualCurrentSong,
     heroDisplayTitle,
     heroDisplayArtist,
     playerError,
@@ -9667,6 +10576,9 @@ function MainModeApp() {
     setDeleteTarget,
     removeSong,
     audioRef,
+    handleAudioTimeUpdate,
+    handleAudioPause,
+    handleAudioEnded,
     handleCanPlay,
     handlePlaying,
     pendingPlayRef,
@@ -9684,6 +10596,7 @@ function MainModeApp() {
     setStatusText,
     resetPlayCountTracker,
     stopFade,
+    stopCrossfadeAuto,
     stopProgressLoop
   };
 
