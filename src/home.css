@@ -17332,3 +17332,119 @@ body.localtifyPerfV310 .app :is(
   transform: translateZ(0);
 }
 
+
+/* localtify 0.3.8 V318 — transform-only home card active state.
+   Fixes button.homeFreshCard.active INP without removing glass/blur/ambience. */
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard){
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout paint style;
+  will-change: transform;
+  transition:
+    transform 170ms cubic-bezier(.22, 1, .36, 1),
+    opacity 140ms ease,
+    border-color 140ms ease !important;
+}
+
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard):hover{
+  transform: translate3d(0, -1px, 0) scale(1.002);
+}
+
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard):active{
+  transform: translate3d(0, 0, 0) scale(0.992) !important;
+  transition-duration: 70ms !important;
+}
+
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard).active{
+  transform: translate3d(0, -1px, 0) scale(1.004) !important;
+  outline: 1px solid rgba(var(--accent-rgb), 0.30);
+  outline-offset: -1px;
+  box-shadow: inherit !important;
+  transition:
+    transform 140ms cubic-bezier(.22, 1, .36, 1),
+    opacity 120ms ease,
+    border-color 120ms ease !important;
+}
+
+.homeView :where(.homeListenCard, .homeFreshCard, .homeAlbumCard).active::after{
+  opacity: 1 !important;
+  transform: translateZ(0);
+  will-change: opacity;
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), 0.12), transparent 46%),
+    radial-gradient(circle at 12% 48%, rgba(var(--accent-rgb), 0.12), transparent 34%) !important;
+}
+
+
+
+/* localtify 0.3.8 V319 — hero ambience focus repair + resize transition.
+   Keeps hero dimensions the same, only stabilizes animation/filter restoration. */
+:root{
+  --resize-dur: 300ms;
+  --resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app .hero.heroPremium,
+.app .hero.heroPremium.heroLayoutMotion{
+  transition:
+    width var(--resize-dur) var(--resize-ease),
+    height var(--resize-dur) var(--resize-ease),
+    min-height var(--resize-dur) var(--resize-ease),
+    max-height var(--resize-dur) var(--resize-ease),
+    padding var(--resize-dur) var(--resize-ease),
+    gap var(--resize-dur) var(--resize-ease),
+    grid-template-columns var(--resize-dur) var(--resize-ease),
+    border-color 260ms ease,
+    box-shadow 320ms var(--resize-ease),
+    background 320ms ease,
+    transform 320ms var(--resize-ease) !important;
+  will-change: min-height, grid-template-columns, padding, gap, transform;
+}
+
+.app .hero.heroPremium::before,
+.app[data-ambient="on"] .hero.heroPremium::before{
+  filter: blur(28px) saturate(1.18) contrast(1.04) brightness(0.76) !important;
+  transform: translateZ(0) scale(1.08) !important;
+  backface-visibility: hidden;
+  will-change: filter, transform, opacity;
+}
+
+.app .hero.heroPremium::after,
+.app .hero.heroPremium > .heroAmbiencePulse,
+.app[data-ambient="on"] .hero.heroPremium > .heroAmbiencePulse{
+  filter: blur(42px) saturate(1.34) brightness(0.86) !important;
+  transform: translateZ(0) scale(1.045) !important;
+  backface-visibility: hidden;
+  will-change: filter, transform, opacity;
+}
+
+body.localtifyFocusRecovering .app .hero.heroPremium::before,
+.app.localtifyHeroAmbienceRecovering .hero.heroPremium::before{
+  filter: blur(29px) saturate(1.2) contrast(1.04) brightness(0.76) !important;
+  transform: translate3d(0, 0, 0.001px) scale(1.081) !important;
+}
+
+body.localtifyFocusRecovering .app .hero.heroPremium::after,
+body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
+.app.localtifyHeroAmbienceRecovering .hero.heroPremium::after,
+.app.localtifyHeroAmbienceRecovering .hero.heroPremium > .heroAmbiencePulse{
+  filter: blur(43px) saturate(1.36) brightness(0.86) !important;
+  transform: translate3d(0, 0, 0.001px) scale(1.047) !important;
+}
+
+/* Scroll masks should leave room for the scrollbar. This does not create a new mask;
+   it only fixes containers that already apply one now or later. */
+.app :is(.content, .homeSongList, .libraryList, .playlistSongList, .coverGalleryViewport, .coverSongList, .albumDetailTrackListV318, .albumFolderPreviewGridV309){
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: calc(100% - 10px) 100%;
+  mask-size: calc(100% - 10px) 100%;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .app .hero.heroPremium,
+  .app .hero.heroPremium.heroLayoutMotion{
+    transition: none !important;
+    will-change: auto;
+  }
+}

@@ -643,12 +643,12 @@ function MainModeApp() {
   useEffect(() => {
     const body = document.body;
 
-    body.classList.add("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyGpuFriendly");
-    body.dataset.localtifyPerf = "v310";
+    body.classList.add("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyPerfV319", "localtifyGpuFriendly");
+    body.dataset.localtifyPerf = "v319";
 
     return () => {
-      body.classList.remove("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyGpuFriendly");
-      if (["v310", "v307", "v305", "v304", "v303", "v301"].includes(String(body.dataset.localtifyPerf || ""))) {
+      body.classList.remove("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyPerfV319", "localtifyGpuFriendly");
+      if (["v319", "v318", "v310", "v307", "v305", "v304", "v303", "v301"].includes(String(body.dataset.localtifyPerf || ""))) {
         delete body.dataset.localtifyPerf;
       }
     };
@@ -686,6 +686,26 @@ function MainModeApp() {
       finishAnalyticsSession("beforeunload");
     };
 
+    let focusRepairTimer = 0;
+
+    const repairHeroAmbienceAfterFocus = () => {
+      if (focusRepairTimer) {
+        window.clearTimeout(focusRepairTimer);
+      }
+
+      // V319: Windows/Electron can occasionally restore the cover pseudo-layer
+      // without reapplying the blur filter after alt-tab. Toggling a short body
+      // class forces a compositor repaint without changing the user setting.
+      document.body.classList.add("localtifyFocusRecovering");
+      appRootRef.current?.classList.add("localtifyHeroAmbienceRecovering");
+
+      focusRepairTimer = window.setTimeout(() => {
+        document.body.classList.remove("localtifyFocusRecovering");
+        appRootRef.current?.classList.remove("localtifyHeroAmbienceRecovering");
+        focusRepairTimer = 0;
+      }, 420);
+    };
+
     const handleVisibilityChange = () => {
       const hidden = document.hidden;
       setIsAppBackgrounded(hidden);
@@ -695,12 +715,16 @@ function MainModeApp() {
         return;
       }
 
+      repairHeroAmbienceAfterFocus();
       trackAppForegrounded({ reason: "visibility_visible", current_view: analyticsViewRef.current });
       trackAppActive({ reason: "visibility_visible", current_view: analyticsViewRef.current });
     };
 
     const handleFocus = () => {
-      if (!document.hidden) setIsAppBackgrounded(false);
+      if (!document.hidden) {
+        setIsAppBackgrounded(false);
+        repairHeroAmbienceAfterFocus();
+      }
       trackAppActive({ reason: "window_focus", current_view: analyticsViewRef.current });
     };
 
@@ -736,6 +760,9 @@ function MainModeApp() {
     return () => {
       analyticsLaunchCancelled = true;
       window.clearTimeout(analyticsLaunchTimer);
+      if (focusRepairTimer) window.clearTimeout(focusRepairTimer);
+      document.body.classList.remove("localtifyFocusRecovering");
+      appRootRef.current?.classList.remove("localtifyHeroAmbienceRecovering");
       finishAnalyticsSession("unmount");
       window.clearInterval(heartbeatTimer);
       window.removeEventListener("beforeunload", handleBeforeUnload);
@@ -1367,7 +1394,7 @@ function MainModeApp() {
     };
   }, [effectiveTheme, settings.reducedMotion]);
 
-  const shouldSuspendProximityMotion = isLocaltifyV301HeavyMotionSurface(view, settingsCategory);
+  const shouldSuspendProximityMotion = false;
 
   useProximityMotion({
     rootRef: appRootRef,
@@ -2824,7 +2851,7 @@ function MainModeApp() {
 
     const shouldSleepBeatFx = isLocaltifyV301HeavyMotionSurface(view, settingsCategory);
 
-    if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || shouldSleepBeatFx || isViewSwitching || isSeeking || isVolumeDragging || isAppBackgrounded) {
+    if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || document.hidden) {
       resetBeatVariables();
       return;
     }
@@ -2940,7 +2967,7 @@ function MainModeApp() {
     };
 
     const tick = (now: number) => {
-      const runtimeBusy = scrollBusyRef.current || performance.now() < rendererQuietUntilRef.current || Boolean(draggedSongIdRef.current) || themeSettlingRef.current || isSeekingRef.current;
+      const runtimeBusy = false;
 
       if (document.hidden || runtimeBusy) {
         if (!hiddenResetDone || !busyResetDone) {
@@ -2949,7 +2976,7 @@ function MainModeApp() {
         hiddenResetDone = document.hidden;
         busyResetDone = runtimeBusy;
         lastPaint = now;
-        scheduleBeatTick(document.hidden ? 900 : 420);
+        scheduleBeatTick(document.hidden ? 900 : 520);
         return;
       }
 
@@ -3034,7 +3061,7 @@ function MainModeApp() {
     return () => {
       clearBeatTimers();
     };
-  }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, view, settingsCategory, isViewSwitching, isSeeking, isVolumeDragging, isAppBackgrounded]);
+  }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, view, settingsCategory, isViewSwitching, isSeeking, isVolumeDragging]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000);
@@ -4249,7 +4276,7 @@ function MainModeApp() {
         timeRef.current = nextTime;
         if (Number.isFinite(nextDuration) && nextDuration > 0) durationRef.current = nextDuration;
 
-        const uiPaintEveryMs = backgroundMode ? 3000 : busyUi ? 520 : 160;
+        const uiPaintEveryMs = backgroundMode ? 3000 : busyUi ? 420 : 120;
         if (!backgroundMode && !isSeekingRef.current && clock - lastProgressUiPaintRef.current > uiPaintEveryMs) {
           lastProgressUiPaintRef.current = clock;
           syncProgressDom(nextTime, nextDuration);
@@ -4277,7 +4304,7 @@ function MainModeApp() {
         }
       }
 
-      scheduleProgressTick(backgroundMode ? 1000 : busyUi ? 360 : 120);
+      scheduleProgressTick(backgroundMode ? 1000 : busyUi ? 300 : 100);
     };
 
     scheduleProgressTick(80);
