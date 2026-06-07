@@ -17859,3 +17859,138 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
     max-width: 76px !important;
   }
 }
+
+
+/* localtify 0.3.8 V328 — resize transition utility.
+   Inspired by Transitions.dev card resize, but applied only to layout surfaces
+   that naturally change size. It avoids the hot homeFresh/homeListen click cards
+   so it does not bring back INP spikes. */
+:root{
+  --localtify-resize-dur: 300ms;
+  --localtify-resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Utility class for future JSX usage. */
+.t-resize,
+.localtifyResizeMotion{
+  transition:
+    width var(--localtify-resize-dur) var(--localtify-resize-ease),
+    height var(--localtify-resize-dur) var(--localtify-resize-ease),
+    min-width var(--localtify-resize-dur) var(--localtify-resize-ease),
+    max-width var(--localtify-resize-dur) var(--localtify-resize-ease),
+    min-height var(--localtify-resize-dur) var(--localtify-resize-ease),
+    max-height var(--localtify-resize-dur) var(--localtify-resize-ease),
+    flex-basis var(--localtify-resize-dur) var(--localtify-resize-ease),
+    grid-template-columns var(--localtify-resize-dur) var(--localtify-resize-ease),
+    padding var(--localtify-resize-dur) var(--localtify-resize-ease),
+    gap var(--localtify-resize-dur) var(--localtify-resize-ease),
+    transform 220ms var(--localtify-resize-ease);
+  will-change: width, height;
+}
+
+/* Apply it to surfaces where resize actually happens:
+   hero expand/compact, sidebar slim/hover, album/download panels. */
+.hero.heroPremium,
+.heroLayoutMotion,
+.heroTextCluster,
+.heroArtShell,
+.heroArt,
+.sidebar,
+.navShell,
+.downloadPanel,
+.downloadQueuePanel,
+.spotifyImportPanel,
+.albumFolderImportPanel,
+.albumFolderImportPreview,
+.albumFolderImportCard,
+.analyticsRecapPanel,
+.analyticsRecapCard,
+.settingsPanel,
+.settingsSectionCard{
+  transition:
+    width var(--localtify-resize-dur) var(--localtify-resize-ease),
+    height var(--localtify-resize-dur) var(--localtify-resize-ease),
+    min-width var(--localtify-resize-dur) var(--localtify-resize-ease),
+    max-width var(--localtify-resize-dur) var(--localtify-resize-ease),
+    min-height var(--localtify-resize-dur) var(--localtify-resize-ease),
+    max-height var(--localtify-resize-dur) var(--localtify-resize-ease),
+    flex-basis var(--localtify-resize-dur) var(--localtify-resize-ease),
+    grid-template-columns var(--localtify-resize-dur) var(--localtify-resize-ease),
+    padding var(--localtify-resize-dur) var(--localtify-resize-ease),
+    gap var(--localtify-resize-dur) var(--localtify-resize-ease),
+    transform 220ms var(--localtify-resize-ease),
+    opacity 180ms ease;
+}
+
+/* Hero-specific resize polish: same size rules, smoother tween when existing
+   classes change layout. */
+.hero.heroPremium.heroExpanded,
+.hero.heroPremium.heroCompact,
+.hero.heroPremium.heroLayoutMotion{
+  will-change: width, height, min-height, grid-template-columns;
+}
+
+.hero.heroPremium .heroArtShell,
+.hero.heroPremium .heroArt,
+.hero.heroPremium .heroTextCluster{
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Sidebar hover/slim resize should feel like a smooth panel, not a snap. */
+.app.sidebarHover .sidebar,
+.app.sidebarSlim .sidebar,
+.app.sidebarHover .navShell,
+.app.sidebarSlim .navShell{
+  will-change: width, min-width, max-width;
+}
+
+/* Do NOT run layout-size transitions on the hot clickable home song/cover cards.
+   They already have transform-only active feedback for INP. */
+.homeFreshCard,
+.homeListenCard,
+.homeAlbumCard,
+.songRow,
+.libraryRow,
+.playlistTrackRow,
+.coverGalleryCardCleanOnly{
+  will-change: transform;
+}
+
+/* Avoid holding will-change forever on idle cards. */
+body.localtifyIdle .t-resize,
+body.localtifyIdle .localtifyResizeMotion,
+body.localtifyIdle .hero.heroPremium,
+body.localtifyIdle .sidebar,
+body.localtifyIdle .downloadPanel,
+body.localtifyIdle .spotifyImportPanel,
+body.localtifyIdle .albumFolderImportPanel,
+body.localtifyIdle .settingsSectionCard{
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .t-resize,
+  .localtifyResizeMotion,
+  .hero.heroPremium,
+  .heroLayoutMotion,
+  .heroTextCluster,
+  .heroArtShell,
+  .heroArt,
+  .sidebar,
+  .navShell,
+  .downloadPanel,
+  .downloadQueuePanel,
+  .spotifyImportPanel,
+  .albumFolderImportPanel,
+  .albumFolderImportPreview,
+  .albumFolderImportCard,
+  .analyticsRecapPanel,
+  .analyticsRecapCard,
+  .settingsPanel,
+  .settingsSectionCard{
+    transition: none !important;
+    will-change: auto !important;
+  }
+}
+
