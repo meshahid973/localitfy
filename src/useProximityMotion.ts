@@ -1,5 +1,9 @@
-/* localtify 0.3.8 V307 — measured proximity motion.
-   Keeps button/player/sidebar motion alive, but removes broad target scanning from pointermove. */
+/* localtify 0.3.8 V311 — cursor velocity proximity motion.
+   Adds physical velocity response without scanning the whole UI on every pointer move.
+   - Uses the actual hovered interactive target only.
+   - Keeps heavy rows/cards/gallery panels skipped.
+   - Adds small velocity stretch/rotate/soft blur variables for CSS.
+*/
 import { useEffect, type RefObject } from "react";
 
 type UseProximityMotionOptions = {
@@ -93,7 +97,11 @@ const SKIP_SELECTOR = [
   ".spotifyDownloadButton",
   ".converterBoxV031",
   ".downloadQueueItem",
-  ".downloadResult"
+  ".downloadResult",
+  ".albumFolderImportPanelV308",
+  ".albumFolderImportPanelV309",
+  ".albumFolderPreviewGridV309",
+  ".albumFolderPreviewCardV309"
 ].join(",");
 
 function clamp(value: number, min: number, max: number) {
@@ -103,7 +111,7 @@ function clamp(value: number, min: number, max: number) {
 function targetPriority(element: HTMLElement) {
   if (element.closest(".playerBar")) return 3;
   if (element.closest(".sidebar") || element.matches(".navItem")) return 3;
-  if (element.matches(".heroMain,.heroGhost,.heroTinyButton,.expandLibraryButton,.homeShelfActionButton")) return 2.6;
+  if (element.matches(".heroMain,.heroGhost,.heroTinyButton,.expandLibraryButton,.homeShelfActionButton")) return 2.7;
   return 2;
 }
 
@@ -119,27 +127,67 @@ function findTarget(root: HTMLElement, eventTarget: EventTarget | null) {
   return isUsableTarget(root, target) ? target : null;
 }
 
-function applyState(element: HTMLElement, strength: number, priority = targetPriority(element)) {
-  const weightedStrength = clamp(strength * (priority >= 3 ? 1 : 0.82), 0, 1);
-  const scale = 1 + weightedStrength * 0.018;
-  const glow = Math.round(weightedStrength * 8);
-  const bg = 0.004 + weightedStrength * 0.012;
-  const line = 0.06 + weightedStrength * 0.08;
-  const signature = `${Math.round(scale * 10000)}:${glow}:${Math.round(bg * 1000)}:${Math.round(line * 1000)}`;
+type MotionPayload = {
+  strength: number;
+  velocityX: number;
+  speed: number;
+  priority: number;
+};
+
+function applyState(element: HTMLElement, payload: MotionPayload) {
+  const priorityBoost = payload.priority >= 3 ? 1 : 0.82;
+  const weightedStrength = clamp(payload.strength * priorityBoost, 0, 1);
+  const safeSpeed = clamp(payload.speed, 0, 2.4);
+  const safeVelocityX = clamp(payload.velocityX, -2.4, 2.4);
+
+  const scale = 1 + weightedStrength * 0.018 + Math.min(safeSpeed * 0.0035, 0.008);
+  const stretchX = 1 + Math.min(safeSpeed * 0.026, 0.045);
+  const stretchY = 1 - Math.min(safeSpeed * 0.008, 0.014);
+  const rotate = clamp(safeVelocityX * 1.85, -3.2, 3.2);
+  const shiftX = clamp(safeVelocityX * 1.4, -3.5, 3.5);
+  const glow = Math.round(weightedStrength * 8 + Math.min(safeSpeed * 4, 6));
+  const bg = 0.004 + weightedStrength * 0.012 + Math.min(safeSpeed * 0.002, 0.005);
+  const line = 0.06 + weightedStrength * 0.08 + Math.min(safeSpeed * 0.006, 0.018);
+
+  // Very small blur only at high pointer speed. It gives a physical burst without
+  // turning hover into an expensive blurry surface.
+  const blur = safeSpeed > 1.15 ? Math.min((safeSpeed - 1.15) * 0.16, 0.24) : 0;
+
+  const signature = [
+    Math.round(scale * 10000),
+    Math.round(stretchX * 10000),
+    Math.round(stretchY * 10000),
+    Math.round(rotate * 100),
+    Math.round(shiftX * 100),
+    Math.round(blur * 100),
+    glow,
+    Math.round(bg * 1000),
+    Math.round(line * 1000)
+  ].join(":");
 
   if (element.dataset.localtifyProxSignature === signature && element.classList.contains("localtifyProximityActive")) return;
 
   element.dataset.localtifyProxSignature = signature;
-  element.classList.add("localtifyProximityTarget", "localtifyProximityActive");
+  element.classList.add("localtifyProximityTarget", "localtifyProximityActive", "localtifyVelocityMotion");
   element.style.setProperty("--prox-scale", scale.toFixed(4));
+  element.style.setProperty("--prox-stretch-x", stretchX.toFixed(4));
+  element.style.setProperty("--prox-stretch-y", stretchY.toFixed(4));
+  element.style.setProperty("--prox-rotate", `${rotate.toFixed(2)}deg`);
+  element.style.setProperty("--prox-shift-x", `${shiftX.toFixed(2)}px`);
+  element.style.setProperty("--prox-blur", `${blur.toFixed(2)}px`);
   element.style.setProperty("--prox-glow-size", `${glow}px`);
   element.style.setProperty("--prox-bg", bg.toFixed(3));
   element.style.setProperty("--prox-line", line.toFixed(3));
 }
 
 function clearElement(element: HTMLElement) {
-  element.classList.remove("localtifyProximityActive");
+  element.classList.remove("localtifyProximityActive", "localtifyVelocityMotion");
   element.style.removeProperty("--prox-scale");
+  element.style.removeProperty("--prox-stretch-x");
+  element.style.removeProperty("--prox-stretch-y");
+  element.style.removeProperty("--prox-rotate");
+  element.style.removeProperty("--prox-shift-x");
+  element.style.removeProperty("--prox-blur");
   element.style.removeProperty("--prox-glow-size");
   element.style.removeProperty("--prox-bg");
   element.style.removeProperty("--prox-line");
@@ -160,7 +208,7 @@ export function useProximityMotion({
     let clearTimer = 0;
     let activeTarget: HTMLElement | null = null;
     let pendingTarget: HTMLElement | null = null;
-    let pendingStrength = 0;
+    let pendingPayload: MotionPayload = { strength: 0.76, velocityX: 0, speed: 0, priority: 2 };
     let lastX = -9999;
     let lastY = -9999;
     let lastMoveAt = 0;
@@ -199,7 +247,7 @@ export function useProximityMotion({
       if (!pendingTarget || !isUsableTarget(root, pendingTarget)) return;
 
       activeTarget = pendingTarget;
-      applyState(activeTarget, pendingStrength, targetPriority(activeTarget));
+      applyState(activeTarget, pendingPayload);
     };
 
     const schedulePaint = () => {
@@ -207,7 +255,7 @@ export function useProximityMotion({
       frame = window.requestAnimationFrame(paint);
     };
 
-    const scheduleClear = (delay = 120) => {
+    const scheduleClear = (delay = 140) => {
       if (clearTimer) window.clearTimeout(clearTimer);
       clearTimer = window.setTimeout(() => {
         clearTimer = 0;
@@ -219,10 +267,13 @@ export function useProximityMotion({
       if (!visible || document.hidden || event.pointerType === "touch") return;
 
       const now = performance.now();
-      const minInterval = isAudioPlaying() ? 42 : 24;
-      const movedFarEnough = Math.abs(event.clientX - lastX) + Math.abs(event.clientY - lastY) >= 7;
+      const dt = Math.max(12, now - (lastMoveAt || now - 16));
+      const dx = lastX === -9999 ? 0 : event.clientX - lastX;
+      const dy = lastY === -9999 ? 0 : event.clientY - lastY;
+      const moved = Math.abs(dx) + Math.abs(dy);
+      const minInterval = isAudioPlaying() ? 34 : 20;
 
-      if (!movedFarEnough && now - lastMoveAt < minInterval) return;
+      if (moved < 3 && now - lastMoveAt < minInterval) return;
       if (now - lastMoveAt < minInterval) return;
 
       lastMoveAt = now;
@@ -231,7 +282,7 @@ export function useProximityMotion({
 
       const target = findTarget(root, event.target);
       if (!target) {
-        scheduleClear(isAudioPlaying() ? 160 : 110);
+        scheduleClear(isAudioPlaying() ? 180 : 120);
         return;
       }
 
@@ -240,10 +291,18 @@ export function useProximityMotion({
         clearTimer = 0;
       }
 
-      // One-target motion only: no querySelectorAll, no broad getBoundingClientRect scan.
-      // This keeps the sidebar/player/hero buttons lively without the profiler's pointermove spike.
+      const priority = targetPriority(target);
+      const velocityX = dx / dt;
+      const speed = Math.sqrt(dx * dx + dy * dy) / dt;
+      const velocityBoost = clamp(speed * 0.26, 0, 0.22);
+
       pendingTarget = target;
-      pendingStrength = targetPriority(target) >= 3 ? 0.9 : 0.74;
+      pendingPayload = {
+        strength: clamp((priority >= 3 ? 0.86 : 0.72) + velocityBoost, 0, 1),
+        velocityX,
+        speed,
+        priority
+      };
       schedulePaint();
     };
 
@@ -252,14 +311,14 @@ export function useProximityMotion({
       const target = findTarget(root, event.target);
       if (!target) return;
       pendingTarget = target;
-      pendingStrength = 1;
+      pendingPayload = { strength: 1, velocityX: 0, speed: 0.75, priority: targetPriority(target) };
       schedulePaint();
     };
 
     const handlePointerOut = (event: PointerEvent) => {
       const next = event.relatedTarget instanceof Element ? event.relatedTarget : null;
       if (next && activeTarget && activeTarget.contains(next)) return;
-      scheduleClear(100);
+      scheduleClear(120);
     };
 
     const handleVisibilityChange = () => {
