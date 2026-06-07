@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld("localitfy", {
   resolvePlaybackUrl: (payload) => ipcRenderer.invoke("playback:resolve-url", payload),
 
   importSongs: () => ipcRenderer.invoke("library:import"),
+  scanAlbumFolder: (payload) => ipcRenderer.invoke("albums:scan-folder", payload),
+  importAlbumFolder: (payload) => ipcRenderer.invoke("albums:import-folder", payload),
   clearLibrary: () => ipcRenderer.invoke("library:clear"),
 
   downloadAudioUrls: (payload) => ipcRenderer.invoke("download:audio", payload),
@@ -52,6 +54,12 @@ contextBridge.exposeInMainWorld("localitfy", {
   getStartWithWindows: () => ipcRenderer.invoke("localitfy:get-start-with-windows"),
   getNativeMediaStatus: () => ipcRenderer.invoke("localitfy:native-media-status"),
 
+  /** V302: renderer-safe DevTools/GPU status bridge. */
+  openDevTools: (payload) => ipcRenderer.invoke("localitfy:open-devtools", payload),
+  toggleDevTools: () => ipcRenderer.invoke("localitfy:toggle-devtools"),
+  getPerformanceStatus: () => ipcRenderer.invoke("localitfy:performance-status"),
+  getGpuStatus: () => ipcRenderer.invoke("localitfy:gpu-status"),
+
   minimizeWindow: () => ipcRenderer.invoke("window:minimize"),
   toggleMaximizeWindow: () => ipcRenderer.invoke("window:toggle-maximize"),
   closeWindow: () => ipcRenderer.invoke("window:close"),
@@ -98,6 +106,15 @@ contextBridge.exposeInMainWorld("localitfy", {
 
     return () => {
       ipcRenderer.removeListener("localitfy:auto-update-event", handler);
+    };
+  },
+
+  onAlbumFolderImportProgress: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("albums:import-folder-progress", handler);
+
+    return () => {
+      ipcRenderer.removeListener("albums:import-folder-progress", handler);
     };
   },
 

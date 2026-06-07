@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.7 V324 release prep. Visual settings wired. Sidebar hover smooth. Albums kept stable. */
+/* localtify 0.3.8 V309 album folder import foundation. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -2633,6 +2633,10 @@ type ManualLocalAlbum = {
   songIds: string[];
   createdAt: number;
   updatedAt: number;
+  sourceType?: "manual" | "folder";
+  sourcePath?: string;
+  folderCoverPath?: string;
+  importedAt?: number;
 };
 
 const MANUAL_LOCAL_ALBUMS_STORAGE_KEY = "localitfy.manualAlbums.v1";
@@ -2678,7 +2682,11 @@ function normalizeManualLocalAlbums(value: unknown): ManualLocalAlbum[] {
         coverUrl,
         songIds,
         createdAt,
-        updatedAt
+        updatedAt,
+        sourceType: raw.sourceType === "folder" ? "folder" : "manual",
+        sourcePath: typeof raw.sourcePath === "string" ? raw.sourcePath : "",
+        folderCoverPath: typeof raw.folderCoverPath === "string" ? raw.folderCoverPath : "",
+        importedAt: Number(raw.importedAt) || 0
       } satisfies ManualLocalAlbum;
     })
     .filter(Boolean) as ManualLocalAlbum[];
@@ -2710,10 +2718,14 @@ function buildManualAlbumEntries(manualAlbums: ManualLocalAlbum[], songsById: Ma
         totalDuration: albumSongs.reduce((total, song) => total + Math.max(0, Number(song.duration) || 0), 0),
         latestAdded,
         source: "manual",
+        sourceType: album.sourceType === "folder" ? "folder" : "manual",
+        sourcePath: album.sourcePath || "",
+        folderCoverPath: album.folderCoverPath || "",
+        importedAt: album.importedAt || 0,
         manualAlbumId: album.id,
         createdAt: album.createdAt,
         updatedAt: album.updatedAt
-      } as LocalAlbumEntry & { source: "manual"; manualAlbumId: string; createdAt: number; updatedAt: number };
+      } as LocalAlbumEntry & { source: "manual"; sourceType?: "manual" | "folder"; sourcePath?: string; folderCoverPath?: string; importedAt?: number; manualAlbumId: string; createdAt: number; updatedAt: number };
     })
     .filter(Boolean) as LocalAlbumEntry[];
 }
@@ -3652,6 +3664,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     appToast,
     importAnimation,
     songs,
+    setSongs,
+    setLibraryScanBusy,
+    setLibraryScanMessage,
+    setImportAnimation,
     libraryScanBusy,
     pixelArtBusy,
     libraryScanMessage,
@@ -3918,11 +3934,25 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const [albumDraftCoverUrl, setAlbumDraftCoverUrl] = useState("");
   const [albumDraftSearch, setAlbumDraftSearch] = useState("");
   const [albumDraftSongIds, setAlbumDraftSongIds] = useState<string[]>([]);
+  const [albumFolderImportPreview, setAlbumFolderImportPreview] = useState<any | null>(null);
+  const [albumFolderImportBusy, setAlbumFolderImportBusy] = useState(false);
+  const [albumFolderImportMessage, setAlbumFolderImportMessage] = useState("");
+  const [albumFolderImportProgress, setAlbumFolderImportProgress] = useState<any | null>(null);
   const albumCoverInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     writeLocalJson(MANUAL_LOCAL_ALBUMS_STORAGE_KEY, manualAlbums);
   }, [manualAlbums]);
+
+  useEffect(() => {
+    if (!window.localitfy?.onAlbumFolderImportProgress) return;
+
+    return window.localitfy.onAlbumFolderImportProgress((payload: any) => {
+      if (!payload || typeof payload !== "object") return;
+      setAlbumFolderImportProgress(payload);
+      if (payload.message) setAlbumFolderImportMessage(String(payload.message));
+    });
+  }, []);
 
   const metadataAlbums = useMemo(() => buildLocalAlbumEntries(songs), [songs]);
   const manualAlbumEntries = useMemo(() => buildManualAlbumEntries(manualAlbums, songsById), [manualAlbums, songsById]);
@@ -3943,6 +3973,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
   const selectedAlbumIds = albumTrackIds(selectedAlbum);
   const selectedAlbumIsManual = Boolean((selectedAlbum as any)?.source === "manual" && (selectedAlbum as any)?.manualAlbumId);
+  const selectedAlbumIsFolder = Boolean(selectedAlbumIsManual && (selectedAlbum as any)?.sourceType === "folder");
   const albumDraftSelectedSongs = useMemo(() => albumDraftSongIds.map((songId) => songsById.get(songId)).filter(isPlayableSong), [albumDraftSongIds, songsById]);
   const albumDraftArtistNames = useMemo(() => uniqueCleanArtistsFromSongs(albumDraftSelectedSongs), [albumDraftSelectedSongs]);
   const albumDraftArtistSuggestion = useMemo(() => suggestAlbumArtistFromSongs(albumDraftSelectedSongs), [albumDraftSelectedSongs]);
@@ -3980,6 +4011,163 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setAlbumDraftSearch("");
     setAlbumDraftSongIds([]);
   }
+
+
+  async function scanAlbumFolderImport(mode: "single" | "library") {
+    if (!window.localitfy?.scanAlbumFolder || albumFolderImportBusy) return;
+
+    setAlbumFolderImportBusy(true);
+    setAlbumFolderImportPreview(null);
+    setAlbumFolderImportProgress({
+      type: "picking",
+      mode,
+      index: 0,
+      total: 1,
+      message: mode === "library" ? "Choose a parent folder that contains album folders." : "Choose one album folder."
+    });
+    setAlbumFolderImportMessage(mode === "library" ? "Choose a parent folder that contains album folders." : "Choose one album folder.");
+    setStatusText?.(mode === "library" ? "opening album library picker..." : "opening album folder picker...");
+    setLibraryScanBusy?.(true);
+    setLibraryScanMessage?.("album folder scan starting...");
+
+    try {
+      const result = await window.localitfy.scanAlbumFolder({ mode });
+
+      if (!result || result.canceled) {
+        setAlbumFolderImportPreview(null);
+        setAlbumFolderImportProgress(null);
+        setAlbumFolderImportMessage("");
+        setStatusText?.("album import cancelled");
+        setLibraryScanMessage?.("");
+        return;
+      }
+
+      if (!result.ok) {
+        setAlbumFolderImportPreview(null);
+        setAlbumFolderImportProgress({ type: "error", mode, message: result.error || "album folder scan failed" });
+        setAlbumFolderImportMessage(result.error || "album folder scan failed");
+        setStatusText?.("album scan failed");
+        return;
+      }
+
+      setAlbumFolderImportPreview(result);
+      setAlbumFolderImportProgress({
+        type: "scan-done",
+        mode,
+        index: result.albums?.length || 0,
+        total: result.albums?.length || 0,
+        message: result.message || `Found ${result.albums?.length || 0} album folders.`
+      });
+      setAlbumFolderImportMessage(result.message || `Found ${result.albums?.length || 0} album folders.`);
+      setStatusText?.(result.message || "album folders ready to import");
+      setLibraryScanMessage?.(`${result.albums?.length || 0} album folder${(result.albums?.length || 0) === 1 ? "" : "s"} ready`);
+    } catch (error: any) {
+      console.error("[localtify album folder scan]", error);
+      setAlbumFolderImportPreview(null);
+      setAlbumFolderImportProgress({ type: "error", mode, message: error?.message || "album folder scan failed" });
+      setAlbumFolderImportMessage(error?.message || "album folder scan failed");
+      setStatusText?.("album scan failed");
+    } finally {
+      setAlbumFolderImportBusy(false);
+      setLibraryScanBusy?.(false);
+    }
+  }
+
+
+  function cancelAlbumFolderImportPreview() {
+    setAlbumFolderImportPreview(null);
+    setAlbumFolderImportProgress(null);
+    setAlbumFolderImportMessage("");
+    setStatusText?.("album import preview cleared");
+  }
+
+  async function commitAlbumFolderImportPreview() {
+    const scanId = albumFolderImportPreview?.scanId;
+    if (!scanId || !window.localitfy?.importAlbumFolder || albumFolderImportBusy) return;
+
+    setAlbumFolderImportBusy(true);
+    setAlbumFolderImportProgress({
+      type: "import-start",
+      index: 0,
+      total: albumFolderImportPreview?.trackCount || 1,
+      message: "Adding album tracks to the library..."
+    });
+    setAlbumFolderImportMessage("Adding album tracks to the library...");
+    setStatusText?.("importing album folder...");
+    setLibraryScanBusy?.(true);
+    setLibraryScanMessage?.("adding album folder tracks to library...");
+
+    try {
+      const result = await window.localitfy.importAlbumFolder({ scanId });
+
+      if (!result?.ok) {
+        setAlbumFolderImportProgress({ type: "error", message: result?.error || "album folder import failed" });
+        setAlbumFolderImportMessage(result?.error || "album folder import failed");
+        setStatusText?.("album import failed");
+        return;
+      }
+
+      if (Array.isArray(result.songs)) {
+        setSongs?.(result.songs);
+        saveLibraryOrder(result.songs);
+      }
+
+      const importedAlbums = Array.isArray(result.albums) ? result.albums : [];
+      const now = Date.now();
+
+      if (importedAlbums.length) {
+        const nextFolderAlbums: ManualLocalAlbum[] = importedAlbums.map((album: any) => ({
+          id: String(album.manualAlbumId || album.id || makeLocalId("album")),
+          title: cleanManualAlbumTitle(album.title || "local album"),
+          artist: cleanManualAlbumArtist(album.artist || "local album"),
+          year: cleanManualAlbumYear(album.year),
+          coverUrl: getRendererSafeImageUrl(album.coverUrl || ""),
+          songIds: Array.isArray(album.songIds) ? [...new Set(album.songIds.map((id: unknown) => String(id || "").trim()).filter(Boolean))] : [],
+          createdAt: Number(album.createdAt) || now,
+          updatedAt: Number(album.updatedAt) || now,
+          sourceType: "folder",
+          sourcePath: String(album.sourcePath || ""),
+          folderCoverPath: String(album.folderCoverPath || ""),
+          importedAt: Number(album.importedAt) || now
+        })).filter((album) => album.title && album.songIds.length);
+
+        setManualAlbums((items) => {
+          const incomingSourcePaths = new Set(nextFolderAlbums.map((album) => album.sourcePath).filter(Boolean));
+          const incomingIds = new Set(nextFolderAlbums.map((album) => album.id));
+          const kept = items.filter((album) => {
+            if (incomingIds.has(album.id)) return false;
+            if (album.sourceType === "folder" && album.sourcePath && incomingSourcePaths.has(album.sourcePath)) return false;
+            return true;
+          });
+
+          return [...nextFolderAlbums, ...kept];
+        });
+
+        setSelectedAlbumId(`manual_${nextFolderAlbums[0]?.id || ""}`);
+      }
+
+      setAlbumFolderImportPreview(null);
+      setAlbumFolderImportProgress({
+        type: "import-done",
+        index: importedAlbums.length,
+        total: importedAlbums.length,
+        changedCount: result.changedCount || 0,
+        message: result.message || "album folder imported"
+      });
+      setAlbumFolderImportMessage(result.message || "album folder imported");
+      setStatusText?.(result.message || "album folder imported");
+      setLibraryScanMessage?.(`${importedAlbums.length} folder album${importedAlbums.length === 1 ? "" : "s"} imported`);
+    } catch (error: any) {
+      console.error("[localtify album folder import]", error);
+      setAlbumFolderImportProgress({ type: "error", message: error?.message || "album folder import failed" });
+      setAlbumFolderImportMessage(error?.message || "album folder import failed");
+      setStatusText?.("album import failed");
+    } finally {
+      setAlbumFolderImportBusy(false);
+      setLibraryScanBusy?.(false);
+    }
+  }
+
 
   function openCreateAlbumBuilder(seedSong?: Song | null) {
     setAlbumBuilderMode("create");
@@ -4062,7 +4250,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       setSelectedAlbumId(`manual_${albumEditingManualId}`);
     } else {
       const id = makeLocalId("album");
-      setManualAlbums((items) => [{ id, title, artist, year, coverUrl: getRendererSafeImageUrl(albumDraftCoverUrl), songIds, createdAt: now, updatedAt: now }, ...items]);
+      setManualAlbums((items) => [{ id, title, artist, year, coverUrl: getRendererSafeImageUrl(albumDraftCoverUrl), songIds, createdAt: now, updatedAt: now, sourceType: "manual" }, ...items]);
       setSelectedAlbumId(`manual_${id}`);
     }
 
@@ -4854,11 +5042,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     <p className="eyebrow">local albums</p>
                     <h3>your albums your way</h3>
                     <p>
-                      group albums from file tags or build your own from songs you already have.
+                      group albums from file tags, build your own, or import real album folders from disk.
                     </p>
                     <div className="albumsHeroActionsV318">
                       <button className="mainAction" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>add album</button>
-                      <button className="heroGhost" type="button" onClick={importSongs}>import folder</button>
+                      <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("single")} disabled={albumFolderImportBusy}>import album folder</button>
+                      <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("library")} disabled={albumFolderImportBusy}>import album library</button>
                     </div>
                   </div>
                   <div className="albumsHeroStatsV318" aria-label="album summary">
@@ -4867,6 +5056,78 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     <span><strong>{metadataAlbums.length}</strong><small>from tags</small></span>
                   </div>
                 </section>
+
+                {(albumFolderImportBusy || albumFolderImportPreview || albumFolderImportMessage) ? (
+                  <section className={`albumFolderImportPanelV309 ${albumFolderImportPreview?.albums?.length ? "hasPreview" : ""}`}>
+                    <div className="albumFolderImportHeaderV309">
+                      <div>
+                        <p className="eyebrow">folder album import</p>
+                        <h3>{albumFolderImportBusy ? "Scanning your folder" : albumFolderImportPreview?.albums?.length ? "Ready to import" : "Album folder importer"}</h3>
+                        <p>{albumFolderImportMessage || "Choose one album folder, or choose a parent folder that contains separate album folders."}</p>
+                      </div>
+
+                      <div className="albumFolderImportActionsV309">
+                        <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("single")} disabled={albumFolderImportBusy}>import one album</button>
+                        <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("library")} disabled={albumFolderImportBusy}>import album library</button>
+                        {(albumFolderImportPreview || albumFolderImportMessage) && !albumFolderImportBusy ? (
+                          <button className="heroGhost" type="button" onClick={cancelAlbumFolderImportPreview}>clear</button>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    {albumFolderImportProgress ? (
+                      <div className="albumFolderProgressV309" role="status" aria-live="polite">
+                        <span>
+                          <i style={{ width: `${albumFolderImportProgress.total ? Math.min(100, Math.max(5, ((albumFolderImportProgress.index || 0) / albumFolderImportProgress.total) * 100)) : albumFolderImportBusy ? 42 : 100}%` }} />
+                        </span>
+                        <small>{albumFolderImportProgress.message || albumFolderImportMessage}</small>
+                      </div>
+                    ) : null}
+
+                    {albumFolderImportPreview?.albums?.length ? (
+                      <>
+                        <div className="albumFolderImportSummaryV309">
+                          <span><strong>{albumFolderImportPreview.albumCount || albumFolderImportPreview.albums.length}</strong><small>albums found</small></span>
+                          <span><strong>{albumFolderImportPreview.trackCount || 0}</strong><small>tracks</small></span>
+                          <span><strong>{albumFolderImportPreview.duplicateCount || 0}</strong><small>already in library</small></span>
+                        </div>
+
+                        <div className="albumFolderPreviewGridV309">
+                          {albumFolderImportPreview.albums.slice(0, 10).map((album: any) => (
+                            <article key={album.id || album.sourcePath} className="albumFolderPreviewCardV309">
+                              <div className="albumFolderPreviewCoverV309">
+                                {album.coverUrl ? <img src={album.coverUrl} alt="" loading="lazy" decoding="async" draggable={false} /> : <span>♪</span>}
+                              </div>
+                              <div className="albumFolderPreviewCopyV309">
+                                <strong title={album.title}>{album.title}</strong>
+                                <small title={album.artist}>{album.artist}</small>
+                                <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` • ${album.duplicateCount} already added` : ""}</em>
+                                {album.sourcePath ? <b title={album.sourcePath}>{album.sourcePath}</b> : null}
+                                {album.warnings?.length ? (
+                                  <ul>
+                                    {album.warnings.slice(0, 3).map((warning: string) => <li key={warning}>{warning}</li>)}
+                                  </ul>
+                                ) : null}
+                              </div>
+                            </article>
+                          ))}
+                        </div>
+
+                        <div className="albumFolderImportFooterV309">
+                          <button className="mainAction" type="button" onClick={() => void commitAlbumFolderImportPreview()} disabled={albumFolderImportBusy}>
+                            {albumFolderImportBusy ? "importing..." : "import albums"}
+                          </button>
+                          <button className="heroGhost" type="button" onClick={cancelAlbumFolderImportPreview} disabled={albumFolderImportBusy}>cancel</button>
+                        </div>
+                      </>
+                    ) : !albumFolderImportBusy && albumFolderImportPreview ? (
+                      <div className="albumFolderEmptyV309">
+                        <strong>No album folders found</strong>
+                        <p>Pick a folder that contains audio files, or choose a parent folder where each album has its own subfolder.</p>
+                      </div>
+                    ) : null}
+                  </section>
+                ) : null}
 
                 <section className="albumsShelfPanelV318">
                   <div className="albumsToolbarV318">
@@ -4905,7 +5166,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             <Cover song={album.coverSong} className="albumCardCoverV318" />
                             <span className="albumCardSheenV318" aria-hidden="true" />
                             <span className="albumCardMetaV318">
-                              <small>{isManual ? "your album" : "from file tags"}</small>
+                              <small>{isManual ? ((album as any).sourceType === "folder" ? "folder album" : "your album") : "from file tags"}</small>
                               <strong title={album.title}>{prettyTitle(album.title, 6)}</strong>
                               <em title={album.artist}>{prettyMeta(album.artist)}</em>
                               <b>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.year ? ` ${album.year}` : ""}</b>
@@ -4929,13 +5190,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       <div className="albumDetailHeroV318" style={{ "--album-hero-cover": selectedAlbum.coverSong ? toCssUrl(getSongAmbientSource(selectedAlbum.coverSong)) : "none" } as CSSProperties}>
                         <Cover song={selectedAlbum.coverSong} className="albumDetailCoverV318" />
                         <div className="albumDetailCopyV318">
-                          <p className="eyebrow">{selectedAlbumIsManual ? "custom album" : "album"}</p>
+                          <p className="eyebrow">{selectedAlbumIsFolder ? "folder album" : selectedAlbumIsManual ? "custom album" : "album"}</p>
                           <h3 title={selectedAlbum.title}>{selectedAlbum.title}</h3>
                           <p>{selectedAlbum.artist}</p>
                           <div className="albumMetaPillsV318">
                             <span>{selectedAlbum.trackCount} track{selectedAlbum.trackCount === 1 ? "" : "s"}</span>
                             <span>{formatTime(selectedAlbum.totalDuration)}</span>
                             {selectedAlbum.year ? <span>{selectedAlbum.year}</span> : null}
+                            {selectedAlbumIsFolder && (selectedAlbum as any).sourcePath ? <span title={(selectedAlbum as any).sourcePath}>folder import</span> : null}
                           </div>
                           <div className="albumActionRowV318">
                             <button className="mainAction" type="button" onClick={() => playAlbumSongs?.(selectedAlbumIds, selectedAlbum.title)} disabled={!selectedAlbumIds.length || !playAlbumSongs}>play</button>

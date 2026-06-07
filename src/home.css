@@ -16695,3 +16695,480 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
 .recentCoverCard{
   content-visibility: visible !important;
 }
+
+
+/* localtify 0.3.8 V309 — album folder importer */
+.albumFolderImportPanelV309{
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 2vw, 24px);
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.075), rgba(255,255,255,0.026) 46%, rgba(0,0,0,0.36)),
+    rgba(7, 7, 12, 0.74);
+  box-shadow:
+    0 22px 68px rgba(0,0,0,0.34),
+    inset 0 1px 0 rgba(255,255,255,0.055);
+  overflow: hidden;
+}
+
+.albumFolderImportHeaderV309{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.albumFolderImportHeaderV309 h3{
+  margin: 5px 0 7px;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 0.92;
+  letter-spacing: -0.065em;
+}
+
+.albumFolderImportHeaderV309 p{
+  max-width: 760px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.albumFolderImportActionsV309,
+.albumFolderImportFooterV309{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.albumFolderImportSummaryV309{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.albumFolderImportSummaryV309 span{
+  min-height: 74px;
+  padding: 14px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  border: 1px solid rgba(255,255,255,0.075);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+}
+
+.albumFolderImportSummaryV309 strong{
+  color: var(--text);
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.albumFolderImportSummaryV309 small{
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.albumFolderPreviewGridV309{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+  gap: 12px;
+}
+
+.albumFolderPreviewCardV309{
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.022)),
+    rgba(0,0,0,0.32);
+}
+
+.albumFolderPreviewCoverV309{
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 15px;
+  color: rgba(var(--accent-rgb), 0.92);
+  background: rgba(255,255,255,0.055);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.albumFolderPreviewCoverV309 img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.albumFolderPreviewCopyV309{
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.albumFolderPreviewCopyV309 strong,
+.albumFolderPreviewCopyV309 small,
+.albumFolderPreviewCopyV309 em,
+.albumFolderPreviewCopyV309 b{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumFolderPreviewCopyV309 strong{
+  color: var(--text);
+  font-size: 15px;
+  letter-spacing: -0.025em;
+}
+
+.albumFolderPreviewCopyV309 small{
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.albumFolderPreviewCopyV309 em{
+  color: var(--accent);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.albumFolderPreviewCopyV309 b{
+  color: var(--faint);
+  font-size: 10px;
+  font-weight: 760;
+}
+
+.albumFolderPreviewCopyV309 ul{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.albumFolderPreviewCopyV309 li{
+  max-width: 100%;
+  padding: 4px 7px;
+  border: 1px solid rgba(255, 184, 107, 0.24);
+  border-radius: 999px;
+  color: rgba(255, 211, 154, 0.9);
+  background: rgba(255, 184, 107, 0.08);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+@media (max-width: 760px){
+  .albumFolderImportHeaderV309{
+    display: grid;
+  }
+
+  .albumFolderImportActionsV309,
+  .albumFolderImportFooterV309{
+    justify-content: flex-start;
+  }
+
+  .albumFolderImportSummaryV309{
+    grid-template-columns: 1fr;
+  }
+
+  .albumFolderPreviewCardV309{
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .albumFolderPreviewCoverV309{
+    width: 58px;
+    height: 58px;
+    border-radius: 13px;
+  }
+}
+
+/* localtify 0.3.8 V309 — album folder importer polish + stuck overlay fix */
+.albumFolderImportPanelV309{
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 16px;
+  margin: 14px 0 18px;
+  padding: clamp(18px, 2vw, 24px);
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.08), rgba(255,255,255,0.028) 44%, rgba(0,0,0,0.34)),
+    rgba(5, 5, 10, 0.76);
+  box-shadow:
+    0 22px 70px rgba(0,0,0,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.055);
+  backdrop-filter: blur(18px) saturate(122%);
+}
+
+.albumFolderImportPanelV309::before{
+  content: "";
+  position: absolute;
+  inset: -40% auto auto -12%;
+  width: min(420px, 40vw);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.18), transparent 62%);
+  opacity: 0.7;
+  filter: blur(10px);
+}
+
+.albumFolderImportPanelV309 > *{
+  position: relative;
+  z-index: 1;
+}
+
+.albumFolderImportHeaderV309{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.albumFolderImportHeaderV309 h3{
+  margin: 4px 0 6px;
+  font-size: clamp(26px, 2.8vw, 42px);
+  line-height: 0.95;
+  letter-spacing: -0.065em;
+}
+
+.albumFolderImportHeaderV309 p:not(.eyebrow){
+  max-width: 780px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.albumFolderImportActionsV309{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.albumFolderImportActionsV309 .heroGhost,
+.albumFolderImportFooterV309 .heroGhost{
+  min-height: 36px;
+  padding-inline: 13px;
+}
+
+.albumFolderProgressV309{
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.085);
+  border-radius: 16px;
+  background: rgba(0,0,0,0.28);
+}
+
+.albumFolderProgressV309 span{
+  position: relative;
+  overflow: hidden;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.09);
+}
+
+.albumFolderProgressV309 i{
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb),0.78), var(--accent));
+  box-shadow: 0 0 24px rgba(var(--accent-rgb),0.18);
+  transition: width 180ms cubic-bezier(0.16,1,0.3,1);
+}
+
+.albumFolderProgressV309 small{
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.albumFolderImportSummaryV309{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.albumFolderImportSummaryV309 span{
+  min-height: 72px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.075);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.035);
+}
+
+.albumFolderImportSummaryV309 strong{
+  color: var(--text);
+  font-size: 26px;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+}
+
+.albumFolderImportSummaryV309 small{
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: lowercase;
+}
+
+.albumFolderPreviewGridV309{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.albumFolderPreviewCardV309{
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.085);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.036);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.albumFolderPreviewCoverV309{
+  width: 68px;
+  height: 68px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: var(--accent);
+  background: linear-gradient(135deg, rgba(var(--accent-rgb),0.14), rgba(255,255,255,0.04));
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.albumFolderPreviewCoverV309 img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.albumFolderPreviewCopyV309{
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+
+.albumFolderPreviewCopyV309 strong,
+.albumFolderPreviewCopyV309 small,
+.albumFolderPreviewCopyV309 em,
+.albumFolderPreviewCopyV309 b{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumFolderPreviewCopyV309 strong{
+  color: var(--text);
+  font-size: 15px;
+  letter-spacing: -0.025em;
+}
+
+.albumFolderPreviewCopyV309 small,
+.albumFolderPreviewCopyV309 em,
+.albumFolderPreviewCopyV309 b{
+  color: var(--text-2);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 760;
+}
+
+.albumFolderPreviewCopyV309 b{
+  color: var(--faint);
+}
+
+.albumFolderPreviewCopyV309 ul{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.albumFolderPreviewCopyV309 li{
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.06);
+  font-size: 10px;
+  font-weight: 820;
+}
+
+.albumFolderImportFooterV309{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.albumFolderEmptyV309{
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border: 1px dashed rgba(255,255,255,0.14);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.025);
+}
+
+.albumFolderEmptyV309 strong{
+  color: var(--text);
+  font-size: 18px;
+}
+
+.albumFolderEmptyV309 p{
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 860px){
+  .albumFolderImportHeaderV309{
+    display: grid;
+  }
+
+  .albumFolderImportActionsV309,
+  .albumFolderImportFooterV309{
+    justify-content: flex-start;
+  }
+
+  .albumFolderImportSummaryV309{
+    grid-template-columns: 1fr;
+  }
+}

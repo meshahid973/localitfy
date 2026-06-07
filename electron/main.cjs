@@ -1,4 +1,4 @@
-/* localtify 0.3.7 V315 — Spotify public fallback for packaged builds. */
+/* localtify 0.3.8 V309 — album folder importer foundation. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -158,6 +158,7 @@ const mediaPathKeyToToken = new Map();
 let mediaServer = null;
 let mediaServerPort = 0;
 let mediaServerReadyPromise = null;
+const albumFolderImportScans = new Map();
 
 try {
   protocol.registerSchemesAsPrivileged([
@@ -1003,11 +1004,79 @@ async function installUpdate() {
   return true;
 }
 
-app.setName(APP_NAME);
-app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
-if (process.platform === "linux") {
-  app.commandLine.appendSwitch("enable-transparent-visuals");
+function appendChromiumSwitchOnce(name, value) {
+  try {
+    if (!name) return false;
+    if (typeof app.commandLine?.hasSwitch === "function" && app.commandLine.hasSwitch(name)) {
+      return false;
+    }
+
+    if (typeof value === "undefined" || value === null || value === "") {
+      app.commandLine.appendSwitch(name);
+    } else {
+      app.commandLine.appendSwitch(name, String(value));
+    }
+
+    return true;
+  } catch (error) {
+    console.log("[localtify chromium switch error]", name, error?.message || error);
+    return false;
+  }
 }
+
+function configureLocaltifyChromiumPerformance() {
+  const switches = [];
+  const add = (name, value) => {
+    const applied = appendChromiumSwitchOnce(name, value);
+    switches.push({
+      name,
+      value: typeof value === "undefined" || value === null ? "" : String(value),
+      applied
+    });
+    return applied;
+  };
+
+  const disableGpuTuning = process.env.LOCALTIFY_DISABLE_GPU_TUNING === "1";
+  const forceOpenGl = process.env.LOCALTIFY_FORCE_OPENGL === "1";
+  const forceAngleGl = process.env.LOCALTIFY_FORCE_ANGLE_GL === "1";
+
+  add("autoplay-policy", "no-user-gesture-required");
+
+  if (!disableGpuTuning) {
+    // Keep Chromium/Electron on hardware acceleration and make compositor/raster work
+    // eligible for the GPU. Do not call app.disableHardwareAcceleration().
+    add("ignore-gpu-blocklist");
+    add("enable-gpu-rasterization");
+    add("enable-zero-copy");
+    add("enable-accelerated-video-decode");
+
+    if (forceOpenGl) {
+      // Optional test mode: PowerShell -> $env:LOCALTIFY_FORCE_OPENGL="1"; npm run dev
+      // This is intentionally opt-in because forced desktop OpenGL can break some
+      // Windows drivers even when normal ANGLE/D3D11 acceleration is fine.
+      add("use-gl", "desktop");
+    } else if (process.platform === "win32") {
+      // Stable Windows default for most GPUs. This keeps GPU acceleration enabled
+      // without forcing a risky OpenGL path.
+      add("use-angle", forceAngleGl ? "gl" : "d3d11");
+    }
+  }
+
+  if (process.platform === "linux") {
+    add("enable-transparent-visuals");
+  }
+
+  return {
+    gpuTuningEnabled: !disableGpuTuning,
+    forceOpenGl,
+    forceAngleGl,
+    platform: process.platform,
+    switches
+  };
+}
+
+app.setName(APP_NAME);
+const LOCALTIFY_CHROMIUM_PERFORMANCE = configureLocaltifyChromiumPerformance();
 
 try {
   // Localtify uses a custom frameless titlebar, so the native menu is not needed.
@@ -2592,6 +2661,563 @@ function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new Set()) 
   };
 }
 
+
+const ALBUM_FOLDER_COVER_NAMES = new Set([
+  "cover.jpg",
+  "cover.jpeg",
+  "cover.png",
+  "folder.jpg",
+  "folder.jpeg",
+  "folder.png",
+  "front.jpg",
+  "front.jpeg",
+  "front.png",
+  "album.jpg",
+  "album.jpeg",
+  "album.png"
+]);
+
+function cleanFolderAlbumText(value, fallback = "") {
+  const text = String(value || "")
+    .replace(/[_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return text || fallback;
+}
+
+function cleanFolderAlbumTitleFromPath(folderPath) {
+  const parsed = path.parse(String(folderPath || ""));
+  return cleanFolderAlbumText(parsed.name, "local album");
+}
+
+function naturalLocaltifyCompare(a, b) {
+  return String(a || "").localeCompare(String(b || ""), undefined, {
+    numeric: true,
+    sensitivity: "base"
+  });
+}
+
+function parseTrackInfoFromFilename(filePath) {
+  const parsed = path.parse(filePath);
+  let base = cleanFolderAlbumText(parsed.name, parsed.name);
+  let disc = 0;
+  let track = 9999;
+
+  const discMatch = base.match(/(?:^|[\s._-])(?:disc|disk|cd)\s*([0-9]{1,2})(?:[\s._-]|$)/i);
+  if (discMatch) {
+    disc = Number(discMatch[1]) || 0;
+    base = cleanFolderAlbumText(base.replace(discMatch[0], " "), base);
+  }
+
+  const trackMatch = base.match(/^\s*(?:d?([0-9]{1,2})[\s._-]*)?([0-9]{1,3})(?:\s*[-._]\s*|\s+)/);
+  if (trackMatch) {
+    if (trackMatch[1]) disc = Number(trackMatch[1]) || disc;
+    track = Number(trackMatch[2]) || track;
+    base = cleanFolderAlbumText(base.slice(trackMatch[0].length), base);
+  }
+
+  let artist = "";
+  let title = base || parsed.name;
+  const dashParts = base.split(/\s+-\s+/).map((item) => item.trim()).filter(Boolean);
+  if (dashParts.length >= 2) {
+    artist = dashParts[0];
+    title = dashParts.slice(1).join(" - ");
+  }
+
+  return {
+    title: cleanFolderAlbumText(title, parsed.name),
+    artist: cleanFolderAlbumText(artist, ""),
+    disc,
+    track,
+    sortName: parsed.name
+  };
+}
+
+function getFolderAlbumCommonArtist(tracks) {
+  const artists = tracks
+    .map((track) => cleanFolderAlbumText(track.artist, ""))
+    .filter(Boolean)
+    .filter((artist) => artist.toLowerCase() !== "unknown artist");
+
+  const unique = [...new Map(artists.map((artist) => [artist.toLowerCase(), artist])).values()];
+
+  if (!unique.length) return "unknown artist";
+  if (unique.length === 1) return unique[0];
+  return "Various Artists";
+}
+
+async function findAlbumFolderCover(folderPath) {
+  const folder = String(folderPath || "");
+  if (!folder || !path.isAbsolute(folder)) return "";
+
+  let entries = [];
+  try {
+    entries = await fs.promises.readdir(folder, { withFileTypes: true });
+  } catch {
+    return "";
+  }
+
+  const directMatches = entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name)
+    .filter((name) => ALBUM_FOLDER_COVER_NAMES.has(name.toLowerCase()))
+    .sort((a, b) => {
+      const aScore = ["cover", "folder", "front", "album"].findIndex((prefix) => a.toLowerCase().startsWith(prefix));
+      const bScore = ["cover", "folder", "front", "album"].findIndex((prefix) => b.toLowerCase().startsWith(prefix));
+      return (aScore === -1 ? 99 : aScore) - (bScore === -1 ? 99 : bScore) || naturalLocaltifyCompare(a, b);
+    });
+
+  if (directMatches[0]) return path.join(folder, directMatches[0]);
+
+  const looseImage = entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name)
+    .find((name) => /^(cover|folder|front|album)[\s._-].*\.(png|jpe?g)$/i.test(name));
+
+  return looseImage ? path.join(folder, looseImage) : "";
+}
+
+async function listAlbumAudioFiles(folderPath, options = {}) {
+  const root = String(folderPath || "");
+  const maxDepth = Number.isFinite(Number(options.maxDepth)) ? Number(options.maxDepth) : 2;
+  const maxFiles = Number.isFinite(Number(options.maxFiles)) ? Number(options.maxFiles) : 420;
+  const out = [];
+
+  async function walk(dir, depth) {
+    if (out.length >= maxFiles || depth > maxDepth) return;
+
+    let entries = [];
+    try {
+      entries = await fs.promises.readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    entries.sort((a, b) => naturalLocaltifyCompare(a.name, b.name));
+
+    for (const entry of entries) {
+      if (out.length >= maxFiles) break;
+      const fullPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        if (entry.name.startsWith(".") || /^(node_modules|localitfy-bin|spotify-covers)$/i.test(entry.name)) continue;
+        await walk(fullPath, depth + 1);
+        continue;
+      }
+
+      if (!entry.isFile()) continue;
+      if (!isAudioFile(fullPath)) continue;
+      if (/\.(part|tmp|download|crdownload)$/i.test(entry.name)) continue;
+
+      out.push(fullPath);
+    }
+  }
+
+  if (!root || !path.isAbsolute(root)) return out;
+  await walk(root, 0);
+
+  return out.sort((a, b) => {
+    const aInfo = parseTrackInfoFromFilename(a);
+    const bInfo = parseTrackInfoFromFilename(b);
+    if (aInfo.disc !== bInfo.disc) return aInfo.disc - bInfo.disc;
+    if (aInfo.track !== bInfo.track) return aInfo.track - bInfo.track;
+    return naturalLocaltifyCompare(aInfo.sortName, bInfo.sortName);
+  });
+}
+
+async function getAlbumLibraryCandidateFolders(rootPath, options = {}) {
+  const root = String(rootPath || "");
+  const maxCandidateFolders = Number.isFinite(Number(options.maxCandidateFolders)) ? Math.max(1, Number(options.maxCandidateFolders)) : 90;
+  const onProgress = typeof options.onProgress === "function" ? options.onProgress : null;
+  if (!root || !path.isAbsolute(root)) return [];
+
+  let entries = [];
+  try {
+    entries = await fs.promises.readdir(root, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+
+  const directories = entries
+    .filter((entry) => entry.isDirectory())
+    .filter((entry) => !entry.name.startsWith("."))
+    .filter((entry) => !/^(node_modules|localitfy-bin|spotify-covers|dist|build|release|out|\.git)$/i.test(entry.name))
+    .map((entry) => path.join(root, entry.name))
+    .sort(naturalLocaltifyCompare)
+    .slice(0, maxCandidateFolders);
+
+  const candidates = [];
+
+  for (let index = 0; index < directories.length; index += 1) {
+    const directory = directories[index];
+    if (onProgress) {
+      onProgress({
+        type: "scan-candidate",
+        index: index + 1,
+        total: directories.length,
+        folder: directory,
+        message: `checking ${path.basename(directory)}`
+      });
+    }
+
+    const files = await listAlbumAudioFiles(directory, { maxDepth: 1, maxFiles: 8 });
+    if (files.length) candidates.push(directory);
+    await yieldToMainLoop();
+  }
+
+  // If the selected parent is itself an album folder, support it instead of returning nothing.
+  if (!candidates.length) {
+    const rootFiles = await listAlbumAudioFiles(root, { maxDepth: 1, maxFiles: 8 });
+    if (rootFiles.length) candidates.push(root);
+  }
+
+  return candidates;
+}
+
+async function scanOneAlbumFolder(folderPath, existingSourceKeys = new Set(), options = {}) {
+  const maxDepth = Number.isFinite(Number(options.maxDepth)) ? Number(options.maxDepth) : 1;
+  const maxFiles = Number.isFinite(Number(options.maxFiles)) ? Number(options.maxFiles) : 280;
+  const audioFiles = await listAlbumAudioFiles(folderPath, { maxDepth, maxFiles });
+
+  const title = cleanFolderAlbumTitleFromPath(folderPath);
+  const coverPath = await findAlbumFolderCover(folderPath);
+  const tracks = audioFiles.map((filePath, index) => {
+    const parsed = parseTrackInfoFromFilename(filePath);
+    return {
+      id: crypto.createHash("sha256").update(filePath).digest("hex"),
+      filePath,
+      title: parsed.title,
+      artist: parsed.artist || "unknown artist",
+      album: title,
+      disc: parsed.disc,
+      track: parsed.track === 9999 ? index + 1 : parsed.track,
+      duplicate: existingSourceKeys.has(String(filePath || "").trim().toLowerCase())
+    };
+  });
+
+  const artist = getFolderAlbumCommonArtist(tracks);
+  const warnings = [];
+
+  if (!tracks.length) warnings.push("No audio files found");
+  if (!coverPath) warnings.push("No cover found");
+  if (artist === "Various Artists") warnings.push("Mixed artists detected");
+  if (audioFiles.length >= maxFiles) warnings.push(`Scan limit reached at ${maxFiles} tracks`);
+
+  const duplicateCount = tracks.filter((track) => track.duplicate).length;
+  if (duplicateCount) warnings.push(`${duplicateCount} duplicate song${duplicateCount === 1 ? "" : "s"} already in library`);
+
+  return {
+    id: `folder_${crypto.createHash("sha1").update(String(folderPath)).digest("hex").slice(0, 12)}`,
+    title,
+    artist,
+    sourcePath: folderPath,
+    coverPath,
+    coverUrl: coverPath ? safeMediaUrl(coverPath) : "",
+    trackCount: tracks.length,
+    duplicateCount,
+    warnings,
+    tracks
+  };
+}
+
+async function openAlbumFolderDialog(senderWindow, mode) {
+  const single = mode === "single";
+  const dialogOptions = {
+    title: single ? "Choose one album folder" : "Choose a music folder with album subfolders",
+    buttonLabel: single ? "Scan album folder" : "Scan album library",
+    properties: ["openDirectory"]
+  };
+
+  return senderWindow && !senderWindow.isDestroyed()
+    ? dialog.showOpenDialog(senderWindow, dialogOptions)
+    : dialog.showOpenDialog(dialogOptions);
+}
+
+async function scanAlbumFolderImportRequest(event, payload = {}) {
+  const mode = payload?.mode === "library" ? "library" : "single";
+  const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+  const dialogResult = await openAlbumFolderDialog(senderWindow, mode);
+
+  if (dialogResult.canceled || !dialogResult.filePaths?.[0]) {
+    return { ok: false, canceled: true, mode, scanId: "", rootPath: "", albums: [], message: "folder scan cancelled" };
+  }
+
+  const rootPath = dialogResult.filePaths[0];
+  const existingSourceKeys = new Set(getSongs().map((song) => String(song.filePath || "").trim().toLowerCase()).filter(Boolean));
+
+  event.sender.send("albums:import-folder-progress", {
+    type: "scan-start",
+    mode,
+    rootPath,
+    total: 0,
+    message: mode === "library" ? "checking album subfolders..." : "checking selected album folder..."
+  });
+
+  const candidateFolders = mode === "library"
+    ? await getAlbumLibraryCandidateFolders(rootPath, {
+        maxCandidateFolders: 90,
+        onProgress: (progress) => {
+          event.sender.send("albums:import-folder-progress", {
+            ...progress,
+            mode,
+            rootPath
+          });
+        }
+      })
+    : [rootPath];
+
+  const albums = [];
+
+  if (!candidateFolders.length) {
+    const scanId = `scan_${Date.now().toString(36)}_${crypto.randomBytes(5).toString("hex")}`;
+    const result = {
+      ok: true,
+      canceled: false,
+      scanId,
+      mode,
+      rootPath,
+      albumCount: 0,
+      trackCount: 0,
+      duplicateCount: 0,
+      albums: [],
+      message: mode === "library"
+        ? "No album folders found. Choose a folder that contains album subfolders with audio files."
+        : "No audio files found in this album folder."
+    };
+
+    albumFolderImportScans.set(scanId, { createdAt: Date.now(), result });
+    event.sender.send("albums:import-folder-progress", {
+      type: "scan-done",
+      mode,
+      rootPath,
+      total: 0,
+      message: result.message
+    });
+    return result;
+  }
+
+  event.sender.send("albums:import-folder-progress", {
+    type: "scan-folders-ready",
+    mode,
+    rootPath,
+    total: candidateFolders.length,
+    message: `checking ${candidateFolders.length} folder${candidateFolders.length === 1 ? "" : "s"}...`
+  });
+
+  for (let index = 0; index < candidateFolders.length; index += 1) {
+    const folder = candidateFolders[index];
+
+    event.sender.send("albums:import-folder-progress", {
+      type: "scan-folder",
+      mode,
+      rootPath,
+      index: index + 1,
+      total: candidateFolders.length,
+      folder,
+      message: `scanning ${path.basename(folder)}`
+    });
+
+    const album = await scanOneAlbumFolder(folder, existingSourceKeys, {
+      maxDepth: mode === "single" ? 1 : 1,
+      maxFiles: mode === "single" ? 320 : 240
+    });
+    if (album.trackCount > 0) albums.push(album);
+    await yieldToMainLoop();
+  }
+
+  const scanId = `scan_${Date.now().toString(36)}_${crypto.randomBytes(5).toString("hex")}`;
+  const result = {
+    ok: true,
+    canceled: false,
+    scanId,
+    mode,
+    rootPath,
+    albumCount: albums.length,
+    trackCount: albums.reduce((total, album) => total + album.trackCount, 0),
+    duplicateCount: albums.reduce((total, album) => total + album.duplicateCount, 0),
+    albums,
+    message: albums.length
+      ? `Found ${albums.length} album${albums.length === 1 ? "" : "s"} with ${albums.reduce((total, album) => total + album.trackCount, 0)} track${albums.reduce((total, album) => total + album.trackCount, 0) === 1 ? "" : "s"}.`
+      : mode === "library"
+        ? "No album folders found. Choose a parent folder that contains album subfolders with audio files."
+        : "No audio files found in this album folder."
+  };
+
+  albumFolderImportScans.set(scanId, {
+    createdAt: Date.now(),
+    result
+  });
+
+  // Keep the preview cache small and short-lived.
+  const cutoff = Date.now() - 15 * 60 * 1000;
+  for (const [key, value] of albumFolderImportScans.entries()) {
+    if (!value || value.createdAt < cutoff || albumFolderImportScans.size > 12) {
+      albumFolderImportScans.delete(key);
+    }
+  }
+
+  event.sender.send("albums:import-folder-progress", {
+    type: "scan-done",
+    mode,
+    rootPath,
+    total: albums.length,
+    message: result.message
+  });
+
+  return result;
+}
+
+async function commitAlbumFolderImportRequest(event, payload = {}) {
+  const scanId = String(payload?.scanId || "");
+  const cached = scanId ? albumFolderImportScans.get(scanId) : null;
+  const scanResult = cached?.result || null;
+
+  if (!scanResult) {
+    return {
+      ok: false,
+      error: "No album scan preview is ready. Scan a folder first.",
+      changedCount: 0,
+      songs: listSongsShaped(),
+      albums: []
+    };
+  }
+
+  if (!scanResult.albums?.length) {
+    return {
+      ok: false,
+      error: scanResult.message || "No album folders were found to import.",
+      changedCount: 0,
+      songs: listSongsShaped(),
+      albums: []
+    };
+  }
+
+  const pixelArtFiles = getPixelArtFiles();
+  const usedCovers = new Set();
+  const existingBefore = getSongs();
+  const existingSourceKeys = new Set(existingBefore.map((song) => String(song.filePath || "").trim().toLowerCase()).filter(Boolean));
+  const songsToInsert = [];
+  let processedTracks = 0;
+
+  event.sender.send("albums:import-folder-progress", {
+    type: "import-start",
+    scanId,
+    total: scanResult.trackCount,
+    message: "adding album tracks to library..."
+  });
+
+  for (let albumIndex = 0; albumIndex < scanResult.albums.length; albumIndex += 1) {
+    const album = scanResult.albums[albumIndex];
+
+    event.sender.send("albums:import-folder-progress", {
+      type: "import-album",
+      scanId,
+      index: albumIndex + 1,
+      total: scanResult.albums.length,
+      folder: album.sourcePath,
+      message: `importing ${album.title}`
+    });
+
+    for (const track of album.tracks || []) {
+      processedTracks += 1;
+      const sourceKey = String(track.filePath || "").trim().toLowerCase();
+      if (!sourceKey || existingSourceKeys.has(sourceKey)) continue;
+
+      const song = makeSongFromFile(track.filePath, pixelArtFiles, usedCovers);
+      song.title = cleanFolderAlbumText(track.title, song.title);
+      song.artist = cleanFolderAlbumText(track.artist, album.artist || song.artist || "unknown artist");
+      song.album = cleanFolderAlbumText(album.title, song.album || "local album");
+      if (album.coverPath && fileExists(album.coverPath)) {
+        song.coverPath = album.coverPath;
+      }
+
+      songsToInsert.push(song);
+      existingSourceKeys.add(sourceKey);
+
+      if (processedTracks % 24 === 0) {
+        event.sender.send("albums:import-folder-progress", {
+          type: "import-track",
+          scanId,
+          index: processedTracks,
+          total: scanResult.trackCount,
+          message: `added ${processedTracks}/${scanResult.trackCount} tracks`
+        });
+        await yieldToMainLoop();
+      }
+    }
+
+    await yieldToMainLoop();
+  }
+
+  const changedCount = songsToInsert.length ? insertSongs(songsToInsert) : 0;
+  clearFileInfoCache();
+
+  const shapedSongs = listSongsShaped();
+  const songsByPath = new Map(
+    shapedSongs
+      .map((song) => [String(song.filePath || "").trim().toLowerCase(), song])
+      .filter(([key]) => Boolean(key))
+  );
+
+  const importedAlbums = scanResult.albums
+    .map((album) => {
+      const songIds = (album.tracks || [])
+        .map((track) => songsByPath.get(String(track.filePath || "").trim().toLowerCase())?.id)
+        .filter(Boolean);
+
+      if (!songIds.length) return null;
+
+      const manualAlbumId = `folder_${crypto.createHash("sha1").update(String(album.sourcePath || album.title)).digest("hex").slice(0, 14)}`;
+
+      return {
+        id: manualAlbumId,
+        manualAlbumId,
+        title: album.title,
+        artist: album.artist || "local album",
+        year: "",
+        coverUrl: album.coverUrl || "",
+        sourceType: "folder",
+        sourcePath: album.sourcePath,
+        folderCoverPath: album.coverPath || "",
+        importedAt: Date.now(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        songIds,
+        trackCount: songIds.length,
+        warnings: album.warnings || []
+      };
+    })
+    .filter(Boolean);
+
+  const message = importedAlbums.length
+    ? `Imported ${importedAlbums.length} folder album${importedAlbums.length === 1 ? "" : "s"}. ${changedCount} new track${changedCount === 1 ? "" : "s"} added.`
+    : "No album was imported because every detected track was unavailable.";
+
+  event.sender.send("albums:import-folder-progress", {
+    type: "import-done",
+    scanId,
+    total: importedAlbums.length,
+    changedCount,
+    message
+  });
+
+  albumFolderImportScans.delete(scanId);
+
+  return {
+    ok: true,
+    scanId,
+    mode: scanResult.mode,
+    rootPath: scanResult.rootPath,
+    changedCount,
+    songs: shapedSongs,
+    albums: importedAlbums,
+    skippedDuplicates: scanResult.duplicateCount || 0,
+    message
+  };
+}
+
+
 function normalizeForLooseMatch(value = "") {
   return String(value || "")
     .toLowerCase()
@@ -3006,6 +3632,128 @@ function getRendererIndexPath() {
   return candidates[0];
 }
 
+
+function getLocaltifyGpuFeatureStatus() {
+  try {
+    return typeof app.getGPUFeatureStatus === "function" ? app.getGPUFeatureStatus() : {};
+  } catch (error) {
+    return { error: error?.message || String(error || "GPU feature status unavailable") };
+  }
+}
+
+async function getLocaltifyPerformanceStatus() {
+  let gpuInfo = null;
+  try {
+    gpuInfo = typeof app.getGPUInfo === "function" ? await app.getGPUInfo("basic") : null;
+  } catch (error) {
+    gpuInfo = { error: error?.message || String(error || "GPU info unavailable") };
+  }
+
+  let metrics = [];
+  try {
+    metrics = typeof app.getAppMetrics === "function"
+      ? app.getAppMetrics().map((metric) => ({
+          type: metric.type,
+          pid: metric.pid,
+          cpu: metric.cpu,
+          memory: metric.memory,
+          sandboxed: metric.sandboxed
+        }))
+      : [];
+  } catch {
+    metrics = [];
+  }
+
+  const win = mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+  const devToolsOpened = (() => {
+    try {
+      return Boolean(win?.webContents?.isDevToolsOpened?.());
+    } catch {
+      return false;
+    }
+  })();
+
+  return {
+    ok: true,
+    appVersion: app.getVersion(),
+    electronVersion: process.versions.electron,
+    chromeVersion: process.versions.chrome,
+    nodeVersion: process.versions.node,
+    platform: process.platform,
+    arch: process.arch,
+    isPackaged: Boolean(app.isPackaged),
+    gpuTuning: LOCALTIFY_CHROMIUM_PERFORMANCE,
+    gpuFeatureStatus: getLocaltifyGpuFeatureStatus(),
+    gpuInfo,
+    processMetrics: metrics,
+    window: {
+      exists: Boolean(win),
+      visible: Boolean(win?.isVisible?.()),
+      focused: Boolean(win?.isFocused?.()),
+      devToolsOpened
+    }
+  };
+}
+
+function openLocaltifyDevTools(win = mainWindow, options = {}) {
+  try {
+    const target = win && !win.isDestroyed() ? win : mainWindow;
+    if (!target || target.isDestroyed()) {
+      return { ok: false, error: "main window is not ready" };
+    }
+
+    const mode = typeof options?.mode === "string" && options.mode
+      ? options.mode
+      : (isDev ? "detach" : "right");
+
+    target.webContents.openDevTools({ mode, activate: true });
+    return {
+      ok: true,
+      opened: true,
+      mode,
+      gpuFeatureStatus: getLocaltifyGpuFeatureStatus()
+    };
+  } catch (error) {
+    return { ok: false, error: error?.message || String(error || "failed to open DevTools") };
+  }
+}
+
+function toggleLocaltifyDevTools(win = mainWindow) {
+  try {
+    const target = win && !win.isDestroyed() ? win : mainWindow;
+    if (!target || target.isDestroyed()) return { ok: false, error: "main window is not ready" };
+
+    if (target.webContents.isDevToolsOpened()) {
+      target.webContents.closeDevTools();
+      return { ok: true, opened: false };
+    }
+
+    return openLocaltifyDevTools(target);
+  } catch (error) {
+    return { ok: false, error: error?.message || String(error || "failed to toggle DevTools") };
+  }
+}
+
+function attachLocaltifyDevToolsShortcuts(win) {
+  if (!win || win.isDestroyed() || win.__localtifyDevToolsShortcutsAttached) return;
+  win.__localtifyDevToolsShortcutsAttached = true;
+
+  win.webContents.on("before-input-event", (event, input = {}) => {
+    const key = String(input.key || "").toLowerCase();
+    const isCtrlOrMeta = Boolean(input.control || input.meta);
+    const isDevToolsCombo = (isCtrlOrMeta && input.shift && key === "i") || key === "f12";
+
+    if (!isDevToolsCombo) return;
+
+    event.preventDefault();
+    const result = toggleLocaltifyDevTools(win);
+    if (!result?.ok) {
+      console.log("[localtify devtools shortcut error]", result?.error || result);
+    }
+  });
+}
+
+
 function createWindow() {
   if (mainWindow && !mainWindow.isDestroyed()) {
     showMainWindow();
@@ -3046,6 +3794,7 @@ function createWindow() {
       backgroundThrottling: true
     }
   });
+  attachLocaltifyDevToolsShortcuts(mainWindow);
   applyWindowTranslucencyToWindow(mainWindow, windowTranslucency);
   mainWindow.webContents.once("did-finish-load", () => {
     applyWindowTranslucencyToWindow(mainWindow, getSavedWindowTranslucencySettings());
@@ -3079,7 +3828,7 @@ function createWindow() {
     });
   });
   if (process.env.LOCALITFY_DEBUG === "1") {
-    mainWindow.webContents.openDevTools({ mode: "detach" });
+    openLocaltifyDevTools(mainWindow, { mode: "detach" });
   }
   mainWindow.once("ready-to-show", () => {
     repairMainWindowBounds(mainWindow, { center: true });
@@ -3142,6 +3891,19 @@ app.whenReady().then(async () => {
     setStartWithWindows(true);
   }
   setupNativeWindowsMediaIpc();
+
+  ipcMain.handle("localitfy:open-devtools", async (event, payload = {}) => {
+    const win = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+    return openLocaltifyDevTools(win, payload);
+  });
+
+  ipcMain.handle("localitfy:toggle-devtools", async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+    return toggleLocaltifyDevTools(win);
+  });
+
+  ipcMain.handle("localitfy:performance-status", async () => getLocaltifyPerformanceStatus());
+  ipcMain.handle("localitfy:gpu-status", async () => getLocaltifyPerformanceStatus());
 
   ipcMain.handle("app:bootstrap", async () => {
     await yieldToMainLoop();
@@ -3277,6 +4039,37 @@ app.whenReady().then(async () => {
     } catch (error) {
       console.log("[localitfy import error]", error?.stack || error?.message);
       return listSongsShaped();
+    }
+  });
+
+
+  ipcMain.handle("albums:scan-folder", async (event, payload) => {
+    try {
+      return await scanAlbumFolderImportRequest(event, payload || {});
+    } catch (error) {
+      console.log("[localtify album folder scan error]", error?.stack || error?.message || error);
+      return {
+        ok: false,
+        error: error?.message || "album folder scan failed",
+        scanId: "",
+        albums: [],
+        songs: listSongsShaped()
+      };
+    }
+  });
+
+  ipcMain.handle("albums:import-folder", async (event, payload) => {
+    try {
+      return await commitAlbumFolderImportRequest(event, payload || {});
+    } catch (error) {
+      console.log("[localtify album folder import error]", error?.stack || error?.message || error);
+      return {
+        ok: false,
+        error: error?.message || "album folder import failed",
+        changedCount: 0,
+        songs: listSongsShaped(),
+        albums: []
+      };
     }
   });
 

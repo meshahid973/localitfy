@@ -61,6 +61,98 @@ declare global {
     createdAt: number;
   };
 
+  type LocalitfyAlbumFolderScanTrack = {
+    id: string;
+    filePath: string;
+    title: string;
+    artist: string;
+    album: string;
+    disc?: number;
+    track?: number;
+    duplicate?: boolean;
+  };
+
+  type LocalitfyAlbumFolderPreview = {
+    id: string;
+    title: string;
+    artist: string;
+    sourcePath: string;
+    coverPath?: string;
+    coverUrl?: string;
+    trackCount: number;
+    duplicateCount?: number;
+    warnings?: string[];
+    tracks: LocalitfyAlbumFolderScanTrack[];
+  };
+
+  type LocalitfyAlbumFolderScanResult = {
+    ok: boolean;
+    canceled?: boolean;
+    scanId?: string;
+    mode?: "single" | "library";
+    rootPath?: string;
+    albumCount?: number;
+    trackCount?: number;
+    duplicateCount?: number;
+    albums?: LocalitfyAlbumFolderPreview[];
+    message?: string;
+    error?: string;
+  };
+
+  type LocalitfyImportedFolderAlbum = {
+    id: string;
+    manualAlbumId?: string;
+    title: string;
+    artist: string;
+    year?: string;
+    coverUrl?: string;
+    sourceType: "folder";
+    sourcePath: string;
+    folderCoverPath?: string;
+    importedAt: number;
+    createdAt: number;
+    updatedAt: number;
+    songIds: string[];
+    trackCount: number;
+    warnings?: string[];
+  };
+
+  type LocalitfyAlbumFolderImportResult = {
+    ok: boolean;
+    scanId?: string;
+    mode?: "single" | "library";
+    rootPath?: string;
+    changedCount: number;
+    skippedDuplicates?: number;
+    songs: any[];
+    albums: LocalitfyImportedFolderAlbum[];
+    message?: string;
+    error?: string;
+  };
+
+  type LocalitfyAlbumFolderProgressPayload = {
+    type:
+      | "picking"
+      | "scan-start"
+      | "scan-candidate"
+      | "scan-folders-ready"
+      | "scan-folder"
+      | "scan-done"
+      | "import-start"
+      | "import-album"
+      | "import-track"
+      | "import-done"
+      | "error";
+    mode?: "single" | "library";
+    scanId?: string;
+    rootPath?: string;
+    folder?: string;
+    index?: number;
+    total?: number;
+    changedCount?: number;
+    message?: string;
+  };
+
 
   type LocalitfyWindowsStartupStatus = {
     ok: boolean;
@@ -118,6 +210,8 @@ declare global {
       }>;
 
       importSongs: () => Promise<any[]>;
+      scanAlbumFolder?: (payload?: { mode?: "single" | "library" }) => Promise<LocalitfyAlbumFolderScanResult>;
+      importAlbumFolder?: (payload: { scanId: string }) => Promise<LocalitfyAlbumFolderImportResult>;
       clearLibrary: () => Promise<any[]>;
 
       downloadAudioUrls: (payload: {
@@ -216,6 +310,7 @@ declare global {
       getNativeMediaStatus?: () => Promise<any>;
       openExternal?: (url: string) => Promise<{ ok: boolean; reason?: string }>;
 
+      onAlbumFolderImportProgress?: (callback: (payload: LocalitfyAlbumFolderProgressPayload) => void) => () => void;
       onDownloadProgress: (callback: (payload: LocalitfyDownloadProgressPayload) => void) => () => void;
       onPlayerCommand: (callback: (payload: any) => void) => () => void;
     };

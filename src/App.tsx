@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.8 V307 measured perf repair. Visuals preserved; hotspots optimized. */
+/* localtify 0.3.8 V309 album folder import foundation. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -8625,6 +8625,10 @@ function MainModeApp() {
     appToast,
     importAnimation,
     songs,
+    setSongs,
+    setLibraryScanBusy,
+    setLibraryScanMessage,
+    setImportAnimation,
     libraryScanBusy,
     pixelArtBusy,
     libraryScanMessage,
