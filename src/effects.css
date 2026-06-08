@@ -406,173 +406,6 @@
   gap: 16px !important;
 }
 
-/* V324 sidebar behavior. Hover mode animates the sidebar itself so the page does not jump. */
-.app{
-  --sidebar-fixed-width: var(--sidebar-width-live, var(--shell-sidebar-width, var(--sidebar-width, 249px)));
-  --sidebar-collapsed-width: 88px;
-  --sidebar-expanded-width: clamp(210px, var(--sidebar-fixed-width), 312px);
-}
-
-.app[data-sidebar-behavior="fixed"] .appShell{
-  grid-template-columns: var(--sidebar-fixed-width) minmax(0, 1fr) !important;
-}
-
-.app[data-sidebar-behavior="fixed"] .sidebar{
-  width: 100% !important;
-}
-
-.app[data-sidebar-behavior="slim"] .appShell,
-.app[data-sidebar-behavior="hover"] .appShell{
-  grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr) !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar,
-.app[data-sidebar-behavior="hover"] .sidebar{
-  width: var(--sidebar-collapsed-width) !important;
-  min-width: var(--sidebar-collapsed-width) !important;
-  max-width: var(--sidebar-expanded-width) !important;
-  overflow: hidden !important;
-  z-index: 48 !important;
-  contain: layout style paint !important;
-  will-change: width !important;
-  transition:
-    width 285ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 190ms ease,
-    border-color 190ms ease,
-    box-shadow 240ms ease !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:hover,
-.app[data-sidebar-behavior="hover"] .sidebar:focus-within{
-  width: var(--sidebar-expanded-width) !important;
-  box-shadow:
-    18px 0 56px rgba(0, 0, 0, 0.28),
-    inset -1px 0 0 rgba(var(--accent-rgb), 0.16) !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .nav .navItem,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .nav .navItem{
-  grid-template-columns: 42px 0 !important;
-  justify-content: center !important;
-  gap: 0 !important;
-  padding-inline: 0 !important;
-  width: 48px !important;
-  min-width: 48px !important;
-  margin-inline: auto !important;
-  transition:
-    width 245ms cubic-bezier(0.16, 1, 0.3, 1),
-    padding 245ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 180ms ease,
-    border-color 180ms ease !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:hover .nav .navItem,
-.app[data-sidebar-behavior="hover"] .sidebar:focus-within .nav .navItem{
-  width: 100% !important;
-  grid-template-columns: 38px minmax(0, 1fr) !important;
-  justify-content: stretch !important;
-  gap: 10px !important;
-  padding-inline: 10px !important;
-  transition:
-    width 260ms cubic-bezier(0.16, 1, 0.3, 1),
-    padding 260ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 180ms ease,
-    border-color 180ms ease !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .navIcon,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navIcon{
-  margin-inline: auto !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .navText,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navText{
-  max-width: 0 !important;
-  opacity: 0 !important;
-  overflow: hidden !important;
-  visibility: hidden !important;
-  transform: translate3d(-8px, 0, 0) !important;
-  pointer-events: none !important;
-  white-space: nowrap !important;
-  transition:
-    opacity 145ms ease,
-    transform 210ms cubic-bezier(0.16, 1, 0.3, 1),
-    max-width 250ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 0ms linear 160ms !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:hover .navText,
-.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText{
-  max-width: 170px !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translate3d(0, 0, 0) !important;
-  pointer-events: auto !important;
-  transition:
-    opacity 190ms ease 70ms,
-    transform 250ms cubic-bezier(0.16, 1, 0.3, 1) 35ms,
-    max-width 285ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 0ms linear !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .sidebarBottom,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .sidebarBottom{
-  display: grid !important;
-  place-items: center !important;
-  padding-inline: 0 !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .importMainAction,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .importMainAction{
-  width: 48px !important;
-  min-width: 48px !important;
-  max-width: 48px !important;
-  height: 48px !important;
-  padding: 0 !important;
-  display: inline-grid !important;
-  place-items: center !important;
-  gap: 0 !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
-  color: transparent !important;
-  overflow: hidden !important;
-  transition:
-    width 250ms cubic-bezier(0.16, 1, 0.3, 1),
-    max-width 250ms cubic-bezier(0.16, 1, 0.3, 1),
-    padding 250ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 180ms ease,
-    box-shadow 180ms ease !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .importMainAction .buttonInlineIcon,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .importMainAction .buttonInlineIcon{
-  width: 18px !important;
-  height: 18px !important;
-  margin: 0 !important;
-  color: #fff !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:hover .importMainAction,
-.app[data-sidebar-behavior="hover"] .sidebar:focus-within .importMainAction{
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  height: 48px !important;
-  padding: 0 16px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  font-size: 13px !important;
-  line-height: 1 !important;
-  color: rgba(5, 3, 8, 0.92) !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebarResizeHandle,
-.app[data-sidebar-behavior="hover"] .sidebarResizeHandle{
-  display: none !important;
-}
-
 .app[data-player-background="flat"] .playerBar{
   background: rgba(8, 8, 12, 0.94) !important;
   border-color: rgba(255,255,255,0.06) !important;
@@ -720,22 +553,439 @@ body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::after{
   transition: none !important;
 }
 
-/* localtify 0.3.8 V307 — preserve blur/glow; keep compositor hints cheap. */
-.app :is(
-  .heroArt.coverAura,
-  .homeListenCover.coverAura,
-  .homeFreshCover.coverAura,
-  .homeAlbumArt.coverAura,
-  .playerBar .smallArt
-){
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-.app :is(
+/* localtify 0.3.8 V305 — keep audio smooth by sleeping expensive paint while the renderer is busy. */
+.app.localtifyInteractionBusy :is(
+  .coverAura::before,
   .heroAmbiencePulse,
   .homeListenBackground,
-  .homeListenBackgroundImage
+  .homeListenBackgroundImage,
+  .homeAlbumArt::before,
+  .homeFreshCover::before,
+  .songArt::before,
+  .playlistTrackCover::before,
+  .playerBar::before
 ){
-  pointer-events: none;
+  opacity: 0 !important;
+  filter: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+.app.localtifyInteractionBusy :is(
+  .nowPlayingCopySwap,
+  .nowPlayingArtSwap,
+  .simpleHeroArtSwap,
+  .homeAlbumCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .songRow,
+  .playlistTrackRow,
+  .playlistSongRow
+){
+  animation: none !important;
+  transition-duration: 0ms !important;
+}
+
+body.localtifyAudioPlaying .app :is(
+  .localtifyProximityActive,
+  .proximityActive,
+  [data-proximity-active="true"]
+){
+  transform: none !important;
+  filter: none !important;
+}
+
+/* localtify 0.3.8 V305 — harsher paint suppression while audio plays / scrolling */
+body.localtifyPerfV305 .app.isScrolling :is(
+  .hero.heroPremium,
+  .homeShelfStack,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .coverQuickApplyBar,
+  .coverGalleryCardCleanOnly,
+  .coverGalleryImageButtonCleanOnly,
+  .homeAlbumCard,
+  .homeFreshCard,
+  .homeListenCard,
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .playerBar
+){
+  animation: none !important;
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(
+  .coverAura,
+  .coverAura::before,
+  .coverAura::after,
+  .heroAmbiencePulse,
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .homeAlbumArt::before,
+  .homeFreshCover::before,
+  .songArt::before,
+  .playerBar::before,
+  .playerBar::after,
+  .coverGalleryImageCleanOnly
+){
+  animation: none !important;
+  filter: none !important;
+}
+
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(
+  .nowPlayingCopySwap,
+  .nowPlayingArtSwap,
+  .simpleHeroArtSwap,
+  .homeAlbumCard,
+  .homeFreshCard,
+  .homeListenCard,
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .coverGalleryCardCleanOnly,
+  .coverSongPickVirtual
+){
+  transition-duration: 80ms !important;
+  animation-duration: 80ms !important;
+}
+
+body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(
+  .hero.heroPremium.heroLayoutMotion,
+  .homeShelfStack,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel
+){
+  animation: none !important;
+  transition-duration: 120ms !important;
+  filter: none !important;
+}
+
+/* localtify 0.3.8 V361 — stable hover sidebar, no runtime CSS.
+   Fixes V360 disappearing sidebar by returning to a real rail width, while
+   removing heavy blur/box-shadow work that made Home lag during hover. */
+.app{
+  --lt-sidebar-closed: 88px;
+  --lt-sidebar-open: 238px;
+  --lt-sidebar-ease: cubic-bezier(.22, 1, .36, 1);
+  --lt-sidebar-fast: cubic-bezier(.16, 1, .3, 1);
+}
+
+/* Normal fixed sidebar stays normal. */
+main.app.app[data-sidebar-behavior="fixed"] > .appShell{
+  grid-template-columns: var(--sidebar-width-live, var(--sidebar-width, 249px)) minmax(0, 1fr) !important;
+  overflow: hidden !important;
+}
+
+main.app.app[data-sidebar-behavior="fixed"] > .appShell > .sidebar{
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: visible !important;
+  clip-path: none !important;
+}
+
+/* Slim/hover keep the app content stable. The sidebar expands over the content,
+   so Home does not re-layout on every hover frame. */
+main.app.app[data-sidebar-behavior="slim"] > .appShell,
+main.app.app[data-sidebar-behavior="hover"] > .appShell{
+  grid-template-columns: var(--lt-sidebar-closed) minmax(0, 1fr) !important;
+  overflow: visible !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .content,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .content{
+  min-width: 0 !important;
+}
+
+/* Closed rail. Keep it visible. Avoid backdrop-filter here because animating
+   a blurred rail over the Home page was causing stutter. */
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
+  position: relative !important;
+  z-index: 120 !important;
+  width: var(--lt-sidebar-closed) !important;
+  min-width: var(--lt-sidebar-closed) !important;
+  max-width: var(--lt-sidebar-open) !important;
+  overflow: hidden !important;
+  padding-inline: 12px !important;
+  transform: translate3d(0,0,0) !important;
+  transform-origin: left center !important;
+  backface-visibility: hidden !important;
+  contain: paint style !important;
+  will-change: width !important;
+  clip-path: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: inset -1px 0 0 rgba(var(--accent-rgb), .12) !important;
+  transition:
+    width 360ms var(--lt-sidebar-ease),
+    min-width 360ms var(--lt-sidebar-ease),
+    max-width 360ms var(--lt-sidebar-ease),
+    border-color 180ms ease,
+    background-color 180ms ease !important;
+}
+
+/* Hover open. No appShell :has() and no grid animation. */
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
+  width: var(--lt-sidebar-open) !important;
+  min-width: var(--lt-sidebar-open) !important;
+  max-width: var(--lt-sidebar-open) !important;
+  box-shadow:
+    14px 0 30px rgba(0,0,0,.18),
+    inset -1px 0 0 rgba(var(--accent-rgb), .16) !important;
+}
+
+/* Disable old pulse/scale/sidebar hover effects. */
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
+  animation-name: none !important;
+  filter: none !important;
+}
+
+/* Nav layout: icons stay visible in closed rail. */
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .nav,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .nav{
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem{
+  width: calc(var(--lt-sidebar-open) - 24px) !important;
+  min-width: 0 !important;
+  height: 46px !important;
+  margin-inline: 0 !important;
+  padding: 0 11px !important;
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 9px !important;
+  border-radius: 15px !important;
+  overflow: hidden !important;
+  color: rgba(255,255,255,.70) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  transform: translate3d(0,0,0) !important;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem:hover,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem:hover{
+  color: #fff !important;
+  background: rgba(255,255,255,.045) !important;
+  border-color: rgba(255,255,255,.065) !important;
+  transform: translate3d(0,0,0) !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem.active,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem.active{
+  color: #fff !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), .14), rgba(var(--accent-rgb), .055)),
+    rgba(255,255,255,.018) !important;
+  border-color: rgba(var(--accent-rgb), .22) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .05) !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navIcon,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navIcon{
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+  color: currentColor !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navIcon svg,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navIcon svg,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navLucideIcon,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navLucideIcon{
+  width: 22px !important;
+  height: 22px !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* Closed: text is completely invisible; no half-cut labels while closed/opening. */
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .logoWrap h1,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .logoWrap p,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap h1,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap p{
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translate3d(-8px,0,0) !important;
+  pointer-events: none !important;
+  transition:
+    opacity 90ms ease,
+    transform 180ms var(--lt-sidebar-fast),
+    visibility 0ms linear 95ms !important;
+}
+
+/* Open: reveal labels after the rail has expanded enough. */
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .navText,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .navText,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap h1,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap p,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap h1,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap p{
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translate3d(0,0,0) !important;
+  pointer-events: auto !important;
+  transition:
+    opacity 190ms ease 170ms,
+    transform 260ms var(--lt-sidebar-ease) 140ms,
+    visibility 0ms linear !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText{
+  display: block !important;
+  min-width: 0 !important;
+  max-width: 154px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText strong,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText small,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText strong,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText small{
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Import button: icon-only closed, full button opened. */
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarBottom,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarBottom{
+  display: grid !important;
+  place-items: center !important;
+  padding-inline: 0 !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .importMainAction,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAction{
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 46px !important;
+  padding: 0 !important;
+  margin-inline: auto !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  gap: 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  border-radius: 15px !important;
+  transition:
+    width 310ms var(--lt-sidebar-ease),
+    max-width 310ms var(--lt-sidebar-ease),
+    padding 270ms var(--lt-sidebar-ease),
+    color 90ms ease,
+    font-size 90ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .importMainAction .buttonInlineIcon,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAction .buttonInlineIcon{
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  flex: 0 0 auto !important;
+}
+
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .importMainAction,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .importMainAction{
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 46px !important;
+  padding: 0 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  color: rgba(5, 3, 8, .92) !important;
+}
+
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarResizeHandle,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarResizeHandle{
+  display: none !important;
+}
+
+/* Home-specific hover perf: do not let sidebar hover restart expensive card filters. */
+main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .coverGalleryCard,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel
+){
+  transition-property: background-color, border-color, opacity !important;
+  filter: none !important;
+}
+
+@media (max-width: 900px){
+  main.app.app[data-sidebar-behavior="hover"] > .appShell,
+  main.app.app[data-sidebar-behavior="slim"] > .appShell{
+    grid-template-columns: var(--lt-sidebar-closed) minmax(0, 1fr) !important;
+  }
+
+  main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
+  main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar{
+    width: var(--lt-sidebar-closed) !important;
+    min-width: var(--lt-sidebar-closed) !important;
+    max-width: var(--lt-sidebar-closed) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
+  main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
+  main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
+  main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
+    transition: none !important;
+  }
 }
