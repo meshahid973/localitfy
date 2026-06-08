@@ -754,7 +754,6 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
   animation-name: none !important;
-  filter: none !important;
 }
 
 /* Nav layout: icons stay visible in closed rail. */
@@ -953,7 +952,8 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarResiz
   display: none !important;
 }
 
-/* Home-specific hover perf: do not let sidebar hover restart expensive card filters. */
+/* Home-specific hover perf: keep visual blur/cover tint intact.
+   Only reduce transition churn while the sidebar is opening. */
 main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
   .homeListenCard,
   .homeFreshCard,
@@ -963,8 +963,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   .homeListenPanel,
   .homeFreshPanel
 ){
-  transition-property: background-color, border-color, opacity !important;
-  filter: none !important;
+  transition-property: background-color, border-color, opacity, transform !important;
 }
 
 @media (max-width: 900px){
@@ -990,8 +989,10 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   }
 }
 
-/* localtify 0.3.8 V362 — image-heavy view performance pass.
-   Keeps TanStack virtualization and reduces image/card paint cost without removing blur/ambience globally. */
+/* localtify 0.3.8 V363 — image performance without stripping blur.
+   This keeps V362 image containment, but removes the bad filter:none rules that
+   killed blurred cover backgrounds while hovering the sidebar/home cards. */
+
 .app .content,
 .app .homeScroll,
 .app .libraryList,
@@ -1017,6 +1018,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   contain-intrinsic-size: 420px;
 }
 
+/* Image decode/composite safety. No filter reset here. */
 .app img{
   image-rendering: auto;
   -webkit-user-drag: none;
@@ -1050,13 +1052,20 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   contain: paint;
 }
 
-.app .homeFreshCard:hover img,
-.app .homeListenCard:hover img,
-.app .coverGalleryCard:hover img,
-.app .coverGalleryCardCleanOnly:hover img{
-  filter: none !important;
+/* Keep hover visual effects intact.
+   Do NOT set filter:none here; the blurred cover layers rely on filter. */
+.app :is(
+  .homeFreshCard,
+  .homeListenCard,
+  .homeAlbumCard,
+  .coverGalleryCard,
+  .coverGalleryCardCleanOnly
+):hover :is(img, .homeListenBackgroundImage){
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
+/* Reduce scroll transition churn without deleting blur/glow/background effects. */
 .app.isScrolling :is(
   .homeFreshCard,
   .homeListenCard,
@@ -1069,21 +1078,11 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   .playlistTrackRow,
   .albumTrackRowV318
 ){
-  transition-property: background-color, border-color, opacity !important;
-  box-shadow: none !important;
+  transition-property: background-color, border-color, opacity, transform !important;
 }
 
-.app.isScrolling :is(
-  .homeFreshCard img,
-  .homeListenCard img,
-  .homeAlbumCard img,
-  .coverGalleryCard img,
-  .coverGalleryCardCleanOnly img,
-  .spotifyTrackItem img
-){
-  filter: none !important;
-}
-
+/* Sidebar hover should not strip image blur from Home.
+   Keep the optimization to layout/composite only. */
 main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
   .homeListenCard,
   .homeFreshCard,
@@ -1092,9 +1091,8 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   .coverGalleryCardCleanOnly,
   .spotifyTrackItem
 ){
-  transition-property: background-color, border-color, opacity !important;
-  box-shadow: none !important;
-  filter: none !important;
+  transition-property: background-color, border-color, opacity, transform !important;
+  contain: paint;
 }
 
 main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
@@ -1102,7 +1100,41 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   .homeFreshCard img,
   .homeAlbumCard img,
   .coverGalleryCard img,
-  .coverGalleryCardCleanOnly img
+  .coverGalleryCardCleanOnly img,
+  .homeListenBackgroundImage
 ){
-  filter: none !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Smooth sidebar open/close without forcing Home cards to repaint their filters. */
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
+  transition:
+    width 420ms cubic-bezier(.22, 1, .36, 1),
+    min-width 420ms cubic-bezier(.22, 1, .36, 1),
+    max-width 420ms cubic-bezier(.22, 1, .36, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 220ms ease !important;
+}
+
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap h1,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap p{
+  transition:
+    opacity 170ms ease,
+    transform 260ms cubic-bezier(.22, 1, .36, 1),
+    visibility 0ms linear 180ms !important;
+}
+
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .navText,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .navText,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap h1,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap p,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap h1,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap p{
+  transition:
+    opacity 210ms ease 170ms,
+    transform 300ms cubic-bezier(.22, 1, .36, 1) 135ms,
+    visibility 0ms linear !important;
 }
