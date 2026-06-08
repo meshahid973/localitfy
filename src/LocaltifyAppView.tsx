@@ -5594,7 +5594,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     <h3>your listening, cleaned up</h3>
                     <p>
                       {songs.length
-                        ? "Fast recap cards for monthly, yearly, and all-time library stats. No heavy charts, no huge tables, just the parts worth sharing."
+                        ? "Fast recap cards from your real local library data: imports, plays, listening time, file health, and library length without heavy charts."
                         : "Import songs and localtify will build a lightweight recap here."}
                     </p>
                   </div>
@@ -5618,11 +5618,13 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 <section className="analyticsRecapGridV339" aria-label="recap cards">
                   {(analyticsRecapCards || []).map((card, index) => {
                     const progress =
-                      index === 0
-                        ? Math.min(100, Math.max(8, recentImportWeekCount * 12))
-                        : index === 1
-                          ? Math.min(100, Math.max(10, songs.length ? 64 : 10))
-                          : Math.min(100, Math.max(10, playedPercent));
+                      typeof card.progress === "number"
+                        ? Math.min(100, Math.max(songs.length ? 4 : 0, card.progress))
+                        : index === 0
+                          ? Math.min(100, Math.max(4, recentImportWeekCount * 12))
+                          : index === 1
+                            ? Math.min(100, Math.max(4, songs.length ? 64 : 4))
+                            : Math.min(100, Math.max(4, playedPercent));
 
                     return (
                       <article
@@ -5681,7 +5683,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     <p className="eyebrow">recap ready</p>
                     <h3>built for monthly or yearly posts</h3>
                     <p>
-                      Use the three recap cards above for a clean localtify wrapped-style summary. It stays lightweight by using already-loaded local library data only.
+                      Use the recap cards above for a clean localtify wrapped-style summary. These numbers come from local song metadata and saved play counts, so they stay lightweight and private.
                     </p>
                   </div>
                   <button

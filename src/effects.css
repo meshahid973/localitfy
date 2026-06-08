@@ -13,7 +13,7 @@
   isolation: isolate !important;
   contain: paint !important;
   transform: translateZ(0) scale(var(--active-song-art-scale, 1)) !important;
-  transition: transform 120ms linear !important;
+  transition: transform 135ms cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
 .app[data-playing="on"] :is(
@@ -754,6 +754,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
   animation-name: none !important;
+  filter: none !important;
 }
 
 /* Nav layout: icons stay visible in closed rail. */
@@ -952,8 +953,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarResiz
   display: none !important;
 }
 
-/* Home-specific hover perf: keep visual blur/cover tint intact.
-   Only reduce transition churn while the sidebar is opening. */
+/* Home-specific hover perf: do not let sidebar hover restart expensive card filters. */
 main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
   .homeListenCard,
   .homeFreshCard,
@@ -963,7 +963,8 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   .homeListenPanel,
   .homeFreshPanel
 ){
-  transition-property: background-color, border-color, opacity, transform !important;
+  transition-property: background-color, border-color, opacity !important;
+  filter: none !important;
 }
 
 @media (max-width: 900px){
@@ -989,100 +990,100 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   }
 }
 
-/* localtify 0.3.8 V363 — image performance without stripping blur.
-   This keeps V362 image containment, but removes the bad filter:none rules that
-   killed blurred cover backgrounds while hovering the sidebar/home cards. */
+/* localtify 0.3.8 V364 — structural performance pass.
+   Permanent composite targets + worker-backed reductions.
+   Important: this does NOT remove image blur, cover tint, hero blur, or player blur. */
 
-.app .content,
-.app .homeScroll,
-.app .libraryList,
-.app .coverGalleryViewport,
-.app .coverSongList,
-.app .playlistSongList,
-.app .spotifyTrackItems,
-.app .downloadQueueList{
-  overscroll-behavior: contain !important;
-  contain: layout style paint !important;
-  transform: translate3d(0, 0, 0) !important;
-  backface-visibility: hidden !important;
-}
-
-.app .homeShelfPanel,
-.app .settingsPageCard,
-.app .downloadPanelV031,
-.app .spotifyTrackList,
-.app .coverGalleryPanel,
-.app .albumShelf,
-.app .playlistPanel{
-  content-visibility: auto;
-  contain-intrinsic-size: 420px;
-}
-
-/* Image decode/composite safety. No filter reset here. */
-.app img{
-  image-rendering: auto;
-  -webkit-user-drag: none;
-  user-select: none;
-  backface-visibility: hidden;
-}
-
-.app .coverImage,
-.app .coverGalleryImageCleanOnly,
-.app .homeListenBackgroundImage,
-.app .spotifyTrackArt img,
-.app .homeFreshCard img,
-.app .homeListenCover img,
-.app .homeAlbumArt img,
-.app .albumCardCoverV318 img,
-.app .albumDetailCoverV318 img,
-.app .albumTrackCoverV318 img,
-.app .albumBuilderSongCoverV318 img,
-.app .playlistTrackCover img,
-.app .smallArt img{
-  display: block;
-  object-fit: cover;
+.app :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem
+){
+  contain: layout paint;
   transform: translateZ(0);
   backface-visibility: hidden;
+  will-change: transform;
 }
 
-.app .coverImage,
-.app .coverGalleryImageCleanOnly,
-.app .spotifyTrackArt img,
-.app .homeListenBackgroundImage{
-  contain: paint;
-}
-
-/* Keep hover visual effects intact.
-   Do NOT set filter:none here; the blurred cover layers rely on filter. */
 .app :is(
   .homeFreshCard,
   .homeListenCard,
   .homeAlbumCard,
   .coverGalleryCard,
-  .coverGalleryCardCleanOnly
-):hover :is(img, .homeListenBackgroundImage){
-  backface-visibility: hidden;
+  .coverGalleryCardCleanOnly,
+  .albumCardV318,
+  .playlistCard
+){
+  contain: layout paint style;
   transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-/* Reduce scroll transition churn without deleting blur/glow/background effects. */
+.app :is(
+  .libraryList,
+  .playlistSongList,
+  .coverSongList,
+  .spotifyTrackItems,
+  .downloadQueueList,
+  .coverGalleryViewport
+){
+  contain: layout style paint;
+  overscroll-behavior: contain;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Scroll defense: reduce transition churn only.
+   Do not disable filter/backdrop-filter because Localtify's cover blur uses those. */
 .app.isScrolling :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem,
   .homeFreshCard,
   .homeListenCard,
   .homeAlbumCard,
   .coverGalleryCard,
-  .coverGalleryCardCleanOnly,
-  .spotifyTrackItem,
-  .libraryRow,
-  .songRow,
-  .playlistTrackRow,
-  .albumTrackRowV318
+  .coverGalleryCardCleanOnly
 ){
   transition-property: background-color, border-color, opacity, transform !important;
+  transition-duration: 90ms !important;
 }
 
-/* Sidebar hover should not strip image blur from Home.
-   Keep the optimization to layout/composite only. */
+/* Override older V303/V305 performance blocks that killed blur while audio played or while scrolling. */
+body.localtifyPerfV303 .app.isScrolling :is(
+  .coverGalleryImageCleanOnly,
+  .coverGalleryImagePlaceholderCleanOnly,
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .playerBar::before,
+  .playerBar::after
+),
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(
+  .coverAura,
+  .coverAura::before,
+  .coverAura::after,
+  .heroAmbiencePulse,
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .homeAlbumArt::before,
+  .homeFreshCover::before,
+  .songArt::before,
+  .playerBar::before,
+  .playerBar::after,
+  .coverGalleryImageCleanOnly
+){
+  filter: revert !important;
+}
+
+/* Keep sidebar hover cheap without deleting card blur. */
 main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
   .homeListenCard,
   .homeFreshCard,
@@ -1092,7 +1093,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   .spotifyTrackItem
 ){
   transition-property: background-color, border-color, opacity, transform !important;
-  contain: paint;
+  contain: paint style;
 }
 
 main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
@@ -1107,34 +1108,94 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   backface-visibility: hidden;
 }
 
-/* Smooth sidebar open/close without forcing Home cards to repaint their filters. */
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
-  transition:
-    width 420ms cubic-bezier(.22, 1, .36, 1),
-    min-width 420ms cubic-bezier(.22, 1, .36, 1),
-    max-width 420ms cubic-bezier(.22, 1, .36, 1),
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 220ms ease !important;
+/* Explicitly keep these blur/tint systems alive. */
+.app :is(
+  .heroAmbiencePulse,
+  .homeListenBackgroundImage,
+  .playerBar::before,
+  .playerBar::after,
+  .coverAura::before,
+  .coverAura::after
+){
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap h1,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap p{
-  transition:
-    opacity 170ms ease,
-    transform 260ms cubic-bezier(.22, 1, .36, 1),
-    visibility 0ms linear 180ms !important;
+/* localtify 0.3.8 V365 — analytics + compositor polish.
+   Keep blur/cover ambience alive while moving row/card motion onto safer composite paths. */
+
+.app :is(
+  .songRow.playing .songArt.coverAura,
+  .libraryRow.playing .songArt.coverAura,
+  .playlistTrackRow.playing .playlistTrackCover,
+  .playlistSongRow.playing .playlistTrackCover,
+  .homeAlbumCard.playing .homeAlbumArt.coverAura,
+  .homeListenCard.playing .homeListenCover.coverAura,
+  .homeFreshCard.playing .homeFreshCover.coverAura
+){
+  position: relative !important;
+  isolation: isolate !important;
+  contain: layout paint style !important;
+  transform: translateZ(0) scale(var(--active-song-art-scale, 1)) !important;
+  backface-visibility: hidden !important;
+  transition: transform 135ms cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap h1,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap p,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap h1,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap p{
-  transition:
-    opacity 210ms ease 170ms,
-    transform 300ms cubic-bezier(.22, 1, .36, 1) 135ms,
-    visibility 0ms linear !important;
+/* Keep high-density rows permanently ready for scrolling.
+   This only promotes geometry; it does not turn off filters or blur. */
+.app :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem
+){
+  contain: layout paint !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Active scroll should reduce animation churn, not remove visual identity. */
+.app.isScrolling :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem,
+  .homeFreshCard,
+  .homeListenCard,
+  .homeAlbumCard,
+  .coverGalleryCard,
+  .coverGalleryCardCleanOnly
+){
+  transition-property: background-color, border-color, opacity, transform !important;
+  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* Undo old scroll/audio rules that tried to kill blur-heavy layers. */
+body.localtifyPerfV303 .app.isScrolling :is(
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .coverGalleryImageCleanOnly,
+  .playerBar::before,
+  .playerBar::after
+),
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(
+  .heroAmbiencePulse,
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .homeAlbumArt::before,
+  .homeFreshCover::before,
+  .playerBar::before,
+  .playerBar::after,
+  .coverGalleryImageCleanOnly
+){
+  filter: revert !important;
+  backdrop-filter: revert !important;
+  -webkit-backdrop-filter: revert !important;
 }

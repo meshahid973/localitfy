@@ -251,6 +251,230 @@ function runLocaltifyIdleTask(task: () => void, timeout = 1400) {
 }
 
 
+type LocaltifyAnalyticsSnapshot = Record<string, string | number | boolean>;
+
+function localtifyAnalyticsNumber(snapshot: LocaltifyAnalyticsSnapshot, key: string, fallback = 0) {
+  const value = Number(snapshot[key]);
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function localtifyAnalyticsString(snapshot: LocaltifyAnalyticsSnapshot, key: string, fallback = "") {
+  const value = snapshot[key];
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function formatAnalyticsDuration(seconds: number) {
+  const safeSeconds = Math.max(0, Math.round(Number(seconds) || 0));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+
+  if (hours > 0) {
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  }
+
+  if (minutes > 0) return `${minutes}m`;
+  return `${safeSeconds}s`;
+}
+
+function computeLocaltifyAnalyticsSnapshot(input: {
+  activeView: string;
+  songs?: any[];
+  likedCount?: number;
+  playlists?: any[];
+  settings?: Record<string, any>;
+  isShuffle?: boolean;
+  repeatMode?: string;
+  downloadResultCount?: number;
+}): LocaltifyAnalyticsSnapshot {
+  const songs = Array.isArray(input.songs) ? input.songs : [];
+  const playlists = Array.isArray(input.playlists) ? input.playlists : [];
+  const settings = input.settings || {};
+  const songCount = songs.length;
+  const likedCount = Number(input.likedCount || 0);
+  const playlistCount = playlists.length;
+  const recentImportCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const yearStart = new Date(now.getFullYear(), 0, 1).getTime();
+
+  let playlistSongTotal = 0;
+  let totalLibrarySeconds = 0;
+  let totalListenedSeconds = 0;
+  let totalPlays = 0;
+  let playedSongCount = 0;
+  let recentImportWeekCount = 0;
+  let missingFileCount = 0;
+  let monthImportCount = 0;
+  let yearImportCount = 0;
+  let monthImportSeconds = 0;
+  let yearImportSeconds = 0;
+  let longestSongDuration = 0;
+  let longestSongTitle = "";
+
+  const artistNames = new Set<string>();
+  const albumNames = new Set<string>();
+  const monthArtists = new Set<string>();
+  const yearArtists = new Set<string>();
+  const yearAlbums = new Set<string>();
+
+  for (const playlist of playlists) {
+    playlistSongTotal += Array.isArray(playlist?.songIds) ? playlist.songIds.length : 0;
+  }
+
+  for (const song of songs) {
+    const duration = Math.max(0, Number(song?.duration) || 0);
+    const playCount = Math.max(0, Number(song?.playCount) || 0);
+    const addedAt = Date.parse(String(song?.dateAdded || ""));
+    const artist = String(song?.artist || "").trim().toLowerCase();
+    const album = String(song?.album || "").trim().toLowerCase();
+
+    totalLibrarySeconds += duration;
+    totalListenedSeconds += duration * playCount;
+    totalPlays += playCount;
+
+    if (playCount > 0) playedSongCount += 1;
+    if (song?.fileExists === false) missingFileCount += 1;
+
+    if (artist && artist !== "unknown artist") artistNames.add(artist);
+    if (album && album !== "unknown album") albumNames.add(album);
+
+    if (duration > longestSongDuration) {
+      longestSongDuration = duration;
+      longestSongTitle = String(song?.title || "").trim();
+    }
+
+    if (Number.isFinite(addedAt)) {
+      if (addedAt >= recentImportCutoff) recentImportWeekCount += 1;
+
+      if (addedAt >= monthStart) {
+        monthImportCount += 1;
+        monthImportSeconds += duration;
+        if (artist && artist !== "unknown artist") monthArtists.add(artist);
+      }
+
+      if (addedAt >= yearStart) {
+        yearImportCount += 1;
+        yearImportSeconds += duration;
+        if (artist && artist !== "unknown artist") yearArtists.add(artist);
+        if (album && album !== "unknown album") yearAlbums.add(album);
+      }
+    }
+  }
+
+  const averageSongSeconds = songCount ? Math.round(totalLibrarySeconds / songCount) : 0;
+  const neverPlayedCount = Math.max(0, songCount - playedSongCount);
+  const likedPercent = songCount ? Math.round((likedCount / songCount) * 100) : 0;
+  const playedPercent = songCount ? Math.round((playedSongCount / songCount) * 100) : 0;
+  const averagePlaysPerSong = songCount ? Math.round((totalPlays / songCount) * 10) / 10 : 0;
+  const libraryHealthPercent = songCount
+    ? Math.max(0, Math.round(((songCount - missingFileCount) / songCount) * 100))
+    : 0;
+
+  let userStage = "new_no_library";
+  if (songCount > 0 && songCount < 15) userStage = "small_library";
+  else if (songCount >= 15 && songCount < 75) userStage = "building_library";
+  else if (songCount >= 75) userStage = "power_library";
+
+  let audienceSegment = "new_local_music_user";
+  if (playlistCount > 0 && settings.discordEnabled) audienceSegment = "playlist_social_listener";
+  else if (settings.discordEnabled) audienceSegment = "discord_presence_listener";
+  else if (settings.customThemeEnabled || settings.coverColorSyncMode !== "off") audienceSegment = "visual_customizer";
+  else if (playlistCount > 0) audienceSegment = "playlist_builder";
+  else if (songCount >= 75) audienceSegment = "large_library_listener";
+  else if (songCount > 0) audienceSegment = "casual_local_listener";
+
+  let primaryAdAngle = "local_music_no_account";
+  if (settings.discordEnabled) primaryAdAngle = "discord_rich_presence";
+  else if (settings.customThemeEnabled || settings.coverColorSyncMode !== "off") primaryAdAngle = "custom_themes_and_covers";
+  else if (playlistCount > 0) primaryAdAngle = "premium_playlists";
+  else if (songCount >= 75) primaryAdAngle = "large_library_player";
+
+  return {
+    active_view: input.activeView,
+    user_stage: userStage,
+    audience_segment: audienceSegment,
+    primary_ad_angle: primaryAdAngle,
+    song_count: songCount,
+    liked_count: likedCount,
+    playlist_count: playlistCount,
+    playlist_song_total: playlistSongTotal,
+    total_plays: totalPlays,
+    total_listened_seconds: Math.round(totalListenedSeconds),
+    library_duration_seconds: Math.round(totalLibrarySeconds),
+    total_library_seconds: Math.round(totalLibrarySeconds),
+    average_song_seconds: averageSongSeconds,
+    average_plays_per_song: averagePlaysPerSong,
+    played_song_count: playedSongCount,
+    never_played_count: neverPlayedCount,
+    recent_import_count: recentImportWeekCount,
+    recent_import_week_count: recentImportWeekCount,
+    missing_file_count: missingFileCount,
+    library_health_percent: libraryHealthPercent,
+    liked_percent: likedPercent,
+    played_percent: playedPercent,
+    month_import_count: monthImportCount,
+    month_import_seconds: Math.round(monthImportSeconds),
+    month_artist_count: monthArtists.size,
+    year_import_count: yearImportCount,
+    year_import_seconds: Math.round(yearImportSeconds),
+    year_artist_count: yearArtists.size,
+    year_album_count: yearAlbums.size,
+    longest_song_duration: Math.round(longestSongDuration),
+    longest_song_title: longestSongTitle,
+    artist_count: artistNames.size,
+    album_count: albumNames.size,
+    has_library: songCount > 0,
+    has_liked_songs: likedCount > 0,
+    has_playlists: playlistCount > 0,
+    has_played_music: playedSongCount > 0,
+    discord_enabled: Boolean(settings.discordEnabled),
+    discord_privacy_mode: Boolean(settings.discordPrivacyMode),
+    discord_buttons_enabled: Boolean(settings.discordButtons),
+    discord_art_mode: String(settings.discordArtMode || "albumCover"),
+    discord_activity_style: String(settings.discordActivityStyle || "normal"),
+    start_with_windows_enabled: Boolean(settings.startWithWindows),
+    minimize_to_tray_enabled: Boolean(settings.minimizeToTray),
+    custom_theme_enabled: Boolean(settings.customThemeEnabled),
+    theme_id: settings.customThemeEnabled ? "custom" : String(settings.theme || "default"),
+    cover_color_sync_mode: String(settings.coverColorSyncMode || "normal"),
+    compact_player_enabled: Boolean(settings.compactPlayer),
+    simple_mode_enabled: Boolean(settings.simpleMode),
+    reduced_motion_enabled: Boolean(settings.reducedMotion),
+    crossfade_enabled: Boolean(settings.crossfadeEnabled),
+    gapless_enabled: Boolean(settings.gaplessPlayback),
+    volume_normalization_enabled: Boolean(settings.volumeNormalization),
+    per_song_volume_memory_enabled: Boolean(settings.perSongVolumeMemory),
+    playback_speed_changed: Number(settings.playbackSpeed || 1) !== 1,
+    shuffle_enabled: Boolean(input.isShuffle),
+    repeat_mode: String(input.repeatMode || "off"),
+    download_result_count: Number(input.downloadResultCount || 0)
+  };
+}
+
+function makeLocaltifyAnalyticsSnapshotFallback(input: {
+  activeView: string;
+  songs?: any[];
+  likedCount?: number;
+  playlists?: any[];
+  settings?: Record<string, any>;
+  isShuffle?: boolean;
+  repeatMode?: string;
+  downloadResultCount?: number;
+}): LocaltifyAnalyticsSnapshot {
+  return computeLocaltifyAnalyticsSnapshot(input);
+}
+
+function createLocaltifyLibraryWorker() {
+  try {
+    return new Worker(new URL("./library.worker.ts", import.meta.url), {
+      type: "module",
+      name: "localtify-library-worker"
+    });
+  } catch {
+    return null;
+  }
+}
+
 const VISUAL_CUSTOMIZATION_DEFAULTS = {
   homeBannerType: "dynamic",
   blurEffects: "normal",
@@ -433,6 +657,8 @@ function MainModeApp() {
   const animationFrameRef = useRef<number | null>(null);
   const progressLoopTimeoutRef = useRef<number | null>(null);
   const saveSettingsTimerRef = useRef<number | null>(null);
+  const analyticsWorkerRef = useRef<Worker | null>(null);
+  const analyticsWorkerRequestRef = useRef(0);
   const playlistSaveTimerRef = useRef<number | null>(null);
   const playerResizeFrameRef = useRef<number | null>(null);
   const sidebarResizeFrameRef = useRef<number | null>(null);
@@ -2342,89 +2568,117 @@ function MainModeApp() {
   );
 
 
-  const analyticsAudienceSnapshot = useMemo(() => {
-    const songCount = songs.length;
-    const likedCount = likedSongs.length;
-    const playlistCount = playlists.length;
-    const playlistSongTotal = playlists.reduce((total, playlist) => total + playlist.songIds.length, 0);
-    const libraryDurationSeconds = Math.round(songs.reduce((total, song) => total + (song.duration || 0), 0));
-    const playedSongCount = songs.filter((song) => (song.playCount || 0) > 0).length;
-    const recentImportCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const recentImportCount = songs.filter((song) => {
-      const addedAt = Date.parse(song.dateAdded || "");
-      return Number.isFinite(addedAt) && addedAt >= recentImportCutoff;
-    }).length;
+  const [analyticsAudienceSnapshot, setAnalyticsAudienceSnapshot] = useState<LocaltifyAnalyticsSnapshot>(() =>
+    makeLocaltifyAnalyticsSnapshotFallback({
+      activeView: view,
+      songs: [],
+      likedCount: 0,
+      playlists: [],
+      settings,
+      isShuffle,
+      repeatMode,
+      downloadResultCount: 0
+    })
+  );
+  const [analyticsAudienceSnapshotReady, setAnalyticsAudienceSnapshotReady] = useState(false);
 
-    const artistCount = new Set(
-      songs
-        .map((song) => String(song.artist || "").trim().toLowerCase())
-        .filter((artist) => artist && artist !== "unknown artist")
-    ).size;
+  useEffect(() => {
+    const requestId = analyticsWorkerRequestRef.current + 1;
+    analyticsWorkerRequestRef.current = requestId;
+    setAnalyticsAudienceSnapshotReady(false);
 
-    const albumCount = new Set(
-      songs
-        .map((song) => String(song.album || "").trim().toLowerCase())
-        .filter((album) => album && album !== "unknown album")
-    ).size;
+    const workerPayload = {
+      type: "compute-analytics-snapshot",
+      requestId,
+      activeView: view,
+      songs,
+      likedCount: likedSongs.length,
+      playlists,
+      settings: {
+        discordEnabled: settings.discordEnabled,
+        discordPrivacyMode: settings.discordPrivacyMode,
+        discordButtons: settings.discordButtons,
+        discordArtMode: settings.discordArtMode,
+        discordActivityStyle: settings.discordActivityStyle,
+        startWithWindows: settings.startWithWindows,
+        minimizeToTray: settings.minimizeToTray,
+        customThemeEnabled: settings.customThemeEnabled,
+        theme: settings.theme,
+        coverColorSyncMode: settings.coverColorSyncMode,
+        compactPlayer: settings.compactPlayer,
+        simpleMode: settings.simpleMode,
+        reducedMotion: settings.reducedMotion,
+        crossfadeEnabled: settings.crossfadeEnabled,
+        gaplessPlayback: settings.gaplessPlayback,
+        volumeNormalization: settings.volumeNormalization,
+        perSongVolumeMemory: settings.perSongVolumeMemory,
+        playbackSpeed: settings.playbackSpeed
+      },
+      isShuffle,
+      repeatMode,
+      downloadResultCount: downloadResults.length
+    };
 
-    let userStage = "new_no_library";
-    if (songCount > 0 && songCount < 15) userStage = "small_library";
-    else if (songCount >= 15 && songCount < 75) userStage = "building_library";
-    else if (songCount >= 75) userStage = "power_library";
+    let cancelled = false;
 
-    let audienceSegment = "new_local_music_user";
-    if (playlistCount > 0 && settings.discordEnabled) audienceSegment = "playlist_social_listener";
-    else if (settings.discordEnabled) audienceSegment = "discord_presence_listener";
-    else if (settings.customThemeEnabled || settings.coverColorSyncMode !== "off") audienceSegment = "visual_customizer";
-    else if (playlistCount > 0) audienceSegment = "playlist_builder";
-    else if (songCount >= 75) audienceSegment = "large_library_listener";
-    else if (songCount > 0) audienceSegment = "casual_local_listener";
+    const applySnapshot = (snapshot: LocaltifyAnalyticsSnapshot) => {
+      if (cancelled || analyticsWorkerRequestRef.current !== requestId) return;
+      setAnalyticsAudienceSnapshot(snapshot);
+      setAnalyticsAudienceSnapshotReady(true);
+    };
 
-    let primaryAdAngle = "local_music_no_account";
-    if (settings.discordEnabled) primaryAdAngle = "discord_rich_presence";
-    else if (settings.customThemeEnabled || settings.coverColorSyncMode !== "off") primaryAdAngle = "custom_themes_and_covers";
-    else if (playlistCount > 0) primaryAdAngle = "premium_playlists";
-    else if (songCount >= 75) primaryAdAngle = "large_library_player";
+    const applyFallback = () => {
+      runLocaltifyIdleTask(() => {
+        applySnapshot(makeLocaltifyAnalyticsSnapshotFallback(workerPayload));
+      }, 900);
+    };
 
-    return {
-      active_view: view,
-      user_stage: userStage,
-      audience_segment: audienceSegment,
-      primary_ad_angle: primaryAdAngle,
-      song_count: songCount,
-      liked_count: likedCount,
-      playlist_count: playlistCount,
-      playlist_song_total: playlistSongTotal,
-      library_duration_seconds: libraryDurationSeconds,
-      played_song_count: playedSongCount,
-      recent_import_count: recentImportCount,
-      artist_count: artistCount,
-      album_count: albumCount,
-      has_library: songCount > 0,
-      has_liked_songs: likedCount > 0,
-      has_playlists: playlistCount > 0,
-      has_played_music: playedSongCount > 0,
-      discord_enabled: settings.discordEnabled,
-      discord_privacy_mode: settings.discordPrivacyMode,
-      discord_buttons_enabled: settings.discordButtons,
-      discord_art_mode: settings.discordArtMode,
-      discord_activity_style: settings.discordActivityStyle,
-      start_with_windows_enabled: settings.startWithWindows,
-      minimize_to_tray_enabled: settings.minimizeToTray,
-      custom_theme_enabled: settings.customThemeEnabled,
-      theme_id: settings.customThemeEnabled ? "custom" : settings.theme,
-      cover_color_sync_mode: settings.coverColorSyncMode,
-      compact_player_enabled: settings.compactPlayer,
-      simple_mode_enabled: settings.simpleMode,
-      reduced_motion_enabled: settings.reducedMotion,
-      crossfade_enabled: settings.crossfadeEnabled,
-      gapless_enabled: settings.gaplessPlayback,
-      volume_normalization_enabled: settings.volumeNormalization,
-      per_song_volume_memory_enabled: settings.perSongVolumeMemory,
-      playback_speed_changed: settings.playbackSpeed !== 1,
-      shuffle_enabled: isShuffle,
-      repeat_mode: repeatMode,
-      download_result_count: downloadResults.length
+    const worker = analyticsWorkerRef.current || createLocaltifyLibraryWorker();
+
+    if (!worker) {
+      applyFallback();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    analyticsWorkerRef.current = worker;
+
+    const handleMessage = (event: MessageEvent) => {
+      const data = event.data || {};
+      if (data.type !== "analytics-snapshot" || data.requestId !== requestId) return;
+      applySnapshot(data.snapshot || makeLocaltifyAnalyticsSnapshotFallback(workerPayload));
+    };
+
+    const handleError = () => {
+      try {
+        worker.removeEventListener("message", handleMessage);
+        worker.removeEventListener("error", handleError);
+        worker.terminate();
+      } catch {
+        // Ignore worker shutdown errors.
+      }
+
+      if (analyticsWorkerRef.current === worker) {
+        analyticsWorkerRef.current = null;
+      }
+
+      applyFallback();
+    };
+
+    worker.addEventListener("message", handleMessage);
+    worker.addEventListener("error", handleError);
+
+    try {
+      worker.postMessage(workerPayload);
+    } catch {
+      handleError();
+    }
+
+    return () => {
+      cancelled = true;
+      worker.removeEventListener("message", handleMessage);
+      worker.removeEventListener("error", handleError);
     };
   }, [
     songs,
@@ -2455,7 +2709,18 @@ function MainModeApp() {
   ]);
 
   useEffect(() => {
-    if (!ready) return;
+    return () => {
+      try {
+        analyticsWorkerRef.current?.terminate();
+      } catch {
+        // Ignore worker shutdown errors.
+      }
+      analyticsWorkerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!ready || !analyticsAudienceSnapshotReady) return;
     let cancelled = false;
 
     runLocaltifyIdleTask(() => {
@@ -2463,18 +2728,18 @@ function MainModeApp() {
       trackAudienceSnapshot(analyticsAudienceSnapshot);
       trackMarketingSnapshot(analyticsAudienceSnapshot);
       trackPlaylistSnapshot({
-        playlist_count: analyticsAudienceSnapshot.playlist_count,
-        playlist_song_total: analyticsAudienceSnapshot.playlist_song_total,
-        has_playlists: analyticsAudienceSnapshot.has_playlists,
-        user_stage: analyticsAudienceSnapshot.user_stage,
-        audience_segment: analyticsAudienceSnapshot.audience_segment
+        playlist_count: Number(analyticsAudienceSnapshot.playlist_count || 0),
+        playlist_song_total: Number(analyticsAudienceSnapshot.playlist_song_total || 0),
+        has_playlists: Boolean(analyticsAudienceSnapshot.has_playlists),
+        user_stage: String(analyticsAudienceSnapshot.user_stage || "new_no_library"),
+        audience_segment: String(analyticsAudienceSnapshot.audience_segment || "new_local_music_user")
       });
     }, 2600);
 
     return () => {
       cancelled = true;
     };
-  }, [ready, analyticsAudienceSnapshot]);
+  }, [ready, analyticsAudienceSnapshotReady, analyticsAudienceSnapshot]);
 
   const showHomeSideCards = settings.showRightColumn && !settings.homeExpanded;
   const homeDashboardClass = [
@@ -2485,63 +2750,53 @@ function MainModeApp() {
     .filter(Boolean)
     .join(" ");
 
-  const totalPlays = useMemo(() => songs.reduce((total, song) => total + song.playCount, 0), [songs]);
+  const totalPlays = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_plays");
+  const libraryAlbumCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "album_count");
+  const libraryArtistCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "artist_count");
+  const totalListenedSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_listened_seconds");
+  const totalMinutes = Math.floor(totalListenedSeconds / 60);
+  const totalLibrarySeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_library_seconds");
+  const averageSongSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "average_song_seconds");
+  const playedSongCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "played_song_count");
+  const neverPlayedCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "never_played_count");
+  const likedPercent = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "liked_percent");
+  const playedPercent = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "played_percent");
+  const averagePlaysPerSong = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "average_plays_per_song");
+  const recentImportWeekCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "recent_import_week_count");
+  const missingFileCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "missing_file_count");
+  const libraryHealthPercent = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "library_health_percent");
+  const monthImportCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "month_import_count");
+  const monthImportSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "month_import_seconds");
+  const monthArtistCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "month_artist_count");
+  const yearImportCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "year_import_count");
+  const yearImportSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "year_import_seconds");
+  const yearAlbumCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "year_album_count");
+  const longestSongDuration = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "longest_song_duration");
+  const longestSongTitle = localtifyAnalyticsString(analyticsAudienceSnapshot, "longest_song_title", "");
 
-  const libraryAlbumCount = useMemo(() => {
-    const names = new Set<string>();
+  const activeSongs = useMemo(() => {
+    if (!songs.length || playedSongCount <= 0) return [];
+    return songs.filter((song) => (song.playCount || 0) > 0).slice(0, Math.min(40, playedSongCount));
+  }, [songs, playedSongCount]);
 
-    for (const song of songs) {
-      const album = String(song.album || "").trim().toLowerCase();
-      if (album) names.add(album);
-    }
+  const neverPlayedSongs = useMemo(() => {
+    if (neverPlayedCount <= 0) return [] as Song[];
+    return new Array(neverPlayedCount).fill(null) as Song[];
+  }, [neverPlayedCount]);
 
-    return names.size;
-  }, [songs]);
-
-  const libraryArtistCount = useMemo(() => {
-    const names = new Set<string>();
-
-    for (const song of songs) {
-      const artist = String(song.artist || "").trim().toLowerCase();
-      if (artist) names.add(artist);
-    }
-
-    return names.size;
-  }, [songs]);
-
-  const totalMinutes = useMemo(() => {
-    const seconds = songs.reduce((total, song) => total + song.duration * song.playCount, 0);
-    return Math.floor(seconds / 60);
-  }, [songs]);
-
-  const totalLibrarySeconds = useMemo(() => {
-    return songs.reduce((total, song) => total + Math.max(0, Number(song.duration) || 0), 0);
-  }, [songs]);
-
-  const averageSongSeconds = useMemo(() => {
-    if (!songs.length) return 0;
-    return Math.round(totalLibrarySeconds / songs.length);
-  }, [songs.length, totalLibrarySeconds]);
-
-  const activeSongs = useMemo(() => songs.filter((song) => (song.playCount || 0) > 0), [songs]);
-  const neverPlayedSongs = useMemo(() => songs.filter((song) => (song.playCount || 0) <= 0), [songs]);
-  const likedPercent = songs.length ? Math.round((likedSongs.length / songs.length) * 100) : 0;
-  const playedPercent = songs.length ? Math.round((activeSongs.length / songs.length) * 100) : 0;
-  const averagePlaysPerSong = songs.length ? Math.round((totalPlays / songs.length) * 10) / 10 : 0;
-  const listenedTimeLabel = totalMinutes >= 60 ? `${Math.round((totalMinutes / 60) * 10) / 10}h` : `${totalMinutes}m`;
-  const libraryLengthLabel = formatTime(totalLibrarySeconds);
+  const listenedTimeLabel = formatAnalyticsDuration(totalListenedSeconds);
+  const libraryLengthLabel = formatAnalyticsDuration(totalLibrarySeconds);
 
   const longestSong = useMemo(() => {
-    let longest: Song | null = null;
-
-    for (const song of songs) {
-      if (!longest || (song.duration || 0) > (longest.duration || 0)) {
-        longest = song;
-      }
-    }
-
-    return longest;
-  }, [songs]);
+    if (!longestSongTitle && longestSongDuration <= 0) return null;
+    return {
+      id: "analytics-longest-track",
+      title: longestSongTitle || "longest track",
+      artist: "",
+      album: "",
+      duration: longestSongDuration
+    } as Song;
+  }, [longestSongTitle, longestSongDuration]);
 
   const recentlyAdded = useMemo(() => {
     return [...songs]
@@ -2575,98 +2830,82 @@ function MainModeApp() {
     return picked.slice(0, 10);
   }, [recentlyAdded, songs]);
 
-  const recentImportWeekCount = useMemo(() => {
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-
-    let count = 0;
-    for (const song of songs) {
-      const addedAt = Date.parse(song.dateAdded || "");
-      if (Number.isFinite(addedAt) && addedAt >= cutoff) count += 1;
-    }
-
-    return count;
-  }, [songs]);
-
-  const missingFileCount = useMemo(() => {
-    let count = 0;
-    for (const song of songs) {
-      if (song.fileExists === false) count += 1;
-    }
-    return count;
-  }, [songs]);
-
-  const libraryHealthPercent = songs.length ? Math.max(0, Math.round(((songs.length - missingFileCount) / songs.length) * 100)) : 0;
   const libraryHealthLabel = !songs.length
     ? "empty"
     : missingFileCount > 0
-      ? `${libraryHealthPercent}% ok`
-      : "healthy";
+      ? `${libraryHealthPercent}% healthy`
+      : "100% healthy";
 
   const analyticsRecapCards = useMemo(() => {
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-    const yearStart = new Date(now.getFullYear(), 0, 1).getTime();
-
-    let monthImports = 0;
-    let yearImports = 0;
-    let monthSeconds = 0;
-    let yearSeconds = 0;
-    const monthArtists = new Set<string>();
-    const yearArtists = new Set<string>();
-    const yearAlbums = new Set<string>();
-
-    for (const song of songs) {
-      const addedAt = Date.parse(song.dateAdded || "");
-      if (!Number.isFinite(addedAt)) continue;
-
-      if (addedAt >= monthStart) {
-        monthImports += 1;
-        monthSeconds += Math.max(0, Number(song.duration) || 0);
-        const artist = String(song.artist || "").trim().toLowerCase();
-        if (artist && artist !== "unknown artist") monthArtists.add(artist);
-      }
-
-      if (addedAt >= yearStart) {
-        yearImports += 1;
-        yearSeconds += Math.max(0, Number(song.duration) || 0);
-        const artist = String(song.artist || "").trim().toLowerCase();
-        const album = String(song.album || "").trim().toLowerCase();
-        if (artist && artist !== "unknown artist") yearArtists.add(artist);
-        if (album && album !== "unknown album") yearAlbums.add(album);
-      }
-    }
-
     return [
       {
         label: "monthly recap",
-        value: monthImports ? `${monthImports.toLocaleString()} new` : "no new songs",
-        note: monthImports ? `${formatTime(monthSeconds)} added this month` : "import music this month to build a recap",
-        meta: `${monthArtists.size} artist${monthArtists.size === 1 ? "" : "s"}`
+        value: monthImportCount ? `${monthImportCount.toLocaleString()} imported` : "no imports",
+        note: monthImportCount
+          ? `${formatAnalyticsDuration(monthImportSeconds)} of music added this month`
+          : "import music this month to build a recap",
+        meta: `${monthArtistCount.toLocaleString()} artist${monthArtistCount === 1 ? "" : "s"}`,
+        progress: songs.length ? Math.min(100, Math.round((monthImportCount / Math.max(1, songs.length)) * 100)) : 0
       },
       {
         label: "yearly recap",
-        value: yearImports ? `${yearImports.toLocaleString()} added` : "year is quiet",
-        note: yearImports ? `${formatTime(yearSeconds)} imported this year` : "your yearly recap starts with imports",
-        meta: `${yearAlbums.size} album${yearAlbums.size === 1 ? "" : "s"}`
+        value: yearImportCount ? `${yearImportCount.toLocaleString()} imported` : "year is quiet",
+        note: yearImportCount
+          ? `${formatAnalyticsDuration(yearImportSeconds)} of music imported this year`
+          : "your yearly recap starts with imports",
+        meta: `${yearAlbumCount.toLocaleString()} album${yearAlbumCount === 1 ? "" : "s"}`,
+        progress: songs.length ? Math.min(100, Math.round((yearImportCount / Math.max(1, songs.length)) * 100)) : 0
       },
       {
-        label: "all-time recap",
+        label: "all-time listening",
         value: listenedTimeLabel,
-        note: `${totalPlays.toLocaleString()} play${totalPlays === 1 ? "" : "s"} across ${songs.length.toLocaleString()} song${songs.length === 1 ? "" : "s"}`,
-        meta: mostPlayed ? `top: ${prettyTitle(mostPlayed.title, 7)}` : "play music to build this"
+        note: `${totalPlays.toLocaleString()} play${totalPlays === 1 ? "" : "s"} • ${formatAnalyticsDuration(totalLibrarySeconds)} library`,
+        meta: mostPlayed ? `top: ${prettyTitle(mostPlayed.title, 7)}` : "play music to build this",
+        progress: playedPercent
       }
     ];
-  }, [songs, listenedTimeLabel, totalPlays, mostPlayed]);
+  }, [
+    monthImportCount,
+    monthImportSeconds,
+    monthArtistCount,
+    yearImportCount,
+    yearImportSeconds,
+    yearAlbumCount,
+    songs.length,
+    listenedTimeLabel,
+    totalPlays,
+    totalLibrarySeconds,
+    mostPlayed,
+    playedPercent
+  ]);
 
   const analyticsStatCards = useMemo(() => ([
-    { label: "songs", value: songs.length.toLocaleString(), note: `${libraryArtistCount} artist${libraryArtistCount === 1 ? "" : "s"}` },
-    { label: "plays", value: totalPlays.toLocaleString(), note: `${averagePlaysPerSong} avg per song` },
-    { label: "listened", value: listenedTimeLabel, note: `${totalMinutes.toLocaleString()} minute${totalMinutes === 1 ? "" : "s"}` },
-    { label: "health", value: libraryHealthLabel, note: missingFileCount > 0 ? `${missingFileCount} missing` : "files available" }
+    {
+      label: "songs",
+      value: songs.length.toLocaleString(),
+      note: `${libraryArtistCount.toLocaleString()} artist${libraryArtistCount === 1 ? "" : "s"} • ${libraryAlbumCount.toLocaleString()} album${libraryAlbumCount === 1 ? "" : "s"}`
+    },
+    {
+      label: "plays",
+      value: totalPlays.toLocaleString(),
+      note: `${playedSongCount.toLocaleString()} played song${playedSongCount === 1 ? "" : "s"} • ${averagePlaysPerSong} avg`
+    },
+    {
+      label: "listened",
+      value: listenedTimeLabel,
+      note: `${totalMinutes.toLocaleString()} minute${totalMinutes === 1 ? "" : "s"} estimated`
+    },
+    {
+      label: "library health",
+      value: libraryHealthLabel,
+      note: missingFileCount > 0 ? `${missingFileCount.toLocaleString()} missing file${missingFileCount === 1 ? "" : "s"}` : "all files available"
+    }
   ]), [
     songs.length,
     libraryArtistCount,
+    libraryAlbumCount,
     totalPlays,
+    playedSongCount,
     averagePlaysPerSong,
     listenedTimeLabel,
     totalMinutes,
@@ -2675,21 +2914,15 @@ function MainModeApp() {
   ]);
 
   useEffect(() => {
-    if (!ready) return;
-
-    const artistCount = new Set(
-      songs.map((song) => String(song.artist || "").trim().toLowerCase()).filter(Boolean)
-    ).size;
-    const albumCount = new Set(
-      songs.map((song) => String(song.album || "").trim().toLowerCase()).filter(Boolean)
-    ).size;
-    const playedSongCount = songs.filter((song) => (song.playCount || 0) > 0).length;
+    if (!ready || !analyticsAudienceSnapshotReady) return;
 
     const signature = [
       songs.length,
       likedSongs.length,
       playedSongCount,
       totalPlays,
+      libraryAlbumCount,
+      libraryArtistCount,
       view,
       settings.theme,
       settings.customThemeEnabled,
@@ -2704,17 +2937,31 @@ function MainModeApp() {
         song_count: songs.length,
         liked_count: likedSongs.length,
         played_song_count: playedSongCount,
-        never_played_count: Math.max(0, songs.length - playedSongCount),
+        never_played_count: neverPlayedCount,
         total_plays: totalPlays,
-        album_count: albumCount,
-        artist_count: artistCount,
+        album_count: libraryAlbumCount,
+        artist_count: libraryArtistCount,
         current_view: view,
         theme_id: settings.theme,
         custom_theme_enabled: settings.customThemeEnabled,
         discord_enabled: settings.discordEnabled
       });
     }, 2200);
-  }, [ready, songs, likedSongs.length, totalPlays, view, settings.theme, settings.customThemeEnabled, settings.discordEnabled]);
+  }, [
+    ready,
+    analyticsAudienceSnapshotReady,
+    songs.length,
+    likedSongs.length,
+    playedSongCount,
+    neverPlayedCount,
+    totalPlays,
+    libraryAlbumCount,
+    libraryArtistCount,
+    view,
+    settings.theme,
+    settings.customThemeEnabled,
+    settings.discordEnabled
+  ]);
 
   // Keep playback progress hot-path out of React renders as much as possible.
   // The animation loop paints the progress DOM directly; React only uses this snapshot when something else renders.
@@ -9585,13 +9832,13 @@ function MainModeApp() {
 
         <section className="bootCard" role={isBootError ? "alert" : "status"} aria-live={isBootError ? "assertive" : "polite"}>
           <div className="bootArtWrap" aria-hidden="true">
-            <img key={`boot-art-${bootRetryKey}`} className="bootArt" src={bootArtSrc} alt="" width={260} height={260} loading="eager" decoding="async" fetchPriority="high" draggable={false} />
+            <img key={`boot-art-${bootRetryKey}`} className="bootArt" src={bootArtSrc} alt="" loading="eager" decoding="async" />
             <span className="bootArtAura" />
           </div>
 
           <div className="bootCopy">
             <div className="bootBrandRow">
-              <img className="bootLogo" src={localtifyLogo} alt="" width={24} height={24} loading="eager" decoding="async" fetchPriority="high" draggable={false} aria-hidden="true" />
+              <img className="bootLogo" src={localtifyLogo} alt="" aria-hidden="true" />
               <span>localtify</span>
             </div>
 
@@ -9667,7 +9914,7 @@ function MainModeApp() {
     <section className="simpleShell">
       <header className="simpleTopbar">
         <div className="simpleBrand">
-          <div className="simpleBrandLogo"><img className="loadingLogoImage" src={localtifyLogo} alt="" width={28} height={28} loading="eager" decoding="async" fetchPriority="high" draggable={false} aria-hidden="true" /></div>
+          <div className="simpleBrandLogo"><img className="loadingLogoImage" src={localtifyLogo} alt="" aria-hidden="true" /></div>
           <div>
             <strong>localtify</strong>
             <small>simple mode</small>
@@ -9925,7 +10172,7 @@ function MainModeApp() {
             <div className="feedbackPromptTopV331">
               <div className="feedbackPromptBrandV331">
                 <span className="feedbackPromptLogoV331" aria-hidden="true">
-                  <img src={localtifyLogo} alt="" width={22} height={22} loading="lazy" decoding="async" fetchPriority="low" draggable={false} />
+                  <img src={localtifyLogo} alt="" />
                 </span>
                 <span>
                   <em>localtify feedback</em>
