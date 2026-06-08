@@ -28,13 +28,11 @@ const DISCORD_ACTIVITY_NAME = APP_NAME;
   I only kept the keys visible from your Discord assets screen so it avoids question mark images.
 */
 const PIXEL_ART_ASSETS = [
-  "earthglow",
-  "mikuu",
-  "somegirllooking",
-  "starpersonlookup",
   "2cats",
   "2tankpeople",
   "4glasses",
+  "aesthetic",
+  "aesthethic",
   "animepixell",
   "blackcat",
   "blackcatlaying",
@@ -42,28 +40,66 @@ const PIXEL_ART_ASSETS = [
   "catinspace",
   "catquestion",
   "content",
+  "earthglow",
   "erikaringingyobell",
+  "evening",
+  "floating",
   "gumball",
-  "mikuinfortnite",
+  "hehe",
+  "hm",
+  "love",
+  "mikuu",
   "mitapixel",
+  "nanashi",
+  "ouushii",
   "peaceanime",
   "smallcatwithwand",
   "smallmita",
+  "snowy",
   "somegirl",
-  "spaceearth"
+  "somegirllooking",
+  "spaceearth",
+  "starpersonlookup",
+  "vibinnn"
 ];
 
 const ASSET_ALIASES = {
+  aesthetic: "aesthetic",
+  aesthethic: "aesthethic",
+  aesthetics: "aesthetic",
+  aesthetix: "aesthetic",
+
   animepixel: "animepixell",
   animepixell: "animepixell",
+
+  blackcat: "blackcat",
+  blackcatlaying: "blackcatlaying",
+
+  catspace: "catinspace",
+  catinspace: "catinspace",
+  catquestion: "catquestion",
+
+  earth: "earthglow",
+  earthglow: "earthglow",
+
+  evening: "evening",
+  floating: "floating",
+  gumball: "gumball",
+  hehe: "hehe",
+  hm: "hm",
+  love: "love",
 
   mikuuu: "mikuu",
   miku: "mikuu",
   mikuu: "mikuu",
+  mikuufortnite: "mikuu",
+  mikuuinfortnite: "mikuu",
+  mikuinfortnite: "mikuu",
 
-  mikuufortnite: "mikuinfortnite",
-  mikuuinfortnite: "mikuinfortnite",
-  mikuinfortnite: "mikuinfortnite",
+  nanashi: "nanashi",
+  ouushi: "ouushii",
+  oushii: "ouushii",
+  ouushii: "ouushii",
 
   erikaringingbell: "erikaringingyobell",
   erikaringingyobell: "erikaringingyobell",
@@ -71,13 +107,26 @@ const ASSET_ALIASES = {
   starpersonlookupp: "starpersonlookup",
   starpersonlookup: "starpersonlookup",
 
+  snowy: "snowy",
+  snow: "snowy",
+
   spacemeteor: "spaceearth",
   spacemetor: "spaceearth",
+  spaceearth: "spaceearth",
 
   marie: "smallmita",
   mitu: "mitapixel",
+  mita: "mitapixel",
+  smallmita: "smallmita",
+  smallcatwand: "smallcatwithwand",
+  smallcatwithwand: "smallcatwithwand",
   beachhouse: "spaceearth",
-  beachhousejpg: "spaceearth"
+  beachhousejpg: "spaceearth",
+
+  vibin: "vibinnn",
+  vibinn: "vibinnn",
+  vibiinnn: "vibinnn",
+  vibinnn: "vibinnn"
 };
 
 const SAFE_ART_ASSETS = [...new Set(PIXEL_ART_ASSETS.map(cleanAssetKey).filter(Boolean))];
@@ -141,6 +190,7 @@ function getDiscordStatus() {
     nextReconnectAt,
     usedArtCount: dynamicUsedAssets.size,
     safeArtCount: SAFE_ART_ASSETS.length,
+    safeArtAssets: SAFE_ART_ASSETS,
     lastSongIdentity,
     lastImageKey
   };
@@ -225,14 +275,15 @@ function normalizeArtMode(value) {
 }
 
 function normalizeStyle(value) {
-  const style = normalizeMode(value, "cute");
+  const style = normalizeMode(value, "recentActivity");
 
   if (style === "cute") return "cute";
   if (style === "detailed") return "detailed";
   if (style === "minimal") return "minimal";
   if (style === "meme" || style === "mememode") return "meme";
+  if (["recent", "recentactivity", "server", "serveractivity", "activitycard", "activity"].includes(style)) return "recentActivity";
 
-  return "clean";
+  return "recentActivity";
 }
 
 function normalizeCleanup(value) {
@@ -601,6 +652,46 @@ function buildSecondLine(payload, artist) {
   return cleanArtist;
 }
 
+function getPlaybackEffectLabel(payload = {}) {
+  const effectMode = normalizeMode(
+    payload?.audioEffectMode || payload?.playbackEffectMode || payload?.localtifyAudioMode,
+    "normal"
+  );
+  const reverb = Math.max(0, safeInteger(payload?.audioReverbAmount ?? payload?.reverbAmount ?? 0, 0));
+  const speed = safeNumber(payload?.playbackSpeed, 1);
+  const labels = [];
+
+  if (effectMode === "nightcore") labels.push("nightcore");
+  if (effectMode === "daycore") labels.push("daycore");
+  if (reverb >= 8) labels.push(`reverb ${Math.min(100, reverb)}%`);
+  if (Number.isFinite(speed) && Math.abs(speed - 1) >= 0.04) labels.push(`${speed.toFixed(2)}x`);
+
+  return labels.slice(0, 2).join(" • ");
+}
+
+function buildRecentActivityState(payload, artist, album) {
+  const effectLabel = getPlaybackEffectLabel(payload);
+  const secondLine = buildSecondLine(payload, artist);
+  const pieces = [];
+
+  if (effectLabel) pieces.push(effectLabel);
+  if (secondLine && secondLine !== APP_NAME) pieces.push(secondLine);
+  if (album && album !== "local files" && pieces.length < 2) pieces.push(album);
+
+  return pieces.filter(Boolean).slice(0, 2).join(" • ") || "local music session";
+}
+
+function buildLargeImageText(payload = {}, key = "") {
+  const title = cleanupTitle(payload?.title, normalizeCleanup(payload?.discordTitleCleanup));
+  const artist = getArtist(payload);
+
+  if (payload?.discordPrivacyMode) return "localtify private session";
+  if (title && artist && artist !== "coderpixel :p") return `${title} • ${artist}`;
+  if (title) return title;
+  if (key) return `localtify art: ${key}`;
+  return "localtify artwork";
+}
+
 function buildActivityText(payload) {
   const style = normalizeStyle(payload?.discordActivityStyle);
   const cleanupMode = normalizeCleanup(payload?.discordTitleCleanup);
@@ -628,6 +719,20 @@ function buildActivityText(payload) {
   }
 
   const cleanTitle = title || "local song";
+
+  if (style === "recentActivity") {
+    if (!isPlaying && payload?.discordShowPausedIdle !== false) {
+      return {
+        details: cleanTitle,
+        state: `paused • ${timeLeft}`
+      };
+    }
+
+    return {
+      details: cleanTitle,
+      state: buildRecentActivityState(payload, artist, album)
+    };
+  }
 
   if (!isPlaying && payload?.discordShowPausedIdle !== false) {
     return {
@@ -821,13 +926,14 @@ function buildBaseActivity(payload = {}) {
 
   if (largeImageKey) {
     activity.largeImageKey = largeImageKey;
-    activity.largeImageText = limitText(payload?.discordAssetLabel || "localtify artwork", 128);
+    activity.largeImageText = limitText(payload?.discordAssetLabel || buildLargeImageText(payload, largeImageKey), 128);
   }
 
   const smallImageMode = cleanSpaces(payload?.discordSmallImageMode || "player");
   if (smallImageMode !== "none" && DEFAULT_LOGO_ASSET && largeImageKey && largeImageKey !== DEFAULT_LOGO_ASSET) {
+    const effectLabel = getPlaybackEffectLabel(payload);
     activity.smallImageKey = DEFAULT_LOGO_ASSET;
-    activity.smallImageText = isPlaying ? "listening in localtify" : "paused in localtify";
+    activity.smallImageText = effectLabel || (isPlaying ? "listening in localtify" : "paused in localtify");
   }
 
   if (duration > 0 && duration > currentTime) {
