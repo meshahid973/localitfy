@@ -43,8 +43,6 @@ It is made for people who like owning their music and want their local library t
 
 v0.3.7 is a big release.
 
-Linux is now supported, and the main new feature is the **Albums** section, suggested in the Issues area by [@Crocodile73](https://github.com/Crocodile73).
-
 The first time setup screen was also fully rebuilt, the app was cleaned up for release, and several performance fixes were made.
 
 ### v0.3.7 highlights
