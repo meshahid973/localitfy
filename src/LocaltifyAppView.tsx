@@ -2360,9 +2360,15 @@ export function useCoverAverageStyle(source: string, enabled: boolean) {
   return style;
 }
 
-export function Cover({ song, className }: { song: Song | null; className: string }) {
+type CoverImagePriority = "auto" | "high" | "low";
+
+export function Cover({ song, className, priority = "auto" }: { song: Song | null; className: string; priority?: CoverImagePriority }) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
   const [imageReady, setImageReady] = useState(false);
+  const isImmediateCover = priority === "high" || (priority === "auto" && /\b(heroArt|smallArt|importCoverArt|editorCover)\b/.test(className));
+  const coverLoadingMode = isImmediateCover ? "eager" : "lazy";
+  const coverFetchPriority = isImmediateCover ? "high" : "low";
+  const coverIntrinsicSize = isImmediateCover ? 512 : 260;
 
   const directCover = getRendererSafeImageUrl(song?.coverUrl);
   const savedCover = String(song?.coverPath || "").trim();
@@ -2405,9 +2411,13 @@ export function Cover({ song, className }: { song: Song | null; className: strin
           className={`coverImage ${imageReady ? "isLoaded" : ""}`}
           src={coverSrc}
           alt=""
+          width={coverIntrinsicSize}
+          height={coverIntrinsicSize}
           draggable={false}
-          loading="lazy"
+          loading={coverLoadingMode}
           decoding="async"
+          fetchPriority={coverFetchPriority}
+          referrerPolicy="no-referrer"
           onLoad={() => setImageReady(true)}
           onError={() => {
             setImageReady(false);
@@ -3490,7 +3500,7 @@ export function TitleBar({ mini = false, children }: { mini?: boolean; children?
   return (
     <header className={mini ? "titleBar miniTitleBar" : "titleBar"}>
       <div className="titleDrag" onDoubleClick={handleTitleDoubleClick} title="drag to move localtify">
-        <img className="titleLogo titleLogoImage" src={localtifyLogo} alt="" aria-hidden="true" />
+        <img className="titleLogo titleLogoImage" src={localtifyLogo} alt="" width={22} height={22} loading="eager" decoding="async" fetchPriority="high" draggable={false} aria-hidden="true" />
         <span>localtify</span>
       </div>
 
@@ -4516,7 +4526,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       {secretMode !== "none" ? (
         <div className={`secretLayer ${secretMode}`} key={`${secretMode}-${secretBurst}`} aria-hidden="true">
           {secretToast ? <div className="secretRibbon">{secretToast}</div> : null}
-          {secretMode === "yukari" ? <img className="yukariSecretPeek" src={yukariUpdateImage} alt="" aria-hidden="true" /> : null}
+          {secretMode === "yukari" ? <img className="yukariSecretPeek" src={yukariUpdateImage} alt="" width={260} height={260} loading="lazy" decoding="async" fetchPriority="low" draggable={false} aria-hidden="true" /> : null}
           {secretMode === "stars"
             ? starParticleStyles.map((style, index) => (
                 <span
@@ -4766,7 +4776,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                       </div>
 
                   <div className={`heroArtWrap nowPlayingArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-                    <Cover song={currentSong} className="heroArt" />
+                    <Cover song={currentSong} className="heroArt" priority="high" />
 
                   </div>
                 </section>
@@ -4817,8 +4827,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                     className="homeListenBackgroundImage"
                                     src={listenAmbienceSource}
                                     alt=""
+                                    width={520}
+                                    height={164}
                                     loading="lazy"
                                     decoding="async"
+                                    fetchPriority="low"
+                                    referrerPolicy="no-referrer"
                                     draggable={false}
                                   />
                                 </span>
@@ -5122,7 +5136,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           {albumFolderImportPreview.albums.slice(0, 10).map((album: any) => (
                             <article key={album.id || album.sourcePath} className="albumFolderPreviewCardV309">
                               <div className="albumFolderPreviewCoverV309">
-                                {album.coverUrl ? <img src={album.coverUrl} alt="" loading="lazy" decoding="async" draggable={false} /> : <span>♪</span>}
+                                {album.coverUrl ? <img src={album.coverUrl} alt="" width={96} height={96} loading="lazy" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" draggable={false} /> : <span>♪</span>}
                               </div>
                               <div className="albumFolderPreviewCopyV309">
                                 <strong title={album.title}>{album.title}</strong>
@@ -5908,7 +5922,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                 >
                                   {coverUrl ? (
                                     <span className="spotifyTrackArt" aria-hidden="true">
-                                      <img src={coverUrl} alt="" loading="lazy" decoding="async" />
+                                      <img src={coverUrl} alt="" width={56} height={56} loading="lazy" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" draggable={false} />
                                     </span>
                                   ) : (
                                     <span className="spotifyTrackIndex">{String(i + 1).padStart(2, "0")}</span>
@@ -6153,7 +6167,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
             <div className="playerLeft">
               <div className={`playerArtSwap nowPlayingPlayerArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-                <Cover song={currentSong} className="smallArt" />
+                <Cover song={currentSong} className="smallArt" priority="high" />
               </div>
 
               <div className={`playerMeta nowPlayingMiniCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>

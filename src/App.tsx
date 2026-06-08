@@ -1747,20 +1747,14 @@ function MainModeApp() {
       [
         { label: "Background", key: "customThemeBackground", value: customThemeBackground, help: "app background" },
         { label: "Surface", key: "customThemeSurface", value: customThemeSurface, help: "cards and panels" },
-        { label: "Text", key: "customThemeText", value: customThemeText, help: "main text" },
-        { label: "Accent", key: "customThemeColor", value: customThemeColor, help: "buttons and active items" },
-        { label: "Accent 2", key: "customThemeColor2", value: customThemeColor2, help: "soft details" },
-        { label: "Highlight", key: "customThemeHighlight", value: customThemeHighlight, help: "small labels" },
-        { label: "Progress", key: "customThemeProgress", value: customThemeProgress, help: "player bar and sliders" }
+        { label: "Accent", key: "customThemeColor", value: customThemeColor, help: "buttons and highlights" },
+        { label: "Text", key: "customThemeText", value: customThemeText, help: "primary text" }
       ] as Array<{ label: string; key: CustomThemeColorKey; value: string; help: string }>,
     [
       customThemeBackground,
       customThemeSurface,
-      customThemeText,
       customThemeColor,
-      customThemeColor2,
-      customThemeHighlight,
-      customThemeProgress
+      customThemeText
     ]
   );
 
@@ -9591,13 +9585,13 @@ function MainModeApp() {
 
         <section className="bootCard" role={isBootError ? "alert" : "status"} aria-live={isBootError ? "assertive" : "polite"}>
           <div className="bootArtWrap" aria-hidden="true">
-            <img key={`boot-art-${bootRetryKey}`} className="bootArt" src={bootArtSrc} alt="" loading="eager" decoding="async" />
+            <img key={`boot-art-${bootRetryKey}`} className="bootArt" src={bootArtSrc} alt="" width={260} height={260} loading="eager" decoding="async" fetchPriority="high" draggable={false} />
             <span className="bootArtAura" />
           </div>
 
           <div className="bootCopy">
             <div className="bootBrandRow">
-              <img className="bootLogo" src={localtifyLogo} alt="" aria-hidden="true" />
+              <img className="bootLogo" src={localtifyLogo} alt="" width={24} height={24} loading="eager" decoding="async" fetchPriority="high" draggable={false} aria-hidden="true" />
               <span>localtify</span>
             </div>
 
@@ -9673,7 +9667,7 @@ function MainModeApp() {
     <section className="simpleShell">
       <header className="simpleTopbar">
         <div className="simpleBrand">
-          <div className="simpleBrandLogo"><img className="loadingLogoImage" src={localtifyLogo} alt="" aria-hidden="true" /></div>
+          <div className="simpleBrandLogo"><img className="loadingLogoImage" src={localtifyLogo} alt="" width={28} height={28} loading="eager" decoding="async" fetchPriority="high" draggable={false} aria-hidden="true" /></div>
           <div>
             <strong>localtify</strong>
             <small>simple mode</small>
@@ -9931,7 +9925,7 @@ function MainModeApp() {
             <div className="feedbackPromptTopV331">
               <div className="feedbackPromptBrandV331">
                 <span className="feedbackPromptLogoV331" aria-hidden="true">
-                  <img src={localtifyLogo} alt="" />
+                  <img src={localtifyLogo} alt="" width={22} height={22} loading="lazy" decoding="async" fetchPriority="low" draggable={false} />
                 </span>
                 <span>
                   <em>localtify feedback</em>
@@ -10042,6 +10036,8 @@ function MainModeApp() {
       { id: "daycore", label: "Daycore", note: "Slower, deeper, lower pitch." }
     ];
 
+    const playbackSpeedValue = clamp(Number(settings.playbackSpeed || 1), 0.5, 2);
+
     return (
       <section className="settingsPageCard playbackLabCardV343" aria-label="Playback lab">
         <div className="settingsSectionTitle">
@@ -10065,7 +10061,7 @@ function MainModeApp() {
           ))}
         </div>
 
-        <div className="playbackEffectSlidersV343">
+        <div className="playbackEffectSlidersV343 playbackEffectSlidersV345">
           <label>
             <span>
               <strong>Effect strength</strong>
@@ -10091,6 +10087,21 @@ function MainModeApp() {
               max={100}
               value={reverbAmount}
               onChange={(event) => void updateSetting("audioReverbAmount" as any, Number(event.currentTarget.value) as any, true)}
+            />
+          </label>
+
+          <label>
+            <span>
+              <strong>Speed</strong>
+              <em>{playbackSpeedValue.toFixed(2)}x</em>
+            </span>
+            <input
+              type="range"
+              min={0.5}
+              max={2}
+              step={0.01}
+              value={playbackSpeedValue}
+              onChange={(event) => void updateSetting("playbackSpeed", Number(event.currentTarget.value) as any, true)}
             />
           </label>
         </div>
@@ -10268,7 +10279,6 @@ function MainModeApp() {
         />
         </Suspense>
         {renderAudioEffectsCard()}
-        {renderSidebarBehaviorRestoreCard()}
         {renderFeedbackSettingsCard()}
       </>
     );

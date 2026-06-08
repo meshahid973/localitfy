@@ -989,3 +989,120 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
     transition: none !important;
   }
 }
+
+/* localtify 0.3.8 V362 — image-heavy view performance pass.
+   Keeps TanStack virtualization and reduces image/card paint cost without removing blur/ambience globally. */
+.app .content,
+.app .homeScroll,
+.app .libraryList,
+.app .coverGalleryViewport,
+.app .coverSongList,
+.app .playlistSongList,
+.app .spotifyTrackItems,
+.app .downloadQueueList{
+  overscroll-behavior: contain !important;
+  contain: layout style paint !important;
+  transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden !important;
+}
+
+.app .homeShelfPanel,
+.app .settingsPageCard,
+.app .downloadPanelV031,
+.app .spotifyTrackList,
+.app .coverGalleryPanel,
+.app .albumShelf,
+.app .playlistPanel{
+  content-visibility: auto;
+  contain-intrinsic-size: 420px;
+}
+
+.app img{
+  image-rendering: auto;
+  -webkit-user-drag: none;
+  user-select: none;
+  backface-visibility: hidden;
+}
+
+.app .coverImage,
+.app .coverGalleryImageCleanOnly,
+.app .homeListenBackgroundImage,
+.app .spotifyTrackArt img,
+.app .homeFreshCard img,
+.app .homeListenCover img,
+.app .homeAlbumArt img,
+.app .albumCardCoverV318 img,
+.app .albumDetailCoverV318 img,
+.app .albumTrackCoverV318 img,
+.app .albumBuilderSongCoverV318 img,
+.app .playlistTrackCover img,
+.app .smallArt img{
+  display: block;
+  object-fit: cover;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.app .coverImage,
+.app .coverGalleryImageCleanOnly,
+.app .spotifyTrackArt img,
+.app .homeListenBackgroundImage{
+  contain: paint;
+}
+
+.app .homeFreshCard:hover img,
+.app .homeListenCard:hover img,
+.app .coverGalleryCard:hover img,
+.app .coverGalleryCardCleanOnly:hover img{
+  filter: none !important;
+}
+
+.app.isScrolling :is(
+  .homeFreshCard,
+  .homeListenCard,
+  .homeAlbumCard,
+  .coverGalleryCard,
+  .coverGalleryCardCleanOnly,
+  .spotifyTrackItem,
+  .libraryRow,
+  .songRow,
+  .playlistTrackRow,
+  .albumTrackRowV318
+){
+  transition-property: background-color, border-color, opacity !important;
+  box-shadow: none !important;
+}
+
+.app.isScrolling :is(
+  .homeFreshCard img,
+  .homeListenCard img,
+  .homeAlbumCard img,
+  .coverGalleryCard img,
+  .coverGalleryCardCleanOnly img,
+  .spotifyTrackItem img
+){
+  filter: none !important;
+}
+
+main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .coverGalleryCard,
+  .coverGalleryCardCleanOnly,
+  .spotifyTrackItem
+){
+  transition-property: background-color, border-color, opacity !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
+  .homeListenCard img,
+  .homeFreshCard img,
+  .homeAlbumCard img,
+  .coverGalleryCard img,
+  .coverGalleryCardCleanOnly img
+){
+  filter: none !important;
+}
