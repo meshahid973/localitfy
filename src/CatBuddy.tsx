@@ -26,6 +26,8 @@ type CatAnimation = {
   src: string;
   frames: number;
   duration: number;
+  loop?: boolean;
+  holdLastFrame?: boolean;
 };
 
 const catAnimations: Record<CatAnimationId, CatAnimation> = {
@@ -33,73 +35,91 @@ const catAnimations: Record<CatAnimationId, CatAnimation> = {
     id: "idle",
     src: new URL("./assets/cat-4/Cat-4-Idle.png", import.meta.url).href,
     frames: 10,
-    duration: 760
+    duration: 760,
+    loop: true
   },
   walk: {
     id: "walk",
     src: new URL("./assets/cat-4/Cat-4-Walk.png", import.meta.url).href,
     frames: 8,
-    duration: 560
+    duration: 560,
+    loop: true
   },
   run: {
     id: "run",
     src: new URL("./assets/cat-4/Cat-4-Run.png", import.meta.url).href,
     frames: 8,
-    duration: 360
+    duration: 360,
+    loop: true
   },
   meow: {
     id: "meow",
     src: new URL("./assets/cat-4/Cat-4-Meow.png", import.meta.url).href,
     frames: 4,
-    duration: 380
+    duration: 420,
+    loop: false,
+    holdLastFrame: true
   },
   laying: {
     id: "laying",
     src: new URL("./assets/cat-4/Cat-4-Laying.png", import.meta.url).href,
     frames: 8,
-    duration: 780
+    duration: 780,
+    loop: false,
+    holdLastFrame: true
   },
   itch: {
     id: "itch",
     src: new URL("./assets/cat-4/Cat-4-Itch.png", import.meta.url).href,
     frames: 2,
-    duration: 260
+    duration: 300,
+    loop: false,
+    holdLastFrame: true
   },
   sleeping1: {
     id: "sleeping1",
     src: new URL("./assets/cat-4/Cat-4-Sleeping1.png", import.meta.url).href,
     frames: 1,
-    duration: 1200
+    duration: 1200,
+    loop: true
   },
   sleeping2: {
     id: "sleeping2",
     src: new URL("./assets/cat-4/Cat-4-Sleeping2.png", import.meta.url).href,
     frames: 1,
-    duration: 1200
+    duration: 1200,
+    loop: true
   },
   sitting: {
     id: "sitting",
     src: new URL("./assets/cat-4/Cat-4-Sitting.png", import.meta.url).href,
     frames: 1,
-    duration: 1200
+    duration: 1200,
+    loop: true
   },
   licking1: {
     id: "licking1",
     src: new URL("./assets/cat-4/Cat-4-Licking 1.png", import.meta.url).href,
     frames: 5,
-    duration: 520
+    duration: 560,
+    loop: false,
+    holdLastFrame: true
   },
   licking2: {
     id: "licking2",
     src: new URL("./assets/cat-4/Cat-4-Licking 2.png", import.meta.url).href,
     frames: 5,
-    duration: 520
+    duration: 560,
+    loop: false,
+    holdLastFrame: true
   },
   stretching: {
     id: "stretching",
     src: new URL("./assets/cat-4/Cat-4-Stretching.png", import.meta.url).href,
     frames: 13,
-    duration: 980
+    duration: 980,
+    loop: false,
+    holdLastFrame: true
   }
 };
 
@@ -111,6 +131,7 @@ const CAT_STOP_DISTANCE = 34;
 const CAT_WALK_SPEED = 165;
 const CAT_RUN_SPEED = 315;
 const CAT_MAX_DIRECTION_TILT = 78 * Math.PI / 180;
+const SINGLE_CLICK_DELAY_MS = 230;
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -130,7 +151,12 @@ function pickIdleAction() {
 }
 
 function getCatSingletonKey() {
-  return "__localtifyCatBuddyPrimaryV404";
+  return "__localtifyCatBuddyPrimaryV405";
+}
+
+function actionDuration(animation: CatAnimationId, wantedDuration: number) {
+  const definition = catAnimations[animation] || catAnimations.idle;
+  return Math.max(wantedDuration, definition.duration + 80);
 }
 
 export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyProps) {
@@ -140,6 +166,7 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
   const imageCacheRef = useRef<Record<string, HTMLImageElement>>({});
   const movementFrameRef = useRef<number | null>(null);
   const drawFrameRef = useRef<number | null>(null);
+  const clickTimerRef = useRef<number | null>(null);
 
   const [isPrimary, setIsPrimary] = useState(true);
   const [animationId, setAnimationId] = useState<CatAnimationId>("idle");
@@ -155,6 +182,7 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
   const lastPointerAtRef = useRef(Date.now());
   const lastMovedAtRef = useRef(Date.now());
   const actionUntilRef = useRef(0);
+  const actionAnimationRef = useRef<CatAnimationId | null>(null);
   const nextRandomActionAtRef = useRef(Date.now() + 7000);
   const animationIdRef = useRef<CatAnimationId>("idle");
   const animationStartedAtRef = useRef(nowMs());
@@ -210,6 +238,15 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
   }, []);
 
   useEffect(() => {
+    return () => {
+      if (clickTimerRef.current !== null) {
+        window.clearTimeout(clickTimerRef.current);
+        clickTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!enabled || !isPrimary) return;
 
     const canvas = canvasRef.current;
@@ -231,9 +268,19 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
         const frameWidth = Math.max(1, Math.floor(image.naturalWidth / frameCount));
         const frameHeight = image.naturalHeight;
         const duration = reducedMotion ? Math.max(currentAnimation.duration, 1200) : currentAnimation.duration;
-        const frameIndex = frameCount <= 1
-          ? 0
-          : Math.floor(((time - animationStartedAtRef.current) % duration) / duration * frameCount);
+        const elapsed = Math.max(0, time - animationStartedAtRef.current);
+        const progress = duration <= 0 ? 1 : elapsed / duration;
+
+        let frameIndex = 0;
+        if (frameCount > 1) {
+          if (currentAnimation.loop !== false) {
+            frameIndex = Math.floor((elapsed % duration) / duration * frameCount);
+          } else if (progress >= 1 && currentAnimation.holdLastFrame) {
+            frameIndex = frameCount - 1;
+          } else {
+            frameIndex = Math.floor(clamp(progress, 0, 0.999) * frameCount);
+          }
+        }
 
         const drawWidth = isResting ? 112 : 96;
         const drawHeight = isResting ? 88 : 96;
@@ -306,8 +353,8 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
       return;
     }
 
-    const setAnimationSafe = (next: CatAnimationId) => {
-      if (animationIdRef.current === next) return;
+    const setAnimationSafe = (next: CatAnimationId, restart = false) => {
+      if (!restart && animationIdRef.current === next) return;
       animationIdRef.current = next;
       animationStartedAtRef.current = nowMs();
       setAnimationId(next);
@@ -333,12 +380,12 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
       targetDirectionTiltRef.current = clamp(nextTilt, -CAT_MAX_DIRECTION_TILT, CAT_MAX_DIRECTION_TILT);
     };
 
-    const moveTowardTarget = (dtSeconds: number) => {
+    const moveTowardTarget = (dtSeconds: number, lockedAction: boolean) => {
       const target = targetRef.current;
       const position = positionRef.current;
 
-      if (!followingRef.current || !target.hasTarget) {
-        targetDirectionTiltRef.current = 0;
+      if (lockedAction || !followingRef.current || !target.hasTarget) {
+        targetDirectionTiltRef.current = lockedAction ? 0 : targetDirectionTiltRef.current;
         return 0;
       }
 
@@ -376,7 +423,15 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
       const dtSeconds = clamp((currentTime - frameClockRef.current) / 1000, 0.001, 0.05);
       frameClockRef.current = currentTime;
 
-      const distance = moveTowardTarget(dtSeconds);
+      const realNow = Date.now();
+      const lockedAction = actionUntilRef.current > realNow && actionAnimationRef.current !== null;
+      const lockedAnimation = actionAnimationRef.current;
+
+      if (!lockedAction && actionAnimationRef.current !== null) {
+        actionAnimationRef.current = null;
+      }
+
+      const distance = moveTowardTarget(dtSeconds, lockedAction);
       const root = rootRef.current;
       const position = positionRef.current;
 
@@ -384,33 +439,36 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
         root.style.transform = `translate3d(${position.x.toFixed(2)}px, ${position.y.toFixed(2)}px, 0)`;
       }
 
-      const realNow = Date.now();
-      const hasAction = actionUntilRef.current > realNow;
+      if (lockedAction && lockedAnimation) {
+        setAnimationSafe(lockedAnimation);
+        movementFrameRef.current = window.requestAnimationFrame(tick);
+        return;
+      }
+
       const idleFor = realNow - Math.max(lastPointerAtRef.current, lastMovedAtRef.current);
 
-      if (!hasAction) {
-        if (followingRef.current && targetRef.current.hasTarget && distance > 180) {
-          setAnimationSafe("run");
-        } else if (followingRef.current && targetRef.current.hasTarget && distance > CAT_STOP_DISTANCE + 5) {
-          setAnimationSafe("walk");
-        } else if (idleFor > 18000) {
-          targetDirectionTiltRef.current = 0;
-          setAnimationSafe(realNow % 5200 > 2600 ? "sleeping1" : "sleeping2");
-        } else if (idleFor > 8500) {
-          targetDirectionTiltRef.current = 0;
-          setAnimationSafe("sitting");
-        } else {
-          targetDirectionTiltRef.current = lerp(targetDirectionTiltRef.current, 0, 0.05);
-          setAnimationSafe("idle");
-        }
+      if (followingRef.current && targetRef.current.hasTarget && distance > 180) {
+        setAnimationSafe("run");
+      } else if (followingRef.current && targetRef.current.hasTarget && distance > CAT_STOP_DISTANCE + 5) {
+        setAnimationSafe("walk");
+      } else if (idleFor > 18000) {
+        targetDirectionTiltRef.current = 0;
+        setAnimationSafe(realNow % 5200 > 2600 ? "sleeping1" : "sleeping2");
+      } else if (idleFor > 8500) {
+        targetDirectionTiltRef.current = 0;
+        setAnimationSafe("sitting");
+      } else {
+        targetDirectionTiltRef.current = lerp(targetDirectionTiltRef.current, 0, 0.05);
+        setAnimationSafe("idle");
+      }
 
-        if (idleFor > 5200 && realNow > nextRandomActionAtRef.current) {
-          const action = pickIdleAction();
-          targetDirectionTiltRef.current = 0;
-          setAnimationSafe(action);
-          actionUntilRef.current = realNow + (action === "stretching" ? 1400 : 900);
-          nextRandomActionAtRef.current = realNow + 6500 + Math.random() * 9500;
-        }
+      if (idleFor > 5200 && realNow > nextRandomActionAtRef.current) {
+        const action = pickIdleAction();
+        targetDirectionTiltRef.current = 0;
+        actionAnimationRef.current = action;
+        actionUntilRef.current = realNow + actionDuration(action, action === "stretching" ? 1400 : 900);
+        setAnimationSafe(action, true);
+        nextRandomActionAtRef.current = realNow + 6500 + Math.random() * 9500;
       }
 
       movementFrameRef.current = window.requestAnimationFrame(tick);
@@ -475,20 +533,40 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
 
   const forceAction = (next: CatAnimationId, durationMs: number) => {
     const time = Date.now();
-    actionUntilRef.current = time + durationMs;
-    nextRandomActionAtRef.current = time + 7500;
+
+    if (clickTimerRef.current !== null) {
+      window.clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+    }
+
     targetDirectionTiltRef.current = 0;
+    directionTiltRef.current = 0;
+    actionAnimationRef.current = next;
+    actionUntilRef.current = time + actionDuration(next, durationMs);
+    nextRandomActionAtRef.current = time + 7600;
     animationIdRef.current = next;
     animationStartedAtRef.current = nowMs();
     setAnimationId(next);
   };
 
   const handleCatClick = () => {
-    if (actionUntilRef.current > Date.now()) return;
-    forceAction("meow", 700);
+    if (clickTimerRef.current !== null) {
+      window.clearTimeout(clickTimerRef.current);
+    }
+
+    clickTimerRef.current = window.setTimeout(() => {
+      clickTimerRef.current = null;
+      if (actionUntilRef.current > Date.now()) return;
+      forceAction("meow", 700);
+    }, SINGLE_CLICK_DELAY_MS);
   };
 
   const handleCatDoubleClick = () => {
+    if (clickTimerRef.current !== null) {
+      window.clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+    }
+
     forceAction("laying", 6500);
   };
 
