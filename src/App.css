@@ -1,3 +1,4 @@
+/* localtify 0.3.8 V414 — app css ownership first pass. */
 .muted-small{
   display: block;
   margin-top: 3px;
@@ -6344,16 +6345,6 @@ button{
   touch-action: none;
 }
 
-.homeAlbumCard,
-.songRow,
-.panel,
-.settingsPageCard,
-.coverGalleryCard,
-.analyticsBigCard,
-.statCard{
-  content-visibility: auto;
-  contain-intrinsic-size: 72px;
-}
 
 .hero,
 .sidebar,
@@ -6511,22 +6502,6 @@ button{
   filter: none !important;
 }
 
-.app.viewSwitching .songCard,
-.app.viewSwitching .songRow,
-.app.viewSwitching .libraryCard,
-.app.viewSwitching .settingsPanelCard,
-.app.viewSwitching .panel{
-
-  filter: none !important;
-}
-
-.app.viewSwitching .songCard:hover,
-.app.viewSwitching .songRow:hover,
-.app.viewSwitching .libraryCard:hover,
-.app.viewSwitching .settingsPanelCard:hover{
-  transform: translate3d(0, -1px, 0) !important;
-  box-shadow: 0 14px 38px rgba(0,0,0,.24) !important;
-}
 .app,
 .app::before,
 .app::after,
@@ -7019,14 +6994,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
   background-size: auto !important;
   animation: none !important;
 }
-.app.viewSwitching :where(.homeAlbumCard,.songRow,.libraryCard,.songCard,.settingsPanelCard),
-body.localitfyThemePainting .app :where(.homeAlbumCard,.songRow,.libraryCard,.songCard,.settingsPanelCard){
-  transition-duration: 90ms !important;
-}
-
-.app :where(.homeAlbumCard,.songRow,.libraryCard,.songCard,.homeListenCard,.homeFreshCover,.coverTile):hover{
-  filter: none !important;
-}
 
 html,
 body,
@@ -7117,12 +7084,6 @@ body,
 
 body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.ambientParticle,.homePulse,.coverSpark,.softOrbit){
   animation-play-state: paused !important;
-}
-@supports (content-visibility: auto){
-  body.localtifyIdle .app:not(.songDragActive) :where(.homeShelfPanel,.homeLibraryPanel,.simpleLibraryPanel,.settingsPanel,.settingsPanelShell){
-    content-visibility: auto;
-    contain-intrinsic-size: 720px;
-  }
 }
 
 .app{
@@ -12404,4 +12365,140 @@ body.localitfyThemePainting .app :is(
 ){
   transform: translateZ(0) !important;
   box-shadow: inherit !important;
+}
+
+/* localtify 0.3.8 V420 — animated sidebar icon polish */
+.sidebar .navIcon{
+  overflow: visible !important;
+  color: currentColor !important;
+}
+
+.sidebar .navAnimatedIcon,
+.sidebar .navAnimatedIcon svg{
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+  overflow: visible !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.sidebar .navItem:hover .navAnimatedIcon,
+.sidebar .navItem.active .navAnimatedIcon,
+.sidebar .navItem[aria-current="page"] .navAnimatedIcon{
+  color: var(--accent) !important;
+  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), .22));
+}
+
+.sidebar .navItem:hover .navIcon{
+  transform: translate3d(0, -1px, 0) scale(1.04) !important;
+}
+
+.sidebar .navItem:active .navIcon{
+  transform: translate3d(0, 0, 0) scale(.96) !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .sidebar .navItem:hover .navIcon,
+  .sidebar .navItem:active .navIcon{
+    transform: none !important;
+  }
+}
+
+/* localtify 0.3.8 V421 — make sidebar icon motion visible on full row hover */
+@keyframes localtifySidebarIconPopV421{
+  0%{ transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+  38%{ transform: translate3d(0,-2px,0) scale(1.12) rotate(-4deg); }
+  68%{ transform: translate3d(0,0,0) scale(.98) rotate(2deg); }
+  100%{ transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+}
+
+.sidebar .navAnimatedIcon{
+  transform-origin: 50% 50% !important;
+  will-change: transform !important;
+}
+
+.sidebar .navItem:hover .navAnimatedIcon,
+.sidebar .navItem:focus-visible .navAnimatedIcon{
+  animation: localtifySidebarIconPopV421 520ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+.sidebar .navItem:hover .navLucideIcon,
+.sidebar .navItem:focus-visible .navLucideIcon{
+  color: var(--accent) !important;
+  stroke: currentColor !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .sidebar .navItem:hover .navAnimatedIcon,
+  .sidebar .navItem:focus-visible .navAnimatedIcon{
+    animation: none !important;
+  }
+}
+
+/* localtify 0.3.8 V422 — sidebar icon animation reliability fix */
+.sidebar .navItem .navIcon,
+.sidebar .navItem .navLucideIcon,
+.sidebar .navItem .navAnimatedIcon,
+.sidebar .navItem .navAnimatedIcon svg{
+  transform-origin: 50% 50% !important;
+  will-change: transform, filter !important;
+  overflow: visible !important;
+}
+
+@keyframes localtifySidebarIconBounceV422{
+  0%{ transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+  28%{ transform: translate3d(0,-2px,0) scale(1.14) rotate(-5deg); }
+  52%{ transform: translate3d(0,1px,0) scale(.97) rotate(3deg); }
+  76%{ transform: translate3d(0,-1px,0) scale(1.04) rotate(-1deg); }
+  100%{ transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+}
+
+@keyframes localtifySidebarIconStrokeV422{
+  0%,100%{ filter: drop-shadow(0 0 0 rgba(var(--accent-rgb), 0)); }
+  45%{ filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), .30)); }
+}
+
+.sidebar .navItem:hover .navIcon,
+.sidebar .navItem:focus-visible .navIcon{
+  animation: localtifySidebarIconBounceV422 560ms cubic-bezier(.16,1,.3,1) both !important;
+}
+
+.sidebar .navItem:hover .navLucideIcon,
+.sidebar .navItem:hover .navAnimatedIcon,
+.sidebar .navItem:focus-visible .navLucideIcon,
+.sidebar .navItem:focus-visible .navAnimatedIcon{
+  color: var(--accent) !important;
+  stroke: currentColor !important;
+  animation: localtifySidebarIconStrokeV422 560ms ease both !important;
+}
+
+.sidebar .navItem.active .navIcon,
+.sidebar .navItem[aria-current="page"] .navIcon{
+  color: var(--accent) !important;
+}
+
+.sidebar .navItem.active .navLucideIcon,
+.sidebar .navItem[aria-current="page"] .navLucideIcon{
+  color: var(--accent) !important;
+  stroke: currentColor !important;
+}
+
+/* Keep old V421 animation from stacking on only some icons. The wrapper owns motion now. */
+.sidebar .navItem:hover .navAnimatedIcon,
+.sidebar .navItem:focus-visible .navAnimatedIcon{
+  animation-name: localtifySidebarIconStrokeV422 !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .sidebar .navItem:hover .navIcon,
+  .sidebar .navItem:focus-visible .navIcon,
+  .sidebar .navItem:hover .navLucideIcon,
+  .sidebar .navItem:hover .navAnimatedIcon,
+  .sidebar .navItem:focus-visible .navLucideIcon,
+  .sidebar .navItem:focus-visible .navAnimatedIcon{
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
 }

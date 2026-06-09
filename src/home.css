@@ -17254,3 +17254,116 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
     justify-content: flex-start;
   }
 }
+
+/* localtify 0.3.8 V422 — stop home listen glow spill */
+.app .homeShelfStack .homeListenPanel,
+.homeView .homeListenPanel{
+  overflow: hidden !important;
+  contain: paint !important;
+  isolation: isolate !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 12px 30px rgba(0,0,0,.18) !important;
+}
+
+.app .homeShelfStack .homeListenPanel::before,
+.app .homeShelfStack .homeListenPanel::after,
+.homeView .homeListenPanel::before,
+.homeView .homeListenPanel::after{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  filter: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.app .homeShelfStack .homeListenRail,
+.homeView .homeListenRail{
+  overflow: hidden !important;
+  contain: paint !important;
+  padding: 1px !important;
+}
+
+.app .homeShelfStack .homeListenCard,
+.homeView .homeListenCard{
+  overflow: hidden !important;
+  contain: paint !important;
+  isolation: isolate !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.050),
+    0 8px 18px rgba(0,0,0,.18) !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover,
+.homeView .homeListenCard:hover{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.060),
+    0 10px 22px rgba(0,0,0,.20) !important;
+}
+
+.app .homeShelfStack .homeListenCard.active,
+.homeView .homeListenCard.active{
+  box-shadow:
+    inset 3px 0 0 rgba(var(--accent-rgb), .72),
+    inset 0 1px 0 rgba(255,255,255,.060),
+    0 10px 22px rgba(0,0,0,.22) !important;
+}
+
+.app .homeShelfStack .homeListenCard::before,
+.app .homeShelfStack .homeListenCard::after,
+.homeView .homeListenCard::before,
+.homeView .homeListenCard::after{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  filter: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenBackground,
+.homeView .homeListenCard .homeListenBackground{
+  inset: 0 !important;
+  overflow: hidden !important;
+  border-radius: inherit !important;
+  opacity: .34 !important;
+  transform: translateZ(0) !important;
+  clip-path: inset(0 round inherit) !important;
+}
+
+.app .homeShelfStack .homeListenCard .homeListenBackgroundImage,
+.homeView .homeListenCard .homeListenBackgroundImage{
+  inset: -18% !important;
+  width: 136% !important;
+  height: 136% !important;
+  max-width: none !important;
+  max-height: none !important;
+  opacity: .58 !important;
+  filter: blur(16px) saturate(1.22) brightness(.68) contrast(1.02) !important;
+  transform: scale(1.04) translateZ(0) !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover .homeListenBackground,
+.homeView .homeListenCard:hover .homeListenBackground{
+  opacity: .42 !important;
+}
+
+.app .homeShelfStack .homeListenCard:hover .homeListenBackgroundImage,
+.homeView .homeListenCard:hover .homeListenBackgroundImage{
+  filter: blur(18px) saturate(1.32) brightness(.72) contrast(1.03) !important;
+  transform: scale(1.06) translateZ(0) !important;
+}
+
+.app .homeShelfStack .homeListenCard .coverAura::before,
+.app .homeShelfStack .homeListenCard .coverAura::after,
+.homeView .homeListenCard .coverAura::before,
+.homeView .homeListenCard .coverAura::after{
+  content: none !important;
+  display: none !important;
+}
+
+.app .heroAmbiencePulse{
+  opacity: 0 !important;
+  display: none !important;
+}
