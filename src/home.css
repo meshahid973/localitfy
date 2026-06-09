@@ -15834,40 +15834,34 @@ body.localtifyIdle .settingsSectionCard{
   }
 }
 
-/* Home card system */
+/* Home cards */
 .homeView,
 .app{
-  --home-card-gap: 14px;
-  --home-card-radius: 22px;
-  --home-card-padding: 0 0 12px;
-  --home-card-cover-radius: 20px 20px 15px 15px;
-  --home-card-bg:
-    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.010) 38%, rgba(255,255,255,.004)),
-    rgba(11, 8, 17, .86);
-  --home-card-bg-hover:
-    linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.014) 38%, rgba(255,255,255,.005)),
-    rgba(13, 10, 20, .88);
-  --home-card-bg-active:
-    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.015) 38%, rgba(255,255,255,.006)),
-    rgba(14, 10, 22, .90);
-  --home-card-bg-no-blur:
-    linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.010) 38%, rgba(255,255,255,.004)),
-    rgba(9, 8, 15, .92);
-  --home-card-bg-more-blur:
-    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.010) 34%, rgba(8,6,14,.58)),
-    rgba(9, 7, 15, .66);
-  --home-card-border: rgba(255,255,255,.078);
-  --home-card-border-hover: rgba(var(--accent-rgb), .24);
-  --home-card-border-active: rgba(var(--accent-rgb), .44);
-  --home-card-shadow: inset 0 1px 0 rgba(255,255,255,.030), 0 8px 22px rgba(0,0,0,.13);
-  --home-card-shadow-hover: inset 0 1px 0 rgba(255,255,255,.034), 0 12px 28px rgba(0,0,0,.16);
-  --home-card-shadow-active: inset 0 0 0 1px rgba(var(--accent-rgb), .14), 0 12px 30px rgba(0,0,0,.18);
+  --home-card-min: 166px;
+  --home-card-min-wide: 154px;
+  --home-card-min-mobile: 142px;
+  --home-card-gap: 20px;
+  --home-card-row-gap: 18px;
+  --home-card-radius: 20px;
+  --home-card-padding: 0 0 14px;
+  --home-card-cover-radius: 18px 18px 13px 13px;
+  --home-card-bg: rgba(10, 8, 16, .90);
+  --home-card-bg-hover: rgba(13, 10, 20, .94);
+  --home-card-bg-active: rgba(16, 12, 24, .96);
+  --home-card-bg-no-blur: rgba(8, 8, 14, .94);
+  --home-card-bg-more-blur: rgba(10, 8, 16, .74);
+  --home-card-border: rgba(255,255,255,.066);
+  --home-card-border-hover: rgba(255,255,255,.13);
+  --home-card-border-active: rgba(var(--accent-rgb), .38);
+  --home-card-shadow: 0 6px 18px rgba(0,0,0,.12);
+  --home-card-shadow-hover: 0 10px 24px rgba(0,0,0,.15);
+  --home-card-shadow-active: inset 0 0 0 1px rgba(var(--accent-rgb), .12), 0 10px 24px rgba(0,0,0,.16);
   --home-card-transition:
-    transform 180ms cubic-bezier(.16,1,.3,1),
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 180ms ease,
-    opacity 160ms ease;
+    transform 170ms cubic-bezier(.16,1,.3,1),
+    border-color 170ms ease,
+    background-color 170ms ease,
+    box-shadow 170ms ease,
+    opacity 150ms ease;
 }
 
 .homeView .homeShelfStack{
@@ -15895,19 +15889,23 @@ body.localtifyIdle .settingsSectionCard{
 .homeView .homeFreshPanel,
 .homeView .homeLibraryPanel{
   background:
-    linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.010) 30%, rgba(255,255,255,.004)),
-    color-mix(in srgb, var(--surface, #151528) 76%, #000 24%) !important;
+    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.008) 32%, rgba(255,255,255,.003)),
+    color-mix(in srgb, var(--surface, #151528) 78%, #000 22%) !important;
 }
 
-/* Quick library layout */
+.homeView .homeLibraryPanel .panelHead,
+.app .homeLibraryPanel .panelHead{
+  margin-bottom: 14px !important;
+}
+
 .homeView .homeAlbumGrid:not(.virtualHomeGridViewport),
 .app .homeAlbumGrid:not(.virtualHomeGridViewport){
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
-  gap: var(--home-card-gap) !important;
+  grid-template-columns: repeat(auto-fill, minmax(var(--home-card-min), 1fr)) !important;
+  gap: var(--home-card-row-gap) var(--home-card-gap) !important;
   align-items: start !important;
-  padding: 6px 7px 40px !important;
-  margin: -2px -5px 0 !important;
+  padding: 10px 12px 56px !important;
+  margin: 0 !important;
   background: transparent !important;
   isolation: isolate !important;
   contain: layout style !important;
@@ -15926,8 +15924,8 @@ body.localtifyIdle .settingsSectionCard{
   max-height: min(720px, calc(100vh - 270px)) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
-  padding: 6px 7px 40px !important;
-  margin: -2px -5px 0 !important;
+  padding: 10px 12px 56px !important;
+  margin: 0 !important;
   background: transparent !important;
   isolation: isolate !important;
   contain: layout style !important;
@@ -15955,10 +15953,11 @@ body.localtifyIdle .settingsSectionCard{
   width: 100% !important;
   min-width: 100% !important;
   display: grid !important;
-  gap: var(--home-card-gap) !important;
+  column-gap: var(--home-card-gap) !important;
+  row-gap: 0 !important;
   align-items: start !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 0 0 var(--home-card-row-gap) !important;
   background: transparent !important;
   box-sizing: border-box !important;
   will-change: transform !important;
@@ -15974,9 +15973,9 @@ body.localtifyIdle .settingsSectionCard{
   align-self: start !important;
   justify-self: stretch !important;
   box-sizing: border-box !important;
+  margin-bottom: var(--home-card-row-gap) !important;
 }
 
-/* Quick library card */
 .homeView .homeAlbumCard,
 .app .homeAlbumCard{
   position: relative !important;
@@ -16013,14 +16012,14 @@ body.localtifyIdle .settingsSectionCard{
   border-color: var(--home-card-border-hover) !important;
   background: var(--home-card-bg-hover) !important;
   box-shadow: var(--home-card-shadow-hover) !important;
-  transform: translate3d(0, -2px, 0) !important;
+  transform: translate3d(0, -1px, 0) !important;
   z-index: 8 !important;
 }
 
 .homeView .homeAlbumCard:active,
 .app .homeAlbumCard:active{
   cursor: grabbing;
-  transform: translate3d(0, 0, 0) scale(.985) !important;
+  transform: translate3d(0, 0, 0) scale(.99) !important;
 }
 
 .homeView .homeAlbumCard.active,
@@ -16031,7 +16030,15 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 .homeView .homeAlbumCard::after,
-.app .homeAlbumCard::after{
+.app .homeAlbumCard::after,
+.homeView .homeAlbumRank,
+.app .homeAlbumRank,
+.homeView .homeAlbumNumber,
+.app .homeAlbumNumber,
+.homeView .homeAlbumIndex,
+.app .homeAlbumIndex,
+.homeView .homeAlbumPlayBadge,
+.app .homeAlbumPlayBadge{
   content: none !important;
   display: none !important;
 }
@@ -16059,32 +16066,30 @@ body.localtifyWantMoreBlur .app .homeAlbumCard::before{
   content: "" !important;
   display: block !important;
   position: absolute !important;
-  left: -18px !important;
-  right: -18px !important;
-  top: 46% !important;
-  bottom: -24px !important;
+  left: -14px !important;
+  right: -14px !important;
+  top: 50% !important;
+  bottom: -20px !important;
   z-index: 0 !important;
   pointer-events: none !important;
   background-image: var(--library-card-cover, none) !important;
   background-size: cover !important;
   background-position: center bottom !important;
-  opacity: .48 !important;
-  filter: blur(22px) saturate(1.10) brightness(.70) !important;
-  transform: scale(1.07) translateZ(0) !important;
+  opacity: .34 !important;
+  filter: blur(18px) saturate(1.04) brightness(.62) !important;
+  transform: scale(1.045) translateZ(0) !important;
 }
 
 body.localtifyWantMoreBlur .homeView .homeAlbumCard:hover::before,
 body.localtifyWantMoreBlur .app .homeAlbumCard:hover::before{
-  opacity: .56 !important;
-  filter: blur(23px) saturate(1.12) brightness(.74) !important;
+  opacity: .40 !important;
 }
 
 body.localtifyWantMoreBlur .homeView .homeAlbumCard.active::before,
 body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
-  opacity: .60 !important;
+  opacity: .46 !important;
 }
 
-/* Cover */
 .homeView .homeAlbumPlayZone,
 .app .homeAlbumPlayZone{
   position: relative !important;
@@ -16097,8 +16102,8 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
   border: 0 !important;
   border-radius: var(--home-card-cover-radius) !important;
   overflow: hidden !important;
-  background: rgba(255,255,255,.035) !important;
-  box-shadow: 0 10px 22px rgba(0,0,0,.24), inset 0 0 0 1px rgba(255,255,255,.045) !important;
+  background: rgba(255,255,255,.030) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.040) !important;
   transform: translateZ(0) !important;
 }
 
@@ -16124,60 +16129,30 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
   z-index: 4 !important;
   overflow: hidden !important;
   background: transparent !important;
-  transition: transform 220ms cubic-bezier(.16,1,.3,1), filter 220ms ease !important;
+  transition: opacity 190ms ease !important;
 }
 
 .homeView .homeAlbumCard:hover .homeAlbumArt,
 .app .homeAlbumCard:hover .homeAlbumArt{
-  transform: scale(1.018) translateZ(0) !important;
+  opacity: .98 !important;
 }
 
-.homeView .homeAlbumRank,
-.app .homeAlbumRank{
-  display: none !important;
-}
-
-.homeView .homeAlbumPlayBadge,
-.app .homeAlbumPlayBadge{
-  position: absolute !important;
-  right: 8px !important;
-  bottom: 8px !important;
-  z-index: 5 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 28px !important;
-  height: 28px !important;
-  padding: 0 10px !important;
-  border-radius: 999px !important;
-  color: #fff !important;
-  border: 1px solid rgba(var(--accent-rgb), .28) !important;
-  background: rgba(0,0,0,.58) !important;
-  backdrop-filter: blur(12px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
-  font-size: 10px !important;
-  font-weight: 900 !important;
-  letter-spacing: .02em !important;
-  text-transform: lowercase !important;
-}
-
-/* Text and actions */
 .homeView .homeAlbumMeta,
 .app .homeAlbumMeta,
 .homeView .homeAlbumStats,
 .app .homeAlbumStats,
 .homeView .homeAlbumActions,
 .app .homeAlbumActions{
-  padding-inline: 12px !important;
+  padding-inline: 14px !important;
 }
 
 .homeView .homeAlbumMeta,
 .app .homeAlbumMeta{
   display: grid !important;
   align-content: start !important;
-  gap: 3px !important;
-  min-height: 50px !important;
-  margin-top: 10px !important;
+  gap: 4px !important;
+  min-height: 48px !important;
+  margin-top: 13px !important;
   background: transparent !important;
   box-shadow: none !important;
   filter: none !important;
@@ -16191,29 +16166,29 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
-  min-height: 32px !important;
-  max-height: 34px !important;
+  min-height: 31px !important;
+  max-height: 33px !important;
   overflow: hidden !important;
   white-space: normal !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
-  color: #fff !important;
-  font-size: 14px !important;
+  color: rgba(255,255,255,.94) !important;
+  font-size: 13.5px !important;
   line-height: 1.15 !important;
-  letter-spacing: -.025em !important;
+  letter-spacing: -.02em !important;
   text-overflow: ellipsis !important;
-  text-shadow: 0 1px 7px rgba(0,0,0,.34) !important;
+  text-shadow: none !important;
 }
 
 .homeView .homeAlbumMeta small,
 .app .homeAlbumMeta small,
 .homeView .homeAlbumStats,
 .app .homeAlbumStats{
-  color: rgba(255,255,255,.58) !important;
+  color: rgba(255,255,255,.52) !important;
   background: transparent !important;
   box-shadow: none !important;
   filter: none !important;
-  text-shadow: 0 1px 6px rgba(0,0,0,.28) !important;
+  text-shadow: none !important;
 }
 
 .homeView .homeAlbumStats,
@@ -16231,28 +16206,29 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
   position: relative !important;
   z-index: 5 !important;
   display: grid !important;
-  grid-template-columns: repeat(2, 32px) !important;
+  grid-template-columns: repeat(2, 30px) !important;
   justify-content: start !important;
   align-items: center !important;
-  gap: 7px !important;
-  min-height: 34px !important;
-  margin-top: 9px !important;
+  gap: 8px !important;
+  min-height: 32px !important;
+  margin-top: 11px !important;
   transform: translateZ(0) !important;
 }
 
 .homeView .homeAlbumActions .iconAction,
 .app .homeAlbumActions .iconAction{
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px !important;
-  border-radius: 11px !important;
-  color: rgba(255,255,255,.86) !important;
-  background: rgba(255,255,255,.034) !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  border-radius: 10px !important;
+  color: rgba(255,255,255,.76) !important;
+  background: rgba(255,255,255,.028) !important;
+  border: 1px solid rgba(255,255,255,.080) !important;
   box-shadow: none !important;
+  opacity: .78 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  transition: transform 160ms cubic-bezier(.16,1,.3,1), background-color 160ms ease, border-color 160ms ease, color 160ms ease !important;
+  transition: transform 150ms cubic-bezier(.16,1,.3,1), background-color 150ms ease, border-color 150ms ease, color 150ms ease, opacity 150ms ease !important;
 }
 
 .homeView .homeAlbumActions .iconAction:nth-child(n + 3),
@@ -16260,17 +16236,24 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
   display: none !important;
 }
 
+.homeView .homeAlbumCard:hover .homeAlbumActions .iconAction,
+.app .homeAlbumCard:hover .homeAlbumActions .iconAction,
+.homeView .homeAlbumActions .iconAction:hover,
+.app .homeAlbumActions .iconAction:hover{
+  opacity: .96 !important;
+}
+
 .homeView .homeAlbumActions .iconAction:hover,
 .app .homeAlbumActions .iconAction:hover{
   color: #fff !important;
-  background: rgba(var(--accent-rgb), .12) !important;
-  border-color: rgba(var(--accent-rgb), .34) !important;
+  background: rgba(var(--accent-rgb), .10) !important;
+  border-color: rgba(var(--accent-rgb), .26) !important;
   transform: translateY(-1px) translateZ(0) !important;
 }
 
 .homeView .homeAlbumActions .iconAction:active,
 .app .homeAlbumActions .iconAction:active{
-  transform: translateY(0) scale(.96) translateZ(0) !important;
+  transform: translateY(0) scale(.97) translateZ(0) !important;
 }
 
 .homeView .homeAlbumEmpty,
@@ -16278,48 +16261,46 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
   grid-column: 1 / -1 !important;
 }
 
-/* Drag states */
 .app.songDragActive .homeAlbumCard{
   transition: var(--home-card-transition), opacity 180ms ease !important;
 }
 
 .homeView .homeAlbumCard.songDragging,
 .app .homeAlbumCard.songDragging{
-  opacity: .48 !important;
+  opacity: .50 !important;
   cursor: grabbing !important;
   border-style: dashed !important;
-  border-color: rgba(var(--accent-rgb), .55) !important;
-  background: rgba(var(--accent-rgb), .065) !important;
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .18), 0 18px 42px rgba(0,0,0,.28) !important;
+  border-color: rgba(var(--accent-rgb), .50) !important;
+  background: rgba(var(--accent-rgb), .060) !important;
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .14), 0 16px 34px rgba(0,0,0,.24) !important;
   animation: localitfyCardPickedUp 620ms ease-in-out infinite !important;
 }
 
 .homeView .homeAlbumCard.songDropTarget,
 .app .homeAlbumCard.songDropTarget{
   opacity: 1 !important;
-  border-color: rgba(var(--accent-rgb), .72) !important;
-  background: rgba(var(--accent-rgb), .095) !important;
-  transform: translate3d(0, -3px, 0) scale(1.012) !important;
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .30), 0 0 0 6px rgba(var(--accent-rgb), .08), 0 20px 50px rgba(0,0,0,.35) !important;
+  border-color: rgba(var(--accent-rgb), .62) !important;
+  background: rgba(var(--accent-rgb), .080) !important;
+  transform: translate3d(0, -2px, 0) scale(1.006) !important;
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .24), 0 0 0 5px rgba(var(--accent-rgb), .060), 0 18px 42px rgba(0,0,0,.26) !important;
 }
 
 .homeView .homeAlbumCard.songDropTarget[data-drop-side="before"],
 .app .homeAlbumCard.songDropTarget[data-drop-side="before"]{
-  box-shadow: -8px 0 0 -3px rgba(var(--accent-rgb), .95), 0 0 0 1px rgba(var(--accent-rgb), .30), 0 0 0 6px rgba(var(--accent-rgb), .08), 0 20px 50px rgba(0,0,0,.35) !important;
+  box-shadow: -8px 0 0 -4px rgba(var(--accent-rgb), .86), 0 0 0 1px rgba(var(--accent-rgb), .24), 0 0 0 5px rgba(var(--accent-rgb), .060), 0 18px 42px rgba(0,0,0,.26) !important;
 }
 
 .homeView .homeAlbumCard.songDropTarget[data-drop-side="after"],
 .app .homeAlbumCard.songDropTarget[data-drop-side="after"]{
-  box-shadow: 8px 0 0 -3px rgba(var(--accent-rgb), .95), 0 0 0 1px rgba(var(--accent-rgb), .30), 0 0 0 6px rgba(var(--accent-rgb), .08), 0 20px 50px rgba(0,0,0,.35) !important;
+  box-shadow: 8px 0 0 -4px rgba(var(--accent-rgb), .86), 0 0 0 1px rgba(var(--accent-rgb), .24), 0 0 0 5px rgba(var(--accent-rgb), .060), 0 18px 42px rgba(0,0,0,.26) !important;
 }
 
-/* Recent covers */
 .homeView .homeFreshRail,
 .app .homeFreshRail{
   overflow-x: auto !important;
   overflow-y: hidden !important;
   scrollbar-gutter: stable !important;
-  padding: 0 2px 8px !important;
+  padding: 0 4px 10px !important;
   margin-inline: 0 !important;
 }
 
@@ -16410,26 +16391,30 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
 }
 
 @media (max-width: 1180px){
-  .homeView .homeAlbumGrid:not(.virtualHomeGridViewport),
-  .app .homeAlbumGrid:not(.virtualHomeGridViewport){
-    grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)) !important;
+  .homeView,
+  .app{
+    --home-card-min: var(--home-card-min-wide);
+    --home-card-gap: 18px;
+    --home-card-row-gap: 16px;
   }
 }
 
 @media (max-width: 900px){
   .homeView,
   .app{
-    --home-card-gap: 12px;
+    --home-card-min: var(--home-card-min-mobile);
+    --home-card-gap: 14px;
+    --home-card-row-gap: 14px;
     --home-card-radius: 18px;
-    --home-card-padding: 0 0 10px;
+    --home-card-padding: 0 0 12px;
     --home-card-cover-radius: 16px 16px 12px 12px;
   }
 
   .homeView .homeAlbumGrid:not(.virtualHomeGridViewport),
   .app .homeAlbumGrid:not(.virtualHomeGridViewport){
-    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)) !important;
-    gap: var(--home-card-gap) !important;
-    padding-inline: 2px !important;
+    grid-template-columns: repeat(auto-fill, minmax(var(--home-card-min), 1fr)) !important;
+    gap: var(--home-card-row-gap) var(--home-card-gap) !important;
+    padding-inline: 6px !important;
     margin-inline: 0 !important;
   }
 
@@ -16439,13 +16424,14 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   .app .virtualHomeGridViewport{
     min-height: 360px !important;
     max-height: min(640px, calc(100vh - 230px)) !important;
-    padding-inline: 2px !important;
+    padding-inline: 6px !important;
     margin-inline: 0 !important;
   }
 
   .homeView .virtualHomeGridRow,
   .app .virtualHomeGridRow{
-    gap: var(--home-card-gap) !important;
+    column-gap: var(--home-card-gap) !important;
+    padding-bottom: var(--home-card-row-gap) !important;
   }
 
   .homeView .homeAlbumMeta,
@@ -16454,6 +16440,6 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   .app .homeAlbumStats,
   .homeView .homeAlbumActions,
   .app .homeAlbumActions{
-    padding-inline: 10px !important;
+    padding-inline: 11px !important;
   }
 }
