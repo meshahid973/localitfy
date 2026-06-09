@@ -1,7 +1,6 @@
 // @ts-nocheck
-/* localtify 0.3.8 V326 downloads + Spotify reliability polish. */
-/* localtify 0.3.8 V327 sidebar behavior restore. */
-/* localtify 0.3.8 V320/V323 final bug sweep + diagnostics cleanup. */
+/* localtify 0.3.8 V395 playback settings cleanup + faster volume changes. */
+/* localtify 0.3.8 V396 audio engine stability pass. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -502,7 +501,9 @@ function applyVisualCustomizationDefaults<T extends Record<string, any>>(setting
     libraryRowStyle: normalizeVisualChoice(settings.libraryRowStyle, ["compactRows", "comfyRows", "coverCards", "listOnly"], VISUAL_CUSTOMIZATION_DEFAULTS.libraryRowStyle),
     starsIntensity: normalizeVisualChoice(settings.starsIntensity, ["off", "subtle", "normal", "bright"], "off"),
     sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
-    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle)
+    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
+    // V385: visible Appearance toggle. Default ON so the current cover-blur look stays enabled.
+    quickLibraryMoreBlur: settings.quickLibraryMoreBlur !== false
   };
 }
 
@@ -750,6 +751,10 @@ function MainModeApp() {
   const [isVolumeDragging, setIsVolumeDragging] = useState(false);
   const [volumeDraft, setVolumeDraft] = useState(() => Math.round(defaultSettings.volume * 100));
   const volumeDraftRef = useRef(Math.round(defaultSettings.volume * 100));
+  const volumeDraftFrameRef = useRef<number | null>(null);
+  const liveVolumeFrameRef = useRef<number | null>(null);
+  const liveVolumePendingPercentRef = useRef(Math.round(defaultSettings.volume * 100));
+  const fadeFrameRef = useRef<number | null>(null);
   const [view, setView] = useState<View>("home");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsCategory, setSettingsCategory] = useState<SettingsCategory>("appearance");
@@ -971,6 +976,19 @@ function MainModeApp() {
       body.classList.remove("localtifyAudioPlaying");
     };
   }, [isPlaying]);
+
+  useEffect(() => {
+    const body = document.body;
+    const wantsMoreBlur = settings.quickLibraryMoreBlur !== false;
+
+    body.classList.toggle("localtifyWantMoreBlur", wantsMoreBlur);
+    body.classList.toggle("localtifyNoMoreBlur", !wantsMoreBlur);
+
+    return () => {
+      body.classList.remove("localtifyWantMoreBlur");
+      body.classList.remove("localtifyNoMoreBlur");
+    };
+  }, [settings.quickLibraryMoreBlur]);
 
   useEffect(() => {
     let analyticsLaunchCancelled = false;
@@ -1644,6 +1662,11 @@ function MainModeApp() {
       if (playerResizeFrameRef.current !== null) {
         window.cancelAnimationFrame(playerResizeFrameRef.current);
         playerResizeFrameRef.current = null;
+      }
+
+      if (volumeDraftFrameRef.current !== null) {
+        window.cancelAnimationFrame(volumeDraftFrameRef.current);
+        volumeDraftFrameRef.current = null;
       }
 
       if (sidebarResizeFrameRef.current !== null) {
@@ -4420,7 +4443,7 @@ function MainModeApp() {
   function toggleMuteFromNative() {
     const currentVolume = clamp(Number(volumeRef.current) || 0, 0, 1);
     const nextVolume = currentVolume > 0.01 ? 0 : clamp(lastNonZeroVolumeRef.current || defaultSettings.volume, 0.05, 1);
-    void updateSetting("volume", nextVolume, true);
+    updateVolumeFast(nextVolume);
   }
 
   useEffect(() => {
@@ -4439,7 +4462,7 @@ function MainModeApp() {
       if (command.type === "seekPercent") handleSeek(String(command.value ?? 0));
 
       if (command.type === "volume") {
-        void updateSetting("volume", clamp(Number(command.value) || 0, 0, 1), true);
+        updateVolumeFast(clamp(Number(command.value) || 0, 0, 1));
       }
     });
 
@@ -4567,7 +4590,7 @@ function MainModeApp() {
 
       if (event.code === "KeyM") {
         event.preventDefault();
-        updateSetting("volume", settings.volume > 0 ? 0 : 0.75, true).catch(() => undefined);
+        updateVolumeFast(settings.volume > 0 ? 0 : 0.75);
       }
     };
 
@@ -4589,8 +4612,24 @@ function MainModeApp() {
         window.clearTimeout(sleepTimerRef.current);
       }
 
+      if (volumeDraftFrameRef.current !== null) {
+        window.cancelAnimationFrame(volumeDraftFrameRef.current);
+        volumeDraftFrameRef.current = null;
+      }
+
+      if (liveVolumeFrameRef.current !== null) {
+        window.cancelAnimationFrame(liveVolumeFrameRef.current);
+        liveVolumeFrameRef.current = null;
+      }
+
+      if (fadeFrameRef.current !== null) {
+        window.cancelAnimationFrame(fadeFrameRef.current);
+        fadeFrameRef.current = null;
+      }
+
       nextAudioRef.current?.pause();
       nextAudioRef.current = null;
+      disposeAudioEngine();
 
       window.localitfy.clearDiscordActivity().catch(() => undefined);
     };
@@ -4601,11 +4640,47 @@ function MainModeApp() {
   }
 
   function getAudioEffectAmount() {
-    return clamp(Number((settings as any).audioEffectAmount ?? 50), 0, 100);
+    return 50;
   }
 
   function getAudioReverbAmount() {
-    return clamp(Number((settings as any).audioReverbAmount ?? 0), 0, 100);
+    return 0;
+  }
+
+  function disposeAudioEngine() {
+    try { beatSourceRef.current?.disconnect(); } catch {}
+    try { beatAnalyserRef.current?.disconnect(); } catch {}
+    try { audioEffectDryGainRef.current?.disconnect(); } catch {}
+    try { audioEffectWetGainRef.current?.disconnect(); } catch {}
+    try { audioEffectDelayRef.current?.disconnect(); } catch {}
+    try { audioEffectFeedbackGainRef.current?.disconnect(); } catch {}
+    try { audioEffectFilterRef.current?.disconnect(); } catch {}
+
+    beatAnalyserRef.current = null;
+    beatDataRef.current = null;
+    audioEffectDryGainRef.current = null;
+    audioEffectWetGainRef.current = null;
+    audioEffectDelayRef.current = null;
+    audioEffectFeedbackGainRef.current = null;
+    audioEffectFilterRef.current = null;
+
+    const context = beatAudioContextRef.current;
+    beatAudioContextRef.current = null;
+    beatSourceRef.current = null;
+
+    if (context && context.state !== "closed") {
+      void context.close().catch(() => undefined);
+    }
+  }
+
+  function setAudioElementVolume(audio: HTMLAudioElement | null | undefined, volume: number) {
+    if (!audio) return;
+    try {
+      audio.muted = false;
+      audio.volume = clamp(Number(volume) || 0, 0, 1);
+    } catch {
+      // Volume changes should never break playback.
+    }
   }
 
   function getEffectivePlaybackRate() {
@@ -4640,8 +4715,9 @@ function MainModeApp() {
   function syncAudioEffectGraph(audio: HTMLAudioElement | null | undefined) {
     if (!audio || audio !== audioRef.current) return;
 
+    const needsAnalyser = Boolean(beatAnalyserRef.current);
     const reverbAmount = getAudioReverbAmount() / 100;
-    const needsGraph = reverbAmount > 0.01 || Boolean(beatSourceRef.current) || Boolean(beatAnalyserRef.current);
+    const needsGraph = needsAnalyser || reverbAmount > 0.01 || Boolean(beatSourceRef.current);
 
     if (!needsGraph) return;
 
@@ -4663,49 +4739,21 @@ function MainModeApp() {
       beatSourceRef.current = source;
 
       const dryGain = audioEffectDryGainRef.current || context.createGain();
-      const wetGain = audioEffectWetGainRef.current || context.createGain();
-      const delayNode = audioEffectDelayRef.current || context.createDelay(0.75);
-      const feedbackGain = audioEffectFeedbackGainRef.current || context.createGain();
-      const filterNode = audioEffectFilterRef.current || context.createBiquadFilter();
-
       audioEffectDryGainRef.current = dryGain;
-      audioEffectWetGainRef.current = wetGain;
-      audioEffectDelayRef.current = delayNode;
-      audioEffectFeedbackGainRef.current = feedbackGain;
-      audioEffectFilterRef.current = filterNode;
 
       try { source.disconnect(); } catch {}
       try { dryGain.disconnect(); } catch {}
-      try { wetGain.disconnect(); } catch {}
-      try { delayNode.disconnect(); } catch {}
-      try { feedbackGain.disconnect(); } catch {}
-      try { filterNode.disconnect(); } catch {}
       try { beatAnalyserRef.current?.disconnect(); } catch {}
 
       dryGain.gain.value = 1;
       source.connect(dryGain);
       dryGain.connect(context.destination);
 
-      if (reverbAmount > 0.01) {
-        delayNode.delayTime.value = 0.055 + reverbAmount * 0.145;
-        feedbackGain.gain.value = Math.min(0.46, 0.08 + reverbAmount * 0.32);
-        wetGain.gain.value = Math.min(0.38, reverbAmount * 0.34);
-        filterNode.type = "lowpass";
-        filterNode.frequency.value = 5200 - reverbAmount * 2200;
-
-        source.connect(delayNode);
-        delayNode.connect(feedbackGain);
-        feedbackGain.connect(delayNode);
-        delayNode.connect(filterNode);
-        filterNode.connect(wetGain);
-        wetGain.connect(context.destination);
-      }
-
-      if (beatAnalyserRef.current) {
+      if (needsAnalyser && beatAnalyserRef.current) {
         source.connect(beatAnalyserRef.current);
       }
     } catch {
-      // If WebAudio setup fails, keep normal HTMLAudio playback alive.
+      // Keep normal HTMLAudio playback alive if WebAudio cannot attach.
     }
   }
 
@@ -4724,11 +4772,9 @@ function MainModeApp() {
       if (!audio) return 0;
       const safeVolume = getTargetAudioVolume(song);
 
-      audio.muted = false;
-      audio.volume = safeVolume;
+      setAudioElementVolume(audio, safeVolume);
       applyPlaybackRateSettings(audio);
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
-      syncAudioEffectGraph(audio);
       volumeRef.current = safeVolume;
       return safeVolume;
     },
@@ -4736,9 +4782,7 @@ function MainModeApp() {
       getTargetAudioVolume,
       settings.playbackSpeed,
       settings.gaplessPlayback,
-      (settings as any).audioEffectMode,
-      (settings as any).audioEffectAmount,
-      (settings as any).audioReverbAmount
+      (settings as any).audioEffectMode
     ]
   );
 
@@ -5222,8 +5266,9 @@ function MainModeApp() {
           }
 
           audio.currentTime = Math.max(0, handoff.time || 0);
-          audio.volume = clamp(handoff.volume || getTargetAudioVolume(currentSong), 0, 1);
-          volumeRef.current = audio.volume;
+          const handoffVolume = clamp(handoff.volume || getTargetAudioVolume(currentSong), 0, 1);
+          setAudioElementVolume(audio, handoffVolume);
+          volumeRef.current = handoffVolume;
 
           if (isPlaying || pendingPlayRef.current) {
             void audio.play().catch(() => undefined);
@@ -5367,7 +5412,7 @@ function MainModeApp() {
       try {
         nextAudio.pause();
         nextAudio.currentTime = 0;
-        nextAudio.volume = 0;
+        setAudioElementVolume(nextAudio, 0);
       } catch {
         // ignore audio cleanup errors
       }
@@ -5504,8 +5549,7 @@ function MainModeApp() {
       }
 
       audio.currentTime = Math.max(0, handoffTime);
-      audio.volume = 0;
-      audio.muted = false;
+      setAudioElementVolume(audio, 0);
       applyPlaybackRateSettings(audio);
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
       syncAudioEffectGraph(audio);
@@ -5514,7 +5558,7 @@ function MainModeApp() {
 
       commitAutoTransitionTarget(target);
 
-      pendingPlayRef.current = true;
+      pendingPlayRef.current = false;
       armPlayCount(target.song.id, Math.max(0, handoffTime));
       setCurrentId(target.song.id);
       setCrossfadePreviewSongId("");
@@ -5534,17 +5578,17 @@ function MainModeApp() {
           const progressValue = clamp((performance.now() - blendStart) / blendMs, 0, 1);
           const eased = 1 - Math.pow(1 - progressValue, 2.6);
 
-          audio.volume = clamp(safeVolume * eased, 0, 1);
-          nextAudio.volume = clamp(safeVolume * (1 - eased), 0, 1);
+          setAudioElementVolume(audio, safeVolume * eased);
+          setAudioElementVolume(nextAudio, safeVolume * (1 - eased));
 
           if (progressValue >= 1) {
             window.clearInterval(blendTimer);
-            audio.volume = safeVolume;
+            setAudioElementVolume(audio, safeVolume);
 
             try {
               nextAudio.pause();
               nextAudio.currentTime = 0;
-              nextAudio.volume = 0;
+              setAudioElementVolume(nextAudio, 0);
             } catch {
               // ignore cleanup errors
             }
@@ -5568,7 +5612,7 @@ function MainModeApp() {
         try {
           nextAudio.pause();
           nextAudio.currentTime = 0;
-          nextAudio.volume = 0;
+          setAudioElementVolume(nextAudio, 0);
         } catch {
           // ignore cleanup errors
         }
@@ -5607,7 +5651,7 @@ function MainModeApp() {
       crossfadeAutoTargetRef.current = "";
       setCrossfadePreviewSongId("");
       try {
-        audio.volume = getTargetAudioVolume(current);
+        setAudioElementVolume(audio, getTargetAudioVolume(current));
       } catch {
         // ignore volume restore errors
       }
@@ -5631,8 +5675,7 @@ function MainModeApp() {
         nextAudio.load();
       }
 
-      nextAudio.muted = false;
-      nextAudio.volume = 0;
+      setAudioElementVolume(nextAudio, 0);
       applyPlaybackRateSettings(nextAudio);
 
       await nextAudio.play();
@@ -5660,8 +5703,8 @@ function MainModeApp() {
         const outgoingFactor = 1 - Math.pow(outgoingProgress, 0.72);
         const incomingFactor = Math.pow(rawProgress, 1.48);
 
-        audio.volume = clamp(startVolume * outgoingFactor, 0, 1);
-        nextAudio.volume = clamp(safeVolume * incomingFactor, 0, 1);
+        setAudioElementVolume(audio, startVolume * outgoingFactor);
+        setAudioElementVolume(nextAudio, safeVolume * incomingFactor);
 
         if (rawProgress >= 1) {
           if (crossfadeIntervalRef.current !== null) {
@@ -5669,8 +5712,8 @@ function MainModeApp() {
             crossfadeIntervalRef.current = null;
           }
 
-          audio.volume = 0;
-          nextAudio.volume = safeVolume;
+          setAudioElementVolume(audio, 0);
+          setAudioElementVolume(nextAudio, safeVolume);
 
           markSongCompletedForPlayCount(current);
           if (current.id) void patchSongLocal(current.id, { playbackPosition: 0 });
@@ -5688,13 +5731,13 @@ function MainModeApp() {
       crossfadeMainPauseGuardRef.current = false;
       setCrossfadePreviewSongId("");
       try {
-        audio.volume = getTargetAudioVolume(current);
+        setAudioElementVolume(audio, getTargetAudioVolume(current));
       } catch {
         // ignore volume restore errors
       }
       try {
         nextAudio.pause();
-        nextAudio.volume = 0;
+        setAudioElementVolume(nextAudio, 0);
       } catch {
         // ignore cleanup errors
       }
@@ -5757,6 +5800,11 @@ function MainModeApp() {
       window.clearInterval(fadeIntervalRef.current);
       fadeIntervalRef.current = null;
     }
+
+    if (fadeFrameRef.current !== null) {
+      window.cancelAnimationFrame(fadeFrameRef.current);
+      fadeFrameRef.current = null;
+    }
   }
 
   function stopProgressLoop() {
@@ -5777,21 +5825,38 @@ function MainModeApp() {
 
     stopFade();
 
-    const startVolume = audio.volume;
-    const delta = target - startVolume;
+    const safeTarget = clamp(Number(target) || 0, 0, 1);
+    const safeDuration = Math.max(0, Number(duration) || 0);
+    const startVolume = clamp(Number(audio.volume) || 0, 0, 1);
+    const delta = safeTarget - startVolume;
+
+    if (safeDuration <= 0 || Math.abs(delta) < 0.002) {
+      setAudioElementVolume(audio, safeTarget);
+      volumeRef.current = safeTarget;
+      if (onDone) onDone();
+      return;
+    }
+
     const startTime = performance.now();
 
-    fadeIntervalRef.current = window.setInterval(() => {
-      const elapsed = performance.now() - startTime;
-      const progressValue = Math.min(1, elapsed / duration);
+    const step = () => {
+      const progressValue = clamp((performance.now() - startTime) / safeDuration, 0, 1);
+      const eased = 1 - Math.pow(1 - progressValue, 2.2);
+      const nextVolume = clamp(startVolume + delta * eased, 0, 1);
 
-      audio.volume = clamp(startVolume + delta * progressValue, 0, 1);
+      setAudioElementVolume(audio, nextVolume);
+      volumeRef.current = nextVolume;
 
       if (progressValue >= 1) {
-        stopFade();
+        fadeFrameRef.current = null;
         if (onDone) onDone();
+        return;
       }
-    }, 16);
+
+      fadeFrameRef.current = window.requestAnimationFrame(step);
+    };
+
+    fadeFrameRef.current = window.requestAnimationFrame(step);
   }
 
   function getAudioErrorText(audio: HTMLAudioElement | null) {
@@ -5850,8 +5915,7 @@ function MainModeApp() {
           audio.currentTime > 0.05
         );
 
-      audio.muted = false;
-      audio.volume = continuingCrossfadePlayback || settings.reducedMotion || !settings.crossfadeEnabled ? safeVolume : 0;
+      setAudioElementVolume(audio, continuingCrossfadePlayback || settings.reducedMotion || !settings.crossfadeEnabled ? safeVolume : 0);
       applyPlaybackRateSettings(audio);
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
       syncAudioEffectGraph(audio);
@@ -5871,7 +5935,7 @@ function MainModeApp() {
       if (!continuingCrossfadePlayback && !settings.reducedMotion && settings.crossfadeEnabled && safeVolume > 0) {
         fadeAudio(safeVolume, Math.max(120, Number(settings.crossfadeSeconds || 1.6) * 1000));
       } else {
-        audio.volume = safeVolume;
+        setAudioElementVolume(audio, safeVolume);
       }
 
       if (handoffActive) {
@@ -5968,6 +6032,27 @@ function MainModeApp() {
       [key]: value
     };
 
+    if (key === "volume") {
+      const safeVolume = clamp(Number(value) || 0, 0, 1);
+      next.volume = safeVolume;
+      volumeDraftRef.current = Math.round(safeVolume * 100);
+      applyLiveVolumePercent(volumeDraftRef.current);
+      setSettings(next);
+
+      if (bootedRef.current) {
+        if (saveSettingsTimerRef.current !== null) {
+          window.clearTimeout(saveSettingsTimerRef.current);
+        }
+
+        saveSettingsTimerRef.current = window.setTimeout(() => {
+          saveSettingsTimerRef.current = null;
+          window.localitfy.saveSettings(next).catch(() => undefined);
+        }, debounce ? 420 : 120);
+      }
+
+      return;
+    }
+
     if (key === "theme") {
       next.theme = normalizeThemeId(value);
       next.customThemeEnabled = false;
@@ -6013,7 +6098,8 @@ function MainModeApp() {
       key === "libraryRowStyle" ||
       key === "starsIntensity" ||
       key === "sidebarBehavior" ||
-      key === "playerBackgroundStyle"
+      key === "playerBackgroundStyle" ||
+      key === "quickLibraryMoreBlur"
     ) {
       kickThemeSettle();
     }
@@ -9246,22 +9332,85 @@ function MainModeApp() {
     }, 0);
   }
 
+  function applyLiveVolumePercent(percent: number, song: Song | null = songRef.current) {
+    const safePercent = clamp(Number(percent), 0, 100);
+    const baseVolume = safePercent / 100;
+    const memoryVolume = settings.perSongVolumeMemory ? clamp(Number(song?.customVolume ?? 1), 0, 1) : 1;
+    const gain = settings.volumeNormalization ? clamp(Number(song?.volumeGain ?? 1), 0.2, 2.4) : 1;
+    const safeVolume = clamp(baseVolume * memoryVolume * gain, 0, 1);
+
+    liveVolumePendingPercentRef.current = safePercent;
+
+    if (liveVolumeFrameRef.current !== null) {
+      window.cancelAnimationFrame(liveVolumeFrameRef.current);
+    }
+
+    liveVolumeFrameRef.current = window.requestAnimationFrame(() => {
+      liveVolumeFrameRef.current = null;
+      setAudioElementVolume(audioRef.current, safeVolume);
+      setAudioElementVolume(nextAudioRef.current, safeVolume);
+      volumeRef.current = safeVolume;
+
+      if (safeVolume > 0.001) {
+        lastNonZeroVolumeRef.current = baseVolume;
+      }
+    });
+
+    return safeVolume;
+  }
+
+  function updateVolumeFast(nextVolume: number) {
+    const safeVolume = clamp(Number(nextVolume) || 0, 0, 1);
+    const safePercent = Math.round(safeVolume * 100);
+    const nextSettings = { ...settings, volume: safeVolume };
+
+    volumeDraftRef.current = safePercent;
+    setVolumeDraft(safePercent);
+    applyLiveVolumePercent(safePercent);
+    setSettings(nextSettings);
+
+    if (!bootedRef.current) return;
+
+    if (saveSettingsTimerRef.current !== null) {
+      window.clearTimeout(saveSettingsTimerRef.current);
+    }
+
+    saveSettingsTimerRef.current = window.setTimeout(() => {
+      window.localitfy.saveSettings(nextSettings).catch(() => undefined);
+    }, 180);
+  }
+
+  function paintVolumeDraft(percent: number) {
+    if (volumeDraftFrameRef.current !== null) {
+      window.cancelAnimationFrame(volumeDraftFrameRef.current);
+    }
+
+    volumeDraftFrameRef.current = window.requestAnimationFrame(() => {
+      volumeDraftFrameRef.current = null;
+      setVolumeDraft(percent);
+    });
+  }
+
   function previewVolume(value: string | number, input?: HTMLInputElement | null) {
     const safePercent = clamp(Number(value), 0, 100);
     volumeDraftRef.current = safePercent;
-    setVolumeDraft(safePercent);
+    paintVolumeDraft(safePercent);
     paintRangeProgress(input, safePercent);
     input?.style.setProperty("--volume-percent", `${safePercent}%`);
-    if (audioRef.current) {
-      audioRef.current.volume = safePercent / 100;
-    }
+    applyLiveVolumePercent(safePercent);
   }
 
   function commitVolume(value?: string | number) {
     const safePercent = clamp(Number(value ?? volumeDraftRef.current), 0, 100);
     volumeDraftRef.current = safePercent;
+
+    if (volumeDraftFrameRef.current !== null) {
+      window.cancelAnimationFrame(volumeDraftFrameRef.current);
+      volumeDraftFrameRef.current = null;
+    }
+
     setVolumeDraft(safePercent);
-    updateSetting("volume", safePercent / 100, true);
+    updateVolumeFast(safePercent / 100);
     setIsVolumeDragging(false);
   }
 
@@ -10270,27 +10419,23 @@ function MainModeApp() {
     if (settingsCategory !== "playback") return null;
 
     const effectMode = getAudioEffectMode();
-    const effectAmount = getAudioEffectAmount();
-    const reverbAmount = getAudioReverbAmount();
 
     const modeOptions: Array<{
       id: "normal" | "nightcore" | "daycore";
       label: string;
       note: string;
     }> = [
-      { id: "normal", label: "Normal", note: "Original pitch and speed." },
-      { id: "nightcore", label: "Nightcore", note: "Faster, brighter, higher pitch." },
-      { id: "daycore", label: "Daycore", note: "Slower, deeper, lower pitch." }
+      { id: "normal", label: "Normal", note: "Uses the speed and volume controls above." },
+      { id: "nightcore", label: "Nightcore", note: "Higher pitch with a faster preset." },
+      { id: "daycore", label: "Daycore", note: "Lower pitch with a slower preset." }
     ];
 
-    const playbackSpeedValue = clamp(Number(settings.playbackSpeed || 1), 0.5, 2);
-
     return (
-      <section className="settingsPageCard playbackLabCardV343" aria-label="Playback lab">
+      <section className="settingsPageCard playbackLabCardV343" aria-label="Pitch presets">
         <div className="settingsSectionTitle">
-          <span>playback lab</span>
-          <strong>Nightcore, daycore, and room reverb</strong>
-          <small>Quick sound effects users can actually see. These apply live while music plays.</small>
+          <span>optional sound preset</span>
+          <strong>Pitch presets</strong>
+          <small>Normal is the clean default. Nightcore and Daycore are one-tap styles, not extra volume or speed sliders.</small>
         </div>
 
         <div className="playbackModeGridV343">
@@ -10306,51 +10451,6 @@ function MainModeApp() {
               <small>{option.note}</small>
             </button>
           ))}
-        </div>
-
-        <div className="playbackEffectSlidersV343 playbackEffectSlidersV345">
-          <label>
-            <span>
-              <strong>Effect strength</strong>
-              <em>{effectAmount}%</em>
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={effectAmount}
-              onChange={(event) => void updateSetting("audioEffectAmount" as any, Number(event.currentTarget.value) as any, true)}
-            />
-          </label>
-
-          <label>
-            <span>
-              <strong>Reverb amount</strong>
-              <em>{reverbAmount}%</em>
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={reverbAmount}
-              onChange={(event) => void updateSetting("audioReverbAmount" as any, Number(event.currentTarget.value) as any, true)}
-            />
-          </label>
-
-          <label>
-            <span>
-              <strong>Speed</strong>
-              <em>{playbackSpeedValue.toFixed(2)}x</em>
-            </span>
-            <input
-              type="range"
-              min={0.5}
-              max={2}
-              step={0.01}
-              value={playbackSpeedValue}
-              onChange={(event) => void updateSetting("playbackSpeed", Number(event.currentTarget.value) as any, true)}
-            />
-          </label>
         </div>
       </section>
     );
