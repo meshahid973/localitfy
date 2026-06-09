@@ -1,4 +1,5 @@
 // @ts-nocheck
+/* localtify 0.3.8 V416 heart like animation. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -306,7 +307,7 @@ export const LIBRARY_ORDER_STORAGE_KEY = "localitfy.libraryOrder.v1";
 export const ONBOARDING_STORAGE_KEY = "localitfy.onboarding.v1";
 
 export const CODERPIXEL_ARTIST_EASTER_EGG = "all hail coderpixel";
-export const CODERPIXEL_ARTIST_CHANCE = 0.05;
+export const CODERPIXEL_ARTIST_CHANCE = 0;
 
 export function stableSongSourceKey(song: Pick<Song, "filePath" | "url">) {
   return String(song.filePath || song.url || "").trim().toLowerCase();
@@ -314,29 +315,10 @@ export function stableSongSourceKey(song: Pick<Song, "filePath" | "url">) {
 
 export function maybeApplyCoderpixelArtist(
   importedSongs: Song[],
-  previousSongIds: Set<string>,
-  previousSongSources: Set<string>
+  _previousSongIds: Set<string>,
+  _previousSongSources: Set<string>
 ): { songs: Song[]; changedSongs: Song[] } {
-  const changedSongs: Song[] = [];
-
-  const songs = importedSongs.map((song) => {
-    const sourceKey = stableSongSourceKey(song);
-    const isNewSong = !previousSongIds.has(song.id) && (!sourceKey || !previousSongSources.has(sourceKey));
-
-    if (!isNewSong || Math.random() >= CODERPIXEL_ARTIST_CHANCE) {
-      return song;
-    }
-
-    const updatedSong = {
-      ...song,
-      artist: CODERPIXEL_ARTIST_EASTER_EGG
-    };
-
-    changedSongs.push(updatedSong);
-    return updatedSong;
-  });
-
-  return { songs, changedSongs };
+  return { songs: importedSongs, changedSongs: [] };
 }
 
 export function makeLocalId(prefix: string) {
@@ -1972,6 +1954,16 @@ export function looksUnknownMeta(value: unknown) {
   return !text || text === "unknown" || text === "unknown artist" || text === "unknown album" || text === "n a" || text === "na" || text === "null" || text === "undefined";
 }
 
+export function looksJunkArtistMeta(value: unknown) {
+  const text = normalizeSearchText(value);
+  if (!text || looksUnknownMeta(text)) return true;
+  if (text === normalizeSearchText(CODERPIXEL_ARTIST_EASTER_EGG)) return true;
+  if (/^coderpixel\b/.test(text)) return true;
+  if (/^(?:slowed|reverb|sped up|nightcore|lyrics?|official|audio|video|visualizer|extended|remastered?)$/.test(text)) return true;
+  if (/\b(?:slowed|reverb|sped up|nightcore|lyrics?|lyric video|official|audio|video|visualizer|extended|remastered?)\b$/.test(text)) return true;
+  return false;
+}
+
 export type SmartSongMetadata = {
   title: string;
   artist: string;
@@ -1979,10 +1971,18 @@ export type SmartSongMetadata = {
 };
 
 export function cleanArtistName(value: unknown) {
-  return cleanMetadataField(value, "unknown artist")
+  let artist = cleanMetadataField(value, "unknown artist")
     .replace(/^by\s+/i, "")
-    .replace(/\s+(?:official|topic|vevo)$/i, "")
-    .trim() || "unknown artist";
+    .replace(/\b(?:official\s+artist\s+channel|official\s+channel|official|topic|vevo)\b$/i, "")
+    .replace(/\s*[|/]+\s*(?:slowed|reverb|sped\s*up|nightcore|lyrics?|official|audio|video|visualizer|loop|extended|remaster(?:ed)?).*$/i, "")
+    .replace(/\s+-\s*(?:slowed|reverb|sped\s*up|nightcore|lyrics?|official|audio|video|visualizer|loop|extended|remaster(?:ed)?).*$/i, "")
+    .replace(/\b(?:slowed\s*(?:and|&)?\s*reverb|slowed|reverb|sped\s*up|nightcore|lyrics?|lyric\s+video|official|audio|video|visualizer|full\s+song|extended|remaster(?:ed)?|320kbps|hq|hd|4k)\b.*$/i, "")
+    .replace(/\b(?:unknown|n\/?a|null|undefined)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (looksJunkArtistMeta(artist)) artist = "";
+  return artist || "unknown artist";
 }
 
 export function cleanTrackName(value: unknown, fallback = "untitled") {
@@ -2038,7 +2038,7 @@ export function smartSongMetadata(song: Partial<Song> & Record<string, any>, ind
   const titleSplit = splitArtistTitleCandidate(String(song.title || ""));
 
   let title = looksUnknownMeta(song.title) ? "" : cleanTrackName(song.title, "");
-  let artist = looksUnknownMeta(song.artist) ? "" : cleanArtistName(song.artist);
+  let artist = looksJunkArtistMeta(song.artist) ? "" : cleanArtistName(song.artist);
   let album = looksUnknownMeta(song.album) ? "" : cleanMetadataField(song.album, "");
 
   if (!artist && titleSplit) {
@@ -2048,9 +2048,9 @@ export function smartSongMetadata(song: Partial<Song> & Record<string, any>, ind
     title = titleSplit.title;
   }
 
-  if ((!title || !artist) && fileSplit) {
+  if ((!title || !artist || looksJunkArtistMeta(artist)) && fileSplit) {
     if (!title) title = fileSplit.title;
-    if (!artist) artist = fileSplit.artist;
+    if (!artist || looksJunkArtistMeta(artist)) artist = fileSplit.artist;
   }
 
   if (title && !artist) {
@@ -2136,8 +2136,6 @@ export function getMetadataRepairPatch(song: Song): Partial<Song> {
   if (cleaned.title && cleaned.title !== song.title) patch.title = cleaned.title;
   if (cleaned.artist && cleaned.artist !== song.artist) patch.artist = cleaned.artist;
   if (cleaned.album && cleaned.album !== song.album) patch.album = cleaned.album;
-  if (cleaned.duration !== song.duration) patch.duration = cleaned.duration;
-  if (cleaned.playCount !== song.playCount) patch.playCount = cleaned.playCount;
   if ((song.playbackPosition || 0) < 0 || !Number.isFinite(Number(song.playbackPosition || 0))) patch.playbackPosition = 0;
 
   return patch;
@@ -2860,6 +2858,25 @@ export type SongRowItemProps = SongInteractionHandlers & {
   draggedSongTitle: string;
 };
 
+
+const LOCALTIFY_LIKE_PARTICLES = Array.from({ length: 10 }, (_, index) => index);
+
+function LocaltifyLikeHeart({ liked }: { liked: boolean }) {
+  return (
+    <span className="localtifyLikeHeart" data-liked={liked ? "true" : "false"} aria-hidden="true">
+      <span className="localtifyLikeCircle" />
+      {LOCALTIFY_LIKE_PARTICLES.map((index) => (
+        <span
+          key={index}
+          className={`localtifyLikeParticle p${index % 4}`}
+          style={{ "--rotate": `${index * 36}deg` } as CSSProperties}
+        />
+      ))}
+      <span className="localtifyLikeFill" />
+    </span>
+  );
+}
+
 export const SongRowItem = memo(function SongRowItem({
   song,
   index,
@@ -2909,12 +2926,12 @@ export const SongRowItem = memo(function SongRowItem({
       <span className="songInfo songDurationInfo">{formatTime(song.duration)}</span>
 
       <button
-        className={`iconAction ${song.liked ? "liked" : ""}`}
+        className={`iconAction localtifyLikeAction ${song.liked ? "liked" : ""}`}
         onClick={() => onToggleLike(song.id)}
-        aria-label="like song"
+        aria-label={song.liked ? "unlike song" : "like song"}
         title={song.liked ? "unlike" : "like"}
       >
-        ♥
+        <LocaltifyLikeHeart liked={song.liked} />
       </button>
 
       <button
@@ -3029,16 +3046,16 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
 
       <div className="homeAlbumActions">
         <button
-          className={`iconAction ${song.liked ? "liked" : ""}`}
+          className={`iconAction localtifyLikeAction ${song.liked ? "liked" : ""}`}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
             onToggleLike(song.id);
           }}
-          aria-label="like song"
+          aria-label={song.liked ? "unlike song" : "like song"}
           title={song.liked ? "unlike" : "like"}
         >
-          ♥
+          <LocaltifyLikeHeart liked={song.liked} />
         </button>
 
         <button
@@ -3823,6 +3840,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     recentImportWeekCount,
     recentlyAdded,
     neverPlayedSongs,
+    missingSongs,
     missingFileCount,
     libraryLengthLabel,
     averageSongSeconds,
@@ -4047,6 +4065,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const albumDraftArtistPreview = albumDraftArtistNames.length
     ? albumDraftArtistNames.slice(0, 3).join(" + ") + (albumDraftArtistNames.length > 3 ? ` + ${albumDraftArtistNames.length - 3} more` : "")
     : "pick songs to read artists";
+
+  const missingLibrarySongs = useMemo(() => Array.isArray(missingSongs) ? missingSongs.filter(Boolean) : [], [missingSongs]);
+  const currentSongMissing = Boolean(currentSong?.id && currentSong.fileExists === false);
+  const missingActionSong = currentSongMissing ? currentSong : missingLibrarySongs[0] || null;
+  const missingLibraryCount = Math.max(Number(missingFileCount || 0), missingLibrarySongs.length);
+  const missingLibraryPreview = useMemo(() => missingLibrarySongs.slice(0, 4), [missingLibrarySongs]);
   const albumDraftPreviewCoverSong = useMemo(() => {
     const safeCover = getRendererSafeImageUrl(albumDraftCoverUrl);
     const seedSong = albumDraftSelectedSongs[0] || null;
@@ -4779,6 +4803,13 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </p>
 
                     {playerError ? <div className="warningBox">{playerError}</div> : null}
+                    {currentSongMissing && missingActionSong ? (
+                      <div className="missingFileActionsV418" role="alert">
+                        <span>localtify still has this song, but the audio file is missing.</span>
+                        <button className="heroGhost" type="button" onClick={() => askRemoveSong(missingActionSong.id)}>remove from localtify</button>
+                        <button className="mainAction" type="button" onClick={importSongs}>reimport file</button>
+                      </div>
+                    ) : null}
                     {isThreeAm && settings.volume > 0.8 ? (
                       <div className="warningBox lateNightWarning">volume is above 80% — late night ears deserve mercy.</div>
                     ) : null}
@@ -5069,6 +5100,36 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   </div>
                 )}
 
+                {view === "library" && missingLibraryCount > 0 ? (
+                  <div className="missingLibraryNoticeV418">
+                    <div className="missingLibraryNoticeCopyV418">
+                      <span>missing files</span>
+                      <strong>{missingLibraryCount} song{missingLibraryCount === 1 ? "" : "s"} need attention</strong>
+                      <p>These songs are still in localtify, but the original audio files are not on this PC anymore.</p>
+                    </div>
+
+                    <div className="missingLibraryPreviewV418">
+                      {missingLibraryPreview.map((song) => (
+                        <div className="missingLibraryItemV418" key={song.id}>
+                          <Cover song={song} className="missingLibraryCoverV418" />
+                          <span>
+                            <strong title={song.title}>{prettyTitle(song.title, 5)}</strong>
+                            <small>{prettyMeta(song.artist)}</small>
+                          </span>
+                          <button type="button" onClick={() => askRemoveSong(song.id)}>remove</button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="missingLibraryActionsV418">
+                      <button className="mainAction" type="button" onClick={importSongs}>reimport audio files</button>
+                      {missingActionSong ? (
+                        <button className="heroGhost" type="button" onClick={() => askRemoveSong(missingActionSong.id)}>remove selected missing song</button>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="libraryListHeaderV025">
                   <span>tracks</span>
                   <span>title</span>
@@ -5318,7 +5379,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                 </span>
                               </button>
                               <span className="albumTrackDurationV318">{formatTime(song.duration)}</span>
-                              <button className={`iconAction ${song.liked ? "liked" : ""}`} type="button" onClick={() => toggleLike(song.id)} aria-label="like song">♥</button>
+                              <button className={`iconAction localtifyLikeAction ${song.liked ? "liked" : ""}`} type="button" onClick={() => toggleLike(song.id)} aria-label={song.liked ? "unlike song" : "like song"} title={song.liked ? "unlike" : "like"}>
+                                <LocaltifyLikeHeart liked={song.liked} />
+                              </button>
                               <button className="iconAction" type="button" onClick={() => openPlaylistPicker(song)} aria-label="add to playlist">+</button>
                             </article>
                           );
@@ -6307,6 +6370,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   {currentSong ? prettyTitle(currentSong.title, 7) : "nothing playing"}
                 </strong>
                 <p className={`nowPlayingMiniArtistSwap ${nowPlayingSongMotionClass}`}>{currentSong ? prettyMeta(currentSong.artist) : "import a song to begin"}</p>
+                {currentSongMissing && missingActionSong ? (
+                  <div className="playerMissingActionsV418">
+                    <button type="button" onClick={() => askRemoveSong(missingActionSong.id)}>remove</button>
+                    <button type="button" onClick={importSongs}>reimport</button>
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -6491,7 +6560,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 <span>＋</span> add to playlist
               </button>
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); toggleLike(menuSong.id); }}>
-                <span>♥</span> {menuSong.liked ? "unlike" : "like"}
+                <span className={`localtifyContextLikeIcon ${menuSong.liked ? "liked" : ""}`}><LocaltifyLikeHeart liked={menuSong.liked} /></span> {menuSong.liked ? "unlike" : "like"}
+              </button>
+              <button type="button" role="menuitem" className="danger" onClick={() => { setSongContextMenu(null); askRemoveSong(menuSong.id); }}>
+                <span>⌫</span> delete
               </button>
             </div>
           </div>

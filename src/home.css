@@ -1,3 +1,4 @@
+/* localtify 0.3.8 V414 — home ownership first pass. */
 .logoIcon{
   width: 42px;
   height: 42px;
@@ -15038,19 +15039,7 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
 .heroLayoutMotion,
 .heroTextCluster,
 .heroArtShell,
-.heroArt,
-.sidebar,
-.navShell,
-.downloadPanel,
-.downloadQueuePanel,
-.spotifyImportPanel,
-.albumFolderImportPanel,
-.albumFolderImportPreview,
-.albumFolderImportCard,
-.analyticsRecapPanel,
-.analyticsRecapCard,
-.settingsPanel,
-.settingsSectionCard{
+.heroArt{
   transition:
     width var(--localtify-resize-dur) var(--localtify-resize-ease),
     height var(--localtify-resize-dur) var(--localtify-resize-ease),
@@ -15081,13 +15070,6 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   backface-visibility: hidden;
 }
 
-/* Sidebar hover/slim resize should feel like a smooth panel, not a snap. */
-.app.sidebarHover .sidebar,
-.app.sidebarSlim .sidebar,
-.app.sidebarHover .navShell,
-.app.sidebarSlim .navShell{
-  will-change: width, min-width, max-width;
-}
 
 /* Do NOT run layout-size transitions on the hot clickable home song/cover cards.
    They already have transform-only active feedback for INP. */
@@ -15096,12 +15078,7 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
 /* Avoid holding will-change forever on idle cards. */
 body.localtifyIdle .t-resize,
 body.localtifyIdle .localtifyResizeMotion,
-body.localtifyIdle .hero.heroPremium,
-body.localtifyIdle .sidebar,
-body.localtifyIdle .downloadPanel,
-body.localtifyIdle .spotifyImportPanel,
-body.localtifyIdle .albumFolderImportPanel,
-body.localtifyIdle .settingsSectionCard{
+body.localtifyIdle .hero.heroPremium{
   will-change: auto;
 }
 
@@ -15112,19 +15089,7 @@ body.localtifyIdle .settingsSectionCard{
   .heroLayoutMotion,
   .heroTextCluster,
   .heroArtShell,
-  .heroArt,
-  .sidebar,
-  .navShell,
-  .downloadPanel,
-  .downloadQueuePanel,
-  .spotifyImportPanel,
-  .albumFolderImportPanel,
-  .albumFolderImportPreview,
-  .albumFolderImportCard,
-  .analyticsRecapPanel,
-  .analyticsRecapCard,
-  .settingsPanel,
-  .settingsSectionCard{
+  .heroArt{
     transition: none !important;
     will-change: auto !important;
   }
@@ -16906,5 +16871,386 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   .app .albumBuilderCoverPreviewV319{
     width: 84px !important;
     height: 84px !important;
+  }
+}
+
+
+/* localtify 0.3.8 V415 — context menu danger action */
+.songContextMenu button.danger{
+  color: rgba(255, 125, 150, 0.96);
+}
+
+.songContextMenu button.danger span{
+  color: #fff;
+  background: rgba(255, 79, 115, 0.9);
+}
+
+.songContextMenu button.danger:hover{
+  color: #fff;
+  background: rgba(255, 79, 115, 0.14);
+}
+
+/* localtify 0.3.8 V416 — animated SVG like heart */
+.iconAction.localtifyLikeAction{
+  position: relative !important;
+  overflow: visible !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+.localtifyLikeHeart{
+  --like-size: 18px;
+  position: relative;
+  width: var(--like-size);
+  height: var(--like-size);
+  display: block;
+  flex: 0 0 auto;
+  background: url("./assets/heart-s.svg") center / contain no-repeat;
+  transform: translateZ(0);
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.iconAction.localtifyLikeAction:hover .localtifyLikeHeart{
+  transform: translateZ(0) scale(1.06);
+}
+
+.localtifyLikeCircle{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 350%;
+  height: 350%;
+  border-radius: 999px;
+  border: 1px solid rgba(254, 88, 122, .92);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+}
+
+.localtifyLikeParticle{
+  --size: 5px;
+  --translate-y: -28px;
+  --d: 0s;
+  position: absolute;
+  top: calc(45% - (var(--size) / 2));
+  left: calc(50% - (var(--size) / 2));
+  width: var(--size);
+  height: var(--size);
+  border-radius: 999px;
+  opacity: 0;
+  transform: rotate(var(--rotate, 0deg)) translateY(0);
+  pointer-events: none;
+}
+
+.localtifyLikeParticle::before{
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: #fe5064;
+  transform: scale(0);
+}
+
+.localtifyLikeParticle.p1{
+  --d: .1s;
+  --size: 4px;
+  --translate-y: -27px;
+}
+.localtifyLikeParticle.p1::before{ background: #8eb539; }
+
+.localtifyLikeParticle.p2{
+  --d: .2s;
+  --size: 3px;
+  --translate-y: -26px;
+}
+.localtifyLikeParticle.p2::before{ background: #3e9be7; }
+.localtifyLikeParticle.p3::before{ background: #f5ce50; }
+
+.localtifyLikeFill{
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  background: url("./assets/heart-f.svg") center / contain no-repeat;
+  transform: scale(0);
+  pointer-events: none;
+}
+
+.iconAction.localtifyLikeAction.liked .localtifyLikeCircle,
+.localtifyContextLikeIcon.liked .localtifyLikeCircle{
+  animation: localtifyLikeCircle 1.1s cubic-bezier(0, .06, .29, 1) both;
+}
+
+.iconAction.localtifyLikeAction.liked .localtifyLikeParticle,
+.localtifyContextLikeIcon.liked .localtifyLikeParticle{
+  animation: localtifyLikeMove .65s cubic-bezier(.63, -.01, .29, 1) var(--d, 0s) both;
+}
+
+.iconAction.localtifyLikeAction.liked .localtifyLikeParticle::before,
+.localtifyContextLikeIcon.liked .localtifyLikeParticle::before{
+  animation:
+    localtifyLikeScaleIn .4s ease-out var(--d, 0s) both,
+    localtifyLikeScaleOut .4s ease-out calc(.55s + var(--d, 0s)) forwards;
+}
+
+.iconAction.localtifyLikeAction.liked .localtifyLikeFill,
+.localtifyContextLikeIcon.liked .localtifyLikeFill{
+  opacity: 1;
+  animation: localtifyLikePopup .7s ease-in-out .15s both;
+}
+
+.localtifyContextLikeIcon{
+  width: 22px;
+  height: 22px;
+  display: inline-grid !important;
+  place-items: center;
+  overflow: visible;
+}
+
+.localtifyContextLikeIcon .localtifyLikeHeart{
+  --like-size: 16px;
+}
+
+@keyframes localtifyLikeCircle{
+  0%, 100%{ opacity: 0; }
+  50%, 80%{ opacity: .4; }
+  0%{ transform: translate(-50%, -50%) scale(0); }
+  100%{ transform: translate(-50%, -50%) scale(.4); }
+}
+
+@keyframes localtifyLikeMove{
+  0%{
+    opacity: 0;
+    transform: rotate(var(--rotate, 0deg)) translateY(0);
+  }
+  100%{
+    opacity: 1;
+    transform: rotate(var(--rotate, 0deg)) translateY(var(--translate-y, 0px));
+  }
+}
+
+@keyframes localtifyLikeScaleIn{
+  from{ transform: scale(0); }
+  to{ transform: scale(1); }
+}
+
+@keyframes localtifyLikeScaleOut{
+  from{ transform: scale(1); }
+  to{ transform: scale(0); }
+}
+
+@keyframes localtifyLikePopup{
+  0%{ transform: scale(0); }
+  40%{ transform: scale(1.6); }
+  60%{ transform: scale(1.04); }
+  80%{ transform: scale(1.1); }
+  100%{ transform: scale(1.04); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .iconAction.localtifyLikeAction.liked .localtifyLikeCircle,
+  .iconAction.localtifyLikeAction.liked .localtifyLikeParticle,
+  .iconAction.localtifyLikeAction.liked .localtifyLikeParticle::before,
+  .iconAction.localtifyLikeAction.liked .localtifyLikeFill,
+  .localtifyContextLikeIcon.liked .localtifyLikeCircle,
+  .localtifyContextLikeIcon.liked .localtifyLikeParticle,
+  .localtifyContextLikeIcon.liked .localtifyLikeParticle::before,
+  .localtifyContextLikeIcon.liked .localtifyLikeFill{
+    animation: none !important;
+  }
+
+  .iconAction.localtifyLikeAction.liked .localtifyLikeFill,
+  .localtifyContextLikeIcon.liked .localtifyLikeFill{
+    opacity: 1;
+    transform: scale(1.04);
+  }
+
+  .localtifyLikeCircle,
+  .localtifyLikeParticle{
+    display: none;
+  }
+}
+
+/* localtify 0.3.8 V418 — missing file recovery */
+.missingFileActionsV418{
+  width: min(620px, 100%);
+  margin-top: 12px;
+  padding: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(255, 120, 150, .28);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 80, 116, .105), rgba(255,255,255,.018)),
+    rgba(6, 5, 10, .78);
+}
+
+.missingFileActionsV418 span{
+  flex: 1 1 240px;
+  color: rgba(255,255,255,.82);
+  font-size: 12px;
+  font-weight: 820;
+  line-height: 1.35;
+}
+
+.missingFileActionsV418 .mainAction,
+.missingFileActionsV418 .heroGhost{
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+.missingLibraryNoticeV418{
+  margin: 14px 0;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: minmax(230px, .9fr) minmax(260px, 1.25fr) auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(255, 120, 150, .22);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 94% 0%, rgba(255,80,116,.12), transparent 36%),
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
+    rgba(4,4,9,.74);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.missingLibraryNoticeCopyV418{
+  min-width: 0;
+}
+
+.missingLibraryNoticeCopyV418 span{
+  display: block;
+  color: #ff7b99;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.missingLibraryNoticeCopyV418 strong{
+  display: block;
+  margin-top: 4px;
+  color: var(--text);
+  font-size: clamp(18px, 1.7vw, 26px);
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+
+.missingLibraryNoticeCopyV418 p{
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.missingLibraryPreviewV418{
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.missingLibraryItemV418{
+  min-width: 0;
+  min-height: 50px;
+  padding: 7px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+}
+
+.missingLibraryCoverV418{
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.missingLibraryItemV418 span{
+  min-width: 0;
+}
+
+.missingLibraryItemV418 strong,
+.missingLibraryItemV418 small{
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.missingLibraryItemV418 strong{
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.missingLibraryItemV418 small{
+  margin-top: 2px;
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 780;
+}
+
+.missingLibraryItemV418 button,
+.playerMissingActionsV418 button{
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 120, 150, .28);
+  border-radius: 999px;
+  color: #ffd7df;
+  background: rgba(255, 80, 116, .10);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.missingLibraryItemV418 button:hover,
+.playerMissingActionsV418 button:hover{
+  border-color: rgba(255, 120, 150, .42);
+  background: rgba(255, 80, 116, .16);
+}
+
+.missingLibraryActionsV418{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.missingLibraryActionsV418 .mainAction,
+.missingLibraryActionsV418 .heroGhost{
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+.playerMissingActionsV418{
+  margin-top: 5px;
+  display: flex;
+  gap: 6px;
+}
+
+@media (max-width: 1180px){
+  .missingLibraryNoticeV418{
+    grid-template-columns: 1fr;
+  }
+
+  .missingLibraryActionsV418{
+    justify-content: flex-start;
   }
 }

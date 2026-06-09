@@ -1,6 +1,9 @@
 // @ts-nocheck
 /* localtify 0.3.8 V395 playback settings cleanup + faster volume changes. */
 /* localtify 0.3.8 V396 audio engine stability pass. */
+/* localtify 0.3.8 V418 missing-file recovery actions. */
+/* localtify 0.3.8 V417 metadata cleaner stability pass. */
+/* localtify 0.3.8 V415 shuffle queue + context delete. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -2789,6 +2792,8 @@ function MainModeApp() {
   const averagePlaysPerSong = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "average_plays_per_song");
   const recentImportWeekCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "recent_import_week_count");
   const missingFileCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "missing_file_count");
+  const missingSongs = useMemo(() => songs.filter((song) => song.fileExists === false), [songs]);
+  const effectiveMissingFileCount = Math.max(missingFileCount, missingSongs.length);
   const libraryHealthPercent = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "library_health_percent");
   const monthImportCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "month_import_count");
   const monthImportSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "month_import_seconds");
@@ -2857,7 +2862,7 @@ function MainModeApp() {
 
   const libraryHealthLabel = !songs.length
     ? "empty"
-    : missingFileCount > 0
+    : effectiveMissingFileCount > 0
       ? `${libraryHealthPercent}% healthy`
       : "100% healthy";
 
@@ -2923,7 +2928,7 @@ function MainModeApp() {
     {
       label: "library health",
       value: libraryHealthLabel,
-      note: missingFileCount > 0 ? `${missingFileCount.toLocaleString()} missing file${missingFileCount === 1 ? "" : "s"}` : "all files available"
+      note: effectiveMissingFileCount > 0 ? `${effectiveMissingFileCount.toLocaleString()} missing file${effectiveMissingFileCount === 1 ? "" : "s"}` : "all files available"
     }
   ]), [
     songs.length,
@@ -2935,7 +2940,7 @@ function MainModeApp() {
     listenedTimeLabel,
     totalMinutes,
     libraryHealthLabel,
-    missingFileCount
+    effectiveMissingFileCount
   ]);
 
   useEffect(() => {
@@ -4872,6 +4877,8 @@ function MainModeApp() {
             setSongs((oldSongs) =>
               oldSongs.map((item) => (item.id === song.id ? { ...item, fileExists: false, url: "" } : item))
             );
+
+            void window.localitfy?.patchSong?.(song.id, { fileExists: false, url: "" }).catch(() => undefined);
           }
 
           return {
@@ -6884,9 +6891,9 @@ function MainModeApp() {
 
     setLibraryScanBusy(true);
     setPlayerError("");
-    setStatusText("cleaning metadata...");
-    showAppToast("cleaning metadata...", "work");
-    setLibraryScanMessage("checking titles, artists, albums, durations, and play counts...");
+    setStatusText("cleaning song names...");
+    showAppToast("cleaning song names...", "work");
+    setLibraryScanMessage("fixing titles, artists, and albums...");
 
     try {
       const repairs = songs
@@ -6894,25 +6901,38 @@ function MainModeApp() {
         .filter((item) => Object.keys(item.patch).length > 0);
 
       if (!repairs.length) {
-        setLibraryScanMessage(`library clean • ${songs.length} indexed`);
-        setStatusText("metadata already looks clean");
-        showAppToast("metadata already looks clean", "success");
+        const indexed = applyLibraryOrder(sanitizeSongList(songs));
+        setSongs(indexed);
+        setLibraryScanMessage(`library clean • ${indexed.length} tracks indexed`);
+        setStatusText("song names already look clean");
+        showAppToast("song names already look clean", "success");
         return;
       }
 
-      for (let index = 0; index < repairs.length; index += 1) {
-        const { song, patch } = repairs[index];
-        await patchSongLocal(song.id, patch);
+      const patchById = new Map(repairs.map(({ song, patch }) => [song.id, patch]));
+      const optimisticSongs = songs.map((song) => {
+        const patch = patchById.get(song.id);
+        return patch ? { ...song, ...patch } : song;
+      });
 
-        if (index % 8 === 0) {
-          setLibraryScanMessage(`cleaned ${index + 1}/${repairs.length} tracks...`);
-          await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
-        }
+      const indexed = applyLibraryOrder(sanitizeSongList(optimisticSongs));
+      setSongs(indexed);
+      setLibraryScanMessage(`cleaned ${repairs.length} track${repairs.length === 1 ? "" : "s"} • saving changes...`);
+
+      const chunkSize = 12;
+      for (let index = 0; index < repairs.length; index += chunkSize) {
+        const chunk = repairs.slice(index, index + chunkSize);
+        await Promise.allSettled(
+          chunk.map(({ song, patch }) => window.localitfy.patchSong(song.id, patch))
+        );
+
+        setLibraryScanMessage(`saved ${Math.min(index + chunk.length, repairs.length)}/${repairs.length} metadata fixes...`);
+        await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
       }
 
-      setLibraryScanMessage(`cleaned ${repairs.length} tracks • search rebuilt`);
-      setStatusText(`cleaned ${repairs.length} metadata fix${repairs.length === 1 ? "" : "es"}`);
-      showAppToast(`cleaned ${repairs.length} metadata fix${repairs.length === 1 ? "" : "es"}`, "success");
+      setLibraryScanMessage(`cleaned ${repairs.length} track${repairs.length === 1 ? "" : "s"} • search rebuilt`);
+      setStatusText(`cleaned ${repairs.length} song name fix${repairs.length === 1 ? "" : "es"}`);
+      showAppToast(`cleaned ${repairs.length} song name fix${repairs.length === 1 ? "" : "es"}`, "success");
     } catch (error) {
       console.error("[localitfy metadata cleaner error]", error);
       setPlayerError("metadata cleaner failed. your library was not deleted.");
@@ -6932,29 +6952,35 @@ function MainModeApp() {
     showAppToast(`search rebuilt • ${repairedSongs.length} tracks`, "success");
   }
 
-  function shuffleLibrarySongsAction() {
-    if (songs.length < 2) {
-      setStatusText("add more songs before shuffling");
-      showAppToast("add more songs before shuffling", "info");
+  function makeShuffledPlayableSongs(sourceSongs: Song[]) {
+    const shuffled = sourceSongs.filter(isPlayableSong);
+
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+
+    return shuffled;
+  }
+
+  async function shuffleLibrarySongsAction() {
+    const shuffled = makeShuffledPlayableSongs(songs);
+
+    if (shuffled.length < 2) {
+      setStatusText("add more playable songs before shuffling");
+      showAppToast("add more playable songs before shuffling", "info");
       return;
     }
 
-    setSongs((previousSongs) => {
-      if (previousSongs.length < 2) return previousSongs;
+    setIsShuffle(true);
+    setActivePlaylistId(null);
+    setSelectedPlaylistId(null);
+    setPlayQueue(shuffled.slice(1).map((song) => song.id));
+    await selectSong(shuffled[0].id, true, { playlistId: null });
 
-      const nextSongs = [...previousSongs];
-      for (let index = nextSongs.length - 1; index > 0; index -= 1) {
-        const swapIndex = Math.floor(Math.random() * (index + 1));
-        [nextSongs[index], nextSongs[swapIndex]] = [nextSongs[swapIndex], nextSongs[index]];
-      }
-
-      saveLibraryOrder(nextSongs);
-      return nextSongs;
-    });
-
-    setLibraryScanMessage(`shuffled ${songs.length} songs`);
-    setStatusText("library order shuffled");
-    showAppToast("library order shuffled", "success");
+    setLibraryScanMessage(`shuffling ${shuffled.length} playable songs`);
+    setStatusText("shuffle queue started");
+    showAppToast("shuffle queue started", "success");
   }
 
   async function importSongs() {
@@ -8185,7 +8211,7 @@ function MainModeApp() {
     event.stopPropagation();
 
     const menuWidth = 236;
-    const menuHeight = 232;
+    const menuHeight = 282;
     const margin = 12;
     const x = Math.min(event.clientX, Math.max(margin, window.innerWidth - menuWidth - margin));
     const y = Math.min(event.clientY, Math.max(margin, window.innerHeight - menuHeight - margin));
@@ -8346,7 +8372,7 @@ function MainModeApp() {
       return;
     }
 
-    const shuffled = [...ids].sort(() => Math.random() - 0.5);
+    const shuffled = makeShuffledPlayableSongs(ids.map((id) => songsById.get(id)).filter(isPlayableSong)).map((song) => song.id);
     setActivePlaylistId(null);
     setPlayQueue(shuffled.slice(1));
     void selectSong(shuffled[0], true, { playlistId: null });
@@ -8917,7 +8943,7 @@ function MainModeApp() {
       setStatusText("playlist is empty");
       return;
     }
-    const ordered = shuffled ? [...playable].sort(() => Math.random() - 0.5) : playable;
+    const ordered = shuffled ? makeShuffledPlayableSongs(playable) : playable;
     setActivePlaylistId(playlist.id);
     setSelectedPlaylistId(playlist.id);
     setPlayQueue(ordered.slice(1).map((song) => song.id));
@@ -9443,6 +9469,12 @@ function MainModeApp() {
     const nextLocalSongs = songs.filter((song) => song.id !== songId);
     const nextSong =
       nextLocalSongs[removedIndex] || nextLocalSongs[removedIndex - 1] || nextLocalSongs[0] || null;
+
+    setSongContextMenu(null);
+    setPlaylistPickerSong((current) => (current?.id === songId ? null : current));
+    setPlayQueue((queue) => queue.filter((queuedId) => queuedId !== songId));
+    setQueueHistory((history) => history.filter((item) => item.songId !== songId));
+    setPlaylists((items) => items.map((item) => ({ ...item, songIds: item.songIds.filter((id) => id !== songId) })));
 
     setDeleteBusy(true);
 
@@ -10811,7 +10843,8 @@ function MainModeApp() {
     recentImportWeekCount,
     recentlyAdded,
     neverPlayedSongs,
-    missingFileCount,
+    missingSongs,
+    missingFileCount: effectiveMissingFileCount,
     libraryLengthLabel,
     averageSongSeconds,
     longestSong,
