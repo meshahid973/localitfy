@@ -12350,3 +12350,58 @@ body.localtifyPerfV301 .app :is(.localtifyStarsBackdrop, .localtifyStarsLayer, .
   display: none !important;
 }
 
+/* localtify 0.3.8 V380 — theme painting lag guard.
+   Color picking now updates CSS variables without forcing expensive animation/filter churn.
+   This does NOT disable image blur, hero blur, player blur, or cover tint. */
+
+body.localitfyThemePainting .app{
+  contain: paint style !important;
+}
+
+body.localitfyThemePainting .app :is(
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .songRow,
+  .libraryRow,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .customThemeManagerV027,
+  .customThemeTokenV027,
+  .playerBar
+){
+  transition-property: background-color, border-color, color, opacity !important;
+  transition-duration: 0ms !important;
+  animation-play-state: paused !important;
+  contain: paint style !important;
+}
+
+/* Keep blur layers alive during theme painting. Old performance patches sometimes killed these. */
+body.localitfyThemePainting .app :is(
+  .homeListenBackgroundImage,
+  .heroAmbiencePulse,
+  .coverAura,
+  .coverAura::before,
+  .coverAura::after,
+  .playerBar::before,
+  .playerBar::after,
+  .ambientSurface::before,
+  .ambientSurface::after
+){
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+}
+
+/* Do not run expensive hover/lift work while dragging a color picker. */
+body.localitfyThemePainting .app :is(
+  .homeAlbumCard:hover,
+  .homeFreshCard:hover,
+  .homeListenCard:hover,
+  .settingsChoice:hover,
+  .settingsTinyButton:hover,
+  .customThemePresetButtonV027:hover,
+  .customThemeTokenV027:hover
+){
+  transform: translateZ(0) !important;
+  box-shadow: inherit !important;
+}

@@ -1,6 +1,4 @@
 // @ts-nocheck
-/* localtify 0.3.8 V324 lightweight analytics view. */
-/* localtify 0.3.8 V309 album folder import foundation. */
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -46,6 +44,10 @@ export type Song = {
   fileExists?: boolean;
   coverPath?: string | null;
   coverUrl?: string | null;
+  coverThumbUrl?: string | null;
+  coverThumbnailUrl?: string | null;
+  thumbnailUrl?: string | null;
+  coverFullUrl?: string | null;
   liked: boolean;
   playCount: number;
   duration: number;
@@ -107,7 +109,7 @@ export const settingsCategoryTabs: {
     label: "Appearance",
     description: "Theme, colors, and layout",
     icon: Palette,
-    keywords: "appearance theme themes color colors accent custom dark light layout spacing corners density ambience glow sidebar"
+    keywords: "appearance theme themes color colors accent custom dark light layout spacing corners density ambience glow sidebar cat pet mascot buddy"
   },
   {
     id: "playback",
@@ -567,6 +569,7 @@ export type Settings = {
   softCorners: boolean;
   denseList: boolean;
   reducedMotion: boolean;
+  catBuddyEnabled: boolean;
   showHeroBadge: boolean;
   simpleMode: boolean;
   lastSongId: string;
@@ -897,6 +900,7 @@ export const V013_RELEASE_DEFAULTS: Partial<Settings> = {
   softCorners: true,
   denseList: true,
   reducedMotion: false,
+  catBuddyEnabled: false,
   showHeroBadge: true,
   simpleMode: false,
 };
@@ -1379,6 +1383,7 @@ export const defaultSettings: Settings = {
   softCorners: true,
   denseList: true,
   reducedMotion: false,
+  catBuddyEnabled: false,
   showHeroBadge: true,
   simpleMode: false,
   lastSongId: "",
@@ -2362,6 +2367,55 @@ export function useCoverAverageStyle(source: string, enabled: boolean) {
 
 type CoverImagePriority = "auto" | "high" | "low";
 
+export 
+type LocaltifyStateCardTone = "info" | "warning" | "error" | "success";
+
+function LocaltifyStateCard({
+  tone = "info",
+  eyebrow,
+  title,
+  message,
+  detail,
+  actions
+}: {
+  tone?: LocaltifyStateCardTone;
+  eyebrow: string;
+  title: string;
+  message: string;
+  detail?: string;
+  actions?: ReactNode;
+}) {
+  return (
+    <div className={`localtifyStateCardV373 ${tone}`}>
+      <span className="localtifyStateIconV373" aria-hidden="true">
+        {tone === "error" ? "!" : tone === "warning" ? "?" : tone === "success" ? "✓" : "i"}
+      </span>
+      <div className="localtifyStateCopyV373">
+        <p className="eyebrow">{eyebrow}</p>
+        <strong>{title}</strong>
+        <span>{message}</span>
+        {detail ? <small>{detail}</small> : null}
+        {actions ? <div className="localtifyStateActionsV373">{actions}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+function getCardCoverUrl(song?: Song | null) {
+  return getRendererSafeImageUrl(song?.coverThumbUrl || song?.coverThumbnailUrl || song?.thumbnailUrl || song?.coverUrl || song?.coverPath || "");
+}
+
+function getFullCoverUrl(song?: Song | null) {
+  return getRendererSafeImageUrl(song?.coverFullUrl || song?.coverUrl || song?.coverPath || "");
+}
+
+
+function getCardCoverCssUrl(song?: Song | null) {
+  const coverUrl = getCardCoverUrl(song);
+  if (!coverUrl) return "none";
+  return `url("${coverUrl.replace(/["\\]/g, "\\$&")}")`;
+}
+
 export function Cover({ song, className, priority = "auto" }: { song: Song | null; className: string; priority?: CoverImagePriority }) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
   const [imageReady, setImageReady] = useState(false);
@@ -2370,7 +2424,7 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
   const coverFetchPriority = isImmediateCover ? "high" : "low";
   const coverIntrinsicSize = isImmediateCover ? 512 : 260;
 
-  const directCover = getRendererSafeImageUrl(song?.coverUrl);
+  const directCover = isImmediateCover ? getFullCoverUrl(song) : getCardCoverUrl(song);
   const savedCover = String(song?.coverPath || "").trim();
   const savedCoverSrc = getRendererSafeImageUrl(savedCover);
   const fallbackAsset = song ? pixelArtForSong(song) : null;
@@ -2389,7 +2443,7 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
   useEffect(() => {
     setFailedSources({});
     setImageReady(false);
-  }, [song?.id, song?.coverUrl, song?.coverPath]);
+  }, [song?.id, song?.coverUrl, song?.coverThumbUrl, song?.coverThumbnailUrl, song?.thumbnailUrl, song?.coverPath]);
 
   useEffect(() => {
     setImageReady(false);
@@ -2490,7 +2544,7 @@ function getSongAddedTime(song: Song) {
 }
 
 function pickAlbumCoverSong(songs: Song[]) {
-  return songs.find((song) => Boolean(getRendererSafeImageUrl(song.coverUrl) || getRendererSafeImageUrl(song.coverPath))) || songs[0] || null;
+  return songs.find((song) => Boolean(getCardCoverUrl(song) || getRendererSafeImageUrl(song.coverPath))) || songs[0] || null;
 }
 
 function makeAlbumCoverSong(coverUrl: string, title: string, artist: string, seedSong?: Song | null): Song {
@@ -2817,7 +2871,6 @@ export const SongRowItem = memo(function SongRowItem({
   draggedSongTitle,
   onSelectSong,
   onToggleLike,
-  onOpenEditor,
   onOpenPlaylistPicker,
   onOpenSongContextMenu,
   onStartSongDrag,
@@ -2873,15 +2926,6 @@ export const SongRowItem = memo(function SongRowItem({
         +
       </button>
 
-      <button
-        className="iconAction"
-        onClick={() => onOpenEditor(song)}
-        aria-label="edit song"
-        title="edit details"
-      >
-        ⋯
-      </button>
-
     </article>
   );
 });
@@ -2909,7 +2953,6 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
   onSelectSong,
   onTogglePlay,
   onToggleLike,
-  onOpenEditor,
   onOpenPlaylistPicker,
   onOpenSongContextMenu,
   onStartSongDrag,
@@ -2921,6 +2964,7 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
   onDragEnd
 }: HomeAlbumCardItemProps) {
   const rankLabel = index < 9 ? `0${index + 1}` : String(index + 1);
+  const cardCoverCssUrl = getCardCoverCssUrl(song);
 
   function clickedInteractiveElement(target: EventTarget | null) {
     return target instanceof HTMLElement
@@ -2954,7 +2998,10 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
       onDragEnd={onDragEnd}
       aria-grabbed={isDragging}
       title={draggedSongTitle ? `dragging ${draggedSongTitle}` : "click to play, drag the card body to reorder"}
-      style={{ "--stagger": `${Math.min(index, 28) * 16}ms` } as CSSProperties}
+      style={{
+        "--stagger": `${Math.min(index, 28) * 16}ms`,
+        "--library-card-cover": cardCoverCssUrl
+      } as CSSProperties}
     >
       <button
         className="homeAlbumPlayZone homeAlbumCoverButton"
@@ -3006,19 +3053,6 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
         >
           +
         </button>
-
-        <button
-          className="iconAction"
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpenEditor(song);
-          }}
-          aria-label="edit song"
-          title="edit details"
-        >
-          ⋯
-        </button>
       </div>
     </article>
   );
@@ -3054,7 +3088,6 @@ export const VirtualSongRows = memo(function VirtualSongRows({
   onSelectSong,
   onTogglePlay,
   onToggleLike,
-  onOpenEditor,
   onOpenPlaylistPicker,
   onOpenSongContextMenu,
   onStartSongDrag,
@@ -3129,7 +3162,6 @@ export const VirtualSongRows = memo(function VirtualSongRows({
                 onSelectSong={onSelectSong}
                 onTogglePlay={onTogglePlay}
                 onToggleLike={onToggleLike}
-                onOpenEditor={onOpenEditor}
                 onOpenPlaylistPicker={onOpenPlaylistPicker}
                 onOpenSongContextMenu={onOpenSongContextMenu}
                 onStartSongDrag={onStartSongDrag}
@@ -3175,7 +3207,6 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   onSelectSong,
   onTogglePlay,
   onToggleLike,
-  onOpenEditor,
   onOpenPlaylistPicker,
   onOpenSongContextMenu,
   onStartSongDrag,
@@ -3288,7 +3319,6 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
                     onSelectSong={onSelectSong}
                     onTogglePlay={onTogglePlay}
                     onToggleLike={onToggleLike}
-                    onOpenEditor={onOpenEditor}
                     onOpenPlaylistPicker={onOpenPlaylistPicker}
                     onOpenSongContextMenu={onOpenSongContextMenu}
                     onStartSongDrag={onStartSongDrag}
@@ -5061,9 +5091,18 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   )
                 ) : (
                   <div className="songList fullList libraryFullListV025">
-                    <div className="emptyState">
-                      {view === "liked" ? "Like a song and it will show up here." : "Import songs to fill your library."}
-                    </div>
+                    <LocaltifyStateCard
+                      tone={view === "liked" ? "info" : "warning"}
+                      eyebrow={view === "liked" ? "liked songs" : "library"}
+                      title={view === "liked" ? "No liked songs yet" : "Your library is empty"}
+                      message={view === "liked" ? "Tap the heart on any song you enjoy and it will show up here." : "Import a few songs and Localtify will build your home shelf, analytics, albums, covers, and playlists from them."}
+                      detail={view === "liked" ? "This is only your local library. Nothing is uploaded anywhere." : "Tip: folder imports work best when your music is already sorted by album or artist."}
+                      actions={view === "liked" ? (
+                        <button className="softButton" type="button" onClick={() => changeView("library", "empty-liked")}>browse library</button>
+                      ) : (
+                        <button className="mainAction" type="button" onClick={importSongs}>import songs</button>
+                      )}
+                    />
                   </div>
                 )}
               </section>
@@ -5216,10 +5255,27 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       })}
                     </div>
                   ) : (
-                    <div className="albumsEmptyStateV318">
-                      <strong>no albums yet</strong>
-                      <p>Use add album to build one from songs you already have.</p>
-                      <button className="mainAction" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>add album</button>
+                    <div className="albumsEmptyStateV318 albumsEmptyStateV373">
+                      <LocaltifyStateCard
+                        tone="info"
+                        eyebrow="albums"
+                        title="No albums yet"
+                        message="Import an album folder and Localtify will group the songs for you. Songs still stay in your normal library."
+                        detail="Best folder shape: Album name → tracks → cover.jpg or folder.png."
+                        actions={
+                          <>
+                            <button className="mainAction" type="button" onClick={() => void scanAlbumFolderImport("single")} disabled={albumFolderImportBusy}>
+                              import album folder
+                            </button>
+                            <button className="softButton" type="button" onClick={() => void scanAlbumFolderImport("library")} disabled={albumFolderImportBusy}>
+                              import album library
+                            </button>
+                            <button className="heroGhost" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>
+                              create manually
+                            </button>
+                          </>
+                        }
+                      />
                     </div>
                   )}
                 </section>
@@ -5264,7 +5320,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                               <span className="albumTrackDurationV318">{formatTime(song.duration)}</span>
                               <button className={`iconAction ${song.liked ? "liked" : ""}`} type="button" onClick={() => toggleLike(song.id)} aria-label="like song">♥</button>
                               <button className="iconAction" type="button" onClick={() => openPlaylistPicker(song)} aria-label="add to playlist">+</button>
-                              <button className="iconAction" type="button" onClick={() => openEditor(song)} aria-label="edit song">⋯</button>
                             </article>
                           );
                         })}
@@ -5272,8 +5327,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </>
                   ) : (
                     <div className="albumsEmptyStateV318 albumDetailEmptyV318">
-                      <strong>choose an album</strong>
-                      <p>Pick an album to see the songs here.</p>
+                      <LocaltifyStateCard
+                        tone="info"
+                        eyebrow="album detail"
+                        title="Choose an album"
+                        message={visibleAlbums.length ? "Pick an album from the shelf and its tracks will appear here." : "Once you import an album folder, this panel will show the track list, duration, and quick actions."}
+                      />
                     </div>
                   )}
                 </section>
@@ -5476,10 +5535,23 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           <span className="playlistShelfDropHint">{activePlaylistId === playlist.id ? "playing" : "drop song"}</span>
                         </button>
                       )) : (
-                        <div className="playlistEmptyState">
-                          <strong>No playlists yet</strong>
-                          <p>Make one above, then add songs from any song card.</p>
-                        </div>
+                        <LocaltifyStateCard
+                          tone={songs.length ? "info" : "warning"}
+                          eyebrow="playlists"
+                          title="No playlists yet"
+                          message={songs.length ? "Create a playlist, then add songs from any song card or row." : "Import songs first, then make a playlist for gaming, studying, edits, or night drives."}
+                          detail={songs.length ? "Tip: you can also drag songs into a playlist card." : "Playlists are local and private."}
+                          actions={songs.length ? (
+                            <button className="mainAction" type="button" onClick={() => {
+                              if (!newPlaylistName.trim()) setNewPlaylistName("my mix");
+                              window.setTimeout(() => createPlaylist(), 0);
+                            }}>
+                              create playlist
+                            </button>
+                          ) : (
+                            <button className="mainAction" type="button" onClick={importSongs}>import songs</button>
+                          )}
+                        />
                       )}
                     </div>
                   </section>
@@ -5542,6 +5614,27 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
             )}
 
             {view === "covers" && (
+              <>
+              {!songs.length ? (
+                <LocaltifyStateCard
+                  tone="info"
+                  eyebrow="covers"
+                  title="Open the cover studio after importing songs"
+                  message="Pixel covers work best when Localtify has songs to attach them to."
+                  detail="You can still browse pixel art, but selecting songs gives the cover tools something useful to change."
+                  actions={<button className="mainAction" type="button" onClick={importSongs}>import songs</button>}
+                />
+              ) : !filteredCoverGalleryAssets.length && !pixelArtBusy ? (
+                <LocaltifyStateCard
+                  tone="warning"
+                  eyebrow="covers"
+                  title="No pixel covers found"
+                  message="Localtify could not find pixel cover art in the current pixelart folder."
+                  detail="Rescan covers or add image files to your pixelart folder. Songs will keep using their existing covers."
+                  actions={<button className="mainAction" type="button" onClick={() => void rescanPixelArtFolder()}>rescan covers</button>}
+                />
+              ) : null}
+
               <Suspense
                 fallback={
                   <section className="panel coverStudioLoading" role="status" aria-live="polite">
@@ -5584,6 +5677,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 togglePixelCoverExcluded={togglePixelCoverExcluded}
                 />
               </Suspense>
+              </>
             )}
 
             {view === "analytics" && (
@@ -5614,6 +5708,25 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </span>
                   </div>
                 </section>
+
+                {!songs.length ? (
+                  <LocaltifyStateCard
+                    tone="info"
+                    eyebrow="analytics"
+                    title="Play songs first"
+                    message="Your monthly and yearly recap appears after Localtify has songs and play history to read."
+                    detail="Localtify only uses your local library data: play counts, durations, imports, liked songs, and missing-file checks."
+                    actions={<button className="mainAction" type="button" onClick={importSongs}>import songs</button>}
+                  />
+                ) : missingFileCount ? (
+                  <LocaltifyStateCard
+                    tone="warning"
+                    eyebrow="library warning"
+                    title="Some songs need attention"
+                    message={`${missingFileCount} file${missingFileCount === 1 ? "" : "s"} could not be found on disk. Analytics still works, but those songs may not play until repaired.`}
+                    detail="This usually happens when a file was moved, renamed, or deleted outside Localtify."
+                  />
+                ) : null}
 
                 <section className="analyticsRecapGridV339" aria-label="recap cards">
                   {(analyticsRecapCards || []).map((card, index) => {
@@ -6077,6 +6190,23 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </div>
                   ) : null}
 
+                  {!downloadQueue.length && !downloadResults.length && !downloadBusy && !spotifyDownloadBusy ? (
+                    <LocaltifyStateCard
+                      tone="info"
+                      eyebrow="downloads"
+                      title="Paste a link to start"
+                      message="YouTube links go in the YouTube tab. Spotify playlists, albums, or tracks go in the Spotify tab."
+                      detail="If a download finishes but does not appear in your library, Localtify will warn you and let you open the folder."
+                      actions={
+                        <>
+                          <button className="mainAction" type="button" onClick={() => setDownloadsTab("youtube")}>YouTube download</button>
+                          <button className="softButton" type="button" onClick={() => setDownloadsTab("spotify")}>Spotify import</button>
+                          <button className="heroGhost" type="button" onClick={convertLocalMedia}>convert local files</button>
+                        </>
+                      }
+                    />
+                  ) : null}
+
                   <div className="converterBox converterBoxV031">
                     <div>
                       <strong>convert local files</strong>
@@ -6362,9 +6492,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
               </button>
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); toggleLike(menuSong.id); }}>
                 <span>♥</span> {menuSong.liked ? "unlike" : "like"}
-              </button>
-              <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); openEditor(menuSong); }}>
-                <span>⋯</span> edit track
               </button>
             </div>
           </div>

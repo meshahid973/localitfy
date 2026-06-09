@@ -16443,3 +16443,468 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
     padding-inline: 11px !important;
   }
 }
+
+/* localtify 0.3.8 V394 — albums V2 polish */
+
+.app .albumsPageV318{
+  --albums-v394-panel: rgba(8, 7, 13, .82);
+  --albums-v394-card: rgba(14, 12, 19, .72);
+  --albums-v394-card-hover: rgba(22, 18, 30, .82);
+  --albums-v394-border: rgba(255, 255, 255, .085);
+  --albums-v394-border-hot: rgba(var(--accent-rgb), .36);
+  --albums-v394-soft: rgba(255, 255, 255, .052);
+  --albums-v394-muted: rgba(var(--text-rgb), .58);
+  --albums-v394-radius: 22px;
+  --albums-v394-ease: cubic-bezier(.16, 1, .3, 1);
+
+  gap: 18px !important;
+  padding-bottom: 26px !important;
+}
+
+.app .albumsPageV318 :is(
+  .albumsHeroPanelV318,
+  .albumsShelfPanelV318,
+  .albumDetailPanelV318,
+  .albumBuilderPanelV318
+){
+  border-color: var(--albums-v394-border) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.010)),
+    var(--albums-v394-panel) !important;
+  box-shadow: none !important;
+}
+
+.app .albumsHeroPanelV318{
+  min-height: 188px !important;
+  padding: clamp(20px, 2.1vw, 30px) !important;
+}
+
+.app .albumsHeroPanelV318::before{
+  opacity: .62 !important;
+  background:
+    radial-gradient(circle at 92% 22%, rgba(var(--accent-rgb), .12), transparent 34%),
+    linear-gradient(90deg, rgba(0,0,0,.58), rgba(0,0,0,.18)) !important;
+}
+
+.app .albumsHeroCopyV318{
+  gap: 9px !important;
+}
+
+.app .albumsHeroCopyV318 h3{
+  max-width: 13ch !important;
+  font-size: clamp(42px, 4.6vw, 72px) !important;
+  line-height: .9 !important;
+}
+
+.app .albumsHeroCopyV318 p:not(.eyebrow){
+  max-width: 62ch !important;
+  color: rgba(var(--text-rgb), .68) !important;
+}
+
+.app .albumsHeroStatsV318{
+  min-width: min(340px, 30vw) !important;
+  gap: 9px !important;
+}
+
+.app .albumsHeroStatsV318 span{
+  min-height: 76px !important;
+  border-color: rgba(255,255,255,.07) !important;
+  background: rgba(255,255,255,.035) !important;
+}
+
+.app .albumsGridV318{
+  grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)) !important;
+  gap: 18px !important;
+  max-height: min(620px, calc(100vh - 398px)) !important;
+  padding: 4px 8px 14px 2px !important;
+  align-content: start !important;
+}
+
+.app .albumCardV318{
+  min-height: 0 !important;
+  height: auto !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(96px, auto) !important;
+  border-radius: var(--albums-v394-radius) !important;
+  border-color: var(--albums-v394-border) !important;
+  background: var(--albums-v394-card) !important;
+  overflow: hidden !important;
+  transform: translateZ(0) !important;
+  transition:
+    transform 180ms var(--albums-v394-ease),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 200ms ease !important;
+}
+
+.app .albumCardV318:hover,
+.app .albumCardV318.active{
+  transform: translate3d(0, -2px, 0) !important;
+  border-color: var(--albums-v394-border-hot) !important;
+  background: var(--albums-v394-card-hover) !important;
+  box-shadow:
+    0 16px 38px rgba(0,0,0,.26),
+    inset 0 0 0 1px rgba(var(--accent-rgb), .08) !important;
+}
+
+.app .albumCardCoverV318{
+  position: relative !important;
+  inset: auto !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 0 0 16px 16px !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,.035) !important;
+}
+
+.app .albumCardV318 :is(.coverImage, img){
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  transform: translateZ(0) !important;
+  filter: saturate(1.02) contrast(1.01) !important;
+}
+
+.app .albumCardV318:hover :is(.coverImage, img),
+.app .albumCardV318.active :is(.coverImage, img){
+  transform: scale(1.018) translateZ(0) !important;
+  filter: saturate(1.06) contrast(1.025) !important;
+}
+
+.app .albumCardSheenV318{
+  display: none !important;
+  content: none !important;
+}
+
+.app .albumCardMetaV318{
+  position: relative !important;
+  inset: auto !important;
+  z-index: 2 !important;
+  padding: 13px 14px 15px !important;
+  display: grid !important;
+  gap: 5px !important;
+  background: transparent !important;
+}
+
+.app .albumCardMetaV318 strong{
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  min-height: 38px !important;
+  max-height: 42px !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+  color: var(--text) !important;
+  font-size: 17px !important;
+  line-height: 1.12 !important;
+  letter-spacing: -.035em !important;
+}
+
+.app .albumCardMetaV318 :is(small, b, em){
+  color: var(--albums-v394-muted) !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  font-style: normal !important;
+  font-weight: 820 !important;
+  text-transform: lowercase !important;
+}
+
+.app .albumDetailHeroV318{
+  min-height: 210px !important;
+  grid-template-columns: 158px minmax(0, 1fr) !important;
+  gap: 18px !important;
+  padding: 18px !important;
+  border-color: rgba(255,255,255,.075) !important;
+  background: rgba(0,0,0,.32) !important;
+}
+
+.app .albumDetailHeroV318::before{
+  opacity: .20 !important;
+  filter: blur(38px) saturate(1.18) brightness(.82) !important;
+}
+
+.app .albumDetailHeroV318::after{
+  background: linear-gradient(90deg, rgba(0,0,0,.80), rgba(0,0,0,.46) 58%, rgba(0,0,0,.64)) !important;
+}
+
+.app .albumDetailCoverV318{
+  width: 158px !important;
+  height: 158px !important;
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  box-shadow:
+    0 22px 44px rgba(0,0,0,.36),
+    0 0 0 1px rgba(255,255,255,.10) inset !important;
+}
+
+.app .albumDetailCopyV318{
+  gap: 6px !important;
+}
+
+.app .albumDetailCopyV318 h3{
+  font-size: clamp(36px, 3.8vw, 64px) !important;
+  line-height: .9 !important;
+}
+
+.app .albumMetaPillsV318{
+  margin-top: 10px !important;
+  gap: 7px !important;
+}
+
+.app .albumMetaPillsV318 span{
+  min-height: 27px !important;
+  padding-inline: 10px !important;
+  border-color: rgba(255,255,255,.075) !important;
+  background: rgba(255,255,255,.052) !important;
+}
+
+.app .albumActionRowV318{
+  margin-top: 11px !important;
+  gap: 8px !important;
+}
+
+.app .albumTrackListV318{
+  max-height: min(430px, calc(100vh - 520px)) !important;
+  min-height: 260px !important;
+  gap: 8px !important;
+  padding: 14px 4px 4px 0 !important;
+}
+
+.app .albumTrackRowV318{
+  grid-template-columns: minmax(0, 1fr) auto repeat(4, 34px) !important;
+  min-height: 62px !important;
+  padding: 8px 9px !important;
+  border-radius: 16px !important;
+  border-color: rgba(255,255,255,.06) !important;
+  background: rgba(255,255,255,.025) !important;
+  cursor: default !important;
+}
+
+.app .albumTrackRowV318:hover{
+  transform: translate3d(2px, 0, 0) !important;
+  border-color: rgba(var(--accent-rgb), .22) !important;
+  background: rgba(255,255,255,.04) !important;
+}
+
+.app .albumTrackRowV318.active{
+  transform: translateZ(0) !important;
+  border-color: rgba(var(--accent-rgb), .34) !important;
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), .12), rgba(255,255,255,.020)) !important;
+}
+
+.app .albumTrackRowV318 .iconAction{
+  display: grid !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 11px !important;
+}
+
+.app .albumTrackRowV318 .iconAction:nth-of-type(n + 3){
+  display: grid !important;
+}
+
+.app .albumTrackRowV318[draggable="true"]{
+  cursor: grab !important;
+}
+
+.app .albumTrackRowV318[draggable="true"]:active,
+.app .albumTrackRowV318.albumTrackDragging,
+.app .albumTrackRowV318.songDragging{
+  cursor: grabbing !important;
+  opacity: .62 !important;
+  border-style: dashed !important;
+  border-color: rgba(var(--accent-rgb), .52) !important;
+}
+
+.app .albumTrackRowV318.albumTrackDropTarget,
+.app .albumTrackRowV318.songDropTarget{
+  border-color: rgba(var(--accent-rgb), .62) !important;
+  background: rgba(var(--accent-rgb), .09) !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb), .20),
+    0 0 0 5px rgba(var(--accent-rgb), .07) !important;
+}
+
+.app .albumTrackMainV318{
+  grid-template-columns: 28px 44px minmax(0, 1fr) !important;
+  gap: 10px !important;
+}
+
+.app .albumTrackMainV318 > span:first-child{
+  color: rgba(var(--text-rgb), .42) !important;
+}
+
+.app .albumTrackCoverV318{
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.app .albumTrackMainV318 strong{
+  font-size: 14px !important;
+}
+
+.app .albumTrackMainV318 small{
+  color: rgba(var(--text-rgb), .52) !important;
+}
+
+.app .albumBuilderPanelV318{
+  padding: 16px !important;
+}
+
+.app .albumBuilderBodyV318{
+  grid-template-columns: minmax(300px, 400px) minmax(500px, 1fr) !important;
+  gap: 16px !important;
+}
+
+.app .albumBuilderCoverPickerV319{
+  grid-template-columns: 112px minmax(0, 1fr) !important;
+  gap: 13px !important;
+  min-height: 136px !important;
+  border-color: rgba(255,255,255,.085) !important;
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), .07), rgba(255,255,255,.024)),
+    rgba(0,0,0,.22) !important;
+}
+
+.app .albumBuilderCoverPreviewV319{
+  width: 112px !important;
+  height: 112px !important;
+  border-radius: 19px !important;
+}
+
+.app .albumBuilderCoverCopyV319 strong{
+  font-size: 18px !important;
+}
+
+.app .albumBuilderCoverCopyV319 span{
+  color: rgba(var(--text-rgb), .60) !important;
+}
+
+.app .albumBuilderCoverActionsV319{
+  gap: 7px !important;
+}
+
+.app .albumBuilderCoverActionsV319 .heroGhost,
+.app .albumBuilderArtistToolsV320 .heroGhost{
+  min-height: 31px !important;
+  padding-inline: 11px !important;
+  border-radius: 11px !important;
+}
+
+.app .albumBuilderSongGridV318{
+  max-height: 330px !important;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+  gap: 9px !important;
+  padding-right: 5px !important;
+}
+
+.app .albumBuilderSongGridV318 button{
+  min-height: 62px !important;
+  border-color: rgba(255,255,255,.065) !important;
+  background: rgba(255,255,255,.025) !important;
+}
+
+.app .albumBuilderSongGridV318 button:hover{
+  transform: translateY(-1px) !important;
+  border-color: rgba(var(--accent-rgb), .22) !important;
+  background: rgba(255,255,255,.04) !important;
+}
+
+.app .albumBuilderSongGridV318 button.selected{
+  border-color: rgba(var(--accent-rgb), .42) !important;
+  background: rgba(var(--accent-rgb), .085) !important;
+}
+
+.app .albumBuilderFooterV318{
+  padding-top: 8px !important;
+  border-top-color: rgba(255,255,255,.065) !important;
+}
+
+.app .albumsEmptyStateV318,
+.app .albumDetailEmptyV318{
+  min-height: 360px !important;
+  padding: 28px !important;
+  border: 1px dashed rgba(var(--accent-rgb), .24) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), .040), rgba(255,255,255,.012)),
+    rgba(0,0,0,.22) !important;
+}
+
+.app .albumsEmptyStateV318 strong{
+  font-size: clamp(24px, 2.4vw, 36px) !important;
+}
+
+.app .albumsEmptyStateV318 p{
+  color: rgba(var(--text-rgb), .62) !important;
+}
+
+.app :is(.albumDuplicateButtonV394, .albumCoverAutoButtonV394, .albumTrackRemoveButtonV394){
+  border-color: rgba(var(--accent-rgb), .22) !important;
+}
+
+@media (max-width: 1280px){
+  .app .albumsPageV318{
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "hero"
+      "detail"
+      "shelf"
+      "builder" !important;
+  }
+
+  .app .albumsGridV318,
+  .app .albumTrackListV318{
+    max-height: 560px !important;
+  }
+
+  .app .albumBuilderBodyV318{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 860px){
+  .app .albumsHeroPanelV318,
+  .app .albumDetailHeroV318{
+    grid-template-columns: 1fr !important;
+  }
+
+  .app .albumsHeroStatsV318{
+    min-width: 0 !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .app .albumDetailCoverV318{
+    width: min(180px, 52vw) !important;
+    height: min(180px, 52vw) !important;
+  }
+
+  .app .albumsGridV318{
+    grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)) !important;
+  }
+
+  .app .albumTrackRowV318{
+    grid-template-columns: minmax(0, 1fr) repeat(3, 34px) !important;
+  }
+
+  .app .albumTrackDurationV318{
+    display: none !important;
+  }
+
+  .app .albumBuilderCoverPickerV319{
+    grid-template-columns: 84px minmax(0, 1fr) !important;
+  }
+
+  .app .albumBuilderCoverPreviewV319{
+    width: 84px !important;
+    height: 84px !important;
+  }
+}

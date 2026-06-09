@@ -125,7 +125,7 @@ function pickIdleAction() {
 }
 
 function getCatSingletonKey() {
-  return "__localtifyCatBuddyPrimaryV402";
+  return "__localtifyCatBuddyPrimaryV403";
 }
 
 export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyProps) {
@@ -139,7 +139,7 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
   const [isPrimary, setIsPrimary] = useState(true);
   const [animationId, setAnimationId] = useState<CatAnimationId>("idle");
   const [following, setFollowing] = useState(true);
-  const [facingLeft, setFacingLeft] = useState(true);
+  const [facingLeft, setFacingLeft] = useState(false);
 
   const positionRef = useRef({ x: 0, y: 0 });
   const targetRef = useRef({ x: 0, y: 0, hasTarget: false });
@@ -227,7 +227,9 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
 
         ctx.save();
 
-        if (!facingLeft) {
+        // LuizMelo Cat-4 sheets face right by default.
+        // Flip only when the target is to the left, otherwise the cat looks like it is moonwalking.
+        if (facingLeft) {
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
         }

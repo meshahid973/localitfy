@@ -9660,3 +9660,1096 @@ body.localtifyPerfV301 .settingsPage :is(.settingsCategoryButton, .settingsTabBu
   }
 }
 
+
+.playbackPresetStripV344{
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.playbackPresetChipV344{
+  min-height: 76px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.078);
+  display: grid;
+  align-content: end;
+  gap: 5px;
+  text-align: left;
+  color: var(--text);
+  cursor: pointer;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.014)),
+    rgba(255,255,255,.024);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.034);
+  transition:
+    transform 170ms cubic-bezier(.22,1,.36,1),
+    border-color 170ms ease,
+    background-color 170ms ease,
+    box-shadow 210ms ease;
+}
+
+.playbackPresetChipV344:hover{
+  transform: translate3d(0,-1px,0);
+  border-color: rgba(var(--accent-rgb), .24);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.018)),
+    rgba(255,255,255,.030);
+}
+
+.playbackPresetChipV344.active{
+  border-color: rgba(var(--accent-rgb), .42);
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), .18), rgba(255,255,255,.024)),
+    rgba(255,255,255,.034);
+  box-shadow:
+    0 10px 24px rgba(var(--accent-rgb), .10),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.playbackPresetChipV344 strong{
+  color: var(--text);
+  font-size: .88rem;
+  font-weight: 950;
+  line-height: 1.05;
+  letter-spacing: -.035em;
+}
+
+.playbackPresetChipV344 small{
+  color: var(--text-2);
+  font-size: .70rem;
+  line-height: 1.24;
+  font-weight: 760;
+}
+
+.playbackPresetChipV344.active small{
+  color: rgba(255,255,255,.74);
+}
+
+@media (max-width: 1180px){
+  .playbackPresetStripV344{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px){
+  .playbackPresetStripV344{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px){
+  .playbackPresetStripV344{
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .playbackPresetChipV344{
+    transition: none !important;
+  }
+
+  .playbackPresetChipV344:hover{
+    transform: none !important;
+  }
+}
+
+
+/* localtify 0.3.8 V345 — playback settings cleanup.
+   Removes the duplicate old "Playback feel" card and removes preset chips.
+   Playback Lab now owns speed + nightcore/daycore/reverb in one clear place. */
+.settingsCategoryMotion[data-settings-category="playback"] .settingsTwoColumn:first-of-type > .settingsPageCard:nth-child(2){
+  display: none !important;
+}
+
+.settingsCategoryMotion[data-settings-category="playback"] .settingsTwoColumn:first-of-type{
+  grid-template-columns: 1fr !important;
+}
+
+.settingsCategoryMotion[data-settings-category="playback"] .settingsTwoColumn:first-of-type > .settingsPageCard:first-child{
+  max-width: none !important;
+}
+
+.playbackLabCardV343{
+  margin-top: 0 !important;
+  padding: 24px !important;
+}
+
+.playbackLabCardV343 .settingsSectionTitle{
+  margin-bottom: 14px !important;
+}
+
+.playbackModeGridV343{
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.playbackModeChoiceV343{
+  min-height: 84px !important;
+  padding: 14px !important;
+}
+
+.playbackEffectSlidersV345{
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.playbackEffectSlidersV345 label{
+  min-height: 86px !important;
+}
+
+.playbackEffectSlidersV345 input[type="range"]{
+  cursor: pointer;
+}
+
+@media (max-width: 920px){
+  .playbackEffectSlidersV345{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 760px){
+  .playbackModeGridV343{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* localtify 0.3.8 V346 — custom theme simplification.
+   Main theme editor now feels visual/user-facing:
+   Background, Surface, Accent, Text + preview + simple swatch presets.
+   Extra advanced color roles stay internal instead of taking over the UI. */
+
+/* Keep the preset lock note from feeling like an error banner. */
+.themePickerLockNoteV026{
+  display: none !important;
+}
+
+/* Top "choose theme" area: calmer and less noisy. */
+.settingsCategoryMotion[data-settings-category="appearance"] .settingsPanelCard:first-of-type{
+  border-radius: 26px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+    rgba(5,5,10,.72) !important;
+  border-color: rgba(255,255,255,.075) !important;
+}
+
+.settingsThemeSelectPanel{
+  max-width: 520px !important;
+}
+
+.settingsThemeSelectPanel select{
+  min-height: 54px !important;
+  border-radius: 16px !important;
+  font-size: .98rem !important;
+}
+
+/* Custom theme card becomes the main visual editor, not a developer panel. */
+.customThemeStudioV025,
+.themeEditorCard,
+.simpleThemeEditorGridV025,
+.customThemeEditorBodyV025{
+  position: relative !important;
+}
+
+.customThemeStudioV025,
+.themeEditorCard{
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 30px !important;
+  border-color: rgba(var(--accent-rgb), .18) !important;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(var(--accent-rgb), .10), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.016)),
+    rgba(7,7,13,.86) !important;
+  box-shadow:
+    0 22px 64px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+/* Clean header: title left, actions/toggle right. */
+.simpleThemeEditorHeadV025,
+.themeEditorHead{
+  margin: 0 !important;
+  padding: 22px 22px 18px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 18px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,0)) !important;
+}
+
+.simpleThemeEditorHeadV025 .settingsSectionTitle,
+.themeEditorHead .settingsSectionTitle{
+  margin: 0 !important;
+  gap: 4px !important;
+}
+
+.simpleThemeEditorHeadV025 .settingsSectionTitle span,
+.themeEditorHead .settingsSectionTitle span{
+  color: var(--accent) !important;
+  font-size: .72rem !important;
+  letter-spacing: .18em !important;
+}
+
+.simpleThemeEditorHeadV025 .settingsSectionTitle strong,
+.themeEditorHead .settingsSectionTitle strong{
+  font-size: clamp(1.45rem, 2.4vw, 2.1rem) !important;
+  letter-spacing: -.055em !important;
+}
+
+.simpleThemeEditorHeadV025 .settingsSectionTitle small,
+.themeEditorHead .settingsSectionTitle small{
+  max-width: 48ch !important;
+  color: rgba(255,255,255,.58) !important;
+  font-size: .86rem !important;
+}
+
+.simpleThemeActionsV025,
+.themeEditorQuickActions{
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 9px !important;
+  flex-wrap: wrap !important;
+}
+
+.simpleThemeActionsV025 .settingsTinyButton,
+.themeEditorQuickActions .settingsTinyButton,
+.themeEditorQuickActions .settingsActionButton{
+  min-height: 42px !important;
+  padding-inline: 15px !important;
+  border-radius: 14px !important;
+  font-size: .82rem !important;
+  font-weight: 920 !important;
+}
+
+/* Main editor: 4 controls left, preview right. */
+.customThemeTopV025{
+  padding: 22px 22px 10px !important;
+  display: grid !important;
+  grid-template-columns: minmax(280px, .82fr) minmax(380px, 1.18fr) !important;
+  gap: 16px !important;
+}
+
+.themeNameField,
+.settingsField{
+  border-radius: 22px !important;
+  border-color: rgba(255,255,255,.075) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.018)),
+    rgba(255,255,255,.028) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.034) !important;
+}
+
+.themeNameField{
+  min-height: 116px !important;
+  align-content: center !important;
+}
+
+.themeNameField label,
+.themeNameField span{
+  color: rgba(255,255,255,.68) !important;
+  font-size: .78rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+}
+
+.themeNameField input,
+.settingsInlineInput,
+.accentTextInput{
+  min-height: 48px !important;
+  border-radius: 15px !important;
+  font-size: .96rem !important;
+}
+
+/* Real mini Localtify preview. */
+.customThemePreviewV025,
+.simpleThemePreviewV025,
+.themeEditorPreview{
+  min-height: 250px !important;
+  padding: 18px !important;
+  border-radius: 24px !important;
+  border-color: rgba(var(--accent-rgb), .20) !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-rows: auto 1fr auto !important;
+  gap: 12px !important;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(var(--accent-rgb), .20), transparent 34%),
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-background, #050507) 70%, rgba(255,255,255,.07)), var(--theme-background, #050507)),
+    rgba(0,0,0,.38) !important;
+}
+
+.customThemePreviewV025::before,
+.simpleThemePreviewV025::before,
+.themeEditorPreview::before{
+  content: "live preview";
+  position: static !important;
+  width: fit-content !important;
+  padding: 6px 9px !important;
+  border-radius: 999px !important;
+  color: color-mix(in srgb, var(--theme-text, #fff) 82%, transparent) !important;
+  background: color-mix(in srgb, var(--theme-surface, #151528) 78%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-color, var(--accent)) 24%, transparent) !important;
+  font-size: .66rem !important;
+  font-weight: 950 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase !important;
+}
+
+.customThemePreviewV025::after,
+.simpleThemePreviewV025::after,
+.themeEditorPreview::after{
+  content: "localtify";
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: color-mix(in srgb, var(--theme-text, #fff) 68%, transparent);
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.themePreviewNowV025,
+.themePreviewCard{
+  min-height: 118px !important;
+  padding: 18px !important;
+  border-radius: 22px !important;
+  display: grid !important;
+  align-content: center !important;
+  gap: 8px !important;
+  border: 1px solid color-mix(in srgb, var(--theme-color, var(--accent)) 18%, transparent) !important;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--theme-color, var(--accent)) 14%, transparent), transparent),
+    color-mix(in srgb, var(--theme-surface, #151528) 82%, transparent) !important;
+}
+
+.themePreviewNowV025 strong,
+.themePreviewCard strong{
+  color: var(--theme-text, var(--text)) !important;
+  font-size: clamp(1.15rem, 2vw, 1.55rem) !important;
+  line-height: .98 !important;
+  letter-spacing: -.055em !important;
+}
+
+.themePreviewNowV025 small,
+.themePreviewCard small{
+  color: color-mix(in srgb, var(--theme-text, #fff) 58%, transparent) !important;
+  font-size: .78rem !important;
+}
+
+.themePreviewPlayerV025,
+.themePreviewPlayer{
+  min-height: 70px !important;
+  padding: 0 16px !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  background: color-mix(in srgb, var(--theme-surface, #151528) 74%, rgba(0,0,0,.32)) !important;
+}
+
+.previewPlayButton{
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #050507 !important;
+  background: var(--theme-color, var(--accent)) !important;
+  box-shadow: 0 0 24px color-mix(in srgb, var(--theme-color, var(--accent)) 32%, transparent) !important;
+}
+
+.themePreviewProgress{
+  height: 8px !important;
+  background: color-mix(in srgb, var(--theme-text, #fff) 16%, transparent) !important;
+}
+
+.themePreviewProgress span{
+  background: linear-gradient(90deg, var(--theme-color, var(--accent)), var(--theme-progress, var(--theme-color, var(--accent)))) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--theme-color, var(--accent)) 34%, transparent) !important;
+}
+
+/* Palette presets: visual swatch strip, not tiny text-heavy cards. */
+.customThemePresetSectionV025{
+  margin: 8px 22px 0 !important;
+  padding: 16px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 22px !important;
+  background: rgba(255,255,255,.026) !important;
+}
+
+.customThemePresetHeaderV025{
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin-bottom: 12px !important;
+}
+
+.customThemePresetHeaderV025 strong,
+.customThemePresetHeaderV025 h3{
+  font-size: 1rem !important;
+}
+
+.customThemePresetHeaderV025 small,
+.customThemePresetHeaderV025 p{
+  max-width: 52ch !important;
+  color: rgba(255,255,255,.52) !important;
+  font-size: .78rem !important;
+}
+
+.customThemePresetGridV025,
+.savedThemeListV025{
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.customThemePresetButtonV025,
+.savedThemeItemV025 button:first-child{
+  position: relative !important;
+  min-height: 94px !important;
+  padding: 12px !important;
+  border-radius: 18px !important;
+  display: grid !important;
+  align-content: end !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+  border-color: rgba(255,255,255,.075) !important;
+  background:
+    radial-gradient(circle at 24% 24%, color-mix(in srgb, var(--preset-accent, var(--accent)) 80%, white 12%), transparent 18px),
+    radial-gradient(circle at 72% 32%, color-mix(in srgb, var(--preset-surface, #24243b) 80%, white 8%), transparent 24px),
+    linear-gradient(135deg, color-mix(in srgb, var(--preset-background, #050507) 82%, white 5%), color-mix(in srgb, var(--preset-accent, var(--accent)) 26%, black 74%)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 12px 28px rgba(0,0,0,.18) !important;
+}
+
+.customThemePresetButtonV025::before,
+.savedThemeItemV025 button:first-child::before{
+  content: "";
+  position: absolute;
+  inset: 10px 10px auto auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--preset-text, rgba(255,255,255,.9));
+  box-shadow:
+    -18px 14px 0 color-mix(in srgb, var(--preset-accent, var(--accent)) 80%, white 4%),
+    -36px 2px 0 color-mix(in srgb, var(--preset-surface, #24243b) 90%, white 4%);
+  opacity: .92;
+}
+
+.customThemePresetButtonV025 strong,
+.savedThemeItemV025 button:first-child strong{
+  position: relative !important;
+  z-index: 1 !important;
+  color: rgba(255,255,255,.94) !important;
+  font-size: .88rem !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.035em !important;
+  text-shadow: 0 2px 10px rgba(0,0,0,.34) !important;
+}
+
+.customThemePresetButtonV025 small,
+.savedThemeItemV025 button:first-child small{
+  position: relative !important;
+  z-index: 1 !important;
+  color: rgba(255,255,255,.66) !important;
+  font-size: .69rem !important;
+  line-height: 1.2 !important;
+  text-shadow: 0 2px 10px rgba(0,0,0,.30) !important;
+}
+
+/* Main colors: only four cards now, bigger and obvious. */
+.customThemeTokenListV025,
+.themeTokenGrid,
+.simpleThemeTokenGridV025{
+  padding: 18px 22px 22px !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.customThemeTokenListV025::before,
+.themeTokenGrid::before,
+.simpleThemeTokenGridV025::before{
+  content: "main colors";
+  grid-column: 1 / -1;
+  width: fit-content;
+  margin-bottom: 0;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.78);
+  background: rgba(var(--accent-rgb), .10);
+  border: 1px solid rgba(var(--accent-rgb), .16);
+  font-size: .66rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.themeTokenCard,
+.simpleThemeTokenCardV025,
+.customThemeTokenRowV025{
+  min-height: 154px !important;
+  padding: 14px !important;
+  border-radius: 22px !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  border-color: rgba(255,255,255,.075) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.016)),
+    rgba(255,255,255,.025) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.032) !important;
+  contain: layout paint style !important;
+}
+
+.themeTokenCard:hover,
+.simpleThemeTokenCardV025:hover,
+.customThemeTokenRowV025:hover{
+  transform: translate3d(0,-1px,0) !important;
+  border-color: rgba(var(--accent-rgb), .23) !important;
+  background: rgba(255,255,255,.036) !important;
+}
+
+.themeColorInput{
+  width: 100% !important;
+  height: 58px !important;
+  border-radius: 17px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.12),
+    0 10px 22px rgba(0,0,0,.20) !important;
+}
+
+.themeTokenVisual{
+  width: 100% !important;
+  height: 58px !important;
+  border-radius: 17px !important;
+}
+
+.themeTokenCopy{
+  display: grid !important;
+  gap: 3px !important;
+}
+
+.themeTokenCopy strong,
+.themeTokenCard strong,
+.simpleThemeTokenCardV025 strong,
+.customThemeTokenRowV025 strong{
+  font-size: .98rem !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.035em !important;
+}
+
+.themeTokenCopy small,
+.themeTokenCard small,
+.simpleThemeTokenCardV025 small,
+.customThemeTokenRowV025 small{
+  color: rgba(255,255,255,.56) !important;
+  font-size: .76rem !important;
+  line-height: 1.25 !important;
+}
+
+.themeTokenCard code,
+.simpleThemeTokenCardV025 code,
+.customThemeTokenRowV025 code{
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 38px !important;
+  padding: 0 10px !important;
+  border-radius: 13px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: rgba(255,255,255,.80) !important;
+  background: rgba(0,0,0,.24) !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  font-size: .78rem !important;
+}
+
+/* Layout/ambience stays visually separate from colors. */
+.settingsCategoryMotion[data-settings-category="appearance"] .settingsTwoColumn{
+  margin-top: 18px !important;
+}
+
+.settingsCategoryMotion[data-settings-category="appearance"] .settingsTwoColumn .settingsPageCard{
+  border-radius: 22px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.014)),
+    rgba(5,5,10,.58) !important;
+  border-color: rgba(255,255,255,.07) !important;
+}
+
+/* Keep theme layout responsive. */
+@media (max-width: 1120px){
+  .customThemeTopV025{
+    grid-template-columns: 1fr !important;
+  }
+
+  .customThemeTokenListV025,
+  .themeTokenGrid,
+  .simpleThemeTokenGridV025{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px){
+  .simpleThemeEditorHeadV025,
+  .themeEditorHead{
+    grid-template-columns: 1fr !important;
+  }
+
+  .simpleThemeActionsV025,
+  .themeEditorQuickActions{
+    justify-content: stretch !important;
+  }
+
+  .simpleThemeActionsV025 > *,
+  .themeEditorQuickActions > *{
+    flex: 1 1 140px !important;
+  }
+
+  .customThemeTokenListV025,
+  .themeTokenGrid,
+  .simpleThemeTokenGridV025,
+  .customThemePresetGridV025,
+  .savedThemeListV025{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+
+/* localtify 0.3.8 V354 — Discord RPC preview card polish.
+   Append this to src/settings.css. It styles the existing .discordPreviewCard
+   to look closer to Discord's Current activity card without changing your settings logic. */
+
+.discordSettingsSection .discordPreviewCard,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewCard,
+.discordPreviewCard {
+  position: relative;
+  min-height: 148px;
+  display: grid !important;
+  grid-template-columns: 78px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 42px 18px 18px;
+  border-radius: 20px;
+  overflow: hidden;
+  color: #241a27;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18)),
+    rgba(239, 207, 235, 0.92);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(12px) saturate(122%);
+  -webkit-backdrop-filter: blur(12px) saturate(122%);
+}
+
+.discordSettingsSection .discordPreviewCard::before,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewCard::before,
+.discordPreviewCard::before {
+  content: "Current activity";
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  color: rgba(36, 26, 39, 0.66);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+.discordSettingsSection .discordPreviewArt,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewArt,
+.discordPreviewArt {
+  position: relative;
+  width: 78px;
+  height: 78px;
+  border-radius: 12px;
+  overflow: visible;
+  background: rgba(255, 255, 255, 0.34);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+}
+
+.discordSettingsSection .discordPreviewCover,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewCover,
+.discordPreviewCover,
+.discordSettingsSection .discordPreviewFallback,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewFallback,
+.discordPreviewFallback {
+  width: 78px !important;
+  height: 78px !important;
+  border-radius: 12px !important;
+  object-fit: cover !important;
+}
+
+.discordSettingsSection .discordPreviewArt::after,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewArt::after,
+.discordPreviewArt::after {
+  content: "";
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 4px solid rgba(239, 207, 235, 0.96);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(216, 75, 245, 0.95) 0 38%, rgba(20, 16, 25, 0.98) 39% 100%);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+}
+
+.discordSettingsSection .discordPreviewMeta,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewMeta,
+.discordPreviewMeta {
+  min-width: 0;
+  color: #241a27;
+}
+
+.discordSettingsSection .discordPreviewBadge,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewBadge,
+.discordPreviewBadge {
+  display: none !important;
+}
+
+.discordSettingsSection .discordPreviewMeta strong,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewMeta strong,
+.discordPreviewMeta strong {
+  display: block;
+  max-width: 100%;
+  color: #211622;
+  font-size: 0.98rem;
+  line-height: 1.16;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.discordSettingsSection .discordPreviewMeta p,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewMeta p,
+.discordPreviewMeta p {
+  margin: 3px 0 0;
+  color: rgba(36, 26, 39, 0.76);
+  font-size: 0.86rem;
+  line-height: 1.2;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.discordSettingsSection .discordPreviewButtons,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewButtons,
+.discordPreviewButtons,
+.discordSettingsSection .rpcButtonHint,
+.settingsCategoryMotion[data-settings-category="discord"] .rpcButtonHint,
+.rpcButtonHint {
+  display: none !important;
+}
+
+.discordSettingsSection .discordPreviewMeta::after,
+.settingsCategoryMotion[data-settings-category="discord"] .discordPreviewMeta::after,
+.discordPreviewMeta::after {
+  content: "00:00  ·  53:25";
+  display: block;
+  margin-top: 10px;
+  padding-top: 8px;
+  color: rgba(36, 26, 39, 0.62);
+  font-size: 0.78rem;
+  font-weight: 800;
+  border-top: 2px solid rgba(36, 26, 39, 0.13);
+}
+
+@media (max-width: 720px) {
+  .discordSettingsSection .discordPreviewCard,
+  .settingsCategoryMotion[data-settings-category="discord"] .discordPreviewCard,
+  .discordPreviewCard {
+    grid-template-columns: 64px minmax(0, 1fr);
+    padding: 40px 14px 14px;
+  }
+
+  .discordSettingsSection .discordPreviewArt,
+  .settingsCategoryMotion[data-settings-category="discord"] .discordPreviewArt,
+  .discordPreviewArt,
+  .discordSettingsSection .discordPreviewCover,
+  .settingsCategoryMotion[data-settings-category="discord"] .discordPreviewCover,
+  .discordPreviewCover,
+  .discordSettingsSection .discordPreviewFallback,
+  .settingsCategoryMotion[data-settings-category="discord"] .discordPreviewFallback,
+  .discordPreviewFallback {
+    width: 64px !important;
+    height: 64px !important;
+  }
+}
+
+
+/* localtify 0.3.8 V356 — merge appearance utility deck */
+.appearanceUnifiedControlDeckV356{
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+}
+
+.appearanceUnifiedHeaderV356{
+  margin: 0 !important;
+  padding: 24px 26px 22px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.075) !important;
+}
+
+.appearanceUnifiedHeaderV356 strong{
+  font-size: clamp(28px, 2.45vw, 42px) !important;
+  letter-spacing: -0.065em !important;
+}
+
+.appearanceUnifiedGridV356{
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 0 !important;
+}
+
+.appearanceUnifiedSectionV356{
+  min-width: 0 !important;
+  padding: 22px 24px 24px !important;
+  background: transparent !important;
+}
+
+.appearanceLayoutSectionV356{
+  border-right: 1px solid rgba(255,255,255,0.07) !important;
+}
+
+.appearanceSidebarSectionV356{
+  grid-column: 1 / -1 !important;
+  border-top: 1px solid rgba(255,255,255,0.07) !important;
+  display: grid !important;
+  gap: 16px !important;
+}
+
+.appearanceUnifiedSectionHeadV356{
+  display: grid !important;
+  gap: 4px !important;
+  margin-bottom: 16px !important;
+}
+
+.appearanceUnifiedSectionHeadV356 strong{
+  color: var(--text) !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.05em !important;
+}
+
+.appearanceUnifiedSectionHeadV356 span{
+  color: var(--text-2) !important;
+  font-size: 12px !important;
+  font-weight: 760 !important;
+  line-height: 1.35 !important;
+}
+
+.appearanceMiniGridV356{
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.appearanceCardsSectionV356 .appearanceMiniGridV356{
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.appearanceCardsSectionV356 .appearanceMiniGridV356 .toggleRow:nth-child(3){
+  grid-column: 1 / -1 !important;
+}
+
+.appearanceCoverSyncV356{
+  margin-top: 18px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid rgba(255,255,255,0.07) !important;
+}
+
+.appearanceCoverSyncV356 .coverSyncOptions{
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.appearanceSidebarSectionV356 .appearanceUnifiedSectionHeadV356{
+  margin-bottom: 0 !important;
+}
+
+.sidebarBehaviorPreviewV356{
+  min-height: 84px !important;
+  margin: 0 !important;
+  border-radius: 18px !important;
+}
+
+.sidebarBehaviorChoicesV356{
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.sidebarBehaviorChoiceV356{
+  min-height: 74px !important;
+  padding: 13px 14px !important;
+  border-radius: 17px !important;
+}
+
+.sidebarBehaviorChoiceV356 em{
+  display: none !important;
+}
+
+.sidebarBehaviorChoiceV356 .sidebarChoiceCopyV327{
+  gap: 4px !important;
+}
+
+.sidebarBehaviorChoiceV356 .sidebarChoiceCopyV327 strong{
+  font-size: 13px !important;
+}
+
+.sidebarBehaviorChoiceV356 .sidebarChoiceCopyV327 small{
+  font-size: 10.5px !important;
+  line-height: 1.25 !important;
+}
+
+@media (max-width: 1180px){
+  .appearanceUnifiedGridV356{
+    grid-template-columns: 1fr !important;
+  }
+
+  .appearanceLayoutSectionV356{
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+  }
+}
+
+@media (max-width: 860px){
+  .appearanceMiniGridV356,
+  .appearanceCardsSectionV356 .appearanceMiniGridV356,
+  .appearanceCoverSyncV356 .coverSyncOptions,
+  .sidebarBehaviorChoicesV356{
+    grid-template-columns: 1fr !important;
+  }
+}
+/* end localtify 0.3.8 V356 appearance deck */
+/* localtify 0.3.8 V358 — settings card resize transitions.
+   Keeps the layout the same, but smooths width/height changes when switching settings sections. */
+:root{
+  --resize-dur: 300ms;
+  --resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@supports (interpolate-size: allow-keywords){
+  :root{
+    interpolate-size: allow-keywords;
+  }
+}
+
+.t-resize,
+.settingsPageCard,
+.settingsPanelCard,
+.settingsCategoryContent,
+.settingsCategoryMotion,
+.settingsGrid,
+.settingsTwoColumn,
+.settingsOptionGrid,
+.appearanceUnifiedDeckV356,
+.appearanceUtilityGridV355,
+.sidebarBehaviorRestoreCardV327{
+  transition:
+    width var(--resize-dur) var(--resize-ease),
+    height var(--resize-dur) var(--resize-ease),
+    min-width var(--resize-dur) var(--resize-ease),
+    min-height var(--resize-dur) var(--resize-ease),
+    max-width var(--resize-dur) var(--resize-ease),
+    max-height var(--resize-dur) var(--resize-ease),
+    grid-template-columns var(--resize-dur) var(--resize-ease),
+    gap 220ms var(--resize-ease),
+    opacity 180ms ease,
+    transform 220ms var(--resize-ease),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.settingsCategoryMotion{
+  transform-origin: top center;
+}
+
+.settingsCategoryMotion > .settingsPageCard,
+.settingsCategoryMotion > .settingsPanelCard,
+.settingsCategoryMotion .settingsPageCard,
+.settingsCategoryMotion .settingsPanelCard{
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .t-resize,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsCategoryContent,
+  .settingsCategoryMotion,
+  .settingsGrid,
+  .settingsTwoColumn,
+  .settingsOptionGrid,
+  .appearanceUnifiedDeckV356,
+  .appearanceUtilityGridV355,
+  .sidebarBehaviorRestoreCardV327{
+    transition: none !important;
+  }
+}
+
+/* localtify 0.3.8 V380 — custom theme editor performance polish.
+   Makes color picking feel lighter without stripping the app's blur/cover visuals. */
+
+.settingsCategoryContentV027 .customThemeManagerV027,
+.settingsCategoryPage .customThemeManagerV027{
+  contain: layout paint style !important;
+  overflow: clip !important;
+}
+
+.settingsCategoryContentV027 .customThemeBodyV027,
+.settingsCategoryPage .customThemeBodyV027,
+.settingsCategoryContentV027 .customThemeTokenGridV027,
+.settingsCategoryPage .customThemeTokenGridV027{
+  contain: layout style !important;
+}
+
+.settingsCategoryContentV027 .customThemeTokenV027,
+.settingsCategoryPage .customThemeTokenV027,
+.settingsCategoryContentV027 .customThemePresetButtonV027,
+.settingsCategoryPage .customThemePresetButtonV027,
+.settingsCategoryContentV027 .savedThemeButtonV027,
+.settingsCategoryPage .savedThemeButtonV027{
+  contain: paint style !important;
+  will-change: auto !important;
+}
+
+body.localitfyThemePainting .settingsCategoryContentV027 .customThemeManagerV027,
+body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027,
+body.localitfyThemePainting .settingsCategoryContentV027 .customThemeTokenV027,
+body.localitfyThemePainting .settingsCategoryPage .customThemeTokenV027,
+body.localitfyThemePainting .settingsCategoryContentV027 .customThemePresetButtonV027,
+body.localitfyThemePainting .settingsCategoryPage .customThemePresetButtonV027,
+body.localitfyThemePainting .settingsCategoryContentV027 .savedThemeButtonV027,
+body.localitfyThemePainting .settingsCategoryPage .savedThemeButtonV027{
+  transition-property: background-color, border-color, color, opacity !important;
+  transition-duration: 0ms !important;
+  box-shadow: none !important;
+}
+
+/* The native color input should not trigger fancy hover layers while dragging colors. */
+body.localitfyThemePainting .customThemeNativeColorInputV027,
+body.localitfyThemePainting .customThemeColorPickerV032{
+  filter: none !important;
+  box-shadow: none !important;
+}

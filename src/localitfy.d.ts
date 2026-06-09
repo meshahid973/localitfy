@@ -1,5 +1,16 @@
 export {};
 
+
+type LocalitfyFeedbackStatus = {
+  ok: boolean;
+  configured: boolean;
+  valid: boolean;
+  envName?: string;
+  status?: "ready" | "invalid" | "not_configured" | string;
+  label?: string;
+  message?: string;
+};
+
 declare global {
   type LocalitfyPixelArtItem = {
     name: string;
@@ -79,6 +90,10 @@ declare global {
     sourcePath: string;
     coverPath?: string;
     coverUrl?: string;
+    coverThumbUrl?: string;
+    coverThumbnailUrl?: string;
+    thumbnailUrl?: string;
+    coverFullUrl?: string;
     trackCount: number;
     duplicateCount?: number;
     warnings?: string[];
@@ -211,6 +226,30 @@ declare global {
     error?: string;
   };
 
+
+  type LocalitfyCoverThumbnailStatus = {
+    ok: boolean;
+    directory?: string;
+    count?: number;
+    sizeBytes?: number;
+    queued?: number;
+    size?: number;
+    message?: string;
+    error?: string;
+  };
+
+  type LocalitfyCoverThumbnailWarmResult = {
+    ok: boolean;
+    scanned?: number;
+    created?: number;
+    cached?: number;
+    warnings?: string[];
+    status?: LocalitfyCoverThumbnailStatus;
+    message?: string;
+    error?: string;
+  };
+
+
   interface Window {
     localitfy: {
       bootstrap: () => Promise<{
@@ -286,6 +325,8 @@ declare global {
       rescanPixelArt?: () => Promise<any>;
       listBrokenCovers?: () => Promise<any[]>;
       getLeastUsedCover?: () => Promise<any | null>;
+      getCoverThumbnailStatus?: () => Promise<LocalitfyCoverThumbnailStatus>;
+      warmCoverThumbnails?: (payload?: { limit?: number; force?: boolean }) => Promise<LocalitfyCoverThumbnailWarmResult>;
 
       analyzeSongVolume?: (id: string) => Promise<any | null>;
 
@@ -338,6 +379,7 @@ declare global {
       }>;
       getGpuStatus?: () => Promise<any>;
       sendFeedback?: (payload: LocalitfyFeedbackPayload) => Promise<LocalitfyFeedbackResult>;
+      getFeedbackStatus?: () => Promise<LocalitfyFeedbackStatus>;
       openExternal?: (url: string) => Promise<{ ok: boolean; reason?: string }>;
 
       onAlbumFolderImportProgress?: (callback: (payload: LocalitfyAlbumFolderProgressPayload) => void) => () => void;

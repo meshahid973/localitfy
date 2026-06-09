@@ -8,13 +8,13 @@ const DEFAULT_LOGO_ASSET = "earthglow";
 const DEFAULT_DOWNLOAD_URL = "https://github.com/meshahid973/localitfy/releases/latest";
 const DEFAULT_SOURCE_URL = "https://github.com/meshahid973/localitfy";
 
-const ACTIVITY_THROTTLE_MS = 900;
-const SAME_SONG_REFRESH_MS = 12000;
-const BUTTON_FORCE_REFRESH_MS = 30000;
+const ACTIVITY_THROTTLE_MS = 1400;
+const SAME_SONG_REFRESH_MS = 20000;
+const BUTTON_FORCE_REFRESH_MS = 60000;
 const RECONNECT_DELAY_MS = 6500;
 const STARTUP_CLEAR_DELAY_MS = 450;
-const CLEAR_BEFORE_SET_DELAY_MS = 180;
-const BUTTON_DOUBLE_PUSH_DELAY_MS = 650;
+const CLEAR_BEFORE_SET_DELAY_MS = 90;
+const BUTTON_DOUBLE_PUSH_DELAY_MS = 0;
 
 // Discord activity type 2 = LISTENING.
 // The discord-rpc setActivity helper drops name/type, so Localtify sends
@@ -175,11 +175,42 @@ const rpcStatus = {
   reconnectAt: 0,
   asset: "",
   song: "",
-  buttons: false
+  buttons: false,
+  lastActivityPreview: null
 };
 
+function makeActivityPreview(activity = {}, payload = {}) {
+  const buttons = Array.isArray(activity.buttons)
+    ? activity.buttons.slice(0, 2).map((button) => ({
+        label: limitText(button?.label || "", 32),
+        url: cleanSpaces(button?.url || "")
+      }))
+    : [];
+
+  const duration = getDuration(payload);
+  const currentTime = getCurrentTime(payload);
+
+  return {
+    appName: APP_NAME,
+    header: "Listening to localtify",
+    title: limitText(activity.details || cleanupTitle(payload?.title, normalizeCleanup(payload?.discordTitleCleanup)) || "local song", 128),
+    state: limitText(activity.state || "local music session", 128),
+    asset: activity.largeImageKey || DEFAULT_LOGO_ASSET,
+    smallAsset: activity.smallImageKey || "",
+    smallText: activity.smallImageText || "",
+    buttons,
+    currentTime,
+    duration,
+    isPlaying: payload?.isPlaying === true,
+    updatedAt: Date.now()
+  };
+}
+
 function setStatus(patch = {}) {
-  Object.assign(rpcStatus, patch, { reconnectAt: nextReconnectAt || 0 });
+  Object.assign(rpcStatus, patch, {
+    reconnectAt: nextReconnectAt || 0,
+    lastUpdatedAt: Date.now()
+  });
 }
 
 function getDiscordStatus() {
@@ -192,7 +223,8 @@ function getDiscordStatus() {
     safeArtCount: SAFE_ART_ASSETS.length,
     safeArtAssets: SAFE_ART_ASSETS,
     lastSongIdentity,
-    lastImageKey
+    lastImageKey,
+    preview: rpcStatus.lastActivityPreview
   };
 }
 
@@ -840,30 +872,28 @@ function buildYoutubeSearchUrl(payload) {
 function buildButtonSets(payload) {
   if (payload?.discordButtons === false) return [[]];
 
-  const songSearchUrl = isSafeHttpUrl(payload?.discordOpenUrl)
-    ? cleanSpaces(payload?.discordOpenUrl)
-    : buildYoutubeSearchUrl(payload);
-
-  const secondUrl =
-    cleanSpaces(payload?.discordGithubUrl) ||
+  /*
+    V354:
+    Keep the actual activity text unchanged, but stop Discord from showing weird
+    labels like "download (1)" or old song-search buttons. The profile/recent
+    activity card now only gets two clean fixed buttons.
+  */
+  const downloadUrl =
     cleanSpaces(payload?.discordDownloadUrl) ||
     DEFAULT_DOWNLOAD_URL;
 
-  const primaryLabel = cleanSpaces(payload?.discordOpenLabel) || "Search this song on YouTube";
-  const secondaryLabel = cleanSpaces(payload?.discordGithubLabel) || "Get localtify";
+  const githubUrl =
+    cleanSpaces(payload?.discordGithubUrl) ||
+    DEFAULT_SOURCE_URL;
 
-  const search = safeButton(primaryLabel, songSearchUrl);
-  const secondary = safeButton(secondaryLabel, secondUrl);
-  const download = safeButton("Download localtify", DEFAULT_DOWNLOAD_URL);
-  const source = safeButton("View GitHub", DEFAULT_SOURCE_URL);
+  const getLocaltify = safeButton("Get Localtify", downloadUrl);
+  const github = safeButton("GitHub", githubUrl);
 
   const sets = [];
 
-  if (search && secondary) sets.push([search, secondary]);
-  if (search && download) sets.push([search, download]);
-  if (search) sets.push([search]);
-  if (download && source) sets.push([download, source]);
-  if (download) sets.push([download]);
+  if (getLocaltify && github) sets.push([getLocaltify, github]);
+  if (getLocaltify) sets.push([getLocaltify]);
+  if (github) sets.push([github]);
 
   sets.push([]);
 
@@ -874,11 +904,14 @@ function buildButtonSets(payload) {
     const local = new Set();
 
     for (const button of set) {
-      const key = `${button.label}|${button.url}`;
-      if (!local.has(key)) {
-        local.add(key);
-        deduped.push(button);
-      }
+      const label = cleanSpaces(button?.label);
+      const url = cleanSpaces(button?.url);
+      const key = `${label}|${url}`;
+
+      if (!label || !isSafeHttpUrl(url) || local.has(key)) continue;
+
+      local.add(key);
+      deduped.push({ label, url });
     }
 
     set.splice(0, set.length, ...deduped.slice(0, 2));
@@ -1079,7 +1112,7 @@ async function hardClearActivity(targetClient = client, reason = "clear") {
 
   try {
     await targetClient.clearActivity();
-    setStatus({ lastAction: `cleared:${reason}`, lastClearedAt: Date.now(), asset: "", song: "", buttons: false });
+    setStatus({ lastAction: `cleared:${reason}`, lastClearedAt: Date.now(), asset: "", song: "", buttons: false, lastActivityPreview: null });
     console.log(`[localitfy rpc] activity cache cleared (${reason})`);
     return true;
   } catch (error) {
@@ -1277,17 +1310,25 @@ async function setDiscordActivity(payload = {}) {
     const needsHardClear =
       songChanged ||
       imageChanged ||
-      buttonsChanged ||
-      importantChanged ||
-      hasButtons ||
       payload?.discordForceRefresh === true;
 
     const chosenAttempt = await applyActivityWithRetries(rpcClient, attempts, {
       forceClear: needsHardClear,
-      doublePush: hasButtons && (buttonsChanged || buttonRefreshPassed || payload?.discordForceRefresh === true)
+      doublePush: false
     });
 
     const finalActivity = chosenAttempt.activity;
+    const preview = makeActivityPreview(finalActivity, payload);
+
+    setStatus({
+      connected: true,
+      lastAction: "set-ok",
+      lastError: "",
+      asset: finalActivity.largeImageKey || "",
+      song: preview.title,
+      buttons: Array.isArray(finalActivity.buttons) && finalActivity.buttons.length > 0,
+      lastActivityPreview: preview
+    });
 
     lastActivitySignature = JSON.stringify(finalActivity);
     lastImportantSignature = buildImportantSignature(finalActivity, payload);

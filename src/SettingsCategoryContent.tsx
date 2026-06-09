@@ -615,14 +615,6 @@ return (
             />
 
             <VisualOptionGroup
-              title="Sidebar"
-              note="Sidebar width behavior."
-              options={SIDEBAR_BEHAVIOR_OPTIONS}
-              value={readSettingChoice(settings, "sidebarBehavior", "fixed")}
-              onChange={(value) => updateSetting("sidebarBehavior", value)}
-            />
-
-            <VisualOptionGroup
               title="Player background"
               note="Bottom bar style."
               options={PLAYER_BACKGROUND_OPTIONS}
@@ -733,52 +725,102 @@ return (
           </div>
         </div>
 
-        <div className="settingsTwoColumn">
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
+        <div className="settingsPanelCard appearanceUnifiedControlDeckV356">
+          <div className="settingsPanelHeader appearanceUnifiedHeaderV356">
+            <div>
+              <strong>Layout, cards, and sidebar</strong>
+              <span>One clean place for spacing, ambience, cover tint, and sidebar behavior.</span>
+            </div>
+          </div>
+
+          <div className="appearanceUnifiedGridV356">
+            <section className="appearanceUnifiedSectionV356 appearanceLayoutSectionV356" aria-label="Layout controls">
+              <div className="appearanceUnifiedSectionHeadV356">
                 <strong>Layout</strong>
                 <span>Change spacing and screen density.</span>
               </div>
-            </div>
-            <div className="settingsMiniGrid">
-              <ToggleRow label="Right side cards" help="Shows the optional right column." checked={settings.showRightColumn} onChange={(value) => updateSetting("showRightColumn", value)} />
-              <ToggleRow label="Expanded now playing" help="Makes the hero area larger." checked={settings.heroExpanded} onChange={(value) => updateSetting("heroExpanded", value)} />
-              <ToggleRow label="Compact player" help="Keeps the bottom player smaller." checked={settings.compactPlayer} onChange={(value) => updateSetting("compactPlayer", value)} />
-              <ToggleRow label="Compact library" help="Fits smaller rows." checked={settings.denseList} onChange={(value) => updateSetting("denseList", value)} />
-              <ToggleRow label="Reduce motion" help="Turns off most decorative animations." checked={settings.reducedMotion} onChange={(value) => updateSetting("reducedMotion", value)} />
-            </div>
-          </div>
+              <div className="settingsMiniGrid appearanceMiniGridV356">
+                <ToggleRow label="Right side cards" help="Shows the optional right column." checked={settings.showRightColumn} onChange={(value) => updateSetting("showRightColumn", value)} />
+                <ToggleRow label="Expanded now playing" help="Makes the hero area larger." checked={settings.heroExpanded} onChange={(value) => updateSetting("heroExpanded", value)} />
+                <ToggleRow label="Compact player" help="Keeps the bottom player smaller." checked={settings.compactPlayer} onChange={(value) => updateSetting("compactPlayer", value)} />
+                <ToggleRow label="Compact library" help="Fits smaller rows." checked={settings.denseList} onChange={(value) => updateSetting("denseList", value)} />
+                <ToggleRow label="Reduce motion" help="Turns off most decorative animations." checked={settings.reducedMotion} onChange={(value) => updateSetting("reducedMotion", value)} />
+              </div>
+            </section>
 
-          <div className="settingsPanelCard coverSyncSettingsCard">
-            <div className="settingsPanelHeader">
-              <div>
+            <section className="appearanceUnifiedSectionV356 appearanceCardsSectionV356" aria-label="Cards and ambience controls">
+              <div className="appearanceUnifiedSectionHeadV356">
                 <strong>Cards and ambience</strong>
-                <span>Control library cards, corners, and cover tint.</span>
+                <span>Control library cards, corners, notes, glow, and cover tint.</span>
               </div>
-            </div>
-            <div className="settingsMiniGrid">
-              <ToggleRow label="Soft corners" help="Uses rounder cards and buttons." checked={settings.softCorners} onChange={(value) => updateSetting("softCorners", value)} />
-              <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={settings.showFloatingNotes} onChange={(value) => updateSetting("showFloatingNotes", value)} />
-              <ToggleRow label="Animated glow" help="Keeps ambience on, but pauses it during fast screen switches." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
-            </div>
+              <div className="settingsMiniGrid appearanceMiniGridV356">
+                <ToggleRow label="Soft corners" help="Uses rounder cards and buttons." checked={settings.softCorners} onChange={(value) => updateSetting("softCorners", value)} />
+                <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={settings.showFloatingNotes} onChange={(value) => updateSetting("showFloatingNotes", value)} />
+                <ToggleRow label="Animated glow" help="Keeps ambience on, but pauses it during fast screen switches." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
+                <ToggleRow label="I WANT MORE BLUR!!!!!" help="Makes quick library cards use stronger album-cover blur." checked={settings.quickLibraryMoreBlur !== false} onChange={(value) => updateSetting("quickLibraryMoreBlur", value)} />
+                <ToggleRow label="cat....." help="Tiny cat follows your cursor. Double-click it to lie down. Middle-click it to stop or follow again." checked={settings.catBuddyEnabled === true} onChange={(value) => updateSetting("catBuddyEnabled", value)} />
+              </div>
 
-            <div className="coverSyncPicker modalCoverSyncPicker">
-              <div className="coverSyncHeader">
-                <strong>Cover Color Sync</strong>
-                <small>Pick how strongly the current cover tints the app.</small>
+              <div className="coverSyncPicker modalCoverSyncPicker appearanceCoverSyncV356">
+                <div className="coverSyncHeader">
+                  <strong>Cover Color Sync</strong>
+                  <small>Pick how strongly the current cover tints the app.</small>
+                </div>
+                <div className="coverSyncOptions" role="group" aria-label="Cover Color Sync strength">
+                  {coverColorSyncOptions.map((option) => (
+                    <button key={option.id} className={`coverSyncChoice ${selectedCoverColorSyncMode === option.id ? "active" : ""}`} type="button" onClick={() => updateCoverColorSyncMode(option.id)} aria-pressed={selectedCoverColorSyncMode === option.id}>
+                      <strong>{option.label}</strong>
+                      <span>{option.note}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="coverSyncOptions" role="group" aria-label="Cover Color Sync strength">
-                {coverColorSyncOptions.map((option) => (
-                  <button key={option.id} className={`coverSyncChoice ${selectedCoverColorSyncMode === option.id ? "active" : ""}`} type="button" onClick={() => updateCoverColorSyncMode(option.id)} aria-pressed={selectedCoverColorSyncMode === option.id}>
-                    <strong>{option.label}</strong>
-                    <span>{option.note}</span>
-                  </button>
-                ))}
+            </section>
+
+            <section className="appearanceUnifiedSectionV356 appearanceSidebarSectionV356" aria-label="Sidebar behavior controls">
+              <div className="appearanceUnifiedSectionHeadV356">
+                <strong>Sidebar behavior</strong>
+                <span>Choose if the sidebar stays full, stays slim, or smoothly opens on hover.</span>
               </div>
-            </div>
+
+              <div className="sidebarBehaviorPreviewV327 sidebarBehaviorPreviewV356" data-mode={settings.sidebarBehavior || "fixed"} aria-hidden="true">
+                <span className="sidebarPreviewRailV327">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className="sidebarPreviewPanelV327">
+                  <b />
+                  <b />
+                  <b />
+                </span>
+              </div>
+
+              <div className="sidebarBehaviorChoicesV327 sidebarBehaviorChoicesV356" role="group" aria-label="Choose sidebar behavior">
+                {SIDEBAR_BEHAVIOR_OPTIONS.map((option) => {
+                  const active = readSettingChoice(settings, "sidebarBehavior", "fixed") === option.id;
+
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`sidebarBehaviorChoiceV327 sidebarBehaviorChoiceV356 ${active ? "active" : ""}`}
+                      onClick={() => updateSetting("sidebarBehavior", option.id)}
+                      aria-pressed={active}
+                    >
+                      <span className="sidebarChoiceDotV327" aria-hidden="true" />
+                      <span className="sidebarChoiceCopyV327">
+                        <strong>{option.label}</strong>
+                        <small>{option.note}</small>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
           </div>
         </div>
+
       </section>
     ) : null}
 

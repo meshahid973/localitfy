@@ -5,8 +5,6 @@ contextBridge.exposeInMainWorld("localitfy", {
   resolvePlaybackUrl: (payload) => ipcRenderer.invoke("playback:resolve-url", payload),
 
   importSongs: () => ipcRenderer.invoke("library:import"),
-  scanAlbumFolder: (payload) => ipcRenderer.invoke("albums:scan-folder", payload),
-  importAlbumFolder: (payload) => ipcRenderer.invoke("albums:import-folder", payload),
   clearLibrary: () => ipcRenderer.invoke("library:clear"),
 
   downloadAudioUrls: (payload) => ipcRenderer.invoke("download:audio", payload),
@@ -29,6 +27,8 @@ contextBridge.exposeInMainWorld("localitfy", {
   rescanPixelArt: () => ipcRenderer.invoke("covers:rescan"),
   listBrokenCovers: () => ipcRenderer.invoke("covers:broken"),
   getLeastUsedCover: () => ipcRenderer.invoke("covers:least-used"),
+  getCoverThumbnailStatus: () => ipcRenderer.invoke("covers:thumbnail-status"),
+  warmCoverThumbnails: (payload) => ipcRenderer.invoke("covers:warm-thumbnails", payload),
   setSongCover: (id, coverPath) => ipcRenderer.invoke("song:set-cover", id, coverPath),
   pickSongCover: (id) => ipcRenderer.invoke("song:pick-cover", id),
   analyzeSongVolume: (id) => ipcRenderer.invoke("song:analyze-volume", id),
@@ -59,7 +59,6 @@ contextBridge.exposeInMainWorld("localitfy", {
   toggleDevTools: () => ipcRenderer.invoke("localitfy:toggle-devtools"),
   getPerformanceStatus: () => ipcRenderer.invoke("localitfy:performance-status"),
   getGpuStatus: () => ipcRenderer.invoke("localitfy:gpu-status"),
-  sendFeedback: (payload) => ipcRenderer.invoke("feedback:send", payload),
 
   minimizeWindow: () => ipcRenderer.invoke("window:minimize"),
   toggleMaximizeWindow: () => ipcRenderer.invoke("window:toggle-maximize"),
@@ -107,15 +106,6 @@ contextBridge.exposeInMainWorld("localitfy", {
 
     return () => {
       ipcRenderer.removeListener("localitfy:auto-update-event", handler);
-    };
-  },
-
-  onAlbumFolderImportProgress: (callback) => {
-    const handler = (_event, payload) => callback(payload);
-    ipcRenderer.on("albums:import-folder-progress", handler);
-
-    return () => {
-      ipcRenderer.removeListener("albums:import-folder-progress", handler);
     };
   },
 

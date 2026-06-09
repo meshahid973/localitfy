@@ -75,6 +75,7 @@ import LocaltifyAppView, {
   VirtualSongRows
 } from "./LocaltifyAppView";
 import Onboarding from "./Onboarding";
+import CatBuddy from "./CatBuddy";
 import {
   APP_VERSION,
   BOOT_MIN_VISIBLE_MS,
@@ -503,7 +504,8 @@ function applyVisualCustomizationDefaults<T extends Record<string, any>>(setting
     sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
     playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
     // V385: visible Appearance toggle. Default ON so the current cover-blur look stays enabled.
-    quickLibraryMoreBlur: settings.quickLibraryMoreBlur !== false
+    quickLibraryMoreBlur: settings.quickLibraryMoreBlur !== false,
+    catBuddyEnabled: settings.catBuddyEnabled === true
   };
 }
 
@@ -6099,7 +6101,8 @@ function MainModeApp() {
       key === "starsIntensity" ||
       key === "sidebarBehavior" ||
       key === "playerBackgroundStyle" ||
-      key === "quickLibraryMoreBlur"
+      key === "quickLibraryMoreBlur" ||
+      key === "catBuddyEnabled"
     ) {
       kickThemeSettle();
     }
@@ -6216,7 +6219,8 @@ function MainModeApp() {
       gifVisualsMode: defaultSettings.gifVisualsMode,
       animatedGlow: defaultSettings.animatedGlow,
       softCorners: defaultSettings.softCorners,
-      reducedMotion: defaultSettings.reducedMotion
+      reducedMotion: defaultSettings.reducedMotion,
+      catBuddyEnabled: defaultSettings.catBuddyEnabled
     });
     setStatusText("appearance reset");
     showAppToast("Appearance reset", "success");
@@ -10960,6 +10964,7 @@ function MainModeApp() {
   return (
     <>
       <LocaltifyAppView {...localtifyAppViewProps} />
+      <CatBuddy enabled={settings.catBuddyEnabled === true} reducedMotion={settings.reducedMotion === true} />
       {renderFeedbackPrompt()}
     </>
   );

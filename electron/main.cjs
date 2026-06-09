@@ -1,4 +1,4 @@
-/* localtify 0.3.8 V310 — startup/service deferral perf pass. Visuals preserved. */
+/* localtify 0.3.8 V302 — GPU acceleration status and DevTools bridge. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -116,6 +116,9 @@ function loadLocaltifyEnv() {
 
 loadLocaltifyEnv();
 
+const ffmpegStatic = require("ffmpeg-static");
+const { autoUpdater } = require("electron-updater");
+
 const {
   initDatabase,
   getSongs,
@@ -132,72 +135,15 @@ const {
   getDatabaseStatus
 } = require("./db.cjs");
 
-// V310: keep launch light. These modules are useful, but they are not needed to
-// paint the first window. Load them only when the user opens downloads,
-// Spotify/download tools, Discord RPC, or updates.
-let ffmpegStaticCache;
-let autoUpdaterCache = null;
-let autoUpdaterLoadFailed = false;
-let rpcModuleCache = null;
-let downloaderModuleCache = null;
-let downloaderReady = false;
-
-function requireLocaltifyModule(modulePath, label) {
-  try {
-    return require(modulePath);
-  } catch (error) {
-    console.log(`[localtify lazy-load error] ${label || modulePath}`, error?.message || error);
-    return null;
-  }
-}
-
-function getFfmpegStaticPathLazy() {
-  if (typeof ffmpegStaticCache !== "undefined") return ffmpegStaticCache;
-  ffmpegStaticCache = requireLocaltifyModule("ffmpeg-static", "ffmpeg-static") || null;
-  return ffmpegStaticCache;
-}
-
-function getAutoUpdaterLazy() {
-  if (autoUpdaterCache || autoUpdaterLoadFailed) return autoUpdaterCache;
-  const updaterModule = requireLocaltifyModule("electron-updater", "electron-updater");
-  autoUpdaterCache = updaterModule?.autoUpdater || null;
-  autoUpdaterLoadFailed = !autoUpdaterCache;
-  return autoUpdaterCache;
-}
-
-function getRpcModuleLazy() {
-  if (rpcModuleCache) return rpcModuleCache;
-  rpcModuleCache = requireLocaltifyModule("./rpc.cjs", "discord rpc") || {};
-  return rpcModuleCache;
-}
-
-function getDiscordStatusSafe() {
-  try {
-    const rpc = getRpcModuleLazy();
-    return typeof rpc.getDiscordStatus === "function" ? rpc.getDiscordStatus() : { ok: false, loaded: false };
-  } catch {
-    return { ok: false, loaded: false };
-  }
-}
-
-function getDownloaderModuleLazy() {
-  if (downloaderModuleCache) return downloaderModuleCache;
-  downloaderModuleCache = requireLocaltifyModule("./downloader.cjs", "downloader") || {};
-  return downloaderModuleCache;
-}
-
-function ensureDownloaderReady() {
-  const downloader = getDownloaderModuleLazy();
-  if (!downloaderReady && typeof downloader.initDownloader === "function") {
-    downloader.initDownloader({
-      userDataPath: app.getPath("userData"),
-      ffmpegPath: getFfmpegPath(),
-      getCookiesFile: getYouTubeCookiesFile
-    });
-    downloaderReady = true;
-  }
-  return downloader;
-}
+const { setDiscordActivity, clearDiscordActivity, shutdownDiscordActivity, getDiscordStatus, resetDiscordActivityCache } = require("./rpc.cjs");
+const {
+  initDownloader,
+  downloadAudioUrls,
+  cancelActiveDownloads,
+  convertLocalMediaFiles,
+  isSupportedMediaPath,
+  downloadSpotifyBatch
+} = require("./downloader.cjs");
 
 const isDev = !app.isPackaged;
 
@@ -212,7 +158,13 @@ const mediaPathKeyToToken = new Map();
 let mediaServer = null;
 let mediaServerPort = 0;
 let mediaServerReadyPromise = null;
-const albumFolderImportScans = new Map();
+
+const COVER_THUMBNAIL_SIZE = 256;
+const COVER_THUMBNAIL_DIR_NAME = "thumbnails";
+const coverThumbnailUrlCache = new Map();
+const coverThumbnailQueue = new Map();
+let coverThumbnailWarmStarted = false;
+
 
 try {
   protocol.registerSchemesAsPrivileged([
@@ -926,12 +878,7 @@ function sendAutoUpdateEvent(payload) {
 }
 
 function setupAutoUpdater() {
-  const autoUpdater = getAutoUpdaterLazy();
-  if (!autoUpdater) {
-    sendAutoUpdateEvent({ type: "error", message: "updater unavailable", error: "electron-updater could not load" });
-    return null;
-  }
-  if (updaterReady) return autoUpdater;
+  if (updaterReady) return;
   updaterReady = true;
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
@@ -994,12 +941,10 @@ function setupAutoUpdater() {
       error: error?.message || String(error || "unknown updater error")
     });
   });
-  return autoUpdater;
 }
 
 async function checkForUpdates(payload = {}) {
-  const autoUpdater = setupAutoUpdater();
-  if (!autoUpdater) return false;
+  setupAutoUpdater();
   updaterSilent = Boolean(payload?.silent);
   if (isDev) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
@@ -1022,8 +967,7 @@ async function checkForUpdates(payload = {}) {
 }
 
 async function downloadUpdate() {
-  const autoUpdater = setupAutoUpdater();
-  if (!autoUpdater) return false;
+  setupAutoUpdater();
   if (isDev) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
@@ -1049,8 +993,7 @@ async function downloadUpdate() {
 }
 
 async function installUpdate() {
-  const autoUpdater = setupAutoUpdater();
-  if (!autoUpdater) return false;
+  setupAutoUpdater();
   if (isDev) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
@@ -1475,6 +1418,255 @@ function safeMediaUrl(filePath) {
   return `http://${MEDIA_SERVER_HOST}:${mediaServerPort}/media/${encodeURIComponent(tokenInfo.token)}?t=${MEDIA_SERVER_TOKEN}&v=${encodeURIComponent(tokenInfo.version)}`;
 }
 
+
+function getCoverThumbnailDirectory() {
+  try {
+    const dir = path.join(app.getPath("userData"), COVER_THUMBNAIL_DIR_NAME);
+    fs.mkdirSync(dir, { recursive: true });
+    return dir;
+  } catch (error) {
+    console.log("[localtify thumbnails directory error]", error?.message || error);
+    return "";
+  }
+}
+
+function getCoverThumbnailCacheKey(filePath) {
+  try {
+    const info = getFileInfoCached(filePath);
+    const signature = [
+      path.normalize(String(filePath || "")).toLowerCase(),
+      info.size || 0,
+      Math.round(info.mtimeMs || 0),
+      COVER_THUMBNAIL_SIZE
+    ].join("|");
+
+    return crypto.createHash("sha1").update(signature).digest("hex");
+  } catch {
+    return crypto.createHash("sha1").update(String(filePath || "")).digest("hex");
+  }
+}
+
+function getCoverThumbnailPath(filePath) {
+  if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) return "";
+
+  const dir = getCoverThumbnailDirectory();
+  if (!dir) return "";
+
+  return path.join(dir, `${getCoverThumbnailCacheKey(filePath)}.png`);
+}
+
+function createCoverThumbnailSync(filePath) {
+  const thumbnailPath = getCoverThumbnailPath(filePath);
+
+  if (!thumbnailPath) {
+    return { ok: false, sourcePath: filePath, thumbnailPath: "", error: "That cover image is missing or unsupported." };
+  }
+
+  if (fileExists(thumbnailPath)) {
+    return { ok: true, sourcePath: filePath, thumbnailPath, cached: true, url: safeMediaUrl(thumbnailPath) };
+  }
+
+  try {
+    const image = nativeImage.createFromPath(filePath);
+
+    if (!image || image.isEmpty()) {
+      return {
+        ok: false,
+        sourcePath: filePath,
+        thumbnailPath: "",
+        error: "Localtify could not read this cover image. The original cover will still be used."
+      };
+    }
+
+    const sourceSize = image.getSize();
+    const resized = image.resize({
+      width: COVER_THUMBNAIL_SIZE,
+      height: COVER_THUMBNAIL_SIZE,
+      quality: "good"
+    });
+
+    if (!resized || resized.isEmpty()) {
+      return {
+        ok: false,
+        sourcePath: filePath,
+        thumbnailPath: "",
+        error: "Localtify could not resize this cover image. The original cover will still be used."
+      };
+    }
+
+    fs.mkdirSync(path.dirname(thumbnailPath), { recursive: true });
+    fs.writeFileSync(thumbnailPath, resized.toPNG());
+
+    return {
+      ok: true,
+      sourcePath: filePath,
+      thumbnailPath,
+      cached: false,
+      url: safeMediaUrl(thumbnailPath),
+      sourceWidth: sourceSize.width,
+      sourceHeight: sourceSize.height,
+      size: COVER_THUMBNAIL_SIZE
+    };
+  } catch (error) {
+    console.log("[localtify thumbnail create error]", error?.message || error);
+    return {
+      ok: false,
+      sourcePath: filePath,
+      thumbnailPath: "",
+      error: "Localtify could not create a small cover thumbnail yet. The full cover will still work."
+    };
+  }
+}
+
+function queueCoverThumbnail(filePath) {
+  if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) return;
+  const thumbnailPath = getCoverThumbnailPath(filePath);
+  if (!thumbnailPath || fileExists(thumbnailPath) || coverThumbnailQueue.has(filePath)) return;
+
+  const timer = setTimeout(() => {
+    coverThumbnailQueue.delete(filePath);
+    createCoverThumbnailSync(filePath);
+  }, 750 + Math.min(3200, coverThumbnailQueue.size * 120));
+
+  coverThumbnailQueue.set(filePath, timer);
+}
+
+function getCoverThumbnailUrl(filePath, options = {}) {
+  const forceCreate = Boolean(options.forceCreate);
+
+  if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) {
+    return "";
+  }
+
+  const key = getCoverThumbnailCacheKey(filePath);
+  const cached = coverThumbnailUrlCache.get(key);
+
+  if (cached && fileExists(cached.thumbnailPath)) {
+    return cached.url;
+  }
+
+  const thumbnailPath = getCoverThumbnailPath(filePath);
+
+  if (thumbnailPath && fileExists(thumbnailPath)) {
+    const url = safeMediaUrl(thumbnailPath);
+    coverThumbnailUrlCache.set(key, { thumbnailPath, url, cachedAt: Date.now() });
+    return url;
+  }
+
+  if (forceCreate) {
+    const created = createCoverThumbnailSync(filePath);
+    if (created.ok && created.url) {
+      coverThumbnailUrlCache.set(key, { thumbnailPath: created.thumbnailPath, url: created.url, cachedAt: Date.now() });
+      return created.url;
+    }
+    return "";
+  }
+
+  queueCoverThumbnail(filePath);
+  return "";
+}
+
+function getCoverThumbnailStatus() {
+  const dir = getCoverThumbnailDirectory();
+  let count = 0;
+  let sizeBytes = 0;
+
+  try {
+    if (dir && fs.existsSync(dir)) {
+      for (const name of fs.readdirSync(dir)) {
+        const filePath = path.join(dir, name);
+        if (!fileExists(filePath)) continue;
+        const info = getFileInfoCached(filePath);
+        if (!info.isFile) continue;
+        count += 1;
+        sizeBytes += info.size || 0;
+      }
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      directory: dir,
+      count,
+      sizeBytes,
+      queued: coverThumbnailQueue.size,
+      message: "Localtify could not read the thumbnail cache. Covers will still load normally.",
+      error: error?.message || "thumbnail status failed"
+    };
+  }
+
+  return {
+    ok: true,
+    directory: dir,
+    count,
+    sizeBytes,
+    queued: coverThumbnailQueue.size,
+    size: COVER_THUMBNAIL_SIZE,
+    message: count
+      ? `${count} small cover thumbnail${count === 1 ? "" : "s"} cached.`
+      : "No cover thumbnails cached yet. Localtify will build them quietly as covers appear."
+  };
+}
+
+function warmCoverThumbnails({ limit = 80, force = false } = {}) {
+  const songs = getSongs();
+  const uniqueCoverPaths = [];
+
+  for (const song of songs) {
+    const coverPath = String(song?.coverPath || "").trim();
+    if (!coverPath || !path.isAbsolute(coverPath) || !isImageFile(coverPath) || !fileExists(coverPath)) continue;
+    if (uniqueCoverPaths.includes(coverPath)) continue;
+    uniqueCoverPaths.push(coverPath);
+    if (uniqueCoverPaths.length >= limit) break;
+  }
+
+  let created = 0;
+  let cached = 0;
+  const warnings = [];
+
+  for (const coverPath of uniqueCoverPaths) {
+    const thumbnailPath = getCoverThumbnailPath(coverPath);
+
+    if (thumbnailPath && fileExists(thumbnailPath) && !force) {
+      cached += 1;
+      continue;
+    }
+
+    const result = createCoverThumbnailSync(coverPath);
+    if (result.ok) {
+      created += result.cached ? 0 : 1;
+      if (result.cached) cached += 1;
+    } else if (result.error) {
+      warnings.push(result.error);
+    }
+  }
+
+  return {
+    ok: true,
+    scanned: uniqueCoverPaths.length,
+    created,
+    cached,
+    warnings: Array.from(new Set(warnings)).slice(0, 4),
+    status: getCoverThumbnailStatus(),
+    message: created
+      ? `Cached ${created} cover thumbnail${created === 1 ? "" : "s"}.`
+      : cached
+        ? "Cover thumbnails are already ready."
+        : "No custom covers needed thumbnail caching yet."
+  };
+}
+
+function scheduleCoverThumbnailWarmup() {
+  if (coverThumbnailWarmStarted) return;
+  coverThumbnailWarmStarted = true;
+  setTimeout(() => {
+    try {
+      warmCoverThumbnails({ limit: 120 });
+    } catch (error) {
+      console.log("[localtify thumbnail warmup error]", error?.message || error);
+    }
+  }, 4500);
+}
+
 function safeImageExtensionFromUrlOrType(rawUrl = "", contentType = "") {
   const cleanType = String(contentType || "").toLowerCase();
   const cleanUrl = String(rawUrl || "").toLowerCase();
@@ -1630,7 +1822,6 @@ function getDownloadDirectory(customFolder) {
 }
 
 function getFfmpegPath() {
-  const ffmpegStatic = getFfmpegStaticPathLazy();
   if (!ffmpegStatic) return null;
   if (app.isPackaged && ffmpegStatic.includes("app.asar")) {
     return ffmpegStatic.replace("app.asar", "app.asar.unpacked");
@@ -2725,563 +2916,6 @@ function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new Set()) 
   };
 }
 
-
-const ALBUM_FOLDER_COVER_NAMES = new Set([
-  "cover.jpg",
-  "cover.jpeg",
-  "cover.png",
-  "folder.jpg",
-  "folder.jpeg",
-  "folder.png",
-  "front.jpg",
-  "front.jpeg",
-  "front.png",
-  "album.jpg",
-  "album.jpeg",
-  "album.png"
-]);
-
-function cleanFolderAlbumText(value, fallback = "") {
-  const text = String(value || "")
-    .replace(/[_]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  return text || fallback;
-}
-
-function cleanFolderAlbumTitleFromPath(folderPath) {
-  const parsed = path.parse(String(folderPath || ""));
-  return cleanFolderAlbumText(parsed.name, "local album");
-}
-
-function naturalLocaltifyCompare(a, b) {
-  return String(a || "").localeCompare(String(b || ""), undefined, {
-    numeric: true,
-    sensitivity: "base"
-  });
-}
-
-function parseTrackInfoFromFilename(filePath) {
-  const parsed = path.parse(filePath);
-  let base = cleanFolderAlbumText(parsed.name, parsed.name);
-  let disc = 0;
-  let track = 9999;
-
-  const discMatch = base.match(/(?:^|[\s._-])(?:disc|disk|cd)\s*([0-9]{1,2})(?:[\s._-]|$)/i);
-  if (discMatch) {
-    disc = Number(discMatch[1]) || 0;
-    base = cleanFolderAlbumText(base.replace(discMatch[0], " "), base);
-  }
-
-  const trackMatch = base.match(/^\s*(?:d?([0-9]{1,2})[\s._-]*)?([0-9]{1,3})(?:\s*[-._]\s*|\s+)/);
-  if (trackMatch) {
-    if (trackMatch[1]) disc = Number(trackMatch[1]) || disc;
-    track = Number(trackMatch[2]) || track;
-    base = cleanFolderAlbumText(base.slice(trackMatch[0].length), base);
-  }
-
-  let artist = "";
-  let title = base || parsed.name;
-  const dashParts = base.split(/\s+-\s+/).map((item) => item.trim()).filter(Boolean);
-  if (dashParts.length >= 2) {
-    artist = dashParts[0];
-    title = dashParts.slice(1).join(" - ");
-  }
-
-  return {
-    title: cleanFolderAlbumText(title, parsed.name),
-    artist: cleanFolderAlbumText(artist, ""),
-    disc,
-    track,
-    sortName: parsed.name
-  };
-}
-
-function getFolderAlbumCommonArtist(tracks) {
-  const artists = tracks
-    .map((track) => cleanFolderAlbumText(track.artist, ""))
-    .filter(Boolean)
-    .filter((artist) => artist.toLowerCase() !== "unknown artist");
-
-  const unique = [...new Map(artists.map((artist) => [artist.toLowerCase(), artist])).values()];
-
-  if (!unique.length) return "unknown artist";
-  if (unique.length === 1) return unique[0];
-  return "Various Artists";
-}
-
-async function findAlbumFolderCover(folderPath) {
-  const folder = String(folderPath || "");
-  if (!folder || !path.isAbsolute(folder)) return "";
-
-  let entries = [];
-  try {
-    entries = await fs.promises.readdir(folder, { withFileTypes: true });
-  } catch {
-    return "";
-  }
-
-  const directMatches = entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name)
-    .filter((name) => ALBUM_FOLDER_COVER_NAMES.has(name.toLowerCase()))
-    .sort((a, b) => {
-      const aScore = ["cover", "folder", "front", "album"].findIndex((prefix) => a.toLowerCase().startsWith(prefix));
-      const bScore = ["cover", "folder", "front", "album"].findIndex((prefix) => b.toLowerCase().startsWith(prefix));
-      return (aScore === -1 ? 99 : aScore) - (bScore === -1 ? 99 : bScore) || naturalLocaltifyCompare(a, b);
-    });
-
-  if (directMatches[0]) return path.join(folder, directMatches[0]);
-
-  const looseImage = entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name)
-    .find((name) => /^(cover|folder|front|album)[\s._-].*\.(png|jpe?g)$/i.test(name));
-
-  return looseImage ? path.join(folder, looseImage) : "";
-}
-
-async function listAlbumAudioFiles(folderPath, options = {}) {
-  const root = String(folderPath || "");
-  const maxDepth = Number.isFinite(Number(options.maxDepth)) ? Number(options.maxDepth) : 2;
-  const maxFiles = Number.isFinite(Number(options.maxFiles)) ? Number(options.maxFiles) : 420;
-  const out = [];
-
-  async function walk(dir, depth) {
-    if (out.length >= maxFiles || depth > maxDepth) return;
-
-    let entries = [];
-    try {
-      entries = await fs.promises.readdir(dir, { withFileTypes: true });
-    } catch {
-      return;
-    }
-
-    entries.sort((a, b) => naturalLocaltifyCompare(a.name, b.name));
-
-    for (const entry of entries) {
-      if (out.length >= maxFiles) break;
-      const fullPath = path.join(dir, entry.name);
-
-      if (entry.isDirectory()) {
-        if (entry.name.startsWith(".") || /^(node_modules|localitfy-bin|spotify-covers)$/i.test(entry.name)) continue;
-        await walk(fullPath, depth + 1);
-        continue;
-      }
-
-      if (!entry.isFile()) continue;
-      if (!isAudioFile(fullPath)) continue;
-      if (/\.(part|tmp|download|crdownload)$/i.test(entry.name)) continue;
-
-      out.push(fullPath);
-    }
-  }
-
-  if (!root || !path.isAbsolute(root)) return out;
-  await walk(root, 0);
-
-  return out.sort((a, b) => {
-    const aInfo = parseTrackInfoFromFilename(a);
-    const bInfo = parseTrackInfoFromFilename(b);
-    if (aInfo.disc !== bInfo.disc) return aInfo.disc - bInfo.disc;
-    if (aInfo.track !== bInfo.track) return aInfo.track - bInfo.track;
-    return naturalLocaltifyCompare(aInfo.sortName, bInfo.sortName);
-  });
-}
-
-async function getAlbumLibraryCandidateFolders(rootPath, options = {}) {
-  const root = String(rootPath || "");
-  const maxCandidateFolders = Number.isFinite(Number(options.maxCandidateFolders)) ? Math.max(1, Number(options.maxCandidateFolders)) : 90;
-  const onProgress = typeof options.onProgress === "function" ? options.onProgress : null;
-  if (!root || !path.isAbsolute(root)) return [];
-
-  let entries = [];
-  try {
-    entries = await fs.promises.readdir(root, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-
-  const directories = entries
-    .filter((entry) => entry.isDirectory())
-    .filter((entry) => !entry.name.startsWith("."))
-    .filter((entry) => !/^(node_modules|localitfy-bin|spotify-covers|dist|build|release|out|\.git)$/i.test(entry.name))
-    .map((entry) => path.join(root, entry.name))
-    .sort(naturalLocaltifyCompare)
-    .slice(0, maxCandidateFolders);
-
-  const candidates = [];
-
-  for (let index = 0; index < directories.length; index += 1) {
-    const directory = directories[index];
-    if (onProgress) {
-      onProgress({
-        type: "scan-candidate",
-        index: index + 1,
-        total: directories.length,
-        folder: directory,
-        message: `checking ${path.basename(directory)}`
-      });
-    }
-
-    const files = await listAlbumAudioFiles(directory, { maxDepth: 1, maxFiles: 8 });
-    if (files.length) candidates.push(directory);
-    await yieldToMainLoop();
-  }
-
-  // If the selected parent is itself an album folder, support it instead of returning nothing.
-  if (!candidates.length) {
-    const rootFiles = await listAlbumAudioFiles(root, { maxDepth: 1, maxFiles: 8 });
-    if (rootFiles.length) candidates.push(root);
-  }
-
-  return candidates;
-}
-
-async function scanOneAlbumFolder(folderPath, existingSourceKeys = new Set(), options = {}) {
-  const maxDepth = Number.isFinite(Number(options.maxDepth)) ? Number(options.maxDepth) : 1;
-  const maxFiles = Number.isFinite(Number(options.maxFiles)) ? Number(options.maxFiles) : 280;
-  const audioFiles = await listAlbumAudioFiles(folderPath, { maxDepth, maxFiles });
-
-  const title = cleanFolderAlbumTitleFromPath(folderPath);
-  const coverPath = await findAlbumFolderCover(folderPath);
-  const tracks = audioFiles.map((filePath, index) => {
-    const parsed = parseTrackInfoFromFilename(filePath);
-    return {
-      id: crypto.createHash("sha256").update(filePath).digest("hex"),
-      filePath,
-      title: parsed.title,
-      artist: parsed.artist || "unknown artist",
-      album: title,
-      disc: parsed.disc,
-      track: parsed.track === 9999 ? index + 1 : parsed.track,
-      duplicate: existingSourceKeys.has(String(filePath || "").trim().toLowerCase())
-    };
-  });
-
-  const artist = getFolderAlbumCommonArtist(tracks);
-  const warnings = [];
-
-  if (!tracks.length) warnings.push("No audio files found");
-  if (!coverPath) warnings.push("No cover found");
-  if (artist === "Various Artists") warnings.push("Mixed artists detected");
-  if (audioFiles.length >= maxFiles) warnings.push(`Scan limit reached at ${maxFiles} tracks`);
-
-  const duplicateCount = tracks.filter((track) => track.duplicate).length;
-  if (duplicateCount) warnings.push(`${duplicateCount} duplicate song${duplicateCount === 1 ? "" : "s"} already in library`);
-
-  return {
-    id: `folder_${crypto.createHash("sha1").update(String(folderPath)).digest("hex").slice(0, 12)}`,
-    title,
-    artist,
-    sourcePath: folderPath,
-    coverPath,
-    coverUrl: coverPath ? safeMediaUrl(coverPath) : "",
-    trackCount: tracks.length,
-    duplicateCount,
-    warnings,
-    tracks
-  };
-}
-
-async function openAlbumFolderDialog(senderWindow, mode) {
-  const single = mode === "single";
-  const dialogOptions = {
-    title: single ? "Choose one album folder" : "Choose a music folder with album subfolders",
-    buttonLabel: single ? "Scan album folder" : "Scan album library",
-    properties: ["openDirectory"]
-  };
-
-  return senderWindow && !senderWindow.isDestroyed()
-    ? dialog.showOpenDialog(senderWindow, dialogOptions)
-    : dialog.showOpenDialog(dialogOptions);
-}
-
-async function scanAlbumFolderImportRequest(event, payload = {}) {
-  const mode = payload?.mode === "library" ? "library" : "single";
-  const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
-  const dialogResult = await openAlbumFolderDialog(senderWindow, mode);
-
-  if (dialogResult.canceled || !dialogResult.filePaths?.[0]) {
-    return { ok: false, canceled: true, mode, scanId: "", rootPath: "", albums: [], message: "folder scan cancelled" };
-  }
-
-  const rootPath = dialogResult.filePaths[0];
-  const existingSourceKeys = new Set(getSongs().map((song) => String(song.filePath || "").trim().toLowerCase()).filter(Boolean));
-
-  event.sender.send("albums:import-folder-progress", {
-    type: "scan-start",
-    mode,
-    rootPath,
-    total: 0,
-    message: mode === "library" ? "checking album subfolders..." : "checking selected album folder..."
-  });
-
-  const candidateFolders = mode === "library"
-    ? await getAlbumLibraryCandidateFolders(rootPath, {
-        maxCandidateFolders: 90,
-        onProgress: (progress) => {
-          event.sender.send("albums:import-folder-progress", {
-            ...progress,
-            mode,
-            rootPath
-          });
-        }
-      })
-    : [rootPath];
-
-  const albums = [];
-
-  if (!candidateFolders.length) {
-    const scanId = `scan_${Date.now().toString(36)}_${crypto.randomBytes(5).toString("hex")}`;
-    const result = {
-      ok: true,
-      canceled: false,
-      scanId,
-      mode,
-      rootPath,
-      albumCount: 0,
-      trackCount: 0,
-      duplicateCount: 0,
-      albums: [],
-      message: mode === "library"
-        ? "No album folders found. Choose a folder that contains album subfolders with audio files."
-        : "No audio files found in this album folder."
-    };
-
-    albumFolderImportScans.set(scanId, { createdAt: Date.now(), result });
-    event.sender.send("albums:import-folder-progress", {
-      type: "scan-done",
-      mode,
-      rootPath,
-      total: 0,
-      message: result.message
-    });
-    return result;
-  }
-
-  event.sender.send("albums:import-folder-progress", {
-    type: "scan-folders-ready",
-    mode,
-    rootPath,
-    total: candidateFolders.length,
-    message: `checking ${candidateFolders.length} folder${candidateFolders.length === 1 ? "" : "s"}...`
-  });
-
-  for (let index = 0; index < candidateFolders.length; index += 1) {
-    const folder = candidateFolders[index];
-
-    event.sender.send("albums:import-folder-progress", {
-      type: "scan-folder",
-      mode,
-      rootPath,
-      index: index + 1,
-      total: candidateFolders.length,
-      folder,
-      message: `scanning ${path.basename(folder)}`
-    });
-
-    const album = await scanOneAlbumFolder(folder, existingSourceKeys, {
-      maxDepth: mode === "single" ? 1 : 1,
-      maxFiles: mode === "single" ? 320 : 240
-    });
-    if (album.trackCount > 0) albums.push(album);
-    await yieldToMainLoop();
-  }
-
-  const scanId = `scan_${Date.now().toString(36)}_${crypto.randomBytes(5).toString("hex")}`;
-  const result = {
-    ok: true,
-    canceled: false,
-    scanId,
-    mode,
-    rootPath,
-    albumCount: albums.length,
-    trackCount: albums.reduce((total, album) => total + album.trackCount, 0),
-    duplicateCount: albums.reduce((total, album) => total + album.duplicateCount, 0),
-    albums,
-    message: albums.length
-      ? `Found ${albums.length} album${albums.length === 1 ? "" : "s"} with ${albums.reduce((total, album) => total + album.trackCount, 0)} track${albums.reduce((total, album) => total + album.trackCount, 0) === 1 ? "" : "s"}.`
-      : mode === "library"
-        ? "No album folders found. Choose a parent folder that contains album subfolders with audio files."
-        : "No audio files found in this album folder."
-  };
-
-  albumFolderImportScans.set(scanId, {
-    createdAt: Date.now(),
-    result
-  });
-
-  // Keep the preview cache small and short-lived.
-  const cutoff = Date.now() - 15 * 60 * 1000;
-  for (const [key, value] of albumFolderImportScans.entries()) {
-    if (!value || value.createdAt < cutoff || albumFolderImportScans.size > 12) {
-      albumFolderImportScans.delete(key);
-    }
-  }
-
-  event.sender.send("albums:import-folder-progress", {
-    type: "scan-done",
-    mode,
-    rootPath,
-    total: albums.length,
-    message: result.message
-  });
-
-  return result;
-}
-
-async function commitAlbumFolderImportRequest(event, payload = {}) {
-  const scanId = String(payload?.scanId || "");
-  const cached = scanId ? albumFolderImportScans.get(scanId) : null;
-  const scanResult = cached?.result || null;
-
-  if (!scanResult) {
-    return {
-      ok: false,
-      error: "No album scan preview is ready. Scan a folder first.",
-      changedCount: 0,
-      songs: listSongsShaped(),
-      albums: []
-    };
-  }
-
-  if (!scanResult.albums?.length) {
-    return {
-      ok: false,
-      error: scanResult.message || "No album folders were found to import.",
-      changedCount: 0,
-      songs: listSongsShaped(),
-      albums: []
-    };
-  }
-
-  const pixelArtFiles = getPixelArtFiles();
-  const usedCovers = new Set();
-  const existingBefore = getSongs();
-  const existingSourceKeys = new Set(existingBefore.map((song) => String(song.filePath || "").trim().toLowerCase()).filter(Boolean));
-  const songsToInsert = [];
-  let processedTracks = 0;
-
-  event.sender.send("albums:import-folder-progress", {
-    type: "import-start",
-    scanId,
-    total: scanResult.trackCount,
-    message: "adding album tracks to library..."
-  });
-
-  for (let albumIndex = 0; albumIndex < scanResult.albums.length; albumIndex += 1) {
-    const album = scanResult.albums[albumIndex];
-
-    event.sender.send("albums:import-folder-progress", {
-      type: "import-album",
-      scanId,
-      index: albumIndex + 1,
-      total: scanResult.albums.length,
-      folder: album.sourcePath,
-      message: `importing ${album.title}`
-    });
-
-    for (const track of album.tracks || []) {
-      processedTracks += 1;
-      const sourceKey = String(track.filePath || "").trim().toLowerCase();
-      if (!sourceKey || existingSourceKeys.has(sourceKey)) continue;
-
-      const song = makeSongFromFile(track.filePath, pixelArtFiles, usedCovers);
-      song.title = cleanFolderAlbumText(track.title, song.title);
-      song.artist = cleanFolderAlbumText(track.artist, album.artist || song.artist || "unknown artist");
-      song.album = cleanFolderAlbumText(album.title, song.album || "local album");
-      if (album.coverPath && fileExists(album.coverPath)) {
-        song.coverPath = album.coverPath;
-      }
-
-      songsToInsert.push(song);
-      existingSourceKeys.add(sourceKey);
-
-      if (processedTracks % 24 === 0) {
-        event.sender.send("albums:import-folder-progress", {
-          type: "import-track",
-          scanId,
-          index: processedTracks,
-          total: scanResult.trackCount,
-          message: `added ${processedTracks}/${scanResult.trackCount} tracks`
-        });
-        await yieldToMainLoop();
-      }
-    }
-
-    await yieldToMainLoop();
-  }
-
-  const changedCount = songsToInsert.length ? insertSongs(songsToInsert) : 0;
-  clearFileInfoCache();
-
-  const shapedSongs = listSongsShaped();
-  const songsByPath = new Map(
-    shapedSongs
-      .map((song) => [String(song.filePath || "").trim().toLowerCase(), song])
-      .filter(([key]) => Boolean(key))
-  );
-
-  const importedAlbums = scanResult.albums
-    .map((album) => {
-      const songIds = (album.tracks || [])
-        .map((track) => songsByPath.get(String(track.filePath || "").trim().toLowerCase())?.id)
-        .filter(Boolean);
-
-      if (!songIds.length) return null;
-
-      const manualAlbumId = `folder_${crypto.createHash("sha1").update(String(album.sourcePath || album.title)).digest("hex").slice(0, 14)}`;
-
-      return {
-        id: manualAlbumId,
-        manualAlbumId,
-        title: album.title,
-        artist: album.artist || "local album",
-        year: "",
-        coverUrl: album.coverUrl || "",
-        sourceType: "folder",
-        sourcePath: album.sourcePath,
-        folderCoverPath: album.coverPath || "",
-        importedAt: Date.now(),
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        songIds,
-        trackCount: songIds.length,
-        warnings: album.warnings || []
-      };
-    })
-    .filter(Boolean);
-
-  const message = importedAlbums.length
-    ? `Imported ${importedAlbums.length} folder album${importedAlbums.length === 1 ? "" : "s"}. ${changedCount} new track${changedCount === 1 ? "" : "s"} added.`
-    : "No album was imported because every detected track was unavailable.";
-
-  event.sender.send("albums:import-folder-progress", {
-    type: "import-done",
-    scanId,
-    total: importedAlbums.length,
-    changedCount,
-    message
-  });
-
-  albumFolderImportScans.delete(scanId);
-
-  return {
-    ok: true,
-    scanId,
-    mode: scanResult.mode,
-    rootPath: scanResult.rootPath,
-    changedCount,
-    songs: shapedSongs,
-    albums: importedAlbums,
-    skippedDuplicates: scanResult.duplicateCount || 0,
-    message
-  };
-}
-
-
 function normalizeForLooseMatch(value = "") {
   return String(value || "")
     .toLowerCase()
@@ -3591,6 +3225,9 @@ function shapeSong(song, pixelArtFiles = null) {
   const runtimeCoverPath = getRuntimeCoverPath(song, pixelArtFiles);
   const coverExists = Boolean(runtimeCoverPath && fileExists(runtimeCoverPath));
 
+  const coverUrl = coverExists ? safeMediaUrl(runtimeCoverPath) : "";
+  const coverThumbUrl = coverExists ? getCoverThumbnailUrl(runtimeCoverPath) : "";
+
   return {
     ...song,
     // Keep database/bootstrap rows clean. Audio URLs are resolved lazily from filePath by playback:resolve-url.
@@ -3598,10 +3235,15 @@ function shapeSong(song, pixelArtFiles = null) {
     // Never hand the renderer a raw file:// cover. In packaged builds Chromium blocks it.
     // If the DB has no coverPath or the old path is broken, use a stable bundled pixel-art fallback at runtime.
     coverPath: song.coverPath || runtimeCoverPath || "",
-    coverUrl: coverExists ? safeMediaUrl(runtimeCoverPath) : "",
+    coverUrl,
+    coverThumbUrl,
+    coverThumbnailUrl: coverThumbUrl,
+    thumbnailUrl: coverThumbUrl,
+    coverFullUrl: coverUrl,
     exists,
     fileExists: exists,
-    coverExists
+    coverExists,
+    coverThumbnailReady: Boolean(coverThumbUrl)
   };
 }
 
@@ -3940,150 +3582,10 @@ function repairMainWindowBounds(win, options = {}) {
   win.setBounds({ x, y, width, height });
 }
 
-function getLocaltifyFeedbackWebhookUrl() {
-  return (
-    process.env.LOCALTIFY_FEEDBACK_WEBHOOK_URL ||
-    process.env.LOCALTIFY_DISCORD_FEEDBACK_WEBHOOK_URL ||
-    process.env.DISCORD_FEEDBACK_WEBHOOK_URL ||
-    process.env.DISCORD_WEBHOOK_URL ||
-    ""
-  ).trim();
-}
-
-function sanitizeLocaltifyFeedbackText(value, maxLength = 1500) {
-  return String(value || "")
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n")
-    .slice(0, maxLength)
-    .trim();
-}
-
-function normalizeLocaltifyFeedbackCategory(value) {
-  const category = String(value || "").trim().toLowerCase();
-
-  if (category === "bug") return "Bug";
-  if (category === "ui") return "UI issue";
-  if (category === "feature") return "Feature request";
-  if (category === "other") return "Other";
-
-  return "Other";
-}
-
-function isAllowedDiscordWebhookUrl(url) {
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol !== "https:") return false;
-    if (parsed.hostname !== "discord.com" && parsed.hostname !== "discordapp.com") return false;
-    return /^\/api\/webhooks\/\d+\/[\w-]+/i.test(parsed.pathname);
-  } catch {
-    return false;
-  }
-}
-
-function postLocaltifyDiscordWebhook(webhookUrl, payload) {
-  return new Promise((resolve, reject) => {
-    let parsed;
-
-    try {
-      parsed = new URL(webhookUrl);
-    } catch (error) {
-      reject(error);
-      return;
-    }
-
-    const body = JSON.stringify(payload);
-    const transport = parsed.protocol === "http:" ? http : https;
-
-    const request = transport.request(
-      {
-        protocol: parsed.protocol,
-        hostname: parsed.hostname,
-        port: parsed.port || (parsed.protocol === "http:" ? 80 : 443),
-        method: "POST",
-        path: `${parsed.pathname}${parsed.search}`,
-        headers: {
-          "content-type": "application/json",
-          "content-length": Buffer.byteLength(body),
-          "user-agent": `localtify/${app.getVersion?.() || "0.3.8"} feedback`
-        },
-        timeout: 12_000
-      },
-      (response) => {
-        const chunks = [];
-
-        response.on("data", (chunk) => chunks.push(chunk));
-        response.on("end", () => {
-          const responseText = Buffer.concat(chunks).toString("utf8");
-
-          if (response.statusCode >= 200 && response.statusCode < 300) {
-            resolve({ ok: true, statusCode: response.statusCode });
-            return;
-          }
-
-          reject(new Error(`Discord webhook returned ${response.statusCode}: ${responseText.slice(0, 240)}`));
-        });
-      }
-    );
-
-    request.on("timeout", () => {
-      request.destroy(new Error("Discord webhook timed out."));
-    });
-
-    request.on("error", reject);
-    request.write(body);
-    request.end();
-  });
-}
-
-function buildLocaltifyFeedbackDiscordPayload(payload = {}) {
-  const categoryLabel = normalizeLocaltifyFeedbackCategory(payload?.category);
-  const message = sanitizeLocaltifyFeedbackText(payload?.message, 1500);
-  const diagnostics = payload?.diagnostics && typeof payload.diagnostics === "object" ? payload.diagnostics : {};
-  const appVersion = sanitizeLocaltifyFeedbackText(payload?.appVersion || diagnostics.appVersion || app.getVersion?.() || "unknown", 80);
-  const platformLabel = sanitizeLocaltifyFeedbackText(payload?.platform || diagnostics.platform || process.platform, 120);
-
-  const fields = [
-    { name: "Category", value: categoryLabel, inline: true },
-    { name: "Version", value: appVersion || "unknown", inline: true },
-    { name: "Platform", value: platformLabel || process.platform, inline: true }
-  ];
-
-  const optionalFields = [
-    ["Electron", diagnostics.electronVersion],
-    ["Chromium", diagnostics.chromeVersion],
-    ["Songs", diagnostics.songCount],
-    ["Playlists", diagnostics.playlistCount],
-    ["Downloads folder", diagnostics.downloadsFolder],
-    ["Discord RPC", diagnostics.discordRpc],
-    ["Update status", diagnostics.updateStatus]
-  ];
-
-  for (const [name, value] of optionalFields) {
-    const cleanValue = sanitizeLocaltifyFeedbackText(value, 180);
-    if (!cleanValue) continue;
-    fields.push({ name, value: cleanValue, inline: String(cleanValue).length < 26 });
-  }
-
-  return {
-    username: "localtify feedback",
-    allowed_mentions: { parse: [] },
-    embeds: [
-      {
-        title: `New localtify feedback — ${categoryLabel}`,
-        description: message,
-        color: 0xd946ef,
-        fields,
-        timestamp: new Date().toISOString(),
-        footer: { text: "Sent from localtify feedback popup" }
-      }
-    ]
-  };
-}
-
-
 app.whenReady().then(async () => {
   registerLocaltifyMediaProtocol();
   await startLocaltifyMediaServer();
+  initDownloader({ userDataPath: app.getPath("userData"), ffmpegPath: getFfmpegPath(), getCookiesFile: getYouTubeCookiesFile });
   const databaseRecovery = restoreDatabaseFromOldUserDataIfNeeded();
   initDatabase(databaseRecovery.dbPath || path.join(app.getPath("userData"), SQLITE_FILE_NAME));
   try {
@@ -4109,46 +3611,9 @@ app.whenReady().then(async () => {
   ipcMain.handle("localitfy:performance-status", async () => getLocaltifyPerformanceStatus());
   ipcMain.handle("localitfy:gpu-status", async () => getLocaltifyPerformanceStatus());
 
-  ipcMain.handle("feedback:send", async (_event, payload = {}) => {
-    try {
-      const webhookUrl = getLocaltifyFeedbackWebhookUrl();
-
-      if (!webhookUrl) {
-        return {
-          ok: false,
-          error: "Feedback webhook is not configured. Add LOCALTIFY_FEEDBACK_WEBHOOK_URL to your env."
-        };
-      }
-
-      if (!isAllowedDiscordWebhookUrl(webhookUrl)) {
-        return {
-          ok: false,
-          error: "Feedback webhook URL must be a Discord webhook URL."
-        };
-      }
-
-      const message = sanitizeLocaltifyFeedbackText(payload?.message, 1500);
-
-      if (message.length < 4) {
-        return { ok: false, error: "Feedback message is too short." };
-      }
-
-      const discordPayload = buildLocaltifyFeedbackDiscordPayload({ ...payload, message });
-      await postLocaltifyDiscordWebhook(webhookUrl, discordPayload);
-
-      return { ok: true };
-    } catch (error) {
-      console.log("[localtify feedback error]", error?.message || error);
-      return {
-        ok: false,
-        error: error?.message || "Failed to send feedback."
-      };
-    }
-  });
-
-
   ipcMain.handle("app:bootstrap", async () => {
     await yieldToMainLoop();
+    scheduleCoverThumbnailWarmup();
     return {
       songs: listSongsShaped(),
       settings: getSettings(),
@@ -4156,7 +3621,7 @@ app.whenReady().then(async () => {
       windowsIntegration: getStartWithWindowsStatus(),
       windowTranslucency: getSavedWindowTranslucencySettings(),
       database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: LEGACY_APP_DATA_NAME },
-      discord: getDiscordStatusSafe()
+      discord: getDiscordStatus()
     };
   });
 
@@ -4247,6 +3712,27 @@ app.whenReady().then(async () => {
   ipcMain.handle("covers:least-used", async () => {
     try { return pickLeastUsedCover(getPixelArtFiles()); } catch { return ""; }
   });
+  ipcMain.handle("covers:thumbnail-status", async () => {
+    try { return getCoverThumbnailStatus(); } catch (error) { return { ok: false, error: error?.message || "thumbnail status failed" }; }
+  });
+  ipcMain.handle("covers:warm-thumbnails", async (_event, payload = {}) => {
+    try {
+      await yieldToMainLoop();
+      return warmCoverThumbnails({
+        limit: Math.max(1, Math.min(500, Number(payload?.limit || 120))),
+        force: Boolean(payload?.force)
+      });
+    } catch (error) {
+      console.log("[localtify warm thumbnails error]", error?.message || error);
+      return {
+        ok: false,
+        created: 0,
+        cached: 0,
+        warnings: ["Localtify could not prepare cover thumbnails right now. Covers will still load normally."],
+        error: error?.message || "thumbnail warmup failed"
+      };
+    }
+  });
   ipcMain.handle("song:set-cover", async (_event, id, coverPath) => {
     const updated = patchSong(id, { coverPath });
     return updated ? shapeSong(updated) : null;
@@ -4284,37 +3770,6 @@ app.whenReady().then(async () => {
     }
   });
 
-
-  ipcMain.handle("albums:scan-folder", async (event, payload) => {
-    try {
-      return await scanAlbumFolderImportRequest(event, payload || {});
-    } catch (error) {
-      console.log("[localtify album folder scan error]", error?.stack || error?.message || error);
-      return {
-        ok: false,
-        error: error?.message || "album folder scan failed",
-        scanId: "",
-        albums: [],
-        songs: listSongsShaped()
-      };
-    }
-  });
-
-  ipcMain.handle("albums:import-folder", async (event, payload) => {
-    try {
-      return await commitAlbumFolderImportRequest(event, payload || {});
-    } catch (error) {
-      console.log("[localtify album folder import error]", error?.stack || error?.message || error);
-      return {
-        ok: false,
-        error: error?.message || "album folder import failed",
-        changedCount: 0,
-        songs: listSongsShaped(),
-        albums: []
-      };
-    }
-  });
-
   ipcMain.handle("media:convert-pick", async (event, payload) => {
     try {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
@@ -4329,8 +3784,8 @@ app.whenReady().then(async () => {
       if (result.canceled || !result.filePaths.length) {
         return { downloadFolder: getDownloadDirectory(), conversions: [], changedCount: 0, songs: listSongsShaped() };
       }
-      const validFiles = result.filePaths.filter((f) => fileExists(f) && (ensureDownloaderReady().isSupportedMediaPath?.(f) ?? false));
-      const converted = await ensureDownloaderReady().convertLocalMediaFiles(
+      const validFiles = result.filePaths.filter((f) => fileExists(f) && isSupportedMediaPath(f));
+      const converted = await convertLocalMediaFiles(
         validFiles,
         getDownloadDirectory(),
         { bitrate: payload?.bitrate || 192 },
@@ -4361,7 +3816,7 @@ app.whenReady().then(async () => {
       const urls = Array.isArray(payload?.urls) ? payload.urls : [payload?.url].filter(Boolean);
       const autoAdd = typeof payload?.autoAdd === "boolean" ? payload.autoAdd : true;
       const downloadFolder = getDownloadDirectory(payload?.folder);
-      const result = await ensureDownloaderReady().downloadAudioUrls(urls, downloadFolder, (progress) => {
+      const result = await downloadAudioUrls(urls, downloadFolder, (progress) => {
         if (!mainWindow || mainWindow.isDestroyed()) return;
         event.sender.send("download:progress", progress);
       }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "" });
@@ -4401,7 +3856,7 @@ app.whenReady().then(async () => {
     }
   });
 
-  ipcMain.handle("download:cancel", async () => ({ cancelled: Boolean(ensureDownloaderReady().cancelActiveDownloads?.()) }));
+  ipcMain.handle("download:cancel", async () => ({ cancelled: cancelActiveDownloads() }));
   ipcMain.handle("download:choose-folder", async () => {
     const owner = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
     const result = await dialog.showOpenDialog(owner, { title: "Choose localtify download folder", properties: ["openDirectory", "createDirectory"] });
@@ -4528,25 +3983,14 @@ app.whenReady().then(async () => {
   ipcMain.handle("database:status", async () => getDatabaseStatus());
 
   ipcMain.handle("discord:set-activity", async (_event, payload) => {
-    try {
-      const rpc = getRpcModuleLazy();
-      return { ok: typeof rpc.setDiscordActivity === "function" ? await rpc.setDiscordActivity(payload) : false };
-    } catch {
-      return { ok: false };
-    }
+    try { return { ok: await setDiscordActivity(payload) }; } catch { return { ok: false }; }
   });
   ipcMain.handle("discord:clear-activity", async () => {
-    try {
-      const rpc = getRpcModuleLazy();
-      return { ok: typeof rpc.clearDiscordActivity === "function" ? await rpc.clearDiscordActivity() : false };
-    } catch {
-      return { ok: false };
-    }
+    try { return { ok: await clearDiscordActivity() }; } catch { return { ok: false }; }
   });
-  ipcMain.handle("discord:status", async () => getDiscordStatusSafe());
+  ipcMain.handle("discord:status", async () => getDiscordStatus());
   ipcMain.handle("discord:reset-cache", async () => {
-    const rpc = getRpcModuleLazy();
-    if (typeof rpc.resetDiscordActivityCache === "function") rpc.resetDiscordActivityCache();
+    resetDiscordActivityCache();
     return true;
   });
 
@@ -4646,7 +4090,7 @@ app.whenReady().then(async () => {
         }
       };
 
-      const result = await ensureDownloaderReady().downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
+      const result = await downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
 
       // Spotify imports must be strict. Do NOT scan the whole download folder here,
       // because that can pull old unrelated local files into the Spotify playlist.
@@ -4766,10 +4210,7 @@ app.whenReady().then(async () => {
 
 app.on("before-quit", async () => {
   allowQuit = true;
-  const rpc = rpcModuleCache;
-  if (rpc && typeof rpc.shutdownDiscordActivity === "function") {
-    await rpc.shutdownDiscordActivity("app-before-quit");
-  }
+  await shutdownDiscordActivity("app-before-quit");
   cleanupNativeWindowsMedia();
   stopLocaltifyMediaServer();
 });
