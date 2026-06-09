@@ -105,14 +105,19 @@ const catAnimations: Record<CatAnimationId, CatAnimation> = {
 
 const CAT_WIDTH = 96;
 const CAT_HEIGHT = 96;
-const CAT_CENTER_X = 48;
-const CAT_CENTER_Y = 66;
+const CAT_CENTER_X = 58;
+const CAT_CENTER_Y = 74;
 const CAT_STOP_DISTANCE = 34;
 const CAT_WALK_SPEED = 165;
 const CAT_RUN_SPEED = 315;
+const CAT_MAX_DIRECTION_TILT = 78 * Math.PI / 180;
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
+}
+
+function lerp(from: number, to: number, amount: number) {
+  return from + (to - from) * amount;
 }
 
 function nowMs() {
@@ -125,7 +130,7 @@ function pickIdleAction() {
 }
 
 function getCatSingletonKey() {
-  return "__localtifyCatBuddyPrimaryV403";
+  return "__localtifyCatBuddyPrimaryV404";
 }
 
 export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyProps) {
@@ -139,11 +144,13 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
   const [isPrimary, setIsPrimary] = useState(true);
   const [animationId, setAnimationId] = useState<CatAnimationId>("idle");
   const [following, setFollowing] = useState(true);
-  const [facingLeft, setFacingLeft] = useState(false);
 
   const positionRef = useRef({ x: 0, y: 0 });
   const targetRef = useRef({ x: 0, y: 0, hasTarget: false });
   const followingRef = useRef(true);
+  const facingLeftRef = useRef(false);
+  const directionTiltRef = useRef(0);
+  const targetDirectionTiltRef = useRef(0);
   const frameClockRef = useRef(nowMs());
   const lastPointerAtRef = useRef(Date.now());
   const lastMovedAtRef = useRef(Date.now());
@@ -154,10 +161,10 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
 
   const canvasSize = useMemo(() => {
     if (animationId === "laying" || animationId === "sleeping1" || animationId === "sleeping2") {
-      return { width: 112, height: 88 };
+      return { width: 144, height: 122 };
     }
 
-    return { width: 96, height: 96 };
+    return { width: 132, height: 132 };
   }, [animationId]);
 
   useEffect(() => {
@@ -212,9 +219,12 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
     const draw = (time: number) => {
       const currentAnimation = catAnimations[animationIdRef.current] || catAnimations.idle;
       const image = imageCacheRef.current[currentAnimation.id];
+      const isResting = currentAnimation.id === "laying" || currentAnimation.id === "sleeping1" || currentAnimation.id === "sleeping2";
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.imageSmoothingEnabled = false;
+
+      directionTiltRef.current = lerp(directionTiltRef.current, targetDirectionTiltRef.current, 0.18);
 
       if (image?.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
         const frameCount = Math.max(1, currentAnimation.frames);
@@ -225,12 +235,17 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
           ? 0
           : Math.floor(((time - animationStartedAtRef.current) % duration) / duration * frameCount);
 
-        ctx.save();
+        const drawWidth = isResting ? 112 : 96;
+        const drawHeight = isResting ? 88 : 96;
 
-        // LuizMelo Cat-4 sheets face right by default.
-        // Flip only when the target is to the left, otherwise the cat looks like it is moonwalking.
-        if (facingLeft) {
-          ctx.translate(canvas.width, 0);
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+
+        if (!isResting) {
+          ctx.rotate(directionTiltRef.current);
+        }
+
+        if (facingLeftRef.current) {
           ctx.scale(-1, 1);
         }
 
@@ -240,10 +255,10 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
           0,
           frameWidth,
           frameHeight,
-          0,
-          0,
-          canvas.width,
-          canvas.height
+          -drawWidth / 2,
+          -drawHeight / 2,
+          drawWidth,
+          drawHeight
         );
 
         ctx.restore();
@@ -260,13 +275,13 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
         drawFrameRef.current = null;
       }
     };
-  }, [enabled, isPrimary, reducedMotion, facingLeft]);
+  }, [enabled, isPrimary, reducedMotion]);
 
   useEffect(() => {
     if (!enabled || !isPrimary) return;
 
-    const startX = clamp(window.innerWidth - 160, 16, window.innerWidth - 120);
-    const startY = clamp(window.innerHeight - 210, 42, window.innerHeight - 132);
+    const startX = clamp(window.innerWidth - 164, 16, window.innerWidth - 128);
+    const startY = clamp(window.innerHeight - 220, 42, window.innerHeight - 142);
 
     positionRef.current = { x: startX, y: startY };
     targetRef.current = {
@@ -298,11 +313,34 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
       setAnimationId(next);
     };
 
+    const updateDirection = (dx: number, dy: number) => {
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
+        targetDirectionTiltRef.current = 0;
+        return;
+      }
+
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+
+      if (absX > Math.max(10, absY * 0.18)) {
+        facingLeftRef.current = dx < 0;
+      }
+
+      const safeX = Math.max(absX, 1);
+      const rawTilt = Math.atan2(dy, safeX);
+      const nextTilt = facingLeftRef.current ? -rawTilt : rawTilt;
+
+      targetDirectionTiltRef.current = clamp(nextTilt, -CAT_MAX_DIRECTION_TILT, CAT_MAX_DIRECTION_TILT);
+    };
+
     const moveTowardTarget = (dtSeconds: number) => {
       const target = targetRef.current;
       const position = positionRef.current;
 
-      if (!followingRef.current || !target.hasTarget) return 0;
+      if (!followingRef.current || !target.hasTarget) {
+        targetDirectionTiltRef.current = 0;
+        return 0;
+      }
 
       const catCenterX = position.x + CAT_CENTER_X;
       const catCenterY = position.y + CAT_CENTER_Y;
@@ -310,7 +348,12 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
       const dy = target.y - catCenterY;
       const distance = Math.hypot(dx, dy);
 
-      if (distance <= CAT_STOP_DISTANCE) return distance;
+      updateDirection(dx, dy);
+
+      if (distance <= CAT_STOP_DISTANCE) {
+        targetDirectionTiltRef.current = lerp(targetDirectionTiltRef.current, 0, 0.08);
+        return distance;
+      }
 
       const speed = distance > 180 ? CAT_RUN_SPEED : CAT_WALK_SPEED;
       const maxStep = speed * dtSeconds;
@@ -323,10 +366,6 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
 
       position.x = clamp(position.x, 8, window.innerWidth - CAT_WIDTH - 10);
       position.y = clamp(position.y, 42, window.innerHeight - CAT_HEIGHT - 106);
-
-      if (Math.abs(dx) > 1.5) {
-        setFacingLeft(dx < 0);
-      }
 
       lastMovedAtRef.current = Date.now();
       return distance;
@@ -355,15 +394,19 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
         } else if (followingRef.current && targetRef.current.hasTarget && distance > CAT_STOP_DISTANCE + 5) {
           setAnimationSafe("walk");
         } else if (idleFor > 18000) {
+          targetDirectionTiltRef.current = 0;
           setAnimationSafe(realNow % 5200 > 2600 ? "sleeping1" : "sleeping2");
         } else if (idleFor > 8500) {
+          targetDirectionTiltRef.current = 0;
           setAnimationSafe("sitting");
         } else {
+          targetDirectionTiltRef.current = lerp(targetDirectionTiltRef.current, 0, 0.05);
           setAnimationSafe("idle");
         }
 
         if (idleFor > 5200 && realNow > nextRandomActionAtRef.current) {
           const action = pickIdleAction();
+          targetDirectionTiltRef.current = 0;
           setAnimationSafe(action);
           actionUntilRef.current = realNow + (action === "stretching" ? 1400 : 900);
           nextRandomActionAtRef.current = realNow + 6500 + Math.random() * 9500;
@@ -434,6 +477,7 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
     const time = Date.now();
     actionUntilRef.current = time + durationMs;
     nextRandomActionAtRef.current = time + 7500;
+    targetDirectionTiltRef.current = 0;
     animationIdRef.current = next;
     animationStartedAtRef.current = nowMs();
     setAnimationId(next);

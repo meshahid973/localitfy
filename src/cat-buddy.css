@@ -3,8 +3,8 @@
   left: 0;
   top: 0;
   z-index: 2600;
-  width: 118px;
-  height: 106px;
+  width: 136px;
+  height: 126px;
   pointer-events: auto;
   user-select: none;
   -webkit-user-select: none;
@@ -17,32 +17,32 @@
 
 .localtifyCatBuddyCanvas{
   position: absolute;
-  left: 8px;
+  left: 0;
   top: 0;
-  width: 96px;
-  height: 96px;
+  width: 132px;
+  height: 132px;
   display: block;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   transform: translateZ(0);
-  transform-origin: 50% 78%;
+  transform-origin: 50% 58%;
   filter: drop-shadow(0 14px 20px rgba(0,0,0,.42));
 }
 
 .localtifyCatBuddy-laying .localtifyCatBuddyCanvas,
 .localtifyCatBuddy-sleeping1 .localtifyCatBuddyCanvas,
 .localtifyCatBuddy-sleeping2 .localtifyCatBuddyCanvas{
-  left: 0;
-  top: 12px;
-  width: 112px;
-  height: 88px;
+  left: -4px;
+  top: 10px;
+  width: 144px;
+  height: 122px;
 }
 
 .localtifyCatBuddyShadow{
   position: absolute;
-  left: 30px;
-  right: 26px;
-  bottom: 6px;
+  left: 34px;
+  right: 34px;
+  bottom: 8px;
   height: 10px;
   border-radius: 999px;
   background: rgba(0,0,0,.34);
@@ -55,14 +55,14 @@
 .localtifyCatBuddy-sleeping1 .localtifyCatBuddyShadow,
 .localtifyCatBuddy-sleeping2 .localtifyCatBuddyShadow{
   left: 24px;
-  right: 22px;
+  right: 26px;
   bottom: 4px;
 }
 
 .localtifyCatBuddyHint{
   position: absolute;
   left: 50%;
-  bottom: 92px;
+  bottom: 104px;
   max-width: 142px;
   padding: 5px 8px;
   border: 1px solid rgba(var(--accent-rgb), .18);
@@ -90,20 +90,20 @@
 
 @media (max-width: 760px){
   .localtifyCatBuddy{
-    width: 96px;
-    height: 88px;
+    width: 104px;
+    height: 98px;
   }
 
   .localtifyCatBuddyCanvas{
-    width: 78px;
-    height: 78px;
+    width: 104px;
+    height: 104px;
   }
 
   .localtifyCatBuddy-laying .localtifyCatBuddyCanvas,
   .localtifyCatBuddy-sleeping1 .localtifyCatBuddyCanvas,
   .localtifyCatBuddy-sleeping2 .localtifyCatBuddyCanvas{
-    width: 92px;
-    height: 72px;
+    width: 112px;
+    height: 94px;
   }
 
   .localtifyCatBuddyHint{
