@@ -2380,8 +2380,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   gap: 10px;
 }
 
-.settingsTextFieldV027,
-.customThemePreviewV027{
+.settingsTextFieldV027{
   border: 1px solid rgba(var(--text-rgb), .12);
   background: rgba(var(--surface-rgb), .52);
   border-radius: 22px;
@@ -2394,8 +2393,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   padding: 16px;
 }
 
-.settingsTextFieldV027 span,
-.customThemePreviewV027 > span{
+.settingsTextFieldV027 span{
   color: rgb(var(--highlight-rgb));
   font-size: .75rem;
   font-weight: 800;
@@ -2415,37 +2413,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsTextFieldV027 input:focus{
   border-color: rgba(var(--accent-rgb), .65);
   box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .1);
-}
-
-.customThemePreviewV027{
-  display: grid;
-  gap: 5px;
-  padding: 16px;
-}
-
-.customThemePreviewV027 strong{
-  font-size: 1.15rem;
-  line-height: 1.1;
-}
-
-.customThemePreviewV027 small{
-  color: rgba(var(--text-rgb), .58);
-}
-
-.customThemePreviewBarV027{
-  height: 8px;
-  margin-top: 10px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(var(--text-rgb), .13);
-}
-
-.customThemePreviewBarV027 i{
-  display: block;
-  width: 58%;
-  height: 100%;
-  border-radius: inherit;
-  background: rgb(var(--progress-rgb));
 }
 
 @media (max-width: 900px){
@@ -2772,7 +2739,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   letter-spacing: .01em !important;
 }
 
-.customThemePreviewV027,
 .themePreviewCardV027{
   background: rgba(255, 255, 255, .025) !important;
   border-color: transparent !important;
@@ -2889,9 +2855,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsCategoryContentV027 .settingsTextFieldV027,
-.settingsCategoryPage .settingsTextFieldV027,
-.settingsCategoryContentV027 .customThemePreviewV027,
-.settingsCategoryPage .customThemePreviewV027{
+.settingsCategoryPage .settingsTextFieldV027{
   min-height: 96px !important;
   padding: 15px 16px !important;
   border-radius: 23px !important;
@@ -2901,9 +2865,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsCategoryContentV027 .settingsTextFieldV027 span,
-.settingsCategoryPage .settingsTextFieldV027 span,
-.settingsCategoryContentV027 .customThemePreviewV027 > span,
-.settingsCategoryPage .customThemePreviewV027 > span{
+.settingsCategoryPage .settingsTextFieldV027 span{
   color: rgb(var(--highlight-rgb)) !important;
   font-size: .72rem !important;
   font-weight: 900 !important;
@@ -2926,44 +2888,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsCategoryPage .settingsTextFieldV027 input:focus{
   border-color: rgba(var(--accent-rgb), .34) !important;
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .10) !important;
-}
-
-.settingsCategoryContentV027 .customThemePreviewV027,
-.settingsCategoryPage .customThemePreviewV027{
-  overflow: hidden !important;
-  gap: 5px !important;
-}
-
-.settingsCategoryContentV027 .customThemePreviewV027 strong,
-.settingsCategoryPage .customThemePreviewV027 strong{
-  font-size: 1.02rem !important;
-  letter-spacing: -.03em !important;
-  line-height: 1.08 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.settingsCategoryContentV027 .customThemePreviewV027 small,
-.settingsCategoryPage .customThemePreviewV027 small{
-  color: rgba(var(--text-rgb), .72) !important;
-  font-weight: 850 !important;
-}
-
-.settingsCategoryContentV027 .customThemePreviewBarV027,
-.settingsCategoryPage .customThemePreviewBarV027{
-  height: 7px !important;
-  margin-top: 7px !important;
-  border-radius: 999px !important;
-  background: rgba(var(--text-rgb), .10) !important;
-  box-shadow: none !important;
-}
-
-.settingsCategoryContentV027 .customThemePreviewBarV027 i,
-.settingsCategoryPage .customThemePreviewBarV027 i{
-  width: 62% !important;
-  background: rgb(var(--progress-rgb)) !important;
-  box-shadow: 0 0 22px rgba(var(--progress-rgb), .20) !important;
 }
 
 .settingsCategoryContentV027 .customThemeTokenHexV027,
@@ -4247,8 +4171,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsSelectField,
 .settingsThemeSelectedPreview,
-.settingsTextFieldV027,
-.customThemePreviewV027{
+.settingsTextFieldV027{
   min-height: 72px !important;
   padding: 14px !important;
   border-radius: 16px !important;
@@ -7103,7 +7026,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .customThemeBodyV027{
   display: grid;
-  grid-template-columns: minmax(230px, .88fr) minmax(360px, 1.12fr);
+  grid-template-columns: minmax(260px, 460px);
   gap: 16px;
   align-items: stretch;
 }
@@ -7141,56 +7064,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   font-size: 13px;
   font-weight: 840;
   outline: 0;
-}
-
-.customThemePreviewV027{
-  min-height: 104px;
-  padding: 16px;
-  border-radius: 18px;
-  display: grid;
-  align-content: center;
-  gap: 4px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
-    rgba(255,255,255,.018);
-}
-
-.customThemePreviewV027 span{
-  color: var(--accent);
-  font-size: 10px;
-  font-weight: 950;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-
-.customThemePreviewV027 strong{
-  color: var(--text);
-  font-size: 16px;
-  line-height: 1.1;
-  overflow-wrap: anywhere;
-}
-
-.customThemePreviewV027 small{
-  color: var(--text-2);
-  font-size: 12px;
-  font-weight: 760;
-}
-
-.customThemePreviewBarV027{
-  height: 7px;
-  margin-top: 8px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255,255,255,.12);
-}
-
-.customThemePreviewBarV027 i{
-  display: block;
-  width: 68%;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--accent);
-  box-shadow: 0 0 18px rgba(var(--accent-rgb),.30);
 }
 
 .customThemePresetRowV027{
@@ -7383,8 +7256,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 @media (max-width: 1180px){
   .customThemeBodyV027{
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: minmax(260px, 460px);
+}
 
   .customThemeTokenGridV027{
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -7401,8 +7274,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   }
 
   .customThemePresetRowV027,
-  .savedThemeRowV027,
-  .customThemeTokenGridV027{
+.savedThemeRowV027,
+.customThemeTokenGridV027{
     grid-template-columns: 1fr;
   }
 }
@@ -7424,7 +7297,6 @@ body.localitfyThemePainting .floatingNotesLayer,
 body.localitfyThemePainting .settingsPanelCard,
 body.localitfyThemePainting .settingsPageCard,
 body.localitfyThemePainting .customThemeManagerV027,
-body.localitfyThemePainting .customThemePreviewV027,
 body.localitfyThemePainting .customThemeTokenV027{
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -7534,7 +7406,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   }
 }
 
-/* V440: settings must not replay fade/enter animations when a setting changes. */
 .settingsCategoryContentV027 .settingsCategoryPage,
 .settingsCategoryPage,
 .discordSettingsPage,
@@ -7575,7 +7446,6 @@ body.localitfyThemePainting .floatingNotesLayer,
 body.localitfyThemePainting .settingsPanelCard,
 body.localitfyThemePainting .settingsPageCard,
 body.localitfyThemePainting .customThemeManagerV027,
-body.localitfyThemePainting .customThemePreviewV027,
 body.localitfyThemePainting .customThemeTokenV027{
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -7591,7 +7461,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   margin-top: 14px;
 }
 
-/* V441: live theme drag without React lag. */
 body.localitfyThemePainting,
 body.localitfyThemePainting *{
   cursor: default;
@@ -7612,7 +7481,6 @@ body.localitfyThemePainting .floatingNotesLayer,
 body.localitfyThemePainting .settingsPanelCard,
 body.localitfyThemePainting .settingsPageCard,
 body.localitfyThemePainting .customThemeManagerV027,
-body.localitfyThemePainting .customThemePreviewV027,
 body.localitfyThemePainting .customThemeTokenV027{
   filter: none !important;
   backdrop-filter: none !important;
@@ -7642,21 +7510,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   font-size: 12px;
   line-height: 1.35;
   font-weight: 760;
-}
-
-.customThemeLiveBadgeV441{
-  width: fit-content;
-  margin-top: 4px;
-  padding: 5px 9px;
-  border: 1px solid rgba(var(--accent-rgb), .24);
-  border-radius: 999px;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb), .075);
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 950;
-  letter-spacing: .08em;
-  text-transform: uppercase;
 }
 
 .customThemeSimpleHintV439{
@@ -7765,8 +7618,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   }
 }
 
-/* V445: cleaner theme controls + less lag while color dragging. */
-
 .customThemeManagerV027{
   contain: layout paint style;
 }
@@ -7793,20 +7644,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   font-weight: 760 !important;
 }
 
-.customThemeLiveBadgeV441{
-  width: fit-content !important;
-  padding: 5px 9px !important;
-  border: 1px solid rgba(var(--accent-rgb), .24) !important;
-  border-radius: 999px !important;
-  color: var(--accent) !important;
-  background: rgba(var(--accent-rgb), .075) !important;
-  font-size: 10px !important;
-  font-style: normal !important;
-  font-weight: 950 !important;
-  letter-spacing: .08em !important;
-  text-transform: uppercase !important;
-}
-
 .settingsHeaderActionsV027{
   display: flex !important;
   flex-wrap: wrap !important;
@@ -7820,7 +7657,7 @@ body.localitfyThemePainting .customThemeTokenV027{
 }
 
 .customThemeBodyV027{
-  grid-template-columns: minmax(230px,.82fr) minmax(360px,1.18fr) !important;
+  grid-template-columns: minmax(260px, 460px) !important;
   gap: 14px !important;
 }
 
@@ -7934,25 +7771,22 @@ body.localitfyThemePainting .customThemeTokenV027{
 
 @media (max-width: 1180px){
   .customThemeBodyV027,
-  .customThemeTokenGridV027{
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
+.customThemeTokenGridV027{
+  grid-template-columns: minmax(260px, 460px) !important;
+}
 }
 
 @media (max-width: 760px){
   .customThemeBodyV027,
-  .customThemePresetRowV027,
-  .customThemeTokenGridV027{
-    grid-template-columns: 1fr !important;
-  }
+.customThemePresetRowV027,
+.customThemeTokenGridV027{
+  grid-template-columns: minmax(260px, 460px) !important;
+}
 
   .settingsHeaderActionsV027{
     justify-content: flex-start !important;
   }
 }
-
-/* V452: overall settings performance baseline.
-   Prevents setting toggles/theme edits from replaying animations or repainting heavy blur. */
 
 .settingsPage,
 .settingsCategoryContent,

@@ -1,5 +1,3 @@
-/* localtify 0.3.8 V425 metadata cleaner preview controls. */
-/* localtify 0.3.7 V324 release prep. Visual controls stay clean and wired. */
 import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
@@ -279,7 +277,6 @@ function RangeRow({
   );
 }
 
-
 type VisualCustomizationOption = {
   id: string;
   label: string;
@@ -359,16 +356,12 @@ function VisualOptionGroup({
 }
 
 const HOME_BANNER_TYPE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
-  { id: "dynamic", label: "Dynamic", note: "cover tint" },
-  { id: "albumCover", label: "Album cover", note: "cover focus" },
   { id: "cleanBlack", label: "Clean black", note: "plain black" },
   { id: "none", label: "None", note: "hide hero art" }
 ];
 
-
 const MEDIA_CARD_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "solid", label: "Solid", note: "flat cards" },
-  { id: "glassy", label: "Glassy", note: "soft glass" },
   { id: "oledFlat", label: "OLED flat", note: "black" }
 ];
 
@@ -385,7 +378,6 @@ const LIBRARY_ROW_STYLE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "listOnly", label: "List only", note: "plain list" }
 ];
 
-
 const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "fixed", label: "Fixed", note: "normal" },
   { id: "slim", label: "Slim", note: "narrow" },
@@ -394,7 +386,6 @@ const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
 
 const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "flat", label: "Flat", note: "flat" },
-  { id: "coverBlur", label: "Cover blur", note: "cover glow" },
   { id: "oledBlack", label: "OLED black", note: "black" }
 ];
 
@@ -649,15 +640,15 @@ return (
               title="Home banner"
               note="Top area style."
               options={HOME_BANNER_TYPE_OPTIONS}
-              value={readSettingChoice(settings, "homeBannerType", "dynamic")}
+              value={readSettingChoice(settings, "homeBannerType", "cleanBlack")}
               onChange={(value) => updateSetting("homeBannerType", value)}
             />
 
             <VisualOptionGroup
               title="Card background"
-              note="Panel/card surface style."
+              note="Card surface style. Solid is safest for release."
               options={MEDIA_CARD_BACKGROUND_OPTIONS}
-              value={readSettingChoice(settings, "mediaCardBackground", "glassy")}
+              value={readSettingChoice(settings, "mediaCardBackground", "solid")}
               onChange={(value) => updateSetting("mediaCardBackground", value)}
             />
 
@@ -679,9 +670,9 @@ return (
 
             <VisualOptionGroup
               title="Player background"
-              note="Bottom bar style."
+              note="Bottom player style. Flat is safest for release."
               options={PLAYER_BACKGROUND_OPTIONS}
-              value={readSettingChoice(settings, "playerBackgroundStyle", "coverBlur")}
+              value={readSettingChoice(settings, "playerBackgroundStyle", "flat")}
               onChange={(value) => updateSetting("playerBackgroundStyle", value)}
             />
           </div>
@@ -692,7 +683,6 @@ return (
             <div>
               <strong>Custom colors</strong>
               <span>Pick a preset first, then fine tune the simple colors.</span>
-              <em className="customThemeLiveBadgeV441">live preview</em>
             </div>
             <div className="settingsHeaderActionsV027">
               <label className="cleanToggleLabel">
@@ -711,14 +701,6 @@ return (
               <input value={customThemeName} onChange={(event) => setCustomThemeName(event.currentTarget.value)} aria-label="Custom colors name" />
             </label>
 
-            <div className="customThemePreviewV027" aria-live="polite">
-              <span>Preview after applying</span>
-              <strong>{currentSong?.title || "localtify preview"}</strong>
-              <small>{currentSong?.artist || "sample artist"}</small>
-              <div className="customThemePreviewBarV027" aria-hidden="true">
-                <i />
-              </div>
-            </div>
           </div>
 
           <div className="customThemePresetRowV027" aria-label="Built in custom theme presets">
@@ -844,7 +826,7 @@ return (
             <section className="appearanceUnifiedSectionV356 appearanceSidebarSectionV356" aria-label="Sidebar behavior controls">
               <div className="appearanceUnifiedSectionHeadV356">
                 <strong>Sidebar behavior</strong>
-                <span>Choose if the sidebar stays full, stays slim, or smoothly opens on hover.</span>
+                <span>Choose if the sidebar stays full or slim.</span>
               </div>
 
               <div className="sidebarBehaviorChoicesV327 sidebarBehaviorChoicesV356" role="group" aria-label="Choose sidebar behavior">
@@ -1344,8 +1326,6 @@ return (
         </div>
       </section>
     ) : null}
-
-
 
     {settingsCategory === "about" ? (
       <section className="settingsCategoryPage" aria-label="About and diagnostics">

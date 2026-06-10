@@ -1614,7 +1614,7 @@ button:active{
     font-size: clamp(38px, 5.4vw, 66px) !important;
   }
 
-  
+
 }
 
 @media (max-width: 920px){
@@ -1623,8 +1623,8 @@ button:active{
   }
 
   .sidebar{
-    padding-inline: 9px !important;
-  }
+  padding-inline: 9px !important;
+}
 
   .logoWrap h1{
     display: none !important;
@@ -2356,7 +2356,7 @@ button:active{
 
 
 @supports (content-visibility: auto){
-  
+
 
   .songRow:not(.active):not(.songDragging):not(.songDropTarget){
     content-visibility: auto;
@@ -3957,7 +3957,7 @@ body.localitfyLibraryPointerDragging{
     grid-template-columns: minmax(0, 1fr) 190px !important;
   }
 
-  
+
 }
 
 @media (max-width: 900px){
@@ -3969,9 +3969,7 @@ body.localitfyLibraryPointerDragging{
     font-size: clamp(38px, 10vw, 58px) !important;
   }
 
-  
 
-  
 }
 
 :root{
@@ -5232,9 +5230,7 @@ body.localitfyLibraryPointerDragging{
 
 
 @supports (content-visibility: auto){
-  
 
-  
 
   .songList .songRow{
     contain-intrinsic-size: 68px;
@@ -7515,7 +7511,7 @@ body.localitfyNoSelect *{
     scrollbar-gutter: auto !important;
   }
 
-  
+
 }
 
 body.localitfyThemePainting .homeHero::before,
@@ -14917,15 +14913,13 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   min-width: var(--sidebar-hover-open-width) !important;
   padding-inline: 12px !important;
   border-color: rgba(var(--accent-rgb),0.26) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.105), rgba(0,0,0,0.18) 38%, rgba(0,0,0,0.36)),
-    var(--localtify-sidebar-bg, rgba(12, 8, 20, .96)) !important;
+  background: var(--sidebar-solid-bg, color-mix(in srgb, var(--bg, #000) 82%, #000 18%)) !important;
+  background-color: var(--sidebar-solid-bg, color-mix(in srgb, var(--bg, #000) 82%, #000 18%)) !important;
+  background-image: none !important;
   box-shadow:
     22px 0 70px rgba(0,0,0,0.46),
     0 0 0 1px rgba(var(--accent-rgb),0.16) inset,
     inset -1px 0 0 rgba(var(--accent-rgb),0.34) !important;
-  backdrop-filter: blur(20px) saturate(124%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(124%) !important;
 }
 
 .app[data-sidebar-behavior="hover"] .sidebar .navItem{
@@ -14948,7 +14942,6 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   opacity: 0 !important;
   transform: translate3d(-16px, 0, 0) scale(.98) !important;
   pointer-events: none !important;
-  filter: blur(2px) !important;
 }
 
 .app[data-sidebar-behavior="hover"] .sidebar:hover .navText,
@@ -14960,7 +14953,6 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   opacity: 1 !important;
   transform: translate3d(0, 0, 0) scale(1) !important;
   pointer-events: auto !important;
-  filter: blur(0) !important;
 }
 
 .app[data-sidebar-behavior="hover"] .sidebar .sidebarBottom{
@@ -15002,10 +14994,10 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   .app[data-sidebar-behavior="fixed"] .sidebar,
   .app[data-sidebar-behavior="slim"] .sidebar,
   .app[data-sidebar-behavior="hover"] .sidebar{
-    width: 76px !important;
-    min-width: 76px !important;
-    max-width: 76px !important;
-  }
+  width: 76px !important;
+  min-width: 76px !important;
+  max-width: 76px !important;
+}
 }
 
 
@@ -15125,9 +15117,9 @@ body.localtifyIdle .settingsSectionCard{
   .analyticsRecapCard,
   .settingsPanel,
   .settingsSectionCard{
-    transition: none !important;
-    will-change: auto !important;
-  }
+  transition: none !important;
+  will-change: auto !important;
+}
 }
 
 
@@ -17074,4 +17066,80 @@ body.localitfyThemePainting .homeSongRow{
   .libraryOverview{
     contain-intrinsic-size: 520px;
   }
+}
+
+/* V453 RELEASE HOME CARD READABILITY */
+.homeAlbumCard{
+  opacity: 1;
+}
+
+.homeAlbumMeta strong,
+.homeAlbumMeta small,
+.homeAlbumStats,
+.homeAlbumStats span,
+.homeAlbumCard strong,
+.homeAlbumCard small{
+  opacity: 1;
+  filter: none;
+  text-shadow: 0 1px 2px rgba(0,0,0,.28);
+}
+
+.homeAlbumMeta small,
+.homeAlbumCard small{
+  color: rgba(255,255,255,.68);
+}
+
+.homeAlbumStats,
+.homeAlbumStats span{
+  color: rgba(255,255,255,.72);
+}
+
+.homeAlbumActions .iconAction,
+.homeAlbumActions .playlistAddAction,
+.homeAlbumActions .likeActionV443{
+  transform: none;
+  transition: none;
+  filter: none;
+  box-shadow: none;
+}
+
+.homeAlbumActions .iconAction:hover,
+.homeAlbumActions .playlistAddAction:hover,
+.homeAlbumActions .likeActionV443:hover{
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+
+.app .sidebar,
+.app[data-sidebar-behavior="fixed"] .sidebar,
+.app[data-sidebar-behavior="slim"] .sidebar,
+.app[data-sidebar-behavior="hover"] .sidebar,
+.app[data-sidebar-behavior="hover"] .sidebar:hover,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within{
+  background: var(--localtify-sidebar-solid-bg, color-mix(in srgb, var(--bg, #000) 86%, #000 14%)) !important;
+  background-color: var(--localtify-sidebar-solid-bg, color-mix(in srgb, var(--bg, #000) 86%, #000 14%)) !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app .sidebar::before,
+.app .sidebar::after,
+.app .sidebar:hover::before,
+.app .sidebar:hover::after{
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+  opacity: 0 !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app .sidebar .navText,
+.app .sidebar .mainAction .buttonInlineIcon + *,
+.app .sidebar .mainAction span:not(.buttonInlineIcon){
+  filter: none !important;
 }
