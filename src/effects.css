@@ -990,7 +990,6 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   }
 }
 
-
 /* localtify 0.3.8 V462 — smoother sidebar hover-out.
    Keep the nice open animation, but make closing feel clean instead of abrupt. */
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
@@ -1256,3 +1255,229 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(
   backdrop-filter: revert !important;
   -webkit-backdrop-filter: revert !important;
 }
+
+/* V467 REAL DISCORD PILL + ICON MOTION START
+   Uses real child elements in LocaltifyAppView so old ::before / transform rules cannot hide it. */
+main.app.app > .appShell > .sidebar .navItemAnimatedV467{
+  position: relative !important;
+  overflow: visible !important;
+  isolation: isolate !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467::before,
+main.app.app > .appShell > .sidebar .navItemAnimatedV467::after{
+  content: none !important;
+  display: none !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navDiscordPillV467{
+  position: absolute !important;
+  left: -7px !important;
+  top: 50% !important;
+  z-index: 8 !important;
+  width: 4px !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.96) !important;
+  opacity: 0 !important;
+  transform: translate3d(0,-50%,0) scaleY(.42) !important;
+  transform-origin: center !important;
+  pointer-events: none !important;
+  box-shadow: 0 0 14px rgba(255,255,255,.20) !important;
+  transition:
+    height 180ms cubic-bezier(.16, 1, .3, 1),
+    opacity 130ms ease,
+    transform 180ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467:hover .navDiscordPillV467,
+main.app.app > .appShell > .sidebar .navItemAnimatedV467:focus-visible .navDiscordPillV467{
+  height: 19px !important;
+  opacity: .78 !important;
+  transform: translate3d(0,-50%,0) scaleY(1) !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.active .navDiscordPillV467{
+  height: 34px !important;
+  opacity: 1 !important;
+  transform: translate3d(0,-50%,0) scaleY(1) !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.active:hover .navDiscordPillV467,
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.active:focus-visible .navDiscordPillV467{
+  height: 40px !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navIcon{
+  position: relative !important;
+  overflow: visible !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navIconMotionV467{
+  width: 24px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  transform-origin: 50% 50% !important;
+  transform-box: fill-box !important;
+  will-change: transform !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navLucideIcon{
+  display: block !important;
+  transform-origin: 50% 50% !important;
+  transform-box: fill-box !important;
+  overflow: visible !important;
+  opacity: .92 !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467:hover .navLucideIcon,
+main.app.app > .appShell > .sidebar .navItemAnimatedV467:focus-visible .navLucideIcon,
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.active .navLucideIcon{
+  opacity: 1 !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467:hover .navLucideIcon :is(path, circle, rect, line, polyline, polygon),
+main.app.app > .appShell > .sidebar .navItemAnimatedV467:focus-visible .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
+  animation: localtifyNavStrokeDrawV467 560ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+/* Animate the wrapper, not the SVG itself, so older transform:none rules cannot kill it. */
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-home:hover .navIconMotionV467{
+  animation: localtifyNavHomeV467 620ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-library:hover .navIconMotionV467{
+  animation: localtifyNavLibraryV467 660ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-albums:hover .navIconMotionV467{
+  animation: localtifyNavDiscV467 780ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-playlists:hover .navIconMotionV467{
+  animation: localtifyNavPlaylistV467 620ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-liked:hover .navIconMotionV467{
+  animation: localtifyNavHeartV467 700ms cubic-bezier(.18, .9, .2, 1.1) both !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-covers:hover .navIconMotionV467{
+  animation: localtifyNavCoversV467 640ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-analytics:hover .navIconMotionV467{
+  animation: localtifyNavAnalyticsV467 680ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-downloads:hover .navIconMotionV467{
+  animation: localtifyNavDownloadV467 700ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-settings:hover .navIconMotionV467{
+  animation: localtifyNavSettingsV467 820ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV467.active .navIconMotionV467{
+  transform: translate3d(0,-1px,0) scale(1.045) !important;
+}
+
+@keyframes localtifyNavStrokeDrawV467{
+  0%{
+    stroke-dasharray: 0 42;
+    stroke-dashoffset: 42;
+    opacity: .38;
+  }
+  60%{
+    stroke-dasharray: 34 42;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100%{
+    stroke-dasharray: 42 0;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes localtifyNavHomeV467{
+  0%{ transform: translate3d(0,0,0) scale(1); }
+  35%{ transform: translate3d(0,-4px,0) scale(1.14); }
+  65%{ transform: translate3d(0,1px,0) scale(.98); }
+  100%{ transform: translate3d(0,0,0) scale(1.045); }
+}
+
+@keyframes localtifyNavLibraryV467{
+  0%{ transform: rotate(0deg) translate3d(0,0,0); }
+  32%{ transform: rotate(-7deg) translate3d(-2px,0,0); }
+  58%{ transform: rotate(6deg) translate3d(2px,0,0); }
+  100%{ transform: rotate(0deg) translate3d(0,0,0) scale(1.045); }
+}
+
+@keyframes localtifyNavDiscV467{
+  0%{ transform: rotate(0deg) scale(1); }
+  54%{ transform: rotate(230deg) scale(1.13); }
+  100%{ transform: rotate(360deg) scale(1.045); }
+}
+
+@keyframes localtifyNavPlaylistV467{
+  0%{ transform: translate3d(0,0,0); }
+  25%{ transform: translate3d(5px,0,0); }
+  50%{ transform: translate3d(-3px,0,0); }
+  74%{ transform: translate3d(2px,0,0); }
+  100%{ transform: translate3d(0,0,0) scale(1.045); }
+}
+
+@keyframes localtifyNavHeartV467{
+  0%{ transform: scale(1); }
+  22%{ transform: scale(1.30); }
+  44%{ transform: scale(.92); }
+  66%{ transform: scale(1.16); }
+  100%{ transform: scale(1.045); }
+}
+
+@keyframes localtifyNavCoversV467{
+  0%{ transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  35%{ transform: translate3d(3px,-3px,0) rotate(5deg) scale(1.12); }
+  70%{ transform: translate3d(-1px,1px,0) rotate(-3deg) scale(.98); }
+  100%{ transform: translate3d(0,0,0) rotate(0deg) scale(1.045); }
+}
+
+@keyframes localtifyNavAnalyticsV467{
+  0%{ transform: translate3d(0,0,0) scaleY(1); }
+  32%{ transform: translate3d(0,-3px,0) scaleY(1.22); }
+  62%{ transform: translate3d(0,1px,0) scaleY(.92); }
+  100%{ transform: translate3d(0,0,0) scaleY(1.045); }
+}
+
+@keyframes localtifyNavDownloadV467{
+  0%{ transform: translate3d(0,0,0); }
+  30%{ transform: translate3d(0,6px,0) scale(.95); }
+  60%{ transform: translate3d(0,-3px,0) scale(1.10); }
+  100%{ transform: translate3d(0,0,0) scale(1.045); }
+}
+
+@keyframes localtifyNavSettingsV467{
+  0%{ transform: rotate(0deg) scale(1); }
+  48%{ transform: rotate(120deg) scale(1.10); }
+  100%{ transform: rotate(180deg) scale(1.045); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navIconMotionV467,
+  main.app.app > .appShell > .sidebar .navItemAnimatedV467:hover .navIconMotionV467,
+  main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
+    animation: none !important;
+    transform: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navDiscordPillV467{
+    transition: none !important;
+  }
+}
+/* V467 REAL DISCORD PILL + ICON MOTION END */

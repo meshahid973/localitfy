@@ -4757,12 +4757,16 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   return (
                     <button
                       key={item.id}
-                      className={view === item.id ? "navItem active" : "navItem"}
+                      className={`navItem navItemAnimatedV467 nav-${item.id} ${view === item.id ? "active" : ""}`}
+                      data-nav-id={item.id}
                       onClick={() => changeView(item.id, "nav")}
                       aria-label={`open ${item.label}`}
                     >
-                      <span className="navIcon" aria-hidden="true">
-                        <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
+                      <span className="navDiscordPillV467" aria-hidden="true" />
+                      <span className={`navIcon navIcon-${item.id}`} aria-hidden="true">
+                        <span className="navIconMotionV467">
+                          <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
+                        </span>
                       </span>
                       <span className="navText">
                         <strong>{item.label}</strong>
@@ -4784,12 +4788,16 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   return (
                     <button
                       key={item.id}
-                      className={view === item.id ? "navItem active" : "navItem"}
+                      className={`navItem navItemAnimatedV467 nav-${item.id} ${view === item.id ? "active" : ""}`}
+                      data-nav-id={item.id}
                       onClick={() => changeView(item.id, "nav")}
                       aria-label={`open ${item.label}`}
                     >
-                      <span className="navIcon" aria-hidden="true">
-                        <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
+                      <span className="navDiscordPillV467" aria-hidden="true" />
+                      <span className={`navIcon navIcon-${item.id}`} aria-hidden="true">
+                        <span className="navIconMotionV467">
+                          <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
+                        </span>
                       </span>
                       <span className="navText">
                         <strong>{item.label}</strong>
