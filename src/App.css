@@ -12694,3 +12694,84 @@ body.localitfyThemePainting .app :is(
     transform: scale(1);
   }
 }
+
+/* V444: no hover movement on quick action buttons + full playlist modal overlay. */
+.app .iconAction.noActionHoverV444,
+.app .homeAlbumActions .iconAction,
+.app .songRow > .iconAction,
+.app .playlistAddAction,
+.app .likeActionV443{
+  transform: none !important;
+  transition: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+.app .iconAction.noActionHoverV444:hover,
+.app .homeAlbumActions .iconAction:hover,
+.app .songRow > .iconAction:hover,
+.app .playlistAddAction:hover,
+.app .likeActionV443:hover{
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+.app .iconAction.noActionHoverV444:active,
+.app .homeAlbumActions .iconAction:active,
+.app .songRow > .iconAction:active,
+.app .playlistAddAction:active,
+.app .likeActionV443:active{
+  transform: none !important;
+  filter: none !important;
+}
+
+.app .iconAction.likeActionV443:not(.liked):not(.likeActionActiveV443):hover .likeHeartShellV443,
+.app .iconAction.likeActionV443:hover .likeHeartShellV443,
+.app .playlistAddAction:hover{
+  transform: none !important;
+  filter: none !important;
+}
+
+.app .playlistPickerWrap.modalWrap,
+.modalWrap.playlistPickerWrap{
+  position: fixed !important;
+  inset: 36px 0 92px 0 !important;
+  z-index: 150 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 18px !important;
+  overflow: auto !important;
+  background: rgba(0,0,0,.68) !important;
+  backdrop-filter: blur(22px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(120%) !important;
+}
+
+.app .playlistPickerModalV444,
+.app .playlistPickerModal{
+  width: min(520px, calc(100vw - 36px)) !important;
+  max-height: min(720px, calc(100vh - 150px)) !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.app .playlistPickerHead h3{
+  overflow-wrap: anywhere !important;
+}
+
+.app .playlistPickerHead .editorHeadSub{
+  display: block !important;
+  margin-top: 5px !important;
+  color: rgba(255,255,255,.62) !important;
+  font-size: 12px !important;
+  font-weight: 760 !important;
+  line-height: 1.35 !important;
+}
+
+@media (max-width: 900px){
+  .app .playlistPickerWrap.modalWrap,
+  .modalWrap.playlistPickerWrap{
+    inset: 36px 0 92px 0 !important;
+    padding: 12px !important;
+  }
+}

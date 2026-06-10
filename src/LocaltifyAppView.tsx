@@ -2225,6 +2225,55 @@ export function prettyMeta(text: string) {
   return value || "unknown artist";
 }
 
+function displaySongWordCountV444(value: string) {
+  return collapseSpaces(value).split(/\s+/).filter(Boolean).length;
+}
+
+function looksLikeArtistInTitleSlotV444(title: string) {
+  const value = lower(collapseSpaces(title));
+  if (!value || value === "unknown artist") return false;
+
+  return /^(dj|mc|lil|yung|young|mr|mrs|ms|dr)\b/.test(value)
+    || (/^[a-z0-9_.]+(?:\s+[a-z0-9_.]+)?$/i.test(value) && displaySongWordCountV444(value) <= 2);
+}
+
+function looksLikeSongInArtistSlotV444(artist: string) {
+  const value = lower(collapseSpaces(artist));
+  if (!value || value === "unknown artist" || value === "unknown") return false;
+
+  return displaySongWordCountV444(value) >= 3
+    || /\b(the|you|your|me|my|love|said|hero|night|ost|collection|theme|song|slowed|remix|edit)\b/.test(value);
+}
+
+function shouldSwapDisplayTitleArtistV444(song: Pick<Song, "title" | "artist">) {
+  const rawTitle = collapseSpaces(song.title || "");
+  const rawArtist = collapseSpaces(song.artist || "");
+  if (!rawTitle || !rawArtist) return false;
+
+  const cleanArtist = lower(rawArtist);
+  if (cleanArtist === "unknown" || cleanArtist === "unknown artist") return false;
+
+  return looksLikeArtistInTitleSlotV444(rawTitle) && looksLikeSongInArtistSlotV444(rawArtist);
+}
+
+function displaySongTitleV444(song: Pick<Song, "title" | "artist">, maxWords = 7) {
+  return shouldSwapDisplayTitleArtistV444(song)
+    ? prettyTitle(song.artist, maxWords)
+    : prettyTitle(song.title, maxWords);
+}
+
+function displaySongArtistV444(song: Pick<Song, "title" | "artist">) {
+  return shouldSwapDisplayTitleArtistV444(song)
+    ? prettyMeta(song.title)
+    : prettyMeta(song.artist);
+}
+
+function displaySongPickerSublineV444(song: Pick<Song, "title" | "artist">) {
+  const artist = displaySongArtistV444(song);
+  if (!artist || artist === "unknown artist") return "Pick a playlist or make a new one.";
+  return `${artist} • Pick a playlist or make a new one.`;
+}
+
 export function discordArtist(text: string) {
   const value = prettyMeta(text);
   if (!value || value === "unknown" || value === "unknown artist") return "coderpixel :p";
@@ -2939,15 +2988,15 @@ export const SongRowItem = memo(function SongRowItem({
         <Cover song={song} className="songArt" />
 
         <span className="songMeta">
-          <strong title={song.title}>{prettyTitle(song.title, 7)}</strong>
-          <small>{prettyMeta(song.artist)}</small>
+          <strong title={displaySongTitleV444(song, 12)}>{displaySongTitleV444(song, 7)}</strong>
+          <small>{displaySongArtistV444(song)}</small>
         </span>
       </button>
 
       <span className="songInfo songDurationInfo">{formatTime(song.duration)}</span>
 
       <button
-        className={`iconAction likeActionV443 ${song.liked ? "liked likeActionActiveV443" : ""}`}
+        className={`iconAction likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`}
         onClick={() => onToggleLike(song.id)}
         aria-label={song.liked ? "unlike song" : "like song"}
         aria-pressed={song.liked}
@@ -2957,8 +3006,12 @@ export const SongRowItem = memo(function SongRowItem({
       </button>
 
       <button
-        className="iconAction playlistAddAction"
-        onClick={() => onOpenPlaylistPicker(song)}
+        className="iconAction playlistAddAction noActionHoverV444"
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+          onOpenPlaylistPicker(song);
+        }}
         aria-label="add to playlist"
         title="add to playlist"
       >
@@ -3068,7 +3121,7 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
 
       <div className="homeAlbumActions">
         <button
-          className={`iconAction likeActionV443 ${song.liked ? "liked likeActionActiveV443" : ""}`}
+          className={`iconAction likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
@@ -3082,7 +3135,7 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
         </button>
 
         <button
-          className="iconAction playlistAddAction"
+          className="iconAction playlistAddAction noActionHoverV444"
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
@@ -3535,8 +3588,8 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
                 <span className="playlistTrackIndex">{active && isPlaying ? "▶" : virtualRow.index + 1}</span>
                 <Cover song={song} className="playlistTrackCover" />
                 <span className="playlistTrackText">
-                  <strong>{prettyTitle(song.title, 7)}</strong>
-                  <small>{prettyMeta(song.artist)}</small>
+                  <strong>{displaySongTitleV444(song, 7)}</strong>
+                  <small>{displaySongArtistV444(song)}</small>
                 </span>
               </button>
               <span className="playlistTrackDuration">{formatTime(song.duration)}</span>
@@ -5358,7 +5411,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                 </span>
                               </button>
                               <span className="albumTrackDurationV318">{formatTime(song.duration)}</span>
-                              <button className={`iconAction likeActionV443 ${song.liked ? "liked likeActionActiveV443" : ""}`} type="button" onClick={() => toggleLike(song.id)} aria-label={song.liked ? "unlike song" : "like song"} aria-pressed={song.liked}>
+                              <button className={`iconAction likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`} type="button" onClick={() => toggleLike(song.id)} aria-label={song.liked ? "unlike song" : "like song"} aria-pressed={song.liked}>
                                 <LikeHeartAnimationV443 liked={song.liked} />
                               </button>
                               <button className="iconAction" type="button" onClick={() => openPlaylistPicker(song)} aria-label="add to playlist">+</button>
@@ -6670,12 +6723,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
       {playlistPickerSong ? (
         <div className="modalWrap playlistPickerWrap" onClick={() => { setPlaylistPickerSong(null); setPlaylistPickerName(""); }}>
-          <div className="playlistPickerModal" role="dialog" aria-modal="true" aria-label="Add song to playlist" onClick={(event) => event.stopPropagation()}>
+          <div className="playlistPickerModal playlistPickerModalV444" role="dialog" aria-modal="true" aria-label="Add song to playlist" onClick={(event) => event.stopPropagation()}>
             <div className="modalHead playlistPickerHead">
               <div>
                 <p className="eyebrow">add to playlist</p>
-                <h3>{prettyTitle(playlistPickerSong.title, 7)}</h3>
-                <span className="editorHeadSub">Pick a playlist or make a new one.</span>
+                <h3>{displaySongTitleV444(playlistPickerSong, 9)}</h3>
+                <span className="editorHeadSub">{displaySongPickerSublineV444(playlistPickerSong)}</span>
               </div>
               <button className="closeModalButton" type="button" onClick={() => { setPlaylistPickerSong(null); setPlaylistPickerName(""); }} aria-label="close">×</button>
             </div>
