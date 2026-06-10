@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { memo, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+/* localtify 0.3.8 V425 — missing cover filter + cache tools. */
 /* localtify 0.3.8 V307 — cover studio stable render. */
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
@@ -130,6 +131,7 @@ type CoverStudioProps = {
 
   selectedCoverSongs: SongLike[];
   currentSong: SongLike | null;
+  missingCoverSongs?: SongLike[];
 
   coverGalleryMood: CoverMood;
   coverMoodOptions: Array<{
@@ -154,6 +156,8 @@ type CoverStudioProps = {
 
   setCoverGalleryMood: (mood: CoverMood) => void;
   randomizeSelectedCovers: (mood: CoverMood) => void | Promise<void>;
+  randomizeMissingCovers?: () => void | Promise<void>;
+  cleanupCoverCache?: () => void | Promise<void>;
   rescanPixelArtFolder: () => void | Promise<void>;
 
   selectCurrentSongForCovers: () => void;
@@ -373,6 +377,7 @@ export default function CoverStudio({
   pixelArtBusy,
   selectedCoverSongs,
   currentSong,
+  missingCoverSongs = [],
   coverGalleryMood,
   coverMoodOptions,
   coverMoodCounts,
@@ -387,6 +392,8 @@ export default function CoverStudio({
   coverMoodName,
   setCoverGalleryMood,
   randomizeSelectedCovers,
+  randomizeMissingCovers,
+  cleanupCoverCache,
   rescanPixelArtFolder,
   selectCurrentSongForCovers,
   selectVisibleSongsForCovers,
@@ -397,6 +404,7 @@ export default function CoverStudio({
 }: CoverStudioProps) {
   const [coverSearch, setCoverSearch] = useState("");
   const [songSearch, setSongSearch] = useState("");
+  const [songFilter, setSongFilter] = useState<"all" | "missing">("all");
   const [previewEntryKey, setPreviewEntryKey] = useState("");
   const [coverToast, setCoverToast] = useState("");
   const [recentCoverEntries, setRecentCoverEntries] = useState<CoverGalleryEntryLike[]>([]);
@@ -413,9 +421,10 @@ export default function CoverStudio({
   }, [deferredCoverSearch, filteredCoverGalleryAssets, coverMoodName]);
 
   const visibleCoverSongs = useMemo(() => {
-    if (!deferredSongSearch) return coverPickerSongList;
-    return coverPickerSongList.filter((song) => songMatches(song, deferredSongSearch));
-  }, [coverPickerSongList, deferredSongSearch]);
+    const sourceSongs = songFilter === "missing" ? missingCoverSongs : coverPickerSongList;
+    if (!deferredSongSearch) return sourceSongs;
+    return sourceSongs.filter((song) => songMatches(song, deferredSongSearch));
+  }, [coverPickerSongList, deferredSongSearch, missingCoverSongs, songFilter]);
 
   const previewEntry = useMemo(() => {
     return (
@@ -493,6 +502,14 @@ export default function CoverStudio({
             least used
           </button>
 
+          <button type="button" onClick={() => void randomizeMissingCovers?.()} disabled={pixelArtBusy || !missingCoverSongs.length}>
+            fix missing {missingCoverSongs.length ? `(${missingCoverSongs.length})` : ""}
+          </button>
+
+          <button type="button" onClick={() => void cleanupCoverCache?.()} disabled={pixelArtBusy}>
+            clean cache
+          </button>
+
           <button type="button" onClick={() => void rescanPixelArtFolder()} disabled={pixelArtBusy}>
             rescan
           </button>
@@ -527,7 +544,7 @@ export default function CoverStudio({
               <p className="eyebrow">songs</p>
               <h3>{coverSelectedSongIds.length} selected</h3>
             </div>
-            <span>{visibleCoverSongs.length}</span>
+            <span>{songFilter === "missing" ? `${visibleCoverSongs.length} missing` : visibleCoverSongs.length}</span>
           </div>
 
           <div className="coverSongSearchWrap">
@@ -541,6 +558,8 @@ export default function CoverStudio({
           </div>
 
           <div className="coverSongTools coverSongToolsClean">
+            <button type="button" className={songFilter === "all" ? "active" : ""} onClick={() => setSongFilter("all")}>all</button>
+            <button type="button" className={songFilter === "missing" ? "active" : ""} onClick={() => setSongFilter("missing")}>missing {missingCoverSongs.length ? `(${missingCoverSongs.length})` : ""}</button>
             <button type="button" onClick={selectCurrentSongForCovers}>current</button>
             <button type="button" onClick={selectVisibleSongsForCovers}>visible</button>
             <button type="button" onClick={() => setCoverSelectedSongIds([])}>clear</button>

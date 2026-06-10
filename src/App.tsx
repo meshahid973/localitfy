@@ -1,7 +1,10 @@
 // @ts-nocheck
 /* localtify 0.3.8 V395 playback settings cleanup + faster volume changes. */
 /* localtify 0.3.8 V396 audio engine stability pass. */
+/* localtify 0.3.8 V419 background-audio and settings-save stability. */
 /* localtify 0.3.8 V418 missing-file recovery actions. */
+/* localtify 0.3.8 V425 cover tools + metadata cleaner preview. */
+/* localtify 0.3.8 V423 like system + quick library modes. */
 /* localtify 0.3.8 V417 metadata cleaner stability pass. */
 /* localtify 0.3.8 V415 shuffle queue + context delete. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -152,7 +155,6 @@ import {
   hexToRgbString,
   hexToRgbaString,
   insertIdNearTarget,
-  isCompleteHexColorInput,
   isPlayableSong,
   lower,
   makeCustomThemeColors,
@@ -663,6 +665,8 @@ function MainModeApp() {
   const animationFrameRef = useRef<number | null>(null);
   const progressLoopTimeoutRef = useRef<number | null>(null);
   const saveSettingsTimerRef = useRef<number | null>(null);
+  const saveSettingsSerialRef = useRef(0);
+  const backgroundAudioRepairTimerRef = useRef<number | null>(null);
   const analyticsWorkerRef = useRef<Worker | null>(null);
   const analyticsWorkerRequestRef = useRef(0);
   const playlistSaveTimerRef = useRef<number | null>(null);
@@ -720,6 +724,8 @@ function MainModeApp() {
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
   const themeSettlingTimerRef = useRef<number | null>(null);
   const customThemeCommitTimerRef = useRef<number | null>(null);
+  const customThemeQuietCommitTimerRef = useRef<number | null>(null);
+  const customThemeQuietPatchRef = useRef<Partial<Settings>>({});
   const customThemePreviewFrameRef = useRef<number | null>(null);
   const themePaintIdleTimerRef = useRef<number | null>(null);
   const viewSwitchTimerRef = useRef<number | null>(null);
@@ -751,6 +757,7 @@ function MainModeApp() {
   const [bootStage, setBootStage] = useState("starting localtify...");
   const [songs, setSongs] = useState<Song[]>([]);
   const [settings, setSettings] = useState<Settings>(() => applyVisualCustomizationDefaults(defaultSettings as Settings));
+  const settingsRef = useRef(settings);
   const [heroMotion, setHeroMotion] = useState<"idle" | "expanding" | "compacting">("idle");
   const [homeEntranceSettled, setHomeEntranceSettled] = useState(false);
   const [isVolumeDragging, setIsVolumeDragging] = useState(false);
@@ -951,6 +958,10 @@ function MainModeApp() {
   const greeting = isThreeAm ? "late night local files" : getGreeting(now.getHours());
 
   useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
+  useEffect(() => {
     isAppBackgroundedRef.current = isAppBackgrounded;
     document.body.classList.toggle("localtifyBackgroundMode", isAppBackgrounded);
 
@@ -994,6 +1005,39 @@ function MainModeApp() {
       body.classList.remove("localtifyNoMoreBlur");
     };
   }, [settings.quickLibraryMoreBlur]);
+
+  function resumeAudioContextSafely() {
+    const context = beatAudioContextRef.current;
+    if (!context || context.state !== "suspended") return;
+    void context.resume().catch(() => undefined);
+  }
+
+  function repairPlaybackAfterAppReturns(reason: "focus" | "visibility" | "background-tick") {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    resumeAudioContextSafely();
+
+    if (!playingRef.current && !pendingPlayRef.current) return;
+    if (!songRef.current) return;
+
+    applyPlaybackRateSettings(audio);
+    setAudioElementVolume(audio, getTargetAudioVolume(songRef.current));
+
+    if (!audio.paused) return;
+
+    const canRepair = reason !== "background-tick" || document.hidden;
+    if (!canRepair) return;
+
+    void audio.play()
+      .then(() => {
+        pendingPlayRef.current = false;
+        if (!playingRef.current) setIsPlaying(true);
+      })
+      .catch(() => {
+        // Alt-tab/focus repair should never flip the player into a failed state.
+      });
+  }
 
   useEffect(() => {
     let analyticsLaunchCancelled = false;
@@ -1043,10 +1087,12 @@ function MainModeApp() {
       setIsAppBackgrounded(hidden);
 
       if (hidden) {
+        repairPlaybackAfterAppReturns("background-tick");
         trackAppBackgrounded({ reason: "visibility_hidden", current_view: analyticsViewRef.current });
         return;
       }
 
+      repairPlaybackAfterAppReturns("visibility");
       repairHeroAmbienceAfterFocus();
       trackAppForegrounded({ reason: "visibility_visible", current_view: analyticsViewRef.current });
       trackAppActive({ reason: "visibility_visible", current_view: analyticsViewRef.current });
@@ -1055,6 +1101,7 @@ function MainModeApp() {
     const handleFocus = () => {
       if (!document.hidden) {
         setIsAppBackgrounded(false);
+        repairPlaybackAfterAppReturns("focus");
         repairHeroAmbienceAfterFocus();
       }
       trackAppActive({ reason: "window_focus", current_view: analyticsViewRef.current });
@@ -1082,6 +1129,11 @@ function MainModeApp() {
       }
     }, 300_000);
 
+    const backgroundAudioKeeper = window.setInterval(() => {
+      if (!document.hidden || !playingRef.current) return;
+      repairPlaybackAfterAppReturns("background-tick");
+    }, 1800);
+
     window.addEventListener("beforeunload", handleBeforeUnload);
     window.addEventListener("focus", handleFocus);
     window.addEventListener("blur", handleBlur);
@@ -1097,6 +1149,7 @@ function MainModeApp() {
       appRootRef.current?.classList.remove("localtifyHeroAmbienceRecovering");
       finishAnalyticsSession("unmount");
       window.clearInterval(heartbeatTimer);
+      window.clearInterval(backgroundAudioKeeper);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("blur", handleBlur);
@@ -1415,6 +1468,8 @@ function MainModeApp() {
   const [pixelArtBusy, setPixelArtBusy] = useState(false);
   const [libraryScanBusy, setLibraryScanBusy] = useState(false);
   const [libraryScanMessage, setLibraryScanMessage] = useState("instant search index ready");
+  const [metadataCleanPreview, setMetadataCleanPreview] = useState<any | null>(null);
+  const [metadataUndoItems, setMetadataUndoItems] = useState<any[]>([]);
   const [appToast, setAppToast] = useState<{
     id: number;
     message: string;
@@ -1640,6 +1695,12 @@ function MainModeApp() {
         window.clearTimeout(customThemeCommitTimerRef.current);
         customThemeCommitTimerRef.current = null;
       }
+
+      if (customThemeQuietCommitTimerRef.current !== null) {
+        window.clearTimeout(customThemeQuietCommitTimerRef.current);
+        customThemeQuietCommitTimerRef.current = null;
+      }
+      customThemeQuietPatchRef.current = {};
 
       if (playlistSaveTimerRef.current !== null) {
         window.clearTimeout(playlistSaveTimerRef.current);
@@ -1999,10 +2060,10 @@ function MainModeApp() {
   const customThemeTokens = useMemo(
     () =>
       [
-        { label: "Background", key: "customThemeBackground", value: customThemeBackground, help: "app background" },
-        { label: "Surface", key: "customThemeSurface", value: customThemeSurface, help: "cards and panels" },
-        { label: "Accent", key: "customThemeColor", value: customThemeColor, help: "buttons and highlights" },
-        { label: "Text", key: "customThemeText", value: customThemeText, help: "primary text" }
+        { label: "App background", key: "customThemeBackground", value: customThemeBackground, help: "main app color" },
+        { label: "Card color", key: "customThemeSurface", value: customThemeSurface, help: "boxes and panels" },
+        { label: "Button color", key: "customThemeColor", value: customThemeColor, help: "buttons and glow" },
+        { label: "Text color", key: "customThemeText", value: customThemeText, help: "words and labels" }
       ] as Array<{ label: string; key: CustomThemeColorKey; value: string; help: string }>,
     [
       customThemeBackground,
@@ -2017,6 +2078,26 @@ function MainModeApp() {
       window.clearTimeout(customThemeCommitTimerRef.current);
       customThemeCommitTimerRef.current = null;
     }
+
+    if (customThemeQuietCommitTimerRef.current !== null) {
+      window.clearTimeout(customThemeQuietCommitTimerRef.current);
+      customThemeQuietCommitTimerRef.current = null;
+    }
+
+    customThemeQuietPatchRef.current = {};
+  }
+
+  function markCustomThemePaintBusy(duration = 520) {
+    document.body.classList.add("localitfyThemePainting");
+
+    if (themePaintIdleTimerRef.current !== null) {
+      window.clearTimeout(themePaintIdleTimerRef.current);
+    }
+
+    themePaintIdleTimerRef.current = window.setTimeout(() => {
+      document.body.classList.remove("localitfyThemePainting");
+      themePaintIdleTimerRef.current = null;
+    }, duration);
   }
 
   function clearCustomThemePreviewStyles() {
@@ -2081,12 +2162,10 @@ function MainModeApp() {
   }
 
   function kickThemeSettle() {
+    // Keep this DOM-only. Changing React state here was causing settings content
+    // to re-render and replay its fade animation when pressing normal settings.
     beginFastThemePaint();
-
-    if (!themeSettlingRef.current) {
-      themeSettlingRef.current = true;
-      setThemeSettling(true);
-    }
+    themeSettlingRef.current = true;
 
     if (themeSettlingTimerRef.current) {
       window.clearTimeout(themeSettlingTimerRef.current);
@@ -2094,9 +2173,8 @@ function MainModeApp() {
 
     themeSettlingTimerRef.current = window.setTimeout(() => {
       themeSettlingRef.current = false;
-      setThemeSettling(false);
       themeSettlingTimerRef.current = null;
-    }, 280);
+    }, 180);
   }
 
   function applyCustomThemePreviewPatch(patch: Partial<Settings>) {
@@ -2174,6 +2252,7 @@ function MainModeApp() {
       customThemeEnabled: true
     };
 
+    markCustomThemePaintBusy(delay + 520);
     queueCustomThemePreviewPatch(customThemeLivePatchRef.current);
     clearPendingCustomThemeCommit();
 
@@ -2186,17 +2265,83 @@ function MainModeApp() {
       customThemeCommitTimerRef.current = null;
       customThemeLivePatchRef.current = {};
 
-      setSettings((old) => {
-        const next: Settings = {
-          ...old,
-          ...commitPatch
-        };
+      startTransition(() => {
+        setSettings((old) => {
+          const next: Settings = {
+            ...old,
+            ...commitPatch
+          };
 
-        if (bootedRef.current) {
-          window.localitfy.saveSettings(next).catch(() => undefined);
-        }
+          settingsRef.current = next;
 
-        return next;
+          if (bootedRef.current) {
+            void saveSettingsSafely(next, false);
+          }
+
+          return next;
+        });
+      });
+    }, delay);
+  }
+
+  function queueQuietCustomThemeColorPatch(patch: Partial<Settings>, delay = 620) {
+    const livePatch = {
+      ...customThemeLivePatchRef.current,
+      ...patch,
+      customThemeEnabled: true
+    };
+
+    customThemeQuietPatchRef.current = {
+      ...customThemeQuietPatchRef.current,
+      ...patch,
+      customThemeEnabled: true
+    };
+
+    customThemeLivePatchRef.current = livePatch;
+
+    // Live preview is DOM-only and rAF-throttled. No React state, no settings
+    // remount, no fade replay while the picker is being dragged.
+    queueCustomThemePreviewPatch(livePatch);
+    document.body.classList.add("localitfyThemePainting");
+
+    if (themePaintIdleTimerRef.current !== null) {
+      window.clearTimeout(themePaintIdleTimerRef.current);
+    }
+
+    themePaintIdleTimerRef.current = window.setTimeout(() => {
+      document.body.classList.remove("localitfyThemePainting");
+      themePaintIdleTimerRef.current = null;
+    }, 160);
+
+    if (customThemeQuietCommitTimerRef.current !== null) {
+      window.clearTimeout(customThemeQuietCommitTimerRef.current);
+    }
+
+    customThemeQuietCommitTimerRef.current = window.setTimeout(() => {
+      const commitPatch = {
+        ...customThemeQuietPatchRef.current,
+        customThemeEnabled: true
+      };
+
+      customThemeQuietCommitTimerRef.current = null;
+      customThemeQuietPatchRef.current = {};
+      customThemeLivePatchRef.current = {};
+
+      startTransition(() => {
+        setSettings((old) => {
+          const next: Settings = {
+            ...old,
+            ...commitPatch
+          };
+
+          settingsRef.current = next;
+
+          if (bootedRef.current) {
+            void saveSettingsSafely(next, false);
+          }
+
+          return next;
+        });
       });
     }, delay);
   }
@@ -2217,22 +2362,12 @@ function MainModeApp() {
 
   function stageCustomThemeColor(key: CustomThemeColorKey, value: string) {
     const safeColor = normalizeHexColor(value, getCustomThemeFallbackColor(key));
-    stageCustomThemePatch({ [key]: safeColor } as Partial<Settings>);
-  }
-
-  function handleCustomThemeNativeColor(key: CustomThemeColorKey, value: string) {
-    const safeColor = normalizeHexColor(value, getCustomThemeFallbackColor(key));
-    setCustomThemeHexDrafts((old) => ({ ...old, [key]: safeColor }));
-    stageCustomThemeColor(key, safeColor);
+    queueQuietCustomThemeColorPatch({ [key]: safeColor } as Partial<Settings>);
   }
 
   function handleCustomThemeHexDraftChange(key: CustomThemeColorKey, value: string) {
     const draft = normalizeHexInputDraft(value);
     setCustomThemeHexDrafts((old) => ({ ...old, [key]: draft }));
-
-    if (isCompleteHexColorInput(draft)) {
-      stageCustomThemeColor(key, draft);
-    }
   }
 
   function commitCustomThemeHexDraft(key: CustomThemeColorKey, value: string, fallback: string) {
@@ -2523,7 +2658,20 @@ function MainModeApp() {
     return rankSongsForSearch(librarySearchIndex, deferredQuery);
   }, [librarySearchIndex, deferredQuery, songs]);
 
-  const likedSongs = useMemo(() => songs.filter((song) => song.liked), [songs]);
+  const likedSongs = useMemo(() => {
+    const seen = new Set<string>();
+
+    return songs.filter((song) => {
+      if (!song.liked) return false;
+
+      const key = String(song.id || stableSongSourceKey(song) || `${song.title}|${song.artist}|${song.duration}`).trim();
+      if (!key) return true;
+      if (seen.has(key)) return false;
+
+      seen.add(key);
+      return true;
+    });
+  }, [songs]);
 
   const topSongs = useMemo(() => {
     return [...songs].sort((a, b) => b.playCount - a.playCount).slice(0, 6);
@@ -3192,6 +3340,17 @@ function MainModeApp() {
     return source.slice(0, 120);
   }, [filteredSongs, query, songs]);
 
+  const missingCoverSongs = useMemo(() => {
+    return songs.filter((song) => {
+      const coverPath = String(song.coverPath || song.savedCoverPath || "").trim();
+      const coverUrl = String(song.coverUrl || song.coverThumbnailUrl || song.thumbnailUrl || "").trim();
+      const coverExists = typeof song.coverExists === "boolean" ? song.coverExists : true;
+      const usesFallbackCover = Boolean(song.usesFallbackCover || song.missingSavedCover);
+
+      return usesFallbackCover || !coverPath || coverExists === false || (!coverUrl && !coverPath);
+    });
+  }, [songs]);
+
   const coverStats = useMemo(() => {
     const usable = coverGalleryAssets.filter((entry) => !entry.excluded);
     const used = usable.filter((entry) => entry.usage > 0);
@@ -3204,10 +3363,11 @@ function MainModeApp() {
       used: used.length,
       favorites: favoritePixelCoverKeys.length,
       excluded: excludedPixelCoverKeys.length,
+      missingSongs: missingCoverSongs.length,
       least,
       most
     };
-  }, [coverGalleryAssets, favoritePixelCoverKeys.length, excludedPixelCoverKeys.length]);
+  }, [coverGalleryAssets, favoritePixelCoverKeys.length, excludedPixelCoverKeys.length, missingCoverSongs.length]);
 
   // Kept intentionally disabled: this preview was calculated every render but is not currently rendered.
   // Re-enable it only when the queue preview UI actually uses this value.
@@ -3283,7 +3443,7 @@ function MainModeApp() {
       if (document.hidden) {
         clearIdleTimer();
         clearActivityTimer();
-        markIdle();
+        if (!playingRef.current) markIdle();
         return;
       }
 
@@ -4615,6 +4775,11 @@ function MainModeApp() {
         window.clearTimeout(saveSettingsTimerRef.current);
       }
 
+      if (backgroundAudioRepairTimerRef.current !== null) {
+        window.clearTimeout(backgroundAudioRepairTimerRef.current);
+        backgroundAudioRepairTimerRef.current = null;
+      }
+
       if (sleepTimerRef.current !== null) {
         window.clearTimeout(sleepTimerRef.current);
       }
@@ -5928,6 +6093,7 @@ function MainModeApp() {
       applyPlaybackRateSettings(audio);
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
       syncAudioEffectGraph(audio);
+      resumeAudioContextSafely();
       volumeRef.current = safeVolume;
 
       if (audio.src !== playbackUrl.url) {
@@ -5998,24 +6164,41 @@ function MainModeApp() {
     setStatusText("paused");
   }
 
-  async function persistSettings(next: Settings, debounce = false) {
-    const shouldTrackThemeChange =
-      bootedRef.current &&
-      (settings.theme !== next.theme || settings.customThemeEnabled !== next.customThemeEnabled);
-    const shouldTrackDiscordToggle = bootedRef.current && settings.discordEnabled !== next.discordEnabled;
+  function settingsAreSame(left: Settings, right: Settings) {
+    const leftKeys = Object.keys(left || {});
+    const rightKeys = Object.keys(right || {});
+    if (leftKeys.length !== rightKeys.length) return false;
+    return leftKeys.every((key) => Object.is((left as any)[key], (right as any)[key]));
+  }
 
-    setSettings(next);
+  function isImmediateSettingsKey(key: string) {
+    return [
+      "volume",
+      "playbackSpeed",
+      "crossfadeSeconds",
+      "crossfadeEnabled",
+      "gaplessPlayback",
+      "volumeNormalization",
+      "perSongVolumeMemory",
+      "sleepTimerMinutes",
+      "discordEnabled",
+      "discordPrivacyMode",
+      "discordButtons",
+      "discordArtMode",
+      "discordActivityStyle",
+      "discordTitleCleanup",
+      "discordSecondLine"
+    ].includes(key);
+  }
 
+  async function saveSettingsSafely(next: Settings, debounce = false) {
     if (!bootedRef.current) return;
 
-    const trackSettingsAnalytics = () => {
-      if (shouldTrackThemeChange) {
-        trackThemeChanged(next.customThemeEnabled ? "custom" : next.theme, next.customThemeEnabled);
-      }
+    const saveSerial = ++saveSettingsSerialRef.current;
 
-      if (shouldTrackDiscordToggle) {
-        trackDiscordToggled(next.discordEnabled);
-      }
+    const runSave = () => {
+      if (saveSerial !== saveSettingsSerialRef.current) return;
+      window.localitfy.saveSettings(next).catch(() => undefined);
     };
 
     if (debounce) {
@@ -6024,20 +6207,49 @@ function MainModeApp() {
       }
 
       saveSettingsTimerRef.current = window.setTimeout(() => {
-        window.localitfy.saveSettings(next).catch(() => undefined);
-      }, 240);
-
-      trackSettingsAnalytics();
+        saveSettingsTimerRef.current = null;
+        runSave();
+      }, 260);
       return;
     }
 
-    await window.localitfy.saveSettings(next);
-    trackSettingsAnalytics();
+    await window.localitfy.saveSettings(next).catch(() => undefined);
+  }
+
+  async function persistSettings(next: Settings, debounce = false, priority: "immediate" | "transition" = "transition") {
+    const previous = settingsRef.current;
+    if (settingsAreSame(previous, next)) return;
+
+    const shouldTrackThemeChange =
+      bootedRef.current &&
+      (previous.theme !== next.theme || previous.customThemeEnabled !== next.customThemeEnabled);
+    const shouldTrackDiscordToggle = bootedRef.current && previous.discordEnabled !== next.discordEnabled;
+
+    settingsRef.current = next;
+
+    if (priority === "immediate") {
+      setSettings(next);
+    } else {
+      startTransition(() => setSettings(next));
+    }
+
+    if (!bootedRef.current) return;
+
+    if (shouldTrackThemeChange) {
+      trackThemeChanged(next.customThemeEnabled ? "custom" : next.theme, next.customThemeEnabled);
+    }
+
+    if (shouldTrackDiscordToggle) {
+      trackDiscordToggled(next.discordEnabled);
+    }
+
+    await saveSettingsSafely(next, debounce);
   }
 
   async function updateSetting<K extends keyof Settings>(key: K, value: Settings[K], debounce = false) {
+    const currentSettings = settingsRef.current;
     const next: Settings = {
-      ...settings,
+      ...currentSettings,
       [key]: value
     };
 
@@ -6046,6 +6258,7 @@ function MainModeApp() {
       next.volume = safeVolume;
       volumeDraftRef.current = Math.round(safeVolume * 100);
       applyLiveVolumePercent(volumeDraftRef.current);
+      settingsRef.current = next;
       setSettings(next);
 
       if (bootedRef.current) {
@@ -6055,7 +6268,7 @@ function MainModeApp() {
 
         saveSettingsTimerRef.current = window.setTimeout(() => {
           saveSettingsTimerRef.current = null;
-          window.localitfy.saveSettings(next).catch(() => undefined);
+          void saveSettingsSafely(next, false);
         }, debounce ? 420 : 120);
       }
 
@@ -6124,7 +6337,7 @@ function MainModeApp() {
       next.simpleMode = false;
     }
 
-    await persistSettings(next, debounce);
+    await persistSettings(next, debounce, isImmediateSettingsKey(String(key)) ? "immediate" : "transition");
 
     if (!debounce && bootedRef.current) {
       if (key === "theme" || key === "customThemeEnabled") {
@@ -6138,8 +6351,9 @@ function MainModeApp() {
   }
 
   async function updateSettingsPatch(patch: Partial<Settings>, debounce = false) {
+    const currentSettings = settingsRef.current;
     const next: Settings = {
-      ...settings,
+      ...currentSettings,
       ...patch
     };
 
@@ -6181,7 +6395,9 @@ function MainModeApp() {
       kickThemeSettle();
     }
 
-    await persistSettings(next, debounce);
+    const patchKeys = Object.keys(patch || {});
+    const priority = patchKeys.some((key) => isImmediateSettingsKey(key)) ? "immediate" : "transition";
+    await persistSettings(next, debounce, priority);
   }
 
   function resetDiscordSettings() {
@@ -6589,6 +6805,96 @@ function MainModeApp() {
     }
   }
 
+  async function changeCoverForSongAction(song: Song | null) {
+    if (!song) return null;
+    setSongContextMenu(null);
+    return chooseCoverFromPc(song);
+  }
+
+  async function randomizeCoverForSongAction(song: Song | null) {
+    if (!song) return null;
+    setSongContextMenu(null);
+    return randomizeCoverForSong(song);
+  }
+
+  async function resetCoverForSongAction(song: Song | null) {
+    if (!song || pixelArtBusy) return null;
+
+    setSongContextMenu(null);
+    setPixelArtBusy(true);
+    setStatusText("resetting cover...");
+    showAppToast("resetting cover...", "work");
+
+    const optimistic = { ...song, coverPath: null, savedCoverPath: "", savedCoverExists: false, usesFallbackCover: true, missingSavedCover: true, coverUrl: null, coverThumbUrl: null, coverThumbnailUrl: null, thumbnailUrl: null };
+    replaceSong(optimistic as Song);
+
+    try {
+      const updated = await window.localitfy.patchSong(song.id, { coverPath: null, coverUrl: null });
+      if (updated) replaceSong(updated);
+      setStatusText("cover reset to default");
+      showAppToast("cover reset to default", "success");
+      return updated || optimistic;
+    } catch (error) {
+      console.error("[localitfy reset cover error]", error);
+      replaceSong(song);
+      setStatusText("cover reset failed");
+      showAppToast("cover reset failed", "error");
+      return null;
+    } finally {
+      setPixelArtBusy(false);
+    }
+  }
+
+  async function randomizeMissingCoversAction() {
+    if (pixelArtBusy) return;
+
+    setPixelArtBusy(true);
+    setStatusText("randomizing missing covers...");
+    showAppToast("randomizing missing covers...", "work");
+
+    try {
+      const updatedSongs = await window.localitfy.randomizeMissingSongCovers?.();
+      if (Array.isArray(updatedSongs)) {
+        setSongs(applyLibraryOrder(sanitizeSongList(updatedSongs)));
+      }
+
+      const changedCount = Array.isArray(updatedSongs) ? Math.max(0, missingCoverSongs.length) : 0;
+      setStatusText(changedCount ? `fixed ${changedCount} missing cover${changedCount === 1 ? "" : "s"}` : "missing cover scan complete");
+      showAppToast(changedCount ? `fixed ${changedCount} missing cover${changedCount === 1 ? "" : "s"}` : "missing cover scan complete", changedCount ? "success" : "info");
+    } catch (error) {
+      console.error("[localitfy missing cover randomize error]", error);
+      setStatusText("missing cover fix failed");
+      showAppToast("missing cover fix failed", "error");
+    } finally {
+      setPixelArtBusy(false);
+    }
+  }
+
+  async function cleanupCoverCacheAction() {
+    if (pixelArtBusy) return;
+
+    setPixelArtBusy(true);
+    setStatusText("cleaning cover cache...");
+    showAppToast("cleaning cover cache...", "work");
+
+    try {
+      const result = await window.localitfy.cleanupCoverCache?.();
+      const removed = Number(result?.removed || 0);
+      const message = removed
+        ? `cleaned ${removed} cached cover thumbnail${removed === 1 ? "" : "s"}`
+        : "cover cache already clean";
+
+      setStatusText(message);
+      showAppToast(message, removed ? "success" : "info");
+    } catch (error) {
+      console.error("[localitfy cover cache cleanup error]", error);
+      setStatusText("cover cache cleanup failed");
+      showAppToast("cover cache cleanup failed", "error");
+    } finally {
+      setPixelArtBusy(false);
+    }
+  }
+
   async function chooseCoverFromPc(song: Song | null) {
     if (!song || pixelArtBusy) return null;
 
@@ -6886,30 +7192,115 @@ function MainModeApp() {
   }
 
 
-  async function cleanLibraryMetadataAction() {
+  function buildMetadataCleanPreview(scope: "all" | "selected" = "all") {
+    const selectedIds = new Set(coverSelectedSongIds);
+    const targetSongs = scope === "selected" && selectedIds.size
+      ? songs.filter((song) => selectedIds.has(song.id))
+      : songs;
+
+    const items = targetSongs.map((song) => {
+      const patch = getMetadataRepairPatch(song);
+      const fields = Object.keys(patch).filter((key) => key !== "playbackPosition");
+
+      return {
+        id: song.id,
+        song,
+        before: {
+          title: song.title,
+          artist: song.artist,
+          album: song.album
+        },
+        after: {
+          title: patch.title ?? song.title,
+          artist: patch.artist ?? song.artist,
+          album: patch.album ?? song.album
+        },
+        patch,
+        fields
+      };
+    });
+
+    const changedItems = items.filter((item) => Object.keys(item.patch).length > 0);
+    const titleFixCount = changedItems.filter((item) => Object.prototype.hasOwnProperty.call(item.patch, "title")).length;
+    const artistFixCount = changedItems.filter((item) => Object.prototype.hasOwnProperty.call(item.patch, "artist")).length;
+    const albumFixCount = changedItems.filter((item) => Object.prototype.hasOwnProperty.call(item.patch, "album")).length;
+
+    return {
+      id: Date.now(),
+      scope,
+      totalCount: targetSongs.length,
+      changedCount: changedItems.length,
+      skippedCount: Math.max(0, targetSongs.length - changedItems.length),
+      titleFixCount,
+      artistFixCount,
+      albumFixCount,
+      items: changedItems
+    };
+  }
+
+  function openMetadataCleanPreview(scope: "all" | "selected" = "all") {
     if (!songs.length || libraryScanBusy) return;
+
+    if (scope === "selected" && !coverSelectedSongIds.length) {
+      showAppToast("select songs in cover studio first", "info");
+      setLibraryScanMessage("select songs in cover studio first");
+      return;
+    }
+
+    const preview = buildMetadataCleanPreview(scope);
+    setMetadataCleanPreview(preview);
+
+    if (!preview.changedCount) {
+      const message = preview.totalCount ? "song names already look clean" : "no songs to clean";
+      setLibraryScanMessage(`${message} • skipped ${preview.skippedCount}`);
+      setStatusText(message);
+      showAppToast(message, "success");
+      return;
+    }
+
+    setLibraryScanMessage(
+      `preview ready • ${preview.changedCount} fix${preview.changedCount === 1 ? "" : "es"} • ${preview.skippedCount} skipped`
+    );
+    setStatusText("metadata preview ready");
+    showAppToast(`preview ready: ${preview.changedCount} fix${preview.changedCount === 1 ? "" : "es"}`, "info");
+  }
+
+  function cleanLibraryMetadataAction() {
+    openMetadataCleanPreview("all");
+  }
+
+  function cleanSelectedMetadataAction() {
+    openMetadataCleanPreview("selected");
+  }
+
+  function cancelMetadataCleanPreviewAction() {
+    setMetadataCleanPreview(null);
+    setLibraryScanMessage("metadata clean preview cancelled");
+    setStatusText("metadata clean preview cancelled");
+  }
+
+  async function applyMetadataCleanPreviewAction() {
+    const preview = metadataCleanPreview;
+    if (!preview || !preview.items?.length || libraryScanBusy) return;
 
     setLibraryScanBusy(true);
     setPlayerError("");
-    setStatusText("cleaning song names...");
-    showAppToast("cleaning song names...", "work");
-    setLibraryScanMessage("fixing titles, artists, and albums...");
+    setStatusText("saving metadata fixes...");
+    showAppToast("saving metadata fixes...", "work");
+    setLibraryScanMessage(`saving ${preview.changedCount} metadata fix${preview.changedCount === 1 ? "" : "es"}...`);
 
     try {
-      const repairs = songs
-        .map((song) => ({ song, patch: getMetadataRepairPatch(song) }))
-        .filter((item) => Object.keys(item.patch).length > 0);
+      const repairs = preview.items;
+      const patchById = new Map(repairs.map((item: any) => [item.id, item.patch]));
+      const undoItems = repairs.map((item: any) => ({
+        id: item.id,
+        patch: {
+          title: item.before.title,
+          artist: item.before.artist,
+          album: item.before.album
+        }
+      }));
 
-      if (!repairs.length) {
-        const indexed = applyLibraryOrder(sanitizeSongList(songs));
-        setSongs(indexed);
-        setLibraryScanMessage(`library clean • ${indexed.length} tracks indexed`);
-        setStatusText("song names already look clean");
-        showAppToast("song names already look clean", "success");
-        return;
-      }
-
-      const patchById = new Map(repairs.map(({ song, patch }) => [song.id, patch]));
       const optimisticSongs = songs.map((song) => {
         const patch = patchById.get(song.id);
         return patch ? { ...song, ...patch } : song;
@@ -6917,28 +7308,77 @@ function MainModeApp() {
 
       const indexed = applyLibraryOrder(sanitizeSongList(optimisticSongs));
       setSongs(indexed);
-      setLibraryScanMessage(`cleaned ${repairs.length} track${repairs.length === 1 ? "" : "s"} • saving changes...`);
 
       const chunkSize = 12;
       for (let index = 0; index < repairs.length; index += chunkSize) {
         const chunk = repairs.slice(index, index + chunkSize);
         await Promise.allSettled(
-          chunk.map(({ song, patch }) => window.localitfy.patchSong(song.id, patch))
+          chunk.map((item: any) => window.localitfy.patchSong(item.id, item.patch))
         );
 
         setLibraryScanMessage(`saved ${Math.min(index + chunk.length, repairs.length)}/${repairs.length} metadata fixes...`);
         await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
       }
 
-      setLibraryScanMessage(`cleaned ${repairs.length} track${repairs.length === 1 ? "" : "s"} • search rebuilt`);
-      setStatusText(`cleaned ${repairs.length} song name fix${repairs.length === 1 ? "" : "es"}`);
-      showAppToast(`cleaned ${repairs.length} song name fix${repairs.length === 1 ? "" : "es"}`, "success");
+      setMetadataUndoItems(undoItems);
+      setMetadataCleanPreview(null);
+      setLibraryScanMessage(
+        `cleaned ${preview.changedCount} • titles ${preview.titleFixCount} • artists ${preview.artistFixCount} • albums ${preview.albumFixCount} • skipped ${preview.skippedCount}`
+      );
+      setStatusText(`cleaned ${preview.changedCount} song metadata fix${preview.changedCount === 1 ? "" : "es"}`);
+      showAppToast(
+        `cleaned ${preview.changedCount} • ${preview.skippedCount} skipped`,
+        "success"
+      );
     } catch (error) {
-      console.error("[localitfy metadata cleaner error]", error);
+      console.error("[localitfy metadata cleaner apply error]", error);
       setPlayerError("metadata cleaner failed. your library was not deleted.");
       setStatusText("metadata cleaner failed");
       setLibraryScanMessage("cleaner failed safely");
       showAppToast("metadata cleaner failed safely", "error");
+    } finally {
+      setLibraryScanBusy(false);
+    }
+  }
+
+  async function undoLastMetadataCleanAction() {
+    if (!metadataUndoItems.length || libraryScanBusy) return;
+
+    setLibraryScanBusy(true);
+    setPlayerError("");
+    setStatusText("undoing metadata clean...");
+    showAppToast("undoing metadata clean...", "work");
+    setLibraryScanMessage(`undoing ${metadataUndoItems.length} metadata fix${metadataUndoItems.length === 1 ? "" : "es"}...`);
+
+    try {
+      const patchById = new Map(metadataUndoItems.map((item) => [item.id, item.patch]));
+      const restoredSongs = songs.map((song) => {
+        const patch = patchById.get(song.id);
+        return patch ? { ...song, ...patch } : song;
+      });
+
+      setSongs(applyLibraryOrder(sanitizeSongList(restoredSongs)));
+
+      const chunkSize = 12;
+      for (let index = 0; index < metadataUndoItems.length; index += chunkSize) {
+        const chunk = metadataUndoItems.slice(index, index + chunkSize);
+        await Promise.allSettled(
+          chunk.map((item) => window.localitfy.patchSong(item.id, item.patch))
+        );
+        setLibraryScanMessage(`restored ${Math.min(index + chunk.length, metadataUndoItems.length)}/${metadataUndoItems.length} songs...`);
+        await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+      }
+
+      const restoredCount = metadataUndoItems.length;
+      setMetadataUndoItems([]);
+      setLibraryScanMessage(`undid metadata clean • restored ${restoredCount} song${restoredCount === 1 ? "" : "s"}`);
+      setStatusText("metadata clean undone");
+      showAppToast("metadata clean undone", "success");
+    } catch (error) {
+      console.error("[localitfy metadata undo error]", error);
+      setStatusText("metadata undo failed");
+      setLibraryScanMessage("metadata undo failed safely");
+      showAppToast("metadata undo failed", "error");
     } finally {
       setLibraryScanBusy(false);
     }
@@ -9445,12 +9885,31 @@ function MainModeApp() {
   }
 
   function toggleLike(songId: string) {
-    const target = songs.find((song) => song.id === songId);
+    const target = songsById.get(songId) || songs.find((song) => song.id === songId);
     if (!target) return;
 
-    void patchSongLocal(songId, {
-      liked: !target.liked
-    });
+    const nextLiked = !target.liked;
+    const toastTitle = prettyTitle(target.title, 5);
+
+    setSongs((oldSongs) =>
+      oldSongs.map((song) => (song.id === songId ? { ...song, liked: nextLiked } : song))
+    );
+
+    showAppToast(
+      nextLiked ? `added "${toastTitle}" to liked` : `removed "${toastTitle}" from liked`,
+      nextLiked ? "success" : "info"
+    );
+
+    void window.localitfy.patchSong(songId, { liked: nextLiked })
+      .then((updated) => {
+        replaceSong({ ...updated, liked: nextLiked });
+      })
+      .catch(() => {
+        setSongs((oldSongs) =>
+          oldSongs.map((song) => (song.id === songId ? { ...song, liked: target.liked } : song))
+        );
+        showAppToast("could not save like change", "error");
+      });
   }
 
   function askRemoveSong(songId: string) {
@@ -10602,9 +11061,9 @@ function MainModeApp() {
         removeSavedCustomThemePreset={removeSavedCustomThemePreset}
         customThemeTokens={customThemeTokens}
         customThemeHexDrafts={customThemeHexDrafts}
-        handleCustomThemeNativeColor={handleCustomThemeNativeColor}
         handleCustomThemeHexDraftChange={handleCustomThemeHexDraftChange}
         commitCustomThemeHexDraft={commitCustomThemeHexDraft}
+        previewCustomThemeColor={stageCustomThemeColor}
         coverColorSyncOptions={coverColorSyncOptions}
         selectedCoverColorSyncMode={selectedCoverColorSyncMode}
         updateCoverColorSyncMode={updateCoverColorSyncMode}
@@ -10616,6 +11075,13 @@ function MainModeApp() {
         songs={songs}
         libraryScanBusy={libraryScanBusy}
         cleanLibraryMetadataAction={cleanLibraryMetadataAction}
+        cleanSelectedMetadataAction={cleanSelectedMetadataAction}
+        metadataSelectedCount={coverSelectedSongIds.length}
+        metadataCleanPreview={metadataCleanPreview}
+        applyMetadataCleanPreviewAction={applyMetadataCleanPreviewAction}
+        cancelMetadataCleanPreviewAction={cancelMetadataCleanPreviewAction}
+        undoLastMetadataCleanAction={undoLastMetadataCleanAction}
+        metadataUndoCount={metadataUndoItems.length}
         rebuildSearchIndexAction={rebuildSearchIndexAction}
         importSongs={importSongs}
         importAnimation={importAnimation}
@@ -10826,6 +11292,9 @@ function MainModeApp() {
     coverSelectedSongIds,
     setCoverGalleryMood,
     randomizeSelectedCovers,
+    randomizeMissingCoversAction,
+    cleanupCoverCacheAction,
+    missingCoverSongs,
     rescanPixelArtFolder,
     selectCurrentSongForCovers,
     selectVisibleSongsForCovers,
@@ -10950,6 +11419,9 @@ function MainModeApp() {
     setEditorSong,
     randomizeCover,
     pickCover,
+    changeCoverForSongAction,
+    randomizeCoverForSongAction,
+    resetCoverForSongAction,
     editTitle,
     setEditTitle,
     editArtist,

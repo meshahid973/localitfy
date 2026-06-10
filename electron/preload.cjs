@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   getLeastUsedCover: () => ipcRenderer.invoke("covers:least-used"),
   getCoverThumbnailStatus: () => ipcRenderer.invoke("covers:thumbnail-status"),
   warmCoverThumbnails: (payload) => ipcRenderer.invoke("covers:warm-thumbnails", payload),
+  cleanupCoverCache: () => ipcRenderer.invoke("covers:cleanup-cache"),
   setSongCover: (id, coverPath) => ipcRenderer.invoke("song:set-cover", id, coverPath),
   pickSongCover: (id) => ipcRenderer.invoke("song:pick-cover", id),
   analyzeSongVolume: (id) => ipcRenderer.invoke("song:analyze-volume", id),

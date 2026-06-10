@@ -1,4 +1,5 @@
-/* localtify 0.3.8 V302 — GPU acceleration status and DevTools bridge. */
+/* localtify 0.3.8 V425 cover picker and cache cleanup. */
+/* localtify 0.3.8 V424 — Windows startup white-screen recovery. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -147,6 +148,15 @@ const {
 
 const isDev = !app.isPackaged;
 
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+}
+
+app.on("second-instance", () => {
+  showMainWindow();
+});
+
 const MEDIA_PROTOCOL = "localtify-media";
 const MEDIA_PROTOCOL_HOST = "file";
 const MEDIA_SERVER_HOST = "127.0.0.1";
@@ -274,6 +284,9 @@ function restoreDatabaseFromOldUserDataIfNeeded() {
 }
 
 let mainWindow = null;
+let mainWindowRendererWatchdog = null;
+let mainWindowRendererRecoveredOnce = false;
+let startupLaunchStatus = { wasOpenedAtLogin: false, wasOpenedAsHidden: false };
 let lastAssignedCoverPath = "";
 
 
@@ -313,16 +326,17 @@ function applyWindowTranslucencyToWindow(win, settings = getSavedWindowTransluce
   const next = normalizeWindowTranslucencySettings(settings);
 
   try {
-    win.setBackgroundColor("#00000000");
+    // Never let the native window show Chromium's default white while Windows is
+    // still starting. The renderer/CSS can still draw the glass UI on top.
+    win.setBackgroundColor("#090012");
   } catch (error) {
     console.log("[localtify window background error]", error?.message || error);
   }
 
   try {
     if (process.platform === "win32" && typeof win.setBackgroundMaterial === "function") {
-      // Native Windows acrylic adds a grey/brown fog over the whole window.
-      // Use pure transparent Electron + CSS glass when the app background is transparent.
-      // Keep acrylic available only for solid-app glass mode.
+      // Keep this stable on Windows boot. DWM/acrylic can be late during login,
+      // so Localtify uses CSS glass and a dark native background instead.
       win.setBackgroundMaterial("none");
     }
   } catch (error) {
@@ -1605,6 +1619,54 @@ function getCoverThumbnailStatus() {
       ? `${count} small cover thumbnail${count === 1 ? "" : "s"} cached.`
       : "No cover thumbnails cached yet. Localtify will build them quietly as covers appear."
   };
+}
+
+function cleanupCoverThumbnailCache() {
+  const dir = getCoverThumbnailDirectory();
+  let removed = 0;
+  let sizeBytes = 0;
+
+  try {
+    for (const timer of coverThumbnailQueue.values()) {
+      try { clearTimeout(timer); } catch {}
+    }
+    coverThumbnailQueue.clear();
+    coverThumbnailUrlCache.clear();
+
+    if (dir && fs.existsSync(dir)) {
+      for (const name of fs.readdirSync(dir)) {
+        const filePath = path.join(dir, name);
+        if (!fileExists(filePath)) continue;
+        const info = getFileInfoCached(filePath);
+        if (!info.isFile) continue;
+        sizeBytes += info.size || 0;
+        fs.rmSync(filePath, { force: true });
+        removed += 1;
+      }
+    }
+
+    clearFileInfoCache();
+
+    return {
+      ok: true,
+      directory: dir,
+      removed,
+      sizeBytes,
+      message: removed
+        ? `Cleaned ${removed} cached cover thumbnail${removed === 1 ? "" : "s"}.`
+        : "Cover cache is already clean."
+    };
+  } catch (error) {
+    console.log("[localtify cover cache cleanup error]", error?.message || error);
+    return {
+      ok: false,
+      directory: dir,
+      removed,
+      sizeBytes,
+      error: error?.message || "cover cache cleanup failed",
+      message: "Localtify could not clean the cover cache right now."
+    };
+  }
 }
 
 function warmCoverThumbnails({ limit = 80, force = false } = {}) {
@@ -3222,6 +3284,8 @@ function getRuntimeCoverPath(song, pixelArtFiles = null) {
 function shapeSong(song, pixelArtFiles = null) {
   if (!song) return null;
   const exists = fileExists(song.filePath);
+  const savedCoverPath = String(song.coverPath || "").trim();
+  const savedCoverExists = Boolean(savedCoverPath && fileExists(savedCoverPath) && isImageFile(savedCoverPath));
   const runtimeCoverPath = getRuntimeCoverPath(song, pixelArtFiles);
   const coverExists = Boolean(runtimeCoverPath && fileExists(runtimeCoverPath));
 
@@ -3234,7 +3298,11 @@ function shapeSong(song, pixelArtFiles = null) {
     url: "",
     // Never hand the renderer a raw file:// cover. In packaged builds Chromium blocks it.
     // If the DB has no coverPath or the old path is broken, use a stable bundled pixel-art fallback at runtime.
-    coverPath: song.coverPath || runtimeCoverPath || "",
+    coverPath: savedCoverPath || runtimeCoverPath || "",
+    savedCoverPath,
+    savedCoverExists,
+    usesFallbackCover: !savedCoverExists,
+    missingSavedCover: !savedCoverPath || (Boolean(savedCoverPath) && !savedCoverExists),
     coverUrl,
     coverThumbUrl,
     coverThumbnailUrl: coverThumbUrl,
@@ -3440,6 +3508,134 @@ function toggleLocaltifyDevTools(win = mainWindow) {
   }
 }
 
+
+function localtifyStartupShellHtml(title, message, detail = "") {
+  const safe = (value) => String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+  return `<!doctype html><html><head><meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      html,body{margin:0;width:100%;height:100%;background:#090012;color:#f8eaff;font-family:Inter,Segoe UI,system-ui,sans-serif;}
+      body{display:grid;place-items:center;overflow:hidden;}
+      .box{max-width:520px;padding:28px;border:1px solid rgba(232,94,255,.28);border-radius:26px;background:linear-gradient(135deg,rgba(42,8,56,.92),rgba(8,2,16,.96));box-shadow:0 24px 80px rgba(0,0,0,.55),0 0 42px rgba(220,76,255,.18);}
+      h1{margin:0 0 10px;font-size:23px;letter-spacing:-.04em;}
+      p{margin:0;color:#cbb8d8;line-height:1.55;font-size:14px;}
+      code{display:block;margin-top:14px;padding:12px;border-radius:14px;background:rgba(255,255,255,.06);color:#f4d5ff;white-space:pre-wrap;word-break:break-word;font-size:12px;}
+    </style></head><body><div class="box"><h1>${safe(title)}</h1><p>${safe(message)}</p>${detail ? `<code>${safe(detail)}</code>` : ""}</div></body></html>`;
+}
+
+function loadLocaltifyStartupShell(win, title, message, detail = "") {
+  if (!win || win.isDestroyed()) return;
+  try {
+    const html = localtifyStartupShellHtml(title, message, detail);
+    win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`).catch(() => {});
+  } catch (error) {
+    console.log("[localtify startup shell error]", error?.message || error);
+  }
+}
+
+function hardenRendererBackground(win) {
+  if (!win || win.isDestroyed()) return;
+  try {
+    win.webContents.insertCSS(`
+      html, body, #root {
+        min-width: 100%;
+        min-height: 100%;
+        background: #090012 !important;
+      }
+      body:empty::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: #090012;
+      }
+    `).catch(() => {});
+  } catch {
+    // harmless best-effort guard
+  }
+}
+
+function verifyRendererMounted(win, indexPath) {
+  if (!win || win.isDestroyed() || isDev) return;
+
+  setTimeout(async () => {
+    if (!win || win.isDestroyed()) return;
+
+    try {
+      const state = await win.webContents.executeJavaScript(`(() => {
+        const root = document.getElementById('root');
+        const body = document.body;
+        return {
+          href: location.href,
+          rootChars: root ? (root.innerHTML || '').trim().length : 0,
+          bodyChars: body ? (body.innerHTML || '').trim().length : 0,
+          title: document.title || ''
+        };
+      })()`, true);
+
+      const rendererLooksEmpty = state && state.href && state.href.startsWith("file:") && state.rootChars < 16 && state.bodyChars < 64;
+      if (!rendererLooksEmpty) return;
+
+      console.log("[localtify renderer empty after startup]", state);
+
+      if (!mainWindowRendererRecoveredOnce) {
+        mainWindowRendererRecoveredOnce = true;
+        win.webContents.reloadIgnoringCache();
+        return;
+      }
+
+      loadLocaltifyStartupShell(
+        win,
+        "localtify could not finish opening",
+        "The window started, but the renderer stayed empty. Restart Localtify once; if this repeats, run npm run build before packaging.",
+        `Renderer: ${indexPath}`
+      );
+    } catch (error) {
+      console.log("[localtify renderer verify error]", error?.message || error);
+    }
+  }, 2500);
+}
+
+function armRendererLoadWatchdog(win, indexPath) {
+  if (!win || win.isDestroyed() || isDev) return;
+  clearTimeout(mainWindowRendererWatchdog);
+
+  mainWindowRendererWatchdog = setTimeout(() => {
+    if (!win || win.isDestroyed()) return;
+
+    try {
+      const loading = win.webContents.isLoading();
+      const url = win.webContents.getURL();
+      console.log("[localtify renderer startup watchdog]", { loading, url, indexPath });
+
+      if (loading) {
+        try { win.webContents.stop(); } catch {}
+      }
+
+      if (!mainWindowRendererRecoveredOnce) {
+        mainWindowRendererRecoveredOnce = true;
+        win.loadFile(indexPath).catch((error) => {
+          loadLocaltifyStartupShell(win, "localtify could not load", error?.message || "Renderer load failed.", indexPath);
+        });
+        return;
+      }
+
+      loadLocaltifyStartupShell(win, "localtify is taking too long to open", "Windows startup may have launched the app before the renderer was ready.", indexPath);
+    } catch (error) {
+      console.log("[localtify renderer watchdog error]", error?.message || error);
+    }
+  }, 14000);
+}
+
+function clearRendererLoadWatchdog() {
+  clearTimeout(mainWindowRendererWatchdog);
+  mainWindowRendererWatchdog = null;
+}
+
 function attachLocaltifyDevToolsShortcuts(win) {
   if (!win || win.isDestroyed() || win.__localtifyDevToolsShortcutsAttached) return;
   win.__localtifyDevToolsShortcutsAttached = true;
@@ -3483,13 +3679,13 @@ function createWindow() {
     minHeight: MAIN_WINDOW_MIN_HEIGHT,
     show: false,
     frame: false,
-    // Keep the native window transparent at creation time. The app still looks
-    // opaque when the setting is off because CSS fills the shell background.
-    // This avoids the Windows/Electron problem where transparency cannot be
-    // reliably enabled after a BrowserWindow has already been created.
-    transparent: true,
+    // V424: do not create the main window as natively transparent. On Windows
+    // login/startup, transparent windows can appear as a permanent white/blank
+    // compositor surface before React paints. CSS still handles the app glass.
+    transparent: false,
     titleBarStyle: "hidden",
-    backgroundColor: "#00000000",
+    backgroundColor: "#090012",
+    paintWhenInitiallyHidden: true,
     ...nativeWindowOptions,
     webPreferences: {
       nodeIntegration: false,
@@ -3497,30 +3693,54 @@ function createWindow() {
       sandbox: false,
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,
-      backgroundThrottling: true
+      // Keeps playback/render timers alive when Windows opens the app in the
+      // background during login or the user alt-tabs quickly.
+      backgroundThrottling: false
     }
   });
   attachLocaltifyDevToolsShortcuts(mainWindow);
   applyWindowTranslucencyToWindow(mainWindow, windowTranslucency);
-  mainWindow.webContents.once("did-finish-load", () => {
-    applyWindowTranslucencyToWindow(mainWindow, getSavedWindowTranslucencySettings());
+
+  const rendererIndexPath = isDev ? "" : getRendererIndexPath();
+
+  mainWindow.webContents.on("dom-ready", () => {
+    hardenRendererBackground(mainWindow);
   });
+
+  mainWindow.webContents.once("did-finish-load", () => {
+    clearRendererLoadWatchdog();
+    applyWindowTranslucencyToWindow(mainWindow, getSavedWindowTranslucencySettings());
+    verifyRendererMounted(mainWindow, rendererIndexPath);
+  });
+
   if (isDev) {
     mainWindow.loadURL("http://localhost:5173").catch((error) => {
       console.log("[localtify main window dev load error]", error?.message || error);
     });
   } else {
-    const indexPath = getRendererIndexPath();
-    console.log("[localtify renderer index]", indexPath);
-    mainWindow.loadFile(indexPath).catch((error) => {
-      console.log("[localtify main window packaged load error]", error?.message || error, indexPath);
+    console.log("[localtify renderer index]", rendererIndexPath);
+    armRendererLoadWatchdog(mainWindow, rendererIndexPath);
+    mainWindow.loadFile(rendererIndexPath).catch((error) => {
+      console.log("[localtify main window packaged load error]", error?.message || error, rendererIndexPath);
+      loadLocaltifyStartupShell(mainWindow, "localtify could not load", error?.message || "Renderer load failed.", rendererIndexPath);
     });
   }
+
   mainWindow.webContents.on("did-fail-load", (_e, code, desc, url) => {
     console.log(`[localitfy main window failed load]`, { code, desc, url });
+    if (!isDev) {
+      loadLocaltifyStartupShell(mainWindow, "localtify failed to load", `${desc || "load failed"} (${code})`, url || rendererIndexPath);
+    }
   });
+
   mainWindow.webContents.on("render-process-gone", (_e, details) => {
     console.log(`[localitfy main window renderer gone]`, details);
+    if (!isDev && !mainWindowRendererRecoveredOnce && mainWindow && !mainWindow.isDestroyed()) {
+      mainWindowRendererRecoveredOnce = true;
+      setTimeout(() => {
+        try { mainWindow?.loadFile(rendererIndexPath); } catch {}
+      }, 450);
+    }
   });
   mainWindow.webContents.on("console-message", (_event, ...args) => {
     const details = args.length === 1 && args[0] && typeof args[0] === "object"
@@ -3540,6 +3760,11 @@ function createWindow() {
     repairMainWindowBounds(mainWindow, { center: true });
     mainWindow.show();
   });
+  mainWindow.on("closed", () => {
+    clearRendererLoadWatchdog();
+    mainWindow = null;
+  });
+
   attachCloseToTray(mainWindow);
 }
 
@@ -3592,9 +3817,11 @@ app.whenReady().then(async () => {
     const savedSettings = getSettings();
     minimizeToTray = Boolean(savedSettings?.minimizeToTray);
     syncWindowsIntegrationSettings(savedSettings, { persistDefault: true });
+    startupLaunchStatus = getStartWithWindowsStatus();
   } catch {
     minimizeToTray = false;
     setStartWithWindows(true);
+    startupLaunchStatus = getStartWithWindowsStatus();
   }
   setupNativeWindowsMediaIpc();
 
@@ -3733,16 +3960,48 @@ app.whenReady().then(async () => {
       };
     }
   });
+  ipcMain.handle("covers:cleanup-cache", async () => {
+    try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; }
+  });
   ipcMain.handle("song:set-cover", async (_event, id, coverPath) => {
     const updated = patchSong(id, { coverPath });
     return updated ? shapeSong(updated) : null;
   });
-  ipcMain.handle("song:pick-cover", async (_event, id) => {
-    const covers = getPixelArtFiles();
+  ipcMain.handle("song:pick-cover", async (event, id) => {
     const song = getSongs().find((item) => item.id === id);
-    const chosen = pickLeastUsedCover(covers, getSongs(), { avoidSelectedCurrent: true, currentPath: song?.coverPath });
-    const updated = patchSong(id, { coverPath: chosen });
-    return updated ? shapeSong(updated) : null;
+    if (!song) return null;
+
+    try {
+      const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+      const result = senderWindow && !senderWindow.isDestroyed()
+        ? await dialog.showOpenDialog(senderWindow, {
+            title: "Choose localtify cover image",
+            buttonLabel: "Use cover",
+            properties: ["openFile"],
+            filters: [
+              { name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp"] }
+            ]
+          })
+        : await dialog.showOpenDialog({
+            title: "Choose localtify cover image",
+            buttonLabel: "Use cover",
+            properties: ["openFile"],
+            filters: [
+              { name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp"] }
+            ]
+          });
+
+      if (result.canceled || !result.filePaths?.[0]) return shapeSong(song);
+
+      const chosen = result.filePaths[0];
+      if (!fileExists(chosen) || !isImageFile(chosen)) return shapeSong(song);
+
+      const updated = patchSong(id, { coverPath: chosen });
+      return updated ? shapeSong(updated) : shapeSong(song);
+    } catch (error) {
+      console.log("[localtify pick cover error]", error?.message || error);
+      return shapeSong(song);
+    }
   });
   ipcMain.handle("song:analyze-volume", async (_event, id) => {
     const target = getSongs().find((item) => item.id === id);
@@ -4194,8 +4453,11 @@ app.whenReady().then(async () => {
     return true;
   });
 
-  createWindow();
-  setupNativeWindowsMedia();
+  const startupCreateDelayMs = process.platform === "win32" && startupLaunchStatus?.wasOpenedAtLogin ? 1600 : 0;
+  setTimeout(() => {
+    createWindow();
+    setupNativeWindowsMedia();
+  }, startupCreateDelayMs);
 
   setTimeout(() => {
     checkForUpdates({ silent: true }).catch((e) => {
