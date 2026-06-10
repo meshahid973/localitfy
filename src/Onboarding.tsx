@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import { Circle, Cloud, Heart, Leaf, Moon, Square } from "lucide-react";
 import "./onboarding-first-run.css";
 
 const ONBOARDING_AUDIO_SRC = new URL("./assets/onboarding.mp3", import.meta.url).href;
+const LOCALTIFY_LOGO_SRC = new URL("./assets/logo.png", import.meta.url).href;
 
 type BusyAction = "import" | "downloads" | "skip" | "start" | null;
 type ImportState = "idle" | "working" | "success" | "error";
@@ -16,7 +18,7 @@ type ThemeChoice = {
   note: string;
   color: string;
   bg: string;
-  icon: string;
+  icon: typeof Leaf;
 };
 
 type StepMeta = {
@@ -40,12 +42,12 @@ type OnboardingProps = {
 };
 
 const THEME_CHOICES: ThemeChoice[] = [
-  { id: "mint", name: "mint", note: "fresh black and green", color: "#8dffce", bg: "#06110d", icon: "✦" },
-  { id: "mono", name: "mono", note: "clean black and white", color: "#f4f4f5", bg: "#09090b", icon: "○" },
-  { id: "berry", name: "berry", note: "pink purple night", color: "#ff72d2", bg: "#160717", icon: "♥" },
-  { id: "midnight", name: "midnight", note: "blue OLED calm", color: "#7dd3fc", bg: "#050b18", icon: "☾" },
-  { id: "terminal", name: "terminal", note: "green console focus", color: "#46ff96", bg: "#020b06", icon: "▣" },
-  { id: "softSky", name: "soft sky", note: "blue silver glow", color: "#93c5fd", bg: "#060b16", icon: "☁" }
+  { id: "mint", name: "mint", note: "fresh black and green", color: "#8dffce", bg: "#06110d", icon: Leaf },
+  { id: "mono", name: "mono", note: "clean black and white", color: "#f4f4f5", bg: "#09090b", icon: Circle },
+  { id: "berry", name: "berry", note: "pink purple night", color: "#ff72d2", bg: "#160717", icon: Heart },
+  { id: "midnight", name: "midnight", note: "blue OLED calm", color: "#7dd3fc", bg: "#050b18", icon: Moon },
+  { id: "terminal", name: "terminal", note: "green console focus", color: "#46ff96", bg: "#020b06", icon: Square },
+  { id: "softSky", name: "soft sky", note: "blue silver glow", color: "#93c5fd", bg: "#060b16", icon: Cloud }
 ];
 
 const STEPS: StepMeta[] = [
@@ -344,10 +346,17 @@ export default function Onboarding({
       <section className="localitfyOnboardingShell" aria-label="localtify first run setup">
         <header className="onboardingHeader">
           <div className="onboardingBrand">
-            <span className="onboardingLogo" aria-hidden="true">♪</span>
+            <span className="onboardingLogoFrame" aria-hidden="true">
+              <img className="onboardingLogoImage" src={LOCALTIFY_LOGO_SRC} alt="" draggable={false} />
+            </span>
             <div>
               <p>localtify setup</p>
-              <strong id="onboardingTitle">make it yours first</strong>
+              <strong id="onboardingTitle" className="onboardingTitleRow">
+                <span className="onboardingTitleInlineLogo" aria-hidden="true">
+                  <img className="onboardingTitleInlineLogoImage" src={LOCALTIFY_LOGO_SRC} alt="" draggable={false} />
+                </span>
+                <span className="onboardingTitleWordmark">make it yours first</span>
+              </strong>
             </div>
           </div>
 
@@ -414,6 +423,7 @@ export default function Onboarding({
                 <div className="onboardingThemeGrid cleaner">
                   {THEME_CHOICES.map((theme) => {
                     const active = previewThemeId === theme.id;
+                    const ThemeIcon = theme.icon;
                     return (
                       <button
                         key={theme.id}
@@ -423,7 +433,9 @@ export default function Onboarding({
                         disabled={busy}
                         style={{ "--theme-accent": theme.color, "--theme-bg": theme.bg } as CssVars}
                       >
-                        <span className="themeIcon">{theme.icon}</span>
+                        <span className="themeIcon" aria-hidden="true">
+                          <ThemeIcon className="themeIconSvg" strokeWidth={2.2} />
+                        </span>
                         <strong>{theme.name}</strong>
                         <small>{theme.note}</small>
                       </button>

@@ -187,23 +187,29 @@
   gap: 14px;
 }
 
-.onboardingLogo {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+.onboardingLogoFrame {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
   display: grid;
   place-items: center;
-  color: #06110b;
-  font-size: 24px;
-  font-weight: 800;
-  background: var(--onboarding-accent);
-  box-shadow: 0 10px 24px rgba(var(--onboarding-accent-rgb), 0.24);
-  transition: transform 200ms var(--squish), box-shadow 200ms ease, background-color 200ms ease;
+  background: linear-gradient(180deg, rgba(var(--onboarding-accent-rgb), 0.16), rgba(var(--onboarding-accent-rgb), 0.07));
+  border: 1px solid rgba(var(--onboarding-accent-rgb), 0.28);
+  box-shadow: 0 12px 28px rgba(var(--onboarding-accent-rgb), 0.20);
+  transition: transform 200ms var(--squish), box-shadow 200ms ease, border-color 200ms ease;
 }
 
-.onboardingLogo:hover {
-  transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 14px 30px rgba(var(--onboarding-accent-rgb), 0.28);
+.onboardingLogoFrame:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 16px 34px rgba(var(--onboarding-accent-rgb), 0.24);
+  border-color: rgba(var(--onboarding-accent-rgb), 0.38);
+}
+
+.onboardingLogoImage {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
 }
 
 .onboardingBrand p,
@@ -223,6 +229,35 @@
   font-size: clamp(28px, 3.1vw, 38px);
   line-height: 0.94;
   letter-spacing: -0.065em;
+}
+
+.onboardingTitleRow {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 12px;
+}
+
+.onboardingTitleInlineLogo {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 12px;
+  display: inline-grid;
+  place-items: center;
+  background: rgba(var(--onboarding-accent-rgb), 0.12);
+  border: 1px solid rgba(var(--onboarding-accent-rgb), 0.26);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.onboardingTitleInlineLogoImage {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
+
+.onboardingTitleWordmark {
+  display: inline-block;
 }
 
 .onboardingHeaderMeta {
@@ -473,15 +508,20 @@
 }
 
 .onboardingThemeChoice .themeIcon {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
   display: grid;
   place-items: center;
   background: var(--theme-accent);
   color: #07110b;
-  font-size: 16px;
-  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 8px 18px rgba(0,0,0,0.16);
+}
+
+.onboardingThemeChoice .themeIconSvg {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 .onboardingThemeChoice strong {
@@ -702,6 +742,23 @@
 }
 
 @media (max-width: 860px) {
+  .onboardingTitleRow {
+    gap: 10px;
+    align-items: center;
+  }
+
+  .onboardingTitleInlineLogo {
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
+    border-radius: 10px;
+  }
+
+  .onboardingTitleInlineLogoImage {
+    width: 16px;
+    height: 16px;
+  }
+
   .onboardingV314,
   .onboardingV315 {
     padding: 16px;
