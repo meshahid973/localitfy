@@ -546,7 +546,7 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
       startupSettingLabel: "Start localtify with Linux",
       startupSettingHelp: "Linux autostart will be added later through a proper desktop-entry flow.",
       linuxInstallNotes: [
-        "AppImage: chmod +x localtify-0.3.8-x64.AppImage, then run it directly.",
+        "AppImage: chmod +x Localtify-0.3.8-x86_64.AppImage, then run it directly.",
         "RPM: for Fedora, openSUSE, and RHEL-style distros.",
         "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
       ]

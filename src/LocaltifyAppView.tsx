@@ -775,7 +775,7 @@ export const updateRibbonEnterSpring = { type: "spring", stiffness: 500, damping
 export const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, mass: 0.55 } as const;
 
 
-export const APP_VERSION = "0.3.7";
+export const APP_VERSION = "0.3.8";
 export const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 export const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 export const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
@@ -870,11 +870,11 @@ export function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 export const whatsNewItems = [
-  "0.3.6 starts the big App.tsx split so the renderer is easier to repair without breaking random UI areas",
-  "The main visual shell now lives in its own LocaltifyAppView file while App.tsx keeps the controller, playback, and data logic",
-  "Update UI, player layout, settings, playlists, downloads, Discord, and cover features stay wired through the same existing state",
-  "No tilt was added back, and the blur, ambience, animated stars, cover glow, and normal motion style stay enabled",
-  "This is a foundation update for cleaner future fixes instead of stacking more emergency code into one giant file"
+  "0.3.8 polishes Albums V2 so custom albums, album shelves, detail pages, and cover actions feel built in",
+  "Downloads, missing-file recovery, playback stability, and metadata cleanup were tightened for daily use",
+  "Settings, onboarding, sidebar behavior, cover tools, and theme editing were cleaned up without redesigning the whole app",
+  "Linux now has clearer AppImage install copy and is treated as an official 0.3.8 release target",
+  "The release focuses on stability, lower UI lag, fewer CSS conflicts, and making the 0.3.7 foundation feel finished"
 ];
 export const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 export const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";

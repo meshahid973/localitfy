@@ -407,7 +407,7 @@ function detectSettingsPlatform(): Required<PlatformInfoLike> {
       startupSettingLabel: "Linux autostart",
       startupSettingHelp: "Hidden in this release. Linux autostart will use a proper desktop-entry flow later.",
       linuxInstallNotes: [
-        "AppImage: chmod +x localtify-0.3.7-x64.AppImage, then run it directly.",
+        "AppImage: chmod +x Localtify-0.3.8-x86_64.AppImage, then run it directly.",
         "RPM: for Fedora, openSUSE, and RHEL-style distros.",
         "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
       ]
