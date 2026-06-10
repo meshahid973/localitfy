@@ -1318,20 +1318,17 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage button,
-.settingsPage button,
 .settingsModal button,
 .cleanSettingsModal button{
   -webkit-tap-highlight-color: transparent;
 }
 
 .settingsPage button:focus,
-.settingsPage button:focus,
 .settingsModal button:focus,
 .cleanSettingsModal button:focus{
   outline: none;
 }
 
-.settingsPage button:focus-visible,
 .settingsPage button:focus-visible,
 .settingsModal button:focus-visible,
 .cleanSettingsModal button:focus-visible{
@@ -1450,7 +1447,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   overflow-wrap: anywhere;
 }
 
-.settingsPage,
 .settingsPage,
 .settingsModal,
 .cleanSettingsModal{
@@ -1674,10 +1670,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.026)), rgba(8, 8, 13, 0.84) !important;
   box-shadow: 0 20px 54px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.045) !important;
   filter: none !important;
-}
-
-.settingsThemeGrid{
-  display: none !important;
 }
 
 .settingsThemeSelectPanel{
@@ -10753,3 +10745,485 @@ body.localitfyThemePainting .customThemeColorPickerV032{
   filter: none !important;
   box-shadow: none !important;
 }
+
+/* localtify 0.3.8 V425 — metadata cleaner preview */
+.metadataCleanerActionRowV425{
+  align-items: center;
+}
+
+.metadataCleanerPreviewBoxV425{
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(var(--accent-rgb), .18);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb), .10), transparent 36%),
+    rgba(0, 0, 0, .20);
+  display: grid;
+  gap: 12px;
+}
+
+.metadataCleanerPreviewHeadV425{
+  display: grid;
+  gap: 4px;
+}
+
+.metadataCleanerPreviewHeadV425 span{
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.metadataCleanerPreviewHeadV425 strong{
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 950;
+  letter-spacing: -.04em;
+}
+
+.metadataCleanerPreviewHeadV425 small{
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.metadataCleanerPreviewListV425{
+  display: grid;
+  gap: 9px;
+}
+
+.metadataCleanerPreviewItemV425{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+}
+
+.metadataCleanerPreviewItemV425 span{
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.metadataCleanerPreviewItemV425 small{
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.metadataCleanerPreviewItemV425 strong,
+.metadataCleanerPreviewItemV425 em{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metadataCleanerPreviewItemV425 strong{
+  color: var(--text);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.metadataCleanerPreviewItemV425 em{
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 750;
+}
+
+.metadataCleanerPreviewItemV425 b{
+  color: var(--accent);
+}
+
+.metadataCleanerPreviewActionsV425{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.settingsActionButton.ghost{
+  background: rgba(255,255,255,.045);
+  color: var(--text);
+}
+
+@media (max-width: 760px){
+  .metadataCleanerPreviewItemV425{
+    grid-template-columns: 1fr;
+  }
+
+  .metadataCleanerPreviewItemV425 b{
+    display: none;
+  }
+}
+
+/* localtify 0.3.8 V426 — settings structural cleanup
+   Purpose: stop old patch layers fighting the settings layout.
+   This block is intentionally final in the file. It restores the theme picker,
+   normalizes setting grids, removes tiny hover jitter, keeps disabled theme
+   content inspectable, and makes settings responsive without layout crashes. */
+
+.settingsPage{
+  width: min(1240px, calc(100% - 24px)) !important;
+  margin: 0 auto !important;
+  padding: 0 12px calc(var(--player-size-used, 92px) + 42px) !important;
+  display: grid !important;
+  gap: 16px !important;
+  color: var(--text) !important;
+}
+
+.settingsPage *,
+.settingsModal *,
+.cleanSettingsModal *{
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.settingsHero,
+.settingsPanelCard,
+.settingsPageCard{
+  overflow: hidden !important;
+  filter: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+.settingsHero::before,
+.settingsHero::after,
+.settingsPanelCard::before,
+.settingsPanelCard::after,
+.settingsPageCard::before,
+.settingsPageCard::after,
+.settingsCategoryPage::before,
+.settingsCategoryPage::after{
+  content: none !important;
+  display: none !important;
+}
+
+.settingsPanelCard:hover,
+.settingsPageCard:hover{
+  transform: none !important;
+  filter: none !important;
+  border-color: rgba(var(--accent-rgb), .18) !important;
+  box-shadow: 0 18px 52px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+.settingsThemeGrid{
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(134px, 1fr)) !important;
+  gap: 14px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.settingsThemeSelectPanel{
+  display: grid !important;
+  grid-template-columns: minmax(250px, 420px) minmax(220px, 1fr) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+}
+
+.settingsSwitchGrid,
+.settingsMiniGrid{
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+}
+
+.settingsMiniGrid.four{
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+}
+
+.settingsPageGrid,
+.settingsTwoColumn{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  align-items: start !important;
+}
+
+.settingSwitchCard,
+.toggleRow,
+.rangeRow{
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 16px !important;
+  min-height: 78px !important;
+  padding: 15px 17px !important;
+  border: 1px solid rgba(255,255,255,.085) !important;
+  border-radius: 17px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.014)),
+    rgba(8,8,13,.58) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.032) !important;
+  filter: none !important;
+  transform: none !important;
+  transition:
+    background-color 190ms ease,
+    border-color 190ms ease,
+    box-shadow 210ms ease,
+    opacity 180ms ease !important;
+}
+
+.settingSwitchCard:hover,
+.toggleRow:hover,
+.rangeRow:hover{
+  transform: none !important;
+  border-color: rgba(var(--accent-rgb), .24) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.048), rgba(255,255,255,.018)),
+    rgba(10,10,16,.68) !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+.settingSwitchCard:active,
+.toggleRow:active,
+.rangeRow:active{
+  transform: none !important;
+}
+
+.settingSwitchCard > span,
+.toggleRowCopy,
+.rangeRowCopy{
+  display: grid !important;
+  gap: 6px !important;
+  align-content: center !important;
+}
+
+.settingSwitchCard small,
+.toggleRow small,
+.rangeRow small{
+  max-width: 48ch !important;
+  line-height: 1.36 !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+.toggleRow input[type="checkbox"]{
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 50px !important;
+  height: 30px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  justify-self: end !important;
+  cursor: pointer !important;
+  background: rgba(255,255,255,.14) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.11) !important;
+}
+
+.toggleRow input[type="checkbox"]::after{
+  content: "" !important;
+  display: block !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin: 4px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,.92) !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.26) !important;
+  transition: transform 210ms cubic-bezier(.2,1.12,.22,1), background-color 180ms ease !important;
+}
+
+.toggleRow input[type="checkbox"]:checked{
+  background: rgba(var(--accent-rgb), .40) !important;
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), .12), inset 0 0 0 1px rgba(var(--accent-rgb), .24) !important;
+}
+
+.toggleRow input[type="checkbox"]:checked::after{
+  transform: translateX(20px) !important;
+  background: var(--accent) !important;
+}
+
+.toggleRow input[type="checkbox"]:focus-visible,
+.settingSwitchCard:focus-visible,
+.toggleRow:focus-visible,
+.rangeRow:focus-visible,
+.settingsChoice:focus-visible,
+.coverSyncChoice:focus-visible{
+  outline: 2px solid rgba(var(--accent-rgb), .58) !important;
+  outline-offset: 3px !important;
+}
+
+.rangeRow{
+  grid-template-columns: minmax(0, .74fr) minmax(150px, 1fr) !important;
+}
+
+.rangeRow input[type="range"]{
+  width: 100% !important;
+  accent-color: var(--accent) !important;
+}
+
+.settingsChoice,
+.coverSyncChoice,
+.settingsThemeCard,
+.themeTokenCard,
+.customThemePresetButtonV025,
+.savedThemeItemV025 button,
+.visualOptionButtonV205,
+.settingsActionButton,
+.settingsTinyButton,
+.settingsPage .softButton{
+  filter: none !important;
+  transform: none !important;
+  transform-style: flat !important;
+  perspective: none !important;
+  will-change: auto !important;
+  transition:
+    background-color 190ms ease,
+    border-color 190ms ease,
+    color 170ms ease,
+    box-shadow 210ms ease,
+    opacity 180ms ease !important;
+}
+
+.settingsChoice:hover,
+.coverSyncChoice:hover,
+.settingsThemeCard:hover,
+.themeTokenCard:hover,
+.customThemePresetButtonV025:hover,
+.savedThemeItemV025 button:hover,
+.visualOptionButtonV205:hover,
+.settingsActionButton:hover,
+.settingsTinyButton:hover,
+.settingsPage .softButton:hover{
+  transform: none !important;
+  filter: none !important;
+}
+
+.settingsActionRow,
+.metadataActionRow,
+.accentControlRow{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.themePickerPanel[data-custom-theme="true"] .themeGrid,
+.themeGrid.isDisabled,
+.themeGrid[aria-disabled="true"]{
+  pointer-events: auto !important;
+  opacity: .72 !important;
+}
+
+.themePickerPanel[data-custom-theme="true"] .themeGrid :is(button, input, select, textarea):disabled,
+.themeGrid.isDisabled :is(button, input, select, textarea):disabled,
+.themeGrid[aria-disabled="true"] :is(button, input, select, textarea):disabled{
+  cursor: not-allowed !important;
+  opacity: .58 !important;
+}
+
+body.localitfyThemePainting .app .settingsThemeCard,
+body.localitfyThemePainting .app .settingsChoice,
+body.localitfyThemePainting .app .settingsActionButton,
+body.localitfyThemePainting .app .settingsTinyButton,
+body.localitfyThemePainting .app .cleanToggleLabel,
+body.localitfyThemePainting .app .themeTokenCard,
+.app.viewSwitching .settingsPage *,
+.app.viewSwitching .settingsModal *{
+  transition-duration: 180ms !important;
+}
+
+.settingsPage button,
+.settingsModal button,
+.cleanSettingsModal button{
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settingsPage button:focus,
+.settingsModal button:focus,
+.cleanSettingsModal button:focus{
+  outline: none;
+}
+
+.settingsPage button:focus-visible,
+.settingsModal button:focus-visible,
+.cleanSettingsModal button:focus-visible{
+  outline: 2px solid rgba(var(--accent-rgb), .58);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1320px){
+  .settingsPage{
+    width: min(1240px, calc(100% - 18px)) !important;
+    padding-inline: 9px !important;
+  }
+
+  .settingsThemeSelectPanel,
+  .customThemeBodyV027,
+  .discordHeroCard,
+  .discordSettingsGrid,
+  .settingsTwoColumn,
+  .settingsPageGrid,
+  .metadataCleanerBody{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 860px){
+  .settingsPage{
+    width: 100% !important;
+    padding-inline: 8px !important;
+  }
+
+  .settingsHero,
+  .settingsPageCard,
+  .settingsPanelCard{
+    padding: 18px !important;
+    border-radius: 18px !important;
+  }
+
+  .settingsLayout{
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    max-height: calc(100vh - 180px) !important;
+    overflow: auto !important;
+  }
+
+  .settingsCategoryRail,
+  .settingsCategoryRailV027{
+    grid-auto-flow: column !important;
+    grid-auto-columns: minmax(156px, 1fr) !important;
+    overflow-x: auto !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,.075) !important;
+  }
+
+  .settingsThemeGrid,
+  .settingsSwitchGrid,
+  .settingsMiniGrid,
+  .coverSyncOptions,
+  .optionGrid,
+  .customThemeTokenGridV027,
+  .settingsResetGrid,
+  .metadataCleanerModes{
+    grid-template-columns: 1fr !important;
+  }
+
+  .rangeRow{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .settingsPage *,
+  .settingsModal *,
+  .cleanSettingsModal *{
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+

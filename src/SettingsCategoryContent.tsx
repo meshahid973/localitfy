@@ -1,3 +1,4 @@
+/* localtify 0.3.8 V426 settings structural cleanup. */
 /* localtify 0.3.7 V324 release prep. Visual controls stay clean and wired. */
 import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
@@ -130,6 +131,13 @@ type SettingsCategoryContentProps = {
   songs: ReadonlyArray<SongLike>;
   libraryScanBusy: boolean;
   cleanLibraryMetadataAction: () => void;
+  cleanSelectedMetadataAction?: () => void;
+  metadataSelectedCount?: number;
+  metadataCleanPreview?: any | null;
+  applyMetadataCleanPreviewAction?: () => void | Promise<void>;
+  cancelMetadataCleanPreviewAction?: () => void;
+  undoLastMetadataCleanAction?: () => void | Promise<void>;
+  metadataUndoCount?: number;
   rebuildSearchIndexAction: () => void;
   importSongs: () => void;
   importAnimation: ImportAnimationLike;
@@ -199,7 +207,7 @@ function ToggleRow({
         </span>
         {help ? <small>{help}</small> : null}
       </span>
-      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.currentTarget.checked)} />
+      <input type="checkbox" role="switch" aria-label={label} aria-checked={checked} checked={checked} onChange={(event) => onChange(event.currentTarget.checked)} />
     </label>
   );
 }
@@ -466,6 +474,13 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   songs,
   libraryScanBusy,
   cleanLibraryMetadataAction,
+  cleanSelectedMetadataAction,
+  metadataSelectedCount = 0,
+  metadataCleanPreview,
+  applyMetadataCleanPreviewAction,
+  cancelMetadataCleanPreviewAction,
+  undoLastMetadataCleanAction,
+  metadataUndoCount = 0,
   rebuildSearchIndexAction,
   importSongs,
   importAnimation,
@@ -1002,11 +1017,47 @@ return (
                 </button>
               ))}
             </div>
-            <div className="settingsActionRow">
-              <button className="settingsActionButton" type="button" disabled={libraryScanBusy} onClick={cleanLibraryMetadataAction}>clean all names</button>
+            <div className="settingsActionRow metadataCleanerActionRowV425">
+              <button className="settingsActionButton" type="button" disabled={libraryScanBusy} onClick={cleanLibraryMetadataAction}>preview clean all</button>
+              <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataSelectedCount} onClick={() => cleanSelectedMetadataAction?.()}>selected only {metadataSelectedCount ? `(${metadataSelectedCount})` : ""}</button>
+              <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataUndoCount} onClick={() => void undoLastMetadataCleanAction?.()}>undo last clean {metadataUndoCount ? `(${metadataUndoCount})` : ""}</button>
               <button className="settingsActionButton" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
               <button className="settingsActionButton" type="button" onClick={importSongs} disabled={importAnimation.active}>import songs</button>
             </div>
+
+            {metadataCleanPreview ? (
+              <div className="metadataCleanerPreviewBoxV425" role="status" aria-live="polite">
+                <div className="metadataCleanerPreviewHeadV425">
+                  <span>preview before applying</span>
+                  <strong>{metadataCleanPreview.changedCount || 0} fix{(metadataCleanPreview.changedCount || 0) === 1 ? "" : "es"}</strong>
+                  <small>{metadataCleanPreview.skippedCount || 0} skipped • titles {metadataCleanPreview.titleFixCount || 0} • artists {metadataCleanPreview.artistFixCount || 0} • albums {metadataCleanPreview.albumFixCount || 0}</small>
+                </div>
+
+                <div className="metadataCleanerPreviewListV425">
+                  {(metadataCleanPreview.items || []).slice(0, 5).map((item: any) => (
+                    <div className="metadataCleanerPreviewItemV425" key={item.id}>
+                      <span>
+                        <small>before</small>
+                        <strong>{item.before?.title || "untitled"}</strong>
+                        <em>{item.before?.artist || "unknown artist"}</em>
+                      </span>
+                      <b aria-hidden="true">→</b>
+                      <span>
+                        <small>after</small>
+                        <strong>{item.after?.title || "untitled"}</strong>
+                        <em>{item.after?.artist || "unknown artist"}</em>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="metadataCleanerPreviewActionsV425">
+                  <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !(metadataCleanPreview.changedCount || 0)} onClick={() => void applyMetadataCleanPreviewAction?.()}>apply fixes</button>
+                  <button className="settingsActionButton ghost" type="button" disabled={libraryScanBusy} onClick={() => cancelMetadataCleanPreviewAction?.()}>cancel</button>
+                </div>
+              </div>
+            ) : null}
+
             {libraryScanMessage ? <p className="settingsHintText">{libraryScanMessage}</p> : null}
           </div>
 
