@@ -10329,10 +10329,9 @@ body.localitfyThemePainting .app :is(
   }
 }
 
-/* V451 CLEAN SHELL + SIDEBAR
-   This is a replacement section, not another patch stack.
-   The sidebar follows the current Localtify app theme background, just slightly darker.
-   No acrylic. No transparent glass. No hover-only black overlay. No sidebar content shifting. */
+/* V453 RELEASE SIDEBAR/SHELL FIX
+   Fixes the "transparent sidebar / content behind sidebar" release blocker.
+   One final shell rule-set: fixed sidebar width, opaque themed sidebar, no hover-shift. */
 
 :root,
 html,
@@ -10346,9 +10345,10 @@ body,
 
 .app{
   --player-size-used: var(--player-size-live, var(--player-size, 92px));
-  --sidebar-width-used: var(--sidebar-width-live, var(--sidebar-width, 236px));
-  --sidebar-bg-clean:
-    linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.34)),
+  --sidebar-width-release: 236px;
+  --sidebar-width-used: var(--sidebar-width-release);
+  --sidebar-bg-release:
+    linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38)),
     var(--bg, #000);
   width: 100vw;
   height: 100vh;
@@ -10358,73 +10358,35 @@ body,
 }
 
 .titleBar{
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  user-select: none;
-  -webkit-app-region: drag;
-  color: var(--text);
   background: var(--bg, #000);
+  background-image: none;
   border-bottom: 1px solid rgba(var(--accent-rgb), .28);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-.titleDrag{
-  height: 100%;
-  padding-left: 14px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: var(--text-2);
-  font-size: 12px;
-  font-weight: 780;
-}
-
-.titleLogo{
-  color: var(--accent);
-}
-
-.windowButtons{
-  height: 100%;
-  display: flex;
-  -webkit-app-region: no-drag;
-}
-
-.windowButtons button{
-  width: 46px;
-  height: 100%;
-  border: 0;
-  color: var(--muted);
-  background: transparent;
-}
-
-.windowButtons button:hover{
-  color: var(--text);
-  background: rgba(255,255,255,.07);
-}
-
-.windowButtons .closeWin:hover{
-  color: #fff;
-  background: #e54868;
-}
-
 .appShell{
   height: calc(100vh - 36px);
   display: grid;
-  grid-template-columns: var(--sidebar-width-used) minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-width-release) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) var(--player-size-used);
   overflow: hidden;
   background: var(--bg, #000);
 }
 
-/* Sidebar stays one consistent darker theme surface. */
-.sidebar{
+/* Fixed sidebar: not transparent, not glass, and content cannot slide underneath it. */
+.sidebar,
+.app .sidebar,
+.app[data-sidebar-behavior="hover"] .sidebar,
+.app.sidebarHoverShiftEnabled .sidebar,
+.app.sidebarHoverOpen .sidebar{
   grid-column: 1;
   grid-row: 1 / 3;
-  min-width: 0;
-  width: var(--sidebar-width-used);
+  position: relative;
+  z-index: 20;
+  width: var(--sidebar-width-release);
+  min-width: var(--sidebar-width-release);
+  max-width: var(--sidebar-width-release);
   height: 100%;
   padding: 16px 12px;
   display: flex;
@@ -10432,54 +10394,86 @@ body,
   gap: 12px;
   overflow: hidden;
   color: var(--text);
-  background: var(--sidebar-bg-clean);
+  background: var(--sidebar-bg-release);
   background-color: var(--bg, #000);
-  border-right: 1px solid rgba(var(--accent-rgb), .24);
+  background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
+  border-right: 1px solid rgba(var(--accent-rgb), .25);
   box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
+  opacity: 1;
+  transform: none;
+  transition: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-.sidebar,
 .sidebar:hover,
 .app .sidebar:hover,
-.app[data-sidebar-behavior="hover"] .sidebar,
 .app[data-sidebar-behavior="hover"] .sidebar:hover{
-  background: var(--sidebar-bg-clean);
+  background: var(--sidebar-bg-release);
   background-color: var(--bg, #000);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
   box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
   transform: none;
-  transition: none;
 }
 
 .sidebar::before,
-.sidebar::after{
+.sidebar::after,
+.sidebar:hover::before,
+.sidebar:hover::after{
   content: none;
   display: none;
 }
 
+/* Main content starts after the actual sidebar. */
+.content,
+.app .content,
+.app.sidebarHoverShiftEnabled .content,
+.app.sidebarHoverOpen .content{
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  margin-left: 0;
+  padding: 18px clamp(18px, 2.1vw, 30px) calc(var(--player-size-used) + 48px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: var(--text);
+  background: var(--bg, #000);
+  transform: none;
+  transition: none;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+}
+
+.playerBar{
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+/* Disable the broken sidebar hover mode for 0.3.8 release. */
+.app[data-sidebar-behavior="hover"]{
+  --sidebar-width: var(--sidebar-width-release);
+}
+
+.app[data-sidebar-behavior="hover"] .appShell{
+  grid-template-columns: var(--sidebar-width-release) minmax(0, 1fr);
+  transition: none;
+}
+
+.app[data-sidebar-behavior="hover"] .content,
+.app[data-sidebar-behavior="hover"].sidebarHoverOpen .content{
+  transform: none;
+  transition: none;
+}
+
+/* Sidebar controls: solid, theme-aware, no blur/glass. */
 .logoWrap{
   min-height: 54px;
   display: flex;
   align-items: center;
   gap: 12px;
   overflow: hidden;
-}
-
-.logoWrap h1{
-  margin: 0;
-  color: var(--text);
-  font-size: 23px;
-  line-height: 1;
-  letter-spacing: -.055em;
-}
-
-.logoWrap p{
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 12px;
 }
 
 .nav{
@@ -10501,12 +10495,11 @@ body,
   background: transparent;
   text-align: left;
   font-weight: 820;
-  box-shadow: none;
   transform: none;
-  transition:
-    color 120ms ease,
-    background-color 120ms ease,
-    border-color 120ms ease;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
 }
 
 .navItem:hover{
@@ -10540,20 +10533,6 @@ body,
   white-space: nowrap;
 }
 
-.navText strong{
-  color: inherit;
-  font-size: 12px;
-  line-height: 1.05;
-  font-weight: 920;
-}
-
-.navText span{
-  color: var(--muted);
-  font-size: 10px;
-  line-height: 1.1;
-  font-weight: 760;
-}
-
 .importMainAction{
   width: 100%;
   min-height: 44px;
@@ -10568,9 +10547,9 @@ body,
   background: var(--accent);
   font-weight: 920;
   box-shadow: 0 12px 28px rgba(var(--accent-rgb), .14);
+  transform: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  transform: none;
 }
 
 .importMainAction:hover{
@@ -10582,57 +10561,33 @@ body,
   display: none;
 }
 
-/* Hover sidebar setting is intentionally neutralized for now. */
-.app[data-sidebar-behavior="hover"]{
-  --sidebar-width: 236px;
-}
-
-.app[data-sidebar-behavior="hover"] .appShell{
-  grid-template-columns: var(--sidebar-width-used) minmax(0, 1fr);
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar{
-  width: var(--sidebar-width-used);
-  min-width: 0;
-  max-width: none;
-}
-
-.app.sidebarHoverShiftEnabled .content,
-.app.sidebarHoverOpen .content{
-  transform: none;
-  transition: none;
-}
-
-.content{
-  grid-column: 2;
-  grid-row: 1;
-  min-width: 0;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: 18px clamp(18px, 2.1vw, 30px) calc(var(--player-size-used) + 48px);
-  color: var(--text);
-  background: var(--bg, #000);
-  scroll-behavior: smooth;
-  overscroll-behavior: contain;
-  overflow-anchor: none;
-  transform: none;
-  backface-visibility: hidden;
-}
-
-.playerBar{
-  grid-column: 1 / -1;
-  grid-row: 2;
-}
-
 .toastStack{
-  left: calc(var(--sidebar-width-used) + 22px);
-  width: min(360px, calc(100vw - var(--sidebar-width-used) - 42px));
+  left: calc(var(--sidebar-width-release) + 22px);
+  width: min(360px, calc(100vw - var(--sidebar-width-release) - 42px));
+}
+
+/* Release performance: stop repeated entrance animations from repainting the page. */
+.content,
+.headerBar,
+.pageTransition,
+.homeSection,
+.homeLibraryPanel,
+.settingsCategoryPage,
+.settingsPanelCard,
+.settingsPageCard{
+  animation: none;
+}
+
+body.localitfyThemePainting .app *,
+body.isResizingSidebar .app *,
+body.isResizingPlayer .app *{
+  transition-duration: 0ms;
+  animation: none;
 }
 
 @media (max-width: 860px){
   .app{
-    --sidebar-width-used: 74px;
+    --sidebar-width-release: 74px;
   }
 
   .sidebar{
@@ -10656,119 +10611,128 @@ body,
   }
 }
 
-/* V452: overall app performance baseline.
-   Safe CSS-only pass: no TSX logic changes, no feature removals. */
-
-.app{
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  contain: size layout style;
+/* Discord-style sidebar white pill indicator (V472) */
+.app .sidebar,
+.app .sidebar .nav{
+  overflow: visible !important;
 }
 
-.content{
-  overflow-anchor: none;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
-  scroll-behavior: auto;
+.app .sidebar .navItem{
+  position: relative !important;
+  overflow: visible !important;
 }
 
-/* Stop old page fade/replay animations from making settings/home feel like they reload. */
-.content,
-.headerBar,
-.pageTransition,
-.settingsCategoryPage,
-.settingsPanelCard,
-.settingsPageCard{
-  animation: none !important;
+.app .sidebar .navItem::after{
+  content: none !important;
+  display: none !important;
 }
 
-.pageTransition,
-.settingsCategoryPage{
-  opacity: 1 !important;
-  transform: none !important;
-}
-
-/* Do not allow general buttons to jump around. Specific player animations still work. */
-.app button:hover:not(.playerBar *):not(.circleButton.main){
-  transform: none !important;
-}
-
-.app button:active:not(.playerBar *):not(.circleButton.main){
-  transform: none !important;
-}
-
-/* Expensive effects pause during theme dragging, window resizing, and scrolling. */
-body.localitfyThemePainting .app,
-body.localitfyThemePainting .app *,
-body.localitfyThemePainting .app *::before,
-body.localitfyThemePainting .app *::after,
-body.isResizingSidebar .app,
-body.isResizingPlayer .app{
-  transition-duration: 0ms !important;
-  animation-duration: 0ms !important;
-  animation-delay: 0ms !important;
-}
-
-body.localitfyThemePainting .ambientSurface::before,
-body.localitfyThemePainting .ambientSurface::after,
-body.localitfyThemePainting .secretLayer,
-body.localitfyThemePainting .floatingNotesLayer,
-body.isResizingSidebar .ambientSurface::before,
-body.isResizingSidebar .ambientSurface::after,
-body.isResizingPlayer .ambientSurface::before,
-body.isResizingPlayer .ambientSurface::after{
+.app .sidebar .navItem::before{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  left: -14px !important;
+  top: 50% !important;
+  width: 4px !important;
+  height: 8px !important;
+  border-radius: 0 999px 999px 0 !important;
+  background: #fff !important;
   opacity: 0 !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  animation: none !important;
-  transition: none !important;
+  transform: translateY(-50%) scaleY(.35) !important;
+  transform-origin: left center !important;
+  pointer-events: none !important;
+  z-index: 99 !important;
+  box-shadow: 0 0 12px rgba(255,255,255,.22) !important;
+  transition:
+    height 180ms cubic-bezier(.16, 1, .3, 1),
+    opacity 140ms ease,
+    transform 180ms cubic-bezier(.16, 1, .3, 1) !important;
 }
 
-body.localitfyThemePainting .panel,
-body.localitfyThemePainting .hero,
-body.localitfyThemePainting .homeShelfPanel,
-body.localitfyThemePainting .homeLibraryPanel,
-body.localitfyThemePainting .settingsPanelCard,
-body.localitfyThemePainting .settingsPageCard,
-body.localitfyThemePainting .modalWrap,
-body.localitfyThemePainting .editorModal{
+.app .sidebar .navItem:hover::before,
+.app .sidebar .navItem:focus-visible::before{
+  height: 18px !important;
+  opacity: .76 !important;
+  transform: translateY(-50%) scaleY(1) !important;
+}
+
+.app .sidebar .navItem.active::before{
+  height: 34px !important;
+  opacity: 1 !important;
+  transform: translateY(-50%) scaleY(1) !important;
+}
+
+.app .sidebar .navItem.active:hover::before,
+.app .sidebar .navItem.active:focus-visible::before{
+  height: 40px !important;
+}
+
+.app .sidebar .navItem.active,
+.app .sidebar .navItem.active:hover,
+.app .sidebar .navItem.active:focus-visible{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
   box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
 }
 
-/* Keep blur/glass off the sidebar permanently. */
-.sidebar,
-.sidebar *,
-.titleBar{
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
+.app .sidebar .navItem.active .navIcon,
+.app .sidebar .navItem.active .navText strong{
+  color: #fff !important;
 }
 
-/* Overlay blur is expensive; use a darker flat overlay instead. */
-.modalWrap,
-.playlistPickerWrap,
-.whatsNewOverlay,
-.importOverlay{
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+.app .sidebar .navItem.active .navText small{
+  color: rgba(255,255,255,.62) !important;
 }
 
-/* Stop forced GPU layers on huge containers after earlier patches. */
-.content,
-.homeView,
-.settingsPage{
-  will-change: auto !important;
+.app .sidebar .navItem .navLucideIcon{
+  transform-origin: 50% 50% !important;
+  transform-box: fill-box !important;
+  overflow: visible !important;
+}
+
+.app .sidebar .navItem:hover .navLucideIcon{
+  animation: localtifySidebarIconPopV472 520ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+.app .sidebar .navItem[aria-label="open albums"]:hover .navLucideIcon,
+.app .sidebar .navItem[aria-label="open settings"]:hover .navLucideIcon{
+  animation: localtifySidebarIconSpinV472 680ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+.app .sidebar .navItem[aria-label="open liked"]:hover .navLucideIcon{
+  animation: localtifySidebarIconHeartV472 620ms cubic-bezier(.18, .9, .2, 1.1) both !important;
+}
+
+@keyframes localtifySidebarIconPopV472{
+  0%{ transform: translate3d(0,0,0) scale(1); }
+  35%{ transform: translate3d(0,-3px,0) scale(1.14); }
+  70%{ transform: translate3d(0,1px,0) scale(.98); }
+  100%{ transform: translate3d(0,0,0) scale(1.04); }
+}
+
+@keyframes localtifySidebarIconSpinV472{
+  0%{ transform: rotate(0deg) scale(1); }
+  55%{ transform: rotate(180deg) scale(1.13); }
+  100%{ transform: rotate(360deg) scale(1.04); }
+}
+
+@keyframes localtifySidebarIconHeartV472{
+  0%{ transform: scale(1); }
+  24%{ transform: scale(1.28); }
+  48%{ transform: scale(.92); }
+  72%{ transform: scale(1.14); }
+  100%{ transform: scale(1.04); }
 }
 
 @media (prefers-reduced-motion: reduce){
-  .app *,
-  .app *::before,
-  .app *::after{
-    animation-duration: 0ms !important;
-    transition-duration: 0ms !important;
-    scroll-behavior: auto !important;
+  .app .sidebar .navItem::before{
+    transition: none !important;
+  }
+
+  .app .sidebar .navItem:hover .navLucideIcon{
+    animation: none !important;
+    transform: none !important;
   }
 }

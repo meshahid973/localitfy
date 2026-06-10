@@ -4757,14 +4757,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   return (
                     <button
                       key={item.id}
-                      className={`navItem navItemAnimatedV467 nav-${item.id} ${view === item.id ? "active" : ""}`}
+                      className={`navItem navItemAnimatedV468 nav-${item.id} ${view === item.id ? "active" : ""}`}
                       data-nav-id={item.id}
                       onClick={() => changeView(item.id, "nav")}
                       aria-label={`open ${item.label}`}
                     >
-                      <span className="navDiscordPillV467" aria-hidden="true" />
+                      <span className="navDiscordPillV468" aria-hidden="true" />
                       <span className={`navIcon navIcon-${item.id}`} aria-hidden="true">
-                        <span className="navIconMotionV467">
+                        <span className="navIconMotionV468">
                           <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
                         </span>
                       </span>
@@ -4788,14 +4788,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   return (
                     <button
                       key={item.id}
-                      className={`navItem navItemAnimatedV467 nav-${item.id} ${view === item.id ? "active" : ""}`}
+                      className={`navItem navItemAnimatedV468 nav-${item.id} ${view === item.id ? "active" : ""}`}
                       data-nav-id={item.id}
                       onClick={() => changeView(item.id, "nav")}
                       aria-label={`open ${item.label}`}
                     >
-                      <span className="navDiscordPillV467" aria-hidden="true" />
+                      <span className="navDiscordPillV468" aria-hidden="true" />
                       <span className={`navIcon navIcon-${item.id}`} aria-hidden="true">
-                        <span className="navIconMotionV467">
+                        <span className="navIconMotionV468">
                           <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
                         </span>
                       </span>

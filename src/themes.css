@@ -2,16 +2,16 @@
   --bg: #020706;
   --bg-2: #020706;
   --bg-3: #0b1713;
-  --panel: color-mix(in oklab, #0b1713 56%, transparent);
-  --surface: color-mix(in oklab, #0b1713 42%, transparent);
-  --surface-2: color-mix(in oklab, #0b1713 56%, transparent);
-  --surface-3: color-mix(in oklab, #0b1713 72%, transparent);
+  --panel: color-mix(in oklab, #0b1713 56%, #000);
+  --surface: color-mix(in oklab, #0b1713 42%, #000);
+  --surface-2: color-mix(in oklab, #0b1713 56%, #000);
+  --surface-3: color-mix(in oklab, #0b1713 72%, #000);
   --text: #f4fff9;
-  --text-2: color-mix(in oklab, #f4fff9 78%, transparent);
-  --muted: color-mix(in oklab, #f4fff9 54%, transparent);
-  --faint: color-mix(in oklab, #f4fff9 34%, transparent);
-  --line: color-mix(in oklab, #8dffce 18%, transparent);
-  --line-2: color-mix(in oklab, #8dffce 28%, transparent);
+  --text-2: color-mix(in oklab, #f4fff9 78%, #000);
+  --muted: color-mix(in oklab, #f4fff9 54%, #000);
+  --faint: color-mix(in oklab, #f4fff9 34%, #000);
+  --line: color-mix(in oklab, #8dffce 18%, #000);
+  --line-2: color-mix(in oklab, #8dffce 28%, #000);
   --accent: #8dffce;
   --accent-2: #68d8ff;
   --highlight: #d8fff0;
@@ -42,16 +42,16 @@
   --bg: #0b0209;
   --bg-2: #0b0209;
   --bg-3: #1b0b18;
-  --panel: color-mix(in oklab, #1b0b18 56%, transparent);
-  --surface: color-mix(in oklab, #1b0b18 42%, transparent);
-  --surface-2: color-mix(in oklab, #1b0b18 56%, transparent);
-  --surface-3: color-mix(in oklab, #1b0b18 72%, transparent);
+  --panel: color-mix(in oklab, #1b0b18 56%, #000);
+  --surface: color-mix(in oklab, #1b0b18 42%, #000);
+  --surface-2: color-mix(in oklab, #1b0b18 56%, #000);
+  --surface-3: color-mix(in oklab, #1b0b18 72%, #000);
   --text: #fff3fb;
-  --text-2: color-mix(in oklab, #fff3fb 78%, transparent);
-  --muted: color-mix(in oklab, #fff3fb 54%, transparent);
-  --faint: color-mix(in oklab, #fff3fb 34%, transparent);
-  --line: color-mix(in oklab, #ff72c8 18%, transparent);
-  --line-2: color-mix(in oklab, #ff72c8 28%, transparent);
+  --text-2: color-mix(in oklab, #fff3fb 78%, #000);
+  --muted: color-mix(in oklab, #fff3fb 54%, #000);
+  --faint: color-mix(in oklab, #fff3fb 34%, #000);
+  --line: color-mix(in oklab, #ff72c8 18%, #000);
+  --line-2: color-mix(in oklab, #ff72c8 28%, #000);
   --accent: #ff72c8;
   --accent-2: #b05cff;
   --highlight: #ffc4ee;
@@ -82,16 +82,16 @@
   --bg: #02070b;
   --bg-2: #02070b;
   --bg-3: #071724;
-  --panel: color-mix(in oklab, #071724 56%, transparent);
-  --surface: color-mix(in oklab, #071724 42%, transparent);
-  --surface-2: color-mix(in oklab, #071724 56%, transparent);
-  --surface-3: color-mix(in oklab, #071724 72%, transparent);
+  --panel: color-mix(in oklab, #071724 56%, #000);
+  --surface: color-mix(in oklab, #071724 42%, #000);
+  --surface-2: color-mix(in oklab, #071724 56%, #000);
+  --surface-3: color-mix(in oklab, #071724 72%, #000);
   --text: #effaff;
-  --text-2: color-mix(in oklab, #effaff 78%, transparent);
-  --muted: color-mix(in oklab, #effaff 54%, transparent);
-  --faint: color-mix(in oklab, #effaff 34%, transparent);
-  --line: color-mix(in oklab, #53d7ff 18%, transparent);
-  --line-2: color-mix(in oklab, #53d7ff 28%, transparent);
+  --text-2: color-mix(in oklab, #effaff 78%, #000);
+  --muted: color-mix(in oklab, #effaff 54%, #000);
+  --faint: color-mix(in oklab, #effaff 34%, #000);
+  --line: color-mix(in oklab, #53d7ff 18%, #000);
+  --line-2: color-mix(in oklab, #53d7ff 28%, #000);
   --accent: #53d7ff;
   --accent-2: #7c5cff;
   --highlight: #c6f3ff;
@@ -122,16 +122,16 @@
   --bg: #0b0502;
   --bg-2: #0b0502;
   --bg-3: #1c1008;
-  --panel: color-mix(in oklab, #1c1008 56%, transparent);
-  --surface: color-mix(in oklab, #1c1008 42%, transparent);
-  --surface-2: color-mix(in oklab, #1c1008 56%, transparent);
-  --surface-3: color-mix(in oklab, #1c1008 72%, transparent);
+  --panel: color-mix(in oklab, #1c1008 56%, #000);
+  --surface: color-mix(in oklab, #1c1008 42%, #000);
+  --surface-2: color-mix(in oklab, #1c1008 56%, #000);
+  --surface-3: color-mix(in oklab, #1c1008 72%, #000);
   --text: #fff7ed;
-  --text-2: color-mix(in oklab, #fff7ed 78%, transparent);
-  --muted: color-mix(in oklab, #fff7ed 54%, transparent);
-  --faint: color-mix(in oklab, #fff7ed 34%, transparent);
-  --line: color-mix(in oklab, #ffb86b 18%, transparent);
-  --line-2: color-mix(in oklab, #ffb86b 28%, transparent);
+  --text-2: color-mix(in oklab, #fff7ed 78%, #000);
+  --muted: color-mix(in oklab, #fff7ed 54%, #000);
+  --faint: color-mix(in oklab, #fff7ed 34%, #000);
+  --line: color-mix(in oklab, #ffb86b 18%, #000);
+  --line-2: color-mix(in oklab, #ffb86b 28%, #000);
   --accent: #ffb86b;
   --accent-2: #ff5f8a;
   --highlight: #ffd7a8;
@@ -162,16 +162,16 @@
   --bg: #080412;
   --bg-2: #080412;
   --bg-3: #161024;
-  --panel: color-mix(in oklab, #161024 56%, transparent);
-  --surface: color-mix(in oklab, #161024 42%, transparent);
-  --surface-2: color-mix(in oklab, #161024 56%, transparent);
-  --surface-3: color-mix(in oklab, #161024 72%, transparent);
+  --panel: color-mix(in oklab, #161024 56%, #000);
+  --surface: color-mix(in oklab, #161024 42%, #000);
+  --surface-2: color-mix(in oklab, #161024 56%, #000);
+  --surface-3: color-mix(in oklab, #161024 72%, #000);
   --text: #f8f3ff;
-  --text-2: color-mix(in oklab, #f8f3ff 78%, transparent);
-  --muted: color-mix(in oklab, #f8f3ff 54%, transparent);
-  --faint: color-mix(in oklab, #f8f3ff 34%, transparent);
-  --line: color-mix(in oklab, #c084fc 18%, transparent);
-  --line-2: color-mix(in oklab, #c084fc 28%, transparent);
+  --text-2: color-mix(in oklab, #f8f3ff 78%, #000);
+  --muted: color-mix(in oklab, #f8f3ff 54%, #000);
+  --faint: color-mix(in oklab, #f8f3ff 34%, #000);
+  --line: color-mix(in oklab, #c084fc 18%, #000);
+  --line-2: color-mix(in oklab, #c084fc 28%, #000);
   --accent: #c084fc;
   --accent-2: #f0abfc;
   --highlight: #e9d5ff;
@@ -202,16 +202,16 @@
   --bg: #030303;
   --bg-2: #030303;
   --bg-3: #121212;
-  --panel: color-mix(in oklab, #121212 56%, transparent);
-  --surface: color-mix(in oklab, #121212 42%, transparent);
-  --surface-2: color-mix(in oklab, #121212 56%, transparent);
-  --surface-3: color-mix(in oklab, #121212 72%, transparent);
+  --panel: color-mix(in oklab, #121212 56%, #000);
+  --surface: color-mix(in oklab, #121212 42%, #000);
+  --surface-2: color-mix(in oklab, #121212 56%, #000);
+  --surface-3: color-mix(in oklab, #121212 72%, #000);
   --text: #f8f8f8;
-  --text-2: color-mix(in oklab, #f8f8f8 78%, transparent);
-  --muted: color-mix(in oklab, #f8f8f8 54%, transparent);
-  --faint: color-mix(in oklab, #f8f8f8 34%, transparent);
-  --line: color-mix(in oklab, #f4f4f5 18%, transparent);
-  --line-2: color-mix(in oklab, #f4f4f5 28%, transparent);
+  --text-2: color-mix(in oklab, #f8f8f8 78%, #000);
+  --muted: color-mix(in oklab, #f8f8f8 54%, #000);
+  --faint: color-mix(in oklab, #f8f8f8 34%, #000);
+  --line: color-mix(in oklab, #f4f4f5 18%, #000);
+  --line-2: color-mix(in oklab, #f4f4f5 28%, #000);
   --accent: #f4f4f5;
   --accent-2: #a1a1aa;
   --highlight: #d4d4d8;
@@ -242,16 +242,16 @@
   --bg: #0b0306;
   --bg-2: #0b0306;
   --bg-3: #1a0b10;
-  --panel: color-mix(in oklab, #1a0b10 56%, transparent);
-  --surface: color-mix(in oklab, #1a0b10 42%, transparent);
-  --surface-2: color-mix(in oklab, #1a0b10 56%, transparent);
-  --surface-3: color-mix(in oklab, #1a0b10 72%, transparent);
+  --panel: color-mix(in oklab, #1a0b10 56%, #000);
+  --surface: color-mix(in oklab, #1a0b10 42%, #000);
+  --surface-2: color-mix(in oklab, #1a0b10 56%, #000);
+  --surface-3: color-mix(in oklab, #1a0b10 72%, #000);
   --text: #fff1f4;
-  --text-2: color-mix(in oklab, #fff1f4 78%, transparent);
-  --muted: color-mix(in oklab, #fff1f4 54%, transparent);
-  --faint: color-mix(in oklab, #fff1f4 34%, transparent);
-  --line: color-mix(in oklab, #fb7185 18%, transparent);
-  --line-2: color-mix(in oklab, #fb7185 28%, transparent);
+  --text-2: color-mix(in oklab, #fff1f4 78%, #000);
+  --muted: color-mix(in oklab, #fff1f4 54%, #000);
+  --faint: color-mix(in oklab, #fff1f4 34%, #000);
+  --line: color-mix(in oklab, #fb7185 18%, #000);
+  --line-2: color-mix(in oklab, #fb7185 28%, #000);
   --accent: #fb7185;
   --accent-2: #f472b6;
   --highlight: #fecdd3;
@@ -282,16 +282,16 @@
   --bg: #030711;
   --bg-2: #030711;
   --bg-3: #0e1626;
-  --panel: color-mix(in oklab, #0e1626 56%, transparent);
-  --surface: color-mix(in oklab, #0e1626 42%, transparent);
-  --surface-2: color-mix(in oklab, #0e1626 56%, transparent);
-  --surface-3: color-mix(in oklab, #0e1626 72%, transparent);
+  --panel: color-mix(in oklab, #0e1626 56%, #000);
+  --surface: color-mix(in oklab, #0e1626 42%, #000);
+  --surface-2: color-mix(in oklab, #0e1626 56%, #000);
+  --surface-3: color-mix(in oklab, #0e1626 72%, #000);
   --text: #f0f7ff;
-  --text-2: color-mix(in oklab, #f0f7ff 78%, transparent);
-  --muted: color-mix(in oklab, #f0f7ff 54%, transparent);
-  --faint: color-mix(in oklab, #f0f7ff 34%, transparent);
-  --line: color-mix(in oklab, #93c5fd 18%, transparent);
-  --line-2: color-mix(in oklab, #93c5fd 28%, transparent);
+  --text-2: color-mix(in oklab, #f0f7ff 78%, #000);
+  --muted: color-mix(in oklab, #f0f7ff 54%, #000);
+  --faint: color-mix(in oklab, #f0f7ff 34%, #000);
+  --line: color-mix(in oklab, #93c5fd 18%, #000);
+  --line-2: color-mix(in oklab, #93c5fd 28%, #000);
   --accent: #93c5fd;
   --accent-2: #f0abfc;
   --highlight: #dbeafe;
@@ -322,16 +322,16 @@
   --bg: #090701;
   --bg-2: #090701;
   --bg-3: #1a1405;
-  --panel: color-mix(in oklab, #1a1405 56%, transparent);
-  --surface: color-mix(in oklab, #1a1405 42%, transparent);
-  --surface-2: color-mix(in oklab, #1a1405 56%, transparent);
-  --surface-3: color-mix(in oklab, #1a1405 72%, transparent);
+  --panel: color-mix(in oklab, #1a1405 56%, #000);
+  --surface: color-mix(in oklab, #1a1405 42%, #000);
+  --surface-2: color-mix(in oklab, #1a1405 56%, #000);
+  --surface-3: color-mix(in oklab, #1a1405 72%, #000);
   --text: #fffbe7;
-  --text-2: color-mix(in oklab, #fffbe7 78%, transparent);
-  --muted: color-mix(in oklab, #fffbe7 54%, transparent);
-  --faint: color-mix(in oklab, #fffbe7 34%, transparent);
-  --line: color-mix(in oklab, #facc15 18%, transparent);
-  --line-2: color-mix(in oklab, #facc15 28%, transparent);
+  --text-2: color-mix(in oklab, #fffbe7 78%, #000);
+  --muted: color-mix(in oklab, #fffbe7 54%, #000);
+  --faint: color-mix(in oklab, #fffbe7 34%, #000);
+  --line: color-mix(in oklab, #facc15 18%, #000);
+  --line-2: color-mix(in oklab, #facc15 28%, #000);
   --accent: #facc15;
   --accent-2: #fb923c;
   --highlight: #fef3c7;
@@ -362,16 +362,16 @@
   --bg: #030800;
   --bg-2: #030800;
   --bg-3: #0d1805;
-  --panel: color-mix(in oklab, #0d1805 56%, transparent);
-  --surface: color-mix(in oklab, #0d1805 42%, transparent);
-  --surface-2: color-mix(in oklab, #0d1805 56%, transparent);
-  --surface-3: color-mix(in oklab, #0d1805 72%, transparent);
+  --panel: color-mix(in oklab, #0d1805 56%, #000);
+  --surface: color-mix(in oklab, #0d1805 42%, #000);
+  --surface-2: color-mix(in oklab, #0d1805 56%, #000);
+  --surface-3: color-mix(in oklab, #0d1805 72%, #000);
   --text: #f7ffe8;
-  --text-2: color-mix(in oklab, #f7ffe8 78%, transparent);
-  --muted: color-mix(in oklab, #f7ffe8 54%, transparent);
-  --faint: color-mix(in oklab, #f7ffe8 34%, transparent);
-  --line: color-mix(in oklab, #a3e635 18%, transparent);
-  --line-2: color-mix(in oklab, #a3e635 28%, transparent);
+  --text-2: color-mix(in oklab, #f7ffe8 78%, #000);
+  --muted: color-mix(in oklab, #f7ffe8 54%, #000);
+  --faint: color-mix(in oklab, #f7ffe8 34%, #000);
+  --line: color-mix(in oklab, #a3e635 18%, #000);
+  --line-2: color-mix(in oklab, #a3e635 28%, #000);
   --accent: #a3e635;
   --accent-2: #22c55e;
   --highlight: #d9f99d;
@@ -402,16 +402,16 @@
   --bg: #020617;
   --bg-2: #020617;
   --bg-3: #0b1223;
-  --panel: color-mix(in oklab, #0b1223 56%, transparent);
-  --surface: color-mix(in oklab, #0b1223 42%, transparent);
-  --surface-2: color-mix(in oklab, #0b1223 56%, transparent);
-  --surface-3: color-mix(in oklab, #0b1223 72%, transparent);
+  --panel: color-mix(in oklab, #0b1223 56%, #000);
+  --surface: color-mix(in oklab, #0b1223 42%, #000);
+  --surface-2: color-mix(in oklab, #0b1223 56%, #000);
+  --surface-3: color-mix(in oklab, #0b1223 72%, #000);
   --text: #f1f5ff;
-  --text-2: color-mix(in oklab, #f1f5ff 78%, transparent);
-  --muted: color-mix(in oklab, #f1f5ff 54%, transparent);
-  --faint: color-mix(in oklab, #f1f5ff 34%, transparent);
-  --line: color-mix(in oklab, #60a5fa 18%, transparent);
-  --line-2: color-mix(in oklab, #60a5fa 28%, transparent);
+  --text-2: color-mix(in oklab, #f1f5ff 78%, #000);
+  --muted: color-mix(in oklab, #f1f5ff 54%, #000);
+  --faint: color-mix(in oklab, #f1f5ff 34%, #000);
+  --line: color-mix(in oklab, #60a5fa 18%, #000);
+  --line-2: color-mix(in oklab, #60a5fa 28%, #000);
   --accent: #60a5fa;
   --accent-2: #818cf8;
   --highlight: #bfdbfe;
@@ -442,16 +442,16 @@
   --bg: #090604;
   --bg-2: #090604;
   --bg-3: #19110c;
-  --panel: color-mix(in oklab, #19110c 56%, transparent);
-  --surface: color-mix(in oklab, #19110c 42%, transparent);
-  --surface-2: color-mix(in oklab, #19110c 56%, transparent);
-  --surface-3: color-mix(in oklab, #19110c 72%, transparent);
+  --panel: color-mix(in oklab, #19110c 56%, #000);
+  --surface: color-mix(in oklab, #19110c 42%, #000);
+  --surface-2: color-mix(in oklab, #19110c 56%, #000);
+  --surface-3: color-mix(in oklab, #19110c 72%, #000);
   --text: #fff7ed;
-  --text-2: color-mix(in oklab, #fff7ed 78%, transparent);
-  --muted: color-mix(in oklab, #fff7ed 54%, transparent);
-  --faint: color-mix(in oklab, #fff7ed 34%, transparent);
-  --line: color-mix(in oklab, #c08457 18%, transparent);
-  --line-2: color-mix(in oklab, #c08457 28%, transparent);
+  --text-2: color-mix(in oklab, #fff7ed 78%, #000);
+  --muted: color-mix(in oklab, #fff7ed 54%, #000);
+  --faint: color-mix(in oklab, #fff7ed 34%, #000);
+  --line: color-mix(in oklab, #c08457 18%, #000);
+  --line-2: color-mix(in oklab, #c08457 28%, #000);
   --accent: #c08457;
   --accent-2: #f5c17a;
   --highlight: #fed7aa;
@@ -482,16 +482,16 @@
   --bg: #0c0205;
   --bg-2: #0c0205;
   --bg-3: #1d0710;
-  --panel: color-mix(in oklab, #1d0710 56%, transparent);
-  --surface: color-mix(in oklab, #1d0710 42%, transparent);
-  --surface-2: color-mix(in oklab, #1d0710 56%, transparent);
-  --surface-3: color-mix(in oklab, #1d0710 72%, transparent);
+  --panel: color-mix(in oklab, #1d0710 56%, #000);
+  --surface: color-mix(in oklab, #1d0710 42%, #000);
+  --surface-2: color-mix(in oklab, #1d0710 56%, #000);
+  --surface-3: color-mix(in oklab, #1d0710 72%, #000);
   --text: #fff1f3;
-  --text-2: color-mix(in oklab, #fff1f3 78%, transparent);
-  --muted: color-mix(in oklab, #fff1f3 54%, transparent);
-  --faint: color-mix(in oklab, #fff1f3 34%, transparent);
-  --line: color-mix(in oklab, #f43f5e 18%, transparent);
-  --line-2: color-mix(in oklab, #f43f5e 28%, transparent);
+  --text-2: color-mix(in oklab, #fff1f3 78%, #000);
+  --muted: color-mix(in oklab, #fff1f3 54%, #000);
+  --faint: color-mix(in oklab, #fff1f3 34%, #000);
+  --line: color-mix(in oklab, #f43f5e 18%, #000);
+  --line-2: color-mix(in oklab, #f43f5e 28%, #000);
   --accent: #f43f5e;
   --accent-2: #fb7185;
   --highlight: #fecdd3;
@@ -522,16 +522,16 @@
   --bg: #02090c;
   --bg-2: #02090c;
   --bg-3: #081821;
-  --panel: color-mix(in oklab, #081821 56%, transparent);
-  --surface: color-mix(in oklab, #081821 42%, transparent);
-  --surface-2: color-mix(in oklab, #081821 56%, transparent);
-  --surface-3: color-mix(in oklab, #081821 72%, transparent);
+  --panel: color-mix(in oklab, #081821 56%, #000);
+  --surface: color-mix(in oklab, #081821 42%, #000);
+  --surface-2: color-mix(in oklab, #081821 56%, #000);
+  --surface-3: color-mix(in oklab, #081821 72%, #000);
   --text: #effdff;
-  --text-2: color-mix(in oklab, #effdff 78%, transparent);
-  --muted: color-mix(in oklab, #effdff 54%, transparent);
-  --faint: color-mix(in oklab, #effdff 34%, transparent);
-  --line: color-mix(in oklab, #67e8f9 18%, transparent);
-  --line-2: color-mix(in oklab, #67e8f9 28%, transparent);
+  --text-2: color-mix(in oklab, #effdff 78%, #000);
+  --muted: color-mix(in oklab, #effdff 54%, #000);
+  --faint: color-mix(in oklab, #effdff 34%, #000);
+  --line: color-mix(in oklab, #67e8f9 18%, #000);
+  --line-2: color-mix(in oklab, #67e8f9 28%, #000);
   --accent: #67e8f9;
   --accent-2: #bae6fd;
   --highlight: #cffafe;
@@ -562,16 +562,16 @@
   --bg: #020804;
   --bg-2: #020804;
   --bg-3: #0b180e;
-  --panel: color-mix(in oklab, #0b180e 56%, transparent);
-  --surface: color-mix(in oklab, #0b180e 42%, transparent);
-  --surface-2: color-mix(in oklab, #0b180e 56%, transparent);
-  --surface-3: color-mix(in oklab, #0b180e 72%, transparent);
+  --panel: color-mix(in oklab, #0b180e 56%, #000);
+  --surface: color-mix(in oklab, #0b180e 42%, #000);
+  --surface-2: color-mix(in oklab, #0b180e 56%, #000);
+  --surface-3: color-mix(in oklab, #0b180e 72%, #000);
   --text: #effff3;
-  --text-2: color-mix(in oklab, #effff3 78%, transparent);
-  --muted: color-mix(in oklab, #effff3 54%, transparent);
-  --faint: color-mix(in oklab, #effff3 34%, transparent);
-  --line: color-mix(in oklab, #86efac 18%, transparent);
-  --line-2: color-mix(in oklab, #86efac 28%, transparent);
+  --text-2: color-mix(in oklab, #effff3 78%, #000);
+  --muted: color-mix(in oklab, #effff3 54%, #000);
+  --faint: color-mix(in oklab, #effff3 34%, #000);
+  --line: color-mix(in oklab, #86efac 18%, #000);
+  --line-2: color-mix(in oklab, #86efac 28%, #000);
   --accent: #86efac;
   --accent-2: #bef264;
   --highlight: #bbf7d0;
@@ -602,16 +602,16 @@
   --bg: #0b0310;
   --bg-2: #0b0310;
   --bg-3: #1b1025;
-  --panel: color-mix(in oklab, #1b1025 56%, transparent);
-  --surface: color-mix(in oklab, #1b1025 42%, transparent);
-  --surface-2: color-mix(in oklab, #1b1025 56%, transparent);
-  --surface-3: color-mix(in oklab, #1b1025 72%, transparent);
+  --panel: color-mix(in oklab, #1b1025 56%, #000);
+  --surface: color-mix(in oklab, #1b1025 42%, #000);
+  --surface-2: color-mix(in oklab, #1b1025 56%, #000);
+  --surface-3: color-mix(in oklab, #1b1025 72%, #000);
   --text: #fff3fb;
-  --text-2: color-mix(in oklab, #fff3fb 78%, transparent);
-  --muted: color-mix(in oklab, #fff3fb 54%, transparent);
-  --faint: color-mix(in oklab, #fff3fb 34%, transparent);
-  --line: color-mix(in oklab, #f472d0 18%, transparent);
-  --line-2: color-mix(in oklab, #f472d0 28%, transparent);
+  --text-2: color-mix(in oklab, #fff3fb 78%, #000);
+  --muted: color-mix(in oklab, #fff3fb 54%, #000);
+  --faint: color-mix(in oklab, #fff3fb 34%, #000);
+  --line: color-mix(in oklab, #f472d0 18%, #000);
+  --line-2: color-mix(in oklab, #f472d0 28%, #000);
   --accent: #f472d0;
   --accent-2: #67e8f9;
   --highlight: #fbcfe8;
@@ -642,16 +642,16 @@
   --bg: #0b0408;
   --bg-2: #0b0408;
   --bg-3: #1c0e16;
-  --panel: color-mix(in oklab, #1c0e16 56%, transparent);
-  --surface: color-mix(in oklab, #1c0e16 42%, transparent);
-  --surface-2: color-mix(in oklab, #1c0e16 56%, transparent);
-  --surface-3: color-mix(in oklab, #1c0e16 72%, transparent);
+  --panel: color-mix(in oklab, #1c0e16 56%, #000);
+  --surface: color-mix(in oklab, #1c0e16 42%, #000);
+  --surface-2: color-mix(in oklab, #1c0e16 56%, #000);
+  --surface-3: color-mix(in oklab, #1c0e16 72%, #000);
   --text: #fff5fa;
-  --text-2: color-mix(in oklab, #fff5fa 78%, transparent);
-  --muted: color-mix(in oklab, #fff5fa 54%, transparent);
-  --faint: color-mix(in oklab, #fff5fa 34%, transparent);
-  --line: color-mix(in oklab, #f9a8d4 18%, transparent);
-  --line-2: color-mix(in oklab, #f9a8d4 28%, transparent);
+  --text-2: color-mix(in oklab, #fff5fa 78%, #000);
+  --muted: color-mix(in oklab, #fff5fa 54%, #000);
+  --faint: color-mix(in oklab, #fff5fa 34%, #000);
+  --line: color-mix(in oklab, #f9a8d4 18%, #000);
+  --line-2: color-mix(in oklab, #f9a8d4 28%, #000);
   --accent: #f9a8d4;
   --accent-2: #fb7185;
   --highlight: #fce7f3;
@@ -682,16 +682,16 @@
   --bg: #050416;
   --bg-2: #050416;
   --bg-3: #121027;
-  --panel: color-mix(in oklab, #121027 56%, transparent);
-  --surface: color-mix(in oklab, #121027 42%, transparent);
-  --surface-2: color-mix(in oklab, #121027 56%, transparent);
-  --surface-3: color-mix(in oklab, #121027 72%, transparent);
+  --panel: color-mix(in oklab, #121027 56%, #000);
+  --surface: color-mix(in oklab, #121027 42%, #000);
+  --surface-2: color-mix(in oklab, #121027 56%, #000);
+  --surface-3: color-mix(in oklab, #121027 72%, #000);
   --text: #f7f3ff;
-  --text-2: color-mix(in oklab, #f7f3ff 78%, transparent);
-  --muted: color-mix(in oklab, #f7f3ff 54%, transparent);
-  --faint: color-mix(in oklab, #f7f3ff 34%, transparent);
-  --line: color-mix(in oklab, #a78bfa 18%, transparent);
-  --line-2: color-mix(in oklab, #a78bfa 28%, transparent);
+  --text-2: color-mix(in oklab, #f7f3ff 78%, #000);
+  --muted: color-mix(in oklab, #f7f3ff 54%, #000);
+  --faint: color-mix(in oklab, #f7f3ff 34%, #000);
+  --line: color-mix(in oklab, #a78bfa 18%, #000);
+  --line-2: color-mix(in oklab, #a78bfa 28%, #000);
   --accent: #a78bfa;
   --accent-2: #f0abfc;
   --highlight: #ddd6fe;
@@ -722,16 +722,16 @@
   --bg: #0b0603;
   --bg-2: #0b0603;
   --bg-3: #1b1008;
-  --panel: color-mix(in oklab, #1b1008 56%, transparent);
-  --surface: color-mix(in oklab, #1b1008 42%, transparent);
-  --surface-2: color-mix(in oklab, #1b1008 56%, transparent);
-  --surface-3: color-mix(in oklab, #1b1008 72%, transparent);
+  --panel: color-mix(in oklab, #1b1008 56%, #000);
+  --surface: color-mix(in oklab, #1b1008 42%, #000);
+  --surface-2: color-mix(in oklab, #1b1008 56%, #000);
+  --surface-3: color-mix(in oklab, #1b1008 72%, #000);
   --text: #fff7ed;
-  --text-2: color-mix(in oklab, #fff7ed 78%, transparent);
-  --muted: color-mix(in oklab, #fff7ed 54%, transparent);
-  --faint: color-mix(in oklab, #fff7ed 34%, transparent);
-  --line: color-mix(in oklab, #fdba74 18%, transparent);
-  --line-2: color-mix(in oklab, #fdba74 28%, transparent);
+  --text-2: color-mix(in oklab, #fff7ed 78%, #000);
+  --muted: color-mix(in oklab, #fff7ed 54%, #000);
+  --faint: color-mix(in oklab, #fff7ed 34%, #000);
+  --line: color-mix(in oklab, #fdba74 18%, #000);
+  --line-2: color-mix(in oklab, #fdba74 28%, #000);
   --accent: #fdba74;
   --accent-2: #fb7185;
   --highlight: #fed7aa;
@@ -762,16 +762,16 @@
   --bg: #04060a;
   --bg-2: #04060a;
   --bg-3: #111827;
-  --panel: color-mix(in oklab, #111827 56%, transparent);
-  --surface: color-mix(in oklab, #111827 42%, transparent);
-  --surface-2: color-mix(in oklab, #111827 56%, transparent);
-  --surface-3: color-mix(in oklab, #111827 72%, transparent);
+  --panel: color-mix(in oklab, #111827 56%, #000);
+  --surface: color-mix(in oklab, #111827 42%, #000);
+  --surface-2: color-mix(in oklab, #111827 56%, #000);
+  --surface-3: color-mix(in oklab, #111827 72%, #000);
   --text: #f8fafc;
-  --text-2: color-mix(in oklab, #f8fafc 78%, transparent);
-  --muted: color-mix(in oklab, #f8fafc 54%, transparent);
-  --faint: color-mix(in oklab, #f8fafc 34%, transparent);
-  --line: color-mix(in oklab, #cbd5e1 18%, transparent);
-  --line-2: color-mix(in oklab, #cbd5e1 28%, transparent);
+  --text-2: color-mix(in oklab, #f8fafc 78%, #000);
+  --muted: color-mix(in oklab, #f8fafc 54%, #000);
+  --faint: color-mix(in oklab, #f8fafc 34%, #000);
+  --line: color-mix(in oklab, #cbd5e1 18%, #000);
+  --line-2: color-mix(in oklab, #cbd5e1 28%, #000);
   --accent: #cbd5e1;
   --accent-2: #94a3b8;
   --highlight: #e2e8f0;
@@ -802,16 +802,16 @@
   --bg: #030414;
   --bg-2: #030414;
   --bg-3: #0e1025;
-  --panel: color-mix(in oklab, #0e1025 56%, transparent);
-  --surface: color-mix(in oklab, #0e1025 42%, transparent);
-  --surface-2: color-mix(in oklab, #0e1025 56%, transparent);
-  --surface-3: color-mix(in oklab, #0e1025 72%, transparent);
+  --panel: color-mix(in oklab, #0e1025 56%, #000);
+  --surface: color-mix(in oklab, #0e1025 42%, #000);
+  --surface-2: color-mix(in oklab, #0e1025 56%, #000);
+  --surface-3: color-mix(in oklab, #0e1025 72%, #000);
   --text: #f8fbff;
-  --text-2: color-mix(in oklab, #f8fbff 78%, transparent);
-  --muted: color-mix(in oklab, #f8fbff 54%, transparent);
-  --faint: color-mix(in oklab, #f8fbff 34%, transparent);
-  --line: color-mix(in oklab, #e0e7ff 18%, transparent);
-  --line-2: color-mix(in oklab, #e0e7ff 28%, transparent);
+  --text-2: color-mix(in oklab, #f8fbff 78%, #000);
+  --muted: color-mix(in oklab, #f8fbff 54%, #000);
+  --faint: color-mix(in oklab, #f8fbff 34%, #000);
+  --line: color-mix(in oklab, #e0e7ff 18%, #000);
+  --line-2: color-mix(in oklab, #e0e7ff 28%, #000);
   --accent: #e0e7ff;
   --accent-2: #93c5fd;
   --highlight: #dbeafe;
@@ -842,16 +842,16 @@
   --bg: #010608;
   --bg-2: #010608;
   --bg-3: #06171b;
-  --panel: color-mix(in oklab, #06171b 56%, transparent);
-  --surface: color-mix(in oklab, #06171b 42%, transparent);
-  --surface-2: color-mix(in oklab, #06171b 56%, transparent);
-  --surface-3: color-mix(in oklab, #06171b 72%, transparent);
+  --panel: color-mix(in oklab, #06171b 56%, #000);
+  --surface: color-mix(in oklab, #06171b 42%, #000);
+  --surface-2: color-mix(in oklab, #06171b 56%, #000);
+  --surface-3: color-mix(in oklab, #06171b 72%, #000);
   --text: #effeff;
-  --text-2: color-mix(in oklab, #effeff 78%, transparent);
-  --muted: color-mix(in oklab, #effeff 54%, transparent);
-  --faint: color-mix(in oklab, #effeff 34%, transparent);
-  --line: color-mix(in oklab, #37f8ff 18%, transparent);
-  --line-2: color-mix(in oklab, #37f8ff 28%, transparent);
+  --text-2: color-mix(in oklab, #effeff 78%, #000);
+  --muted: color-mix(in oklab, #effeff 54%, #000);
+  --faint: color-mix(in oklab, #effeff 34%, #000);
+  --line: color-mix(in oklab, #37f8ff 18%, #000);
+  --line-2: color-mix(in oklab, #37f8ff 28%, #000);
   --accent: #37f8ff;
   --accent-2: #22d3ee;
   --highlight: #a5f3fc;
@@ -882,16 +882,16 @@
   --bg: #080011;
   --bg-2: #080011;
   --bg-3: #170826;
-  --panel: color-mix(in oklab, #170826 56%, transparent);
-  --surface: color-mix(in oklab, #170826 42%, transparent);
-  --surface-2: color-mix(in oklab, #170826 56%, transparent);
-  --surface-3: color-mix(in oklab, #170826 72%, transparent);
+  --panel: color-mix(in oklab, #170826 56%, #000);
+  --surface: color-mix(in oklab, #170826 42%, #000);
+  --surface-2: color-mix(in oklab, #170826 56%, #000);
+  --surface-3: color-mix(in oklab, #170826 72%, #000);
   --text: #fbf4ff;
-  --text-2: color-mix(in oklab, #fbf4ff 78%, transparent);
-  --muted: color-mix(in oklab, #fbf4ff 54%, transparent);
-  --faint: color-mix(in oklab, #fbf4ff 34%, transparent);
-  --line: color-mix(in oklab, #a855f7 18%, transparent);
-  --line-2: color-mix(in oklab, #a855f7 28%, transparent);
+  --text-2: color-mix(in oklab, #fbf4ff 78%, #000);
+  --muted: color-mix(in oklab, #fbf4ff 54%, #000);
+  --faint: color-mix(in oklab, #fbf4ff 34%, #000);
+  --line: color-mix(in oklab, #a855f7 18%, #000);
+  --line-2: color-mix(in oklab, #a855f7 28%, #000);
   --accent: #a855f7;
   --accent-2: #22d3ee;
   --highlight: #e9d5ff;
@@ -922,16 +922,16 @@
   --bg: #0b0301;
   --bg-2: #0b0301;
   --bg-3: #1d0b04;
-  --panel: color-mix(in oklab, #1d0b04 56%, transparent);
-  --surface: color-mix(in oklab, #1d0b04 42%, transparent);
-  --surface-2: color-mix(in oklab, #1d0b04 56%, transparent);
-  --surface-3: color-mix(in oklab, #1d0b04 72%, transparent);
+  --panel: color-mix(in oklab, #1d0b04 56%, #000);
+  --surface: color-mix(in oklab, #1d0b04 42%, #000);
+  --surface-2: color-mix(in oklab, #1d0b04 56%, #000);
+  --surface-3: color-mix(in oklab, #1d0b04 72%, #000);
   --text: #fff7ed;
-  --text-2: color-mix(in oklab, #fff7ed 78%, transparent);
-  --muted: color-mix(in oklab, #fff7ed 54%, transparent);
-  --faint: color-mix(in oklab, #fff7ed 34%, transparent);
-  --line: color-mix(in oklab, #ff7a2f 18%, transparent);
-  --line-2: color-mix(in oklab, #ff7a2f 28%, transparent);
+  --text-2: color-mix(in oklab, #fff7ed 78%, #000);
+  --muted: color-mix(in oklab, #fff7ed 54%, #000);
+  --faint: color-mix(in oklab, #fff7ed 34%, #000);
+  --line: color-mix(in oklab, #ff7a2f 18%, #000);
+  --line-2: color-mix(in oklab, #ff7a2f 28%, #000);
   --accent: #ff7a2f;
   --accent-2: #ffd166;
   --highlight: #fed7aa;
@@ -962,16 +962,16 @@
   --bg: #020704;
   --bg-2: #020704;
   --bg-3: #08170e;
-  --panel: color-mix(in oklab, #08170e 56%, transparent);
-  --surface: color-mix(in oklab, #08170e 42%, transparent);
-  --surface-2: color-mix(in oklab, #08170e 56%, transparent);
-  --surface-3: color-mix(in oklab, #08170e 72%, transparent);
+  --panel: color-mix(in oklab, #08170e 56%, #000);
+  --surface: color-mix(in oklab, #08170e 42%, #000);
+  --surface-2: color-mix(in oklab, #08170e 56%, #000);
+  --surface-3: color-mix(in oklab, #08170e 72%, #000);
   --text: #effff5;
-  --text-2: color-mix(in oklab, #effff5 78%, transparent);
-  --muted: color-mix(in oklab, #effff5 54%, transparent);
-  --faint: color-mix(in oklab, #effff5 34%, transparent);
-  --line: color-mix(in oklab, #34d399 18%, transparent);
-  --line-2: color-mix(in oklab, #34d399 28%, transparent);
+  --text-2: color-mix(in oklab, #effff5 78%, #000);
+  --muted: color-mix(in oklab, #effff5 54%, #000);
+  --faint: color-mix(in oklab, #effff5 34%, #000);
+  --line: color-mix(in oklab, #34d399 18%, #000);
+  --line-2: color-mix(in oklab, #34d399 28%, #000);
   --accent: #34d399;
   --accent-2: #86efac;
   --highlight: #bbf7d0;
@@ -1002,16 +1002,16 @@
   --bg: #020716;
   --bg-2: #020716;
   --bg-3: #09162c;
-  --panel: color-mix(in oklab, #09162c 56%, transparent);
-  --surface: color-mix(in oklab, #09162c 42%, transparent);
-  --surface-2: color-mix(in oklab, #09162c 56%, transparent);
-  --surface-3: color-mix(in oklab, #09162c 72%, transparent);
+  --panel: color-mix(in oklab, #09162c 56%, #000);
+  --surface: color-mix(in oklab, #09162c 42%, #000);
+  --surface-2: color-mix(in oklab, #09162c 56%, #000);
+  --surface-3: color-mix(in oklab, #09162c 72%, #000);
   --text: #f0f9ff;
-  --text-2: color-mix(in oklab, #f0f9ff 78%, transparent);
-  --muted: color-mix(in oklab, #f0f9ff 54%, transparent);
-  --faint: color-mix(in oklab, #f0f9ff 34%, transparent);
-  --line: color-mix(in oklab, #38bdf8 18%, transparent);
-  --line-2: color-mix(in oklab, #38bdf8 28%, transparent);
+  --text-2: color-mix(in oklab, #f0f9ff 78%, #000);
+  --muted: color-mix(in oklab, #f0f9ff 54%, #000);
+  --faint: color-mix(in oklab, #f0f9ff 34%, #000);
+  --line: color-mix(in oklab, #38bdf8 18%, #000);
+  --line-2: color-mix(in oklab, #38bdf8 28%, #000);
   --accent: #38bdf8;
   --accent-2: #2563eb;
   --highlight: #bae6fd;
@@ -1042,16 +1042,16 @@
   --bg: #0c0205;
   --bg-2: #0c0205;
   --bg-3: #1e0710;
-  --panel: color-mix(in oklab, #1e0710 56%, transparent);
-  --surface: color-mix(in oklab, #1e0710 42%, transparent);
-  --surface-2: color-mix(in oklab, #1e0710 56%, transparent);
-  --surface-3: color-mix(in oklab, #1e0710 72%, transparent);
+  --panel: color-mix(in oklab, #1e0710 56%, #000);
+  --surface: color-mix(in oklab, #1e0710 42%, #000);
+  --surface-2: color-mix(in oklab, #1e0710 56%, #000);
+  --surface-3: color-mix(in oklab, #1e0710 72%, #000);
   --text: #fff1f4;
-  --text-2: color-mix(in oklab, #fff1f4 78%, transparent);
-  --muted: color-mix(in oklab, #fff1f4 54%, transparent);
-  --faint: color-mix(in oklab, #fff1f4 34%, transparent);
-  --line: color-mix(in oklab, #fb315d 18%, transparent);
-  --line-2: color-mix(in oklab, #fb315d 28%, transparent);
+  --text-2: color-mix(in oklab, #fff1f4 78%, #000);
+  --muted: color-mix(in oklab, #fff1f4 54%, #000);
+  --faint: color-mix(in oklab, #fff1f4 34%, #000);
+  --line: color-mix(in oklab, #fb315d 18%, #000);
+  --line-2: color-mix(in oklab, #fb315d 28%, #000);
   --accent: #fb315d;
   --accent-2: #f97316;
   --highlight: #fecdd3;
@@ -1082,16 +1082,16 @@
   --bg: #02090b;
   --bg-2: #02090b;
   --bg-3: #08171a;
-  --panel: color-mix(in oklab, #08171a 56%, transparent);
-  --surface: color-mix(in oklab, #08171a 42%, transparent);
-  --surface-2: color-mix(in oklab, #08171a 56%, transparent);
-  --surface-3: color-mix(in oklab, #08171a 72%, transparent);
+  --panel: color-mix(in oklab, #08171a 56%, #000);
+  --surface: color-mix(in oklab, #08171a 42%, #000);
+  --surface-2: color-mix(in oklab, #08171a 56%, #000);
+  --surface-3: color-mix(in oklab, #08171a 72%, #000);
   --text: #f2fffd;
-  --text-2: color-mix(in oklab, #f2fffd 78%, transparent);
-  --muted: color-mix(in oklab, #f2fffd 54%, transparent);
-  --faint: color-mix(in oklab, #f2fffd 34%, transparent);
-  --line: color-mix(in oklab, #5eead4 18%, transparent);
-  --line-2: color-mix(in oklab, #5eead4 28%, transparent);
+  --text-2: color-mix(in oklab, #f2fffd 78%, #000);
+  --muted: color-mix(in oklab, #f2fffd 54%, #000);
+  --faint: color-mix(in oklab, #f2fffd 34%, #000);
+  --line: color-mix(in oklab, #5eead4 18%, #000);
+  --line-2: color-mix(in oklab, #5eead4 28%, #000);
   --accent: #5eead4;
   --accent-2: #c084fc;
   --highlight: #ccfbf1;
@@ -1122,16 +1122,16 @@
   --bg: #080604;
   --bg-2: #080604;
   --bg-3: #17120b;
-  --panel: color-mix(in oklab, #17120b 56%, transparent);
-  --surface: color-mix(in oklab, #17120b 42%, transparent);
-  --surface-2: color-mix(in oklab, #17120b 56%, transparent);
-  --surface-3: color-mix(in oklab, #17120b 72%, transparent);
+  --panel: color-mix(in oklab, #17120b 56%, #000);
+  --surface: color-mix(in oklab, #17120b 42%, #000);
+  --surface-2: color-mix(in oklab, #17120b 56%, #000);
+  --surface-3: color-mix(in oklab, #17120b 72%, #000);
   --text: #fffaf0;
-  --text-2: color-mix(in oklab, #fffaf0 78%, transparent);
-  --muted: color-mix(in oklab, #fffaf0 54%, transparent);
-  --faint: color-mix(in oklab, #fffaf0 34%, transparent);
-  --line: color-mix(in oklab, #fff1c2 18%, transparent);
-  --line-2: color-mix(in oklab, #fff1c2 28%, transparent);
+  --text-2: color-mix(in oklab, #fffaf0 78%, #000);
+  --muted: color-mix(in oklab, #fffaf0 54%, #000);
+  --faint: color-mix(in oklab, #fffaf0 34%, #000);
+  --line: color-mix(in oklab, #fff1c2 18%, #000);
+  --line-2: color-mix(in oklab, #fff1c2 28%, #000);
   --accent: #fff1c2;
   --accent-2: #f0b35a;
   --highlight: #fde68a;
@@ -1162,16 +1162,16 @@
   --bg: #070315;
   --bg-2: #070315;
   --bg-3: #160c28;
-  --panel: color-mix(in oklab, #160c28 56%, transparent);
-  --surface: color-mix(in oklab, #160c28 42%, transparent);
-  --surface-2: color-mix(in oklab, #160c28 56%, transparent);
-  --surface-3: color-mix(in oklab, #160c28 72%, transparent);
+  --panel: color-mix(in oklab, #160c28 56%, #000);
+  --surface: color-mix(in oklab, #160c28 42%, #000);
+  --surface-2: color-mix(in oklab, #160c28 56%, #000);
+  --surface-3: color-mix(in oklab, #160c28 72%, #000);
   --text: #fff4fd;
-  --text-2: color-mix(in oklab, #fff4fd 78%, transparent);
-  --muted: color-mix(in oklab, #fff4fd 54%, transparent);
-  --faint: color-mix(in oklab, #fff4fd 34%, transparent);
-  --line: color-mix(in oklab, #fb6fd9 18%, transparent);
-  --line-2: color-mix(in oklab, #fb6fd9 28%, transparent);
+  --text-2: color-mix(in oklab, #fff4fd 78%, #000);
+  --muted: color-mix(in oklab, #fff4fd 54%, #000);
+  --faint: color-mix(in oklab, #fff4fd 34%, #000);
+  --line: color-mix(in oklab, #fb6fd9 18%, #000);
+  --line-2: color-mix(in oklab, #fb6fd9 28%, #000);
   --accent: #fb6fd9;
   --accent-2: #4dd4ff;
   --highlight: #fbcfe8;
@@ -1202,16 +1202,16 @@
   --bg: #07000f;
   --bg-2: #07000f;
   --bg-3: #150822;
-  --panel: color-mix(in oklab, #150822 56%, transparent);
-  --surface: color-mix(in oklab, #150822 42%, transparent);
-  --surface-2: color-mix(in oklab, #150822 56%, transparent);
-  --surface-3: color-mix(in oklab, #150822 72%, transparent);
+  --panel: color-mix(in oklab, #150822 56%, #000);
+  --surface: color-mix(in oklab, #150822 42%, #000);
+  --surface-2: color-mix(in oklab, #150822 56%, #000);
+  --surface-3: color-mix(in oklab, #150822 72%, #000);
   --text: #faf5ff;
-  --text-2: color-mix(in oklab, #faf5ff 78%, transparent);
-  --muted: color-mix(in oklab, #faf5ff 54%, transparent);
-  --faint: color-mix(in oklab, #faf5ff 34%, transparent);
-  --line: color-mix(in oklab, #8b5cf6 18%, transparent);
-  --line-2: color-mix(in oklab, #8b5cf6 28%, transparent);
+  --text-2: color-mix(in oklab, #faf5ff 78%, #000);
+  --muted: color-mix(in oklab, #faf5ff 54%, #000);
+  --faint: color-mix(in oklab, #faf5ff 34%, #000);
+  --line: color-mix(in oklab, #8b5cf6 18%, #000);
+  --line-2: color-mix(in oklab, #8b5cf6 28%, #000);
   --accent: #8b5cf6;
   --accent-2: #f0abfc;
   --highlight: #ddd6fe;
@@ -1242,16 +1242,16 @@
   --bg: #000804;
   --bg-2: #000804;
   --bg-3: #06140b;
-  --panel: color-mix(in oklab, #06140b 56%, transparent);
-  --surface: color-mix(in oklab, #06140b 42%, transparent);
-  --surface-2: color-mix(in oklab, #06140b 56%, transparent);
-  --surface-3: color-mix(in oklab, #06140b 72%, transparent);
+  --panel: color-mix(in oklab, #06140b 56%, #000);
+  --surface: color-mix(in oklab, #06140b 42%, #000);
+  --surface-2: color-mix(in oklab, #06140b 56%, #000);
+  --surface-3: color-mix(in oklab, #06140b 72%, #000);
   --text: #effff3;
-  --text-2: color-mix(in oklab, #effff3 78%, transparent);
-  --muted: color-mix(in oklab, #effff3 54%, transparent);
-  --faint: color-mix(in oklab, #effff3 34%, transparent);
-  --line: color-mix(in oklab, #22c55e 18%, transparent);
-  --line-2: color-mix(in oklab, #22c55e 28%, transparent);
+  --text-2: color-mix(in oklab, #effff3 78%, #000);
+  --muted: color-mix(in oklab, #effff3 54%, #000);
+  --faint: color-mix(in oklab, #effff3 34%, #000);
+  --line: color-mix(in oklab, #22c55e 18%, #000);
+  --line-2: color-mix(in oklab, #22c55e 28%, #000);
   --accent: #22c55e;
   --accent-2: #bbf7d0;
   --highlight: #86efac;
@@ -1282,16 +1282,16 @@
   --bg: #0b0310;
   --bg-2: #0b0310;
   --bg-3: #1b1025;
-  --panel: color-mix(in oklab, #1b1025 56%, transparent);
-  --surface: color-mix(in oklab, #1b1025 42%, transparent);
-  --surface-2: color-mix(in oklab, #1b1025 56%, transparent);
-  --surface-3: color-mix(in oklab, #1b1025 72%, transparent);
+  --panel: color-mix(in oklab, #1b1025 56%, #000);
+  --surface: color-mix(in oklab, #1b1025 42%, #000);
+  --surface-2: color-mix(in oklab, #1b1025 56%, #000);
+  --surface-3: color-mix(in oklab, #1b1025 72%, #000);
   --text: #fff4fd;
-  --text-2: color-mix(in oklab, #fff4fd 78%, transparent);
-  --muted: color-mix(in oklab, #fff4fd 54%, transparent);
-  --faint: color-mix(in oklab, #fff4fd 34%, transparent);
-  --line: color-mix(in oklab, #fb7bdc 18%, transparent);
-  --line-2: color-mix(in oklab, #fb7bdc 28%, transparent);
+  --text-2: color-mix(in oklab, #fff4fd 78%, #000);
+  --muted: color-mix(in oklab, #fff4fd 54%, #000);
+  --faint: color-mix(in oklab, #fff4fd 34%, #000);
+  --line: color-mix(in oklab, #fb7bdc 18%, #000);
+  --line-2: color-mix(in oklab, #fb7bdc 28%, #000);
   --accent: #fb7bdc;
   --accent-2: #67e8f9;
   --highlight: #fbcfe8;
@@ -1322,16 +1322,16 @@
   --bg: #020617;
   --bg-2: #020617;
   --bg-3: #0b1224;
-  --panel: color-mix(in oklab, #0b1224 56%, transparent);
-  --surface: color-mix(in oklab, #0b1224 42%, transparent);
-  --surface-2: color-mix(in oklab, #0b1224 56%, transparent);
-  --surface-3: color-mix(in oklab, #0b1224 72%, transparent);
+  --panel: color-mix(in oklab, #0b1224 56%, #000);
+  --surface: color-mix(in oklab, #0b1224 42%, #000);
+  --surface-2: color-mix(in oklab, #0b1224 56%, #000);
+  --surface-3: color-mix(in oklab, #0b1224 72%, #000);
   --text: #f0f9ff;
-  --text-2: color-mix(in oklab, #f0f9ff 78%, transparent);
-  --muted: color-mix(in oklab, #f0f9ff 54%, transparent);
-  --faint: color-mix(in oklab, #f0f9ff 34%, transparent);
-  --line: color-mix(in oklab, #38bdf8 18%, transparent);
-  --line-2: color-mix(in oklab, #38bdf8 28%, transparent);
+  --text-2: color-mix(in oklab, #f0f9ff 78%, #000);
+  --muted: color-mix(in oklab, #f0f9ff 54%, #000);
+  --faint: color-mix(in oklab, #f0f9ff 34%, #000);
+  --line: color-mix(in oklab, #38bdf8 18%, #000);
+  --line-2: color-mix(in oklab, #38bdf8 28%, #000);
   --accent: #38bdf8;
   --accent-2: #818cf8;
   --highlight: #bfdbfe;
@@ -1362,16 +1362,16 @@
   --bg: #0b0200;
   --bg-2: #0b0200;
   --bg-3: #1c0803;
-  --panel: color-mix(in oklab, #1c0803 56%, transparent);
-  --surface: color-mix(in oklab, #1c0803 42%, transparent);
-  --surface-2: color-mix(in oklab, #1c0803 56%, transparent);
-  --surface-3: color-mix(in oklab, #1c0803 72%, transparent);
+  --panel: color-mix(in oklab, #1c0803 56%, #000);
+  --surface: color-mix(in oklab, #1c0803 42%, #000);
+  --surface-2: color-mix(in oklab, #1c0803 56%, #000);
+  --surface-3: color-mix(in oklab, #1c0803 72%, #000);
   --text: #fff4ee;
-  --text-2: color-mix(in oklab, #fff4ee 78%, transparent);
-  --muted: color-mix(in oklab, #fff4ee 54%, transparent);
-  --faint: color-mix(in oklab, #fff4ee 34%, transparent);
-  --line: color-mix(in oklab, #ef4444 18%, transparent);
-  --line-2: color-mix(in oklab, #ef4444 28%, transparent);
+  --text-2: color-mix(in oklab, #fff4ee 78%, #000);
+  --muted: color-mix(in oklab, #fff4ee 54%, #000);
+  --faint: color-mix(in oklab, #fff4ee 34%, #000);
+  --line: color-mix(in oklab, #ef4444 18%, #000);
+  --line-2: color-mix(in oklab, #ef4444 28%, #000);
   --accent: #ef4444;
   --accent-2: #f59e0b;
   --highlight: #fecaca;
@@ -1402,16 +1402,16 @@
   --bg: #04101d;
   --bg-2: #04101d;
   --bg-3: #0c1b2f;
-  --panel: color-mix(in oklab, #0c1b2f 56%, transparent);
-  --surface: color-mix(in oklab, #0c1b2f 42%, transparent);
-  --surface-2: color-mix(in oklab, #0c1b2f 56%, transparent);
-  --surface-3: color-mix(in oklab, #0c1b2f 72%, transparent);
+  --panel: color-mix(in oklab, #0c1b2f 56%, #000);
+  --surface: color-mix(in oklab, #0c1b2f 42%, #000);
+  --surface-2: color-mix(in oklab, #0c1b2f 56%, #000);
+  --surface-3: color-mix(in oklab, #0c1b2f 72%, #000);
   --text: #f0f9ff;
-  --text-2: color-mix(in oklab, #f0f9ff 78%, transparent);
-  --muted: color-mix(in oklab, #f0f9ff 54%, transparent);
-  --faint: color-mix(in oklab, #f0f9ff 34%, transparent);
-  --line: color-mix(in oklab, #93c5fd 18%, transparent);
-  --line-2: color-mix(in oklab, #93c5fd 28%, transparent);
+  --text-2: color-mix(in oklab, #f0f9ff 78%, #000);
+  --muted: color-mix(in oklab, #f0f9ff 54%, #000);
+  --faint: color-mix(in oklab, #f0f9ff 34%, #000);
+  --line: color-mix(in oklab, #93c5fd 18%, #000);
+  --line-2: color-mix(in oklab, #93c5fd 28%, #000);
   --accent: #93c5fd;
   --accent-2: #e0f2fe;
   --highlight: #dbeafe;
@@ -1442,16 +1442,16 @@
   --bg: #03030a;
   --bg-2: #03030a;
   --bg-3: #0e1020;
-  --panel: color-mix(in oklab, #0e1020 56%, transparent);
-  --surface: color-mix(in oklab, #0e1020 42%, transparent);
-  --surface-2: color-mix(in oklab, #0e1020 56%, transparent);
-  --surface-3: color-mix(in oklab, #0e1020 72%, transparent);
+  --panel: color-mix(in oklab, #0e1020 56%, #000);
+  --surface: color-mix(in oklab, #0e1020 42%, #000);
+  --surface-2: color-mix(in oklab, #0e1020 56%, #000);
+  --surface-3: color-mix(in oklab, #0e1020 72%, #000);
   --text: #f8fbff;
-  --text-2: color-mix(in oklab, #f8fbff 78%, transparent);
-  --muted: color-mix(in oklab, #f8fbff 54%, transparent);
-  --faint: color-mix(in oklab, #f8fbff 34%, transparent);
-  --line: color-mix(in oklab, #22d3ee 18%, transparent);
-  --line-2: color-mix(in oklab, #22d3ee 28%, transparent);
+  --text-2: color-mix(in oklab, #f8fbff 78%, #000);
+  --muted: color-mix(in oklab, #f8fbff 54%, #000);
+  --faint: color-mix(in oklab, #f8fbff 34%, #000);
+  --line: color-mix(in oklab, #22d3ee 18%, #000);
+  --line-2: color-mix(in oklab, #22d3ee 28%, #000);
   --accent: #22d3ee;
   --accent-2: #f472b6;
   --highlight: #a5f3fc;
@@ -1476,35 +1476,6 @@
   --localtify-panel-bg: rgba(14, 16, 32, 0.52);
   --localtify-panel-bg-2: rgba(3, 3, 10, 0.74);
   --localtify-line-soft: rgba(34, 211, 238, 0.16);
-}
-
-.app[data-theme]{
-  background:
-    radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb), 0.09), transparent 32%),
-    radial-gradient(circle at 92% 18%, rgba(var(--accent-2-rgb), 0.075), transparent 34%),
-    var(--bg);
-}
-
-.app[data-theme] .titleBar{
-  background:
-    linear-gradient(90deg,
-      color-mix(in oklab, var(--bg) 82%, var(--accent) 12%),
-      color-mix(in oklab, var(--bg-3) 78%, var(--accent) 12%)
-    );
-  border-bottom-color: color-mix(in oklab, var(--accent) 28%, rgba(255,255,255,0.08));
-}
-
-.app[data-theme] .settingsThemeSelectedPreview,
-.app[data-theme] .settingsSelectField{
-  border-color: color-mix(in oklab, var(--accent) 25%, rgba(255,255,255,0.08));
-}
-
-.app[data-theme] .settingsSelectField select{
-  color: var(--text);
-  background:
-    color-mix(in oklab, var(--bg) 76%, black 12%);
-  border-color: color-mix(in oklab, var(--accent) 36%, rgba(255,255,255,0.12));
-  accent-color: var(--accent);
 }
 
 .app[data-theme="stars"]{
@@ -1535,180 +1506,4 @@
     radial-gradient(circle, rgba(255,255,255,.92) 0 .75px, transparent 1.6px),
     radial-gradient(circle, rgba(158,220,255,.7) 0 .9px, transparent 1.7px),
     radial-gradient(circle, rgba(255,139,251,.55) 0 .85px, transparent 1.6px);
-}
-
-.app[data-theme="stars"]::before,
-.app[data-theme="stars"]::after,
-.app[data-theme="stars"] .content::before,
-.app[data-theme="stars"] .content::after,
-.app[data-theme="stars"] .localtifyStarsNebula,
-.app[data-theme="stars"] .localtifyStarParticle,
-.app[data-theme="stars"] .localtifyStarSweep,
-.app[data-theme="stars"] .ambientOrb,
-.app[data-theme="stars"] .sideAmbienceOrb{
-  display: none !important;
-  opacity: 0 !important;
-  animation: none !important;
-  background: none !important;
-  filter: none !important;
-}
-
-.app[data-theme="stars"] .content{
-  background: transparent !important;
-}
-
-.app[data-theme="stars"] .titleBar,
-.app[data-theme="stars"] .appShell,
-.app[data-theme="stars"] .updateToastLayer,
-.app[data-theme="stars"] .toastHost,
-.app[data-theme="stars"] .topUpdateRibbonLayer{
-  position: relative !important;
-  z-index: 2 !important;
-}
-
-.app[data-theme="stars"] .appShell{
-  background: transparent !important;
-}
-
-.app[data-theme="stars"] .localtifyStarsBackdrop{
-  position: fixed !important;
-  inset: 36px 0 0 0 !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  z-index: 0 !important;
-  opacity: .92 !important;
-  background:
-    radial-gradient(circle at 16% 18%, rgba(229, 90, 231, .07), transparent 28%),
-    radial-gradient(circle at 84% 16%, rgba(143, 220, 255, .06), transparent 30%),
-    linear-gradient(180deg, #03040e 0%, #050312 48%, #02030b 100%) !important;
-}
-
-.app[data-theme="stars"] .localtifyStarsLayer{
-  position: absolute !important;
-  inset: -10vh -10vw !important;
-  pointer-events: none !important;
-  background-repeat: repeat !important;
-  background-position:
-    var(--stars-a-x, 18px) var(--stars-a-y, 22px),
-    var(--stars-b-x, 91px) var(--stars-b-y, 71px),
-    var(--stars-c-x, 161px) var(--stars-c-y, 119px) !important;
-  background-size:
-    var(--stars-a-size, 241px) var(--stars-a-size, 241px),
-    var(--stars-b-size, 337px) var(--stars-b-size, 337px),
-    var(--stars-c-size, 421px) var(--stars-c-size, 421px) !important;
-  transform: translate3d(0, 0, 0) !important;
-
-}
-
-.app[data-theme="stars"] .localtifyStarsLayerA{
-  opacity: .58 !important;
-  background-image: var(--localtify-stars-field-a) !important;
-  animation: localtifyStarsDriftV146 var(--localtify-stars-drift-duration, 96s) linear infinite !important;
-}
-
-.app[data-theme="stars"] .localtifyStarsLayerB{
-  opacity: .46 !important;
-  background-image: var(--localtify-stars-field-b) !important;
-  animation:
-    localtifyStarsDriftReverseV146 76s linear infinite,
-    localtifyStarsTwinkleV146 var(--localtify-stars-sparkle-duration, 4.8s) steps(7, end) infinite !important;
-}
-
-.app[data-theme="stars"] .localtifyStarsLayerC{
-  opacity: .34 !important;
-  background-image: var(--localtify-stars-field-c) !important;
-  animation:
-    localtifyStarsSlowDriftV146 132s linear infinite reverse,
-    localtifyStarsTinySparkleV146 6.8s steps(8, end) infinite !important;
-}
-
-.app.themeMotionBooting[data-theme="stars"] :is(
-  .songRow,
-  .songCard,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .homeListenCard,
-  .libraryCard,
-  .libraryCardV025,
-  .playlistPanel,
-  .playlistShelfCard,
-  .playlistTrackRow,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .settingsCard,
-  .updateSettingsCard
-)::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: -1px !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: .18 !important;
-  background: linear-gradient(115deg, transparent 0 38%, rgba(255,255,255,.16) 49%, transparent 62%) !important;
-  transform: translate3d(-120%, 0, 0) !important;
-  animation: localtifyStarsBootShimmerV146 7.8s ease-in-out infinite !important;
-}
-
-.app.themeMotionReady[data-theme="stars"] :is(
-  .songRow,
-  .songCard,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .homeListenCard,
-  .libraryCard,
-  .libraryCardV025,
-  .playlistPanel,
-  .playlistShelfCard,
-  .playlistTrackRow,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .settingsCard,
-  .updateSettingsCard
-)::after{
-  content: none !important;
-  opacity: 0 !important;
-  animation: none !important;
-  background: none !important;
-}
-
-@keyframes localtifyStarsDriftV146{
-  0%{ transform: translate3d(-4.8vw, -1.2vh, 0) scale(1); }
-  28%{ transform: translate3d(-.8vw, .9vh, 0) scale(1.004); }
-  62%{ transform: translate3d(4.5vw, -1.9vh, 0) scale(1.009); }
-  100%{ transform: translate3d(-4.8vw, -1.2vh, 0) scale(1); }
-}
-
-@keyframes localtifyStarsDriftReverseV146{
-  0%{ transform: translate3d(4.4vw, 1.6vh, 0) scale(1.006); }
-  36%{ transform: translate3d(.6vw, -.8vh, 0) scale(1.001); }
-  100%{ transform: translate3d(-3.8vw, 1.3vh, 0) scale(1.006); }
-}
-
-@keyframes localtifyStarsSlowDriftV146{
-  0%{ transform: translate3d(-2.8vw, .8vh, 0) scale(1); }
-  46%{ transform: translate3d(1.4vw, -1.5vh, 0) scale(1.008); }
-  100%{ transform: translate3d(2.8vw, .4vh, 0) scale(1.002); }
-}
-
-@keyframes localtifyStarsTwinkleV146{
-  0%, 100%{ opacity: .32; }
-  11%{ opacity: .72; }
-  25%{ opacity: .36; }
-  47%{ opacity: .82; }
-  73%{ opacity: .4; }
-}
-
-@keyframes localtifyStarsTinySparkleV146{
-  0%, 100%{ opacity: .2; }
-  18%{ opacity: .52; }
-  41%{ opacity: .28; }
-  64%{ opacity: .6; }
-  86%{ opacity: .24; }
-}
-
-@keyframes localtifyStarsBootShimmerV146{
-  0%{ transform: translate3d(-125%, 0, 0); opacity: 0; }
-  15%{ opacity: .14; }
-  48%{ opacity: .2; }
-  72%, 100%{ transform: translate3d(125%, 0, 0); opacity: 0; }
 }

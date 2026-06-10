@@ -337,7 +337,7 @@ function applyWindowTranslucencyToWindow(win, settings = getSavedWindowTransluce
     if (process.platform === "win32" && typeof win.setBackgroundMaterial === "function") {
       // Keep this stable on Windows boot. DWM/acrylic can be late during login,
       // so Localtify uses CSS glass and a dark native background instead.
-      win.setBackgroundMaterial("none");
+      win.setBackgroundMaterial('none');
     }
   } catch (error) {
     console.log("[localtify window material error]", error?.message || error);
@@ -2462,6 +2462,19 @@ async function fetchSpotifyOembed(trackUrl) {
   const res = await spotifyHttpGet(`https://open.spotify.com/oembed?url=${encodeURIComponent(trackUrl)}`, {
     Accept: "application/json"
   });
+  // localtifyOpaqueReleaseFixV453: opaque Electron fallback; React/theme CSS owns the app background.
+  try {
+    mainWindow.setBackgroundColor("#000000");
+    if (process.platform === "win32" && typeof mainWindow.setBackgroundMaterial === "function") {
+      mainWindow.setBackgroundMaterial("none");
+    }
+  } catch {}
+
+  // localtifyWindowOpaqueFixV449: opaque Electron fallback only. The React app CSS controls the real app background.
+  try {
+    mainWindow.setBackgroundColor("#000000");
+  } catch {}
+
 
   if (res.status !== 200) return null;
 
