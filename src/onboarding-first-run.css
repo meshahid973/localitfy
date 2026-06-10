@@ -231,35 +231,6 @@
   letter-spacing: -0.065em;
 }
 
-.onboardingTitleRow {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 12px;
-}
-
-.onboardingTitleInlineLogo {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  border-radius: 12px;
-  display: inline-grid;
-  place-items: center;
-  background: rgba(var(--onboarding-accent-rgb), 0.12);
-  border: 1px solid rgba(var(--onboarding-accent-rgb), 0.26);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
-}
-
-.onboardingTitleInlineLogoImage {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-  display: block;
-}
-
-.onboardingTitleWordmark {
-  display: inline-block;
-}
-
 .onboardingHeaderMeta {
   display: flex;
   flex-wrap: wrap;
@@ -742,22 +713,11 @@
 }
 
 @media (max-width: 860px) {
-  .onboardingTitleRow {
-    gap: 10px;
-    align-items: center;
-  }
+  
 
-  .onboardingTitleInlineLogo {
-    width: 28px;
-    height: 28px;
-    flex-basis: 28px;
-    border-radius: 10px;
-  }
+  
 
-  .onboardingTitleInlineLogoImage {
-    width: 16px;
-    height: 16px;
-  }
+  
 
   .onboardingV314,
   .onboardingV315 {
@@ -823,4 +783,37 @@ body.localtifyPerfV301 .onboardingCoreOrb{
 body.localtifyPerfV301 .onboardingV314 :is(button, input),
 body.localtifyPerfV301 .onboardingV315 :is(button, input){
   touch-action: manipulation;
+}
+
+/* V463 small onboarding optimization */
+.onboardingV315,
+.localitfyOnboardingShell,
+.onboardingBody{
+  contain: layout paint style;
+}
+
+.onboardingThemeGrid.cleaner,
+.onboardingFeatureGrid.cleaner,
+.onboardingSummaryGrid.cleaner{
+  contain: layout paint;
+}
+
+.onboardingThemeChoice,
+.onboardingFeatureGrid.cleaner > div,
+.onboardingSummaryGrid.cleaner > div,
+.discordChoice{
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.onboardingLogoImage,
+.onboardingThemeChoice .themeIconSvg{
+  pointer-events: none;
+  user-select: none;
+}
+
+body.localtifyPerfV301 .onboardingThemeChoice,
+body.localtifyPerfV301 .onboardingFeatureGrid.cleaner > div,
+body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
+  transition-property: border-color, background-color, box-shadow;
 }

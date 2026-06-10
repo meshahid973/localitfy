@@ -351,12 +351,7 @@ export default function Onboarding({
             </span>
             <div>
               <p>localtify setup</p>
-              <strong id="onboardingTitle" className="onboardingTitleRow">
-                <span className="onboardingTitleInlineLogo" aria-hidden="true">
-                  <img className="onboardingTitleInlineLogoImage" src={LOCALTIFY_LOGO_SRC} alt="" draggable={false} />
-                </span>
-                <span className="onboardingTitleWordmark">make it yours first</span>
-              </strong>
+              <strong id="onboardingTitle">make it yours first</strong>
             </div>
           </div>
 
