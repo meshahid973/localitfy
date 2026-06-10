@@ -12502,3 +12502,195 @@ body.localitfyThemePainting .app :is(
     filter: none !important;
   }
 }
+
+/* V443: restored SVG heart like animation.
+   Uses src/assets/heart-s.svg and src/assets/heart-f.svg. */
+.iconAction.likeActionV443{
+  position: relative;
+  overflow: visible;
+  display: inline-grid;
+  place-items: center;
+  isolation: isolate;
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+.likeHeartAnimationV443{
+  --like-heart-size: 19px;
+  position: relative;
+  width: var(--like-heart-size);
+  height: var(--like-heart-size);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.likeHeartShellV443{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: url("./assets/heart-s.svg") center / contain no-repeat;
+  transform: translateZ(0);
+}
+
+.likeHeartFillV443{
+  position: absolute;
+  inset: 5% 0 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  background: url("./assets/heart-f.svg") center / contain no-repeat;
+  transform: scale(0);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+}
+
+.likeBurstRingV443{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 350%;
+  height: 350%;
+  border: 1px solid #fe587a;
+  border-radius: 999px;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+}
+
+.likeBurstParticleV443{
+  position: absolute;
+  top: calc(45% - (var(--particle-size, 5px) / 2));
+  left: calc(50% - (var(--particle-size, 5px) / 2));
+  width: var(--particle-size, 5px);
+  height: var(--particle-size, 5px);
+  border-radius: 999px;
+  opacity: 0;
+  transform: rotate(var(--rotate, 0deg)) translateY(0);
+  pointer-events: none;
+}
+
+.likeBurstParticleV443::before{
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--particle-color, #fe5064);
+  transform: scale(0);
+}
+
+.iconAction.likeActionV443.liked .likeHeartFillV443,
+.iconAction.likeActionV443.likeActionActiveV443 .likeHeartFillV443{
+  opacity: 1;
+  animation: localtifyLikeHeartPopupV443 700ms ease-in-out 120ms both;
+}
+
+.iconAction.likeActionV443.liked .likeBurstRingV443,
+.iconAction.likeActionV443.likeActionActiveV443 .likeBurstRingV443{
+  animation: localtifyLikeRingV443 860ms cubic-bezier(0, 0.06, 0.29, 1) 0s both;
+}
+
+.iconAction.likeActionV443.liked .likeBurstParticleV443,
+.iconAction.likeActionV443.likeActionActiveV443 .likeBurstParticleV443{
+  animation: localtifyLikeParticleMoveV443 650ms cubic-bezier(0.63, -0.01, 0.29, 1) var(--particle-delay, 0s) both;
+}
+
+.iconAction.likeActionV443.liked .likeBurstParticleV443::before,
+.iconAction.likeActionV443.likeActionActiveV443 .likeBurstParticleV443::before{
+  animation:
+    localtifyLikeParticleScaleInV443 400ms ease-out var(--particle-delay, 0s) both,
+    localtifyLikeParticleScaleOutV443 400ms ease-out calc(550ms + var(--particle-delay, 0s)) forwards;
+}
+
+.iconAction.likeActionV443:not(.liked):not(.likeActionActiveV443):hover .likeHeartShellV443{
+  transform: translateY(-1px) scale(1.06);
+  filter: drop-shadow(0 0 8px rgba(var(--accent-rgb), .22));
+}
+
+.iconAction.likeActionV443.liked .likeHeartShellV443,
+.iconAction.likeActionV443.likeActionActiveV443 .likeHeartShellV443{
+  filter: drop-shadow(0 0 10px rgba(254, 88, 122, .30));
+}
+
+@keyframes localtifyLikeRingV443{
+  0%, 100%{
+    opacity: 0;
+  }
+  48%, 78%{
+    opacity: .42;
+  }
+  0%{
+    transform: translate(-50%, -50%) scale(0);
+  }
+  100%{
+    transform: translate(-50%, -50%) scale(.42);
+  }
+}
+
+@keyframes localtifyLikeParticleMoveV443{
+  0%{
+    opacity: 0;
+    transform: rotate(var(--rotate, 0deg)) translateY(0);
+  }
+  100%{
+    opacity: 1;
+    transform: rotate(var(--rotate, 0deg)) translateY(var(--particle-translate-y, -28px));
+  }
+}
+
+@keyframes localtifyLikeParticleScaleInV443{
+  0%{
+    transform: scale(0);
+  }
+  100%{
+    transform: scale(1);
+  }
+}
+
+@keyframes localtifyLikeParticleScaleOutV443{
+  0%{
+    transform: scale(1);
+  }
+  100%{
+    transform: scale(0);
+  }
+}
+
+@keyframes localtifyLikeHeartPopupV443{
+  0%{
+    transform: scale(0);
+  }
+  40%{
+    transform: scale(1.6);
+  }
+  60%{
+    transform: scale(1.04);
+  }
+  80%{
+    transform: scale(1.1);
+  }
+  100%{
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .iconAction.likeActionV443.liked .likeHeartFillV443,
+  .iconAction.likeActionV443.likeActionActiveV443 .likeHeartFillV443,
+  .iconAction.likeActionV443.liked .likeBurstRingV443,
+  .iconAction.likeActionV443.likeActionActiveV443 .likeBurstRingV443,
+  .iconAction.likeActionV443.liked .likeBurstParticleV443,
+  .iconAction.likeActionV443.likeActionActiveV443 .likeBurstParticleV443,
+  .iconAction.likeActionV443.liked .likeBurstParticleV443::before,
+  .iconAction.likeActionV443.likeActionActiveV443 .likeBurstParticleV443::before{
+    animation: none !important;
+  }
+
+  .iconAction.likeActionV443.liked .likeHeartFillV443,
+  .iconAction.likeActionV443.likeActionActiveV443 .likeHeartFillV443{
+    opacity: 1;
+    transform: scale(1);
+  }
+}
