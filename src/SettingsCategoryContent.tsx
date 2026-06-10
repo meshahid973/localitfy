@@ -1,7 +1,5 @@
-/* localtify 0.3.8 V426 settings structural cleanup. */
-/* localtify 0.3.7 V324 release prep. Visual controls stay clean and wired. */
 import { memo, useEffect, useMemo, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 type ThemeId = string;
 type DownloadQuality = "best" | "320" | "256" | "192";
@@ -60,6 +58,7 @@ type SongLike = {
   id?: string;
   title?: string;
   artist?: string;
+  album?: string;
   [key: string]: any;
 };
 
@@ -69,6 +68,10 @@ type ImportAnimationLike = {
 };
 
 type UpdatePromptLike = {
+  status?: string;
+  version?: string;
+  message?: string;
+  error?: string;
   [key: string]: any;
 };
 
@@ -97,10 +100,6 @@ type SettingsCategoryContentProps = {
   settingsCategory: string;
   currentTheme: CurrentThemeOption;
   settings: Settings;
-
-  // Keep callbacks permissive here because App.tsx owns the exact domain types
-  // such as keyof Settings, CustomThemeColorKey, View, Playlist, and update status unions.
-  // This component only forwards already-valid values from typed option arrays.
   updateSetting: (...args: any[]) => void | Promise<void>;
   visibleThemes: ReadonlyArray<ThemeOption>;
   THEME_SWATCH_COLORS: Record<string, string>;
@@ -183,23 +182,169 @@ type SettingsCategoryContentProps = {
   resetAllSettingsSafely: () => void;
 };
 
+type VisualCustomizationOption = {
+  id: string;
+  label: string;
+  note: string;
+};
+
+type OptionItem = {
+  id: string;
+  label: string;
+  note?: string;
+};
+
 function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
+  return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
+}
+
+function numberSetting(value: unknown, fallback: number) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function boolSetting(value: unknown) {
+  return Boolean(value);
+}
+
+function textSetting(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function optionLabel(option: ChoiceOption | ThemeOption | OptionItem | CustomThemePresetOption) {
+  return "label" in option && option.label ? option.label : "name" in option && option.name ? option.name : option.id;
+}
+
+function optionNote(option: ChoiceOption | ThemeOption | OptionItem | CustomThemePresetOption) {
+  return "note" in option && option.note ? option.note : "";
+}
+
+function safeHex(value: string) {
+  const trimmed = value.trim();
+  return /^#[0-9a-fA-F]{6}$/.test(trimmed) ? trimmed : "#7dd3fc";
+}
+
+function run(action: (...args: any[]) => void | Promise<void>, ...args: any[]) {
+  void action(...args);
+}
+
+function detectSettingsPlatform(): Required<PlatformInfoLike> {
+  const userAgent = typeof navigator !== "undefined" ? String(navigator.userAgent || "").toLowerCase() : "";
+  const platform = typeof navigator !== "undefined" ? String(navigator.platform || "").toLowerCase() : "";
+  const isLinux = /linux|x11|wayland/.test(userAgent) || platform.includes("linux");
+  const isMac = /mac os|macintosh|darwin/.test(userAgent) || platform.includes("mac");
+  const isWindows = /windows|win32|win64|wow64/.test(userAgent) || platform.includes("win");
+
+  if (isLinux) {
+    return {
+      id: "linux",
+      label: "Linux",
+      releaseLabel: "AppImage, RPM, and DEB",
+      startupSettingSupported: false,
+      desktopControlsLabel: "Linux desktop controls",
+      desktopControlsHelp: "Tray and media keys work when your desktop environment exposes them.",
+      startupSettingLabel: "Linux autostart",
+      startupSettingHelp: "Linux autostart will use a desktop entry flow later.",
+      linuxInstallNotes: [
+        "AppImage works as the universal Linux package.",
+        "RPM is for Fedora, openSUSE, and RHEL-style distros.",
+        "DEB is for Ubuntu, Debian, Linux Mint, and related distros."
+      ]
+    };
+  }
+
+  if (isMac) {
+    return {
+      id: "mac",
+      label: "macOS",
+      releaseLabel: "macOS build not published yet",
+      startupSettingSupported: false,
+      desktopControlsLabel: "macOS desktop controls",
+      desktopControlsHelp: "macOS controls are hidden until a macOS release exists.",
+      startupSettingLabel: "Start localtify with macOS",
+      startupSettingHelp: "macOS autostart can be added later with a signed build.",
+      linuxInstallNotes: []
+    };
+  }
+
+  return {
+    id: isWindows ? "windows" : "unknown",
+    label: isWindows ? "Windows" : "Unknown desktop",
+    releaseLabel: isWindows ? "NSIS installer" : "Desktop build",
+    startupSettingSupported: isWindows,
+    desktopControlsLabel: isWindows ? "Windows controls" : "Desktop controls",
+    desktopControlsHelp: isWindows ? "Use media keys, taskbar controls, tray controls, and Windows now playing." : "Tray and media keys work where your desktop supports them.",
+    startupSettingLabel: "Start localtify when Windows starts",
+    startupSettingHelp: "Keeps localtify ready after you sign in.",
+    linuxInstallNotes: []
+  };
+}
+
+function PageHeader({
+  eyebrow,
+  title,
+  detail,
+  meta
+}: {
+  eyebrow: string;
+  title: string;
+  detail?: string;
+  meta?: string;
+}) {
+  return (
+    <div className="settingsCategoryHeader">
+      <div>
+        <p className="eyebrow">{eyebrow}</p>
+        <h4>{title}</h4>
+        {detail ? <p className="settingsLead">{detail}</p> : null}
+      </div>
+      {meta ? <span>{meta}</span> : null}
+    </div>
+  );
+}
+
+function Panel({
+  title,
+  note,
+  children,
+  action,
+  className = ""
+}: {
+  title: string;
+  note?: string;
+  children: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`settingsPanelCard ${className}`}>
+      <div className="settingsPanelHeader">
+        <div>
+          <strong>{title}</strong>
+          {note ? <span>{note}</span> : null}
+        </div>
+        {action ? <div className="settingsPanelHeaderAction">{action}</div> : null}
+      </div>
+      {children}
+    </div>
+  );
 }
 
 function ToggleRow({
   label,
   help,
   checked,
+  disabled,
   onChange
 }: {
   label: string;
   help?: string;
   checked: boolean;
+  disabled?: boolean;
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="toggleRow" title={help || label}>
+    <label className={`toggleRow ${checked ? "active" : ""} ${disabled ? "disabled" : ""}`} title={help || label}>
       <span className="toggleRowCopy">
         <span className="settingsLabelLine">
           <strong>{label}</strong>
@@ -207,7 +352,7 @@ function ToggleRow({
         </span>
         {help ? <small>{help}</small> : null}
       </span>
-      <input type="checkbox" role="switch" aria-label={label} aria-checked={checked} checked={checked} onChange={(event) => onChange(event.currentTarget.checked)} />
+      <input type="checkbox" role="switch" aria-label={label} aria-checked={checked} checked={checked} disabled={disabled} onChange={(event) => onChange(event.currentTarget.checked)} />
     </label>
   );
 }
@@ -219,6 +364,7 @@ function RangeRow({
   max,
   step,
   suffix,
+  disabled,
   onChange
 }: {
   label: string;
@@ -227,37 +373,34 @@ function RangeRow({
   max: number;
   step: number;
   suffix?: string;
+  disabled?: boolean;
   onChange: (value: number) => void;
 }) {
   const [draftValue, setDraftValue] = useState(value);
   const [editing, setEditing] = useState(false);
   const activeValue = editing ? draftValue : value;
-  const shownValue = `${activeValue}${suffix || ""}`;
   const fill = ((activeValue - min) / (max - min || 1)) * 100;
+  const displayValue = step < 1 ? activeValue.toFixed(step < 0.05 ? 2 : 1).replace(/\.0$/, "") : String(Math.round(activeValue));
 
   useEffect(() => {
-    if (!editing) {
-      setDraftValue(value);
-    }
+    if (!editing) setDraftValue(value);
   }, [editing, value]);
 
   function commit(nextValue = draftValue) {
     const clamped = clamp(nextValue, min, max);
     setDraftValue(clamped);
     setEditing(false);
-    if (clamped !== value) {
-      onChange(clamped);
-    }
+    if (clamped !== value) onChange(clamped);
   }
 
   return (
-    <label className="rangeRow" title={`${label}: ${shownValue}`}>
+    <label className={`rangeRow ${disabled ? "disabled" : ""}`} title={`${label}: ${displayValue}${suffix || ""}`}>
       <span className="rangeRowCopy">
         <span className="settingsLabelLine">
           <strong>{label}</strong>
           <span className="settingsInfoDot" aria-hidden="true">i</span>
         </span>
-        <small>{shownValue}</small>
+        <small>{displayValue}{suffix || ""}</small>
       </span>
       <input
         type="range"
@@ -265,6 +408,7 @@ function RangeRow({
         max={max}
         step={step}
         value={activeValue}
+        disabled={disabled}
         style={{ ["--range-progress" as string]: `${clamp(fill, 0, 100)}%` } as CSSProperties}
         onPointerDown={() => {
           setEditing(true);
@@ -279,37 +423,34 @@ function RangeRow({
   );
 }
 
-
-type VisualCustomizationOption = {
-  id: string;
-  label: string;
-  note: string;
-};
-
-function readSettingChoice(settings: Settings, key: string, fallback: string) {
-  const value = settings?.[key];
-  return typeof value === "string" && value.trim() ? value : fallback;
-}
-
-function VisualOptionButton({
-  option,
-  active,
-  onClick
+function ChoiceGrid({
+  options,
+  value,
+  onChange,
+  columns = "auto",
+  ariaLabel
 }: {
-  option: VisualCustomizationOption;
-  active: boolean;
-  onClick: () => void;
+  options: ReadonlyArray<ChoiceOption | OptionItem | ThemeOption>;
+  value: string;
+  onChange: (value: string) => void;
+  columns?: "auto" | "two" | "three" | "four";
+  ariaLabel?: string;
 }) {
   return (
-    <button
-      className={`visualOptionButtonV205 ${active ? "active" : ""}`}
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-    >
-      <strong>{option.label}</strong>
-      <span>{option.note}</span>
-    </button>
+    <div className={`settingsChoiceGrid settingsChoiceGrid-${columns}`} role="group" aria-label={ariaLabel}>
+      {options.map((option) => (
+        <button
+          key={option.id}
+          className={`settingsChoice ${value === option.id ? "active" : ""}`}
+          type="button"
+          onClick={() => onChange(option.id)}
+          aria-pressed={value === option.id}
+        >
+          <strong>{optionLabel(option)}</strong>
+          {optionNote(option) ? <small>{optionNote(option)}</small> : null}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -327,21 +468,61 @@ function VisualOptionGroup({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="visualOptionGroupV205">
-      <div className="visualOptionGroupHeadV205">
+    <div className="visualOptionGroup">
+      <div className="visualOptionGroupHead">
         <strong>{title}</strong>
         <span>{note}</span>
       </div>
-      <div className="visualOptionGridV205">
-        {options.map((option) => (
-          <VisualOptionButton
-            key={option.id}
-            option={option}
-            active={value === option.id}
-            onClick={() => onChange(option.id)}
-          />
-        ))}
-      </div>
+      <ChoiceGrid options={options} value={value} onChange={onChange} columns="three" ariaLabel={title} />
+    </div>
+  );
+}
+
+function StatGrid({ items }: { items: Array<{ label: string; value: ReactNode }> }) {
+  return (
+    <div className="settingsStatGrid">
+      {items.map((item) => (
+        <span key={item.label}>
+          <strong>{item.value}</strong>
+          <small>{item.label}</small>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ThemePresetButton({
+  preset,
+  active,
+  onClick,
+  onRemove
+}: {
+  preset: CustomThemePresetOption;
+  active?: boolean;
+  onClick: () => void;
+  onRemove?: () => void;
+}) {
+  const accent = preset.colors?.customThemeColor || preset.colors?.customThemeAccent || "#7dd3fc";
+
+  return (
+    <div className={`settingsPresetItem ${active ? "active" : ""}`} style={{ ["--preset-accent" as string]: accent } as CSSProperties}>
+      <button type="button" onClick={onClick}>
+        <i aria-hidden="true" />
+        <span>
+          <strong>{preset.name}</strong>
+          {preset.note ? <small>{preset.note}</small> : null}
+        </span>
+      </button>
+      {onRemove ? <button className="settingsTinyButton danger" type="button" onClick={onRemove} aria-label={`Remove ${preset.name}`}>remove</button> : null}
+    </div>
+  );
+}
+
+function EmptyState({ title, note }: { title: string; note: string }) {
+  return (
+    <div className="settingsEmptyState">
+      <strong>{title}</strong>
+      <span>{note}</span>
     </div>
   );
 }
@@ -352,7 +533,6 @@ const HOME_BANNER_TYPE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "cleanBlack", label: "Clean black", note: "plain black" },
   { id: "none", label: "None", note: "hide hero art" }
 ];
-
 
 const MEDIA_CARD_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "solid", label: "Solid", note: "flat cards" },
@@ -373,72 +553,30 @@ const LIBRARY_ROW_STYLE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "listOnly", label: "List only", note: "plain list" }
 ];
 
-
 const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "fixed", label: "Fixed", note: "normal" },
   { id: "slim", label: "Slim", note: "narrow" },
-  { id: "hover", label: "Expand on hover", note: "hover open" }
+  { id: "hover", label: "Expand", note: "hover open" }
 ];
 
 const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
-  { id: "flat", label: "Flat", note: "flat" },
-  { id: "coverBlur", label: "Cover blur", note: "cover glow" },
-  { id: "oledBlack", label: "OLED black", note: "black" }
+  { id: "flat", label: "Flat", note: "stable" },
+  { id: "coverBlur", label: "Cover blur", note: "soft" },
+  { id: "oledBlack", label: "OLED", note: "black" }
 ];
 
-function detectSettingsPlatform(): Required<PlatformInfoLike> {
-  const userAgent = typeof navigator !== "undefined" ? String(navigator.userAgent || "").toLowerCase() : "";
-  const platform = typeof navigator !== "undefined" ? String(navigator.platform || "").toLowerCase() : "";
-  const isLinux = /linux|x11|wayland/.test(userAgent) || platform.includes("linux");
-  const isMac = /mac os|macintosh|darwin/.test(userAgent) || platform.includes("mac");
-  const isWindows = /windows|win32|win64|wow64/.test(userAgent) || platform.includes("win");
+const DOWNLOAD_QUALITY_OPTIONS: ReadonlyArray<OptionItem> = [
+  { id: "best", label: "Best", note: "highest available" },
+  { id: "320", label: "320kbps", note: "large mp3" },
+  { id: "256", label: "256kbps", note: "balanced" },
+  { id: "192", label: "192kbps", note: "smaller" }
+];
 
-  if (isLinux) {
-    return {
-      id: "linux",
-      label: "Linux",
-      releaseLabel: "AppImage / RPM / DEB",
-      startupSettingSupported: false,
-      desktopControlsLabel: "Linux desktop controls",
-      desktopControlsHelp: "Tray and media keys work where your Linux desktop environment exposes them.",
-      startupSettingLabel: "Linux autostart",
-      startupSettingHelp: "Hidden in this release. Linux autostart will use a proper desktop-entry flow later.",
-      linuxInstallNotes: [
-        "AppImage: chmod +x localtify-0.3.7-x64.AppImage, then run it directly.",
-        "RPM: for Fedora, openSUSE, and RHEL-style distros.",
-        "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
-      ]
-    };
-  }
-
-  if (isMac) {
-    return {
-      id: "mac",
-      label: "macOS",
-      releaseLabel: "macOS build not published yet",
-      startupSettingSupported: false,
-      desktopControlsLabel: "macOS desktop controls",
-      desktopControlsHelp: "macOS support is not part of this release yet. Windows startup controls stay hidden.",
-      startupSettingLabel: "Start localtify with macOS",
-      startupSettingHelp: "macOS autostart will be added later when a signed macOS build exists.",
-      linuxInstallNotes: []
-    };
-  }
-
-  return {
-    id: isWindows ? "windows" : "unknown",
-    label: isWindows ? "Windows" : "Unknown desktop",
-    releaseLabel: isWindows ? "NSIS installer" : "Desktop build",
-    startupSettingSupported: isWindows,
-    desktopControlsLabel: isWindows ? "Windows controls" : "Desktop controls",
-    desktopControlsHelp: isWindows
-      ? "Use keyboard media keys, taskbar buttons, tray controls, and Windows now playing."
-      : "Tray and media keys are available where the current desktop environment supports them.",
-    startupSettingLabel: "Start localtify when Windows starts",
-    startupSettingHelp: "Enabled by default so the player is ready after you sign in. You can turn it off anytime.",
-    linuxInstallNotes: []
-  };
-}
+const DOWNLOAD_FORMAT_OPTIONS: ReadonlyArray<OptionItem> = [
+  { id: "mp3", label: "MP3", note: "recommended" },
+  { id: "flac", label: "FLAC", note: "larger files" },
+  { id: "wav", label: "WAV", note: "huge raw files" }
+];
 
 const SettingsCategoryContent = memo(function SettingsCategoryContent({
   settingsCategory,
@@ -530,512 +668,247 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
     ...fallbackPlatformInfo,
     ...(platformInfo || {})
   } as Required<PlatformInfoLike>;
-  const linuxInstallNotes = activePlatformInfo.linuxInstallNotes?.length
-    ? activePlatformInfo.linuxInstallNotes
-    : fallbackPlatformInfo.linuxInstallNotes;
+
+  const linuxInstallNotes = activePlatformInfo.linuxInstallNotes?.length ? activePlatformInfo.linuxInstallNotes : fallbackPlatformInfo.linuxInstallNotes;
   const showLinuxInstallNotes = activePlatformInfo.id === "linux" || linuxInstallNotes.length > 0;
+  const selectedThemeColor = THEME_SWATCH_COLORS[effectiveTheme] ?? THEME_SWATCH_COLORS.mint ?? "#7dd3fc";
+  const previewSongTitle = currentSong?.title || "No song playing";
+  const previewSongArtist = currentSong?.artist || "local files";
 
-return (
-  <>
-    {settingsCategory === "appearance" ? (
+  if (settingsCategory === "appearance") {
+    return (
       <section className="settingsCategoryPage" aria-label="Appearance settings">
-        <div className="settingsCategoryHeader">
-          <div>
-            <p className="eyebrow">appearance</p>
-            <h4>how the app looks</h4>
-          </div>
-          <span>{currentTheme.name} theme active</span>
-        </div>
+        <PageHeader eyebrow="appearance" title="how the app looks" detail="Theme, density, motion, and custom color controls in one stable layout." meta={`${currentTheme.name} theme`} />
 
-        <div className="settingsPanelCard">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Choose theme</strong>
-              <span>Pick the base look of localtify.</span>
-            </div>
-          </div>
-
+        <Panel title="Theme" note="Choose the base look. Presets lock while custom theme is enabled.">
           <div className="settingsThemeSelectPanel">
             <label className="settingsSelectField">
-              <span>theme</span>
-              <select
-                value={settings.theme}
-                disabled={settings.customThemeEnabled}
-                title={settings.customThemeEnabled ? "Turn off custom theme before choosing a preset." : "Choose theme"}
-                onChange={(event) => {
-                  if (settings.customThemeEnabled) return;
-                  void updateSetting("theme", event.currentTarget.value as ThemeId);
-                }}
-                aria-label="Choose theme"
-              >
-                {visibleThemes.map((theme) => (
-                  <option key={theme.id} value={theme.id}>{theme.name}</option>
-                ))}
+              <span>base theme</span>
+              <select value={settings.theme} disabled={boolSetting(settings.customThemeEnabled)} onChange={(event) => run(updateSetting, "theme", event.currentTarget.value as ThemeId)} aria-label="Choose theme">
+                {visibleThemes.map((theme) => <option key={theme.id} value={theme.id}>{theme.name}</option>)}
               </select>
             </label>
-
-            {settings.customThemeEnabled ? (
-              <p className="themePickerLockNoteV026">custom theme is on, so preset themes are locked.</p>
-            ) : null}
-
             <div className="settingsThemeSelectedPreview" aria-live="polite">
-              <span className="settingsThemeDot" style={{ background: THEME_SWATCH_COLORS[effectiveTheme] ?? THEME_SWATCH_COLORS.mint }} aria-hidden="true" />
+              <span className="settingsThemeDot" style={{ background: selectedThemeColor }} aria-hidden="true" />
               <div>
-                <strong>{settings.customThemeEnabled ? "custom theme" : currentTheme.name}</strong>
-                <small>{currentTheme.note}</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="settingsPanelCard visualCustomizationCardV205">
-          <div className="settingsPanelHeader visualCustomizationHeaderV205">
-            <div>
-              <strong>Visuals</strong>
-              <span>Quick controls for home cards sidebar and player.</span>
-            </div>
-          </div>
-
-          <div className="visualCustomizationGridV205">
-            <VisualOptionGroup
-              title="Home banner"
-              note="Top area style."
-              options={HOME_BANNER_TYPE_OPTIONS}
-              value={readSettingChoice(settings, "homeBannerType", "dynamic")}
-              onChange={(value) => updateSetting("homeBannerType", value)}
-            />
-
-            <VisualOptionGroup
-              title="Card background"
-              note="Panel/card surface style."
-              options={MEDIA_CARD_BACKGROUND_OPTIONS}
-              value={readSettingChoice(settings, "mediaCardBackground", "glassy")}
-              onChange={(value) => updateSetting("mediaCardBackground", value)}
-            />
-
-            <VisualOptionGroup
-              title="Home layout"
-              note="Home screen density."
-              options={HOME_LAYOUT_OPTIONS}
-              value={readSettingChoice(settings, "homeLayoutMode", "balanced")}
-              onChange={(value) => updateSetting("homeLayoutMode", value)}
-            />
-
-            <VisualOptionGroup
-              title="Library rows"
-              note="Library list density."
-              options={LIBRARY_ROW_STYLE_OPTIONS}
-              value={readSettingChoice(settings, "libraryRowStyle", "comfyRows")}
-              onChange={(value) => updateSetting("libraryRowStyle", value)}
-            />
-
-            <VisualOptionGroup
-              title="Player background"
-              note="Bottom bar style."
-              options={PLAYER_BACKGROUND_OPTIONS}
-              value={readSettingChoice(settings, "playerBackgroundStyle", "coverBlur")}
-              onChange={(value) => updateSetting("playerBackgroundStyle", value)}
-            />
-          </div>
-        </div>
-
-        <div className="settingsPanelCard customThemeManagerV027">
-          <div className="settingsPanelHeader customThemeHeaderV027">
-            <div>
-              <strong>Custom theme</strong>
-              <span>Turn on a custom theme and adjust the main colors.</span>
-            </div>
-            <div className="settingsHeaderActionsV027">
-              <label className="cleanToggleLabel">
-                <input type="checkbox" checked={settings.customThemeEnabled} onChange={(event) => updateSetting("customThemeEnabled", event.currentTarget.checked)} />
-                <span>{settings.customThemeEnabled ? "Custom theme on" : "Custom theme off"}</span>
-              </label>
-              <button className="settingsTinyButton" type="button" onClick={randomizeCustomThemePalette}>Random colors</button>
-              <button className="settingsTinyButton" type="button" onClick={resetCustomThemePalette}>Reset colors</button>
-              <button className="settingsTinyButton" type="button" onClick={saveCurrentCustomThemePreset}>Save theme</button>
-            </div>
-          </div>
-
-          <div className="customThemeBodyV027">
-            <label className="settingsTextFieldV027">
-              <span>Theme name</span>
-              <input value={customThemeName} onChange={(event) => setCustomThemeName(event.currentTarget.value)} aria-label="Custom theme name" />
-            </label>
-
-            <div className="customThemePreviewV027" aria-live="polite">
-              <span>Preview</span>
-              <strong>{currentSong?.title || "localtify preview"}</strong>
-              <small>{currentSong?.artist || "sample artist"}</small>
-              <div className="customThemePreviewBarV027" aria-hidden="true">
-                <i />
+                <strong>{boolSetting(settings.customThemeEnabled) ? "custom theme" : currentTheme.name}</strong>
+                <small>{currentTheme.note || "Ready"}</small>
               </div>
             </div>
           </div>
 
-          <div className="customThemePresetRowV027" aria-label="Built in custom theme presets">
-            {BUILT_IN_CUSTOM_THEME_PRESETS.map((preset) => (
-              <button key={preset.name} className="customThemePresetButtonV027" type="button" onClick={() => applyCustomThemePreset(preset)}>
-                <span style={{ background: preset.colors.customThemeColor }} aria-hidden="true" />
-                <strong>{preset.name}</strong>
-                <small>{preset.note}</small>
+          <div className="settingsThemeGrid" aria-label="Theme presets">
+            {visibleThemes.map((theme) => (
+              <button
+                key={theme.id}
+                className={`settingsThemeCard ${!settings.customThemeEnabled && settings.theme === theme.id ? "active" : ""}`}
+                type="button"
+                disabled={boolSetting(settings.customThemeEnabled)}
+                onClick={() => run(updateSetting, "theme", theme.id as ThemeId)}
+                aria-pressed={!settings.customThemeEnabled && settings.theme === theme.id}
+              >
+                <span className="settingsThemeSwatch" style={{ background: THEME_SWATCH_COLORS[theme.id] ?? selectedThemeColor }} aria-hidden="true" />
+                <strong>{theme.name}</strong>
+                {theme.note ? <small>{theme.note}</small> : null}
               </button>
             ))}
           </div>
+        </Panel>
 
-          {savedCustomThemes.length > 0 ? (
-            <div className="savedThemeRowV027" aria-label="Saved custom themes">
-              {savedCustomThemes.map((preset) => (
-                <div key={preset.id} className="savedThemeButtonV027">
-                  <button type="button" onClick={() => applyCustomThemePreset(preset)}>
-                    <span style={{ background: preset.colors.customThemeColor }} aria-hidden="true" />
-                    <strong>{preset.name}</strong>
-                  </button>
-                  <button type="button" onClick={() => removeSavedCustomThemePreset(preset.id)} aria-label={`Remove ${preset.name}`}>
-                    remove
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="customThemeTokenGridV027">
-            {customThemeTokens.map((token) => {
-              const hexDraft = customThemeHexDrafts[token.key] ?? token.value;
-
-              return (
-                <div className="customThemeTokenV027" key={token.key}>
-                  <label className="customThemeColorPickerV032" title={`Pick ${token.label.toLowerCase()} color`}>
-                    <span className="customThemeColorPreviewV027" style={{ background: token.value }} aria-hidden="true" />
-                    <input
-                      className="customThemeNativeColorInputV027"
-                      type="color"
-                      value={token.value}
-                      onInput={(event) => handleCustomThemeNativeColor(token.key, event.currentTarget.value)}
-                      onChange={(event) => handleCustomThemeNativeColor(token.key, event.currentTarget.value)}
-                      aria-label={`${token.label} color picker`}
-                    />
-                  </label>
-                  <strong>{token.label}</strong>
-                  <small>{token.help}</small>
-                  <input
-                    className="customThemeHexInputV032"
-                    type="text"
-                    inputMode="text"
-                    spellCheck={false}
-                    autoCapitalize="off"
-                    maxLength={7}
-                    value={hexDraft}
-                    onChange={(event) => handleCustomThemeHexDraftChange(token.key, event.currentTarget.value)}
-                    onBlur={(event) => commitCustomThemeHexDraft(token.key, event.currentTarget.value, token.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.currentTarget.blur();
-                      }
-                    }}
-                    aria-label={`${token.label} hex color code`}
-                  />
-                </div>
-              );
-            })}
+        <Panel title="Visual density" note="Small layout controls that do not remount the app.">
+          <div className="visualCustomizationGrid">
+            <VisualOptionGroup title="Home banner" note="Top area style" options={HOME_BANNER_TYPE_OPTIONS} value={textSetting(settings.homeBannerType, "dynamic")} onChange={(value) => run(updateSetting, "homeBannerType", value)} />
+            <VisualOptionGroup title="Card background" note="Surface style" options={MEDIA_CARD_BACKGROUND_OPTIONS} value={textSetting(settings.mediaCardBackground, "glassy")} onChange={(value) => run(updateSetting, "mediaCardBackground", value)} />
+            <VisualOptionGroup title="Home layout" note="Home screen density" options={HOME_LAYOUT_OPTIONS} value={textSetting(settings.homeLayoutMode, "balanced")} onChange={(value) => run(updateSetting, "homeLayoutMode", value)} />
+            <VisualOptionGroup title="Library rows" note="Library list density" options={LIBRARY_ROW_STYLE_OPTIONS} value={textSetting(settings.libraryRowStyle, "comfyRows")} onChange={(value) => run(updateSetting, "libraryRowStyle", value)} />
+            <VisualOptionGroup title="Sidebar" note="Navigation behavior" options={SIDEBAR_BEHAVIOR_OPTIONS} value={textSetting(settings.sidebarBehavior, "fixed")} onChange={(value) => run(updateSetting, "sidebarBehavior", value)} />
+            <VisualOptionGroup title="Player background" note="Bottom bar style" options={PLAYER_BACKGROUND_OPTIONS} value={textSetting(settings.playerBackgroundStyle, "coverBlur")} onChange={(value) => run(updateSetting, "playerBackgroundStyle", value)} />
           </div>
-        </div>
-
-        <div className="settingsPanelCard appearanceUnifiedControlDeckV356">
-          <div className="settingsPanelHeader appearanceUnifiedHeaderV356">
-            <div>
-              <strong>Layout, cards, and sidebar</strong>
-              <span>One clean place for spacing, ambience, cover tint, and sidebar behavior.</span>
-            </div>
-          </div>
-
-          <div className="appearanceUnifiedGridV356">
-            <section className="appearanceUnifiedSectionV356 appearanceLayoutSectionV356" aria-label="Layout controls">
-              <div className="appearanceUnifiedSectionHeadV356">
-                <strong>Layout</strong>
-                <span>Change spacing and screen density.</span>
-              </div>
-              <div className="settingsMiniGrid appearanceMiniGridV356">
-                <ToggleRow label="Right side cards" help="Shows the optional right column." checked={settings.showRightColumn} onChange={(value) => updateSetting("showRightColumn", value)} />
-                <ToggleRow label="Expanded now playing" help="Makes the hero area larger." checked={settings.heroExpanded} onChange={(value) => updateSetting("heroExpanded", value)} />
-                <ToggleRow label="Compact player" help="Keeps the bottom player smaller." checked={settings.compactPlayer} onChange={(value) => updateSetting("compactPlayer", value)} />
-                <ToggleRow label="Compact library" help="Fits smaller rows." checked={settings.denseList} onChange={(value) => updateSetting("denseList", value)} />
-                <ToggleRow label="Reduce motion" help="Turns off most decorative animations." checked={settings.reducedMotion} onChange={(value) => updateSetting("reducedMotion", value)} />
-              </div>
-            </section>
-
-            <section className="appearanceUnifiedSectionV356 appearanceCardsSectionV356" aria-label="Cards and ambience controls">
-              <div className="appearanceUnifiedSectionHeadV356">
-                <strong>Cards and ambience</strong>
-                <span>Control library cards, corners, notes, glow, and cover tint.</span>
-              </div>
-              <div className="settingsMiniGrid appearanceMiniGridV356">
-                <ToggleRow label="Soft corners" help="Uses rounder cards and buttons." checked={settings.softCorners} onChange={(value) => updateSetting("softCorners", value)} />
-                <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={settings.showFloatingNotes} onChange={(value) => updateSetting("showFloatingNotes", value)} />
-                <ToggleRow label="Animated glow" help="Keeps ambience on, but pauses it during fast screen switches." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
-                <ToggleRow label="I WANT MORE BLUR!!!!!" help="Makes quick library cards use stronger album-cover blur." checked={settings.quickLibraryMoreBlur !== false} onChange={(value) => updateSetting("quickLibraryMoreBlur", value)} />
-                <ToggleRow label="cat....." help="Tiny cat follows your cursor. Double-click it to lie down. Middle-click it to stop or follow again." checked={settings.catBuddyEnabled === true} onChange={(value) => updateSetting("catBuddyEnabled", value)} />
-              </div>
-
-              <div className="coverSyncPicker modalCoverSyncPicker appearanceCoverSyncV356">
-                <div className="coverSyncHeader">
-                  <strong>Cover Color Sync</strong>
-                  <small>Pick how strongly the current cover tints the app.</small>
-                </div>
-                <div className="coverSyncOptions" role="group" aria-label="Cover Color Sync strength">
-                  {coverColorSyncOptions.map((option) => (
-                    <button key={option.id} className={`coverSyncChoice ${selectedCoverColorSyncMode === option.id ? "active" : ""}`} type="button" onClick={() => updateCoverColorSyncMode(option.id)} aria-pressed={selectedCoverColorSyncMode === option.id}>
-                      <strong>{option.label}</strong>
-                      <span>{option.note}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section className="appearanceUnifiedSectionV356 appearanceSidebarSectionV356" aria-label="Sidebar behavior controls">
-              <div className="appearanceUnifiedSectionHeadV356">
-                <strong>Sidebar behavior</strong>
-                <span>Choose if the sidebar stays full, stays slim, or smoothly opens on hover.</span>
-              </div>
-
-              <div className="sidebarBehaviorPreviewV327 sidebarBehaviorPreviewV356" data-mode={settings.sidebarBehavior || "fixed"} aria-hidden="true">
-                <span className="sidebarPreviewRailV327">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <span className="sidebarPreviewPanelV327">
-                  <b />
-                  <b />
-                  <b />
-                </span>
-              </div>
-
-              <div className="sidebarBehaviorChoicesV327 sidebarBehaviorChoicesV356" role="group" aria-label="Choose sidebar behavior">
-                {SIDEBAR_BEHAVIOR_OPTIONS.map((option) => {
-                  const active = readSettingChoice(settings, "sidebarBehavior", "fixed") === option.id;
-
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      className={`sidebarBehaviorChoiceV327 sidebarBehaviorChoiceV356 ${active ? "active" : ""}`}
-                      onClick={() => updateSetting("sidebarBehavior", option.id)}
-                      aria-pressed={active}
-                    >
-                      <span className="sidebarChoiceDotV327" aria-hidden="true" />
-                      <span className="sidebarChoiceCopyV327">
-                        <strong>{option.label}</strong>
-                        <small>{option.note}</small>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          </div>
-        </div>
-
-      </section>
-    ) : null}
-
-    {settingsCategory === "playback" ? (
-      <section className="settingsCategoryPage" aria-label="Playback settings">
-        <div className="settingsCategoryHeader">
-          <div>
-            <p className="eyebrow">playback</p>
-            <h4>how songs play</h4>
-          </div>
-          <span>local music controls</span>
-        </div>
+        </Panel>
 
         <div className="settingsTwoColumn">
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Song transitions</strong>
-                <span>Make switching between songs smoother.</span>
-              </div>
+          <Panel title="Motion and comfort" note="Keep animation smooth without heavy repainting.">
+            <div className="settingsMiniGrid">
+              <ToggleRow label="Reduced motion" help="Uses calmer transitions across settings and library." checked={boolSetting(settings.reducedMotion)} onChange={(value) => run(updateSetting, "reducedMotion", value)} />
+              <ToggleRow label="Soft corners" help="Uses rounded cards and controls." checked={settings.softCorners !== false} onChange={(value) => run(updateSetting, "softCorners", value)} />
+              <ToggleRow label="Compact player" help="Shrinks the bottom player area." checked={boolSetting(settings.compactPlayer)} onChange={(value) => run(updateSetting, "compactPlayer", value)} />
+              <ToggleRow label="Right column" help="Shows the side panel on wider layouts." checked={settings.showRightColumn !== false} onChange={(value) => run(updateSetting, "showRightColumn", value)} />
             </div>
-            <RangeRow label="Crossfade" value={settings.crossfadeSeconds} min={0} max={10} step={1} suffix="s" onChange={(value) => updateSetting("crossfadeSeconds", value)} />
-            <ToggleRow label="Crossfade enabled" help="Turns the crossfade setting on or off." checked={settings.crossfadeEnabled} onChange={(value) => updateSetting("crossfadeEnabled", value)} />
-            <ToggleRow label="Gapless playback" help="Starts the next song without silence." checked={settings.gaplessPlayback} onChange={(value) => updateSetting("gaplessPlayback", value)} />
-          </div>
+          </Panel>
 
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Playback feel</strong>
-                <span>Small controls for speed and loudness.</span>
-              </div>
+          <Panel title="Custom theme" note="Create or tune your own palette.">
+            <div className="settingsActionRow">
+              <ToggleRow label="Enable custom theme" checked={boolSetting(settings.customThemeEnabled)} onChange={(value) => run(updateSetting, "customThemeEnabled", value)} />
+              <button className="settingsActionButton" type="button" onClick={randomizeCustomThemePalette}>randomize</button>
+              <button className="settingsActionButton" type="button" onClick={resetCustomThemePalette}>reset</button>
             </div>
-            <RangeRow label="Speed" value={settings.playbackSpeed} min={0.75} max={1.5} step={0.05} suffix="x" onChange={(value) => updateSetting("playbackSpeed", value)} />
-            <RangeRow label="Volume" value={settings.volume} min={0} max={1} step={0.01} suffix="" onChange={(value) => updateSetting("volume", value)} />
-            <ToggleRow label="Volume normalization" help="Balances loud and quiet files." checked={settings.volumeNormalization} onChange={(value) => updateSetting("volumeNormalization", value)} />
-            <ToggleRow label="Per-song volume" help="Remembers custom volume per track." checked={settings.perSongVolumeMemory} onChange={(value) => updateSetting("perSongVolumeMemory", value)} />
-            <ToggleRow label="Sleep timer" help="Lets the app stop after a set time." checked={settings.sleepTimerMinutes > 0} onChange={(value) => updateSetting("sleepTimerMinutes", value ? 30 : 0)} />
-          </div>
+            <div className="settingsInlineForm">
+              <input className="settingsInlineInput" value={customThemeName} onChange={(event) => setCustomThemeName(event.currentTarget.value)} placeholder="custom theme name" aria-label="Custom theme name" />
+              <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={saveCurrentCustomThemePreset}>save preset</button>
+            </div>
+          </Panel>
         </div>
+
+        {boolSetting(settings.customThemeEnabled) ? (
+          <Panel title="Custom palette" note="Edit color tokens without changing the page layout.">
+            <div className="settingsPresetGrid">
+              {BUILT_IN_CUSTOM_THEME_PRESETS.map((preset) => (
+                <ThemePresetButton key={preset.id} preset={preset} onClick={() => run(applyCustomThemePreset, preset)} />
+              ))}
+            </div>
+
+            {savedCustomThemes.length ? (
+              <div className="settingsPresetGrid settingsSavedPresetGrid">
+                {savedCustomThemes.map((preset) => (
+                  <ThemePresetButton key={preset.id} preset={preset} onClick={() => run(applyCustomThemePreset, preset)} onRemove={() => removeSavedCustomThemePreset(preset.id)} />
+                ))}
+              </div>
+            ) : null}
+
+            <div className="settingsTokenGrid">
+              {customThemeTokens.map((token) => {
+                const draft = customThemeHexDrafts[token.key] ?? token.value;
+                return (
+                  <label className="settingsTokenCard" key={token.key}>
+                    <input className="themeColorInput" type="color" value={safeHex(draft)} onChange={(event) => run(handleCustomThemeNativeColor, token.key, event.currentTarget.value)} aria-label={`${token.label} color`} />
+                    <span className="themeTokenVisual" style={{ background: safeHex(draft) }} aria-hidden="true" />
+                    <span className="themeTokenCopy">
+                      <strong>{token.label}</strong>
+                      {token.help ? <small>{token.help}</small> : null}
+                    </span>
+                    <input
+                      className="accentTextInput"
+                      value={draft}
+                      onChange={(event) => run(handleCustomThemeHexDraftChange, token.key, event.currentTarget.value)}
+                      onBlur={() => run(commitCustomThemeHexDraft, token.key)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") run(commitCustomThemeHexDraft, token.key);
+                      }}
+                      aria-label={`${token.label} hex value`}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          </Panel>
+        ) : null}
+
+        <Panel title="Cover color sync" note="Choose how album art influences the UI.">
+          <ChoiceGrid options={coverColorSyncOptions} value={selectedCoverColorSyncMode} onChange={(value) => run(updateCoverColorSyncMode, value)} columns="three" ariaLabel="Cover color sync" />
+        </Panel>
       </section>
-    ) : null}
+    );
+  }
 
-    {settingsCategory === "discord" ? (
-      <section className="settingsCategoryPage discordSettingsPage" aria-label="Discord settings">
-        <div className="settingsCategoryHeader discordCategoryHeader">
-          <div>
-            <p className="eyebrow">discord rich presence</p>
-            <h4>privacy, text, buttons, and artwork</h4>
-          </div>
-          <span>{settings.discordEnabled ? "showing activity" : "activity hidden"}</span>
+  if (settingsCategory === "playback") {
+    return (
+      <section className="settingsCategoryPage" aria-label="Playback settings">
+        <PageHeader eyebrow="playback" title="how songs play" detail="Smooth transitions, volume, and playback behavior." meta={currentSong ? `${previewSongTitle} • ${previewSongArtist}` : "local music controls"} />
+
+        <div className="settingsTwoColumn">
+          <Panel title="Song transitions" note="Use measured timing so the audio system stays stable.">
+            <div className="settingsMiniGrid">
+              <RangeRow label="Crossfade" value={numberSetting(settings.crossfadeSeconds, 0)} min={0} max={10} step={1} suffix="s" disabled={!boolSetting(settings.crossfadeEnabled)} onChange={(value) => run(updateSetting, "crossfadeSeconds", value)} />
+              <ToggleRow label="Crossfade enabled" help="Turns crossfade on or off." checked={boolSetting(settings.crossfadeEnabled)} onChange={(value) => run(updateSetting, "crossfadeEnabled", value)} />
+              <ToggleRow label="Gapless playback" help="Starts the next song without silence." checked={boolSetting(settings.gaplessPlayback)} onChange={(value) => run(updateSetting, "gaplessPlayback", value)} />
+            </div>
+          </Panel>
+
+          <Panel title="Playback feel" note="Small controls for loudness and speed.">
+            <div className="settingsMiniGrid">
+              <RangeRow label="Speed" value={numberSetting(settings.playbackSpeed, 1)} min={0.75} max={1.5} step={0.05} suffix="x" onChange={(value) => run(updateSetting, "playbackSpeed", value)} />
+              <RangeRow label="Volume" value={numberSetting(settings.volume, 1)} min={0} max={1} step={0.01} onChange={(value) => run(updateSetting, "volume", value)} />
+              <ToggleRow label="Volume normalization" help="Balances loud and quiet files." checked={boolSetting(settings.volumeNormalization)} onChange={(value) => run(updateSetting, "volumeNormalization", value)} />
+              <ToggleRow label="Per-song volume" help="Remembers custom volume per track." checked={boolSetting(settings.perSongVolumeMemory)} onChange={(value) => run(updateSetting, "perSongVolumeMemory", value)} />
+              <ToggleRow label="Sleep timer" help="Stops playback after thirty minutes when enabled." checked={numberSetting(settings.sleepTimerMinutes, 0) > 0} onChange={(value) => run(updateSetting, "sleepTimerMinutes", value ? 30 : 0)} />
+            </div>
+          </Panel>
         </div>
 
-        <div className="settingsPanelCard discordHeroCard">
+        <Panel title="Now playing preview" note="Shows how the player text currently resolves.">
+          <div className="settingsPreviewCard">
+            <span>current song</span>
+            <strong>{previewSongTitle}</strong>
+            <small>{previewSongArtist}</small>
+          </div>
+        </Panel>
+      </section>
+    );
+  }
+
+  if (settingsCategory === "discord") {
+    return (
+      <section className="settingsCategoryPage" aria-label="Discord settings">
+        <PageHeader eyebrow="discord rich presence" title="privacy, text, buttons, and artwork" detail="Controls what Discord can show while localtify is running." meta={settings.discordEnabled ? "showing activity" : "activity hidden"} />
+
+        <Panel title="Discord preview" note="This preview follows the current RPC text settings.">
           <div className="discordPreviewMock" aria-label="Discord activity preview">
             <span>{discordPreview.badge}</span>
             <strong>{discordPreview.details}</strong>
             <small>{discordPreview.state}</small>
           </div>
+        </Panel>
 
-          <div className="discordHeroCopy">
-            <strong>Discord preview</strong>
-            <span>These controls match rpc.cjs: privacy hides the exact song, style changes the text, artwork changes the large image, and buttons can be disabled.</span>
+        <Panel title="Privacy and visibility" note="Keep these obvious so nobody gets stuck in privacy mode.">
+          <div className="settingsMiniGrid four">
+            <ToggleRow label="Enable Discord activity" help="Shows localtify as your Discord status." checked={boolSetting(settings.discordEnabled)} onChange={(value) => run(updateSetting, "discordEnabled", value)} />
+            <ToggleRow label="Privacy mode" help="Hides the exact song name." checked={boolSetting(settings.discordPrivacyMode)} onChange={(value) => run(updateSetting, "discordPrivacyMode", value)} />
+            <ToggleRow label="Paused status" help="Shows paused or idle when playback is not active." checked={boolSetting(settings.discordShowPausedIdle)} onChange={(value) => run(updateSetting, "discordShowPausedIdle", value)} />
+            <ToggleRow label="RPC buttons" help="Shows safe Discord buttons." checked={boolSetting(settings.discordButtons)} onChange={(value) => run(updateSetting, "discordButtons", value)} />
           </div>
-        </div>
+        </Panel>
 
-        <div className="settingsPanelCard discordMainControls">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Privacy and visibility</strong>
-              <span>The most important Discord settings are here first so nobody gets stuck in privacy mode.</span>
-            </div>
-          </div>
+        <div className="settingsTwoColumn">
+          <Panel title="Status style" note="Changes the main Discord text style.">
+            <ChoiceGrid options={discordStyleOptions} value={textSetting(settings.discordActivityStyle, discordStyleOptions[0]?.id || "")} onChange={(value) => run(updateSetting, "discordActivityStyle", value)} columns="three" ariaLabel="Discord status style" />
+          </Panel>
 
-          <div className="settingsMiniGrid four discordToggleGrid">
-            <ToggleRow label="Enable Discord activity" help="Shows localtify as your Discord status." checked={settings.discordEnabled} onChange={(value) => updateSetting("discordEnabled", value)} />
-            <ToggleRow label="Privacy mode" help="Hides the exact song name and shows a generic local music status." checked={settings.discordPrivacyMode} onChange={(value) => updateSetting("discordPrivacyMode", value)} />
-            <ToggleRow label="Paused status" help="Shows paused/idle when playback is not active." checked={settings.discordShowPausedIdle} onChange={(value) => updateSetting("discordShowPausedIdle", value)} />
-            <ToggleRow label="RPC buttons" help="Shows safe buttons like search song or get localtify." checked={settings.discordButtons} onChange={(value) => updateSetting("discordButtons", value)} />
-          </div>
-        </div>
-
-        <div className="settingsTwoColumn discordSettingsGrid">
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Status style</strong>
-                <span>Changes the main Discord text style.</span>
-              </div>
-            </div>
-            <div className="optionGrid five discordOptionGrid">
-              {discordStyleOptions.map((option) => (
-                <button key={option.id} className={`settingsChoice ${settings.discordActivityStyle === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordActivityStyle", option.id)}>
-                  <strong>{option.name}</strong>
-                  <small>{option.note}</small>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Second line</strong>
-                <span>Choose the smaller line under the song.</span>
-              </div>
-            </div>
-            <div className="optionGrid five discordOptionGrid">
-              {discordSecondLineOptions.map((option) => (
-                <button key={option.id} className={`settingsChoice ${settings.discordSecondLine === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordSecondLine", option.id)}>
-                  <strong>{option.name}</strong>
-                  <small>{option.note}</small>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="settingsPanelCard discordArtworkCard">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Artwork mode</strong>
-              <span>Choose the image used in Discord Rich Presence.</span>
-            </div>
-          </div>
-          <div className="optionGrid four discordOptionGrid">
-            {discordArtModeOptions.map((option) => (
-              <button key={option.id} className={`settingsChoice ${settings.discordArtMode === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordArtMode", option.id)}>
-                <strong>{option.name}</strong>
-                <small>{option.note}</small>
-              </button>
-            ))}
-          </div>
-          <p className="settingsHintText">Pixel shuffle rotates through available Discord image assets before repeating them.</p>
-        </div>
-
-        <div className="settingsPanelCard">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Title cleanup</strong>
-              <span>Controls the text cleanup used by Discord and metadata previews.</span>
-            </div>
-          </div>
-          <div className="optionGrid three discordOptionGrid">
-            {discordCleanupOptions.map((option) => (
-              <button key={option.id} className={`settingsChoice ${settings.discordTitleCleanup === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordTitleCleanup", option.id)}>
-                <strong>{option.name}</strong>
-                <small>{option.note}</small>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-    ) : null}
-
-    {settingsCategory === "library" || settingsCategory === "metadata" ? (
-      <section className="settingsCategoryPage" aria-label="Library settings">
-        <div className="settingsCategoryHeader">
-          <div>
-            <p className="eyebrow">library</p>
-            <h4>imports, search, and playlists</h4>
-          </div>
-          <span>{songs.length} songs indexed</span>
+          <Panel title="Second line" note="Choose the smaller line under the song.">
+            <ChoiceGrid options={discordSecondLineOptions} value={textSetting(settings.discordSecondLine, discordSecondLineOptions[0]?.id || "")} onChange={(value) => run(updateSetting, "discordSecondLine", value)} columns="three" ariaLabel="Discord second line" />
+          </Panel>
         </div>
 
         <div className="settingsTwoColumn">
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Metadata cleanup</strong>
-                <span>Control how messy file names are cleaned.</span>
-              </div>
-            </div>
-            <div className="optionGrid three">
-              {discordCleanupOptions.map((option) => (
-                <button key={option.id} className={`settingsChoice ${settings.discordTitleCleanup === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordTitleCleanup", option.id)}>
-                  <strong>{option.name}</strong>
-                  <small>{option.note}</small>
-                </button>
-              ))}
-            </div>
-            <div className="settingsActionRow metadataCleanerActionRowV425">
-              <button className="settingsActionButton" type="button" disabled={libraryScanBusy} onClick={cleanLibraryMetadataAction}>preview clean all</button>
+          <Panel title="Artwork mode" note="Choose the image used in Rich Presence.">
+            <ChoiceGrid options={discordArtModeOptions} value={textSetting(settings.discordArtMode, discordArtModeOptions[0]?.id || "")} onChange={(value) => run(updateSetting, "discordArtMode", value)} columns="three" ariaLabel="Discord artwork mode" />
+          </Panel>
+
+          <Panel title="Title cleanup" note="Controls cleanup used by Discord and metadata previews.">
+            <ChoiceGrid options={discordCleanupOptions} value={textSetting(settings.discordTitleCleanup, discordCleanupOptions[0]?.id || "")} onChange={(value) => run(updateSetting, "discordTitleCleanup", value)} columns="three" ariaLabel="Discord title cleanup" />
+          </Panel>
+        </div>
+      </section>
+    );
+  }
+
+  if (settingsCategory === "library" || settingsCategory === "metadata") {
+    const previewItems = Array.isArray(metadataCleanPreview?.items) ? metadataCleanPreview.items.slice(0, 6) : [];
+
+    return (
+      <section className="settingsCategoryPage" aria-label="Library settings">
+        <PageHeader eyebrow={settingsCategory === "metadata" ? "metadata" : "library"} title="imports, search, and playlists" detail="Clean names, rebuild search, create playlists, and keep the library responsive." meta={`${songs.length} songs indexed`} />
+
+        <div className="settingsTwoColumn">
+          <Panel title="Metadata cleanup" note="Preview fixes before applying them to the library.">
+            <ChoiceGrid options={discordCleanupOptions} value={textSetting(settings.discordTitleCleanup, discordCleanupOptions[0]?.id || "")} onChange={(value) => run(updateSetting, "discordTitleCleanup", value)} columns="three" ariaLabel="Metadata cleanup mode" />
+            <div className="settingsActionRow">
+              <button className="settingsActionButton settingsPrimaryAction" type="button" disabled={libraryScanBusy} onClick={cleanLibraryMetadataAction}>preview clean all</button>
               <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataSelectedCount} onClick={() => cleanSelectedMetadataAction?.()}>selected only {metadataSelectedCount ? `(${metadataSelectedCount})` : ""}</button>
-              <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataUndoCount} onClick={() => void undoLastMetadataCleanAction?.()}>undo last clean {metadataUndoCount ? `(${metadataUndoCount})` : ""}</button>
+              <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataUndoCount} onClick={() => run(undoLastMetadataCleanAction || (() => undefined))}>undo last clean {metadataUndoCount ? `(${metadataUndoCount})` : ""}</button>
               <button className="settingsActionButton" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
               <button className="settingsActionButton" type="button" onClick={importSongs} disabled={importAnimation.active}>import songs</button>
             </div>
 
             {metadataCleanPreview ? (
-              <div className="metadataCleanerPreviewBoxV425" role="status" aria-live="polite">
-                <div className="metadataCleanerPreviewHeadV425">
+              <div className="metadataCleanerPreviewBox" role="status" aria-live="polite">
+                <div className="metadataCleanerPreviewHead">
                   <span>preview before applying</span>
                   <strong>{metadataCleanPreview.changedCount || 0} fix{(metadataCleanPreview.changedCount || 0) === 1 ? "" : "es"}</strong>
                   <small>{metadataCleanPreview.skippedCount || 0} skipped • titles {metadataCleanPreview.titleFixCount || 0} • artists {metadataCleanPreview.artistFixCount || 0} • albums {metadataCleanPreview.albumFixCount || 0}</small>
                 </div>
-
-                <div className="metadataCleanerPreviewListV425">
-                  {(metadataCleanPreview.items || []).slice(0, 5).map((item: any) => (
-                    <div className="metadataCleanerPreviewItemV425" key={item.id}>
+                <div className="metadataCleanerPreviewList">
+                  {previewItems.length ? previewItems.map((item: any) => (
+                    <div className="metadataCleanerPreviewItem" key={item.id || `${item.before?.title}-${item.after?.title}`}>
                       <span>
                         <small>before</small>
                         <strong>{item.before?.title || "untitled"}</strong>
@@ -1048,34 +921,27 @@ return (
                         <em>{item.after?.artist || "unknown artist"}</em>
                       </span>
                     </div>
-                  ))}
+                  )) : <EmptyState title="No preview items" note="Nothing needed cleanup with the current settings." />}
                 </div>
-
-                <div className="metadataCleanerPreviewActionsV425">
-                  <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !(metadataCleanPreview.changedCount || 0)} onClick={() => void applyMetadataCleanPreviewAction?.()}>apply fixes</button>
-                  <button className="settingsActionButton ghost" type="button" disabled={libraryScanBusy} onClick={() => cancelMetadataCleanPreviewAction?.()}>cancel</button>
+                <div className="settingsActionRow">
+                  <button className="settingsActionButton settingsPrimaryAction" type="button" disabled={libraryScanBusy || !(metadataCleanPreview.changedCount || 0)} onClick={() => run(applyMetadataCleanPreviewAction || (() => undefined))}>apply fixes</button>
+                  <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={() => cancelMetadataCleanPreviewAction?.()}>cancel</button>
                 </div>
               </div>
             ) : null}
 
             {libraryScanMessage ? <p className="settingsHintText">{libraryScanMessage}</p> : null}
-          </div>
+          </Panel>
 
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Playlists and queue</strong>
-                <span>Create playlists, clear the queue, and test playback.</span>
-              </div>
-            </div>
-            <div className="settingsActionRow">
-              <input className="settingsInlineInput" value={newPlaylistName} onChange={(event) => setNewPlaylistName(event.currentTarget.value)} placeholder="new playlist name" />
-              <button className="settingsActionButton" type="button" onClick={() => createPlaylist()}>create playlist</button>
-              <button className="settingsActionButton" type="button" onClick={() => changeView("playlists", "settings")}>open playlists</button>
+          <Panel title="Playlists and queue" note="Create playlists and control the active queue.">
+            <div className="settingsInlineForm">
+              <input className="settingsInlineInput" value={newPlaylistName} onChange={(event) => setNewPlaylistName(event.currentTarget.value)} placeholder="new playlist name" aria-label="New playlist name" />
+              <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={createPlaylist}>create</button>
+              <button className="settingsActionButton" type="button" onClick={() => run(changeView, "playlists", "settings")}>open</button>
               <button className="settingsActionButton" type="button" onClick={clearQueue} disabled={playQueue.length === 0}>clear queue</button>
             </div>
             <ToggleRow label="Repeat active playlist" help="When the queue ends, localtify starts the active playlist again." checked={repeatPlaylist} onChange={(value) => setRepeatPlaylist(value)} />
-            <div className="settingsPlainList settingsPlaylistList">
+            <div className="settingsPlaylistList">
               {playlists.length ? playlists.map((playlist) => (
                 <div className="settingsPlaylistItem" key={playlist.id}>
                   <span>
@@ -1084,162 +950,87 @@ return (
                   </span>
                   <div>
                     <button className="settingsTinyButton" type="button" onClick={() => openPlaylist(playlist.id)}>open</button>
-                    <button className="settingsTinyButton" type="button" onClick={() => playPlaylist(playlist, false)} disabled={playlist.songIds.length === 0}>play</button>
-                    <button className="settingsTinyButton" type="button" onClick={() => playPlaylist(playlist, true)} disabled={playlist.songIds.length === 0}>shuffle</button>
+                    <button className="settingsTinyButton" type="button" onClick={() => run(playPlaylist, playlist, false)} disabled={playlist.songIds.length === 0}>play</button>
+                    <button className="settingsTinyButton" type="button" onClick={() => run(playPlaylist, playlist, true)} disabled={playlist.songIds.length === 0}>shuffle</button>
                     <button className="settingsTinyButton danger" type="button" onClick={() => removePlaylist(playlist.id)}>remove</button>
                   </div>
                 </div>
-              )) : <p className="settingsHintText">No playlists yet. Create one here, then add songs from the song editor.</p>}
+              )) : <EmptyState title="No playlists yet" note="Create one here, then add songs from the song menu." />}
             </div>
-          </div>
+          </Panel>
         </div>
       </section>
-    ) : null}
+    );
+  }
 
-    {settingsCategory === "covers" ? (
+  if (settingsCategory === "covers") {
+    return (
       <section className="settingsCategoryPage" aria-label="Cover settings">
-        <div className="settingsCategoryHeader">
-          <div>
-            <p className="eyebrow">covers</p>
-            <h4>pixel art and cover tools</h4>
-          </div>
-          <span>{pixelArtAssets.length} pixel art assets</span>
-        </div>
+        <PageHeader eyebrow="covers" title="pixel art and cover tools" detail="Cover actions stay light here; the heavy gallery opens only when needed." meta={`${pixelArtAssets.length} pixel assets`} />
 
         <div className="settingsTwoColumn">
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Cover gallery</strong>
-                <span>Open the full cover page only when you need it, so settings stays light.</span>
-              </div>
-            </div>
+          <Panel title="Cover gallery" note="Open the gallery only when you need to edit covers.">
             <div className="settingsActionRow">
-              <button className="settingsActionButton" type="button" onClick={() => changeView("covers", "settings")}>open cover gallery</button>
+              <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={() => run(changeView, "covers", "settings")}>open cover gallery</button>
               <button className="settingsActionButton" type="button" disabled={pixelArtBusy || songs.length === 0} onClick={randomizeAllCovers}>randomize all covers</button>
               <button className="settingsActionButton" type="button" disabled={pixelArtBusy} onClick={rescanPixelArtFolder}>rescan pixel art</button>
             </div>
-            <p className="settingsHintText">{pixelArtBusy ? "working on pixel art..." : "Cover tools stay here, but the expensive gallery only renders when opened."}</p>
-          </div>
+            <p className="settingsHintText">{pixelArtBusy ? "Working on pixel art..." : "Missing-cover filters and batch cover tools are inside the cover gallery."}</p>
+          </Panel>
 
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Cover ambience</strong>
-                <span>Control cover glow without making screen switching heavy.</span>
-              </div>
-            </div>
+          <Panel title="Cover ambience" note="Keep these light to avoid screen-switch stutter.">
             <div className="settingsMiniGrid">
-              <ToggleRow label="Cover glow" help="Adds cover-based glow to the UI." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
-              <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={settings.showFloatingNotes} onChange={(value) => updateSetting("showFloatingNotes", value)} />
-              <ToggleRow label="Large artwork" help="Makes cover images bigger on the home page." checked={settings.homeExpanded} onChange={(value) => updateSetting("homeExpanded", value)} />
+              <ToggleRow label="Cover glow" help="Adds cover-based glow to the UI." checked={boolSetting(settings.animatedGlow)} onChange={(value) => run(updateSetting, "animatedGlow", value)} />
+              <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={boolSetting(settings.showFloatingNotes)} onChange={(value) => run(updateSetting, "showFloatingNotes", value)} />
+              <ToggleRow label="Large artwork" help="Makes cover images larger on the home page." checked={boolSetting(settings.homeExpanded)} onChange={(value) => run(updateSetting, "homeExpanded", value)} />
+              <ToggleRow label="Quick library blur" help="Adds softer blur on quick library cards." checked={boolSetting(settings.quickLibraryMoreBlur)} onChange={(value) => run(updateSetting, "quickLibraryMoreBlur", value)} />
             </div>
-          </div>
+          </Panel>
         </div>
       </section>
-    ) : null}
+    );
+  }
 
-    {settingsCategory === "downloads" ? (
-      <section className="settingsContentBlock">
-        <p className="eyebrow">downloads</p>
-        <h2>download settings</h2>
-        <p className="settingsLead">Choose how downloaded audio is saved, named, converted, and imported.</p>
+  if (settingsCategory === "downloads") {
+    return (
+      <section className="settingsCategoryPage" aria-label="Download settings">
+        <PageHeader eyebrow="downloads" title="download settings" detail="Choose how downloaded audio is saved, named, converted, and imported." meta={settings.downloadFolder || downloadFolderLabel || "default folder"} />
 
-        <div className="settingsGrid twoCols downloadSettingsGridV031">
-          <div className="settingGroup">
-            <h3>Audio quality</h3>
-            <p>Best keeps the source quality when possible. Fixed bitrates are useful if you want smaller MP3 files.</p>
-            <div className="optionGrid compactOptions">
-              {(["best", "320", "256", "192"] as Settings["downloadQuality"][]).map((quality) => (
-                <button
-                  key={quality}
-                  className={`settingsChoice ${settings.downloadQuality === quality ? "active" : ""}`}
-                  onClick={() => void updateSetting("downloadQuality", quality)}
-                >
-                  <strong>{quality === "best" ? "Best" : `${quality}kbps`}</strong>
-                  <span>{quality === "best" ? "highest available" : "smaller file size"}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="settingsTwoColumn">
+          <Panel title="Audio quality" note="Best keeps source quality when possible.">
+            <ChoiceGrid options={DOWNLOAD_QUALITY_OPTIONS} value={textSetting(settings.downloadQuality, "best")} onChange={(value) => run(updateSetting, "downloadQuality", value as DownloadQuality)} columns="four" ariaLabel="Download quality" />
+          </Panel>
 
-          <div className="settingGroup">
-            <h3>Format</h3>
-            <p>MP3 is best for compatibility. FLAC is bigger but keeps more quality when conversion allows it.</p>
-            <div className="optionGrid compactOptions">
-              {(["mp3", "flac", "wav"] as Settings["downloadFormat"][]).map((format) => (
-                <button
-                  key={format}
-                  className={`settingsChoice ${settings.downloadFormat === format ? "active" : ""}`}
-                  onClick={() => void updateSetting("downloadFormat", format)}
-                >
-                  <strong>{format.toUpperCase()}</strong>
-                  <span>{format === "mp3" ? "recommended" : format === "flac" ? "large quality files" : "huge raw files"}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <Panel title="Format" note="MP3 is the safest default for compatibility.">
+            <ChoiceGrid options={DOWNLOAD_FORMAT_OPTIONS} value={textSetting(settings.downloadFormat, "mp3")} onChange={(value) => run(updateSetting, "downloadFormat", value as DownloadFormat)} columns="three" ariaLabel="Download format" />
+          </Panel>
         </div>
 
-        <div className="settingsCardStack downloadToggleStackV031">
-          <label className="toggleRow">
-            <span>
-              <strong>Auto-add to library</strong>
-              <small>Downloaded audio appears in localtify automatically.</small>
-            </span>
-            <input
-              type="checkbox"
-              checked={settings.downloadAutoAdd}
-              onChange={(event) => void updateSetting("downloadAutoAdd", event.currentTarget.checked)}
-            />
-          </label>
+        <Panel title="Download behavior" note="Keep post-download cleanup automatic and predictable.">
+          <div className="settingsMiniGrid">
+            <ToggleRow label="Auto-add to library" help="Downloaded audio appears in localtify automatically." checked={boolSetting(settings.downloadAutoAdd)} onChange={(value) => run(updateSetting, "downloadAutoAdd", value)} />
+            <ToggleRow label="Clean title after download" help="Removes common video words from downloaded filenames." checked={boolSetting(settings.downloadCleanTitle)} onChange={(value) => run(updateSetting, "downloadCleanTitle", value)} />
+          </div>
+        </Panel>
 
-          <label className="toggleRow">
-            <span>
-              <strong>Clean title after download</strong>
-              <small>Removes common video words like official video/audio from downloaded filenames.</small>
-            </span>
-            <input
-              type="checkbox"
-              checked={settings.downloadCleanTitle}
-              onChange={(event) => void updateSetting("downloadCleanTitle", event.currentTarget.checked)}
-            />
-          </label>
-        </div>
-
-        <div className="settingGroup downloadFolderGroupV031">
-          <h3>Download folder</h3>
-          <p>Choose where localtify saves downloaded songs. Leave it empty to use the default Downloads/localitfy folder.</p>
-          <div className="folderPickerRow">
+        <Panel title="Download folder" note="Choose where localtify saves downloaded songs.">
+          <div className="settingsFolderRow">
             <code>{settings.downloadFolder || downloadFolderLabel || "Default downloads folder"}</code>
-            <button className="softButton" onClick={() => void chooseDownloadFolder()}>choose folder</button>
-            {settings.downloadFolder ? (
-              <button className="softButton" onClick={() => void updateSetting("downloadFolder", "")}>use default</button>
-            ) : null}
+            <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={chooseDownloadFolder}>choose folder</button>
+            {settings.downloadFolder ? <button className="settingsActionButton" type="button" onClick={() => run(updateSetting, "downloadFolder", "")}>use default</button> : null}
           </div>
-        </div>
+        </Panel>
       </section>
-    ) : null}
+    );
+  }
 
-    {settingsCategory === "updates" ? (
-      <section className="settingsCategoryPage settingsUpdatesPage" aria-label="Update settings">
-        <div className="settingsCategoryHeader">
-          <div>
-            <p className="eyebrow">updates</p>
-            <h4>updates and version</h4>
-          </div>
-          <span>version {APP_VERSION} • {activePlatformInfo.label}</span>
-        </div>
+  if (settingsCategory === "updates") {
+    return (
+      <section className="settingsCategoryPage" aria-label="Update settings">
+        <PageHeader eyebrow="updates" title="updates and version" detail="Check for releases, install downloaded updates, and view notes." meta={`version ${APP_VERSION} • ${activePlatformInfo.label}`} />
 
-        <div className="settingsTwoColumn settingsUpdatesGrid">
-          <div className="settingsPanelCard settingsUpdatePanel">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Update status</strong>
-                <span>Check for new releases and finish downloaded updates.</span>
-              </div>
-            </div>
-
+        <div className="settingsTwoColumn">
+          <Panel title="Update status" note="Check for new releases and finish downloaded updates.">
             <div className="settingsUpdateSummary">
               <div className="settingsUpdateCurrent">
                 <span className="settingsUpdateVersionBadge">{APP_VERSION}</span>
@@ -1248,90 +1039,52 @@ return (
                   <span>localtify {APP_VERSION}</span>
                 </div>
               </div>
-
-              <div className={`settingsUpdateMessage settingsUpdateMessage-${updatePrompt.status}`}>
-                <strong>{updatePrompt.status === "idle" ? "Ready to check" : updatePrompt.status === "error" ? "Update check failed" : updateStatusLabel(updatePrompt.status)}</strong>
-                <span>
-                  {updatePrompt.error || updatePrompt.message || (updatePrompt.status === "idle" ? "Check for updates whenever you are ready." : "Update status will appear here.")}
-                </span>
+              <div className={`settingsUpdateMessage settingsUpdateMessage-${updatePrompt.status || "idle"}`}>
+                <strong>{updatePrompt.status === "idle" || !updatePrompt.status ? "Ready to check" : updatePrompt.status === "error" ? "Update check failed" : updateStatusLabel(updatePrompt.status)}</strong>
+                <span>{updatePrompt.error || updatePrompt.message || (updatePrompt.status === "idle" || !updatePrompt.status ? "Check for updates whenever you are ready." : "Update status will appear here.")}</span>
               </div>
             </div>
-
-            <div className="settingsActionRow settingsUpdateActions">
+            <div className="settingsActionRow">
               <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={manualUpdateCheck} disabled={updatePrompt.status === "checking" || updatePrompt.status === "downloading"}>check now</button>
               <button className="settingsActionButton" type="button" onClick={askUpdaterToInstall} disabled={updatePrompt.status !== "downloaded"}>restart to install</button>
               <button className="settingsActionButton settingsGhostAction" type="button" onClick={skipAvailableUpdate} disabled={!updatePrompt.version || updatePrompt.status !== "available"}>skip version</button>
             </div>
-          </div>
+          </Panel>
 
-          <div className="settingsPanelCard settingsUpdateBehaviorPanel">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Update behavior</strong>
-                <span>Choose how localtify checks for updates.</span>
-              </div>
-            </div>
+          <Panel title="Update behavior" note="Choose how localtify checks for updates.">
             <div className="settingsMiniGrid">
-              <ToggleRow label="Update checks" help="Checks for new releases while the app is open." checked={settings.autoUpdateEnabled} onChange={(value) => updateSetting("autoUpdateEnabled", value)} />
-              <ToggleRow label="Notify only" help="Shows an update message instead of installing automatically." checked={settings.autoUpdateNotifyOnly} onChange={(value) => updateSetting("autoUpdateNotifyOnly", value)} />
+              <ToggleRow label="Update checks" help="Checks for new releases while the app is open." checked={boolSetting(settings.autoUpdateEnabled)} onChange={(value) => run(updateSetting, "autoUpdateEnabled", value)} />
+              <ToggleRow label="Notify only" help="Shows update messages instead of installing automatically." checked={boolSetting(settings.autoUpdateNotifyOnly)} onChange={(value) => run(updateSetting, "autoUpdateNotifyOnly", value)} />
             </div>
             <div className="settingsActionRow">
-              <button className="settingsActionButton" type="button" onClick={() => setWhatsNewOpen(true)}>Open what’s new</button>
+              <button className="settingsActionButton" type="button" onClick={() => setWhatsNewOpen(true)}>open what’s new</button>
             </div>
-          </div>
+          </Panel>
         </div>
 
         {showLinuxInstallNotes ? (
-          <div className="settingsPanelCard settingsFullWidthPanel settingsLinuxInstallPanel">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Linux packages</strong>
-                <span>AppImage is the main universal Linux build. RPM and DEB are extra native installers.</span>
-              </div>
-            </div>
-            <ul className="settingsPlainList settingsReleaseList">
+          <Panel title="Linux packages" note="AppImage is the main universal Linux build. RPM and DEB are native installers.">
+            <ul className="settingsPlainList">
               {linuxInstallNotes.map((note) => <li key={note}>{note}</li>)}
             </ul>
-          </div>
+          </Panel>
         ) : null}
 
-        <div className="settingsPanelCard settingsFullWidthPanel">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>What’s new in {APP_VERSION}</strong>
-              <span>Short notes for this release.</span>
-            </div>
-          </div>
-          <ul className="settingsPlainList settingsReleaseList">
-            {whatsNewItems.map((item) => <li key={item}>{item}</li>)}
+        <Panel title={`What’s new in ${APP_VERSION}`} note="Short release notes.">
+          <ul className="settingsPlainList">
+            {whatsNewItems.length ? whatsNewItems.map((item) => <li key={item}>{item}</li>) : <li>No release notes loaded yet.</li>}
           </ul>
-        </div>
+        </Panel>
       </section>
-    ) : null}
+    );
+  }
 
-
-
-    {settingsCategory === "about" ? (
+  if (settingsCategory === "about") {
+    return (
       <section className="settingsCategoryPage" aria-label="About and diagnostics">
-        <div className="settingsCategoryHeader">
-          <div>
-            <p className="eyebrow">about</p>
-            <h4>localtify status</h4>
-          </div>
-          <span>version {APP_VERSION} • {activePlatformInfo.label}</span>
-        </div>
+        <PageHeader eyebrow="about" title="localtify status" detail="Copy diagnostics when reporting bugs. No song names or private library paths are included." meta={`version ${APP_VERSION} • ${activePlatformInfo.label}`} />
 
-        <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsPanel">
-          <div className="settingsPanelHeader settingsDiagnosticsHeader">
-            <div>
-              <strong>App info</strong>
-              <span>Copy this when reporting bugs so it is easier to understand your setup.</span>
-            </div>
-            <button className="settingsActionButton settingsCopyInfoButton" type="button" onClick={copyDiagnosticsInfo}>
-              {diagnosticsCopied ? "copied" : "copy app info"}
-            </button>
-          </div>
-
+        <Panel title="App info" note="Use this when reporting bugs." action={<button className="settingsActionButton settingsPrimaryAction" type="button" onClick={copyDiagnosticsInfo}>{diagnosticsCopied ? "copied" : "copy app info"}</button>}>
           <div className="settingsDiagnosticsGrid">
             {diagnosticsInfo.items.map((item) => (
               <div className="settingsDiagnosticCard" key={item.label}>
@@ -1340,128 +1093,91 @@ return (
               </div>
             ))}
           </div>
-        </div>
+        </Panel>
 
-        <div className="settingsPanelCard settingsFullWidthPanel settingsPlatformPanel">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Platform support</strong>
-              <span>Windows and Linux now use separate release packages, icons, and platform controls.</span>
-            </div>
-          </div>
-          <div className="statusGrid">
-            <span><strong>{activePlatformInfo.label}</strong><small>platform</small></span>
-            <span><strong>{activePlatformInfo.releaseLabel}</strong><small>package</small></span>
-            <span><strong>{activePlatformInfo.startupSettingSupported ? "available" : "hidden"}</strong><small>startup setting</small></span>
-            <span><strong>{showLinuxInstallNotes ? "ready" : "standard"}</strong><small>release notes</small></span>
-          </div>
-        </div>
+        <Panel title="Platform support" note="Windows and Linux use separate release packages, icons, and platform controls.">
+          <StatGrid items={[
+            { label: "platform", value: activePlatformInfo.label },
+            { label: "package", value: activePlatformInfo.releaseLabel },
+            { label: "startup setting", value: activePlatformInfo.startupSettingSupported ? "available" : "hidden" },
+            { label: "release notes", value: showLinuxInstallNotes ? "ready" : "standard" }
+          ]} />
+        </Panel>
 
-        <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsCopyPanel">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Bug report text</strong>
-              <span>No song names, file paths, or private library metadata are included.</span>
-            </div>
-          </div>
+        <Panel title="Bug report text" note="Copyable app diagnostics only.">
           <textarea className="settingsDiagnosticsText" readOnly value={diagnosticsInfo.copyText} aria-label="localtify diagnostics text" />
-        </div>
+        </Panel>
       </section>
-    ) : null}
+    );
+  }
 
-    {settingsCategory === "advanced" ? (
+  if (settingsCategory === "advanced") {
+    return (
       <section className="settingsCategoryPage" aria-label="Advanced settings">
-        <div className="settingsCategoryHeader">
-          <div>
-            <p className="eyebrow">advanced</p>
-            <h4>reset and app status</h4>
-          </div>
-          <span>version {APP_VERSION} • {activePlatformInfo.label}</span>
-        </div>
+        <PageHeader eyebrow="advanced" title="reset and app status" detail="Reset selected settings without touching your songs." meta={`version ${APP_VERSION} • ${activePlatformInfo.label}`} />
 
         <div className="settingsTwoColumn">
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>App status</strong>
-                <span>Quick library and importer status.</span>
-              </div>
-            </div>
-            <div className="statusGrid">
-              <span><strong>{songs.length}</strong><small>songs</small></span>
-              <span><strong>{likedSongs.length}</strong><small>liked</small></span>
-              <span><strong>{pixelArtAssets.length}</strong><small>pixel art</small></span>
-              <span><strong>{importAnimation.active ? "busy" : "ready"}</strong><small>importer</small></span>
-            </div>
-          </div>
+          <Panel title="App status" note="Quick library and importer status.">
+            <StatGrid items={[
+              { label: "songs", value: songs.length },
+              { label: "liked", value: likedSongs.length },
+              { label: "pixel art", value: pixelArtAssets.length },
+              { label: "importer", value: importAnimation.active ? "busy" : "ready" }
+            ]} />
+          </Panel>
 
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Search and library</strong>
-                <span>Rebuild search if imported songs do not appear correctly.</span>
-              </div>
-            </div>
+          <Panel title="Search and library" note="Rebuild search if imported songs do not appear correctly.">
             <div className="settingsActionRow">
-              <button className="settingsActionButton" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>Rebuild search</button>
+              <button className="settingsActionButton settingsPrimaryAction" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
               <button className="settingsActionButton" type="button" onClick={() => {
                 libraryRenderLimitRef.current = INITIAL_LIBRARY_RENDER_LIMIT;
                 setLibraryRenderLimit(INITIAL_LIBRARY_RENDER_LIMIT);
-              }}>Reset loaded songs</button>
+              }}>reset loaded songs</button>
             </div>
-          </div>
+          </Panel>
         </div>
 
-        <div className="settingsPanelCard settingsFullWidthPanel">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>{activePlatformInfo.desktopControlsLabel}</strong>
-              <span>{activePlatformInfo.desktopControlsHelp}</span>
-            </div>
-          </div>
+        <Panel title={activePlatformInfo.desktopControlsLabel} note={activePlatformInfo.desktopControlsHelp}>
           <div className="settingsMiniGrid">
-            <ToggleRow label="Keep localtify in tray when closed" help="The X button hides the app instead of quitting. Use Quit from the tray to close it fully." checked={settings.minimizeToTray} onChange={(value) => updateSetting("minimizeToTray", value)} />
-            {activePlatformInfo.startupSettingSupported ? (
-              <ToggleRow label={activePlatformInfo.startupSettingLabel} help={activePlatformInfo.startupSettingHelp} checked={settings.startWithWindows} onChange={(value) => updateSetting("startWithWindows", value)} />
-            ) : null}
+            <ToggleRow label="Keep localtify in tray when closed" help="The close button hides the app instead of quitting." checked={boolSetting(settings.minimizeToTray)} onChange={(value) => run(updateSetting, "minimizeToTray", value)} />
+            {activePlatformInfo.startupSettingSupported ? <ToggleRow label={activePlatformInfo.startupSettingLabel} help={activePlatformInfo.startupSettingHelp} checked={boolSetting(settings.startWithWindows)} onChange={(value) => run(updateSetting, "startWithWindows", value)} /> : null}
           </div>
-        </div>
+        </Panel>
 
-        <div className="settingsPanelCard settingsFullWidthPanel settingsResetPanel">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Reset settings</strong>
-              <span>Reset only the selected app settings. Your songs stay in the library.</span>
-            </div>
-          </div>
-
+        <Panel title="Reset settings" note="Reset only the selected group. Your library stays untouched.">
           <div className="settingsResetGrid">
             <button className="settingsResetButton" type="button" onClick={resetDiscordSettings}>
               <strong>Reset Discord settings</strong>
-              <span>Restores privacy mode, status text, buttons, artwork, and cleanup.</span>
+              <span>Privacy mode, status text, buttons, artwork, and cleanup.</span>
             </button>
             <button className="settingsResetButton" type="button" onClick={resetAppearanceSettings}>
               <strong>Reset appearance</strong>
-              <span>Restores theme, colors, motion, corners, and ambience settings.</span>
+              <span>Theme, colors, motion, corners, and ambience settings.</span>
             </button>
             <button className="settingsResetButton" type="button" onClick={resetPlayerLayoutSettings}>
               <strong>Reset player layout</strong>
-              <span>Restores player size, visualizer, volume, and speed.</span>
+              <span>Player size, visualizer, volume, and speed.</span>
             </button>
             <button className="settingsResetButton" type="button" onClick={resetLibraryLayoutSettings}>
               <strong>Reset library layout</strong>
-              <span>Restores sidebar width, compact library, home layout, and hero options.</span>
+              <span>Library density, loaded rows, and list preferences.</span>
             </button>
             <button className="settingsResetButton danger" type="button" onClick={resetAllSettingsSafely}>
               <strong>Reset all settings</strong>
-              <span>Asks first, then restores every app setting to default.</span>
+              <span>Restores app defaults without deleting songs.</span>
             </button>
           </div>
-        </div>
+        </Panel>
       </section>
-    ) : null}
-  </>
-);
+    );
+  }
+
+  return (
+    <section className="settingsCategoryPage" aria-label="Settings">
+      <PageHeader eyebrow="settings" title="choose a category" detail="Pick a settings category from the sidebar." />
+      <EmptyState title="No category selected" note="The settings page is ready." />
+    </section>
+  );
 });
 
 export default SettingsCategoryContent;
