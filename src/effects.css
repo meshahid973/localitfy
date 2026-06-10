@@ -1256,174 +1256,188 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(
   -webkit-backdrop-filter: revert !important;
 }
 
-/* V467 REAL DISCORD PILL + ICON MOTION START
-   Uses real child elements in LocaltifyAppView so old ::before / transform rules cannot hide it. */
-main.app.app > .appShell > .sidebar .navItemAnimatedV467{
+/* V468 DISCORD PILL ONLY + REAL ICON MOTION START
+   Active nav no longer uses a rectangle highlight.
+   It uses a Discord-style white pill on the far-left + actual icon motion. */
+
+/* kill the rectangle highlight from older App/effects/home rules */
+main.app.app > .appShell > .sidebar .navItemAnimatedV468,
+main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover,
+main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible,
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.active,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468:hover,
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468.active,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468:hover,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468.active{
   position: relative !important;
   overflow: visible !important;
   isolation: isolate !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467::before,
-main.app.app > .appShell > .sidebar .navItemAnimatedV467::after{
+/* do not allow old pseudo indicators/circles to show */
+main.app.app > .appShell > .sidebar .navItemAnimatedV468::before,
+main.app.app > .appShell > .sidebar .navItemAnimatedV468::after{
   content: none !important;
   display: none !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navDiscordPillV467{
+/* the actual Discord pill */
+main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navDiscordPillV468{
   position: absolute !important;
-  left: -7px !important;
+  left: -23px !important;
   top: 50% !important;
-  z-index: 8 !important;
-  width: 4px !important;
+  z-index: 20 !important;
+  width: 5px !important;
   height: 8px !important;
-  border-radius: 999px !important;
-  background: rgba(255,255,255,.96) !important;
+  border-radius: 0 999px 999px 0 !important;
+  background: #fff !important;
   opacity: 0 !important;
-  transform: translate3d(0,-50%,0) scaleY(.42) !important;
-  transform-origin: center !important;
+  transform: translate3d(0,-50%,0) scaleY(.25) !important;
+  transform-origin: left center !important;
   pointer-events: none !important;
-  box-shadow: 0 0 14px rgba(255,255,255,.20) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.08),
+    0 0 14px rgba(255,255,255,.24) !important;
   transition:
-    height 180ms cubic-bezier(.16, 1, .3, 1),
-    opacity 130ms ease,
-    transform 180ms cubic-bezier(.16, 1, .3, 1) !important;
+    height 170ms cubic-bezier(.16, 1, .3, 1),
+    opacity 120ms ease,
+    transform 170ms cubic-bezier(.16, 1, .3, 1) !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467:hover .navDiscordPillV467,
-main.app.app > .appShell > .sidebar .navItemAnimatedV467:focus-visible .navDiscordPillV467{
-  height: 19px !important;
-  opacity: .78 !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover .navDiscordPillV468,
+main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible .navDiscordPillV468{
+  height: 18px !important;
+  opacity: .74 !important;
   transform: translate3d(0,-50%,0) scaleY(1) !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.active .navDiscordPillV467{
-  height: 34px !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navDiscordPillV468{
+  height: 36px !important;
   opacity: 1 !important;
   transform: translate3d(0,-50%,0) scaleY(1) !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.active:hover .navDiscordPillV467,
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.active:focus-visible .navDiscordPillV467{
-  height: 40px !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.active:hover .navDiscordPillV468,
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.active:focus-visible .navDiscordPillV468{
+  height: 42px !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navIcon{
+/* make active state text/icon visible without a card behind it */
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIcon,
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navText strong{
+  color: #fff !important;
+}
+
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navText small{
+  color: rgba(255,255,255,.58) !important;
+}
+
+/* icon wrapper that old transform:none rules do not target */
+main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIcon{
   position: relative !important;
   overflow: visible !important;
   display: grid !important;
   place-items: center !important;
+  color: currentColor !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navIconMotionV467{
+main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
   width: 24px !important;
   height: 24px !important;
   display: grid !important;
   place-items: center !important;
   transform-origin: 50% 50% !important;
-  transform-box: fill-box !important;
   will-change: transform !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navLucideIcon{
+main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon{
   display: block !important;
+  opacity: .92 !important;
   transform-origin: 50% 50% !important;
   transform-box: fill-box !important;
   overflow: visible !important;
-  opacity: .92 !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467:hover .navLucideIcon,
-main.app.app > .appShell > .sidebar .navItemAnimatedV467:focus-visible .navLucideIcon,
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.active .navLucideIcon{
-  opacity: 1 !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover .navLucideIcon :is(path, circle, rect, line, polyline, polygon),
+main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
+  animation: localtifyNavStrokeDrawV468 560ms cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467:hover .navLucideIcon :is(path, circle, rect, line, polyline, polygon),
-main.app.app > .appShell > .sidebar .navItemAnimatedV467:focus-visible .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
-  animation: localtifyNavStrokeDrawV467 560ms cubic-bezier(.16, 1, .3, 1) both !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-home:hover .navIconMotionV468{
+  animation: localtifyNavHomeV468 620ms cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
-/* Animate the wrapper, not the SVG itself, so older transform:none rules cannot kill it. */
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-home:hover .navIconMotionV467{
-  animation: localtifyNavHomeV467 620ms cubic-bezier(.16, 1, .3, 1) both !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-library:hover .navIconMotionV468{
+  animation: localtifyNavLibraryV468 660ms cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-library:hover .navIconMotionV467{
-  animation: localtifyNavLibraryV467 660ms cubic-bezier(.16, 1, .3, 1) both !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-albums:hover .navIconMotionV468{
+  animation: localtifyNavDiscV468 780ms cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-albums:hover .navIconMotionV467{
-  animation: localtifyNavDiscV467 780ms cubic-bezier(.16, 1, .3, 1) both !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-playlists:hover .navIconMotionV468{
+  animation: localtifyNavPlaylistV468 620ms cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-playlists:hover .navIconMotionV467{
-  animation: localtifyNavPlaylistV467 620ms cubic-bezier(.16, 1, .3, 1) both !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-liked:hover .navIconMotionV468{
+  animation: localtifyNavHeartV468 700ms cubic-bezier(.18, .9, .2, 1.1) both !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-liked:hover .navIconMotionV467{
-  animation: localtifyNavHeartV467 700ms cubic-bezier(.18, .9, .2, 1.1) both !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-covers:hover .navIconMotionV468{
+  animation: localtifyNavCoversV468 640ms cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-covers:hover .navIconMotionV467{
-  animation: localtifyNavCoversV467 640ms cubic-bezier(.16, 1, .3, 1) both !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-analytics:hover .navIconMotionV468{
+  animation: localtifyNavAnalyticsV468 680ms cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-analytics:hover .navIconMotionV467{
-  animation: localtifyNavAnalyticsV467 680ms cubic-bezier(.16, 1, .3, 1) both !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-downloads:hover .navIconMotionV468{
+  animation: localtifyNavDownloadV468 700ms cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-downloads:hover .navIconMotionV467{
-  animation: localtifyNavDownloadV467 700ms cubic-bezier(.16, 1, .3, 1) both !important;
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-settings:hover .navIconMotionV468{
+  animation: localtifyNavSettingsV468 820ms cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.nav-settings:hover .navIconMotionV467{
-  animation: localtifyNavSettingsV467 820ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV467.active .navIconMotionV467{
+main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV468{
   transform: translate3d(0,-1px,0) scale(1.045) !important;
 }
 
-@keyframes localtifyNavStrokeDrawV467{
-  0%{
-    stroke-dasharray: 0 42;
-    stroke-dashoffset: 42;
-    opacity: .38;
-  }
-  60%{
-    stroke-dasharray: 34 42;
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-  100%{
-    stroke-dasharray: 42 0;
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
+@keyframes localtifyNavStrokeDrawV468{
+  0%{ stroke-dasharray: 0 42; stroke-dashoffset: 42; opacity: .38; }
+  60%{ stroke-dasharray: 34 42; stroke-dashoffset: 0; opacity: 1; }
+  100%{ stroke-dasharray: 42 0; stroke-dashoffset: 0; opacity: 1; }
 }
 
-@keyframes localtifyNavHomeV467{
+@keyframes localtifyNavHomeV468{
   0%{ transform: translate3d(0,0,0) scale(1); }
   35%{ transform: translate3d(0,-4px,0) scale(1.14); }
   65%{ transform: translate3d(0,1px,0) scale(.98); }
   100%{ transform: translate3d(0,0,0) scale(1.045); }
 }
 
-@keyframes localtifyNavLibraryV467{
+@keyframes localtifyNavLibraryV468{
   0%{ transform: rotate(0deg) translate3d(0,0,0); }
   32%{ transform: rotate(-7deg) translate3d(-2px,0,0); }
   58%{ transform: rotate(6deg) translate3d(2px,0,0); }
   100%{ transform: rotate(0deg) translate3d(0,0,0) scale(1.045); }
 }
 
-@keyframes localtifyNavDiscV467{
+@keyframes localtifyNavDiscV468{
   0%{ transform: rotate(0deg) scale(1); }
   54%{ transform: rotate(230deg) scale(1.13); }
   100%{ transform: rotate(360deg) scale(1.045); }
 }
 
-@keyframes localtifyNavPlaylistV467{
+@keyframes localtifyNavPlaylistV468{
   0%{ transform: translate3d(0,0,0); }
   25%{ transform: translate3d(5px,0,0); }
   50%{ transform: translate3d(-3px,0,0); }
@@ -1431,7 +1445,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV467.active .navIconMotionV4
   100%{ transform: translate3d(0,0,0) scale(1.045); }
 }
 
-@keyframes localtifyNavHeartV467{
+@keyframes localtifyNavHeartV468{
   0%{ transform: scale(1); }
   22%{ transform: scale(1.30); }
   44%{ transform: scale(.92); }
@@ -1439,45 +1453,45 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV467.active .navIconMotionV4
   100%{ transform: scale(1.045); }
 }
 
-@keyframes localtifyNavCoversV467{
+@keyframes localtifyNavCoversV468{
   0%{ transform: translate3d(0,0,0) rotate(0deg) scale(1); }
   35%{ transform: translate3d(3px,-3px,0) rotate(5deg) scale(1.12); }
   70%{ transform: translate3d(-1px,1px,0) rotate(-3deg) scale(.98); }
   100%{ transform: translate3d(0,0,0) rotate(0deg) scale(1.045); }
 }
 
-@keyframes localtifyNavAnalyticsV467{
+@keyframes localtifyNavAnalyticsV468{
   0%{ transform: translate3d(0,0,0) scaleY(1); }
   32%{ transform: translate3d(0,-3px,0) scaleY(1.22); }
   62%{ transform: translate3d(0,1px,0) scaleY(.92); }
   100%{ transform: translate3d(0,0,0) scaleY(1.045); }
 }
 
-@keyframes localtifyNavDownloadV467{
+@keyframes localtifyNavDownloadV468{
   0%{ transform: translate3d(0,0,0); }
   30%{ transform: translate3d(0,6px,0) scale(.95); }
   60%{ transform: translate3d(0,-3px,0) scale(1.10); }
   100%{ transform: translate3d(0,0,0) scale(1.045); }
 }
 
-@keyframes localtifyNavSettingsV467{
+@keyframes localtifyNavSettingsV468{
   0%{ transform: rotate(0deg) scale(1); }
   48%{ transform: rotate(120deg) scale(1.10); }
   100%{ transform: rotate(180deg) scale(1.045); }
 }
 
 @media (prefers-reduced-motion: reduce){
-  main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navIconMotionV467,
-  main.app.app > .appShell > .sidebar .navItemAnimatedV467:hover .navIconMotionV467,
-  main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
+  main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468,
+  main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover .navIconMotionV468,
+  main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
     animation: none !important;
     transform: none !important;
     stroke-dasharray: none !important;
     stroke-dashoffset: 0 !important;
   }
 
-  main.app.app > .appShell > .sidebar .navItemAnimatedV467 .navDiscordPillV467{
+  main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navDiscordPillV468{
     transition: none !important;
   }
 }
-/* V467 REAL DISCORD PILL + ICON MOTION END */
+/* V468 DISCORD PILL ONLY + REAL ICON MOTION END */
