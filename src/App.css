@@ -216,26 +216,6 @@
   width: 100%;
 }
 
-.appShell{
-  grid-template-columns: var(--sidebar-width, 249px) minmax(0, 1fr) !important;
-  grid-template-rows: minmax(0, 1fr) 92px !important;
-}
-
-.sidebar{
-  grid-row: 1 !important;
-  grid-column: 1 !important;
-  min-width: 0 !important;
-  padding: 16px 12px !important;
-  gap: 12px !important;
-}
-
-.content{
-  grid-row: 1 !important;
-  grid-column: 2 !important;
-  padding: 18px clamp(18px, 2.1vw, 30px) 22px !important;
-  scroll-behavior: smooth;
-}
-
 .headerBar{
   position: sticky !important;
   top: 0 !important;
@@ -295,124 +275,6 @@
   pointer-events: auto !important;
 }
 
-.content{
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  scroll-padding-top: 18px !important;
-  padding-bottom: 138px !important;
-}
-
-.appShell{
-  overflow: hidden !important;
-}
-
-.sidebarCustomTheme{
-  overflow: visible !important;
-  padding: 12px !important;
-}
-
-.sidebarCustomThemeHeader{
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-}
-
-.sidebarCustomColorGrid{
-  display: grid !important;
-  grid-template-columns: 46px minmax(0, 1fr) !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin-top: 10px !important;
-}
-
-.sidebarCustomColorGrid.second{
-  display: none !important;
-}
-
-.sidebarColorWheel{
-  width: 46px !important;
-  height: 46px !important;
-  border-radius: 15px !important;
-  overflow: hidden !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.62) !important;
-  background: rgba(255,255,255,0.06) !important;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 12px 28px rgba(var(--accent-rgb), 0.16) !important;
-}
-
-.sidebarColorWheel input{
-  position: absolute !important;
-  inset: -8px !important;
-  width: 64px !important;
-  height: 64px !important;
-  opacity: 0 !important;
-  cursor: pointer !important;
-}
-
-.sidebarColorWheel span{
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: inherit !important;
-}
-
-.sidebarHexInput{
-  min-width: 0 !important;
-  height: 46px !important;
-  border-radius: 14px !important;
-  padding: 0 13px !important;
-  color: var(--text) !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.02em !important;
-  text-transform: uppercase !important;
-  background: rgba(255,255,255,0.045) !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  outline: none !important;
-}
-
-.sidebarHexInput:focus{
-  border-color: rgba(var(--accent-rgb), 0.72) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.14) !important;
-}
-
-.sidebarCustomThemeActions{
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 8px !important;
-  margin-top: 10px !important;
-}
-
-.sidebarCustomThemeActions button{
-  height: 34px !important;
-  border-radius: 12px !important;
-  background: rgba(255,255,255,0.065) !important;
-  border: 1px solid rgba(255,255,255,0.10) !important;
-  color: var(--text) !important;
-  font-weight: 700 !important;
-}
-
-.sidebarCustomThemeActions button:hover{
-  transform: translateY(-1px) !important;
-  border-color: rgba(var(--accent-rgb), 0.44) !important;
-  background: rgba(var(--accent-rgb), 0.12) !important;
-}
-
-.sidebarThemeBody[aria-hidden="false"]{
-  max-height: min(62vh, 620px) !important;
-  overflow: visible !important;
-}
-
-.sidebarThemeBodyInner{
-  overflow: visible !important;
-}
-
-.sidebarThemeList{
-  max-height: 330px !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  padding-right: 4px !important;
-}
-
 .secretLayer.stars{
   position: fixed !important;
   inset: 0 !important;
@@ -449,19 +311,11 @@
     width: 100% !important;
     min-width: 0 !important;
   }
-
-  .sidebarThemeBody[aria-hidden="false"]{
-    max-height: 520px !important;
-  }
 }
 
 :root{
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-pop: cubic-bezier(0.2, 1.25, 0.32, 1);
-}
-
-.content{
-  animation: localitfyContentIn 420ms var(--ease-smooth) both;
 }
 
 .panel{
@@ -1162,14 +1016,6 @@
   }
 }
 
-.app .content{
-  overscroll-behavior: contain;
-  scroll-behavior: smooth;
-  scrollbar-gutter: auto;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-}
-
 .app .ambientSurface::before{
   opacity: 0.14;
   filter: blur(42px) saturate(1.12) brightness(0.92);
@@ -1377,46 +1223,6 @@
   width: 62%;
 }
 
-.sidebarResizeHandle::after{
-  position: absolute;
-  z-index: 3;
-  pointer-events: none;
-  opacity: 0;
-  transform: translate3d(0, 4px, 0) scale(0.96);
-  color: rgba(255, 255, 255, 0.74);
-  background: rgba(8, 8, 10, 0.92);
-  border: 1px solid rgba(var(--accent-rgb), 0.26);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
-  border-radius: 999px;
-  padding: 6px 9px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  transition:
-    opacity 150ms ease,
-    transform 170ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 170ms ease,
-    color 170ms ease;
-}
-
-.sidebarResizeHandle::after{
-  content: "drag sidebar";
-  top: 50%;
-  left: 14px;
-  white-space: nowrap;
-}
-
-.sidebarResizeHandle:hover::after{
-  opacity: 1;
-  border-color: rgba(var(--accent-rgb), 0.42);
-  color: #fff;
-  transform: translate3d(0, 0, 0) scale(1);
-}
-
-body.isResizingSidebar .sidebarResizeHandle span{
-  animation: localitfyCuteDragBreath 880ms ease-in-out infinite;
-}
-
 .songRow.songDragging{
   opacity: 0.52 !important;
   border-style: dashed !important;
@@ -1448,16 +1254,6 @@ html{
   scroll-behavior: smooth;
 }
 
-.app .content{
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scroll-behavior: smooth;
-  scrollbar-gutter: auto;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
 .app .songRow{
   contain: layout style;
   backface-visibility: hidden;
@@ -1484,18 +1280,6 @@ html{
 
 .app[data-ambient="off"] .ambientSurface::before{
   opacity: 0 !important;
-}
-
-.app.songDragActive .content{
-  scroll-behavior: auto;
-}
-
-.app .content{
-  overflow-anchor: none;
-  overscroll-behavior: contain;
-  scroll-behavior: smooth;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
 }
 
 .app .pageTransition{
@@ -1527,15 +1311,6 @@ html{
   --sidebar-width-used: var(--sidebar-width-live, var(--sidebar-width, 249px));
 }
 
-.appShell{
-  grid-template-columns: var(--sidebar-width-used) minmax(0, 1fr) !important;
-  grid-template-rows: minmax(0, 1fr) var(--player-size-used) !important;
-}
-
-.content{
-  padding-bottom: calc(var(--player-size-used) + 48px) !important;
-}
-
 .toastStack{
   left: calc(var(--sidebar-width-used) + 22px) !important;
   width: min(360px, calc(100vw - var(--sidebar-width-used) - 42px)) !important;
@@ -1558,37 +1333,6 @@ body.isResizingPlayer{
 body.isResizingSidebar .ambientSurface::before{
   animation-play-state: paused !important;
   transition-duration: 0ms !important;
-}
-
-.sidebarResizeHandle{
-  touch-action: none !important;
-  -webkit-app-region: no-drag !important;
-}
-
-.sidebarResizeHandle{
-  width: 14px !important;
-  right: -7px !important;
-}
-
-.sidebarResizeHandle::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  opacity: 0;
-  background: rgba(var(--accent-rgb), 0.20);
-  box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.12);
-  transition: opacity 140ms ease, transform 140ms ease;
-}
-
-.sidebarResizeHandle:hover::before{
-  opacity: 1;
-}
-
-body.isResizingSidebar .sidebar{
-  box-shadow:
-    0 0 0 1px rgba(var(--accent-rgb), 0.22) inset,
-    14px 0 44px rgba(var(--accent-rgb), 0.08) !important;
 }
 
 .localitfyDragPreview{
@@ -1661,10 +1405,6 @@ body.isResizingSidebar .ambientSurface::before{
 
 body.isResizingSidebar .homeAlbumCard{
   transition: none !important;
-}
-
-body.isResizingSidebar .content{
-  scroll-behavior: auto !important;
 }
 
 body.isResizingSidebar{
@@ -1754,7 +1494,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .app.flatNoGradientUI .sidebarNav button,
 .app.flatNoGradientUI .navButton,
-.app.flatNoGradientUI .sidebar button,
 .app.flatNoGradientUI .iconAction,
 .app.flatNoGradientUI .pillButton,
 .app.flatNoGradientUI .smallButton,
@@ -1773,7 +1512,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .app.flatNoGradientUI .sidebarNav button:hover,
 .app.flatNoGradientUI .navButton:hover,
-.app.flatNoGradientUI .sidebar button:hover,
 .app.flatNoGradientUI .iconAction:hover,
 .app.flatNoGradientUI .pillButton:hover,
 .app.flatNoGradientUI .smallButton:hover,
@@ -2446,115 +2184,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   background-size: auto, auto, 42px 42px, 42px 42px, auto !important;
 }
 
-.titleBar{
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012)),
-    rgba(0, 0, 0, 0.88) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
-  box-shadow: 0 1px 0 rgba(var(--accent-rgb), 0.06) inset !important;
-  backdrop-filter: blur(22px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(150%) !important;
-}
-
-.titleDrag{
-  color: rgba(255, 255, 255, 0.68) !important;
-  letter-spacing: -0.01em !important;
-}
-
-.titleLogo{
-  color: var(--accent) !important;
-  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.22)) !important;
-}
-
-.windowButtons button{
-  transition:
-    color 150ms ease,
-    background-color 150ms ease,
-    transform 150ms var(--shell-ease) !important;
-}
-
-.windowButtons button:hover{
-  color: #fff !important;
-  background: rgba(255, 255, 255, 0.105) !important;
-}
-
-.windowButtons button:active{
-  transform: scale(0.96) !important;
-}
-
-.sidebar{
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
-    rgba(0, 0, 0, 0.74) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.075) !important;
-  box-shadow:
-    inset -1px 0 0 rgba(var(--accent-rgb), 0.035),
-    12px 0 46px rgba(0, 0, 0, 0.22) !important;
-  backdrop-filter: blur(24px) saturate(145%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(145%) !important;
-}
-
-.logoWrap{
-  min-height: 62px !important;
-  padding: 8px 8px 10px !important;
-  border: 1px solid rgba(255, 255, 255, 0.055) !important;
-  border-radius: 18px !important;
-  background:
-    radial-gradient(circle at 18% 16%, rgba(var(--accent-rgb), 0.14), transparent 42%),
-    rgba(255, 255, 255, 0.028) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
-}
-
-.logoWrap h1{
-  letter-spacing: -0.07em !important;
-}
-
-.logoWrap p{
-  color: rgba(255, 255, 255, 0.47) !important;
-}
-
-.navItem{
-  height: 41px !important;
-  border-radius: 13px !important;
-  color: rgba(255, 255, 255, 0.56) !important;
-  background: transparent !important;
-  transition:
-    color 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms var(--shell-ease) !important;
-}
-
-.navItem:hover{
-  color: rgba(255, 255, 255, 0.94) !important;
-  background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.095), rgba(255, 255, 255, 0.045)) !important;
-  border-color: rgba(var(--accent-rgb), 0.18) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
-  transform: translate3d(3px, 0, 0) !important;
-}
-
-.navItem.active{
-  color: #fff !important;
-  background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.18), rgba(var(--accent-rgb), 0.065)) !important;
-  border-color: rgba(var(--accent-rgb), 0.32) !important;
-  box-shadow:
-    inset 3px 0 0 var(--accent),
-    0 12px 30px rgba(var(--accent-rgb), 0.075) !important;
-}
-
-.content{
-  background:
-    radial-gradient(circle at 78% 4%, rgba(var(--accent-rgb), 0.045), transparent 30%),
-    linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
-    transparent !important;
-  background-size: auto, 42px 42px, 42px 42px, auto !important;
-  scroll-behavior: smooth !important;
-}
-
 .panel{
   border-color: var(--shell-border) !important;
   background:
@@ -2863,33 +2492,6 @@ input[type="range"]{
   --shell-sidebar-muted: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%);
 }
 
-.appShell{
-  grid-template-columns: minmax(236px, var(--sidebar-width, 260px)) minmax(0, 1fr) !important;
-}
-
-.sidebar{
-  padding: 16px 14px 14px !important;
-  gap: 12px !important;
-  background:
-    radial-gradient(circle at 15% 6%, color-mix(in oklab, var(--accent) 8%, transparent), transparent 32%),
-    linear-gradient(180deg, color-mix(in oklab, var(--accent) 3%, transparent), transparent 42%),
-    rgba(0, 0, 0, 0.76) !important;
-  border-right: 1px solid color-mix(in oklab, var(--accent) 13%, transparent) !important;
-  box-shadow:
-    inset -1px 0 0 color-mix(in oklab, var(--accent) 7%, transparent),
-    14px 0 44px rgba(0, 0, 0, 0.22) !important;
-}
-
-.logoWrap{
-  min-height: 66px !important;
-  padding: 9px 10px !important;
-  border: 1px solid color-mix(in oklab, var(--accent) 14%, transparent) !important;
-  border-radius: 18px !important;
-  background:
-    radial-gradient(circle at 18% 18%, color-mix(in oklab, var(--accent) 15%, transparent), transparent 44%),
-    color-mix(in oklab, var(--accent) 4%, transparent) !important;
-}
-
 .sidebarModeSwitch{
   min-height: 34px;
   padding: 4px;
@@ -2933,35 +2535,6 @@ input[type="range"]{
   transform: translateY(-1px);
 }
 
-.nav{
-  gap: 8px !important;
-}
-
-.navItem{
-  min-height: 56px !important;
-  height: auto !important;
-  width: 100%;
-  display: grid !important;
-  grid-template-columns: 38px minmax(0, 1fr);
-  align-items: center;
-  gap: 11px;
-  padding: 8px 10px !important;
-  border-radius: 15px !important;
-  color: var(--shell-sidebar-muted) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  text-align: left !important;
-  line-height: 1.1;
-  box-shadow: none !important;
-  transition:
-    color 220ms ease,
-    background 220ms ease,
-    border-color 220ms ease,
-    transform 220ms var(--shell-sidebar-ease),
-    box-shadow 220ms ease,
-    filter 220ms ease !important;
-}
-
 .navIcon{
   width: 38px;
   height: 38px;
@@ -2984,72 +2557,6 @@ input[type="range"]{
     filter 220ms ease;
 }
 
-.navText{
-  min-width: 0;
-  display: grid;
-  gap: 3px;
-}
-
-.navText strong{
-  overflow: hidden;
-  color: inherit;
-  font-size: 13px;
-  font-weight: 940;
-  letter-spacing: -0.025em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.navText small{
-  overflow: hidden;
-  color: color-mix(in oklab, var(--muted) 74%, var(--accent) 26%);
-  font-size: 10px;
-  font-weight: 780;
-  letter-spacing: 0.015em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  opacity: 0.82;
-}
-
-.navItem:hover{
-  color: var(--shell-sidebar-text) !important;
-  background: var(--shell-sidebar-hover) !important;
-  border-color: var(--shell-sidebar-line) !important;
-  transform: translate3d(4px, -1px, 0) !important;
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--text) 7%, transparent),
-    0 12px 28px color-mix(in oklab, var(--accent) 7%, transparent) !important;
-}
-
-.navItem:hover .navIcon{
-  color: color-mix(in oklab, var(--text) 74%, var(--accent) 26%);
-  background: color-mix(in oklab, var(--accent) 18%, transparent);
-  border-color: color-mix(in oklab, var(--accent) 30%, transparent);
-  transform: scale(1.055);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--text) 9%, transparent),
-    0 0 18px color-mix(in oklab, var(--accent) 18%, transparent);
-}
-
-.navItem.active{
-  color: var(--text) !important;
-  background: var(--shell-sidebar-active) !important;
-  border-color: color-mix(in oklab, var(--accent) 34%, transparent) !important;
-  box-shadow:
-    inset 3px 0 0 var(--accent),
-    inset 0 1px 0 color-mix(in oklab, var(--text) 7%, transparent),
-    0 14px 34px color-mix(in oklab, var(--accent) 8%, transparent) !important;
-}
-
-.navItem.active .navIcon{
-  color: #06100b;
-  background: var(--accent);
-  border-color: color-mix(in oklab, var(--accent) 58%, white 6%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 0 18px color-mix(in oklab, var(--accent) 20%, transparent);
-}
-
 .mainAction{
   min-height: 50px !important;
   margin-top: 2px;
@@ -3068,29 +2575,9 @@ input[type="range"]{
 }
 
 @media (max-width: 920px){
-  .appShell{
-    grid-template-columns: 88px minmax(0, 1fr) !important;
-  }
-
-  .sidebar{
-    padding-inline: 10px !important;
-  }
 
   .sidebarModeSwitch{
     display: none !important;
-  }
-
-  .logoWrap{
-    justify-content: center;
-    min-height: 58px !important;
-    padding: 8px !important;
-  }
-
-  .navItem{
-    min-height: 52px !important;
-    grid-template-columns: 1fr !important;
-    justify-items: center;
-    padding: 7px !important;
   }
 
   .navIcon{
@@ -3111,31 +2598,6 @@ input[type="range"]{
   }
 }
 
-.sidebar{
-  gap: 16px !important;
-}
-
-.logoWrap{
-  min-height: 76px !important;
-  padding: 12px 8px 14px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 13px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.logoWrap:hover{
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
 .logoIcon{
   width: 32px !important;
   height: 32px !important;
@@ -3151,50 +2613,6 @@ input[type="range"]{
   text-shadow: 0 0 14px color-mix(in oklab, var(--accent) 32%, transparent) !important;
   transform: none !important;
   filter: none !important;
-}
-
-.logoWrap h1{
-  margin: 0 !important;
-  color: var(--text) !important;
-  font-size: clamp(25px, 1.6vw, 30px) !important;
-  line-height: 0.9 !important;
-  font-weight: 980 !important;
-  letter-spacing: -0.075em !important;
-  text-transform: lowercase !important;
-}
-
-.logoWrap p{
-  margin: 5px 0 0 !important;
-  color: color-mix(in oklab, var(--muted) 86%, var(--accent) 14%) !important;
-  font-size: 12px !important;
-  font-weight: 740 !important;
-  letter-spacing: -0.015em !important;
-}
-
-.nav{
-  gap: 7px !important;
-}
-
-.navItem{
-  min-height: 58px !important;
-  height: auto !important;
-  display: grid !important;
-  grid-template-columns: 34px minmax(0, 1fr) !important;
-  align-items: center !important;
-  gap: 13px !important;
-  padding: 9px 10px !important;
-  border-radius: 14px !important;
-  color: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  box-shadow: none !important;
-  filter: none !important;
-  transform: none !important;
-  transition:
-    color 190ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 190ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 190ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 210ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .navIcon{
@@ -3219,86 +2637,7 @@ input[type="range"]{
     text-shadow 190ms ease !important;
 }
 
-.navText{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 4px !important;
-}
-
-.navText strong{
-  color: inherit !important;
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.035em !important;
-}
-
-.navText small{
-  color: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%) !important;
-  font-size: 10.5px !important;
-  font-weight: 760 !important;
-  letter-spacing: -0.005em !important;
-  opacity: 0.78 !important;
-}
-
-.navItem:hover{
-  color: var(--text) !important;
-  background: color-mix(in oklab, var(--accent) 9%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent) 18%, transparent) !important;
-  box-shadow: inset 3px 0 0 color-mix(in oklab, var(--accent) 34%, transparent) !important;
-  transform: none !important;
-  filter: none !important;
-}
-
-.navItem:hover .navIcon{
-  color: color-mix(in oklab, var(--accent) 86%, var(--text) 14%) !important;
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  text-shadow: 0 0 12px color-mix(in oklab, var(--accent) 26%, transparent) !important;
-  transform: none !important;
-  filter: none !important;
-}
-
-.navItem.active{
-  color: var(--text) !important;
-  background: color-mix(in oklab, var(--accent) 13%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent) 26%, transparent) !important;
-  box-shadow:
-    inset 3px 0 0 var(--accent),
-    0 0 0 1px color-mix(in oklab, var(--accent) 7%, transparent) !important;
-  transform: none !important;
-}
-
-.navItem.active .navIcon{
-  color: var(--accent) !important;
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  text-shadow: 0 0 14px color-mix(in oklab, var(--accent) 34%, transparent) !important;
-  transform: none !important;
-}
-
-.navItem:active{
-  transform: none !important;
-}
-
 @media (max-width: 920px){
-  .logoWrap{
-    justify-content: center !important;
-    min-height: 64px !important;
-    padding: 10px 0 !important;
-  }
-
-  .logoWrap h1{
-    display: none !important;
-  }
-
-  .navItem{
-    min-height: 54px !important;
-    grid-template-columns: 1fr !important;
-    justify-items: center !important;
-    padding: 8px 4px !important;
-  }
 
   .navIcon{
     width: 34px !important;
@@ -3316,93 +2655,8 @@ input[type="range"]{
   --shell-soft-text: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%);
 }
 
-.appShell{
-  grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr) !important;
-}
-
-.sidebar{
-  width: var(--shell-sidebar-width) !important;
-  padding: 18px 14px 16px !important;
-  gap: 18px !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.008)),
-    rgba(5, 5, 10, 0.86) !important;
-  border-right: 1px solid color-mix(in oklab, var(--accent) 12%, rgba(255,255,255,.07)) !important;
-  box-shadow: inset -1px 0 0 rgba(255,255,255,.028) !important;
-  backdrop-filter: blur(18px) saturate(1.08) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(1.08) !important;
-}
-
 .sidebarModeSwitch{
   display: none !important;
-}
-
-.nav{
-  display: grid !important;
-  gap: 11px !important;
-  margin: 0 !important;
-  padding: 4px 0 0 !important;
-}
-
-.navItem{
-  min-height: 59px !important;
-  height: auto !important;
-  width: 100% !important;
-  display: grid !important;
-  grid-template-columns: 36px minmax(0, 1fr) !important;
-  align-items: center !important;
-  gap: 14px !important;
-  padding: 9px 12px !important;
-  position: relative !important;
-  overflow: hidden !important;
-  color: var(--shell-soft-text) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  border-radius: 12px !important;
-  box-shadow: none !important;
-  text-align: left !important;
-  transform: translate3d(0,0,0) !important;
-  filter: none !important;
-  transition:
-    color 190ms var(--shell-motion-ease),
-    background-color 190ms var(--shell-motion-ease),
-    border-color 190ms var(--shell-motion-ease),
-    box-shadow 210ms var(--shell-motion-ease),
-    transform 210ms var(--shell-motion-ease) !important;
-}
-
-.navItem::before{
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 13px;
-  bottom: 13px;
-  width: 3px;
-  border-radius: 999px;
-  background: var(--accent);
-  opacity: 0;
-  transform: scaleY(.45);
-  transform-origin: center;
-  transition:
-    opacity 190ms var(--shell-motion-ease),
-    transform 220ms var(--shell-motion-ease);
-}
-
-.navItem::after{
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  background:
-    linear-gradient(90deg, color-mix(in oklab, var(--accent) 12%, transparent), transparent 62%),
-    radial-gradient(circle at 18% 50%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 32%);
-  transition: opacity 210ms var(--shell-motion-ease);
-}
-
-.navItem > *{
-  position: relative;
-  z-index: 1;
 }
 
 .navIcon{
@@ -3429,104 +2683,6 @@ input[type="range"]{
     transform 190ms var(--shell-motion-ease) !important;
 }
 
-.navText{
-  display: grid !important;
-  min-width: 0 !important;
-  gap: 4px !important;
-}
-
-.navText strong{
-  color: inherit !important;
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.032em !important;
-  line-height: 1 !important;
-  text-transform: lowercase !important;
-}
-
-.navText small{
-  color: color-mix(in oklab, var(--muted) 84%, var(--accent) 16%) !important;
-  font-size: 10.5px !important;
-  font-weight: 760 !important;
-  line-height: 1 !important;
-  opacity: .78 !important;
-}
-
-.navItem:hover{
-  color: var(--text) !important;
-  background: var(--shell-hover-bg) !important;
-  border-color: var(--shell-hover-line) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
-  transform: translate3d(2px, 0, 0) !important;
-}
-
-.navItem:hover::before{
-  opacity: 1;
-  transform: scaleY(1);
-}
-
-.navItem:hover::after{
-  opacity: 1;
-}
-
-.navItem:hover .navIcon{
-  color: var(--accent) !important;
-  opacity: 1 !important;
-  text-shadow: 0 0 12px color-mix(in oklab, var(--accent) 28%, transparent) !important;
-  transform: translate3d(1px, 0, 0) scale(1.035) !important;
-}
-
-.navItem.active{
-  color: var(--text) !important;
-  background: var(--shell-active-bg) !important;
-  border-color: color-mix(in oklab, var(--accent) 28%, transparent) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.045),
-    0 0 0 1px color-mix(in oklab, var(--accent) 5%, transparent) !important;
-  transform: translate3d(0,0,0) !important;
-}
-
-.navItem.active .navIcon{
-  color: var(--accent) !important;
-  opacity: 1 !important;
-  text-shadow: 0 0 14px color-mix(in oklab, var(--accent) 34%, transparent) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.navItem:active{
-  transform: translate3d(1px, 0, 0) scale(.992) !important;
-}
-
-.sidebar .mainAction{
-  min-height: 42px !important;
-  margin-top: auto !important;
-  border-radius: 11px !important;
-  box-shadow: 0 8px 22px color-mix(in oklab, var(--accent) 18%, transparent) !important;
-}
-
-.sidebar .mainAction:hover{
-  transform: translateY(-1px) !important;
-  box-shadow:
-    0 10px 28px color-mix(in oklab, var(--accent) 22%, transparent),
-    0 0 0 1px color-mix(in oklab, var(--accent) 18%, transparent) inset !important;
-}
-
-.content > .pageTransition{
-  transform-origin: 50% 26px !important;
-  animation: localtifyShellPageIn 430ms var(--shell-motion-ease) both !important;
-
-}
-
-.content > .pageTransition > *{
-  animation: localtifyShellChildIn 500ms var(--shell-motion-ease) both !important;
-  animation-delay: 34ms !important;
-}
-
-.content > .pageTransition > *:nth-child(2){ animation-delay: 70ms !important; }
-.content > .pageTransition > *:nth-child(3){ animation-delay: 100ms !important; }
-.content > .pageTransition > *:nth-child(4){ animation-delay: 126ms !important; }
-
 @keyframes localtifyShellPageIn{
   0%{
     opacity: 0;
@@ -3551,27 +2707,6 @@ input[type="range"]{
   }
 }
 
-@media (max-width: 920px){
-  .sidebar{
-    padding: 14px 8px !important;
-  }
-
-  .navItem{
-    min-height: 54px !important;
-    grid-template-columns: 1fr !important;
-    justify-items: center !important;
-    padding: 8px 4px !important;
-  }
-
-  .navText{
-    display: none !important;
-  }
-}
-
-.sidebar .mainAction{
-  margin-top: 4px !important;
-}
-
 :root{
   --font-display: "Space Grotesk", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-body: "Space Grotesk", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -3588,21 +2723,6 @@ body{
   letter-spacing: -0.018em;
 }
 
-.titleDrag{
-  font-family: var(--font-display) !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.07em;
-}
-
-.logoWrap h1{
-  font-size: 25px !important;
-}
-
-.logoWrap p{
-  font-weight: 700 !important;
-  letter-spacing: -0.018em;
-}
-
 .loadingLogo{
   color: #071008 !important;
   background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 72%, #ffffff)) !important;
@@ -3613,18 +2733,6 @@ body{
   width: 1em !important;
   height: 1em !important;
   stroke: currentColor !important;
-}
-
-.navItem{
-  min-height: 52px !important;
-  height: auto !important;
-  display: grid !important;
-  grid-template-columns: 26px minmax(0, 1fr) !important;
-  gap: 13px !important;
-  align-items: center !important;
-  padding: 10px 12px !important;
-  font-family: var(--font-display) !important;
-  font-weight: 700 !important;
 }
 
 .navIcon{
@@ -3646,36 +2754,6 @@ body{
   width: 100% !important;
   height: 100% !important;
   stroke: currentColor !important;
-}
-
-.navText{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 2px !important;
-}
-
-.navText strong{
-  font-size: 14px !important;
-  line-height: 1.05 !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.045em !important;
-}
-
-.navText small{
-  font-size: 10.5px !important;
-  line-height: 1 !important;
-  text-transform: lowercase !important;
-}
-
-.navItem:hover .navIcon{
-  color: var(--accent) !important;
-  transform: translateX(1px) scale(1.04) !important;
-  filter: drop-shadow(0 0 9px rgba(var(--accent-rgb), 0.24));
-}
-
-.navItem.active .navIcon{
-  color: var(--accent) !important;
-  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.34));
 }
 
 .iconTextButton{
@@ -3707,39 +2785,6 @@ body{
   letter-spacing: -0.018em;
 }
 
-.titleDrag{
-  font-family: var(--font-display) !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.064em;
-}
-
-.app .sidebar{
-  padding: 18px 14px 16px !important;
-  gap: 14px !important;
-}
-
-.app .sidebar .nav{
-  gap: 8px !important;
-}
-
-.app .sidebar .navItem{
-  min-height: 54px !important;
-  height: auto !important;
-  display: grid !important;
-  grid-template-columns: 30px minmax(0, 1fr) !important;
-  gap: 13px !important;
-  align-items: center !important;
-  padding: 10px 12px !important;
-  border-radius: 12px !important;
-  border: 1px solid transparent !important;
-  color: color-mix(in oklab, var(--text, #fff) 68%, transparent) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  text-align: left !important;
-  font-family: var(--font-display) !important;
-  font-weight: 800 !important;
-}
-
 .app .navIcon{
   width: 28px !important;
   height: 28px !important;
@@ -3767,38 +2812,6 @@ body{
   stroke: currentColor !important;
   fill: currentColor !important;
   fill-opacity: .16 !important;
-}
-
-.app .navItem:hover{
-  color: #fff !important;
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 9%, transparent) !important;
-  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 18%, transparent) !important;
-  box-shadow: inset 3px 0 0 color-mix(in oklab, var(--theme-accent, var(--accent)) 62%, transparent) !important;
-}
-
-.app .navItem:hover .navIcon{
-  color: var(--accent) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.app .navItem:hover .navLucideIcon{
-  fill-opacity: .36 !important;
-}
-
-.app .navText strong{
-  font-size: 14px !important;
-  line-height: 1.05 !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.045em !important;
-}
-
-.app .navText small{
-  color: color-mix(in oklab, var(--text, #fff) 44%, transparent) !important;
-  font-size: 10.5px !important;
-  line-height: 1 !important;
-  font-weight: 750 !important;
-  text-transform: lowercase !important;
 }
 
 .app .songList{
@@ -3838,7 +2851,6 @@ body{
     inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
-.app .navItem,
 .app .songRow,
 .app .topRow,
 .app .homeAlbumCard,
@@ -3857,46 +2869,6 @@ body{
   transition: none !important;
   animation: none !important;
   transform: none !important;
-}
-
-.app .sidebar .logoWrap{
-  display: none !important;
-}
-
-.app .sidebar{
-  width: 236px;
-  padding: 20px 16px 16px !important;
-  gap: 14px !important;
-  background: color-mix(in oklab, #000 82%, var(--theme-accent, var(--accent)) 4%) !important;
-  border-right: 1px solid color-mix(in oklab, var(--theme-accent, var(--accent)) 11%, rgba(255,255,255,.06)) !important;
-}
-
-.app .sidebar .nav{
-  gap: 7px !important;
-}
-
-.app .sidebar .navItem{
-  min-height: 50px !important;
-  height: auto !important;
-  display: grid !important;
-  grid-template-columns: 28px minmax(0, 1fr) !important;
-  gap: 12px !important;
-  align-items: center !important;
-  padding: 9px 11px !important;
-  border-radius: 9px !important;
-  border: 1px solid transparent !important;
-  color: color-mix(in oklab, var(--text, #fff) 62%, transparent) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  text-align: left !important;
-  transform: none !important;
-}
-
-.app .sidebar .navItem:hover{
-  color: #fff !important;
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 8%, transparent) !important;
-  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 16%, transparent) !important;
-  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--theme-accent, var(--accent)) 62%, transparent) !important;
 }
 
 .app .navIcon{
@@ -3932,41 +2904,9 @@ body{
   stroke-width: 2.05 !important;
 }
 
-.app .navItem:hover .navLucideIcon{
-  fill-opacity: .18 !important;
-  stroke-width: 2.08 !important;
-}
-
-.app .navText{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 2px !important;
-}
-
-.app .navText strong{
-  font-size: 14px !important;
-  line-height: 1.05 !important;
-  font-weight: 760 !important;
-  letter-spacing: -0.035em !important;
-}
-
-.app .navText small{
-  color: color-mix(in oklab, var(--text, #fff) 42%, transparent) !important;
-  font-size: 10.5px !important;
-  line-height: 1 !important;
-  font-weight: 650 !important;
-  text-transform: lowercase !important;
-}
-
 .app{
   --control-circle: 42px;
   --control-circle-main: 48px;
-}
-
-.content{
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-gutter: auto;
 }
 
 .headerBar{
@@ -3977,32 +2917,9 @@ body{
   -webkit-backdrop-filter: blur(18px);
 }
 
-.navItem{
-  min-height: 52px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease;
-}
-
-.navItem:hover{
-  background: color-mix(in oklab, var(--accent) 9%, transparent);
-  border-color: color-mix(in oklab, var(--accent) 22%, transparent);
-  transform: translateX(2px);
-}
-
-.navItem.active{
-  background: color-mix(in oklab, var(--accent) 15%, transparent);
-  border-color: color-mix(in oklab, var(--accent) 42%, transparent);
-  box-shadow: inset 3px 0 0 color-mix(in oklab, var(--accent) 75%, white 5%);
-}
-
 .navLucideIcon{
   fill: none !important;
   stroke-width: 2.1;
-}
-
-.navItem.active .navLucideIcon{
-  fill: color-mix(in oklab, var(--accent) 24%, transparent) !important;
 }
 
 .settingsThemeGrid{
@@ -4095,43 +3012,6 @@ html{
   background-position: 0 0 !important;
 }
 
-.appShell{
-  background: transparent !important;
-}
-
-.titleBar{
-  background: color-mix(in oklab, var(--bg, #000) 88%, var(--accent, #64f0a4) 3%) !important;
-  border-bottom-color: color-mix(in oklab, var(--accent, #64f0a4) 16%, transparent) !important;
-  box-shadow: none !important;
-}
-
-.content{
-  background-color: transparent !important;
-  background-image:
-    linear-gradient(var(--page-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--page-line) 1px, transparent 1px) !important;
-  background-size: 42px 42px !important;
-  background-position: 0 0 !important;
-}
-
-.sidebar{
-  background:
-    linear-gradient(180deg, var(--sidebar-bg-solid), var(--sidebar-bg-soft)) !important;
-  border-right-color: var(--sidebar-line) !important;
-  box-shadow: none !important;
-}
-
-.sidebar::before{
-  content: none !important;
-  display: none !important;
-  opacity: 0 !important;
-  background: none !important;
-  background-image: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-  animation: none !important;
-}
-
 [data-orb]{
   display: none !important;
   opacity: 0 !important;
@@ -4166,13 +3046,6 @@ html{
 .ambientSurface:hover{
   background: color-mix(in oklab, var(--accent, #64f0a4) 6%, var(--surface, rgba(255,255,255,.04)) 94%) !important;
   border-color: color-mix(in oklab, var(--accent, #64f0a4) 26%, var(--line, rgba(255,255,255,.08)) 74%) !important;
-  box-shadow: none !important;
-}
-
-.sidebarCustomTheme{
-  background: color-mix(in oklab, var(--bg, #000) 86%, var(--accent, #64f0a4) 5%) !important;
-  background-image: none !important;
-  border-color: color-mix(in oklab, var(--accent, #64f0a4) 18%, var(--line, rgba(255,255,255,.08)) 82%) !important;
   box-shadow: none !important;
 }
 
@@ -4252,25 +3125,8 @@ html{
   animation: none !important;
 }
 
-.titleBar{
-  background: var(--theme-topbar-bg) !important;
-  border-bottom: 1px solid var(--theme-line) !important;
-  box-shadow: none !important;
-}
-
 .shell{
   background: transparent !important;
-}
-
-.sidebar{
-  background: var(--theme-sidebar-bg) !important;
-  border-right: 1px solid var(--theme-line) !important;
-  box-shadow: inset -1px 0 0 color-mix(in oklab, var(--theme-accent) 6%, transparent) !important;
-}
-
-.content{
-  background: var(--theme-content-bg) !important;
-  background-size: 42px 42px, 42px 42px, auto !important;
 }
 
 .bottomPlayer,
@@ -4278,38 +3134,6 @@ html{
   background: var(--theme-player-bg) !important;
   border-top: 1px solid var(--theme-line) !important;
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--theme-accent) 7%, transparent) !important;
-}
-
-.sidebar .navItem{
-  background: transparent !important;
-  border-color: transparent !important;
-  color: color-mix(in oklab, var(--text, #fff) 78%, var(--muted, #9ca3af) 22%) !important;
-}
-
-.sidebar .navItem:hover{
-  transform: translateX(2px) !important;
-  background: color-mix(in oklab, var(--theme-accent) 9%, transparent) !important;
-  border-color: color-mix(in oklab, var(--theme-accent) 18%, transparent) !important;
-  box-shadow: none !important;
-}
-
-.sidebar .navItem.active{
-  background: color-mix(in oklab, var(--theme-accent) 18%, transparent) !important;
-  border-color: color-mix(in oklab, var(--theme-accent) 42%, rgba(255,255,255,.07)) !important;
-  box-shadow: inset 3px 0 0 var(--theme-accent) !important;
-}
-
-.sidebar .navItem svg{
-  color: #ffffff !important;
-  stroke: #ffffff !important;
-  fill: none !important;
-  filter: none !important;
-}
-
-.logoWrap{
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
 }
 
 .importButton{
@@ -4375,46 +3199,6 @@ body{
     linear-gradient(180deg, var(--localtify-page-bg), var(--localtify-page-bg-2)) !important;
   background-size: 42px 42px, 42px 42px, auto !important;
   color: var(--text, #f7f7f7) !important;
-}
-
-.sidebar{
-  background:
-    linear-gradient(180deg, var(--localtify-sidebar-bg), var(--localtify-sidebar-bg-2)) !important;
-  border-right: 1px solid var(--localtify-line-soft) !important;
-  box-shadow: inset -1px 0 0 rgba(255,255,255,.018) !important;
-}
-
-.sidebar *{
-  text-shadow: none !important;
-}
-
-.sidebar svg{
-  color: #f7f7f7 !important;
-  stroke: #f7f7f7 !important;
-  fill: none !important;
-  filter: none !important;
-}
-
-.navItem{
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  color: color-mix(in oklab, var(--text, #fff) 74%, var(--muted, #8d8d8d)) !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.navItem:hover{
-  background: color-mix(in oklab, var(--accent, #ff65df) 9%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 18%, transparent) !important;
-  transform: translateX(2px) !important;
-  box-shadow: none !important;
-}
-
-.navItem.active{
-  background: color-mix(in oklab, var(--accent, #ff65df) 18%, var(--localtify-sidebar-bg)) !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 45%, transparent) !important;
-  color: #fff !important;
-  box-shadow: inset 3px 0 0 var(--accent, #ff65df) !important;
 }
 
 .logoPill{
@@ -4506,15 +3290,6 @@ button:hover,
   border-color: color-mix(in srgb, var(--accent, #ff6edb) 24%, transparent) !important;
 }
 
-.app[data-theme] .sidebar{
-  background:
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--accent, #ff6edb) 12%, var(--bg, #050505)) 0%,
-      color-mix(in srgb, var(--accent, #ff6edb) 5%, var(--bg, #050505)) 42%,
-      var(--bg, #050505) 100%) !important;
-  border-color: color-mix(in srgb, var(--accent, #ff6edb) 24%, transparent) !important;
-}
-
 .app[data-theme] .main{
   background:
     linear-gradient(180deg,
@@ -4527,11 +3302,6 @@ button:hover,
   color: #ffffff !important;
   stroke: #ffffff !important;
   fill: none !important;
-}
-
-.app[data-theme] .navItem.active svg{
-  color: #ffffff !important;
-  stroke: #ffffff !important;
 }
 
 .importButton{
@@ -4556,11 +3326,6 @@ button:hover,
 .rangeInput::-webkit-slider-thumb{
   outline: none !important;
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent, #ff6edb) 22%, transparent) !important;
-}
-
-body.localitfyThemePainting .app :where(.content, .simpleShell, .songList, .homeAlbumGrid){
-  scrollbar-gutter: auto;
-  overscroll-behavior: contain;
 }
 
 .app .songRow{
@@ -4588,11 +3353,6 @@ body.localitfyThemePainting .app :where(.content, .simpleShell, .songList, .home
     contain-intrinsic-size: 230px 290px;
   }
 
-}
-
-.app .content{
-  overscroll-behavior: contain;
-  scrollbar-gutter: auto;
 }
 
 .app .songRow{
@@ -4675,33 +3435,6 @@ body.localitfyThemePainting .app *{
   transform: translate3d(0, -1px, 0);
 }
 
-.appShell{
-  grid-template-columns: var(--sidebar-width-live, var(--sidebar-width, 236px)) minmax(0, 1fr);
-}
-
-.sidebar{
-  --sidebar-border: rgba(255, 255, 255, 0.065);
-  --sidebar-line: rgba(255, 255, 255, 0.082);
-  --sidebar-hover: rgba(255, 255, 255, 0.055);
-  --sidebar-active: rgba(255, 255, 255, 0.085);
-  position: relative;
-  padding: 16px 12px 14px !important;
-  gap: 10px !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.012)),
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.045), transparent 48%),
-    rgba(10, 10, 12, 0.9) !important;
-  border-right: 1px solid var(--sidebar-border) !important;
-  box-shadow: inset -1px 0 rgba(255, 255, 255, 0.018) !important;
-  backdrop-filter: blur(18px) saturate(112%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(112%) !important;
-}
-
-.nav{
-  display: grid !important;
-  gap: 6px !important;
-}
-
 .navMain{
   flex: 0 0 auto;
 }
@@ -4723,63 +3456,6 @@ body.localitfyThemePainting .app *{
   gap: 10px;
 }
 
-.navItem{
-  position: relative !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  height: 52px !important;
-  padding: 0 12px !important;
-  display: grid !important;
-  grid-template-columns: 34px minmax(0, 1fr) !important;
-  align-items: center !important;
-  gap: 10px !important;
-  border: 0 !important;
-  border-radius: 10px !important;
-  color: rgba(255, 255, 255, 0.5) !important;
-  background: transparent !important;
-  text-align: left !important;
-  box-shadow: none !important;
-  outline: 0 !important;
-  transform: none !important;
-  transition:
-    color 145ms ease,
-    background-color 145ms ease,
-    opacity 145ms ease !important;
-}
-
-.navItem::before{
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 9px;
-  bottom: 9px;
-  width: 3px;
-  border-radius: 999px;
-  background: transparent;
-  opacity: 0;
-  transition: opacity 145ms ease, background-color 145ms ease, box-shadow 145ms ease;
-}
-
-.navItem:hover{
-  color: rgba(255, 255, 255, 0.82) !important;
-  background: var(--sidebar-hover) !important;
-  border-color: transparent !important;
-  transform: none !important;
-}
-
-.navItem.active{
-  color: #fff !important;
-  background: var(--sidebar-active) !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-
-.navItem.active::before{
-  opacity: 1;
-  background: var(--accent);
-  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.42);
-}
-
 .navIcon{
   width: 34px;
   height: 34px;
@@ -4797,127 +3473,13 @@ body.localitfyThemePainting .app *{
   filter: none !important;
 }
 
-.navText{
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-  line-height: 1.05;
-}
-
-.navText strong{
-  overflow: hidden;
-  color: currentColor;
-  font-size: 13px;
-  font-weight: 850;
-  letter-spacing: -0.012em;
-  text-overflow: ellipsis;
-  text-transform: lowercase;
-  white-space: nowrap;
-}
-
-.navText small{
-  overflow: hidden;
-  color: rgba(255, 255, 255, 0.34) !important;
-  font-size: 10.5px;
-  font-weight: 720;
-  letter-spacing: -0.01em;
-  text-overflow: ellipsis;
-  text-transform: lowercase;
-  white-space: nowrap;
-}
-
-.navItem:hover .navText small{
-  color: rgba(255, 255, 255, 0.52) !important;
-}
-
-.importMainAction{
-  width: 100% !important;
-  min-height: 42px !important;
-  justify-content: center !important;
-  border-radius: 10px !important;
-  color: #071009 !important;
-  background: var(--accent) !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.importMainAction:hover{
-  filter: brightness(1.055) saturate(1.02) !important;
-  transform: none !important;
-}
-
 .buttonInlineIcon{
   transform: none !important;
   rotate: 0deg !important;
 }
 
-.sidebarResizeHandle{
-  right: -4px !important;
-  width: 8px !important;
-  background: transparent !important;
-}
-
-.sidebarResizeHandle span{
-  width: 2px !important;
-  background: transparent !important;
-}
-
-.sidebar:hover .sidebarResizeHandle span{
-  background: rgba(255, 255, 255, 0.12) !important;
-}
-
-@media (max-width: 900px){
-  .sidebar{
-    display: none !important;
-  }
-}
-
-.sidebar{
-  --sidebar-line: rgba(var(--accent-rgb), 0.16);
-  --sidebar-line-soft: rgba(255, 255, 255, 0.075);
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.035), transparent 34%),
-    rgba(6, 8, 12, 0.74);
-  border-right: 1px solid color-mix(in srgb, var(--sidebar-line) 72%, rgba(255, 255, 255, 0.08));
-}
-
 .navMain{
   gap: 10px;
-}
-
-.navItem{
-  min-height: 56px;
-  padding: 0 15px;
-  border-radius: 16px;
-  border: 1px solid transparent;
-  background: transparent;
-  box-shadow: none;
-  color: color-mix(in srgb, var(--text-2) 72%, var(--accent) 28%);
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    color 160ms ease,
-    transform 160ms ease;
-}
-
-.navItem:hover{
-  background: rgba(var(--accent-rgb), 0.07);
-  border-color: rgba(var(--accent-rgb), 0.12);
-  color: var(--text);
-  transform: translateX(2px);
-}
-
-.navItem.active{
-  background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.20), rgba(var(--accent-rgb), 0.075)),
-    rgba(255, 255, 255, 0.045);
-  border-color: rgba(var(--accent-rgb), 0.30);
-  color: var(--text);
-  box-shadow:
-    inset 3px 0 0 var(--accent),
-    0 16px 34px rgba(0, 0, 0, 0.22),
-    0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .navIcon{
@@ -4934,18 +3496,6 @@ body.localitfyThemePainting .app *{
   stroke-linecap: round;
   stroke-linejoin: round;
   filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.10));
-}
-
-.navItem.active .navLucideIcon{
-  filter: drop-shadow(0 0 14px rgba(var(--accent-rgb), 0.18));
-}
-
-.navText strong{
-  letter-spacing: -0.015em;
-}
-
-.navText small{
-  opacity: 0.68;
 }
 
 .navDivider{
@@ -4982,38 +3532,6 @@ body.localitfyThemePainting .app *{
   box-shadow: 0 18px 38px rgba(var(--accent-rgb), 0.26);
 }
 
-.app .sidebar{
-  --sidebar-solid-line: color-mix(in oklab, var(--accent, #a98cff) 20%, rgba(255,255,255,.10));
-  background:
-    linear-gradient(180deg, color-mix(in oklab, var(--accent, #a98cff) 10%, transparent), transparent 42%),
-    color-mix(in oklab, var(--bg, #06060a) 86%, var(--accent, #a98cff) 9%) !important;
-  border-right: 1px solid var(--sidebar-solid-line) !important;
-}
-
-.app .navItem{
-  min-height: 54px !important;
-  padding: 0 15px !important;
-  border-radius: 15px !important;
-  color: color-mix(in oklab, var(--text, #fff) 62%, var(--accent, #a98cff) 38%) !important;
-}
-
-.app .navItem:hover{
-  background: color-mix(in oklab, var(--accent, #a98cff) 10%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent, #a98cff) 24%, transparent) !important;
-  transform: translate3d(2px, 0, 0) !important;
-}
-
-.app .navItem.active{
-  background:
-    linear-gradient(90deg, color-mix(in oklab, var(--accent, #a98cff) 24%, transparent), color-mix(in oklab, var(--accent, #a98cff) 8%, transparent)),
-    color-mix(in oklab, var(--surface, rgba(255,255,255,.04)) 70%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent, #a98cff) 38%, transparent) !important;
-  box-shadow:
-    inset 3px 0 0 var(--accent, #a98cff),
-    inset 0 1px 0 rgba(255,255,255,.055),
-    0 16px 32px rgba(0,0,0,.24) !important;
-}
-
 .app .navIcon{
   width: 33px !important;
   height: 33px !important;
@@ -5033,11 +3551,6 @@ body.localitfyThemePainting .app *{
   filter: drop-shadow(0 0 12px color-mix(in oklab, var(--accent, #a98cff) 20%, transparent)) !important;
 }
 
-.app .navItem.active .navLucideIcon{
-  fill-opacity: .34 !important;
-  filter: drop-shadow(0 0 15px color-mix(in oklab, var(--accent, #a98cff) 30%, transparent)) !important;
-}
-
 .app .navDivider{
   width: calc(100% - 28px) !important;
   height: 1px !important;
@@ -5049,35 +3562,9 @@ body.localitfyThemePainting .app *{
   mask-image: none !important;
 }
 
-.appShell .content{
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: contain;
-  scrollbar-gutter: auto;
-}
-
-.appShell .mainArea{
-  min-height: 0;
-}
-
 html{
   background: var(--app-bg-solid, var(--bg, #050505)) !important;
   background-image: none !important;
-  background-size: auto !important;
-}
-
-.content{
-  background:
-    radial-gradient(circle at 18% 0%, color-mix(in oklab, var(--accent, #ff65df) 13%, transparent) 0%, transparent 34%),
-    linear-gradient(180deg,
-      color-mix(in oklab, var(--bg, #050505) 84%, var(--accent, #ff65df) 7%) 0%,
-      var(--app-bg-solid, var(--bg, #050505)) 420px) !important;
-  background-image:
-    radial-gradient(circle at 18% 0%, color-mix(in oklab, var(--accent, #ff65df) 13%, transparent) 0%, transparent 34%),
-    linear-gradient(180deg,
-      color-mix(in oklab, var(--bg, #050505) 84%, var(--accent, #ff65df) 7%) 0%,
-      var(--app-bg-solid, var(--bg, #050505)) 420px) !important;
   background-size: auto !important;
 }
 
@@ -5120,11 +3607,6 @@ html{
   background-size: auto !important;
 }
 
-.content{
-  background: var(--theme-content-bg) !important;
-  background-size: auto !important;
-}
-
 .editorModal{
   background-image: none !important;
   background-size: auto !important;
@@ -5139,10 +3621,6 @@ html{
 }
 
 .app::before{
-  background-image: none !important;
-}
-
-.content{
   background-image: none !important;
 }
 
@@ -5994,17 +4472,6 @@ html{
   100%{ opacity: .66; text-shadow: 0 0 6px rgba(255,255,255,.34); }
 }
 
-.titleBar{
-  position: relative !important;
-  z-index: 6200 !important;
-}
-
-.windowButtons,
-.windowButtons button{
-  position: relative !important;
-  z-index: 6201 !important;
-}
-
 .app .secretLayer{
   inset: 36px 0 94px 0 !important;
   z-index: 35 !important;
@@ -6147,8 +4614,8 @@ html{
   }
 
   .downloadPanel .converterBox .heroMain,
-  .downloadPanel .downloadActions .heroMain,
-  .downloadPanel .downloadActions .heroGhost{
+.downloadPanel .downloadActions .heroMain,
+.downloadPanel .downloadActions .heroGhost{
     width: 100% !important;
     justify-self: stretch !important;
   }
@@ -6156,57 +4623,19 @@ html{
 
 .app,
 .app::before,
-.content,
-.content::before,
 .mainView,
 .mainView::before,
 .homeView,
-.homeView::before {
+.homeView::before{
   background-image: none !important;
   background-size: auto !important;
 }
 
 .app::before,
-.content::before,
 .mainView::before,
-.homeView::before {
+.homeView::before{
   opacity: 0 !important;
   display: none !important;
-}
-
-.sidebar .navItem,
-.sidebar .navItem *,
-.navItem,
-.navItem * {
-  color: rgba(255, 255, 255, 0.74) !important;
-}
-
-.sidebar .navItem svg,
-.navItem svg {
-  color: currentColor !important;
-  stroke: currentColor !important;
-  fill: none !important;
-}
-
-.sidebar .navItem.active,
-.sidebar .navItem.active *,
-.sidebar .navItem[aria-current="page"],
-.sidebar .navItem[aria-current="page"] *,
-.navItem.active,
-.navItem.active *,
-.navItem[aria-current="page"],
-.navItem[aria-current="page"] * {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-}
-
-.sidebar .navItem.active svg,
-.sidebar .navItem[aria-current="page"] svg,
-.navItem.active svg,
-.navItem[aria-current="page"] svg {
-  color: #ffffff !important;
-  stroke: #ffffff !important;
-  fill: none !important;
 }
 
 .songRow.active,
@@ -6216,7 +4645,7 @@ html{
 .songCard.playing,
 .songCard.isPlaying,
 .coverSongRow.active,
-.coverSongRow.selected {
+.coverSongRow.selected{
   color: #ffffff !important;
   -webkit-text-fill-color: initial !important;
 }
@@ -6228,7 +4657,7 @@ html{
 .songCard.playing *,
 .songCard.isPlaying *,
 .coverSongRow.active *,
-.coverSongRow.selected * {
+.coverSongRow.selected *{
   color: inherit !important;
   -webkit-text-fill-color: currentColor !important;
 }
@@ -6241,7 +4670,7 @@ html{
 .songCard.isPlaying .songTitle,
 .songCard.active h3,
 .songCard.playing h3,
-.songCard.isPlaying h3 {
+.songCard.isPlaying h3{
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
@@ -6254,7 +4683,7 @@ html{
 .songCard.isPlaying .songArtist,
 .songCard.active p,
 .songCard.playing p,
-.songCard.isPlaying p {
+.songCard.isPlaying p{
   color: rgba(255, 255, 255, 0.74) !important;
   -webkit-text-fill-color: rgba(255, 255, 255, 0.74) !important;
 }
@@ -6275,7 +4704,7 @@ button svg,
   -webkit-text-fill-color: #ffffff !important;
 }
 
-.themePickerLockNoteV026 {
+.themePickerLockNoteV026{
   margin: 8px 0 0;
   color: rgba(255, 255, 255, 0.62);
   font-size: 12px;
@@ -6285,14 +4714,14 @@ button svg,
 
 .themeGridLockedV026 .themeCard,
 .themeCardLockedV026,
-.settingsThemeSelectPanel select:disabled {
+.settingsThemeSelectPanel select:disabled{
   cursor: not-allowed !important;
   opacity: 0.55 !important;
   filter: grayscale(0.25) !important;
 }
 
 .app,
-.app * {
+.app *{
   transition-property: background-color, border-color, color, box-shadow, opacity, transform;
 }
 
@@ -6303,7 +4732,7 @@ button svg,
 .homeView,
 .libraryView,
 .coverStudioView,
-.settingsView {
+.settingsView{
   scrollbar-gutter: auto;
 }
 
@@ -6331,24 +4760,21 @@ button{
 .app .libraryRow:hover,
 .app .coverCard:hover,
 .app .sectionCard:hover,
-.app .statCard:hover {
+.app .statCard:hover{
   transition-duration: 180ms;
   transition-timing-function: cubic-bezier(.2,.9,.2,1);
 }
 
-.app :is(input, textarea, select, button) {
+.app :is(input, textarea, select, button){
   transition-duration: 160ms;
 }
 
-.app input[type="range"] {
+.app input[type="range"]{
   contain: layout style;
   touch-action: none;
 }
 
-
-.hero,
-.sidebar,
-.titleBar{
+.hero{
   content-visibility: visible;
 }
 
@@ -6399,30 +4825,6 @@ button{
     --sidebar-width-used: 0px;
   }
 
-  .appShell{
-    width: 100vw !important;
-    height: calc(100vh - 36px) !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: minmax(0, 1fr) var(--player-size-used) !important;
-    overflow: hidden !important;
-  }
-
-  .sidebar,
-  .sidebarResizeHandle{
-    display: none !important;
-  }
-
-  .content{
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    padding: 14px 12px calc(var(--player-size-used) + 18px) !important;
-    overflow-x: hidden !important;
-    scrollbar-gutter: auto !important;
-  }
-
   .headerBar{
     min-height: auto !important;
     margin: -14px -12px 12px !important;
@@ -6450,7 +4852,7 @@ button{
   }
 
   .compactHeaderTools .search,
-  .search{
+.search{
     width: 100% !important;
     min-width: 0 !important;
     height: 38px !important;
@@ -6481,7 +4883,6 @@ button{
   scroll-padding-bottom: 128px !important;
 }
 
-.app.viewSwitching .content,
 .app.viewSwitching .mainContent,
 .app.viewSwitching .homeShell,
 .app.viewSwitching .libraryPanel,
@@ -6504,13 +4905,7 @@ button{
 
 .app,
 .app::before,
-.app::after,
-.content,
-.content::before,
-.content::after,
-.sidebar,
-.sidebar::before,
-.sidebar::after{
+.app::after{
   background-image: none !important;
   background-size: auto !important;
 }
@@ -6542,40 +4937,12 @@ button{
   border-radius: 5px;
 }
 
-.navItem{
-  overflow: hidden;
-  isolation: isolate;
-}
-
 .navLucideIcon,
 .navItemIcon,
 .navIcon{
   transform-origin: center;
   transition: transform 260ms cubic-bezier(.22,.9,.28,1), color 220ms ease, opacity 220ms ease, filter 220ms ease;
 
-}
-
-.navItem:hover .navLucideIcon,
-.navItem:hover .navItemIcon,
-.navItem:hover .navIcon{
-  animation: localtifyNavIconLift 720ms cubic-bezier(.2,.84,.26,1) both;
-  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), .35));
-}
-
-.navItem:hover .navLucideIcon path,
-.navItem:hover .navLucideIcon polyline,
-.navItem:hover .navLucideIcon line,
-.navItem:hover .navLucideIcon circle,
-.navItem:hover .navLucideIcon rect{
-  stroke-dasharray: 34;
-  stroke-dashoffset: 34;
-  animation: localtifyIconStrokeDraw 780ms cubic-bezier(.18,.82,.28,1) both;
-}
-
-.navItem.active .navLucideIcon,
-.navItem.active .navItemIcon,
-.navItem.active .navIcon{
-  animation: localtifyNavIconSettle 560ms cubic-bezier(.2,.84,.26,1) both;
 }
 
 @keyframes localtifyIconStrokeDraw{
@@ -6602,13 +4969,6 @@ button{
 .app,
 .app::before,
 .app::after,
-.appShell,
-.content,
-.content::before,
-.content::after,
-.sidebar,
-.sidebar::before,
-.sidebar::after,
 .homeView,
 .libraryView,
 .settingsPage,
@@ -6619,39 +4979,9 @@ button{
   background-size: auto !important;
 }
 
-.content{
-  min-height: 0 !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain;
-  scrollbar-gutter: auto;
-}
-
-.sidebar{
-  min-height: 0 !important;
-  overflow: hidden !important;
-}
-
-.nav,
 .navMain,
 .navUtility{
   min-width: 0 !important;
-  overflow: visible !important;
-}
-
-.navItem{
-  position: relative !important;
-  min-width: 0 !important;
-  overflow: visible !important;
-  isolation: auto !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-.navItem:hover{
-  transform: translate3d(2px, 0, 0) !important;
-}
-
-.navItem.active{
   overflow: visible !important;
 }
 
@@ -6687,21 +5017,6 @@ button{
   stroke: currentColor !important;
   stroke-dasharray: none !important;
   stroke-dashoffset: 0 !important;
-}
-
-.navItem:hover .navIcon{
-  animation: localtifyNavIconSmoothHover 760ms cubic-bezier(.2,.86,.22,1) both !important;
-  filter: drop-shadow(0 0 9px rgba(var(--accent-rgb), .26)) !important;
-}
-
-.navItem:hover .navLucideIcon{
-  animation: localtifyNavSvgSmoothHover 760ms cubic-bezier(.2,.86,.22,1) both !important;
-}
-
-.navItem.active .navIcon,
-.navItem.active .navLucideIcon{
-  animation: none !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
 }
 
 @keyframes localtifyNavIconSmoothHover{
@@ -6839,52 +5154,13 @@ button{
 
 @media (max-width: 760px){
   html,
-  body,
-  #root,
-  .app{
+body,
+#root,
+.app{
     width: 100% !important;
     max-width: 100% !important;
     overflow: hidden !important;
   }
-
-  .appShell{
-    width: 100% !important;
-    max-width: 100% !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: minmax(0, 1fr) var(--player-size-used, var(--player-size-live, var(--player-size, 92px))) !important;
-    overflow: hidden !important;
-  }
-
-  .content{
-    grid-column: 1 / -1 !important;
-    grid-row: 1 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-    padding: 10px 4px 10px 4px !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    scrollbar-gutter: auto !important;
-    overscroll-behavior: contain !important;
-  }
-
-  .content::-webkit-scrollbar{
-  width: 0 !important;
-  height: 0 !important;
-}
-
-  .content::-webkit-scrollbar-track{
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-  .content::-webkit-scrollbar-thumb{
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
 
   .headerBar{
     width: 100% !important;
@@ -6896,8 +5172,8 @@ button{
   }
 
   .compactHeaderTools,
-  .searchEasterWrap,
-  .search{
+.searchEasterWrap,
+.search{
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -6913,8 +5189,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
 }
 
 .app,
-.appShell,
-.content,
 .mainContent,
 .contentScroller,
 .simpleShell{
@@ -6927,10 +5201,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
 
 .app::before,
 .app::after,
-.appShell::before,
-.appShell::after,
-.content::before,
-.content::after,
 .mainContent::before,
 .mainContent::after,
 .contentScroller::before,
@@ -6942,10 +5212,8 @@ body.localitfyThemePainting .app .ambientSurface::after{
 }
 
 .app,
-.appShell,
 .mainView,
 .mainContent,
-.content,
 .contentScroller,
 .simpleShell,
 .page,
@@ -6967,10 +5235,8 @@ body.localitfyThemePainting .app .ambientSurface::after{
 }
 
 .app,
-.appShell,
 .mainView,
 .mainContent,
-.content,
 .contentScroller,
 .simpleShell{
   background-image: none !important;
@@ -6978,14 +5244,10 @@ body.localitfyThemePainting .app .ambientSurface::after{
 
 .app::before,
 .app::after,
-.appShell::before,
-.appShell::after,
 .mainView::before,
 .mainView::after,
 .mainContent::before,
 .mainContent::after,
-.content::before,
-.content::after,
 .contentScroller::before,
 .contentScroller::after,
 .simpleShell::before,
@@ -6999,9 +5261,7 @@ html,
 body,
 #root,
 .app,
-.appShell,
 .mainContent,
-.content,
 .contentScroller,
 .page,
 .pageShell,
@@ -7032,12 +5292,8 @@ body,
 
 .app::before,
 .app::after,
-.appShell::before,
-.appShell::after,
 .mainContent::before,
 .mainContent::after,
-.content::before,
-.content::after,
 .contentScroller::before,
 .contentScroller::after,
 .page::before,
@@ -7071,7 +5327,6 @@ body,
 
 .app,
 .mainContent,
-.content,
 .contentScroller{
   background-image:
     radial-gradient(circle at 48% 0%, color-mix(in oklab, var(--accent, #ff4ee8) 8%, transparent) 0%, transparent 34%),
@@ -7095,25 +5350,14 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
   background-position: center !important;
 }
 
-.content{
-  background-color: transparent !important;
-  background-image:
-    radial-gradient(circle at 74% 0%, color-mix(in oklab, var(--accent, #e64be8) 5%, transparent), transparent 34%) !important;
-  background-size: auto !important;
-  background-position: center !important;
-}
-
 .app::before,
 .app::after,
-.content::before,
-.content::after,
 .pageTransition::before,
 .pageTransition::after{
   background-image: none !important;
 }
 
 .app.viewSwitching,
-.app.viewSwitching .content,
 .app.viewSwitching .pageTransition,
 .app.viewSwitching .ambientSurface,
 .app.viewSwitching .coverAura{
@@ -7121,7 +5365,6 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
   opacity: 1 !important;
 }
 
-.content > .pageTransition,
 .pageTransition,
 .pageTransition > *{
   animation: none !important;
@@ -7158,41 +5401,34 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 .app,
 .app::before,
 .app::after,
-.content,
-.content::before,
-.content::after,
 .mainStage,
 .mainStage::before,
 .mainStage::after,
 .ambientSurface,
 .ambientSurface::before,
-.ambientSurface::after {
+.ambientSurface::after{
   background-image: none !important;
   background-size: auto !important;
 }
 
-.app {
+.app{
   background:
     radial-gradient(circle at 50% 100%, rgba(var(--player-ambient-rgb, var(--accent-rgb)), 0.075), transparent 46%),
     radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.10), transparent 31%),
     var(--bg) !important;
 }
 
-.content,
-.mainStage {
+.mainStage{
   background: transparent !important;
 }
 
-.sidebar,
 .sideNav,
-.sidebarNav {
+.sidebarNav{
   overflow: hidden !important;
   contain: layout paint style;
 }
 
-.sideItem,
-.sidebar button,
-.sidebar a {
+.sideItem{
   overflow: hidden !important;
   contain: paint;
   transition:
@@ -7205,9 +5441,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 .sideItem::before,
 .sideItem::after,
 .sideItem.active::before,
-.sideItem.active::after,
-.sidebar button::before,
-.sidebar button::after {
+.sideItem.active::after{
   inset: 0 !important;
   width: auto !important;
   height: auto !important;
@@ -7216,9 +5450,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 }
 
 .sideItem.active,
-.sideItem[aria-current="page"],
-.sidebar button.active,
-.sidebar .active {
+.sideItem[aria-current="page"]{
   box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.34) !important;
   border-left-color: rgba(var(--accent-rgb), 0.55) !important;
 }
@@ -7228,7 +5460,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 .app.playerScrubbing .ambientSurface::after,
 .app.isScrolling .ambientSurface,
 .app.isScrolling .ambientSurface::before,
-.app.isScrolling .ambientSurface::after {
+.app.isScrolling .ambientSurface::after{
   transition: none !important;
   animation-play-state: paused !important;
 }
@@ -7241,7 +5473,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 .app.isScrolling .panel,
 .app.playerScrubbing .playerBar,
 .app.playerScrubbing .progressInput,
-.app.playerScrubbing .volumeSlider {
+.app.playerScrubbing .volumeSlider{
   transition-duration: 0s !important;
 }
 
@@ -7250,15 +5482,13 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 .libraryCard,
 .songCard,
 .homeFreshCard,
-.homeListenCard {
+.homeListenCard{
   content-visibility: auto;
   contain-intrinsic-size: 1px 280px;
 }
 
 .sideItem.active,
-.sideItem[aria-current="page"],
-.sidebar button.active,
-.sidebar .active {
+.sideItem[aria-current="page"]{
   border-left-width: 1px !important;
   border-left-style: solid !important;
   box-shadow:
@@ -7267,7 +5497,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 }
 
 .loadingScreen,
-.editorModal {
+.editorModal{
   background:
     radial-gradient(circle at 50% 100%, rgba(var(--accent-rgb), 0.09), transparent 42%),
     #000 !important;
@@ -7277,7 +5507,6 @@ html,
 body,
 #root,
 .app,
-.appShell,
 .mainShell,
 .mainArea,
 .mainContent,
@@ -7298,7 +5527,7 @@ body,
 .hero,
 .heroCard,
 .libraryPanel,
-.settingsPanel {
+.settingsPanel{
   background-image: none !important;
 }
 
@@ -7310,8 +5539,6 @@ body::after,
 #root::after,
 .app::before,
 .app::after,
-.appShell::before,
-.appShell::after,
 .mainShell::before,
 .mainShell::after,
 .mainArea::before,
@@ -7347,7 +5574,7 @@ body::after,
 .libraryPanel::before,
 .libraryPanel::after,
 .settingsPanel::before,
-.settingsPanel::after {
+.settingsPanel::after{
   background-image: none !important;
   background-size: auto !important;
 }
@@ -7360,8 +5587,7 @@ body::after,
 .settingCard,
 .panel,
 .heroCard,
-.sidebarItem,
-.navItem {
+.sidebarItem{
   rotate: 0deg !important;
   transform-style: flat !important;
   perspective: none !important;
@@ -7433,121 +5659,18 @@ body::after,
 
 @media (max-width: 640px){
   .app .whatsNewCard,
-  .whatsNewCard{
+.whatsNewCard{
     width: min(94vw, 720px) !important;
     border-radius: 22px !important;
   }
 
   .app .whatsNewCard li,
-  .whatsNewCard li{
+.whatsNewCard li{
     padding: 11px 12px 11px 17px !important;
     font-size: 12.5px !important;
   }
 }
 
-.app .sidebar,
-.app .sidebar .nav,
-.app .sidebar .navMain,
-.app .sidebar .navUtility{
-  overflow: visible !important;
-}
-
-.app .sidebar .nav{
-  width: 100% !important;
-  box-sizing: border-box !important;
-  gap: 7px !important;
-}
-
-.app .sidebar .navItem{
-  width: 100% !important;
-  min-height: 54px !important;
-  height: auto !important;
-  box-sizing: border-box !important;
-  display: grid !important;
-  grid-template-columns: 34px minmax(0, 1fr) !important;
-  align-items: center !important;
-  justify-content: start !important;
-  gap: 12px !important;
-  padding: 9px 13px !important;
-  border-radius: 16px !important;
-  overflow: hidden !important;
-  transform: none !important;
-  background-clip: padding-box !important;
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 160ms ease,
-    box-shadow 200ms ease !important;
-}
-
-.app .sidebar .navItem:hover,
-.app .sidebar .navItem.active,
-.app .sidebar .navItem:active{
-  transform: none !important;
-  border-radius: 16px !important;
-}
-
-.app .sidebar .navItem:hover{
-  background: color-mix(in oklab, var(--accent, #ff65df) 11%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 23%, rgba(255,255,255,.06)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
-}
-
-.app .sidebar .navItem.active{
-  background: color-mix(in oklab, var(--accent, #ff65df) 19%, rgba(255,255,255,.025)) !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 42%, rgba(255,255,255,.07)) !important;
-  box-shadow:
-    inset 3px 0 0 var(--accent, #ff65df),
-    inset 0 1px 0 rgba(255,255,255,.04) !important;
-}
-
-.app .sidebar .navIcon{
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px !important;
-  display: grid !important;
-  place-items: center !important;
-  border-radius: 12px !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.app .sidebar .navItem.active .navIcon,
-.app .sidebar .navItem:hover .navIcon{
-  background: color-mix(in oklab, var(--accent, #ff65df) 14%, rgba(255,255,255,.035)) !important;
-}
-
-.app .sidebar .navText{
-  min-width: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  gap: 1px !important;
-  line-height: 1.05 !important;
-}
-
-.app .sidebar .navText strong,
-.app .sidebar .navText small{
-  max-width: 100% !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-.app .sidebar .navText strong{
-  font-size: 0.91rem !important;
-  line-height: 1.05 !important;
-}
-
-.app .sidebar .navText small{
-  font-size: 0.68rem !important;
-  line-height: 1.05 !important;
-  opacity: .78 !important;
-}
-
-.app .sidebar .navItem,
-.app .sidebar .sidebarItem,
 .app .settingsCategoryButton,
 .app .whatsNewClose,
 .app .updatePrimaryButton,
@@ -7557,18 +5680,8 @@ body::after,
   transform-origin: center !important;
 }
 
-.app .sidebar .navItem:hover,
-.app .sidebar .sidebarItem:hover,
 .app .settingsCategoryButton:hover{
   transform: translate3d(0,0,0) !important;
-}
-
-.app .sidebar .navItem,
-.app .sidebar .sidebarItem{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  border-radius: 18px !important;
-  outline: none !important;
 }
 
 .app .whatsNewCard{
@@ -7595,30 +5708,23 @@ body::after,
 }
 
 .app .pageTransition,
-.app .mainContent,
-.app .content{
+.app .mainContent{
   transform: translate3d(0,0,0);
 }
 
-.app.viewSwitching .content,
 .app.viewSwitching .mainContent,
 .app.viewSwitching .pageTransition{
   opacity: 1 !important;
   transform: translate3d(0,0,0) !important;
 }
 
-.app .navItem,
-.app .sidebar button,
 .app .sidebarNav button{
   transform: translate3d(0,0,0) !important;
 
   transition: background-color 170ms ease, border-color 170ms ease, color 170ms ease, box-shadow 170ms ease, opacity 170ms ease !important;
 }
 
-.app .navItem:hover,
-.app .sidebar button:hover,
-.app .sidebarNav button:hover,
-.app .navItem:active{
+.app .sidebarNav button:hover{
   transform: translate3d(0,0,0) !important;
 }
 
@@ -7650,7 +5756,7 @@ body::after,
   transform: translateY(-50%) !important;
 }
 
-.coverAura {
+.coverAura{
   position: relative;
   overflow: hidden;
   isolation: isolate;
@@ -7660,7 +5766,7 @@ body::after,
   contain: paint;
 }
 
-.coverAura .coverPlaceholder {
+.coverAura .coverPlaceholder{
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -7680,18 +5786,18 @@ body::after,
   pointer-events: none;
 }
 
-.coverAura.hasCover.coverReady .coverPlaceholder {
+.coverAura.hasCover.coverReady .coverPlaceholder{
   opacity: 0;
   transform: scale(0.985);
 }
 
-.coverAura.noCover .coverPlaceholder {
+.coverAura.noCover .coverPlaceholder{
   opacity: 1;
   transform: none;
 }
 
 .coverAura > img.coverImage,
-.coverAura img.coverImage {
+.coverAura img.coverImage{
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -7709,12 +5815,12 @@ body::after,
 }
 
 .coverAura > img.coverImage.isLoaded,
-.coverAura img.coverImage.isLoaded {
+.coverAura img.coverImage.isLoaded{
   opacity: 1;
   transform: scale(1);
 }
 
-.coverAura.coverLoading::after {
+.coverAura.coverLoading::after{
   content: "";
   position: absolute;
   inset: 0;
@@ -7726,7 +5832,7 @@ body::after,
 }
 
 .coverAura.noCover::after,
-.coverAura.coverReady::after {
+.coverAura.coverReady::after{
   display: none;
 }
 
@@ -7737,7 +5843,7 @@ body::after,
 }
 
 body.localtifyBackgroundMode .app,
-.app.appBackgrounded {
+.app.appBackgrounded{
   --background-visual-opacity: 0.35;
 }
 
@@ -7754,12 +5860,12 @@ body.localtifyBackgroundMode .visualizer,
 .app.appBackgrounded .heroGlow,
 .app.appBackgrounded .heroBackground,
 .app.appBackgrounded .nowPlayingAura,
-.app.appBackgrounded .visualizer {
+.app.appBackgrounded .visualizer{
   animation-play-state: paused;
 }
 
 body.localtifyBackgroundMode .ambientSurface,
-.app.appBackgrounded .ambientSurface {
+.app.appBackgrounded .ambientSurface{
   opacity: var(--background-visual-opacity, 0.35);
 }
 
@@ -7772,114 +5878,9 @@ body.localtifyBackgroundMode .ambientSurface,
 .settingsSection,
 .settingsCard,
 .songListPanel,
-.recentImportsPanel {
+.recentImportsPanel{
   content-visibility: auto;
   contain-intrinsic-size: 320px;
-}
-
-.titleBar{
-  height: 36px !important;
-  min-height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-.titleDrag{
-  height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-.windowButtons{
-  height: 36px !important;
-  min-height: 36px !important;
-  display: flex !important;
-  align-items: stretch !important;
-  justify-content: flex-end !important;
-  -webkit-app-region: no-drag !important;
-}
-
-.windowButtons button{
-  width: 46px !important;
-  height: 36px !important;
-  min-width: 46px !important;
-  min-height: 36px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1 !important;
-  text-align: center !important;
-  vertical-align: middle !important;
-  font-family: "Segoe UI Symbol", "Segoe UI", system-ui, sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  transform: none !important;
-  -webkit-app-region: no-drag !important;
-}
-
-.windowButtons button[aria-label="Minimize window"]{
-  font-size: 15px !important;
-  padding-bottom: 2px !important;
-}
-
-.windowButtons button[aria-label="Maximize window"]{
-  font-size: 12px !important;
-  padding-bottom: 1px !important;
-}
-
-.windowButtons .closeWin{
-  font-size: 16px !important;
-  padding-bottom: 1px !important;
-}
-
-.windowButtons button:active{
-  transform: none !important;
-}
-
-.app .titleBar,
-.app[data-theme] .titleBar,
-.app[data-custom-theme="true"] .titleBar{
-  background:
-    linear-gradient(
-      90deg,
-      color-mix(in oklab, var(--bg, #050505) 74%, var(--accent, #ff65df) 18%),
-      color-mix(in oklab, var(--bg-2, var(--bg, #050505)) 68%, var(--accent, #ff65df) 22%) 48%,
-      color-mix(in oklab, var(--bg, #050505) 76%, var(--progress, var(--accent, #ff65df)) 16%)
-    ) !important;
-  border-bottom: 1px solid color-mix(in oklab, var(--accent, #ff65df) 36%, rgba(255,255,255,0.07)) !important;
-  box-shadow:
-    inset 0 -1px 0 rgba(var(--accent-rgb, 255, 101, 223), 0.10),
-    0 1px 18px rgba(var(--accent-rgb, 255, 101, 223), 0.08) !important;
-  backdrop-filter: blur(18px) saturate(132%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(132%) !important;
-}
-
-.app .titleDrag{
-  color: color-mix(in oklab, var(--text, #ffffff) 76%, var(--accent, #ff65df) 14%) !important;
-}
-
-.app .titleLogo{
-  color: var(--accent, #ff65df) !important;
-  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb, 255, 101, 223), 0.22)) !important;
-}
-
-.app .windowButtons button{
-  color: color-mix(in oklab, var(--text, #ffffff) 64%, var(--accent, #ff65df) 12%) !important;
-  background: transparent !important;
-}
-
-.app .windowButtons button:hover{
-  color: #ffffff !important;
-  background: color-mix(in oklab, var(--accent, #ff65df) 20%, rgba(255,255,255,0.06)) !important;
-}
-
-.app .windowButtons .closeWin:hover{
-  color: #ffffff !important;
-  background: color-mix(in oklab, #e54868 74%, var(--accent, #ff65df) 18%) !important;
 }
 
 .app .updateToastLayer,
@@ -8131,7 +6132,7 @@ body.localtifyBackgroundMode .ambientSurface,
 
 @media (max-width: 900px){
   .app .updateToastLayer,
-  .updateToastLayer{
+.updateToastLayer{
     inset: 48px 14px auto 14px !important;
     width: auto !important;
   }
@@ -8139,23 +6140,15 @@ body.localtifyBackgroundMode .ambientSurface,
 
 @media (max-width: 620px){
   .app .updateToastCard,
-  .updateToastCard{
+.updateToastCard{
     grid-template-columns: 30px minmax(0, 1fr) auto !important;
     border-radius: 16px !important;
   }
 
   .app .updateToastActions,
-  .updateToastActions{
+.updateToastActions{
     justify-content: flex-start !important;
   }
-}
-
-.app.updateRibbonVisible .appShell{
-  padding-top: 48px !important;
-}
-
-.app.updateRibbonVisible .content{
-  scroll-padding-top: 60px !important;
 }
 
 .app .topUpdateRibbonLayer,
@@ -8412,54 +6405,43 @@ body.localtifyBackgroundMode .ambientSurface,
 
 @media (max-width: 1100px){
   .app .topUpdateRibbon,
-  .topUpdateRibbon{
+.topUpdateRibbon{
     grid-template-columns: 28px minmax(0, 1fr) auto !important;
     gap: 10px !important;
     padding: 0 14px !important;
   }
 
   .app .topUpdateRibbonMeta,
-  .topUpdateRibbonMeta{
+.topUpdateRibbonMeta{
     display: none !important;
   }
 }
 
 @media (max-width: 760px){
-  .app.updateRibbonVisible .appShell{
-    padding-top: 54px !important;
-  }
 
   .app .topUpdateRibbonLayer,
-  .topUpdateRibbonLayer,
-  .app .topUpdateRibbon,
-  .topUpdateRibbon{
+.topUpdateRibbonLayer,
+.app .topUpdateRibbon,
+.topUpdateRibbon{
     height: 54px !important;
     min-height: 54px !important;
     max-height: 54px !important;
   }
 
   .app .topUpdateRibbonText,
-  .topUpdateRibbonText{
+.topUpdateRibbonText{
     grid-template-columns: minmax(0, 1fr) !important;
     gap: 2px !important;
   }
 
   .app .topUpdateRibbonText .eyebrow,
-  .topUpdateRibbonText .eyebrow,
-  .app .topUpdateRibbonText p:not(.eyebrow),
-  .topUpdateRibbonText p:not(.eyebrow),
-  .app .topUpdateRibbon .updateGhostButton,
-  .topUpdateRibbon .updateGhostButton{
+.topUpdateRibbonText .eyebrow,
+.app .topUpdateRibbonText p:not(.eyebrow),
+.topUpdateRibbonText p:not(.eyebrow),
+.app .topUpdateRibbon .updateGhostButton,
+.topUpdateRibbon .updateGhostButton{
     display: none !important;
   }
-}
-
-.app.updateRibbonVisible .appShell{
-  padding-top: 38px !important;
-}
-
-.app.updateRibbonVisible .content{
-  scroll-padding-top: 48px !important;
 }
 
 .app .topUpdateRibbonLayer,
@@ -8697,45 +6679,34 @@ body.localtifyBackgroundMode .ambientSurface,
 
 @media (max-width: 1080px){
   .app .topUpdateRibbon,
-  .topUpdateRibbon{
+.topUpdateRibbon{
     grid-template-columns: 24px minmax(0, 1fr) auto !important;
     padding: 0 10px !important;
   }
 
   .app .topUpdateRibbonMeta,
-  .topUpdateRibbonMeta{
+.topUpdateRibbonMeta{
     display: none !important;
   }
 }
 
 @media (max-width: 720px){
-  .app.updateRibbonVisible .appShell{
-    padding-top: 42px !important;
-  }
 
   .app .topUpdateRibbonLayer,
-  .topUpdateRibbonLayer,
-  .app .topUpdateRibbon,
-  .topUpdateRibbon{
+.topUpdateRibbonLayer,
+.app .topUpdateRibbon,
+.topUpdateRibbon{
     height: 42px !important;
     min-height: 42px !important;
     max-height: 42px !important;
   }
 
   .app .topUpdateRibbonText .eyebrow,
-  .topUpdateRibbonText .eyebrow,
-  .app .topUpdateRibbon .updateGhostButton,
-  .topUpdateRibbon .updateGhostButton{
+.topUpdateRibbonText .eyebrow,
+.app .topUpdateRibbon .updateGhostButton,
+.topUpdateRibbon .updateGhostButton{
     display: none !important;
   }
-}
-
-.app.updateRibbonVisible .appShell{
-  padding-top: 42px !important;
-}
-
-.app.updateRibbonVisible .content{
-  scroll-padding-top: 52px !important;
 }
 
 .app .topUpdateRibbonLayer,
@@ -8921,44 +6892,41 @@ body.localtifyBackgroundMode .ambientSurface,
 
 @media (max-width: 980px){
   .app .topUpdateRibbon,
-  .topUpdateRibbon{
+.topUpdateRibbon{
     grid-template-columns: minmax(0, 1fr) auto !important;
     column-gap: 8px !important;
     padding: 0 10px !important;
   }
 
   .app .topUpdateRibbonMeta,
-  .topUpdateRibbonMeta{
+.topUpdateRibbonMeta{
     display: none !important;
   }
 }
 
 @media (max-width: 720px){
-  .app.updateRibbonVisible .appShell{
-    padding-top: 46px !important;
-  }
 
   .app .topUpdateRibbonLayer,
-  .topUpdateRibbonLayer,
-  .app .topUpdateRibbon,
-  .topUpdateRibbon{
+.topUpdateRibbonLayer,
+.app .topUpdateRibbon,
+.topUpdateRibbon{
     height: 46px !important;
     min-height: 46px !important;
     max-height: 46px !important;
   }
 
   .app .topUpdateRibbonText .eyebrow,
-  .topUpdateRibbonText .eyebrow{
+.topUpdateRibbonText .eyebrow{
     display: none !important;
   }
 
   .app .topUpdateRibbonText h3,
-  .topUpdateRibbonText h3{
+.topUpdateRibbonText h3{
     max-width: none !important;
   }
 }
 
-.virtualSongViewport {
+.virtualSongViewport{
   position: relative !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
@@ -8969,39 +6937,39 @@ body.localtifyBackgroundMode .ambientSurface,
   -webkit-overflow-scrolling: touch;
 }
 
-.songList.virtualSongViewport {
+.songList.virtualSongViewport{
   display: block !important;
   height: clamp(320px, calc(100vh - 380px), 680px);
   min-height: 260px;
   padding: 2px 8px 14px 2px !important;
 }
 
-.songList.simpleList.virtualSongViewport {
+.songList.simpleList.virtualSongViewport{
   height: clamp(260px, calc(100vh - 430px), 560px);
 }
 
-.homeSongList.virtualSongViewport {
+.homeSongList.virtualSongViewport{
   height: clamp(320px, calc(100vh - 430px), 640px);
 }
 
-.homeAlbumGrid.virtualSongViewport {
+.homeAlbumGrid.virtualSongViewport{
   display: block !important;
   height: clamp(420px, calc(100vh - 390px), 740px);
   min-height: 320px;
   padding: 2px 8px 18px 2px !important;
 }
 
-.homeAlbumGrid.simpleAlbumGrid.virtualSongViewport {
+.homeAlbumGrid.simpleAlbumGrid.virtualSongViewport{
   height: clamp(320px, calc(100vh - 430px), 620px);
 }
 
-.virtualSongCanvas {
+.virtualSongCanvas{
   position: relative;
   width: 100%;
   min-height: 100%;
 }
 
-.virtualSongItem {
+.virtualSongItem{
   position: absolute;
   inset: 0 0 auto 0;
   width: 100%;
@@ -9010,16 +6978,16 @@ body.localtifyBackgroundMode .ambientSurface,
   contain: layout paint style;
 }
 
-.virtualSongItem .songRow {
+.virtualSongItem .songRow{
   width: 100%;
   margin: 0 !important;
 }
 
-.virtualHomeGridCanvas {
+.virtualHomeGridCanvas{
   min-height: 100%;
 }
 
-.virtualHomeGridRow {
+.virtualHomeGridRow{
   position: absolute;
   inset: 0 0 auto 0;
   display: grid;
@@ -9031,26 +6999,26 @@ body.localtifyBackgroundMode .ambientSurface,
   contain: layout paint style;
 }
 
-.virtualHomeGridRow .homeAlbumCard {
+.virtualHomeGridRow .homeAlbumCard{
   min-width: 0;
   width: 100%;
   margin: 0 !important;
 }
 
-.virtualSongViewport::-webkit-scrollbar {
+.virtualSongViewport::-webkit-scrollbar{
   width: 8px;
 }
 
-.virtualSongViewport::-webkit-scrollbar-track {
+.virtualSongViewport::-webkit-scrollbar-track{
   background: transparent;
 }
 
-.virtualSongViewport::-webkit-scrollbar-thumb {
+.virtualSongViewport::-webkit-scrollbar-thumb{
   border-radius: 999px;
   background: rgba(var(--accent-rgb), .28);
 }
 
-.virtualSongViewport::-webkit-scrollbar-thumb:hover {
+.virtualSongViewport::-webkit-scrollbar-thumb:hover{
   background: rgba(var(--accent-rgb), .42);
 }
 
@@ -9395,17 +7363,17 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 
   .bootBrandRow,
-  .bootActions{
+.bootActions{
     margin-inline: auto;
   }
 
   .bootCopy h1,
-  .bootCopy p{
+.bootCopy p{
     margin-inline: auto;
   }
 }
 
-.screensaverOverlay {
+.screensaverOverlay{
   position: fixed;
   inset: 0;
   z-index: 9998;
@@ -9418,7 +7386,7 @@ body.localtifyBackgroundMode .ambientSurface,
   cursor: none;
 }
 
-.screensaverBackdrop {
+.screensaverBackdrop{
   position: absolute;
   inset: -8%;
   background-position: center;
@@ -9429,7 +7397,7 @@ body.localtifyBackgroundMode .ambientSurface,
   animation: screensaverBackdropDrift 20s ease-in-out infinite alternate;
 }
 
-.screensaverGlow {
+.screensaverGlow{
   position: absolute;
   inset: 0;
   background:
@@ -9438,7 +7406,7 @@ body.localtifyBackgroundMode .ambientSurface,
   pointer-events: none;
 }
 
-.screensaverPanel {
+.screensaverPanel{
   position: relative;
   width: min(1040px, calc(100vw - 72px));
   height: min(620px, calc(100vh - 92px));
@@ -9458,7 +7426,7 @@ body.localtifyBackgroundMode .ambientSurface,
   backdrop-filter: blur(18px) saturate(1.08);
 }
 
-.screensaverPanel::before {
+.screensaverPanel::before{
   content: "";
   position: absolute;
   inset: 0;
@@ -9469,7 +7437,7 @@ body.localtifyBackgroundMode .ambientSurface,
   animation: screensaverWallpaperBreathe 12s ease-in-out infinite alternate;
 }
 
-.screensaverShade {
+.screensaverShade{
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -9478,7 +7446,7 @@ body.localtifyBackgroundMode .ambientSurface,
     radial-gradient(circle at 50% 58%, transparent 0 42%, rgba(0, 0, 0, 0.42) 100%);
 }
 
-.screensaverIdleText {
+.screensaverIdleText{
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -9501,9 +7469,9 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .staticBackgrounds .screensaverBackdrop,
 .staticBackgrounds .screensaverPanel::before,
-.staticBackgrounds .screensaverIdleText { animation: none; }
+.staticBackgrounds .screensaverIdleText{ animation: none; }
 
-[data-anime-visuals="off"] .screensaverOverlay { display: none; }
+[data-anime-visuals="off"] .screensaverOverlay{ display: none; }
 
 @keyframes screensaverBackdropDrift {
   from { transform: scale(1.1) translate3d(-1.1%, -0.7%, 0); }
@@ -9521,7 +7489,7 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 @media (max-width: 860px) {
-  .screensaverPanel {
+  .screensaverPanel{
     width: calc(100vw - 32px);
     height: min(680px, calc(100vh - 56px));
     padding: 28px;
@@ -9529,15 +7497,15 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-.gifVisualModePicker { margin: 16px 0 4px; display: grid; gap: 8px; }
-.gifVisualModePicker label {
+.gifVisualModePicker{ margin: 16px 0 4px; display: grid; gap: 8px; }
+.gifVisualModePicker label{
   color: var(--muted);
   font-size: 0.76rem;
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-.gifVisualModePicker select {
+.gifVisualModePicker select{
   width: min(320px, 100%);
   height: 44px;
   border-radius: 16px;
@@ -9548,23 +7516,6 @@ body.localtifyBackgroundMode .ambientSurface,
   font: inherit;
   font-weight: 800;
   outline: none;
-}
-
-.app.updateRibbonVisible .content::before{
-  content: "" !important;
-  position: fixed !important;
-  top: 78px !important;
-  right: 0 !important;
-  width: clamp(220px, 26vw, 520px) !important;
-  height: clamp(180px, 24vh, 320px) !important;
-  pointer-events: none !important;
-  z-index: 45 !important;
-  opacity: .42 !important;
-  background:
-    radial-gradient(circle at 100% 34%, rgba(var(--accent-rgb, 230,90,223), .18), transparent 44%),
-    radial-gradient(circle at 78% 64%, rgba(255,255,255,.05), transparent 42%) !important;
-  filter: blur(22px) saturate(1.08) !important;
-  transform: translate3d(0,0,0) !important;
 }
 
 .app .topUpdateRibbonLayer,
@@ -9685,25 +7636,17 @@ body.localtifyBackgroundMode .ambientSurface,
 
 @media (max-width: 980px){
   .app .updateYukariPeek,
-  .updateYukariPeek{
+.updateYukariPeek{
     top: 92px !important;
     right: -58px !important;
     width: 118px !important;
     opacity: .76 !important;
   }
-
-  .app.updateRibbonVisible .content::before{
-    opacity: .28 !important;
-  }
 }
 
 @media (max-width: 720px){
   .app .updateYukariPeek,
-  .updateYukariPeek{
-    display: none !important;
-  }
-
-  .app.updateRibbonVisible .content::before{
+.updateYukariPeek{
     display: none !important;
   }
 }
@@ -9857,68 +7800,6 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .search:focus::placeholder{
   opacity: .42;
   color: rgba(255, 255, 255, .42);
-}
-
-.app :where(
-  .softButton,
-  .circleButton,
-  .updatePrimaryButton,
-  .updateGhostButton,
-  .updateToastClose,
-  .navItem,
-  .settingsTinyButton,
-  .settingsActionButton,
-  .coverSyncChoice,
-  .settingsThemeCard,
-  .cleanToggleLabel,
-  .customThemePresetButtonV027,
-  .downloadActionButton,
-  .playlistActionButton
-){
-  transform-origin: center;
-  transition:
-    transform 150ms cubic-bezier(.16, 1, .3, 1),
-    filter 150ms ease,
-    box-shadow 150ms ease,
-    background-color 150ms ease,
-    border-color 150ms ease !important;
-}
-
-.app :where(
-  .softButton,
-  .circleButton,
-  .updatePrimaryButton,
-  .updateGhostButton,
-  .updateToastClose,
-  .navItem,
-  .settingsTinyButton,
-  .settingsActionButton,
-  .coverSyncChoice,
-  .cleanToggleLabel,
-  .downloadActionButton,
-  .playlistActionButton
-):hover{
-  transform: translate3d(0, -1px, 0);
-}
-
-.app :where(
-  .softButton,
-  .circleButton,
-  .updatePrimaryButton,
-  .updateGhostButton,
-  .updateToastClose,
-  .navItem,
-  .settingsTinyButton,
-  .settingsActionButton,
-  .coverSyncChoice,
-  .settingsThemeCard,
-  .cleanToggleLabel,
-  .customThemePresetButtonV027,
-  .downloadActionButton,
-  .playlistActionButton
-):active{
-  transform: translate3d(0, 0, 0) scale(.96) !important;
-  filter: brightness(.96);
 }
 
 .app :where(input, textarea, select, option):active,
@@ -10281,12 +8162,12 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 
   .app .heroPremium .heroTitle,
-  .app .heroPremium .nowPlayingTitleSwap{
+.app .heroPremium .nowPlayingTitleSwap{
     max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 340px)) !important;
   }
 
   .app .heroPremium .heroArtistLine,
-  .app .heroPremium .nowPlayingArtistSwap{
+.app .heroPremium .nowPlayingArtistSwap{
     max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 360px)) !important;
   }
 }
@@ -10303,13 +8184,13 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 
   .app .heroPremium .heroTitle,
-  .app .heroPremium .nowPlayingTitleSwap{
+.app .heroPremium .nowPlayingTitleSwap{
     max-width: 100% !important;
     font-size: clamp(40px, 9vw, 70px) !important;
   }
 
   .app .heroPremium .heroArtistLine,
-  .app .heroPremium .nowPlayingArtistSwap{
+.app .heroPremium .nowPlayingArtistSwap{
     max-width: 100% !important;
   }
 
@@ -10324,7 +8205,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 
   .app .heroPremium .heroTitle,
-  .app .heroPremium .nowPlayingTitleSwap{
+.app .heroPremium .nowPlayingTitleSwap{
     font-size: clamp(34px, 11vw, 56px) !important;
   }
 
@@ -10691,25 +8572,25 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium,
-  .app .pageTransition[data-view="home"] .hero.heroPremium{
+.app .pageTransition[data-view="home"] .hero.heroPremium{
     grid-template-columns: minmax(0, 1fr) clamp(128px, 13vw, 196px) !important;
     column-gap: clamp(16px, 2.8vw, 42px) !important;
     padding-inline: clamp(28px, 3.2vw, 54px) !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean{
+.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean{
     max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 300px)) !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
+.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
     max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 320px)) !important;
     font-size: clamp(38px, 4.05vw, 62px) !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
     font-size: clamp(32px, 3.45vw, 52px) !important;
   }
 }
@@ -10720,35 +8601,35 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium,
-  .app .pageTransition[data-view="home"] .hero.heroPremium{
+.app .pageTransition[data-view="home"] .hero.heroPremium{
     grid-template-columns: minmax(0, 1fr) !important;
     min-height: clamp(286px, 34vh, 380px) !important;
     padding: 26px !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium .heroArtWrap,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroArtWrap{
+.app .pageTransition[data-view="home"] .hero.heroPremium .heroArtWrap{
     display: none !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean{
+.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean{
     max-width: 100% !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
+.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
     max-width: 100% !important;
     font-size: clamp(36px, 8.8vw, 66px) !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
+.app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
     font-size: clamp(32px, 7.6vw, 54px) !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium .heroArtistLine,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroArtistLine{
+.app .pageTransition[data-view="home"] .hero.heroPremium .heroArtistLine{
     max-width: 100% !important;
   }
 }
@@ -10759,24 +8640,24 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium,
-  .app .pageTransition[data-view="home"] .hero.heroPremium{
+.app .pageTransition[data-view="home"] .hero.heroPremium{
     padding: 22px !important;
     min-height: 292px !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
+.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
     font-size: clamp(32px, 10vw, 52px) !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions{
+.app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions{
     width: 100% !important;
     justify-content: center !important;
   }
 
   .app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton,
-  .app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton{
+.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton{
     flex: 1 1 0 !important;
     padding-inline: 10px !important;
   }
@@ -10784,50 +8665,6 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app{
   --localtify-titlebar-height: 36px !important;
-}
-
-.app .titleBar:not(.miniTitleBar),
-.titleBar:not(.miniTitleBar){
-  position: relative !important;
-  z-index: 3400 !important;
-  height: var(--localtify-titlebar-height, 36px) !important;
-  min-height: var(--localtify-titlebar-height, 36px) !important;
-  max-height: var(--localtify-titlebar-height, 36px) !important;
-  display: grid !important;
-  grid-template-columns: minmax(118px, clamp(138px, 9.6vw, 206px)) minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  justify-content: stretch !important;
-  gap: 0 !important;
-  overflow: hidden !important;
-  -webkit-app-region: drag !important;
-}
-
-.app .titleBar:not(.miniTitleBar) .titleDrag,
-.titleBar:not(.miniTitleBar) .titleDrag{
-  grid-column: 1 !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  height: 100% !important;
-  overflow: hidden !important;
-  padding-left: 13px !important;
-  padding-right: 8px !important;
-  -webkit-app-region: drag !important;
-}
-
-.app .titleBar:not(.miniTitleBar) .titleDrag span,
-.titleBar:not(.miniTitleBar) .titleDrag span{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-}
-
-.app .titleBar:not(.miniTitleBar) .windowButtons,
-.titleBar:not(.miniTitleBar) .windowButtons{
-  grid-column: 3 !important;
-  justify-self: end !important;
-  height: 100% !important;
-  -webkit-app-region: no-drag !important;
 }
 
 .app .titleBarUpdateSlot,
@@ -11120,28 +8957,6 @@ body.localtifyBackgroundMode .ambientSurface,
   background: rgba(var(--accent-rgb, 230,90,223), .42) !important;
 }
 
-.app.updateRibbonVisible .appShell,
-.app[data-update-ribbon="true"] .appShell,
-.appShell{
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-  top: auto !important;
-  height: calc(100vh - var(--localtify-titlebar-height, 36px)) !important;
-  max-height: calc(100vh - var(--localtify-titlebar-height, 36px)) !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
-  grid-template-rows: minmax(0, 1fr) var(--player-size-used, var(--player-size-live, var(--player-size, 108px))) !important;
-}
-
-.app.updateRibbonVisible .content,
-.app[data-update-ribbon="true"] .content,
-.app .content{
-  min-height: 0 !important;
-  scroll-padding-top: 18px !important;
-  padding-bottom: clamp(18px, 2vh, 26px) !important;
-}
-
 .app .playerBar,
 .playerBar{
   grid-row: 2 !important;
@@ -11158,38 +8973,34 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 @media (max-width: 1180px){
   .app .titleBarUpdateSlot .topUpdateRibbonMeta,
-  .titleBarUpdateSlot .topUpdateRibbonMeta{
+.titleBarUpdateSlot .topUpdateRibbonMeta{
     display: none !important;
   }
 }
 
 @media (max-width: 920px){
-  .app .titleBar:not(.miniTitleBar),
-  .titleBar:not(.miniTitleBar){
-    grid-template-columns: minmax(82px, 118px) minmax(0, 1fr) auto !important;
-  }
 
   .app .titleBarUpdateSlot .topUpdateRibbonText .eyebrow,
-  .titleBarUpdateSlot .topUpdateRibbonText .eyebrow,
-  .app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
-  .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton{
+.titleBarUpdateSlot .topUpdateRibbonText .eyebrow,
+.app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
+.titleBarUpdateSlot .topUpdateRibbon .updateGhostButton{
     display: none !important;
   }
 
   .app .titleBarUpdateSlot .topUpdateRibbonText h3,
-  .titleBarUpdateSlot .topUpdateRibbonText h3{
+.titleBarUpdateSlot .topUpdateRibbonText h3{
     font-size: 10.5px !important;
   }
 }
 
 @media (max-width: 680px){
   .app .titleBarUpdateSlot,
-  .titleBarUpdateSlot{
+.titleBarUpdateSlot{
     padding: 0 6px !important;
   }
 
   .app .titleBarUpdateSlot .topUpdateRibbonText,
-  .titleBarUpdateSlot .topUpdateRibbonText{
+.titleBarUpdateSlot .topUpdateRibbonText{
     display: none !important;
   }
 
@@ -11198,19 +9009,13 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   }
 
   .app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
-  .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton{
+.titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton{
     padding: 0 8px !important;
   }
 }
 
-.app.updateRibbonVisible .appShell,
-.app.updateRibbonVisible .mainLayout,
-.app.updateRibbonVisible .content{
+.app.updateRibbonVisible .mainLayout{
   padding-top: 0 !important;
-}
-
-.app.updateRibbonVisible .content{
-  scroll-padding-top: 0 !important;
 }
 
 .app .topUpdateRibbonLayer,
@@ -11498,46 +9303,46 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 @media (max-width: 1240px){
   .app .topUpdateRibbonLayer,
-  .topUpdateRibbonLayer{
+.topUpdateRibbonLayer{
     left: 118px !important;
     right: 132px !important;
   }
 
   .app .topUpdateRibbonMeta,
-  .topUpdateRibbonMeta{
+.topUpdateRibbonMeta{
     display: none !important;
   }
 }
 
 @media (max-width: 860px){
   .app .topUpdateRibbonLayer,
-  .topUpdateRibbonLayer{
+.topUpdateRibbonLayer{
     left: 64px !important;
     right: 118px !important;
   }
 
   .app .topUpdateRibbonText .eyebrow,
-  .topUpdateRibbonText .eyebrow,
-  .app .topUpdateRibbon .updateGhostButton,
-  .topUpdateRibbon .updateGhostButton{
+.topUpdateRibbonText .eyebrow,
+.app .topUpdateRibbon .updateGhostButton,
+.topUpdateRibbon .updateGhostButton{
     display: none !important;
   }
 }
 
 @media (max-width: 620px){
   .app .topUpdateRibbonLayer,
-  .topUpdateRibbonLayer{
+.topUpdateRibbonLayer{
     left: 46px !important;
     right: 104px !important;
   }
 
   .app .topUpdateRibbonIcon,
-  .topUpdateRibbonIcon{
+.topUpdateRibbonIcon{
     display: none !important;
   }
 
   .app .topUpdateRibbonMain,
-  .topUpdateRibbonMain{
+.topUpdateRibbonMain{
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
@@ -11767,26 +9572,26 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 @media (max-width: 1180px){
   .app .topUpdateRibbonLayer,
-  .topUpdateRibbonLayer{
+.topUpdateRibbonLayer{
     left: 118px !important;
     right: 132px !important;
   }
 
   .app .topUpdateRibbonText .eyebrow,
-  .topUpdateRibbonText .eyebrow{
+.topUpdateRibbonText .eyebrow{
     display: none !important;
   }
 }
 
 @media (max-width: 860px){
   .app .topUpdateRibbonLayer,
-  .topUpdateRibbonLayer{
+.topUpdateRibbonLayer{
     left: 62px !important;
     right: 116px !important;
   }
 
   .app .topUpdateRibbon .updateGhostButton,
-  .topUpdateRibbon .updateGhostButton{
+.topUpdateRibbon .updateGhostButton{
     display: none !important;
   }
 }
@@ -11847,7 +9652,8 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   --lt-glass-accent-alpha: 0.075;
 }
 
-/* localtify 0.3.8 V359: hover sidebar CSS moved to effects.css, the last imported CSS layer. */
+/* localtify 0.3.8 V359: hover sidebar CSS moved to effects.css,
+the last imported CSS layer. */
 
 .app[data-stars-intensity="off"] .localtifyStarsBackdrop{
   display: none !important;
@@ -11982,10 +9788,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   background-image: inherit !important;
 }
 
-.localtifyProximityActive:is(button,[role="button"],.navItem,.mainAction,.heroMain,.heroGhost,.softButton,.playerButton,.circleButton){
-  transform: scale(var(--prox-scale, 1)) translateZ(0) !important;
-}
-
 .app .playerBar > :where(.playerLeft,.playerCenter,.playerRight,.controlRow,.progressRow,.volumeWrap){
   contain: layout style !important;
 }
@@ -12024,22 +9826,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   background-image: inherit !important;
 }
 
-.sidebar .navItem::before,
-.sidebar .navItem::after,
-.sidebar .navIcon::before,
-.sidebar .navIcon::after{
-  content: none !important;
-  display: none !important;
-}
-
-.sidebar .navIcon,
-.sidebar .navItem.active .navIcon,
-.sidebar .navItem:hover .navIcon{
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
 .app .playlistTrackMain,
 .app .playlistTrackMain:hover,
 .app .playlistTrackMain:active,
@@ -12054,106 +9840,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   rotate: none !important;
   filter: none !important;
   text-shadow: none !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover){
-  width: var(--localtify-sidebar-closed-width) !important;
-  min-width: var(--localtify-sidebar-closed-width) !important;
-  max-width: var(--localtify-sidebar-closed-width) !important;
-  box-shadow: none !important;
-  transition:
-    width 520ms cubic-bezier(.16, 1, .3, 1),
-    min-width 520ms cubic-bezier(.16, 1, .3, 1),
-    max-width 520ms cubic-bezier(.16, 1, .3, 1),
-    box-shadow 260ms ease,
-    border-color 220ms ease,
-    background-color 220ms ease !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .navItem{
-  width: 48px !important;
-  min-width: 48px !important;
-  height: 48px !important;
-  margin-inline: auto !important;
-  padding: 0 !important;
-  justify-content: center !important;
-  gap: 0 !important;
-  border-radius: 15px !important;
-  transition:
-    width 500ms cubic-bezier(.16, 1, .3, 1),
-    min-width 500ms cubic-bezier(.16, 1, .3, 1),
-    padding 480ms cubic-bezier(.16, 1, .3, 1),
-    gap 460ms cubic-bezier(.16, 1, .3, 1),
-    margin 460ms cubic-bezier(.16, 1, .3, 1),
-    color 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 170ms cubic-bezier(.16, 1, .3, 1) !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .navText{
-  max-width: 0 !important;
-  opacity: 0 !important;
-  transform: translate3d(-12px, 0, 0) !important;
-  pointer-events: none !important;
-  transition:
-    opacity 140ms ease,
-    transform 360ms cubic-bezier(.16, 1, .3, 1),
-    max-width 430ms cubic-bezier(.16, 1, .3, 1) !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .logoWrap{
-  justify-content: center !important;
-  gap: 0 !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .logoWrap h1,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .logoWrap p{
-  max-width: 0 !important;
-  opacity: 0 !important;
-  transform: translate3d(-10px, 0, 0) !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-  transition:
-    opacity 130ms ease,
-    transform 340ms cubic-bezier(.16, 1, .3, 1),
-    max-width 420ms cubic-bezier(.16, 1, .3, 1) !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .importMainAction{
-  width: 48px !important;
-  min-width: 48px !important;
-  max-width: 48px !important;
-  height: 44px !important;
-  padding: 0 !important;
-  margin-inline: auto !important;
-  justify-content: center !important;
-  gap: 0 !important;
-  font-size: 0 !important;
-  transition:
-    width 500ms cubic-bezier(.16, 1, .3, 1),
-    min-width 500ms cubic-bezier(.16, 1, .3, 1),
-    max-width 500ms cubic-bezier(.16, 1, .3, 1),
-    padding 470ms cubic-bezier(.16, 1, .3, 1),
-    gap 450ms cubic-bezier(.16, 1, .3, 1),
-    margin 450ms cubic-bezier(.16, 1, .3, 1),
-    font-size 120ms ease,
-    transform 170ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease !important;
-}
-
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover) .importMainAction span{
-  max-width: 0 !important;
-  opacity: 0 !important;
-  transform: translate3d(-10px, 0, 0) !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-  white-space: nowrap !important;
-  transition:
-    opacity 120ms ease,
-    transform 320ms cubic-bezier(.16, 1, .3, 1),
-    max-width 380ms cubic-bezier(.16, 1, .3, 1) !important;
 }
 
 .app .secretLayer.stars,
@@ -12179,8 +9865,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 .app::before,
 .app::after,
-.content::before,
-.content::after,
 .ambientSurface::before,
 .ambientSurface::after,
 .panel.ambientSurface::before,
@@ -12193,8 +9877,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   filter: none !important;
 }
 
-.app[data-theme="stars"],
-.app[data-theme="stars"] .content{
+.app[data-theme="stars"]{
   background-image: none !important;
   background-color: #050010 !important;
 }
@@ -12210,16 +9893,12 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 }
 
 /* localtify 0.3.8 V301 — renderer performance guardrails
-   Keeps the visual identity, but sleeps expensive paint during scroll/drag/heavy views. */
+   Keeps the visual identity,
+but sleeps expensive paint during scroll/drag/heavy views. */
 body.localtifyPerfV301 .app{
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   contain: layout style paint;
-}
-
-body.localtifyPerfV301 .content{
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
 }
 
 body.localtifyPerfV301 .app :is(
@@ -12261,20 +9940,6 @@ body.localtifyPerfV301 .app :is(
 }
 
 body.localtifyPerfV301 .app.isScrolling :is(
-  .panel,
-  .headerBar,
-  .sidebar,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .homeShelfPanel,
-  .homeHeroCard,
-  .playerBar
-){
-  backdrop-filter: blur(8px) saturate(108%) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(108%) !important;
-}
-
-body.localtifyPerfV301 .app.isScrolling :is(
   .homeAlbumCard,
   .homeListenCard,
   .homeFreshCard,
@@ -12313,7 +9978,10 @@ body.localtifyPerfV301 .app :is(.localtifyStarsBackdrop, .localtifyStarsLayer, .
 
 /* localtify 0.3.8 V380 — theme painting lag guard.
    Color picking now updates CSS variables without forcing expensive animation/filter churn.
-   This does NOT disable image blur, hero blur, player blur, or cover tint. */
+   This does NOT disable image blur,
+hero blur,
+player blur,
+or cover tint. */
 
 body.localitfyThemePainting .app{
   contain: paint style !important;
@@ -12367,83 +10035,12 @@ body.localitfyThemePainting .app :is(
   box-shadow: inherit !important;
 }
 
-/* localtify 0.3.8 V420 — animated sidebar icon polish */
-.sidebar .navIcon{
-  overflow: visible !important;
-  color: currentColor !important;
-}
-
-.sidebar .navAnimatedIcon,
-.sidebar .navAnimatedIcon svg{
-  width: 22px !important;
-  height: 22px !important;
-  display: block !important;
-  overflow: visible !important;
-  color: currentColor !important;
-  stroke: currentColor !important;
-}
-
-.sidebar .navItem:hover .navAnimatedIcon,
-.sidebar .navItem.active .navAnimatedIcon,
-.sidebar .navItem[aria-current="page"] .navAnimatedIcon{
-  color: var(--accent) !important;
-  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), .22));
-}
-
-.sidebar .navItem:hover .navIcon{
-  transform: translate3d(0, -1px, 0) scale(1.04) !important;
-}
-
-.sidebar .navItem:active .navIcon{
-  transform: translate3d(0, 0, 0) scale(.96) !important;
-}
-
-@media (prefers-reduced-motion: reduce){
-  .sidebar .navItem:hover .navIcon,
-  .sidebar .navItem:active .navIcon{
-    transform: none !important;
-  }
-}
-
 /* localtify 0.3.8 V421 — make sidebar icon motion visible on full row hover */
 @keyframes localtifySidebarIconPopV421{
   0%{ transform: translate3d(0,0,0) scale(1) rotate(0deg); }
   38%{ transform: translate3d(0,-2px,0) scale(1.12) rotate(-4deg); }
   68%{ transform: translate3d(0,0,0) scale(.98) rotate(2deg); }
   100%{ transform: translate3d(0,0,0) scale(1) rotate(0deg); }
-}
-
-.sidebar .navAnimatedIcon{
-  transform-origin: 50% 50% !important;
-  will-change: transform !important;
-}
-
-.sidebar .navItem:hover .navAnimatedIcon,
-.sidebar .navItem:focus-visible .navAnimatedIcon{
-  animation: localtifySidebarIconPopV421 520ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-.sidebar .navItem:hover .navLucideIcon,
-.sidebar .navItem:focus-visible .navLucideIcon{
-  color: var(--accent) !important;
-  stroke: currentColor !important;
-}
-
-@media (prefers-reduced-motion: reduce){
-  .sidebar .navItem:hover .navAnimatedIcon,
-  .sidebar .navItem:focus-visible .navAnimatedIcon{
-    animation: none !important;
-  }
-}
-
-/* localtify 0.3.8 V422 — sidebar icon animation reliability fix */
-.sidebar .navItem .navIcon,
-.sidebar .navItem .navLucideIcon,
-.sidebar .navItem .navAnimatedIcon,
-.sidebar .navItem .navAnimatedIcon svg{
-  transform-origin: 50% 50% !important;
-  will-change: transform, filter !important;
-  overflow: visible !important;
 }
 
 @keyframes localtifySidebarIconBounceV422{
@@ -12457,50 +10054,6 @@ body.localitfyThemePainting .app :is(
 @keyframes localtifySidebarIconStrokeV422{
   0%,100%{ filter: drop-shadow(0 0 0 rgba(var(--accent-rgb), 0)); }
   45%{ filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), .30)); }
-}
-
-.sidebar .navItem:hover .navIcon,
-.sidebar .navItem:focus-visible .navIcon{
-  animation: localtifySidebarIconBounceV422 560ms cubic-bezier(.16,1,.3,1) both !important;
-}
-
-.sidebar .navItem:hover .navLucideIcon,
-.sidebar .navItem:hover .navAnimatedIcon,
-.sidebar .navItem:focus-visible .navLucideIcon,
-.sidebar .navItem:focus-visible .navAnimatedIcon{
-  color: var(--accent) !important;
-  stroke: currentColor !important;
-  animation: localtifySidebarIconStrokeV422 560ms ease both !important;
-}
-
-.sidebar .navItem.active .navIcon,
-.sidebar .navItem[aria-current="page"] .navIcon{
-  color: var(--accent) !important;
-}
-
-.sidebar .navItem.active .navLucideIcon,
-.sidebar .navItem[aria-current="page"] .navLucideIcon{
-  color: var(--accent) !important;
-  stroke: currentColor !important;
-}
-
-/* Keep old V421 animation from stacking on only some icons. The wrapper owns motion now. */
-.sidebar .navItem:hover .navAnimatedIcon,
-.sidebar .navItem:focus-visible .navAnimatedIcon{
-  animation-name: localtifySidebarIconStrokeV422 !important;
-}
-
-@media (prefers-reduced-motion: reduce){
-  .sidebar .navItem:hover .navIcon,
-  .sidebar .navItem:focus-visible .navIcon,
-  .sidebar .navItem:hover .navLucideIcon,
-  .sidebar .navItem:hover .navAnimatedIcon,
-  .sidebar .navItem:focus-visible .navLucideIcon,
-  .sidebar .navItem:focus-visible .navAnimatedIcon{
-    animation: none !important;
-    transform: none !important;
-    filter: none !important;
-  }
 }
 
 /* V443: restored SVG heart like animation.
@@ -12678,18 +10231,18 @@ body.localitfyThemePainting .app :is(
 
 @media (prefers-reduced-motion: reduce){
   .iconAction.likeActionV443.liked .likeHeartFillV443,
-  .iconAction.likeActionV443.likeActionActiveV443 .likeHeartFillV443,
-  .iconAction.likeActionV443.liked .likeBurstRingV443,
-  .iconAction.likeActionV443.likeActionActiveV443 .likeBurstRingV443,
-  .iconAction.likeActionV443.liked .likeBurstParticleV443,
-  .iconAction.likeActionV443.likeActionActiveV443 .likeBurstParticleV443,
-  .iconAction.likeActionV443.liked .likeBurstParticleV443::before,
-  .iconAction.likeActionV443.likeActionActiveV443 .likeBurstParticleV443::before{
+.iconAction.likeActionV443.likeActionActiveV443 .likeHeartFillV443,
+.iconAction.likeActionV443.liked .likeBurstRingV443,
+.iconAction.likeActionV443.likeActionActiveV443 .likeBurstRingV443,
+.iconAction.likeActionV443.liked .likeBurstParticleV443,
+.iconAction.likeActionV443.likeActionActiveV443 .likeBurstParticleV443,
+.iconAction.likeActionV443.liked .likeBurstParticleV443::before,
+.iconAction.likeActionV443.likeActionActiveV443 .likeBurstParticleV443::before{
     animation: none !important;
   }
 
   .iconAction.likeActionV443.liked .likeHeartFillV443,
-  .iconAction.likeActionV443.likeActionActiveV443 .likeHeartFillV443{
+.iconAction.likeActionV443.likeActionActiveV443 .likeHeartFillV443{
     opacity: 1;
     transform: scale(1);
   }
@@ -12770,8 +10323,452 @@ body.localitfyThemePainting .app :is(
 
 @media (max-width: 900px){
   .app .playlistPickerWrap.modalWrap,
-  .modalWrap.playlistPickerWrap{
+.modalWrap.playlistPickerWrap{
     inset: 36px 0 92px 0 !important;
     padding: 12px !important;
+  }
+}
+
+/* V451 CLEAN SHELL + SIDEBAR
+   This is a replacement section, not another patch stack.
+   The sidebar follows the current Localtify app theme background, just slightly darker.
+   No acrylic. No transparent glass. No hover-only black overlay. No sidebar content shifting. */
+
+:root,
+html,
+body,
+#root{
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: var(--bg, #000);
+}
+
+.app{
+  --player-size-used: var(--player-size-live, var(--player-size, 92px));
+  --sidebar-width-used: var(--sidebar-width-live, var(--sidebar-width, 236px));
+  --sidebar-bg-clean:
+    linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.34)),
+    var(--bg, #000);
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  color: var(--text);
+  background: var(--bg, #000);
+}
+
+.titleBar{
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  -webkit-app-region: drag;
+  color: var(--text);
+  background: var(--bg, #000);
+  border-bottom: 1px solid rgba(var(--accent-rgb), .28);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.titleDrag{
+  height: 100%;
+  padding-left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 780;
+}
+
+.titleLogo{
+  color: var(--accent);
+}
+
+.windowButtons{
+  height: 100%;
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.windowButtons button{
+  width: 46px;
+  height: 100%;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+}
+
+.windowButtons button:hover{
+  color: var(--text);
+  background: rgba(255,255,255,.07);
+}
+
+.windowButtons .closeWin:hover{
+  color: #fff;
+  background: #e54868;
+}
+
+.appShell{
+  height: calc(100vh - 36px);
+  display: grid;
+  grid-template-columns: var(--sidebar-width-used) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) var(--player-size-used);
+  overflow: hidden;
+  background: var(--bg, #000);
+}
+
+/* Sidebar stays one consistent darker theme surface. */
+.sidebar{
+  grid-column: 1;
+  grid-row: 1 / 3;
+  min-width: 0;
+  width: var(--sidebar-width-used);
+  height: 100%;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  color: var(--text);
+  background: var(--sidebar-bg-clean);
+  background-color: var(--bg, #000);
+  border-right: 1px solid rgba(var(--accent-rgb), .24);
+  box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.sidebar,
+.sidebar:hover,
+.app .sidebar:hover,
+.app[data-sidebar-behavior="hover"] .sidebar,
+.app[data-sidebar-behavior="hover"] .sidebar:hover{
+  background: var(--sidebar-bg-clean);
+  background-color: var(--bg, #000);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
+  transform: none;
+  transition: none;
+}
+
+.sidebar::before,
+.sidebar::after{
+  content: none;
+  display: none;
+}
+
+.logoWrap{
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.logoWrap h1{
+  margin: 0;
+  color: var(--text);
+  font-size: 23px;
+  line-height: 1;
+  letter-spacing: -.055em;
+}
+
+.logoWrap p{
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.nav{
+  display: grid;
+  gap: 7px;
+}
+
+.navItem{
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  color: var(--text-2);
+  background: transparent;
+  text-align: left;
+  font-weight: 820;
+  box-shadow: none;
+  transform: none;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.navItem:hover{
+  color: var(--text);
+  background: rgba(255,255,255,.045);
+  border-color: rgba(255,255,255,.075);
+  transform: none;
+  box-shadow: none;
+}
+
+.navItem.active{
+  color: var(--text);
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), .16), rgba(var(--accent-rgb), .08)),
+    rgba(var(--accent-rgb), .045);
+  border-color: rgba(var(--accent-rgb), .36);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .10);
+}
+
+.navText{
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.navText strong,
+.navText span{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navText strong{
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.05;
+  font-weight: 920;
+}
+
+.navText span{
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.1;
+  font-weight: 760;
+}
+
+.importMainAction{
+  width: 100%;
+  min-height: 44px;
+  margin-top: auto;
+  border: 1px solid rgba(var(--accent-rgb), .32);
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #08070c;
+  background: var(--accent);
+  font-weight: 920;
+  box-shadow: 0 12px 28px rgba(var(--accent-rgb), .14);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform: none;
+}
+
+.importMainAction:hover{
+  transform: none;
+  filter: brightness(1.03);
+}
+
+.sidebarResizeHandle{
+  display: none;
+}
+
+/* Hover sidebar setting is intentionally neutralized for now. */
+.app[data-sidebar-behavior="hover"]{
+  --sidebar-width: 236px;
+}
+
+.app[data-sidebar-behavior="hover"] .appShell{
+  grid-template-columns: var(--sidebar-width-used) minmax(0, 1fr);
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar{
+  width: var(--sidebar-width-used);
+  min-width: 0;
+  max-width: none;
+}
+
+.app.sidebarHoverShiftEnabled .content,
+.app.sidebarHoverOpen .content{
+  transform: none;
+  transition: none;
+}
+
+.content{
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 18px clamp(18px, 2.1vw, 30px) calc(var(--player-size-used) + 48px);
+  color: var(--text);
+  background: var(--bg, #000);
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  transform: none;
+  backface-visibility: hidden;
+}
+
+.playerBar{
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.toastStack{
+  left: calc(var(--sidebar-width-used) + 22px);
+  width: min(360px, calc(100vw - var(--sidebar-width-used) - 42px));
+}
+
+@media (max-width: 860px){
+  .app{
+    --sidebar-width-used: 74px;
+  }
+
+  .sidebar{
+    padding: 12px 8px;
+  }
+
+  .navItem{
+    grid-template-columns: 1fr;
+    place-items: center;
+    padding: 0;
+  }
+
+  .navText,
+  .logoWrap h1,
+  .logoWrap p{
+    display: none;
+  }
+
+  .content{
+    padding-inline: 14px;
+  }
+}
+
+/* V452: overall app performance baseline.
+   Safe CSS-only pass: no TSX logic changes, no feature removals. */
+
+.app{
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  contain: size layout style;
+}
+
+.content{
+  overflow-anchor: none;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scroll-behavior: auto;
+}
+
+/* Stop old page fade/replay animations from making settings/home feel like they reload. */
+.content,
+.headerBar,
+.pageTransition,
+.settingsCategoryPage,
+.settingsPanelCard,
+.settingsPageCard{
+  animation: none !important;
+}
+
+.pageTransition,
+.settingsCategoryPage{
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Do not allow general buttons to jump around. Specific player animations still work. */
+.app button:hover:not(.playerBar *):not(.circleButton.main){
+  transform: none !important;
+}
+
+.app button:active:not(.playerBar *):not(.circleButton.main){
+  transform: none !important;
+}
+
+/* Expensive effects pause during theme dragging, window resizing, and scrolling. */
+body.localitfyThemePainting .app,
+body.localitfyThemePainting .app *,
+body.localitfyThemePainting .app *::before,
+body.localitfyThemePainting .app *::after,
+body.isResizingSidebar .app,
+body.isResizingPlayer .app{
+  transition-duration: 0ms !important;
+  animation-duration: 0ms !important;
+  animation-delay: 0ms !important;
+}
+
+body.localitfyThemePainting .ambientSurface::before,
+body.localitfyThemePainting .ambientSurface::after,
+body.localitfyThemePainting .secretLayer,
+body.localitfyThemePainting .floatingNotesLayer,
+body.isResizingSidebar .ambientSurface::before,
+body.isResizingSidebar .ambientSurface::after,
+body.isResizingPlayer .ambientSurface::before,
+body.isResizingPlayer .ambientSurface::after{
+  opacity: 0 !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+body.localitfyThemePainting .panel,
+body.localitfyThemePainting .hero,
+body.localitfyThemePainting .homeShelfPanel,
+body.localitfyThemePainting .homeLibraryPanel,
+body.localitfyThemePainting .settingsPanelCard,
+body.localitfyThemePainting .settingsPageCard,
+body.localitfyThemePainting .modalWrap,
+body.localitfyThemePainting .editorModal{
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* Keep blur/glass off the sidebar permanently. */
+.sidebar,
+.sidebar *,
+.titleBar{
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Overlay blur is expensive; use a darker flat overlay instead. */
+.modalWrap,
+.playlistPickerWrap,
+.whatsNewOverlay,
+.importOverlay{
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Stop forced GPU layers on huge containers after earlier patches. */
+.content,
+.homeView,
+.settingsPage{
+  will-change: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .app *,
+  .app *::before,
+  .app *::after{
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
   }
 }

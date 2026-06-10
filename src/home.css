@@ -16909,182 +16909,169 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   }
 }
 
-/* V442: working More quick-library blur toggle.
-   This targets the visible home quick library cards only. */
-.app.moreQuickLibraryBlur,
-body.localtifyWantMoreBlur .app{
-  --quick-library-card-bg: rgba(10, 8, 16, .56);
-  --quick-library-card-bg-hover: rgba(13, 10, 20, .62);
-  --quick-library-cover-blur-opacity: .42;
-  --quick-library-cover-blur-opacity-hover: .52;
-  --quick-library-cover-blur-opacity-active: .62;
-  --quick-library-cover-blur: 24px;
-  --quick-library-cover-scale: 1.16;
+/* V445: home panels respect slim sidebar and theme painting stays cheap. */
+
+.homePage,
+.homeView{
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
 }
 
-.app.lessQuickLibraryBlur,
-body.localtifyNoMoreBlur .app{
-  --quick-library-card-bg: rgba(8, 8, 14, .94);
-  --quick-library-card-bg-hover: rgba(12, 10, 18, .96);
-  --quick-library-cover-blur-opacity: 0;
-  --quick-library-cover-blur-opacity-hover: 0;
-  --quick-library-cover-blur-opacity-active: 0;
-  --quick-library-cover-blur: 0px;
-  --quick-library-cover-scale: 1;
+.homeShelfStack,
+.homeShelfPanel,
+.homeLibraryPanel,
+.quickLibraryPanel,
+.localPicksPanel,
+.coverShelf,
+.libraryOverview{
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
-.app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumCard,
-body.localtifyWantMoreBlur .app .homeLibraryPanel .homeAlbumCard{
-  background: var(--quick-library-card-bg) !important;
-  border-color: rgba(255,255,255,.085) !important;
+.homeShelfPanel,
+.homeLibraryPanel{
+  border-left-width: 1px !important;
 }
 
-.app.lessQuickLibraryBlur .homeLibraryPanel .homeAlbumCard,
-body.localtifyNoMoreBlur .app .homeLibraryPanel .homeAlbumCard{
-  background: var(--quick-library-card-bg) !important;
-}
-
-.app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumCard:hover,
-body.localtifyWantMoreBlur .app .homeLibraryPanel .homeAlbumCard:hover{
-  background: var(--quick-library-card-bg-hover) !important;
-  border-color: rgba(var(--accent-rgb), .22) !important;
-}
-
-.app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumCard::before,
-body.localtifyWantMoreBlur .app .homeLibraryPanel .homeAlbumCard::before{
-  content: "" !important;
-  display: block !important;
-  position: absolute !important;
-  inset: -28px !important;
-  z-index: 0 !important;
+.homeShelfPanel::before,
+.homeShelfPanel::after,
+.homeLibraryPanel::before,
+.homeLibraryPanel::after{
   pointer-events: none !important;
-  background-image:
-    linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.56)),
-    var(--library-card-cover, none) !important;
-  background-size: cover !important;
-  background-position: center !important;
-  opacity: var(--quick-library-cover-blur-opacity) !important;
-  filter: blur(var(--quick-library-cover-blur)) saturate(1.24) brightness(.72) !important;
-  transform: scale(var(--quick-library-cover-scale)) translateZ(0) !important;
-  transition: opacity 170ms ease !important;
 }
 
-.app.lessQuickLibraryBlur .homeLibraryPanel .homeAlbumCard::before,
-body.localtifyNoMoreBlur .app .homeLibraryPanel .homeAlbumCard::before{
-  content: none !important;
-  display: none !important;
+.homeAlbumCard,
+.recentCoverCard,
+.coverCard,
+.songCard{
+  transform: none !important;
 }
 
-.app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumCard:hover::before,
-body.localtifyWantMoreBlur .app .homeLibraryPanel .homeAlbumCard:hover::before{
-  opacity: var(--quick-library-cover-blur-opacity-hover) !important;
+.homeAlbumCard:hover,
+.recentCoverCard:hover,
+.coverCard:hover,
+.songCard:hover{
+  transform: none !important;
 }
 
-.app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumCard.active::before,
-body.localtifyWantMoreBlur .app .homeLibraryPanel .homeAlbumCard.active::before{
-  opacity: var(--quick-library-cover-blur-opacity-active) !important;
-}
-
-.app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumPlayZone,
-body.localtifyWantMoreBlur .app .homeLibraryPanel .homeAlbumPlayZone{
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.055),
-    0 10px 28px rgba(0,0,0,.26) !important;
-}
-
-.app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumMeta,
-.app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumStats,
-.app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumActions,
-body.localtifyWantMoreBlur .app .homeLibraryPanel .homeAlbumMeta,
-body.localtifyWantMoreBlur .app .homeLibraryPanel .homeAlbumStats,
-body.localtifyWantMoreBlur .app .homeLibraryPanel .homeAlbumActions{
-  position: relative !important;
-  z-index: 3 !important;
-}
-
-body.localitfyThemePainting .app.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumCard::before,
-.app.isScrolling.moreQuickLibraryBlur .homeLibraryPanel .homeAlbumCard::before{
+body.localitfyThemePainting .homeShelfPanel,
+body.localitfyThemePainting .homeLibraryPanel,
+body.localitfyThemePainting .homeAlbumCard,
+body.localitfyThemePainting .recentCoverCard,
+body.localitfyThemePainting .coverCard,
+body.localitfyThemePainting .songCard{
   transition: none !important;
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+body.localitfyThemePainting .homeAlbumCard::before,
+body.localitfyThemePainting .homeAlbumCard::after,
+body.localitfyThemePainting .homeShelfPanel::before,
+body.localitfyThemePainting .homeShelfPanel::after{
+  opacity: 0 !important;
+  filter: none !important;
+}
+
+/* V452: overall home performance baseline.
+   Keeps the same UI, but makes shelves/cards cheaper to render. */
+
+.homeView,
+.homePage{
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.homeShelfPanel,
+.homeLibraryPanel,
+.quickLibraryPanel,
+.localPicksPanel,
+.coverShelf,
+.libraryOverview{
+  contain: layout paint style;
+  content-visibility: auto;
+  contain-intrinsic-size: 420px;
+}
+
+.homeAlbumCard,
+.recentCoverCard,
+.coverCard,
+.songCard,
+.homeSongRow{
+  contain: layout paint style;
+  backface-visibility: hidden;
+  transform: none !important;
   will-change: auto !important;
 }
 
-/* V444: no hover movement on quick action buttons + full playlist modal overlay. */
-.app .iconAction.noActionHoverV444,
-.app .homeAlbumActions .iconAction,
-.app .songRow > .iconAction,
-.app .playlistAddAction,
-.app .likeActionV443{
+.homeAlbumCard:hover,
+.recentCoverCard:hover,
+.coverCard:hover,
+.songCard:hover,
+.homeSongRow:hover{
+  transform: none !important;
+}
+
+.homeAlbumCard img,
+.recentCoverCard img,
+.coverCard img,
+.songCard img{
+  backface-visibility: hidden;
+}
+
+/* Keep quick-library blur available, but disable the expensive card blur while the app is repainting. */
+body.localitfyThemePainting .homeAlbumCard::before,
+body.localitfyThemePainting .homeAlbumCard::after,
+body.localitfyThemePainting .recentCoverCard::before,
+body.localitfyThemePainting .recentCoverCard::after,
+body.isResizingSidebar .homeAlbumCard::before,
+body.isResizingSidebar .homeAlbumCard::after,
+body.isResizingPlayer .homeAlbumCard::before,
+body.isResizingPlayer .homeAlbumCard::after{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  filter: none !important;
+}
+
+body.localitfyThemePainting .homeAlbumCard,
+body.localitfyThemePainting .recentCoverCard,
+body.localitfyThemePainting .coverCard,
+body.localitfyThemePainting .songCard,
+body.localitfyThemePainting .homeSongRow{
+  transition: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.homeAlbumActions .iconAction,
+.homeAlbumActions .iconAction:hover,
+.homeAlbumActions .iconAction:active{
   transform: none !important;
   transition: none !important;
-  filter: none !important;
-  box-shadow: none !important;
 }
 
-.app .iconAction.noActionHoverV444:hover,
-.app .homeAlbumActions .iconAction:hover,
-.app .songRow > .iconAction:hover,
-.app .playlistAddAction:hover,
-.app .likeActionV443:hover{
-  transform: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-.app .iconAction.noActionHoverV444:active,
-.app .homeAlbumActions .iconAction:active,
-.app .songRow > .iconAction:active,
-.app .playlistAddAction:active,
-.app .likeActionV443:active{
-  transform: none !important;
-  filter: none !important;
-}
-
-.app .iconAction.likeActionV443:not(.liked):not(.likeActionActiveV443):hover .likeHeartShellV443,
-.app .iconAction.likeActionV443:hover .likeHeartShellV443,
-.app .playlistAddAction:hover{
-  transform: none !important;
-  filter: none !important;
-}
-
-.app .playlistPickerWrap.modalWrap,
-.modalWrap.playlistPickerWrap{
-  position: fixed !important;
-  inset: 36px 0 92px 0 !important;
-  z-index: 150 !important;
-  display: grid !important;
-  place-items: center !important;
-  padding: 18px !important;
-  overflow: auto !important;
-  background: rgba(0,0,0,.68) !important;
-  backdrop-filter: blur(22px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(120%) !important;
-}
-
-.app .playlistPickerModalV444,
-.app .playlistPickerModal{
-  width: min(520px, calc(100vw - 36px)) !important;
-  max-height: min(720px, calc(100vh - 150px)) !important;
-  position: relative !important;
-  z-index: 2 !important;
-}
-
-.app .playlistPickerHead h3{
-  overflow-wrap: anywhere !important;
-}
-
-.app .playlistPickerHead .editorHeadSub{
-  display: block !important;
-  margin-top: 5px !important;
-  color: rgba(255,255,255,.62) !important;
-  font-size: 12px !important;
-  font-weight: 760 !important;
-  line-height: 1.35 !important;
+/* Avoid huge hidden glow layers from costing frames inside long shelves. */
+.homeShelfPanel::before,
+.homeShelfPanel::after,
+.homeLibraryPanel::before,
+.homeLibraryPanel::after{
+  pointer-events: none !important;
 }
 
 @media (max-width: 900px){
-  .app .playlistPickerWrap.modalWrap,
-  .modalWrap.playlistPickerWrap{
-    inset: 36px 0 92px 0 !important;
-    padding: 12px !important;
+  .homeShelfPanel,
+  .homeLibraryPanel,
+  .quickLibraryPanel,
+  .localPicksPanel,
+  .coverShelf,
+  .libraryOverview{
+    contain-intrinsic-size: 520px;
   }
 }

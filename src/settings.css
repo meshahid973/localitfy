@@ -7764,3 +7764,270 @@ body.localitfyThemePainting .customThemeTokenV027{
     grid-template-columns: 1fr;
   }
 }
+
+/* V445: cleaner theme controls + less lag while color dragging. */
+
+.customThemeManagerV027{
+  contain: layout paint style;
+}
+
+.customThemeHeaderV027{
+  align-items: center !important;
+}
+
+.customThemeHeaderV027 > div:first-child{
+  display: grid !important;
+  gap: 5px !important;
+}
+
+.customThemeHeaderV027 strong{
+  font-size: 22px !important;
+  letter-spacing: -.035em !important;
+}
+
+.customThemeHeaderV027 span{
+  max-width: 46ch !important;
+  color: var(--text-2) !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  font-weight: 760 !important;
+}
+
+.customThemeLiveBadgeV441{
+  width: fit-content !important;
+  padding: 5px 9px !important;
+  border: 1px solid rgba(var(--accent-rgb), .24) !important;
+  border-radius: 999px !important;
+  color: var(--accent) !important;
+  background: rgba(var(--accent-rgb), .075) !important;
+  font-size: 10px !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+}
+
+.settingsHeaderActionsV027{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  gap: 9px !important;
+}
+
+.settingsHeaderActionsV027 .settingsTinyButton,
+.settingsHeaderActionsV027 .cleanToggleLabel{
+  min-height: 40px !important;
+}
+
+.customThemeBodyV027{
+  grid-template-columns: minmax(230px,.82fr) minmax(360px,1.18fr) !important;
+  gap: 14px !important;
+}
+
+.customThemePresetRowV027{
+  grid-template-columns: repeat(auto-fit, minmax(172px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.customThemePresetButtonV027{
+  min-height: 72px !important;
+  border: 1px solid rgba(255,255,255,.06) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.048), rgba(255,255,255,.014)),
+    rgba(255,255,255,.018) !important;
+}
+
+.customThemePresetButtonV027:hover{
+  transform: none !important;
+  border-color: rgba(var(--accent-rgb), .22) !important;
+  box-shadow: none !important;
+}
+
+.customThemeSimpleHintV439{
+  margin: 14px 0 12px !important;
+  padding: 12px 14px !important;
+  border: 1px solid rgba(var(--accent-rgb), .16) !important;
+  border-radius: 15px !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), .055), rgba(var(--accent-rgb), .018)),
+    rgba(255,255,255,.014) !important;
+}
+
+.customThemeSimpleHintV439 strong{
+  color: var(--text) !important;
+  font-size: 14px !important;
+}
+
+.customThemeSimpleHintV439 span{
+  color: var(--text-2) !important;
+  font-size: 11px !important;
+  line-height: 1.32 !important;
+}
+
+.customThemeTokenGridV027{
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.customThemeTokenV027{
+  min-height: 92px !important;
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto 34px !important;
+  align-content: center !important;
+  border: 1px solid rgba(255,255,255,.055) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.012)),
+    rgba(255,255,255,.016) !important;
+  box-shadow: none !important;
+}
+
+.customThemeColorPickerV032{
+  grid-column: 1 !important;
+  grid-row: 1 / 3 !important;
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.customThemeTokenV027 > strong{
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.customThemeTokenV027 > small{
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.customThemeHexInputV032{
+  grid-column: 1 / -1 !important;
+  grid-row: 3 !important;
+  width: 100% !important;
+  height: 34px !important;
+  margin-top: 4px !important;
+  border: 1px solid rgba(255,255,255,.06) !important;
+  background: rgba(0,0,0,.18) !important;
+}
+
+.customThemeColorPreviewV027{
+  transition: none !important;
+}
+
+body.localitfyThemePainting .settingsCategoryPage,
+body.localitfyThemePainting .settingsPanelCard,
+body.localitfyThemePainting .settingsPageCard,
+body.localitfyThemePainting .customThemeManagerV027,
+body.localitfyThemePainting .customThemePresetButtonV027,
+body.localitfyThemePainting .customThemeTokenV027{
+  transition: none !important;
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 1180px){
+  .customThemeBodyV027,
+  .customThemeTokenGridV027{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px){
+  .customThemeBodyV027,
+  .customThemePresetRowV027,
+  .customThemeTokenGridV027{
+    grid-template-columns: 1fr !important;
+  }
+
+  .settingsHeaderActionsV027{
+    justify-content: flex-start !important;
+  }
+}
+
+/* V452: overall settings performance baseline.
+   Prevents setting toggles/theme edits from replaying animations or repainting heavy blur. */
+
+.settingsPage,
+.settingsCategoryContent,
+.settingsCategoryContentV027{
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.settingsCategoryPage,
+.discordSettingsPage,
+.settingsPanelCard,
+.settingsPageCard,
+.customThemeManagerV027{
+  animation: none !important;
+  transform: none !important;
+}
+
+.settingsPanelCard,
+.settingsPageCard,
+.customThemeManagerV027,
+.appearanceUnifiedControlDeckV356{
+  contain: layout paint style;
+}
+
+.settingsThemeGrid,
+.customThemePresetRowV027,
+.customThemeTokenGridV027,
+.appearanceMiniGridV356{
+  contain: layout paint style;
+}
+
+.customThemeTokenV027,
+.customThemePresetButtonV027,
+.toggleRow,
+.coverSyncChoice,
+.sidebarBehaviorChoiceV327{
+  contain: layout paint style;
+  will-change: auto !important;
+}
+
+.customThemeTokenV027:hover,
+.customThemePresetButtonV027:hover,
+.toggleRow:hover{
+  transform: none !important;
+}
+
+body.localitfyThemePainting .settingsCategoryPage,
+body.localitfyThemePainting .settingsPanelCard,
+body.localitfyThemePainting .settingsPageCard,
+body.localitfyThemePainting .customThemeManagerV027,
+body.localitfyThemePainting .customThemePresetButtonV027,
+body.localitfyThemePainting .customThemeTokenV027,
+body.localitfyThemePainting .toggleRow{
+  transition: none !important;
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.settingsPanelCard,
+.settingsPageCard,
+.customThemeManagerV027{
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.customThemeColorPreviewV027,
+.customThemeNativeColorInputV027,
+.customThemeHexInputV032{
+  transition: none !important;
+}
+
+.settingsPage button:hover,
+.settingsPage button:active{
+  transform: none !important;
+}
