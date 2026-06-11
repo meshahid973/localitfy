@@ -679,6 +679,8 @@ function MainModeApp() {
   const playCountLastTimeRef = useRef(0);
   const sleepTimerRef = useRef<number | null>(null);
   const positionSaveRef = useRef(0);
+  const lastStablePlaybackTimeRef = useRef({ songId: "", time: 0, updatedAt: 0 });
+  const focusAudioRepairCooldownRef = useRef(0);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
   const playbackUrlCacheRef = useRef<Map<string, PlaybackUrlCacheEntry>>(new Map());
   const playbackUrlPendingRef = useRef<Map<string, Promise<PlaybackUrlResult>>>(new Map());
@@ -1014,20 +1016,45 @@ function MainModeApp() {
 
   function repairPlaybackAfterAppReturns(reason: "focus" | "visibility" | "background-tick") {
     const audio = audioRef.current;
-    if (!audio) return;
+    const song = songRef.current;
 
-    resumeAudioContextSafely();
+    if (!audio || !song) return;
 
+    // 0.4.0 audio-engine rule:
+    // Focus/alt-tab recovery is allowed to update UI state, but it must not touch
+    // volume, playbackRate, effects, crossfade, or restart the track while audio is already playing.
     if (!playingRef.current && !pendingPlayRef.current) return;
-    if (!songRef.current) return;
 
-    applyPlaybackRateSettings(audio);
-    setAudioElementVolume(audio, getTargetAudioVolume(songRef.current));
+    const now = performance.now();
+    if (now - focusAudioRepairCooldownRef.current < 350) return;
+    focusAudioRepairCooldownRef.current = now;
 
-    if (!audio.paused) return;
+    const stable = lastStablePlaybackTimeRef.current;
+    const latestTime = Number.isFinite(audio.currentTime) ? audio.currentTime : timeRef.current || 0;
+    const stableTime =
+      stable.songId === song.id && now - stable.updatedAt < 20_000
+        ? stable.time
+        : timeRef.current || latestTime;
 
-    const canRepair = reason !== "background-tick" || document.hidden;
-    if (!canRepair) return;
+    if (!audio.paused) {
+      const safeTime = Math.max(latestTime, stableTime);
+      timeRef.current = safeTime;
+      syncProgressDom(safeTime, durationRef.current || audio.duration || song.duration || 0, true);
+      return;
+    }
+
+    // Only recover if Chromium/Electron paused the HTMLAudio element while the app still believes it is playing.
+    // Do not run this while hidden, because background performance mode must never mutate the audio engine.
+    if (reason === "background-tick" || document.hidden) return;
+
+    try {
+      if (stableTime > 0 && latestTime + 0.3 < stableTime) {
+        audio.currentTime = stableTime;
+        timeRef.current = stableTime;
+      }
+    } catch {
+      // Ignore seek restore failures.
+    }
 
     void audio.play()
       .then(() => {
@@ -1087,7 +1114,7 @@ function MainModeApp() {
       setIsAppBackgrounded(hidden);
 
       if (hidden) {
-        repairPlaybackAfterAppReturns("background-tick");
+        // Do not touch playback while hidden. Only visual/UI work is allowed in background mode.
         trackAppBackgrounded({ reason: "visibility_hidden", current_view: analyticsViewRef.current });
         return;
       }
@@ -1129,10 +1156,7 @@ function MainModeApp() {
       }
     }, 300_000);
 
-    const backgroundAudioKeeper = window.setInterval(() => {
-      if (!document.hidden || !playingRef.current) return;
-      repairPlaybackAfterAppReturns("background-tick");
-    }, 1800);
+    // 0.4.0: no background audio keeper. Background/performance mode must not mutate playback.
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     window.addEventListener("focus", handleFocus);
@@ -1149,7 +1173,6 @@ function MainModeApp() {
       appRootRef.current?.classList.remove("localtifyHeroAmbienceRecovering");
       finishAnalyticsSession("unmount");
       window.clearInterval(heartbeatTimer);
-      window.clearInterval(backgroundAudioKeeper);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("blur", handleBlur);
@@ -4959,7 +4982,6 @@ function MainModeApp() {
       setAudioElementVolume(audio, safeVolume);
       applyPlaybackRateSettings(audio);
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
-      volumeRef.current = safeVolume;
       return safeVolume;
     },
     [
@@ -5127,6 +5149,13 @@ function MainModeApp() {
         const nextDuration = Number.isFinite(audio.duration) ? audio.duration : currentDuration;
 
         timeRef.current = nextTime;
+        if (!isSeekingRef.current && currentSong?.id) {
+          lastStablePlaybackTimeRef.current = {
+            songId: currentSong.id,
+            time: nextTime,
+            updatedAt: performance.now()
+          };
+        }
         if (Number.isFinite(nextDuration) && nextDuration > 0) durationRef.current = nextDuration;
 
         const uiPaintEveryMs = backgroundMode ? 3000 : busyUi ? 420 : 120;
@@ -5162,7 +5191,7 @@ function MainModeApp() {
     scheduleProgressTick(80);
 
     return () => stopProgressLoop();
-  }, [isPlaying, currentSong?.id, currentDuration, settings.gaplessPlayback, syncProgressDom]);
+  }, [isPlaying, currentSong?.id, currentDuration, settings.gaplessPlayback, isAppBackgrounded, syncProgressDom]);
 
   const discordSettingsRef = useRef(settings);
 
@@ -5454,7 +5483,6 @@ function MainModeApp() {
           audio.currentTime = Math.max(0, handoff.time || 0);
           const handoffVolume = clamp(handoff.volume || getTargetAudioVolume(currentSong), 0, 1);
           setAudioElementVolume(audio, handoffVolume);
-          volumeRef.current = handoffVolume;
 
           if (isPlaying || pendingPlayRef.current) {
             void audio.play().catch(() => undefined);
@@ -5717,73 +5745,118 @@ function MainModeApp() {
     const audio = audioRef.current;
     if (!audio || !target?.song) return;
 
-    const handoffTime = Number.isFinite(nextAudio.currentTime) ? nextAudio.currentTime : 0;
     const handoffUrl = nextAudio.src;
-
-    crossfadeHandoffRef.current = {
-      songId: target.song.id,
-      url: handoffUrl,
-      time: handoffTime,
-      volume: safeVolume
-    };
+    const readLiveNextTime = () => Number.isFinite(nextAudio.currentTime) ? Math.max(0, nextAudio.currentTime) : 0;
 
     crossfadeMainPauseGuardRef.current = true;
+    setAudioElementVolume(nextAudio, safeVolume);
 
     try {
       if (audio.src !== handoffUrl) {
         audio.src = handoffUrl;
       }
 
-      audio.currentTime = Math.max(0, handoffTime);
+      // Keep the audible hidden element playing while the real player warms up.
+      // This removes the tiny silence/cut that happened when the main element took over too early.
+      const warmStart = performance.now();
+      const liveTimeBeforePlay = readLiveNextTime();
+
+      try {
+        audio.currentTime = Math.max(0, liveTimeBeforePlay);
+      } catch {
+        // Ignore seek warmup failures.
+      }
+
       setAudioElementVolume(audio, 0);
       applyPlaybackRateSettings(audio);
-      audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
+      audio.preload = "auto";
       syncAudioEffectGraph(audio);
 
+      if (audio.readyState < 3) {
+        await new Promise<void>((resolve) => {
+          let settled = false;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            audio.removeEventListener("canplay", finish);
+            audio.removeEventListener("canplaythrough", finish);
+            resolve();
+          };
+
+          audio.addEventListener("canplay", finish, { once: true });
+          audio.addEventListener("canplaythrough", finish, { once: true });
+          window.setTimeout(finish, 280);
+        });
+      }
+
+      const warmedTime = readLiveNextTime();
+      try {
+        audio.currentTime = Math.max(0, warmedTime + 0.015);
+      } catch {
+        // Ignore final seek alignment failures.
+      }
+
       await audio.play();
+
+      const finalHandoffTime = readLiveNextTime();
+
+      crossfadeHandoffRef.current = {
+        songId: target.song.id,
+        url: handoffUrl,
+        time: finalHandoffTime,
+        volume: safeVolume
+      };
 
       commitAutoTransitionTarget(target);
 
       pendingPlayRef.current = false;
-      armPlayCount(target.song.id, Math.max(0, handoffTime));
+      armPlayCount(target.song.id, Math.max(0, finalHandoffTime));
       setCurrentId(target.song.id);
       setCrossfadePreviewSongId("");
       void rememberCurrentSong(target.song.id);
-      setCurrentTime(Math.max(0, handoffTime));
-      timeRef.current = Math.max(0, handoffTime);
+      setCurrentTime(Math.max(0, finalHandoffTime));
+      timeRef.current = Math.max(0, finalHandoffTime);
+      lastStablePlaybackTimeRef.current = {
+        songId: target.song.id,
+        time: Math.max(0, finalHandoffTime),
+        updatedAt: performance.now()
+      };
       setCurrentDuration(target.song.duration || nextAudio.duration || 0);
       setIsPlaying(true);
       setPlayerError("");
       setStatusText(`crossfading into ${prettyTitle(target.song.title, 5)}`);
 
-      const blendMs = 420;
+      const blendMs = 180;
       const blendStart = performance.now();
 
-      window.setTimeout(() => {
-        const blendTimer = window.setInterval(() => {
-          const progressValue = clamp((performance.now() - blendStart) / blendMs, 0, 1);
-          const eased = 1 - Math.pow(1 - progressValue, 2.6);
+      const blendStep = () => {
+        const progressValue = clamp((performance.now() - blendStart) / blendMs, 0, 1);
+        const eased = 1 - Math.pow(1 - progressValue, 2.4);
 
-          setAudioElementVolume(audio, safeVolume * eased);
-          setAudioElementVolume(nextAudio, safeVolume * (1 - eased));
+        setAudioElementVolume(audio, safeVolume * eased);
+        setAudioElementVolume(nextAudio, safeVolume * (1 - eased));
 
-          if (progressValue >= 1) {
-            window.clearInterval(blendTimer);
-            setAudioElementVolume(audio, safeVolume);
+        if (progressValue >= 1) {
+          setAudioElementVolume(audio, safeVolume);
 
-            try {
-              nextAudio.pause();
-              nextAudio.currentTime = 0;
-              setAudioElementVolume(nextAudio, 0);
-            } catch {
-              // ignore cleanup errors
-            }
-
-            crossfadeMainPauseGuardRef.current = false;
-            clearCrossfadeHandoffSoon(target.song.id, 450);
+          try {
+            nextAudio.pause();
+            nextAudio.currentTime = 0;
+            setAudioElementVolume(nextAudio, 0);
+          } catch {
+            // ignore cleanup errors
           }
-        }, 16);
-      }, 0);
+
+          crossfadeMainPauseGuardRef.current = false;
+          clearCrossfadeHandoffSoon(target.song.id, 900);
+          return;
+        }
+
+        window.requestAnimationFrame(blendStep);
+      };
+
+      // Give Chromium one frame after play() so output is actually audible before fading hidden audio out.
+      window.setTimeout(() => window.requestAnimationFrame(blendStep), Math.max(16, Math.min(90, performance.now() - warmStart)));
     } catch {
       // Keep the already-playing hidden audio alive briefly so users do not hear a hard stop,
       // then let the normal playback state-sync recover.
@@ -5802,7 +5875,7 @@ function MainModeApp() {
         } catch {
           // ignore cleanup errors
         }
-      }, 950);
+      }, 1200);
     }
   }
 
@@ -5882,12 +5955,12 @@ function MainModeApp() {
         // V342 curve:
         // - outgoing track stays full for a tiny moment, then drops faster
         // - incoming track rises slower and smoother so the transition feels musical
-        const outgoingHold = 0.16;
+        const outgoingHold = 0.10;
         const outgoingProgress = rawProgress <= outgoingHold
           ? 0
           : clamp((rawProgress - outgoingHold) / (1 - outgoingHold), 0, 1);
-        const outgoingFactor = 1 - Math.pow(outgoingProgress, 0.72);
-        const incomingFactor = Math.pow(rawProgress, 1.48);
+        const outgoingFactor = 1 - Math.pow(outgoingProgress, 0.82);
+        const incomingFactor = Math.pow(rawProgress, 1.18);
 
         setAudioElementVolume(audio, startVolume * outgoingFactor);
         setAudioElementVolume(nextAudio, safeVolume * incomingFactor);
@@ -5936,6 +6009,13 @@ function MainModeApp() {
     const duration = Number.isFinite(audio.duration) ? audio.duration : durationRef.current || currentDuration || 0;
 
     timeRef.current = nextTime;
+    if (!isSeekingRef.current && songRef.current?.id) {
+      lastStablePlaybackTimeRef.current = {
+        songId: songRef.current.id,
+        time: nextTime,
+        updatedAt: performance.now()
+      };
+    }
     tickPlayCountTracker(nextTime);
 
     if (duration > 0) {
@@ -6018,7 +6098,6 @@ function MainModeApp() {
 
     if (safeDuration <= 0 || Math.abs(delta) < 0.002) {
       setAudioElementVolume(audio, safeTarget);
-      volumeRef.current = safeTarget;
       if (onDone) onDone();
       return;
     }
@@ -6031,7 +6110,6 @@ function MainModeApp() {
       const nextVolume = clamp(startVolume + delta * eased, 0, 1);
 
       setAudioElementVolume(audio, nextVolume);
-      volumeRef.current = nextVolume;
 
       if (progressValue >= 1) {
         fadeFrameRef.current = null;
@@ -6101,12 +6179,12 @@ function MainModeApp() {
           audio.currentTime > 0.05
         );
 
-      setAudioElementVolume(audio, continuingCrossfadePlayback || settings.reducedMotion || !settings.crossfadeEnabled ? safeVolume : 0);
+      const shouldColdFadeIn = !continuingCrossfadePlayback && reason !== "state-sync" && !settings.reducedMotion && settings.crossfadeEnabled;
+      setAudioElementVolume(audio, shouldColdFadeIn ? 0 : safeVolume);
       applyPlaybackRateSettings(audio);
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
       syncAudioEffectGraph(audio);
       resumeAudioContextSafely();
-      volumeRef.current = safeVolume;
 
       if (audio.src !== playbackUrl.url) {
         audio.src = playbackUrl.url;
@@ -6119,7 +6197,7 @@ function MainModeApp() {
 
       pendingPlayRef.current = false;
 
-      if (!continuingCrossfadePlayback && !settings.reducedMotion && settings.crossfadeEnabled && safeVolume > 0) {
+      if (shouldColdFadeIn && safeVolume > 0) {
         fadeAudio(safeVolume, Math.max(120, Number(settings.crossfadeSeconds || 1.6) * 1000));
       } else {
         setAudioElementVolume(audio, safeVolume);
@@ -9865,7 +9943,6 @@ function MainModeApp() {
       liveVolumeFrameRef.current = null;
       setAudioElementVolume(audioRef.current, safeVolume);
       setAudioElementVolume(nextAudioRef.current, safeVolume);
-      volumeRef.current = safeVolume;
 
       if (safeVolume > 0.001) {
         lastNonZeroVolumeRef.current = baseVolume;
