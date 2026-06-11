@@ -3,7 +3,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const SCHEMA_VERSION = 12;
+const SCHEMA_VERSION = 13;
 const BACKUP_KEEP_LIMIT = 8;
 
 let db = null;
@@ -26,9 +26,12 @@ const SONG_COLUMNS = {
   album: "TEXT NOT NULL DEFAULT 'local files'",
   filePath: "TEXT UNIQUE NOT NULL",
   coverPath: "TEXT",
+  coverSource: "TEXT NOT NULL DEFAULT 'none'",
+  coverUpdatedAt: "TEXT",
   liked: "INTEGER NOT NULL DEFAULT 0",
   playCount: "INTEGER NOT NULL DEFAULT 0",
   duration: "REAL NOT NULL DEFAULT 0",
+  durationMs: "REAL NOT NULL DEFAULT 0",
   dateAdded: "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP",
   lastPlayed: "TEXT",
   volumeGain: "REAL NOT NULL DEFAULT 1",
@@ -173,6 +176,7 @@ function createSongsTable(database) {
     CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
+    CREATE INDEX IF NOT EXISTS idx_songs_coverSource ON songs(coverSource);
   `);
 }
 
@@ -266,16 +270,25 @@ function normalizeOldSong(row) {
   const filePath = asText(row?.filePath ?? row?.file_path ?? row?.path ?? row?.url, "");
   if (!filePath) return null;
 
+  const rawDuration = Math.max(0, asNumber(row?.duration, 0));
+  const rawDurationMs = Math.max(0, asNumber(row?.durationMs ?? row?.duration_ms, rawDuration > 0 ? rawDuration * 1000 : 0));
+  const normalizedDuration = rawDuration > 0 ? rawDuration : rawDurationMs > 0 ? rawDurationMs / 1000 : 0;
+  const normalizedDurationMs = rawDurationMs > 0 ? rawDurationMs : normalizedDuration > 0 ? normalizedDuration * 1000 : 0;
+  const normalizedCoverPath = asText(row?.coverPath ?? row?.cover_path ?? row?.cover, "") || null;
+
   return {
     id: asText(row?.id, crypto.randomUUID()),
     title: asText(row?.title ?? row?.name, path.parse(filePath).name || "untitled"),
     artist: asText(row?.artist, "unknown artist"),
     album: asText(row?.album, "local files"),
     filePath,
-    coverPath: asText(row?.coverPath ?? row?.cover_path ?? row?.cover, "") || null,
+    coverPath: normalizedCoverPath,
+    coverSource: asText(row?.coverSource ?? row?.cover_source, normalizedCoverPath ? "unknown" : "none"),
+    coverUpdatedAt: asText(row?.coverUpdatedAt ?? row?.cover_updated_at, "") || null,
     liked: asBoolInt(row?.liked),
     playCount: Math.max(0, Math.floor(asNumber(row?.playCount ?? row?.play_count, 0))),
-    duration: Math.max(0, asNumber(row?.duration, 0)),
+    duration: normalizedDuration,
+    durationMs: normalizedDurationMs,
     dateAdded: asText(row?.dateAdded ?? row?.date_added, new Date().toISOString()),
     lastPlayed: asText(row?.lastPlayed ?? row?.last_played, "") || null,
     volumeGain: asClampedNumber(row?.volumeGain ?? row?.volume_gain, 1, 0.2, 3),
@@ -369,12 +382,12 @@ function rebuildSongsTable(database) {
   const rows = database.prepare(`SELECT * FROM ${oldTable}`).all();
   const insert = database.prepare(`
     INSERT OR IGNORE INTO songs (
-      id, title, artist, album, filePath, coverPath, liked, playCount,
-      duration, dateAdded, lastPlayed, volumeGain, playbackPosition, customVolume,
+      id, title, artist, album, filePath, coverPath, coverSource, coverUpdatedAt, liked, playCount,
+      duration, durationMs, dateAdded, lastPlayed, volumeGain, playbackPosition, customVolume,
       sourceType, sourceTrackId, sourceUrl, sourceProvider, sourceProviderUrl, sourceMatchScore
     ) VALUES (
-      @id, @title, @artist, @album, @filePath, @coverPath, @liked, @playCount,
-      @duration, @dateAdded, @lastPlayed, @volumeGain, @playbackPosition, @customVolume,
+      @id, @title, @artist, @album, @filePath, @coverPath, @coverSource, @coverUpdatedAt, @liked, @playCount,
+      @duration, @durationMs, @dateAdded, @lastPlayed, @volumeGain, @playbackPosition, @customVolume,
       @sourceType, @sourceTrackId, @sourceUrl, @sourceProvider, @sourceProviderUrl, @sourceMatchScore
     )
   `);
@@ -422,9 +435,12 @@ function repairBrokenRows(database) {
       artist = @artist,
       album = @album,
       coverPath = @coverPath,
+      coverSource = @coverSource,
+      coverUpdatedAt = @coverUpdatedAt,
       liked = @liked,
       playCount = @playCount,
       duration = @duration,
+      durationMs = @durationMs,
       dateAdded = @dateAdded,
       lastPlayed = @lastPlayed,
       volumeGain = @volumeGain,
@@ -449,9 +465,13 @@ function repairBrokenRows(database) {
       row.title !== normalized.title ||
       row.artist !== normalized.artist ||
       row.album !== normalized.album ||
+      String(row.coverPath || "") !== String(normalized.coverPath || "") ||
+      String(row.coverSource || "") !== String(normalized.coverSource || "") ||
+      String(row.coverUpdatedAt || "") !== String(normalized.coverUpdatedAt || "") ||
       Number(row.liked) !== normalized.liked ||
       Number(row.playCount) !== normalized.playCount ||
       Number(row.duration) !== normalized.duration ||
+      Number(row.durationMs || 0) !== Number(normalized.durationMs || 0) ||
       Number(row.volumeGain) !== normalized.volumeGain ||
       Number(row.playbackPosition) !== normalized.playbackPosition ||
       Number(row.customVolume) !== normalized.customVolume ||
@@ -501,6 +521,7 @@ function migrateSongsTable(database) {
     CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
+    CREATE INDEX IF NOT EXISTS idx_songs_coverSource ON songs(coverSource);
   `);
 
   return { rebuilt: false, addedColumns };
@@ -637,12 +658,12 @@ function insertSongs(songs) {
 
   const stmt = database.prepare(`
     INSERT INTO songs (
-      id, title, artist, album, filePath, coverPath, liked, playCount,
-      duration, dateAdded, lastPlayed, volumeGain, playbackPosition, customVolume,
+      id, title, artist, album, filePath, coverPath, coverSource, coverUpdatedAt, liked, playCount,
+      duration, durationMs, dateAdded, lastPlayed, volumeGain, playbackPosition, customVolume,
       sourceType, sourceTrackId, sourceUrl, sourceProvider, sourceProviderUrl, sourceMatchScore
     ) VALUES (
-      @id, @title, @artist, @album, @filePath, @coverPath, @liked, @playCount,
-      @duration, @dateAdded, @lastPlayed, @volumeGain, @playbackPosition, @customVolume,
+      @id, @title, @artist, @album, @filePath, @coverPath, @coverSource, @coverUpdatedAt, @liked, @playCount,
+      @duration, @durationMs, @dateAdded, @lastPlayed, @volumeGain, @playbackPosition, @customVolume,
       @sourceType, @sourceTrackId, @sourceUrl, @sourceProvider, @sourceProviderUrl, @sourceMatchScore
     )
     ON CONFLICT(filePath) DO UPDATE SET
@@ -659,9 +680,18 @@ function insertSongs(songs) {
         ELSE songs.album
       END,
       coverPath = CASE
+        WHEN songs.coverSource = 'custom' AND songs.coverPath IS NOT NULL AND TRIM(songs.coverPath) <> '' THEN songs.coverPath
+        WHEN excluded.coverPath IS NOT NULL AND TRIM(excluded.coverPath) <> '' AND COALESCE(songs.coverSource, '') <> 'custom' THEN excluded.coverPath
         WHEN songs.coverPath IS NULL OR TRIM(songs.coverPath) = '' THEN excluded.coverPath
         ELSE songs.coverPath
       END,
+      coverSource = CASE
+        WHEN songs.coverSource = 'custom' THEN songs.coverSource
+        WHEN excluded.coverSource IS NOT NULL AND TRIM(excluded.coverSource) <> '' THEN excluded.coverSource
+        WHEN songs.coverSource IS NULL OR TRIM(songs.coverSource) = '' THEN 'none'
+        ELSE songs.coverSource
+      END,
+      coverUpdatedAt = COALESCE(NULLIF(excluded.coverUpdatedAt, ''), songs.coverUpdatedAt),
       dateAdded = CASE
         WHEN songs.dateAdded IS NULL OR TRIM(songs.dateAdded) = '' THEN excluded.dateAdded
         ELSE songs.dateAdded
@@ -669,6 +699,10 @@ function insertSongs(songs) {
       duration = CASE
         WHEN songs.duration IS NULL OR songs.duration <= 0 THEN excluded.duration
         ELSE songs.duration
+      END,
+      durationMs = CASE
+        WHEN songs.durationMs IS NULL OR songs.durationMs <= 0 THEN excluded.durationMs
+        ELSE songs.durationMs
       END,
       volumeGain = CASE
         WHEN songs.volumeGain IS NULL OR songs.volumeGain <= 0 THEN excluded.volumeGain
@@ -721,9 +755,12 @@ function patchSong(id, patch) {
     "artist",
     "album",
     "coverPath",
+    "coverSource",
+    "coverUpdatedAt",
     "liked",
     "playCount",
     "duration",
+    "durationMs",
     "lastPlayed",
     "volumeGain",
     "playbackPosition",
@@ -747,7 +784,7 @@ function patchSong(id, patch) {
 
     if (key === "liked") values.push(asBoolInt(value));
     else if (key === "playCount") values.push(Math.max(0, Math.floor(asNumber(value, 0))));
-    else if (key === "duration" || key === "playbackPosition" || key === "sourceMatchScore") values.push(Math.max(0, asNumber(value, 0)));
+    else if (key === "duration" || key === "durationMs" || key === "playbackPosition" || key === "sourceMatchScore") values.push(Math.max(0, asNumber(value, 0)));
     else if (key === "volumeGain") values.push(asClampedNumber(value, 1, 0.2, 3));
     else if (key === "customVolume") values.push(asClampedNumber(value, 1, 0, 1));
     else values.push(value ?? null);
@@ -915,6 +952,7 @@ function getDatabaseStatus() {
   const playlistCount = safeAll(database, "SELECT COUNT(*) AS count FROM playlists")[0]?.count || 0;
   const playlistSongCount = safeAll(database, "SELECT COUNT(*) AS count FROM playlist_songs")[0]?.count || 0;
   const missingPathRows = safeAll(database, "SELECT COUNT(*) AS count FROM songs WHERE filePath IS NULL OR TRIM(filePath) = ''")[0]?.count || 0;
+  const missingDurationRows = safeAll(database, "SELECT COUNT(*) AS count FROM songs WHERE duration IS NULL OR duration <= 0 OR durationMs IS NULL OR durationMs <= 0")[0]?.count || 0;
 
   return {
     path: dbFilePath,
@@ -925,6 +963,7 @@ function getDatabaseStatus() {
     playlistCount,
     playlistSongCount,
     missingPathRows,
+    missingDurationRows,
     lastMigration: lastMigrationReport
   };
 }

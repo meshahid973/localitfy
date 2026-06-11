@@ -115,6 +115,9 @@ declare global {
     artist: string;
     sourcePath: string;
     coverPath?: string;
+    coverSource?: "custom" | "embedded" | "folder" | "spotify" | "fallback" | "none" | "unknown" | string;
+    coverUpdatedAt?: string | null;
+    durationMs?: number;
     coverUrl?: string;
     coverThumbUrl?: string;
     coverThumbnailUrl?: string;
