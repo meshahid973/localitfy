@@ -37,6 +37,22 @@ function loadLocaltifyEnv() {
     }
   })();
 
+  const executableDir = (() => {
+    try {
+      return process.execPath ? path.dirname(process.execPath) : "";
+    } catch {
+      return "";
+    }
+  })();
+
+  const userDataPath = (() => {
+    try {
+      return typeof app.getPath === "function" ? app.getPath("userData") : "";
+    } catch {
+      return "";
+    }
+  })();
+
   const possibleEnvPaths = (() => {
     const seen = new Set();
     return [
@@ -46,6 +62,10 @@ function loadLocaltifyEnv() {
       safePath(appPath, ".env.production"),
       safePath(resourcePath, ".env"),
       safePath(resourcePath, ".env.production"),
+      safePath(executableDir, ".env"),
+      safePath(executableDir, ".env.production"),
+      safePath(userDataPath, ".env"),
+      safePath(userDataPath, ".env.production"),
       safePath(resourcePath, "app", ".env"),
       safePath(resourcePath, "app", ".env.production")
     ].filter(Boolean).filter((item) => {
@@ -4172,6 +4192,294 @@ function repairMainWindowBounds(win, options = {}) {
   win.setBounds({ x, y, width, height });
 }
 
+
+function cleanFeedbackText(value, maxLength = 1500) {
+  return String(value || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function getFeedbackWebhookInfo() {
+  const keys = [
+    "LOCALTIFY_FEEDBACK_WEBHOOK_URL",
+    "LOCALITFY_FEEDBACK_WEBHOOK_URL",
+    "VITE_LOCALTIFY_FEEDBACK_WEBHOOK_URL",
+    "VITE_LOCALITFY_FEEDBACK_WEBHOOK_URL",
+    "FEEDBACK_WEBHOOK_URL"
+  ];
+
+  for (const key of keys) {
+    const value = String(process.env[key] || "").trim();
+    if (!value) continue;
+
+    const valid = /^https:\/\/(?:discord(?:app)?\.com)\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+(?:\?.*)?$/.test(value);
+
+    return {
+      configured: true,
+      valid,
+      envName: key,
+      url: value,
+      label: valid ? "Discord feedback enabled" : "Discord webhook invalid",
+      message: valid
+        ? "Feedback will be delivered to your Discord channel."
+        : "Use a real https://discord.com/api/webhooks/... URL."
+    };
+  }
+
+  return {
+    configured: false,
+    valid: false,
+    envName: "",
+    url: "",
+    label: "Discord feedback not configured",
+    message: "Set LOCALTIFY_FEEDBACK_WEBHOOK_URL in .env, beside the exe, resources, or userData."
+  };
+}
+
+function getFeedbackStatus() {
+  const info = getFeedbackWebhookInfo();
+
+  return {
+    configured: Boolean(info.configured),
+    valid: Boolean(info.valid),
+    envName: info.envName || "",
+    label: info.label,
+    message: info.message,
+    isPackaged: Boolean(app.isPackaged)
+  };
+}
+
+function postDiscordWebhookWithElectronNet(webhookUrl, body) {
+  return new Promise((resolve) => {
+    let settled = false;
+    let request;
+
+    const done = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(result);
+    };
+
+    const payload = Buffer.from(JSON.stringify(body), "utf8");
+    const timer = setTimeout(() => {
+      try {
+        if (request && typeof request.abort === "function") request.abort();
+      } catch {
+      }
+
+      done({
+        ok: false,
+        code: "webhook_timeout",
+        error: "Discord webhook request timed out. Check the webhook URL, internet connection, or Discord reachability, then try again."
+      });
+    }, 30_000);
+
+    try {
+      request = net.request({
+        method: "POST",
+        url: webhookUrl,
+        redirect: "follow"
+      });
+
+      request.setHeader("Content-Type", "application/json");
+      request.setHeader("Content-Length", String(payload.length));
+      request.setHeader("User-Agent", "Localtify-Feedback/0.3.9");
+
+      request.on("response", (response) => {
+        let raw = "";
+
+        response.on("data", (chunk) => {
+          raw += Buffer.isBuffer(chunk) ? chunk.toString("utf8") : String(chunk || "");
+        });
+
+        response.on("end", () => {
+          const ok = response.statusCode >= 200 && response.statusCode < 300;
+
+          done({
+            ok,
+            statusCode: response.statusCode,
+            code: ok ? "ok" : "webhook_failed",
+            error: ok ? "" : raw.slice(0, 500) || `Discord returned HTTP ${response.statusCode}`
+          });
+        });
+      });
+
+      request.on("error", (error) => {
+        done({
+          ok: false,
+          code: "webhook_failed",
+          error: error?.message || "Discord webhook request failed."
+        });
+      });
+
+      request.write(payload);
+      request.end();
+    } catch (error) {
+      done({
+        ok: false,
+        code: "webhook_failed",
+        error: error?.message || "Discord webhook request failed before sending."
+      });
+    }
+  });
+}
+
+function postDiscordWebhookWithNodeHttps(webhookUrl, body) {
+  return new Promise((resolve) => {
+    let parsed;
+    let settled = false;
+
+    const done = (result) => {
+      if (settled) return;
+      settled = true;
+      resolve(result);
+    };
+
+    try {
+      parsed = new URL(webhookUrl);
+    } catch {
+      done({ ok: false, code: "webhook_invalid", error: "Webhook URL could not be parsed." });
+      return;
+    }
+
+    const payload = Buffer.from(JSON.stringify(body), "utf8");
+    const request = https.request(
+      {
+        method: "POST",
+        hostname: parsed.hostname,
+        path: `${parsed.pathname}${parsed.search || ""}`,
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": String(payload.length),
+          "User-Agent": "Localtify-Feedback/0.3.9"
+        },
+        timeout: 30_000
+      },
+      (response) => {
+        let raw = "";
+
+        response.setEncoding("utf8");
+        response.on("data", (chunk) => {
+          raw += chunk;
+        });
+        response.on("end", () => {
+          const ok = response.statusCode >= 200 && response.statusCode < 300;
+
+          done({
+            ok,
+            statusCode: response.statusCode,
+            code: ok ? "ok" : "webhook_failed",
+            error: ok ? "" : raw.slice(0, 500) || `Discord returned HTTP ${response.statusCode}`
+          });
+        });
+      }
+    );
+
+    request.on("timeout", () => {
+      request.destroy(new Error("Discord webhook request timed out."));
+    });
+
+    request.on("error", (error) => {
+      done({
+        ok: false,
+        code: error?.message?.toLowerCase().includes("timed out") ? "webhook_timeout" : "webhook_failed",
+        error: error?.message || "Discord webhook request failed."
+      });
+    });
+
+    request.write(payload);
+    request.end();
+  });
+}
+
+async function postDiscordWebhook(webhookUrl, body) {
+  if (net && typeof net.request === "function") {
+    const electronResult = await postDiscordWebhookWithElectronNet(webhookUrl, body);
+
+    if (electronResult.ok) return electronResult;
+
+    // If Chromium networking times out, Node HTTPS usually will too. Return the clearer error fast.
+    if (electronResult.code === "webhook_timeout") return electronResult;
+  }
+
+  return postDiscordWebhookWithNodeHttps(webhookUrl, body);
+}
+
+async function sendLocaltifyFeedback(payload = {}) {
+  const webhook = getFeedbackWebhookInfo();
+
+  if (!webhook.configured) {
+    return { ok: false, code: "webhook_missing", error: webhook.message };
+  }
+
+  if (!webhook.valid) {
+    return { ok: false, code: "webhook_invalid", error: webhook.message };
+  }
+
+  const category = cleanFeedbackText(payload.category || "other", 40) || "other";
+  const message = cleanFeedbackText(payload.message, 1500);
+  const appVersion = cleanFeedbackText(payload.appVersion || "", 80);
+  const platform = cleanFeedbackText(payload.platform || process.platform, 80);
+  const diagnostics = payload && typeof payload.diagnostics === "object" && payload.diagnostics
+    ? payload.diagnostics
+    : {};
+
+  if (message.length < 4) {
+    return { ok: false, code: "message_too_short", error: "Feedback message is too short." };
+  }
+
+  const fieldFrom = (name, value) => {
+    const clean = cleanFeedbackText(value, 220) || "unknown";
+    return { name, value: clean, inline: true };
+  };
+
+  const fields = [
+    fieldFrom("category", category),
+    fieldFrom("app", appVersion || "unknown"),
+    fieldFrom("platform", platform || process.platform),
+    fieldFrom("songs", diagnostics.songCount),
+    fieldFrom("playlists", diagnostics.playlistCount),
+    fieldFrom("downloads folder", diagnostics.downloadsFolder),
+    fieldFrom("discord rpc", diagnostics.discordRpc),
+    fieldFrom("update status", diagnostics.updateStatus)
+  ].filter((field) => field.value !== "unknown" || ["category", "app", "platform"].includes(field.name));
+
+  const result = await postDiscordWebhook(webhook.url, {
+    username: "Localtify Feedback",
+    avatar_url: "https://raw.githubusercontent.com/meshahid973/localitfy/main/build/icon.png",
+    allowed_mentions: { parse: [] },
+    embeds: [
+      {
+        title: `Localtify feedback — ${category}`,
+        description: message,
+        color: 0xd946ef,
+        timestamp: new Date().toISOString(),
+        fields
+      }
+    ]
+  });
+
+  if (!result.ok) {
+    return {
+      ok: false,
+      code: result.code || "webhook_failed",
+      statusCode: result.statusCode,
+      error: result.error || "Discord did not accept the feedback."
+    };
+  }
+
+  return {
+    ok: true,
+    code: "sent",
+    statusCode: result.statusCode,
+    envName: webhook.envName
+  };
+}
+
+
 app.whenReady().then(async () => {
   registerLocaltifyMediaProtocol();
   await startLocaltifyMediaServer();
@@ -4202,6 +4510,8 @@ app.whenReady().then(async () => {
 
   ipcMain.handle("localitfy:performance-status", async () => getLocaltifyPerformanceStatus());
   ipcMain.handle("localitfy:gpu-status", async () => getLocaltifyPerformanceStatus());
+  ipcMain.handle("feedback:status", async () => getFeedbackStatus());
+  ipcMain.handle("feedback:send", async (_event, payload = {}) => sendLocaltifyFeedback(payload));
 
   ipcMain.handle("app:bootstrap", async () => {
     await yieldToMainLoop();

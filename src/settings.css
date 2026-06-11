@@ -4766,416 +4766,81 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.13);
 }
 
-
-
-
-
-
-
-
-
-@media (prefers-reduced-motion: reduce){
-  .feedbackCategoryButtonV329,
+.feedbackSettingsButtonV329{
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 180ms cubic-bezier(.22, 1, .36, 1),
+    opacity 160ms ease,
+    box-shadow 180ms ease;
 }
 
-.feedbackPromptOverlayV331{
-  position: fixed;
-  inset: 0;
-  z-index: 18000;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background:
-    radial-gradient(circle at 52% 36%, rgba(var(--accent-rgb),0.16), transparent 34%),
-    rgba(0,0,0,0.72);
-  backdrop-filter: blur(18px) saturate(120%);
-  -webkit-backdrop-filter: blur(18px) saturate(120%);
+.feedbackSettingsButtonV329:hover{
+  transform: translateY(-1px);
 }
 
-.feedbackPromptCardV331{
-  width: min(620px, calc(100vw - 34px));
-  max-height: min(760px, calc(100vh - 50px));
-  overflow: auto;
-  padding: 18px;
-  border: 1px solid rgba(var(--accent-rgb),0.24);
-  border-radius: 24px;
-  color: var(--text);
-  background:
-    radial-gradient(circle at 86% 10%, rgba(var(--accent-rgb),0.13), transparent 32%),
-    linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.024)),
-    rgba(7,7,12,0.94);
-  box-shadow:
-    0 34px 110px rgba(0,0,0,0.72),
-    0 0 0 1px rgba(255,255,255,0.045) inset;
+.feedbackSettingsCardV329{
+  overflow: hidden;
 }
 
-.feedbackPromptTopV331,
-.feedbackPromptActionsV331{
+.feedbackSettingsButtonV329{
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
+  text-align: left;
+  color: #fff;
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.22), rgba(255, 255, 255, 0.055)),
+    rgba(255, 255, 255, 0.045);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
-.feedbackPromptBrandV331{
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  gap: 10px;
-}
-
-.feedbackPromptLogoV331{
-  width: 38px;
-  height: 38px;
+.feedbackSettingsButtonV329 span{
   display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 12px;
-  background: rgba(var(--accent-rgb),0.13);
-  border: 1px solid rgba(var(--accent-rgb),0.18);
+  gap: 4px;
 }
 
-.feedbackPromptLogoV331 img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.feedbackSettingsButtonV329 strong{
+  font-size: 0.98rem;
 }
 
-.feedbackPromptBrandV331 em,
-.feedbackPromptBrandV331 strong{
-  display: block;
+.feedbackSettingsButtonV329 small{
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.80rem;
+  font-weight: 700;
+}
+
+.feedbackSettingsButtonV329 em{
   font-style: normal;
-}
-
-.feedbackPromptBrandV331 em{
-  color: var(--accent);
-  font-size: 0.66rem;
-  font-weight: 950;
-  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.68);
 }
 
-.feedbackPromptBrandV331 strong{
-  margin-top: 2px;
-  font-size: 1rem;
-  letter-spacing: -0.035em;
-}
-
-.feedbackPromptCloseV331{
-  width: 34px;
-  height: 34px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255,255,255,0.11);
-  border-radius: 12px;
-  color: rgba(255,255,255,0.82);
-  background: rgba(255,255,255,0.055);
-  cursor: pointer;
-}
-
-.feedbackPromptCloseV331 svg{
-  stroke: currentColor;
-}
-
-.feedbackPromptCopyV331{
-  margin: 18px 0 14px;
-}
-
-.feedbackPromptBadgeV331{
-  display: inline-flex;
-  margin-bottom: 8px;
-  color: var(--accent);
-  font-size: 0.68rem;
-  font-weight: 950;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.feedbackPromptCopyV331 h2{
-  margin: 0;
-  font-size: clamp(32px, 5vw, 48px);
-  line-height: 0.92;
-  letter-spacing: -0.075em;
-}
-
-.feedbackPromptCopyV331 p{
-  margin: 10px 0 0;
-  color: rgba(255,255,255,0.68);
-  font-size: 0.88rem;
-  line-height: 1.45;
-}
-
-.feedbackCategoryRowV331{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0 0 12px;
-}
-
-.feedbackCategoryButtonV331{
-  min-height: 38px;
-  padding: 8px 10px;
-  border: 1px solid rgba(255,255,255,0.095);
-  border-radius: 13px;
-  color: rgba(255,255,255,0.76);
-  background: rgba(255,255,255,0.045);
-  font: inherit;
-  font-size: 0.76rem;
-  font-weight: 950;
-  cursor: pointer;
-}
-
-.feedbackCategoryButtonV331.active{
-  color: #fff;
-  border-color: rgba(var(--accent-rgb),0.48);
-  background: rgba(var(--accent-rgb),0.18);
-}
-
-.feedbackTextareaWrapV331{
-  display: grid;
-  gap: 7px;
-}
-
-.feedbackTextareaWrapV331 > span,
-.feedbackTextareaWrapV331 small{
-  color: rgba(255,255,255,0.62);
-  font-size: 0.76rem;
-  font-weight: 850;
-}
-
-.feedbackTextareaWrapV331 textarea{
-  width: 100%;
-  min-height: 154px;
-  resize: vertical;
-  padding: 13px 14px;
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 17px;
-  color: #fff;
-  outline: none;
-  background: rgba(255,255,255,0.055);
-  font: inherit;
-  line-height: 1.45;
-}
-
-.feedbackTextareaWrapV331 textarea:focus{
-  border-color: rgba(var(--accent-rgb),0.44);
-  box-shadow: 0 0 0 4px rgba(var(--accent-rgb),0.10);
-}
-
-.feedbackStatusV331{
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  font-size: 0.82rem;
-  font-weight: 850;
-  background: rgba(255,255,255,0.055);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.feedbackStatusV331.error{
-  color: #ffd7e1;
-  border-color: rgba(255,78,108,0.28);
-  background: rgba(255,78,108,0.10);
-}
-
-.feedbackStatusV331.success{
-  color: #ddffe8;
-  border-color: rgba(100,240,164,0.28);
-  background: rgba(100,240,164,0.10);
-}
-
-.feedbackPromptActionsV331{
-  margin-top: 14px;
-}
-
-.feedbackMaybeButtonV331,
-.feedbackSendButtonV331{
-  min-height: 40px;
-  padding: 0 15px;
-  border-radius: 14px;
-  font: inherit;
-  font-weight: 950;
-  cursor: pointer;
-}
-
-.feedbackMaybeButtonV331{
-  color: rgba(255,255,255,0.75);
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.055);
-}
-
-.feedbackSendButtonV331{
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #140616;
-  border: 1px solid rgba(255,255,255,0.16);
-  background: var(--accent);
-}
-
-.feedbackSendButtonV331:disabled{
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.feedbackSendSparkV334{
-  display: inline-grid;
-  place-items: center;
-}
-
-.feedbackSendSparkV334 svg{
-  width: 14px;
-  height: 14px;
-  stroke: currentColor;
-}
-
-@media (max-width: 620px){
-  .feedbackPromptOverlayV331{
-    padding: 12px;
+@media (prefers-reduced-motion: reduce){
+  .feedbackCategoryButtonV329,
+.feedbackSettingsButtonV329{
+    transition: none !important;
   }
+}@media (max-width: 720px){}
 
-  .feedbackPromptCardV331{
-    width: calc(100vw - 24px);
-    max-height: calc(100vh - 24px);
-  }
-
-  .feedbackCategoryRowV331{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .feedbackPromptActionsV331{
-    align-items: stretch;
-    flex-direction: column-reverse;
-  }
-}
-
-.feedbackSendTextV334,
-.feedbackSendSparkV334{
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  transform: translateZ(0);
-  transition:
-    transform 260ms cubic-bezier(.22,1,.36,1),
-    opacity 180ms ease,
-    filter 220ms ease;
-}
-
-.feedbackSendTextV334{
-  letter-spacing: -0.015em;
-}
-
-.feedbackSendSparkV334{
-  opacity: 0;
-  width: 0;
-  margin-left: -8px;
-  transform: translate3d(-8px, 8px, 0) rotate(-16deg) scale(0.7);
-}
-
-@keyframes localtifyFeedbackSendOrbitV334{
+@media (max-width: 720px){}@keyframes localtifyFeedbackSendOrbitV334{
   0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
   50% { transform: translate3d(2px,-2px,0) rotate(180deg) scale(0.92); }
   100% { transform: translate3d(0,0,0) rotate(360deg) scale(1); }
 }
 
-@media (prefers-reduced-motion: reduce){
-  .feedbackSendTextV334,
-.feedbackSendSparkV334{
-    transition: none !important;
-    animation: none !important;
-  }
-}
+@media (max-height: 760px){}
 
-.feedbackCategoryRowV331{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-  margin: 0 0 12px !important;
-}
-
-.feedbackCategoryButtonV331{
-  min-height: 38px !important;
-  padding: 9px 10px !important;
-  border-radius: 13px !important;
-  font-size: 0.78rem !important;
-  font-weight: 950 !important;
-}
-
-.feedbackSendTextV334{
-  white-space: nowrap;
-}
-
-.feedbackSendSparkV334{
-  flex: 0 0 13px !important;
-  width: 13px !important;
-  margin-left: 0 !important;
-  font-size: 0.82rem !important;
-  line-height: 1 !important;
-}
-
-@media (max-height: 760px){
-
-  .feedbackCategoryRowV331{
-    margin-bottom: 10px !important;
-  }
-}
-
-@media (max-width: 620px){
-
-  .feedbackCategoryRowV331{
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-}
-
-.feedbackSendTextV334{
-  position: relative !important;
-  z-index: 1 !important;
-  white-space: nowrap !important;
-  line-height: 1 !important;
-  transform: translateZ(0) !important;
-  transition:
-    transform 220ms cubic-bezier(.22,1,.36,1),
-    letter-spacing 220ms ease,
-    color 180ms ease !important;
-}
-
-.feedbackSendSparkV334{
-  position: relative !important;
-  z-index: 1 !important;
-  flex: 0 0 0 !important;
-  width: 0 !important;
-  margin-left: -7px !important;
-  opacity: 0 !important;
-  color: #041008 !important;
-  font-size: 0.82rem !important;
-  line-height: 1 !important;
-  transform: translate3d(-6px,5px,0) rotate(-12deg) scale(0.78) !important;
-  transition:
-    width 220ms cubic-bezier(.22,1,.36,1),
-    margin-left 220ms cubic-bezier(.22,1,.36,1),
-    opacity 160ms ease,
-    transform 240ms cubic-bezier(.22,1,.36,1) !important;
-}
-
-@media (prefers-reduced-motion: reduce){
-  .feedbackSendTextV334,
-.feedbackSendSparkV334{
-    transition: none !important;
-    animation: none !important;
-  }
-}
-
-
-
-
-
-
-
-
-
-@keyframes localtifyFeedbackSentPopV337{
+@media (max-width: 620px){}@keyframes localtifyFeedbackSentPopV337{
   0% { transform: translateY(0) scale(1); }
   45% { transform: translateY(-2px) scale(1.006); }
   100% { transform: translateY(0) scale(1); }
@@ -7860,4 +7525,438 @@ body.localitfyThemePainting .toggleRow{
 .settingsPage button:hover,
 .settingsPage button:active{
   transform: none !important;
+}
+
+/* localtify 0.3.9 — feedback UI rewritten as one clean section */
+.feedbackSettingsCardV331{
+  display: grid !important;
+  gap: 16px !important;
+}
+
+.feedbackSettingsHeaderV331{
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+}
+
+.feedbackSettingsIconV331{
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 auto !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.22) !important;
+  border-radius: 14px !important;
+  color: var(--accent) !important;
+  background: rgba(var(--accent-rgb), 0.13) !important;
+  font-size: 16px !important;
+  font-weight: 950 !important;
+}
+
+.feedbackWebhookStatusV337{
+  display: grid !important;
+  gap: 5px !important;
+  padding: 16px 18px !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.feedbackWebhookStatusV337.ready{
+  border-color: rgba(64, 220, 140, 0.34) !important;
+  background: rgba(33, 180, 110, 0.10) !important;
+}
+
+.feedbackWebhookStatusV337.notReady{
+  border-color: rgba(255, 184, 107, 0.28) !important;
+  background: rgba(255, 184, 107, 0.08) !important;
+}
+
+.feedbackWebhookStatusV337 strong,
+.feedbackWebhookStatusV337 small,
+.feedbackWebhookStatusV337 em{
+  display: block !important;
+}
+
+.feedbackWebhookStatusV337 strong{
+  color: #fff !important;
+  font-size: 0.98rem !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.feedbackWebhookStatusV337 small{
+  color: rgba(255,255,255,0.64) !important;
+  font-size: 0.82rem !important;
+  font-weight: 760 !important;
+  line-height: 1.35 !important;
+}
+
+.feedbackWebhookStatusV337 em{
+  width: max-content !important;
+  max-width: 100% !important;
+  margin-top: 5px !important;
+  padding: 6px 10px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  color: #dcffe9 !important;
+  background: rgba(64, 220, 140, 0.18) !important;
+  font-size: 0.72rem !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.feedbackSettingsButtonV331{
+  width: 100% !important;
+  min-height: 64px !important;
+  padding: 12px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.22) !important;
+  border-radius: 18px !important;
+  color: var(--text) !important;
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.13), rgba(255,255,255,0.035)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  text-align: left !important;
+}
+
+.feedbackSettingsButtonV331 span{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 4px !important;
+}
+
+.feedbackSettingsButtonV331 strong,
+.feedbackSettingsButtonV331 small,
+.feedbackSettingsButtonV331 em{
+  display: block !important;
+}
+
+.feedbackSettingsButtonV331 strong{
+  color: #fff !important;
+  font-size: 1rem !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1.1 !important;
+}
+
+.feedbackSettingsButtonV331 small{
+  color: rgba(255,255,255,0.62) !important;
+  font-size: 0.82rem !important;
+  font-weight: 780 !important;
+  line-height: 1.3 !important;
+}
+
+.feedbackSettingsButtonV331 em{
+  min-width: 54px !important;
+  padding: 8px 11px !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.28) !important;
+  border-radius: 999px !important;
+  color: var(--accent) !important;
+  background: rgba(var(--accent-rgb), 0.10) !important;
+  font-size: 0.72rem !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.08em !important;
+  text-align: center !important;
+  text-transform: uppercase !important;
+}
+
+.feedbackSettingsButtonV331:hover{
+  border-color: rgba(var(--accent-rgb), 0.38) !important;
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.17), rgba(255,255,255,0.045)) !important;
+}
+
+.feedbackSettingsButtonV331:disabled{
+  cursor: not-allowed !important;
+  opacity: .55 !important;
+}
+
+.feedbackPromptOverlayV331{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 24px !important;
+  overflow: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  background: radial-gradient(circle at 50% 28%, rgba(var(--accent-rgb), 0.16), transparent 36%), rgba(0, 0, 0, 0.72) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+}
+
+.feedbackPromptCardV331{
+  position: relative !important;
+  z-index: 2147483001 !important;
+  width: min(620px, calc(100vw - 34px)) !important;
+  max-height: min(760px, calc(100vh - 50px)) !important;
+  overflow: auto !important;
+  padding: 18px !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.24) !important;
+  border-radius: 24px !important;
+  color: var(--text) !important;
+  background: radial-gradient(circle at 86% 10%, rgba(var(--accent-rgb), 0.13), transparent 32%), linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.024)), rgba(7, 7, 12, 0.96) !important;
+  box-shadow: 0 34px 110px rgba(0,0,0,0.72), 0 0 0 1px rgba(255,255,255,0.045) inset !important;
+}
+
+.feedbackPromptTopV331,
+.feedbackPromptActionsV331{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.feedbackPromptBrandV331{
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  gap: 10px !important;
+}
+
+.feedbackPromptLogoV331{
+  width: 38px !important;
+  height: 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.18) !important;
+  border-radius: 12px !important;
+  background: rgba(var(--accent-rgb), 0.13) !important;
+}
+
+.feedbackPromptLogoV331 img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.feedbackPromptBrandV331 em,
+.feedbackPromptBrandV331 strong{
+  display: block !important;
+  font-style: normal !important;
+}
+
+.feedbackPromptBrandV331 em{
+  color: var(--accent) !important;
+  font-size: 0.66rem !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+
+.feedbackPromptBrandV331 strong{
+  margin-top: 2px !important;
+  color: #fff !important;
+  font-size: 1rem !important;
+  letter-spacing: -0.035em !important;
+}
+
+.feedbackPromptCloseV331{
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 auto !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  border-radius: 14px !important;
+  color: rgba(255,255,255,0.88) !important;
+  background: rgba(255,255,255,0.07) !important;
+  cursor: pointer !important;
+}
+
+.feedbackPromptCloseV331 svg{
+  display: block !important;
+  width: 18px !important;
+  height: 18px !important;
+  stroke: currentColor !important;
+}
+
+.feedbackPromptCopyV331{
+  margin: 18px 0 14px !important;
+}
+
+.feedbackPromptBadgeV331{
+  display: inline-flex !important;
+  margin-bottom: 8px !important;
+  color: var(--accent) !important;
+  font-size: 0.68rem !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+
+.feedbackPromptCopyV331 h2{
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: clamp(32px, 5vw, 48px) !important;
+  line-height: 0.92 !important;
+  letter-spacing: -0.075em !important;
+}
+
+.feedbackPromptCopyV331 p{
+  margin: 10px 0 0 !important;
+  color: rgba(255,255,255,0.68) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.45 !important;
+}
+
+.feedbackCategoryRowV331{
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 0 12px !important;
+}
+
+.feedbackCategoryButtonV331{
+  min-height: 38px !important;
+  padding: 8px 10px !important;
+  border: 1px solid rgba(255,255,255,0.095) !important;
+  border-radius: 13px !important;
+  color: rgba(255,255,255,0.76) !important;
+  background: rgba(255,255,255,0.045) !important;
+  font: inherit !important;
+  font-size: 0.76rem !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.feedbackCategoryButtonV331.active{
+  color: #fff !important;
+  border-color: rgba(var(--accent-rgb),0.48) !important;
+  background: rgba(var(--accent-rgb),0.18) !important;
+}
+
+.feedbackTextareaWrapV331{
+  display: grid !important;
+  gap: 7px !important;
+}
+
+.feedbackTextareaWrapV331 > span,
+.feedbackTextareaWrapV331 small{
+  color: rgba(255,255,255,0.62) !important;
+  font-size: 0.76rem !important;
+  font-weight: 850 !important;
+}
+
+.feedbackTextareaWrapV331 textarea{
+  width: 100% !important;
+  min-height: 154px !important;
+  resize: vertical !important;
+  padding: 13px 14px !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  border-radius: 17px !important;
+  color: #fff !important;
+  outline: none !important;
+  background: rgba(255,255,255,0.055) !important;
+  font: inherit !important;
+  line-height: 1.45 !important;
+}
+
+.feedbackTextareaWrapV331 textarea:focus{
+  border-color: rgba(var(--accent-rgb),0.44) !important;
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb),0.10) !important;
+}
+
+.feedbackStatusV331{
+  margin-top: 12px !important;
+  padding: 10px 12px !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 14px !important;
+  background: rgba(255,255,255,0.055) !important;
+  font-size: 0.82rem !important;
+  font-weight: 850 !important;
+}
+
+.feedbackStatusV331.error{
+  color: #ffd7e1 !important;
+  border-color: rgba(255,78,108,0.28) !important;
+  background: rgba(255,78,108,0.10) !important;
+}
+
+.feedbackStatusV331.success{
+  color: #ddffe8 !important;
+  border-color: rgba(100,240,164,0.28) !important;
+  background: rgba(100,240,164,0.10) !important;
+}
+
+.feedbackPromptActionsV331{
+  margin-top: 14px !important;
+}
+
+.feedbackMaybeButtonV331,
+.feedbackSendButtonV331{
+  min-height: 40px !important;
+  padding: 0 15px !important;
+  border-radius: 14px !important;
+  font: inherit !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.feedbackMaybeButtonV331{
+  color: rgba(255,255,255,0.75) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  background: rgba(255,255,255,0.055) !important;
+}
+
+.feedbackSendButtonV331{
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: #140616 !important;
+  border: 1px solid rgba(255,255,255,0.16) !important;
+  background: var(--accent) !important;
+}
+
+.feedbackSendButtonV331:disabled{
+  cursor: not-allowed !important;
+  opacity: 0.55 !important;
+}
+
+.feedbackSendSparkV334,
+.feedbackSendSparkV334 svg{
+  display: inline-grid !important;
+  place-items: center !important;
+  stroke: currentColor !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .feedbackCategoryButtonV331,
+  .feedbackSettingsButtonV331,
+  .feedbackMaybeButtonV331,
+  .feedbackSendButtonV331{
+    transition: none !important;
+  }
+}
+
+@media (max-width: 620px){
+  .feedbackPromptOverlayV331{
+    padding: 12px !important;
+  }
+
+  .feedbackPromptCardV331{
+    width: calc(100vw - 24px) !important;
+    max-height: calc(100vh - 24px) !important;
+  }
+
+  .feedbackCategoryRowV331{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .feedbackPromptActionsV331{
+    align-items: stretch !important;
+    flex-direction: column-reverse !important;
+  }
 }

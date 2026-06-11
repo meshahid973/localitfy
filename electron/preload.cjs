@@ -7,9 +7,6 @@ contextBridge.exposeInMainWorld("localitfy", {
   importSongs: () => ipcRenderer.invoke("library:import"),
   clearLibrary: () => ipcRenderer.invoke("library:clear"),
 
-  scanAlbumFolder: (payload) => ipcRenderer.invoke("album:scan-folder", payload),
-  importAlbumFolder: (payload) => ipcRenderer.invoke("album:import-folder", payload),
-
   downloadAudioUrls: (payload) => ipcRenderer.invoke("download:audio", payload),
   cancelDownload: () => ipcRenderer.invoke("download:cancel"),
   chooseDownloadFolder: () => ipcRenderer.invoke("download:choose-folder"),
@@ -63,6 +60,8 @@ contextBridge.exposeInMainWorld("localitfy", {
   toggleDevTools: () => ipcRenderer.invoke("localitfy:toggle-devtools"),
   getPerformanceStatus: () => ipcRenderer.invoke("localitfy:performance-status"),
   getGpuStatus: () => ipcRenderer.invoke("localitfy:gpu-status"),
+  getFeedbackStatus: () => ipcRenderer.invoke("feedback:status"),
+  sendFeedback: (payload) => ipcRenderer.invoke("feedback:send", payload),
 
   minimizeWindow: () => ipcRenderer.invoke("window:minimize"),
   toggleMaximizeWindow: () => ipcRenderer.invoke("window:toggle-maximize"),
@@ -93,7 +92,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   spotdlCheck: () => ipcRenderer.invoke("spotdl-check"),
   /** Download Spotify track searches through localtify's download bridge. */
   spotdlDownloadBatch: (payload) => ipcRenderer.invoke("spotdl-download-batch", payload),
-  spotifyDownloadBatch: (payload) => ipcRenderer.invoke("spotify-download-batch", payload),
+  spotifyDownloadBatch: (payload) => ipcRenderer.invoke("spotdl-download-batch", payload),
 
   onSpotdlTrackDone: (callback) => {
     const handler = (_event, payload) => callback(payload);
@@ -110,15 +109,6 @@ contextBridge.exposeInMainWorld("localitfy", {
 
     return () => {
       ipcRenderer.removeListener("localitfy:auto-update-event", handler);
-    };
-  },
-
-  onAlbumFolderImportProgress: (callback) => {
-    const handler = (_event, payload) => callback(payload);
-    ipcRenderer.on("album-folder-import:progress", handler);
-
-    return () => {
-      ipcRenderer.removeListener("album-folder-import:progress", handler);
     };
   },
 

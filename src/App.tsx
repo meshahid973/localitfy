@@ -609,12 +609,12 @@ type FeedbackCategoryId = typeof FEEDBACK_CATEGORY_OPTIONS[number]["id"];
 
 function shouldOpenFeedbackPromptFromSettingsSearch(value: string) {
   const query = value.trim().toLowerCase();
-  return query === "/feedback";
+  return query === "/feedback" || query === "feedback";
 }
 
 function shouldOpenFeedbackPromptFromGlobalSearch(value: string) {
   const query = value.trim().toLowerCase();
-  return query === "/feedback";
+  return query === "/feedback" || query === "feedback";
 }
 
 
@@ -1191,15 +1191,16 @@ function MainModeApp() {
   const settingsSearchResultLabel = settingsSearchQuery
     ? visibleSettingsTabs.length
       ? `showing ${visibleSettingsTabs.length} matching section${visibleSettingsTabs.length === 1 ? "" : "s"}`
-      : "no exact section found â€” Search for settings such as Discord, theme, cover, update, volume, feedback."
-    : "Search for settings such as Discord, theme, cover, update, volume, feedback.";
+      : "no exact section found â€” Search for settings such as Discord, theme, cover, update, volume, or type /feedback."
+    : "Search for settings such as Discord, theme, cover, update, volume, or type /feedback.";
 
   function handleSettingsSearchInput(value: string) {
     setSettingsSearch(value);
 
     if (shouldOpenFeedbackPromptFromSettingsSearch(value)) {
       setSettingsSearch("");
-      setSettingsOpen(false);
+      setQuery("");
+      setSettingsCategory("advanced");
       setFeedbackCategory("bug");
       openFeedbackPrompt(true);
       setStatusText("feedback box opened");
@@ -10360,6 +10361,78 @@ function MainModeApp() {
   }, []);
 
   useEffect(() => {
+    if (!ready) return;
+
+    const openFeedbackNow = () => {
+      setQuery("");
+      setSettingsSearch("");
+      setSettingsOpen(false);
+      setFeedbackCategory("bug");
+      openFeedbackPrompt(true);
+      setStatusText("feedback box opened");
+      showAppToast("feedback box opened", "success");
+    };
+
+    const isFeedbackCommand = (value: unknown) => {
+      const query = String(value || "").trim().toLowerCase();
+      return query === "/feedback" || query === "feedback";
+    };
+
+    const looksLikeSearchInput = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLInputElement)) return false;
+      const haystack = [
+        target.className,
+        target.placeholder,
+        target.getAttribute("aria-label"),
+        target.getAttribute("name"),
+        target.getAttribute("type")
+      ].map((item) => String(item || "").toLowerCase()).join(" ");
+
+      return haystack.includes("search") || haystack.includes("query");
+    };
+
+    const handleExternalFeedback = (event: Event) => {
+      event.preventDefault?.();
+      openFeedbackNow();
+    };
+
+    const handleSearchInputCommand = (event: Event) => {
+      const target = event.target;
+
+      if (!looksLikeSearchInput(target)) return;
+      if (!isFeedbackCommand((target as HTMLInputElement).value)) return;
+
+      (target as HTMLInputElement).value = "";
+      event.preventDefault?.();
+      event.stopPropagation?.();
+      openFeedbackNow();
+    };
+
+    const handleFeedbackButtonClick = (event: MouseEvent) => {
+      const target = event.target;
+      const element = target instanceof Element
+        ? target.closest("[data-localtify-feedback-open], .feedbackSettingsButtonV331")
+        : null;
+
+      if (!element) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      openFeedbackNow();
+    };
+
+    window.addEventListener("localtify:open-feedback", handleExternalFeedback as EventListener);
+    document.addEventListener("input", handleSearchInputCommand, true);
+    document.addEventListener("click", handleFeedbackButtonClick, true);
+
+    return () => {
+      window.removeEventListener("localtify:open-feedback", handleExternalFeedback as EventListener);
+      document.removeEventListener("input", handleSearchInputCommand, true);
+      document.removeEventListener("click", handleFeedbackButtonClick, true);
+    };
+  }, [openFeedbackPrompt, ready]);
+
+  useEffect(() => {
     if (!ready || feedbackPromptWasSeen()) return;
 
     let cancelled = false;
@@ -10459,7 +10532,7 @@ function MainModeApp() {
 
       feedbackLastSentAtRef.current = Date.now();
       markFeedbackPromptSeen();
-      setFeedbackStatus({ kind: "success", message: "Sent successfully â€” thanks, Iâ€™ll review this." });
+      setFeedbackStatus({ kind: "success", message: "Sent successfully — thanks, I’ll review this." });
       setFeedbackMessage("");
 
       window.setTimeout(() => {
@@ -10775,8 +10848,51 @@ function MainModeApp() {
     );
   }
 
+
+
+
+
   function renderFeedbackSettingsCard() {
-    return null;
+    if (settingsCategory !== "advanced") return null;
+
+    const feedbackReady = Boolean(feedbackConfigStatus?.configured && feedbackConfigStatus?.valid);
+    const feedbackStatusLabel = feedbackConfigStatus
+      ? feedbackConfigStatus.label || (feedbackReady ? "Discord feedback enabled" : "Discord feedback not configured")
+      : "Checking feedback status...";
+    const feedbackStatusMessage = feedbackConfigStatus?.message ||
+      (feedbackReady ? "Feedback will be delivered to your Discord channel." : "Add LOCALTIFY_FEEDBACK_WEBHOOK_URL to your .env or packaged resources to enable Discord delivery.");
+
+    return (
+      <section className={`settingsPageCard feedbackSettingsCardV331 ${feedbackReady ? "feedbackReady" : "feedbackNotReady"}`} aria-label="Send feedback">
+        <div className="feedbackSettingsHeaderV331">
+          <span className="feedbackSettingsIconV331" aria-hidden="true">âœ¦</span>
+          <div className="settingsSectionTitle">
+            <span>feedback</span>
+            <strong>Send feedback</strong>
+            <small>Report bugs, UI issues, or feature ideas directly from localtify. Type feedback or /feedback in search, or press this button.</small>
+          </div>
+        </div>
+
+        <div className={`feedbackWebhookStatusV337 ${feedbackReady ? "ready" : "notReady"}`}>
+          <strong>{feedbackStatusLabel}</strong>
+          <small>{feedbackStatusMessage}</small>
+          {feedbackConfigStatus?.envName ? <em>{feedbackConfigStatus.envName}</em> : null}
+        </div>
+
+        <button
+          type="button"
+          className="feedbackSettingsButtonV331 localtifyProximityTarget"
+          data-localtify-feedback-open="true"
+          onClick={() => openFeedbackPrompt(true)}
+        >
+          <span>
+            <strong>Open feedback box</strong>
+            <small>{feedbackReady ? "Send a short report straight to the feedback channel." : "You can test the popup UI, but delivery needs the webhook env."}</small>
+          </span>
+          <em>open</em>
+        </button>
+      </section>
+    );
   }
 
 
@@ -11120,6 +11236,7 @@ function MainModeApp() {
         />
         </Suspense>
         {renderAudioEffectsCard()}
+        {renderFeedbackSettingsCard()}
       </>
     );
   }

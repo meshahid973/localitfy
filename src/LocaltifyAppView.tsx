@@ -29,7 +29,6 @@ import {
   Volume2,
   VolumeX,
   Pencil,
-  RotateCcw,
   Plus,
   Trash2,
   X,
@@ -4113,6 +4112,15 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
   } = props;
 
+  useEffect(() => {
+    const body = document.body;
+    body.classList.toggle("localtifyEditorModalOpen", Boolean(editorSong));
+
+    return () => {
+      body.classList.remove("localtifyEditorModalOpen");
+    };
+  }, [editorSong]);
+
   function downloadStatusLabel(status: string) {
     if (status === "done") return "done";
     if (status === "failed") return "failed";
@@ -4927,8 +4935,19 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <input
                     className="search"
                     value={query}
-                    onChange={(event) => handleSearchInput(event.currentTarget.value)}
-                    placeholder="search songs, try /stars"
+                    onChange={(event) => {
+                      const nextValue = event.currentTarget.value;
+                      const command = nextValue.trim().toLowerCase();
+
+                      if (command === "/feedback" || command === "feedback") {
+                        event.currentTarget.value = "";
+                        window.dispatchEvent(new CustomEvent("localtify:open-feedback"));
+                        return;
+                      }
+
+                      handleSearchInput(nextValue);
+                    }}
+                    placeholder="search songs, try /feedback"
                   />
                 </div>
               </div>
@@ -6699,21 +6718,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); openEditor(menuSong); }}>
                 <span className="songContextMenuIcon"><Pencil size={13} strokeWidth={3} /></span> edit song data
               </button>
-              <button type="button" role="menuitem" onClick={() => changeCoverForSongAction(menuSong)}>
-                <span className="songContextMenuIcon"><Images size={13} strokeWidth={3} /></span> change cover
-              </button>
-              <button type="button" role="menuitem" onClick={() => randomizeCoverForSongAction(menuSong)}>
-                <span className="songContextMenuIcon"><RotateCcw size={13} strokeWidth={3} /></span> random cover
-              </button>
               <div className="songContextMenuDivider" aria-hidden="true" />
-              <button type="button" role="menuitem" onClick={() => openPlaylistPicker(menuSong)}>
+              <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); openPlaylistPicker(menuSong); }}>
                 <span className="songContextMenuIcon"><Plus size={13} strokeWidth={3} /></span> add to playlist
               </button>
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); toggleLike(menuSong.id); }}>
                 <span className="songContextMenuIcon"><Heart size={13} strokeWidth={3} /></span> {menuSong.liked ? "unlike" : "like"}
-              </button>
-              <button type="button" role="menuitem" onClick={() => resetCoverForSongAction(menuSong)}>
-                <span className="songContextMenuIcon"><RotateCcw size={13} strokeWidth={3} /></span> reset cover
               </button>
               <button className="dangerMenuItem" type="button" role="menuitem" onClick={() => { setSongContextMenu(null); askRemoveSong(menuSong.id); }}>
                 <span className="songContextMenuIcon"><Trash2 size={13} strokeWidth={3} /></span> remove from library
