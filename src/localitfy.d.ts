@@ -46,6 +46,19 @@ declare global {
     downloadedBytes?: number;
     totalBytes?: number;
     speedBytesPerSecond?: number;
+    source?: string;
+    spotifyTrackId?: string;
+    spotifyUrl?: string;
+    provider?: string;
+    providerUrl?: string;
+    matchedTitle?: string;
+    matchedArtist?: string;
+    matchedDurationMs?: number;
+    matchScore?: number;
+    matchOk?: boolean;
+    librarySongId?: string;
+    importedToLibrary?: boolean;
+    statusLabel?: string;
   };
 
   type LocalitfyDownloadResult = {
@@ -55,6 +68,19 @@ declare global {
     filename?: string;
     sizeBytes?: number;
     error?: string;
+    source?: string;
+    spotifyTrackId?: string;
+    spotifyUrl?: string;
+    provider?: string;
+    providerUrl?: string;
+    matchedTitle?: string;
+    matchedArtist?: string;
+    matchedDurationMs?: number;
+    matchScore?: number;
+    matchOk?: boolean;
+    librarySongId?: string;
+    importedToLibrary?: boolean;
+    statusLabel?: string;
   };
 
   type LocalitfyConversionResult = {
@@ -250,6 +276,40 @@ declare global {
   };
 
 
+  type LocalitfySpotifyTrackPayload = {
+    id?: string;
+    spotifyTrackId?: string;
+    title?: string;
+    name?: string;
+    artist?: string;
+    artists?: string;
+    albumName?: string;
+    coverUrl?: string;
+    spotifyCoverUrl?: string;
+    albumCoverUrl?: string;
+    spotifyUrl?: string;
+    isrc?: string;
+    duration?: number;
+    durationMs?: number;
+  };
+
+  type LocalitfySpotifyDownloadBatchResult = {
+    downloadFolder: string;
+    downloads: LocalitfyDownloadResult[];
+    changedCount?: number;
+    songs?: any[];
+    importedFilePaths?: string[];
+    spotifyImportedSongIds?: string[];
+    spotifyImportMap?: Array<{
+      spotifyTrackId: string;
+      songId: string;
+      filePath: string;
+    }>;
+    spotifySourceName?: string;
+    spotifySourceType?: string;
+    error?: string;
+  };
+
   interface Window {
     localitfy: {
       bootstrap: () => Promise<{
@@ -381,6 +441,16 @@ declare global {
       sendFeedback?: (payload: LocalitfyFeedbackPayload) => Promise<LocalitfyFeedbackResult>;
       getFeedbackStatus?: () => Promise<LocalitfyFeedbackStatus>;
       openExternal?: (url: string) => Promise<{ ok: boolean; reason?: string }>;
+
+      spotifyCheck?: () => Promise<any>;
+      spotifyLogin?: () => Promise<any>;
+      spotifyLogout?: () => Promise<any>;
+      spotifyFetch?: (payload: { url: string }) => Promise<any>;
+      spotifyFetchTracks?: (url: string) => Promise<any>;
+      spotdlCheck?: () => Promise<any>;
+      spotdlDownloadBatch?: (payload: { tracks: LocalitfySpotifyTrackPayload[]; options?: any; sourceName?: string; sourceType?: string }) => Promise<LocalitfySpotifyDownloadBatchResult>;
+      spotifyDownloadBatch?: (payload: { tracks: LocalitfySpotifyTrackPayload[]; options?: any; sourceName?: string; sourceType?: string }) => Promise<LocalitfySpotifyDownloadBatchResult>;
+      onSpotdlTrackDone?: (callback: (payload: LocalitfyDownloadProgressPayload | LocalitfyDownloadResult) => void) => () => void;
 
       onAlbumFolderImportProgress?: (callback: (payload: LocalitfyAlbumFolderProgressPayload) => void) => () => void;
       onDownloadProgress: (callback: (payload: LocalitfyDownloadProgressPayload) => void) => () => void;

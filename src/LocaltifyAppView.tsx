@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -60,6 +60,12 @@ export type Song = {
   sizeBytes?: number;
   bitrate?: number;
   sampleRate?: number;
+  sourceType?: "local" | "youtube" | "spotify" | string;
+  sourceTrackId?: string | null;
+  sourceUrl?: string | null;
+  sourceProvider?: string | null;
+  sourceProviderUrl?: string | null;
+  sourceMatchScore?: number;
 };
 
 export type PlaybackUrlResult = {
@@ -641,6 +647,19 @@ export type DownloadResult = {
   filename?: string;
   sizeBytes?: number;
   error?: string;
+  source?: "youtube" | "spotify" | string;
+  spotifyTrackId?: string;
+  spotifyUrl?: string;
+  provider?: string;
+  providerUrl?: string;
+  matchedTitle?: string;
+  matchedArtist?: string;
+  matchedDurationMs?: number;
+  matchScore?: number;
+  matchOk?: boolean;
+  importedToLibrary?: boolean;
+  librarySongId?: string;
+  statusLabel?: string;
 };
 
 export type DownloadQueueItem = {
@@ -655,6 +674,14 @@ export type DownloadQueueItem = {
   filePath?: string;
   filename?: string;
   error?: string;
+  source?: "youtube" | "spotify" | string;
+  spotifyTrackId?: string;
+  spotifyUrl?: string;
+  providerUrl?: string;
+  matchScore?: number;
+  importedToLibrary?: boolean;
+  librarySongId?: string;
+  statusLabel?: string;
 };
 
 export type SpotifyTrack = {
@@ -668,6 +695,15 @@ export type SpotifyTrack = {
   albumCoverUrl?: string;
   spotifyCoverUrl?: string;
   spotifyUrl?: string;
+  isrc?: string;
+  downloadStatus?: "ready" | "queued" | "downloading" | "done" | "failed";
+  downloadError?: string;
+  downloadMessage?: string;
+  downloadedFilePath?: string;
+  importedToLibrary?: boolean;
+  librarySongId?: string;
+  matchScore?: number;
+  providerUrl?: string;
 };
 
 export type AutoUpdateEvent = {
@@ -4098,6 +4134,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const [albumFolderImportMessage, setAlbumFolderImportMessage] = useState("");
   const [albumFolderImportProgress, setAlbumFolderImportProgress] = useState<any | null>(null);
   const albumCoverInputRef = useRef<HTMLInputElement | null>(null);
+  const albumBuilderSectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     writeLocalJson(MANUAL_LOCAL_ALBUMS_STORAGE_KEY, manualAlbums);
@@ -4160,6 +4197,15 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       .slice(0, 80);
   }, [songs, albumDraftSearch, albumDraftSongIds]);
 
+  function scrollAlbumBuilderIntoView() {
+    window.requestAnimationFrame(() => {
+      albumBuilderSectionRef.current?.scrollIntoView({
+        behavior: settings.reducedMotion ? "auto" : "smooth",
+        block: "start"
+      });
+    });
+  }
+
   function resetAlbumBuilderDraft() {
     setAlbumBuilderMode("create");
     setAlbumEditingManualId("");
@@ -4173,7 +4219,15 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
 
   async function scanAlbumFolderImport(mode: "single" | "library") {
-    if (!window.localitfy?.scanAlbumFolder || albumFolderImportBusy) return;
+    if (albumFolderImportBusy) return;
+
+    if (!window.localitfy?.scanAlbumFolder) {
+      const message = "album folder import bridge missing — restart Localtify after replacing electron/preload.cjs and electron/main.cjs";
+      setAlbumFolderImportMessage(message);
+      setAlbumFolderImportProgress({ type: "error", mode, message });
+      setStatusText?.("album import bridge missing");
+      return;
+    }
 
     setAlbumFolderImportBusy(true);
     setAlbumFolderImportPreview(null);
@@ -4338,6 +4392,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setAlbumDraftSearch("");
     setAlbumDraftSongIds(seedSong ? [seedSong.id] : []);
     setAlbumBuilderOpen(true);
+    setStatusText?.("album builder opened");
+    scrollAlbumBuilderIntoView();
   }
 
   function openEditAlbumBuilder(album: LocalAlbumEntry | null) {
@@ -4355,6 +4411,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setAlbumDraftSearch("");
     setAlbumDraftSongIds(uniquePlayableSongIds(manual.songIds, songsById));
     setAlbumBuilderOpen(true);
+    setStatusText?.("album editor opened");
+    scrollAlbumBuilderIntoView();
   }
 
   function closeAlbumBuilder() {
@@ -5440,7 +5498,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   )}
                 </section>
 
-                <section className={`albumBuilderPanelV318 ${albumBuilderOpen ? "open" : ""}`}>
+                <section ref={albumBuilderSectionRef} className={`albumBuilderPanelV318 ${albumBuilderOpen ? "open" : ""}`}>
                   <div className="albumBuilderHeaderV318">
                     <div>
                       <p className="eyebrow">{albumBuilderMode === "edit" ? "edit custom album" : "create"}</p>

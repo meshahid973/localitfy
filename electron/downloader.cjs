@@ -204,6 +204,11 @@ function buildProgressPayload(job, p) {
     status: percent >= 88 ? "converting" : "downloading",
     id: job.id,
     url: job.url,
+    spotifyTrackId: job.spotifyTrackId,
+    spotifyUrl: job.spotifyUrl,
+    source: job.source,
+    provider: job.provider,
+    providerUrl: job.providerUrl,
     index: job.index,
     total: job.total,
     file: job.file || "track",
@@ -361,19 +366,350 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
 }
 
 // ====================== SPOTIFY DOWNLOAD ======================
-// Downloads tracks from a Spotify source by searching YouTube via yt-dlp's
-// ytsearch1: prefix — no Spotify API key or sp_dc cookie required here.
-// The metadata (title, artist) must be fetched upstream (see main.cjs:
-// spotifyFetchTracks IPC handler) and passed in as the `tracks` array.
-//
-// Wire in main.cjs:
-//   ipcMain.handle("spotify-download-batch", async (_event, { tracks, options }) => {
-//     const folder = resolveDownloadFolder(options);
-//     const result = await downloadSpotifyBatch(tracks, folder, progressCallback, options);
-//     // re-scan library, return { songs, downloads, downloadFolder }
-//   });
-// And expose via preload.cjs:
-//   spotifyDownloadBatch: (payload) => ipcRenderer.invoke("spotify-download-batch", payload)
+// Spotify downloads use Spotify metadata as identity, then choose a safe
+// YouTube audio candidate. Never use ytsearch1 first-result downloading here;
+// that is what caused same-name songs to import as the wrong audio.
+
+function normalizeSpotifyMatchText(value = "") {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[''`´]/g, "")
+    .replace(/\b(feat|ft|featuring)\.?\b/g, " ")
+    .replace(/\([^)]*\)|\[[^\]]*\]/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function spotifyMatchWords(value = "") {
+  return normalizeSpotifyMatchText(value)
+    .split(" ")
+    .filter((word) => word.length > 1);
+}
+
+function getSpotifyTrackId(track = {}) {
+  return String(track.spotifyTrackId || track.id || track.trackId || "").trim();
+}
+
+function getSpotifyTrackUrl(track = {}) {
+  const explicit = String(track.spotifyUrl || track.url || "").trim();
+  const trackId = getSpotifyTrackId(track);
+  if (/^https:\/\/open\.spotify\.com\/track\//i.test(explicit)) return explicit;
+  return trackId ? `https://open.spotify.com/track/${trackId}` : explicit;
+}
+
+function buildSpotifySearchQuery(track = {}) {
+  const title = String(track.title || track.name || "unknown track").trim();
+  const artist = String(track.artist || track.artists || "").trim();
+  const isrc = String(track.isrc || "").trim();
+
+  if (isrc) return `${artist ? `${artist} ` : ""}${title} ${isrc} official audio`.trim();
+  if (artist) return `${artist} - ${title} official audio`;
+  return `${title} official audio`;
+}
+
+function getCandidateUrl(candidate = {}) {
+  const direct =
+    candidate.webpage_url ||
+    candidate.webpageUrl ||
+    candidate.original_url ||
+    candidate.url ||
+    candidate.id;
+
+  const value = String(direct || "").trim();
+  if (/^https?:\/\//i.test(value)) return value;
+
+  const id = String(candidate.id || "").trim();
+  if (id) return `https://www.youtube.com/watch?v=${id}`;
+
+  return value;
+}
+
+function runYtDlpJson(ytDlp, args) {
+  return new Promise((resolve, reject) => {
+    activeDownloadCancelled = false;
+    const proc = ytDlp.exec(args);
+    activeDownloadProcesses.add(proc);
+
+    let stdout = "";
+    let stderr = "";
+
+    proc.stdout?.on("data", (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    proc.stderr?.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    proc.on("error", (err) => {
+      activeDownloadProcesses.delete(proc);
+      reject(new Error(err?.message || String(err)));
+    });
+
+    proc.on("close", (code) => {
+      activeDownloadProcesses.delete(proc);
+      if (activeDownloadCancelled) return reject(new Error("Download cancelled"));
+      if (typeof code === "number" && code !== 0) {
+        return reject(new Error(stderr.trim() || `yt-dlp metadata read exited with code ${code}`));
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+function parseYtDlpJsonLines(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return [];
+
+  const candidates = [];
+
+  try {
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed?.entries)) return parsed.entries.filter(Boolean);
+    if (parsed && typeof parsed === "object") return [parsed];
+  } catch {
+    // yt-dlp --dump-json often writes one JSON object per line.
+  }
+
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed?.entries)) candidates.push(...parsed.entries.filter(Boolean));
+      else if (parsed && typeof parsed === "object") candidates.push(parsed);
+    } catch {
+      // Ignore non-JSON logging lines.
+    }
+  }
+
+  return candidates;
+}
+
+async function searchSpotifyYoutubeCandidates(track, limit = 8) {
+  const ytDlp = await getYtDlp();
+  const query = buildSpotifySearchQuery(track);
+  const searchUrl = `ytsearch${Math.max(3, Math.min(10, Number(limit) || 8))}:${query}`;
+
+  const baseArgs = [
+    searchUrl,
+    "--dump-json",
+    "--flat-playlist",
+    "--no-warnings",
+    "--no-colors",
+    "--ignore-errors"
+  ];
+
+  const attempts = [baseArgs];
+
+  if (_getCookiesFile) {
+    try {
+      const cookiesFile = await _getCookiesFile();
+      if (cookiesFile && fs.existsSync(cookiesFile)) {
+        attempts.push([...baseArgs, "--cookies", cookiesFile]);
+      }
+    } catch {
+      // Metadata search can still work without cookies.
+    }
+  }
+
+  let lastError = null;
+
+  for (const args of attempts) {
+    try {
+      const stdout = await runYtDlpJson(ytDlp, args);
+      const candidates = parseYtDlpJsonLines(stdout)
+        .map((candidate) => ({
+          ...candidate,
+          providerUrl: getCandidateUrl(candidate),
+          searchQuery: query
+        }))
+        .filter((candidate) => candidate.providerUrl);
+
+      if (candidates.length) return candidates;
+    } catch (error) {
+      lastError = error;
+      if (String(error?.message || "").toLowerCase().includes("cancel")) throw error;
+    }
+  }
+
+  if (lastError) {
+    console.log("[localtify spotify] candidate search failed:", lastError?.message || lastError);
+  }
+
+  return [];
+}
+
+const SPOTIFY_BAD_CANDIDATE_WORDS = [
+  "slowed",
+  "sped up",
+  "speed up",
+  "nightcore",
+  "remix",
+  "mashup",
+  "live",
+  "concert",
+  "karaoke",
+  "instrumental",
+  "cover",
+  "reaction",
+  "shorts",
+  "edit audio",
+  "bass boosted",
+  "8d audio"
+];
+
+function scoreSpotifyYoutubeCandidate(track = {}, candidate = {}) {
+  const wantedTitle = String(track.title || track.name || "").trim();
+  const wantedArtist = String(track.artist || track.artists || "").trim();
+  const wantedCombined = normalizeSpotifyMatchText(`${wantedArtist} ${wantedTitle}`);
+  const candidateTitle = String(candidate.title || candidate.fulltitle || "").trim();
+  const candidateUploader = String(candidate.uploader || candidate.channel || candidate.creator || "").trim();
+  const candidateCombined = normalizeSpotifyMatchText(`${candidateTitle} ${candidateUploader}`);
+
+  let score = 0;
+  const reasons = [];
+
+  const titleKey = normalizeSpotifyMatchText(wantedTitle);
+  const artistKey = normalizeSpotifyMatchText(wantedArtist);
+
+  if (titleKey && candidateCombined.includes(titleKey)) {
+    score += 28;
+    reasons.push("title");
+  }
+
+  if (artistKey && candidateCombined.includes(artistKey)) {
+    score += 24;
+    reasons.push("artist");
+  }
+
+  const wantedWords = new Set(spotifyMatchWords(wantedCombined).filter((word) => word.length > 2));
+  const candidateWords = new Set(spotifyMatchWords(candidateCombined).filter((word) => word.length > 2));
+  let overlap = 0;
+
+  for (const word of wantedWords) {
+    if (candidateWords.has(word)) overlap += 1;
+  }
+
+  if (wantedWords.size) {
+    const ratio = overlap / wantedWords.size;
+    score += Math.round(ratio * 26);
+    if (ratio >= 0.65) reasons.push("word-overlap");
+  }
+
+  const expectedDurationSeconds = Number(track.durationMs || 0) > 0
+    ? Number(track.durationMs) / 1000
+    : Number(track.duration || 0);
+  const candidateDurationSeconds = Number(candidate.duration || 0);
+
+  if (expectedDurationSeconds > 0 && candidateDurationSeconds > 0) {
+    const diff = Math.abs(expectedDurationSeconds - candidateDurationSeconds);
+    if (diff <= 3) {
+      score += 26;
+      reasons.push("duration-exact");
+    } else if (diff <= 8) {
+      score += 18;
+      reasons.push("duration-close");
+    } else if (diff <= 15) {
+      score += 8;
+      reasons.push("duration-ok");
+    } else if (diff > 25) {
+      score -= 26;
+      reasons.push("duration-mismatch");
+    }
+  }
+
+  if (/\bofficial\b|\baudio\b|\btopic\b/i.test(`${candidateTitle} ${candidateUploader}`)) {
+    score += 8;
+    reasons.push("official-audio");
+  }
+
+  const wantedRaw = normalizeSpotifyMatchText(`${wantedTitle} ${wantedArtist}`);
+  const candidateRaw = normalizeSpotifyMatchText(`${candidateTitle} ${candidateUploader}`);
+
+  for (const word of SPOTIFY_BAD_CANDIDATE_WORDS) {
+    const badKey = normalizeSpotifyMatchText(word);
+    if (badKey && candidateRaw.includes(badKey) && !wantedRaw.includes(badKey)) {
+      score -= 18;
+      reasons.push(`reject-word:${word}`);
+    }
+  }
+
+  if (!titleKey || !candidateCombined.includes(titleKey)) {
+    score -= 18;
+    reasons.push("missing-title");
+  }
+
+  if (artistKey && !candidateCombined.includes(artistKey)) {
+    score -= 10;
+    reasons.push("missing-artist");
+  }
+
+  return {
+    ...candidate,
+    matchScore: score,
+    matchReasons: reasons,
+    matchedTitle: candidateTitle,
+    matchedArtist: candidateUploader,
+    matchedDurationMs: candidateDurationSeconds > 0 ? Math.round(candidateDurationSeconds * 1000) : 0,
+    providerUrl: candidate.providerUrl || getCandidateUrl(candidate),
+    matchOk: score >= 48
+  };
+}
+
+async function findSpotifyYoutubeMatch(track = {}, onProgress, job = {}) {
+  const candidates = await searchSpotifyYoutubeCandidates(track, 8);
+  const scored = candidates
+    .map((candidate) => scoreSpotifyYoutubeCandidate(track, candidate))
+    .sort((a, b) => b.matchScore - a.matchScore);
+
+  const best = scored[0] || null;
+  const title = String(track.title || track.name || "track").trim();
+
+  if (!best || !best.matchOk) {
+    onProgress?.({
+      type: "download",
+      status: "failed",
+      id: job.id,
+      url: job.url,
+      spotifyTrackId: job.spotifyTrackId,
+      spotifyUrl: job.spotifyUrl,
+      source: "spotify",
+      provider: "youtube",
+      index: job.index,
+      total: job.total,
+      file: title,
+      progress: 100,
+      speed: null,
+      size: null,
+      eta: null,
+      error: "Could not safely match this Spotify track.",
+      message: "Could not safely match this Spotify track."
+    });
+
+    return {
+      ok: false,
+      url: job.url,
+      spotifyTrackId: job.spotifyTrackId,
+      spotifyUrl: job.spotifyUrl,
+      source: "spotify",
+      provider: "youtube",
+      error: "Could not safely match this Spotify track.",
+      matchOk: false,
+      matchScore: best?.matchScore || 0,
+      matchedTitle: best?.matchedTitle || "",
+      matchedArtist: best?.matchedArtist || "",
+      matchedDurationMs: best?.matchedDurationMs || 0,
+      providerUrl: best?.providerUrl || "",
+      candidatesChecked: scored.length
+    };
+  }
+
+  return best;
+}
 
 async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, options = {}) {
   if (!Array.isArray(tracks) || !tracks.length) {
@@ -386,77 +722,153 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
   const total = tracks.length;
 
   for (let index = 0; index < total; index++) {
-    const track = tracks[index];
-    const { title = "unknown", artist = "" } = track;
-    const id = `spt_${Date.now()}_${index}`;
+    const track = tracks[index] || {};
+    const title = String(track.title || track.name || "unknown").trim() || "unknown";
+    const artist = String(track.artist || track.artists || "").trim();
+    const spotifyTrackId = getSpotifyTrackId(track);
+    const spotifyUrl = getSpotifyTrackUrl(track);
+    const id = `spt_${spotifyTrackId || Date.now()}_${index}`;
+    const searchUrl = spotifyUrl || `spotify:track:${spotifyTrackId || id}`;
 
-    // Use yt-dlp's built-in ytsearch1: to find the best YouTube match.
-    const query = artist
-      ? `ytsearch1:${artist} - ${title} audio`
-      : `ytsearch1:${title} audio`;
+    const basePayload = {
+      type: "download",
+      id,
+      url: searchUrl,
+      spotifyTrackId,
+      spotifyUrl,
+      source: "spotify",
+      provider: "youtube",
+      index,
+      total,
+      file: title,
+      speed: null,
+      size: null,
+      eta: null
+    };
 
     onProgress?.({
-      type: "download",
+      ...basePayload,
       status: "queued",
-      id,
-      url: query,
-      index,
-      total,
-      file: title,
       progress: 0,
-      speed: null,
-      size: null,
-      eta: null,
-      message: `Searching YouTube for "${title}"...`
+      message: `Queued Spotify track "${title}"`
     });
 
-    // Emit a "searching" progress tick so the queue item appears active
     onProgress?.({
-      type: "download",
+      ...basePayload,
       status: "downloading",
-      id,
-      url: query,
-      index,
-      total,
-      file: title,
       progress: 2,
-      speed: null,
-      size: null,
-      eta: null,
-      message: `Searching: "${artist ? `${artist} — ` : ""}${title}"`
+      message: `Finding safe match: "${artist ? `${artist} — ` : ""}${title}"`
     });
 
-    // downloadYouTube accepts any yt-dlp-compatible input, including ytsearch1:
+    let match;
+    try {
+      match = await findSpotifyYoutubeMatch(track, onProgress, basePayload);
+    } catch (error) {
+      const message = error?.message || "Could not search YouTube for this Spotify track.";
+      const failed = {
+        ok: false,
+        url: searchUrl,
+        spotifyTrackId,
+        spotifyUrl,
+        source: "spotify",
+        provider: "youtube",
+        error: message,
+        matchOk: false
+      };
+      results.push(failed);
+      if (String(message).toLowerCase().includes("cancel")) break;
+      continue;
+    }
+
+    if (!match?.matchOk || !match.providerUrl) {
+      results.push(match);
+      if (String(match?.error || "").toLowerCase().includes("cancel")) break;
+      continue;
+    }
+
+    onProgress?.({
+      ...basePayload,
+      status: "downloading",
+      progress: 6,
+      providerUrl: match.providerUrl,
+      message: `Matched safely (${Math.round(match.matchScore)}): ${match.matchedTitle || title}`
+    });
+
     const dlResult = await downloadYouTube(
-      query,
+      match.providerUrl,
       destinationDirectory,
       onProgress,
       { ...options, cleanTitle: false },
-      { id, index, total, url: query, file: title, format: safeDownloadFormat(options.format) }
+      {
+        ...basePayload,
+        url: match.providerUrl,
+        providerUrl: match.providerUrl,
+        file: title,
+        format: safeDownloadFormat(options.format)
+      }
     );
 
+    const enrichedBase = {
+      ...dlResult,
+      url: searchUrl,
+      spotifyTrackId,
+      spotifyUrl,
+      source: "spotify",
+      provider: "youtube",
+      providerUrl: match.providerUrl,
+      matchedTitle: match.matchedTitle || "",
+      matchedArtist: match.matchedArtist || "",
+      matchedDurationMs: match.matchedDurationMs || 0,
+      matchScore: Math.round(match.matchScore || 0),
+      matchOk: Boolean(match.matchOk)
+    };
+
     if (dlResult.ok && dlResult.filePath && title) {
-      // Rename the downloaded file to "Artist - Title.ext" using Spotify metadata
       try {
         const dir = path.dirname(dlResult.filePath);
-        const ext = path.extname(dlResult.filePath);
+        const ext = path.extname(dlResult.filePath) || `.${safeDownloadFormat(options.format)}`;
+        const safeTrackId = sanitizeFilename(spotifyTrackId || crypto.createHash("sha1").update(`${artist}-${title}`).digest("hex").slice(0, 12));
         const spotifyName = artist
-          ? sanitizeFilename(`${artist} - ${title}`)
-          : sanitizeFilename(title);
+          ? sanitizeFilename(`spotify_${safeTrackId} - ${artist} - ${title}`)
+          : sanitizeFilename(`spotify_${safeTrackId} - ${title}`);
         const newPath = uniquePath(dir, `${spotifyName}${ext}`);
         fs.renameSync(dlResult.filePath, newPath);
-        results.push({
-          ...dlResult,
+
+        const finalResult = {
+          ...enrichedBase,
           filePath: newPath,
           filename: path.basename(newPath)
+        };
+
+        results.push(finalResult);
+
+        onProgress?.({
+          ...basePayload,
+          status: "done",
+          progress: 100,
+          providerUrl: match.providerUrl,
+          file: path.basename(newPath),
+          message: "Adding Spotify track to library..."
         });
+
         continue;
       } catch {
-        // Rename failed — keep the original filename
+        // Rename failed — keep the original filename but still keep identity fields.
       }
     }
 
-    results.push(dlResult);
+    results.push(enrichedBase);
+
+    if (!dlResult.ok) {
+      onProgress?.({
+        ...basePayload,
+        status: String(dlResult.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed",
+        progress: 100,
+        providerUrl: match.providerUrl,
+        error: dlResult.error,
+        message: String(dlResult.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?"
+      });
+    }
 
     if (String(dlResult.error || "").toLowerCase().includes("cancel")) break;
   }

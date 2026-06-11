@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+﻿import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
 type ThemeId = string;
@@ -407,7 +407,7 @@ function detectSettingsPlatform(): Required<PlatformInfoLike> {
       startupSettingLabel: "Linux autostart",
       startupSettingHelp: "Hidden in this release. Linux autostart will use a proper desktop-entry flow later.",
       linuxInstallNotes: [
-        "AppImage: chmod +x Localtify-0.3.8-x86_64.AppImage, then run it directly.",
+        "AppImage: chmod +x Localtify-0.3.9-x86_64.AppImage, then run it directly.",
         "RPM: for Fedora, openSUSE, and RHEL-style distros.",
         "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
       ]
@@ -1048,7 +1048,7 @@ return (
                 <div className="metadataCleanerPreviewHeadV425">
                   <span>preview before applying</span>
                   <strong>{metadataCleanPreview.changedCount || 0} fix{(metadataCleanPreview.changedCount || 0) === 1 ? "" : "es"}</strong>
-                  <small>{metadataCleanPreview.skippedCount || 0} skipped • titles {metadataCleanPreview.titleFixCount || 0} • artists {metadataCleanPreview.artistFixCount || 0} • albums {metadataCleanPreview.albumFixCount || 0}</small>
+                  <small>{metadataCleanPreview.skippedCount || 0} skipped â€¢ titles {metadataCleanPreview.titleFixCount || 0} â€¢ artists {metadataCleanPreview.artistFixCount || 0} â€¢ albums {metadataCleanPreview.albumFixCount || 0}</small>
                 </div>
 
                 <div className="metadataCleanerPreviewListV425">
@@ -1059,7 +1059,7 @@ return (
                         <strong>{item.before?.title || "untitled"}</strong>
                         <em>{item.before?.artist || "unknown artist"}</em>
                       </span>
-                      <b aria-hidden="true">→</b>
+                      <b aria-hidden="true">â†’</b>
                       <span>
                         <small>after</small>
                         <strong>{item.after?.title || "untitled"}</strong>
@@ -1246,7 +1246,7 @@ return (
             <p className="eyebrow">updates</p>
             <h4>updates and version</h4>
           </div>
-          <span>version {APP_VERSION} • {activePlatformInfo.label}</span>
+          <span>version {APP_VERSION} â€¢ {activePlatformInfo.label}</span>
         </div>
 
         <div className="settingsTwoColumn settingsUpdatesGrid">
@@ -1294,7 +1294,7 @@ return (
               <ToggleRow label="Notify only" help="Shows an update message instead of installing automatically." checked={settings.autoUpdateNotifyOnly} onChange={(value) => updateSetting("autoUpdateNotifyOnly", value)} />
             </div>
             <div className="settingsActionRow">
-              <button className="settingsActionButton" type="button" onClick={() => setWhatsNewOpen(true)}>Open what’s new</button>
+              <button className="settingsActionButton" type="button" onClick={() => setWhatsNewOpen(true)}>Open whatâ€™s new</button>
             </div>
           </div>
         </div>
@@ -1316,7 +1316,7 @@ return (
         <div className="settingsPanelCard settingsFullWidthPanel">
           <div className="settingsPanelHeader">
             <div>
-              <strong>What’s new in {APP_VERSION}</strong>
+              <strong>Whatâ€™s new in {APP_VERSION}</strong>
               <span>Short notes for this release.</span>
             </div>
           </div>
@@ -1334,7 +1334,7 @@ return (
             <p className="eyebrow">about</p>
             <h4>localtify status</h4>
           </div>
-          <span>version {APP_VERSION} • {activePlatformInfo.label}</span>
+          <span>version {APP_VERSION} â€¢ {activePlatformInfo.label}</span>
         </div>
 
         <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsPanel">
@@ -1392,7 +1392,7 @@ return (
             <p className="eyebrow">advanced</p>
             <h4>reset and app status</h4>
           </div>
-          <span>version {APP_VERSION} • {activePlatformInfo.label}</span>
+          <span>version {APP_VERSION} â€¢ {activePlatformInfo.label}</span>
         </div>
 
         <div className="settingsTwoColumn">
@@ -1481,3 +1481,4 @@ return (
 });
 
 export default SettingsCategoryContent;
+

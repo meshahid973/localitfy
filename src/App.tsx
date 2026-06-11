@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 /* localtify 0.3.8 V395 playback settings cleanup + faster volume changes. */
 /* localtify 0.3.8 V396 audio engine stability pass. */
 /* localtify 0.3.8 V419 background-audio and settings-save stability. */
@@ -546,7 +546,7 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
       startupSettingLabel: "Start localtify with Linux",
       startupSettingHelp: "Linux autostart will be added later through a proper desktop-entry flow.",
       linuxInstallNotes: [
-        "AppImage: chmod +x Localtify-0.3.8-x86_64.AppImage, then run it directly.",
+        "AppImage: chmod +x Localtify-0.3.9-x86_64.AppImage, then run it directly.",
         "RPM: for Fedora, openSUSE, and RHEL-style distros.",
         "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
       ]
@@ -622,7 +622,7 @@ function shouldOpenOnboardingForThisRelease() {
     const releaseShowcaseDone = window.localStorage.getItem(ONBOARDING_RELEASE_SHOWCASE_KEY) === "done";
 
     // New users still see onboarding because the normal onboarding key is missing.
-    // Existing users also see the new v0.3.8 onboarding once because the release key is missing.
+    // Existing users also see the new v0.3.9 onboarding once because the release key is missing.
     return !oldOnboardingDone || !releaseShowcaseDone;
   } catch {
     return true;
@@ -890,6 +890,7 @@ function MainModeApp() {
   const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("all");
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
+  const [libraryFilterMode, setLibraryFilterMode] = useState<"all" | "missing">("all");
   const [libraryRenderLimit, setLibraryRenderLimit] = useState(INITIAL_LIBRARY_RENDER_LIMIT);
   const libraryRenderLimitRef = useRef(INITIAL_LIBRARY_RENDER_LIMIT);
   const libraryListLengthRef = useRef(0);
@@ -1189,7 +1190,7 @@ function MainModeApp() {
   const settingsSearchResultLabel = settingsSearchQuery
     ? visibleSettingsTabs.length
       ? `showing ${visibleSettingsTabs.length} matching section${visibleSettingsTabs.length === 1 ? "" : "s"}`
-      : "no exact section found — Search for settings such as Discord, theme, cover, update, volume, feedback."
+      : "no exact section found â€” Search for settings such as Discord, theme, cover, update, volume, feedback."
     : "Search for settings such as Discord, theme, cover, update, volume, feedback.";
 
   function handleSettingsSearchInput(value: string) {
@@ -2488,7 +2489,7 @@ function MainModeApp() {
     title.textContent = prettyTitle(song.title, 7);
 
     const note = document.createElement("small");
-    note.textContent = "drop to reorder · player = queue next";
+    note.textContent = "drop to reorder Â· player = queue next";
 
     text.append(title, note);
     preview.append(orb, text);
@@ -2567,7 +2568,7 @@ function MainModeApp() {
       return;
     }
 
-    showAppToast("popup blocked — opening snake game here", "info");
+    showAppToast("popup blocked â€” opening snake game here", "info");
     window.location.href = gameUrl;
   }
 
@@ -2651,12 +2652,17 @@ function MainModeApp() {
 
   const starParticleStyles = useMemo<CSSProperties[]>(() => [], []);
 
-  const librarySearchIndex = useMemo(() => songs.map((song) => buildSongSearchEntry(song)), [songs]);
+  const missingSongs = useMemo(() => songs.filter((song) => song.fileExists === false), [songs]);
+  const librarySourceSongs = useMemo(() => (
+    libraryFilterMode === "missing" ? missingSongs : songs
+  ), [libraryFilterMode, missingSongs, songs]);
+
+  const librarySearchIndex = useMemo(() => librarySourceSongs.map((song) => buildSongSearchEntry(song)), [librarySourceSongs]);
 
   const filteredSongs = useMemo(() => {
-    if (!deferredQuery.trim()) return songs;
+    if (!deferredQuery.trim()) return librarySourceSongs;
     return rankSongsForSearch(librarySearchIndex, deferredQuery);
-  }, [librarySearchIndex, deferredQuery, songs]);
+  }, [librarySearchIndex, deferredQuery, librarySourceSongs]);
 
   const likedSongs = useMemo(() => {
     const seen = new Set<string>();
@@ -2940,7 +2946,6 @@ function MainModeApp() {
   const averagePlaysPerSong = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "average_plays_per_song");
   const recentImportWeekCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "recent_import_week_count");
   const missingFileCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "missing_file_count");
-  const missingSongs = useMemo(() => songs.filter((song) => song.fileExists === false), [songs]);
   const effectiveMissingFileCount = Math.max(missingFileCount, missingSongs.length);
   const libraryHealthPercent = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "library_health_percent");
   const monthImportCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "month_import_count");
@@ -3037,7 +3042,7 @@ function MainModeApp() {
       {
         label: "all-time listening",
         value: listenedTimeLabel,
-        note: `${totalPlays.toLocaleString()} play${totalPlays === 1 ? "" : "s"} • ${formatAnalyticsDuration(totalLibrarySeconds)} library`,
+        note: `${totalPlays.toLocaleString()} play${totalPlays === 1 ? "" : "s"} â€¢ ${formatAnalyticsDuration(totalLibrarySeconds)} library`,
         meta: mostPlayed ? `top: ${prettyTitle(mostPlayed.title, 7)}` : "play music to build this",
         progress: playedPercent
       }
@@ -3061,12 +3066,12 @@ function MainModeApp() {
     {
       label: "songs",
       value: songs.length.toLocaleString(),
-      note: `${libraryArtistCount.toLocaleString()} artist${libraryArtistCount === 1 ? "" : "s"} • ${libraryAlbumCount.toLocaleString()} album${libraryAlbumCount === 1 ? "" : "s"}`
+      note: `${libraryArtistCount.toLocaleString()} artist${libraryArtistCount === 1 ? "" : "s"} â€¢ ${libraryAlbumCount.toLocaleString()} album${libraryAlbumCount === 1 ? "" : "s"}`
     },
     {
       label: "plays",
       value: totalPlays.toLocaleString(),
-      note: `${playedSongCount.toLocaleString()} played song${playedSongCount === 1 ? "" : "s"} • ${averagePlaysPerSong} avg`
+      note: `${playedSongCount.toLocaleString()} played song${playedSongCount === 1 ? "" : "s"} â€¢ ${averagePlaysPerSong} avg`
     },
     {
       label: "listened",
@@ -3383,7 +3388,7 @@ function MainModeApp() {
     if (view === "albums") return "local albums from metadata and your custom collections";
     if (view === "playlists") return `${playlists.length} playlist${playlists.length === 1 ? "" : "s"}`;
     if (view === "liked") return `${likedSongs.length} liked track${likedSongs.length === 1 ? "" : "s"}`;
-    if (view === "covers") return `${coverStats.usable} usable cover${coverStats.usable === 1 ? "" : "s"} • ${coverStats.favorites} favorite${coverStats.favorites === 1 ? "" : "s"}`;
+    if (view === "covers") return `${coverStats.usable} usable cover${coverStats.usable === 1 ? "" : "s"} â€¢ ${coverStats.favorites} favorite${coverStats.favorites === 1 ? "" : "s"}`;
     if (view === "downloads") return "download direct audio links and import them automatically";
     if (view === "settings") return "theme, playback, discord, library, and advanced controls";
     return "your listening numbers and favorite tracks";
@@ -7252,14 +7257,14 @@ function MainModeApp() {
 
     if (!preview.changedCount) {
       const message = preview.totalCount ? "song names already look clean" : "no songs to clean";
-      setLibraryScanMessage(`${message} • skipped ${preview.skippedCount}`);
+      setLibraryScanMessage(`${message} â€¢ skipped ${preview.skippedCount}`);
       setStatusText(message);
       showAppToast(message, "success");
       return;
     }
 
     setLibraryScanMessage(
-      `preview ready • ${preview.changedCount} fix${preview.changedCount === 1 ? "" : "es"} • ${preview.skippedCount} skipped`
+      `preview ready â€¢ ${preview.changedCount} fix${preview.changedCount === 1 ? "" : "es"} â€¢ ${preview.skippedCount} skipped`
     );
     setStatusText("metadata preview ready");
     showAppToast(`preview ready: ${preview.changedCount} fix${preview.changedCount === 1 ? "" : "es"}`, "info");
@@ -7323,11 +7328,11 @@ function MainModeApp() {
       setMetadataUndoItems(undoItems);
       setMetadataCleanPreview(null);
       setLibraryScanMessage(
-        `cleaned ${preview.changedCount} • titles ${preview.titleFixCount} • artists ${preview.artistFixCount} • albums ${preview.albumFixCount} • skipped ${preview.skippedCount}`
+        `cleaned ${preview.changedCount} â€¢ titles ${preview.titleFixCount} â€¢ artists ${preview.artistFixCount} â€¢ albums ${preview.albumFixCount} â€¢ skipped ${preview.skippedCount}`
       );
       setStatusText(`cleaned ${preview.changedCount} song metadata fix${preview.changedCount === 1 ? "" : "es"}`);
       showAppToast(
-        `cleaned ${preview.changedCount} • ${preview.skippedCount} skipped`,
+        `cleaned ${preview.changedCount} â€¢ ${preview.skippedCount} skipped`,
         "success"
       );
     } catch (error) {
@@ -7371,7 +7376,7 @@ function MainModeApp() {
 
       const restoredCount = metadataUndoItems.length;
       setMetadataUndoItems([]);
-      setLibraryScanMessage(`undid metadata clean • restored ${restoredCount} song${restoredCount === 1 ? "" : "s"}`);
+      setLibraryScanMessage(`undid metadata clean â€¢ restored ${restoredCount} song${restoredCount === 1 ? "" : "s"}`);
       setStatusText("metadata clean undone");
       showAppToast("metadata clean undone", "success");
     } catch (error) {
@@ -7387,9 +7392,9 @@ function MainModeApp() {
   function rebuildSearchIndexAction() {
     const repairedSongs = applyLibraryOrder(sanitizeSongList(songs));
     setSongs(repairedSongs);
-    setLibraryScanMessage(`search rebuilt • ${repairedSongs.length} tracks indexed`);
+    setLibraryScanMessage(`search rebuilt â€¢ ${repairedSongs.length} tracks indexed`);
     setStatusText("fast search index rebuilt");
-    showAppToast(`search rebuilt • ${repairedSongs.length} tracks`, "success");
+    showAppToast(`search rebuilt â€¢ ${repairedSongs.length} tracks`, "success");
   }
 
   function makeShuffledPlayableSongs(sourceSongs: Song[]) {
@@ -7470,7 +7475,7 @@ function MainModeApp() {
       playbackUrlCacheRef.current.clear();
       playbackUrlPendingRef.current.clear();
       setSongs(imported);
-      setLibraryScanMessage(`indexed ${imported.length} tracks • search, folders, and metadata ready`);
+      setLibraryScanMessage(`indexed ${imported.length} tracks â€¢ search, folders, and metadata ready`);
 
       if (changedSongs.length > 0) {
         void Promise.allSettled(
@@ -7519,7 +7524,7 @@ function MainModeApp() {
           createImportAnimationState({
             active: true,
             phase: "success",
-            message: "library checked — no duplicates added",
+            message: "library checked â€” no duplicates added",
             count: 0,
             total: imported.length,
             preview: previewSongs
@@ -7550,7 +7555,7 @@ function MainModeApp() {
         createImportAnimationState({
           active: true,
           phase: "error",
-          message: "import failed safely — your library was not deleted",
+          message: "import failed safely â€” your library was not deleted",
           count: 0,
           total: songs.length,
           preview: songs.slice(0, 8)
@@ -7623,6 +7628,12 @@ function MainModeApp() {
   function findDownloadedSongMatch(result: DownloadResult, librarySongs: Song[]) {
     const filePath = String(result.filePath || "").trim().toLowerCase();
     const filename = String(result.filename || "").trim().toLowerCase();
+    const spotifyTrackId = String((result as any).spotifyTrackId || "").trim();
+
+    if (spotifyTrackId) {
+      const exactSpotify = librarySongs.find((song) => String((song as any).sourceTrackId || "").trim() === spotifyTrackId);
+      if (exactSpotify) return exactSpotify;
+    }
 
     if (filePath) {
       const exact = librarySongs.find((song) => String(song.filePath || "").trim().toLowerCase() === filePath);
@@ -7654,7 +7665,7 @@ function MainModeApp() {
           ? importedToLibrary
             ? "Added to library"
             : "Downloaded, not imported"
-          : "Failed — retry available"
+          : "Failed â€” retry available"
       };
     });
   }
@@ -7667,7 +7678,9 @@ function MainModeApp() {
     setDownloadQueue((current) => {
       const next = [...current];
       enrichedResults.forEach((result) => {
+        const resultSpotifyTrackId = String((result as any).spotifyTrackId || "").trim();
         const index = next.findIndex((item) =>
+          (resultSpotifyTrackId && String((item as any).spotifyTrackId || "").trim() === resultSpotifyTrackId) ||
           item.url === result.url ||
           (result.filename && item.filename === result.filename) ||
           (result.filePath && item.filePath === result.filePath)
@@ -7690,6 +7703,10 @@ function MainModeApp() {
           importedToLibrary: result.importedToLibrary,
           librarySongId: result.librarySongId,
           statusLabel: result.statusLabel,
+          spotifyTrackId: (result as any).spotifyTrackId || (next[index] as any).spotifyTrackId,
+          spotifyUrl: (result as any).spotifyUrl || (next[index] as any).spotifyUrl,
+          providerUrl: (result as any).providerUrl || (next[index] as any).providerUrl,
+          matchScore: (result as any).matchScore,
           title: result.filename || next[index].title
         };
       });
@@ -7894,7 +7911,7 @@ function MainModeApp() {
         ok: false,
         url,
         error: message,
-        statusLabel: "Failed — retry available"
+        statusLabel: "Failed â€” retry available"
       })) as any[];
 
       setDownloadResults(failedDownloads);
@@ -7904,11 +7921,11 @@ function MainModeApp() {
         progress: 100,
         message,
         error: message,
-        statusLabel: "Failed — retry available"
+        statusLabel: "Failed â€” retry available"
       })));
       setPlayerError(message);
       setStatusText("download failed");
-      showAppToast("Download failed — retry from the queue", "error");
+      showAppToast("Download failed â€” retry from the queue", "error");
     } finally {
       setDownloadBusy(false);
     }
@@ -7994,7 +8011,7 @@ function MainModeApp() {
         setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
       } else {
         setSpotifyFetchError("");
-        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready — paste a link" : "spotify connected — paste a link to fetch tracks");
+        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready â€” paste a link" : "spotify connected â€” paste a link to fetch tracks");
       }
     } catch (error) {
       const message = String((error as Error)?.message || "Spotify login failed.");
@@ -8114,7 +8131,10 @@ function MainModeApp() {
         title: (t.title || (t as any).name || "unknown track").trim(),
         artist: (t.artist || (t as any).artists || "").trim(),
         albumName: (t.albumName || (t as any).album || "").trim(),
-        coverUrl: (t.coverUrl || (t as any).spotifyCoverUrl || (t as any).albumCoverUrl || "").trim()
+        coverUrl: (t.coverUrl || (t as any).spotifyCoverUrl || (t as any).albumCoverUrl || "").trim(),
+        spotifyUrl: String((t as any).spotifyUrl || "").trim(),
+        isrc: String((t as any).isrc || "").trim(),
+        durationMs: Number((t as any).durationMs || 0) || undefined
       }));
 
       const sourceName = String(result.playlistName || result.name || result.title || "").trim();
@@ -8205,8 +8225,8 @@ function MainModeApp() {
         id: `spt_${t.id}_${i}`,
         spotifyTrackId: t.id,
         source: "spotify",
-        url: `spotify:search:${t.artist ? `${t.artist} ` : ""}${t.title}`,
-        title: t.artist ? `${t.artist} — ${t.title}` : t.title,
+        url: (t as any).spotifyUrl || `spotify:track:${t.id}`,
+        title: t.artist ? `${t.artist} â€” ${t.title}` : t.title,
         status: "queued" as const,
         progress: 0,
         message: "Waiting..."
@@ -8216,11 +8236,11 @@ function MainModeApp() {
 
     try {
       const bridge = (window.localitfy as any);
-      const spotifyDownloadBridge = bridge?.spotdlDownloadBatch || bridge?.spotifyDownloadBatch;
+      const spotifyDownloadBridge = bridge?.spotifyDownloadBatch || bridge?.spotdlDownloadBatch;
       if (!spotifyDownloadBridge) {
         const message = "Spotify download is not wired in preload/main yet.";
         setSpotifyFetchError(message);
-        setDownloadQueue((items) => items.map((item) => ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" })));
+        setDownloadQueue((items) => items.map((item) => ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed â€” retry available" })));
         setStatusText("spotify download failed");
         showAppToast("Spotify download bridge missing", "error");
         return;
@@ -8234,6 +8254,7 @@ function MainModeApp() {
           albumName: t.albumName,
           coverUrl: t.coverUrl || (t as any).spotifyCoverUrl || (t as any).albumCoverUrl || "",
           spotifyUrl: (t as any).spotifyUrl || "",
+          isrc: (t as any).isrc || "",
           duration: t.duration,
           durationMs: (t as any).durationMs
         })),
@@ -8277,11 +8298,27 @@ function MainModeApp() {
         setDownloadResults(enrichedDownloads);
         syncDownloadFilesToQueue(enrichedDownloads, nextSongs);
 
+        const enrichedDownloadsBySpotifyId = new Map(
+          enrichedDownloads
+            .map((item: any) => [String(item.spotifyTrackId || "").trim(), item])
+            .filter(([id]) => Boolean(id))
+        );
+        const rawDownloadsBySpotifyId = new Map(
+          downloads
+            .map((item: any) => [String(item.spotifyTrackId || "").trim(), item])
+            .filter(([id]) => Boolean(id))
+        );
+
         setSpotifyTracks((items) => items.map((track: any) => {
           const selectedIndex = selected.findIndex((selectedTrack) => selectedTrack.id === track.id);
           if (selectedIndex === -1) return track;
 
-          const resultForTrack: any = enrichedDownloads[selectedIndex] || downloads[selectedIndex] || null;
+          const resultForTrack: any =
+            enrichedDownloadsBySpotifyId.get(String(track.id || "").trim()) ||
+            rawDownloadsBySpotifyId.get(String(track.id || "").trim()) ||
+            enrichedDownloads[selectedIndex] ||
+            downloads[selectedIndex] ||
+            null;
           if (!resultForTrack) {
             return {
               ...track,
@@ -8299,10 +8336,12 @@ function MainModeApp() {
               ? resultForTrack.importedToLibrary
                 ? "Added to library"
                 : "Downloaded, not imported"
-              : "Failed — retry available",
+              : "Failed â€” retry available",
             downloadedFilePath: resultForTrack.filePath || "",
             importedToLibrary: Boolean(resultForTrack.importedToLibrary),
-            librarySongId: resultForTrack.librarySongId || ""
+            librarySongId: resultForTrack.librarySongId || "",
+            matchScore: resultForTrack.matchScore,
+            providerUrl: resultForTrack.providerUrl || ""
           };
         }));
 
@@ -8381,9 +8420,9 @@ function MainModeApp() {
           );
           if (settings.downloadAutoAdd && nextSongs.length) changeView("library", "unknown");
         } else {
-          setStatusText("spotify download finished — no tracks added");
+          setStatusText("spotify download finished â€” no tracks added");
           setPlayerError("no tracks downloaded. check the queue for errors.");
-          showAppToast("Spotify download failed — retry from the queue", "error");
+          showAppToast("Spotify download failed â€” retry from the queue", "error");
         }
 
         if (failCount > 0) {
@@ -8400,16 +8439,16 @@ function MainModeApp() {
       setSpotifyFetchError(message);
       setSpotifyTracks((items) => items.map((track: any) => (
         selected.some((selectedTrack) => selectedTrack.id === track.id)
-          ? { ...track, downloadStatus: "failed", downloadError: message, downloadMessage: "Failed — retry available" }
+          ? { ...track, downloadStatus: "failed", downloadError: message, downloadMessage: "Failed â€” retry available" }
           : track
       )));
       const failedDownloads = selected.map((track) => ({
         ok: false,
-        url: `spotify:search:${track.artist ? `${track.artist} ` : ""}${track.title}`,
+        url: (track as any).spotifyUrl || `spotify:track:${track.id}`,
         source: "spotify",
         spotifyTrackId: track.id,
         error: message,
-        statusLabel: "Failed — retry available"
+        statusLabel: "Failed â€” retry available"
       })) as any[];
       setDownloadResults(failedDownloads);
       setDownloadQueue((items) => items.map((item) => ({
@@ -8418,10 +8457,10 @@ function MainModeApp() {
         progress: 100,
         message,
         error: message,
-        statusLabel: "Failed — retry available"
+        statusLabel: "Failed â€” retry available"
       })));
       setStatusText("spotify download failed");
-      showAppToast("Spotify download failed — retry from the queue", "error");
+      showAppToast("Spotify download failed â€” retry from the queue", "error");
     } finally {
       setSpotifyDownloadBusy(false);
       setDownloadBusy(false);
@@ -9987,6 +10026,89 @@ function MainModeApp() {
     }
   }
 
+  async function removeMissingSongs() {
+    const targets = songs.filter((song) => song.fileExists === false);
+    if (!targets.length) {
+      showAppToast("no missing songs to remove", "info");
+      return;
+    }
+
+    const targetIds = new Set(targets.map((song) => song.id).filter(Boolean));
+    const wasCurrent = currentId ? targetIds.has(currentId) : false;
+    const nextLocalSongs = songs.filter((song) => !targetIds.has(song.id));
+    const nextSong = nextLocalSongs[0] || null;
+    const removedLabel = `${targets.length} missing song${targets.length === 1 ? "" : "s"}`;
+
+    setSongContextMenu(null);
+    setPlaylistPickerSong((current) => (current?.id && targetIds.has(current.id) ? null : current));
+    setPlayQueue((queue) => queue.filter((queuedId) => !targetIds.has(queuedId)));
+    setQueueHistory((history) => history.filter((item) => !targetIds.has(item.songId)));
+    setPlaylists((items) => items.map((item) => ({ ...item, songIds: item.songIds.filter((id) => !targetIds.has(id)) })));
+    setDeleteTarget((current) => (current?.id && targetIds.has(current.id) ? null : current));
+
+    if (editorSong?.id && targetIds.has(editorSong.id)) {
+      setEditorSong(null);
+    }
+
+    setDeleteBusy(true);
+
+    try {
+      if (wasCurrent) {
+        const audio = audioRef.current;
+
+        stopFade();
+        stopProgressLoop();
+        audio?.pause();
+        audio?.removeAttribute("src");
+        audio?.load();
+
+        pendingPlayRef.current = false;
+        resetPlayCountTracker();
+
+        setIsPlaying(false);
+        setCurrentTime(0);
+        setCurrentDuration(0);
+        setPlayerError("");
+        await window.localitfy.clearDiscordActivity().catch(() => undefined);
+
+        setCurrentId(nextSong?.id || "");
+
+        if (settings.rememberLastSong) {
+          const nextSettings = {
+            ...settings,
+            lastSongId: nextSong?.id || ""
+          };
+
+          setSettings(nextSettings);
+          await window.localitfy.saveSettings(nextSettings).catch(() => undefined);
+        }
+      }
+
+      setSongs(nextLocalSongs);
+      setLibraryFilterMode("all");
+      setStatusText(`removed ${removedLabel} from library`);
+
+      let updatedSongs: Song[] | null = null;
+      for (const id of targetIds) {
+        updatedSongs = await window.localitfy.deleteSong(id);
+      }
+
+      if (updatedSongs) {
+        setSongs(applyLibraryOrder(sanitizeSongList(updatedSongs)));
+      }
+
+      showAppToast(`removed ${removedLabel}`, "success");
+    } catch (error) {
+      console.error("[localitfy remove missing songs error]", error);
+      setStatusText("could not remove missing songs");
+      showAppToast("could not remove missing songs", "error");
+    } finally {
+      setDeleteBusy(false);
+      setDeleteTarget(null);
+    }
+  }
+
+
   function openEditor(song: Song) {
     setEditorSong(song);
     setEditTitle(song.title || "");
@@ -10425,7 +10547,7 @@ function MainModeApp() {
 
       feedbackLastSentAtRef.current = Date.now();
       markFeedbackPromptSeen();
-      setFeedbackStatus({ kind: "success", message: "Sent successfully — thanks, I’ll review this." });
+      setFeedbackStatus({ kind: "success", message: "Sent successfully â€” thanks, Iâ€™ll review this." });
       setFeedbackMessage("");
 
       window.setTimeout(() => {
@@ -10758,11 +10880,11 @@ function MainModeApp() {
     return (
       <section className={`settingsPageCard feedbackSettingsCardV331 ${feedbackReady ? "feedbackReady" : "feedbackNotReady"}`} aria-label="Send feedback">
         <div className="feedbackSettingsHeaderV331">
-          <span className="feedbackSettingsIconV331" aria-hidden="true">✦</span>
+          <span className="feedbackSettingsIconV331" aria-hidden="true">âœ¦</span>
           <div className="settingsSectionTitle">
             <span>feedback</span>
             <strong>Send feedback</strong>
-            <small>Report bugs, UI issues, or feature ideas directly from localtify. You can also type “feedback” in settings search or “/feedback” in the song search.</small>
+            <small>Report bugs, UI issues, or feature ideas directly from localtify. You can also type â€œfeedbackâ€ in settings search or â€œ/feedbackâ€ in the song search.</small>
           </div>
         </div>
 
@@ -10830,7 +10952,7 @@ function MainModeApp() {
                 onClick={() => closeFeedbackPrompt(!feedbackPromptManualOpen)}
                 aria-label="Close feedback popup"
               >
-                ×
+                Ã—
               </button>
             </div>
 
@@ -10900,7 +11022,7 @@ function MainModeApp() {
                 disabled={feedbackSendBusy || feedbackStatus.kind === "success" || !feedbackReady}
               >
                 <span className="feedbackSendTextV334">{feedbackStatus.kind === "success" ? "Sent" : feedbackSendBusy ? "Sending..." : "Send"}</span>
-                <span className="feedbackSendSparkV334" aria-hidden="true">↗</span>
+                <span className="feedbackSendSparkV334" aria-hidden="true">â†—</span>
               </button>
             </div>
           </Motion.div>
@@ -11314,6 +11436,8 @@ function MainModeApp() {
     neverPlayedSongs,
     missingSongs,
     missingFileCount: effectiveMissingFileCount,
+    libraryFilterMode,
+    setLibraryFilterMode,
     libraryLengthLabel,
     averageSongSeconds,
     longestSong,
@@ -11441,6 +11565,7 @@ function MainModeApp() {
     deleteBusy,
     setDeleteTarget,
     removeSong,
+    removeMissingSongs,
     audioRef,
     handleAudioTimeUpdate,
     handleAudioPause,
@@ -11478,3 +11603,5 @@ function MainModeApp() {
 export default function App() {
   return <MainModeApp />;
 }
+
+

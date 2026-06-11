@@ -3,7 +3,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const SCHEMA_VERSION = 11;
+const SCHEMA_VERSION = 12;
 const BACKUP_KEEP_LIMIT = 8;
 
 let db = null;
@@ -33,7 +33,13 @@ const SONG_COLUMNS = {
   lastPlayed: "TEXT",
   volumeGain: "REAL NOT NULL DEFAULT 1",
   playbackPosition: "REAL NOT NULL DEFAULT 0",
-  customVolume: "REAL NOT NULL DEFAULT 1"
+  customVolume: "REAL NOT NULL DEFAULT 1",
+  sourceType: "TEXT NOT NULL DEFAULT 'local'",
+  sourceTrackId: "TEXT",
+  sourceUrl: "TEXT",
+  sourceProvider: "TEXT",
+  sourceProviderUrl: "TEXT",
+  sourceMatchScore: "REAL NOT NULL DEFAULT 0"
 };
 
 const SETTINGS_COLUMNS = {
@@ -165,6 +171,8 @@ function createSongsTable(database) {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_songs_filePath ON songs(filePath);
     CREATE INDEX IF NOT EXISTS idx_songs_title ON songs(title);
     CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
+    CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
+    CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
   `);
 }
 
@@ -272,7 +280,13 @@ function normalizeOldSong(row) {
     lastPlayed: asText(row?.lastPlayed ?? row?.last_played, "") || null,
     volumeGain: asClampedNumber(row?.volumeGain ?? row?.volume_gain, 1, 0.2, 3),
     playbackPosition: Math.max(0, asNumber(row?.playbackPosition ?? row?.playback_position, 0)),
-    customVolume: asClampedNumber(row?.customVolume ?? row?.custom_volume, 1, 0, 1)
+    customVolume: asClampedNumber(row?.customVolume ?? row?.custom_volume, 1, 0, 1),
+    sourceType: asText(row?.sourceType ?? row?.source_type, "local"),
+    sourceTrackId: asText(row?.sourceTrackId ?? row?.source_track_id, "") || null,
+    sourceUrl: asText(row?.sourceUrl ?? row?.source_url, "") || null,
+    sourceProvider: asText(row?.sourceProvider ?? row?.source_provider, "") || null,
+    sourceProviderUrl: asText(row?.sourceProviderUrl ?? row?.source_provider_url, "") || null,
+    sourceMatchScore: Math.max(0, asNumber(row?.sourceMatchScore ?? row?.source_match_score, 0))
   };
 }
 
@@ -356,10 +370,12 @@ function rebuildSongsTable(database) {
   const insert = database.prepare(`
     INSERT OR IGNORE INTO songs (
       id, title, artist, album, filePath, coverPath, liked, playCount,
-      duration, dateAdded, lastPlayed, volumeGain, playbackPosition, customVolume
+      duration, dateAdded, lastPlayed, volumeGain, playbackPosition, customVolume,
+      sourceType, sourceTrackId, sourceUrl, sourceProvider, sourceProviderUrl, sourceMatchScore
     ) VALUES (
       @id, @title, @artist, @album, @filePath, @coverPath, @liked, @playCount,
-      @duration, @dateAdded, @lastPlayed, @volumeGain, @playbackPosition, @customVolume
+      @duration, @dateAdded, @lastPlayed, @volumeGain, @playbackPosition, @customVolume,
+      @sourceType, @sourceTrackId, @sourceUrl, @sourceProvider, @sourceProviderUrl, @sourceMatchScore
     )
   `);
 
@@ -413,7 +429,13 @@ function repairBrokenRows(database) {
       lastPlayed = @lastPlayed,
       volumeGain = @volumeGain,
       playbackPosition = @playbackPosition,
-      customVolume = @customVolume
+      customVolume = @customVolume,
+      sourceType = @sourceType,
+      sourceTrackId = @sourceTrackId,
+      sourceUrl = @sourceUrl,
+      sourceProvider = @sourceProvider,
+      sourceProviderUrl = @sourceProviderUrl,
+      sourceMatchScore = @sourceMatchScore
     WHERE rowid = @rowid
   `);
 
@@ -432,7 +454,13 @@ function repairBrokenRows(database) {
       Number(row.duration) !== normalized.duration ||
       Number(row.volumeGain) !== normalized.volumeGain ||
       Number(row.playbackPosition) !== normalized.playbackPosition ||
-      Number(row.customVolume) !== normalized.customVolume;
+      Number(row.customVolume) !== normalized.customVolume ||
+      String(row.sourceType || "local") !== String(normalized.sourceType || "local") ||
+      String(row.sourceTrackId || "") !== String(normalized.sourceTrackId || "") ||
+      String(row.sourceUrl || "") !== String(normalized.sourceUrl || "") ||
+      String(row.sourceProvider || "") !== String(normalized.sourceProvider || "") ||
+      String(row.sourceProviderUrl || "") !== String(normalized.sourceProviderUrl || "") ||
+      Number(row.sourceMatchScore || 0) !== Number(normalized.sourceMatchScore || 0);
 
     if (!changed) continue;
 
@@ -471,6 +499,8 @@ function migrateSongsTable(database) {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_songs_filePath ON songs(filePath);
     CREATE INDEX IF NOT EXISTS idx_songs_title ON songs(title);
     CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
+    CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
+    CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
   `);
 
   return { rebuilt: false, addedColumns };
@@ -608,10 +638,12 @@ function insertSongs(songs) {
   const stmt = database.prepare(`
     INSERT INTO songs (
       id, title, artist, album, filePath, coverPath, liked, playCount,
-      duration, dateAdded, lastPlayed, volumeGain, playbackPosition, customVolume
+      duration, dateAdded, lastPlayed, volumeGain, playbackPosition, customVolume,
+      sourceType, sourceTrackId, sourceUrl, sourceProvider, sourceProviderUrl, sourceMatchScore
     ) VALUES (
       @id, @title, @artist, @album, @filePath, @coverPath, @liked, @playCount,
-      @duration, @dateAdded, @lastPlayed, @volumeGain, @playbackPosition, @customVolume
+      @duration, @dateAdded, @lastPlayed, @volumeGain, @playbackPosition, @customVolume,
+      @sourceType, @sourceTrackId, @sourceUrl, @sourceProvider, @sourceProviderUrl, @sourceMatchScore
     )
     ON CONFLICT(filePath) DO UPDATE SET
       title = CASE
@@ -641,6 +673,18 @@ function insertSongs(songs) {
       volumeGain = CASE
         WHEN songs.volumeGain IS NULL OR songs.volumeGain <= 0 THEN excluded.volumeGain
         ELSE songs.volumeGain
+      END,
+      sourceType = CASE
+        WHEN excluded.sourceType IS NOT NULL AND TRIM(excluded.sourceType) <> '' AND excluded.sourceType <> 'local' THEN excluded.sourceType
+        ELSE songs.sourceType
+      END,
+      sourceTrackId = COALESCE(NULLIF(excluded.sourceTrackId, ''), songs.sourceTrackId),
+      sourceUrl = COALESCE(NULLIF(excluded.sourceUrl, ''), songs.sourceUrl),
+      sourceProvider = COALESCE(NULLIF(excluded.sourceProvider, ''), songs.sourceProvider),
+      sourceProviderUrl = COALESCE(NULLIF(excluded.sourceProviderUrl, ''), songs.sourceProviderUrl),
+      sourceMatchScore = CASE
+        WHEN excluded.sourceMatchScore IS NOT NULL AND excluded.sourceMatchScore > 0 THEN excluded.sourceMatchScore
+        ELSE songs.sourceMatchScore
       END
   `);
 
@@ -683,7 +727,13 @@ function patchSong(id, patch) {
     "lastPlayed",
     "volumeGain",
     "playbackPosition",
-    "customVolume"
+    "customVolume",
+    "sourceType",
+    "sourceTrackId",
+    "sourceUrl",
+    "sourceProvider",
+    "sourceProviderUrl",
+    "sourceMatchScore"
   ];
 
   const entries = Object.entries(patch).filter(([key]) => allowed.includes(key));
@@ -697,7 +747,7 @@ function patchSong(id, patch) {
 
     if (key === "liked") values.push(asBoolInt(value));
     else if (key === "playCount") values.push(Math.max(0, Math.floor(asNumber(value, 0))));
-    else if (key === "duration" || key === "playbackPosition") values.push(Math.max(0, asNumber(value, 0)));
+    else if (key === "duration" || key === "playbackPosition" || key === "sourceMatchScore") values.push(Math.max(0, asNumber(value, 0)));
     else if (key === "volumeGain") values.push(asClampedNumber(value, 1, 0.2, 3));
     else if (key === "customVolume") values.push(asClampedNumber(value, 1, 0, 1));
     else values.push(value ?? null);

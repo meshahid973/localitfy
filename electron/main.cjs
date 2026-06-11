@@ -2430,7 +2430,8 @@ function shapeSpotifyTrack(track, fallbackAlbumName = "", fallbackCoverUrl = "")
     spotifyCoverUrl: coverUrl,
     duration: Math.round(Number(track.duration_ms || 0) / 1000),
     durationMs: Number(track.duration_ms || 0),
-    spotifyUrl: track.external_urls?.spotify || (track.id ? `https://open.spotify.com/track/${track.id}` : "")
+    spotifyUrl: track.external_urls?.spotify || (track.id ? `https://open.spotify.com/track/${track.id}` : ""),
+    isrc: String(track.external_ids?.isrc || track.isrc || "")
   };
 }
 
@@ -2746,7 +2747,7 @@ async function fetchSpotifyTracksFromUrl(rawUrl) {
       let offset = 0;
 
       while (true) {
-        const page = await spotifyApiGet(`/playlists/${id}/tracks?limit=100&offset=${offset}&fields=items(track(id,name,artists,album(name,images(url,width,height)),duration_ms,is_local,external_urls)),next`);
+        const page = await spotifyApiGet(`/playlists/${id}/tracks?limit=100&offset=${offset}&fields=items(track(id,name,artists,album(name,images(url,width,height)),duration_ms,is_local,external_urls,external_ids(isrc))),next`);
         const items = page.items || [];
 
         for (const item of items) {
@@ -3105,7 +3106,7 @@ async function makeSongFromFileWithMetadata(filePath, tracks = [], pixelArtFiles
   };
 }
 
-async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixelArtFiles = [], usedCovers = new Set()) {
+async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixelArtFiles = [], usedCovers = new Set(), sourceInfo = {}) {
   const baseSong = makeSongFromFile(filePath, pixelArtFiles, usedCovers);
 
   const title = String(track?.title || track?.name || "").trim();
@@ -3113,7 +3114,9 @@ async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixel
   const album = String(track?.albumName || track?.album || "").trim();
   const coverUrl = String(track?.coverUrl || track?.spotifyCoverUrl || track?.albumCoverUrl || "").trim();
   const duration = Number(track?.duration || Math.round(Number(track?.durationMs || 0) / 1000) || baseSong.duration || 0);
-  const cachedCoverPath = await cacheSpotifyCoverImage(coverUrl, track?.id || title || filePath);
+  const spotifyTrackId = String(sourceInfo?.sourceTrackId || track?.sourceTrackId || track?.spotifyTrackId || track?.id || "").trim();
+  const spotifyUrl = String(sourceInfo?.sourceUrl || track?.sourceUrl || track?.spotifyUrl || (spotifyTrackId ? `https://open.spotify.com/track/${spotifyTrackId}` : "")).trim();
+  const cachedCoverPath = await cacheSpotifyCoverImage(coverUrl, spotifyTrackId || track?.id || title || filePath);
 
   return {
     ...baseSong,
@@ -3121,10 +3124,15 @@ async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixel
     artist: artist || baseSong.artist,
     album: album || baseSong.album || "",
     coverPath: cachedCoverPath || baseSong.coverPath,
-    duration
+    duration,
+    sourceType: "spotify",
+    sourceTrackId: spotifyTrackId,
+    sourceUrl: spotifyUrl,
+    sourceProvider: String(sourceInfo?.sourceProvider || sourceInfo?.provider || "youtube"),
+    sourceProviderUrl: String(sourceInfo?.sourceProviderUrl || sourceInfo?.providerUrl || ""),
+    sourceMatchScore: Number(sourceInfo?.sourceMatchScore ?? sourceInfo?.matchScore ?? 0) || 0
   };
 }
-
 
 async function importNewAudioFilesFromDirectory(directory, tracks = [], options = {}) {
   const audioFiles = listAudioFilesInDirectory(directory, options);
@@ -3172,6 +3180,348 @@ async function importNewAudioFilesFromDirectory(directory, tracks = [], options 
     files: newFiles
   };
 }
+
+
+const albumFolderScanCache = new Map();
+const ALBUM_FOLDER_SCAN_TTL_MS = 20 * 60 * 1000;
+const ALBUM_FOLDER_MAX_ALBUMS = 260;
+const ALBUM_FOLDER_MAX_TRACKS_PER_ALBUM = 420;
+
+function cleanAlbumFolderText(value, fallback = "") {
+  const text = String(value || "")
+    .replace(/[\u0000-\u001f]/g, " ")
+    .replace(/[_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return (text || fallback).slice(0, 140);
+}
+
+function cleanupAlbumTrackName(value = "") {
+  return cleanAlbumFolderText(value)
+    .replace(/^\s*(?:cd|disc)?\s*\d{1,2}\s*[-_. ]+\s*/i, "")
+    .replace(/^\s*\d{1,3}\s*[-_. ]+\s*/i, "")
+    .replace(/^\s*\d{1,2}-\d{1,3}\s*[-_. ]+\s*/i, "")
+    .trim();
+}
+
+function parseAlbumTrackFileName(filePath, fallbackAlbumTitle = "local album") {
+  const parsed = path.parse(String(filePath || ""));
+  const rawName = cleanupAlbumTrackName(parsed.name || "track");
+  const parts = rawName.split(" - ").map((item) => cleanAlbumFolderText(item)).filter(Boolean);
+
+  let artist = "unknown artist";
+  let title = rawName || parsed.name || "track";
+
+  if (parts.length >= 2) {
+    artist = parts[0] || artist;
+    title = parts.slice(1).join(" - ") || title;
+  }
+
+  return {
+    title: cleanAlbumFolderText(title, parsed.name || "track"),
+    artist: cleanAlbumFolderText(artist, "unknown artist"),
+    album: cleanAlbumFolderText(fallbackAlbumTitle, "local album")
+  };
+}
+
+function albumTrackNumberFromFileName(filePath, index = 0) {
+  const name = path.parse(String(filePath || "")).name;
+  const match = name.match(/^\s*(?:cd|disc)?\s*(\d{1,2})?\s*[-_. ]?\s*(\d{1,3})\b/i) || name.match(/^\s*(\d{1,3})\b/);
+  const value = Number(match?.[2] || match?.[1] || 0);
+  return Number.isFinite(value) && value > 0 ? value : index + 1;
+}
+
+function findAlbumFolderCoverPath(folderPath) {
+  if (!folderPath || !path.isAbsolute(folderPath) || !fs.existsSync(folderPath)) return "";
+
+  let entries = [];
+  try {
+    entries = fs.readdirSync(folderPath, { withFileTypes: true });
+  } catch {
+    return "";
+  }
+
+  const imageFiles = entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => path.join(folderPath, entry.name))
+    .filter((filePath) => isImageFile(filePath) && fileExists(filePath));
+
+  if (!imageFiles.length) return "";
+
+  const preferred = imageFiles.find((filePath) => /(^|[\s_\-.])(cover|folder|front|artwork|album)([\s_\-.]|$)/i.test(path.parse(filePath).name));
+  return preferred || imageFiles[0] || "";
+}
+
+function folderHasAudioFiles(folderPath) {
+  return listAudioFilesInDirectory(folderPath, { maxDepth: 1, maxFiles: 8 }).length > 0;
+}
+
+function findAlbumFoldersFromRoot(rootPath, mode = "single") {
+  const root = String(rootPath || "");
+  if (!root || !path.isAbsolute(root) || !fs.existsSync(root)) return [];
+
+  if (mode === "single") return [root];
+
+  let entries = [];
+  try {
+    entries = fs.readdirSync(root, { withFileTypes: true });
+  } catch {
+    return folderHasAudioFiles(root) ? [root] : [];
+  }
+
+  const folders = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name.startsWith(".") || entry.name === "localitfy-bin" || entry.name === "spotify-covers") continue;
+    const fullPath = path.join(root, entry.name);
+    if (folderHasAudioFiles(fullPath)) folders.push(fullPath);
+    if (folders.length >= ALBUM_FOLDER_MAX_ALBUMS) break;
+  }
+
+  if (!folders.length && folderHasAudioFiles(root)) folders.push(root);
+  return folders;
+}
+
+function buildAlbumFolderPreview(folderPath, index = 0) {
+  const albumTitle = cleanAlbumFolderText(path.basename(folderPath), `album ${index + 1}`);
+  const existingPaths = new Set(
+    getSongs()
+      .map((song) => path.normalize(String(song.filePath || "")).toLowerCase())
+      .filter(Boolean)
+  );
+
+  const audioFiles = listAudioFilesInDirectory(folderPath, { maxDepth: 1, maxFiles: ALBUM_FOLDER_MAX_TRACKS_PER_ALBUM });
+  const coverPath = findAlbumFolderCoverPath(folderPath);
+  const parsedTracks = audioFiles.map((filePath, trackIndex) => {
+    const metadata = parseAlbumTrackFileName(filePath, albumTitle);
+    const duplicate = existingPaths.has(path.normalize(String(filePath || "")).toLowerCase());
+    return {
+      id: crypto.createHash("sha1").update(`${filePath}:${trackIndex}`).digest("hex"),
+      filePath,
+      title: metadata.title,
+      artist: metadata.artist,
+      album: metadata.album,
+      disc: 1,
+      track: albumTrackNumberFromFileName(filePath, trackIndex),
+      duplicate
+    };
+  }).sort((a, b) => (a.track || 0) - (b.track || 0) || a.title.localeCompare(b.title));
+
+  const artistCounts = new Map();
+  for (const track of parsedTracks) {
+    const artist = cleanAlbumFolderText(track.artist, "unknown artist");
+    if (!artist || artist === "unknown artist") continue;
+    artistCounts.set(artist, (artistCounts.get(artist) || 0) + 1);
+  }
+
+  const albumArtist = [...artistCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "various artists";
+  const duplicateCount = parsedTracks.filter((track) => track.duplicate).length;
+
+  return {
+    id: crypto.createHash("sha1").update(folderPath).digest("hex"),
+    title: albumTitle,
+    artist: albumArtist,
+    sourcePath: folderPath,
+    coverPath,
+    coverUrl: coverPath ? safeMediaUrl(coverPath) : "",
+    coverThumbUrl: coverPath ? getCoverThumbnailUrl(coverPath) : "",
+    coverThumbnailUrl: coverPath ? getCoverThumbnailUrl(coverPath) : "",
+    thumbnailUrl: coverPath ? getCoverThumbnailUrl(coverPath) : "",
+    coverFullUrl: coverPath ? safeMediaUrl(coverPath) : "",
+    trackCount: parsedTracks.length,
+    duplicateCount,
+    warnings: duplicateCount ? [`${duplicateCount} track${duplicateCount === 1 ? "" : "s"} already in library`] : [],
+    tracks: parsedTracks
+  };
+}
+
+function pruneAlbumFolderScanCache() {
+  const now = Date.now();
+  for (const [scanId, scan] of albumFolderScanCache) {
+    if (!scan?.createdAt || now - scan.createdAt > ALBUM_FOLDER_SCAN_TTL_MS) {
+      albumFolderScanCache.delete(scanId);
+    }
+  }
+}
+
+async function handleAlbumFolderScan(event, payload = {}) {
+  const mode = payload?.mode === "library" ? "library" : "single";
+  const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+  const result = senderWindow && !senderWindow.isDestroyed()
+    ? await dialog.showOpenDialog(senderWindow, {
+        title: mode === "library" ? "Choose folder containing album folders" : "Choose one album folder",
+        buttonLabel: mode === "library" ? "scan album library" : "scan album folder",
+        defaultPath: app.getPath("music"),
+        properties: ["openDirectory"]
+      })
+    : await dialog.showOpenDialog({
+        title: mode === "library" ? "Choose folder containing album folders" : "Choose one album folder",
+        buttonLabel: mode === "library" ? "scan album library" : "scan album folder",
+        defaultPath: app.getPath("music"),
+        properties: ["openDirectory"]
+      });
+
+  if (result.canceled || !result.filePaths?.[0]) {
+    return { ok: true, canceled: true, mode, albums: [], albumCount: 0, trackCount: 0, duplicateCount: 0, message: "album folder picker cancelled" };
+  }
+
+  const rootPath = result.filePaths[0];
+  event.sender.send("album-folder-import:progress", { type: "scan-start", mode, rootPath, message: "Scanning album folders..." });
+
+  const folderPaths = findAlbumFoldersFromRoot(rootPath, mode);
+  const albums = [];
+
+  for (let index = 0; index < folderPaths.length; index += 1) {
+    const folderPath = folderPaths[index];
+    event.sender.send("album-folder-import:progress", {
+      type: "scan-progress",
+      mode,
+      index: index + 1,
+      total: folderPaths.length,
+      folderPath,
+      message: `Scanning ${path.basename(folderPath)}`
+    });
+
+    const preview = buildAlbumFolderPreview(folderPath, index);
+    if (preview.trackCount > 0) albums.push(preview);
+  }
+
+  pruneAlbumFolderScanCache();
+
+  const scanId = crypto.randomBytes(12).toString("hex");
+  const trackCount = albums.reduce((total, album) => total + album.trackCount, 0);
+  const duplicateCount = albums.reduce((total, album) => total + (album.duplicateCount || 0), 0);
+  const scanPayload = {
+    ok: true,
+    canceled: false,
+    scanId,
+    mode,
+    rootPath,
+    albumCount: albums.length,
+    trackCount,
+    duplicateCount,
+    albums,
+    message: albums.length
+      ? `Found ${albums.length} album${albums.length === 1 ? "" : "s"} with ${trackCount} track${trackCount === 1 ? "" : "s"}.`
+      : "No audio files were found in that folder."
+  };
+
+  albumFolderScanCache.set(scanId, { ...scanPayload, createdAt: Date.now() });
+  event.sender.send("album-folder-import:progress", { type: "scan-done", mode, index: albums.length, total: albums.length, message: scanPayload.message });
+  return scanPayload;
+}
+
+async function handleAlbumFolderImport(event, payload = {}) {
+  pruneAlbumFolderScanCache();
+
+  const scanId = String(payload?.scanId || "").trim();
+  const scan = albumFolderScanCache.get(scanId);
+  if (!scan) {
+    return { ok: false, error: "Album scan expired. Please choose the album folder again.", songs: listSongsShaped(), albums: [] };
+  }
+
+  const albums = Array.isArray(scan.albums) ? scan.albums : [];
+  const allTracks = albums.flatMap((album) => (Array.isArray(album.tracks) ? album.tracks : []).map((track) => ({ album, track })));
+
+  event.sender.send("album-folder-import:progress", {
+    type: "import-start",
+    index: 0,
+    total: allTracks.length,
+    message: "Adding album tracks to Localtify..."
+  });
+
+  const existingPaths = new Set(
+    getSongs()
+      .map((song) => path.normalize(String(song.filePath || "")).toLowerCase())
+      .filter(Boolean)
+  );
+
+  const pixelArtFiles = getPixelArtFiles();
+  const usedCovers = new Set();
+  const importedSongs = [];
+  const importStartedAt = Date.now();
+
+  for (let index = 0; index < allTracks.length; index += 1) {
+    const { album, track } = allTracks[index];
+    const filePath = String(track.filePath || "");
+    const fileKey = path.normalize(filePath).toLowerCase();
+
+    event.sender.send("album-folder-import:progress", {
+      type: "import-progress",
+      index: index + 1,
+      total: allTracks.length,
+      filePath,
+      message: `Adding ${track.title || path.basename(filePath)}`
+    });
+
+    if (!filePath || !fileExists(filePath) || !isAudioFile(filePath) || existingPaths.has(fileKey)) continue;
+
+    const baseSong = makeSongFromFile(filePath, pixelArtFiles, usedCovers);
+    importedSongs.push({
+      ...baseSong,
+      title: cleanAlbumFolderText(track.title, baseSong.title || "track"),
+      artist: cleanAlbumFolderText(track.artist, baseSong.artist || album.artist || "unknown artist"),
+      album: cleanAlbumFolderText(album.title, track.album || "local album"),
+      coverPath: album.coverPath && fileExists(album.coverPath) ? album.coverPath : baseSong.coverPath,
+      sourceType: "local",
+      sourceProvider: "album-folder",
+      sourceUrl: album.sourcePath || "",
+      sourceProviderUrl: album.sourcePath || ""
+    });
+    existingPaths.add(fileKey);
+  }
+
+  const changedCount = importedSongs.length ? insertSongs(importedSongs) : 0;
+  clearFileInfoCache();
+
+  const rawSongs = getSongs();
+  const songByPath = new Map(rawSongs.map((song) => [path.normalize(String(song.filePath || "")).toLowerCase(), song]));
+  const importedAlbums = albums.map((album) => {
+    const songIds = (album.tracks || [])
+      .map((track) => songByPath.get(path.normalize(String(track.filePath || "")).toLowerCase())?.id)
+      .filter(Boolean);
+
+    return {
+      id: album.id,
+      manualAlbumId: crypto.createHash("sha1").update(String(album.sourcePath || album.id || album.title)).digest("hex"),
+      title: album.title,
+      artist: album.artist || "various artists",
+      year: "",
+      coverUrl: album.coverUrl || "",
+      sourceType: "folder",
+      sourcePath: album.sourcePath || "",
+      folderCoverPath: album.coverPath || "",
+      importedAt: importStartedAt,
+      createdAt: importStartedAt,
+      updatedAt: Date.now(),
+      songIds
+    };
+  }).filter((album) => album.songIds.length > 0);
+
+  const afterSongs = listSongsShaped();
+  const message = `Imported ${changedCount} new track${changedCount === 1 ? "" : "s"} from ${importedAlbums.length} album${importedAlbums.length === 1 ? "" : "s"}.`;
+
+  event.sender.send("album-folder-import:progress", {
+    type: "import-done",
+    index: allTracks.length,
+    total: allTracks.length,
+    changedCount,
+    message
+  });
+
+  albumFolderScanCache.delete(scanId);
+
+  return {
+    ok: true,
+    changedCount,
+    importedCount: importedSongs.length,
+    trackCount: allTracks.length,
+    songs: afterSongs,
+    albums: importedAlbums,
+    message
+  };
+}
+
 async function repairSpotifyMetadataForFolder(directory, tracks = [], options = {}) {
   const audioFiles = listAudioFilesInDirectory(directory, options);
   if (!audioFiles.length || !Array.isArray(tracks) || !tracks.length) {
@@ -4042,6 +4392,25 @@ app.whenReady().then(async () => {
     }
   });
 
+
+  ipcMain.handle("album:scan-folder", async (event, payload = {}) => {
+    try {
+      return await handleAlbumFolderScan(event, payload);
+    } catch (error) {
+      console.log("[localtify album folder scan error]", error?.stack || error?.message || error);
+      return { ok: false, error: error?.message || "album folder scan failed", songs: listSongsShaped(), albums: [] };
+    }
+  });
+
+  ipcMain.handle("album:import-folder", async (event, payload = {}) => {
+    try {
+      return await handleAlbumFolderImport(event, payload);
+    } catch (error) {
+      console.log("[localtify album folder import error]", error?.stack || error?.message || error);
+      return { ok: false, error: error?.message || "album folder import failed", songs: listSongsShaped(), albums: [] };
+    }
+  });
+
   ipcMain.handle("media:convert-pick", async (event, payload) => {
     try {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
@@ -4367,17 +4736,36 @@ app.whenReady().then(async () => {
       // Spotify imports must be strict. Do NOT scan the whole download folder here,
       // because that can pull old unrelated local files into the Spotify playlist.
       // Only files returned by this Spotify batch are allowed into the auto playlist.
+      const tracksBySpotifyId = new Map(
+        tracks
+          .map((track) => [String(track?.spotifyTrackId || track?.id || "").trim(), track])
+          .filter(([id]) => Boolean(id))
+      );
+
       const successfulDownloads = (result.downloads || [])
-        .map((item, index) => ({
-          item,
-          track: tracks[index] || (item?.filePath ? matchSpotifyTrackForFile(item.filePath, tracks) : null) || {}
-        }))
-        .filter(({ item }) => item?.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath));
+        .map((item, index) => {
+          const spotifyTrackId = String(item?.spotifyTrackId || "").trim();
+          const track =
+            tracksBySpotifyId.get(spotifyTrackId) ||
+            tracks[index] ||
+            (item?.filePath ? matchSpotifyTrackForFile(item.filePath, tracks) : null) ||
+            {};
+
+          return { item, track };
+        })
+        .filter(({ item }) =>
+          item?.ok &&
+          item.filePath &&
+          item.matchOk !== false &&
+          fileExists(item.filePath) &&
+          isAudioFile(item.filePath)
+        );
 
       let changedCount = 0;
       let afterSongs = listSongsShaped();
       const importedFilePaths = [];
       const importedSongIds = [];
+      const spotifyImportMap = [];
 
       if (autoAdd && successfulDownloads.length) {
         const pixelArtFiles = getPixelArtFiles();
@@ -4388,11 +4776,25 @@ app.whenReady().then(async () => {
           const filePath = item.filePath;
           importedFilePaths.push(filePath);
 
+          const spotifyTrackId = String(item.spotifyTrackId || track?.spotifyTrackId || track?.id || "").trim();
+          const sourceInfo = {
+            sourceTrackId: spotifyTrackId,
+            sourceUrl: String(item.spotifyUrl || track?.spotifyUrl || (spotifyTrackId ? `https://open.spotify.com/track/${spotifyTrackId}` : "")).trim(),
+            sourceProvider: String(item.provider || "youtube"),
+            sourceProviderUrl: String(item.providerUrl || ""),
+            sourceMatchScore: Number(item.matchScore || 0)
+          };
+
           // Exact file + exact Spotify metadata. This is the important part:
           // the Spotify cover goes into coverPath, replacing the pixel fallback.
-          const song = await makeSongFromFileWithExactSpotifyTrack(filePath, track, pixelArtFiles, usedCovers);
+          const song = await makeSongFromFileWithExactSpotifyTrack(filePath, track, pixelArtFiles, usedCovers, sourceInfo);
           importedSongs.push(song);
           importedSongIds.push(song.id);
+          spotifyImportMap.push({
+            spotifyTrackId,
+            songId: song.id,
+            filePath
+          });
         }
 
         changedCount = insertSongs(importedSongs);
@@ -4406,7 +4808,13 @@ app.whenReady().then(async () => {
               artist: song.artist,
               album: song.album,
               coverPath: song.coverPath,
-              duration: song.duration
+              duration: song.duration,
+              sourceType: song.sourceType,
+              sourceTrackId: song.sourceTrackId,
+              sourceUrl: song.sourceUrl,
+              sourceProvider: song.sourceProvider,
+              sourceProviderUrl: song.sourceProviderUrl,
+              sourceMatchScore: song.sourceMatchScore
             });
           } catch (error) {
             console.log("[localtify spotify metadata patch error]", error?.message || error);
@@ -4417,17 +4825,42 @@ app.whenReady().then(async () => {
         afterSongs = listSongsShaped();
       }
 
-      for (const item of result.downloads || []) {
+      const importMapBySpotifyId = new Map(
+        spotifyImportMap
+          .map((item) => [String(item.spotifyTrackId || "").trim(), item])
+          .filter(([id]) => Boolean(id))
+      );
+      const importMapByFilePath = new Map(
+        spotifyImportMap
+          .map((item) => [path.normalize(String(item.filePath || "")).toLowerCase(), item])
+          .filter(([filePath]) => Boolean(filePath))
+      );
+
+      const finalDownloads = (result.downloads || []).map((item) => {
+        const bySpotifyId = importMapBySpotifyId.get(String(item?.spotifyTrackId || "").trim());
+        const byFilePath = item?.filePath ? importMapByFilePath.get(path.normalize(String(item.filePath)).toLowerCase()) : null;
+        const imported = bySpotifyId || byFilePath || null;
+
+        return {
+          ...item,
+          importedToLibrary: Boolean(imported),
+          librarySongId: imported?.songId || item.librarySongId || ""
+        };
+      });
+
+      for (const item of finalDownloads) {
         if (item?.ok) event.sender.send("spotdl-track-done", item);
       }
 
       return {
         ...result,
+        downloads: finalDownloads,
         changedCount,
         songs: afterSongs,
         downloadFolder,
         importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean))),
         spotifyImportedSongIds: Array.from(new Set(importedSongIds.filter(Boolean))),
+        spotifyImportMap,
         spotifySourceName: payload?.sourceName || options?.sourceName || "",
         spotifySourceType: payload?.sourceType || options?.sourceType || ""
       };
@@ -4439,6 +4872,7 @@ app.whenReady().then(async () => {
         changedCount: 0,
         songs: listSongsShaped(),
         spotifyImportedSongIds: [],
+        spotifyImportMap: [],
         importedFilePaths: []
       };
     }

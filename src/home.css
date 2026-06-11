@@ -17143,3 +17143,440 @@ body.localitfyThemePainting .homeSongRow{
 .app .sidebar .mainAction span:not(.buttonInlineIcon){
   filter: none !important;
 }
+
+
+/* localtify 0.3.9 V039 — library missing-file view + cleaner library glow-up.
+   home.css owns library surfaces; keep this soft, not boxy. */
+.app .libraryPanelV025{
+  position: relative !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at 92% 4%, rgba(var(--accent-rgb), 0.135), transparent 32%),
+    radial-gradient(circle at 8% 0%, rgba(255,255,255,0.055), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,0.048), rgba(255,255,255,0.018)),
+    rgba(13, 9, 20, 0.74) !important;
+  box-shadow:
+    0 24px 82px rgba(0,0,0,0.34),
+    inset 0 1px 0 rgba(255,255,255,0.055) !important;
+  backdrop-filter: blur(18px) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(118%) !important;
+}
+
+.app .libraryPanelV025::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb),0.10), transparent 30%, transparent 70%, rgba(var(--accent-rgb),0.045)),
+    linear-gradient(180deg, rgba(255,255,255,0.038), transparent 42%) !important;
+  opacity: .75 !important;
+}
+
+.app .libraryPanelV025 > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.app .libraryPanelV025 .panelHead,
+.app .libraryPanelV025 .libraryPanelHeadV025{
+  align-items: flex-end !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 8px !important;
+  border-bottom: 0 !important;
+}
+
+.app .libraryPanelTitleV025 .eyebrow{
+  color: rgba(var(--accent-rgb), .86) !important;
+}
+
+.app .libraryPanelTitleV025 h3{
+  margin: 0 !important;
+  font-size: clamp(2rem, 3.2vw, 3.05rem) !important;
+  line-height: .88 !important;
+  letter-spacing: -.075em !important;
+}
+
+.app .libraryPanelTitleV025 span{
+  max-width: 720px !important;
+  color: color-mix(in oklab, var(--text-2, #d8d3df) 86%, var(--accent, #ff65df) 14%) !important;
+  font-size: .86rem !important;
+}
+
+.app .libraryQuickMetaV039{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+  margin: 10px 0 12px !important;
+}
+
+.app .libraryQuickMetaV039 span{
+  display: inline-flex !important;
+  align-items: baseline !important;
+  gap: 6px !important;
+  min-height: 28px !important;
+  padding: 0 11px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: color-mix(in oklab, var(--text, #fff) 75%, var(--muted, #a7a0b5) 25%) !important;
+  background: rgba(255,255,255,.045) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+  font-size: .75rem !important;
+  font-weight: 820 !important;
+  text-transform: lowercase !important;
+}
+
+.app .libraryQuickMetaV039 strong{
+  color: var(--text, #fff) !important;
+  font-size: .88rem !important;
+  letter-spacing: -.03em !important;
+}
+
+.app .libraryQuickMetaV039 .is-warning{
+  color: color-mix(in oklab, #ffd28a 78%, var(--text, #fff) 22%) !important;
+  background: rgba(255,185,91,.075) !important;
+}
+
+.app .libraryMissingStripV039{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin: 10px 0 14px !important;
+  padding: 12px 14px !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(90deg, rgba(255,183,77,.12), rgba(var(--accent-rgb),.05)),
+    rgba(18,14,26,.55) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(255,196,104,.72),
+    inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.app .libraryMissingStripV039 strong,
+.app .libraryMissingStripV039 span{
+  display: block !important;
+}
+
+.app .libraryMissingStripV039 strong{
+  color: color-mix(in oklab, #ffd58c 72%, var(--text, #fff) 28%) !important;
+  font-size: .92rem !important;
+  letter-spacing: -.02em !important;
+}
+
+.app .libraryMissingStripV039 span{
+  margin-top: 2px !important;
+  color: var(--text-2, rgba(255,255,255,.72)) !important;
+  font-size: .78rem !important;
+}
+
+.app .libraryMissingActionsV039{
+  display: inline-flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  justify-content: flex-end !important;
+}
+
+.app .libraryMissingActionsV039 button,
+.app .shuffleLibraryButtonV025{
+  min-height: 34px !important;
+  padding: 0 13px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: var(--text, #fff) !important;
+  background: rgba(255,255,255,.065) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
+  font-size: .75rem !important;
+  font-weight: 900 !important;
+  text-transform: lowercase !important;
+  transition: background 160ms ease, transform 160ms ease, color 160ms ease !important;
+}
+
+.app .libraryMissingActionsV039 button:hover,
+.app .shuffleLibraryButtonV025:hover{
+  transform: translateY(-1px) !important;
+  background: rgba(var(--accent-rgb), .16) !important;
+}
+
+.app .libraryMissingActionsV039 button.active{
+  color: #09050d !important;
+  background: color-mix(in oklab, var(--accent, #ff65df) 82%, #fff 18%) !important;
+}
+
+.app .libraryListHeaderV025{
+  position: sticky !important;
+  top: 54px !important;
+  z-index: 5 !important;
+  margin: 4px 0 8px !important;
+  padding: 8px 18px !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)), rgba(10,8,15,.72) !important;
+  backdrop-filter: blur(10px) saturate(114%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(114%) !important;
+  color: color-mix(in oklab, var(--text-2, #ddd) 78%, var(--accent, #ff65df) 22%) !important;
+  font-size: .70rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+
+.app .libraryFullListV025{
+  display: grid !important;
+  gap: 9px !important;
+  padding: 2px 0 132px !important;
+  background: transparent !important;
+}
+
+.app .libraryFullListV025 .songRow{
+  min-height: 68px !important;
+  grid-template-columns: minmax(0, 1fr) max-content 34px 34px !important;
+  gap: 12px !important;
+  padding: 10px 14px !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.038), rgba(255,255,255,.015)),
+    rgba(17, 13, 25, .58) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+  backdrop-filter: blur(7px) saturate(110%) !important;
+  -webkit-backdrop-filter: blur(7px) saturate(110%) !important;
+  transform: none !important;
+}
+
+.app .libraryFullListV025 .songRow:hover{
+  transform: none !important;
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), .105), rgba(255,255,255,.018)),
+    rgba(22, 16, 32, .68) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(var(--accent-rgb), .46),
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 12px 34px rgba(0,0,0,.14) !important;
+}
+
+.app .libraryFullListV025 .songRow.active{
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), .16), rgba(255,255,255,.025)),
+    rgba(26, 18, 38, .72) !important;
+  box-shadow:
+    inset 3px 0 0 var(--progress, var(--accent)),
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 12px 34px rgba(0,0,0,.15) !important;
+}
+
+.app .libraryFullListV025 .songRow.songMissingFileV039{
+  background:
+    linear-gradient(90deg, rgba(255,184,77,.10), rgba(255,255,255,.014)),
+    rgba(19, 13, 22, .62) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(255,190,91,.62),
+    inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.app .libraryFullListV025 .songRow.songMissingFileV039 .songMeta small,
+.app .libraryFullListV025 .songRow.songMissingFileV039 .songDurationInfo{
+  color: color-mix(in oklab, #ffd28a 74%, var(--text, #fff) 26%) !important;
+}
+
+.app .libraryFullListV025 .songButton,
+.app .libraryFullListV025 .songMeta{
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.app .libraryFullListV025 .songMeta strong,
+.app .libraryFullListV025 .songMeta small{
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 900px){
+  .app .libraryMissingStripV039{
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .app .libraryMissingActionsV039{
+    justify-content: flex-start !important;
+  }
+
+  .app .libraryFullListV025 .songRow{
+    grid-template-columns: minmax(0, 1fr) 34px 34px !important;
+  }
+
+  .app .libraryFullListV025 .songDurationInfo{
+    display: none !important;
+  }
+}
+
+
+/* localtify 0.3.9 — cleaner library missing-file strip + tighter rows */
+.app .libraryPanelV025{
+  padding: 22px 24px 28px !important;
+}
+
+.app .libraryPanelHeadV025{
+  padding-bottom: 12px !important;
+  gap: 14px !important;
+  border-bottom-color: rgba(255,255,255,.055) !important;
+}
+
+.app .libraryPanelTitleV025 h3{
+  margin: 1px 0 4px !important;
+  font-size: clamp(1.82rem, 3.35vw, 3rem) !important;
+  line-height: .94 !important;
+}
+
+.app .libraryPanelTitleV025 > span{
+  font-size: .88rem !important;
+  line-height: 1.32 !important;
+}
+
+.app .libraryQuickMetaV039{
+  margin: 8px 0 8px !important;
+  gap: 6px !important;
+}
+
+.app .libraryQuickMetaV039 span{
+  min-height: 26px !important;
+  padding: 5px 9px !important;
+  font-size: .72rem !important;
+  background: rgba(255,255,255,.04) !important;
+}
+
+.app .libraryQuickMetaV039 .is-warning{
+  color: color-mix(in oklab, var(--text, #fff) 88%, var(--accent, #ff65df) 12%) !important;
+  background: rgba(var(--accent-rgb), .065) !important;
+}
+
+.app .libraryMissingStripV039{
+  margin: 4px 0 7px !important;
+  padding: 8px 10px !important;
+  min-height: 0 !important;
+  gap: 10px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.052), rgba(var(--accent-rgb),.035)),
+    rgba(16, 12, 22, .58) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.app .libraryMissingStripV039 strong{
+  color: var(--text, #fff) !important;
+  font-size: .84rem !important;
+  letter-spacing: -.018em !important;
+}
+
+.app .libraryMissingStripV039 span{
+  margin-top: 1px !important;
+  color: var(--text-2, rgba(255,255,255,.68)) !important;
+  font-size: .72rem !important;
+}
+
+.app .libraryMissingActionsV039{
+  gap: 6px !important;
+}
+
+.app .libraryMissingActionsV039 button,
+.app .shuffleLibraryButtonV025{
+  min-height: 30px !important;
+  padding: 0 11px !important;
+  font-size: .70rem !important;
+  background: rgba(255,255,255,.055) !important;
+}
+
+.app .libraryMissingActionsV039 button:hover,
+.app .shuffleLibraryButtonV025:hover{
+  transform: none !important;
+  background: rgba(var(--accent-rgb), .12) !important;
+}
+
+.app .libraryMissingActionsV039 button.active{
+  color: var(--text, #fff) !important;
+  background: rgba(var(--accent-rgb), .16) !important;
+}
+
+.app .libraryMissingActionsV039 .dangerGhostV039{
+  color: color-mix(in oklab, #ff7f9d 72%, var(--text, #fff) 28%) !important;
+  background: rgba(255, 95, 132, .09) !important;
+}
+
+.app .libraryMissingActionsV039 .dangerGhostV039:hover{
+  background: rgba(255, 95, 132, .14) !important;
+}
+
+.app .libraryListHeaderV025{
+  top: 50px !important;
+  margin: 2px 0 6px !important;
+  padding: 7px 14px !important;
+  border-radius: 13px !important;
+  background: rgba(10, 8, 15, .62) !important;
+}
+
+.app .libraryFullListV025{
+  gap: 6px !important;
+  padding: 0 0 116px !important;
+}
+
+.app .libraryFullListV025 .songRow{
+  min-height: 54px !important;
+  grid-template-columns: minmax(0, 1fr) max-content 32px 32px !important;
+  gap: 9px !important;
+  padding: 7px 11px !important;
+  border-radius: 15px !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.034), rgba(255,255,255,.012)),
+    rgba(17, 13, 25, .54) !important;
+}
+
+.app .libraryFullListV025 .songButton{
+  min-height: 40px !important;
+}
+
+.app .libraryFullListV025 .songArt{
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+}
+
+.app .libraryFullListV025 .songMeta strong{
+  font-size: .82rem !important;
+}
+
+.app .libraryFullListV025 .songMeta small{
+  font-size: .70rem !important;
+}
+
+.app .libraryFullListV025 .songDurationInfo{
+  color: rgba(255,255,255,.68) !important;
+  font-size: .74rem !important;
+}
+
+.app .libraryFullListV025 .songRow:hover{
+  transform: none !important;
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), .085), rgba(255,255,255,.014)),
+    rgba(22, 16, 32, .62) !important;
+  box-shadow: inset 2px 0 0 rgba(var(--accent-rgb), .28), inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+.app .libraryFullListV025 .songRow.songMissingFileV039{
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.038), rgba(var(--accent-rgb), .026)),
+    rgba(18, 13, 23, .58) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.app .libraryFullListV025 .songRow.songMissingFileV039 .songMeta small,
+.app .libraryFullListV025 .songRow.songMissingFileV039 .songDurationInfo{
+  color: rgba(255,255,255,.56) !important;
+}
