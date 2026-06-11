@@ -1,4 +1,4 @@
-/* localtify 0.3.8 V320 — stabilized physical proximity motion.
+/* localtify 0.3.9 V320 — stabilized physical proximity motion.
    Only sidebar / player / hero controls get velocity motion.
    Home cards and big lists stay out of the pointer hot path.
 */
@@ -372,3 +372,4 @@ export function useProximityMotion({
     };
   }, [disabled, resetKey, rootRef, suspended]);
 }
+

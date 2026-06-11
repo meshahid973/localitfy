@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { memo, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-/* localtify 0.3.8 V425 — missing cover filter + cache tools. */
-/* localtify 0.3.8 V307 — cover studio stable render. */
+/* localtify 0.3.9 V425 — missing cover filter + cache tools. */
+/* localtify 0.3.9 V307 — cover studio stable render. */
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
 
@@ -636,3 +636,4 @@ export default function CoverStudio({
     </section>
   );
 }
+

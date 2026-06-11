@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* localtify 0.3.8 V473 — shared domain/view types.
+/* localtify 0.3.9 V473 — shared domain/view types.
    These are currently re-exported from LocaltifyAppView so the split is safe.
    After this builds cleanly, the actual type declarations can be moved here without touching App.tsx again. */
 export type {
@@ -51,3 +51,4 @@ export type {
   VirtualPlaylistTrackListProps,
   VirtualSongRowsProps
 } from "./LocaltifyAppView";
+

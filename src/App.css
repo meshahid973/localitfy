@@ -1,4 +1,4 @@
-/* localtify 0.3.8 V414 — app css ownership first pass. */
+/* localtify 0.3.9 V414 — app css ownership first pass. */
 .muted-small{
   display: block;
   margin-top: 3px;
@@ -9652,7 +9652,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   --lt-glass-accent-alpha: 0.075;
 }
 
-/* localtify 0.3.8 V359: hover sidebar CSS moved to effects.css,
+/* localtify 0.3.9 V359: hover sidebar CSS moved to effects.css,
 the last imported CSS layer. */
 
 .app[data-stars-intensity="off"] .localtifyStarsBackdrop{
@@ -9892,7 +9892,7 @@ the last imported CSS layer. */
   transform: translateZ(0);
 }
 
-/* localtify 0.3.8 V301 — renderer performance guardrails
+/* localtify 0.3.9 V301 — renderer performance guardrails
    Keeps the visual identity,
 but sleeps expensive paint during scroll/drag/heavy views. */
 body.localtifyPerfV301 .app{
@@ -9976,7 +9976,7 @@ body.localtifyPerfV301 .app :is(.localtifyStarsBackdrop, .localtifyStarsLayer, .
   display: none !important;
 }
 
-/* localtify 0.3.8 V380 — theme painting lag guard.
+/* localtify 0.3.9 V380 — theme painting lag guard.
    Color picking now updates CSS variables without forcing expensive animation/filter churn.
    This does NOT disable image blur,
 hero blur,
@@ -10035,7 +10035,7 @@ body.localitfyThemePainting .app :is(
   box-shadow: inherit !important;
 }
 
-/* localtify 0.3.8 V421 — make sidebar icon motion visible on full row hover */
+/* localtify 0.3.9 V421 — make sidebar icon motion visible on full row hover */
 @keyframes localtifySidebarIconPopV421{
   0%{ transform: translate3d(0,0,0) scale(1) rotate(0deg); }
   38%{ transform: translate3d(0,-2px,0) scale(1.12) rotate(-4deg); }
@@ -10451,7 +10451,7 @@ body,
   grid-row: 2;
 }
 
-/* Disable the broken sidebar hover mode for 0.3.8 release. */
+/* Disable the broken sidebar hover mode for 0.3.9 release. */
 .app[data-sidebar-behavior="hover"]{
   --sidebar-width: var(--sidebar-width-release);
 }
@@ -10736,3 +10736,4 @@ body.isResizingPlayer .app *{
     transform: none !important;
   }
 }
+

@@ -765,7 +765,7 @@
   }
 }
 
-/* localtify 0.3.8 V301 — lighter first-run compositor path */
+/* localtify 0.3.9 V301 — lighter first-run compositor path */
 body.localtifyPerfV301 .onboardingV314,
 body.localtifyPerfV301 .onboardingV315{
   contain: layout paint style;
@@ -817,3 +817,4 @@ body.localtifyPerfV301 .onboardingFeatureGrid.cleaner > div,
 body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   transition-property: border-color, background-color, box-shadow;
 }
+

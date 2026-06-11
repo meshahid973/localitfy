@@ -1,5 +1,5 @@
-/* localtify 0.3.8 V425 cover picker and cache cleanup. */
-/* localtify 0.3.8 V424 — Windows startup white-screen recovery. */
+/* localtify 0.3.9 V425 cover picker and cache cleanup. */
+/* localtify 0.3.9 V424 — Windows startup white-screen recovery. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");

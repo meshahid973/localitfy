@@ -18,7 +18,7 @@ body {
   overflow: hidden;
 }
 
-/* localtify 0.3.8 V301 — root scroll/compositor guard */
+/* localtify 0.3.9 V301 — root scroll/compositor guard */
 html,
 body{
   overscroll-behavior: none;
@@ -27,3 +27,4 @@ body{
 body.localtifyPerfV301{
   background: #000;
 }
+

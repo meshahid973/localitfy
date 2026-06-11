@@ -5448,7 +5448,7 @@ line-clamp: 2 !important;
   transform: translateZ(0);
 }
 
-/* localtify 0.3.8 V301 — core compositor hints */
+/* localtify 0.3.9 V301 — core compositor hints */
 body.localtifyPerfV301{
   overscroll-behavior: none;
 }
@@ -5467,7 +5467,7 @@ body.localtifyPerfV301 .sidebar{
   contain: layout paint style;
 }
 
-/* localtify 0.3.8 V324 — lightweight analytics / recap page.
+/* localtify 0.3.9 V324 — lightweight analytics / recap page.
    Replaces the old heavy local analytics layout with simple recap cards. */
 .analyticsLiteV324{
   width: 100% !important;
@@ -5811,3 +5811,4 @@ body.localtifyPerfV301 .sidebar{
   }
 }
 /* V471 DISCORD SIDEBAR PILL END */
+

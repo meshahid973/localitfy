@@ -459,7 +459,7 @@
   display: none !important;
 }
 
-/* localtify 0.3.8 V301 — effects sleep when renderer is busy */
+/* localtify 0.3.9 V301 — effects sleep when renderer is busy */
 body.localtifyPerfV301 .app.isScrolling :is(
   .songRow.playing .songArt.coverAura,
   .homeAlbumCard.playing .homeAlbumArt.coverAura,
@@ -494,7 +494,7 @@ body.localtifyPerfV301.localtifyBackgroundMode .app .homeFreshCover::before{
   filter: none !important;
 }
 
-/* localtify 0.3.8 V303 — profiler fix: sleep expensive paint while scrolling/audio analyser is busy */
+/* localtify 0.3.9 V303 — profiler fix: sleep expensive paint while scrolling/audio analyser is busy */
 body.localtifyPerfV303 .app.isScrolling :is(
   .heroAmbiencePulse,
   .coverAura::before,
@@ -553,7 +553,7 @@ body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::after{
   transition: none !important;
 }
 
-/* localtify 0.3.8 V305 — keep audio smooth by sleeping expensive paint while the renderer is busy. */
+/* localtify 0.3.9 V305 — keep audio smooth by sleeping expensive paint while the renderer is busy. */
 .app.localtifyInteractionBusy :is(
   .coverAura::before,
   .heroAmbiencePulse,
@@ -595,7 +595,7 @@ body.localtifyAudioPlaying .app :is(
   filter: none !important;
 }
 
-/* localtify 0.3.8 V305 — harsher paint suppression while audio plays / scrolling */
+/* localtify 0.3.9 V305 — harsher paint suppression while audio plays / scrolling */
 body.localtifyPerfV305 .app.isScrolling :is(
   .hero.heroPremium,
   .homeShelfStack,
@@ -671,7 +671,7 @@ body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(
   filter: none !important;
 }
 
-/* localtify 0.3.8 V361 — stable hover sidebar, no runtime CSS.
+/* localtify 0.3.9 V361 — stable hover sidebar, no runtime CSS.
    Fixes V360 disappearing sidebar by returning to a real rail width, while
    removing heavy blur/box-shadow work that made Home lag during hover. */
 .app{
@@ -990,7 +990,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   }
 }
 
-/* localtify 0.3.8 V462 — smoother sidebar hover-out.
+/* localtify 0.3.9 V462 — smoother sidebar hover-out.
    Keep the nice open animation, but make closing feel clean instead of abrupt. */
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
   transition:
@@ -1046,7 +1046,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
     box-shadow 150ms ease !important;
 }
 
-/* localtify 0.3.8 V364 — structural performance pass.
+/* localtify 0.3.9 V364 — structural performance pass.
    Permanent composite targets + worker-backed reductions.
    Important: this does NOT remove image blur, cover tint, hero blur, or player blur. */
 
@@ -1177,7 +1177,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   transform: translateZ(0);
 }
 
-/* localtify 0.3.8 V365 — analytics + compositor polish.
+/* localtify 0.3.9 V365 — analytics + compositor polish.
    Keep blur/cover ambience alive while moving row/card motion onto safer composite paths. */
 
 .app :is(
@@ -1495,3 +1495,4 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   }
 }
 /* V468 DISCORD PILL ONLY + REAL ICON MOTION END */
+

@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -804,12 +804,12 @@ export function updateWasLeftAlone(version: string) {
 export function updateRibbonTitle(prompt: UpdatePromptState) {
   const version = prompt.version || APP_VERSION;
 
-  if (prompt.status === "available") return `Update available — Localtify ${version} is available.`;
-  if (prompt.status === "downloaded") return `Update ready — restart to install Localtify ${version}.`;
-  if (prompt.status === "downloading") return `Downloading update — ${Math.round(clamp(prompt.percent, 0, 100))}%`;
+  if (prompt.status === "available") return `Update available � Localtify ${version} is available.`;
+  if (prompt.status === "downloaded") return `Update ready � restart to install Localtify ${version}.`;
+  if (prompt.status === "downloading") return `Downloading update � ${Math.round(clamp(prompt.percent, 0, 100))}%`;
   if (prompt.status === "latest") return "Localtify is up to date.";
   if (prompt.status === "error") return "Update check failed.";
-  if (prompt.status === "dev") return "Installed app required — auto update only works in the packaged app.";
+  if (prompt.status === "dev") return "Installed app required � auto update only works in the packaged app.";
   if (prompt.status === "checking") return "Checking for updates...";
   return "Localtify update";
 }
@@ -819,7 +819,7 @@ export const updateRibbonEnterSpring = { type: "spring", stiffness: 500, damping
 export const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, mass: 0.55 } as const;
 
 
-export const APP_VERSION = "0.3.8";
+export const APP_VERSION = "0.3.9";
 export const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 export const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 export const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
@@ -906,7 +906,7 @@ export function cleanToastCopy(message: string, kind: AppToastKind) {
   if (lower.includes("settings saved")) return "Settings saved";
 
   return raw
-    .replace(/\s*[•—-]\s*check (?:the )?(?:terminal|console).*$/i, "")
+    .replace(/\s*[��-]\s*check (?:the )?(?:terminal|console).*$/i, "")
     .replace(/\s*safely\b/gi, "")
     .replace(/\s+/g, " ")
     .trim()
@@ -914,10 +914,10 @@ export function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 export const whatsNewItems = [
-  "0.3.8 polishes Albums V2 so custom albums, album shelves, detail pages, and cover actions feel built in",
+  "0.3.9 polishes Albums V2 so custom albums, album shelves, detail pages, and cover actions feel built in",
   "Downloads, missing-file recovery, playback stability, and metadata cleanup were tightened for daily use",
   "Settings, onboarding, sidebar behavior, cover tools, and theme editing were cleaned up without redesigning the whole app",
-  "Linux now has clearer AppImage install copy and is treated as an official 0.3.8 release target",
+  "Linux now has clearer AppImage install copy and is treated as an official 0.3.9 release target",
   "The release focuses on stability, lower UI lag, fewer CSS conflicts, and making the 0.3.7 foundation feel finished"
 ];
 export const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
@@ -951,12 +951,12 @@ export const V013_RELEASE_DEFAULTS: Partial<Settings> = {
 
 
 export const themes = [
-  { id: "mint", name: "mint berry", note: "black and fresh", mood: "clean + calm", emoji: "🌿" },
-  { id: "bubblegum", name: "bubblegum", note: "pink blue pop", mood: "cute UI", emoji: "🫧" },
-  { id: "berry", name: "berry", note: "deep purple glow", mood: "soft night", emoji: "🍓" },
-  { id: "midnight", name: "midnight", note: "deep blue OLED", mood: "late night", emoji: "🌙" },
-  { id: "mono", name: "mono", note: "clean white", mood: "simple focus", emoji: "○" },
-  { id: "stars", name: "stars", note: "drifting sparkle field", mood: "sparkly night", emoji: "✦" },
+  { id: "mint", name: "mint berry", note: "black and fresh", mood: "clean + calm", emoji: "??" },
+  { id: "bubblegum", name: "bubblegum", note: "pink blue pop", mood: "cute UI", emoji: "??" },
+  { id: "berry", name: "berry", note: "deep purple glow", mood: "soft night", emoji: "??" },
+  { id: "midnight", name: "midnight", note: "deep blue OLED", mood: "late night", emoji: "??" },
+  { id: "mono", name: "mono", note: "clean white", mood: "simple focus", emoji: "?" },
+  { id: "stars", name: "stars", note: "drifting sparkle field", mood: "sparkly night", emoji: "?" },
 ] as const;
 
 export const THEME_ID_SET = new Set<string>(themes.map((theme) => theme.id));
@@ -1845,8 +1845,8 @@ export function stripDuplicateCopySuffix(text: string) {
   let next = text;
   for (let index = 0; index < 5; index += 1) {
     const cleaned = next
-      .replace(/\s*\((?:copy|копия|duplicate|\d+)\)\s*$/gi, "")
-      .replace(/\s*\[(?:copy|копия|duplicate|\d+)\]\s*$/gi, "")
+      .replace(/\s*\((?:copy|?????|duplicate|\d+)\)\s*$/gi, "")
+      .replace(/\s*\[(?:copy|?????|duplicate|\d+)\]\s*$/gi, "")
       .replace(/\s+-\s+copy\s*$/gi, "")
       .replace(/\s+copy\s*$/gi, "")
       .trim();
@@ -1885,9 +1885,9 @@ export function cleanupSongTitle(rawTitle: string, strength: DiscordTitleCleanup
 
   text = stripAudioExtension(text)
     .replace(/[_]+/g, " ")
-    .replace(/[–—−]+/g, " - ")
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'");
+    .replace(/[��-]+/g, " - ")
+    .replace(/[��]/g, '"')
+    .replace(/[��]/g, "'");
 
   text = stripTrackNumber(stripDuplicateCopySuffix(text));
   text = removeBracketNoise(text, strength);
@@ -1903,7 +1903,7 @@ export function cleanupSongTitle(rawTitle: string, strength: DiscordTitleCleanup
     .replace(/\s*[{}\[\]]\s*/g, " ")
     .replace(/\s*\(\s*\)\s*/g, " ")
     .replace(/(^|\s)[+~]+(?=\s|$)/g, " ")
-    .replace(/\s+[–—-]\s*$/g, " ");
+    .replace(/\s+[��-]\s*$/g, " ");
 
   return collapseSpaces(text) || "untitled";
 }
@@ -2031,8 +2031,8 @@ export function cleanArtistName(value: unknown) {
 
 export function cleanTrackName(value: unknown, fallback = "untitled") {
   return cleanMetadataField(value, fallback)
-    .replace(/^[-–—|/]+\s*/, "")
-    .replace(/\s*[-–—|/]+$/, "")
+    .replace(/^[-��|/]+\s*/, "")
+    .replace(/\s*[-��|/]+$/, "")
     .trim() || fallback;
 }
 
@@ -2047,7 +2047,7 @@ export function scoreArtistGuess(text: string) {
 
 export function splitArtistTitleCandidate(value: string) {
   const base = cleanupSongTitle(stripAudioExtension(value), "light");
-  const separators = [" - ", " – ", " — ", " | ", " / ", " ~ "];
+  const separators = [" - ", " � ", " � ", " | ", " / ", " ~ "];
 
   for (const separator of separators) {
     if (!base.includes(separator)) continue;
@@ -2315,7 +2315,7 @@ function displaySongArtistV444(song: Pick<Song, "title" | "artist">) {
 function displaySongPickerSublineV444(song: Pick<Song, "title" | "artist">) {
   const artist = displaySongArtistV444(song);
   if (!artist || artist === "unknown artist") return "Pick a playlist or make a new one.";
-  return `${artist} • Pick a playlist or make a new one.`;
+  return `${artist} � Pick a playlist or make a new one.`;
 }
 
 export function discordArtist(text: string) {
@@ -2481,7 +2481,7 @@ function LocaltifyStateCard({
   return (
     <div className={`localtifyStateCardV373 ${tone}`}>
       <span className="localtifyStateIconV373" aria-hidden="true">
-        {tone === "error" ? "!" : tone === "warning" ? "?" : tone === "success" ? "✓" : "i"}
+        {tone === "error" ? "!" : tone === "warning" ? "?" : tone === "success" ? "?" : "i"}
       </span>
       <div className="localtifyStateCopyV373">
         <p className="eyebrow">{eyebrow}</p>
@@ -2530,7 +2530,7 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
     .filter(Boolean);
   const coverSrc = sourceCandidates.find((source) => !failedSources[source]) || "";
   const hasCover = Boolean(coverSrc);
-  const fallback = song ? prettyTitle(song.title, 1).slice(0, 1) || "♪" : "♪";
+  const fallback = song ? prettyTitle(song.title, 1).slice(0, 1) || "?" : "?";
   const style = hasCover ? ({ "--cover-art-url": toCssUrl(coverSrc), "--cover-url": toCssUrl(coverSrc) } as CSSProperties) : undefined;
 
   useEffect(() => {
@@ -3030,13 +3030,13 @@ export const SongRowItem = memo(function SongRowItem({
       style={{ "--stagger": `${Math.min(index, 20) * 18}ms` } as CSSProperties}
     >
       <button className="songButton" onClick={() => onSelectSong(song.id, true)}>
-        <span className="songIndex">{active && isPlaying ? "▶" : index + 1}</span>
+        <span className="songIndex">{active && isPlaying ? "?" : index + 1}</span>
 
         <Cover song={song} className="songArt" />
 
         <span className="songMeta">
           <strong title={displaySongTitleV444(song, 12)}>{displaySongTitleV444(song, 7)}</strong>
-          <small>{isMissingFile ? "missing local file • reimport or relink" : displaySongArtistV444(song)}</small>
+          <small>{isMissingFile ? "missing local file � reimport or relink" : displaySongArtistV444(song)}</small>
         </span>
       </button>
 
@@ -3632,7 +3632,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
             >
               <span className="playlistTrackGrip"><GripVertical size={14} strokeWidth={2.25} /></span>
               <button className="playlistTrackMain" type="button" onClick={() => onSelectSong(song.id)}>
-                <span className="playlistTrackIndex">{active && isPlaying ? "▶" : virtualRow.index + 1}</span>
+                <span className="playlistTrackIndex">{active && isPlaying ? "?" : virtualRow.index + 1}</span>
                 <Cover song={song} className="playlistTrackCover" />
                 <span className="playlistTrackText">
                   <strong>{displaySongTitleV444(song, 7)}</strong>
@@ -3681,12 +3681,12 @@ export function TitleBar({ mini = false, children }: { mini?: boolean; children?
       ) : null}
 
       <div className="windowButtons">
-        <button type="button" onClick={() => window.localitfy.minimizeWindow()} aria-label="Minimize window">─</button>
+        <button type="button" onClick={() => window.localitfy.minimizeWindow()} aria-label="Minimize window">-</button>
         {!mini ? (
-          <button type="button" onClick={() => window.localitfy.toggleMaximizeWindow()} aria-label="Maximize window">□</button>
+          <button type="button" onClick={() => window.localitfy.toggleMaximizeWindow()} aria-label="Maximize window">?</button>
         ) : null}
         <button type="button" className="closeWin" onClick={() => window.localitfy.closeWindow()} aria-label="Close window">
-          ×
+          �
         </button>
       </div>
     </header>
@@ -3734,9 +3734,9 @@ export function buildDiscordPreview({
 
   let moodTitle = title;
 
-  if (song.liked) moodTitle = `♡ ${title}`;
-  else if (mostPlayed && mostPlayed.id === song.id) moodTitle = `on repeat • ${title}`;
-  else if ((song.playCount || 0) <= 0) moodTitle = `discovering • ${title}`;
+  if (song.liked) moodTitle = `? ${title}`;
+  else if (mostPlayed && mostPlayed.id === song.id) moodTitle = `on repeat � ${title}`;
+  else if ((song.playCount || 0) <= 0) moodTitle = `discovering � ${title}`;
 
   const getSecondLine = () => {
     if (settings.discordSecondLine === "album") return album;
@@ -3749,7 +3749,7 @@ export function buildDiscordPreview({
   if (!isPlaying && settings.discordShowPausedIdle) {
     return {
       badge: "PAUSED",
-      details: `paused • ${title}`,
+      details: `paused � ${title}`,
       state: timeLeft
     };
   }
@@ -3757,8 +3757,8 @@ export function buildDiscordPreview({
   if (settings.discordActivityStyle === "cute") {
     return {
       badge: "PLAYING",
-      details: `vibing to ${moodTitle} ♡`,
-      state: `${getSecondLine()} • localtify`
+      details: `vibing to ${moodTitle} ?`,
+      state: `${getSecondLine()} � localtify`
     };
   }
 
@@ -3766,7 +3766,7 @@ export function buildDiscordPreview({
     return {
       badge: "PLAYING",
       details: moodTitle,
-      state: `${artist} • ${album} • ${timeLeft}`
+      state: `${artist} � ${album} � ${timeLeft}`
     };
   }
 
@@ -3788,7 +3788,7 @@ export function buildDiscordPreview({
 
   return {
     badge: "PLAYING",
-    details: `♪ ${moodTitle}`,
+    details: `? ${moodTitle}`,
     state: getSecondLine()
   };
 }
@@ -4250,7 +4250,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     if (albumFolderImportBusy) return;
 
     if (!window.localitfy?.scanAlbumFolder) {
-      const message = "album folder import bridge missing — restart Localtify after replacing electron/preload.cjs and electron/main.cjs";
+      const message = "album folder import bridge missing � restart Localtify after replacing electron/preload.cjs and electron/main.cjs";
       setAlbumFolderImportMessage(message);
       setAlbumFolderImportProgress({ type: "error", mode, message });
       setStatusText?.("album import bridge missing");
@@ -4607,7 +4607,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 transition={settings.reducedMotion ? { duration: 0.1 } : { ...updateRibbonChildSpring, delay: 0.04 }}
               >
                 <div className="updateToastIcon topUpdateRibbonIcon" aria-hidden="true">
-                  {updatePrompt.status === "downloaded" ? "✓" : updatePrompt.status === "downloading" ? "↓" : updatePrompt.status === "error" ? "!" : "↧"}
+                  {updatePrompt.status === "downloaded" ? "?" : updatePrompt.status === "downloading" ? "?" : updatePrompt.status === "error" ? "!" : "?"}
                 </div>
 
                 <div className="updateToastText topUpdateRibbonText">
@@ -4679,7 +4679,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                   {updatePrompt.status !== "downloading" ? (
                     <button className="updateToastClose" type="button" onClick={() => setUpdatePrompt(defaultUpdatePrompt)} aria-label="Dismiss update notice">
-                      ×
+                      �
                     </button>
                   ) : null}
                 </Motion.div>
@@ -4978,7 +4978,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                     {playerError ? <div className="warningBox">{playerError}</div> : null}
                     {isThreeAm && settings.volume > 0.8 ? (
-                      <div className="warningBox lateNightWarning">volume is above 80% — late night ears deserve mercy.</div>
+                      <div className="warningBox lateNightWarning">volume is above 80% � late night ears deserve mercy.</div>
                     ) : null}
                     <div className="heroQuickActions">
                       <button
@@ -5401,12 +5401,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           {albumFolderImportPreview.albums.slice(0, 10).map((album: any) => (
                             <article key={album.id || album.sourcePath} className="albumFolderPreviewCardV309">
                               <div className="albumFolderPreviewCoverV309">
-                                {album.coverUrl ? <img src={album.coverUrl} alt="" width={96} height={96} loading="lazy" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" draggable={false} /> : <span>♪</span>}
+                                {album.coverUrl ? <img src={album.coverUrl} alt="" width={96} height={96} loading="lazy" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" draggable={false} /> : <span>?</span>}
                               </div>
                               <div className="albumFolderPreviewCopyV309">
                                 <strong title={album.title}>{album.title}</strong>
                                 <small title={album.artist}>{album.artist}</small>
-                                <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` • ${album.duplicateCount} already added` : ""}</em>
+                                <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` � ${album.duplicateCount} already added` : ""}</em>
                                 {album.sourcePath ? <b title={album.sourcePath}>{album.sourcePath}</b> : null}
                                 {album.warnings?.length ? (
                                   <ul>
@@ -5487,7 +5487,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         eyebrow="albums"
                         title="No albums yet"
                         message="Import an album folder and Localtify will group the songs for you. Songs still stay in your normal library."
-                        detail="Best folder shape: Album name → tracks → cover.jpg or folder.png."
+                        detail="Best folder shape: Album name ? tracks ? cover.jpg or folder.png."
                         actions={
                           <>
                             <button className="mainAction" type="button" onClick={() => void scanAlbumFolderImport("single")} disabled={albumFolderImportBusy}>
@@ -5634,7 +5634,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                   <strong>{prettyTitle(song.title, 8)}</strong>
                                   <small>{prettyMeta(song.artist)}</small>
                                 </span>
-                                <b>{selected ? "✓" : "+"}</b>
+                                <b>{selected ? "?" : "+"}</b>
                               </button>
                             );
                           })}
@@ -5668,17 +5668,17 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       <h3>{selectedPlaylist ? selectedPlaylist.name : "make your first mix"}</h3>
                       <p>
                         {selectedPlaylist
-                          ? `${selectedPlaylistSongs.length} song${selectedPlaylistSongs.length === 1 ? "" : "s"} • ${formatTime(selectedPlaylistDuration)} total`
+                          ? `${selectedPlaylistSongs.length} song${selectedPlaylistSongs.length === 1 ? "" : "s"} � ${formatTime(selectedPlaylistDuration)} total`
                           : "Create a playlist, add songs, and keep your local music feeling familiar."}
                       </p>
                     </div>
 
                     {selectedPlaylist ? renderPlaylistCollage(selectedPlaylistSongs, "playlistHeroCollage playlistCoverCollage") : (
                       <div className="playlistHeroCollage playlistCoverCollage playlistEmptyCollage" aria-hidden="true">
-                        <div className="playlistCoverTile empty"><span>♪</span></div>
+                        <div className="playlistCoverTile empty"><span>?</span></div>
                         <div className="playlistCoverTile empty"><span>+</span></div>
-                        <div className="playlistCoverTile empty"><span>♫</span></div>
-                        <div className="playlistCoverTile empty"><span>♪</span></div>
+                        <div className="playlistCoverTile empty"><span>?</span></div>
+                        <div className="playlistCoverTile empty"><span>?</span></div>
                       </div>
                     )}
 
@@ -5715,7 +5715,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <aside className="panel playlistCreatePanel">
                     <p className="eyebrow">new playlist</p>
                     <h3>start a mix</h3>
-                    <p className="softText">Night drive, gaming, school, sad songs — whatever fits.</p>
+                    <p className="softText">Night drive, gaming, school, sad songs � whatever fits.</p>
                     <form
                       className="playlistCreateForm"
                       onSubmit={(event) => {
@@ -5758,7 +5758,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           {renderPlaylistCollage(previewSongs)}
                           <span className="playlistShelfMeta">
                             <strong>{playlist.name}</strong>
-                            <small>{songCount} song{songCount === 1 ? "" : "s"} • {formatTime(duration)}</small>
+                            <small>{songCount} song{songCount === 1 ? "" : "s"} � {formatTime(duration)}</small>
                           </span>
                           <span className="playlistShelfDropHint">{activePlaylistId === playlist.id ? "playing" : "drop song"}</span>
                         </button>
@@ -6014,7 +6014,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                   <div className="analyticsMiniCardV339">
                     <span>longest track</span>
-                    <strong>{longestSong ? formatTime(longestSong.duration || 0) : "—"}</strong>
+                    <strong>{longestSong ? formatTime(longestSong.duration || 0) : "�"}</strong>
                     <small>{longestSong ? prettyTitle(longestSong.title, 5) : "no songs yet"}</small>
                   </div>
                 </section>
@@ -6030,7 +6030,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <button
                     type="button"
                     className="softButton analyticsShareButtonV339"
-                    onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.map((card) => `${card.label}: ${card.value}`).join(" • ")}`)}
+                    onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.map((card) => `${card.label}: ${card.value}`).join(" � ")}`)}
                     disabled={!songs.length}
                   >
                     copy recap line
@@ -6092,7 +6092,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </div>
                   </div>
 
-                  {/* ── Source tabs ──────────────────────────────── */}
+                  {/* -- Source tabs -------------------------------- */}
                   <div className="downloadTabStrip">
                     <button
                       className={downloadsTab === "youtube" ? "downloadTab active" : "downloadTab"}
@@ -6109,7 +6109,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </button>
                   </div>
 
-                  {/* ── YouTube tab ───────────────────────────────── */}
+                  {/* -- YouTube tab --------------------------------- */}
                   {downloadsTab === "youtube" && (
                     <>
                       <div className="downloadNotice downloadNoticeV031">
@@ -6154,10 +6154,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </>
                   )}
 
-                  {/* ── Spotify tab ───────────────────────────────── */}
+                  {/* -- Spotify tab --------------------------------- */}
                   {downloadsTab === "spotify" && (
                     <>
-                      {/* ── Auth status card ── */}
+                      {/* -- Auth status card -- */}
                       <div className={`spotifyAuthCard${spotifyLoggedIn ? " loggedIn" : ""}`}>
                         <div className="spotifyAuthLeft">
                           <span className="spotifyAuthDot" aria-hidden="true" />
@@ -6186,7 +6186,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         </div>
                       </div>
 
-                      {/* ── URL fetch ── */}
+                      {/* -- URL fetch -- */}
                       <div className="downloadNotice downloadNoticeV031 spotifyNotice">
                         Paste a Spotify playlist, album, or track link. If Spotify blocks it, make the playlist public on your profile, not only shareable by link.
                       </div>
@@ -6217,7 +6217,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         </div>
                       ) : null}
 
-                      {/* ── Track list ── */}
+                      {/* -- Track list -- */}
                       {spotifyTracks.length > 0 && (
                         <div className="spotifyTrackList">
                           <div className="spotifyTrackListHead">
@@ -6276,11 +6276,11 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                       <span className="spotifySourceBadge">Spotify</span>
                                       <span className={`spotifyTrackStatus ${statusLabel.replace(/\s+/g, "-")}`}>{statusLabel}</span>
                                     </div>
-                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` · ${track.albumName}` : ""}</p>
+                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` � ${track.albumName}` : ""}</p>
                                     {track.downloadMessage ? <small>{track.downloadMessage}</small> : null}
                                     {track.downloadError ? <small className="spotifyTrackError">{track.downloadError}</small> : null}
                                   </div>
-                                  <span className="spotifyTrackCheck" aria-hidden="true">{selected ? "✓" : ""}</span>
+                                  <span className="spotifyTrackCheck" aria-hidden="true">{selected ? "?" : ""}</span>
                                   {failed ? (
                                     <span
                                       className="spotifyRetryButton"
@@ -6339,7 +6339,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </>
                   )}
 
-                  {/* ── Shared: queue, converter, results ─────────── */}
+                  {/* -- Shared: queue, converter, results ----------- */}
                   {downloadQueue.length ? (
                     <div className="downloadQueuePanel">
                       <div className="panelHead smallPanelHead">
@@ -6471,7 +6471,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             key={`${item.url || item.filename || index}`}
                             className={failed ? "downloadResult bad downloadResultV326" : imported ? "downloadResult ok downloadResultV326" : "downloadResult warn downloadResultV326"}
                           >
-                            <span>{failed ? "!" : imported ? "✓" : "↓"}</span>
+                            <span>{failed ? "!" : imported ? "?" : "?"}</span>
 
                             <div>
                               <strong>{failed ? "Download failed" : imported ? "Added to library" : "Downloaded, not imported"}</strong>
@@ -7027,3 +7027,4 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     </main>
   );
 }
+

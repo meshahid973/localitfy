@@ -2422,7 +2422,7 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
 }
 
 
-/* localtify 0.3.8 V320 — stabilized physical velocity motion.
+/* localtify 0.3.9 V320 — stabilized physical velocity motion.
    Transform-only, no blur/filter writes, and scoped to sidebar/player/hero controls. */
 .app :is(.sidebar, .playerBar, .hero) .localtifyProximityTarget{
   --prox-scale: 1;
@@ -2481,7 +2481,7 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
 }
 
 
-/* localtify 0.3.8 V320 — final interaction guard.
+/* localtify 0.3.9 V320 — final interaction guard.
    Velocity/proximity motion is only for safe controls; cards/lists never get owned by pointer JS. */
 .app :is(.homeFreshCard,.homeListenCard,.homeAlbumCard,.songRow,.libraryRow,.playlistTrackRow,.playlistSongRow,.albumTrackRowV318,.coverGalleryCard,.coverGalleryCardCleanOnly).localtifyProximityTarget{
   transform: translateZ(0) !important;
@@ -2491,3 +2491,4 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
 .app :is(.homeFreshCard,.homeListenCard,.homeAlbumCard,.songRow,.libraryRow,.playlistTrackRow,.playlistSongRow,.albumTrackRowV318,.coverGalleryCard,.coverGalleryCardCleanOnly).localtifyProximityActive{
   transform: translateZ(0) !important;
 }
+

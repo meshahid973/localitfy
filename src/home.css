@@ -16436,7 +16436,7 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   }
 }
 
-/* localtify 0.3.8 V394 — albums V2 polish */
+/* localtify 0.3.9 V394 — albums V2 polish */
 
 .app .albumsPageV318{
   --albums-v394-panel: rgba(8, 7, 13, .82);
@@ -17844,3 +17844,4 @@ body.localitfyThemePainting .homeSongRow{
     inset: 36px 0 0 0 !important;
   }
 }
+

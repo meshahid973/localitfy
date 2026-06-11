@@ -1,12 +1,12 @@
-﻿// @ts-nocheck
-/* localtify 0.3.8 V395 playback settings cleanup + faster volume changes. */
-/* localtify 0.3.8 V396 audio engine stability pass. */
-/* localtify 0.3.8 V419 background-audio and settings-save stability. */
-/* localtify 0.3.8 V418 missing-file recovery actions. */
-/* localtify 0.3.8 V425 cover tools + metadata cleaner preview. */
-/* localtify 0.3.8 V423 like system + quick library modes. */
-/* localtify 0.3.8 V417 metadata cleaner stability pass. */
-/* localtify 0.3.8 V415 shuffle queue + context delete. */
+// @ts-nocheck
+/* localtify 0.3.9 V395 playback settings cleanup + faster volume changes. */
+/* localtify 0.3.9 V396 audio engine stability pass. */
+/* localtify 0.3.9 V419 background-audio and settings-save stability. */
+/* localtify 0.3.9 V418 missing-file recovery actions. */
+/* localtify 0.3.9 V425 cover tools + metadata cleaner preview. */
+/* localtify 0.3.9 V423 like system + quick library modes. */
+/* localtify 0.3.9 V417 metadata cleaner stability pass. */
+/* localtify 0.3.9 V415 shuffle queue + context delete. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -1191,7 +1191,7 @@ function MainModeApp() {
   const settingsSearchResultLabel = settingsSearchQuery
     ? visibleSettingsTabs.length
       ? `showing ${visibleSettingsTabs.length} matching section${visibleSettingsTabs.length === 1 ? "" : "s"}`
-      : "no exact section found â€” Search for settings such as Discord, theme, cover, update, volume, or type /feedback."
+      : "no exact section found — Search for settings such as Discord, theme, cover, update, volume, or type /feedback."
     : "Search for settings such as Discord, theme, cover, update, volume, or type /feedback.";
 
   function handleSettingsSearchInput(value: string) {
@@ -2489,7 +2489,7 @@ function MainModeApp() {
     title.textContent = prettyTitle(song.title, 7);
 
     const note = document.createElement("small");
-    note.textContent = "drop to reorder Â· player = queue next";
+    note.textContent = "drop to reorder · player = queue next";
 
     text.append(title, note);
     preview.append(orb, text);
@@ -2568,7 +2568,7 @@ function MainModeApp() {
       return;
     }
 
-    showAppToast("popup blocked â€” opening snake game here", "info");
+    showAppToast("popup blocked — opening snake game here", "info");
     window.location.href = gameUrl;
   }
 
@@ -3038,7 +3038,7 @@ function MainModeApp() {
       {
         label: "all-time listening",
         value: listenedTimeLabel,
-        note: `${totalPlays.toLocaleString()} play${totalPlays === 1 ? "" : "s"} â€¢ ${formatAnalyticsDuration(totalLibrarySeconds)} library`,
+        note: `${totalPlays.toLocaleString()} play${totalPlays === 1 ? "" : "s"} • ${formatAnalyticsDuration(totalLibrarySeconds)} library`,
         meta: mostPlayed ? `top: ${prettyTitle(mostPlayed.title, 7)}` : "play music to build this",
         progress: playedPercent
       }
@@ -3062,12 +3062,12 @@ function MainModeApp() {
     {
       label: "songs",
       value: songs.length.toLocaleString(),
-      note: `${libraryArtistCount.toLocaleString()} artist${libraryArtistCount === 1 ? "" : "s"} â€¢ ${libraryAlbumCount.toLocaleString()} album${libraryAlbumCount === 1 ? "" : "s"}`
+      note: `${libraryArtistCount.toLocaleString()} artist${libraryArtistCount === 1 ? "" : "s"} • ${libraryAlbumCount.toLocaleString()} album${libraryAlbumCount === 1 ? "" : "s"}`
     },
     {
       label: "plays",
       value: totalPlays.toLocaleString(),
-      note: `${playedSongCount.toLocaleString()} played song${playedSongCount === 1 ? "" : "s"} â€¢ ${averagePlaysPerSong} avg`
+      note: `${playedSongCount.toLocaleString()} played song${playedSongCount === 1 ? "" : "s"} • ${averagePlaysPerSong} avg`
     },
     {
       label: "listened",
@@ -3384,7 +3384,7 @@ function MainModeApp() {
     if (view === "albums") return "local albums from metadata and your custom collections";
     if (view === "playlists") return `${playlists.length} playlist${playlists.length === 1 ? "" : "s"}`;
     if (view === "liked") return `${likedSongs.length} liked track${likedSongs.length === 1 ? "" : "s"}`;
-    if (view === "covers") return `${coverStats.usable} usable cover${coverStats.usable === 1 ? "" : "s"} â€¢ ${coverStats.favorites} favorite${coverStats.favorites === 1 ? "" : "s"}`;
+    if (view === "covers") return `${coverStats.usable} usable cover${coverStats.usable === 1 ? "" : "s"} • ${coverStats.favorites} favorite${coverStats.favorites === 1 ? "" : "s"}`;
     if (view === "downloads") return "download direct audio links and import them automatically";
     if (view === "settings") return "theme, playback, discord, library, and advanced controls";
     return "your listening numbers and favorite tracks";
@@ -7253,14 +7253,14 @@ function MainModeApp() {
 
     if (!preview.changedCount) {
       const message = preview.totalCount ? "song names already look clean" : "no songs to clean";
-      setLibraryScanMessage(`${message} â€¢ skipped ${preview.skippedCount}`);
+      setLibraryScanMessage(`${message} • skipped ${preview.skippedCount}`);
       setStatusText(message);
       showAppToast(message, "success");
       return;
     }
 
     setLibraryScanMessage(
-      `preview ready â€¢ ${preview.changedCount} fix${preview.changedCount === 1 ? "" : "es"} â€¢ ${preview.skippedCount} skipped`
+      `preview ready • ${preview.changedCount} fix${preview.changedCount === 1 ? "" : "es"} • ${preview.skippedCount} skipped`
     );
     setStatusText("metadata preview ready");
     showAppToast(`preview ready: ${preview.changedCount} fix${preview.changedCount === 1 ? "" : "es"}`, "info");
@@ -7324,11 +7324,11 @@ function MainModeApp() {
       setMetadataUndoItems(undoItems);
       setMetadataCleanPreview(null);
       setLibraryScanMessage(
-        `cleaned ${preview.changedCount} â€¢ titles ${preview.titleFixCount} â€¢ artists ${preview.artistFixCount} â€¢ albums ${preview.albumFixCount} â€¢ skipped ${preview.skippedCount}`
+        `cleaned ${preview.changedCount} • titles ${preview.titleFixCount} • artists ${preview.artistFixCount} • albums ${preview.albumFixCount} • skipped ${preview.skippedCount}`
       );
       setStatusText(`cleaned ${preview.changedCount} song metadata fix${preview.changedCount === 1 ? "" : "es"}`);
       showAppToast(
-        `cleaned ${preview.changedCount} â€¢ ${preview.skippedCount} skipped`,
+        `cleaned ${preview.changedCount} • ${preview.skippedCount} skipped`,
         "success"
       );
     } catch (error) {
@@ -7372,7 +7372,7 @@ function MainModeApp() {
 
       const restoredCount = metadataUndoItems.length;
       setMetadataUndoItems([]);
-      setLibraryScanMessage(`undid metadata clean â€¢ restored ${restoredCount} song${restoredCount === 1 ? "" : "s"}`);
+      setLibraryScanMessage(`undid metadata clean • restored ${restoredCount} song${restoredCount === 1 ? "" : "s"}`);
       setStatusText("metadata clean undone");
       showAppToast("metadata clean undone", "success");
     } catch (error) {
@@ -7388,9 +7388,9 @@ function MainModeApp() {
   function rebuildSearchIndexAction() {
     const repairedSongs = applyLibraryOrder(sanitizeSongList(songs));
     setSongs(repairedSongs);
-    setLibraryScanMessage(`search rebuilt â€¢ ${repairedSongs.length} tracks indexed`);
+    setLibraryScanMessage(`search rebuilt • ${repairedSongs.length} tracks indexed`);
     setStatusText("fast search index rebuilt");
-    showAppToast(`search rebuilt â€¢ ${repairedSongs.length} tracks`, "success");
+    showAppToast(`search rebuilt • ${repairedSongs.length} tracks`, "success");
   }
 
   function makeShuffledPlayableSongs(sourceSongs: Song[]) {
@@ -7471,7 +7471,7 @@ function MainModeApp() {
       playbackUrlCacheRef.current.clear();
       playbackUrlPendingRef.current.clear();
       setSongs(imported);
-      setLibraryScanMessage(`indexed ${imported.length} tracks â€¢ search, folders, and metadata ready`);
+      setLibraryScanMessage(`indexed ${imported.length} tracks • search, folders, and metadata ready`);
 
       if (changedSongs.length > 0) {
         void Promise.allSettled(
@@ -7520,7 +7520,7 @@ function MainModeApp() {
           createImportAnimationState({
             active: true,
             phase: "success",
-            message: "library checked â€” no duplicates added",
+            message: "library checked — no duplicates added",
             count: 0,
             total: imported.length,
             preview: previewSongs
@@ -7551,7 +7551,7 @@ function MainModeApp() {
         createImportAnimationState({
           active: true,
           phase: "error",
-          message: "import failed safely â€” your library was not deleted",
+          message: "import failed safely — your library was not deleted",
           count: 0,
           total: songs.length,
           preview: songs.slice(0, 8)
@@ -7661,7 +7661,7 @@ function MainModeApp() {
           ? importedToLibrary
             ? "Added to library"
             : "Downloaded, not imported"
-          : "Failed â€” retry available"
+          : "Failed — retry available"
       };
     });
   }
@@ -7907,7 +7907,7 @@ function MainModeApp() {
         ok: false,
         url,
         error: message,
-        statusLabel: "Failed â€” retry available"
+        statusLabel: "Failed — retry available"
       })) as any[];
 
       setDownloadResults(failedDownloads);
@@ -7917,11 +7917,11 @@ function MainModeApp() {
         progress: 100,
         message,
         error: message,
-        statusLabel: "Failed â€” retry available"
+        statusLabel: "Failed — retry available"
       })));
       setPlayerError(message);
       setStatusText("download failed");
-      showAppToast("Download failed â€” retry from the queue", "error");
+      showAppToast("Download failed — retry from the queue", "error");
     } finally {
       setDownloadBusy(false);
     }
@@ -8007,7 +8007,7 @@ function MainModeApp() {
         setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
       } else {
         setSpotifyFetchError("");
-        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready â€” paste a link" : "spotify connected â€” paste a link to fetch tracks");
+        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready — paste a link" : "spotify connected — paste a link to fetch tracks");
       }
     } catch (error) {
       const message = String((error as Error)?.message || "Spotify login failed.");
@@ -8222,7 +8222,7 @@ function MainModeApp() {
         spotifyTrackId: t.id,
         source: "spotify",
         url: (t as any).spotifyUrl || `spotify:track:${t.id}`,
-        title: t.artist ? `${t.artist} â€” ${t.title}` : t.title,
+        title: t.artist ? `${t.artist} — ${t.title}` : t.title,
         status: "queued" as const,
         progress: 0,
         message: "Waiting..."
@@ -8236,7 +8236,7 @@ function MainModeApp() {
       if (!spotifyDownloadBridge) {
         const message = "Spotify download is not wired in preload/main yet.";
         setSpotifyFetchError(message);
-        setDownloadQueue((items) => items.map((item) => ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed â€” retry available" })));
+        setDownloadQueue((items) => items.map((item) => ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" })));
         setStatusText("spotify download failed");
         showAppToast("Spotify download bridge missing", "error");
         return;
@@ -8332,7 +8332,7 @@ function MainModeApp() {
               ? resultForTrack.importedToLibrary
                 ? "Added to library"
                 : "Downloaded, not imported"
-              : "Failed â€” retry available",
+              : "Failed — retry available",
             downloadedFilePath: resultForTrack.filePath || "",
             importedToLibrary: Boolean(resultForTrack.importedToLibrary),
             librarySongId: resultForTrack.librarySongId || "",
@@ -8416,9 +8416,9 @@ function MainModeApp() {
           );
           if (settings.downloadAutoAdd && nextSongs.length) changeView("library", "unknown");
         } else {
-          setStatusText("spotify download finished â€” no tracks added");
+          setStatusText("spotify download finished — no tracks added");
           setPlayerError("no tracks downloaded. check the queue for errors.");
-          showAppToast("Spotify download failed â€” retry from the queue", "error");
+          showAppToast("Spotify download failed — retry from the queue", "error");
         }
 
         if (failCount > 0) {
@@ -8435,7 +8435,7 @@ function MainModeApp() {
       setSpotifyFetchError(message);
       setSpotifyTracks((items) => items.map((track: any) => (
         selected.some((selectedTrack) => selectedTrack.id === track.id)
-          ? { ...track, downloadStatus: "failed", downloadError: message, downloadMessage: "Failed â€” retry available" }
+          ? { ...track, downloadStatus: "failed", downloadError: message, downloadMessage: "Failed — retry available" }
           : track
       )));
       const failedDownloads = selected.map((track) => ({
@@ -8444,7 +8444,7 @@ function MainModeApp() {
         source: "spotify",
         spotifyTrackId: track.id,
         error: message,
-        statusLabel: "Failed â€” retry available"
+        statusLabel: "Failed — retry available"
       })) as any[];
       setDownloadResults(failedDownloads);
       setDownloadQueue((items) => items.map((item) => ({
@@ -8453,10 +8453,10 @@ function MainModeApp() {
         progress: 100,
         message,
         error: message,
-        statusLabel: "Failed â€” retry available"
+        statusLabel: "Failed — retry available"
       })));
       setStatusText("spotify download failed");
-      showAppToast("Spotify download failed â€” retry from the queue", "error");
+      showAppToast("Spotify download failed — retry from the queue", "error");
     } finally {
       setSpotifyDownloadBusy(false);
       setDownloadBusy(false);
@@ -10533,7 +10533,7 @@ function MainModeApp() {
 
       feedbackLastSentAtRef.current = Date.now();
       markFeedbackPromptSeen();
-      setFeedbackStatus({ kind: "success", message: "Sent successfully — thanks, I’ll review this." });
+      setFeedbackStatus({ kind: "success", message: "Sent successfully � thanks, I�ll review this." });
       setFeedbackMessage("");
 
       window.setTimeout(() => {
@@ -10867,7 +10867,7 @@ function MainModeApp() {
     return (
       <section className={`settingsPageCard feedbackSettingsCardV331 ${feedbackReady ? "feedbackReady" : "feedbackNotReady"}`} aria-label="Send feedback">
         <div className="feedbackSettingsHeaderV331">
-          <span className="feedbackSettingsIconV331" aria-hidden="true">âœ¦</span>
+          <span className="feedbackSettingsIconV331" aria-hidden="true">✦</span>
           <div className="settingsSectionTitle">
             <span>feedback</span>
             <strong>Send feedback</strong>
@@ -11588,5 +11588,6 @@ function MainModeApp() {
 export default function App() {
   return <MainModeApp />;
 }
+
 
 
