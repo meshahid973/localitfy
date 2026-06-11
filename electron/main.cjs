@@ -4201,6 +4201,63 @@ function cleanFeedbackText(value, maxLength = 1500) {
     .slice(0, maxLength);
 }
 
+
+function getPackagedEnvCandidatePaths() {
+  const safePath = (...parts) => {
+    try {
+      return path.join(...parts.filter(Boolean));
+    } catch {
+      return "";
+    }
+  };
+
+  const cwd = (() => {
+    try {
+      return process.cwd();
+    } catch {
+      return "";
+    }
+  })();
+
+  const resourcePath = (() => {
+    try {
+      return process.resourcesPath || "";
+    } catch {
+      return "";
+    }
+  })();
+
+  const executableDir = (() => {
+    try {
+      return process.execPath ? path.dirname(process.execPath) : "";
+    } catch {
+      return "";
+    }
+  })();
+
+  const userDataPath = (() => {
+    try {
+      return typeof app.getPath === "function" ? app.getPath("userData") : "";
+    } catch {
+      return "";
+    }
+  })();
+
+  return [
+    safePath(cwd, ".env"),
+    safePath(cwd, ".env.production"),
+    safePath(executableDir, ".env"),
+    safePath(executableDir, ".env.production"),
+    safePath(resourcePath, ".env"),
+    safePath(resourcePath, ".env.production"),
+    safePath(resourcePath, "app", ".env"),
+    safePath(resourcePath, "app.asar.unpacked", ".env"),
+    safePath(userDataPath, ".env"),
+    safePath(userDataPath, ".env.production")
+  ].filter(Boolean);
+}
+
+
 function getFeedbackWebhookInfo() {
   const keys = [
     "LOCALTIFY_FEEDBACK_WEBHOOK_URL",
@@ -4273,7 +4330,7 @@ function postDiscordWebhookWithElectronNet(webhookUrl, body) {
       done({
         ok: false,
         code: "webhook_timeout",
-        error: "Discord webhook request timed out. Check the webhook URL, internet connection, or Discord reachability, then try again."
+        error: "Discord webhook request timed out. Check internet/firewall or regenerate the webhook URL. Check the webhook URL, internet connection, or Discord reachability, then try again."
       });
     }, 30_000);
 
@@ -4379,7 +4436,7 @@ function postDiscordWebhookWithNodeHttps(webhookUrl, body) {
     );
 
     request.on("timeout", () => {
-      request.destroy(new Error("Discord webhook request timed out."));
+      request.destroy(new Error("Discord webhook request timed out. Check internet/firewall or regenerate the webhook URL."));
     });
 
     request.on("error", (error) => {

@@ -587,7 +587,7 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
 const ONBOARDING_RELEASE_SHOWCASE_KEY = `localitfy.onboarding.release-showcase.${APP_VERSION}`;
 
 const FEEDBACK_PROMPT_SEEN_KEY = "localitfy.feedbackPrompt.seen.v1";
-const FEEDBACK_PROMPT_DELAY_MS = 60_000;
+const FEEDBACK_PROMPT_DELAY_MS = 40_000;
 const FEEDBACK_PROMPT_RETRY_DELAY_MS = 15_000;
 const FEEDBACK_MESSAGE_MAX_LENGTH = 1_500;
 const FEEDBACK_PROMPT_COPY = {
@@ -595,7 +595,7 @@ const FEEDBACK_PROMPT_COPY = {
   body:
     "really it has been amazing for users like you to keep using the app which make me want to update the app even more, why did this popup come? Well as you may know or may also have experienced localtify has few here and there visual or ui bugs in the app and that probably has made you angry. or maybe you really want a feature to be added.",
   footer:
-    "Which is why below me theres a message box where you can send bug reports and suggestions. and I will be actively reviewing them!"
+    "Which is why below me theres a message box where you can send bug reports and suggestions. and I will be actively reviewing them! (also you can type feeback in search bar)"
 } as const;
 
 const FEEDBACK_CATEGORY_OPTIONS = [
@@ -10329,6 +10329,7 @@ function MainModeApp() {
     }
   }
 
+
   function feedbackPromptIsBlocked() {
     const blockers = feedbackPromptBlockersRef.current;
 
@@ -10847,6 +10848,7 @@ function MainModeApp() {
       </aside>
     );
   }
+
 
 
 

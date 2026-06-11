@@ -78,12 +78,19 @@ function createId(prefix: string): string {
   const cryptoRef =
     typeof globalThis !== "undefined" && "crypto" in globalThis ? globalThis.crypto : undefined;
 
-  const rand =
-    cryptoRef && typeof cryptoRef.randomUUID === "function"
-      ? cryptoRef.randomUUID()
-      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  if (cryptoRef && typeof cryptoRef.randomUUID === "function") {
+    return `${prefix}_${cryptoRef.randomUUID()}`;
+  }
 
-  return `${prefix}_${rand}`;
+  if (cryptoRef && typeof cryptoRef.getRandomValues === "function") {
+    const bytes = new Uint8Array(16);
+    cryptoRef.getRandomValues(bytes);
+
+    const randomHex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+    return `${prefix}_${Date.now().toString(36)}-${randomHex}`;
+  }
+
+  return `${prefix}_${Date.now().toString(36)}`;
 }
 
 function getInstallId(): string {
@@ -233,7 +240,6 @@ function isSensitivePropertyKey(key: string): boolean {
     "flow_step",
     "host",
     "import_source",
-    "language",
     "latest_version",
     "library_view",
     "locale",
@@ -244,7 +250,6 @@ function isSensitivePropertyKey(key: string): boolean {
     "reason",
     "repeat_mode",
     "result_type",
-    "screen_bucket",
     "screen_name",
     "section",
     "source",
@@ -345,45 +350,6 @@ function sanitizeProperties(properties: AnalyticsProperties = {}): AnalyticsProp
   return safe;
 }
 
-function getScreenBucket(): string {
-  try {
-    const width = window.screen?.width || window.innerWidth || 0;
-    const height = window.screen?.height || window.innerHeight || 0;
-
-    if (width >= 3840 || height >= 2160) return "4k";
-    if (width >= 2560 || height >= 1440) return "1440p";
-    if (width >= 1920 || height >= 1080) return "1080p";
-    if (width > 0 && height > 0) return "small";
-  } catch {
-    // ignored
-  }
-
-  return "unknown";
-}
-
-
-function getTimezoneOffsetBucket(): string {
-  const offset = new Date().getTimezoneOffset();
-  if (!Number.isFinite(offset)) return "unknown";
-
-  if (offset === 0) return "utc";
-  const absoluteHours = Math.round(Math.abs(offset) / 60);
-  const direction = offset < 0 ? "utc_plus" : "utc_minus";
-
-  if (absoluteHours <= 2) return `${direction}_0_2`;
-  if (absoluteHours <= 5) return `${direction}_3_5`;
-  if (absoluteHours <= 8) return `${direction}_6_8`;
-  return `${direction}_9_plus`;
-}
-
-function getLocalTimeBucket(): string {
-  const hour = new Date().getHours();
-
-  if (hour >= 5 && hour < 12) return "morning";
-  if (hour >= 12 && hour < 17) return "afternoon";
-  if (hour >= 17 && hour < 22) return "evening";
-  return "late_night";
-}
 
 function getLocaleParts(): AnalyticsProperties {
   let locale = "unknown";
@@ -394,11 +360,10 @@ function getLocaleParts(): AnalyticsProperties {
     locale = "unknown";
   }
 
-  const [languageCode, regionCode] = locale.split("-");
+  const [, regionCode] = locale.split("-");
 
   return {
-    locale_language: cleanString(languageCode, "unknown").toLowerCase().slice(0, 12),
-    locale_region: cleanString(regionCode, "unknown").toUpperCase().slice(0, 12)
+    locale_region: cleanString(regionCode, "unknown").toUpperCase().slice(0, 12) // country/region only
   };
 }
 
@@ -448,36 +413,6 @@ function bucketDays(value: unknown): string {
   if (days <= 30) return "8-30_days";
   if (days <= 90) return "31-90_days";
   return "90_plus_days";
-}
-
-function getCoarseHardwareProperties(): AnalyticsProperties {
-  const props: AnalyticsProperties = {};
-
-  try {
-    const memory = Number((navigator as Navigator & { deviceMemory?: number }).deviceMemory);
-    if (Number.isFinite(memory) && memory > 0) {
-      if (memory <= 4) props.device_memory_bucket = "4gb_or_less";
-      else if (memory <= 8) props.device_memory_bucket = "5-8gb";
-      else if (memory <= 16) props.device_memory_bucket = "9-16gb";
-      else props.device_memory_bucket = "17gb_plus";
-    }
-  } catch {
-    // ignored
-  }
-
-  try {
-    const threads = Number(navigator.hardwareConcurrency);
-    if (Number.isFinite(threads) && threads > 0) {
-      if (threads <= 4) props.cpu_threads_bucket = "4_or_less";
-      else if (threads <= 8) props.cpu_threads_bucket = "5-8";
-      else if (threads <= 16) props.cpu_threads_bucket = "9-16";
-      else props.cpu_threads_bucket = "17_plus";
-    }
-  } catch {
-    // ignored
-  }
-
-  return props;
 }
 
 function addAudienceBuckets(properties: AnalyticsProperties = {}): AnalyticsProperties {
@@ -545,13 +480,7 @@ function getDeviceProperties(): AnalyticsProperties {
     os_name: osName,
     os_platform: platform,
     user_agent_family: userAgentFamily,
-    language,
-    timezone_offset_minutes: new Date().getTimezoneOffset(),
-    timezone_offset_bucket: getTimezoneOffsetBucket(),
-    local_time_bucket: getLocalTimeBucket(),
-    screen_bucket: getScreenBucket(),
-    ...getLocaleParts(),
-    ...getCoarseHardwareProperties()
+    ...getLocaleParts()
   };
 }
 

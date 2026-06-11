@@ -124,6 +124,10 @@
       {
         "from": "build/icon.png",
         "to": "build/icon.png"
+      },
+      {
+        "from": ".env",
+        "to": ".env"
       }
     ],
     "asar": true,
