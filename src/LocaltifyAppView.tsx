@@ -3002,10 +3002,13 @@ export const SongRowItem = memo(function SongRowItem({
   onDropSong,
   onDragEnd
 }: SongRowItemProps) {
+  const isMissingFile = song.fileExists === false;
+
   return (
     <article
-      className={`songRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""}`}
+      className={`songRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""} ${isMissingFile ? "songMissingFileV039" : ""}`}
       data-library-song-id={song.id}
+      data-file-exists={isMissingFile ? "false" : "true"}
       data-drop-side={isDropTarget ? libraryDropSide : undefined}
       draggable
       onDragStart={(event) => onStartSongDrag(event, song.id)}
@@ -3015,7 +3018,7 @@ export const SongRowItem = memo(function SongRowItem({
       onDragEnd={onDragEnd}
       onContextMenu={(event) => onOpenSongContextMenu?.(event, song)}
       aria-grabbed={isDragging}
-      title={draggedSongTitle ? `dragging ${draggedSongTitle}` : "drag onto another song to reorder, or drop on the bottom player to play next"}
+      title={isMissingFile ? "This song is still in Localtify, but the local audio file is missing." : draggedSongTitle ? `dragging ${draggedSongTitle}` : "drag onto another song to reorder, or drop on the bottom player to play next"}
       style={{ "--stagger": `${Math.min(index, 20) * 18}ms` } as CSSProperties}
     >
       <button className="songButton" onClick={() => onSelectSong(song.id, true)}>
@@ -3025,11 +3028,11 @@ export const SongRowItem = memo(function SongRowItem({
 
         <span className="songMeta">
           <strong title={displaySongTitleV444(song, 12)}>{displaySongTitleV444(song, 7)}</strong>
-          <small>{displaySongArtistV444(song)}</small>
+          <small>{isMissingFile ? "missing local file • reimport or relink" : displaySongArtistV444(song)}</small>
         </span>
       </button>
 
-      <span className="songInfo songDurationInfo">{formatTime(song.duration)}</span>
+      <span className="songInfo songDurationInfo">{isMissingFile ? "missing" : formatTime(song.duration)}</span>
 
       <button
         className={`iconAction likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`}
@@ -3895,6 +3898,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     handleLibraryAreaDragLeave,
     handleLibraryAreaDrop,
     visibleSongs,
+    libraryFilterMode,
+    setLibraryFilterMode,
+    missingSongs,
     selectedPlaylist,
     selectedPlaylistSongs,
     selectedPlaylistDuration,
@@ -4071,6 +4077,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     deleteBusy,
     setDeleteTarget,
     removeSong,
+    removeMissingSongs,
     audioRef,
     handleAudioTimeUpdate,
     handleAudioPause,
@@ -4114,6 +4121,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     return selected ? "ready" : "not selected";
   }
 
+  const safeMissingSongs = Array.isArray(missingSongs) ? missingSongs : [];
+  const showingMissingFiles = view === "library" && libraryFilterMode === "missing";
+  const libraryMissingLabel = `${missingFileCount || safeMissingSongs.length} missing file${(missingFileCount || safeMissingSongs.length) === 1 ? "" : "s"}`;
+
   const [albumSearch, setAlbumSearch] = useState("");
   const [albumSortMode, setAlbumSortMode] = useState("recent");
   const [selectedAlbumId, setSelectedAlbumId] = useState("");
@@ -4122,6 +4133,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   );
   const [albumBuilderOpen, setAlbumBuilderOpen] = useState(false);
   const [albumBuilderMode, setAlbumBuilderMode] = useState<"create" | "edit">("create");
+  const albumBuilderSectionRef = useRef<HTMLElement | null>(null);
   const [albumEditingManualId, setAlbumEditingManualId] = useState("");
   const [albumDraftTitle, setAlbumDraftTitle] = useState("");
   const [albumDraftArtist, setAlbumDraftArtist] = useState("");
@@ -4134,7 +4146,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const [albumFolderImportMessage, setAlbumFolderImportMessage] = useState("");
   const [albumFolderImportProgress, setAlbumFolderImportProgress] = useState<any | null>(null);
   const albumCoverInputRef = useRef<HTMLInputElement | null>(null);
-  const albumBuilderSectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     writeLocalJson(MANUAL_LOCAL_ALBUMS_STORAGE_KEY, manualAlbums);
@@ -5208,29 +5219,55 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 </div>
 
                 {view === "library" && (
-                  <div className="libraryStatsV025" aria-label="library summary">
-                    <div>
-                      <span>tracks</span>
-                      <strong>{songs.length}</strong>
+                  <>
+                    <div className="libraryQuickMetaV039" aria-label="library summary">
+                      <span><strong>{songs.length}</strong> tracks</span>
+                      <span><strong>{libraryAlbumCount}</strong> albums</span>
+                      <span><strong>{libraryArtistCount}</strong> artists</span>
+                      <span className={missingFileCount ? "is-warning" : ""}><strong>{missingFileCount}</strong> missing</span>
                     </div>
-                    <div>
-                      <span>albums</span>
-                      <strong>{libraryAlbumCount}</strong>
-                    </div>
-                    <div>
-                      <span>artists</span>
-                      <strong>{libraryArtistCount}</strong>
-                    </div>
-                    <div>
-                      <span>plays</span>
-                      <strong>{totalPlays}</strong>
-                    </div>
-                  </div>
+
+                    {missingFileCount > 0 ? (
+                      <div className="libraryMissingStripV039" role="status" aria-live="polite">
+                        <div>
+                          <strong>{libraryMissingLabel}</strong>
+                          <span>saved in Localtify, but the audio file is not on this PC.</span>
+                        </div>
+                        <div className="libraryMissingActionsV039">
+                          <button
+                            type="button"
+                            className={showingMissingFiles ? "active" : ""}
+                            onClick={() => setLibraryFilterMode?.("missing")}
+                          >
+                            show missing
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setLibraryFilterMode?.("all")}
+                          >
+                            show all
+                          </button>
+                          <button type="button" onClick={importSongs}>
+                            reimport
+                          </button>
+                          <button
+                            type="button"
+                            className="dangerGhostV039"
+                            onClick={() => void removeMissingSongs?.()}
+                            disabled={deleteBusy}
+                            title="Remove missing song records from Localtify. This does not delete real audio files."
+                          >
+                            remove missing
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
                 )}
 
                 <div className="libraryListHeaderV025">
-                  <span>tracks</span>
-                  <span>title</span>
+                  <span>{showingMissingFiles ? `missing files (${visibleSongs.length})` : "tracks"}</span>
+                  <span>{showingMissingFiles ? "repair" : "title"}</span>
                 </div>
 
                 {visibleSongs.length ? (
@@ -5251,12 +5288,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 ) : (
                   <div className="songList fullList libraryFullListV025">
                     <LocaltifyStateCard
-                      tone={view === "liked" ? "info" : "warning"}
-                      eyebrow={view === "liked" ? "liked songs" : "library"}
-                      title={view === "liked" ? "No liked songs yet" : "Your library is empty"}
-                      message={view === "liked" ? "Tap the heart on any song you enjoy and it will show up here." : "Import a few songs and Localtify will build your home shelf, analytics, albums, covers, and playlists from them."}
-                      detail={view === "liked" ? "This is only your local library. Nothing is uploaded anywhere." : "Tip: folder imports work best when your music is already sorted by album or artist."}
-                      actions={view === "liked" ? (
+                      tone={showingMissingFiles ? "info" : view === "liked" ? "info" : "warning"}
+                      eyebrow={showingMissingFiles ? "file check" : view === "liked" ? "liked songs" : "library"}
+                      title={showingMissingFiles ? "No missing files" : view === "liked" ? "No liked songs yet" : "Your library is empty"}
+                      message={showingMissingFiles ? "Every song Localtify knows about is available on this PC right now." : view === "liked" ? "Tap the heart on any song you enjoy and it will show up here." : "Import a few songs and Localtify will build your home shelf, analytics, albums, covers, and playlists from them."}
+                      detail={showingMissingFiles ? "Switch back to all tracks to continue browsing your library." : view === "liked" ? "This is only your local library. Nothing is uploaded anywhere." : "Tip: folder imports work best when your music is already sorted by album or artist."}
+                      actions={showingMissingFiles ? (
+                        <button className="softButton" type="button" onClick={() => setLibraryFilterMode?.("all")}>show all tracks</button>
+                      ) : view === "liked" ? (
                         <button className="softButton" type="button" onClick={() => changeView("library", "empty-liked")}>browse library</button>
                       ) : (
                         <button className="mainAction" type="button" onClick={importSongs}>import songs</button>
@@ -6648,11 +6687,27 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); queueSong(menuSong.id, true); }}>
                 <span>↱</span> play next
               </button>
+              <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); openEditor(menuSong); }}>
+                <span>✎</span> edit song data
+              </button>
+              <button type="button" role="menuitem" onClick={() => changeCoverForSongAction(menuSong)}>
+                <span>▣</span> change cover
+              </button>
+              <button type="button" role="menuitem" onClick={() => randomizeCoverForSongAction(menuSong)}>
+                <span>↻</span> random cover
+              </button>
+              <div className="songContextMenuDivider" aria-hidden="true" />
               <button type="button" role="menuitem" onClick={() => openPlaylistPicker(menuSong)}>
                 <span>＋</span> add to playlist
               </button>
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); toggleLike(menuSong.id); }}>
                 <span>♥</span> {menuSong.liked ? "unlike" : "like"}
+              </button>
+              <button type="button" role="menuitem" onClick={() => resetCoverForSongAction(menuSong)}>
+                <span>⌫</span> reset cover
+              </button>
+              <button className="dangerMenuItem" type="button" role="menuitem" onClick={() => { setSongContextMenu(null); askRemoveSong(menuSong.id); }}>
+                <span>×</span> remove from library
               </button>
             </div>
           </div>

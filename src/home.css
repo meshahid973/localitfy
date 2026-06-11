@@ -17580,3 +17580,40 @@ body.localitfyThemePainting .homeSongRow{
 .app .libraryFullListV025 .songRow.songMissingFileV039 .songDurationInfo{
   color: rgba(255,255,255,.56) !important;
 }
+
+/* localtify 0.3.9 — right-click song editor quickfix */
+.songContextMenu{
+  width: min(258px, calc(100vw - 24px));
+  padding: 9px;
+}
+
+.songContextMenuHead{
+  margin-bottom: 5px;
+}
+
+.songContextMenu button{
+  min-height: 34px;
+  border-radius: 11px;
+  font-size: 12px;
+}
+
+.songContextMenuDivider{
+  height: 1px;
+  margin: 6px 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.075);
+}
+
+.songContextMenu button.dangerMenuItem{
+  color: rgba(255, 210, 218, 0.92);
+}
+
+.songContextMenu button.dangerMenuItem span{
+  color: #fff;
+  background: rgba(255, 78, 108, 0.9);
+}
+
+.songContextMenu button.dangerMenuItem:hover{
+  background: rgba(255, 78, 108, 0.13);
+}
+
