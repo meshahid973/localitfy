@@ -1496,3 +1496,159 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 }
 /* V468 DISCORD PILL ONLY + REAL ICON MOTION END */
 
+/* localtify 0.4.0 — Linux desktop polish.
+   Goal: fewer compositor problems on KDE/GNOME, clearer titlebar buttons,
+   better scrollbars, and lower GPU/CPU usage while keeping the app cute.
+*/
+.app[data-platform="linux"]{
+  --linux-titlebar-height: 38px;
+  --linux-scrollbar-size: 11px;
+  --linux-surface-solid: color-mix(in srgb, var(--bg, #000) 88%, #050508 12%);
+}
+
+.app[data-platform="linux"] .titleBar{
+  height: var(--linux-titlebar-height) !important;
+  min-height: var(--linux-titlebar-height) !important;
+  background: rgba(0, 0, 0, 0.96) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.105) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-platform="linux"] .titleDrag{
+  min-width: 0 !important;
+  padding-left: 13px !important;
+  gap: 8px !important;
+}
+
+.app[data-platform="linux"] .titleLogoImage{
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.app[data-platform="linux"] .windowButtons button{
+  width: 48px !important;
+  min-width: 48px !important;
+  color: rgba(255,255,255,.74) !important;
+  background: transparent !important;
+  display: inline-grid !important;
+  place-items: center !important;
+}
+
+.app[data-platform="linux"] .windowButtons button:hover{
+  color: #fff !important;
+  background: rgba(255,255,255,.105) !important;
+}
+
+.app[data-platform="linux"] .windowButtons .closeWin:hover{
+  background: #e54868 !important;
+}
+
+.app[data-platform="linux"] .windowButtons svg{
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.app[data-platform="linux"] .appShell{
+  height: calc(100vh - var(--linux-titlebar-height)) !important;
+}
+
+.app[data-platform="linux"] .content,
+.app[data-platform="linux"] .settingsPage,
+.app[data-platform="linux"] .simpleShell{
+  scrollbar-gutter: stable !important;
+}
+
+.app[data-platform="linux"] *::-webkit-scrollbar{
+  width: var(--linux-scrollbar-size) !important;
+  height: var(--linux-scrollbar-size) !important;
+}
+
+.app[data-platform="linux"] *::-webkit-scrollbar-track{
+  background: rgba(255,255,255,.035) !important;
+}
+
+.app[data-platform="linux"] *::-webkit-scrollbar-thumb{
+  border: 3px solid rgba(0,0,0,.72) !important;
+  border-radius: 999px !important;
+  background: rgba(var(--accent-rgb), .42) !important;
+}
+
+.app[data-platform="linux"] *::-webkit-scrollbar-thumb:hover{
+  background: rgba(var(--accent-rgb), .64) !important;
+}
+
+.app[data-platform="linux"] :is(
+  .panel,
+  .settingsHero,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .libraryPanelV025,
+  .downloadPanel,
+  .downloadPanelV031,
+  .spotifyFlowPanelV256,
+  .albumFolderImportPanelV308,
+  .albumFolderImportPanelV309,
+  .modalWrap,
+  .editorModal,
+  .playerBar,
+  .sidebar
+){
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-platform="linux"] :is(.panel, .settingsPanelCard, .settingsPageCard, .libraryPanelV025){
+  background-color: var(--linux-surface-solid) !important;
+}
+
+.app[data-platform="linux"] .playerBar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.012)),
+    rgba(0,0,0,.94) !important;
+}
+
+.app[data-platform="linux"] .playerBar::before{
+  opacity: .10 !important;
+  filter: blur(18px) saturate(1.08) brightness(.72) !important;
+  transform: translateZ(0) scale(1.02) !important;
+}
+
+.app[data-platform="linux"] .playerBar:hover::before{
+  opacity: .16 !important;
+  filter: blur(20px) saturate(1.12) brightness(.74) !important;
+  transform: translateZ(0) scale(1.025) !important;
+}
+
+.app[data-platform="linux"][data-playing="on"] :is(
+  .songRow.playing .songArt.coverAura,
+  .homeAlbumCard.playing .homeAlbumArt.coverAura,
+  .homeListenCard.playing .homeListenCover.coverAura,
+  .homeFreshCard.playing .homeFreshCover.coverAura,
+  .playlistTrackRow.playing .playlistTrackCover,
+  .playlistSongRow.playing .playlistTrackCover,
+  .libraryRow.playing .songArt.coverAura
+)::before{
+  opacity: .18 !important;
+  filter: blur(10px) saturate(1.06) !important;
+}
+
+.app[data-platform="linux"] :is(button, input, textarea, select, [role="button"]):focus-visible{
+  outline: 2px solid rgba(var(--accent-rgb), .72) !important;
+  outline-offset: 2px !important;
+}
+
+.app[data-platform="linux"] .search{
+  background: rgba(255,255,255,.06) !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .app[data-platform="linux"] *,
+  .app[data-platform="linux"] *::before,
+  .app[data-platform="linux"] *::after{
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+

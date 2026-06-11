@@ -1,4 +1,4 @@
-// @ts-nocheck
+ï»¿// @ts-nocheck
 /* localtify 0.3.9 V395 playback settings cleanup + faster volume changes. */
 /* localtify 0.3.9 V396 audio engine stability pass. */
 /* localtify 0.3.9 V419 background-audio and settings-save stability. */
@@ -548,7 +548,8 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
       startupSettingLabel: "Start localtify with Linux",
       startupSettingHelp: "Linux autostart will be added later through a proper desktop-entry flow.",
       linuxInstallNotes: [
-        "AppImage: chmod +x Localtify-0.3.9-x86_64.AppImage, then run it directly.",
+        "AppImage: right click > Properties > Allow executing file as program, or run chmod +x Localtify-0.4.0-x86_64.AppImage.",
+        "If the AppImage does not open, install FUSE/libfuse2 for your distro, then run it again.",
         "RPM: for Fedora, openSUSE, and RHEL-style distros.",
         "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
       ]
@@ -620,12 +621,9 @@ function shouldOpenFeedbackPromptFromGlobalSearch(value: string) {
 
 function shouldOpenOnboardingForThisRelease() {
   try {
-    const oldOnboardingDone = window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === "done";
-    const releaseShowcaseDone = window.localStorage.getItem(ONBOARDING_RELEASE_SHOWCASE_KEY) === "done";
-
-    // New users still see onboarding because the normal onboarding key is missing.
-    // Existing users also see the new v0.3.9 onboarding once because the release key is missing.
-    return !oldOnboardingDone || !releaseShowcaseDone;
+    // 0.4.0 rule: users who already finished or skipped onboarding must not see it again.
+    // Devs can still force it with /onboarding or /onboardingreset.
+    return window.localStorage.getItem(ONBOARDING_STORAGE_KEY) !== "done";
   } catch {
     return true;
   }
@@ -1827,6 +1825,19 @@ function MainModeApp() {
   });
 
   const platformInfo = useMemo(() => getLocaltifyPlatformInfo(), []);
+
+  useEffect(() => {
+    const body = document.body;
+    body.dataset.localtifyPlatform = platformInfo.id;
+    body.classList.toggle("localtifyLinux", platformInfo.id === "linux");
+    body.classList.toggle("localtifyWindows", platformInfo.id === "windows");
+    body.classList.toggle("localtifyMac", platformInfo.id === "mac");
+
+    return () => {
+      delete body.dataset.localtifyPlatform;
+      body.classList.remove("localtifyLinux", "localtifyWindows", "localtifyMac");
+    };
+  }, [platformInfo.id]);
 
   useEffect(() => {
     if (!ready || !window.localitfy?.getPerformanceStatus) return;
@@ -10533,7 +10544,7 @@ function MainModeApp() {
 
       feedbackLastSentAtRef.current = Date.now();
       markFeedbackPromptSeen();
-      setFeedbackStatus({ kind: "success", message: "Sent successfully — thanks, I’ll review this." });
+      setFeedbackStatus({ kind: "success", message: "Sent successfully ï¿½ thanks, Iï¿½ll review this." });
       setFeedbackMessage("");
 
       window.setTimeout(() => {
@@ -11255,6 +11266,7 @@ function MainModeApp() {
   const localtifyAppViewProps = {
     appRootRef,
     settings,
+    platformInfo,
     themeMotionReady,
     showTopUpdateRibbon,
     isViewSwitching,
