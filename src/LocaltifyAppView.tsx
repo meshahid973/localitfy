@@ -31,7 +31,12 @@ import {
   Pencil,
   RotateCcw,
   Plus,
-  Trash2
+  Trash2,
+  X,
+  Save,
+  HeartOff,
+  ImagePlus,
+  GripVertical
 } from "lucide-react";
 
 const Onboarding = lazy(() => import("./Onboarding"));
@@ -3626,7 +3631,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               }}
               onContextMenu={(event) => onOpenContextMenu(event, song)}
             >
-              <span className="playlistTrackGrip">⋮⋮</span>
+              <span className="playlistTrackGrip"><GripVertical size={14} strokeWidth={2.25} /></span>
               <button className="playlistTrackMain" type="button" onClick={() => onSelectSong(song.id)}>
                 <span className="playlistTrackIndex">{active && isPlaying ? "▶" : virtualRow.index + 1}</span>
                 <Cover song={song} className="playlistTrackCover" />
@@ -3636,8 +3641,8 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
                 </span>
               </button>
               <span className="playlistTrackDuration">{formatTime(song.duration)}</span>
-              <button className="iconAction" type="button" onClick={() => onRemoveSong(selectedPlaylistId, song.id)} aria-label="remove from playlist">
-                ×
+              <button className="iconAction iconActionSvg" type="button" onClick={() => onRemoveSong(selectedPlaylistId, song.id)} aria-label="remove from playlist">
+                <X size={16} strokeWidth={2.5} />
               </button>
             </article>
           );
@@ -6640,7 +6645,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
           >
             <div className="modalHead cleanSettingsHead">
               <div><p className="eyebrow">settings</p><h3 id="settingsTitle">make localtify feel right</h3><span>clear controls, simple wording, and no messy long scrolling.</span></div>
-              <button className="closeModalButton" type="button" onClick={() => setSettingsOpen(false)} aria-label="Close settings">×</button>
+              <button className="closeModalButton" type="button" onClick={() => setSettingsOpen(false)} aria-label="Close settings"><X size={18} strokeWidth={2.4} /></button>
             </div>
             <div className="settingsLayout settingsModalLayoutV027">
               {renderSettingsRail("modal")}
@@ -6721,7 +6726,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       {whatsNewOpen ? (
         <div className="whatsNewOverlay" onClick={closeWhatsNew}>
           <section className="whatsNewCard" role="dialog" aria-modal="true" aria-labelledby="whatsNewTitle" onClick={(event) => event.stopPropagation()}>
-            <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new">×</button>
+            <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new"><X size={18} strokeWidth={2.4} /></button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
             <p className="whatsNewSubtext">0.3.5 is a smoothness pass: CSS ownership is cleaner, hero expansion no longer replays the home page, proximity stays responsive, audio glow is scoped, and blur/ambience/motion stay enabled.</p>
@@ -6740,6 +6745,11 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 <h3>edit track</h3>
                 <span className="editorHeadSub">change the name, cover, and details for this song.</span>
               </div>
+              <div className="editorHeaderActions">
+                <button className="closeModalButton editorCloseButton" type="button" onClick={() => setEditorSong(null)} aria-label="Close edit track dialog">
+                  <X size={18} strokeWidth={2.4} />
+                </button>
+              </div>
             </div>
 
             <div className="editorGrid editorGridBetter">
@@ -6748,12 +6758,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <Cover song={editorSong} className="editorCover" />
                 </div>
 
-                <div className="editorCoverActions">
-                  <button className="softButton" disabled={pixelArtBusy} onClick={randomizeCover}>
-                    random pixel art
+                <div className="editorCoverActions editorCoverActionsBetterV039">
+                  <button className="softButton editorIconButton" disabled={pixelArtBusy} onClick={randomizeCover}>
+                    <Shuffle size={15} strokeWidth={2.4} />
+                    <span>random pixel art</span>
                   </button>
-                  <button className="softButton" disabled={pixelArtBusy} onClick={pickCover}>
-                    choose image from pc
+                  <button className="softButton editorIconButton" disabled={pixelArtBusy} onClick={pickCover}>
+                    <ImagePlus size={15} strokeWidth={2.4} />
+                    <span>choose image from pc</span>
                   </button>
                 </div>
 
@@ -6828,16 +6840,19 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
 
                 <div className="editorActions editorActionsBetter">
-                  <button className="softButton" onClick={() => toggleLike(editorSong.id)}>
-                    {editorSong.liked ? "unlike" : "like"}
+                  <button className="softButton editorIconButton" onClick={() => toggleLike(editorSong.id)}>
+                    {editorSong.liked ? <HeartOff size={15} strokeWidth={2.4} /> : <Heart size={15} strokeWidth={2.4} />}
+                    <span>{editorSong.liked ? "unlike" : "like"}</span>
                   </button>
 
-                  <button className="dangerButton" onClick={() => askRemoveSong(editorSong.id)}>
-                    remove song
+                  <button className="dangerButton editorIconButton" onClick={() => askRemoveSong(editorSong.id)}>
+                    <Trash2 size={15} strokeWidth={2.4} />
+                    <span>remove song</span>
                   </button>
 
-                  <button className="heroMain" onClick={saveEditor}>
-                    save changes
+                  <button className="heroMain editorIconButton" onClick={saveEditor}>
+                    <Save size={15} strokeWidth={2.4} />
+                    <span>save changes</span>
                   </button>
                 </div>
               </div>
@@ -6855,7 +6870,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 <h3>{displaySongTitleV444(playlistPickerSong, 9)}</h3>
                 <span className="editorHeadSub">{displaySongPickerSublineV444(playlistPickerSong)}</span>
               </div>
-              <button className="closeModalButton" type="button" onClick={() => { setPlaylistPickerSong(null); setPlaylistPickerName(""); }} aria-label="close">×</button>
+              <button className="closeModalButton" type="button" onClick={() => { setPlaylistPickerSong(null); setPlaylistPickerName(""); }} aria-label="close"><X size={18} strokeWidth={2.4} /></button>
             </div>
 
             <div className="playlistPickerList">
