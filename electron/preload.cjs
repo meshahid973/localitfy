@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld("localitfy", {
   importSongs: () => ipcRenderer.invoke("library:import"),
   clearLibrary: () => ipcRenderer.invoke("library:clear"),
 
+  scanAlbumFolder: (payload) => ipcRenderer.invoke("album:scan-folder", payload),
+  importAlbumFolder: (payload) => ipcRenderer.invoke("album:import-folder", payload),
+
   downloadAudioUrls: (payload) => ipcRenderer.invoke("download:audio", payload),
   cancelDownload: () => ipcRenderer.invoke("download:cancel"),
   chooseDownloadFolder: () => ipcRenderer.invoke("download:choose-folder"),
@@ -118,6 +121,15 @@ contextBridge.exposeInMainWorld("localitfy", {
 
     return () => {
       ipcRenderer.removeListener("download:progress", handler);
+    };
+  },
+
+  onAlbumFolderImportProgress: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("album-folder-import:progress", handler);
+
+    return () => {
+      ipcRenderer.removeListener("album-folder-import:progress", handler);
     };
   },
 
