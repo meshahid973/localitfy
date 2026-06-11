@@ -27,7 +27,11 @@ import {
   SlidersHorizontal,
   Repeat2,
   Volume2,
-  VolumeX
+  VolumeX,
+  Pencil,
+  RotateCcw,
+  Plus,
+  Trash2
 } from "lucide-react";
 
 const Onboarding = lazy(() => import("./Onboarding"));
@@ -6682,32 +6686,32 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
               </div>
 
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); void selectSong(menuSong.id, true); }}>
-                <span>▶</span> play now
+                <span className="songContextMenuIcon"><Play size={13} strokeWidth={3} /></span> play now
               </button>
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); queueSong(menuSong.id, true); }}>
-                <span>↱</span> play next
+                <span className="songContextMenuIcon"><SkipForward size={13} strokeWidth={3} /></span> play next
               </button>
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); openEditor(menuSong); }}>
-                <span>✎</span> edit song data
+                <span className="songContextMenuIcon"><Pencil size={13} strokeWidth={3} /></span> edit song data
               </button>
               <button type="button" role="menuitem" onClick={() => changeCoverForSongAction(menuSong)}>
-                <span>▣</span> change cover
+                <span className="songContextMenuIcon"><Images size={13} strokeWidth={3} /></span> change cover
               </button>
               <button type="button" role="menuitem" onClick={() => randomizeCoverForSongAction(menuSong)}>
-                <span>↻</span> random cover
+                <span className="songContextMenuIcon"><RotateCcw size={13} strokeWidth={3} /></span> random cover
               </button>
               <div className="songContextMenuDivider" aria-hidden="true" />
               <button type="button" role="menuitem" onClick={() => openPlaylistPicker(menuSong)}>
-                <span>＋</span> add to playlist
+                <span className="songContextMenuIcon"><Plus size={13} strokeWidth={3} /></span> add to playlist
               </button>
               <button type="button" role="menuitem" onClick={() => { setSongContextMenu(null); toggleLike(menuSong.id); }}>
-                <span>♥</span> {menuSong.liked ? "unlike" : "like"}
+                <span className="songContextMenuIcon"><Heart size={13} strokeWidth={3} /></span> {menuSong.liked ? "unlike" : "like"}
               </button>
               <button type="button" role="menuitem" onClick={() => resetCoverForSongAction(menuSong)}>
-                <span>⌫</span> reset cover
+                <span className="songContextMenuIcon"><RotateCcw size={13} strokeWidth={3} /></span> reset cover
               </button>
               <button className="dangerMenuItem" type="button" role="menuitem" onClick={() => { setSongContextMenu(null); askRemoveSong(menuSong.id); }}>
-                <span>×</span> remove from library
+                <span className="songContextMenuIcon"><Trash2 size={13} strokeWidth={3} /></span> remove from library
               </button>
             </div>
           </div>
