@@ -10737,3 +10737,107 @@ body.isResizingPlayer .app *{
   }
 }
 
+/* localtify 0.4.0 — theme contrast + sidebar import cleanup.
+   Uses CSS vars from App.tsx so white accents automatically get black text/icons.
+*/
+.app{
+  --accent-contrast: var(--button-text-on-accent, #06100b);
+  --accent-contrast-rgb: var(--button-text-on-accent-rgb, 6, 16, 11);
+  --progress-contrast: var(--button-text-on-progress, var(--accent-contrast));
+}
+
+.app :is(
+  .mainAction,
+  .heroMain,
+  .circleButton.main:not(.playerBar *),
+  .settingsActionButton.isPrimary,
+  .settingsTinyButton.isPrimary,
+  .editor-playlist-list button.is-on
+){
+  color: var(--accent-contrast) !important;
+  text-shadow: none !important;
+}
+
+.app :is(
+  .mainAction,
+  .heroMain,
+  .circleButton.main:not(.playerBar *),
+  .settingsActionButton.isPrimary,
+  .settingsTinyButton.isPrimary,
+  .editor-playlist-list button.is-on
+) :is(svg, .buttonInlineIcon, .settingsThemeIcon){
+  color: currentColor !important;
+  stroke: currentColor !important;
+  fill: none;
+}
+
+.app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *)){
+  background: var(--accent) !important;
+}
+
+.mainAction.importMainAction.iconTextButton{
+  min-height: 46px !important;
+  display: inline-grid !important;
+  grid-auto-flow: column !important;
+  grid-auto-columns: max-content !important;
+  place-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  line-height: 1 !important;
+  color: var(--accent-contrast) !important;
+  text-align: center !important;
+}
+
+.mainAction.importMainAction .buttonInlineIcon{
+  width: 18px !important;
+  height: 18px !important;
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  transform: none !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.mainAction.importMainAction .buttonLabel{
+  display: inline-block !important;
+  min-width: 0 !important;
+  color: currentColor !important;
+  white-space: nowrap !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction.importMainAction,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction.importMainAction{
+  width: 50px !important;
+  min-width: 50px !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  padding: 0 !important;
+  margin-inline: auto !important;
+  display: grid !important;
+  place-items: center !important;
+  grid-auto-flow: row !important;
+  gap: 0 !important;
+  border-radius: 17px !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction.importMainAction .buttonInlineIcon,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction.importMainAction .buttonInlineIcon{
+  width: 20px !important;
+  height: 20px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .mainAction.importMainAction .buttonLabel,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction.importMainAction .buttonLabel{
+  display: none !important;
+}
+
+.app .playerBar,
+.app .playerBar::before,
+.app .playerBar::after{
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+

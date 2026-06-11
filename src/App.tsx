@@ -498,6 +498,45 @@ function normalizeVisualChoice(value: unknown, allowed: readonly string[], fallb
 }
 
 
+
+
+function getHexRgbParts(hexColor: string, fallback = "#8dffce") {
+  const clean = normalizeHexColor(hexColor, fallback).replace("#", "");
+
+  if (!/^[0-9a-f]{6}$/i.test(clean)) {
+    return { r: 141, g: 255, b: 206 };
+  }
+
+  return {
+    r: Number.parseInt(clean.slice(0, 2), 16),
+    g: Number.parseInt(clean.slice(2, 4), 16),
+    b: Number.parseInt(clean.slice(4, 6), 16)
+  };
+}
+
+function getReadableColorOnHex(hexColor: string, fallback = "#06100b") {
+  const { r, g, b } = getHexRgbParts(hexColor);
+
+  const linearize = (value: number) => {
+    const channel = value / 255;
+    return channel <= 0.03928 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+  };
+
+  const luminance =
+    0.2126 * linearize(r) +
+    0.7152 * linearize(g) +
+    0.0722 * linearize(b);
+
+  return luminance > 0.5 ? "#050505" : "#ffffff";
+}
+
+function getReadableColorRgb(hexColor: string) {
+  return getReadableColorOnHex(hexColor) === "#050505" ? "5, 5, 5" : "255, 255, 255";
+}
+
+
+
+
 function applyVisualCustomizationDefaults<T extends Record<string, any>>(settings: T): T {
   return {
     ...settings,
@@ -2046,6 +2085,13 @@ function MainModeApp() {
   const customThemeText = normalizeHexColor(settings.customThemeText, "#f5f3ff");
   const customThemeHighlight = normalizeHexColor(settings.customThemeHighlight, "#c084fc");
   const customThemeProgress = normalizeHexColor(settings.customThemeProgress, customThemeColor);
+  const customThemeAccentContrast = getReadableColorOnHex(customThemeColor);
+  const customThemeAccentContrastSoft = customThemeAccentContrast === "#050505" ? "rgba(5, 5, 5, 0.92)" : "rgba(255, 255, 255, 0.94)";
+  const customThemeProgressContrast = getReadableColorOnHex(customThemeProgress);
+  const customThemeAccentContrastRgb = getReadableColorRgb(customThemeColor);
+  const customThemeProgressContrastRgb = getReadableColorRgb(customThemeProgress);
+
+
   const customThemeStyle = useMemo<CSSProperties>(() => {
     if (!settings.customThemeEnabled) return {};
 
@@ -2064,6 +2110,17 @@ function MainModeApp() {
       "--accent-2": customThemeColor2,
       "--highlight": customThemeHighlight,
       "--progress": customThemeProgress,
+      "--accent-contrast": customThemeAccentContrast,
+      "--accent-contrast-rgb": customThemeAccentContrastRgb,
+      "--accent-contrast-soft": customThemeAccentContrastSoft,
+      "--progress-contrast": customThemeProgressContrast,
+      "--progress-contrast-rgb": customThemeProgressContrastRgb,
+      "--player-main-button-text": customThemeAccentContrast,
+      "--player-main-button-text-rgb": customThemeAccentContrastRgb,
+      "--button-text-on-accent": customThemeAccentContrast,
+      "--button-text-on-accent-rgb": customThemeAccentContrastRgb,
+      "--button-text-on-progress": customThemeProgressContrast,
+
       "--accent-rgb": hexToRgbString(customThemeColor, "#8dffce"),
       "--accent-2-rgb": hexToRgbString(customThemeColor2, "#8ecbff"),
       "--highlight-rgb": hexToRgbString(customThemeHighlight, "#c084fc"),
@@ -2088,7 +2145,12 @@ function MainModeApp() {
     customThemeColor,
     customThemeColor2,
     customThemeHighlight,
-    customThemeProgress
+    customThemeProgress,
+    customThemeAccentContrast,
+    customThemeAccentContrastRgb,
+    customThemeAccentContrastSoft,
+    customThemeProgressContrast,
+    customThemeProgressContrastRgb
   ]);
 
 

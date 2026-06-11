@@ -2610,3 +2610,97 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
   will-change: auto !important;
 }
 
+/* localtify 0.4.0 — player control cleanup.
+   Fixes the visible player outline, removes the volume icon bubble,
+   and makes accent buttons readable on light/dark custom colors.
+*/
+.playerBar{
+  --player-main-readable: var(--player-main-button-text, var(--accent-contrast, #06100b));
+  --player-progress-fill: rgb(var(--accent-rgb)) !important;
+  border-top-color: transparent !important;
+  outline: 0 !important;
+  box-shadow:
+    0 -14px 42px rgba(0, 0, 0, 0.50) !important;
+}
+
+.playerBar:focus,
+.playerBar:focus-within{
+  outline: 0 !important;
+}
+
+.playerBar::after{
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.playerBar .circleButton.main{
+  color: var(--player-main-readable) !important;
+  background: rgb(var(--accent-rgb)) !important;
+  text-shadow: none !important;
+}
+
+.playerBar .circleButton.main:hover,
+.playerBar .circleButton.main:focus-visible{
+  color: var(--player-main-readable) !important;
+  background: rgb(var(--accent-rgb)) !important;
+}
+
+.playerBar .circleButton.main :is(svg, .playerControlIcon){
+  color: currentColor !important;
+  stroke: currentColor !important;
+  fill: currentColor !important;
+  fill-opacity: 0.08 !important;
+}
+
+/* The volume icon should be just an icon, not a second pill/bubble. */
+.playerBar .volumeWrap{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.playerBar .volumeIconButton,
+.playerBar .volumeIconButton:hover,
+.playerBar .volumeIconButton:focus,
+.playerBar .volumeIconButton:focus-visible,
+.playerBar .volumeIconButton:active{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.playerBar .volumeIconButton::before,
+.playerBar .volumeIconButton::after{
+  display: none !important;
+  content: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.playerBar .volumeIconButton :is(svg, .playerControlIcon){
+  display: block !important;
+  margin: 0 !important;
+  color: rgba(255,255,255,.78) !important;
+  stroke: currentColor !important;
+  fill: none !important;
+}
+
+.playerBar .volumeIconButton:hover :is(svg, .playerControlIcon){
+  color: rgba(255,255,255,.96) !important;
+}
+
+.playerBar .progressRow input[type="range"],
+.playerBar .volumeWrap input[type="range"]{
+  outline: 0 !important;
+}
+
+.playerBar .progressRow input[type="range"]:focus-visible,
+.playerBar .volumeWrap input[type="range"]:focus-visible{
+  filter: brightness(1.1) !important;
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .18) !important;
+}
+
