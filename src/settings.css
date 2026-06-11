@@ -4766,242 +4766,287 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.13);
 }
 
-.feedbackSettingsButtonV329{
-  border: 0;
-  border-radius: 16px;
-  padding: 12px 16px;
-  font: inherit;
-  font-weight: 900;
-  cursor: pointer;
-  transition:
-    transform 180ms cubic-bezier(.22, 1, .36, 1),
-    opacity 160ms ease,
-    box-shadow 180ms ease;
-}
 
-.feedbackSettingsButtonV329:hover{
-  transform: translateY(-1px);
-}
 
-.feedbackSettingsCardV329{
-  overflow: hidden;
-}
 
-.feedbackSettingsButtonV329{
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  text-align: left;
-  color: #fff;
-  border: 1px solid rgba(var(--accent-rgb), 0.22);
-  background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), 0.22), rgba(255, 255, 255, 0.055)),
-    rgba(255, 255, 255, 0.045);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
-}
 
-.feedbackSettingsButtonV329 span{
-  display: grid;
-  gap: 4px;
-}
 
-.feedbackSettingsButtonV329 strong{
-  font-size: 0.98rem;
-}
 
-.feedbackSettingsButtonV329 small{
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 0.80rem;
-  font-weight: 700;
-}
 
-.feedbackSettingsButtonV329 em{
-  font-style: normal;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.68);
-}
 
 @media (prefers-reduced-motion: reduce){
   .feedbackCategoryButtonV329,
-.feedbackSettingsButtonV329{
-    transition: none !important;
-  }
+}
+
+.feedbackPromptOverlayV331{
+  position: fixed;
+  inset: 0;
+  z-index: 18000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 52% 36%, rgba(var(--accent-rgb),0.16), transparent 34%),
+    rgba(0,0,0,0.72);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+.feedbackPromptCardV331{
+  width: min(620px, calc(100vw - 34px));
+  max-height: min(760px, calc(100vh - 50px));
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid rgba(var(--accent-rgb),0.24);
+  border-radius: 24px;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 86% 10%, rgba(var(--accent-rgb),0.13), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.024)),
+    rgba(7,7,12,0.94);
+  box-shadow:
+    0 34px 110px rgba(0,0,0,0.72),
+    0 0 0 1px rgba(255,255,255,0.045) inset;
+}
+
+.feedbackPromptTopV331,
+.feedbackPromptActionsV331{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.feedbackPromptBrandV331{
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.feedbackPromptLogoV331{
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(var(--accent-rgb),0.13);
+  border: 1px solid rgba(var(--accent-rgb),0.18);
+}
+
+.feedbackPromptLogoV331 img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.feedbackPromptBrandV331 em,
+.feedbackPromptBrandV331 strong{
+  display: block;
+  font-style: normal;
+}
+
+.feedbackPromptBrandV331 em{
+  color: var(--accent);
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.feedbackPromptBrandV331 strong{
+  margin-top: 2px;
+  font-size: 1rem;
+  letter-spacing: -0.035em;
+}
+
+.feedbackPromptCloseV331{
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.11);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.82);
+  background: rgba(255,255,255,0.055);
+  cursor: pointer;
+}
+
+.feedbackPromptCloseV331 svg{
+  stroke: currentColor;
+}
+
+.feedbackPromptCopyV331{
+  margin: 18px 0 14px;
+}
+
+.feedbackPromptBadgeV331{
+  display: inline-flex;
+  margin-bottom: 8px;
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.feedbackPromptCopyV331 h2{
+  margin: 0;
+  font-size: clamp(32px, 5vw, 48px);
+  line-height: 0.92;
+  letter-spacing: -0.075em;
+}
+
+.feedbackPromptCopyV331 p{
+  margin: 10px 0 0;
+  color: rgba(255,255,255,0.68);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .feedbackCategoryRowV331{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  margin: 0 0 14px;
+  margin: 0 0 12px;
 }
 
 .feedbackCategoryButtonV331{
-  min-height: 44px;
+  min-height: 38px;
+  padding: 8px 10px;
   border: 1px solid rgba(255,255,255,0.095);
-  border-radius: 15px;
-  padding: 0 11px;
-  color: rgba(255,255,255,0.74);
-  background: rgba(255,255,255,0.052);
+  border-radius: 13px;
+  color: rgba(255,255,255,0.76);
+  background: rgba(255,255,255,0.045);
   font: inherit;
-  font-size: 0.78rem;
-  font-weight: 900;
+  font-size: 0.76rem;
+  font-weight: 950;
   cursor: pointer;
-  transition:
-    transform 180ms cubic-bezier(.22,1,.36,1),
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease,
-    box-shadow 180ms ease;
-}
-
-.feedbackCategoryButtonV331:hover{
-  transform: translateY(-1px);
-  color: #fff;
-  border-color: rgba(var(--accent-rgb),0.26);
 }
 
 .feedbackCategoryButtonV331.active{
   color: #fff;
-  border-color: rgba(var(--accent-rgb),0.42);
-  background:
-    linear-gradient(135deg, rgba(var(--accent-rgb),0.34), rgba(var(--accent-rgb),0.16)),
-    rgba(255,255,255,0.055);
-  box-shadow:
-    0 12px 28px rgba(var(--accent-rgb),0.12),
-    inset 0 1px 0 rgba(255,255,255,0.07);
+  border-color: rgba(var(--accent-rgb),0.48);
+  background: rgba(var(--accent-rgb),0.18);
 }
 
-.feedbackSettingsButtonV331{
-  border: 0;
-  border-radius: 16px;
-  padding: 12px 16px;
+.feedbackTextareaWrapV331{
+  display: grid;
+  gap: 7px;
+}
+
+.feedbackTextareaWrapV331 > span,
+.feedbackTextareaWrapV331 small{
+  color: rgba(255,255,255,0.62);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.feedbackTextareaWrapV331 textarea{
+  width: 100%;
+  min-height: 154px;
+  resize: vertical;
+  padding: 13px 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 17px;
+  color: #fff;
+  outline: none;
+  background: rgba(255,255,255,0.055);
+  font: inherit;
+  line-height: 1.45;
+}
+
+.feedbackTextareaWrapV331 textarea:focus{
+  border-color: rgba(var(--accent-rgb),0.44);
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb),0.10);
+}
+
+.feedbackStatusV331{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.82rem;
+  font-weight: 850;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.feedbackStatusV331.error{
+  color: #ffd7e1;
+  border-color: rgba(255,78,108,0.28);
+  background: rgba(255,78,108,0.10);
+}
+
+.feedbackStatusV331.success{
+  color: #ddffe8;
+  border-color: rgba(100,240,164,0.28);
+  background: rgba(100,240,164,0.10);
+}
+
+.feedbackPromptActionsV331{
+  margin-top: 14px;
+}
+
+.feedbackMaybeButtonV331,
+.feedbackSendButtonV331{
+  min-height: 40px;
+  padding: 0 15px;
+  border-radius: 14px;
   font: inherit;
   font-weight: 950;
   cursor: pointer;
-  transition:
-    transform 180ms cubic-bezier(.22,1,.36,1),
-    opacity 160ms ease,
-    box-shadow 180ms ease,
-    background-color 160ms ease;
 }
 
-.feedbackSettingsButtonV331:hover{
-  transform: translateY(-1px);
+.feedbackMaybeButtonV331{
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.055);
 }
 
-.feedbackSettingsCardV331{
-  overflow: hidden;
-  position: relative;
-}
-
-.feedbackSettingsHeaderV331{
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.feedbackSettingsIconV331{
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb),0.10);
-  border: 1px solid rgba(var(--accent-rgb),0.18);
-}
-
-.feedbackSettingsButtonV331{
-  width: 100%;
-  display: flex;
+.feedbackSendButtonV331{
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  text-align: left;
-  color: #fff;
-  border: 1px solid rgba(var(--accent-rgb),0.22);
-  background:
-    linear-gradient(135deg, rgba(var(--accent-rgb),0.20), rgba(255,255,255,0.055)),
-    rgba(255,255,255,0.045);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055);
+  gap: 8px;
+  color: #140616;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: var(--accent);
 }
 
-.feedbackSettingsButtonV331 span{
-  display: grid;
-  gap: 4px;
+.feedbackSendButtonV331:disabled{
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
-.feedbackSettingsButtonV331 strong{
-  font-size: 0.98rem;
+.feedbackSendSparkV334{
+  display: inline-grid;
+  place-items: center;
 }
 
-.feedbackSettingsButtonV331 small{
-  color: rgba(255,255,255,0.58);
-  font-size: 0.80rem;
-  font-weight: 750;
+.feedbackSendSparkV334 svg{
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
 }
 
-.feedbackSettingsButtonV331 em{
-  flex: 0 0 auto;
-  padding: 7px 10px;
-  border-radius: 999px;
-  color: rgba(var(--accent-rgb),0.96);
-  background: rgba(var(--accent-rgb),0.10);
-  border: 1px solid rgba(var(--accent-rgb),0.18);
-  font-style: normal;
-  font-size: 0.70rem;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+@media (max-width: 620px){
+  .feedbackPromptOverlayV331{
+    padding: 12px;
+  }
 
-@media (max-width: 720px){
+  .feedbackPromptCardV331{
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+  }
 
   .feedbackCategoryRowV331{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (prefers-reduced-motion: reduce){
-  .feedbackCategoryButtonV331,
-.feedbackSettingsButtonV331{
-    transition: none !important;
-  }
-}
-
-.feedbackCategoryRowV331{
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 7px !important;
-  margin: 2px 0 12px !important;
-}
-
-.feedbackCategoryButtonV331{
-  min-height: 38px !important;
-  border-radius: 13px !important;
-  padding: 0 10px !important;
-  background: rgba(255,255,255,0.045) !important;
-  font-size: 0.72rem !important;
-  box-shadow: none !important;
-}
-
-.feedbackCategoryButtonV331.active{
-  background: rgba(var(--accent-rgb),0.18) !important;
-  border-color: rgba(var(--accent-rgb),0.48) !important;
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb),0.13) inset !important;
-}
-
-.feedbackSettingsButtonV331 small{
-  line-height: 1.35;
-}
-
-@media (max-width: 720px){
-
-  .feedbackCategoryRowV331{
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  .feedbackPromptActionsV331{
+    align-items: stretch;
+    flex-direction: column-reverse;
   }
 }
 
@@ -5122,62 +5167,13 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   }
 }
 
-.feedbackSettingsCardV331.feedbackReady{
-  border-color: rgba(90,255,148,0.22) !important;
-}
 
-.feedbackSettingsCardV331.feedbackNotReady{
-  border-color: rgba(255,184,107,0.18) !important;
-}
 
-.feedbackWebhookStatusV337{
-  display: grid;
-  gap: 4px;
-  margin: 12px 0 14px;
-  padding: 12px 13px;
-  border-radius: 15px;
-  border: 1px solid rgba(255,255,255,0.09);
-  background: rgba(255,255,255,0.035);
-}
 
-.feedbackWebhookStatusV337 strong{
-  color: rgba(255,255,255,0.92);
-  font-size: 0.92rem;
-  letter-spacing: -0.02em;
-}
 
-.feedbackWebhookStatusV337 small{
-  color: rgba(255,255,255,0.58);
-  font-size: 0.78rem;
-  line-height: 1.35;
-  font-weight: 760;
-}
 
-.feedbackWebhookStatusV337 em{
-  width: fit-content;
-  max-width: 100%;
-  margin-top: 3px;
-  padding: 5px 8px;
-  border-radius: 999px;
-  color: rgba(220,255,232,0.96);
-  background: rgba(90,255,148,0.11);
-  border: 1px solid rgba(90,255,148,0.18);
-  font-size: 0.68rem;
-  font-style: normal;
-  font-weight: 950;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 
-.feedbackWebhookStatusV337.ready{
-  border-color: rgba(90,255,148,0.22);
-  background: rgba(28,164,76,0.095);
-}
 
-.feedbackWebhookStatusV337.notReady{
-  border-color: rgba(255,184,107,0.22);
-  background: rgba(120,70,18,0.12);
-}
 
 @keyframes localtifyFeedbackSentPopV337{
   0% { transform: translateY(0) scale(1); }

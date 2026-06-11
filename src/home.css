@@ -8682,8 +8682,8 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .songContextMenu{
   position: fixed;
   z-index: 11001;
-  width: min(236px, calc(100vw - 24px));
-  padding: 10px;
+  width: min(224px, calc(100vw - 24px));
+  padding: 9px;
   border: 1px solid rgba(var(--accent-rgb), 0.22);
   border-radius: 18px;
   color: var(--text);
@@ -8737,7 +8737,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 
 .songContextMenu button{
   width: 100%;
-  min-height: 36px;
+  min-height: 34px;
   display: flex;
   align-items: center;
   gap: 10px;

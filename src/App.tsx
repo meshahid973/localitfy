@@ -34,7 +34,9 @@ import {
   SlidersHorizontal,
   Repeat2,
   Volume2,
-  VolumeX
+  VolumeX,
+  X,
+  Send
 } from "lucide-react";
 import { useProximityMotion } from "./useProximityMotion";
 import {
@@ -606,13 +608,13 @@ const FEEDBACK_CATEGORY_OPTIONS = [
 type FeedbackCategoryId = typeof FEEDBACK_CATEGORY_OPTIONS[number]["id"];
 
 function shouldOpenFeedbackPromptFromSettingsSearch(value: string) {
-  const query = normalizeSettingsSearch(value);
-  return /(^|\b)(feedback|send feedback|suggestion|suggestions|bug report|report bug|ui bug|ui issue|feature request)(\b|$)/.test(query);
+  const query = value.trim().toLowerCase();
+  return query === "/feedback";
 }
 
 function shouldOpenFeedbackPromptFromGlobalSearch(value: string) {
   const query = value.trim().toLowerCase();
-  return query === "/feedback" || query === "/suggestion" || query === "/suggestions" || query === "/bug" || query === "/bugreport" || query === "/reportbug";
+  return query === "/feedback";
 }
 
 
@@ -890,7 +892,6 @@ function MainModeApp() {
   const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("all");
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
-  const [libraryFilterMode, setLibraryFilterMode] = useState<"all" | "missing">("all");
   const [libraryRenderLimit, setLibraryRenderLimit] = useState(INITIAL_LIBRARY_RENDER_LIMIT);
   const libraryRenderLimitRef = useRef(INITIAL_LIBRARY_RENDER_LIMIT);
   const libraryListLengthRef = useRef(0);
@@ -1197,14 +1198,12 @@ function MainModeApp() {
     setSettingsSearch(value);
 
     if (shouldOpenFeedbackPromptFromSettingsSearch(value)) {
-      setSettingsCategory("advanced");
-
-      if (!feedbackPromptOpen) {
-        setFeedbackPromptManualOpen(true);
-        setFeedbackStatus({ kind: "idle", message: "" });
-        setFeedbackPromptOpen(true);
-      }
-
+      setSettingsSearch("");
+      setSettingsOpen(false);
+      setFeedbackCategory("bug");
+      openFeedbackPrompt(true);
+      setStatusText("feedback box opened");
+      showAppToast("feedback box opened", "success");
       return;
     }
 
@@ -2652,17 +2651,12 @@ function MainModeApp() {
 
   const starParticleStyles = useMemo<CSSProperties[]>(() => [], []);
 
-  const missingSongs = useMemo(() => songs.filter((song) => song.fileExists === false), [songs]);
-  const librarySourceSongs = useMemo(() => (
-    libraryFilterMode === "missing" ? missingSongs : songs
-  ), [libraryFilterMode, missingSongs, songs]);
-
-  const librarySearchIndex = useMemo(() => librarySourceSongs.map((song) => buildSongSearchEntry(song)), [librarySourceSongs]);
+  const librarySearchIndex = useMemo(() => songs.map((song) => buildSongSearchEntry(song)), [songs]);
 
   const filteredSongs = useMemo(() => {
-    if (!deferredQuery.trim()) return librarySourceSongs;
+    if (!deferredQuery.trim()) return songs;
     return rankSongsForSearch(librarySearchIndex, deferredQuery);
-  }, [librarySearchIndex, deferredQuery, librarySourceSongs]);
+  }, [librarySearchIndex, deferredQuery, songs]);
 
   const likedSongs = useMemo(() => {
     const seen = new Set<string>();
@@ -2946,6 +2940,7 @@ function MainModeApp() {
   const averagePlaysPerSong = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "average_plays_per_song");
   const recentImportWeekCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "recent_import_week_count");
   const missingFileCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "missing_file_count");
+  const missingSongs = useMemo(() => songs.filter((song) => song.fileExists === false), [songs]);
   const effectiveMissingFileCount = Math.max(missingFileCount, missingSongs.length);
   const libraryHealthPercent = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "library_health_percent");
   const monthImportCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "month_import_count");
@@ -4204,12 +4199,12 @@ function MainModeApp() {
 
     if (shouldOpenFeedbackPromptFromGlobalSearch(value)) {
       setQuery("");
+      setSettingsSearch("");
       setSettingsOpen(false);
-      setFeedbackPromptManualOpen(true);
       setFeedbackCategory("bug");
-      setFeedbackStatus({ kind: "idle", message: "" });
-      setFeedbackPromptOpen(true);
+      openFeedbackPrompt(true);
       setStatusText("feedback box opened");
+      showAppToast("feedback box opened", "success");
       return;
     }
 
@@ -10026,89 +10021,6 @@ function MainModeApp() {
     }
   }
 
-  async function removeMissingSongs() {
-    const targets = songs.filter((song) => song.fileExists === false);
-    if (!targets.length) {
-      showAppToast("no missing songs to remove", "info");
-      return;
-    }
-
-    const targetIds = new Set(targets.map((song) => song.id).filter(Boolean));
-    const wasCurrent = currentId ? targetIds.has(currentId) : false;
-    const nextLocalSongs = songs.filter((song) => !targetIds.has(song.id));
-    const nextSong = nextLocalSongs[0] || null;
-    const removedLabel = `${targets.length} missing song${targets.length === 1 ? "" : "s"}`;
-
-    setSongContextMenu(null);
-    setPlaylistPickerSong((current) => (current?.id && targetIds.has(current.id) ? null : current));
-    setPlayQueue((queue) => queue.filter((queuedId) => !targetIds.has(queuedId)));
-    setQueueHistory((history) => history.filter((item) => !targetIds.has(item.songId)));
-    setPlaylists((items) => items.map((item) => ({ ...item, songIds: item.songIds.filter((id) => !targetIds.has(id)) })));
-    setDeleteTarget((current) => (current?.id && targetIds.has(current.id) ? null : current));
-
-    if (editorSong?.id && targetIds.has(editorSong.id)) {
-      setEditorSong(null);
-    }
-
-    setDeleteBusy(true);
-
-    try {
-      if (wasCurrent) {
-        const audio = audioRef.current;
-
-        stopFade();
-        stopProgressLoop();
-        audio?.pause();
-        audio?.removeAttribute("src");
-        audio?.load();
-
-        pendingPlayRef.current = false;
-        resetPlayCountTracker();
-
-        setIsPlaying(false);
-        setCurrentTime(0);
-        setCurrentDuration(0);
-        setPlayerError("");
-        await window.localitfy.clearDiscordActivity().catch(() => undefined);
-
-        setCurrentId(nextSong?.id || "");
-
-        if (settings.rememberLastSong) {
-          const nextSettings = {
-            ...settings,
-            lastSongId: nextSong?.id || ""
-          };
-
-          setSettings(nextSettings);
-          await window.localitfy.saveSettings(nextSettings).catch(() => undefined);
-        }
-      }
-
-      setSongs(nextLocalSongs);
-      setLibraryFilterMode("all");
-      setStatusText(`removed ${removedLabel} from library`);
-
-      let updatedSongs: Song[] | null = null;
-      for (const id of targetIds) {
-        updatedSongs = await window.localitfy.deleteSong(id);
-      }
-
-      if (updatedSongs) {
-        setSongs(applyLibraryOrder(sanitizeSongList(updatedSongs)));
-      }
-
-      showAppToast(`removed ${removedLabel}`, "success");
-    } catch (error) {
-      console.error("[localitfy remove missing songs error]", error);
-      setStatusText("could not remove missing songs");
-      showAppToast("could not remove missing songs", "error");
-    } finally {
-      setDeleteBusy(false);
-      setDeleteTarget(null);
-    }
-  }
-
-
   function openEditor(song: Song) {
     setEditorSong(song);
     setEditTitle(song.title || "");
@@ -10863,50 +10775,8 @@ function MainModeApp() {
     );
   }
 
-
-
-
-
   function renderFeedbackSettingsCard() {
-    if (settingsCategory !== "advanced") return null;
-
-    const feedbackReady = Boolean(feedbackConfigStatus?.configured && feedbackConfigStatus?.valid);
-    const feedbackStatusLabel = feedbackConfigStatus
-      ? feedbackConfigStatus.label || (feedbackReady ? "Discord feedback enabled" : "Discord feedback not configured")
-      : "Checking feedback status...";
-    const feedbackStatusMessage = feedbackConfigStatus?.message ||
-      (feedbackReady ? "Feedback will be delivered to your Discord channel." : "Add LOCALTIFY_FEEDBACK_WEBHOOK_URL to enable Discord delivery.");
-
-    return (
-      <section className={`settingsPageCard feedbackSettingsCardV331 ${feedbackReady ? "feedbackReady" : "feedbackNotReady"}`} aria-label="Send feedback">
-        <div className="feedbackSettingsHeaderV331">
-          <span className="feedbackSettingsIconV331" aria-hidden="true">âœ¦</span>
-          <div className="settingsSectionTitle">
-            <span>feedback</span>
-            <strong>Send feedback</strong>
-            <small>Report bugs, UI issues, or feature ideas directly from localtify. You can also type â€œfeedbackâ€ in settings search or â€œ/feedbackâ€ in the song search.</small>
-          </div>
-        </div>
-
-        <div className={`feedbackWebhookStatusV337 ${feedbackReady ? "ready" : "notReady"}`}>
-          <strong>{feedbackStatusLabel}</strong>
-          <small>{feedbackStatusMessage}</small>
-          {feedbackConfigStatus?.envName ? <em>{feedbackConfigStatus.envName}</em> : null}
-        </div>
-
-        <button
-          type="button"
-          className="feedbackSettingsButtonV331 localtifyProximityTarget"
-          onClick={() => openFeedbackPrompt(true)}
-        >
-          <span>
-            <strong>Open feedback box</strong>
-            <small>{feedbackReady ? "Send a short report straight to the feedback channel." : "You can test the popup UI, but delivery needs the webhook env."}</small>
-          </span>
-          <em>open</em>
-        </button>
-      </section>
-    );
+    return null;
   }
 
 
@@ -10952,7 +10822,7 @@ function MainModeApp() {
                 onClick={() => closeFeedbackPrompt(!feedbackPromptManualOpen)}
                 aria-label="Close feedback popup"
               >
-                Ã—
+                <X size={18} strokeWidth={2.4} />
               </button>
             </div>
 
@@ -11022,7 +10892,7 @@ function MainModeApp() {
                 disabled={feedbackSendBusy || feedbackStatus.kind === "success" || !feedbackReady}
               >
                 <span className="feedbackSendTextV334">{feedbackStatus.kind === "success" ? "Sent" : feedbackSendBusy ? "Sending..." : "Send"}</span>
-                <span className="feedbackSendSparkV334" aria-hidden="true">â†—</span>
+                <span className="feedbackSendSparkV334" aria-hidden="true"><Send size={14} strokeWidth={2.4} /></span>
               </button>
             </div>
           </Motion.div>
@@ -11250,7 +11120,6 @@ function MainModeApp() {
         />
         </Suspense>
         {renderAudioEffectsCard()}
-        {renderFeedbackSettingsCard()}
       </>
     );
   }
@@ -11436,8 +11305,6 @@ function MainModeApp() {
     neverPlayedSongs,
     missingSongs,
     missingFileCount: effectiveMissingFileCount,
-    libraryFilterMode,
-    setLibraryFilterMode,
     libraryLengthLabel,
     averageSongSeconds,
     longestSong,
@@ -11565,7 +11432,6 @@ function MainModeApp() {
     deleteBusy,
     setDeleteTarget,
     removeSong,
-    removeMissingSongs,
     audioRef,
     handleAudioTimeUpdate,
     handleAudioPause,
