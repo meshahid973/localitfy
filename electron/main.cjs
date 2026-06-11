@@ -2437,13 +2437,15 @@ function shapeSpotifyTrack(track, fallbackAlbumName = "", fallbackCoverUrl = "")
 
 
 function decodeHtmlEntities(value) {
+  // Decode ampersands last so strings like &amp;quot; do not become quotes in one pass.
+  // Also leave lt/gt encoded; titles do not need markup characters and this keeps
+  // untrusted Spotify/search metadata from becoming HTML-shaped text later.
   return String(value || "")
-    .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
     .replace(/&#x27;/g, "'")
     .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
 }
 
 function uniqSpotifyIds(ids = []) {

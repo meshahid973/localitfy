@@ -17774,3 +17774,73 @@ body.localitfyThemePainting .homeSongRow{
     position: static !important;
   }
 }
+
+
+/* localtify 0.3.9 — editor overlay full-screen fix: no left-side blur seam */
+.app .modalWrap.editorModalWrap,
+.modalWrap.editorModalWrap{
+  position: fixed !important;
+  inset: 36px 0 var(--player-size-used, var(--player-size, 92px)) 0 !important;
+  z-index: 12000 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: clamp(14px, 2vw, 28px) !important;
+  overflow: auto !important;
+  background:
+    radial-gradient(circle at 82% 22%, rgba(var(--accent-rgb), .12), transparent 38%),
+    rgba(0, 0, 0, .72) !important;
+  backdrop-filter: blur(28px) saturate(118%) brightness(.78) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(118%) brightness(.78) !important;
+}
+
+.app .modalWrap.editorModalWrap::before{
+  content: "" !important;
+  position: fixed !important;
+  inset: 36px 0 var(--player-size-used, var(--player-size, 92px)) 0 !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.66), rgba(0,0,0,.34) 18%, rgba(0,0,0,.24) 82%, rgba(0,0,0,.58)),
+    linear-gradient(180deg, rgba(0,0,0,.36), rgba(0,0,0,.20)) !important;
+  opacity: 1 !important;
+}
+
+.app .modalWrap.editorModalWrap > .editorModal{
+  position: relative !important;
+  z-index: 1 !important;
+  margin: 0 !important;
+}
+
+.app .editorModalHead,
+.app .editorGridBetter,
+.app .editorActionsBetter{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* make every editor/menu action icon use SVG sizing, never text-glyph sizing */
+.app :is(.editorIconButton, .songContextMenu button, .closeModalButton, .iconActionSvg) svg{
+  display: block !important;
+  stroke: currentColor !important;
+}
+
+.app .editorIconButton{
+  white-space: nowrap !important;
+}
+
+.app .editorCloseButton svg,
+.app .closeModalButton svg{
+  width: 18px !important;
+  height: 18px !important;
+}
+
+@media (max-width: 760px){
+  .app .modalWrap.editorModalWrap,
+  .modalWrap.editorModalWrap{
+    inset: 36px 0 0 0 !important;
+    padding: 10px !important;
+  }
+
+  .app .modalWrap.editorModalWrap::before{
+    inset: 36px 0 0 0 !important;
+  }
+}
