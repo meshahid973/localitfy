@@ -1652,3 +1652,164 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   }
 }
 
+/* localtify 0.4.0 — packaged feedback modal lock.
+   Keep feedback popup identical in dev and packaged builds.
+*/
+.feedbackPromptOverlayV331{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: clamp(16px, 2.2vw, 30px) !important;
+  overflow: auto !important;
+  isolation: isolate !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(var(--accent-rgb), 0.17), transparent 38%),
+    rgba(0, 0, 0, 0.74) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+}
+
+.feedbackPromptOverlayV331 *{
+  box-sizing: border-box !important;
+}
+
+.feedbackPromptCardV331{
+  position: relative !important;
+  z-index: 2147483001 !important;
+  width: min(620px, calc(100vw - 34px)) !important;
+  max-width: min(620px, calc(100vw - 34px)) !important;
+  max-height: min(760px, calc(100vh - 48px)) !important;
+  overflow: auto !important;
+  display: block !important;
+  padding: 18px !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.24) !important;
+  border-radius: 24px !important;
+  color: var(--text) !important;
+  background:
+    radial-gradient(circle at 86% 10%, rgba(var(--accent-rgb), 0.13), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.026)),
+    rgba(7, 7, 12, 0.985) !important;
+  box-shadow:
+    0 34px 110px rgba(0,0,0,0.74),
+    0 0 0 1px rgba(255,255,255,0.045) inset !important;
+  transform-origin: center center !important;
+}
+
+.feedbackPromptTopV331,
+.feedbackPromptActionsV331{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.feedbackPromptCopyV331{
+  display: block !important;
+  margin: 18px 0 14px !important;
+}
+
+.feedbackPromptBadgeV331{
+  display: inline-flex !important;
+  margin: 0 0 8px !important;
+  line-height: 1 !important;
+}
+
+.feedbackPromptCopyV331 h2{
+  display: block !important;
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+  color: #fff !important;
+  font-size: clamp(32px, 3.7vw, 46px) !important;
+  line-height: 0.96 !important;
+  letter-spacing: -0.075em !important;
+  white-space: normal !important;
+  text-wrap: balance !important;
+}
+
+.feedbackPromptCopyV331 p{
+  display: block !important;
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+  color: rgba(255,255,255,0.70) !important;
+  font-size: 0.88rem !important;
+  font-weight: 760 !important;
+  line-height: 1.48 !important;
+  letter-spacing: -0.012em !important;
+  white-space: normal !important;
+}
+
+.feedbackCategoryRowV331{
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 0 12px !important;
+}
+
+.feedbackCategoryButtonV331{
+  min-width: 0 !important;
+  min-height: 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 8px 10px !important;
+  line-height: 1 !important;
+}
+
+.feedbackTextareaWrapV331{
+  display: grid !important;
+  gap: 7px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.feedbackTextareaWrapV331 textarea{
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 154px !important;
+  max-height: min(260px, 32vh) !important;
+  display: block !important;
+  line-height: 1.45 !important;
+}
+
+.feedbackPromptActionsV331{
+  margin-top: 14px !important;
+}
+
+.feedbackMaybeButtonV331,
+.feedbackSendButtonV331,
+.feedbackPromptCloseV331{
+  flex: 0 0 auto !important;
+}
+
+@media (max-width: 720px){
+  .feedbackPromptOverlayV331{
+    place-items: start center !important;
+    padding: 14px !important;
+  }
+
+  .feedbackPromptCardV331{
+    width: calc(100vw - 28px) !important;
+    max-width: calc(100vw - 28px) !important;
+    max-height: calc(100vh - 28px) !important;
+    border-radius: 20px !important;
+  }
+
+  .feedbackPromptCopyV331 h2{
+    font-size: clamp(30px, 9vw, 42px) !important;
+  }
+
+  .feedbackCategoryRowV331{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
