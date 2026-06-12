@@ -1878,3 +1878,98 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   color: #fff !important;
 }
 
+/* localtify 0.4.0 — no glyph UI icons + full app modal overlay.
+   Uses inline SVGs so packaged builds do not depend on font glyph rendering.
+*/
+.app:has(.modalWrap)::before{
+  content: "" !important;
+  position: fixed !important;
+  inset: 36px 0 0 0 !important;
+  z-index: 2147482400 !important;
+  pointer-events: none !important;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb), 0.14), transparent 42%),
+    rgba(0, 0, 0, 0.58) !important;
+  backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
+}
+
+.app .modalWrap{
+  z-index: 2147482500 !important;
+}
+
+.app .windowButtons button{
+  display: grid !important;
+  place-items: center !important;
+  min-width: 46px !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: rgba(255,255,255,0.74) !important;
+}
+
+.app .windowButtons button svg,
+.inlineGlyphIcon,
+.emptyCoverIconSlot svg,
+.playlistCoverTile.empty svg,
+.spotifyTrackCheck svg,
+.albumBuilderSongGridV318 button b svg,
+.localtifyStateIconV373 svg,
+.updateToastIcon svg,
+.downloadResultV326 > span svg{
+  display: block !important;
+  width: 1em !important;
+  height: 1em !important;
+  flex: 0 0 auto !important;
+  color: currentColor !important;
+  pointer-events: none !important;
+  shape-rendering: geometricPrecision !important;
+}
+
+.app .windowButtons button svg{
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.songIndex .playingBarsIcon,
+.playlistTrackIndex .playingBarsIcon{
+  width: 13px !important;
+  height: 13px !important;
+  opacity: .95 !important;
+}
+
+.emptyCoverIconSlot,
+.playlistCoverTile.empty span{
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  color: rgba(255,255,255,0.58) !important;
+}
+
+.playlistCoverTile.empty{
+  display: grid !important;
+  place-items: center !important;
+}
+
+.albumBuilderSongGridV318 button b,
+.spotifyTrackCheck,
+.downloadResultV326 > span,
+.localtifyStateIconV373,
+.updateToastIcon{
+  display: grid !important;
+  place-items: center !important;
+}
+
+.albumBuilderSongGridV318 button b svg,
+.spotifyTrackCheck svg{
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.localtifyStateIconV373 svg,
+.updateToastIcon svg,
+.downloadResultV326 > span svg{
+  width: 18px !important;
+  height: 18px !important;
+}
+

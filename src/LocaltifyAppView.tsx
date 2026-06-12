@@ -2481,7 +2481,7 @@ function LocaltifyStateCard({
   return (
     <div className={`localtifyStateCardV373 ${tone}`}>
       <span className="localtifyStateIconV373" aria-hidden="true">
-        {tone === "error" ? "!" : tone === "warning" ? "?" : tone === "success" ? "?" : "i"}
+        <LocaltifyStateToneIcon tone={tone} />
       </span>
       <div className="localtifyStateCopyV373">
         <p className="eyebrow">{eyebrow}</p>
@@ -3096,7 +3096,7 @@ export const SongRowItem = memo(function SongRowItem({
       style={{ "--stagger": `${Math.min(index, 20) * 18}ms` } as CSSProperties}
     >
       <button className="songButton" onClick={() => onSelectSong(song.id, true)}>
-        <span className="songIndex">{active && isPlaying ? "?" : index + 1}</span>
+        <span className="songIndex">{active && isPlaying ? <PlayingBarsIcon /> : index + 1}</span>
 
         <Cover song={song} className="songArt" />
 
@@ -3698,7 +3698,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
             >
               <span className="playlistTrackGrip"><GripVertical size={14} strokeWidth={2.25} /></span>
               <button className="playlistTrackMain" type="button" onClick={() => onSelectSong(song.id)}>
-                <span className="playlistTrackIndex">{active && isPlaying ? "?" : virtualRow.index + 1}</span>
+                <span className="playlistTrackIndex">{active && isPlaying ? <PlayingBarsIcon /> : virtualRow.index + 1}</span>
                 <Cover song={song} className="playlistTrackCover" />
                 <span className="playlistTrackText">
                   <strong>{displaySongTitleV444(song, 7)}</strong>
@@ -3755,9 +3755,7 @@ export function TitleBar({ mini = false, children }: { mini?: boolean; children?
             </svg>
           </button>
         ) : null}
-        <button type="button" className="closeWin" onClick={() => window.localitfy.closeWindow()} aria-label="Close window">
-          �
-        </button>
+        <button type="button" className="closeWin" onClick={() => window.localitfy.closeWindow()} aria-label="Close window"><WindowCloseIcon /></button>
       </div>
     </header>
   );
@@ -4692,7 +4690,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 transition={settings.reducedMotion ? { duration: 0.1 } : { ...updateRibbonChildSpring, delay: 0.04 }}
               >
                 <div className="updateToastIcon topUpdateRibbonIcon" aria-hidden="true">
-                  {updatePrompt.status === "downloaded" ? "?" : updatePrompt.status === "downloading" ? "?" : updatePrompt.status === "error" ? "!" : "?"}
+                  <UpdateStatusIcon status={updatePrompt.status} />
                 </div>
 
                 <div className="updateToastText topUpdateRibbonText">
@@ -5486,7 +5484,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           {albumFolderImportPreview.albums.slice(0, 10).map((album: any) => (
                             <article key={album.id || album.sourcePath} className="albumFolderPreviewCardV309">
                               <div className="albumFolderPreviewCoverV309">
-                                {album.coverUrl ? <img src={album.coverUrl} alt="" width={96} height={96} loading="lazy" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" draggable={false} /> : <span>?</span>}
+                                {album.coverUrl ? <img src={album.coverUrl} alt="" width={96} height={96} loading="lazy" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" draggable={false} /> : <span><EmptyCoverIcon /></span>}
                               </div>
                               <div className="albumFolderPreviewCopyV309">
                                 <strong title={album.title}>{album.title}</strong>
@@ -5719,7 +5717,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                   <strong>{prettyTitle(song.title, 8)}</strong>
                                   <small>{prettyMeta(song.artist)}</small>
                                 </span>
-                                <b>{selected ? "?" : "+"}</b>
+                                <b>{selected ? <CheckMiniIcon /> : <PlusMiniIcon />}</b>
                               </button>
                             );
                           })}
@@ -5760,10 +5758,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                     {selectedPlaylist ? renderPlaylistCollage(selectedPlaylistSongs, "playlistHeroCollage playlistCoverCollage") : (
                       <div className="playlistHeroCollage playlistCoverCollage playlistEmptyCollage" aria-hidden="true">
-                        <div className="playlistCoverTile empty"><span>?</span></div>
+                        <div className="playlistCoverTile empty"><span><EmptyCoverIcon /></span></div>
                         <div className="playlistCoverTile empty"><span>+</span></div>
-                        <div className="playlistCoverTile empty"><span>?</span></div>
-                        <div className="playlistCoverTile empty"><span>?</span></div>
+                        <div className="playlistCoverTile empty"><span><EmptyCoverIcon /></span></div>
+                        <div className="playlistCoverTile empty"><span><EmptyCoverIcon /></span></div>
                       </div>
                     )}
 
@@ -6365,7 +6363,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                     {track.downloadMessage ? <small>{track.downloadMessage}</small> : null}
                                     {track.downloadError ? <small className="spotifyTrackError">{track.downloadError}</small> : null}
                                   </div>
-                                  <span className="spotifyTrackCheck" aria-hidden="true">{selected ? "?" : ""}</span>
+                                  <span className="spotifyTrackCheck" aria-hidden="true">{selected ? <CheckMiniIcon /> : null}</span>
                                   {failed ? (
                                     <span
                                       className="spotifyRetryButton"
@@ -6556,7 +6554,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             key={`${item.url || item.filename || index}`}
                             className={failed ? "downloadResult bad downloadResultV326" : imported ? "downloadResult ok downloadResultV326" : "downloadResult warn downloadResultV326"}
                           >
-                            <span>{failed ? "!" : imported ? "?" : "?"}</span>
+                            <span><ResultStatusIcon failed={failed} imported={imported} /></span>
 
                             <div>
                               <strong>{failed ? "Download failed" : imported ? "Added to library" : "Downloaded, not imported"}</strong>
