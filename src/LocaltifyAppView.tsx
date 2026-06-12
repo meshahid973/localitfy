@@ -112,6 +112,11 @@ function ResultStatusIcon({ failed, imported }: { failed: boolean; imported: boo
 }
 
 
+function MetaDividerDot() {
+  return <span className="metaDividerDot" aria-hidden="true" />;
+}
+
+
 import {
   BarChart3,
   Disc3,
@@ -3182,7 +3187,7 @@ export const SongRowItem = memo(function SongRowItem({
 
         <span className="songMeta">
           <strong title={displaySongTitleV444(song, 12)}>{displaySongTitleV444(song, 7)}</strong>
-          <small>{isMissingFile ? "missing local file � reimport or relink" : displaySongArtistV444(song)}</small>
+          <small>{isMissingFile ? "missing local file · reimport or relink" : displaySongArtistV444(song)}</small>
         </span>
       </button>
 
@@ -5830,16 +5835,22 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       <p className="eyebrow">playlists</p>
                       <h3>{selectedPlaylist ? selectedPlaylist.name : "make your first mix"}</h3>
                       <p>
-                        {selectedPlaylist
-                          ? `${selectedPlaylistSongs.length} song${selectedPlaylistSongs.length === 1 ? "" : "s"} � ${formatTime(selectedPlaylistDuration)} total`
-                          : "Create a playlist, add songs, and keep your local music feeling familiar."}
+                        {selectedPlaylist ? (
+                          <>
+                            {selectedPlaylistSongs.length} song{selectedPlaylistSongs.length === 1 ? "" : "s"}
+                            <MetaDividerDot />
+                            {formatTime(selectedPlaylistDuration)} total
+                          </>
+                        ) : (
+                          "Create a playlist, add songs, and keep your local music feeling familiar."
+                        )}
                       </p>
                     </div>
 
                     {selectedPlaylist ? renderPlaylistCollage(selectedPlaylistSongs, "playlistHeroCollage playlistCoverCollage") : (
                       <div className="playlistHeroCollage playlistCoverCollage playlistEmptyCollage" aria-hidden="true">
                         <div className="playlistCoverTile empty"><span><EmptyCoverIcon /></span></div>
-                        <div className="playlistCoverTile empty"><span>+</span></div>
+                        <div className="playlistCoverTile empty"><span><PlusMiniIcon /></span></div>
                         <div className="playlistCoverTile empty"><span><EmptyCoverIcon /></span></div>
                         <div className="playlistCoverTile empty"><span><EmptyCoverIcon /></span></div>
                       </div>
@@ -5921,7 +5932,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           {renderPlaylistCollage(previewSongs)}
                           <span className="playlistShelfMeta">
                             <strong>{playlist.name}</strong>
-                            <small>{songCount} song{songCount === 1 ? "" : "s"} � {formatTime(duration)}</small>
+                            <small>{songCount} song{songCount === 1 ? "" : "s"}<MetaDividerDot />{formatTime(duration)}</small>
                           </span>
                           <span className="playlistShelfDropHint">{activePlaylistId === playlist.id ? "playing" : "drop song"}</span>
                         </button>

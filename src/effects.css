@@ -2001,3 +2001,114 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
     0 0 22px rgba(229, 72, 104, 0.26) !important;
 }
 
+/* localtify 0.4.0 — missing library actions + playlist dark polish.
+   Missing files are clearly red, and playlist panels no longer get a separate bright grey wash.
+*/
+.app .libraryMissingStripV039{
+  border: 1px solid rgba(255, 79, 115, 0.26) !important;
+  background:
+    linear-gradient(90deg, rgba(255, 79, 115, 0.18), rgba(95, 23, 46, 0.12)),
+    rgba(18, 8, 14, 0.82) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(255, 79, 115, 0.86),
+    0 12px 34px rgba(0,0,0,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.045) !important;
+}
+
+.app .libraryMissingStripV039 strong{
+  color: #ffd4dc !important;
+}
+
+.app .libraryMissingStripV039 span{
+  color: rgba(255, 226, 232, 0.74) !important;
+}
+
+.app .libraryMissingActionsV039 button{
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 2 !important;
+  min-height: 30px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 234, 238, 0.86) !important;
+  background: rgba(255, 255, 255, 0.065) !important;
+}
+
+.app .libraryMissingActionsV039 button:hover,
+.app .libraryMissingActionsV039 button.active{
+  border-color: rgba(255, 113, 141, 0.36) !important;
+  color: #fff !important;
+  background: rgba(255, 79, 115, 0.18) !important;
+}
+
+.app .libraryMissingActionsV039 .dangerGhostV039{
+  color: #ffd1dc !important;
+  background: rgba(255, 79, 115, 0.14) !important;
+}
+
+.app .libraryMissingActionsV039 .dangerGhostV039:hover{
+  background: rgba(255, 79, 115, 0.25) !important;
+}
+
+.app .playlistHeroPanel,
+.app .playlistCreatePanel,
+.app .playlistShelfPanel,
+.app .playlistTracksPanel{
+  border-color: rgba(255,255,255,.075) !important;
+  background:
+    radial-gradient(circle at 18% 2%, rgba(var(--accent-rgb), .075), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.012)),
+    rgba(7, 4, 11, .88) !important;
+  box-shadow:
+    0 24px 80px rgba(0,0,0,.46),
+    inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.app .playlistHeroPanel::before{
+  opacity: .22 !important;
+}
+
+.app .playlistShelfCard{
+  background: rgba(12, 8, 17, .72) !important;
+  border-color: rgba(255,255,255,.075) !important;
+}
+
+.app .playlistShelfCard:hover{
+  background: rgba(18, 12, 24, .86) !important;
+  border-color: rgba(var(--accent-rgb), .19) !important;
+}
+
+.app .playlistShelfCard.active,
+.app .playlistShelfCard.playing{
+  background:
+    linear-gradient(90deg, rgba(var(--accent-rgb), .105), rgba(255,255,255,.026)),
+    rgba(13, 8, 18, .88) !important;
+  border-color: rgba(var(--accent-rgb), .24) !important;
+}
+
+.metaDividerDot{
+  display: inline-block !important;
+  width: .34em !important;
+  height: .34em !important;
+  margin: 0 .48em !important;
+  border-radius: 999px !important;
+  vertical-align: .12em !important;
+  background: currentColor !important;
+  opacity: .42 !important;
+}
+
+.playlistShelfMeta small{
+  display: flex !important;
+  align-items: center !important;
+  gap: 0 !important;
+}
+
+.playlistCoverTile.empty{
+  color: rgba(255,255,255,.56) !important;
+  background: rgba(255,255,255,.045) !important;
+}
+
+.playlistCoverTile.empty svg{
+  width: 18px !important;
+  height: 18px !important;
+}
+
