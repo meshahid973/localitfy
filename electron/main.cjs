@@ -3033,6 +3033,7 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
     metadata,
     filePath,
     folderCoverPath: options.folderCoverPath || "",
+    albumEmbeddedCoverPath: options.albumEmbeddedCoverPath || options.albumCoverPath || "",
     spotifyCoverPath: options.spotifyCoverPath || "",
     fallbackCoverPath: fallbackCover
   });
@@ -3345,7 +3346,7 @@ function findAlbumFoldersFromRoot(rootPath, mode = "single") {
 }
 
 async function buildAlbumFolderPreview(folderPath, index = 0) {
-  const albumTitle = cleanAlbumFolderText(path.basename(folderPath), `album ${index + 1}`);
+  const folderTitle = cleanAlbumFolderText(path.basename(folderPath), `album ${index + 1}`);
   const existingPaths = new Set(
     getSongs()
       .map((song) => path.normalize(String(song.filePath || "")).toLowerCase())
@@ -3353,35 +3354,64 @@ async function buildAlbumFolderPreview(folderPath, index = 0) {
   );
 
   const audioFiles = listAudioFilesInDirectory(folderPath, { maxDepth: 1, maxFiles: ALBUM_FOLDER_MAX_TRACKS_PER_ALBUM });
-  const coverPath = findAlbumFolderCoverPath(folderPath);
-  const parsedTracks = (await Promise.all(audioFiles.map(async (filePath, trackIndex) => {
-    const filenameMetadata = parseAlbumTrackFileName(filePath, albumTitle);
-    const tagMetadata = await readLocalAudioMetadata(filePath, { readCover: false });
+  const folderCoverPath = findAlbumFolderCoverPath(folderPath);
+
+  let albumEmbeddedCoverPath = "";
+  const parsedTracks = [];
+
+  for (let trackIndex = 0; trackIndex < audioFiles.length; trackIndex += 1) {
+    const filePath = audioFiles[trackIndex];
+    const filenameMetadata = parseAlbumTrackFileName(filePath, folderTitle);
+    const shouldReadCover = !folderCoverPath && !albumEmbeddedCoverPath && trackIndex < 12;
+    const tagMetadata = await readLocalAudioMetadata(filePath, { readCover: shouldReadCover });
     const duplicate = existingPaths.has(path.normalize(String(filePath || "")).toLowerCase());
 
-    return {
+    if (!albumEmbeddedCoverPath && tagMetadata?.embeddedCoverPath && fileExists(tagMetadata.embeddedCoverPath)) {
+      albumEmbeddedCoverPath = tagMetadata.embeddedCoverPath;
+    }
+
+    const durationMs = Math.max(
+      0,
+      Number(tagMetadata?.durationMs || 0),
+      Number(tagMetadata?.duration || 0) > 0 ? Number(tagMetadata.duration) * 1000 : 0
+    );
+
+    parsedTracks.push({
       id: crypto.createHash("sha1").update(`${filePath}:${trackIndex}`).digest("hex"),
       filePath,
       title: cleanAlbumFolderText(tagMetadata?.title, filenameMetadata.title),
       artist: cleanAlbumFolderText(tagMetadata?.artist, filenameMetadata.artist),
       album: cleanAlbumFolderText(tagMetadata?.album, filenameMetadata.album),
-      duration: Number(tagMetadata?.duration || 0) || 0,
-      durationMs: Number(tagMetadata?.durationMs || 0) || 0,
+      duration: durationMs > 0 ? Math.round(durationMs / 1000) : Number(tagMetadata?.duration || 0) || 0,
+      durationMs,
       disc: Number(tagMetadata?.disc || 1) || 1,
       track: Number(tagMetadata?.track || albumTrackNumberFromFileName(filePath, trackIndex)) || albumTrackNumberFromFileName(filePath, trackIndex),
-      duplicate
-    };
-  }))).sort((a, b) => (a.disc || 1) - (b.disc || 1) || (a.track || 0) - (b.track || 0) || a.title.localeCompare(b.title));
+      duplicate,
+      metadataSource: tagMetadata?.source || "filename",
+      durationSource: tagMetadata?.durationSource || "none",
+      hasEmbeddedCover: Boolean(tagMetadata?.hasEmbeddedCover)
+    });
+  }
+
+  parsedTracks.sort((a, b) => (a.disc || 1) - (b.disc || 1) || (a.track || 0) - (b.track || 0) || a.title.localeCompare(b.title));
 
   const artistCounts = new Map();
+  const albumCounts = new Map();
+
   for (const track of parsedTracks) {
     const artist = cleanAlbumFolderText(track.artist, "unknown artist");
-    if (!artist || artist === "unknown artist") continue;
-    artistCounts.set(artist, (artistCounts.get(artist) || 0) + 1);
+    const album = cleanAlbumFolderText(track.album, "");
+
+    if (artist && artist !== "unknown artist") artistCounts.set(artist, (artistCounts.get(artist) || 0) + 1);
+    if (album && album !== "local album") albumCounts.set(album, (albumCounts.get(album) || 0) + 1);
   }
 
   const albumArtist = [...artistCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "various artists";
+  const tagAlbumTitle = [...albumCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+  const albumTitle = cleanAlbumFolderText(tagAlbumTitle || folderTitle, folderTitle);
   const duplicateCount = parsedTracks.filter((track) => track.duplicate).length;
+  const coverPath = folderCoverPath || albumEmbeddedCoverPath || "";
+  const coverSource = folderCoverPath ? "folder" : albumEmbeddedCoverPath ? "embedded" : "none";
 
   return {
     id: crypto.createHash("sha1").update(folderPath).digest("hex"),
@@ -3389,6 +3419,9 @@ async function buildAlbumFolderPreview(folderPath, index = 0) {
     artist: albumArtist,
     sourcePath: folderPath,
     coverPath,
+    coverSource,
+    folderCoverPath: folderCoverPath || "",
+    embeddedCoverPath: albumEmbeddedCoverPath || "",
     coverUrl: coverPath ? safeMediaUrl(coverPath) : "",
     coverThumbUrl: coverPath ? getCoverThumbnailUrl(coverPath) : "",
     coverThumbnailUrl: coverPath ? getCoverThumbnailUrl(coverPath) : "",
@@ -3522,17 +3555,33 @@ async function handleAlbumFolderImport(event, payload = {}) {
 
     if (!filePath || !fileExists(filePath) || !isAudioFile(filePath) || existingPaths.has(fileKey)) continue;
 
-    const baseSong = await makeSongFromFile(filePath, pixelArtFiles, usedCovers, { folderCoverPath: album.coverPath || "" });
+    const baseSong = await makeSongFromFile(filePath, pixelArtFiles, usedCovers, {
+      album: album.title || track.album || "",
+      folderCoverPath: album.coverSource === "folder" ? album.coverPath || album.folderCoverPath || "" : album.folderCoverPath || "",
+      albumEmbeddedCoverPath: album.coverSource === "embedded" ? album.coverPath || album.embeddedCoverPath || "" : album.embeddedCoverPath || ""
+    });
+
+    const durationMs = Math.max(
+      0,
+      Number(track.durationMs || 0),
+      Number(baseSong.durationMs || 0),
+      Number(track.duration || 0) > 0 ? Number(track.duration) * 1000 : 0,
+      Number(baseSong.duration || 0) > 0 ? Number(baseSong.duration) * 1000 : 0
+    );
+    const duration = durationMs > 0
+      ? Math.round(durationMs / 1000)
+      : Math.max(0, Number(track.duration || 0), Number(baseSong.duration || 0));
+
     importedSongs.push({
       ...baseSong,
       title: cleanAlbumFolderText(track.title, baseSong.title || "track"),
       artist: cleanAlbumFolderText(track.artist, baseSong.artist || album.artist || "unknown artist"),
-      album: cleanAlbumFolderText(album.title, track.album || "local album"),
-      coverPath: baseSong.coverSource === "embedded" ? baseSong.coverPath : (album.coverPath && fileExists(album.coverPath) ? album.coverPath : baseSong.coverPath),
-      coverSource: baseSong.coverSource === "embedded" ? "embedded" : (album.coverPath && fileExists(album.coverPath) ? "folder" : baseSong.coverSource),
-      coverUpdatedAt: new Date().toISOString(),
-      duration: Number(track.duration || baseSong.duration || 0) || 0,
-      durationMs: Number(track.durationMs || baseSong.durationMs || 0) || 0,
+      album: cleanAlbumFolderText(album.title || track.album, baseSong.album || "local album"),
+      coverPath: baseSong.coverPath || "",
+      coverSource: baseSong.coverSource || "none",
+      coverUpdatedAt: baseSong.coverUpdatedAt || new Date().toISOString(),
+      duration,
+      durationMs: durationMs || (duration > 0 ? duration * 1000 : 0),
       sourceType: "local",
       sourceProvider: "album-folder",
       sourceUrl: album.sourcePath || "",
@@ -3772,10 +3821,13 @@ function buildRandomizeMissingSongCovers() {
 
 
 async function repairMissingSongMetadata(payload = {}) {
-  const limit = Math.max(1, Math.min(500, Number(payload?.limit || 120) || 120));
+  const limit = Math.max(1, Math.min(1000, Number(payload?.limit || 180) || 180));
+  const force = Boolean(payload?.force || payload?.forceAll);
+  const coverOnly = Boolean(payload?.coverOnly);
+  const durationOnly = Boolean(payload?.durationOnly);
   const allSongs = getSongs();
   const pixelArtFiles = getPixelArtFiles();
-  const usedCovers = new Set();
+
   const targets = allSongs.filter((song) => {
     if (!song?.filePath || !fileExists(song.filePath) || !isAudioFile(song.filePath)) return false;
 
@@ -3788,21 +3840,26 @@ async function repairMissingSongMetadata(payload = {}) {
       song.coverSource === "none" ||
       song.coverSource === "unknown";
 
+    if (force) return true;
+    if (coverOnly) return coverMissing;
+    if (durationOnly) return durationMissing;
     return durationMissing || coverMissing;
   }).slice(0, limit);
 
   let changedCount = 0;
+  let durationFixedCount = 0;
+  let coverFixedCount = 0;
   const changedIds = [];
 
   for (const song of targets) {
     const metadata = await readLocalAudioMetadata(song.filePath);
     const fallbackCover = pickStablePixelCoverForSong(song, pixelArtFiles);
-    if (fallbackCover) usedCovers.add(fallbackCover);
 
     const coverResult = await resolveSongCover({
       song,
       metadata,
       filePath: song.filePath,
+      folderCoverPath: findFolderCover(song.filePath),
       fallbackCoverPath: fallbackCover
     });
 
@@ -3811,14 +3868,24 @@ async function repairMissingSongMetadata(payload = {}) {
     const artist = String(metadata?.artist || "").trim();
     const album = String(metadata?.album || "").trim();
 
-    if (title && (!song.title || song.title === path.parse(song.filePath).name)) patch.title = title;
-    if (artist && (!song.artist || song.artist === "unknown artist")) patch.artist = artist;
-    if (album && (!song.album || song.album === "local files")) patch.album = album;
+    if (!durationOnly) {
+      if (title && (!song.title || song.title === path.parse(song.filePath).name)) patch.title = title;
+      if (artist && (!song.artist || song.artist === "unknown artist")) patch.artist = artist;
+      if (album && (!song.album || song.album === "local files")) patch.album = album;
+    }
 
-    if (Number(song.duration || 0) <= 0 && Number(metadata?.duration || 0) > 0) patch.duration = Number(metadata.duration);
-    if (Number(song.durationMs || 0) <= 0 && Number(metadata?.durationMs || 0) > 0) patch.durationMs = Number(metadata.durationMs);
+    const metadataDurationMs = Math.max(
+      0,
+      Number(metadata?.durationMs || 0),
+      Number(metadata?.duration || 0) > 0 ? Number(metadata.duration) * 1000 : 0
+    );
 
-    if (coverResult.coverPath && (!song.coverPath || !fileExists(song.coverPath) || song.coverSource !== "custom")) {
+    if (!coverOnly && metadataDurationMs > 0 && (force || Number(song.duration || 0) <= 0 || Number(song.durationMs || 0) <= 0)) {
+      patch.durationMs = metadataDurationMs;
+      patch.duration = Math.round(metadataDurationMs / 1000);
+    }
+
+    if (!durationOnly && coverResult.coverPath && (force || !song.coverPath || !fileExists(song.coverPath) || song.coverSource !== "custom" && ["fallback", "none", "unknown", ""].includes(String(song.coverSource || "")))) {
       patch.coverPath = coverResult.coverPath;
       patch.coverSource = coverResult.coverSource;
       patch.coverUpdatedAt = coverResult.coverUpdatedAt;
@@ -3827,6 +3894,8 @@ async function repairMissingSongMetadata(payload = {}) {
     if (Object.keys(patch).length) {
       patchSong(song.id, patch);
       changedCount += 1;
+      if (Object.prototype.hasOwnProperty.call(patch, "duration") || Object.prototype.hasOwnProperty.call(patch, "durationMs")) durationFixedCount += 1;
+      if (Object.prototype.hasOwnProperty.call(patch, "coverPath")) coverFixedCount += 1;
       changedIds.push(song.id);
     }
   }
@@ -3837,6 +3906,8 @@ async function repairMissingSongMetadata(payload = {}) {
     ok: true,
     scannedCount: targets.length,
     changedCount,
+    durationFixedCount,
+    coverFixedCount,
     changedIds,
     songs: listSongsShaped()
   };

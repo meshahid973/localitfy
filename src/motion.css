@@ -2492,3 +2492,47 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   transform: translateZ(0) !important;
 }
 
+/* localtify 0.4.0 V430 — dynamic proximity motion.
+   This does not lower motion; it makes the movement react to pointer speed, direction, and hit position.
+*/
+.app :is(.sidebar, .playerBar, .hero) .localtifyProximityTarget{
+  --prox-shift-y: 0px;
+  --prox-glow: .08;
+  --prox-duration: 230ms;
+  transition:
+    transform var(--prox-duration, 230ms) cubic-bezier(.16, 1, .3, 1),
+    box-shadow var(--prox-duration, 230ms) ease,
+    border-color var(--prox-duration, 230ms) ease !important;
+}
+
+.app :is(.sidebar, .playerBar, .hero) .localtifyProximityTarget.localtifyProximityActive.localtifyVelocityMotionV430:is(
+  button,
+  [role="button"],
+  .navItem,
+  .mainAction,
+  .heroMain,
+  .heroGhost,
+  .heroTinyButton,
+  .expandLibraryButton,
+  .homeShelfActionButton,
+  .softButton,
+  .toolButton,
+  .iconAction,
+  .playerButton,
+  .playerControlButton,
+  .circleButton,
+  .repeatButton,
+  .volumeIconButton
+){
+  transform:
+    translate3d(var(--prox-shift-x, 0px), var(--prox-shift-y, 0px), 0)
+    rotateZ(var(--prox-rotate, 0deg))
+    scaleX(var(--prox-stretch-x, 1))
+    scaleY(var(--prox-stretch-y, 1))
+    scale(var(--prox-scale, 1)) !important;
+  box-shadow:
+    0 10px calc(18px + (34px * var(--prox-glow, .08))) rgba(var(--accent-rgb), calc(.04 + (.12 * var(--prox-glow, .08)))),
+    inset 0 1px rgba(255,255,255,.08) !important;
+  filter: none !important;
+}
+

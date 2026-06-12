@@ -1,4 +1,4 @@
-/* localtify 0.3.9 V320 — stabilized physical proximity motion.
+/* localtify 0.4.0 V430 — dynamic physical proximity motion.
    Only sidebar / player / hero controls get velocity motion.
    Home cards and big lists stay out of the pointer hot path.
 */
@@ -88,38 +88,71 @@ type MotionPayload = {
   stretchY: number;
   rotate: number;
   shiftX: number;
+  shiftY: number;
+  glow: number;
+  durationMs: number;
 };
 
 function targetPriority(element: HTMLElement) {
-  if (element.closest(".playerBar")) return 1.12;
-  if (element.closest(".sidebar")) return 1.06;
-  if (element.closest(".hero")) return 0.98;
-  return 0.9;
+  if (element.closest(".playerBar")) return 1.15;
+  if (element.closest(".sidebar")) return 1.08;
+  if (element.closest(".hero")) return 1.02;
+  return 0.94;
 }
 
-function buildPayload(velocityX: number, velocityY: number, speed: number, priority = 1): MotionPayload {
-  // Physical feel from velocity, but clamped and transform-only.
-  const vx = clamp(velocityX * priority, -1, 1);
-  const vy = clamp(velocityY * priority, -0.75, 0.75);
-  const safeSpeed = clamp(speed * priority, 0, 1.2);
-  const stretch = Math.min(Math.abs(vx) * 0.08, 0.08);
-  const squash = Math.min((Math.abs(vx) + Math.abs(vy)) * 0.012, 0.018);
+function readPointerGeometry(element: HTMLElement, clientX: number, clientY: number) {
+  const rect = element.getBoundingClientRect();
+  const width = Math.max(1, rect.width);
+  const height = Math.max(1, rect.height);
+  const centerX = rect.left + width / 2;
+  const centerY = rect.top + height / 2;
+
+  const localX = clamp((clientX - centerX) / (width / 2), -1, 1);
+  const localY = clamp((clientY - centerY) / (height / 2), -1, 1);
+  const distance = clamp(Math.sqrt(localX * localX + localY * localY), 0, 1.4);
+
+  return { localX, localY, distance, width, height };
+}
+
+function buildPayload(
+  velocityX: number,
+  velocityY: number,
+  speed: number,
+  priority = 1,
+  geometry = { localX: 0, localY: 0, distance: 0, width: 44, height: 44 }
+): MotionPayload {
+  // Dynamic feel: velocity controls stretch, pointer position controls lean/shift,
+  // target size changes the max movement, and speed changes settle timing.
+  const vx = clamp(velocityX * priority, -1.25, 1.25);
+  const vy = clamp(velocityY * priority, -1, 1);
+  const safeSpeed = clamp(speed * priority, 0, 1.45);
+  const edgePull = clamp(geometry.distance, 0, 1.25);
+  const sizeBoost = clamp((geometry.width + geometry.height) / 140, 0.72, 1.32);
+
+  const stretch = Math.min((Math.abs(vx) * 0.07 + safeSpeed * 0.025) * sizeBoost, 0.115);
+  const squash = Math.min((Math.abs(vx) + Math.abs(vy) + edgePull) * 0.012, 0.026);
+  const lean = clamp((vx * 4.8 + geometry.localX * 3.2) * sizeBoost, -7.5, 7.5);
+  const shiftX = clamp((vx * 3.5 + geometry.localX * 2.8) * sizeBoost, -5.8, 5.8);
+  const shiftY = clamp((vy * 2.2 + geometry.localY * 1.8) * sizeBoost, -3.6, 3.6);
 
   return {
-    scale: 1 + Math.min(safeSpeed * 0.014, 0.022),
+    scale: 1 + Math.min((safeSpeed * 0.014 + edgePull * 0.007) * sizeBoost, 0.034),
     stretchX: 1 + stretch,
     stretchY: 1 - squash,
-    rotate: clamp(vx * 6, -6, 6),
-    shiftX: clamp(vx * 3.2 + vy * 0.35, -4.2, 4.2)
+    rotate: lean,
+    shiftX,
+    shiftY,
+    glow: clamp(0.08 + safeSpeed * 0.22 + edgePull * 0.12, 0.08, 0.42),
+    durationMs: Math.round(clamp(260 - safeSpeed * 82, 130, 260))
   };
 }
 
 function restPayload(): MotionPayload {
-  return { scale: 1.004, stretchX: 1, stretchY: 1, rotate: 0, shiftX: 0 };
+  return { scale: 1.004, stretchX: 1, stretchY: 1, rotate: 0, shiftX: 0, shiftY: 0, glow: 0.08, durationMs: 230 };
 }
 
 function pressPayload(): MotionPayload {
-  return { scale: 0.988, stretchX: 1.025, stretchY: 0.988, rotate: 0, shiftX: 0 };
+  return { scale: 0.982, stretchX: 1.03, stretchY: 0.982, rotate: 0, shiftX: 0, shiftY: 0.6, glow: 0.22, durationMs: 120 };
 }
 
 function payloadSignature(payload: MotionPayload) {
@@ -128,7 +161,10 @@ function payloadSignature(payload: MotionPayload) {
     Math.round(payload.stretchX * 10000),
     Math.round(payload.stretchY * 10000),
     Math.round(payload.rotate * 100),
-    Math.round(payload.shiftX * 100)
+    Math.round(payload.shiftX * 100),
+    Math.round(payload.shiftY * 100),
+    Math.round(payload.glow * 1000),
+    Math.round(payload.durationMs)
   ].join(":");
 }
 
@@ -137,12 +173,15 @@ function applyState(element: HTMLElement, payload: MotionPayload) {
   if (element.dataset.localtifyProxSignature === signature && element.classList.contains("localtifyProximityActive")) return;
 
   element.dataset.localtifyProxSignature = signature;
-  element.classList.add("localtifyProximityTarget", "localtifyProximityActive", "localtifyVelocityMotion", "localtifyVelocityMotionV320");
+  element.classList.add("localtifyProximityTarget", "localtifyProximityActive", "localtifyVelocityMotion", "localtifyVelocityMotionV320", "localtifyVelocityMotionV430");
   element.style.setProperty("--prox-scale", payload.scale.toFixed(4));
   element.style.setProperty("--prox-stretch-x", payload.stretchX.toFixed(4));
   element.style.setProperty("--prox-stretch-y", payload.stretchY.toFixed(4));
   element.style.setProperty("--prox-rotate", `${payload.rotate.toFixed(2)}deg`);
   element.style.setProperty("--prox-shift-x", `${payload.shiftX.toFixed(2)}px`);
+  element.style.setProperty("--prox-shift-y", `${payload.shiftY.toFixed(2)}px`);
+  element.style.setProperty("--prox-glow", payload.glow.toFixed(3));
+  element.style.setProperty("--prox-duration", `${payload.durationMs}ms`);
 }
 
 function clearElement(element: HTMLElement) {
@@ -152,13 +191,17 @@ function clearElement(element: HTMLElement) {
     "localtifyVelocityMotionV312",
     "localtifyVelocityMotionV316",
     "localtifyVelocityMotionV318",
-    "localtifyVelocityMotionV320"
+    "localtifyVelocityMotionV320",
+    "localtifyVelocityMotionV430"
   );
   element.style.removeProperty("--prox-scale");
   element.style.removeProperty("--prox-stretch-x");
   element.style.removeProperty("--prox-stretch-y");
   element.style.removeProperty("--prox-rotate");
   element.style.removeProperty("--prox-shift-x");
+  element.style.removeProperty("--prox-shift-y");
+  element.style.removeProperty("--prox-glow");
+  element.style.removeProperty("--prox-duration");
   element.style.removeProperty("--prox-blur");
   element.style.removeProperty("--prox-glow-size");
   element.style.removeProperty("--prox-bg");
@@ -311,7 +354,13 @@ export function useProximityMotion({
       const speed = Math.sqrt(dx * dx + dy * dy) / dt;
 
       pendingTarget = target;
-      pendingPayload = buildPayload(velocityX, velocityY, speed, targetPriority(target));
+      pendingPayload = buildPayload(
+        velocityX,
+        velocityY,
+        speed,
+        targetPriority(target),
+        readPointerGeometry(target, event.clientX, event.clientY)
+      );
       schedulePaint();
       settleActive(115);
     };

@@ -176,6 +176,22 @@ async function resolveSongCover(input = {}) {
     };
   }
 
+
+  const albumEmbeddedCoverPath = input.albumEmbeddedCoverPath || input.albumCoverPath || "";
+  if (albumEmbeddedCoverPath && fileExists(albumEmbeddedCoverPath) && isImageFile(albumEmbeddedCoverPath)) {
+    const cached = copyCoverToAppStorage(albumEmbeddedCoverPath, {
+      source: "embedded",
+      filePath: input.filePath || song.filePath || "",
+      songId: song.id || ""
+    }) || albumEmbeddedCoverPath;
+
+    return {
+      coverPath: cached,
+      coverSource: "embedded",
+      coverUpdatedAt: now
+    };
+  }
+
   if (input.spotifyCoverPath && fileExists(input.spotifyCoverPath) && isImageFile(input.spotifyCoverPath)) {
     return {
       coverPath: input.spotifyCoverPath,
