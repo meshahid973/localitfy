@@ -2577,6 +2577,33 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
 }
 
 
+function WindowMinimizeIcon() {
+  return (
+    <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" focusable="false">
+      <path d="M2.25 6.25h7.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function WindowMaximizeIcon() {
+  return (
+    <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" focusable="false">
+      <rect x="2.2" y="2.2" width="7.6" height="7.6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.45" />
+    </svg>
+  );
+}
+
+function WindowCloseIcon() {
+  return (
+    <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" focusable="false">
+      <path d="M3 3l6 6M9 3L3 9" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+
+
+
 export type LocalAlbumEntry = {
   id: string;
   title: string;
@@ -3720,7 +3747,7 @@ export function TitleBar({ mini = false, children }: { mini?: boolean; children?
       ) : null}
 
       <div className="windowButtons">
-        <button type="button" onClick={() => window.localitfy.minimizeWindow()} aria-label="Minimize window">-</button>
+        <button type="button" onClick={() => window.localitfy.minimizeWindow()} aria-label="Minimize window"><WindowMinimizeIcon /></button>
         {!mini ? (
           <button type="button" className="maxWin" onClick={() => window.localitfy.toggleMaximizeWindow()} aria-label="Maximize or restore window">
             <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" focusable="false">

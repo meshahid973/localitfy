@@ -10841,3 +10841,68 @@ body.isResizingPlayer .app *{
   border-right: 0 !important;
 }
 
+/* localtify 0.4.0 — global modal blur lock.
+   Fixes delete/confirm overlays only blurring the content panel while the sidebar/player stay sharp.
+*/
+.app .modalWrap{
+  position: fixed !important;
+  inset: 36px 0 0 0 !important;
+  z-index: 2147482500 !important;
+  width: 100vw !important;
+  height: calc(100vh - 36px) !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: clamp(16px, 2vw, 28px) !important;
+  overflow: auto !important;
+  isolation: isolate !important;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(var(--accent-rgb), 0.13), transparent 42%),
+    rgba(0, 0, 0, 0.64) !important;
+  backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
+}
+
+.app .modalWrap::before{
+  content: "" !important;
+  position: fixed !important;
+  inset: 36px 0 0 0 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.46)),
+    rgba(0,0,0,0.12) !important;
+}
+
+.app .modalWrap .editorModal,
+.app .modalWrap .confirmModal,
+.app .modalWrap [class*="Modal"]{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.app .windowButtons button{
+  display: grid !important;
+  place-items: center !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: rgba(255,255,255,0.72) !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+.app .windowButtons button svg{
+  display: block !important;
+  width: 12px !important;
+  height: 12px !important;
+  pointer-events: none !important;
+  color: currentColor !important;
+  transform: translateZ(0) !important;
+}
+
+.app .windowButtons button:hover{
+  color: #fff !important;
+}
+
+.app .windowButtons .closeWin:hover{
+  color: #fff !important;
+}
+
