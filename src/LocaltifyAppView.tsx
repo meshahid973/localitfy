@@ -5260,14 +5260,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         <p className="eyebrow">fresh shelf</p>
                         <h3>recent covers</h3>
                       </div>
-                      <button
-                        className="homeShelfActionButton quiet"
-                        type="button"
-                        onClick={() => updateSetting("homeExpanded", !settings.homeExpanded)}
-                        aria-pressed={settings.homeExpanded}
-                      >
-                        {settings.homeExpanded ? "compact library" : "open full shelf"}
-                      </button>
                     </div>
 
                     <div className="homeFreshRail">
@@ -5310,7 +5302,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           type="button"
                           onClick={() => updateSetting("homeExpanded", !settings.homeExpanded)}
                           aria-pressed={settings.homeExpanded}
-                          title={settings.homeExpanded ? "make the home library compact" : "expand the home library"}
+                          title={settings.homeExpanded ? "compact quick library" : "expand quick library"}
                         >
                           {settings.homeExpanded ? "compact" : "expand"}
                         </button>

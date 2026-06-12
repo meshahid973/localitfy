@@ -18116,3 +18116,43 @@ body.localitfyThemePainting .homeSongRow{
   height: 18px !important;
 }
 
+/* localtify 0.4.0 — home shelf ownership cleanup.
+   Recent covers is display-only now; quick library owns expand/compact.
+*/
+.app .homeFreshPanel .homeShelfHeader{
+  align-items: end !important;
+}
+
+.app .homeFreshPanel .homeShelfHeader > div{
+  min-width: 0 !important;
+}
+
+.app .homeFreshPanel .homeShelfActionButton{
+  display: none !important;
+}
+
+.app .homeFreshRail,
+.app .homeAlbumGrid,
+.app .homeSongList{
+  contain: layout paint style !important;
+}
+
+.app .homeFreshCard,
+.app .homeListenCard,
+.app .homeAlbumCard,
+.app .songRow,
+.app .libraryRow{
+  content-visibility: auto;
+  contain-intrinsic-size: 92px 132px;
+}
+
+/* Keep full animation/motion, but make paint ownership clearer. */
+.app .homeFreshCard :is(img, .coverAura),
+.app .homeListenCard :is(img, .coverAura),
+.app .homeAlbumCard :is(img, .coverAura),
+.app .songRow :is(img, .coverAura),
+.app .libraryRow :is(img, .coverAura){
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
