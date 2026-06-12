@@ -2536,3 +2536,140 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   filter: none !important;
 }
 
+/* localtify 0.4.0 — smooth compositor motion pass.
+   Important: will-change is only enabled on active/animated surfaces,
+   not globally, so we get smoother motion without burning GPU/RAM.
+*/
+.app :is(
+  .hero,
+  .heroPremium,
+  .heroArt,
+  .heroArtWrap,
+  .nowPlayingArt,
+  .simpleHeroArt,
+  .playerBar,
+  .playerBar button,
+  .sidebar button,
+  .sidebar .navItem,
+  .modalWrap,
+  .editorModal,
+  .feedbackPromptCardV331,
+  .toast,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .albumCardV318,
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow
+){
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.app :is(
+  .heroLayoutMotion.heroLayoutPulseA,
+  .heroLayoutMotion.heroLayoutPulseB,
+  .nowPlayingArtSwap,
+  .simpleHeroArtSwap,
+  .nowPlayingCopySwap,
+  .nowPlayingMiniCopySwap,
+  .loadingCard,
+  .toast,
+  .modalWrap,
+  .editorModal,
+  .feedbackPromptCardV331,
+  .localtifyProximityActive,
+  .localtifyVelocityMotionV430
+){
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.app :is(
+  .songRow.playing,
+  .libraryRow.playing,
+  .playlistTrackRow.playing,
+  .playlistSongRow.playing,
+  .homeListenCard.playing,
+  .homeFreshCard.playing,
+  .homeAlbumCard.playing
+){
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+}
+
+.app :is(
+  .heroMain,
+  .heroGhost,
+  .heroTinyButton,
+  .mainAction,
+  .softButton,
+  .iconAction,
+  .toolButton,
+  .circleButton,
+  .navButton,
+  .tabButton,
+  .settingsThemeCard,
+  .settingsChoice,
+  .visualOptionButtonV205,
+  .feedbackCategoryButtonV331,
+  .feedbackMaybeButtonV331,
+  .feedbackSendButtonV331
+){
+  transition-timing-function: cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+.app :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .albumCardV318
+){
+  transition:
+    transform 240ms cubic-bezier(.16, 1, .3, 1),
+    opacity 180ms ease,
+    background 220ms ease,
+    border-color 220ms ease,
+    box-shadow 240ms ease,
+    filter 220ms ease !important;
+}
+
+.app :is(.coverAura, .songArt, .homeListenCover, .homeFreshCover, .homeAlbumArt, .albumCover, .playlistTrackCover) img{
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  transition:
+    transform 320ms cubic-bezier(.16, 1, .3, 1),
+    filter 260ms ease,
+    opacity 180ms ease !important;
+}
+
+.app :is(.modalWrap, .editorModal, .feedbackPromptCardV331){
+  contain: layout paint style;
+}
+
+.app :is(.content, .settingsPage, .settingsShell, .albumShelfV318, .libraryList){
+  scroll-behavior: smooth;
+}
+
+/* Remove compositor hints after active proximity ends. */
+.app .localtifyProximityTarget:not(.localtifyProximityActive){
+  will-change: auto;
+}
+
+/* Keep reduced-motion users safe without changing your normal motion. */
+@media (prefers-reduced-motion: reduce){
+  .app :is(.localtifyProximityActive, .localtifyVelocityMotionV430){
+    will-change: auto;
+  }
+}
+
