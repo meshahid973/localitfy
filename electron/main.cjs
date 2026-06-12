@@ -3529,15 +3529,20 @@ async function handleAlbumFolderImport(event, payload = {}) {
     message: "Adding album tracks to Localtify..."
   });
 
-  const existingPaths = new Set(
-    getSongs()
-      .map((song) => path.normalize(String(song.filePath || "")).toLowerCase())
-      .filter(Boolean)
+  const existingSongsBefore = getSongs();
+  const existingSongByPath = new Map(
+    existingSongsBefore
+      .filter((song) => song?.filePath)
+      .map((song) => [path.normalize(String(song.filePath || "")).toLowerCase(), song])
   );
+  const existingPaths = new Set(existingSongByPath.keys());
 
   const pixelArtFiles = getPixelArtFiles();
   const usedCovers = new Set();
   const importedSongs = [];
+  let repairedExistingCount = 0;
+  let repairedCoverCount = 0;
+  let repairedDurationCount = 0;
   const importStartedAt = Date.now();
 
   for (let index = 0; index < allTracks.length; index += 1) {
@@ -3553,12 +3558,74 @@ async function handleAlbumFolderImport(event, payload = {}) {
       message: `Adding ${track.title || path.basename(filePath)}`
     });
 
-    if (!filePath || !fileExists(filePath) || !isAudioFile(filePath) || existingPaths.has(fileKey)) continue;
+    if (!filePath || !fileExists(filePath) || !isAudioFile(filePath)) continue;
+
+    const folderCoverPath = album.coverSource === "folder"
+      ? album.coverPath || album.folderCoverPath || ""
+      : album.folderCoverPath || "";
+    const albumEmbeddedCoverPath = album.coverSource === "embedded"
+      ? album.coverPath || album.embeddedCoverPath || ""
+      : album.embeddedCoverPath || "";
+
+    const existingSong = existingSongByPath.get(fileKey);
+
+    if (existingSong) {
+      // Important: importing an album folder again should repair existing tracks,
+      // not skip them forever. This fixes old imports that got fallback/anime art or 0:00 duration.
+      const metadata = await readLocalAudioMetadata(filePath, { readCover: !folderCoverPath });
+      const fallbackCover = pickStablePixelCoverForSong(existingSong, pixelArtFiles);
+      const coverResult = await resolveSongCover({
+        song: existingSong,
+        metadata,
+        filePath,
+        folderCoverPath,
+        albumEmbeddedCoverPath,
+        fallbackCoverPath: fallbackCover
+      });
+
+      const durationMs = Math.max(
+        0,
+        Number(track.durationMs || 0),
+        Number(metadata?.durationMs || 0),
+        Number(track.duration || 0) > 0 ? Number(track.duration) * 1000 : 0,
+        Number(metadata?.duration || 0) > 0 ? Number(metadata.duration) * 1000 : 0
+      );
+      const duration = durationMs > 0
+        ? Math.round(durationMs / 1000)
+        : Math.max(0, Number(track.duration || 0), Number(metadata?.duration || 0), Number(existingSong.duration || 0));
+
+      const patch = {
+        title: cleanAlbumFolderText(track.title || metadata?.title, existingSong.title || "track"),
+        artist: cleanAlbumFolderText(track.artist || metadata?.artist, existingSong.artist || album.artist || "unknown artist"),
+        album: cleanAlbumFolderText(album.title || track.album || metadata?.album, existingSong.album || "local album"),
+        sourceType: "local",
+        sourceProvider: "album-folder",
+        sourceUrl: album.sourcePath || "",
+        sourceProviderUrl: album.sourcePath || ""
+      };
+
+      if (durationMs > 0) {
+        patch.duration = duration;
+        patch.durationMs = durationMs;
+      }
+
+      if (coverResult?.coverPath && existingSong.coverSource !== "custom") {
+        patch.coverPath = coverResult.coverPath;
+        patch.coverSource = coverResult.coverSource || "none";
+        patch.coverUpdatedAt = coverResult.coverUpdatedAt || new Date().toISOString();
+      }
+
+      patchSong(existingSong.id, patch);
+      repairedExistingCount += 1;
+      if (durationMs > 0) repairedDurationCount += 1;
+      if (coverResult?.coverPath) repairedCoverCount += 1;
+      continue;
+    }
 
     const baseSong = await makeSongFromFile(filePath, pixelArtFiles, usedCovers, {
       album: album.title || track.album || "",
-      folderCoverPath: album.coverSource === "folder" ? album.coverPath || album.folderCoverPath || "" : album.folderCoverPath || "",
-      albumEmbeddedCoverPath: album.coverSource === "embedded" ? album.coverPath || album.embeddedCoverPath || "" : album.embeddedCoverPath || ""
+      folderCoverPath,
+      albumEmbeddedCoverPath
     });
 
     const durationMs = Math.max(
@@ -3590,15 +3657,25 @@ async function handleAlbumFolderImport(event, payload = {}) {
     existingPaths.add(fileKey);
   }
 
-  const changedCount = importedSongs.length ? insertSongs(importedSongs) : 0;
+  const insertedCount = importedSongs.length ? insertSongs(importedSongs) : 0;
   clearFileInfoCache();
 
   const rawSongs = getSongs();
+  const songById = new Map(rawSongs.map((song) => [song.id, song]));
   const songByPath = new Map(rawSongs.map((song) => [path.normalize(String(song.filePath || "")).toLowerCase(), song]));
   const importedAlbums = albums.map((album) => {
     const songIds = (album.tracks || [])
       .map((track) => songByPath.get(path.normalize(String(track.filePath || "")).toLowerCase())?.id)
       .filter(Boolean);
+
+    const albumSongs = songIds.map((id) => songById.get(id)).filter(Boolean);
+    const preferredCoverSong =
+      albumSongs.find((song) => ["custom", "folder", "embedded"].includes(String(song.coverSource || "")) && song.coverPath) ||
+      albumSongs.find((song) => song.coverPath) ||
+      null;
+    const stableCoverPath = preferredCoverSong?.coverPath || album.coverPath || "";
+    const stableCoverSource = preferredCoverSong?.coverSource || album.coverSource || "none";
+    const stableCoverUrl = stableCoverPath ? safeMediaUrl(stableCoverPath) : (preferredCoverSong?.coverUrl || album.coverUrl || "");
 
     return {
       id: album.id,
@@ -3606,10 +3683,13 @@ async function handleAlbumFolderImport(event, payload = {}) {
       title: album.title,
       artist: album.artist || "various artists",
       year: "",
-      coverUrl: album.coverUrl || "",
+      coverPath: stableCoverPath,
+      coverSource: stableCoverSource,
+      coverUrl: stableCoverUrl || "",
       sourceType: "folder",
       sourcePath: album.sourcePath || "",
-      folderCoverPath: album.coverPath || "",
+      folderCoverPath: album.folderCoverPath || (album.coverSource === "folder" ? album.coverPath || "" : ""),
+      embeddedCoverPath: album.embeddedCoverPath || (album.coverSource === "embedded" ? album.coverPath || "" : ""),
       importedAt: importStartedAt,
       createdAt: importStartedAt,
       updatedAt: Date.now(),
@@ -3617,8 +3697,9 @@ async function handleAlbumFolderImport(event, payload = {}) {
     };
   }).filter((album) => album.songIds.length > 0);
 
+  const changedCount = insertedCount + repairedExistingCount;
   const afterSongs = listSongsShaped();
-  const message = `Imported ${changedCount} new track${changedCount === 1 ? "" : "s"} from ${importedAlbums.length} album${importedAlbums.length === 1 ? "" : "s"}.`;
+  const message = `Imported ${insertedCount} new track${insertedCount === 1 ? "" : "s"} and repaired ${repairedExistingCount} existing track${repairedExistingCount === 1 ? "" : "s"} from ${importedAlbums.length} album${importedAlbums.length === 1 ? "" : "s"}.`;
 
   event.sender.send("album-folder-import:progress", {
     type: "import-done",
@@ -3633,6 +3714,10 @@ async function handleAlbumFolderImport(event, payload = {}) {
   return {
     ok: true,
     changedCount,
+    insertedCount,
+    repairedExistingCount,
+    repairedCoverCount,
+    repairedDurationCount,
     importedCount: importedSongs.length,
     trackCount: allTracks.length,
     songs: afterSongs,

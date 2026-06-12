@@ -2661,9 +2661,28 @@ function makeAlbumCoverSong(coverUrl: string, title: string, artist: string, see
   } as Song;
 }
 
+function normalizeStoredPathForCompare(value: unknown) {
+  return String(value || "").trim().replace(/\\/g, "/").toLowerCase();
+}
+
 function pickManualAlbumCoverSong(album: ManualLocalAlbum, albumSongs: Song[]) {
+  const storedCoverPath = normalizeStoredPathForCompare(album.coverPath || album.folderCoverPath || album.embeddedCoverPath || "");
+  const preferredByPath = storedCoverPath
+    ? albumSongs.find((song) => normalizeStoredPathForCompare(song.coverPath) === storedCoverPath)
+    : null;
+
+  if (preferredByPath) return preferredByPath;
+
+  const preferredBySource = albumSongs.find((song) =>
+    ["custom", "folder", "embedded"].includes(String((song as any).coverSource || "")) &&
+    Boolean(getCardCoverUrl(song) || getRendererSafeImageUrl(song.coverPath))
+  );
+
+  if (preferredBySource) return preferredBySource;
+
   const safeCoverUrl = getRendererSafeImageUrl(album.coverUrl);
   if (safeCoverUrl) return makeAlbumCoverSong(safeCoverUrl, album.title, album.artist, albumSongs[0] || null);
+
   return pickAlbumCoverSong(albumSongs);
 }
 
@@ -2788,6 +2807,9 @@ type ManualLocalAlbum = {
   artist: string;
   year?: string;
   coverUrl?: string;
+  coverPath?: string;
+  coverSource?: string;
+  embeddedCoverPath?: string;
   songIds: string[];
   createdAt: number;
   updatedAt: number;
@@ -2838,6 +2860,9 @@ function normalizeManualLocalAlbums(value: unknown): ManualLocalAlbum[] {
         artist: artist || "local album",
         year: cleanManualAlbumYear(raw.year),
         coverUrl,
+        coverPath: String(raw.coverPath || ""),
+        coverSource: String(raw.coverSource || ""),
+        embeddedCoverPath: String(raw.embeddedCoverPath || ""),
         songIds,
         createdAt,
         updatedAt,
@@ -4386,6 +4411,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
           artist: cleanManualAlbumArtist(album.artist || "local album"),
           year: cleanManualAlbumYear(album.year),
           coverUrl: getRendererSafeImageUrl(album.coverUrl || ""),
+          coverPath: String(album.coverPath || ""),
+          coverSource: String(album.coverSource || ""),
+          embeddedCoverPath: String(album.embeddedCoverPath || ""),
           songIds: Array.isArray(album.songIds) ? [...new Set(album.songIds.map((id: unknown) => String(id || "").trim()).filter(Boolean))] : [],
           createdAt: Number(album.createdAt) || now,
           updatedAt: Number(album.updatedAt) || now,
@@ -4418,8 +4446,11 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
         changedCount: result.changedCount || 0,
         message: result.message || "album folder imported"
       });
-      setAlbumFolderImportMessage(result.message || "album folder imported");
-      setStatusText?.(result.message || "album folder imported");
+      const repairText = result.repairedExistingCount
+        ? ` repaired ${result.repairedExistingCount} existing track${result.repairedExistingCount === 1 ? "" : "s"}`
+        : "";
+      setAlbumFolderImportMessage(result.message || `album folder imported${repairText}`);
+      setStatusText?.(result.message || `album folder imported${repairText}`);
       setLibraryScanMessage?.(`${importedAlbums.length} folder album${importedAlbums.length === 1 ? "" : "s"} imported`);
     } catch (error: any) {
       console.error("[localtify album folder import]", error);
