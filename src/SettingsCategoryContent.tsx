@@ -1,75 +1,62 @@
 ﻿import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-
 type ThemeId = string;
 type DownloadQuality = "best" | "320" | "256" | "192";
 type DownloadFormat = "mp3" | "flac" | "wav";
-
 type Settings = {
   downloadQuality: DownloadQuality;
   downloadFormat: DownloadFormat;
   [key: string]: any;
 };
-
 type ThemeOption = {
   id: string;
   name: string;
   note?: string;
 };
-
 type CurrentThemeOption = {
   name: string;
   note?: string;
 };
-
 type CustomThemeColorPatch = {
   customThemeColor: string;
   [key: string]: string;
 };
-
 type CustomThemePresetOption = {
   id: string;
   name: string;
   note?: string;
   colors: CustomThemeColorPatch;
 };
-
 type CustomThemeTokenOption = {
   key: string;
   label: string;
   help?: string;
   value: string;
 };
-
 type ChoiceOption = {
   id: string;
   label?: string;
   name?: string;
   note?: string;
 };
-
 type PlaylistOption = {
   id: string;
   name: string;
   songIds: string[];
 };
-
 type SongLike = {
   id?: string;
   title?: string;
   artist?: string;
   [key: string]: any;
 };
-
 type ImportAnimationLike = {
   active: boolean;
   [key: string]: any;
 };
-
 type UpdatePromptLike = {
   [key: string]: any;
 };
-
 type PlatformInfoLike = {
   id?: "windows" | "linux" | "mac" | "unknown";
   label?: string;
@@ -81,24 +68,17 @@ type PlatformInfoLike = {
   startupSettingHelp?: string;
   linuxInstallNotes?: string[];
 };
-
 type DiagnosticsInfo = {
   items: Array<{ label: string; value: string | number }>;
   copyText: string;
 };
-
 type MutableNumberRef = {
   current: number;
 };
-
 type SettingsCategoryContentProps = {
   settingsCategory: string;
   currentTheme: CurrentThemeOption;
   settings: Settings;
-
-  // Keep callbacks permissive here because App.tsx owns the exact domain types
-  // such as keyof Settings, CustomThemeColorKey, View, Playlist, and update status unions.
-  // This component only forwards already-valid values from typed option arrays.
   updateSetting: (...args: any[]) => void | Promise<void>;
   visibleThemes: ReadonlyArray<ThemeOption>;
   THEME_SWATCH_COLORS: Record<string, string>;
@@ -180,11 +160,9 @@ type SettingsCategoryContentProps = {
   resetLibraryLayoutSettings: () => void;
   resetAllSettingsSafely: () => void;
 };
-
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
-
 function ToggleRow({
   label,
   help,
@@ -209,7 +187,6 @@ function ToggleRow({
     </label>
   );
 }
-
 function RangeRow({
   label,
   value,
@@ -232,13 +209,11 @@ function RangeRow({
   const activeValue = editing ? draftValue : value;
   const shownValue = `${activeValue}${suffix || ""}`;
   const fill = ((activeValue - min) / (max - min || 1)) * 100;
-
   useEffect(() => {
     if (!editing) {
       setDraftValue(value);
     }
   }, [editing, value]);
-
   function commit(nextValue = draftValue) {
     const clamped = clamp(nextValue, min, max);
     setDraftValue(clamped);
@@ -247,7 +222,6 @@ function RangeRow({
       onChange(clamped);
     }
   }
-
   return (
     <label className="rangeRow" title={`${label}: ${shownValue}`}>
       <span className="rangeRowCopy">
@@ -276,30 +250,24 @@ function RangeRow({
     </label>
   );
 }
-
 type VisualCustomizationOption = {
   id: string;
   label: string;
   note: string;
 };
-
 function readSettingChoice(settings: Settings, key: string, fallback: string) {
   const value = settings?.[key];
   return typeof value === "string" && value.trim() ? value : fallback;
 }
-
 const COMPLETE_HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
-
 function cleanCustomColorDraft(value: string) {
   const raw = String(value || "").trim().replace(/[^#0-9a-fA-F]/g, "");
   const withoutExtraHashes = raw.replace(/#/g, "");
   return `#${withoutExtraHashes}`.slice(0, 7);
 }
-
 function isCompleteHexColor(value: string) {
   return COMPLETE_HEX_COLOR_RE.test(String(value || "").trim());
 }
-
 function VisualOptionButton({
   option,
   active,
@@ -321,7 +289,6 @@ function VisualOptionButton({
     </button>
   );
 }
-
 function VisualOptionGroup({
   title,
   note,
@@ -354,48 +321,40 @@ function VisualOptionGroup({
     </div>
   );
 }
-
 const HOME_BANNER_TYPE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "cleanBlack", label: "Clean black", note: "plain black" },
   { id: "none", label: "None", note: "hide hero art" }
 ];
-
 const MEDIA_CARD_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "solid", label: "Solid", note: "flat cards" },
   { id: "oledFlat", label: "OLED flat", note: "black" }
 ];
-
 const HOME_LAYOUT_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "compact", label: "Compact", note: "smaller" },
   { id: "balanced", label: "Balanced", note: "default" },
   { id: "bigHero", label: "Big hero", note: "larger hero" }
 ];
-
 const LIBRARY_ROW_STYLE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "compactRows", label: "Compact rows", note: "smaller rows" },
   { id: "comfyRows", label: "Comfy rows", note: "readable" },
   { id: "coverCards", label: "Cover cards", note: "cover-first" },
   { id: "listOnly", label: "List only", note: "plain list" }
 ];
-
 const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "fixed", label: "Fixed", note: "normal" },
   { id: "slim", label: "Slim", note: "narrow" },
   { id: "hover", label: "Expand on hover", note: "hover open" }
 ];
-
 const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "flat", label: "Flat", note: "flat" },
   { id: "oledBlack", label: "OLED black", note: "black" }
 ];
-
 function detectSettingsPlatform(): Required<PlatformInfoLike> {
   const userAgent = typeof navigator !== "undefined" ? String(navigator.userAgent || "").toLowerCase() : "";
   const platform = typeof navigator !== "undefined" ? String(navigator.platform || "").toLowerCase() : "";
   const isLinux = /linux|x11|wayland/.test(userAgent) || platform.includes("linux");
   const isMac = /mac os|macintosh|darwin/.test(userAgent) || platform.includes("mac");
   const isWindows = /windows|win32|win64|wow64/.test(userAgent) || platform.includes("win");
-
   if (isLinux) {
     return {
       id: "linux",
@@ -414,7 +373,6 @@ function detectSettingsPlatform(): Required<PlatformInfoLike> {
       ]
     };
   }
-
   if (isMac) {
     return {
       id: "mac",
@@ -428,7 +386,6 @@ function detectSettingsPlatform(): Required<PlatformInfoLike> {
       linuxInstallNotes: []
     };
   }
-
   return {
     id: isWindows ? "windows" : "unknown",
     label: isWindows ? "Windows" : "Unknown desktop",
@@ -443,7 +400,6 @@ function detectSettingsPlatform(): Required<PlatformInfoLike> {
     linuxInstallNotes: []
   };
 }
-
 const SettingsCategoryContent = memo(function SettingsCategoryContent({
   settingsCategory,
   currentTheme,
@@ -538,7 +494,6 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
     [customThemeTokens]
   );
   const [customColorDrafts, setCustomColorDrafts] = useState<Record<string, string>>({});
-
   useEffect(() => {
     const nextDrafts: Record<string, string> = {};
     customThemeTokens.forEach((token) => {
@@ -546,35 +501,27 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
     });
     setCustomColorDrafts(nextDrafts);
   }, [customThemeTokenSignature, customThemeTokens]);
-
   function previewCustomColorDraft(key: string, value: string, fallback: string, swatch?: HTMLElement | null) {
     const draft = cleanCustomColorDraft(value);
     if (!isCompleteHexColor(draft)) return;
-
     if (swatch) {
       swatch.style.background = draft;
     }
-
     previewCustomThemeColor?.(key, draft, fallback);
   }
-
   function setCustomColorDraft(key: string, value: string, fallback?: string) {
     const draft = cleanCustomColorDraft(value);
     setCustomColorDrafts((old) => ({ ...old, [key]: draft }));
-
     if (fallback && isCompleteHexColor(draft)) {
       previewCustomThemeColor?.(key, draft, fallback);
     }
   }
-
   function applyCustomColorDraft(key: string, value: string, fallback: string) {
     const draft = cleanCustomColorDraft(value);
     const safeColor = isCompleteHexColor(draft) ? draft : fallback;
-
     setCustomColorDrafts((old) => ({ ...old, [key]: safeColor }));
     commitCustomThemeHexDraft(key, safeColor, fallback);
   }
-
 return (
   <>
     {settingsCategory === "appearance" ? (
@@ -586,7 +533,6 @@ return (
           </div>
           <span>{currentTheme.name} theme active</span>
         </div>
-
         <div className="settingsPanelCard">
           <div className="settingsPanelHeader">
             <div>
@@ -594,7 +540,6 @@ return (
               <span>Pick the base look of localtify.</span>
             </div>
           </div>
-
           <div className="settingsThemeSelectPanel">
             <label className="settingsSelectField">
               <span>theme</span>
@@ -613,11 +558,9 @@ return (
                 ))}
               </select>
             </label>
-
             {settings.customThemeEnabled ? (
               <p className="themePickerLockNoteV026">custom theme is on, so preset themes are locked.</p>
             ) : null}
-
             <div className="settingsThemeSelectedPreview" aria-live="polite">
               <span className="settingsThemeDot" style={{ background: THEME_SWATCH_COLORS[effectiveTheme] ?? THEME_SWATCH_COLORS.mint }} aria-hidden="true" />
               <div>
@@ -627,7 +570,6 @@ return (
             </div>
           </div>
         </div>
-
         <div className="settingsPanelCard visualCustomizationCardV205">
           <div className="settingsPanelHeader visualCustomizationHeaderV205">
             <div>
@@ -635,7 +577,6 @@ return (
               <span>Quick controls for home cards sidebar and player.</span>
             </div>
           </div>
-
           <div className="visualCustomizationGridV205">
             <VisualOptionGroup
               title="Home banner"
@@ -644,7 +585,6 @@ return (
               value={readSettingChoice(settings, "homeBannerType", "cleanBlack")}
               onChange={(value) => updateSetting("homeBannerType", value)}
             />
-
             <VisualOptionGroup
               title="Card background"
               note="Card surface style. Solid is safest for release."
@@ -652,7 +592,6 @@ return (
               value={readSettingChoice(settings, "mediaCardBackground", "solid")}
               onChange={(value) => updateSetting("mediaCardBackground", value)}
             />
-
             <VisualOptionGroup
               title="Home layout"
               note="Home screen density."
@@ -660,7 +599,6 @@ return (
               value={readSettingChoice(settings, "homeLayoutMode", "balanced")}
               onChange={(value) => updateSetting("homeLayoutMode", value)}
             />
-
             <VisualOptionGroup
               title="Library rows"
               note="Library list density."
@@ -668,7 +606,6 @@ return (
               value={readSettingChoice(settings, "libraryRowStyle", "comfyRows")}
               onChange={(value) => updateSetting("libraryRowStyle", value)}
             />
-
             <VisualOptionGroup
               title="Player background"
               note="Bottom player style. Flat is safest for release."
@@ -678,7 +615,6 @@ return (
             />
           </div>
         </div>
-
         <div className="settingsPanelCard customThemeManagerV027">
           <div className="settingsPanelHeader customThemeHeaderV027">
             <div>
@@ -695,15 +631,12 @@ return (
               <button className="settingsTinyButton" type="button" onClick={saveCurrentCustomThemePreset}>Save</button>
             </div>
           </div>
-
           <div className="customThemeBodyV027">
             <label className="settingsTextFieldV027">
               <span>Name</span>
               <input value={customThemeName} onChange={(event) => setCustomThemeName(event.currentTarget.value)} aria-label="Custom colors name" />
             </label>
-
           </div>
-
           <div className="customThemePresetRowV027" aria-label="Built in custom theme presets">
             {BUILT_IN_CUSTOM_THEME_PRESETS.map((preset) => (
               <button key={preset.name} className="customThemePresetButtonV027" type="button" onClick={() => applyCustomThemePreset(preset)}>
@@ -713,7 +646,6 @@ return (
               </button>
             ))}
           </div>
-
           {savedCustomThemes.length > 0 ? (
             <div className="savedThemeRowV027" aria-label="Saved custom themes">
               {savedCustomThemes.map((preset) => (
@@ -729,17 +661,14 @@ return (
               ))}
             </div>
           ) : null}
-
           <div className="customThemeSimpleHintV439">
             <strong>Live colors</strong>
             <span>Drag the color picker to preview instantly. The app saves once after you stop, so it stays smooth.</span>
           </div>
-
           <div className="customThemeTokenGridV027">
             {customThemeTokens.map((token) => {
               const hexDraft = customColorDrafts[token.key] ?? token.value;
               const previewColor = isCompleteHexColor(hexDraft) ? hexDraft : token.value;
-
               return (
                 <div className="customThemeTokenV027" key={token.key}>
                   <label className="customThemeColorPickerV032" title={`Pick ${token.label.toLowerCase()} color`}>
@@ -772,7 +701,6 @@ return (
                       if (event.key === "Enter") {
                         event.currentTarget.blur();
                       }
-
                       if (event.key === "Escape") {
                         setCustomColorDraft(token.key, token.value);
                         event.currentTarget.blur();
@@ -785,7 +713,6 @@ return (
             })}
           </div>
         </div>
-
         <div className="settingsPanelCard appearanceUnifiedControlDeckV356">
           <div className="settingsPanelHeader appearanceUnifiedHeaderV356">
             <div>
@@ -793,7 +720,6 @@ return (
               <span>One clean place for spacing, ambience, cover tint, and sidebar behavior.</span>
             </div>
           </div>
-
           <div className="appearanceUnifiedGridV356">
             <section className="appearanceUnifiedSectionV356 appearanceLayoutSectionV356" aria-label="Layout controls">
               <div className="appearanceUnifiedSectionHeadV356">
@@ -808,7 +734,6 @@ return (
                 <ToggleRow label="Reduce motion" help="Turns off most decorative animations." checked={settings.reducedMotion} onChange={(value) => updateSetting("reducedMotion", value)} />
               </div>
             </section>
-
             <section className="appearanceUnifiedSectionV356 appearanceCardsSectionV356" aria-label="Cards and ambience controls">
               <div className="appearanceUnifiedSectionHeadV356">
                 <strong>Cards and ambience</strong>
@@ -821,19 +746,15 @@ return (
                 <ToggleRow label="More quick-library blur" help="Adds stronger album-cover blur behind the quick library cards." checked={settings.quickLibraryMoreBlur !== false} onChange={(value) => updateSetting("quickLibraryMoreBlur", value)} />
                 <ToggleRow label="cat....." help="Tiny cat follows your cursor. Double-click it to lie down. Middle-click it to stop or follow again." checked={settings.catBuddyEnabled === true} onChange={(value) => updateSetting("catBuddyEnabled", value)} />
               </div>
-
             </section>
-
             <section className="appearanceUnifiedSectionV356 appearanceSidebarSectionV356" aria-label="Sidebar behavior controls">
               <div className="appearanceUnifiedSectionHeadV356">
                 <strong>Sidebar behavior</strong>
                 <span>Choose if the sidebar stays full or slim.</span>
               </div>
-
               <div className="sidebarBehaviorChoicesV327 sidebarBehaviorChoicesV356" role="group" aria-label="Choose sidebar behavior">
                 {SIDEBAR_BEHAVIOR_OPTIONS.map((option) => {
                   const active = readSettingChoice(settings, "sidebarBehavior", "fixed") === option.id;
-
                   return (
                     <button
                       key={option.id}
@@ -854,10 +775,8 @@ return (
             </section>
           </div>
         </div>
-
       </section>
     ) : null}
-
     {settingsCategory === "playback" ? (
       <section className="settingsCategoryPage" aria-label="Playback settings">
         <div className="settingsCategoryHeader">
@@ -867,7 +786,6 @@ return (
           </div>
           <span>local music controls</span>
         </div>
-
         <div className="settingsTwoColumn">
           <div className="settingsPanelCard">
             <div className="settingsPanelHeader">
@@ -880,7 +798,6 @@ return (
             <ToggleRow label="Crossfade enabled" help="Turns the crossfade setting on or off." checked={settings.crossfadeEnabled} onChange={(value) => updateSetting("crossfadeEnabled", value)} />
             <ToggleRow label="Gapless playback" help="Starts the next song without silence." checked={settings.gaplessPlayback} onChange={(value) => updateSetting("gaplessPlayback", value)} />
           </div>
-
           <div className="settingsPanelCard">
             <div className="settingsPanelHeader">
               <div>
@@ -897,7 +814,6 @@ return (
         </div>
       </section>
     ) : null}
-
     {settingsCategory === "discord" ? (
       <section className="settingsCategoryPage discordSettingsPage" aria-label="Discord settings">
         <div className="settingsCategoryHeader discordCategoryHeader">
@@ -907,20 +823,17 @@ return (
           </div>
           <span>{settings.discordEnabled ? "showing activity" : "activity hidden"}</span>
         </div>
-
         <div className="settingsPanelCard discordHeroCard">
           <div className="discordPreviewMock" aria-label="Discord activity preview">
             <span>{discordPreview.badge}</span>
             <strong>{discordPreview.details}</strong>
             <small>{discordPreview.state}</small>
           </div>
-
           <div className="discordHeroCopy">
             <strong>Discord preview</strong>
             <span>These controls match rpc.cjs: privacy hides the exact song, style changes the text, artwork changes the large image, and buttons can be disabled.</span>
           </div>
         </div>
-
         <div className="settingsPanelCard discordMainControls">
           <div className="settingsPanelHeader">
             <div>
@@ -928,7 +841,6 @@ return (
               <span>The most important Discord settings are here first so nobody gets stuck in privacy mode.</span>
             </div>
           </div>
-
           <div className="settingsMiniGrid four discordToggleGrid">
             <ToggleRow label="Enable Discord activity" help="Shows localtify as your Discord status." checked={settings.discordEnabled} onChange={(value) => updateSetting("discordEnabled", value)} />
             <ToggleRow label="Privacy mode" help="Hides the exact song name and shows a generic local music status." checked={settings.discordPrivacyMode} onChange={(value) => updateSetting("discordPrivacyMode", value)} />
@@ -936,7 +848,6 @@ return (
             <ToggleRow label="RPC buttons" help="Shows safe buttons like search song or get localtify." checked={settings.discordButtons} onChange={(value) => updateSetting("discordButtons", value)} />
           </div>
         </div>
-
         <div className="settingsTwoColumn discordSettingsGrid">
           <div className="settingsPanelCard">
             <div className="settingsPanelHeader">
@@ -954,7 +865,6 @@ return (
               ))}
             </div>
           </div>
-
           <div className="settingsPanelCard">
             <div className="settingsPanelHeader">
               <div>
@@ -972,7 +882,6 @@ return (
             </div>
           </div>
         </div>
-
         <div className="settingsPanelCard discordArtworkCard">
           <div className="settingsPanelHeader">
             <div>
@@ -990,7 +899,6 @@ return (
           </div>
           <p className="settingsHintText">Pixel shuffle rotates through available Discord image assets before repeating them.</p>
         </div>
-
         <div className="settingsPanelCard">
           <div className="settingsPanelHeader">
             <div>
@@ -1009,7 +917,6 @@ return (
         </div>
       </section>
     ) : null}
-
     {settingsCategory === "library" || settingsCategory === "metadata" ? (
       <section className="settingsCategoryPage" aria-label="Library settings">
         <div className="settingsCategoryHeader">
@@ -1019,48 +926,56 @@ return (
           </div>
           <span>{songs.length} songs indexed</span>
         </div>
-
         <div className="settingsTwoColumn">
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
+          <div className="settingsPanelCard metadataCleanerPanelV440">
+            <div className="settingsPanelHeader metadataCleanerHeaderV440">
               <div>
-                <strong>Metadata cleanup</strong>
-                <span>Control how messy file names are cleaned.</span>
+                <strong>Clean title tool</strong>
+                <span>Preview better song titles and artist names before anything changes.</span>
               </div>
+              <span className="metadataCleanerBadgeV440">{libraryScanBusy ? "working" : "preview first"}</span>
             </div>
-            <div className="optionGrid three">
+            <div className="metadataCleanerHeroV440">
+              <span>local library cleanup</span>
+              <strong>Fix messy downloaded names without touching the real audio files.</strong>
+              <small>Localtify cleans its saved library text only. You can preview all fixes, apply selected fixes, or undo the last clean.</small>
+            </div>
+            <div className="metadataCleanerStatsV440">
+              <span><strong>{songs.length}</strong><small>songs in library</small></span>
+              <span><strong>{metadataSelectedCount || 0}</strong><small>selected</small></span>
+              <span><strong>{metadataUndoCount || 0}</strong><small>undo stack</small></span>
+            </div>
+            <div className="metadataCleanerModeGridV440">
               {discordCleanupOptions.map((option) => (
-                <button key={option.id} className={`settingsChoice ${settings.discordTitleCleanup === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordTitleCleanup", option.id)}>
+                <button key={option.id} className={`cleanerOptionV440 ${settings.discordTitleCleanup === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordTitleCleanup", option.id)}>
                   <strong>{option.name}</strong>
                   <small>{option.note}</small>
                 </button>
               ))}
             </div>
-            <div className="settingsActionRow metadataCleanerActionRowV425">
-              <button className="settingsActionButton" type="button" disabled={libraryScanBusy} onClick={cleanLibraryMetadataAction}>preview clean all</button>
-              <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataSelectedCount} onClick={() => cleanSelectedMetadataAction?.()}>selected only {metadataSelectedCount ? `(${metadataSelectedCount})` : ""}</button>
+            <div className="settingsActionRow metadataCleanerActionRowV440">
+              <button className="settingsActionButton settingsPrimaryAction" type="button" disabled={libraryScanBusy} onClick={cleanLibraryMetadataAction}>preview all fixes</button>
+              <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataSelectedCount} onClick={() => cleanSelectedMetadataAction?.()}>preview selected {metadataSelectedCount ? `(${metadataSelectedCount})` : ""}</button>
               <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataUndoCount} onClick={() => void undoLastMetadataCleanAction?.()}>undo last clean {metadataUndoCount ? `(${metadataUndoCount})` : ""}</button>
-              <button className="settingsActionButton" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
-              <button className="settingsActionButton" type="button" onClick={importSongs} disabled={importAnimation.active}>import songs</button>
+              <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
+              <button className="settingsActionButton settingsGhostAction" type="button" onClick={importSongs} disabled={importAnimation.active}>import songs</button>
             </div>
-
             {metadataCleanPreview ? (
-              <div className="metadataCleanerPreviewBoxV425" role="status" aria-live="polite">
-                <div className="metadataCleanerPreviewHeadV425">
+              <div className="metadataCleanerPreviewBoxV425 metadataCleanerPreviewBoxV440" role="status" aria-live="polite">
+                <div className="metadataCleanerPreviewHeadV425 metadataCleanerPreviewHeadV440">
                   <span>preview before applying</span>
-                  <strong>{metadataCleanPreview.changedCount || 0} fix{(metadataCleanPreview.changedCount || 0) === 1 ? "" : "es"}</strong>
-                  <small>{metadataCleanPreview.skippedCount || 0} skipped â€¢ titles {metadataCleanPreview.titleFixCount || 0} â€¢ artists {metadataCleanPreview.artistFixCount || 0} â€¢ albums {metadataCleanPreview.albumFixCount || 0}</small>
+                  <strong>{metadataCleanPreview.changedCount || 0} fix{(metadataCleanPreview.changedCount || 0) === 1 ? "" : "es"} ready</strong>
+                  <small>{metadataCleanPreview.skippedCount || 0} skipped · {metadataCleanPreview.titleFixCount || 0} titles · {metadataCleanPreview.artistFixCount || 0} artists · {metadataCleanPreview.albumFixCount || 0} albums</small>
                 </div>
-
-                <div className="metadataCleanerPreviewListV425">
-                  {(metadataCleanPreview.items || []).slice(0, 5).map((item: any) => (
-                    <div className="metadataCleanerPreviewItemV425" key={item.id}>
+                <div className="metadataCleanerPreviewListV425 metadataCleanerPreviewListV440">
+                  {(metadataCleanPreview.items || []).slice(0, 6).map((item: any) => (
+                    <div className="metadataCleanerPreviewItemV425 metadataCleanerPreviewItemV440" key={item.id}>
                       <span>
                         <small>before</small>
                         <strong>{item.before?.title || "untitled"}</strong>
                         <em>{item.before?.artist || "unknown artist"}</em>
                       </span>
-                      <b aria-hidden="true">â†’</b>
+                      <b className="metadataCleanerArrowV440" aria-hidden="true"><i /></b>
                       <span>
                         <small>after</small>
                         <strong>{item.after?.title || "untitled"}</strong>
@@ -1069,17 +984,14 @@ return (
                     </div>
                   ))}
                 </div>
-
-                <div className="metadataCleanerPreviewActionsV425">
-                  <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !(metadataCleanPreview.changedCount || 0)} onClick={() => void applyMetadataCleanPreviewAction?.()}>apply fixes</button>
-                  <button className="settingsActionButton ghost" type="button" disabled={libraryScanBusy} onClick={() => cancelMetadataCleanPreviewAction?.()}>cancel</button>
+                <div className="metadataCleanerPreviewActionsV425 metadataCleanerPreviewActionsV440">
+                  <button className="settingsActionButton settingsPrimaryAction" type="button" disabled={libraryScanBusy || !(metadataCleanPreview.changedCount || 0)} onClick={() => void applyMetadataCleanPreviewAction?.()}>apply preview</button>
+                  <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={() => cancelMetadataCleanPreviewAction?.()}>cancel</button>
                 </div>
               </div>
             ) : null}
-
             {libraryScanMessage ? <p className="settingsHintText">{libraryScanMessage}</p> : null}
           </div>
-
           <div className="settingsPanelCard">
             <div className="settingsPanelHeader">
               <div>
@@ -1114,7 +1026,6 @@ return (
         </div>
       </section>
     ) : null}
-
     {settingsCategory === "covers" ? (
       <section className="settingsCategoryPage" aria-label="Cover settings">
         <div className="settingsCategoryHeader">
@@ -1124,7 +1035,6 @@ return (
           </div>
           <span>{pixelArtAssets.length} pixel art assets</span>
         </div>
-
         <div className="settingsTwoColumn">
           <div className="settingsPanelCard">
             <div className="settingsPanelHeader">
@@ -1140,7 +1050,6 @@ return (
             </div>
             <p className="settingsHintText">{pixelArtBusy ? "working on pixel art..." : "Cover tools stay here, but the expensive gallery only renders when opened."}</p>
           </div>
-
           <div className="settingsPanelCard">
             <div className="settingsPanelHeader">
               <div>
@@ -1157,13 +1066,11 @@ return (
         </div>
       </section>
     ) : null}
-
     {settingsCategory === "downloads" ? (
       <section className="settingsContentBlock">
         <p className="eyebrow">downloads</p>
         <h2>download settings</h2>
         <p className="settingsLead">Choose how downloaded audio is saved, named, converted, and imported.</p>
-
         <div className="settingsGrid twoCols downloadSettingsGridV031">
           <div className="settingGroup">
             <h3>Audio quality</h3>
@@ -1181,7 +1088,6 @@ return (
               ))}
             </div>
           </div>
-
           <div className="settingGroup">
             <h3>Format</h3>
             <p>MP3 is best for compatibility. FLAC is bigger but keeps more quality when conversion allows it.</p>
@@ -1199,7 +1105,6 @@ return (
             </div>
           </div>
         </div>
-
         <div className="settingsCardStack downloadToggleStackV031">
           <label className="toggleRow">
             <span>
@@ -1212,7 +1117,6 @@ return (
               onChange={(event) => void updateSetting("downloadAutoAdd", event.currentTarget.checked)}
             />
           </label>
-
           <label className="toggleRow">
             <span>
               <strong>Clean title after download</strong>
@@ -1225,7 +1129,6 @@ return (
             />
           </label>
         </div>
-
         <div className="settingGroup downloadFolderGroupV031">
           <h3>Download folder</h3>
           <p>Choose where localtify saves downloaded songs. Leave it empty to use the default Downloads/localitfy folder.</p>
@@ -1239,7 +1142,6 @@ return (
         </div>
       </section>
     ) : null}
-
     {settingsCategory === "updates" ? (
       <section className="settingsCategoryPage settingsUpdatesPage" aria-label="Update settings">
         <div className="settingsCategoryHeader">
@@ -1247,9 +1149,8 @@ return (
             <p className="eyebrow">updates</p>
             <h4>updates and version</h4>
           </div>
-          <span>version {APP_VERSION} â€¢ {activePlatformInfo.label}</span>
+          <span>version {APP_VERSION} · {activePlatformInfo.label}</span>
         </div>
-
         <div className="settingsTwoColumn settingsUpdatesGrid">
           <div className="settingsPanelCard settingsUpdatePanel">
             <div className="settingsPanelHeader">
@@ -1258,31 +1159,39 @@ return (
                 <span>Check for new releases and finish downloaded updates.</span>
               </div>
             </div>
-
-            <div className="settingsUpdateSummary">
-              <div className="settingsUpdateCurrent">
-                <span className="settingsUpdateVersionBadge">{APP_VERSION}</span>
+            <div className="settingsUpdateStageV440">
+              <div className={`settingsUpdateIslandV440 settingsUpdateIsland-${updatePrompt.status}`} data-status={updatePrompt.status}>
+                <span className="settingsUpdateIslandMarkV440">localtify</span>
                 <div>
-                  <strong>Current version</strong>
-                  <span>localtify {APP_VERSION}</span>
+                  <strong>
+                    {updatePrompt.status === "available"
+                      ? "there is a new update"
+                      : updatePrompt.status === "downloaded"
+                        ? "update ready to install"
+                        : updatePrompt.status === "downloading"
+                          ? "downloading update"
+                          : updatePrompt.status === "checking"
+                            ? "checking for updates"
+                            : updatePrompt.status === "error"
+                              ? "update check failed"
+                              : "localtify is ready"}
+                  </strong>
+                  <small>
+                    {updatePrompt.error || updatePrompt.message || (updatePrompt.status === "idle" ? `current version ${APP_VERSION}` : updateStatusLabel(updatePrompt.status))}
+                  </small>
                 </div>
               </div>
-
-              <div className={`settingsUpdateMessage settingsUpdateMessage-${updatePrompt.status}`}>
-                <strong>{updatePrompt.status === "idle" ? "Ready to check" : updatePrompt.status === "error" ? "Update check failed" : updateStatusLabel(updatePrompt.status)}</strong>
-                <span>
-                  {updatePrompt.error || updatePrompt.message || (updatePrompt.status === "idle" ? "Check for updates whenever you are ready." : "Update status will appear here.")}
-                </span>
+              <div className="settingsUpdateMetaV440">
+                <span><strong>{APP_VERSION}</strong><small>current version</small></span>
+                <span><strong>{activePlatformInfo.label}</strong><small>platform</small></span>
               </div>
             </div>
-
             <div className="settingsActionRow settingsUpdateActions">
               <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={manualUpdateCheck} disabled={updatePrompt.status === "checking" || updatePrompt.status === "downloading"}>check now</button>
               <button className="settingsActionButton" type="button" onClick={askUpdaterToInstall} disabled={updatePrompt.status !== "downloaded"}>restart to install</button>
               <button className="settingsActionButton settingsGhostAction" type="button" onClick={skipAvailableUpdate} disabled={!updatePrompt.version || updatePrompt.status !== "available"}>skip version</button>
             </div>
           </div>
-
           <div className="settingsPanelCard settingsUpdateBehaviorPanel">
             <div className="settingsPanelHeader">
               <div>
@@ -1295,11 +1204,10 @@ return (
               <ToggleRow label="Notify only" help="Shows an update message instead of installing automatically." checked={settings.autoUpdateNotifyOnly} onChange={(value) => updateSetting("autoUpdateNotifyOnly", value)} />
             </div>
             <div className="settingsActionRow">
-              <button className="settingsActionButton" type="button" onClick={() => setWhatsNewOpen(true)}>Open whatâ€™s new</button>
+              <button className="settingsActionButton" type="button" onClick={() => setWhatsNewOpen(true)}>Open what's new</button>
             </div>
           </div>
         </div>
-
         {showLinuxInstallNotes ? (
           <div className="settingsPanelCard settingsFullWidthPanel settingsLinuxInstallPanel">
             <div className="settingsPanelHeader">
@@ -1313,11 +1221,10 @@ return (
             </ul>
           </div>
         ) : null}
-
         <div className="settingsPanelCard settingsFullWidthPanel">
           <div className="settingsPanelHeader">
             <div>
-              <strong>Whatâ€™s new in {APP_VERSION}</strong>
+              <strong>What's new in {APP_VERSION}</strong>
               <span>Short notes for this release.</span>
             </div>
           </div>
@@ -1327,7 +1234,6 @@ return (
         </div>
       </section>
     ) : null}
-
     {settingsCategory === "about" ? (
       <section className="settingsCategoryPage" aria-label="About and diagnostics">
         <div className="settingsCategoryHeader">
@@ -1335,21 +1241,27 @@ return (
             <p className="eyebrow">about</p>
             <h4>localtify status</h4>
           </div>
-          <span>version {APP_VERSION} â€¢ {activePlatformInfo.label}</span>
+          <span>version {APP_VERSION} · {activePlatformInfo.label}</span>
         </div>
-
-        <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsPanel">
+        <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsPanel settingsDiagnosticsPanelV440">
           <div className="settingsPanelHeader settingsDiagnosticsHeader">
             <div>
               <strong>App info</strong>
-              <span>Copy this when reporting bugs so it is easier to understand your setup.</span>
+              <span>Copy a safe bug report summary without song names or file paths.</span>
             </div>
             <button className="settingsActionButton settingsCopyInfoButton" type="button" onClick={copyDiagnosticsInfo}>
               {diagnosticsCopied ? "copied" : "copy app info"}
             </button>
           </div>
-
-          <div className="settingsDiagnosticsGrid">
+          <div className="settingsDiagnosticsHeroV440">
+            <div>
+              <span>localtify status</span>
+              <strong>{APP_VERSION} on {activePlatformInfo.label}</strong>
+              <small>{songs.length} songs · {playlists.length} playlist{playlists.length === 1 ? "" : "s"} · {activePlatformInfo.releaseLabel}</small>
+            </div>
+            <em>{diagnosticsCopied ? "copied to clipboard" : "ready for bug reports"}</em>
+          </div>
+          <div className="settingsDiagnosticsGrid settingsDiagnosticsGridV440">
             {diagnosticsInfo.items.map((item) => (
               <div className="settingsDiagnosticCard" key={item.label}>
                 <span>{item.label}</span>
@@ -1358,7 +1270,6 @@ return (
             ))}
           </div>
         </div>
-
         <div className="settingsPanelCard settingsFullWidthPanel settingsPlatformPanel">
           <div className="settingsPanelHeader">
             <div>
@@ -1373,7 +1284,6 @@ return (
             <span><strong>{showLinuxInstallNotes ? "ready" : "standard"}</strong><small>release notes</small></span>
           </div>
         </div>
-
         <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsCopyPanel">
           <div className="settingsPanelHeader">
             <div>
@@ -1385,7 +1295,6 @@ return (
         </div>
       </section>
     ) : null}
-
     {settingsCategory === "advanced" ? (
       <section className="settingsCategoryPage" aria-label="Advanced settings">
         <div className="settingsCategoryHeader">
@@ -1393,9 +1302,8 @@ return (
             <p className="eyebrow">advanced</p>
             <h4>reset and app status</h4>
           </div>
-          <span>version {APP_VERSION} â€¢ {activePlatformInfo.label}</span>
+          <span>version {APP_VERSION} · {activePlatformInfo.label}</span>
         </div>
-
         <div className="settingsTwoColumn">
           <div className="settingsPanelCard">
             <div className="settingsPanelHeader">
@@ -1411,7 +1319,6 @@ return (
               <span><strong>{importAnimation.active ? "busy" : "ready"}</strong><small>importer</small></span>
             </div>
           </div>
-
           <div className="settingsPanelCard">
             <div className="settingsPanelHeader">
               <div>
@@ -1428,7 +1335,6 @@ return (
             </div>
           </div>
         </div>
-
         <div className="settingsPanelCard settingsFullWidthPanel">
           <div className="settingsPanelHeader">
             <div>
@@ -1443,7 +1349,6 @@ return (
             ) : null}
           </div>
         </div>
-
         <div className="settingsPanelCard settingsFullWidthPanel settingsResetPanel">
           <div className="settingsPanelHeader">
             <div>
@@ -1451,7 +1356,6 @@ return (
               <span>Reset only the selected app settings. Your songs stay in the library.</span>
             </div>
           </div>
-
           <div className="settingsResetGrid">
             <button className="settingsResetButton" type="button" onClick={resetDiscordSettings}>
               <strong>Reset Discord settings</strong>
@@ -1480,6 +1384,4 @@ return (
   </>
 );
 });
-
 export default SettingsCategoryContent;
-
