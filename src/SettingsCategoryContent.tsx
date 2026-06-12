@@ -413,7 +413,6 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   saveCurrentCustomThemePreset,
   customThemeName,
   setCustomThemeName,
-  currentSong,
   BUILT_IN_CUSTOM_THEME_PRESETS,
   applyCustomThemePreset,
   savedCustomThemes,
@@ -440,18 +439,7 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   importSongs,
   importAnimation,
   libraryScanMessage,
-  newPlaylistName,
-  setNewPlaylistName,
-  createPlaylist,
   changeView,
-  clearQueue,
-  playQueue,
-  repeatPlaylist,
-  setRepeatPlaylist,
-  playlists,
-  openPlaylist,
-  playPlaylist,
-  removePlaylist,
   pixelArtAssets,
   pixelArtBusy,
   randomizeAllCovers,
@@ -464,8 +452,6 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   manualUpdateCheck,
   askUpdaterToInstall,
   skipAvailableUpdate,
-  setWhatsNewOpen,
-  whatsNewItems,
   copyDiagnosticsInfo,
   diagnosticsCopied,
   diagnosticsInfo,
@@ -922,107 +908,64 @@ return (
         <div className="settingsCategoryHeader">
           <div>
             <p className="eyebrow">library</p>
-            <h4>imports, search, and playlists</h4>
+            <h4>imports, search, and metadata</h4>
           </div>
           <span>{songs.length} songs indexed</span>
         </div>
-        <div className="settingsTwoColumn">
-          <div className="settingsPanelCard metadataCleanerPanelV440">
-            <div className="settingsPanelHeader metadataCleanerHeaderV440">
-              <div>
-                <strong>Clean title tool</strong>
-                <span>Preview better song titles and artist names before anything changes.</span>
-              </div>
-              <span className="metadataCleanerBadgeV440">{libraryScanBusy ? "working" : "preview first"}</span>
+        <div className="settingsPanelCard metadataCleanerPanelV441">
+          <div className="settingsPanelHeader metadataCleanerHeaderV440">
+            <div>
+              <strong>Clean title tool</strong>
+              <span>Preview title cleanup before changing saved library text.</span>
             </div>
-            <div className="metadataCleanerHeroV440">
-              <span>local library cleanup</span>
-              <strong>Fix messy downloaded names without touching the real audio files.</strong>
-              <small>Localtify cleans its saved library text only. You can preview all fixes, apply selected fixes, or undo the last clean.</small>
-            </div>
-            <div className="metadataCleanerStatsV440">
-              <span><strong>{songs.length}</strong><small>songs in library</small></span>
-              <span><strong>{metadataSelectedCount || 0}</strong><small>selected</small></span>
-              <span><strong>{metadataUndoCount || 0}</strong><small>undo stack</small></span>
-            </div>
-            <div className="metadataCleanerModeGridV440">
-              {discordCleanupOptions.map((option) => (
-                <button key={option.id} className={`cleanerOptionV440 ${settings.discordTitleCleanup === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordTitleCleanup", option.id)}>
-                  <strong>{option.name}</strong>
-                  <small>{option.note}</small>
-                </button>
-              ))}
-            </div>
-            <div className="settingsActionRow metadataCleanerActionRowV440">
-              <button className="settingsActionButton settingsPrimaryAction" type="button" disabled={libraryScanBusy} onClick={cleanLibraryMetadataAction}>preview all fixes</button>
-              <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataSelectedCount} onClick={() => cleanSelectedMetadataAction?.()}>preview selected {metadataSelectedCount ? `(${metadataSelectedCount})` : ""}</button>
-              <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataUndoCount} onClick={() => void undoLastMetadataCleanAction?.()}>undo last clean {metadataUndoCount ? `(${metadataUndoCount})` : ""}</button>
-              <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
-              <button className="settingsActionButton settingsGhostAction" type="button" onClick={importSongs} disabled={importAnimation.active}>import songs</button>
-            </div>
-            {metadataCleanPreview ? (
-              <div className="metadataCleanerPreviewBoxV425 metadataCleanerPreviewBoxV440" role="status" aria-live="polite">
-                <div className="metadataCleanerPreviewHeadV425 metadataCleanerPreviewHeadV440">
-                  <span>preview before applying</span>
-                  <strong>{metadataCleanPreview.changedCount || 0} fix{(metadataCleanPreview.changedCount || 0) === 1 ? "" : "es"} ready</strong>
-                  <small>{metadataCleanPreview.skippedCount || 0} skipped · {metadataCleanPreview.titleFixCount || 0} titles · {metadataCleanPreview.artistFixCount || 0} artists · {metadataCleanPreview.albumFixCount || 0} albums</small>
-                </div>
-                <div className="metadataCleanerPreviewListV425 metadataCleanerPreviewListV440">
-                  {(metadataCleanPreview.items || []).slice(0, 6).map((item: any) => (
-                    <div className="metadataCleanerPreviewItemV425 metadataCleanerPreviewItemV440" key={item.id}>
-                      <span>
-                        <small>before</small>
-                        <strong>{item.before?.title || "untitled"}</strong>
-                        <em>{item.before?.artist || "unknown artist"}</em>
-                      </span>
-                      <b className="metadataCleanerArrowV440" aria-hidden="true"><i /></b>
-                      <span>
-                        <small>after</small>
-                        <strong>{item.after?.title || "untitled"}</strong>
-                        <em>{item.after?.artist || "unknown artist"}</em>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="metadataCleanerPreviewActionsV425 metadataCleanerPreviewActionsV440">
-                  <button className="settingsActionButton settingsPrimaryAction" type="button" disabled={libraryScanBusy || !(metadataCleanPreview.changedCount || 0)} onClick={() => void applyMetadataCleanPreviewAction?.()}>apply preview</button>
-                  <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={() => cancelMetadataCleanPreviewAction?.()}>cancel</button>
-                </div>
-              </div>
-            ) : null}
-            {libraryScanMessage ? <p className="settingsHintText">{libraryScanMessage}</p> : null}
+            <span className="metadataCleanerBadgeV440">{libraryScanBusy ? "working" : "preview first"}</span>
           </div>
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Playlists and queue</strong>
-                <span>Create playlists, clear the queue, and test playback.</span>
+          <div className="metadataCleanerModeGridV441">
+            {discordCleanupOptions.map((option) => (
+              <button key={option.id} className={`cleanerOptionV440 ${settings.discordTitleCleanup === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordTitleCleanup", option.id)}>
+                <strong>{option.name}</strong>
+                <small>{option.note}</small>
+              </button>
+            ))}
+          </div>
+          <div className="settingsActionRow metadataCleanerActionRowV440">
+            <button className="settingsActionButton settingsPrimaryAction" type="button" disabled={libraryScanBusy} onClick={cleanLibraryMetadataAction}>preview all fixes</button>
+            <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataSelectedCount} onClick={() => cleanSelectedMetadataAction?.()}>preview selected {metadataSelectedCount ? `(${metadataSelectedCount})` : ""}</button>
+            <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataUndoCount} onClick={() => void undoLastMetadataCleanAction?.()}>undo last clean {metadataUndoCount ? `(${metadataUndoCount})` : ""}</button>
+            <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
+            <button className="settingsActionButton settingsGhostAction" type="button" onClick={importSongs} disabled={importAnimation.active}>import songs</button>
+          </div>
+          {metadataCleanPreview ? (
+            <div className="metadataCleanerPreviewBoxV425 metadataCleanerPreviewBoxV440" role="status" aria-live="polite">
+              <div className="metadataCleanerPreviewHeadV425 metadataCleanerPreviewHeadV440">
+                <span>preview before applying</span>
+                <strong>{metadataCleanPreview.changedCount || 0} fix{(metadataCleanPreview.changedCount || 0) === 1 ? "" : "es"} ready</strong>
+                <small>{metadataCleanPreview.skippedCount || 0} skipped · {metadataCleanPreview.titleFixCount || 0} titles · {metadataCleanPreview.artistFixCount || 0} artists · {metadataCleanPreview.albumFixCount || 0} albums</small>
               </div>
-            </div>
-            <div className="settingsActionRow">
-              <input className="settingsInlineInput" value={newPlaylistName} onChange={(event) => setNewPlaylistName(event.currentTarget.value)} placeholder="new playlist name" />
-              <button className="settingsActionButton" type="button" onClick={() => createPlaylist()}>create playlist</button>
-              <button className="settingsActionButton" type="button" onClick={() => changeView("playlists", "settings")}>open playlists</button>
-              <button className="settingsActionButton" type="button" onClick={clearQueue} disabled={playQueue.length === 0}>clear queue</button>
-            </div>
-            <ToggleRow label="Repeat active playlist" help="When the queue ends, localtify starts the active playlist again." checked={repeatPlaylist} onChange={(value) => setRepeatPlaylist(value)} />
-            <div className="settingsPlainList settingsPlaylistList">
-              {playlists.length ? playlists.map((playlist) => (
-                <div className="settingsPlaylistItem" key={playlist.id}>
-                  <span>
-                    <strong>{playlist.name}</strong>
-                    <small>{playlist.songIds.length} song{playlist.songIds.length === 1 ? "" : "s"}</small>
-                  </span>
-                  <div>
-                    <button className="settingsTinyButton" type="button" onClick={() => openPlaylist(playlist.id)}>open</button>
-                    <button className="settingsTinyButton" type="button" onClick={() => playPlaylist(playlist, false)} disabled={playlist.songIds.length === 0}>play</button>
-                    <button className="settingsTinyButton" type="button" onClick={() => playPlaylist(playlist, true)} disabled={playlist.songIds.length === 0}>shuffle</button>
-                    <button className="settingsTinyButton danger" type="button" onClick={() => removePlaylist(playlist.id)}>remove</button>
+              <div className="metadataCleanerPreviewListV425 metadataCleanerPreviewListV440">
+                {(metadataCleanPreview.items || []).slice(0, 6).map((item: any) => (
+                  <div className="metadataCleanerPreviewItemV425 metadataCleanerPreviewItemV440" key={item.id}>
+                    <span>
+                      <small>before</small>
+                      <strong>{item.before?.title || "untitled"}</strong>
+                      <em>{item.before?.artist || "unknown artist"}</em>
+                    </span>
+                    <b className="metadataCleanerArrowV440" aria-hidden="true"><i /></b>
+                    <span>
+                      <small>after</small>
+                      <strong>{item.after?.title || "untitled"}</strong>
+                      <em>{item.after?.artist || "unknown artist"}</em>
+                    </span>
                   </div>
-                </div>
-              )) : <p className="settingsHintText">No playlists yet. Create one here, then add songs from the song editor.</p>}
+                ))}
+              </div>
+              <div className="metadataCleanerPreviewActionsV425 metadataCleanerPreviewActionsV440">
+                <button className="settingsActionButton settingsPrimaryAction" type="button" disabled={libraryScanBusy || !(metadataCleanPreview.changedCount || 0)} onClick={() => void applyMetadataCleanPreviewAction?.()}>apply preview</button>
+                <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={() => cancelMetadataCleanPreviewAction?.()}>cancel</button>
+              </div>
             </div>
-          </div>
+          ) : null}
+          {libraryScanMessage ? <p className="settingsHintText">{libraryScanMessage}</p> : null}
         </div>
       </section>
     ) : null}
@@ -1031,38 +974,23 @@ return (
         <div className="settingsCategoryHeader">
           <div>
             <p className="eyebrow">covers</p>
-            <h4>pixel art and cover tools</h4>
+            <h4>cover tools</h4>
           </div>
           <span>{pixelArtAssets.length} pixel art assets</span>
         </div>
-        <div className="settingsTwoColumn">
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Cover gallery</strong>
-                <span>Open the full cover page only when you need it, so settings stays light.</span>
-              </div>
-            </div>
-            <div className="settingsActionRow">
-              <button className="settingsActionButton" type="button" onClick={() => changeView("covers", "settings")}>open cover gallery</button>
-              <button className="settingsActionButton" type="button" disabled={pixelArtBusy || songs.length === 0} onClick={randomizeAllCovers}>randomize all covers</button>
-              <button className="settingsActionButton" type="button" disabled={pixelArtBusy} onClick={rescanPixelArtFolder}>rescan pixel art</button>
-            </div>
-            <p className="settingsHintText">{pixelArtBusy ? "working on pixel art..." : "Cover tools stay here, but the expensive gallery only renders when opened."}</p>
-          </div>
-          <div className="settingsPanelCard">
-            <div className="settingsPanelHeader">
-              <div>
-                <strong>Cover ambience</strong>
-                <span>Control cover glow without making screen switching heavy.</span>
-              </div>
-            </div>
-            <div className="settingsMiniGrid">
-              <ToggleRow label="Cover glow" help="Adds cover-based glow to the UI." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
-              <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={settings.showFloatingNotes} onChange={(value) => updateSetting("showFloatingNotes", value)} />
-              <ToggleRow label="Large artwork" help="Makes cover images bigger on the home page." checked={settings.homeExpanded} onChange={(value) => updateSetting("homeExpanded", value)} />
+        <div className="settingsPanelCard settingsCoverToolsCompactV441">
+          <div className="settingsPanelHeader">
+            <div>
+              <strong>Cover actions</strong>
+              <span>Keep the heavy gallery out of settings. Open it only when you need cover editing.</span>
             </div>
           </div>
+          <div className="settingsActionRow">
+            <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={() => changeView("covers", "settings")}>open cover gallery</button>
+            <button className="settingsActionButton" type="button" disabled={pixelArtBusy || songs.length === 0} onClick={randomizeAllCovers}>randomize all covers</button>
+            <button className="settingsActionButton" type="button" disabled={pixelArtBusy} onClick={rescanPixelArtFolder}>rescan pixel art</button>
+          </div>
+          <p className="settingsHintText">{pixelArtBusy ? "working on pixel art..." : "Extra visual toggles were removed from this page because real cover editing belongs in the cover gallery."}</p>
         </div>
       </section>
     ) : null}
@@ -1156,35 +1084,13 @@ return (
             <div className="settingsPanelHeader">
               <div>
                 <strong>Update status</strong>
-                <span>Check for new releases and finish downloaded updates.</span>
+                <span>The update island appears at the top of the app when there is something important.</span>
               </div>
             </div>
-            <div className="settingsUpdateStageV440">
-              <div className={`settingsUpdateIslandV440 settingsUpdateIsland-${updatePrompt.status}`} data-status={updatePrompt.status}>
-                <span className="settingsUpdateIslandMarkV440">localtify</span>
-                <div>
-                  <strong>
-                    {updatePrompt.status === "available"
-                      ? "there is a new update"
-                      : updatePrompt.status === "downloaded"
-                        ? "update ready to install"
-                        : updatePrompt.status === "downloading"
-                          ? "downloading update"
-                          : updatePrompt.status === "checking"
-                            ? "checking for updates"
-                            : updatePrompt.status === "error"
-                              ? "update check failed"
-                              : "localtify is ready"}
-                  </strong>
-                  <small>
-                    {updatePrompt.error || updatePrompt.message || (updatePrompt.status === "idle" ? `current version ${APP_VERSION}` : updateStatusLabel(updatePrompt.status))}
-                  </small>
-                </div>
-              </div>
-              <div className="settingsUpdateMetaV440">
-                <span><strong>{APP_VERSION}</strong><small>current version</small></span>
-                <span><strong>{activePlatformInfo.label}</strong><small>platform</small></span>
-              </div>
+            <div className="settingsUpdatePlainStatusV441">
+              <span><strong>{updateStatusLabel(updatePrompt.status)}</strong><small>status</small></span>
+              <span><strong>{APP_VERSION}</strong><small>current version</small></span>
+              <span><strong>{activePlatformInfo.label}</strong><small>platform</small></span>
             </div>
             <div className="settingsActionRow settingsUpdateActions">
               <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={manualUpdateCheck} disabled={updatePrompt.status === "checking" || updatePrompt.status === "downloading"}>check now</button>
@@ -1203,9 +1109,6 @@ return (
               <ToggleRow label="Update checks" help="Checks for new releases while the app is open." checked={settings.autoUpdateEnabled} onChange={(value) => updateSetting("autoUpdateEnabled", value)} />
               <ToggleRow label="Notify only" help="Shows an update message instead of installing automatically." checked={settings.autoUpdateNotifyOnly} onChange={(value) => updateSetting("autoUpdateNotifyOnly", value)} />
             </div>
-            <div className="settingsActionRow">
-              <button className="settingsActionButton" type="button" onClick={() => setWhatsNewOpen(true)}>Open what's new</button>
-            </div>
           </div>
         </div>
         {showLinuxInstallNotes ? (
@@ -1221,17 +1124,6 @@ return (
             </ul>
           </div>
         ) : null}
-        <div className="settingsPanelCard settingsFullWidthPanel">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>What's new in {APP_VERSION}</strong>
-              <span>Short notes for this release.</span>
-            </div>
-          </div>
-          <ul className="settingsPlainList settingsReleaseList">
-            {whatsNewItems.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        </div>
       </section>
     ) : null}
     {settingsCategory === "about" ? (
@@ -1243,23 +1135,15 @@ return (
           </div>
           <span>version {APP_VERSION} · {activePlatformInfo.label}</span>
         </div>
-        <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsPanel settingsDiagnosticsPanelV440">
+        <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsPanel settingsDiagnosticsPanelV441">
           <div className="settingsPanelHeader settingsDiagnosticsHeader">
             <div>
               <strong>App info</strong>
-              <span>Copy a safe bug report summary without song names or file paths.</span>
+              <span>Copy a safe bug report summary when someone needs your setup.</span>
             </div>
             <button className="settingsActionButton settingsCopyInfoButton" type="button" onClick={copyDiagnosticsInfo}>
               {diagnosticsCopied ? "copied" : "copy app info"}
             </button>
-          </div>
-          <div className="settingsDiagnosticsHeroV440">
-            <div>
-              <span>localtify status</span>
-              <strong>{APP_VERSION} on {activePlatformInfo.label}</strong>
-              <small>{songs.length} songs · {playlists.length} playlist{playlists.length === 1 ? "" : "s"} · {activePlatformInfo.releaseLabel}</small>
-            </div>
-            <em>{diagnosticsCopied ? "copied to clipboard" : "ready for bug reports"}</em>
           </div>
           <div className="settingsDiagnosticsGrid settingsDiagnosticsGridV440">
             {diagnosticsInfo.items.map((item) => (
@@ -1269,29 +1153,6 @@ return (
               </div>
             ))}
           </div>
-        </div>
-        <div className="settingsPanelCard settingsFullWidthPanel settingsPlatformPanel">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Platform support</strong>
-              <span>Windows and Linux now use separate release packages, icons, and platform controls.</span>
-            </div>
-          </div>
-          <div className="statusGrid">
-            <span><strong>{activePlatformInfo.label}</strong><small>platform</small></span>
-            <span><strong>{activePlatformInfo.releaseLabel}</strong><small>package</small></span>
-            <span><strong>{activePlatformInfo.startupSettingSupported ? "available" : "hidden"}</strong><small>startup setting</small></span>
-            <span><strong>{showLinuxInstallNotes ? "ready" : "standard"}</strong><small>release notes</small></span>
-          </div>
-        </div>
-        <div className="settingsPanelCard settingsFullWidthPanel settingsDiagnosticsCopyPanel">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Bug report text</strong>
-              <span>No song names, file paths, or private library metadata are included.</span>
-            </div>
-          </div>
-          <textarea className="settingsDiagnosticsText" readOnly value={diagnosticsInfo.copyText} aria-label="localtify diagnostics text" />
         </div>
       </section>
     ) : null}

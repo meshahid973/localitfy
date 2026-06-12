@@ -8609,3 +8609,134 @@ body.localitfyThemePainting .toggleRow{
   }
 }
 
+
+.settingsUpdatesPage .settingsUpdateStageV440,
+.settingsDiagnosticsHeroV440,
+.settingsPlatformPanel,
+.settingsDiagnosticsCopyPanel{
+  display: none !important;
+}
+
+.settingsUpdatePlainStatusV441{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.settingsUpdatePlainStatusV441 span{
+  min-height: 66px;
+  padding: 12px 13px;
+  border: 1px solid rgba(255,255,255,0.075);
+  border-radius: 15px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.026);
+}
+
+.settingsUpdatePlainStatusV441 strong{
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settingsUpdatePlainStatusV441 small{
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.metadataCleanerPanelV441{
+  max-width: 760px;
+}
+
+.metadataCleanerPanelV441 .metadataCleanerHeaderV440{
+  margin-bottom: 14px !important;
+}
+
+.metadataCleanerModeGridV441{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+}
+
+.metadataCleanerPanelV441 .cleanerOptionV440{
+  min-height: 72px !important;
+}
+
+.settingsCoverToolsCompactV441{
+  max-width: 760px;
+}
+
+.settingsDiagnosticsPanelV441{
+  max-width: 940px;
+}
+
+.settingsDiagnosticsPanelV441 .settingsDiagnosticsGridV440{
+  margin-top: 10px;
+}
+
+.downloadToggleStackV031{
+  max-width: 920px;
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.downloadToggleStackV031 .toggleRow{
+  min-height: 62px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 12px 14px !important;
+}
+
+.downloadToggleStackV031 .toggleRow > span{
+  min-width: 0 !important;
+}
+
+.downloadToggleStackV031 input[type="checkbox"]{
+  justify-self: end !important;
+}
+
+.discordHeroCard{
+  grid-template-columns: minmax(260px, .9fr) minmax(300px, 1.1fr) !important;
+  align-items: stretch !important;
+}
+
+.discordPreviewMock{
+  min-height: 112px !important;
+  display: grid !important;
+  align-content: center !important;
+}
+
+.discordMainControls .settingsMiniGrid,
+.discordToggleGrid{
+  grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+}
+
+.discordSettingsGrid{
+  grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+  align-items: start !important;
+}
+
+.settingsPage .settingsPanelCard:empty{
+  display: none !important;
+}
+
+@media (max-width: 900px){
+  .settingsUpdatePlainStatusV441,
+  .metadataCleanerModeGridV441,
+  .discordMainControls .settingsMiniGrid,
+  .discordToggleGrid,
+  .discordSettingsGrid{
+    grid-template-columns: 1fr !important;
+  }
+}
+
