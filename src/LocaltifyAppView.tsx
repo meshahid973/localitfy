@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -804,12 +804,12 @@ export function updateWasLeftAlone(version: string) {
 export function updateRibbonTitle(prompt: UpdatePromptState) {
   const version = prompt.version || APP_VERSION;
 
-  if (prompt.status === "available") return `Update available — Localtify ${version} is available.`;
-  if (prompt.status === "downloaded") return `Update ready — restart to install Localtify ${version}.`;
-  if (prompt.status === "downloading") return `Downloading update — ${Math.round(clamp(prompt.percent, 0, 100))}%`;
+  if (prompt.status === "available") return `Update available � Localtify ${version} is available.`;
+  if (prompt.status === "downloaded") return `Update ready � restart to install Localtify ${version}.`;
+  if (prompt.status === "downloading") return `Downloading update � ${Math.round(clamp(prompt.percent, 0, 100))}%`;
   if (prompt.status === "latest") return "Localtify is up to date.";
   if (prompt.status === "error") return "Update check failed.";
-  if (prompt.status === "dev") return "Installed app required — auto update only works in the packaged app.";
+  if (prompt.status === "dev") return "Installed app required � auto update only works in the packaged app.";
   if (prompt.status === "checking") return "Checking for updates...";
   return "Localtify update";
 }
@@ -906,7 +906,7 @@ export function cleanToastCopy(message: string, kind: AppToastKind) {
   if (lower.includes("settings saved")) return "Settings saved";
 
   return raw
-    .replace(/\s*[•—-]\s*check (?:the )?(?:terminal|console).*$/i, "")
+    .replace(/\s*[��-]\s*check (?:the )?(?:terminal|console).*$/i, "")
     .replace(/\s*safely\b/gi, "")
     .replace(/\s+/g, " ")
     .trim()
@@ -1885,9 +1885,9 @@ export function cleanupSongTitle(rawTitle: string, strength: DiscordTitleCleanup
 
   text = stripAudioExtension(text)
     .replace(/[_]+/g, " ")
-    .replace(/[–—-]+/g, " - ")
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'");
+    .replace(/[��-]+/g, " - ")
+    .replace(/[��]/g, '"')
+    .replace(/[��]/g, "'");
 
   text = stripTrackNumber(stripDuplicateCopySuffix(text));
   text = removeBracketNoise(text, strength);
@@ -1903,7 +1903,7 @@ export function cleanupSongTitle(rawTitle: string, strength: DiscordTitleCleanup
     .replace(/\s*[{}\[\]]\s*/g, " ")
     .replace(/\s*\(\s*\)\s*/g, " ")
     .replace(/(^|\s)[+~]+(?=\s|$)/g, " ")
-    .replace(/\s+[–—-]\s*$/g, " ");
+    .replace(/\s+[��-]\s*$/g, " ");
 
   return collapseSpaces(text) || "untitled";
 }
@@ -2031,8 +2031,8 @@ export function cleanArtistName(value: unknown) {
 
 export function cleanTrackName(value: unknown, fallback = "untitled") {
   return cleanMetadataField(value, fallback)
-    .replace(/^[-–—|/]+\s*/, "")
-    .replace(/\s*[-–—|/]+$/, "")
+    .replace(/^[-��|/]+\s*/, "")
+    .replace(/\s*[-��|/]+$/, "")
     .trim() || fallback;
 }
 
@@ -2047,7 +2047,7 @@ export function scoreArtistGuess(text: string) {
 
 export function splitArtistTitleCandidate(value: string) {
   const base = cleanupSongTitle(stripAudioExtension(value), "light");
-  const separators = [" - ", " – ", " — ", " | ", " / ", " ~ "];
+  const separators = [" - ", " � ", " � ", " | ", " / ", " ~ "];
 
   for (const separator of separators) {
     if (!base.includes(separator)) continue;
@@ -2315,7 +2315,7 @@ function displaySongArtistV444(song: Pick<Song, "title" | "artist">) {
 function displaySongPickerSublineV444(song: Pick<Song, "title" | "artist">) {
   const artist = displaySongArtistV444(song);
   if (!artist || artist === "unknown artist") return "Pick a playlist or make a new one.";
-  return `${artist} • Pick a playlist or make a new one.`;
+  return `${artist} � Pick a playlist or make a new one.`;
 }
 
 export function discordArtist(text: string) {
@@ -2850,6 +2850,20 @@ function normalizeManualLocalAlbums(value: unknown): ManualLocalAlbum[] {
     .filter(Boolean) as ManualLocalAlbum[];
 }
 
+function buildManualAlbumSongIdSet(manualAlbums: ManualLocalAlbum[]) {
+  const ids = new Set<string>();
+
+  manualAlbums.forEach((album) => {
+    if (!Array.isArray(album.songIds)) return;
+    album.songIds.forEach((songId) => {
+      const cleaned = String(songId || "").trim();
+      if (cleaned) ids.add(cleaned);
+    });
+  });
+
+  return ids;
+}
+
 function buildManualAlbumEntries(manualAlbums: ManualLocalAlbum[], songsById: Map<string, Song>): LocalAlbumEntry[] {
   return manualAlbums
     .map((album) => {
@@ -3036,7 +3050,7 @@ export const SongRowItem = memo(function SongRowItem({
 
         <span className="songMeta">
           <strong title={displaySongTitleV444(song, 12)}>{displaySongTitleV444(song, 7)}</strong>
-          <small>{isMissingFile ? "missing local file • reimport or relink" : displaySongArtistV444(song)}</small>
+          <small>{isMissingFile ? "missing local file � reimport or relink" : displaySongArtistV444(song)}</small>
         </span>
       </button>
 
@@ -3690,7 +3704,7 @@ export function TitleBar({ mini = false, children }: { mini?: boolean; children?
           </button>
         ) : null}
         <button type="button" className="closeWin" onClick={() => window.localitfy.closeWindow()} aria-label="Close window">
-          ×
+          �
         </button>
       </div>
     </header>
@@ -3739,8 +3753,8 @@ export function buildDiscordPreview({
   let moodTitle = title;
 
   if (song.liked) moodTitle = `? ${title}`;
-  else if (mostPlayed && mostPlayed.id === song.id) moodTitle = `on repeat • ${title}`;
-  else if ((song.playCount || 0) <= 0) moodTitle = `discovering • ${title}`;
+  else if (mostPlayed && mostPlayed.id === song.id) moodTitle = `on repeat � ${title}`;
+  else if ((song.playCount || 0) <= 0) moodTitle = `discovering � ${title}`;
 
   const getSecondLine = () => {
     if (settings.discordSecondLine === "album") return album;
@@ -3753,7 +3767,7 @@ export function buildDiscordPreview({
   if (!isPlaying && settings.discordShowPausedIdle) {
     return {
       badge: "PAUSED",
-      details: `paused • ${title}`,
+      details: `paused � ${title}`,
       state: timeLeft
     };
   }
@@ -3762,7 +3776,7 @@ export function buildDiscordPreview({
     return {
       badge: "PLAYING",
       details: `vibing to ${moodTitle} ?`,
-      state: `${getSecondLine()} • localtify`
+      state: `${getSecondLine()} � localtify`
     };
   }
 
@@ -3770,7 +3784,7 @@ export function buildDiscordPreview({
     return {
       badge: "PLAYING",
       details: moodTitle,
-      state: `${artist} • ${album} • ${timeLeft}`
+      state: `${artist} � ${album} � ${timeLeft}`
     };
   }
 
@@ -4183,8 +4197,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     });
   }, []);
 
-  const metadataAlbums = useMemo(() => buildLocalAlbumEntries(songs), [songs]);
   const manualAlbumEntries = useMemo(() => buildManualAlbumEntries(manualAlbums, songsById), [manualAlbums, songsById]);
+  const manualAlbumSongIds = useMemo(() => buildManualAlbumSongIdSet(manualAlbums), [manualAlbums]);
+  const metadataAlbums = useMemo(() => {
+    const unclaimedSongs = songs.filter((song) => !manualAlbumSongIds.has(song.id));
+    return buildLocalAlbumEntries(unclaimedSongs);
+  }, [songs, manualAlbumSongIds]);
   const localAlbums = useMemo(() => [...manualAlbumEntries, ...metadataAlbums], [manualAlbumEntries, metadataAlbums]);
   const visibleAlbums = useMemo(
     () => filterAndSortAlbums(localAlbums, albumSearch, albumSortMode),
@@ -4255,7 +4273,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     if (albumFolderImportBusy) return;
 
     if (!window.localitfy?.scanAlbumFolder) {
-      const message = "album folder import bridge missing — restart Localtify after replacing electron/preload.cjs and electron/main.cjs";
+      const message = "album folder import bridge missing � restart Localtify after replacing electron/preload.cjs and electron/main.cjs";
       setAlbumFolderImportMessage(message);
       setAlbumFolderImportProgress({ type: "error", mode, message });
       setStatusText?.("album import bridge missing");
@@ -4688,7 +4706,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                   {updatePrompt.status !== "downloading" ? (
                     <button className="updateToastClose" type="button" onClick={() => setUpdatePrompt(defaultUpdatePrompt)} aria-label="Dismiss update notice">
-                      ×
+                      �
                     </button>
                   ) : null}
                 </Motion.div>
@@ -4987,7 +5005,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                     {playerError ? <div className="warningBox">{playerError}</div> : null}
                     {isThreeAm && settings.volume > 0.8 ? (
-                      <div className="warningBox lateNightWarning">volume is above 80% — late night ears deserve mercy.</div>
+                      <div className="warningBox lateNightWarning">volume is above 80% � late night ears deserve mercy.</div>
                     ) : null}
                     <div className="heroQuickActions">
                       <button
@@ -5415,7 +5433,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                               <div className="albumFolderPreviewCopyV309">
                                 <strong title={album.title}>{album.title}</strong>
                                 <small title={album.artist}>{album.artist}</small>
-                                <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` • ${album.duplicateCount} already added` : ""}</em>
+                                <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` � ${album.duplicateCount} already added` : ""}</em>
                                 {album.sourcePath ? <b title={album.sourcePath}>{album.sourcePath}</b> : null}
                                 {album.warnings?.length ? (
                                   <ul>
@@ -5677,7 +5695,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       <h3>{selectedPlaylist ? selectedPlaylist.name : "make your first mix"}</h3>
                       <p>
                         {selectedPlaylist
-                          ? `${selectedPlaylistSongs.length} song${selectedPlaylistSongs.length === 1 ? "" : "s"} • ${formatTime(selectedPlaylistDuration)} total`
+                          ? `${selectedPlaylistSongs.length} song${selectedPlaylistSongs.length === 1 ? "" : "s"} � ${formatTime(selectedPlaylistDuration)} total`
                           : "Create a playlist, add songs, and keep your local music feeling familiar."}
                       </p>
                     </div>
@@ -5724,7 +5742,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <aside className="panel playlistCreatePanel">
                     <p className="eyebrow">new playlist</p>
                     <h3>start a mix</h3>
-                    <p className="softText">Night drive, gaming, school, sad songs — whatever fits.</p>
+                    <p className="softText">Night drive, gaming, school, sad songs � whatever fits.</p>
                     <form
                       className="playlistCreateForm"
                       onSubmit={(event) => {
@@ -5767,7 +5785,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           {renderPlaylistCollage(previewSongs)}
                           <span className="playlistShelfMeta">
                             <strong>{playlist.name}</strong>
-                            <small>{songCount} song{songCount === 1 ? "" : "s"} • {formatTime(duration)}</small>
+                            <small>{songCount} song{songCount === 1 ? "" : "s"} � {formatTime(duration)}</small>
                           </span>
                           <span className="playlistShelfDropHint">{activePlaylistId === playlist.id ? "playing" : "drop song"}</span>
                         </button>
@@ -6023,7 +6041,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                   <div className="analyticsMiniCardV339">
                     <span>longest track</span>
-                    <strong>{longestSong ? formatTime(longestSong.duration || 0) : "—"}</strong>
+                    <strong>{longestSong ? formatTime(longestSong.duration || 0) : "�"}</strong>
                     <small>{longestSong ? prettyTitle(longestSong.title, 5) : "no songs yet"}</small>
                   </div>
                 </section>
@@ -6039,7 +6057,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <button
                     type="button"
                     className="softButton analyticsShareButtonV339"
-                    onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.map((card) => `${card.label}: ${card.value}`).join(" • ")}`)}
+                    onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.map((card) => `${card.label}: ${card.value}`).join(" � ")}`)}
                     disabled={!songs.length}
                   >
                     copy recap line
@@ -6285,7 +6303,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                       <span className="spotifySourceBadge">Spotify</span>
                                       <span className={`spotifyTrackStatus ${statusLabel.replace(/\s+/g, "-")}`}>{statusLabel}</span>
                                     </div>
-                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` · ${track.albumName}` : ""}</p>
+                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` � ${track.albumName}` : ""}</p>
                                     {track.downloadMessage ? <small>{track.downloadMessage}</small> : null}
                                     {track.downloadError ? <small className="spotifyTrackError">{track.downloadError}</small> : null}
                                   </div>
