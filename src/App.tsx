@@ -2481,7 +2481,8 @@ function MainModeApp() {
 
     const orb = document.createElement("span");
     orb.className = "localitfyDragPreviewOrb";
-    orb.textContent = song.liked ? "?" : "?";
+    orb.textContent = "";
+    orb.dataset.kind = song.liked ? "liked" : "song";
 
     const text = document.createElement("span");
     text.className = "localitfyDragPreviewText";
@@ -10224,7 +10225,7 @@ function MainModeApp() {
       <div className={className} aria-hidden="true">
         {tiles.map((song, index) => (
           <div className={song ? "playlistCoverTile" : "playlistCoverTile empty"} key={song ? `${song.id}-${index}` : `empty-${index}`}>
-            {song ? <Cover song={song} className="playlistCoverImage" /> : <span>?</span>}
+            {song ? <Cover song={song} className="playlistCoverImage" /> : <span><Images size={18} aria-hidden="true" /></span>}
           </div>
         ))}
       </div>
@@ -10624,7 +10625,7 @@ function MainModeApp() {
 
       feedbackLastSentAtRef.current = Date.now();
       markFeedbackPromptSeen();
-      setFeedbackStatus({ kind: "success", message: "Sent successfully � thanks, I�ll review this." });
+      setFeedbackStatus({ kind: "success", message: "Sent successfully. Thanks, I will review this." });
       setFeedbackMessage("");
 
       window.setTimeout(() => {

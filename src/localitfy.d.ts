@@ -119,6 +119,9 @@ declare global {
     coverUpdatedAt?: string | null;
     durationMs?: number;
     coverUrl?: string;
+    coverPath?: string;
+    coverSource?: string;
+    embeddedCoverPath?: string;
     coverThumbUrl?: string;
     coverThumbnailUrl?: string;
     thumbnailUrl?: string;
@@ -150,6 +153,9 @@ declare global {
     artist: string;
     year?: string;
     coverUrl?: string;
+    coverPath?: string;
+    coverSource?: string;
+    embeddedCoverPath?: string;
     sourceType: "folder";
     sourcePath: string;
     folderCoverPath?: string;
@@ -218,6 +224,9 @@ declare global {
     artist?: string;
     album?: string;
     coverUrl?: string;
+    coverPath?: string;
+    coverSource?: string;
+    embeddedCoverPath?: string;
     hasSong?: boolean;
     minimizeToTray?: boolean;
     startWithWindows?: boolean;
@@ -288,6 +297,9 @@ declare global {
     artists?: string;
     albumName?: string;
     coverUrl?: string;
+    coverPath?: string;
+    coverSource?: string;
+    embeddedCoverPath?: string;
     spotifyCoverUrl?: string;
     albumCoverUrl?: string;
     spotifyUrl?: string;

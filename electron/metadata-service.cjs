@@ -18,7 +18,6 @@ function initMetadataService(options = {}) {
     try {
       fs.mkdirSync(getEmbeddedCoverCacheDirectory(), { recursive: true });
     } catch {
-      // Metadata must never block startup.
     }
   }
 }

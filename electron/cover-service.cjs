@@ -31,7 +31,6 @@ function initCoverService(options = {}) {
     try {
       fs.mkdirSync(getCoverCacheDirectory(), { recursive: true });
     } catch {
-      // Cover cache must never block startup.
     }
   }
 }
@@ -142,26 +141,22 @@ async function resolveSongCover(input = {}) {
   const song = input.song || {};
   const metadata = input.metadata || {};
   const now = new Date().toISOString();
-
-  // User custom cover always wins.
-  if (song.coverSource === "custom" && existingCoverIsUsable(song)) {
-    return {
-      coverPath: song.coverPath,
-      coverSource: "custom",
-      coverUpdatedAt: song.coverUpdatedAt || now
-    };
-  }
-
-  // Embedded tag cover comes before folder cover and fallback art.
-  if (metadata.embeddedCoverPath && fileExists(metadata.embeddedCoverPath) && isImageFile(metadata.embeddedCoverPath)) {
-    return {
-      coverPath: metadata.embeddedCoverPath,
-      coverSource: "embedded",
-      coverUpdatedAt: now
-    };
-  }
-
   const folderCover = input.folderCoverPath || findFolderCover(input.filePath || song.filePath || "");
+
+  if (input.preferFolderCover && folderCover) {
+    const cached = copyCoverToAppStorage(folderCover, {
+      source: "folder",
+      filePath: input.filePath || song.filePath || "",
+      songId: song.id || ""
+    }) || folderCover;
+
+    return { coverPath: cached, coverSource: "folder", coverUpdatedAt: now };
+  }
+
+  if (song.coverSource === "custom" && existingCoverIsUsable(song)) {
+    return { coverPath: song.coverPath, coverSource: "custom", coverUpdatedAt: song.coverUpdatedAt || now };
+  }
+
   if (folderCover) {
     const cached = copyCoverToAppStorage(folderCover, {
       source: "folder",
@@ -169,13 +164,12 @@ async function resolveSongCover(input = {}) {
       songId: song.id || ""
     }) || folderCover;
 
-    return {
-      coverPath: cached,
-      coverSource: "folder",
-      coverUpdatedAt: now
-    };
+    return { coverPath: cached, coverSource: "folder", coverUpdatedAt: now };
   }
 
+  if (metadata.embeddedCoverPath && fileExists(metadata.embeddedCoverPath) && isImageFile(metadata.embeddedCoverPath)) {
+    return { coverPath: metadata.embeddedCoverPath, coverSource: "embedded", coverUpdatedAt: now };
+  }
 
   const albumEmbeddedCoverPath = input.albumEmbeddedCoverPath || input.albumCoverPath || "";
   if (albumEmbeddedCoverPath && fileExists(albumEmbeddedCoverPath) && isImageFile(albumEmbeddedCoverPath)) {
@@ -185,34 +179,18 @@ async function resolveSongCover(input = {}) {
       songId: song.id || ""
     }) || albumEmbeddedCoverPath;
 
-    return {
-      coverPath: cached,
-      coverSource: "embedded",
-      coverUpdatedAt: now
-    };
+    return { coverPath: cached, coverSource: "embedded", coverUpdatedAt: now };
   }
 
   if (input.spotifyCoverPath && fileExists(input.spotifyCoverPath) && isImageFile(input.spotifyCoverPath)) {
-    return {
-      coverPath: input.spotifyCoverPath,
-      coverSource: "spotify",
-      coverUpdatedAt: now
-    };
+    return { coverPath: input.spotifyCoverPath, coverSource: "spotify", coverUpdatedAt: now };
   }
 
   if (input.fallbackCoverPath && fileExists(input.fallbackCoverPath) && isImageFile(input.fallbackCoverPath)) {
-    return {
-      coverPath: input.fallbackCoverPath,
-      coverSource: "fallback",
-      coverUpdatedAt: now
-    };
+    return { coverPath: input.fallbackCoverPath, coverSource: "fallback", coverUpdatedAt: now };
   }
 
-  return {
-    coverPath: "",
-    coverSource: "none",
-    coverUpdatedAt: now
-  };
+  return { coverPath: "", coverSource: "none", coverUpdatedAt: now };
 }
 
 module.exports = {

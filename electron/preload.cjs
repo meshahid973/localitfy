@@ -59,7 +59,6 @@ contextBridge.exposeInMainWorld("localitfy", {
   getStartWithWindows: () => ipcRenderer.invoke("localitfy:get-start-with-windows"),
   getNativeMediaStatus: () => ipcRenderer.invoke("localitfy:native-media-status"),
 
-  /** V302: renderer-safe DevTools/GPU status bridge. */
   openDevTools: (payload) => ipcRenderer.invoke("localitfy:open-devtools", payload),
   toggleDevTools: () => ipcRenderer.invoke("localitfy:toggle-devtools"),
   getPerformanceStatus: () => ipcRenderer.invoke("localitfy:performance-status"),
@@ -75,26 +74,18 @@ contextBridge.exposeInMainWorld("localitfy", {
   downloadUpdate: () => ipcRenderer.invoke("localitfy:download-update"),
   installUpdate: () => ipcRenderer.invoke("localitfy:install-update"),
 
-  /** Spotify public-only import. Public playlists/albums/tracks do not need manual cookies. */
   /** Check if Spotify OAuth/PKCE is configured and connected. */
   spotifyCheck: () => ipcRenderer.invoke("spotify-check"),
-  /** Open Spotify OAuth login popup. No sp_dc cookie paste. */
   spotifyLogin: () => ipcRenderer.invoke("spotify-login"),
-  /** Disabled compatibility method. Use spotifyLogin instead. */
   spotifyImportBrowser: () => ipcRenderer.invoke("spotify-import-browser"),
-  /** Disabled compatibility method. Use spotifyLogin instead. */
   spotifySetCookie: (payload) => {
     const spDc = typeof payload === "string" ? payload : payload?.spDc;
     return ipcRenderer.invoke("spotify-set-cookie", { spDc });
   },
-  /** Clear stored Spotify OAuth token. */
   spotifyLogout: () => ipcRenderer.invoke("spotify-logout"),
-  /** Fetch track list from any public Spotify playlist/album/track URL. */
   spotifyFetch: (payload) => ipcRenderer.invoke("spotify-fetch", payload),
   spotifyFetchTracks: (url) => ipcRenderer.invoke("spotify-fetch", { url }),
-  /** Check the local Spotify download bridge. */
   spotdlCheck: () => ipcRenderer.invoke("spotdl-check"),
-  /** Download Spotify track searches through localtify's download bridge. */
   spotdlDownloadBatch: (payload) => ipcRenderer.invoke("spotdl-download-batch", payload),
   spotifyDownloadBatch: (payload) => ipcRenderer.invoke("spotdl-download-batch", payload),
 

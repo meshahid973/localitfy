@@ -2152,3 +2152,64 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   backface-visibility: hidden;
 }
 
+.app .homeFreshRail,
+.app .homeListenGrid,
+.app .homeAlbumGrid,
+.app .libraryList,
+.app .albumShelfGridV318,
+.app .playlistTrackList,
+.app .coverGalleryGridCleanOnly{
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 720px;
+  contain: layout paint style;
+}
+
+.app .homeFreshCard,
+.app .homeListenCard,
+.app .homeAlbumCard,
+.app .songRow,
+.app .libraryRow,
+.app .playlistTrackRow,
+.app .playlistSongRow,
+.app .albumCardV318,
+.app .coverGalleryCardCleanOnly{
+  content-visibility: auto;
+  contain-intrinsic-size: 120px 150px;
+  contain: layout paint style;
+}
+
+.app :is(.homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumCardV318, .coverGalleryCardCleanOnly) img{
+  content-visibility: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.app :is(.localtifyProximityTarget, .homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
+  will-change: auto;
+}
+
+.inlineGlyphIcon,
+.emptyCoverIcon,
+.playingBarsIcon,
+.updateMiniIcon,
+.checkMiniIcon,
+.plusMiniIcon,
+.alertMiniIcon,
+.infoMiniIcon{
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  color: currentColor;
+  vertical-align: -0.15em;
+}
+
+.localitfyDragPreviewOrb[data-kind=liked]::before,
+.localitfyDragPreviewOrb[data-kind=song]::before{
+  content: "";
+  width: 9px;
+  height: 9px;
+  display: block;
+  border-radius: 999px;
+  background: currentColor;
+}
+

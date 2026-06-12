@@ -3580,6 +3580,7 @@ async function handleAlbumFolderImport(event, payload = {}) {
         filePath,
         folderCoverPath,
         albumEmbeddedCoverPath,
+        preferFolderCover: Boolean(folderCoverPath),
         fallbackCoverPath: fallbackCover
       });
 
@@ -3625,7 +3626,8 @@ async function handleAlbumFolderImport(event, payload = {}) {
     const baseSong = await makeSongFromFile(filePath, pixelArtFiles, usedCovers, {
       album: album.title || track.album || "",
       folderCoverPath,
-      albumEmbeddedCoverPath
+      albumEmbeddedCoverPath,
+      preferFolderCover: Boolean(folderCoverPath)
     });
 
     const durationMs = Math.max(
@@ -3670,7 +3672,9 @@ async function handleAlbumFolderImport(event, payload = {}) {
 
     const albumSongs = songIds.map((id) => songById.get(id)).filter(Boolean);
     const preferredCoverSong =
-      albumSongs.find((song) => ["custom", "folder", "embedded"].includes(String(song.coverSource || "")) && song.coverPath) ||
+      albumSongs.find((song) => String(song.coverSource || "") === "folder" && song.coverPath) ||
+      albumSongs.find((song) => String(song.coverSource || "") === "embedded" && song.coverPath) ||
+      albumSongs.find((song) => String(song.coverSource || "") === "custom" && song.coverPath) ||
       albumSongs.find((song) => song.coverPath) ||
       null;
     const stableCoverPath = preferredCoverSong?.coverPath || album.coverPath || "";
