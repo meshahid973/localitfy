@@ -8235,3 +8235,195 @@ body.localitfyThemePainting .toggleRow{
     grid-template-columns: 1fr !important;
   }
 }
+
+.playerOwnershipPanelV445{
+  display: grid;
+  gap: 16px;
+}
+
+.playerOwnershipPanelV445 .settingsPanelHeader{
+  margin-bottom: 0;
+}
+
+.visualOptionGroupV205{
+  display: grid;
+  gap: 10px;
+}
+
+.visualOptionGroupHeadV205{
+  display: grid;
+  gap: 4px;
+}
+
+.visualOptionGroupHeadV205 strong{
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+
+.visualOptionGroupHeadV205 span{
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 760;
+}
+
+.visualOptionGridV205{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.visualOptionButtonV205{
+  min-height: 58px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  color: var(--text);
+  text-align: left;
+  background: rgba(255,255,255,.030);
+}
+
+.visualOptionButtonV205.active{
+  border-color: rgba(var(--accent-rgb), .42);
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), .14), rgba(255,255,255,.028)),
+    rgba(0,0,0,.18);
+}
+
+.visualOptionButtonV205 strong{
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.05;
+}
+
+.visualOptionButtonV205 span{
+  color: var(--text-2);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 760;
+}
+
+.bouncyHeroRangeRowV448{
+  min-height: 108px;
+  padding: 16px;
+  border: 1px solid rgba(var(--accent-rgb), .18);
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 16px;
+  align-items: center;
+  background:
+    radial-gradient(circle at var(--bouncy-progress, 50%) 100%, rgba(var(--accent-rgb), .15), transparent 36%),
+    rgba(255,255,255,.026);
+}
+
+.bouncyHeroRangeCopyV448{
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.bouncyHeroRangeCopyV448 strong{
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+
+.bouncyHeroRangeCopyV448 small{
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 760;
+}
+
+.bouncyHeroRangeValueV448{
+  min-width: 58px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid rgba(var(--accent-rgb), .24);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), .08);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.bouncyHeroSliderShellV448{
+  position: relative;
+  grid-column: 1 / -1;
+  min-height: 34px;
+  display: grid;
+  align-items: center;
+}
+
+.bouncyHeroSliderShellV448 input{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  opacity: 0;
+  cursor: grab;
+}
+
+.bouncyHeroSliderShellV448 input:active{
+  cursor: grabbing;
+}
+
+.bouncyHeroSliderRailV448{
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+  overflow: visible;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.045)),
+    rgba(0,0,0,.32);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -8px 16px rgba(0,0,0,.22);
+}
+
+.bouncyHeroSliderFillV448{
+  position: absolute;
+  inset: 3px auto 3px 3px;
+  width: calc(var(--bouncy-progress, 50%) - 3px);
+  min-width: 14px;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 72%, white), var(--accent));
+  box-shadow: 0 0 22px rgba(var(--accent-rgb), .26);
+}
+
+.bouncyHeroSliderThumbV448{
+  position: absolute;
+  top: 50%;
+  left: var(--bouncy-progress, 50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #08070c;
+  background: var(--accent);
+  box-shadow: 0 10px 26px rgba(0,0,0,.32), 0 0 0 7px rgba(var(--accent-rgb), .10);
+  transform: translate(-50%, -50%);
+  transition: transform 170ms cubic-bezier(.18, 1.4, .24, 1), box-shadow 170ms ease;
+}
+
+.bouncyHeroSliderShellV448 input:active + .bouncyHeroSliderRailV448 .bouncyHeroSliderThumbV448{
+  transform: translate(-50%, -50%) scale(1.16);
+  box-shadow: 0 14px 34px rgba(0,0,0,.38), 0 0 0 10px rgba(var(--accent-rgb), .12);
+}
+
+.bouncyHeroSliderThumbV448 span{
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.86);
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,.22);
+}

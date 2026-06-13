@@ -510,6 +510,7 @@ function applyVisualCustomizationDefaults<T extends Record<string, any>>(setting
     starsIntensity: normalizeVisualChoice(settings.starsIntensity, ["off", "subtle", "normal", "bright"], "off"),
     sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
     playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
+    homeHeroCoverBrightness: Number.isFinite(Number(settings.homeHeroCoverBrightness)) ? Math.min(1.55, Math.max(0.65, Number(settings.homeHeroCoverBrightness))) : 1,
     // V385: visible Appearance toggle. Default ON so the current cover-blur look stays enabled.
     quickLibraryMoreBlur: settings.quickLibraryMoreBlur !== false,
     catBuddyEnabled: settings.catBuddyEnabled === true

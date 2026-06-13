@@ -5285,7 +5285,7 @@ body.localitfyLibraryPointerDragging{
   background:
     linear-gradient(90deg, rgba(0,0,0,.98) 0%, rgba(0,0,0,.88) 43%, rgba(0,0,0,.40) 68%, rgba(0,0,0,.70) 100%),
     var(--cover-url, var(--cover-art-url, none)) center right / cover no-repeat !important;
-  filter: saturate(1.14) contrast(1.03) !important;
+  filter: brightness(var(--home-hero-cover-glow-brightness, .72)) saturate(var(--home-hero-cover-saturation, 1.14)) contrast(var(--home-hero-cover-contrast, 1.03)) !important;
   transform: scale(1.015) !important;
 }
 
@@ -5300,7 +5300,7 @@ body.localitfyLibraryPointerDragging{
   background:
     radial-gradient(circle at 54% 48%, color-mix(in oklab, var(--accent, #a98cff) 28%, transparent), transparent 38%),
     var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-  filter: blur(42px) saturate(1.38) !important;
+  filter: blur(42px) brightness(var(--home-hero-cover-glow-brightness, .72)) saturate(var(--home-hero-cover-saturation, 1.38)) !important;
   transform: scale(1.04) !important;
 }
 
@@ -5314,7 +5314,7 @@ body.localitfyLibraryPointerDragging{
   background:
     radial-gradient(circle at 55% 50%, color-mix(in oklab, var(--accent, #a98cff) 24%, transparent), transparent 35%),
     var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-  filter: blur(30px) saturate(1.24) !important;
+  filter: blur(30px) brightness(var(--home-hero-cover-glow-brightness, .72)) saturate(var(--home-hero-cover-saturation, 1.24)) !important;
   transform: translateZ(0) scale(1.02) !important;
   animation: none !important;
 }
@@ -5374,7 +5374,7 @@ body.localitfyLibraryPointerDragging{
   object-fit: cover !important;
   object-position: center !important;
   transform: none !important;
-  filter: saturate(1.04) contrast(1.02) !important;
+  filter: brightness(var(--home-hero-cover-brightness, 1)) saturate(var(--home-hero-cover-saturation, 1.04)) contrast(var(--home-hero-cover-contrast, 1.02)) !important;
 }
 
 .app .heroArt:hover img{

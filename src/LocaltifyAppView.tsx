@@ -1550,6 +1550,7 @@ export const defaultSettings: Settings = {
   libraryRowStyle: "comfyRows",
   sidebarBehavior: "fixed",
   playerBackgroundStyle: "coverBlur",
+  homeHeroCoverBrightness: 1,
   starsIntensity: "off",
   blurEffects: "normal",
 
@@ -4676,6 +4677,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     if (albumEditingManualId === manualId) closeAlbumBuilder();
   }
 
+  const homeHeroCoverBrightness = clamp(Number(settings.homeHeroCoverBrightness ?? 1), 0.65, 1.55);
+  const homeHeroCoverContrast = clamp(1.02 + (homeHeroCoverBrightness - 1) * 0.08, 0.98, 1.08);
+  const homeHeroCoverSaturation = clamp(1.04 + (homeHeroCoverBrightness - 1) * 0.14, 1, 1.14);
+  const homeHeroCoverGlowBrightness = clamp(0.72 + (homeHeroCoverBrightness - 1) * 0.34, 0.62, 0.92);
   const platformId = String((platformInfo as any)?.id || "unknown").toLowerCase();
 
   return (
@@ -4690,6 +4695,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
         {
           "--player-size": `${clamp(Number(settings.playerSize || 108), 74, 168)}px`,
           "--sidebar-width": `${clamp(Number(settings.sidebarWidth || 249), 184, 340)}px`,
+          "--home-hero-cover-brightness": String(homeHeroCoverBrightness),
+          "--home-hero-cover-contrast": String(homeHeroCoverContrast),
+          "--home-hero-cover-saturation": String(homeHeroCoverSaturation),
+          "--home-hero-cover-glow-brightness": String(homeHeroCoverGlowBrightness),
           ...themePresetStyle,
           ...animatedThemeVisualStyle,
           ...customThemeStyle
