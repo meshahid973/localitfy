@@ -8,6 +8,11 @@ export type PhysicalDragBounds = {
   max: number;
 };
 
+export type PhysicalVerticalDragBounds = {
+  top: number;
+  bottom: number;
+};
+
 export const physicalDragDefaults = {
   dragElastic: 0.08,
   dragMomentum: false,
@@ -18,6 +23,11 @@ export const physicalDragDefaults = {
     mass: 0.86
   }
 } as const;
+
+export const updateIslandDragBounds: PhysicalVerticalDragBounds = {
+  top: -10,
+  bottom: 18
+};
 
 export function clampToBounds(value: number, bounds: PhysicalDragBounds) {
   if (!Number.isFinite(value)) return bounds.min;
@@ -53,6 +63,15 @@ export function createCenterOpenSnapPoints(center: number, open: number): Physic
     { id: "center", value: center },
     { id: "open", value: open }
   ];
+}
+
+export function createVerticalDragConstraints(bounds: PhysicalVerticalDragBounds) {
+  return {
+    top: bounds.top,
+    bottom: bounds.bottom,
+    left: 0,
+    right: 0
+  };
 }
 
 export function createMotionDragProps(bounds: PhysicalDragBounds) {

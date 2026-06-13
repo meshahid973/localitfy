@@ -3,6 +3,7 @@ import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo,
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import UpdateIsland from "./app/UpdateIsland";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FastAverageColor } from "fast-average-color";
 
@@ -4744,127 +4745,22 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       ) : null}
 
       <TitleBar>
-        <AnimatePresence initial={false}>
-        {showTopUpdateRibbon ? (
-          <Motion.div
-            key={`update-ribbon-${updatePrompt.status}-${updatePrompt.version || APP_VERSION}`}
-            className="updateToastLayer topUpdateRibbonLayer"
-            role="presentation"
-            initial={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
-            animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -16 }}
-            transition={settings.reducedMotion ? { duration: 0.12 } : updateRibbonEnterSpring}
-          >
-            <Motion.img
-              className={`updateYukariPeek updateYukariPeek-${updatePrompt.status}`}
-              src={yukariUpdateImage}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-              initial={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, x: 118, rotate: 2, scale: 0.985 }}
-              animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, rotate: 0, scale: 1 }}
-              exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, x: 96, rotate: 2, scale: 0.985 }}
-              transition={settings.reducedMotion ? { duration: 0.12 } : { type: "spring", stiffness: 260, damping: 24, mass: 0.82, delay: 0.08 }}
-            />
-            <Motion.section
-              className={`updateToastCard topUpdateRibbon ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
-              onClick={(event) => event.stopPropagation()}
-              role="status"
-              aria-live="polite"
-              aria-label="localtify update"
-              initial={settings.reducedMotion ? false : { opacity: 0, y: -8, scale: 0.992 }}
-              animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.995 }}
-              transition={settings.reducedMotion ? { duration: 0.12 } : updateRibbonEnterSpring}
-            >
-              <Motion.div
-                className="topUpdateRibbonMain"
-                initial={settings.reducedMotion ? false : { opacity: 0, y: 6 }}
-                animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                transition={settings.reducedMotion ? { duration: 0.1 } : { ...updateRibbonChildSpring, delay: 0.04 }}
-              >
-                <div className="updateToastIcon topUpdateRibbonIcon" aria-hidden="true">
-                  <UpdateStatusIcon status={updatePrompt.status} />
-                </div>
-
-                <div className="updateToastText topUpdateRibbonText">
-                  <p className="eyebrow">localtify</p>
-                  <h3>{updateRibbonTitle(updatePrompt)}</h3>
-                </div>
-              </Motion.div>
-
-              <Motion.div
-                className="topUpdateRibbonRight"
-                initial={settings.reducedMotion ? false : { opacity: 0, y: 6 }}
-                animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                transition={settings.reducedMotion ? { duration: 0.1 } : { ...updateRibbonChildSpring, delay: 0.12 }}
-              >
-                <Motion.div
-                  className="updateToastMetaRow topUpdateRibbonMeta"
-                  aria-label="update info"
-                  initial={settings.reducedMotion ? false : { opacity: 0, x: 6 }}
-                  animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                  exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, x: 4 }}
-                  transition={settings.reducedMotion ? { duration: 0.1 } : { ...updateRibbonChildSpring, delay: 0.14 }}
-                >
-                  <span className="updateVersionPill">version {updatePrompt.version || APP_VERSION}</span>
-                </Motion.div>
-
-                <Motion.div
-                  className="updateToastActions topUpdateRibbonActions"
-                  initial={settings.reducedMotion ? false : { opacity: 0, x: 8 }}
-                  animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                  exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, x: 5 }}
-                  transition={settings.reducedMotion ? { duration: 0.1 } : { ...updateRibbonChildSpring, delay: 0.18 }}
-                >
-                  {updatePrompt.status === "available" ? (
-                    <>
-                      <button className="updatePrimaryButton" type="button" onClick={askUpdaterToDownload}>
-                        download
-                      </button>
-                    </>
-                  ) : null}
-
-                  {updatePrompt.status === "downloaded" ? (
-                    <>
-                      <button className="updatePrimaryButton" type="button" onClick={askUpdaterToInstall}>
-                        restart
-                      </button>
-                    </>
-                  ) : null}
-
-                  {updatePrompt.status === "error" || updatePrompt.status === "latest" || updatePrompt.status === "dev" ? (
-                    <button className="updatePrimaryButton" type="button" onClick={manualUpdateCheck}>
-                      check again
-                    </button>
-                  ) : null}
-
-                  {updatePrompt.status !== "downloading" ? (
-                    <button className="updateToastClose" type="button" onClick={() => setUpdatePrompt(defaultUpdatePrompt)} aria-label="Dismiss update notice">
-                      <WindowCloseIcon />
-                    </button>
-                  ) : null}
-                </Motion.div>
-              </Motion.div>
-
-              {updatePrompt.status === "downloading" ? (
-                <Motion.div
-                  className="updateProgressTrack topUpdateRibbonProgress"
-                  aria-label="update progress"
-                  initial={settings.reducedMotion ? false : { opacity: 0, scaleX: 0.94 }}
-                  animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, scaleX: 1 }}
-                  exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, scaleX: 0.96 }}
-                  transition={settings.reducedMotion ? { duration: 0.1 } : { ...updateRibbonChildSpring, delay: 0.2 }}
-                >
-                  <span style={{ width: `${clamp(updatePrompt.percent, 0, 100)}%` }} />
-                </Motion.div>
-              ) : null}
-            </Motion.section>
-          </Motion.div>
-        ) : null}
-        </AnimatePresence>
+        <UpdateIsland
+          show={showTopUpdateRibbon}
+          updatePrompt={updatePrompt}
+          appVersion={APP_VERSION}
+          reducedMotion={settings.reducedMotion}
+          yukariUpdateImage={yukariUpdateImage}
+          enterSpring={updateRibbonEnterSpring}
+          childSpring={updateRibbonChildSpring}
+          titleForPrompt={updateRibbonTitle}
+          StatusIcon={UpdateStatusIcon}
+          CloseIcon={WindowCloseIcon}
+          onDownload={askUpdaterToDownload}
+          onInstall={askUpdaterToInstall}
+          onCheckAgain={manualUpdateCheck}
+          onDismiss={() => setUpdatePrompt(defaultUpdatePrompt)}
+        />
       </TitleBar>
 
       <AnimatePresence>
