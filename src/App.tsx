@@ -39,6 +39,10 @@ import {
   Send
 } from "lucide-react";
 import { useProximityMotion } from "./useProximityMotion";
+import { HtmlAudioEngine } from "./player/htmlAudioEngine";
+import { createPlayerController } from "./player/playerController";
+import type { PlayerController } from "./player/playerController";
+import type { PlayerEngineSource } from "./player/PlayerEngine";
 import {
   initLocalitfyAnalytics,
   trackAppLaunched,
@@ -653,6 +657,8 @@ function resetOnboardingForThisRelease() {
 
 function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playerEngineRef = useRef<HtmlAudioEngine | null>(null);
+  const playerControllerRef = useRef<PlayerController | null>(null);
   const crossfadeIntervalRef = useRef<number | null>(null);
   const crossfadeAutoStartedRef = useRef(false);
   const crossfadeAutoTargetRef = useRef("");
@@ -1357,6 +1363,32 @@ function MainModeApp() {
   const currentSong = useMemo(() => {
     return songs.find((song) => song.id === currentId) ?? null;
   }, [songs, currentId]);
+  function buildPlayerEngineSource(song: Song, url: string): PlayerEngineSource {
+    return {
+      id: song.id,
+      url,
+      title: song.title,
+      artist: song.artist,
+      album: song.album,
+      duration: song.duration
+    };
+  }
+
+  function ensurePlayerController() {
+    const audio = audioRef.current;
+    if (!audio) return null;
+
+    if (!playerEngineRef.current || playerEngineRef.current.element !== audio) {
+      playerControllerRef.current?.destroy();
+
+      const engine = new HtmlAudioEngine(audio);
+      playerEngineRef.current = engine;
+      playerControllerRef.current = createPlayerController(engine);
+    }
+
+    return playerControllerRef.current;
+  }
+
   const [crossfadePreviewSongId, setCrossfadePreviewSongId] = useState("");
   const visualCurrentSong = useMemo(() => {
     if (!crossfadePreviewSongId) return currentSong;
@@ -4858,9 +4890,21 @@ function MainModeApp() {
 
   function setAudioElementVolume(audio: HTMLAudioElement | null | undefined, volume: number) {
     if (!audio) return;
+
+    const safeVolume = clamp(Number(volume) || 0, 0, 1);
+
     try {
+      if (audio === audioRef.current) {
+        const controller = ensurePlayerController();
+
+        if (controller) {
+          controller.setVolume(safeVolume);
+          return;
+        }
+      }
+
       audio.muted = false;
-      audio.volume = clamp(Number(volume) || 0, 0, 1);
+      audio.volume = safeVolume;
     } catch {
       // Volume changes should never break playback.
     }
@@ -6086,6 +6130,7 @@ function MainModeApp() {
     try {
       stopFade();
 
+      const playerController = ensurePlayerController();
       const safeVolume = getTargetAudioVolume(song);
 
       const handoffActive = crossfadeHandoffRef.current?.songId === song.id;
@@ -6106,14 +6151,16 @@ function MainModeApp() {
       resumeAudioContextSafely();
       volumeRef.current = safeVolume;
 
-      if (audio.src !== playbackUrl.url) {
+      if (playerController) {
+        playerController.load(buildPlayerEngineSource(song, playbackUrl.url));
+      } else if (audio.src !== playbackUrl.url) {
         audio.src = playbackUrl.url;
         audio.load();
       }
 
       pendingPlayRef.current = true;
 
-      await audio.play();
+      await (playerController ? playerController.play() : audio.play());
 
       pendingPlayRef.current = false;
 
@@ -6147,6 +6194,7 @@ function MainModeApp() {
 
   function pauseAudioSmooth() {
     const audio = audioRef.current;
+    const playerController = ensurePlayerController();
 
     pendingPlayRef.current = false;
     stopCrossfadeAuto();
@@ -6159,11 +6207,13 @@ function MainModeApp() {
 
     if (!audio.paused) {
       if (settings.reducedMotion) {
-        audio.pause();
+        if (playerController) playerController.pause();
+        else audio.pause();
         applyAudioQualitySettings(audio, currentSong);
       } else {
         fadeAudio(0, 120, () => {
-          audio.pause();
+          if (playerController) playerController.pause();
+          else audio.pause();
           applyAudioQualitySettings(audio, currentSong);
         });
       }
@@ -9661,7 +9711,9 @@ function MainModeApp() {
 
       if (audio) {
         try {
-          audio.currentTime = 0;
+          const controller = ensurePlayerController();
+          if (controller) controller.seekTo(0);
+          else audio.currentTime = 0;
         } catch {
           // ignore seek errors from unavailable audio sources
         }
@@ -9756,7 +9808,9 @@ function MainModeApp() {
     const audio = audioRef.current;
 
     if (audio && audio.currentTime > 4) {
-      audio.currentTime = 0;
+      const controller = ensurePlayerController();
+      if (controller) controller.seekTo(0);
+      else audio.currentTime = 0;
       setCurrentTime(0);
       return;
     }
@@ -9833,7 +9887,9 @@ function MainModeApp() {
 
     const safePercent = clamp(Number(value), 0, 100);
     const nextTime = (safePercent / 100) * duration;
-    audio.currentTime = nextTime;
+    const controller = ensurePlayerController();
+    if (controller) controller.seekTo(nextTime);
+    else audio.currentTime = nextTime;
     timeRef.current = nextTime;
     lastProgressUiPaintRef.current = 0;
     lastProgressStatePaintRef.current = 0;
