@@ -916,8 +916,8 @@ export function updateWasLeftAlone(version: string) {
 export function updateRibbonTitle(prompt: UpdatePromptState) {
   const version = prompt.version || APP_VERSION;
 
-  if (prompt.status === "available") return `there is a new update · Localtify ${version} is available.`;
-  if (prompt.status === "downloaded") return `update ready · restart to install Localtify ${version}.`;
+  if (prompt.status === "available") return `new update · Localtify ${version} is ready`;
+  if (prompt.status === "downloaded") return `update ready · restart to install ${version}`;
   if (prompt.status === "downloading") return `downloading update · ${Math.round(clamp(prompt.percent, 0, 100))}%`;
   if (prompt.status === "latest") return "Localtify is up to date.";
   if (prompt.status === "error") return "Update check failed.";
@@ -4810,11 +4810,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   transition={settings.reducedMotion ? { duration: 0.1 } : { ...updateRibbonChildSpring, delay: 0.14 }}
                 >
                   <span className="updateVersionPill">version {updatePrompt.version || APP_VERSION}</span>
-                  {updatePrompt.status === "available" || updatePrompt.status === "downloaded" || updatePrompt.status === "dev" ? (
-                    <span className={`updateSafePill ${updatePrompt.libraryBackedUp ? "ok" : "pending"}`}>
-                      {updatePrompt.status === "dev" ? "dev mode" : updatePrompt.libraryBackedUp ? "library safe" : "app status"}
-                    </span>
-                  ) : null}
                 </Motion.div>
 
                 <Motion.div
@@ -4826,9 +4821,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 >
                   {updatePrompt.status === "available" ? (
                     <>
-                      <button className="updateGhostButton" type="button" onClick={openUpdateChangelog}>
-                        view release
-                      </button>
                       <button className="updateGhostButton" type="button" onClick={skipAvailableUpdate}>
                         skip
                       </button>
@@ -4840,9 +4832,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                   {updatePrompt.status === "downloaded" ? (
                     <>
-                      <button className="updateGhostButton" type="button" onClick={openUpdateChangelog}>
-                        view release
-                      </button>
                       <button className="updatePrimaryButton" type="button" onClick={askUpdaterToInstall}>
                         restart
                       </button>
