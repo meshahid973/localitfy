@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { AnimatePresence, motion as Motion } from "motion/react";
+import { Surface, SurfaceActions, SurfaceHeader } from "../ui/Surface";
 import {
   createVerticalDragConstraints,
   physicalDragDefaults,
@@ -80,7 +81,8 @@ export default function UpdateIsland({
             transition={reducedMotion ? { duration: 0.12 } : { type: "spring", stiffness: 260, damping: 24, mass: 0.82, delay: 0.08 }}
           />
 
-          <Motion.section
+          <Surface
+            as={Motion.section}
             className={`updateToastCard topUpdateRibbon ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
             onClick={(event) => event.stopPropagation()}
             role="status"
@@ -92,7 +94,8 @@ export default function UpdateIsland({
             transition={reducedMotion ? { duration: 0.12 } : enterSpring}
             {...dragProps}
           >
-            <Motion.div
+            <SurfaceHeader
+              as={Motion.div}
               className="topUpdateRibbonMain"
               initial={reducedMotion ? false : { opacity: 0, y: 6 }}
               animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
@@ -107,7 +110,7 @@ export default function UpdateIsland({
                 <p className="eyebrow">localtify</p>
                 <h3>{titleForPrompt(updatePrompt)}</h3>
               </div>
-            </Motion.div>
+            </SurfaceHeader>
 
             <Motion.div
               className="topUpdateRibbonRight"
@@ -127,7 +130,8 @@ export default function UpdateIsland({
                 <span className="updateVersionPill">version {updatePrompt.version || appVersion}</span>
               </Motion.div>
 
-              <Motion.div
+              <SurfaceActions
+                as={Motion.div}
                 className="updateToastActions topUpdateRibbonActions"
                 initial={reducedMotion ? false : { opacity: 0, x: 8 }}
                 animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
@@ -157,7 +161,7 @@ export default function UpdateIsland({
                     <CloseIcon />
                   </button>
                 ) : null}
-              </Motion.div>
+              </SurfaceActions>
             </Motion.div>
 
             {updatePrompt.status === "downloading" ? (
@@ -172,7 +176,7 @@ export default function UpdateIsland({
                 <span style={{ width: `${clampPercent(updatePrompt.percent)}%` }} />
               </Motion.div>
             ) : null}
-          </Motion.section>
+          </Surface>
         </Motion.div>
       ) : null}
     </AnimatePresence>

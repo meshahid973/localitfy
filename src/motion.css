@@ -2673,41 +2673,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   }
 }
 
-.app .homeFreshRail,
-.app .homeListenGrid,
-.app .homeAlbumGrid,
-.app .libraryList,
-.app .albumShelfGridV318,
-.app .playlistTrackList,
-.app .coverGalleryGridCleanOnly{
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 720px;
-  contain: layout paint style;
-}
-
-.app .homeFreshCard,
-.app .homeListenCard,
-.app .homeAlbumCard,
-.app .songRow,
-.app .libraryRow,
-.app .playlistTrackRow,
-.app .playlistSongRow,
-.app .albumCardV318,
-.app .coverGalleryCardCleanOnly{
-  content-visibility: auto;
-  contain-intrinsic-size: 120px 150px;
-  contain: layout paint style;
-}
-
-.app :is(.homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumCardV318, .coverGalleryCardCleanOnly) img{
-  content-visibility: auto;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-.app :is(.localtifyProximityTarget, .homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
-  will-change: auto;
-}
 
 .inlineGlyphIcon,
 .emptyCoverIcon,
