@@ -36,6 +36,19 @@
   --localtify-panel-bg: rgba(11, 23, 19, 0.52);
   --localtify-panel-bg-2: rgba(2, 7, 6, 0.74);
   --localtify-line-soft: rgba(141, 255, 206, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="berry"]{
@@ -76,6 +89,19 @@
   --localtify-panel-bg: rgba(27, 11, 24, 0.52);
   --localtify-panel-bg-2: rgba(11, 2, 9, 0.74);
   --localtify-line-soft: rgba(255, 114, 200, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="aqua"]{
@@ -116,6 +142,19 @@
   --localtify-panel-bg: rgba(7, 23, 36, 0.52);
   --localtify-panel-bg-2: rgba(2, 7, 11, 0.74);
   --localtify-line-soft: rgba(83, 215, 255, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="sunset"]{
@@ -156,6 +195,19 @@
   --localtify-panel-bg: rgba(28, 16, 8, 0.52);
   --localtify-panel-bg-2: rgba(11, 5, 2, 0.74);
   --localtify-line-soft: rgba(255, 184, 107, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="lavender"]{
@@ -196,6 +248,19 @@
   --localtify-panel-bg: rgba(22, 16, 36, 0.52);
   --localtify-panel-bg-2: rgba(8, 4, 18, 0.74);
   --localtify-line-soft: rgba(192, 132, 252, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="mono"]{
@@ -236,6 +301,19 @@
   --localtify-panel-bg: rgba(18, 18, 18, 0.52);
   --localtify-panel-bg-2: rgba(3, 3, 3, 0.74);
   --localtify-line-soft: rgba(244, 244, 245, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="rose"]{
@@ -276,6 +354,19 @@
   --localtify-panel-bg: rgba(26, 11, 16, 0.52);
   --localtify-panel-bg-2: rgba(11, 3, 6, 0.74);
   --localtify-line-soft: rgba(251, 113, 133, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="cotton"]{
@@ -316,6 +407,19 @@
   --localtify-panel-bg: rgba(14, 22, 38, 0.52);
   --localtify-panel-bg-2: rgba(3, 7, 17, 0.74);
   --localtify-line-soft: rgba(147, 197, 253, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="honey"]{
@@ -356,6 +460,19 @@
   --localtify-panel-bg: rgba(26, 20, 5, 0.52);
   --localtify-panel-bg-2: rgba(9, 7, 1, 0.74);
   --localtify-line-soft: rgba(250, 204, 21, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="lime"]{
@@ -396,6 +513,19 @@
   --localtify-panel-bg: rgba(13, 24, 5, 0.52);
   --localtify-panel-bg-2: rgba(3, 8, 0, 0.74);
   --localtify-line-soft: rgba(163, 230, 53, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="midnight"]{
@@ -436,6 +566,19 @@
   --localtify-panel-bg: rgba(11, 18, 35, 0.52);
   --localtify-panel-bg-2: rgba(2, 6, 23, 0.74);
   --localtify-line-soft: rgba(96, 165, 250, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="mocha"]{
@@ -476,6 +619,19 @@
   --localtify-panel-bg: rgba(25, 17, 12, 0.52);
   --localtify-panel-bg-2: rgba(9, 6, 4, 0.74);
   --localtify-line-soft: rgba(192, 132, 87, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="cherry"]{
@@ -516,6 +672,19 @@
   --localtify-panel-bg: rgba(29, 7, 16, 0.52);
   --localtify-panel-bg-2: rgba(12, 2, 5, 0.74);
   --localtify-line-soft: rgba(244, 63, 94, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="ice"]{
@@ -556,6 +725,19 @@
   --localtify-panel-bg: rgba(8, 24, 33, 0.52);
   --localtify-panel-bg-2: rgba(2, 9, 12, 0.74);
   --localtify-line-soft: rgba(103, 232, 249, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="matcha"]{
@@ -596,6 +778,19 @@
   --localtify-panel-bg: rgba(11, 24, 14, 0.52);
   --localtify-panel-bg-2: rgba(2, 8, 4, 0.74);
   --localtify-line-soft: rgba(134, 239, 172, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="bubblegum"]{
@@ -636,6 +831,19 @@
   --localtify-panel-bg: rgba(27, 16, 37, 0.52);
   --localtify-panel-bg-2: rgba(11, 3, 16, 0.74);
   --localtify-line-soft: rgba(244, 114, 208, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="sakura"]{
@@ -676,6 +884,19 @@
   --localtify-panel-bg: rgba(28, 14, 22, 0.52);
   --localtify-panel-bg-2: rgba(11, 4, 8, 0.74);
   --localtify-line-soft: rgba(249, 168, 212, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="dreamcore"]{
@@ -716,6 +937,19 @@
   --localtify-panel-bg: rgba(18, 16, 39, 0.52);
   --localtify-panel-bg-2: rgba(5, 4, 22, 0.74);
   --localtify-line-soft: rgba(167, 139, 250, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="peach"]{
@@ -756,6 +990,19 @@
   --localtify-panel-bg: rgba(27, 16, 8, 0.52);
   --localtify-panel-bg-2: rgba(11, 6, 3, 0.74);
   --localtify-line-soft: rgba(253, 186, 116, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="moon"]{
@@ -796,6 +1043,19 @@
   --localtify-panel-bg: rgba(17, 24, 39, 0.52);
   --localtify-panel-bg-2: rgba(4, 6, 10, 0.74);
   --localtify-line-soft: rgba(203, 213, 225, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="starlight"]{
@@ -836,6 +1096,19 @@
   --localtify-panel-bg: rgba(14, 16, 37, 0.52);
   --localtify-panel-bg-2: rgba(3, 4, 20, 0.74);
   --localtify-line-soft: rgba(224, 231, 255, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="neonNoir"]{
@@ -876,6 +1149,19 @@
   --localtify-panel-bg: rgba(6, 23, 27, 0.52);
   --localtify-panel-bg-2: rgba(1, 6, 8, 0.74);
   --localtify-line-soft: rgba(55, 248, 255, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="cyberGrape"]{
@@ -916,6 +1202,19 @@
   --localtify-panel-bg: rgba(23, 8, 38, 0.52);
   --localtify-panel-bg-2: rgba(8, 0, 17, 0.74);
   --localtify-line-soft: rgba(168, 85, 247, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="ember"]{
@@ -956,6 +1255,19 @@
   --localtify-panel-bg: rgba(29, 11, 4, 0.52);
   --localtify-panel-bg-2: rgba(11, 3, 1, 0.74);
   --localtify-line-soft: rgba(255, 122, 47, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="forest"]{
@@ -996,6 +1308,19 @@
   --localtify-panel-bg: rgba(8, 23, 14, 0.52);
   --localtify-panel-bg-2: rgba(2, 7, 4, 0.74);
   --localtify-line-soft: rgba(52, 211, 153, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="ocean"]{
@@ -1036,6 +1361,19 @@
   --localtify-panel-bg: rgba(9, 22, 44, 0.52);
   --localtify-panel-bg-2: rgba(2, 7, 22, 0.74);
   --localtify-line-soft: rgba(56, 189, 248, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="ruby"]{
@@ -1076,6 +1414,19 @@
   --localtify-panel-bg: rgba(30, 7, 16, 0.52);
   --localtify-panel-bg-2: rgba(12, 2, 5, 0.74);
   --localtify-line-soft: rgba(251, 49, 93, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="aurora"]{
@@ -1116,6 +1467,19 @@
   --localtify-panel-bg: rgba(8, 23, 26, 0.52);
   --localtify-panel-bg-2: rgba(2, 9, 11, 0.74);
   --localtify-line-soft: rgba(94, 234, 212, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="vanilla"]{
@@ -1156,6 +1520,19 @@
   --localtify-panel-bg: rgba(23, 18, 11, 0.52);
   --localtify-panel-bg-2: rgba(8, 6, 4, 0.74);
   --localtify-line-soft: rgba(255, 241, 194, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="vaporwave"]{
@@ -1196,6 +1573,19 @@
   --localtify-panel-bg: rgba(22, 12, 40, 0.52);
   --localtify-panel-bg-2: rgba(7, 3, 21, 0.74);
   --localtify-line-soft: rgba(251, 111, 217, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="ultraviolet"]{
@@ -1236,6 +1626,19 @@
   --localtify-panel-bg: rgba(21, 8, 34, 0.52);
   --localtify-panel-bg-2: rgba(7, 0, 15, 0.74);
   --localtify-line-soft: rgba(139, 92, 246, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="terminal"]{
@@ -1276,6 +1679,19 @@
   --localtify-panel-bg: rgba(6, 20, 11, 0.52);
   --localtify-panel-bg-2: rgba(0, 8, 4, 0.74);
   --localtify-line-soft: rgba(34, 197, 94, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="candyCloud"]{
@@ -1316,6 +1732,19 @@
   --localtify-panel-bg: rgba(27, 16, 37, 0.52);
   --localtify-panel-bg-2: rgba(11, 3, 16, 0.74);
   --localtify-line-soft: rgba(251, 123, 220, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="rainstorm"]{
@@ -1356,6 +1785,19 @@
   --localtify-panel-bg: rgba(11, 18, 36, 0.52);
   --localtify-panel-bg-2: rgba(2, 6, 23, 0.74);
   --localtify-line-soft: rgba(56, 189, 248, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="lavaLamp"]{
@@ -1396,6 +1838,19 @@
   --localtify-panel-bg: rgba(28, 8, 3, 0.52);
   --localtify-panel-bg-2: rgba(11, 2, 0, 0.74);
   --localtify-line-soft: rgba(239, 68, 68, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="softSky"]{
@@ -1436,6 +1891,19 @@
   --localtify-panel-bg: rgba(12, 27, 47, 0.52);
   --localtify-panel-bg-2: rgba(4, 16, 29, 0.74);
   --localtify-line-soft: rgba(147, 197, 253, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="arcadeGhost"]{
@@ -1476,6 +1944,19 @@
   --localtify-panel-bg: rgba(14, 16, 32, 0.52);
   --localtify-panel-bg-2: rgba(3, 3, 10, 0.74);
   --localtify-line-soft: rgba(34, 211, 238, 0.16);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }
 
 .app[data-theme="stars"]{
@@ -1506,4 +1987,17 @@
     radial-gradient(circle, rgba(255,255,255,.92) 0 .75px, transparent 1.6px),
     radial-gradient(circle, rgba(158,220,255,.7) 0 .9px, transparent 1.7px),
     radial-gradient(circle, rgba(255,139,251,.55) 0 .85px, transparent 1.6px);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2, var(--bg));
+  --lt-surface: var(--surface, var(--panel));
+  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
+  --lt-surface-raised: var(--surface-2, var(--panel));
+  --lt-text: var(--text);
+  --lt-muted: var(--muted, var(--text-2));
+  --lt-faint: var(--faint, var(--muted));
+  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
+  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: var(--danger, #ff6b8a);
 }

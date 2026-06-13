@@ -2,7 +2,7 @@
 .muted-small{
   display: block;
   margin-top: 3px;
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 11px;
   line-height: 1.35;
 }
@@ -174,14 +174,14 @@
 
 .editor-tool-buttons button:hover{
   transform: translateY(-1px) !important;
-  border-color: rgba(var(--accent-rgb), 0.28) !important;
-  background: rgba(var(--accent-rgb), 0.13) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.28) !important;
+  background: rgba(var(--lt-accent-rgb), 0.13) !important;
 }
 
 .editor-playlist-list button.is-on{
   color: var(--accent-contrast) !important;
   border-color: transparent !important;
-  background: var(--accent) !important;
+  background: var(--lt-accent) !important;
 }
 
 .muted-small{
@@ -283,20 +283,20 @@
   overflow: hidden !important;
   mix-blend-mode: screen !important;
   background:
-    radial-gradient(circle at 12% 18%, rgba(var(--accent-rgb), 0.11), transparent 24%),
+    radial-gradient(circle at 12% 18%, rgba(var(--lt-accent-rgb), 0.11), transparent 24%),
     radial-gradient(circle at 82% 24%, rgba(255,255,255,0.08), transparent 20%),
     radial-gradient(circle at 48% 86%, rgba(var(--accent-2-rgb), 0.10), transparent 25%) !important;
 }
 
 .secretLayer .starParticleLarge::before{
   content: "✧" !important;
-  color: var(--accent) !important;
+  color: var(--lt-accent) !important;
 }
 
 .secretRibbon{
   backdrop-filter: blur(14px) saturate(125%) !important;
   -webkit-backdrop-filter: blur(14px) saturate(125%) !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.28) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.28) !important;
   background: rgba(6, 6, 8, 0.58) !important;
   box-shadow: 0 18px 60px rgba(0,0,0,0.32) !important;
 }
@@ -381,15 +381,15 @@
 
 .songRow.songDropTarget[data-drop-side="before"]{
   box-shadow:
-    inset 0 4px 0 rgba(var(--accent-rgb), 0.95),
-    0 0 0 1px rgba(var(--accent-rgb), 0.30),
+    inset 0 4px 0 rgba(var(--lt-accent-rgb), 0.95),
+    0 0 0 1px rgba(var(--lt-accent-rgb), 0.30),
     0 14px 34px rgba(0, 0, 0, 0.25) !important;
 }
 
 .songRow.songDropTarget[data-drop-side="after"]{
   box-shadow:
-    inset 0 -4px 0 rgba(var(--accent-rgb), 0.95),
-    0 0 0 1px rgba(var(--accent-rgb), 0.30),
+    inset 0 -4px 0 rgba(var(--lt-accent-rgb), 0.95),
+    0 0 0 1px rgba(var(--lt-accent-rgb), 0.30),
     0 14px 34px rgba(0, 0, 0, 0.25) !important;
 }
 
@@ -407,8 +407,8 @@
 
 .app{
   --panel: var(--panel, rgba(255, 255, 255, 0.035));
-  --accent-2: var(--accent-2, var(--accent));
-  --accent-2-rgb: var(--accent-2-rgb, var(--accent-rgb));
+  --accent-2: var(--accent-2, var(--lt-accent));
+  --accent-2-rgb: var(--accent-2-rgb, var(--lt-accent-rgb));
 }
 
 .appToast{
@@ -422,11 +422,11 @@
   max-width: min(360px, calc(100vw - 48px));
   min-height: 42px;
   padding: 10px 14px;
-  border: 1px solid rgba(var(--accent-rgb, 141, 255, 206), 0.24);
+  border: 1px solid rgba(var(--lt-accent-rgb, 141, 255, 206), 0.24);
   border-radius: 16px;
   background: rgba(12, 12, 14, 0.9);
-  color: var(--text, #fff);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32), 0 0 24px rgba(var(--accent-rgb, 141, 255, 206), 0.11);
+  color: var(--lt-text, #fff);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32), 0 0 24px rgba(var(--lt-accent-rgb, 141, 255, 206), 0.11);
   transform: translate3d(0, 0, 0);
   animation: localitfyToastIn 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
   pointer-events: none;
@@ -447,8 +447,8 @@
   height: 9px;
   flex: 0 0 auto;
   border-radius: 999px;
-  background: var(--accent, #8dffce);
-  box-shadow: 0 0 18px rgba(var(--accent-rgb, 141, 255, 206), 0.62);
+  background: var(--lt-accent, #8dffce);
+  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb, 141, 255, 206), 0.62);
 }
 
 .appToast.work .appToastDot{
@@ -456,7 +456,7 @@
 }
 
 .appToast.success{
-  border-color: rgba(var(--accent-rgb, 141, 255, 206), 0.34);
+  border-color: rgba(var(--lt-accent-rgb, 141, 255, 206), 0.34);
 }
 
 .appToast.error{
@@ -478,10 +478,10 @@
   gap: 12px;
   width: min(360px, calc(100vw - var(--sidebar-width, 249px) - 42px));
   padding: 11px 13px;
-  border: 1px solid rgba(var(--accent-rgb, 141, 255, 206), 0.2);
+  border: 1px solid rgba(var(--lt-accent-rgb, 141, 255, 206), 0.2);
   border-radius: 18px;
   background: rgba(11, 12, 14, 0.88);
-  color: var(--text, #fff);
+  color: var(--lt-text, #fff);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
   animation: localitfyTinyScannerIn 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
   pointer-events: none;
@@ -506,7 +506,7 @@
 }
 
 .tinyScanner small{
-  color: var(--text-2, rgba(255, 255, 255, 0.62));
+  color: var(--lt-muted, rgba(255, 255, 255, 0.62));
   font-size: 11px;
   font-weight: 750;
 }
@@ -517,8 +517,8 @@
   height: 18px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: var(--accent, #8dffce);
-  box-shadow: 0 0 20px rgba(var(--accent-rgb, 141, 255, 206), 0.42);
+  background: var(--lt-accent, #8dffce);
+  box-shadow: 0 0 20px rgba(var(--lt-accent-rgb, 141, 255, 206), 0.42);
   animation: localitfyScannerPulse 960ms ease-in-out infinite;
 }
 
@@ -527,7 +527,7 @@
   position: absolute;
   inset: -5px;
   border-radius: inherit;
-  border: 1px solid rgba(var(--accent-rgb, 141, 255, 206), 0.34);
+  border: 1px solid rgba(var(--lt-accent-rgb, 141, 255, 206), 0.34);
   animation: localitfyScannerRing 960ms ease-out infinite;
 }
 
@@ -575,14 +575,14 @@
 
 .app .circleButton.main:not(.playerBar *){
   box-shadow:
-    0 0 0 0 rgba(var(--accent-rgb), 0),
-    0 14px 34px rgba(var(--accent-rgb), 0.17) !important;
+    0 0 0 0 rgba(var(--lt-accent-rgb), 0),
+    0 14px 34px rgba(var(--lt-accent-rgb), 0.17) !important;
 }
 
 .app .circleButton.main:hover:not(.playerBar *){
   box-shadow:
-    0 0 0 7px rgba(var(--accent-rgb), 0.11),
-    0 18px 44px rgba(var(--accent-rgb), 0.24) !important;
+    0 0 0 7px rgba(var(--lt-accent-rgb), 0.11),
+    0 18px 44px rgba(var(--lt-accent-rgb), 0.24) !important;
 }
 
 .app .appToast{
@@ -648,7 +648,7 @@
   padding: 28px;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 30%, rgba(var(--accent-rgb), 0.13), transparent 34%),
+    radial-gradient(circle at 50% 30%, rgba(var(--lt-accent-rgb), 0.13), transparent 34%),
     radial-gradient(circle at 18% 88%, rgba(var(--accent-2-rgb), 0.10), transparent 30%),
     rgba(0, 0, 0, 0.50);
   backdrop-filter: blur(18px) saturate(1.08);
@@ -663,10 +663,10 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   background:
     linear-gradient(180deg, rgba(17, 17, 18, 0.94), rgba(4, 4, 5, 0.98)),
-    radial-gradient(circle at 80% 0%, rgba(var(--accent-rgb), 0.22), transparent 38%);
+    radial-gradient(circle at 80% 0%, rgba(var(--lt-accent-rgb), 0.22), transparent 38%);
   box-shadow:
     0 34px 100px rgba(0, 0, 0, 0.66),
-    0 0 0 1px rgba(var(--accent-rgb), 0.09),
+    0 0 0 1px rgba(var(--lt-accent-rgb), 0.09),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
   padding: 24px;
   animation: localitfyImportPanelPop 410ms var(--cinematic-ease) both;
@@ -723,7 +723,7 @@
   font-size: clamp(38px, 5vw, 62px);
   line-height: 0.84;
   letter-spacing: -0.075em;
-  text-shadow: 0 0 28px rgba(var(--accent-rgb), 0.28);
+  text-shadow: 0 0 28px rgba(var(--lt-accent-rgb), 0.28);
   animation: localitfyCounterRoll 580ms var(--cinematic-pop) both;
 }
 
@@ -748,8 +748,8 @@
   right: -20%;
   top: 34%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.72), rgba(255, 255, 255, 0.74), transparent);
-  box-shadow: 0 0 34px rgba(var(--accent-rgb), 0.42);
+  background: linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), 0.72), rgba(255, 255, 255, 0.74), transparent);
+  box-shadow: 0 0 34px rgba(var(--lt-accent-rgb), 0.42);
   transform: translateY(-80px);
   animation: localitfyScannerLine 1240ms var(--cinematic-ease) infinite;
 }
@@ -761,7 +761,7 @@
   right: -160px;
   top: -180px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.18), transparent 64%);
+  background: radial-gradient(circle, rgba(var(--lt-accent-rgb), 0.18), transparent 64%);
   filter: blur(8px);
   animation: localitfyScannerBreath 1800ms ease-in-out infinite;
 }
@@ -775,8 +775,8 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow:
-    0 0 0 8px rgba(var(--accent-rgb), 0.10),
-    0 0 30px rgba(var(--accent-rgb), 0.65);
+    0 0 0 8px rgba(var(--lt-accent-rgb), 0.10),
+    0 0 30px rgba(var(--lt-accent-rgb), 0.65);
   animation: localitfyScannerOrb 1240ms var(--cinematic-ease) infinite;
 }
 
@@ -855,10 +855,10 @@
 }
 
 .importPhase-success .importPanel{
-  border-color: rgba(var(--accent-rgb), 0.25);
+  border-color: rgba(var(--lt-accent-rgb), 0.25);
   box-shadow:
     0 34px 100px rgba(0, 0, 0, 0.66),
-    0 0 54px rgba(var(--accent-rgb), 0.12),
+    0 0 54px rgba(var(--lt-accent-rgb), 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
@@ -933,8 +933,8 @@
 }
 
 @keyframes localitfyProgressTrackPop {
-  0% { filter: brightness(1) drop-shadow(0 0 0 rgba(var(--accent-rgb), 0)); transform: scaleY(0.92); }
-  55% { filter: brightness(1.18) drop-shadow(0 0 12px rgba(var(--accent-rgb), 0.24)); transform: scaleY(1.08); }
+  0% { filter: brightness(1) drop-shadow(0 0 0 rgba(var(--lt-accent-rgb), 0)); transform: scaleY(0.92); }
+  55% { filter: brightness(1.18) drop-shadow(0 0 12px rgba(var(--lt-accent-rgb), 0.24)); transform: scaleY(1.08); }
   100% { filter: none; transform: scaleY(1); }
 }
 
@@ -1052,7 +1052,7 @@
   gap: 10px;
   width: 236px;
   padding: 9px 11px;
-  border: 1px solid rgba(var(--accent-rgb), 0.38);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.38);
   border-radius: 18px;
   color: #fff;
   background: rgba(7, 7, 8, 0.94);
@@ -1072,10 +1072,10 @@
   display: grid;
   place-items: center;
   color: #050505;
-  background: var(--accent);
+  background: var(--lt-accent);
   font-size: 17px;
   font-weight: 700;
-  box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.22);
+  box-shadow: 0 0 22px rgba(var(--lt-accent-rgb), 0.22);
 }
 
 .localitfyDragPreviewText{
@@ -1113,7 +1113,7 @@
   gap: 12px;
   margin: 0 0 16px;
   padding: 14px;
-  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.28);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.032);
   box-shadow:
@@ -1139,7 +1139,7 @@
 }
 
 .themeLivePreviewTop em{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-style: normal;
 }
 
@@ -1154,7 +1154,7 @@
   width: 54px;
   height: 54px;
   border-radius: 16px;
-  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.22);
 }
 
 .themeLivePreviewText{
@@ -1197,9 +1197,9 @@
 }
 
 .themeLivePreviewPills span:first-child{
-  border-color: rgba(var(--accent-rgb), 0.42);
-  background: rgba(var(--accent-rgb), 0.18);
-  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--lt-accent-rgb), 0.42);
+  background: rgba(var(--lt-accent-rgb), 0.18);
+  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb), 0.12);
 }
 
 .themeLivePreviewBar{
@@ -1214,8 +1214,8 @@
   width: 42%;
   height: 100%;
   border-radius: inherit;
-  background: var(--accent);
-  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.20);
+  background: var(--lt-accent);
+  box-shadow: 0 0 20px rgba(var(--lt-accent-rgb), 0.20);
   transition: width 280ms ease, background-color 300ms ease, box-shadow 300ms ease;
 }
 
@@ -1226,22 +1226,22 @@
 .songRow.songDragging{
   opacity: 0.52 !important;
   border-style: dashed !important;
-  border-color: rgba(var(--accent-rgb), 0.56) !important;
-  background: rgba(var(--accent-rgb), 0.06) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.56) !important;
+  background: rgba(var(--lt-accent-rgb), 0.06) !important;
   transform: translate3d(3px, 0, 0) scale(0.992) !important;
 }
 
 .songRow.songDropTarget{
-  border-color: rgba(var(--accent-rgb), 0.72) !important;
-  background: rgba(var(--accent-rgb), 0.08) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.72) !important;
+  background: rgba(var(--lt-accent-rgb), 0.08) !important;
   box-shadow:
-    inset 4px 0 0 rgba(var(--accent-rgb), 0.86),
+    inset 4px 0 0 rgba(var(--lt-accent-rgb), 0.86),
     0 12px 30px rgba(0, 0, 0, 0.24) !important;
 }
 
 .songRow.songDropTarget[data-drop-side="after"]{
   box-shadow:
-    inset -4px 0 0 rgba(var(--accent-rgb), 0.86),
+    inset -4px 0 0 rgba(var(--lt-accent-rgb), 0.86),
     0 12px 30px rgba(0, 0, 0, 0.24) !important;
 }
 
@@ -1355,8 +1355,8 @@ body.localitfySongDragging .songRow{
 
 .songDropTarget{
   position: relative !important;
-  border-color: rgba(var(--accent-rgb), 0.72) !important;
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.24), 0 18px 42px rgba(0, 0, 0, 0.26) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.72) !important;
+  box-shadow: 0 0 0 1px rgba(var(--lt-accent-rgb), 0.24), 0 18px 42px rgba(0, 0, 0, 0.26) !important;
 }
 
 .songDropTarget::before{
@@ -1365,8 +1365,8 @@ body.localitfySongDragging .songRow{
   z-index: 6;
   pointer-events: none;
   border-radius: 999px;
-  background: var(--accent);
-  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.42);
+  background: var(--lt-accent);
+  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb), 0.42);
 }
 
 .songRow.songDropTarget[data-drop-side="before"]::before{
@@ -1455,7 +1455,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   --flat-surface-2: #0b0b0b;
   --flat-surface-3: #111111;
   --flat-border: rgba(255, 255, 255, 0.105);
-  --flat-border-strong: rgba(var(--accent-rgb), 0.48);
+  --flat-border-strong: rgba(var(--lt-accent-rgb), 0.48);
   --flat-text: #ffffff;
   --flat-muted: rgba(255, 255, 255, 0.62);
   --flat-faint: rgba(255, 255, 255, 0.38);
@@ -1529,10 +1529,10 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .app.flatNoGradientUI .themeItem.active,
 .app.flatNoGradientUI .iconAction.liked,
 .app.flatNoGradientUI .primaryButton{
-  background: var(--accent) !important;
+  background: var(--lt-accent) !important;
   background-image: none !important;
   color: #050505 !important;
-  border-color: rgba(var(--accent-rgb), 0.78) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.78) !important;
   box-shadow: none !important;
 }
 
@@ -1543,7 +1543,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .app.flatNoGradientUI .homeAlbumCard:hover{
   transform: translate3d(0, -1px, 0) !important;
-  border-color: rgba(var(--accent-rgb), 0.42) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.42) !important;
 }
 
 .app.flatNoGradientUI.themeSettling *{
@@ -1556,7 +1556,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .cleanToggleLabel{ display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); font-size: 12px; font-weight: 800; text-transform: lowercase; }
-.cleanToggleLabel input{ width: 16px; height: 16px; accent-color: rgb(var(--accent-rgb)); }
+.cleanToggleLabel input{ width: 16px; height: 16px; accent-color: rgb(var(--lt-accent-rgb)); }
 .accentTextInput{ width: 120px; height: 40px; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.055); color: #fff; padding: 0 12px; font: inherit; font-weight: 800; }
 
 .statusGrid{ display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
@@ -1584,7 +1584,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--lt-border);
   border-radius: var(--radius);
   background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
@@ -1605,13 +1605,13 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .libraryUtilityBar strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 0.9rem;
   letter-spacing: -0.02em;
 }
 
 .libraryUtilityBar small{
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 0.78rem;
 }
 
@@ -1627,9 +1627,9 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .libraryUtilityActions button{
   min-height: 32px;
   padding: 0 12px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--lt-border);
   border-radius: var(--pill);
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,0.06);
   font-weight: 820;
   transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
@@ -1637,8 +1637,8 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .libraryUtilityActions button:hover:not(:disabled){
   transform: translateY(-1px);
-  border-color: rgba(var(--accent-rgb),0.38);
-  background: rgba(var(--accent-rgb),0.12);
+  border-color: rgba(var(--lt-accent-rgb),0.38);
+  background: rgba(var(--lt-accent-rgb),0.12);
 }
 
 @media (max-width: 860px){
@@ -1670,7 +1670,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .whatsNewCard .eyebrow{
   margin-right: 44px;
-  color: rgb(var(--accent-rgb));
+  color: rgb(var(--lt-accent-rgb));
 }
 
 .whatsNewCard h3{
@@ -1722,14 +1722,14 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   width: 9px;
   height: 9px;
   border-radius: 999px;
-  background: rgb(var(--accent-rgb));
-  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.34);
+  background: rgb(var(--lt-accent-rgb));
+  box-shadow: 0 0 16px rgba(var(--lt-accent-rgb), 0.34);
   transform: translateY(-50%);
 }
 
 .whatsNewCard li:hover{
   transform: translateY(-1px);
-  border-color: rgba(var(--accent-rgb), 0.28);
+  border-color: rgba(var(--lt-accent-rgb), 0.28);
   background: rgba(255, 255, 255, 0.065);
 }
 
@@ -1742,9 +1742,9 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .whatsNewClose:hover{
   transform: translateY(-1px);
-  border-color: rgba(var(--accent-rgb), 0.34);
+  border-color: rgba(var(--lt-accent-rgb), 0.34);
   color: #fff;
-  background: rgba(var(--accent-rgb), 0.11);
+  background: rgba(var(--lt-accent-rgb), 0.11);
 }
 
 .whatsNewCard > .heroMain{
@@ -1769,7 +1769,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   border-radius: 26px !important;
   background: rgba(7, 7, 7, 0.88) !important;
   box-shadow: 0 32px 120px rgba(0, 0, 0, 0.62),
-    0 0 0 1px rgba(var(--accent-rgb), 0.08) inset !important;
+    0 0 0 1px rgba(var(--lt-accent-rgb), 0.08) inset !important;
   backdrop-filter: blur(26px) saturate(145%) !important;
 }
 
@@ -1791,7 +1791,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   display: block;
   margin-top: 8px;
   max-width: 560px;
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 14px;
   line-height: 1.45;
 }
@@ -1826,7 +1826,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   aspect-ratio: 1 / 1 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  background: rgba(var(--accent-rgb), 0.92) !important;
+  background: rgba(var(--lt-accent-rgb), 0.92) !important;
 }
 
 .editorCover img{
@@ -1875,14 +1875,14 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .editorMiniStats strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 13px;
   font-weight: 700;
 }
 
 .editorMiniStats small{
   margin-top: 3px;
-  color: var(--faint);
+  color: var(--lt-faint);
   font-size: 11px;
   font-weight: 750;
 }
@@ -1910,14 +1910,14 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .editorSectionTitle strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 14px;
   font-weight: 700;
 }
 
 .editorSectionTitle span{
   max-width: 260px;
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.35;
   text-align: right;
@@ -1934,7 +1934,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .editorFieldsBetter label span{
-  color: var(--muted) !important;
+  color: var(--lt-muted) !important;
   font-size: 12px !important;
   font-weight: 700 !important;
   text-transform: none !important;
@@ -1947,7 +1947,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   padding: 0 14px !important;
   border: 1px solid rgba(255, 255, 255, 0.11) !important;
   border-radius: 13px !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   background: rgba(255, 255, 255, 0.055) !important;
   outline: none !important;
   font-size: 15px !important;
@@ -1955,9 +1955,9 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .editorFieldsBetter input:focus{
-  border-color: rgba(var(--accent-rgb), 0.62) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.62) !important;
   background: rgba(255, 255, 255, 0.075) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), 0.12) !important;
 }
 
 .editorPreviewCard .editorPreview{
@@ -1975,14 +1975,14 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .editorPreviewCard .editorPreview strong{
   display: block;
   overflow-wrap: anywhere;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 18px;
   line-height: 1.25;
 }
 
 .editorPreviewCard .editorPreview p{
   margin: 8px 0 0 !important;
-  color: var(--muted) !important;
+  color: var(--lt-muted) !important;
   font-size: 14px !important;
 }
 
@@ -2012,7 +2012,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   padding: 0 13px !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 999px !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   background: rgba(255, 255, 255, 0.06) !important;
   font-weight: 700 !important;
   transition: transform 150ms ease, background 150ms ease, border-color 150ms ease !important;
@@ -2021,7 +2021,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .editor-playlist-tools button.is-on{
   color: #070707 !important;
   border-color: transparent !important;
-  background: var(--accent) !important;
+  background: var(--lt-accent) !important;
 }
 
 .editorActionsBetter{
@@ -2100,7 +2100,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .libraryHeaderActions span{
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 12px;
   font-weight: 850;
 }
@@ -2111,8 +2111,8 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 999px;
   color: #060606;
-  background: var(--accent);
-  box-shadow: 0 10px 28px rgba(var(--accent-rgb), 0.16);
+  background: var(--lt-accent);
+  box-shadow: 0 10px 28px rgba(var(--lt-accent-rgb), 0.16);
   font: inherit;
   font-size: 12px;
   font-weight: 700;
@@ -2123,7 +2123,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .libraryHeaderActions button:hover:not(:disabled){
   transform: translateY(-1px);
   filter: brightness(1.04);
-  box-shadow: 0 14px 34px rgba(var(--accent-rgb), 0.22);
+  box-shadow: 0 14px 34px rgba(var(--lt-accent-rgb), 0.22);
 }
 
 .libraryHeaderActions button:active:not(:disabled){
@@ -2165,9 +2165,9 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   --shell-panel-hover: rgba(255, 255, 255, 0.086);
   --shell-border: rgba(255, 255, 255, 0.095);
   --shell-border-strong: rgba(255, 255, 255, 0.145);
-  --shell-accent-panel: rgba(var(--accent-rgb), 0.085);
-  --shell-accent-hover: rgba(var(--accent-rgb), 0.145);
-  --shell-accent-border: rgba(var(--accent-rgb), 0.26);
+  --shell-accent-panel: rgba(var(--lt-accent-rgb), 0.085);
+  --shell-accent-hover: rgba(var(--lt-accent-rgb), 0.145);
+  --shell-accent-border: rgba(var(--lt-accent-rgb), 0.26);
   --shell-card-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
   --shell-card-shadow-hover: 0 24px 70px rgba(0, 0, 0, 0.42);
   --shell-ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -2176,8 +2176,8 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .app{
   background:
-    radial-gradient(circle at 12% -8%, rgba(var(--accent-rgb), 0.09), transparent 34%),
-    radial-gradient(circle at 92% 8%, rgba(var(--accent-rgb), 0.055), transparent 34%),
+    radial-gradient(circle at 12% -8%, rgba(var(--lt-accent-rgb), 0.09), transparent 34%),
+    radial-gradient(circle at 92% 8%, rgba(var(--lt-accent-rgb), 0.055), transparent 34%),
     linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.013) 1px, transparent 1px),
     #000 !important;
@@ -2205,9 +2205,9 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .panel:hover{
-  border-color: rgba(var(--accent-rgb), 0.17) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.17) !important;
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.045), rgba(255, 255, 255, 0.026)),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), 0.045), rgba(255, 255, 255, 0.026)),
     rgba(0, 0, 0, 0.34) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.065),
@@ -2224,12 +2224,12 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .eyebrow{
-  color: var(--accent) !important;
-  text-shadow: 0 0 18px rgba(var(--accent-rgb), 0.18) !important;
+  color: var(--lt-accent) !important;
+  text-shadow: 0 0 18px rgba(var(--lt-accent-rgb), 0.18) !important;
 }
 
 .ambientSurface{
-  border-color: rgba(var(--accent-rgb), 0.15) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.15) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.055),
     0 18px 54px rgba(0, 0, 0, 0.26) !important;
@@ -2255,7 +2255,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .ambientSurface::after{
   display: block !important;
   background:
-    radial-gradient(circle at var(--glow-x, 78%) var(--glow-y, 44%), rgba(var(--accent-rgb), 0.115), transparent 36%),
+    radial-gradient(circle at var(--glow-x, 78%) var(--glow-y, 44%), rgba(var(--lt-accent-rgb), 0.115), transparent 36%),
     linear-gradient(90deg, rgba(0, 0, 0, 0.84), rgba(0, 0, 0, 0.58) 52%, rgba(0, 0, 0, 0.36)) !important;
   transition:
     opacity 360ms ease,
@@ -2263,11 +2263,11 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .ambientSurface:hover{
-  border-color: rgba(var(--accent-rgb), 0.25) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.25) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.07),
     0 22px 68px rgba(0, 0, 0, 0.34),
-    0 0 0 1px rgba(var(--accent-rgb), 0.035) !important;
+    0 0 0 1px rgba(var(--lt-accent-rgb), 0.035) !important;
   transform: translate3d(0, -1px, 0) !important;
 }
 
@@ -2344,18 +2344,18 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .songRow:hover{
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.075), rgba(255, 255, 255, 0.046)) !important;
-  border-color: rgba(var(--accent-rgb), 0.18) !important;
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), 0.075), rgba(255, 255, 255, 0.046)) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.18) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
   transform: translate3d(3px, 0, 0) !important;
 }
 
 .songRow.active{
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.13), rgba(var(--accent-rgb), 0.05)) !important;
-  border-color: rgba(var(--accent-rgb), 0.32) !important;
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), 0.13), rgba(var(--lt-accent-rgb), 0.05)) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.32) !important;
   box-shadow:
-    inset 3px 0 0 var(--accent),
+    inset 3px 0 0 var(--lt-accent),
     0 16px 42px rgba(0, 0, 0, 0.25) !important;
 }
 
@@ -2373,11 +2373,11 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .softButton:hover,
 .heroGhost:hover:hover:not(:disabled){
   color: #fff !important;
-  background: rgba(var(--accent-rgb), 0.13) !important;
-  border-color: rgba(var(--accent-rgb), 0.24) !important;
+  background: rgba(var(--lt-accent-rgb), 0.13) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.24) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 12px 26px rgba(var(--accent-rgb), 0.075) !important;
+    0 12px 26px rgba(var(--lt-accent-rgb), 0.075) !important;
   transform: translate3d(0, -1px, 0) !important;
 }
 
@@ -2390,9 +2390,9 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   color: #04100a !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 42%),
-    var(--accent) !important;
+    var(--lt-accent) !important;
   box-shadow:
-    0 12px 34px rgba(var(--accent-rgb), 0.18),
+    0 12px 34px rgba(var(--lt-accent-rgb), 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
 }
 
@@ -2400,19 +2400,19 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .mainAction:hover,
 .heroMain:hover{
   box-shadow:
-    0 0 0 7px rgba(var(--accent-rgb), 0.10),
-    0 18px 46px rgba(var(--accent-rgb), 0.23),
+    0 0 0 7px rgba(var(--lt-accent-rgb), 0.10),
+    0 18px 46px rgba(var(--lt-accent-rgb), 0.23),
     inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
 }
 
 input[type="range"]{
-  accent-color: var(--accent) !important;
+  accent-color: var(--lt-accent) !important;
 }
 
 .editorFields input{
   border-color: rgba(255, 255, 255, 0.09) !important;
   background: rgba(255, 255, 255, 0.055) !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
@@ -2420,42 +2420,42 @@ input[type="range"]{
 }
 
 .editorFields input:focus{
-  border-color: rgba(var(--accent-rgb), 0.32) !important;
-  background: rgba(var(--accent-rgb), 0.07) !important;
-  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.09) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.32) !important;
+  background: rgba(var(--lt-accent-rgb), 0.07) !important;
+  box-shadow: 0 0 0 4px rgba(var(--lt-accent-rgb), 0.09) !important;
   outline: none !important;
 }
 
 .appToast{
-  border-color: rgba(var(--accent-rgb), 0.24) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.24) !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)),
     rgba(5, 5, 6, 0.9) !important;
   box-shadow:
     0 20px 54px rgba(0, 0, 0, 0.42),
-    0 0 26px rgba(var(--accent-rgb), 0.08) !important;
+    0 0 26px rgba(var(--lt-accent-rgb), 0.08) !important;
   backdrop-filter: blur(18px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
 }
 
 .scannerOrb{
   box-shadow:
-    0 0 0 5px rgba(var(--accent-rgb), 0.08),
-    0 0 22px rgba(var(--accent-rgb), 0.42) !important;
+    0 0 0 5px rgba(var(--lt-accent-rgb), 0.08),
+    0 0 22px rgba(var(--lt-accent-rgb), 0.42) !important;
 }
 
 .deleteModal{
-  border-color: rgba(var(--accent-rgb), 0.20) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.20) !important;
   background:
-    radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb), 0.085), transparent 36%),
+    radial-gradient(circle at 18% 0%, rgba(var(--lt-accent-rgb), 0.085), transparent 36%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
     rgba(5, 5, 6, 0.96) !important;
 }
 
 .loadingLogo{
   box-shadow:
-    0 0 0 9px rgba(var(--accent-rgb), 0.095),
-    0 20px 48px rgba(var(--accent-rgb), 0.17) !important;
+    0 0 0 9px rgba(var(--lt-accent-rgb), 0.095),
+    0 20px 48px rgba(var(--lt-accent-rgb), 0.17) !important;
 }
 
 ::-webkit-scrollbar-track{
@@ -2468,7 +2468,7 @@ input[type="range"]{
 }
 
 ::-webkit-scrollbar-thumb:hover{
-  background: rgba(var(--accent-rgb), 0.34) !important;
+  background: rgba(var(--lt-accent-rgb), 0.34) !important;
 }
 
 @keyframes localtifyShellHeaderIn{
@@ -2484,12 +2484,12 @@ input[type="range"]{
 
 .app{
   --shell-sidebar-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --shell-sidebar-soft: color-mix(in oklab, var(--accent) 5%, transparent);
-  --shell-sidebar-hover: color-mix(in oklab, var(--accent) 11%, transparent);
-  --shell-sidebar-active: color-mix(in oklab, var(--accent) 16%, transparent);
-  --shell-sidebar-line: color-mix(in oklab, var(--accent) 24%, transparent);
-  --shell-sidebar-text: color-mix(in oklab, var(--text) 84%, var(--accent) 16%);
-  --shell-sidebar-muted: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%);
+  --shell-sidebar-soft: color-mix(in oklab, var(--lt-accent) 5%, transparent);
+  --shell-sidebar-hover: color-mix(in oklab, var(--lt-accent) 11%, transparent);
+  --shell-sidebar-active: color-mix(in oklab, var(--lt-accent) 16%, transparent);
+  --shell-sidebar-line: color-mix(in oklab, var(--lt-accent) 24%, transparent);
+  --shell-sidebar-text: color-mix(in oklab, var(--lt-text) 84%, var(--lt-accent) 16%);
+  --shell-sidebar-muted: color-mix(in oklab, var(--lt-muted) 82%, var(--lt-accent) 18%);
 }
 
 .sidebarModeSwitch{
@@ -2498,10 +2498,10 @@ input[type="range"]{
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
-  border: 1px solid color-mix(in oklab, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--lt-accent) 12%, transparent);
   border-radius: 13px;
-  background: color-mix(in oklab, var(--accent) 5%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--text) 7%, transparent);
+  background: color-mix(in oklab, var(--lt-accent) 5%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--lt-text) 7%, transparent);
 }
 
 .sidebarModeTab{
@@ -2523,15 +2523,15 @@ input[type="range"]{
 
 .sidebarModeTab.active{
   color: var(--shell-sidebar-text);
-  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  background: color-mix(in oklab, var(--lt-accent) 14%, transparent);
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--text) 8%, transparent),
-    0 8px 20px color-mix(in oklab, var(--accent) 7%, transparent);
+    inset 0 1px 0 color-mix(in oklab, var(--lt-text) 8%, transparent),
+    0 8px 20px color-mix(in oklab, var(--lt-accent) 7%, transparent);
 }
 
 .sidebarModeTab:not(.active):hover{
   color: var(--shell-sidebar-text);
-  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  background: color-mix(in oklab, var(--lt-accent) 8%, transparent);
   transform: translateY(-1px);
 }
 
@@ -2541,13 +2541,13 @@ input[type="range"]{
   display: grid;
   place-items: center;
   border-radius: 12px;
-  color: color-mix(in oklab, var(--accent) 72%, var(--text) 28%);
-  background: color-mix(in oklab, var(--accent) 9%, transparent);
-  border: 1px solid color-mix(in oklab, var(--accent) 12%, transparent);
+  color: color-mix(in oklab, var(--lt-accent) 72%, var(--lt-text) 28%);
+  background: color-mix(in oklab, var(--lt-accent) 9%, transparent);
+  border: 1px solid color-mix(in oklab, var(--lt-accent) 12%, transparent);
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--text) 6%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--lt-text) 6%, transparent);
   transition:
     color 220ms ease,
     background 220ms ease,
@@ -2564,14 +2564,14 @@ input[type="range"]{
   letter-spacing: -0.02em;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 14px 30px color-mix(in oklab, var(--accent) 13%, transparent) !important;
+    0 14px 30px color-mix(in oklab, var(--lt-accent) 13%, transparent) !important;
 }
 
 .mainAction:hover{
   transform: translateY(-2px) scale(1.01) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    0 18px 34px color-mix(in oklab, var(--accent) 18%, transparent) !important;
+    0 18px 34px color-mix(in oklab, var(--lt-accent) 18%, transparent) !important;
 }
 
 @media (max-width: 920px){
@@ -2604,13 +2604,13 @@ input[type="range"]{
   min-width: 32px !important;
   border: 0 !important;
   border-radius: 0 !important;
-  color: var(--accent) !important;
+  color: var(--lt-accent) !important;
   background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
   font-size: 26px !important;
   line-height: 1 !important;
-  text-shadow: 0 0 14px color-mix(in oklab, var(--accent) 32%, transparent) !important;
+  text-shadow: 0 0 14px color-mix(in oklab, var(--lt-accent) 32%, transparent) !important;
   transform: none !important;
   filter: none !important;
 }
@@ -2622,7 +2622,7 @@ input[type="range"]{
   place-items: center !important;
   border: 0 !important;
   border-radius: 0 !important;
-  color: color-mix(in oklab, var(--accent) 70%, var(--text) 30%) !important;
+  color: color-mix(in oklab, var(--lt-accent) 70%, var(--lt-text) 30%) !important;
   background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
@@ -2649,10 +2649,10 @@ input[type="range"]{
 .app{
   --shell-sidebar-width: var(--sidebar-width-live, var(--sidebar-width, 236px));
   --shell-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --shell-hover-bg: color-mix(in oklab, var(--accent) 9%, transparent);
-  --shell-active-bg: color-mix(in oklab, var(--accent) 13%, transparent);
-  --shell-hover-line: color-mix(in oklab, var(--accent) 22%, transparent);
-  --shell-soft-text: color-mix(in oklab, var(--muted) 82%, var(--accent) 18%);
+  --shell-hover-bg: color-mix(in oklab, var(--lt-accent) 9%, transparent);
+  --shell-active-bg: color-mix(in oklab, var(--lt-accent) 13%, transparent);
+  --shell-hover-line: color-mix(in oklab, var(--lt-accent) 22%, transparent);
+  --shell-soft-text: color-mix(in oklab, var(--lt-muted) 82%, var(--lt-accent) 18%);
 }
 
 .sidebarModeSwitch{
@@ -2664,7 +2664,7 @@ input[type="range"]{
   height: 36px !important;
   display: grid !important;
   place-items: center !important;
-  color: color-mix(in oklab, var(--accent) 74%, var(--text) 26%) !important;
+  color: color-mix(in oklab, var(--lt-accent) 74%, var(--lt-text) 26%) !important;
   background: transparent !important;
   background-image: none !important;
   border: 0 !important;
@@ -2725,7 +2725,7 @@ body{
 
 .loadingLogo{
   color: #071008 !important;
-  background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 72%, #ffffff)) !important;
+  background: linear-gradient(135deg, var(--lt-accent), color-mix(in oklab, var(--lt-accent) 72%, #ffffff)) !important;
 }
 
 .loadingLogo svg{
@@ -2741,12 +2741,12 @@ body{
   min-width: 24px !important;
   display: grid !important;
   place-items: center !important;
-  color: color-mix(in oklab, var(--accent) 72%, var(--text)) !important;
+  color: color-mix(in oklab, var(--lt-accent) 72%, var(--lt-text)) !important;
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.16));
+  filter: drop-shadow(0 0 6px rgba(var(--lt-accent-rgb), 0.16));
 }
 
 .navLucideIcon{
@@ -2791,7 +2791,7 @@ body{
   min-width: 28px !important;
   display: grid !important;
   place-items: center !important;
-  color: color-mix(in oklab, var(--accent) 76%, #ffffff 24%) !important;
+  color: color-mix(in oklab, var(--lt-accent) 76%, #ffffff 24%) !important;
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -2824,8 +2824,8 @@ body{
   isolation: isolate !important;
   overflow: hidden !important;
   border-radius: 12px !important;
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 4%, rgba(0,0,0,.46)) !important;
-  border: 1px solid color-mix(in oklab, var(--theme-accent, var(--accent)) 14%, rgba(255,255,255,.06)) !important;
+  background: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 4%, rgba(0,0,0,.46)) !important;
+  border: 1px solid color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 14%, rgba(255,255,255,.06)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
   filter: none !important;
 }
@@ -2844,10 +2844,10 @@ body{
 }
 
 .app .songRow.active{
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 7%, rgba(0,0,0,.48)) !important;
-  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 28%, rgba(255,255,255,.08)) !important;
+  background: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 7%, rgba(0,0,0,.48)) !important;
+  border-color: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 28%, rgba(255,255,255,.08)) !important;
   box-shadow:
-    inset 3px 0 0 var(--accent),
+    inset 3px 0 0 var(--lt-accent),
     inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
@@ -2877,7 +2877,7 @@ body{
   min-width: 24px !important;
   display: grid !important;
   place-items: center !important;
-  color: color-mix(in oklab, var(--accent) 76%, #ffffff 24%) !important;
+  color: color-mix(in oklab, var(--lt-accent) 76%, #ffffff 24%) !important;
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -2930,20 +2930,20 @@ body{
 
 .softButton{
   border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--accent) 22%, rgba(255,255,255,.08));
+  border: 1px solid color-mix(in oklab, var(--lt-accent) 22%, rgba(255,255,255,.08));
   background: color-mix(in oklab, var(--surface) 70%, transparent);
-  color: var(--text);
+  color: var(--lt-text);
 }
 
 .softButton:hover{
-  background: color-mix(in oklab, var(--accent) 12%, transparent);
-  border-color: color-mix(in oklab, var(--accent) 42%, transparent);
+  background: color-mix(in oklab, var(--lt-accent) 12%, transparent);
+  border-color: color-mix(in oklab, var(--lt-accent) 42%, transparent);
 }
 
 .fullWidth input{
-  color: var(--text);
-  background: color-mix(in oklab, var(--bg) 78%, transparent);
-  border-color: color-mix(in oklab, var(--accent) 18%, rgba(255,255,255,.1));
+  color: var(--lt-text);
+  background: color-mix(in oklab, var(--lt-bg) 78%, transparent);
+  border-color: color-mix(in oklab, var(--lt-accent) 18%, rgba(255,255,255,.1));
 }
 
 .circleButton:not(.playerBar *){
@@ -2956,8 +2956,8 @@ body{
   place-items: center !important;
   border-radius: 999px !important;
   background: color-mix(in oklab, var(--surface) 58%, transparent) !important;
-  border: 1px solid color-mix(in oklab, var(--accent) 22%, rgba(255,255,255,.12)) !important;
-  color: color-mix(in oklab, var(--text) 88%, var(--accent) 12%) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent) 22%, rgba(255,255,255,.12)) !important;
+  color: color-mix(in oklab, var(--lt-text) 88%, var(--lt-accent) 12%) !important;
   box-shadow: none !important;
   transform: none;
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease !important;
@@ -2965,9 +2965,9 @@ body{
 
 .circleButton:hover:not(.playerBar *){
   transform: translateY(-1px) scale(1.04) !important;
-  background: color-mix(in oklab, var(--accent) 12%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent) 45%, transparent) !important;
-  box-shadow: 0 0 14px color-mix(in oklab, var(--accent) 18%, transparent) !important;
+  background: color-mix(in oklab, var(--lt-accent) 12%, transparent) !important;
+  border-color: color-mix(in oklab, var(--lt-accent) 45%, transparent) !important;
+  box-shadow: 0 0 14px color-mix(in oklab, var(--lt-accent) 18%, transparent) !important;
 }
 
 .circleButton.main:not(.playerBar *){
@@ -2975,14 +2975,14 @@ body{
   height: var(--control-circle-main) !important;
   min-width: var(--control-circle-main) !important;
   min-height: var(--control-circle-main) !important;
-  background: linear-gradient(135deg, var(--accent), var(--highlight, var(--accent-2))) !important;
+  background: linear-gradient(135deg, var(--lt-accent), var(--highlight, var(--accent-2))) !important;
   color: #050505 !important;
-  border-color: color-mix(in oklab, var(--accent) 65%, white 10%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent) 65%, white 10%) !important;
 }
 
 .circleButton.active:not(.playerBar *){
-  background: color-mix(in oklab, var(--accent) 18%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent) 52%, transparent) !important;
+  background: color-mix(in oklab, var(--lt-accent) 18%, transparent) !important;
+  border-color: color-mix(in oklab, var(--lt-accent) 52%, transparent) !important;
 }
 
 .playIcon{
@@ -2990,13 +2990,13 @@ body{
 }
 
 .app{
-  --app-grid-line: color-mix(in oklab, var(--text, #fff) 4%, transparent);
-  --app-bg-solid: var(--bg, #000);
-  --app-bg-raised: color-mix(in oklab, var(--bg, #000) 92%, var(--surface, rgba(255,255,255,.05)) 8%);
-  --sidebar-bg-solid: color-mix(in oklab, var(--bg, #000) 88%, var(--accent, #64f0a4) 7%);
-  --sidebar-bg-soft: color-mix(in oklab, var(--bg-2, var(--bg, #000)) 90%, var(--accent, #64f0a4) 5%);
-  --sidebar-line: color-mix(in oklab, var(--accent, #64f0a4) 18%, var(--line, rgba(255,255,255,.08)) 82%);
-  --page-line: color-mix(in oklab, var(--accent, #64f0a4) 8%, var(--text, #fff) 3%);
+  --app-grid-line: color-mix(in oklab, var(--lt-text, #fff) 4%, transparent);
+  --app-bg-solid: var(--lt-bg, #000);
+  --app-bg-raised: color-mix(in oklab, var(--lt-bg, #000) 92%, var(--surface, rgba(255,255,255,.05)) 8%);
+  --sidebar-bg-solid: color-mix(in oklab, var(--lt-bg, #000) 88%, var(--lt-accent, #64f0a4) 7%);
+  --sidebar-bg-soft: color-mix(in oklab, var(--bg-2, var(--lt-bg, #000)) 90%, var(--lt-accent, #64f0a4) 5%);
+  --sidebar-line: color-mix(in oklab, var(--lt-accent, #64f0a4) 18%, var(--lt-border, rgba(255,255,255,.08)) 82%);
+  --page-line: color-mix(in oklab, var(--lt-accent, #64f0a4) 8%, var(--lt-text, #fff) 3%);
 }
 
 html{
@@ -3027,8 +3027,8 @@ html{
 .ambientSurface{
   isolation: auto !important;
   background:
-    color-mix(in oklab, var(--surface, rgba(255,255,255,.04)) 72%, var(--bg, #000) 28%) !important;
-  border-color: color-mix(in oklab, var(--accent, #64f0a4) 16%, var(--line, rgba(255,255,255,.08)) 84%) !important;
+    color-mix(in oklab, var(--surface, rgba(255,255,255,.04)) 72%, var(--lt-bg, #000) 28%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #64f0a4) 16%, var(--lt-border, rgba(255,255,255,.08)) 84%) !important;
   box-shadow: none !important;
 }
 
@@ -3044,21 +3044,21 @@ html{
 }
 
 .ambientSurface:hover{
-  background: color-mix(in oklab, var(--accent, #64f0a4) 6%, var(--surface, rgba(255,255,255,.04)) 94%) !important;
-  border-color: color-mix(in oklab, var(--accent, #64f0a4) 26%, var(--line, rgba(255,255,255,.08)) 74%) !important;
+  background: color-mix(in oklab, var(--lt-accent, #64f0a4) 6%, var(--surface, rgba(255,255,255,.04)) 94%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #64f0a4) 26%, var(--lt-border, rgba(255,255,255,.08)) 74%) !important;
   box-shadow: none !important;
 }
 
 .sidebarThemeOption{
-  background: color-mix(in oklab, var(--bg, #000) 78%, var(--surface, rgba(255,255,255,.05)) 22%) !important;
+  background: color-mix(in oklab, var(--lt-bg, #000) 78%, var(--surface, rgba(255,255,255,.05)) 22%) !important;
   background-image: none !important;
-  border-color: color-mix(in oklab, var(--accent, #64f0a4) 14%, var(--line, rgba(255,255,255,.08)) 86%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #64f0a4) 14%, var(--lt-border, rgba(255,255,255,.08)) 86%) !important;
   box-shadow: none !important;
 }
 
 .sidebarThemeOption:hover{
-  background: color-mix(in oklab, var(--accent, #64f0a4) 10%, var(--bg, #000) 90%) !important;
-  border-color: color-mix(in oklab, var(--accent, #64f0a4) 34%, transparent) !important;
+  background: color-mix(in oklab, var(--lt-accent, #64f0a4) 10%, var(--lt-bg, #000) 90%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #64f0a4) 34%, transparent) !important;
   transform: translateY(-1px) !important;
 }
 
@@ -3072,11 +3072,11 @@ html{
 }
 
 :root{
-  --theme-accent: var(--accent, #8dffce);
+  --theme-accent: var(--lt-accent, #8dffce);
   --theme-accent-2: var(--accent-2, var(--theme-accent));
   --theme-progress: var(--progress, var(--theme-accent));
   --theme-highlight: var(--highlight, var(--theme-accent-2));
-  --theme-bg: var(--bg, #050506);
+  --theme-bg: var(--lt-bg, #050506);
   --theme-bg-2: var(--bg-2, color-mix(in oklab, var(--theme-bg) 88%, var(--theme-accent) 12%));
   --theme-panel: var(--panel, color-mix(in oklab, var(--theme-bg) 82%, var(--theme-accent) 10%));
   --theme-panel-2: var(--panel-2, color-mix(in oklab, var(--theme-panel) 86%, var(--theme-accent-2) 8%));
@@ -3115,7 +3115,7 @@ html{
 .app{
   background: var(--theme-page-bg) !important;
   background-size: 42px 42px, 42px 42px, auto !important;
-  color: var(--text, #f6f4ff) !important;
+  color: var(--lt-text, #f6f4ff) !important;
 }
 
 .app::before{
@@ -3173,15 +3173,15 @@ html{
 }
 
 :root{
-  --localtify-page-bg: color-mix(in oklab, var(--bg, #050505) 78%, var(--accent, #ff65df) 12%);
-  --localtify-page-bg-2: color-mix(in oklab, var(--bg-2, #080808) 74%, var(--accent, #ff65df) 14%);
-  --localtify-sidebar-bg: color-mix(in oklab, var(--bg, #050505) 72%, var(--accent, #ff65df) 17%);
-  --localtify-sidebar-bg-2: color-mix(in oklab, var(--bg-2, #080808) 70%, var(--accent-2, var(--accent, #ff65df)) 16%);
-  --localtify-panel-bg: color-mix(in oklab, var(--surface, #101010) 76%, var(--accent, #ff65df) 9%);
-  --localtify-panel-bg-2: color-mix(in oklab, var(--surface-2, #151515) 74%, var(--accent-2, var(--accent, #ff65df)) 8%);
-  --localtify-row-bg: color-mix(in oklab, var(--surface, #101010) 82%, var(--accent, #ff65df) 5%);
-  --localtify-line: color-mix(in oklab, var(--accent, #ff65df) 22%, rgba(255,255,255,.055));
-  --localtify-line-soft: color-mix(in oklab, var(--accent, #ff65df) 12%, rgba(255,255,255,.045));
+  --localtify-page-bg: color-mix(in oklab, var(--lt-bg, #050505) 78%, var(--lt-accent, #ff65df) 12%);
+  --localtify-page-bg-2: color-mix(in oklab, var(--bg-2, #080808) 74%, var(--lt-accent, #ff65df) 14%);
+  --localtify-sidebar-bg: color-mix(in oklab, var(--lt-bg, #050505) 72%, var(--lt-accent, #ff65df) 17%);
+  --localtify-sidebar-bg-2: color-mix(in oklab, var(--bg-2, #080808) 70%, var(--accent-2, var(--lt-accent, #ff65df)) 16%);
+  --localtify-panel-bg: color-mix(in oklab, var(--surface, #101010) 76%, var(--lt-accent, #ff65df) 9%);
+  --localtify-panel-bg-2: color-mix(in oklab, var(--surface-2, #151515) 74%, var(--accent-2, var(--lt-accent, #ff65df)) 8%);
+  --localtify-row-bg: color-mix(in oklab, var(--surface, #101010) 82%, var(--lt-accent, #ff65df) 5%);
+  --localtify-line: color-mix(in oklab, var(--lt-accent, #ff65df) 22%, rgba(255,255,255,.055));
+  --localtify-line-soft: color-mix(in oklab, var(--lt-accent, #ff65df) 12%, rgba(255,255,255,.045));
 }
 
 html{
@@ -3189,7 +3189,7 @@ html{
 }
 
 body{
-  color: var(--text, #f7f7f7) !important;
+  color: var(--lt-text, #f7f7f7) !important;
 }
 
 .app{
@@ -3198,12 +3198,12 @@ body{
     linear-gradient(90deg, rgba(255,255,255,.014) 1px, transparent 1px),
     linear-gradient(180deg, var(--localtify-page-bg), var(--localtify-page-bg-2)) !important;
   background-size: 42px 42px, 42px 42px, auto !important;
-  color: var(--text, #f7f7f7) !important;
+  color: var(--lt-text, #f7f7f7) !important;
 }
 
 .logoPill{
-  background: color-mix(in oklab, var(--localtify-sidebar-bg) 82%, var(--accent, #ff65df) 8%) !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 18%, transparent) !important;
+  background: color-mix(in oklab, var(--localtify-sidebar-bg) 82%, var(--lt-accent, #ff65df) 8%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 18%, transparent) !important;
   box-shadow: none !important;
 }
 
@@ -3217,9 +3217,9 @@ body{
 .hero:hover{
   background:
     linear-gradient(135deg,
-      color-mix(in oklab, var(--localtify-panel-bg) 84%, var(--accent, #ff65df) 7%),
-      color-mix(in oklab, var(--localtify-panel-bg-2) 84%, var(--accent-2, var(--accent, #ff65df)) 6%)) !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 24%, rgba(255,255,255,.055)) !important;
+      color-mix(in oklab, var(--localtify-panel-bg) 84%, var(--lt-accent, #ff65df) 7%),
+      color-mix(in oklab, var(--localtify-panel-bg-2) 84%, var(--accent-2, var(--lt-accent, #ff65df)) 6%)) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 24%, rgba(255,255,255,.055)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 16px 36px rgba(0,0,0,.20) !important;
 }
 
@@ -3269,15 +3269,15 @@ button:hover,
 .heroMain:hover,
 .importSongsButton:hover,
 .importButton:hover{
-  box-shadow: 0 0 12px color-mix(in oklab, var(--accent, #ff65df) 14%, transparent) !important;
+  box-shadow: 0 0 12px color-mix(in oklab, var(--lt-accent, #ff65df) 14%, transparent) !important;
 }
 
 .app[data-theme]{
   background:
     linear-gradient(180deg,
-      color-mix(in srgb, var(--accent, #ff6edb) 10%, var(--bg, #050505)) 0%,
-      color-mix(in srgb, var(--accent, #ff6edb) 5%, var(--bg, #050505)) 34%,
-      var(--bg, #050505) 100%) !important;
+      color-mix(in srgb, var(--lt-accent, #ff6edb) 10%, var(--lt-bg, #050505)) 0%,
+      color-mix(in srgb, var(--lt-accent, #ff6edb) 5%, var(--lt-bg, #050505)) 34%,
+      var(--lt-bg, #050505) 100%) !important;
 }
 
 .app[data-theme]::before{
@@ -3286,16 +3286,16 @@ button:hover,
 }
 
 .app[data-theme] .titlebar{
-  background: color-mix(in srgb, var(--accent, #ff6edb) 5%, #050505) !important;
-  border-color: color-mix(in srgb, var(--accent, #ff6edb) 24%, transparent) !important;
+  background: color-mix(in srgb, var(--lt-accent, #ff6edb) 5%, #050505) !important;
+  border-color: color-mix(in srgb, var(--lt-accent, #ff6edb) 24%, transparent) !important;
 }
 
 .app[data-theme] .main{
   background:
     linear-gradient(180deg,
-      color-mix(in srgb, var(--accent, #ff6edb) 8%, var(--bg, #050505)) 0%,
-      color-mix(in srgb, var(--accent, #ff6edb) 4%, var(--bg, #050505)) 38%,
-      var(--bg, #050505) 100%) !important;
+      color-mix(in srgb, var(--lt-accent, #ff6edb) 8%, var(--lt-bg, #050505)) 0%,
+      color-mix(in srgb, var(--lt-accent, #ff6edb) 4%, var(--lt-bg, #050505)) 38%,
+      var(--lt-bg, #050505) 100%) !important;
 }
 
 .app[data-theme] .navIcon{
@@ -3306,9 +3306,9 @@ button:hover,
 
 .importButton{
   min-height: 40px !important;
-  border: 1px solid color-mix(in srgb, var(--accent, #ff6edb) 42%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--lt-accent, #ff6edb) 42%, transparent) !important;
   border-radius: 14px !important;
-  background: color-mix(in srgb, var(--accent, #ff6edb) 18%, rgba(255, 255, 255, 0.04)) !important;
+  background: color-mix(in srgb, var(--lt-accent, #ff6edb) 18%, rgba(255, 255, 255, 0.04)) !important;
   color: #ffffff !important;
   box-shadow: none !important;
   text-transform: lowercase !important;
@@ -3316,7 +3316,7 @@ button:hover,
 
 .importButton:hover{
   transform: translateY(-1px) !important;
-  background: color-mix(in srgb, var(--accent, #ff6edb) 28%, rgba(255, 255, 255, 0.05)) !important;
+  background: color-mix(in srgb, var(--lt-accent, #ff6edb) 28%, rgba(255, 255, 255, 0.05)) !important;
 }
 
 .rangeInput:focus{
@@ -3325,7 +3325,7 @@ button:hover,
 
 .rangeInput::-webkit-slider-thumb{
   outline: none !important;
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent, #ff6edb) 22%, transparent) !important;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--lt-accent, #ff6edb) 22%, transparent) !important;
 }
 
 .app .songRow{
@@ -3412,7 +3412,7 @@ body.localitfyThemePainting .app *{
   gap: 12px;
   color: rgba(255, 255, 255, 0.68);
   background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.18);
   border-radius: 14px;
   contain: layout paint style;
 }
@@ -3420,10 +3420,10 @@ body.localitfyThemePainting .app *{
 .libraryLoadMoreButton{
   min-height: 34px;
   padding: 0 14px;
-  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.28);
   border-radius: 999px;
-  color: var(--text);
-  background: rgba(var(--accent-rgb), 0.13);
+  color: var(--lt-text);
+  background: rgba(var(--lt-accent-rgb), 0.13);
   cursor: pointer;
   font: inherit;
   font-size: 12px;
@@ -3431,7 +3431,7 @@ body.localitfyThemePainting .app *{
 }
 
 .libraryLoadMoreButton:hover{
-  background: rgba(var(--accent-rgb), 0.2);
+  background: rgba(var(--lt-accent-rgb), 0.2);
   transform: translate3d(0, -1px, 0);
 }
 
@@ -3495,7 +3495,7 @@ body.localitfyThemePainting .app *{
   stroke-width: 2.55 !important;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.10));
+  filter: drop-shadow(0 0 10px rgba(var(--lt-accent-rgb), 0.10));
 }
 
 .navDivider{
@@ -3503,7 +3503,7 @@ body.localitfyThemePainting .app *{
   width: calc(100% - 28px) !important;
   margin-left: 14px !important;
   margin-right: 14px !important;
-  background: linear-gradient(90deg, var(--sidebar-line-soft), rgba(var(--accent-rgb), 0.18), var(--sidebar-line-soft)) !important;
+  background: linear-gradient(90deg, var(--sidebar-line-soft), rgba(var(--lt-accent-rgb), 0.18), var(--sidebar-line-soft)) !important;
   -webkit-mask-image: none !important;
   mask-image: none !important;
   opacity: 1 !important;
@@ -3522,14 +3522,14 @@ body.localitfyThemePainting .app *{
 
 .mainAction.importMainAction{
   border: 0;
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 58%, #ffffff 42%));
+  background: linear-gradient(135deg, var(--lt-accent), color-mix(in srgb, var(--lt-accent) 58%, #ffffff 42%));
   color: #06080c;
-  box-shadow: 0 14px 30px rgba(var(--accent-rgb), 0.18);
+  box-shadow: 0 14px 30px rgba(var(--lt-accent-rgb), 0.18);
 }
 
 .mainAction.importMainAction:hover{
   transform: translateY(-1px);
-  box-shadow: 0 18px 38px rgba(var(--accent-rgb), 0.26);
+  box-shadow: 0 18px 38px rgba(var(--lt-accent-rgb), 0.26);
 }
 
 .app .navIcon{
@@ -3548,7 +3548,7 @@ body.localitfyThemePainting .app *{
   fill: currentColor !important;
   fill-opacity: .22 !important;
   stroke-width: 2.85 !important;
-  filter: drop-shadow(0 0 12px color-mix(in oklab, var(--accent, #a98cff) 20%, transparent)) !important;
+  filter: drop-shadow(0 0 12px color-mix(in oklab, var(--lt-accent, #a98cff) 20%, transparent)) !important;
 }
 
 .app .navDivider{
@@ -3556,24 +3556,24 @@ body.localitfyThemePainting .app *{
   height: 1px !important;
   margin-left: 14px !important;
   margin-right: 14px !important;
-  background: color-mix(in oklab, var(--accent, #a98cff) 20%, rgba(255,255,255,.11)) !important;
+  background: color-mix(in oklab, var(--lt-accent, #a98cff) 20%, rgba(255,255,255,.11)) !important;
   opacity: 1 !important;
   -webkit-mask-image: none !important;
   mask-image: none !important;
 }
 
 html{
-  background: var(--app-bg-solid, var(--bg, #050505)) !important;
+  background: var(--app-bg-solid, var(--lt-bg, #050505)) !important;
   background-image: none !important;
   background-size: auto !important;
 }
 
 .homeView{
   background-image:
-    radial-gradient(circle at 12% 0%, color-mix(in oklab, var(--accent, #ff65df) 10%, transparent) 0%, transparent 32%),
+    radial-gradient(circle at 12% 0%, color-mix(in oklab, var(--lt-accent, #ff65df) 10%, transparent) 0%, transparent 32%),
     linear-gradient(180deg,
-      color-mix(in oklab, var(--bg, #050505) 82%, var(--accent, #ff65df) 8%) 0%,
-      color-mix(in oklab, var(--bg-2, #080808) 88%, var(--accent, #ff65df) 4%) 100%) !important;
+      color-mix(in oklab, var(--lt-bg, #050505) 82%, var(--lt-accent, #ff65df) 8%) 0%,
+      color-mix(in oklab, var(--bg-2, #080808) 88%, var(--lt-accent, #ff65df) 4%) 100%) !important;
   background-size: auto !important;
 }
 
@@ -3582,10 +3582,10 @@ html{
 }
 
 :root{
-  --theme-page-bg: radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb, 255, 105, 180), 0.10), transparent 34%),
+  --theme-page-bg: radial-gradient(circle at 18% 0%, rgba(var(--lt-accent-rgb, 255, 105, 180), 0.10), transparent 34%),
     radial-gradient(circle at 88% 12%, rgba(var(--accent-2-rgb, 128, 92, 255), 0.10), transparent 34%),
-    linear-gradient(180deg, var(--bg, #08060d) 0%, #08040a 100%) !important;
-  --theme-content-bg: radial-gradient(circle at 20% 0%, rgba(var(--accent-rgb, 255, 105, 180), 0.08), transparent 30%),
+    linear-gradient(180deg, var(--lt-bg, #08060d) 0%, #08040a 100%) !important;
+  --theme-content-bg: radial-gradient(circle at 20% 0%, rgba(var(--lt-accent-rgb, 255, 105, 180), 0.08), transparent 30%),
     linear-gradient(180deg, rgba(10, 7, 14, 0.98), rgba(7, 4, 10, 0.99)) !important;
 }
 
@@ -3616,8 +3616,8 @@ html{
   --motion-spring: cubic-bezier(0.18, 0.92, 0.2, 1.16);
   --motion-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --hover-glow-soft: color-mix(in srgb, var(--accent, #ff65c8) 18%, transparent);
-  --hover-surface-soft: color-mix(in srgb, var(--surface, #161320) 86%, var(--accent, #ff65c8) 14%);
+  --hover-glow-soft: color-mix(in srgb, var(--lt-accent, #ff65c8) 18%, transparent);
+  --hover-surface-soft: color-mix(in srgb, var(--surface, #161320) 86%, var(--lt-accent, #ff65c8) 14%);
 }
 
 .app::before{
@@ -3648,9 +3648,9 @@ html{
 }
 
 .homeListenCard:hover{
-  background-color: color-mix(in srgb, var(--surface-raised, #191622) 78%, var(--accent, #ff65c8) 11%) !important;
-  border-color: color-mix(in srgb, var(--accent, #ff65c8) 34%, transparent) !important;
-  box-shadow: 0 18px 42px color-mix(in srgb, var(--accent, #ff65c8) 10%, transparent);
+  background-color: color-mix(in srgb, var(--surface-raised, #191622) 78%, var(--lt-accent, #ff65c8) 11%) !important;
+  border-color: color-mix(in srgb, var(--lt-accent, #ff65c8) 34%, transparent) !important;
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--lt-accent, #ff65c8) 10%, transparent);
 }
 
 .hero,
@@ -3721,7 +3721,7 @@ html{
   overflow: hidden;
   color: rgba(255, 255, 255, 0.92);
   background:
-    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb, 141, 255, 206), 0.18), transparent 36%),
+    radial-gradient(circle at 50% 0%, rgba(var(--lt-accent-rgb, 141, 255, 206), 0.18), transparent 36%),
     radial-gradient(circle at 20% 70%, rgba(var(--progress-rgb, 141, 255, 206), 0.10), transparent 34%),
     linear-gradient(180deg, #040407 0%, #08080d 52%, #020204 100%) !important;
 }
@@ -3963,10 +3963,10 @@ html{
   min-width: 190px;
   padding: 14px;
   border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lt-accent) 38%, transparent);
   background: color-mix(in srgb, var(--surface) 88%, #05020a 12%);
   box-shadow: 0 16px 46px rgba(0, 0, 0, .34);
-  color: var(--text);
+  color: var(--lt-text);
 }
 
 .secretDevPanel strong{
@@ -3978,13 +3978,13 @@ html{
 
 .secretDevPanel span{
   font-size: .76rem;
-  color: var(--muted);
+  color: var(--lt-muted);
 }
 
 .secretDevPanel button{
-  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lt-accent) 34%, transparent);
   background: color-mix(in srgb, var(--surface2) 88%, transparent);
-  color: var(--text);
+  color: var(--lt-text);
   border-radius: 12px;
   padding: 8px 10px;
   cursor: pointer;
@@ -4120,12 +4120,12 @@ html{
   transform: translateX(-50%) !important;
   padding: 9px 14px !important;
   border-radius: 999px !important;
-  border: 1px solid rgba(var(--accent-rgb), .36) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), .36) !important;
   background: rgba(8, 8, 12, .72) !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   backdrop-filter: blur(14px) saturate(125%) !important;
   -webkit-backdrop-filter: blur(14px) saturate(125%) !important;
-  box-shadow: 0 14px 44px rgba(0, 0, 0, .34), 0 0 28px rgba(var(--accent-rgb), .16) !important;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, .34), 0 0 28px rgba(var(--lt-accent-rgb), .16) !important;
   font-size: 12px !important;
   font-weight: 950 !important;
   letter-spacing: .02em !important;
@@ -4141,7 +4141,7 @@ html{
 .app .secretLayer.disco::before{
   opacity: .92 !important;
   background:
-    linear-gradient(105deg, transparent 0 11%, rgba(var(--accent-rgb), .36) 13%, transparent 19% 100%),
+    linear-gradient(105deg, transparent 0 11%, rgba(var(--lt-accent-rgb), .36) 13%, transparent 19% 100%),
     linear-gradient(78deg, transparent 0 43%, rgba(255,255,255,.14) 50%, transparent 58% 100%),
     linear-gradient(255deg, transparent 0 12%, rgba(var(--accent-2-rgb), .28) 16%, transparent 23% 100%) !important;
   filter: blur(7px) !important;
@@ -4153,13 +4153,13 @@ html{
   opacity: .18 !important;
   background:
     repeating-linear-gradient(90deg, transparent 0 78px, rgba(255,255,255,.26) 80px 82px, transparent 84px 150px),
-    repeating-linear-gradient(0deg, transparent 0 54px, rgba(var(--accent-rgb), .20) 55px 57px, transparent 58px 118px) !important;
+    repeating-linear-gradient(0deg, transparent 0 54px, rgba(var(--lt-accent-rgb), .20) 55px 57px, transparent 58px 118px) !important;
   animation: localtifyStageGridFixed 2.8s linear infinite !important;
 }
 
 .app .secretLayer.disco .secretAura{
   background:
-    radial-gradient(circle at 19% 18%, rgba(var(--accent-rgb), .22), transparent 28%),
+    radial-gradient(circle at 19% 18%, rgba(var(--lt-accent-rgb), .22), transparent 28%),
     radial-gradient(circle at 82% 24%, rgba(var(--accent-2-rgb), .16), transparent 24%),
     radial-gradient(circle at 50% 94%, rgba(255,255,255,.08), transparent 30%) !important;
 }
@@ -4223,12 +4223,12 @@ html{
   opacity: .64 !important;
   background:
     repeating-linear-gradient(90deg, transparent 0 32px, rgba(255,255,255,.12) 34px 36px, transparent 38px 92px),
-    linear-gradient(90deg, transparent, rgba(var(--accent-rgb), .20), transparent) !important;
+    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .20), transparent) !important;
   animation: localtifySpeedLinesWorking 520ms linear infinite !important;
 }
 
 .app .secretLayer.fast .secretAura{
-  background: radial-gradient(circle at 50% 50%, rgba(var(--accent-rgb), .14), transparent 38%) !important;
+  background: radial-gradient(circle at 50% 50%, rgba(var(--lt-accent-rgb), .14), transparent 38%) !important;
 }
 
 @keyframes localtifySpeedLinesWorking{
@@ -4339,10 +4339,10 @@ html{
   max-width: min(520px, calc(100vw - 40px)) !important;
   padding: 9px 14px !important;
   border-radius: 999px !important;
-  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--lt-accent) 42%, transparent) !important;
   background: color-mix(in srgb, #050509 74%, var(--surface) 26%) !important;
-  color: var(--text) !important;
-  box-shadow: 0 14px 44px rgba(0, 0, 0, .34), 0 0 26px rgba(var(--accent-rgb), .15) !important;
+  color: var(--lt-text) !important;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, .34), 0 0 26px rgba(var(--lt-accent-rgb), .15) !important;
   backdrop-filter: blur(12px) saturate(120%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
   font-size: 12px !important;
@@ -4360,7 +4360,7 @@ html{
   display: block !important;
   opacity: .74 !important;
   background:
-    linear-gradient(103deg, transparent 0 12%, rgba(var(--accent-rgb), .34) 15%, transparent 24% 100%),
+    linear-gradient(103deg, transparent 0 12%, rgba(var(--lt-accent-rgb), .34) 15%, transparent 24% 100%),
     linear-gradient(76deg, transparent 0 46%, rgba(255, 255, 255, .13) 52%, transparent 60% 100%),
     linear-gradient(256deg, transparent 0 15%, rgba(var(--accent-2-rgb), .24) 19%, transparent 28% 100%) !important;
   filter: blur(5px) !important;
@@ -4373,7 +4373,7 @@ html{
   opacity: .14 !important;
   background:
     repeating-linear-gradient(90deg, transparent 0 86px, rgba(255,255,255,.24) 88px 90px, transparent 92px 154px),
-    repeating-linear-gradient(0deg, transparent 0 58px, rgba(var(--accent-rgb), .18) 59px 61px, transparent 62px 122px) !important;
+    repeating-linear-gradient(0deg, transparent 0 58px, rgba(var(--lt-accent-rgb), .18) 59px 61px, transparent 62px 122px) !important;
   animation: localtifyStageGridNoOrbs 3s linear infinite !important;
 }
 
@@ -4392,7 +4392,7 @@ html{
   opacity: .58 !important;
   background:
     repeating-linear-gradient(90deg, transparent 0 34px, rgba(255,255,255,.13) 36px 38px, transparent 40px 94px),
-    linear-gradient(90deg, transparent 0%, rgba(var(--accent-rgb), .15) 50%, transparent 100%) !important;
+    linear-gradient(90deg, transparent 0%, rgba(var(--lt-accent-rgb), .15) 50%, transparent 100%) !important;
   filter: none !important;
   animation: localtifySpeedLinesNoOrbs 520ms linear infinite !important;
 }
@@ -4488,7 +4488,7 @@ html{
   background: #fff !important;
   box-shadow:
     0 0 5px rgba(255,255,255,.82),
-    0 0 12px color-mix(in oklab, var(--theme-progress, var(--accent)) 28%, transparent) !important;
+    0 0 12px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 28%, transparent) !important;
 }
 
 .downloadPanel{
@@ -4529,7 +4529,7 @@ html{
 .downloadPanel .softButton:focus-visible,
 .downloadPanel .heroMain:focus-visible,
 .downloadPanel .heroGhost:focus-visible{
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--theme-progress, var(--accent)) 18%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 18%, transparent) !important;
 }
 
 .downloadPanel .converterBox{
@@ -4550,11 +4550,11 @@ html{
 .downloadPanel .downloadActions .heroMain{
   width: auto !important;
   justify-self: end !important;
-  border: 1px solid color-mix(in oklab, var(--theme-progress, var(--accent)) 58%, transparent) !important;
+  border: 1px solid color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 58%, transparent) !important;
   color: #08040b !important;
-  background: var(--theme-progress, var(--accent)) !important;
+  background: var(--theme-progress, var(--lt-accent)) !important;
   box-shadow:
-    0 12px 30px color-mix(in oklab, var(--theme-progress, var(--accent)) 22%, transparent),
+    0 12px 30px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 22%, transparent),
     inset 0 1px 0 rgba(255,255,255,.32) !important;
 }
 
@@ -4562,7 +4562,7 @@ html{
 .downloadPanel .downloadActions .heroMain:hover{
   transform: translateY(-1px) scale(1.015) !important;
   box-shadow:
-    0 16px 38px color-mix(in oklab, var(--theme-progress, var(--accent)) 28%, transparent),
+    0 16px 38px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 28%, transparent),
     inset 0 1px 0 rgba(255,255,255,.36) !important;
 }
 
@@ -4591,8 +4591,8 @@ html{
 .downloadPanel .downloadActions .heroGhost:hover,
 .downloadPanel .softButton:hover{
   transform: translateY(-1px) scale(1.012) !important;
-  border-color: color-mix(in oklab, var(--theme-progress, var(--accent)) 32%, var(--theme-line, rgba(255,255,255,.14))) !important;
-  background: color-mix(in oklab, var(--theme-progress, var(--accent)) 10%, var(--theme-surface, #15131f)) !important;
+  border-color: color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 32%, var(--theme-line, rgba(255,255,255,.14))) !important;
+  background: color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 10%, var(--theme-surface, #15131f)) !important;
 }
 
 .downloadPanel .downloadTextarea,
@@ -4604,8 +4604,8 @@ html{
 }
 
 .downloadPanel .downloadTextarea:focus{
-  border-color: color-mix(in oklab, var(--theme-progress, var(--accent)) 38%, var(--theme-line, rgba(255,255,255,.16))) !important;
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--theme-progress, var(--accent)) 10%, transparent) !important;
+  border-color: color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 38%, var(--theme-line, rgba(255,255,255,.16))) !important;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 10%, transparent) !important;
 }
 
 @media (max-width: 920px){
@@ -4801,16 +4801,16 @@ button{
 
 .compactQuickNavButton:hover{
   color: #fff;
-  border-color: rgba(var(--accent-rgb),0.24);
-  background: rgba(var(--accent-rgb),0.09);
+  border-color: rgba(var(--lt-accent-rgb),0.24);
+  background: rgba(var(--lt-accent-rgb),0.09);
   transform: translate3d(0,-1px,0);
 }
 
 .compactQuickNavButton.active{
   color: #fff;
-  border-color: rgba(var(--accent-rgb),0.42);
-  background: rgba(var(--accent-rgb),0.16);
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.08);
+  border-color: rgba(var(--lt-accent-rgb),0.42);
+  background: rgba(var(--lt-accent-rgb),0.16);
+  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb),0.08);
 }
 
 .compactQuickNavButton svg{
@@ -4922,7 +4922,7 @@ button{
   width: 16px !important;
   height: 16px !important;
   border-radius: 5px;
-  filter: drop-shadow(0 0 9px rgba(var(--accent-rgb), .38));
+  filter: drop-shadow(0 0 9px rgba(var(--lt-accent-rgb), .38));
 }
 
 .loadingLogoImage{
@@ -5067,7 +5067,7 @@ button{
   padding: 10px 13px !important;
   gap: 9px !important;
   border-radius: 14px !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.22) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.22) !important;
   background: rgba(7, 7, 8, 0.88) !important;
   box-shadow:
     0 16px 42px rgba(0, 0, 0, 0.36),
@@ -5079,7 +5079,7 @@ button{
 
 .app .appToast strong{
   max-width: 270px !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   font-size: 12.5px !important;
   font-weight: 780 !important;
   letter-spacing: -0.01em !important;
@@ -5089,12 +5089,12 @@ button{
 .app .appToastDot{
   width: 8px !important;
   height: 8px !important;
-  background: rgba(var(--accent-rgb), 0.95) !important;
-  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.5) !important;
+  background: rgba(var(--lt-accent-rgb), 0.95) !important;
+  box-shadow: 0 0 16px rgba(var(--lt-accent-rgb), 0.5) !important;
 }
 
 .app .appToast.success{
-  border-color: rgba(var(--accent-rgb), 0.3) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.3) !important;
 }
 
 .app .appToast.error{
@@ -5329,11 +5329,11 @@ body,
 .mainContent,
 .contentScroller{
   background-image:
-    radial-gradient(circle at 48% 0%, color-mix(in oklab, var(--accent, #ff4ee8) 8%, transparent) 0%, transparent 34%),
-    radial-gradient(circle at 88% 88%, color-mix(in oklab, var(--accent-2, var(--accent, #9d6cff)) 6%, transparent) 0%, transparent 32%),
+    radial-gradient(circle at 48% 0%, color-mix(in oklab, var(--lt-accent, #ff4ee8) 8%, transparent) 0%, transparent 34%),
+    radial-gradient(circle at 88% 88%, color-mix(in oklab, var(--accent-2, var(--lt-accent, #9d6cff)) 6%, transparent) 0%, transparent 32%),
     linear-gradient(180deg,
-      color-mix(in oklab, var(--bg, #030207) 94%, var(--accent, #ff4ee8) 3%),
-      color-mix(in oklab, var(--bg-2, #07050d) 95%, var(--accent-2, var(--accent, #9d6cff)) 2%)) !important;
+      color-mix(in oklab, var(--lt-bg, #030207) 94%, var(--lt-accent, #ff4ee8) 3%),
+      color-mix(in oklab, var(--bg-2, #07050d) 95%, var(--accent-2, var(--lt-accent, #9d6cff)) 2%)) !important;
   background-size: auto !important;
 }
 
@@ -5342,9 +5342,9 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 }
 
 .app{
-  background-color: var(--app-bg-solid, var(--bg, #000)) !important;
+  background-color: var(--app-bg-solid, var(--lt-bg, #000)) !important;
   background-image:
-    radial-gradient(circle at 12% -12%, color-mix(in oklab, var(--accent, #e64be8) 10%, transparent), transparent 34%),
+    radial-gradient(circle at 12% -12%, color-mix(in oklab, var(--lt-accent, #e64be8) 10%, transparent), transparent 34%),
     radial-gradient(circle at 88% 4%, color-mix(in oklab, var(--accent-2, #8b5cf6) 7%, transparent), transparent 36%) !important;
   background-size: auto !important;
   background-position: center !important;
@@ -5413,9 +5413,9 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 
 .app{
   background:
-    radial-gradient(circle at 50% 100%, rgba(var(--player-ambient-rgb, var(--accent-rgb)), 0.075), transparent 46%),
-    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.10), transparent 31%),
-    var(--bg) !important;
+    radial-gradient(circle at 50% 100%, rgba(var(--player-ambient-rgb, var(--lt-accent-rgb)), 0.075), transparent 46%),
+    radial-gradient(circle at top left, rgba(var(--lt-accent-rgb), 0.10), transparent 31%),
+    var(--lt-bg) !important;
 }
 
 .mainStage{
@@ -5451,8 +5451,8 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 
 .sideItem.active,
 .sideItem[aria-current="page"]{
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.34) !important;
-  border-left-color: rgba(var(--accent-rgb), 0.55) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), 0.34) !important;
+  border-left-color: rgba(var(--lt-accent-rgb), 0.55) !important;
 }
 
 .app.playerScrubbing .ambientSurface,
@@ -5492,14 +5492,14 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
   border-left-width: 1px !important;
   border-left-style: solid !important;
   box-shadow:
-    inset 0 0 0 1px rgba(var(--accent-rgb), 0.30),
-    0 12px 30px rgba(var(--accent-rgb), 0.10) !important;
+    inset 0 0 0 1px rgba(var(--lt-accent-rgb), 0.30),
+    0 12px 30px rgba(var(--lt-accent-rgb), 0.10) !important;
 }
 
 .loadingScreen,
 .editorModal{
   background:
-    radial-gradient(circle at 50% 100%, rgba(var(--accent-rgb), 0.09), transparent 42%),
+    radial-gradient(circle at 50% 100%, rgba(var(--lt-accent-rgb), 0.09), transparent 42%),
     #000 !important;
 }
 
@@ -5619,11 +5619,11 @@ body::after,
   width: 100% !important;
   margin: 0 !important;
   padding: 12px 14px 12px 18px !important;
-  border: 1px solid rgba(var(--accent-rgb), .18) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), .18) !important;
   border-radius: 16px !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
-    color-mix(in oklab, var(--surface, #111017) 88%, var(--accent, #ff4ee8) 5%) !important;
+    color-mix(in oklab, var(--surface, #111017) 88%, var(--lt-accent, #ff4ee8) 5%) !important;
   color: rgba(255,255,255,.88) !important;
   font-size: 13px !important;
   font-weight: 750 !important;
@@ -5647,7 +5647,7 @@ body::after,
   height: auto !important;
   border-radius: 999px !important;
   transform: none !important;
-  background: linear-gradient(180deg, var(--accent, #ff4ee8), rgba(var(--accent-rgb), .25)) !important;
+  background: linear-gradient(180deg, var(--lt-accent, #ff4ee8), rgba(var(--lt-accent-rgb), .25)) !important;
   box-shadow: none !important;
 }
 
@@ -5761,7 +5761,7 @@ body::after,
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(circle at 50% 42%, rgba(var(--accent-rgb, 227, 78, 232), 0.16), transparent 58%),
+    radial-gradient(circle at 50% 42%, rgba(var(--lt-accent-rgb, 227, 78, 232), 0.16), transparent 58%),
     rgba(8, 5, 12, 0.92);
   contain: paint;
 }
@@ -5779,7 +5779,7 @@ body::after,
   text-transform: lowercase;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.055), transparent 42%),
-    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb, 227, 78, 232), 0.18), transparent 62%);
+    radial-gradient(circle at 50% 45%, rgba(var(--lt-accent-rgb, 227, 78, 232), 0.18), transparent 62%);
   opacity: 1;
   transform: scale(1.01);
   transition: opacity 220ms ease, transform 280ms ease;
@@ -5911,15 +5911,15 @@ body.localtifyBackgroundMode .ambientSurface,
   gap: 12px !important;
   padding: 13px !important;
   border-radius: 18px !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e86be8) 38%, rgba(255,255,255,.13)) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e86be8) 38%, rgba(255,255,255,.13)) !important;
   background:
-    radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb, 232,107,232), .18), transparent 54%),
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb, 232,107,232), .18), transparent 54%),
     linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.035) 48%, rgba(0,0,0,.18)),
-    color-mix(in oklab, var(--bg-2, #09060d) 78%, var(--accent, #e86be8) 10%) !important;
-  color: var(--text, #f5f5f5) !important;
+    color-mix(in oklab, var(--bg-2, #09060d) 78%, var(--lt-accent, #e86be8) 10%) !important;
+  color: var(--lt-text, #f5f5f5) !important;
   box-shadow:
     0 24px 76px rgba(0,0,0,.42),
-    0 0 0 1px rgba(var(--accent-rgb, 232,107,232), .08),
+    0 0 0 1px rgba(var(--lt-accent-rgb, 232,107,232), .08),
     inset 0 1px 0 rgba(255,255,255,.08) !important;
   overflow: hidden !important;
   backdrop-filter: blur(22px) saturate(136%) !important;
@@ -5934,7 +5934,7 @@ body.localtifyBackgroundMode .ambientSurface,
   inset: 0 !important;
   pointer-events: none !important;
   border-radius: inherit !important;
-  background: linear-gradient(90deg, rgba(var(--accent-rgb, 232,107,232), .18), transparent 38%, rgba(255,255,255,.04)) !important;
+  background: linear-gradient(90deg, rgba(var(--lt-accent-rgb, 232,107,232), .18), transparent 38%, rgba(255,255,255,.04)) !important;
   opacity: .74 !important;
 }
 
@@ -5952,10 +5952,10 @@ body.localtifyBackgroundMode .ambientSurface,
   display: grid !important;
   place-items: center !important;
   border-radius: 10px !important;
-  background: color-mix(in oklab, var(--accent, #e86be8) 18%, rgba(255,255,255,.06)) !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e86be8) 45%, rgba(255,255,255,.14)) !important;
-  color: color-mix(in oklab, var(--accent, #e86be8) 68%, white 32%) !important;
-  box-shadow: 0 0 24px rgba(var(--accent-rgb, 232,107,232), .16) !important;
+  background: color-mix(in oklab, var(--lt-accent, #e86be8) 18%, rgba(255,255,255,.06)) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e86be8) 45%, rgba(255,255,255,.14)) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e86be8) 68%, white 32%) !important;
+  box-shadow: 0 0 24px rgba(var(--lt-accent-rgb, 232,107,232), .16) !important;
   font-size: 14px !important;
   font-weight: 950 !important;
 }
@@ -5970,7 +5970,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .updateToastText .eyebrow,
 .updateToastText .eyebrow{
   margin: 0 !important;
-  color: color-mix(in oklab, var(--accent, #e86be8) 82%, white 18%) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e86be8) 82%, white 18%) !important;
   font-size: 10px !important;
   line-height: 1 !important;
   font-weight: 950 !important;
@@ -5981,7 +5981,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .updateToastText h3,
 .updateToastText h3{
   margin: 0 !important;
-  color: var(--text, #f5f5f5) !important;
+  color: var(--lt-text, #f5f5f5) !important;
   font-size: 14px !important;
   line-height: 1.15 !important;
   letter-spacing: -.02em !important;
@@ -5992,7 +5992,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .updateToastText p:not(.eyebrow){
   margin: 0 !important;
   min-width: 0 !important;
-  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.66)) 92%, var(--text, #fff) 8%) !important;
+  color: color-mix(in oklab, var(--lt-muted, rgba(255,255,255,.66)) 92%, var(--lt-text, #fff) 8%) !important;
   font-size: 12px !important;
   line-height: 1.35 !important;
   display: -webkit-box !important;
@@ -6022,7 +6022,7 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: 999px !important;
   background: rgba(0,0,0,.18) !important;
   border: 1px solid rgba(255,255,255,.09) !important;
-  color: color-mix(in oklab, var(--text, #fff) 72%, var(--muted, #aaa) 28%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 72%, var(--lt-muted, #aaa) 28%) !important;
   font-size: 10.5px !important;
   font-weight: 850 !important;
   letter-spacing: .01em !important;
@@ -6036,7 +6036,7 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .updateSafePill.ok,
 .updateSafePill.ok{
-  color: color-mix(in oklab, var(--accent, #e86be8) 72%, white 28%) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e86be8) 72%, white 28%) !important;
 }
 
 .app .updateToastActions,
@@ -6069,7 +6069,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .updateGhostButton{
   background: rgba(255,255,255,.052) !important;
   border: 1px solid rgba(255,255,255,.10) !important;
-  color: color-mix(in oklab, var(--text, #fff) 72%, var(--muted, #aaa) 28%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 72%, var(--lt-muted, #aaa) 28%) !important;
   box-shadow: none !important;
 }
 
@@ -6077,16 +6077,16 @@ body.localtifyBackgroundMode .ambientSurface,
 .updateGhostButton:hover{
   transform: none !important;
   background: rgba(255,255,255,.085) !important;
-  border-color: color-mix(in oklab, var(--accent, #e86be8) 35%, rgba(255,255,255,.16)) !important;
-  color: var(--text, #fff) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #e86be8) 35%, rgba(255,255,255,.16)) !important;
+  color: var(--lt-text, #fff) !important;
 }
 
 .app .updatePrimaryButton,
 .updatePrimaryButton{
-  background: color-mix(in oklab, var(--accent, #e86be8) 84%, white 16%) !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e86be8) 72%, white 28%) !important;
+  background: color-mix(in oklab, var(--lt-accent, #e86be8) 84%, white 16%) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e86be8) 72%, white 28%) !important;
   color: #060407 !important;
-  box-shadow: 0 14px 32px rgba(var(--accent-rgb, 232,107,232), .18) !important;
+  box-shadow: 0 14px 32px rgba(var(--lt-accent-rgb, 232,107,232), .18) !important;
 }
 
 .app .updatePrimaryButton:hover,
@@ -6105,7 +6105,7 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: 10px !important;
   background: rgba(255,255,255,.052) !important;
   border: 1px solid rgba(255,255,255,.10) !important;
-  color: var(--muted, rgba(255,255,255,.62)) !important;
+  color: var(--lt-muted, rgba(255,255,255,.62)) !important;
   transform: none !important;
 }
 
@@ -6121,8 +6121,8 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .updateProgressTrack span,
 .updateProgressTrack span{
-  background: color-mix(in oklab, var(--accent, #e86be8) 82%, white 18%) !important;
-  box-shadow: 0 0 18px rgba(var(--accent-rgb, 232,107,232), .34) !important;
+  background: color-mix(in oklab, var(--lt-accent, #e86be8) 82%, white 18%) !important;
+  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb, 232,107,232), .34) !important;
 }
 
 @keyframes localtifyUpdateNoticeIn{
@@ -6183,19 +6183,19 @@ body.localtifyBackgroundMode .ambientSurface,
   padding: 0 18px !important;
   border-radius: 0 !important;
   border: 0 !important;
-  border-top: 1px solid color-mix(in oklab, var(--accent, #e962e9) 28%, rgba(255,255,255,.05)) !important;
-  border-bottom: 1px solid color-mix(in oklab, var(--accent, #e962e9) 42%, rgba(255,255,255,.07)) !important;
+  border-top: 1px solid color-mix(in oklab, var(--lt-accent, #e962e9) 28%, rgba(255,255,255,.05)) !important;
+  border-bottom: 1px solid color-mix(in oklab, var(--lt-accent, #e962e9) 42%, rgba(255,255,255,.07)) !important;
   background:
     linear-gradient(90deg,
-      color-mix(in oklab, var(--bg, #05010a) 82%, var(--accent, #e962e9) 12%),
-      color-mix(in oklab, var(--bg-2, #08040d) 72%, var(--accent, #e962e9) 18%) 46%,
-      color-mix(in oklab, var(--bg, #05010a) 84%, var(--progress, var(--accent, #e962e9)) 11%)
+      color-mix(in oklab, var(--lt-bg, #05010a) 82%, var(--lt-accent, #e962e9) 12%),
+      color-mix(in oklab, var(--bg-2, #08040d) 72%, var(--lt-accent, #e962e9) 18%) 46%,
+      color-mix(in oklab, var(--lt-bg, #05010a) 84%, var(--progress, var(--lt-accent, #e962e9)) 11%)
     ) !important;
-  color: var(--text, #f6f2fb) !important;
+  color: var(--lt-text, #f6f2fb) !important;
   box-shadow:
     0 12px 38px rgba(0,0,0,.24),
     inset 0 1px 0 rgba(255,255,255,.055),
-    inset 0 -1px 0 rgba(var(--accent-rgb, 233,98,233), .10) !important;
+    inset 0 -1px 0 rgba(var(--lt-accent-rgb, 233,98,233), .10) !important;
   overflow: hidden !important;
   backdrop-filter: blur(18px) saturate(130%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
@@ -6210,8 +6210,8 @@ body.localtifyBackgroundMode .ambientSurface,
   pointer-events: none !important;
   border-radius: 0 !important;
   background:
-    radial-gradient(circle at 18% -80%, rgba(var(--accent-rgb, 233,98,233), .22), transparent 52%),
-    linear-gradient(90deg, rgba(255,255,255,.045), transparent 35%, rgba(var(--accent-rgb, 233,98,233), .08)) !important;
+    radial-gradient(circle at 18% -80%, rgba(var(--lt-accent-rgb, 233,98,233), .22), transparent 52%),
+    linear-gradient(90deg, rgba(255,255,255,.045), transparent 35%, rgba(var(--lt-accent-rgb, 233,98,233), .08)) !important;
   opacity: .86 !important;
 }
 
@@ -6223,10 +6223,10 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: 8px !important;
   display: grid !important;
   place-items: center !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e962e9) 48%, rgba(255,255,255,.16)) !important;
-  background: rgba(var(--accent-rgb, 233,98,233), .14) !important;
-  color: color-mix(in oklab, var(--accent, #e962e9) 72%, white 28%) !important;
-  box-shadow: 0 0 18px rgba(var(--accent-rgb, 233,98,233), .15) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e962e9) 48%, rgba(255,255,255,.16)) !important;
+  background: rgba(var(--lt-accent-rgb, 233,98,233), .14) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e962e9) 72%, white 28%) !important;
+  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb, 233,98,233), .15) !important;
   font-size: 13px !important;
   font-weight: 950 !important;
   line-height: 1 !important;
@@ -6244,7 +6244,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow{
   margin: 0 !important;
-  color: color-mix(in oklab, var(--accent, #e962e9) 72%, white 28%) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e962e9) 72%, white 28%) !important;
   font-size: 10px !important;
   line-height: 1 !important;
   font-weight: 950 !important;
@@ -6257,7 +6257,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbonText h3{
   margin: 0 !important;
   min-width: 0 !important;
-  color: color-mix(in oklab, var(--text, #fff) 92%, var(--accent, #e962e9) 8%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 92%, var(--lt-accent, #e962e9) 8%) !important;
   font-size: 13px !important;
   line-height: 1.15 !important;
   font-weight: 850 !important;
@@ -6272,7 +6272,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbonText p:not(.eyebrow){
   margin: 0 !important;
   min-width: 0 !important;
-  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 88%, var(--text, #fff) 12%) !important;
+  color: color-mix(in oklab, var(--lt-muted, rgba(255,255,255,.62)) 88%, var(--lt-text, #fff) 12%) !important;
   font-size: 12px !important;
   line-height: 1.2 !important;
   font-weight: 720 !important;
@@ -6303,7 +6303,7 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: 999px !important;
   background: rgba(0,0,0,.18) !important;
   border: 1px solid rgba(255,255,255,.095) !important;
-  color: color-mix(in oklab, var(--text, #fff) 76%, var(--accent, #e962e9) 10%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 76%, var(--lt-accent, #e962e9) 10%) !important;
   font-size: 10.5px !important;
   font-weight: 850 !important;
   white-space: nowrap !important;
@@ -6343,7 +6343,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbon .updateGhostButton{
   background: rgba(255,255,255,.045) !important;
   border: 1px solid rgba(255,255,255,.095) !important;
-  color: color-mix(in oklab, var(--text, #fff) 76%, var(--muted, #aaa) 24%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 76%, var(--lt-muted, #aaa) 24%) !important;
   box-shadow: none !important;
 }
 
@@ -6351,16 +6351,16 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbon .updateGhostButton:hover{
   transform: none !important;
   background: rgba(255,255,255,.075) !important;
-  border-color: color-mix(in oklab, var(--accent, #e962e9) 36%, rgba(255,255,255,.16)) !important;
-  color: var(--text, #fff) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #e962e9) 36%, rgba(255,255,255,.16)) !important;
+  color: var(--lt-text, #fff) !important;
 }
 
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
-  background: color-mix(in oklab, var(--accent, #e962e9) 84%, white 16%) !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e962e9) 70%, white 30%) !important;
+  background: color-mix(in oklab, var(--lt-accent, #e962e9) 84%, white 16%) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e962e9) 70%, white 30%) !important;
   color: #070409 !important;
-  box-shadow: 0 10px 26px rgba(var(--accent-rgb, 233,98,233), .15) !important;
+  box-shadow: 0 10px 26px rgba(var(--lt-accent-rgb, 233,98,233), .15) !important;
 }
 
 .app .topUpdateRibbon .updateToastClose,
@@ -6372,7 +6372,7 @@ body.localtifyBackgroundMode .ambientSurface,
   place-items: center !important;
   background: rgba(255,255,255,.045) !important;
   border: 1px solid rgba(255,255,255,.095) !important;
-  color: var(--muted, rgba(255,255,255,.62)) !important;
+  color: var(--lt-muted, rgba(255,255,255,.62)) !important;
 }
 
 .app .topUpdateRibbonProgress,
@@ -6394,8 +6394,8 @@ body.localtifyBackgroundMode .ambientSurface,
   display: block !important;
   height: 100% !important;
   border-radius: 0 !important;
-  background: color-mix(in oklab, var(--accent, #e962e9) 82%, white 18%) !important;
-  box-shadow: 0 0 16px rgba(var(--accent-rgb, 233,98,233), .36) !important;
+  background: color-mix(in oklab, var(--lt-accent, #e962e9) 82%, white 18%) !important;
+  box-shadow: 0 0 16px rgba(var(--lt-accent-rgb, 233,98,233), .36) !important;
 }
 
 @keyframes localtifyTopUpdateRibbonIn{
@@ -6481,12 +6481,12 @@ body.localtifyBackgroundMode .ambientSurface,
   outline: 0 !important;
   background:
     linear-gradient(90deg,
-      color-mix(in oklab, var(--bg, #08030d) 88%, var(--accent, #e65adf) 9%),
-      color-mix(in oklab, var(--bg-2, #100718) 78%, var(--accent, #e65adf) 14%) 52%,
-      color-mix(in oklab, var(--bg, #08030d) 90%, var(--accent-2, var(--accent, #e65adf)) 7%)
+      color-mix(in oklab, var(--lt-bg, #08030d) 88%, var(--lt-accent, #e65adf) 9%),
+      color-mix(in oklab, var(--bg-2, #100718) 78%, var(--lt-accent, #e65adf) 14%) 52%,
+      color-mix(in oklab, var(--lt-bg, #08030d) 90%, var(--accent-2, var(--lt-accent, #e65adf)) 7%)
     ) !important;
-  border-bottom: 1px solid rgba(var(--accent-rgb, 230,90,223), .26) !important;
-  color: var(--text, #f8f2ff) !important;
+  border-bottom: 1px solid rgba(var(--lt-accent-rgb, 230,90,223), .26) !important;
+  color: var(--lt-text, #f8f2ff) !important;
   box-shadow:
     0 10px 28px rgba(0,0,0,.20),
     inset 0 -1px 0 rgba(255,255,255,.035) !important;
@@ -6503,8 +6503,8 @@ body.localtifyBackgroundMode .ambientSurface,
   pointer-events: none !important;
   border-radius: 0 !important;
   background:
-    radial-gradient(circle at 14% -140%, rgba(var(--accent-rgb, 230,90,223), .20), transparent 48%),
-    linear-gradient(90deg, rgba(255,255,255,.035), transparent 34%, rgba(var(--accent-rgb, 230,90,223), .045)) !important;
+    radial-gradient(circle at 14% -140%, rgba(var(--lt-accent-rgb, 230,90,223), .20), transparent 48%),
+    linear-gradient(90deg, rgba(255,255,255,.035), transparent 34%, rgba(var(--lt-accent-rgb, 230,90,223), .045)) !important;
   opacity: .72 !important;
 }
 
@@ -6518,9 +6518,9 @@ body.localtifyBackgroundMode .ambientSurface,
   place-items: center !important;
   align-self: center !important;
   justify-self: center !important;
-  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .28) !important;
-  background: rgba(var(--accent-rgb, 230,90,223), .11) !important;
-  color: color-mix(in oklab, var(--accent, #e65adf) 65%, white 35%) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb, 230,90,223), .28) !important;
+  background: rgba(var(--lt-accent-rgb, 230,90,223), .11) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e65adf) 65%, white 35%) !important;
   box-shadow: none !important;
   font-size: 12px !important;
   font-weight: 950 !important;
@@ -6540,7 +6540,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbonText .eyebrow{
   margin: 0 !important;
   flex: 0 0 auto !important;
-  color: color-mix(in oklab, var(--accent, #e65adf) 72%, white 28%) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e65adf) 72%, white 28%) !important;
   font-size: 10px !important;
   line-height: 1 !important;
   font-weight: 950 !important;
@@ -6553,7 +6553,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbonText h3{
   margin: 0 !important;
   min-width: 0 !important;
-  color: color-mix(in oklab, var(--text, #fff) 92%, var(--accent, #e65adf) 8%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 92%, var(--lt-accent, #e65adf) 8%) !important;
   font-size: 12.5px !important;
   line-height: 1.1 !important;
   font-weight: 850 !important;
@@ -6585,7 +6585,7 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: 999px !important;
   border: 0 !important;
   background: rgba(255,255,255,.055) !important;
-  color: color-mix(in oklab, var(--text, #fff) 78%, var(--muted, #aaa) 22%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 78%, var(--lt-muted, #aaa) 22%) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.055) !important;
   font-size: 10px !important;
   font-weight: 850 !important;
@@ -6594,7 +6594,7 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .topUpdateRibbon .updateSafePill.pending,
 .topUpdateRibbon .updateSafePill.pending{
-  color: color-mix(in oklab, var(--accent, #e65adf) 64%, white 36%) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e65adf) 64%, white 36%) !important;
 }
 
 .app .topUpdateRibbonActions,
@@ -6632,16 +6632,16 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbon .updateGhostButton{
   border: 0 !important;
   background: rgba(255,255,255,.052) !important;
-  color: color-mix(in oklab, var(--text, #fff) 78%, var(--muted, #aaa) 22%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 78%, var(--lt-muted, #aaa) 22%) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.055) !important;
 }
 
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
   border: 0 !important;
-  background: color-mix(in oklab, var(--accent, #e65adf) 82%, white 18%) !important;
+  background: color-mix(in oklab, var(--lt-accent, #e65adf) 82%, white 18%) !important;
   color: #080409 !important;
-  box-shadow: 0 8px 20px rgba(var(--accent-rgb, 230,90,223), .14) !important;
+  box-shadow: 0 8px 20px rgba(var(--lt-accent-rgb, 230,90,223), .14) !important;
 }
 
 .app .topUpdateRibbon .updateGhostButton:hover,
@@ -6660,7 +6660,7 @@ body.localtifyBackgroundMode .ambientSurface,
   place-items: center !important;
   border: 0 !important;
   background: rgba(255,255,255,.044) !important;
-  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 86%, var(--text, #fff) 14%) !important;
+  color: color-mix(in oklab, var(--lt-muted, rgba(255,255,255,.62)) 86%, var(--lt-text, #fff) 14%) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.052) !important;
 }
 
@@ -6751,16 +6751,16 @@ body.localtifyBackgroundMode .ambientSurface,
   outline: 0 !important;
   background:
     linear-gradient(90deg,
-      color-mix(in oklab, var(--bg, #09030f) 88%, var(--accent, #e65adf) 8%),
-      color-mix(in oklab, var(--bg-2, #14091d) 76%, var(--accent, #e65adf) 13%) 54%,
-      color-mix(in oklab, var(--bg, #09030f) 89%, var(--accent, #e65adf) 7%)
+      color-mix(in oklab, var(--lt-bg, #09030f) 88%, var(--lt-accent, #e65adf) 8%),
+      color-mix(in oklab, var(--bg-2, #14091d) 76%, var(--lt-accent, #e65adf) 13%) 54%,
+      color-mix(in oklab, var(--lt-bg, #09030f) 89%, var(--lt-accent, #e65adf) 7%)
     ) !important;
-  border-bottom: 1px solid rgba(var(--accent-rgb, 230,90,223), .20) !important;
-  color: var(--text, #fff) !important;
+  border-bottom: 1px solid rgba(var(--lt-accent-rgb, 230,90,223), .20) !important;
+  color: var(--lt-text, #fff) !important;
   box-shadow:
     0 8px 24px rgba(0,0,0,.18),
     inset 0 1px 0 rgba(255,255,255,.025),
-    inset 0 -1px 0 rgba(var(--accent-rgb, 230,90,223), .10) !important;
+    inset 0 -1px 0 rgba(var(--lt-accent-rgb, 230,90,223), .10) !important;
   overflow: hidden !important;
   backdrop-filter: blur(16px) saturate(130%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(130%) !important;
@@ -6770,8 +6770,8 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbon::before{
   opacity: .44 !important;
   background:
-    radial-gradient(circle at 18% -120%, rgba(var(--accent-rgb, 230,90,223), .16), transparent 46%),
-    linear-gradient(90deg, rgba(255,255,255,.020), transparent 34%, rgba(var(--accent-rgb, 230,90,223), .030)) !important;
+    radial-gradient(circle at 18% -120%, rgba(var(--lt-accent-rgb, 230,90,223), .16), transparent 46%),
+    linear-gradient(90deg, rgba(255,255,255,.020), transparent 34%, rgba(var(--lt-accent-rgb, 230,90,223), .030)) !important;
 }
 
 .app .topUpdateRibbonMain,
@@ -7015,25 +7015,25 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .virtualSongViewport::-webkit-scrollbar-thumb{
   border-radius: 999px;
-  background: rgba(var(--accent-rgb), .28);
+  background: rgba(var(--lt-accent-rgb), .28);
 }
 
 .virtualSongViewport::-webkit-scrollbar-thumb:hover{
-  background: rgba(var(--accent-rgb), .42);
+  background: rgba(var(--lt-accent-rgb), .42);
 }
 
 .app[data-cover-sync]:not([data-cover-sync="off"]){
-  --player-ambient-rgb: var(--cover-rgb, var(--accent-rgb));
-  --active-cover-rgb: var(--cover-rgb, var(--accent-rgb));
+  --player-ambient-rgb: var(--cover-rgb, var(--lt-accent-rgb));
+  --active-cover-rgb: var(--cover-rgb, var(--lt-accent-rgb));
 }
 
 .app[data-cover-sync]:not([data-cover-sync="off"]) .ambientSurface::after{
-  --ambient-cover-rgb: var(--cover-rgb, var(--accent-rgb));
+  --ambient-cover-rgb: var(--cover-rgb, var(--lt-accent-rgb));
 }
 
 .app[data-cover-sync]:not([data-cover-sync="off"]) .heroArtWrap,
 .app[data-cover-sync]:not([data-cover-sync="off"]) .playerBar{
-  --player-ambient-rgb: var(--cover-rgb, var(--accent-rgb));
+  --player-ambient-rgb: var(--cover-rgb, var(--lt-accent-rgb));
 }
 
 .loadingScreen.bootScreen{
@@ -7045,11 +7045,11 @@ body.localtifyBackgroundMode .ambientSurface,
   overflow: hidden;
   position: relative;
   isolation: isolate;
-  color: var(--text, #f5efff);
+  color: var(--lt-text, #f5efff);
   background:
-    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent, #f16ab6) 20%, transparent), transparent 34%),
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--lt-accent, #f16ab6) 20%, transparent), transparent 34%),
     radial-gradient(circle at 18% 82%, color-mix(in srgb, var(--accent-2, #b4f269) 9%, transparent), transparent 32%),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg, #08050d) 96%, #000 4%), #030207) !important;
+    linear-gradient(180deg, color-mix(in srgb, var(--lt-bg, #08050d) 96%, #000 4%), #030207) !important;
 }
 
 .bootGlow{
@@ -7057,7 +7057,7 @@ body.localtifyBackgroundMode .ambientSurface,
   inset: -22%;
   z-index: -2;
   background:
-    radial-gradient(circle at 44% 40%, color-mix(in srgb, var(--accent, #f16ab6) 18%, transparent), transparent 34%),
+    radial-gradient(circle at 44% 40%, color-mix(in srgb, var(--lt-accent, #f16ab6) 18%, transparent), transparent 34%),
     radial-gradient(circle at 62% 58%, rgba(255, 255, 255, 0.055), transparent 28%);
   filter: blur(32px);
   opacity: 0.8;
@@ -7078,10 +7078,10 @@ body.localtifyBackgroundMode .ambientSurface,
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.072), rgba(255, 255, 255, 0.038)),
     color-mix(in srgb, var(--surface, #17101f) 82%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent, #f16ab6) 24%, rgba(255, 255, 255, 0.075));
+  border: 1px solid color-mix(in srgb, var(--lt-accent, #f16ab6) 24%, rgba(255, 255, 255, 0.075));
   box-shadow:
     0 34px 90px rgba(0, 0, 0, 0.54),
-    0 0 54px color-mix(in srgb, var(--accent, #f16ab6) 14%, transparent),
+    0 0 54px color-mix(in srgb, var(--lt-accent, #f16ab6) 14%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.095);
   backdrop-filter: blur(28px) saturate(1.2);
   animation: bootCardIn 520ms cubic-bezier(0.18, 1.05, 0.2, 1) both;
@@ -7105,7 +7105,7 @@ body.localtifyBackgroundMode .ambientSurface,
   position: absolute;
   inset: -18px;
   border-radius: 38px;
-  background: color-mix(in srgb, var(--accent, #f16ab6) 24%, transparent);
+  background: color-mix(in srgb, var(--lt-accent, #f16ab6) 24%, transparent);
   filter: blur(26px);
   opacity: 0.55;
   transform: translate3d(0, 0, 0);
@@ -7151,7 +7151,7 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.045);
   border: 1px solid rgba(255, 255, 255, 0.055);
-  color: color-mix(in srgb, var(--muted, #b6a8c7) 78%, transparent);
+  color: color-mix(in srgb, var(--lt-muted, #b6a8c7) 78%, transparent);
   transform: translate3d(0, 0, 0);
   transition:
     background-color 180ms ease,
@@ -7162,10 +7162,10 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 .bootAssetItem.active{
-  color: var(--text, #f5efff);
-  background: color-mix(in srgb, var(--accent, #f16ab6) 13%, rgba(255, 255, 255, 0.055));
-  border-color: color-mix(in srgb, var(--accent, #f16ab6) 24%, rgba(255, 255, 255, 0.07));
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent, #f16ab6) 10%, transparent);
+  color: var(--lt-text, #f5efff);
+  background: color-mix(in srgb, var(--lt-accent, #f16ab6) 13%, rgba(255, 255, 255, 0.055));
+  border-color: color-mix(in srgb, var(--lt-accent, #f16ab6) 24%, rgba(255, 255, 255, 0.07));
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--lt-accent, #f16ab6) 10%, transparent);
   transform: translate3d(0, -1px, 0);
 }
 
@@ -7183,8 +7183,8 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 .bootAssetItem.active .bootAssetDot{
-  background: var(--accent, #f16ab6);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--accent, #f16ab6) 55%, transparent);
+  background: var(--lt-accent, #f16ab6);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--lt-accent, #f16ab6) 55%, transparent);
   animation: bootAssetPulse 980ms ease-in-out infinite alternate;
 }
 
@@ -7215,7 +7215,7 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 .bootAssetText small{
-  color: color-mix(in srgb, var(--muted, #b6a8c7) 78%, transparent);
+  color: color-mix(in srgb, var(--lt-muted, #b6a8c7) 78%, transparent);
   font-size: 10px;
   line-height: 1.2;
   font-weight: 780;
@@ -7228,7 +7228,7 @@ body.localtifyBackgroundMode .ambientSurface,
   width: fit-content;
   padding: 7px 10px;
   border-radius: 999px;
-  color: color-mix(in srgb, var(--text, #f5efff) 84%, transparent);
+  color: color-mix(in srgb, var(--lt-text, #f5efff) 84%, transparent);
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid rgba(255, 255, 255, 0.075);
   font-size: 12px;
@@ -7254,7 +7254,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .bootCopy p{
   margin: 0;
   max-width: 36ch;
-  color: color-mix(in srgb, var(--muted, #b6a8c7) 82%, transparent);
+  color: color-mix(in srgb, var(--lt-muted, #b6a8c7) 82%, transparent);
   font-size: 14px;
   line-height: 1.45;
   font-weight: 750;
@@ -7275,8 +7275,8 @@ body.localtifyBackgroundMode .ambientSurface,
   width: 42%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, transparent, var(--accent, #f16ab6), transparent);
-  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent, #f16ab6) 52%, transparent));
+  background: linear-gradient(90deg, transparent, var(--lt-accent, #f16ab6), transparent);
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--lt-accent, #f16ab6) 52%, transparent));
   animation: bootProgressSweep 1.05s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
@@ -7305,14 +7305,14 @@ body.localtifyBackgroundMode .ambientSurface,
 .bootButton:hover{
   transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.105);
-  border-color: color-mix(in srgb, var(--accent, #f16ab6) 30%, rgba(255, 255, 255, 0.12));
+  border-color: color-mix(in srgb, var(--lt-accent, #f16ab6) 30%, rgba(255, 255, 255, 0.12));
 }
 
 .bootButtonPrimary{
   color: #100914;
-  background: var(--accent, #f16ab6);
-  border-color: color-mix(in srgb, var(--accent, #f16ab6) 74%, white 16%);
-  box-shadow: 0 14px 34px color-mix(in srgb, var(--accent, #f16ab6) 22%, transparent);
+  background: var(--lt-accent, #f16ab6);
+  border-color: color-mix(in srgb, var(--lt-accent, #f16ab6) 74%, white 16%);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--lt-accent, #f16ab6) 22%, transparent);
 }
 
 @keyframes bootCardIn{
@@ -7381,7 +7381,7 @@ body.localtifyBackgroundMode .ambientSurface,
   place-items: center;
   overflow: hidden;
   background:
-    radial-gradient(circle at 52% 52%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 34%),
+    radial-gradient(circle at 52% 52%, color-mix(in srgb, var(--lt-accent) 14%, transparent), transparent 34%),
     rgba(0, 0, 0, 0.92);
   cursor: none;
 }
@@ -7402,7 +7402,7 @@ body.localtifyBackgroundMode .ambientSurface,
   inset: 0;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.2) 45%, rgba(0, 0, 0, 0.82)),
-    radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 38%);
+    radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--lt-accent) 18%, transparent), transparent 38%);
   pointer-events: none;
 }
 
@@ -7418,10 +7418,10 @@ body.localtifyBackgroundMode .ambientSurface,
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lt-accent) 20%, transparent);
   box-shadow:
     0 42px 130px rgba(0, 0, 0, 0.72),
-    0 0 90px color-mix(in srgb, var(--accent) 14%, transparent);
+    0 0 90px color-mix(in srgb, var(--lt-accent) 14%, transparent);
   isolation: isolate;
   backdrop-filter: blur(18px) saturate(1.08);
 }
@@ -7456,8 +7456,8 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.92);
   background: rgba(6, 2, 12, 0.46);
-  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42), 0 0 34px color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lt-text) 12%, transparent);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42), 0 0 34px color-mix(in srgb, var(--lt-accent) 12%, transparent);
   backdrop-filter: blur(18px) saturate(1.12);
   font-size: clamp(1.2rem, 2.4vw, 2rem);
   font-weight: 900;
@@ -7499,7 +7499,7 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .gifVisualModePicker{ margin: 16px 0 4px; display: grid; gap: 8px; }
 .gifVisualModePicker label{
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 0.76rem;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -7509,9 +7509,9 @@ body.localtifyBackgroundMode .ambientSurface,
   width: min(320px, 100%);
   height: 44px;
   border-radius: 16px;
-  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lt-accent) 24%, transparent);
   background: rgba(255, 255, 255, 0.05);
-  color: var(--text);
+  color: var(--lt-text);
   padding: 0 14px;
   font: inherit;
   font-weight: 800;
@@ -7559,7 +7559,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .topUpdateRibbon .updatePrimaryButton:hover,
 .topUpdateRibbon .updatePrimaryButton:hover{
   transform: translate3d(0,-1px,0) !important;
-  box-shadow: 0 10px 24px rgba(var(--accent-rgb, 230,90,223), .22) !important;
+  box-shadow: 0 10px 24px rgba(var(--lt-accent-rgb, 230,90,223), .22) !important;
 }
 
 .app .topUpdateRibbon .updateGhostButton,
@@ -7596,7 +7596,7 @@ body.localtifyBackgroundMode .ambientSurface,
   object-position: center !important;
   filter:
     drop-shadow(0 22px 40px rgba(0,0,0,.55))
-    drop-shadow(0 0 18px rgba(var(--accent-rgb, 230,90,223), .20)) !important;
+    drop-shadow(0 0 18px rgba(var(--lt-accent-rgb, 230,90,223), .20)) !important;
   transform-origin: 80% 22% !important;
 
 }
@@ -7630,8 +7630,8 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 @keyframes updateIconPulseV159{
-  0%, 100%{ box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 0 rgba(var(--accent-rgb,230,90,223),0); }
-  50%{ box-shadow: inset 0 0 0 1px rgba(255,255,255,.07), 0 0 16px rgba(var(--accent-rgb,230,90,223),.18); }
+  0%, 100%{ box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 0 rgba(var(--lt-accent-rgb,230,90,223),0); }
+  50%{ box-shadow: inset 0 0 0 1px rgba(255,255,255,.07), 0 0 16px rgba(var(--lt-accent-rgb,230,90,223),.18); }
 }
 
 @media (max-width: 980px){
@@ -7760,7 +7760,7 @@ body.localtifyBackgroundMode .ambientSurface,
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(var(--accent-rgb), .72),
+    rgba(var(--lt-accent-rgb), .72),
     rgba(255, 255, 255, .72),
     transparent
   );
@@ -7773,7 +7773,7 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .searchEasterWrap:focus-within{
   transform: translate3d(0, -1px, 0) scaleX(1.018);
-  filter: drop-shadow(0 0 18px rgba(var(--accent-rgb), .10));
+  filter: drop-shadow(0 0 18px rgba(var(--lt-accent-rgb), .10));
 }
 
 .app .searchEasterWrap:focus-within::after{
@@ -7782,12 +7782,12 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 .app .search:focus{
-  background: rgba(var(--accent-rgb), .075) !important;
-  border-color: rgba(var(--accent-rgb), .46) !important;
+  background: rgba(var(--lt-accent-rgb), .075) !important;
+  border-color: rgba(var(--lt-accent-rgb), .46) !important;
   box-shadow:
-    0 0 0 3px rgba(var(--accent-rgb), .105),
+    0 0 0 3px rgba(var(--lt-accent-rgb), .105),
     0 14px 40px rgba(0, 0, 0, .18),
-    0 0 36px rgba(var(--accent-rgb), .10) !important;
+    0 0 36px rgba(var(--lt-accent-rgb), .10) !important;
 }
 
 .app .search::placeholder{
@@ -7813,7 +7813,7 @@ body.localtifyBackgroundMode .ambientSurface,
   --hero-actions-pop-v164: cubic-bezier(.2, 1.26, .24, 1);
   --hero-actions-bg-v164: rgba(8, 6, 13, .48);
   --hero-actions-border-v164: rgba(255, 255, 255, .115);
-  --hero-actions-shadow-v164: 0 16px 42px rgba(0, 0, 0, .30), 0 0 30px rgba(var(--accent-rgb), .075);
+  --hero-actions-shadow-v164: 0 16px 42px rgba(0, 0, 0, .30), 0 0 30px rgba(var(--lt-accent-rgb), .075);
 }
 
 .app .heroPremium{
@@ -7972,7 +7972,7 @@ body.localtifyBackgroundMode .ambientSurface,
   color: rgba(255, 255, 255, .92) !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03)),
-    radial-gradient(circle at 16% 0%, rgba(var(--accent-rgb), .18), transparent 58%),
+    radial-gradient(circle at 16% 0%, rgba(var(--lt-accent-rgb), .18), transparent 58%),
     var(--hero-actions-bg-v164) !important;
   box-shadow:
     var(--hero-actions-shadow-v164),
@@ -7993,7 +7993,7 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: inherit !important;
   opacity: .48 !important;
   background:
-    radial-gradient(circle at 22% 52%, rgba(var(--accent-rgb), .22), transparent 56%),
+    radial-gradient(circle at 22% 52%, rgba(var(--lt-accent-rgb), .22), transparent 56%),
     radial-gradient(circle at 84% 28%, rgba(255, 255, 255, .08), transparent 46%) !important;
   filter: blur(16px) !important;
 }
@@ -8048,7 +8048,7 @@ body.localtifyBackgroundMode .ambientSurface,
   z-index: -1 !important;
   border-radius: inherit !important;
   opacity: 0 !important;
-  background: radial-gradient(circle at 50% 20%, rgba(var(--accent-rgb), .28), transparent 68%) !important;
+  background: radial-gradient(circle at 50% 20%, rgba(var(--lt-accent-rgb), .28), transparent 68%) !important;
   transition: opacity 160ms ease !important;
 }
 
@@ -8070,13 +8070,13 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .heroPremium .heroTinyButton:hover{
   color: #fff !important;
-  border-color: rgba(var(--accent-rgb), .50) !important;
+  border-color: rgba(var(--lt-accent-rgb), .50) !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .055)),
-    rgba(var(--accent-rgb), .14) !important;
+    rgba(var(--lt-accent-rgb), .14) !important;
   box-shadow:
     0 12px 30px rgba(0, 0, 0, .26),
-    0 0 28px rgba(var(--accent-rgb), .16),
+    0 0 28px rgba(var(--lt-accent-rgb), .16),
     inset 0 1px 0 rgba(255, 255, 255, .14) !important;
   transform: translate3d(0, -2px, 0) scale(1.035) !important;
 }
@@ -8098,12 +8098,12 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .heroPremium .heroTinyButton[aria-pressed="true"]{
   color: var(--accent-contrast, #09070c) !important;
-  border-color: rgba(var(--accent-rgb), .38) !important;
+  border-color: rgba(var(--lt-accent-rgb), .38) !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .23), rgba(255, 255, 255, .07)),
-    var(--accent) !important;
+    var(--lt-accent) !important;
   box-shadow:
-    0 12px 32px rgba(var(--accent-rgb), .27),
+    0 12px 32px rgba(var(--lt-accent-rgb), .27),
     inset 0 1px 0 rgba(255, 255, 255, .24),
     inset 0 -1px 0 rgba(0, 0, 0, .14) !important;
 }
@@ -8377,11 +8377,11 @@ body.localtifyBackgroundMode .ambientSurface,
   color: rgba(255, 255, 255, .92) !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .105), rgba(255, 255, 255, .035)),
-    radial-gradient(circle at 14% 0%, rgba(var(--accent-rgb), .22), transparent 58%),
+    radial-gradient(circle at 14% 0%, rgba(var(--lt-accent-rgb), .22), transparent 58%),
     rgba(9, 6, 14, .54) !important;
   box-shadow:
     0 16px 42px rgba(0, 0, 0, .34),
-    0 0 30px rgba(var(--accent-rgb), .095),
+    0 0 30px rgba(var(--lt-accent-rgb), .095),
     inset 0 1px 0 rgba(255, 255, 255, .11),
     inset 0 -1px 0 rgba(0, 0, 0, .20) !important;
   backdrop-filter: blur(18px) saturate(1.32) brightness(1.04) !important;
@@ -8403,7 +8403,7 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: inherit !important;
   opacity: .50 !important;
   background:
-    radial-gradient(circle at 24% 52%, rgba(var(--accent-rgb), .25), transparent 58%),
+    radial-gradient(circle at 24% 52%, rgba(var(--lt-accent-rgb), .25), transparent 58%),
     radial-gradient(circle at 88% 30%, rgba(255, 255, 255, .08), transparent 50%) !important;
   filter: blur(15px) !important;
 }
@@ -8468,7 +8468,7 @@ body.localtifyBackgroundMode .ambientSurface,
   z-index: -1 !important;
   border-radius: inherit !important;
   opacity: 0 !important;
-  background: radial-gradient(circle at 50% 20%, rgba(var(--accent-rgb), .28), transparent 68%) !important;
+  background: radial-gradient(circle at 50% 20%, rgba(var(--lt-accent-rgb), .28), transparent 68%) !important;
   transition: opacity 150ms ease !important;
 }
 
@@ -8492,13 +8492,13 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton:hover,
 .app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton:hover{
   color: #fff !important;
-  border-color: rgba(var(--accent-rgb), .50) !important;
+  border-color: rgba(var(--lt-accent-rgb), .50) !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .055)),
-    rgba(var(--accent-rgb), .14) !important;
+    rgba(var(--lt-accent-rgb), .14) !important;
   box-shadow:
     0 12px 30px rgba(0, 0, 0, .26),
-    0 0 28px rgba(var(--accent-rgb), .16),
+    0 0 28px rgba(var(--lt-accent-rgb), .16),
     inset 0 1px 0 rgba(255, 255, 255, .14) !important;
   transform: translate3d(0, -2px, 0) scale(1.035) !important;
 }
@@ -8524,12 +8524,12 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton[aria-pressed="true"],
 .app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton[aria-pressed="true"]{
   color: var(--accent-contrast, #09070c) !important;
-  border-color: rgba(var(--accent-rgb), .38) !important;
+  border-color: rgba(var(--lt-accent-rgb), .38) !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .23), rgba(255, 255, 255, .07)),
-    var(--accent) !important;
+    var(--lt-accent) !important;
   box-shadow:
-    0 12px 32px rgba(var(--accent-rgb), .27),
+    0 12px 32px rgba(var(--lt-accent-rgb), .27),
     inset 0 1px 0 rgba(255, 255, 255, .24),
     inset 0 -1px 0 rgba(0, 0, 0, .14) !important;
 }
@@ -8779,9 +8779,9 @@ body.localtifyBackgroundMode .ambientSurface,
   border-radius: 6px !important;
   display: grid !important;
   place-items: center !important;
-  color: color-mix(in oklab, var(--accent, #e65adf) 84%, white 8%) !important;
-  background: rgba(var(--accent-rgb, 230,90,223), .12) !important;
-  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .22) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e65adf) 84%, white 8%) !important;
+  background: rgba(var(--lt-accent-rgb, 230,90,223), .12) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb, 230,90,223), .22) !important;
   box-shadow: none !important;
   font-size: 10px !important;
   line-height: 1 !important;
@@ -8805,14 +8805,14 @@ body.localtifyBackgroundMode .ambientSurface,
 .titleBarUpdateSlot .topUpdateRibbonText .eyebrow{
   flex: 0 0 auto !important;
   margin: 0 !important;
-  color: color-mix(in oklab, var(--accent, #e65adf) 82%, white 10%) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e65adf) 82%, white 10%) !important;
   font-size: 9px !important;
   line-height: 1 !important;
   font-weight: 900 !important;
   letter-spacing: .12em !important;
   text-transform: uppercase !important;
   white-space: nowrap !important;
-  text-shadow: 0 0 12px rgba(var(--accent-rgb, 230,90,223), .18) !important;
+  text-shadow: 0 0 12px rgba(var(--lt-accent-rgb, 230,90,223), .18) !important;
 }
 
 .app .titleBarUpdateSlot .topUpdateRibbonText h3,
@@ -8912,9 +8912,9 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
 .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton{
   color: #08020a !important;
-  background: var(--accent, #e65adf) !important;
+  background: var(--lt-accent, #e65adf) !important;
   border-color: transparent !important;
-  box-shadow: 0 0 14px rgba(var(--accent-rgb, 230,90,223), .18) !important;
+  box-shadow: 0 0 14px rgba(var(--lt-accent-rgb, 230,90,223), .18) !important;
 }
 
 .app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
@@ -8954,7 +8954,7 @@ body.localtifyBackgroundMode .ambientSurface,
   margin: 0 !important;
   pointer-events: none !important;
   border-radius: 999px !important;
-  background: rgba(var(--accent-rgb, 230,90,223), .42) !important;
+  background: rgba(var(--lt-accent-rgb, 230,90,223), .42) !important;
 }
 
 .app .playerBar,
@@ -9068,16 +9068,16 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   align-items: center !important;
   column-gap: 8px !important;
   border-radius: 12px !important;
-  border: 1px solid rgba(var(--accent-rgb, 230, 90, 223), 0.22) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb, 230, 90, 223), 0.22) !important;
   outline: 0 !important;
-  color: var(--text, #fff) !important;
+  color: var(--lt-text, #fff) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.014)),
     rgba(18, 10, 27, 0.76) !important;
   box-shadow:
     0 8px 22px rgba(0,0,0,0.20),
     inset 0 1px 0 rgba(255,255,255,0.055),
-    inset 0 -1px 0 rgba(var(--accent-rgb, 230,90,223),0.10) !important;
+    inset 0 -1px 0 rgba(var(--lt-accent-rgb, 230,90,223),0.10) !important;
   overflow: hidden !important;
   backdrop-filter: blur(10px) saturate(118%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(118%) !important;
@@ -9092,8 +9092,8 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   pointer-events: none !important;
   border-radius: inherit !important;
   background:
-    radial-gradient(circle at 8% 0%, rgba(var(--accent-rgb, 230,90,223), 0.16), transparent 34%),
-    linear-gradient(90deg, rgba(255,255,255,0.035), transparent 42%, rgba(var(--accent-rgb, 230,90,223),0.045)) !important;
+    radial-gradient(circle at 8% 0%, rgba(var(--lt-accent-rgb, 230,90,223), 0.16), transparent 34%),
+    linear-gradient(90deg, rgba(255,255,255,0.035), transparent 42%, rgba(var(--lt-accent-rgb, 230,90,223),0.045)) !important;
   opacity: 0.62 !important;
   z-index: 0 !important;
 }
@@ -9125,9 +9125,9 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   place-items: center !important;
   align-self: center !important;
   justify-self: center !important;
-  border: 1px solid rgba(var(--accent-rgb, 230,90,223),0.26) !important;
-  background: rgba(var(--accent-rgb, 230,90,223),0.12) !important;
-  color: color-mix(in oklab, var(--accent, #e65adf) 66%, white 34%) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb, 230,90,223),0.26) !important;
+  background: rgba(var(--lt-accent-rgb, 230,90,223),0.12) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e65adf) 66%, white 34%) !important;
   box-shadow: none !important;
   font-size: 10.5px !important;
   font-weight: 950 !important;
@@ -9150,7 +9150,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbonText .eyebrow{
   margin: 0 !important;
   flex: 0 0 auto !important;
-  color: color-mix(in oklab, var(--accent, #e65adf) 70%, white 30%) !important;
+  color: color-mix(in oklab, var(--lt-accent, #e65adf) 70%, white 30%) !important;
   font-size: 9px !important;
   line-height: 1 !important;
   font-weight: 950 !important;
@@ -9164,7 +9164,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   margin: 0 !important;
   min-width: 0 !important;
   max-width: 100% !important;
-  color: color-mix(in oklab, var(--text, #fff) 90%, var(--accent, #e65adf) 10%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 90%, var(--lt-accent, #e65adf) 10%) !important;
   font-size: 11.5px !important;
   line-height: 1 !important;
   font-weight: 820 !important;
@@ -9221,7 +9221,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   line-height: 1 !important;
   margin: 0 !important;
   background: rgba(255,255,255,0.052) !important;
-  color: color-mix(in oklab, var(--text, #fff) 78%, var(--muted, #aaa) 22%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 78%, var(--lt-muted, #aaa) 22%) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.052) !important;
   font-size: 9.6px !important;
   font-weight: 820 !important;
@@ -9256,16 +9256,16 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbon .updateGhostButton{
   border: 0 !important;
   background: rgba(255,255,255,0.050) !important;
-  color: color-mix(in oklab, var(--text, #fff) 76%, var(--muted, #aaa) 24%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 76%, var(--lt-muted, #aaa) 24%) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.052) !important;
 }
 
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
   border: 0 !important;
-  background: color-mix(in oklab, var(--accent, #e65adf) 82%, white 18%) !important;
+  background: color-mix(in oklab, var(--lt-accent, #e65adf) 82%, white 18%) !important;
   color: #070409 !important;
-  box-shadow: 0 7px 16px rgba(var(--accent-rgb, 230,90,223),0.13) !important;
+  box-shadow: 0 7px 16px rgba(var(--lt-accent-rgb, 230,90,223),0.13) !important;
 }
 
 .app .topUpdateRibbon .updateGhostButton:hover,
@@ -9283,7 +9283,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   padding: 0 !important;
   border: 0 !important;
   background: rgba(255,255,255,0.045) !important;
-  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 86%, var(--text, #fff) 14%) !important;
+  color: color-mix(in oklab, var(--lt-muted, rgba(255,255,255,.62)) 86%, var(--lt-text, #fff) 14%) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.050) !important;
 }
 
@@ -9305,8 +9305,8 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   display: block !important;
   height: 100% !important;
   border-radius: inherit !important;
-  background: color-mix(in oklab, var(--accent, #e65adf) 82%, white 18%) !important;
-  box-shadow: 0 0 12px rgba(var(--accent-rgb, 230,90,223),0.30) !important;
+  background: color-mix(in oklab, var(--lt-accent, #e65adf) 82%, white 18%) !important;
+  box-shadow: 0 0 12px rgba(var(--lt-accent-rgb, 230,90,223),0.30) !important;
 }
 
 @media (max-width: 1240px){
@@ -9381,7 +9381,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   background:
     linear-gradient(180deg, rgba(255,255,255,0.050), rgba(255,255,255,0.012)),
     rgba(16, 9, 25, 0.72) !important;
-  border-color: rgba(var(--accent-rgb, 230,90,223), 0.20) !important;
+  border-color: rgba(var(--lt-accent-rgb, 230,90,223), 0.20) !important;
   box-shadow:
     0 8px 20px rgba(0,0,0,0.18),
     inset 0 1px 0 rgba(255,255,255,0.050) !important;
@@ -9395,7 +9395,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbon::before{
   opacity: .42 !important;
   background:
-    radial-gradient(circle at 7% 0%, rgba(var(--accent-rgb, 230,90,223), 0.14), transparent 34%),
+    radial-gradient(circle at 7% 0%, rgba(var(--lt-accent-rgb, 230,90,223), 0.14), transparent 34%),
     linear-gradient(90deg, rgba(255,255,255,0.030), transparent 44%) !important;
 }
 
@@ -9422,7 +9422,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   border-radius: 7px !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.04),
-    0 0 12px rgba(var(--accent-rgb, 230,90,223),0.10) !important;
+    0 0 12px rgba(var(--lt-accent-rgb, 230,90,223),0.10) !important;
   animation: localtifyUpdateIconPulseV195 3.8s ease-in-out infinite !important;
 }
 
@@ -9503,10 +9503,10 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbon .updatePrimaryButton{
   background:
     linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0.04)),
-    color-mix(in oklab, var(--accent, #e65adf) 84%, white 16%) !important;
+    color-mix(in oklab, var(--lt-accent, #e65adf) 84%, white 16%) !important;
   color: #08030a !important;
   box-shadow:
-    0 7px 15px rgba(var(--accent-rgb, 230,90,223),0.16),
+    0 7px 15px rgba(var(--lt-accent-rgb, 230,90,223),0.16),
     inset 0 1px 0 rgba(255,255,255,0.25) !important;
 }
 
@@ -9537,7 +9537,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   transform: translateY(-1px) scale(1.022) !important;
   filter: brightness(1.045) saturate(1.04) !important;
   box-shadow:
-    0 8px 18px rgba(var(--accent-rgb, 230,90,223),0.22),
+    0 8px 18px rgba(var(--lt-accent-rgb, 230,90,223),0.22),
     inset 0 1px 0 rgba(255,255,255,0.30) !important;
 }
 
@@ -9675,7 +9675,7 @@ the last imported CSS layer. */
   z-index: 0 !important;
   opacity: 0.34 !important;
   background:
-    radial-gradient(circle at 18% 18%, rgba(var(--accent-rgb),0.055), transparent 35%),
+    radial-gradient(circle at 18% 18%, rgba(var(--lt-accent-rgb),0.055), transparent 35%),
     #050511 !important;
   contain: strict !important;
 }
@@ -9691,7 +9691,7 @@ the last imported CSS layer. */
 .app .localtifyStarsLayerA{
   background-image:
     radial-gradient(circle, rgba(255,255,255,.42) 0 .9px, transparent 1.7px),
-    radial-gradient(circle, rgba(var(--accent-rgb),.30) 0 .8px, transparent 1.6px) !important;
+    radial-gradient(circle, rgba(var(--lt-accent-rgb),.30) 0 .8px, transparent 1.6px) !important;
   background-size: 104px 104px, 156px 156px !important;
   animation: localtifyV214StarDriftA 150s linear infinite !important;
 }
@@ -10060,8 +10060,8 @@ body.localitfyThemePainting .app :is(
 }
 
 @keyframes localtifySidebarIconStrokeV422{
-  0%,100%{ filter: drop-shadow(0 0 0 rgba(var(--accent-rgb), 0)); }
-  45%{ filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), .30)); }
+  0%,100%{ filter: drop-shadow(0 0 0 rgba(var(--lt-accent-rgb), 0)); }
+  45%{ filter: drop-shadow(0 0 10px rgba(var(--lt-accent-rgb), .30)); }
 }
 
 /* V443: restored SVG heart like animation.
@@ -10167,7 +10167,7 @@ body.localitfyThemePainting .app :is(
 
 .iconAction.likeActionV443:not(.liked):not(.likeActionActiveV443):hover .likeHeartShellV443{
   transform: translateY(-1px) scale(1.06);
-  filter: drop-shadow(0 0 8px rgba(var(--accent-rgb), .22));
+  filter: drop-shadow(0 0 8px rgba(var(--lt-accent-rgb), .22));
 }
 
 .iconAction.likeActionV443.liked .likeHeartShellV443,
@@ -10348,7 +10348,7 @@ body,
   width: 100%;
   height: 100%;
   margin: 0;
-  background: var(--bg, #000);
+  background: var(--lt-bg, #000);
 }
 
 .app{
@@ -10357,18 +10357,18 @@ body,
   --sidebar-width-used: var(--sidebar-width-release);
   --sidebar-bg-release:
     linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38)),
-    var(--bg, #000);
+    var(--lt-bg, #000);
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  color: var(--text);
-  background: var(--bg, #000);
+  color: var(--lt-text);
+  background: var(--lt-bg, #000);
 }
 
 .titleBar{
-  background: var(--bg, #000);
+  background: var(--lt-bg, #000);
   background-image: none;
-  border-bottom: 1px solid rgba(var(--accent-rgb), .28);
+  border-bottom: 1px solid rgba(var(--lt-accent-rgb), .28);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -10382,7 +10382,7 @@ body,
   gap: 0 !important;
   row-gap: 0 !important;
   min-height: 0 !important;
-  background: var(--bg, #000);
+  background: var(--lt-bg, #000);
 }
 
 /* Fixed sidebar: not transparent, not glass, and content cannot slide underneath it. */
@@ -10404,11 +10404,11 @@ body,
   flex-direction: column;
   gap: 12px;
   overflow: hidden;
-  color: var(--text);
+  color: var(--lt-text);
   background: var(--sidebar-bg-release);
-  background-color: var(--bg, #000);
+  background-color: var(--lt-bg, #000);
   background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
-  border-right: 1px solid rgba(var(--accent-rgb), .25);
+  border-right: 1px solid rgba(var(--lt-accent-rgb), .25);
   box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
   opacity: 1;
   transform: none;
@@ -10421,7 +10421,7 @@ body,
 .app .sidebar:hover,
 .app[data-sidebar-behavior="hover"] .sidebar:hover{
   background: var(--sidebar-bg-release);
-  background-color: var(--bg, #000);
+  background-color: var(--lt-bg, #000);
   background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
   box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
   transform: none;
@@ -10449,8 +10449,8 @@ body,
   padding: 18px clamp(18px, 2.1vw, 30px) calc(var(--player-size-used) + 48px);
   overflow-x: hidden;
   overflow-y: auto;
-  color: var(--text);
-  background: var(--bg, #000);
+  color: var(--lt-text);
+  background: var(--lt-bg, #000);
   transform: none;
   transition: none;
   overscroll-behavior: contain;
@@ -10502,7 +10502,7 @@ body,
   grid-template-columns: 28px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
-  color: var(--text-2);
+  color: var(--lt-muted);
   background: transparent;
   text-align: left;
   font-weight: 820;
@@ -10514,7 +10514,7 @@ body,
 }
 
 .navItem:hover{
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,.045);
   border-color: rgba(255,255,255,.075);
   transform: none;
@@ -10522,12 +10522,12 @@ body,
 }
 
 .navItem.active{
-  color: var(--text);
+  color: var(--lt-text);
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), .16), rgba(var(--accent-rgb), .08)),
-    rgba(var(--accent-rgb), .045);
-  border-color: rgba(var(--accent-rgb), .36);
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .10);
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .16), rgba(var(--lt-accent-rgb), .08)),
+    rgba(var(--lt-accent-rgb), .045);
+  border-color: rgba(var(--lt-accent-rgb), .36);
+  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .10);
 }
 
 .navText{
@@ -10548,16 +10548,16 @@ body,
   width: 100%;
   min-height: 44px;
   margin-top: auto;
-  border: 1px solid rgba(var(--accent-rgb), .32);
+  border: 1px solid rgba(var(--lt-accent-rgb), .32);
   border-radius: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
   color: #08070c;
-  background: var(--accent);
+  background: var(--lt-accent);
   font-weight: 920;
-  box-shadow: 0 12px 28px rgba(var(--accent-rgb), .14);
+  box-shadow: 0 12px 28px rgba(var(--lt-accent-rgb), .14);
   transform: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -10783,7 +10783,7 @@ body.isResizingPlayer .app *{
 }
 
 .app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *)){
-  background: var(--accent) !important;
+  background: var(--lt-accent) !important;
 }
 
 .mainAction.importMainAction.iconTextButton{
@@ -10867,7 +10867,7 @@ body.isResizingPlayer .app *{
   overflow: auto !important;
   isolation: isolate !important;
   background:
-    radial-gradient(circle at 50% 44%, rgba(var(--accent-rgb), 0.13), transparent 42%),
+    radial-gradient(circle at 50% 44%, rgba(var(--lt-accent-rgb), 0.13), transparent 42%),
     rgba(0, 0, 0, 0.64) !important;
   backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
   -webkit-backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
@@ -10927,7 +10927,7 @@ body.isResizingPlayer .app *{
   z-index: 2147482400 !important;
   pointer-events: none !important;
   background:
-    radial-gradient(circle at 50% 45%, rgba(var(--accent-rgb), 0.14), transparent 42%),
+    radial-gradient(circle at 50% 45%, rgba(var(--lt-accent-rgb), 0.14), transparent 42%),
     rgba(0, 0, 0, 0.58) !important;
   backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
   -webkit-backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
@@ -11079,7 +11079,7 @@ body.isResizingPlayer .app *{
     rgba(0,0,0,.86) !important;
   box-shadow:
     0 12px 34px rgba(0,0,0,.42),
-    0 0 28px rgba(var(--accent-rgb), .10),
+    0 0 28px rgba(var(--lt-accent-rgb), .10),
     inset 0 1px 0 rgba(255,255,255,.065) !important;
   backdrop-filter: blur(18px) saturate(130%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
@@ -11112,8 +11112,8 @@ body.isResizingPlayer .app *{
   display: grid !important;
   place-items: center !important;
   color: #06100b !important;
-  background: var(--accent) !important;
-  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .09) !important;
+  background: var(--lt-accent) !important;
+  box-shadow: 0 0 0 4px rgba(var(--lt-accent-rgb), .09) !important;
   animation: none !important;
 }
 
@@ -11191,8 +11191,8 @@ body.isResizingPlayer .app *{
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
   color: #06100b !important;
-  background: var(--accent) !important;
-  box-shadow: 0 0 18px rgba(var(--accent-rgb), .14) !important;
+  background: var(--lt-accent) !important;
+  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb), .14) !important;
 }
 
 .app .topUpdateRibbon .updateToastClose,

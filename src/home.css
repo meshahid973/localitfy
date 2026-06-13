@@ -71,7 +71,7 @@
 }
 
 .panel{
-  border: 1px solid var(--line);
+  border: 1px solid var(--lt-border);
   border-radius: var(--radius);
   background: rgba(7, 7, 7, 0.72);
   box-shadow: var(--shadow-soft);
@@ -695,12 +695,12 @@ button,
 .homeLibraryExpanded{
   min-height: calc(100vh - 386px);
   max-height: calc(100vh - 184px);
-  border-color: rgba(var(--accent-rgb), .24) !important;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), .055), rgba(255,255,255,.018)),
+  border-color: rgba(var(--lt-accent-rgb), .24) !important;
+  background: linear-gradient(180deg, rgba(var(--lt-accent-rgb), .055), rgba(255,255,255,.018)),
     rgba(0,0,0,.55) !important;
   box-shadow: 0 18px 70px rgba(0,0,0,.46),
     inset 0 1px 0 rgba(255,255,255,.07),
-    inset 4px 0 0 rgba(var(--accent-rgb), .74) !important;
+    inset 4px 0 0 rgba(var(--lt-accent-rgb), .74) !important;
   animation: localitfyLibraryDrop 320ms cubic-bezier(.2,.8,.2,1) both;
 }
 
@@ -712,7 +712,7 @@ button,
 }
 
 .homeLibraryActions span{
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 13px;
 }
 
@@ -779,9 +779,9 @@ button,
 
 .simpleLibraryExpanded{
   min-height: calc(100vh - 430px);
-  border-color: rgba(var(--accent-rgb), .22) !important;
+  border-color: rgba(var(--lt-accent-rgb), .22) !important;
   box-shadow: 0 16px 54px rgba(0,0,0,.42),
-    inset 4px 0 0 rgba(var(--accent-rgb), .68) !important;
+    inset 4px 0 0 rgba(var(--lt-accent-rgb), .68) !important;
   animation: localitfyLibraryDrop 320ms cubic-bezier(.2,.8,.2,1) both;
 }
 
@@ -1871,7 +1871,7 @@ button:active{
   transform: translate3d(0, -4px, 0) scale(1.009) !important;
   box-shadow:
     0 16px 38px rgba(0, 0, 0, 0.34),
-    0 0 0 1px rgba(var(--accent-rgb), 0.16) !important;
+    0 0 0 1px rgba(var(--lt-accent-rgb), 0.16) !important;
 }
 
 
@@ -2340,11 +2340,11 @@ button:active{
 }
 
 .app .homeLibraryPanel{
-  border-color: rgba(var(--accent-rgb), 0.2) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.2) !important;
   box-shadow:
     0 18px 70px rgba(0, 0, 0, 0.46),
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 4px 0 0 rgba(var(--accent-rgb), 0.72) !important;
+    inset 4px 0 0 rgba(var(--lt-accent-rgb), 0.72) !important;
 }
 
 .app .heroPremium{
@@ -2815,7 +2815,7 @@ body.localitfyLibraryPointerDragging{
 
 .coverPanelHeadClean > span,
 .coverGalleryHeaderClean > span{
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 0.72rem;
   font-weight: 850;
 }
@@ -2977,7 +2977,7 @@ body.localitfyLibraryPointerDragging{
 }
 
 .coverStudioCleanLayout .coverGalleryCardCleanOnly:hover{
-  border-color: rgba(var(--accent-rgb),0.32) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.32) !important;
   background: rgba(255,255,255,0.058) !important;
 }
 
@@ -3432,14 +3432,14 @@ body.localitfyLibraryPointerDragging{
 .editorPreviewCard .editorPreview strong{
   display: block;
   overflow-wrap: anywhere;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 18px;
   line-height: 1.25;
 }
 
 .editorPreviewCard .editorPreview p{
   margin: 8px 0 0 !important;
-  color: var(--muted) !important;
+  color: var(--lt-muted) !important;
   font-size: 14px !important;
 }
 
@@ -3557,7 +3557,7 @@ body.localitfyLibraryPointerDragging{
 }
 
 .libraryHeaderActions span{
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 12px;
   font-weight: 850;
 }
@@ -3568,8 +3568,8 @@ body.localitfyLibraryPointerDragging{
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 999px;
   color: #060606;
-  background: var(--accent);
-  box-shadow: 0 10px 28px rgba(var(--accent-rgb), 0.16);
+  background: var(--lt-accent);
+  box-shadow: 0 10px 28px rgba(var(--lt-accent-rgb), 0.16);
   font: inherit;
   font-size: 12px;
   font-weight: 700;
@@ -3580,7 +3580,7 @@ body.localitfyLibraryPointerDragging{
 .libraryHeaderActions button:hover:not(:disabled){
   transform: translateY(-1px);
   filter: brightness(1.04);
-  box-shadow: 0 14px 34px rgba(var(--accent-rgb), 0.22);
+  box-shadow: 0 14px 34px rgba(var(--lt-accent-rgb), 0.22);
 }
 
 .libraryHeaderActions button:active:not(:disabled){
@@ -3886,14 +3886,14 @@ body.localitfyLibraryPointerDragging{
 }
 
 .homeLibraryExpanded{
-  border-color: rgba(var(--accent-rgb), 0.28) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.28) !important;
   background:
-    radial-gradient(circle at 12% 0%, rgba(var(--accent-rgb), 0.10), transparent 34%),
+    radial-gradient(circle at 12% 0%, rgba(var(--lt-accent-rgb), 0.10), transparent 34%),
     linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.018)),
     rgba(0, 0, 0, 0.62) !important;
   box-shadow:
     0 22px 76px rgba(0,0,0,0.50),
-    inset 4px 0 0 rgba(var(--accent-rgb), 0.70),
+    inset 4px 0 0 rgba(var(--lt-accent-rgb), 0.70),
     inset 0 1px 0 rgba(255,255,255,0.07) !important;
 }
 
@@ -4030,7 +4030,7 @@ body.localitfyLibraryPointerDragging{
 
 .homeLibraryPanel{
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.040), rgba(255, 255, 255, 0.014)),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), 0.040), rgba(255, 255, 255, 0.014)),
     rgba(0, 0, 0, 0.52) !important;
   border-color: var(--localtify-shell-soft-border) !important;
   box-shadow:
@@ -4224,12 +4224,12 @@ body.localitfyLibraryPointerDragging{
 
 .homeLibraryPanel:hover{
   background:
-    linear-gradient(180deg, color-mix(in oklab, var(--accent) 7%, transparent), transparent 72%),
-    color-mix(in oklab, var(--accent) 4%, rgba(0, 0, 0, 0.42)) !important;
-  border-color: color-mix(in oklab, var(--accent) 22%, transparent) !important;
+    linear-gradient(180deg, color-mix(in oklab, var(--lt-accent) 7%, transparent), transparent 72%),
+    color-mix(in oklab, var(--lt-accent) 4%, rgba(0, 0, 0, 0.42)) !important;
+  border-color: color-mix(in oklab, var(--lt-accent) 22%, transparent) !important;
   box-shadow:
     0 18px 54px rgba(0, 0, 0, 0.28),
-    0 0 0 1px color-mix(in oklab, var(--accent) 6%, transparent) inset !important;
+    0 0 0 1px color-mix(in oklab, var(--lt-accent) 6%, transparent) inset !important;
 }
 
 
@@ -4438,12 +4438,12 @@ body.localitfyLibraryPointerDragging{
 .homeLibraryPanel:hover{
   transform: translateY(-1px) !important;
   background:
-    linear-gradient(180deg, color-mix(in oklab, var(--accent) 5%, transparent), rgba(255,255,255,.012)),
+    linear-gradient(180deg, color-mix(in oklab, var(--lt-accent) 5%, transparent), rgba(255,255,255,.012)),
     rgba(0,0,0,.56) !important;
-  border-color: color-mix(in oklab, var(--accent) 20%, transparent) !important;
+  border-color: color-mix(in oklab, var(--lt-accent) 20%, transparent) !important;
   box-shadow:
     0 14px 42px rgba(0,0,0,.3),
-    inset 3px 0 0 color-mix(in oklab, var(--accent) 28%, transparent) !important;
+    inset 3px 0 0 color-mix(in oklab, var(--lt-accent) 28%, transparent) !important;
 }
 
 .mainAction:hover,
@@ -4679,21 +4679,21 @@ body.localitfyLibraryPointerDragging{
 .homeLibraryPanel .songRow{
   max-width: 100% !important;
   min-width: 0 !important;
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 4%, rgba(0, 0, 0, .50)) !important;
-  border: 1px solid color-mix(in oklab, var(--theme-accent, var(--accent)) 13%, rgba(255, 255, 255, .055)) !important;
+  background: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 4%, rgba(0, 0, 0, .50)) !important;
+  border: 1px solid color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 13%, rgba(255, 255, 255, .055)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
 
 .homeLibraryPanel .songRow:hover{
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 4%, rgba(0, 0, 0, .50)) !important;
-  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 13%, rgba(255,255,255,.055)) !important;
+  background: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 4%, rgba(0, 0, 0, .50)) !important;
+  border-color: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 13%, rgba(255,255,255,.055)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
 
 .homeLibraryPanel .songRow.active{
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 7%, rgba(0, 0, 0, .50)) !important;
-  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 30%, rgba(255,255,255,.08)) !important;
-  box-shadow: inset 3px 0 0 var(--accent) !important;
+  background: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 7%, rgba(0, 0, 0, .50)) !important;
+  border-color: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 30%, rgba(255,255,255,.08)) !important;
+  box-shadow: inset 3px 0 0 var(--lt-accent) !important;
 }
 
 .homeLibraryPanel .songRow:not(.songDropTarget)::before{
@@ -4721,14 +4721,14 @@ body.localitfyLibraryPointerDragging{
 
 
 .app .homeLibraryPanel{
-  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 10%, rgba(255,255,255,.055)) !important;
-  border-left-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 10%, rgba(255,255,255,.055)) !important;
+  border-color: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 10%, rgba(255,255,255,.055)) !important;
+  border-left-color: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 10%, rgba(255,255,255,.055)) !important;
   box-shadow: none !important;
   outline: none !important;
 }
 
 .app .homeLibraryExpanded{
-  border-left-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 10%, rgba(255,255,255,.055)) !important;
+  border-left-color: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 10%, rgba(255,255,255,.055)) !important;
   box-shadow: 0 16px 48px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.035) !important;
   background: linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.010)), rgba(0,0,0,.54) !important;
 }
@@ -5199,13 +5199,13 @@ body.localitfyLibraryPointerDragging{
 
 .songCard{
   background: color-mix(in srgb, var(--surface, #151515) 76%, transparent) !important;
-  border-color: color-mix(in srgb, var(--accent, #ff6edb) 18%, transparent) !important;
+  border-color: color-mix(in srgb, var(--lt-accent, #ff6edb) 18%, transparent) !important;
   box-shadow: none !important;
 }
 
 .songCard:hover{
   transform: translateY(-2px) !important;
-  border-color: color-mix(in srgb, var(--accent, #ff6edb) 34%, transparent) !important;
+  border-color: color-mix(in srgb, var(--lt-accent, #ff6edb) 34%, transparent) !important;
 }
 
 .songCard:hover img{
@@ -5664,14 +5664,14 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 .libraryPanelActionsV025 > span{
   border: 0 !important;
   background: rgba(255, 255, 255, 0.075) !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   box-shadow: none !important;
 }
 
 .shuffleLibraryButtonV025:hover{
   transform: translateY(-1px) !important;
-  background: color-mix(in srgb, var(--accent) 28%, rgba(255, 255, 255, 0.08)) !important;
-  color: var(--text) !important;
+  background: color-mix(in srgb, var(--lt-accent) 28%, rgba(255, 255, 255, 0.08)) !important;
+  color: var(--lt-text) !important;
 }
 
 .libraryStatsV025{
@@ -5691,7 +5691,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 .libraryStatsV025 span{
-  color: color-mix(in srgb, var(--text-muted) 78%, var(--accent) 22%);
+  color: color-mix(in srgb, var(--text-muted) 78%, var(--lt-accent) 22%);
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -5701,7 +5701,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 .libraryStatsV025 strong{
   display: block;
   margin-top: 8px;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(1.8rem, 2.6vw, 2.65rem);
   line-height: 1;
   letter-spacing: -0.05em;
@@ -5732,7 +5732,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 
 .libraryFullListV025 .songRow:hover{
   transform: translateX(3px) !important;
-  border-color: color-mix(in srgb, var(--accent) 26%, rgba(255, 255, 255, 0.08)) !important;
+  border-color: color-mix(in srgb, var(--lt-accent) 26%, rgba(255, 255, 255, 0.08)) !important;
   background:
     linear-gradient(90deg, color-mix(in srgb, var(--accent-soft) 12%, transparent), rgba(255, 255, 255, 0.026)),
     color-mix(in srgb, var(--surface) 88%, #030303 12%) !important;
@@ -5842,9 +5842,9 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     linear-gradient(135deg,
       color-mix(in srgb, var(--accentSoft, #7cff9b) 12%, transparent),
       color-mix(in srgb, var(--surface, #101010) 90%, transparent) 42%,
-      color-mix(in srgb, var(--accent, #8dff6c) 8%, transparent)
+      color-mix(in srgb, var(--lt-accent, #8dff6c) 8%, transparent)
     );
-  border:1px solid color-mix(in srgb, var(--accent, #8dff6c) 22%, transparent);
+  border:1px solid color-mix(in srgb, var(--lt-accent, #8dff6c) 22%, transparent);
   box-shadow:0 22px 60px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.045);
   isolation:isolate;
 }
@@ -5855,7 +5855,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   inset:0;
   pointer-events:none;
   background:
-    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--accent, #8dff6c) 18%, transparent), transparent 28%),
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--lt-accent, #8dff6c) 18%, transparent), transparent 28%),
     linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
     linear-gradient(180deg, rgba(255,255,255,.018) 1px, transparent 1px);
   background-size:auto, 58px 58px, 58px 58px;
@@ -5870,7 +5870,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   gap:16px;
   margin-bottom:16px;
   padding-bottom:14px;
-  border-bottom:1px solid color-mix(in srgb, var(--text, #fff) 9%, transparent);
+  border-bottom:1px solid color-mix(in srgb, var(--lt-text, #fff) 9%, transparent);
 }
 
 .homeShelfHeader h3{
@@ -5897,8 +5897,8 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   padding:0 14px;
   border-radius:999px;
   color:color-mix(in srgb, var(--background, #000) 88%, #fff);
-  background:linear-gradient(135deg, var(--accent, #8dff6c), color-mix(in srgb, var(--accent, #8dff6c) 70%, #fff 30%));
-  box-shadow:0 12px 28px color-mix(in srgb, var(--accent, #8dff6c) 24%, transparent);
+  background:linear-gradient(135deg, var(--lt-accent, #8dff6c), color-mix(in srgb, var(--lt-accent, #8dff6c) 70%, #fff 30%));
+  box-shadow:0 12px 28px color-mix(in srgb, var(--lt-accent, #8dff6c) 24%, transparent);
   font-size:.78rem;
   font-weight:950;
   cursor:pointer;
@@ -5906,8 +5906,8 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 .homeShelfActionButton.quiet{
-  color:var(--text, #fff);
-  background:color-mix(in srgb, var(--raised, #202020) 78%, var(--accent, #8dff6c) 10%);
+  color:var(--lt-text, #fff);
+  background:color-mix(in srgb, var(--raised, #202020) 78%, var(--lt-accent, #8dff6c) 10%);
   box-shadow:none;
 }
 
@@ -5937,13 +5937,13 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   min-width:0;
   min-height:82px;
   padding:10px 14px 10px 10px;
-  border:1px solid color-mix(in srgb, var(--text, #fff) 8%, transparent);
+  border:1px solid color-mix(in srgb, var(--lt-text, #fff) 8%, transparent);
   border-radius:18px;
-  color:var(--text, #fff);
+  color:var(--lt-text, #fff);
   background:
     linear-gradient(90deg,
       color-mix(in srgb, var(--raised, #1b1b1b) 88%, transparent),
-      color-mix(in srgb, var(--surface, #101010) 82%, var(--accent, #8dff6c) 8%)
+      color-mix(in srgb, var(--surface, #101010) 82%, var(--lt-accent, #8dff6c) 8%)
     );
   box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
   cursor:pointer;
@@ -5953,13 +5953,13 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 
 .homeListenCard:hover{
   transform:translateY(-2px);
-  border-color:color-mix(in srgb, var(--accent, #8dff6c) 44%, transparent);
+  border-color:color-mix(in srgb, var(--lt-accent, #8dff6c) 44%, transparent);
   background:
     linear-gradient(90deg,
-      color-mix(in srgb, var(--accent, #8dff6c) 17%, var(--raised, #1b1b1b) 83%),
-      color-mix(in srgb, var(--surface, #101010) 76%, var(--accent, #8dff6c) 15%)
+      color-mix(in srgb, var(--lt-accent, #8dff6c) 17%, var(--raised, #1b1b1b) 83%),
+      color-mix(in srgb, var(--surface, #101010) 76%, var(--lt-accent, #8dff6c) 15%)
     );
-  box-shadow:0 16px 34px rgba(0,0,0,.24), 0 0 0 1px color-mix(in srgb, var(--accent, #8dff6c) 12%, transparent);
+  box-shadow:0 16px 34px rgba(0,0,0,.24), 0 0 0 1px color-mix(in srgb, var(--lt-accent, #8dff6c) 12%, transparent);
 }
 
 .homeListenCover{
@@ -6051,7 +6051,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   padding:10px;
   border:0;
   border-radius:18px;
-  color:var(--text, #fff);
+  color:var(--lt-text, #fff);
   background:color-mix(in srgb, var(--raised, #191919) 78%, transparent);
   cursor:pointer;
   text-align:left;
@@ -6061,7 +6061,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 
 .homeFreshCard:hover{
   transform:translateY(-3px);
-  background:color-mix(in srgb, var(--accent, #8dff6c) 16%, var(--raised, #191919) 84%);
+  background:color-mix(in srgb, var(--lt-accent, #8dff6c) 16%, var(--raised, #191919) 84%);
   box-shadow:0 16px 34px rgba(0,0,0,.22);
 }
 
@@ -6135,15 +6135,15 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   padding: 20px 22px 22px !important;
   background:
     linear-gradient(135deg,
-      color-mix(in oklab, var(--surface, #101010) 82%, var(--accent, #ff65df) 8%),
-      color-mix(in oklab, var(--surface-2, #151515) 85%, var(--accent-2, var(--accent, #ff65df)) 6%)) !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 18%, rgba(255,255,255,.06)) !important;
+      color-mix(in oklab, var(--surface, #101010) 82%, var(--lt-accent, #ff65df) 8%),
+      color-mix(in oklab, var(--surface-2, #151515) 85%, var(--accent-2, var(--lt-accent, #ff65df)) 6%)) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 18%, rgba(255,255,255,.06)) !important;
 }
 
 .homeShelfHeader{
   margin-bottom: 16px !important;
   padding-bottom: 12px !important;
-  border-bottom: 1px solid color-mix(in oklab, var(--accent, #ff65df) 12%, rgba(255,255,255,.06)) !important;
+  border-bottom: 1px solid color-mix(in oklab, var(--lt-accent, #ff65df) 12%, rgba(255,255,255,.06)) !important;
 }
 
 .homeShelfHeader h2{
@@ -6154,7 +6154,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 .homeShelfOverline{
-  color: var(--accent, #ff65df) !important;
+  color: var(--lt-accent, #ff65df) !important;
   letter-spacing: .18em !important;
 }
 
@@ -6178,9 +6178,9 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   border-radius: 18px !important;
   background:
     linear-gradient(90deg,
-      color-mix(in oklab, var(--surface-2, #151515) 90%, var(--accent, #ff65df) 4%) 0%,
-      color-mix(in oklab, var(--surface, #111111) 86%, var(--accent, #ff65df) 7%) 100%) !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #ff65df) 11%, rgba(255,255,255,.065)) !important;
+      color-mix(in oklab, var(--surface-2, #151515) 90%, var(--lt-accent, #ff65df) 4%) 0%,
+      color-mix(in oklab, var(--surface, #111111) 86%, var(--lt-accent, #ff65df) 7%) 100%) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #ff65df) 11%, rgba(255,255,255,.065)) !important;
   box-shadow: none !important;
   transform: translateZ(0) !important;
   contain: layout paint style !important;
@@ -6189,19 +6189,19 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 .homeListenCard:hover{
   background:
     linear-gradient(90deg,
-      color-mix(in oklab, var(--surface-2, #151515) 84%, var(--accent, #ff65df) 9%) 0%,
-      color-mix(in oklab, var(--surface, #111111) 80%, var(--accent, #ff65df) 12%) 100%) !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 28%, rgba(255,255,255,.07)) !important;
+      color-mix(in oklab, var(--surface-2, #151515) 84%, var(--lt-accent, #ff65df) 9%) 0%,
+      color-mix(in oklab, var(--surface, #111111) 80%, var(--lt-accent, #ff65df) 12%) 100%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 28%, rgba(255,255,255,.07)) !important;
   transform: translateY(-1px) translateZ(0) !important;
 }
 
 .homeListenCard.active{
   background:
     linear-gradient(90deg,
-      color-mix(in oklab, var(--accent, #ff65df) 18%, var(--surface-2, #151515)) 0%,
-      color-mix(in oklab, var(--surface, #111111) 78%, var(--accent, #ff65df) 14%) 100%) !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 50%, rgba(255,255,255,.09)) !important;
-  box-shadow: inset 3px 0 0 var(--accent, #ff65df), 0 14px 34px rgba(0,0,0,.18) !important;
+      color-mix(in oklab, var(--lt-accent, #ff65df) 18%, var(--surface-2, #151515)) 0%,
+      color-mix(in oklab, var(--surface, #111111) 78%, var(--lt-accent, #ff65df) 14%) 100%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 50%, rgba(255,255,255,.09)) !important;
+  box-shadow: inset 3px 0 0 var(--lt-accent, #ff65df), 0 14px 34px rgba(0,0,0,.18) !important;
 }
 
 .homeListenCover{
@@ -6258,7 +6258,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 .homeShelfActions span{
-  background: color-mix(in oklab, var(--surface-2, #151515) 86%, var(--accent, #ff65df) 8%) !important;
+  background: color-mix(in oklab, var(--surface-2, #151515) 86%, var(--lt-accent, #ff65df) 8%) !important;
   border: 0 !important;
   box-shadow: none !important;
 }
@@ -6360,7 +6360,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 
 .homeShelfPanel{
   background: linear-gradient(180deg, rgba(var(--surface-rgb, 20, 18, 28), 0.82), rgba(var(--surface-rgb, 20, 18, 28), 0.58)) !important;
-  border-color: rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.20) !important;
+  border-color: rgba(var(--progress-rgb, var(--lt-accent-rgb, 255, 105, 180)), 0.20) !important;
 }
 
 .simpleHero{
@@ -6430,8 +6430,8 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 
 .homeListenCard.active{
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--accent, #ff65c8) 58%, transparent),
-    0 20px 56px color-mix(in srgb, var(--accent, #ff65c8) 16%, transparent);
+    0 0 0 1px color-mix(in srgb, var(--lt-accent, #ff65c8) 58%, transparent),
+    0 20px 56px color-mix(in srgb, var(--lt-accent, #ff65c8) 16%, transparent);
 }
 
 .homeListenCard.active::before{
@@ -6440,7 +6440,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   inset: -2px;
   border-radius: inherit;
   pointer-events: none;
-  background: radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--progress, var(--accent)) 32%, transparent), transparent 42%);
+  background: radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--progress, var(--lt-accent)) 32%, transparent), transparent 42%);
   opacity: .55;
   animation: localtifyV025ActiveBreath 2.8s ease-in-out infinite;
 }
@@ -7063,7 +7063,7 @@ body.localitfyNoSelect *{
 
 .libraryPanelTitleV025 span,
 .libraryPanelV025 .eyebrow {
-  color: var(--accent) !important;
+  color: var(--lt-accent) !important;
   letter-spacing: 0.18em !important;
 }
 
@@ -7108,7 +7108,7 @@ body.localitfyNoSelect *{
 .libraryMetricCard {
   min-height: 92px !important;
   padding: 18px 20px !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.18) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.18) !important;
   background: rgba(255, 255, 255, 0.045) !important;
   border-radius: var(--card-radius, 22px) !important;
   overflow: hidden !important;
@@ -7130,7 +7130,7 @@ body.localitfyNoSelect *{
   min-height: 72px !important;
   padding: 12px 18px !important;
   border-radius: 16px !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.20) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.20) !important;
   background: rgba(255, 255, 255, 0.035) !important;
   color: rgba(255, 255, 255, 0.88) !important;
   overflow: hidden !important;
@@ -7146,8 +7146,8 @@ body.localitfyNoSelect *{
 .libraryPanelV025 .songRow:hover,
 .tracksList .songRow:hover {
   transform: translateY(-2px) scale(1.004) !important;
-  border-color: rgba(var(--accent-rgb), 0.42) !important;
-  background: rgba(var(--accent-rgb), 0.10) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.42) !important;
+  background: rgba(var(--lt-accent-rgb), 0.10) !important;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22) !important;
 }
 
@@ -7157,9 +7157,9 @@ body.localitfyNoSelect *{
 .libraryPanelV025 .songRow.active,
 .libraryPanelV025 .songRow.playing,
 .libraryPanelV025 .songRow.isActive {
-  border-color: rgba(var(--accent-rgb), 0.72) !important;
-  background: rgba(var(--accent-rgb), 0.16) !important;
-  box-shadow: inset 3px 0 0 var(--accent), 0 18px 44px rgba(0, 0, 0, 0.24) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.72) !important;
+  background: rgba(var(--lt-accent-rgb), 0.16) !important;
+  box-shadow: inset 3px 0 0 var(--lt-accent), 0 18px 44px rgba(0, 0, 0, 0.24) !important;
   color: #ffffff !important;
 }
 
@@ -7228,8 +7228,8 @@ body.localitfyNoSelect *{
 .localPickCard:hover {
   transform: translateY(-3px) scale(1.012) !important;
   z-index: 3 !important;
-  border-color: rgba(var(--accent-rgb), 0.46) !important;
-  background: rgba(var(--accent-rgb), 0.10) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.46) !important;
+  background: rgba(var(--lt-accent-rgb), 0.10) !important;
   box-shadow: 0 16px 44px rgba(0, 0, 0, 0.28) !important;
 }
 
@@ -7632,11 +7632,11 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app .simpleLibraryPanel,
 .app .homeLibraryPanel{
   background-image:
-    radial-gradient(circle at 50% 6%, color-mix(in oklab, var(--accent, #ff4ee8) 7%, transparent) 0%, transparent 35%),
-    radial-gradient(circle at 10% 92%, color-mix(in oklab, var(--accent-2, var(--accent, #9d6cff)) 6%, transparent) 0%, transparent 30%),
+    radial-gradient(circle at 50% 6%, color-mix(in oklab, var(--lt-accent, #ff4ee8) 7%, transparent) 0%, transparent 35%),
+    radial-gradient(circle at 10% 92%, color-mix(in oklab, var(--accent-2, var(--lt-accent, #9d6cff)) 6%, transparent) 0%, transparent 30%),
     linear-gradient(180deg,
-      color-mix(in oklab, var(--bg, #030207) 92%, var(--accent, #ff4ee8) 4%),
-      color-mix(in oklab, var(--bg-2, #07050d) 94%, var(--accent-2, var(--accent, #9d6cff)) 3%)) !important;
+      color-mix(in oklab, var(--lt-bg, #030207) 92%, var(--lt-accent, #ff4ee8) 4%),
+      color-mix(in oklab, var(--bg-2, #07050d) 94%, var(--accent-2, var(--lt-accent, #9d6cff)) 3%)) !important;
   background-size: auto !important;
 }
 
@@ -7706,8 +7706,8 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .homeFreshCard:hover,
 .coverCard:hover,
 .coverGalleryCard:hover {
-  background: color-mix(in srgb, var(--surface) 78%, var(--accent) 8%) !important;
-  border-color: rgba(var(--accent-rgb), 0.32) !important;
+  background: color-mix(in srgb, var(--surface) 78%, var(--lt-accent) 8%) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.32) !important;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025) !important;
   transform: translateZ(0) !important;
 }
@@ -7765,9 +7765,9 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .app .playlistShelfPanel,
 .app .playlistTracksPanel{
   border-radius: 28px !important;
-  border: 1px solid color-mix(in oklab, var(--theme-progress, var(--accent)) 18%, rgba(255,255,255,.07)) !important;
+  border: 1px solid color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 18%, rgba(255,255,255,.07)) !important;
   background:
-    radial-gradient(circle at 14% 0%, color-mix(in oklab, var(--theme-progress, var(--accent)) 12%, transparent), transparent 36%),
+    radial-gradient(circle at 14% 0%, color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 12%, transparent), transparent 36%),
     linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.018)),
     rgba(5,5,7,.74) !important;
   box-shadow:
@@ -7797,7 +7797,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   width: 360px;
   height: 360px;
   border-radius: 999px;
-  background: color-mix(in oklab, var(--theme-progress, var(--accent)) 15%, transparent);
+  background: color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 15%, transparent);
   filter: blur(48px);
   opacity: .72;
   pointer-events: none;
@@ -7988,16 +7988,16 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 
 .app .playlistShelfCard.active,
 .app .playlistShelfCard.playing{
-  background: rgba(var(--accent-rgb), .070);
-  border-color: rgba(var(--accent-rgb), .24);
-  box-shadow: inset 2px 0 0 rgba(var(--accent-rgb), .72);
+  background: rgba(var(--lt-accent-rgb), .070);
+  border-color: rgba(var(--lt-accent-rgb), .24);
+  box-shadow: inset 2px 0 0 rgba(var(--lt-accent-rgb), .72);
 }
 
 .app .playlistShelfCard.dropTarget{
   transform: none;
-  background: rgba(var(--accent-rgb), .085);
-  border-color: rgba(var(--accent-rgb), .38);
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .13);
+  background: rgba(var(--lt-accent-rgb), .085);
+  border-color: rgba(var(--lt-accent-rgb), .38);
+  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .13);
 }
 
 .app .playlistShelfCard::before,
@@ -8617,9 +8617,9 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   bottom: 10px;
   z-index: 2;
   padding: 5px 9px;
-  border: 1px solid rgba(var(--accent-rgb), 0.24);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.24);
   border-radius: 999px;
-  color: rgba(var(--accent-rgb), 0.95);
+  color: rgba(var(--lt-accent-rgb), 0.95);
   background: rgba(0, 0, 0, 0.42);
   font-size: 10px;
   font-weight: 900;
@@ -8886,12 +8886,12 @@ html body .content{
   background-clip: padding-box !important;
   isolation: isolate !important;
   background-image:
-    radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--accent, #ff4ee8) 9%, transparent) 0%, transparent 38%),
+    radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--lt-accent, #ff4ee8) 9%, transparent) 0%, transparent 38%),
     linear-gradient(180deg,
-      color-mix(in oklab, var(--surface, #111017) 88%, var(--accent, #ff4ee8) 6%),
-      color-mix(in oklab, var(--surface-2, #0b0712) 91%, var(--accent-2, var(--accent, #9d6cff)) 5%)) !important;
+      color-mix(in oklab, var(--surface, #111017) 88%, var(--lt-accent, #ff4ee8) 6%),
+      color-mix(in oklab, var(--surface-2, #0b0712) 91%, var(--accent-2, var(--lt-accent, #9d6cff)) 5%)) !important;
   background-size: auto !important;
-  border-color: color-mix(in oklab, var(--border, rgba(255,255,255,.09)) 76%, var(--accent, #ff4ee8) 16%) !important;
+  border-color: color-mix(in oklab, var(--lt-border, rgba(255,255,255,.09)) 76%, var(--lt-accent, #ff4ee8) 16%) !important;
 }
 
 .app .homeShelfPanel::before,
@@ -8950,9 +8950,9 @@ html body .content{
   overflow: hidden !important;
   background:
     linear-gradient(180deg,
-      color-mix(in oklab, var(--surface, #17111f) 84%, var(--accent, #ff65df) 7%),
-      color-mix(in oklab, var(--surface-2, #0d0814) 88%, var(--accent, #ff65df) 4%)) !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #ff65df) 18%, rgba(255,255,255,.06)) !important;
+      color-mix(in oklab, var(--surface, #17111f) 84%, var(--lt-accent, #ff65df) 7%),
+      color-mix(in oklab, var(--surface-2, #0d0814) 88%, var(--lt-accent, #ff65df) 4%)) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #ff65df) 18%, rgba(255,255,255,.06)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
@@ -8964,7 +8964,7 @@ html body .content{
 .app .libraryListHeaderV025{
   grid-template-columns: minmax(0, 1fr) auto !important;
   padding: 0 18px 0 10px !important;
-  color: color-mix(in oklab, var(--muted, #a7a0b5) 88%, var(--accent, #ff65df) 12%) !important;
+  color: color-mix(in oklab, var(--lt-muted, #a7a0b5) 88%, var(--lt-accent, #ff65df) 12%) !important;
 }
 
 .app .libraryFullListV025{
@@ -8994,22 +8994,22 @@ html body .content{
 
 .app .libraryFullListV025 .songRow:hover{
   transform: none !important;
-  border-color: color-mix(in oklab, var(--accent, #ff65df) 28%, rgba(255,255,255,.075)) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 28%, rgba(255,255,255,.075)) !important;
   background:
     linear-gradient(90deg,
-      color-mix(in oklab, var(--accent, #ff65df) 11%, transparent),
+      color-mix(in oklab, var(--lt-accent, #ff65df) 11%, transparent),
       rgba(255,255,255,.026)),
     color-mix(in oklab, var(--surface, #17111f) 86%, #030303 14%) !important;
   box-shadow:
-    inset 3px 0 0 color-mix(in oklab, var(--accent, #ff65df) 42%, transparent),
+    inset 3px 0 0 color-mix(in oklab, var(--lt-accent, #ff65df) 42%, transparent),
     0 12px 30px rgba(0,0,0,.14) !important;
 }
 
 .app .libraryFullListV025 .songRow.active{
   transform: none !important;
-  border-color: color-mix(in oklab, var(--progress, var(--accent, #ff65df)) 48%, rgba(255,255,255,.12)) !important;
+  border-color: color-mix(in oklab, var(--progress, var(--lt-accent, #ff65df)) 48%, rgba(255,255,255,.12)) !important;
   box-shadow:
-    inset 3px 0 0 var(--progress, var(--accent, #ff65df)),
+    inset 3px 0 0 var(--progress, var(--lt-accent, #ff65df)),
     0 12px 30px rgba(0,0,0,.12) !important;
 }
 
@@ -9037,7 +9037,7 @@ html body .content{
   align-items: center !important;
   justify-content: flex-end !important;
   min-width: 46px !important;
-  color: color-mix(in oklab, var(--text, #fff) 76%, var(--muted, #9ca3af) 24%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 76%, var(--lt-muted, #9ca3af) 24%) !important;
   font-weight: 800 !important;
   font-size: .82rem !important;
 }
@@ -9121,7 +9121,7 @@ html body .content{
 
 .app :where(.songRow,.playlistSongRow,.libraryFullListV025 .songRow,.homeSongList .songRow):hover{
   transform: translate3d(0,0,0) !important;
-  border-color: color-mix(in srgb, var(--accent) 24%, rgba(255,255,255,.08)) !important;
+  border-color: color-mix(in srgb, var(--lt-accent) 24%, rgba(255,255,255,.08)) !important;
   background-image: none !important;
 }
 
@@ -10484,7 +10484,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   border: 1px solid var(--home-glass-line) !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.044), rgba(255, 255, 255, 0.012)),
-    radial-gradient(circle at 82% 18%, rgba(var(--accent-rgb), 0.055), transparent 32%),
+    radial-gradient(circle at 82% 18%, rgba(var(--lt-accent-rgb), 0.055), transparent 32%),
     var(--home-glass-bg) !important;
   box-shadow:
     inset 0 1px 0 var(--home-glass-highlight),
@@ -10512,7 +10512,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.014) 26%, transparent 62%),
     radial-gradient(circle at 16% 10%, rgba(255, 255, 255, 0.052), transparent 24%),
-    radial-gradient(circle at 86% 14%, rgba(var(--accent-rgb), 0.072), transparent 30%) !important;
+    radial-gradient(circle at 86% 14%, rgba(var(--lt-accent-rgb), 0.072), transparent 30%) !important;
   background-size: auto !important;
   opacity: 1 !important;
   filter: none !important;
@@ -10652,7 +10652,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   border: 1px solid var(--lt-acrylic-line) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012) 24%, rgba(255,255,255,0.004) 100%),
-    linear-gradient(135deg, rgba(var(--accent-rgb), 0.06), transparent 34%),
+    linear-gradient(135deg, rgba(var(--lt-accent-rgb), 0.06), transparent 34%),
     var(--lt-acrylic-panel-bg) !important;
   box-shadow:
     inset 0 1px 0 var(--lt-acrylic-highlight),
@@ -10676,7 +10676,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   background:
     linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.014) 24%, transparent 56%),
     radial-gradient(circle at 18% 10%, rgba(255,255,255,0.05), transparent 22%),
-    radial-gradient(circle at 84% 16%, rgba(var(--accent-rgb), 0.075), transparent 28%) !important;
+    radial-gradient(circle at 84% 16%, rgba(var(--lt-accent-rgb), 0.075), transparent 28%) !important;
   opacity: 0.95 !important;
   z-index: 0 !important;
 }
@@ -10806,7 +10806,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   min-height: 26px !important;
   padding: 0 10px !important;
   border-radius: 999px !important;
-  color: color-mix(in oklab, var(--text, #fff) 72%, var(--muted, #a7a0b5) 28%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 72%, var(--lt-muted, #a7a0b5) 28%) !important;
   background: rgba(255,255,255,.045) !important;
   border: 1px solid rgba(255,255,255,.075) !important;
   font-size: .72rem !important;
@@ -10838,13 +10838,13 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 .app .libraryFullListV025 .songRow:hover{
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), .095), rgba(255,255,255,.022)),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .095), rgba(255,255,255,.022)),
     rgba(22, 17, 32, .64) !important;
 }
 
 .app .libraryFullListV025 .songRow.active{
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), .15), rgba(255,255,255,.026)),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .15), rgba(255,255,255,.026)),
     rgba(28, 20, 39, .70) !important;
 }
 
@@ -11662,11 +11662,11 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 .app .homeShelfStack .homeListenCard:hover{
   transform: translateY(-2px) translateZ(0) !important;
-  border-color: rgba(var(--accent-rgb), 0.34) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.34) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.070),
     0 16px 34px rgba(0, 0, 0, 0.26),
-    0 0 26px rgba(var(--accent-rgb), 0.08) !important;
+    0 0 26px rgba(var(--lt-accent-rgb), 0.08) !important;
 }
 
 .app .homeShelfStack .homeListenCard:hover .homeListenBackground{
@@ -11681,17 +11681,17 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .app .homeShelfStack .homeListenCard:hover .homeListenForeground{
   background:
     linear-gradient(90deg, rgba(2, 2, 7, 0.64) 0%, rgba(2, 2, 7, 0.24) 38%, rgba(2, 2, 7, 0.64) 100%),
-    radial-gradient(circle at 18% 50%, rgba(var(--accent-rgb), 0.12), transparent 30%),
+    radial-gradient(circle at 18% 50%, rgba(var(--lt-accent-rgb), 0.12), transparent 30%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.060), transparent 54%) !important;
 }
 
 .app .homeShelfStack .homeListenCard.active{
-  border-color: rgba(var(--accent-rgb), 0.50) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.50) !important;
   box-shadow:
-    inset 2px 0 0 rgba(var(--accent-rgb), 0.82),
+    inset 2px 0 0 rgba(var(--lt-accent-rgb), 0.82),
     inset 0 1px 0 rgba(255, 255, 255, 0.070),
     0 16px 38px rgba(0, 0, 0, 0.28),
-    0 0 30px rgba(var(--accent-rgb), 0.10) !important;
+    0 0 30px rgba(var(--lt-accent-rgb), 0.10) !important;
 }
 
 .app .homeShelfStack .homeListenCard.active .homeListenBackground{
@@ -11701,7 +11701,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .app .homeShelfStack .homeListenCard.active .homeListenForeground{
   background:
     linear-gradient(90deg, rgba(2, 2, 7, 0.62) 0%, rgba(2, 2, 7, 0.22) 40%, rgba(2, 2, 7, 0.62) 100%),
-    radial-gradient(circle at 18% 50%, rgba(var(--accent-rgb), 0.14), transparent 32%),
+    radial-gradient(circle at 18% 50%, rgba(var(--lt-accent-rgb), 0.14), transparent 32%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.065), transparent 54%) !important;
 }
 
@@ -12022,12 +12022,12 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 .app .homeShelfStack .homeListenCard.active{
-  border-color: rgba(var(--accent-rgb), .44) !important;
+  border-color: rgba(var(--lt-accent-rgb), .44) !important;
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), .12), rgba(255,255,255,.036)),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .12), rgba(255,255,255,.036)),
     rgba(43, 40, 48, .64) !important;
   box-shadow:
-    inset 3px 0 0 rgba(var(--accent-rgb), .76),
+    inset 3px 0 0 rgba(var(--lt-accent-rgb), .76),
     inset 0 1px 0 rgba(255,255,255,.070),
     0 16px 36px rgba(0,0,0,.30) !important;
 }
@@ -12227,9 +12227,9 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 .app .homeShelfStack .homeListenCard.active{
-  border-color: rgba(var(--accent-rgb), .44) !important;
+  border-color: rgba(var(--lt-accent-rgb), .44) !important;
   box-shadow:
-    inset 3px 0 0 rgba(var(--accent-rgb), .76),
+    inset 3px 0 0 rgba(var(--lt-accent-rgb), .76),
     inset 0 1px 0 rgba(255,255,255,.070),
     0 16px 36px rgba(0,0,0,.30) !important;
 }
@@ -12730,7 +12730,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .albumBuilderPanelV318{
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(var(--accent-rgb), .16);
+  border: 1px solid rgba(var(--lt-accent-rgb), .16);
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.014)), rgba(3, 3, 8, .72);
   box-shadow: none;
@@ -12752,8 +12752,8 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(0,0,0,.58), rgba(var(--accent-rgb), .08) 46%, rgba(255,255,255,.02)),
-    radial-gradient(circle at 92% 18%, rgba(var(--accent-rgb), .16), transparent 32%);
+    linear-gradient(90deg, rgba(0,0,0,.58), rgba(var(--lt-accent-rgb), .08) 46%, rgba(255,255,255,.02)),
+    radial-gradient(circle at 92% 18%, rgba(var(--lt-accent-rgb), .16), transparent 32%);
   opacity: .88;
 }
 
@@ -12947,7 +12947,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   border: 1px solid rgba(255,255,255,.07);
   border-radius: 22px;
   overflow: hidden;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,.025);
   text-align: left;
   animation: albumCardInV318 240ms cubic-bezier(.16,1,.3,1) both;
@@ -12958,8 +12958,8 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .albumCardV318:hover,
 .albumCardV318.active{
   transform: translateY(-3px) scale(1.012);
-  border-color: rgba(var(--accent-rgb), .42);
-  background: rgba(var(--accent-rgb), .055);
+  border-color: rgba(var(--lt-accent-rgb), .42);
+  background: rgba(var(--lt-accent-rgb), .055);
   box-shadow: 0 22px 42px rgba(0,0,0,.28);
 }
 
@@ -13011,7 +13011,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .albumCardMetaV318 strong{
   display: block;
   min-width: 0;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 18px;
   line-height: 1.05;
   letter-spacing: -.035em;
@@ -13514,7 +13514,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .albumDetailPanelV318,
 .albumBuilderPanelV318{
   background: linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.01)), rgba(5,4,10,.80);
-  border-color: rgba(var(--accent-rgb), .13);
+  border-color: rgba(var(--lt-accent-rgb), .13);
 }
 
 .albumsGridV318{
@@ -13538,7 +13538,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .albumCardV318:hover,
 .albumCardV318.active{
   transform: translateY(-2px) scale(1.008);
-  background: rgba(var(--accent-rgb), .045);
+  background: rgba(var(--lt-accent-rgb), .045);
   box-shadow: 0 16px 34px rgba(0,0,0,.24);
 }
 
@@ -13972,10 +13972,10 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
   display: grid;
   gap: 16px;
   padding: clamp(18px, 2vw, 24px);
-  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.18);
   border-radius: 22px;
   background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), 0.075), rgba(255,255,255,0.026) 46%, rgba(0,0,0,0.36)),
+    linear-gradient(135deg, rgba(var(--lt-accent-rgb), 0.075), rgba(255,255,255,0.026) 46%, rgba(0,0,0,0.36)),
     rgba(7, 7, 12, 0.74);
   box-shadow:
     0 22px 68px rgba(0,0,0,0.34),
@@ -14180,10 +14180,10 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
   gap: 16px;
   margin: 14px 0 18px;
   padding: clamp(18px, 2vw, 24px);
-  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.18);
   border-radius: 22px;
   background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), 0.08), rgba(255,255,255,0.028) 44%, rgba(0,0,0,0.34)),
+    linear-gradient(135deg, rgba(var(--lt-accent-rgb), 0.08), rgba(255,255,255,0.028) 44%, rgba(0,0,0,0.34)),
     rgba(5, 5, 10, 0.76);
   box-shadow:
     0 22px 70px rgba(0,0,0,0.42),
@@ -14199,7 +14199,7 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
   aspect-ratio: 1;
   border-radius: 999px;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.18), transparent 62%);
+  background: radial-gradient(circle, rgba(var(--lt-accent-rgb), 0.18), transparent 62%);
   opacity: 0.7;
   filter: blur(10px);
 }
@@ -15530,14 +15530,14 @@ body.localtifyIdle .settingsSectionCard{
   width: var(--recap-progress);
   height: 7px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent), rgba(255,255,255,.72));
-  box-shadow: 0 0 18px rgba(var(--accent-rgb), .20);
+  background: linear-gradient(90deg, var(--lt-accent), rgba(255,255,255,.72));
+  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb), .20);
 }
 
 .analyticsRecapCardV339 span,
 .analyticsSnapshotCardV339 span,
 .analyticsMiniCardV339 span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 950;
   letter-spacing: .15em;
@@ -15545,7 +15545,7 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 .analyticsRecapCardV339 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(26px, 3vw, 44px);
   line-height: .92;
   letter-spacing: -.065em;
@@ -15553,7 +15553,7 @@ body.localtifyIdle .settingsSectionCard{
 
 .analyticsRecapCardV339 small,
 .analyticsRecapCardV339 em{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.32;
   font-style: normal;
@@ -15582,7 +15582,7 @@ body.localtifyIdle .settingsSectionCard{
 
 .analyticsSnapshotCardV339 strong,
 .analyticsMiniCardV339 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(20px, 2vw, 30px);
   line-height: .98;
   letter-spacing: -.045em;
@@ -15590,7 +15590,7 @@ body.localtifyIdle .settingsSectionCard{
 
 .analyticsSnapshotCardV339 small,
 .analyticsMiniCardV339 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.3;
   font-weight: 760;
@@ -15598,7 +15598,7 @@ body.localtifyIdle .settingsSectionCard{
 
 .analyticsSharePanelV339{
   padding: 18px;
-  border: 1px solid rgba(var(--accent-rgb), .14);
+  border: 1px solid rgba(var(--lt-accent-rgb), .14);
   border-radius: 22px;
   display: flex;
   align-items: center;
@@ -15609,7 +15609,7 @@ body.localtifyIdle .settingsSectionCard{
 
 .analyticsSharePanelV339 h3{
   margin: 0 0 6px;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(24px, 2.4vw, 38px);
   line-height: .94;
   letter-spacing: -.06em;
@@ -15618,7 +15618,7 @@ body.localtifyIdle .settingsSectionCard{
 .analyticsSharePanelV339 p{
   max-width: 70ch;
   margin: 0;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 13px;
   line-height: 1.4;
   font-weight: 760;
@@ -15692,13 +15692,13 @@ body.localtifyIdle .settingsSectionCard{
     linear-gradient(180deg, rgba(var(--text-rgb), .045), rgba(var(--text-rgb), .018)),
     rgba(5, 4, 9, .46);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
-  color: var(--text);
+  color: var(--lt-text);
   text-align: left;
   contain: layout paint style;
 }
 
 .localtifyStateCardV373.info{
-  border-color: rgba(var(--accent-rgb), .14);
+  border-color: rgba(var(--lt-accent-rgb), .14);
 }
 
 .localtifyStateCardV373.warning{
@@ -15838,10 +15838,10 @@ body.localtifyIdle .settingsSectionCard{
   --home-card-bg-more-blur: rgba(10, 8, 16, .74);
   --home-card-border: rgba(255,255,255,.066);
   --home-card-border-hover: rgba(255,255,255,.13);
-  --home-card-border-active: rgba(var(--accent-rgb), .38);
+  --home-card-border-active: rgba(var(--lt-accent-rgb), .38);
   --home-card-shadow: 0 6px 18px rgba(0,0,0,.12);
   --home-card-shadow-hover: 0 10px 24px rgba(0,0,0,.15);
-  --home-card-shadow-active: inset 0 0 0 1px rgba(var(--accent-rgb), .12), 0 10px 24px rgba(0,0,0,.16);
+  --home-card-shadow-active: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .12), 0 10px 24px rgba(0,0,0,.16);
   --home-card-transition:
     transform 170ms cubic-bezier(.16,1,.3,1),
     border-color 170ms ease,
@@ -16256,29 +16256,29 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
   opacity: .50 !important;
   cursor: grabbing !important;
   border-style: dashed !important;
-  border-color: rgba(var(--accent-rgb), .50) !important;
-  background: rgba(var(--accent-rgb), .060) !important;
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .14), 0 16px 34px rgba(0,0,0,.24) !important;
+  border-color: rgba(var(--lt-accent-rgb), .50) !important;
+  background: rgba(var(--lt-accent-rgb), .060) !important;
+  box-shadow: 0 0 0 1px rgba(var(--lt-accent-rgb), .14), 0 16px 34px rgba(0,0,0,.24) !important;
   animation: localitfyCardPickedUp 620ms ease-in-out infinite !important;
 }
 
 .homeView .homeAlbumCard.songDropTarget,
 .app .homeAlbumCard.songDropTarget{
   opacity: 1 !important;
-  border-color: rgba(var(--accent-rgb), .62) !important;
-  background: rgba(var(--accent-rgb), .080) !important;
+  border-color: rgba(var(--lt-accent-rgb), .62) !important;
+  background: rgba(var(--lt-accent-rgb), .080) !important;
   transform: translate3d(0, -2px, 0) scale(1.006) !important;
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .24), 0 0 0 5px rgba(var(--accent-rgb), .060), 0 18px 42px rgba(0,0,0,.26) !important;
+  box-shadow: 0 0 0 1px rgba(var(--lt-accent-rgb), .24), 0 0 0 5px rgba(var(--lt-accent-rgb), .060), 0 18px 42px rgba(0,0,0,.26) !important;
 }
 
 .homeView .homeAlbumCard.songDropTarget[data-drop-side="before"],
 .app .homeAlbumCard.songDropTarget[data-drop-side="before"]{
-  box-shadow: -8px 0 0 -4px rgba(var(--accent-rgb), .86), 0 0 0 1px rgba(var(--accent-rgb), .24), 0 0 0 5px rgba(var(--accent-rgb), .060), 0 18px 42px rgba(0,0,0,.26) !important;
+  box-shadow: -8px 0 0 -4px rgba(var(--lt-accent-rgb), .86), 0 0 0 1px rgba(var(--lt-accent-rgb), .24), 0 0 0 5px rgba(var(--lt-accent-rgb), .060), 0 18px 42px rgba(0,0,0,.26) !important;
 }
 
 .homeView .homeAlbumCard.songDropTarget[data-drop-side="after"],
 .app .homeAlbumCard.songDropTarget[data-drop-side="after"]{
-  box-shadow: 8px 0 0 -4px rgba(var(--accent-rgb), .86), 0 0 0 1px rgba(var(--accent-rgb), .24), 0 0 0 5px rgba(var(--accent-rgb), .060), 0 18px 42px rgba(0,0,0,.26) !important;
+  box-shadow: 8px 0 0 -4px rgba(var(--lt-accent-rgb), .86), 0 0 0 1px rgba(var(--lt-accent-rgb), .24), 0 0 0 5px rgba(var(--lt-accent-rgb), .060), 0 18px 42px rgba(0,0,0,.26) !important;
 }
 
 .homeView .homeFreshRail,
@@ -16468,7 +16468,7 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
 .app .albumsHeroPanelV318::before{
   opacity: .62 !important;
   background:
-    radial-gradient(circle at 92% 22%, rgba(var(--accent-rgb), .12), transparent 34%),
+    radial-gradient(circle at 92% 22%, rgba(var(--lt-accent-rgb), .12), transparent 34%),
     linear-gradient(90deg, rgba(0,0,0,.58), rgba(0,0,0,.18)) !important;
 }
 
@@ -16530,7 +16530,7 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   background: var(--albums-v394-card-hover) !important;
   box-shadow:
     0 16px 38px rgba(0,0,0,.26),
-    inset 0 0 0 1px rgba(var(--accent-rgb), .08) !important;
+    inset 0 0 0 1px rgba(var(--lt-accent-rgb), .08) !important;
 }
 
 .app .albumCardCoverV318{
@@ -16585,7 +16585,7 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   max-height: 42px !important;
   white-space: normal !important;
   overflow: hidden !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   font-size: 17px !important;
   line-height: 1.12 !important;
   letter-spacing: -.035em !important;
@@ -17147,7 +17147,7 @@ body.localitfyThemePainting .homeSongRow{
   border: 0 !important;
   border-radius: 24px !important;
   background:
-    radial-gradient(circle at 92% 4%, rgba(var(--accent-rgb), 0.135), transparent 32%),
+    radial-gradient(circle at 92% 4%, rgba(var(--lt-accent-rgb), 0.135), transparent 32%),
     radial-gradient(circle at 8% 0%, rgba(255,255,255,0.055), transparent 30%),
     linear-gradient(180deg, rgba(255,255,255,0.048), rgba(255,255,255,0.018)),
     rgba(13, 9, 20, 0.74) !important;
@@ -17165,7 +17165,7 @@ body.localitfyThemePainting .homeSongRow{
   pointer-events: none !important;
   border-radius: inherit !important;
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb),0.10), transparent 30%, transparent 70%, rgba(var(--accent-rgb),0.045)),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb),0.10), transparent 30%, transparent 70%, rgba(var(--lt-accent-rgb),0.045)),
     linear-gradient(180deg, rgba(255,255,255,0.038), transparent 42%) !important;
   opacity: .75 !important;
 }
@@ -17184,7 +17184,7 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 .app .libraryPanelTitleV025 .eyebrow{
-  color: rgba(var(--accent-rgb), .86) !important;
+  color: rgba(var(--lt-accent-rgb), .86) !important;
 }
 
 .app .libraryPanelTitleV025 h3{
@@ -17196,7 +17196,7 @@ body.localitfyThemePainting .homeSongRow{
 
 .app .libraryPanelTitleV025 span{
   max-width: 720px !important;
-  color: color-mix(in oklab, var(--text-2, #d8d3df) 86%, var(--accent, #ff65df) 14%) !important;
+  color: color-mix(in oklab, var(--lt-muted, #d8d3df) 86%, var(--lt-accent, #ff65df) 14%) !important;
   font-size: .86rem !important;
 }
 
@@ -17216,7 +17216,7 @@ body.localitfyThemePainting .homeSongRow{
   padding: 0 11px !important;
   border: 0 !important;
   border-radius: 999px !important;
-  color: color-mix(in oklab, var(--text, #fff) 75%, var(--muted, #a7a0b5) 25%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 75%, var(--lt-muted, #a7a0b5) 25%) !important;
   background: rgba(255,255,255,.045) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
   font-size: .75rem !important;
@@ -17225,13 +17225,13 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 .app .libraryQuickMetaV039 strong{
-  color: var(--text, #fff) !important;
+  color: var(--lt-text, #fff) !important;
   font-size: .88rem !important;
   letter-spacing: -.03em !important;
 }
 
 .app .libraryQuickMetaV039 .is-warning{
-  color: color-mix(in oklab, #ffd28a 78%, var(--text, #fff) 22%) !important;
+  color: color-mix(in oklab, #ffd28a 78%, var(--lt-text, #fff) 22%) !important;
   background: rgba(255,185,91,.075) !important;
 }
 
@@ -17245,7 +17245,7 @@ body.localitfyThemePainting .homeSongRow{
   border: 0 !important;
   border-radius: 18px !important;
   background:
-    linear-gradient(90deg, rgba(255,183,77,.12), rgba(var(--accent-rgb),.05)),
+    linear-gradient(90deg, rgba(255,183,77,.12), rgba(var(--lt-accent-rgb),.05)),
     rgba(18,14,26,.55) !important;
   box-shadow:
     inset 3px 0 0 rgba(255,196,104,.72),
@@ -17258,14 +17258,14 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 .app .libraryMissingStripV039 strong{
-  color: color-mix(in oklab, #ffd58c 72%, var(--text, #fff) 28%) !important;
+  color: color-mix(in oklab, #ffd58c 72%, var(--lt-text, #fff) 28%) !important;
   font-size: .92rem !important;
   letter-spacing: -.02em !important;
 }
 
 .app .libraryMissingStripV039 span{
   margin-top: 2px !important;
-  color: var(--text-2, rgba(255,255,255,.72)) !important;
+  color: var(--lt-muted, rgba(255,255,255,.72)) !important;
   font-size: .78rem !important;
 }
 
@@ -17282,7 +17282,7 @@ body.localitfyThemePainting .homeSongRow{
   padding: 0 13px !important;
   border: 0 !important;
   border-radius: 999px !important;
-  color: var(--text, #fff) !important;
+  color: var(--lt-text, #fff) !important;
   background: rgba(255,255,255,.065) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
   font-size: .75rem !important;
@@ -17294,12 +17294,12 @@ body.localitfyThemePainting .homeSongRow{
 .app .libraryMissingActionsV039 button:hover,
 .app .shuffleLibraryButtonV025:hover{
   transform: translateY(-1px) !important;
-  background: rgba(var(--accent-rgb), .16) !important;
+  background: rgba(var(--lt-accent-rgb), .16) !important;
 }
 
 .app .libraryMissingActionsV039 button.active{
   color: #09050d !important;
-  background: color-mix(in oklab, var(--accent, #ff65df) 82%, #fff 18%) !important;
+  background: color-mix(in oklab, var(--lt-accent, #ff65df) 82%, #fff 18%) !important;
 }
 
 .app .libraryListHeaderV025{
@@ -17313,7 +17313,7 @@ body.localitfyThemePainting .homeSongRow{
   background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)), rgba(10,8,15,.72) !important;
   backdrop-filter: blur(10px) saturate(114%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(114%) !important;
-  color: color-mix(in oklab, var(--text-2, #ddd) 78%, var(--accent, #ff65df) 22%) !important;
+  color: color-mix(in oklab, var(--lt-muted, #ddd) 78%, var(--lt-accent, #ff65df) 22%) !important;
   font-size: .70rem !important;
   font-weight: 900 !important;
   letter-spacing: .12em !important;
@@ -17346,20 +17346,20 @@ body.localitfyThemePainting .homeSongRow{
 .app .libraryFullListV025 .songRow:hover{
   transform: none !important;
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), .105), rgba(255,255,255,.018)),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .105), rgba(255,255,255,.018)),
     rgba(22, 16, 32, .68) !important;
   box-shadow:
-    inset 3px 0 0 rgba(var(--accent-rgb), .46),
+    inset 3px 0 0 rgba(var(--lt-accent-rgb), .46),
     inset 0 1px 0 rgba(255,255,255,.045),
     0 12px 34px rgba(0,0,0,.14) !important;
 }
 
 .app .libraryFullListV025 .songRow.active{
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), .16), rgba(255,255,255,.025)),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .16), rgba(255,255,255,.025)),
     rgba(26, 18, 38, .72) !important;
   box-shadow:
-    inset 3px 0 0 var(--progress, var(--accent)),
+    inset 3px 0 0 var(--progress, var(--lt-accent)),
     inset 0 1px 0 rgba(255,255,255,.05),
     0 12px 34px rgba(0,0,0,.15) !important;
 }
@@ -17375,7 +17375,7 @@ body.localitfyThemePainting .homeSongRow{
 
 .app .libraryFullListV025 .songRow.songMissingFileV039 .songMeta small,
 .app .libraryFullListV025 .songRow.songMissingFileV039 .songDurationInfo{
-  color: color-mix(in oklab, #ffd28a 74%, var(--text, #fff) 26%) !important;
+  color: color-mix(in oklab, #ffd28a 74%, var(--lt-text, #fff) 26%) !important;
 }
 
 .app .libraryFullListV025 .songButton,
@@ -17447,8 +17447,8 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 .app .libraryQuickMetaV039 .is-warning{
-  color: color-mix(in oklab, var(--text, #fff) 88%, var(--accent, #ff65df) 12%) !important;
-  background: rgba(var(--accent-rgb), .065) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 88%, var(--lt-accent, #ff65df) 12%) !important;
+  background: rgba(var(--lt-accent-rgb), .065) !important;
 }
 
 .app .libraryMissingStripV039{
@@ -17459,20 +17459,20 @@ body.localitfyThemePainting .homeSongRow{
   border: 0 !important;
   border-radius: 14px !important;
   background:
-    linear-gradient(90deg, rgba(255,255,255,.052), rgba(var(--accent-rgb),.035)),
+    linear-gradient(90deg, rgba(255,255,255,.052), rgba(var(--lt-accent-rgb),.035)),
     rgba(16, 12, 22, .58) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
 .app .libraryMissingStripV039 strong{
-  color: var(--text, #fff) !important;
+  color: var(--lt-text, #fff) !important;
   font-size: .84rem !important;
   letter-spacing: -.018em !important;
 }
 
 .app .libraryMissingStripV039 span{
   margin-top: 1px !important;
-  color: var(--text-2, rgba(255,255,255,.68)) !important;
+  color: var(--lt-muted, rgba(255,255,255,.68)) !important;
   font-size: .72rem !important;
 }
 
@@ -17491,16 +17491,16 @@ body.localitfyThemePainting .homeSongRow{
 .app .libraryMissingActionsV039 button:hover,
 .app .shuffleLibraryButtonV025:hover{
   transform: none !important;
-  background: rgba(var(--accent-rgb), .12) !important;
+  background: rgba(var(--lt-accent-rgb), .12) !important;
 }
 
 .app .libraryMissingActionsV039 button.active{
-  color: var(--text, #fff) !important;
-  background: rgba(var(--accent-rgb), .16) !important;
+  color: var(--lt-text, #fff) !important;
+  background: rgba(var(--lt-accent-rgb), .16) !important;
 }
 
 .app .libraryMissingActionsV039 .dangerGhostV039{
-  color: color-mix(in oklab, #ff7f9d 72%, var(--text, #fff) 28%) !important;
+  color: color-mix(in oklab, #ff7f9d 72%, var(--lt-text, #fff) 28%) !important;
   background: rgba(255, 95, 132, .09) !important;
 }
 
@@ -17558,14 +17558,14 @@ body.localitfyThemePainting .homeSongRow{
 .app .libraryFullListV025 .songRow:hover{
   transform: none !important;
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), .085), rgba(255,255,255,.014)),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .085), rgba(255,255,255,.014)),
     rgba(22, 16, 32, .62) !important;
-  box-shadow: inset 2px 0 0 rgba(var(--accent-rgb), .28), inset 0 1px 0 rgba(255,255,255,.04) !important;
+  box-shadow: inset 2px 0 0 rgba(var(--lt-accent-rgb), .28), inset 0 1px 0 rgba(255,255,255,.04) !important;
 }
 
 .app .libraryFullListV025 .songRow.songMissingFileV039{
   background:
-    linear-gradient(90deg, rgba(255,255,255,.038), rgba(var(--accent-rgb), .026)),
+    linear-gradient(90deg, rgba(255,255,255,.038), rgba(var(--lt-accent-rgb), .026)),
     rgba(18, 13, 23, .58) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
@@ -18053,7 +18053,7 @@ body.localitfyThemePainting .homeSongRow{
 .app .playlistTracksPanel{
   border-color: rgba(255,255,255,.075) !important;
   background:
-    radial-gradient(circle at 18% 2%, rgba(var(--accent-rgb), .075), transparent 34%),
+    radial-gradient(circle at 18% 2%, rgba(var(--lt-accent-rgb), .075), transparent 34%),
     linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.012)),
     rgba(7, 4, 11, .88) !important;
   box-shadow:
@@ -18072,15 +18072,15 @@ body.localitfyThemePainting .homeSongRow{
 
 .app .playlistShelfCard:hover{
   background: rgba(18, 12, 24, .86) !important;
-  border-color: rgba(var(--accent-rgb), .19) !important;
+  border-color: rgba(var(--lt-accent-rgb), .19) !important;
 }
 
 .app .playlistShelfCard.active,
 .app .playlistShelfCard.playing{
   background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), .105), rgba(255,255,255,.026)),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .105), rgba(255,255,255,.026)),
     rgba(13, 8, 18, .88) !important;
-  border-color: rgba(var(--accent-rgb), .24) !important;
+  border-color: rgba(var(--lt-accent-rgb), .24) !important;
 }
 
 .metaDividerDot{
