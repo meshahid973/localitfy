@@ -8959,10 +8959,18 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .playerBar,
 .playerBar{
+  grid-column: 1 / -1 !important;
   grid-row: 2 !important;
   align-self: stretch !important;
+  justify-self: stretch !important;
+  width: 100% !important;
+  height: var(--player-size-used, var(--player-size-live, var(--player-size, 108px))) !important;
   min-height: 74px !important;
-  max-height: var(--player-size-used, var(--player-size-live, var(--player-size, 108px))) !important;
+  max-height: none !important;
+  margin: 0 !important;
+  bottom: auto !important;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
   transform: translate3d(0,0,0) !important;
 }
 
@@ -10371,6 +10379,9 @@ body,
   grid-template-columns: var(--sidebar-width-release) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) var(--player-size-used);
   overflow: hidden;
+  gap: 0 !important;
+  row-gap: 0 !important;
+  min-height: 0 !important;
   background: var(--bg, #000);
 }
 

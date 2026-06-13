@@ -4039,14 +4039,10 @@ body.localitfyLibraryPointerDragging{
 }
 
 .homeLibraryPanel:hover{
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.074), rgba(255, 255, 255, 0.018)),
-    rgba(0, 0, 0, 0.50) !important;
-  border-color: var(--localtify-shell-hover-border) !important;
-  box-shadow:
-    0 22px 60px rgba(0, 0, 0, 0.30),
-    0 0 0 1px rgba(var(--accent-rgb), 0.052) inset !important;
-  transform: translateY(-1px) translateZ(0) !important;
+  background: inherit !important;
+  border-color: inherit !important;
+  box-shadow: inherit !important;
+  transform: none !important;
 }
 
 
@@ -4176,12 +4172,10 @@ body.localitfyLibraryPointerDragging{
 }
 
 .app .homeLibraryPanel:hover{
-  background: var(--theme-panel-hover-glass, rgba(var(--accent-rgb), 0.045)) !important;
-  border-color: var(--theme-panel-hover-border, rgba(var(--accent-rgb), 0.18)) !important;
-  box-shadow:
-    0 18px 58px rgba(0, 0, 0, 0.36),
-    inset 0 1px 0 rgba(var(--accent-rgb), 0.07),
-    inset 4px 0 0 rgba(var(--accent-rgb), 0.34) !important;
+  background: inherit !important;
+  border-color: inherit !important;
+  box-shadow: inherit !important;
+  transform: none !important;
 }
 
 
@@ -4679,7 +4673,7 @@ body.localitfyLibraryPointerDragging{
 }
 
 .songRow:hover .songArt{
-  filter: saturate(1.14) contrast(1.06) brightness(1.04) !important;
+  filter: none !important;
 }
 
 .homeLibraryPanel .songRow{
@@ -4691,9 +4685,9 @@ body.localitfyLibraryPointerDragging{
 }
 
 .homeLibraryPanel .songRow:hover{
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 8%, rgba(0, 0, 0, .48)) !important;
-  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 24%, rgba(255,255,255,.075)) !important;
-  box-shadow: inset 3px 0 0 color-mix(in oklab, var(--theme-accent, var(--accent)) 44%, transparent) !important;
+  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 4%, rgba(0, 0, 0, .50)) !important;
+  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 13%, rgba(255,255,255,.055)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
 
 .homeLibraryPanel .songRow.active{
@@ -5285,7 +5279,7 @@ body.localitfyLibraryPointerDragging{
   background:
     linear-gradient(90deg, rgba(0,0,0,.98) 0%, rgba(0,0,0,.88) 43%, rgba(0,0,0,.40) 68%, rgba(0,0,0,.70) 100%),
     var(--cover-url, var(--cover-art-url, none)) center right / cover no-repeat !important;
-  filter: brightness(var(--home-hero-cover-glow-brightness, .72)) saturate(var(--home-hero-cover-saturation, 1.14)) contrast(var(--home-hero-cover-contrast, 1.03)) !important;
+  filter: saturate(1.14) contrast(1.03) !important;
   transform: scale(1.015) !important;
 }
 
@@ -5300,7 +5294,7 @@ body.localitfyLibraryPointerDragging{
   background:
     radial-gradient(circle at 54% 48%, color-mix(in oklab, var(--accent, #a98cff) 28%, transparent), transparent 38%),
     var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-  filter: blur(42px) brightness(var(--home-hero-cover-glow-brightness, .72)) saturate(var(--home-hero-cover-saturation, 1.38)) !important;
+  filter: blur(42px) saturate(1.38) !important;
   transform: scale(1.04) !important;
 }
 
@@ -5314,7 +5308,7 @@ body.localitfyLibraryPointerDragging{
   background:
     radial-gradient(circle at 55% 50%, color-mix(in oklab, var(--accent, #a98cff) 24%, transparent), transparent 35%),
     var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-  filter: blur(30px) brightness(var(--home-hero-cover-glow-brightness, .72)) saturate(var(--home-hero-cover-saturation, 1.24)) !important;
+  filter: blur(30px) saturate(1.24) !important;
   transform: translateZ(0) scale(1.02) !important;
   animation: none !important;
 }
@@ -5374,7 +5368,7 @@ body.localitfyLibraryPointerDragging{
   object-fit: cover !important;
   object-position: center !important;
   transform: none !important;
-  filter: brightness(var(--home-hero-cover-brightness, 1)) saturate(var(--home-hero-cover-saturation, 1.04)) contrast(var(--home-hero-cover-contrast, 1.02)) !important;
+  filter: saturate(1.04) contrast(1.02) !important;
 }
 
 .app .heroArt:hover img{
@@ -16001,11 +15995,11 @@ body.localtifyIdle .settingsSectionCard{
 
 .homeView .homeAlbumCard:hover,
 .app .homeAlbumCard:hover{
-  border-color: var(--home-card-border-hover) !important;
-  background: var(--home-card-bg-hover) !important;
-  box-shadow: var(--home-card-shadow-hover) !important;
-  transform: translate3d(0, -1px, 0) !important;
-  z-index: 8 !important;
+  border-color: var(--home-card-border) !important;
+  background: var(--home-card-bg) !important;
+  box-shadow: var(--home-card-shadow) !important;
+  transform: translateZ(0) !important;
+  z-index: 2 !important;
 }
 
 .homeView .homeAlbumCard:active,
