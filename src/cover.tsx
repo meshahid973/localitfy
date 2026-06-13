@@ -5,6 +5,8 @@ import { memo, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, us
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
 
+const EMPTY_STATE_IMAGE_SRC = new URL("./assets/empty-state.png", import.meta.url).href;
+
 const CoverGalleryImage = memo(function CoverGalleryImage({ src, label, priority = false }: { src: string; label: string; priority?: boolean }) {
   const [failed, setFailed] = useState(false);
   const fallback = String(label || "cover").trim().slice(0, 1).toUpperCase() || "♪";
@@ -199,6 +201,17 @@ function songMatches(song: SongLike, query: string) {
   return searchText.includes(query);
 }
 
+function CoverCuteEmptyState() {
+  return (
+    <div className="emptyState coverEmptyState coverEmptyStateClean coverEmptyStateCuteV466 coverEmptyStateNoBoxV467">
+      <span className="coverEmptyImageShellV466" aria-hidden="true">
+        <img src={EMPTY_STATE_IMAGE_SRC} alt="" draggable={false} />
+      </span>
+      <p className="coverEmptyCaptionV467">my team couldn't find anything here!!</p>
+    </div>
+  );
+}
+
 function VirtualCoverSongList({
   songs,
   selectedIds,
@@ -226,10 +239,7 @@ function VirtualCoverSongList({
 
   if (!songs.length) {
     return (
-      <div className="emptyState coverEmptyState coverEmptyStateClean">
-        <strong>no matching songs</strong>
-        <p>Clear the search or import songs first.</p>
-      </div>
+      <CoverCuteEmptyState />
     );
   }
 
@@ -295,10 +305,7 @@ function VirtualCoverGalleryGrid({
 
   if (!entries.length) {
     return (
-      <div className="emptyState coverEmptyState coverEmptyStateClean coverEmptyStateBig">
-        <strong>no covers found</strong>
-        <p>Clear the search, change filter, or rescan the pixelart folder.</p>
-      </div>
+      <CoverCuteEmptyState />
     );
   }
 

@@ -11237,3 +11237,40 @@ body.isResizingPlayer .app *{
   58%{ opacity: 1; width: min(1260px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 96px)); transform: translate3d(0,0,0) scale(1.006); filter: blur(0); }
   100%{ opacity: 1; width: min(1240px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 116px)); transform: translate3d(0,0,0) scale(1); filter: blur(0); }
 }
+
+/* localtify v467 — sidebar grouping */
+.sidebarNavGroupsV467{
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.sidebarNavGroupV467{
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.sidebarGroupLabelV467{
+  margin: 0 0 1px 12px;
+  color: rgba(var(--text-rgb), .34);
+  font-size: 9px;
+  font-weight: 1000;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.navGroupedV467{
+  gap: 6px;
+}
+
+.sidebarNavGroup-app .navItem{
+  min-height: 42px;
+}
+
+.sidebarNavGroupV467 .navDivider{
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
+/* end localtify v467 sidebar grouping */

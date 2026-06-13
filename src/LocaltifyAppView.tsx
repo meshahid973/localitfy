@@ -7,6 +7,8 @@ import UpdateIsland from "./app/UpdateIsland";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FastAverageColor } from "fast-average-color";
 
+const EMPTY_STATE_IMAGE_SRC = new URL("./assets/empty-state.png", import.meta.url).href;
+
 function WindowMinimizeIcon() {
   return (
     <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" focusable="false">
@@ -345,6 +347,16 @@ export const navItems: Array<{
   { id: "analytics", label: "analytics", hint: "stats", icon: BarChart3 },
   { id: "downloads", label: "downloads", hint: "imports", icon: Download },
   { id: "settings", label: "settings", hint: "controls", icon: SettingsIcon }
+];
+
+export const sidebarNavGroups: Array<{
+  id: "library" | "tools" | "app";
+  label: string;
+  itemIds: View[];
+}> = [
+  { id: "library", label: "library", itemIds: ["home", "library", "liked", "albums", "playlists"] },
+  { id: "tools", label: "tools", itemIds: ["downloads", "covers", "analytics"] },
+  { id: "app", label: "app", itemIds: ["settings"] }
 ];
 
 export const coverMoodOptions: Array<{
@@ -2583,7 +2595,10 @@ function LocaltifyStateCard({
   title,
   message,
   detail,
-  actions
+  actions,
+  centered = false,
+  cute = false,
+  badge = "♪"
 }: {
   tone?: LocaltifyStateCardTone;
   eyebrow: string;
@@ -2591,19 +2606,37 @@ function LocaltifyStateCard({
   message: string;
   detail?: string;
   actions?: ReactNode;
+  centered?: boolean;
+  cute?: boolean;
+  badge?: string;
 }) {
   return (
-    <div className={`localtifyStateCardV373 ${tone}`}>
-      <span className="localtifyStateIconV373" aria-hidden="true">
-        <LocaltifyStateToneIcon tone={tone} />
-      </span>
-      <div className="localtifyStateCopyV373">
-        <p className="eyebrow">{eyebrow}</p>
-        <strong>{title}</strong>
-        <span>{message}</span>
-        {detail ? <small>{detail}</small> : null}
-        {actions ? <div className="localtifyStateActionsV373">{actions}</div> : null}
-      </div>
+    <div className={`localtifyStateCardV373 ${tone}${centered ? " localtifyStateCardCenteredV466" : ""}${cute ? " localtifyStateCardCuteV466" : ""}`}>
+      {cute ? (
+        <>
+          <div className="localtifyEmptyArtV466" aria-hidden="true">
+            <span className="localtifyEmptyImageShellV466">
+              <img src={EMPTY_STATE_IMAGE_SRC} alt="" draggable={false} />
+            </span>
+          </div>
+          <p className="localtifyEmptyCaptionV467">my team couldn't find anything here!!</p>
+          {actions ? <div className="localtifyStateActionsV373 localtifyEmptyActionsV467">{actions}</div> : null}
+        </>
+      ) : (
+        <>
+          <span className="localtifyStateIconV373" aria-hidden="true">
+            <LocaltifyStateToneIcon tone={tone} />
+          </span>
+
+          <div className="localtifyStateCopyV373">
+            <p className="eyebrow">{eyebrow}</p>
+            <strong>{title}</strong>
+            <span>{message}</span>
+            {detail ? <small>{detail}</small> : null}
+            {actions ? <div className="localtifyStateActionsV373">{actions}</div> : null}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -4894,65 +4927,52 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       ) : (
         <div className="appShell">
           <aside className="sidebar">
-            <nav className="nav navMain" aria-label="main navigation">
-              {navItems
-                .filter((item) => item.id !== "settings")
-                .map((item) => {
-                  const Icon = item.icon;
+            <div className="sidebarNavGroupsV467" aria-label="localtify navigation groups">
+              {sidebarNavGroups.map((group, groupIndex) => {
+                const groupItems = group.itemIds
+                  .map((itemId) => navItems.find((item) => item.id === itemId))
+                  .filter(Boolean);
 
-                  return (
-                    <button
-                      key={item.id}
-                      className={`navItem navItemAnimatedV468 nav-${item.id} ${view === item.id ? "active" : ""}`}
-                      data-nav-id={item.id}
-                      onClick={() => changeView(item.id, "nav")}
-                      aria-label={`open ${item.label}`}
+                return (
+                  <div key={group.id} className={`sidebarNavGroupV467 sidebarNavGroup-${group.id}`}>
+                    <p className="sidebarGroupLabelV467">{group.label}</p>
+
+                    <nav
+                      className={`nav navGroupedV467 ${group.id === "app" ? "navUtility" : "navMain"}`}
+                      aria-label={`${group.label} navigation`}
                     >
-                      <span className="navDiscordPillV468" aria-hidden="true" />
-                      <span className={`navIcon navIcon-${item.id}`} aria-hidden="true">
-                        <span className="navIconMotionV468">
-                          <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
-                        </span>
-                      </span>
-                      <span className="navText">
-                        <strong>{item.label}</strong>
-                        <small>{item.hint}</small>
-                      </span>
-                    </button>
-                  );
-                })}
-            </nav>
+                      {groupItems.map((item) => {
+                        const Icon = item.icon;
 
-            <div className="navDivider" aria-hidden="true" />
+                        return (
+                          <button
+                            key={item.id}
+                            className={`navItem navItemAnimatedV468 nav-${item.id} ${view === item.id ? "active" : ""}`}
+                            data-nav-id={item.id}
+                            data-nav-group={group.id}
+                            onClick={() => changeView(item.id, "nav")}
+                            aria-label={`open ${item.label}`}
+                          >
+                            <span className="navDiscordPillV468" aria-hidden="true" />
+                            <span className={`navIcon navIcon-${item.id}`} aria-hidden="true">
+                              <span className="navIconMotionV468">
+                                <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
+                              </span>
+                            </span>
+                            <span className="navText">
+                              <strong>{item.label}</strong>
+                              <small>{item.hint}</small>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </nav>
 
-            <nav className="nav navUtility" aria-label="settings navigation">
-              {navItems
-                .filter((item) => item.id === "settings")
-                .map((item) => {
-                  const Icon = item.icon;
-
-                  return (
-                    <button
-                      key={item.id}
-                      className={`navItem navItemAnimatedV468 nav-${item.id} ${view === item.id ? "active" : ""}`}
-                      data-nav-id={item.id}
-                      onClick={() => changeView(item.id, "nav")}
-                      aria-label={`open ${item.label}`}
-                    >
-                      <span className="navDiscordPillV468" aria-hidden="true" />
-                      <span className={`navIcon navIcon-${item.id}`} aria-hidden="true">
-                        <span className="navIconMotionV468">
-                          <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
-                        </span>
-                      </span>
-                      <span className="navText">
-                        <strong>{item.label}</strong>
-                        <small>{item.hint}</small>
-                      </span>
-                    </button>
-                  );
-                })}
-            </nav>
+                    {groupIndex < sidebarNavGroups.length - 1 ? <div className="navDivider" aria-hidden="true" /> : null}
+                  </div>
+                );
+              })}
+            </div>
 
             <div className="sidebarBottom">
               <button className="mainAction importMainAction iconTextButton" onClick={importSongs} aria-label="Import songs">
@@ -5367,17 +5387,22 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </div>
                   )
                 ) : (
-                  <div className="songList fullList libraryFullListV025">
+                  <div className="songList fullList libraryFullListV025 emptyStateCenterV466">
                     <LocaltifyStateCard
-                      tone={showingMissingFiles ? "info" : view === "liked" ? "info" : "warning"}
-                      eyebrow={showingMissingFiles ? "file check" : view === "liked" ? "liked songs" : "library"}
-                      title={showingMissingFiles ? "No missing files" : view === "liked" ? "No liked songs yet" : "Your library is empty"}
-                      message={showingMissingFiles ? "Every song Localtify knows about is available on this PC right now." : view === "liked" ? "Tap the heart on any song you enjoy and it will show up here." : "Import a few songs and Localtify will build your home shelf, analytics, albums, covers, and playlists from them."}
-                      detail={showingMissingFiles ? "Switch back to all tracks to continue browsing your library." : view === "liked" ? "This is only your local library. Nothing is uploaded anywhere." : "Tip: folder imports work best when your music is already sorted by album or artist."}
+                      centered
+                      cute
+                      badge={showingMissingFiles ? "✓" : view === "liked" ? "♡" : query.trim() ? "⌕" : "♪"}
+                      tone={showingMissingFiles ? "success" : view === "liked" || query.trim() ? "info" : "warning"}
+                      eyebrow={showingMissingFiles ? "file check" : view === "liked" ? "liked songs" : query.trim() ? "search" : "library"}
+                      title={showingMissingFiles ? "All files are cozy" : view === "liked" ? "No liked songs yet" : query.trim() ? "No songs found" : "No songs yet"}
+                      message={showingMissingFiles ? "Every song Localtify knows about is available on this PC right now." : view === "liked" ? "Tap the heart on any song you enjoy and it will show up here." : query.trim() ? "Nothing matched that search. Try a softer title, artist, album, or file name." : "Drop your music here and I’ll keep it cozy."}
+                      detail={showingMissingFiles ? "Switch back to all tracks to continue browsing your library." : view === "liked" ? "This is only your local library. Nothing is uploaded anywhere." : query.trim() ? "Your library is still here, the search just got too specific." : "Import a few songs and Localtify will build your shelves, albums, covers, and playlists from them."}
                       actions={showingMissingFiles ? (
                         <button className="softButton" type="button" onClick={() => setLibraryFilterMode?.("all")}>show all tracks</button>
                       ) : view === "liked" ? (
                         <button className="softButton" type="button" onClick={() => changeView("library", "empty-liked")}>browse library</button>
+                      ) : query.trim() ? (
+                        <button className="softButton" type="button" onClick={() => handleSearchInput("")}>clear search</button>
                       ) : (
                         <button className="mainAction" type="button" onClick={importSongs}>import songs</button>
                       )}
@@ -5534,13 +5559,16 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       })}
                     </div>
                   ) : (
-                    <div className="albumsEmptyStateV318 albumsEmptyStateV373">
+                    <div className="albumsEmptyStateV318 albumsEmptyStateV373 emptyStateCenterV466">
                       <LocaltifyStateCard
+                        centered
+                        cute
+                        badge="▣"
                         tone="info"
                         eyebrow="albums"
                         title="No albums yet"
-                        message="Import an album folder and Localtify will group the songs for you. Songs still stay in your normal library."
-                        detail="Best folder shape: Album name ? tracks ? cover.jpg or folder.png."
+                        message="Give Localtify an album folder and it’ll make the shelf feel tidy."
+                        detail="Best folder shape: Album name → tracks → cover.jpg or folder.png."
                         actions={
                           <>
                             <button className="mainAction" type="button" onClick={() => void scanAlbumFolderImport("single")} disabled={albumFolderImportBusy}>
@@ -5823,10 +5851,13 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         </button>
                       )) : (
                         <LocaltifyStateCard
+                          centered
+                          cute
+                          badge="♫"
                           tone={songs.length ? "info" : "warning"}
                           eyebrow="playlists"
                           title="No playlists yet"
-                          message={songs.length ? "Create a playlist, then add songs from any song card or row." : "Import songs first, then make a playlist for gaming, studying, edits, or night drives."}
+                          message={songs.length ? "Create a tiny mix and give your favorite songs a cozy corner." : "Import songs first, then make a playlist for gaming, studying, edits, or night drives."}
                           detail={songs.length ? "Tip: you can also drag songs into a playlist card." : "Playlists are local and private."}
                           actions={songs.length ? (
                             <button className="mainAction" type="button" onClick={() => {
@@ -5904,19 +5935,25 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
               <>
               {!songs.length ? (
                 <LocaltifyStateCard
+                  centered
+                  cute
+                  badge="✦"
                   tone="info"
                   eyebrow="covers"
-                  title="Open the cover studio after importing songs"
-                  message="Pixel covers work best when Localtify has songs to attach them to."
-                  detail="You can still browse pixel art, but selecting songs gives the cover tools something useful to change."
+                  title="Covers need songs first"
+                  message="Import music, then the cover studio can dress every track up properly."
+                  detail="Your empty-state art will show here too, so the page still feels cute before the library exists."
                   actions={<button className="mainAction" type="button" onClick={importSongs}>import songs</button>}
                 />
               ) : !filteredCoverGalleryAssets.length && !pixelArtBusy ? (
                 <LocaltifyStateCard
+                  centered
+                  cute
+                  badge="☁"
                   tone="warning"
                   eyebrow="covers"
                   title="No pixel covers found"
-                  message="Localtify could not find pixel cover art in the current pixelart folder."
+                  message="The cover shelf is empty right now, but your songs are safe."
                   detail="Rescan covers or add image files to your pixelart folder. Songs will keep using their existing covers."
                   actions={<button className="mainAction" type="button" onClick={() => void rescanPixelArtFolder()}>rescan covers</button>}
                 />
@@ -6479,11 +6516,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                   {!downloadQueue.length && !downloadResults.length && !downloadBusy && !spotifyDownloadBusy ? (
                     <LocaltifyStateCard
+                      centered
+                      cute
+                      badge="↓"
                       tone="info"
                       eyebrow="downloads"
-                      title="Paste a link to start"
-                      message="YouTube links go in the YouTube tab. Spotify playlists, albums, or tracks go in the Spotify tab."
-                      detail="If a download finishes but does not appear in your library, Localtify will warn you and let you open the folder."
+                      title="No downloads yet"
+                      message="Paste a link and Localtify will bring the audio home."
+                      detail="YouTube links go in the YouTube tab. Spotify playlists, albums, or tracks go in the Spotify tab."
                       actions={
                         <>
                           <button className="mainAction" type="button" onClick={() => setDownloadsTab("youtube")}>YouTube download</button>
