@@ -4821,9 +4821,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 >
                   {updatePrompt.status === "available" ? (
                     <>
-                      <button className="updateGhostButton" type="button" onClick={skipAvailableUpdate}>
-                        skip
-                      </button>
                       <button className="updatePrimaryButton" type="button" onClick={askUpdaterToDownload}>
                         download
                       </button>
