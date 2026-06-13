@@ -11413,3 +11413,124 @@ body.isResizingPlayer .app *{
   }
 }
 /* end localtify v468 sidebar selected pill + spacing polish */
+
+/* localtify v469 — calm cute import music button */
+.app .sidebarBottom{
+  border-top-color: rgba(255,255,255,.055) !important;
+  gap: 10px !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton{
+  position: relative !important;
+  min-height: 43px !important;
+  width: 100% !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), .26) !important;
+  border-radius: 999px !important;
+  color: var(--lt-text) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .115), rgba(var(--lt-accent-rgb), .055)),
+    rgba(8, 8, 13, .62) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 18px rgba(0,0,0,.18) !important;
+  transform: translate3d(0,0,0) scale(1) !important;
+  transition:
+    transform 170ms cubic-bezier(.16, 1, .3, 1),
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton::before{
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255,255,255,.13), transparent 34%),
+    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .08), transparent);
+  opacity: .62;
+}
+
+.app .mainAction.importMainAction.iconTextButton::after{
+  content: "✦";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  pointer-events: none;
+  color: var(--lt-accent);
+  font-size: 12px;
+  font-weight: 1000;
+  opacity: 0;
+  transform: translate3d(-5px,-50%,0) scale(.74) rotate(-10deg);
+  transition:
+    opacity 150ms ease,
+    transform 190ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.app .mainAction.importMainAction.iconTextButton .buttonInlineIcon{
+  position: relative;
+  z-index: 1;
+  width: 17px !important;
+  height: 17px !important;
+  transform: translate3d(0,0,0) scale(1) !important;
+  transition: transform 170ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton .buttonLabel{
+  position: relative;
+  z-index: 1;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  letter-spacing: -.01em !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton:hover,
+.app .mainAction.importMainAction.iconTextButton:focus-visible{
+  color: var(--lt-text) !important;
+  border-color: rgba(var(--lt-accent-rgb), .38) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .155), rgba(var(--lt-accent-rgb), .078)),
+    rgba(10, 10, 16, .72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 10px 22px rgba(0,0,0,.20) !important;
+  transform: translate3d(2px,0,0) scale(1) !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton:hover::after,
+.app .mainAction.importMainAction.iconTextButton:focus-visible::after{
+  opacity: .92;
+  transform: translate3d(0,-50%,0) scale(1) rotate(0deg);
+}
+
+.app .mainAction.importMainAction.iconTextButton:hover .buttonInlineIcon,
+.app .mainAction.importMainAction.iconTextButton:focus-visible .buttonInlineIcon{
+  transform: translate3d(0,0,0) scale(1.04) !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton:active{
+  transform: translate3d(2px,1px,0) scale(.985) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 5px 12px rgba(0,0,0,.18) !important;
+}
+
+@media (max-width: 860px){
+  .app .mainAction.importMainAction.iconTextButton,
+  .app .mainAction.importMainAction.iconTextButton:hover,
+  .app .mainAction.importMainAction.iconTextButton:focus-visible,
+  .app .mainAction.importMainAction.iconTextButton:active{
+    transform: none !important;
+  }
+
+  .app .mainAction.importMainAction.iconTextButton::after{
+    display: none !important;
+  }
+}
+/* end localtify v469 calm cute import music button */

@@ -4975,9 +4975,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
             </div>
 
             <div className="sidebarBottom">
-              <button className="mainAction importMainAction iconTextButton" onClick={importSongs} aria-label="Import songs">
+              <button className="mainAction importMainAction iconTextButton" onClick={importSongs} aria-label="Import music">
                 <FolderPlus className="buttonInlineIcon" size={17} strokeWidth={2.1} aria-hidden="true" />
-                <span className="buttonLabel">import songs</span>
+                <span className="buttonLabel">import music</span>
               </button>
             </div>
 
