@@ -11625,3 +11625,164 @@ body.isResizingPlayer .app *{
     rgba(9,8,15,.92) !important;
 }
 /* end localtify v470 readable contrast guard + import button repair */
+
+/* localtify v471 — calm header + search polish */
+.app .content > .headerBar{
+  min-height: 76px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: clamp(18px, 3vw, 38px) !important;
+  padding: 18px 22px 12px !important;
+  border-bottom: 1px solid rgba(255,255,255,.045) !important;
+  background:
+    linear-gradient(180deg, rgba(7, 7, 12, .46), rgba(7, 7, 12, .08)),
+    transparent !important;
+  box-shadow: none !important;
+}
+
+.app .headerText{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 4px !important;
+  align-content: start !important;
+}
+
+.app .headerText .eyebrow{
+  margin: 0 !important;
+  color: rgba(var(--text-rgb), .50) !important;
+  font-size: 10px !important;
+  font-weight: 1000 !important;
+  letter-spacing: .18em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+}
+
+.app .headerText h2{
+  margin: 0 !important;
+  color: rgba(var(--text-rgb), .96) !important;
+  font-size: clamp(28px, 3.3vw, 46px) !important;
+  font-weight: 1000 !important;
+  line-height: .92 !important;
+  letter-spacing: -.075em !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,.24) !important;
+}
+
+.app .headerTools.compactHeaderTools{
+  flex: 0 1 420px !important;
+  min-width: min(360px, 42vw) !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  padding-top: 7px !important;
+}
+
+.app .searchEasterWrap{
+  width: min(100%, 380px) !important;
+  position: relative !important;
+}
+
+.app .searchEasterWrap::before{
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 15% 50%, rgba(var(--lt-accent-rgb), .105), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent);
+  opacity: .72;
+}
+
+.app .searchEasterWrap:focus-within::before{
+  opacity: 1;
+}
+
+.app .search,
+.app .searchEasterWrap .search{
+  position: relative !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  border: 1px solid rgba(255,255,255,.095) !important;
+  border-radius: 999px !important;
+  color: rgba(var(--text-rgb), .92) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.018)),
+    rgba(8, 8, 14, .82) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 22px rgba(0,0,0,.18) !important;
+  outline: none !important;
+  font-size: 12px !important;
+  font-weight: 820 !important;
+  letter-spacing: -.005em !important;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 170ms cubic-bezier(.16, 1, .3, 1) !important;
+}
+
+.app .search::placeholder,
+.app .searchEasterWrap .search::placeholder{
+  color: rgba(var(--text-rgb), .43) !important;
+  font-weight: 780 !important;
+}
+
+.app .search:hover,
+.app .searchEasterWrap .search:hover{
+  border-color: rgba(255,255,255,.14) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.022)),
+    rgba(10, 10, 17, .86) !important;
+}
+
+.app .search:focus,
+.app .searchEasterWrap .search:focus{
+  border-color: rgba(var(--lt-accent-rgb), .42) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .075), rgba(255,255,255,.022)),
+    rgba(10, 10, 18, .90) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.052),
+    0 0 0 3px rgba(var(--lt-accent-rgb), .095),
+    0 10px 24px rgba(0,0,0,.20) !important;
+  transform: translate3d(0,-1px,0) !important;
+}
+
+.app .pageTransition{
+  padding-top: 2px !important;
+}
+
+.app .pageTransition > :first-child{
+  margin-top: 0 !important;
+}
+
+@media (max-width: 900px){
+  .app .content > .headerBar{
+    align-items: stretch !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 16px 16px 12px !important;
+  }
+
+  .app .headerTools.compactHeaderTools{
+    width: 100% !important;
+    min-width: 0 !important;
+    flex-basis: auto !important;
+    justify-content: stretch !important;
+    padding-top: 0 !important;
+  }
+
+  .app .searchEasterWrap{
+    width: 100% !important;
+  }
+
+  .app .headerText h2{
+    font-size: clamp(30px, 10vw, 42px) !important;
+  }
+}
+/* end localtify v471 calm header + search polish */
