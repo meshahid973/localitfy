@@ -1,0 +1,39 @@
+/* localtify 0.4.0 theme token foundation
+   This file owns shared color, radius, and shadow tokens.
+   Keep it visually neutral so old CSS keeps the same look while new CSS can use stable names. */
+
+:root{
+  --lt-bg: #080712;
+  --lt-bg-soft: #100b18;
+
+  --lt-surface: rgba(18, 15, 28, 0.86);
+  --lt-surface-soft: rgba(255, 255, 255, 0.045);
+  --lt-surface-raised: rgba(255, 255, 255, 0.075);
+
+  --lt-text: #f7f3ff;
+  --lt-muted: rgba(247, 243, 255, 0.62);
+  --lt-faint: rgba(247, 243, 255, 0.38);
+
+  --lt-border: rgba(255, 255, 255, 0.10);
+  --lt-border-strong: rgba(255, 255, 255, 0.18);
+
+  --lt-accent: #ee6be8;
+  --lt-accent-rgb: 238, 107, 232;
+  --lt-danger: #ff6b8a;
+
+  --lt-radius-sm: 12px;
+  --lt-radius-md: 18px;
+  --lt-radius-lg: 26px;
+
+  --lt-shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.34);
+
+  --bg: var(--lt-bg);
+  --text: var(--lt-text);
+  --text-2: var(--lt-muted);
+  --muted: var(--lt-muted);
+  --faint: var(--lt-faint);
+  --accent: var(--lt-accent);
+  --accent-rgb: var(--lt-accent-rgb);
+  --danger: var(--lt-danger);
+  --border: var(--lt-border);
+}
