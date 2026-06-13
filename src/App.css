@@ -11534,3 +11534,94 @@ body.isResizingPlayer .app *{
   }
 }
 /* end localtify v469 calm cute import music button */
+
+/* localtify v470 — readable contrast guard + import button repair */
+.app{
+  color: var(--lt-text, rgba(255,255,255,.92));
+  text-rendering: geometricPrecision;
+}
+
+/* General readable surfaces: keep blur/motion, just make text/borders less muddy. */
+.app :is(.panel, .ambientSurface, .headerBar, .sidebar, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel){
+  color: rgba(var(--text-rgb), .90);
+}
+
+.app :is(.panel, .ambientSurface, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel){
+  border-color: rgba(255,255,255,.105);
+}
+
+.app :is(.softText, .panel p, .navText small, .downloadNotice, .converterBoxV031 p){
+  color: rgba(var(--text-rgb), .68);
+}
+
+.app :is(.eyebrow, .sidebarGroupLabelV467){
+  color: rgba(var(--text-rgb), .48);
+}
+
+.app :is(input, textarea, .search){
+  color: rgba(var(--text-rgb), .88) !important;
+  border-color: rgba(255,255,255,.105) !important;
+  background-color: rgba(10,9,16,.78) !important;
+}
+
+.app :is(input, textarea, .search)::placeholder{
+  color: rgba(var(--text-rgb), .46) !important;
+}
+
+/* Repair import music button contrast: no black text, no muddy label. */
+.app .mainAction.importMainAction.iconTextButton,
+.app .mainAction.importMainAction.iconTextButton:hover,
+.app .mainAction.importMainAction.iconTextButton:focus-visible,
+.app .mainAction.importMainAction.iconTextButton:active{
+  color: rgba(255,255,255,.94) !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,.28) !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton{
+  border-color: rgba(var(--lt-accent-rgb), .34) !important;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255,255,255,.13), transparent 34%),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .22), rgba(var(--lt-accent-rgb), .105)),
+    rgba(11,10,18,.86) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.075),
+    0 8px 18px rgba(0,0,0,.20) !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton .buttonInlineIcon,
+.app .mainAction.importMainAction.iconTextButton .buttonLabel,
+.app .mainAction.importMainAction.iconTextButton svg,
+.app .mainAction.importMainAction.iconTextButton path{
+  color: rgba(255,255,255,.94) !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton .buttonLabel{
+  font-weight: 950 !important;
+  letter-spacing: -.012em !important;
+}
+
+.app .mainAction.importMainAction.iconTextButton:hover,
+.app .mainAction.importMainAction.iconTextButton:focus-visible{
+  border-color: rgba(var(--lt-accent-rgb), .48) !important;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255,255,255,.16), transparent 34%),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .285), rgba(var(--lt-accent-rgb), .135)),
+    rgba(13,12,22,.90) !important;
+}
+
+/* keep the sparkle readable, but small */
+.app .mainAction.importMainAction.iconTextButton::after{
+  color: rgba(255,255,255,.92) !important;
+  text-shadow: 0 0 10px rgba(var(--lt-accent-rgb), .28);
+}
+
+/* Active press stays physical, not flashy. */
+.app .mainAction.importMainAction.iconTextButton:active{
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .20), rgba(var(--lt-accent-rgb), .10)),
+    rgba(9,8,15,.92) !important;
+}
+/* end localtify v470 readable contrast guard + import button repair */
