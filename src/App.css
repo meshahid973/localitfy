@@ -11274,3 +11274,142 @@ body.isResizingPlayer .app *{
   margin-bottom: 10px;
 }
 /* end localtify v467 sidebar grouping */
+
+/* localtify v468 — sidebar selected pill + spacing polish */
+.app .sidebarNavGroupsV467{
+  gap: 2px !important;
+}
+
+.app .sidebarNavGroupV467{
+  gap: 6px !important;
+}
+
+.app .sidebarNavGroupV467 + .sidebarNavGroupV467{
+  margin-top: 8px !important;
+}
+
+.app .sidebarGroupLabelV467{
+  margin: 0 0 2px 13px !important;
+  color: rgba(var(--text-rgb), .36) !important;
+  font-size: 8.5px !important;
+  font-weight: 1000 !important;
+  letter-spacing: .19em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+}
+
+.app .navGroupedV467{
+  gap: 5px !important;
+}
+
+/* No left glow / Discord indicator. Active state should be a soft pill only. */
+.app .sidebar .navItem::before,
+.app .sidebar .navItem::after{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .sidebar .navItem{
+  min-height: 46px !important;
+  border-radius: 16px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  background-image: none !important;
+  color: rgba(var(--text-rgb), .62) !important;
+  transform: translate3d(0,0,0) !important;
+  box-shadow: none !important;
+  transition:
+    transform 170ms cubic-bezier(.16, 1, .3, 1),
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease !important;
+}
+
+.app .sidebar .navItem:hover,
+.app .sidebar .navItem:focus-visible{
+  color: rgba(var(--text-rgb), .92) !important;
+  background: rgba(255,255,255,.045) !important;
+  border-color: rgba(255,255,255,.075) !important;
+  transform: translate3d(2px,0,0) !important;
+  box-shadow: none !important;
+}
+
+.app .sidebar .navItem.active,
+.app .sidebar .navItem.active:hover,
+.app .sidebar .navItem.active:focus-visible{
+  color: var(--lt-text) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .135), rgba(var(--lt-accent-rgb), .072)),
+    rgba(var(--lt-accent-rgb), .052) !important;
+  border-color: rgba(var(--lt-accent-rgb), .24) !important;
+  transform: translate3d(2px,0,0) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .06) !important;
+}
+
+.app .sidebar .navItem .navIcon{
+  color: rgba(var(--text-rgb), .66) !important;
+  opacity: 1 !important;
+  transform: translate3d(0,0,0) scale(1) !important;
+  filter: none !important;
+  transition:
+    transform 170ms cubic-bezier(.16, 1, .3, 1),
+    color 150ms ease,
+    opacity 150ms ease !important;
+}
+
+.app .sidebar .navItem:hover .navIcon,
+.app .sidebar .navItem:focus-visible .navIcon,
+.app .sidebar .navItem.active .navIcon{
+  color: var(--lt-text) !important;
+  transform: translate3d(0,0,0) scale(1.04) !important;
+}
+
+.app .sidebar .navItem.active .navText strong,
+.app .sidebar .navItem.active:hover .navText strong,
+.app .sidebar .navItem.active:focus-visible .navText strong{
+  color: var(--lt-text) !important;
+}
+
+.app .sidebar .navItem.active .navText small,
+.app .sidebar .navItem.active:hover .navText small,
+.app .sidebar .navItem.active:focus-visible .navText small{
+  color: rgba(var(--text-rgb), .62) !important;
+}
+
+.app .sidebar .navItem:hover .navLucideIcon,
+.app .sidebar .navItem[aria-label="open albums"]:hover .navLucideIcon,
+.app .sidebar .navItem[aria-label="open settings"]:hover .navLucideIcon,
+.app .sidebar .navItem[aria-label="open liked"]:hover .navLucideIcon{
+  animation: none !important;
+  transform: translate3d(0,0,0) scale(1.04) !important;
+}
+
+.app .sidebarNavGroupV467 .navDivider{
+  width: calc(100% - 34px) !important;
+  height: 1px !important;
+  margin: 8px 17px 10px !important;
+  background: rgba(255,255,255,.055) !important;
+  opacity: .58 !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+
+@media (max-width: 860px){
+  .app .sidebarGroupLabelV467{
+    display: none !important;
+  }
+
+  .app .sidebarNavGroupV467 + .sidebarNavGroupV467{
+    margin-top: 4px !important;
+  }
+
+  .app .sidebar .navItem,
+  .app .sidebar .navItem:hover,
+  .app .sidebar .navItem.active{
+    transform: none !important;
+  }
+}
+/* end localtify v468 sidebar selected pill + spacing polish */
