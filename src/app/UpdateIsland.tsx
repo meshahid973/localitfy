@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { AnimatePresence, motion as Motion } from "motion/react";
-import { Surface, SurfaceActions, SurfaceHeader } from "../ui/Surface";
+import { Surface, SurfaceActions, SurfaceBody, SurfaceHeader } from "../ui/Surface";
 import {
   createVerticalDragConstraints,
   physicalDragDefaults,
@@ -10,6 +10,13 @@ import {
 function clampPercent(value: number) {
   if (!Number.isFinite(Number(value))) return 0;
   return Math.min(100, Math.max(0, Number(value)));
+}
+
+function updateTone(status: string) {
+  if (status === "downloaded") return "success";
+  if (status === "error") return "danger";
+  if (status === "downloading" || status === "available") return "accent";
+  return "neutral";
 }
 
 type UpdateIslandProps = {
@@ -45,6 +52,11 @@ export default function UpdateIsland({
   onCheckAgain,
   onDismiss
 }: UpdateIslandProps) {
+  const versionLabel = updatePrompt.version || appVersion;
+  const progress = clampPercent(updatePrompt.percent);
+  const showClose = updatePrompt.status !== "downloading";
+  const surfaceTone = updateTone(updatePrompt.status);
+
   const dragProps = reducedMotion
     ? {}
     : {
@@ -61,7 +73,7 @@ export default function UpdateIsland({
     <AnimatePresence initial={false}>
       {show ? (
         <Motion.div
-          key={`update-ribbon-${updatePrompt.status}-${updatePrompt.version || appVersion}`}
+          key={`update-ribbon-${updatePrompt.status}-${versionLabel}`}
           className="updateToastLayer topUpdateRibbonLayer"
           role="presentation"
           initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
@@ -83,6 +95,10 @@ export default function UpdateIsland({
 
           <Surface
             as={Motion.section}
+            tone={surfaceTone}
+            density="compact"
+            elevated
+            interactive
             className={`updateToastCard topUpdateRibbon ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
             onClick={(event) => event.stopPropagation()}
             role="status"
@@ -96,6 +112,7 @@ export default function UpdateIsland({
           >
             <SurfaceHeader
               as={Motion.div}
+              density="compact"
               className="topUpdateRibbonMain"
               initial={reducedMotion ? false : { opacity: 0, y: 6 }}
               animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
@@ -106,10 +123,10 @@ export default function UpdateIsland({
                 <StatusIcon status={updatePrompt.status} />
               </div>
 
-              <div className="updateToastText topUpdateRibbonText">
+              <SurfaceBody className="updateToastText topUpdateRibbonText" density="compact">
                 <p className="eyebrow">localtify</p>
                 <h3>{titleForPrompt(updatePrompt)}</h3>
-              </div>
+              </SurfaceBody>
             </SurfaceHeader>
 
             <Motion.div
@@ -127,11 +144,12 @@ export default function UpdateIsland({
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 4 }}
                 transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.14 }}
               >
-                <span className="updateVersionPill">version {updatePrompt.version || appVersion}</span>
+                <span className="updateVersionPill">version {versionLabel}</span>
               </Motion.div>
 
               <SurfaceActions
                 as={Motion.div}
+                density="compact"
                 className="updateToastActions topUpdateRibbonActions"
                 initial={reducedMotion ? false : { opacity: 0, x: 8 }}
                 animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
@@ -156,7 +174,7 @@ export default function UpdateIsland({
                   </button>
                 ) : null}
 
-                {updatePrompt.status !== "downloading" ? (
+                {showClose ? (
                   <button className="updateToastClose" type="button" onClick={onDismiss} aria-label="Dismiss update notice">
                     <CloseIcon />
                   </button>
@@ -173,7 +191,7 @@ export default function UpdateIsland({
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scaleX: 0.96 }}
                 transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.2 }}
               >
-                <span style={{ width: `${clampPercent(updatePrompt.percent)}%` }} />
+                <span style={{ width: `${progress}%` }} />
               </Motion.div>
             ) : null}
           </Surface>
