@@ -436,8 +436,10 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   undoLastMetadataCleanAction,
   metadataUndoCount = 0,
   rebuildSearchIndexAction,
+  importSongs,
   importAnimation,
   libraryScanMessage,
+  changeView,
   pixelArtAssets,
   pixelArtBusy,
   randomizeAllCovers,
@@ -590,13 +592,6 @@ return (
               value={readSettingChoice(settings, "libraryRowStyle", "comfyRows")}
               onChange={(value) => updateSetting("libraryRowStyle", value)}
             />
-            <VisualOptionGroup
-              title="Player background"
-              note="Bottom player style. Flat is safest for release."
-              options={PLAYER_BACKGROUND_OPTIONS}
-              value={readSettingChoice(settings, "playerBackgroundStyle", "flat")}
-              onChange={(value) => updateSetting("playerBackgroundStyle", value)}
-            />
           </div>
         </div>
         <div className="settingsPanelCard customThemeManagerV027">
@@ -645,6 +640,10 @@ return (
               ))}
             </div>
           ) : null}
+          <div className="customThemeSimpleHintV439">
+            <strong>Live colors</strong>
+            <span>Drag the color picker to preview instantly. The app saves once after you stop, so it stays smooth.</span>
+          </div>
           <div className="customThemeTokenGridV027">
             {customThemeTokens.map((token) => {
               const hexDraft = customColorDrafts[token.key] ?? token.value;
@@ -719,6 +718,7 @@ return (
               </div>
               <div className="settingsMiniGrid appearanceMiniGridV356">
                 <ToggleRow label="Soft corners" help="Uses rounder cards and buttons." checked={settings.softCorners} onChange={(value) => updateSetting("softCorners", value)} />
+                <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={settings.showFloatingNotes} onChange={(value) => updateSetting("showFloatingNotes", value)} />
                 <ToggleRow label="Animated glow" help="Keeps ambience on, but pauses it during fast screen switches." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
                 <ToggleRow label="More quick-library blur" help="Adds stronger album-cover blur behind the quick library cards." checked={settings.quickLibraryMoreBlur !== false} onChange={(value) => updateSetting("quickLibraryMoreBlur", value)} />
                 <ToggleRow label="cat....." help="Tiny cat follows your cursor. Double-click it to lie down. Middle-click it to stop or follow again." checked={settings.catBuddyEnabled === true} onChange={(value) => updateSetting("catBuddyEnabled", value)} />
@@ -784,12 +784,29 @@ return (
             </div>
             <RangeRow label="Speed" value={settings.playbackSpeed} min={0.75} max={1.5} step={0.05} suffix="x" onChange={(value) => updateSetting("playbackSpeed", value)} />
             <RangeRow label="Volume" value={settings.volume} min={0} max={1} step={0.01} suffix="" onChange={(value) => updateSetting("volume", value)} />
-            <ToggleRow label="Expanded now playing" help="Makes the home player hero larger." checked={settings.heroExpanded} onChange={(value) => updateSetting("heroExpanded", value)} />
-            <ToggleRow label="Compact player" help="Keeps the bottom player smaller." checked={settings.compactPlayer} onChange={(value) => updateSetting("compactPlayer", value)} />
             <ToggleRow label="Volume normalization" help="Balances loud and quiet files." checked={settings.volumeNormalization} onChange={(value) => updateSetting("volumeNormalization", value)} />
             <ToggleRow label="Per-song volume" help="Remembers custom volume per track." checked={settings.perSongVolumeMemory} onChange={(value) => updateSetting("perSongVolumeMemory", value)} />
             <ToggleRow label="Sleep timer" help="Lets the app stop after a set time." checked={settings.sleepTimerMinutes > 0} onChange={(value) => updateSetting("sleepTimerMinutes", value ? 30 : 0)} />
           </div>
+        </div>
+        <div className="settingsPanelCard settingsFullWidthPanel playerOwnershipPanelV445">
+          <div className="settingsPanelHeader">
+            <div>
+              <strong>Player layout</strong>
+              <span>Player size and bottom bar style live here, not Appearance.</span>
+            </div>
+          </div>
+          <div className="settingsMiniGrid">
+            <ToggleRow label="Expanded now playing" help="Makes the home player hero larger." checked={settings.heroExpanded} onChange={(value) => updateSetting("heroExpanded", value)} />
+            <ToggleRow label="Compact player" help="Keeps the bottom player smaller." checked={settings.compactPlayer} onChange={(value) => updateSetting("compactPlayer", value)} />
+          </div>
+          <VisualOptionGroup
+            title="Player background"
+            note="Bottom player style. Flat is safest for release."
+            options={PLAYER_BACKGROUND_OPTIONS}
+            value={readSettingChoice(settings, "playerBackgroundStyle", "flat")}
+            onChange={(value) => updateSetting("playerBackgroundStyle", value)}
+          />
         </div>
       </section>
     ) : null}
@@ -878,22 +895,6 @@ return (
           </div>
           <p className="settingsHintText">Pixel shuffle rotates through available Discord image assets before repeating them.</p>
         </div>
-        <div className="settingsPanelCard">
-          <div className="settingsPanelHeader">
-            <div>
-              <strong>Title cleanup</strong>
-              <span>Controls the text cleanup used by Discord and metadata previews.</span>
-            </div>
-          </div>
-          <div className="optionGrid three discordOptionGrid">
-            {discordCleanupOptions.map((option) => (
-              <button key={option.id} className={`settingsChoice ${settings.discordTitleCleanup === option.id ? "active" : ""}`} type="button" onClick={() => updateSetting("discordTitleCleanup", option.id)}>
-                <strong>{option.name}</strong>
-                <small>{option.note}</small>
-              </button>
-            ))}
-          </div>
-        </div>
       </section>
     ) : null}
     {settingsCategory === "library" || settingsCategory === "metadata" ? (
@@ -926,6 +927,7 @@ return (
             <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataSelectedCount} onClick={() => cleanSelectedMetadataAction?.()}>preview selected {metadataSelectedCount ? `(${metadataSelectedCount})` : ""}</button>
             <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataUndoCount} onClick={() => void undoLastMetadataCleanAction?.()}>undo last clean {metadataUndoCount ? `(${metadataUndoCount})` : ""}</button>
             <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
+            <button className="settingsActionButton settingsGhostAction" type="button" onClick={importSongs} disabled={importAnimation.active}>import songs</button>
           </div>
           {metadataCleanPreview ? (
             <div className="metadataCleanerPreviewBoxV425 metadataCleanerPreviewBoxV440" role="status" aria-live="polite">
@@ -978,9 +980,11 @@ return (
             </div>
           </div>
           <div className="settingsActionRow">
+            <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={() => changeView("covers", "settings")}>open cover gallery</button>
             <button className="settingsActionButton" type="button" disabled={pixelArtBusy || songs.length === 0} onClick={randomizeAllCovers}>randomize all covers</button>
             <button className="settingsActionButton" type="button" disabled={pixelArtBusy} onClick={rescanPixelArtFolder}>rescan pixel art</button>
           </div>
+          <p className="settingsHintText">{pixelArtBusy ? "working on pixel art..." : "Extra visual toggles were removed from this page because real cover editing belongs in the cover gallery."}</p>
         </div>
       </section>
     ) : null}

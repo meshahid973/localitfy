@@ -5631,11 +5631,11 @@ function MainModeApp() {
 
       if (playlistIndex !== -1) {
         if (isShuffle && activePlaylistSongs.length > 1) {
-          const otherPlaylistSongs = activePlaylistSongs.filter((song) => song.id !== currentSong.id);
-          const randomPlaylistSong = otherPlaylistSongs[Math.floor(Math.random() * otherPlaylistSongs.length)];
-          if (randomPlaylistSong) {
+          const { nextSong } = buildShuffleQueue(activePlaylistSongs, currentSong.id);
+
+          if (nextSong) {
             return {
-              song: randomPlaylistSong,
+              song: nextSong,
               playlistId: activePlaylist.id,
               kind: "playlist-shuffle" as const
             };
@@ -5658,12 +5658,11 @@ function MainModeApp() {
     }
 
     if (isShuffle && playableSongs.length > 1) {
-      const otherSongs = playableSongs.filter((song) => song.id !== currentId);
-      const randomSong = otherSongs[Math.floor(Math.random() * otherSongs.length)];
+      const { nextSong } = buildShuffleQueue(playableSongs, currentId);
 
-      if (randomSong) {
+      if (nextSong) {
         return {
-          song: randomSong,
+          song: nextSong,
           playlistId: null,
           kind: "library-shuffle" as const
         };
@@ -7407,9 +7406,9 @@ function MainModeApp() {
     if (safeMax <= 1) return 0;
 
     try {
-      const randomValues = new Uint32Array(1);
-      window.crypto?.getRandomValues(randomValues);
-      return randomValues[0] % safeMax;
+      const values = new Uint32Array(1);
+      window.crypto?.getRandomValues(values);
+      return values[0] % safeMax;
     } catch {
       return Math.floor(Math.random() * safeMax);
     }
@@ -7438,17 +7437,25 @@ function MainModeApp() {
     return shuffled;
   }
 
-  function queueShuffledLibrary(shouldPlay = true) {
-    const shuffled = makeShuffledPlayableSongs(playableSongs, currentId);
+  function buildShuffleQueue(sourceSongs: Song[], avoidFirstSongId = "") {
+    const shuffled = makeShuffledPlayableSongs(sourceSongs, avoidFirstSongId);
+    const [nextSong, ...queuedSongs] = shuffled;
 
-    if (shuffled.length < 2) {
+    return {
+      shuffled,
+      nextSong: nextSong || null,
+      queuedSongIds: queuedSongs.map((song) => song.id)
+    };
+  }
+
+  async function shuffleLibrarySongsAction() {
+    const { shuffled, nextSong, queuedSongIds } = buildShuffleQueue(playableSongs, currentId);
+
+    if (!nextSong || shuffled.length < 2) {
       setStatusText("add more playable songs before shuffling");
       showAppToast("add more playable songs before shuffling", "info");
-      return null;
+      return;
     }
-
-    const [firstSong, ...queuedSongs] = shuffled;
-    const queuedSongIds = queuedSongs.map((song) => song.id);
 
     setIsShuffle(true);
     setActivePlaylistId(null);
@@ -7456,19 +7463,11 @@ function MainModeApp() {
     setQueueHistory([]);
     setPlayQueue(queuedSongIds);
 
-    if (shouldPlay) {
-      void selectSong(firstSong.id, true, { playlistId: null });
-    }
+    await selectSong(nextSong.id, true, { playlistId: null });
 
     setLibraryScanMessage(`library shuffle ready · ${queuedSongIds.length} queued`);
     setStatusText(`shuffling library · ${shuffled.length} songs`);
     showAppToast(`shuffling library · ${shuffled.length} songs`, "success");
-
-    return { firstSong, queuedSongIds };
-  }
-
-  async function shuffleLibrarySongsAction() {
-    queueShuffledLibrary(true);
   }
 
   async function importSongs() {
@@ -9690,9 +9689,13 @@ function MainModeApp() {
 
       if (playlistIndex !== -1) {
         if (isShuffle && activePlaylistSongs.length > 1) {
-          const otherPlaylistSongs = activePlaylistSongs.filter((song) => song.id !== currentSong.id);
-          const randomPlaylistSong = otherPlaylistSongs[Math.floor(Math.random() * otherPlaylistSongs.length)];
-          if (randomPlaylistSong) void selectSong(randomPlaylistSong.id, forcePlay, { playlistId: activePlaylist.id });
+          const { nextSong, queuedSongIds } = buildShuffleQueue(activePlaylistSongs, currentSong.id);
+
+          if (nextSong) {
+            setPlayQueue(queuedSongIds);
+            void selectSong(nextSong.id, forcePlay, { playlistId: activePlaylist.id });
+          }
+
           return;
         }
 
@@ -9712,12 +9715,11 @@ function MainModeApp() {
     }
 
     if (isShuffle && playableSongs.length > 1) {
-      const shuffled = makeShuffledPlayableSongs(playableSongs, currentId);
-      const [nextSong, ...nextQueue] = shuffled;
+      const { nextSong, queuedSongIds } = buildShuffleQueue(playableSongs, currentId);
 
       if (nextSong) {
         setActivePlaylistId(null);
-        setPlayQueue(nextQueue.map((song) => song.id));
+        setPlayQueue(queuedSongIds);
         void selectSong(nextSong.id, forcePlay, { playlistId: null });
       }
 
