@@ -109,25 +109,25 @@ button:disabled:active{
 
 .heroLayoutMotion.heroLayoutPulseA,
 .heroLayoutMotion.heroLayoutPulseB{
-  animation: none;
-  transform-origin: center;
+  animation: localtifyHeroReflow 440ms var(--motion-ease) both;
+  transform-origin: top center;
 }
 
 .heroLayoutMotion .heroTextClean,
 .heroLayoutMotion .heroArtWrap,
 .heroLayoutMotion .heroTitle,
 .heroLayoutMotion .heroTinyButton{
-  transition-property: opacity, filter;
-  transition-duration: var(--motion-normal);
+  transition-property: transform, opacity, filter;
+  transition-duration: var(--motion-slow);
   transition-timing-function: var(--motion-ease);
 }
 
 .heroLayoutMotion.heroExpanded .heroTextClean{
-  transform: none;
+  transform: translate3d(0, -2px, 0);
 }
 
 .heroLayoutMotion.heroExpanded .heroArtWrap{
-  transform: none;
+  transform: translate3d(-4px, 0, 0) scale(1.025);
 }
 
 .heroExpandedShelf{
@@ -245,6 +245,11 @@ body.localitfySongDragging .app .coverAura::before{
   0%{ opacity: 0; transform: translate3d(8px, 0, 0) scale(0.975); }
   72%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1.012); }
   100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes localtifyHeroReflow{
+  from{ opacity: 0.94; transform: translate3d(0, 8px, 0) scale(0.996); }
+  to{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes localtifyShelfIn{
@@ -2416,6 +2421,7 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   }
 }
 
+
 /* localtify 0.3.9 V320 — stabilized physical velocity motion.
    Transform-only, no blur/filter writes, and scoped to sidebar/player/hero controls. */
 .app :is(.sidebar, .playerBar, .hero) .localtifyProximityTarget{
@@ -2473,6 +2479,7 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
     transform: translateZ(0) scale(var(--prox-scale, 1)) !important;
   }
 }
+
 
 /* localtify 0.3.9 V320 — final interaction guard.
    Velocity/proximity motion is only for safe controls; cards/lists never get owned by pointer JS. */
@@ -2726,3 +2733,59 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   border-radius: 999px;
   background: currentColor;
 }
+
+/* localtify v459 reduced motion owner */
+:root{
+  --lt-motion-fast: 140ms;
+  --lt-motion-normal: 220ms;
+  --lt-motion-slow: 360ms;
+}
+
+.app[data-reduce-motion="true"],
+.app.reduceMotion,
+body.reduceMotion{
+  scroll-behavior: auto !important;
+}
+
+.app[data-reduce-motion="true"] *,
+.app[data-reduce-motion="true"] *::before,
+.app[data-reduce-motion="true"] *::after,
+.app.reduceMotion *,
+.app.reduceMotion *::before,
+.app.reduceMotion *::after,
+body.reduceMotion *,
+body.reduceMotion *::before,
+body.reduceMotion *::after{
+  animation-duration: 0.001ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
+}
+
+.app[data-reduce-motion="true"] :is(.ambientSurface::before, .ambientSurface::after, .secretLayer, .starParticle, .starParticleLarge),
+.app.reduceMotion :is(.ambientSurface::before, .ambientSurface::after, .secretLayer, .starParticle, .starParticleLarge),
+body.reduceMotion :is(.ambientSurface::before, .ambientSurface::after, .secretLayer, .starParticle, .starParticleLarge){
+  animation: none !important;
+}
+
+.app[data-reduce-motion="true"] :is(.homeAlbumCard, .songRow, .circleButton, .softButton, .primaryButton, .ghostButton),
+.app.reduceMotion :is(.homeAlbumCard, .songRow, .circleButton, .softButton, .primaryButton, .ghostButton),
+body.reduceMotion :is(.homeAlbumCard, .songRow, .circleButton, .softButton, .primaryButton, .ghostButton){
+  will-change: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .app:not([data-reduce-motion="false"]) *,
+  .app:not([data-reduce-motion="false"]) *::before,
+  .app:not([data-reduce-motion="false"]) *::after{
+    animation-duration: 0.001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* end localtify v459 reduced motion owner */

@@ -8351,3 +8351,187 @@ body.localitfyThemePainting .toggleRow{
   background: rgba(255,255,255,.86);
   box-shadow: inset 0 -2px 4px rgba(0,0,0,.22);
 }
+
+.bouncyHeroRangeRowV448{
+  position: relative;
+  min-height: 112px;
+  padding: 16px;
+  border: 1px solid rgba(var(--lt-accent-rgb), .20);
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 16px;
+  align-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at var(--bouncy-progress, 50%) 100%, rgba(var(--lt-accent-rgb), .18), transparent 38%),
+    linear-gradient(180deg, rgba(255,255,255,.060), rgba(255,255,255,.026)),
+    rgba(255,255,255,.030);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 14px 34px rgba(0,0,0,.18);
+}
+
+.bouncyHeroRangeRowV448::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .42;
+  background:
+    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .13), transparent);
+  transform: translateX(calc((var(--bouncy-progress, 50%) - 50%) * .35));
+}
+
+.bouncyHeroRangeCopyV448{
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.bouncyHeroRangeCopyV448 strong{
+  color: var(--lt-text);
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+
+.bouncyHeroRangeCopyV448 small{
+  max-width: 38rem;
+  color: var(--lt-muted);
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 760;
+}
+
+.bouncyHeroRangeValueV448{
+  position: relative;
+  z-index: 1;
+  min-width: 58px;
+  min-height: 34px;
+  padding: 0 11px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--lt-text);
+  border: 1px solid rgba(var(--lt-accent-rgb), .24);
+  background: rgba(var(--lt-accent-rgb), .12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: -.015em;
+}
+
+.bouncyHeroRangeInputV448{
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.bouncyHeroRangeInputV448::-webkit-slider-runnable-track{
+  height: 8px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, var(--lt-accent) 0 var(--bouncy-progress, 50%), rgba(255,255,255,.11) var(--bouncy-progress, 50%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 0 18px rgba(var(--lt-accent-rgb), .10);
+}
+
+.bouncyHeroRangeInputV448::-webkit-slider-thumb{
+  width: 22px;
+  height: 22px;
+  margin-top: -7px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,.95), rgba(255,255,255,.15) 30%, transparent 31%),
+    var(--lt-accent);
+  box-shadow:
+    0 0 0 5px rgba(var(--lt-accent-rgb), .16),
+    0 10px 24px rgba(var(--lt-accent-rgb), .28),
+    0 4px 14px rgba(0,0,0,.34);
+}
+
+.bouncyHeroRangeInputV448::-moz-range-track{
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.11);
+}
+
+.bouncyHeroRangeInputV448::-moz-range-progress{
+  height: 8px;
+  border-radius: 999px;
+  background: var(--lt-accent);
+}
+
+.bouncyHeroRangeInputV448::-moz-range-thumb{
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--lt-accent);
+  box-shadow:
+    0 0 0 5px rgba(var(--lt-accent-rgb), .16),
+    0 10px 24px rgba(var(--lt-accent-rgb), .28),
+    0 4px 14px rgba(0,0,0,.34);
+}
+
+.visualOptionGridV205{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 8px;
+}
+
+.visualOptionButtonV205{
+  min-height: 54px;
+  padding: 12px 13px;
+  border: 1px solid rgba(255,255,255,.085);
+  border-radius: 15px;
+  display: grid;
+  gap: 4px;
+  align-content: center;
+  text-align: left;
+  color: var(--lt-text);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.026)),
+    rgba(255,255,255,.026);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+}
+
+.visualOptionButtonV205 strong{
+  color: var(--lt-text);
+  font-size: 13px;
+  line-height: 1.05;
+}
+
+.visualOptionButtonV205 span{
+  color: var(--lt-muted);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 760;
+}
+
+.visualOptionButtonV205.isActive,
+.visualOptionButtonV205[aria-pressed="true"]{
+  border-color: rgba(var(--lt-accent-rgb), .42);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(var(--lt-accent-rgb), .20), transparent 44%),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .14), rgba(255,255,255,.028)),
+    rgba(0,0,0,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 12px 30px rgba(var(--lt-accent-rgb), .10);
+}
