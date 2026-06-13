@@ -250,67 +250,6 @@ function RangeRow({
     </label>
   );
 }
-function BouncyHeroRangeRow({
-  label,
-  help,
-  value,
-  min,
-  max,
-  step,
-  displayValue,
-  onChange
-}: {
-  label: string;
-  help: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  displayValue: (value: number) => string;
-  onChange: (value: number) => void | Promise<void>;
-}) {
-  const safeValue = Number.isFinite(Number(value)) ? Number(value) : 1;
-  const [draftValue, setDraftValue] = useState(safeValue);
-  const clampedValue = clamp(draftValue, min, max);
-  const fill = ((clampedValue - min) / (max - min || 1)) * 100;
-
-  useEffect(() => {
-    setDraftValue(safeValue);
-  }, [safeValue]);
-
-  function updateValue(rawValue: number) {
-    const nextValue = Number(clamp(rawValue, min, max).toFixed(2));
-    setDraftValue(nextValue);
-    void onChange(nextValue);
-  }
-
-  return (
-    <label className="bouncyHeroRangeRowV448" title={`${label}: ${displayValue(clampedValue)}`}>
-      <span className="bouncyHeroRangeCopyV448">
-        <strong>{label}</strong>
-        <small>{help}</small>
-      </span>
-      <span className="bouncyHeroRangeValueV448">{displayValue(clampedValue)}</span>
-      <span
-        className="bouncyHeroSliderShellV448"
-        style={{ ["--bouncy-progress" as string]: `${clamp(fill, 0, 100)}%` } as CSSProperties}
-      >
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={clampedValue}
-          onChange={(event) => updateValue(Number(event.currentTarget.value))}
-        />
-        <span className="bouncyHeroSliderRailV448" aria-hidden="true">
-          <span className="bouncyHeroSliderFillV448" />
-          <span className="bouncyHeroSliderThumbV448"><span /></span>
-        </span>
-      </span>
-    </label>
-  );
-}
 type VisualCustomizationOption = {
   id: string;
   label: string;
@@ -407,8 +346,7 @@ const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "hover", label: "Expand on hover", note: "hover open" }
 ];
 const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
-  { id: "flat", label: "Flat", note: "plain bar" },
-  { id: "coverBlur", label: "Cover blur", note: "album glow" },
+  { id: "flat", label: "Flat", note: "flat" },
   { id: "oledBlack", label: "OLED black", note: "black" }
 ];
 function detectSettingsPlatform(): Required<PlatformInfoLike> {
@@ -498,10 +436,8 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   undoLastMetadataCleanAction,
   metadataUndoCount = 0,
   rebuildSearchIndexAction,
-  importSongs,
   importAnimation,
   libraryScanMessage,
-  changeView,
   pixelArtAssets,
   pixelArtBusy,
   randomizeAllCovers,
@@ -702,10 +638,6 @@ return (
               ))}
             </div>
           ) : null}
-          <div className="customThemeSimpleHintV439">
-            <strong>Live colors</strong>
-            <span>Drag the color picker to preview instantly. The app saves once after you stop, so it stays smooth.</span>
-          </div>
           <div className="customThemeTokenGridV027">
             {customThemeTokens.map((token) => {
               const hexDraft = customColorDrafts[token.key] ?? token.value;
@@ -780,7 +712,6 @@ return (
               </div>
               <div className="settingsMiniGrid appearanceMiniGridV356">
                 <ToggleRow label="Soft corners" help="Uses rounder cards and buttons." checked={settings.softCorners} onChange={(value) => updateSetting("softCorners", value)} />
-                <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={settings.showFloatingNotes} onChange={(value) => updateSetting("showFloatingNotes", value)} />
                 <ToggleRow label="Animated glow" help="Keeps ambience on, but pauses it during fast screen switches." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
                 <ToggleRow label="More quick-library blur" help="Adds stronger album-cover blur behind the quick library cards." checked={settings.quickLibraryMoreBlur !== false} onChange={(value) => updateSetting("quickLibraryMoreBlur", value)} />
                 <ToggleRow label="cat....." help="Tiny cat follows your cursor. Double-click it to lie down. Middle-click it to stop or follow again." checked={settings.catBuddyEnabled === true} onChange={(value) => updateSetting("catBuddyEnabled", value)} />
@@ -864,20 +795,10 @@ return (
           </div>
           <VisualOptionGroup
             title="Player background"
-            note="Bottom player style. Cover blur keeps the original album glow."
+            note="Bottom player style. Flat is safest for release."
             options={PLAYER_BACKGROUND_OPTIONS}
-            value={readSettingChoice(settings, "playerBackgroundStyle", "coverBlur")}
+            value={readSettingChoice(settings, "playerBackgroundStyle", "flat")}
             onChange={(value) => updateSetting("playerBackgroundStyle", value)}
-          />
-          <BouncyHeroRangeRow
-            label="Hero image brightness"
-            help="Only changes the big now playing cover on the home page."
-            value={Number(settings.homeHeroCoverBrightness ?? 1)}
-            min={0.65}
-            max={1.55}
-            step={0.05}
-            displayValue={(value) => `${Math.round(value * 100)}%`}
-            onChange={(value) => updateSetting("homeHeroCoverBrightness", value)}
           />
         </div>
       </section>
@@ -999,7 +920,6 @@ return (
             <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataSelectedCount} onClick={() => cleanSelectedMetadataAction?.()}>preview selected {metadataSelectedCount ? `(${metadataSelectedCount})` : ""}</button>
             <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataUndoCount} onClick={() => void undoLastMetadataCleanAction?.()}>undo last clean {metadataUndoCount ? `(${metadataUndoCount})` : ""}</button>
             <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
-            <button className="settingsActionButton settingsGhostAction" type="button" onClick={importSongs} disabled={importAnimation.active}>import songs</button>
           </div>
           {metadataCleanPreview ? (
             <div className="metadataCleanerPreviewBoxV425 metadataCleanerPreviewBoxV440" role="status" aria-live="polite">
@@ -1052,11 +972,9 @@ return (
             </div>
           </div>
           <div className="settingsActionRow">
-            <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={() => changeView("covers", "settings")}>open cover gallery</button>
             <button className="settingsActionButton" type="button" disabled={pixelArtBusy || songs.length === 0} onClick={randomizeAllCovers}>randomize all covers</button>
             <button className="settingsActionButton" type="button" disabled={pixelArtBusy} onClick={rescanPixelArtFolder}>rescan pixel art</button>
           </div>
-          <p className="settingsHintText">{pixelArtBusy ? "working on pixel art..." : "Extra visual toggles were removed from this page because real cover editing belongs in the cover gallery."}</p>
         </div>
       </section>
     ) : null}
