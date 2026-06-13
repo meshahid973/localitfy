@@ -62,13 +62,6 @@
     rgba(7, 7, 12, 0.72);
   box-shadow: 0 18px 54px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.045);
   backdrop-filter: blur(18px) saturate(120%);
-  transition: transform 220ms cubic-bezier(.2,.9,.18,1), border-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
-}
-
-.settingsPageCard:hover{
-  transform: none;
-  border-color: rgba(var(--accent-rgb), 0.24);
-  box-shadow: 0 24px 70px rgba(0,0,0,0.42), 0 0 38px rgba(var(--accent-rgb),0.07);
 }
 
 .settingsSectionTitle,
@@ -154,14 +147,6 @@
   color: var(--text);
   background: rgba(255,255,255,0.025);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.032);
-  transition: transform 200ms cubic-bezier(.2,.9,.18,1), border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
-}
-
-.settingsThemeCard:hover{
-  transform: none;
-  border-color: rgba(var(--accent-rgb),0.26);
-  background: rgba(var(--accent-rgb),0.05);
-  box-shadow: 0 14px 34px rgba(0,0,0,0.28), 0 0 26px rgba(var(--accent-rgb),0.07);
 }
 
 .settingsThemeCard.active{
@@ -178,12 +163,6 @@
   place-items: center;
   color: #fff;
   box-shadow: 0 0 30px rgba(var(--accent-rgb),0.24), inset 0 1px 0 rgba(255,255,255,0.24);
-  transition: transform 220ms cubic-bezier(.2,1.3,.18,1), filter 180ms ease;
-}
-
-.settingsThemeCard:hover .settingsThemeSwatch{
-  transform: scale(1.07);
-  filter: saturate(1.16) brightness(1.06);
 }
 
 .settingsThemeIcon{
@@ -239,16 +218,6 @@
   font-weight: 900;
   letter-spacing: -0.015em;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.045);
-  transition: transform 180ms cubic-bezier(.2,.9,.18,1), border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease;
-}
-
-.settingsPage .softButton:hover,
-.settingsTinyButton:hover,
-.settingsActionButton:hover{
-  transform: none;
-  border-color: rgba(var(--accent-rgb),0.38);
-  background: rgba(var(--accent-rgb),0.1);
-  box-shadow: 0 14px 30px rgba(0,0,0,0.28), 0 0 20px rgba(var(--accent-rgb),0.08);
 }
 
 .settingsPage .softButton.active,
@@ -327,7 +296,6 @@
   color: var(--text);
   background: rgba(0,0,0,0.22);
   font-weight: 820;
-  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
 .settingsField input:focus,
@@ -456,14 +424,6 @@
   background:
     radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--preset-accent, var(--accent)) 24%, transparent), transparent 38%),
     linear-gradient(135deg, color-mix(in srgb, var(--preset-surface, #171724) 82%, transparent), color-mix(in srgb, var(--preset-bg, #050510) 86%, transparent));
-  transition: transform 190ms cubic-bezier(.2,1.15,.18,1), border-color 190ms ease, box-shadow 190ms ease;
-}
-
-.customThemePresetButtonV025:hover,
-.savedThemeItemV025 button:hover{
-  transform: translateY(-2px) scale(1.01);
-  border-color: color-mix(in srgb, var(--preset-accent, var(--accent)) 52%, rgba(255,255,255,0.12));
-  box-shadow: 0 16px 38px rgba(0,0,0,0.3), 0 0 22px color-mix(in srgb, var(--preset-accent, var(--accent)) 18%, transparent);
 }
 
 .customThemePresetButtonV025 i,
@@ -537,13 +497,6 @@
   gap: 12px;
   align-items: center;
   background: rgba(255,255,255,0.026);
-  transition: transform 180ms cubic-bezier(.2,.9,.18,1), border-color 180ms ease, background 180ms ease;
-}
-
-.themeTokenCard:hover{
-  transform: none;
-  border-color: rgba(var(--accent-rgb),0.22);
-  background: rgba(var(--accent-rgb),0.045);
 }
 
 .themeColorInput{
@@ -693,14 +646,6 @@
   text-align: left;
   background: rgba(255,255,255,0.027);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.026);
-  transition: transform 190ms cubic-bezier(.2,1.2,.18,1), border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
-}
-
-.settingsChoice:hover{
-  transform: none;
-  border-color: rgba(var(--accent-rgb),0.25);
-  background: rgba(var(--accent-rgb),0.052);
-  box-shadow: 0 16px 34px rgba(0,0,0,0.26), 0 0 22px rgba(var(--accent-rgb),0.06);
 }
 
 .settingsChoice strong{
@@ -1032,24 +977,6 @@
 .app .settingsTinyButton,
 .app .cleanToggleLabel,
 .app .themeTokenCard{
-  transition:
-    transform 220ms cubic-bezier(.2,.85,.2,1),
-    background-color 220ms ease,
-    border-color 220ms ease,
-    color 180ms ease,
-    box-shadow 240ms ease !important;
-}
-
-.app .settingsThemeCard:hover,
-.app .themeTokenCard:hover{
-  transform: translateY(-2px) scale(1.018) !important;
-}
-
-.app .settingsChoice:hover,
-.app .settingsActionButton:hover,
-.app .settingsTinyButton:hover,
-.app .cleanToggleLabel:hover{
-  transform: translateY(-1px) scale(1.01) !important;
 }
 
 .app .settingsThemeCard.active,
@@ -1112,16 +1039,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   transform: translate3d(0,0,0);
 }
 
-.settingsChoice:hover{
-  transform: translate3d(0,-1px,0);
-  border-color: rgba(var(--accent-rgb),0.22);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.023)),
-    rgba(9,9,16,0.68);
-  box-shadow: 0 12px 26px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.045);
-  filter: none !important;
-}
-
 .settingsChoice:active{
   transform: translate3d(0,0,0) scale(0.995);
 }
@@ -1167,23 +1084,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   filter: none !important;
   transform-style: flat !important;
   perspective: none !important;
-  transition:
-    transform 190ms cubic-bezier(.2,1.05,.22,1),
-    background-color 220ms ease,
-    border-color 220ms ease,
-    color 180ms ease,
-    box-shadow 240ms ease !important;
-}
-
-.settingsChoice:hover,
-.settingsThemeCard:hover,
-.themeTokenCard:hover,
-.customThemePresetButtonV025:hover,
-.savedThemeItemV025 button:hover{
-  transform: translate3d(0,-1px,0) scale(1.008) !important;
-  filter: none !important;
-  border-color: rgba(var(--accent-rgb),0.26) !important;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.18), 0 0 18px rgba(var(--accent-rgb),0.045) !important;
 }
 
 .settingsChoice:active,
@@ -1192,11 +1092,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .customThemePresetButtonV025:active,
 .savedThemeItemV025 button:active{
   transform: translate3d(0,0,0) scale(0.992) !important;
-}
-
-.settingsThemeCard:hover .settingsThemeSwatch{
-  transform: scale(1.04) !important;
-  rotate: 0deg !important;
 }
 
 .settingsSwitchGrid,
@@ -1229,16 +1124,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsHero{
   min-height: 112px;
   padding: 26px 30px;
-}
-
-.settingsHero:hover,
-.settingsPanelCard:hover,
-.settingsPageCard:hover{
-  transform: translate3d(0, -1px, 0) scale(1.001) !important;
-  border-color: rgba(var(--accent-rgb),0.2) !important;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.026)), rgba(8, 8, 13, 0.84) !important;
-  box-shadow: 0 20px 54px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.045) !important;
-  filter: none !important;
 }
 
 .settingsThemeSelectPanel{
@@ -1284,14 +1169,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   font: inherit;
   font-weight: 850;
   letter-spacing: -0.015em;
-  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
-}
-
-.settingsSelectField select:hover,
-.settingsSelectField select:focus{
-  border-color: rgba(var(--accent-rgb),0.5);
-  background: #07070c;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.09);
 }
 
 .settingsSelectField option{
@@ -1333,19 +1210,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   font-weight: 760;
 }
 
-.settingsThemeCard,
-.settingsThemeCard:hover,
-.settingsThemeCard.active,
-.settingsThemeSwatch,
-.settingsThemeCard:hover .settingsThemeSwatch,
-.themeTokenVisual,
-.customThemePresetButtonV025 i,
-.savedThemeItemV025 i{
-  filter: none !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08) !important;
-  transform: none !important;
-}
-
 .settingsSwitchGrid,
 .settingsMiniGrid{
   display: grid !important;
@@ -1370,14 +1234,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsChoice{
   align-content: center !important;
   justify-items: start !important;
-}
-
-.settingsChoice:hover{
-  transform: translate3d(0, -1px, 0) scale(1.003) !important;
-  border-color: rgba(var(--accent-rgb),0.22) !important;
-  background: rgba(255,255,255,0.046) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04) !important;
-  filter: none !important;
 }
 
 .settingsChoice:active{
@@ -1490,16 +1346,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   color: var(--text) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
   filter: none !important;
-  transition: transform 160ms cubic-bezier(.2,1,.25,1), border-color 180ms ease, background-color 180ms ease !important;
-}
-
-.settingsActionButton:hover,
-.settingsTinyButton:hover,
-.settingsPage .softButton:hover{
-  transform: translate3d(0,-1px,0) scale(1.006) !important;
-  border-color: rgba(var(--accent-rgb),0.32) !important;
-  background: rgba(255,255,255,0.055) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045) !important;
 }
 
 .settingsActionButton:active,
@@ -1557,26 +1403,10 @@ body.localitfyThemePainting .app .themeTokenCard{
   backdrop-filter: blur(10px) saturate(108%) !important;
 }
 
-.settingsHero:hover,
-.settingsPanelCard:hover,
-.settingsPageCard:hover{
-  transform: translate3d(0,-1px,0) !important;
-  background: rgba(12, 11, 18, 0.88) !important;
-  border-color: rgba(255,255,255,0.13) !important;
-  box-shadow: 0 18px 46px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.045) !important;
-}
-
 .settingsSwitchGrid,
 .settingsMiniGrid{
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 12px !important;
-}
-
-.settingsChoice:hover{
-  transform: translate3d(0,-1px,0) scale(1.002) !important;
-  background: rgba(255,255,255,0.048) !important;
-  border-color: rgba(var(--accent-rgb),0.24) !important;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.045) !important;
 }
 
 .settingsChoice:active{
@@ -1639,24 +1469,10 @@ body.localitfyThemePainting .app .themeTokenCard{
   transition-timing-function: ease;
 }
 
-.settingsPanel:hover,
-.settingsCard:hover,
-.settingRow:hover,
-.settingsRow:hover,
-.themePickerPanel:hover,
-.themeButton:hover,
-.themeTile:hover,
-.cleanerOption:hover{
-  filter: none !important;
-  backdrop-filter: inherit;
-}
-
 .settingsView input[type="range"]{
-  transition: background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
 }
 
 .settingsView input[type="range"]::-webkit-slider-thumb{
-  transition: transform 120ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
 .themePickerPanel[data-custom-theme="true"] .themeGrid,
@@ -1664,13 +1480,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .themeGrid[aria-disabled="true"]{
   pointer-events: none;
   opacity: .5;
-}
-
-.settingsPageCard:hover,
-.settingsPanelCard:hover{
-  transform: translateY(-1px) !important;
-  box-shadow: 0 18px 46px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.04) !important;
-  filter: none !important;
 }
 
 .settingsCategoryPage[aria-label="Discord settings"],
@@ -1774,12 +1583,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   color: rgba(255,255,255,0.58);
   font-size: 11px;
   line-height: 1.3;
-}
-
-.settingsQuickButton:hover{
-  border-color: rgba(var(--accent-rgb),0.32);
-  background: rgba(var(--accent-rgb),0.10);
-  transform: translate3d(0,-1px,0) !important;
 }
 
 .settingsPageGrid{
@@ -1953,10 +1756,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   contain: layout paint;
 }
 
-.discordOptionGrid .settingsChoice:hover{
-  filter: none !important;
-}
-
 .settingsDiscordSmallImageBlock{
   border-color: rgba(var(--accent-rgb), 0.12);
 }
@@ -2031,12 +1830,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   contain: layout paint;
 }
 
-.settingsCategoryContentV027 .settingsPanelCard:hover{
-  transform: translateY(-1px) !important;
-  filter: none !important;
-  box-shadow: 0 18px 42px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.04) !important;
-}
-
 .settingsCategoryContentV027 .settingsTwoColumn{
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 14px !important;
@@ -2051,12 +1844,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsCategoryContentV027 .settingRow{
   min-width: 0 !important;
 
-}
-
-.settingsCategoryContentV027 .settingsChoice:hover,
-.settingsCategoryContentV027 .settingRow:hover{
-  transform: translateY(-1px) !important;
-  filter: none !important;
 }
 
 .discordSettingsPage{
@@ -2333,13 +2120,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 }
 
-.settingsPanelCard:hover,
-.settingsPageCard:hover,
-.settingsChoice:hover{
-  filter: none !important;
-  transform: translate3d(0, -1px, 0) !important;
-}
-
 @keyframes settingsPageEnterSmooth{
   0%{ opacity: .7; transform: translate3d(0, 8px, 0) scale(.996); }
   45%{ opacity: 1; transform: translate3d(0, -1px, 0) scale(1.001); }
@@ -2602,7 +2382,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 
 .settingsResetButton strong{
@@ -2616,21 +2395,9 @@ body.localitfyThemePainting .app .themeTokenCard{
   line-height: 1.35;
 }
 
-.settingsResetButton:hover{
-  transform: none;
-  border-color: color-mix(in srgb, var(--accent, #ed28f0) 58%, var(--border, rgba(255,255,255,.16)));
-  background: color-mix(in srgb, var(--surface, #151019) 82%, var(--accent, #ed28f0) 8%);
-  box-shadow: 0 18px 46px color-mix(in srgb, var(--accent, #ed28f0) 14%, transparent);
-}
-
 .settingsResetButton.danger{
   grid-column: 1 / -1;
   border-color: color-mix(in srgb, #ff5f8a 42%, var(--border, rgba(255,255,255,.14)));
-}
-
-.settingsResetButton.danger:hover{
-  border-color: color-mix(in srgb, #ff5f8a 65%, var(--accent, #ed28f0));
-  background: color-mix(in srgb, #ff5f8a 8%, var(--surface, #151019));
 }
 
 .app.viewSwitching .settingsStatusCards span,
@@ -2706,13 +2473,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsActionCardV027,
 .settingsMiniActionV027{
   background: rgba(255, 255, 255, .035) !important;
-}
-
-.settingsChoice:hover,
-.settingsActionCardV027:hover,
-.settingsMiniActionV027:hover{
-  background: rgba(255, 255, 255, .055) !important;
-  border-color: rgba(var(--accent-rgb), .16) !important;
 }
 
 .settingsChoice.isActive{
@@ -2847,13 +2607,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   letter-spacing: -.018em !important;
 }
 
-.settingsCategoryContentV027 .customThemeHeaderV027 .settingsTinyButton:hover,
-.settingsCategoryPage .customThemeHeaderV027 .settingsTinyButton:hover{
-  transform: translate3d(0, -1px, 0) !important;
-  border-color: rgba(var(--accent-rgb), .26) !important;
-  background: rgba(var(--accent-rgb), .095) !important;
-}
-
 .settingsCategoryContentV027 .settingsTextFieldV027,
 .settingsCategoryPage .settingsTextFieldV027{
   min-height: 96px !important;
@@ -2899,7 +2652,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 body.localitfyThemePainting .settingsCategoryContentV027 .customThemeManagerV027,
 body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
-  transition: none !important;
   filter: none !important;
 }
 
@@ -2953,11 +2705,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border-color: rgba(var(--accent-rgb), .62) !important;
 }
 
-.aboutActionButton:hover{
-  transform: translate3d(0,0,0) !important;
-  filter: brightness(1.05);
-}
-
 .aboutPlainCard{
   border-radius: 24px !important;
   overflow: hidden !important;
@@ -2974,11 +2721,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   backface-visibility: hidden;
 }
 
-.settingsPanelCard:hover,
-.settingsChoice:hover{
-  transform: translate3d(0,0,0) !important;
-}
-
 @media (max-width: 880px){
 
   .aboutActionGrid{
@@ -2989,11 +2731,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsPage :where(.settingsActionButton,.settingsTinyButton,.aboutActionButton,.softButton,.heroGhost){
   transform: translate3d(0,0,0) !important;
   white-space: nowrap !important;
-}
-
-.settingsPage :where(.settingsActionButton,.settingsTinyButton,.aboutActionButton,.softButton,.heroGhost):hover{
-  transform: translate3d(0,0,0) !important;
-  filter: none !important;
 }
 
 .aboutActionGrid .aboutActionButton{
@@ -3322,12 +3059,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   transform: none !important;
 }
 
-.settingsUpdatesPage .settingsActionButton:hover:not(:disabled){
-  transform: translateY(-1px) !important;
-  background: color-mix(in oklab, var(--accent, #e65adf) 16%, rgba(255,255,255,.06)) !important;
-  border-color: color-mix(in oklab, var(--accent, #e65adf) 38%, rgba(255,255,255,.14)) !important;
-}
-
 .settingsUpdateBehaviorPanel .settingsMiniGrid{
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 12px !important;
@@ -3514,12 +3245,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.07) !important;
 }
 
-.settingsUpdatesPage .settingsActionButton:hover:not(:disabled){
-  transform: translateY(-1px) !important;
-  background: rgba(var(--accent-rgb, 230,90,223), .12) !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb, 230,90,223), .22) !important;
-}
-
 .settingsUpdatesPage .settingsActionButton:disabled{
   opacity: .42 !important;
   background: rgba(255,255,255,.030) !important;
@@ -3679,21 +3404,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
     0 10px 22px rgba(0,0,0,0.12) !important;
   backdrop-filter: blur(6px) saturate(112%) !important;
   -webkit-backdrop-filter: blur(6px) saturate(112%) !important;
-}
-
-.settingsChoice:hover,
-.settingsThemeCard:hover,
-.settingsActionCardV027:hover,
-.settingsMiniActionV027:hover,
-.settingsPlaylistItem:hover{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.014)),
-    var(--settings-acrylic-card-hover) !important;
-  border-color: rgba(var(--accent-rgb),0.22) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.040),
-    0 14px 28px rgba(0,0,0,0.16),
-    0 0 18px rgba(var(--accent-rgb),0.045) !important;
 }
 
 .settingsChoice.active,
@@ -3919,7 +3629,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border-radius: inherit;
   background: linear-gradient(90deg, rgba(var(--accent-rgb), .5), rgba(var(--accent-rgb), .86));
   box-shadow: 0 0 24px rgba(var(--accent-rgb), .18);
-  transition: width 260ms cubic-bezier(.16,1,.3,1);
 }
 
 .settingsUpdateProgressV199 small{
@@ -3957,10 +3666,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   color: var(--text-2);
   border-color: rgba(255,255,255,.10);
   background: rgba(255,255,255,.038);
-}
-
-.settingsUpdateMainActionV199:hover:not(:disabled){
-  transform: translate3d(0,-2px,0) scale(1.012);
 }
 
 .settingsUpdateMainActionV199:active:not(:disabled){
@@ -4263,19 +3968,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border-radius: 16px !important;
 }
 
-.settingsChoice:hover,
-.settingsResetButton:hover,
-.settingsActionButton:hover,
-.settingsTinyButton:hover,
-.cleanToggleLabel:hover{
-  transform: translateY(-1px) !important;
-  border-color: rgba(var(--accent-rgb),0.14) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.014)),
-    rgba(255,255,255,0.015) !important;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.13), inset 0 1px 0 rgba(255,255,255,0.026) !important;
-}
-
 .settingsChoice strong,
 .settingsResetButton strong{
   font-size: 13.5px !important;
@@ -4342,20 +4034,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   gap: 5px !important;
 }
 
-.settingsResetButton:hover{
-  transform: translateY(-1px) !important;
-  box-shadow: 0 9px 20px rgba(0,0,0,0.14) !important;
-}
-
 .settingsResetButton.danger{
   border-color: rgba(255,95,138,0.18) !important;
-}
-
-.settingsResetButton.danger:hover{
-  border-color: rgba(255,95,138,0.28) !important;
-  background:
-    linear-gradient(180deg, rgba(255,95,138,0.045), rgba(255,95,138,0.02)),
-    rgba(255,255,255,0.012) !important;
 }
 
 .statusGrid span{
@@ -4457,13 +4137,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   animation: none !important;
 }
 
-.settingsPanelCard:hover,
-.settingsPageCard:hover{
-  transform: none !important;
-  border-color: rgba(var(--accent-rgb),0.14) !important;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.030) !important;
-}
-
 .settingsCategoryContent,
 .settingsCategoryContentV027{
   padding: 16px 18px 38px !important;
@@ -4520,14 +4193,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   background:
     linear-gradient(180deg, rgba(255,255,255,0.020), rgba(255,255,255,0.008)),
     rgba(255,255,255,0.010) !important;
-  box-shadow: none !important;
-}
-
-.settingsChoice:hover,
-.settingsResetButton:hover{
-  transform: none !important;
-  border-color: rgba(var(--accent-rgb),0.13) !important;
-  background: rgba(255,255,255,0.020) !important;
   box-shadow: none !important;
 }
 
@@ -4685,11 +4350,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   position: relative;
 }
 
-.settingsPage .settingsChoice:hover::before{
-  border-color: rgba(var(--accent-rgb),0.34);
-  transform: translateZ(0) scale(1.06);
-}
-
 .aboutSettingsPage,
 .settingsDiagnosticsPanel,
 .settingsDiagnosticsCopyPanel{
@@ -4746,17 +4406,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   font: inherit;
   font-size: 0.82rem;
   font-weight: 800;
-  transition:
-    transform 180ms cubic-bezier(.22, 1, .36, 1),
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
-}
-
-.feedbackCategoryButtonV329:hover{
-  transform: translateY(-1px);
-  color: #fff;
-  border-color: rgba(var(--accent-rgb), 0.26);
 }
 
 .feedbackCategoryButtonV329.active{
@@ -4773,14 +4422,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   font: inherit;
   font-weight: 900;
   cursor: pointer;
-  transition:
-    transform 180ms cubic-bezier(.22, 1, .36, 1),
-    opacity 160ms ease,
-    box-shadow 180ms ease;
-}
-
-.feedbackSettingsButtonV329:hover{
-  transform: translateY(-1px);
 }
 
 .feedbackSettingsCardV329{
@@ -4828,7 +4469,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 @media (prefers-reduced-motion: reduce){
   .feedbackCategoryButtonV329,
 .feedbackSettingsButtonV329{
-    transition: none !important;
   }
 }@media (max-width: 720px){}
 
@@ -4985,15 +4625,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   box-shadow: inset 0 1px 0 rgba(255,255,255,.030) !important;
 }
 
-.themeTokenCard:hover,
-.simpleThemeTokenCardV025:hover,
-.customThemeTokenRowV025:hover{
-  transform: translate3d(0,-1px,0) !important;
-  border-color: rgba(var(--accent-rgb), .24) !important;
-  background: rgba(255,255,255,.042) !important;
-  box-shadow: 0 10px 22px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.038) !important;
-}
-
 .themeColorInput{
   width: 38px !important;
   height: 38px !important;
@@ -5057,16 +4688,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
     linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.016)),
     rgba(255,255,255,.026);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.034);
-  transition:
-    transform 180ms cubic-bezier(.22,1,.36,1),
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 220ms ease;
-}
-
-.playbackModeChoiceV343:hover{
-  transform: translate3d(0,-1px,0);
-  border-color: rgba(var(--accent-rgb), .24);
 }
 
 .playbackModeChoiceV343.active{
@@ -5166,19 +4787,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
     linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.014)),
     rgba(255,255,255,.024);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.034);
-  transition:
-    transform 170ms cubic-bezier(.22,1,.36,1),
-    border-color 170ms ease,
-    background-color 170ms ease,
-    box-shadow 210ms ease;
-}
-
-.playbackPresetChipV344:hover{
-  transform: translate3d(0,-1px,0);
-  border-color: rgba(var(--accent-rgb), .24);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.018)),
-    rgba(255,255,255,.030);
 }
 
 .playbackPresetChipV344.active{
@@ -5230,12 +4838,8 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 
 @media (prefers-reduced-motion: reduce){
   .playbackPresetChipV344{
-    transition: none !important;
   }
 
-  .playbackPresetChipV344:hover{
-    transform: none !important;
-  }
 }
 
 .settingsCategoryMotion[data-settings-category="playback"] .settingsTwoColumn:first-of-type > .settingsPageCard:nth-child(2){
@@ -5606,14 +5210,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   contain: layout paint style !important;
 }
 
-.themeTokenCard:hover,
-.simpleThemeTokenCardV025:hover,
-.customThemeTokenRowV025:hover{
-  transform: translate3d(0,-1px,0) !important;
-  border-color: rgba(var(--accent-rgb), .23) !important;
-  background: rgba(255,255,255,.036) !important;
-}
-
 .themeColorInput{
   width: 100% !important;
   height: 58px !important;
@@ -5877,20 +5473,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 .settingsTwoColumn,
 .settingsOptionGrid,
 .appearanceUtilityGridV355{
-  transition:
-    width var(--resize-dur) var(--resize-ease),
-    height var(--resize-dur) var(--resize-ease),
-    min-width var(--resize-dur) var(--resize-ease),
-    min-height var(--resize-dur) var(--resize-ease),
-    max-width var(--resize-dur) var(--resize-ease),
-    max-height var(--resize-dur) var(--resize-ease),
-    grid-template-columns var(--resize-dur) var(--resize-ease),
-    gap 220ms var(--resize-ease),
-    opacity 180ms ease,
-    transform 220ms var(--resize-ease),
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 180ms ease !important;
 }
 
 .settingsCategoryMotion{
@@ -5915,7 +5497,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 .settingsTwoColumn,
 .settingsOptionGrid,
 .appearanceUtilityGridV355{
-    transition: none !important;
   }
 }
 
@@ -6174,21 +5755,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
     rgba(255,255,255,.012);
   box-shadow: none;
   transform: translateZ(0);
-  transition:
-    transform 180ms cubic-bezier(.2,.85,.2,1),
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-.settingsCategoryButton:hover,
-.settingsCategoryButtonV027:hover{
-  transform: translate3d(1px,0,0);
-  border-color: rgba(var(--accent-rgb),.16);
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),.055), rgba(var(--accent-rgb),.025)),
-    rgba(255,255,255,.014);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.028);
 }
 
 .settingsCategoryButton.active,
@@ -6209,14 +5775,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   place-items: center;
   color: var(--accent);
   background: rgba(var(--accent-rgb),.085);
-}
-
-.settingsCategoryButton:hover .settingsCategoryIcon,
-.settingsCategoryButton.active .settingsCategoryIcon,
-.settingsCategoryButtonV027:hover .settingsCategoryIcon,
-.settingsCategoryButtonV027.active .settingsCategoryIcon{
-  transform: none;
-  background: rgba(var(--accent-rgb),.12);
 }
 
 .settingsLucideIcon,
@@ -6465,20 +6023,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
     rgba(255,255,255,.018);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.026);
   cursor: pointer;
-  transition:
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms cubic-bezier(.2,.85,.2,1);
-}
-
-.toggleRow:hover{
-  transform: translateY(-1px);
-  border-color: rgba(var(--accent-rgb),.22);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.018)),
-    rgba(var(--accent-rgb),.025);
-  box-shadow: 0 10px 22px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.034);
 }
 
 .toggleRowCopy,
@@ -6542,10 +6086,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
     linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04)),
     rgba(255,255,255,.095);
   box-shadow: inset 0 1px 2px rgba(0,0,0,.34);
-  transition:
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 180ms ease;
 }
 
 .toggleRow input[type="checkbox"]::before{
@@ -6559,10 +6099,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   background: rgba(245,245,255,.94);
   box-shadow: 0 3px 8px rgba(0,0,0,.32);
   transform: translateX(0);
-  transition:
-    transform 190ms cubic-bezier(.2,.9,.18,1),
-    background-color 180ms ease,
-    box-shadow 180ms ease;
 }
 
 .toggleRow input[type="checkbox"]::after{
@@ -6752,18 +6288,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
     rgba(255,255,255,.020);
   text-align: left;
   cursor: pointer;
-  transition:
-    transform 180ms cubic-bezier(.2,.85,.2,1),
-    background-color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-.customThemePresetButtonV027:hover{
-  transform: translateY(-1px);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.018)),
-    rgba(var(--accent-rgb),.026);
-  box-shadow: 0 10px 22px rgba(0,0,0,.16);
 }
 
 .customThemePresetButtonV027 > span{
@@ -6986,30 +6510,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   font-weight: 760;
 }
 
-.customThemeSimpleHintV439{
-  margin-top: 16px;
-  margin-bottom: 10px;
-  padding: 12px 14px;
-  border: 1px solid rgba(var(--accent-rgb), .14);
-  border-radius: 15px;
-  display: grid;
-  gap: 3px;
-  background: rgba(var(--accent-rgb), .045);
-}
-
-.customThemeSimpleHintV439 strong{
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.1;
-}
-
-.customThemeSimpleHintV439 span{
-  color: var(--text-2);
-  font-size: 11px;
-  line-height: 1.35;
-  font-weight: 760;
-}
-
 .customThemePresetRowV027{
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 }
@@ -7096,7 +6596,6 @@ body.localitfyThemePainting .app,
 body.localitfyThemePainting .app *,
 body.localitfyThemePainting .app *::before,
 body.localitfyThemePainting .app *::after{
-  transition: none !important;
   animation: none !important;
 }
 
@@ -7118,10 +6617,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   cursor: pointer;
 }
 
-.customThemeSimpleHintV439{
-  margin-top: 14px;
-}
-
 body.localitfyThemePainting,
 body.localitfyThemePainting *{
   cursor: default;
@@ -7131,7 +6626,6 @@ body.localitfyThemePainting .app,
 body.localitfyThemePainting .app *,
 body.localitfyThemePainting .app *::before,
 body.localitfyThemePainting .app *::after{
-  transition: none !important;
   animation: none !important;
 }
 
@@ -7173,31 +6667,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   font-weight: 760;
 }
 
-.customThemeSimpleHintV439{
-  margin: 16px 0 14px;
-  padding: 13px 15px;
-  border: 1px solid rgba(var(--accent-rgb), .18);
-  border-radius: 16px;
-  display: grid;
-  gap: 4px;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), .065), rgba(var(--accent-rgb), .022)),
-    rgba(255,255,255,.014);
-}
-
-.customThemeSimpleHintV439 strong{
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.05;
-}
-
-.customThemeSimpleHintV439 span{
-  color: var(--text-2);
-  font-size: 11px;
-  line-height: 1.32;
-  font-weight: 760;
-}
-
 .customThemePresetRowV027{
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 }
@@ -7207,10 +6676,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   background:
     linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.016)),
     rgba(255,255,255,.018);
-}
-
-.customThemePresetButtonV027:hover{
-  border-color: rgba(var(--accent-rgb), .22);
 }
 
 .customThemeTokenGridV027{
@@ -7258,7 +6723,6 @@ body.localitfyThemePainting .customThemeTokenV027{
 }
 
 .customThemeColorPreviewV027{
-  transition: none !important;
 }
 
 .settingsCategoryPage,
@@ -7335,33 +6799,6 @@ body.localitfyThemePainting .customThemeTokenV027{
     rgba(255,255,255,.018) !important;
 }
 
-.customThemePresetButtonV027:hover{
-  transform: none !important;
-  border-color: rgba(var(--accent-rgb), .22) !important;
-  box-shadow: none !important;
-}
-
-.customThemeSimpleHintV439{
-  margin: 14px 0 12px !important;
-  padding: 12px 14px !important;
-  border: 1px solid rgba(var(--accent-rgb), .16) !important;
-  border-radius: 15px !important;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), .055), rgba(var(--accent-rgb), .018)),
-    rgba(255,255,255,.014) !important;
-}
-
-.customThemeSimpleHintV439 strong{
-  color: var(--text) !important;
-  font-size: 14px !important;
-}
-
-.customThemeSimpleHintV439 span{
-  color: var(--text-2) !important;
-  font-size: 11px !important;
-  line-height: 1.32 !important;
-}
-
 .customThemeTokenGridV027{
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: 10px !important;
@@ -7413,7 +6850,6 @@ body.localitfyThemePainting .customThemeTokenV027{
 }
 
 .customThemeColorPreviewV027{
-  transition: none !important;
 }
 
 body.localitfyThemePainting .settingsCategoryPage,
@@ -7422,7 +6858,6 @@ body.localitfyThemePainting .settingsPageCard,
 body.localitfyThemePainting .customThemeManagerV027,
 body.localitfyThemePainting .customThemePresetButtonV027,
 body.localitfyThemePainting .customThemeTokenV027{
-  transition: none !important;
   animation: none !important;
   filter: none !important;
   backdrop-filter: none !important;
@@ -7488,12 +6923,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   will-change: auto !important;
 }
 
-.customThemeTokenV027:hover,
-.customThemePresetButtonV027:hover,
-.toggleRow:hover{
-  transform: none !important;
-}
-
 body.localitfyThemePainting .settingsCategoryPage,
 body.localitfyThemePainting .settingsPanelCard,
 body.localitfyThemePainting .settingsPageCard,
@@ -7501,7 +6930,6 @@ body.localitfyThemePainting .customThemeManagerV027,
 body.localitfyThemePainting .customThemePresetButtonV027,
 body.localitfyThemePainting .customThemeTokenV027,
 body.localitfyThemePainting .toggleRow{
-  transition: none !important;
   animation: none !important;
   filter: none !important;
   backdrop-filter: none !important;
@@ -7519,12 +6947,6 @@ body.localitfyThemePainting .toggleRow{
 .customThemeColorPreviewV027,
 .customThemeNativeColorInputV027,
 .customThemeHexInputV032{
-  transition: none !important;
-}
-
-.settingsPage button:hover,
-.settingsPage button:active{
-  transform: none !important;
 }
 
 /* localtify 0.3.9 — feedback UI rewritten as one clean section */
@@ -7666,11 +7088,6 @@ body.localitfyThemePainting .toggleRow{
   letter-spacing: 0.08em !important;
   text-align: center !important;
   text-transform: uppercase !important;
-}
-
-.feedbackSettingsButtonV331:hover{
-  border-color: rgba(var(--accent-rgb), 0.38) !important;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.17), rgba(255,255,255,0.045)) !important;
 }
 
 .feedbackSettingsButtonV331:disabled{
@@ -7937,7 +7354,6 @@ body.localitfyThemePainting .toggleRow{
   .feedbackSettingsButtonV331,
   .feedbackMaybeButtonV331,
   .feedbackSendButtonV331{
-    transition: none !important;
   }
 }
 
@@ -8122,7 +7538,6 @@ body.localitfyThemePainting .toggleRow{
   }
 }
 
-
 .metadataCleanerPanelV440{
   border-color: rgba(var(--accent-rgb),0.16) !important;
   background:
@@ -8233,13 +7648,6 @@ body.localitfyThemePainting .toggleRow{
   color: var(--text);
   text-align: left;
   background: rgba(255,255,255,0.030);
-  transition: transform 180ms cubic-bezier(.2,1,.2,1), background 180ms ease, border-color 180ms ease, box-shadow 200ms ease;
-}
-
-.cleanerOptionV440:hover{
-  transform: translate3d(0,-1px,0) scale(1.004);
-  border-color: rgba(var(--accent-rgb),0.24);
-  background: rgba(var(--accent-rgb),0.060);
 }
 
 .cleanerOptionV440.active{
@@ -8397,12 +7805,6 @@ body.localitfyThemePainting .toggleRow{
     rgba(0,0,0,0.82);
   box-shadow: 0 20px 55px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08);
   animation: settingsIslandInV440 360ms cubic-bezier(.16,1,.3,1) both;
-  transition: width 320ms cubic-bezier(.16,1,.3,1), transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
-}
-
-.settingsUpdateIslandV440:hover{
-  transform: translateY(-1px) scale(1.006);
-  border-color: rgba(var(--accent-rgb),0.26);
 }
 
 .settingsUpdateIslandV440[data-status="available"],
@@ -8609,7 +8011,6 @@ body.localitfyThemePainting .toggleRow{
   }
 }
 
-
 .settingsUpdatesPage .settingsUpdateStageV440,
 .settingsDiagnosticsHeroV440,
 .settingsPlatformPanel,
@@ -8739,4 +8140,3 @@ body.localitfyThemePainting .toggleRow{
     grid-template-columns: 1fr !important;
   }
 }
-

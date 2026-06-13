@@ -647,10 +647,6 @@ return (
               ))}
             </div>
           ) : null}
-          <div className="customThemeSimpleHintV439">
-            <strong>Live colors</strong>
-            <span>Drag the color picker to preview instantly. The app saves once after you stop, so it stays smooth.</span>
-          </div>
           <div className="customThemeTokenGridV027">
             {customThemeTokens.map((token) => {
               const hexDraft = customColorDrafts[token.key] ?? token.value;
@@ -727,7 +723,6 @@ return (
               </div>
               <div className="settingsMiniGrid appearanceMiniGridV356">
                 <ToggleRow label="Soft corners" help="Uses rounder cards and buttons." checked={settings.softCorners} onChange={(value) => updateSetting("softCorners", value)} />
-                <ToggleRow label="Floating notes" help="Shows tiny music note particles." checked={settings.showFloatingNotes} onChange={(value) => updateSetting("showFloatingNotes", value)} />
                 <ToggleRow label="Animated glow" help="Keeps ambience on, but pauses it during fast screen switches." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
                 <ToggleRow label="More quick-library blur" help="Adds stronger album-cover blur behind the quick library cards." checked={settings.quickLibraryMoreBlur !== false} onChange={(value) => updateSetting("quickLibraryMoreBlur", value)} />
                 <ToggleRow label="cat....." help="Tiny cat follows your cursor. Double-click it to lie down. Middle-click it to stop or follow again." checked={settings.catBuddyEnabled === true} onChange={(value) => updateSetting("catBuddyEnabled", value)} />
