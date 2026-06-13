@@ -17860,17 +17860,6 @@ body.localitfyThemePainting .homeSongRow{
   -webkit-backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
 }
 
-.app .modalWrap::before{
-  content: "" !important;
-  position: fixed !important;
-  inset: 36px 0 0 0 !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.46)),
-    rgba(0,0,0,0.12) !important;
-}
-
 .app .modalWrap .editorModal,
 .app .modalWrap .confirmModal,
 .app .modalWrap [class*="Modal"]{
@@ -17918,10 +17907,6 @@ body.localitfyThemePainting .homeSongRow{
     rgba(0, 0, 0, 0.58) !important;
   backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
   -webkit-backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
-}
-
-.app .modalWrap{
-  z-index: 2147482500 !important;
 }
 
 .app .windowButtons button{
