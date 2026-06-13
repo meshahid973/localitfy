@@ -62,6 +62,7 @@
     rgba(7, 7, 12, 0.72);
   box-shadow: 0 18px 54px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.045);
   backdrop-filter: blur(18px) saturate(120%);
+  transition: transform 220ms cubic-bezier(.2,.9,.18,1), border-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
 }
 
 .settingsSectionTitle,
@@ -147,6 +148,7 @@
   color: var(--text);
   background: rgba(255,255,255,0.025);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.032);
+  transition: transform 200ms cubic-bezier(.2,.9,.18,1), border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
 }
 
 .settingsThemeCard.active{
@@ -163,6 +165,7 @@
   place-items: center;
   color: #fff;
   box-shadow: 0 0 30px rgba(var(--accent-rgb),0.24), inset 0 1px 0 rgba(255,255,255,0.24);
+  transition: transform 220ms cubic-bezier(.2,1.3,.18,1), filter 180ms ease;
 }
 
 .settingsThemeIcon{
@@ -218,6 +221,7 @@
   font-weight: 900;
   letter-spacing: -0.015em;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.045);
+  transition: transform 180ms cubic-bezier(.2,.9,.18,1), border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease;
 }
 
 .settingsPage .softButton.active,
@@ -296,6 +300,7 @@
   color: var(--text);
   background: rgba(0,0,0,0.22);
   font-weight: 820;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
 .settingsField input:focus,
@@ -424,6 +429,7 @@
   background:
     radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--preset-accent, var(--accent)) 24%, transparent), transparent 38%),
     linear-gradient(135deg, color-mix(in srgb, var(--preset-surface, #171724) 82%, transparent), color-mix(in srgb, var(--preset-bg, #050510) 86%, transparent));
+  transition: transform 190ms cubic-bezier(.2,1.15,.18,1), border-color 190ms ease, box-shadow 190ms ease;
 }
 
 .customThemePresetButtonV025 i,
@@ -497,6 +503,7 @@
   gap: 12px;
   align-items: center;
   background: rgba(255,255,255,0.026);
+  transition: transform 180ms cubic-bezier(.2,.9,.18,1), border-color 180ms ease, background 180ms ease;
 }
 
 .themeColorInput{
@@ -646,6 +653,7 @@
   text-align: left;
   background: rgba(255,255,255,0.027);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.026);
+  transition: transform 190ms cubic-bezier(.2,1.2,.18,1), border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
 }
 
 .settingsChoice strong{
@@ -977,6 +985,12 @@
 .app .settingsTinyButton,
 .app .cleanToggleLabel,
 .app .themeTokenCard{
+  transition:
+    transform 220ms cubic-bezier(.2,.85,.2,1),
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 180ms ease,
+    box-shadow 240ms ease !important;
 }
 
 .app .settingsThemeCard.active,
@@ -1084,6 +1098,12 @@ body.localitfyThemePainting .app .themeTokenCard{
   filter: none !important;
   transform-style: flat !important;
   perspective: none !important;
+  transition:
+    transform 190ms cubic-bezier(.2,1.05,.22,1),
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 180ms ease,
+    box-shadow 240ms ease !important;
 }
 
 .settingsChoice:active,
@@ -1169,6 +1189,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   font: inherit;
   font-weight: 850;
   letter-spacing: -0.015em;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 
 .settingsSelectField option{
@@ -1346,6 +1367,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   color: var(--text) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
   filter: none !important;
+  transition: transform 160ms cubic-bezier(.2,1,.25,1), border-color 180ms ease, background-color 180ms ease !important;
 }
 
 .settingsActionButton:active,
@@ -1470,9 +1492,11 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsView input[type="range"]{
+  transition: background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
 }
 
 .settingsView input[type="range"]::-webkit-slider-thumb{
+  transition: transform 120ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
 .themePickerPanel[data-custom-theme="true"] .themeGrid,
@@ -2382,6 +2406,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   justify-content: center;
   gap: 6px;
   cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 
 .settingsResetButton strong{
@@ -2652,6 +2677,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 body.localitfyThemePainting .settingsCategoryContentV027 .customThemeManagerV027,
 body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
+  transition: none !important;
   filter: none !important;
 }
 
@@ -3629,6 +3655,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border-radius: inherit;
   background: linear-gradient(90deg, rgba(var(--accent-rgb), .5), rgba(var(--accent-rgb), .86));
   box-shadow: 0 0 24px rgba(var(--accent-rgb), .18);
+  transition: width 260ms cubic-bezier(.16,1,.3,1);
 }
 
 .settingsUpdateProgressV199 small{
@@ -4406,6 +4433,11 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   font: inherit;
   font-size: 0.82rem;
   font-weight: 800;
+  transition:
+    transform 180ms cubic-bezier(.22, 1, .36, 1),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
 }
 
 .feedbackCategoryButtonV329.active{
@@ -4422,6 +4454,10 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   font: inherit;
   font-weight: 900;
   cursor: pointer;
+  transition:
+    transform 180ms cubic-bezier(.22, 1, .36, 1),
+    opacity 160ms ease,
+    box-shadow 180ms ease;
 }
 
 .feedbackSettingsCardV329{
@@ -4469,6 +4505,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 @media (prefers-reduced-motion: reduce){
   .feedbackCategoryButtonV329,
 .feedbackSettingsButtonV329{
+    transition: none !important;
   }
 }@media (max-width: 720px){}
 
@@ -4688,6 +4725,11 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
     linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.016)),
     rgba(255,255,255,.026);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.034);
+  transition:
+    transform 180ms cubic-bezier(.22,1,.36,1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 220ms ease;
 }
 
 .playbackModeChoiceV343.active{
@@ -4787,6 +4829,11 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
     linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.014)),
     rgba(255,255,255,.024);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.034);
+  transition:
+    transform 170ms cubic-bezier(.22,1,.36,1),
+    border-color 170ms ease,
+    background-color 170ms ease,
+    box-shadow 210ms ease;
 }
 
 .playbackPresetChipV344.active{
@@ -4838,6 +4885,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 
 @media (prefers-reduced-motion: reduce){
   .playbackPresetChipV344{
+    transition: none !important;
   }
 
 }
@@ -5473,6 +5521,20 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 .settingsTwoColumn,
 .settingsOptionGrid,
 .appearanceUtilityGridV355{
+  transition:
+    width var(--resize-dur) var(--resize-ease),
+    height var(--resize-dur) var(--resize-ease),
+    min-width var(--resize-dur) var(--resize-ease),
+    min-height var(--resize-dur) var(--resize-ease),
+    max-width var(--resize-dur) var(--resize-ease),
+    max-height var(--resize-dur) var(--resize-ease),
+    grid-template-columns var(--resize-dur) var(--resize-ease),
+    gap 220ms var(--resize-ease),
+    opacity 180ms ease,
+    transform 220ms var(--resize-ease),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease !important;
 }
 
 .settingsCategoryMotion{
@@ -5497,6 +5559,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 .settingsTwoColumn,
 .settingsOptionGrid,
 .appearanceUtilityGridV355{
+    transition: none !important;
   }
 }
 
@@ -5755,6 +5818,11 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
     rgba(255,255,255,.012);
   box-shadow: none;
   transform: translateZ(0);
+  transition:
+    transform 180ms cubic-bezier(.2,.85,.2,1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .settingsCategoryButton.active,
@@ -6023,6 +6091,11 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
     rgba(255,255,255,.018);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.026);
   cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(.2,.85,.2,1);
 }
 
 .toggleRowCopy,
@@ -6086,6 +6159,10 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
     linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04)),
     rgba(255,255,255,.095);
   box-shadow: inset 0 1px 2px rgba(0,0,0,.34);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .toggleRow input[type="checkbox"]::before{
@@ -6099,6 +6176,10 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   background: rgba(245,245,255,.94);
   box-shadow: 0 3px 8px rgba(0,0,0,.32);
   transform: translateX(0);
+  transition:
+    transform 190ms cubic-bezier(.2,.9,.18,1),
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .toggleRow input[type="checkbox"]::after{
@@ -6288,6 +6369,10 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
     rgba(255,255,255,.020);
   text-align: left;
   cursor: pointer;
+  transition:
+    transform 180ms cubic-bezier(.2,.85,.2,1),
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .customThemePresetButtonV027 > span{
@@ -6596,6 +6681,7 @@ body.localitfyThemePainting .app,
 body.localitfyThemePainting .app *,
 body.localitfyThemePainting .app *::before,
 body.localitfyThemePainting .app *::after{
+  transition: none !important;
   animation: none !important;
 }
 
@@ -6626,6 +6712,7 @@ body.localitfyThemePainting .app,
 body.localitfyThemePainting .app *,
 body.localitfyThemePainting .app *::before,
 body.localitfyThemePainting .app *::after{
+  transition: none !important;
   animation: none !important;
 }
 
@@ -6723,6 +6810,7 @@ body.localitfyThemePainting .customThemeTokenV027{
 }
 
 .customThemeColorPreviewV027{
+  transition: none !important;
 }
 
 .settingsCategoryPage,
@@ -6850,6 +6938,7 @@ body.localitfyThemePainting .customThemeTokenV027{
 }
 
 .customThemeColorPreviewV027{
+  transition: none !important;
 }
 
 body.localitfyThemePainting .settingsCategoryPage,
@@ -6858,6 +6947,7 @@ body.localitfyThemePainting .settingsPageCard,
 body.localitfyThemePainting .customThemeManagerV027,
 body.localitfyThemePainting .customThemePresetButtonV027,
 body.localitfyThemePainting .customThemeTokenV027{
+  transition: none !important;
   animation: none !important;
   filter: none !important;
   backdrop-filter: none !important;
@@ -6930,6 +7020,7 @@ body.localitfyThemePainting .customThemeManagerV027,
 body.localitfyThemePainting .customThemePresetButtonV027,
 body.localitfyThemePainting .customThemeTokenV027,
 body.localitfyThemePainting .toggleRow{
+  transition: none !important;
   animation: none !important;
   filter: none !important;
   backdrop-filter: none !important;
@@ -6947,6 +7038,7 @@ body.localitfyThemePainting .toggleRow{
 .customThemeColorPreviewV027,
 .customThemeNativeColorInputV027,
 .customThemeHexInputV032{
+  transition: none !important;
 }
 
 /* localtify 0.3.9 — feedback UI rewritten as one clean section */
@@ -7354,6 +7446,7 @@ body.localitfyThemePainting .toggleRow{
   .feedbackSettingsButtonV331,
   .feedbackMaybeButtonV331,
   .feedbackSendButtonV331{
+    transition: none !important;
   }
 }
 
@@ -7648,6 +7741,7 @@ body.localitfyThemePainting .toggleRow{
   color: var(--text);
   text-align: left;
   background: rgba(255,255,255,0.030);
+  transition: transform 180ms cubic-bezier(.2,1,.2,1), background 180ms ease, border-color 180ms ease, box-shadow 200ms ease;
 }
 
 .cleanerOptionV440.active{
@@ -7805,6 +7899,7 @@ body.localitfyThemePainting .toggleRow{
     rgba(0,0,0,0.82);
   box-shadow: 0 20px 55px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08);
   animation: settingsIslandInV440 360ms cubic-bezier(.16,1,.3,1) both;
+  transition: width 320ms cubic-bezier(.16,1,.3,1), transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
 }
 
 .settingsUpdateIslandV440[data-status="available"],

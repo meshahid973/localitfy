@@ -436,10 +436,8 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   undoLastMetadataCleanAction,
   metadataUndoCount = 0,
   rebuildSearchIndexAction,
-  importSongs,
   importAnimation,
   libraryScanMessage,
-  changeView,
   pixelArtAssets,
   pixelArtBusy,
   randomizeAllCovers,
@@ -710,8 +708,6 @@ return (
               </div>
               <div className="settingsMiniGrid appearanceMiniGridV356">
                 <ToggleRow label="Right side cards" help="Shows the optional right column." checked={settings.showRightColumn} onChange={(value) => updateSetting("showRightColumn", value)} />
-                <ToggleRow label="Expanded now playing" help="Makes the hero area larger." checked={settings.heroExpanded} onChange={(value) => updateSetting("heroExpanded", value)} />
-                <ToggleRow label="Compact player" help="Keeps the bottom player smaller." checked={settings.compactPlayer} onChange={(value) => updateSetting("compactPlayer", value)} />
                 <ToggleRow label="Compact library" help="Fits smaller rows." checked={settings.denseList} onChange={(value) => updateSetting("denseList", value)} />
                 <ToggleRow label="Reduce motion" help="Turns off most decorative animations." checked={settings.reducedMotion} onChange={(value) => updateSetting("reducedMotion", value)} />
               </div>
@@ -788,6 +784,8 @@ return (
             </div>
             <RangeRow label="Speed" value={settings.playbackSpeed} min={0.75} max={1.5} step={0.05} suffix="x" onChange={(value) => updateSetting("playbackSpeed", value)} />
             <RangeRow label="Volume" value={settings.volume} min={0} max={1} step={0.01} suffix="" onChange={(value) => updateSetting("volume", value)} />
+            <ToggleRow label="Expanded now playing" help="Makes the home player hero larger." checked={settings.heroExpanded} onChange={(value) => updateSetting("heroExpanded", value)} />
+            <ToggleRow label="Compact player" help="Keeps the bottom player smaller." checked={settings.compactPlayer} onChange={(value) => updateSetting("compactPlayer", value)} />
             <ToggleRow label="Volume normalization" help="Balances loud and quiet files." checked={settings.volumeNormalization} onChange={(value) => updateSetting("volumeNormalization", value)} />
             <ToggleRow label="Per-song volume" help="Remembers custom volume per track." checked={settings.perSongVolumeMemory} onChange={(value) => updateSetting("perSongVolumeMemory", value)} />
             <ToggleRow label="Sleep timer" help="Lets the app stop after a set time." checked={settings.sleepTimerMinutes > 0} onChange={(value) => updateSetting("sleepTimerMinutes", value ? 30 : 0)} />
@@ -928,7 +926,6 @@ return (
             <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataSelectedCount} onClick={() => cleanSelectedMetadataAction?.()}>preview selected {metadataSelectedCount ? `(${metadataSelectedCount})` : ""}</button>
             <button className="settingsActionButton" type="button" disabled={libraryScanBusy || !metadataUndoCount} onClick={() => void undoLastMetadataCleanAction?.()}>undo last clean {metadataUndoCount ? `(${metadataUndoCount})` : ""}</button>
             <button className="settingsActionButton settingsGhostAction" type="button" disabled={libraryScanBusy} onClick={rebuildSearchIndexAction}>rebuild search</button>
-            <button className="settingsActionButton settingsGhostAction" type="button" onClick={importSongs} disabled={importAnimation.active}>import songs</button>
           </div>
           {metadataCleanPreview ? (
             <div className="metadataCleanerPreviewBoxV425 metadataCleanerPreviewBoxV440" role="status" aria-live="polite">
@@ -981,11 +978,9 @@ return (
             </div>
           </div>
           <div className="settingsActionRow">
-            <button className="settingsActionButton settingsPrimaryAction" type="button" onClick={() => changeView("covers", "settings")}>open cover gallery</button>
             <button className="settingsActionButton" type="button" disabled={pixelArtBusy || songs.length === 0} onClick={randomizeAllCovers}>randomize all covers</button>
             <button className="settingsActionButton" type="button" disabled={pixelArtBusy} onClick={rescanPixelArtFolder}>rescan pixel art</button>
           </div>
-          <p className="settingsHintText">{pixelArtBusy ? "working on pixel art..." : "Extra visual toggles were removed from this page because real cover editing belongs in the cover gallery."}</p>
         </div>
       </section>
     ) : null}

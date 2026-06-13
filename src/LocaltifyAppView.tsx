@@ -4040,6 +4040,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     openCoversViewWithCurrentSong,
     homeListenNowSongs,
     shuffleLibrarySongsAction,
+    playableSongCount,
     currentId,
     selectSong,
     updateSetting,
@@ -5185,14 +5186,15 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         <h3>Listen now</h3>
                       </div>
                       <div className="homeShelfActions">
-                        <span>{homeListenNowSongs.length} pick{homeListenNowSongs.length === 1 ? "" : "s"}</span>
+                        <span>{playableSongCount || 0} playable</span>
                         <button
                           className="homeShelfActionButton"
                           type="button"
                           onClick={shuffleLibrarySongsAction}
-                          disabled={songs.length < 2}
+                          disabled={(playableSongCount || 0) < 2}
+                          title="Shuffle the whole library and fill the queue"
                         >
-                          shuffle songs
+                          shuffle library
                         </button>
                       </div>
                     </div>
@@ -5400,7 +5402,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <div className="libraryHeaderActions libraryPanelActionsV025 libraryActionsCleanV026">
                     {view === "library" ? (
                       <button type="button" className="shuffleLibraryButtonV025" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
-                        shuffle songs
+                        shuffle library
                       </button>
                     ) : null}
                   </div>
