@@ -250,11 +250,7 @@ function RangeRow({
     </label>
   );
 }
-type VisualCustomizationOption = {
-  id: string;
-  label: string;
-  note: string;
-};
+
 function readSettingChoice(settings: Settings, key: string, fallback: string) {
   const value = settings?.[key];
   return typeof value === "string" && value.trim() ? value : fallback;
@@ -321,6 +317,74 @@ function VisualOptionGroup({
     </div>
   );
 }
+
+function BouncyHeroRangeRow({
+  label,
+  help,
+  value,
+  min,
+  max,
+  step,
+  displayValue,
+  onChange
+}: {
+  label: string;
+  help: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  displayValue: (value: number) => string;
+  onChange: (value: number) => void | Promise<void>;
+}) {
+  const safeValue = Number.isFinite(Number(value)) ? Number(value) : 1;
+  const [draftValue, setDraftValue] = useState(safeValue);
+  const clampedValue = clamp(draftValue, min, max);
+  const fill = ((clampedValue - min) / (max - min || 1)) * 100;
+
+  useEffect(() => {
+    setDraftValue(safeValue);
+  }, [safeValue]);
+
+  function updateValue(rawValue: number) {
+    const nextValue = Number(clamp(rawValue, min, max).toFixed(2));
+    setDraftValue(nextValue);
+    void onChange(nextValue);
+  }
+
+  return (
+    <label className="bouncyHeroRangeRowV448" title={`${label}: ${displayValue(clampedValue)}`}>
+      <span className="bouncyHeroRangeCopyV448">
+        <strong>{label}</strong>
+        <small>{help}</small>
+      </span>
+      <span className="bouncyHeroRangeValueV448">{displayValue(clampedValue)}</span>
+      <span
+        className="bouncyHeroSliderShellV448"
+        style={{ ["--bouncy-progress" as string]: `${clamp(fill, 0, 100)}%` } as CSSProperties}
+      >
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={clampedValue}
+          onChange={(event) => updateValue(Number(event.currentTarget.value))}
+        />
+        <span className="bouncyHeroSliderRailV448" aria-hidden="true">
+          <span className="bouncyHeroSliderFillV448" />
+          <span className="bouncyHeroSliderThumbV448"><span /></span>
+        </span>
+      </span>
+    </label>
+  );
+}
+type VisualCustomizationOption = {
+  id: string;
+  label: string;
+  note: string;
+};
+
 const HOME_BANNER_TYPE_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "cleanBlack", label: "Clean black", note: "plain black" },
   { id: "none", label: "None", note: "hide hero art" }
@@ -346,7 +410,8 @@ const SIDEBAR_BEHAVIOR_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
   { id: "hover", label: "Expand on hover", note: "hover open" }
 ];
 const PLAYER_BACKGROUND_OPTIONS: ReadonlyArray<VisualCustomizationOption> = [
-  { id: "flat", label: "Flat", note: "flat" },
+  { id: "flat", label: "Flat", note: "plain bar" },
+  { id: "coverBlur", label: "Cover blur", note: "album glow" },
   { id: "oledBlack", label: "OLED black", note: "black" }
 ];
 function detectSettingsPlatform(): Required<PlatformInfoLike> {
@@ -795,10 +860,20 @@ return (
           </div>
           <VisualOptionGroup
             title="Player background"
-            note="Bottom player style. Flat is safest for release."
+            note="Bottom player style. Cover blur keeps the original album glow."
             options={PLAYER_BACKGROUND_OPTIONS}
-            value={readSettingChoice(settings, "playerBackgroundStyle", "flat")}
+            value={readSettingChoice(settings, "playerBackgroundStyle", "coverBlur")}
             onChange={(value) => updateSetting("playerBackgroundStyle", value)}
+          />
+          <BouncyHeroRangeRow
+            label="Hero image brightness"
+            help="Only changes the big now playing cover on the home page."
+            value={Number(settings.homeHeroCoverBrightness ?? 1)}
+            min={0.65}
+            max={1.55}
+            step={0.05}
+            displayValue={(value) => `${Math.round(value * 100)}%`}
+            onChange={(value) => updateSetting("homeHeroCoverBrightness", value)}
           />
         </div>
       </section>

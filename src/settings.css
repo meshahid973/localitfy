@@ -5,7 +5,7 @@
   padding: 0 22px 132px;
   display: grid;
   gap: 22px;
-  color: var(--text);
+  color: var(--lt-text);
 }
 
 .settingsPage *{
@@ -21,10 +21,10 @@
   justify-content: space-between;
   gap: 20px;
   overflow: hidden;
-  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.2);
   border-radius: 20px;
   background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), 0.105), rgba(255,255,255,0.028) 48%, rgba(0,0,0,0.32)),
+    linear-gradient(135deg, rgba(var(--lt-accent-rgb), 0.105), rgba(255,255,255,0.028) 48%, rgba(0,0,0,0.32)),
     rgba(8, 8, 12, 0.78);
   box-shadow: 0 24px 76px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.055);
   backdrop-filter: blur(18px) saturate(125%);
@@ -45,7 +45,7 @@
 .settingsHero .softText{
   max-width: 760px;
   margin: 0;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 14px;
   line-height: 1.45;
 }
@@ -94,7 +94,7 @@
 .settingsCategoryHeader span,
 .customThemePresetHeaderV025 span{
   display: block;
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.2em;
@@ -106,7 +106,7 @@
 .settingsCategoryHeader h4{
   display: block;
   margin: 0;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(26px, 2.4vw, 42px);
   line-height: 0.94;
   letter-spacing: -0.06em;
@@ -123,7 +123,7 @@
 .settingsCategoryHeader > span,
 .customThemePresetHeaderV025 small{
   display: block;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 13px;
   line-height: 1.45;
   letter-spacing: 0;
@@ -145,16 +145,16 @@
   display: grid;
   place-items: center;
   gap: 8px;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,0.025);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.032);
   transition: transform 200ms cubic-bezier(.2,.9,.18,1), border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
 }
 
 .settingsThemeCard.active{
-  border-color: rgba(var(--accent-rgb),0.48);
-  background: linear-gradient(180deg, rgba(var(--accent-rgb),0.13), rgba(255,255,255,0.026));
-  box-shadow: 0 16px 40px rgba(0,0,0,0.34), 0 0 24px rgba(var(--accent-rgb),0.12), inset 0 0 0 1px rgba(var(--accent-rgb),0.08);
+  border-color: rgba(var(--lt-accent-rgb),0.48);
+  background: linear-gradient(180deg, rgba(var(--lt-accent-rgb),0.13), rgba(255,255,255,0.026));
+  box-shadow: 0 16px 40px rgba(0,0,0,0.34), 0 0 24px rgba(var(--lt-accent-rgb),0.12), inset 0 0 0 1px rgba(var(--lt-accent-rgb),0.08);
 }
 
 .settingsThemeSwatch{
@@ -164,7 +164,7 @@
   display: grid;
   place-items: center;
   color: #fff;
-  box-shadow: 0 0 30px rgba(var(--accent-rgb),0.24), inset 0 1px 0 rgba(255,255,255,0.24);
+  box-shadow: 0 0 30px rgba(var(--lt-accent-rgb),0.24), inset 0 1px 0 rgba(255,255,255,0.24);
   transition: transform 220ms cubic-bezier(.2,1.3,.18,1), filter 180ms ease;
 }
 
@@ -173,14 +173,14 @@
 }
 
 .settingsThemeCard strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 15px;
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
 
 .settingsThemeCard small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   line-height: 1.25;
   text-align: center;
@@ -214,9 +214,9 @@
 .settingsActionButton{
   min-height: 42px;
   padding: 0 16px;
-  border: 1px solid rgba(var(--accent-rgb),0.22);
+  border: 1px solid rgba(var(--lt-accent-rgb),0.22);
   border-radius: 14px;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,0.045);
   font-weight: 900;
   letter-spacing: -0.015em;
@@ -227,13 +227,13 @@
 .settingsPage .softButton.active,
 .settingsActionButton.mainMetadataAction{
   color: #08070c;
-  border-color: var(--accent);
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 68%, white));
-  box-shadow: 0 14px 34px rgba(var(--accent-rgb),0.18), 0 0 26px rgba(var(--accent-rgb),0.18);
+  border-color: var(--lt-accent);
+  background: linear-gradient(135deg, var(--lt-accent), color-mix(in srgb, var(--lt-accent) 68%, white));
+  box-shadow: 0 14px 34px rgba(var(--lt-accent-rgb),0.18), 0 0 26px rgba(var(--lt-accent-rgb),0.18);
 }
 
 .settingsPage .softButton.quiet{
-  color: var(--text-2);
+  color: var(--lt-muted);
   border-color: rgba(255,255,255,0.1);
   background: rgba(255,255,255,0.035);
 }
@@ -247,10 +247,10 @@
 .themeEditorGuideV025{
   margin: 0 0 24px;
   padding: 16px 18px;
-  border-left: 3px solid rgba(var(--accent-rgb),0.45);
+  border-left: 3px solid rgba(var(--lt-accent-rgb),0.45);
   border-radius: 0 16px 16px 0;
-  color: var(--text-2);
-  background: rgba(var(--accent-rgb),0.055);
+  color: var(--lt-muted);
+  background: rgba(var(--lt-accent-rgb),0.055);
   font-weight: 750;
   line-height: 1.45;
 }
@@ -281,7 +281,7 @@
 
 .settingsField span,
 .themeNameField span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -297,7 +297,7 @@
   border-radius: 14px;
   padding: 0 14px;
   outline: none;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(0,0,0,0.22);
   font-weight: 820;
   transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
@@ -306,21 +306,21 @@
 .settingsField input:focus,
 .settingsInlineInput:focus,
 .accentTextInput:focus{
-  border-color: rgba(var(--accent-rgb),0.42);
+  border-color: rgba(var(--lt-accent-rgb),0.42);
   background: rgba(0,0,0,0.32);
-  box-shadow: 0 0 0 4px rgba(var(--accent-rgb),0.08);
+  box-shadow: 0 0 0 4px rgba(var(--lt-accent-rgb),0.08);
 }
 
 .themeEditorPreview,
 .simpleThemePreviewV025,
 .customThemePreviewV025{
   padding: 16px;
-  border: 1px solid rgba(var(--accent-rgb),0.18);
+  border: 1px solid rgba(var(--lt-accent-rgb),0.18);
   border-radius: 20px;
   display: grid;
   gap: 12px;
   background:
-    radial-gradient(circle at 92% 5%, rgba(var(--accent-rgb),0.11), transparent 36%),
+    radial-gradient(circle at 92% 5%, rgba(var(--lt-accent-rgb),0.11), transparent 36%),
     rgba(0,0,0,0.23);
 }
 
@@ -343,7 +343,7 @@
 
 .themePreviewCard span,
 .themePreviewNowV025 span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.18em;
@@ -351,14 +351,14 @@
 }
 
 .themePreviewCard strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 22px;
   line-height: 1;
   letter-spacing: -0.04em;
 }
 
 .themePreviewCard small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   font-weight: 750;
 }
@@ -373,7 +373,7 @@
 }
 
 .previewPlayButton{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 16px;
 }
 
@@ -390,8 +390,8 @@
   width: 62%;
   height: 100%;
   border-radius: inherit;
-  background: var(--accent);
-  box-shadow: 0 0 20px rgba(var(--accent-rgb),0.42);
+  background: var(--lt-accent);
+  box-shadow: 0 0 20px rgba(var(--lt-accent-rgb),0.42);
 }
 
 .customThemePresetSectionV025{
@@ -424,10 +424,10 @@
   align-items: center;
   gap: 14px;
   overflow: hidden;
-  color: var(--text);
+  color: var(--lt-text);
   text-align: left;
   background:
-    radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--preset-accent, var(--accent)) 24%, transparent), transparent 38%),
+    radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--preset-accent, var(--lt-accent)) 24%, transparent), transparent 38%),
     linear-gradient(135deg, color-mix(in srgb, var(--preset-surface, #171724) 82%, transparent), color-mix(in srgb, var(--preset-bg, #050510) 86%, transparent));
   transition: transform 190ms cubic-bezier(.2,1.15,.18,1), border-color 190ms ease, box-shadow 190ms ease;
 }
@@ -438,8 +438,8 @@
   height: 42px;
   flex: 0 0 auto;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--preset-accent, var(--accent)), var(--preset-accent-2, var(--accent)));
-  box-shadow: 0 0 24px color-mix(in srgb, var(--preset-accent, var(--accent)) 34%, transparent);
+  background: linear-gradient(135deg, var(--preset-accent, var(--lt-accent)), var(--preset-accent-2, var(--lt-accent)));
+  box-shadow: 0 0 24px color-mix(in srgb, var(--preset-accent, var(--lt-accent)) 34%, transparent);
 }
 
 .customThemePresetButtonV025 span,
@@ -452,12 +452,12 @@
 .savedThemeItemV025 strong{
   font-size: 14px;
   line-height: 1.1;
-  color: var(--text);
+  color: var(--lt-text);
 }
 
 .customThemePresetButtonV025 small,
 .savedThemeItemV025 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.25;
   font-weight: 750;
@@ -478,7 +478,7 @@
   min-width: 42px;
   padding: 0 12px;
   justify-content: center;
-  color: var(--danger);
+  color: var(--lt-danger);
   background: rgba(255,255,255,0.035);
 }
 
@@ -526,7 +526,7 @@
   width: 32px;
   height: 32px;
   border-radius: 12px;
-  box-shadow: 0 0 18px rgba(var(--accent-rgb),0.14), inset 0 1px 0 rgba(255,255,255,0.18);
+  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb),0.14), inset 0 1px 0 rgba(255,255,255,0.18);
 }
 
 .themeTokenCopy{
@@ -535,13 +535,13 @@
 }
 
 .themeTokenCopy strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 14px;
   line-height: 1.1;
 }
 
 .themeTokenCopy small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.25;
   font-weight: 750;
@@ -550,17 +550,17 @@
 .themeTokenCard code{
   padding: 6px 9px;
   border-radius: 999px;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb),0.09);
+  color: var(--lt-accent);
+  background: rgba(var(--lt-accent-rgb),0.09);
   font-size: 11px;
   font-weight: 900;
 }
 
 .metadataCleanerPageCard{
-  border-color: rgba(var(--accent-rgb),0.18);
+  border-color: rgba(var(--lt-accent-rgb),0.18);
   background:
-    radial-gradient(circle at 9% 0%, rgba(var(--accent-rgb),0.11), transparent 36%),
-    radial-gradient(circle at 92% 72%, rgba(var(--accent-rgb),0.085), transparent 36%),
+    radial-gradient(circle at 9% 0%, rgba(var(--lt-accent-rgb),0.11), transparent 36%),
+    radial-gradient(circle at 92% 72%, rgba(var(--lt-accent-rgb),0.085), transparent 36%),
     linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.022)),
     rgba(7,7,12,0.76);
 }
@@ -581,12 +581,12 @@
   align-content: center;
   gap: 8px;
   background:
-    radial-gradient(circle at 18% 12%, rgba(var(--accent-rgb),0.11), transparent 38%),
+    radial-gradient(circle at 18% 12%, rgba(var(--lt-accent-rgb),0.11), transparent 38%),
     rgba(0,0,0,0.28);
 }
 
 .metadataCleanerPreview span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.17em;
@@ -594,7 +594,7 @@
 }
 
 .metadataCleanerPreview strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(24px, 3vw, 42px);
   line-height: 0.96;
   letter-spacing: -0.06em;
@@ -608,7 +608,7 @@
   padding: 8px 11px;
   border-radius: 999px;
   color: #08070c;
-  background: var(--accent);
+  background: var(--lt-accent);
   font-size: 12px;
   font-weight: 950;
   overflow-wrap: anywhere;
@@ -649,7 +649,7 @@
   padding: 16px 17px;
   border: 1px solid rgba(255,255,255,0.075);
   border-radius: 18px;
-  color: var(--text);
+  color: var(--lt-text);
   text-align: left;
   background: rgba(255,255,255,0.027);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.026);
@@ -657,7 +657,7 @@
 }
 
 .settingsChoice strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 15px;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -666,7 +666,7 @@
 .settingsChoice small{
   display: block;
   max-width: 36ch;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.35;
   font-weight: 760;
@@ -689,9 +689,9 @@
 }
 
 .settingsChoice.active{
-  border-color: rgba(var(--accent-rgb),0.48);
-  background: linear-gradient(180deg, rgba(var(--accent-rgb),0.13), rgba(255,255,255,0.026));
-  box-shadow: 0 14px 34px rgba(0,0,0,0.28), 0 0 20px rgba(var(--accent-rgb),0.1), inset 0 0 0 1px rgba(var(--accent-rgb),0.08);
+  border-color: rgba(var(--lt-accent-rgb),0.48);
+  background: linear-gradient(180deg, rgba(var(--lt-accent-rgb),0.13), rgba(255,255,255,0.026));
+  box-shadow: 0 14px 34px rgba(0,0,0,0.28), 0 0 20px rgba(var(--lt-accent-rgb),0.1), inset 0 0 0 1px rgba(var(--lt-accent-rgb),0.08);
 }
 
 .settingsActionRow,
@@ -710,7 +710,7 @@
 .settingsHintText,
 .metadataCleanerHint{
   margin: 0;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.45;
   font-weight: 760;
@@ -728,7 +728,7 @@
   padding: 11px 13px;
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 14px;
-  color: var(--text-2);
+  color: var(--lt-muted);
   background: rgba(255,255,255,0.025);
   font-size: 12px;
   line-height: 1.35;
@@ -754,13 +754,13 @@
 }
 
 .statusGrid strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 22px;
   line-height: 1;
 }
 
 .statusGrid small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   font-weight: 850;
   text-transform: uppercase;
@@ -783,12 +783,12 @@
 }
 
 .settingsPlaylistItem strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 14px;
 }
 
 .settingsPlaylistItem small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
 }
 
@@ -809,10 +809,10 @@
   width: min(1180px, 100%) !important;
   max-height: min(820px, calc(100vh - 150px)) !important;
   overflow: hidden !important;
-  border: 1px solid rgba(var(--accent-rgb),0.18) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb),0.18) !important;
   border-radius: 24px !important;
   background:
-    radial-gradient(circle at 85% 0%, rgba(var(--accent-rgb),0.12), transparent 34%),
+    radial-gradient(circle at 85% 0%, rgba(var(--lt-accent-rgb),0.12), transparent 34%),
     rgba(7,7,12,0.92) !important;
   box-shadow: 0 32px 100px rgba(0,0,0,0.66) !important;
 }
@@ -828,7 +828,7 @@
 }
 
 .cleanSettingsHead span{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 13px;
   font-weight: 760;
 }
@@ -872,12 +872,12 @@
 .settingsInfoDot{
   width: 17px;
   height: 17px;
-  border: 1px solid rgba(var(--accent-rgb),0.34);
+  border: 1px solid rgba(var(--lt-accent-rgb),0.34);
   border-radius: 50%;
   display: inline-grid;
   place-items: center;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb),0.08);
+  color: var(--lt-accent);
+  background: rgba(var(--lt-accent-rgb),0.08);
   font-size: 10px;
   font-weight: 950;
 }
@@ -885,19 +885,19 @@
 .cleanToggleLabel{
   min-height: 40px;
   padding: 0 13px;
-  border: 1px solid rgba(var(--accent-rgb),0.22);
+  border: 1px solid rgba(var(--lt-accent-rgb),0.22);
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  color: var(--text);
-  background: rgba(var(--accent-rgb),0.07);
+  color: var(--lt-text);
+  background: rgba(var(--lt-accent-rgb),0.07);
   font-size: 13px;
   font-weight: 900;
 }
 
 .cleanToggleLabel input{
-  accent-color: var(--accent);
+  accent-color: var(--lt-accent);
 }
 
 @keyframes settingsCardIn{
@@ -996,8 +996,8 @@
 .app .settingsThemeCard.active,
 .app .settingsChoice.active{
   box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--theme-progress, var(--accent)) 28%, transparent),
-    0 18px 48px color-mix(in oklab, var(--theme-progress, var(--accent)) 10%, transparent) !important;
+    inset 0 0 0 1px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 28%, transparent),
+    0 18px 48px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 10%, transparent) !important;
 }
 
 .app .metadataCleanerPageCard{
@@ -1032,7 +1032,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsPage button:focus-visible,
 .settingsModal button:focus-visible,
 .cleanSettingsModal button:focus-visible{
-  outline: 2px solid rgba(var(--accent-rgb), 0.58);
+  outline: 2px solid rgba(var(--lt-accent-rgb), 0.58);
   outline-offset: 3px;
 }
 
@@ -1059,8 +1059,8 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsChoice:focus-visible{
   outline: none;
-  border-color: rgba(var(--accent-rgb),0.46);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.16), inset 0 1px 0 rgba(255,255,255,0.05);
+  border-color: rgba(var(--lt-accent-rgb),0.46);
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb),0.16), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 .optionGrid{
@@ -1086,8 +1086,8 @@ body.localitfyThemePainting .app .themeTokenCard{
   --settings-row-bg: rgba(255,255,255,0.032);
   --settings-row-bg-hover: rgba(255,255,255,0.047);
   --settings-row-border: rgba(255,255,255,0.082);
-  --settings-row-border-hover: rgba(var(--accent-rgb),0.28);
-  --settings-row-shadow-hover: 0 12px 28px rgba(0,0,0,0.18), 0 0 0 1px rgba(var(--accent-rgb),0.055) inset;
+  --settings-row-border-hover: rgba(var(--lt-accent-rgb),0.28);
+  --settings-row-shadow-hover: 0 12px 28px rgba(0,0,0,0.18), 0 0 0 1px rgba(var(--lt-accent-rgb),0.055) inset;
 }
 
 .settingsChoice,
@@ -1124,7 +1124,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsModal :focus-visible,
 .cleanSettingsModal :focus-visible{
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.16), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb),0.16), inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 
 .settingsPage{
@@ -1170,7 +1170,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsSelectField span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.18em;
@@ -1183,7 +1183,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 10px;
   padding: 0 12px;
-  color: var(--text);
+  color: var(--lt-text);
   background: #050509;
   outline: none;
   font: inherit;
@@ -1216,7 +1216,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsThemeSelectedPreview strong{
   display: block;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 15px;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -1225,7 +1225,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsThemeSelectedPreview small{
   display: block;
   margin-top: 4px;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.25;
   font-weight: 760;
@@ -1265,7 +1265,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   max-width: 100% !important;
   display: block !important;
   margin: 0 !important;
-  color: var(--text-2) !important;
+  color: var(--lt-muted) !important;
   font-size: 12px !important;
   line-height: 1.35 !important;
   font-weight: 760 !important;
@@ -1273,7 +1273,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsChoice strong{
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   font-size: 14px !important;
   line-height: 1.12 !important;
   letter-spacing: -0.02em !important;
@@ -1286,7 +1286,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .cleanToggleLabel input:checked + span{
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb),0.18) !important;
 }
 
 .metadataCleanerPageCard{
@@ -1314,14 +1314,14 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .metadataCleanerPreview span{
-  color: var(--accent) !important;
+  color: var(--lt-accent) !important;
   font-size: 10px !important;
   letter-spacing: 0.18em !important;
 }
 
 .metadataCleanerPreview strong{
   margin-top: 10px !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   font-size: clamp(22px, 2.35vw, 34px) !important;
   line-height: 0.98 !important;
   letter-spacing: -0.055em !important;
@@ -1335,7 +1335,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   padding: 7px 10px !important;
   border-radius: 10px !important;
   color: #050509 !important;
-  background: var(--accent) !important;
+  background: var(--lt-accent) !important;
   white-space: normal !important;
 }
 
@@ -1364,7 +1364,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   border-radius: 12px !important;
   border: 1px solid rgba(255,255,255,0.11) !important;
   background: rgba(0,0,0,0.26) !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
   filter: none !important;
   transition: transform 160ms cubic-bezier(.2,1,.25,1), border-color 180ms ease, background-color 180ms ease !important;
@@ -1378,9 +1378,9 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .mainMetadataAction,
 .settingsActionButton.primary{
-  border-color: rgba(var(--accent-rgb),0.34) !important;
-  background: rgba(var(--accent-rgb),0.18) !important;
-  color: var(--text) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.34) !important;
+  background: rgba(var(--lt-accent-rgb),0.18) !important;
+  color: var(--lt-text) !important;
 }
 
 @media (max-width: 860px){
@@ -1539,7 +1539,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsDiscordPrivacyShortcut{
-  border-color: color-mix(in srgb, var(--accent, #f020d5) 32%, rgba(255,255,255,0.12)) !important;
+  border-color: color-mix(in srgb, var(--lt-accent, #f020d5) 32%, rgba(255,255,255,0.12)) !important;
 }
 
 .settingsDiscordPrivacyShortcut .settingsTinyButton{
@@ -1570,9 +1570,9 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsQuickStartCard{
   padding: 20px !important;
-  border-color: rgba(var(--accent-rgb),0.22) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.22) !important;
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.075), rgba(255,255,255,0.022)),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb),0.075), rgba(255,255,255,0.022)),
     rgba(6,6,10,0.74) !important;
 }
 
@@ -1590,7 +1590,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   display: grid;
   align-content: center;
   gap: 5px;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,0.04);
   text-align: left;
   box-shadow: none;
@@ -1662,7 +1662,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsDiscordRpcPageCard{
   contain: layout paint;
   scroll-margin-top: 18px;
-  border-color: rgba(var(--accent-rgb), 0.18) !important;
+  border-color: rgba(var(--lt-accent-rgb), 0.18) !important;
 }
 
 .settingsDiscordTitleRow{
@@ -1710,7 +1710,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   align-content: center;
   gap: 8px;
   overflow: hidden;
-  border: 1px solid rgba(var(--accent-rgb), 0.16);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.16);
   border-radius: 18px;
   background: rgba(0, 0, 0, 0.28);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
@@ -1719,7 +1719,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .discordPreviewMock span,
 .settingsPageDiscordPreview span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -1728,7 +1728,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .discordPreviewMock strong,
 .settingsPageDiscordPreview strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(22px, 2vw, 34px);
   line-height: 0.96;
   letter-spacing: -0.055em;
@@ -1736,7 +1736,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .discordPreviewMock small,
 .settingsPageDiscordPreview small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 13px;
   font-weight: 800;
   line-height: 1.35;
@@ -1781,16 +1781,16 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsDiscordSmallImageBlock{
-  border-color: rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--lt-accent-rgb), 0.12);
 }
 
 .settingsDiscordHintText{
   margin: 14px 0 0 !important;
   padding: 11px 13px;
-  border: 1px solid rgba(var(--accent-rgb), 0.14);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.14);
   border-radius: 14px;
-  color: var(--text-2) !important;
-  background: rgba(var(--accent-rgb), 0.045);
+  color: var(--lt-muted) !important;
+  background: rgba(var(--lt-accent-rgb), 0.045);
 }
 
 @media (max-width: 980px){
@@ -1889,13 +1889,13 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .discordHeroCopy strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 19px;
   letter-spacing: -.035em;
 }
 
 .discordHeroCopy span{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 13px;
   line-height: 1.45;
   font-weight: 760;
@@ -1911,7 +1911,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsHintText{
   margin: 12px 0 0;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.45;
   font-weight: 760;
@@ -1923,14 +1923,14 @@ body.localitfyThemePainting .app .themeTokenCard{
   padding: 0 12px;
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 12px;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,.045);
   outline: none;
 }
 
 .settingsInlineInput:focus{
-  border-color: rgba(var(--accent-rgb),.36);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.08);
+  border-color: rgba(var(--lt-accent-rgb),.36);
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb),.08);
 }
 
 .settingsPlaylistList{
@@ -1956,7 +1956,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPlaylistItem small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   font-weight: 750;
 }
@@ -1984,12 +1984,12 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .statusGrid strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 18px;
 }
 
 .statusGrid small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   font-weight: 780;
 }
@@ -2215,8 +2215,8 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsTextFieldV027 input:focus{
-  border-color: rgba(var(--accent-rgb), .65);
-  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .1);
+  border-color: rgba(var(--lt-accent-rgb), .65);
+  box-shadow: 0 0 0 4px rgba(var(--lt-accent-rgb), .1);
 }
 
 @media (max-width: 900px){
@@ -2316,8 +2316,8 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsStatusCards span{
   min-height: 78px;
-  border: 1px solid color-mix(in srgb, var(--border, rgba(255,255,255,.14)) 78%, var(--accent, #ed28f0) 22%);
-  background: color-mix(in srgb, var(--surface, #151019) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lt-border, rgba(255,255,255,.14)) 78%, var(--lt-accent, #ed28f0) 22%);
+  background: color-mix(in srgb, var(--lt-surface, #151019) 88%, transparent);
   border-radius: 18px;
   padding: 14px;
   display: flex;
@@ -2329,19 +2329,19 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsStatusCards strong{
   font-size: 1.05rem;
   line-height: 1;
-  color: var(--text, #f7f3ff);
+  color: var(--lt-text, #f7f3ff);
 }
 
 .settingsStatusCards small{
   font-size: .75rem;
-  color: var(--muted, rgba(247,243,255,.62));
+  color: var(--lt-muted, rgba(247,243,255,.62));
   font-weight: 800;
 }
 
 .settingsUpdateMessage{
   margin: 8px 0 14px;
-  border: 1px solid color-mix(in srgb, var(--accent, #ed28f0) 42%, transparent);
-  background: color-mix(in srgb, var(--accent, #ed28f0) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lt-accent, #ed28f0) 42%, transparent);
+  background: color-mix(in srgb, var(--lt-accent, #ed28f0) 10%, transparent);
   border-radius: 18px;
   padding: 14px 16px;
   display: flex;
@@ -2351,11 +2351,11 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsUpdateMessage strong{
   text-transform: capitalize;
-  color: var(--text, #f7f3ff);
+  color: var(--lt-text, #f7f3ff);
 }
 
 .settingsUpdateMessage span{
-  color: var(--muted, rgba(247,243,255,.66));
+  color: var(--lt-muted, rgba(247,243,255,.66));
   font-weight: 750;
 }
 
@@ -2378,13 +2378,13 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsPlainList{
   margin: 0;
   padding: 0 0 0 18px;
-  color: var(--muted, rgba(247,243,255,.68));
+  color: var(--lt-muted, rgba(247,243,255,.68));
   font-weight: 760;
   line-height: 1.65;
 }
 
 .settingsReleaseList li::marker{
-  color: var(--accent, #ed28f0);
+  color: var(--lt-accent, #ed28f0);
 }
 
 .settingsResetGrid{
@@ -2395,9 +2395,9 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsResetButton{
   min-height: 92px;
-  border: 1px solid color-mix(in srgb, var(--border, rgba(255,255,255,.14)) 78%, var(--accent, #ed28f0) 22%);
-  background: color-mix(in srgb, var(--surface, #151019) 90%, transparent);
-  color: var(--text, #f7f3ff);
+  border: 1px solid color-mix(in srgb, var(--lt-border, rgba(255,255,255,.14)) 78%, var(--lt-accent, #ed28f0) 22%);
+  background: color-mix(in srgb, var(--lt-surface, #151019) 90%, transparent);
+  color: var(--lt-text, #f7f3ff);
   border-radius: 20px;
   padding: 16px;
   text-align: left;
@@ -2415,14 +2415,14 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsResetButton span{
-  color: var(--muted, rgba(247,243,255,.64));
+  color: var(--lt-muted, rgba(247,243,255,.64));
   font-weight: 720;
   line-height: 1.35;
 }
 
 .settingsResetButton.danger{
   grid-column: 1 / -1;
-  border-color: color-mix(in srgb, #ff5f8a 42%, var(--border, rgba(255,255,255,.14)));
+  border-color: color-mix(in srgb, #ff5f8a 42%, var(--lt-border, rgba(255,255,255,.14)));
 }
 
 .app.viewSwitching .settingsStatusCards span,
@@ -2483,8 +2483,8 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsThemeSelectV027:focus,
 .settingsTextInputV027:focus,
 .themeNameInputV027:focus{
-  border-color: rgba(var(--accent-rgb), .36) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .10) !important;
+  border-color: rgba(var(--lt-accent-rgb), .36) !important;
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .10) !important;
 }
 
 .settingsChoice,
@@ -2501,8 +2501,8 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsChoice.isActive{
-  background: rgba(var(--accent-rgb), .12) !important;
-  border-color: rgba(var(--accent-rgb), .30) !important;
+  background: rgba(var(--lt-accent-rgb), .12) !important;
+  border-color: rgba(var(--lt-accent-rgb), .30) !important;
 }
 
 .themePresetGridV027{
@@ -2516,10 +2516,10 @@ body.localitfyThemePainting .app .themeTokenCard{
   max-width: 92px !important;
   padding: 4px 8px !important;
   border-radius: 999px !important;
-  background: rgba(var(--accent-rgb), .10) !important;
+  background: rgba(var(--lt-accent-rgb), .10) !important;
   border: 0 !important;
   box-shadow: none !important;
-  color: rgb(var(--accent-rgb)) !important;
+  color: rgb(var(--lt-accent-rgb)) !important;
   font-size: 11px !important;
   letter-spacing: .01em !important;
 }
@@ -2539,7 +2539,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   border-radius: 28px !important;
   border: 1px solid rgba(var(--text-rgb), .075) !important;
   background:
-    radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb), .075), transparent 34%),
+    radial-gradient(circle at 18% 0%, rgba(var(--lt-accent-rgb), .075), transparent 34%),
     radial-gradient(circle at 90% 6%, rgba(var(--highlight-rgb), .06), transparent 30%),
     rgba(255, 255, 255, .022) !important;
   box-shadow: none !important;
@@ -2609,8 +2609,8 @@ body.localitfyThemePainting .app .themeTokenCard{
   padding: 0 14px !important;
   border-radius: 999px !important;
   color: rgb(var(--text-rgb)) !important;
-  background: rgba(var(--accent-rgb), .115) !important;
-  border: 1px solid rgba(var(--accent-rgb), .24) !important;
+  background: rgba(var(--lt-accent-rgb), .115) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), .24) !important;
   box-shadow: none !important;
   font-size: .82rem !important;
   font-weight: 900 !important;
@@ -2664,8 +2664,8 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsCategoryContentV027 .settingsTextFieldV027 input:focus,
 .settingsCategoryPage .settingsTextFieldV027 input:focus{
-  border-color: rgba(var(--accent-rgb), .34) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .10) !important;
+  border-color: rgba(var(--lt-accent-rgb), .34) !important;
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .10) !important;
 }
 
 .settingsCategoryContentV027 .customThemeTokenHexV027,
@@ -2726,9 +2726,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .aboutActionButton.primary{
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), .92), rgba(var(--accent-rgb), .68)) !important;
+  background: linear-gradient(180deg, rgba(var(--lt-accent-rgb), .92), rgba(var(--lt-accent-rgb), .68)) !important;
   color: #08040b !important;
-  border-color: rgba(var(--accent-rgb), .62) !important;
+  border-color: rgba(var(--lt-accent-rgb), .62) !important;
 }
 
 .aboutPlainCard{
@@ -2808,7 +2808,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsDiagnosticCard span{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -2817,7 +2817,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsDiagnosticCard strong{
   overflow: hidden;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(18px, 1.8vw, 28px);
   line-height: 1;
   letter-spacing: -0.045em;
@@ -2840,10 +2840,10 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsDiagnosticsText:focus{
-  border-color: rgba(var(--accent-rgb),0.34);
+  border-color: rgba(var(--lt-accent-rgb),0.34);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.04),
-    0 0 0 3px rgba(var(--accent-rgb),0.08);
+    0 0 0 3px rgba(var(--lt-accent-rgb),0.08);
 }
 
 @media (max-width: 960px){
@@ -2951,9 +2951,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   align-items: center !important;
   justify-content: center !important;
   border-radius: 999px !important;
-  color: color-mix(in oklab, var(--text, #fff) 78%, var(--accent, #e65adf) 22%) !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 28%, rgba(255,255,255,.10)) !important;
-  background: color-mix(in oklab, var(--surface, rgba(255,255,255,.05)) 82%, var(--accent, #e65adf) 9%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 78%, var(--lt-accent, #e65adf) 22%) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e65adf) 28%, rgba(255,255,255,.10)) !important;
+  background: color-mix(in oklab, var(--lt-surface, rgba(255,255,255,.05)) 82%, var(--lt-accent, #e65adf) 9%) !important;
 }
 
 .settingsUpdatesGrid{
@@ -2967,9 +2967,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   position: relative !important;
   overflow: hidden !important;
   border-radius: 22px !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 24%, rgba(255,255,255,.10)) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e65adf) 24%, rgba(255,255,255,.10)) !important;
   background:
-    radial-gradient(circle at 12% 0%, rgba(var(--accent-rgb, 230,90,223), .13), transparent 38%),
+    radial-gradient(circle at 12% 0%, rgba(var(--lt-accent-rgb, 230,90,223), .13), transparent 38%),
     linear-gradient(145deg, rgba(255,255,255,.052), rgba(255,255,255,.025) 48%, rgba(0,0,0,.18)) !important;
   box-shadow:
     0 24px 70px rgba(0,0,0,.36),
@@ -2994,12 +2994,12 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   font-size: 18px !important;
   line-height: 1.05 !important;
   letter-spacing: -.035em !important;
-  color: var(--text, #fff) !important;
+  color: var(--lt-text, #fff) !important;
 }
 
 .settingsUpdatesPage .settingsPanelHeader span{
   max-width: 58ch !important;
-  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 88%, var(--text, #fff) 12%) !important;
+  color: color-mix(in oklab, var(--lt-muted, rgba(255,255,255,.62)) 88%, var(--lt-text, #fff) 12%) !important;
 }
 
 .settingsUpdatesPage .settingsStatusCards{
@@ -3012,10 +3012,10 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   min-height: 84px !important;
   padding: 13px 14px !important;
   border-radius: 18px !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 25%, rgba(255,255,255,.105)) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e65adf) 25%, rgba(255,255,255,.105)) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.025)),
-    color-mix(in oklab, var(--bg-2, #08060b) 84%, var(--accent, #e65adf) 8%) !important;
+    color-mix(in oklab, var(--bg-2, #08060b) 84%, var(--lt-accent, #e65adf) 8%) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.052) !important;
   justify-content: space-between !important;
 }
@@ -3028,13 +3028,13 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   white-space: nowrap !important;
   font-size: clamp(15px, 1.05vw, 18px) !important;
   letter-spacing: -.02em !important;
-  color: var(--text, #fff) !important;
+  color: var(--lt-text, #fff) !important;
 }
 
 .settingsUpdatesPage .settingsStatusCards small{
   display: block !important;
   margin-top: 4px !important;
-  color: var(--muted, rgba(255,255,255,.58)) !important;
+  color: var(--lt-muted, rgba(255,255,255,.58)) !important;
   font-size: 11px !important;
   line-height: 1.1 !important;
   letter-spacing: .01em !important;
@@ -3044,9 +3044,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   margin: 8px 0 14px !important;
   padding: 14px 15px !important;
   border-radius: 18px !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 34%, rgba(255,255,255,.10)) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e65adf) 34%, rgba(255,255,255,.10)) !important;
   background:
-    radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb, 230,90,223), .14), transparent 60%),
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb, 230,90,223), .14), transparent 60%),
     rgba(255,255,255,.038) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.055) !important;
 }
@@ -3059,7 +3059,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsUpdatesPage .settingsUpdateMessage span{
   max-width: 72ch !important;
-  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 92%, var(--text, #fff) 8%) !important;
+  color: color-mix(in oklab, var(--lt-muted, rgba(255,255,255,.62)) 92%, var(--lt-text, #fff) 8%) !important;
   font-size: 13px !important;
   line-height: 1.35 !important;
 }
@@ -3078,9 +3078,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   min-height: 38px !important;
   padding: 0 14px !important;
   border-radius: 14px !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #e65adf) 24%, rgba(255,255,255,.12)) !important;
+  border: 1px solid color-mix(in oklab, var(--lt-accent, #e65adf) 24%, rgba(255,255,255,.12)) !important;
   background: rgba(255,255,255,.052) !important;
-  color: color-mix(in oklab, var(--text, #fff) 82%, var(--accent, #e65adf) 18%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 82%, var(--lt-accent, #e65adf) 18%) !important;
   box-shadow: none !important;
   transform: none !important;
 }
@@ -3112,7 +3112,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border-radius: 15px !important;
   border: 1px solid rgba(255,255,255,.075) !important;
   background: rgba(255,255,255,.038) !important;
-  color: color-mix(in oklab, var(--text, #fff) 76%, var(--muted, #aaa) 24%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 76%, var(--lt-muted, #aaa) 24%) !important;
   font-size: 13px !important;
   font-weight: 780 !important;
   line-height: 1.35 !important;
@@ -3152,9 +3152,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsUpdatesPage .settingsPanelCard,
 .settingsUpdatesPage .settingsFullWidthPanel{
   border-radius: 21px !important;
-  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .18) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb, 230,90,223), .18) !important;
   background:
-    radial-gradient(circle at 10% -18%, rgba(var(--accent-rgb, 230,90,223), .105), transparent 42%),
+    radial-gradient(circle at 10% -18%, rgba(var(--lt-accent-rgb, 230,90,223), .105), transparent 42%),
     linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.020) 58%, rgba(0,0,0,.16)) !important;
   box-shadow:
     0 18px 52px rgba(0,0,0,.30),
@@ -3192,7 +3192,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   min-height: 58px !important;
   padding: 12px 13px !important;
   border-radius: 17px !important;
-  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .14) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb, 230,90,223), .14) !important;
   background: rgba(255,255,255,.036) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
@@ -3206,8 +3206,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   justify-content: center !important;
   border-radius: 12px !important;
   color: #080409 !important;
-  background: color-mix(in oklab, var(--accent, #e65adf) 82%, white 18%) !important;
-  box-shadow: 0 10px 26px rgba(var(--accent-rgb, 230,90,223), .14) !important;
+  background: color-mix(in oklab, var(--lt-accent, #e65adf) 82%, white 18%) !important;
+  box-shadow: 0 10px 26px rgba(var(--lt-accent-rgb, 230,90,223), .14) !important;
   font-size: 14px !important;
   font-weight: 950 !important;
   letter-spacing: -.015em !important;
@@ -3220,13 +3220,13 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsUpdateCurrent strong{
-  color: var(--text, #fff) !important;
+  color: var(--lt-text, #fff) !important;
   font-size: 13px !important;
   line-height: 1.1 !important;
 }
 
 .settingsUpdateCurrent span:not(.settingsUpdateVersionBadge){
-  color: var(--muted, rgba(255,255,255,.62)) !important;
+  color: var(--lt-muted, rgba(255,255,255,.62)) !important;
   font-size: 12px !important;
   font-weight: 760 !important;
 }
@@ -3235,8 +3235,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   margin: 0 !important;
   padding: 13px 14px !important;
   border-radius: 17px !important;
-  border: 1px solid rgba(var(--accent-rgb, 230,90,223), .16) !important;
-  background: color-mix(in oklab, rgba(255,255,255,.045) 82%, var(--accent, #e65adf) 6%) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb, 230,90,223), .16) !important;
+  background: color-mix(in oklab, rgba(255,255,255,.045) 82%, var(--lt-accent, #e65adf) 6%) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
 
@@ -3246,7 +3246,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsUpdatesPage .settingsUpdateMessage span{
-  color: color-mix(in oklab, var(--muted, rgba(255,255,255,.62)) 90%, var(--text, #fff) 10%) !important;
+  color: color-mix(in oklab, var(--lt-muted, rgba(255,255,255,.62)) 90%, var(--lt-text, #fff) 10%) !important;
   font-size: 12.5px !important;
   line-height: 1.38 !important;
 }
@@ -3267,7 +3267,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border-radius: 13px !important;
   border: 0 !important;
   background: rgba(255,255,255,.055) !important;
-  color: color-mix(in oklab, var(--text, #fff) 82%, var(--muted, #aaa) 18%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 82%, var(--lt-muted, #aaa) 18%) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.07) !important;
 }
 
@@ -3298,7 +3298,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border: 0 !important;
   background: rgba(255,255,255,.036) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.055) !important;
-  color: color-mix(in oklab, var(--text, #fff) 78%, var(--muted, #aaa) 22%) !important;
+  color: color-mix(in oklab, var(--lt-text, #fff) 78%, var(--lt-muted, #aaa) 22%) !important;
   font-size: 12.7px !important;
   font-weight: 770 !important;
 }
@@ -3308,7 +3308,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   top: 15px !important;
   width: 7px !important;
   height: 7px !important;
-  box-shadow: 0 0 14px rgba(var(--accent-rgb, 230,90,223), .30) !important;
+  box-shadow: 0 0 14px rgba(var(--lt-accent-rgb, 230,90,223), .30) !important;
 }
 
 @media (max-width: 1120px){
@@ -3340,7 +3340,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsUpdatesPage .settingsPanelCard,
 .settingsUpdatesPage .settingsFullWidthPanel{
-  border-color: rgba(var(--accent-rgb, 230,90,223), .13) !important;
+  border-color: rgba(var(--lt-accent-rgb, 230,90,223), .13) !important;
   box-shadow:
     0 16px 46px rgba(0,0,0,.24),
     inset 0 1px 0 rgba(255,255,255,.028) !important;
@@ -3404,7 +3404,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsDiscordPanelV027{
   background:
     linear-gradient(180deg, rgba(255,255,255,0.044), rgba(255,255,255,0.012) 30%, rgba(255,255,255,0.004)),
-    radial-gradient(circle at 88% 10%, rgba(var(--accent-rgb),0.075), transparent 28%),
+    radial-gradient(circle at 88% 10%, rgba(var(--lt-accent-rgb),0.075), transparent 28%),
     var(--settings-acrylic-bg) !important;
   border: 1px solid var(--settings-acrylic-line) !important;
   box-shadow:
@@ -3436,11 +3436,11 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsThemeCard.active{
   background:
     linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.016)),
-    rgba(var(--accent-rgb),0.18) !important;
-  border-color: rgba(var(--accent-rgb),0.32) !important;
+    rgba(var(--lt-accent-rgb),0.18) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.32) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.045),
-    inset 3px 0 0 rgba(var(--accent-rgb),0.84),
+    inset 3px 0 0 rgba(var(--lt-accent-rgb),0.84),
     0 14px 28px rgba(0,0,0,0.16) !important;
 }
 
@@ -3463,10 +3463,10 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .themeNameInputV027:focus,
 .settingsField input:focus,
 .settingsInlineInput:focus{
-  border-color: rgba(var(--accent-rgb),0.30) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.30) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.036),
-    0 0 0 3px rgba(var(--accent-rgb),0.070) !important;
+    0 0 0 3px rgba(var(--lt-accent-rgb),0.070) !important;
 }
 
 .settingsOverlay{
@@ -3500,7 +3500,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   display: block;
   margin-top: 8px;
   max-width: 680px;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 13px;
   line-height: 1.45;
   font-weight: 760;
@@ -3513,9 +3513,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(var(--accent-rgb), .26);
+  border: 1px solid rgba(var(--lt-accent-rgb), .26);
   border-radius: 999px;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,.055);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 14px 34px rgba(0,0,0,.22);
   backdrop-filter: blur(12px) saturate(118%);
@@ -3528,9 +3528,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsUpdateHeaderBadge-available,
 .settingsUpdateHeaderBadge-downloaded{
-  border-color: rgba(var(--accent-rgb), .45);
-  background: rgba(var(--accent-rgb), .13);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 16px 42px rgba(var(--accent-rgb), .12);
+  border-color: rgba(var(--lt-accent-rgb), .45);
+  background: rgba(var(--lt-accent-rgb), .13);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 16px 42px rgba(var(--lt-accent-rgb), .12);
 }
 
 .settingsUpdateHeaderBadge-error{
@@ -3541,9 +3541,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsUpdateHeroCardV199{
   padding: clamp(22px, 2.4vw, 34px);
   border-radius: 26px;
-  border-color: rgba(var(--accent-rgb), .22);
+  border-color: rgba(var(--lt-accent-rgb), .22);
   background:
-    radial-gradient(circle at 12% 0%, rgba(var(--accent-rgb), .18), transparent 32%),
+    radial-gradient(circle at 12% 0%, rgba(var(--lt-accent-rgb), .18), transparent 32%),
     linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.026) 48%, rgba(0,0,0,.26)),
     rgba(9, 9, 14, .74);
   box-shadow: 0 26px 80px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.07);
@@ -3553,8 +3553,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsUpdateHeroCard-available,
 .settingsUpdateHeroCard-downloaded{
-  border-color: rgba(var(--accent-rgb), .38);
-  box-shadow: 0 30px 88px rgba(0,0,0,.44), 0 0 44px rgba(var(--accent-rgb), .09), inset 0 1px 0 rgba(255,255,255,.075);
+  border-color: rgba(var(--lt-accent-rgb), .38);
+  box-shadow: 0 30px 88px rgba(0,0,0,.44), 0 0 44px rgba(var(--lt-accent-rgb), .09), inset 0 1px 0 rgba(255,255,255,.075);
 }
 
 .settingsUpdateHeroCard-error{
@@ -3580,7 +3580,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsUpdateKickerV199{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 1000;
   letter-spacing: .2em;
@@ -3588,7 +3588,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsUpdateHeroCopyV199 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(31px, 3.3vw, 52px);
   line-height: .92;
   letter-spacing: -.065em;
@@ -3597,7 +3597,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsUpdateHeroCopyV199 small{
   max-width: 720px;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 14px;
   line-height: 1.5;
   font-weight: 760;
@@ -3623,7 +3623,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsUpdateVersionStackV199 span,
 .settingsUpdateFactsV199 span{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 10px;
   font-weight: 950;
   letter-spacing: .14em;
@@ -3631,7 +3631,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsUpdateVersionStackV199 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 23px;
   line-height: 1;
   letter-spacing: -.04em;
@@ -3642,7 +3642,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   height: 34px;
   margin-top: 18px;
   overflow: hidden;
-  border: 1px solid rgba(var(--accent-rgb), .26);
+  border: 1px solid rgba(var(--lt-accent-rgb), .26);
   border-radius: 999px;
   background: rgba(255,255,255,.05);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.055);
@@ -3653,8 +3653,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   inset: 0 auto 0 0;
   width: 0%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(var(--accent-rgb), .5), rgba(var(--accent-rgb), .86));
-  box-shadow: 0 0 24px rgba(var(--accent-rgb), .18);
+  background: linear-gradient(90deg, rgba(var(--lt-accent-rgb), .5), rgba(var(--lt-accent-rgb), .86));
+  box-shadow: 0 0 24px rgba(var(--lt-accent-rgb), .18);
   transition: width 260ms cubic-bezier(.16,1,.3,1);
 }
 
@@ -3663,7 +3663,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   inset: 0;
   display: grid;
   place-items: center;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 12px;
   font-weight: 950;
 }
@@ -3685,12 +3685,12 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsUpdateMainActionV199.primary{
   color: #08070d;
   border-color: transparent;
-  background: var(--accent);
-  box-shadow: 0 18px 44px rgba(var(--accent-rgb), .20), 0 0 24px rgba(var(--accent-rgb), .18);
+  background: var(--lt-accent);
+  box-shadow: 0 18px 44px rgba(var(--lt-accent-rgb), .20), 0 0 24px rgba(var(--lt-accent-rgb), .18);
 }
 
 .settingsUpdateMainActionV199.quiet{
-  color: var(--text-2);
+  color: var(--lt-muted);
   border-color: rgba(255,255,255,.10);
   background: rgba(255,255,255,.038);
 }
@@ -3728,7 +3728,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsUpdateFactsV199 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 18px;
   line-height: 1.08;
   letter-spacing: -.035em;
@@ -3760,7 +3760,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   gap: 10px;
   border: 1px solid rgba(255,255,255,.075);
   border-radius: 15px;
-  color: var(--text-2);
+  color: var(--lt-muted);
   background: rgba(255,255,255,.035);
   font-size: 13px;
   line-height: 1.42;
@@ -3772,8 +3772,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   height: 7px;
   margin-top: 6px;
   border-radius: 999px;
-  background: var(--accent);
-  box-shadow: 0 0 16px rgba(var(--accent-rgb), .24);
+  background: var(--lt-accent);
+  box-shadow: 0 0 16px rgba(var(--lt-accent-rgb), .24);
 }
 
 @media (max-width: 980px){
@@ -4015,8 +4015,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   margin-right: 5px !important;
   font-size: 8.5px !important;
   opacity: .72 !important;
-  background: rgba(var(--accent-rgb),0.06) !important;
-  border-color: rgba(var(--accent-rgb),0.2) !important;
+  background: rgba(var(--lt-accent-rgb),0.06) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.2) !important;
 }
 
 .settingsPage .softButton,
@@ -4042,11 +4042,11 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .discordHeroCopy span{ font-size: 12px !important; }
 
 .settingsChoice.active{
-  border-color: rgba(var(--accent-rgb),0.22) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.22) !important;
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.08), rgba(var(--accent-rgb),0.04)),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb),0.08), rgba(var(--lt-accent-rgb),0.04)),
     rgba(255,255,255,0.015) !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.08) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb),0.08) !important;
 }
 
 .settingsResetGrid{
@@ -4442,9 +4442,9 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 
 .feedbackCategoryButtonV329.active{
   color: #fff;
-  border-color: rgba(var(--accent-rgb), 0.42);
-  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.36), rgba(var(--accent-rgb), 0.18));
-  box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.13);
+  border-color: rgba(var(--lt-accent-rgb), 0.42);
+  background: linear-gradient(135deg, rgba(var(--lt-accent-rgb), 0.36), rgba(var(--lt-accent-rgb), 0.18));
+  box-shadow: 0 12px 28px rgba(var(--lt-accent-rgb), 0.13);
 }
 
 .feedbackSettingsButtonV329{
@@ -4472,9 +4472,9 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   gap: 14px;
   text-align: left;
   color: #fff;
-  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.22);
   background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), 0.22), rgba(255, 255, 255, 0.055)),
+    linear-gradient(135deg, rgba(var(--lt-accent-rgb), 0.22), rgba(255, 255, 255, 0.055)),
     rgba(255, 255, 255, 0.045);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
@@ -4533,7 +4533,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 .customThemeStudioV025,
 .themeEditorCard{
   overflow: hidden !important;
-  border-color: rgba(var(--accent-rgb), .18) !important;
+  border-color: rgba(var(--lt-accent-rgb), .18) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.02)),
     rgba(8,8,14,.84) !important;
@@ -4589,9 +4589,9 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   overflow: hidden !important;
   min-height: 188px !important;
   border-radius: 22px !important;
-  border-color: rgba(var(--accent-rgb), .20) !important;
+  border-color: rgba(var(--lt-accent-rgb), .20) !important;
   background:
-    radial-gradient(circle at 85% 10%, rgba(var(--accent-rgb), .18), transparent 36%),
+    radial-gradient(circle at 85% 10%, rgba(var(--lt-accent-rgb), .18), transparent 36%),
     linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.018)),
     rgba(0,0,0,.24) !important;
   box-shadow:
@@ -4604,7 +4604,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   min-height: 94px !important;
   border: 1px solid rgba(255,255,255,.075) !important;
   background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), .12), rgba(255,255,255,.026)),
+    linear-gradient(135deg, rgba(var(--lt-accent-rgb), .12), rgba(255,255,255,.026)),
     rgba(0,0,0,.26) !important;
 }
 
@@ -4638,7 +4638,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   min-height: 72px !important;
   border-radius: 16px !important;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--preset-accent, var(--accent)) 14%, rgba(255,255,255,.035)), rgba(255,255,255,.024)),
+    linear-gradient(135deg, color-mix(in srgb, var(--preset-accent, var(--lt-accent)) 14%, rgba(255,255,255,.035)), rgba(255,255,255,.024)),
     rgba(255,255,255,.026) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
@@ -4720,7 +4720,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   gap: 6px;
   text-align: left;
   cursor: pointer;
-  color: var(--text);
+  color: var(--lt-text);
   background:
     linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.016)),
     rgba(255,255,255,.026);
@@ -4733,12 +4733,12 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 }
 
 .playbackModeChoiceV343.active{
-  border-color: rgba(var(--accent-rgb), .42);
+  border-color: rgba(var(--lt-accent-rgb), .42);
   background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), .18), rgba(255,255,255,.025)),
+    linear-gradient(135deg, rgba(var(--lt-accent-rgb), .18), rgba(255,255,255,.025)),
     rgba(255,255,255,.035);
   box-shadow:
-    0 12px 28px rgba(var(--accent-rgb), .10),
+    0 12px 28px rgba(var(--lt-accent-rgb), .10),
     inset 0 1px 0 rgba(255,255,255,.048);
 }
 
@@ -4749,7 +4749,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 }
 
 .playbackModeChoiceV343 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: .78rem;
   line-height: 1.35;
   font-weight: 760;
@@ -4778,7 +4778,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 }
 
 .playbackEffectSlidersV343 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: .88rem;
   font-weight: 900;
 }
@@ -4787,9 +4787,9 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   min-width: 48px;
   padding: 5px 8px;
   border-radius: 999px;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb), .10);
-  border: 1px solid rgba(var(--accent-rgb), .16);
+  color: var(--lt-accent);
+  background: rgba(var(--lt-accent-rgb), .10);
+  border: 1px solid rgba(var(--lt-accent-rgb), .16);
   text-align: center;
   font-style: normal;
   font-size: .74rem;
@@ -4798,7 +4798,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 
 .playbackEffectSlidersV343 input[type="range"]{
   width: 100%;
-  accent-color: var(--accent);
+  accent-color: var(--lt-accent);
 }
 
 @media (max-width: 760px){
@@ -4823,7 +4823,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   align-content: end;
   gap: 5px;
   text-align: left;
-  color: var(--text);
+  color: var(--lt-text);
   cursor: pointer;
   background:
     linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.014)),
@@ -4837,17 +4837,17 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 }
 
 .playbackPresetChipV344.active{
-  border-color: rgba(var(--accent-rgb), .42);
+  border-color: rgba(var(--lt-accent-rgb), .42);
   background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), .18), rgba(255,255,255,.024)),
+    linear-gradient(135deg, rgba(var(--lt-accent-rgb), .18), rgba(255,255,255,.024)),
     rgba(255,255,255,.034);
   box-shadow:
-    0 10px 24px rgba(var(--accent-rgb), .10),
+    0 10px 24px rgba(var(--lt-accent-rgb), .10),
     inset 0 1px 0 rgba(255,255,255,.05);
 }
 
 .playbackPresetChipV344 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: .88rem;
   font-weight: 950;
   line-height: 1.05;
@@ -4855,7 +4855,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 }
 
 .playbackPresetChipV344 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: .70rem;
   line-height: 1.24;
   font-weight: 760;
@@ -4970,9 +4970,9 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   padding: 0 !important;
   overflow: hidden !important;
   border-radius: 30px !important;
-  border-color: rgba(var(--accent-rgb), .18) !important;
+  border-color: rgba(var(--lt-accent-rgb), .18) !important;
   background:
-    radial-gradient(circle at 88% 8%, rgba(var(--accent-rgb), .10), transparent 34%),
+    radial-gradient(circle at 88% 8%, rgba(var(--lt-accent-rgb), .10), transparent 34%),
     linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.016)),
     rgba(7,7,13,.86) !important;
   box-shadow:
@@ -5003,7 +5003,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 
 .simpleThemeEditorHeadV025 .settingsSectionTitle span,
 .themeEditorHead .settingsSectionTitle span{
-  color: var(--accent) !important;
+  color: var(--lt-accent) !important;
   font-size: .72rem !important;
   letter-spacing: .18em !important;
 }
@@ -5085,13 +5085,13 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   min-height: 250px !important;
   padding: 18px !important;
   border-radius: 24px !important;
-  border-color: rgba(var(--accent-rgb), .20) !important;
+  border-color: rgba(var(--lt-accent-rgb), .20) !important;
   overflow: hidden !important;
   display: grid !important;
   grid-template-rows: auto 1fr auto !important;
   gap: 12px !important;
   background:
-    radial-gradient(circle at 92% 8%, rgba(var(--accent-rgb), .20), transparent 34%),
+    radial-gradient(circle at 92% 8%, rgba(var(--lt-accent-rgb), .20), transparent 34%),
     linear-gradient(180deg, color-mix(in srgb, var(--theme-background, #050507) 70%, rgba(255,255,255,.07)), var(--theme-background, #050507)),
     rgba(0,0,0,.38) !important;
 }
@@ -5104,15 +5104,15 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   display: grid !important;
   align-content: center !important;
   gap: 8px !important;
-  border: 1px solid color-mix(in srgb, var(--theme-color, var(--accent)) 18%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-color, var(--lt-accent)) 18%, transparent) !important;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--theme-color, var(--accent)) 14%, transparent), transparent),
+    linear-gradient(135deg, color-mix(in srgb, var(--theme-color, var(--lt-accent)) 14%, transparent), transparent),
     color-mix(in srgb, var(--theme-surface, #151528) 82%, transparent) !important;
 }
 
 .themePreviewNowV025 strong,
 .themePreviewCard strong{
-  color: var(--theme-text, var(--text)) !important;
+  color: var(--theme-text, var(--lt-text)) !important;
   font-size: clamp(1.15rem, 2vw, 1.55rem) !important;
   line-height: .98 !important;
   letter-spacing: -.055em !important;
@@ -5140,8 +5140,8 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   display: grid !important;
   place-items: center !important;
   color: #050507 !important;
-  background: var(--theme-color, var(--accent)) !important;
-  box-shadow: 0 0 24px color-mix(in srgb, var(--theme-color, var(--accent)) 32%, transparent) !important;
+  background: var(--theme-color, var(--lt-accent)) !important;
+  box-shadow: 0 0 24px color-mix(in srgb, var(--theme-color, var(--lt-accent)) 32%, transparent) !important;
 }
 
 .themePreviewProgress{
@@ -5150,8 +5150,8 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 }
 
 .themePreviewProgress span{
-  background: linear-gradient(90deg, var(--theme-color, var(--accent)), var(--theme-progress, var(--theme-color, var(--accent)))) !important;
-  box-shadow: 0 0 18px color-mix(in srgb, var(--theme-color, var(--accent)) 34%, transparent) !important;
+  background: linear-gradient(90deg, var(--theme-color, var(--lt-accent)), var(--theme-progress, var(--theme-color, var(--lt-accent)))) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--theme-color, var(--lt-accent)) 34%, transparent) !important;
 }
 
 .customThemePresetSectionV025{
@@ -5201,9 +5201,9 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   overflow: hidden !important;
   border-color: rgba(255,255,255,.075) !important;
   background:
-    radial-gradient(circle at 24% 24%, color-mix(in srgb, var(--preset-accent, var(--accent)) 80%, white 12%), transparent 18px),
+    radial-gradient(circle at 24% 24%, color-mix(in srgb, var(--preset-accent, var(--lt-accent)) 80%, white 12%), transparent 18px),
     radial-gradient(circle at 72% 32%, color-mix(in srgb, var(--preset-surface, #24243b) 80%, white 8%), transparent 24px),
-    linear-gradient(135deg, color-mix(in srgb, var(--preset-background, #050507) 82%, white 5%), color-mix(in srgb, var(--preset-accent, var(--accent)) 26%, black 74%)) !important;
+    linear-gradient(135deg, color-mix(in srgb, var(--preset-background, #050507) 82%, white 5%), color-mix(in srgb, var(--preset-accent, var(--lt-accent)) 26%, black 74%)) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.05),
     0 12px 28px rgba(0,0,0,.18) !important;
@@ -5583,10 +5583,10 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .metadataCleanerPreviewBoxV425{
   margin-top: 14px;
   padding: 14px;
-  border: 1px solid rgba(var(--accent-rgb), .18);
+  border: 1px solid rgba(var(--lt-accent-rgb), .18);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb), .10), transparent 36%),
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .10), transparent 36%),
     rgba(0, 0, 0, .20);
   display: grid;
   gap: 12px;
@@ -5598,7 +5598,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .metadataCleanerPreviewHeadV425 span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: .15em;
@@ -5606,14 +5606,14 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .metadataCleanerPreviewHeadV425 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 20px;
   font-weight: 950;
   letter-spacing: -.04em;
 }
 
 .metadataCleanerPreviewHeadV425 small{
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 12px;
   font-weight: 800;
 }
@@ -5641,7 +5641,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .metadataCleanerPreviewItemV425 small{
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 9px;
   font-weight: 900;
   letter-spacing: .12em;
@@ -5657,21 +5657,21 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .metadataCleanerPreviewItemV425 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 13px;
   font-style: normal;
   font-weight: 900;
 }
 
 .metadataCleanerPreviewItemV425 em{
-  color: var(--muted);
+  color: var(--lt-muted);
   font-size: 12px;
   font-style: normal;
   font-weight: 750;
 }
 
 .metadataCleanerPreviewItemV425 b{
-  color: var(--accent);
+  color: var(--lt-accent);
 }
 
 .metadataCleanerPreviewActionsV425{
@@ -5682,7 +5682,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsActionButton.ghost{
   background: rgba(255,255,255,.045);
-  color: var(--text);
+  color: var(--lt-text);
 }
 
 @media (max-width: 760px){
@@ -5753,7 +5753,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border: 1px solid rgba(255,255,255,.07);
   border-radius: 11px;
   outline: 0;
-  color: var(--text);
+  color: var(--lt-text);
   background:
     linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.008)),
     rgba(0,0,0,.20);
@@ -5765,11 +5765,11 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsSearchCardV027 input:focus,
 .settingsSearchBoxV027 input:focus{
-  border-color: rgba(var(--accent-rgb),.34);
+  border-color: rgba(var(--lt-accent-rgb),.34);
   background:
     linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.012)),
     rgba(0,0,0,.25);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.08), inset 0 1px 0 rgba(255,255,255,.03);
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb),.08), inset 0 1px 0 rgba(255,255,255,.03);
 }
 
 .settingsSearchHintV027{
@@ -5790,12 +5790,12 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsNoSearchResultsV027 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 12px;
 }
 
 .settingsNoSearchResultsV027 span{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   line-height: 1.34;
 }
@@ -5811,7 +5811,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   grid-template-columns: 32px minmax(0, 1fr);
   gap: 9px;
   align-items: center;
-  color: var(--text);
+  color: var(--lt-text);
   text-align: left;
   background:
     linear-gradient(180deg, rgba(255,255,255,.020), rgba(255,255,255,.006)),
@@ -5828,11 +5828,11 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsCategoryButton.active,
 .settingsCategoryButtonV027.active,
 .settingsCategoryButtonV027.isActive{
-  border-color: rgba(var(--accent-rgb),.24);
+  border-color: rgba(var(--lt-accent-rgb),.24);
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),.12), rgba(var(--accent-rgb),.045)),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb),.12), rgba(var(--lt-accent-rgb),.045)),
     rgba(255,255,255,.018);
-  box-shadow: inset 3px 0 0 rgba(var(--accent-rgb),.82), inset 0 1px 0 rgba(255,255,255,.032);
+  box-shadow: inset 3px 0 0 rgba(var(--lt-accent-rgb),.82), inset 0 1px 0 rgba(255,255,255,.032);
 }
 
 .settingsCategoryIcon{
@@ -5841,8 +5841,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border-radius: 11px;
   display: grid;
   place-items: center;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb),.085);
+  color: var(--lt-accent);
+  background: rgba(var(--lt-accent-rgb),.085);
 }
 
 .settingsLucideIcon,
@@ -5861,7 +5861,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsCategoryCopy strong{
   min-width: 0;
   overflow: hidden;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 12px;
   line-height: 1.08;
   font-weight: 900;
@@ -6019,7 +6019,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .appearanceUnifiedHeaderV356 span{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.35;
   font-weight: 760;
@@ -6055,14 +6055,14 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .appearanceUnifiedSectionHeadV356 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 24px;
   line-height: .95;
   letter-spacing: -.045em;
 }
 
 .appearanceUnifiedSectionHeadV356 span{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.34;
   font-weight: 760;
@@ -6085,7 +6085,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   grid-template-columns: minmax(0, 1fr) 50px;
   gap: 14px;
   align-items: center;
-  color: var(--text);
+  color: var(--lt-text);
   background:
     linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.014)),
     rgba(255,255,255,.018);
@@ -6115,7 +6115,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .toggleRow strong{
   min-width: 0;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 14px;
   line-height: 1.08;
   font-weight: 900;
@@ -6125,7 +6125,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .toggleRow small{
   max-width: 32ch;
   margin: 0;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   line-height: 1.28;
   font-weight: 740;
@@ -6135,12 +6135,12 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   width: 15px;
   height: 15px;
   flex: 0 0 auto;
-  border: 1px solid rgba(var(--accent-rgb),.28);
+  border: 1px solid rgba(var(--lt-accent-rgb),.28);
   border-radius: 999px;
   display: inline-grid;
   place-items: center;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb),.075);
+  color: var(--lt-accent);
+  background: rgba(var(--lt-accent-rgb),.075);
   font-size: 9px;
   font-weight: 950;
 }
@@ -6188,21 +6188,21 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .toggleRow input[type="checkbox"]:checked{
-  border-color: rgba(var(--accent-rgb),.50);
+  border-color: rgba(var(--lt-accent-rgb),.50);
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),.46), rgba(var(--accent-rgb),.26)),
-    rgba(var(--accent-rgb),.22);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.07), inset 0 1px 2px rgba(0,0,0,.24);
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb),.46), rgba(var(--lt-accent-rgb),.26)),
+    rgba(var(--lt-accent-rgb),.22);
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb),.07), inset 0 1px 2px rgba(0,0,0,.24);
 }
 
 .toggleRow input[type="checkbox"]:checked::before{
   transform: translateX(20px);
-  background: color-mix(in srgb, var(--accent) 72%, white);
-  box-shadow: 0 0 16px rgba(var(--accent-rgb),.32), 0 3px 8px rgba(0,0,0,.28);
+  background: color-mix(in srgb, var(--lt-accent) 72%, white);
+  box-shadow: 0 0 16px rgba(var(--lt-accent-rgb),.32), 0 3px 8px rgba(0,0,0,.28);
 }
 
 .toggleRow input[type="checkbox"]:focus-visible{
-  outline: 2px solid rgba(var(--accent-rgb),.62);
+  outline: 2px solid rgba(var(--lt-accent-rgb),.62);
   outline-offset: 3px;
 }
 
@@ -6221,14 +6221,14 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   grid-template-columns: 12px minmax(0, 1fr);
   gap: 10px;
   align-items: center;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,.018);
   text-align: left;
 }
 
 .sidebarBehaviorChoiceV327.active{
-  border-color: rgba(var(--accent-rgb),.42);
-  background: rgba(var(--accent-rgb),.07);
+  border-color: rgba(var(--lt-accent-rgb),.42);
+  background: rgba(var(--lt-accent-rgb),.07);
 }
 
 .sidebarChoiceDotV327{
@@ -6239,8 +6239,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .sidebarBehaviorChoiceV327.active .sidebarChoiceDotV327{
-  background: var(--accent);
-  box-shadow: 0 0 14px rgba(var(--accent-rgb),.34);
+  background: var(--lt-accent);
+  box-shadow: 0 0 14px rgba(var(--lt-accent-rgb),.34);
 }
 
 .sidebarChoiceCopyV327{
@@ -6249,13 +6249,13 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .sidebarChoiceCopyV327 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 13px;
   line-height: 1.1;
 }
 
 .sidebarChoiceCopyV327 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   line-height: 1.23;
 }
@@ -6323,7 +6323,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .customThemeBodyV027 .settingsTextFieldV027 span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 950;
   letter-spacing: .14em;
@@ -6336,7 +6336,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   padding: 0 14px;
   border: 0;
   border-radius: 14px;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(0,0,0,.18);
   font: inherit;
   font-size: 13px;
@@ -6363,7 +6363,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   column-gap: 12px;
   row-gap: 2px;
   align-items: center;
-  color: var(--text);
+  color: var(--lt-text);
   background:
     linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.014)),
     rgba(255,255,255,.020);
@@ -6380,12 +6380,12 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   width: 34px;
   height: 34px;
   border-radius: 12px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 0 18px rgba(var(--accent-rgb),.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 0 18px rgba(var(--lt-accent-rgb),.14);
 }
 
 .customThemePresetButtonV027 strong{
   min-width: 0;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 13px;
   line-height: 1.08;
   overflow: hidden;
@@ -6395,7 +6395,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .customThemePresetButtonV027 small{
   min-width: 0;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   line-height: 1.22;
   font-weight: 740;
@@ -6423,7 +6423,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .savedThemeButtonV027 button{
   border: 0;
   border-radius: inherit;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(255,255,255,.020);
 }
 
@@ -6465,7 +6465,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border: 1px solid rgba(255,255,255,.14);
   border-radius: 13px;
   display: block;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 0 18px rgba(var(--accent-rgb),.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 0 18px rgba(var(--lt-accent-rgb),.10);
 }
 
 .customThemeNativeColorInputV027{
@@ -6481,7 +6481,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   grid-column: 2;
   grid-row: 1;
   min-width: 0;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 13px;
   line-height: 1.08;
   overflow: hidden;
@@ -6493,7 +6493,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   grid-column: 2;
   grid-row: 2;
   min-width: 0;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   line-height: 1.22;
   font-weight: 740;
@@ -6510,7 +6510,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   padding: 0 10px;
   border: 0;
   border-radius: 12px;
-  color: var(--text);
+  color: var(--lt-text);
   background: rgba(0,0,0,.18);
   font: inherit;
   font-size: 11px;
@@ -6521,7 +6521,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .customThemeHexInputV032:focus,
 .customThemeBodyV027 .settingsTextFieldV027 input:focus{
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.10);
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb),.10);
 }
 
 @media (max-width: 1180px){
@@ -6589,7 +6589,7 @@ body.localitfyThemePainting .customThemeTokenV027{
 
 .customThemeHeaderV027 span{
   max-width: 56ch;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.34;
   font-weight: 760;
@@ -6748,7 +6748,7 @@ body.localitfyThemePainting .customThemeTokenV027{
 }
 
 .customThemeHeaderV027 span{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.35;
   font-weight: 760;
@@ -6851,7 +6851,7 @@ body.localitfyThemePainting .customThemeTokenV027{
 
 .customThemeHeaderV027 span{
   max-width: 46ch !important;
-  color: var(--text-2) !important;
+  color: var(--lt-muted) !important;
   font-size: 12px !important;
   line-height: 1.35 !important;
   font-weight: 760 !important;
@@ -7059,10 +7059,10 @@ body.localitfyThemePainting .toggleRow{
   flex: 0 0 auto !important;
   display: grid !important;
   place-items: center !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.22) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.22) !important;
   border-radius: 14px !important;
-  color: var(--accent) !important;
-  background: rgba(var(--accent-rgb), 0.13) !important;
+  color: var(--lt-accent) !important;
+  background: rgba(var(--lt-accent-rgb), 0.13) !important;
   font-size: 16px !important;
   font-weight: 950 !important;
 }
@@ -7130,10 +7130,10 @@ body.localitfyThemePainting .toggleRow{
   align-items: center !important;
   justify-content: space-between !important;
   gap: 14px !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.22) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.22) !important;
   border-radius: 18px !important;
-  color: var(--text) !important;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.13), rgba(255,255,255,0.035)) !important;
+  color: var(--lt-text) !important;
+  background: linear-gradient(180deg, rgba(var(--lt-accent-rgb), 0.13), rgba(255,255,255,0.035)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
   cursor: pointer !important;
   pointer-events: auto !important;
@@ -7170,10 +7170,10 @@ body.localitfyThemePainting .toggleRow{
 .feedbackSettingsButtonV331 em{
   min-width: 54px !important;
   padding: 8px 11px !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.28) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.28) !important;
   border-radius: 999px !important;
-  color: var(--accent) !important;
-  background: rgba(var(--accent-rgb), 0.10) !important;
+  color: var(--lt-accent) !important;
+  background: rgba(var(--lt-accent-rgb), 0.10) !important;
   font-size: 0.72rem !important;
   font-style: normal !important;
   font-weight: 950 !important;
@@ -7200,7 +7200,7 @@ body.localitfyThemePainting .toggleRow{
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-  background: radial-gradient(circle at 50% 28%, rgba(var(--accent-rgb), 0.16), transparent 36%), rgba(0, 0, 0, 0.72) !important;
+  background: radial-gradient(circle at 50% 28%, rgba(var(--lt-accent-rgb), 0.16), transparent 36%), rgba(0, 0, 0, 0.72) !important;
   backdrop-filter: blur(18px) saturate(120%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
 }
@@ -7212,10 +7212,10 @@ body.localitfyThemePainting .toggleRow{
   max-height: min(760px, calc(100vh - 50px)) !important;
   overflow: auto !important;
   padding: 18px !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.24) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.24) !important;
   border-radius: 24px !important;
-  color: var(--text) !important;
-  background: radial-gradient(circle at 86% 10%, rgba(var(--accent-rgb), 0.13), transparent 32%), linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.024)), rgba(7, 7, 12, 0.96) !important;
+  color: var(--lt-text) !important;
+  background: radial-gradient(circle at 86% 10%, rgba(var(--lt-accent-rgb), 0.13), transparent 32%), linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.024)), rgba(7, 7, 12, 0.96) !important;
   box-shadow: 0 34px 110px rgba(0,0,0,0.72), 0 0 0 1px rgba(255,255,255,0.045) inset !important;
 }
 
@@ -7240,9 +7240,9 @@ body.localitfyThemePainting .toggleRow{
   display: grid !important;
   place-items: center !important;
   overflow: hidden !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.18) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.18) !important;
   border-radius: 12px !important;
-  background: rgba(var(--accent-rgb), 0.13) !important;
+  background: rgba(var(--lt-accent-rgb), 0.13) !important;
 }
 
 .feedbackPromptLogoV331 img{
@@ -7258,7 +7258,7 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .feedbackPromptBrandV331 em{
-  color: var(--accent) !important;
+  color: var(--lt-accent) !important;
   font-size: 0.66rem !important;
   font-weight: 950 !important;
   letter-spacing: 0.14em !important;
@@ -7299,7 +7299,7 @@ body.localitfyThemePainting .toggleRow{
 .feedbackPromptBadgeV331{
   display: inline-flex !important;
   margin-bottom: 8px !important;
-  color: var(--accent) !important;
+  color: var(--lt-accent) !important;
   font-size: 0.68rem !important;
   font-weight: 950 !important;
   letter-spacing: 0.14em !important;
@@ -7343,8 +7343,8 @@ body.localitfyThemePainting .toggleRow{
 
 .feedbackCategoryButtonV331.active{
   color: #fff !important;
-  border-color: rgba(var(--accent-rgb),0.48) !important;
-  background: rgba(var(--accent-rgb),0.18) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.48) !important;
+  background: rgba(var(--lt-accent-rgb),0.18) !important;
 }
 
 .feedbackTextareaWrapV331{
@@ -7374,8 +7374,8 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .feedbackTextareaWrapV331 textarea:focus{
-  border-color: rgba(var(--accent-rgb),0.44) !important;
-  box-shadow: 0 0 0 4px rgba(var(--accent-rgb),0.10) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.44) !important;
+  box-shadow: 0 0 0 4px rgba(var(--lt-accent-rgb),0.10) !important;
 }
 
 .feedbackStatusV331{
@@ -7426,7 +7426,7 @@ body.localitfyThemePainting .toggleRow{
   gap: 8px !important;
   color: #140616 !important;
   border: 1px solid rgba(255,255,255,0.16) !important;
-  background: var(--accent) !important;
+  background: var(--lt-accent) !important;
 }
 
 .feedbackSendButtonV331:disabled{
@@ -7490,7 +7490,7 @@ body.localitfyThemePainting .toggleRow{
   visibility: visible !important;
   opacity: 1 !important;
   background:
-    radial-gradient(circle at 50% 28%, rgba(var(--accent-rgb), 0.17), transparent 38%),
+    radial-gradient(circle at 50% 28%, rgba(var(--lt-accent-rgb), 0.17), transparent 38%),
     rgba(0, 0, 0, 0.74) !important;
   backdrop-filter: blur(18px) saturate(120%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
@@ -7509,11 +7509,11 @@ body.localitfyThemePainting .toggleRow{
   overflow: auto !important;
   display: block !important;
   padding: 18px !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.24) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.24) !important;
   border-radius: 24px !important;
-  color: var(--text) !important;
+  color: var(--lt-text) !important;
   background:
-    radial-gradient(circle at 86% 10%, rgba(var(--accent-rgb), 0.13), transparent 32%),
+    radial-gradient(circle at 86% 10%, rgba(var(--lt-accent-rgb), 0.13), transparent 32%),
     linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.026)),
     rgba(7, 7, 12, 0.985) !important;
   box-shadow:
@@ -7632,9 +7632,9 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .metadataCleanerPanelV440{
-  border-color: rgba(var(--accent-rgb),0.16) !important;
+  border-color: rgba(var(--lt-accent-rgb),0.16) !important;
   background:
-    radial-gradient(circle at 12% 0%, rgba(var(--accent-rgb),0.10), transparent 36%),
+    radial-gradient(circle at 12% 0%, rgba(var(--lt-accent-rgb),0.10), transparent 36%),
     linear-gradient(180deg, rgba(255,255,255,0.040), rgba(255,255,255,0.018)),
     rgba(7,7,12,0.78) !important;
 }
@@ -7646,12 +7646,12 @@ body.localitfyThemePainting .toggleRow{
 .metadataCleanerBadgeV440{
   min-height: 30px;
   padding: 0 12px;
-  border: 1px solid rgba(var(--accent-rgb),0.22);
+  border: 1px solid rgba(var(--lt-accent-rgb),0.22);
   border-radius: 999px;
   display: inline-grid;
   place-items: center;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb),0.08);
+  color: var(--lt-accent);
+  background: rgba(var(--lt-accent-rgb),0.08);
   font-size: 11px;
   font-weight: 920;
   letter-spacing: -0.01em;
@@ -7665,12 +7665,12 @@ body.localitfyThemePainting .toggleRow{
   display: grid;
   gap: 6px;
   background:
-    radial-gradient(circle at 88% 10%, rgba(var(--accent-rgb),0.11), transparent 34%),
+    radial-gradient(circle at 88% 10%, rgba(var(--lt-accent-rgb),0.11), transparent 34%),
     rgba(0,0,0,0.22);
 }
 
 .metadataCleanerHeroV440 span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 920;
   letter-spacing: 0.16em;
@@ -7679,7 +7679,7 @@ body.localitfyThemePainting .toggleRow{
 
 .metadataCleanerHeroV440 strong{
   max-width: 760px;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(22px, 2.4vw, 34px);
   line-height: 0.98;
   letter-spacing: -0.055em;
@@ -7687,7 +7687,7 @@ body.localitfyThemePainting .toggleRow{
 
 .metadataCleanerHeroV440 small{
   max-width: 820px;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.45;
   font-weight: 760;
@@ -7712,13 +7712,13 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .metadataCleanerStatsV440 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 24px;
   line-height: 1;
 }
 
 .metadataCleanerStatsV440 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   font-weight: 820;
   text-transform: lowercase;
@@ -7738,16 +7738,16 @@ body.localitfyThemePainting .toggleRow{
   display: grid;
   align-content: center;
   gap: 5px;
-  color: var(--text);
+  color: var(--lt-text);
   text-align: left;
   background: rgba(255,255,255,0.030);
   transition: transform 180ms cubic-bezier(.2,1,.2,1), background 180ms ease, border-color 180ms ease, box-shadow 200ms ease;
 }
 
 .cleanerOptionV440.active{
-  border-color: rgba(var(--accent-rgb),0.44);
+  border-color: rgba(var(--lt-accent-rgb),0.44);
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.13), rgba(255,255,255,0.026)),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb),0.13), rgba(255,255,255,0.026)),
     rgba(0,0,0,0.16);
 }
 
@@ -7757,7 +7757,7 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .cleanerOptionV440 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   line-height: 1.3;
   font-weight: 760;
@@ -7770,10 +7770,10 @@ body.localitfyThemePainting .toggleRow{
 .metadataCleanerPreviewBoxV440{
   margin-top: 14px !important;
   padding: 16px !important;
-  border: 1px solid rgba(var(--accent-rgb),0.18) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb),0.18) !important;
   border-radius: 18px !important;
   background:
-    linear-gradient(180deg, rgba(var(--accent-rgb),0.065), rgba(255,255,255,0.018)),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb),0.065), rgba(255,255,255,0.018)),
     rgba(0,0,0,0.25) !important;
 }
 
@@ -7784,7 +7784,7 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .metadataCleanerPreviewHeadV440 span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 920;
   letter-spacing: 0.16em;
@@ -7792,13 +7792,13 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .metadataCleanerPreviewHeadV440 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 22px;
   line-height: 1;
 }
 
 .metadataCleanerPreviewHeadV440 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   font-weight: 760;
 }
@@ -7826,7 +7826,7 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .metadataCleanerPreviewItemV440 small{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 9px;
   font-weight: 920;
   letter-spacing: 0.12em;
@@ -7842,12 +7842,12 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .metadataCleanerPreviewItemV440 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 13px;
 }
 
 .metadataCleanerPreviewItemV440 em{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   font-style: normal;
   font-weight: 740;
@@ -7862,8 +7862,8 @@ body.localitfyThemePainting .toggleRow{
   width: 22px;
   height: 2px;
   border-radius: 999px;
-  background: var(--accent);
-  box-shadow: 7px -4px 0 -1px var(--accent), 7px 4px 0 -1px var(--accent);
+  background: var(--lt-accent);
+  box-shadow: 7px -4px 0 -1px var(--lt-accent), 7px 4px 0 -1px var(--lt-accent);
   transform: translateZ(0);
 }
 
@@ -7879,7 +7879,7 @@ body.localitfyThemePainting .toggleRow{
   border: 1px solid rgba(255,255,255,0.075);
   border-radius: 22px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb),0.12), transparent 42%),
+    radial-gradient(circle at 50% 0%, rgba(var(--lt-accent-rgb),0.12), transparent 42%),
     rgba(0,0,0,0.24);
 }
 
@@ -7905,8 +7905,8 @@ body.localitfyThemePainting .toggleRow{
 .settingsUpdateIslandV440[data-status="available"],
 .settingsUpdateIslandV440[data-status="downloaded"]{
   width: min(620px, 100%);
-  border-color: rgba(var(--accent-rgb),0.38);
-  box-shadow: 0 24px 70px rgba(0,0,0,0.48), 0 0 34px rgba(var(--accent-rgb),0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+  border-color: rgba(var(--lt-accent-rgb),0.38);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.48), 0 0 34px rgba(var(--lt-accent-rgb),0.12), inset 0 1px 0 rgba(255,255,255,0.08);
   animation: settingsIslandPopV440 520ms cubic-bezier(.16,1,.3,1) both;
 }
 
@@ -7918,7 +7918,7 @@ body.localitfyThemePainting .toggleRow{
   display: grid;
   place-items: center;
   color: #08070c;
-  background: var(--accent);
+  background: var(--lt-accent);
   font-size: 12px;
   font-weight: 950;
   letter-spacing: -0.02em;
@@ -7963,13 +7963,13 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .settingsUpdateMetaV440 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 18px;
   line-height: 1;
 }
 
 .settingsUpdateMetaV440 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 11px;
   font-weight: 820;
   text-transform: uppercase;
@@ -7978,7 +7978,7 @@ body.localitfyThemePainting .toggleRow{
 
 .settingsDiagnosticsPanelV440{
   background:
-    radial-gradient(circle at 9% 4%, rgba(var(--accent-rgb),0.10), transparent 32%),
+    radial-gradient(circle at 9% 4%, rgba(var(--lt-accent-rgb),0.10), transparent 32%),
     linear-gradient(180deg, rgba(255,255,255,0.040), rgba(255,255,255,0.018)),
     rgba(7,7,12,0.80) !important;
 }
@@ -7986,19 +7986,19 @@ body.localitfyThemePainting .toggleRow{
 .settingsDiagnosticsHeroV440{
   margin-bottom: 14px;
   padding: 18px;
-  border: 1px solid rgba(var(--accent-rgb),0.16);
+  border: 1px solid rgba(var(--lt-accent-rgb),0.16);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   background:
-    radial-gradient(circle at 92% 10%, rgba(var(--accent-rgb),0.13), transparent 34%),
+    radial-gradient(circle at 92% 10%, rgba(var(--lt-accent-rgb),0.13), transparent 34%),
     rgba(0,0,0,0.24);
 }
 
 .settingsDiagnosticsHeroV440 span{
-  color: var(--accent);
+  color: var(--lt-accent);
   font-size: 10px;
   font-weight: 920;
   letter-spacing: 0.16em;
@@ -8008,7 +8008,7 @@ body.localitfyThemePainting .toggleRow{
 .settingsDiagnosticsHeroV440 strong{
   display: block;
   margin-top: 6px;
-  color: var(--text);
+  color: var(--lt-text);
   font-size: clamp(24px, 2.6vw, 38px);
   line-height: 0.98;
   letter-spacing: -0.06em;
@@ -8017,7 +8017,7 @@ body.localitfyThemePainting .toggleRow{
 .settingsDiagnosticsHeroV440 small{
   display: block;
   margin-top: 6px;
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 12px;
   font-weight: 760;
 }
@@ -8025,12 +8025,12 @@ body.localitfyThemePainting .toggleRow{
 .settingsDiagnosticsHeroV440 em{
   min-height: 34px;
   padding: 0 13px;
-  border: 1px solid rgba(var(--accent-rgb),0.22);
+  border: 1px solid rgba(var(--lt-accent-rgb),0.22);
   border-radius: 999px;
   display: grid;
   place-items: center;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb),0.08);
+  color: var(--lt-accent);
+  background: rgba(var(--lt-accent-rgb),0.08);
   font-size: 12px;
   font-style: normal;
   font-weight: 900;
@@ -8132,7 +8132,7 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .settingsUpdatePlainStatusV441 strong{
-  color: var(--text);
+  color: var(--lt-text);
   font-size: 20px;
   line-height: 1;
   overflow: hidden;
@@ -8141,7 +8141,7 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .settingsUpdatePlainStatusV441 small{
-  color: var(--text-2);
+  color: var(--lt-muted);
   font-size: 10px;
   font-weight: 850;
   letter-spacing: .08em;
@@ -8230,4 +8230,124 @@ body.localitfyThemePainting .toggleRow{
   .discordSettingsGrid{
     grid-template-columns: 1fr !important;
   }
+}
+
+.bouncyHeroRangeRowV448{
+  min-height: 108px;
+  padding: 16px;
+  border: 1px solid rgba(var(--lt-accent-rgb), .18);
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 16px;
+  align-items: center;
+  background:
+    radial-gradient(circle at var(--bouncy-progress, 50%) 100%, rgba(var(--lt-accent-rgb), .15), transparent 36%),
+    rgba(255,255,255,.026);
+}
+
+.bouncyHeroRangeCopyV448{
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.bouncyHeroRangeCopyV448 strong{
+  color: var(--lt-text);
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+
+.bouncyHeroRangeCopyV448 small{
+  color: var(--lt-muted);
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 760;
+}
+
+.bouncyHeroRangeValueV448{
+  min-width: 58px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid rgba(var(--lt-accent-rgb), .24);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--lt-accent);
+  background: rgba(var(--lt-accent-rgb), .08);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.bouncyHeroSliderShellV448{
+  position: relative;
+  grid-column: 1 / -1;
+  min-height: 34px;
+  display: grid;
+  align-items: center;
+}
+
+.bouncyHeroSliderShellV448 input{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  opacity: 0;
+  cursor: grab;
+}
+
+.bouncyHeroSliderShellV448 input:active{
+  cursor: grabbing;
+}
+
+.bouncyHeroSliderRailV448{
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+  overflow: visible;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.045)),
+    rgba(0,0,0,.32);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -8px 16px rgba(0,0,0,.22);
+}
+
+.bouncyHeroSliderFillV448{
+  position: absolute;
+  inset: 3px auto 3px 3px;
+  width: calc(var(--bouncy-progress, 50%) - 3px);
+  min-width: 14px;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--lt-accent) 72%, white), var(--lt-accent));
+  box-shadow: 0 0 22px rgba(var(--lt-accent-rgb), .26);
+}
+
+.bouncyHeroSliderThumbV448{
+  position: absolute;
+  top: 50%;
+  left: var(--bouncy-progress, 50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #08070c;
+  background: var(--lt-accent);
+  box-shadow: 0 10px 26px rgba(0,0,0,.32), 0 0 0 7px rgba(var(--lt-accent-rgb), .10);
+  transform: translate(-50%, -50%);
+  transition: transform 170ms cubic-bezier(.18, 1.4, .24, 1), box-shadow 170ms ease;
+}
+
+.bouncyHeroSliderShellV448 input:active + .bouncyHeroSliderRailV448 .bouncyHeroSliderThumbV448{
+  transform: translate(-50%, -50%) scale(1.16);
+  box-shadow: 0 14px 34px rgba(0,0,0,.38), 0 0 0 10px rgba(var(--lt-accent-rgb), .12);
+}
+
+.bouncyHeroSliderThumbV448 span{
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.86);
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,.22);
 }
