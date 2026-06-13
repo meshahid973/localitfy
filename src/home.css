@@ -17860,13 +17860,6 @@ body.localitfyThemePainting .homeSongRow{
   -webkit-backdrop-filter: blur(22px) saturate(124%) brightness(0.82) !important;
 }
 
-.app .modalWrap .editorModal,
-.app .modalWrap .confirmModal,
-.app .modalWrap [class*="Modal"]{
-  position: relative !important;
-  z-index: 1 !important;
-}
-
 .app .windowButtons button{
   display: grid !important;
   place-items: center !important;
