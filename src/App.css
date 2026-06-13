@@ -11040,19 +11040,18 @@ body.isResizingPlayer .app *{
     0 0 22px rgba(229, 72, 104, 0.26) !important;
 }
 
-
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
   position: fixed !important;
-  top: 5px !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 36px !important;
+  top: 3px !important;
+  left: var(--sidebar-width-used, var(--sidebar-width, 249px)) !important;
+  right: 96px !important;
+  height: 32px !important;
   z-index: 2147483100 !important;
   display: flex !important;
-  justify-content: center !important;
   align-items: flex-start !important;
-  padding: 0 104px !important;
+  justify-content: center !important;
+  padding: 0 !important;
   pointer-events: none !important;
 }
 
@@ -11063,64 +11062,65 @@ body.isResizingPlayer .app *{
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
-  width: min(640px, calc(100vw - 310px)) !important;
-  min-height: 32px !important;
-  max-height: 36px !important;
-  padding: 4px 6px 4px 8px !important;
+  width: min(1180px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 126px)) !important;
+  min-height: 30px !important;
+  max-height: 32px !important;
+  padding: 4px 6px 4px 9px !important;
+  border: 0 !important;
   border-radius: 999px !important;
   display: grid !important;
-  grid-template-columns: minmax(0,1fr) auto !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
   align-items: center !important;
   gap: 8px !important;
   pointer-events: auto !important;
   overflow: hidden !important;
-  border: 1px solid rgba(var(--accent-rgb),0.30) !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.020)),
-    rgba(0,0,0,0.84) !important;
+    linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+    rgba(0,0,0,.86) !important;
   box-shadow:
-    0 16px 46px rgba(0,0,0,0.46),
-    0 0 34px rgba(var(--accent-rgb),0.13),
-    inset 0 1px 0 rgba(255,255,255,0.10) !important;
+    0 12px 34px rgba(0,0,0,.42),
+    0 0 28px rgba(var(--accent-rgb), .10),
+    inset 0 1px 0 rgba(255,255,255,.065) !important;
   backdrop-filter: blur(18px) saturate(130%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
-  transform-origin: top center !important;
-  animation: localtifyTopIslandInV441 460ms cubic-bezier(.16,1,.3,1) both !important;
+  animation: localtifyTopIslandInV454 420ms cubic-bezier(.16,1,.3,1) both !important;
 }
 
 .app .topUpdateRibbon.available,
 .app .topUpdateRibbon.downloaded,
 .topUpdateRibbon.available,
 .topUpdateRibbon.downloaded{
-  width: min(780px, calc(100vw - 280px)) !important;
-  animation: localtifyTopIslandPopV441 620ms cubic-bezier(.16,1,.3,1) both !important;
+  width: min(1280px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 116px)) !important;
+  animation: localtifyTopIslandPopV454 560ms cubic-bezier(.16,1,.3,1) both !important;
 }
 
 .app .topUpdateRibbonMain,
 .topUpdateRibbonMain{
   min-width: 0 !important;
   display: grid !important;
-  grid-template-columns: 26px minmax(0,1fr) !important;
+  grid-template-columns: 24px minmax(0, 1fr) !important;
   align-items: center !important;
   gap: 8px !important;
 }
 
 .app .topUpdateRibbonIcon,
 .topUpdateRibbonIcon{
-  width: 24px !important;
-  height: 24px !important;
+  width: 22px !important;
+  height: 22px !important;
+  border: 0 !important;
   border-radius: 999px !important;
   display: grid !important;
   place-items: center !important;
-  color: #08070c !important;
+  color: #06100b !important;
   background: var(--accent) !important;
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .09) !important;
   animation: none !important;
 }
 
 .app .topUpdateRibbonIcon svg,
 .topUpdateRibbonIcon svg{
-  width: 14px !important;
-  height: 14px !important;
+  width: 13px !important;
+  height: 13px !important;
 }
 
 .app .topUpdateRibbonText,
@@ -11130,7 +11130,9 @@ body.isResizingPlayer .app *{
 }
 
 .app .topUpdateRibbonText .eyebrow,
-.topUpdateRibbonText .eyebrow{
+.topUpdateRibbonText .eyebrow,
+.app .topUpdateRibbonMeta,
+.topUpdateRibbonMeta{
   display: none !important;
 }
 
@@ -11140,7 +11142,7 @@ body.isResizingPlayer .app *{
   color: #fff !important;
   font-size: 12px !important;
   line-height: 1 !important;
-  letter-spacing: -0.015em !important;
+  letter-spacing: -.014em !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -11148,22 +11150,18 @@ body.isResizingPlayer .app *{
 
 .app .topUpdateRibbonRight,
 .topUpdateRibbonRight{
+  min-width: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-end !important;
-  gap: 6px !important;
-  min-width: 0 !important;
-}
-
-.app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta{
-  display: none !important;
+  gap: 5px !important;
 }
 
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
   display: flex !important;
   align-items: center !important;
+  justify-content: flex-end !important;
   gap: 5px !important;
 }
 
@@ -11173,9 +11171,10 @@ body.isResizingPlayer .app *{
 .topUpdateRibbon .updateGhostButton,
 .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updateToastClose{
-  min-height: 24px !important;
-  height: 24px !important;
+  height: 23px !important;
+  min-height: 23px !important;
   padding: 0 10px !important;
+  border: 0 !important;
   border-radius: 999px !important;
   font-size: 10px !important;
   line-height: 1 !important;
@@ -11183,13 +11182,28 @@ body.isResizingPlayer .app *{
   white-space: nowrap !important;
 }
 
+.app .topUpdateRibbon .updateGhostButton,
+.topUpdateRibbon .updateGhostButton{
+  color: rgba(255,255,255,.70) !important;
+  background: rgba(255,255,255,.052) !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updatePrimaryButton{
+  color: #06100b !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 18px rgba(var(--accent-rgb), .14) !important;
+}
+
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
-  width: 24px !important;
-  min-width: 24px !important;
+  width: 23px !important;
+  min-width: 23px !important;
   padding: 0 !important;
   display: grid !important;
   place-items: center !important;
+  color: rgba(255,255,255,.70) !important;
+  background: rgba(255,255,255,.046) !important;
 }
 
 .app .topUpdateRibbon .updateToastClose svg,
@@ -11205,16 +11219,17 @@ body.isResizingPlayer .app *{
   right: 10px !important;
   bottom: 3px !important;
   height: 2px !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
 }
 
-@keyframes localtifyTopIslandInV441{
-  from{ opacity: 0; transform: translate3d(0,-14px,0) scale(.90); filter: blur(7px); }
+@keyframes localtifyTopIslandInV454{
+  from{ opacity: 0; transform: translate3d(0,-12px,0) scale(.94); filter: blur(5px); }
   to{ opacity: 1; transform: translate3d(0,0,0) scale(1); filter: blur(0); }
 }
 
-@keyframes localtifyTopIslandPopV441{
-  0%{ opacity: 0; width: min(360px, calc(100vw - 310px)); transform: translate3d(0,-14px,0) scale(.90); filter: blur(7px); }
-  58%{ opacity: 1; width: min(810px, calc(100vw - 260px)); transform: translate3d(0,0,0) scale(1.012); filter: blur(0); }
-  100%{ opacity: 1; width: min(780px, calc(100vw - 280px)); transform: translate3d(0,0,0) scale(1); filter: blur(0); }
+@keyframes localtifyTopIslandPopV454{
+  0%{ opacity: 0; width: min(620px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 320px)); transform: translate3d(0,-12px,0) scale(.94); filter: blur(5px); }
+  58%{ opacity: 1; width: min(1320px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 96px)); transform: translate3d(0,0,0) scale(1.006); filter: blur(0); }
+  100%{ opacity: 1; width: min(1280px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 116px)); transform: translate3d(0,0,0) scale(1); filter: blur(0); }
 }
-
