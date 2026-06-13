@@ -18103,57 +18103,6 @@ body.localitfyThemePainting .homeSongRow{
   display: none !important;
 }
 
-.app .homeFreshRail,
-.app .homeListenGrid,
-.app .homeAlbumGrid,
-.app .homeSongList{
-  contain: layout paint style !important;
-}
-
-.pageTransition[data-view="home"] :is(
-  .homeFreshRail,
-  .homeListenGrid,
-  .homeAlbumGrid,
-  .homeSongList,
-  .homeLibraryPanel,
-  .homeShelfPanel
-){
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 680px;
-  contain: layout paint style;
-}
-
-.pageTransition[data-view="home"] :is(
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryRow
-){
-  contain: layout paint style;
-}
-
-.pageTransition[data-view="home"] :is(
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryRow
-) :is(img, .coverAura){
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-.pageTransition[data-view="home"] :is(
-  .localtifyProximityTarget,
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryRow
-):not(.localtifyProximityActive):not(.playing):not(:hover){
-  will-change: auto;
-}
 
 .inlineGlyphIcon,
 .emptyCoverIcon,
@@ -18180,3 +18129,57 @@ body.localitfyThemePainting .homeSongRow{
   background: currentColor;
 }
 
+/* localtify v465 — home compositor guard, no motion reduction */
+.pageTransition[data-view="home"]{
+  isolation: isolate;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.pageTransition[data-view="home"] :is(
+  .homeFreshRail,
+  .homeListenGrid,
+  .homeAlbumGrid,
+  .homeSongList,
+  .homeLibraryPanel,
+  .homeShelfPanel
+){
+  contain: layout paint style;
+}
+
+.pageTransition[data-view="home"] :is(
+  .homeFreshCard,
+  .homeListenCard,
+  .homeAlbumCard,
+  .songRow,
+  .libraryRow
+){
+  contain: layout paint;
+}
+
+.pageTransition[data-view="home"] :is(
+  .homeFreshCard,
+  .homeListenCard,
+  .homeAlbumCard,
+  .songRow,
+  .libraryRow
+):not(:hover):not(.playing):not(.active):not(.localtifyProximityActive){
+  will-change: auto;
+}
+
+.pageTransition[data-view="home"] :is(
+  .homeFreshCard:hover,
+  .homeListenCard:hover,
+  .homeAlbumCard:hover,
+  .songRow:hover,
+  .libraryRow:hover,
+  .homeFreshCard.playing,
+  .homeListenCard.playing,
+  .homeAlbumCard.playing,
+  .songRow.playing,
+  .libraryRow.playing,
+  .localtifyProximityActive
+){
+  will-change: transform;
+}
+/* end localtify v465 home compositor guard */
