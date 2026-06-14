@@ -4,7 +4,7 @@
 
 ### your local music, but prettier.
 
-A cute local music player for people who still keep songs on their PC.
+A cute desktop music player for people who still keep songs on their PC.
 
 <br />
 
@@ -23,38 +23,39 @@ A cute local music player for people who still keep songs on their PC.
 <br />
 <br />
 
-<strong>No account.</strong> <strong>No subscription.</strong> <strong>No ads between your songs.</strong> <strong>Your music stays on your computer.</strong>
+<strong>no need for account</strong> <strong>no subscription.</strong> <strong>No ads between your songs.</strong>
 
 </div>
 
 ---
 
-## What is localtify?
+## About localtify
 
-localtify is a Spotify inspired desktop music player for your own local files.
+localtify is a modern desktop music player for your own local files.
 
-You import the songs you already have, and localtify turns them into a proper music library with albums, playlists, covers, themes, stats, Discord Rich Presence, desktop controls, and a smooth dark interface.
+It takes the songs you already have and turns them into a proper music library with albums, playlists, covers, themes, listening stats, Discord Rich Presence, desktop controls, and a smooth dark interface.
 
-It is made for people who like owning their music and want their local library to feel modern again.
+It is built for people who like owning their music, organizing their own library, and making local songs feel clean, personal, and modern again.
+
+localtify is not a streaming service. It does not need an account, it does not put ads between your songs, and it does not move your music into someone else’s cloud.
 
 ---
 
-## What is new in v0.3.7?
+## Why localtify?
 
-v0.3.7 is a big release.
+Most local music apps either feel too old, too plain, or too messy.
 
-The first time setup screen was also fully rebuilt, the app was cleaned up for release, and several performance fixes were made.
+localtify tries to make a local library feel closer to a real modern music app while still keeping everything on your computer.
 
-### v0.3.7 highlights
+You can:
 
-| Area        | What changed                                                                          |
-| ----------- | ------------------------------------------------------------------------------------- |
-| Albums      | New Albums page, album details, custom albums, album covers, play, shuffle, and queue |
-| Linux       | AppImage, DEB, and RPM builds are now supported                                       |
-| Onboarding  | New first time setup screen for new users and existing users once                     |
-| Spotify     | Fixed packaged app issues with missing client ID errors                               |
-| UI          | Cleaner sidebar hover, visual settings, album cards, and downloads layout             |
-| Performance | CSS cleanup, old patch cleanup, and lighter motion behavior                           |
+* keep your own files
+* organize songs into albums and playlists
+* customize covers and themes
+* download or import music into your library
+* use desktop media controls
+* show optional Discord listening activity
+* keep the app private and local-first
 
 ---
 
@@ -75,7 +76,7 @@ Download the Windows installer from the latest release.
 The file usually looks like this:
 
 ```txt
-localtify-setup-0.3.7.exe
+localtify-setup-0.4.0.exe
 ```
 
 Install it, open localtify, and import your songs.
@@ -93,8 +94,8 @@ Linux builds are available from the Releases page.
 For AppImage, you may need to make it executable first:
 
 ```bash
-chmod +x localtify-0.3.7-x86_64.AppImage
-./localtify-0.3.7-x86_64.AppImage
+chmod +x localtify-0.4.0-x86_64.AppImage
+./localtify-0.4.0-x86_64.AppImage
 ```
 
 ---
@@ -117,6 +118,7 @@ chmod +x localtify-0.3.7-x86_64.AppImage
 ### Albums
 
 * automatic albums from song metadata
+* folder-based album importing
 * custom albums made from songs in your library
 * custom album title, artist, year, and cover
 * album detail pages
@@ -125,6 +127,15 @@ chmod +x localtify-0.3.7-x86_64.AppImage
 * queue album
 * support for different artists in one album
 * proper cover fitting for album cards
+
+### Downloads and imports
+
+* download audio from YouTube links
+* import public Spotify playlists, albums, and tracks
+* convert local video or audio files into library tracks
+* automatically add downloaded songs to your library
+* view download progress and results
+* open the downloads folder from inside the app
 
 ### Visuals
 
@@ -135,6 +146,7 @@ chmod +x localtify-0.3.7-x86_64.AppImage
 * cover studio tools
 * album cover glow in some areas
 * smooth sidebar hover
+* cleaner panels and page transitions
 * visual settings for the home page, cards, sidebar, library, and player
 * cute little easter eggs like `/yukari` and `/stars`
 
@@ -169,7 +181,7 @@ You need:
 * npm
 * Git
 
-Windows is recommended for the full desktop experience, but Linux builds are now supported too.
+Windows is recommended for the full desktop experience, but Linux builds are supported too.
 
 Clone the repo:
 
@@ -322,23 +334,7 @@ Please avoid random fixes at the bottom of unrelated CSS files. It makes future 
 
 Pull requests are welcome.
 
-You do not need to be a perfect developer to help. Small fixes, bug reports, screenshots, UI polish, and documentation improvements are all useful.
-
-Good things to work on:
-
-* UI polish
-* albums improvements
-* playlist improvements
-* player improvements
-* performance fixes
-* Linux testing
-* Windows integration
-* bug fixes
-* accessibility improvements
-* cleaner settings pages
-* better empty states
-* safer update flow
-* code cleanup
+Small fixes, bug reports, screenshots, UI polish, documentation improvements, accessibility improvements, and performance fixes are useful.
 
 Before opening a pull request, run:
 
@@ -426,7 +422,7 @@ git add README.md src electron package.json package-lock.json .gitignore .env.ex
 Commit the changes:
 
 ```bash
-git commit -m "docs: update localtify readme"
+git commit -m "docs: update readme"
 ```
 
 Push to GitHub:
@@ -444,8 +440,6 @@ git push -u origin main
 ---
 
 ## How to publish a new app release
-
-Use this when releasing a new version like `0.3.7`.
 
 Make sure the version is correct in:
 
@@ -494,6 +488,9 @@ Before publishing a release, check:
 * playlists still load
 * importing songs works
 * downloaded songs appear in the library
+* YouTube downloads work
+* Spotify imports work
+* local file conversion works
 * covers and pixel art fallback covers load
 * settings save after restarting the app
 * update popup looks correct
@@ -522,30 +519,3 @@ Before publishing a release, check:
 ## License
 
 MIT License
-
----
-
-## Credits
-
-Made by [@meshahid973](https://github.com/meshahid973)
-
-Thanks to everyone who reports bugs, opens issues, tests releases, and suggests features.
-
-Contributors:
-
-* [@todouro](https://github.com/todouro)
-* [@yudafao](https://github.com/yudafao)
-
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=meshahid973%2Flocalitfy&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=meshahid973/localitfy&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=meshahid973/localitfy&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=meshahid973/localitfy&type=date&legend=top-left" />
- </picture>
-</a>
-
-
-
