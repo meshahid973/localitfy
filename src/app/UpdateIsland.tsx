@@ -136,16 +136,6 @@ export default function UpdateIsland({
               exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
               transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.12 }}
             >
-              <Motion.div
-                className="updateToastMetaRow topUpdateRibbonMeta"
-                aria-label="update info"
-                initial={reducedMotion ? false : { opacity: 0, x: 6 }}
-                animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 4 }}
-                transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.14 }}
-              >
-                <span className="updateVersionPill">version {versionLabel}</span>
-              </Motion.div>
 
               <SurfaceActions
                 as={Motion.div}
@@ -156,7 +146,6 @@ export default function UpdateIsland({
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 5 }}
                 transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.18 }}
               >
-
                 {updatePrompt.status === "available" ? (
                   <button className="updatePrimaryButton" type="button" onClick={onDownload}>
                     download update

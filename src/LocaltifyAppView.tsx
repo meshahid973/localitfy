@@ -285,16 +285,16 @@ export const settingsCategoryTabs: {
   {
     id: "about",
     label: "About",
-    description: "Version, diagnostics, and links",
+    description: "Version only",
     icon: SettingsIcon,
-    keywords: "about app info diagnostics debug copy version song count playlist count theme discord startup status github bug report contributors open source"
+    keywords: "about app info version localtify open source"
   },
   {
     id: "advanced",
     label: "Advanced",
-    description: "Reset and app status",
+    description: "Maintenance tools",
     icon: SlidersHorizontal,
-    keywords: "advanced reset status app stats diagnostics maintenance backup database safe storage settings"
+    keywords: "advanced diagnostics debug version update force source reset status app stats maintenance backup database safe storage settings linux autostart"
   }
 ];
 
@@ -6142,7 +6142,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <div>
                     <p className="eyebrow">localtify controls</p>
                     <h3>settings</h3>
-                    <p className="softText">Change appearance, playback, Discord, library, covers, updates, and advanced options.</p>
+                    <p className="softText">Simple settings up front. Diagnostics, repair, and debug-style tools live in Advanced.</p>
                   </div>
 
                 </div>
