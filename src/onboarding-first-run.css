@@ -818,3 +818,108 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   transition-property: border-color, background-color, box-shadow;
 }
 
+/* localtify v499 — onboarding peeking mascot */
+.localitfyOnboardingShell{
+  isolation: isolate;
+  overflow: visible;
+}
+
+.onboardingHeader,
+.onboardingProgress,
+.onboardingStepTabs,
+.onboardingBody,
+.onboardingFooter{
+  position: relative;
+  z-index: 3;
+}
+
+.onboardingMascotPeekWrapV499{
+  position: absolute;
+  right: clamp(-118px, -6.4vw, -72px);
+  top: 47%;
+  z-index: 2;
+  width: clamp(190px, 16vw, 255px);
+  aspect-ratio: 726 / 915;
+  pointer-events: none;
+  opacity: 0.96;
+  transform: translate3d(0, -50%, 0);
+  filter:
+    drop-shadow(0 24px 36px rgba(0, 0, 0, 0.34))
+    drop-shadow(0 0 24px rgba(var(--onboarding-accent-rgb), 0.14));
+}
+
+.onboardingMascotPeekImageV499{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform: translateZ(0);
+}
+
+.onboardingMascotPeekSoftEdgeV499{
+  position: absolute;
+  right: clamp(42px, 4.1vw, 62px);
+  top: 8.5%;
+  width: clamp(20px, 2.2vw, 34px);
+  height: 82%;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.025)),
+    linear-gradient(90deg, rgba(var(--onboarding-accent-rgb), .08), rgba(7,8,12,.96) 42%, rgba(7,8,12,.82));
+  border: 1px solid rgba(var(--onboarding-accent-rgb), .14);
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.30),
+    inset 1px 0 0 rgba(255,255,255,.08),
+    inset -1px 0 0 rgba(0,0,0,.42);
+  opacity: .96;
+}
+
+.onboardingStageCard .onboardingMascotPeekWrapV499{
+  animation: onboardingMascotPeekInV499 620ms cubic-bezier(.16,1,.3,1) 140ms both;
+}
+
+@keyframes onboardingMascotPeekInV499{
+  from{
+    opacity: 0;
+    transform: translate3d(24px, -50%, 0) rotate(1.5deg);
+  }
+  to{
+    opacity: .96;
+    transform: translate3d(0, -50%, 0) rotate(0deg);
+  }
+}
+
+@media (max-width: 1120px){
+  .onboardingMascotPeekWrapV499{
+    right: clamp(-130px, -12vw, -92px);
+    width: clamp(170px, 19vw, 225px);
+    opacity: .88;
+  }
+}
+
+@media (max-width: 860px){
+  .localitfyOnboardingShell{
+    overflow: hidden;
+  }
+
+  .onboardingMascotPeekWrapV499{
+    right: -98px;
+    top: 135px;
+    width: 170px;
+    opacity: .58;
+  }
+
+  .onboardingMascotPeekSoftEdgeV499{
+    display: none;
+  }
+}
+
+@media (max-width: 560px){
+  .onboardingMascotPeekWrapV499{
+    display: none;
+  }
+}
+/* end localtify v499 */

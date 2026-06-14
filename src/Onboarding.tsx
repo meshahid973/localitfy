@@ -5,6 +5,7 @@ import "./onboarding-first-run.css";
 
 const ONBOARDING_AUDIO_SRC = new URL("./assets/onboarding.mp3", import.meta.url).href;
 const LOCALTIFY_LOGO_SRC = new URL("./assets/logo.png", import.meta.url).href;
+const ONBOARDING_PEEK_MASCOT_SRC = new URL("./assets/peek-onboarding.png", import.meta.url).href;
 
 type BusyAction = "import" | "downloads" | "skip" | "start" | null;
 type ImportState = "idle" | "working" | "success" | "error";
@@ -344,6 +345,16 @@ export default function Onboarding({
       </div>
 
       <section className="localitfyOnboardingShell" aria-label="localtify first run setup">
+        <div className="onboardingMascotPeekWrapV499" aria-hidden="true">
+          <img
+            className="onboardingMascotPeekImageV499"
+            src={ONBOARDING_PEEK_MASCOT_SRC}
+            alt=""
+            draggable={false}
+          />
+          <span className="onboardingMascotPeekSoftEdgeV499" />
+        </div>
+
         <header className="onboardingHeader">
           <div className="onboardingBrand">
             <span className="onboardingLogoFrame" aria-hidden="true">
