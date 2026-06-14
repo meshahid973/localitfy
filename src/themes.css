@@ -2206,3 +2206,33 @@
   background: #ffffff !important;
 }
 /* end localtify v488 */
+
+/* localtify v489 — final light mode variables */
+.app[data-theme="mono"]{
+  color-scheme: light;
+  --bg: #f4f6fb;
+  --bg-2: #eef1f7;
+  --surface: #ffffff;
+  --surface-2: #e8ecf5;
+  --text: #343a55;
+  --muted: #6f768f;
+  --line: rgba(55,61,87,.12);
+  --line-2: rgba(55,61,87,.20);
+  --accent: #58617f;
+  --accent-rgb: 88, 97, 127;
+  --lt-bg: var(--bg);
+  --lt-surface: var(--surface);
+  --lt-text: var(--text);
+  --lt-muted: var(--muted);
+  --lt-border: var(--line);
+  --lt-border-strong: var(--line-2);
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+}
+
+.app[data-theme="mono"] select,
+.app[data-theme="mono"] option{
+  color: #343a55 !important;
+  background: #ffffff !important;
+}
+/* end localtify v489 */

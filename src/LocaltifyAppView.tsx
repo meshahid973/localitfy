@@ -6629,9 +6629,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 </button>
                 <button className={`circleButton main ${playButtonBurst ? `playButtonBurst playButtonBurst${playButtonBurst % 2}` : ""}`} onClick={togglePlay} aria-label={isPlaying ? "pause" : "play"}>
                   {isPlaying ? (
-                    <Pause className="playerControlIcon pauseIcon" size={18} strokeWidth={2.75} fill="none" aria-hidden="true" />
+                    <svg className="playerControlIcon pauseIcon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                      <rect x="5.7" y="4.5" width="3.4" height="11" rx="1.25" fill="currentColor" />
+                      <rect x="10.9" y="4.5" width="3.4" height="11" rx="1.25" fill="currentColor" />
+                    </svg>
                   ) : (
-                    <Play className="playerControlIcon playIcon" size={18} strokeWidth={2.45} fill="currentColor" aria-hidden="true" />
+                    <svg className="playerControlIcon playIcon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                      <path d="M7.25 5.1c0-.86.95-1.37 1.66-.88l6.55 4.48c.66.45.66 1.42 0 1.87l-6.55 4.48c-.71.49-1.66-.02-1.66-.88V5.1Z" fill="currentColor" />
+                    </svg>
                   )}
                 </button>
                 <button className="circleButton" onClick={() => playNext(true)} aria-label="next song">

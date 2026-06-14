@@ -8632,3 +8632,62 @@ body.localitfyThemePainting .toggleRow{
     0 12px 28px rgba(55,61,87,.07) !important;
 }
 /* end localtify v488 */
+
+/* localtify v489 — settings outline removal */
+.settingsContent :is(
+  .settingsPanel,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsSection,
+  .settingsGroup,
+  .themePreviewCard,
+  .settingsColorPanel,
+  .settingsBlock,
+  .appearanceUnifiedSectionV356,
+  .appearanceUnifiedControlDeckV356,
+  .customThemeManagerV027,
+  .visualCustomizationCardV205
+){
+  border-color: transparent !important;
+  outline: 0 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.020),
+    0 12px 28px rgba(0,0,0,.12) !important;
+}
+
+.settingsContent :is(
+  .settingsPanel,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .themePreviewCard,
+  .appearanceUnifiedSectionV356
+):hover{
+  border-color: rgba(255,255,255,.045) !important;
+}
+
+.settingsContent :is(.settingsPanel,.settingsPageCard,.settingsPanelCard,.themePreviewCard)::before,
+.settingsContent :is(.settingsPanel,.settingsPageCard,.settingsPanelCard,.themePreviewCard)::after{
+  opacity: .10 !important;
+}
+
+.app[data-theme="mono"] .settingsContent :is(
+  .settingsPanel,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsSection,
+  .settingsGroup,
+  .themePreviewCard,
+  .settingsColorPanel,
+  .settingsBlock,
+  .appearanceUnifiedSectionV356,
+  .appearanceUnifiedControlDeckV356,
+  .customThemeManagerV027,
+  .visualCustomizationCardV205
+){
+  border-color: transparent !important;
+  background: rgba(246,248,252,.78) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.62),
+    0 12px 28px rgba(55,61,87,.07) !important;
+}
+/* end localtify v489 */

@@ -19230,3 +19230,60 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 /* end localtify v488 */
+
+/* localtify v489 — hero spacing final */
+.app .hero.heroPremium .heroText.heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean{
+  transform: translate3d(0, -12px, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium.heroExpanded .heroText.heroTextClean,
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean{
+  transform: translate3d(0, -18px, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroArtistLine,
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
+  margin-top: 2px !important;
+  margin-bottom: 14px !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions,
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
+  gap: 6px !important;
+  padding: 0 !important;
+  margin-top: 2px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton,
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions .heroTinyButton{
+  height: 27px !important;
+  min-height: 27px !important;
+  padding: 0 11px !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  box-shadow: none !important;
+  text-transform: lowercase !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:first-child{
+  background: color-mix(in oklab, var(--lt-accent) 70%, #ffffff 30%) !important;
+  color: color-mix(in oklab, var(--lt-bg) 80%, #000 20%) !important;
+  border-color: transparent !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:not(:first-child){
+  background: rgba(255,255,255,.052) !important;
+  color: rgba(var(--text-rgb), .76) !important;
+  border-color: rgba(255,255,255,.060) !important;
+}
+
+.app[data-theme="mono"] .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:first-child{
+  background: #58617f !important;
+  color: #fff !important;
+}
+/* end localtify v489 */

@@ -13205,3 +13205,148 @@ body.isResizingPlayer .app *{
     0 8px 18px rgba(55,61,87,.09) !important;
 }
 /* end localtify v488 */
+
+/* localtify v489 — black update strip, clipped search fix, calmer header */
+.app .content > .headerBar{
+  min-height: 100px !important;
+  padding: 26px 22px 13px !important;
+  overflow: visible !important;
+}
+
+.app .headerText{
+  padding-top: 5px !important;
+}
+
+.app .headerText h2{
+  line-height: 1.02 !important;
+  transform: none !important;
+}
+
+.app .headerTools.compactHeaderTools{
+  padding-top: 10px !important;
+  overflow: visible !important;
+}
+
+.app .searchEasterWrap{
+  width: min(100%, 438px) !important;
+  padding: 5px !important;
+  margin: -5px -5px 0 0 !important;
+  overflow: visible !important;
+  contain: layout style !important;
+}
+
+.app .searchEasterWrap::before{
+  inset: 5px !important;
+  opacity: .50 !important;
+}
+
+.app .search,
+.app .searchEasterWrap .search{
+  min-height: 42px !important;
+  border-color: rgba(255,255,255,.17) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.042), rgba(255,255,255,.016)),
+    rgba(8, 8, 14, .92) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.048),
+    0 7px 16px rgba(0,0,0,.15) !important;
+}
+
+.app .search:hover,
+.app .searchEasterWrap .search:hover,
+.app .search:focus,
+.app .searchEasterWrap .search:focus{
+  transform: none !important;
+  border-color: rgba(var(--lt-accent-rgb), .48) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.058),
+    0 0 0 2px rgba(var(--lt-accent-rgb), .12),
+    0 8px 18px rgba(0,0,0,.17) !important;
+}
+
+/* Update notice: black strip, no release link. */
+.app .topUpdateRibbonLayer,
+.topUpdateRibbonLayer{
+  top: 36px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  z-index: 4100 !important;
+}
+
+.app .topUpdateRibbon,
+.topUpdateRibbon,
+.app .topUpdateRibbon.updateToastCard,
+.topUpdateRibbon.updateToastCard{
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(255,255,255,.060) !important;
+  border-bottom: 1px solid rgba(var(--lt-accent-rgb), .28) !important;
+  border-radius: 0 !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.008)),
+    #050507 !important;
+  color: rgba(255,255,255,.92) !important;
+  box-shadow:
+    0 7px 22px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.050) !important;
+  backdrop-filter: blur(10px) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(118%) !important;
+}
+
+.app .topUpdateRibbon::before,
+.topUpdateRibbon::before{
+  background:
+    radial-gradient(circle at 0% 50%, rgba(var(--lt-accent-rgb), .16), transparent 34%),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .070), transparent 48%) !important;
+  opacity: .70 !important;
+}
+
+.app .topUpdateRibbonText h3,
+.topUpdateRibbonText h3{
+  color: rgba(255,255,255,.92) !important;
+  font-size: 11.5px !important;
+}
+
+.app .topUpdateRibbonIcon,
+.topUpdateRibbonIcon{
+  color: rgba(var(--lt-accent-rgb), .95) !important;
+}
+
+.app .topUpdateRibbon .updateReleaseLinkV486,
+.topUpdateRibbon .updateReleaseLinkV486{
+  display: none !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updatePrimaryButton{
+  height: 23px !important;
+  min-height: 23px !important;
+  color: #06100d !important;
+  background: color-mix(in oklab, var(--lt-accent) 82%, #ffffff 18%) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updateToastClose{
+  color: rgba(255,255,255,.58) !important;
+}
+
+/* Light mode search stays visible and unclipped. */
+.app[data-theme="mono"] .searchEasterWrap{
+  overflow: visible !important;
+}
+
+.app[data-theme="mono"] .search,
+.app[data-theme="mono"] .searchEasterWrap .search{
+  color: var(--lt-text) !important;
+  border-color: rgba(55,61,87,.18) !important;
+  background: rgba(255,255,255,.88) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.66),
+    0 8px 18px rgba(55,61,87,.09) !important;
+}
+/* end localtify v489 */
