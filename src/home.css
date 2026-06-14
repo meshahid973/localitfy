@@ -18840,3 +18840,223 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 /* end localtify v475/v476 */
+
+/* localtify v480 — Kopuz-style album header polish + local optimizations */
+.albumDetailPanelV318{
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.albumDetailHeroV318{
+  min-height: 260px !important;
+  grid-template-columns: clamp(178px, 18vw, 230px) minmax(0, 1fr) !important;
+  gap: clamp(20px, 3vw, 34px) !important;
+  padding: clamp(18px, 2.4vw, 28px) !important;
+  border-radius: 24px !important;
+  border-color: rgba(255,255,255,.085) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.012)),
+    rgba(4,4,9,.70) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 16px 42px rgba(0,0,0,.22) !important;
+  contain: layout paint style;
+}
+
+.albumDetailHeroV318::before{
+  inset: -28% !important;
+  filter: blur(44px) saturate(1.30) !important;
+  opacity: .30 !important;
+  transform: scale(1.06) translateZ(0) !important;
+}
+
+.albumDetailHeroV318::after{
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.76), rgba(0,0,0,.50) 52%, rgba(0,0,0,.66)),
+    radial-gradient(circle at 88% 22%, rgba(var(--lt-accent-rgb), .12), transparent 34%) !important;
+}
+
+.albumDetailCoverV318{
+  width: clamp(178px, 18vw, 230px) !important;
+  height: clamp(178px, 18vw, 230px) !important;
+  border-radius: 28px !important;
+  box-shadow:
+    0 28px 54px rgba(0,0,0,.42),
+    0 0 0 1px rgba(255,255,255,.12),
+    inset 0 1px 0 rgba(255,255,255,.06) !important;
+  transform: translateZ(0);
+}
+
+.albumDetailCopyV318{
+  gap: 9px !important;
+  align-content: center !important;
+}
+
+.albumDetailCopyV318 .eyebrow{
+  margin: 0 !important;
+  color: rgba(var(--text-rgb), .62) !important;
+  font-size: 10px !important;
+  letter-spacing: .18em !important;
+}
+
+.albumDetailCopyV318 h3{
+  max-width: 13ch !important;
+  margin: 0 !important;
+  color: rgba(var(--text-rgb), .97) !important;
+  font-size: clamp(42px, 5vw, 78px) !important;
+  line-height: .86 !important;
+  letter-spacing: -.09em !important;
+  text-wrap: balance;
+}
+
+.albumDetailCopyV318 p:not(.eyebrow){
+  margin: -2px 0 0 !important;
+  color: rgba(var(--text-rgb), .72) !important;
+  font-size: 15px !important;
+  font-weight: 850 !important;
+}
+
+.albumMetaPillsV318{
+  gap: 7px !important;
+  margin-top: 8px !important;
+}
+
+.albumMetaPillsV318 span{
+  min-height: 30px !important;
+  padding: 0 11px !important;
+  border-color: rgba(255,255,255,.09) !important;
+  background: rgba(255,255,255,.052) !important;
+  color: rgba(var(--text-rgb), .77) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.030);
+}
+
+.albumActionRowV318{
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+
+.albumActionRowV318 .mainAction,
+.albumActionRowV318 .heroGhost{
+  min-height: 38px !important;
+  padding: 0 15px !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+.albumActionRowV318 .mainAction{
+  color: #fff !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), .34) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .25), rgba(var(--lt-accent-rgb), .12)),
+    rgba(8,8,14,.76) !important;
+}
+
+.albumActionRowV318 .heroGhost{
+  color: rgba(var(--text-rgb), .72) !important;
+  border-color: rgba(255,255,255,.08) !important;
+  background: rgba(255,255,255,.034) !important;
+}
+
+.albumTrackListV318{
+  max-height: min(460px, calc(100vh - 560px)) !important;
+  min-height: 240px !important;
+  gap: 7px !important;
+  padding: 12px 2px 2px !important;
+  contain: layout style;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.albumTrackRowV318{
+  min-height: 62px !important;
+  border-color: rgba(255,255,255,.065) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.010)),
+    rgba(6,6,10,.54) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+  transition:
+    transform 170ms cubic-bezier(.16,1,.3,1),
+    border-color 155ms ease,
+    background-color 155ms ease,
+    box-shadow 155ms ease !important;
+}
+
+.albumTrackRowV318:hover{
+  transform: translate3d(2px,0,0) !important;
+  border-color: rgba(255,255,255,.12) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.014)),
+    rgba(9,9,15,.66) !important;
+}
+
+.albumTrackRowV318.active{
+  transform: translate3d(2px,0,0) !important;
+  border-color: rgba(var(--lt-accent-rgb), .28) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .105), rgba(var(--lt-accent-rgb), .040)),
+    rgba(8,8,14,.72) !important;
+}
+
+.albumTrackMainV318 strong{
+  color: rgba(var(--text-rgb), .94) !important;
+  font-weight: 900 !important;
+}
+
+.albumTrackMainV318 small,
+.albumTrackDurationV318,
+.albumTrackMainV318 > span:first-child{
+  color: rgba(var(--text-rgb), .58) !important;
+}
+
+/* Local page optimization: keep blur and motion, just restrict paint/layout ownership. */
+.albumsPageV318,
+.downloadsLayoutV031,
+.playlistsPage,
+.analyticsStudioV339{
+  contain: layout style;
+}
+
+.albumsShelfGridV318,
+.albumTrackListV318,
+.playlistTrackList,
+.downloadQueueList,
+.spotifyTrackItems{
+  contain: layout style;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 520px;
+}
+
+/* Avoid permanent compositor work on idle cards/rows. */
+:is(.albumCardV318, .albumTrackRowV318, .playlistTrackRow, .downloadQueueItem, .spotifyTrackItem):not(:hover):not(.active):not(.playing):not(:focus-visible){
+  will-change: auto !important;
+}
+
+@media (max-width: 940px){
+  .albumDetailHeroV318{
+    grid-template-columns: 132px minmax(0, 1fr) !important;
+  }
+
+  .albumDetailCoverV318{
+    width: 132px !important;
+    height: 132px !important;
+    border-radius: 22px !important;
+  }
+
+  .albumDetailCopyV318 h3{
+    font-size: clamp(34px, 9vw, 56px) !important;
+  }
+}
+
+@media (max-width: 680px){
+  .albumDetailHeroV318{
+    grid-template-columns: 1fr !important;
+    justify-items: start !important;
+  }
+
+  .albumDetailCoverV318{
+    width: 150px !important;
+    height: 150px !important;
+  }
+}
+/* end localtify v480 album polish */

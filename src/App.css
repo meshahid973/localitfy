@@ -12066,3 +12066,145 @@ body.isResizingPlayer .app *{
   }
 }
 /* end localtify v473 animated bright header stars + search repair + css optimization */
+
+/* localtify v478 — calm panel hierarchy + broad CSS optimization */
+.app{
+  --panel-calm-bg: rgba(5, 5, 10, .70);
+  --panel-calm-bg-strong: rgba(7, 7, 13, .78);
+  --panel-calm-line: rgba(255,255,255,.085);
+  --panel-calm-line-hover: rgba(255,255,255,.13);
+  --panel-calm-shadow: 0 12px 32px rgba(0,0,0,.18);
+  --panel-calm-shadow-hover: 0 16px 38px rgba(0,0,0,.22);
+}
+
+/* Normal surfaces become calm. Active/important states can still opt into accent. */
+.app :is(
+  .panel,
+  .ambientSurface,
+  .settingsPanel,
+  .settingsCard,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .downloadPanel,
+  .playlistHeroPanel,
+  .playlistCreatePanel,
+  .playlistShelfPanel,
+  .playlistTracksPanel,
+  .analyticsStudioV339 > section,
+  .albumsHeroPanelV318,
+  .albumsShelfPanelV318,
+  .albumDetailPanelV318,
+  .albumBuilderPanelV318
+):not(.playerBar):not(.topUpdateRibbon){
+  border-color: var(--panel-calm-line) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.012)),
+    var(--panel-calm-bg) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.032),
+    var(--panel-calm-shadow) !important;
+  color: rgba(var(--text-rgb), .90) !important;
+  isolation: isolate;
+  contain: layout paint style;
+}
+
+/* Hover should feel premium, not flashy. */
+.app :is(
+  .panel,
+  .ambientSurface,
+  .settingsCard,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .downloadPanel,
+  .playlistHeroPanel,
+  .playlistCreatePanel,
+  .playlistShelfPanel,
+  .playlistTracksPanel,
+  .albumsHeroPanelV318,
+  .albumsShelfPanelV318,
+  .albumDetailPanelV318,
+  .albumBuilderPanelV318
+):not(.playerBar):not(.topUpdateRibbon):hover{
+  border-color: var(--panel-calm-line-hover) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.016)),
+    var(--panel-calm-bg-strong) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    var(--panel-calm-shadow-hover) !important;
+}
+
+/* Important/active surfaces get accent only through border and a tiny wash. */
+.app :is(
+  .active,
+  .selected,
+  .playing,
+  .isActive,
+  .downloaded,
+  .loggedIn
+):is(.panel, .ambientSurface, .settingsCard, .settingsPageCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318){
+  border-color: rgba(var(--lt-accent-rgb), .22) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .070), rgba(255,255,255,.014)),
+    rgba(6, 6, 11, .76) !important;
+}
+
+/* Warning/danger are readable, not loud. */
+.app :is(.warning, .warn, .notImported, .failed, .bad):not(.playerBar){
+  border-color: rgba(255, 190, 94, .24) !important;
+}
+
+.app :is(.error, .danger, .failed, .bad):not(.playerBar){
+  border-color: rgba(255, 90, 126, .25) !important;
+}
+
+/* Text hierarchy guard. */
+.app :is(.panel, .ambientSurface, .downloadPanel, .settingsPanel, .albumDetailPanelV318) :is(h3, h4, strong){
+  color: rgba(var(--text-rgb), .94);
+}
+
+.app :is(.panel, .ambientSurface, .downloadPanel, .settingsPanel, .albumDetailPanelV318) :is(p, small, span){
+  text-rendering: geometricPrecision;
+}
+
+/* Big optimization: avoid permanent compositor allocations on idle interactive pieces. */
+.app :is(
+  button,
+  .navItem,
+  .songRow,
+  .libraryRow,
+  .albumTrackRowV318,
+  .homeFreshCard,
+  .homeListenCard,
+  .homeAlbumCard,
+  .downloadQueueItem,
+  .downloadResultV326,
+  .spotifyTrackItem,
+  .panel,
+  .ambientSurface
+):not(:hover):not(:focus-visible):not(:active):not(.active):not(.playing):not(.localtifyProximityActive){
+  will-change: auto !important;
+}
+
+/* Keep scroll areas contained so expensive repaints don't leak across the app. */
+.app :is(
+  .content,
+  .pageTransition,
+  .songList,
+  .libraryList,
+  .albumTrackListV318,
+  .downloadQueueList,
+  .spotifyTrackItems,
+  .coverGalleryGridCleanOnly,
+  .playlistTrackList
+){
+  overscroll-behavior: contain;
+  contain: layout style;
+}
+
+.app :is(.albumTrackListV318, .downloadQueueList, .spotifyTrackItems, .playlistTrackList){
+  scrollbar-gutter: stable;
+}
+
+/* Do not change player blur/motion. */
+/* end localtify v478 calm panel hierarchy + broad CSS optimization */
