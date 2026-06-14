@@ -6174,16 +6174,16 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <div className="panelHead downloadHeroHead">
                     <div>
                       <p className="eyebrow">downloads</p>
-                      <h3>get music</h3>
-                      <p className="softText">Download from YouTube or import from Spotify. Files land in your library automatically.</p>
+                      <h3>download music</h3>
+                      <p className="softText">Paste a YouTube or Spotify link. Localtify keeps the rest quiet.</p>
                     </div>
 
-                    <div className="downloadHeroActions">
+                    <div className="downloadHeroActions downloadHeroActionsCompactV475">
                       <button className="softButton" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
-                        open folder
+                        folder
                       </button>
                       <button className="softButton" onClick={() => { changeView("settings", "unknown"); setSettingsCategory("downloads"); }}>
-                        download settings
+                        settings
                       </button>
                     </div>
                   </div>
@@ -6208,11 +6208,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   {/* -- YouTube tab --------------------------------- */}
                   {downloadsTab === "youtube" && (
                     <>
-                      <div className="downloadNotice downloadNoticeV031">
-                        Paste YouTube links one per line. localtify will download audio, convert it, and add it to your library unless auto-add is turned off.
-                      </div>
-
-                      <textarea
+                       <textarea
                         className="downloadTextarea downloadTextareaV031"
                         value={downloadText}
                         onChange={(event) => setDownloadText(event.currentTarget.value)}
@@ -6232,21 +6228,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           <button className="heroGhost" onClick={() => setDownloadText("")}>clear links</button>
                         )}
 
-                        <button
-                          className="heroGhost"
-                          onClick={() => clearFinishedDownloads?.()}
-                          disabled={downloadBusy || !downloadQueue.some((item) => item.status === "done")}
-                        >
-                          clear finished
-                        </button>
-                        <button
-                          className="heroGhost"
-                          onClick={() => clearFailedDownloads?.()}
-                          disabled={downloadBusy || !downloadQueue.some((item) => item.status === "failed" || item.status === "cancelled")}
-                        >
-                          clear failed
-                        </button>
-                      </div>
+                       </div>
                     </>
                   )}
 
@@ -6258,10 +6240,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         <div className="spotifyAuthLeft">
                           <span className="spotifyAuthDot" aria-hidden="true" />
                           <div>
-                            <strong>{spotifyLoggedIn ? "Spotify connected" : "Spotify public import"}</strong>
-                            <p>
-                              Connect once with Spotify. No cookie paste. Only public playlists, albums, and tracks are imported.
-                            </p>
+                            <strong>{spotifyLoggedIn ? "Spotify connected" : "Spotify import"}</strong>
+                            <p>Paste a public Spotify link and choose what to fetch.</p>
                           </div>
                         </div>
                         <div className="spotifyAuthActions">
@@ -6272,28 +6252,26 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           >
                             {spotifyLoginBusy ? "opening..." : spotifyLoggedIn ? "reconnect" : "connect spotify"}
                           </button>
-                          <button
-                            className="softButton spotifyAuthBtn"
-                            onClick={() => void handleSpotifyLogout()}
-                            disabled={spotifyLoginBusy}
-                          >
-                            disconnect
-                          </button>
+                          {spotifyLoggedIn ? (
+                            <button
+                              className="softButton spotifyAuthBtn"
+                              onClick={() => void handleSpotifyLogout()}
+                              disabled={spotifyLoginBusy}
+                            >
+                              disconnect
+                            </button>
+                          ) : null}
                         </div>
                       </div>
 
                       {/* -- URL fetch -- */}
-                      <div className="downloadNotice downloadNoticeV031 spotifyNotice">
-                        Paste a Spotify playlist, album, or track link. If Spotify blocks it, make the playlist public on your profile, not only shareable by link.
-                      </div>
-
-                      <div className="spotifyUrlRow">
+                       <div className="spotifyUrlRow">
                         <input
                           type="url"
                           className="downloadTextarea downloadTextareaV031 spotifyUrlInput"
                           value={spotifyUrl}
                           onChange={(e) => { setSpotifyUrl(e.currentTarget.value); setSpotifyFetchError(""); }}
-                          placeholder="https://open.spotify.com/playlist/..."
+                          placeholder="paste spotify playlist, album, or track link"
                           disabled={spotifyFetchBusy || spotifyDownloadBusy}
                           onKeyDown={(e) => { if (e.key === "Enter" && spotifyUrl.trim()) void fetchSpotifyTracks(); }}
                         />
@@ -6302,7 +6280,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           onClick={() => void fetchSpotifyTracks()}
                           disabled={spotifyFetchBusy || spotifyDownloadBusy || !spotifyUrl.trim()}
                         >
-                          {spotifyFetchBusy ? "fetching..." : "fetch tracks"}
+                          {spotifyFetchBusy ? "fetching..." : "fetch"}
                         </button>
                       </div>
 
@@ -6537,11 +6515,11 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <div className="converterBox converterBoxV031">
                     <div>
                       <strong>convert local files</strong>
-                      <p>Choose mp4, webm, mkv, mov, wav, m4a, flac, or mp3 files. localtify converts and imports them.</p>
+                      <p>Turn local video/audio files into library tracks.</p>
                     </div>
 
                     <button className="heroMain" onClick={convertLocalMedia} disabled={convertBusy}>
-                      {convertBusy ? "converting..." : "choose files and convert"}
+                      {convertBusy ? "converting..." : "choose files"}
                     </button>
 
                     {convertBusy ? (

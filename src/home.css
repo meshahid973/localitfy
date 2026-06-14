@@ -18499,3 +18499,344 @@ body.localitfyThemePainting .homeSongRow{
   text-wrap: balance;
 }
 /* end localtify v467 no-box empty states */
+
+/* localtify v475/v476 — premium library rows + calmer downloads */
+
+/* Library rows: clearer text, calmer borders, special playing state */
+.app :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow){
+  border-color: rgba(255,255,255,.068) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.012)),
+    rgba(6,6,10,.52) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.028) !important;
+  transform: translate3d(0,0,0) !important;
+  transition:
+    transform 170ms cubic-bezier(.16,1,.3,1),
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 150ms ease !important;
+}
+
+.app :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):hover{
+  border-color: rgba(255,255,255,.12) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.018)),
+    rgba(9,9,15,.66) !important;
+  transform: translate3d(2px,0,0) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 18px rgba(0,0,0,.14) !important;
+}
+
+.app :is(.songRow.playing, .songRow.active, .libraryRow.playing, .libraryRow.active, .playlistTrackRow.playing, .playlistSongRow.playing){
+  border-color: rgba(var(--lt-accent-rgb), .26) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .105), rgba(var(--lt-accent-rgb), .042)),
+    rgba(8,8,14,.72) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--lt-accent-rgb), .045),
+    0 8px 18px rgba(0,0,0,.15) !important;
+}
+
+.app :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow) :is(strong, .songTitle, .trackTitle){
+  color: rgba(var(--text-rgb), .94) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.018em !important;
+}
+
+.app :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow) :is(p, small, .songArtist, .trackArtist){
+  color: rgba(var(--text-rgb), .62) !important;
+}
+
+.app :is(.songRow.missing, .libraryRow.missing, .songRow.fileMissing, .libraryRow.fileMissing){
+  border-color: rgba(255, 188, 91, .22) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 188, 91, .075), rgba(255,255,255,.014)),
+    rgba(9,7,5,.60) !important;
+}
+
+.app :is(.songRow.missing, .libraryRow.missing, .songRow.fileMissing, .libraryRow.fileMissing) :is(strong, .songTitle){
+  color: rgba(255, 224, 174, .95) !important;
+}
+
+/* Downloads: calmer page, cleaner tabs, less utility noise */
+.downloadsLayoutV031{
+  display: grid;
+  gap: 14px !important;
+}
+
+.downloadPanelV031{
+  border-color: rgba(255,255,255,.09) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.014)),
+    rgba(5,5,10,.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 16px 40px rgba(0,0,0,.20) !important;
+}
+
+.downloadHeroHead{
+  align-items: center !important;
+  gap: 14px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid rgba(255,255,255,.055) !important;
+}
+
+.downloadHeroHead h3{
+  color: rgba(var(--text-rgb), .96) !important;
+  letter-spacing: -.055em !important;
+}
+
+.downloadHeroHead .softText{
+  max-width: 560px !important;
+  color: rgba(var(--text-rgb), .62) !important;
+}
+
+.downloadHeroActionsCompactV475{
+  display: flex !important;
+  gap: 7px !important;
+  justify-content: flex-end !important;
+}
+
+.downloadHeroActionsCompactV475 .softButton{
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  color: rgba(var(--text-rgb), .68) !important;
+  background: rgba(255,255,255,.035) !important;
+  border-color: rgba(255,255,255,.075) !important;
+  box-shadow: none !important;
+}
+
+.downloadHeroActionsCompactV475 .softButton:hover{
+  color: rgba(var(--text-rgb), .92) !important;
+  background: rgba(255,255,255,.055) !important;
+  transform: translate3d(0,-1px,0);
+}
+
+.downloadTabStrip{
+  width: fit-content !important;
+  max-width: 100% !important;
+  display: inline-flex !important;
+  gap: 4px !important;
+  margin: 14px 0 12px !important;
+  padding: 4px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 999px !important;
+  background: rgba(6,6,10,.62) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+
+.downloadTab{
+  min-height: 34px !important;
+  padding: 0 16px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: rgba(var(--text-rgb), .60) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-weight: 900 !important;
+}
+
+.downloadTab:hover{
+  color: rgba(var(--text-rgb), .86) !important;
+  background: rgba(255,255,255,.045) !important;
+}
+
+.downloadTab.active{
+  color: rgba(255,255,255,.95) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .22), rgba(var(--lt-accent-rgb), .10)),
+    rgba(var(--lt-accent-rgb), .08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+
+.spotifyTabDot{
+  width: 7px !important;
+  height: 7px !important;
+  opacity: .82 !important;
+}
+
+.downloadNoticeV031{
+  display: none !important;
+}
+
+.downloadTextareaV031{
+  min-height: 132px !important;
+  padding: 14px 15px !important;
+  border-radius: 18px !important;
+  color: rgba(var(--text-rgb), .90) !important;
+  border-color: rgba(255,255,255,.09) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.012)),
+    rgba(5,5,9,.66) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.028) !important;
+  resize: vertical;
+}
+
+.downloadTextareaV031::placeholder{
+  color: rgba(var(--text-rgb), .40) !important;
+}
+
+.downloadTextareaV031:focus,
+.spotifyUrlInput:focus{
+  border-color: rgba(var(--lt-accent-rgb), .36) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 0 0 3px rgba(var(--lt-accent-rgb), .075) !important;
+}
+
+.downloadActionsV031,
+.spotifyDownloadRow{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+
+.downloadActionsV031 :is(.heroMain, .heroGhost),
+.spotifyDownloadRow :is(.heroMain, .heroGhost){
+  min-height: 36px !important;
+  padding: 0 15px !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+.downloadActionsV031 .heroMain,
+.spotifyDownloadRow .heroMain,
+.spotifyFetchButton{
+  color: #fff !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), .34) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .24), rgba(var(--lt-accent-rgb), .115)),
+    rgba(8,8,14,.78) !important;
+}
+
+.downloadActionsV031 .heroGhost,
+.spotifyDownloadRow .heroGhost{
+  color: rgba(var(--text-rgb), .72) !important;
+  border-color: rgba(255,255,255,.075) !important;
+  background: rgba(255,255,255,.032) !important;
+}
+
+.spotifyAuthCard{
+  margin-top: 4px !important;
+  padding: 12px !important;
+  border-radius: 18px !important;
+  border-color: rgba(255,255,255,.075) !important;
+  background: rgba(255,255,255,.032) !important;
+  box-shadow: none !important;
+}
+
+.spotifyAuthLeft strong{
+  color: rgba(var(--text-rgb), .91) !important;
+  font-size: 13px !important;
+}
+
+.spotifyAuthLeft p{
+  margin-top: 3px !important;
+  color: rgba(var(--text-rgb), .58) !important;
+  font-size: 12px !important;
+}
+
+.spotifyAuthActions{
+  gap: 7px !important;
+}
+
+.spotifyAuthBtn{
+  min-height: 33px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+.spotifyUrlRow{
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 9px !important;
+  margin-top: 12px !important;
+}
+
+.spotifyUrlInput{
+  min-height: 42px !important;
+  border-radius: 999px !important;
+}
+
+.spotifyFetchButton{
+  min-height: 42px !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+.spotifyTrackList,
+.downloadQueuePanel,
+.downloadResultsV031,
+.converterBoxV031{
+  border-color: rgba(255,255,255,.075) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.012)),
+    rgba(5,5,9,.58) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.026) !important;
+}
+
+.spotifyTrackListHead,
+.smallPanelHead,
+.downloadResultsV031 > strong{
+  border-bottom-color: rgba(255,255,255,.055) !important;
+}
+
+.spotifyTrackItem,
+.downloadQueueItem,
+.downloadResultV326{
+  border-color: rgba(255,255,255,.065) !important;
+  background: rgba(255,255,255,.026) !important;
+  box-shadow: none !important;
+}
+
+.spotifyTrackItem:hover,
+.downloadQueueItem:hover,
+.downloadResultV326:hover{
+  border-color: rgba(255,255,255,.105) !important;
+  background: rgba(255,255,255,.040) !important;
+  transform: translate3d(1px,0,0);
+}
+
+.downloadQueueTrack,
+.converterTrack{
+  background: rgba(255,255,255,.070) !important;
+}
+
+.converterBoxV031{
+  margin-top: 14px !important;
+  border-radius: 18px !important;
+}
+
+.converterBoxV031 .heroMain{
+  min-height: 36px !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+/* Keep empty-state visible and clean */
+.downloadPanelV031 > .localtifyStateCardCuteV466{
+  margin: 30px auto 18px !important;
+}
+
+@media (max-width: 840px){
+  .downloadHeroHead{
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .downloadHeroActionsCompactV475,
+  .spotifyAuthActions{
+    justify-content: flex-start !important;
+  }
+
+  .spotifyUrlRow,
+  .converterBoxV031{
+    grid-template-columns: 1fr !important;
+  }
+}
+/* end localtify v475/v476 */
