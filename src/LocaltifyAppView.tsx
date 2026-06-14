@@ -929,12 +929,12 @@ export function updateWasLeftAlone(version: string) {
 export function updateRibbonTitle(prompt: UpdatePromptState) {
   const version = prompt.version || APP_VERSION;
 
-  if (prompt.status === "available") return `new update · Localtify ${version} is ready`;
-  if (prompt.status === "downloaded") return `update ready · restart to install ${version}`;
-  if (prompt.status === "downloading") return `downloading update · ${Math.round(clamp(prompt.percent, 0, 100))}%`;
+  if (prompt.status === "available") return `Update available · Localtify ${version} is available.`;
+  if (prompt.status === "downloaded") return `Update ready · restart to install Localtify ${version}.`;
+  if (prompt.status === "downloading") return `Downloading update · ${Math.round(clamp(prompt.percent, 0, 100))}%`;
   if (prompt.status === "latest") return "Localtify is up to date.";
   if (prompt.status === "error") return "Update check failed.";
-  if (prompt.status === "dev") return "installed app required · auto update only works in the packaged app.";
+  if (prompt.status === "dev") return "Install Localtify to use automatic updates.";
   if (prompt.status === "checking") return "Checking for updates...";
   return "Localtify update";
 }
@@ -1080,7 +1080,7 @@ export const themes = [
   { id: "bubblegum", name: "bubblegum", note: "pink blue pop", mood: "cute UI", emoji: "??" },
   { id: "berry", name: "berry", note: "deep purple glow", mood: "soft night", emoji: "??" },
   { id: "midnight", name: "midnight", note: "deep blue OLED", mood: "late night", emoji: "??" },
-  { id: "mono", name: "mono", note: "clean white", mood: "simple focus", emoji: "?" },
+  { id: "mono", name: "light mode", note: "bright clean contrast", mood: "daylight", emoji: "☀️" },
   { id: "stars", name: "stars", note: "drifting sparkle field", mood: "sparkly night", emoji: "?" },
 ] as const;
 
@@ -4792,6 +4792,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
           onDownload={askUpdaterToDownload}
           onInstall={askUpdaterToInstall}
           onCheckAgain={manualUpdateCheck}
+          onOpenRelease={() => window.open(LOCALITFY_DOWNLOAD_URL, "_blank", "noopener,noreferrer")}
           onDismiss={() => setUpdatePrompt(defaultUpdatePrompt)}
         />
       </TitleBar>
@@ -6629,9 +6630,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                 </button>
                 <button className={`circleButton main ${playButtonBurst ? `playButtonBurst playButtonBurst${playButtonBurst % 2}` : ""}`} onClick={togglePlay} aria-label={isPlaying ? "pause" : "play"}>
                   {isPlaying ? (
-                    <Pause className="playerControlIcon" size={18} strokeWidth={2.2} fill="none" aria-hidden="true" />
+                    <Pause className="playerControlIcon pauseIcon" size={18} strokeWidth={2.75} fill="none" aria-hidden="true" />
                   ) : (
-                    <Play className="playerControlIcon playIcon" size={18} strokeWidth={2.2} fill="none" aria-hidden="true" />
+                    <Play className="playerControlIcon playIcon" size={18} strokeWidth={2.45} fill="currentColor" aria-hidden="true" />
                   )}
                 </button>
                 <button className="circleButton" onClick={() => playNext(true)} aria-label="next song">

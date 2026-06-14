@@ -18979,3 +18979,185 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 /* end localtify v482 consolidated home cleanup */
+
+/* localtify v484 — home panel outline uses theme accent, not fixed pink */
+.app :is(
+  .hero,
+  .heroPremium,
+  .heroCompact,
+  .homeListenCard,
+  .homeAlbumCard,
+  .homeFreshCard,
+  .coverGalleryCard,
+  .coverGridCard,
+  .playlistCard,
+  .albumCard,
+  .songRow
+):not(.playerBar){
+  border-color: color-mix(in oklab, rgba(255,255,255,.07) 58%, var(--lt-accent) 42%) !important;
+}
+
+.app :is(
+  .hero,
+  .heroPremium,
+  .heroCompact,
+  .homeListenCard,
+  .homeAlbumCard,
+  .homeFreshCard,
+  .coverGalleryCard,
+  .coverGridCard,
+  .playlistCard,
+  .albumCard
+):not(.playerBar):hover{
+  border-color: color-mix(in oklab, rgba(255,255,255,.09) 42%, var(--lt-accent) 58%) !important;
+}
+
+.app :is(
+  .homeListenCard.active,
+  .homeListenCard.playing,
+  .songRow.active,
+  .songRow.playing,
+  .hero.heroPremium
+){
+  border-color: color-mix(in oklab, rgba(255,255,255,.06) 26%, var(--lt-accent) 74%) !important;
+}
+/* end localtify v484 */
+
+/* localtify v486 — reduce excessive home outlines */
+.app :is(
+  .hero,
+  .heroPremium,
+  .heroCompact,
+  .homeListenCard,
+  .homeAlbumCard,
+  .homeFreshCard,
+  .coverGalleryCard,
+  .coverGridCard,
+  .playlistCard,
+  .albumCard,
+  .songRow
+):not(.playerBar){
+  border-color: color-mix(in oklab, rgba(255,255,255,.055) 78%, var(--lt-accent) 22%) !important;
+}
+
+.app :is(
+  .homeListenCard.active,
+  .homeListenCard.playing,
+  .songRow.active,
+  .songRow.playing,
+  .albumTrackRowV318.active
+){
+  border-color: color-mix(in oklab, rgba(255,255,255,.07) 32%, var(--lt-accent) 68%) !important;
+}
+
+.app :is(.hero.heroPremium, .heroCompact){
+  border-color: color-mix(in oklab, rgba(255,255,255,.06) 66%, var(--lt-accent) 34%) !important;
+}
+
+.app :is(.homeListenCard, .homeAlbumCard, .homeFreshCard, .coverGalleryCard, .albumCard):hover{
+  border-color: color-mix(in oklab, rgba(255,255,255,.075) 62%, var(--lt-accent) 38%) !important;
+}
+
+.app[data-theme="mono"] :is(.hero,.heroPremium,.panel,.homeListenCard,.homeAlbumCard,.homeFreshCard,.albumCard,.songRow){
+  border-color: rgba(55,61,87,.12) !important;
+}
+
+.app[data-theme="mono"] :is(.homeListenCard.active,.homeListenCard.playing,.songRow.active,.songRow.playing){
+  border-color: rgba(86,97,127,.36) !important;
+}
+/* end localtify v486 */
+
+/* localtify v487 — hero text raise, quick action simplify, outline cleanup */
+.app .hero.heroPremium .heroText.heroTextClean{
+  transform: translate3d(0, -54px, 0) !important;
+}
+
+.app .hero.heroPremium.heroExpanded .heroText.heroTextClean{
+  transform: translate3d(0, -68px, 0) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean{
+  transform: translate3d(0, -52px, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean{
+  transform: translate3d(0, -66px, 0) scale(1) !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .eyebrow{
+  margin-bottom: 10px !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroTitle{
+  line-height: .88 !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroArtistLine,
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
+  margin-top: -10px !important;
+  margin-bottom: 7px !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions,
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
+  gap: 6px !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton,
+.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions .heroTinyButton{
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 11px !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  box-shadow: none !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:first-child{
+  background: color-mix(in oklab, var(--lt-accent) 70%, #fff 30%) !important;
+  color: color-mix(in oklab, var(--lt-bg) 80%, #000 20%) !important;
+  border-color: transparent !important;
+}
+
+.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:not(:first-child){
+  background: rgba(255,255,255,.055) !important;
+  color: rgba(var(--text-rgb), .76) !important;
+  border-color: rgba(255,255,255,.08) !important;
+}
+
+.app :is(
+  .hero,
+  .heroPremium,
+  .heroCompact,
+  .homeListenCard,
+  .homeAlbumCard,
+  .homeFreshCard,
+  .coverGalleryCard,
+  .coverGridCard,
+  .playlistCard,
+  .albumCard,
+  .songRow
+):not(.playerBar){
+  border-color: color-mix(in oklab, rgba(255,255,255,.052) 84%, var(--lt-accent) 16%) !important;
+}
+
+.app :is(.homeListenCard.active,.homeListenCard.playing,.songRow.active,.songRow.playing,.albumTrackRowV318.active){
+  border-color: color-mix(in oklab, rgba(255,255,255,.07) 30%, var(--lt-accent) 70%) !important;
+}
+
+.app[data-theme="mono"] :is(.hero,.heroPremium,.panel,.homeListenCard,.homeAlbumCard,.homeFreshCard,.albumCard,.songRow){
+  border-color: rgba(55,61,87,.12) !important;
+  background-color: rgba(246,248,252,.74) !important;
+}
+
+.app[data-theme="mono"] .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:first-child{
+  background: #58617f !important;
+  color: #fff !important;
+}
+/* end localtify v487 */

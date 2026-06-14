@@ -8535,3 +8535,52 @@ body.localitfyThemePainting .toggleRow{
     inset 0 1px 0 rgba(255,255,255,.06),
     0 12px 30px rgba(var(--lt-accent-rgb), .10);
 }
+
+/* localtify v487 — settings light mode contrast */
+.app[data-theme="mono"] .settingsShell,
+.app[data-theme="mono"] .settingsCategoryContent,
+.app[data-theme="mono"] .settingsPanel,
+.app[data-theme="mono"] .settingsPageShell{
+  color: var(--lt-text) !important;
+}
+
+.app[data-theme="mono"] :is(.settingsPanel,.settingsCard,.settingsPageCard,.settingsPanelCard,.themePreviewCard,.themeCard,.colorCard){
+  border-color: rgba(55,61,87,.13) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.38)),
+    rgba(246,248,252,.82) !important;
+  color: var(--lt-text) !important;
+  box-shadow: 0 12px 28px rgba(55,61,87,.08), inset 0 1px 0 rgba(255,255,255,.60) !important;
+}
+
+.app[data-theme="mono"] :is(.settingsPanel,.settingsCard,.settingsPageCard,.settingsPanelCard,.themePreviewCard,.themeCard,.colorCard) :is(h1,h2,h3,h4,strong,label){
+  color: var(--lt-text) !important;
+}
+
+.app[data-theme="mono"] :is(.settingsPanel,.settingsCard,.settingsPageCard,.settingsPanelCard,.themePreviewCard,.themeCard,.colorCard) :is(p,small,span){
+  color: var(--lt-muted) !important;
+}
+
+.app[data-theme="mono"] :is(select,input,textarea,.themeSelect){
+  color: var(--lt-text) !important;
+  background: rgba(255,255,255,.86) !important;
+  border-color: rgba(55,61,87,.16) !important;
+}
+
+.app[data-theme="mono"] select option{
+  color: #343a55 !important;
+  background: #ffffff !important;
+}
+
+.app[data-theme="mono"] :is(.settingPill,.togglePill,.segmentedButton,.settingsButton){
+  color: var(--lt-text) !important;
+  background: rgba(255,255,255,.62) !important;
+  border-color: rgba(55,61,87,.13) !important;
+}
+
+.app[data-theme="mono"] :is(.settingPill.active,.togglePill.active,.segmentedButton.active){
+  color: #ffffff !important;
+  background: #58617f !important;
+  border-color: rgba(55,61,87,.24) !important;
+}
+/* end localtify v487 */

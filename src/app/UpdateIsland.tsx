@@ -33,6 +33,7 @@ type UpdateIslandProps = {
   onDownload: () => void;
   onInstall: () => void;
   onCheckAgain: () => void;
+  onOpenRelease?: () => void;
   onDismiss: () => void;
 };
 
@@ -50,6 +51,7 @@ export default function UpdateIsland({
   onDownload,
   onInstall,
   onCheckAgain,
+  onOpenRelease,
   onDismiss
 }: UpdateIslandProps) {
   const versionLabel = updatePrompt.version || appVersion;
@@ -156,9 +158,15 @@ export default function UpdateIsland({
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 5 }}
                 transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.18 }}
               >
+                {(updatePrompt.status === "available" || updatePrompt.status === "downloaded") && onOpenRelease ? (
+                  <button className="updateGhostButton updateReleaseLinkV486" type="button" onClick={onOpenRelease}>
+                    view release
+                  </button>
+                ) : null}
+
                 {updatePrompt.status === "available" ? (
                   <button className="updatePrimaryButton" type="button" onClick={onDownload}>
-                    download
+                    download update
                   </button>
                 ) : null}
 

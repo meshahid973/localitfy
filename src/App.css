@@ -12009,3 +12009,1060 @@ body.isResizingPlayer .app *{
   }
 }
 /* end localtify v482 consolidated app cleanup */
+
+/* localtify v484 — header spacing, prettier stars, accent outline, lighter search */
+.app{
+  --panel-calm-line: color-mix(in oklab, rgba(255,255,255,.07) 56%, var(--lt-accent) 44%) !important;
+  --panel-calm-line-hover: color-mix(in oklab, rgba(255,255,255,.09) 42%, var(--lt-accent) 58%) !important;
+  --panel-calm-outline-soft: color-mix(in oklab, rgba(255,255,255,.055) 62%, var(--lt-accent) 38%) !important;
+  --panel-calm-outline-strong: color-mix(in oklab, rgba(255,255,255,.08) 42%, var(--lt-accent) 58%) !important;
+}
+
+.app .content > .headerBar{
+  min-height: 92px !important;
+  padding: 24px 22px 13px !important;
+  align-items: flex-start !important;
+  border-bottom: 1px solid color-mix(in oklab, rgba(255,255,255,.05) 62%, var(--lt-accent) 38%) !important;
+}
+
+.app .headerText{
+  padding-top: 6px !important;
+  gap: 5px !important;
+}
+
+.app .headerText .eyebrow{
+  color: color-mix(in oklab, rgba(255,255,255,.42) 62%, var(--lt-accent) 38%) !important;
+}
+
+.app .headerText h2{
+  transform: translate3d(0, 2px, 0) !important;
+}
+
+.app .headerTools.compactHeaderTools{
+  padding-top: 9px !important;
+}
+
+.app .searchEasterWrap{
+  width: min(100%, 446px) !important;
+  margin-top: 1px !important;
+}
+
+.app .searchEasterWrap::before{
+  inset: 1px !important;
+  opacity: .78 !important;
+  background:
+    radial-gradient(circle at 16% 50%, rgba(var(--lt-accent-rgb), .15), transparent 38%),
+    linear-gradient(180deg, rgba(255,255,255,.038), transparent 74%) !important;
+}
+
+.app .search,
+.app .searchEasterWrap .search{
+  min-height: 45px !important;
+  padding: 0 19px !important;
+  border: 1px solid color-mix(in oklab, rgba(255,255,255,.13) 58%, var(--lt-accent) 42%) !important;
+  color: rgba(255,255,255,.96) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.018)),
+    rgba(8, 8, 14, .90) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 8px 18px rgba(0,0,0,.16) !important;
+}
+
+.app .search::placeholder,
+.app .searchEasterWrap .search::placeholder{
+  color: rgba(255,255,255,.74) !important;
+}
+
+.app .search:hover,
+.app .searchEasterWrap .search:hover{
+  border-color: color-mix(in oklab, rgba(255,255,255,.15) 44%, var(--lt-accent) 56%) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.022)),
+    rgba(9, 9, 16, .94) !important;
+}
+
+.app .search:focus,
+.app .searchEasterWrap .search:focus{
+  border-color: color-mix(in oklab, rgba(255,255,255,.08) 26%, var(--lt-accent) 74%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 0 0 3px rgba(var(--lt-accent-rgb), .11),
+    0 10px 22px rgba(0,0,0,.18) !important;
+  transform: translate3d(0, -1px, 0) !important;
+}
+
+/* Accent-driven calm outlines instead of fixed pink borders. */
+.app :is(
+  .panel,
+  .ambientSurface,
+  .settingsPanel,
+  .settingsCard,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .downloadPanel,
+  .playlistHeroPanel,
+  .playlistCreatePanel,
+  .playlistShelfPanel,
+  .playlistTracksPanel,
+  .analyticsStudioV339 > section,
+  .albumsHeroPanelV318,
+  .albumsShelfPanelV318,
+  .albumDetailPanelV318,
+  .albumBuilderPanelV318
+):not(.playerBar):not(.topUpdateRibbon){
+  border-color: var(--panel-calm-outline-soft) !important;
+}
+
+.app :is(
+  .panel,
+  .ambientSurface,
+  .settingsCard,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .downloadPanel,
+  .playlistHeroPanel,
+  .playlistCreatePanel,
+  .playlistShelfPanel,
+  .playlistTracksPanel,
+  .albumsHeroPanelV318,
+  .albumsShelfPanelV318,
+  .albumDetailPanelV318,
+  .albumBuilderPanelV318
+):not(.playerBar):not(.topUpdateRibbon):hover{
+  border-color: var(--panel-calm-outline-strong) !important;
+}
+
+/* Lighter, prettier header stars: twinkle + drift with theme accent. */
+.app .content > .headerBar::before{
+  opacity: .76 !important;
+  filter: none !important;
+  background-size: 100% 100% !important;
+  background-image:
+    radial-gradient(circle at 4% 30%, rgba(255,255,255,.96) 0 1.3px, transparent 2px),
+    radial-gradient(circle at 10% 70%, rgba(var(--lt-accent-rgb),.92) 0 1.15px, transparent 1.95px),
+    radial-gradient(circle at 17% 21%, rgba(255,255,255,.78) 0 1px, transparent 1.85px),
+    radial-gradient(circle at 24% 60%, rgba(var(--lt-accent-rgb),.78) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 34% 18%, rgba(255,255,255,.88) 0 1.15px, transparent 2px),
+    radial-gradient(circle at 42% 68%, rgba(var(--lt-accent-rgb),.86) 0 1.15px, transparent 2px),
+    radial-gradient(circle at 52% 28%, rgba(255,255,255,.84) 0 1.15px, transparent 2px),
+    radial-gradient(circle at 62% 70%, rgba(var(--lt-accent-rgb),.82) 0 1.15px, transparent 2px),
+    radial-gradient(circle at 74% 22%, rgba(255,255,255,.86) 0 1.05px, transparent 1.9px),
+    radial-gradient(circle at 84% 66%, rgba(var(--lt-accent-rgb),.78) 0 1.1px, transparent 1.95px),
+    radial-gradient(circle at 94% 32%, rgba(255,255,255,.84) 0 1px, transparent 1.85px) !important;
+  animation: localtifyHeaderStarsPulseV484 4.8s ease-in-out infinite !important;
+}
+
+.app .content > .headerBar::after{
+  opacity: .48 !important;
+  background-size: 118% 100% !important;
+  background-image:
+    radial-gradient(circle at 14% 44%, rgba(255,255,255,.72) 0 .95px, transparent 1.8px),
+    radial-gradient(circle at 28% 14%, rgba(var(--lt-accent-rgb),.56) 0 .85px, transparent 1.7px),
+    radial-gradient(circle at 39% 58%, rgba(255,255,255,.58) 0 .95px, transparent 1.8px),
+    radial-gradient(circle at 54% 22%, rgba(var(--lt-accent-rgb),.52) 0 .85px, transparent 1.7px),
+    radial-gradient(circle at 69% 46%, rgba(255,255,255,.60) 0 .95px, transparent 1.8px),
+    radial-gradient(circle at 82% 18%, rgba(var(--lt-accent-rgb),.48) 0 .85px, transparent 1.7px),
+    radial-gradient(circle at 92% 54%, rgba(255,255,255,.56) 0 .95px, transparent 1.8px),
+    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .035), transparent) !important;
+  animation: localtifyHeaderStarsDriftV484 10s ease-in-out infinite alternate !important;
+}
+
+@keyframes localtifyHeaderStarsPulseV484{
+  0%{
+    opacity: .40;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  24%{
+    opacity: .88;
+    transform: translate3d(2px, -1px, 0) scale(1.015);
+  }
+  50%{
+    opacity: .54;
+    transform: translate3d(0, 1px, 0) scale(1);
+  }
+  78%{
+    opacity: .95;
+    transform: translate3d(-2px, 0, 0) scale(1.02);
+  }
+  100%{
+    opacity: .46;
+    transform: translate3d(1px, -1px, 0) scale(1);
+  }
+}
+
+@keyframes localtifyHeaderStarsDriftV484{
+  0%{
+    opacity: .26;
+    transform: translate3d(-10px, 0, 0);
+  }
+  25%{
+    opacity: .56;
+    transform: translate3d(-2px, -1px, 0);
+  }
+  50%{
+    opacity: .34;
+    transform: translate3d(4px, 1px, 0);
+  }
+  75%{
+    opacity: .60;
+    transform: translate3d(8px, -1px, 0);
+  }
+  100%{
+    opacity: .30;
+    transform: translate3d(12px, 0, 0);
+  }
+}
+
+@media (max-width: 980px){
+  .app .content > .headerBar{
+    min-height: 96px !important;
+    padding-top: 20px !important;
+  }
+
+  .app .headerText{
+    padding-top: 2px !important;
+  }
+
+  .app .headerTools.compactHeaderTools{
+    min-width: 0 !important;
+    width: 100% !important;
+    padding-top: 4px !important;
+  }
+
+  .app .searchEasterWrap{
+    width: 100% !important;
+  }
+}
+/* end localtify v484 */
+
+/* localtify v485 — reference-like update ribbon + stronger light/dark contrast */
+.app .topUpdateRibbonLayer,
+.topUpdateRibbonLayer{
+  position: fixed !important;
+  inset: 36px 0 auto 0 !important;
+  z-index: 2450 !important;
+  height: 31px !important;
+  min-height: 31px !important;
+  pointer-events: none !important;
+}
+
+.app .updateYukariPeek,
+.updateYukariPeek{
+  display: none !important;
+}
+
+.app .topUpdateRibbon,
+.topUpdateRibbon{
+  pointer-events: auto !important;
+  width: 100vw !important;
+  height: 31px !important;
+  min-height: 31px !important;
+  max-height: 31px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 12px !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  border-top: 1px solid color-mix(in oklab, var(--lt-accent) 30%, transparent) !important;
+  border-bottom: 1px solid color-mix(in oklab, var(--lt-accent) 44%, rgba(255,255,255,.06)) !important;
+  background:
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--lt-accent) 24%, var(--lt-bg) 76%),
+      color-mix(in oklab, var(--lt-accent) 18%, var(--lt-bg) 82%) 46%,
+      color-mix(in oklab, var(--progress, var(--lt-accent)) 16%, var(--lt-bg) 84%)
+    ) !important;
+  color: color-mix(in oklab, var(--lt-text) 90%, var(--lt-accent) 10%) !important;
+  box-shadow:
+    0 6px 18px rgba(0,0,0,.16),
+    inset 0 1px 0 rgba(255,255,255,.040) !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(12px) saturate(125%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(125%) !important;
+}
+
+.app .topUpdateRibbon::before,
+.topUpdateRibbon::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: .38 !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.025), transparent 34%, rgba(var(--lt-accent-rgb), .045)),
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .12), transparent 38%) !important;
+}
+
+.app .topUpdateRibbon::after,
+.topUpdateRibbon::after{
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 1px !important;
+  width: 100% !important;
+  background: rgba(var(--lt-accent-rgb), .30) !important;
+  opacity: .75 !important;
+}
+
+.app .topUpdateRibbonMain,
+.topUpdateRibbonMain{
+  min-width: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.app .topUpdateRibbonIcon,
+.topUpdateRibbonIcon{
+  width: 15px !important;
+  height: 15px !important;
+  min-width: 15px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  color: color-mix(in oklab, var(--lt-accent) 72%, var(--lt-text) 28%) !important;
+  box-shadow: none !important;
+}
+
+.app .topUpdateRibbonText,
+.topUpdateRibbonText{
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+}
+
+.app .topUpdateRibbonText .eyebrow,
+.topUpdateRibbonText .eyebrow{
+  display: none !important;
+}
+
+.app .topUpdateRibbonText h3,
+.topUpdateRibbonText h3{
+  margin: 0 !important;
+  min-width: 0 !important;
+  color: color-mix(in oklab, var(--lt-text) 90%, var(--lt-accent) 10%) !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  font-weight: 920 !important;
+  letter-spacing: .015em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-transform: none !important;
+}
+
+.app .topUpdateRibbonRight,
+.topUpdateRibbonRight{
+  height: 100% !important;
+  min-width: max-content !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.app .topUpdateRibbonMeta,
+.topUpdateRibbonMeta,
+.app .topUpdateRibbon .updateVersionPill,
+.topUpdateRibbon .updateVersionPill,
+.app .topUpdateRibbon .updateSafePill,
+.topUpdateRibbon .updateSafePill{
+  display: none !important;
+}
+
+.app .topUpdateRibbonActions,
+.topUpdateRibbonActions{
+  height: 100% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updatePrimaryButton{
+  height: 21px !important;
+  min-height: 21px !important;
+  padding: 0 9px !important;
+  border: 1px solid color-mix(in oklab, var(--lt-text) 10%, var(--lt-accent) 42%) !important;
+  border-radius: 999px !important;
+  color: color-mix(in oklab, var(--lt-bg) 70%, #000 30%) !important;
+  background: color-mix(in oklab, var(--lt-accent) 82%, #fff 18%) !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-transform: lowercase !important;
+}
+
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updateToastClose{
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  color: color-mix(in oklab, var(--lt-text) 64%, transparent) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.app .topUpdateRibbon .updateToastClose:hover,
+.topUpdateRibbon .updateToastClose:hover{
+  color: var(--lt-text) !important;
+  background: rgba(255,255,255,.06) !important;
+  transform: none !important;
+}
+
+/* Proper contrast layer for the light theme. */
+.app[data-theme="mono"]{
+  background:
+    linear-gradient(rgba(61, 67, 92, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 67, 92, .030) 1px, transparent 1px),
+    var(--lt-bg) !important;
+  background-size: 42px 42px !important;
+}
+
+.app[data-theme="mono"] :is(.panel, .ambientSurface, .sidebar, .playerBar, .settingsPageShell, .downloadPanel){
+  border-color: rgba(72, 78, 104, .13) !important;
+}
+
+.app[data-theme="mono"] .headerText h2,
+.app[data-theme="mono"] :is(h1,h2,h3,h4,strong){
+  color: var(--lt-text) !important;
+}
+
+.app[data-theme="mono"] :is(.softText, p, small, .navText small){
+  color: var(--lt-muted) !important;
+}
+
+@media (max-width: 760px){
+  .app .topUpdateRibbon,
+  .topUpdateRibbon{
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    padding: 0 8px !important;
+  }
+
+  .app .topUpdateRibbonText h3,
+  .topUpdateRibbonText h3{
+    font-size: 10px !important;
+  }
+
+  .app .topUpdateRibbon .updatePrimaryButton,
+  .topUpdateRibbon .updatePrimaryButton{
+    display: none !important;
+  }
+}
+/* end localtify v485 reference-like update ribbon */
+
+/* localtify v486 — stronger update ribbon, organic header stars, less outline noise */
+.app{
+  --outline-calm-v486: color-mix(in oklab, rgba(255,255,255,.055) 78%, var(--lt-accent) 22%) !important;
+  --outline-active-v486: color-mix(in oklab, rgba(255,255,255,.08) 38%, var(--lt-accent) 62%) !important;
+}
+
+/* Title/search spacing fix */
+.app .content > .headerBar{
+  min-height: 104px !important;
+  padding: 30px 22px 15px !important;
+}
+
+.app .headerText{
+  padding-top: 8px !important;
+}
+
+.app .headerTools.compactHeaderTools{
+  padding-top: 12px !important;
+}
+
+/* Organic stars: the positions drift, not just the whole layer. */
+.app .content > .headerBar::before{
+  opacity: .72 !important;
+  filter: none !important;
+  background-size: 100% 100% !important;
+  background-position:
+    0% 0%,
+    6% 12%,
+    -4% 8%,
+    8% -6%,
+    -6% -10%,
+    4% 10%,
+    -8% 6%,
+    7% -8%,
+    -5% 4%,
+    0% 0% !important;
+  background-image:
+    radial-gradient(circle at 6% 27%, rgba(255,255,255,.95) 0 1.15px, transparent 2px),
+    radial-gradient(circle at 14% 68%, rgba(var(--lt-accent-rgb),.78) 0 1px, transparent 1.85px),
+    radial-gradient(circle at 23% 20%, rgba(255,255,255,.72) 0 .95px, transparent 1.75px),
+    radial-gradient(circle at 35% 56%, rgba(var(--lt-accent-rgb),.68) 0 1px, transparent 1.85px),
+    radial-gradient(circle at 47% 16%, rgba(255,255,255,.86) 0 1.1px, transparent 1.95px),
+    radial-gradient(circle at 58% 72%, rgba(var(--lt-accent-rgb),.70) 0 1px, transparent 1.85px),
+    radial-gradient(circle at 69% 26%, rgba(255,255,255,.76) 0 1px, transparent 1.85px),
+    radial-gradient(circle at 79% 63%, rgba(var(--lt-accent-rgb),.64) 0 .95px, transparent 1.8px),
+    radial-gradient(circle at 91% 31%, rgba(255,255,255,.80) 0 1px, transparent 1.85px),
+    radial-gradient(circle at 96% 70%, rgba(var(--lt-accent-rgb),.52) 0 .85px, transparent 1.7px) !important;
+  animation: localtifyHeaderStarsScatterV486 7.8s ease-in-out infinite alternate !important;
+}
+
+.app .content > .headerBar::after{
+  opacity: .50 !important;
+  background-size: 124% 100% !important;
+  background-position:
+    0% 0%,
+    -8% 10%,
+    6% -8%,
+    -10% -4%,
+    8% 8%,
+    0% 0% !important;
+  background-image:
+    radial-gradient(circle at 10% 48%, rgba(255,255,255,.60) 0 .85px, transparent 1.7px),
+    radial-gradient(circle at 31% 13%, rgba(var(--lt-accent-rgb),.48) 0 .8px, transparent 1.6px),
+    radial-gradient(circle at 51% 54%, rgba(255,255,255,.54) 0 .85px, transparent 1.7px),
+    radial-gradient(circle at 72% 18%, rgba(var(--lt-accent-rgb),.44) 0 .8px, transparent 1.6px),
+    radial-gradient(circle at 88% 50%, rgba(255,255,255,.50) 0 .85px, transparent 1.7px),
+    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .028), transparent) !important;
+  animation: localtifyHeaderStarsScatterSoftV486 12s ease-in-out infinite alternate !important;
+}
+
+@keyframes localtifyHeaderStarsScatterV486{
+  0%{
+    opacity: .36;
+    background-position: 0% 0%, 6% 12%, -4% 8%, 8% -6%, -6% -10%, 4% 10%, -8% 6%, 7% -8%, -5% 4%, 0% 0%;
+    transform: translate3d(0,0,0);
+  }
+  28%{
+    opacity: .88;
+    background-position: 3% -3%, -5% 10%, 8% -6%, -4% 8%, 9% 4%, -8% -5%, 5% 10%, -6% 5%, 6% -7%, -2% 3%;
+    transform: translate3d(1px,-1px,0);
+  }
+  54%{
+    opacity: .48;
+    background-position: -4% 5%, 9% -6%, 3% 10%, -9% 2%, 5% -8%, 7% 7%, -3% -6%, 8% 8%, -7% 2%, 4% -5%;
+    transform: translate3d(-1px,1px,0);
+  }
+  82%{
+    opacity: .96;
+    background-position: 8% -7%, -8% -3%, 10% 3%, 5% 10%, -10% 5%, 2% -9%, 8% -2%, -7% 9%, 3% -8%, -5% 7%;
+    transform: translate3d(2px,0,0);
+  }
+  100%{
+    opacity: .42;
+    background-position: -2% 7%, 4% -8%, -6% -6%, 10% 6%, -4% 9%, 9% -7%, -9% 1%, 5% -10%, -1% 8%, 7% -2%;
+    transform: translate3d(0,-1px,0);
+  }
+}
+
+@keyframes localtifyHeaderStarsScatterSoftV486{
+  0%{
+    opacity: .22;
+    background-position: 0% 0%, -8% 10%, 6% -8%, -10% -4%, 8% 8%, 0% 0%;
+  }
+  45%{
+    opacity: .58;
+    background-position: 10% -6%, 4% 8%, -9% 6%, 8% -10%, -5% 4%, 12% 0%;
+  }
+  100%{
+    opacity: .28;
+    background-position: -7% 6%, 9% -8%, -4% -9%, 6% 10%, 10% -5%, -12% 0%;
+  }
+}
+
+/* Much more visible full-width update ribbon, like a real top app notice. */
+.app .titleBar,
+.titleBar{
+  overflow: visible !important;
+}
+
+.app .topUpdateRibbonLayer,
+.topUpdateRibbonLayer{
+  position: fixed !important;
+  top: 36px !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  width: 100vw !important;
+  height: 35px !important;
+  min-height: 35px !important;
+  z-index: 4000 !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.app .topUpdateRibbon,
+.topUpdateRibbon{
+  pointer-events: auto !important;
+  position: relative !important;
+  width: 100vw !important;
+  height: 35px !important;
+  min-height: 35px !important;
+  max-height: 35px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 0 13px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background:
+    linear-gradient(90deg,
+      rgba(var(--lt-accent-rgb), .23),
+      color-mix(in oklab, #0f2734 66%, var(--lt-accent) 34%) 38%,
+      color-mix(in oklab, #0b1620 78%, var(--lt-accent) 22%)
+    ) !important;
+  color: #eaffff !important;
+  box-shadow:
+    0 6px 18px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(255,255,255,.10) !important;
+  backdrop-filter: blur(10px) saturate(128%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(128%) !important;
+  overflow: hidden !important;
+}
+
+.app .topUpdateRibbonMain,
+.topUpdateRibbonMain{
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  height: 100% !important;
+}
+
+.app .topUpdateRibbonIcon,
+.topUpdateRibbonIcon{
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  color: #bdefff !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .topUpdateRibbonText,
+.topUpdateRibbonText{
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  overflow: hidden !important;
+}
+
+.app .topUpdateRibbonText .eyebrow,
+.topUpdateRibbonText .eyebrow{
+  display: none !important;
+}
+
+.app .topUpdateRibbonText h3,
+.topUpdateRibbonText h3{
+  margin: 0 !important;
+  min-width: 0 !important;
+  color: #eaffff !important;
+  font-size: 11.5px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: .01em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.app .topUpdateRibbonActions,
+.topUpdateRibbonActions{
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 100% !important;
+}
+
+.app .topUpdateRibbon .updateReleaseLinkV486,
+.topUpdateRibbon .updateReleaseLinkV486{
+  height: 22px !important;
+  min-height: 22px !important;
+  padding: 0 9px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: #dffaff !important;
+  background: rgba(255,255,255,.09) !important;
+  box-shadow: none !important;
+  font-size: 10.5px !important;
+  font-weight: 850 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updatePrimaryButton{
+  height: 23px !important;
+  min-height: 23px !important;
+  padding: 0 11px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  color: #081015 !important;
+  background: #bdefff !important;
+  box-shadow: none !important;
+  font-size: 10.5px !important;
+  font-weight: 950 !important;
+}
+
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updateToastClose{
+  width: 23px !important;
+  height: 23px !important;
+  min-width: 23px !important;
+  color: rgba(234,255,255,.64) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Reduce outline noise: only active/important areas should look outlined. */
+.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
+  border-color: var(--outline-calm-v486) !important;
+}
+
+.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
+  border-color: color-mix(in oklab, rgba(255,255,255,.075) 62%, var(--lt-accent) 38%) !important;
+}
+
+.app :is(.active,.playing,.selected):is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318){
+  border-color: var(--outline-active-v486) !important;
+}
+
+@media (max-width: 760px){
+  .app .topUpdateRibbonText h3,
+  .topUpdateRibbonText h3{
+    font-size: 10.5px !important;
+  }
+
+  .app .topUpdateRibbon .updateReleaseLinkV486,
+  .topUpdateRibbon .updateReleaseLinkV486{
+    display: none !important;
+  }
+}
+/* end localtify v486 */
+
+/* localtify v487 — final ribbon, header stars, light contrast, outline cleanup */
+.app{
+  --outline-calm-v487: color-mix(in oklab, rgba(255,255,255,.05) 84%, var(--lt-accent) 16%) !important;
+  --outline-hover-v487: color-mix(in oklab, rgba(255,255,255,.065) 68%, var(--lt-accent) 32%) !important;
+  --outline-active-v487: color-mix(in oklab, rgba(255,255,255,.06) 30%, var(--lt-accent) 70%) !important;
+}
+
+.app .content > .headerBar{
+  min-height: 98px !important;
+  padding: 27px 22px 13px !important;
+}
+
+.app .headerText{
+  padding-top: 4px !important;
+}
+
+.app .headerTools.compactHeaderTools{
+  padding-top: 9px !important;
+}
+
+/* Star field: individual dot positions shift instead of one flat layer sliding. */
+.app .content > .headerBar::before{
+  opacity: .70 !important;
+  filter: none !important;
+  background-size:
+    101% 101%,
+    103% 101%,
+    98% 103%,
+    104% 100%,
+    100% 104%,
+    105% 101%,
+    99% 105%,
+    103% 102%,
+    101% 99%,
+    106% 103% !important;
+  background-position:
+    0% 0%,
+    6% 12%,
+    -4% 8%,
+    8% -6%,
+    -6% -10%,
+    4% 10%,
+    -8% 6%,
+    7% -8%,
+    -5% 4%,
+    0% 0% !important;
+  animation: localtifyHeaderScatterV487 8s ease-in-out infinite alternate !important;
+}
+
+.app .content > .headerBar::after{
+  opacity: .44 !important;
+  background-size:
+    122% 100%,
+    110% 104%,
+    118% 102%,
+    112% 106%,
+    126% 100%,
+    100% 100% !important;
+  animation: localtifyHeaderScatterSoftV487 12s ease-in-out infinite alternate !important;
+}
+
+@keyframes localtifyHeaderScatterV487{
+  0%{
+    opacity: .34;
+    background-position: 0% 0%, 6% 12%, -4% 8%, 8% -6%, -6% -10%, 4% 10%, -8% 6%, 7% -8%, -5% 4%, 0% 0%;
+    transform: translate3d(0,0,0);
+  }
+  24%{
+    opacity: .90;
+    background-position: 5% -4%, -8% 9%, 9% -8%, -5% 9%, 8% 5%, -9% -6%, 6% 11%, -7% 6%, 8% -8%, -3% 4%;
+    transform: translate3d(1px,-1px,0);
+  }
+  50%{
+    opacity: .46;
+    background-position: -5% 6%, 10% -7%, 4% 11%, -10% 3%, 6% -9%, 8% 8%, -4% -7%, 9% 9%, -8% 3%, 5% -6%;
+    transform: translate3d(-1px,1px,0);
+  }
+  78%{
+    opacity: .96;
+    background-position: 9% -8%, -9% -4%, 11% 4%, 6% 11%, -11% 6%, 3% -10%, 9% -3%, -8% 10%, 4% -9%, -6% 8%;
+    transform: translate3d(2px,0,0);
+  }
+  100%{
+    opacity: .40;
+    background-position: -3% 8%, 5% -9%, -7% -7%, 11% 7%, -5% 10%, 10% -8%, -10% 2%, 6% -11%, -2% 9%, 8% -3%;
+    transform: translate3d(0,-1px,0);
+  }
+}
+
+@keyframes localtifyHeaderScatterSoftV487{
+  0%{
+    opacity: .20;
+    background-position: 0% 0%, -8% 10%, 6% -8%, -10% -4%, 8% 8%, 0% 0%;
+  }
+  44%{
+    opacity: .52;
+    background-position: 10% -6%, 4% 8%, -9% 6%, 8% -10%, -5% 4%, 12% 0%;
+  }
+  100%{
+    opacity: .26;
+    background-position: -7% 6%, 9% -8%, -4% -9%, 6% 10%, 10% -5%, -12% 0%;
+  }
+}
+
+/* Update notice is a real top strip, not a floating card. */
+.app .titleBar,
+.titleBar{
+  overflow: visible !important;
+}
+
+.app .topUpdateRibbonLayer,
+.topUpdateRibbonLayer{
+  position: fixed !important;
+  top: 36px !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  width: 100vw !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  z-index: 4000 !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.app .updateYukariPeek,
+.updateYukariPeek{
+  display: none !important;
+}
+
+.app .topUpdateRibbon,
+.topUpdateRibbon,
+.app .topUpdateRibbon.updateToastCard,
+.topUpdateRibbon.updateToastCard{
+  pointer-events: auto !important;
+  position: relative !important;
+  width: 100vw !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 0 13px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background:
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .24), rgba(20, 76, 102, .96) 38%, rgba(10, 24, 35, .96)) !important;
+  color: #eaffff !important;
+  box-shadow:
+    0 7px 20px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.09),
+    inset 0 -1px 0 rgba(255,255,255,.13) !important;
+  backdrop-filter: blur(10px) saturate(128%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(128%) !important;
+  overflow: hidden !important;
+}
+
+.app .topUpdateRibbonMain,
+.topUpdateRibbonMain{
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  min-width: 0 !important;
+  height: 100% !important;
+}
+
+.app .topUpdateRibbonIcon,
+.topUpdateRibbonIcon{
+  width: 17px !important;
+  height: 17px !important;
+  min-width: 17px !important;
+  color: #bdefff !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .topUpdateRibbonText,
+.topUpdateRibbonText{
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  overflow: hidden !important;
+}
+
+.app .topUpdateRibbonText .eyebrow,
+.topUpdateRibbonText .eyebrow{
+  display: none !important;
+}
+
+.app .topUpdateRibbonText h3,
+.topUpdateRibbonText h3{
+  margin: 0 !important;
+  min-width: 0 !important;
+  color: #eaffff !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: .01em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.app .topUpdateRibbonRight,
+.topUpdateRibbonRight,
+.app .topUpdateRibbonActions,
+.topUpdateRibbonActions{
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 100% !important;
+}
+
+.app .topUpdateRibbonMeta,
+.topUpdateRibbonMeta,
+.app .topUpdateRibbon .updateVersionPill,
+.topUpdateRibbon .updateVersionPill,
+.app .topUpdateRibbon .updateSafePill,
+.topUpdateRibbon .updateSafePill{
+  display: none !important;
+}
+
+.app .topUpdateRibbon .updateReleaseLinkV486,
+.topUpdateRibbon .updateReleaseLinkV486{
+  height: 22px !important;
+  min-height: 22px !important;
+  padding: 0 9px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: #dffaff !important;
+  background: rgba(255,255,255,.10) !important;
+  box-shadow: none !important;
+  font-size: 10.5px !important;
+  font-weight: 850 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updatePrimaryButton{
+  height: 23px !important;
+  min-height: 23px !important;
+  padding: 0 11px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  color: #081015 !important;
+  background: #bdefff !important;
+  box-shadow: none !important;
+  font-size: 10.5px !important;
+  font-weight: 950 !important;
+}
+
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updateToastClose{
+  width: 23px !important;
+  height: 23px !important;
+  min-width: 23px !important;
+  color: rgba(234,255,255,.68) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Fewer outlines globally. Accent outline is mostly active/important only. */
+.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
+  border-color: var(--outline-calm-v487) !important;
+}
+
+.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
+  border-color: var(--outline-hover-v487) !important;
+}
+
+.app :is(.active,.playing,.selected):is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318){
+  border-color: var(--outline-active-v487) !important;
+}
+
+/* Light mode app shell readability. */
+.app[data-theme="mono"]{
+  background:
+    linear-gradient(rgba(55,61,87,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(55,61,87,.030) 1px, transparent 1px),
+    var(--lt-bg) !important;
+  background-size: 42px 42px !important;
+  color: var(--lt-text) !important;
+}
+
+.app[data-theme="mono"] .content{
+  background: transparent !important;
+  color: var(--lt-text) !important;
+}
+
+.app[data-theme="mono"] .content > .headerBar{
+  border-bottom-color: rgba(55,61,87,.14) !important;
+  background: linear-gradient(180deg, rgba(246,248,252,.80), rgba(246,248,252,.38)) !important;
+}
+
+.app[data-theme="mono"] .content > .headerBar::before,
+.app[data-theme="mono"] .content > .headerBar::after{
+  opacity: .16 !important;
+}
+
+.app[data-theme="mono"] .search,
+.app[data-theme="mono"] .searchEasterWrap .search{
+  color: var(--lt-text) !important;
+  border-color: rgba(55,61,87,.18) !important;
+  background: rgba(255,255,255,.76) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.58), 0 8px 18px rgba(55,61,87,.09) !important;
+}
+
+.app[data-theme="mono"] .search::placeholder,
+.app[data-theme="mono"] .searchEasterWrap .search::placeholder{
+  color: rgba(52,58,85,.58) !important;
+}
+/* end localtify v487 */
