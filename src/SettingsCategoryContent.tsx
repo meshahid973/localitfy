@@ -1,5 +1,6 @@
 ﻿import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
+const SETTINGS_INFO_MASCOT_SRC = new URL("./assets/info-state.png", import.meta.url).href;
 type ThemeId = string;
 type DownloadQuality = "best" | "320" | "256" | "192";
 type DownloadFormat = "mp3" | "flac" | "wav";
@@ -572,11 +573,17 @@ return (
           </div>
         </div>
 
-        <div className="settingsPanelCard settingsFocusPanelV491 settingsAppearanceAdvancedCalloutV492">
-          <div className="settingsPanelHeader">
-            <div>
+        <div className="settingsPanelCard settingsFocusPanelV491 settingsAppearanceAdvancedCalloutV492 settingsAppearanceInfoCalloutV500">
+          <div className="settingsPanelHeader settingsAppearanceInfoInnerV500">
+            <img
+              className="settingsInfoMascotV500"
+              src={SETTINGS_INFO_MASCOT_SRC}
+              alt=""
+              draggable={false}
+              aria-hidden="true"
+            />
+            <div className="settingsAppearanceInfoCopyV500">
               <strong>looking for the other apperance options? go to advanced!</strong>
-              <span>Layout, card behavior, sidebar, glow, motion, cover repair, Linux notes, diagnostics, and reset tools are kept in Advanced now.</span>
             </div>
             <button
               className="settingsActionButton settingsPrimaryAction"
