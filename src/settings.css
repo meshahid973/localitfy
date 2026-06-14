@@ -8584,3 +8584,51 @@ body.localitfyThemePainting .toggleRow{
   border-color: rgba(55,61,87,.24) !important;
 }
 /* end localtify v487 */
+
+/* localtify v488 — remove settings outline noise */
+.settingsContent :is(
+  .settingsPanel,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsSection,
+  .settingsGroup,
+  .themePreviewCard,
+  .settingsColorPanel,
+  .settingsBlock
+){
+  border-color: rgba(255,255,255,.045) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 12px 28px rgba(0,0,0,.14) !important;
+}
+
+.settingsContent :is(.settingsPanel,.settingsPageCard,.settingsPanelCard,.themePreviewCard):hover{
+  border-color: rgba(255,255,255,.065) !important;
+}
+
+.settingsContent :is(.settingsPanel,.settingsPageCard,.settingsPanelCard,.themePreviewCard)::before,
+.settingsContent :is(.settingsPanel,.settingsPageCard,.settingsPanelCard,.themePreviewCard)::after{
+  opacity: .18 !important;
+}
+
+.settingsContent :is(.settingsPanel,.settingsPageCard,.settingsPanelCard,.themePreviewCard).active{
+  border-color: rgba(var(--lt-accent-rgb), .22) !important;
+}
+
+.app[data-theme="mono"] .settingsContent :is(
+  .settingsPanel,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .settingsSection,
+  .settingsGroup,
+  .themePreviewCard,
+  .settingsColorPanel,
+  .settingsBlock
+){
+  border-color: rgba(55,61,87,.10) !important;
+  background: rgba(246,248,252,.74) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.62),
+    0 12px 28px rgba(55,61,87,.07) !important;
+}
+/* end localtify v488 */

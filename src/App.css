@@ -13066,3 +13066,142 @@ body.isResizingPlayer .app *{
   color: rgba(52,58,85,.58) !important;
 }
 /* end localtify v487 */
+
+/* localtify v488 — black update ribbon + search clipping fix + calmer header */
+.app .content > .headerBar{
+  min-height: 102px !important;
+  padding: 28px 22px 15px !important;
+  overflow: visible !important;
+}
+
+.app .headerText{
+  padding-top: 7px !important;
+}
+
+.app .headerTools.compactHeaderTools{
+  padding-top: 13px !important;
+  overflow: visible !important;
+}
+
+.app .searchEasterWrap{
+  width: min(100%, 438px) !important;
+  padding: 4px !important;
+  margin: -4px -4px 0 0 !important;
+  overflow: visible !important;
+  contain: layout style !important;
+}
+
+.app .searchEasterWrap::before{
+  inset: 4px !important;
+  opacity: .58 !important;
+}
+
+.app .search,
+.app .searchEasterWrap .search{
+  min-height: 42px !important;
+  border-color: rgba(255,255,255,.18) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
+    rgba(8, 8, 14, .92) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.050),
+    0 7px 16px rgba(0,0,0,.16) !important;
+}
+
+.app .search:hover,
+.app .searchEasterWrap .search:hover,
+.app .search:focus,
+.app .searchEasterWrap .search:focus{
+  transform: none !important;
+  border-color: rgba(var(--lt-accent-rgb), .50) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.060),
+    0 0 0 2px rgba(var(--lt-accent-rgb), .13),
+    0 8px 18px rgba(0,0,0,.18) !important;
+}
+
+/* Update ribbon: black, cleaner, no release link. */
+.app .topUpdateRibbonLayer,
+.topUpdateRibbonLayer{
+  top: 36px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  z-index: 4100 !important;
+}
+
+.app .topUpdateRibbon,
+.topUpdateRibbon,
+.app .topUpdateRibbon.updateToastCard,
+.topUpdateRibbon.updateToastCard{
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(255,255,255,.065) !important;
+  border-bottom: 1px solid rgba(var(--lt-accent-rgb), .34) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.010)),
+    #050507 !important;
+  color: rgba(255,255,255,.92) !important;
+  box-shadow:
+    0 7px 22px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.055) !important;
+  backdrop-filter: blur(10px) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(118%) !important;
+}
+
+.app .topUpdateRibbon::before,
+.topUpdateRibbon::before{
+  background:
+    radial-gradient(circle at 0% 50%, rgba(var(--lt-accent-rgb), .18), transparent 34%),
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .08), transparent 48%) !important;
+  opacity: .72 !important;
+}
+
+.app .topUpdateRibbonText h3,
+.topUpdateRibbonText h3{
+  color: rgba(255,255,255,.92) !important;
+  font-size: 11.5px !important;
+}
+
+.app .topUpdateRibbonIcon,
+.topUpdateRibbonIcon{
+  color: rgba(var(--lt-accent-rgb), .95) !important;
+}
+
+.app .topUpdateRibbon .updateReleaseLinkV486,
+.topUpdateRibbon .updateReleaseLinkV486{
+  display: none !important;
+}
+
+.app .topUpdateRibbon .updatePrimaryButton,
+.topUpdateRibbon .updatePrimaryButton{
+  height: 23px !important;
+  min-height: 23px !important;
+  color: #06100d !important;
+  background: color-mix(in oklab, var(--lt-accent) 82%, #ffffff 18%) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .topUpdateRibbon .updateToastClose,
+.topUpdateRibbon .updateToastClose{
+  color: rgba(255,255,255,.58) !important;
+}
+
+/* Light mode search still readable and unclipped. */
+.app[data-theme="mono"] .searchEasterWrap{
+  overflow: visible !important;
+}
+
+.app[data-theme="mono"] .search,
+.app[data-theme="mono"] .searchEasterWrap .search{
+  color: var(--lt-text) !important;
+  border-color: rgba(55,61,87,.19) !important;
+  background: rgba(255,255,255,.86) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.65),
+    0 8px 18px rgba(55,61,87,.09) !important;
+}
+/* end localtify v488 */

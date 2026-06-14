@@ -3182,3 +3182,49 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
   stroke: #ffffff !important;
 }
 /* end localtify v487 */
+
+/* localtify v488 — final play icon centering */
+.playerBar .circleButton.main{
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+}
+
+.playerBar .circleButton.main .playerControlIcon,
+.playerBar .circleButton.main svg{
+  position: relative !important;
+  display: block !important;
+  margin: 0 !important;
+}
+
+.playerBar .circleButton.main .playIcon{
+  width: 20px !important;
+  height: 20px !important;
+  color: #050505 !important;
+  stroke: #050505 !important;
+  fill: #050505 !important;
+  fill-opacity: 1 !important;
+  stroke-width: 0 !important;
+  transform: translate3d(1px, 0, 0) !important;
+}
+
+.playerBar .circleButton.main .pauseIcon{
+  width: 21px !important;
+  height: 21px !important;
+  color: #050505 !important;
+  stroke: #050505 !important;
+  fill: none !important;
+  stroke-width: 3 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.app[data-theme="mono"] .playerBar .circleButton.main .playIcon{
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.app[data-theme="mono"] .playerBar .circleButton.main .pauseIcon{
+  stroke: #ffffff !important;
+}
+/* end localtify v488 */

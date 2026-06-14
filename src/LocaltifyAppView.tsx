@@ -4792,7 +4792,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
           onDownload={askUpdaterToDownload}
           onInstall={askUpdaterToInstall}
           onCheckAgain={manualUpdateCheck}
-          onOpenRelease={() => window.open(LOCALITFY_DOWNLOAD_URL, "_blank", "noopener,noreferrer")}
           onDismiss={() => setUpdatePrompt(defaultUpdatePrompt)}
         />
       </TitleBar>
