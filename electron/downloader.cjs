@@ -26,7 +26,10 @@ const MEDIA_EXTENSIONS = new Set([
 
 function initDownloader({ userDataPath, ffmpegPath, getCookiesFile }) {
   _userDataPath = userDataPath;
-  if (ffmpegPath) _ffmpegPath = ffmpegPath;
+  if (ffmpegPath) {
+    _ffmpegPath = ffmpegPath;
+    try { ffmpeg.setFfmpegPath(_ffmpegPath); } catch { /* keep fallback */ }
+  }
   if (getCookiesFile) _getCookiesFile = getCookiesFile;
 }
 
@@ -69,6 +72,14 @@ async function getYtDlp() {
     console.log("[localitfy] downloading yt-dlp binary...");
     await YTDlpWrap.downloadFromGithub(binaryPath);
     console.log("[localitfy] yt-dlp ready at", binaryPath);
+  }
+
+  if (process.platform !== "win32") {
+    try {
+      fs.chmodSync(binaryPath, 0o755);
+    } catch (error) {
+      console.log("[localitfy] yt-dlp chmod warning", error?.message || error);
+    }
   }
 
   _ytDlpWrap = new YTDlpWrap(binaryPath);

@@ -2105,6 +2105,66 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   display: none !important;
 }
 
+.app .homeFreshRail,
+.app .homeAlbumGrid,
+.app .homeSongList{
+  contain: layout paint style !important;
+}
+
+.app .homeFreshCard,
+.app .homeListenCard,
+.app .homeAlbumCard,
+.app .songRow,
+.app .libraryRow{
+  content-visibility: auto;
+  contain-intrinsic-size: 92px 132px;
+}
+
+/* Keep full animation/motion, but make paint ownership clearer. */
+.app .homeFreshCard :is(img, .coverAura),
+.app .homeListenCard :is(img, .coverAura),
+.app .homeAlbumCard :is(img, .coverAura),
+.app .songRow :is(img, .coverAura),
+.app .libraryRow :is(img, .coverAura){
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.app .homeFreshRail,
+.app .homeListenGrid,
+.app .homeAlbumGrid,
+.app .libraryList,
+.app .albumShelfGridV318,
+.app .playlistTrackList,
+.app .coverGalleryGridCleanOnly{
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 720px;
+  contain: layout paint style;
+}
+
+.app .homeFreshCard,
+.app .homeListenCard,
+.app .homeAlbumCard,
+.app .songRow,
+.app .libraryRow,
+.app .playlistTrackRow,
+.app .playlistSongRow,
+.app .albumCardV318,
+.app .coverGalleryCardCleanOnly{
+  content-visibility: auto;
+  contain-intrinsic-size: 120px 150px;
+  contain: layout paint style;
+}
+
+.app :is(.homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumCardV318, .coverGalleryCardCleanOnly) img{
+  content-visibility: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.app :is(.localtifyProximityTarget, .homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
+  will-change: auto;
+}
 
 .inlineGlyphIcon,
 .emptyCoverIcon,
@@ -2131,3 +2191,87 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   background: currentColor;
 }
 
+/* localtify v483 — Linux desktop polish without reducing blur */
+.app[data-platform="linux"]{
+  --linux-titlebar-height-v483: 39px;
+  --linux-scrollbar-size-v483: 11px;
+}
+
+.app[data-platform="linux"] .titleBar{
+  min-height: var(--linux-titlebar-height-v483) !important;
+  height: var(--linux-titlebar-height-v483) !important;
+  border-bottom-color: rgba(255,255,255,.09) !important;
+}
+
+.app[data-platform="linux"] .titleDrag{
+  min-width: 0 !important;
+  padding-left: 13px !important;
+  gap: 8px !important;
+}
+
+.app[data-platform="linux"] .titleLogoImage{
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.app[data-platform="linux"] .windowButtons button{
+  min-width: 46px !important;
+  width: 46px !important;
+  color: rgba(255,255,255,.76) !important;
+  display: inline-grid !important;
+  place-items: center !important;
+}
+
+.app[data-platform="linux"] .windowButtons button:hover{
+  color: rgba(255,255,255,.94) !important;
+}
+
+.app[data-platform="linux"] :is(
+  .content,
+  .sidebar,
+  .pageTransition,
+  .songList,
+  .libraryList,
+  .albumTrackListV318,
+  .downloadQueueList,
+  .spotifyTrackItems,
+  .playlistTrackList,
+  .settingsContent
+){
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--lt-accent-rgb), .34) rgba(255,255,255,.055);
+}
+
+.app[data-platform="linux"] :is(
+  .songRow,
+  .libraryRow,
+  .albumTrackRowV318,
+  .downloadQueueItem,
+  .spotifyTrackItem,
+  .playlistTrackRow
+){
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
+}
+
+.app[data-platform="linux"] :is(
+  .songRow,
+  .libraryRow,
+  .albumTrackRowV318,
+  .downloadQueueItem,
+  .spotifyTrackItem,
+  .playlistTrackRow
+):not(:hover):not(.active):not(.playing):not(:focus-visible){
+  will-change: auto !important;
+}
+
+.app[data-platform="linux"] :is(input, textarea, button, select){
+  font-family: inherit;
+}
+
+.app[data-platform="linux"] .downloadTextareaV031,
+.app[data-platform="linux"] .spotifyUrlInput{
+  caret-color: rgba(var(--lt-accent-rgb), .95);
+}
+
+/* end localtify v483 Linux desktop polish */

@@ -230,6 +230,36 @@ const LEGACY_APP_DATA_NAME = "localitfy";
 const SQLITE_FILE_NAME = "localitfy.sqlite";
 const APP_USER_MODEL_ID = "com.meshahid973.localitfy";
 
+const IS_LINUX = process.platform === "linux";
+
+function getLinuxSessionInfo() {
+  const env = process.env || {};
+  return {
+    isLinux: IS_LINUX,
+    desktop: String(env.XDG_CURRENT_DESKTOP || env.DESKTOP_SESSION || "").trim(),
+    sessionType: String(env.XDG_SESSION_TYPE || "").trim(),
+    waylandDisplay: String(env.WAYLAND_DISPLAY || "").trim(),
+    x11Display: String(env.DISPLAY || "").trim(),
+    isWayland: IS_LINUX && (String(env.XDG_SESSION_TYPE || "").toLowerCase() === "wayland" || Boolean(env.WAYLAND_DISPLAY)),
+    isX11: IS_LINUX && (String(env.XDG_SESSION_TYPE || "").toLowerCase() === "x11" || Boolean(env.DISPLAY)),
+    isAppImage: IS_LINUX && Boolean(env.APPIMAGE),
+    appImagePath: IS_LINUX ? String(env.APPIMAGE || "") : "",
+    isFlatpak: IS_LINUX && Boolean(env.FLATPAK_ID || env.container === "flatpak"),
+    isSnap: IS_LINUX && Boolean(env.SNAP || env.SNAP_NAME)
+  };
+}
+
+function shouldUseLinuxOzoneAuto() {
+  return IS_LINUX && process.env.LOCALTIFY_DISABLE_LINUX_OZONE_AUTO !== "1";
+}
+
+function shouldEnableLinuxTransparentVisuals() {
+  // Transparent native visuals are opt-in on Linux. Most compositors are more
+  // stable with an opaque Electron surface while Localtify draws blur in CSS.
+  return IS_LINUX && process.env.LOCALTIFY_ENABLE_LINUX_TRANSPARENT_VISUALS === "1";
+}
+
+
 function uniquePaths(items) {
   const seen = new Set();
   return items.filter((item) => {
@@ -647,7 +677,27 @@ function getAppIconPathCandidates() {
   const appPath = (() => {
     try { return app.getAppPath(); } catch { return ""; }
   })();
+  const linuxPngCandidates = IS_LINUX ? [
+    safePathJoin(process.cwd(), "build", "icon.png"),
+    safePathJoin(process.cwd(), "build", "icons", "512x512.png"),
+    safePathJoin(process.cwd(), "build", "icons", "256x256.png"),
+    safePathJoin(__dirname, "build", "icon.png"),
+    safePathJoin(__dirname, "..", "build", "icon.png"),
+    safePathJoin(__dirname, "..", "build", "icons", "512x512.png"),
+    safePathJoin(appPath, "build", "icon.png"),
+    safePathJoin(appPath, "build", "icons", "512x512.png"),
+    safePathJoin(process.resourcesPath || "", "build", "icon.png"),
+    safePathJoin(process.resourcesPath || "", "app", "build", "icon.png"),
+    safePathJoin(process.resourcesPath || "", "app", "build", "icons", "512x512.png"),
+    safePathJoin(process.resourcesPath || "", "app.asar.unpacked", "build", "icon.png"),
+    safePathJoin(process.resourcesPath || "", "assets", "icon.png"),
+    safePathJoin(process.resourcesPath || "", "icon.png"),
+    safePathJoin(process.cwd(), "assets", "icon.png"),
+    safePathJoin(process.cwd(), "public", "logo.png")
+  ] : [];
+
   return [
+    ...linuxPngCandidates,
     safePathJoin(process.cwd(), "build", "icon.ico"),
     safePathJoin(__dirname, "build", "icon.ico"),
     safePathJoin(__dirname, "..", "build", "icon.ico"),
@@ -1113,8 +1163,15 @@ function configureLocaltifyChromiumPerformance() {
     }
   }
 
-  if (process.platform === "linux") {
-    add("enable-transparent-visuals");
+  if (IS_LINUX) {
+    // Linux/AppImage hardening:
+    // - /dev/shm can be tiny on some systems, so avoid renderer crashes there.
+    // - basic password store avoids keyring prompts during normal local playback.
+    // - ozone auto lets Electron choose Wayland/X11 without forcing one backend.
+    add("disable-dev-shm-usage");
+    add("password-store", "basic");
+    if (shouldUseLinuxOzoneAuto()) add("ozone-platform-hint", "auto");
+    if (shouldEnableLinuxTransparentVisuals()) add("enable-transparent-visuals");
   }
 
   return {
@@ -1122,6 +1179,7 @@ function configureLocaltifyChromiumPerformance() {
     forceOpenGl,
     forceAngleGl,
     platform: process.platform,
+    linux: getLinuxSessionInfo(),
     switches
   };
 }
@@ -4126,6 +4184,7 @@ async function getLocaltifyPerformanceStatus() {
     platform: process.platform,
     arch: process.arch,
     isPackaged: Boolean(app.isPackaged),
+    linux: getLinuxSessionInfo(),
     gpuTuning: LOCALTIFY_CHROMIUM_PERFORMANCE,
     gpuFeatureStatus: getLocaltifyGpuFeatureStatus(),
     gpuInfo,
@@ -4349,6 +4408,7 @@ function createWindow() {
     minHeight: MAIN_WINDOW_MIN_HEIGHT,
     show: false,
     frame: false,
+    icon: getAppIconPath() || undefined,
     // V424: do not create the main window as natively transparent. On Windows
     // login/startup, transparent windows can appear as a permanent white/blank
     // compositor surface before React paints. CSS still handles the app glass.
@@ -4426,10 +4486,15 @@ function createWindow() {
   if (process.env.LOCALITFY_DEBUG === "1") {
     openLocaltifyDevTools(mainWindow, { mode: "detach" });
   }
-  mainWindow.once("ready-to-show", () => {
+  let mainWindowShownOnce = false;
+  const showMainWindowWhenReady = () => {
+    if (mainWindowShownOnce || !mainWindow || mainWindow.isDestroyed()) return;
+    mainWindowShownOnce = true;
     repairMainWindowBounds(mainWindow, { center: true });
     mainWindow.show();
-  });
+  };
+  mainWindow.once("ready-to-show", showMainWindowWhenReady);
+  setTimeout(showMainWindowWhenReady, IS_LINUX ? 2200 : 3600);
   mainWindow.on("closed", () => {
     clearRendererLoadWatchdog();
     mainWindow = null;
@@ -4866,6 +4931,7 @@ app.whenReady().then(async () => {
       playlists: getPlaylists(),
       windowsIntegration: getStartWithWindowsStatus(),
       windowTranslucency: getSavedWindowTranslucencySettings(),
+      platform: { name: process.platform, arch: process.arch, linux: getLinuxSessionInfo() },
       database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: LEGACY_APP_DATA_NAME },
       discord: getDiscordStatus()
     };
@@ -5171,8 +5237,17 @@ app.whenReady().then(async () => {
   });
   ipcMain.handle("download:open-folder", async (_event, folder) => {
     const target = getDownloadDirectory(folder);
-    await shell.openPath(target);
-    return true;
+    try {
+      const openError = await shell.openPath(target);
+      if (openError) {
+        console.log("[localtify open folder error]", openError, target);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log("[localtify open folder exception]", error?.message || error, target);
+      return false;
+    }
   });
 
   ipcMain.handle("song:patch", async (_event, id, patch) => {

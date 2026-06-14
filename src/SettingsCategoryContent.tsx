@@ -427,14 +427,15 @@ function detectSettingsPlatform(): Required<PlatformInfoLike> {
       releaseLabel: "AppImage / RPM / DEB",
       startupSettingSupported: false,
       desktopControlsLabel: "Linux desktop controls",
-      desktopControlsHelp: "Tray and media keys work where your Linux desktop environment exposes them.",
+      desktopControlsHelp: "Tray and media keys work where your Linux desktop environment exposes them. If a desktop blocks global media keys, the in-app player and tray still work.",
       startupSettingLabel: "Linux autostart",
-      startupSettingHelp: "Hidden in this release. Linux autostart will use a proper desktop-entry flow later.",
+      startupSettingHelp: "Linux autostart is desktop-specific, so Localtify keeps this manual for now instead of writing risky startup files.",
       linuxInstallNotes: [
-        "AppImage: right click > Properties > Allow executing file as program, or run chmod +x Localtify-0.4.0-x86_64.AppImage.",
-        "If the AppImage does not open, install FUSE/libfuse2 for your distro, then run it again.",
-        "RPM: for Fedora, openSUSE, and RHEL-style distros.",
-        "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
+        "AppImage: run chmod +x Localtify-0.4.0-x86_64.AppImage, then open it.",
+        "If AppImage will not launch, install FUSE/libfuse2 for your distro and try again.",
+        "DEB: best for Ubuntu, Debian, Linux Mint, and related distros.",
+        "RPM: best for Fedora, openSUSE, and RHEL-style distros.",
+        "Wayland/X11: Localtify uses an opaque native window and CSS-drawn blur for better compositor stability."
       ]
     };
   }
