@@ -7,7 +7,48 @@ import UpdateIsland from "./app/UpdateIsland";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FastAverageColor } from "fast-average-color";
 
-const EMPTY_STATE_IMAGE_SRC = new URL("./assets/empty-state.png", import.meta.url).href;
+const MASCOT_STATE_IMAGE_SRC = {
+  empty: new URL("./assets/empty-state.png", import.meta.url).href,
+  happy: new URL("./assets/happy-state.png", import.meta.url).href,
+  question: new URL("./assets/question-state.png", import.meta.url).href,
+  info: new URL("./assets/info-state.png", import.meta.url).href,
+  warning: new URL("./assets/warning-state.png", import.meta.url).href,
+  danger: new URL("./assets/danger-state.png", import.meta.url).href,
+  error: new URL("./assets/error-state.png", import.meta.url).href,
+  loading: new URL("./assets/loading-state.png", import.meta.url).href,
+  confused: new URL("./assets/question-state.png", import.meta.url).href,
+  neutral: new URL("./assets/empty-state.png", import.meta.url).href
+} as const;
+type MascotStateKey = keyof typeof MASCOT_STATE_IMAGE_SRC;
+
+function MascotStateArt({
+  state = "neutral",
+  className = ""
+}: {
+  state?: MascotStateKey;
+  className?: string;
+}) {
+  const src = MASCOT_STATE_IMAGE_SRC[state] || MASCOT_STATE_IMAGE_SRC.neutral;
+  return (
+    <img
+      className={`mascotStateArtV496 mascotState-${state} ${className}`.trim()}
+      src={src}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+      aria-hidden="true"
+    />
+  );
+}
+
+function mascotStateForToast(kind?: string): MascotStateKey {
+  if (kind === "success") return "happy";
+  if (kind === "error") return "error";
+  if (kind === "work") return "loading";
+  return "info";
+}
+
 
 function WindowMinimizeIcon() {
   return (
@@ -2589,6 +2630,14 @@ type CoverImagePriority = "auto" | "high" | "low";
 export 
 type LocaltifyStateCardTone = "info" | "warning" | "error" | "success";
 
+function mascotStateForTone(tone: LocaltifyStateCardTone, cute = false): MascotStateKey {
+  if (tone === "success") return "happy";
+  if (tone === "warning") return "warning";
+  if (tone === "error") return "error";
+  return cute ? "empty" : "info";
+}
+
+
 function LocaltifyStateCard({
   tone = "info",
   eyebrow,
@@ -2598,7 +2647,8 @@ function LocaltifyStateCard({
   actions,
   centered = false,
   cute = false,
-  badge = "♪"
+  badge = "♪",
+  mascotState
 }: {
   tone?: LocaltifyStateCardTone;
   eyebrow: string;
@@ -2609,14 +2659,16 @@ function LocaltifyStateCard({
   centered?: boolean;
   cute?: boolean;
   badge?: string;
+  mascotState?: MascotStateKey;
 }) {
+  const resolvedMascotState = mascotState || mascotStateForTone(tone, cute);
   return (
     <div className={`localtifyStateCardV373 ${tone}${centered ? " localtifyStateCardCenteredV466" : ""}${cute ? " localtifyStateCardCuteV466" : ""}`}>
       {cute ? (
         <>
           <div className="localtifyEmptyArtV466" aria-hidden="true">
             <span className="localtifyEmptyImageShellV466">
-              <img src={EMPTY_STATE_IMAGE_SRC} alt="" draggable={false} />
+              <MascotStateArt state={resolvedMascotState} className="localtifyEmptyMascotV496" />
             </span>
           </div>
           <p className="localtifyEmptyCaptionV467">my team couldn't find anything here!!</p>
@@ -3439,9 +3491,12 @@ export const VirtualSongRows = memo(function VirtualSongRows({
         onDragLeave={onAreaDragLeave}
         onDrop={onAreaDrop}
       >
-        <div className="emptyState">
-          <strong>import songs to fill this area</strong>
-          <p>import some music and this area will wake up.</p>
+        <div className="emptyState mascotEmptyStateV496">
+          <MascotStateArt state="empty" className="emptyStateMascotV496" />
+          <span className="mascotEmptyCopyV496">
+            <strong>import songs to fill this area</strong>
+            <p>import some music and this area will wake up.</p>
+          </span>
         </div>
       </div>
     );
@@ -3745,12 +3800,15 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
   if (!selectedPlaylistId || !list.length) {
     return (
       <div
-        className={`playlistEmptyState ${selectedPlaylistId ? "playlistDropEmpty" : ""}`}
+        className={`playlistEmptyState playlistMascotEmptyV496 ${selectedPlaylistId ? "playlistDropEmpty" : ""}`}
         onDragOver={handleEmptyDragOver}
         onDrop={handleEmptyDrop}
       >
-        <strong>{selectedPlaylistId ? "This playlist is empty" : "Choose a playlist"}</strong>
-        <p>{selectedPlaylistId ? "Drop a song here, or use the + button on any song to add music." : "Your playlist songs will show up here."}</p>
+        <MascotStateArt state={selectedPlaylistId ? "question" : "empty"} className="playlistEmptyMascotV496" />
+        <span className="mascotEmptyCopyV496">
+          <strong>{selectedPlaylistId ? "This playlist is empty" : "Choose a playlist"}</strong>
+          <p>{selectedPlaylistId ? "Drop a song here, or use the + button on any song to add music." : "Your playlist songs will show up here."}</p>
+        </span>
       </div>
     );
   }
@@ -4716,6 +4774,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const homeHeroCoverSaturation = clamp(1.04 + (homeHeroCoverBrightness - 1) * 0.14, 1, 1.14);
   const homeHeroCoverGlowBrightness = clamp(0.72 + (homeHeroCoverBrightness - 1) * 0.34, 0.62, 0.92);
   const platformId = String((platformInfo as any)?.id || "unknown").toLowerCase();
+  const mascotDebugMode =
+    typeof window !== "undefined" &&
+    window.localStorage.getItem("localtify:mascotDebug") === "1";
 
   return (
     <main
@@ -4842,7 +4903,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       ) : null}
 
       {appToast ? (
-        <div className={`appToast ${appToast.kind}`} key={appToast.id} role="status">
+        <div className={`appToast ${appToast.kind} appToastMascotHostV496`} key={appToast.id} role="status">
+          <MascotStateArt state={mascotStateForToast(appToast.kind)} className="appToastMascotV496" />
           <span className="appToastDot" />
           <strong>{appToast.message}</strong>
         </div>
@@ -4857,7 +4919,11 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
               <span className="importScannerOrb" />
             </div>
 
-            <div className="importPanelHead">
+            <div className="importPanelHead importPanelHeadMascotV496">
+              <MascotStateArt
+                state={importAnimation.phase === "success" ? "happy" : importAnimation.phase === "error" ? "error" : "loading"}
+                className="importMascotV496"
+              />
               <p className="eyebrow">local import</p>
               <h3>{importAnimation.phase === "success" ? importAnimation.message : "scanning your music"}</h3>
               <span>{importAnimation.phase === "error" ? "safe rollback" : importAnimation.message}</span>
@@ -4896,7 +4962,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       ) : null}
 
       {!importAnimation.active && (libraryScanBusy || pixelArtBusy) ? (
-        <div className="tinyScanner" role="status" aria-live="polite">
+        <div className="tinyScanner tinyScannerMascotHostV496" role="status" aria-live="polite">
+          <MascotStateArt state="loading" className="tinyScannerMascotV496" />
           <span className="scannerOrb" />
           <span>
             <strong>{pixelArtBusy ? "updating covers" : "scanning library"}</strong>
@@ -5033,6 +5100,36 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
               </div>
             </header>
 
+            {mascotDebugMode ? (
+              <section className="mascotDebugPanelV498" aria-label="Mascot state debug gallery">
+                <div className="panelHead mascotDebugHeadV498">
+                  <div>
+                    <p className="eyebrow">mascot debug</p>
+                    <h3>all mascot states</h3>
+                  </div>
+                  <button
+                    className="softButton"
+                    type="button"
+                    onClick={() => {
+                      window.localStorage.removeItem("localtify:mascotDebug");
+                      window.location.reload();
+                    }}
+                  >
+                    hide
+                  </button>
+                </div>
+
+                <div className="mascotDebugGridV498">
+                  {(["empty", "happy", "question", "info", "warning", "danger", "error", "loading"] as MascotStateKey[]).map((state) => (
+                    <div className="mascotDebugCardV498" key={state}>
+                      <MascotStateArt state={state} />
+                      <strong>{state}</strong>
+                      <small>{state}-state.png</small>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             <div
               className={`pageTransition pageTransition-${view}`}
@@ -5943,6 +6040,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   title="Covers need songs first"
                   message="Import music, then the cover studio can dress every track up properly."
                   detail="Your empty-state art will show here too, so the page still feels cute before the library exists."
+                  mascotState="empty"
                   actions={<button className="mainAction" type="button" onClick={importSongs}>import songs</button>}
                 />
               ) : !filteredCoverGalleryAssets.length && !pixelArtBusy ? (
@@ -5955,6 +6053,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   title="No pixel covers found"
                   message="The cover shelf is empty right now, but your songs are safe."
                   detail="Rescan covers or add image files to your pixelart folder. Songs will keep using their existing covers."
+                  mascotState="warning"
                   actions={<button className="mainAction" type="button" onClick={() => void rescanPixelArtFolder()}>rescan covers</button>}
                 />
               ) : null}
@@ -6984,9 +7083,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   </button>
                 );
               }) : (
-                <div className="playlistEmptyState">
-                  <strong>No playlists yet</strong>
-                  <p>Make one below and this song will be added right away.</p>
+                <div className="playlistEmptyState playlistMascotEmptyV496">
+                  <MascotStateArt state="question" className="playlistEmptyMascotV496" />
+                  <span className="mascotEmptyCopyV496">
+                    <strong>No playlists yet</strong>
+                    <p>Make one below and this song will be added right away.</p>
+                  </span>
                 </div>
               )}
             </div>

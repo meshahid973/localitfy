@@ -19332,3 +19332,457 @@ body.localitfyThemePainting .homeSongRow{
   box-shadow: none !important;
 }
 /* end localtify v495 */
+
+/* localtify v496 — mascot state art */
+.mascotStateArtV496{
+  display: block;
+  width: var(--mascot-size, 112px);
+  height: var(--mascot-size, 112px);
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+  image-rendering: auto;
+  transform: translateZ(0);
+  filter:
+    drop-shadow(0 16px 24px rgba(0,0,0,.32))
+    drop-shadow(0 0 18px rgba(var(--lt-accent-rgb), .12));
+}
+
+.localtifyEmptyImageShellV466 .mascotStateArtV496,
+.localtifyEmptyMascotV496{
+  --mascot-size: clamp(132px, 16vw, 210px);
+  margin: 0 auto;
+}
+
+.mascotEmptyStateV496,
+.playlistMascotEmptyV496{
+  min-height: 176px !important;
+  display: grid !important;
+  grid-template-columns: minmax(94px, 140px) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 18px !important;
+  padding: 18px !important;
+  text-align: left !important;
+}
+
+.emptyStateMascotV496,
+.playlistEmptyMascotV496{
+  --mascot-size: clamp(96px, 10vw, 132px);
+  justify-self: center;
+}
+
+.mascotEmptyCopyV496{
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mascotEmptyCopyV496 strong{
+  color: var(--lt-text, #fff);
+  font-size: clamp(20px, 2vw, 30px);
+  letter-spacing: -.055em;
+  line-height: .96;
+}
+
+.mascotEmptyCopyV496 p{
+  max-width: 480px;
+  margin: 0;
+  color: var(--lt-muted, rgba(255,255,255,.62));
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.appToastMascotHostV496{
+  padding-left: 9px !important;
+}
+
+.appToastMascotV496{
+  --mascot-size: 34px;
+  margin-right: 2px;
+  filter:
+    drop-shadow(0 8px 10px rgba(0,0,0,.28))
+    drop-shadow(0 0 10px rgba(var(--lt-accent-rgb), .16));
+}
+
+.tinyScannerMascotHostV496{
+  min-height: 58px;
+  padding-left: 10px !important;
+}
+
+.tinyScannerMascotV496{
+  --mascot-size: 42px;
+  flex: 0 0 auto;
+}
+
+.importPanelHeadMascotV496{
+  min-height: 112px;
+  padding-left: clamp(104px, 11vw, 132px) !important;
+}
+
+.importMascotV496{
+  --mascot-size: clamp(82px, 9vw, 112px);
+  position: absolute;
+  left: 22px;
+  top: 18px;
+  z-index: 3;
+}
+
+.localtifyStateCardCuteV466 .localtifyEmptyCaptionV467{
+  margin-top: 8px !important;
+}
+
+.mascotState-happy{
+  animation: mascotHappyFloatV496 3.2s ease-in-out infinite;
+}
+
+.mascotState-question,
+.mascotState-confused{
+  animation: mascotQuestionFloatV496 3.7s ease-in-out infinite;
+}
+
+.mascotState-warning{
+  animation: mascotWarningPulseV496 2.6s ease-in-out infinite;
+}
+
+@keyframes mascotHappyFloatV496{
+  0%,100%{ transform: translate3d(0,0,0) rotate(-1deg); }
+  50%{ transform: translate3d(0,-5px,0) rotate(1deg); }
+}
+
+@keyframes mascotQuestionFloatV496{
+  0%,100%{ transform: translate3d(0,0,0) rotate(.5deg); }
+  50%{ transform: translate3d(0,-3px,0) rotate(-.8deg); }
+}
+
+@keyframes mascotWarningPulseV496{
+  0%,100%{ transform: translate3d(0,0,0) scale(1); filter: drop-shadow(0 16px 24px rgba(0,0,0,.32)) drop-shadow(0 0 16px rgba(255,190,75,.12)); }
+  50%{ transform: translate3d(0,-2px,0) scale(1.025); filter: drop-shadow(0 16px 24px rgba(0,0,0,.32)) drop-shadow(0 0 24px rgba(255,190,75,.20)); }
+}
+
+@media (max-width: 720px){
+  .mascotEmptyStateV496,
+  .playlistMascotEmptyV496{
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    text-align: center !important;
+  }
+
+  .importPanelHeadMascotV496{
+    padding-left: 0 !important;
+    padding-top: 96px !important;
+  }
+
+  .importMascotV496{
+    left: 50%;
+    top: 10px;
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .mascotStateArtV496{
+    animation: none !important;
+  }
+}
+/* end localtify v496 */
+
+/* localtify v497 — full 8-state mascot sizing and fit */
+.mascotStateArtV496{
+  width: var(--mascot-size, 148px) !important;
+  height: var(--mascot-size, 148px) !important;
+  max-width: 100% !important;
+  max-height: var(--mascot-max-height, 260px) !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  aspect-ratio: 1 / 1 !important;
+  display: block !important;
+  user-select: none !important;
+  pointer-events: none !important;
+  image-rendering: auto !important;
+  transform: translateZ(0) !important;
+  filter:
+    drop-shadow(0 18px 28px rgba(0,0,0,.34))
+    drop-shadow(0 0 22px rgba(var(--lt-accent-rgb), .16)) !important;
+}
+
+.localtifyEmptyImageShellV466{
+  width: clamp(180px, 22vw, 290px) !important;
+  min-height: clamp(170px, 20vw, 270px) !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: visible !important;
+}
+
+.localtifyEmptyImageShellV466 .mascotStateArtV496,
+.localtifyEmptyMascotV496{
+  --mascot-size: clamp(170px, 21vw, 280px);
+  --mascot-max-height: 300px;
+  margin: 0 auto !important;
+}
+
+.localtifyStateCardCuteV466{
+  overflow: visible !important;
+}
+
+.localtifyStateCardCuteV466 .localtifyEmptyArtV466{
+  min-height: clamp(176px, 20vw, 275px) !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: visible !important;
+}
+
+.mascotEmptyStateV496,
+.playlistMascotEmptyV496{
+  min-height: clamp(210px, 24vh, 310px) !important;
+  display: grid !important;
+  grid-template-columns: minmax(150px, 230px) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: clamp(18px, 2.4vw, 34px) !important;
+  padding: clamp(20px, 2.4vw, 34px) !important;
+  text-align: left !important;
+  overflow: visible !important;
+}
+
+.emptyStateMascotV496,
+.playlistEmptyMascotV496{
+  --mascot-size: clamp(145px, 16vw, 220px);
+  --mascot-max-height: 230px;
+  justify-self: center !important;
+  align-self: center !important;
+}
+
+.mascotEmptyCopyV496{
+  display: grid !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  align-content: center !important;
+}
+
+.mascotEmptyCopyV496 strong{
+  color: var(--lt-text, #fff) !important;
+  font-size: clamp(24px, 2.8vw, 42px) !important;
+  letter-spacing: -.065em !important;
+  line-height: .94 !important;
+  text-wrap: balance !important;
+}
+
+.mascotEmptyCopyV496 p{
+  max-width: 560px !important;
+  margin: 0 !important;
+  color: var(--lt-muted, rgba(255,255,255,.62)) !important;
+  font-size: clamp(13px, 1.05vw, 15px) !important;
+  font-weight: 760 !important;
+  line-height: 1.38 !important;
+}
+
+.appToastMascotV496{
+  --mascot-size: 42px;
+  --mascot-max-height: 48px;
+  flex: 0 0 auto !important;
+  margin: -8px 1px -8px -2px !important;
+}
+
+.tinyScannerMascotHostV496{
+  min-height: 70px !important;
+  padding-left: 12px !important;
+  gap: 12px !important;
+}
+
+.tinyScannerMascotV496{
+  --mascot-size: 58px;
+  --mascot-max-height: 64px;
+  flex: 0 0 auto !important;
+  margin: -8px 0 !important;
+}
+
+.importPanelHeadMascotV496{
+  min-height: clamp(132px, 16vw, 178px) !important;
+  padding-left: clamp(140px, 15vw, 190px) !important;
+  overflow: visible !important;
+}
+
+.importMascotV496{
+  --mascot-size: clamp(120px, 13vw, 168px);
+  --mascot-max-height: 180px;
+  position: absolute !important;
+  left: 20px !important;
+  top: 8px !important;
+  z-index: 4 !important;
+}
+
+.mascotState-happy{
+  animation: mascotHappyFloatV496 3.2s ease-in-out infinite !important;
+}
+
+.mascotState-question,
+.mascotState-confused,
+.mascotState-info,
+.mascotState-empty{
+  animation: mascotQuestionFloatV496 3.7s ease-in-out infinite !important;
+}
+
+.mascotState-loading{
+  animation: mascotLoadingBounceV497 1.65s ease-in-out infinite !important;
+}
+
+.mascotState-warning{
+  animation: mascotWarningPulseV496 2.6s ease-in-out infinite !important;
+}
+
+.mascotState-danger,
+.mascotState-error{
+  animation: mascotDangerPulseV497 2.15s ease-in-out infinite !important;
+}
+
+@keyframes mascotLoadingBounceV497{
+  0%,100%{ transform: translate3d(0,0,0) scale(1); }
+  45%{ transform: translate3d(0,-7px,0) scale(1.025); }
+}
+
+@keyframes mascotDangerPulseV497{
+  0%,100%{
+    transform: translate3d(0,0,0) scale(1);
+    filter: drop-shadow(0 18px 28px rgba(0,0,0,.34)) drop-shadow(0 0 18px rgba(255,80,100,.14));
+  }
+  50%{
+    transform: translate3d(0,-3px,0) scale(1.035);
+    filter: drop-shadow(0 18px 28px rgba(0,0,0,.34)) drop-shadow(0 0 30px rgba(255,80,100,.24));
+  }
+}
+
+@media (max-width: 760px){
+  .mascotEmptyStateV496,
+  .playlistMascotEmptyV496{
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    text-align: center !important;
+    min-height: 280px !important;
+  }
+
+  .emptyStateMascotV496,
+  .playlistEmptyMascotV496{
+    --mascot-size: clamp(150px, 45vw, 220px);
+  }
+
+  .importPanelHeadMascotV496{
+    padding-left: 0 !important;
+    padding-top: 130px !important;
+  }
+
+  .importMascotV496{
+    left: 50% !important;
+    top: 4px !important;
+    transform: translateX(-50%) !important;
+    --mascot-size: 128px;
+  }
+}
+/* end localtify v497 */
+
+/* localtify v498 — temporary mascot debug gallery */
+.mascotDebugPanelV498{
+  position: relative;
+  z-index: 4;
+  padding: 18px;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
+    rgba(0,0,0,.30);
+  border: 1px solid rgba(255,255,255,.07);
+  margin: 0 0 16px;
+  box-shadow:
+    0 16px 44px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.045);
+  overflow: visible;
+}
+
+.mascotDebugHeadV498{
+  margin-bottom: 0;
+}
+
+.mascotDebugHeadV498 h3{
+  margin: 2px 0 0;
+  color: var(--lt-text, #fff);
+  font-size: clamp(24px, 2.8vw, 38px);
+  line-height: .95;
+  letter-spacing: -.065em;
+}
+
+.mascotDebugGridV498{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.mascotDebugCardV498{
+  min-height: 250px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 16px 14px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(var(--lt-accent-rgb), .08), transparent 34%),
+    rgba(0,0,0,.28);
+  border: 1px solid rgba(255,255,255,.055);
+  overflow: visible;
+}
+
+.mascotDebugCardV498 .mascotStateArtV496{
+  --mascot-size: clamp(150px, 12vw, 190px);
+  --mascot-max-height: 205px;
+}
+
+.mascotDebugCardV498 strong{
+  color: var(--lt-text);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -.02em;
+}
+
+.mascotDebugCardV498 small{
+  color: var(--lt-muted);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.app[data-theme="mono"] .mascotDebugPanelV498{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.44)),
+    rgba(245,247,252,.84);
+  border-color: rgba(55,61,87,.10);
+  box-shadow:
+    0 12px 30px rgba(55,61,87,.09),
+    inset 0 1px 0 rgba(255,255,255,.66);
+}
+
+.app[data-theme="mono"] .mascotDebugCardV498{
+  background: rgba(255,255,255,.58);
+  border-color: rgba(55,61,87,.10);
+}
+
+@media (max-width: 760px){
+  .mascotDebugPanelV498{
+    padding: 14px;
+  }
+
+  .mascotDebugHeadV498{
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mascotDebugGridV498{
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .mascotDebugCardV498{
+    min-height: 220px;
+  }
+
+  .mascotDebugCardV498 .mascotStateArtV496{
+    --mascot-size: 145px;
+  }
+}
+/* end localtify v498 */
