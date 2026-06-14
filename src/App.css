@@ -11786,3 +11786,102 @@ body.isResizingPlayer .app *{
   }
 }
 /* end localtify v471 calm header + search polish */
+
+/* localtify v472 — lightweight header stars + CSS compositor cleanup */
+.app .content > .headerBar{
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  contain: layout paint style !important;
+}
+
+.app .content > .headerBar::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .46;
+  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(circle at 8% 28%, rgba(255,255,255,.72) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 15% 64%, rgba(var(--lt-accent-rgb),.55) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 31% 24%, rgba(255,255,255,.42) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 42% 72%, rgba(var(--lt-accent-rgb),.38) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 58% 30%, rgba(255,255,255,.50) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 72% 62%, rgba(var(--lt-accent-rgb),.45) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 86% 26%, rgba(255,255,255,.50) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 94% 72%, rgba(var(--lt-accent-rgb),.34) 0 1px, transparent 1.8px);
+  transform: translateZ(0);
+}
+
+.app .content > .headerBar::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .36;
+  background:
+    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .035), transparent),
+    radial-gradient(ellipse at 50% 0%, rgba(var(--lt-accent-rgb), .08), transparent 58%);
+  transform: translateZ(0);
+}
+
+.app .content > .headerBar > *{
+  position: relative;
+  z-index: 1;
+}
+
+.app .headerText,
+.app .headerTools.compactHeaderTools,
+.app .searchEasterWrap{
+  contain: layout paint style;
+}
+
+.app .searchEasterWrap::before{
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+.app .search,
+.app .searchEasterWrap .search{
+  will-change: auto !important;
+}
+
+.app .search:focus,
+.app .searchEasterWrap .search:focus{
+  will-change: transform, border-color, box-shadow !important;
+}
+
+/* Keep motion, but avoid leaving compositor hints active everywhere. */
+.app :is(
+  .navItem,
+  .mainAction.importMainAction,
+  .homeShelfActionButton,
+  .heroTinyButton,
+  .softButton,
+  .heroGhost,
+  .circleButton
+):not(:hover):not(:focus-visible):not(:active):not(.active):not(.playing){
+  will-change: auto !important;
+}
+
+.app :is(.sidebarNavGroupsV467, .sidebarNavGroupV467, .navGroupedV467){
+  contain: layout paint style;
+}
+
+.app .content{
+  isolation: isolate;
+}
+
+.app .pageTransition{
+  contain: layout style;
+}
+
+/* No star layer when users explicitly reduce motion/visual noise. */
+.app[data-reduce-motion="true"] .content > .headerBar::before,
+.app[data-reduce-motion="true"] .content > .headerBar::after{
+  opacity: .18;
+}
+/* end localtify v472 lightweight header stars + CSS compositor cleanup */
