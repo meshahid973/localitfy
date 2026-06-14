@@ -18500,9 +18500,9 @@ body.localitfyThemePainting .homeSongRow{
 }
 /* end localtify v467 no-box empty states */
 
-/* localtify v475/v476 — premium library rows + calmer downloads */
+/* localtify v482 — consolidated library/downloads/albums cleanup + bug sweep */
 
-/* Library rows: clearer text, calmer borders, special playing state */
+/* Library rows: one final owner block instead of stacked v475 overrides. */
 .app :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow){
   border-color: rgba(255,255,255,.068) !important;
   background:
@@ -18519,14 +18519,14 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 .app :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):hover{
-  border-color: rgba(255,255,255,.12) !important;
+  border-color: rgba(255,255,255,.11) !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.018)),
-    rgba(9,9,15,.66) !important;
-  transform: translate3d(2px,0,0) !important;
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.016)),
+    rgba(9,9,15,.64) !important;
+  transform: translate3d(1px,0,0) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    0 8px 18px rgba(0,0,0,.14) !important;
+    inset 0 1px 0 rgba(255,255,255,.038),
+    0 8px 18px rgba(0,0,0,.13) !important;
 }
 
 .app :is(.songRow.playing, .songRow.active, .libraryRow.playing, .libraryRow.active, .playlistTrackRow.playing, .playlistSongRow.playing){
@@ -18556,14 +18556,11 @@ body.localitfyThemePainting .homeSongRow{
     rgba(9,7,5,.60) !important;
 }
 
-.app :is(.songRow.missing, .libraryRow.missing, .songRow.fileMissing, .libraryRow.fileMissing) :is(strong, .songTitle){
-  color: rgba(255, 224, 174, .95) !important;
-}
-
-/* Downloads: calmer page, cleaner tabs, less utility noise */
+/* Downloads: cleaner and less noisy, keeping empty-state. */
 .downloadsLayoutV031{
   display: grid;
   gap: 14px !important;
+  contain: layout style;
 }
 
 .downloadPanelV031{
@@ -18603,16 +18600,10 @@ body.localitfyThemePainting .homeSongRow{
   min-height: 32px !important;
   padding: 0 12px !important;
   border-radius: 999px !important;
-  color: rgba(var(--text-rgb), .68) !important;
+  color: rgba(var(--text-rgb), .70) !important;
   background: rgba(255,255,255,.035) !important;
   border-color: rgba(255,255,255,.075) !important;
   box-shadow: none !important;
-}
-
-.downloadHeroActionsCompactV475 .softButton:hover{
-  color: rgba(var(--text-rgb), .92) !important;
-  background: rgba(255,255,255,.055) !important;
-  transform: translate3d(0,-1px,0);
 }
 
 .downloadTabStrip{
@@ -18633,7 +18624,7 @@ body.localitfyThemePainting .homeSongRow{
   padding: 0 16px !important;
   border: 0 !important;
   border-radius: 999px !important;
-  color: rgba(var(--text-rgb), .60) !important;
+  color: rgba(var(--text-rgb), .64) !important;
   background: transparent !important;
   box-shadow: none !important;
   font-weight: 900 !important;
@@ -18652,18 +18643,12 @@ body.localitfyThemePainting .homeSongRow{
   box-shadow: inset 0 1px 0 rgba(255,255,255,.055) !important;
 }
 
-.spotifyTabDot{
-  width: 7px !important;
-  height: 7px !important;
-  opacity: .82 !important;
-}
-
 .downloadNoticeV031{
   display: none !important;
 }
 
 .downloadTextareaV031{
-  min-height: 132px !important;
+  min-height: 136px !important;
   padding: 14px 15px !important;
   border-radius: 18px !important;
   color: rgba(var(--text-rgb), .90) !important;
@@ -18676,7 +18661,7 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 .downloadTextareaV031::placeholder{
-  color: rgba(var(--text-rgb), .40) !important;
+  color: rgba(var(--text-rgb), .43) !important;
 }
 
 .downloadTextareaV031:focus,
@@ -18703,23 +18688,6 @@ body.localitfyThemePainting .homeSongRow{
   box-shadow: none !important;
 }
 
-.downloadActionsV031 .heroMain,
-.spotifyDownloadRow .heroMain,
-.spotifyFetchButton{
-  color: #fff !important;
-  border: 1px solid rgba(var(--lt-accent-rgb), .34) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .24), rgba(var(--lt-accent-rgb), .115)),
-    rgba(8,8,14,.78) !important;
-}
-
-.downloadActionsV031 .heroGhost,
-.spotifyDownloadRow .heroGhost{
-  color: rgba(var(--text-rgb), .72) !important;
-  border-color: rgba(255,255,255,.075) !important;
-  background: rgba(255,255,255,.032) !important;
-}
-
 .spotifyAuthCard{
   margin-top: 4px !important;
   padding: 12px !important;
@@ -18740,13 +18708,10 @@ body.localitfyThemePainting .homeSongRow{
   font-size: 12px !important;
 }
 
-.spotifyAuthActions{
-  gap: 7px !important;
-}
-
-.spotifyAuthBtn{
-  min-height: 33px !important;
-  padding: 0 12px !important;
+.spotifyAuthBtn,
+.spotifyFetchButton,
+.converterBoxV031 .heroMain{
+  min-height: 36px !important;
   border-radius: 999px !important;
   box-shadow: none !important;
 }
@@ -18763,12 +18728,6 @@ body.localitfyThemePainting .homeSongRow{
   border-radius: 999px !important;
 }
 
-.spotifyFetchButton{
-  min-height: 42px !important;
-  border-radius: 999px !important;
-  box-shadow: none !important;
-}
-
 .spotifyTrackList,
 .downloadQueuePanel,
 .downloadResultsV031,
@@ -18778,12 +18737,6 @@ body.localitfyThemePainting .homeSongRow{
     linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.012)),
     rgba(5,5,9,.58) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.026) !important;
-}
-
-.spotifyTrackListHead,
-.smallPanelHead,
-.downloadResultsV031 > strong{
-  border-bottom-color: rgba(255,255,255,.055) !important;
 }
 
 .spotifyTrackItem,
@@ -18802,46 +18755,12 @@ body.localitfyThemePainting .homeSongRow{
   transform: translate3d(1px,0,0);
 }
 
-.downloadQueueTrack,
-.converterTrack{
-  background: rgba(255,255,255,.070) !important;
-}
-
 .converterBoxV031{
   margin-top: 14px !important;
   border-radius: 18px !important;
 }
 
-.converterBoxV031 .heroMain{
-  min-height: 36px !important;
-  border-radius: 999px !important;
-  box-shadow: none !important;
-}
-
-/* Keep empty-state visible and clean */
-.downloadPanelV031 > .localtifyStateCardCuteV466{
-  margin: 30px auto 18px !important;
-}
-
-@media (max-width: 840px){
-  .downloadHeroHead{
-    align-items: flex-start !important;
-    flex-direction: column !important;
-  }
-
-  .downloadHeroActionsCompactV475,
-  .spotifyAuthActions{
-    justify-content: flex-start !important;
-  }
-
-  .spotifyUrlRow,
-  .converterBoxV031{
-    grid-template-columns: 1fr !important;
-  }
-}
-/* end localtify v475/v476 */
-
-/* localtify v480 — Kopuz-style album header polish + local optimizations */
+/* Album page: consolidated v480 header polish, with overflow/mobile fixes. */
 .albumDetailPanelV318{
   display: grid;
   gap: 14px;
@@ -18889,25 +18808,20 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 .albumDetailCopyV318{
+  min-width: 0 !important;
   gap: 9px !important;
   align-content: center !important;
 }
 
-.albumDetailCopyV318 .eyebrow{
-  margin: 0 !important;
-  color: rgba(var(--text-rgb), .62) !important;
-  font-size: 10px !important;
-  letter-spacing: .18em !important;
-}
-
 .albumDetailCopyV318 h3{
-  max-width: 13ch !important;
+  max-width: min(13ch, 100%) !important;
   margin: 0 !important;
   color: rgba(var(--text-rgb), .97) !important;
   font-size: clamp(42px, 5vw, 78px) !important;
   line-height: .86 !important;
   letter-spacing: -.09em !important;
   text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .albumDetailCopyV318 p:not(.eyebrow){
@@ -18944,20 +18858,6 @@ body.localitfyThemePainting .homeSongRow{
   box-shadow: none !important;
 }
 
-.albumActionRowV318 .mainAction{
-  color: #fff !important;
-  border: 1px solid rgba(var(--lt-accent-rgb), .34) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .25), rgba(var(--lt-accent-rgb), .12)),
-    rgba(8,8,14,.76) !important;
-}
-
-.albumActionRowV318 .heroGhost{
-  color: rgba(var(--text-rgb), .72) !important;
-  border-color: rgba(255,255,255,.08) !important;
-  background: rgba(255,255,255,.034) !important;
-}
-
 .albumTrackListV318{
   max-height: min(460px, calc(100vh - 560px)) !important;
   min-height: 240px !important;
@@ -18983,33 +18883,19 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 .albumTrackRowV318:hover{
-  transform: translate3d(2px,0,0) !important;
-  border-color: rgba(255,255,255,.12) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.014)),
-    rgba(9,9,15,.66) !important;
+  transform: translate3d(1px,0,0) !important;
+  border-color: rgba(255,255,255,.11) !important;
 }
 
 .albumTrackRowV318.active{
-  transform: translate3d(2px,0,0) !important;
+  transform: translate3d(1px,0,0) !important;
   border-color: rgba(var(--lt-accent-rgb), .28) !important;
   background:
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .105), rgba(var(--lt-accent-rgb), .040)),
     rgba(8,8,14,.72) !important;
 }
 
-.albumTrackMainV318 strong{
-  color: rgba(var(--text-rgb), .94) !important;
-  font-weight: 900 !important;
-}
-
-.albumTrackMainV318 small,
-.albumTrackDurationV318,
-.albumTrackMainV318 > span:first-child{
-  color: rgba(var(--text-rgb), .58) !important;
-}
-
-/* Local page optimization: keep blur and motion, just restrict paint/layout ownership. */
+/* Safer optimization: keep paint/layout ownership, avoid broad content-visibility on animated home grids. */
 .albumsPageV318,
 .downloadsLayoutV031,
 .playlistsPage,
@@ -19017,24 +18903,24 @@ body.localitfyThemePainting .homeSongRow{
   contain: layout style;
 }
 
-.albumsShelfGridV318,
 .albumTrackListV318,
-.playlistTrackList,
 .downloadQueueList,
-.spotifyTrackItems{
+.spotifyTrackItems,
+.playlistTrackList{
   contain: layout style;
   content-visibility: auto;
   contain-intrinsic-size: 1px 520px;
 }
 
-/* Avoid permanent compositor work on idle cards/rows. */
 :is(.albumCardV318, .albumTrackRowV318, .playlistTrackRow, .downloadQueueItem, .spotifyTrackItem):not(:hover):not(.active):not(.playing):not(:focus-visible){
   will-change: auto !important;
 }
 
+/* Bug sweep: mobile/overflow/input fixes. */
 @media (max-width: 940px){
   .albumDetailHeroV318{
     grid-template-columns: 132px minmax(0, 1fr) !important;
+    min-height: 190px !important;
   }
 
   .albumDetailCoverV318{
@@ -19045,6 +18931,30 @@ body.localitfyThemePainting .homeSongRow{
 
   .albumDetailCopyV318 h3{
     font-size: clamp(34px, 9vw, 56px) !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 840px){
+  .downloadHeroHead{
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .downloadHeroActionsCompactV475,
+  .spotifyAuthActions{
+    justify-content: flex-start !important;
+  }
+
+  .spotifyUrlRow,
+  .converterBoxV031{
+    grid-template-columns: 1fr !important;
+  }
+
+  .spotifyFetchButton,
+  .spotifyAuthBtn,
+  .converterBoxV031 .heroMain{
+    width: 100% !important;
   }
 }
 
@@ -19058,5 +18968,14 @@ body.localitfyThemePainting .homeSongRow{
     width: 150px !important;
     height: 150px !important;
   }
+
+  .albumActionRowV318,
+  .albumMetaPillsV318{
+    width: 100% !important;
+  }
+
+  .albumActionRowV318 :is(.mainAction, .heroGhost){
+    flex: 1 1 auto !important;
+  }
 }
-/* end localtify v480 album polish */
+/* end localtify v482 consolidated home cleanup */

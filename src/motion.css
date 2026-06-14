@@ -2755,25 +2755,23 @@ body.reduceMotion :is(.homeAlbumCard, .songRow, .circleButton, .softButton, .pri
 }
 /* end localtify v459 reduced motion owner */
 
-/* localtify v481 — tiny page transition polish + motion-safe optimization */
+/* localtify v482 — single page transition owner + duplicate animation bug sweep */
 .app .content > .pageTransition{
   transform: translate3d(0,0,0);
   backface-visibility: hidden;
   contain: layout style;
-  animation: localtifyPageSwitchV481 235ms cubic-bezier(.16, 1, .3, 1) both;
+  animation: localtifyPageSwitchV482 235ms cubic-bezier(.16, 1, .3, 1) both;
 }
 
-.app .content > .pageTransition > :is(section, .panel, .hero, .downloadsLayoutV031, .albumsPageV318, .playlistsPage, .analyticsStudioV339):first-child{
-  animation: localtifyPageFirstPanelV481 255ms cubic-bezier(.16, 1, .3, 1) both;
-}
-
-/* Keep hero reflow special cases from fighting page switch. */
+/* Guard against double page animations during hero expand/compact. */
 .app.heroMotionActive .content > .pageTransition,
 .app.heroMotionActive .content > .pageTransition > *{
   animation: none !important;
+  animation-delay: 0ms !important;
+  animation-fill-mode: none !important;
 }
 
-@keyframes localtifyPageSwitchV481{
+@keyframes localtifyPageSwitchV482{
   from{
     opacity: .001;
     transform: translate3d(0, 4px, 0);
@@ -2784,18 +2782,7 @@ body.reduceMotion :is(.homeAlbumCard, .songRow, .circleButton, .softButton, .pri
   }
 }
 
-@keyframes localtifyPageFirstPanelV481{
-  from{
-    opacity: .001;
-    transform: translate3d(0, 5px, 0);
-  }
-  to{
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-/* Big optimization without killing motion/blur: compositor hints only while useful. */
+/* Big cleanup without reducing motion/blur: only hovered/active items keep compositor hints. */
 .app :is(
   .homeFreshCard,
   .homeListenCard,
@@ -2828,8 +2815,7 @@ body.reduceMotion :is(.homeAlbumCard, .songRow, .circleButton, .softButton, .pri
   will-change: transform, border-color, background-color !important;
 }
 
-.app[data-reduce-motion="true"] .content > .pageTransition,
-.app[data-reduce-motion="true"] .content > .pageTransition > :is(section, .panel, .hero, .downloadsLayoutV031, .albumsPageV318, .playlistsPage, .analyticsStudioV339):first-child{
+.app[data-reduce-motion="true"] .content > .pageTransition{
   animation: none !important;
 }
-/* end localtify v481 tiny page transition polish */
+/* end localtify v482 motion cleanup */
