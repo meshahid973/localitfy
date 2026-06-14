@@ -77,6 +77,7 @@ type MutableNumberRef = {
 };
 type SettingsCategoryContentProps = {
   settingsCategory: string;
+  setSettingsCategory?: (value: string) => void;
   currentTheme: CurrentThemeOption;
   settings: Settings;
   updateSetting: (...args: any[]) => void | Promise<void>;
@@ -313,6 +314,7 @@ function detectSettingsPlatform(): Required<PlatformInfoLike> {
 }
 const SettingsCategoryContent = memo(function SettingsCategoryContent({
   settingsCategory,
+  setSettingsCategory,
   currentTheme,
   settings,
   updateSetting,
@@ -550,19 +552,39 @@ return (
           <div className="settingsChoiceRowV491" role="group" aria-label="Live cover color strength">
             {coverColorSyncOptions.map((option: ChoiceOption) => {
               const active = selectedCoverColorSyncMode === option.id;
+              const label = option.label || option.name || option.id;
+              const note = option.note || (option.id === "off" ? "no cover tint" : option.id === "subtle" ? "tiny cover tint" : option.id === "strong" ? "bigger cover mood" : "balanced cover tint");
               return (
                 <button
                   key={option.id}
                   type="button"
                   className={`settingsChoicePillV491 ${active ? "active" : ""}`}
-                  onClick={() => updateCoverColorSyncMode(option.id)}
+                  onClick={() => void updateCoverColorSyncMode(option.id)}
                   aria-pressed={active}
+                  aria-label={`Set live cover colors to ${label}`}
+                  title={`Live cover colors: ${label}`}
                 >
-                  <strong>{option.label}</strong>
-                  <span>{option.note}</span>
+                  <strong>{label}</strong>
+                  <span>{note}</span>
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        <div className="settingsPanelCard settingsFocusPanelV491 settingsAppearanceAdvancedCalloutV492">
+          <div className="settingsPanelHeader">
+            <div>
+              <strong>looking for the other apperance options? go to advanced!</strong>
+              <span>Layout, card behavior, sidebar, glow, motion, cover repair, Linux notes, diagnostics, and reset tools are kept in Advanced now.</span>
+            </div>
+            <button
+              className="settingsActionButton settingsPrimaryAction"
+              type="button"
+              onClick={() => setSettingsCategory?.("advanced")}
+            >
+              go to advanced
+            </button>
           </div>
         </div>
       </section>

@@ -8980,3 +8980,497 @@ body.localitfyThemePainting .toggleRow{
   overflow: hidden !important;
 }
 /* end localtify v491b */
+
+/* localtify v492 — smooth settings, no outline-heavy panels */
+.settingsPage,
+.settingsCategoryContent,
+.settingsCategoryMotion{
+  scroll-behavior: smooth !important;
+}
+
+.settingsPage :is(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingGroup,
+  .settingsChoice,
+  .toggleRow,
+  .rangeRow,
+  .settingsThemeCard,
+  .settingsActionButton,
+  .settingsTinyButton,
+  .settingsResetButton,
+  .customThemePresetButtonV027,
+  .customThemeTokenV027,
+  .settingsDiagnosticCard,
+  .discordPreviewMock,
+  .settingsSelectField,
+  .settingsThemeSelectedPreview,
+  .settingsChoicePillV491,
+  .settingsManualNoteV491
+){
+  outline: 0 !important;
+  border-color: rgba(255,255,255,.045) !important;
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.16),
+    inset 0 1px 0 rgba(255,255,255,.025) !important;
+  transition:
+    transform 180ms cubic-bezier(.18,.82,.18,1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease,
+    color 180ms ease !important;
+}
+
+.settingsPage :is(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingGroup,
+  .settingsChoice,
+  .toggleRow,
+  .rangeRow,
+  .settingsThemeCard,
+  .settingsActionButton,
+  .settingsTinyButton,
+  .settingsResetButton,
+  .customThemePresetButtonV027,
+  .customThemeTokenV027,
+  .settingsDiagnosticCard,
+  .settingsChoicePillV491
+):hover{
+  transform: translate3d(0,-1px,0) !important;
+  border-color: rgba(255,255,255,.075) !important;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.030) !important;
+}
+
+.settingsPage :is(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingGroup,
+  .toggleRow,
+  .rangeRow,
+  .settingsDiagnosticCard
+):focus-within{
+  outline: 0 !important;
+  border-color: rgba(var(--lt-accent-rgb),.16) !important;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.18),
+    0 0 0 1px rgba(var(--lt-accent-rgb),.075) inset !important;
+}
+
+.settingsPage :is(.settingsChoice.active, .settingsThemeCard.active, .settingsChoicePillV491.active){
+  border-color: rgba(var(--lt-accent-rgb),.26) !important;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.18),
+    inset 3px 0 0 rgba(var(--lt-accent-rgb),.62) !important;
+}
+
+.settingsPage :is(button, .settingsChoice, .settingsThemeCard, .settingsActionButton, .settingsTinyButton):active{
+  transform: translate3d(0,0,0) scale(.985) !important;
+}
+
+/* Discord section becomes calmer and fits better */
+.discordSettingsPage .settingsPanelCard{
+  border-color: rgba(113,219,255,.12) !important;
+  box-shadow:
+    0 12px 32px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.026) !important;
+}
+
+.discordSettingsPage .discordSettingsGrid{
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important;
+  align-items: stretch !important;
+  gap: 14px !important;
+}
+
+.discordSettingsPage .discordOptionGrid{
+  gap: 10px !important;
+}
+
+.discordSettingsPage .settingsChoice{
+  min-height: 72px !important;
+  border-color: rgba(255,255,255,.045) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.033), rgba(255,255,255,.015)),
+    rgba(255,255,255,.018) !important;
+}
+
+.discordSettingsPage .settingsChoice:hover{
+  border-color: rgba(255,255,255,.075) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.042), rgba(255,255,255,.020)),
+    rgba(255,255,255,.022) !important;
+}
+
+.discordSettingsPage .settingsChoice.active{
+  border-color: rgba(var(--lt-accent-rgb),.28) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb),.095), rgba(255,255,255,.018)),
+    rgba(255,255,255,.018) !important;
+}
+
+/* Appearance bottom callout */
+.settingsAppearanceAdvancedCalloutV492{
+  border-color: rgba(var(--lt-accent-rgb),.14) !important;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(var(--lt-accent-rgb),.10), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.017)),
+    rgba(7,7,12,.58) !important;
+}
+
+.settingsAppearanceAdvancedCalloutV492 .settingsPanelHeader{
+  align-items: center !important;
+  margin-bottom: 0 !important;
+}
+
+.settingsAppearanceAdvancedCalloutV492 strong{
+  text-transform: lowercase !important;
+}
+
+.settingsAppearanceAdvancedCalloutV492 .settingsActionButton{
+  white-space: nowrap !important;
+}
+
+.app[data-theme="mono"] .settingsPage :is(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingGroup,
+  .settingsChoice,
+  .toggleRow,
+  .rangeRow,
+  .settingsThemeCard,
+  .settingsActionButton,
+  .settingsTinyButton,
+  .settingsResetButton,
+  .customThemePresetButtonV027,
+  .customThemeTokenV027,
+  .settingsDiagnosticCard,
+  .discordPreviewMock,
+  .settingsSelectField,
+  .settingsThemeSelectedPreview,
+  .settingsChoicePillV491,
+  .settingsManualNoteV491
+){
+  border-color: rgba(55,61,87,.085) !important;
+  box-shadow:
+    0 10px 24px rgba(55,61,87,.065),
+    inset 0 1px 0 rgba(255,255,255,.56) !important;
+}
+
+@media (max-width: 960px){
+  .discordSettingsPage .discordSettingsGrid{
+    grid-template-columns: 1fr !important;
+  }
+
+  .settingsAppearanceAdvancedCalloutV492 .settingsPanelHeader{
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .settingsAppearanceAdvancedCalloutV492 .settingsActionButton{
+    width: 100% !important;
+  }
+}
+/* end localtify v492 */
+
+/* localtify v493 — real no-outline settings pass */
+.settingsPage,
+.settingsPage *{
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
+}
+
+.settingsPage :is(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsFocusPanelV491,
+  .settingsBoringPanelV491,
+  .settingGroup,
+  .settingsChoice,
+  .settingsChoicePillV491,
+  .toggleRow,
+  .rangeRow,
+  .settingsThemeCard,
+  .settingsActionButton,
+  .settingsTinyButton,
+  .settingsResetButton,
+  .customThemePresetButtonV027,
+  .customThemePresetButtonCleanV491,
+  .customThemeTokenV027,
+  .customThemeTokenCleanV491,
+  .settingsDiagnosticCard,
+  .discordPreviewMock,
+  .settingsSelectField,
+  .settingsThemeSelectedPreview,
+  .settingsManualNoteV491,
+  .settingsLiveCoverColorsV491,
+  .settingsAppearanceAdvancedCalloutV492,
+  .discordHeroCard,
+  .discordMainControls,
+  .discordArtworkCard
+){
+  outline: none !important;
+  border-color: transparent !important;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.13),
+    inset 0 1px 0 rgba(255,255,255,.018) !important;
+  transform: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease,
+    box-shadow 150ms ease !important;
+}
+
+.settingsPage :is(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsFocusPanelV491,
+  .settingsBoringPanelV491,
+  .settingGroup,
+  .settingsChoice,
+  .settingsChoicePillV491,
+  .toggleRow,
+  .rangeRow,
+  .settingsThemeCard,
+  .settingsActionButton,
+  .settingsTinyButton,
+  .settingsResetButton,
+  .customThemePresetButtonV027,
+  .customThemePresetButtonCleanV491,
+  .customThemeTokenV027,
+  .customThemeTokenCleanV491,
+  .settingsDiagnosticCard
+):hover,
+.settingsPage :is(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsFocusPanelV491,
+  .settingsBoringPanelV491,
+  .settingGroup,
+  .settingsChoice,
+  .settingsChoicePillV491,
+  .toggleRow,
+  .rangeRow,
+  .settingsThemeCard,
+  .settingsActionButton,
+  .settingsTinyButton,
+  .settingsResetButton,
+  .customThemePresetButtonV027,
+  .customThemePresetButtonCleanV491,
+  .customThemeTokenV027,
+  .customThemeTokenCleanV491,
+  .settingsDiagnosticCard
+):focus,
+.settingsPage :is(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsFocusPanelV491,
+  .settingsBoringPanelV491,
+  .settingGroup,
+  .settingsChoice,
+  .settingsChoicePillV491,
+  .toggleRow,
+  .rangeRow,
+  .settingsThemeCard,
+  .settingsActionButton,
+  .settingsTinyButton,
+  .settingsResetButton,
+  .customThemePresetButtonV027,
+  .customThemePresetButtonCleanV491,
+  .customThemeTokenV027,
+  .customThemeTokenCleanV491,
+  .settingsDiagnosticCard
+):focus-within{
+  outline: none !important;
+  border-color: transparent !important;
+  transform: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  box-shadow:
+    0 9px 24px rgba(0,0,0,.15),
+    inset 0 1px 0 rgba(255,255,255,.022) !important;
+}
+
+/* Active states: no purple outline, no left strip, no boxed flash. */
+.settingsPage :is(
+  .settingsChoice.active,
+  .settingsThemeCard.active,
+  .settingsChoicePillV491.active,
+  .cleanerOptionV440.active,
+  .visualOptionButtonV205.active,
+  .sidebarBehaviorChoiceV327.active
+){
+  outline: none !important;
+  border-color: transparent !important;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.14),
+    inset 0 1px 0 rgba(255,255,255,.022) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .105), rgba(var(--lt-accent-rgb), .045)),
+    rgba(255,255,255,.026) !important;
+  color: var(--lt-text) !important;
+}
+
+.settingsPage :is(
+  .settingsChoice.active,
+  .settingsThemeCard.active,
+  .settingsChoicePillV491.active,
+  .cleanerOptionV440.active,
+  .visualOptionButtonV205.active,
+  .sidebarBehaviorChoiceV327.active
+)::before,
+.settingsPage :is(
+  .settingsChoice.active,
+  .settingsThemeCard.active,
+  .settingsChoicePillV491.active,
+  .cleanerOptionV440.active,
+  .visualOptionButtonV205.active,
+  .sidebarBehaviorChoiceV327.active
+)::after{
+  opacity: 0 !important;
+  display: none !important;
+  content: none !important;
+}
+
+/* Remove purple strip / separator lines in Downloads and Settings cards. */
+.settingsContentBlock,
+.settingsDownloadsCleanV491,
+.settingsDownloadsCleanV491 :is(.settingGroup, .settingsCardStack, .downloadFolderGroupV031),
+.downloadSettingsGridV031,
+.downloadToggleStackV031,
+.downloadFolderGroupV031{
+  border-color: transparent !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.settingsDownloadsCleanV491 .settingGroup,
+.settingsDownloadsCleanV491 .settingsCardStack{
+  padding: 0 !important;
+}
+
+.settingsDownloadsCleanV491 .optionGrid{
+  gap: 10px !important;
+}
+
+/* Discord RPC area: stop disappearing on hover and make options stable. */
+.discordSettingsPage,
+.discordSettingsPage *{
+  transform-style: flat !important;
+}
+
+.discordSettingsPage :is(.settingsChoice, .settingsPanelCard, .discordPreviewMock){
+  contain: layout style !important;
+  will-change: auto !important;
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.discordSettingsPage :is(.settingsChoice, .settingsPanelCard, .discordPreviewMock):hover,
+.discordSettingsPage :is(.settingsChoice, .settingsPanelCard, .discordPreviewMock):focus,
+.discordSettingsPage :is(.settingsChoice, .settingsPanelCard, .discordPreviewMock):focus-within{
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  border-color: transparent !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.017)),
+    rgba(255,255,255,.020) !important;
+}
+
+.discordSettingsPage .settingsChoice.active{
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .11), rgba(var(--lt-accent-rgb), .045)),
+    rgba(255,255,255,.024) !important;
+  border-color: transparent !important;
+}
+
+.discordSettingsPage .settingsChoice :is(strong, small, span){
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Live cover colors: make the buttons feel clickable but not outlined. */
+.settingsLiveCoverColorsV491{
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.settingsLiveCoverColorsV491 .settingsChoicePillV491{
+  min-height: 64px !important;
+  cursor: pointer !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.018)),
+    rgba(255,255,255,.022) !important;
+}
+
+.settingsLiveCoverColorsV491 .settingsChoicePillV491:hover{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.022)),
+    rgba(255,255,255,.026) !important;
+}
+
+.settingsLiveCoverColorsV491 .settingsChoicePillV491.active{
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .13), rgba(var(--lt-accent-rgb), .055)),
+    rgba(255,255,255,.025) !important;
+}
+
+/* Appearance callout should be calm, not another purple box. */
+.settingsAppearanceAdvancedCalloutV492{
+  border-color: transparent !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.016)),
+    rgba(255,255,255,.018) !important;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.13),
+    inset 0 1px 0 rgba(255,255,255,.020) !important;
+}
+
+.settingsAppearanceAdvancedCalloutV492 .settingsActionButton{
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.app[data-theme="mono"] .settingsPage :is(
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsFocusPanelV491,
+  .settingsBoringPanelV491,
+  .settingGroup,
+  .settingsChoice,
+  .settingsChoicePillV491,
+  .toggleRow,
+  .rangeRow,
+  .settingsThemeCard,
+  .settingsActionButton,
+  .settingsTinyButton,
+  .settingsResetButton,
+  .customThemePresetButtonV027,
+  .customThemeTokenV027,
+  .settingsDiagnosticCard,
+  .discordPreviewMock,
+  .settingsSelectField,
+  .settingsThemeSelectedPreview
+){
+  border-color: transparent !important;
+  box-shadow:
+    0 8px 18px rgba(55,61,87,.055),
+    inset 0 1px 0 rgba(255,255,255,.50) !important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .settingsPage *,
+  .discordSettingsPage *{
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
+/* end localtify v493 */
