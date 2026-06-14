@@ -19287,3 +19287,48 @@ body.localitfyThemePainting .homeSongRow{
   color: #fff !important;
 }
 /* end localtify v489 */
+
+/* localtify v495 — sidebar seam cleanup */
+.app .sidebar,
+.sidebar{
+  outline: 0 !important;
+  border: 0 !important;
+  border-right: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .content,
+.content{
+  border-left: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .sidebar::before,
+.app .sidebar::after,
+.sidebar::before,
+.sidebar::after{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+.app .sidebar .navItem,
+.app .sidebar .sidebarToolButton,
+.sidebar .navItem,
+.sidebar .sidebarToolButton{
+  outline: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.app .sidebar .navItem:hover,
+.app .sidebar .sidebarToolButton:hover,
+.sidebar .navItem:hover,
+.sidebar .sidebarToolButton:hover{
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+/* end localtify v495 */

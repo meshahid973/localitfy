@@ -13350,3 +13350,66 @@ body.isResizingPlayer .app *{
     0 8px 18px rgba(55,61,87,.09) !important;
 }
 /* end localtify v489 */
+
+/* localtify v495 — minimal sidebar outline removal */
+.app .sidebar,
+.sidebar{
+  outline: 0 !important;
+  border: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .sidebar::before,
+.app .sidebar::after,
+.sidebar::before,
+.sidebar::after{
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+.app .content,
+.content{
+  border-left: 0 !important;
+  outline-left: 0 !important;
+}
+
+.app .appShell,
+.appShell{
+  border-left: 0 !important;
+  border-right: 0 !important;
+  outline: 0 !important;
+}
+
+.app .sidebar :is(.navItem,.navIcon,.sidebarToolButton,.sidebarGroupLabelV467,.mainAction),
+.sidebar :is(.navItem,.navIcon,.sidebarToolButton,.sidebarGroupLabelV467,.mainAction){
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.app .sidebar :is(.navItem,.sidebarToolButton),
+.sidebar :is(.navItem,.sidebarToolButton){
+  border-color: transparent !important;
+}
+
+.app .sidebar :is(.navItem.active,.navItem[aria-current="page"],.sidebarToolButton.active),
+.sidebar :is(.navItem.active,.navItem[aria-current="page"],.sidebarToolButton.active){
+  border-color: transparent !important;
+  box-shadow: none !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .10), rgba(var(--lt-accent-rgb), .045)),
+    rgba(255,255,255,.030) !important;
+}
+
+.app[data-theme="mono"] .sidebar,
+.app[data-theme="mono"] .content,
+.app[data-theme="mono"] .appShell{
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+/* end localtify v495 */
