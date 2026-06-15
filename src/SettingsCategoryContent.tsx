@@ -1,6 +1,7 @@
 ﻿import { memo, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 const SETTINGS_INFO_MASCOT_SRC = new URL("./assets/info-state.png", import.meta.url).href;
+const SETTINGS_DANGER_MASCOT_SRC = new URL("./assets/danger-state.png", import.meta.url).href;
 type ThemeId = string;
 type DownloadQuality = "best" | "320" | "256" | "192";
 type DownloadFormat = "mp3" | "flac" | "wav";
@@ -1038,8 +1039,15 @@ return (
           ) : null}
         </div>
 
-        <div className="settingsPanelCard settingsBoringPanelV491 settingsFullWidthPanel settingsResetPanel settingsDangerPanelV491">
-          <div className="settingsPanelHeader">
+        <div className="settingsPanelCard settingsBoringPanelV491 settingsFullWidthPanel settingsResetPanel settingsDangerPanelV491 settingsDangerMascotPanelV501">
+          <div className="settingsPanelHeader settingsDangerMascotHeaderV501">
+            <img
+              className="settingsDangerMascotV501"
+              src={SETTINGS_DANGER_MASCOT_SRC}
+              alt=""
+              draggable={false}
+              aria-hidden="true"
+            />
             <div>
               <strong>Danger / reset tools</strong>
               <span>Reset only the selected app settings. Your songs stay in the library.</span>

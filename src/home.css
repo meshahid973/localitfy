@@ -19786,3 +19786,156 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 /* end localtify v498 */
+
+/* localtify v501 — real mascot states in empty/download UI */
+.mascotHelperBubbleV501{
+  display: grid;
+  grid-template-columns: clamp(72px, 6.5vw, 102px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(12px, 1.4vw, 18px);
+  min-height: 104px;
+  padding: 12px 16px;
+  margin: 0 0 14px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.065);
+  background:
+    radial-gradient(circle at 7% 50%, rgba(var(--lt-accent-rgb), .10), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.016)),
+    rgba(7,7,12,.48);
+  box-shadow:
+    0 12px 32px rgba(0,0,0,.20),
+    inset 0 1px 0 rgba(255,255,255,.032);
+  overflow: visible;
+}
+
+.mascotHelperBubbleV501.error{
+  border-color: rgba(255,95,120,.13);
+  background:
+    radial-gradient(circle at 7% 50%, rgba(255,95,120,.11), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.015)),
+    rgba(7,7,12,.50);
+}
+
+.mascotHelperBubbleV501.success{
+  border-color: rgba(var(--lt-accent-rgb), .12);
+}
+
+.mascotHelperArtV501{
+  --mascot-size: clamp(78px, 7.4vw, 116px);
+  --mascot-max-height: 122px;
+  justify-self: center;
+  margin: -10px 0;
+}
+
+.mascotHelperCopyV501{
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mascotHelperCopyV501 strong{
+  color: var(--lt-text, #fff);
+  font-size: clamp(19px, 1.8vw, 28px);
+  line-height: .96;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+}
+
+.mascotHelperCopyV501 span{
+  max-width: 760px;
+  color: var(--lt-muted, rgba(255,255,255,.62));
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.mascotHelperActionsV501{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.homeShelfMascotEmptyV501{
+  min-height: 164px !important;
+  grid-template-columns: minmax(104px, 140px) minmax(0, 1fr) !important;
+}
+
+.homeShelfEmptyMascotV501{
+  --mascot-size: clamp(105px, 10vw, 150px);
+  --mascot-max-height: 160px;
+}
+
+.libraryMissingMascotStripV501{
+  grid-template-columns: clamp(48px, 4.5vw, 70px) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+}
+
+.libraryMissingMascotV501{
+  --mascot-size: clamp(54px, 5vw, 78px);
+  --mascot-max-height: 82px;
+  margin: -10px 0;
+}
+
+.downloadQueueTop{
+  grid-template-columns: auto auto minmax(0, 1fr) auto !important;
+}
+
+.downloadQueueMascotV501{
+  --mascot-size: 42px;
+  --mascot-max-height: 46px;
+  margin: -8px 0;
+}
+
+.converterBoxV031{
+  position: relative;
+  overflow: visible;
+}
+
+.converterMascotV501{
+  --mascot-size: 64px;
+  --mascot-max-height: 70px;
+  position: absolute;
+  right: 120px;
+  top: 50%;
+  transform: translate3d(0, -50%, 0) !important;
+  opacity: .95;
+}
+
+.downloadResultV326{
+  grid-template-columns: auto auto minmax(0, 1fr) auto !important;
+  align-items: center;
+}
+
+.downloadResultMascotV501{
+  --mascot-size: 46px;
+  --mascot-max-height: 50px;
+  margin: -8px 0;
+}
+
+@media (max-width: 820px){
+  .mascotHelperBubbleV501{
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .mascotHelperActionsV501{
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .homeShelfMascotEmptyV501{
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    text-align: center !important;
+  }
+
+  .converterMascotV501{
+    position: static;
+    transform: none !important;
+    justify-self: center;
+    margin: 4px auto -2px;
+  }
+}
+/* end localtify v501 */

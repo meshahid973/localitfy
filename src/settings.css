@@ -9572,3 +9572,61 @@ body.localitfyThemePainting .toggleRow{
   }
 }
 /* end localtify v500 */
+
+/* localtify v501 — advanced danger mascot */
+.settingsDangerMascotPanelV501{
+  overflow: visible !important;
+  border-color: rgba(255, 90, 120, .10) !important;
+  background:
+    radial-gradient(circle at 5% 18%, rgba(255,90,120,.105), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.014)),
+    rgba(8,8,13,.48) !important;
+}
+
+.settingsDangerMascotHeaderV501{
+  display: grid !important;
+  grid-template-columns: clamp(74px, 7vw, 104px) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: clamp(12px, 1.4vw, 20px) !important;
+}
+
+.settingsDangerMascotV501{
+  width: clamp(84px, 8vw, 120px) !important;
+  height: clamp(84px, 8vw, 120px) !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  user-select: none !important;
+  pointer-events: none !important;
+  transform: translate3d(0, -2px, 0) !important;
+  filter:
+    drop-shadow(0 14px 18px rgba(0,0,0,.30))
+    drop-shadow(0 0 20px rgba(255,90,120,.16)) !important;
+  animation: settingsDangerMascotPulseV501 2.3s ease-in-out infinite;
+}
+
+@keyframes settingsDangerMascotPulseV501{
+  0%,100%{ transform: translate3d(0,-2px,0) scale(1); }
+  50%{ transform: translate3d(0,-5px,0) scale(1.025); }
+}
+
+.settingsDangerPanelV491 .settingsResetButton.danger{
+  border-color: rgba(255, 90, 120, .18) !important;
+  background:
+    linear-gradient(180deg, rgba(255,90,120,.105), rgba(255,255,255,.020)),
+    rgba(255,255,255,.020) !important;
+}
+
+@media (max-width: 760px){
+  .settingsDangerMascotHeaderV501{
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    text-align: center !important;
+  }
+
+  .settingsDangerMascotV501{
+    width: 118px !important;
+    height: 118px !important;
+  }
+}
+/* end localtify v501 */

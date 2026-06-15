@@ -2693,6 +2693,35 @@ function LocaltifyStateCard({
   );
 }
 
+
+function MascotHelperBubble({
+  state = "info",
+  tone = "info",
+  eyebrow,
+  title,
+  message,
+  actions
+}: {
+  state?: MascotStateKey;
+  tone?: LocaltifyStateCardTone;
+  eyebrow?: string;
+  title: string;
+  message: string;
+  actions?: ReactNode;
+}) {
+  return (
+    <aside className={`mascotHelperBubbleV501 mascotHelper-${state} ${tone}`} role="status">
+      <MascotStateArt state={state} className="mascotHelperArtV501" />
+      <div className="mascotHelperCopyV501">
+        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+        <strong>{title}</strong>
+        <span>{message}</span>
+      </div>
+      {actions ? <div className="mascotHelperActionsV501">{actions}</div> : null}
+    </aside>
+  );
+}
+
 function getCardCoverUrl(song?: Song | null) {
   return getRendererSafeImageUrl(song?.coverThumbUrl || song?.coverThumbnailUrl || song?.thumbnailUrl || song?.coverUrl || song?.coverPath || "");
 }
@@ -4777,6 +4806,37 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const mascotDebugMode =
     typeof window !== "undefined" &&
     window.localStorage.getItem("localtify:mascotDebug") === "1";
+  const downloadWorking =
+    Boolean(downloadBusy || spotifyDownloadBusy || convertBusy) ||
+    downloadQueue.some((item: any) => ["queued", "working", "downloading", "fetching", "converting"].includes(String(item.status || "").toLowerCase()));
+  const downloadHasFailure =
+    downloadQueue.some((item: any) => ["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase())) ||
+    downloadResults.some((item: any) => item && item.ok === false);
+  const downloadHasSuccess =
+    downloadQueue.some((item: any) => String(item.status || "").toLowerCase() === "done" && item.importedToLibrary !== false) ||
+    downloadResults.some((item: any) => item && item.ok !== false && item.importedToLibrary !== false);
+  const downloadMascotState: MascotStateKey = downloadWorking
+    ? "loading"
+    : downloadHasFailure
+      ? "error"
+      : downloadHasSuccess
+        ? "happy"
+        : "info";
+  const downloadMascotTone: LocaltifyStateCardTone = downloadHasFailure ? "error" : downloadHasSuccess ? "success" : "info";
+  const downloadMascotTitle = downloadWorking
+    ? "working on your downloads"
+    : downloadHasFailure
+      ? "download needs attention"
+      : downloadHasSuccess
+        ? "download finished"
+        : "need help downloading?";
+  const downloadMascotMessage = downloadWorking
+    ? "Keep this open and I’ll show progress here while Localtify downloads, converts, and imports."
+    : downloadHasFailure
+      ? "Something failed safely. Use retry, check the link, or open the folder to inspect the file."
+      : downloadHasSuccess
+        ? "Nice, the latest finished files are ready below. Open them in your library or clear finished items."
+        : "Paste a YouTube link, fetch Spotify tracks, or convert local files. Nothing touches the database until something is imported.";
 
   return (
     <main
@@ -5256,9 +5316,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           );
                         })
                       ) : (
-                        <div className="emptyState homeShelfEmpty">
-                          <strong>no songs yet</strong>
-                          <p>Import songs to start building your local library.</p>
+                        <div className="emptyState homeShelfEmpty homeShelfMascotEmptyV501">
+                          <MascotStateArt state="empty" className="homeShelfEmptyMascotV501" />
+                          <span className="mascotEmptyCopyV496">
+                            <strong>no songs yet</strong>
+                            <p>Import songs to start building your local library.</p>
+                          </span>
                         </div>
                       )}
                     </div>
@@ -5426,7 +5489,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </div>
 
                     {missingFileCount > 0 ? (
-                      <div className="libraryMissingStripV039" role="status" aria-live="polite">
+                      <div className="libraryMissingStripV039 libraryMissingMascotStripV501" role="status" aria-live="polite">
+                        <MascotStateArt state="warning" className="libraryMissingMascotV501" />
                         <div>
                           <strong>{libraryMissingLabel}</strong>
                           <span>saved in Localtify, but the audio file is not on this PC.</span>
@@ -5494,6 +5558,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       title={showingMissingFiles ? "All files are cozy" : view === "liked" ? "No liked songs yet" : query.trim() ? "No songs found" : "No songs yet"}
                       message={showingMissingFiles ? "Every song Localtify knows about is available on this PC right now." : view === "liked" ? "Tap the heart on any song you enjoy and it will show up here." : query.trim() ? "Nothing matched that search. Try a softer title, artist, album, or file name." : "Drop your music here and I’ll keep it cozy."}
                       detail={showingMissingFiles ? "Switch back to all tracks to continue browsing your library." : view === "liked" ? "This is only your local library. Nothing is uploaded anywhere." : query.trim() ? "Your library is still here, the search just got too specific." : "Import a few songs and Localtify will build your shelves, albums, covers, and playlists from them."}
+                      mascotState={showingMissingFiles ? "happy" : query.trim() ? "question" : view === "liked" ? "empty" : "empty"}
                       actions={showingMissingFiles ? (
                         <button className="softButton" type="button" onClick={() => setLibraryFilterMode?.("all")}>show all tracks</button>
                       ) : view === "liked" ? (
@@ -6287,6 +6352,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </div>
                   </div>
 
+                  <MascotHelperBubble
+                    state={downloadMascotState}
+                    tone={downloadMascotTone}
+                    eyebrow="download helper"
+                    title={downloadMascotTitle}
+                    message={downloadMascotMessage}
+                  />
+
                   {/* -- Source tabs -------------------------------- */}
                   <div className="downloadTabStrip">
                     <button
@@ -6553,6 +6626,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             >
                               <div className="downloadQueueTop">
                                 <span className="downloadQueueIndex">{String(index + 1).padStart(2, "0")}</span>
+                                <MascotStateArt
+                                  state={failed ? "error" : downloadedNotImported ? "warning" : done ? "happy" : "loading"}
+                                  className="downloadQueueMascotV501"
+                                />
                                 <div>
                                   <strong>{item.filename || item.title}</strong>
                                   <p>{item.message || downloadStatusLabel(item.status)}</p>
@@ -6601,6 +6678,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       title="No downloads yet"
                       message="Paste a link and Localtify will bring the audio home."
                       detail="YouTube links go in the YouTube tab. Spotify playlists, albums, or tracks go in the Spotify tab."
+                      mascotState="empty"
                       actions={
                         <>
                           <button className="mainAction" type="button" onClick={() => setDownloadsTab("youtube")}>YouTube download</button>
@@ -6620,6 +6698,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     <button className="heroMain" onClick={convertLocalMedia} disabled={convertBusy}>
                       {convertBusy ? "converting..." : "choose files"}
                     </button>
+
+                    {convertBusy ? <MascotStateArt state="loading" className="converterMascotV501" /> : null}
 
                     {convertBusy ? (
                       <div className="converterProgress">
@@ -6648,6 +6728,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             className={failed ? "downloadResult bad downloadResultV326" : imported ? "downloadResult ok downloadResultV326" : "downloadResult warn downloadResultV326"}
                           >
                             <span><ResultStatusIcon failed={failed} imported={imported} /></span>
+                            <MascotStateArt
+                              state={failed ? "error" : imported ? "happy" : "warning"}
+                              className="downloadResultMascotV501"
+                            />
 
                             <div>
                               <strong>{failed ? "Download failed" : imported ? "Added to library" : "Downloaded, not imported"}</strong>
