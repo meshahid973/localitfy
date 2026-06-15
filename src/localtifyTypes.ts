@@ -1,54 +1,5 @@
-// @ts-nocheck
-/* localtify 0.3.9 V473 — shared domain/view types.
-   These are currently re-exported from LocaltifyAppView so the split is safe.
-   After this builds cleanly, the actual type declarations can be moved here without touching App.tsx again. */
-export type {
-  AppToastKind,
-  AutoUpdateEvent,
-  CoverAverageStyle,
-  CoverColorSyncMode,
-  CoverMood,
-  CustomThemeColorKey,
-  CustomThemeColorPatch,
-  CustomThemePreset,
-  DiscordActivityStyle,
-  DiscordArtMode,
-  DiscordSecondLine,
-  DiscordTitleCleanup,
-  DownloadQueueItem,
-  DownloadResult,
-  HomeAlbumCardItemProps,
-  ImportAnimationPhase,
-  ImportAnimationState,
-  LibraryDropSide,
-  LibraryDropTarget,
-  LocaltifyAppViewProps,
-  PlaybackUrlCacheEntry,
-  PlaybackUrlResult,
-  PixelArtAsset,
-  PixelArtBridgeAsset,
-  Playlist,
-  PlaylistSummary,
-  QueueHistoryItem,
-  RuntimePixelArtAsset,
-  SearchQueryInfo,
-  SecretMode,
-  SecretTriggerMode,
-  Settings,
-  SettingsCategory,
-  SmartSongMetadata,
-  Song,
-  SongContextMenuState,
-  SongInteractionHandlers,
-  SongRowItemProps,
-  SongSearchEntry,
-  SpotifyTrack,
-  ThemeId,
-  ThemeVisualPalette,
-  UpdatePromptState,
-  View,
-  VirtualHomeSongCardsProps,
-  VirtualPlaylistTrackListProps,
-  VirtualSongRowsProps
-} from "./LocaltifyAppView";
-
+export type * from "./types/song";
+export type * from "./types/downloads";
+export type * from "./types/settings";
+export type * from "./types/playlists";
+export type * from "./types/theme";

@@ -6,20 +6,9 @@ import type { LucideIcon } from "lucide-react";
 import UpdateIsland from "./app/UpdateIsland";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FastAverageColor } from "fast-average-color";
+import { mascotAssets, type MascotStateKey } from "./localtifyAssets";
+import { getDownloadPageState } from "./features/downloads/downloadState";
 
-const MASCOT_STATE_IMAGE_SRC = {
-  empty: new URL("./assets/empty-state.png", import.meta.url).href,
-  happy: new URL("./assets/happy-state.png", import.meta.url).href,
-  question: new URL("./assets/question-state.png", import.meta.url).href,
-  info: new URL("./assets/info-state.png", import.meta.url).href,
-  warning: new URL("./assets/warning-state.png", import.meta.url).href,
-  danger: new URL("./assets/danger-state.png", import.meta.url).href,
-  error: new URL("./assets/error-state.png", import.meta.url).href,
-  loading: new URL("./assets/loading-state.png", import.meta.url).href,
-  confused: new URL("./assets/question-state.png", import.meta.url).href,
-  neutral: new URL("./assets/empty-state.png", import.meta.url).href
-} as const;
-type MascotStateKey = keyof typeof MASCOT_STATE_IMAGE_SRC;
 
 function MascotStateArt({
   state = "neutral",
@@ -28,7 +17,7 @@ function MascotStateArt({
   state?: MascotStateKey;
   className?: string;
 }) {
-  const src = MASCOT_STATE_IMAGE_SRC[state] || MASCOT_STATE_IMAGE_SRC.neutral;
+  const src = mascotAssets[state] || mascotAssets.neutral;
   return (
     <img
       className={`mascotStateArtV496 mascotState-${state} ${className}`.trim()}
@@ -4806,41 +4795,23 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const mascotDebugMode =
     typeof window !== "undefined" &&
     window.localStorage.getItem("localtify:mascotDebug") === "1";
-  const downloadWorking =
-    Boolean(downloadBusy || spotifyDownloadBusy || convertBusy) ||
-    downloadQueue.some((item: any) => ["queued", "working", "downloading", "fetching", "converting"].includes(String(item.status || "").toLowerCase()));
-  const downloadHasFailure =
-    downloadQueue.some((item: any) => ["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase())) ||
-    downloadResults.some((item: any) => item && item.ok === false);
-  const downloadHasSuccess =
-    downloadQueue.some((item: any) => String(item.status || "").toLowerCase() === "done" && item.importedToLibrary !== false) ||
-    downloadResults.some((item: any) => item && item.ok !== false && item.importedToLibrary !== false);
-  const downloadMascotState: MascotStateKey = downloadWorking
-    ? "loading"
-    : downloadHasFailure
-      ? "error"
-      : downloadHasSuccess
-        ? "happy"
-        : "info";
-  const downloadMascotTone: LocaltifyStateCardTone = downloadHasFailure ? "error" : downloadHasSuccess ? "success" : "info";
-  const downloadMascotTitle = downloadWorking
-    ? "working on your downloads"
-    : downloadHasFailure
-      ? "download needs attention"
-      : downloadHasSuccess
-        ? "download finished"
-        : "need help downloading?";
-  const downloadMascotMessage = downloadWorking
-    ? "Keep this open and I’ll show progress here while Localtify downloads, converts, and imports."
-    : downloadHasFailure
-      ? "Something failed safely. Use retry failed, copy the error, or open the folder to inspect the file."
-      : downloadHasSuccess
-        ? "Nice, the latest finished files are ready below. Open them in your library or clear finished items."
-        : "Paste a YouTube link, fetch Spotify tracks, or convert local files. Nothing touches the database until something is imported.";
-  const failedDownloadQueueItems = downloadQueue.filter((item: any) => ["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase()));
-  const finishedDownloadQueueItems = downloadQueue.filter((item: any) => String(item.status || "").toLowerCase() === "done");
-  const failedDownloadResults = downloadResults.filter((item: any) => item && item.ok === false);
-  const firstDownloadError = failedDownloadQueueItems[0]?.error || failedDownloadResults[0]?.error || spotifyFetchError || "";
+  const downloadPageState = getDownloadPageState({
+    downloadBusy,
+    spotifyDownloadBusy,
+    convertBusy,
+    downloadQueue,
+    downloadResults,
+    spotifyFetchError
+  });
+  const downloadWorking = downloadPageState.downloadWorking;
+  const downloadMascotState = downloadPageState.mascotState as MascotStateKey;
+  const downloadMascotTone = downloadPageState.tone as LocaltifyStateCardTone;
+  const downloadMascotTitle = downloadPageState.title;
+  const downloadMascotMessage = downloadPageState.message;
+  const failedDownloadQueueItems = downloadPageState.failedQueueItems;
+  const finishedDownloadQueueItems = downloadPageState.finishedQueueItems;
+  const failedDownloadResults = downloadPageState.failedResults;
+  const firstDownloadError = downloadPageState.firstError;
   const copyDownloadError = async (errorText?: string) => {
     const text = String(errorText || firstDownloadError || "No download error found.");
     try {
