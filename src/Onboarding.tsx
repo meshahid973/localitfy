@@ -52,7 +52,7 @@ const THEME_CHOICES: ThemeChoice[] = [
 ];
 
 const STEPS: StepMeta[] = [
-  { id: "welcome", label: "welcome", eyebrow: "first run", title: "your local music, but cleaner" },
+  { id: "welcome", label: "welcome", eyebrow: "first run", title: "make your local library feel alive" },
   { id: "style", label: "style", eyebrow: "look", title: "pick the starting mood" },
   { id: "import", label: "import", eyebrow: "library", title: "bring your songs in" },
   { id: "downloads", label: "downloads", eyebrow: "tools", title: "youtube and spotify later" },
@@ -241,7 +241,7 @@ export default function Onboarding({
     if (busyAction === "start") return "opening localtify...";
     if (step === 2 && importState === "working") return "importing...";
     if (step === 2 && !libraryGateReady) return "import or skip first";
-    if (step === STEPS.length - 1) return "start listening";
+    if (step === STEPS.length - 1) return "open my library";
     return "continue";
   }
 
@@ -366,11 +366,7 @@ export default function Onboarding({
             </div>
           </div>
 
-          <div className="onboardingHeaderMeta">
-            <span>v{appVersion}</span>
-            <span>{songsCount} tracks</span>
-            <span>{audioStarted ? "intro sound on" : audioBlocked ? "click to enable sound" : "intro sound ready"}</span>
-          </div>
+
         </header>
 
         <div className="onboardingProgress" aria-label={`setup progress ${step + 1} of ${STEPS.length}`}>
@@ -381,38 +377,27 @@ export default function Onboarding({
           <div className="onboardingProgressTrack" aria-hidden="true"><span /></div>
         </div>
 
-        <nav className="onboardingStepTabs" aria-label="onboarding steps">
-          {STEPS.map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              className={index === step ? "active" : index < step ? "done" : ""}
-              onClick={() => goToStep(index)}
-              disabled={busy}
-              aria-current={index === step ? "step" : undefined}
-            >
-              <b>{index + 1}</b>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
         <div className="onboardingBody">
           <section key={`${activeStep.id}-${direction}`} className={`onboardingSlide ${direction === 1 ? "slideForward" : "slideBack"}`} aria-live="polite">
             {step === 0 && (
-              <div className="onboardingContentLayout twoCol">
+              <div className="onboardingContentLayout twoCol onboardingWelcomeV505">
                 <div className="onboardingHeroCopy">
                   <p className="onboardingKicker">welcome</p>
                   <h2>{activeStep.title}</h2>
                   <p className="onboardingLead">
-                    localtify keeps your music local, gives it a proper player, and makes the whole library feel way more polished from the start.
+                    Localtify keeps your songs on your device, gives them covers, playlists, downloads, and a player that actually feels polished.
+                  </p>
+
+                  <p className="onboardingTrustLineV506">
+                    No account needed. Local files stay local. Change everything later.
                   </p>
                 </div>
-                <div className="onboardingFeatureGrid cleaner">
-                  <div><b>local library</b><small>files, search, queue, and playlists</small></div>
-                  <div><b>pixel covers</b><small>cover gallery, custom art, and randomizer</small></div>
-                  <div><b>downloads</b><small>queue, retry, auto-add, and progress</small></div>
-                  <div><b>discord</b><small>optional rich presence after setup</small></div>
+
+                <div className="onboardingFeatureGrid cleaner onboardingBenefitGridV505">
+                  <div><b>Play local songs beautifully</b><small>A clean player, queue, search, and smooth browsing.</small></div>
+                  <div><b>Fix covers and messy metadata</b><small>Repair missing covers and keep your library tidy.</small></div>
+                  <div><b>Download and import without chaos</b><small>Links, retries, conversion, and auto-add when needed.</small></div>
+                  <div><b>Optional Discord presence</b><small>Show what you’re listening to only when you want it on.</small></div>
                 </div>
               </div>
             )}
@@ -457,7 +442,7 @@ export default function Onboarding({
                   <p className="onboardingKicker">library</p>
                   <h2>{activeStep.title}</h2>
                   <p className="onboardingLead">
-                    Import now without leaving onboarding. When the import finishes, this screen stays here and Continue unlocks.
+                    Choose your songs or skip safely. Localtify never deletes your files during setup.
                   </p>
                 </div>
                 <div className={`onboardingUtilityPanel importState-${importState} ${libraryGateReady ? "ready" : ""}`}>
@@ -499,7 +484,7 @@ export default function Onboarding({
                   <p className="onboardingKicker">downloads</p>
                   <h2>{activeStep.title}</h2>
                   <p className="onboardingLead">
-                    YouTube links, Spotify public playlist imports, local conversion, retry queue, and auto-add all live in Downloads after setup.
+                    Downloads stay inside Localtify with retries, conversion, progress, and a clean folder shortcut when you need it.
                   </p>
                 </div>
                 <div className="onboardingUtilityPanel">
@@ -523,7 +508,7 @@ export default function Onboarding({
                   <p className="onboardingKicker">finish</p>
                   <h2>your library is ready</h2>
                   <p className="onboardingLead">
-                    Start listening now. The real app loads only after this screen closes, so onboarding stays clean and fast the whole time.
+                    Everything is ready. Open your library now, or change these choices later from Settings.
                   </p>
                 </div>
                 <div className="onboardingSummaryGrid cleaner">
@@ -541,7 +526,7 @@ export default function Onboarding({
 
         <footer className="onboardingFooter">
           <button type="button" className="onboardingSkip" onClick={() => void finishOnboarding("skip")} disabled={busy}>
-            skip setup
+            skip safely
           </button>
           <div className="onboardingFooterActions">
             <button type="button" className="onboardingBack" onClick={goBack} disabled={busy || step === 0}>back</button>

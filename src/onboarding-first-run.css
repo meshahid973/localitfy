@@ -923,3 +923,413 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   }
 }
 /* end localtify v499 */
+
+/* localtify v505 — onboarding first impression cleanup */
+.localitfyOnboardingShell{
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  width: min(1080px, calc(100vw - 190px));
+  padding: 22px 24px 20px;
+  overflow: visible;
+}
+
+.onboardingHeader{
+  padding-right: clamp(80px, 9vw, 132px);
+}
+
+.onboardingHeaderMeta,
+.onboardingStepTabs{
+  display: none !important;
+}
+
+.onboardingProgress{
+  position: relative;
+  z-index: 5;
+}
+
+.onboardingProgressTop{
+  margin-bottom: 8px;
+}
+
+.onboardingProgressTop span{
+  color: rgba(var(--onboarding-accent-rgb), .92);
+}
+
+.onboardingProgressTop strong{
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255,255,255,.58);
+  background: rgba(255,255,255,.032);
+  border: 1px solid rgba(255,255,255,.055);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.onboardingBody{
+  position: relative;
+  z-index: 4;
+  min-height: 360px;
+  border-color: rgba(255,255,255,.045);
+  background:
+    radial-gradient(circle at 102% 48%, rgba(var(--onboarding-accent-rgb), .07), transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,.006));
+}
+
+.onboardingWelcomeV505{
+  grid-template-columns: minmax(300px, .92fr) minmax(0, 1.08fr);
+  padding-right: clamp(52px, 8vw, 108px);
+}
+
+.onboardingHeroCopy h2{
+  max-width: 8.5ch;
+}
+
+.onboardingWelcomeV505 .onboardingHeroCopy h2{
+  max-width: 9.2ch;
+  font-size: clamp(54px, 5vw, 74px);
+}
+
+.onboardingWelcomeV505 .onboardingLead{
+  max-width: 42ch;
+  color: rgba(255,255,255,.68);
+}
+
+.onboardingTrustStripV505{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 18px;
+  max-width: 520px;
+}
+
+.onboardingTrustStripV505 span{
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255,255,255,.72);
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.055);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: -.01em;
+  text-transform: lowercase;
+}
+
+.onboardingMascotBubbleV505{
+  position: relative;
+  margin-top: 14px;
+  max-width: 430px;
+  padding: 12px 14px;
+  border-radius: 16px 16px 16px 6px;
+  color: rgba(255,255,255,.86);
+  background:
+    linear-gradient(180deg, rgba(var(--onboarding-accent-rgb), .10), rgba(255,255,255,.028)),
+    rgba(255,255,255,.025);
+  border: 1px solid rgba(var(--onboarding-accent-rgb), .18);
+  box-shadow:
+    0 12px 26px rgba(0,0,0,.16),
+    inset 0 1px 0 rgba(255,255,255,.04);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.38;
+}
+
+.onboardingMascotBubbleV505::after{
+  content: "";
+  position: absolute;
+  right: -8px;
+  top: 18px;
+  width: 14px;
+  height: 14px;
+  transform: rotate(45deg);
+  background: rgba(255,255,255,.035);
+  border-top: 1px solid rgba(var(--onboarding-accent-rgb), .16);
+  border-right: 1px solid rgba(var(--onboarding-accent-rgb), .16);
+}
+
+.onboardingBenefitGridV505{
+  gap: 10px;
+}
+
+.onboardingBenefitGridV505 > div{
+  min-height: 104px;
+  padding: 16px 16px 15px;
+  border-radius: 18px;
+  border-color: rgba(255,255,255,.055);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.014)),
+    rgba(255,255,255,.018);
+  box-shadow: none;
+}
+
+.onboardingBenefitGridV505 > div:hover{
+  transform: none;
+  border-color: rgba(var(--onboarding-accent-rgb), .16);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.018)),
+    rgba(255,255,255,.02);
+}
+
+.onboardingBenefitGridV505 b{
+  margin-bottom: 8px;
+  font-size: 15px;
+  line-height: 1.08;
+  letter-spacing: -.025em;
+}
+
+.onboardingBenefitGridV505 small{
+  color: rgba(255,255,255,.56);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.onboardingMascotPeekWrapV499{
+  right: clamp(-178px, -12vw, -136px);
+  top: 54%;
+  z-index: 6;
+  width: clamp(220px, 17.5vw, 286px);
+  opacity: .98;
+  filter:
+    drop-shadow(0 26px 42px rgba(0, 0, 0, 0.38))
+    drop-shadow(0 0 28px rgba(var(--onboarding-accent-rgb), 0.16));
+}
+
+.onboardingMascotPeekSoftEdgeV499{
+  right: clamp(54px, 4.6vw, 72px);
+  top: 7%;
+  width: clamp(22px, 2.2vw, 36px);
+  height: 84%;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.022)),
+    linear-gradient(90deg, rgba(var(--onboarding-accent-rgb), .06), rgba(7,8,12,.98) 42%, rgba(7,8,12,.88));
+  opacity: .98;
+}
+
+.onboardingSkip{
+  color: rgba(255,255,255,.72);
+}
+
+.onboardingSkip::after{
+  content: " — nothing is locked";
+  color: rgba(255,255,255,.36);
+  font-weight: 750;
+}
+
+.onboardingContinue{
+  min-width: 116px;
+}
+
+@media (max-width: 1120px){
+  .localitfyOnboardingShell{
+    width: min(960px, calc(100vw - 80px));
+  }
+
+  .onboardingWelcomeV505{
+    padding-right: 0;
+  }
+
+  .onboardingMascotPeekWrapV499{
+    right: -154px;
+    width: 236px;
+    opacity: .88;
+  }
+}
+
+@media (max-width: 860px){
+  .localitfyOnboardingShell{
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  .onboardingHeader{
+    padding-right: 0;
+  }
+
+  .onboardingWelcomeV505{
+    grid-template-columns: 1fr;
+  }
+
+  .onboardingMascotBubbleV505::after{
+    display: none;
+  }
+
+  .onboardingMascotPeekWrapV499{
+    right: -118px;
+    top: 160px;
+    width: 188px;
+    opacity: .36;
+  }
+
+  .onboardingSkip::after{
+    content: "";
+  }
+}
+/* end localtify v505 */
+
+/* localtify v506 — onboarding layout fix after first impression test */
+.localitfyOnboardingShell{
+  width: min(1120px, calc(100vw - 180px));
+  min-height: 600px;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+
+.onboardingHeader{
+  min-height: 62px;
+  padding-right: clamp(96px, 11vw, 160px);
+}
+
+.onboardingBody{
+  min-height: 390px;
+  overflow: hidden;
+}
+
+.onboardingSlide{
+  padding: 30px 32px;
+}
+
+.onboardingWelcomeV505{
+  grid-template-columns: minmax(330px, 0.92fr) minmax(360px, 1.08fr);
+  gap: clamp(22px, 3vw, 42px);
+  padding-right: clamp(104px, 11vw, 160px);
+}
+
+.onboardingWelcomeV505 .onboardingHeroCopy h2{
+  max-width: 9.6ch;
+  font-size: clamp(52px, 4.75vw, 72px);
+}
+
+.onboardingWelcomeV505 .onboardingLead{
+  max-width: 43ch;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.onboardingTrustStripV505,
+.onboardingMascotBubbleV505{
+  display: none !important;
+}
+
+.onboardingTrustLineV506{
+  max-width: 460px;
+  margin: 16px 0 0;
+  color: rgba(255,255,255,.58);
+  font-size: 12px;
+  font-weight: 820;
+  line-height: 1.45;
+  letter-spacing: -.01em;
+}
+
+.onboardingTrustLineV506::before{
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 999px;
+  display: inline-block;
+  vertical-align: 1px;
+  background: var(--onboarding-accent);
+  box-shadow: 0 0 0 4px rgba(var(--onboarding-accent-rgb), .105);
+}
+
+.onboardingBenefitGridV505{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-self: center;
+}
+
+.onboardingBenefitGridV505 > div{
+  min-height: 98px;
+  padding: 15px 15px 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.012)),
+    rgba(255,255,255,.016);
+}
+
+.onboardingBenefitGridV505 b{
+  font-size: 14px;
+}
+
+.onboardingBenefitGridV505 small{
+  font-size: 12px;
+  line-height: 1.38;
+}
+
+.onboardingMascotPeekWrapV499{
+  right: clamp(-104px, -7.5vw, -72px);
+  top: 51%;
+  width: clamp(244px, 18.8vw, 318px);
+  opacity: .98;
+  z-index: 5;
+}
+
+.onboardingMascotPeekImageV499{
+  object-position: left center;
+}
+
+.onboardingMascotPeekSoftEdgeV499{
+  right: clamp(64px, 4.8vw, 86px);
+  top: 5%;
+  width: clamp(26px, 2.35vw, 40px);
+  height: 88%;
+  opacity: .98;
+}
+
+.onboardingFooter{
+  min-height: 54px;
+}
+
+.onboardingSkip{
+  padding-inline: 16px;
+}
+
+.onboardingSkip::after{
+  content: "";
+}
+
+@media (max-width: 1120px){
+  .localitfyOnboardingShell{
+    width: min(980px, calc(100vw - 72px));
+  }
+
+  .onboardingWelcomeV505{
+    grid-template-columns: minmax(0, 1fr);
+    padding-right: 0;
+  }
+
+  .onboardingBenefitGridV505{
+    max-width: 680px;
+  }
+
+  .onboardingMascotPeekWrapV499{
+    right: -126px;
+    width: 248px;
+    opacity: .56;
+  }
+}
+
+@media (max-width: 860px){
+  .localitfyOnboardingShell{
+    min-height: 0;
+  }
+
+  .onboardingBody{
+    min-height: 0;
+  }
+
+  .onboardingWelcomeV505{
+    grid-template-columns: 1fr;
+  }
+
+  .onboardingBenefitGridV505{
+    grid-template-columns: 1fr;
+  }
+
+  .onboardingMascotPeekWrapV499{
+    display: none;
+  }
+}
+/* end localtify v506 */
