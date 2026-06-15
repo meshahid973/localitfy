@@ -20139,3 +20139,44 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 /* end localtify v511 */
+
+
+/* localtify v512 — downloads error cleanup */
+.downloadHelperHeroErrorV512{
+  grid-template-columns: clamp(112px, 9vw, 148px) minmax(0, 1fr) auto !important;
+  min-height: 124px !important;
+  padding-block: 14px !important;
+}
+
+.downloadHelperHeroErrorV512 .mascotHelperArtV501{
+  --mascot-size: clamp(116px, 9.8vw, 156px) !important;
+  --mascot-max-height: 160px !important;
+  margin: -18px 0 !important;
+  filter: drop-shadow(0 18px 36px rgba(255, 92, 122, .18));
+}
+
+.downloadHelperHeroErrorV512 .mascotHelperCopyV501 strong{
+  font-size: clamp(22px, 2vw, 32px) !important;
+}
+
+.downloadHelperHeroErrorV512 .mascotHelperCopyV501 span{
+  max-width: 720px !important;
+}
+
+.downloadResultsHeadV502 > div{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 920px){
+  .downloadHelperHeroErrorV512{
+    grid-template-columns: 1fr !important;
+  }
+
+  .downloadHelperHeroErrorV512 .mascotHelperArtV501{
+    justify-self: start;
+    margin: 0 !important;
+  }
+}
+/* end localtify v512 */

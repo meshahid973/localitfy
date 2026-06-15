@@ -2701,7 +2701,8 @@ function MascotHelperBubble({
   title,
   message,
   actions,
-  hideMascot = false
+  hideMascot = false,
+  className = ""
 }: {
   state?: MascotStateKey;
   tone?: LocaltifyStateCardTone;
@@ -2710,9 +2711,10 @@ function MascotHelperBubble({
   message: string;
   actions?: ReactNode;
   hideMascot?: boolean;
+  className?: string;
 }) {
   return (
-    <aside className={`mascotHelperBubbleV501 mascotHelper-${state} ${tone} ${hideMascot ? "noMascotV511" : ""}`} role="status">
+    <aside className={`mascotHelperBubbleV501 mascotHelper-${state} ${tone} ${hideMascot ? "noMascotV511" : ""} ${className}`.trim()} role="status">
       {!hideMascot ? <MascotStateArt state={state} className="mascotHelperArtV501" /> : null}
       <div className="mascotHelperCopyV501">
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
@@ -4842,6 +4844,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const failedDownloadQueueItems = downloadQueue.filter((item: any) => ["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase()));
   const finishedDownloadQueueItems = downloadQueue.filter((item: any) => String(item.status || "").toLowerCase() === "done");
   const failedDownloadResults = downloadResults.filter((item: any) => item && item.ok === false);
+  const visibleDownloadQueueItems = downloadQueue.filter((item: any) => !["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase()));
+  const visibleDownloadResults = downloadResults.filter((item: any) => !(item && item.ok === false));
   const firstDownloadError = failedDownloadQueueItems[0]?.error || failedDownloadResults[0]?.error || spotifyFetchError || "";
   const copyDownloadError = async (errorText?: string) => {
     const text = String(errorText || firstDownloadError || "No download error found.");
@@ -6381,7 +6385,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     eyebrow="download helper"
                     title={downloadMascotTitle}
                     message={downloadMascotMessage}
-                    hideMascot
+                    className={downloadHasFailure ? "downloadHelperHeroErrorV512" : ""}
                     actions={
                       <>
                         <button className="softButton mascotDownloadActionV502" type="button" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
@@ -6637,12 +6641,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   )}
 
                   {/* -- Shared: queue, converter, results ----------- */}
-                  {downloadQueue.length ? (
+                  {visibleDownloadQueueItems.length ? (
                     <div className="downloadQueuePanel">
                       <div className="panelHead smallPanelHead">
                         <div>
                           <p className="eyebrow">queue</p>
-                          <h3>{downloadQueue.length} item{downloadQueue.length === 1 ? "" : "s"}</h3>
+                          <h3>{visibleDownloadQueueItems.length} item{visibleDownloadQueueItems.length === 1 ? "" : "s"}</h3>
                         </div>
                         <div className="downloadQueueHeaderActions downloadQueueHeaderActionsV502">
                           <span>{downloadBusy ? "working" : failedDownloadQueueItems.length ? "needs attention" : "ready"}</span>
@@ -6678,7 +6682,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       </div>
 
                       <div className="downloadQueueList">
-                        {downloadQueue.map((item, index) => {
+                        {visibleDownloadQueueItems.map((item, index) => {
                           const done = item.status === "done";
                           const failed = item.status === "failed" || item.status === "cancelled";
                           const downloadedNotImported = done && item.importedToLibrary === false;
@@ -6732,7 +6736,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     </div>
                   ) : null}
 
-                  {!downloadQueue.length && !downloadResults.length && !downloadBusy && !spotifyDownloadBusy ? (
+                  {!visibleDownloadQueueItems.length && !visibleDownloadResults.length && !downloadBusy && !spotifyDownloadBusy ? (
                     <LocaltifyStateCard
                       centered
                       cute
@@ -6779,7 +6783,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     ) : null}
                   </div>
 
-                  {downloadResults.length ? (
+                  {visibleDownloadResults.length ? (
                     <div className="downloadResults downloadResultsV031 downloadResultsGlowV502">
                       <div className="downloadResultsHeadV502">
                         <strong>finished downloads</strong>
@@ -6787,23 +6791,13 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           <button className="softButton tinyDownloadAction" type="button" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
                             open folder
                           </button>
-                          {failedDownloadResults.length ? (
-                            <>
-                              <button className="softButton tinyDownloadAction" type="button" onClick={retryFailedDownloads} disabled={downloadBusy || spotifyDownloadBusy}>
-                                retry failed
-                              </button>
-                              <button className="softButton tinyDownloadAction" type="button" onClick={() => void copyDownloadError()}>
-                                copy error
-                              </button>
-                            </>
-                          ) : null}
                           <button className="softButton tinyDownloadAction" type="button" onClick={() => clearFinishedDownloads?.()} disabled={downloadBusy}>
                             clear finished
                           </button>
                         </div>
                       </div>
 
-                      {downloadResults.map((item: any, index) => {
+                      {visibleDownloadResults.map((item: any, index) => {
                         const imported = item.importedToLibrary !== false;
                         const failed = !item.ok;
                         return (
