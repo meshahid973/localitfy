@@ -20080,3 +20080,62 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 /* end localtify v502 */
+
+/* localtify v511 — remove mascot clutter from downloads */
+.mascotHelperBubbleV501.noMascotV511{
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  min-height: 84px !important;
+  padding-block: 12px !important;
+}
+
+.mascotHelperBubbleV501.noMascotV511 .mascotHelperCopyV501 strong{
+  font-size: clamp(20px, 1.65vw, 26px) !important;
+}
+
+.mascotHelperBubbleV501.noMascotV511 .mascotHelperCopyV501 span{
+  max-width: 680px !important;
+}
+
+.spotifyErrorNoMascotV511{
+  grid-template-columns: minmax(0, 1fr) auto !important;
+}
+
+.spotifyErrorNoMascotV511 .spotifyErrorMascotArtV502{
+  display: none !important;
+}
+
+.downloadQueueTop{
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+}
+
+.downloadResultV326{
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+}
+
+.downloadQueueMascotV501,
+.downloadResultMascotV501{
+  display: none !important;
+}
+
+.downloadQueueItemV338{
+  min-height: 92px !important;
+}
+
+.downloadResultV326{
+  min-height: 78px !important;
+}
+
+.downloadResultsGlowV502{
+  padding-top: 12px !important;
+}
+
+@media (max-width: 820px){
+  .mascotHelperBubbleV501.noMascotV511{
+    grid-template-columns: 1fr !important;
+  }
+
+  .spotifyErrorNoMascotV511{
+    grid-template-columns: 1fr !important;
+  }
+}
+/* end localtify v511 */

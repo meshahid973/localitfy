@@ -6,9 +6,20 @@ import type { LucideIcon } from "lucide-react";
 import UpdateIsland from "./app/UpdateIsland";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FastAverageColor } from "fast-average-color";
-import { mascotAssets, type MascotStateKey } from "./localtifyAssets";
-import { getDownloadPageState } from "./features/downloads/downloadState";
 
+const MASCOT_STATE_IMAGE_SRC = {
+  empty: new URL("./assets/empty-state.png", import.meta.url).href,
+  happy: new URL("./assets/happy-state.png", import.meta.url).href,
+  question: new URL("./assets/question-state.png", import.meta.url).href,
+  info: new URL("./assets/info-state.png", import.meta.url).href,
+  warning: new URL("./assets/warning-state.png", import.meta.url).href,
+  danger: new URL("./assets/danger-state.png", import.meta.url).href,
+  error: new URL("./assets/error-state.png", import.meta.url).href,
+  loading: new URL("./assets/loading-state.png", import.meta.url).href,
+  confused: new URL("./assets/question-state.png", import.meta.url).href,
+  neutral: new URL("./assets/empty-state.png", import.meta.url).href
+} as const;
+type MascotStateKey = keyof typeof MASCOT_STATE_IMAGE_SRC;
 
 function MascotStateArt({
   state = "neutral",
@@ -17,7 +28,7 @@ function MascotStateArt({
   state?: MascotStateKey;
   className?: string;
 }) {
-  const src = mascotAssets[state] || mascotAssets.neutral;
+  const src = MASCOT_STATE_IMAGE_SRC[state] || MASCOT_STATE_IMAGE_SRC.neutral;
   return (
     <img
       className={`mascotStateArtV496 mascotState-${state} ${className}`.trim()}
@@ -2689,7 +2700,8 @@ function MascotHelperBubble({
   eyebrow,
   title,
   message,
-  actions
+  actions,
+  hideMascot = false
 }: {
   state?: MascotStateKey;
   tone?: LocaltifyStateCardTone;
@@ -2697,10 +2709,11 @@ function MascotHelperBubble({
   title: string;
   message: string;
   actions?: ReactNode;
+  hideMascot?: boolean;
 }) {
   return (
-    <aside className={`mascotHelperBubbleV501 mascotHelper-${state} ${tone}`} role="status">
-      <MascotStateArt state={state} className="mascotHelperArtV501" />
+    <aside className={`mascotHelperBubbleV501 mascotHelper-${state} ${tone} ${hideMascot ? "noMascotV511" : ""}`} role="status">
+      {!hideMascot ? <MascotStateArt state={state} className="mascotHelperArtV501" /> : null}
       <div className="mascotHelperCopyV501">
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
         <strong>{title}</strong>
@@ -4795,23 +4808,41 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const mascotDebugMode =
     typeof window !== "undefined" &&
     window.localStorage.getItem("localtify:mascotDebug") === "1";
-  const downloadPageState = getDownloadPageState({
-    downloadBusy,
-    spotifyDownloadBusy,
-    convertBusy,
-    downloadQueue,
-    downloadResults,
-    spotifyFetchError
-  });
-  const downloadWorking = downloadPageState.downloadWorking;
-  const downloadMascotState = downloadPageState.mascotState as MascotStateKey;
-  const downloadMascotTone = downloadPageState.tone as LocaltifyStateCardTone;
-  const downloadMascotTitle = downloadPageState.title;
-  const downloadMascotMessage = downloadPageState.message;
-  const failedDownloadQueueItems = downloadPageState.failedQueueItems;
-  const finishedDownloadQueueItems = downloadPageState.finishedQueueItems;
-  const failedDownloadResults = downloadPageState.failedResults;
-  const firstDownloadError = downloadPageState.firstError;
+  const downloadWorking =
+    Boolean(downloadBusy || spotifyDownloadBusy || convertBusy) ||
+    downloadQueue.some((item: any) => ["queued", "working", "downloading", "fetching", "converting"].includes(String(item.status || "").toLowerCase()));
+  const downloadHasFailure =
+    downloadQueue.some((item: any) => ["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase())) ||
+    downloadResults.some((item: any) => item && item.ok === false);
+  const downloadHasSuccess =
+    downloadQueue.some((item: any) => String(item.status || "").toLowerCase() === "done" && item.importedToLibrary !== false) ||
+    downloadResults.some((item: any) => item && item.ok !== false && item.importedToLibrary !== false);
+  const downloadMascotState: MascotStateKey = downloadWorking
+    ? "loading"
+    : downloadHasFailure
+      ? "error"
+      : downloadHasSuccess
+        ? "happy"
+        : "info";
+  const downloadMascotTone: LocaltifyStateCardTone = downloadHasFailure ? "error" : downloadHasSuccess ? "success" : "info";
+  const downloadMascotTitle = downloadWorking
+    ? "working on your downloads"
+    : downloadHasFailure
+      ? "download needs attention"
+      : downloadHasSuccess
+        ? "download finished"
+        : "need help downloading?";
+  const downloadMascotMessage = downloadWorking
+    ? "Keep this open and I’ll show progress here while Localtify downloads, converts, and imports."
+    : downloadHasFailure
+      ? "Something failed safely. Use retry failed, copy the error, or open the folder to inspect the file."
+      : downloadHasSuccess
+        ? "Nice, the latest finished files are ready below. Open them in your library or clear finished items."
+        : "Paste a YouTube link, fetch Spotify tracks, or convert local files. Nothing touches the database until something is imported.";
+  const failedDownloadQueueItems = downloadQueue.filter((item: any) => ["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase()));
+  const finishedDownloadQueueItems = downloadQueue.filter((item: any) => String(item.status || "").toLowerCase() === "done");
+  const failedDownloadResults = downloadResults.filter((item: any) => item && item.ok === false);
+  const firstDownloadError = failedDownloadQueueItems[0]?.error || failedDownloadResults[0]?.error || spotifyFetchError || "";
   const copyDownloadError = async (errorText?: string) => {
     const text = String(errorText || firstDownloadError || "No download error found.");
     try {
@@ -6350,6 +6381,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     eyebrow="download helper"
                     title={downloadMascotTitle}
                     message={downloadMascotMessage}
+                    hideMascot
                     actions={
                       <>
                         <button className="softButton mascotDownloadActionV502" type="button" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
@@ -6471,8 +6503,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       </div>
 
                       {spotifyFetchError ? (
-                        <div className="spotifyError spotifyErrorV326 spotifyErrorMascotV502">
-                          <MascotStateArt state="question" className="spotifyErrorMascotArtV502" />
+                        <div className="spotifyError spotifyErrorV326 spotifyErrorMascotV502 spotifyErrorNoMascotV511">
                           <div>
                             <strong>Spotify needs attention</strong>
                             <span>{spotifyFetchError}</span>
@@ -6660,10 +6691,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             >
                               <div className="downloadQueueTop">
                                 <span className="downloadQueueIndex">{String(index + 1).padStart(2, "0")}</span>
-                                <MascotStateArt
-                                  state={failed ? "error" : downloadedNotImported ? "warning" : done ? "happy" : "loading"}
-                                  className="downloadQueueMascotV501"
-                                />
                                 <div>
                                   <strong>{item.filename || item.title}</strong>
                                   <p>{item.message || downloadStatusLabel(item.status)}</p>
@@ -6785,10 +6812,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             className={failed ? "downloadResult bad downloadResultV326" : imported ? "downloadResult ok downloadResultV326" : "downloadResult warn downloadResultV326"}
                           >
                             <span><ResultStatusIcon failed={failed} imported={imported} /></span>
-                            <MascotStateArt
-                              state={failed ? "error" : imported ? "happy" : "warning"}
-                              className="downloadResultMascotV501"
-                            />
 
                             <div>
                               <strong>{failed ? "Download failed" : imported ? "Added to library" : "Downloaded, not imported"}</strong>
