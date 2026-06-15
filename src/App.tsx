@@ -550,15 +550,13 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
       releaseLabel: "AppImage / RPM / DEB",
       startupSettingSupported: false,
       desktopControlsLabel: "Linux desktop controls",
-      desktopControlsHelp: "Tray and media keys work where your Linux desktop environment exposes them. If a desktop blocks global media keys, the in-app player and tray still work.",
-      startupSettingLabel: "Linux autostart",
-      startupSettingHelp: "Linux autostart is desktop-specific, so Localtify keeps this manual for now instead of writing risky startup files.",
+      desktopControlsHelp: "Tray and media keys work where your Linux desktop environment exposes them. Windows startup is hidden here because Linux uses desktop-specific autostart files.",
+      startupSettingLabel: "Start localtify with Linux",
+      startupSettingHelp: "Linux autostart will be added later through a proper desktop-entry flow.",
       linuxInstallNotes: [
-        "AppImage: run chmod +x Localtify-0.4.0-x86_64.AppImage, then open it.",
-        "If AppImage will not launch, install FUSE/libfuse2 for your distro and try again.",
-        "DEB: best for Ubuntu, Debian, Linux Mint, and related distros.",
-        "RPM: best for Fedora, openSUSE, and RHEL-style distros.",
-        "Wayland/X11: Localtify uses an opaque native window and CSS-drawn blur for better compositor stability."
+        "AppImage: chmod +x Localtify-0.3.9-x86_64.AppImage, then run it directly.",
+        "RPM: for Fedora, openSUSE, and RHEL-style distros.",
+        "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
       ]
     };
   }
@@ -11352,6 +11350,7 @@ function MainModeApp() {
         >
           <SettingsCategoryContent
           settingsCategory={settingsCategory}
+        setSettingsCategory={setSettingsCategory}
         currentTheme={currentTheme}
         settings={settings}
         updateSetting={updateSetting}
