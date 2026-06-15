@@ -4833,10 +4833,31 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const downloadMascotMessage = downloadWorking
     ? "Keep this open and I’ll show progress here while Localtify downloads, converts, and imports."
     : downloadHasFailure
-      ? "Something failed safely. Use retry, check the link, or open the folder to inspect the file."
+      ? "Something failed safely. Use retry failed, copy the error, or open the folder to inspect the file."
       : downloadHasSuccess
         ? "Nice, the latest finished files are ready below. Open them in your library or clear finished items."
         : "Paste a YouTube link, fetch Spotify tracks, or convert local files. Nothing touches the database until something is imported.";
+  const failedDownloadQueueItems = downloadQueue.filter((item: any) => ["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase()));
+  const finishedDownloadQueueItems = downloadQueue.filter((item: any) => String(item.status || "").toLowerCase() === "done");
+  const failedDownloadResults = downloadResults.filter((item: any) => item && item.ok === false);
+  const firstDownloadError = failedDownloadQueueItems[0]?.error || failedDownloadResults[0]?.error || spotifyFetchError || "";
+  const copyDownloadError = async (errorText?: string) => {
+    const text = String(errorText || firstDownloadError || "No download error found.");
+    try {
+      await navigator.clipboard?.writeText(text);
+      setStatusText("download error copied");
+    } catch {
+      setStatusText(text);
+    }
+  };
+  const retryFailedDownloads = () => {
+    failedDownloadQueueItems.forEach((item: any) => {
+      void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "");
+    });
+    failedDownloadResults.forEach((item: any) => {
+      void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "");
+    });
+  };
 
   return (
     <main
@@ -6358,6 +6379,28 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     eyebrow="download helper"
                     title={downloadMascotTitle}
                     message={downloadMascotMessage}
+                    actions={
+                      <>
+                        <button className="softButton mascotDownloadActionV502" type="button" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
+                          open folder
+                        </button>
+                        {failedDownloadQueueItems.length || failedDownloadResults.length ? (
+                          <>
+                            <button className="softButton mascotDownloadActionV502" type="button" onClick={retryFailedDownloads} disabled={downloadBusy || spotifyDownloadBusy}>
+                              retry failed
+                            </button>
+                            <button className="softButton mascotDownloadActionV502" type="button" onClick={() => void copyDownloadError()}>
+                              copy error
+                            </button>
+                          </>
+                        ) : null}
+                        {finishedDownloadQueueItems.length ? (
+                          <button className="softButton mascotDownloadActionV502" type="button" onClick={() => clearFinishedDownloads?.()} disabled={downloadBusy || spotifyDownloadBusy}>
+                            clear finished
+                          </button>
+                        ) : null}
+                      </>
+                    }
                   />
 
                   {/* -- Source tabs -------------------------------- */}
@@ -6457,9 +6500,15 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       </div>
 
                       {spotifyFetchError ? (
-                        <div className="spotifyError spotifyErrorV326">
-                          <strong>Spotify needs attention</strong>
-                          <span>{spotifyFetchError}</span>
+                        <div className="spotifyError spotifyErrorV326 spotifyErrorMascotV502">
+                          <MascotStateArt state="question" className="spotifyErrorMascotArtV502" />
+                          <div>
+                            <strong>Spotify needs attention</strong>
+                            <span>{spotifyFetchError}</span>
+                          </div>
+                          <button className="softButton" type="button" onClick={() => void copyDownloadError(spotifyFetchError)}>
+                            copy error
+                          </button>
                         </div>
                       ) : null}
 
@@ -6593,19 +6642,33 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                           <p className="eyebrow">queue</p>
                           <h3>{downloadQueue.length} item{downloadQueue.length === 1 ? "" : "s"}</h3>
                         </div>
-                        <div className="downloadQueueHeaderActions">
-                          <span>{downloadBusy ? "working" : "ready"}</span>
+                        <div className="downloadQueueHeaderActions downloadQueueHeaderActionsV502">
+                          <span>{downloadBusy ? "working" : failedDownloadQueueItems.length ? "needs attention" : "ready"}</span>
                           <button
                             className="softButton tinyDownloadAction"
-                            onClick={() => clearFinishedDownloads?.()}
-                            disabled={downloadBusy || !downloadQueue.some((item) => item.status === "done")}
+                            onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}
                           >
-                            clear done
+                            folder
                           </button>
                           <button
                             className="softButton tinyDownloadAction"
+                            onClick={retryFailedDownloads}
+                            disabled={downloadBusy || !failedDownloadQueueItems.length}
+                          >
+                            retry failed
+                          </button>
+                          <button
+                            className="softButton tinyDownloadAction"
+                            onClick={() => clearFinishedDownloads?.()}
+                            disabled={downloadBusy || !finishedDownloadQueueItems.length}
+                          >
+                            clear finished
+                          </button>
+                          <button
+                            className="softButton tinyDownloadAction dangerTinyDownloadActionV502"
                             onClick={() => clearFailedDownloads?.()}
-                            disabled={downloadBusy || !downloadQueue.some((item) => item.status === "failed" || item.status === "cancelled")}
+                            disabled={downloadBusy || !failedDownloadQueueItems.length}
+                            title="clear failed/cancelled items from the queue"
                           >
                             clear failed
                           </button>
@@ -6652,7 +6715,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                               <div className="downloadQueueActions">
                                 {failed ? (
-                                  <button className="softButton" onClick={() => void retryDownload(item.url, item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                                  <>
+                                    <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url, item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                                    <button className="softButton" onClick={() => void copyDownloadError(item.error || item.message || item.url)}>copy error</button>
+                                  </>
                                 ) : null}
                                 {done && item.importedToLibrary !== false ? (
                                   <button className="softButton" onClick={() => openDownloadedSongInLibrary(item)}>open in library</button>
@@ -6716,8 +6782,28 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   </div>
 
                   {downloadResults.length ? (
-                    <div className="downloadResults downloadResultsV031">
-                      <strong>finished downloads</strong>
+                    <div className="downloadResults downloadResultsV031 downloadResultsGlowV502">
+                      <div className="downloadResultsHeadV502">
+                        <strong>finished downloads</strong>
+                        <div>
+                          <button className="softButton tinyDownloadAction" type="button" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
+                            open folder
+                          </button>
+                          {failedDownloadResults.length ? (
+                            <>
+                              <button className="softButton tinyDownloadAction" type="button" onClick={retryFailedDownloads} disabled={downloadBusy || spotifyDownloadBusy}>
+                                retry failed
+                              </button>
+                              <button className="softButton tinyDownloadAction" type="button" onClick={() => void copyDownloadError()}>
+                                copy error
+                              </button>
+                            </>
+                          ) : null}
+                          <button className="softButton tinyDownloadAction" type="button" onClick={() => clearFinishedDownloads?.()} disabled={downloadBusy}>
+                            clear finished
+                          </button>
+                        </div>
+                      </div>
 
                       {downloadResults.map((item: any, index) => {
                         const imported = item.importedToLibrary !== false;
@@ -6747,7 +6833,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             </div>
 
                             {failed ? (
-                              <button className="softButton" onClick={() => void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                              <span className="downloadResultActionsV502">
+                                <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                                <button className="softButton" onClick={() => void copyDownloadError(item.error || item.url || item.filename)}>copy error</button>
+                              </span>
                             ) : imported ? (
                               <button className="softButton" onClick={() => openDownloadedSongInLibrary(item)}>open in library</button>
                             ) : (

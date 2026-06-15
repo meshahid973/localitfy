@@ -19939,3 +19939,144 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 /* end localtify v501 */
+
+/* localtify v502 — downloads mascot glow-up actions */
+.downloadPanelV031{
+  overflow: visible !important;
+}
+
+.downloadHeroActionsCompactV475,
+.downloadQueueHeaderActionsV502,
+.downloadResultsHeadV502 > div,
+.downloadResultActionsV502{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.downloadQueueHeaderActionsV502 span{
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--lt-muted);
+  background: rgba(255,255,255,.035);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: lowercase;
+}
+
+.mascotDownloadActionV502{
+  min-height: 36px !important;
+  padding-inline: 13px !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+}
+
+.dangerTinyDownloadActionV502,
+.downloadRetryButtonV502{
+  border-color: rgba(255, 90, 120, .16) !important;
+  background:
+    linear-gradient(180deg, rgba(255,90,120,.095), rgba(255,255,255,.020)),
+    rgba(255,255,255,.018) !important;
+}
+
+.downloadRetryButtonV502:hover,
+.dangerTinyDownloadActionV502:hover{
+  border-color: rgba(255, 90, 120, .26) !important;
+  background:
+    linear-gradient(180deg, rgba(255,90,120,.13), rgba(255,255,255,.026)),
+    rgba(255,255,255,.022) !important;
+}
+
+.spotifyErrorMascotV502{
+  display: grid !important;
+  grid-template-columns: 66px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 14px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 190, 80, .15) !important;
+  background:
+    radial-gradient(circle at 6% 50%, rgba(255, 190, 80, .11), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.042), rgba(255,255,255,.016)),
+    rgba(0,0,0,.22) !important;
+}
+
+.spotifyErrorMascotArtV502{
+  --mascot-size: 68px;
+  --mascot-max-height: 72px;
+  margin: -10px 0;
+}
+
+.downloadResultsGlowV502{
+  position: relative;
+  overflow: visible;
+  padding-top: 14px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 5% 0%, rgba(var(--lt-accent-rgb), .09), transparent 36%),
+    rgba(255,255,255,.018);
+}
+
+.downloadResultsHeadV502{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.downloadResultsHeadV502 > strong{
+  color: var(--lt-text, #fff);
+  font-size: clamp(20px, 1.9vw, 30px);
+  line-height: .95;
+  letter-spacing: -.055em;
+}
+
+.downloadResultActionsV502{
+  justify-content: flex-end !important;
+}
+
+.downloadQueueItemV338.failed,
+.downloadQueueItemV338.cancelled,
+.downloadResult.bad{
+  border-color: rgba(255, 90, 120, .16) !important;
+  background:
+    radial-gradient(circle at 4% 16%, rgba(255,90,120,.09), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.018)),
+    rgba(255,255,255,.018) !important;
+}
+
+.downloadQueueItemV338.done,
+.downloadResult.ok{
+  border-color: rgba(var(--lt-accent-rgb), .13) !important;
+}
+
+.downloadQueueMascotV501,
+.downloadResultMascotV501{
+  filter:
+    drop-shadow(0 10px 14px rgba(0,0,0,.28))
+    drop-shadow(0 0 14px rgba(var(--lt-accent-rgb), .12)) !important;
+}
+
+@media (max-width: 820px){
+  .spotifyErrorMascotV502{
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    text-align: center !important;
+  }
+
+  .downloadResultsHeadV502{
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .downloadResultsHeadV502 > div{
+    justify-content: flex-start !important;
+  }
+}
+/* end localtify v502 */
