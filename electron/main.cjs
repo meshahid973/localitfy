@@ -9,6 +9,28 @@ const crypto = require("node:crypto");
 const { execFile } = require("node:child_process");
 const { pathToFileURL } = require("node:url");
 
+process.env.DOTENV_CONFIG_QUIET = process.env.DOTENV_CONFIG_QUIET || "true";
+process.env.DOTENVX_QUIET = process.env.DOTENVX_QUIET || "true";
+
+const LOCALTIFY_RENDERER_PROTOCOL = "localtify-renderer";
+
+try {
+  protocol.registerSchemesAsPrivileged([
+    {
+      scheme: LOCALTIFY_RENDERER_PROTOCOL,
+      privileges: {
+        standard: true,
+        secure: true,
+        supportFetchAPI: true,
+        corsEnabled: true,
+        stream: true
+      }
+    }
+  ]);
+} catch (error) {
+  console.log("[localtify renderer protocol scheme error]", error?.message || error);
+}
+
 function loadLocaltifyEnv() {
   const publicSpotifyClientId = "586c22791eb74d73b1c83db88f1d4c52";
 
@@ -846,19 +868,18 @@ function attachCloseToTray(win) {
 
 function updateNativeMediaState(payload = {}) {
   const volume = Number(payload.volume);
-  const has = (key) => Object.prototype.hasOwnProperty.call(payload || {}, key);
   nativeMediaState = {
     ...nativeMediaState,
-    isPlaying: has("isPlaying") ? Boolean(payload.isPlaying) : nativeMediaState.isPlaying,
+    isPlaying: Boolean(payload.isPlaying),
     volume: Number.isFinite(volume) ? Math.max(0, Math.min(1, volume)) : nativeMediaState.volume,
-    muted: has("muted") ? Boolean(payload.muted) : nativeMediaState.muted,
-    title: has("title") ? String(payload.title || "") : nativeMediaState.title,
-    artist: has("artist") ? String(payload.artist || "") : nativeMediaState.artist,
-    album: has("album") ? String(payload.album || "") : nativeMediaState.album,
-    coverUrl: has("coverUrl") ? String(payload.coverUrl || "") : nativeMediaState.coverUrl,
-    hasSong: has("hasSong") ? Boolean(payload.hasSong) : nativeMediaState.hasSong
+    muted: Boolean(payload.muted),
+    title: String(payload.title || ""),
+    artist: String(payload.artist || ""),
+    album: String(payload.album || ""),
+    coverUrl: String(payload.coverUrl || ""),
+    hasSong: Boolean(payload.hasSong)
   };
-  if (has("minimizeToTray")) {
+  if (Object.prototype.hasOwnProperty.call(payload, "minimizeToTray")) {
     minimizeToTray = Boolean(payload.minimizeToTray);
   }
   updateTrayMenu();
@@ -892,14 +913,6 @@ function setupNativeWindowsMediaIpc() {
     startWithWindows: getStartWithWindowsStatus(),
     trayReady: Boolean(tray),
     mediaKeysRegistered: nativeShortcutsRegistered
-  }));
-
-  ipcMain.handle("localitfy:player-command", async (_event, command = {}) => ({
-    ok: sendPlayerCommand(command),
-    command: {
-      ...command,
-      source: command?.source || "renderer"
-    }
   }));
 }
 
@@ -936,8 +949,9 @@ function setupAutoUpdater() {
   updaterReady = true;
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
-  autoUpdater.allowPrerelease = false;
+  autoUpdater.allowPrerelease = process.env.LOCALTIFY_ALLOW_PRERELEASE_UPDATES === "1";
   autoUpdater.allowDowngrade = false;
+  try { autoUpdater.logger = null; } catch {}
   autoUpdater.on("checking-for-update", () => {
     sendAutoUpdateEvent({ type: "checking", message: "checking for updates..." });
   });
@@ -989,12 +1003,26 @@ function setupAutoUpdater() {
   });
   autoUpdater.on("error", (error) => {
     updaterChecking = false;
+    if (isLinuxUpdateMetadataMissingError(error)) {
+      sendAutoUpdateEvent({
+        type: "not-available",
+        message: "linux update metadata is not available yet",
+        skipped: true,
+        platform: "linux"
+      });
+      return;
+    }
     sendAutoUpdateEvent({
       type: "error",
       message: "update check failed",
       error: error?.message || String(error || "unknown updater error")
     });
   });
+}
+
+function isLinuxUpdateMetadataMissingError(error) {
+  const text = String(error?.message || error || "");
+  return process.platform === "linux" && /latest-linux\.yml/i.test(text) && /404|Cannot find/i.test(text);
 }
 
 async function checkForUpdates(payload = {}) {
@@ -1011,6 +1039,15 @@ async function checkForUpdates(payload = {}) {
     return true;
   } catch (error) {
     updaterChecking = false;
+    if (isLinuxUpdateMetadataMissingError(error)) {
+      sendAutoUpdateEvent({
+        type: "not-available",
+        message: "linux update metadata is not available yet",
+        skipped: true,
+        platform: "linux"
+      });
+      return false;
+    }
     sendAutoUpdateEvent({
       type: "error",
       message: "update check failed",
@@ -1123,7 +1160,29 @@ function configureLocaltifyChromiumPerformance() {
   }
 
   if (process.platform === "linux") {
-    add("enable-transparent-visuals");
+    // AppImage/Linux safety: Fedora/Wayland can expose Vulkan through Ozone and
+    // abort the packaged renderer. For release builds, reliability matters more
+    // than GPU compositing. Users can opt back into Linux GPU/Wayland testing with:
+    // LOCALTIFY_LINUX_GPU=1 LOCALTIFY_ENABLE_WAYLAND=1 ./localtify.AppImage
+    const linuxGpuOptIn = process.env.LOCALTIFY_LINUX_GPU === "1";
+    const linuxWaylandOptIn = process.env.LOCALTIFY_ENABLE_WAYLAND === "1";
+
+    add("disable-vulkan");
+    add("disable-features", "Vulkan,VulkanFromANGLE,DefaultANGLEVulkan,VaapiVideoDecoder,UseChromeOSDirectVideoDecoder");
+    add("enable-features", "UseOzonePlatform");
+
+    if (!linuxWaylandOptIn) {
+      add("ozone-platform", "x11");
+      add("ozone-platform-hint", "x11");
+    }
+
+    if (app.isPackaged && !linuxGpuOptIn) {
+      // Do not disable the whole GPU on Linux. The earlier safety patch made the
+      // AppImage open, but software rendering made the UI extremely laggy.
+      // Vulkan/Wayland/video-decode are the risky parts, so keep those off while
+      // leaving normal compositing available.
+      add("disable-accelerated-video-decode");
+    }
   }
 
   return {
@@ -4086,6 +4145,118 @@ function getRendererIndexPath() {
 }
 
 
+let localtifyRendererProtocolReady = false;
+
+function safeRendererProtocolPathname(requestUrl) {
+  try {
+    const url = new URL(requestUrl);
+    const rawPath = decodeURIComponent(url.pathname || "/");
+    if (!rawPath || rawPath === "/" || rawPath === "/index.html") return "index.html";
+    return rawPath.replace(/^\/+/, "");
+  } catch {
+    return "index.html";
+  }
+}
+
+function getRendererProtocolEntryUrl() {
+  return `${LOCALTIFY_RENDERER_PROTOCOL}://app/index.html`;
+}
+
+function isPackagedLinuxAppImageRuntime() {
+  return Boolean(app.isPackaged && process.platform === "linux");
+}
+
+
+function getLocaltifyRendererMimeType(filePath) {
+  const ext = String(path.extname(filePath || "") || "").toLowerCase();
+  switch (ext) {
+    case ".html": return "text/html; charset=utf-8";
+    case ".js": return "text/javascript; charset=utf-8";
+    case ".mjs": return "text/javascript; charset=utf-8";
+    case ".css": return "text/css; charset=utf-8";
+    case ".json": return "application/json; charset=utf-8";
+    case ".svg": return "image/svg+xml";
+    case ".png": return "image/png";
+    case ".jpg":
+    case ".jpeg": return "image/jpeg";
+    case ".gif": return "image/gif";
+    case ".webp": return "image/webp";
+    case ".ico": return "image/x-icon";
+    case ".woff": return "font/woff";
+    case ".woff2": return "font/woff2";
+    case ".mp3": return "audio/mpeg";
+    case ".wav": return "audio/wav";
+    case ".ogg": return "audio/ogg";
+    default: return "application/octet-stream";
+  }
+}
+
+function readLocaltifyRendererFile(filePath) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, (error, data) => {
+      if (error) reject(error);
+      else resolve(data);
+    });
+  });
+}
+
+function registerLocaltifyRendererProtocol() {
+  if (isDev || localtifyRendererProtocolReady) return;
+  localtifyRendererProtocolReady = true;
+
+  protocol.handle(LOCALTIFY_RENDERER_PROTOCOL, async (request) => {
+    const indexPath = getRendererIndexPath();
+    const distDir = path.dirname(indexPath);
+    const requestPath = safeRendererProtocolPathname(request.url);
+    const targetPath = requestPath === "index.html"
+      ? indexPath
+      : path.normalize(path.join(distDir, requestPath));
+
+    const normalizedDist = path.normalize(distDir);
+    const normalizedTarget = path.normalize(targetPath);
+    const insideDist = normalizedTarget === normalizedDist || normalizedTarget.startsWith(normalizedDist + path.sep);
+
+    if (!insideDist) {
+      return new Response("Blocked localtify renderer path", { status: 403 });
+    }
+
+    if (!filePathExistsForRenderer(normalizedTarget)) {
+      console.log("[localtify renderer protocol missing asset]", request.url, normalizedTarget);
+      return new Response("Localtify renderer asset missing", { status: 404 });
+    }
+
+    try {
+      const data = await readLocaltifyRendererFile(normalizedTarget);
+      return new Response(data, {
+        status: 200,
+        headers: {
+          "content-type": getLocaltifyRendererMimeType(normalizedTarget),
+          "cache-control": "no-cache"
+        }
+      });
+    } catch (error) {
+      console.log("[localtify renderer protocol read failed]", request.url, normalizedTarget, error?.message || error);
+      return new Response("Localtify renderer asset read failed", { status: 500 });
+    }
+  });
+}
+
+function loadPackagedLocaltifyRenderer(win, indexPath) {
+  if (!win || win.isDestroyed()) return Promise.resolve();
+  registerLocaltifyRendererProtocol();
+  const protocolUrl = getRendererProtocolEntryUrl();
+
+  return win.loadURL(protocolUrl).catch((protocolError) => {
+    console.log("[localtify renderer protocol load failed]", protocolError?.message || protocolError, protocolUrl, indexPath);
+    if (!win || win.isDestroyed()) return;
+    if (isPackagedLinuxAppImageRuntime()) {
+      throw protocolError;
+    }
+    return win.loadFile(indexPath);
+  });
+}
+
+
 function getLocaltifyGpuFeatureStatus() {
   try {
     return typeof app.getGPUFeatureStatus === "function" ? app.getGPUFeatureStatus() : {};
@@ -4239,7 +4410,7 @@ function hardenRendererBackground(win) {
 }
 
 function verifyRendererMounted(win, indexPath) {
-  if (!win || win.isDestroyed() || isDev) return;
+  if (!win || win.isDestroyed() || isDev || isPackagedLinuxAppImageRuntime()) return;
 
   setTimeout(async () => {
     if (!win || win.isDestroyed()) return;
@@ -4280,7 +4451,7 @@ function verifyRendererMounted(win, indexPath) {
 }
 
 function armRendererLoadWatchdog(win, indexPath) {
-  if (!win || win.isDestroyed() || isDev) return;
+  if (!win || win.isDestroyed() || isDev || isPackagedLinuxAppImageRuntime()) return;
   clearTimeout(mainWindowRendererWatchdog);
 
   mainWindowRendererWatchdog = setTimeout(() => {
@@ -4297,7 +4468,7 @@ function armRendererLoadWatchdog(win, indexPath) {
 
       if (!mainWindowRendererRecoveredOnce) {
         mainWindowRendererRecoveredOnce = true;
-        win.loadFile(indexPath).catch((error) => {
+        loadPackagedLocaltifyRenderer(win, indexPath).catch((error) => {
           loadLocaltifyStartupShell(win, "localtify could not load", error?.message || "Renderer load failed.", indexPath);
         });
         return;
@@ -4399,15 +4570,21 @@ function createWindow() {
   } else {
     console.log("[localtify renderer index]", rendererIndexPath);
     armRendererLoadWatchdog(mainWindow, rendererIndexPath);
-    mainWindow.loadFile(rendererIndexPath).catch((error) => {
+    loadPackagedLocaltifyRenderer(mainWindow, rendererIndexPath).catch((error) => {
       console.log("[localtify main window packaged load error]", error?.message || error, rendererIndexPath);
       loadLocaltifyStartupShell(mainWindow, "localtify could not load", error?.message || "Renderer load failed.", rendererIndexPath);
     });
   }
 
-  mainWindow.webContents.on("did-fail-load", (_e, code, desc, url) => {
-    console.log(`[localitfy main window failed load]`, { code, desc, url });
-    if (!isDev) {
+  mainWindow.webContents.on("did-fail-load", (_e, code, desc, url, isMainFrame) => {
+    console.log(`[localitfy main window failed load]`, { code, desc, url, isMainFrame });
+    const failedUrl = String(url || "");
+    const isIgnorableAbort = code === -3 && (
+      failedUrl.startsWith("data:") ||
+      failedUrl.startsWith(`${LOCALTIFY_RENDERER_PROTOCOL}://`) ||
+      (isPackagedLinuxAppImageRuntime() && failedUrl.startsWith("file:"))
+    );
+    if (!isDev && isMainFrame !== false && !isIgnorableAbort) {
       loadLocaltifyStartupShell(mainWindow, "localtify failed to load", `${desc || "load failed"} (${code})`, url || rendererIndexPath);
     }
   });
@@ -4417,7 +4594,7 @@ function createWindow() {
     if (!isDev && !mainWindowRendererRecoveredOnce && mainWindow && !mainWindow.isDestroyed()) {
       mainWindowRendererRecoveredOnce = true;
       setTimeout(() => {
-        try { mainWindow?.loadFile(rendererIndexPath); } catch {}
+        try { void loadPackagedLocaltifyRenderer(mainWindow, rendererIndexPath); } catch {}
       }, 450);
     }
   });
@@ -4439,6 +4616,19 @@ function createWindow() {
     repairMainWindowBounds(mainWindow, { center: true });
     mainWindow.show();
   });
+
+  if (isPackagedLinuxAppImageRuntime()) {
+    setTimeout(() => {
+      try {
+        if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) {
+          repairMainWindowBounds(mainWindow, { center: true });
+          mainWindow.show();
+        }
+      } catch (error) {
+        console.log("[localtify linux delayed show error]", error?.message || error);
+      }
+    }, 1600);
+  }
   mainWindow.on("closed", () => {
     clearRendererLoadWatchdog();
     mainWindow = null;
@@ -4832,6 +5022,7 @@ async function sendLocaltifyFeedback(payload = {}) {
 
 
 app.whenReady().then(async () => {
+  registerLocaltifyRendererProtocol();
   registerLocaltifyMediaProtocol();
   await startLocaltifyMediaServer();
   initDownloader({ userDataPath: app.getPath("userData"), ffmpegPath: getFfmpegPath(), getCookiesFile: getYouTubeCookiesFile });
