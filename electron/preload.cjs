@@ -54,6 +54,8 @@ contextBridge.exposeInMainWorld("localitfy", {
   resetDiscordCache: () => ipcRenderer.invoke("discord:reset-cache"),
   resetDiscordActivity: () => ipcRenderer.invoke("discord:reset-cache"),
 
+  updateNativeMediaState: (payload) => ipcRenderer.invoke("localitfy:native-media-state", payload),
+  sendPlayerCommand: (command) => ipcRenderer.invoke("localitfy:player-command", command),
   setMinimizeToTray: (enabled) => ipcRenderer.invoke("localitfy:set-minimize-to-tray", { enabled }),
   setStartWithWindows: (enabled) => ipcRenderer.invoke("localitfy:set-start-with-windows", { enabled }),
   getStartWithWindows: () => ipcRenderer.invoke("localitfy:get-start-with-windows"),

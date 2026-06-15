@@ -60,6 +60,112 @@ const SKIP_SELECTOR = [
   ".albumFolderImportPanelV309"
 ].join(",");
 
+type MotionDebugState = {
+  active: boolean;
+  zone: string;
+  target: string;
+  skipped: string;
+  frameCostMs: number;
+};
+
+declare global {
+  interface Window {
+    __localtifyMotionDebugOverlay?: HTMLElement;
+    __localtifyMotionDebugLast?: MotionDebugState;
+  }
+}
+
+function motionDebugEnabled() {
+  try {
+    return window.localStorage.getItem("localtify:motionDebug") === "1";
+  } catch {
+    return false;
+  }
+}
+
+function ensureMotionDebugOverlay() {
+  if (!motionDebugEnabled()) return null;
+  let element = window.__localtifyMotionDebugOverlay;
+  if (element && document.body.contains(element)) return element;
+
+  element = document.createElement("aside");
+  element.className = "localtifyMotionDebugOverlayV503";
+  element.setAttribute("aria-hidden", "true");
+  element.style.cssText = [
+    "position:fixed",
+    "right:12px",
+    "bottom:12px",
+    "z-index:2147483647",
+    "min-width:220px",
+    "max-width:320px",
+    "padding:10px 12px",
+    "border-radius:14px",
+    "border:1px solid rgba(255,255,255,.14)",
+    "background:rgba(4,5,8,.88)",
+    "color:rgba(255,255,255,.88)",
+    "font:700 11px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace",
+    "box-shadow:0 18px 44px rgba(0,0,0,.42)",
+    "backdrop-filter:blur(14px) saturate(120%)",
+    "pointer-events:none",
+    "white-space:pre-wrap"
+  ].join(";");
+  document.body.appendChild(element);
+  window.__localtifyMotionDebugOverlay = element;
+  return element;
+}
+
+function motionZoneForElement(element: HTMLElement | null) {
+  if (!element) return "none";
+  if (element.closest(".playerBar")) return "player";
+  if (element.closest(".sidebar")) return "sidebar";
+  if (element.closest(".hero")) return "hero";
+  if (element.closest(".downloadsLayout,.downloadPanel")) return "downloads-skipped";
+  if (element.closest(".settingsPage,.settingsShell,.settingsModal")) return "settings-skipped";
+  if (element.closest(".libraryRow,.songRow,.homeListenCard,.homeFreshCard,.homeAlbumCard")) return "list-skipped";
+  return "other";
+}
+
+function motionTargetLabel(element: HTMLElement | null) {
+  if (!element) return "none";
+  const text = String(element.getAttribute("aria-label") || element.getAttribute("title") || element.textContent || "").trim().replace(/\s+/g, " ");
+  const className = String(element.className || "").replace(/\s+/g, ".");
+  return (text || element.tagName.toLowerCase() + (className ? "." + className.slice(0, 72) : "")).slice(0, 96);
+}
+
+function motionSkipReason(root: HTMLElement, eventTarget: EventTarget | null) {
+  if (!(eventTarget instanceof Element)) return "non-element";
+  const target = eventTarget.closest<HTMLElement>(BUTTON_SELECTOR);
+  if (!target) return "no allowed button";
+  if (!root.contains(target)) return "outside root";
+  if (!isInsideAllowedMotionZone(target)) return motionZoneForElement(target);
+  if (target.matches(SKIP_SELECTOR) || target.closest(SKIP_SELECTOR)) return "skip selector";
+  if (target.hasAttribute("disabled") || target.getAttribute("aria-disabled") === "true") return "disabled";
+  return "unknown";
+}
+
+function publishMotionDebug(state: MotionDebugState) {
+  if (!motionDebugEnabled()) return;
+  window.__localtifyMotionDebugLast = state;
+  window.dispatchEvent(new CustomEvent("localtify:motion-debug", { detail: state }));
+  const overlay = ensureMotionDebugOverlay();
+  if (!overlay) return;
+  overlay.textContent = [
+    "motion debug",
+    `active: ${state.active ? "yes" : "no"}`,
+    `zone: ${state.zone}`,
+    `target: ${state.target}`,
+    `skipped: ${state.skipped || "no"}`,
+    `frame: ${state.frameCostMs.toFixed(2)}ms`
+  ].join("\n");
+}
+
+function removeMotionDebugOverlay() {
+  const element = window.__localtifyMotionDebugOverlay;
+  if (element && element.parentElement) element.parentElement.removeChild(element);
+  delete window.__localtifyMotionDebugOverlay;
+}
+
+
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
@@ -260,10 +366,12 @@ export function useProximityMotion({
       pendingTarget = null;
       pendingPayload = null;
       lastMoveAt = 0;
+      publishMotionDebug({ active: false, zone: "none", target: "none", skipped: "cleared", frameCostMs: 0 });
     };
 
     const paint = () => {
       frame = 0;
+      const paintStartedAt = performance.now();
       if (!visible || document.hidden || !pendingTarget || !pendingPayload) return;
       if (!isUsableTarget(root, pendingTarget)) return;
 
@@ -273,6 +381,13 @@ export function useProximityMotion({
 
       activeTarget = pendingTarget;
       applyState(activeTarget, pendingPayload);
+      publishMotionDebug({
+        active: true,
+        zone: motionZoneForElement(activeTarget),
+        target: motionTargetLabel(activeTarget),
+        skipped: "no",
+        frameCostMs: performance.now() - paintStartedAt
+      });
     };
 
     const schedulePaint = () => {
@@ -316,7 +431,10 @@ export function useProximityMotion({
     const handlePointerOver = (event: PointerEvent) => {
       if (!visible || document.hidden || event.pointerType === "touch") return;
       const target = findTarget(root, event.target);
-      if (!target) return;
+      if (!target) {
+        publishMotionDebug({ active: false, zone: motionZoneForElement(event.target instanceof HTMLElement ? event.target : null), target: "none", skipped: motionSkipReason(root, event.target), frameCostMs: 0 });
+        return;
+      }
       setTarget(target, event.clientX, event.clientY);
     };
 
@@ -328,6 +446,7 @@ export function useProximityMotion({
         : findTarget(root, event.target);
 
       if (!target) {
+        publishMotionDebug({ active: false, zone: motionZoneForElement(event.target instanceof HTMLElement ? event.target : null), target: "none", skipped: motionSkipReason(root, event.target), frameCostMs: 0 });
         scheduleClear(150);
         return;
       }
@@ -370,7 +489,10 @@ export function useProximityMotion({
       const target = activeTarget && activeTarget.contains(event.target as Node) && isUsableTarget(root, activeTarget)
         ? activeTarget
         : findTarget(root, event.target);
-      if (!target) return;
+      if (!target) {
+        publishMotionDebug({ active: false, zone: motionZoneForElement(event.target instanceof HTMLElement ? event.target : null), target: "none", skipped: motionSkipReason(root, event.target), frameCostMs: 0 });
+        return;
+      }
 
       pendingTarget = target;
       pendingPayload = pressPayload();
@@ -418,6 +540,7 @@ export function useProximityMotion({
       window.removeEventListener("blur", clearActive);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearActive();
+      removeMotionDebugOverlay();
     };
   }, [disabled, resetKey, rootRef, suspended]);
 }

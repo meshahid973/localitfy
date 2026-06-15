@@ -232,6 +232,26 @@ declare global {
     startWithWindows?: boolean;
   };
 
+
+  type LocalitfyPlayerCommand = {
+    type:
+      | "toggle"
+      | "play"
+      | "pause"
+      | "stop"
+      | "prev"
+      | "next"
+      | "repeat"
+      | "shuffle"
+      | "muteToggle"
+      | "seekPercent"
+      | "volume"
+      | string;
+    value?: number | string;
+    source?: string;
+    [key: string]: any;
+  };
+
   type AutoUpdateEvent = {
     type: "checking" | "available" | "not-available" | "downloading" | "downloaded" | "error" | "dev" | "backup";
     version?: string;
@@ -427,7 +447,7 @@ declare global {
       onAutoUpdate?: (callback: (payload: AutoUpdateEvent) => void) => () => void;
       onAutoUpdateEvent?: (callback: (payload: AutoUpdateEvent) => void) => () => void;
 
-      sendPlayerCommand: (command: any) => Promise<boolean>;
+      sendPlayerCommand: (command: LocalitfyPlayerCommand) => Promise<{ ok: boolean; command?: LocalitfyPlayerCommand }> | Promise<boolean>;
 
       minimizeWindow: () => Promise<boolean>;
       toggleMaximizeWindow: () => Promise<boolean>;
@@ -469,7 +489,7 @@ declare global {
 
       onAlbumFolderImportProgress?: (callback: (payload: LocalitfyAlbumFolderProgressPayload) => void) => () => void;
       onDownloadProgress: (callback: (payload: LocalitfyDownloadProgressPayload) => void) => () => void;
-      onPlayerCommand: (callback: (payload: any) => void) => () => void;
+      onPlayerCommand: (callback: (payload: LocalitfyPlayerCommand) => void) => () => void;
     };
   }
 }
