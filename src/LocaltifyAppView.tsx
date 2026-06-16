@@ -5838,25 +5838,18 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         message="Give Localtify an album folder and it’ll make the shelf feel tidy."
                         detail="Best folder shape: Album name → tracks → cover.jpg or folder.png."
                         actions={
-                          <>
-                            <button className="mainAction" type="button" onClick={() => void scanAlbumFolderImport("single")} disabled={albumFolderImportBusy}>
-                              import album folder
-                            </button>
-                            <button className="softButton" type="button" onClick={() => void scanAlbumFolderImport("library")} disabled={albumFolderImportBusy}>
-                              import album library
-                            </button>
-                            <button className="heroGhost" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>
-                              create manually
-                            </button>
-                          </>
+                          <button className="mainAction" type="button" onClick={() => void scanAlbumFolderImport("library")} disabled={albumFolderImportBusy}>
+                            import album library
+                          </button>
                         }
                       />
                     </div>
                   )}
                 </section>
 
-                <section className="albumDetailPanelV318">
-                  {selectedAlbum ? (
+                {(selectedAlbum || visibleAlbums.length > 0) ? (
+                  <section className="albumDetailPanelV318">
+                    {selectedAlbum ? (
                     <>
                       <div className="albumDetailHeroV318" style={{ "--album-hero-cover": selectedAlbum.coverSong ? toCssUrl(getSongAmbientSource(selectedAlbum.coverSong)) : "none" } as CSSProperties}>
                         <Cover song={selectedAlbum.coverSong} className="albumDetailCoverV318" />
@@ -5915,9 +5908,11 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       />
                     </div>
                   )}
-                </section>
+                  </section>
+                ) : null}
 
-                <section ref={albumBuilderSectionRef} className={`albumBuilderPanelV318 ${albumBuilderOpen ? "open" : ""}`}>
+                {albumBuilderOpen ? (
+                  <section ref={albumBuilderSectionRef} className="albumBuilderPanelV318 open">
                   <div className="albumBuilderHeaderV318">
                     <div>
                       <p className="eyebrow">{albumBuilderMode === "edit" ? "edit custom album" : "create"}</p>
@@ -6007,7 +6002,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   ) : (
                     <p className="albumBuilderClosedTextV318">build albums from any songs in your library.</p>
                   )}
-                </section>
+                  </section>
+                ) : null}
               </section>
             )}
 

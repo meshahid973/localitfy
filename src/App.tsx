@@ -5460,11 +5460,10 @@ function MainModeApp() {
     if (!playableSongs.length || !currentSong) return null;
 
     if (repeatMode === "one") {
-      return {
-        song: currentSong,
-        playlistId: currentPlaybackPlaylist?.id || activePlaylist?.id || null,
-        kind: "repeat-one" as const
-      };
+      // Single-song loop must not use hidden crossfade/preload audio.
+      // The ended handler restarts the same track directly, which prevents
+      // repeat-one from accidentally advancing to another song.
+      return null;
     }
 
     const queuedIndex = playQueue.findIndex((songId) => isPlayableSong(songsById.get(songId)));
@@ -5797,6 +5796,7 @@ function MainModeApp() {
         remaining <= crossfadeWindow &&
         nextTime > 5 &&
         !audio.paused &&
+        repeatMode !== "one" &&
         !settings.reducedMotion &&
         settings.crossfadeEnabled
       ) {
@@ -5816,16 +5816,20 @@ function MainModeApp() {
   }
 
   function handleAudioEnded() {
-    if (crossfadeAutoStartedRef.current || crossfadeHandoffRef.current) {
-      // The hidden next audio is already taking over. Do not double-skip.
-      return;
-    }
-
     const endedSong = songRef.current || currentSong;
     markSongCompletedForPlayCount(endedSong);
 
     if (endedSong?.id) {
       void patchSongLocal(endedSong.id, { playbackPosition: 0 });
+    }
+
+    if (repeatMode === "one" && restartCurrentSongForRepeatOne()) {
+      return;
+    }
+
+    if (crossfadeAutoStartedRef.current || crossfadeHandoffRef.current) {
+      // The hidden next audio is already taking over. Do not double-skip.
+      return;
     }
 
     playNext(true, "auto");
@@ -9510,26 +9514,56 @@ function MainModeApp() {
     return playableSongs.findIndex((song) => song.id === currentId);
   }
 
+  function restartCurrentSongForRepeatOne() {
+    const song = songRef.current || currentSong;
+    const audio = audioRef.current;
+
+    if (!song) return false;
+
+    stopCrossfadeAuto();
+    crossfadeHandoffRef.current = null;
+    crossfadeMainPauseGuardRef.current = false;
+
+    try {
+      const controller = ensurePlayerController();
+      if (controller) controller.seekTo(0);
+      else if (audio) audio.currentTime = 0;
+    } catch {
+      try {
+        if (audio) audio.currentTime = 0;
+      } catch {
+        // ignore seek errors
+      }
+    }
+
+    timeRef.current = 0;
+    setCurrentTime(0);
+    pendingPlayRef.current = true;
+    setIsPlaying(true);
+    setStatusText(`looping ${prettyTitle(song.title, 5)}`);
+
+    if (audio) {
+      void audio.play()
+        .then(() => {
+          pendingPlayRef.current = false;
+          playingRef.current = true;
+          setIsPlaying(true);
+        })
+        .catch(() => {
+          void selectSong(song.id, true, currentPlaybackPlaylist ? { playlistId: currentPlaybackPlaylist.id } : undefined);
+        });
+    } else {
+      void selectSong(song.id, true, currentPlaybackPlaylist ? { playlistId: currentPlaybackPlaylist.id } : undefined);
+    }
+
+    return true;
+  }
+
   function playNext(forcePlay = true, trigger: "manual" | "auto" = "manual") {
     if (trigger === "manual") stopCrossfadeAuto();
     if (!playableSongs.length) return;
 
-    if (trigger === "auto" && repeatMode === "one" && currentSong) {
-      const audio = audioRef.current;
-
-      if (audio) {
-        try {
-          const controller = ensurePlayerController();
-          if (controller) controller.seekTo(0);
-          else audio.currentTime = 0;
-        } catch {
-          // ignore seek errors from unavailable audio sources
-        }
-      }
-
-      timeRef.current = 0;
-      setCurrentTime(0);
-      void selectSong(currentSong.id, true, currentPlaybackPlaylist ? { playlistId: currentPlaybackPlaylist.id } : undefined);
+    if (trigger === "auto" && repeatMode === "one" && restartCurrentSongForRepeatOne()) {
       return;
     }
 
@@ -11599,4 +11633,7 @@ function MainModeApp() {
 export default function App() {
   return <MainModeApp />;
 }
+
+
+
 
