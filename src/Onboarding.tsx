@@ -86,7 +86,6 @@ function clampStep(step: number) {
 }
 
 export default function Onboarding({
-  appVersion,
   songsCount,
   currentTheme = "mint",
   discordEnabled = false,
