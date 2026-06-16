@@ -584,6 +584,7 @@ function restoreCustomThemeAfterUpdate(nextSettings: Settings, storedSettings: P
 
 
 function MainModeApp() {
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerEngineRef = useRef<HtmlAudioEngine | null>(null);
   const playerControllerRef = useRef<PlayerController | null>(null);
@@ -643,6 +644,27 @@ function MainModeApp() {
   const audioEffectDelayRef = useRef<DelayNode | null>(null);
   const audioEffectFeedbackGainRef = useRef<GainNode | null>(null);
   const audioEffectFilterRef = useRef<BiquadFilterNode | null>(null);
+
+  useEffect(() => {
+    const body = document.body;
+    const syncFocusClass = () => {
+      const backgrounded = document.hidden || !document.hasFocus();
+      body.classList.toggle("localtifyWindowBackgrounded", backgrounded);
+    };
+
+    syncFocusClass();
+    window.addEventListener("focus", syncFocusClass);
+    window.addEventListener("blur", syncFocusClass);
+    document.addEventListener("visibilitychange", syncFocusClass);
+
+    return () => {
+      window.removeEventListener("focus", syncFocusClass);
+      window.removeEventListener("blur", syncFocusClass);
+      document.removeEventListener("visibilitychange", syncFocusClass);
+      body.classList.remove("localtifyWindowBackgrounded");
+    };
+  }, []);
+
   const beatDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const beatSmoothRef = useRef({ bass: 0, mid: 0, energy: 0, phase: 0 });
   const beatReactiveTargetCacheRef = useRef<{ nodes: HTMLElement[]; refreshedAt: number; songId: string }>({
@@ -3183,9 +3205,9 @@ function MainModeApp() {
 
   useEffect(() => {
     if (!isSeekingRef.current) {
-      syncProgressDom(currentTime, currentDuration || currentSong?.duration || 0, true);
+      syncProgressDom(timeRef.current || currentTime, currentDuration || currentSong?.duration || 0, true);
     }
-  }, [currentSong?.id, currentTime, currentDuration, currentSong?.duration, syncProgressDom]);
+  }, [currentSong?.id, currentDuration, currentSong?.duration, syncProgressDom]);
 
   const pixelArtPool = useMemo(
     () => (pixelArtAssets.length ? pixelArtAssets : getCachedRuntimePixelArtAssets()),
@@ -5105,15 +5127,16 @@ function MainModeApp() {
         timeRef.current = nextTime;
         if (Number.isFinite(nextDuration) && nextDuration > 0) durationRef.current = nextDuration;
 
-        const uiPaintEveryMs = backgroundMode ? 3000 : busyUi ? 420 : 120;
+        const uiPaintEveryMs = backgroundMode ? 5000 : busyUi ? 700 : 220;
         if (!backgroundMode && !isSeekingRef.current && clock - lastProgressUiPaintRef.current > uiPaintEveryMs) {
           lastProgressUiPaintRef.current = clock;
           syncProgressDom(nextTime, nextDuration);
         }
 
-        // Keep playback position out of React's hot path. The DOM progress gets painted
-        // directly and React state only changes when the actual song duration changes.
-        if (!isSeekingRef.current && clock - lastProgressStatePaintRef.current > 12000) {
+        // Keep playback progress out of React's hot path. The DOM progress gets
+        // painted directly; React state only changes for actual duration changes,
+        // manual seeks, song switches, or hard resets.
+        if (!isSeekingRef.current && clock - lastProgressStatePaintRef.current > 20000) {
           lastProgressStatePaintRef.current = clock;
         }
 
@@ -5128,14 +5151,14 @@ function MainModeApp() {
         positionSaveRef.current = Date.now();
 
         if (!backgroundMode && !busyUi && settings.gaplessPlayback && nextDuration > 0 && nextDuration - nextTime < 20) {
-          window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
+          window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 2200), 900);
         }
       }
 
-      scheduleProgressTick(backgroundMode ? 1000 : busyUi ? 300 : 100);
+      scheduleProgressTick(backgroundMode ? 1800 : busyUi ? 520 : 180);
     };
 
-    scheduleProgressTick(80);
+    scheduleProgressTick(140);
 
     return () => stopProgressLoop();
   }, [isPlaying, currentSong?.id, currentDuration, settings.gaplessPlayback, syncProgressDom]);

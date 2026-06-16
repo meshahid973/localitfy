@@ -2846,3 +2846,92 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
     0 12px 30px rgba(255, 92, 137, 0.10) !important;
 }
 
+
+/* v0.4.1 performance ownership: player blur/glow safety */
+.app .playerBar{
+  --player-perf-blur: 32px;
+  --player-perf-opacity: 0.42;
+  --player-perf-hover-opacity: 0.50;
+  --player-perf-saturate: 1.42;
+  --player-perf-brightness: 1.00;
+  backdrop-filter: blur(14px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.08) !important;
+}
+
+.app .playerBar::before{
+  opacity: clamp(0.18, var(--player-perf-opacity), 0.58) !important;
+  filter:
+    blur(var(--player-perf-blur))
+    saturate(var(--player-perf-saturate))
+    brightness(var(--player-perf-brightness)) !important;
+  transform: translate3d(0, 4px, 0) scale(1.12) !important;
+  transition:
+    opacity 360ms ease,
+    filter 420ms ease,
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.app .playerBar:hover::before{
+  opacity: clamp(0.24, var(--player-perf-hover-opacity), 0.64) !important;
+  filter:
+    blur(calc(var(--player-perf-blur) + 4px))
+    saturate(calc(var(--player-perf-saturate) + 0.10))
+    brightness(1.04) !important;
+  transform: translate3d(0, 2px, 0) scale(1.14) !important;
+}
+
+.app.appBackgrounded .playerBar,
+body.localtifyWindowBackgrounded .app .playerBar,
+.app.reducedMotion .playerBar,
+.app[data-motion-level="reduced"] .playerBar,
+.app.viewSwitching .playerBar,
+.app.themeSettling .playerBar{
+  --player-perf-blur: 18px;
+  --player-perf-opacity: 0.14;
+  --player-perf-hover-opacity: 0.14;
+  --player-perf-saturate: 1.04;
+  --player-perf-brightness: 0.92;
+  backdrop-filter: blur(8px) saturate(1.02) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(1.02) !important;
+}
+
+.app.appBackgrounded .playerBar::before,
+body.localtifyWindowBackgrounded .app .playerBar::before,
+.app.reducedMotion .playerBar::before,
+.app[data-motion-level="reduced"] .playerBar::before,
+.app.viewSwitching .playerBar::before,
+.app.themeSettling .playerBar::before{
+  animation: none !important;
+  transition: opacity 120ms ease, filter 120ms ease !important;
+  transform: translate3d(0, 0, 0) scale(1.04) !important;
+}
+
+.app.appBackgrounded .playerBar:hover::before,
+body.localtifyWindowBackgrounded .app .playerBar:hover::before,
+.app.reducedMotion .playerBar:hover::before,
+.app[data-motion-level="reduced"] .playerBar:hover::before,
+.app.viewSwitching .playerBar:hover::before,
+.app.themeSettling .playerBar:hover::before{
+  opacity: var(--player-perf-hover-opacity) !important;
+  filter:
+    blur(var(--player-perf-blur))
+    saturate(var(--player-perf-saturate))
+    brightness(var(--player-perf-brightness)) !important;
+  transform: translate3d(0, 0, 0) scale(1.04) !important;
+}
+
+.app.appAudioPlaying:not(.playerScrubbing) .playerBar .smallArt,
+.app.appAudioPlaying:not(.playerScrubbing) .playerBar .smallArt img{
+  animation-play-state: paused !important;
+}
+
+.app.reducedMotion .playerBar .playButtonBurst,
+.app[data-motion-level="reduced"] .playerBar .playButtonBurst{
+  animation: none !important;
+}
+
+.app.viewSwitching .playerBar *,
+.app.themeSettling .playerBar *{
+  transition-duration: 80ms !important;
+}
+
