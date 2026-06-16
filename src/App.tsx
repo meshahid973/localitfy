@@ -231,6 +231,51 @@ import type {
 
 const SettingsCategoryContent = lazy(() => import("./SettingsCategoryContent"));
 
+
+const LOCALTFY_PLAYER_MORPH_PAUSE = {
+  left: "M5 5L9 5L9 19L5 19Z",
+  right: "M15 5L19 5L19 19L15 19Z"
+} as const;
+
+const LOCALTFY_PLAYER_MORPH_PLAY = {
+  left: "M7 5L13 8.5L13 15.5L7 19Z",
+  right: "M13 8.5L19 12L19 12L13 15.5Z"
+} as const;
+
+const LOCALTFY_PLAYER_MORPH_SPRING = {
+  type: "spring",
+  stiffness: 260,
+  damping: 26,
+  mass: 0.9
+} as const;
+
+function PlayerPlayPauseMorphIcon({ playing, className = "" }: { playing: boolean; className?: string }) {
+  const target = playing ? LOCALTFY_PLAYER_MORPH_PAUSE : LOCALTFY_PLAYER_MORPH_PLAY;
+
+  return (
+    <svg
+      className={`playerMorphIcon ${className}`.trim()}
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <Motion.path
+        animate={{ d: target.left }}
+        transition={LOCALTFY_PLAYER_MORPH_SPRING}
+        initial={false}
+      />
+      <Motion.path
+        animate={{ d: target.right }}
+        transition={LOCALTFY_PLAYER_MORPH_SPRING}
+        initial={false}
+      />
+    </svg>
+  );
+}
+
+
 const LOCALTIFY_V301_HEAVY_MOTION_VIEWS = new Set<View>([
   "library",
   "liked",
@@ -462,6 +507,81 @@ function resetOnboardingForThisRelease() {
     // Ignore reset storage errors.
   }
 }
+
+
+const CUSTOM_THEME_UPDATE_BACKUP_KEY = "localitfy.customThemeBackup.v1";
+
+const CUSTOM_THEME_PERSIST_KEYS = [
+  "customThemeEnabled",
+  "customThemeColor",
+  "customThemeColor2",
+  "customThemeBackground",
+  "customThemeSurface",
+  "customThemeText",
+  "customThemeHighlight",
+  "customThemeProgress"
+] as const;
+
+function readCustomThemeBackupPatch(): Partial<Settings> {
+  try {
+    const raw = window.localStorage.getItem(CUSTOM_THEME_UPDATE_BACKUP_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Partial<Settings>;
+    return extractCustomThemePersistencePatch(parsed);
+  } catch {
+    return {};
+  }
+}
+
+function extractCustomThemePersistencePatch(source: Partial<Settings> | null | undefined): Partial<Settings> {
+  if (!source || typeof source !== "object") return {};
+
+  const hasCustomTheme =
+    source.customThemeEnabled === true ||
+    CUSTOM_THEME_PERSIST_KEYS.some((key) => {
+      if (key === "customThemeEnabled") return false;
+      return typeof source[key] === "string" && String(source[key] || "").trim().length > 0;
+    });
+
+  if (!hasCustomTheme) return {};
+
+  const patch: Partial<Settings> = {
+    customThemeEnabled: true
+  };
+
+  for (const key of CUSTOM_THEME_PERSIST_KEYS) {
+    const value = source[key];
+    if (typeof value === "undefined") continue;
+    (patch as any)[key] = value;
+  }
+
+  patch.customThemeEnabled = true;
+  return patch;
+}
+
+function writeCustomThemeBackupPatch(source: Partial<Settings> | null | undefined) {
+  const patch = extractCustomThemePersistencePatch(source);
+  if (!Object.keys(patch).length) return;
+
+  try {
+    window.localStorage.setItem(CUSTOM_THEME_UPDATE_BACKUP_KEY, JSON.stringify(patch));
+  } catch {
+    // Theme backup must never block settings saves.
+  }
+}
+
+function restoreCustomThemeAfterUpdate(nextSettings: Settings, storedSettings: Partial<Settings>) {
+  const storedPatch = extractCustomThemePersistencePatch(storedSettings);
+  const backupPatch = readCustomThemeBackupPatch();
+  const patch = Object.keys(storedPatch).length ? storedPatch : backupPatch;
+
+  if (!Object.keys(patch).length) return false;
+
+  Object.assign(nextSettings, patch, { customThemeEnabled: true });
+  writeCustomThemeBackupPatch(nextSettings);
+  return true;
+}
+
 
 function MainModeApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -2484,6 +2604,8 @@ function MainModeApp() {
       }
 
       saveSettingsTimerRef.current = window.setTimeout(() => {
+        writeCustomThemeBackupPatch(nextSettings);
+        writeCustomThemeBackupPatch(nextSettings);
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
         saveSettingsTimerRef.current = null;
       }, 360);
@@ -4266,6 +4388,8 @@ function MainModeApp() {
         ...(shouldApplyV013Defaults ? V013_RELEASE_DEFAULTS : {})
       } as Settings);
 
+      const didRestoreCustomThemeAfterUpdate = restoreCustomThemeAfterUpdate(nextSettings, storedSettings);
+
       if (shouldApplyStartWithWindowsDefault) {
         nextSettings.startWithWindows = true;
       }
@@ -4306,6 +4430,7 @@ function MainModeApp() {
         shouldRepairAnimatedVisualSettings ||
         shouldRepairBootTheme ||
         shouldPersistVisualCustomizationDefaults ||
+        didRestoreCustomThemeAfterUpdate ||
         (platformInfo.startupSettingSupported && typeof storedSettings.startWithWindows === "undefined");
 
       if (shouldPersistBootSettings) {
@@ -6085,6 +6210,7 @@ function MainModeApp() {
       return;
     }
 
+    writeCustomThemeBackupPatch(next);
     await window.localitfy.saveSettings(next).catch(() => undefined);
   }
 
@@ -6400,6 +6526,7 @@ function MainModeApp() {
       setSettings(nextSettings);
 
       if (bootedRef.current) {
+        writeCustomThemeBackupPatch(nextSettings);
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
       }
 
@@ -10746,11 +10873,7 @@ function MainModeApp() {
               <SkipBack className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />
             </button>
             <button className={`circleButton main ${playButtonBurst ? `playButtonBurst playButtonBurst${playButtonBurst % 2}` : ""}`} onClick={togglePlay} aria-label={isPlaying ? "pause" : "play"}>
-              {isPlaying ? (
-                <Pause className="playerControlIcon" size={18} strokeWidth={2.2} fill="none" aria-hidden="true" />
-              ) : (
-                <Play className="playerControlIcon playIcon" size={18} strokeWidth={2.2} fill="none" aria-hidden="true" />
-              )}
+              <PlayerPlayPauseMorphIcon playing={isPlaying} />
             </button>
             <button className="circleButton" onClick={() => playNext(true)} aria-label="next song">
               <SkipForward className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />

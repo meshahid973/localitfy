@@ -301,8 +301,8 @@
 
 .playerBar .circleButton.main .playerControlIcon,
 .playerBar .circleButton.main svg{
-  width: 19px !important;
-  height: 19px !important;
+  width: 22px !important;
+  height: 22px !important;
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
@@ -2702,5 +2702,71 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 .playerBar .volumeWrap input[type="range"]:focus-visible{
   filter: brightness(1.1) !important;
   box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .18) !important;
+}
+
+
+/* v0.4.1: smooth play/pause path morph for the main player button */
+.playerMorphIcon{
+  width: 26px !important;
+  height: 26px !important;
+  display: block !important;
+  overflow: visible !important;
+  color: currentColor !important;
+  transform: translateZ(0) !important;
+  pointer-events: none !important;
+}
+
+.playerMorphIcon path{
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  stroke-width: 1.25 !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+  vector-effect: non-scaling-stroke !important;
+}
+
+.playerBar .circleButton.main .playerMorphIcon,
+.playerBar .playPauseButton .playerMorphIcon,
+.simpleControls .circleButton.main .playerMorphIcon{
+  color: #ffffff !important;
+}
+
+.playerBar .circleButton.main .playerMorphIcon{
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.simpleControls .circleButton.main .playerMorphIcon{
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.playerBar .circleButton.main:active .playerMorphIcon,
+.simpleControls .circleButton.main:active .playerMorphIcon{
+  transform: scale(0.94) translateZ(0) !important;
+}
+
+
+/* v0.4.1: player CSS ownership pass — radius scale + morph icon sizing */
+.playerBar{
+  --player-radius-xs: 12px;
+  --player-radius-s: 16px;
+  --player-radius-m: 24px;
+}
+
+.playerBar .smallArt,
+.playerBar .queueItemArt{
+  border-radius: var(--player-radius-xs) !important;
+}
+
+.playerBar .queueNowArt,
+.playerBar .albumTrackCoverV318{
+  border-radius: var(--player-radius-s) !important;
+}
+
+.playerBar .queueDrawer,
+.playerBar .queueNowCard,
+.playerBar .queueDrawerSection{
+  border-radius: var(--player-radius-m) !important;
 }
 
