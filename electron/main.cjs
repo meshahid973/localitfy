@@ -1,5 +1,5 @@
-﻿/* localtify 0.3.9 V425 cover picker and cache cleanup. */
-/* localtify 0.3.9 V424 â€” Windows startup white-screen recovery. */
+﻿/* localtify 0.4.1 V425 cover picker and cache cleanup. */
+/* localtify 0.4.1 V424 â€” Windows startup white-screen recovery. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -3334,6 +3334,10 @@ const albumFolderScanCache = new Map();
 const ALBUM_FOLDER_SCAN_TTL_MS = 20 * 60 * 1000;
 const ALBUM_FOLDER_MAX_ALBUMS = 260;
 const ALBUM_FOLDER_MAX_TRACKS_PER_ALBUM = 420;
+const ALBUM_FOLDER_LIBRARY_SCAN_MAX_DEPTH = 4;
+const ALBUM_FOLDER_SCAN_YIELD_EVERY_TRACKS = 8;
+const ALBUM_FOLDER_IMPORT_YIELD_EVERY_TRACKS = 12;
+const ALBUM_FOLDER_IMPORT_PROGRESS_EVERY_TRACKS = 5;
 
 function cleanAlbumFolderText(value, fallback = "") {
   const text = String(value || "")
@@ -3384,7 +3388,19 @@ function findAlbumFolderCoverPath(folderPath) {
 }
 
 function folderHasAudioFiles(folderPath) {
-  return listAudioFilesInDirectory(folderPath, { maxDepth: 1, maxFiles: 8 }).length > 0;
+  // Direct-only. The old maxDepth: 1 treated parent artist folders as albums
+  // when audio lived in child album folders, which caused wrong covers and heavy
+  // scans. A folder becomes an album only when it directly contains audio files.
+  return listAudioFilesInDirectory(folderPath, { maxDepth: 0, maxFiles: 8 }).length > 0;
+}
+
+function isIgnoredAlbumLibraryFolderName(name = "") {
+  return String(name || "").startsWith(".") ||
+    name === "localitfy-bin" ||
+    name === "spotify-covers" ||
+    name === "node_modules" ||
+    name === "release" ||
+    name === "dist";
 }
 
 function findAlbumFoldersFromRoot(rootPath, mode = "single") {
@@ -3393,20 +3409,38 @@ function findAlbumFoldersFromRoot(rootPath, mode = "single") {
 
   if (mode === "single") return [root];
 
-  let entries = [];
-  try {
-    entries = fs.readdirSync(root, { withFileTypes: true });
-  } catch {
-    return folderHasAudioFiles(root) ? [root] : [];
-  }
-
   const folders = [];
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    if (entry.name.startsWith(".") || entry.name === "localitfy-bin" || entry.name === "spotify-covers") continue;
-    const fullPath = path.join(root, entry.name);
-    if (folderHasAudioFiles(fullPath)) folders.push(fullPath);
-    if (folders.length >= ALBUM_FOLDER_MAX_ALBUMS) break;
+  const queue = [{ folderPath: root, depth: 0 }];
+  const seen = new Set();
+
+  while (queue.length && folders.length < ALBUM_FOLDER_MAX_ALBUMS) {
+    const current = queue.shift();
+    const folderPath = current?.folderPath || "";
+    const depth = Number(current?.depth || 0);
+    const folderKey = path.normalize(folderPath).toLowerCase();
+
+    if (!folderPath || seen.has(folderKey)) continue;
+    seen.add(folderKey);
+
+    if (folderHasAudioFiles(folderPath)) {
+      folders.push(folderPath);
+      continue;
+    }
+
+    if (depth >= ALBUM_FOLDER_LIBRARY_SCAN_MAX_DEPTH) continue;
+
+    let entries = [];
+    try {
+      entries = fs.readdirSync(folderPath, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      if (isIgnoredAlbumLibraryFolderName(entry.name)) continue;
+      queue.push({ folderPath: path.join(folderPath, entry.name), depth: depth + 1 });
+    }
   }
 
   if (!folders.length && folderHasAudioFiles(root)) folders.push(root);
@@ -3421,13 +3455,17 @@ async function buildAlbumFolderPreview(folderPath, index = 0) {
       .filter(Boolean)
   );
 
-  const audioFiles = listAudioFilesInDirectory(folderPath, { maxDepth: 1, maxFiles: ALBUM_FOLDER_MAX_TRACKS_PER_ALBUM });
+  const audioFiles = listAudioFilesInDirectory(folderPath, { maxDepth: 2, maxFiles: ALBUM_FOLDER_MAX_TRACKS_PER_ALBUM });
   const folderCoverPath = findAlbumFolderCoverPath(folderPath);
 
   let albumEmbeddedCoverPath = "";
   const parsedTracks = [];
 
   for (let trackIndex = 0; trackIndex < audioFiles.length; trackIndex += 1) {
+    if (trackIndex > 0 && trackIndex % ALBUM_FOLDER_SCAN_YIELD_EVERY_TRACKS === 0) {
+      await yieldToMainLoop();
+    }
+
     const filePath = audioFiles[trackIndex];
     const filenameMetadata = parseAlbumTrackFileName(filePath, folderTitle);
     const shouldReadCover = !folderCoverPath && !albumEmbeddedCoverPath && trackIndex < 12;
@@ -3545,12 +3583,14 @@ async function handleAlbumFolderScan(event, payload = {}) {
       mode,
       index: index + 1,
       total: folderPaths.length,
+      folder: folderPath,
       folderPath,
       message: `Scanning ${path.basename(folderPath)}`
     });
 
     const preview = await buildAlbumFolderPreview(folderPath, index);
     if (preview.trackCount > 0) albums.push(preview);
+    await yieldToMainLoop();
   }
 
   pruneAlbumFolderScanCache();
@@ -3618,13 +3658,23 @@ async function handleAlbumFolderImport(event, payload = {}) {
     const filePath = String(track.filePath || "");
     const fileKey = path.normalize(filePath).toLowerCase();
 
-    event.sender.send("album-folder-import:progress", {
-      type: "import-progress",
-      index: index + 1,
-      total: allTracks.length,
-      filePath,
-      message: `Adding ${track.title || path.basename(filePath)}`
-    });
+    if (
+      index === 0 ||
+      index + 1 === allTracks.length ||
+      index % ALBUM_FOLDER_IMPORT_PROGRESS_EVERY_TRACKS === 0
+    ) {
+      event.sender.send("album-folder-import:progress", {
+        type: "import-progress",
+        index: index + 1,
+        total: allTracks.length,
+        filePath,
+        message: `Adding ${track.title || path.basename(filePath)}`
+      });
+    }
+
+    if (index > 0 && index % ALBUM_FOLDER_IMPORT_YIELD_EVERY_TRACKS === 0) {
+      await yieldToMainLoop();
+    }
 
     if (!filePath || !fileExists(filePath) || !isAudioFile(filePath)) continue;
 
@@ -4827,7 +4877,7 @@ function postDiscordWebhookWithElectronNet(webhookUrl, body) {
 
       request.setHeader("Content-Type", "application/json");
       request.setHeader("Content-Length", String(payload.length));
-      request.setHeader("User-Agent", "Localtify-Feedback/0.3.9");
+      request.setHeader("User-Agent", "Localtify-Feedback/0.4.1");
 
       request.on("response", (response) => {
         let raw = "";
@@ -4895,7 +4945,7 @@ function postDiscordWebhookWithNodeHttps(webhookUrl, body) {
         headers: {
           "Content-Type": "application/json",
           "Content-Length": String(payload.length),
-          "User-Agent": "Localtify-Feedback/0.3.9"
+          "User-Agent": "Localtify-Feedback/0.4.1"
         },
         timeout: 30_000
       },

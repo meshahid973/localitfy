@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "localtify",
   "version": "0.4.1",
   "private": true,
@@ -125,10 +125,6 @@
       {
         "from": "build/icon.png",
         "to": "build/icon.png"
-      },
-      {
-        "from": ".env",
-        "to": ".env"
       }
     ],
     "asar": true,
@@ -193,4 +189,3 @@
     "compression": "maximum"
   }
 }
-

@@ -1080,11 +1080,11 @@ export function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 export const whatsNewItems = [
-  "0.3.9 polishes Albums V2 so custom albums, album shelves, detail pages, and cover actions feel built in",
-  "Downloads, missing-file recovery, playback stability, and metadata cleanup were tightened for daily use",
-  "Settings, onboarding, sidebar behavior, cover tools, and theme editing were cleaned up without redesigning the whole app",
-  "Linux now has clearer AppImage install copy and is treated as an official 0.3.9 release target",
-  "The release focuses on stability, lower UI lag, fewer CSS conflicts, and making the 0.3.7 foundation feel finished"
+  "0.4.1 fixes the album library importer freezing on large nested-folder scans",
+  "Nested album folders are detected more safely so parent artist folders do not steal child album covers",
+  "Album import progress is throttled so the UI stays responsive while scanning and importing",
+  "Linux AppImage startup hardening from 0.4.0 is kept, with cleaner update-check behavior",
+  "Small release cleanup for version text, Linux install copy, and old development comments"
 ];
 export const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 export const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -7076,7 +7076,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new"><X size={18} strokeWidth={2.4} /></button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.3.5 is a smoothness pass: CSS ownership is cleaner, hero expansion no longer replays the home page, proximity stays responsive, audio glow is scoped, and blur/ambience/motion stay enabled.</p>
+            <p className="whatsNewSubtext">0.4.1 is a fast hotfix focused on the album importer freeze, nested-folder scanning, cover accuracy, and keeping the app responsive after the 0.4.0 release.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>
