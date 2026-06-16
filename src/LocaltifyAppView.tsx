@@ -3,6 +3,51 @@ import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo,
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+
+const LOCALTFY_PLAYER_MORPH_PAUSE = {
+  left: "M5 5L9 5L9 19L5 19Z",
+  right: "M15 5L19 5L19 19L15 19Z"
+} as const;
+
+const LOCALTFY_PLAYER_MORPH_PLAY = {
+  left: "M7 5L13 8.5L13 15.5L7 19Z",
+  right: "M13 8.5L19 12L19 12L13 15.5Z"
+} as const;
+
+const LOCALTFY_PLAYER_MORPH_SPRING = {
+  type: "spring",
+  stiffness: 260,
+  damping: 26,
+  mass: 0.9
+} as const;
+
+function PlayerPlayPauseMorphIcon({ playing, className = "" }: { playing: boolean; className?: string }) {
+  const target = playing ? LOCALTFY_PLAYER_MORPH_PAUSE : LOCALTFY_PLAYER_MORPH_PLAY;
+
+  return (
+    <svg
+      className={`playerMorphIcon ${className}`.trim()}
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <Motion.path
+        animate={{ d: target.left }}
+        transition={LOCALTFY_PLAYER_MORPH_SPRING}
+        initial={false}
+      />
+      <Motion.path
+        animate={{ d: target.right }}
+        transition={LOCALTFY_PLAYER_MORPH_SPRING}
+        initial={false}
+      />
+    </svg>
+  );
+}
+
+
 import UpdateIsland from "./app/UpdateIsland";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FastAverageColor } from "fast-average-color";
@@ -4458,11 +4503,22 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const [albumFolderImportBusy, setAlbumFolderImportBusy] = useState(false);
   const [albumFolderImportMessage, setAlbumFolderImportMessage] = useState("");
   const [albumFolderImportProgress, setAlbumFolderImportProgress] = useState<any | null>(null);
+  const [albumDeleteConfirmArmed, setAlbumDeleteConfirmArmed] = useState(false);
+  const albumDeleteConfirmTimerRef = useRef<number | null>(null);
   const albumCoverInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     writeLocalJson(MANUAL_LOCAL_ALBUMS_STORAGE_KEY, manualAlbums);
   }, [manualAlbums]);
+
+  useEffect(() => {
+    return () => {
+      if (albumDeleteConfirmTimerRef.current !== null) {
+        window.clearTimeout(albumDeleteConfirmTimerRef.current);
+        albumDeleteConfirmTimerRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!window.localitfy?.onAlbumFolderImportProgress) return;
@@ -4616,6 +4672,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
 
   function cancelAlbumFolderImportPreview() {
+    setAlbumDeleteConfirmArmed(false);
     setAlbumFolderImportPreview(null);
     setAlbumFolderImportProgress(null);
     setAlbumFolderImportMessage("");
@@ -4705,18 +4762,21 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       }
 
       setAlbumFolderImportPreview(null);
+      const skippedDuplicates = Number(result.duplicateCount ?? albumFolderImportPreview?.duplicateCount ?? 0) || 0;
+      const importSummary = `imported ${importedAlbums.length} album${importedAlbums.length === 1 ? "" : "s"} • skipped ${skippedDuplicates} duplicate${skippedDuplicates === 1 ? "" : "s"}`;
       setAlbumFolderImportProgress({
         type: "import-done",
         index: importedAlbums.length,
         total: importedAlbums.length,
         changedCount: result.changedCount || 0,
-        message: result.message || "album folder imported"
+        duplicateCount: skippedDuplicates,
+        message: result.message || importSummary
       });
       const repairText = result.repairedExistingCount
-        ? ` repaired ${result.repairedExistingCount} existing track${result.repairedExistingCount === 1 ? "" : "s"}`
+        ? ` • repaired ${result.repairedExistingCount} track${result.repairedExistingCount === 1 ? "" : "s"}`
         : "";
-      setAlbumFolderImportMessage(result.message || `album folder imported${repairText}`);
-      setStatusText?.(result.message || `album folder imported${repairText}`);
+      setAlbumFolderImportMessage(result.message || `${importSummary}${repairText}`);
+      setStatusText?.(result.message || `${importSummary}${repairText}`);
       setLibraryScanMessage?.(`${importedAlbums.length} folder album${importedAlbums.length === 1 ? "" : "s"} imported`);
     } catch (error: any) {
       console.error("[localtify album folder import]", error);
@@ -4858,6 +4918,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     if (selectedAlbumIsManual) {
       deleteManualAlbum(selectedAlbum);
       setStatusText?.("album deleted");
+      setLibraryScanMessage?.("album deleted");
       return;
     }
 
@@ -4865,19 +4926,54 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setSelectedAlbumId("");
   }
 
+  function armDeleteAllAlbums() {
+    const albumCount = localAlbums.length;
+
+    if (!albumCount) {
+      setStatusText?.("no albums to clear");
+      return;
+    }
+
+    setAlbumDeleteConfirmArmed(true);
+    setStatusText?.(`sure? click again to clear ${albumCount} album${albumCount === 1 ? "" : "s"}`);
+
+    if (albumDeleteConfirmTimerRef.current !== null) {
+      window.clearTimeout(albumDeleteConfirmTimerRef.current);
+    }
+
+    albumDeleteConfirmTimerRef.current = window.setTimeout(() => {
+      setAlbumDeleteConfirmArmed(false);
+      albumDeleteConfirmTimerRef.current = null;
+    }, 4200);
+  }
+
   async function deleteAllAlbums() {
     const manualCount = manualAlbums.length;
+    const metadataCount = metadataAlbums.length;
+    const albumCount = manualCount + metadataCount;
     const taggedSongs = songs.filter((song) => String(song.album || "").trim());
 
+    if (!albumDeleteConfirmArmed) {
+      armDeleteAllAlbums();
+      return;
+    }
+
+    if (albumDeleteConfirmTimerRef.current !== null) {
+      window.clearTimeout(albumDeleteConfirmTimerRef.current);
+      albumDeleteConfirmTimerRef.current = null;
+    }
+
+    setAlbumDeleteConfirmArmed(false);
     setManualAlbums([]);
     setSelectedAlbumId("");
     closeAlbumBuilder();
 
     if (taggedSongs.length) {
       await clearAlbumTagFromSongs(taggedSongs, "all albums");
-    } else {
-      setStatusText?.(`deleted ${manualCount} custom/folder album${manualCount === 1 ? "" : "s"}`);
     }
+
+    setStatusText?.(`cleared ${albumCount} album${albumCount === 1 ? "" : "s"}`);
+    setLibraryScanMessage?.(`cleared ${albumCount} album${albumCount === 1 ? "" : "s"}`);
   }
 
   const homeHeroCoverBrightness = clamp(Number(settings.homeHeroCoverBrightness ?? 1), 0.65, 1.55);
@@ -5698,7 +5794,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       <button className="mainAction" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>add album</button>
                       <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("single")} disabled={albumFolderImportBusy}>import album folder</button>
                       <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("library")} disabled={albumFolderImportBusy}>import album library</button>
-                      <button className="heroGhost danger" type="button" onClick={() => void deleteAllAlbums()} disabled={!manualAlbums.length && !metadataAlbums.length}>delete all albums</button>
+                      <button className={`heroGhost danger ${albumDeleteConfirmArmed ? "confirmArmed" : ""}`} type="button" onClick={() => void deleteAllAlbums()} disabled={!manualAlbums.length && !metadataAlbums.length}>{albumDeleteConfirmArmed ? "sure? delete" : "delete all albums"}</button>
                     </div>
                   </div>
                   <div className="albumsHeroStatsV318" aria-label="album summary">
@@ -6966,11 +7062,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <SkipBack className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />
                 </button>
                 <button className={`circleButton main ${playButtonBurst ? `playButtonBurst playButtonBurst${playButtonBurst % 2}` : ""}`} onClick={togglePlay} aria-label={isPlaying ? "pause" : "play"}>
-                  {isPlaying ? (
-                    <Pause className="playerControlIcon pauseIcon" size={18} strokeWidth={2.75} fill="none" aria-hidden="true" />
-                  ) : (
-                    <Play className="playerControlIcon playIcon" size={18} strokeWidth={2.45} fill="currentColor" aria-hidden="true" />
-                  )}
+                  <PlayerPlayPauseMorphIcon playing={isPlaying} />
                 </button>
                 <button className="circleButton" onClick={() => playNext(true)} aria-label="next song">
                   <SkipForward className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />

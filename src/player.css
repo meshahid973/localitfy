@@ -2719,7 +2719,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 .playerMorphIcon path{
   fill: currentColor !important;
   stroke: currentColor !important;
-  stroke-width: 1.25 !important;
+  stroke-width: 1.28 !important;
   stroke-linejoin: round !important;
   stroke-linecap: round !important;
   vector-effect: non-scaling-stroke !important;
@@ -2732,8 +2732,8 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 }
 
 .playerBar .circleButton.main .playerMorphIcon{
-  width: 24px !important;
-  height: 24px !important;
+  width: 25px !important;
+  height: 25px !important;
 }
 
 .simpleControls .circleButton.main .playerMorphIcon{
@@ -2768,5 +2768,81 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 .playerBar .queueNowCard,
 .playerBar .queueDrawerSection{
   border-radius: var(--player-radius-m) !important;
+}
+
+
+/* v0.4.1: small player icon polish + safer album delete confirmation */
+.playerBar .circleButton:not(.main) .playerControlIcon,
+.playerBar .circleButton:not(.main) svg,
+.playerBar .volumeIconButton svg,
+.playerBar .repeatButton svg{
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.playerBar .circleButton[aria-label="previous song"] svg,
+.playerBar .circleButton[aria-label="next song"] svg{
+  width: 20px !important;
+  height: 20px !important;
+  stroke-width: 2.35 !important;
+}
+
+.playerBar .circleButton.active,
+.playerBar .repeatButton.active{
+  color: rgb(var(--accent-rgb)) !important;
+  filter:
+    drop-shadow(0 0 8px rgba(var(--accent-rgb),0.28))
+    drop-shadow(0 0 18px rgba(var(--accent-rgb),0.12)) !important;
+}
+
+.playerBar .circleButton.active:hover,
+.playerBar .repeatButton.active:hover{
+  filter:
+    drop-shadow(0 0 10px rgba(var(--accent-rgb),0.34))
+    drop-shadow(0 0 22px rgba(var(--accent-rgb),0.16)) !important;
+}
+
+.playerBar .repeatStateMark{
+  right: 0 !important;
+  bottom: 0 !important;
+  min-width: 13px !important;
+  height: 13px !important;
+  padding: 0 4px !important;
+  border-radius: var(--player-radius-xs, 12px) !important;
+  background: rgb(var(--accent-rgb)) !important;
+  color: #fff !important;
+  font-size: 8px !important;
+  font-weight: 950 !important;
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,0.42),
+    0 0 12px rgba(var(--accent-rgb),0.34) !important;
+}
+
+.controlRow .queueButtonBadge,
+.playerBar .queueButtonBadge{
+  right: -6px !important;
+  top: -7px !important;
+  min-width: 17px !important;
+  height: 17px !important;
+  padding: 0 5px !important;
+  border-radius: var(--player-radius-xs, 12px) !important;
+  background: rgb(var(--accent-rgb)) !important;
+  color: #fff !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,0.44),
+    0 0 16px rgba(var(--accent-rgb),0.34) !important;
+}
+
+.heroGhost.danger.confirmArmed{
+  color: #fff !important;
+  border-color: rgba(255, 92, 137, 0.52) !important;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255, 92, 137, 0.24), transparent 44%),
+    rgba(255, 92, 137, 0.12) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 92, 137, 0.14) inset,
+    0 12px 30px rgba(255, 92, 137, 0.10) !important;
 }
 
