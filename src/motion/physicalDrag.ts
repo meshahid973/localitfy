@@ -1,4 +1,4 @@
-export type PhysicalSnapPoint = {
+﻿export type PhysicalSnapPoint = {
   id: string;
   value: number;
 };
@@ -81,3 +81,4 @@ export function createMotionDragProps(bounds: PhysicalDragBounds) {
     dragMomentum: physicalDragDefaults.dragMomentum
   } as const;
 }
+

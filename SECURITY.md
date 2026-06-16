@@ -1,4 +1,4 @@
-# Security Policy
+﻿# Security Policy
 
 <p align="center">
   <strong>Security matters for localtify.</strong>
@@ -83,3 +83,4 @@ Please do not publicly share exploit details before a fix is released.
 This helps protect users while the issue is being checked and fixed.
 
 Thanks for helping keep localtify safe.
+

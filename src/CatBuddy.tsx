@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import "./cat-buddy.css";
 
@@ -610,3 +610,4 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
     </div>
   );
 }
+

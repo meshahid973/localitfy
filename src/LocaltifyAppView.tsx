@@ -985,7 +985,7 @@ export const updateRibbonEnterSpring = { type: "spring", stiffness: 500, damping
 export const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, mass: 0.55 } as const;
 
 
-export const APP_VERSION = "0.4.0";
+export const APP_VERSION = "0.4.1";
 export const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 export const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 export const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
@@ -7367,5 +7367,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     </main>
   );
 }
+
 
 

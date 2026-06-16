@@ -1,4 +1,4 @@
-export const mascotAssets = {
+﻿export const mascotAssets = {
   empty: new URL("./assets/empty-state.png", import.meta.url).href,
   happy: new URL("./assets/happy-state.png", import.meta.url).href,
   question: new URL("./assets/question-state.png", import.meta.url).href,
@@ -19,3 +19,4 @@ export const localtifyAssets = {
   onboardingAudio: new URL("./assets/onboarding.mp3", import.meta.url).href,
   mascot: mascotAssets
 } as const;
+

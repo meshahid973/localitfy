@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 // localtify 0.2.9 native Windows media integration
 // Add this file next to your Electron main.cjs, then call attachLocaltifyNativeWindowsMedia(mainWindow).
@@ -138,7 +138,7 @@ function updateTrayMenu() {
   if (!tray) return;
 
   const title = currentState.hasSong
-    ? `${currentState.title || "Unknown song"}${currentState.artist ? ` — ${currentState.artist}` : ""}`
+    ? `${currentState.title || "Unknown song"}${currentState.artist ? ` â€” ${currentState.artist}` : ""}`
     : "localtify";
 
   tray.setToolTip(title);
@@ -325,3 +325,4 @@ function attachLocaltifyNativeWindowsMedia(win, options = {}) {
 }
 
 module.exports = { attachLocaltifyNativeWindowsMedia };
+

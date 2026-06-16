@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   PlayerEngine,
   PlayerEngineEvent,
   PlayerEngineListener,
@@ -145,3 +145,4 @@ export class HtmlAudioEngine implements PlayerEngine {
     }
   }
 }
+

@@ -1,4 +1,4 @@
-export type LocaltifyAnalyticsSnapshot = Record<string, string | number | boolean>;
+﻿export type LocaltifyAnalyticsSnapshot = Record<string, string | number | boolean>;
 
 export type LocaltifyAnalyticsSnapshotInput = {
   activeView: string;
@@ -216,3 +216,4 @@ export function createLocaltifyLibraryWorker() {
     return null;
   }
 }
+

@@ -1,5 +1,5 @@
-// @ts-nocheck
-/* localtify 0.3.9 V473 — shared helpers, normalizers, search, metadata, theme, cover, and update utilities.
+﻿// @ts-nocheck
+/* localtify 0.3.9 V473 â€” shared helpers, normalizers, search, metadata, theme, cover, and update utilities.
    Safe boundary module: helpers are re-exported from LocaltifyAppView for this pass. */
 export {
   applyLibraryOrder,
@@ -110,4 +110,5 @@ export {
   writeLocalJson,
   writeSavedCustomThemePresets
 } from "./LocaltifyAppView";
+
 

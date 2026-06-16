@@ -1,4 +1,4 @@
-const fs = require("node:fs");
+﻿const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const crypto = require("node:crypto");
@@ -207,8 +207,8 @@ function buildProgressPayload(job, p) {
   const eta = p?.eta ?? null;
   let message = "Downloading audio...";
   if (percent >= 88) message = `Converting to ${String(job.format || "mp3").toUpperCase()}...`;
-  if (speed) message += `  •  ${speed}`;
-  if (eta && eta !== "00:00") message += `  •  ETA ${eta}`;
+  if (speed) message += `  â€¢  ${speed}`;
+  if (eta && eta !== "00:00") message += `  â€¢  ETA ${eta}`;
 
   return {
     type: "download",
@@ -363,7 +363,7 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
           file: baseName,
           progress: percent,
           speed: kbps,
-          message: `Converting... ${percent}%${kbps ? `  •  ${kbps}` : ""}`
+          message: `Converting... ${percent}%${kbps ? `  â€¢  ${kbps}` : ""}`
         });
       })
       .on("end", () => {
@@ -385,7 +385,7 @@ function normalizeSpotifyMatchText(value = "") {
   return String(value || "")
     .toLowerCase()
     .replace(/&/g, " and ")
-    .replace(/[''`´]/g, "")
+    .replace(/[''`Â´]/g, "")
     .replace(/\b(feat|ft|featuring)\.?\b/g, " ")
     .replace(/\([^)]*\)|\[[^\]]*\]/g, " ")
     .replace(/[^a-z0-9]+/g, " ")
@@ -768,7 +768,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
       ...basePayload,
       status: "downloading",
       progress: 2,
-      message: `Finding safe match: "${artist ? `${artist} — ` : ""}${title}"`
+      message: `Finding safe match: "${artist ? `${artist} â€” ` : ""}${title}"`
     });
 
     let match;
@@ -864,7 +864,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
 
         continue;
       } catch {
-        // Rename failed — keep the original filename but still keep identity fields.
+        // Rename failed â€” keep the original filename but still keep identity fields.
       }
     }
 
@@ -877,7 +877,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
         progress: 100,
         providerUrl: match.providerUrl,
         error: dlResult.error,
-        message: String(dlResult.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?"
+        message: String(dlResult.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed â€” retry?"
       });
     }
 
@@ -905,7 +905,7 @@ async function downloadAudioUrls(input, destinationDirectory, onProgress, option
       : { ok: false, url, error: "Only YouTube URLs are supported" };
 
     if (!result.ok) {
-      onProgress?.({ type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?" });
+      onProgress?.({ type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed â€” retry?" });
     }
 
     results.push(result);
@@ -947,3 +947,4 @@ module.exports = {
   isSupportedMediaPath,
   cancelActiveDownloads
 };
+

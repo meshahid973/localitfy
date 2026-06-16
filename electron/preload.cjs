@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require("electron");
+﻿const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("localitfy", {
   bootstrap: () => ipcRenderer.invoke("app:bootstrap"),
@@ -136,3 +136,4 @@ contextBridge.exposeInMainWorld("localitfy", {
     };
   }
 });
+

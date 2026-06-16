@@ -1,4 +1,4 @@
-export type PlayerEngineEvent =
+﻿export type PlayerEngineEvent =
   | "sourcechange"
   | "loadstart"
   | "loadedmetadata"
@@ -61,3 +61,4 @@ export interface PlayerEngine {
 
   destroy(): void;
 }
+

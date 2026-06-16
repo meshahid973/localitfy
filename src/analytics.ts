@@ -1,4 +1,4 @@
-import posthog from "posthog-js";
+﻿import posthog from "posthog-js";
 
 export type AnalyticsValue = string | number | boolean | null | undefined;
 export type AnalyticsProperties = Record<string, AnalyticsValue>;
@@ -1292,3 +1292,4 @@ export function resetLocaltifyAnalyticsIdentity(): void {
 
   identifyInstall();
 }
+

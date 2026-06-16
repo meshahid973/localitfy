@@ -1,4 +1,4 @@
-# Contributing to localtify
+﻿# Contributing to localtify
 
 <p align="center">
   <strong>Thanks for wanting to help localtify.</strong>
@@ -352,3 +352,4 @@ Open an issue if you are stuck or unsure.
 You can also open a pull request even if your change is not perfect yet. Just say what you need help with.
 
 Thanks for helping localtify improve.
+

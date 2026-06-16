@@ -1,4 +1,4 @@
-const RPC = require("discord-rpc");
+﻿const RPC = require("discord-rpc");
 
 const CLIENT_ID = "1499896817138012271";
 
@@ -247,7 +247,7 @@ function lower(text) {
 function limitText(text, maxLength = 128) {
   const value = cleanSpaces(text);
   if (value.length <= maxLength) return value;
-  return `${value.slice(0, Math.max(0, maxLength - 1)).trim()}…`;
+  return `${value.slice(0, Math.max(0, maxLength - 1)).trim()}â€¦`;
 }
 
 function safeNumber(value, fallback = 0) {
@@ -358,7 +358,7 @@ function cleanupTitle(rawTitle, cleanupMode = "heavy") {
     .normalize("NFKC")
     .replace(/\.[a-z0-9]{2,5}$/i, " ")
     .replace(/[_]+/g, " ")
-    .replace(/[–—]+/g, " ")
+    .replace(/[â€“â€”]+/g, " ")
     .replace(/\((\d+)\)/gi, " ")
     .replace(/\[(\d+)\]/gi, " ")
     .replace(/\bfeat\.?\b/gi, " ")
@@ -698,7 +698,7 @@ function getPlaybackEffectLabel(payload = {}) {
   if (reverb >= 8) labels.push(`reverb ${Math.min(100, reverb)}%`);
   if (Number.isFinite(speed) && Math.abs(speed - 1) >= 0.04) labels.push(`${speed.toFixed(2)}x`);
 
-  return labels.slice(0, 2).join(" • ");
+  return labels.slice(0, 2).join(" â€¢ ");
 }
 
 function buildRecentActivityState(payload, artist, album) {
@@ -710,7 +710,7 @@ function buildRecentActivityState(payload, artist, album) {
   if (secondLine && secondLine !== APP_NAME) pieces.push(secondLine);
   if (album && album !== "local files" && pieces.length < 2) pieces.push(album);
 
-  return pieces.filter(Boolean).slice(0, 2).join(" • ") || "local music session";
+  return pieces.filter(Boolean).slice(0, 2).join(" â€¢ ") || "local music session";
 }
 
 function buildLargeImageText(payload = {}, key = "") {
@@ -718,7 +718,7 @@ function buildLargeImageText(payload = {}, key = "") {
   const artist = getArtist(payload);
 
   if (payload?.discordPrivacyMode) return "localtify private session";
-  if (title && artist && artist !== "coderpixel :p") return `${title} • ${artist}`;
+  if (title && artist && artist !== "coderpixel :p") return `${title} â€¢ ${artist}`;
   if (title) return title;
   if (key) return `localtify art: ${key}`;
   return "localtify artwork";
@@ -756,7 +756,7 @@ function buildActivityText(payload) {
     if (!isPlaying && payload?.discordShowPausedIdle !== false) {
       return {
         details: cleanTitle,
-        state: `paused • ${timeLeft}`
+        state: `paused â€¢ ${timeLeft}`
       };
     }
 
@@ -769,14 +769,14 @@ function buildActivityText(payload) {
   if (!isPlaying && payload?.discordShowPausedIdle !== false) {
     return {
       details: cleanTitle,
-      state: `paused • ${timeLeft}`
+      state: `paused â€¢ ${timeLeft}`
     };
   }
 
   if (style === "detailed") {
     return {
       details: cleanTitle,
-      state: `${buildSecondLine({ ...payload, discordSecondLine: "artist" }, artist)} • album: ${album}`
+      state: `${buildSecondLine({ ...payload, discordSecondLine: "artist" }, artist)} â€¢ album: ${album}`
     };
   }
 
@@ -796,7 +796,7 @@ function buildActivityText(payload) {
 
   if (style === "cute") {
     return {
-      details: payload?.liked ? `♡ ${cleanTitle}` : cleanTitle,
+      details: payload?.liked ? `â™¡ ${cleanTitle}` : cleanTitle,
       state: secondLine
     };
   }

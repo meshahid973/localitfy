@@ -1,4 +1,4 @@
-import "./style.css";
+﻿import "./style.css";
 
 const CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID || "1499896817138012271";
 const APP_VERSION = "0.3.8";
@@ -148,7 +148,7 @@ function renderShell(mode: "browser" | "discord") {
           <div class="presenceCopy">
             <span>Recent Activity text</span>
             <strong>Localtify v${APP_VERSION}</strong>
-            <small>music room • local music player</small>
+            <small>music room â€¢ local music player</small>
           </div>
         </section>
 
@@ -342,7 +342,7 @@ async function setLocaltifyActivity() {
     activity: {
       type: 0,
       details: `Localtify v${APP_VERSION}`,
-      state: "music room • local music player",
+      state: "music room â€¢ local music player",
       timestamps: {
         start: Date.now()
       },
@@ -411,7 +411,7 @@ async function shareActivity() {
 
       setStatus(
         result?.success ? "Share dialog opened" : "Share cancelled",
-        result?.success ? "Your Localtify Activity link is ready." : "No problem — you can try again.",
+        result?.success ? "Your Localtify Activity link is ready." : "No problem â€” you can try again.",
         result?.success ? "good" : "warn"
       );
       return;
@@ -516,3 +516,4 @@ async function boot() {
 }
 
 void boot();
+

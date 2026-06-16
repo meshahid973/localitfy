@@ -1,4 +1,4 @@
-/* localtify 0.4.0 V430 — dynamic physical proximity motion.
+﻿/* localtify 0.4.1 V430 â€” dynamic physical proximity motion.
    Only sidebar / player / hero controls get velocity motion.
    Home cards and big lists stay out of the pointer hot path.
 */
@@ -544,4 +544,5 @@ export function useProximityMotion({
     };
   }, [disabled, resetKey, rootRef, suspended]);
 }
+
 

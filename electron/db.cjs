@@ -1,4 +1,4 @@
-const Database = require("better-sqlite3");
+﻿const Database = require("better-sqlite3");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -984,3 +984,4 @@ module.exports = {
   repairDatabaseNow,
   getDatabaseStatus
 };
+

@@ -1,5 +1,5 @@
-/* localtify 0.3.9 V425 cover picker and cache cleanup. */
-/* localtify 0.3.9 V424 — Windows startup white-screen recovery. */
+﻿/* localtify 0.3.9 V425 cover picker and cache cleanup. */
+/* localtify 0.3.9 V424 â€” Windows startup white-screen recovery. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -730,7 +730,7 @@ function getNativeMediaTitle() {
   if (!nativeMediaState.hasSong) return "localtify";
   const title = nativeMediaState.title || "unknown song";
   const artist = nativeMediaState.artist || "";
-  return artist ? `${title} — ${artist}` : title;
+  return artist ? `${title} â€” ${artist}` : title;
 }
 
 function updateTrayMenu() {
@@ -2218,7 +2218,7 @@ async function spotifyTokenRequest(formData) {
 
   if (res.status !== 200) {
     const detail = data?.error_description || data?.error || res.body?.slice?.(0, 160) || "";
-    throw new Error(`Spotify OAuth returned HTTP ${res.status}${detail ? ` — ${detail}` : ""}`);
+    throw new Error(`Spotify OAuth returned HTTP ${res.status}${detail ? ` â€” ${detail}` : ""}`);
   }
 
   return data;
@@ -2400,7 +2400,7 @@ async function loginSpotifyOAuth() {
     loginWindow = new BrowserWindow({
       width: 540,
       height: 720,
-      title: "Connect Spotify — localtify",
+      title: "Connect Spotify â€” localtify",
       parent: mainWindow || undefined,
       modal: false,
       autoHideMenuBar: true,
@@ -2643,7 +2643,7 @@ async function fetchSpotifyPublicTrackFallback(trackId) {
       if (!artist) {
         const descriptionMatch = html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i);
         const desc = decodeHtmlEntities(descriptionMatch?.[1] || "").trim();
-        if (desc) artist = desc.split("·")[0].trim();
+        if (desc) artist = desc.split("Â·")[0].trim();
       }
     }
   } catch {
@@ -4994,7 +4994,7 @@ async function sendLocaltifyFeedback(payload = {}) {
     allowed_mentions: { parse: [] },
     embeds: [
       {
-        title: `Localtify feedback — ${category}`,
+        title: `Localtify feedback â€” ${category}`,
         description: message,
         color: 0xd946ef,
         timestamp: new Date().toISOString(),
@@ -5500,7 +5500,7 @@ app.whenReady().then(async () => {
     return true;
   });
 
-  // ── Spotify: fetch public track metadata through OAuth PKCE ─────────────
+  // â”€â”€ Spotify: fetch public track metadata through OAuth PKCE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const runSpotifyFetch = async (payload = {}) => {
     try {
       const url = typeof payload === "string" ? payload : payload?.url;
@@ -5794,3 +5794,4 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+

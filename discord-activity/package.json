@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "discord-activity",
   "private": true,
   "version": "0.0.0",
@@ -16,3 +16,4 @@
     "@discord/embedded-app-sdk": "^2.5.0"
   }
 }
+

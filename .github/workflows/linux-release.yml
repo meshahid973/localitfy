@@ -1,4 +1,4 @@
-name: Build Linux release
+﻿name: Build Linux release
 
 on:
   workflow_dispatch:

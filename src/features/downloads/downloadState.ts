@@ -1,4 +1,4 @@
-export type DownloadPageMascotState = "empty" | "info" | "loading" | "happy" | "warning" | "error" | "question" | "danger";
+﻿export type DownloadPageMascotState = "empty" | "info" | "loading" | "happy" | "warning" | "error" | "question" | "danger";
 export type DownloadPageTone = "info" | "success" | "warning" | "error";
 
 type QueueItem = {
@@ -144,3 +144,4 @@ export function getDownloadPageState(input: DownloadPageStateInput): DownloadPag
     message: "Paste a YouTube link, fetch Spotify tracks, or convert local files. Nothing touches the database until something is imported."
   };
 }
+

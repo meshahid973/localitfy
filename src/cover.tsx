@@ -1,7 +1,7 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { memo, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-/* localtify 0.3.9 V425 — missing cover filter + cache tools. */
-/* localtify 0.3.9 V307 — cover studio stable render. */
+/* localtify 0.3.9 V425 â€” missing cover filter + cache tools. */
+/* localtify 0.3.9 V307 â€” cover studio stable render. */
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
 
@@ -9,7 +9,7 @@ const EMPTY_STATE_IMAGE_SRC = new URL("./assets/empty-state.png", import.meta.ur
 
 const CoverGalleryImage = memo(function CoverGalleryImage({ src, label, priority = false }: { src: string; label: string; priority?: boolean }) {
   const [failed, setFailed] = useState(false);
-  const fallback = String(label || "cover").trim().slice(0, 1).toUpperCase() || "♪";
+  const fallback = String(label || "cover").trim().slice(0, 1).toUpperCase() || "â™ª";
 
   useEffect(() => {
     setFailed(false);
@@ -267,7 +267,7 @@ function VirtualCoverSongList({
                 <strong>{prettyTitle(String(song.title || "untitled"), 6)}</strong>
                 <small>{prettyMeta(String(song.artist || "unknown artist"))}</small>
               </span>
-              <em>{selected ? "✓" : "+"}</em>
+              <em>{selected ? "âœ“" : "+"}</em>
             </button>
           );
         })}
@@ -324,7 +324,7 @@ function VirtualCoverGalleryGrid({
             >
               {rowEntries.map((entry) => {
                 const imageUrl = entry.asset.url || pixelArtUrl(entry.asset.file);
-                const tags = entry.tags.map(coverMoodName).filter(Boolean).slice(0, 2).join(" · ");
+                const tags = entry.tags.map(coverMoodName).filter(Boolean).slice(0, 2).join(" Â· ");
 
                 return (
                   <article
@@ -344,7 +344,7 @@ function VirtualCoverGalleryGrid({
 
                     <div className="coverGalleryInfoCleanOnly">
                       <strong title={entry.asset.label}>{entry.asset.label}</strong>
-                      <small>{entry.usage} use{entry.usage === 1 ? "" : "s"}{tags ? ` • ${tags}` : ""}</small>
+                      <small>{entry.usage} use{entry.usage === 1 ? "" : "s"}{tags ? ` â€¢ ${tags}` : ""}</small>
                     </div>
 
                     <div className="coverGalleryActionsCleanOnly">
@@ -355,7 +355,7 @@ function VirtualCoverGalleryGrid({
                         aria-label={entry.excluded ? "show cover again" : "hide cover"}
                         title={entry.excluded ? "show cover again" : "hide cover"}
                       >
-                        <span aria-hidden="true">{entry.excluded ? "↺" : "×"}</span>
+                        <span aria-hidden="true">{entry.excluded ? "â†º" : "Ã—"}</span>
                       </button>
 
                       <button
@@ -607,8 +607,8 @@ export default function CoverStudio({
           <div className="coverQuickApplyBar">
             <div className="coverQuickPreview" aria-label="cover preview">
               <CoverComponent song={activeTargetSong ?? currentSong} className="coverStudioMiniSongArt" />
-              <span aria-hidden="true">→</span>
-              {previewEntry ? <CoverGalleryImage src={previewImageUrl} label={previewEntry.asset.label} priority /> : <div className="coverPreviewEmpty">♪</div>}
+              <span aria-hidden="true">â†’</span>
+              {previewEntry ? <CoverGalleryImage src={previewImageUrl} label={previewEntry.asset.label} priority /> : <div className="coverPreviewEmpty">â™ª</div>}
               <button type="button" disabled={!previewEntry || pixelArtBusy || randomizeDisabled} onClick={() => previewEntry && void applyEntry(previewEntry)}>
                 apply preview
               </button>
@@ -643,4 +643,5 @@ export default function CoverStudio({
     </section>
   );
 }
+
 

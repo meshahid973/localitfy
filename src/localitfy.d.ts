@@ -1,4 +1,4 @@
-export {};
+﻿export {};
 
 
 type LocalitfyFeedbackStatus = {
@@ -493,3 +493,4 @@ declare global {
     };
   }
 }
+

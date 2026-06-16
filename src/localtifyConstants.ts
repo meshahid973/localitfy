@@ -1,5 +1,5 @@
-// @ts-nocheck
-/* localtify 0.4.0 V473 — shared constants, option lists, defaults, assets, and release copy.
+﻿// @ts-nocheck
+/* localtify 0.4.1 V473 â€” shared constants, option lists, defaults, assets, and release copy.
    Safe boundary module: values are re-exported from LocaltifyAppView for this pass. */
 export {
   APP_VERSION,
@@ -60,6 +60,7 @@ export {
   whatsNewItems,
   yukariUpdateImage
 } from "./LocaltifyAppView";
+
 
 
 

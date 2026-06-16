@@ -1,4 +1,4 @@
-type Env = {
+﻿type Env = {
   DISCORD_CLIENT_SECRET?: string;
   DISCORD_CLIENT_ID?: string;
   VITE_DISCORD_CLIENT_ID?: string;
@@ -87,3 +87,4 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 export const onRequest: PagesFunction<Env> = async () => {
   return json({ error: "Method not allowed" }, 405);
 };
+

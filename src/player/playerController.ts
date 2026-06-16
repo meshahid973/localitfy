@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   PlayerEngine,
   PlayerEngineEvent,
   PlayerEngineSource,
@@ -146,3 +146,4 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
     destroy
   };
 }
+
