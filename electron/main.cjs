@@ -951,11 +951,25 @@ function setupAutoUpdater() {
   autoUpdater.autoInstallOnAppQuit = false;
   autoUpdater.allowPrerelease = process.env.LOCALTIFY_ALLOW_PRERELEASE_UPDATES === "1";
   autoUpdater.allowDowngrade = false;
+
+  if (linuxUpdaterIsManualOnly()) {
+    autoUpdater.autoDownload = false;
+    autoUpdater.autoInstallOnAppQuit = false;
+  }
+
   try { autoUpdater.logger = null; } catch {}
   autoUpdater.on("checking-for-update", () => {
     sendAutoUpdateEvent({ type: "checking", message: "checking for updates..." });
   });
   autoUpdater.on("update-available", (info) => {
+    if (linuxUpdaterIsManualOnly()) {
+      sendLinuxManualUpdateOnlyEvent({
+        version: safeUpdateInfo(info).version,
+        reason: "linux-manual-only-update-available"
+      });
+      return;
+    }
+
     const cleanInfo = safeUpdateInfo(info);
     updaterChecking = false;
     updateDownloaded = false;
@@ -1025,6 +1039,182 @@ function isLinuxUpdateMetadataMissingError(error) {
   return process.platform === "linux" && /latest-linux\.yml/i.test(text) && /404|Cannot find/i.test(text);
 }
 
+// LOCALTIFY_LINUX_MANUAL_UPDATE_LINK_FIX
+// Linux AppImage updates must never auto-download or auto-install.
+// The app only checks GitHub Releases, shows an update prompt, and the
+// download/install buttons open GitHub instead of touching the running AppImage.
+const LOCALTIFY_LINUX_RELEASES_URL = "https://github.com/meshahid973/localitfy/releases/latest";
+const LOCALTIFY_GITHUB_LATEST_RELEASE_API = "https://api.github.com/repos/meshahid973/localitfy/releases/latest";
+
+function isLinuxAppImageUpdateRuntime() {
+  return Boolean(app.isPackaged && process.platform === "linux");
+}
+
+function linuxUpdaterIsManualOnly() {
+  return isLinuxAppImageUpdateRuntime() && process.env.LOCALTIFY_ENABLE_LINUX_UPDATER !== "1";
+}
+
+function normalizeUpdateVersion(value = "") {
+  return String(value || "").trim().replace(/^v/i, "");
+}
+
+function compareUpdateVersions(leftValue = "", rightValue = "") {
+  const left = normalizeUpdateVersion(leftValue).split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const right = normalizeUpdateVersion(rightValue).split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const length = Math.max(left.length, right.length, 3);
+
+  for (let index = 0; index < length; index += 1) {
+    const a = left[index] || 0;
+    const b = right[index] || 0;
+    if (a > b) return 1;
+    if (a < b) return -1;
+  }
+
+  return 0;
+}
+
+function fetchGithubLatestReleaseInfo() {
+  return new Promise((resolve) => {
+    try {
+      const request = https.get(
+        LOCALTIFY_GITHUB_LATEST_RELEASE_API,
+        {
+          headers: {
+            "user-agent": "localtify-updater",
+            "accept": "application/vnd.github+json"
+          },
+          timeout: 6500
+        },
+        (response) => {
+          let body = "";
+          response.setEncoding("utf8");
+          response.on("data", (chunk) => { body += chunk; });
+          response.on("end", () => {
+            try {
+              if (response.statusCode && response.statusCode >= 400) {
+                resolve(null);
+                return;
+              }
+
+              const data = JSON.parse(body || "{}");
+              const tag = String(data.tag_name || data.name || "").trim();
+              const version = normalizeUpdateVersion(tag);
+              const assets = Array.isArray(data.assets) ? data.assets : [];
+              const appImageAsset = assets.find((asset) => /\.AppImage$/i.test(String(asset?.name || "")));
+
+              resolve({
+                version,
+                tag,
+                releaseUrl: String(data.html_url || LOCALTIFY_LINUX_RELEASES_URL),
+                downloadUrl: String(appImageAsset?.browser_download_url || data.html_url || LOCALTIFY_LINUX_RELEASES_URL),
+                releaseNotes: typeof data.body === "string" ? data.body : ""
+              });
+            } catch {
+              resolve(null);
+            }
+          });
+        }
+      );
+
+      request.on("timeout", () => {
+        request.destroy();
+        resolve(null);
+      });
+
+      request.on("error", () => resolve(null));
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+function sendLinuxManualUpdateEvent(extra = {}) {
+  updaterChecking = false;
+  updateDownloaded = false;
+
+  return sendAutoUpdateEvent({
+    type: "available",
+    platform: "linux",
+    manualOnly: true,
+    version: extra.version || "latest",
+    downloadUrl: extra.downloadUrl || LOCALTIFY_LINUX_RELEASES_URL,
+    releaseNotes: extra.releaseNotes || "",
+    message: extra.message || "Linux update available. Auto-update is disabled for AppImage, so download the latest AppImage from GitHub.",
+    ...extra
+  });
+}
+
+async function checkLinuxManualReleaseUpdate(payload = {}) {
+  if (!linuxUpdaterIsManualOnly()) return null;
+
+  updaterChecking = true;
+
+  if (!payload?.silent) {
+    sendAutoUpdateEvent({
+      type: "checking",
+      platform: "linux",
+      manualOnly: true,
+      message: "Checking GitHub releases..."
+    });
+  }
+
+  const latest = await fetchGithubLatestReleaseInfo();
+  updaterChecking = false;
+
+  if (!latest?.version) {
+    if (!payload?.silent) {
+      sendLinuxManualUpdateEvent({
+        version: "latest",
+        downloadUrl: LOCALTIFY_LINUX_RELEASES_URL,
+        reason: "linux-release-check-fallback",
+        message: "Could not check Linux updates automatically. Open GitHub releases to download the latest AppImage."
+      });
+    }
+    return false;
+  }
+
+  const currentVersion = normalizeUpdateVersion(app.getVersion());
+  const hasNewerVersion = compareUpdateVersions(latest.version, currentVersion) > 0;
+
+  if (!hasNewerVersion) {
+    sendAutoUpdateEvent({
+      type: "not-available",
+      platform: "linux",
+      manualOnly: true,
+      silent: Boolean(payload?.silent),
+      version: latest.version,
+      message: "Linux AppImage is up to date."
+    });
+    return false;
+  }
+
+  sendLinuxManualUpdateEvent({
+    version: latest.version,
+    downloadUrl: latest.downloadUrl || latest.releaseUrl || LOCALTIFY_LINUX_RELEASES_URL,
+    releaseNotes: latest.releaseNotes || "",
+    reason: "linux-manual-update-available"
+  });
+
+  return true;
+}
+
+async function openLinuxUpdateReleaseLink(reason = "manual-link") {
+  const url = LOCALTIFY_LINUX_RELEASES_URL;
+
+  sendLinuxManualUpdateEvent({
+    version: lastUpdateInfo?.version || "latest",
+    downloadUrl: url,
+    reason,
+    message: "Opening GitHub releases for Linux AppImage download..."
+  });
+
+  await shell.openExternal(url).catch((error) => {
+    console.log("[localtify linux updater open link error]", error?.message || error);
+  });
+
+  return false;
+}
+
 async function checkForUpdates(payload = {}) {
   setupAutoUpdater();
   updaterSilent = Boolean(payload?.silent);
@@ -1032,6 +1222,10 @@ async function checkForUpdates(payload = {}) {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
   }
+
+  const linuxManualResult = await checkLinuxManualReleaseUpdate(payload);
+  if (linuxManualResult !== null) return linuxManualResult;
+
   if (updaterChecking) return true;
   updaterChecking = true;
   try {
@@ -1063,6 +1257,11 @@ async function downloadUpdate() {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
   }
+
+  if (linuxUpdaterIsManualOnly()) {
+    return openLinuxUpdateReleaseLink("download-button");
+  }
+
   try {
     updateDownloaded = false;
     sendAutoUpdateEvent({
@@ -1089,6 +1288,11 @@ async function installUpdate() {
     sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
     return false;
   }
+
+  if (linuxUpdaterIsManualOnly()) {
+    return openLinuxUpdateReleaseLink("install-button");
+  }
+
   if (!updateDownloaded) {
     sendAutoUpdateEvent({
       type: "error",
@@ -5834,6 +6038,12 @@ app.whenReady().then(async () => {
   ipcMain.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
   ipcMain.handle("localitfy:download-update", async () => downloadUpdate());
   ipcMain.handle("localitfy:install-update", async () => installUpdate());
+  ipcMain.handle("localitfy:open-external", async (_event, url) => {
+    const targetUrl = String(url || "").trim();
+    if (!/^https?:\/\//i.test(targetUrl)) return { ok: false, reason: "invalid-url" };
+    await shell.openExternal(targetUrl);
+    return { ok: true };
+  });
 
   ipcMain.handle("window:minimize", async (event) => {
     BrowserWindow.fromWebContents(event.sender)?.minimize();

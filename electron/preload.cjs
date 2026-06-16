@@ -75,6 +75,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   checkForUpdates: (payload) => ipcRenderer.invoke("localitfy:check-for-updates", payload),
   downloadUpdate: () => ipcRenderer.invoke("localitfy:download-update"),
   installUpdate: () => ipcRenderer.invoke("localitfy:install-update"),
+  openExternal: (url) => ipcRenderer.invoke("localitfy:open-external", url),
 
   /** Check if Spotify OAuth/PKCE is configured and connected. */
   spotifyCheck: () => ipcRenderer.invoke("spotify-check"),

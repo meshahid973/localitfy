@@ -387,7 +387,10 @@ function normalizeSpotifyMatchText(value = "") {
     .replace(/&/g, " and ")
     .replace(/[''`Â´]/g, "")
     .replace(/\b(feat|ft|featuring)\.?\b/g, " ")
-    .replace(/\([^)]*\)|\[[^\]]*\]/g, " ")
+    // Keep the words inside brackets. Removing the whole bracket made real
+    // Spotify identities like "slowed", "remix", or "with Future" look absent,
+    // then the safe matcher rejected good YouTube results.
+    .replace(/[()\[\]{}]/g, " ")
     .replace(/[^a-z0-9]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -397,6 +400,32 @@ function spotifyMatchWords(value = "") {
   return normalizeSpotifyMatchText(value)
     .split(" ")
     .filter((word) => word.length > 1);
+}
+
+function spotifyWordOverlapRatio(wanted = "", candidate = "") {
+  const wantedWords = new Set(spotifyMatchWords(wanted).filter((word) => word.length > 2));
+  const candidateWords = new Set(spotifyMatchWords(candidate).filter((word) => word.length > 2));
+
+  if (!wantedWords.size) return 0;
+
+  let overlap = 0;
+  for (const word of wantedWords) {
+    if (candidateWords.has(word)) overlap += 1;
+  }
+
+  return overlap / wantedWords.size;
+}
+
+function hasHardSpotifyRejectWord(track = {}, candidate = {}) {
+  const wantedRaw = normalizeSpotifyMatchText(`${track.title || track.name || ""} ${track.artist || track.artists || ""}`);
+  const candidateRaw = normalizeSpotifyMatchText(`${candidate.title || candidate.fulltitle || ""} ${candidate.uploader || candidate.channel || candidate.creator || ""}`);
+
+  for (const word of SPOTIFY_BAD_CANDIDATE_WORDS) {
+    const badKey = normalizeSpotifyMatchText(word);
+    if (badKey && candidateRaw.includes(badKey) && !wantedRaw.includes(badKey)) return true;
+  }
+
+  return false;
 }
 
 function getSpotifyTrackId(track = {}) {
@@ -418,6 +447,45 @@ function buildSpotifySearchQuery(track = {}) {
   if (isrc) return `${artist ? `${artist} ` : ""}${title} ${isrc} official audio`.trim();
   if (artist) return `${artist} - ${title} official audio`;
   return `${title} official audio`;
+}
+
+function buildSpotifySearchQueries(track = {}) {
+  const title = String(track.title || track.name || "unknown track").trim();
+  const artist = String(track.artist || track.artists || "").trim();
+  const isrc = String(track.isrc || "").trim();
+  const queries = [];
+
+  const push = (query) => {
+    const value = String(query || "").replace(/\s+/g, " ").trim();
+    if (value && !queries.includes(value)) queries.push(value);
+  };
+
+  if (isrc) push(`${artist ? `${artist} ` : ""}${title} ${isrc} official audio`);
+  if (artist) {
+    push(`${artist} - ${title} official audio`);
+    push(`${artist} ${title} audio`);
+    push(`${artist} ${title}`);
+  }
+
+  push(`${title} official audio`);
+  push(`${title} audio`);
+  push(`${title} song`);
+  push(`${title} music`);
+  push(title);
+
+  return queries;
+}
+
+function buildSpotifyDirectSearchFallbackUrl(track = {}, best = null) {
+  const queries = buildSpotifySearchQueries(track);
+  const title = String(track.title || track.name || "").trim();
+  const artist = String(track.artist || track.artists || "").trim();
+  const bestQuery = String(best?.searchQuery || "").trim();
+  const query = bestQuery || queries[0] || `${artist ? `${artist} ` : ""}${title}`.trim();
+
+  if (!query) return "";
+
+  return `ytsearch1:${query}`;
 }
 
 function getCandidateUrl(candidate = {}) {
@@ -502,56 +570,67 @@ function parseYtDlpJsonLines(raw) {
 
 async function searchSpotifyYoutubeCandidates(track, limit = 8) {
   const ytDlp = await getYtDlp();
-  const query = buildSpotifySearchQuery(track);
-  const searchUrl = `ytsearch${Math.max(3, Math.min(10, Number(limit) || 8))}:${query}`;
-
-  const baseArgs = [
-    searchUrl,
-    "--dump-json",
-    "--flat-playlist",
-    "--no-warnings",
-    "--no-colors",
-    "--ignore-errors"
-  ];
-
-  const attempts = [baseArgs];
-
-  if (_getCookiesFile) {
-    try {
-      const cookiesFile = await _getCookiesFile();
-      if (cookiesFile && fs.existsSync(cookiesFile)) {
-        attempts.push([...baseArgs, "--cookies", cookiesFile]);
-      }
-    } catch {
-      // Metadata search can still work without cookies.
-    }
-  }
-
+  const queries = buildSpotifySearchQueries(track);
+  const searchLimit = Math.max(5, Math.min(12, Number(limit) || 8));
+  const seen = new Set();
+  const allCandidates = [];
   let lastError = null;
 
-  for (const args of attempts) {
-    try {
-      const stdout = await runYtDlpJson(ytDlp, args);
-      const candidates = parseYtDlpJsonLines(stdout)
-        .map((candidate) => ({
-          ...candidate,
-          providerUrl: getCandidateUrl(candidate),
-          searchQuery: query
-        }))
-        .filter((candidate) => candidate.providerUrl);
+  for (const query of queries) {
+    const searchUrl = `ytsearch${searchLimit}:${query}`;
+    const baseArgs = [
+      searchUrl,
+      "--dump-json",
+      "--flat-playlist",
+      "--no-warnings",
+      "--no-colors",
+      "--ignore-errors"
+    ];
 
-      if (candidates.length) return candidates;
-    } catch (error) {
-      lastError = error;
-      if (String(error?.message || "").toLowerCase().includes("cancel")) throw error;
+    const attempts = [baseArgs];
+
+    if (_getCookiesFile) {
+      try {
+        const cookiesFile = await _getCookiesFile();
+        if (cookiesFile && fs.existsSync(cookiesFile)) {
+          attempts.push([...baseArgs, "--cookies", cookiesFile]);
+        }
+      } catch {
+        // Metadata search can still work without cookies.
+      }
+    }
+
+    for (const args of attempts) {
+      try {
+        const stdout = await runYtDlpJson(ytDlp, args);
+        const candidates = parseYtDlpJsonLines(stdout)
+          .map((candidate) => ({
+            ...candidate,
+            providerUrl: getCandidateUrl(candidate),
+            searchQuery: query
+          }))
+          .filter((candidate) => candidate.providerUrl);
+
+        for (const candidate of candidates) {
+          const key = String(candidate.providerUrl || candidate.id || "").trim();
+          if (!key || seen.has(key)) continue;
+          seen.add(key);
+          allCandidates.push(candidate);
+        }
+
+        if (allCandidates.length >= searchLimit) return allCandidates;
+      } catch (error) {
+        lastError = error;
+        if (String(error?.message || "").toLowerCase().includes("cancel")) throw error;
+      }
     }
   }
 
-  if (lastError) {
+  if (lastError && !allCandidates.length) {
     console.log("[localtify spotify] candidate search failed:", lastError?.message || lastError);
   }
 
-  return [];
+  return allCandidates;
 }
 
 const SPOTIFY_BAD_CANDIDATE_WORDS = [
@@ -597,17 +676,10 @@ function scoreSpotifyYoutubeCandidate(track = {}, candidate = {}) {
     reasons.push("artist");
   }
 
-  const wantedWords = new Set(spotifyMatchWords(wantedCombined).filter((word) => word.length > 2));
-  const candidateWords = new Set(spotifyMatchWords(candidateCombined).filter((word) => word.length > 2));
-  let overlap = 0;
+  const ratio = spotifyWordOverlapRatio(wantedCombined, candidateCombined);
 
-  for (const word of wantedWords) {
-    if (candidateWords.has(word)) overlap += 1;
-  }
-
-  if (wantedWords.size) {
-    const ratio = overlap / wantedWords.size;
-    score += Math.round(ratio * 26);
+  if (ratio > 0) {
+    score += Math.round(ratio * 30);
     if (ratio >= 0.65) reasons.push("word-overlap");
   }
 
@@ -659,6 +731,24 @@ function scoreSpotifyYoutubeCandidate(track = {}, candidate = {}) {
     reasons.push("missing-artist");
   }
 
+  const titleOverlapRatio = spotifyWordOverlapRatio(titleKey, candidateCombined);
+  const hasUsefulTitle = Boolean(titleKey && (candidateCombined.includes(titleKey) || titleOverlapRatio >= 0.75));
+  const hasUsefulArtist = !artistKey || candidateCombined.includes(artistKey) || spotifyWordOverlapRatio(artistKey, candidateCombined) >= 0.7;
+  const hasDurationSafety =
+    expectedDurationSeconds <= 0 ||
+    candidateDurationSeconds <= 0 ||
+    Math.abs(expectedDurationSeconds - candidateDurationSeconds) <= 18;
+  const hardReject = hasHardSpotifyRejectWord(track, candidate);
+
+  if (hasUsefulTitle && !hardReject) {
+    score += 8;
+    reasons.push("safe-title");
+  }
+
+  const strictOk = score >= 48 && hasUsefulTitle && hasUsefulArtist && hasDurationSafety && !hardReject;
+  const relaxedTitleOnlyOk = !artistKey && score >= 38 && hasUsefulTitle && hasDurationSafety && !hardReject;
+  const relaxedMissingArtistOk = artistKey && score >= 44 && hasUsefulTitle && ratio >= 0.55 && hasDurationSafety && !hardReject;
+
   return {
     ...candidate,
     matchScore: score,
@@ -667,20 +757,71 @@ function scoreSpotifyYoutubeCandidate(track = {}, candidate = {}) {
     matchedArtist: candidateUploader,
     matchedDurationMs: candidateDurationSeconds > 0 ? Math.round(candidateDurationSeconds * 1000) : 0,
     providerUrl: candidate.providerUrl || getCandidateUrl(candidate),
-    matchOk: score >= 48
+    matchOk: Boolean(strictOk || relaxedTitleOnlyOk || relaxedMissingArtistOk),
+    matchMode: strictOk ? "strict" : relaxedTitleOnlyOk ? "title-only" : relaxedMissingArtistOk ? "relaxed-artist" : "rejected"
   };
 }
 
 async function findSpotifyYoutubeMatch(track = {}, onProgress, job = {}) {
-  const candidates = await searchSpotifyYoutubeCandidates(track, 8);
+  const candidates = await searchSpotifyYoutubeCandidates(track, 12);
   const scored = candidates
     .map((candidate) => scoreSpotifyYoutubeCandidate(track, candidate))
     .sort((a, b) => b.matchScore - a.matchScore);
 
-  const best = scored[0] || null;
+  const best = scored.find((candidate) => candidate.matchOk) || scored[0] || null;
   const title = String(track.title || track.name || "track").trim();
 
   if (!best || !best.matchOk) {
+    const fallbackUrl = buildSpotifyDirectSearchFallbackUrl(track, best);
+
+    // Public Spotify fallback can have weak/missing artist data. If the safe
+    // metadata pre-check cannot find candidates, do not instantly fail the
+    // selected track. Let yt-dlp perform one direct search/download attempt.
+    if (fallbackUrl) {
+      onProgress?.({
+        type: "download",
+        status: "downloading",
+        id: job.id,
+        url: job.url,
+        spotifyTrackId: job.spotifyTrackId,
+        spotifyUrl: job.spotifyUrl,
+        source: "spotify",
+        provider: "youtube",
+        index: job.index,
+        total: job.total,
+        file: title,
+        progress: 4,
+        speed: null,
+        size: null,
+        eta: null,
+        providerUrl: fallbackUrl,
+        message: `Using direct search fallback: "${title}"`
+      });
+
+      return {
+        ok: true,
+        url: job.url,
+        spotifyTrackId: job.spotifyTrackId,
+        spotifyUrl: job.spotifyUrl,
+        source: "spotify",
+        provider: "youtube",
+        matchOk: true,
+        matchScore: best?.matchScore || 32,
+        matchMode: "direct-search",
+        matchReasons: best?.matchReasons || ["direct-search-fallback"],
+        matchedTitle: best?.matchedTitle || title,
+        matchedArtist: best?.matchedArtist || "",
+        matchedDurationMs: best?.matchedDurationMs || 0,
+        providerUrl: fallbackUrl,
+        candidatesChecked: scored.length
+      };
+    }
+
+    const bestScore = Math.round(best?.matchScore || 0);
+    const message = scored.length
+      ? `Could not safely match "${title}" (best score ${bestScore}).`
+      : `Could not find YouTube candidates for "${title}".`;
+
     onProgress?.({
       type: "download",
       status: "failed",
@@ -697,8 +838,8 @@ async function findSpotifyYoutubeMatch(track = {}, onProgress, job = {}) {
       speed: null,
       size: null,
       eta: null,
-      error: "Could not safely match this Spotify track.",
-      message: "Could not safely match this Spotify track."
+      error: message,
+      message
     });
 
     return {
@@ -708,9 +849,11 @@ async function findSpotifyYoutubeMatch(track = {}, onProgress, job = {}) {
       spotifyUrl: job.spotifyUrl,
       source: "spotify",
       provider: "youtube",
-      error: "Could not safely match this Spotify track.",
+      error: message,
       matchOk: false,
       matchScore: best?.matchScore || 0,
+      matchMode: best?.matchMode || "none",
+      matchReasons: best?.matchReasons || [],
       matchedTitle: best?.matchedTitle || "",
       matchedArtist: best?.matchedArtist || "",
       matchedDurationMs: best?.matchedDurationMs || 0,
@@ -802,7 +945,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
       status: "downloading",
       progress: 6,
       providerUrl: match.providerUrl,
-      message: `Matched safely (${Math.round(match.matchScore)}): ${match.matchedTitle || title}`
+      message: match.matchMode === "direct-search" ? `Searching YouTube directly: ${title}` : `Matched ${match.matchMode || "safely"} (${Math.round(match.matchScore)}): ${match.matchedTitle || title}`
     });
 
     const dlResult = await downloadYouTube(
