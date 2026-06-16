@@ -3338,6 +3338,7 @@ const ALBUM_FOLDER_LIBRARY_SCAN_MAX_DEPTH = 4;
 const ALBUM_FOLDER_SCAN_YIELD_EVERY_TRACKS = 8;
 const ALBUM_FOLDER_IMPORT_YIELD_EVERY_TRACKS = 12;
 const ALBUM_FOLDER_IMPORT_PROGRESS_EVERY_TRACKS = 5;
+const ALBUM_FOLDER_DISC_FOLDER_RE = /^(?:cd|disc|disk|side|volume|vol)\s*[-_ ]?\d{1,2}$/i;
 
 function cleanAlbumFolderText(value, fallback = "") {
   const text = String(value || "")
@@ -3388,10 +3389,33 @@ function findAlbumFolderCoverPath(folderPath) {
 }
 
 function folderHasAudioFiles(folderPath) {
-  // Direct-only. The old maxDepth: 1 treated parent artist folders as albums
-  // when audio lived in child album folders, which caused wrong covers and heavy
-  // scans. A folder becomes an album only when it directly contains audio files.
+  // Direct-only. Parent artist/library folders must not become one giant album.
   return listAudioFilesInDirectory(folderPath, { maxDepth: 0, maxFiles: 8 }).length > 0;
+}
+
+function isDiscLikeAlbumSubfolderName(name = "") {
+  return ALBUM_FOLDER_DISC_FOLDER_RE.test(String(name || "").trim());
+}
+
+function folderHasDiscAudioFiles(folderPath) {
+  let entries = [];
+  try {
+    entries = fs.readdirSync(folderPath, { withFileTypes: true });
+  } catch {
+    return false;
+  }
+
+  return entries.some((entry) => {
+    if (!entry.isDirectory()) return false;
+    if (!isDiscLikeAlbumSubfolderName(entry.name)) return false;
+    return folderHasAudioFiles(path.join(folderPath, entry.name));
+  });
+}
+
+function isAlbumFolderCandidate(folderPath) {
+  // A real album folder either directly contains tracks or has immediate
+  // CD1/Disc 1 style subfolders. Do not scan random grandchildren here.
+  return folderHasAudioFiles(folderPath) || folderHasDiscAudioFiles(folderPath);
 }
 
 function isIgnoredAlbumLibraryFolderName(name = "") {
@@ -3407,8 +3431,6 @@ function findAlbumFoldersFromRoot(rootPath, mode = "single") {
   const root = String(rootPath || "");
   if (!root || !path.isAbsolute(root) || !fs.existsSync(root)) return [];
 
-  if (mode === "single") return [root];
-
   const folders = [];
   const queue = [{ folderPath: root, depth: 0 }];
   const seen = new Set();
@@ -3422,8 +3444,12 @@ function findAlbumFoldersFromRoot(rootPath, mode = "single") {
     if (!folderPath || seen.has(folderKey)) continue;
     seen.add(folderKey);
 
-    if (folderHasAudioFiles(folderPath)) {
+    const isRoot = folderKey === path.normalize(root).toLowerCase();
+
+    if (isAlbumFolderCandidate(folderPath)) {
       folders.push(folderPath);
+      // Once a folder is a valid album, never keep walking into it as separate
+      // nested albums except the root fallback case below.
       continue;
     }
 
@@ -3441,10 +3467,14 @@ function findAlbumFoldersFromRoot(rootPath, mode = "single") {
       if (isIgnoredAlbumLibraryFolderName(entry.name)) continue;
       queue.push({ folderPath: path.join(folderPath, entry.name), depth: depth + 1 });
     }
+
+    // Single import on an artist/library folder should not create one giant
+    // fake album. If the chosen folder has no direct tracks, it falls through
+    // to discovered child album folders instead.
+    if (mode === "single" && isRoot && folders.length) break;
   }
 
-  if (!folders.length && folderHasAudioFiles(root)) folders.push(root);
-  return folders;
+  return folders.slice(0, ALBUM_FOLDER_MAX_ALBUMS);
 }
 
 async function buildAlbumFolderPreview(folderPath, index = 0) {
@@ -3455,7 +3485,7 @@ async function buildAlbumFolderPreview(folderPath, index = 0) {
       .filter(Boolean)
   );
 
-  const audioFiles = listAudioFilesInDirectory(folderPath, { maxDepth: 2, maxFiles: ALBUM_FOLDER_MAX_TRACKS_PER_ALBUM });
+  const audioFiles = listAudioFilesInDirectory(folderPath, { maxDepth: 1, maxFiles: ALBUM_FOLDER_MAX_TRACKS_PER_ALBUM });
   const folderCoverPath = findAlbumFolderCoverPath(folderPath);
 
   let albumEmbeddedCoverPath = "";
@@ -3514,7 +3544,10 @@ async function buildAlbumFolderPreview(folderPath, index = 0) {
 
   const albumArtist = [...artistCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "various artists";
   const tagAlbumTitle = [...albumCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "";
-  const albumTitle = cleanAlbumFolderText(tagAlbumTitle || folderTitle, folderTitle);
+  // Folder albums should trust the folder name first. Embedded tags are often
+  // generic ("localtify", "unknown album", etc.) and caused every imported
+  // folder album to collapse into ugly tag-based names.
+  const albumTitle = cleanAlbumFolderText(folderTitle || tagAlbumTitle, tagAlbumTitle || folderTitle);
   const duplicateCount = parsedTracks.filter((track) => track.duplicate).length;
   const coverPath = folderCoverPath || albumEmbeddedCoverPath || "";
   const coverSource = folderCoverPath ? "folder" : albumEmbeddedCoverPath ? "embedded" : "none";
@@ -3842,6 +3875,8 @@ async function handleAlbumFolderImport(event, payload = {}) {
     repairedDurationCount,
     importedCount: importedSongs.length,
     trackCount: allTracks.length,
+    mode: scan.mode,
+    rootPath: scan.rootPath || "",
     songs: afterSongs,
     albums: importedAlbums,
     message

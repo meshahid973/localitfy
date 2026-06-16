@@ -3107,6 +3107,21 @@ function normalizeManualLocalAlbums(value: unknown): ManualLocalAlbum[] {
     .filter(Boolean) as ManualLocalAlbum[];
 }
 
+function normalizeFolderAlbumPathKey(value: unknown) {
+  return String(value || "")
+    .replace(/\\+/g, "/")
+    .replace(/\/+/g, "/")
+    .replace(/\/$/, "")
+    .trim()
+    .toLowerCase();
+}
+
+function folderAlbumPathContains(parentPath: unknown, childPath: unknown) {
+  const parent = normalizeFolderAlbumPathKey(parentPath);
+  const child = normalizeFolderAlbumPathKey(childPath);
+  return Boolean(parent && child && (child === parent || child.startsWith(`${parent}/`)));
+}
+
 function buildManualAlbumSongIdSet(manualAlbums: ManualLocalAlbum[]) {
   const ids = new Set<string>();
 
@@ -4661,11 +4676,25 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
         })).filter((album) => album.title && album.songIds.length);
 
         setManualAlbums((items) => {
-          const incomingSourcePaths = new Set(nextFolderAlbums.map((album) => album.sourcePath).filter(Boolean));
+          const incomingSourcePaths = new Set(nextFolderAlbums.map((album) => normalizeFolderAlbumPathKey(album.sourcePath)).filter(Boolean));
           const incomingIds = new Set(nextFolderAlbums.map((album) => album.id));
+          const importRootPath = String(result.rootPath || albumFolderImportPreview?.rootPath || "");
+
           const kept = items.filter((album) => {
             if (incomingIds.has(album.id)) return false;
-            if (album.sourceType === "folder" && album.sourcePath && incomingSourcePaths.has(album.sourcePath)) return false;
+
+            if (album.sourceType === "folder" && album.sourcePath) {
+              const albumSourceKey = normalizeFolderAlbumPathKey(album.sourcePath);
+              if (incomingSourcePaths.has(albumSourceKey)) return false;
+
+              // If a user previously imported the parent folder as one giant
+              // album, remove that stale folder album when the proper library
+              // import creates child album folders.
+              if (folderAlbumPathContains(importRootPath, album.sourcePath)) return false;
+              if (nextFolderAlbums.some((incoming) => folderAlbumPathContains(album.sourcePath, incoming.sourcePath))) return false;
+              if (nextFolderAlbums.some((incoming) => folderAlbumPathContains(incoming.sourcePath, album.sourcePath))) return false;
+            }
+
             return true;
           });
 
@@ -4800,6 +4829,55 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setManualAlbums((items) => items.filter((item) => item.id !== manualId));
     setSelectedAlbumId("");
     if (albumEditingManualId === manualId) closeAlbumBuilder();
+  }
+
+  async function clearAlbumTagFromSongs(targetSongs: Song[], label = "album") {
+    const safeSongs = targetSongs.filter((song) => song?.id && String(song.album || "").trim());
+
+    if (!safeSongs.length) {
+      setStatusText?.(`${label} already clear`);
+      return;
+    }
+
+    setStatusText?.(`clearing ${safeSongs.length} album tag${safeSongs.length === 1 ? "" : "s"}...`);
+
+    for (let index = 0; index < safeSongs.length; index += 1) {
+      const song = safeSongs[index];
+      await patchSongLocal(song.id, { album: "" });
+      if (index > 0 && index % 12 === 0) {
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+      }
+    }
+
+    setStatusText?.(`cleared ${safeSongs.length} album tag${safeSongs.length === 1 ? "" : "s"}`);
+  }
+
+  async function deleteSelectedAlbum() {
+    if (!selectedAlbum) return;
+
+    if (selectedAlbumIsManual) {
+      deleteManualAlbum(selectedAlbum);
+      setStatusText?.("album deleted");
+      return;
+    }
+
+    await clearAlbumTagFromSongs(selectedAlbum.songs || [], selectedAlbum.title || "album");
+    setSelectedAlbumId("");
+  }
+
+  async function deleteAllAlbums() {
+    const manualCount = manualAlbums.length;
+    const taggedSongs = songs.filter((song) => String(song.album || "").trim());
+
+    setManualAlbums([]);
+    setSelectedAlbumId("");
+    closeAlbumBuilder();
+
+    if (taggedSongs.length) {
+      await clearAlbumTagFromSongs(taggedSongs, "all albums");
+    } else {
+      setStatusText?.(`deleted ${manualCount} custom/folder album${manualCount === 1 ? "" : "s"}`);
+    }
   }
 
   const homeHeroCoverBrightness = clamp(Number(settings.homeHeroCoverBrightness ?? 1), 0.65, 1.55);
@@ -5620,6 +5698,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                       <button className="mainAction" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}>add album</button>
                       <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("single")} disabled={albumFolderImportBusy}>import album folder</button>
                       <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("library")} disabled={albumFolderImportBusy}>import album library</button>
+                      <button className="heroGhost danger" type="button" onClick={() => void deleteAllAlbums()} disabled={!manualAlbums.length && !metadataAlbums.length}>delete all albums</button>
                     </div>
                   </div>
                   <div className="albumsHeroStatsV318" aria-label="album summary">
@@ -5796,6 +5875,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             <button className="heroGhost" type="button" onClick={() => shuffleAlbumSongs?.(selectedAlbumIds, selectedAlbum.title)} disabled={selectedAlbumIds.length < 2 || !shuffleAlbumSongs}>shuffle</button>
                             <button className="heroGhost" type="button" onClick={() => queueAlbumSongs?.(selectedAlbumIds, selectedAlbum.title)} disabled={!selectedAlbumIds.length || !queueAlbumSongs}>queue</button>
                             {selectedAlbumIsManual ? <button className="heroGhost" type="button" onClick={() => openEditAlbumBuilder(selectedAlbum)}>edit</button> : null}
+                            <button className="heroGhost danger" type="button" onClick={() => void deleteSelectedAlbum()} disabled={!selectedAlbumIds.length && !selectedAlbumIsManual}>
+                              {selectedAlbumIsManual ? "delete album" : "remove tag album"}
+                            </button>
                           </div>
                         </div>
                       </div>
