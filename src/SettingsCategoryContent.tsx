@@ -2,7 +2,6 @@
 import type { CSSProperties } from "react";
 const SETTINGS_INFO_MASCOT_SRC = new URL("./assets/info-state.png", import.meta.url).href;
 const SETTINGS_DANGER_MASCOT_SRC = new URL("./assets/danger-state.png", import.meta.url).href;
-const SETTINGS_HAPPY_MASCOT_SRC = new URL("./assets/happy-state.png", import.meta.url).href;
 type ThemeId = string;
 type DownloadQuality = "best" | "320" | "256" | "192";
 type DownloadFormat = "mp3" | "flac" | "wav";
@@ -333,9 +332,6 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
   customThemeTokens,
   commitCustomThemeHexDraft,
   previewCustomThemeColor,
-  coverColorSyncOptions,
-  selectedCoverColorSyncMode,
-  updateCoverColorSyncMode,
   discordPreview,
   discordStyleOptions,
   discordSecondLineOptions,
@@ -553,7 +549,6 @@ const quickLibraryBlurEnabled = settings.quickLibraryMoreBlur !== false;
               <strong>Home cards</strong>
               <span>Card blur and the tiny cat live here now. Advanced cover tint controls stay in Advanced.</span>
             </div>
-            <img className="settingsHomeMascotV503" src={SETTINGS_HAPPY_MASCOT_SRC} alt="" draggable={false} aria-hidden="true" />
             <label className="cleanToggleLabel settingsCatBuddyToggleV502" title="Show or hide the tiny cat buddy.">
               <input
                 type="checkbox"
