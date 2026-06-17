@@ -68,7 +68,7 @@ export function getDownloadPageState(input: DownloadPageStateInput): DownloadPag
   const failedQueueItems = queue.filter((item) => FAILED_STATUSES.has(statusOf(item)));
   const finishedQueueItems = queue.filter((item) => FINISHED_STATUSES.has(statusOf(item)));
   const failedResults = results.filter((item) => item && item.ok === false);
-  const finishedResults = results.filter((item) => item && item.ok !== false);
+  const finishedResults = results.filter((item) => item && item.ok === true);
   const badLinkText = String(input.spotifyFetchError || "").trim();
 
   const downloadWorking =
@@ -87,7 +87,7 @@ export function getDownloadPageState(input: DownloadPageStateInput): DownloadPag
     hasFinished: finishedQueueItems.length > 0 || finishedResults.length > 0,
     hasBadLink: Boolean(badLinkText),
     canRetryFailed: failedQueueItems.length > 0 || failedResults.length > 0,
-    canClearFinished: finishedQueueItems.length > 0,
+    canClearFinished: finishedQueueItems.length > 0 || finishedResults.length > 0,
     firstError,
     downloadWorking,
     failedQueueItems,

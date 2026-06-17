@@ -11,20 +11,6 @@ export type LocaltifyAnalyticsSnapshotInput = {
   downloadResultCount?: number;
 };
 
-function formatAnalyticsDuration(seconds: number) {
-  const safeSeconds = Math.max(0, Math.round(Number(seconds) || 0));
-  const hours = Math.floor(safeSeconds / 3600);
-  const minutes = Math.floor((safeSeconds % 3600) / 60);
-
-  if (hours > 0) {
-    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
-  }
-
-  if (minutes > 0) return `${minutes}m`;
-  return `${safeSeconds}s`;
-}
-
-
 export function computeLocaltifyAnalyticsSnapshot(input: {
   activeView: string;
   songs?: any[];
@@ -58,7 +44,6 @@ export function computeLocaltifyAnalyticsSnapshot(input: {
   let monthImportSeconds = 0;
   let yearImportSeconds = 0;
   let longestSongDuration = 0;
-  let longestSongTitle = "";
 
   const artistNames = new Set<string>();
   const albumNames = new Set<string>();
@@ -89,7 +74,6 @@ export function computeLocaltifyAnalyticsSnapshot(input: {
 
     if (duration > longestSongDuration) {
       longestSongDuration = duration;
-      longestSongTitle = String(song?.title || "").trim();
     }
 
     if (Number.isFinite(addedAt)) {
@@ -124,17 +108,20 @@ export function computeLocaltifyAnalyticsSnapshot(input: {
   else if (songCount >= 15 && songCount < 75) userStage = "building_library";
   else if (songCount >= 75) userStage = "power_library";
 
+  const coverColorSyncMode = String(settings.coverColorSyncMode || "off");
+  const isVisualCustomizer = Boolean(settings.customThemeEnabled) || coverColorSyncMode !== "off";
+
   let audienceSegment = "new_local_music_user";
   if (playlistCount > 0 && settings.discordEnabled) audienceSegment = "playlist_social_listener";
   else if (settings.discordEnabled) audienceSegment = "discord_presence_listener";
-  else if (settings.customThemeEnabled || settings.coverColorSyncMode !== "off") audienceSegment = "visual_customizer";
+  else if (isVisualCustomizer) audienceSegment = "visual_customizer";
   else if (playlistCount > 0) audienceSegment = "playlist_builder";
   else if (songCount >= 75) audienceSegment = "large_library_listener";
   else if (songCount > 0) audienceSegment = "casual_local_listener";
 
   let primaryAdAngle = "local_music_no_account";
   if (settings.discordEnabled) primaryAdAngle = "discord_rich_presence";
-  else if (settings.customThemeEnabled || settings.coverColorSyncMode !== "off") primaryAdAngle = "custom_themes_and_covers";
+  else if (isVisualCustomizer) primaryAdAngle = "custom_themes_and_covers";
   else if (playlistCount > 0) primaryAdAngle = "premium_playlists";
   else if (songCount >= 75) primaryAdAngle = "large_library_player";
 
@@ -169,7 +156,6 @@ export function computeLocaltifyAnalyticsSnapshot(input: {
     year_artist_count: yearArtists.size,
     year_album_count: yearAlbums.size,
     longest_song_duration: Math.round(longestSongDuration),
-    longest_song_title: longestSongTitle,
     artist_count: artistNames.size,
     album_count: albumNames.size,
     has_library: songCount > 0,
@@ -185,7 +171,7 @@ export function computeLocaltifyAnalyticsSnapshot(input: {
     minimize_to_tray_enabled: Boolean(settings.minimizeToTray),
     custom_theme_enabled: Boolean(settings.customThemeEnabled),
     theme_id: settings.customThemeEnabled ? "custom" : String(settings.theme || "default"),
-    cover_color_sync_mode: String(settings.coverColorSyncMode || "normal"),
+    cover_color_sync_mode: coverColorSyncMode,
     compact_player_enabled: Boolean(settings.compactPlayer),
     simple_mode_enabled: Boolean(settings.simpleMode),
     reduced_motion_enabled: Boolean(settings.reducedMotion),

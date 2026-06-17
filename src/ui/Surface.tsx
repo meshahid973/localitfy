@@ -1,4 +1,5 @@
 ﻿import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import "./surface.css";
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -7,15 +8,18 @@ function cx(...parts: Array<string | false | null | undefined>) {
 type SurfaceTone = "neutral" | "accent" | "success" | "warning" | "danger";
 type SurfaceDensity = "compact" | "normal" | "roomy";
 
-type SurfaceProps<T extends ElementType> = {
+type SurfaceBaseProps<T extends ElementType> = {
   as?: T;
   children?: ReactNode;
   className?: string;
-  tone?: SurfaceTone;
   density?: SurfaceDensity;
+} & Omit<ComponentPropsWithoutRef<T>, "as" | "className" | "children">;
+
+type SurfaceProps<T extends ElementType> = SurfaceBaseProps<T> & {
+  tone?: SurfaceTone;
   elevated?: boolean;
   interactive?: boolean;
-} & Omit<ComponentPropsWithoutRef<T>, "as" | "className" | "children">;
+};
 
 export function Surface<T extends ElementType = "section">({
   as,
@@ -52,7 +56,7 @@ export function SurfaceHeader<T extends ElementType = "header">({
   children,
   density = "normal",
   ...props
-}: SurfaceProps<T>) {
+}: SurfaceBaseProps<T>) {
   const Component = as || "header";
 
   return (
@@ -68,7 +72,7 @@ export function SurfaceBody<T extends ElementType = "div">({
   children,
   density = "normal",
   ...props
-}: SurfaceProps<T>) {
+}: SurfaceBaseProps<T>) {
   const Component = as || "div";
 
   return (
@@ -84,7 +88,7 @@ export function SurfaceActions<T extends ElementType = "div">({
   children,
   density = "normal",
   ...props
-}: SurfaceProps<T>) {
+}: SurfaceBaseProps<T>) {
   const Component = as || "div";
 
   return (
@@ -93,4 +97,3 @@ export function SurfaceActions<T extends ElementType = "div">({
     </Component>
   );
 }
-
