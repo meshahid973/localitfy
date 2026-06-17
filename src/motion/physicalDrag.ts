@@ -34,9 +34,25 @@ export function clampToBounds(value: number, bounds: PhysicalDragBounds) {
   return Math.min(bounds.max, Math.max(bounds.min, value));
 }
 
+export function normalizeDragBounds(bounds: PhysicalDragBounds): PhysicalDragBounds {
+  const min = Number(bounds.min);
+  const max = Number(bounds.max);
+
+  if (!Number.isFinite(min) || !Number.isFinite(max)) {
+    return { min: 0, max: 0 };
+  }
+
+  if (min <= max) return { min, max };
+  return { min: max, max: min };
+}
+
 export function applyBoundaryResistance(value: number, bounds: PhysicalDragBounds, resistance = 0.18) {
-  if (value < bounds.min) return bounds.min + (value - bounds.min) * resistance;
-  if (value > bounds.max) return bounds.max + (value - bounds.max) * resistance;
+  const safeBounds = normalizeDragBounds(bounds);
+  const safeResistance = clampToBounds(Number(resistance), { min: 0, max: 1 });
+
+  if (!Number.isFinite(value)) return safeBounds.min;
+  if (value < safeBounds.min) return safeBounds.min + (value - safeBounds.min) * safeResistance;
+  if (value > safeBounds.max) return safeBounds.max + (value - safeBounds.max) * safeResistance;
   return value;
 }
 
@@ -49,12 +65,14 @@ export function nearestSnapPoint(value: number, points: readonly PhysicalSnapPoi
 }
 
 export function snapValue(value: number, points: readonly PhysicalSnapPoint[], bounds?: PhysicalDragBounds) {
-  const point = nearestSnapPoint(bounds ? clampToBounds(value, bounds) : value, points);
-  return point?.value ?? value;
+  const safeValue = bounds ? clampToBounds(value, normalizeDragBounds(bounds)) : value;
+  const point = nearestSnapPoint(safeValue, points);
+  return point?.value ?? safeValue;
 }
 
 export function snapId(value: number, points: readonly PhysicalSnapPoint[], bounds?: PhysicalDragBounds) {
-  const point = nearestSnapPoint(bounds ? clampToBounds(value, bounds) : value, points);
+  const safeValue = bounds ? clampToBounds(value, normalizeDragBounds(bounds)) : value;
+  const point = nearestSnapPoint(safeValue, points);
   return point?.id ?? "";
 }
 
@@ -74,11 +92,34 @@ export function createVerticalDragConstraints(bounds: PhysicalVerticalDragBounds
   };
 }
 
-export function createMotionDragProps(bounds: PhysicalDragBounds) {
+export function createHorizontalDragProps(bounds: PhysicalDragBounds) {
+  const safeBounds = normalizeDragBounds(bounds);
+
   return {
-    dragConstraints: { left: bounds.min, right: bounds.max, top: bounds.min, bottom: bounds.max },
+    drag: "x",
+    dragConstraints: { left: safeBounds.min, right: safeBounds.max, top: 0, bottom: 0 },
     dragElastic: physicalDragDefaults.dragElastic,
     dragMomentum: physicalDragDefaults.dragMomentum
   } as const;
 }
 
+export function createVerticalDragProps(bounds: PhysicalDragBounds) {
+  const safeBounds = normalizeDragBounds(bounds);
+
+  return {
+    drag: "y",
+    dragConstraints: { left: 0, right: 0, top: safeBounds.min, bottom: safeBounds.max },
+    dragElastic: physicalDragDefaults.dragElastic,
+    dragMomentum: physicalDragDefaults.dragMomentum
+  } as const;
+}
+
+export function createMotionDragProps(bounds: PhysicalDragBounds) {
+  const safeBounds = normalizeDragBounds(bounds);
+
+  return {
+    dragConstraints: { left: safeBounds.min, right: safeBounds.max, top: safeBounds.min, bottom: safeBounds.max },
+    dragElastic: physicalDragDefaults.dragElastic,
+    dragMomentum: physicalDragDefaults.dragMomentum
+  } as const;
+}

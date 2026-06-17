@@ -1,5 +1,5 @@
-﻿// @ts-nocheck
-import { AnimatePresence, motion as Motion } from "motion/react";
+﻿import { AnimatePresence, motion as Motion } from "motion/react";
+import type { ReactNode } from "react";
 import { Surface, SurfaceActions, SurfaceBody, SurfaceHeader } from "../ui/Surface";
 import {
   createVerticalDragConstraints,
@@ -12,7 +12,25 @@ function clampPercent(value: number) {
   return Math.min(100, Math.max(0, Number(value)));
 }
 
-function updateTone(status: string) {
+type UpdatePromptStatus =
+  | "idle"
+  | "checking"
+  | "available"
+  | "downloading"
+  | "downloaded"
+  | "latest"
+  | "error"
+  | "dev"
+  | string;
+
+type UpdatePromptForIsland = {
+  status: UpdatePromptStatus;
+  version?: string;
+  percent?: number;
+  nagStage?: string | number | null;
+};
+
+function updateTone(status: UpdatePromptStatus) {
   if (status === "downloaded") return "success";
   if (status === "error") return "danger";
   if (status === "downloading" || status === "available") return "accent";
@@ -21,15 +39,15 @@ function updateTone(status: string) {
 
 type UpdateIslandProps = {
   show: boolean;
-  updatePrompt: any;
+  updatePrompt?: UpdatePromptForIsland | null;
   appVersion: string;
   reducedMotion: boolean;
   yukariUpdateImage: string;
   enterSpring: any;
   childSpring: any;
-  titleForPrompt: (prompt: any) => string;
-  StatusIcon: (props: { status: string }) => JSX.Element;
-  CloseIcon: () => JSX.Element;
+  titleForPrompt: (prompt: UpdatePromptForIsland) => string;
+  StatusIcon: (props: { status: string }) => ReactNode;
+  CloseIcon: () => ReactNode;
   onDownload: () => void;
   onInstall: () => void;
   onCheckAgain: () => void;
@@ -52,10 +70,18 @@ export default function UpdateIsland({
   onCheckAgain,
   onDismiss
 }: UpdateIslandProps) {
-  const versionLabel = updatePrompt.version || appVersion;
-  const progress = clampPercent(updatePrompt.percent);
-  const showClose = updatePrompt.status !== "downloading";
-  const surfaceTone = updateTone(updatePrompt.status);
+  const safePrompt: UpdatePromptForIsland = updatePrompt ?? {
+    status: "idle",
+    version: appVersion,
+    percent: 0,
+    nagStage: null
+  };
+
+  const versionLabel = safePrompt.version || appVersion;
+  const progress = clampPercent(Number(safePrompt.percent || 0));
+  const showClose = safePrompt.status !== "downloading";
+  const surfaceTone = updateTone(safePrompt.status);
+  const ribbonTitle = titleForPrompt(safePrompt);
 
   const dragProps = reducedMotion
     ? {}
@@ -73,7 +99,7 @@ export default function UpdateIsland({
     <AnimatePresence initial={false}>
       {show ? (
         <Motion.div
-          key={`update-ribbon-${updatePrompt.status}-${versionLabel}`}
+          key={`update-ribbon-${safePrompt.status}-${versionLabel}`}
           className="updateToastLayer topUpdateRibbonLayer"
           role="presentation"
           initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
@@ -82,7 +108,7 @@ export default function UpdateIsland({
           transition={reducedMotion ? { duration: 0.12 } : enterSpring}
         >
           <Motion.img
-            className={`updateYukariPeek updateYukariPeek-${updatePrompt.status}`}
+            className={`updateYukariPeek updateYukariPeek-${safePrompt.status}`}
             src={yukariUpdateImage}
             alt=""
             aria-hidden="true"
@@ -94,14 +120,14 @@ export default function UpdateIsland({
           />
 
           <Surface
-            as={Motion.section}
+            as={Motion.section as any}
             tone={surfaceTone}
             density="compact"
             elevated
             interactive
-            className={`updateToastCard topUpdateRibbon ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
-            onClick={(event) => event.stopPropagation()}
-            role="status"
+            className={`updateToastCard topUpdateRibbon ${safePrompt.status} ${safePrompt.nagStage ? `updateNagStage-${safePrompt.nagStage}` : ""}`}
+            onClick={(event: React.MouseEvent<HTMLElement>) => event.stopPropagation()}
+            role="region"
             aria-live="polite"
             aria-label="localtify update"
             initial={reducedMotion ? false : { opacity: 0, y: -8, scale: 0.992 }}
@@ -111,7 +137,7 @@ export default function UpdateIsland({
             {...dragProps}
           >
             <SurfaceHeader
-              as={Motion.div}
+              as={Motion.div as any}
               density="compact"
               className="topUpdateRibbonMain"
               initial={reducedMotion ? false : { opacity: 0, y: 6 }}
@@ -120,12 +146,12 @@ export default function UpdateIsland({
               transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.04 }}
             >
               <div className="updateToastIcon topUpdateRibbonIcon" aria-hidden="true">
-                <StatusIcon status={updatePrompt.status} />
+                <StatusIcon status={safePrompt.status} />
               </div>
 
               <SurfaceBody className="updateToastText topUpdateRibbonText" density="compact">
                 <p className="eyebrow">localtify</p>
-                <h3>{titleForPrompt(updatePrompt)}</h3>
+                <h3>{ribbonTitle}</h3>
               </SurfaceBody>
             </SurfaceHeader>
 
@@ -136,9 +162,8 @@ export default function UpdateIsland({
               exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
               transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.12 }}
             >
-
               <SurfaceActions
-                as={Motion.div}
+                as={Motion.div as any}
                 density="compact"
                 className="updateToastActions topUpdateRibbonActions"
                 initial={reducedMotion ? false : { opacity: 0, x: 8 }}
@@ -146,19 +171,19 @@ export default function UpdateIsland({
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 5 }}
                 transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.18 }}
               >
-                {updatePrompt.status === "available" ? (
+                {safePrompt.status === "available" ? (
                   <button className="updatePrimaryButton" type="button" onClick={onDownload}>
                     download update
                   </button>
                 ) : null}
 
-                {updatePrompt.status === "downloaded" ? (
+                {safePrompt.status === "downloaded" ? (
                   <button className="updatePrimaryButton" type="button" onClick={onInstall}>
                     restart
                   </button>
                 ) : null}
 
-                {updatePrompt.status === "error" || updatePrompt.status === "latest" || updatePrompt.status === "dev" ? (
+                {safePrompt.status === "error" || safePrompt.status === "latest" || safePrompt.status === "dev" ? (
                   <button className="updatePrimaryButton" type="button" onClick={onCheckAgain}>
                     check again
                   </button>
@@ -172,10 +197,14 @@ export default function UpdateIsland({
               </SurfaceActions>
             </Motion.div>
 
-            {updatePrompt.status === "downloading" ? (
+            {safePrompt.status === "downloading" ? (
               <Motion.div
                 className="updateProgressTrack topUpdateRibbonProgress"
+                role="progressbar"
                 aria-label="update progress"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progress}
                 initial={reducedMotion ? false : { opacity: 0, scaleX: 0.94 }}
                 animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scaleX: 1 }}
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scaleX: 0.96 }}
@@ -190,4 +219,3 @@ export default function UpdateIsland({
     </AnimatePresence>
   );
 }
-
