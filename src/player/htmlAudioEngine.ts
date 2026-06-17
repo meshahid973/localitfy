@@ -54,6 +54,18 @@ export class HtmlAudioEngine implements PlayerEngine {
     this.emit("sourcechange");
   }
 
+  clear() {
+    this.pause();
+    this.source = null;
+
+    if (this.element.src) {
+      this.element.removeAttribute("src");
+      this.element.load();
+    }
+
+    this.emit("sourcechange");
+  }
+
   async play() {
     await this.element.play();
   }
@@ -75,22 +87,18 @@ export class HtmlAudioEngine implements PlayerEngine {
   seek(seconds: number) {
     const duration = Number.isFinite(this.element.duration) ? this.element.duration : Number.POSITIVE_INFINITY;
     this.element.currentTime = clamp(seconds, 0, duration);
-    this.emit("timeupdate");
   }
 
   setVolume(volume: number) {
     this.element.volume = clamp(volume, 0, 1);
-    this.emit("volumechange");
   }
 
   setMuted(muted: boolean) {
     this.element.muted = muted;
-    this.emit("volumechange");
   }
 
   setPlaybackRate(rate: number) {
     this.element.playbackRate = clamp(rate, 0.25, 4);
-    this.emit("ratechange");
   }
 
   getState(): PlayerEngineState {
@@ -124,14 +132,13 @@ export class HtmlAudioEngine implements PlayerEngine {
   }
 
   destroy() {
-    this.pause();
+    this.clear();
 
     for (const remove of this.removeDomListeners.splice(0)) {
       remove();
     }
 
     this.listeners.clear();
-    this.source = null;
   }
 
   private emit(event: PlayerEngineEvent) {

@@ -1,11 +1,56 @@
 ﻿// @ts-nocheck
-/* localtify 0.4.1 V473 â€” shared constants, option lists, defaults, assets, and release copy.
-   Safe boundary module: values are re-exported from LocaltifyAppView for this pass. */
+/* localtify 0.4.2 V042 — shared constants boundary.
+   This file now owns the safest release/update boot constants directly.
+   The remaining legacy constants are still bridged from LocaltifyAppView until they are extracted in smaller passes. */
+
+export type LocaltifyBootStep = {
+  label: string;
+  detail: string;
+};
+
+export type LocaltifyUpdatePromptState = {
+  visible: boolean;
+  status: "idle" | "checking" | "available" | "downloading" | "downloaded" | "latest" | "error" | "dev";
+  version: string;
+  percent: number;
+  message: string;
+  error: string;
+  backupPath?: string;
+  libraryBackedUp?: boolean;
+  releaseNotes?: string;
+  downloadedBytes?: number;
+  totalBytes?: number;
+  sizeBytes?: number;
+  speedBytesPerSecond?: number;
+  nagStage?: 0 | 1 | 2 | 3;
+};
+
+export const APP_VERSION = "0.4.2";
+
+export const BOOT_STEPS = [
+  { label: "settings", detail: "theme, volume, Discord, and app preferences" },
+  { label: "library", detail: "songs, folders, durations, and saved order" },
+  { label: "playlists", detail: "mixes, song order, covers, and totals" },
+  { label: "covers", detail: "pixel art, album art, and ambience colors" },
+  { label: "player", detail: "queue, last song, progress, and audio state" },
+  { label: "interface", detail: "home, settings, animations, and shortcuts" }
+] as const satisfies readonly LocaltifyBootStep[];
+
+export const defaultUpdatePrompt: LocaltifyUpdatePromptState = {
+  visible: false,
+  status: "idle",
+  version: "",
+  percent: 0,
+  message: "",
+  error: ""
+};
+
+export const WHATS_NEW_SEEN_KEY = "localitfy.whatsNewSeenVersion";
+export const UPDATE_LEAVE_ALONE_PREFIX = "localitfy.updateLeaveAloneVersion.";
+
 export {
-  APP_VERSION,
   ARCADE_GHOST_UNLOCKED_KEY,
   BOOT_MIN_VISIBLE_MS,
-  BOOT_STEPS,
   BUILT_IN_CUSTOM_THEME_PRESETS,
   CODERPIXEL_ARTIST_CHANCE,
   CODERPIXEL_ARTIST_EASTER_EGG,
@@ -36,14 +81,11 @@ export {
   THEME_ID_SET,
   THEME_PRESET_COLORS,
   THEME_SWATCH_COLORS,
-  UPDATE_LEAVE_ALONE_PREFIX,
   V013_DEFAULTS_KEY,
   V013_RELEASE_DEFAULTS,
-  WHATS_NEW_SEEN_KEY,
   coverColorSyncOptions,
   coverMoodOptions,
   defaultSettings,
-  defaultUpdatePrompt,
   discordArtModeOptions,
   discordCleanupOptions,
   discordSecondLineOptions,
@@ -60,7 +102,3 @@ export {
   whatsNewItems,
   yukariUpdateImage
 } from "./LocaltifyAppView";
-
-
-
-

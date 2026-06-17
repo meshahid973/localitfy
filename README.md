@@ -87,7 +87,7 @@ Download the Windows installer from the latest release.
 The file usually looks like this:
 
 ```txt
-localtify-setup-0.4.1.exe
+localtify-setup-0.4.2.exe
 ```
 
 Install it, open localtify, and import your songs.
@@ -105,8 +105,8 @@ Linux builds are available from the Releases page.
 For AppImage, you may need to make it executable first:
 
 ```bash
-chmod +x localtify-0.4.1-x86_64.AppImage
-./localtify-0.4.1-x86_64.AppImage
+chmod +x localtify-0.4.2-x86_64.AppImage
+./localtify-0.4.2-x86_64.AppImage
 ```
 
 ---

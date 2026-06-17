@@ -22,8 +22,8 @@ latest-linux.yml
 ## AppImage test
 
 ```bash
-chmod +x Localtify-0.4.1-x86_64.AppImage
-./Localtify-0.4.1-x86_64.AppImage
+chmod +x Localtify-0.4.2-x86_64.AppImage
+./Localtify-0.4.2-x86_64.AppImage
 ```
 
 Check:
@@ -83,8 +83,8 @@ downloaded track imports into library
 Only use these for debugging broken drivers/compositors:
 
 ```bash
-LOCALTIFY_DISABLE_GPU_TUNING=1 ./Localtify-0.4.1-x86_64.AppImage
-LOCALTIFY_DISABLE_LINUX_OZONE_AUTO=1 ./Localtify-0.4.1-x86_64.AppImage
+LOCALTIFY_DISABLE_GPU_TUNING=1 ./Localtify-0.4.2-x86_64.AppImage
+LOCALTIFY_DISABLE_LINUX_OZONE_AUTO=1 ./Localtify-0.4.2-x86_64.AppImage
 ```
 
 Localtify should work without those flags on normal installs.

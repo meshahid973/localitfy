@@ -24,8 +24,11 @@ export type PlayerController = {
   seekTo(seconds: number): void;
   seekBy(deltaSeconds: number): void;
   setVolume(volume: number): void;
+  setMuted(muted: boolean): void;
+  setPlaybackRate(rate: number): void;
 
   setQueue(queue: readonly PlayerEngineSource[], startIndex?: number): void;
+  clearQueue(): void;
   next(): void;
   previous(): void;
 
@@ -51,6 +54,10 @@ const ENGINE_EVENTS: readonly PlayerEngineEvent[] = [
 function clampIndex(index: number, queue: readonly PlayerEngineSource[]) {
   if (queue.length === 0) return -1;
   return Math.min(queue.length - 1, Math.max(0, index));
+}
+
+function sameSource(left: PlayerEngineSource, right: PlayerEngineSource) {
+  return left.id === right.id && left.url === right.url;
 }
 
 export function createPlayerController(engine: PlayerEngine): PlayerController {
@@ -81,13 +88,17 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
   }
 
   function load(source: PlayerEngineSource) {
-    engine.load(source);
+    const existingIndex = queue.findIndex((item) => sameSource(item, source));
 
-    const existingIndex = queue.findIndex((item) => item.id === source.id && item.url === source.url);
     if (existingIndex >= 0) {
       queueIndex = existingIndex;
+    } else {
+      // Standalone playback should not keep an old queue/index around.
+      queue = [source];
+      queueIndex = 0;
     }
 
+    engine.load(source);
     emit("queuechange");
   }
 
@@ -97,8 +108,17 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
 
     if (queueIndex >= 0) {
       engine.load(queue[queueIndex]);
+    } else {
+      engine.clear();
     }
 
+    emit("queuechange");
+  }
+
+  function clearQueue() {
+    queue = [];
+    queueIndex = -1;
+    engine.clear();
     emit("queuechange");
   }
 
@@ -127,6 +147,8 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
     }
 
     listeners.clear();
+    queue = [];
+    queueIndex = -1;
     engine.destroy();
   }
 
@@ -138,7 +160,10 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
     seekTo: (seconds) => engine.seek(seconds),
     seekBy: (deltaSeconds) => engine.seek(engine.getState().currentTime + deltaSeconds),
     setVolume: (volume) => engine.setVolume(volume),
+    setMuted: (muted) => engine.setMuted(muted),
+    setPlaybackRate: (rate) => engine.setPlaybackRate(rate),
     setQueue,
+    clearQueue,
     next,
     previous,
     getSnapshot,
@@ -146,4 +171,3 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
     destroy
   };
 }
-

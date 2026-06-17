@@ -47,6 +47,7 @@ export interface PlayerEngine {
   readonly element: HTMLAudioElement;
 
   load(source: PlayerEngineSource): void;
+  clear(): void;
   play(): Promise<void>;
   pause(): void;
   toggle(): Promise<boolean>;

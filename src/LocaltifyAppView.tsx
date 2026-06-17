@@ -1030,7 +1030,7 @@ export const updateRibbonEnterSpring = { type: "spring", stiffness: 500, damping
 export const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, mass: 0.55 } as const;
 
 
-export const APP_VERSION = "0.4.1";
+export const APP_VERSION = "0.4.2";
 export const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 export const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 export const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
@@ -1125,7 +1125,7 @@ export function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 export const whatsNewItems = [
-  "0.4.1 fixes the album library importer freezing on large nested-folder scans",
+  "0.4.2 fixes the album library importer freezing on large nested-folder scans",
   "Nested album folders are detected more safely so parent artist folders do not steal child album covers",
   "Album import progress is throttled so the UI stays responsive while scanning and importing",
   "Linux AppImage startup hardening from 0.4.0 is kept, with cleaner update-check behavior",
@@ -7246,7 +7246,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new"><X size={18} strokeWidth={2.4} /></button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.4.1 is a fast hotfix focused on the album importer freeze, nested-folder scanning, cover accuracy, and keeping the app responsive after the 0.4.0 release.</p>
+            <p className="whatsNewSubtext">0.4.2 is a fast hotfix focused on the album importer freeze, nested-folder scanning, cover accuracy, and keeping the app responsive after the 0.4.0 release.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>

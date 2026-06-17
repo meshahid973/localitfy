@@ -1,4 +1,4 @@
-.playerBar{
+﻿.playerBar{
   --player-size-used: var(--player-size-live, var(--player-size, 108px));
   --player-control-size: clamp(34px, calc(var(--player-size-used) * 0.36), 40px);
   --player-main-control-size: clamp(42px, calc(var(--player-size-used) * 0.45), 50px);
@@ -2571,7 +2571,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   box-shadow: 0 10px 24px rgba(var(--accent-rgb),0.22) !important;
 }
 
-/* localtify 0.3.9 V301 — smoother player paint path */
+/* localtify 0.3.9 V301 â€” smoother player paint path */
 body.localtifyPerfV301 .playerBar{
   contain: layout paint style !important;
   transform: translateZ(0) !important;
@@ -2610,7 +2610,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
   will-change: auto !important;
 }
 
-/* localtify 0.4.0 — player control cleanup.
+/* localtify 0.4.0 â€” player control cleanup.
    Fixes the visible player outline, removes the volume icon bubble,
    and makes accent buttons readable on light/dark custom colors.
 */
@@ -2705,7 +2705,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 }
 
 
-/* v0.4.1: smooth play/pause path morph for the main player button */
+/* v0.4.2: smooth play/pause path morph for the main player button */
 .playerMorphIcon{
   width: 26px !important;
   height: 26px !important;
@@ -2747,7 +2747,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 }
 
 
-/* v0.4.1: player CSS ownership pass — radius scale + morph icon sizing */
+/* v0.4.2: player CSS ownership pass â€” radius scale + morph icon sizing */
 .playerBar{
   --player-radius-xs: 12px;
   --player-radius-s: 16px;
@@ -2771,7 +2771,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 }
 
 
-/* v0.4.1: small player icon polish + safer album delete confirmation */
+/* v0.4.2: small player icon polish + safer album delete confirmation */
 .playerBar .circleButton:not(.main) .playerControlIcon,
 .playerBar .circleButton:not(.main) svg,
 .playerBar .volumeIconButton svg,
@@ -2847,7 +2847,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 }
 
 
-/* v0.4.1 performance ownership: player blur/glow safety */
+/* v0.4.2 performance ownership: player blur/glow safety */
 .app .playerBar{
   --player-perf-blur: 32px;
   --player-perf-opacity: 0.42;
