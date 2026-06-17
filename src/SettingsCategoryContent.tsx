@@ -2,6 +2,7 @@
 import type { CSSProperties } from "react";
 const SETTINGS_INFO_MASCOT_SRC = new URL("./assets/info-state.png", import.meta.url).href;
 const SETTINGS_DANGER_MASCOT_SRC = new URL("./assets/danger-state.png", import.meta.url).href;
+const SETTINGS_HAPPY_MASCOT_SRC = new URL("./assets/happy-state.png", import.meta.url).href;
 type ThemeId = string;
 type DownloadQuality = "best" | "320" | "256" | "192";
 type DownloadFormat = "mp3" | "flac" | "wav";
@@ -418,7 +419,9 @@ const SettingsCategoryContent = memo(function SettingsCategoryContent({
     setCustomColorDrafts((old) => ({ ...old, [key]: safeColor }));
     commitCustomThemeHexDraft(key, safeColor, fallback);
   }
-return (
+const quickLibraryBlurEnabled = settings.quickLibraryMoreBlur !== false;
+
+  return (
   <>
     {settingsCategory === "appearance" ? (
       <section className="settingsCategoryPage settingsDeclutterPageV491 settingsAppearanceCleanV491" aria-label="Appearance settings">
@@ -544,33 +547,38 @@ return (
           </div>
         </div>
 
-        <div className="settingsPanelCard settingsFocusPanelV491 settingsLiveCoverColorsV491">
-          <div className="settingsPanelHeader">
+        <div className="settingsPanelCard settingsFocusPanelV491 settingsHomeCardsV502">
+          <div className="settingsPanelHeader settingsHomeCardsHeaderV502">
             <div>
-              <strong>Live cover colors</strong>
-              <span>Controls how much album art color is allowed to tint the app and player.</span>
+              <strong>Home cards</strong>
+              <span>Card blur and the tiny cat live here now. Advanced cover tint controls stay in Advanced.</span>
             </div>
+            <img className="settingsHomeMascotV503" src={SETTINGS_HAPPY_MASCOT_SRC} alt="" draggable={false} aria-hidden="true" />
+            <label className="cleanToggleLabel settingsCatBuddyToggleV502" title="Show or hide the tiny cat buddy.">
+              <input
+                type="checkbox"
+                checked={settings.catBuddyEnabled === true}
+                onChange={(event) => updateSetting("catBuddyEnabled", event.currentTarget.checked)}
+              />
+              <span>{settings.catBuddyEnabled === true ? "Cat buddy on" : "Cat buddy off"}</span>
+            </label>
           </div>
-          <div className="settingsChoiceRowV491" role="group" aria-label="Live cover color strength">
-            {coverColorSyncOptions.map((option: ChoiceOption) => {
-              const active = selectedCoverColorSyncMode === option.id;
-              const label = option.label || option.name || option.id;
-              const note = option.note || (option.id === "off" ? "no cover tint" : option.id === "subtle" ? "tiny cover tint" : option.id === "strong" ? "bigger cover mood" : "balanced cover tint");
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={`settingsChoicePillV491 ${active ? "active" : ""}`}
-                  onClick={() => void updateCoverColorSyncMode(option.id)}
-                  aria-pressed={active}
-                  aria-label={`Set live cover colors to ${label}`}
-                  title={`Live cover colors: ${label}`}
-                >
-                  <strong>{label}</strong>
-                  <span>{note}</span>
-                </button>
-              );
-            })}
+
+          <div className="settingsHomeCardControlsV502">
+            <label className="toggleRow settingsCardBlurToggleV502" title="Use album covers as soft blurred backgrounds on home and quick library cards.">
+              <span className="toggleRowCopy">
+                <span className="settingsLabelLine">
+                  <strong>Album cover card blur</strong>
+                  <span className="settingsInfoDot" aria-hidden="true">i</span>
+                </span>
+                <small>{quickLibraryBlurEnabled ? "Home cards use a soft blurred album-cover glow." : "Home cards stay flatter and faster."}</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={quickLibraryBlurEnabled}
+                onChange={(event) => updateSetting("quickLibraryMoreBlur", event.currentTarget.checked)}
+              />
+            </label>
           </div>
         </div>
 
@@ -584,7 +592,7 @@ return (
               aria-hidden="true"
             />
             <div className="settingsAppearanceInfoCopyV500">
-              <strong>looking for the other apperance options? go to advanced!</strong>
+              <strong>looking for the other appearance options? go to advanced!</strong>
             </div>
             <button
               className="settingsActionButton settingsPrimaryAction"
@@ -995,7 +1003,6 @@ return (
             <ToggleRow label="Reduce motion" help="Turns off most decorative animations." checked={settings.reducedMotion} onChange={(value) => updateSetting("reducedMotion", value)} />
             <ToggleRow label="Soft corners" help="Uses rounder cards and buttons." checked={settings.softCorners} onChange={(value) => updateSetting("softCorners", value)} />
             <ToggleRow label="Animated glow" help="Keeps ambience on, but pauses it during fast screen switches." checked={settings.animatedGlow} onChange={(value) => updateSetting("animatedGlow", value)} />
-            <ToggleRow label="Cat buddy" help="Tiny cat follows your cursor." checked={settings.catBuddyEnabled === true} onChange={(value) => updateSetting("catBuddyEnabled", value)} />
           </div>
         </div>
 

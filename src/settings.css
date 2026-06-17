@@ -9630,3 +9630,65 @@ body.localitfyThemePainting .toggleRow{
   }
 }
 /* end localtify v501 */
+/* localtify 0.4.2 V502 — Appearance home cards restored + cat buddy setting */
+.settingsHomeCardsV502{
+  border-color: rgba(var(--lt-accent-rgb), 0.20) !important;
+}
+
+.settingsHomeCardsHeaderV502{
+  align-items: center !important;
+}
+
+.settingsHomeCardsHeaderV502 .cleanToggleLabel,
+.settingsCatBuddyToggleV502{
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+.settingsHomeCardControlsV502{
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.settingsCardBackgroundRowV502{
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.settingsCardBlurPillV502{
+  min-height: 70px !important;
+}
+
+.settingsCardBlurToggleV502{
+  min-height: 68px !important;
+  margin: 0 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb),0.055), rgba(255,255,255,0.018)),
+    rgba(255,255,255,0.032) !important;
+}
+
+.settingsCardBlurToggleV502 .toggleRowCopy strong{
+  color: var(--lt-text) !important;
+}
+
+.settingsCardBlurToggleV502 .toggleRowCopy small{
+  color: var(--lt-muted) !important;
+}
+
+@media (max-width: 900px){
+  .settingsHomeCardsHeaderV502{
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .settingsHomeCardsHeaderV502 .cleanToggleLabel,
+  .settingsCatBuddyToggleV502{
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .settingsCardBackgroundRowV502{
+    grid-template-columns: 1fr !important;
+  }
+}
