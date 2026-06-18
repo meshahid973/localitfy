@@ -158,7 +158,7 @@ function setStoredSchemaVersion(database, version = SCHEMA_VERSION) {
         migratedAt = excluded.migratedAt,
         appVersion = excluded.appVersion
     `)
-    .run(version, now, "0.2.9");
+    .run(version, now, "0.4.2");
 }
 
 function createSongsTable(database) {
@@ -803,19 +803,53 @@ function patchSong(id, patch) {
 
 function deleteSong(id) {
   const database = ensureDb();
-  if (!id) return false;
+  const cleanId = asText(id, "");
+  if (!cleanId) return false;
 
   try {
-    const result = database.prepare("DELETE FROM songs WHERE id = ?").run(id);
-    return result.changes > 0;
+    const tx = database.transaction((songId) => {
+      database.prepare("DELETE FROM playlist_songs WHERE songId = ?").run(songId);
+      return database.prepare("DELETE FROM songs WHERE id = ?").run(songId).changes > 0;
+    });
+
+    return tx(cleanId);
   } catch {
     return false;
   }
 }
 
+function deleteSongs(ids = []) {
+  const database = ensureDb();
+  const cleanIds = [...new Set((Array.isArray(ids) ? ids : []).map((id) => asText(id, "")).filter(Boolean))];
+  if (!cleanIds.length) return 0;
+
+  try {
+    const tx = database.transaction((songIds) => {
+      let changed = 0;
+      const deletePlaylistRefs = database.prepare("DELETE FROM playlist_songs WHERE songId = ?");
+      const deleteSongRow = database.prepare("DELETE FROM songs WHERE id = ?");
+
+      for (const songId of songIds) {
+        deletePlaylistRefs.run(songId);
+        changed += deleteSongRow.run(songId).changes;
+      }
+
+      return changed;
+    });
+
+    return tx(cleanIds);
+  } catch {
+    return 0;
+  }
+}
+
 function clearLibrary() {
   const database = ensureDb();
-  database.prepare("DELETE FROM songs").run();
+  const tx = database.transaction(() => {
+    database.prepare("DELETE FROM playlist_songs").run();
+    database.prepare("DELETE FROM songs").run();
+  });
+  tx();
 }
 
 function getSettings() {
@@ -975,6 +1009,7 @@ module.exports = {
   insertSongs,
   patchSong,
   deleteSong,
+  deleteSongs,
   clearLibrary,
   getSettings,
   saveSettings,

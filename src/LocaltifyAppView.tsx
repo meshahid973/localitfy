@@ -1125,11 +1125,11 @@ export function cleanToastCopy(message: string, kind: AppToastKind) {
 }
 
 export const whatsNewItems = [
-  "0.4.2 fixes the album library importer freezing on large nested-folder scans",
-  "Nested album folders are detected more safely so parent artist folders do not steal child album covers",
-  "Album import progress is throttled so the UI stays responsive while scanning and importing",
-  "Linux AppImage startup hardening from 0.4.0 is kept, with cleaner update-check behavior",
-  "Small release cleanup for version text, Linux install copy, and old development comments"
+  "Fixed bulk album import freezes on large nested-folder scans",
+  "Improved album cover detection so folder and embedded covers win properly",
+  "Reduced startup cover loading pressure after big imports",
+  "Fixed settings appearance cleanup and restored the important controls",
+  "Improved player queue stability for standalone loads and empty queues"
 ];
 export const V013_DEFAULTS_KEY = "localitfy.v013.defaultsApplied";
 export const START_WITH_WINDOWS_DEFAULT_KEY = "localitfy.v029.startWithWindowsDefaultApplied";
@@ -2797,10 +2797,13 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
   const directCover = isImmediateCover ? getFullCoverUrl(song) : getCardCoverUrl(song);
   const savedCover = String(song?.coverPath || "").trim();
   const savedCoverSrc = getRendererSafeImageUrl(savedCover);
-  const fallbackAsset = song ? pixelArtForSong(song) : null;
-  const backupFallbackAsset = song ? nextPixelArtForSong(song) : null;
-  const fallbackSrc = runtimePixelArtImageUrl(fallbackAsset);
-  const backupFallbackSrc = runtimePixelArtImageUrl(backupFallbackAsset);
+  const coverSource = String((song as any)?.coverSource || "").trim().toLowerCase();
+  const isGeneratedAlbumCover = coverSource === "generated" || String(song?.id || "").startsWith("album-cover-");
+  const allowPixelFallback = !isGeneratedAlbumCover;
+  const fallbackAsset = allowPixelFallback && song ? pixelArtForSong(song) : null;
+  const backupFallbackAsset = allowPixelFallback && song ? nextPixelArtForSong(song) : null;
+  const fallbackSrc = allowPixelFallback ? runtimePixelArtImageUrl(fallbackAsset) : "";
+  const backupFallbackSrc = allowPixelFallback ? runtimePixelArtImageUrl(backupFallbackAsset) : "";
 
   const sourceCandidates = [directCover, savedCoverSrc, fallbackSrc, backupFallbackSrc]
     .map((source) => source.trim())
@@ -2808,7 +2811,13 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
   const coverSrc = sourceCandidates.find((source) => !failedSources[source]) || "";
   const hasCover = Boolean(coverSrc);
   const fallback = song ? prettyTitle(song.title, 1).slice(0, 1) || "?" : "?";
-  const style = hasCover ? ({ "--cover-art-url": toCssUrl(coverSrc), "--cover-url": toCssUrl(coverSrc) } as CSSProperties) : undefined;
+  const generatedInitials = isGeneratedAlbumCover ? generatedAlbumInitials(song?.title || "album", song?.artist || "local album") : fallback;
+  const generatedHue = isGeneratedAlbumCover ? generatedAlbumHue(song?.title || "album", song?.artist || "local album") : 292;
+  const style = hasCover
+    ? ({ "--cover-art-url": toCssUrl(coverSrc), "--cover-url": toCssUrl(coverSrc) } as CSSProperties)
+    : isGeneratedAlbumCover
+      ? ({ "--generated-cover-hue": `${generatedHue}deg` } as CSSProperties)
+      : undefined;
 
   useEffect(() => {
     setFailedSources({});
@@ -2821,12 +2830,12 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
 
   return (
     <div
-      className={`coverAura ${className} ${hasCover ? "hasCover" : "noCover"} ${imageReady ? "coverReady" : "coverLoading"}`}
+      className={`coverAura ${className} ${hasCover ? "hasCover" : "noCover"} ${isGeneratedAlbumCover ? "generatedAlbumCover" : ""} ${imageReady ? "coverReady" : "coverLoading"}`}
       style={style}
       data-cover-title={song?.title ?? "localtify"}
     >
       <span className="coverPlaceholder" aria-hidden="true">
-        {fallback}
+        {isGeneratedAlbumCover ? generatedInitials : fallback}
       </span>
 
       {hasCover ? (
@@ -2913,11 +2922,60 @@ function getSongAddedTime(song: Song) {
   return Number.isFinite(addedAt) ? addedAt : 0;
 }
 
-function pickAlbumCoverSong(songs: Song[]) {
-  return songs.find((song) => Boolean(getCardCoverUrl(song) || getRendererSafeImageUrl(song.coverPath))) || songs[0] || null;
+function isRealAlbumArtSource(value: unknown) {
+  return ["custom", "folder", "embedded", "spotify"].includes(String(value || "").trim().toLowerCase());
 }
 
-function makeAlbumCoverSong(coverUrl: string, title: string, artist: string, seedSong?: Song | null): Song {
+function isRealAlbumCoverSong(song?: Song | null) {
+  if (!song) return false;
+  const source = String((song as any).coverSource || "").trim().toLowerCase();
+  const hasStoredCover = Boolean(getRendererSafeImageUrl(song.coverUrl) || getRendererSafeImageUrl(song.coverPath));
+  if (!hasStoredCover) return false;
+  if (source === "fallback" || source === "generated" || source === "none" || source === "unknown") return false;
+  return isRealAlbumArtSource(source) || !source;
+}
+
+function generatedAlbumInitials(title: string, artist: string) {
+  const cleaned = `${title || "album"} ${artist || ""}`
+    .replace(/[^a-z0-9 ]/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const words = cleaned.split(" ").filter(Boolean);
+  const letters = words.slice(0, 2).map((word) => word[0]?.toUpperCase()).join("");
+  return letters || "♪";
+}
+
+function generatedAlbumHue(title: string, artist: string) {
+  const text = `${title || "album"}:${artist || "local"}`;
+  let hash = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = ((hash << 5) - hash + text.charCodeAt(index)) | 0;
+  }
+  return Math.abs(hash) % 360;
+}
+
+function makeGeneratedAlbumCoverUrl(title: string, artist: string) {
+  // Generated album covers are rendered with CSS in <Cover>, not SVG <img> data URLs.
+  // This keeps large imported libraries smooth and prevents mascot/pixel fallbacks.
+  return "";
+}
+
+function makeGeneratedAlbumCoverSong(title: string, artist: string, seedSong?: Song | null): Song {
+  return makeAlbumCoverSong(makeGeneratedAlbumCoverUrl(title, artist), title, artist, seedSong, "generated") as Song;
+}
+
+function pickAlbumCoverSong(songs: Song[], albumTitle = "", albumArtist = "") {
+  const realCoverSong = songs.find(isRealAlbumCoverSong);
+  if (realCoverSong) return realCoverSong;
+  const seedSong = songs[0] || null;
+  return makeGeneratedAlbumCoverSong(
+    albumTitle || seedSong?.album || seedSong?.title || "local album",
+    albumArtist || seedSong?.artist || "local album",
+    seedSong
+  );
+}
+
+function makeAlbumCoverSong(coverUrl: string, title: string, artist: string, seedSong?: Song | null, coverSource = "custom"): Song {
   const safeCoverUrl = getRendererSafeImageUrl(coverUrl);
   const base = seedSong || null;
 
@@ -2931,6 +2989,7 @@ function makeAlbumCoverSong(coverUrl: string, title: string, artist: string, see
     fileExists: true,
     coverPath: null,
     coverUrl: safeCoverUrl,
+    coverSource,
     liked: false,
     playCount: 0,
     duration: 0,
@@ -2945,22 +3004,23 @@ function normalizeStoredPathForCompare(value: unknown) {
 function pickManualAlbumCoverSong(album: ManualLocalAlbum, albumSongs: Song[]) {
   const storedCoverPath = normalizeStoredPathForCompare(album.coverPath || album.folderCoverPath || album.embeddedCoverPath || "");
   const preferredByPath = storedCoverPath
-    ? albumSongs.find((song) => normalizeStoredPathForCompare(song.coverPath) === storedCoverPath)
+    ? albumSongs.find((song) => normalizeStoredPathForCompare(song.coverPath) === storedCoverPath && isRealAlbumCoverSong(song))
     : null;
 
   if (preferredByPath) return preferredByPath;
 
-  const preferredBySource = albumSongs.find((song) =>
-    ["custom", "folder", "embedded"].includes(String((song as any).coverSource || "")) &&
-    Boolean(getCardCoverUrl(song) || getRendererSafeImageUrl(song.coverPath))
-  );
+  const preferredBySource = albumSongs.find((song) => {
+    const source = String((song as any).coverSource || "").trim().toLowerCase();
+    return ["custom", "folder", "embedded", "spotify"].includes(source) &&
+      Boolean(getCardCoverUrl(song) || getRendererSafeImageUrl(song.coverPath));
+  });
 
   if (preferredBySource) return preferredBySource;
 
   const safeCoverUrl = getRendererSafeImageUrl(album.coverUrl);
   if (safeCoverUrl) return makeAlbumCoverSong(safeCoverUrl, album.title, album.artist, albumSongs[0] || null);
 
-  return pickAlbumCoverSong(albumSongs);
+  return pickAlbumCoverSong(albumSongs, album.title, album.artist);
 }
 
 function resizeAlbumCoverFile(file: File, size = 640): Promise<string> {
@@ -3029,7 +3089,7 @@ export function buildLocalAlbumEntries(inputSongs: Song[]): LocalAlbumEntry[] {
       existing.latestAdded = Math.max(existing.latestAdded, getSongAddedTime(song));
       if (!existing.year) existing.year = getAlbumYear(song);
       if (!existing.coverSong || getRendererSafeImageUrl(song.coverUrl) || getRendererSafeImageUrl(song.coverPath)) {
-        existing.coverSong = pickAlbumCoverSong(existing.songs);
+        existing.coverSong = pickAlbumCoverSong(existing.songs, existing.title, existing.artist);
       }
       return;
     }
@@ -3050,7 +3110,7 @@ export function buildLocalAlbumEntries(inputSongs: Song[]): LocalAlbumEntry[] {
 
   return [...groups.values()].map((album) => ({
     ...album,
-    coverSong: pickAlbumCoverSong(album.songs),
+    coverSong: pickAlbumCoverSong(album.songs, album.title, album.artist),
     songs: [...album.songs].sort((a, b) => {
       const trackA = Number((a as any).track || (a as any).trackNumber || 0);
       const trackB = Number((b as any).track || (b as any).trackNumber || 0);
@@ -4442,6 +4502,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     songRef,
     markSongCompletedForPlayCount,
     patchSongLocal,
+    patchSongsBulkLocal,
     playbackUrlCacheRef,
     setPlayerError,
     getAudioErrorText,
@@ -4901,14 +4962,23 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
     setStatusText?.(`clearing ${safeSongs.length} album tag${safeSongs.length === 1 ? "" : "s"}...`);
 
-    for (let index = 0; index < safeSongs.length; index += 1) {
-      const song = safeSongs[index];
-      await patchSongLocal(song.id, { album: "" });
-      if (index > 0 && index % 12 === 0) {
-        await new Promise((resolve) => window.setTimeout(resolve, 0));
+    const ids = [...new Set(safeSongs.map((song) => String(song.id || "").trim()).filter(Boolean))];
+
+    if (ids.length >= 25 && typeof patchSongsBulkLocal === "function") {
+      await patchSongsBulkLocal(ids, { album: "" });
+    } else {
+      for (let index = 0; index < safeSongs.length; index += 1) {
+        const song = safeSongs[index];
+        await patchSongLocal(song.id, { album: "" });
+        if (index > 0 && index % 12 === 0) {
+          await new Promise((resolve) => window.setTimeout(resolve, 0));
+        }
       }
     }
 
+    setAlbumFolderImportPreview(null);
+    setAlbumFolderImportProgress(null);
+    setAlbumFolderImportMessage("");
     setStatusText?.(`cleared ${safeSongs.length} album tag${safeSongs.length === 1 ? "" : "s"}`);
   }
 
@@ -4967,6 +5037,9 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setManualAlbums([]);
     setSelectedAlbumId("");
     closeAlbumBuilder();
+    setAlbumFolderImportPreview(null);
+    setAlbumFolderImportProgress(null);
+    setAlbumFolderImportMessage("");
 
     if (taggedSongs.length) {
       await clearAlbumTagFromSongs(taggedSongs, "all albums");
@@ -4992,7 +5065,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     downloadResults.some((item: any) => item && item.ok === false);
   const downloadHasSuccess =
     downloadQueue.some((item: any) => String(item.status || "").toLowerCase() === "done" && item.importedToLibrary !== false) ||
-    downloadResults.some((item: any) => item && item.ok !== false && item.importedToLibrary !== false);
+    downloadResults.some((item: any) => item && item.ok === true && item.importedToLibrary !== false);
   const downloadMascotState: MascotStateKey = downloadWorking
     ? "loading"
     : downloadHasFailure
@@ -5038,6 +5111,12 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "");
     });
   };
+
+  const albumImportPreviewAlbumCount = Number(albumFolderImportPreview?.albumCount || albumFolderImportPreview?.albums?.length || 0);
+  const albumImportPreviewTrackCount = Number(albumFolderImportPreview?.trackCount || 0);
+  const albumImportPreviewDuplicateCount = Number(albumFolderImportPreview?.duplicateCount || 0);
+  const albumImportIsLarge = Boolean(albumFolderImportPreview?.hasLargeImportWarning) || albumImportPreviewTrackCount >= 500 || albumImportPreviewAlbumCount >= 50;
+  const albumImportWarningText = albumFolderImportPreview?.importWarning || `Found ${albumImportPreviewTrackCount} tracks across ${albumImportPreviewAlbumCount} folders. This may take a while. Continue?`;
 
   return (
     <main
@@ -5809,7 +5888,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     <div className="albumFolderImportHeaderV309">
                       <div>
                         <p className="eyebrow">folder album import</p>
-                        <h3>{albumFolderImportBusy ? "Scanning your folder" : albumFolderImportPreview?.albums?.length ? "Ready to import" : "Album folder importer"}</h3>
+                        <h3>{albumFolderImportBusy ? "Scanning your folder" : albumFolderImportPreview?.albums?.length ? "Review before import" : "Album folder importer"}</h3>
                         <p>{albumFolderImportMessage || "Choose one album folder, or choose a parent folder that contains separate album folders."}</p>
                       </div>
 
@@ -5834,10 +5913,17 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                     {albumFolderImportPreview?.albums?.length ? (
                       <>
                         <div className="albumFolderImportSummaryV309">
-                          <span><strong>{albumFolderImportPreview.albumCount || albumFolderImportPreview.albums.length}</strong><small>albums found</small></span>
-                          <span><strong>{albumFolderImportPreview.trackCount || 0}</strong><small>tracks</small></span>
-                          <span><strong>{albumFolderImportPreview.duplicateCount || 0}</strong><small>already in library</small></span>
+                          <span><strong>{albumImportPreviewAlbumCount}</strong><small>albums found</small></span>
+                          <span><strong>{albumImportPreviewTrackCount}</strong><small>tracks</small></span>
+                          <span><strong>{albumImportPreviewDuplicateCount}</strong><small>already in library</small></span>
                         </div>
+
+                        {albumImportIsLarge ? (
+                          <div className="albumFolderImportWarningV042" role="note">
+                            <strong>{albumImportWarningText}</strong>
+                            <span>Import in smaller batches if the app becomes slow.</span>
+                          </div>
+                        ) : null}
 
                         <div className="albumFolderPreviewGridV309">
                           {albumFolderImportPreview.albums.slice(0, 10).map((album: any) => (
@@ -5849,12 +5935,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                 <strong title={album.title}>{album.title}</strong>
                                 <small title={album.artist}>{album.artist}</small>
                                 <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` � ${album.duplicateCount} already added` : ""}</em>
-                                {album.sourcePath ? <b title={album.sourcePath}>{album.sourcePath}</b> : null}
-                                {album.warnings?.length ? (
-                                  <ul>
-                                    {album.warnings.slice(0, 3).map((warning: string) => <li key={warning}>{warning}</li>)}
-                                  </ul>
-                                ) : null}
+                                {album.previewTrackCount && album.previewTrackCount > 24 ? <b>{album.previewTrackCount - 24} more tracks hidden from preview</b> : null}
                               </div>
                             </article>
                           ))}
@@ -5862,7 +5943,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                         <div className="albumFolderImportFooterV309">
                           <button className="mainAction" type="button" onClick={() => void commitAlbumFolderImportPreview()} disabled={albumFolderImportBusy}>
-                            {albumFolderImportBusy ? "importing..." : "import albums"}
+                            {albumFolderImportBusy ? "importing..." : albumImportIsLarge ? "continue import" : "import albums"}
                           </button>
                           <button className="heroGhost" type="button" onClick={cancelAlbumFolderImportPreview} disabled={albumFolderImportBusy}>cancel</button>
                         </div>
@@ -7246,7 +7327,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
             <button className="whatsNewClose" type="button" onClick={closeWhatsNew} aria-label="Close what's new"><X size={18} strokeWidth={2.4} /></button>
             <p className="eyebrow">what's new</p>
             <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-            <p className="whatsNewSubtext">0.4.2 is a fast hotfix focused on the album importer freeze, nested-folder scanning, cover accuracy, and keeping the app responsive after the 0.4.0 release.</p>
+            <p className="whatsNewSubtext">0.4.2 focuses on stability: safer album imports, cleaner album covers, lighter startup cover loading, and small UI cleanup from the 0.4.1 feedback.</p>
             <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
             <button className="heroMain" type="button" onClick={closeWhatsNew}>got it</button>
           </section>

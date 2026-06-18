@@ -399,7 +399,9 @@ declare global {
       setSongCover?: (id: string, coverPath: string) => Promise<any | null>;
 
       patchSong: (id: string, patch: any) => Promise<any | null>;
+      patchSongs?: (ids: string[], patch: any) => Promise<any[]>;
       deleteSong: (id: string) => Promise<any[]>;
+      deleteSongs?: (ids: string[]) => Promise<any[]>;
 
       randomizeSongCover: (id: string) => Promise<any | null>;
       randomizeAllSongCovers?: () => Promise<any[]>;

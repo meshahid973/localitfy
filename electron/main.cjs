@@ -1,4 +1,4 @@
-﻿/* localtify 0.4.2 V043 album import cover/cache hardening. */
+﻿/* localtify 0.4.2 V044 album import UX and cover fallback cleanup. */
 /* localtify 0.4.1 V425 cover picker and cache cleanup. */
 /* localtify 0.4.1 V424 â€” Windows startup white-screen recovery. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
@@ -169,6 +169,7 @@ const {
   insertSongs,
   patchSong,
   deleteSong,
+  deleteSongs,
   clearLibrary,
   getSettings,
   saveSettings,
@@ -3349,7 +3350,8 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
     albumEmbeddedCoverPath: options.albumEmbeddedCoverPath || options.albumCoverPath || "",
     spotifyCoverPath: options.spotifyCoverPath || "",
     preferFolderCover: Boolean(options.preferFolderCover),
-    fallbackCoverPath: fallbackCover
+    fallbackCoverPath: options.allowFallbackCover === false ? "" : fallbackCover,
+    allowFallbackCover: options.allowFallbackCover !== false
   });
 
   if (coverResult.coverSource === "fallback" && coverResult.coverPath) {
@@ -3585,6 +3587,25 @@ const ALBUM_FOLDER_SCAN_YIELD_EVERY_TRACKS = 8;
 const ALBUM_FOLDER_IMPORT_YIELD_EVERY_TRACKS = 12;
 const ALBUM_FOLDER_IMPORT_PROGRESS_EVERY_TRACKS = 5;
 const ALBUM_FOLDER_DISC_FOLDER_RE = /^(?:cd|disc|disk|side|volume|vol)\s*[-_ ]?\d{1,2}$/i;
+const REAL_ALBUM_COVER_SOURCES = new Set(["folder", "embedded", "custom", "spotify"]);
+
+function isRealAlbumCoverSource(source = "") {
+  return REAL_ALBUM_COVER_SOURCES.has(String(source || "").trim().toLowerCase());
+}
+
+function realAlbumCoverPathFrom(album = {}) {
+  const source = String(album.coverSource || "").trim().toLowerCase();
+  const coverPath = String(album.coverPath || "").trim();
+  if (coverPath && isRealAlbumCoverSource(source)) return coverPath;
+
+  const folderCoverPath = String(album.folderCoverPath || "").trim();
+  if (folderCoverPath) return folderCoverPath;
+
+  const embeddedCoverPath = String(album.embeddedCoverPath || "").trim();
+  if (embeddedCoverPath) return embeddedCoverPath;
+
+  return "";
+}
 
 function cleanAlbumFolderText(value, fallback = "") {
   const text = String(value || "")
@@ -3916,6 +3937,10 @@ async function handleAlbumFolderScan(event, payload = {}) {
     albumCount: albums.length,
     trackCount,
     duplicateCount,
+    hasLargeImportWarning: trackCount >= 500 || albums.length >= 50,
+    importWarning: trackCount >= 500 || albums.length >= 50
+      ? `Found ${trackCount} tracks across ${albums.length} folders. This may take a while; import in smaller batches if the app becomes slow.`
+      : "",
     albums,
     message
   };
@@ -4011,7 +4036,8 @@ async function handleAlbumFolderImport(event, payload = {}) {
         folderCoverPath,
         albumEmbeddedCoverPath,
         preferFolderCover: Boolean(folderCoverPath),
-        fallbackCoverPath: fallbackCover
+        fallbackCoverPath: "",
+        allowFallbackCover: false
       });
 
       const durationMs = Math.max(
@@ -4058,7 +4084,8 @@ async function handleAlbumFolderImport(event, payload = {}) {
       folderCoverPath,
       albumEmbeddedCoverPath,
       preferFolderCover: Boolean(folderCoverPath),
-      readCover: false
+      readCover: false,
+      allowFallbackCover: false
     });
 
     const durationMs = Math.max(
@@ -4112,15 +4139,16 @@ async function handleAlbumFolderImport(event, payload = {}) {
       null;
     // Album cards should only use real album art. Song fallback/pixel/mascot art is fine for songs,
     // but it should not become the album cover because that made folder albums look like random mascots.
+    const realAlbumCoverPath = realAlbumCoverPathFrom(album);
     const stableCoverPath =
       preferredCoverSong?.coverPath ||
-      album.coverPath ||
+      realAlbumCoverPath ||
       nonFallbackCoverSong?.coverPath ||
       "";
     const stableCoverSource = stableCoverPath
-      ? (preferredCoverSong?.coverSource || album.coverSource || nonFallbackCoverSong?.coverSource || "none")
+      ? (preferredCoverSong?.coverSource || (realAlbumCoverPath ? (album.coverSource || "folder") : "") || nonFallbackCoverSong?.coverSource || "none")
       : "none";
-    const stableCoverUrl = stableCoverPath ? safeMediaUrl(stableCoverPath) : (preferredCoverSong?.coverUrl || album.coverUrl || "");
+    const stableCoverUrl = stableCoverPath ? safeMediaUrl(stableCoverPath) : "";
 
     return {
       id: album.id,
@@ -4240,6 +4268,8 @@ async function repairSpotifyMetadataForFolder(directory, tracks = [], options = 
 
       if (!currentCover || !fileExists(currentCover) || isPixelFallback || !isSpotifyCover) {
         patch.coverPath = cachedCoverPath;
+        patch.coverSource = "spotify";
+        patch.coverUpdatedAt = new Date().toISOString();
       }
     }
 
@@ -4346,7 +4376,7 @@ function buildRandomizeMissingSongCovers() {
   for (const song of targetSongs) {
     const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true });
     if (!chosen) continue;
-    patchSong(song.id, { coverPath: chosen });
+    patchSong(song.id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
   }
   return listSongsShaped();
 }
@@ -5270,7 +5300,7 @@ function postDiscordWebhookWithNodeHttps(webhookUrl, body) {
         headers: {
           "Content-Type": "application/json",
           "Content-Length": String(payload.length),
-          "User-Agent": "Localtify-Feedback/0.4.1"
+          "User-Agent": "Localtify-Feedback/0.4.2"
         },
         timeout: 30_000
       },
@@ -5505,7 +5535,7 @@ app.whenReady().then(async () => {
     const songs = getSongs();
     for (const song of songs) {
       const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
-      if (chosen) patchSong(song.id, { coverPath: chosen });
+      if (chosen) patchSong(song.id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
     }
     return listSongsShaped();
   });
@@ -5523,7 +5553,7 @@ app.whenReady().then(async () => {
       const song = songs.find((item) => item.id === id);
       if (!song) continue;
       const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
-      if (chosen) patchSong(id, { coverPath: chosen });
+      if (chosen) patchSong(id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
     }
     return listSongsShaped();
   });
@@ -5558,7 +5588,7 @@ app.whenReady().then(async () => {
     try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; }
   });
   ipcMain.handle("song:set-cover", async (_event, id, coverPath) => {
-    const updated = patchSong(id, { coverPath });
+    const updated = patchSong(id, { coverPath, coverSource: coverPath ? "custom" : "none", coverUpdatedAt: new Date().toISOString() });
     return updated ? shapeSong(updated) : null;
   });
   ipcMain.handle("song:pick-cover", async (event, id) => {
@@ -5590,7 +5620,7 @@ app.whenReady().then(async () => {
       const chosen = result.filePaths[0];
       if (!fileExists(chosen) || !isImageFile(chosen)) return shapeSong(song);
 
-      const updated = patchSong(id, { coverPath: chosen });
+      const updated = patchSong(id, { coverPath: chosen, coverSource: "custom", coverUpdatedAt: new Date().toISOString() });
       return updated ? shapeSong(updated) : shapeSong(song);
     } catch (error) {
       console.log("[localtify pick cover error]", error?.message || error);
@@ -5754,11 +5784,36 @@ app.whenReady().then(async () => {
     const updated = patchSong(id, patch);
     return updated ? shapeSong(updated) : null;
   });
+  ipcMain.handle("song:patch-many", async (_event, ids = [], patch = {}) => {
+    try {
+      const safeIds = [...new Set((Array.isArray(ids) ? ids : [])
+        .map((id) => String(id || "").trim())
+        .filter(Boolean))];
+
+      if (!safeIds.length || !patch || typeof patch !== "object") {
+        return listSongsShaped();
+      }
+
+      for (let index = 0; index < safeIds.length; index += 1) {
+        patchSong(safeIds[index], patch);
+
+        if (index > 0 && index % 250 === 0) {
+          await yieldToMainLoop();
+        }
+      }
+
+      return listSongsShaped();
+    } catch (error) {
+      console.log("[localitfy bulk patch song error]", error?.message || error);
+      return listSongsShaped();
+    }
+  });
   ipcMain.handle("song:random-cover", async (_event, id) => {
     const covers = getPixelArtFiles();
     const song = getSongs().find((item) => item.id === id);
     const chosen = pickLeastUsedCover(covers, song ? [song] : [], { avoidSelectedCurrent: true });
-    const updated = patchSong(id, { coverPath: chosen });
+    if (!chosen) return song ? shapeSong(song) : null;
+    const updated = patchSong(id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
     return updated ? shapeSong(updated) : null;
   });
   ipcMain.handle("song:delete", async (_event, id) => {
@@ -5767,6 +5822,15 @@ app.whenReady().then(async () => {
       return listSongsShaped();
     } catch (error) {
       console.log("[localitfy delete song error]", error?.message);
+      return listSongsShaped();
+    }
+  });
+  ipcMain.handle("song:delete-many", async (_event, ids = []) => {
+    try {
+      deleteSongs(ids);
+      return listSongsShaped();
+    } catch (error) {
+      console.log("[localitfy bulk delete songs error]", error?.message || error);
       return listSongsShaped();
     }
   });
@@ -6048,6 +6112,8 @@ app.whenReady().then(async () => {
               artist: song.artist,
               album: song.album,
               coverPath: song.coverPath,
+              coverSource: song.coverSource,
+              coverUpdatedAt: song.coverUpdatedAt,
               duration: song.duration,
               sourceType: song.sourceType,
               sourceTrackId: song.sourceTrackId,
@@ -6175,4 +6241,3 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
-

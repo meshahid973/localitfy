@@ -21,7 +21,9 @@ contextBridge.exposeInMainWorld("localitfy", {
   setPixelArtCover: (id, coverPath) => ipcRenderer.invoke("song:set-cover", id, coverPath),
 
   patchSong: (id, patch) => ipcRenderer.invoke("song:patch", id, patch),
+  patchSongs: (ids, patch) => ipcRenderer.invoke("song:patch-many", ids, patch),
   deleteSong: (id) => ipcRenderer.invoke("song:delete", id),
+  deleteSongs: (ids) => ipcRenderer.invoke("song:delete-many", ids),
   randomizeSongCover: (id) => ipcRenderer.invoke("song:random-cover", id),
   randomizeAllSongCovers: () => ipcRenderer.invoke("covers:randomize-all"),
   randomizeMissingSongCovers: () => ipcRenderer.invoke("covers:randomize-missing"),
