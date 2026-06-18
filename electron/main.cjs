@@ -1,4 +1,5 @@
-﻿/* localtify 0.4.1 V425 cover picker and cache cleanup. */
+﻿/* localtify 0.4.2 V043 album import cover/cache hardening. */
+/* localtify 0.4.1 V425 cover picker and cache cleanup. */
 /* localtify 0.4.1 V424 â€” Windows startup white-screen recovery. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
@@ -224,8 +225,11 @@ let mediaServerReadyPromise = null;
 
 const COVER_THUMBNAIL_SIZE = 256;
 const COVER_THUMBNAIL_DIR_NAME = "thumbnails";
+const COVER_THUMBNAIL_QUEUE_DELAY_MS = 420;
+const COVER_THUMBNAIL_MAX_QUEUE = 700;
 const coverThumbnailUrlCache = new Map();
 const coverThumbnailQueue = new Map();
+let coverThumbnailQueueTimer = null;
 let coverThumbnailWarmStarted = false;
 
 
@@ -1835,17 +1839,41 @@ function createCoverThumbnailSync(filePath) {
   }
 }
 
+function scheduleCoverThumbnailQueue() {
+  if (coverThumbnailQueueTimer || !coverThumbnailQueue.size) return;
+
+  coverThumbnailQueueTimer = setTimeout(() => {
+    coverThumbnailQueueTimer = null;
+
+    const nextPath = coverThumbnailQueue.keys().next().value;
+    if (!nextPath) return;
+
+    coverThumbnailQueue.delete(nextPath);
+
+    try {
+      createCoverThumbnailSync(nextPath);
+    } catch (error) {
+      console.log("[localtify thumbnail queue error]", error?.message || error);
+    }
+
+    if (coverThumbnailQueue.size) {
+      scheduleCoverThumbnailQueue();
+    }
+  }, COVER_THUMBNAIL_QUEUE_DELAY_MS);
+}
+
 function queueCoverThumbnail(filePath) {
   if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) return;
   const thumbnailPath = getCoverThumbnailPath(filePath);
   if (!thumbnailPath || fileExists(thumbnailPath) || coverThumbnailQueue.has(filePath)) return;
 
-  const timer = setTimeout(() => {
-    coverThumbnailQueue.delete(filePath);
-    createCoverThumbnailSync(filePath);
-  }, 750 + Math.min(3200, coverThumbnailQueue.size * 120));
+  if (coverThumbnailQueue.size >= COVER_THUMBNAIL_MAX_QUEUE) {
+    const oldestPath = coverThumbnailQueue.keys().next().value;
+    if (oldestPath) coverThumbnailQueue.delete(oldestPath);
+  }
 
-  coverThumbnailQueue.set(filePath, timer);
+  coverThumbnailQueue.set(filePath, Date.now());
+  scheduleCoverThumbnailQueue();
 }
 
 function getCoverThumbnailUrl(filePath, options = {}) {
@@ -1930,8 +1958,9 @@ function cleanupCoverThumbnailCache() {
   let sizeBytes = 0;
 
   try {
-    for (const timer of coverThumbnailQueue.values()) {
-      try { clearTimeout(timer); } catch {}
+    if (coverThumbnailQueueTimer) {
+      try { clearTimeout(coverThumbnailQueueTimer); } catch {}
+      coverThumbnailQueueTimer = null;
     }
     coverThumbnailQueue.clear();
     coverThumbnailUrlCache.clear();
@@ -1975,17 +2004,19 @@ function cleanupCoverThumbnailCache() {
 function warmCoverThumbnails({ limit = 80, force = false } = {}) {
   const songs = getSongs();
   const uniqueCoverPaths = [];
+  const max = Math.max(1, Math.min(500, Number(limit || 80)));
 
   for (const song of songs) {
     const coverPath = String(song?.coverPath || "").trim();
     if (!coverPath || !path.isAbsolute(coverPath) || !isImageFile(coverPath) || !fileExists(coverPath)) continue;
     if (uniqueCoverPaths.includes(coverPath)) continue;
     uniqueCoverPaths.push(coverPath);
-    if (uniqueCoverPaths.length >= limit) break;
+    if (uniqueCoverPaths.length >= max) break;
   }
 
-  let created = 0;
+  let queued = 0;
   let cached = 0;
+  let created = 0;
   const warnings = [];
 
   for (const coverPath of uniqueCoverPaths) {
@@ -1996,13 +2027,19 @@ function warmCoverThumbnails({ limit = 80, force = false } = {}) {
       continue;
     }
 
-    const result = createCoverThumbnailSync(coverPath);
-    if (result.ok) {
-      created += result.cached ? 0 : 1;
-      if (result.cached) cached += 1;
-    } else if (result.error) {
-      warnings.push(result.error);
+    if (force && created < 2) {
+      const result = createCoverThumbnailSync(coverPath);
+      if (result.ok) {
+        created += result.cached ? 0 : 1;
+        if (result.cached) cached += 1;
+      } else if (result.error) {
+        warnings.push(result.error);
+      }
+      continue;
     }
+
+    queueCoverThumbnail(coverPath);
+    queued += 1;
   }
 
   return {
@@ -2010,13 +2047,16 @@ function warmCoverThumbnails({ limit = 80, force = false } = {}) {
     scanned: uniqueCoverPaths.length,
     created,
     cached,
+    queued,
     warnings: Array.from(new Set(warnings)).slice(0, 4),
     status: getCoverThumbnailStatus(),
     message: created
-      ? `Cached ${created} cover thumbnail${created === 1 ? "" : "s"}.`
-      : cached
-        ? "Cover thumbnails are already ready."
-        : "No custom covers needed thumbnail caching yet."
+      ? `Cached ${created} cover thumbnail${created === 1 ? "" : "s"} and queued ${queued}.`
+      : queued
+        ? `Queued ${queued} cover thumbnail${queued === 1 ? "" : "s"} to build quietly.`
+        : cached
+          ? "Cover thumbnails are already ready."
+          : "No custom covers needed thumbnail caching yet."
   };
 }
 
@@ -2025,7 +2065,7 @@ function scheduleCoverThumbnailWarmup() {
   coverThumbnailWarmStarted = true;
   setTimeout(() => {
     try {
-      warmCoverThumbnails({ limit: 120 });
+      warmCoverThumbnails({ limit: 80 });
     } catch (error) {
       console.log("[localtify thumbnail warmup error]", error?.message || error);
     }
@@ -3280,7 +3320,8 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
   }
 
   const id = crypto.createHash("sha256").update(filePath).digest("hex");
-  const metadata = await readLocalAudioMetadata(filePath);
+  const shouldReadCover = options.readCover !== false && !options.folderCoverPath && !options.albumEmbeddedCoverPath && !options.albumCoverPath;
+  const metadata = await readLocalAudioMetadata(filePath, { readCover: shouldReadCover });
 
   title = String(metadata?.title || title || parsed.name || "untitled").trim();
   artist = String(metadata?.artist || artist || "unknown artist").trim();
@@ -3307,6 +3348,7 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
     folderCoverPath: options.folderCoverPath || "",
     albumEmbeddedCoverPath: options.albumEmbeddedCoverPath || options.albumCoverPath || "",
     spotifyCoverPath: options.spotifyCoverPath || "",
+    preferFolderCover: Boolean(options.preferFolderCover),
     fallbackCoverPath: fallbackCover
   });
 
@@ -3589,7 +3631,24 @@ function albumTrackNumberFromFileName(filePath, index = 0) {
 }
 
 function findAlbumFolderCoverPath(folderPath) {
-  return findFolderCover(folderPath);
+  const rootCover = findFolderCover(folderPath);
+  if (rootCover) return rootCover;
+
+  let entries = [];
+  try {
+    entries = fs.readdirSync(folderPath, { withFileTypes: true });
+  } catch {
+    return "";
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (!isDiscLikeAlbumSubfolderName(entry.name)) continue;
+    const cover = findFolderCover(path.join(folderPath, entry.name));
+    if (cover) return cover;
+  }
+
+  return "";
 }
 
 function folderHasAudioFiles(folderPath) {
@@ -3835,7 +3894,20 @@ async function handleAlbumFolderScan(event, payload = {}) {
   const scanId = crypto.randomBytes(12).toString("hex");
   const trackCount = albums.reduce((total, album) => total + album.trackCount, 0);
   const duplicateCount = albums.reduce((total, album) => total + (album.duplicateCount || 0), 0);
-  const scanPayload = {
+  const message = albums.length
+    ? `Found ${albums.length} album${albums.length === 1 ? "" : "s"} with ${trackCount} track${trackCount === 1 ? "" : "s"}.`
+    : "No audio files were found in that folder.";
+
+  // Keep the full scan in the main process cache for import, but only send a light preview
+  // to the renderer. Huge libraries can contain thousands of tracks, and serializing every
+  // track over IPC can make the app look frozen after the scan/import finishes.
+  const uiAlbums = albums.map((album) => ({
+    ...album,
+    tracks: Array.isArray(album.tracks) ? album.tracks.slice(0, 24) : [],
+    previewTrackCount: Array.isArray(album.tracks) ? album.tracks.length : Number(album.trackCount || 0)
+  }));
+
+  const fullScanPayload = {
     ok: true,
     canceled: false,
     scanId,
@@ -3845,12 +3917,15 @@ async function handleAlbumFolderScan(event, payload = {}) {
     trackCount,
     duplicateCount,
     albums,
-    message: albums.length
-      ? `Found ${albums.length} album${albums.length === 1 ? "" : "s"} with ${trackCount} track${trackCount === 1 ? "" : "s"}.`
-      : "No audio files were found in that folder."
+    message
   };
 
-  albumFolderScanCache.set(scanId, { ...scanPayload, createdAt: Date.now() });
+  const scanPayload = {
+    ...fullScanPayload,
+    albums: uiAlbums
+  };
+
+  albumFolderScanCache.set(scanId, { ...fullScanPayload, createdAt: Date.now() });
   event.sender.send("album-folder-import:progress", { type: "scan-done", mode, index: albums.length, total: albums.length, message: scanPayload.message });
   return scanPayload;
 }
@@ -3927,7 +4002,7 @@ async function handleAlbumFolderImport(event, payload = {}) {
     if (existingSong) {
       // Important: importing an album folder again should repair existing tracks,
       // not skip them forever. This fixes old imports that got fallback/anime art or 0:00 duration.
-      const metadata = await readLocalAudioMetadata(filePath, { readCover: !folderCoverPath });
+      const metadata = await readLocalAudioMetadata(filePath, { readCover: false });
       const fallbackCover = pickStablePixelCoverForSong(existingSong, pixelArtFiles);
       const coverResult = await resolveSongCover({
         song: existingSong,
@@ -3982,7 +4057,8 @@ async function handleAlbumFolderImport(event, payload = {}) {
       album: album.title || track.album || "",
       folderCoverPath,
       albumEmbeddedCoverPath,
-      preferFolderCover: Boolean(folderCoverPath)
+      preferFolderCover: Boolean(folderCoverPath),
+      readCover: false
     });
 
     const durationMs = Math.max(
@@ -4030,10 +4106,20 @@ async function handleAlbumFolderImport(event, payload = {}) {
       albumSongs.find((song) => String(song.coverSource || "") === "folder" && song.coverPath) ||
       albumSongs.find((song) => String(song.coverSource || "") === "embedded" && song.coverPath) ||
       albumSongs.find((song) => String(song.coverSource || "") === "custom" && song.coverPath) ||
-      albumSongs.find((song) => song.coverPath) ||
       null;
-    const stableCoverPath = preferredCoverSong?.coverPath || album.coverPath || "";
-    const stableCoverSource = preferredCoverSong?.coverSource || album.coverSource || "none";
+    const nonFallbackCoverSong =
+      albumSongs.find((song) => song.coverPath && String(song.coverSource || "") !== "fallback") ||
+      null;
+    // Album cards should only use real album art. Song fallback/pixel/mascot art is fine for songs,
+    // but it should not become the album cover because that made folder albums look like random mascots.
+    const stableCoverPath =
+      preferredCoverSong?.coverPath ||
+      album.coverPath ||
+      nonFallbackCoverSong?.coverPath ||
+      "";
+    const stableCoverSource = stableCoverPath
+      ? (preferredCoverSong?.coverSource || album.coverSource || nonFallbackCoverSong?.coverSource || "none")
+      : "none";
     const stableCoverUrl = stableCoverPath ? safeMediaUrl(stableCoverPath) : (preferredCoverSong?.coverUrl || album.coverUrl || "");
 
     return {

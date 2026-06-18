@@ -1,4 +1,5 @@
-﻿const fs = require("node:fs");
+﻿/* localtify 0.4.2 V043 shared album cover cache. */
+const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
@@ -108,14 +109,22 @@ function copyCoverToAppStorage(sourcePath, options = {}) {
     const stat = fs.statSync(sourcePath);
     const ext = path.extname(sourcePath).toLowerCase() || ".jpg";
     const source = String(options.source || "cover");
-    const seed = [
+    const sharedAlbumArt = options.shared === true || source === "folder" || source === "embedded" || source === "album";
+    const seedParts = [
       source,
       sourcePath,
       String(stat.mtimeMs || ""),
-      String(stat.size || ""),
-      String(options.filePath || ""),
-      String(options.songId || "")
-    ].join("::");
+      String(stat.size || "")
+    ];
+
+    // Folder/album art should be cached once per source image, not once per track.
+    // The old per-track seed could create hundreds/thousands of duplicate cached covers
+    // during bulk album imports, which then made startup thumbnail warmup heavier too.
+    if (!sharedAlbumArt) {
+      seedParts.push(String(options.filePath || ""), String(options.songId || ""));
+    }
+
+    const seed = seedParts.join("::");
 
     const hash = crypto.createHash("sha1").update(seed).digest("hex");
     const dir = getCoverCacheDirectory();
