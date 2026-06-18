@@ -1,0 +1,52 @@
+.viewErrorBoundaryCard{
+  width: min(680px, 100%);
+  margin: 28px auto;
+  padding: 24px;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.24);
+  border-radius: 22px;
+  display: grid;
+  gap: 10px;
+  color: var(--lt-text);
+  background:
+    radial-gradient(circle at 92% 0%, rgba(var(--lt-accent-rgb), 0.14), transparent 38%),
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.024)),
+    rgba(8, 8, 13, 0.86);
+  box-shadow: 0 22px 70px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.06);
+  backdrop-filter: blur(18px) saturate(122%);
+}
+
+.viewErrorBoundaryCard span{
+  color: var(--lt-accent);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.viewErrorBoundaryCard strong{
+  color: var(--lt-text);
+  font-size: clamp(24px, 3vw, 38px);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.viewErrorBoundaryCard small{
+  max-width: 64ch;
+  color: var(--lt-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 760;
+  overflow-wrap: anywhere;
+}
+
+.viewErrorBoundaryCard button{
+  width: fit-content;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(var(--lt-accent-rgb), 0.32);
+  border-radius: 999px;
+  color: #09070d;
+  background: var(--lt-accent);
+  font-weight: 950;
+  cursor: pointer;
+}

@@ -32,6 +32,87 @@ try {
   console.log("[localtify renderer protocol scheme error]", error?.message || error);
 }
 
+
+const LOCALTIFY_ALLOWED_EXTERNAL_PROTOCOLS = new Set(["http:", "https:"]);
+
+function isLocaltifyDevRendererUrl(value) {
+  try {
+    const parsed = new URL(String(value || ""));
+    return parsed.protocol === "http:" && ["localhost", "127.0.0.1"].includes(parsed.hostname) && parsed.port === "5173";
+  } catch {
+    return false;
+  }
+}
+
+function isLocaltifyTrustedRendererUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return false;
+
+  if (isDev && isLocaltifyDevRendererUrl(raw)) return true;
+
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol === `${LOCALTIFY_RENDERER_PROTOCOL}:`) return true;
+    if (!isDev && parsed.protocol === "file:") return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function isLocaltifySafeExternalUrl(value) {
+  try {
+    const parsed = new URL(String(value || "").trim());
+    return LOCALTIFY_ALLOWED_EXTERNAL_PROTOCOLS.has(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
+function openLocaltifyExternalUrl(value) {
+  const targetUrl = String(value || "").trim();
+  if (!isLocaltifySafeExternalUrl(targetUrl)) return Promise.resolve({ ok: false, reason: "invalid-url" });
+
+  return shell.openExternal(targetUrl)
+    .then(() => ({ ok: true }))
+    .catch((error) => ({ ok: false, reason: error?.message || "open-external-failed" }));
+}
+
+function applyLocaltifyMainWindowSecurity(win) {
+  if (!win || win.isDestroyed?.()) return;
+  const contents = win.webContents;
+  if (!contents || contents.__localtifySecurityAttached) return;
+  contents.__localtifySecurityAttached = true;
+
+  contents.setWindowOpenHandler(({ url }) => {
+    if (isLocaltifySafeExternalUrl(url)) {
+      void openLocaltifyExternalUrl(url);
+    }
+    return { action: "deny" };
+  });
+
+  contents.on("will-navigate", (event, url) => {
+    if (isLocaltifyTrustedRendererUrl(url)) return;
+
+    event.preventDefault();
+
+    if (isLocaltifySafeExternalUrl(url)) {
+      void openLocaltifyExternalUrl(url);
+    }
+  });
+
+  contents.on("will-redirect", (event, url, isInPlace, isMainFrame) => {
+    if (isMainFrame === false || isLocaltifyTrustedRendererUrl(url)) return;
+
+    event.preventDefault();
+
+    if (isLocaltifySafeExternalUrl(url)) {
+      void openLocaltifyExternalUrl(url);
+    }
+  });
+}
+
+
 function loadLocaltifyEnv() {
   const publicSpotifyClientId = "586c22791eb74d73b1c83db88f1d4c52";
 
@@ -169,7 +250,6 @@ const {
   insertSongs,
   patchSong,
   deleteSong,
-  deleteSongs,
   clearLibrary,
   getSettings,
   saveSettings,
@@ -4268,8 +4348,6 @@ async function repairSpotifyMetadataForFolder(directory, tracks = [], options = 
 
       if (!currentCover || !fileExists(currentCover) || isPixelFallback || !isSpotifyCover) {
         patch.coverPath = cachedCoverPath;
-        patch.coverSource = "spotify";
-        patch.coverUpdatedAt = new Date().toISOString();
       }
     }
 
@@ -4376,7 +4454,7 @@ function buildRandomizeMissingSongCovers() {
   for (const song of targetSongs) {
     const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true });
     if (!chosen) continue;
-    patchSong(song.id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
+    patchSong(song.id, { coverPath: chosen });
   }
   return listSongsShaped();
 }
@@ -4945,7 +5023,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: false,
+      sandbox: true,
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,
       // Keeps playback/render timers alive when Windows opens the app in the
@@ -4954,6 +5032,7 @@ function createWindow() {
     }
   });
   attachLocaltifyDevToolsShortcuts(mainWindow);
+  applyLocaltifyMainWindowSecurity(mainWindow);
   applyWindowTranslucencyToWindow(mainWindow, windowTranslucency);
 
   const rendererIndexPath = isDev ? "" : getRendererIndexPath();
@@ -5300,7 +5379,7 @@ function postDiscordWebhookWithNodeHttps(webhookUrl, body) {
         headers: {
           "Content-Type": "application/json",
           "Content-Length": String(payload.length),
-          "User-Agent": "Localtify-Feedback/0.4.2"
+          "User-Agent": "Localtify-Feedback/0.4.1"
         },
         timeout: 30_000
       },
@@ -5535,7 +5614,7 @@ app.whenReady().then(async () => {
     const songs = getSongs();
     for (const song of songs) {
       const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
-      if (chosen) patchSong(song.id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
+      if (chosen) patchSong(song.id, { coverPath: chosen });
     }
     return listSongsShaped();
   });
@@ -5553,7 +5632,7 @@ app.whenReady().then(async () => {
       const song = songs.find((item) => item.id === id);
       if (!song) continue;
       const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
-      if (chosen) patchSong(id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
+      if (chosen) patchSong(id, { coverPath: chosen });
     }
     return listSongsShaped();
   });
@@ -5588,7 +5667,7 @@ app.whenReady().then(async () => {
     try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; }
   });
   ipcMain.handle("song:set-cover", async (_event, id, coverPath) => {
-    const updated = patchSong(id, { coverPath, coverSource: coverPath ? "custom" : "none", coverUpdatedAt: new Date().toISOString() });
+    const updated = patchSong(id, { coverPath });
     return updated ? shapeSong(updated) : null;
   });
   ipcMain.handle("song:pick-cover", async (event, id) => {
@@ -5620,7 +5699,7 @@ app.whenReady().then(async () => {
       const chosen = result.filePaths[0];
       if (!fileExists(chosen) || !isImageFile(chosen)) return shapeSong(song);
 
-      const updated = patchSong(id, { coverPath: chosen, coverSource: "custom", coverUpdatedAt: new Date().toISOString() });
+      const updated = patchSong(id, { coverPath: chosen });
       return updated ? shapeSong(updated) : shapeSong(song);
     } catch (error) {
       console.log("[localtify pick cover error]", error?.message || error);
@@ -5812,8 +5891,7 @@ app.whenReady().then(async () => {
     const covers = getPixelArtFiles();
     const song = getSongs().find((item) => item.id === id);
     const chosen = pickLeastUsedCover(covers, song ? [song] : [], { avoidSelectedCurrent: true });
-    if (!chosen) return song ? shapeSong(song) : null;
-    const updated = patchSong(id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
+    const updated = patchSong(id, { coverPath: chosen });
     return updated ? shapeSong(updated) : null;
   });
   ipcMain.handle("song:delete", async (_event, id) => {
@@ -5822,15 +5900,6 @@ app.whenReady().then(async () => {
       return listSongsShaped();
     } catch (error) {
       console.log("[localitfy delete song error]", error?.message);
-      return listSongsShaped();
-    }
-  });
-  ipcMain.handle("song:delete-many", async (_event, ids = []) => {
-    try {
-      deleteSongs(ids);
-      return listSongsShaped();
-    } catch (error) {
-      console.log("[localitfy bulk delete songs error]", error?.message || error);
       return listSongsShaped();
     }
   });
@@ -6112,8 +6181,6 @@ app.whenReady().then(async () => {
               artist: song.artist,
               album: song.album,
               coverPath: song.coverPath,
-              coverSource: song.coverSource,
-              coverUpdatedAt: song.coverUpdatedAt,
               duration: song.duration,
               sourceType: song.sourceType,
               sourceTrackId: song.sourceTrackId,
@@ -6190,12 +6257,7 @@ app.whenReady().then(async () => {
   ipcMain.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
   ipcMain.handle("localitfy:download-update", async () => downloadUpdate());
   ipcMain.handle("localitfy:install-update", async () => installUpdate());
-  ipcMain.handle("localitfy:open-external", async (_event, url) => {
-    const targetUrl = String(url || "").trim();
-    if (!/^https?:\/\//i.test(targetUrl)) return { ok: false, reason: "invalid-url" };
-    await shell.openExternal(targetUrl);
-    return { ok: true };
-  });
+  ipcMain.handle("localitfy:open-external", async (_event, url) => openLocaltifyExternalUrl(url));
 
   ipcMain.handle("window:minimize", async (event) => {
     BrowserWindow.fromWebContents(event.sender)?.minimize();

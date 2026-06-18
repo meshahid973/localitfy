@@ -1030,7 +1030,7 @@ export const updateRibbonEnterSpring = { type: "spring", stiffness: 500, damping
 export const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, mass: 0.55 } as const;
 
 
-export const APP_VERSION = "0.4.2";
+export const APP_VERSION = "0.4.1";
 export const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 export const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 export const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
@@ -3004,16 +3004,15 @@ function normalizeStoredPathForCompare(value: unknown) {
 function pickManualAlbumCoverSong(album: ManualLocalAlbum, albumSongs: Song[]) {
   const storedCoverPath = normalizeStoredPathForCompare(album.coverPath || album.folderCoverPath || album.embeddedCoverPath || "");
   const preferredByPath = storedCoverPath
-    ? albumSongs.find((song) => normalizeStoredPathForCompare(song.coverPath) === storedCoverPath && isRealAlbumCoverSong(song))
+    ? albumSongs.find((song) => normalizeStoredPathForCompare(song.coverPath) === storedCoverPath)
     : null;
 
   if (preferredByPath) return preferredByPath;
 
-  const preferredBySource = albumSongs.find((song) => {
-    const source = String((song as any).coverSource || "").trim().toLowerCase();
-    return ["custom", "folder", "embedded", "spotify"].includes(source) &&
-      Boolean(getCardCoverUrl(song) || getRendererSafeImageUrl(song.coverPath));
-  });
+  const preferredBySource = albumSongs.find((song) =>
+    ["custom", "folder", "embedded"].includes(String((song as any).coverSource || "")) &&
+    Boolean(getCardCoverUrl(song) || getRendererSafeImageUrl(song.coverPath))
+  );
 
   if (preferredBySource) return preferredBySource;
 
@@ -4567,6 +4566,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   const [albumDeleteConfirmArmed, setAlbumDeleteConfirmArmed] = useState(false);
   const albumDeleteConfirmTimerRef = useRef<number | null>(null);
   const albumCoverInputRef = useRef<HTMLInputElement | null>(null);
+  const albumFolderProgressTimerRef = useRef<number | null>(null);
+  const albumFolderProgressPayloadRef = useRef<any | null>(null);
 
   useEffect(() => {
     writeLocalJson(MANUAL_LOCAL_ALBUMS_STORAGE_KEY, manualAlbums);
@@ -4584,11 +4585,54 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
   useEffect(() => {
     if (!window.localitfy?.onAlbumFolderImportProgress) return;
 
-    return window.localitfy.onAlbumFolderImportProgress((payload: any) => {
+    const commitProgress = () => {
+      if (albumFolderProgressTimerRef.current !== null) {
+        window.clearTimeout(albumFolderProgressTimerRef.current);
+        albumFolderProgressTimerRef.current = null;
+      }
+
+      const payload = albumFolderProgressPayloadRef.current;
+      albumFolderProgressPayloadRef.current = null;
+
       if (!payload || typeof payload !== "object") return;
+
       setAlbumFolderImportProgress(payload);
       if (payload.message) setAlbumFolderImportMessage(String(payload.message));
+    };
+
+    const unsubscribe = window.localitfy.onAlbumFolderImportProgress((payload: any) => {
+      if (!payload || typeof payload !== "object") return;
+
+      albumFolderProgressPayloadRef.current = payload;
+
+      const type = String(payload.type || "");
+      const shouldCommitImmediately =
+        type.includes("start") ||
+        type.includes("done") ||
+        type.includes("error") ||
+        type.includes("cancel");
+
+      if (shouldCommitImmediately) {
+        commitProgress();
+        return;
+      }
+
+      if (albumFolderProgressTimerRef.current !== null) return;
+
+      // Coalesce noisy scan/import progress to roughly 10 UI commits per second.
+      albumFolderProgressTimerRef.current = window.setTimeout(commitProgress, 100);
     });
+
+    return () => {
+      unsubscribe?.();
+
+      if (albumFolderProgressTimerRef.current !== null) {
+        window.clearTimeout(albumFolderProgressTimerRef.current);
+        albumFolderProgressTimerRef.current = null;
+      }
+
+      albumFolderProgressPayloadRef.current = null;
+    };
   }, []);
 
   const manualAlbumEntries = useMemo(() => buildManualAlbumEntries(manualAlbums, songsById), [manualAlbums, songsById]);
@@ -5065,7 +5109,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     downloadResults.some((item: any) => item && item.ok === false);
   const downloadHasSuccess =
     downloadQueue.some((item: any) => String(item.status || "").toLowerCase() === "done" && item.importedToLibrary !== false) ||
-    downloadResults.some((item: any) => item && item.ok === true && item.importedToLibrary !== false);
+    downloadResults.some((item: any) => item && item.ok !== false && item.importedToLibrary !== false);
   const downloadMascotState: MascotStateKey = downloadWorking
     ? "loading"
     : downloadHasFailure

@@ -158,7 +158,7 @@ function setStoredSchemaVersion(database, version = SCHEMA_VERSION) {
         migratedAt = excluded.migratedAt,
         appVersion = excluded.appVersion
     `)
-    .run(version, now, "0.4.2");
+    .run(version, now, "0.2.9");
 }
 
 function createSongsTable(database) {
@@ -633,6 +633,18 @@ function safeAll(database, sql, params = []) {
   }
 }
 
+function chunkArray(items, size = 250) {
+  const list = Array.isArray(items) ? items : [];
+  const chunkSize = Math.max(1, Math.floor(Number(size) || 250));
+  const chunks = [];
+
+  for (let index = 0; index < list.length; index += chunkSize) {
+    chunks.push(list.slice(index, index + chunkSize));
+  }
+
+  return chunks;
+}
+
 function getSongs() {
   const database = ensureDb();
   return safeAll(database, "SELECT * FROM songs ORDER BY dateAdded DESC")
@@ -740,7 +752,13 @@ function insertSongs(songs) {
     return changed;
   });
 
-  return tx(list);
+  let changed = 0;
+
+  for (const chunk of chunkArray(list, 250)) {
+    changed += tx(chunk);
+  }
+
+  return changed;
 }
 
 function patchSong(id, patch) {
@@ -803,52 +821,38 @@ function patchSong(id, patch) {
 
 function deleteSong(id) {
   const database = ensureDb();
-  const cleanId = asText(id, "");
-  if (!cleanId) return false;
+  if (!id) return false;
+
+  const tx = database.transaction((songId) => {
+    try {
+      database.prepare("DELETE FROM playlist_songs WHERE songId = ?").run(songId);
+    } catch {
+      // Old databases may not have playlist_songs yet.
+    }
+
+    const result = database.prepare("DELETE FROM songs WHERE id = ?").run(songId);
+    return result.changes > 0;
+  });
 
   try {
-    const tx = database.transaction((songId) => {
-      database.prepare("DELETE FROM playlist_songs WHERE songId = ?").run(songId);
-      return database.prepare("DELETE FROM songs WHERE id = ?").run(songId).changes > 0;
-    });
-
-    return tx(cleanId);
+    return tx(id);
   } catch {
     return false;
-  }
-}
-
-function deleteSongs(ids = []) {
-  const database = ensureDb();
-  const cleanIds = [...new Set((Array.isArray(ids) ? ids : []).map((id) => asText(id, "")).filter(Boolean))];
-  if (!cleanIds.length) return 0;
-
-  try {
-    const tx = database.transaction((songIds) => {
-      let changed = 0;
-      const deletePlaylistRefs = database.prepare("DELETE FROM playlist_songs WHERE songId = ?");
-      const deleteSongRow = database.prepare("DELETE FROM songs WHERE id = ?");
-
-      for (const songId of songIds) {
-        deletePlaylistRefs.run(songId);
-        changed += deleteSongRow.run(songId).changes;
-      }
-
-      return changed;
-    });
-
-    return tx(cleanIds);
-  } catch {
-    return 0;
   }
 }
 
 function clearLibrary() {
   const database = ensureDb();
   const tx = database.transaction(() => {
-    database.prepare("DELETE FROM playlist_songs").run();
+    try {
+      database.prepare("DELETE FROM playlist_songs").run();
+    } catch {
+      // Old databases may not have playlist_songs yet.
+    }
+
     database.prepare("DELETE FROM songs").run();
   });
+
   tx();
 }
 
@@ -1009,7 +1013,6 @@ module.exports = {
   insertSongs,
   patchSong,
   deleteSong,
-  deleteSongs,
   clearLibrary,
   getSettings,
   saveSettings,

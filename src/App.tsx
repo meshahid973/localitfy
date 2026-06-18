@@ -90,6 +90,7 @@ import LocaltifyAppView, {
 } from "./LocaltifyAppView";
 import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
+import ViewErrorBoundary from "./ui/ViewErrorBoundary";
 import {
   APP_VERSION,
   BOOT_MIN_VISIBLE_MS,
@@ -441,12 +442,12 @@ const FEEDBACK_PROMPT_SEEN_KEY = "localitfy.feedbackPrompt.seen.v1";
 const FEEDBACK_PROMPT_DELAY_MS = 40_000;
 const FEEDBACK_PROMPT_RETRY_DELAY_MS = 15_000;
 const FEEDBACK_MESSAGE_MAX_LENGTH = 1_500;
-const LOCALTIFY_042_WHATS_NEW_ITEMS = [
-  "Fixed bulk album import freezes",
-  "Improved album cover detection",
-  "Reduced startup cover loading",
-  "Fixed settings appearance cleanup",
-  "Improved player queue stability"
+const LOCALTIFY_041_WHATS_NEW_ITEMS = [
+  "0.4.1 is a quick hotfix for the album library importer freezing during big nested-folder scans.",
+  "Bulk album scanning now treats nested folders safer, so artist folders do not steal covers from child album folders.",
+  "Album import progress is throttled more carefully so the app stays responsive during large imports.",
+  "Linux AppImage startup and update-check noise from the 0.4.0 release path were cleaned up.",
+  "Small release cleanup: version text, Linux install copy, and old development comments were tidied."
 ] as const;
 
 const FEEDBACK_PROMPT_COPY = {
@@ -10221,14 +10222,8 @@ function MainModeApp() {
       setStatusText(`removed ${removedLabel} from library`);
 
       let updatedSongs: Song[] | null = null;
-      const targetIdList = [...targetIds];
-
-      if (typeof window.localitfy.deleteSongs === "function") {
-        updatedSongs = await window.localitfy.deleteSongs(targetIdList);
-      } else {
-        for (const id of targetIdList) {
-          updatedSongs = await window.localitfy.deleteSong(id);
-        }
+      for (const id of targetIds) {
+        updatedSongs = await window.localitfy.deleteSong(id);
       }
 
       if (updatedSongs) {
@@ -11371,6 +11366,7 @@ function MainModeApp() {
             </div>
           }
         >
+          <ViewErrorBoundary name="Settings panel">
           <SettingsCategoryContent
           settingsCategory={settingsCategory}
         setSettingsCategory={setSettingsCategory}
@@ -11442,7 +11438,7 @@ function MainModeApp() {
         askUpdaterToInstall={askUpdaterToInstall}
         skipAvailableUpdate={skipAvailableUpdate}
         setWhatsNewOpen={setWhatsNewOpen}
-        whatsNewItems={LOCALTIFY_042_WHATS_NEW_ITEMS}
+        whatsNewItems={LOCALTIFY_041_WHATS_NEW_ITEMS}
         copyDiagnosticsInfo={copyDiagnosticsInfo}
         diagnosticsCopied={diagnosticsCopied}
         diagnosticsInfo={diagnosticsInfo}
@@ -11457,7 +11453,8 @@ function MainModeApp() {
         resetLibraryLayoutSettings={resetLibraryLayoutSettings}
         resetAllSettingsSafely={resetAllSettingsSafely}
         />
-        </Suspense>
+
+          </ViewErrorBoundary>        </Suspense>
         {renderAudioEffectsCard()}
         {renderFeedbackSettingsCard()}
       </>
@@ -11805,8 +11802,12 @@ function MainModeApp() {
 
   return (
     <>
-      <LocaltifyAppView {...localtifyAppViewProps} />
-      <CatBuddy enabled={settings.catBuddyEnabled === true} reducedMotion={settings.reducedMotion === true} />
+      <ViewErrorBoundary name="Localtify main view">
+        <LocaltifyAppView {...localtifyAppViewProps} />
+      </ViewErrorBoundary>
+      <ViewErrorBoundary name="Cat buddy">
+        <CatBuddy enabled={settings.catBuddyEnabled === true} reducedMotion={settings.reducedMotion === true} />
+      </ViewErrorBoundary>
       {renderFeedbackPrompt()}
     </>
   );

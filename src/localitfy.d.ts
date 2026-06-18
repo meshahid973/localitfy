@@ -401,7 +401,6 @@ declare global {
       patchSong: (id: string, patch: any) => Promise<any | null>;
       patchSongs?: (ids: string[], patch: any) => Promise<any[]>;
       deleteSong: (id: string) => Promise<any[]>;
-      deleteSongs?: (ids: string[]) => Promise<any[]>;
 
       randomizeSongCover: (id: string) => Promise<any | null>;
       randomizeAllSongCovers?: () => Promise<any[]>;
@@ -485,6 +484,12 @@ declare global {
       onDownloadProgress: (callback: (payload: LocalitfyDownloadProgressPayload) => void) => () => void;
       onPlayerCommand: (callback: (payload: LocalitfyPlayerCommand) => void) => () => void;
     };
+
+    /**
+     * Correctly-spelled, namespaced bridge added in 0.4.2.
+     * The old window.localitfy API remains for compatibility.
+     */
+    localtify: any;
   }
 }
 
