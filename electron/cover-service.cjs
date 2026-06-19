@@ -1,4 +1,4 @@
-﻿/* localtify 0.4.2 V043 shared album cover cache. */
+﻿/* localtify 0.4.2 V044 album cover fallback opt-out. */
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -150,6 +150,7 @@ async function resolveSongCover(input = {}) {
   const song = input.song || {};
   const metadata = input.metadata || {};
   const now = new Date().toISOString();
+  const allowFallbackCover = input.allowFallbackCover !== false;
   const folderCover = input.folderCoverPath || findFolderCover(input.filePath || song.filePath || "");
 
   if (input.preferFolderCover && folderCover) {
@@ -195,7 +196,7 @@ async function resolveSongCover(input = {}) {
     return { coverPath: input.spotifyCoverPath, coverSource: "spotify", coverUpdatedAt: now };
   }
 
-  if (input.fallbackCoverPath && fileExists(input.fallbackCoverPath) && isImageFile(input.fallbackCoverPath)) {
+  if (allowFallbackCover && input.fallbackCoverPath && fileExists(input.fallbackCoverPath) && isImageFile(input.fallbackCoverPath)) {
     return { coverPath: input.fallbackCoverPath, coverSource: "fallback", coverUpdatedAt: now };
   }
 

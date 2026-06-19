@@ -1,6 +1,4 @@
-﻿/* localtify 0.4.2 V044 album import UX and cover fallback cleanup. */
-/* localtify 0.4.1 V425 cover picker and cache cleanup. */
-/* localtify 0.4.1 V424 â€” Windows startup white-screen recovery. */
+﻿/* localtify 0.4.2 V044 stability, cover ownership, and bridge cleanup. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -249,6 +247,7 @@ const {
   getSongs,
   insertSongs,
   patchSong,
+  patchSongs,
   deleteSong,
   clearLibrary,
   getSettings,
@@ -4454,7 +4453,7 @@ function buildRandomizeMissingSongCovers() {
   for (const song of targetSongs) {
     const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true });
     if (!chosen) continue;
-    patchSong(song.id, { coverPath: chosen });
+    patchSong(song.id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
   }
   return listSongsShaped();
 }
@@ -5614,7 +5613,7 @@ app.whenReady().then(async () => {
     const songs = getSongs();
     for (const song of songs) {
       const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
-      if (chosen) patchSong(song.id, { coverPath: chosen });
+      if (chosen) patchSong(song.id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
     }
     return listSongsShaped();
   });
@@ -5632,7 +5631,7 @@ app.whenReady().then(async () => {
       const song = songs.find((item) => item.id === id);
       if (!song) continue;
       const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
-      if (chosen) patchSong(id, { coverPath: chosen });
+      if (chosen) patchSong(id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
     }
     return listSongsShaped();
   });
@@ -5873,11 +5872,15 @@ app.whenReady().then(async () => {
         return listSongsShaped();
       }
 
-      for (let index = 0; index < safeIds.length; index += 1) {
-        patchSong(safeIds[index], patch);
+      if (typeof patchSongs === "function") {
+        patchSongs(safeIds, patch);
+      } else {
+        for (let index = 0; index < safeIds.length; index += 1) {
+          patchSong(safeIds[index], patch);
 
-        if (index > 0 && index % 250 === 0) {
-          await yieldToMainLoop();
+          if (index > 0 && index % 250 === 0) {
+            await yieldToMainLoop();
+          }
         }
       }
 
@@ -5891,7 +5894,8 @@ app.whenReady().then(async () => {
     const covers = getPixelArtFiles();
     const song = getSongs().find((item) => item.id === id);
     const chosen = pickLeastUsedCover(covers, song ? [song] : [], { avoidSelectedCurrent: true });
-    const updated = patchSong(id, { coverPath: chosen });
+    if (!chosen) return song ? shapeSong(song) : null;
+    const updated = patchSong(id, { coverPath: chosen, coverSource: "fallback", coverUpdatedAt: new Date().toISOString() });
     return updated ? shapeSong(updated) : null;
   });
   ipcMain.handle("song:delete", async (_event, id) => {

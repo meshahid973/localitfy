@@ -270,7 +270,7 @@ const localtifyApi = Object.freeze({
     },
     logout: () => safeInvoke(channels.spotify.logout),
     fetch: (payload) => safeInvoke(channels.spotify.fetch, payload),
-    fetchTracks: (url) => safeInvoke(channels.spotify.fetch, { url }),
+    fetchTracks: (url) => safeInvoke(channels.spotify.fetchTracks, url),
     spotdlCheck: () => safeInvoke(channels.spotify.spotdlCheck),
     spotdlDownloadBatch: (payload) => safeInvoke(channels.spotify.spotdlDownloadBatch, payload),
     spotifyDownloadBatch: (payload) => safeInvoke(channels.spotify.spotdlDownloadBatch, payload),

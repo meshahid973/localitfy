@@ -9630,225 +9630,41 @@ body.localitfyThemePainting .toggleRow{
   }
 }
 /* end localtify v501 */
-/* localtify 0.4.2 V502 — Appearance home cards restored + cat buddy setting */
-.settingsHomeCardsV502{
-  border-color: rgba(var(--lt-accent-rgb), 0.20) !important;
+
+
+/* localtify V045 settings CSS cleanup.
+   Settings cards own their interaction/focus behavior here. */
+.settingsCategoryContent,
+.settingsCategoryPage{
+  contain: layout style;
 }
 
-.settingsHomeCardsHeaderV502{
-  align-items: center !important;
+.settingsChoice,
+.settingsThemeCard,
+.settingsPageCard,
+.settingsPanelCard,
+.themeTokenCard{
+  transform-style: flat !important;
+  perspective: none !important;
+  backface-visibility: hidden;
 }
 
-.settingsHomeCardsHeaderV502 .cleanToggleLabel,
-.settingsCatBuddyToggleV502{
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
+.settingsChoice::before,
+.settingsChoice::after,
+.settingsThemeCard::before,
+.settingsThemeCard::after,
+.settingsPageCard::before,
+.settingsPageCard::after,
+.settingsPanelCard::before,
+.settingsPanelCard::after{
+  pointer-events: none;
 }
 
-.settingsHomeCardControlsV502{
-  display: grid !important;
-  gap: 12px !important;
+.settingsChoice:focus-visible,
+.settingsThemeCard:focus-visible,
+.settingsActionButton:focus-visible,
+.settingsTinyButton:focus-visible,
+.cleanToggleLabel:focus-within{
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .16), inset 0 1px 0 rgba(255,255,255,.05) !important;
 }
-
-.settingsCardBackgroundRowV502{
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-}
-
-.settingsCardBlurPillV502{
-  min-height: 70px !important;
-}
-
-.settingsCardBlurToggleV502{
-  min-height: 68px !important;
-  margin: 0 !important;
-  border-radius: 16px !important;
-  border: 1px solid rgba(255,255,255,0.09) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb),0.055), rgba(255,255,255,0.018)),
-    rgba(255,255,255,0.032) !important;
-}
-
-.settingsCardBlurToggleV502 .toggleRowCopy strong{
-  color: var(--lt-text) !important;
-}
-
-.settingsCardBlurToggleV502 .toggleRowCopy small{
-  color: var(--lt-muted) !important;
-}
-
-@media (max-width: 900px){
-  .settingsHomeCardsHeaderV502{
-    align-items: stretch !important;
-    flex-direction: column !important;
-  }
-
-  .settingsHomeCardsHeaderV502 .cleanToggleLabel,
-  .settingsCatBuddyToggleV502{
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  .settingsCardBackgroundRowV502{
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* localtify 0.4.2 V503 — restore appearance callout, remove extra appearance rows, mascot polish */
-.settingsLiveCoverColorsV491,
-.settingsCardBackgroundRowV502{
-  display: none !important;
-}
-
-.settingsHomeCardsHeaderV502{
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto auto !important;
-  align-items: center !important;
-  gap: 14px !important;
-}
-
-.settingsHomeMascotV503{
-  width: clamp(54px, 4.4vw, 76px) !important;
-  height: clamp(54px, 4.4vw, 76px) !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  display: block !important;
-  pointer-events: none !important;
-  user-select: none !important;
-  -webkit-user-drag: none !important;
-  filter:
-    drop-shadow(0 12px 18px rgba(0,0,0,.30))
-    drop-shadow(0 0 18px rgba(var(--lt-accent-rgb), .14)) !important;
-}
-
-.settingsHomeCardsV502 .settingsHomeCardControlsV502{
-  grid-template-columns: 1fr !important;
-}
-
-.settingsHomeCardsV502 .settingsCardBlurToggleV502{
-  max-width: none !important;
-}
-
-.settingsAppearanceInfoCalloutV500{
-  display: block !important;
-}
-
-.settingsAppearanceInfoCalloutV500 .settingsInfoMascotV500{
-  object-fit: contain !important;
-  object-position: center !important;
-}
-
-@media (max-width: 900px){
-  .settingsHomeCardsHeaderV502{
-    grid-template-columns: 1fr !important;
-    justify-items: stretch !important;
-  }
-
-  .settingsHomeMascotV503{
-    justify-self: center !important;
-    width: 96px !important;
-    height: 96px !important;
-  }
-}
-/* end localtify v503 */
-
-
-/* localtify 0.4.2 V504 — compact appearance home card cleanup */
-.settingsHomeMascotV503{
-  display: none !important;
-}
-
-.settingsHomeCardsV502{
-  overflow: hidden !important;
-  padding: 18px 20px !important;
-}
-
-.settingsHomeCardsHeaderV502{
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: 14px !important;
-  margin-bottom: 14px !important;
-}
-
-.settingsHomeCardsHeaderV502 .settingsPanelHeader,
-.settingsHomeCardsHeaderV502 > div{
-  min-width: 0 !important;
-}
-
-.settingsHomeCardsHeaderV502 strong{
-  line-height: .98 !important;
-}
-
-.settingsHomeCardsHeaderV502 span{
-  max-width: 56ch !important;
-}
-
-.settingsCatBuddyToggleV502{
-  justify-self: end !important;
-  min-height: 34px !important;
-  padding-inline: 11px !important;
-  opacity: .9 !important;
-}
-
-.settingsHomeCardControlsV502{
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 0 !important;
-}
-
-.settingsCardBlurToggleV502{
-  min-height: 64px !important;
-  padding: 14px 16px !important;
-  align-items: center !important;
-  background: rgba(255,255,255,.034) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.032) !important;
-}
-
-.settingsCardBlurToggleV502 .toggleRowCopy{
-  gap: 4px !important;
-}
-
-.settingsAppearanceInfoCalloutV500{
-  padding: 12px 16px !important;
-}
-
-@media (max-width: 760px){
-  .settingsHomeCardsHeaderV502{
-    grid-template-columns: 1fr !important;
-  }
-
-  .settingsCatBuddyToggleV502{
-    justify-self: stretch !important;
-    justify-content: center !important;
-  }
-}
-/* end localtify v504 */
-
-/* localtify 0.4.2 V505 — settings cleanup guard */
-.settingsHomeCardsV502 .settingsHomeMascotV503,
-.settingsHomeCardsV502 .settingsInfoMascotV500{
-  display: none !important;
-}
-
-.settingsHomeCardsV502{
-  min-height: 0 !important;
-}
-
-.settingsHomeCardsV502 .settingsPanelHeader{
-  min-height: 0 !important;
-}
-
-.settingsHomeCardsV502 .settingsCardBackgroundRowV502{
-  display: none !important;
-}
-
-.settingsHomeCardsV502 .settingsCardBlurToggleV502{
-  width: 100% !important;
-}
-
-.settingsAppearanceInfoCalloutV500 .settingsInfoMascotV500{
-  display: block !important;
-  width: clamp(70px, 6vw, 94px) !important;
-  height: clamp(70px, 6vw, 94px) !important;
-}
-/* end localtify v505 */

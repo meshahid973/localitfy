@@ -1,12 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.4.1 V395 playback settings cleanup + faster volume changes. */
-/* localtify 0.4.1 V396 audio engine stability pass. */
-/* localtify 0.4.1 V419 background-audio and settings-save stability. */
-/* localtify 0.4.1 V418 missing-file recovery actions. */
-/* localtify 0.4.1 V425 cover tools + metadata cleaner preview. */
-/* localtify 0.4.1 V423 like system + quick library modes. */
-/* localtify 0.4.1 V417 metadata cleaner stability pass. */
-/* localtify 0.4.1 V415 shuffle queue + context delete. */
+/* localtify 0.4.2 V044 stability, bridge hardening, and CSS ownership cleanup. */
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -400,7 +393,7 @@ function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
       startupSettingLabel: "Start localtify with Linux",
       startupSettingHelp: "Linux autostart will be added later through a proper desktop-entry flow.",
       linuxInstallNotes: [
-        "AppImage: chmod +x localtify-0.4.1-x86_64.AppImage, then run it directly.",
+        "AppImage: chmod +x localtify-0.4.2-x86_64.AppImage, then run it directly.",
         "RPM: for Fedora, openSUSE, and RHEL-style distros.",
         "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
       ]
@@ -443,11 +436,11 @@ const FEEDBACK_PROMPT_DELAY_MS = 40_000;
 const FEEDBACK_PROMPT_RETRY_DELAY_MS = 15_000;
 const FEEDBACK_MESSAGE_MAX_LENGTH = 1_500;
 const LOCALTIFY_041_WHATS_NEW_ITEMS = [
-  "0.4.1 is a quick hotfix for the album library importer freezing during big nested-folder scans.",
-  "Bulk album scanning now treats nested folders safer, so artist folders do not steal covers from child album folders.",
-  "Album import progress is throttled more carefully so the app stays responsive during large imports.",
-  "Linux AppImage startup and update-check noise from the 0.4.0 release path were cleaned up.",
-  "Small release cleanup: version text, Linux install copy, and old development comments were tidied."
+  "0.4.2 fixes bulk album import freezes and reduces heavy cover work during startup.",
+  "Album cover detection is safer: folder and embedded covers win, generated covers stay lightweight, and mascot art is no longer treated as album art.",
+  "Player queue handling, settings cleanup, and appearance polish were tightened for daily use.",
+  "Electron security was hardened with a stricter preload bridge, sandboxed renderer, and blocked random navigation.",
+  "CSS ownership cleanup reduces cross-file fighting, heavy transitions, and scroll jank in album/settings views."
 ] as const;
 
 const FEEDBACK_PROMPT_COPY = {
@@ -484,7 +477,7 @@ function shouldOpenOnboardingForThisRelease() {
     const releaseShowcaseDone = window.localStorage.getItem(ONBOARDING_RELEASE_SHOWCASE_KEY) === "done";
 
     // New users still see onboarding because the normal onboarding key is missing.
-    // Existing users also see the new v0.4.1 onboarding once because the release key is missing.
+    // Existing users also see the current release onboarding once because the release key is missing.
     return !oldOnboardingDone || !releaseShowcaseDone;
   } catch {
     return true;
@@ -2946,7 +2939,6 @@ function MainModeApp() {
   const yearImportSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "year_import_seconds");
   const yearAlbumCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "year_album_count");
   const longestSongDuration = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "longest_song_duration");
-  const longestSongTitle = localtifyAnalyticsString(analyticsAudienceSnapshot, "longest_song_title", "");
 
   const activeSongs = useMemo(() => {
     if (!songs.length || playedSongCount <= 0) return [];
@@ -2962,15 +2954,15 @@ function MainModeApp() {
   const libraryLengthLabel = formatAnalyticsDuration(totalLibrarySeconds);
 
   const longestSong = useMemo(() => {
-    if (!longestSongTitle && longestSongDuration <= 0) return null;
+    if (longestSongDuration <= 0) return null;
     return {
       id: "analytics-longest-track",
-      title: longestSongTitle || "longest track",
+      title: "longest track",
       artist: "",
       album: "",
       duration: longestSongDuration
     } as Song;
-  }, [longestSongTitle, longestSongDuration]);
+  }, [longestSongDuration]);
 
   const recentlyAdded = useMemo(() => {
     return [...songs]

@@ -20180,3 +20180,82 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 /* end localtify v512 */
+
+
+/* localtify V045 home/albums CSS cleanup.
+   Home and album cards own their layout/perf here, not in a separate override file. */
+.homeView .virtualHomeGridRow,
+.app .virtualHomeGridRow{
+  align-items: stretch;
+}
+
+.homeView .virtualHomeGridRow > .homeAlbumCard,
+.app .virtualHomeGridRow > .homeAlbumCard{
+  height: 100%;
+}
+
+.homeView .homeAlbumCard,
+.app .homeAlbumCard,
+.app .albumCardV318,
+.app .albumDetailPanelV318,
+.app .albumShelfPanelV318{
+  contain: layout style paint;
+}
+
+.homeView .homeAlbumCard,
+.app .homeAlbumCard,
+.app .albumCardV318{
+  transform-style: flat !important;
+  perspective: none !important;
+  backface-visibility: hidden;
+}
+
+.homeView .homeAlbumCard::before,
+.homeView .homeAlbumCard::after,
+.app .homeAlbumCard::before,
+.app .homeAlbumCard::after,
+.app .albumCardV318::before,
+.app .albumCardV318::after,
+.app .albumCardSheenV318{
+  pointer-events: none;
+}
+
+.app .coverAura.generatedAlbumCover.noCover{
+  --generated-cover-hue: var(--generated-cover-hue, 292deg);
+  overflow: hidden;
+  contain: paint;
+  background:
+    radial-gradient(circle at 28% 18%, hsla(var(--generated-cover-hue), 86%, 68%, .28), transparent 38%),
+    radial-gradient(circle at 82% 78%, hsla(calc(var(--generated-cover-hue) + 52deg), 92%, 62%, .2), transparent 42%),
+    linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+    rgba(10,10,16,.88);
+}
+
+.app .coverAura.generatedAlbumCover.noCover .coverImage,
+.app .coverAura.generatedAlbumCover.noCover img{
+  display: none !important;
+}
+
+.app .coverAura.generatedAlbumCover.noCover .coverPlaceholder{
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,.92);
+  font-size: clamp(24px, 4.4vw, 54px);
+  font-weight: 950;
+  letter-spacing: -.08em;
+  text-shadow: 0 12px 34px rgba(0,0,0,.35);
+}
+
+.app .coverAura.generatedAlbumCover.noCover::after{
+  content: "♪";
+  position: absolute;
+  right: 12%;
+  bottom: 10%;
+  color: rgba(255,255,255,.16);
+  font-size: clamp(32px, 5vw, 70px);
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}

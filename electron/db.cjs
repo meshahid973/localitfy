@@ -819,6 +819,73 @@ function patchSong(id, patch) {
   return getSong(id);
 }
 
+function normalizeSongPatchValue(key, value) {
+  if (key === "liked") return asBoolInt(value);
+  if (key === "playCount") return Math.max(0, Math.floor(asNumber(value, 0)));
+  if (key === "duration" || key === "durationMs" || key === "playbackPosition" || key === "sourceMatchScore") return Math.max(0, asNumber(value, 0));
+  if (key === "volumeGain") return asClampedNumber(value, 1, 0.2, 3);
+  if (key === "customVolume") return asClampedNumber(value, 1, 0, 1);
+  return value ?? null;
+}
+
+function patchSongs(ids, patch) {
+  const database = ensureDb();
+  const safeIds = [...new Set((Array.isArray(ids) ? ids : [])
+    .map((id) => String(id || "").trim())
+    .filter(Boolean))];
+
+  if (!safeIds.length || !patch || typeof patch !== "object") return 0;
+
+  const allowed = [
+    "title",
+    "artist",
+    "album",
+    "coverPath",
+    "coverSource",
+    "coverUpdatedAt",
+    "liked",
+    "playCount",
+    "duration",
+    "durationMs",
+    "lastPlayed",
+    "volumeGain",
+    "playbackPosition",
+    "customVolume",
+    "sourceType",
+    "sourceTrackId",
+    "sourceUrl",
+    "sourceProvider",
+    "sourceProviderUrl",
+    "sourceMatchScore"
+  ];
+
+  const entries = Object.entries(patch).filter(([key]) => allowed.includes(key));
+  if (!entries.length) return 0;
+
+  const sets = entries.map(([key]) => `${key} = ?`);
+  const baseValues = entries.map(([key, value]) => normalizeSongPatchValue(key, value));
+  const stmt = database.prepare(`UPDATE songs SET ${sets.join(", ")} WHERE id = ?`);
+
+  const tx = database.transaction((items) => {
+    let changed = 0;
+    for (const id of items) {
+      changed += stmt.run(...baseValues, id).changes || 0;
+    }
+    return changed;
+  });
+
+  let changed = 0;
+  for (const chunk of chunkArray(safeIds, 500)) {
+    try {
+      changed += tx(chunk);
+    } catch (error) {
+      lastMigrationReport.errors.push(`bulk patch failed: ${error?.message || error}`);
+    }
+  }
+
+  return changed;
+}
+
 function deleteSong(id) {
   const database = ensureDb();
   if (!id) return false;
@@ -1012,6 +1079,7 @@ module.exports = {
   getSong,
   insertSongs,
   patchSong,
+  patchSongs,
   deleteSong,
   clearLibrary,
   getSettings,

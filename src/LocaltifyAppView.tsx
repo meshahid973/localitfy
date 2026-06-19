@@ -1030,7 +1030,7 @@ export const updateRibbonEnterSpring = { type: "spring", stiffness: 500, damping
 export const updateRibbonChildSpring = { type: "spring", stiffness: 520, damping: 34, mass: 0.55 } as const;
 
 
-export const APP_VERSION = "0.4.1";
+export const APP_VERSION = "0.4.2";
 export const localtifyLogo = new URL("./assets/logo.png", import.meta.url).href;
 export const loadingScreenGif = new URL("./assets/loading-screen.gif", import.meta.url).href;
 export const screensaverImage = new URL("./assets/screensaver.jpg", import.meta.url).href;
@@ -1117,7 +1117,7 @@ export function cleanToastCopy(message: string, kind: AppToastKind) {
   if (lower.includes("settings saved")) return "Settings saved";
 
   return raw
-    .replace(/\s*[��-]\s*check (?:the )?(?:terminal|console).*$/i, "")
+    .replace(/\s*[——-]\s*check (?:the )?(?:terminal|console).*$/i, "")
     .replace(/\s*safely\b/gi, "")
     .replace(/\s+/g, " ")
     .trim()
@@ -2097,9 +2097,9 @@ export function cleanupSongTitle(rawTitle: string, strength: DiscordTitleCleanup
 
   text = stripAudioExtension(text)
     .replace(/[_]+/g, " ")
-    .replace(/[��-]+/g, " - ")
-    .replace(/[��]/g, '"')
-    .replace(/[��]/g, "'");
+    .replace(/[——-]+/g, " - ")
+    .replace(/[——]/g, '"')
+    .replace(/[——]/g, "'");
 
   text = stripTrackNumber(stripDuplicateCopySuffix(text));
   text = removeBracketNoise(text, strength);
@@ -2115,7 +2115,7 @@ export function cleanupSongTitle(rawTitle: string, strength: DiscordTitleCleanup
     .replace(/\s*[{}\[\]]\s*/g, " ")
     .replace(/\s*\(\s*\)\s*/g, " ")
     .replace(/(^|\s)[+~]+(?=\s|$)/g, " ")
-    .replace(/\s+[��-]\s*$/g, " ");
+    .replace(/\s+[——-]\s*$/g, " ");
 
   return collapseSpaces(text) || "untitled";
 }
@@ -2243,8 +2243,8 @@ export function cleanArtistName(value: unknown) {
 
 export function cleanTrackName(value: unknown, fallback = "untitled") {
   return cleanMetadataField(value, fallback)
-    .replace(/^[-��|/]+\s*/, "")
-    .replace(/\s*[-��|/]+$/, "")
+    .replace(/^[-——|/]+\s*/, "")
+    .replace(/\s*[-——|/]+$/, "")
     .trim() || fallback;
 }
 
@@ -2259,7 +2259,7 @@ export function scoreArtistGuess(text: string) {
 
 export function splitArtistTitleCandidate(value: string) {
   const base = cleanupSongTitle(stripAudioExtension(value), "light");
-  const separators = [" - ", " � ", " � ", " | ", " / ", " ~ "];
+  const separators = [" - ", " · ", " · ", " | ", " / ", " ~ "];
 
   for (const separator of separators) {
     if (!base.includes(separator)) continue;
@@ -2527,7 +2527,7 @@ function displaySongArtistV444(song: Pick<Song, "title" | "artist">) {
 function displaySongPickerSublineV444(song: Pick<Song, "title" | "artist">) {
   const artist = displaySongArtistV444(song);
   if (!artist || artist === "unknown artist") return "Pick a playlist or make a new one.";
-  return `${artist} � Pick a playlist or make a new one.`;
+  return `${artist} · Pick a playlist or make a new one.`;
 }
 
 export function discordArtist(text: string) {
@@ -4133,8 +4133,8 @@ export function buildDiscordPreview({
   let moodTitle = title;
 
   if (song.liked) moodTitle = `? ${title}`;
-  else if (mostPlayed && mostPlayed.id === song.id) moodTitle = `on repeat � ${title}`;
-  else if ((song.playCount || 0) <= 0) moodTitle = `discovering � ${title}`;
+  else if (mostPlayed && mostPlayed.id === song.id) moodTitle = `on repeat · ${title}`;
+  else if ((song.playCount || 0) <= 0) moodTitle = `discovering · ${title}`;
 
   const getSecondLine = () => {
     if (settings.discordSecondLine === "album") return album;
@@ -4147,7 +4147,7 @@ export function buildDiscordPreview({
   if (!isPlaying && settings.discordShowPausedIdle) {
     return {
       badge: "PAUSED",
-      details: `paused � ${title}`,
+      details: `paused · ${title}`,
       state: timeLeft
     };
   }
@@ -4156,7 +4156,7 @@ export function buildDiscordPreview({
     return {
       badge: "PLAYING",
       details: `vibing to ${moodTitle} ?`,
-      state: `${getSecondLine()} � localtify`
+      state: `${getSecondLine()} · localtify`
     };
   }
 
@@ -4164,7 +4164,7 @@ export function buildDiscordPreview({
     return {
       badge: "PLAYING",
       details: moodTitle,
-      state: `${artist} � ${album} � ${timeLeft}`
+      state: `${artist} · ${album} · ${timeLeft}`
     };
   }
 
@@ -4711,7 +4711,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     if (albumFolderImportBusy) return;
 
     if (!window.localitfy?.scanAlbumFolder) {
-      const message = "album folder import bridge missing � restart Localtify after replacing electron/preload.cjs and electron/main.cjs";
+      const message = "album folder import bridge missing — restart Localtify after replacing electron/preload.cjs and electron/main.cjs";
       setAlbumFolderImportMessage(message);
       setAlbumFolderImportProgress({ type: "error", mode, message });
       setStatusText?.("album import bridge missing");
@@ -5539,7 +5539,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                     {playerError ? <div className="warningBox">{playerError}</div> : null}
                     {isThreeAm && settings.volume > 0.8 ? (
-                      <div className="warningBox lateNightWarning">volume is above 80% � late night ears deserve mercy.</div>
+                      <div className="warningBox lateNightWarning">volume is above 80% · late night ears deserve mercy.</div>
                     ) : null}
                     <div className="heroQuickActions">
                       <button
@@ -5978,7 +5978,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                               <div className="albumFolderPreviewCopyV309">
                                 <strong title={album.title}>{album.title}</strong>
                                 <small title={album.artist}>{album.artist}</small>
-                                <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` � ${album.duplicateCount} already added` : ""}</em>
+                                <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` · ${album.duplicateCount} already added` : ""}</em>
                                 {album.previewTrackCount && album.previewTrackCount > 24 ? <b>{album.previewTrackCount - 24} more tracks hidden from preview</b> : null}
                               </div>
                             </article>
@@ -6290,7 +6290,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <aside className="panel playlistCreatePanel">
                     <p className="eyebrow">new playlist</p>
                     <h3>start a mix</h3>
-                    <p className="softText">Night drive, gaming, school, sad songs � whatever fits.</p>
+                    <p className="softText">Night drive, gaming, school, sad songs · whatever fits.</p>
                     <form
                       className="playlistCreateForm"
                       onSubmit={(event) => {
@@ -6600,7 +6600,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
 
                   <div className="analyticsMiniCardV339">
                     <span>longest track</span>
-                    <strong>{longestSong ? formatTime(longestSong.duration || 0) : "�"}</strong>
+                    <strong>{longestSong ? formatTime(longestSong.duration || 0) : "—"}</strong>
                     <small>{longestSong ? prettyTitle(longestSong.title, 5) : "no songs yet"}</small>
                   </div>
                 </section>
@@ -6616,7 +6616,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                   <button
                     type="button"
                     className="softButton analyticsShareButtonV339"
-                    onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.map((card) => `${card.label}: ${card.value}`).join(" � ")}`)}
+                    onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.map((card) => `${card.label}: ${card.value}`).join(" · ")}`)}
                     disabled={!songs.length}
                   >
                     copy recap line
@@ -6876,7 +6876,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                                       <span className="spotifySourceBadge">Spotify</span>
                                       <span className={`spotifyTrackStatus ${statusLabel.replace(/\s+/g, "-")}`}>{statusLabel}</span>
                                     </div>
-                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` � ${track.albumName}` : ""}</p>
+                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` · ${track.albumName}` : ""}</p>
                                     {track.downloadMessage ? <small>{track.downloadMessage}</small> : null}
                                     {track.downloadError ? <small className="spotifyTrackError">{track.downloadError}</small> : null}
                                   </div>
