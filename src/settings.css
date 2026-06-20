@@ -9743,3 +9743,75 @@ body.localitfyThemePainting .toggleRow{
 .app[data-theme="frutigerAero"] :is(input, textarea, select){
   border-radius: 8px !important;
 }
+
+/* localtify V047 — Frutiger Aero settings broken contrast/layout repair */
+.app[data-theme="frutigerAero"] .settingsPage,
+.app[data-theme="frutigerAero"] .settingsLayout,
+.app[data-theme="frutigerAero"] .settingsMain{
+  color: #06243b !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.settingsHero,.settingsPanelCard,.settingsPageCard,.settingsCategorySurfaceV027,.themeEditorCard,.customThemeStudioV025,.visualSettingsCard,.playbackLabCardV343,.settingsSidebarPanel,.settingsNavPanel){
+  color: #06243b !important;
+  border-color: rgba(0,105,150,.24) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.92), rgba(240,254,255,.72) 52%, rgba(205,243,252,.58)),
+    rgba(255,255,255,.62) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.96),
+    0 16px 42px rgba(0,126,170,.13) !important;
+  backdrop-filter: blur(12px) saturate(124%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(124%) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.settingsSectionTitle strong,.settingsPanelHeader strong,.settingsCategoryHeader h4,.settingsHero h3,.settingsThemeCard strong,.themeEditorHead strong,.simpleThemeEditorHeadV025 strong){
+  color: #06243b !important;
+  -webkit-text-fill-color: #06243b !important;
+  background: none !important;
+  text-shadow: 0 1px rgba(255,255,255,.92), 0 2px 0 rgba(0,110,150,.08) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.settingsSectionTitle span,.settingsPanelHeader span,.settingsCategoryHeader span,.customThemePresetHeaderV025 span){
+  color: #008ab7 !important;
+  -webkit-text-fill-color: #008ab7 !important;
+  text-shadow: 0 1px rgba(255,255,255,.75) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.settingsSectionTitle small,.settingsPanelHeader small,.settingsCategoryHeader > span,.customThemePresetHeaderV025 small,.settingsThemeCard small,.settingsDescription,.settingsHelpText){
+  color: rgba(6,36,59,.66) !important;
+  -webkit-text-fill-color: rgba(6,36,59,.66) !important;
+  text-shadow: none !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.settingsThemeCard,.settingsChoice,.toggleRow,.rangeRow,.settingSwitchCard,.visualOptionButtonV205,.sidebarBehaviorChoiceV327,.playbackModeChoiceV343,.customThemePresetButtonV025,.settingsCategoryButton){
+  color: #06243b !important;
+  border-color: rgba(0,105,150,.18) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.94), rgba(238,254,255,.72) 54%, rgba(207,244,252,.62)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.96), 0 7px 18px rgba(0,126,170,.09) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.settingsThemeCard.active,.settingsChoice.active,.settingSwitchCard.active,.visualOptionButtonV205.active,.sidebarBehaviorChoiceV327.active,.playbackModeChoiceV343.active,.settingsCategoryButton.active){
+  color: #06243b !important;
+  border-color: rgba(0,156,212,.58) !important;
+  background:
+    linear-gradient(180deg, #fff, rgba(216,254,255,.86) 52%, rgba(141,255,114,.26)) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(input, textarea, select,.settingsInput,.settingsSelect){
+  color: #06243b !important;
+  -webkit-text-fill-color: #06243b !important;
+  background: linear-gradient(180deg, #fff, #eefcff) !important;
+  border: 1px solid rgba(0,105,150,.30) !important;
+  border-radius: 8px !important;
+  box-shadow: inset 0 1px 2px rgba(0,80,120,.12), 0 1px rgba(255,255,255,.86) !important;
+}
+
+.app[data-theme="frutigerAero"] .settingsThemeCard[data-theme-id="frutigerAero"],
+.app[data-theme="frutigerAero"] .settingsThemeCard.active{
+  outline: none !important;
+}
+
+.app[data-theme="frutigerAero"] .mascotStateArtV496{
+  filter: drop-shadow(0 10px 18px rgba(0,126,170,.16)) !important;
+}

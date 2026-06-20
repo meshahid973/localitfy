@@ -2440,3 +2440,47 @@ body.isResizingSidebar .app[data-theme="frutigerAero"] *,
 .app[data-theme="frutigerAero"].playerScrubbing *{
   transition-duration: 0s !important;
 }
+
+/* localtify V047 — Frutiger Aero scoped polish repair */
+.app[data-theme="frutigerAero"] ::selection{
+  color: #06243b !important;
+  background: rgba(141,255,114,.52) !important;
+}
+
+.app[data-theme="frutigerAero"] ::-webkit-scrollbar{
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.app[data-theme="frutigerAero"] ::-webkit-scrollbar-track{
+  background: linear-gradient(90deg, #dff5f9, #ffffff 45%, #c2edf5) !important;
+  border-left: 1px solid rgba(0,105,150,.12) !important;
+}
+
+.app[data-theme="frutigerAero"] ::-webkit-scrollbar-thumb{
+  border: 1px solid rgba(0,90,130,.32) !important;
+  border-radius: 4px !important;
+  background:
+    linear-gradient(90deg, #ffffff 0%, #dffbff 42%, #96e6f4 43%, #3dbedc 100%) !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.96),
+    inset 0 -1px 1px rgba(0,80,120,.16) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.appToast,.updateIsland,.topUpdateRibbon){
+  color: #06243b !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(225,250,255,.78)) !important;
+  border-color: rgba(0,105,150,.26) !important;
+  text-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .app[data-theme="frutigerAero"]::before{
+    animation: localtifyFrutigerBubbles 44s linear infinite !important;
+  }
+}
+
+body.isResizingSidebar .app[data-theme="frutigerAero"] *,
+.app[data-theme="frutigerAero"].playerScrubbing *{
+  transition-duration: 0ms !important;
+}

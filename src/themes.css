@@ -2293,3 +2293,54 @@
   --shadow-soft: 0 14px 38px rgba(0, 123, 160, 0.16);
   color: var(--text);
 }
+
+/* localtify V047 — Frutiger Aero contrast repair */
+.app[data-theme="frutigerAero"]{
+  --bg: #ecffff;
+  --bg-2: #d5fbff;
+  --bg-3: #f8ffff;
+  --panel: rgba(255, 255, 255, 0.74);
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-2: rgba(241, 255, 255, 0.88);
+  --surface-3: rgba(218, 249, 255, 0.94);
+  --text: #06243b;
+  --text-2: rgba(6, 36, 59, 0.82);
+  --muted: rgba(6, 36, 59, 0.66);
+  --faint: rgba(6, 36, 59, 0.46);
+  --line: rgba(0, 115, 150, 0.25);
+  --line-2: rgba(0, 115, 150, 0.38);
+  --accent: #24d8ff;
+  --accent-2: #8dff72;
+  --highlight: #ffffff;
+  --progress: #24d8ff;
+  --accent-rgb: 36, 216, 255;
+  --accent-2-rgb: 141, 255, 114;
+  --progress-rgb: 36, 216, 255;
+  --accent-soft: rgba(36, 216, 255, 0.16);
+  --accent-line: rgba(0, 156, 212, 0.44);
+  --theme-card-glass: rgba(255,255,255,.52);
+  --theme-card-border: rgba(0, 126, 170, .30);
+  --theme-hover-glass: rgba(235, 254, 255, .68);
+  --theme-hover-border: rgba(36, 216, 255, .54);
+  --localtify-sidebar-bg: rgba(226, 250, 253, .90);
+  --localtify-sidebar-bg-2: rgba(255, 255, 255, .70);
+  --localtify-panel-bg: rgba(255,255,255,.72);
+  --localtify-panel-bg-2: rgba(221, 247, 253, .70);
+  --localtify-line-soft: rgba(0, 126, 170, .20);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2);
+  --lt-surface: var(--surface);
+  --lt-surface-soft: rgba(255,255,255,.62);
+  --lt-surface-raised: var(--surface-2);
+  --lt-text: var(--text);
+  --lt-muted: var(--muted);
+  --lt-faint: var(--faint);
+  --lt-border: var(--line);
+  --lt-border-strong: var(--line-2);
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --grid-line: rgba(0, 126, 170, .065);
+  --shadow: 0 22px 72px rgba(0, 126, 170, .18);
+  --shadow-soft: 0 12px 34px rgba(0, 126, 170, .12);
+  color: var(--lt-text) !important;
+}

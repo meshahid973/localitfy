@@ -13254,3 +13254,127 @@ body.isResizingPlayer .app *{
   border-color: rgba(54,225,255,.72) !important;
   box-shadow: inset 0 1px 2px rgba(0, 80, 120, .12), 0 0 0 3px rgba(54,225,255,.22), 0 0 22px rgba(54,225,255,.18) !important;
 }
+
+/* localtify V047 — Frutiger Aero shell/sidebar readability repair */
+.app[data-theme="frutigerAero"]{
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255,255,255,.95) 0 2px, transparent 3px 120px),
+    radial-gradient(circle at 75% 28%, rgba(255,255,255,.65) 0 1px, transparent 2px 110px),
+    radial-gradient(circle at 86% 72%, rgba(141,255,114,.28), transparent 24%),
+    radial-gradient(circle at 10% 82%, rgba(36,216,255,.24), transparent 30%),
+    linear-gradient(135deg, #f7ffff 0%, #d9fbff 32%, #9aebff 66%, #d8ff9b 100%) !important;
+  color: #06243b !important;
+}
+
+.app[data-theme="frutigerAero"]::before{
+  opacity: .28 !important;
+  mix-blend-mode: normal !important;
+}
+
+.app[data-theme="frutigerAero"] .titleBar{
+  color: #06243b !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.92), rgba(222,248,255,.78) 50%, rgba(82,199,232,.48)) !important;
+  border-bottom: 1px solid rgba(0, 126, 170, .24) !important;
+}
+
+.app[data-theme="frutigerAero"] .appShell{
+  background: transparent !important;
+}
+
+.app[data-theme="frutigerAero"] .sidebar,
+.app[data-theme="frutigerAero"] .sidebar:hover,
+.app[data-theme="frutigerAero"][data-sidebar-behavior="hover"] .sidebar,
+.app[data-theme="frutigerAero"].sidebarHoverOpen .sidebar{
+  color: #06243b !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.78), rgba(225,249,253,.86) 44%, rgba(195,232,237,.88)) !important;
+  background-color: rgba(225,249,253,.92) !important;
+  border-right: 1px solid rgba(0, 126, 170, .26) !important;
+  box-shadow:
+    inset -1px 0 rgba(255,255,255,.78),
+    12px 0 40px rgba(0, 126, 170, .10) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-theme="frutigerAero"] .sidebar :is(.sectionLabel,.navText strong,.navText span,.logoText,.sidebarAction span,.sidebarBottom,.sidebarBottom *),
+.app[data-theme="frutigerAero"] .navItem,
+.app[data-theme="frutigerAero"] .navItemIcon,
+.app[data-theme="frutigerAero"] .sidebarAction{
+  color: #12364f !important;
+  text-shadow: 0 1px rgba(255,255,255,.72) !important;
+}
+
+.app[data-theme="frutigerAero"] .sectionLabel{
+  color: rgba(6,36,59,.74) !important;
+  letter-spacing: .18em !important;
+}
+
+.app[data-theme="frutigerAero"] .navItem{
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+.app[data-theme="frutigerAero"] .navItem:hover{
+  color: #06243b !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(210,249,255,.58)) !important;
+  border-color: rgba(0, 126, 170, .24) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.86), 0 8px 18px rgba(0,126,170,.10) !important;
+}
+
+.app[data-theme="frutigerAero"] .navItem.active{
+  color: #06243b !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(194,247,255,.72) 52%, rgba(141,255,114,.28)) !important;
+  border-color: rgba(0, 156, 212, .42) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.95),
+    0 0 0 1px rgba(141,255,114,.18) inset,
+    0 10px 24px rgba(0,126,170,.13) !important;
+}
+
+.app[data-theme="frutigerAero"] .content,
+.app[data-theme="frutigerAero"] .simpleShell{
+  color: #06243b !important;
+  background:
+    linear-gradient(rgba(255,255,255,.24) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.20) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(246,255,255,.82), rgba(204,247,255,.48) 48%, rgba(205,255,147,.22)) !important;
+  background-size: 54px 54px, 54px 54px, cover !important;
+}
+
+.app[data-theme="frutigerAero"] .headerBar{
+  color: #06243b !important;
+  background:
+    linear-gradient(180deg, rgba(247,255,255,.94), rgba(224,250,255,.78) 74%, rgba(224,250,255,0)) !important;
+}
+
+.app[data-theme="frutigerAero"] .headerText h2,
+.app[data-theme="frutigerAero"] .headerText small{
+  color: #06243b !important;
+  -webkit-text-fill-color: #06243b !important;
+  text-shadow: 0 1px rgba(255,255,255,.92) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.mainAction,.heroMain,.softButton,.simpleAction){
+  color: #06243b !important;
+  background:
+    linear-gradient(180deg, #ffffff, #dffbff 45%, #77e7fb 46%, #26afd9) !important;
+  border-color: rgba(0, 105, 150, .35) !important;
+  text-shadow: 0 1px rgba(255,255,255,.74) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.heroGhost,.simpleGhost,.circleButton:not(.playerBar *),.iconAction){
+  color: #06243b !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(231,252,255,.78)) !important;
+  border-color: rgba(0, 105, 150, .25) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(input, textarea, select, .search){
+  color: #06243b !important;
+  -webkit-text-fill-color: #06243b !important;
+  caret-color: #008fbd !important;
+  background: linear-gradient(180deg, #ffffff, #f0fdff) !important;
+  border-color: rgba(0, 105, 150, .32) !important;
+}
