@@ -2358,3 +2358,85 @@ body.localtifyNoMoreBlur .app :where(.homeAlbumCard,
     transition-duration: 1ms !important;
   }
 }
+/* localtify V046 — Frutiger Aero bubbles, glass sheen, and scoped scrollbars */
+.app[data-theme="frutigerAero"] ::-webkit-scrollbar{
+  width: 15px;
+  height: 15px;
+}
+
+.app[data-theme="frutigerAero"] ::-webkit-scrollbar-corner{
+  background: #e8fbff;
+}
+
+.app[data-theme="frutigerAero"] ::-webkit-scrollbar-track{
+  border-left: 1px solid rgba(0, 111, 150, .12);
+  background: linear-gradient(90deg, #dceff4, #ffffff 45%, #c5eaf5);
+}
+
+.app[data-theme="frutigerAero"] ::-webkit-scrollbar-thumb{
+  min-height: 34px;
+  border: 1px solid rgba(7,34,56,.38);
+  border-radius: 4px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.86) 0 2px, transparent 3px),
+    linear-gradient(90deg, #ffffff 0%, #d8f8ff 45%, #8fddee 46%, #48bcd8 100%);
+  background-repeat: no-repeat;
+  background-size: 62% auto, cover;
+  background-position: center;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.95),
+    inset 0 -1px 1px rgba(0,60,90,.18);
+}
+
+.app[data-theme="frutigerAero"] ::-webkit-scrollbar-thumb:hover{
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.96) 0 2px, transparent 3px),
+    linear-gradient(90deg, #ffffff 0%, #e8fcff 45%, #9af0ff 46%, #28aed6 100%);
+}
+
+.app[data-theme="frutigerAero"] ::selection{
+  color: #02263a;
+  background: rgba(173, 255, 92, .58);
+}
+
+.app[data-theme="frutigerAero"] .ambientSurface::before{
+  opacity: .16 !important;
+  filter: blur(28px) saturate(1.08) brightness(1.1) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.panel,.hero,.settingsPageCard,.settingsPanelCard,.homeAlbumCard,.homeListenCard,.songRow,.playerBar)::after{
+  pointer-events: none;
+}
+
+.app[data-theme="frutigerAero"] :is(.panel,.hero,.settingsPageCard,.settingsPanelCard,.homeAlbumCard,.homeListenCard,.songRow)::before{
+  pointer-events: none;
+}
+
+.app[data-theme="frutigerAero"] .appToast,
+.app[data-theme="frutigerAero"] .updateIsland,
+.app[data-theme="frutigerAero"] .topUpdateRibbon{
+  color: #072238 !important;
+  border: 1px solid rgba(0, 111, 150, .28) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.92), rgba(224,251,255,.72) 52%, rgba(176,239,252,.5)),
+    rgba(255,255,255,.58) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.96), 0 18px 46px rgba(0,120,170,.18) !important;
+  backdrop-filter: blur(18px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .app[data-theme="frutigerAero"]::before{
+    animation: localtifyFrutigerBubbles 28s linear infinite;
+  }
+}
+
+@keyframes localtifyFrutigerBubbles{
+  0%{ background-position: 0 0, 0 0, 0 0, 0 0, center; }
+  100%{ background-position: 0 -240px, 0 -220px, 0 -280px, 0 -260px, center; }
+}
+
+body.isResizingSidebar .app[data-theme="frutigerAero"] *,
+.app[data-theme="frutigerAero"].playerScrubbing *{
+  transition-duration: 0s !important;
+}

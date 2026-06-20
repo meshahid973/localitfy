@@ -2236,3 +2236,60 @@
   background: #ffffff !important;
 }
 /* end localtify v489 */
+/* localtify V046 — Frutiger Aero theme identity */
+.app[data-theme="frutigerAero"]{
+  --bg: #dffcff;
+  --bg-2: #b8f6ff;
+  --bg-3: #f3ffff;
+  --panel: rgba(255, 255, 255, 0.64);
+  --surface: rgba(255, 255, 255, 0.62);
+  --surface-2: rgba(235, 255, 255, 0.76);
+  --surface-3: rgba(216, 251, 255, 0.88);
+  --text: #072238;
+  --text-2: rgba(7, 34, 56, 0.78);
+  --muted: rgba(7, 34, 56, 0.66);
+  --faint: rgba(7, 34, 56, 0.42);
+  --line: rgba(0, 123, 160, 0.22);
+  --line-2: rgba(0, 123, 160, 0.34);
+  --accent: #36e1ff;
+  --accent-2: #adff5c;
+  --highlight: #ffffff;
+  --progress: #7affd7;
+  --accent-rgb: 54, 225, 255;
+  --accent-2-rgb: 173, 255, 92;
+  --highlight-rgb: 255, 255, 255;
+  --progress-rgb: 122, 255, 215;
+  --accent-soft: rgba(54, 225, 255, 0.18);
+  --accent-line: rgba(54, 225, 255, 0.44);
+  --theme-accent: #36e1ff;
+  --theme-accent-2: #adff5c;
+  --theme-highlight: #ffffff;
+  --theme-progress: #7affd7;
+  --theme-card-glass: rgba(255, 255, 255, 0.34);
+  --theme-card-border: rgba(54, 225, 255, 0.28);
+  --theme-hover-glass: rgba(54, 225, 255, 0.16);
+  --theme-hover-border: rgba(54, 225, 255, 0.42);
+  --card-rgb: 54, 225, 255;
+  --localtify-sidebar-bg: rgba(226, 252, 255, 0.72);
+  --localtify-sidebar-bg-2: rgba(255, 255, 255, 0.48);
+  --localtify-panel-bg: rgba(255, 255, 255, 0.55);
+  --localtify-panel-bg-2: rgba(211, 247, 255, 0.58);
+  --localtify-line-soft: rgba(54, 225, 255, 0.24);
+  --lt-bg: var(--bg);
+  --lt-bg-soft: var(--bg-2);
+  --lt-surface: var(--surface);
+  --lt-surface-soft: rgba(255, 255, 255, 0.48);
+  --lt-surface-raised: var(--surface-2);
+  --lt-text: var(--text);
+  --lt-muted: var(--muted);
+  --lt-faint: var(--faint);
+  --lt-border: var(--line);
+  --lt-border-strong: var(--line-2);
+  --lt-accent: var(--accent);
+  --lt-accent-rgb: var(--accent-rgb);
+  --lt-danger: #e54868;
+  --grid-line: rgba(0, 120, 160, 0.08);
+  --shadow: 0 22px 72px rgba(0, 123, 160, 0.22);
+  --shadow-soft: 0 14px 38px rgba(0, 123, 160, 0.16);
+  color: var(--text);
+}

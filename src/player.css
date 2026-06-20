@@ -2934,4 +2934,64 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 .app.themeSettling .playerBar *{
   transition-duration: 80ms !important;
 }
+/* localtify V046 — Frutiger Aero glass player */
+.app[data-theme="frutigerAero"] .playerBar{
+  color: #072238 !important;
+  border-top: 1px solid rgba(0, 111, 150, .3) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.78), rgba(221,249,255,.58) 48%, rgba(54,170,215,.34) 49%, rgba(228,252,255,.52)),
+    rgba(230, 252, 255, .58) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.94),
+    0 -18px 58px rgba(0, 120, 170, .16) !important;
+  backdrop-filter: blur(22px) saturate(145%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(145%) !important;
+}
 
+.app[data-theme="frutigerAero"] .playerBar::before{
+  opacity: .18 !important;
+  filter: blur(24px) saturate(1.12) brightness(1.05) !important;
+}
+
+.app[data-theme="frutigerAero"] .playerBar::after{
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255,255,255,.45), transparent 22%),
+    radial-gradient(circle at 74% 22%, rgba(173,255,92,.18), transparent 28%),
+    linear-gradient(90deg, rgba(255,255,255,.72), rgba(224,250,255,.46), rgba(255,255,255,.64)) !important;
+  opacity: .92 !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.playerButton,.playerControlButton,.circleButton,.repeatButton,.volumeIconButton){
+  color: #072238 !important;
+  border: 1px solid rgba(0,111,150,.3) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(219,251,255,.78) 50%, rgba(64,207,242,.54)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.96), inset 0 -1px rgba(0,80,120,.16), 0 8px 22px rgba(0,120,170,.14) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.playerButton,.playerControlButton,.circleButton,.repeatButton,.volumeIconButton):hover{
+  border-color: rgba(54,225,255,.62) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,1), rgba(206,251,255,.88) 48%, rgba(64,220,255,.68)) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.progressTrack,.progressRange,.volumeRange,.volumeTrack){
+  --player-progress-fill: linear-gradient(90deg, #36e1ff, #7affd7 54%, #adff5c) !important;
+}
+
+.app[data-theme="frutigerAero"] input[type="range"]{
+  accent-color: #36e1ff !important;
+}
+
+.app[data-theme="frutigerAero"] .playerMeta,
+.app[data-theme="frutigerAero"] .playerSub,
+.app[data-theme="frutigerAero"] .playerTime,
+.app[data-theme="frutigerAero"] .volumeText{
+  color: rgba(7,34,56,.68) !important;
+  text-shadow: 0 1px rgba(255,255,255,.72) !important;
+}
+
+.app[data-theme="frutigerAero"] .playerTitle{
+  color: #06263d !important;
+  text-shadow: 0 1px rgba(255,255,255,.92) !important;
+}

@@ -20259,3 +20259,126 @@ body.localitfyThemePainting .homeSongRow{
   line-height: 1;
   pointer-events: none;
 }
+/* localtify V046 — Frutiger Aero home, library, and album surfaces */
+.app[data-theme="frutigerAero"] .hero,
+.app[data-theme="frutigerAero"] .heroPremium,
+.app[data-theme="frutigerAero"] .panel,
+.app[data-theme="frutigerAero"] .homeShelf,
+.app[data-theme="frutigerAero"] .homeSection,
+.app[data-theme="frutigerAero"] .homeDashboardCard,
+.app[data-theme="frutigerAero"] .playlistShelf,
+.app[data-theme="frutigerAero"] .albumFolderImportPanelV308,
+.app[data-theme="frutigerAero"] .albumFolderImportPanelV309,
+.app[data-theme="frutigerAero"] .albumDetailPanelV318,
+.app[data-theme="frutigerAero"] .albumBuilderPanelV318{
+  color: #072238 !important;
+  border: 1px solid rgba(0, 111, 150, .26) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.8), rgba(237,254,255,.56) 52%, rgba(193,240,250,.46)),
+    rgba(255,255,255,.48) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.92),
+    inset 0 -1px rgba(0,80,120,.08),
+    0 22px 58px rgba(0, 120, 170, .18) !important;
+  backdrop-filter: blur(18px) saturate(138%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(138%) !important;
+}
+
+.app[data-theme="frutigerAero"] .hero::after,
+.app[data-theme="frutigerAero"] .heroPremium::after{
+  background:
+    radial-gradient(circle at 84% 24%, rgba(255,255,255,.52), transparent 18%),
+    radial-gradient(circle at 74% 64%, rgba(173,255,92,.22), transparent 26%),
+    linear-gradient(110deg, rgba(255,255,255,.52), rgba(255,255,255,.1) 34%, rgba(54,225,255,.16) 72%) !important;
+  opacity: .92 !important;
+}
+
+.app[data-theme="frutigerAero"] .heroTitle,
+.app[data-theme="frutigerAero"] .headerText h2,
+.app[data-theme="frutigerAero"] .simpleHeroText h2{
+  color: #06263d !important;
+  text-shadow: 0 1px rgba(255,255,255,.95), 0 10px 26px rgba(0,120,170,.16) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.heroMetaLine,.softText,.muted-small,.homeShelfHeader small,.homeCardMeta,.songMeta,.songInfo,.albumMetaV318){
+  color: rgba(7,34,56,.68) !important;
+  text-shadow: 0 1px rgba(255,255,255,.7) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryRow,.playlistTrackRow,.playlistSongRow,.albumCardV318,.albumTrackRowV318){
+  color: #072238 !important;
+  border: 1px solid rgba(0, 111, 150, .18) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.86), rgba(238,254,255,.62) 54%, rgba(204,243,252,.56)),
+    rgba(255,255,255,.48) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.92),
+    0 10px 24px rgba(0, 120, 170, .1) !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryRow,.playlistTrackRow,.playlistSongRow,.albumCardV318,.albumTrackRowV318):hover{
+  border-color: rgba(54,225,255,.5) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(225,253,255,.78) 52%, rgba(149,236,252,.64)),
+    rgba(255,255,255,.58) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.96),
+    0 14px 32px rgba(0, 145, 205, .18),
+    0 0 0 1px rgba(255,255,255,.44) inset !important;
+}
+
+.app[data-theme="frutigerAero"] :is(.homeListenCard.active,.homeFreshCard.active,.homeAlbumCard.active,.songRow.active,.libraryRow.active,.playlistTrackRow.active,.playlistSongRow.active,.albumCardV318.active){
+  border-color: rgba(104, 223, 255, .68) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(214,254,255,.82) 48%, rgba(173,255,92,.26)),
+    rgba(255,255,255,.64) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,1),
+    0 0 0 1px rgba(173,255,92,.36) inset,
+    0 16px 38px rgba(0, 167, 220, .22),
+    0 0 36px rgba(173,255,92,.18) !important;
+}
+
+.app[data-theme="frutigerAero"] .coverAura.generatedAlbumCover.noCover{
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.92), transparent 20%),
+    radial-gradient(circle at 74% 82%, rgba(173,255,92,.42), transparent 36%),
+    radial-gradient(circle at 34% 78%, rgba(54,225,255,.48), transparent 40%),
+    linear-gradient(135deg, #ffffff, #d9fbff 42%, #74eaff 68%, #a8ff62 100%) !important;
+  border: 1px solid rgba(0, 111, 150, .28) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.98),
+    inset 0 -18px 34px rgba(0, 112, 170, .14),
+    0 12px 34px rgba(0, 132, 190, .22) !important;
+}
+
+.app[data-theme="frutigerAero"] .coverAura.generatedAlbumCover.noCover::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: 8% 11% auto auto !important;
+  width: 28% !important;
+  aspect-ratio: 1 !important;
+  border-radius: 999px !important;
+  background: radial-gradient(circle at 38% 34%, #fff 0 18%, rgba(255,255,255,.62) 19% 58%, rgba(255,255,255,.12) 59% 100%) !important;
+  box-shadow: -24px 34px 0 -12px rgba(255,255,255,.38), 34px 52px 0 -18px rgba(255,255,255,.3) !important;
+  pointer-events: none !important;
+}
+
+.app[data-theme="frutigerAero"] .coverAura.generatedAlbumCover.noCover .coverPlaceholder{
+  color: #05304b !important;
+  text-shadow: 0 1px rgba(255,255,255,.92), 0 10px 22px rgba(0, 120, 170, .2) !important;
+}
+
+.app[data-theme="frutigerAero"] .coverAura.generatedAlbumCover.noCover::after{
+  color: rgba(5, 48, 75, .18) !important;
+  text-shadow: 0 1px rgba(255,255,255,.72) !important;
+}
+
+.app[data-theme="frutigerAero"] .homeAlbumCard::after,
+.app[data-theme="frutigerAero"] .albumCardV318::after,
+.app[data-theme="frutigerAero"] .homeListenCard::after{
+  background:
+    linear-gradient(115deg, transparent 0 18%, rgba(255,255,255,.55) 19%, transparent 38%),
+    radial-gradient(circle at 84% 18%, rgba(255,255,255,.44), transparent 18%) !important;
+  opacity: .46 !important;
+}
