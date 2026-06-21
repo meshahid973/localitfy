@@ -1,4 +1,4 @@
-/* localtify V324 — effects owner. No window transparency. No standalone ambience orbs. Smooth visual settings. */
+
 
 .app[data-playing="on"] :is(
   .songRow.playing .songArt.coverAura,
@@ -152,7 +152,7 @@
   }
 }
 
-/* V321 visual settings owner. Keep this at the end because effects.css is imported last. */
+
 .app{
   --v321-panel-bg: rgba(16, 15, 21, 0.72);
   --v321-panel-border: rgba(255, 255, 255, 0.075);
@@ -459,7 +459,7 @@
   display: none !important;
 }
 
-/* localtify 0.3.9 V301 — effects sleep when renderer is busy */
+
 body.localtifyPerfV301 .app.isScrolling :is(
   .songRow.playing .songArt.coverAura,
   .homeAlbumCard.playing .homeAlbumArt.coverAura,
@@ -494,7 +494,7 @@ body.localtifyPerfV301.localtifyBackgroundMode .app .homeFreshCover::before{
   filter: none !important;
 }
 
-/* localtify 0.3.9 V303 — profiler fix: sleep expensive paint while scrolling/audio analyser is busy */
+
 body.localtifyPerfV303 .app.isScrolling :is(
   .heroAmbiencePulse,
   .coverAura::before,
@@ -553,7 +553,7 @@ body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::after{
   transition: none !important;
 }
 
-/* localtify 0.3.9 V305 — keep audio smooth by sleeping expensive paint while the renderer is busy. */
+
 .app.localtifyInteractionBusy :is(
   .coverAura::before,
   .heroAmbiencePulse,
@@ -595,7 +595,7 @@ body.localtifyAudioPlaying .app :is(
   filter: none !important;
 }
 
-/* localtify 0.3.9 V305 — harsher paint suppression while audio plays / scrolling */
+
 body.localtifyPerfV305 .app.isScrolling :is(
   .hero.heroPremium,
   .homeShelfStack,
@@ -671,9 +671,7 @@ body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(
   filter: none !important;
 }
 
-/* localtify 0.3.9 V361 — stable hover sidebar, no runtime CSS.
-   Fixes V360 disappearing sidebar by returning to a real rail width, while
-   removing heavy blur/box-shadow work that made Home lag during hover. */
+
 .app{
   --lt-sidebar-closed: 88px;
   --lt-sidebar-open: 238px;
@@ -990,8 +988,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   }
 }
 
-/* localtify 0.3.9 V462 — smoother sidebar hover-out.
-   Keep the nice open animation, but make closing feel clean instead of abrupt. */
+
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
   transition:
     width 320ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1046,9 +1043,6 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
     box-shadow 150ms ease !important;
 }
 
-/* localtify 0.3.9 V364 — structural performance pass.
-   Permanent composite targets + worker-backed reductions.
-   Important: this does NOT remove image blur, cover tint, hero blur, or player blur. */
 
 .app :is(
   .songRow,
@@ -1113,7 +1107,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
   transition-duration: 90ms !important;
 }
 
-/* Override older V303/V305 performance blocks that killed blur while audio played or while scrolling. */
+
 body.localtifyPerfV303 .app.isScrolling :is(
   .coverGalleryImageCleanOnly,
   .coverGalleryImagePlaceholderCleanOnly,
@@ -1177,8 +1171,6 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   transform: translateZ(0);
 }
 
-/* localtify 0.3.9 V365 — analytics + compositor polish.
-   Keep blur/cover ambience alive while moving row/card motion onto safer composite paths. */
 
 .app :is(
   .songRow.playing .songArt.coverAura,
@@ -1256,9 +1248,6 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(
   -webkit-backdrop-filter: revert !important;
 }
 
-/* V468 DISCORD PILL ONLY + REAL ICON MOTION START
-   Active nav no longer uses a rectangle highlight.
-   It uses a Discord-style white pill on the far-left + actual icon motion. */
 
 /* kill the rectangle highlight from older App/effects/home rules */
 main.app.app > .appShell > .sidebar .navItemAnimatedV468,
@@ -1494,12 +1483,8 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
     transition: none !important;
   }
 }
-/* V468 DISCORD PILL ONLY + REAL ICON MOTION END */
 
-/* localtify 0.4.0 — Linux desktop polish.
-   Goal: fewer compositor problems on KDE/GNOME, clearer titlebar buttons,
-   better scrollbars, and lower GPU/CPU usage while keeping the app cute.
-*/
+
 .app[data-platform="linux"]{
   --linux-titlebar-height: 38px;
   --linux-scrollbar-size: 11px;
@@ -1652,9 +1637,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   }
 }
 
-/* localtify 0.4.0 — packaged feedback modal lock.
-   Keep feedback popup identical in dev and packaged builds.
-*/
+
 .feedbackPromptOverlayV331{
   position: fixed !important;
   inset: 0 !important;
@@ -1813,9 +1796,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   }
 }
 
-/* localtify 0.4.0 — global modal blur lock.
-   Fixes delete/confirm overlays only blurring the content panel while the sidebar/player stay sharp.
-*/
+
 .app .modalWrap{
   position: fixed !important;
   inset: 36px 0 0 0 !important;
@@ -1860,9 +1841,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   color: #fff !important;
 }
 
-/* localtify 0.4.0 — no glyph UI icons + full app modal overlay.
-   Uses inline SVGs so packaged builds do not depend on font glyph rendering.
-*/
+
 .app:has(.modalWrap)::before{
   content: "" !important;
   position: fixed !important;
@@ -1951,9 +1930,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   height: 18px !important;
 }
 
-/* localtify 0.4.0 — titlebar hover colors.
-   Maximize gets orange, close stays red, minimize stays neutral.
-*/
+
 .app .windowButtons button[aria-label*="Maximize"]:hover,
 .app .windowButtons button[aria-label*="restore"]:hover,
 .app .windowButtons button.maxWin:hover{
@@ -1979,9 +1956,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
     0 0 22px rgba(229, 72, 104, 0.26) !important;
 }
 
-/* localtify 0.4.0 — missing library actions + playlist dark polish.
-   Missing files are clearly red, and playlist panels no longer get a separate bright grey wash.
-*/
+
 .app .libraryMissingStripV039{
   border: 1px solid rgba(255, 79, 115, 0.26) !important;
   background:
@@ -2090,9 +2065,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   height: 18px !important;
 }
 
-/* localtify 0.4.0 — home shelf ownership cleanup.
-   Recent covers is display-only now; quick library owns expand/compact.
-*/
+
 .app .homeFreshPanel .homeShelfHeader{
   align-items: end !important;
 }
@@ -2120,7 +2093,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   contain-intrinsic-size: 92px 132px;
 }
 
-/* Keep full animation/motion, but make paint ownership clearer. */
 .app .homeFreshCard :is(img, .coverAura),
 .app .homeListenCard :is(img, .coverAura),
 .app .homeAlbumCard :is(img, .coverAura),
@@ -2191,7 +2163,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   background: currentColor;
 }
 
-/* localtify v483 — Linux desktop polish without reducing blur */
+
 .app[data-platform="linux"]{
   --linux-titlebar-height-v483: 39px;
   --linux-scrollbar-size-v483: 11px;
@@ -2274,11 +2246,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   caret-color: rgba(var(--lt-accent-rgb), .95);
 }
 
-/* end localtify v483 Linux desktop polish */
 
-
-/* localtify V045 real CSS cleanup: cross-view performance guards.
-   This lives in effects.css because it controls app-wide motion/blur states. */
 .app{
   isolation: isolate;
 }

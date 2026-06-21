@@ -16430,7 +16430,6 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   }
 }
 
-/* localtify 0.3.9 V394 — albums V2 polish */
 
 .app .albumsPageV318{
   --albums-v394-panel: rgba(8, 7, 13, .82);
@@ -16895,7 +16894,6 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   }
 }
 
-/* V445: home panels respect slim sidebar and theme painting stays cheap. */
 
 .homePage,
 .homeView{
@@ -16964,8 +16962,6 @@ body.localitfyThemePainting .homeShelfPanel::after{
   filter: none !important;
 }
 
-/* V452: overall home performance baseline.
-   Keeps the same UI, but makes shelves/cards cheaper to render. */
 
 .homeView,
 .homePage{
@@ -17062,7 +17058,7 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 
-/* V453 RELEASE HOME CARD READABILITY */
+
 .homeAlbumCard{
   opacity: 1;
 }
@@ -17139,8 +17135,6 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 
-/* localtify 0.3.9 V039 — library missing-file view + cleaner library glow-up.
-   home.css owns library surfaces; keep this soft, not boxy. */
 .app .libraryPanelV025{
   position: relative !important;
   overflow: hidden !important;
@@ -17412,7 +17406,6 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 
-/* localtify 0.3.9 — cleaner library missing-file strip + tighter rows */
 .app .libraryPanelV025{
   padding: 22px 24px 28px !important;
 }
@@ -17575,7 +17568,7 @@ body.localitfyThemePainting .homeSongRow{
   color: rgba(255,255,255,.56) !important;
 }
 
-/* localtify 0.3.9 — right-click song editor quickfix */
+
 .songContextMenu{
   width: min(258px, calc(100vw - 24px));
   padding: 9px;
@@ -17612,8 +17605,6 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 
-
-/* localtify 0.3.9 — clean SVG icons for the right-click song menu */
 .songContextMenu button span.songContextMenuIcon{
   width: 22px;
   height: 22px;
@@ -17647,7 +17638,6 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 
-/* localtify 0.3.9 — editor modal polish + SVG icon cleanup */
 .iconActionSvg,
 .closeModalButton,
 .whatsNewClose,
@@ -17770,7 +17760,6 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 
-/* localtify 0.3.9 — editor overlay full-screen fix: no left-side blur seam */
 .app .modalWrap.editorModalWrap,
 .modalWrap.editorModalWrap{
   position: fixed !important;
@@ -17839,9 +17828,7 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 
-/* localtify 0.4.0 — global modal blur lock.
-   Fixes delete/confirm overlays only blurring the content panel while the sidebar/player stay sharp.
-*/
+
 .app .modalWrap{
   position: fixed !important;
   inset: 36px 0 0 0 !important;
@@ -17886,9 +17873,7 @@ body.localitfyThemePainting .homeSongRow{
   color: #fff !important;
 }
 
-/* localtify 0.4.0 — no glyph UI icons + full app modal overlay.
-   Uses inline SVGs so packaged builds do not depend on font glyph rendering.
-*/
+
 .app:has(.modalWrap)::before{
   content: "" !important;
   position: fixed !important;
@@ -17977,9 +17962,7 @@ body.localitfyThemePainting .homeSongRow{
   height: 18px !important;
 }
 
-/* localtify 0.4.0 — missing library actions + playlist dark polish.
-   Missing files are clearly red, and playlist panels no longer get a separate bright grey wash.
-*/
+
 .app .libraryMissingStripV039{
   border: 1px solid rgba(255, 79, 115, 0.26) !important;
   background:
@@ -18088,9 +18071,7 @@ body.localitfyThemePainting .homeSongRow{
   height: 18px !important;
 }
 
-/* localtify 0.4.0 — home shelf ownership cleanup.
-   Recent covers is display-only now; quick library owns expand/compact.
-*/
+
 .app .homeFreshPanel .homeShelfHeader{
   align-items: end !important;
 }
@@ -18129,7 +18110,7 @@ body.localitfyThemePainting .homeSongRow{
   background: currentColor;
 }
 
-/* localtify v465 — home compositor guard, no motion reduction */
+
 .pageTransition[data-view="home"]{
   isolation: isolate;
   transform: translateZ(0);
@@ -18182,9 +18163,8 @@ body.localitfyThemePainting .homeSongRow{
 ){
   will-change: transform;
 }
-/* end localtify v465 home compositor guard */
 
-/* localtify v466 — cute calm empty states */
+
 .emptyStateCenterV466{
   min-height: min(52vh, 520px);
   display: grid !important;
@@ -18366,9 +18346,8 @@ body.localitfyThemePainting .homeSongRow{
     justify-items: stretch;
   }
 }
-/* end localtify v466 cute calm empty states */
 
-/* localtify v467 — no-box empty states */
+
 .emptyStateCenterV466{
   min-height: min(52vh, 520px);
   display: grid !important;
@@ -18498,11 +18477,8 @@ body.localitfyThemePainting .homeSongRow{
   text-align: center;
   text-wrap: balance;
 }
-/* end localtify v467 no-box empty states */
 
-/* localtify v482 — consolidated library/downloads/albums cleanup + bug sweep */
 
-/* Library rows: one final owner block instead of stacked v475 overrides. */
 .app :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow){
   border-color: rgba(255,255,255,.068) !important;
   background:
@@ -18760,7 +18736,7 @@ body.localitfyThemePainting .homeSongRow{
   border-radius: 18px !important;
 }
 
-/* Album page: consolidated v480 header polish, with overflow/mobile fixes. */
+
 .albumDetailPanelV318{
   display: grid;
   gap: 14px;
@@ -18895,7 +18871,6 @@ body.localitfyThemePainting .homeSongRow{
     rgba(8,8,14,.72) !important;
 }
 
-/* Safer optimization: keep paint/layout ownership, avoid broad content-visibility on animated home grids. */
 .albumsPageV318,
 .downloadsLayoutV031,
 .playlistsPage,
@@ -18978,9 +18953,8 @@ body.localitfyThemePainting .homeSongRow{
     flex: 1 1 auto !important;
   }
 }
-/* end localtify v482 consolidated home cleanup */
 
-/* localtify v484 — home panel outline uses theme accent, not fixed pink */
+
 .app :is(
   .hero,
   .heroPremium,
@@ -19021,9 +18995,8 @@ body.localitfyThemePainting .homeSongRow{
 ){
   border-color: color-mix(in oklab, rgba(255,255,255,.06) 26%, var(--lt-accent) 74%) !important;
 }
-/* end localtify v484 */
 
-/* localtify v486 — reduce excessive home outlines */
+
 .app :is(
   .hero,
   .heroPremium,
@@ -19065,9 +19038,8 @@ body.localitfyThemePainting .homeSongRow{
 .app[data-theme="mono"] :is(.homeListenCard.active,.homeListenCard.playing,.songRow.active,.songRow.playing){
   border-color: rgba(86,97,127,.36) !important;
 }
-/* end localtify v486 */
 
-/* localtify v487 — hero text raise, quick action simplify, outline cleanup */
+
 .app .hero.heroPremium .heroText.heroTextClean{
   transform: translate3d(0, -54px, 0) !important;
 }
@@ -19160,9 +19132,8 @@ body.localitfyThemePainting .homeSongRow{
   background: #58617f !important;
   color: #fff !important;
 }
-/* end localtify v487 */
 
-/* localtify v488 — hero spacing correction + simple quick actions */
+
 .app .hero.heroPremium .heroText.heroTextClean{
   transform: translate3d(0, -26px, 0) !important;
 }
@@ -19229,9 +19200,8 @@ body.localitfyThemePainting .homeSongRow{
     transform: translate3d(0, -14px, 0) scale(1) !important;
   }
 }
-/* end localtify v488 */
 
-/* localtify v489 — hero spacing final */
+
 .app .hero.heroPremium .heroText.heroTextClean,
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean{
   transform: translate3d(0, -12px, 0) scale(1) !important;
@@ -19286,9 +19256,8 @@ body.localitfyThemePainting .homeSongRow{
   background: #58617f !important;
   color: #fff !important;
 }
-/* end localtify v489 */
 
-/* localtify v495 — sidebar seam cleanup */
+
 .app .sidebar,
 .sidebar{
   outline: 0 !important;
@@ -19331,9 +19300,8 @@ body.localitfyThemePainting .homeSongRow{
   border-color: transparent !important;
   box-shadow: none !important;
 }
-/* end localtify v495 */
 
-/* localtify v496 — mascot state art */
+
 .mascotStateArtV496{
   display: block;
   width: var(--mascot-size, 112px);
@@ -19485,9 +19453,8 @@ body.localitfyThemePainting .homeSongRow{
     animation: none !important;
   }
 }
-/* end localtify v496 */
 
-/* localtify v497 — full 8-state mascot sizing and fit */
+
 .mascotStateArtV496{
   width: var(--mascot-size, 148px) !important;
   height: var(--mascot-size, 148px) !important;
@@ -19677,9 +19644,8 @@ body.localitfyThemePainting .homeSongRow{
     --mascot-size: 128px;
   }
 }
-/* end localtify v497 */
 
-/* localtify v498 — temporary mascot debug gallery */
+
 .mascotDebugPanelV498{
   position: relative;
   z-index: 4;
@@ -19785,9 +19751,8 @@ body.localitfyThemePainting .homeSongRow{
     --mascot-size: 145px;
   }
 }
-/* end localtify v498 */
 
-/* localtify v501 — real mascot states in empty/download UI */
+
 .mascotHelperBubbleV501{
   display: grid;
   grid-template-columns: clamp(72px, 6.5vw, 102px) minmax(0, 1fr) auto;
@@ -19938,9 +19903,8 @@ body.localitfyThemePainting .homeSongRow{
     margin: 4px auto -2px;
   }
 }
-/* end localtify v501 */
 
-/* localtify v502 — downloads mascot glow-up actions */
+
 .downloadPanelV031{
   overflow: visible !important;
 }
@@ -20079,9 +20043,8 @@ body.localitfyThemePainting .homeSongRow{
     justify-content: flex-start !important;
   }
 }
-/* end localtify v502 */
 
-/* localtify v511 — remove mascot clutter from downloads */
+
 .mascotHelperBubbleV501.noMascotV511{
   grid-template-columns: minmax(0, 1fr) auto !important;
   min-height: 84px !important;
@@ -20138,10 +20101,8 @@ body.localitfyThemePainting .homeSongRow{
     grid-template-columns: 1fr !important;
   }
 }
-/* end localtify v511 */
 
 
-/* localtify v512 — downloads error cleanup */
 .downloadHelperHeroErrorV512{
   grid-template-columns: clamp(112px, 9vw, 148px) minmax(0, 1fr) auto !important;
   min-height: 124px !important;
@@ -20179,11 +20140,8 @@ body.localitfyThemePainting .homeSongRow{
     margin: 0 !important;
   }
 }
-/* end localtify v512 */
 
 
-/* localtify V045 home/albums CSS cleanup.
-   Home and album cards own their layout/perf here, not in a separate override file. */
 .homeView .virtualHomeGridRow,
 .app .virtualHomeGridRow{
   align-items: stretch;

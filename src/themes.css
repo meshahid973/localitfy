@@ -2002,7 +2002,7 @@
   --lt-danger: var(--danger, #ff6b8a);
 }
 
-/* localtify v485 — proper contrast light mode + reference-inspired theme polish */
+
 .app[data-theme="mono"]{
   --bg: #f1f3f8;
   --bg-2: #edf0f6;
@@ -2065,9 +2065,8 @@
   --line: color-mix(in oklab, var(--accent) 20%, #000);
   --line-2: color-mix(in oklab, var(--accent) 34%, #000);
 }
-/* end localtify v485 theme polish */
 
-/* localtify v486 — light mode visibility and contrast final pass */
+
 .app[data-theme="mono"]{
   color-scheme: light;
   --bg: #f3f5fa;
@@ -2120,9 +2119,8 @@
   --lt-accent: var(--accent);
   --lt-accent-rgb: var(--accent-rgb);
 }
-/* end localtify v486 */
 
-/* localtify v487 — light mode final contrast */
+
 .app[data-theme="mono"]{
   color-scheme: light;
   --bg: #f3f5fa;
@@ -2175,9 +2173,8 @@
   --lt-accent: var(--accent);
   --lt-accent-rgb: var(--accent-rgb);
 }
-/* end localtify v487 */
 
-/* localtify v488 — light mode shell/select contrast */
+
 .app[data-theme="mono"]{
   color-scheme: light;
   --bg: #f4f6fb;
@@ -2205,9 +2202,8 @@
   color: #343a55 !important;
   background: #ffffff !important;
 }
-/* end localtify v488 */
 
-/* localtify v489 — final light mode variables */
+
 .app[data-theme="mono"]{
   color-scheme: light;
   --bg: #f4f6fb;
@@ -2235,4 +2231,4 @@
   color: #343a55 !important;
   background: #ffffff !important;
 }
-/* end localtify v489 */
+

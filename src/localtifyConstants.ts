@@ -1,7 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.4.2 V042 — shared constants boundary.
-   This file now owns the safest release/update boot constants directly.
-   The remaining legacy constants are still bridged from LocaltifyAppView until they are extracted in smaller passes. */
+
 
 export type LocaltifyBootStep = {
   label: string;

@@ -1,7 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.4.2 V042 — shared helper bridge.
-   Update helpers are now owned here so they use the real APP_VERSION / update constants.
-   The remaining legacy helpers are still bridged from LocaltifyAppView until they are extracted in smaller passes. */
+
 import { APP_VERSION, UPDATE_LEAVE_ALONE_PREFIX } from "./localtifyConstants";
 
 type UpdateRibbonPromptLike = {

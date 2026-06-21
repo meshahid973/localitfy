@@ -7041,7 +7041,7 @@ body.localitfyThemePainting .toggleRow{
   transition: none !important;
 }
 
-/* localtify 0.3.9 — feedback UI rewritten as one clean section */
+
 .feedbackSettingsCardV331{
   display: grid !important;
   gap: 16px !important;
@@ -7470,9 +7470,7 @@ body.localitfyThemePainting .toggleRow{
   }
 }
 
-/* localtify 0.4.0 — packaged feedback modal lock.
-   Keep feedback popup identical in dev and packaged builds.
-*/
+
 .feedbackPromptOverlayV331{
   position: fixed !important;
   inset: 0 !important;
@@ -8536,7 +8534,7 @@ body.localitfyThemePainting .toggleRow{
     0 12px 30px rgba(var(--lt-accent-rgb), .10);
 }
 
-/* localtify v487 — settings light mode contrast */
+
 .app[data-theme="mono"] .settingsShell,
 .app[data-theme="mono"] .settingsCategoryContent,
 .app[data-theme="mono"] .settingsPanel,
@@ -8583,9 +8581,8 @@ body.localitfyThemePainting .toggleRow{
   background: #58617f !important;
   border-color: rgba(55,61,87,.24) !important;
 }
-/* end localtify v487 */
 
-/* localtify v488 — remove settings outline noise */
+
 .settingsContent :is(
   .settingsPanel,
   .settingsPageCard,
@@ -8631,9 +8628,8 @@ body.localitfyThemePainting .toggleRow{
     inset 0 1px 0 rgba(255,255,255,.62),
     0 12px 28px rgba(55,61,87,.07) !important;
 }
-/* end localtify v488 */
 
-/* localtify v489 — settings outline removal */
+
 .settingsContent :is(
   .settingsPanel,
   .settingsPageCard,
@@ -8690,9 +8686,8 @@ body.localitfyThemePainting .toggleRow{
     inset 0 1px 0 rgba(255,255,255,.62),
     0 12px 28px rgba(55,61,87,.07) !important;
 }
-/* end localtify v489 */
 
-/* localtify v491 — settings de-clutter */
+
 .settingsDeclutterPageV491{
   --settings-clean-border: rgba(255,255,255,.065);
   --settings-clean-border-soft: rgba(255,255,255,.045);
@@ -8956,9 +8951,8 @@ body.localitfyThemePainting .toggleRow{
     grid-template-columns: 1fr !important;
   }
 }
-/* end localtify v491 */
 
-/* localtify v491b — unused settings cleanup safety */
+
 .settingsDeclutterPageV491 .visualOptionGroupV205,
 .settingsDeclutterPageV491 .visualCustomizationGridV205,
 .settingsDeclutterPageV491 .bouncyHeroRangeRowV448,
@@ -8979,9 +8973,8 @@ body.localitfyThemePainting .toggleRow{
 .settingsAppearanceCleanV491 .customThemeTokenCleanV491{
   overflow: hidden !important;
 }
-/* end localtify v491b */
 
-/* localtify v492 — smooth settings, no outline-heavy panels */
+
 .settingsPage,
 .settingsCategoryContent,
 .settingsCategoryMotion{
@@ -9173,9 +9166,8 @@ body.localitfyThemePainting .toggleRow{
     width: 100% !important;
   }
 }
-/* end localtify v492 */
 
-/* localtify v493 — real no-outline settings pass */
+
 .settingsPage,
 .settingsPage *{
   -webkit-backface-visibility: hidden !important;
@@ -9473,9 +9465,8 @@ body.localitfyThemePainting .toggleRow{
     animation-duration: .01ms !important;
   }
 }
-/* end localtify v493 */
 
-/* localtify v500 — appearance info mascot callout */
+
 .settingsAppearanceInfoCalloutV500{
   position: relative !important;
   overflow: visible !important;
@@ -9571,9 +9562,8 @@ body.localitfyThemePainting .toggleRow{
     width: min(100%, 260px) !important;
   }
 }
-/* end localtify v500 */
 
-/* localtify v501 — advanced danger mascot */
+
 .settingsDangerMascotPanelV501{
   overflow: visible !important;
   border-color: rgba(255, 90, 120, .10) !important;
@@ -9629,11 +9619,8 @@ body.localitfyThemePainting .toggleRow{
     height: 118px !important;
   }
 }
-/* end localtify v501 */
 
 
-/* localtify V045 settings CSS cleanup.
-   Settings cards own their interaction/focus behavior here. */
 .settingsCategoryContent,
 .settingsCategoryPage{
   contain: layout style;

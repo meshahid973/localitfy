@@ -1292,7 +1292,6 @@ body.isResizingSidebar{
   text-rendering: optimizeSpeed;
 }
 
-/* Onboarding styles moved to src/onboarding-first-run.css in V315. */
 
 .app{
   -webkit-font-smoothing: antialiased;
@@ -9450,8 +9449,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   --lt-glass-accent-alpha: 0.075;
 }
 
-/* localtify 0.3.9 V359: hover sidebar CSS moved to effects.css,
-the last imported CSS layer. */
 
 .app[data-stars-intensity="off"] .localtifyStarsBackdrop{
   display: none !important;
@@ -9680,7 +9677,7 @@ the last imported CSS layer. */
   background-color: #050010 !important;
 }
 
-/* V309 low-lag guardrails. */
+
 .app img{
   -webkit-user-drag: none;
   user-select: none;
@@ -9690,9 +9687,7 @@ the last imported CSS layer. */
   transform: translateZ(0);
 }
 
-/* localtify 0.3.9 V301 — renderer performance guardrails
-   Keeps the visual identity,
-but sleeps expensive paint during scroll/drag/heavy views. */
+
 body.localtifyPerfV301 .app{
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -9774,12 +9769,6 @@ body.localtifyPerfV301 .app :is(.localtifyStarsBackdrop, .localtifyStarsLayer, .
   display: none !important;
 }
 
-/* localtify 0.3.9 V380 — theme painting lag guard.
-   Color picking now updates CSS variables without forcing expensive animation/filter churn.
-   This does NOT disable image blur,
-hero blur,
-player blur,
-or cover tint. */
 
 body.localitfyThemePainting .app{
   contain: paint style !important;
@@ -9853,8 +9842,7 @@ body.localitfyThemePainting .app :is(
   45%{ filter: drop-shadow(0 0 10px rgba(var(--lt-accent-rgb), .30)); }
 }
 
-/* V443: restored SVG heart like animation.
-   Uses src/assets/heart-s.svg and src/assets/heart-f.svg. */
+
 .iconAction.likeActionV443{
   position: relative;
   overflow: visible;
@@ -10045,7 +10033,7 @@ body.localitfyThemePainting .app :is(
   }
 }
 
-/* V444: no hover movement on quick action buttons + full playlist modal overlay. */
+
 .app .iconAction.noActionHoverV444,
 .app .homeAlbumActions .iconAction,
 .app .songRow > .iconAction,
@@ -10126,9 +10114,6 @@ body.localitfyThemePainting .app :is(
   }
 }
 
-/* V453 RELEASE SIDEBAR/SHELL FIX
-   Fixes the "transparent sidebar / content behind sidebar" release blocker.
-   One final shell rule-set: fixed sidebar width, opaque themed sidebar, no hover-shift. */
 
 :root,
 html,
@@ -10411,7 +10396,7 @@ body.isResizingPlayer .app *{
   }
 }
 
-/* Discord-style sidebar white pill indicator (V472) */
+
 .app .sidebar,
 .app .sidebar .nav{
   overflow: visible !important;
@@ -10537,9 +10522,7 @@ body.isResizingPlayer .app *{
   }
 }
 
-/* localtify 0.4.0 — theme contrast + sidebar import cleanup.
-   Uses CSS vars from App.tsx so white accents automatically get black text/icons.
-*/
+
 .app{
   --accent-contrast: var(--button-text-on-accent, #06100b);
   --accent-contrast-rgb: var(--button-text-on-accent-rgb, 6, 16, 11);
@@ -10641,9 +10624,7 @@ body.isResizingPlayer .app *{
   border-right: 0 !important;
 }
 
-/* localtify 0.4.0 — global modal blur lock.
-   Fixes delete/confirm overlays only blurring the content panel while the sidebar/player stay sharp.
-*/
+
 .app .modalWrap{
   position: fixed !important;
   inset: 36px 0 0 0 !important;
@@ -10706,9 +10687,7 @@ body.isResizingPlayer .app *{
   color: #fff !important;
 }
 
-/* localtify 0.4.0 — no glyph UI icons + full app modal overlay.
-   Uses inline SVGs so packaged builds do not depend on font glyph rendering.
-*/
+
 .app:has(.modalWrap)::before{
   content: "" !important;
   position: fixed !important;
@@ -10801,9 +10780,7 @@ body.isResizingPlayer .app *{
   height: 18px !important;
 }
 
-/* localtify 0.4.0 — titlebar hover colors.
-   Maximize gets orange, close stays red, minimize stays neutral.
-*/
+
 .app .windowButtons button[aria-label*="Maximize"]:hover,
 .app .windowButtons button[aria-label*="restore"]:hover,
 .app .windowButtons button.maxWin:hover{
@@ -11057,7 +11034,7 @@ body.isResizingPlayer .app *{
   margin-top: 8px;
   margin-bottom: 10px;
 }
-/* end localtify v467 sidebar grouping */
+
 
 .app .sidebarNavGroupsV467{
   gap: 2px !important;
@@ -11195,7 +11172,7 @@ body.isResizingPlayer .app *{
     transform: none !important;
   }
 }
-/* end localtify v468 sidebar selected pill + spacing polish */
+
 
 .app .sidebarBottom{
   border-top-color: rgba(255,255,255,.055) !important;
@@ -11315,7 +11292,7 @@ body.isResizingPlayer .app *{
     display: none !important;
   }
 }
-/* end localtify v469 calm cute import music button */
+
 
 .app{
   color: var(--lt-text, rgba(255,255,255,.92));
@@ -11405,7 +11382,7 @@ body.isResizingPlayer .app *{
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .20), rgba(var(--lt-accent-rgb), .10)),
     rgba(9,8,15,.92) !important;
 }
-/* end localtify v470 readable contrast guard + import button repair */
+
 
 .app{
   --panel-calm-bg: rgba(5, 5, 10, .70);
@@ -11416,7 +11393,7 @@ body.isResizingPlayer .app *{
   --panel-calm-shadow-hover: 0 16px 38px rgba(0,0,0,.22);
 }
 
-/* Header/search consolidated from v471-v473, so older override stacks are no longer needed. */
+
 .app .content > .headerBar{
   position: relative !important;
   min-height: 82px !important;
@@ -11599,7 +11576,7 @@ body.isResizingPlayer .app *{
   will-change: transform, border-color, box-shadow !important;
 }
 
-/* Calm panel hierarchy, consolidated from v478. */
+
 .app :is(
   .panel,
   .ambientSurface,
@@ -11788,7 +11765,7 @@ body.isResizingPlayer .app *{
     font-size: clamp(30px, 10vw, 42px) !important;
   }
 }
-/* end localtify v482 consolidated app cleanup */
+
 
 .app{
   --panel-calm-line: color-mix(in oklab, rgba(255,255,255,.07) 56%, var(--lt-accent) 44%) !important;
@@ -12010,7 +11987,7 @@ body.isResizingPlayer .app *{
     width: 100% !important;
   }
 }
-/* end localtify v484 */
+
 
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
@@ -12217,7 +12194,7 @@ body.isResizingPlayer .app *{
     display: none !important;
   }
 }
-/* end localtify v485 reference-like update ribbon */
+
 
 .app{
   --outline-calm-v486: color-mix(in oklab, rgba(255,255,255,.055) 78%, var(--lt-accent) 22%) !important;
@@ -12478,7 +12455,7 @@ body.isResizingPlayer .app *{
     display: none !important;
   }
 }
-/* end localtify v486 */
+
 
 .app{
   --outline-calm-v487: color-mix(in oklab, rgba(255,255,255,.05) 84%, var(--lt-accent) 16%) !important;
@@ -12796,7 +12773,7 @@ body.isResizingPlayer .app *{
 .app[data-theme="mono"] .searchEasterWrap .search::placeholder{
   color: rgba(52,58,85,.58) !important;
 }
-/* end localtify v487 */
+
 
 .app .content > .headerBar{
   min-height: 102px !important;
@@ -12904,7 +12881,7 @@ body.isResizingPlayer .app *{
     inset 0 1px 0 rgba(255,255,255,.65),
     0 8px 18px rgba(55,61,87,.09) !important;
 }
-/* end localtify v488 */
+
 
 .app .content > .headerBar{
   min-height: 100px !important;
@@ -13048,7 +13025,7 @@ body.isResizingPlayer .app *{
     inset 0 1px 0 rgba(255,255,255,.66),
     0 8px 18px rgba(55,61,87,.09) !important;
 }
-/* end localtify v489 */
+
 
 .app .sidebar,
 .sidebar{
@@ -13110,4 +13087,4 @@ body.isResizingPlayer .app *{
   border-color: transparent !important;
   box-shadow: none !important;
 }
-/* end localtify v495 */
+

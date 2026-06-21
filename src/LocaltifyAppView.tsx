@@ -1011,7 +1011,6 @@ export function updateWasLeftAlone(version: string) {
 }
 
 
-
 export function updateRibbonTitle(prompt: UpdatePromptState) {
   const version = prompt.version || APP_VERSION;
 
@@ -2672,7 +2671,7 @@ export function useCoverAverageStyle(source: string, enabled: boolean) {
 
 type CoverImagePriority = "auto" | "high" | "low";
 
-export 
+export
 type LocaltifyStateCardTone = "info" | "warning" | "error" | "success";
 
 function mascotStateForTone(tone: LocaltifyStateCardTone, cute = false): MascotStateKey {
@@ -7662,6 +7661,5 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     </main>
   );
 }
-
 
 

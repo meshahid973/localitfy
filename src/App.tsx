@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/* localtify 0.4.2 V044 stability, bridge hardening, and CSS ownership cleanup. */
+
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -355,7 +355,6 @@ function applyVisualCustomizationDefaults<T extends Record<string, any>>(setting
     sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
     playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
     homeHeroCoverBrightness: Number.isFinite(Number(settings.homeHeroCoverBrightness)) ? Math.min(1.55, Math.max(0.65, Number(settings.homeHeroCoverBrightness))) : 1,
-    // V385: visible Appearance toggle. Default ON so the current cover-blur look stays enabled.
     quickLibraryMoreBlur: settings.quickLibraryMoreBlur !== false,
     catBuddyEnabled: settings.catBuddyEnabled === true
   };
@@ -440,7 +439,7 @@ const LOCALTIFY_041_WHATS_NEW_ITEMS = [
   "Album cover detection is safer: folder and embedded covers win, generated covers stay lightweight, and mascot art is no longer treated as album art.",
   "Player queue handling, settings cleanup, and appearance polish were tightened for daily use.",
   "Electron security was hardened with a stricter preload bridge, sandboxed renderer, and blocked random navigation.",
-  "CSS ownership cleanup reduces cross-file fighting, heavy transitions, and scroll jank in album/settings views."
+  "Legacy CSS patch leftovers were cleaned up so album, settings, and player surfaces fight each other less."
 ] as const;
 
 const FEEDBACK_PROMPT_COPY = {
@@ -1024,7 +1023,6 @@ function MainModeApp() {
         window.clearTimeout(focusRepairTimer);
       }
 
-      // V319: Windows/Electron can occasionally restore the cover pseudo-layer
       // without reapplying the blur filter after alt-tab. Toggling a short body
       // class forces a compositor repaint without changing the user setting.
       document.body.classList.add("localtifyFocusRecovering");
@@ -1114,7 +1112,6 @@ function MainModeApp() {
     };
   }, []);
 
-  // V313: onboarding is now a true first-run mini-app.
   // Do not auto-close it just because songs exist; import completion is handled inside Onboarding.
 
   useEffect(() => {
@@ -1184,7 +1181,6 @@ function MainModeApp() {
       viewSwitchTimerRef.current = null;
     }
 
-    // v0.2.8: switching sections should feel instant. The old viewSwitching
     // timer forced extra renders and briefly paused the app ambience, which made
     // every page feel like it was loading. Keep the page change low-priority,
     // but do not add the extra visual shutdown state.
@@ -2572,7 +2568,6 @@ function MainModeApp() {
       heroExpanded: nextExpanded
     };
 
-    // V141: compact/expand is a local hero animation only.
     // After the first toggle, permanent home entrance animations are locked
     // so the Listen now / recent covers shelf cannot replay a delayed fade-in.
     document.body.classList.remove(
@@ -3388,7 +3383,6 @@ function MainModeApp() {
   }), [settings, currentSong, isPlaying, currentDuration, songs.length, mostPlayed]);
 
 
-
   useEffect(() => {
     const body = document.body;
     let idleTimer: number | null = null;
@@ -3583,7 +3577,6 @@ function MainModeApp() {
 
       cache.nodes.forEach((node) => clearBeatVariablesFromNode(node));
 
-      // V303: do not run getBoundingClientRect() here. The performance recording showed
       // style recalculation spikes inside the analyser tick, and layout reads make that worse.
       // Keep the reactive glow on a tiny set of likely-visible art nodes only.
       cache.nodes = Array.from(
@@ -3843,7 +3836,6 @@ function MainModeApp() {
       if (payload.type === "dev") {
         if (payload.silent) return;
 
-        // V179: dev/packaged-only update messages must never open the global top ribbon.
         // The ribbon is reserved for real update states only, so the app does not look broken
         // while testing with npm run dev.
         setUpdatePrompt(defaultUpdatePrompt);
@@ -4369,7 +4361,6 @@ function MainModeApp() {
 
     const waitForMinimumBoot = () => {
       const now = typeof performance !== "undefined" ? performance.now() : Date.now();
-      // V251: keep the loading screen visible for polish, but do not force a long wait
       // after the real bootstrap work has already finished.
       const fastBootMinimumMs = Math.min(BOOT_MIN_VISIBLE_MS, 520);
       const remaining = Math.max(0, fastBootMinimumMs - (now - bootStartedAt));
@@ -4422,7 +4413,6 @@ function MainModeApp() {
       );
       nextSettings.showAmbientGradient = nextSettings.coverColorSyncMode !== "off";
 
-      // Simple Mode was removed in v0.2.8. Keep old installs from booting into it.
       nextSettings.simpleMode = false;
 
       const normalizedBootTheme = normalizeThemeId(nextSettings.theme);
@@ -4520,8 +4510,6 @@ function MainModeApp() {
       if (bootStepTimer) window.clearInterval(bootStepTimer);
     };
   }, [loadPixelArtAssets, bootRetryKey]);
-  // Heavy automatic late-night secret effects were removed in V215.
-  // Heavy automatic MiSide/joke visual mode was removed in V215.
 
 
   useEffect(() => {
@@ -5139,7 +5127,6 @@ function MainModeApp() {
           syncProgressDom(nextTime, nextDuration, true);
         }
 
-        // V341: Localtify now always starts songs from the beginning.
         // Do not keep writing resume positions during normal playback.
         positionSaveRef.current = Date.now();
 
@@ -5549,7 +5536,6 @@ function MainModeApp() {
   }
 
   function getAutoCrossfadeSeconds() {
-    // V342: end-of-song transitions should feel like a real 3 second crossfade.
     // Existing shorter settings are respected for manual fade-in, but auto-next uses at least 3s.
     return clamp(Math.max(3, Number(settings.crossfadeSeconds || 3)), 3, 6);
   }
@@ -5869,7 +5855,6 @@ function MainModeApp() {
         const elapsed = performance.now() - startTime;
         const rawProgress = clamp(elapsed / crossfadeMs, 0, 1);
 
-        // V342 curve:
         // - outgoing track stays full for a tiny moment, then drops faster
         // - incoming track rises slower and smoother so the transition feels musical
         const outgoingHold = 0.16;
@@ -6347,7 +6332,6 @@ function MainModeApp() {
     }
 
     if (key === "simpleMode") {
-      // Simple Mode was removed in v0.2.8. Do not let old UI/state re-enable it.
       next.simpleMode = false;
     }
 
@@ -7650,7 +7634,7 @@ function MainModeApp() {
 
   function parseDownloadUrls(text: string) {
     return text
-      .split(/\r?\n|,/) 
+      .split(/\r?\n|,/)
       .map((url) => url.trim())
       .filter(Boolean);
   }
@@ -7925,7 +7909,6 @@ function MainModeApp() {
       const successCount = downloads.filter((item) => item.ok).length;
       const failCount = downloads.filter((item) => !item.ok).length;
 
-      // V320: after a successful download, refresh from the real database rows once.
       // This prevents the old bug where a downloaded file finished but did not appear in Library.
       if ((successCount > 0 || Number(result.changedCount || 0) > 0) && window.localitfy?.bootstrap) {
         try {
@@ -9910,7 +9893,6 @@ function MainModeApp() {
     syncProgressDom(nextTime, duration, true);
     setCurrentTime(nextTime);
 
-    // V341: seeking is temporary only. Next play still starts at 0:00.
   }
 
   function paintRangeProgress(input: HTMLInputElement | null | undefined, percent: number) {
@@ -11006,7 +10988,6 @@ function MainModeApp() {
   );
 
 
-
   function renderSettingsRail(mode: "page" | "modal" = "page") {
     const shownTabs = visibleSettingsTabs;
 
@@ -11055,10 +11036,6 @@ function MainModeApp() {
       </aside>
     );
   }
-
-
-
-
 
 
   function renderFeedbackSettingsCard() {
@@ -11808,7 +11785,5 @@ function MainModeApp() {
 export default function App() {
   return <MainModeApp />;
 }
-
-
 
 
