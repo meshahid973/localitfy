@@ -48,8 +48,7 @@ const THEME_CHOICES: ThemeChoice[] = [
   { id: "berry", name: "berry", note: "pink purple night", color: "#ff72d2", bg: "#160717", icon: Heart },
   { id: "midnight", name: "midnight", note: "blue OLED calm", color: "#7dd3fc", bg: "#050b18", icon: Moon },
   { id: "terminal", name: "terminal", note: "green console focus", color: "#46ff96", bg: "#020b06", icon: Square },
-  { id: "softSky", name: "soft sky", note: "blue silver glow", color: "#93c5fd", bg: "#060b16", icon: Cloud },
-  { id: "frutigerAero", name: "frutiger aero", note: "glossy aqua desktop", color: "#4eeaff", bg: "#dffcff", icon: Cloud }
+  { id: "softSky", name: "soft sky", note: "blue silver glow", color: "#93c5fd", bg: "#060b16", icon: Cloud }
 ];
 
 const STEPS: StepMeta[] = [

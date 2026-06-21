@@ -753,7 +753,6 @@ export type ThemeId =
   | "rainstorm"
   | "lavaLamp"
   | "softSky"
-  | "frutigerAero"
   | "stars"
   | "arcadeGhost";
 export type DiscordArtMode = "albumCover" | "randomPixel" | "logo" | "none";
@@ -1168,7 +1167,6 @@ export const themes = [
   { id: "berry", name: "berry", note: "deep purple glow", mood: "soft night", emoji: "??" },
   { id: "midnight", name: "midnight", note: "deep blue OLED", mood: "late night", emoji: "??" },
   { id: "mono", name: "light mode", note: "bright clean contrast", mood: "daylight", emoji: "☀️" },
-  { id: "frutigerAero", name: "frutiger aero", note: "glossy aqua desktop", mood: "fresh + nostalgic", emoji: "🫧" },
   { id: "stars", name: "stars", note: "drifting sparkle field", mood: "sparkly night", emoji: "?" },
 ] as const;
 
@@ -1230,7 +1228,6 @@ export const THEME_SWATCH_COLORS: Record<ThemeId, string> = {
   rainstorm: "linear-gradient(135deg, #020617 0%, #38bdf8 45%, #818cf8 100%)",
   lavaLamp: "linear-gradient(135deg, #1b0500 0%, #ef4444 45%, #f59e0b 100%)",
   softSky: "linear-gradient(135deg, #06111f 0%, #93c5fd 52%, #e0f2fe 100%)",
-  frutigerAero: "linear-gradient(135deg, #eaffff 0%, #4eeaff 44%, #adff5c 100%)",
   arcadeGhost: "#22d3ee"
 };
 
@@ -1797,7 +1794,6 @@ export const THEME_PRESET_COLORS: Record<ThemeId, ThemeVisualPalette> = {
   rainstorm: { accent: "#38bdf8", accent2: "#818cf8", background: "#020617", surface: "#0b1224", text: "#f0f9ff", highlight: "#bfdbfe" },
   lavaLamp: { accent: "#ef4444", accent2: "#f59e0b", background: "#0b0200", surface: "#1c0803", text: "#fff4ee", highlight: "#fecaca" },
   softSky: { accent: "#93c5fd", accent2: "#e0f2fe", background: "#04101d", surface: "#0c1b2f", text: "#f0f9ff", highlight: "#dbeafe" },
-  frutigerAero: { accent: "#36e1ff", accent2: "#adff5c", background: "#dffcff", surface: "#f3ffff", text: "#072238", highlight: "#ffffff", progress: "#7affd7" },
   arcadeGhost: { accent: "#22d3ee", accent2: "#f472b6", background: "#03030a", surface: "#0e1020", text: "#f8fbff", highlight: "#a5f3fc" }
 };
 
@@ -1805,49 +1801,6 @@ export function makeThemePresetStyle(themeId: ThemeId): CSSProperties {
   const palette = THEME_PRESET_COLORS[themeId] ?? THEME_PRESET_COLORS.mint;
   const progress = palette.progress ?? palette.accent;
   const accentRgb = hexToRgbString(palette.accent, THEME_PRESET_COLORS.mint.accent);
-
-  if (themeId === "frutigerAero") {
-    return {
-      "--bg": "#dffcff",
-      "--bg-2": "#b8f6ff",
-      "--bg-3": "#f3ffff",
-      "--panel": "rgba(255, 255, 255, 0.64)",
-      "--surface": "rgba(255, 255, 255, 0.62)",
-      "--surface-2": "rgba(235, 255, 255, 0.76)",
-      "--surface-3": "rgba(216, 251, 255, 0.88)",
-      "--text": "#072238",
-      "--text-2": "rgba(7, 34, 56, 0.78)",
-      "--muted": "rgba(7, 34, 56, 0.66)",
-      "--faint": "rgba(7, 34, 56, 0.42)",
-      "--line": "rgba(0, 123, 160, 0.22)",
-      "--line-2": "rgba(0, 123, 160, 0.34)",
-      "--accent": "#36e1ff",
-      "--accent-2": "#adff5c",
-      "--highlight": "#ffffff",
-      "--progress": "#7affd7",
-      "--accent-rgb": "54, 225, 255",
-      "--accent-2-rgb": "173, 255, 92",
-      "--highlight-rgb": "255, 255, 255",
-      "--progress-rgb": "122, 255, 215",
-      "--accent-soft": "rgba(54, 225, 255, 0.18)",
-      "--accent-line": "rgba(54, 225, 255, 0.44)",
-      "--theme-accent": "#36e1ff",
-      "--theme-accent-2": "#adff5c",
-      "--theme-highlight": "#ffffff",
-      "--theme-progress": "#7affd7",
-      "--theme-card-glass": "rgba(255, 255, 255, 0.34)",
-      "--theme-card-border": "rgba(54, 225, 255, 0.28)",
-      "--theme-hover-glass": "rgba(54, 225, 255, 0.16)",
-      "--theme-hover-border": "rgba(54, 225, 255, 0.42)",
-      "--card-rgb": "54, 225, 255",
-      "--localtify-sidebar-bg": "rgba(226, 252, 255, 0.72)",
-      "--localtify-sidebar-bg-2": "rgba(255, 255, 255, 0.48)",
-      "--localtify-panel-bg": "rgba(255, 255, 255, 0.55)",
-      "--localtify-panel-bg-2": "rgba(211, 247, 255, 0.58)",
-      "--localtify-line-soft": "rgba(54, 225, 255, 0.24)"
-    } as CSSProperties;
-  }
-
   const accent2Rgb = hexToRgbString(palette.accent2, palette.accent);
   const highlightRgb = hexToRgbString(palette.highlight, palette.accent);
   const progressRgb = hexToRgbString(progress, palette.accent);
