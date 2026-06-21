@@ -8915,7 +8915,7 @@ body.localitfyThemePainting .toggleRow{
   display: none !important;
 }
 
-/* Hide older/developer-style surfaces if a stale JSX block still renders. */
+
 .visualCustomizationCardV205,
 .appearanceUnifiedControlDeckV356,
 .settingsUpdatePanel,
@@ -9064,7 +9064,7 @@ body.localitfyThemePainting .toggleRow{
   transform: translate3d(0,0,0) scale(.985) !important;
 }
 
-/* Discord section becomes calmer and fits better */
+
 .discordSettingsPage .settingsPanelCard{
   border-color: rgba(113,219,255,.12) !important;
   box-shadow:
@@ -9104,7 +9104,7 @@ body.localitfyThemePainting .toggleRow{
     rgba(255,255,255,.018) !important;
 }
 
-/* Appearance bottom callout */
+
 .settingsAppearanceAdvancedCalloutV492{
   border-color: rgba(var(--lt-accent-rgb),.14) !important;
   background:
@@ -9288,7 +9288,7 @@ body.localitfyThemePainting .toggleRow{
     inset 0 1px 0 rgba(255,255,255,.022) !important;
 }
 
-/* Active states: no purple outline, no left strip, no boxed flash. */
+
 .settingsPage :is(
   .settingsChoice.active,
   .settingsThemeCard.active,
@@ -9329,7 +9329,7 @@ body.localitfyThemePainting .toggleRow{
   content: none !important;
 }
 
-/* Remove purple strip / separator lines in Downloads and Settings cards. */
+
 .settingsContentBlock,
 .settingsDownloadsCleanV491,
 .settingsDownloadsCleanV491 :is(.settingGroup, .settingsCardStack, .downloadFolderGroupV031),
@@ -9350,7 +9350,7 @@ body.localitfyThemePainting .toggleRow{
   gap: 10px !important;
 }
 
-/* Discord RPC area: stop disappearing on hover and make options stable. */
+
 .discordSettingsPage,
 .discordSettingsPage *{
   transform-style: flat !important;
@@ -9389,7 +9389,7 @@ body.localitfyThemePainting .toggleRow{
   filter: none !important;
 }
 
-/* Live cover colors: make the buttons feel clickable but not outlined. */
+
 .settingsLiveCoverColorsV491{
   border-color: transparent !important;
   box-shadow: none !important;
@@ -9415,7 +9415,7 @@ body.localitfyThemePainting .toggleRow{
     rgba(255,255,255,.025) !important;
 }
 
-/* Appearance callout should be calm, not another purple box. */
+
 .settingsAppearanceAdvancedCalloutV492{
   border-color: transparent !important;
   background:
@@ -9654,4 +9654,52 @@ body.localitfyThemePainting .toggleRow{
 .cleanToggleLabel:focus-within{
   outline: none !important;
   box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .16), inset 0 1px 0 rgba(255,255,255,.05) !important;
+}
+
+
+/* Stable settings layout */
+.settingsPage{
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+}
+
+.settingsPanelCard,
+.settingsPageCard,
+.settingsCategoryContent,
+.themeEditorCard,
+.customThemeStudioV025{
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.settingsThemeGrid,
+.settingsChoiceGrid,
+.customThemePresetGridV025,
+.visualOptionsGridV205{
+  min-width: 0 !important;
+}
+
+.settingsThemeCard,
+.settingsChoice,
+.settingSwitchCard,
+.rangeRow,
+.toggleRow{
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.settingsThemeCard strong,
+.settingsThemeCard small,
+.settingsChoice strong,
+.settingsChoice small,
+.settingSwitchCard strong,
+.settingSwitchCard small{
+  overflow-wrap: anywhere !important;
+}
+
+.settingsPage input,
+.settingsPage select,
+.settingsPage textarea{
+  max-width: 100% !important;
 }

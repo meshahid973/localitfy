@@ -3770,7 +3770,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   }, []);
 
   const isSimpleGrid = className.includes("simpleAlbumGrid");
-  const minColumnWidth = isSimpleGrid ? 156 : 168;
+  const minColumnWidth = isSimpleGrid ? 168 : 188;
   const gridGap = 14;
   const columns = Math.max(1, Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap)));
   const rowCount = Math.max(1, Math.ceil(list.length / columns));
@@ -3778,13 +3778,17 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   const rowVirtualizer = useVirtualizer({
     count: list.length ? rowCount : 0,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 256,
+    estimateSize: () => (isSimpleGrid ? 292 : 326),
     overscan: 2,
     getItemKey: (rowIndex) => {
       const firstSong = list[rowIndex * columns];
       return firstSong?.id ? `${firstSong.id}-${columns}` : `${rowIndex}-${columns}`;
     }
   });
+
+  useEffect(() => {
+    rowVirtualizer.measure();
+  }, [columns, isSimpleGrid, list.length, rowVirtualizer]);
 
   if (!list.length) {
     return (
@@ -5108,7 +5112,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     downloadResults.some((item: any) => item && item.ok === false);
   const downloadHasSuccess =
     downloadQueue.some((item: any) => String(item.status || "").toLowerCase() === "done" && item.importedToLibrary !== false) ||
-    downloadResults.some((item: any) => item && item.ok !== false && item.importedToLibrary !== false);
+    downloadResults.some((item: any) => item && item.ok === true && item.importedToLibrary !== false);
   const downloadMascotState: MascotStateKey = downloadWorking
     ? "loading"
     : downloadHasFailure

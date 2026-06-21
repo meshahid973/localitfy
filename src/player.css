@@ -2649,7 +2649,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
   fill-opacity: 0.08 !important;
 }
 
-/* The volume icon should be just an icon, not a second pill/bubble. */
+
 .playerBar .volumeWrap{
   background: transparent !important;
   border: 0 !important;
@@ -2928,3 +2928,52 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
   transition-duration: 80ms !important;
 }
 
+
+
+/* Stable player layout */
+.playerBar{
+  grid-template-columns: minmax(260px, 390px) minmax(360px, 1fr) minmax(150px, 240px) !important;
+  padding-left: clamp(18px, 1.8vw, 28px) !important;
+  padding-right: clamp(18px, 1.8vw, 28px) !important;
+}
+
+.playerBar .playerLeft{
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  overflow: hidden !important;
+}
+
+.playerBar .playerMeta{
+  min-width: 0 !important;
+  max-width: min(290px, 26vw) !important;
+  overflow: hidden !important;
+}
+
+.playerBar .playerMeta strong,
+.playerBar .playerMeta p{
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.playerBar .smallArt img,
+.playerBar .smallArt .coverImage{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+@media (max-width: 900px){
+  .playerBar{
+    grid-template-columns: minmax(160px, 1fr) minmax(210px, 1.4fr) minmax(92px, 150px) !important;
+  }
+
+  .playerBar .playerMeta{
+    max-width: min(230px, 34vw) !important;
+  }
+}

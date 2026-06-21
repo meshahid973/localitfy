@@ -14464,17 +14464,6 @@ body.localtifyPerfV310 .app :is(
   contain: layout style;
 }
 
-
-/* Don't animate background/box-shadow during click selection. Those are the expensive parts
-   DevTools reports as INP presentation delay on button.homeFreshCard.active. */
-
-
-/* A cheap active glow overlay instead of repainting the whole card background on every click. */
-
-
-/* Make the press physical, but only with transform. No filter, no blur toggle, no layout. */
-
-
 .content > .headerBar,
 .headerBar{
   position: relative !important;
@@ -14530,7 +14519,7 @@ body.localtifyPerfV310 .app :is(
   transform: translateZ(0) scale(1.006);
 }
 
-/* Avoid expensive sticky/repaint behavior during scroll. The top header is normal document flow. */
+
 .content.isScrolling > .headerBar,
 .app.isScrolling .headerBar{
   position: relative !important;
@@ -14592,8 +14581,7 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   transform: translate3d(0, 0, 0.001px) scale(1.047) !important;
 }
 
-/* Scroll masks should leave room for the scrollbar. This does not create a new mask;
-   it only fixes containers that already apply one now or later. */
+
 .app :is(.content, .homeSongList, .libraryList, .playlistSongList, .coverGalleryViewport, .coverSongList, .albumDetailTrackListV318, .albumFolderPreviewGridV309){
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
@@ -14618,8 +14606,6 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   container-type: normal !important;
 }
 
-
-/* keep the hero album-cover ambience blurred after focus/alt-tab repaint */
 .app.localtifyHeroFocusRepair .hero.heroPremium::before,
 .app.localtifyHeroFocusRepair .hero.heroPremium::after,
 .app.localtifyHeroFocusRepair .heroAmbiencePulse,
@@ -14630,7 +14616,7 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   backface-visibility: hidden;
 }
 
-/* scrollbar-safe masks for current/future masked scroll areas */
+
 :is(.content,.homeSongList,.songList,.albumFolderPreviewGridV309,.albumsGridV318,.settingsContentColumn){
   mask-repeat: no-repeat;
   -webkit-mask-repeat: no-repeat;
@@ -15000,7 +14986,7 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   --localtify-resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Utility class for future JSX usage. */
+
 .t-resize,
 .localtifyResizeMotion{
   transition:
@@ -15018,8 +15004,7 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   will-change: width, height;
 }
 
-/* Apply it to surfaces where resize actually happens:
-   hero expand/compact, sidebar slim/hover, album/download panels. */
+
 .hero.heroPremium,
 .heroLayoutMotion,
 .heroTextCluster,
@@ -15052,8 +15037,7 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
     opacity 180ms ease;
 }
 
-/* Hero-specific resize polish: same size rules, smoother tween when existing
-   classes change layout. */
+
 .hero.heroPremium.heroExpanded,
 .hero.heroPremium.heroCompact,
 .hero.heroPremium.heroLayoutMotion{
@@ -15067,7 +15051,7 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   backface-visibility: hidden;
 }
 
-/* Sidebar hover/slim resize should feel like a smooth panel, not a snap. */
+
 .app.sidebarHover .sidebar,
 .app.sidebarSlim .sidebar,
 .app.sidebarHover .navShell,
@@ -15075,11 +15059,6 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   will-change: width, min-width, max-width;
 }
 
-/* Do NOT run layout-size transitions on the hot clickable home song/cover cards.
-   They already have transform-only active feedback for INP. */
-
-
-/* Avoid holding will-change forever on idle cards. */
 body.localtifyIdle .t-resize,
 body.localtifyIdle .localtifyResizeMotion,
 body.localtifyIdle .hero.heroPremium,
@@ -15820,7 +15799,7 @@ body.localtifyIdle .settingsSectionCard{
   }
 }
 
-/* Home cards */
+
 .homeView,
 .app{
   --home-card-min: 166px;
@@ -17006,7 +16985,7 @@ body.localitfyThemePainting .homeShelfPanel::after{
   backface-visibility: hidden;
 }
 
-/* Keep quick-library blur available, but disable the expensive card blur while the app is repainting. */
+
 body.localitfyThemePainting .homeAlbumCard::before,
 body.localitfyThemePainting .homeAlbumCard::after,
 body.localitfyThemePainting .recentCoverCard::before,
@@ -17039,7 +17018,7 @@ body.localitfyThemePainting .homeSongRow{
   transition: none !important;
 }
 
-/* Avoid huge hidden glow layers from costing frames inside long shelves. */
+
 .homeShelfPanel::before,
 .homeShelfPanel::after,
 .homeLibraryPanel::before,
@@ -17800,7 +17779,7 @@ body.localitfyThemePainting .homeSongRow{
   z-index: 1 !important;
 }
 
-/* make every editor/menu action icon use SVG sizing, never text-glyph sizing */
+
 .app :is(.editorIconButton, .songContextMenu button, .closeModalButton, .iconActionSvg) svg{
   display: block !important;
   stroke: currentColor !important;
@@ -18532,7 +18511,7 @@ body.localitfyThemePainting .homeSongRow{
     rgba(9,7,5,.60) !important;
 }
 
-/* Downloads: cleaner and less noisy, keeping empty-state. */
+
 .downloadsLayoutV031{
   display: grid;
   gap: 14px !important;
@@ -18891,7 +18870,7 @@ body.localitfyThemePainting .homeSongRow{
   will-change: auto !important;
 }
 
-/* Bug sweep: mobile/overflow/input fixes. */
+
 @media (max-width: 940px){
   .albumDetailHeroV318{
     grid-template-columns: 132px minmax(0, 1fr) !important;
@@ -20216,4 +20195,421 @@ body.localitfyThemePainting .homeSongRow{
   font-weight: 900;
   line-height: 1;
   pointer-events: none;
+}
+
+
+/* Cover studio text/crop repair. Keeps gallery text clean and images cropped square. */
+.coverStudioCleanLayout .coverSongPick em{
+  min-width: 22px !important;
+  height: 22px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  font-style: normal !important;
+  line-height: 1 !important;
+  color: var(--lt-accent) !important;
+  background: rgba(var(--lt-accent-rgb), .12) !important;
+}
+
+.coverStudioCleanLayout .coverQuickPreview > span[aria-hidden="true"]{
+  display: grid !important;
+  place-items: center !important;
+  min-width: 20px !important;
+  color: rgba(var(--lt-accent-rgb), .92) !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+}
+
+.coverStudioCleanLayout .coverGalleryInfoCleanOnly strong,
+.coverStudioCleanLayout .coverGalleryInfoCleanOnly small{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  text-shadow: none !important;
+}
+
+.coverStudioCleanLayout .coverGalleryImageButtonCleanOnly,
+.coverStudioCleanLayout .coverGalleryImageShellCleanOnly,
+.coverStudioCleanLayout .coverGalleryImagePlaceholderCleanOnly,
+.coverStudioCleanLayout .coverGalleryImageCleanOnly{
+  aspect-ratio: 1 / 1 !important;
+  line-height: 0 !important;
+}
+
+.coverStudioCleanLayout .coverGalleryImageShellCleanOnly{
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.coverStudioCleanLayout .coverGalleryImageCleanOnly{
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+}
+
+.coverStudioCleanLayout .coverGalleryImagePlaceholderCleanOnly{
+  z-index: 1 !important;
+  line-height: 1 !important;
+}
+
+.coverStudioCleanLayout .coverQuickPreview .coverGalleryImageShellCleanOnly,
+.coverStudioCleanLayout .coverRecentInline .coverGalleryImageShellCleanOnly{
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+.app .homeFreshCard,
+.homeView .homeFreshCard{
+  align-content: start !important;
+}
+
+.app .homeFreshCover,
+.homeView .homeFreshCover{
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;
+  overflow: hidden !important;
+  line-height: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+.app .homeFreshCover .coverImage,
+.app .homeFreshCover img,
+.homeView .homeFreshCover .coverImage,
+.homeView .homeFreshCover img{
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+}
+
+.app .homeListenCover,
+.homeView .homeListenCover{
+  position: relative !important;
+  overflow: hidden !important;
+  line-height: 0 !important;
+}
+
+.app .homeListenCover .coverImage,
+.app .homeListenCover img,
+.homeView .homeListenCover .coverImage,
+.homeView .homeListenCover img{
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+}
+
+
+/* Quick library card grid repair: fixed rows, fixed card boxes, clean cover crop. */
+.homeView .homeAlbumGrid.virtualHomeGridViewport,
+.app .homeAlbumGrid.virtualHomeGridViewport,
+.homeView .virtualHomeGridViewport,
+.app .virtualHomeGridViewport{
+  --home-card-fixed-height: clamp(286px, 15.2vw, 336px) !important;
+  --home-card-gap: clamp(14px, 1vw, 18px) !important;
+  --home-card-row-gap: clamp(16px, 1.2vw, 22px) !important;
+  min-height: min(650px, calc(100vh - 268px)) !important;
+  max-height: min(760px, calc(100vh - 245px)) !important;
+  padding: 10px 12px 62px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-gutter: stable both-edges !important;
+}
+
+.homeView .virtualHomeGridCanvas,
+.app .virtualHomeGridCanvas{
+  contain: layout style !important;
+  min-width: 100% !important;
+}
+
+.homeView .virtualHomeGridRow,
+.app .virtualHomeGridRow{
+  align-items: stretch !important;
+  grid-auto-rows: var(--home-card-fixed-height) !important;
+  min-height: var(--home-card-fixed-height) !important;
+  height: var(--home-card-fixed-height) !important;
+  column-gap: var(--home-card-gap) !important;
+  padding-bottom: var(--home-card-row-gap) !important;
+  box-sizing: border-box !important;
+}
+
+.homeView .virtualHomeGridRow > .homeAlbumCard,
+.app .virtualHomeGridRow > .homeAlbumCard,
+.homeView .virtualHomeGridViewport .homeAlbumCard,
+.app .virtualHomeGridViewport .homeAlbumCard{
+  align-self: stretch !important;
+  justify-self: stretch !important;
+  height: var(--home-card-fixed-height) !important;
+  min-height: var(--home-card-fixed-height) !important;
+  max-height: var(--home-card-fixed-height) !important;
+  margin: 0 !important;
+}
+
+.homeView .homeAlbumCard,
+.app .homeAlbumCard{
+  display: grid !important;
+  grid-template-rows: minmax(0, auto) 52px 20px 34px !important;
+  align-content: start !important;
+  row-gap: 8px !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.homeView .homeAlbumPlayZone,
+.app .homeAlbumPlayZone{
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;
+  min-height: 0 !important;
+  max-height: min(178px, calc(var(--home-card-fixed-height) - 126px)) !important;
+  align-self: start !important;
+  justify-self: stretch !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+.homeView .homeAlbumArt,
+.app .homeAlbumArt,
+.homeView .homeAlbumArt .coverImage,
+.app .homeAlbumArt .coverImage,
+.homeView .homeAlbumArt img,
+.app .homeAlbumArt img,
+.homeView .homeAlbumPlayZone img,
+.app .homeAlbumPlayZone img,
+.homeView .homeAlbumPlayZone .coverImage,
+.app .homeAlbumPlayZone .coverImage{
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+  overflow: hidden !important;
+  transform: none !important;
+}
+
+.homeView .homeAlbumMeta,
+.app .homeAlbumMeta{
+  min-height: 52px !important;
+  max-height: 52px !important;
+  margin: 0 !important;
+  padding-inline: 2px !important;
+  display: grid !important;
+  grid-template-rows: 32px 15px !important;
+  align-content: start !important;
+  gap: 5px !important;
+  overflow: hidden !important;
+}
+
+.homeView .homeAlbumMeta strong,
+.app .homeAlbumMeta strong{
+  min-height: 32px !important;
+  max-height: 32px !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  overflow: hidden !important;
+}
+
+.homeView .homeAlbumMeta small,
+.app .homeAlbumMeta small{
+  display: block !important;
+  min-height: 15px !important;
+  max-height: 15px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.homeView .homeAlbumStats,
+.app .homeAlbumStats{
+  min-height: 20px !important;
+  max-height: 20px !important;
+  margin: 0 !important;
+  padding-inline: 2px !important;
+  align-self: start !important;
+  overflow: hidden !important;
+}
+
+.homeView .homeAlbumActions,
+.app .homeAlbumActions{
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin: 0 !important;
+  padding-inline: 2px !important;
+  align-self: end !important;
+  overflow: hidden !important;
+}
+
+.homeView .homeAlbumActions .iconAction,
+.app .homeAlbumActions .iconAction,
+.homeView .homeAlbumActions .playlistAddAction,
+.app .homeAlbumActions .playlistAddAction,
+.homeView .homeAlbumActions .likeActionV443,
+.app .homeAlbumActions .likeActionV443{
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  max-width: 30px !important;
+  max-height: 30px !important;
+  transform: none !important;
+}
+
+.homeView .homeAlbumCard:hover,
+.app .homeAlbumCard:hover,
+.homeView .homeAlbumCard.active,
+.app .homeAlbumCard.active{
+  transform: none !important;
+}
+
+.homeView .homeAlbumCard.songDragging,
+.app .homeAlbumCard.songDragging{
+  transform: none !important;
+}
+
+@media (max-width: 1100px){
+  .homeView .homeAlbumGrid.virtualHomeGridViewport,
+  .app .homeAlbumGrid.virtualHomeGridViewport,
+  .homeView .virtualHomeGridViewport,
+  .app .virtualHomeGridViewport{
+    --home-card-fixed-height: 300px !important;
+  }
+}
+
+@media (max-width: 760px){
+  .homeView .homeAlbumGrid.virtualHomeGridViewport,
+  .app .homeAlbumGrid.virtualHomeGridViewport,
+  .homeView .virtualHomeGridViewport,
+  .app .virtualHomeGridViewport{
+    --home-card-fixed-height: 286px !important;
+  }
+}
+
+
+/* Stable section layout */
+.homeView .virtualHomeGridRow,
+.app .virtualHomeGridRow{
+  align-items: stretch !important;
+}
+
+.homeView .virtualHomeGridRow > .homeAlbumCard,
+.app .virtualHomeGridRow > .homeAlbumCard,
+.homeView .virtualHomeGridViewport .homeAlbumCard,
+.app .virtualHomeGridViewport .homeAlbumCard{
+  height: 100% !important;
+  display: grid !important;
+  grid-template-rows: auto 56px 20px 34px !important;
+  align-content: start !important;
+}
+
+.homeView .homeAlbumCard,
+.app .homeAlbumCard{
+  display: grid !important;
+  grid-template-rows: auto 56px 20px 34px !important;
+  align-content: start !important;
+}
+
+.homeView .homeAlbumMeta,
+.app .homeAlbumMeta{
+  min-height: 56px !important;
+  max-height: 56px !important;
+  overflow: hidden !important;
+}
+
+.homeView .homeAlbumMeta strong,
+.app .homeAlbumMeta strong{
+  min-height: 32px !important;
+  max-height: 32px !important;
+}
+
+.homeView .homeAlbumMeta small,
+.app .homeAlbumMeta small{
+  display: block !important;
+  min-height: 16px !important;
+  max-height: 16px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.homeView .homeAlbumStats,
+.app .homeAlbumStats{
+  min-height: 20px !important;
+  max-height: 20px !important;
+  margin-top: 6px !important;
+  overflow: hidden !important;
+}
+
+.homeView .homeAlbumActions,
+.app .homeAlbumActions{
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin-top: 9px !important;
+  overflow: hidden !important;
+}
+
+.homeView .homeAlbumPlayZone,
+.app .homeAlbumPlayZone,
+.homeView .homeFreshCover,
+.app .homeFreshCover,
+.homeView .recentCoverThumb,
+.app .recentCoverThumb{
+  aspect-ratio: 1 / 1 !important;
+}
+
+.homeView .homeAlbumArt img,
+.app .homeAlbumArt img,
+.homeView .homeFreshCover img,
+.app .homeFreshCover img,
+.homeView .recentCoverThumb img,
+.app .recentCoverThumb img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+.homeView .homeAlbumCard:hover,
+.app .homeAlbumCard:hover,
+.homeView .homeFreshCard:hover,
+.app .homeFreshCard:hover{
+  translate: none !important;
 }

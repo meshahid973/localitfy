@@ -184,7 +184,7 @@ const localtifyApi = Object.freeze({
     patch: (id, patch) => safeInvoke(channels.songs.patch, id, patch),
     patchMany: (ids, patch) => safeInvoke(channels.songs.patchMany, ids, patch),
     delete: (id) => safeInvoke(channels.songs.delete, id),
-    setCover: (id, coverPath) => safeInvoke(channels.songs.setCover, id, coverPath),
+    setCover: (id, coverPath, coverSource = "custom") => safeInvoke(channels.songs.setCover, id, coverPath, coverSource),
     pickCover: (id) => safeInvoke(channels.songs.pickCover, id),
     randomCover: (id) => safeInvoke(channels.songs.randomCover, id),
     analyzeVolume: (id) => safeInvoke(channels.songs.analyzeVolume, id)
@@ -273,7 +273,7 @@ const localtifyApi = Object.freeze({
     fetchTracks: (url) => safeInvoke(channels.spotify.fetchTracks, url),
     spotdlCheck: () => safeInvoke(channels.spotify.spotdlCheck),
     spotdlDownloadBatch: (payload) => safeInvoke(channels.spotify.spotdlDownloadBatch, payload),
-    spotifyDownloadBatch: (payload) => safeInvoke(channels.spotify.spotdlDownloadBatch, payload),
+    spotifyDownloadBatch: (payload) => safeInvoke(channels.spotify.spotifyDownloadBatch, payload),
     onTrackDone: (callback) => listen(channels.spotify.spotdlTrackDone, callback)
   })
 });

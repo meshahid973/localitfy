@@ -814,7 +814,7 @@ function getNativeMediaTitle() {
   if (!nativeMediaState.hasSong) return "localtify";
   const title = nativeMediaState.title || "unknown song";
   const artist = nativeMediaState.artist || "";
-  return artist ? `${title} â€” ${artist}` : title;
+  return artist ? `${title} — ${artist}` : title;
 }
 
 function updateTrayMenu() {
@@ -2542,7 +2542,7 @@ async function spotifyTokenRequest(formData) {
 
   if (res.status !== 200) {
     const detail = data?.error_description || data?.error || res.body?.slice?.(0, 160) || "";
-    throw new Error(`Spotify OAuth returned HTTP ${res.status}${detail ? ` â€” ${detail}` : ""}`);
+    throw new Error(`Spotify OAuth returned HTTP ${res.status}${detail ? ` — ${detail}` : ""}`);
   }
 
   return data;
@@ -2724,7 +2724,7 @@ async function loginSpotifyOAuth() {
     loginWindow = new BrowserWindow({
       width: 540,
       height: 720,
-      title: "Connect Spotify â€” localtify",
+      title: "Connect Spotify — localtify",
       parent: mainWindow || undefined,
       modal: false,
       autoHideMenuBar: true,
@@ -2967,7 +2967,7 @@ async function fetchSpotifyPublicTrackFallback(trackId) {
       if (!artist) {
         const descriptionMatch = html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i);
         const desc = decodeHtmlEntities(descriptionMatch?.[1] || "").trim();
-        if (desc) artist = desc.split("Â·")[0].trim();
+        if (desc) artist = desc.split("·")[0].trim();
       }
     }
   } catch {
@@ -5477,7 +5477,7 @@ async function sendLocaltifyFeedback(payload = {}) {
     allowed_mentions: { parse: [] },
     embeds: [
       {
-        title: `Localtify feedback â€” ${category}`,
+        title: `Localtify feedback — ${category}`,
         description: message,
         color: 0xd946ef,
         timestamp: new Date().toISOString(),
@@ -5665,8 +5665,16 @@ app.whenReady().then(async () => {
   ipcMain.handle("covers:cleanup-cache", async () => {
     try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; }
   });
-  ipcMain.handle("song:set-cover", async (_event, id, coverPath) => {
-    const updated = patchSong(id, { coverPath });
+  ipcMain.handle("song:set-cover", async (_event, id, coverPath, coverSource = "custom") => {
+    const safeCoverPath = String(coverPath || "").trim();
+    const safeCoverSource = ["custom", "folder", "embedded", "spotify", "fallback", "generated", "none"].includes(String(coverSource || "").trim().toLowerCase())
+      ? String(coverSource || "custom").trim().toLowerCase()
+      : "custom";
+    const updated = patchSong(id, {
+      coverPath: safeCoverPath || null,
+      coverSource: safeCoverPath ? safeCoverSource : "none",
+      coverUpdatedAt: new Date().toISOString()
+    });
     return updated ? shapeSong(updated) : null;
   });
   ipcMain.handle("song:pick-cover", async (event, id) => {
@@ -5698,7 +5706,7 @@ app.whenReady().then(async () => {
       const chosen = result.filePaths[0];
       if (!fileExists(chosen) || !isImageFile(chosen)) return shapeSong(song);
 
-      const updated = patchSong(id, { coverPath: chosen });
+      const updated = patchSong(id, { coverPath: chosen, coverSource: "custom", coverUpdatedAt: new Date().toISOString() });
       return updated ? shapeSong(updated) : shapeSong(song);
     } catch (error) {
       console.log("[localtify pick cover error]", error?.message || error);
@@ -6012,7 +6020,7 @@ app.whenReady().then(async () => {
     return true;
   });
 
-  // â”€â”€ Spotify: fetch public track metadata through OAuth PKCE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Spotify: fetch public track metadata through OAuth PKCE
   const runSpotifyFetch = async (payload = {}) => {
     try {
       const url = typeof payload === "string" ? payload : payload?.url;
