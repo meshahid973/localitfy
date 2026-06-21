@@ -1,4 +1,4 @@
-﻿/* localtify 0.4.2 V044 stability, cover ownership, and bridge cleanup. */
+﻿/* localtify 0.4.2 stability, cover handling, and bridge cleanup. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const http = require("node:http");
 const https = require("node:https");
@@ -4402,17 +4402,24 @@ function getRuntimeCoverPath(song, pixelArtFiles = null) {
   return pickStablePixelCoverForSong(song, pixelArtFiles);
 }
 
+function isRendererSafeCoverUrl(value) {
+  const text = String(value || "").trim();
+  return /^(app|https?|data|blob):/i.test(text);
+}
+
 function shapeSong(song, pixelArtFiles = null) {
   if (!song) return null;
   const exists = fileExists(song.filePath);
   const savedCoverPath = String(song.coverPath || "").trim();
-  const savedCoverExists = Boolean(savedCoverPath && fileExists(savedCoverPath) && isImageFile(savedCoverPath));
-  const runtimeCoverPath = getRuntimeCoverPath(song, pixelArtFiles);
-  const coverExists = Boolean(runtimeCoverPath && fileExists(runtimeCoverPath));
+  const savedCoverIsFile = Boolean(savedCoverPath && fileExists(savedCoverPath) && isImageFile(savedCoverPath));
+  const savedCoverIsUrl = Boolean(savedCoverPath && isRendererSafeCoverUrl(savedCoverPath));
+  const savedCoverExists = savedCoverIsFile || savedCoverIsUrl;
+  const runtimeCoverPath = savedCoverExists ? savedCoverPath : getRuntimeCoverPath(song, pixelArtFiles);
+  const coverExists = Boolean(runtimeCoverPath && (savedCoverIsUrl || (fileExists(runtimeCoverPath) && isImageFile(runtimeCoverPath))));
   const runtimeCoverSource = savedCoverExists ? String(song.coverSource || "unknown") : (runtimeCoverPath ? "fallback" : "none");
 
-  const coverUrl = coverExists ? safeMediaUrl(runtimeCoverPath) : "";
-  const coverThumbUrl = coverExists ? getCoverThumbnailUrl(runtimeCoverPath) : "";
+  const coverUrl = savedCoverIsUrl ? savedCoverPath : (coverExists ? safeMediaUrl(runtimeCoverPath) : "");
+  const coverThumbUrl = !savedCoverIsUrl && coverExists ? getCoverThumbnailUrl(runtimeCoverPath) : "";
 
   return {
     ...song,

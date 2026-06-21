@@ -3750,35 +3750,53 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   onDragEnd
 }: VirtualHomeSongCardsProps) {
   const parentRef = useRef<HTMLDivElement | null>(null);
+  const resizeFrameRef = useRef<number | null>(null);
   const [viewportWidth, setViewportWidth] = useState(0);
 
   useLayoutEffect(() => {
     const element = parentRef.current;
     if (!element) return;
 
-    const updateWidth = () => setViewportWidth(element.clientWidth || 0);
-    updateWidth();
+    const commitWidth = () => {
+      resizeFrameRef.current = null;
+      const nextWidth = Math.max(0, element.clientWidth || 0);
+      setViewportWidth((previousWidth) => (Math.abs(previousWidth - nextWidth) < 4 ? previousWidth : nextWidth));
+    };
+
+    const queueWidthUpdate = () => {
+      if (resizeFrameRef.current !== null) return;
+      resizeFrameRef.current = window.requestAnimationFrame(commitWidth);
+    };
+
+    queueWidthUpdate();
 
     if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", updateWidth);
-      return () => window.removeEventListener("resize", updateWidth);
+      window.addEventListener("resize", queueWidthUpdate);
+      return () => {
+        window.removeEventListener("resize", queueWidthUpdate);
+        if (resizeFrameRef.current !== null) window.cancelAnimationFrame(resizeFrameRef.current);
+      };
     }
 
-    const observer = new ResizeObserver(updateWidth);
+    const observer = new ResizeObserver(queueWidthUpdate);
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (resizeFrameRef.current !== null) window.cancelAnimationFrame(resizeFrameRef.current);
+    };
   }, []);
 
   const isSimpleGrid = className.includes("simpleAlbumGrid");
   const minColumnWidth = isSimpleGrid ? 168 : 188;
-  const gridGap = 14;
-  const columns = Math.max(1, Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap)));
+  const gridGap = 16;
+  const rawColumns = Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap));
+  const columns = Math.max(1, Math.min(list.length || 1, rawColumns || 1));
   const rowCount = Math.max(1, Math.ceil(list.length / columns));
 
   const rowVirtualizer = useVirtualizer({
     count: list.length ? rowCount : 0,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => (isSimpleGrid ? 292 : 326),
+    estimateSize: () => (isSimpleGrid ? 318 : 344),
     overscan: 2,
     getItemKey: (rowIndex) => {
       const firstSong = list[rowIndex * columns];

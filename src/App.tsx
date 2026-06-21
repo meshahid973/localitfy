@@ -434,12 +434,12 @@ const FEEDBACK_PROMPT_SEEN_KEY = "localitfy.feedbackPrompt.seen.v1";
 const FEEDBACK_PROMPT_DELAY_MS = 40_000;
 const FEEDBACK_PROMPT_RETRY_DELAY_MS = 15_000;
 const FEEDBACK_MESSAGE_MAX_LENGTH = 1_500;
-const LOCALTIFY_041_WHATS_NEW_ITEMS = [
+const LOCALTIFY_042_WHATS_NEW_ITEMS = [
   "0.4.2 fixes bulk album import freezes and reduces heavy cover work during startup.",
   "Album cover detection is safer: folder and embedded covers win, generated covers stay lightweight, and mascot art is no longer treated as album art.",
   "Player queue handling, settings cleanup, and appearance polish were tightened for daily use.",
   "Electron security was hardened with a stricter preload bridge, sandboxed renderer, and blocked random navigation.",
-  "Legacy CSS patch leftovers were cleaned up so album, settings, and player surfaces fight each other less."
+  "Home cards, settings panels, player text, and cover handling were cleaned up for a calmer daily build."
 ] as const;
 
 const FEEDBACK_PROMPT_COPY = {
@@ -447,7 +447,7 @@ const FEEDBACK_PROMPT_COPY = {
   body:
     "really it has been amazing for users like you to keep using the app which make me want to update the app even more, why did this popup come? Well as you may know or may also have experienced localtify has few here and there visual or ui bugs in the app and that probably has made you angry. or maybe you really want a feature to be added.",
   footer:
-    "Which is why below me theres a message box where you can send bug reports and suggestions. and I will be actively reviewing them! (also you can type feeback in search bar)"
+    "Which is why below me theres a message box where you can send bug reports and suggestions. and I will be actively reviewing them! (also you can type feedback in search bar)"
 } as const;
 
 const FEEDBACK_CATEGORY_OPTIONS = [
@@ -6765,13 +6765,15 @@ function MainModeApp() {
       let updated: Song | null = null;
       const publicCoverUrl = asset?.url || (asset?.file ? pixelArtUrl(asset.file) : "");
 
-      if (asset?.path && window.localitfy.setSongCover) {
-        updated = await window.localitfy.setSongCover(song.id, asset.path);
-      } else if (publicCoverUrl && window.localitfy.patchSong) {
+      if ((asset?.path || publicCoverUrl) && window.localitfy.patchSong) {
         updated = await window.localitfy.patchSong(song.id, {
-          coverPath: asset?.path || null,
-          coverUrl: publicCoverUrl
+          coverPath: asset?.path || publicCoverUrl || null,
+          coverUrl: publicCoverUrl || null,
+          coverSource: "fallback",
+          coverUpdatedAt: new Date().toISOString()
         });
+      } else if (asset?.path && window.localitfy.setSongCover) {
+        updated = await window.localitfy.setSongCover(song.id, asset.path, "fallback");
       } else if (window.localitfy.randomizeSongCover) {
         updated = await window.localitfy.randomizeSongCover(song.id);
       }
@@ -6824,11 +6826,11 @@ function MainModeApp() {
     setStatusText("resetting cover...");
     showAppToast("resetting cover...", "work");
 
-    const optimistic = { ...song, coverPath: null, savedCoverPath: "", savedCoverExists: false, usesFallbackCover: true, missingSavedCover: true, coverUrl: null, coverThumbUrl: null, coverThumbnailUrl: null, thumbnailUrl: null };
+    const optimistic = { ...song, coverPath: null, coverSource: "none", coverUpdatedAt: new Date().toISOString(), savedCoverPath: "", savedCoverExists: false, usesFallbackCover: true, missingSavedCover: true, coverUrl: null, coverThumbUrl: null, coverThumbnailUrl: null, thumbnailUrl: null };
     replaceSong(optimistic as Song);
 
     try {
-      const updated = await window.localitfy.patchSong(song.id, { coverPath: null, coverUrl: null });
+      const updated = await window.localitfy.patchSong(song.id, { coverPath: null, coverUrl: null, coverSource: "none", coverUpdatedAt: new Date().toISOString() });
       if (updated) replaceSong(updated);
       setStatusText("cover reset to default");
       showAppToast("cover reset to default", "success");
@@ -6952,13 +6954,15 @@ function MainModeApp() {
 
         const publicCoverUrl = asset?.url || (asset?.file ? pixelArtUrl(asset.file) : "");
 
-        if (asset?.path && window.localitfy.setSongCover) {
-          updated = await window.localitfy.setSongCover(song.id, asset.path);
-        } else if (publicCoverUrl && window.localitfy.patchSong) {
+        if ((asset?.path || publicCoverUrl) && window.localitfy.patchSong) {
           updated = await window.localitfy.patchSong(song.id, {
-            coverPath: asset?.path || null,
-            coverUrl: publicCoverUrl
+            coverPath: asset?.path || publicCoverUrl || null,
+            coverUrl: publicCoverUrl || null,
+            coverSource: "fallback",
+            coverUpdatedAt: new Date().toISOString()
           });
+        } else if (asset?.path && window.localitfy.setSongCover) {
+          updated = await window.localitfy.setSongCover(song.id, asset.path, "fallback");
         } else if (window.localitfy.randomizeSongCover) {
           updated = await window.localitfy.randomizeSongCover(song.id);
         }
@@ -6966,8 +6970,10 @@ function MainModeApp() {
         const finalSong = updated || (asset
           ? {
               ...song,
-              coverPath: asset.path || null,
-              coverUrl: publicCoverUrl || song.coverUrl
+              coverPath: asset.path || publicCoverUrl || null,
+              coverUrl: publicCoverUrl || song.coverUrl,
+              coverSource: "fallback",
+              coverUpdatedAt: new Date().toISOString()
             }
           : null);
 
@@ -7122,13 +7128,15 @@ function MainModeApp() {
         let updated: Song | null = null;
         const publicCoverUrl = asset.url || (asset.file ? pixelArtUrl(asset.file) : "");
 
-        if (asset.path && window.localitfy.setSongCover) {
-          updated = await window.localitfy.setSongCover(song.id, asset.path);
-        } else if (publicCoverUrl && window.localitfy.patchSong) {
+        if ((asset.path || publicCoverUrl) && window.localitfy.patchSong) {
           updated = await window.localitfy.patchSong(song.id, {
-            coverPath: asset.path || null,
-            coverUrl: publicCoverUrl
+            coverPath: asset.path || publicCoverUrl || null,
+            coverUrl: publicCoverUrl || null,
+            coverSource: "fallback",
+            coverUpdatedAt: new Date().toISOString()
           });
+        } else if (asset.path && window.localitfy.setSongCover) {
+          updated = await window.localitfy.setSongCover(song.id, asset.path, "fallback");
         } else if (window.localitfy.randomizeSongCover) {
           updated = await window.localitfy.randomizeSongCover(song.id);
         }
@@ -7136,8 +7144,10 @@ function MainModeApp() {
         const finalSong = updated || (asset
           ? {
               ...song,
-              coverPath: asset.path || null,
-              coverUrl: publicCoverUrl || song.coverUrl
+              coverPath: asset.path || publicCoverUrl || null,
+              coverUrl: publicCoverUrl || song.coverUrl,
+              coverSource: "fallback",
+              coverUpdatedAt: new Date().toISOString()
             }
           : null);
 
@@ -7209,8 +7219,9 @@ function MainModeApp() {
     try {
       const updatedSongs = await window.localitfy.patchSongs?.(safeIds, patch);
       if (Array.isArray(updatedSongs)) {
-        setSongs(updatedSongs);
-        return updatedSongs;
+        const orderedSongs = applyLibraryOrder(sanitizeSongList(updatedSongs));
+        setSongs(orderedSongs);
+        return orderedSongs;
       }
     } catch {
       // optimistic bulk update stays
@@ -11407,7 +11418,7 @@ function MainModeApp() {
         askUpdaterToInstall={askUpdaterToInstall}
         skipAvailableUpdate={skipAvailableUpdate}
         setWhatsNewOpen={setWhatsNewOpen}
-        whatsNewItems={LOCALTIFY_041_WHATS_NEW_ITEMS}
+        whatsNewItems={LOCALTIFY_042_WHATS_NEW_ITEMS}
         copyDiagnosticsInfo={copyDiagnosticsInfo}
         diagnosticsCopied={diagnosticsCopied}
         diagnosticsInfo={diagnosticsInfo}

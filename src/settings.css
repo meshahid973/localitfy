@@ -9657,10 +9657,13 @@ body.localitfyThemePainting .toggleRow{
 }
 
 
-/* Stable settings layout */
-.settingsPage{
+/* Settings layout cleanup */
+.settingsPage,
+.settingsCategoryContent,
+.settingsCategoryPage{
   min-width: 0 !important;
   overflow-x: hidden !important;
+  contain: layout style !important;
 }
 
 .settingsPanelCard,
@@ -9684,9 +9687,24 @@ body.localitfyThemePainting .toggleRow{
 .settingsChoice,
 .settingSwitchCard,
 .rangeRow,
-.toggleRow{
+.toggleRow,
+.themeTokenCard{
   min-width: 0 !important;
   overflow: hidden !important;
+  transform-style: flat !important;
+  perspective: none !important;
+  backface-visibility: hidden !important;
+}
+
+.settingsChoice::before,
+.settingsChoice::after,
+.settingsThemeCard::before,
+.settingsThemeCard::after,
+.settingsPageCard::before,
+.settingsPageCard::after,
+.settingsPanelCard::before,
+.settingsPanelCard::after{
+  pointer-events: none !important;
 }
 
 .settingsThemeCard strong,
@@ -9702,4 +9720,13 @@ body.localitfyThemePainting .toggleRow{
 .settingsPage select,
 .settingsPage textarea{
   max-width: 100% !important;
+}
+
+.settingsChoice:focus-visible,
+.settingsThemeCard:focus-visible,
+.settingsActionButton:focus-visible,
+.settingsTinyButton:focus-visible,
+.cleanToggleLabel:focus-within{
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .16), inset 0 1px 0 rgba(255,255,255,.05) !important;
 }

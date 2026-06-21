@@ -20523,48 +20523,147 @@ body.localitfyThemePainting .homeSongRow{
   }
 }
 
+/* Quick library grid cleanup */
+.homeView .homeAlbumGrid.virtualHomeGridViewport,
+.app .homeAlbumGrid.virtualHomeGridViewport,
+.homeView .virtualHomeGridViewport,
+.app .virtualHomeGridViewport{
+  --home-card-fixed-height: 318px !important;
+  --home-card-row-height: 344px !important;
+  --home-card-gap: 16px !important;
+  --home-card-row-gap: 20px !important;
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: min(640px, calc(100vh - 285px)) !important;
+  max-height: min(760px, calc(100vh - 245px)) !important;
+  padding: 10px 12px 58px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-gutter: stable both-edges !important;
+  contain: layout style !important;
+}
 
-/* Stable section layout */
+.homeView .virtualHomeGridCanvas,
+.app .virtualHomeGridCanvas{
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 .homeView .virtualHomeGridRow,
 .app .virtualHomeGridRow{
-  align-items: stretch !important;
+  position: absolute !important;
+  inset: 0 0 auto 0 !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  height: var(--home-card-row-height) !important;
+  min-height: var(--home-card-row-height) !important;
+  display: grid !important;
+  column-gap: var(--home-card-gap) !important;
+  row-gap: 0 !important;
+  align-items: start !important;
+  padding: 0 0 var(--home-card-row-gap) !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  will-change: transform !important;
 }
 
 .homeView .virtualHomeGridRow > .homeAlbumCard,
 .app .virtualHomeGridRow > .homeAlbumCard,
 .homeView .virtualHomeGridViewport .homeAlbumCard,
 .app .virtualHomeGridViewport .homeAlbumCard{
-  height: 100% !important;
-  display: grid !important;
-  grid-template-rows: auto 56px 20px 34px !important;
-  align-content: start !important;
+  align-self: start !important;
+  justify-self: stretch !important;
+  height: var(--home-card-fixed-height) !important;
+  min-height: var(--home-card-fixed-height) !important;
+  max-height: var(--home-card-fixed-height) !important;
+  margin: 0 !important;
 }
 
 .homeView .homeAlbumCard,
 .app .homeAlbumCard{
   display: grid !important;
-  grid-template-rows: auto 56px 20px 34px !important;
-  align-content: start !important;
+  grid-template-rows: minmax(0, 1fr) 58px 22px 34px !important;
+  gap: 8px !important;
+  align-content: stretch !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+}
+
+.homeView .homeAlbumPlayZone,
+.app .homeAlbumPlayZone{
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  height: auto !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  align-self: start !important;
+  justify-self: stretch !important;
+}
+
+.homeView .homeAlbumArt,
+.app .homeAlbumArt,
+.homeView .homeAlbumArt .coverImage,
+.app .homeAlbumArt .coverImage,
+.homeView .homeAlbumArt img,
+.app .homeAlbumArt img,
+.homeView .homeAlbumPlayZone img,
+.app .homeAlbumPlayZone img,
+.homeView .homeFreshCover img,
+.app .homeFreshCover img,
+.homeView .recentCoverThumb img,
+.app .recentCoverThumb img{
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+  transform: none !important;
 }
 
 .homeView .homeAlbumMeta,
 .app .homeAlbumMeta{
-  min-height: 56px !important;
-  max-height: 56px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  display: grid !important;
+  grid-template-rows: 36px 16px !important;
+  gap: 6px !important;
+  align-content: start !important;
+  margin: 0 !important;
+  padding: 0 2px !important;
   overflow: hidden !important;
 }
 
 .homeView .homeAlbumMeta strong,
 .app .homeAlbumMeta strong{
-  min-height: 32px !important;
-  max-height: 32px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  overflow: hidden !important;
 }
 
 .homeView .homeAlbumMeta small,
-.app .homeAlbumMeta small{
-  display: block !important;
-  min-height: 16px !important;
-  max-height: 16px !important;
+.app .homeAlbumMeta small,
+.homeView .homeAlbumStats,
+.app .homeAlbumStats{
   overflow: hidden !important;
   white-space: nowrap !important;
   text-overflow: ellipsis !important;
@@ -20572,44 +20671,59 @@ body.localitfyThemePainting .homeSongRow{
 
 .homeView .homeAlbumStats,
 .app .homeAlbumStats{
-  min-height: 20px !important;
-  max-height: 20px !important;
-  margin-top: 6px !important;
-  overflow: hidden !important;
+  min-height: 22px !important;
+  max-height: 22px !important;
+  margin: 0 !important;
+  padding: 0 2px !important;
 }
 
 .homeView .homeAlbumActions,
 .app .homeAlbumActions{
   min-height: 34px !important;
   max-height: 34px !important;
-  margin-top: 9px !important;
+  margin: 0 !important;
+  padding: 0 2px !important;
+  align-self: end !important;
   overflow: hidden !important;
 }
 
-.homeView .homeAlbumPlayZone,
-.app .homeAlbumPlayZone,
-.homeView .homeFreshCover,
-.app .homeFreshCover,
-.homeView .recentCoverThumb,
-.app .recentCoverThumb{
-  aspect-ratio: 1 / 1 !important;
-}
-
-.homeView .homeAlbumArt img,
-.app .homeAlbumArt img,
-.homeView .homeFreshCover img,
-.app .homeFreshCover img,
-.homeView .recentCoverThumb img,
-.app .recentCoverThumb img{
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: center center !important;
+.homeView .homeAlbumActions .iconAction,
+.app .homeAlbumActions .iconAction,
+.homeView .homeAlbumActions .playlistAddAction,
+.app .homeAlbumActions .playlistAddAction,
+.homeView .homeAlbumActions .likeActionV443,
+.app .homeAlbumActions .likeActionV443{
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  max-width: 30px !important;
+  max-height: 30px !important;
+  transform: none !important;
 }
 
 .homeView .homeAlbumCard:hover,
 .app .homeAlbumCard:hover,
+.homeView .homeAlbumCard.active,
+.app .homeAlbumCard.active,
 .homeView .homeFreshCard:hover,
 .app .homeFreshCard:hover{
+  transform: none !important;
   translate: none !important;
+}
+
+@media (max-width: 1100px){
+  .homeView .virtualHomeGridViewport,
+  .app .virtualHomeGridViewport{
+    --home-card-fixed-height: 304px !important;
+    --home-card-row-height: 330px !important;
+  }
+}
+
+@media (max-width: 760px){
+  .homeView .virtualHomeGridViewport,
+  .app .virtualHomeGridViewport{
+    --home-card-fixed-height: 292px !important;
+    --home-card-row-height: 318px !important;
+  }
 }
