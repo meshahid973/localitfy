@@ -9828,3 +9828,112 @@ body.localitfyThemePainting .toggleRow{
 .app[data-card-background="oledFlat"] :is(.settingsPageCard,.settingsPanelCard,.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeTokenCard,.customThemeTokenRowV025,.customThemePresetButtonV025,.settingsThemeSelectPanel,.themeEditorCard,.customThemeStudioV025){
   background: rgba(2,2,6,.96) !important;
 }
+
+/* V059 settings layout and theme surface fixes. */
+.settingsPage{
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 clamp(18px, 2.2vw, 34px) 140px !important;
+}
+
+.settingsLayout{
+  width: 100% !important;
+  max-width: none !important;
+  grid-template-columns: clamp(230px, 15vw, 280px) minmax(0, 1fr) !important;
+  align-items: start !important;
+}
+
+.settingsCategoryContent,
+.settingsCategoryContentV027{
+  width: 100% !important;
+  max-width: none !important;
+  padding: 18px clamp(18px, 2.1vw, 34px) 44px !important;
+}
+
+.settingsCategoryPage{
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.settingsPage :is(.settingsHero,.settingsPanelCard,.settingsPageCard,.settingsCategorySurfaceV027,.settingsWideCard,.settingsBlockV027,.settingsPanelV027,.settingsSectionV027,.appearanceUnifiedSectionV356,.appearanceUnifiedControlDeckV356,.customThemeManagerV027,.visualCustomizationCardV205){
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 24%, rgba(255,255,255,.08)) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .065), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.012)),
+    var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.78))) !important;
+  box-shadow: 0 16px 44px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.044) !important;
+}
+
+.app[data-custom-theme="true"] .settingsPage :is(.settingsHero,.settingsPanelCard,.settingsPageCard,.settingsCategorySurfaceV027,.settingsWideCard,.settingsBlockV027,.settingsPanelV027,.settingsSectionV027,.appearanceUnifiedSectionV356,.appearanceUnifiedControlDeckV356,.customThemeManagerV027,.visualCustomizationCardV205){
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .070), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.042), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--bg, #050517) 12%) !important;
+}
+
+.settingsThemeSelectPanel{
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(240px, 360px) minmax(260px, 1fr) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+.settingsSelectField,
+.settingsThemeSelectedPreview{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.016)),
+    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--bg, #050517) 12%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 20%, rgba(255,255,255,.08)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.settingsSelectField select,
+.settingsThemeSelectPanel select,
+.settingsTextFieldV027 input,
+.settingsTextInputV027,
+.themeTokenCard code,
+.simpleThemeTokenCardV025 code{
+  color: var(--lt-text) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--localtify-owned-card-strong, var(--lt-surface-raised, rgba(21,21,40,.94))) 88%, var(--bg, #050517) 12%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 22%, rgba(255,255,255,.08)) !important;
+}
+
+.themeTokenCard,
+.simpleThemeTokenCardV025,
+.customThemeTokenRowV025,
+.settingsThemeCard,
+.settingsChoice{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--bg, #050517) 12%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 16%, rgba(255,255,255,.06)) !important;
+}
+
+.settingsThemeCard:hover,
+.settingsChoice:hover,
+.themeTokenCard:hover,
+.simpleThemeTokenCardV025:hover{
+  background:
+    radial-gradient(circle at 12% 8%, rgba(var(--lt-accent-rgb), .10), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,.060), rgba(255,255,255,.016)),
+    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 86%, var(--lt-accent, #8dffce) 14%) !important;
+}
+
+.homeCardsSettingsPanelV327,
+.albumCoverCardBlurToggleV327{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--bg, #050517) 12%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 18%, rgba(255,255,255,.07)) !important;
+}
+
+@media (max-width: 980px){
+  .settingsLayout,
+  .settingsThemeSelectPanel{
+    grid-template-columns: 1fr !important;
+  }
+}

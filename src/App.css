@@ -13190,3 +13190,45 @@ body.isResizingPlayer .app *{
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .14), rgba(var(--lt-accent-rgb), .055)),
     var(--localtify-sidebar-bg-2, var(--localtify-owned-panel-soft)) !important;
 }
+
+/* V059 theme surface contract: App.css owns the outer shell only. */
+.app{
+  --localtify-owned-panel: var(--localtify-panel-bg, var(--lt-surface-raised, rgba(21, 21, 40, .76)));
+  --localtify-owned-panel-soft: var(--localtify-panel-bg-2, var(--lt-surface-soft, rgba(21, 21, 40, .48)));
+  --localtify-owned-card: var(--localtify-card-bg, var(--lt-surface-raised, rgba(21, 21, 40, .86)));
+  --localtify-owned-card-soft: var(--localtify-card-bg-soft, var(--lt-surface-soft, rgba(21, 21, 40, .62)));
+  --localtify-owned-card-strong: var(--localtify-card-bg-strong, var(--lt-surface-raised, rgba(21, 21, 40, .94)));
+  --localtify-owned-line: var(--localtify-line-soft, rgba(var(--lt-accent-rgb), .16));
+}
+
+.app .content,
+.content{
+  background:
+    radial-gradient(circle at 12% 0%, rgba(var(--lt-accent-rgb), .070), transparent 34%),
+    radial-gradient(circle at 92% 12%, rgba(var(--accent-2-rgb, var(--lt-accent-rgb)), .045), transparent 35%),
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--bg, #050517) 91%, var(--lt-accent, #8dffce) 9%),
+      var(--bg, #050517) 44%,
+      color-mix(in oklab, var(--bg, #050517) 88%, #000 12%)) !important;
+}
+
+.app .sidebar,
+.sidebar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.020), rgba(255,255,255,.006)),
+    var(--localtify-sidebar-bg, color-mix(in oklab, var(--bg, #050517) 88%, #000 12%)) !important;
+}
+
+.app .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.settingsHero):not(.playerBar){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.012)),
+    var(--localtify-owned-panel) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 20%, rgba(255,255,255,.08)) !important;
+  box-shadow: 0 14px 36px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.app[data-custom-theme="true"] .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.settingsHero):not(.playerBar){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.014)),
+    var(--localtify-owned-card-soft) !important;
+}

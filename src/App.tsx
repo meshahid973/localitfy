@@ -2032,6 +2032,10 @@ function MainModeApp() {
       "--lt-accent-rgb": hexToRgbString(customThemeColor, "#8dffce"),
       "--localtify-panel-bg": hexToRgbaString(customThemeSurface, "#151528", 0.74),
       "--localtify-panel-bg-2": hexToRgbaString(customThemeSurface, "#151528", 0.54),
+      "--localtify-card-bg": hexToRgbaString(customThemeSurface, "#151528", 0.86),
+      "--localtify-card-bg-soft": hexToRgbaString(customThemeSurface, "#151528", 0.66),
+      "--localtify-card-bg-strong": hexToRgbaString(customThemeSurface, "#151528", 0.94),
+      "--localtify-card-rgb": hexToRgbString(customThemeSurface, "#151528"),
       "--localtify-line-soft": hexToRgbaString(customThemeColor, "#8dffce", 0.18),
       "--localtify-sidebar-bg": hexToRgbaString(customThemeBackground, "#050517", 0.96),
       "--localtify-sidebar-bg-2": hexToRgbaString(customThemeSurface, "#151528", 0.34)

@@ -20866,3 +20866,80 @@ body.localitfyThemePainting .homeSongRow{
 .app[data-card-background="oledFlat"] :is(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.homeListenCard,.homeFreshCard,.homeAlbumCard){
   background: rgba(2,2,6,.96) !important;
 }
+
+/* V059 home/library surface and card alignment fixes. */
+.app{
+  --home-panel-bg-owned: var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.78)));
+  --home-card-bg-owned: var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86)));
+  --home-card-bg-soft-owned: var(--localtify-owned-card-soft, var(--lt-surface-soft, rgba(21,21,40,.64)));
+}
+
+.app :is(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanel){
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 26%, rgba(255,255,255,.075)) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .075), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.012)),
+    var(--home-panel-bg-owned) !important;
+  box-shadow: 0 18px 48px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.app[data-custom-theme="true"] :is(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanel){
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .075), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--home-panel-bg-owned) 92%, var(--bg, #050517) 8%) !important;
+}
+
+.app :is(.homeListenCard,.homeFreshCard,.homeAlbumCard,.homeLibraryPanel .songRow,.homeShelfPanel .songRow,.homeListenPanel .songRow,.libraryCard,.libraryCardV025,.albumCardV318){
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 15%, rgba(255,255,255,.065)) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--home-card-bg-owned) 88%, var(--bg, #050517) 12%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 8px 22px rgba(0,0,0,.18) !important;
+}
+
+.app[data-custom-theme="true"] :is(.homeListenCard,.homeFreshCard,.homeAlbumCard,.homeLibraryPanel .songRow,.homeShelfPanel .songRow,.homeListenPanel .songRow,.libraryCard,.libraryCardV025,.albumCardV318){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.056), rgba(255,255,255,.016)),
+    color-mix(in oklab, var(--home-card-bg-owned) 90%, var(--bg, #050517) 10%) !important;
+}
+
+.app :is(.homeListenCard:hover,.homeFreshCard:hover,.homeAlbumCard:hover,.homeLibraryPanel .songRow:hover,.homeShelfPanel .songRow:hover,.homeListenPanel .songRow:hover,.libraryCard:hover,.libraryCardV025:hover,.albumCardV318:hover){
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 40%, rgba(255,255,255,.10)) !important;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(var(--lt-accent-rgb), .11), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.018)),
+    color-mix(in oklab, var(--home-card-bg-owned) 88%, var(--lt-accent, #8dffce) 12%) !important;
+}
+
+.app :is(.homeAlbumCard,.homeFreshCard,.homeListenCard){
+  transform-origin: center top !important;
+}
+
+.app :is(.homeAlbumCard:hover,.homeFreshCard:hover,.homeListenCard:hover){
+  transform: none !important;
+}
+
+.app :is(.homeAlbumGrid,.homeAlbumGridScroller,.homeAlbumScroller,.homeLibraryScroller,.virtualHomeGridViewport){
+  padding-top: 10px !important;
+  overflow: visible !important;
+}
+
+.app :is(.homeShelfPanel,.homeFreshPanel,.homeLibraryPanel){
+  overflow: visible !important;
+}
+
+.app :is(.homeAlbumArt,.homeListenCover,.homeFreshCover,.recentCoverThumb,.songArt,.libraryCardCover,.albumCardCoverV318){
+  aspect-ratio: 1 / 1 !important;
+  overflow: hidden !important;
+}
+
+.app :is(.homeAlbumArt,.homeListenCover,.homeFreshCover,.recentCoverThumb,.songArt,.libraryCardCover,.albumCardCoverV318) img,
+.app :is(.homeAlbumArt,.homeListenCover,.homeFreshCover,.recentCoverThumb,.songArt,.libraryCardCover,.albumCardCoverV318) .coverImage{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+  transform: none !important;
+}

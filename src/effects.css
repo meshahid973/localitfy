@@ -2253,3 +2253,8 @@ body.localtifyNoMoreBlur .app :where(.homeAlbumCard,
     transition-duration: 1ms !important;
   }
 }
+
+/* V059 effects.css only handles motion/effects here, not page/card background ownership. */
+.app[data-custom-theme="true"] :where(.homeAlbumCard,.settingsPageCard,.settingsPanelCard,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.playerBar){
+  transition-property: border-color, background, box-shadow, opacity, transform, filter !important;
+}
