@@ -13156,3 +13156,37 @@ body.isResizingPlayer .app *{
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+
+/* Theme-aware shell surfaces: App.css owns only the outer shell, not page cards. */
+.app{
+  --localtify-owned-panel: var(--localtify-panel-bg, var(--lt-surface-raised, rgba(21, 21, 40, .76)));
+  --localtify-owned-panel-soft: var(--localtify-panel-bg-2, var(--lt-surface-soft, rgba(21, 21, 40, .48)));
+  --localtify-owned-line: var(--localtify-line-soft, rgba(var(--lt-accent-rgb), .16));
+}
+
+.app .content,
+.content{
+  background:
+    radial-gradient(circle at 10% 0%, rgba(var(--lt-accent-rgb), .070), transparent 34%),
+    radial-gradient(circle at 88% 10%, rgba(var(--accent-2-rgb, var(--lt-accent-rgb)), .045), transparent 35%),
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--bg, #050517) 92%, var(--lt-accent, #8dffce) 8%),
+      var(--bg, #050517) 38%,
+      color-mix(in oklab, var(--bg, #050517) 88%, #000 12%)) !important;
+}
+
+.app .sidebar,
+.sidebar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,.008)),
+    var(--localtify-sidebar-bg, color-mix(in oklab, var(--bg, #050517) 86%, #000 14%)) !important;
+}
+
+.app .navItem.active,
+.app .navItem[aria-current="page"],
+.app .sidebarToolButton.active{
+  background:
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .14), rgba(var(--lt-accent-rgb), .055)),
+    var(--localtify-sidebar-bg-2, var(--localtify-owned-panel-soft)) !important;
+}

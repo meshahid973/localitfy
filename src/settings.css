@@ -9767,3 +9767,64 @@ body.localitfyThemePainting .toggleRow{
   min-width: 0 !important;
   max-width: 100% !important;
 }
+
+
+/* Settings theme area ownership: settings.css owns settings panels, theme cards and custom color cards. */
+.app[data-card-background="glassy"] :is(.settingsPageCard,.settingsPanelCard,.settingsThemeSelectPanel,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027),
+.app[data-card-background="solid"] :is(.settingsPageCard,.settingsPanelCard,.settingsThemeSelectPanel,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 26%, rgba(255,255,255,.065)) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .075), transparent 36%),
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.014)),
+    var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.78))) !important;
+  box-shadow:
+    0 18px 54px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.052) !important;
+}
+
+.app[data-card-background="glassy"] :is(.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeTokenCard,.customThemeTokenRowV025,.customThemePresetButtonV025,.settingsThemeSelectedPreview),
+.app[data-card-background="solid"] :is(.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeTokenCard,.customThemeTokenRowV025,.customThemePresetButtonV025,.settingsThemeSelectedPreview){
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 16%, rgba(255,255,255,.065)) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.016)),
+    color-mix(in oklab, var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.82))) 86%, var(--bg, #050517) 14%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 8px 22px rgba(0,0,0,.16) !important;
+}
+
+.app[data-card-background="glassy"] :is(.settingsThemeCard.active,.settingsChoice.active,.customThemePresetButtonV025.active,.settingsThemeCard:hover,.settingsChoice:hover,.customThemePresetButtonV025:hover),
+.app[data-card-background="solid"] :is(.settingsThemeCard.active,.settingsChoice.active,.customThemePresetButtonV025.active,.settingsThemeCard:hover,.settingsChoice:hover,.customThemePresetButtonV025:hover){
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 48%, rgba(255,255,255,.12)) !important;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(var(--lt-accent-rgb), .12), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.068), rgba(255,255,255,.020)),
+    color-mix(in oklab, var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--lt-accent, #8dffce) 12%) !important;
+}
+
+.settingsPage :is(input,select,textarea,.settingsThemeSelectV027,.customThemeTokenHexV027,.customThemeHexValueV027){
+  color: var(--lt-text) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 18%, rgba(255,255,255,.08)) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018)),
+    color-mix(in oklab, var(--bg, #050517) 70%, var(--localtify-owned-panel, var(--lt-surface-raised, #151528)) 30%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+
+.settingsPage :is(input,select,textarea,.settingsThemeSelectV027):focus{
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 60%, rgba(255,255,255,.12)) !important;
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .14), inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+
+.settingsThemeGrid,
+.customThemePresetGridV025{
+  align-items: stretch !important;
+}
+
+.customThemeTokenListV025{
+  gap: 12px !important;
+}
+
+.app[data-card-background="oledFlat"] :is(.settingsPageCard,.settingsPanelCard,.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeTokenCard,.customThemeTokenRowV025,.customThemePresetButtonV025,.settingsThemeSelectPanel,.themeEditorCard,.customThemeStudioV025){
+  background: rgba(2,2,6,.96) !important;
+}

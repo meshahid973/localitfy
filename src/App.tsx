@@ -2019,7 +2019,22 @@ function MainModeApp() {
       "--theme-card-border": hexToRgbaString(customThemeColor, "#8dffce", 0.16),
       "--theme-hover-glass": hexToRgbaString(customThemeColor, "#8dffce", 0.09),
       "--theme-hover-border": hexToRgbaString(customThemeColor, "#8dffce", 0.32),
-      "--card-rgb": hexToRgbString(customThemeColor, "#8dffce")
+      "--card-rgb": hexToRgbString(customThemeColor, "#8dffce"),
+      "--lt-bg": customThemeBackground,
+      "--lt-bg-soft": hexToRgbaString(customThemeBackground, "#050517", 0.86),
+      "--lt-surface": hexToRgbaString(customThemeSurface, "#151528", 0.72),
+      "--lt-surface-soft": hexToRgbaString(customThemeSurface, "#151528", 0.48),
+      "--lt-surface-raised": hexToRgbaString(customThemeSurface, "#151528", 0.86),
+      "--lt-text": customThemeText,
+      "--lt-muted": hexToRgbaString(customThemeText, "#f5f3ff", 0.58),
+      "--lt-faint": hexToRgbaString(customThemeText, "#f5f3ff", 0.36),
+      "--lt-accent": customThemeColor,
+      "--lt-accent-rgb": hexToRgbString(customThemeColor, "#8dffce"),
+      "--localtify-panel-bg": hexToRgbaString(customThemeSurface, "#151528", 0.74),
+      "--localtify-panel-bg-2": hexToRgbaString(customThemeSurface, "#151528", 0.54),
+      "--localtify-line-soft": hexToRgbaString(customThemeColor, "#8dffce", 0.18),
+      "--localtify-sidebar-bg": hexToRgbaString(customThemeBackground, "#050517", 0.96),
+      "--localtify-sidebar-bg-2": hexToRgbaString(customThemeSurface, "#151528", 0.34)
     } as CSSProperties;
   }, [
     settings.customThemeEnabled,

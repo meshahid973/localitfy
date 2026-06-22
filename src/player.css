@@ -2998,3 +2998,25 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
+
+
+/* Player surface ownership: player.css owns the bottom player bar and follows theme/custom colors. */
+.app[data-card-background="glassy"] .playerBar,
+.app[data-card-background="solid"] .playerBar{
+  border-top-color: color-mix(in oklab, var(--lt-accent, #8dffce) 22%, rgba(255,255,255,.07)) !important;
+  background:
+    radial-gradient(circle at 18% 48%, rgba(var(--lt-accent-rgb), .10), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+    color-mix(in oklab, var(--bg, #050517) 58%, var(--localtify-owned-panel, var(--lt-surface-raised, #151528)) 42%) !important;
+  box-shadow:
+    0 -18px 54px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+
+.app[data-card-background="glassy"] :is(.playerButton,.playerControlButton,.circleButton.playerButton,.volumeSliderShell),
+.app[data-card-background="solid"] :is(.playerButton,.playerControlButton,.circleButton.playerButton,.volumeSliderShell){
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 18%, rgba(255,255,255,.07)) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.060), rgba(255,255,255,.018)),
+    color-mix(in oklab, var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.82))) 82%, var(--bg, #050517) 18%) !important;
+}
