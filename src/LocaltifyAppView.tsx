@@ -3792,11 +3792,17 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   const rawColumns = Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap));
   const columns = Math.max(1, Math.min(list.length || 1, rawColumns || 1));
   const rowCount = Math.max(1, Math.ceil(list.length / columns));
+  const rowEstimate = useMemo(() => {
+    if (isSimpleGrid) return viewportWidth > 0 && viewportWidth < 760 ? 292 : 318;
+    if (viewportWidth > 0 && viewportWidth < 760) return 318;
+    if (viewportWidth > 0 && viewportWidth < 1100) return 330;
+    return 344;
+  }, [isSimpleGrid, viewportWidth]);
 
   const rowVirtualizer = useVirtualizer({
     count: list.length ? rowCount : 0,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => (isSimpleGrid ? 318 : 344),
+    estimateSize: () => rowEstimate,
     overscan: 2,
     getItemKey: (rowIndex) => {
       const firstSong = list[rowIndex * columns];
@@ -3806,7 +3812,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
 
   useEffect(() => {
     rowVirtualizer.measure();
-  }, [columns, isSimpleGrid, list.length, rowVirtualizer]);
+  }, [columns, list.length, rowEstimate, rowVirtualizer]);
 
   if (!list.length) {
     return (

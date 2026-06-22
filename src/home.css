@@ -20727,3 +20727,104 @@ body.localitfyThemePainting .homeSongRow{
     --home-card-row-height: 318px !important;
   }
 }
+
+
+/* Home surface and quick-library layout ownership */
+.app[data-card-background="solid"] :is(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanelV025,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025,.albumCardV318,.albumTrackRowV318,.albumSongPickerRowV318,.coverGalleryPanelClean,.coverTargetPanelCleanOnly,.downloadCard){
+  background: rgba(18, 17, 24, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-card-background="glassy"] :is(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanelV025,.coverGalleryPanelClean,.coverTargetPanelCleanOnly,.downloadCard){
+  background: rgba(17, 15, 22, 0.68) !important;
+  border-color: rgba(255, 255, 255, 0.095) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 18px 42px rgba(0, 0, 0, 0.22) !important;
+  backdrop-filter: blur(16px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
+}
+
+.app[data-card-background="glassy"] :is(.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025,.albumCardV318,.albumTrackRowV318,.albumSongPickerRowV318){
+  background: rgba(19, 17, 25, 0.58) !important;
+  border-color: rgba(255, 255, 255, 0.095) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
+}
+
+.app[data-card-background="oledFlat"] :is(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanelV025,.homeListenCard,.homeFreshCard,.homeAlbumCard,.songRow,.libraryCard,.libraryCardV025,.albumCardV318,.albumTrackRowV318,.albumSongPickerRowV318,.coverGalleryPanelClean,.coverTargetPanelCleanOnly,.downloadCard){
+  background: rgba(2, 2, 6, 0.98) !important;
+  border-color: rgba(255, 255, 255, 0.052) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.homeView .homeAlbumGrid.virtualHomeGridViewport,
+.app .homeAlbumGrid.virtualHomeGridViewport,
+.homeView .virtualHomeGridViewport,
+.app .virtualHomeGridViewport{
+  --home-card-fixed-height: 318px !important;
+  --home-card-row-height: 344px !important;
+  --home-card-gap: 16px !important;
+  --home-card-row-gap: 20px !important;
+}
+
+.homeView .virtualHomeGridRow,
+.app .virtualHomeGridRow{
+  height: var(--home-card-row-height) !important;
+  min-height: var(--home-card-row-height) !important;
+  max-height: var(--home-card-row-height) !important;
+  overflow: visible !important;
+}
+
+.homeView .virtualHomeGridRow > .homeAlbumCard,
+.app .virtualHomeGridRow > .homeAlbumCard{
+  height: var(--home-card-fixed-height) !important;
+  min-height: var(--home-card-fixed-height) !important;
+  max-height: var(--home-card-fixed-height) !important;
+  contain: layout paint style !important;
+}
+
+.homeView .homeAlbumCard .homeAlbumActions,
+.app .homeAlbumCard .homeAlbumActions{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  align-self: end !important;
+}
+
+.homeView .homeAlbumCard :is(.homeAlbumArt,.homeAlbumPlayZone,.homeFreshCover,.recentCoverThumb),
+.app .homeAlbumCard :is(.homeAlbumArt,.homeAlbumPlayZone,.homeFreshCover,.recentCoverThumb){
+  overflow: hidden !important;
+}
+
+.homeView .homeAlbumCard :is(img,.coverImage),
+.app .homeAlbumCard :is(img,.coverImage){
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  transform: none !important;
+}
+
+@media (max-width: 1100px){
+  .homeView .homeAlbumGrid.virtualHomeGridViewport,
+  .app .homeAlbumGrid.virtualHomeGridViewport,
+  .homeView .virtualHomeGridViewport,
+  .app .virtualHomeGridViewport{
+    --home-card-fixed-height: 304px !important;
+    --home-card-row-height: 330px !important;
+  }
+}
+
+@media (max-width: 760px){
+  .homeView .homeAlbumGrid.virtualHomeGridViewport,
+  .app .homeAlbumGrid.virtualHomeGridViewport,
+  .homeView .virtualHomeGridViewport,
+  .app .virtualHomeGridViewport{
+    --home-card-fixed-height: 292px !important;
+    --home-card-row-height: 318px !important;
+  }
+}

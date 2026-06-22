@@ -152,73 +152,6 @@
   }
 }
 
-
-.app{
-  --v321-panel-bg: rgba(16, 15, 21, 0.72);
-  --v321-panel-border: rgba(255, 255, 255, 0.075);
-  --v321-card-bg: rgba(14, 13, 18, 0.74);
-  --v321-card-border: rgba(255, 255, 255, 0.08);
-  --v321-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
-  --v321-fast: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.app[data-card-background="solid"]{
-  --v321-panel-bg: rgba(18, 17, 23, 0.96);
-  --v321-card-bg: rgba(20, 19, 25, 0.96);
-  --v321-card-border: rgba(255, 255, 255, 0.07);
-  --v321-card-shadow: none;
-}
-
-.app[data-card-background="glassy"]{
-  --v321-panel-bg: rgba(17, 15, 22, 0.68);
-  --v321-card-bg: rgba(18, 16, 24, 0.62);
-  --v321-card-border: rgba(255, 255, 255, 0.095);
-  --v321-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 18px 42px rgba(0, 0, 0, 0.22);
-}
-
-.app[data-card-background="oledFlat"]{
-  --v321-panel-bg: rgba(3, 3, 7, 0.98);
-  --v321-card-bg: rgba(4, 4, 9, 0.98);
-  --v321-card-border: rgba(255, 255, 255, 0.055);
-  --v321-card-shadow: none;
-}
-
-.app :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard){
-  background: var(--v321-panel-bg) !important;
-  border-color: var(--v321-panel-border) !important;
-  box-shadow: var(--v321-card-shadow) !important;
-  transition: background-color var(--v321-fast), border-color var(--v321-fast), box-shadow var(--v321-fast), transform var(--v321-fast) !important;
-}
-
-.app[data-card-background="glassy"] :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard){
-  backdrop-filter: blur(16px) saturate(1.08) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
-}
-
-.app[data-card-background="solid"] :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard),
-.app[data-card-background="oledFlat"] :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard){
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app[data-card-background="solid"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .albumCardV318, .albumTrackRowV318, .albumSongPickerRowV318){
-  background: rgba(18, 17, 24, 0.96) !important;
-  border-color: rgba(255, 255, 255, 0.07) !important;
-  box-shadow: none !important;
-}
-
-.app[data-card-background="glassy"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .albumCardV318, .albumTrackRowV318, .albumSongPickerRowV318){
-  background: rgba(19, 17, 25, 0.58) !important;
-  border-color: rgba(255, 255, 255, 0.095) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
-}
-
-.app[data-card-background="oledFlat"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .albumCardV318, .albumTrackRowV318, .albumSongPickerRowV318){
-  background: rgba(2, 2, 6, 0.98) !important;
-  border-color: rgba(255, 255, 255, 0.052) !important;
-  box-shadow: none !important;
-}
-
 .app[data-home-banner="dynamic"] .hero.ambientSurface::before,
 .app[data-home-banner="dynamic"] .hero.ambientSurface::after{
   display: block !important;
@@ -679,7 +612,7 @@ body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(
   --lt-sidebar-fast: cubic-bezier(.16, 1, .3, 1);
 }
 
-/* Normal fixed sidebar stays normal. */
+
 main.app.app[data-sidebar-behavior="fixed"] > .appShell{
   grid-template-columns: var(--sidebar-width-live, var(--sidebar-width, 249px)) minmax(0, 1fr) !important;
   overflow: hidden !important;
@@ -693,8 +626,7 @@ main.app.app[data-sidebar-behavior="fixed"] > .appShell > .sidebar{
   clip-path: none !important;
 }
 
-/* Slim/hover keep the app content stable. The sidebar expands over the content,
-   so Home does not re-layout on every hover frame. */
+
 main.app.app[data-sidebar-behavior="slim"] > .appShell,
 main.app.app[data-sidebar-behavior="hover"] > .appShell{
   grid-template-columns: var(--lt-sidebar-closed) minmax(0, 1fr) !important;
@@ -706,8 +638,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .content{
   min-width: 0 !important;
 }
 
-/* Closed rail. Keep it visible. Avoid backdrop-filter here because animating
-   a blurred rail over the Home page was causing stutter. */
+
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
   position: relative !important;
@@ -735,7 +666,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
     background-color 180ms ease !important;
 }
 
-/* Hover open. No appShell :has() and no grid animation. */
+
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
   width: var(--lt-sidebar-open) !important;
@@ -746,7 +677,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
     inset -1px 0 0 rgba(var(--accent-rgb), .16) !important;
 }
 
-/* Disable old pulse/scale/sidebar hover effects. */
+
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
@@ -755,7 +686,7 @@ main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
   filter: none !important;
 }
 
-/* Nav layout: icons stay visible in closed rail. */
+
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .nav,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .nav{
   width: 100% !important;
@@ -832,7 +763,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navLucideIco
   transform: none !important;
 }
 
-/* Closed: text is completely invisible; no half-cut labels while closed/opening. */
+
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText,
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .logoWrap h1,
@@ -849,7 +780,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap p{
     visibility 0ms linear 95ms !important;
 }
 
-/* Open: reveal labels after the rail has expanded enough. */
+
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .navText,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .navText,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap h1,
@@ -885,7 +816,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText smal
   white-space: nowrap !important;
 }
 
-/* Import button: icon-only closed, full button opened. */
+
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarBottom,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarBottom{
   display: grid !important;
@@ -951,7 +882,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarResiz
   display: none !important;
 }
 
-/* Home-specific hover perf: do not let sidebar hover restart expensive card filters. */
+
 main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
   .homeListenCard,
   .homeFreshCard,
@@ -1087,8 +1018,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
   backface-visibility: hidden;
 }
 
-/* Scroll defense: reduce transition churn only.
-   Do not disable filter/backdrop-filter because Localtify's cover blur uses those. */
+
 .app.isScrolling :is(
   .songRow,
   .libraryRow,
@@ -1133,7 +1063,7 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(
   filter: revert !important;
 }
 
-/* Keep sidebar hover cheap without deleting card blur. */
+
 main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
   .homeListenCard,
   .homeFreshCard,
@@ -1158,7 +1088,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   backface-visibility: hidden;
 }
 
-/* Explicitly keep these blur/tint systems alive. */
+
 .app :is(
   .heroAmbiencePulse,
   .homeListenBackgroundImage,
@@ -1189,8 +1119,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   transition: transform 135ms cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-/* Keep high-density rows permanently ready for scrolling.
-   This only promotes geometry; it does not turn off filters or blur. */
+
 .app :is(
   .songRow,
   .libraryRow,
@@ -1206,7 +1135,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   will-change: transform;
 }
 
-/* Active scroll should reduce animation churn, not remove visual identity. */
+
 .app.isScrolling :is(
   .songRow,
   .libraryRow,
@@ -1225,7 +1154,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
   transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-/* Undo old scroll/audio rules that tried to kill blur-heavy layers. */
+
 body.localtifyPerfV303 .app.isScrolling :is(
   .homeListenBackground,
   .homeListenBackgroundImage,
@@ -1248,8 +1177,6 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(
   -webkit-backdrop-filter: revert !important;
 }
 
-
-/* kill the rectangle highlight from older App/effects/home rules */
 main.app.app > .appShell > .sidebar .navItemAnimatedV468,
 main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover,
 main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible,
@@ -1271,14 +1198,14 @@ main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimat
   outline: none !important;
 }
 
-/* do not allow old pseudo indicators/circles to show */
+
 main.app.app > .appShell > .sidebar .navItemAnimatedV468::before,
 main.app.app > .appShell > .sidebar .navItemAnimatedV468::after{
   content: none !important;
   display: none !important;
 }
 
-/* the actual Discord pill */
+
 main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navDiscordPillV468{
   position: absolute !important;
   left: -23px !important;
@@ -1319,7 +1246,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active:focus-visible .n
   height: 42px !important;
 }
 
-/* make active state text/icon visible without a card behind it */
+
 main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIcon,
 main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navText strong{
   color: #fff !important;
@@ -1329,7 +1256,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navText small{
   color: rgba(255,255,255,.58) !important;
 }
 
-/* icon wrapper that old transform:none rules do not target */
+
 main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIcon{
   position: relative !important;
   overflow: visible !important;

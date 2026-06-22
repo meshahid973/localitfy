@@ -805,6 +805,8 @@ function patchSong(id, patch) {
     else if (key === "duration" || key === "durationMs" || key === "playbackPosition" || key === "sourceMatchScore") values.push(Math.max(0, asNumber(value, 0)));
     else if (key === "volumeGain") values.push(asClampedNumber(value, 1, 0.2, 3));
     else if (key === "customVolume") values.push(asClampedNumber(value, 1, 0, 1));
+    else if (key === "coverSource") values.push(normalizeCoverSource(value));
+    else if (key === "coverPath" || key === "coverUpdatedAt") values.push(String(value || "").trim() || null);
     else values.push(value ?? null);
   }
 
@@ -819,12 +821,20 @@ function patchSong(id, patch) {
   return getSong(id);
 }
 
+function normalizeCoverSource(value) {
+  const source = String(value || "").trim().toLowerCase();
+  if (["custom", "folder", "embedded", "spotify", "fallback", "generated", "none", "unknown"].includes(source)) return source;
+  return "none";
+}
+
 function normalizeSongPatchValue(key, value) {
   if (key === "liked") return asBoolInt(value);
   if (key === "playCount") return Math.max(0, Math.floor(asNumber(value, 0)));
   if (key === "duration" || key === "durationMs" || key === "playbackPosition" || key === "sourceMatchScore") return Math.max(0, asNumber(value, 0));
   if (key === "volumeGain") return asClampedNumber(value, 1, 0.2, 3);
   if (key === "customVolume") return asClampedNumber(value, 1, 0, 1);
+  if (key === "coverSource") return normalizeCoverSource(value);
+  if (key === "coverPath" || key === "coverUpdatedAt") return String(value || "").trim() || null;
   return value ?? null;
 }
 

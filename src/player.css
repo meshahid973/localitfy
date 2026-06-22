@@ -2974,3 +2974,27 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
     grid-template-columns: minmax(150px, 1fr) minmax(210px, 1.4fr) minmax(92px, 150px) !important;
   }
 }
+
+
+/* Player sizing and image guard */
+.playerBar :is(.playerArt,.playerCover,.playerCoverShell,.nowPlayingArt){
+  aspect-ratio: 1 / 1 !important;
+  overflow: hidden !important;
+  flex: 0 0 auto !important;
+}
+
+.playerBar :is(.playerArt,.playerCover,.playerCoverShell,.nowPlayingArt) img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+  transform: none !important;
+}
+
+.playerBar :is(.playerTitle,.playerArtist,.playerSongTitle,.playerSongArtist){
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}

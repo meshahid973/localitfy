@@ -9792,7 +9792,7 @@ body.localitfyThemePainting .app :is(
   contain: paint style !important;
 }
 
-/* Keep blur layers alive during theme painting. Old performance patches sometimes killed these. */
+
 body.localitfyThemePainting .app :is(
   .homeListenBackgroundImage,
   .heroAmbiencePulse,
@@ -9808,7 +9808,7 @@ body.localitfyThemePainting .app :is(
   backface-visibility: hidden !important;
 }
 
-/* Do not run expensive hover/lift work while dragging a color picker. */
+
 body.localitfyThemePainting .app :is(
   .homeAlbumCard:hover,
   .homeFreshCard:hover,
@@ -10159,7 +10159,7 @@ body,
   background: var(--lt-bg, #000);
 }
 
-/* Fixed sidebar: not transparent, not glass, and content cannot slide underneath it. */
+
 .sidebar,
 .app .sidebar,
 .app[data-sidebar-behavior="hover"] .sidebar,
@@ -10209,7 +10209,7 @@ body,
   display: none;
 }
 
-/* Main content starts after the actual sidebar. */
+
 .content,
 .app .content,
 .app.sidebarHoverShiftEnabled .content,
@@ -10236,7 +10236,7 @@ body,
   grid-row: 2;
 }
 
-/* Disable the broken sidebar hover mode for 0.3.9 release. */
+
 .app[data-sidebar-behavior="hover"]{
   --sidebar-width: var(--sidebar-width-release);
 }
@@ -10252,7 +10252,7 @@ body,
   transition: none;
 }
 
-/* Sidebar controls: solid, theme-aware, no blur/glass. */
+
 .logoWrap{
   min-height: 54px;
   display: flex;
@@ -10351,7 +10351,7 @@ body,
   width: min(360px, calc(100vw - var(--sidebar-width-release) - 42px));
 }
 
-/* Release performance: stop repeated entrance animations from repainting the page. */
+
 .content,
 .headerBar,
 .pageTransition,
@@ -11062,7 +11062,7 @@ body.isResizingPlayer .app *{
   gap: 5px !important;
 }
 
-/* No left glow / Discord indicator. Active state should be a soft pill only. */
+
 .app .sidebar .navItem::before,
 .app .sidebar .navItem::after{
   content: none !important;
@@ -11299,7 +11299,7 @@ body.isResizingPlayer .app *{
   text-rendering: geometricPrecision;
 }
 
-/* General readable surfaces: keep blur/motion, just make text/borders less muddy. */
+
 .app :is(.panel, .ambientSurface, .headerBar, .sidebar, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel){
   color: rgba(var(--text-rgb), .90);
 }
@@ -11326,7 +11326,7 @@ body.isResizingPlayer .app *{
   color: rgba(var(--text-rgb), .46) !important;
 }
 
-/* Repair import music button contrast: no black text, no muddy label. */
+
 .app .mainAction.importMainAction.iconTextButton,
 .app .mainAction.importMainAction.iconTextButton:hover,
 .app .mainAction.importMainAction.iconTextButton:focus-visible,
@@ -11370,13 +11370,13 @@ body.isResizingPlayer .app *{
     rgba(13,12,22,.90) !important;
 }
 
-/* keep the sparkle readable, but small */
+
 .app .mainAction.importMainAction.iconTextButton::after{
   color: rgba(255,255,255,.92) !important;
   text-shadow: 0 0 10px rgba(var(--lt-accent-rgb), .28);
 }
 
-/* Active press stays physical, not flashy. */
+
 .app .mainAction.importMainAction.iconTextButton:active{
   background:
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .20), rgba(var(--lt-accent-rgb), .10)),
@@ -11647,7 +11647,7 @@ body.isResizingPlayer .app *{
     rgba(6, 6, 11, .76) !important;
 }
 
-/* Tiny bug sweep: disabled/readability/hover intensity/mobile. */
+
 .app :is(button, input, textarea, select):disabled{
   opacity: .56 !important;
   cursor: not-allowed !important;
@@ -11845,7 +11845,7 @@ body.isResizingPlayer .app *{
   transform: translate3d(0, -1px, 0) !important;
 }
 
-/* Accent-driven calm outlines instead of fixed pink borders. */
+
 .app :is(
   .panel,
   .ambientSurface,
@@ -11886,7 +11886,7 @@ body.isResizingPlayer .app *{
   border-color: var(--panel-calm-outline-strong) !important;
 }
 
-/* Lighter, prettier header stars: twinkle + drift with theme accent. */
+
 .app .content > .headerBar::before{
   opacity: .76 !important;
   filter: none !important;
@@ -12155,7 +12155,7 @@ body.isResizingPlayer .app *{
   transform: none !important;
 }
 
-/* Proper contrast layer for the light theme. */
+
 .app[data-theme="mono"]{
   background:
     linear-gradient(rgba(61, 67, 92, .035) 1px, transparent 1px),
@@ -12201,7 +12201,7 @@ body.isResizingPlayer .app *{
   --outline-active-v486: color-mix(in oklab, rgba(255,255,255,.08) 38%, var(--lt-accent) 62%) !important;
 }
 
-/* Title/search spacing fix */
+
 .app .content > .headerBar{
   min-height: 104px !important;
   padding: 30px 22px 15px !important;
@@ -12215,7 +12215,7 @@ body.isResizingPlayer .app *{
   padding-top: 12px !important;
 }
 
-/* Organic stars: the positions drift, not just the whole layer. */
+
 .app .content > .headerBar::before{
   opacity: .72 !important;
   filter: none !important;
@@ -12308,7 +12308,7 @@ body.isResizingPlayer .app *{
   }
 }
 
-/* Much more visible full-width update ribbon, like a real top app notice. */
+
 .app .titleBar,
 .titleBar{
   overflow: visible !important;
@@ -12431,7 +12431,7 @@ body.isResizingPlayer .app *{
   box-shadow: none !important;
 }
 
-/* Reduce outline noise: only active/important areas should look outlined. */
+
 .app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--outline-calm-v486) !important;
 }
@@ -12476,7 +12476,7 @@ body.isResizingPlayer .app *{
   padding-top: 9px !important;
 }
 
-/* Star field: individual dot positions shift instead of one flat layer sliding. */
+
 .app .content > .headerBar::before{
   opacity: .70 !important;
   filter: none !important;
@@ -12560,7 +12560,7 @@ body.isResizingPlayer .app *{
   }
 }
 
-/* Update notice is a real top strip, not a floating card. */
+
 .app .titleBar,
 .titleBar{
   overflow: visible !important;
@@ -12723,7 +12723,7 @@ body.isResizingPlayer .app *{
   box-shadow: none !important;
 }
 
-/* Fewer outlines globally. Accent outline is mostly active/important only. */
+
 .app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--outline-calm-v487) !important;
 }
@@ -12736,7 +12736,7 @@ body.isResizingPlayer .app *{
   border-color: var(--outline-active-v487) !important;
 }
 
-/* Light mode app shell readability. */
+
 .app[data-theme="mono"]{
   background:
     linear-gradient(rgba(55,61,87,.035) 1px, transparent 1px),
@@ -12827,7 +12827,7 @@ body.isResizingPlayer .app *{
     0 8px 18px rgba(0,0,0,.18) !important;
 }
 
-/* Update ribbon: black, cleaner, no release link. */
+
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
   top: 36px !important;
@@ -12866,8 +12866,6 @@ body.isResizingPlayer .app *{
   opacity: .72 !important;
 }
 
-
-/* Light mode search still readable and unclipped. */
 .app[data-theme="mono"] .searchEasterWrap{
   overflow: visible !important;
 }
@@ -12940,7 +12938,7 @@ body.isResizingPlayer .app *{
     0 8px 18px rgba(0,0,0,.17) !important;
 }
 
-/* Update notice: black strip, no release link. */
+
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
   top: 36px !important;
@@ -13011,7 +13009,7 @@ body.isResizingPlayer .app *{
   color: rgba(255,255,255,.58) !important;
 }
 
-/* Light mode search stays visible and unclipped. */
+
 .app[data-theme="mono"] .searchEasterWrap{
   overflow: visible !important;
 }
@@ -13088,3 +13086,73 @@ body.isResizingPlayer .app *{
   box-shadow: none !important;
 }
 
+
+
+/* Localtify cover rendering safety: keep every saved cover cropped, never stretched. */
+.coverAura{
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  line-height: 0 !important;
+}
+
+.coverAura .coverPlaceholder{
+  line-height: 1 !important;
+  pointer-events: none !important;
+}
+
+.coverAura > img.coverImage,
+.coverAura img.coverImage{
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  border-radius: inherit !important;
+  transform-origin: center center !important;
+}
+
+.coverAura.heroArt,
+.coverAura.homeFreshCover,
+.coverAura.coverSongThumb,
+.coverAura.coverStudioMiniSongArt,
+.coverAura.albumCardCoverV318,
+.coverAura.albumDetailCoverV318,
+.coverAura.albumBuilderCoverPreviewV319,
+.coverAura.albumBuilderPreviewCoverV318{
+  aspect-ratio: 1 / 1 !important;
+}
+
+
+/* App shell visual setting fallback */
+.app[data-card-background="solid"] .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.playerBar){
+  background: rgba(18, 17, 24, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-card-background="glassy"] .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.playerBar){
+  background: rgba(17, 15, 22, 0.68) !important;
+  border-color: rgba(255, 255, 255, 0.095) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 18px 42px rgba(0, 0, 0, 0.22) !important;
+  backdrop-filter: blur(16px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
+}
+
+.app[data-card-background="oledFlat"] .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.playerBar){
+  background: rgba(2, 2, 6, 0.98) !important;
+  border-color: rgba(255, 255, 255, 0.052) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
