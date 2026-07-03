@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
@@ -3358,7 +3358,7 @@ const LIKE_BURST_PARTICLES_V443 = [
 
 function LikeHeartAnimationV443({ liked }: { liked: boolean }) {
   return (
-    <span className="likeHeartAnimationV443" aria-hidden="true" data-liked={liked ? "true" : "false"}>
+    <span key={liked ? "liked" : "unliked"} className="likeHeartAnimationV443" aria-hidden="true" data-liked={liked ? "true" : "false"}>
       <span className="likeHeartShellV443">
         <span className="likeBurstRingV443" />
         {LIKE_BURST_PARTICLES_V443.map((particle) => (
@@ -3790,13 +3790,13 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   const minColumnWidth = isSimpleGrid ? 168 : 188;
   const gridGap = 16;
   const rawColumns = Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap));
-  const columns = Math.max(1, Math.min(list.length || 1, rawColumns || 1));
+  const columns = Math.max(1, rawColumns || 1);
   const rowCount = Math.max(1, Math.ceil(list.length / columns));
   const rowEstimate = useMemo(() => {
     if (isSimpleGrid) return viewportWidth > 0 && viewportWidth < 760 ? 292 : 318;
-    if (viewportWidth > 0 && viewportWidth < 760) return 318;
-    if (viewportWidth > 0 && viewportWidth < 1100) return 330;
-    return 344;
+    if (viewportWidth > 0 && viewportWidth < 760) return 348;
+    if (viewportWidth > 0 && viewportWidth < 1100) return 360;
+    return 372;
   }, [isSimpleGrid, viewportWidth]);
 
   const rowVirtualizer = useVirtualizer({
