@@ -2929,7 +2929,7 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 }
 
 
-/* Player layout cleanup */
+/* Player layout */
 .playerBar{
   grid-template-columns: minmax(250px, 390px) minmax(340px, 1fr) minmax(138px, 236px) !important;
   padding-left: clamp(16px, 1.8vw, 28px) !important;
@@ -2976,7 +2976,7 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 }
 
 
-/* Player sizing and image guard */
+/* Player image sizing */
 .playerBar :is(.playerArt,.playerCover,.playerCoverShell,.nowPlayingArt){
   aspect-ratio: 1 / 1 !important;
   overflow: hidden !important;
@@ -3000,19 +3000,7 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 }
 
 
-/* Player surface ownership: player.css owns the bottom player bar and follows theme/custom colors. */
-.app[data-card-background="glassy"] .playerBar,
-.app[data-card-background="solid"] .playerBar{
-  border-top-color: color-mix(in oklab, var(--lt-accent, #8dffce) 22%, rgba(255,255,255,.07)) !important;
-  background:
-    radial-gradient(circle at 18% 48%, rgba(var(--lt-accent-rgb), .10), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
-    color-mix(in oklab, var(--bg, #050517) 58%, var(--localtify-owned-panel, var(--lt-surface-raised, #151528)) 42%) !important;
-  box-shadow:
-    0 -18px 54px rgba(0,0,0,.30),
-    inset 0 1px 0 rgba(255,255,255,.055) !important;
-}
-
+/* Player surfaces */
 .app[data-card-background="glassy"] :is(.playerButton,.playerControlButton,.circleButton.playerButton,.volumeSliderShell),
 .app[data-card-background="solid"] :is(.playerButton,.playerControlButton,.circleButton.playerButton,.volumeSliderShell){
   border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 18%, rgba(255,255,255,.07)) !important;
@@ -3021,7 +3009,7 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
     color-mix(in oklab, var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.82))) 82%, var(--bg, #050517) 18%) !important;
 }
 
-/* V059 player surface follows current theme/card color. */
+
 .app[data-custom-theme="true"] .playerBar,
 .app[data-card-background="glassy"] .playerBar,
 .app[data-card-background="solid"] .playerBar{

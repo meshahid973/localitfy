@@ -9621,43 +9621,7 @@ body.localitfyThemePainting .toggleRow{
 }
 
 
-.settingsCategoryContent,
-.settingsCategoryPage{
-  contain: layout style;
-}
-
-.settingsChoice,
-.settingsThemeCard,
-.settingsPageCard,
-.settingsPanelCard,
-.themeTokenCard{
-  transform-style: flat !important;
-  perspective: none !important;
-  backface-visibility: hidden;
-}
-
-.settingsChoice::before,
-.settingsChoice::after,
-.settingsThemeCard::before,
-.settingsThemeCard::after,
-.settingsPageCard::before,
-.settingsPageCard::after,
-.settingsPanelCard::before,
-.settingsPanelCard::after{
-  pointer-events: none;
-}
-
-.settingsChoice:focus-visible,
-.settingsThemeCard:focus-visible,
-.settingsActionButton:focus-visible,
-.settingsTinyButton:focus-visible,
-.cleanToggleLabel:focus-within{
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .16), inset 0 1px 0 rgba(255,255,255,.05) !important;
-}
-
-
-/* Settings layout cleanup */
+/* Settings layout */
 .settingsPage,
 .settingsCategoryContent,
 .settingsCategoryPage{
@@ -9732,7 +9696,7 @@ body.localitfyThemePainting .toggleRow{
 }
 
 
-/* Settings surface ownership */
+/* Settings card variants */
 .app[data-card-background="solid"] :is(.settingsPanelCard,.settingsPageCard,.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeEditorCard,.customThemeStudioV025){
   background: rgba(18, 17, 24, 0.96) !important;
   border-color: rgba(255, 255, 255, 0.07) !important;
@@ -9769,7 +9733,7 @@ body.localitfyThemePainting .toggleRow{
 }
 
 
-/* Settings theme area ownership: settings.css owns settings panels, theme cards and custom color cards. */
+/* Settings theme surfaces */
 .app[data-card-background="glassy"] :is(.settingsPageCard,.settingsPanelCard,.settingsThemeSelectPanel,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027),
 .app[data-card-background="solid"] :is(.settingsPageCard,.settingsPanelCard,.settingsThemeSelectPanel,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){
   border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 26%, rgba(255,255,255,.065)) !important;
@@ -9829,7 +9793,7 @@ body.localitfyThemePainting .toggleRow{
   background: rgba(2,2,6,.96) !important;
 }
 
-/* V059 settings layout and theme surface fixes. */
+/* Settings workspace and custom-theme layout */
 .settingsPage{
   width: 100% !important;
   max-width: none !important;

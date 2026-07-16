@@ -985,6 +985,7 @@ function MainModeApp() {
 
     void audio.play()
       .then(() => {
+        applyPlaybackRateSettings(audio, settingsRef.current);
         pendingPlayRef.current = false;
         if (!playingRef.current) setIsPlaying(true);
       })
@@ -4694,13 +4695,13 @@ function MainModeApp() {
 
       navigator.mediaSession.setPositionState({
         duration: duration || Math.max(position, 1),
-        playbackRate: clamp(Number(settings.playbackSpeed) || 1, 0.5, 2),
+        playbackRate: getEffectivePlaybackRate(settingsRef.current),
         position
       });
     } catch {
       // Windows media progress is optional; never risk playback for it.
     }
-  }, [currentSong?.id, currentDuration, settings.playbackSpeed]);
+  }, [currentSong?.id, currentDuration, settings.playbackSpeed, (settings as any).audioEffectMode]);
 
   useEffect(() => {
     window.localitfy.setMinimizeToTray?.(settings.minimizeToTray).catch(() => undefined);
@@ -4805,8 +4806,8 @@ function MainModeApp() {
     };
   }, []);
 
-  function getAudioEffectMode() {
-    return String((settings as any).audioEffectMode || "normal") as "normal" | "nightcore" | "daycore";
+  function getAudioEffectMode(sourceSettings: Partial<Settings> = settingsRef.current) {
+    return String((sourceSettings as any).audioEffectMode || "normal") as "normal" | "nightcore" | "daycore";
   }
 
   function getAudioEffectAmount() {
@@ -4865,9 +4866,9 @@ function MainModeApp() {
     }
   }
 
-  function getEffectivePlaybackRate() {
-    const baseRate = clamp(Number(settings.playbackSpeed) || 1, 0.5, 2);
-    const mode = getAudioEffectMode();
+  function getEffectivePlaybackRate(sourceSettings: Partial<Settings> = settingsRef.current) {
+    const baseRate = clamp(Number(sourceSettings.playbackSpeed) || 1, 0.5, 2);
+    const mode = getAudioEffectMode(sourceSettings);
     const amount = getAudioEffectAmount() / 100;
 
     if (mode === "nightcore") return clamp(baseRate * (1.08 + amount * 0.14), 0.5, 2);
@@ -4876,21 +4877,32 @@ function MainModeApp() {
     return baseRate;
   }
 
-  function applyPlaybackRateSettings(audio: HTMLAudioElement | null | undefined) {
+  function applyPlaybackRateSettings(
+    audio: HTMLAudioElement | null | undefined,
+    sourceSettings: Partial<Settings> = settingsRef.current
+  ) {
     if (!audio) return;
 
-    const mode = getAudioEffectMode();
-    const rate = getEffectivePlaybackRate();
+    const mode = getAudioEffectMode(sourceSettings);
+    const rate = getEffectivePlaybackRate(sourceSettings);
+    const preservesPitch = mode === "normal";
 
-    audio.playbackRate = rate;
+    if (audio === audioRef.current) {
+      const controller = ensurePlayerController();
+      if (controller) {
+        controller.setPlaybackRate(rate, preservesPitch);
+        return;
+      }
+    }
 
-    // Nightcore/daycore should change pitch too, not just tempo.
     try {
-      (audio as any).preservesPitch = mode === "normal";
-      (audio as any).mozPreservesPitch = mode === "normal";
-      (audio as any).webkitPreservesPitch = mode === "normal";
+      audio.preservesPitch = preservesPitch;
+      (audio as HTMLAudioElement & { mozPreservesPitch?: boolean }).mozPreservesPitch = preservesPitch;
+      (audio as HTMLAudioElement & { webkitPreservesPitch?: boolean }).webkitPreservesPitch = preservesPitch;
+      audio.defaultPlaybackRate = rate;
+      audio.playbackRate = rate;
     } catch {
-      // Older Chromium builds can ignore pitch flags safely.
+      // Playback-rate repair should never stop audio on older Chromium builds.
     }
   }
 
@@ -4940,13 +4952,13 @@ function MainModeApp() {
   }
 
   const getTargetAudioVolume = useCallback(
-    (song: Song | null = songRef.current) => {
-      const baseVolume = clamp(Number(settings.volume) || 0, 0, 1);
-      const memoryVolume = settings.perSongVolumeMemory ? clamp(Number(song?.customVolume ?? 1), 0, 1) : 1;
-      const gain = settings.volumeNormalization ? clamp(Number(song?.volumeGain ?? 1), 0.2, 2.4) : 1;
+    (song: Song | null = songRef.current, sourceSettings: Partial<Settings> = settingsRef.current) => {
+      const baseVolume = clamp(Number(sourceSettings.volume) || 0, 0, 1);
+      const memoryVolume = sourceSettings.perSongVolumeMemory ? clamp(Number(song?.customVolume ?? 1), 0, 1) : 1;
+      const gain = sourceSettings.volumeNormalization ? clamp(Number(song?.volumeGain ?? 1), 0.2, 2.4) : 1;
       return clamp(baseVolume * memoryVolume * gain, 0, 1);
     },
-    [settings.volume, settings.perSongVolumeMemory, settings.volumeNormalization]
+    []
   );
 
   const applyAudioQualitySettings = useCallback(
@@ -5860,6 +5872,7 @@ function MainModeApp() {
       applyPlaybackRateSettings(nextAudio);
 
       await nextAudio.play();
+      applyPlaybackRateSettings(nextAudio, settingsRef.current);
 
       setCrossfadePreviewSongId(target.song.id);
       stopFade();
@@ -6192,6 +6205,7 @@ function MainModeApp() {
     return [
       "volume",
       "playbackSpeed",
+      "audioEffectMode",
       "crossfadeSeconds",
       "crossfadeEnabled",
       "gaplessPlayback",
@@ -9885,6 +9899,8 @@ function MainModeApp() {
     const audio = audioRef.current;
     if (!audio) return;
 
+    applyPlaybackRateSettings(audio, settingsRef.current);
+
     if ((pendingPlayRef.current || isPlaying) && audio.paused) {
       void startAudioPlayback("can-play");
     }
@@ -9894,6 +9910,7 @@ function MainModeApp() {
     const song = songRef.current || currentSong;
     if (!song) return;
 
+    applyPlaybackRateSettings(audioRef.current, settingsRef.current);
     pendingPlayRef.current = false;
     setIsPlaying(true);
 

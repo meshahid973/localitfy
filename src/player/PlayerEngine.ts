@@ -55,7 +55,7 @@ export interface PlayerEngine {
   seek(seconds: number): void;
   setVolume(volume: number): void;
   setMuted(muted: boolean): void;
-  setPlaybackRate(rate: number): void;
+  setPlaybackRate(rate: number, preservesPitch?: boolean): void;
 
   getState(): PlayerEngineState;
   on(event: PlayerEngineEvent, listener: PlayerEngineListener): PlayerEngineUnsubscribe;

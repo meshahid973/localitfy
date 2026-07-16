@@ -25,7 +25,7 @@ export type PlayerController = {
   seekBy(deltaSeconds: number): void;
   setVolume(volume: number): void;
   setMuted(muted: boolean): void;
-  setPlaybackRate(rate: number): void;
+  setPlaybackRate(rate: number, preservesPitch?: boolean): void;
 
   setQueue(queue: readonly PlayerEngineSource[], startIndex?: number): void;
   clearQueue(): void;
@@ -161,7 +161,7 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
     seekBy: (deltaSeconds) => engine.seek(engine.getState().currentTime + deltaSeconds),
     setVolume: (volume) => engine.setVolume(volume),
     setMuted: (muted) => engine.setMuted(muted),
-    setPlaybackRate: (rate) => engine.setPlaybackRate(rate),
+    setPlaybackRate: (rate, preservesPitch) => engine.setPlaybackRate(rate, preservesPitch),
     setQueue,
     clearQueue,
     next,

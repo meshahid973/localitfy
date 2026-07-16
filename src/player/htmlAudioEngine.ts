@@ -20,9 +20,25 @@ const MEDIA_EVENTS: readonly PlayerEngineEvent[] = [
   "error"
 ];
 
+const PLAYBACK_SETTING_EVENTS = new Set<PlayerEngineEvent>([
+  "loadedmetadata",
+  "canplay",
+  "play"
+]);
+
 function clamp(value: number, min: number, max: number) {
   if (!Number.isFinite(value)) return min;
   return Math.min(max, Math.max(min, value));
+}
+
+function setPitchPreservation(element: HTMLAudioElement, preservesPitch: boolean) {
+  try {
+    element.preservesPitch = preservesPitch;
+    (element as HTMLAudioElement & { mozPreservesPitch?: boolean }).mozPreservesPitch = preservesPitch;
+    (element as HTMLAudioElement & { webkitPreservesPitch?: boolean }).webkitPreservesPitch = preservesPitch;
+  } catch {
+    // Older Chromium builds may not expose every pitch-preservation property.
+  }
 }
 
 export class HtmlAudioEngine implements PlayerEngine {
@@ -31,13 +47,27 @@ export class HtmlAudioEngine implements PlayerEngine {
   private source: PlayerEngineSource | null = null;
   private readonly listeners = new Map<PlayerEngineEvent, Set<PlayerEngineListener>>();
   private readonly removeDomListeners: PlayerEngineUnsubscribe[] = [];
+  private desiredPlaybackRate = 1;
+  private desiredPreservesPitch = true;
+  private applyingPlaybackSettings = false;
 
   constructor(element?: HTMLAudioElement) {
     this.element = element ?? new Audio();
     this.element.preload = this.element.preload || "metadata";
+    this.desiredPlaybackRate = clamp(this.element.playbackRate || 1, 0.25, 4);
+    this.desiredPreservesPitch = this.element.preservesPitch !== false;
 
     for (const event of MEDIA_EVENTS) {
-      const handler = () => this.emit(event);
+      const handler = () => {
+        if (PLAYBACK_SETTING_EVENTS.has(event)) {
+          this.restorePlaybackSettings();
+        } else if (event === "ratechange") {
+          this.repairUnexpectedRateChange();
+        }
+
+        this.emit(event);
+      };
+
       this.element.addEventListener(event, handler);
       this.removeDomListeners.push(() => this.element.removeEventListener(event, handler));
     }
@@ -51,6 +81,7 @@ export class HtmlAudioEngine implements PlayerEngine {
       this.element.load();
     }
 
+    this.restorePlaybackSettings();
     this.emit("sourcechange");
   }
 
@@ -67,7 +98,9 @@ export class HtmlAudioEngine implements PlayerEngine {
   }
 
   async play() {
+    this.restorePlaybackSettings();
     await this.element.play();
+    this.restorePlaybackSettings();
   }
 
   pause() {
@@ -97,8 +130,10 @@ export class HtmlAudioEngine implements PlayerEngine {
     this.element.muted = muted;
   }
 
-  setPlaybackRate(rate: number) {
-    this.element.playbackRate = clamp(rate, 0.25, 4);
+  setPlaybackRate(rate: number, preservesPitch = true) {
+    this.desiredPlaybackRate = clamp(rate, 0.25, 4);
+    this.desiredPreservesPitch = preservesPitch;
+    this.restorePlaybackSettings();
   }
 
   getState(): PlayerEngineState {
@@ -141,6 +176,33 @@ export class HtmlAudioEngine implements PlayerEngine {
     this.listeners.clear();
   }
 
+  private restorePlaybackSettings() {
+    if (this.applyingPlaybackSettings) return;
+
+    this.applyingPlaybackSettings = true;
+
+    try {
+      setPitchPreservation(this.element, this.desiredPreservesPitch);
+
+      if (Math.abs(this.element.defaultPlaybackRate - this.desiredPlaybackRate) > 0.0001) {
+        this.element.defaultPlaybackRate = this.desiredPlaybackRate;
+      }
+
+      if (Math.abs(this.element.playbackRate - this.desiredPlaybackRate) > 0.0001) {
+        this.element.playbackRate = this.desiredPlaybackRate;
+      }
+    } finally {
+      this.applyingPlaybackSettings = false;
+    }
+  }
+
+  private repairUnexpectedRateChange() {
+    if (this.applyingPlaybackSettings) return;
+    if (Math.abs(this.element.playbackRate - this.desiredPlaybackRate) <= 0.0001) return;
+
+    queueMicrotask(() => this.restorePlaybackSettings());
+  }
+
   private emit(event: PlayerEngineEvent) {
     const state = this.getState();
     const eventListeners = this.listeners.get(event);
@@ -152,4 +214,3 @@ export class HtmlAudioEngine implements PlayerEngine {
     }
   }
 }
-

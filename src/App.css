@@ -9854,8 +9854,9 @@ body.localitfyThemePainting .app :is(
 }
 
 .likeHeartAnimationV443{
-  --like-heart-size: 19px;
+  --like-heart-size: 20px;
   position: relative;
+  overflow: visible;
   width: var(--like-heart-size);
   height: var(--like-heart-size);
   display: grid;
@@ -9866,6 +9867,7 @@ body.localitfyThemePainting .app :is(
 
 .likeHeartShellV443{
   position: relative;
+  overflow: visible;
   width: 100%;
   height: 100%;
   background: url("./assets/heart-s.svg") center / contain no-repeat;
@@ -9880,6 +9882,7 @@ body.localitfyThemePainting .app :is(
   opacity: 0;
   background: url("./assets/heart-f.svg") center / contain no-repeat;
   transform: scale(0);
+  will-change: transform, opacity;
   transform-origin: 50% 50%;
   pointer-events: none;
 }
@@ -9895,6 +9898,7 @@ body.localitfyThemePainting .app :is(
   opacity: 0;
   transform: translate(-50%, -50%) scale(0);
   pointer-events: none;
+  z-index: 1;
 }
 
 .likeBurstParticleV443{
@@ -9907,6 +9911,7 @@ body.localitfyThemePainting .app :is(
   opacity: 0;
   transform: rotate(var(--rotate, 0deg)) translateY(0);
   pointer-events: none;
+  z-index: 2;
 }
 
 .likeBurstParticleV443::before{
@@ -10031,6 +10036,18 @@ body.localitfyThemePainting .app :is(
     opacity: 1;
     transform: scale(1);
   }
+}
+
+
+.iconAction.likeActionV443,
+.iconAction.likeActionV443 .likeHeartAnimationV443,
+.iconAction.likeActionV443 .likeHeartShellV443{
+  overflow: visible;
+}
+
+.iconAction.likeActionV443.liked,
+.iconAction.likeActionV443.likeActionActiveV443{
+  z-index: 5;
 }
 
 
@@ -10397,14 +10414,17 @@ body.isResizingPlayer .app *{
 }
 
 
-.app .sidebar,
+.app .sidebar{
+  overflow: hidden;
+}
+
 .app .sidebar .nav{
-  overflow: visible !important;
+  overflow: hidden;
 }
 
 .app .sidebar .navItem{
-  position: relative !important;
-  overflow: visible !important;
+  position: relative;
+  overflow: hidden;
 }
 
 .app .sidebar .navItem::after{
@@ -10478,16 +10498,16 @@ body.isResizingPlayer .app *{
 }
 
 .app .sidebar .navItem:hover .navLucideIcon{
-  animation: localtifySidebarIconPopV472 520ms cubic-bezier(.16, 1, .3, 1) both !important;
+  animation: none !important;
 }
 
 .app .sidebar .navItem[aria-label="open albums"]:hover .navLucideIcon,
 .app .sidebar .navItem[aria-label="open settings"]:hover .navLucideIcon{
-  animation: localtifySidebarIconSpinV472 680ms cubic-bezier(.16, 1, .3, 1) both !important;
+  animation: none !important;
 }
 
 .app .sidebar .navItem[aria-label="open liked"]:hover .navLucideIcon{
-  animation: localtifySidebarIconHeartV472 620ms cubic-bezier(.18, .9, .2, 1.1) both !important;
+  animation: none !important;
 }
 
 @keyframes localtifySidebarIconPopV472{
@@ -11081,7 +11101,6 @@ body.isResizingPlayer .app *{
   transform: translate3d(0,0,0) !important;
   box-shadow: none !important;
   transition:
-    transform 170ms cubic-bezier(.16, 1, .3, 1),
     color 150ms ease,
     background-color 150ms ease,
     border-color 150ms ease,
@@ -11093,7 +11112,7 @@ body.isResizingPlayer .app *{
   color: rgba(var(--text-rgb), .92) !important;
   background: rgba(255,255,255,.045) !important;
   border-color: rgba(255,255,255,.075) !important;
-  transform: translate3d(2px,0,0) !important;
+  transform: none !important;
   box-shadow: none !important;
 }
 
@@ -11105,7 +11124,7 @@ body.isResizingPlayer .app *{
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .135), rgba(var(--lt-accent-rgb), .072)),
     rgba(var(--lt-accent-rgb), .052) !important;
   border-color: rgba(var(--lt-accent-rgb), .24) !important;
-  transform: translate3d(2px,0,0) !important;
+  transform: none !important;
   box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .06) !important;
 }
 
@@ -11124,7 +11143,7 @@ body.isResizingPlayer .app *{
 .app .sidebar .navItem:focus-visible .navIcon,
 .app .sidebar .navItem.active .navIcon{
   color: var(--lt-text) !important;
-  transform: translate3d(0,0,0) scale(1.04) !important;
+  transform: none !important;
 }
 
 .app .sidebar .navItem.active .navText strong,
@@ -11144,7 +11163,7 @@ body.isResizingPlayer .app *{
 .app .sidebar .navItem[aria-label="open settings"]:hover .navLucideIcon,
 .app .sidebar .navItem[aria-label="open liked"]:hover .navLucideIcon{
   animation: none !important;
-  transform: translate3d(0,0,0) scale(1.04) !important;
+  transform: none !important;
 }
 
 .app .sidebarNavGroupV467 .navDivider{
@@ -11270,7 +11289,7 @@ body.isResizingPlayer .app *{
 
 .app .mainAction.importMainAction.iconTextButton:hover .buttonInlineIcon,
 .app .mainAction.importMainAction.iconTextButton:focus-visible .buttonInlineIcon{
-  transform: translate3d(0,0,0) scale(1.04) !important;
+  transform: none !important;
 }
 
 .app .mainAction.importMainAction.iconTextButton:active{
@@ -13088,7 +13107,7 @@ body.isResizingPlayer .app *{
 
 
 
-/* Localtify cover rendering safety: keep every saved cover cropped, never stretched. */
+/* Cover image cropping */
 .coverAura{
   position: relative !important;
   min-width: 0 !important;
@@ -13132,7 +13151,7 @@ body.isResizingPlayer .app *{
 }
 
 
-/* App shell visual setting fallback */
+/* Generic panel variants */
 .app[data-card-background="solid"] .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.playerBar){
   background: rgba(18, 17, 24, 0.96) !important;
   border-color: rgba(255, 255, 255, 0.07) !important;
@@ -13158,40 +13177,7 @@ body.isResizingPlayer .app *{
 }
 
 
-/* Theme-aware shell surfaces: App.css owns only the outer shell, not page cards. */
-.app{
-  --localtify-owned-panel: var(--localtify-panel-bg, var(--lt-surface-raised, rgba(21, 21, 40, .76)));
-  --localtify-owned-panel-soft: var(--localtify-panel-bg-2, var(--lt-surface-soft, rgba(21, 21, 40, .48)));
-  --localtify-owned-line: var(--localtify-line-soft, rgba(var(--lt-accent-rgb), .16));
-}
-
-.app .content,
-.content{
-  background:
-    radial-gradient(circle at 10% 0%, rgba(var(--lt-accent-rgb), .070), transparent 34%),
-    radial-gradient(circle at 88% 10%, rgba(var(--accent-2-rgb, var(--lt-accent-rgb)), .045), transparent 35%),
-    linear-gradient(180deg,
-      color-mix(in oklab, var(--bg, #050517) 92%, var(--lt-accent, #8dffce) 8%),
-      var(--bg, #050517) 38%,
-      color-mix(in oklab, var(--bg, #050517) 88%, #000 12%)) !important;
-}
-
-.app .sidebar,
-.sidebar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,.008)),
-    var(--localtify-sidebar-bg, color-mix(in oklab, var(--bg, #050517) 86%, #000 14%)) !important;
-}
-
-.app .navItem.active,
-.app .navItem[aria-current="page"],
-.app .sidebarToolButton.active{
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .14), rgba(var(--lt-accent-rgb), .055)),
-    var(--localtify-sidebar-bg-2, var(--localtify-owned-panel-soft)) !important;
-}
-
-/* V059 theme surface contract: App.css owns the outer shell only. */
+/* Shell surface ownership */
 .app{
   --localtify-owned-panel: var(--localtify-panel-bg, var(--lt-surface-raised, rgba(21, 21, 40, .76)));
   --localtify-owned-panel-soft: var(--localtify-panel-bg-2, var(--lt-surface-soft, rgba(21, 21, 40, .48)));

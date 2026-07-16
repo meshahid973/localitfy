@@ -15805,26 +15805,40 @@ body.localtifyIdle .settingsSectionCard{
   --home-card-min: 166px;
   --home-card-min-wide: 154px;
   --home-card-min-mobile: 142px;
-  --home-card-gap: 20px;
-  --home-card-row-gap: 18px;
+  --home-card-gap: 16px;
+  --home-card-row-gap: 28px;
+  --home-card-fixed-height: 344px;
+  --home-card-row-height: 372px;
   --home-card-radius: 20px;
-  --home-card-padding: 0 0 14px;
-  --home-card-cover-radius: 18px 18px 13px 13px;
-  --home-card-bg: rgba(10, 8, 16, .90);
-  --home-card-bg-hover: rgba(13, 10, 20, .94);
-  --home-card-bg-active: rgba(16, 12, 24, .96);
-  --home-card-bg-no-blur: rgba(8, 8, 14, .94);
-  --home-card-bg-more-blur: rgba(10, 8, 16, .74);
-  --home-card-border: rgba(255,255,255,.066);
-  --home-card-border-hover: rgba(255,255,255,.13);
+  --home-card-padding: 12px;
+  --home-card-cover-radius: 14px;
+  --home-panel-bg-owned: var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.78)));
+  --home-card-bg-owned: var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86)));
+  --home-card-bg:
+    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--home-card-bg-owned) 88%, var(--bg, #050517) 12%);
+  --home-card-bg-hover:
+    radial-gradient(circle at 12% 8%, rgba(var(--lt-accent-rgb), .10), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.018)),
+    color-mix(in oklab, var(--home-card-bg-owned) 88%, var(--lt-accent, #8dffce) 12%);
+  --home-card-bg-active:
+    linear-gradient(180deg, rgba(255,255,255,.058), rgba(255,255,255,.016)),
+    color-mix(in oklab, var(--home-card-bg-owned) 88%, var(--lt-accent, #8dffce) 12%);
+  --home-card-bg-no-blur:
+    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.012)),
+    color-mix(in oklab, var(--home-card-bg-owned) 92%, var(--bg, #050517) 8%);
+  --home-card-bg-more-blur:
+    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--home-card-bg-owned) 74%, transparent 26%);
+  --home-card-border: color-mix(in oklab, var(--lt-accent, #8dffce) 15%, rgba(255,255,255,.065));
+  --home-card-border-hover: color-mix(in oklab, var(--lt-accent, #8dffce) 40%, rgba(255,255,255,.10));
   --home-card-border-active: rgba(var(--lt-accent-rgb), .38);
-  --home-card-shadow: 0 6px 18px rgba(0,0,0,.12);
-  --home-card-shadow-hover: 0 10px 24px rgba(0,0,0,.15);
+  --home-card-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 8px 22px rgba(0,0,0,.18);
+  --home-card-shadow-hover: inset 0 1px 0 rgba(255,255,255,.050), 0 10px 24px rgba(0,0,0,.20);
   --home-card-shadow-active: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .12), 0 10px 24px rgba(0,0,0,.16);
   --home-card-transition:
-    transform 170ms cubic-bezier(.16,1,.3,1),
     border-color 170ms ease,
-    background-color 170ms ease,
+    background 170ms ease,
     box-shadow 170ms ease,
     opacity 150ms ease;
 }
@@ -15850,12 +15864,41 @@ body.localtifyIdle .settingsSectionCard{
   overflow: hidden !important;
 }
 
-.homeView .homeListenPanel,
-.homeView .homeFreshPanel,
-.homeView .homeLibraryPanel{
+.homeView :is(.homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeShelfPanel, .simpleLibraryPanel, .libraryPanel),
+.app :is(.homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeShelfPanel, .simpleLibraryPanel, .libraryPanel){
+  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 26%, rgba(255,255,255,.075)) !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.008) 32%, rgba(255,255,255,.003)),
-    color-mix(in srgb, var(--surface, #151528) 78%, #000 22%) !important;
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .07), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.012)),
+    var(--home-panel-bg-owned) !important;
+  box-shadow: 0 18px 48px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.app[data-custom-theme="true"] :is(.homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanel),
+.app[data-custom-theme="true"][data-card-background="oledFlat"] :is(.homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanel){
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .07), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--home-panel-bg-owned) 92%, var(--bg, #050517) 8%) !important;
+}
+
+.app :is(.homeListenCard, .homeFreshCard, .homeAlbumCard, .homeLibraryPanel .songRow, .homeShelfPanel .songRow, .homeListenPanel .songRow, .libraryCard, .libraryCardV025, .albumCardV318){
+  border-color: var(--home-card-border) !important;
+  background: var(--home-card-bg) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.app[data-custom-theme="true"] :is(.homeListenCard, .homeFreshCard, .homeAlbumCard, .homeLibraryPanel .songRow, .homeShelfPanel .songRow, .homeListenPanel .songRow, .libraryCard, .libraryCardV025, .albumCardV318),
+.app[data-custom-theme="true"][data-card-background="oledFlat"] :is(.homeListenCard, .homeFreshCard, .homeAlbumCard, .homeLibraryPanel .songRow, .homeShelfPanel .songRow, .homeListenPanel .songRow, .libraryCard, .libraryCardV025, .albumCardV318){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.056), rgba(255,255,255,.016)),
+    color-mix(in oklab, var(--home-card-bg-owned) 90%, var(--bg, #050517) 10%) !important;
+}
+
+.app :is(.homeListenCard:hover, .homeFreshCard:hover, .homeAlbumCard:hover, .homeLibraryPanel .songRow:hover, .homeShelfPanel .songRow:hover, .homeListenPanel .songRow:hover, .libraryCard:hover, .libraryCardV025:hover, .albumCardV318:hover){
+  border-color: var(--home-card-border-hover) !important;
+  background: var(--home-card-bg-hover) !important;
+  box-shadow: var(--home-card-shadow-hover) !important;
 }
 
 .homeView .homeLibraryPanel .panelHead,
@@ -15885,18 +15928,18 @@ body.localtifyIdle .settingsSectionCard{
   position: relative !important;
   width: 100% !important;
   min-width: 0 !important;
-  min-height: 420px !important;
-  max-height: min(720px, calc(100vh - 270px)) !important;
+  min-height: min(640px, calc(100vh - 285px)) !important;
+  max-height: min(760px, calc(100vh - 245px)) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
-  padding: 10px 12px 56px !important;
+  padding: 22px 14px 82px !important;
   margin: 0 !important;
   background: transparent !important;
   isolation: isolate !important;
   contain: layout style !important;
   content-visibility: visible !important;
   box-sizing: border-box !important;
-  scrollbar-gutter: stable !important;
+  scrollbar-gutter: stable both-edges !important;
 }
 
 .homeView .virtualHomeGridCanvas,
@@ -15917,6 +15960,8 @@ body.localtifyIdle .settingsSectionCard{
   inset: 0 0 auto 0 !important;
   width: 100% !important;
   min-width: 100% !important;
+  height: var(--home-card-row-height) !important;
+  min-height: var(--home-card-row-height) !important;
   display: grid !important;
   column-gap: var(--home-card-gap) !important;
   row-gap: 0 !important;
@@ -15928,6 +15973,14 @@ body.localtifyIdle .settingsSectionCard{
   will-change: transform !important;
 }
 
+.homeView .virtualHomeGridViewport[data-virtual-count="1"] .virtualHomeGridRow,
+.app .virtualHomeGridViewport[data-virtual-count="1"] .virtualHomeGridRow,
+.homeView .virtualHomeGridViewport[data-virtual-count="2"] .virtualHomeGridRow,
+.app .virtualHomeGridViewport[data-virtual-count="2"] .virtualHomeGridRow{
+  grid-template-columns: repeat(auto-fit, minmax(188px, 224px)) !important;
+  justify-content: start !important;
+}
+
 .homeView .virtualHomeGridRow > .homeAlbumCard,
 .app .virtualHomeGridRow > .homeAlbumCard,
 .homeView .virtualHomeGridViewport .homeAlbumCard,
@@ -15935,16 +15988,32 @@ body.localtifyIdle .settingsSectionCard{
   width: 100% !important;
   min-width: 0 !important;
   max-width: none !important;
+  height: var(--home-card-fixed-height) !important;
+  min-height: var(--home-card-fixed-height) !important;
+  max-height: var(--home-card-fixed-height) !important;
   align-self: start !important;
   justify-self: stretch !important;
   box-sizing: border-box !important;
   margin-bottom: var(--home-card-row-gap) !important;
 }
 
+.homeView .virtualHomeGridViewport[data-virtual-count="1"] .homeAlbumCard,
+.app .virtualHomeGridViewport[data-virtual-count="1"] .homeAlbumCard,
+.homeView .virtualHomeGridViewport[data-virtual-count="2"] .homeAlbumCard,
+.app .virtualHomeGridViewport[data-virtual-count="2"] .homeAlbumCard{
+  justify-self: start !important;
+  width: min(224px, 100%) !important;
+  max-width: 224px !important;
+}
+
 .homeView .homeAlbumCard,
 .app .homeAlbumCard{
   position: relative !important;
   isolation: isolate !important;
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) 56px 22px 42px !important;
+  gap: 8px !important;
+  align-content: stretch !important;
   overflow: hidden !important;
   min-width: 0 !important;
   min-height: 0 !important;
@@ -15988,9 +16057,9 @@ body.localtifyIdle .settingsSectionCard{
 
 .homeView .homeAlbumCard:hover,
 .app .homeAlbumCard:hover{
-  border-color: var(--home-card-border) !important;
-  background: var(--home-card-bg) !important;
-  box-shadow: var(--home-card-shadow) !important;
+  border-color: var(--home-card-border-hover) !important;
+  background: var(--home-card-bg-hover) !important;
+  box-shadow: var(--home-card-shadow-hover) !important;
   transform: translateZ(0) !important;
   z-index: 2 !important;
 }
@@ -16033,40 +16102,15 @@ body.localtifyNoMoreBlur .app .homeAlbumCard::before{
 body.localtifyNoMoreBlur .homeView .homeAlbumCard,
 body.localtifyNoMoreBlur .app .homeAlbumCard{
   background: var(--home-card-bg-no-blur) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 body.localtifyWantMoreBlur .homeView .homeAlbumCard,
 body.localtifyWantMoreBlur .app .homeAlbumCard{
   background: var(--home-card-bg-more-blur) !important;
-}
-
-body.localtifyWantMoreBlur .homeView .homeAlbumCard::before,
-body.localtifyWantMoreBlur .app .homeAlbumCard::before{
-  content: "" !important;
-  display: block !important;
-  position: absolute !important;
-  left: -14px !important;
-  right: -14px !important;
-  top: 50% !important;
-  bottom: -20px !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  background-image: var(--library-card-cover, none) !important;
-  background-size: cover !important;
-  background-position: center bottom !important;
-  opacity: .34 !important;
-  filter: blur(18px) saturate(1.04) brightness(.62) !important;
-  transform: scale(1.045) translateZ(0) !important;
-}
-
-body.localtifyWantMoreBlur .homeView .homeAlbumCard:hover::before,
-body.localtifyWantMoreBlur .app .homeAlbumCard:hover::before{
-  opacity: .40 !important;
-}
-
-body.localtifyWantMoreBlur .homeView .homeAlbumCard.active::before,
-body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
-  opacity: .46 !important;
+  backdrop-filter: blur(18px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.08) !important;
 }
 
 .homeView .homeAlbumPlayZone,
@@ -16128,10 +16172,12 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
 .homeView .homeAlbumMeta,
 .app .homeAlbumMeta{
   display: grid !important;
+  grid-template-rows: 36px 16px !important;
   align-content: start !important;
   gap: 4px !important;
-  min-height: 48px !important;
-  margin-top: 13px !important;
+  min-height: 56px !important;
+  max-height: 56px !important;
+  margin: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
   filter: none !important;
@@ -16176,29 +16222,34 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
   justify-content: space-between !important;
   align-items: center !important;
   gap: 8px !important;
-  min-height: 18px !important;
-  margin-top: 8px !important;
+  min-height: 22px !important;
+  max-height: 22px !important;
+  margin: 0 !important;
 }
 
 .homeView .homeAlbumActions,
 .app .homeAlbumActions{
   position: relative !important;
   z-index: 5 !important;
-  display: grid !important;
-  grid-template-columns: repeat(2, 30px) !important;
-  justify-content: start !important;
+  display: flex !important;
+  justify-content: flex-start !important;
   align-items: center !important;
   gap: 8px !important;
-  min-height: 32px !important;
-  margin-top: 11px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  margin: 0 !important;
+  overflow: visible !important;
   transform: translateZ(0) !important;
 }
 
 .homeView .homeAlbumActions .iconAction,
 .app .homeAlbumActions .iconAction{
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  max-width: 34px !important;
+  max-height: 34px !important;
   border-radius: 10px !important;
   color: rgba(255,255,255,.76) !important;
   background: rgba(255,255,255,.028) !important;
@@ -16420,6 +16471,23 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   .homeView .homeAlbumActions,
   .app .homeAlbumActions{
     padding-inline: 11px !important;
+  }
+}
+
+
+@media (max-width: 1100px){
+  .homeView,
+  .app{
+    --home-card-fixed-height: 332px;
+    --home-card-row-height: 360px;
+  }
+}
+
+@media (max-width: 760px){
+  .homeView,
+  .app{
+    --home-card-fixed-height: 320px;
+    --home-card-row-height: 348px;
   }
 }
 
@@ -20345,317 +20413,3 @@ body.localitfyThemePainting .homeSongRow{
   object-position: center center !important;
   display: block !important;
 }
-
-/* Home quick-library/card ownership
-   Replaces the stacked V061/V062 quick-library override block.
-   This section owns only home panels, quick-library cards, and card crop/hover behavior. */
-.app{
-  --home-panel-bg-owned: var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.78)));
-  --home-card-bg-owned: var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86)));
-  --home-card-fixed-height: 344px;
-  --home-card-row-height: 372px;
-  --home-card-gap: 16px;
-}
-
-.app :is(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanel){
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 26%, rgba(255,255,255,.075)) !important;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .07), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.012)),
-    var(--home-panel-bg-owned) !important;
-  box-shadow: 0 18px 48px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.045) !important;
-}
-
-.app[data-custom-theme="true"] :is(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanel),
-.app[data-custom-theme="true"][data-card-background="oledFlat"] :is(.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.simpleLibraryPanel,.libraryPanel){
-  background:
-    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .07), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.014)),
-    color-mix(in oklab, var(--home-panel-bg-owned) 92%, var(--bg, #050517) 8%) !important;
-}
-
-.app :is(.homeListenCard,.homeFreshCard,.homeAlbumCard,.homeLibraryPanel .songRow,.homeShelfPanel .songRow,.homeListenPanel .songRow,.libraryCard,.libraryCardV025,.albumCardV318){
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 15%, rgba(255,255,255,.065)) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
-    color-mix(in oklab, var(--home-card-bg-owned) 88%, var(--bg, #050517) 12%) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 8px 22px rgba(0,0,0,.18) !important;
-}
-
-.app[data-custom-theme="true"] :is(.homeListenCard,.homeFreshCard,.homeAlbumCard,.homeLibraryPanel .songRow,.homeShelfPanel .songRow,.homeListenPanel .songRow,.libraryCard,.libraryCardV025,.albumCardV318),
-.app[data-custom-theme="true"][data-card-background="oledFlat"] :is(.homeListenCard,.homeFreshCard,.homeAlbumCard,.homeLibraryPanel .songRow,.homeShelfPanel .songRow,.homeListenPanel .songRow,.libraryCard,.libraryCardV025,.albumCardV318){
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.056), rgba(255,255,255,.016)),
-    color-mix(in oklab, var(--home-card-bg-owned) 90%, var(--bg, #050517) 10%) !important;
-}
-
-.app :is(.homeListenCard:hover,.homeFreshCard:hover,.homeAlbumCard:hover,.homeLibraryPanel .songRow:hover,.homeShelfPanel .songRow:hover,.homeListenPanel .songRow:hover,.libraryCard:hover,.libraryCardV025:hover,.albumCardV318:hover){
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 40%, rgba(255,255,255,.10)) !important;
-  background:
-    radial-gradient(circle at 12% 8%, rgba(var(--lt-accent-rgb), .10), transparent 32%),
-    linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.018)),
-    color-mix(in oklab, var(--home-card-bg-owned) 88%, var(--lt-accent, #8dffce) 12%) !important;
-}
-
-.app :is(.homeShelfPanel,.homeFreshPanel,.homeLibraryPanel){
-  overflow: hidden !important;
-}
-
-.homeView .homeAlbumGrid.virtualHomeGridViewport,
-.app .homeAlbumGrid.virtualHomeGridViewport,
-.homeView .virtualHomeGridViewport,
-.app .virtualHomeGridViewport{
-  display: block !important;
-  position: relative !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: min(640px, calc(100vh - 285px)) !important;
-  max-height: min(760px, calc(100vh - 245px)) !important;
-  padding: 22px 14px 82px !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  scrollbar-gutter: stable both-edges !important;
-  contain: layout style !important;
-}
-
-.homeView .virtualHomeGridCanvas,
-.app .virtualHomeGridCanvas{
-  position: relative !important;
-  display: block !important;
-  width: 100% !important;
-  min-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.homeView .virtualHomeGridRow,
-.app .virtualHomeGridRow{
-  position: absolute !important;
-  inset: 0 0 auto 0 !important;
-  width: 100% !important;
-  min-width: 100% !important;
-  height: var(--home-card-row-height) !important;
-  min-height: var(--home-card-row-height) !important;
-  display: grid !important;
-  column-gap: var(--home-card-gap) !important;
-  row-gap: 0 !important;
-  align-items: start !important;
-  padding: 0 0 28px !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-  background: transparent !important;
-  overflow: visible !important;
-  will-change: transform !important;
-}
-
-.homeView .virtualHomeGridViewport[data-virtual-count="1"] .virtualHomeGridRow,
-.app .virtualHomeGridViewport[data-virtual-count="1"] .virtualHomeGridRow,
-.homeView .virtualHomeGridViewport[data-virtual-count="2"] .virtualHomeGridRow,
-.app .virtualHomeGridViewport[data-virtual-count="2"] .virtualHomeGridRow{
-  grid-template-columns: repeat(auto-fit, minmax(188px, 224px)) !important;
-  justify-content: start !important;
-}
-
-.homeView .virtualHomeGridRow > .homeAlbumCard,
-.app .virtualHomeGridRow > .homeAlbumCard,
-.homeView .virtualHomeGridViewport .homeAlbumCard,
-.app .virtualHomeGridViewport .homeAlbumCard{
-  align-self: start !important;
-  justify-self: stretch !important;
-  width: 100% !important;
-  height: var(--home-card-fixed-height) !important;
-  min-height: var(--home-card-fixed-height) !important;
-  max-height: var(--home-card-fixed-height) !important;
-  margin: 0 !important;
-  contain: layout style paint !important;
-}
-
-.homeView .virtualHomeGridViewport[data-virtual-count="1"] .homeAlbumCard,
-.app .virtualHomeGridViewport[data-virtual-count="1"] .homeAlbumCard,
-.homeView .virtualHomeGridViewport[data-virtual-count="2"] .homeAlbumCard,
-.app .virtualHomeGridViewport[data-virtual-count="2"] .homeAlbumCard{
-  justify-self: start !important;
-  width: min(224px, 100%) !important;
-  max-width: 224px !important;
-}
-
-.homeView .homeAlbumCard,
-.app .homeAlbumCard{
-  position: relative !important;
-  display: grid !important;
-  grid-template-rows: minmax(0, 1fr) 56px 22px 42px !important;
-  gap: 8px !important;
-  align-content: stretch !important;
-  padding: 12px !important;
-  overflow: hidden !important;
-  isolation: isolate !important;
-  box-sizing: border-box !important;
-  transform: none !important;
-  transform-origin: center top !important;
-}
-
-.homeView .homeAlbumCard::before,
-.homeView .homeAlbumCard::after,
-.app .homeAlbumCard::before,
-.app .homeAlbumCard::after{
-  display: none !important;
-  content: none !important;
-}
-
-.homeView .homeAlbumPlayZone,
-.app .homeAlbumPlayZone{
-  width: 100% !important;
-  aspect-ratio: 1 / 1 !important;
-  height: auto !important;
-  max-height: 100% !important;
-  min-height: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  overflow: hidden !important;
-  align-self: start !important;
-  justify-self: stretch !important;
-}
-
-.homeView .homeAlbumArt,
-.app .homeAlbumArt,
-.homeView .homeAlbumArt .coverImage,
-.app .homeAlbumArt .coverImage,
-.homeView .homeAlbumArt img,
-.app .homeAlbumArt img,
-.homeView .homeAlbumPlayZone img,
-.app .homeAlbumPlayZone img,
-.homeView .homeFreshCover img,
-.app .homeFreshCover img,
-.homeView .recentCoverThumb img,
-.app .recentCoverThumb img{
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  aspect-ratio: 1 / 1 !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  display: block !important;
-  transform: none !important;
-}
-
-.homeView .homeAlbumMeta,
-.app .homeAlbumMeta{
-  min-height: 56px !important;
-  max-height: 56px !important;
-  display: grid !important;
-  grid-template-rows: 36px 16px !important;
-  gap: 4px !important;
-  align-content: start !important;
-  margin: 0 !important;
-  padding: 0 2px !important;
-  overflow: hidden !important;
-}
-
-.homeView .homeAlbumMeta strong,
-.app .homeAlbumMeta strong{
-  min-height: 36px !important;
-  max-height: 36px !important;
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  line-clamp: 2 !important;
-  overflow: hidden !important;
-}
-
-.homeView .homeAlbumMeta small,
-.app .homeAlbumMeta small,
-.homeView .homeAlbumStats,
-.app .homeAlbumStats{
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-}
-
-.homeView .homeAlbumStats,
-.app .homeAlbumStats{
-  min-height: 22px !important;
-  max-height: 22px !important;
-  margin: 0 !important;
-  padding: 0 2px !important;
-}
-
-.homeView .homeAlbumActions,
-.app .homeAlbumActions{
-  min-height: 42px !important;
-  max-height: 42px !important;
-  margin: 0 !important;
-  padding: 0 2px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
-  align-self: end !important;
-  overflow: visible !important;
-}
-
-.homeView .homeAlbumActions .iconAction,
-.app .homeAlbumActions .iconAction,
-.homeView .homeAlbumActions .playlistAddAction,
-.app .homeAlbumActions .playlistAddAction,
-.homeView .homeAlbumActions .likeActionV443,
-.app .homeAlbumActions .likeActionV443{
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  min-height: 34px !important;
-  max-width: 34px !important;
-  max-height: 34px !important;
-  transform: none !important;
-  overflow: visible !important;
-}
-
-.homeView .homeAlbumCard:hover,
-.app .homeAlbumCard:hover,
-.homeView .homeAlbumCard.active,
-.app .homeAlbumCard.active,
-.homeView .homeFreshCard:hover,
-.app .homeFreshCard:hover,
-.homeView .homeListenCard:hover,
-.app .homeListenCard:hover{
-  transform: none !important;
-  translate: none !important;
-}
-
-.app :is(.homeAlbumArt,.homeListenCover,.homeFreshCover,.recentCoverThumb,.songArt,.libraryCardCover,.albumCardCoverV318){
-  aspect-ratio: 1 / 1 !important;
-  overflow: hidden !important;
-}
-
-.app :is(.homeAlbumArt,.homeListenCover,.homeFreshCover,.recentCoverThumb,.songArt,.libraryCardCover,.albumCardCoverV318) img,
-.app :is(.homeAlbumArt,.homeListenCover,.homeFreshCover,.recentCoverThumb,.songArt,.libraryCardCover,.albumCardCoverV318) .coverImage{
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  display: block !important;
-  transform: none !important;
-}
-
-@media (max-width: 1100px){
-  .app{
-    --home-card-fixed-height: 332px;
-    --home-card-row-height: 360px;
-  }
-}
-
-@media (max-width: 760px){
-  .app{
-    --home-card-fixed-height: 320px;
-    --home-card-row-height: 348px;
-  }
-
-  .homeView .homeAlbumGrid.virtualHomeGridViewport,
-  .app .homeAlbumGrid.virtualHomeGridViewport,
-  .homeView .virtualHomeGridViewport,
-  .app .virtualHomeGridViewport{
-    padding: 16px 10px 58px !important;
-  }
-}
-
