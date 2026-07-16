@@ -9620,70 +9620,166 @@ body.localitfyThemePainting .toggleRow{
   }
 }
 
-
-/* Settings layout */
+/* Settings workspace: single owned layout and surface implementation. */
 .settingsPage,
 .settingsCategoryContent,
 .settingsCategoryPage{
-  min-width: 0 !important;
-  overflow-x: hidden !important;
-  contain: layout style !important;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.settingsPage{
+  margin: 0;
+  padding: 0 clamp(18px, 2.2vw, 34px) 140px;
+  overflow-x: clip;
+}
+
+.settingsLayout{
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: clamp(230px, 15vw, 280px) minmax(0, 1fr);
+  align-items: start;
+}
+
+.settingsCategoryContent,
+.settingsCategoryContentV027{
+  width: 100%;
+  min-width: 0;
+  padding: 18px clamp(18px, 2.1vw, 34px) 44px;
+}
+
+.settingsCategoryPage{
+  display: grid;
+  gap: 18px;
+  align-content: start;
 }
 
 .settingsPanelCard,
 .settingsPageCard,
-.settingsCategoryContent,
 .themeEditorCard,
-.customThemeStudioV025{
-  min-width: 0 !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+.customThemeStudioV025,
+.customThemeManagerV027{
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--lt-border);
+  border-radius: var(--lt-panel-radius, 20px);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.012)),
+    var(--lt-surface-raised);
+  box-shadow: 0 16px 44px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.044);
 }
 
-.settingsThemeGrid,
-.settingsChoiceGrid,
-.customThemePresetGridV025,
-.visualOptionsGridV205{
-  min-width: 0 !important;
+.app[data-card-background="glassy"] :is(.settingsPanelCard,.settingsPageCard,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){
+  background: color-mix(in oklab, var(--lt-surface-raised) 86%, transparent);
+  backdrop-filter: blur(16px) saturate(1.10);
+  -webkit-backdrop-filter: blur(16px) saturate(1.10);
 }
 
+.app[data-card-background="solid"] :is(.settingsPanelCard,.settingsPageCard,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){
+  background: var(--lt-surface-raised);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+.app[data-card-background="oledFlat"] :is(.settingsPanelCard,.settingsPageCard,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){
+  background: color-mix(in oklab, var(--lt-bg) 96%, #000 4%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+.settingsThemeSelectPanel,
+.settingsThemeSelectPanelV491{
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 360px) minmax(260px, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.settingsSelectField,
+.settingsThemeSelectedPreview,
+.settingsThemeSelectedPreviewV491,
 .settingsThemeCard,
 .settingsChoice,
 .settingSwitchCard,
-.rangeRow,
 .toggleRow,
-.themeTokenCard{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  transform-style: flat !important;
-  perspective: none !important;
-  backface-visibility: hidden !important;
+.rangeRow,
+.themeTokenCard,
+.customThemeTokenCleanV491,
+.customThemePresetButtonCleanV491{
+  min-width: 0;
+  border-color: var(--lt-border);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+    color-mix(in oklab, var(--lt-surface-raised) 90%, var(--lt-bg) 10%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
 }
 
-.settingsChoice::before,
-.settingsChoice::after,
-.settingsThemeCard::before,
-.settingsThemeCard::after,
-.settingsPageCard::before,
-.settingsPageCard::after,
-.settingsPanelCard::before,
-.settingsPanelCard::after{
-  pointer-events: none !important;
+.settingsThemeCard:hover,
+.settingsChoice:hover,
+.customThemePresetButtonCleanV491:hover,
+.settingsThemeCard.active,
+.settingsChoice.active{
+  border-color: color-mix(in oklab, var(--lt-border-strong) 58%, var(--lt-accent) 42%);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(var(--lt-accent-rgb), .10), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.058), rgba(255,255,255,.016)),
+    color-mix(in oklab, var(--lt-surface-raised) 88%, var(--lt-accent) 12%);
 }
 
-.settingsThemeCard strong,
-.settingsThemeCard small,
-.settingsChoice strong,
-.settingsChoice small,
-.settingSwitchCard strong,
-.settingSwitchCard small{
-  overflow-wrap: anywhere !important;
+.settingsPage :is(input,select,textarea){
+  min-width: 0;
+  max-width: 100%;
+  color: var(--lt-text);
+  border-color: var(--lt-border);
+  background: color-mix(in oklab, var(--lt-bg) 72%, var(--lt-surface-raised) 28%);
 }
 
-.settingsPage input,
-.settingsPage select,
-.settingsPage textarea{
-  max-width: 100% !important;
+.settingsPage :is(input,select,textarea):focus{
+  outline: none;
+  border-color: color-mix(in oklab, var(--lt-border-strong) 44%, var(--lt-accent) 56%);
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .13);
+}
+
+.settingsHomeCardsV502{
+  overflow: visible;
+}
+
+.settingsHomeCardControlsV502{
+  display: grid;
+  gap: 12px;
+}
+
+.settingsCardBlurToggleV502{
+  min-height: 76px;
+  padding: 14px 16px;
+  overflow: visible;
+  border-radius: var(--lt-card-radius, 16px);
+}
+
+.settingsCardBlurToggleV502 .toggleRowCopy{
+  min-width: 0;
+}
+
+.customThemeTokenGridCleanV491{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.settingsTwoColumnCleanV491,
+.settingsAdvancedGridV491{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .settingsChoice:focus-visible,
@@ -9691,213 +9787,31 @@ body.localitfyThemePainting .toggleRow{
 .settingsActionButton:focus-visible,
 .settingsTinyButton:focus-visible,
 .cleanToggleLabel:focus-within{
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .16), inset 0 1px 0 rgba(255,255,255,.05) !important;
-}
-
-
-/* Settings card variants */
-.app[data-card-background="solid"] :is(.settingsPanelCard,.settingsPageCard,.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeEditorCard,.customThemeStudioV025){
-  background: var(--lt-surface-raised) !important;
-  border-color: var(--lt-border) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app[data-card-background="glassy"] :is(.settingsPanelCard,.settingsPageCard,.themeEditorCard,.customThemeStudioV025){
-  background: color-mix(in oklab, var(--lt-surface) 82%, transparent) !important;
-  border-color: var(--lt-border) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 18px 42px rgba(0, 0, 0, 0.22) !important;
-  backdrop-filter: blur(16px) saturate(1.08) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
-}
-
-.app[data-card-background="glassy"] :is(.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow){
-  background: color-mix(in oklab, var(--lt-surface-raised) 76%, transparent) !important;
-  border-color: var(--lt-border) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
-}
-
-.app[data-card-background="oledFlat"] :is(.settingsPanelCard,.settingsPageCard,.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeEditorCard,.customThemeStudioV025){
-  background: color-mix(in oklab, var(--lt-bg) 96%, #000 4%) !important;
-  border-color: var(--lt-border) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.settingsPage :is(input,select,textarea){
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
-
-
-/* Settings theme surfaces */
-.app[data-card-background="glassy"] :is(.settingsPageCard,.settingsPanelCard,.settingsThemeSelectPanel,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027),
-.app[data-card-background="solid"] :is(.settingsPageCard,.settingsPanelCard,.settingsThemeSelectPanel,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 26%, rgba(255,255,255,.065)) !important;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .075), transparent 36%),
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.014)),
-    var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.78))) !important;
-  box-shadow:
-    0 18px 54px rgba(0,0,0,.24),
-    inset 0 1px 0 rgba(255,255,255,.052) !important;
-}
-
-.app[data-card-background="glassy"] :is(.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeTokenCard,.customThemeTokenRowV025,.customThemePresetButtonV025,.settingsThemeSelectedPreview),
-.app[data-card-background="solid"] :is(.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeTokenCard,.customThemeTokenRowV025,.customThemePresetButtonV025,.settingsThemeSelectedPreview){
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 16%, rgba(255,255,255,.065)) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.016)),
-    color-mix(in oklab, var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.82))) 86%, var(--bg, #050517) 14%) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.055),
-    0 8px 22px rgba(0,0,0,.16) !important;
-}
-
-.app[data-card-background="glassy"] :is(.settingsThemeCard.active,.settingsChoice.active,.customThemePresetButtonV025.active,.settingsThemeCard:hover,.settingsChoice:hover,.customThemePresetButtonV025:hover),
-.app[data-card-background="solid"] :is(.settingsThemeCard.active,.settingsChoice.active,.customThemePresetButtonV025.active,.settingsThemeCard:hover,.settingsChoice:hover,.customThemePresetButtonV025:hover){
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 48%, rgba(255,255,255,.12)) !important;
-  background:
-    radial-gradient(circle at 12% 8%, rgba(var(--lt-accent-rgb), .12), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.068), rgba(255,255,255,.020)),
-    color-mix(in oklab, var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--lt-accent, #8dffce) 12%) !important;
-}
-
-.settingsPage :is(input,select,textarea,.settingsThemeSelectV027,.customThemeTokenHexV027,.customThemeHexValueV027){
-  color: var(--lt-text) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 18%, rgba(255,255,255,.08)) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018)),
-    color-mix(in oklab, var(--bg, #050517) 70%, var(--localtify-owned-panel, var(--lt-surface-raised, #151528)) 30%) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.055) !important;
-}
-
-.settingsPage :is(input,select,textarea,.settingsThemeSelectV027):focus{
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 60%, rgba(255,255,255,.12)) !important;
-  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .14), inset 0 1px 0 rgba(255,255,255,.055) !important;
-}
-
-.settingsThemeGrid,
-.customThemePresetGridV025{
-  align-items: stretch !important;
-}
-
-.customThemeTokenListV025{
-  gap: 12px !important;
-}
-
-.app[data-card-background="oledFlat"] :is(.settingsPageCard,.settingsPanelCard,.settingsThemeCard,.settingsChoice,.settingSwitchCard,.toggleRow,.rangeRow,.themeTokenCard,.customThemeTokenRowV025,.customThemePresetButtonV025,.settingsThemeSelectPanel,.themeEditorCard,.customThemeStudioV025){
-  background: rgba(2,2,6,.96) !important;
-}
-
-/* Settings workspace and custom-theme layout */
-.settingsPage{
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 clamp(18px, 2.2vw, 34px) 140px !important;
-}
-
-.settingsLayout{
-  width: 100% !important;
-  max-width: none !important;
-  grid-template-columns: clamp(230px, 15vw, 280px) minmax(0, 1fr) !important;
-  align-items: start !important;
-}
-
-.settingsCategoryContent,
-.settingsCategoryContentV027{
-  width: 100% !important;
-  max-width: none !important;
-  padding: 18px clamp(18px, 2.1vw, 34px) 44px !important;
-}
-
-.settingsCategoryPage{
-  width: 100% !important;
-  max-width: none !important;
-}
-
-.settingsPage :is(.settingsHero,.settingsPanelCard,.settingsPageCard,.settingsCategorySurfaceV027,.settingsWideCard,.settingsBlockV027,.settingsPanelV027,.settingsSectionV027,.appearanceUnifiedSectionV356,.appearanceUnifiedControlDeckV356,.customThemeManagerV027,.visualCustomizationCardV205){
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 24%, rgba(255,255,255,.08)) !important;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .065), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.012)),
-    var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.78))) !important;
-  box-shadow: 0 16px 44px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.044) !important;
-}
-
-.app[data-custom-theme="true"] .settingsPage :is(.settingsHero,.settingsPanelCard,.settingsPageCard,.settingsCategorySurfaceV027,.settingsWideCard,.settingsBlockV027,.settingsPanelV027,.settingsSectionV027,.appearanceUnifiedSectionV356,.appearanceUnifiedControlDeckV356,.customThemeManagerV027,.visualCustomizationCardV205){
-  background:
-    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .070), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.042), rgba(255,255,255,.014)),
-    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--bg, #050517) 12%) !important;
-}
-
-.settingsThemeSelectPanel{
-  width: 100% !important;
-  display: grid !important;
-  grid-template-columns: minmax(240px, 360px) minmax(260px, 1fr) !important;
-  gap: 18px !important;
-  align-items: stretch !important;
-}
-
-.settingsSelectField,
-.settingsThemeSelectedPreview{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.016)),
-    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--bg, #050517) 12%) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 20%, rgba(255,255,255,.08)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
-}
-
-.settingsSelectField select,
-.settingsThemeSelectPanel select,
-.settingsTextFieldV027 input,
-.settingsTextInputV027,
-.themeTokenCard code,
-.simpleThemeTokenCardV025 code{
-  color: var(--lt-text) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
-    color-mix(in oklab, var(--localtify-owned-card-strong, var(--lt-surface-raised, rgba(21,21,40,.94))) 88%, var(--bg, #050517) 12%) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 22%, rgba(255,255,255,.08)) !important;
-}
-
-.themeTokenCard,
-.simpleThemeTokenCardV025,
-.customThemeTokenRowV025,
-.settingsThemeCard,
-.settingsChoice{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
-    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--bg, #050517) 12%) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 16%, rgba(255,255,255,.06)) !important;
-}
-
-.settingsThemeCard:hover,
-.settingsChoice:hover,
-.themeTokenCard:hover,
-.simpleThemeTokenCardV025:hover{
-  background:
-    radial-gradient(circle at 12% 8%, rgba(var(--lt-accent-rgb), .10), transparent 32%),
-    linear-gradient(180deg, rgba(255,255,255,.060), rgba(255,255,255,.016)),
-    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 86%, var(--lt-accent, #8dffce) 14%) !important;
-}
-
-.homeCardsSettingsPanelV327,
-.albumCoverCardBlurToggleV327{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.050), rgba(255,255,255,.014)),
-    color-mix(in oklab, var(--localtify-owned-card, var(--lt-surface-raised, rgba(21,21,40,.86))) 88%, var(--bg, #050517) 12%) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 18%, rgba(255,255,255,.07)) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .15);
 }
 
 @media (max-width: 980px){
   .settingsLayout,
-  .settingsThemeSelectPanel{
-    grid-template-columns: 1fr !important;
+  .settingsThemeSelectPanel,
+  .settingsThemeSelectPanelV491,
+  .settingsTwoColumnCleanV491,
+  .settingsAdvancedGridV491{
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px){
+  .settingsPage{
+    padding-inline: 12px;
+  }
+
+  .settingsCategoryContent,
+  .settingsCategoryContentV027{
+    padding-inline: 0;
+  }
+
+  .customThemeTokenGridCleanV491{
+    grid-template-columns: 1fr;
   }
 }

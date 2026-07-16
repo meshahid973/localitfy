@@ -251,8 +251,6 @@
 @media (max-width: 900px){
 
 
-
-
 .hero{
   grid-template-columns: 1fr;
 }
@@ -1603,14 +1601,6 @@ button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
 @media (max-width: 920px){
 
 
-
-
-
-
-
-
-
-
   .headerBar{
     flex-direction: column !important;
     align-items: stretch !important;
@@ -1933,29 +1923,115 @@ button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
   }
 }
 
+
+/* Home now-playing ambience: single owned implementation. */
 .app .hero.heroPremium{
-  position: relative !important;
-  overflow: hidden !important;
-  isolation: isolate !important;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: color-mix(in oklab, var(--lt-border-strong) 72%, var(--lt-accent) 28%);
+  background:
+    radial-gradient(circle at 82% 42%, rgba(var(--lt-accent-rgb), .10), transparent 36%),
+    linear-gradient(110deg, color-mix(in oklab, var(--lt-bg) 92%, #000 8%), color-mix(in oklab, var(--lt-surface-raised) 88%, var(--lt-bg) 12%));
+  box-shadow: 0 22px 64px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.045);
 }
 
-.app .heroAmbiencePulse{
+.app .hero.heroPremium::before{
+  content: "";
   position: absolute;
-  inset: -28%;
+  inset: -22%;
   z-index: 0;
+  pointer-events: none;
+  background: var(--cover-art-url, var(--cover-url, none)) center / cover no-repeat;
+  opacity: 0;
+  filter: blur(48px) saturate(1.46) brightness(.68) contrast(1.05);
+  transform: translate3d(0,0,0) scale(1.18);
+  transition: opacity 260ms ease, filter 260ms ease, transform 420ms cubic-bezier(.16,1,.3,1);
+  backface-visibility: hidden;
+}
+
+.app[data-cover-ambience="on"] .hero.heroPremium::before{
+  opacity: .56;
+}
+
+.app .hero.heroPremium::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 83% 45%, rgba(var(--lt-accent-rgb), .10), transparent 28%),
+    linear-gradient(90deg, rgba(2,3,7,.95) 0%, rgba(2,3,7,.88) 34%, rgba(2,3,7,.58) 64%, rgba(2,3,7,.72) 100%);
+}
+
+.app .hero.heroPremium > .heroCoverGhost{
+  position: absolute;
+  inset: -34% -10% -34% 38%;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 42px;
+  background: var(--cover-art-url, var(--cover-url, none)) center / cover no-repeat;
+  opacity: 0;
+  filter: blur(62px) saturate(1.62) brightness(.82);
+  transform: translate3d(0,0,0) scale(1.14);
+  transition: opacity 300ms ease, transform 520ms cubic-bezier(.16,1,.3,1);
+  mix-blend-mode: normal;
+}
+
+.app[data-cover-ambience="on"] .hero.heroPremium > .heroCoverGhost{
+  opacity: .30;
+}
+
+.app .hero.heroPremium > .heroAmbiencePulse{
+  position: absolute;
+  inset: -18%;
+  z-index: 1;
   pointer-events: none;
   opacity: 0;
   background:
-    radial-gradient(circle at 72% 24%, rgba(var(--accent-rgb), 0.30), transparent 34%),
-    radial-gradient(circle at 18% 76%, rgba(var(--accent-2-rgb), 0.16), transparent 36%),
-    linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.10), transparent 58%),
-    var(--cover-url, none);
-  background-size: auto, auto, auto, cover;
-  background-position: center;
-  filter: blur(28px) saturate(1.18);
-  transform: scale(0.95) translate3d(-10px, 12px, 0);
-  animation: localitfyCinematicAmbience 760ms var(--cinematic-ease) both;
+    radial-gradient(circle at 75% 38%, rgba(var(--lt-accent-rgb), .20), transparent 34%),
+    radial-gradient(circle at 18% 76%, rgba(var(--accent-2-rgb, var(--lt-accent-rgb)), .10), transparent 38%);
+  filter: blur(34px) saturate(1.20);
+  transform: translate3d(0,0,0) scale(1.04);
+  transition: opacity 260ms ease;
 }
+
+.app[data-cover-ambience="on"].animatedGlow .hero.heroPremium > .heroAmbiencePulse{
+  opacity: .56;
+  animation: localtifyHeroAmbienceDrift 8s ease-in-out infinite alternate;
+}
+
+@keyframes localtifyHeroAmbienceDrift{
+  0%{ transform: translate3d(-1.5%,1%,0) scale(1.03); opacity: .44; }
+  100%{ transform: translate3d(1.5%,-1%,0) scale(1.07); opacity: .60; }
+}
+
+.app .hero.heroPremium:hover::before{
+  filter: blur(46px) saturate(1.52) brightness(.72) contrast(1.05);
+  transform: translate3d(0,0,0) scale(1.20);
+}
+
+.app .hero.heroPremium > :not(.heroCoverGhost):not(.heroAmbiencePulse){
+  position: relative;
+  z-index: 3;
+}
+
+.app[data-cover-ambience="off"] .hero.heroPremium > :is(.heroCoverGhost,.heroAmbiencePulse),
+body.isResizingSidebar .app .hero.heroPremium > :is(.heroCoverGhost,.heroAmbiencePulse),
+body.localitfySongDragging .app .hero.heroPremium > :is(.heroCoverGhost,.heroAmbiencePulse){
+  opacity: 0;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .app .hero.heroPremium::before,
+  .app .hero.heroPremium > :is(.heroCoverGhost,.heroAmbiencePulse){
+    transition: none;
+    animation: none;
+  }
+}
+
 
 .app .nowPlayingArtSwap{
   transform-origin: center;
@@ -2336,16 +2412,6 @@ button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
 }
 
 
-.app .heroAmbiencePulse{
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  animation: none !important;
-  background: none !important;
-  transform: none !important;
-}
-
 .app .heroArtWrap{
   position: relative !important;
   z-index: 3 !important;
@@ -2397,9 +2463,6 @@ button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
 body.isResizingSidebar .heroArtWrap::before{
   display: none !important;
 }
-
-
-
 
 
 .songRow.songDropTarget[data-drop-side="before"]{
@@ -4222,21 +4285,9 @@ body.localitfyLibraryPointerDragging{
 }
 
 
-
-
-
-
-
-
-
-
-
 .sidebarModeSwitch{
   display: none !important;
 }
-
-
-
 
 
 .app .iconAction:hover,
@@ -4875,83 +4926,6 @@ body.localitfyLibraryPointerDragging{
   backdrop-filter: none !important;
 }
 
-.app .hero.heroPremium{
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-}
-
-.app .hero.heroPremium{
-  min-height: clamp(330px, 36vh, 430px) !important;
-  grid-template-columns: minmax(0, 1fr) clamp(260px, 22vw, 360px) !important;
-  gap: clamp(22px, 3vw, 46px) !important;
-  align-items: center !important;
-  padding: clamp(34px, 4vw, 56px) clamp(34px, 4.6vw, 66px) !important;
-  border-radius: 25px !important;
-  border-color: color-mix(in oklab, var(--accent, #a98cff) 30%, rgba(255,255,255,.11)) !important;
-  background:
-    linear-gradient(90deg, rgba(0,0,0,.90) 0%, rgba(0,0,0,.80) 44%, rgba(0,0,0,.62) 70%, rgba(0,0,0,.70) 100%),
-    radial-gradient(circle at 84% 46%, color-mix(in oklab, var(--accent, #a98cff) 20%, transparent), transparent 34%),
-    color-mix(in oklab, var(--bg, #050508) 84%, var(--accent, #a98cff) 7%) !important;
-  box-shadow:
-    0 26px 84px rgba(0,0,0,.42),
-    inset 0 1px 0 rgba(255,255,255,.07),
-    inset 0 -1px 0 color-mix(in oklab, var(--accent, #a98cff) 18%, transparent) !important;
-}
-
-.app .hero.heroPremium::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: -3 !important;
-  display: block !important;
-  pointer-events: none !important;
-  opacity: .34 !important;
-  background:
-    linear-gradient(90deg, rgba(0,0,0,.98) 0%, rgba(0,0,0,.88) 43%, rgba(0,0,0,.40) 68%, rgba(0,0,0,.70) 100%),
-    var(--cover-url, var(--cover-art-url, none)) center right / cover no-repeat !important;
-  filter: saturate(1.14) contrast(1.03) !important;
-  transform: scale(1.015) !important;
-}
-
-.app .hero.heroPremium::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: -18% -8% -18% 48% !important;
-  z-index: -2 !important;
-  display: block !important;
-  pointer-events: none !important;
-  opacity: .30 !important;
-  background:
-    radial-gradient(circle at 54% 48%, color-mix(in oklab, var(--accent, #a98cff) 28%, transparent), transparent 38%),
-    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-  filter: blur(42px) saturate(1.38) !important;
-  transform: scale(1.04) !important;
-}
-
-.app .hero.heroPremium > .heroAmbiencePulse{
-  display: block !important;
-  position: absolute !important;
-  inset: -28% -12% -28% 42% !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-  opacity: .26 !important;
-  background:
-    radial-gradient(circle at 55% 50%, color-mix(in oklab, var(--accent, #a98cff) 24%, transparent), transparent 35%),
-    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-  filter: blur(30px) saturate(1.24) !important;
-  transform: translateZ(0) scale(1.02) !important;
-  animation: none !important;
-}
-
-.app .hero.heroPremium:hover{
-  transform: translateY(-1px) translateZ(0) !important;
-  border-color: color-mix(in oklab, var(--accent, #a98cff) 42%, rgba(255,255,255,.14)) !important;
-  box-shadow:
-    0 30px 92px rgba(0,0,0,.46),
-    0 0 36px color-mix(in oklab, var(--accent, #a98cff) 8%, transparent),
-    inset 0 1px 0 rgba(255,255,255,.08) !important;
-}
 
 .app .hero.heroPremium .heroTitle{
   max-width: min(920px, 58vw) !important;
@@ -5057,75 +5031,6 @@ body.localitfyLibraryPointerDragging{
   }
 }
 
-.app .hero.heroPremium{
-  position: relative !important;
-  overflow: hidden !important;
-  isolation: isolate !important;
-  min-height: clamp(330px, 34vh, 430px) !important;
-  border-radius: 22px !important;
-  background:
-    radial-gradient(circle at 83% 44%, rgba(var(--accent-rgb), 0.10), transparent 34%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.98) 0%, rgba(0, 0, 0, 0.94) 34%, rgba(8, 8, 10, 0.92) 100%) !important;
-  border-color: rgba(var(--accent-rgb), 0.20) !important;
-  box-shadow:
-    0 18px 70px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
-}
-
-.app[data-ambient="on"] .hero.heroPremium::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: -76px !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  background-image: var(--cover-url, none) !important;
-  background-position: center center !important;
-  background-size: cover !important;
-  background-repeat: no-repeat !important;
-  opacity: 0.34 !important;
-  filter: blur(46px) saturate(1.28) brightness(0.56) contrast(1.04) !important;
-  transform: translate3d(0, 0, 0) scale(1.20) !important;
-  transition: opacity 220ms ease, filter 220ms ease !important;
-  animation: none !important;
-  image-rendering: auto !important;
-  backface-visibility: hidden !important;
-}
-
-.app .hero.heroPremium::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 1 !important;
-  pointer-events: none !important;
-  background:
-    radial-gradient(circle at 88% 48%, rgba(var(--accent-rgb), 0.10), transparent 27%),
-    linear-gradient(90deg,
-      rgba(0, 0, 0, 0.96) 0%,
-      rgba(0, 0, 0, 0.93) 29%,
-      rgba(0, 0, 0, 0.78) 49%,
-      rgba(0, 0, 0, 0.62) 68%,
-      rgba(0, 0, 0, 0.72) 100%) !important;
-  opacity: 1 !important;
-  transition: none !important;
-}
-
-.app .hero.heroPremium:hover::before{
-  opacity: 0.36 !important;
-  filter: blur(46px) saturate(1.30) brightness(0.58) contrast(1.04) !important;
-  background-position: center center !important;
-  transform: translate3d(0, 0, 0) scale(1.20) !important;
-}
-
-.app .hero.heroPremium:hover::after{
-  background:
-    radial-gradient(circle at 88% 48%, rgba(var(--accent-rgb), 0.11), transparent 27%),
-    linear-gradient(90deg,
-      rgba(0, 0, 0, 0.955) 0%,
-      rgba(0, 0, 0, 0.92) 29%,
-      rgba(0, 0, 0, 0.77) 49%,
-      rgba(0, 0, 0, 0.61) 68%,
-      rgba(0, 0, 0, 0.72) 100%) !important;
-}
 
 .app .hero.heroPremium .heroText{
   position: relative !important;
@@ -5217,10 +5122,7 @@ body.localitfyLibraryPointerDragging{
   transform: translate3d(0, -1px, 0) !important;
 }
 
-body.localitfySongDragging .app .hero.heroPremium::before{
-  filter: blur(22px) saturate(1.05) brightness(0.56) !important;
-  opacity: 0.22 !important;
-}
+
 
 @media (max-width: 940px){
   .app .hero.heroPremium{
@@ -5554,15 +5456,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 
-
-
-
-
-
-
-
-
-
 .homeListenIndex{
   display:grid;
   place-items:center;
@@ -5575,13 +5468,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   font-weight:950;
   letter-spacing:.02em;
 }
-
-
-
-
-
-
-
 
 
 .homeFreshRail{
@@ -5664,12 +5550,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   }
 
 
-
-
-
-
-
-
 }
 
 .homeView{
@@ -5706,25 +5586,9 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 
-
-
-
-
-
-
-
-
-
 .homeListenIndex{
   display: none !important;
 }
-
-
-
-
-
-
-
 
 
 .homeShelfActions span{
@@ -5744,13 +5608,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 @media (max-width: 720px){
 
 
-
-
-
 }
-
-
-
 
 
 :root{
@@ -5839,16 +5697,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   opacity: .42;
   mix-blend-mode: screen;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 .hero{
@@ -6878,11 +6726,6 @@ body.localitfyNoSelect *{
     flex: 0 0 auto !important;
     max-width: 100% !important;
   }
-
-
-
-
-
 
 
   .homeFreshRail{
@@ -8579,8 +8422,6 @@ html body .content{
 }
 
 
-
-
 .app :where(.songRow, .playlistSongRow, .libraryFullListV025 .songRow, .homeSongList .songRow){
   position: relative !important;
   max-width: 100% !important;
@@ -8706,9 +8547,6 @@ html body .content{
   background-color: #122319 !important;
   border-bottom-color: rgba(30,215,96,0.20) !important;
 }
-
-
-
 
 
 .app[data-download-source="youtube"] .ambientSurface:not(.playerBar):not(.smallArt),
@@ -9451,40 +9289,7 @@ body.localitfyHeroReflowing .app .homeShelfStack{
 }
 
 
-
-
-
-.app .hero.heroPremium{
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: clip !important;
-}
-
-.app .hero.heroPremium .heroCoverGhost{
-  position: absolute !important;
-  top: 8% !important;
-  right: clamp(190px, 15vw, 360px) !important;
-  width: clamp(320px, 38vw, 720px) !important;
-  height: clamp(260px, 32vw, 620px) !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  border-radius: 42px !important;
-  background:
-    radial-gradient(circle at 52% 50%, rgba(var(--accent-rgb), 0.13), transparent 64%),
-    var(--cover-art-url, none) center / cover no-repeat !important;
-  opacity: 0.135 !important;
-  filter: blur(34px) saturate(1.12) brightness(0.72) !important;
-  transform: translate3d(0, 0, 0) scale(1.08) !important;
-  mix-blend-mode: screen !important;
-  animation: localtifyHeroGhostCatchup 640ms cubic-bezier(.16, 1, .3, 1) 70ms both !important;
-
-}
-
-.app[data-ambient="off"] .hero.heroPremium .heroCoverGhost,
-body.isResizingSidebar .app .hero.heroPremium .heroCoverGhost,
-body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
-  display: none !important;
-}.app .hero.heroPremium .heroArtWrap{
+.app .hero.heroPremium .heroArtWrap{
   position: relative !important;
   z-index: 2 !important;
 }
@@ -9813,8 +9618,6 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
 }
 
 
-
-
 .app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting){
   transform: translate3d(0, 0, 0) scale(1) !important;
 }
@@ -9927,13 +9730,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
   --home-glass-blur: 11px;
   --home-glass-blur-light: 8px;
 }
-
-
-
-
-
-
-
 
 
 .homeView :where(.hero, .simpleHero){
@@ -10818,16 +10614,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
   transform: none !important;
 }
 
-.app[data-ambient="on"] .hero.heroPremium > .heroAmbiencePulse{
-  display: block !important;
-  opacity: 0.20 !important;
-  visibility: visible !important;
-}
-
-.app[data-ambient="on"] .hero.heroPremium.heroCompact > .heroAmbiencePulse{
-  opacity: 0.16 !important;
-  filter: blur(28px) saturate(1.18) brightness(0.72) !important;
-}
 
 @media (max-width: 900px){
   .app .hero.heroPremium.heroLayoutMotion.heroCompact{
@@ -10905,11 +10691,11 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
   transition: opacity 200ms ease;
 }
 
-.app.moreQuickLibraryBlur .homeShelfStack .homeListenCard[data-cover-ambience="on"] .homeListenBackground{
-  opacity: .50;
+.app[data-cover-ambience="on"] .homeShelfStack .homeListenCard[data-cover-ambience="on"] .homeListenBackground{
+  opacity: .58;
 }
 
-.app.lessQuickLibraryBlur .homeShelfStack .homeListenCard .homeListenBackground{
+.app[data-cover-ambience="off"] .homeShelfStack .homeListenCard .homeListenBackground{
   opacity: 0;
 }
 
@@ -10922,7 +10708,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
   object-fit: cover;
   object-position: center;
   opacity: .72;
-  filter: blur(24px) saturate(1.48) brightness(.78) contrast(1.04);
+  filter: blur(32px) saturate(1.52) brightness(.74) contrast(1.04);
   transform: scale(1.18) translateZ(0);
   transition: transform 240ms cubic-bezier(.16,1,.3,1), filter 200ms ease;
 }
@@ -11033,16 +10819,16 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 15px 32px rgba(0,0,0,.23);
 }
 
-.app.moreQuickLibraryBlur .homeShelfStack .homeListenCard:hover .homeListenBackground{
+.app[data-cover-ambience="on"] .homeShelfStack .homeListenCard:hover .homeListenBackground{
   opacity: .64;
 }
 
-.app.lessQuickLibraryBlur .homeShelfStack .homeListenCard:hover .homeListenBackground{
+.app[data-cover-ambience="off"] .homeShelfStack .homeListenCard:hover .homeListenBackground{
   opacity: 0;
 }
 
 .app .homeShelfStack .homeListenCard:hover .homeListenBackgroundImage{
-  filter: blur(25px) saturate(1.58) brightness(.82) contrast(1.04);
+  filter: blur(30px) saturate(1.62) brightness(.78) contrast(1.04);
   transform: scale(1.22) translateZ(0);
 }
 
@@ -13357,37 +13143,6 @@ body.localtifyPerfV310 .app :is(.panel, .ambientSurface, .homeShelfPanel, .homeL
   will-change: min-height, grid-template-columns, padding, gap, transform;
 }
 
-.app .hero.heroPremium::before,
-.app[data-ambient="on"] .hero.heroPremium::before{
-  filter: blur(28px) saturate(1.18) contrast(1.04) brightness(0.76) !important;
-  transform: translateZ(0) scale(1.08) !important;
-  backface-visibility: hidden;
-  will-change: filter, transform, opacity;
-}
-
-.app .hero.heroPremium::after,
-.app .hero.heroPremium > .heroAmbiencePulse,
-.app[data-ambient="on"] .hero.heroPremium > .heroAmbiencePulse{
-  filter: blur(42px) saturate(1.34) brightness(0.86) !important;
-  transform: translateZ(0) scale(1.045) !important;
-  backface-visibility: hidden;
-  will-change: filter, transform, opacity;
-}
-
-body.localtifyFocusRecovering .app .hero.heroPremium::before,
-.app.localtifyHeroAmbienceRecovering .hero.heroPremium::before{
-  filter: blur(29px) saturate(1.2) contrast(1.04) brightness(0.76) !important;
-  transform: translate3d(0, 0, 0.001px) scale(1.081) !important;
-}
-
-body.localtifyFocusRecovering .app .hero.heroPremium::after,
-body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
-.app.localtifyHeroAmbienceRecovering .hero.heroPremium::after,
-.app.localtifyHeroAmbienceRecovering .hero.heroPremium > .heroAmbiencePulse{
-  filter: blur(43px) saturate(1.36) brightness(0.86) !important;
-  transform: translate3d(0, 0, 0.001px) scale(1.047) !important;
-}
-
 
 .app :is(.content, .homeSongList, .libraryList, .playlistSongList, .coverGalleryViewport, .coverSongList, .albumDetailTrackListV318, .albumFolderPreviewGridV309){
   -webkit-mask-repeat: no-repeat;
@@ -13411,16 +13166,6 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   top: auto !important;
   z-index: 12 !important;
   container-type: normal !important;
-}
-
-.app.localtifyHeroFocusRepair .hero.heroPremium::before,
-.app.localtifyHeroFocusRepair .hero.heroPremium::after,
-.app.localtifyHeroFocusRepair .heroAmbiencePulse,
-.hero.heroPremium::before,
-.hero.heroPremium::after,
-.heroAmbiencePulse{
-  transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
 
@@ -13583,61 +13328,6 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 :root{
   --localtify-resize-dur: 300ms;
   --localtify-resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -13705,8 +13395,6 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
   transform: translateZ(0);
   backface-visibility: hidden;
 }
-
-
 
 
 body.localtifyIdle .t-resize,
@@ -14452,20 +14140,7 @@ body.localtifyIdle .settingsSectionCard{
 .app{
 
 
-
-
-
-
-
   --home-panel-bg-owned: var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.78)));
-
-
-
-
-
-
-
-
 
 
 }
@@ -14504,71 +14179,6 @@ body.localtifyIdle .settingsSectionCard{
 .app .homeLibraryPanel .panelHead{
   margin-bottom: 14px;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 .app .albumsPageV318{
@@ -15060,14 +14670,6 @@ body.localtifyIdle .settingsSectionCard{
 .homeLibraryPanel::after{
   pointer-events: none !important;
 }
-
-
-
-
-
-
-
-
 
 
 .app .libraryPanelV025{
@@ -17103,19 +16705,11 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 
-
-
 .app .content,
 .content{
   border-left: 0 !important;
   box-shadow: none !important;
 }
-
-
-
-
-
-
 
 
 .mascotStateArtV496{
@@ -17958,8 +17552,6 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 
-
-
 .app .coverAura.generatedAlbumCover.noCover{
   --generated-cover-hue: var(--generated-cover-hue, 292deg);
   overflow: hidden;
@@ -18137,7 +17729,7 @@ body.localtifyIdle .settingsSectionCard{
 
 /* Quick Library and cover-card ownership. */
 .pageTransition-home{
-  --quick-library-card-min: 204px;
+  --quick-library-card-min: 220px;
   --quick-library-card-gap: var(--lt-layout-gap, 16px);
   --quick-library-row-gap: 24px;
   --quick-library-card-radius: var(--lt-card-radius, 16px);
@@ -18237,20 +17829,20 @@ body.localtifyIdle .settingsSectionCard{
     linear-gradient(180deg, rgba(6,7,12,.20) 0%, rgba(6,7,12,.68) 58%, rgba(6,7,12,.92) 100%),
     var(--quick-library-cover-url, none) center / cover no-repeat;
   opacity: 0;
-  filter: blur(22px) saturate(1.18);
+  filter: blur(26px) saturate(1.34) brightness(.78);
   transform: scale(1.10);
   transition: opacity 220ms ease, filter 220ms ease, transform 260ms cubic-bezier(.16,1,.3,1);
 }
 
-.app.moreQuickLibraryBlur .virtualHomeGridViewport .homeAlbumCard[data-cover-ambience="on"]::before{
-  opacity: .22;
+.app[data-cover-ambience="on"] .virtualHomeGridViewport .homeAlbumCard[data-cover-ambience="on"]::before{
+  opacity: .32;
 }
 
-.app[data-ambient="off"].moreQuickLibraryBlur .virtualHomeGridViewport .homeAlbumCard[data-cover-ambience="on"]::before{
-  opacity: .12;
+.app[data-cover-ambience="on"] .virtualHomeGridViewport .homeAlbumCard[data-cover-ambience="on"]::before{
+  opacity: .32;
 }
 
-.app.lessQuickLibraryBlur .virtualHomeGridViewport .homeAlbumCard::before{
+.app[data-cover-ambience="off"] .virtualHomeGridViewport .homeAlbumCard::before{
   opacity: 0;
 }
 
@@ -18284,7 +17876,7 @@ body.localtifyIdle .settingsSectionCard{
   transform: scale(1.13);
 }
 
-.app.lessQuickLibraryBlur .virtualHomeGridViewport .homeAlbumCard:hover::before{
+.app[data-cover-ambience="off"] .virtualHomeGridViewport .homeAlbumCard:hover::before{
   opacity: 0;
 }
 
@@ -18470,7 +18062,7 @@ body.localtifyIdle .settingsSectionCard{
 
 @media (max-width: 1180px){
   .pageTransition-home{
-    --quick-library-card-min: 184px;
+    --quick-library-card-min: 196px;
     --quick-library-card-gap: 14px;
     --quick-library-row-gap: 20px;
   }
@@ -18478,7 +18070,7 @@ body.localtifyIdle .settingsSectionCard{
 
 @media (max-width: 900px){
   .pageTransition-home{
-    --quick-library-card-min: 160px;
+    --quick-library-card-min: 168px;
     --quick-library-card-gap: 12px;
     --quick-library-row-gap: 16px;
     --quick-library-card-radius: 15px;

@@ -546,8 +546,8 @@ const quickLibraryBlurEnabled = settings.quickLibraryMoreBlur !== false;
         <div className="settingsPanelCard settingsFocusPanelV491 settingsHomeCardsV502">
           <div className="settingsPanelHeader settingsHomeCardsHeaderV502">
             <div>
-              <strong>Home cards</strong>
-              <span>Card blur and the tiny cat live here now. Advanced cover tint controls stay in Advanced.</span>
+              <strong>Home ambience</strong>
+              <span>Control album-cover ambience for the now-playing banner, Listen Now, and Quick Library.</span>
             </div>
             <label className="cleanToggleLabel settingsCatBuddyToggleV502" title="Show or hide the tiny cat buddy.">
               <input
@@ -560,13 +560,13 @@ const quickLibraryBlurEnabled = settings.quickLibraryMoreBlur !== false;
           </div>
 
           <div className="settingsHomeCardControlsV502">
-            <label className="toggleRow settingsCardBlurToggleV502" title="Use album covers as soft blurred backgrounds on home and quick library cards.">
+            <label className="toggleRow settingsCardBlurToggleV502" title="Use album covers as soft blurred ambience across the home page.">
               <span className="toggleRowCopy">
                 <span className="settingsLabelLine">
-                  <strong>Album cover card blur</strong>
+                  <strong>Album-cover ambience</strong>
                   <span className="settingsInfoDot" aria-hidden="true">i</span>
                 </span>
-                <small>{quickLibraryBlurEnabled ? "Home cards use a soft blurred album-cover glow." : "Home cards stay flatter and faster."}</small>
+                <small>{quickLibraryBlurEnabled ? "The banner and home cards use soft blurred album-cover ambience." : "The banner and home cards use flat themed surfaces."}</small>
               </span>
               <input
                 type="checkbox"

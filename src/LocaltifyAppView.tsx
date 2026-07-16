@@ -3543,7 +3543,7 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
       </button>
 
       <div className="homeAlbumMeta">
-        <strong title={displaySongTitleV444(song, 40)}>{displaySongTitleV444(song, 40)}</strong>
+        <strong title={displaySongTitleV444(song, 96)}>{displaySongTitleV444(song, 96)}</strong>
         <small title={displaySongArtistV444(song)}>{displaySongArtistV444(song)}</small>
       </div>
 
@@ -3785,8 +3785,8 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   const isSimpleGrid = className.includes("simpleAlbumGrid");
   const compactViewport = viewportWidth > 0 && viewportWidth < 900;
   const mediumViewport = viewportWidth >= 900 && viewportWidth < 1180;
-  const minColumnWidth = isSimpleGrid ? 176 : compactViewport ? 160 : mediumViewport ? 184 : 204;
-  const mobileCardFloor = 160;
+  const minColumnWidth = isSimpleGrid ? 184 : compactViewport ? 168 : mediumViewport ? 196 : 220;
+  const mobileCardFloor = 168;
   const gridGap = compactViewport ? 12 : mediumViewport ? 14 : 16;
   const rowGap = compactViewport ? 16 : mediumViewport ? 20 : 24;
   const viewportChrome = isSimpleGrid ? 16 : compactViewport ? 16 : 28;
@@ -5234,6 +5234,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
       data-custom-theme={settings.customThemeEnabled ? "true" : "false"}
       data-corners={settings.softCorners ? "soft" : "sharp"}
       data-ambient={effectiveAmbient ? "on" : "off"}
+      data-cover-ambience={settings.quickLibraryMoreBlur !== false ? "on" : "off"}
       data-cover-sync={effectiveCoverColorSyncMode}
       data-notes={effectiveNotes ? "on" : "off"}
       data-badge={settings.showHeroBadge ? "on" : "off"}
