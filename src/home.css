@@ -5472,8 +5472,10 @@ body.localitfyLibraryPointerDragging{
 
 .homeFreshRail{
   display:grid;
-  grid-template-columns:repeat(10, minmax(122px, 1fr));
-  gap:14px;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(112px, 132px);
+  align-items:start;
+  gap:12px;
   overflow-x:auto;
   overflow-y:hidden;
   padding:2px 2px 8px;
@@ -5482,7 +5484,7 @@ body.localitfyLibraryPointerDragging{
 }
 
 .homeFreshRail::-webkit-scrollbar{
-  height:8px;
+  height:7px;
 }
 
 .homeFreshRail::-webkit-scrollbar-track{
@@ -5491,38 +5493,81 @@ body.localitfyLibraryPointerDragging{
 
 .homeFreshRail::-webkit-scrollbar-thumb{
   border-radius:999px;
-  background:color-mix(in srgb, var(--accent, #8dff6c) 26%, rgba(255,255,255,.12));
+  background:color-mix(in srgb, var(--lt-border-strong, rgba(255,255,255,.18)) 78%, transparent);
 }
 
 .homeFreshCard{
   position:relative;
+  align-self:start;
+  width:100%;
+  min-width:0;
+  height:auto;
   display:grid;
-  gap:8px;
-  min-width:122px;
-  padding:10px;
-  border:0;
-  border-radius:18px;
+  grid-template-rows:auto 34px 16px;
+  align-content:start;
+  gap:7px;
+  padding:9px;
+  overflow:hidden;
+  border:1px solid var(--lt-border, rgba(255,255,255,.09));
+  border-radius:15px;
   color:var(--lt-text, #fff);
-  background:color-mix(in srgb, var(--raised, #191919) 78%, transparent);
+  background:color-mix(in oklab, var(--lt-surface-raised, rgba(24,25,34,.94)) 94%, transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
   cursor:pointer;
   text-align:left;
   scroll-snap-align:start;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+  transform:translate3d(0,0,0);
+  transition:transform 170ms cubic-bezier(.16,1,.3,1), border-color 150ms ease, background-color 150ms ease;
 }
 
 .homeFreshCard:hover{
-  transform:translateY(-3px);
-  background:color-mix(in srgb, var(--lt-accent, #8dff6c) 16%, var(--raised, #191919) 84%);
-  box-shadow:0 16px 34px rgba(0,0,0,.22);
+  transform:translate3d(0,-2px,0);
+  border-color:color-mix(in oklab, var(--lt-border-strong, rgba(255,255,255,.18)) 70%, var(--lt-accent) 30%);
+  background:color-mix(in oklab, var(--lt-surface-raised, rgba(24,25,34,.94)) 94%, var(--lt-accent) 6%);
+}
+
+.homeFreshCard > strong{
+  display:-webkit-box;
+  min-width:0;
+  max-height:34px;
+  overflow:hidden;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+  color:var(--lt-text);
+  font-size:12.5px;
+  line-height:1.32;
+  overflow-wrap:anywhere;
+}
+
+.homeFreshCard > small{
+  min-width:0;
+  overflow:hidden;
+  color:var(--lt-muted);
+  font-size:10.5px;
+  line-height:16px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
 .homeFreshCover{
+  position:relative;
   width:100%;
   aspect-ratio:1;
-  border-radius:16px;
   overflow:hidden;
-  background:color-mix(in srgb, var(--surface, #101010) 84%, #000 16%);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);
+  border-radius:12px;
+  background:var(--lt-surface-soft, rgba(255,255,255,.04));
+}
+
+.homeFreshCover img,
+.homeFreshCover .coverImage{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center;
 }
 
 .homeShelfEmpty{
@@ -6954,7 +6999,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 
 .songRow,
 
-.homeFreshCard,
 
 .coverCard,
 
@@ -6981,9 +7025,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 
 .songCard::after,
 
-.homeFreshCard::before,
 
-.homeFreshCard::after,
 
 .coverCard::before,
 
@@ -7002,7 +7044,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 
 .songCard:hover,
 
-.homeFreshCard:hover,
 
 .coverCard:hover,
 
@@ -7019,7 +7060,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 
 .songCard:hover img,
 
-.homeFreshCard:hover img,
 
 .coverCard:hover img,
 
@@ -7030,8 +7070,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 .libraryCard,
 .libraryCardV025,
 .coverCard,
-.coverGalleryCard,
-.homeFreshCard{
+.coverGalleryCard{
   content-visibility: auto;
   contain-intrinsic-size: 172px 260px;
 }
@@ -14677,22 +14716,18 @@ body.localtifyIdle .settingsSectionCard{
 .app .libraryPanelV025{
   position: relative !important;
   overflow: hidden !important;
-  border: 0 !important;
-  border-radius: 24px !important;
+  border: 1px solid var(--lt-border, rgba(255,255,255,.09)) !important;
+  border-radius: 18px !important;
   background:
-    radial-gradient(circle at 92% 4%, rgba(var(--lt-accent-rgb), 0.135), transparent 32%),
-    radial-gradient(circle at 8% 0%, rgba(255,255,255,0.055), transparent 30%),
-    linear-gradient(180deg, rgba(255,255,255,0.048), rgba(255,255,255,0.018)),
-    rgba(13, 9, 20, 0.74) !important;
-  box-shadow:
-    0 24px 82px rgba(0,0,0,0.34),
-    inset 0 1px 0 rgba(255,255,255,0.055) !important;
-  backdrop-filter: blur(18px) saturate(118%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(118%) !important;
+    linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.010)),
+    var(--lt-surface-raised, rgba(15,16,23,.88)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .app .libraryPanelV025::before{
-  content: "" !important;
+  content: none !important;
   position: absolute !important;
   inset: 0 !important;
   pointer-events: none !important;
@@ -14861,7 +14896,7 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 .app .libraryFullListV025 .songRow{
-  min-height: 68px !important;
+  min-height: 62px !important;
   grid-template-columns: minmax(0, 1fr) max-content 34px 34px !important;
   gap: 12px !important;
   padding: 10px 14px !important;
@@ -14946,7 +14981,7 @@ body.localtifyIdle .settingsSectionCard{
 
 
 .app .libraryPanelV025{
-  padding: 22px 24px 28px !important;
+  padding: 18px 20px 24px !important;
 }
 
 .app .libraryPanelHeadV025{
@@ -14957,7 +14992,7 @@ body.localtifyIdle .settingsSectionCard{
 
 .app .libraryPanelTitleV025 h3{
   margin: 1px 0 4px !important;
-  font-size: clamp(1.82rem, 3.35vw, 3rem) !important;
+  font-size: clamp(1.7rem, 2.8vw, 2.45rem) !important;
   line-height: .94 !important;
 }
 
@@ -16043,18 +16078,20 @@ body.localtifyIdle .settingsSectionCard{
 
 .downloadsLayoutV031{
   display: grid;
-  gap: 14px !important;
+  gap: 12px !important;
+  max-width: 1040px;
+  margin: 0 auto;
   contain: layout style;
 }
 
 .downloadPanelV031{
-  border-color: rgba(255,255,255,.09) !important;
+  padding: 18px !important;
+  border-color: var(--lt-border, rgba(255,255,255,.09)) !important;
+  border-radius: 18px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.014)),
-    rgba(5,5,10,.72) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 16px 40px rgba(0,0,0,.20) !important;
+    linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,.010)),
+    var(--lt-surface-raised, rgba(15,16,23,.88)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
 
 .downloadHeroHead{
@@ -16463,17 +16500,6 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 
-.app :is(.hero, .heroPremium, .heroCompact, .homeListenCard, .homeFreshCard, .coverGalleryCard, .coverGridCard, .playlistCard, .albumCard, .songRow):not(.playerBar){
-  border-color: color-mix(in oklab, rgba(255,255,255,.07) 58%, var(--lt-accent) 42%) !important;
-}
-
-.app :is(.hero, .heroPremium, .heroCompact, .homeListenCard, .homeFreshCard, .coverGalleryCard, .coverGridCard, .playlistCard, .albumCard):not(.playerBar):hover{
-  border-color: color-mix(in oklab, rgba(255,255,255,.09) 42%, var(--lt-accent) 58%) !important;
-}
-
-.app :is(.homeListenCard.active, .homeListenCard.playing, .songRow.active, .songRow.playing, .hero.heroPremium){
-  border-color: color-mix(in oklab, rgba(255,255,255,.06) 26%, var(--lt-accent) 74%) !important;
-}
 
 
 .app :is(.hero, .heroPremium, .heroCompact, .homeListenCard, .homeFreshCard, .coverGalleryCard, .coverGridCard, .playlistCard, .albumCard, .songRow):not(.playerBar){
@@ -17393,9 +17419,7 @@ body.localtifyIdle .settingsSectionCard{
   overflow: visible;
   padding-top: 14px;
   border-radius: 20px;
-  background:
-    radial-gradient(circle at 5% 0%, rgba(var(--lt-accent-rgb), .09), transparent 36%),
-    rgba(255,255,255,.018);
+  background: rgba(255,255,255,.018);
 }
 
 .downloadResultsHeadV502{
@@ -17676,38 +17700,6 @@ body.localtifyIdle .settingsSectionCard{
   aspect-ratio: 1 / 1 !important;
 }
 
-.app .homeFreshCard,
-.homeView .homeFreshCard{
-  align-content: start !important;
-}
-
-.app .homeFreshCover,
-.homeView .homeFreshCover{
-  position: relative !important;
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1 / 1 !important;
-  overflow: hidden !important;
-  line-height: 0 !important;
-  flex: 0 0 auto !important;
-}
-
-.app .homeFreshCover .coverImage,
-.app .homeFreshCover img,
-.homeView .homeFreshCover .coverImage,
-.homeView .homeFreshCover img{
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  display: block !important;
-}
 
 .app .homeListenCover,
 .homeView .homeListenCover{
@@ -17731,10 +17723,10 @@ body.localtifyIdle .settingsSectionCard{
 
 /* Quick Library and cover-card ownership. */
 .pageTransition-home{
-  --quick-library-card-min: 220px;
-  --quick-library-card-gap: var(--lt-layout-gap, 16px);
-  --quick-library-row-gap: 24px;
-  --quick-library-card-radius: var(--lt-card-radius, 16px);
+  --quick-library-card-min: 176px;
+  --quick-library-card-gap: 14px;
+  --quick-library-row-gap: 18px;
+  --quick-library-card-radius: 14px;
   --quick-library-card-surface: color-mix(
     in oklab,
     var(--lt-surface-raised, rgba(24, 25, 34, .96)) 94%,
@@ -17748,11 +17740,11 @@ body.localtifyIdle .settingsSectionCard{
   display: block;
   width: 100%;
   min-width: 0;
-  min-height: min(620px, calc(100vh - 285px));
-  max-height: min(760px, calc(100vh - 245px));
+  min-height: min(500px, calc(100vh - 285px));
+  max-height: min(680px, calc(100vh - 245px));
   overflow-x: clip;
   overflow-y: auto;
-  padding: 18px 14px 34px;
+  padding: 14px 10px 26px;
   margin: 0;
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
@@ -17794,9 +17786,9 @@ body.localtifyIdle .settingsSectionCard{
   width: 100%;
   min-width: 0;
   display: grid;
-  grid-template-rows: auto 48px 20px 40px;
-  gap: 7px;
-  padding: 0 0 12px;
+  grid-template-rows: auto 42px 18px 36px;
+  gap: 6px;
+  padding: 0 0 10px;
   overflow: visible;
   border: 1px solid var(--quick-library-card-border, rgba(255,255,255,.10));
   border-radius: var(--quick-library-card-radius, 16px);
@@ -17837,11 +17829,7 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 .app[data-cover-ambience="on"] .virtualHomeGridViewport .homeAlbumCard[data-cover-ambience="on"]::before{
-  opacity: .32;
-}
-
-.app[data-cover-ambience="on"] .virtualHomeGridViewport .homeAlbumCard[data-cover-ambience="on"]::before{
-  opacity: .32;
+  opacity: .28;
 }
 
 .app[data-cover-ambience="off"] .virtualHomeGridViewport .homeAlbumCard::before{
@@ -17949,12 +17937,12 @@ body.localtifyIdle .settingsSectionCard{
 
 .virtualHomeGridViewport :is(.homeAlbumMeta, .homeAlbumStats, .homeAlbumActions){
   min-width: 0;
-  padding-inline: var(--lt-card-padding, 14px);
+  padding-inline: 11px;
 }
 
 .virtualHomeGridViewport .homeAlbumMeta{
   display: grid;
-  grid-template-rows: 32px 14px;
+  grid-template-rows: 28px 14px;
   align-content: start;
   gap: 2px;
   margin: 0;
@@ -17962,13 +17950,13 @@ body.localtifyIdle .settingsSectionCard{
 
 .virtualHomeGridViewport .homeAlbumMeta strong{
   display: -webkit-box;
-  max-height: 32px;
+  max-height: 28px;
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   color: var(--lt-text);
-  font-size: 13.5px;
+  font-size: 12.5px;
   line-height: 1.16;
   letter-spacing: -.02em;
   overflow-wrap: anywhere;
@@ -17984,7 +17972,7 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 .virtualHomeGridViewport .homeAlbumStats{
-  min-height: 20px;
+  min-height: 18px;
   display: flex;
   align-items: center;
   color: var(--lt-faint);
@@ -18001,10 +17989,10 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 .virtualHomeGridViewport .homeAlbumActionButton{
-  width: var(--lt-control-height-sm, 34px);
-  height: var(--lt-control-height-sm, 34px);
-  min-width: var(--lt-control-height-sm, 34px);
-  min-height: var(--lt-control-height-sm, 34px);
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   display: grid;
   place-items: center;
   overflow: visible;
@@ -18064,24 +18052,24 @@ body.localtifyIdle .settingsSectionCard{
 
 @media (max-width: 1180px){
   .pageTransition-home{
-    --quick-library-card-min: 196px;
-    --quick-library-card-gap: 14px;
-    --quick-library-row-gap: 20px;
+    --quick-library-card-min: 160px;
+    --quick-library-card-gap: 12px;
+    --quick-library-row-gap: 16px;
   }
 }
 
 @media (max-width: 900px){
   .pageTransition-home{
-    --quick-library-card-min: 168px;
-    --quick-library-card-gap: 12px;
-    --quick-library-row-gap: 16px;
-    --quick-library-card-radius: 15px;
+    --quick-library-card-min: 144px;
+    --quick-library-card-gap: 10px;
+    --quick-library-row-gap: 14px;
+    --quick-library-card-radius: 14px;
   }
 
   .virtualHomeGridViewport{
     min-height: 360px;
     max-height: min(640px, calc(100vh - 230px));
-    padding: 14px 8px 28px;
+    padding: 12px 6px 22px;
   }
 
   .virtualHomeGridViewport[data-virtual-count="1"],

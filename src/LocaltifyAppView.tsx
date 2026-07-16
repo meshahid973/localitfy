@@ -3801,11 +3801,11 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   const isSimpleGrid = className.includes("simpleAlbumGrid");
   const compactViewport = viewportWidth > 0 && viewportWidth < 900;
   const mediumViewport = viewportWidth >= 900 && viewportWidth < 1180;
-  const minColumnWidth = isSimpleGrid ? 184 : compactViewport ? 168 : mediumViewport ? 196 : 220;
-  const mobileCardFloor = 168;
-  const gridGap = compactViewport ? 12 : mediumViewport ? 14 : 16;
-  const rowGap = compactViewport ? 16 : mediumViewport ? 20 : 24;
-  const viewportChrome = isSimpleGrid ? 16 : compactViewport ? 16 : 28;
+  const minColumnWidth = isSimpleGrid ? 170 : compactViewport ? 144 : mediumViewport ? 160 : 176;
+  const mobileCardFloor = 144;
+  const gridGap = compactViewport ? 10 : mediumViewport ? 12 : 14;
+  const rowGap = compactViewport ? 14 : mediumViewport ? 16 : 18;
+  const viewportChrome = isSimpleGrid ? 14 : compactViewport ? 12 : 20;
   const usableWidth = Math.max(mobileCardFloor, (viewportWidth || minColumnWidth) - viewportChrome);
   const rawColumns = Math.max(1, Math.floor((usableWidth + gridGap) / (minColumnWidth + gridGap)));
   const canShowCompleteSmallSet = list.length > 0 && list.length <= 2 && rawColumns >= list.length;
@@ -3817,8 +3817,8 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
     mobileCardFloor,
     (usableWidth - Math.max(0, columns - 1) * gridGap) / columns
   );
-  const estimatedCardWidth = canShowCompleteSmallSet ? Math.min(232, estimatedColumnWidth) : estimatedColumnWidth;
-  const fixedCardBodyHeight = 146;
+  const estimatedCardWidth = canShowCompleteSmallSet ? Math.min(188, estimatedColumnWidth) : estimatedColumnWidth;
+  const fixedCardBodyHeight = 122;
   const rowEstimate = useMemo(
     () => Math.ceil(estimatedCardWidth + fixedCardBodyHeight + rowGap),
     [estimatedCardWidth, rowGap]
@@ -5711,8 +5711,8 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                             style={{ "--card-delay": `${index * 42}ms` } as CSSProperties}
                           >
                             <Cover song={song} className="homeFreshCover" />
-                            <strong>{prettyTitle(song.title, 4)}</strong>
-                            <small>{prettyMeta(song.artist)}</small>
+                            <strong title={displaySongTitleV444(song, 96)}>{displaySongTitleV444(song, 96)}</strong>
+                            <small title={displaySongArtistV444(song)}>{displaySongArtistV444(song)}</small>
                           </button>
                         ))
                       ) : (

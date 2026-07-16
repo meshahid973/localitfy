@@ -1168,12 +1168,10 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeL
   display: none !important;
 }
 
-.app .homeFreshRail,
 .app .homeSongList{
   contain: layout paint style !important;
 }
 
-.app .homeFreshCard,
 .app .homeListenCard,
 .app .songRow,
 .app .libraryRow{
@@ -1181,7 +1179,6 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeL
   contain-intrinsic-size: 92px 132px;
 }
 
-.app .homeFreshCard :is(img, .coverAura),
 .app .homeListenCard :is(img, .coverAura),
 .app .songRow :is(img, .coverAura),
 .app .libraryRow :is(img, .coverAura){
@@ -1189,7 +1186,6 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeL
   backface-visibility: hidden;
 }
 
-.app .homeFreshRail,
 .app .homeListenGrid,
 .app .libraryList,
 .app .albumShelfGridV318,
@@ -1200,7 +1196,6 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeL
   contain: layout paint style;
 }
 
-.app .homeFreshCard,
 .app .homeListenCard,
 .app .songRow,
 .app .libraryRow,
@@ -1213,13 +1208,13 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeL
   contain: layout paint style;
 }
 
-.app :is(.homeFreshCard, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumCardV318, .coverGalleryCardCleanOnly) img{
+.app :is(.homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumCardV318, .coverGalleryCardCleanOnly) img{
   content-visibility: auto;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-.app :is(.localtifyProximityTarget, .homeFreshCard, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
+.app :is(.localtifyProximityTarget, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
   will-change: auto;
 }
 

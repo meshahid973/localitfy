@@ -726,9 +726,9 @@ body.localitfyThemePainting .app :where(.songRow, .songCard, .libraryCard, .play
     transform: translate3d(0,1px,0) scale(.985) !important;
     }
 
-  
 
-  
+
+
 
   .updateToastCard,
 .whatsNewCard,
@@ -1723,7 +1723,6 @@ body.localitfyDropCommitted .app :is(.songRow, .homeListenCard, .playlistTrackRo
 .coverSyncChoice,
 .songRow,
 .homeListenCard,
-.homeFreshCard,
 .playlistTrackRow,
 .playlistSongRow,
 .libraryRow{
@@ -1752,7 +1751,6 @@ body.localitfyDropCommitted .app :is(.songRow, .homeListenCard, .playlistTrackRo
 }
 
 .homeListenCard:hover,
-.homeFreshCard:hover,
 .coverGalleryCard:hover,
 .settingsThemeCard:hover,
 .settingSwitchCard:hover,
@@ -2084,7 +2082,7 @@ body.localitfyDropCommitted .app :is(.songRow, .homeListenCard, .playlistTrackRo
   backface-visibility: hidden;
 }
 
-.app :is(.coverGalleryCard, .homeFreshCard, .songRow, .libraryRow):hover{
+.app :is(.coverGalleryCard, .songRow, .libraryRow):hover{
   filter: none !important;
 }
 
@@ -2125,7 +2123,6 @@ body.localitfyDropCommitted .app :is(.songRow, .homeListenCard, .playlistTrackRo
   filter: none !important;
 }
 
-.app .homeFreshCard.localtifyProximityTarget,
 .app .homeListenCard.localtifyProximityTarget,
 .app .songRow.localtifyProximityTarget,
 .app .libraryRow.localtifyProximityTarget{
@@ -2142,12 +2139,12 @@ body.localitfyDropCommitted .app :is(.songRow, .homeListenCard, .playlistTrackRo
 
 /* localtify 0.3.9 V320 — final interaction guard.
    Velocity/proximity motion is only for safe controls; cards/lists never get owned by pointer JS. */
-.app :is(.homeFreshCard, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumTrackRowV318, .coverGalleryCard, .coverGalleryCardCleanOnly).localtifyProximityTarget{
+.app :is(.homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumTrackRowV318, .coverGalleryCard, .coverGalleryCardCleanOnly).localtifyProximityTarget{
   transform: translateZ(0) !important;
   filter: none !important;
 }
 
-.app :is(.homeFreshCard, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumTrackRowV318, .coverGalleryCard, .coverGalleryCardCleanOnly).localtifyProximityActive{
+.app :is(.homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumTrackRowV318, .coverGalleryCard, .coverGalleryCardCleanOnly).localtifyProximityActive{
   transform: translateZ(0) !important;
 }
 

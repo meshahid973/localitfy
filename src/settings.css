@@ -9592,7 +9592,7 @@ body.localitfyThemePainting .toggleRow{
   filter:
     drop-shadow(0 14px 18px rgba(0,0,0,.30))
     drop-shadow(0 0 20px rgba(255,90,120,.16)) !important;
-  animation: settingsDangerMascotPulseV501 2.3s ease-in-out infinite;
+  animation: settingsDangerMascotPulseV501 3.2s ease-in-out infinite;
 }
 
 @keyframes settingsDangerMascotPulseV501{
@@ -9632,7 +9632,7 @@ body.localitfyThemePainting .toggleRow{
 
 .settingsPage{
   margin: 0;
-  padding: 0 clamp(18px, 2.2vw, 34px) 140px;
+  padding: 0 clamp(14px, 1.8vw, 26px) 120px;
   overflow-x: clip;
 }
 
@@ -9640,21 +9640,21 @@ body.localitfyThemePainting .toggleRow{
   width: 100%;
   min-width: 0;
   display: grid;
-  grid-template-columns: clamp(220px, 14vw, 264px) minmax(0, 1fr);
+  grid-template-columns: clamp(196px, 13vw, 228px) minmax(0, 1fr);
   align-items: start;
-  gap: 14px;
+  gap: 12px;
 }
 
 .settingsCategoryContent,
 .settingsCategoryContentV027{
   width: 100%;
   min-width: 0;
-  padding: 18px clamp(18px, 2.1vw, 34px) 44px;
+  padding: 14px clamp(14px, 1.6vw, 24px) 36px;
 }
 
 .settingsCategoryPage{
   display: grid;
-  gap: 14px;
+  gap: 10px;
   align-content: start;
 }
 
@@ -9668,11 +9668,11 @@ body.localitfyThemePainting .toggleRow{
   max-width: 100%;
   overflow: hidden;
   border: 1px solid var(--lt-border);
-  border-radius: var(--lt-panel-radius, 18px);
+  border-radius: 16px;
   background:
     linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.010)),
     var(--lt-surface-raised);
-  box-shadow: 0 10px 28px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.038);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
 }
 
 .app[data-card-background="glassy"] :is(.settingsPanelCard,.settingsPageCard,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){
@@ -9700,8 +9700,8 @@ body.localitfyThemePainting .toggleRow{
   width: 100%;
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(220px, 360px) minmax(260px, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(200px, 320px) minmax(240px, 1fr);
+  gap: 12px;
   align-items: stretch;
 }
 
