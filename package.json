@@ -27,7 +27,8 @@
     "assets:compress:dry": "node scripts/compress-localtify-assets.mjs --dry-run",
     "clean:builds": "node scripts/compress-localtify-assets.mjs --clean-build-output",
     "prebuild": "node scripts/compress-localtify-assets.mjs",
-    "chunks:audit": "node -e \"const fs=require('fs'),p='dist/assets'; if(!fs.existsSync(p)){console.log('run npm run build first'); process.exit(0)}; fs.readdirSync(p).map(n=>({n,s:fs.statSync(p+'/'+n).size})).sort((a,b)=>b.s-a.s).slice(0,30).forEach(x=>console.log((x.s/1024).toFixed(1)+' KB  '+x.n))\""
+    "chunks:audit": "node -e \"const fs=require('fs'),p='dist/assets'; if(!fs.existsSync(p)){console.log('run npm run build first'); process.exit(0)}; fs.readdirSync(p).map(n=>({n,s:fs.statSync(p+'/'+n).size})).sort((a,b)=>b.s-a.s).slice(0,30).forEach(x=>console.log((x.s/1024).toFixed(1)+' KB  '+x.n))\"",
+    "release:check": "npm run build && node scripts/release-check.mjs && npm run chunks:audit"
   },
   "dependencies": {
     "better-sqlite3": "^12.5.0",
@@ -36,7 +37,6 @@
     "electron-updater": "^6.6.2",
     "ffmpeg-static": "^5.3.0",
     "fluent-ffmpeg": "^2.1.3",
-    "fs-extra": "^11.3.2",
     "music-metadata": "^11.13.0",
     "sanitize-filename": "^1.6.3",
     "yt-dlp-wrap": "^2.3.12",

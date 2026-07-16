@@ -5,7 +5,6 @@ import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { FastAverageColor } from "fast-average-color";
 import {
   BarChart3,
   Download,
@@ -81,7 +80,6 @@ import LocaltifyAppView, {
   VirtualHomeSongCards,
   VirtualSongRows
 } from "./LocaltifyAppView";
-import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
 import ViewErrorBoundary from "./ui/ViewErrorBoundary";
 import {
@@ -224,6 +222,7 @@ import type {
 } from "./localtifyTypes";
 
 const SettingsCategoryContent = lazy(() => import("./SettingsCategoryContent"));
+const Onboarding = lazy(() => import("./Onboarding"));
 
 
 const LOCALTFY_PLAYER_MORPH_PAUSE = {
@@ -435,11 +434,11 @@ const FEEDBACK_PROMPT_DELAY_MS = 40_000;
 const FEEDBACK_PROMPT_RETRY_DELAY_MS = 15_000;
 const FEEDBACK_MESSAGE_MAX_LENGTH = 1_500;
 const LOCALTIFY_042_WHATS_NEW_ITEMS = [
-  "0.4.2 fixes bulk album import freezes and reduces heavy cover work during startup.",
-  "Album cover detection is safer: folder and embedded covers win, generated covers stay lightweight, and mascot art is no longer treated as album art.",
-  "Player queue handling, settings cleanup, and appearance polish were tightened for daily use.",
-  "Electron security was hardened with a stricter preload bridge, sandboxed renderer, and blocked random navigation.",
-  "Home cards, settings panels, player text, and cover handling were cleaned up for a calmer daily build."
+  "Playback state now survives Alt+Tab, sleep/wake, and audio-device changes without losing speed, mute, volume, queue, or position.",
+  "Home cover ambience is enabled by default and uses a softer, properly blurred treatment across the banner, Listen Now, and Quick Library.",
+  "Quick Library sizing, title clamping, heart animation space, dragging, and compact layouts were stabilized across window sizes.",
+  "Spotify and YouTube input handling now avoids duplicate requests and uses cleaner release-ready status messages without changing the downloader backend.",
+  "Settings and shared surfaces were simplified, duplicate startup work was removed, and release verification was added for 0.4.2."
 ] as const;
 
 const FEEDBACK_PROMPT_COPY = {
@@ -7783,10 +7782,18 @@ function MainModeApp() {
   }
 
   function parseDownloadUrls(text: string) {
+    const seen = new Set<string>();
+
     return text
       .split(/\r?\n|,/)
       .map((url) => url.trim())
-      .filter(Boolean);
+      .filter((url) => {
+        if (!url) return false;
+        const key = url.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
   }
 
   function makeQueuedDownloads(urls: string[]): DownloadQueueItem[] {
@@ -8169,7 +8176,7 @@ function MainModeApp() {
     return [
       "Spotify could not read this playlist.",
       "Make sure it is public on your Spotify profile, not only shareable by link.",
-      "Open Spotify ? playlist menu ? add to profile / make public, then paste the link again."
+      "Open Spotify → playlist menu → add to profile / make public, then paste the link again."
     ].join("\n");
   }
 
@@ -8216,7 +8223,7 @@ function MainModeApp() {
 
       if (!res?.ok && !state.loggedIn && !state.fallbackAvailable) {
         const message = res?.needsClientId
-          ? "Spotify public import fallback is not available in this build. Replace electron/main.cjs with the v315 Spotify public fallback file."
+          ? "Spotify public import is unavailable in this build. Open Settings → About and copy diagnostics before reporting it."
           : res?.error || "Spotify login cancelled.";
         setSpotifyFetchError(message);
         setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
@@ -8301,7 +8308,7 @@ function MainModeApp() {
       if (checkRes) {
         const connection = updateSpotifyConnectionState(checkRes);
         if ((!connection.ready || checkRes?.needsClientId) && !connection.fallbackAvailable) {
-          const message = "Spotify public import is not ready in this build. Replace electron/main.cjs with the v315 Spotify public fallback file.";
+          const message = "Spotify public import is unavailable in this build. Open Settings → About and copy diagnostics before reporting it.";
           setSpotifyFetchError(message);
           setStatusText("spotify setup needed");
           return;
@@ -11014,18 +11021,20 @@ function MainModeApp() {
 
   if (onboardingOpen || onboardingDevPreview) {
     return (
-      <Onboarding
-        appVersion={APP_VERSION}
-        songsCount={songs.length}
-        currentTheme={currentTheme?.id ?? settings.theme}
-        discordEnabled={settings.discordEnabled}
-        onChooseTheme={handleOnboardingTheme}
-        onSetDiscordEnabled={handleOnboardingDiscord}
-        onImportMusic={handleOnboardingImportMusic}
-        onOpenDownloads={handleOnboardingDownloads}
-        onStartListening={handleOnboardingStartListening}
-        onSkip={skipOnboarding}
-      />
+      <Suspense fallback={<main className="onboardingBootBlank" aria-label="localtify is preparing onboarding"><span>localtify</span></main>}>
+        <Onboarding
+          appVersion={APP_VERSION}
+          songsCount={songs.length}
+          currentTheme={currentTheme?.id ?? settings.theme}
+          discordEnabled={settings.discordEnabled}
+          onChooseTheme={handleOnboardingTheme}
+          onSetDiscordEnabled={handleOnboardingDiscord}
+          onImportMusic={handleOnboardingImportMusic}
+          onOpenDownloads={handleOnboardingDownloads}
+          onStartListening={handleOnboardingStartListening}
+          onSkip={skipOnboarding}
+        />
+      </Suspense>
     );
   }
 

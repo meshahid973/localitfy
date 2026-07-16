@@ -6305,7 +6305,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .customThemeBodyV027{
   display: grid;
   grid-template-columns: minmax(260px, 460px);
-  gap: 16px;
+  gap: 12px;
   align-items: stretch;
 }
 
@@ -9640,8 +9640,9 @@ body.localitfyThemePainting .toggleRow{
   width: 100%;
   min-width: 0;
   display: grid;
-  grid-template-columns: clamp(230px, 15vw, 280px) minmax(0, 1fr);
+  grid-template-columns: clamp(220px, 14vw, 264px) minmax(0, 1fr);
   align-items: start;
+  gap: 14px;
 }
 
 .settingsCategoryContent,
@@ -9653,7 +9654,7 @@ body.localitfyThemePainting .toggleRow{
 
 .settingsCategoryPage{
   display: grid;
-  gap: 18px;
+  gap: 14px;
   align-content: start;
 }
 
@@ -9667,11 +9668,11 @@ body.localitfyThemePainting .toggleRow{
   max-width: 100%;
   overflow: hidden;
   border: 1px solid var(--lt-border);
-  border-radius: var(--lt-panel-radius, 20px);
+  border-radius: var(--lt-panel-radius, 18px);
   background:
-    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.012)),
+    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.010)),
     var(--lt-surface-raised);
-  box-shadow: 0 16px 44px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.044);
+  box-shadow: 0 10px 28px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.038);
 }
 
 .app[data-card-background="glassy"] :is(.settingsPanelCard,.settingsPageCard,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){

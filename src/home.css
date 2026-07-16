@@ -1944,14 +1944,14 @@ button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
   pointer-events: none;
   background: var(--cover-art-url, var(--cover-url, none)) center / cover no-repeat;
   opacity: 0;
-  filter: blur(48px) saturate(1.46) brightness(.68) contrast(1.05);
-  transform: translate3d(0,0,0) scale(1.18);
+  filter: blur(56px) saturate(1.38) brightness(.72) contrast(1.03);
+  transform: translate3d(0,0,0) scale(1.24);
   transition: opacity 260ms ease, filter 260ms ease, transform 420ms cubic-bezier(.16,1,.3,1);
   backface-visibility: hidden;
 }
 
 .app[data-cover-ambience="on"] .hero.heroPremium::before{
-  opacity: .56;
+  opacity: .68;
 }
 
 .app .hero.heroPremium::after{
@@ -1962,7 +1962,7 @@ button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
   pointer-events: none;
   background:
     radial-gradient(circle at 83% 45%, rgba(var(--lt-accent-rgb), .10), transparent 28%),
-    linear-gradient(90deg, rgba(2,3,7,.95) 0%, rgba(2,3,7,.88) 34%, rgba(2,3,7,.58) 64%, rgba(2,3,7,.72) 100%);
+    linear-gradient(90deg, rgba(2,3,7,.93) 0%, rgba(2,3,7,.82) 34%, rgba(2,3,7,.46) 64%, rgba(2,3,7,.60) 100%);
 }
 
 .app .hero.heroPremium > .heroCoverGhost{
@@ -1973,14 +1973,14 @@ button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
   border-radius: 42px;
   background: var(--cover-art-url, var(--cover-url, none)) center / cover no-repeat;
   opacity: 0;
-  filter: blur(62px) saturate(1.62) brightness(.82);
+  filter: blur(70px) saturate(1.46) brightness(.78);
   transform: translate3d(0,0,0) scale(1.14);
   transition: opacity 300ms ease, transform 520ms cubic-bezier(.16,1,.3,1);
   mix-blend-mode: normal;
 }
 
 .app[data-cover-ambience="on"] .hero.heroPremium > .heroCoverGhost{
-  opacity: .30;
+  opacity: .38;
 }
 
 .app .hero.heroPremium > .heroAmbiencePulse{
@@ -10692,7 +10692,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
 }
 
 .app[data-cover-ambience="on"] .homeShelfStack .homeListenCard[data-cover-ambience="on"] .homeListenBackground{
-  opacity: .58;
+  opacity: .72;
 }
 
 .app[data-cover-ambience="off"] .homeShelfStack .homeListenCard .homeListenBackground{
@@ -10701,15 +10701,15 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
 
 .app .homeShelfStack .homeListenCard .homeListenBackgroundImage{
   position: absolute;
-  inset: -34%;
-  width: 168%;
-  height: 168%;
+  inset: -52%;
+  width: 204%;
+  height: 204%;
   display: block;
   object-fit: cover;
   object-position: center;
-  opacity: .72;
-  filter: blur(32px) saturate(1.52) brightness(.74) contrast(1.04);
-  transform: scale(1.18) translateZ(0);
+  opacity: .58;
+  filter: blur(52px) saturate(1.34) brightness(.64) contrast(1.02);
+  transform: scale(1.30) translateZ(0);
   transition: transform 240ms cubic-bezier(.16,1,.3,1), filter 200ms ease;
 }
 
@@ -10726,8 +10726,10 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
   min-width: 0;
   padding: 0 14px 0 0;
   background:
-    linear-gradient(90deg, rgba(6,6,10,.08), rgba(6,6,10,.44) 30%, rgba(6,6,10,.66)),
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.055));
+    linear-gradient(90deg, rgba(6,6,10,.12), rgba(6,6,10,.40) 30%, rgba(6,6,10,.62)),
+    linear-gradient(180deg, rgba(255,255,255,.040), rgba(0,0,0,.060));
+  backdrop-filter: blur(10px) saturate(1.08);
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
 }
 
 .app .homeShelfStack .homeListenCard .homeListenCover,
@@ -10820,7 +10822,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
 }
 
 .app[data-cover-ambience="on"] .homeShelfStack .homeListenCard:hover .homeListenBackground{
-  opacity: .64;
+  opacity: .78;
 }
 
 .app[data-cover-ambience="off"] .homeShelfStack .homeListenCard:hover .homeListenBackground{
@@ -10828,8 +10830,8 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
 }
 
 .app .homeShelfStack .homeListenCard:hover .homeListenBackgroundImage{
-  filter: blur(30px) saturate(1.62) brightness(.78) contrast(1.04);
-  transform: scale(1.22) translateZ(0);
+  filter: blur(48px) saturate(1.42) brightness(.68) contrast(1.02);
+  transform: scale(1.34) translateZ(0);
 }
 
 .app .homeShelfStack .homeListenCard:hover .homeListenCover img,

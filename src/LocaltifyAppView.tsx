@@ -239,7 +239,6 @@ import {
   GripVertical
 } from "lucide-react";
 
-const Onboarding = lazy(() => import("./Onboarding"));
 const CoverStudio = lazy(() => import("./cover"));
 
 export type Song = {
@@ -1651,6 +1650,7 @@ export const defaultSettings: Settings = {
   homeHeroCoverBrightness: 1,
   starsIntensity: "off",
   blurEffects: "normal",
+  quickLibraryMoreBlur: true,
 
   discordEnabled: true,
   discordShowPausedIdle: true,
@@ -2605,6 +2605,22 @@ export type CoverAverageStyle = CSSProperties & {
 };
 
 export const coverAverageColorCache = new Map<string, CoverAverageStyle>();
+const COVER_AVERAGE_COLOR_CACHE_LIMIT = 256;
+
+function cacheCoverAverageStyle(source: string, style: CoverAverageStyle) {
+  if (coverAverageColorCache.has(source)) {
+    coverAverageColorCache.delete(source);
+  }
+
+  coverAverageColorCache.set(source, style);
+
+  while (coverAverageColorCache.size > COVER_AVERAGE_COLOR_CACHE_LIMIT) {
+    const oldestKey = coverAverageColorCache.keys().next().value;
+    if (!oldestKey) break;
+    coverAverageColorCache.delete(oldestKey);
+  }
+}
+
 export const fastAverageColor = typeof window !== "undefined" ? new FastAverageColor() : null;
 
 export function buildCoverAverageStyle(hex: string): CoverAverageStyle {
@@ -2651,7 +2667,7 @@ export function useCoverAverageStyle(source: string, enabled: boolean) {
           if (cancelled || requestIdRef.current !== requestId) return;
 
           const nextStyle = buildCoverAverageStyle(color.hex);
-          coverAverageColorCache.set(coverSource, nextStyle);
+          cacheCoverAverageStyle(coverSource, nextStyle);
           setStyle(nextStyle);
         })
         .catch(() => {
@@ -5400,23 +5416,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
         </div>
       ) : null}
 
-      {onboardingOpen ? (
-        <Suspense fallback={null}>
-          <Onboarding
-            appVersion={APP_VERSION}
-            songsCount={songs.length}
-            currentTheme={settings.customThemeEnabled ? "custom" : settings.theme}
-            discordEnabled={settings.discordEnabled}
-            onChooseTheme={handleOnboardingTheme}
-            onSetDiscordEnabled={handleOnboardingDiscord}
-            onImportMusic={handleOnboardingImportMusic}
-            onOpenDownloads={handleOnboardingDownloads}
-            onStartListening={handleOnboardingStartListening}
-            onSkip={skipOnboarding}
-          />
-        </Suspense>
-      ) : null}
-
       {effectiveSimpleMode ? (
         simpleModeView
       ) : (
@@ -5672,7 +5671,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                               <span className="homeListenForeground">
                                 <Cover song={song} className="homeListenCover" />
                                 <span className="homeListenCopy">
-                                  <strong className="homeListenTitle">{prettyTitle(song.title, 5)}</strong>
+                                  <strong className="homeListenTitle">{prettyTitle(song.title, 12)}</strong>
                                   <small className="homeListenArtist">{prettyMeta(song.artist)}</small>
                                 </span>
                                 <span className="homeListenMeta">{formatTime(song.duration || 0)}</span>

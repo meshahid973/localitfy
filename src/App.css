@@ -10517,8 +10517,8 @@ body.isResizingPlayer .app *{
 }
 
 
-.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .analyticsStudioV339 > section, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon){
-  border-color: var(--panel-calm-line) !important;
+.app .pageTransition:not([data-view="home"]) :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .analyticsStudioV339 > section, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon){
+  border-color: var(--lt-border) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.012)),
     var(--panel-calm-bg) !important;
@@ -10530,8 +10530,8 @@ body.isResizingPlayer .app *{
   contain: layout paint style;
 }
 
-.app :is(.panel, .ambientSurface, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
-  border-color: var(--panel-calm-line-hover) !important;
+.app .pageTransition:not([data-view="home"]) :is(.panel, .ambientSurface, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
+  border-color: var(--lt-border-strong) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.016)),
     var(--panel-calm-bg-strong) !important;
@@ -10540,7 +10540,7 @@ body.isResizingPlayer .app *{
     var(--panel-calm-shadow-hover) !important;
 }
 
-.app :is(.active, .selected, .playing, .isActive, .downloaded, .loggedIn):is(.panel, .ambientSurface, .settingsCard, .settingsPageCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318){
+.app .pageTransition:not([data-view="home"]) :is(.active, .selected, .playing, .isActive, .downloaded, .loggedIn):is(.panel, .ambientSurface, .settingsCard, .settingsPageCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318){
   border-color: rgba(var(--lt-accent-rgb), .22) !important;
   background:
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .070), rgba(255,255,255,.014)),
@@ -10721,14 +10721,6 @@ body.isResizingPlayer .app *{
   transform: translate3d(0, -1px, 0) !important;
 }
 
-
-.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .analyticsStudioV339 > section, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon){
-  border-color: var(--panel-calm-outline-soft) !important;
-}
-
-.app :is(.panel, .ambientSurface, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
-  border-color: var(--panel-calm-outline-strong) !important;
-}
 
 
 .app .content > .headerBar::before{
@@ -11276,18 +11268,6 @@ body.isResizingPlayer .app *{
 }
 
 
-.app :is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
-  border-color: var(--outline-calm-v486) !important;
-}
-
-.app :is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
-  border-color: color-mix(in oklab, rgba(255,255,255,.075) 62%, var(--lt-accent) 38%) !important;
-}
-
-.app :is(.active, .playing, .selected):is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318){
-  border-color: var(--outline-active-v486) !important;
-}
-
 @media (max-width: 760px){
   .app .topUpdateRibbonText h3,
 .topUpdateRibbonText h3{
@@ -11567,18 +11547,6 @@ body.isResizingPlayer .app *{
   box-shadow: none !important;
 }
 
-
-.app :is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
-  border-color: var(--outline-calm-v487) !important;
-}
-
-.app :is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
-  border-color: var(--outline-hover-v487) !important;
-}
-
-.app :is(.active, .playing, .selected):is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318){
-  border-color: var(--outline-active-v487) !important;
-}
 
 
 .app[data-theme="mono"]{
