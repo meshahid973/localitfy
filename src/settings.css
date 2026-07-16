@@ -9673,12 +9673,15 @@ body.localitfyThemePainting .toggleRow{
     linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.010)),
     var(--lt-surface-raised);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+  content-visibility: auto;
+  contain: layout paint style;
+  contain-intrinsic-size: 1px 260px;
 }
 
 .app[data-card-background="glassy"] :is(.settingsPanelCard,.settingsPageCard,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){
-  background: color-mix(in oklab, var(--lt-surface-raised) 86%, transparent);
-  backdrop-filter: blur(16px) saturate(1.10);
-  -webkit-backdrop-filter: blur(16px) saturate(1.10);
+  background: color-mix(in oklab, var(--lt-surface-raised) 91%, transparent);
+  backdrop-filter: blur(8px) saturate(1.06);
+  -webkit-backdrop-filter: blur(8px) saturate(1.06);
 }
 
 .app[data-card-background="solid"] :is(.settingsPanelCard,.settingsPageCard,.themeEditorCard,.customThemeStudioV025,.customThemeManagerV027){

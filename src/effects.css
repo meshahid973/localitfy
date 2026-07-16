@@ -1175,15 +1175,7 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeL
 .app .homeListenCard,
 .app .songRow,
 .app .libraryRow{
-  content-visibility: auto;
-  contain-intrinsic-size: 92px 132px;
-}
-
-.app .homeListenCard :is(img, .coverAura),
-.app .songRow :is(img, .coverAura),
-.app .libraryRow :is(img, .coverAura){
-  transform: translateZ(0);
-  backface-visibility: hidden;
+  contain: layout style;
 }
 
 .app .homeListenGrid,
@@ -1203,15 +1195,7 @@ body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeL
 .app .playlistSongRow,
 .app .albumCardV318,
 .app .coverGalleryCardCleanOnly{
-  content-visibility: auto;
-  contain-intrinsic-size: 120px 150px;
   contain: layout paint style;
-}
-
-.app :is(.homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumCardV318, .coverGalleryCardCleanOnly) img{
-  content-visibility: auto;
-  transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
 .app :is(.localtifyProximityTarget, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
@@ -1316,6 +1300,14 @@ body.localtifyFocusRecovering .app :where(.settingsChoice, .settingsThemeCard, .
 
 body.localtifyBackgroundMode .app :where(.catBuddy, .catBuddyShell, .coverAura::before, .coverAura::after, .albumCardSheenV318, .heroAnimatedStarLayer, .backgroundStarLayer, .ambientLayer, .appGlowLayer){
   animation-play-state: paused !important;
+}
+
+body.localtifyAdaptivePerformance .app :where(.heroAnimatedStarLayer, .backgroundStarLayer, .ambientLayer, .appGlowLayer, .albumCardSheenV318){
+  animation-play-state: paused !important;
+}
+
+body.localtifyAdaptivePerformance .app :where(.settingsPageCard, .settingsPanelCard, .homeListenCard, .homeFreshCard, .albumCardV318){
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03) !important;
 }
 
 .app[data-card-background="solid"] :where(.albumCardV318, .settingsPageCard, .settingsPanelCard),

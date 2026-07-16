@@ -909,12 +909,71 @@ function MainModeApp() {
 
   useEffect(() => {
     const body = document.body;
+    const perfClasses = [
+      "localtifyPerfV301",
+      "localtifyPerfV303",
+      "localtifyPerfV307",
+      "localtifyPerfV310",
+      "localtifyPerfV319",
+      "localtifyGpuFriendly"
+    ];
 
-    body.classList.add("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyPerfV319", "localtifyGpuFriendly");
+    body.classList.add(...perfClasses);
     body.dataset.localtifyPerf = "v319";
 
+    const navigatorWithMemory = navigator as Navigator & { deviceMemory?: number };
+    const logicalCores = Math.max(1, Number(navigator.hardwareConcurrency) || 4);
+    const deviceMemory = Math.max(1, Number(navigatorWithMemory.deviceMemory) || 8);
+    const hardwareNeedsHelp = logicalCores <= 4 || deviceMemory <= 4;
+
+    let startTimer = 0;
+    let sampleFrame = 0;
+    let previousFrameAt = 0;
+    let measuredFrames = 0;
+    let slowFrames = 0;
+    let totalFrameTime = 0;
+
+    const applyAdaptiveProfile = (enabled: boolean) => {
+      body.classList.toggle("localtifyAdaptivePerformance", enabled);
+      body.dataset.localtifyRenderProfile = enabled ? "adaptive" : "full";
+    };
+
+    const sampleRenderer = (frameAt: number) => {
+      if (document.hidden) {
+        previousFrameAt = frameAt;
+        sampleFrame = window.requestAnimationFrame(sampleRenderer);
+        return;
+      }
+
+      if (previousFrameAt > 0) {
+        const frameTime = Math.min(80, Math.max(0, frameAt - previousFrameAt));
+        totalFrameTime += frameTime;
+        measuredFrames += 1;
+        if (frameTime > 28) slowFrames += 1;
+      }
+
+      previousFrameAt = frameAt;
+
+      if (measuredFrames < 90) {
+        sampleFrame = window.requestAnimationFrame(sampleRenderer);
+        return;
+      }
+
+      const averageFrameTime = totalFrameTime / Math.max(1, measuredFrames);
+      applyAdaptiveProfile(hardwareNeedsHelp || slowFrames >= 10 || averageFrameTime > 20.5);
+      sampleFrame = 0;
+    };
+
+    applyAdaptiveProfile(hardwareNeedsHelp);
+    startTimer = window.setTimeout(() => {
+      sampleFrame = window.requestAnimationFrame(sampleRenderer);
+    }, 1200);
+
     return () => {
-      body.classList.remove("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyPerfV319", "localtifyGpuFriendly");
+      if (startTimer) window.clearTimeout(startTimer);
+      if (sampleFrame) window.cancelAnimationFrame(sampleFrame);
+      body.classList.remove(...perfClasses, "localtifyAdaptivePerformance");
+      delete body.dataset.localtifyRenderProfile;
       if (["v319", "v318", "v310", "v307", "v305", "v304", "v303", "v301"].includes(String(body.dataset.localtifyPerf || ""))) {
         delete body.dataset.localtifyPerf;
       }

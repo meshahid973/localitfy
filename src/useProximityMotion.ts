@@ -1,4 +1,4 @@
-﻿/* localtify 0.4.2 V430 â€” dynamic physical proximity motion.
+/* localtify 0.4.2 V430 â€” dynamic physical proximity motion.
    Only sidebar / player / hero controls get velocity motion.
    Home cards and big lists stay out of the pointer hot path.
 */
@@ -206,8 +206,8 @@ function targetPriority(element: HTMLElement) {
   return 0.94;
 }
 
-function readPointerGeometry(element: HTMLElement, clientX: number, clientY: number) {
-  const rect = element.getBoundingClientRect();
+function readPointerGeometry(element: HTMLElement, clientX: number, clientY: number, cachedRect?: DOMRect) {
+  const rect = cachedRect || element.getBoundingClientRect();
   const width = Math.max(1, rect.width);
   const height = Math.max(1, rect.height);
   const centerX = rect.left + width / 2;
@@ -335,6 +335,20 @@ export function useProximityMotion({
     let lastY = 0;
     let lastMoveAt = 0;
     let visible = !document.hidden;
+    let geometryTarget: HTMLElement | null = null;
+    let geometryRect: DOMRect | null = null;
+    let geometryReadAt = 0;
+
+    const readCachedGeometry = (target: HTMLElement, clientX: number, clientY: number) => {
+      const now = performance.now();
+      if (geometryTarget !== target || !geometryRect || now - geometryReadAt > 180) {
+        geometryTarget = target;
+        geometryRect = target.getBoundingClientRect();
+        geometryReadAt = now;
+      }
+
+      return readPointerGeometry(target, clientX, clientY, geometryRect);
+    };
 
     const cancelFrame = () => {
       if (frame) {
@@ -365,6 +379,9 @@ export function useProximityMotion({
       activeTarget = null;
       pendingTarget = null;
       pendingPayload = null;
+      geometryTarget = null;
+      geometryRect = null;
+      geometryReadAt = 0;
       lastMoveAt = 0;
       publishMotionDebug({ active: false, zone: "none", target: "none", skipped: "cleared", frameCostMs: 0 });
     };
@@ -430,6 +447,8 @@ export function useProximityMotion({
 
     const handlePointerOver = (event: PointerEvent) => {
       if (!visible || document.hidden || event.pointerType === "touch") return;
+      const eventElement = event.target instanceof Element ? event.target : null;
+      if (!eventElement?.closest(".sidebar, .playerBar, .hero")) return;
       const target = findTarget(root, event.target);
       if (!target) {
         publishMotionDebug({ active: false, zone: motionZoneForElement(event.target instanceof HTMLElement ? event.target : null), target: "none", skipped: motionSkipReason(root, event.target), frameCostMs: 0 });
@@ -440,6 +459,8 @@ export function useProximityMotion({
 
     const handlePointerMove = (event: PointerEvent) => {
       if (!visible || document.hidden || event.pointerType === "touch") return;
+      const eventElement = event.target instanceof Element ? event.target : null;
+      if (!activeTarget && !eventElement?.closest(".sidebar, .playerBar, .hero")) return;
 
       const target = activeTarget && activeTarget.contains(event.target as Node) && isUsableTarget(root, activeTarget)
         ? activeTarget
@@ -478,7 +499,7 @@ export function useProximityMotion({
         velocityY,
         speed,
         targetPriority(target),
-        readPointerGeometry(target, event.clientX, event.clientY)
+        readCachedGeometry(target, event.clientX, event.clientY)
       );
       schedulePaint();
       settleActive(115);

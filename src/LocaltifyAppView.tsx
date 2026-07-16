@@ -2657,11 +2657,14 @@ export function useCoverAverageStyle(source: string, enabled: boolean) {
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
 
-    const timer = window.setTimeout(() => {
+    let idleHandle = 0;
+    let fallbackTimer = 0;
+
+    const extractColor = () => {
       fastAverageColor
         .getColorAsync(coverSource, {
           algorithm: "sqrt",
-          mode: "precision"
+          mode: "speed"
         })
         .then((color) => {
           if (cancelled || requestIdRef.current !== requestId) return;
@@ -2674,11 +2677,23 @@ export function useCoverAverageStyle(source: string, enabled: boolean) {
           if (cancelled || requestIdRef.current !== requestId) return;
           setStyle({});
         });
-    }, 80);
+    };
+
+    const idleApi = window as typeof window & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    if (typeof idleApi.requestIdleCallback === "function") {
+      idleHandle = idleApi.requestIdleCallback(extractColor, { timeout: 700 });
+    } else {
+      fallbackTimer = window.setTimeout(extractColor, 120);
+    }
 
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
+      if (idleHandle && typeof idleApi.cancelIdleCallback === "function") idleApi.cancelIdleCallback(idleHandle);
+      if (fallbackTimer) window.clearTimeout(fallbackTimer);
     };
   }, [enabled, source]);
 
@@ -2796,7 +2811,31 @@ function getFullCoverUrl(song?: Song | null) {
 
 
 
-export function Cover({ song, className, priority = "auto" }: { song: Song | null; className: string; priority?: CoverImagePriority }) {
+export type CoverProps = {
+  song: Song | null;
+  className: string;
+  priority?: CoverImagePriority;
+};
+
+function sameCoverVisual(left: Song | null, right: Song | null) {
+  if (left === right) return true;
+  if (!left || !right) return false;
+
+  return (
+    left.id === right.id &&
+    left.title === right.title &&
+    left.artist === right.artist &&
+    left.coverUrl === right.coverUrl &&
+    left.coverPath === right.coverPath &&
+    left.coverThumbUrl === right.coverThumbUrl &&
+    left.coverThumbnailUrl === right.coverThumbnailUrl &&
+    left.thumbnailUrl === right.thumbnailUrl &&
+    left.coverFullUrl === right.coverFullUrl &&
+    String((left as any).coverSource || "") === String((right as any).coverSource || "")
+  );
+}
+
+export const Cover = memo(function Cover({ song, className, priority = "auto" }: CoverProps) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
   const [imageReady, setImageReady] = useState(false);
   const isImmediateCover = priority === "high" || (priority === "auto" && /\b(heroArt|smallArt|importCoverArt|editorCover)\b/.test(className));
@@ -2870,8 +2909,11 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
       ) : null}
     </div>
   );
-}
-
+}, (previous, next) => (
+  previous.className === next.className &&
+  previous.priority === next.priority &&
+  sameCoverVisual(previous.song, next.song)
+));
 
 export type LocalAlbumEntry = {
   id: string;
@@ -3828,7 +3870,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
     count: list.length ? rowCount : 0,
     getScrollElement: () => parentRef.current,
     estimateSize: () => rowEstimate,
-    overscan: 2,
+    overscan: rowCount > 12 ? 1 : 2,
     getItemKey: (rowIndex) => {
       const firstSong = list[rowIndex * columns];
       return firstSong?.id ? `${firstSong.id}-${columns}` : `${rowIndex}-${columns}`;
@@ -3879,7 +3921,6 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
           return (
             <div
               key={virtualRow.key}
-              ref={rowVirtualizer.measureElement}
               data-index={virtualRow.index}
               className="virtualHomeGridRow"
               style={{
