@@ -12009,14 +12009,15 @@ body.isResizingPlayer .app *{
   --localtify-sidebar-motion: cubic-bezier(.22, 1, .36, 1);
 }
 
-.app[data-sidebar-behavior="fixed"] .appShell{
-  grid-template-columns: var(--localtify-sidebar-open) minmax(0, 1fr);
+/* app-core.css owns the shell grid. These variables keep that single grid rule
+   in sync with fixed, slim and hover sidebar behavior without competing rules. */
+.app[data-sidebar-behavior="fixed"]{
+  --sidebar-width-used: var(--localtify-sidebar-open);
 }
 
-.app[data-sidebar-behavior="slim"] .appShell,
-.app[data-sidebar-behavior="hover"] .appShell{
-  grid-template-columns: var(--localtify-sidebar-collapsed) minmax(0, 1fr);
-  overflow: visible;
+.app[data-sidebar-behavior="slim"],
+.app[data-sidebar-behavior="hover"]{
+  --sidebar-width-used: var(--localtify-sidebar-collapsed);
 }
 
 .app .sidebar{
@@ -12034,7 +12035,7 @@ body.isResizingPlayer .app *{
   padding: 16px 12px;
   overflow: hidden;
   border: 0;
-  border-right: 1px solid color-mix(in oklab, var(--lt-accent) 16%, var(--lt-border));
+  border-right: 1px solid color-mix(in oklab, var(--lt-border) 88%, rgba(255,255,255,.08) 12%);
   background:
     linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,.008)),
     var(--localtify-sidebar-bg, color-mix(in oklab, var(--lt-bg) 90%, var(--lt-accent) 10%));
@@ -12249,7 +12250,7 @@ body.isResizingPlayer .app *{
 .app .navDivider{
   height: 1px;
   margin: 3px 8px 0;
-  background: color-mix(in oklab, var(--lt-accent) 10%, var(--lt-border));
+  background: color-mix(in oklab, var(--lt-border) 90%, rgba(255,255,255,.08) 10%);
 }
 
 .app .sidebarBottom{
@@ -12302,6 +12303,75 @@ body.isResizingPlayer .app *{
 .app[data-sidebar-behavior="slim"] .sidebar .importMainAction .buttonInlineIcon,
 .app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .importMainAction .buttonInlineIcon{
   margin: 0;
+}
+
+/* Fixed-sidebar resize control. It is a vertical hit target at the sidebar edge,
+   not a normal button in the flex layout, so it cannot become a grey bottom strip. */
+.app .sidebarResizeHandle{
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  width: 10px;
+  min-width: 10px;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  color: transparent;
+  background: transparent;
+  box-shadow: none;
+  cursor: col-resize;
+  touch-action: none;
+  transform: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.app .sidebarResizeHandle::before{
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: transparent;
+  transition: background-color 140ms ease;
+}
+
+.app .sidebarResizeHandle > span{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 48px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--lt-border) 78%, rgba(255,255,255,.16) 22%);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 140ms ease, background-color 140ms ease;
+  pointer-events: none;
+}
+
+.app .sidebar:hover .sidebarResizeHandle > span,
+.app .sidebarResizeHandle:hover > span,
+.app .sidebarResizeHandle:focus-visible > span,
+.app.isResizingSidebar .sidebarResizeHandle > span{
+  opacity: .72;
+}
+
+.app .sidebarResizeHandle:hover::before,
+.app .sidebarResizeHandle:focus-visible::before,
+.app.isResizingSidebar .sidebarResizeHandle::before{
+  background: color-mix(in oklab, var(--lt-border) 72%, rgba(255,255,255,.14) 28%);
+}
+
+.app .sidebarResizeHandle:active{
+  transform: none;
 }
 
 .app[data-sidebar-behavior="slim"] .sidebarResizeHandle,

@@ -15223,7 +15223,7 @@ body.localtifyIdle .settingsSectionCard{
 
 .homeView :is(.homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeShelfPanel, .simpleLibraryPanel, .libraryPanel),
 .app :is(.homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeShelfPanel, .simpleLibraryPanel, .libraryPanel){
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 24%, rgba(255,255,255,.075));
+  border-color: color-mix(in oklab, var(--lt-border, rgba(255,255,255,.08)) 88%, rgba(255,255,255,.10) 12%);
   background:
     radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb), .06), transparent 34%),
     linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.010)),
@@ -18884,7 +18884,7 @@ body.localtifyIdle .settingsSectionCard{
     var(--lt-surface-raised, var(--surface-2, #15151b)) 88%,
     rgb(var(--card-rgb, var(--lt-accent-rgb))) 12%
   );
-  --quick-library-card-border: color-mix(in oklab, var(--lt-border) 74%, var(--lt-accent) 26%);
+  --quick-library-card-border: color-mix(in oklab, var(--lt-border) 88%, var(--lt-accent) 12%);
 }
 
 .homeView .homeAlbumGrid:not(.virtualHomeGridViewport),
