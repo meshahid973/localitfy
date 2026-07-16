@@ -1591,7 +1591,7 @@ button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
 
 
 @media (max-width: 1180px){
-  
+
 
   .heroTitle{
     font-size: clamp(38px, 5.4vw, 66px) !important;
@@ -1601,15 +1601,15 @@ button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
 }
 
 @media (max-width: 920px){
-  
 
-  
 
-  
 
-  
 
-  
+
+
+
+
+
 
   .headerBar{
     flex-direction: column !important;
@@ -5553,59 +5553,15 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   box-shadow:none;
 }
 
-.homeListenRail{
-  display:grid;
-  grid-template-columns:repeat(3, minmax(220px, 1fr));
-  gap:12px;
-}
 
-.homeListenCard{
-  position:relative;
-  display:grid;
-  grid-template-columns:72px 32px minmax(0, 1fr) auto;
-  align-items:center;
-  gap:12px;
-  min-width:0;
-  min-height:82px;
-  padding:10px 14px 10px 10px;
-  border:1px solid color-mix(in srgb, var(--lt-text, #fff) 8%, transparent);
-  border-radius:18px;
-  color:var(--lt-text, #fff);
-  background:
-    linear-gradient(90deg,
-      color-mix(in srgb, var(--raised, #1b1b1b) 88%, transparent),
-      color-mix(in srgb, var(--surface, #101010) 82%, var(--lt-accent, #8dff6c) 8%)
-    );
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
-  cursor:pointer;
-  text-align:left;
-  transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
-}
 
-.homeListenCard:hover{
-  transform:translateY(-2px);
-  border-color:color-mix(in srgb, var(--lt-accent, #8dff6c) 44%, transparent);
-  background:
-    linear-gradient(90deg,
-      color-mix(in srgb, var(--lt-accent, #8dff6c) 17%, var(--raised, #1b1b1b) 83%),
-      color-mix(in srgb, var(--surface, #101010) 76%, var(--lt-accent, #8dff6c) 15%)
-    );
-  box-shadow:0 16px 34px rgba(0,0,0,.24), 0 0 0 1px color-mix(in srgb, var(--lt-accent, #8dff6c) 12%, transparent);
-}
 
-.homeListenCover{
-  width:72px;
-  height:62px;
-  border-radius:14px;
-  overflow:hidden;
-  background:color-mix(in srgb, var(--raised, #1f1f1f) 80%, #000 20%);
-}
 
-.homeListenCover img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
+
+
+
+
+
 
 .homeListenIndex{
   display:grid;
@@ -5620,35 +5576,13 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   letter-spacing:.02em;
 }
 
-.homeListenCopy{
-  display:grid;
-  min-width:0;
-  gap:4px;
-}
 
-.homeListenCopy strong{
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-weight:950;
-  letter-spacing:-.035em;
-}
 
-.homeListenCopy small{
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:var(--textMuted, rgba(255,255,255,.58));
-  font-size:.75rem;
-  font-weight:850;
-}
 
-.homeListenMeta{
-  color:var(--textMuted, rgba(255,255,255,.58));
-  font-size:.76rem;
-  font-weight:900;
-  white-space:nowrap;
-}
+
+
+
+
 
 .homeFreshRail{
   display:grid;
@@ -5711,9 +5645,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 @media (max-width: 1180px){
-  .homeListenRail{
-    grid-template-columns:repeat(2, minmax(220px, 1fr));
-  }
+
 
   .homeFreshRail{
     grid-template-columns:repeat(10, minmax(132px, 150px));
@@ -5731,22 +5663,13 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     flex-direction:column;
   }
 
-  .homeListenRail{
-    grid-template-columns:1fr;
-  }
 
-  .homeListenCard{
-    grid-template-columns:60px 28px minmax(0, 1fr);
-  }
 
-  .homeListenCover{
-    width:60px;
-    height:56px;
-  }
 
-  .homeListenMeta{
-    display:none;
-  }
+
+
+
+
 }
 
 .homeView{
@@ -5762,14 +5685,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   gap: 18px !important;
 }
 
-.homeListenPanel{
-  padding: 20px 22px 22px !important;
-  background:
-    linear-gradient(135deg,
-      color-mix(in oklab, var(--surface, #101010) 82%, var(--lt-accent, #ff65df) 8%),
-      color-mix(in oklab, var(--surface-2, #151515) 85%, var(--accent-2, var(--lt-accent, #ff65df)) 6%)) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 18%, rgba(255,255,255,.06)) !important;
-}
+
 
 .homeShelfHeader{
   margin-bottom: 16px !important;
@@ -5789,104 +5705,27 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   letter-spacing: .18em !important;
 }
 
-.homeListenRail{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(230px, 1fr)) !important;
-  gap: 16px 18px !important;
-  align-items: stretch !important;
-}
 
-.homeListenCard{
-  min-height: 92px !important;
-  height: 92px !important;
-  padding: 0 18px 0 0 !important;
-  display: grid !important;
-  grid-template-columns: 92px minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: 16px !important;
-  overflow: hidden !important;
-  text-align: left !important;
-  border-radius: 18px !important;
-  background:
-    linear-gradient(90deg,
-      color-mix(in oklab, var(--surface-2, #151515) 90%, var(--lt-accent, #ff65df) 4%) 0%,
-      color-mix(in oklab, var(--surface, #111111) 86%, var(--lt-accent, #ff65df) 7%) 100%) !important;
-  border: 1px solid color-mix(in oklab, var(--lt-accent, #ff65df) 11%, rgba(255,255,255,.065)) !important;
-  box-shadow: none !important;
-  transform: translateZ(0) !important;
-  contain: layout paint style !important;
-}
 
-.homeListenCard:hover{
-  background:
-    linear-gradient(90deg,
-      color-mix(in oklab, var(--surface-2, #151515) 84%, var(--lt-accent, #ff65df) 9%) 0%,
-      color-mix(in oklab, var(--surface, #111111) 80%, var(--lt-accent, #ff65df) 12%) 100%) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 28%, rgba(255,255,255,.07)) !important;
-  transform: translateY(-1px) translateZ(0) !important;
-}
 
-.homeListenCard.active{
-  background:
-    linear-gradient(90deg,
-      color-mix(in oklab, var(--lt-accent, #ff65df) 18%, var(--surface-2, #151515)) 0%,
-      color-mix(in oklab, var(--surface, #111111) 78%, var(--lt-accent, #ff65df) 14%) 100%) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 50%, rgba(255,255,255,.09)) !important;
-  box-shadow: inset 3px 0 0 var(--lt-accent, #ff65df), 0 14px 34px rgba(0,0,0,.18) !important;
-}
 
-.homeListenCover{
-  width: 92px !important;
-  height: 92px !important;
-  min-width: 92px !important;
-  border-radius: 16px 0 0 16px !important;
-  object-fit: cover !important;
-  display: block !important;
-  background: color-mix(in oklab, var(--surface-2, #151515) 88%, var(--accent, #ff65df) 5%) !important;
-}
+
+
+
+
+
 
 .homeListenIndex{
   display: none !important;
 }
 
-.homeListenCopy{
-  min-width: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  gap: 6px !important;
-}
 
-.homeListenTitle{
-  font-size: 15px !important;
-  font-weight: 850 !important;
-  letter-spacing: -0.025em !important;
-  color: var(--text, #fff) !important;
-  max-width: 100% !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
 
-.homeListenArtist{
-  font-size: 12px !important;
-  font-weight: 750 !important;
-  color: color-mix(in oklab, var(--text-muted, #aaa) 82%, var(--accent, #ff65df) 10%) !important;
-  max-width: 100% !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
 
-.homeListenMeta{
-  align-self: center !important;
-  justify-self: end !important;
-  font-size: 12px !important;
-  font-weight: 850 !important;
-  color: color-mix(in oklab, var(--text-muted, #aaa) 92%, white 6%) !important;
-  opacity: .9 !important;
-  white-space: nowrap !important;
-}
+
+
+
+
 
 .homeShelfActions span{
   background: color-mix(in oklab, var(--surface-2, #151515) 86%, var(--lt-accent, #ff65df) 8%) !important;
@@ -5895,55 +5734,24 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 @media (max-width: 1500px){
-  .homeListenRail{
-    grid-template-columns: repeat(3, minmax(220px, 1fr)) !important;
-  }
+
 }
 
 @media (max-width: 1100px){
-  .homeListenRail{
-    grid-template-columns: repeat(2, minmax(220px, 1fr)) !important;
-  }
+
 }
 
 @media (max-width: 720px){
-  .homeListenRail{
-    grid-template-columns: 1fr !important;
-  }
 
-  .homeListenCard{
-    grid-template-columns: 78px minmax(0, 1fr) auto !important;
-    height: 78px !important;
-    min-height: 78px !important;
-  }
 
-  .homeListenCover{
-    width: 78px !important;
-    height: 78px !important;
-    min-width: 78px !important;
-  }
+
+
+
 }
 
-.homeListenCopy strong{
-  font-size: 15px !important;
-  font-weight: 850 !important;
-  letter-spacing: -0.025em !important;
-  color: var(--text, #fff) !important;
-  max-width: 100% !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
 
-.homeListenCopy small{
-  font-size: 12px !important;
-  font-weight: 750 !important;
-  color: color-mix(in oklab, var(--text-muted, #aaa) 82%, var(--accent, #ff65df) 10%) !important;
-  max-width: 100% !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
+
+
 
 :root{
   --theme-page-bg: radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb, 255, 105, 180), 0.10), transparent 34%),
@@ -5966,10 +5774,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   contain: layout paint;
 }
 
-.homeListenGrid{
-  content-visibility: auto;
-  contain-intrinsic-size: 740px;
-}
+
 
 .heroAction.active{
   color: var(--text, #fff) !important;
@@ -5977,9 +5782,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   background: rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.18) !important;
   box-shadow: 0 0 26px rgba(var(--progress-rgb, var(--accent-rgb, 255, 105, 180)), 0.18) !important;
 }
-.homeListenCard{
-    animation-duration: 280ms !important;
-  }
+
 
 .app{
   background-size: auto !important;
@@ -6037,44 +5840,15 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   mix-blend-mode: screen;
 }
 
-.homeListenCard{
-  --card-delay: 0ms;
-  position: relative;
-  overflow: hidden;
-  transform: translateZ(0);
-}
 
-.homeListenCard::after{
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,.08) 44%, transparent 62%);
-  transform: translateX(-120%);
-  opacity: 0;
-}
 
-.homeListenCard:hover::after{
-  opacity: 1;
-  animation: localtifyV025CardSheen 780ms var(--motion-smooth) both;
-}
 
-.homeListenCard.active{
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--lt-accent, #ff65c8) 58%, transparent),
-    0 20px 56px color-mix(in srgb, var(--lt-accent, #ff65c8) 16%, transparent);
-}
 
-.homeListenCard.active::before{
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--progress, var(--lt-accent)) 32%, transparent), transparent 42%);
-  opacity: .55;
-  animation: localtifyV025ActiveBreath 2.8s ease-in-out infinite;
-}
+
+
+
+
+
 
 
 .hero{
@@ -6962,12 +6736,17 @@ body.localitfyNoSelect *{
 
 @media (max-width: 760px){
   .homeView,
+
 .homeShelfStack,
+
 .homeShelfPanel,
-.homeListenPanel,
+
 .homeFreshPanel,
+
 .homeLibraryPanel,
+
 .simpleLibraryPanel,
+
 .simpleHero{
     width: 100% !important;
     max-width: 100% !important;
@@ -7053,9 +6832,11 @@ body.localitfyNoSelect *{
   }
 
   .homeShelfPanel,
-.homeListenPanel,
+
 .homeFreshPanel,
+
 .homeLibraryPanel,
+
 .simpleLibraryPanel{
     margin: 10px 0 0 !important;
     padding: 14px 12px !important;
@@ -7098,30 +6879,11 @@ body.localitfyNoSelect *{
     max-width: 100% !important;
   }
 
-  .homeListenRail{
-    width: 100% !important;
-    max-width: 100% !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 10px !important;
-    overflow: hidden !important;
-  }
 
-  .homeListenCard{
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    grid-template-columns: 72px minmax(0, 1fr) auto !important;
-    height: 76px !important;
-    min-height: 76px !important;
-    padding: 0 12px 0 0 !important;
-    gap: 12px !important;
-  }
 
-  .homeListenCover{
-    width: 72px !important;
-    height: 76px !important;
-    min-width: 72px !important;
-  }
+
+
+
 
   .homeFreshRail{
     width: 100% !important;
@@ -7145,16 +6907,25 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 .homeView,
+
 .homeShell,
+
 .homeShelfStack,
+
 .homeShelfPanel,
-.homeListenPanel,
+
 .homeFreshPanel,
+
 .homeLibraryPanel,
+
 .simpleLibraryPanel,
+
 .libraryPanel,
+
 .content,
+
 .mainContent,
+
 .contentScroller{
   --grid-line: transparent !important;
   --app-grid-line: transparent !important;
@@ -7163,28 +6934,47 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 .homeView::before,
+
 .homeView::after,
+
 .homeShell::before,
+
 .homeShell::after,
+
 .homeShelfStack::before,
+
 .homeShelfStack::after,
+
 .homeShelfPanel::before,
+
 .homeShelfPanel::after,
-.homeListenPanel::before,
-.homeListenPanel::after,
+
 .homeFreshPanel::before,
+
 .homeFreshPanel::after,
+
 .homeLibraryPanel::before,
+
 .homeLibraryPanel::after,
+
 .simpleLibraryPanel::before,
+
 .simpleLibraryPanel::after,
+
 .libraryPanel::before,
+
 .libraryPanel::after,
+
 .content::before,
+
 .content::after,
+
 .mainContent::before,
+
 .mainContent::after,
+
 .contentScroller::before,
+
 .contentScroller::after{
   background-image: none !important;
   background-size: auto !important;
@@ -7192,36 +6982,63 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 
 
 .homeView::before,
+
 .homeView::after,
+
 .homePage::before,
+
 .homePage::after,
+
 .homeShell::before,
+
 .homeShell::after,
+
 .homeShelfStack::before,
+
 .homeShelfStack::after,
+
 .homeShelfPanel::before,
+
 .homeShelfPanel::after,
-.homeListenPanel::before,
-.homeListenPanel::after,
+
 .homeFreshPanel::before,
+
 .homeFreshPanel::after,
+
 .homeLibraryPanel::before,
+
 .homeLibraryPanel::after,
+
 .simpleLibraryPanel::before,
+
 .simpleLibraryPanel::after,
+
 .libraryPanel::before,
+
 .libraryPanel::after,
+
 .settingsPage::before,
+
 .settingsPage::after,
+
 .settingsContent::before,
+
 .settingsContent::after,
+
 .settingsBody::before,
+
 .settingsBody::after,
+
 .settingsScroll::before,
+
 .settingsScroll::after,
+
 .settingsPanel::before,
+
 .settingsPanel::after,
+
 .settingsPanelShell::before,
+
 .settingsPanelShell::after{
   background-image: none !important;
   background-size: auto !important;
@@ -7239,21 +7056,14 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 
-.app,
-.app :where(.homeView, .homePage, .homeShell, .homeShelfStack, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanel, .mainContent, .content, .contentScroller, .settingsView, .settingsPage, .settingsContent, .settingsBody, .settingsScroll, .settingsShell, .settingsWorkspace, .settingsMain, .settingsStage, .settingsCanvas, .settingsPanel, .settingsPanelShell){
+.app{
   --grid-line: transparent !important;
   --app-grid-line: transparent !important;
   --page-line: transparent !important;
   background-size: auto !important;
 }
 
-.app :where(.homeView, .homePage, .homeShell, .homeShelfStack, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanel, .mainContent, .content, .contentScroller, .settingsView, .settingsPage, .settingsContent, .settingsBody, .settingsScroll, .settingsShell, .settingsWorkspace, .settingsMain, .settingsStage, .settingsCanvas, .settingsPanel, .settingsPanelShell)::before,
-.app :where(.homeView, .homePage, .homeShell, .homeShelfStack, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanel, .mainContent, .content, .contentScroller, .settingsView, .settingsPage, .settingsContent, .settingsBody, .settingsScroll, .settingsShell, .settingsWorkspace, .settingsMain, .settingsStage, .settingsCanvas, .settingsPanel, .settingsPanelShell)::after{
-  background-image: none !important;
-  background-size: auto !important;
-  opacity: 0 !important;
-  animation: none !important;
-}
+
 
 .app .homeView,
 .app .homePage,
@@ -7294,12 +7104,17 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 .libraryCard,
+
 .libraryCardV025,
+
 .songCard,
+
 .songRow,
-.homeListenCard,
+
 .homeFreshCard,
+
 .coverCard,
+
 .coverGalleryCard{
   contain: layout paint style;
   backface-visibility: hidden;
@@ -7312,29 +7127,42 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 .libraryCard::before,
+
 .libraryCard::after,
+
 .libraryCardV025::before,
+
 .libraryCardV025::after,
+
 .songCard::before,
+
 .songCard::after,
-.homeListenCard::before,
-.homeListenCard::after,
+
 .homeFreshCard::before,
+
 .homeFreshCard::after,
+
 .coverCard::before,
+
 .coverCard::after,
+
 .coverGalleryCard::before,
+
 .coverGalleryCard::after{
   display: none !important;
   content: none !important;
 }
 
 .libraryCard:hover,
+
 .libraryCardV025:hover,
+
 .songCard:hover,
-.homeListenCard:hover,
+
 .homeFreshCard:hover,
+
 .coverCard:hover,
+
 .coverGalleryCard:hover{
   background: color-mix(in srgb, var(--surface) 78%, var(--lt-accent) 8%) !important;
   border-color: rgba(var(--lt-accent-rgb), 0.32) !important;
@@ -7343,11 +7171,15 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 .libraryCard:hover img,
+
 .libraryCardV025:hover img,
+
 .songCard:hover img,
-.homeListenCard:hover img,
+
 .homeFreshCard:hover img,
+
 .coverCard:hover img,
+
 .coverGalleryCard:hover img{
   transform: none !important;
 }
@@ -7361,8 +7193,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   contain-intrinsic-size: 172px 260px;
 }
 
-.songRow,
-.homeListenCard{
+.songRow{
   content-visibility: auto;
   contain-intrinsic-size: 1px 72px;
 }
@@ -8186,9 +8017,11 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 .app .homeShelfPanel,
-.app .homeListenPanel,
+
 .app .homeFreshPanel,
+
 .app .homeLibraryPanel,
+
 .app .simpleLibraryPanel{
   width: 100% !important;
   max-width: 100% !important;
@@ -8203,18 +8036,22 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 }
 
 .app .homeShelfPanel > *,
-.app .homeListenPanel > *,
+
 .app .homeFreshPanel > *,
+
 .app .homeLibraryPanel > *,
+
 .app .simpleLibraryPanel > *{
   min-width: 0 !important;
 }
 
 @media (max-width: 760px){
   .app .homeShelfPanel,
-.app .homeListenPanel,
+
 .app .homeFreshPanel,
+
 .app .homeLibraryPanel,
+
 .app .simpleLibraryPanel{
     border-radius: 18px !important;
   }
@@ -8472,8 +8309,9 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   letter-spacing: -0.065em !important;
 }
 
-.app .homeListenPanel,
+
 .app .homeFreshPanel,
+
 .app .homeLibraryPanel{
   box-shadow: 0 18px 46px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.035) !important;
 }
@@ -8506,9 +8344,11 @@ html body .content{
 }
 
 .app .homeShelfPanel,
-.app .homeListenPanel,
+
 .app .homeFreshPanel,
+
 .app .homeLibraryPanel,
+
 .app .simpleLibraryPanel{
   position: relative !important;
   border-radius: 24px !important;
@@ -8525,14 +8365,19 @@ html body .content{
 }
 
 .app .homeShelfPanel::before,
+
 .app .homeShelfPanel::after,
-.app .homeListenPanel::before,
-.app .homeListenPanel::after,
+
 .app .homeFreshPanel::before,
+
 .app .homeFreshPanel::after,
+
 .app .homeLibraryPanel::before,
+
 .app .homeLibraryPanel::after,
+
 .app .simpleLibraryPanel::before,
+
 .app .simpleLibraryPanel::after{
   content: none !important;
   display: none !important;
@@ -8544,9 +8389,11 @@ html body .content{
 }
 
 .app .homeShelfPanel > *,
-.app .homeListenPanel > *,
+
 .app .homeFreshPanel > *,
+
 .app .homeLibraryPanel > *,
+
 .app .simpleLibraryPanel > *{
   position: relative;
   z-index: 1;
@@ -8732,11 +8579,7 @@ html body .content{
 }
 
 
-.app :where(.homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanelV025){
-  border-radius: 24px !important;
-  overflow: hidden !important;
-  background-clip: padding-box !important;
-}
+
 
 .app :where(.songRow, .playlistSongRow, .libraryFullListV025 .songRow, .homeSongList .songRow){
   position: relative !important;
@@ -9931,8 +9774,9 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
 }
 
 .app .homeShelfPanel,
-.app .homeListenPanel,
+
 .app .homeFreshPanel,
+
 .app .homeLibraryPanel{
   contain: layout paint style !important;
 }
@@ -9968,18 +9812,14 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
   }
 }
 
-.app.homeEntranceSettled :where(.homeShelfStack, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel){
-  opacity: 1 !important;
-}
+
 
 
 .app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting){
   transform: translate3d(0, 0, 0) scale(1) !important;
 }
 
-.app.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(.homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel){
-  transform: translate3d(0, 0, 0) scale(1) !important;
-}
+
 
 .app .hero.heroPremium.heroLayoutMotion{
   contain: layout paint style !important;
@@ -9997,9 +9837,11 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
 }
 
 .app .homeShelfStack,
+
 .app .homeShelfPanel,
-.app .homeListenPanel,
+
 .app .homeFreshPanel,
+
 .app .homeLibraryPanel{
   opacity: 1 !important;
   backface-visibility: hidden !important;
@@ -10010,20 +9852,19 @@ body.localitfyHeroPanelShrinking .app .homeShelfStack{
   contain: layout paint style !important;
 }
 
-.app .homeListenPanel,
+
 .app .homeFreshPanel,
+
 .app .homeLibraryPanel{
   contain: layout paint style !important;
 }
 
-.app.homeEntranceSettled.heroMotionActive .homeShelfStack,
-.app.homeEntranceSettled.heroMotionActive .homeShelfStack :where(.homeListenPanel, .homeFreshPanel, .homeLibraryPanel){
+.app.homeEntranceSettled.heroMotionActive .homeShelfStack{
   animation-fill-mode: both !important;
 }
 
 
-.app.homeEntranceSettled:not(.heroMotionActive) .homeShelfStack,
-.app.homeEntranceSettled:not(.heroMotionActive) .homeShelfStack :where(.homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeListenRail, .homeFreshRail){
+.app.homeEntranceSettled:not(.heroMotionActive) .homeShelfStack{
   transform: translate3d(0, 0, 0) scale(1) !important;
 }
 .app.homeEntranceSettled :is(.homeHeroSection, .homeSections, .homeSection, .homeShelf, .homePanel, .libraryPanel){
@@ -10087,58 +9928,13 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
   --home-glass-blur-light: 8px;
 }
 
-.homeView :where(.hero, .simpleHero, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanel, .panel.ambientSurface){
-  position: relative !important;
-  overflow: hidden !important;
-  isolation: isolate !important;
-  border: 1px solid var(--home-glass-line) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.044), rgba(255, 255, 255, 0.012)),
-    radial-gradient(circle at 82% 18%, rgba(var(--lt-accent-rgb), 0.055), transparent 32%),
-    var(--home-glass-bg) !important;
-  box-shadow:
-    inset 0 1px 0 var(--home-glass-highlight),
-    var(--home-glass-shadow) !important;
-  backdrop-filter: blur(var(--home-glass-blur)) saturate(116%) !important;
-  -webkit-backdrop-filter: blur(var(--home-glass-blur)) saturate(116%) !important;
-}
 
-.homeView :where(.hero, .simpleHero, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanel, .panel.ambientSurface)::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.014) 26%, transparent 62%),
-    radial-gradient(circle at 16% 10%, rgba(255, 255, 255, 0.052), transparent 24%),
-    radial-gradient(circle at 86% 14%, rgba(var(--lt-accent-rgb), 0.072), transparent 30%) !important;
-  background-size: auto !important;
-  opacity: 1 !important;
-  filter: none !important;
-  transform: none !important;
-  z-index: 0 !important;
-}
 
-.homeView :where(.hero, .simpleHero, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanel, .panel.ambientSurface)::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  background:
-    linear-gradient(180deg, transparent 0%, transparent 58%, rgba(0, 0, 0, 0.08) 100%) !important;
-  background-size: auto !important;
-  opacity: 1 !important;
-  filter: none !important;
-  transform: none !important;
-  z-index: 0 !important;
-}
 
-.homeView :where(.hero, .simpleHero, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .simpleLibraryPanel, .libraryPanel, .panel.ambientSurface) > *{
-  position: relative !important;
-  z-index: 1 !important;
-}
+
+
+
+
 
 .homeView :where(.hero, .simpleHero){
   border-color: var(--home-glass-line-strong) !important;
@@ -10220,11 +10016,15 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
 }
 
 .homeView .hero,
+
 .homeView .homeShelfPanel,
-.homeView .homeListenPanel,
+
 .homeView .homeFreshPanel,
+
 .homeView .homeLibraryPanel,
+
 .homeView .homeAlbumPanel,
+
 .homeView .panel.ambientSurface{
   position: relative !important;
   overflow: hidden !important;
@@ -10242,11 +10042,15 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
 }
 
 .homeView .hero::before,
+
 .homeView .homeShelfPanel::before,
-.homeView .homeListenPanel::before,
+
 .homeView .homeFreshPanel::before,
+
 .homeView .homeLibraryPanel::before,
+
 .homeView .homeAlbumPanel::before,
+
 .homeView .panel.ambientSurface::before{
   content: "" !important;
   position: absolute !important;
@@ -10262,11 +10066,15 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
 }
 
 .homeView .hero::after,
+
 .homeView .homeShelfPanel::after,
-.homeView .homeListenPanel::after,
+
 .homeView .homeFreshPanel::after,
+
 .homeView .homeLibraryPanel::after,
+
 .homeView .homeAlbumPanel::after,
+
 .homeView .panel.ambientSurface::after{
   content: "" !important;
   position: absolute !important;
@@ -10278,11 +10086,15 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
 }
 
 .homeView .hero > *,
+
 .homeView .homeShelfPanel > *,
-.homeView .homeListenPanel > *,
+
 .homeView .homeFreshPanel > *,
+
 .homeView .homeLibraryPanel > *,
+
 .homeView .homeAlbumPanel > *,
+
 .homeView .panel.ambientSurface > *{
   position: relative !important;
   z-index: 1 !important;
@@ -11032,806 +10844,256 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection, .homeShel
   }
 }
 
+
+/* Listen Now cards: single owned implementation. */
 .app .homeShelfStack .homeListenPanel{
-  overflow: hidden !important;
+  overflow: hidden;
 }
 
 .app .homeShelfStack .homeListenRail{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(270px, 1fr)) !important;
-  gap: 12px 16px !important;
-  align-items: stretch !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  overflow: visible !important;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(260px, 1fr));
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  align-items: stretch;
+  overflow: visible;
 }
 
 .app .homeShelfStack .homeListenCard{
-  --listen-card-cover-size: 72px;
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-  contain: layout paint !important;
-  content-visibility: visible !important;
-  display: block !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 84px !important;
-  height: 84px !important;
-  padding: 0 !important;
-  border: 1px solid rgba(255, 255, 255, 0.088) !important;
-  border-radius: 18px !important;
-  color: rgba(255, 255, 255, 0.98) !important;
-  text-align: left !important;
+  --listen-card-cover-size: 74px;
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 74px;
+  min-height: 74px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--lt-border, rgba(255,255,255,.09));
+  border-radius: var(--lt-card-radius, 16px);
+  color: var(--lt-text);
+  text-align: left;
   background:
-    linear-gradient(90deg, rgba(3, 3, 8, 0.78) 0%, rgba(5, 4, 12, 0.46) 44%, rgba(3, 3, 8, 0.76) 100%),
-    rgba(5, 4, 12, 0.80) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.055),
-    0 12px 28px rgba(0, 0, 0, 0.20) !important;
-  transform: translateZ(0) !important;
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
+    var(--lt-surface-raised, rgba(24,25,34,.92));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 24px rgba(0,0,0,.18);
+  transform: translate3d(0,0,0);
   transition:
-    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 200ms ease !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenBackground{
-  position: absolute !important;
-  inset: -38px -54px !important;
-  z-index: 0 !important;
-  display: block !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  border-radius: inherit !important;
-  opacity: 0.72 !important;
-  transform: scale(1.16) translateZ(0) !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenBackgroundImage{
-  position: absolute !important;
-  inset: 0 !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  object-fit: cover !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: blur(28px) saturate(1.85) brightness(1.02) contrast(1.10) !important;
-  transform: scale(1.22) translateZ(0) !important;
-  transform-origin: center !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenForeground{
-  position: relative !important;
-  z-index: 5 !important;
-  display: grid !important;
-  grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
-  grid-template-areas: "cover copy time" !important;
-  align-items: center !important;
-  column-gap: 14px !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  padding: 10px 15px 10px 10px !important;
-  border-radius: inherit !important;
-  background:
-    linear-gradient(90deg, rgba(2, 2, 7, 0.72) 0%, rgba(2, 2, 7, 0.28) 38%, rgba(2, 2, 7, 0.72) 100%),
-    radial-gradient(circle at 22% 50%, rgba(255, 255, 255, 0.055), transparent 35%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.050), transparent 56%) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: none !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenCover,
-.app .homeShelfStack .homeListenCard .coverAura.homeListenCover{
-  grid-area: cover !important;
-  align-self: center !important;
-  justify-self: start !important;
-  display: block !important;
-  flex: 0 0 var(--listen-card-cover-size) !important;
-  width: var(--listen-card-cover-size) !important;
-  min-width: var(--listen-card-cover-size) !important;
-  max-width: var(--listen-card-cover-size) !important;
-  height: 64px !important;
-  min-height: 64px !important;
-  max-height: 64px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border-radius: 14px !important;
-  overflow: hidden !important;
-  background: rgba(0, 0, 0, 0.48) !important;
-  box-shadow:
-    0 12px 26px rgba(0, 0, 0, 0.42),
-    0 0 0 1px rgba(255, 255, 255, 0.12) !important;
-  transform: none !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenCover img,
-.app .homeShelfStack .homeListenCard .homeListenCover .coverImage,
-.app .homeShelfStack .homeListenCard .coverAura.homeListenCover img,
-.app .homeShelfStack .homeListenCard .coverAura.homeListenCover .coverImage{
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  object-fit: cover !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenCopy{
-  grid-area: copy !important;
-  align-self: center !important;
-  justify-self: stretch !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: 5px !important;
-  min-width: 0 !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  text-align: left !important;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.82) !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenTitle,
-.app .homeShelfStack .homeListenCard .homeListenCopy strong{
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255, 255, 255, 0.99) !important;
-  font-size: 14px !important;
-  font-weight: 950 !important;
-  line-height: 1.12 !important;
-  letter-spacing: -0.028em !important;
-  text-align: left !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenArtist,
-.app .homeShelfStack .homeListenCard .homeListenCopy small{
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255, 255, 255, 0.70) !important;
-  font-size: 12px !important;
-  font-weight: 790 !important;
-  line-height: 1.16 !important;
-  text-align: left !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenMeta{
-  grid-area: time !important;
-  align-self: center !important;
-  justify-self: end !important;
-  min-width: max-content !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  color: rgba(255, 255, 255, 0.74) !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  text-align: right !important;
-  white-space: nowrap !important;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.82) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-.app .homeShelfStack .homeListenCard:hover{
-  transform: translateY(-2px) translateZ(0) !important;
-  border-color: rgba(var(--lt-accent-rgb), 0.34) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.070),
-    0 16px 34px rgba(0, 0, 0, 0.26),
-    0 0 26px rgba(var(--lt-accent-rgb), 0.08) !important;
-}
-
-.app .homeShelfStack .homeListenCard:hover .homeListenBackground{
-  opacity: 0.86 !important;
-}
-
-.app .homeShelfStack .homeListenCard:hover .homeListenBackgroundImage{
-  filter: blur(32px) saturate(2.08) brightness(1.10) contrast(1.12) !important;
-  transform: scale(1.26) translate3d(1.5%, -1%, 0) !important;
-}
-
-.app .homeShelfStack .homeListenCard:hover .homeListenForeground{
-  background:
-    linear-gradient(90deg, rgba(2, 2, 7, 0.64) 0%, rgba(2, 2, 7, 0.24) 38%, rgba(2, 2, 7, 0.64) 100%),
-    radial-gradient(circle at 18% 50%, rgba(var(--lt-accent-rgb), 0.12), transparent 30%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.060), transparent 54%) !important;
-}
-
-.app .homeShelfStack .homeListenCard.active{
-  border-color: rgba(var(--lt-accent-rgb), 0.50) !important;
-  box-shadow:
-    inset 2px 0 0 rgba(var(--lt-accent-rgb), 0.82),
-    inset 0 1px 0 rgba(255, 255, 255, 0.070),
-    0 16px 38px rgba(0, 0, 0, 0.28),
-    0 0 30px rgba(var(--lt-accent-rgb), 0.10) !important;
-}
-
-.app .homeShelfStack .homeListenCard.active .homeListenBackground{
-  opacity: 0.92 !important;
-}
-
-.app .homeShelfStack .homeListenCard.active .homeListenForeground{
-  background:
-    linear-gradient(90deg, rgba(2, 2, 7, 0.62) 0%, rgba(2, 2, 7, 0.22) 40%, rgba(2, 2, 7, 0.62) 100%),
-    radial-gradient(circle at 18% 50%, rgba(var(--lt-accent-rgb), 0.14), transparent 32%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.065), transparent 54%) !important;
-}
-
-@media (max-width: 1500px){
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(3, minmax(260px, 1fr)) !important;
-  }
-}
-
-@media (max-width: 1040px){
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(2, minmax(240px, 1fr)) !important;
-  }
-}
-
-@media (max-width: 680px){
-  .app .homeShelfStack .homeShelfHeader{
-    align-items: flex-start !important;
-    flex-direction: column !important;
-  }
-
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: 1fr !important;
-  }
-
-  .app .homeShelfStack .homeListenCard{
-    --listen-card-cover-size: 64px;
-    min-height: 76px !important;
-    height: 76px !important;
-  }
-
-  .app .homeShelfStack .homeListenCard .homeListenForeground{
-    grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
-    padding: 9px 12px 9px 9px !important;
-    column-gap: 12px !important;
-  }
-
-  .app .homeShelfStack .homeListenCard .homeListenCover,
-.app .homeShelfStack .homeListenCard .coverAura.homeListenCover{
-    height: 56px !important;
-    min-height: 56px !important;
-    max-height: 56px !important;
-  }
-
-  .app .homeShelfStack .homeListenCard .homeListenMeta{
-    display: none !important;
-  }
-}
-
-.app .homeShelfStack .homeListenPanel{
-  padding: clamp(16px, 1.5vw, 22px) !important;
-  overflow: hidden !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.020), rgba(255,255,255,.010)),
-    rgba(3, 3, 10, .46) !important;
-  border-color: rgba(255,255,255,.070) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
-}
-
-.app .homeShelfStack .homeListenRail{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(280px, 1fr)) !important;
-  gap: 14px 18px !important;
-  align-items: stretch !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  overflow: visible !important;
-}
-
-.app .homeShelfStack .homeListenCard{
-  --listen-card-cover-size: 82px;
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-  contain: layout paint !important;
-  content-visibility: visible !important;
-  display: block !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 82px !important;
-  height: 82px !important;
-  padding: 0 !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  border-radius: 14px !important;
-  color: rgba(255,255,255,.98) !important;
-  text-align: left !important;
-  background:
-    linear-gradient(90deg, rgba(255,255,255,.065), rgba(255,255,255,.032)),
-    rgba(38, 36, 40, .58) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.050),
-    0 12px 26px rgba(0,0,0,.22) !important;
-  transform: translateZ(0) !important;
-  transition:
-    transform 170ms cubic-bezier(.16,1,.3,1),
-    border-color 170ms ease,
-    background-color 170ms ease,
-    box-shadow 190ms ease !important;
+    transform 180ms cubic-bezier(.16,1,.3,1),
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 180ms ease;
 }
 
 .app .homeShelfStack .homeListenCard::before,
 .app .homeShelfStack .homeListenCard::after{
-  content: none !important;
-  display: none !important;
+  content: none;
+  display: none;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenBackground{
-  position: absolute !important;
-  inset: -26px -38px !important;
-  z-index: 0 !important;
-  display: block !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  border-radius: inherit !important;
-  opacity: .52 !important;
-  transform: scale(1.12) translateZ(0) !important;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background: var(--lt-surface-raised, rgba(10,10,14,.78));
+  transition: opacity 200ms ease;
+}
+
+.app.moreQuickLibraryBlur .homeShelfStack .homeListenCard[data-cover-ambience="on"] .homeListenBackground{
+  opacity: .50;
+}
+
+.app.lessQuickLibraryBlur .homeShelfStack .homeListenCard .homeListenBackground{
+  opacity: 0;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenBackgroundImage{
-  position: absolute !important;
-  inset: 0 !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  object-fit: cover !important;
-  object-position: center !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: blur(24px) saturate(1.50) brightness(.76) contrast(1.02) !important;
-  transform: scale(1.20) translateZ(0) !important;
-  transform-origin: center !important;
-}
-
-.app .homeShelfStack .homeListenCard[data-cover-ambience="off"] .homeListenBackground{
-  opacity: 0 !important;
+  position: absolute;
+  inset: -34%;
+  width: 168%;
+  height: 168%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  opacity: .72;
+  filter: blur(24px) saturate(1.48) brightness(.78) contrast(1.04);
+  transform: scale(1.18) translateZ(0);
+  transition: transform 240ms cubic-bezier(.16,1,.3,1), filter 200ms ease;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenForeground{
-  position: relative !important;
-  z-index: 5 !important;
-  display: grid !important;
-  grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
-  grid-template-areas: "cover copy time" !important;
-  align-items: center !important;
-  column-gap: 18px !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  padding: 0 16px 0 0 !important;
-  border-radius: inherit !important;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content;
+  grid-template-areas: "cover copy time";
+  align-items: center;
+  column-gap: 14px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0 14px 0 0;
   background:
-    linear-gradient(90deg,
-      rgba(6, 6, 9, .18) 0%,
-      rgba(6, 6, 9, .48) 28%,
-      rgba(6, 6, 9, .68) 100%),
-    linear-gradient(180deg, rgba(255,255,255,.030), rgba(0,0,0,.100)) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: none !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenForeground > *{
-  position: relative !important;
-  z-index: 6 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: none !important;
+    linear-gradient(90deg, rgba(6,6,10,.08), rgba(6,6,10,.44) 30%, rgba(6,6,10,.66)),
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.055));
 }
 
 .app .homeShelfStack .homeListenCard .homeListenCover,
 .app .homeShelfStack .homeListenCard .coverAura.homeListenCover{
-  grid-area: cover !important;
-  align-self: stretch !important;
-  justify-self: stretch !important;
-  display: block !important;
-  flex: 0 0 var(--listen-card-cover-size) !important;
-  width: var(--listen-card-cover-size) !important;
-  min-width: var(--listen-card-cover-size) !important;
-  max-width: var(--listen-card-cover-size) !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  max-height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border-radius: 13px 0 0 13px !important;
-  overflow: hidden !important;
-  background: rgba(0,0,0,.38) !important;
-  box-shadow:
-    12px 0 30px rgba(0,0,0,.22),
-    inset -1px 0 0 rgba(255,255,255,.075) !important;
-  transform: none !important;
+  grid-area: cover;
+  align-self: stretch;
+  justify-self: start;
+  width: var(--listen-card-cover-size);
+  min-width: var(--listen-card-cover-size);
+  height: var(--listen-card-cover-size);
+  margin: 0;
+  overflow: hidden;
+  border-radius: calc(var(--lt-card-radius, 16px) - 1px) 0 0 calc(var(--lt-card-radius, 16px) - 1px);
+  background: var(--lt-surface-soft, rgba(0,0,0,.36));
+  box-shadow: inset -1px 0 0 var(--lt-border, rgba(255,255,255,.08));
 }
 
 .app .homeShelfStack .homeListenCard .homeListenCover::before,
 .app .homeShelfStack .homeListenCard .homeListenCover::after,
 .app .homeShelfStack .homeListenCard .coverAura.homeListenCover::before,
 .app .homeShelfStack .homeListenCard .coverAura.homeListenCover::after{
-  content: none !important;
-  display: none !important;
+  content: none;
+  display: none;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenCover img,
 .app .homeShelfStack .homeListenCard .homeListenCover .coverImage,
 .app .homeShelfStack .homeListenCard .coverAura.homeListenCover img,
 .app .homeShelfStack .homeListenCard .coverAura.homeListenCover .coverImage{
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  object-fit: cover !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: saturate(1.04) contrast(1.02) !important;
-  transform: none !important;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.001);
+  transition: transform 240ms cubic-bezier(.16,1,.3,1), filter 200ms ease;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenCopy{
-  grid-area: copy !important;
-  align-self: center !important;
-  justify-self: stretch !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: 5px !important;
-  min-width: 0 !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  text-align: left !important;
-  text-shadow: 0 2px 16px rgba(0,0,0,.68) !important;
+  grid-area: copy;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  text-align: left;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenTitle,
 .app .homeShelfStack .homeListenCard .homeListenCopy strong{
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255,255,255,.98) !important;
-  font-size: 15px !important;
-  font-weight: 950 !important;
-  line-height: 1.08 !important;
-  letter-spacing: -.026em !important;
-  text-align: left !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--lt-text);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -.025em;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenArtist,
 .app .homeShelfStack .homeListenCard .homeListenCopy small{
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255,255,255,.62) !important;
-  font-size: 12px !important;
-  font-weight: 780 !important;
-  line-height: 1.12 !important;
-  text-align: left !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--lt-muted);
+  font-size: 11.5px;
+  font-weight: 760;
+  line-height: 1.12;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenMeta{
-  grid-area: time !important;
-  align-self: center !important;
-  justify-self: end !important;
-  min-width: max-content !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  color: rgba(255,255,255,.68) !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  text-align: right !important;
-  white-space: nowrap !important;
-  text-shadow: 0 2px 16px rgba(0,0,0,.68) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  grid-area: time;
+  justify-self: end;
+  min-width: max-content;
+  color: var(--lt-faint);
+  font-size: 11.5px;
+  font-weight: 850;
+  white-space: nowrap;
 }
 
 .app .homeShelfStack .homeListenCard:hover{
-  transform: translateY(-2px) translateZ(0) !important;
-  border-color: rgba(255,255,255,.15) !important;
-  background:
-    linear-gradient(90deg, rgba(255,255,255,.082), rgba(255,255,255,.044)),
-    rgba(48,46,50,.62) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.065),
-    0 16px 34px rgba(0,0,0,.28) !important;
+  transform: translate3d(0,-2px,0);
+  border-color: color-mix(in oklab, var(--lt-border-strong, rgba(255,255,255,.18)) 72%, var(--lt-accent) 28%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 15px 32px rgba(0,0,0,.23);
 }
 
-.app .homeShelfStack .homeListenCard:hover .homeListenBackground{
-  opacity: .68 !important;
+.app.moreQuickLibraryBlur .homeShelfStack .homeListenCard:hover .homeListenBackground{
+  opacity: .64;
+}
+
+.app.lessQuickLibraryBlur .homeShelfStack .homeListenCard:hover .homeListenBackground{
+  opacity: 0;
 }
 
 .app .homeShelfStack .homeListenCard:hover .homeListenBackgroundImage{
-  filter: blur(26px) saturate(1.72) brightness(.86) contrast(1.06) !important;
-  transform: scale(1.24) translate3d(1%, -1%, 0) !important;
+  filter: blur(25px) saturate(1.58) brightness(.82) contrast(1.04);
+  transform: scale(1.22) translateZ(0);
 }
 
 .app .homeShelfStack .homeListenCard:hover .homeListenCover img,
-.app .homeShelfStack .homeListenCard:hover .homeListenCover .coverImage,
-.app .homeShelfStack .homeListenCard:hover .coverAura.homeListenCover img,
-.app .homeShelfStack .homeListenCard:hover .coverAura.homeListenCover .coverImage{
-  transform: scale(1.025) translateZ(0) !important;
+.app .homeShelfStack .homeListenCard:hover .homeListenCover .coverImage{
+  transform: scale(1.028);
+  filter: saturate(1.04) contrast(1.02);
 }
 
 .app .homeShelfStack .homeListenCard.active{
-  border-color: rgba(var(--lt-accent-rgb), .44) !important;
-  background:
-    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .12), rgba(255,255,255,.036)),
-    rgba(43, 40, 48, .64) !important;
-  box-shadow:
-    inset 3px 0 0 rgba(var(--lt-accent-rgb), .76),
-    inset 0 1px 0 rgba(255,255,255,.070),
-    0 16px 36px rgba(0,0,0,.30) !important;
-}
-
-.app .homeShelfStack .homeListenCard.active .homeListenBackground{
-  opacity: .70 !important;
-}
-
-.app .homeShelfStack .homeListenCard.active .homeListenForeground{
-  background:
-    linear-gradient(90deg,
-      rgba(6, 6, 9, .12) 0%,
-      rgba(6, 6, 9, .40) 28%,
-      rgba(6, 6, 9, .62) 100%),
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.085)) !important;
+  border-color: color-mix(in oklab, var(--lt-border-strong, rgba(255,255,255,.18)) 48%, var(--lt-accent) 52%);
+  box-shadow: inset 3px 0 0 rgba(var(--lt-accent-rgb), .72), inset 0 1px 0 rgba(255,255,255,.06), 0 16px 34px rgba(0,0,0,.26);
 }
 
 @media (max-width: 1500px){
   .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(3, minmax(270px, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(250px, 1fr));
   }
 }
 
 @media (max-width: 1040px){
   .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(2, minmax(250px, 1fr)) !important;
+    grid-template-columns: repeat(2, minmax(230px, 1fr));
   }
 }
 
 @media (max-width: 680px){
   .app .homeShelfStack .homeShelfHeader{
-    align-items: flex-start !important;
-    flex-direction: column !important;
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .app .homeShelfStack .homeListenRail{
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr;
   }
 
   .app .homeShelfStack .homeListenCard{
-    --listen-card-cover-size: 74px;
-    min-height: 74px !important;
-    height: 74px !important;
+    --listen-card-cover-size: 70px;
+    height: 70px;
+    min-height: 70px;
   }
 
   .app .homeShelfStack .homeListenCard .homeListenForeground{
-    grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
-    padding: 0 12px 0 0 !important;
-    column-gap: 13px !important;
+    padding-right: 12px;
+    column-gap: 12px;
   }
 
   .app .homeShelfStack .homeListenCard .homeListenMeta{
-    display: none !important;
+    display: none;
   }
 }
-
-
-.app .homeShelfStack .homeListenRail{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(280px, 1fr)) !important;
-  gap: 14px !important;
-  align-items: stretch !important;
-}
-
-.app .homeShelfStack .homeListenCard{
-  --listen-card-cover-size: 74px;
-  position: relative !important;
-  isolation: isolate !important;
-  min-height: 74px !important;
-  height: 74px !important;
-  overflow: hidden !important;
-  border-radius: 18px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(20,19,24,.62) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
-  transform: translateZ(0) !important;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease,
-    transform 160ms cubic-bezier(.16,1,.3,1) !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenBackground{
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-  opacity: .50 !important;
-  background: rgba(10,10,14,.38) !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenBackgroundImage{
-  position: absolute !important;
-  inset: -34% !important;
-  width: 168% !important;
-  height: 168% !important;
-  object-fit: cover !important;
-  object-position: center !important;
-  opacity: .72 !important;
-  filter: blur(24px) saturate(1.48) brightness(.78) contrast(1.04) !important;
-  transform: scale(1.18) translateZ(0) !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenForeground{
-  position: relative !important;
-  z-index: 2 !important;
-  height: 100% !important;
-  min-height: inherit !important;
-  display: grid !important;
-  grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
-  grid-template-areas: "cover copy time" !important;
-  align-items: center !important;
-  column-gap: 14px !important;
-  padding: 0 14px 0 0 !important;
-  background:
-    linear-gradient(90deg,
-      rgba(6,6,10,.08) 0,
-      rgba(6,6,10,.44) 30%,
-      rgba(6,6,10,.66) 100%),
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.055)) !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenCover{
-  grid-area: cover !important;
-  width: var(--listen-card-cover-size) !important;
-  height: var(--listen-card-cover-size) !important;
-  min-width: var(--listen-card-cover-size) !important;
-  border-radius: 0 16px 16px 0 !important;
-  overflow: hidden !important;
-  align-self: stretch !important;
-  justify-self: start !important;
-  margin: 0 !important;
-  transform: none !important;
-  filter: none !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenCover img,
-.app .homeShelfStack .homeListenCard .homeListenCover .coverImage{
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  display: block !important;
-  filter: none !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenCopy{
-  grid-area: copy !important;
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 5px !important;
-  text-align: left !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenTitle,
-.app .homeShelfStack .homeListenCard .homeListenCopy strong{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255,255,255,.98) !important;
-  font-size: 15px !important;
-  font-weight: 950 !important;
-  line-height: 1.08 !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenArtist,
-.app .homeShelfStack .homeListenCard .homeListenCopy small{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255,255,255,.62) !important;
-  font-size: 12px !important;
-  font-weight: 780 !important;
-  line-height: 1.12 !important;
-}
-
-.app .homeShelfStack .homeListenCard .homeListenMeta{
-  grid-area: time !important;
-  justify-self: end !important;
-  min-width: max-content !important;
-  color: rgba(255,255,255,.68) !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  white-space: nowrap !important;
-}
-
-.app .homeShelfStack .homeListenCard:hover{
-  transform: translateY(-1px) translateZ(0) !important;
-  border-color: rgba(255,255,255,.15) !important;
-}
-
-.app .homeShelfStack .homeListenCard:hover .homeListenBackground{
-  opacity: .64 !important;
-}
-
-.app .homeShelfStack .homeListenCard.active{
-  border-color: rgba(var(--lt-accent-rgb), .44) !important;
-  box-shadow:
-    inset 3px 0 0 rgba(var(--lt-accent-rgb), .76),
-    inset 0 1px 0 rgba(255,255,255,.070),
-    0 16px 36px rgba(0,0,0,.30) !important;
-}
-
-@media (max-width: 1500px){
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(3, minmax(270px, 1fr)) !important;
-  }
-}
-
-@media (max-width: 1040px){
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(2, minmax(250px, 1fr)) !important;
-  }
-}
-
-@media (max-width: 680px){
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: 1fr !important;
-  }
-}
-
 
 .app img{
   -webkit-user-drag: none;
@@ -15188,24 +14450,24 @@ body.localtifyIdle .settingsSectionCard{
 
 .homeView,
 .app{
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
   --home-panel-bg-owned: var(--localtify-owned-panel, var(--lt-surface-raised, rgba(21,21,40,.78)));
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
+
+
 }
 
 .homeView .homeShelfStack{
@@ -18872,18 +18134,19 @@ body.localtifyIdle .settingsSectionCard{
   object-position: center center !important;
   display: block !important;
 }
+
 /* Quick Library and cover-card ownership. */
-.homeView{
-  --quick-library-card-min: 188px;
+.pageTransition-home{
+  --quick-library-card-min: 204px;
   --quick-library-card-gap: var(--lt-layout-gap, 16px);
   --quick-library-row-gap: 24px;
   --quick-library-card-radius: var(--lt-card-radius, 16px);
   --quick-library-card-surface: color-mix(
     in oklab,
-    var(--lt-surface-raised) 96%,
-    var(--lt-accent) 4%
+    var(--lt-surface-raised, rgba(24, 25, 34, .96)) 94%,
+    transparent
   );
-  --quick-library-card-border: var(--lt-border);
+  --quick-library-card-border: var(--lt-border, rgba(255,255,255,.10));
 }
 
 .virtualHomeGridViewport{
@@ -18904,7 +18167,7 @@ body.localtifyIdle .settingsSectionCard{
 
 .virtualHomeGridViewport[data-virtual-count="1"],
 .virtualHomeGridViewport[data-virtual-count="2"]{
-  height: calc(var(--quick-library-content-height, 380px) + 52px);
+  height: calc(var(--quick-library-content-height, 390px) + 36px);
   min-height: 0;
   max-height: none;
   overflow-y: clip;
@@ -18924,10 +18187,10 @@ body.localtifyIdle .settingsSectionCard{
   display: grid;
   width: 100%;
   min-width: 100%;
-  gap: 0 var(--quick-library-card-gap);
+  column-gap: var(--quick-library-card-gap, 16px);
   align-items: start;
   justify-content: start;
-  padding: 0 0 var(--quick-library-row-gap);
+  padding: 0 0 var(--quick-library-row-gap, 24px);
   margin: 0;
 }
 
@@ -18937,40 +18200,65 @@ body.localtifyIdle .settingsSectionCard{
   width: 100%;
   min-width: 0;
   display: grid;
-  grid-template-rows: auto 52px 20px 40px;
-  gap: 6px;
-  padding: 0 0 10px;
+  grid-template-rows: auto 48px 20px 40px;
+  gap: 7px;
+  padding: 0 0 12px;
   overflow: visible;
-  border: 1px solid var(--quick-library-card-border);
-  border-radius: var(--quick-library-card-radius);
+  border: 1px solid var(--quick-library-card-border, rgba(255,255,255,.10));
+  border-radius: var(--quick-library-card-radius, 16px);
   color: var(--lt-text);
   background:
-    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.008)),
-    var(--quick-library-card-surface);
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.010)),
+    var(--quick-library-card-surface, rgba(24,25,34,.92));
   background-clip: padding-box;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.032), 0 10px 24px rgba(0,0,0,.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 10px 24px rgba(0,0,0,.18);
   contain: layout style;
   cursor: grab;
   user-select: none;
-  transform: none;
-  scale: 1;
-  filter: none;
-  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  transform: translate3d(0, 0, 0);
+  transition:
+    transform 180ms cubic-bezier(.16,1,.3,1),
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 180ms ease;
 }
 
-.virtualHomeGridViewport .homeAlbumCard.localtifyProximityTarget,
-.virtualHomeGridViewport .homeAlbumCard.localtifyProximityActive,
-.virtualHomeGridViewport .homeAlbumPlayZone.localtifyProximityTarget,
-.virtualHomeGridViewport .homeAlbumPlayZone.localtifyProximityActive,
-.virtualHomeGridViewport .homeAlbumActionButton.localtifyProximityTarget,
-.virtualHomeGridViewport .homeAlbumActionButton.localtifyProximityActive{
-  transform: none !important;
-  scale: 1 !important;
-  rotate: 0deg !important;
-  filter: none !important;
+.virtualHomeGridViewport .homeAlbumCard::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  clip-path: inset(0 round var(--quick-library-card-radius, 16px));
+  background:
+    linear-gradient(180deg, rgba(6,7,12,.20) 0%, rgba(6,7,12,.68) 58%, rgba(6,7,12,.92) 100%),
+    var(--quick-library-cover-url, none) center / cover no-repeat;
+  opacity: 0;
+  filter: blur(22px) saturate(1.18);
+  transform: scale(1.10);
+  transition: opacity 220ms ease, filter 220ms ease, transform 260ms cubic-bezier(.16,1,.3,1);
 }
 
-.virtualHomeGridViewport .homeAlbumCard::before,
+.app.moreQuickLibraryBlur .virtualHomeGridViewport .homeAlbumCard[data-cover-ambience="on"]::before{
+  opacity: .22;
+}
+
+.app[data-ambient="off"].moreQuickLibraryBlur .virtualHomeGridViewport .homeAlbumCard[data-cover-ambience="on"]::before{
+  opacity: .12;
+}
+
+.app.lessQuickLibraryBlur .virtualHomeGridViewport .homeAlbumCard::before{
+  opacity: 0;
+}
+
+.virtualHomeGridViewport .homeAlbumCard > *{
+  position: relative;
+  z-index: 1;
+}
+
 .virtualHomeGridViewport .homeAlbumCard::after,
 .virtualHomeGridViewport .homeAlbumArt::before,
 .virtualHomeGridViewport .homeAlbumArt::after{
@@ -18978,22 +18266,38 @@ body.localtifyIdle .settingsSectionCard{
   display: none;
 }
 
+
 .virtualHomeGridViewport .homeAlbumCard:hover{
-  border-color: color-mix(in oklab, var(--lt-border-strong) 72%, var(--lt-accent) 28%);
+  transform: translate3d(0, -3px, 0);
+  border-color: color-mix(in oklab, var(--lt-border-strong, rgba(255,255,255,.18)) 72%, var(--lt-accent) 28%);
   background:
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.010)),
-    color-mix(in oklab, var(--quick-library-card-surface) 96%, var(--lt-accent) 4%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 14px 30px rgba(0,0,0,.20);
+    linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.014)),
+    color-mix(in oklab, var(--quick-library-card-surface) 95%, var(--lt-accent) 5%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 16px 34px rgba(0,0,0,.24);
+}
+
+.virtualHomeGridViewport .homeAlbumCard:hover::before{
+  opacity: .28;
+  filter: blur(20px) saturate(1.24);
+  transform: scale(1.13);
+}
+
+.app.lessQuickLibraryBlur .virtualHomeGridViewport .homeAlbumCard:hover::before{
+  opacity: 0;
 }
 
 .virtualHomeGridViewport .homeAlbumCard:active{
   cursor: grabbing;
-  scale: .99;
+  transform: translate3d(0, -1px, 0) scale(.992);
 }
 
 .virtualHomeGridViewport .homeAlbumCard.active{
-  border-color: color-mix(in oklab, var(--lt-border-strong) 54%, var(--lt-accent) 46%);
-  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .07), 0 12px 26px rgba(0,0,0,.18);
+  border-color: color-mix(in oklab, var(--lt-border-strong, rgba(255,255,255,.18)) 52%, var(--lt-accent) 48%);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--lt-accent-rgb), .08),
+    0 14px 30px rgba(0,0,0,.22);
 }
 
 .virtualHomeGridViewport .homeAlbumPlayZone{
@@ -19005,20 +18309,23 @@ body.localtifyIdle .settingsSectionCard{
   padding: 0;
   overflow: hidden;
   border: 0;
-  border-radius: calc(var(--quick-library-card-radius) - 1px) calc(var(--quick-library-card-radius) - 1px) 0 0;
-  background: var(--lt-surface-soft);
-  box-shadow: inset 0 -1px 0 var(--lt-border);
-  transform: none;
-  scale: 1;
+  border-radius: calc(var(--quick-library-card-radius, 16px) - 1px) calc(var(--quick-library-card-radius, 16px) - 1px) 0 0;
+  background: var(--lt-surface-soft, rgba(255,255,255,.04));
+  box-shadow: inset 0 -1px 0 var(--quick-library-card-border, rgba(255,255,255,.10));
+  transform: translateZ(0);
 }
 
-.virtualHomeGridViewport .homeAlbumPlayZone:hover,
-.virtualHomeGridViewport .homeAlbumPlayZone:active{
-  transform: none;
-  scale: 1;
+.virtualHomeGridViewport .homeAlbumArt{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: hidden;
+  border-radius: 0;
+  background: transparent;
 }
 
-.virtualHomeGridViewport .homeAlbumArt,
 .virtualHomeGridViewport .homeAlbumArt img,
 .virtualHomeGridViewport .homeAlbumArt .coverImage{
   position: absolute;
@@ -19030,13 +18337,16 @@ body.localtifyIdle .settingsSectionCard{
   max-width: none;
   max-height: none;
   display: block;
-  overflow: hidden;
-  border-radius: 0;
   object-fit: cover;
   object-position: center;
-  background: transparent;
-  transform: none;
-  filter: none;
+  transform: scale(1.001);
+  transition: transform 260ms cubic-bezier(.16,1,.3,1), filter 220ms ease;
+}
+
+.virtualHomeGridViewport .homeAlbumCard:hover .homeAlbumArt img,
+.virtualHomeGridViewport .homeAlbumCard:hover .homeAlbumArt .coverImage{
+  transform: scale(1.035);
+  filter: saturate(1.05) contrast(1.02);
 }
 
 .virtualHomeGridViewport :is(.homeAlbumRank, .homeAlbumNumber, .homeAlbumIndex, .homeAlbumPlayBadge){
@@ -19052,7 +18362,7 @@ body.localtifyIdle .settingsSectionCard{
   display: grid;
   grid-template-rows: 32px 14px;
   align-content: start;
-  gap: 3px;
+  gap: 2px;
   margin: 0;
 }
 
@@ -19104,25 +18414,28 @@ body.localtifyIdle .settingsSectionCard{
   display: grid;
   place-items: center;
   overflow: visible;
-  border: 1px solid var(--lt-border);
+  border: 1px solid var(--lt-border, rgba(255,255,255,.10));
   border-radius: var(--lt-control-radius, 12px);
   color: var(--lt-muted);
-  background: var(--lt-surface-soft);
+  background: color-mix(in oklab, var(--lt-surface-soft, rgba(255,255,255,.05)) 92%, transparent);
   box-shadow: none;
-  transform: none;
-  scale: 1;
-  filter: none;
-  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+  transform: translate3d(0,0,0);
+  transition:
+    transform 150ms cubic-bezier(.16,1,.3,1),
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease;
 }
 
-.virtualHomeGridViewport .homeAlbumActionButton:hover,
-.virtualHomeGridViewport .homeAlbumActionButton:active{
+.virtualHomeGridViewport .homeAlbumActionButton:hover{
   color: var(--lt-text);
-  border-color: color-mix(in oklab, var(--lt-border-strong) 72%, var(--lt-accent) 28%);
-  background: color-mix(in oklab, var(--lt-surface-soft) 90%, var(--lt-accent) 10%);
-  box-shadow: none;
-  transform: none;
-  scale: 1;
+  border-color: color-mix(in oklab, var(--lt-border-strong, rgba(255,255,255,.18)) 70%, var(--lt-accent) 30%);
+  background: color-mix(in oklab, var(--lt-surface-soft, rgba(255,255,255,.05)) 86%, var(--lt-accent) 14%);
+  transform: translate3d(0,-1px,0) scale(1.025);
+}
+
+.virtualHomeGridViewport .homeAlbumActionButton:active{
+  transform: translate3d(0,0,0) scale(.96);
 }
 
 .virtualHomeGridViewport .homeAlbumActions .likeActionV443,
@@ -19134,13 +18447,17 @@ body.localtifyIdle .settingsSectionCard{
   opacity: .52;
   cursor: grabbing;
   border-style: dashed;
-  border-color: color-mix(in oklab, var(--lt-border-strong) 44%, var(--lt-accent) 56%);
+  border-color: color-mix(in oklab, var(--lt-border-strong, rgba(255,255,255,.18)) 44%, var(--lt-accent) 56%);
+  transform: scale(.985);
 }
 
 .virtualHomeGridViewport .homeAlbumCard.songDropTarget{
   opacity: 1;
-  border-color: color-mix(in oklab, var(--lt-border-strong) 34%, var(--lt-accent) 66%);
-  box-shadow: 0 0 0 1px rgba(var(--lt-accent-rgb), .18), 0 0 0 5px rgba(var(--lt-accent-rgb), .05), 0 16px 34px rgba(0,0,0,.22);
+  border-color: color-mix(in oklab, var(--lt-border-strong, rgba(255,255,255,.18)) 34%, var(--lt-accent) 66%);
+  box-shadow:
+    0 0 0 1px rgba(var(--lt-accent-rgb), .18),
+    0 0 0 5px rgba(var(--lt-accent-rgb), .05),
+    0 16px 34px rgba(0,0,0,.22);
 }
 
 .homeAlbumEmpty{
@@ -19152,16 +18469,16 @@ body.localtifyIdle .settingsSectionCard{
 }
 
 @media (max-width: 1180px){
-  .homeView{
-    --quick-library-card-min: 176px;
+  .pageTransition-home{
+    --quick-library-card-min: 184px;
     --quick-library-card-gap: 14px;
     --quick-library-row-gap: 20px;
   }
 }
 
 @media (max-width: 900px){
-  .homeView{
-    --quick-library-card-min: 154px;
+  .pageTransition-home{
+    --quick-library-card-min: 160px;
     --quick-library-card-gap: 12px;
     --quick-library-row-gap: 16px;
     --quick-library-card-radius: 15px;
@@ -19181,5 +18498,21 @@ body.localtifyIdle .settingsSectionCard{
 
   .virtualHomeGridViewport :is(.homeAlbumMeta, .homeAlbumStats, .homeAlbumActions){
     padding-inline: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .virtualHomeGridViewport .homeAlbumCard,
+  .virtualHomeGridViewport .homeAlbumCard::before,
+  .virtualHomeGridViewport .homeAlbumArt img,
+  .virtualHomeGridViewport .homeAlbumActionButton{
+    transition-duration: 1ms;
+  }
+
+  .virtualHomeGridViewport .homeAlbumCard:hover,
+  .virtualHomeGridViewport .homeAlbumCard:active,
+  .virtualHomeGridViewport .homeAlbumActionButton:hover,
+  .virtualHomeGridViewport .homeAlbumActionButton:active{
+    transform: none;
   }
 }

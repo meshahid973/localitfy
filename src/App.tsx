@@ -931,19 +931,6 @@ function MainModeApp() {
     };
   }, [isPlaying]);
 
-  useEffect(() => {
-    const body = document.body;
-    const wantsMoreBlur = settings.quickLibraryMoreBlur !== false;
-
-    body.classList.toggle("localtifyWantMoreBlur", wantsMoreBlur);
-    body.classList.toggle("localtifyNoMoreBlur", !wantsMoreBlur);
-
-    return () => {
-      body.classList.remove("localtifyWantMoreBlur");
-      body.classList.remove("localtifyNoMoreBlur");
-    };
-  }, [settings.quickLibraryMoreBlur]);
-
   function resumeAudioContextSafely() {
     const context = beatAudioContextRef.current;
     if (!context || context.state !== "suspended") return;

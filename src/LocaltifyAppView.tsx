@@ -3487,6 +3487,7 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
   onDragEnd
 }: HomeAlbumCardItemProps) {
   const rankLabel = index < 9 ? `0${index + 1}` : String(index + 1);
+  const ambientCover = getCardCoverUrl(song) || getSongAmbientSource(song);
 
   function clickedInteractiveElement(target: EventTarget | null) {
     return target instanceof HTMLElement
@@ -3520,7 +3521,11 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
       onDragEnd={onDragEnd}
       aria-grabbed={isDragging}
       title={draggedSongTitle ? `dragging ${draggedSongTitle}` : "click to play, drag the card body to reorder"}
-      style={{ "--stagger": `${Math.min(index, 28) * 16}ms` } as CSSProperties}
+      data-cover-ambience={ambientCover ? "on" : "off"}
+      style={{
+        "--stagger": `${Math.min(index, 28) * 16}ms`,
+        "--quick-library-cover-url": toCssUrl(ambientCover)
+      } as CSSProperties}
     >
       <button
         className="homeAlbumPlayZone homeAlbumCoverButton"
@@ -3780,8 +3785,8 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   const isSimpleGrid = className.includes("simpleAlbumGrid");
   const compactViewport = viewportWidth > 0 && viewportWidth < 900;
   const mediumViewport = viewportWidth >= 900 && viewportWidth < 1180;
-  const minColumnWidth = isSimpleGrid ? 168 : compactViewport ? 154 : mediumViewport ? 176 : 188;
-  const mobileCardFloor = 154;
+  const minColumnWidth = isSimpleGrid ? 176 : compactViewport ? 160 : mediumViewport ? 184 : 204;
+  const mobileCardFloor = 160;
   const gridGap = compactViewport ? 12 : mediumViewport ? 14 : 16;
   const rowGap = compactViewport ? 16 : mediumViewport ? 20 : 24;
   const viewportChrome = isSimpleGrid ? 16 : compactViewport ? 16 : 28;
@@ -3796,8 +3801,8 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
     mobileCardFloor,
     (usableWidth - Math.max(0, columns - 1) * gridGap) / columns
   );
-  const estimatedCardWidth = canShowCompleteSmallSet ? Math.min(224, estimatedColumnWidth) : estimatedColumnWidth;
-  const fixedCardBodyHeight = 140;
+  const estimatedCardWidth = canShowCompleteSmallSet ? Math.min(232, estimatedColumnWidth) : estimatedColumnWidth;
+  const fixedCardBodyHeight = 146;
   const rowEstimate = useMemo(
     () => Math.ceil(estimatedCardWidth + fixedCardBodyHeight + rowGap),
     [estimatedCardWidth, rowGap]
