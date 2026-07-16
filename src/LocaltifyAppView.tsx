@@ -3557,7 +3557,7 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
 
       <div className="homeAlbumActions">
         <button
-          className={`iconAction likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`}
+          className={`iconAction homeAlbumActionButton likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
@@ -3571,7 +3571,7 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
         </button>
 
         <button
-          className="iconAction playlistAddAction noActionHoverV444"
+          className="iconAction homeAlbumActionButton playlistAddAction noActionHoverV444"
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
@@ -3788,16 +3788,23 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
 
   const isSimpleGrid = className.includes("simpleAlbumGrid");
   const minColumnWidth = isSimpleGrid ? 168 : 188;
+  const mobileCardFloor = 154;
   const gridGap = 16;
-  const rawColumns = Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap));
-  const columns = Math.max(1, rawColumns || 1);
+  const viewportChrome = isSimpleGrid ? 16 : 28;
+  const usableWidth = Math.max(mobileCardFloor, (viewportWidth || minColumnWidth) - viewportChrome);
+  const rawColumns = Math.max(1, Math.floor((usableWidth + gridGap) / (minColumnWidth + gridGap)));
+  const isSmallGrid = list.length > 0 && list.length <= 2;
+  const columns = isSmallGrid ? list.length : Math.max(1, Math.min(list.length || 1, rawColumns));
   const rowCount = Math.max(1, Math.ceil(list.length / columns));
-  const rowEstimate = useMemo(() => {
-    if (isSimpleGrid) return viewportWidth > 0 && viewportWidth < 760 ? 292 : 318;
-    if (viewportWidth > 0 && viewportWidth < 760) return 348;
-    if (viewportWidth > 0 && viewportWidth < 1100) return 360;
-    return 372;
-  }, [isSimpleGrid, viewportWidth]);
+  const estimatedColumnWidth = Math.max(
+    mobileCardFloor,
+    (usableWidth - Math.max(0, columns - 1) * gridGap) / columns
+  );
+  const estimatedCardWidth = isSmallGrid ? Math.min(224, estimatedColumnWidth) : estimatedColumnWidth;
+  const rowEstimate = useMemo(
+    () => Math.ceil(estimatedCardWidth + 166),
+    [estimatedCardWidth]
+  );
 
   const rowVirtualizer = useVirtualizer({
     count: list.length ? rowCount : 0,
@@ -3856,7 +3863,10 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
               className="virtualHomeGridRow"
               style={{
                 transform: `translateY(${virtualRow.start}px)`,
-                gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`
+                gridTemplateColumns: isSmallGrid
+                  ? `repeat(${rowSongs.length}, minmax(0, ${Math.max(mobileCardFloor, Math.floor(estimatedCardWidth))}px))`
+                  : `repeat(${columns}, minmax(0, 1fr))`,
+                justifyContent: "start"
               }}
             >
               {rowSongs.map((song, offset) => {
@@ -5425,17 +5435,14 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
                         return (
                           <button
                             key={item.id}
-                            className={`navItem navItemAnimatedV468 nav-${item.id} ${view === item.id ? "active" : ""}`}
+                            className={`navItem nav-${item.id} ${view === item.id ? "active" : ""}`}
                             data-nav-id={item.id}
                             data-nav-group={group.id}
                             onClick={() => changeView(item.id, "nav")}
                             aria-label={`open ${item.label}`}
                           >
-                            <span className="navDiscordPillV468" aria-hidden="true" />
                             <span className={`navIcon navIcon-${item.id}`} aria-hidden="true">
-                              <span className="navIconMotionV468">
-                                <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
-                              </span>
+                              <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
                             </span>
                             <span className="navText">
                               <strong>{item.label}</strong>

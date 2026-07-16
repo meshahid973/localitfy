@@ -136,17 +136,7 @@ button:disabled{
   grid-template-rows: minmax(0, 1fr) 92px;
 }
 
-.sidebar{
-  grid-row: 1 / 3;
-  min-height: 0;
-  padding: 18px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  background: rgba(0, 0, 0, 0.76);
-  border-right: 1px solid var(--line);
-  backdrop-filter: blur(18px);
-}
+
 
 .content{
   min-width: 0;
@@ -157,58 +147,19 @@ button:disabled{
   background-size: auto;
 }
 
-.logoWrap{
-  min-height: 54px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 
-.logoWrap h1{
-  margin: 0;
-  font-size: 23px;
-  line-height: 1;
-  letter-spacing: -0.055em;
-}
 
-.logoWrap p{
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-}
 
-.nav{
-  display: grid;
-  gap: 5px;
-}
 
-.navItem{
-  height: 39px;
-  padding: 0 12px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  color: var(--muted);
-  background: #000;
-  text-align: left;
-  font-weight: 760;
-  transition: color 120ms ease,
-    background 120ms ease,
-    border-color 120ms ease,
-    transform 120ms ease;
-}
 
-.navItem:hover{
-  color: var(--text);
-  background: var(--surface-2);
-  transform: translateX(2px);
-}
 
-.navItem.active{
-  color: var(--text);
-  background: var(--accent-soft);
-  border-color: var(--accent-line);
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.28);
-}
+
+
+
+
+
+
+
 
 .circleButton.active:not(.playerBar *){
   color: #06100b;
@@ -1255,7 +1206,6 @@ input[type="range"]{
   pointer-events: none;
 }
 
-.navItem,
 .heroGhost,
 .softButton,
 .mainAction,
@@ -1265,7 +1215,6 @@ input[type="range"]{
   transition-duration: 120ms;
 }
 
-.navItem:hover,
 .heroGhost:hover,
 .softButton:hover,
 .mainAction:hover,
@@ -1275,9 +1224,7 @@ input[type="range"]{
   transform: translate3d(0, -1px, 0);
 }
 
-.navItem:hover{
-  border-color: color-mix(in srgb, var(--accent) 26%, rgba(255, 255, 255, 0.1));
-}
+
 
 .editorModal{
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.012)),
@@ -1330,39 +1277,17 @@ input[type="range"]{
   grid-template-rows: minmax(0, 1fr) 88px;
 }
 
-.sidebar{
-  padding: 16px 12px;
-  gap: 14px;
-  background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(18px) saturate(120%);
-}
 
-.logoWrap h1{
-  font-size: 21px;
-  letter-spacing: -0.045em;
-}
 
-.navItem{
-  background: var(--surface);
-  border: 1px solid transparent;
-  box-shadow: none;
-}
 
-.navItem{
-  border-radius: 11px;
-}
 
-.navItem.active{
-  background: rgba(var(--accent-rgb), 0.13);
-  border-color: rgba(var(--accent-rgb), 0.34);
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.28);
-}
 
-.navItem:hover{
-  background: var(--surface-hover);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translate3d(0, -1px, 0);
-}
+
+
+
+
+
+
 
 .hero{
   min-height: 260px;
@@ -1643,10 +1568,7 @@ input[type="range"]::-webkit-slider-thumb{
   border-radius: 9px;
 }
 
-.sidebar{
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.018), transparent),
-    rgba(0, 0, 0, 0.9);
-}
+
 
 .circleButton:not(.playerBar *),
 .iconAction{
@@ -1669,7 +1591,7 @@ input[type="range"]::-webkit-slider-thumb{
 }
 }
 
-button:active{
+button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
   transform: scale(0.985) translateZ(0);
 }
 
@@ -1883,7 +1805,7 @@ button:active{
     transparent !important;
 }
 
-button:active,
+button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active,
 .songRow:active,
 .iconAction:active,
 .circleButton:active:not(.playerBar *){
@@ -2165,11 +2087,11 @@ button{
     box-shadow .16s ease !important;
 }
 
-button:hover{
+button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):hover{
   transform: translateY(-1px) !important;
 }
 
-button:active{
+button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
   transform: translateY(0) scale(.985) !important;
 }
 
@@ -2261,19 +2183,14 @@ button:active{
 
 }
 
-.sidebar{
-  animation: sidebarEnter 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  transition: width 180ms ease, border-color 160ms ease, background 160ms ease !important;
-}
+
 
 @keyframes sidebarEnter {
   from { opacity: 0; transform: translateX(-12px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
-.navItem:hover{
-  transform: translateX(4px) translateZ(0) !important;
-}
+
 
 @keyframes shelfDrop {
   from { opacity: 0; transform: translateY(-8px); }
@@ -2388,69 +2305,17 @@ body.isResizingPlayer{
   contain: layout paint size;
 }
 
-.sidebar{
-  position: relative;
-  min-width: 184px;
-  max-width: 340px;
-  contain: layout paint;
-}
 
-.sidebarResizeHandle{
-  position: absolute;
-  top: 0;
-  right: -7px;
-  z-index: 30;
-  width: 14px;
-  height: 100%;
-  border: 0;
-  border-radius: 0;
-  background: #000;
-  cursor: ew-resize;
-  -webkit-app-region: no-drag;
-}
 
-.sidebarResizeHandle::before{
-  content: "";
-  position: absolute;
-  top: 18px;
-  bottom: 18px;
-  left: 6px;
-  width: 1px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  transition: width 140ms ease,
-    background 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
-}
 
-.sidebarResizeHandle span{
-  position: absolute;
-  top: 50%;
-  left: 4px;
-  width: 6px;
-  height: 46px;
-  border-radius: 999px;
-  transform: translateY(-50%) scaleY(0.72);
-  background: rgba(var(--accent-rgb), 0.22);
-  opacity: 0;
-  transition: opacity 140ms ease,
-    transform 140ms ease,
-    background 140ms ease;
-}
 
-.sidebarResizeHandle:hover::before{
-  width: 2px;
-  background: rgba(var(--accent-rgb), 0.72);
-  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.32);
-  transform: translateX(-1px);
-}
 
-.sidebarResizeHandle:hover span{
-  opacity: 1;
-  transform: translateY(-50%) scaleY(1);
-  background: rgba(var(--accent-rgb), 0.5);
-}
+
+
+
+
+
+
 
 .isResizingSidebar{
   cursor: ew-resize !important;
@@ -3000,9 +2865,7 @@ body.isResizingPlayer{
   font-synthesis: none !important;
 }
 
-.sidebar{
-  padding-bottom: 18px !important;
-}
+
 
 .compactActionRow{
   display: flex !important;
@@ -3141,16 +3004,13 @@ body.isResizingPlayer{
 }
 }
 
-.sidebar{
-  overflow: visible !important;
-}
+
 
 .app{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.navItem.active,
 .mainAction,
 .circleButton.main:not(.playerBar *){
   box-shadow: 0 12px 30px rgba(var(--accent-rgb), 0.12),
@@ -3299,11 +3159,11 @@ button{
     box-shadow 190ms ease !important;
 }
 
-button:hover{
+button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):hover{
   transform: translateY(-1px) translateZ(0);
 }
 
-button:active{
+button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
   transform: translateY(0) scale(0.97) translateZ(0);
 }
 
@@ -3402,9 +3262,7 @@ button:active{
   grid-template-columns: 1fr !important;
 }
 
-.sidebar{
-  display: none !important;
-}
+
 
 }
 
@@ -3455,12 +3313,12 @@ button:active{
 .app::before,
 .content::before,
 .loadingScreen::before,
-.editorModal::before {
+.editorModal::before{
   background-image: none !important;
   background-size: auto !important;
 }
 
-.app {
+.app{
   background:
     radial-gradient(circle at 50% 100%, rgba(var(--player-ambient-rgb, var(--accent-rgb)), 0.075), transparent 46%),
     radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.10), transparent 31%),
@@ -3502,139 +3360,15 @@ button:active{
   background-size: auto !important;
 }
 
-.app .sidebar{
-  overflow: hidden !important;
-  padding: 16px 12px !important;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.055), rgba(0, 0, 0, 0.02) 42%),
-    rgba(0, 0, 0, 0.76) !important;
-  border-right: 1px solid rgba(var(--accent-rgb), 0.18) !important;
-  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.035) !important;
-  backdrop-filter: blur(14px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(120%) !important;
-  contain: layout paint !important;
-}
 
-.app .sidebarResizeHandle{
-  right: 0 !important;
-  width: 8px !important;
-  overflow: hidden !important;
-}
 
-.app .sidebarResizeHandle::before,
-.app .sidebarResizeHandle span{
-  box-shadow: none !important;
-}
 
-.app .logoWrap{
-  padding-inline: 4px !important;
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
 
-.app .nav{
-  width: 100% !important;
-  gap: 7px !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-}
 
-.app .sidebar .nav .navItem{
-  width: 100% !important;
-  max-width: 100% !important;
-  min-height: 48px !important;
-  height: 48px !important;
-  display: grid !important;
-  grid-template-columns: 34px minmax(0, 1fr) !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin: 0 !important;
-  padding: 7px 10px !important;
-  border-radius: 14px !important;
-  color: rgba(255, 255, 255, 0.68) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  box-shadow: none !important;
-  transform: none !important;
-  filter: none !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
-  transition:
-    color 140ms ease,
-    background-color 140ms ease,
-    border-color 140ms ease !important;
-}
 
-.app .sidebar .nav .navItem:hover{
-  color: rgba(255, 255, 255, 0.94) !important;
-  background: rgba(var(--accent-rgb), 0.075) !important;
-  border-color: rgba(var(--accent-rgb), 0.16) !important;
-  box-shadow: none !important;
-  transform: none !important;
-  filter: none !important;
-}
 
-.app .sidebar .nav .navItem.active{
-  color: #fff !important;
-  background: rgba(var(--accent-rgb), 0.14) !important;
-  border-color: rgba(var(--accent-rgb), 0.28) !important;
-  box-shadow:
-    inset 3px 0 0 rgba(var(--accent-rgb), 0.92),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.035) !important;
-  transform: none !important;
-  filter: none !important;
-}
 
-.app .sidebar .nav .navItem::before,
-.app .sidebar .nav .navItem::after{
-  display: none !important;
-}
 
-.app .sidebar .nav .navIcon{
-  width: 32px !important;
-  height: 32px !important;
-  display: grid !important;
-  place-items: center !important;
-  border-radius: 10px !important;
-  color: rgba(255, 255, 255, 0.72) !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  transform: none !important;
-  filter: none !important;
-  transition: color 140ms ease, background-color 140ms ease !important;
-}
-
-.app .sidebar .nav .navItem:hover .navIcon,
-.app .sidebar .nav .navItem.active .navIcon{
-  color: #fff !important;
-  background: rgba(var(--accent-rgb), 0.16) !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  transform: none !important;
-  filter: none !important;
-}
-
-.app .sidebar .nav .navText,
-.app .sidebar .nav .navText strong,
-.app .sidebar .nav .navText small{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-.app .sidebar .nav .navText strong{
-  font-size: 13px !important;
-  line-height: 1.05 !important;
-}
-
-.app .sidebar .nav .navText small{
-  color: rgba(255, 255, 255, 0.46) !important;
-  font-size: 10px !important;
-  line-height: 1.05 !important;
-}
 
 .app .ambientSurface::before{
   filter: blur(32px) saturate(1.08) brightness(0.92) !important;
@@ -3659,7 +3393,7 @@ button:active{
 .playlistPage,
 .homePage,
 .libraryView,
-.scrollContent {
+.scrollContent{
   background-image: none !important;
 }
 
@@ -3684,16 +3418,12 @@ button:active{
 .playlistPage::before,
 .playlistPage::after,
 .homePage::before,
-.homePage::after {
+.homePage::after{
   background-image: none !important;
   background-size: auto !important;
   opacity: 0 !important;
 }
 
-.sidebarItem,
-.sidebarItem:hover,
-.navItem,
-.navItem:hover,
 .libraryCard,
 .libraryCard:hover,
 .songCard,
@@ -3703,7 +3433,7 @@ button:active{
 .panel,
 .panel:hover,
 .card,
-.card:hover {
+.card:hover{
   rotate: 0deg !important;
   transform-style: flat !important;
   perspective: none !important;
@@ -3739,12 +3469,7 @@ body,
   grid-template-rows: minmax(0, 1fr) var(--player-size-used, var(--player-size-live, var(--player-size, 108px))) !important;
 }
 
-.app .sidebar{
-  grid-column: 1 !important;
-  grid-row: 1 !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-}
+
 
 .app .content{
   grid-column: 2 !important;
@@ -3780,10 +3505,7 @@ body,
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
-  .app .sidebar,
-  .app .sidebarResizeHandle{
-    display: none !important;
-  }
+  
 
   .app .content{
     grid-column: 1 !important;
@@ -4050,7 +3772,7 @@ body,
   }
 
   .updatePrimaryButton,
-  .updateGhostButton{
+.updateGhostButton{
     flex: 1 1 100%;
   }
 }
@@ -4148,13 +3870,13 @@ body,
   box-shadow: 0 14px 32px rgba(var(--accent-rgb), 0.18) !important;
 }
 
-.updateToastLayer {
+.updateToastLayer{
   padding: clamp(18px, 3vw, 34px) !important;
   align-items: flex-end !important;
   justify-content: flex-end !important;
 }
 
-.updateToastCard {
+.updateToastCard{
   width: min(520px, calc(100vw - 32px)) !important;
   border-radius: 24px !important;
   border: 1px solid rgba(255,255,255,0.13) !important;
@@ -4165,22 +3887,22 @@ body,
   overflow: hidden !important;
 }
 
-.updateToastCard::before {
+.updateToastCard::before{
   opacity: 0.32 !important;
   filter: blur(18px) !important;
 }
 
-.updateToastText h3 {
+.updateToastText h3{
   letter-spacing: -0.045em !important;
   line-height: 0.98 !important;
 }
 
-.updateToastText p:not(.eyebrow) {
+.updateToastText p:not(.eyebrow){
   color: rgba(255,255,255,0.68) !important;
   line-height: 1.55 !important;
 }
 
-.updateToastMetaRow {
+.updateToastMetaRow{
   display: flex !important;
   flex-wrap: wrap !important;
   gap: 8px !important;
@@ -4188,7 +3910,7 @@ body,
 }
 
 .updateVersionPill,
-.updateSafePill {
+.updateSafePill{
   min-height: 30px !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -4202,17 +3924,17 @@ body,
   letter-spacing: 0.01em !important;
 }
 
-.updateSafePill.ok {
+.updateSafePill.ok{
   border-color: rgba(var(--accent-rgb), 0.28) !important;
   background: rgba(var(--accent-rgb), 0.12) !important;
   color: rgba(255,255,255,0.88) !important;
 }
 
-.updateSafePill.pending {
+.updateSafePill.pending{
   color: rgba(255,255,255,0.62) !important;
 }
 
-.updateProgressTrack {
+.updateProgressTrack{
   height: 8px !important;
   border-radius: 999px !important;
   background: rgba(255,255,255,0.11) !important;
@@ -4220,7 +3942,7 @@ body,
   margin-top: 18px !important;
 }
 
-.updateProgressTrack span {
+.updateProgressTrack span{
   height: 100% !important;
   border-radius: inherit !important;
   background: rgba(var(--accent-rgb), 0.95) !important;
@@ -4228,7 +3950,7 @@ body,
   transition: width 320ms ease !important;
 }
 
-.updateToastActions {
+.updateToastActions{
   display: flex !important;
   justify-content: flex-end !important;
   align-items: center !important;
@@ -4238,7 +3960,7 @@ body,
 }
 
 .updatePrimaryButton,
-.updateGhostButton {
+.updateGhostButton{
   min-height: 40px !important;
   border-radius: 15px !important;
   padding: 0 15px !important;
@@ -4248,32 +3970,32 @@ body,
   transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease !important;
 }
 
-.updateGhostButton {
+.updateGhostButton{
   background: rgba(255,255,255,0.055) !important;
   border: 1px solid rgba(255,255,255,0.12) !important;
   color: rgba(255,255,255,0.76) !important;
   box-shadow: none !important;
 }
 
-.updateGhostButton:hover {
+.updateGhostButton:hover{
   transform: translateY(-1px) !important;
   background: rgba(255,255,255,0.085) !important;
   border-color: rgba(255,255,255,0.2) !important;
 }
 
-.updatePrimaryButton {
+.updatePrimaryButton{
   background: rgba(var(--accent-rgb), 0.94) !important;
   border: 1px solid rgba(var(--accent-rgb), 0.9) !important;
   color: #050505 !important;
   box-shadow: 0 12px 34px rgba(var(--accent-rgb),0.2) !important;
 }
 
-.updatePrimaryButton:hover {
+.updatePrimaryButton:hover{
   transform: translateY(-1px) !important;
   box-shadow: 0 18px 44px rgba(var(--accent-rgb),0.26) !important;
 }
 
-.updateToastClose {
+.updateToastClose{
   border-radius: 999px !important;
   background: rgba(255,255,255,0.06) !important;
   border: 1px solid rgba(255,255,255,0.1) !important;
@@ -4799,8 +4521,8 @@ line-clamp: 2 !important;
 
 @media (max-width: 620px){
   .analyticsCardGridV030,
-  .analyticsHealthGridV030,
-  .recentImportStripV030{
+.analyticsHealthGridV030,
+.recentImportStripV030{
     grid-template-columns: 1fr !important;
   }
 
@@ -5260,7 +4982,7 @@ line-clamp: 2 !important;
 
 @media (max-width: 980px){
   .analyticsLocalHero,
-  .analyticsLocalSplit{
+.analyticsLocalSplit{
     grid-template-columns: 1fr !important;
   }
 
@@ -5280,8 +5002,8 @@ line-clamp: 2 !important;
 
 @media (max-width: 640px){
   .analyticsLocalHeroStats,
-  .analyticsLocalGrid,
-  .analyticsLocalHealthGrid{
+.analyticsLocalGrid,
+.analyticsLocalHealthGrid{
     grid-template-columns: 1fr !important;
   }
 
@@ -5305,7 +5027,7 @@ line-clamp: 2 !important;
   --button-shadow: 0 14px 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.055);
 }
 
-.app :is(.mainAction,.heroMain,.simpleAction,.updatePrimaryButton,.aboutActionButton.primary,.settingsActionButton.primary,.primaryButton){
+.app :is(.mainAction, .heroMain, .simpleAction, .updatePrimaryButton, .aboutActionButton.primary, .settingsActionButton.primary, .primaryButton){
   min-height: var(--button-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -5323,7 +5045,7 @@ line-clamp: 2 !important;
   cursor: pointer !important;
 }
 
-.app :is(.softButton,.heroGhost,.simpleGhost,.updateGhostButton,.toolButton,.tabButton,.navButton,.settingsActionButton,.settingsTinyButton,.aboutActionButton):not(.primary):not(.danger):not(.main){
+.app :is(.softButton, .heroGhost, .simpleGhost, .updateGhostButton, .toolButton, .tabButton, .navButton, .settingsActionButton, .settingsTinyButton, .aboutActionButton):not(.primary):not(.danger):not(.main){
   min-height: var(--button-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -5340,13 +5062,13 @@ line-clamp: 2 !important;
   cursor: pointer !important;
 }
 
-.app :is(.mainAction,.heroMain,.simpleAction,.updatePrimaryButton,.aboutActionButton.primary,.settingsActionButton.primary,.primaryButton):hover{
+.app :is(.mainAction, .heroMain, .simpleAction, .updatePrimaryButton, .aboutActionButton.primary, .settingsActionButton.primary, .primaryButton):hover{
   border-color: color-mix(in srgb, var(--accent) 66%, rgba(255,255,255,.18)) !important;
   box-shadow: 0 16px 36px rgba(var(--accent-rgb), .2), inset 0 1px 0 rgba(255,255,255,.2) !important;
   filter: none !important;
 }
 
-.app :is(.softButton,.heroGhost,.simpleGhost,.updateGhostButton,.toolButton,.tabButton,.navButton,.settingsActionButton,.settingsTinyButton,.aboutActionButton):not(.primary):not(.danger):not(.main):hover{
+.app :is(.softButton, .heroGhost, .simpleGhost, .updateGhostButton, .toolButton, .tabButton, .navButton, .settingsActionButton, .settingsTinyButton, .aboutActionButton):not(.primary):not(.danger):not(.main):hover{
   border-color: color-mix(in srgb, var(--accent) 32%, rgba(255,255,255,.14)) !important;
   background: var(--button-bg-hover) !important;
   color: rgba(255,255,255,.96) !important;
@@ -5354,7 +5076,7 @@ line-clamp: 2 !important;
   filter: none !important;
 }
 
-.app :is(.dangerButton,.danger,.settingsDangerButton,.deleteButton,.removeButton,.resetButton){
+.app :is(.dangerButton, .danger, .settingsDangerButton, .deleteButton, .removeButton, .resetButton){
   min-height: var(--button-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -5369,14 +5091,14 @@ line-clamp: 2 !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
-.app :is(.dangerButton,.danger,.settingsDangerButton,.deleteButton,.removeButton,.resetButton):hover{
+.app :is(.dangerButton, .danger, .settingsDangerButton, .deleteButton, .removeButton, .resetButton):hover{
   border-color: rgba(255,92,122,.4) !important;
   background: rgba(255,68,104,.12) !important;
   color: #ffd2dc !important;
   filter: none !important;
 }
 
-.app :is(.iconAction,.songMenuButton,.closeModalButton,.updateToastClose),
+.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose),
 .app :is(.circleButton):not(.playerBar *){
   width: 38px !important;
   height: 38px !important;
@@ -5392,7 +5114,7 @@ line-clamp: 2 !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
-.app :is(.iconAction,.songMenuButton,.closeModalButton,.updateToastClose):hover,
+.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose):hover,
 .app :is(.circleButton):not(.playerBar *):hover{
   border-color: color-mix(in srgb, var(--accent) 30%, rgba(255,255,255,.12)) !important;
   background: rgba(255,255,255,.07) !important;
@@ -5400,7 +5122,7 @@ line-clamp: 2 !important;
   box-shadow: 0 12px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.055) !important;
 }
 
-.app :is(.tinyToggle,.sidebarThemeOption,.themeChip,.filterChip,.pillButton,.smallPillButton){
+.app :is(.tinyToggle, .sidebarThemeOption, .themeChip, .filterChip, .pillButton, .smallPillButton){
   min-height: var(--button-height-sm) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -5414,29 +5136,20 @@ line-clamp: 2 !important;
   font-weight: 850 !important;
 }
 
-.app :is(.tinyToggle,.sidebarThemeOption,.themeChip,.filterChip,.pillButton,.smallPillButton):hover,
-.app :is(.tinyToggle,.sidebarThemeOption,.themeChip,.filterChip,.pillButton,.smallPillButton).active,
-.app :is(.tinyToggle,.sidebarThemeOption,.themeChip,.filterChip,.pillButton,.smallPillButton)[aria-pressed="true"]{
+.app :is(.tinyToggle, .sidebarThemeOption, .themeChip, .filterChip, .pillButton, .smallPillButton):hover,
+.app :is(.tinyToggle, .sidebarThemeOption, .themeChip, .filterChip, .pillButton, .smallPillButton).active,
+.app :is(.tinyToggle, .sidebarThemeOption, .themeChip, .filterChip, .pillButton, .smallPillButton)[aria-pressed="true"]{
   border-color: color-mix(in srgb, var(--accent) 34%, rgba(255,255,255,.12)) !important;
   background: rgba(var(--accent-rgb), .11) !important;
   color: rgba(255,255,255,.96) !important;
 }
 
-.app :is(button,a,[role="button"]):focus-visible{
+.app :is(button, a, [role="button"]):focus-visible{
   outline: 2px solid rgba(var(--accent-rgb), .58) !important;
   outline-offset: 3px !important;
 }
 
-.app .sidebar .nav .navItem{
-  border-radius: 16px !important;
-  transform: translate3d(0,0,0) !important;
-}
 
-.app .sidebar .nav .navItem:hover,
-.app .sidebar .nav .navItem.active{
-  transform: translate3d(0,0,0) !important;
-  border-color: color-mix(in srgb, var(--accent) 28%, rgba(255,255,255,.08)) !important;
-}
 
 /* V309 low-lag guardrails. */
 .app img{
@@ -5444,7 +5157,7 @@ line-clamp: 2 !important;
   user-select: none;
 }
 
-.app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
+.app :is(.songRow, .libraryRow, .homeListenCard, .homeFreshCard, .coverGalleryCard, .settingsPageCard, .panel){
   transform: translateZ(0);
 }
 
@@ -5462,8 +5175,7 @@ body.localtifyPerfV301 .content{
   contain: layout style paint;
 }
 
-body.localtifyPerfV301 .titleBar,
-body.localtifyPerfV301 .sidebar{
+body.localtifyPerfV301 .titleBar{
   contain: layout paint style;
 }
 
@@ -5711,8 +5423,8 @@ body.localtifyPerfV301 .sidebar{
 
 @media (max-width: 1040px){
   .analyticsLiteHeroV324,
-  .analyticsRecapGridV324,
-  .analyticsLiteCopyGridV324{
+.analyticsRecapGridV324,
+.analyticsLiteCopyGridV324{
     grid-template-columns: 1fr !important;
   }
 
@@ -5728,87 +5440,7 @@ body.localtifyPerfV301 .sidebar{
 
 @media (max-width: 640px){
   .analyticsLiteHeroStatsV324,
-  .analyticsLiteGridV324{
+.analyticsLiteGridV324{
     grid-template-columns: 1fr !important;
   }
 }
-
-/* V471 DISCORD SIDEBAR PILL START
-   Discord-style left white pill using only CSS pseudo-elements.
-   Sidebar/nav ownership stays in app-core.css. */
-.sidebar,
-.sidebar .nav{
-  overflow: visible !important;
-}
-
-.sidebar .navItem{
-  position: relative !important;
-  overflow: visible !important;
-}
-
-.sidebar .navItem::before{
-  content: "" !important;
-  display: block !important;
-  position: absolute !important;
-  left: -14px !important;
-  top: 50% !important;
-  width: 4px !important;
-  height: 8px !important;
-  border-radius: 0 999px 999px 0 !important;
-  background: #fff !important;
-  opacity: 0 !important;
-  transform: translateY(-50%) scaleY(.35) !important;
-  transform-origin: left center !important;
-  pointer-events: none !important;
-  z-index: 30 !important;
-  transition:
-    height 180ms cubic-bezier(.16, 1, .3, 1),
-    opacity 140ms ease,
-    transform 180ms cubic-bezier(.16, 1, .3, 1) !important;
-}
-
-.sidebar .navItem:hover::before,
-.sidebar .navItem:focus-visible::before{
-  height: 18px !important;
-  opacity: .78 !important;
-  transform: translateY(-50%) scaleY(1) !important;
-}
-
-.sidebar .navItem.active::before{
-  height: 34px !important;
-  opacity: 1 !important;
-  transform: translateY(-50%) scaleY(1) !important;
-}
-
-.sidebar .navItem.active:hover::before,
-.sidebar .navItem.active:focus-visible::before{
-  height: 40px !important;
-}
-
-/* Remove the big active rectangle/card highlight. The pill becomes the active indicator. */
-.sidebar .navItem.active,
-.sidebar .navItem.active:hover,
-.sidebar .navItem.active:focus-visible{
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-
-.sidebar .navItem.active .navIcon,
-.sidebar .navItem.active .navText strong{
-  color: #fff !important;
-}
-
-.sidebar .navItem.active .navText small{
-  color: rgba(255,255,255,.62) !important;
-}
-
-@media (prefers-reduced-motion: reduce){
-  .sidebar .navItem::before{
-    transition: none !important;
-  }
-}
-/* V471 DISCORD SIDEBAR PILL END */
-

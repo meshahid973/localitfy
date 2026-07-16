@@ -1,14 +1,6 @@
 
 
-.app[data-playing="on"] :is(
-  .songRow.playing .songArt.coverAura,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .libraryRow.playing .songArt.coverAura
-){
+.app[data-playing="on"] :is(.songRow.playing .songArt.coverAura, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura, .playlistTrackRow.playing .playlistTrackCover, .playlistSongRow.playing .playlistTrackCover, .libraryRow.playing .songArt.coverAura){
   position: relative !important;
   isolation: isolate !important;
   contain: paint !important;
@@ -16,27 +8,14 @@
   transition: transform 135ms cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-.app[data-playing="on"] :is(
-  .songRow.playing .songArt.coverAura,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .libraryRow.playing .songArt.coverAura
-)::before{
+.app[data-playing="on"] :is(.songRow.playing .songArt.coverAura, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura, .playlistTrackRow.playing .playlistTrackCover, .playlistSongRow.playing .playlistTrackCover, .libraryRow.playing .songArt.coverAura)::before{
   opacity: min(var(--active-song-glow-opacity, 0.28), 0.34) !important;
   filter: blur(14px) saturate(1.18) !important;
   transform: translateZ(0) scale(var(--active-song-glow-scale, 1.01)) !important;
   transition: opacity 120ms linear, transform 120ms linear !important;
 }
 
-.app[data-playing="on"] :is(
-  .songRow.playing,
-  .playlistTrackRow.playing,
-  .playlistSongRow.playing,
-  .libraryRow.playing
-) :is(.songArt, .smallArt, .coverAura){
+.app[data-playing="on"] :is(.songRow.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing) :is(.songArt, .smallArt, .coverAura){
   filter: saturate(1.05) contrast(1.02) !important;
 }
 
@@ -44,23 +23,7 @@
   display: block;
 }
 
-.app :is(
-  .ambientOrb,
-  .sideAmbienceOrb,
-  .lightOrb,
-  .ambientSurfaceGlow,
-  .orb,
-  .localtifyStarsBackdrop,
-  .localtifyStarsLayer,
-  .localtifyStarParticle,
-  .localtifyStarsNebula,
-  .localtifyStarSweep,
-  .themeBackdrop,
-  .animatedThemeBackdrop,
-  .backgroundGradient,
-  .appBackdrop,
-  .appBackgroundLayer
-){
+.app :is(.ambientOrb, .sideAmbienceOrb, .lightOrb, .ambientSurfaceGlow, .orb, .localtifyStarsBackdrop, .localtifyStarsLayer, .localtifyStarParticle, .localtifyStarsNebula, .localtifyStarSweep, .themeBackdrop, .animatedThemeBackdrop, .backgroundGradient, .appBackdrop, .appBackgroundLayer){
   display: none !important;
   opacity: 0 !important;
   background: none !important;
@@ -335,9 +298,7 @@
   min-height: 520px !important;
 }
 
-.app[data-library-row-style="coverCards"] .libraryCoverCardsGridV321 .virtualHomeGridRow{
-  gap: 16px !important;
-}
+
 
 .app[data-player-background="flat"] .playerBar{
   background: rgba(8, 8, 12, 0.94) !important;
@@ -393,33 +354,19 @@
 }
 
 
-body.localtifyPerfV301 .app.isScrolling :is(
-  .songRow.playing .songArt.coverAura,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .libraryRow.playing .songArt.coverAura
-)::before{
+body.localtifyPerfV301 .app.isScrolling :is(.songRow.playing .songArt.coverAura, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura, .playlistTrackRow.playing .playlistTrackCover, .playlistSongRow.playing .playlistTrackCover, .libraryRow.playing .songArt.coverAura)::before{
   opacity: 0 !important;
   filter: none !important;
   transform: none !important;
 }
 
-body.localtifyPerfV301 .app.isScrolling :is(
-  .songRow.playing,
-  .playlistTrackRow.playing,
-  .playlistSongRow.playing,
-  .libraryRow.playing
-) :is(.songArt, .smallArt, .coverAura){
+body.localtifyPerfV301 .app.isScrolling :is(.songRow.playing, .playlistTrackRow.playing, .playlistSongRow.playing, .libraryRow.playing) :is(.songArt, .smallArt, .coverAura){
   filter: none !important;
 }
 
 body.localtifyPerfV301.localtifyBackgroundMode .app .heroAmbiencePulse,
 body.localtifyPerfV301.localtifyBackgroundMode .app .coverAura::before,
 body.localtifyPerfV301.localtifyBackgroundMode .app .songArt::before,
-body.localtifyPerfV301.localtifyBackgroundMode .app .homeAlbumArt::before,
 body.localtifyPerfV301.localtifyBackgroundMode .app .homeListenCover::before,
 body.localtifyPerfV301.localtifyBackgroundMode .app .homeFreshCover::before{
   opacity: 0 !important;
@@ -428,17 +375,7 @@ body.localtifyPerfV301.localtifyBackgroundMode .app .homeFreshCover::before{
 }
 
 
-body.localtifyPerfV303 .app.isScrolling :is(
-  .heroAmbiencePulse,
-  .coverAura::before,
-  .songArt::before,
-  .homeAlbumArt::before,
-  .homeListenCover::before,
-  .homeFreshCover::before,
-  .playlistTrackCover::before,
-  .playlistSongRow .playlistTrackCover::before,
-  .playerBar::before
-){
+body.localtifyPerfV303 .app.isScrolling :is(.heroAmbiencePulse, .coverAura::before, .songArt::before, .homeListenCover::before, .homeFreshCover::before, .playlistTrackCover::before, .playlistSongRow .playlistTrackCover::before, .playerBar::before){
   opacity: 0 !important;
   filter: none !important;
   animation: none !important;
@@ -446,34 +383,14 @@ body.localtifyPerfV303 .app.isScrolling :is(
   transform: none !important;
 }
 
-body.localtifyPerfV303 .app.isScrolling :is(
-  .coverGalleryCard,
-  .coverGalleryImageButtonCleanOnly,
-  .coverSongPick,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .homeListenCard,
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .settingsPageCard,
-  .settingsPanelCard
-){
+body.localtifyPerfV303 .app.isScrolling :is(.coverGalleryCard, .coverGalleryImageButtonCleanOnly, .coverSongPick, .homeFreshCard, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .settingsPageCard, .settingsPanelCard){
   transition-property: background-color, border-color, color, opacity !important;
   transition-duration: 90ms !important;
   filter: none !important;
   box-shadow: none !important;
 }
 
-body.localtifyPerfV303 .app.isScrolling :is(
-  .coverGalleryImageCleanOnly,
-  .coverGalleryImagePlaceholderCleanOnly,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .localtifyStarsLayer,
-  .localtifyStarsBackdrop
-){
+body.localtifyPerfV303 .app.isScrolling :is(.coverGalleryImageCleanOnly, .coverGalleryImagePlaceholderCleanOnly, .homeListenBackground, .homeListenBackgroundImage, .localtifyStarsLayer, .localtifyStarsBackdrop){
   animation: none !important;
   transition: none !important;
   filter: none !important;
@@ -487,67 +404,25 @@ body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::after{
 }
 
 
-.app.localtifyInteractionBusy :is(
-  .coverAura::before,
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .homeAlbumArt::before,
-  .homeFreshCover::before,
-  .songArt::before,
-  .playlistTrackCover::before,
-  .playerBar::before
-){
+.app.localtifyInteractionBusy :is(.coverAura::before, .heroAmbiencePulse, .homeListenBackground, .homeListenBackgroundImage, .homeFreshCover::before, .songArt::before, .playlistTrackCover::before, .playerBar::before){
   opacity: 0 !important;
   filter: none !important;
   animation: none !important;
   transition: none !important;
 }
 
-.app.localtifyInteractionBusy :is(
-  .nowPlayingCopySwap,
-  .nowPlayingArtSwap,
-  .simpleHeroArtSwap,
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .songRow,
-  .playlistTrackRow,
-  .playlistSongRow
-){
+.app.localtifyInteractionBusy :is(.nowPlayingCopySwap, .nowPlayingArtSwap, .simpleHeroArtSwap, .homeListenCard, .homeFreshCard, .songRow, .playlistTrackRow, .playlistSongRow){
   animation: none !important;
   transition-duration: 0ms !important;
 }
 
-body.localtifyAudioPlaying .app :is(
-  .localtifyProximityActive,
-  .proximityActive,
-  [data-proximity-active="true"]
-){
+body.localtifyAudioPlaying .app :is(.localtifyProximityActive, .proximityActive, [data-proximity-active="true"]){
   transform: none !important;
   filter: none !important;
 }
 
 
-body.localtifyPerfV305 .app.isScrolling :is(
-  .hero.heroPremium,
-  .homeShelfStack,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .coverQuickApplyBar,
-  .coverGalleryCardCleanOnly,
-  .coverGalleryImageButtonCleanOnly,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .homeListenCard,
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .playerBar
-){
+body.localtifyPerfV305 .app.isScrolling :is(.hero.heroPremium, .homeShelfStack, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .coverQuickApplyBar, .coverGalleryCardCleanOnly, .coverGalleryImageButtonCleanOnly, .homeFreshCard, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .playerBar){
   animation: none !important;
   transition-duration: 0ms !important;
   transition-delay: 0ms !important;
@@ -555,463 +430,111 @@ body.localtifyPerfV305 .app.isScrolling :is(
   filter: none !important;
 }
 
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(
-  .coverAura,
-  .coverAura::before,
-  .coverAura::after,
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .homeAlbumArt::before,
-  .homeFreshCover::before,
-  .songArt::before,
-  .playerBar::before,
-  .playerBar::after,
-  .coverGalleryImageCleanOnly
-){
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(.coverAura, .coverAura::before, .coverAura::after, .heroAmbiencePulse, .homeListenBackground, .homeListenBackgroundImage, .homeFreshCover::before, .songArt::before, .playerBar::before, .playerBar::after, .coverGalleryImageCleanOnly){
   animation: none !important;
   filter: none !important;
 }
 
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(
-  .nowPlayingCopySwap,
-  .nowPlayingArtSwap,
-  .simpleHeroArtSwap,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .homeListenCard,
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .coverGalleryCardCleanOnly,
-  .coverSongPickVirtual
-){
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(.nowPlayingCopySwap, .nowPlayingArtSwap, .simpleHeroArtSwap, .homeFreshCard, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .coverGalleryCardCleanOnly, .coverSongPickVirtual){
   transition-duration: 80ms !important;
   animation-duration: 80ms !important;
 }
 
-body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(
-  .hero.heroPremium.heroLayoutMotion,
-  .homeShelfStack,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel
-){
+body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(.hero.heroPremium.heroLayoutMotion, .homeShelfStack, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel){
   animation: none !important;
   transition-duration: 120ms !important;
   filter: none !important;
 }
 
 
-.app{
-  --lt-sidebar-closed: 88px;
-  --lt-sidebar-open: 238px;
-  --lt-sidebar-ease: cubic-bezier(.22, 1, .36, 1);
-  --lt-sidebar-fast: cubic-bezier(.16, 1, .3, 1);
-}
 
 
-main.app.app[data-sidebar-behavior="fixed"] > .appShell{
-  grid-template-columns: var(--sidebar-width-live, var(--sidebar-width, 249px)) minmax(0, 1fr) !important;
-  overflow: hidden !important;
-}
-
-main.app.app[data-sidebar-behavior="fixed"] > .appShell > .sidebar{
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  overflow: visible !important;
-  clip-path: none !important;
-}
 
 
-main.app.app[data-sidebar-behavior="slim"] > .appShell,
-main.app.app[data-sidebar-behavior="hover"] > .appShell{
-  grid-template-columns: var(--lt-sidebar-closed) minmax(0, 1fr) !important;
-  overflow: visible !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .content,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .content{
-  min-width: 0 !important;
-}
 
 
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
-  position: relative !important;
-  z-index: 120 !important;
-  width: var(--lt-sidebar-closed) !important;
-  min-width: var(--lt-sidebar-closed) !important;
-  max-width: var(--lt-sidebar-open) !important;
-  overflow: hidden !important;
-  padding-inline: 12px !important;
-  transform: translate3d(0,0,0) !important;
-  transform-origin: left center !important;
-  backface-visibility: hidden !important;
-  contain: paint style !important;
-  will-change: width !important;
-  clip-path: none !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: inset -1px 0 0 rgba(var(--accent-rgb), .12) !important;
-  transition:
-    width 360ms var(--lt-sidebar-ease),
-    min-width 360ms var(--lt-sidebar-ease),
-    max-width 360ms var(--lt-sidebar-ease),
-    border-color 180ms ease,
-    background-color 180ms ease !important;
-}
 
 
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
-  width: var(--lt-sidebar-open) !important;
-  min-width: var(--lt-sidebar-open) !important;
-  max-width: var(--lt-sidebar-open) !important;
-  box-shadow:
-    14px 0 30px rgba(0,0,0,.18),
-    inset -1px 0 0 rgba(var(--accent-rgb), .16) !important;
-}
 
 
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
-  animation-name: none !important;
-  filter: none !important;
-}
 
 
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .nav,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .nav{
-  width: 100% !important;
-  min-width: 0 !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem{
-  width: calc(var(--lt-sidebar-open) - 24px) !important;
-  min-width: 0 !important;
-  height: 46px !important;
-  margin-inline: 0 !important;
-  padding: 0 11px !important;
-  display: grid !important;
-  grid-template-columns: 42px minmax(0, 1fr) !important;
-  align-items: center !important;
-  justify-content: stretch !important;
-  gap: 9px !important;
-  border-radius: 15px !important;
-  overflow: hidden !important;
-  color: rgba(255,255,255,.70) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  box-shadow: none !important;
-  transform: translate3d(0,0,0) !important;
-  transition:
-    color 150ms ease,
-    background-color 150ms ease,
-    border-color 150ms ease !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem:hover,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem:hover{
-  color: #fff !important;
-  background: rgba(255,255,255,.045) !important;
-  border-color: rgba(255,255,255,.065) !important;
-  transform: translate3d(0,0,0) !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem.active,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem.active{
-  color: #fff !important;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), .14), rgba(var(--accent-rgb), .055)),
-    rgba(255,255,255,.018) !important;
-  border-color: rgba(var(--accent-rgb), .22) !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .05) !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navIcon,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navIcon{
-  width: 42px !important;
-  height: 42px !important;
-  min-width: 42px !important;
-  display: grid !important;
-  place-items: center !important;
-  margin: 0 !important;
-  color: currentColor !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navIcon svg,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navIcon svg,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navLucideIcon,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navLucideIcon{
-  width: 22px !important;
-  height: 22px !important;
-  color: currentColor !important;
-  stroke: currentColor !important;
-  filter: none !important;
-  transform: none !important;
-}
 
 
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .logoWrap h1,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .logoWrap p,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap h1,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap p{
-  opacity: 0 !important;
-  visibility: hidden !important;
-  transform: translate3d(-8px,0,0) !important;
-  pointer-events: none !important;
-  transition:
-    opacity 90ms ease,
-    transform 180ms var(--lt-sidebar-fast),
-    visibility 0ms linear 95ms !important;
-}
 
 
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap h1,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap p,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap h1,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap p{
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translate3d(0,0,0) !important;
-  pointer-events: auto !important;
-  transition:
-    opacity 190ms ease 170ms,
-    transform 260ms var(--lt-sidebar-ease) 140ms,
-    visibility 0ms linear !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText{
-  display: block !important;
-  min-width: 0 !important;
-  max-width: 154px !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText strong,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText small,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText strong,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText small{
-  display: block !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
 
 
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarBottom,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarBottom{
-  display: grid !important;
-  place-items: center !important;
-  padding-inline: 0 !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .importMainAction,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAction{
-  width: 48px !important;
-  min-width: 48px !important;
-  max-width: 48px !important;
-  height: 46px !important;
-  padding: 0 !important;
-  margin-inline: auto !important;
-  display: inline-grid !important;
-  place-items: center !important;
-  gap: 0 !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
-  color: transparent !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  border-radius: 15px !important;
-  transition:
-    width 310ms var(--lt-sidebar-ease),
-    max-width 310ms var(--lt-sidebar-ease),
-    padding 270ms var(--lt-sidebar-ease),
-    color 90ms ease,
-    font-size 90ms ease,
-    background-color 150ms ease,
-    box-shadow 150ms ease !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .importMainAction .buttonInlineIcon,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAction .buttonInlineIcon{
-  width: 18px !important;
-  height: 18px !important;
-  margin: 0 !important;
-  color: #fff !important;
-  opacity: 1 !important;
-  flex: 0 0 auto !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .importMainAction,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .importMainAction{
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  height: 46px !important;
-  padding: 0 14px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  font-size: 13px !important;
-  line-height: 1 !important;
-  color: rgba(5, 3, 8, .92) !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarResizeHandle,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarResizeHandle{
-  display: none !important;
-}
 
 
-main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel
-){
-  transition-property: background-color, border-color, opacity !important;
-  filter: none !important;
-}
-
-@media (max-width: 900px){
-  main.app.app[data-sidebar-behavior="hover"] > .appShell,
-  main.app.app[data-sidebar-behavior="slim"] > .appShell{
-    grid-template-columns: var(--lt-sidebar-closed) minmax(0, 1fr) !important;
-  }
-
-  main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
-  main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar{
-    width: var(--lt-sidebar-closed) !important;
-    min-width: var(--lt-sidebar-closed) !important;
-    max-width: var(--lt-sidebar-closed) !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce){
-  main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
-  main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
-  main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
-  main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
-    transition: none !important;
-  }
-}
 
 
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
-  transition:
-    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    min-width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 180ms ease,
-    border-color 180ms ease,
-    background-color 180ms ease !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap h1,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .logoWrap p{
-  transition:
-    opacity 140ms ease 80ms,
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0ms linear 220ms !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap h1,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .logoWrap p,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap h1,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .logoWrap p{
-  transition:
-    opacity 180ms ease 130ms,
-    transform 240ms cubic-bezier(0.16, 1, 0.3, 1) 110ms,
-    visibility 0ms linear 0ms !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAction{
-  transition:
-    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    padding 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    color 120ms ease 70ms,
-    font-size 0ms linear 70ms,
-    background-color 150ms ease,
-    box-shadow 150ms ease !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .importMainAction,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .importMainAction{
-  transition:
-    width 320ms cubic-bezier(0.16, 1, 0.3, 1),
-    max-width 320ms cubic-bezier(0.16, 1, 0.3, 1),
-    padding 280ms cubic-bezier(0.16, 1, 0.3, 1),
-    color 120ms ease 120ms,
-    font-size 0ms linear 120ms,
-    background-color 150ms ease,
-    box-shadow 150ms ease !important;
-}
 
 
-.app :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem
-){
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.app :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumTrackRowV318, .spotifyTrackItem, .downloadQueueItem){
   contain: layout paint;
   transform: translateZ(0);
   backface-visibility: hidden;
   will-change: transform;
 }
 
-.app :is(
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly,
-  .albumCardV318,
-  .playlistCard
-){
+.app :is(.homeFreshCard, .homeListenCard, .coverGalleryCard, .coverGalleryCardCleanOnly, .albumCardV318, .playlistCard){
   contain: layout paint style;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-.app :is(
-  .libraryList,
-  .playlistSongList,
-  .coverSongList,
-  .spotifyTrackItems,
-  .downloadQueueList,
-  .coverGalleryViewport
-){
+.app :is(.libraryList, .playlistSongList, .coverSongList, .spotifyTrackItems, .downloadQueueList, .coverGalleryViewport){
   contain: layout style paint;
   overscroll-behavior: contain;
   transform: translateZ(0);
@@ -1019,98 +542,30 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
 }
 
 
-.app.isScrolling :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem,
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly
-){
+.app.isScrolling :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumTrackRowV318, .spotifyTrackItem, .downloadQueueItem, .homeFreshCard, .homeListenCard, .coverGalleryCard, .coverGalleryCardCleanOnly){
   transition-property: background-color, border-color, opacity, transform !important;
   transition-duration: 90ms !important;
 }
 
 
-body.localtifyPerfV303 .app.isScrolling :is(
-  .coverGalleryImageCleanOnly,
-  .coverGalleryImagePlaceholderCleanOnly,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .playerBar::before,
-  .playerBar::after
-),
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(
-  .coverAura,
-  .coverAura::before,
-  .coverAura::after,
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .homeAlbumArt::before,
-  .homeFreshCover::before,
-  .songArt::before,
-  .playerBar::before,
-  .playerBar::after,
-  .coverGalleryImageCleanOnly
-){
+body.localtifyPerfV303 .app.isScrolling :is(.coverGalleryImageCleanOnly, .coverGalleryImagePlaceholderCleanOnly, .homeListenBackground, .homeListenBackgroundImage, .playerBar::before, .playerBar::after),
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(.coverAura, .coverAura::before, .coverAura::after, .heroAmbiencePulse, .homeListenBackground, .homeListenBackgroundImage, .homeFreshCover::before, .songArt::before, .playerBar::before, .playerBar::after, .coverGalleryImageCleanOnly){
   filter: revert !important;
 }
 
 
-main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly,
-  .spotifyTrackItem
-){
-  transition-property: background-color, border-color, opacity, transform !important;
-  contain: paint style;
-}
-
-main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
-  .homeListenCard img,
-  .homeFreshCard img,
-  .homeAlbumCard img,
-  .coverGalleryCard img,
-  .coverGalleryCardCleanOnly img,
-  .homeListenBackgroundImage
-){
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
 
 
-.app :is(
-  .heroAmbiencePulse,
-  .homeListenBackgroundImage,
-  .playerBar::before,
-  .playerBar::after,
-  .coverAura::before,
-  .coverAura::after
-){
+
+
+
+.app :is(.heroAmbiencePulse, .homeListenBackgroundImage, .playerBar::before, .playerBar::after, .coverAura::before, .coverAura::after){
   backface-visibility: hidden;
   transform: translateZ(0);
 }
 
 
-.app :is(
-  .songRow.playing .songArt.coverAura,
-  .libraryRow.playing .songArt.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura
-){
+.app :is(.songRow.playing .songArt.coverAura, .libraryRow.playing .songArt.coverAura, .playlistTrackRow.playing .playlistTrackCover, .playlistSongRow.playing .playlistTrackCover, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura){
   position: relative !important;
   isolation: isolate !important;
   contain: layout paint style !important;
@@ -1120,15 +575,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
 }
 
 
-.app :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem
-){
+.app :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumTrackRowV318, .spotifyTrackItem, .downloadQueueItem){
   contain: layout paint !important;
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -1136,280 +583,19 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
 }
 
 
-.app.isScrolling :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem,
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly
-){
+.app.isScrolling :is(.songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumTrackRowV318, .spotifyTrackItem, .downloadQueueItem, .homeFreshCard, .homeListenCard, .coverGalleryCard, .coverGalleryCardCleanOnly){
   transition-property: background-color, border-color, opacity, transform !important;
   transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
 
-body.localtifyPerfV303 .app.isScrolling :is(
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .coverGalleryImageCleanOnly,
-  .playerBar::before,
-  .playerBar::after
-),
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .homeAlbumArt::before,
-  .homeFreshCover::before,
-  .playerBar::before,
-  .playerBar::after,
-  .coverGalleryImageCleanOnly
-){
+body.localtifyPerfV303 .app.isScrolling :is(.homeListenBackground, .homeListenBackgroundImage, .coverGalleryImageCleanOnly, .playerBar::before, .playerBar::after),
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeListenBackground, .homeListenBackgroundImage, .homeFreshCover::before, .playerBar::before, .playerBar::after, .coverGalleryImageCleanOnly){
   filter: revert !important;
   backdrop-filter: revert !important;
   -webkit-backdrop-filter: revert !important;
 }
 
-main.app.app > .appShell > .sidebar .navItemAnimatedV468,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468:hover,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468.active,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468:hover,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468.active{
-  position: relative !important;
-  overflow: visible !important;
-  isolation: isolate !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468::before,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468::after{
-  content: none !important;
-  display: none !important;
-}
-
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navDiscordPillV468{
-  position: absolute !important;
-  left: -23px !important;
-  top: 50% !important;
-  z-index: 20 !important;
-  width: 5px !important;
-  height: 8px !important;
-  border-radius: 0 999px 999px 0 !important;
-  background: #fff !important;
-  opacity: 0 !important;
-  transform: translate3d(0,-50%,0) scaleY(.25) !important;
-  transform-origin: left center !important;
-  pointer-events: none !important;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.08),
-    0 0 14px rgba(255,255,255,.24) !important;
-  transition:
-    height 170ms cubic-bezier(.16, 1, .3, 1),
-    opacity 120ms ease,
-    transform 170ms cubic-bezier(.16, 1, .3, 1) !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover .navDiscordPillV468,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible .navDiscordPillV468{
-  height: 18px !important;
-  opacity: .74 !important;
-  transform: translate3d(0,-50%,0) scaleY(1) !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navDiscordPillV468{
-  height: 36px !important;
-  opacity: 1 !important;
-  transform: translate3d(0,-50%,0) scaleY(1) !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active:hover .navDiscordPillV468,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active:focus-visible .navDiscordPillV468{
-  height: 42px !important;
-}
-
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIcon,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navText strong{
-  color: #fff !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navText small{
-  color: rgba(255,255,255,.58) !important;
-}
-
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIcon{
-  position: relative !important;
-  overflow: visible !important;
-  display: grid !important;
-  place-items: center !important;
-  color: currentColor !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
-  width: 24px !important;
-  height: 24px !important;
-  display: grid !important;
-  place-items: center !important;
-  transform-origin: 50% 50% !important;
-  will-change: transform !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon{
-  display: block !important;
-  opacity: .92 !important;
-  transform-origin: 50% 50% !important;
-  transform-box: fill-box !important;
-  overflow: visible !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover .navLucideIcon :is(path, circle, rect, line, polyline, polygon),
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
-  animation: localtifyNavStrokeDrawV468 560ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-home:hover .navIconMotionV468{
-  animation: localtifyNavHomeV468 620ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-library:hover .navIconMotionV468{
-  animation: localtifyNavLibraryV468 660ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-albums:hover .navIconMotionV468{
-  animation: localtifyNavDiscV468 780ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-playlists:hover .navIconMotionV468{
-  animation: localtifyNavPlaylistV468 620ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-liked:hover .navIconMotionV468{
-  animation: localtifyNavHeartV468 700ms cubic-bezier(.18, .9, .2, 1.1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-covers:hover .navIconMotionV468{
-  animation: localtifyNavCoversV468 640ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-analytics:hover .navIconMotionV468{
-  animation: localtifyNavAnalyticsV468 680ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-downloads:hover .navIconMotionV468{
-  animation: localtifyNavDownloadV468 700ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.nav-settings:hover .navIconMotionV468{
-  animation: localtifyNavSettingsV468 820ms cubic-bezier(.16, 1, .3, 1) both !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV468{
-  transform: translate3d(0,-1px,0) scale(1.045) !important;
-}
-
-@keyframes localtifyNavStrokeDrawV468{
-  0%{ stroke-dasharray: 0 42; stroke-dashoffset: 42; opacity: .38; }
-  60%{ stroke-dasharray: 34 42; stroke-dashoffset: 0; opacity: 1; }
-  100%{ stroke-dasharray: 42 0; stroke-dashoffset: 0; opacity: 1; }
-}
-
-@keyframes localtifyNavHomeV468{
-  0%{ transform: translate3d(0,0,0) scale(1); }
-  35%{ transform: translate3d(0,-4px,0) scale(1.14); }
-  65%{ transform: translate3d(0,1px,0) scale(.98); }
-  100%{ transform: translate3d(0,0,0) scale(1.045); }
-}
-
-@keyframes localtifyNavLibraryV468{
-  0%{ transform: rotate(0deg) translate3d(0,0,0); }
-  32%{ transform: rotate(-7deg) translate3d(-2px,0,0); }
-  58%{ transform: rotate(6deg) translate3d(2px,0,0); }
-  100%{ transform: rotate(0deg) translate3d(0,0,0) scale(1.045); }
-}
-
-@keyframes localtifyNavDiscV468{
-  0%{ transform: rotate(0deg) scale(1); }
-  54%{ transform: rotate(230deg) scale(1.13); }
-  100%{ transform: rotate(360deg) scale(1.045); }
-}
-
-@keyframes localtifyNavPlaylistV468{
-  0%{ transform: translate3d(0,0,0); }
-  25%{ transform: translate3d(5px,0,0); }
-  50%{ transform: translate3d(-3px,0,0); }
-  74%{ transform: translate3d(2px,0,0); }
-  100%{ transform: translate3d(0,0,0) scale(1.045); }
-}
-
-@keyframes localtifyNavHeartV468{
-  0%{ transform: scale(1); }
-  22%{ transform: scale(1.30); }
-  44%{ transform: scale(.92); }
-  66%{ transform: scale(1.16); }
-  100%{ transform: scale(1.045); }
-}
-
-@keyframes localtifyNavCoversV468{
-  0%{ transform: translate3d(0,0,0) rotate(0deg) scale(1); }
-  35%{ transform: translate3d(3px,-3px,0) rotate(5deg) scale(1.12); }
-  70%{ transform: translate3d(-1px,1px,0) rotate(-3deg) scale(.98); }
-  100%{ transform: translate3d(0,0,0) rotate(0deg) scale(1.045); }
-}
-
-@keyframes localtifyNavAnalyticsV468{
-  0%{ transform: translate3d(0,0,0) scaleY(1); }
-  32%{ transform: translate3d(0,-3px,0) scaleY(1.22); }
-  62%{ transform: translate3d(0,1px,0) scaleY(.92); }
-  100%{ transform: translate3d(0,0,0) scaleY(1.045); }
-}
-
-@keyframes localtifyNavDownloadV468{
-  0%{ transform: translate3d(0,0,0); }
-  30%{ transform: translate3d(0,6px,0) scale(.95); }
-  60%{ transform: translate3d(0,-3px,0) scale(1.10); }
-  100%{ transform: translate3d(0,0,0) scale(1.045); }
-}
-
-@keyframes localtifyNavSettingsV468{
-  0%{ transform: rotate(0deg) scale(1); }
-  48%{ transform: rotate(120deg) scale(1.10); }
-  100%{ transform: rotate(180deg) scale(1.045); }
-}
-
-@media (prefers-reduced-motion: reduce){
-  main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468,
-  main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover .navIconMotionV468,
-  main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
-    animation: none !important;
-    transform: none !important;
-    stroke-dasharray: none !important;
-    stroke-dashoffset: 0 !important;
-  }
-
-  main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navDiscordPillV468{
-    transition: none !important;
-  }
-}
 
 
 .app[data-platform="linux"]{
@@ -1490,22 +676,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   background: rgba(var(--accent-rgb), .64) !important;
 }
 
-.app[data-platform="linux"] :is(
-  .panel,
-  .settingsHero,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .libraryPanelV025,
-  .downloadPanel,
-  .downloadPanelV031,
-  .spotifyFlowPanelV256,
-  .albumFolderImportPanelV308,
-  .albumFolderImportPanelV309,
-  .modalWrap,
-  .editorModal,
-  .playerBar,
-  .sidebar
-){
+.app[data-platform="linux"] :is(.panel, .settingsHero, .settingsPanelCard, .settingsPageCard, .libraryPanelV025, .downloadPanel, .downloadPanelV031, .spotifyFlowPanelV256, .albumFolderImportPanelV308, .albumFolderImportPanelV309, .modalWrap, .editorModal, .playerBar){
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -1532,15 +703,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   transform: translateZ(0) scale(1.025) !important;
 }
 
-.app[data-platform="linux"][data-playing="on"] :is(
-  .songRow.playing .songArt.coverAura,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .libraryRow.playing .songArt.coverAura
-)::before{
+.app[data-platform="linux"][data-playing="on"] :is(.songRow.playing .songArt.coverAura, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura, .playlistTrackRow.playing .playlistTrackCover, .playlistSongRow.playing .playlistTrackCover, .libraryRow.playing .songArt.coverAura)::before{
   opacity: .18 !important;
   filter: blur(10px) saturate(1.06) !important;
 }
@@ -1556,8 +719,8 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 
 @media (prefers-reduced-motion: reduce){
   .app[data-platform="linux"] *,
-  .app[data-platform="linux"] *::before,
-  .app[data-platform="linux"] *::after{
+.app[data-platform="linux"] *::before,
+.app[data-platform="linux"] *::after{
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
@@ -2006,14 +1169,12 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 }
 
 .app .homeFreshRail,
-.app .homeAlbumGrid,
 .app .homeSongList{
   contain: layout paint style !important;
 }
 
 .app .homeFreshCard,
 .app .homeListenCard,
-.app .homeAlbumCard,
 .app .songRow,
 .app .libraryRow{
   content-visibility: auto;
@@ -2022,7 +1183,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 
 .app .homeFreshCard :is(img, .coverAura),
 .app .homeListenCard :is(img, .coverAura),
-.app .homeAlbumCard :is(img, .coverAura),
 .app .songRow :is(img, .coverAura),
 .app .libraryRow :is(img, .coverAura){
   transform: translateZ(0);
@@ -2031,7 +1191,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 
 .app .homeFreshRail,
 .app .homeListenGrid,
-.app .homeAlbumGrid,
 .app .libraryList,
 .app .albumShelfGridV318,
 .app .playlistTrackList,
@@ -2043,7 +1202,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 
 .app .homeFreshCard,
 .app .homeListenCard,
-.app .homeAlbumCard,
 .app .songRow,
 .app .libraryRow,
 .app .playlistTrackRow,
@@ -2055,13 +1213,13 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   contain: layout paint style;
 }
 
-.app :is(.homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumCardV318, .coverGalleryCardCleanOnly) img{
+.app :is(.homeFreshCard, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumCardV318, .coverGalleryCardCleanOnly) img{
   content-visibility: auto;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-.app :is(.localtifyProximityTarget, .homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
+.app :is(.localtifyProximityTarget, .homeFreshCard, .homeListenCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
   will-change: auto;
 }
 
@@ -2125,42 +1283,17 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   color: rgba(255,255,255,.94) !important;
 }
 
-.app[data-platform="linux"] :is(
-  .content,
-  .sidebar,
-  .pageTransition,
-  .songList,
-  .libraryList,
-  .albumTrackListV318,
-  .downloadQueueList,
-  .spotifyTrackItems,
-  .playlistTrackList,
-  .settingsContent
-){
+.app[data-platform="linux"] :is(.content, .pageTransition, .songList, .libraryList, .albumTrackListV318, .downloadQueueList, .spotifyTrackItems, .playlistTrackList, .settingsContent){
   scrollbar-width: thin;
   scrollbar-color: rgba(var(--lt-accent-rgb), .34) rgba(255,255,255,.055);
 }
 
-.app[data-platform="linux"] :is(
-  .songRow,
-  .libraryRow,
-  .albumTrackRowV318,
-  .downloadQueueItem,
-  .spotifyTrackItem,
-  .playlistTrackRow
-){
+.app[data-platform="linux"] :is(.songRow, .libraryRow, .albumTrackRowV318, .downloadQueueItem, .spotifyTrackItem, .playlistTrackRow){
   backface-visibility: hidden;
   transform: translate3d(0,0,0);
 }
 
-.app[data-platform="linux"] :is(
-  .songRow,
-  .libraryRow,
-  .albumTrackRowV318,
-  .downloadQueueItem,
-  .spotifyTrackItem,
-  .playlistTrackRow
-):not(:hover):not(.active):not(.playing):not(:focus-visible){
+.app[data-platform="linux"] :is(.songRow, .libraryRow, .albumTrackRowV318, .downloadQueueItem, .spotifyTrackItem, .playlistTrackRow):not(:hover):not(.active):not(.playing):not(:focus-visible){
   will-change: auto !important;
 }
 
@@ -2178,75 +1311,27 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   isolation: isolate;
 }
 
-body.localitfyThemePainting .app :where(.settingsChoice,
-  .settingsThemeCard,
-  .homeAlbumCard,
-  .albumCardV318,
-  .themeTokenCard,
-  .coverAura,
-  .playerBar,
-  .sidebar,
-  .heroPanel),
-body.isResizingPlayer .app :where(.settingsChoice,
-  .settingsThemeCard,
-  .homeAlbumCard,
-  .albumCardV318,
-  .themeTokenCard,
-  .coverAura,
-  .playerBar,
-  .sidebar,
-  .heroPanel),
-body.isResizingSidebar .app :where(.settingsChoice,
-  .settingsThemeCard,
-  .homeAlbumCard,
-  .albumCardV318,
-  .themeTokenCard,
-  .coverAura,
-  .playerBar,
-  .sidebar,
-  .heroPanel),
-body.localtifyFocusRecovering .app :where(.settingsChoice,
-  .settingsThemeCard,
-  .homeAlbumCard,
-  .albumCardV318,
-  .themeTokenCard,
-  .coverAura,
-  .playerBar,
-  .sidebar,
-  .heroPanel){
+body.localitfyThemePainting .app :where(.settingsChoice, .settingsThemeCard, .albumCardV318, .themeTokenCard, .coverAura, .playerBar, .heroPanel),
+body.isResizingPlayer .app :where(.settingsChoice, .settingsThemeCard, .albumCardV318, .themeTokenCard, .coverAura, .playerBar, .heroPanel),
+body.isResizingSidebar .app :where(.settingsChoice, .settingsThemeCard, .albumCardV318, .themeTokenCard, .coverAura, .playerBar, .heroPanel),
+body.localtifyFocusRecovering .app :where(.settingsChoice, .settingsThemeCard, .albumCardV318, .themeTokenCard, .coverAura, .playerBar, .heroPanel){
   transition-duration: 80ms !important;
   animation-duration: 80ms !important;
 }
 
-body.localtifyBackgroundMode .app :where(.catBuddy,
-  .catBuddyShell,
-  .coverAura::before,
-  .coverAura::after,
-  .albumCardSheenV318,
-  .heroAnimatedStarLayer,
-  .backgroundStarLayer,
-  .ambientLayer,
-  .appGlowLayer){
+body.localtifyBackgroundMode .app :where(.catBuddy, .catBuddyShell, .coverAura::before, .coverAura::after, .albumCardSheenV318, .heroAnimatedStarLayer, .backgroundStarLayer, .ambientLayer, .appGlowLayer){
   animation-play-state: paused !important;
 }
 
-.app[data-card-background="solid"] :where(.homeAlbumCard,
-  .albumCardV318,
-  .settingsPageCard,
-  .settingsPanelCard),
-body.localtifyNoMoreBlur .app :where(.homeAlbumCard,
-  .albumCardV318,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .albumDetailPanelV318,
-  .albumShelfPanelV318){
+.app[data-card-background="solid"] :where(.albumCardV318, .settingsPageCard, .settingsPanelCard),
+body.localtifyNoMoreBlur .app :where(.albumCardV318, .settingsPageCard, .settingsPanelCard, .albumDetailPanelV318, .albumShelfPanelV318){
   backdrop-filter: none !important;
 }
 
 @media (prefers-reduced-motion: reduce){
   .app *,
-  .app *::before,
-  .app *::after{
+.app *::before,
+.app *::after{
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
@@ -2255,6 +1340,6 @@ body.localtifyNoMoreBlur .app :where(.homeAlbumCard,
 }
 
 /* Theme-change transitions for effect-bearing surfaces */
-.app[data-custom-theme="true"] :where(.homeAlbumCard,.settingsPageCard,.settingsPanelCard,.homeShelfPanel,.homeListenPanel,.homeFreshPanel,.homeLibraryPanel,.playerBar){
+.app[data-custom-theme="true"] :where(.settingsPageCard, .settingsPanelCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .playerBar){
   transition-property: border-color, background, box-shadow, opacity, transform, filter !important;
 }

@@ -1264,19 +1264,9 @@ body.localitfySongDragging .songRow{
   height: 3px;
 }
 
-.homeAlbumCard.songDropTarget[data-drop-side="before"]::before{
-  top: 12px;
-  bottom: 12px;
-  left: -4px;
-  width: 3px;
-}
 
-.homeAlbumCard.songDropTarget[data-drop-side="after"]::before{
-  top: 12px;
-  bottom: 12px;
-  right: -4px;
-  width: 3px;
-}
+
+
 
 body.isResizingSidebar .ambientSurface::before{
   animation: none !important;
@@ -1284,9 +1274,7 @@ body.isResizingSidebar .ambientSurface::before{
   filter: none !important;
 }
 
-body.isResizingSidebar .homeAlbumCard{
-  transition: none !important;
-}
+
 
 body.isResizingSidebar{
   text-rendering: optimizeSpeed;
@@ -1305,11 +1293,11 @@ body.isResizingSidebar{
     opacity 150ms ease !important;
 }
 
-.app button:hover{
+.app button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):hover{
   transform: translateY(-1px) translateZ(0);
 }
 
-.app button:active{
+.app button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):active{
   transform: translateY(0) scale(0.985) translateZ(0);
 }
 
@@ -1372,7 +1360,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   border-color: var(--flat-border-strong) !important;
 }
 
-.app.flatNoGradientUI .sidebarNav button,
 .app.flatNoGradientUI .navButton,
 .app.flatNoGradientUI .iconAction,
 .app.flatNoGradientUI .pillButton,
@@ -1390,7 +1377,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   box-shadow: none !important;
 }
 
-.app.flatNoGradientUI .sidebarNav button:hover,
 .app.flatNoGradientUI .navButton:hover,
 .app.flatNoGradientUI .iconAction:hover,
 .app.flatNoGradientUI .pillButton:hover,
@@ -1402,9 +1388,7 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   background-image: none !important;
 }
 
-.app.flatNoGradientUI .sidebarNav button.active,
 .app.flatNoGradientUI .navButton.active,
-.app.flatNoGradientUI .homeAlbumCard.active,
 .app.flatNoGradientUI .songRow.active,
 .app.flatNoGradientUI .themeItem.active,
 .app.flatNoGradientUI .iconAction.liked,
@@ -1421,19 +1405,13 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   z-index: 4 !important;
 }
 
-.app.flatNoGradientUI .homeAlbumCard:hover{
-  transform: translate3d(0, -1px, 0) !important;
-  border-color: rgba(var(--lt-accent-rgb), 0.42) !important;
-}
+
 
 .app.flatNoGradientUI.themeSettling *{
   transition-duration: 1ms !important;
 }
 
-.app.flatNoGradientUI .homeAlbumArt{
-  background-image: none;
-  filter: none;
-}
+
 
 .cleanToggleLabel{ display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); font-size: 12px; font-weight: 800; text-transform: lowercase; }
 .cleanToggleLabel input{ width: 16px; height: 16px; accent-color: rgb(var(--lt-accent-rgb)); }
@@ -1449,14 +1427,10 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .whatsNewClose{ position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.05); color: rgba(255,255,255,.7); cursor: pointer; }
 @keyframes whatsNewFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes whatsNewPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@media (max-width: 980px){
-   }
 
 
-@media (max-width: 860px){
 
 
-}
 
 .whatsNewOverlay{
   background: rgba(0, 0, 0, 0.68);
@@ -2288,15 +2262,7 @@ input[type="range"]{
   }
 }
 
-.app{
-  --shell-sidebar-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --shell-sidebar-soft: color-mix(in oklab, var(--lt-accent) 5%, transparent);
-  --shell-sidebar-hover: color-mix(in oklab, var(--lt-accent) 11%, transparent);
-  --shell-sidebar-active: color-mix(in oklab, var(--lt-accent) 16%, transparent);
-  --shell-sidebar-line: color-mix(in oklab, var(--lt-accent) 24%, transparent);
-  --shell-sidebar-text: color-mix(in oklab, var(--lt-text) 84%, var(--lt-accent) 16%);
-  --shell-sidebar-muted: color-mix(in oklab, var(--lt-muted) 82%, var(--lt-accent) 18%);
-}
+
 
 .sidebarModeSwitch{
   min-height: 34px;
@@ -2341,27 +2307,7 @@ input[type="range"]{
   transform: translateY(-1px);
 }
 
-.navIcon{
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  color: color-mix(in oklab, var(--lt-accent) 72%, var(--lt-text) 28%);
-  background: color-mix(in oklab, var(--lt-accent) 9%, transparent);
-  border: 1px solid color-mix(in oklab, var(--lt-accent) 12%, transparent);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--lt-text) 6%, transparent);
-  transition:
-    color 220ms ease,
-    background 220ms ease,
-    border-color 220ms ease,
-    transform 220ms var(--shell-sidebar-ease),
-    box-shadow 220ms ease,
-    filter 220ms ease;
-}
+
 
 .mainAction{
   min-height: 50px !important;
@@ -2383,10 +2329,7 @@ input[type="range"]{
 @media (max-width: 920px){
 
 
-  .navIcon{
-    width: 36px;
-    height: 36px;
-  }
+  
 
   .mainAction{
     min-height: 46px !important;
@@ -2418,39 +2361,12 @@ input[type="range"]{
   filter: none !important;
 }
 
-.navIcon{
-  width: 34px !important;
-  height: 34px !important;
-  display: grid !important;
-  place-items: center !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  color: color-mix(in oklab, var(--lt-accent) 70%, var(--lt-text) 30%) !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  font-size: 23px !important;
-  font-weight: 920 !important;
-  line-height: 1 !important;
-  transform: none !important;
-  filter: none !important;
-  transition:
-    color 190ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 190ms ease,
-    text-shadow 190ms ease !important;
-}
 
-@media (max-width: 920px){
 
-  .navIcon{
-    width: 34px !important;
-    height: 34px !important;
-    font-size: 23px !important;
-  }
-}
+
 
 .app{
-  --shell-sidebar-width: var(--sidebar-width-live, var(--sidebar-width, 236px));
+  
   --shell-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --shell-hover-bg: color-mix(in oklab, var(--lt-accent) 9%, transparent);
   --shell-active-bg: color-mix(in oklab, var(--lt-accent) 13%, transparent);
@@ -2462,29 +2378,7 @@ input[type="range"]{
   display: none !important;
 }
 
-.navIcon{
-  width: 36px !important;
-  height: 36px !important;
-  display: grid !important;
-  place-items: center !important;
-  color: color-mix(in oklab, var(--lt-accent) 74%, var(--lt-text) 26%) !important;
-  background: transparent !important;
-  background-image: none !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  font-size: 23px !important;
-  line-height: 1 !important;
-  font-weight: 700 !important;
-  opacity: .9 !important;
-  transform: none !important;
-  filter: none !important;
-  transition:
-    color 190ms var(--shell-motion-ease),
-    opacity 190ms var(--shell-motion-ease),
-    text-shadow 190ms var(--shell-motion-ease),
-    transform 190ms var(--shell-motion-ease) !important;
-}
+
 
 @keyframes localtifyShellPageIn{
   0%{
@@ -2538,26 +2432,9 @@ body{
   stroke: currentColor !important;
 }
 
-.navIcon{
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  display: grid !important;
-  place-items: center !important;
-  color: color-mix(in oklab, var(--lt-accent) 72%, var(--lt-text)) !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  filter: drop-shadow(0 0 6px rgba(var(--lt-accent-rgb), 0.16));
-}
 
-.navLucideIcon{
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  stroke: currentColor !important;
-}
+
+
 
 .iconTextButton{
   display: inline-flex !important;
@@ -2588,34 +2465,11 @@ body{
   letter-spacing: -0.018em;
 }
 
-.app .navIcon{
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  display: grid !important;
-  place-items: center !important;
-  color: color-mix(in oklab, var(--lt-accent) 76%, #ffffff 24%) !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
 
-.app .navLucideIcon{
-  display: block !important;
-  stroke: currentColor !important;
-  fill: currentColor !important;
-  fill-opacity: .16 !important;
-  stroke-width: 2.8 !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-}
 
-.app .navLucideIcon *{
-  stroke: currentColor !important;
-  fill: currentColor !important;
-  fill-opacity: .16 !important;
-}
+
+
+
 
 .app .songList{
   overflow-x: hidden !important;
@@ -2656,7 +2510,6 @@ body{
 
 .app .songRow,
 .app .topRow,
-.app .homeAlbumCard,
 .app .simpleAlbumCard,
 .app .songArt,
 .app .heroArt,
@@ -2674,38 +2527,11 @@ body{
   transform: none !important;
 }
 
-.app .navIcon{
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  display: grid !important;
-  place-items: center !important;
-  color: color-mix(in oklab, var(--lt-accent) 76%, #ffffff 24%) !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  filter: none !important;
-  transform: none !important;
-}
 
-.app .navLucideIcon{
-  display: block !important;
-  stroke: currentColor !important;
-  fill: currentColor !important;
-  fill-opacity: .10 !important;
-  stroke-width: 2.05 !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-  filter: none !important;
-}
 
-.app .navLucideIcon *{
-  stroke: currentColor !important;
-  fill: currentColor !important;
-  fill-opacity: .10 !important;
-  stroke-width: 2.05 !important;
-}
+
+
+
 
 .app{
   --control-circle: 42px;
@@ -2720,10 +2546,7 @@ body{
   -webkit-backdrop-filter: blur(18px);
 }
 
-.navLucideIcon{
-  fill: none !important;
-  stroke-width: 2.1;
-}
+
 
 .settingsThemeGrid{
   display: grid;
@@ -3062,7 +2885,7 @@ button,
     filter 150ms ease !important;
 }
 
-button:hover,
+button:not(.navItem):not(.homeAlbumPlayZone):not(.homeAlbumActionButton):hover,
 .button:hover,
 .iconButton:hover,
 .circleButton:hover:not(.playerBar *),
@@ -3101,11 +2924,7 @@ button:hover,
       var(--lt-bg, #050505) 100%) !important;
 }
 
-.app[data-theme] .navIcon{
-  color: #ffffff !important;
-  stroke: #ffffff !important;
-  fill: none !important;
-}
+
 
 .importButton{
   min-height: 40px !important;
@@ -3139,10 +2958,7 @@ button:hover,
   contain: layout style;
 }
 
-@supports (content-visibility: auto){
 
-
-}
 
 .app .songRow{
   backface-visibility: hidden;
@@ -3167,9 +2983,7 @@ button:hover,
     contain-intrinsic-size: 54px;
   }
 
-  .app .homeAlbumGrid .homeAlbumCard{
-    contain-intrinsic-size: 230px 290px;
-  }
+  
 
 }
 
@@ -3224,132 +3038,42 @@ body.localitfyThemePainting .app *{
   transform: translate3d(0, -1px, 0);
 }
 
-.navMain{
-  flex: 0 0 auto;
-}
 
-.navDivider{
-  width: calc(100% - 18px);
-  height: 1px;
-  margin: 9px auto 11px;
-  flex: 0 0 auto;
-  background: linear-gradient(90deg, transparent, var(--sidebar-line), transparent);
-  opacity: 0.95;
-}
 
-.sidebarBottom{
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--sidebar-line);
-  display: grid;
-  gap: 10px;
-}
 
-.navIcon{
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  color: currentColor;
-  opacity: 0.92;
-}
 
-.navLucideIcon{
-  display: block;
-  transform: none !important;
-  rotate: 0deg !important;
-  fill: none !important;
-  filter: none !important;
-}
+
+
+
+
+
 
 .buttonInlineIcon{
   transform: none !important;
   rotate: 0deg !important;
 }
 
-.navMain{
-  gap: 10px;
-}
 
-.navIcon{
-  width: 35px;
-  height: 35px;
-  min-width: 35px;
-  color: currentColor;
-}
 
-.navLucideIcon{
-  width: 25px !important;
-  height: 25px !important;
-  stroke-width: 2.55 !important;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 10px rgba(var(--lt-accent-rgb), 0.10));
-}
 
-.navDivider{
-  height: 1px !important;
-  width: calc(100% - 28px) !important;
-  margin-left: 14px !important;
-  margin-right: 14px !important;
-  background: linear-gradient(90deg, var(--sidebar-line-soft), rgba(var(--lt-accent-rgb), 0.18), var(--sidebar-line-soft)) !important;
-  -webkit-mask-image: none !important;
-  mask-image: none !important;
-  opacity: 1 !important;
-}
 
-.navDivider{
-  margin-top: 18px !important;
-  margin-bottom: 18px !important;
-}
 
-.sidebarBottom::before{
-  content: "";
-  display: block;
-  margin-bottom: 16px;
-}
 
-.mainAction.importMainAction{
-  border: 0;
-  background: linear-gradient(135deg, var(--lt-accent), color-mix(in srgb, var(--lt-accent) 58%, #ffffff 42%));
-  color: #06080c;
-  box-shadow: 0 14px 30px rgba(var(--lt-accent-rgb), 0.18);
-}
 
-.mainAction.importMainAction:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 18px 38px rgba(var(--lt-accent-rgb), 0.26);
-}
 
-.app .navIcon{
-  width: 33px !important;
-  height: 33px !important;
-  min-width: 33px !important;
-  display: grid !important;
-  place-items: center !important;
-  color: currentColor !important;
-}
 
-.app .navLucideIcon{
-  width: 22px !important;
-  height: 22px !important;
-  stroke: currentColor !important;
-  fill: currentColor !important;
-  fill-opacity: .22 !important;
-  stroke-width: 2.85 !important;
-  filter: drop-shadow(0 0 12px color-mix(in oklab, var(--lt-accent, #a98cff) 20%, transparent)) !important;
-}
 
-.app .navDivider{
-  width: calc(100% - 28px) !important;
-  height: 1px !important;
-  margin-left: 14px !important;
-  margin-right: 14px !important;
-  background: color-mix(in oklab, var(--lt-accent, #a98cff) 20%, rgba(255,255,255,.11)) !important;
-  opacity: 1 !important;
-  -webkit-mask-image: none !important;
-  mask-image: none !important;
-}
+
+
+
+
+
+
+
+
+
+
+
 
 html{
   background: var(--app-bg-solid, var(--lt-bg, #050505)) !important;
@@ -3429,10 +3153,8 @@ html{
 .homeHeroCard,
 .homeListenCard,
 .homeFreshCard,
-.homeAlbumCard,
 .songRow,
-.navButton,
-.sidebarAction{
+.navButton{
   transition-timing-function: var(--motion-smooth);
 }
 
@@ -3459,10 +3181,8 @@ html{
 .hero,
 .homeListenCard,
 .homeFreshCard,
-.homeAlbumCard,
 .songRow,
 .navButton,
-.sidebarAction,
 .transportButton{
   transition-timing-function: var(--motion-smooth);
 }
@@ -4532,7 +4252,6 @@ button svg,
 .panel,
 .sectionCard,
 .statCard,
-.sidebarItem,
 .iconButton,
 .circleButton,
 .primaryButton,
@@ -4726,13 +4445,7 @@ button{
   border-radius: 5px;
 }
 
-.navLucideIcon,
-.navItemIcon,
-.navIcon{
-  transform-origin: center;
-  transition: transform 260ms cubic-bezier(.22,.9,.28,1), color 220ms ease, opacity 220ms ease, filter 220ms ease;
 
-}
 
 @keyframes localtifyIconStrokeDraw{
   0%{ stroke-dashoffset: 34; opacity: .62; }
@@ -4768,45 +4481,13 @@ button{
   background-size: auto !important;
 }
 
-.navMain,
-.navUtility{
-  min-width: 0 !important;
-  overflow: visible !important;
-}
 
-.navIcon{
-  position: relative !important;
-  z-index: 1 !important;
-  overflow: visible !important;
-  flex: 0 0 auto !important;
-  transform-origin: center !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
 
-.navLucideIcon{
-  display: block !important;
-  overflow: visible !important;
-  fill: none !important;
-  fill-opacity: 0 !important;
-  stroke: currentColor !important;
-  stroke-width: 2.65 !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-}
 
-.navLucideIcon path,
-.navLucideIcon polyline,
-.navLucideIcon line,
-.navLucideIcon circle,
-.navLucideIcon rect{
-  fill: none !important;
-  fill-opacity: 0 !important;
-  stroke: currentColor !important;
-  stroke-dasharray: none !important;
-  stroke-dashoffset: 0 !important;
-}
+
+
+
+
 
 @keyframes localtifyNavIconSmoothHover{
   0%{ transform: translate3d(0,0,0) scale(1); }
@@ -5126,7 +4807,7 @@ body,
   background-size: auto !important;
 }
 
-body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.ambientParticle,.homePulse,.coverSpark,.softOrbit){
+body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote, .secretLayer, .ambientParticle, .homePulse, .coverSpark, .softOrbit){
   animation-play-state: paused !important;
 }
 
@@ -5181,8 +4862,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 
 .coverGalleryGrid,
 .libraryGrid,
-.homeAlbums,
-.homeAlbumGrid{
+.homeAlbums{
   content-visibility: auto;
   contain-intrinsic-size: 720px;
 }
@@ -5211,8 +4891,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
   background: transparent !important;
 }
 
-.sideNav,
-.sidebarNav{
+.sideNav{
   overflow: hidden !important;
   contain: layout paint style;
 }
@@ -5375,8 +5054,7 @@ body::after,
 .playlistSongRow,
 .settingCard,
 .panel,
-.heroCard,
-.sidebarItem{
+.heroCard{
   rotate: 0deg !important;
   transform-style: flat !important;
   perspective: none !important;
@@ -5507,15 +5185,9 @@ body::after,
   transform: translate3d(0,0,0) !important;
 }
 
-.app .sidebarNav button{
-  transform: translate3d(0,0,0) !important;
 
-  transition: background-color 170ms ease, border-color 170ms ease, color 170ms ease, box-shadow 170ms ease, opacity 170ms ease !important;
-}
 
-.app .sidebarNav button:hover{
-  transform: translate3d(0,0,0) !important;
-}
+
 
 .app .whatsNewCard ul,
 .app .updateCard ul,
@@ -6741,16 +6413,9 @@ body.localtifyBackgroundMode .ambientSurface,
   height: clamp(320px, calc(100vh - 430px), 640px);
 }
 
-.homeAlbumGrid.virtualSongViewport{
-  display: block !important;
-  height: clamp(420px, calc(100vh - 390px), 740px);
-  min-height: 320px;
-  padding: 2px 8px 18px 2px !important;
-}
 
-.homeAlbumGrid.simpleAlbumGrid.virtualSongViewport{
-  height: clamp(320px, calc(100vh - 430px), 620px);
-}
+
+
 
 .virtualSongCanvas{
   position: relative;
@@ -6772,27 +6437,11 @@ body.localtifyBackgroundMode .ambientSurface,
   margin: 0 !important;
 }
 
-.virtualHomeGridCanvas{
-  min-height: 100%;
-}
 
-.virtualHomeGridRow{
-  position: absolute;
-  inset: 0 0 auto 0;
-  display: grid;
-  gap: 14px;
-  width: 100%;
-  align-items: start;
-  padding-bottom: 14px;
-  box-sizing: border-box;
-  contain: layout paint style;
-}
 
-.virtualHomeGridRow .homeAlbumCard{
-  min-width: 0;
-  width: 100%;
-  margin: 0 !important;
-}
+
+
+
 
 .virtualSongViewport::-webkit-scrollbar{
   width: 8px;
@@ -9533,67 +9182,19 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   to{ transform: translate3d(112px,-74px,0); }
 }
 
-:is(
-  .songRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .libraryRow,
-  .libraryCard,
-  .libraryCardV025,
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .coverTile,
-  .coverGalleryCard,
-  .settingSwitchCard,
-  .settingsChoice,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .settingsResetButton,
-  .toggleRow,
-  .rangeRow,
-  .visualOptionButtonV205,
-  .visualOptionGroupV205
-).localtifyProximityTarget,
-:is(
-  .songRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .libraryRow,
-  .libraryCard,
-  .libraryCardV025,
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .coverTile,
-  .coverGalleryCard,
-  .settingSwitchCard,
-  .settingsChoice,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .settingsResetButton,
-  .toggleRow,
-  .rangeRow,
-  .visualOptionButtonV205,
-  .visualOptionGroupV205
-).localtifyProximityActive{
+:is(.songRow, .playlistTrackRow, .playlistSongRow, .libraryRow, .libraryCard, .libraryCardV025, .homeListenCard, .homeFreshCard, .coverTile, .coverGalleryCard, .settingSwitchCard, .settingsChoice, .settingsPanelCard, .settingsPageCard, .settingsResetButton, .toggleRow, .rangeRow, .visualOptionButtonV205, .visualOptionGroupV205).localtifyProximityTarget,
+:is(.songRow, .playlistTrackRow, .playlistSongRow, .libraryRow, .libraryCard, .libraryCardV025, .homeListenCard, .homeFreshCard, .coverTile, .coverGalleryCard, .settingSwitchCard, .settingsChoice, .settingsPanelCard, .settingsPageCard, .settingsResetButton, .toggleRow, .rangeRow, .visualOptionButtonV205, .visualOptionGroupV205).localtifyProximityActive{
   transform: none !important;
   filter: none !important;
   box-shadow: inherit !important;
   background-image: inherit !important;
 }
 
-.app .playerBar > :where(.playerLeft,.playerCenter,.playerRight,.controlRow,.progressRow,.volumeWrap){
+.app .playerBar > :where(.playerLeft, .playerCenter, .playerRight, .controlRow, .progressRow, .volumeWrap){
   contain: layout style !important;
 }
 
-.app :where(
-  .secretLayer.arcadeGhost,
-  .lateNightNoteLayer,
-  .lateNightWarning,
-  .misideWhisper,
-  .misideEggNotice
-){
+.app :where(.secretLayer.arcadeGhost, .lateNightNoteLayer, .lateNightWarning, .misideWhisper, .misideEggNotice){
   display: none !important;
   animation: none !important;
   pointer-events: none !important;
@@ -9603,19 +9204,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   display: none !important;
 }
 
-.app :where(
-  .settingsPanelCard,
-  .settingsPageCard,
-  .settingSwitchCard,
-  .settingsResetButton,
-  .settingsChoice,
-  .coverSyncChoice,
-  .songRow,
-  .libraryCard,
-  .libraryCardV025,
-  .coverTile,
-  .coverGalleryCard
-).localtifyProximityActive{
+.app :where(.settingsPanelCard, .settingsPageCard, .settingSwitchCard, .settingsResetButton, .settingsChoice, .coverSyncChoice, .songRow, .libraryCard, .libraryCardV025, .coverTile, .coverGalleryCard).localtifyProximityActive{
   transform: none !important;
   box-shadow: inherit !important;
   background-image: inherit !important;
@@ -9683,7 +9272,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   user-select: none;
 }
 
-.app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
+.app :is(.songRow, .libraryRow, .homeListenCard, .homeFreshCard, .coverGalleryCard, .settingsPageCard, .panel){
   transform: translateZ(0);
 }
 
@@ -9694,64 +9283,28 @@ body.localtifyPerfV301 .app{
   contain: layout style paint;
 }
 
-body.localtifyPerfV301 .app :is(
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .downloadQueueItem,
-  .spotifyTrackCard,
-  .albumCard,
-  .albumShelfCard,
-  .libraryCard
-){
+body.localtifyPerfV301 .app :is(.homeListenCard, .homeFreshCard, .playlistTrackRow, .playlistSongRow, .downloadQueueItem, .spotifyTrackCard, .albumCard, .albumShelfCard, .libraryCard){
   contain: layout paint style;
   backface-visibility: hidden;
 }
 
 @supports (content-visibility: auto){
-  body.localtifyPerfV301 .app :is(
-    .homeAlbumCard,
-    .homeListenCard,
-    .homeFreshCard,
-    .playlistTrackRow,
-    .playlistSongRow,
-    .downloadQueueItem,
-    .spotifyTrackCard,
-    .albumCard,
-    .albumShelfCard,
-    .libraryCard
-  ){
+  body.localtifyPerfV301 .app :is(.homeListenCard, .homeFreshCard, .playlistTrackRow, .playlistSongRow, .downloadQueueItem, .spotifyTrackCard, .albumCard, .albumShelfCard, .libraryCard){
     content-visibility: auto;
     contain-intrinsic-size: 96px 220px;
   }
 
-  body.localtifyPerfV301 .app :is(.homeAlbumCard, .albumCard, .albumShelfCard){
+  body.localtifyPerfV301 .app :is(.albumCard, .albumShelfCard){
     contain-intrinsic-size: 220px 180px;
   }
 }
 
-body.localtifyPerfV301 .app.isScrolling :is(
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .downloadQueueItem,
-  .spotifyTrackCard,
-  .albumCard,
-  .libraryCard,
-  .songRow,
-  .libraryRow
-){
+body.localtifyPerfV301 .app.isScrolling :is(.homeListenCard, .homeFreshCard, .playlistTrackRow, .playlistSongRow, .downloadQueueItem, .spotifyTrackCard, .albumCard, .libraryCard, .songRow, .libraryRow){
   transition-duration: 80ms !important;
   animation: none !important;
   will-change: auto !important;
 }
 
-body.localtifyPerfV301 .app.isScrolling .homeAlbumCard::before,
-body.localtifyPerfV301 .app.isScrolling .homeAlbumCard::after,
 body.localtifyPerfV301 .app.isScrolling .homeListenCard::before,
 body.localtifyPerfV301 .app.isScrolling .homeListenCard::after,
 body.localtifyPerfV301 .app.isScrolling .homeFreshCard::before,
@@ -9774,18 +9327,7 @@ body.localitfyThemePainting .app{
   contain: paint style !important;
 }
 
-body.localitfyThemePainting .app :is(
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryRow,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .customThemeManagerV027,
-  .customThemeTokenV027,
-  .playerBar
-){
+body.localitfyThemePainting .app :is(.homeListenCard, .homeFreshCard, .songRow, .libraryRow, .settingsPanelCard, .settingsPageCard, .customThemeManagerV027, .customThemeTokenV027, .playerBar){
   transition-property: background-color, border-color, color, opacity !important;
   transition-duration: 0ms !important;
   animation-play-state: paused !important;
@@ -9793,31 +9335,13 @@ body.localitfyThemePainting .app :is(
 }
 
 
-body.localitfyThemePainting .app :is(
-  .homeListenBackgroundImage,
-  .heroAmbiencePulse,
-  .coverAura,
-  .coverAura::before,
-  .coverAura::after,
-  .playerBar::before,
-  .playerBar::after,
-  .ambientSurface::before,
-  .ambientSurface::after
-){
+body.localitfyThemePainting .app :is(.homeListenBackgroundImage, .heroAmbiencePulse, .coverAura, .coverAura::before, .coverAura::after, .playerBar::before, .playerBar::after, .ambientSurface::before, .ambientSurface::after){
   transform: translateZ(0) !important;
   backface-visibility: hidden !important;
 }
 
 
-body.localitfyThemePainting .app :is(
-  .homeAlbumCard:hover,
-  .homeFreshCard:hover,
-  .homeListenCard:hover,
-  .settingsChoice:hover,
-  .settingsTinyButton:hover,
-  .customThemePresetButtonV027:hover,
-  .customThemeTokenV027:hover
-){
+body.localitfyThemePainting .app :is(.homeFreshCard:hover, .homeListenCard:hover, .settingsChoice:hover, .settingsTinyButton:hover, .customThemePresetButtonV027:hover, .customThemeTokenV027:hover){
   transform: translateZ(0) !important;
   box-shadow: inherit !important;
 }
@@ -10052,7 +9576,6 @@ body.localitfyThemePainting .app :is(
 
 
 .app .iconAction.noActionHoverV444,
-.app .homeAlbumActions .iconAction,
 .app .songRow > .iconAction,
 .app .playlistAddAction,
 .app .likeActionV443{
@@ -10063,7 +9586,6 @@ body.localitfyThemePainting .app :is(
 }
 
 .app .iconAction.noActionHoverV444:hover,
-.app .homeAlbumActions .iconAction:hover,
 .app .songRow > .iconAction:hover,
 .app .playlistAddAction:hover,
 .app .likeActionV443:hover{
@@ -10073,7 +9595,6 @@ body.localitfyThemePainting .app :is(
 }
 
 .app .iconAction.noActionHoverV444:active,
-.app .homeAlbumActions .iconAction:active,
 .app .songRow > .iconAction:active,
 .app .playlistAddAction:active,
 .app .likeActionV443:active{
@@ -10177,60 +9698,15 @@ body,
 }
 
 
-.sidebar,
-.app .sidebar,
-.app[data-sidebar-behavior="hover"] .sidebar,
-.app.sidebarHoverShiftEnabled .sidebar,
-.app.sidebarHoverOpen .sidebar{
-  grid-column: 1;
-  grid-row: 1 / 3;
-  position: relative;
-  z-index: 20;
-  width: var(--sidebar-width-release);
-  min-width: var(--sidebar-width-release);
-  max-width: var(--sidebar-width-release);
-  height: 100%;
-  padding: 16px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow: hidden;
-  color: var(--lt-text);
-  background: var(--sidebar-bg-release);
-  background-color: var(--lt-bg, #000);
-  background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
-  border-right: 1px solid rgba(var(--lt-accent-rgb), .25);
-  box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
-  opacity: 1;
-  transform: none;
-  transition: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
 
-.sidebar:hover,
-.app .sidebar:hover,
-.app[data-sidebar-behavior="hover"] .sidebar:hover{
-  background: var(--sidebar-bg-release);
-  background-color: var(--lt-bg, #000);
-  background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
-  box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
-  transform: none;
-}
 
-.sidebar::before,
-.sidebar::after,
-.sidebar:hover::before,
-.sidebar:hover::after{
-  content: none;
-  display: none;
-}
+
+
+
 
 
 .content,
-.app .content,
-.app.sidebarHoverShiftEnabled .content,
-.app.sidebarHoverOpen .content{
+.app .content{
   grid-column: 2;
   grid-row: 1;
   min-width: 0;
@@ -10254,114 +9730,24 @@ body,
 }
 
 
-.app[data-sidebar-behavior="hover"]{
-  --sidebar-width: var(--sidebar-width-release);
-}
-
-.app[data-sidebar-behavior="hover"] .appShell{
-  grid-template-columns: var(--sidebar-width-release) minmax(0, 1fr);
-  transition: none;
-}
-
-.app[data-sidebar-behavior="hover"] .content,
-.app[data-sidebar-behavior="hover"].sidebarHoverOpen .content{
-  transform: none;
-  transition: none;
-}
 
 
-.logoWrap{
-  min-height: 54px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  overflow: hidden;
-}
 
-.nav{
-  display: grid;
-  gap: 7px;
-}
 
-.navItem{
-  width: 100%;
-  min-height: 46px;
-  padding: 0 12px;
-  border: 1px solid transparent;
-  border-radius: 13px;
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  color: var(--lt-muted);
-  background: transparent;
-  text-align: left;
-  font-weight: 820;
-  transform: none;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
-}
 
-.navItem:hover{
-  color: var(--lt-text);
-  background: rgba(255,255,255,.045);
-  border-color: rgba(255,255,255,.075);
-  transform: none;
-  box-shadow: none;
-}
 
-.navItem.active{
-  color: var(--lt-text);
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .16), rgba(var(--lt-accent-rgb), .08)),
-    rgba(var(--lt-accent-rgb), .045);
-  border-color: rgba(var(--lt-accent-rgb), .36);
-  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .10);
-}
 
-.navText{
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
 
-.navText strong,
-.navText span{
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
-.importMainAction{
-  width: 100%;
-  min-height: 44px;
-  margin-top: auto;
-  border: 1px solid rgba(var(--lt-accent-rgb), .32);
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  color: #08070c;
-  background: var(--lt-accent);
-  font-weight: 920;
-  box-shadow: 0 12px 28px rgba(var(--lt-accent-rgb), .14);
-  transform: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
 
-.importMainAction:hover{
-  transform: none;
-  filter: brightness(1.03);
-}
 
-.sidebarResizeHandle{
-  display: none;
-}
+
+
+
+
+
+
+
 
 .toastStack{
   left: calc(var(--sidebar-width-release) + 22px);
@@ -10392,21 +9778,11 @@ body.isResizingPlayer .app *{
     --sidebar-width-release: 74px;
   }
 
-  .sidebar{
-    padding: 12px 8px;
-  }
+  
 
-  .navItem{
-    grid-template-columns: 1fr;
-    place-items: center;
-    padding: 0;
-  }
+  
 
-  .navText,
-  .logoWrap h1,
-  .logoWrap p{
-    display: none;
-  }
+  
 
   .content{
     padding-inline: 14px;
@@ -10414,133 +9790,6 @@ body.isResizingPlayer .app *{
 }
 
 
-.app .sidebar{
-  overflow: hidden;
-}
-
-.app .sidebar .nav{
-  overflow: hidden;
-}
-
-.app .sidebar .navItem{
-  position: relative;
-  overflow: hidden;
-}
-
-.app .sidebar .navItem::after{
-  content: none !important;
-  display: none !important;
-}
-
-.app .sidebar .navItem::before{
-  content: "" !important;
-  display: block !important;
-  position: absolute !important;
-  left: -14px !important;
-  top: 50% !important;
-  width: 4px !important;
-  height: 8px !important;
-  border-radius: 0 999px 999px 0 !important;
-  background: #fff !important;
-  opacity: 0 !important;
-  transform: translateY(-50%) scaleY(.35) !important;
-  transform-origin: left center !important;
-  pointer-events: none !important;
-  z-index: 99 !important;
-  box-shadow: 0 0 12px rgba(255,255,255,.22) !important;
-  transition:
-    height 180ms cubic-bezier(.16, 1, .3, 1),
-    opacity 140ms ease,
-    transform 180ms cubic-bezier(.16, 1, .3, 1) !important;
-}
-
-.app .sidebar .navItem:hover::before,
-.app .sidebar .navItem:focus-visible::before{
-  height: 18px !important;
-  opacity: .76 !important;
-  transform: translateY(-50%) scaleY(1) !important;
-}
-
-.app .sidebar .navItem.active::before{
-  height: 34px !important;
-  opacity: 1 !important;
-  transform: translateY(-50%) scaleY(1) !important;
-}
-
-.app .sidebar .navItem.active:hover::before,
-.app .sidebar .navItem.active:focus-visible::before{
-  height: 40px !important;
-}
-
-.app .sidebar .navItem.active,
-.app .sidebar .navItem.active:hover,
-.app .sidebar .navItem.active:focus-visible{
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-
-.app .sidebar .navItem.active .navIcon,
-.app .sidebar .navItem.active .navText strong{
-  color: #fff !important;
-}
-
-.app .sidebar .navItem.active .navText small{
-  color: rgba(255,255,255,.62) !important;
-}
-
-.app .sidebar .navItem .navLucideIcon{
-  transform-origin: 50% 50% !important;
-  transform-box: fill-box !important;
-  overflow: visible !important;
-}
-
-.app .sidebar .navItem:hover .navLucideIcon{
-  animation: none !important;
-}
-
-.app .sidebar .navItem[aria-label="open albums"]:hover .navLucideIcon,
-.app .sidebar .navItem[aria-label="open settings"]:hover .navLucideIcon{
-  animation: none !important;
-}
-
-.app .sidebar .navItem[aria-label="open liked"]:hover .navLucideIcon{
-  animation: none !important;
-}
-
-@keyframes localtifySidebarIconPopV472{
-  0%{ transform: translate3d(0,0,0) scale(1); }
-  35%{ transform: translate3d(0,-3px,0) scale(1.14); }
-  70%{ transform: translate3d(0,1px,0) scale(.98); }
-  100%{ transform: translate3d(0,0,0) scale(1.04); }
-}
-
-@keyframes localtifySidebarIconSpinV472{
-  0%{ transform: rotate(0deg) scale(1); }
-  55%{ transform: rotate(180deg) scale(1.13); }
-  100%{ transform: rotate(360deg) scale(1.04); }
-}
-
-@keyframes localtifySidebarIconHeartV472{
-  0%{ transform: scale(1); }
-  24%{ transform: scale(1.28); }
-  48%{ transform: scale(.92); }
-  72%{ transform: scale(1.14); }
-  100%{ transform: scale(1.04); }
-}
-
-@media (prefers-reduced-motion: reduce){
-  .app .sidebar .navItem::before{
-    transition: none !important;
-  }
-
-  .app .sidebar .navItem:hover .navLucideIcon{
-    animation: none !important;
-    transform: none !important;
-  }
-}
 
 
 .app{
@@ -10549,26 +9798,12 @@ body.isResizingPlayer .app *{
   --progress-contrast: var(--button-text-on-progress, var(--accent-contrast));
 }
 
-.app :is(
-  .mainAction,
-  .heroMain,
-  .circleButton.main:not(.playerBar *),
-  .settingsActionButton.isPrimary,
-  .settingsTinyButton.isPrimary,
-  .editor-playlist-list button.is-on
-){
+.app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *), .settingsActionButton.isPrimary, .settingsTinyButton.isPrimary, .editor-playlist-list button.is-on){
   color: var(--accent-contrast) !important;
   text-shadow: none !important;
 }
 
-.app :is(
-  .mainAction,
-  .heroMain,
-  .circleButton.main:not(.playerBar *),
-  .settingsActionButton.isPrimary,
-  .settingsTinyButton.isPrimary,
-  .editor-playlist-list button.is-on
-) :is(svg, .buttonInlineIcon, .settingsThemeIcon){
+.app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *), .settingsActionButton.isPrimary, .settingsTinyButton.isPrimary, .editor-playlist-list button.is-on) :is(svg, .buttonInlineIcon, .settingsThemeIcon){
   color: currentColor !important;
   stroke: currentColor !important;
   fill: none;
@@ -10578,64 +9813,17 @@ body.isResizingPlayer .app *{
   background: var(--lt-accent) !important;
 }
 
-.mainAction.importMainAction.iconTextButton{
-  min-height: 46px !important;
-  display: inline-grid !important;
-  grid-auto-flow: column !important;
-  grid-auto-columns: max-content !important;
-  place-items: center !important;
-  justify-content: center !important;
-  gap: 9px !important;
-  line-height: 1 !important;
-  color: var(--accent-contrast) !important;
-  text-align: center !important;
-}
 
-.mainAction.importMainAction .buttonInlineIcon{
-  width: 18px !important;
-  height: 18px !important;
-  display: block !important;
-  flex: 0 0 auto !important;
-  margin: 0 !important;
-  transform: none !important;
-  color: currentColor !important;
-  stroke: currentColor !important;
-}
 
-.mainAction.importMainAction .buttonLabel{
-  display: inline-block !important;
-  min-width: 0 !important;
-  color: currentColor !important;
-  white-space: nowrap !important;
-}
 
-.app[data-sidebar-behavior="slim"] .sidebar .mainAction.importMainAction,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction.importMainAction{
-  width: 50px !important;
-  min-width: 50px !important;
-  height: 50px !important;
-  min-height: 50px !important;
-  padding: 0 !important;
-  margin-inline: auto !important;
-  display: grid !important;
-  place-items: center !important;
-  grid-auto-flow: row !important;
-  gap: 0 !important;
-  border-radius: 17px !important;
-}
 
-.app[data-sidebar-behavior="slim"] .sidebar .mainAction.importMainAction .buttonInlineIcon,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction.importMainAction .buttonInlineIcon{
-  width: 20px !important;
-  height: 20px !important;
-  margin: 0 !important;
-  transform: none !important;
-}
 
-.app[data-sidebar-behavior="slim"] .sidebar .mainAction.importMainAction .buttonLabel,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction.importMainAction .buttonLabel{
-  display: none !important;
-}
+
+
+
+
+
+
 
 .app .playerBar,
 .app .playerBar::before,
@@ -11020,297 +10208,70 @@ body.isResizingPlayer .app *{
   100%{ opacity: 1; width: min(1240px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 116px)); transform: translate3d(0,0,0) scale(1); filter: blur(0); }
 }
 
-.sidebarNavGroupsV467{
-  display: grid;
-  gap: 0;
-  min-width: 0;
-}
-
-.sidebarNavGroupV467{
-  display: grid;
-  gap: 7px;
-  min-width: 0;
-}
-
-.sidebarGroupLabelV467{
-  margin: 0 0 1px 12px;
-  color: rgba(var(--text-rgb), .34);
-  font-size: 9px;
-  font-weight: 1000;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  line-height: 1.1;
-}
-
-.navGroupedV467{
-  gap: 6px;
-}
-
-.sidebarNavGroup-app .navItem{
-  min-height: 42px;
-}
-
-.sidebarNavGroupV467 .navDivider{
-  margin-top: 8px;
-  margin-bottom: 10px;
-}
 
 
-.app .sidebarNavGroupsV467{
-  gap: 2px !important;
-}
-
-.app .sidebarNavGroupV467{
-  gap: 6px !important;
-}
-
-.app .sidebarNavGroupV467 + .sidebarNavGroupV467{
-  margin-top: 8px !important;
-}
-
-.app .sidebarGroupLabelV467{
-  margin: 0 0 2px 13px !important;
-  color: rgba(var(--text-rgb), .36) !important;
-  font-size: 8.5px !important;
-  font-weight: 1000 !important;
-  letter-spacing: .19em !important;
-  line-height: 1 !important;
-  text-transform: uppercase !important;
-}
-
-.app .navGroupedV467{
-  gap: 5px !important;
-}
 
 
-.app .sidebar .navItem::before,
-.app .sidebar .navItem::after{
-  content: none !important;
-  display: none !important;
-  opacity: 0 !important;
-  box-shadow: none !important;
-}
-
-.app .sidebar .navItem{
-  min-height: 46px !important;
-  border-radius: 16px !important;
-  border: 1px solid transparent !important;
-  background: transparent !important;
-  background-image: none !important;
-  color: rgba(var(--text-rgb), .62) !important;
-  transform: translate3d(0,0,0) !important;
-  box-shadow: none !important;
-  transition:
-    color 150ms ease,
-    background-color 150ms ease,
-    border-color 150ms ease,
-    box-shadow 150ms ease !important;
-}
-
-.app .sidebar .navItem:hover,
-.app .sidebar .navItem:focus-visible{
-  color: rgba(var(--text-rgb), .92) !important;
-  background: rgba(255,255,255,.045) !important;
-  border-color: rgba(255,255,255,.075) !important;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-.app .sidebar .navItem.active,
-.app .sidebar .navItem.active:hover,
-.app .sidebar .navItem.active:focus-visible{
-  color: var(--lt-text) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .135), rgba(var(--lt-accent-rgb), .072)),
-    rgba(var(--lt-accent-rgb), .052) !important;
-  border-color: rgba(var(--lt-accent-rgb), .24) !important;
-  transform: none !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .06) !important;
-}
-
-.app .sidebar .navItem .navIcon{
-  color: rgba(var(--text-rgb), .66) !important;
-  opacity: 1 !important;
-  transform: translate3d(0,0,0) scale(1) !important;
-  filter: none !important;
-  transition:
-    transform 170ms cubic-bezier(.16, 1, .3, 1),
-    color 150ms ease,
-    opacity 150ms ease !important;
-}
-
-.app .sidebar .navItem:hover .navIcon,
-.app .sidebar .navItem:focus-visible .navIcon,
-.app .sidebar .navItem.active .navIcon{
-  color: var(--lt-text) !important;
-  transform: none !important;
-}
-
-.app .sidebar .navItem.active .navText strong,
-.app .sidebar .navItem.active:hover .navText strong,
-.app .sidebar .navItem.active:focus-visible .navText strong{
-  color: var(--lt-text) !important;
-}
-
-.app .sidebar .navItem.active .navText small,
-.app .sidebar .navItem.active:hover .navText small,
-.app .sidebar .navItem.active:focus-visible .navText small{
-  color: rgba(var(--text-rgb), .62) !important;
-}
-
-.app .sidebar .navItem:hover .navLucideIcon,
-.app .sidebar .navItem[aria-label="open albums"]:hover .navLucideIcon,
-.app .sidebar .navItem[aria-label="open settings"]:hover .navLucideIcon,
-.app .sidebar .navItem[aria-label="open liked"]:hover .navLucideIcon{
-  animation: none !important;
-  transform: none !important;
-}
-
-.app .sidebarNavGroupV467 .navDivider{
-  width: calc(100% - 34px) !important;
-  height: 1px !important;
-  margin: 8px 17px 10px !important;
-  background: rgba(255,255,255,.055) !important;
-  opacity: .58 !important;
-  -webkit-mask-image: none !important;
-  mask-image: none !important;
-}
-
-@media (max-width: 860px){
-  .app .sidebarGroupLabelV467{
-    display: none !important;
-  }
-
-  .app .sidebarNavGroupV467 + .sidebarNavGroupV467{
-    margin-top: 4px !important;
-  }
-
-  .app .sidebar .navItem,
-  .app .sidebar .navItem:hover,
-  .app .sidebar .navItem.active{
-    transform: none !important;
-  }
-}
 
 
-.app .sidebarBottom{
-  border-top-color: rgba(255,255,255,.055) !important;
-  gap: 10px !important;
-}
 
-.app .mainAction.importMainAction.iconTextButton{
-  position: relative !important;
-  min-height: 43px !important;
-  width: 100% !important;
-  justify-content: center !important;
-  gap: 9px !important;
-  overflow: hidden !important;
-  border: 1px solid rgba(var(--lt-accent-rgb), .26) !important;
-  border-radius: 999px !important;
-  color: var(--lt-text) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .115), rgba(var(--lt-accent-rgb), .055)),
-    rgba(8, 8, 13, .62) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    0 8px 18px rgba(0,0,0,.18) !important;
-  transform: translate3d(0,0,0) scale(1) !important;
-  transition:
-    transform 170ms cubic-bezier(.16, 1, .3, 1),
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease,
-    color 160ms ease !important;
-}
 
-.app .mainAction.importMainAction.iconTextButton::before{
-  content: "";
-  position: absolute;
-  inset: 1px;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 22% 18%, rgba(255,255,255,.13), transparent 34%),
-    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .08), transparent);
-  opacity: .62;
-}
 
-.app .mainAction.importMainAction.iconTextButton::after{
-  content: "✦";
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  pointer-events: none;
-  color: var(--lt-accent);
-  font-size: 12px;
-  font-weight: 1000;
-  opacity: 0;
-  transform: translate3d(-5px,-50%,0) scale(.74) rotate(-10deg);
-  transition:
-    opacity 150ms ease,
-    transform 190ms cubic-bezier(.16, 1, .3, 1);
-}
 
-.app .mainAction.importMainAction.iconTextButton .buttonInlineIcon{
-  position: relative;
-  z-index: 1;
-  width: 17px !important;
-  height: 17px !important;
-  transform: translate3d(0,0,0) scale(1) !important;
-  transition: transform 170ms cubic-bezier(.16, 1, .3, 1) !important;
-}
 
-.app .mainAction.importMainAction.iconTextButton .buttonLabel{
-  position: relative;
-  z-index: 1;
-  font-size: 12px !important;
-  font-weight: 950 !important;
-  letter-spacing: -.01em !important;
-}
 
-.app .mainAction.importMainAction.iconTextButton:hover,
-.app .mainAction.importMainAction.iconTextButton:focus-visible{
-  color: var(--lt-text) !important;
-  border-color: rgba(var(--lt-accent-rgb), .38) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .155), rgba(var(--lt-accent-rgb), .078)),
-    rgba(10, 10, 16, .72) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 10px 22px rgba(0,0,0,.20) !important;
-  transform: translate3d(2px,0,0) scale(1) !important;
-}
 
-.app .mainAction.importMainAction.iconTextButton:hover::after,
-.app .mainAction.importMainAction.iconTextButton:focus-visible::after{
-  opacity: .92;
-  transform: translate3d(0,-50%,0) scale(1) rotate(0deg);
-}
 
-.app .mainAction.importMainAction.iconTextButton:hover .buttonInlineIcon,
-.app .mainAction.importMainAction.iconTextButton:focus-visible .buttonInlineIcon{
-  transform: none !important;
-}
 
-.app .mainAction.importMainAction.iconTextButton:active{
-  transform: translate3d(2px,1px,0) scale(.985) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 5px 12px rgba(0,0,0,.18) !important;
-}
 
-@media (max-width: 860px){
-  .app .mainAction.importMainAction.iconTextButton,
-  .app .mainAction.importMainAction.iconTextButton:hover,
-  .app .mainAction.importMainAction.iconTextButton:focus-visible,
-  .app .mainAction.importMainAction.iconTextButton:active{
-    transform: none !important;
-  }
 
-  .app .mainAction.importMainAction.iconTextButton::after{
-    display: none !important;
-  }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .app{
@@ -11319,7 +10280,7 @@ body.isResizingPlayer .app *{
 }
 
 
-.app :is(.panel, .ambientSurface, .headerBar, .sidebar, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel){
+.app :is(.panel, .ambientSurface, .headerBar, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel){
   color: rgba(var(--text-rgb), .90);
 }
 
@@ -11327,11 +10288,11 @@ body.isResizingPlayer .app *{
   border-color: rgba(255,255,255,.105);
 }
 
-.app :is(.softText, .panel p, .navText small, .downloadNotice, .converterBoxV031 p){
+.app :is(.softText, .panel p, .downloadNotice, .converterBoxV031 p){
   color: rgba(var(--text-rgb), .68);
 }
 
-.app :is(.eyebrow, .sidebarGroupLabelV467){
+.app :is(.eyebrow){
   color: rgba(var(--text-rgb), .48);
 }
 
@@ -11346,61 +10307,21 @@ body.isResizingPlayer .app *{
 }
 
 
-.app .mainAction.importMainAction.iconTextButton,
-.app .mainAction.importMainAction.iconTextButton:hover,
-.app .mainAction.importMainAction.iconTextButton:focus-visible,
-.app .mainAction.importMainAction.iconTextButton:active{
-  color: rgba(255,255,255,.94) !important;
-  text-shadow: 0 1px 0 rgba(0,0,0,.28) !important;
-}
-
-.app .mainAction.importMainAction.iconTextButton{
-  border-color: rgba(var(--lt-accent-rgb), .34) !important;
-  background:
-    radial-gradient(circle at 24% 18%, rgba(255,255,255,.13), transparent 34%),
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .22), rgba(var(--lt-accent-rgb), .105)),
-    rgba(11,10,18,.86) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.075),
-    0 8px 18px rgba(0,0,0,.20) !important;
-}
-
-.app .mainAction.importMainAction.iconTextButton .buttonInlineIcon,
-.app .mainAction.importMainAction.iconTextButton .buttonLabel,
-.app .mainAction.importMainAction.iconTextButton svg,
-.app .mainAction.importMainAction.iconTextButton path{
-  color: rgba(255,255,255,.94) !important;
-  stroke: currentColor !important;
-  opacity: 1 !important;
-  filter: none !important;
-}
-
-.app .mainAction.importMainAction.iconTextButton .buttonLabel{
-  font-weight: 950 !important;
-  letter-spacing: -.012em !important;
-}
-
-.app .mainAction.importMainAction.iconTextButton:hover,
-.app .mainAction.importMainAction.iconTextButton:focus-visible{
-  border-color: rgba(var(--lt-accent-rgb), .48) !important;
-  background:
-    radial-gradient(circle at 24% 18%, rgba(255,255,255,.16), transparent 34%),
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .285), rgba(var(--lt-accent-rgb), .135)),
-    rgba(13,12,22,.90) !important;
-}
 
 
-.app .mainAction.importMainAction.iconTextButton::after{
-  color: rgba(255,255,255,.92) !important;
-  text-shadow: 0 0 10px rgba(var(--lt-accent-rgb), .28);
-}
 
 
-.app .mainAction.importMainAction.iconTextButton:active{
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .20), rgba(var(--lt-accent-rgb), .10)),
-    rgba(9,8,15,.92) !important;
-}
+
+
+
+
+
+
+
+
+
+
+
 
 
 .app{
@@ -11596,24 +10517,7 @@ body.isResizingPlayer .app *{
 }
 
 
-.app :is(
-  .panel,
-  .ambientSurface,
-  .settingsPanel,
-  .settingsCard,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .downloadPanel,
-  .playlistHeroPanel,
-  .playlistCreatePanel,
-  .playlistShelfPanel,
-  .playlistTracksPanel,
-  .analyticsStudioV339 > section,
-  .albumsHeroPanelV318,
-  .albumsShelfPanelV318,
-  .albumDetailPanelV318,
-  .albumBuilderPanelV318
-):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .analyticsStudioV339 > section, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--panel-calm-line) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.012)),
@@ -11626,22 +10530,7 @@ body.isResizingPlayer .app *{
   contain: layout paint style;
 }
 
-.app :is(
-  .panel,
-  .ambientSurface,
-  .settingsCard,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .downloadPanel,
-  .playlistHeroPanel,
-  .playlistCreatePanel,
-  .playlistShelfPanel,
-  .playlistTracksPanel,
-  .albumsHeroPanelV318,
-  .albumsShelfPanelV318,
-  .albumDetailPanelV318,
-  .albumBuilderPanelV318
-):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
   border-color: var(--panel-calm-line-hover) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.016)),
@@ -11651,15 +10540,7 @@ body.isResizingPlayer .app *{
     var(--panel-calm-shadow-hover) !important;
 }
 
-.app :is(.active, .selected, .playing, .isActive, .downloaded, .loggedIn):is(
-  .panel,
-  .ambientSurface,
-  .settingsCard,
-  .settingsPageCard,
-  .downloadPanel,
-  .albumDetailPanelV318,
-  .albumsShelfPanelV318
-){
+.app :is(.active, .selected, .playing, .isActive, .downloaded, .loggedIn):is(.panel, .ambientSurface, .settingsCard, .settingsPageCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318){
   border-color: rgba(var(--lt-accent-rgb), .22) !important;
   background:
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .070), rgba(255,255,255,.014)),
@@ -11681,35 +10562,11 @@ body.isResizingPlayer .app *{
   border-color: rgba(255, 90, 126, .25) !important;
 }
 
-.app :is(
-  button,
-  .navItem,
-  .songRow,
-  .libraryRow,
-  .albumTrackRowV318,
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .downloadQueueItem,
-  .downloadResultV326,
-  .spotifyTrackItem,
-  .panel,
-  .ambientSurface
-):not(:hover):not(:focus-visible):not(:active):not(.active):not(.playing):not(.localtifyProximityActive){
+.app :is(button, .songRow, .libraryRow, .albumTrackRowV318, .homeFreshCard, .homeListenCard, .downloadQueueItem, .downloadResultV326, .spotifyTrackItem, .panel, .ambientSurface):not(:hover):not(:focus-visible):not(:active):not(.active):not(.playing):not(.localtifyProximityActive){
   will-change: auto !important;
 }
 
-.app :is(
-  .content,
-  .pageTransition,
-  .songList,
-  .libraryList,
-  .albumTrackListV318,
-  .downloadQueueList,
-  .spotifyTrackItems,
-  .coverGalleryGridCleanOnly,
-  .playlistTrackList
-){
+.app :is(.content, .pageTransition, .songList, .libraryList, .albumTrackListV318, .downloadQueueList, .spotifyTrackItems, .coverGalleryGridCleanOnly, .playlistTrackList){
   overscroll-behavior: contain;
   contain: layout style;
 }
@@ -11865,43 +10722,11 @@ body.isResizingPlayer .app *{
 }
 
 
-.app :is(
-  .panel,
-  .ambientSurface,
-  .settingsPanel,
-  .settingsCard,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .downloadPanel,
-  .playlistHeroPanel,
-  .playlistCreatePanel,
-  .playlistShelfPanel,
-  .playlistTracksPanel,
-  .analyticsStudioV339 > section,
-  .albumsHeroPanelV318,
-  .albumsShelfPanelV318,
-  .albumDetailPanelV318,
-  .albumBuilderPanelV318
-):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .analyticsStudioV339 > section, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--panel-calm-outline-soft) !important;
 }
 
-.app :is(
-  .panel,
-  .ambientSurface,
-  .settingsCard,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .downloadPanel,
-  .playlistHeroPanel,
-  .playlistCreatePanel,
-  .playlistShelfPanel,
-  .playlistTracksPanel,
-  .albumsHeroPanelV318,
-  .albumsShelfPanelV318,
-  .albumDetailPanelV318,
-  .albumBuilderPanelV318
-):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface, .settingsCard, .settingsPageCard, .settingsPanelCard, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel, .albumsHeroPanelV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
   border-color: var(--panel-calm-outline-strong) !important;
 }
 
@@ -12183,33 +11008,33 @@ body.isResizingPlayer .app *{
   background-size: 42px 42px !important;
 }
 
-.app[data-theme="mono"] :is(.panel, .ambientSurface, .sidebar, .playerBar, .settingsPageShell, .downloadPanel){
+.app[data-theme="mono"] :is(.panel, .ambientSurface, .playerBar, .settingsPageShell, .downloadPanel){
   border-color: rgba(72, 78, 104, .13) !important;
 }
 
 .app[data-theme="mono"] .headerText h2,
-.app[data-theme="mono"] :is(h1,h2,h3,h4,strong){
+.app[data-theme="mono"] :is(h1, h2, h3, h4, strong){
   color: var(--lt-text) !important;
 }
 
-.app[data-theme="mono"] :is(.softText, p, small, .navText small){
+.app[data-theme="mono"] :is(.softText, p, small){
   color: var(--lt-muted) !important;
 }
 
 @media (max-width: 760px){
   .app .topUpdateRibbon,
-  .topUpdateRibbon{
+.topUpdateRibbon{
     grid-template-columns: minmax(0, 1fr) auto !important;
     padding: 0 8px !important;
   }
 
   .app .topUpdateRibbonText h3,
-  .topUpdateRibbonText h3{
+.topUpdateRibbonText h3{
     font-size: 10px !important;
   }
 
   .app .topUpdateRibbon .updatePrimaryButton,
-  .topUpdateRibbon .updatePrimaryButton{
+.topUpdateRibbon .updatePrimaryButton{
     display: none !important;
   }
 }
@@ -12451,26 +11276,26 @@ body.isResizingPlayer .app *{
 }
 
 
-.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--outline-calm-v486) !important;
 }
 
-.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
   border-color: color-mix(in oklab, rgba(255,255,255,.075) 62%, var(--lt-accent) 38%) !important;
 }
 
-.app :is(.active,.playing,.selected):is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318){
+.app :is(.active, .playing, .selected):is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318){
   border-color: var(--outline-active-v486) !important;
 }
 
 @media (max-width: 760px){
   .app .topUpdateRibbonText h3,
-  .topUpdateRibbonText h3{
+.topUpdateRibbonText h3{
     font-size: 10.5px !important;
   }
 
   .app .topUpdateRibbon .updateReleaseLinkV486,
-  .topUpdateRibbon .updateReleaseLinkV486{
+.topUpdateRibbon .updateReleaseLinkV486{
     display: none !important;
   }
 }
@@ -12743,15 +11568,15 @@ body.isResizingPlayer .app *{
 }
 
 
-.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--outline-calm-v487) !important;
 }
 
-.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
   border-color: var(--outline-hover-v487) !important;
 }
 
-.app :is(.active,.playing,.selected):is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318){
+.app :is(.active, .playing, .selected):is(.panel, .ambientSurface, .settingsCard, .downloadPanel, .albumDetailPanelV318, .albumsShelfPanelV318){
   border-color: var(--outline-active-v487) !important;
 }
 
@@ -13044,26 +11869,9 @@ body.isResizingPlayer .app *{
 }
 
 
-.app .sidebar,
-.sidebar{
-  outline: 0 !important;
-  border: 0 !important;
-  border-left: 0 !important;
-  border-right: 0 !important;
-  box-shadow: none !important;
-}
 
-.app .sidebar::before,
-.app .sidebar::after,
-.sidebar::before,
-.sidebar::after{
-  content: none !important;
-  display: none !important;
-  opacity: 0 !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  background: none !important;
-}
+
+
 
 .app .content,
 .content{
@@ -13078,27 +11886,8 @@ body.isResizingPlayer .app *{
   outline: 0 !important;
 }
 
-.app .sidebar :is(.navItem,.navIcon,.sidebarToolButton,.sidebarGroupLabelV467,.mainAction),
-.sidebar :is(.navItem,.navIcon,.sidebarToolButton,.sidebarGroupLabelV467,.mainAction){
-  outline: 0 !important;
-  box-shadow: none !important;
-}
 
-.app .sidebar :is(.navItem,.sidebarToolButton),
-.sidebar :is(.navItem,.sidebarToolButton){
-  border-color: transparent !important;
-}
 
-.app .sidebar :is(.navItem.active,.navItem[aria-current="page"],.sidebarToolButton.active),
-.sidebar :is(.navItem.active,.navItem[aria-current="page"],.sidebarToolButton.active){
-  border-color: transparent !important;
-  box-shadow: none !important;
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .10), rgba(var(--lt-accent-rgb), .045)),
-    rgba(255,255,255,.030) !important;
-}
-
-.app[data-theme="mono"] .sidebar,
 .app[data-theme="mono"] .content,
 .app[data-theme="mono"] .appShell{
   border-color: transparent !important;
@@ -13198,12 +11987,7 @@ body.isResizingPlayer .app *{
       color-mix(in oklab, var(--bg, #050517) 88%, #000 12%)) !important;
 }
 
-.app .sidebar,
-.sidebar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.020), rgba(255,255,255,.006)),
-    var(--localtify-sidebar-bg, color-mix(in oklab, var(--bg, #050517) 88%, #000 12%)) !important;
-}
+
 
 .app .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.settingsHero):not(.playerBar){
   background:
@@ -13217,4 +12001,333 @@ body.isResizingPlayer .app *{
   background:
     linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.014)),
     var(--localtify-owned-card-soft) !important;
+}
+/* Sidebar ownership: one stable layout and hover system. */
+.app{
+  --localtify-sidebar-collapsed: 84px;
+  --localtify-sidebar-open: clamp(220px, var(--sidebar-width-live, var(--sidebar-width, 249px)), 320px);
+  --localtify-sidebar-motion: cubic-bezier(.22, 1, .36, 1);
+}
+
+.app[data-sidebar-behavior="fixed"] .appShell{
+  grid-template-columns: var(--localtify-sidebar-open) minmax(0, 1fr);
+}
+
+.app[data-sidebar-behavior="slim"] .appShell,
+.app[data-sidebar-behavior="hover"] .appShell{
+  grid-template-columns: var(--localtify-sidebar-collapsed) minmax(0, 1fr);
+  overflow: visible;
+}
+
+.app .sidebar{
+  position: relative;
+  z-index: 120;
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 12px;
+  overflow: hidden;
+  border: 0;
+  border-right: 1px solid color-mix(in oklab, var(--lt-accent) 16%, var(--lt-border));
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,.008)),
+    var(--localtify-sidebar-bg, color-mix(in oklab, var(--lt-bg) 90%, var(--lt-accent) 10%));
+  box-shadow: inset -1px 0 0 rgba(255,255,255,.018);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform: none;
+  transition:
+    width 280ms var(--localtify-sidebar-motion),
+    min-width 280ms var(--localtify-sidebar-motion),
+    max-width 280ms var(--localtify-sidebar-motion),
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar,
+.app[data-sidebar-behavior="hover"] .sidebar{
+  width: var(--localtify-sidebar-collapsed);
+  min-width: var(--localtify-sidebar-collapsed);
+  max-width: var(--localtify-sidebar-open);
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within{
+  width: var(--localtify-sidebar-open);
+  min-width: var(--localtify-sidebar-open);
+  box-shadow: 18px 0 42px rgba(0,0,0,.24), inset -1px 0 0 rgba(var(--lt-accent-rgb), .14);
+}
+
+.app .sidebarNavGroupsV467{
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 13px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.app .sidebarNavGroupsV467::-webkit-scrollbar{
+  display: none;
+}
+
+.app .sidebarNavGroupV467{
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.app .sidebarGroupLabelV467{
+  min-height: 14px;
+  margin: 0;
+  padding: 0 10px;
+  overflow: hidden;
+  color: var(--lt-faint);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .16em;
+  line-height: 14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: opacity 120ms ease;
+}
+
+.app .nav{
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.app .sidebar .navItem{
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  padding: 0 10px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  color: var(--lt-muted);
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+  transform: none;
+  scale: 1;
+  rotate: 0deg;
+  filter: none;
+  animation: none;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.app .sidebar .navItem.localtifyProximityTarget,
+.app .sidebar .navItem.localtifyProximityActive,
+.app .sidebar .navItem.localtifyVelocityMotionV320,
+.app .sidebar .navItem.localtifyVelocityMotionV430{
+  transform: none !important;
+  scale: 1 !important;
+  rotate: 0deg !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+.app .sidebar .navItem::before{
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--lt-accent);
+  opacity: 0;
+  transform: none;
+  transition: opacity 150ms ease;
+}
+
+.app .sidebar .navItem:hover,
+.app .sidebar .navItem:focus-visible{
+  color: var(--lt-text);
+  border-color: color-mix(in oklab, var(--lt-accent) 18%, rgba(255,255,255,.06));
+  background: color-mix(in oklab, var(--lt-surface-raised) 88%, var(--lt-accent) 12%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+  transform: none;
+  scale: 1;
+  filter: none;
+}
+
+.app .sidebar .navItem:active{
+  transform: none;
+  scale: .985;
+}
+
+.app .sidebar .navItem.active{
+  color: var(--lt-text);
+  border-color: rgba(var(--lt-accent-rgb), .30);
+  background:
+    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .14), rgba(var(--lt-accent-rgb), .045)),
+    var(--lt-surface-soft);
+  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .045);
+}
+
+.app .sidebar .navItem.active::before{
+  opacity: 1;
+}
+
+.app .sidebar .navIcon{
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: grid;
+  place-items: center;
+  color: currentColor;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+  scale: 1;
+  rotate: 0deg;
+  filter: none;
+  animation: none;
+}
+
+.app .sidebar .navLucideIcon,
+.app .sidebar .navLucideIcon *{
+  color: currentColor;
+  stroke: currentColor;
+  transform: none;
+  filter: none;
+  animation: none;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+}
+
+.app .sidebar .navText{
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 130ms ease, visibility 0ms linear;
+}
+
+.app .sidebar .navText strong,
+.app .sidebar .navText small{
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app .sidebar .navText strong{
+  color: inherit;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.app .sidebar .navText small{
+  margin-top: 1px;
+  color: var(--lt-faint);
+  font-size: 9px;
+  line-height: 12px;
+}
+
+.app .navDivider{
+  height: 1px;
+  margin: 3px 8px 0;
+  background: color-mix(in oklab, var(--lt-accent) 10%, var(--lt-border));
+}
+
+.app .sidebarBottom{
+  min-width: 0;
+  margin-top: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.app .sidebar .importMainAction{
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  justify-content: center;
+  overflow: hidden;
+  transform: none;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .navItem,
+.app[data-sidebar-behavior="hover"] .sidebar .navItem{
+  width: calc(var(--localtify-sidebar-open) - 24px);
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .navText,
+.app[data-sidebar-behavior="slim"] .sidebar .sidebarGroupLabelV467,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .navText,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .sidebarGroupLabelV467{
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.app[data-sidebar-behavior="hover"] .sidebar:hover .navText,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .navText,
+.app[data-sidebar-behavior="hover"] .sidebar:hover .sidebarGroupLabelV467,
+.app[data-sidebar-behavior="hover"] .sidebar:focus-within .sidebarGroupLabelV467{
+  opacity: 1;
+  visibility: visible;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .importMainAction,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .importMainAction{
+  width: 48px;
+  min-width: 48px;
+  padding-inline: 0;
+  justify-self: center;
+  font-size: 0;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebar .importMainAction .buttonInlineIcon,
+.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .importMainAction .buttonInlineIcon{
+  margin: 0;
+}
+
+.app[data-sidebar-behavior="slim"] .sidebarResizeHandle,
+.app[data-sidebar-behavior="hover"] .sidebarResizeHandle{
+  display: none;
+}
+
+.app[data-sidebar-behavior="fixed"] .sidebarResizeHandle{
+  display: block;
+}
+
+@media (max-width: 900px){
+  .app[data-sidebar-behavior] .appShell{
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app[data-sidebar-behavior] .sidebar,
+  .app[data-sidebar-behavior] .sidebarResizeHandle{
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .app .sidebar,
+  .app .sidebar *,
+  .app .sidebar .navItem{
+    transition: none;
+  }
 }
