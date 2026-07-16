@@ -1,11 +1,16 @@
-﻿export type PlayerEngineEvent =
+export type PlayerEngineEvent =
   | "sourcechange"
   | "loadstart"
   | "loadedmetadata"
   | "canplay"
-  | "timeupdate"
   | "play"
+  | "playing"
   | "pause"
+  | "timeupdate"
+  | "waiting"
+  | "stalled"
+  | "suspend"
+  | "emptied"
   | "ended"
   | "volumechange"
   | "ratechange"
@@ -56,10 +61,10 @@ export interface PlayerEngine {
   setVolume(volume: number): void;
   setMuted(muted: boolean): void;
   setPlaybackRate(rate: number, preservesPitch?: boolean): void;
+  recover(): void;
 
   getState(): PlayerEngineState;
   on(event: PlayerEngineEvent, listener: PlayerEngineListener): PlayerEngineUnsubscribe;
 
   destroy(): void;
 }
-

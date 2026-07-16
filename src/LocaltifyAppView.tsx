@@ -2779,11 +2779,6 @@ function getFullCoverUrl(song?: Song | null) {
 }
 
 
-function getCardCoverCssUrl(song?: Song | null) {
-  const coverUrl = getCardCoverUrl(song);
-  if (!coverUrl) return "none";
-  return `url("${coverUrl.replace(/["\\]/g, "\\$&")}")`;
-}
 
 export function Cover({ song, className, priority = "auto" }: { song: Song | null; className: string; priority?: CoverImagePriority }) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
@@ -3492,7 +3487,6 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
   onDragEnd
 }: HomeAlbumCardItemProps) {
   const rankLabel = index < 9 ? `0${index + 1}` : String(index + 1);
-  const cardCoverCssUrl = getCardCoverCssUrl(song);
 
   function clickedInteractiveElement(target: EventTarget | null) {
     return target instanceof HTMLElement
@@ -3526,10 +3520,7 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
       onDragEnd={onDragEnd}
       aria-grabbed={isDragging}
       title={draggedSongTitle ? `dragging ${draggedSongTitle}` : "click to play, drag the card body to reorder"}
-      style={{
-        "--stagger": `${Math.min(index, 28) * 16}ms`,
-        "--library-card-cover": cardCoverCssUrl
-      } as CSSProperties}
+      style={{ "--stagger": `${Math.min(index, 28) * 16}ms` } as CSSProperties}
     >
       <button
         className="homeAlbumPlayZone homeAlbumCoverButton"
@@ -3547,8 +3538,8 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
       </button>
 
       <div className="homeAlbumMeta">
-        <strong title={song.title}>{prettyTitle(song.title, 7)}</strong>
-        <small>{prettyMeta(song.artist)}</small>
+        <strong title={displaySongTitleV444(song, 40)}>{displaySongTitleV444(song, 40)}</strong>
+        <small title={displaySongArtistV444(song)}>{displaySongArtistV444(song)}</small>
       </div>
 
       <div className="homeAlbumStats">
@@ -3787,23 +3778,29 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   }, []);
 
   const isSimpleGrid = className.includes("simpleAlbumGrid");
-  const minColumnWidth = isSimpleGrid ? 168 : 188;
+  const compactViewport = viewportWidth > 0 && viewportWidth < 900;
+  const mediumViewport = viewportWidth >= 900 && viewportWidth < 1180;
+  const minColumnWidth = isSimpleGrid ? 168 : compactViewport ? 154 : mediumViewport ? 176 : 188;
   const mobileCardFloor = 154;
-  const gridGap = 16;
-  const viewportChrome = isSimpleGrid ? 16 : 28;
+  const gridGap = compactViewport ? 12 : mediumViewport ? 14 : 16;
+  const rowGap = compactViewport ? 16 : mediumViewport ? 20 : 24;
+  const viewportChrome = isSimpleGrid ? 16 : compactViewport ? 16 : 28;
   const usableWidth = Math.max(mobileCardFloor, (viewportWidth || minColumnWidth) - viewportChrome);
   const rawColumns = Math.max(1, Math.floor((usableWidth + gridGap) / (minColumnWidth + gridGap)));
-  const isSmallGrid = list.length > 0 && list.length <= 2;
-  const columns = isSmallGrid ? list.length : Math.max(1, Math.min(list.length || 1, rawColumns));
+  const canShowCompleteSmallSet = list.length > 0 && list.length <= 2 && rawColumns >= list.length;
+  const columns = canShowCompleteSmallSet
+    ? list.length
+    : Math.max(1, Math.min(list.length || 1, rawColumns));
   const rowCount = Math.max(1, Math.ceil(list.length / columns));
   const estimatedColumnWidth = Math.max(
     mobileCardFloor,
     (usableWidth - Math.max(0, columns - 1) * gridGap) / columns
   );
-  const estimatedCardWidth = isSmallGrid ? Math.min(224, estimatedColumnWidth) : estimatedColumnWidth;
+  const estimatedCardWidth = canShowCompleteSmallSet ? Math.min(224, estimatedColumnWidth) : estimatedColumnWidth;
+  const fixedCardBodyHeight = 140;
   const rowEstimate = useMemo(
-    () => Math.ceil(estimatedCardWidth + 166),
-    [estimatedCardWidth]
+    () => Math.ceil(estimatedCardWidth + fixedCardBodyHeight + rowGap),
+    [estimatedCardWidth, rowGap]
   );
 
   const rowVirtualizer = useVirtualizer({
@@ -3817,7 +3814,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
     }
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     rowVirtualizer.measure();
   }, [columns, list.length, rowEstimate, rowVirtualizer]);
 
@@ -3846,6 +3843,9 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
       onDrop={onAreaDrop}
       data-virtual-count={list.length}
       data-virtual-columns={columns}
+      data-virtual-rows={rowCount}
+      data-grid-kind={isSimpleGrid ? "library" : "quick"}
+      style={{ "--quick-library-content-height": `${rowEstimate * rowCount}px` } as CSSProperties}
     >
       <div
         className="virtualSongCanvas virtualHomeGridCanvas"
@@ -3863,7 +3863,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
               className="virtualHomeGridRow"
               style={{
                 transform: `translateY(${virtualRow.start}px)`,
-                gridTemplateColumns: isSmallGrid
+                gridTemplateColumns: canShowCompleteSmallSet
                   ? `repeat(${rowSongs.length}, minmax(0, ${Math.max(mobileCardFloor, Math.floor(estimatedCardWidth))}px))`
                   : `repeat(${columns}, minmax(0, 1fr))`,
                 justifyContent: "start"
@@ -4527,6 +4527,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     handleAudioTimeUpdate,
     handleAudioPause,
     handleAudioEnded,
+    handleAudioError,
     handleCanPlay,
     handlePlaying,
     pendingPlayRef,
@@ -7673,25 +7674,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
           if (endedSong?.id) void patchSongLocal(endedSong.id, { playbackPosition: 0 });
           playNext(true, "auto");
         }}
-        onError={() => {
-          const audio = audioRef.current;
-          const failedSong = songRef.current || currentSong;
-          const failedCacheKey = getSongPlaybackSourceKey(failedSong);
-          if (failedCacheKey) playbackUrlCacheRef.current.delete(failedCacheKey);
-
-          setPlayerError(getAudioErrorText(audio));
-          setStatusText("playback error");
-          setIsPlaying(false);
-
-          pendingPlayRef.current = false;
-          resetPlayCountTracker();
-
-          stopFade();
-          if (typeof stopCrossfadeAuto === "function") stopCrossfadeAuto();
-          stopProgressLoop();
-
-          window.localitfy.clearDiscordActivity().catch(() => undefined);
-        }}
+        onError={handleAudioError}
       />
     </main>
   );

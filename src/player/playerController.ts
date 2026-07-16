@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   PlayerEngine,
   PlayerEngineEvent,
   PlayerEngineSource,
@@ -20,6 +20,7 @@ export type PlayerController = {
   play(): Promise<void>;
   pause(): void;
   toggle(): Promise<boolean>;
+  recover(): void;
 
   seekTo(seconds: number): void;
   seekBy(deltaSeconds: number): void;
@@ -42,9 +43,14 @@ const ENGINE_EVENTS: readonly PlayerEngineEvent[] = [
   "loadstart",
   "loadedmetadata",
   "canplay",
-  "timeupdate",
   "play",
+  "playing",
   "pause",
+  "timeupdate",
+  "waiting",
+  "stalled",
+  "suspend",
+  "emptied",
   "ended",
   "volumechange",
   "ratechange",
@@ -60,9 +66,14 @@ function sameSource(left: PlayerEngineSource, right: PlayerEngineSource) {
   return left.id === right.id && left.url === right.url;
 }
 
+function sameQueue(left: readonly PlayerEngineSource[], right: readonly PlayerEngineSource[]) {
+  return left.length === right.length && left.every((item, index) => sameSource(item, right[index]));
+}
+
 export function createPlayerController(engine: PlayerEngine): PlayerController {
   let queue: PlayerEngineSource[] = [];
   let queueIndex = -1;
+  let destroyed = false;
 
   const listeners = new Set<PlayerControllerListener>();
   const removeEngineListeners = ENGINE_EVENTS.map((event) =>
@@ -70,11 +81,9 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
   );
 
   function emit(event: PlayerEngineEvent | "queuechange") {
+    if (destroyed || !listeners.size) return;
     const snapshot = getSnapshot();
-
-    for (const listener of listeners) {
-      listener(snapshot, event);
-    }
+    for (const listener of listeners) listener(snapshot, event);
   }
 
   function getSnapshot(): PlayerControllerSnapshot {
@@ -89,37 +98,40 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
 
   function load(source: PlayerEngineSource) {
     const existingIndex = queue.findIndex((item) => sameSource(item, source));
+    const previousIndex = queueIndex;
+    const previousQueue = queue;
 
     if (existingIndex >= 0) {
       queueIndex = existingIndex;
     } else {
-      // Standalone playback should not keep an old queue/index around.
       queue = [source];
       queueIndex = 0;
     }
 
     engine.load(source);
-    emit("queuechange");
+    if (previousIndex !== queueIndex || previousQueue !== queue) emit("queuechange");
   }
 
   function setQueue(nextQueue: readonly PlayerEngineSource[], startIndex = 0) {
-    queue = [...nextQueue];
-    queueIndex = clampIndex(startIndex, queue);
+    const normalizedQueue = [...nextQueue];
+    const nextIndex = clampIndex(startIndex, normalizedQueue);
+    const changed = !sameQueue(queue, normalizedQueue) || queueIndex !== nextIndex;
 
-    if (queueIndex >= 0) {
-      engine.load(queue[queueIndex]);
-    } else {
-      engine.clear();
-    }
+    queue = normalizedQueue;
+    queueIndex = nextIndex;
 
-    emit("queuechange");
+    if (queueIndex >= 0) engine.load(queue[queueIndex]);
+    else engine.clear();
+
+    if (changed) emit("queuechange");
   }
 
   function clearQueue() {
+    const changed = queue.length > 0 || queueIndex !== -1;
     queue = [];
     queueIndex = -1;
     engine.clear();
-    emit("queuechange");
+    if (changed) emit("queuechange");
   }
 
   function next() {
@@ -137,15 +149,15 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
   }
 
   function onChange(listener: PlayerControllerListener): PlayerEngineUnsubscribe {
+    if (destroyed) return () => undefined;
     listeners.add(listener);
     return () => listeners.delete(listener);
   }
 
   function destroy() {
-    for (const remove of removeEngineListeners) {
-      remove();
-    }
-
+    if (destroyed) return;
+    destroyed = true;
+    for (const remove of removeEngineListeners) remove();
     listeners.clear();
     queue = [];
     queueIndex = -1;
@@ -157,6 +169,7 @@ export function createPlayerController(engine: PlayerEngine): PlayerController {
     play: () => engine.play(),
     pause: () => engine.pause(),
     toggle: () => engine.toggle(),
+    recover: () => engine.recover(),
     seekTo: (seconds) => engine.seek(seconds),
     seekBy: (deltaSeconds) => engine.seek(engine.getState().currentTime + deltaSeconds),
     setVolume: (volume) => engine.setVolume(volume),

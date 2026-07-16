@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   PlayerEngine,
   PlayerEngineEvent,
   PlayerEngineListener,
@@ -11,19 +11,25 @@ const MEDIA_EVENTS: readonly PlayerEngineEvent[] = [
   "loadstart",
   "loadedmetadata",
   "canplay",
-  "timeupdate",
   "play",
+  "playing",
   "pause",
+  "timeupdate",
+  "waiting",
+  "stalled",
+  "suspend",
+  "emptied",
   "ended",
   "volumechange",
   "ratechange",
   "error"
 ];
 
-const PLAYBACK_SETTING_EVENTS = new Set<PlayerEngineEvent>([
+const RESTORE_EVENTS = new Set<PlayerEngineEvent>([
   "loadedmetadata",
   "canplay",
-  "play"
+  "play",
+  "playing"
 ]);
 
 function clamp(value: number, min: number, max: number) {
@@ -37,7 +43,7 @@ function setPitchPreservation(element: HTMLAudioElement, preservesPitch: boolean
     (element as HTMLAudioElement & { mozPreservesPitch?: boolean }).mozPreservesPitch = preservesPitch;
     (element as HTMLAudioElement & { webkitPreservesPitch?: boolean }).webkitPreservesPitch = preservesPitch;
   } catch {
-    // Older Chromium builds may not expose every pitch-preservation property.
+    // Old Chromium builds may not expose every pitch property.
   }
 }
 
@@ -49,20 +55,30 @@ export class HtmlAudioEngine implements PlayerEngine {
   private readonly removeDomListeners: PlayerEngineUnsubscribe[] = [];
   private desiredPlaybackRate = 1;
   private desiredPreservesPitch = true;
-  private applyingPlaybackSettings = false;
+  private desiredVolume = 1;
+  private desiredMuted = false;
+  private pendingSeek: number | null = null;
+  private applyingOutputState = false;
+  private repairQueued = false;
+  private playPromise: Promise<void> | null = null;
+  private playAttempt = 0;
+  private destroyed = false;
 
   constructor(element?: HTMLAudioElement) {
     this.element = element ?? new Audio();
     this.element.preload = this.element.preload || "metadata";
     this.desiredPlaybackRate = clamp(this.element.playbackRate || 1, 0.25, 4);
     this.desiredPreservesPitch = this.element.preservesPitch !== false;
+    this.desiredVolume = clamp(this.element.volume, 0, 1);
+    this.desiredMuted = this.element.muted;
 
     for (const event of MEDIA_EVENTS) {
       const handler = () => {
-        if (PLAYBACK_SETTING_EVENTS.has(event)) {
-          this.restorePlaybackSettings();
-        } else if (event === "ratechange") {
-          this.repairUnexpectedRateChange();
+        if (RESTORE_EVENTS.has(event)) {
+          this.restoreOutputState();
+          this.applyPendingSeek();
+        } else if (event === "ratechange" || event === "volumechange") {
+          this.queueRepairIfNeeded();
         }
 
         this.emit(event);
@@ -74,20 +90,28 @@ export class HtmlAudioEngine implements PlayerEngine {
   }
 
   load(source: PlayerEngineSource) {
+    if (this.destroyed) return;
+
+    const sourceChanged = this.source?.id !== source.id || this.source?.url !== source.url;
     this.source = source;
 
-    if (this.element.src !== source.url) {
+    if (sourceChanged || !this.element.src) {
+      this.pendingSeek = null;
       this.element.src = source.url;
       this.element.load();
     }
 
-    this.restorePlaybackSettings();
+    this.restoreOutputState();
     this.emit("sourcechange");
   }
 
   clear() {
+    if (this.destroyed) return;
+
     this.pause();
     this.source = null;
+    this.pendingSeek = null;
+    this.playPromise = null;
 
     if (this.element.src) {
       this.element.removeAttribute("src");
@@ -97,13 +121,37 @@ export class HtmlAudioEngine implements PlayerEngine {
     this.emit("sourcechange");
   }
 
-  async play() {
-    this.restorePlaybackSettings();
-    await this.element.play();
-    this.restorePlaybackSettings();
+  play() {
+    if (this.destroyed) return Promise.reject(new Error("player engine destroyed"));
+    if (!this.element.paused && !this.element.ended) {
+      this.restoreOutputState();
+      return Promise.resolve();
+    }
+    if (this.playPromise) return this.playPromise;
+
+    this.restoreOutputState();
+    const attempt = ++this.playAttempt;
+    const playPromise = this.element.play()
+      .then(() => {
+        if (attempt !== this.playAttempt || this.destroyed) {
+          this.element.pause();
+          return;
+        }
+
+        this.restoreOutputState();
+        this.applyPendingSeek();
+      })
+      .finally(() => {
+        if (this.playPromise === playPromise) this.playPromise = null;
+      });
+
+    this.playPromise = playPromise;
+    return playPromise;
   }
 
   pause() {
+    this.playAttempt += 1;
+    this.playPromise = null;
     this.element.pause();
   }
 
@@ -118,22 +166,39 @@ export class HtmlAudioEngine implements PlayerEngine {
   }
 
   seek(seconds: number) {
+    const safeSeconds = Math.max(0, Number(seconds) || 0);
     const duration = Number.isFinite(this.element.duration) ? this.element.duration : Number.POSITIVE_INFINITY;
-    this.element.currentTime = clamp(seconds, 0, duration);
+    const target = clamp(safeSeconds, 0, duration);
+
+    if (this.element.readyState < HTMLMediaElement.HAVE_METADATA) {
+      this.pendingSeek = target;
+      return;
+    }
+
+    this.pendingSeek = null;
+    this.element.currentTime = target;
   }
 
   setVolume(volume: number) {
-    this.element.volume = clamp(volume, 0, 1);
+    this.desiredVolume = clamp(volume, 0, 1);
+    this.restoreOutputState();
   }
 
   setMuted(muted: boolean) {
-    this.element.muted = muted;
+    this.desiredMuted = Boolean(muted);
+    this.restoreOutputState();
   }
 
   setPlaybackRate(rate: number, preservesPitch = true) {
     this.desiredPlaybackRate = clamp(rate, 0.25, 4);
     this.desiredPreservesPitch = preservesPitch;
-    this.restorePlaybackSettings();
+    this.restoreOutputState();
+  }
+
+  recover() {
+    if (this.destroyed) return;
+    this.restoreOutputState();
+    this.applyPendingSeek();
   }
 
   getState(): PlayerEngineState {
@@ -160,26 +225,45 @@ export class HtmlAudioEngine implements PlayerEngine {
 
     return () => {
       bucket.delete(listener);
-      if (bucket.size === 0) {
-        this.listeners.delete(event);
-      }
+      if (bucket.size === 0) this.listeners.delete(event);
     };
   }
 
   destroy() {
-    this.clear();
+    if (this.destroyed) return;
+    this.destroyed = true;
+    this.playAttempt += 1;
+    this.playPromise = null;
 
-    for (const remove of this.removeDomListeners.splice(0)) {
-      remove();
+    for (const remove of this.removeDomListeners.splice(0)) remove();
+    this.listeners.clear();
+
+    try {
+      this.element.pause();
+      this.element.removeAttribute("src");
+      this.element.load();
+    } catch {
+      // Teardown must not throw during React unmount.
     }
 
-    this.listeners.clear();
+    this.source = null;
+    this.pendingSeek = null;
   }
 
-  private restorePlaybackSettings() {
-    if (this.applyingPlaybackSettings) return;
+  private applyPendingSeek() {
+    if (this.pendingSeek === null || this.element.readyState < HTMLMediaElement.HAVE_METADATA) return;
+    const duration = Number.isFinite(this.element.duration) ? this.element.duration : Number.POSITIVE_INFINITY;
+    const target = clamp(this.pendingSeek, 0, duration);
+    this.pendingSeek = null;
 
-    this.applyingPlaybackSettings = true;
+    if (Math.abs(this.element.currentTime - target) > 0.05) {
+      this.element.currentTime = target;
+    }
+  }
+
+  private restoreOutputState() {
+    if (this.destroyed || this.applyingOutputState) return;
+    this.applyingOutputState = true;
 
     try {
       setPitchPreservation(this.element, this.desiredPreservesPitch);
@@ -187,30 +271,40 @@ export class HtmlAudioEngine implements PlayerEngine {
       if (Math.abs(this.element.defaultPlaybackRate - this.desiredPlaybackRate) > 0.0001) {
         this.element.defaultPlaybackRate = this.desiredPlaybackRate;
       }
-
       if (Math.abs(this.element.playbackRate - this.desiredPlaybackRate) > 0.0001) {
         this.element.playbackRate = this.desiredPlaybackRate;
       }
+      if (Math.abs(this.element.volume - this.desiredVolume) > 0.0001) {
+        this.element.volume = this.desiredVolume;
+      }
+      if (this.element.muted !== this.desiredMuted) {
+        this.element.muted = this.desiredMuted;
+      }
     } finally {
-      this.applyingPlaybackSettings = false;
+      this.applyingOutputState = false;
     }
   }
 
-  private repairUnexpectedRateChange() {
-    if (this.applyingPlaybackSettings) return;
-    if (Math.abs(this.element.playbackRate - this.desiredPlaybackRate) <= 0.0001) return;
+  private queueRepairIfNeeded() {
+    if (this.destroyed || this.applyingOutputState || this.repairQueued) return;
 
-    queueMicrotask(() => this.restorePlaybackSettings());
+    const rateWrong = Math.abs(this.element.playbackRate - this.desiredPlaybackRate) > 0.0001;
+    const volumeWrong = Math.abs(this.element.volume - this.desiredVolume) > 0.0001;
+    const muteWrong = this.element.muted !== this.desiredMuted;
+    if (!rateWrong && !volumeWrong && !muteWrong) return;
+
+    this.repairQueued = true;
+    queueMicrotask(() => {
+      this.repairQueued = false;
+      this.restoreOutputState();
+    });
   }
 
   private emit(event: PlayerEngineEvent) {
-    const state = this.getState();
     const eventListeners = this.listeners.get(event);
+    if (!eventListeners?.size) return;
 
-    if (!eventListeners) return;
-
-    for (const listener of eventListeners) {
-      listener(state, event);
-    }
+    const state = this.getState();
+    for (const listener of eventListeners) listener(state, event);
   }
 }

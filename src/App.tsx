@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 
 import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
@@ -598,7 +598,10 @@ function MainModeApp() {
   const progressLoopTimeoutRef = useRef<number | null>(null);
   const saveSettingsTimerRef = useRef<number | null>(null);
   const saveSettingsSerialRef = useRef(0);
-  const backgroundAudioRepairTimerRef = useRef<number | null>(null);
+  const activePlayRequestRef = useRef<{ songId: string; promise: Promise<boolean> } | null>(null);
+  const playbackFailureIdsRef = useRef<Set<string>>(new Set());
+  const playbackRecoveryRef = useRef<{ songId: string; timer: number } | null>(null);
+  const lifecycleLastTickRef = useRef(Date.now());
   const analyticsWorkerRef = useRef<Worker | null>(null);
   const analyticsWorkerRequestRef = useRef(0);
   const playlistSaveTimerRef = useRef<number | null>(null);
@@ -638,25 +641,6 @@ function MainModeApp() {
   const audioEffectFeedbackGainRef = useRef<GainNode | null>(null);
   const audioEffectFilterRef = useRef<BiquadFilterNode | null>(null);
 
-  useEffect(() => {
-    const body = document.body;
-    const syncFocusClass = () => {
-      const backgrounded = document.hidden || !document.hasFocus();
-      body.classList.toggle("localtifyWindowBackgrounded", backgrounded);
-    };
-
-    syncFocusClass();
-    window.addEventListener("focus", syncFocusClass);
-    window.addEventListener("blur", syncFocusClass);
-    document.addEventListener("visibilitychange", syncFocusClass);
-
-    return () => {
-      window.removeEventListener("focus", syncFocusClass);
-      window.removeEventListener("blur", syncFocusClass);
-      document.removeEventListener("visibilitychange", syncFocusClass);
-      body.classList.remove("localtifyWindowBackgrounded");
-    };
-  }, []);
 
   const beatDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const beatSmoothRef = useRef({ bass: 0, mid: 0, energy: 0, phase: 0 });
@@ -966,33 +950,48 @@ function MainModeApp() {
     void context.resume().catch(() => undefined);
   }
 
-  function repairPlaybackAfterAppReturns(reason: "focus" | "visibility" | "background-tick") {
+  function repairPlaybackAfterAppReturns(reason: "focus" | "visibility" | "background-tick" | "device-change" | "wake") {
     const audio = audioRef.current;
-    if (!audio) return;
+    const song = songRef.current;
+    if (!audio || !song) return;
 
     resumeAudioContextSafely();
 
+    const controller = ensurePlayerController();
+    const latestSettings = settingsRef.current;
+    const targetVolume = getTargetAudioVolume(song, latestSettings);
+
+    applyPlaybackRateSettings(audio, latestSettings);
+    setAudioElementVolume(audio, targetVolume);
+    controller?.setMuted(targetVolume <= 0.001);
+    controller?.recover();
+    syncAudioEffectGraph(audio);
+
+    // Some audio devices reset the media position to zero after sleep/wake.
+    // Only restore when the track was genuinely in progress and has not ended.
+    if (!audio.ended && audio.currentTime < 0.05 && timeRef.current > 2) {
+      const restoreTime = Math.min(timeRef.current, Math.max(0, (durationRef.current || song.duration || 0) - 0.25));
+      if (restoreTime > 0.5) {
+        if (controller) controller.seekTo(restoreTime);
+        else audio.currentTime = restoreTime;
+      }
+    }
+
     if (!playingRef.current && !pendingPlayRef.current) return;
-    if (!songRef.current) return;
-
-    applyPlaybackRateSettings(audio);
-    setAudioElementVolume(audio, getTargetAudioVolume(songRef.current));
-
     if (!audio.paused) return;
+    if (reason === "background-tick" && !document.hidden) return;
 
-    const canRepair = reason !== "background-tick" || document.hidden;
-    if (!canRepair) return;
-
-    void audio.play()
+    void (controller ? controller.play() : audio.play())
       .then(() => {
         applyPlaybackRateSettings(audio, settingsRef.current);
         pendingPlayRef.current = false;
         if (!playingRef.current) setIsPlaying(true);
       })
-      .catch(() => {
-        // Alt-tab/focus repair should never flip the player into a failed state.
+      .catch((error) => {
+        console.warn(`[localtify playback repair:${reason}]`, error);
       });
   }
+
 
   useEffect(() => {
     let analyticsLaunchCancelled = false;
@@ -1013,22 +1012,13 @@ function MainModeApp() {
       trackAppSessionEnded({ reason, current_view: analyticsViewRef.current });
     };
 
-    const handleBeforeUnload = () => {
-      finishAnalyticsSession("beforeunload");
-    };
-
+    const handleBeforeUnload = () => finishAnalyticsSession("beforeunload");
     let focusRepairTimer = 0;
 
     const repairHeroAmbienceAfterFocus = () => {
-      if (focusRepairTimer) {
-        window.clearTimeout(focusRepairTimer);
-      }
-
-      // without reapplying the blur filter after alt-tab. Toggling a short body
-      // class forces a compositor repaint without changing the user setting.
+      if (focusRepairTimer) window.clearTimeout(focusRepairTimer);
       document.body.classList.add("localtifyFocusRecovering");
       appRootRef.current?.classList.add("localtifyHeroAmbienceRecovering");
-
       focusRepairTimer = window.setTimeout(() => {
         document.body.classList.remove("localtifyFocusRecovering");
         appRootRef.current?.classList.remove("localtifyHeroAmbienceRecovering");
@@ -1036,9 +1026,15 @@ function MainModeApp() {
       }, 420);
     };
 
+    const syncBackgroundState = (hidden: boolean) => {
+      isAppBackgroundedRef.current = hidden;
+      setIsAppBackgrounded((current) => (current === hidden ? current : hidden));
+      document.body.classList.toggle("localtifyWindowBackgrounded", hidden);
+    };
+
     const handleVisibilityChange = () => {
       const hidden = document.hidden;
-      setIsAppBackgrounded(hidden);
+      syncBackgroundState(hidden);
 
       if (hidden) {
         repairPlaybackAfterAppReturns("background-tick");
@@ -1053,17 +1049,21 @@ function MainModeApp() {
     };
 
     const handleFocus = () => {
-      if (!document.hidden) {
-        setIsAppBackgrounded(false);
-        repairPlaybackAfterAppReturns("focus");
-        repairHeroAmbienceAfterFocus();
-      }
+      syncBackgroundState(false);
+      repairPlaybackAfterAppReturns("focus");
+      repairHeroAmbienceAfterFocus();
       trackAppActive({ reason: "window_focus", current_view: analyticsViewRef.current });
     };
 
     const handleBlur = () => {
-      if (document.hidden) setIsAppBackgrounded(true);
+      syncBackgroundState(document.hidden || !document.hasFocus());
       trackAppBackgrounded({ reason: "window_blur", current_view: analyticsViewRef.current });
+    };
+
+    const handlePageShow = () => repairPlaybackAfterAppReturns("wake");
+    const handleDeviceChange = () => {
+      repairPlaybackAfterAppReturns("device-change");
+      if (playingRef.current) setStatusText("audio device changed · playback restored");
     };
 
     const handleWindowError = (event: ErrorEvent) => {
@@ -1077,41 +1077,50 @@ function MainModeApp() {
       trackError("unhandled_rejection", reason, { current_view: analyticsViewRef.current });
     };
 
+    syncBackgroundState(document.hidden || !document.hasFocus());
+    lifecycleLastTickRef.current = Date.now();
+
     const heartbeatTimer = window.setInterval(() => {
+      const now = Date.now();
+      const gap = now - lifecycleLastTickRef.current;
+      lifecycleLastTickRef.current = now;
+
+      if (gap > 45_000) repairPlaybackAfterAppReturns("wake");
       if (!document.hidden) {
         trackAppActive({ reason: "heartbeat", current_view: analyticsViewRef.current });
+      } else if (playingRef.current) {
+        repairPlaybackAfterAppReturns("background-tick");
       }
-    }, 300_000);
-
-    const backgroundAudioKeeper = window.setInterval(() => {
-      if (!document.hidden || !playingRef.current) return;
-      repairPlaybackAfterAppReturns("background-tick");
-    }, 1800);
+    }, 15_000);
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     window.addEventListener("focus", handleFocus);
     window.addEventListener("blur", handleBlur);
+    window.addEventListener("pageshow", handlePageShow);
     window.addEventListener("error", handleWindowError);
     window.addEventListener("unhandledrejection", handleUnhandledRejection);
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    navigator.mediaDevices?.addEventListener?.("devicechange", handleDeviceChange);
 
     return () => {
       analyticsLaunchCancelled = true;
       window.clearTimeout(analyticsLaunchTimer);
       if (focusRepairTimer) window.clearTimeout(focusRepairTimer);
-      document.body.classList.remove("localtifyFocusRecovering");
+      document.body.classList.remove("localtifyFocusRecovering", "localtifyWindowBackgrounded");
       appRootRef.current?.classList.remove("localtifyHeroAmbienceRecovering");
       finishAnalyticsSession("unmount");
       window.clearInterval(heartbeatTimer);
-      window.clearInterval(backgroundAudioKeeper);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("blur", handleBlur);
+      window.removeEventListener("pageshow", handlePageShow);
       window.removeEventListener("error", handleWindowError);
       window.removeEventListener("unhandledrejection", handleUnhandledRejection);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      navigator.mediaDevices?.removeEventListener?.("devicechange", handleDeviceChange);
     };
   }, []);
+
 
   // Do not auto-close it just because songs exist; import completion is handled inside Onboarding.
 
@@ -3441,23 +3450,17 @@ function MainModeApp() {
       }, 90);
     };
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        clearIdleTimer();
-        clearActivityTimer();
-        if (!playingRef.current) markIdle();
-        return;
-      }
-
+    if (isAppBackgrounded) {
+      clearIdleTimer();
+      clearActivityTimer();
+      if (!playingRef.current) markIdle();
+    } else {
       markActive();
-    };
-
-    markActive();
+    }
 
     window.addEventListener("pointerdown", scheduleActive, passiveOptions);
     window.addEventListener("wheel", scheduleActive, passiveOptions);
     window.addEventListener("keydown", scheduleActive);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       clearIdleTimer();
@@ -3465,10 +3468,9 @@ function MainModeApp() {
       window.removeEventListener("pointerdown", scheduleActive, passiveOptions);
       window.removeEventListener("wheel", scheduleActive, passiveOptions);
       window.removeEventListener("keydown", scheduleActive);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
       body.classList.remove("localtifyIdle");
     };
-  }, [isPlaying]);
+  }, [isPlaying, isAppBackgrounded]);
 
   useEffect(() => {
     songRef.current = currentSong;
@@ -4612,28 +4614,26 @@ function MainModeApp() {
     updateVolumeFast(nextVolume);
   }
 
+  const handleNativePlayerCommand = useStableCallback((command: any) => {
+    if (!command || typeof command !== "object") return;
+
+    if (command.type === "toggle") togglePlay();
+    if (command.type === "play") setIsPlaying(true);
+    if (command.type === "pause") setIsPlaying(false);
+    if (command.type === "stop") stopPlaybackFromNative();
+    if (command.type === "prev") playPrevious();
+    if (command.type === "next") playNext(true);
+    if (command.type === "repeat") toggleRepeat();
+    if (command.type === "shuffle") setIsShuffle((value) => !value);
+    if (command.type === "muteToggle") toggleMuteFromNative();
+    if (command.type === "seekPercent") handleSeek(String(command.value ?? 0));
+    if (command.type === "volume") updateVolumeFast(clamp(Number(command.value) || 0, 0, 1));
+  });
+
   useEffect(() => {
-    const off = window.localitfy.onPlayerCommand((command: any) => {
-      if (!command || typeof command !== "object") return;
-
-      if (command.type === "toggle") togglePlay();
-      if (command.type === "play") setIsPlaying(true);
-      if (command.type === "pause") setIsPlaying(false);
-      if (command.type === "stop") stopPlaybackFromNative();
-      if (command.type === "prev") playPrevious();
-      if (command.type === "next") playNext(true);
-      if (command.type === "repeat") toggleRepeat();
-      if (command.type === "shuffle") setIsShuffle((value) => !value);
-      if (command.type === "muteToggle") toggleMuteFromNative();
-      if (command.type === "seekPercent") handleSeek(String(command.value ?? 0));
-
-      if (command.type === "volume") {
-        updateVolumeFast(clamp(Number(command.value) || 0, 0, 1));
-      }
-    });
-
+    const off = window.localitfy.onPlayerCommand(handleNativePlayerCommand);
     return () => off();
-  }, [settings.volume, currentId, isPlaying, songs]);
+  }, [handleNativePlayerCommand]);
 
 
   useEffect(() => {
@@ -4774,10 +4774,6 @@ function MainModeApp() {
         window.clearTimeout(saveSettingsTimerRef.current);
       }
 
-      if (backgroundAudioRepairTimerRef.current !== null) {
-        window.clearTimeout(backgroundAudioRepairTimerRef.current);
-        backgroundAudioRepairTimerRef.current = null;
-      }
 
       if (sleepTimerRef.current !== null) {
         window.clearTimeout(sleepTimerRef.current);
@@ -4796,6 +4792,11 @@ function MainModeApp() {
       if (fadeFrameRef.current !== null) {
         window.cancelAnimationFrame(fadeFrameRef.current);
         fadeFrameRef.current = null;
+      }
+
+      if (playbackRecoveryRef.current) {
+        window.clearTimeout(playbackRecoveryRef.current.timer);
+        playbackRecoveryRef.current = null;
       }
 
       nextAudioRef.current?.pause();
@@ -4855,12 +4856,13 @@ function MainModeApp() {
 
         if (controller) {
           controller.setVolume(safeVolume);
+          controller.setMuted(safeVolume <= 0.001);
           return;
         }
       }
 
-      audio.muted = false;
       audio.volume = safeVolume;
+      audio.muted = safeVolume <= 0.001;
     } catch {
       // Volume changes should never break playback.
     }
@@ -4968,16 +4970,11 @@ function MainModeApp() {
 
       setAudioElementVolume(audio, safeVolume);
       applyPlaybackRateSettings(audio);
-      audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
+      audio.preload = settingsRef.current.gaplessPlayback ? "auto" : "metadata";
       volumeRef.current = safeVolume;
       return safeVolume;
     },
-    [
-      getTargetAudioVolume,
-      settings.playbackSpeed,
-      settings.gaplessPlayback,
-      (settings as any).audioEffectMode
-    ]
+    [getTargetAudioVolume]
   );
 
   const resolvePlaybackUrl = useCallback(
@@ -5417,14 +5414,15 @@ function MainModeApp() {
       audio.pause();
       audio.removeAttribute("src");
       audio.load();
-
-      pendingPlayRef.current = false;
-      resetPlayCountTracker();
-      setIsPlaying(false);
       setCurrentTime(0);
       setCurrentDuration(0);
-      setPlayerError("this audio file is missing. reimport it on this pc.");
-      setStatusText("file missing");
+
+      recoverFromPlaybackFailure(
+        currentSong,
+        "this audio file is missing. reimport or relink it on this pc.",
+        "file missing",
+        { songId: currentSong.id, filePath: currentSong.filePath || "", reason: "missing-source" }
+      );
       return;
     }
 
@@ -5438,15 +5436,22 @@ function MainModeApp() {
         audio.pause();
         audio.removeAttribute("src");
         audio.load();
-
-        pendingPlayRef.current = false;
-        resetPlayCountTracker();
-
-        setIsPlaying(false);
         setCurrentTime(0);
         setCurrentDuration(0);
-        setPlayerError(result.fileExists === false ? "this audio file is missing. reimport it on this pc." : "could not create a playback URL for this song.");
-        setStatusText(result.fileExists === false ? "file missing" : "playback url failed");
+
+        const missing = result.fileExists === false;
+        recoverFromPlaybackFailure(
+          currentSong,
+          missing
+            ? "this audio file is missing. reimport or relink it on this pc."
+            : "Localtify could not prepare this audio file for playback.",
+          missing ? "file missing" : "playback URL failed",
+          {
+            songId: currentSong.id,
+            filePath: currentSong.filePath || "",
+            reason: result.error || (missing ? "file-missing" : "url-resolution-failed")
+          }
+        );
         return;
       }
 
@@ -5937,6 +5942,87 @@ function MainModeApp() {
     }
   }
 
+  function recoverFromPlaybackFailure(
+    failedSong: Song | null,
+    message: string,
+    status: string,
+    technical?: Record<string, unknown>,
+    shouldSkip = playingRef.current || pendingPlayRef.current
+  ) {
+    const songId = failedSong?.id || "";
+
+    if (technical) {
+      console.error("[localtify playback error]", technical);
+      trackError("audio_playback_failed", message, technical);
+    }
+
+    pendingPlayRef.current = false;
+    activePlayRequestRef.current = null;
+    resetPlayCountTracker();
+    stopFade();
+    stopCrossfadeAuto();
+    stopProgressLoop();
+
+    try { audioRef.current?.pause(); } catch {}
+    try { nextAudioRef.current?.pause(); } catch {}
+
+    if (songId) playbackFailureIdsRef.current.add(songId);
+
+    const hasAlternative = playableSongs.some((song) =>
+      song.id !== songId &&
+      !playbackFailureIdsRef.current.has(song.id) &&
+      isPlayableSong(song)
+    );
+
+    if (shouldSkip && hasAlternative) {
+      setPlayerError(`${message} Skipping to the next playable track.`);
+      setStatusText(`${status} · skipping`);
+      showAppToast(`could not play ${prettyTitle(failedSong?.title || "track", 5)} · skipping`, "error");
+
+      if (!playbackRecoveryRef.current || playbackRecoveryRef.current.songId !== songId) {
+        if (playbackRecoveryRef.current) {
+          window.clearTimeout(playbackRecoveryRef.current.timer);
+        }
+
+        const timer = window.setTimeout(() => {
+          playbackRecoveryRef.current = null;
+          playNext(true, "manual");
+        }, 180);
+
+        playbackRecoveryRef.current = { songId, timer };
+      }
+
+      return true;
+    }
+
+    setIsPlaying(false);
+    setPlayerError(message);
+    setStatusText(status);
+    window.localitfy.clearDiscordActivity().catch(() => undefined);
+    return false;
+  }
+
+  function handleAudioError() {
+    const audio = audioRef.current;
+    const failedSong = songRef.current || currentSong;
+    const failedCacheKey = getSongPlaybackSourceKey(failedSong);
+    if (failedCacheKey) playbackUrlCacheRef.current.delete(failedCacheKey);
+
+    const message = getAudioErrorText(audio);
+    const technical = {
+      songId: failedSong?.id || "",
+      title: failedSong?.title || "unknown",
+      filePath: failedSong?.filePath || "",
+      mediaCode: audio?.error?.code || 0,
+      mediaMessage: audio?.error?.message || "",
+      readyState: audio?.readyState ?? -1,
+      networkState: audio?.networkState ?? -1,
+      currentTime: audio?.currentTime || 0
+    };
+
+    recoverFromPlaybackFailure(failedSong, message, "playback error", technical);
+  }
+
   function handleAudioTimeUpdate(event: SyntheticEvent<HTMLAudioElement>) {
     const audio = event.currentTarget;
     const nextTime = audio.currentTime;
@@ -6068,7 +6154,23 @@ function MainModeApp() {
     return "audio could not start. try reimporting the file.";
   }
 
-  async function startAudioPlayback(reason = "manual") {
+  function startAudioPlayback(reason = "manual") {
+    const song = songRef.current || currentSong;
+    const existing = activePlayRequestRef.current;
+
+    if (song && existing?.songId === song.id) return existing.promise;
+
+    const promise = performAudioPlayback(reason).finally(() => {
+      if (activePlayRequestRef.current?.promise === promise) {
+        activePlayRequestRef.current = null;
+      }
+    });
+
+    if (song) activePlayRequestRef.current = { songId: song.id, promise };
+    return promise;
+  }
+
+  async function performAudioPlayback(reason = "manual") {
     const audio = audioRef.current;
     const song = songRef.current || currentSong;
 
@@ -6078,22 +6180,31 @@ function MainModeApp() {
     }
 
     if (!getSongPlaybackSourceKey(song) || song.fileExists === false) {
-      pendingPlayRef.current = false;
-      resetPlayCountTracker();
-      setIsPlaying(false);
-      setPlayerError("this audio file is missing. reimport it on this pc.");
-      setStatusText("file missing");
+      recoverFromPlaybackFailure(
+        song,
+        "this audio file is missing. reimport or relink it on this pc.",
+        "file missing",
+        { songId: song.id, filePath: song.filePath || "", reason: "missing-source" }
+      );
       return false;
     }
 
     const playbackUrl = await resolvePlaybackUrl(song);
 
     if (!playbackUrl.ok || !playbackUrl.url || playbackUrl.fileExists === false) {
-      pendingPlayRef.current = false;
-      resetPlayCountTracker();
-      setIsPlaying(false);
-      setPlayerError(playbackUrl.fileExists === false ? "this audio file is missing. reimport it on this pc." : "could not create a playback URL for this song.");
-      setStatusText(playbackUrl.fileExists === false ? "file missing" : "playback url failed");
+      const missing = playbackUrl.fileExists === false;
+      recoverFromPlaybackFailure(
+        song,
+        missing
+          ? "this audio file is missing. reimport or relink it on this pc."
+          : "Localtify could not prepare this audio file for playback.",
+        missing ? "file missing" : "playback URL failed",
+        {
+          songId: song.id,
+          filePath: song.filePath || "",
+          reason: playbackUrl.error || (missing ? "file-missing" : "url-resolution-failed")
+        }
+      );
       return false;
     }
 
@@ -6101,7 +6212,8 @@ function MainModeApp() {
       stopFade();
 
       const playerController = ensurePlayerController();
-      const safeVolume = getTargetAudioVolume(song);
+      const liveSettings = settingsRef.current;
+      const safeVolume = getTargetAudioVolume(song, liveSettings);
 
       const handoffActive = crossfadeHandoffRef.current?.songId === song.id;
       const continuingCrossfadePlayback =
@@ -6114,9 +6226,9 @@ function MainModeApp() {
           audio.currentTime > 0.05
         );
 
-      setAudioElementVolume(audio, continuingCrossfadePlayback || settings.reducedMotion || !settings.crossfadeEnabled ? safeVolume : 0);
-      applyPlaybackRateSettings(audio);
-      audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
+      setAudioElementVolume(audio, continuingCrossfadePlayback || liveSettings.reducedMotion || !liveSettings.crossfadeEnabled ? safeVolume : 0);
+      applyPlaybackRateSettings(audio, liveSettings);
+      audio.preload = liveSettings.gaplessPlayback ? "auto" : "metadata";
       syncAudioEffectGraph(audio);
       resumeAudioContextSafely();
       volumeRef.current = safeVolume;
@@ -6134,8 +6246,8 @@ function MainModeApp() {
 
       pendingPlayRef.current = false;
 
-      if (!continuingCrossfadePlayback && !settings.reducedMotion && settings.crossfadeEnabled && safeVolume > 0) {
-        fadeAudio(safeVolume, Math.max(120, Number(settings.crossfadeSeconds || 1.6) * 1000));
+      if (!continuingCrossfadePlayback && !liveSettings.reducedMotion && liveSettings.crossfadeEnabled && safeVolume > 0) {
+        fadeAudio(safeVolume, Math.max(120, Number(liveSettings.crossfadeSeconds || 1.6) * 1000));
       } else {
         setAudioElementVolume(audio, safeVolume);
       }
@@ -6151,12 +6263,19 @@ function MainModeApp() {
       setStatusText(`playing ${prettyTitle(song.title, 5)}`);
 
       return true;
-    } catch {
-      pendingPlayRef.current = false;
-      resetPlayCountTracker();
-      setIsPlaying(false);
-      setPlayerError(getAudioErrorText(audio));
-      setStatusText(reason === "manual" ? "playback failed" : "audio not ready");
+    } catch (error) {
+      const message = getAudioErrorText(audio);
+      recoverFromPlaybackFailure(
+        song,
+        message,
+        reason === "manual" ? "playback failed" : "audio not ready",
+        {
+          songId: song.id,
+          filePath: song.filePath || "",
+          reason,
+          error: error instanceof Error ? error.message : String(error || "unknown playback rejection")
+        }
+      );
 
       return false;
     }
@@ -9590,16 +9709,23 @@ function MainModeApp() {
       return;
     }
 
-    if (!getSongPlaybackSourceKey(targetSong) || targetSong.fileExists === false) {
-      pendingPlayRef.current = false;
-      resetPlayCountTracker();
+    playbackFailureIdsRef.current.delete(songId);
+    if (playbackRecoveryRef.current?.songId === songId) {
+      window.clearTimeout(playbackRecoveryRef.current.timer);
+      playbackRecoveryRef.current = null;
+    }
 
+    if (!getSongPlaybackSourceKey(targetSong) || targetSong.fileExists === false) {
       setCurrentId(songId);
       void rememberCurrentSong(songId);
 
-      setIsPlaying(false);
-      setPlayerError("this audio file is missing. reimport it on this pc.");
-      setStatusText("file missing");
+      recoverFromPlaybackFailure(
+        targetSong,
+        "this audio file is missing. reimport or relink it on this pc.",
+        "file missing",
+        { songId: targetSong.id, filePath: targetSong.filePath || "", reason: "missing-source" },
+        shouldPlay
+      );
       return;
     }
 
@@ -9694,11 +9820,13 @@ function MainModeApp() {
     }
 
     if (!getSongPlaybackSourceKey(currentSong) || currentSong.fileExists === false) {
-      pendingPlayRef.current = false;
-      resetPlayCountTracker();
-      setIsPlaying(false);
-      setPlayerError("this audio file is missing. reimport it on this pc.");
-      setStatusText("file missing");
+      recoverFromPlaybackFailure(
+        currentSong,
+        "this audio file is missing. reimport or relink it on this pc.",
+        "file missing",
+        { songId: currentSong.id, filePath: currentSong.filePath || "", reason: "missing-source" },
+        true
+      );
       return;
     }
 
@@ -9760,13 +9888,27 @@ function MainModeApp() {
 
   function playNext(forcePlay = true, trigger: "manual" | "auto" = "manual") {
     if (trigger === "manual") stopCrossfadeAuto();
-    if (!playableSongs.length) return;
 
-    if (trigger === "auto" && repeatMode === "one" && restartCurrentSongForRepeatOne()) {
+    const sessionPlayableSongs = playableSongs.filter(
+      (song) => !playbackFailureIdsRef.current.has(song.id)
+    );
+
+    if (!sessionPlayableSongs.length) {
+      pendingPlayRef.current = false;
+      setIsPlaying(false);
+      setStatusText("no playable tracks remain");
       return;
     }
 
-    const queuedIndex = playQueue.findIndex((songId) => isPlayableSong(songsById.get(songId)));
+    if (trigger === "auto" && repeatMode === "one" && !playbackFailureIdsRef.current.has(currentId) && restartCurrentSongForRepeatOne()) {
+      return;
+    }
+
+    const queuedIndex = playQueue.findIndex((songId) => {
+      const queuedSong = songsById.get(songId);
+      return Boolean(queuedSong && !playbackFailureIdsRef.current.has(songId) && isPlayableSong(queuedSong));
+    });
+
     if (queuedIndex !== -1) {
       const queuedSong = songsById.get(playQueue[queuedIndex]);
       setPlayQueue((queue) => queue.slice(queuedIndex + 1));
@@ -9780,11 +9922,14 @@ function MainModeApp() {
     }
 
     if (activePlaylist && currentSong) {
-      const playlistIndex = activePlaylistSongs.findIndex((song) => song.id === currentSong.id);
+      const availablePlaylistSongs = activePlaylistSongs.filter(
+        (song) => !playbackFailureIdsRef.current.has(song.id)
+      );
+      const playlistIndex = availablePlaylistSongs.findIndex((song) => song.id === currentSong.id);
 
-      if (playlistIndex !== -1) {
-        if (isShuffle && activePlaylistSongs.length > 1) {
-          const { nextSong, queuedSongIds } = buildShuffleQueue(activePlaylistSongs, currentSong.id);
+      if (availablePlaylistSongs.length) {
+        if (isShuffle && availablePlaylistSongs.length > 1) {
+          const { nextSong, queuedSongIds } = buildShuffleQueue(availablePlaylistSongs, currentSong.id);
 
           if (nextSong) {
             setPlayQueue(queuedSongIds);
@@ -9794,10 +9939,13 @@ function MainModeApp() {
           return;
         }
 
-        const playlistNext = activePlaylistSongs[playlistIndex + 1] || (repeatPlaylist || repeatMode === "all" ? activePlaylistSongs[0] : null);
+        const playlistNext = playlistIndex >= 0
+          ? availablePlaylistSongs[playlistIndex + 1] || (repeatPlaylist || repeatMode === "all" ? availablePlaylistSongs[0] : null)
+          : availablePlaylistSongs[0];
 
         if (playlistNext && playlistNext.id !== currentSong.id) {
-          setPlayQueue(activePlaylistSongs.slice(activePlaylistSongs.findIndex((song) => song.id === playlistNext.id) + 1).map((song) => song.id));
+          const nextIndex = availablePlaylistSongs.findIndex((song) => song.id === playlistNext.id);
+          setPlayQueue(availablePlaylistSongs.slice(nextIndex + 1).map((song) => song.id));
           void selectSong(playlistNext.id, forcePlay, { playlistId: activePlaylist.id });
         } else {
           setIsPlaying(false);
@@ -9809,8 +9957,8 @@ function MainModeApp() {
       }
     }
 
-    if (isShuffle && playableSongs.length > 1) {
-      const { nextSong, queuedSongIds } = buildShuffleQueue(playableSongs, currentId);
+    if (isShuffle && sessionPlayableSongs.length > 1) {
+      const { nextSong, queuedSongIds } = buildShuffleQueue(sessionPlayableSongs, currentId);
 
       if (nextSong) {
         setActivePlaylistId(null);
@@ -9821,16 +9969,16 @@ function MainModeApp() {
       return;
     }
 
-    const index = currentIndex();
+    const index = sessionPlayableSongs.findIndex((song) => song.id === currentId);
 
     if (index === -1) {
-      void selectSong(playableSongs[0].id, forcePlay);
+      void selectSong(sessionPlayableSongs[0].id, forcePlay);
       return;
     }
 
-    if (index >= playableSongs.length - 1) {
+    if (index >= sessionPlayableSongs.length - 1) {
       if (repeatMode === "all") {
-        void selectSong(playableSongs[0].id, forcePlay);
+        void selectSong(sessionPlayableSongs[0].id, forcePlay);
       } else {
         setIsPlaying(false);
         setStatusText("queue ended");
@@ -9839,7 +9987,7 @@ function MainModeApp() {
       return;
     }
 
-    void selectSong(playableSongs[index + 1].id, forcePlay);
+    void selectSong(sessionPlayableSongs[index + 1].id, forcePlay);
   }
 
   function playPrevious() {
@@ -9911,6 +10059,11 @@ function MainModeApp() {
     if (!song) return;
 
     applyPlaybackRateSettings(audioRef.current, settingsRef.current);
+    playbackFailureIdsRef.current.delete(song.id);
+    if (playbackRecoveryRef.current) {
+      window.clearTimeout(playbackRecoveryRef.current.timer);
+      playbackRecoveryRef.current = null;
+    }
     pendingPlayRef.current = false;
     setIsPlaying(true);
 
@@ -11794,6 +11947,7 @@ function MainModeApp() {
     handleAudioTimeUpdate,
     handleAudioPause,
     handleAudioEnded,
+    handleAudioError,
     handleCanPlay,
     handlePlaying,
     pendingPlayRef,

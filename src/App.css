@@ -11942,24 +11942,24 @@ body.isResizingPlayer .app *{
 
 /* Generic panel variants */
 .app[data-card-background="solid"] .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.playerBar){
-  background: rgba(18, 17, 24, 0.96) !important;
-  border-color: rgba(255, 255, 255, 0.07) !important;
+  background: var(--lt-surface-raised) !important;
+  border-color: var(--lt-border) !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 .app[data-card-background="glassy"] .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.playerBar){
-  background: rgba(17, 15, 22, 0.68) !important;
-  border-color: rgba(255, 255, 255, 0.095) !important;
+  background: color-mix(in oklab, var(--lt-surface) 82%, transparent) !important;
+  border-color: var(--lt-border) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 18px 42px rgba(0, 0, 0, 0.22) !important;
   backdrop-filter: blur(16px) saturate(1.08) !important;
   -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
 }
 
 .app[data-card-background="oledFlat"] .panel:not(.homeShelfPanel):not(.homeListenPanel):not(.homeFreshPanel):not(.homeLibraryPanel):not(.settingsPanelCard):not(.settingsPageCard):not(.playerBar){
-  background: rgba(2, 2, 6, 0.98) !important;
-  border-color: rgba(255, 255, 255, 0.052) !important;
+  background: color-mix(in oklab, var(--lt-bg) 96%, #000 4%) !important;
+  border-color: var(--lt-border) !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -11993,7 +11993,7 @@ body.isResizingPlayer .app *{
   background:
     linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.012)),
     var(--localtify-owned-panel) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #8dffce) 20%, rgba(255,255,255,.08)) !important;
+  border-color: var(--lt-border) !important;
   box-shadow: 0 14px 36px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
@@ -12113,7 +12113,7 @@ body.isResizingPlayer .app *{
   position: relative;
   width: 100%;
   min-width: 0;
-  height: 46px;
+  height: var(--lt-control-height-lg, 46px);
   padding: 0 10px;
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr);
@@ -12121,7 +12121,7 @@ body.isResizingPlayer .app *{
   gap: 9px;
   overflow: hidden;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-radius: var(--lt-control-radius, 12px);
   color: var(--lt-muted);
   background: transparent;
   box-shadow: none;

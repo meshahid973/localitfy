@@ -1,6 +1,5 @@
-/* localtify 0.4.0 theme token foundation
-   This file owns shared color, radius, and shadow tokens.
-   Keep it visually neutral so old CSS keeps the same look while new CSS can use stable names. */
+/* Shared Localtify design tokens.
+   Themes may replace colors, while components reuse the same spacing and sizing. */
 
 :root{
   --lt-bg: #080712;
@@ -24,6 +23,16 @@
   --lt-radius-sm: 12px;
   --lt-radius-md: 18px;
   --lt-radius-lg: 26px;
+
+  --lt-panel-radius: var(--lt-radius-md);
+  --lt-card-radius: 16px;
+  --lt-control-radius: 12px;
+  --lt-panel-padding: 18px;
+  --lt-card-padding: 14px;
+  --lt-control-height-sm: 34px;
+  --lt-control-height: 42px;
+  --lt-control-height-lg: 46px;
+  --lt-layout-gap: 16px;
 
   --lt-shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.34);
 
