@@ -1,22 +1,34 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+function shouldIgnoreWatchPath(watchPath: string) {
+  const normalized = watchPath.replace(/\\/g, "/");
+  return (
+    normalized.endsWith("/src-tauri") ||
+    normalized.includes("/src-tauri/") ||
+    normalized.includes("/.tauri-target/")
+  );
+}
+
 export default defineConfig({
   base: "./",
   plugins: [react()],
+  clearScreen: false,
+  envPrefix: ["VITE_", "TAURI_ENV_"],
   server: {
     host: "127.0.0.1",
     port: 5173,
     strictPort: true,
     watch: {
-      ignored: ["**/src-tauri/**"]
+      ignored: shouldIgnoreWatchPath
     }
   },
   build: {
     outDir: "dist",
     emptyOutDir: true,
-    target: "es2022",
-    sourcemap: false,
+    target: process.env.TAURI_ENV_PLATFORM === "windows" ? "chrome105" : "safari13",
+    minify: process.env.TAURI_ENV_DEBUG ? false : "esbuild",
+    sourcemap: Boolean(process.env.TAURI_ENV_DEBUG),
     cssCodeSplit: true,
     modulePreload: {
       polyfill: false
