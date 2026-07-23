@@ -1,11 +1,22 @@
 type JsonRecord = Record<string, unknown>;
 
+type TauriInvoke = <T = unknown>(command: string, args?: Record<string, unknown>) => Promise<T>;
+
+type TauriGlobal = {
+  core?: {
+    invoke?: TauriInvoke;
+    convertFileSrc?: (filePath: string, protocol?: string) => string;
+  };
+};
+
 type TauriInternals = {
-  invoke?: <T = unknown>(command: string, args?: Record<string, unknown>) => Promise<T>;
+  invoke?: TauriInvoke;
 };
 
 type LocaltifyWindow = Window & {
-  localitfy?: Record<string, any>;
+  localitify?: Record<string, any>;
+  localtify?: Record<string, any>;
+  __TAURI__?: TauriGlobal;
   __TAURI_INTERNALS__?: TauriInternals;
   __LOCALTIFY_DESKTOP_RUNTIME__?: "electron" | "tauri-compat";
 };
@@ -56,16 +67,23 @@ function migrationPending(feature: string, extra: JsonRecord = {}) {
   };
 }
 
-function installTauriWindowRegions() {
-  const apply = () => {
-    const titleBars = document.querySelectorAll<HTMLElement>(".titleBar, .titleDrag");
-    if (!titleBars.length) return false;
+function installNativeTauriFrameLayout() {
+  document.documentElement.dataset.localtifyRuntime = "tauri";
 
-    titleBars.forEach((element) => element.setAttribute("data-tauri-drag-region", ""));
-    document
-      .querySelectorAll<HTMLElement>(".windowButtons, .windowButtons button, .windowButtons svg, .windowButtons path, .windowButtons rect")
-      .forEach((element) => element.setAttribute("data-tauri-drag-region", "false"));
-    return true;
+  const apply = () => {
+    const titleBar = document.querySelector<HTMLElement>(".titleBar");
+    const appShell = document.querySelector<HTMLElement>(".appShell");
+
+    if (titleBar) {
+      titleBar.hidden = true;
+      titleBar.style.display = "none";
+    }
+
+    if (appShell) {
+      appShell.style.height = "100vh";
+    }
+
+    return Boolean(titleBar && appShell);
   };
 
   if (apply()) return;
@@ -73,31 +91,69 @@ function installTauriWindowRegions() {
   const observer = new MutationObserver(() => {
     if (apply()) observer.disconnect();
   });
+
   observer.observe(document.documentElement, { childList: true, subtree: true });
 }
 
 function installTauriCompatibilityBridge() {
   const desktopWindow = window as LocaltifyWindow;
 
-  if (desktopWindow.localitfy) {
+  if (desktopWindow.localtify || desktopWindow.localitify) {
     desktopWindow.__LOCALTIFY_DESKTOP_RUNTIME__ = "electron";
     return;
   }
 
+  installNativeTauriFrameLayout();
+
+  const resolveInvoke = (): TauriInvoke | null => {
+    const globalInvoke = desktopWindow.__TAURI__?.core?.invoke;
+    if (typeof globalInvoke === "function") return globalInvoke.bind(desktopWindow.__TAURI__?.core);
+
+    const internalInvoke = desktopWindow.__TAURI_INTERNALS__?.invoke;
+    if (typeof internalInvoke === "function") return internalInvoke.bind(desktopWindow.__TAURI_INTERNALS__);
+
+    return null;
+  };
+
   const invoke = async <T = unknown>(command: string, args: Record<string, unknown> = {}) => {
-    const invokeCommand = desktopWindow.__TAURI_INTERNALS__?.invoke;
-    if (typeof invokeCommand !== "function") {
-      throw new Error("Tauri invoke bridge is unavailable");
+    const invokeCommand = resolveInvoke();
+    if (!invokeCommand) {
+      throw new Error(
+        "Tauri invoke bridge is unavailable. Confirm app.withGlobalTauri is enabled and restart the Tauri process."
+      );
     }
     return invokeCommand<T>(command, args);
+  };
+
+  const convertFileSrc = (filePath: string) => {
+    const convert = desktopWindow.__TAURI__?.core?.convertFileSrc;
+    if (typeof convert !== "function") return "";
+    try {
+      return convert(String(filePath || ""));
+    } catch {
+      return "";
+    }
   };
 
   let settings = readJson<JsonRecord>(SETTINGS_KEY, {});
   let playlists = readJson<any[]>(PLAYLISTS_KEY, []);
   let songs = readJson<any[]>(SONGS_KEY, []);
 
+  const hydrateSong = (song: any) => {
+    if (!song || typeof song !== "object") return song;
+
+    const coverPath = String(song.coverPath || "").trim();
+    const coverUrl = coverPath ? convertFileSrc(coverPath) : "";
+
+    return {
+      ...song,
+      url: "",
+      ...(coverUrl ? { coverUrl, coverFullUrl: coverUrl } : {})
+    };
+  };
+
   const rememberState = (nextSongs: unknown, nextSettings: unknown, nextPlaylists: unknown) => {
-    songs = cloneArray(nextSongs);
+    songs = cloneArray<any>(nextSongs).map(hydrateSong);
     settings = asObject(nextSettings);
     playlists = cloneArray(nextPlaylists);
     writeJson(SONGS_KEY, songs);
@@ -133,12 +189,25 @@ function installTauriCompatibilityBridge() {
   const api: Record<string, any> = {
     bootstrap: async () => {
       try {
-        const payload = await invoke<any>("bootstrap_localtify");
+        let payload = await invoke<any>("bootstrap_localtify");
+        const payloadSongs = cloneArray(payload?.songs);
+        const candidateCount = Number(payload?.database?.candidateCount || 0);
+
+        if (payloadSongs.length === 0 && candidateCount > 0) {
+          payload = await invoke<any>("restore_localtify_legacy_data");
+        }
+
         rememberState(payload?.songs, payload?.settings, payload?.playlists);
         return payload;
       } catch (error) {
-        console.error("[localtify] Tauri data bootstrap failed; using preserved fallback state.", error);
-        return fallbackBootstrap(error);
+        console.error("[localtify] Tauri data bootstrap failed.", error);
+
+        if (songs.length > 0 || playlists.length > 0 || Object.keys(settings).length > 0) {
+          console.warn("[localtify] Using the last preserved renderer snapshot instead of showing an empty library.");
+          return fallbackBootstrap(error);
+        }
+
+        throw error;
       }
     },
 
@@ -151,9 +220,16 @@ function installTauriCompatibilityBridge() {
     resolvePlaybackUrl: async (payload: JsonRecord = {}) => {
       const fallbackUrl = String(payload.fallbackUrl || "").trim();
       const filePath = String(payload.filePath || "").trim();
+
       if (fallbackUrl) {
         return { ok: true, url: fallbackUrl, filePath, fileExists: true };
       }
+
+      const assetUrl = filePath ? convertFileSrc(filePath) : "";
+      if (assetUrl) {
+        return { ok: true, url: assetUrl, filePath, fileExists: true };
+      }
+
       return migrationPending("Local-file playback URL resolution", {
         filePath,
         fileExists: undefined
@@ -162,11 +238,7 @@ function installTauriCompatibilityBridge() {
 
     importSongs: async () => cloneArray(songs),
     clearLibrary: async () => {
-      try {
-        songs = cloneArray(await invoke<any[]>("clear_localtify_library"));
-      } catch {
-        songs = [];
-      }
+      songs = cloneArray(await invoke<any[]>("clear_localtify_library"));
       writeJson(SONGS_KEY, songs);
       return cloneArray(songs);
     },
@@ -203,40 +275,20 @@ function installTauriCompatibilityBridge() {
     listPixelArt: async () => [],
     listPixelCovers: async () => [],
     patchSong: async (id: string, patch: JsonRecord) => {
-      try {
-        const updated = await invoke<any>("patch_localtify_song", { id, patch });
-        if (updated) {
-          songs = songs.map((song) => String(song?.id || "") === String(id) ? updated : song);
-          writeJson(SONGS_KEY, songs);
-        }
-        return updated;
-      } catch {
-        let updated: any = null;
-        songs = songs.map((song) => {
-          if (String(song?.id || "") !== String(id)) return song;
-          updated = { ...song, ...(patch || {}) };
-          return updated;
-        });
+      const updated = await invoke<any>("patch_localtify_song", { id, patch });
+      if (updated) {
+        songs = songs.map((song) => String(song?.id || "") === String(id) ? hydrateSong(updated) : song);
         writeJson(SONGS_KEY, songs);
-        return updated;
       }
+      return updated;
     },
     patchSongs: async (ids: string[], patch: JsonRecord) => {
-      try {
-        songs = cloneArray(await invoke<any[]>("patch_localtify_songs", { ids, patch }));
-      } catch {
-        const idSet = new Set(cloneArray<string>(ids).map(String));
-        songs = songs.map((song) => idSet.has(String(song?.id || "")) ? { ...song, ...(patch || {}) } : song);
-      }
+      songs = cloneArray(await invoke<any[]>("patch_localtify_songs", { ids, patch })).map(hydrateSong);
       writeJson(SONGS_KEY, songs);
       return cloneArray(songs);
     },
     deleteSong: async (id: string) => {
-      try {
-        songs = cloneArray(await invoke<any[]>("delete_localtify_song", { id }));
-      } catch {
-        songs = songs.filter((song) => String(song?.id || "") !== String(id));
-      }
+      songs = cloneArray(await invoke<any[]>("delete_localtify_song", { id })).map(hydrateSong);
       writeJson(SONGS_KEY, songs);
       return cloneArray(songs);
     },
@@ -257,40 +309,22 @@ function installTauriCompatibilityBridge() {
     analyzeSongVolume: async () => null,
 
     getSettings: async () => {
-      try {
-        settings = asObject(await invoke("get_localtify_settings"));
-        writeJson(SETTINGS_KEY, settings);
-      } catch {
-        // Preserve the last known settings snapshot.
-      }
+      settings = asObject(await invoke("get_localtify_settings"));
+      writeJson(SETTINGS_KEY, settings);
       return { ...settings };
     },
     saveSettings: async (nextSettings: JsonRecord) => {
-      settings = asObject(nextSettings);
-      try {
-        settings = asObject(await invoke("save_localtify_settings", { settings }));
-      } catch {
-        // The local fallback remains recoverable even if Rust persistence fails.
-      }
+      settings = asObject(await invoke("save_localtify_settings", { settings: asObject(nextSettings) }));
       writeJson(SETTINGS_KEY, settings);
       return { ...settings };
     },
     getPlaylists: async () => {
-      try {
-        playlists = cloneArray(await invoke<any[]>("get_localtify_playlists"));
-        writeJson(PLAYLISTS_KEY, playlists);
-      } catch {
-        // Preserve the last known playlist snapshot.
-      }
+      playlists = cloneArray(await invoke<any[]>("get_localtify_playlists"));
+      writeJson(PLAYLISTS_KEY, playlists);
       return cloneArray(playlists);
     },
     savePlaylists: async (nextPlaylists: any[]) => {
-      playlists = cloneArray(nextPlaylists);
-      try {
-        playlists = cloneArray(await invoke<any[]>("save_localtify_playlists", { playlists }));
-      } catch {
-        // The local fallback remains recoverable even if Rust persistence fails.
-      }
+      playlists = cloneArray(await invoke<any[]>("save_localtify_playlists", { playlists: cloneArray(nextPlaylists) }));
       writeJson(PLAYLISTS_KEY, playlists);
       return cloneArray(playlists);
     },
@@ -298,13 +332,7 @@ function installTauriCompatibilityBridge() {
     updateBackupNow: async () => invoke("backup_localtify_state"),
     backupDatabaseNow: async () => invoke("backup_localtify_state"),
     repairDatabaseNow: async () => api.getDatabaseStatus(),
-    getDatabaseStatus: async () => {
-      try {
-        return await invoke("localtify_database_status");
-      } catch (error) {
-        return { ...fallbackBootstrap(error).database, songCount: songs.length, playlistCount: playlists.length };
-      }
-    },
+    getDatabaseStatus: async () => invoke("localtify_database_status"),
 
     setDiscordActivity: async () => migrationPending("Discord activity"),
     updateDiscordActivity: async () => migrationPending("Discord activity"),
@@ -463,11 +491,10 @@ function installTauriCompatibilityBridge() {
     closeWindow: api.closeWindow
   };
 
-  desktopWindow.localitfy = api;
+  desktopWindow.localtify = api;
   desktopWindow.__LOCALTIFY_DESKTOP_RUNTIME__ = "tauri-compat";
-  installTauriWindowRegions();
 
-  console.info("[localtify] Installed Tauri migration bridge with protected legacy-data recovery.");
+  console.info("[localtify] Installed stable Tauri bridge with protected legacy-data recovery.");
 }
 
 installTauriCompatibilityBridge();
