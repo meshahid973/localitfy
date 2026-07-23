@@ -10,6 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "label": "main",
@@ -20,14 +21,21 @@
         "minHeight": 640,
         "resizable": true,
         "fullscreen": false,
-        "visible": false,
-        "decorations": false,
+        "visible": true,
+        "decorations": true,
         "shadow": true,
         "transparent": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "$APPDATA/**/*",
+          "$RESOURCE/**/*"
+        ]
+      }
     }
   },
   "bundle": {
