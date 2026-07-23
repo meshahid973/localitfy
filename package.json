@@ -21,6 +21,7 @@
     "tauri:dev": "node scripts/tauri-run.mjs dev",
     "tauri:check": "node scripts/tauri-run.mjs check",
     "tauri:build": "node scripts/tauri-run.mjs build",
+    "tauri:verify": "npm run build && npm run tauri:check",
     "clean:release": "node -e \"require('fs').rmSync('release',{recursive:true,force:true})\"",
     "dist": "npm run clean:release && npm run build && electron-builder --win nsis --x64",
     "publish": "npm run clean:release && npm run build && electron-builder --win nsis --x64 --publish always",
