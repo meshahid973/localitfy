@@ -5,11 +5,11 @@ use std::{
     collections::HashSet,
     env, fs,
     path::{Path, PathBuf},
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use tauri::{AppHandle, Manager};
 
-const STATE_VERSION: u32 = 1;
+const STATE_VERSION: u32 = 2;
 const STATE_FILE_NAME: &str = "localtify-state.json";
 const LEGACY_DATABASE_NAME: &str = "localitfy.sqlite";
 
@@ -21,9 +21,22 @@ struct PersistedState {
     imported_at_ms: u64,
     imported_from: Option<String>,
     migration_backup: Option<String>,
+    #[serde(default)]
+    source_song_count: usize,
+    #[serde(default)]
+    source_playlist_count: usize,
     songs: Vec<Value>,
     settings: Map<String, Value>,
     playlists: Vec<Value>,
+}
+
+#[derive(Clone)]
+struct LegacyDatabaseCandidate {
+    path: PathBuf,
+    song_count: usize,
+    playlist_count: usize,
+    settings_count: usize,
+    modified_ms: u64,
 }
 
 fn empty_state() -> PersistedState {
@@ -33,6 +46,8 @@ fn empty_state() -> PersistedState {
         imported_at_ms: 0,
         imported_from: None,
         migration_backup: None,
+        source_song_count: 0,
+        source_playlist_count: 0,
         songs: Vec::new(),
         settings: Map::new(),
         playlists: Vec::new(),
@@ -41,6 +56,13 @@ fn empty_state() -> PersistedState {
 
 fn now_ms() -> u64 {
     SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or(0)
+}
+
+fn system_time_ms(value: SystemTime) -> u64 {
+    value
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_millis() as u64)
         .unwrap_or(0)
@@ -108,32 +130,177 @@ fn write_state(app: &AppHandle, state: &PersistedState) -> Result<PathBuf, Strin
     Ok(path)
 }
 
-fn legacy_database_candidates() -> Vec<PathBuf> {
-    let Some(app_data) = env::var_os("APPDATA").map(PathBuf::from) else {
-        return Vec::new();
-    };
+fn push_unique_path(paths: &mut Vec<PathBuf>, seen: &mut HashSet<String>, path: PathBuf) {
+    if !path.is_file() {
+        return;
+    }
 
-    let mut seen = HashSet::new();
-    ["localitfy", "localtify", "Electron"]
-        .into_iter()
-        .map(|directory| app_data.join(directory).join(LEGACY_DATABASE_NAME))
-        .filter(|path| seen.insert(path.to_string_lossy().to_lowercase()))
-        .filter(|path| {
-            fs::metadata(path)
-                .map(|metadata| metadata.is_file() && metadata.len() > 0)
-                .unwrap_or(false)
-        })
-        .collect()
+    let key = path.to_string_lossy().replace('\\', "/").to_lowercase();
+    if seen.insert(key) {
+        paths.push(path);
+    }
 }
 
-fn find_legacy_database() -> Option<PathBuf> {
-    let mut candidates = legacy_database_candidates();
+fn collect_sqlite_files(
+    root: &Path,
+    depth: usize,
+    paths: &mut Vec<PathBuf>,
+    seen: &mut HashSet<String>,
+) {
+    if depth == 0 || !root.is_dir() {
+        return;
+    }
+
+    let Ok(entries) = fs::read_dir(root) else {
+        return;
+    };
+
+    for entry in entries.filter_map(Result::ok) {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_sqlite_files(&path, depth - 1, paths, seen);
+            continue;
+        }
+
+        let file_name = path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("")
+            .to_lowercase();
+
+        if file_name == LEGACY_DATABASE_NAME
+            || (file_name.starts_with("localitfy.sqlite.backup-")
+                && file_name.ends_with(".sqlite"))
+        {
+            push_unique_path(paths, seen, path);
+        }
+    }
+}
+
+fn legacy_database_paths(app: &AppHandle) -> Vec<PathBuf> {
+    let mut paths = Vec::new();
+    let mut seen = HashSet::new();
+
+    if let Some(app_data) = env::var_os("APPDATA").map(PathBuf::from) {
+        for directory in ["localitfy", "localtify", "Electron"] {
+            let root = app_data.join(directory);
+            push_unique_path(
+                &mut paths,
+                &mut seen,
+                root.join(LEGACY_DATABASE_NAME),
+            );
+            collect_sqlite_files(&root, 2, &mut paths, &mut seen);
+        }
+    }
+
+    if let Some(local_app_data) = env::var_os("LOCALAPPDATA").map(PathBuf::from) {
+        collect_sqlite_files(
+            &local_app_data.join("localtify").join("migration-safety"),
+            5,
+            &mut paths,
+            &mut seen,
+        );
+    }
+
+    if let Ok(tauri_data) = app_data_dir(app) {
+        collect_sqlite_files(
+            &tauri_data.join("migration-backups"),
+            5,
+            &mut paths,
+            &mut seen,
+        );
+    }
+
+    if let Some(user_profile) = env::var_os("USERPROFILE").map(PathBuf::from) {
+        let desktop = user_profile.join("Desktop");
+        if let Ok(entries) = fs::read_dir(&desktop) {
+            for entry in entries.filter_map(Result::ok) {
+                let path = entry.path();
+                let file_name = path
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap_or("");
+                if path.is_dir() && file_name.starts_with("localitfy-data-safety-") {
+                    collect_sqlite_files(&path, 4, &mut paths, &mut seen);
+                }
+            }
+        }
+    }
+
+    paths
+}
+
+fn table_exists(connection: &Connection, table_name: &str) -> bool {
+    connection
+        .query_row(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?1",
+            [table_name],
+            |row| row.get::<_, i64>(0),
+        )
+        .map(|count| count > 0)
+        .unwrap_or(false)
+}
+
+fn table_count(connection: &Connection, table_name: &str) -> usize {
+    if !table_exists(connection, table_name) {
+        return 0;
+    }
+
+    let sql = match table_name {
+        "songs" => "SELECT COUNT(*) FROM songs",
+        "settings" => "SELECT COUNT(*) FROM settings",
+        "playlists" => "SELECT COUNT(*) FROM playlists",
+        _ => return 0,
+    };
+
+    connection
+        .query_row(sql, [], |row| row.get::<_, i64>(0))
+        .map(|count| count.max(0) as usize)
+        .unwrap_or(0)
+}
+
+fn inspect_database(path: &Path) -> Option<LegacyDatabaseCandidate> {
+    let connection = Connection::open_with_flags(
+        path,
+        OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )
+    .ok()?;
+
+    let _ = connection.busy_timeout(Duration::from_secs(2));
+    let modified_ms = fs::metadata(path)
+        .and_then(|metadata| metadata.modified())
+        .map(system_time_ms)
+        .unwrap_or(0);
+
+    Some(LegacyDatabaseCandidate {
+        path: path.to_path_buf(),
+        song_count: table_count(&connection, "songs"),
+        playlist_count: table_count(&connection, "playlists"),
+        settings_count: table_count(&connection, "settings"),
+        modified_ms,
+    })
+}
+
+fn legacy_database_candidates(app: &AppHandle) -> Vec<LegacyDatabaseCandidate> {
+    let mut candidates: Vec<_> = legacy_database_paths(app)
+        .into_iter()
+        .filter_map(|path| inspect_database(&path))
+        .collect();
+
     candidates.sort_by(|left, right| {
-        let left_modified = fs::metadata(left).and_then(|metadata| metadata.modified()).ok();
-        let right_modified = fs::metadata(right).and_then(|metadata| metadata.modified()).ok();
-        right_modified.cmp(&left_modified)
+        right
+            .song_count
+            .cmp(&left.song_count)
+            .then_with(|| right.playlist_count.cmp(&left.playlist_count))
+            .then_with(|| right.settings_count.cmp(&left.settings_count))
+            .then_with(|| right.modified_ms.cmp(&left.modified_ms))
     });
-    candidates.into_iter().next()
+
+    candidates
+}
+
+fn find_best_legacy_database(app: &AppHandle) -> Option<LegacyDatabaseCandidate> {
+    legacy_database_candidates(app).into_iter().next()
 }
 
 fn copy_legacy_backup(app: &AppHandle, database_path: &Path) -> Result<PathBuf, String> {
@@ -312,50 +479,106 @@ fn read_legacy_playlists(connection: &Connection) -> Vec<Value> {
         .collect()
 }
 
-fn import_legacy_state(app: &AppHandle, database_path: &Path) -> Result<PersistedState, String> {
-    let backup = copy_legacy_backup(app, database_path).ok();
-    let connection = Connection::open_with_flags(
-        database_path,
-        OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-    )
-    .map_err(|error| format!("Could not open legacy Localtify database read-only: {error}"))?;
+fn import_legacy_state(
+    app: &AppHandle,
+    candidate: &LegacyDatabaseCandidate,
+) -> Result<PersistedState, String> {
+    let backup_dir = copy_legacy_backup(app, &candidate.path)?;
+    let snapshot_path = backup_dir.join(
+        candidate
+            .path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or(LEGACY_DATABASE_NAME),
+    );
 
-    let _ = connection.execute_batch("PRAGMA query_only = ON; PRAGMA busy_timeout = 3000;");
+    let connection = Connection::open(&snapshot_path)
+        .map_err(|error| format!("Could not open protected Localtify database snapshot: {error}"))?;
+    let _ = connection.execute_batch("PRAGMA busy_timeout = 3000; PRAGMA query_only = ON;");
+
+    let songs = read_legacy_songs(&connection);
+    let settings = read_legacy_settings(&connection);
+    let playlists = read_legacy_playlists(&connection);
 
     Ok(PersistedState {
         version: STATE_VERSION,
         initialized: true,
         imported_at_ms: now_ms(),
-        imported_from: Some(database_path.to_string_lossy().to_string()),
-        migration_backup: backup.map(|path| path.to_string_lossy().to_string()),
-        songs: read_legacy_songs(&connection),
-        settings: read_legacy_settings(&connection),
-        playlists: read_legacy_playlists(&connection),
+        imported_from: Some(candidate.path.to_string_lossy().to_string()),
+        migration_backup: Some(backup_dir.to_string_lossy().to_string()),
+        source_song_count: candidate.song_count.max(songs.len()),
+        source_playlist_count: candidate.playlist_count.max(playlists.len()),
+        songs,
+        settings,
+        playlists,
     })
 }
 
+fn should_upgrade_state(
+    state: &PersistedState,
+    best_candidate: Option<&LegacyDatabaseCandidate>,
+) -> bool {
+    let Some(candidate) = best_candidate else {
+        return false;
+    };
+
+    if state.version < STATE_VERSION {
+        return candidate.song_count > state.songs.len()
+            || candidate.playlist_count > state.playlists.len();
+    }
+
+    if state.imported_from.is_some() && state.source_song_count == 0 && state.songs.is_empty() {
+        return candidate.song_count > 0;
+    }
+
+    false
+}
+
 fn ensure_state(app: &AppHandle) -> Result<PersistedState, String> {
-    if let Some(state) = read_state(app)? {
-        if state.initialized && (state.imported_from.is_some() || !state.songs.is_empty()) {
-            return Ok(state);
+    let existing = read_state(app)?;
+    let candidates = legacy_database_candidates(app);
+    let best_candidate = candidates.first();
+
+    if let Some(state) = existing {
+        if should_upgrade_state(&state, best_candidate) {
+            if let Some(candidate) = best_candidate {
+                let upgraded = import_legacy_state(app, candidate)?;
+                write_state(app, &upgraded)?;
+                return Ok(upgraded);
+            }
         }
 
-        if state.initialized && find_legacy_database().is_none() {
+        if state.initialized {
             return Ok(state);
         }
     }
 
-    if let Some(database_path) = find_legacy_database() {
-        let state = import_legacy_state(app, &database_path)?;
+    if let Some(candidate) = best_candidate {
+        let state = import_legacy_state(app, candidate)?;
         write_state(app, &state)?;
         return Ok(state);
     }
 
-    Ok(empty_state())
+    let mut state = empty_state();
+    state.initialized = true;
+    write_state(app, &state)?;
+    Ok(state)
+}
+
+fn candidate_payload(candidate: &LegacyDatabaseCandidate) -> Value {
+    json!({
+        "path": candidate.path.to_string_lossy(),
+        "songCount": candidate.song_count,
+        "playlistCount": candidate.playlist_count,
+        "settingsCount": candidate.settings_count,
+        "modifiedMs": candidate.modified_ms
+    })
 }
 
 fn bootstrap_payload(app: &AppHandle, state: &PersistedState) -> Result<Value, String> {
     let state_file = state_path(app)?;
+    let candidates = legacy_database_candidates(app);
+
     Ok(json!({
         "songs": state.songs,
         "settings": state.settings,
@@ -375,7 +598,9 @@ fn bootstrap_payload(app: &AppHandle, state: &PersistedState) -> Result<Value, S
             "migrationBackup": state.migration_backup,
             "statePath": state_file.to_string_lossy(),
             "songCount": state.songs.len(),
-            "playlistCount": state.playlists.len()
+            "playlistCount": state.playlists.len(),
+            "candidateCount": candidates.len(),
+            "candidates": candidates.iter().take(12).map(candidate_payload).collect::<Vec<_>>()
         },
         "discord": {
             "ok": false,
@@ -555,6 +780,8 @@ pub fn backup_localtify_state(app: AppHandle) -> Result<Value, String> {
 #[tauri::command]
 pub fn localtify_database_status(app: AppHandle) -> Result<Value, String> {
     let state = ensure_state(&app)?;
+    let candidates = legacy_database_candidates(&app);
+
     Ok(json!({
         "ok": true,
         "runtime": "tauri-state",
@@ -565,7 +792,9 @@ pub fn localtify_database_status(app: AppHandle) -> Result<Value, String> {
         "statePath": state_path(&app)?.to_string_lossy(),
         "songCount": state.songs.len(),
         "settingsCount": state.settings.len(),
-        "playlistCount": state.playlists.len()
+        "playlistCount": state.playlists.len(),
+        "candidateCount": candidates.len(),
+        "candidates": candidates.iter().take(20).map(candidate_payload).collect::<Vec<_>>()
     }))
 }
 
@@ -575,9 +804,9 @@ pub fn restore_localtify_legacy_data(app: AppHandle) -> Result<Value, String> {
         let _ = backup_localtify_state(app.clone());
     }
 
-    let database_path = find_legacy_database()
-        .ok_or_else(|| "No existing Electron Localtify database was found".to_string())?;
-    let state = import_legacy_state(&app, &database_path)?;
+    let candidate = find_best_legacy_database(&app)
+        .ok_or_else(|| "No existing Electron Localtify database or safety backup was found".to_string())?;
+    let state = import_legacy_state(&app, &candidate)?;
     write_state(&app, &state)?;
     bootstrap_payload(&app, &state)
 }
