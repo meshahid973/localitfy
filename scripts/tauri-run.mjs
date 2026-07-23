@@ -32,8 +32,16 @@ let args;
 if (mode === "check") {
   command = "cargo";
   args = ["check", "--manifest-path", path.join("src-tauri", "Cargo.toml")];
+} else if (process.platform === "win32") {
+  command = process.env.ComSpec?.trim() || "cmd.exe";
+  args = [
+    "/d",
+    "/s",
+    "/c",
+    `npx --yes @tauri-apps/cli@2.11.4 ${mode}`
+  ];
 } else {
-  command = process.platform === "win32" ? "npx.cmd" : "npx";
+  command = "npx";
   args = ["--yes", "@tauri-apps/cli@2.11.4", mode];
 }
 
@@ -44,7 +52,8 @@ const child = spawn(command, args, {
   cwd: projectRoot,
   env,
   stdio: "inherit",
-  shell: false
+  shell: false,
+  windowsHide: false
 });
 
 child.on("error", (error) => {
