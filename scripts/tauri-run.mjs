@@ -1,5 +1,12 @@
 import { spawn } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync
+} from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,12 +24,91 @@ if (!supportedModes.has(mode)) {
 const localAppData =
   process.env.LOCALAPPDATA?.trim() ||
   path.join(os.homedir(), "AppData", "Local");
+const roamingAppData =
+  process.env.APPDATA?.trim() ||
+  path.join(os.homedir(), "AppData", "Roaming");
 const cargoTargetDir = path.join(localAppData, "localtify", "cargo-target");
+const dataSafetyRoot = path.join(localAppData, "localtify", "migration-safety");
+const backupManifestPath = path.join(dataSafetyRoot, "last-electron-backup.json");
 const detectedCpuCount = Math.max(1, os.cpus()?.length || 1);
 const defaultCargoJobs = Math.max(2, Math.min(4, Math.ceil(detectedCpuCount / 4)));
 const cargoJobs = process.env.CARGO_BUILD_JOBS?.trim() || String(defaultCargoJobs);
 
 mkdirSync(cargoTargetDir, { recursive: true });
+mkdirSync(dataSafetyRoot, { recursive: true });
+
+function readBackupManifest() {
+  try {
+    return JSON.parse(readFileSync(backupManifestPath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function createElectronDataSafetyBackup() {
+  const candidates = ["localitfy", "localtify", "Electron"]
+    .map((directoryName) => ({
+      directoryName,
+      databasePath: path.join(roamingAppData, directoryName, "localitfy.sqlite")
+    }))
+    .filter(({ databasePath }) => existsSync(databasePath));
+
+  if (!candidates.length) {
+    console.warn("[localtify] No existing Electron database was found to back up.");
+    return;
+  }
+
+  const fingerprint = candidates.map(({ databasePath }) => {
+    const stats = statSync(databasePath);
+    const walPath = `${databasePath}-wal`;
+    const walStats = existsSync(walPath) ? statSync(walPath) : null;
+    return {
+      databasePath,
+      size: stats.size,
+      mtimeMs: stats.mtimeMs,
+      walSize: walStats?.size || 0,
+      walMtimeMs: walStats?.mtimeMs || 0
+    };
+  });
+
+  const previous = readBackupManifest();
+  if (previous && JSON.stringify(previous.fingerprint) === JSON.stringify(fingerprint)) {
+    console.log(`[localtify] Electron data safety backup is current: ${previous.backupDirectory}`);
+    return;
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const backupDirectory = path.join(dataSafetyRoot, `electron-${timestamp}`);
+  mkdirSync(backupDirectory, { recursive: true });
+
+  for (const { directoryName, databasePath } of candidates) {
+    const targetDirectory = path.join(backupDirectory, directoryName);
+    mkdirSync(targetDirectory, { recursive: true });
+
+    for (const suffix of ["", "-wal", "-shm"]) {
+      const source = `${databasePath}${suffix}`;
+      if (!existsSync(source)) continue;
+      copyFileSync(source, path.join(targetDirectory, `localitfy.sqlite${suffix}`));
+    }
+  }
+
+  writeFileSync(
+    backupManifestPath,
+    JSON.stringify({ createdAt: new Date().toISOString(), backupDirectory, fingerprint }, null, 2),
+    "utf8"
+  );
+
+  console.log(`[localtify] Protected existing Electron data at: ${backupDirectory}`);
+}
+
+if (mode === "dev" || mode === "build") {
+  try {
+    createElectronDataSafetyBackup();
+  } catch (error) {
+    console.error("[localtify] Refusing to start because the Electron data safety backup failed.", error);
+    process.exit(1);
+  }
+}
 
 const env = {
   ...process.env,
