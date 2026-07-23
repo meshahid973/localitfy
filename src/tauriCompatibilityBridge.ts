@@ -1,7 +1,12 @@
 type JsonRecord = Record<string, unknown>;
 
+type TauriInternals = {
+  invoke?: <T = unknown>(command: string, args?: Record<string, unknown>) => Promise<T>;
+};
+
 type LocaltifyWindow = Window & {
   localitfy?: Record<string, any>;
+  __TAURI_INTERNALS__?: TauriInternals;
   __LOCALTIFY_DESKTOP_RUNTIME__?: "electron" | "tauri-compat";
 };
 
@@ -13,8 +18,7 @@ function readJson<T>(key: string, fallback: T): T {
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return fallback;
-    const parsed = JSON.parse(raw) as T;
-    return parsed ?? fallback;
+    return (JSON.parse(raw) as T) ?? fallback;
   } catch {
     return fallback;
   }
@@ -24,12 +28,18 @@ function writeJson(key: string, value: unknown) {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Storage failures must not prevent the desktop shell from rendering.
+    // A storage failure must never blank the desktop renderer.
   }
 }
 
 function cloneArray<T>(value: unknown): T[] {
-  return Array.isArray(value) ? [...value] as T[] : [];
+  return Array.isArray(value) ? ([...value] as T[]) : [];
+}
+
+function asObject(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? { ...(value as JsonRecord) }
+    : {};
 }
 
 function noOpSubscription() {
@@ -40,10 +50,30 @@ function migrationPending(feature: string, extra: JsonRecord = {}) {
   return {
     ok: false,
     supported: false,
-    runtime: "tauri-compat",
+    runtime: "tauri-migration",
     error: `${feature} has not been migrated to the Tauri backend yet.`,
     ...extra
   };
+}
+
+function installTauriWindowRegions() {
+  const apply = () => {
+    const titleBars = document.querySelectorAll<HTMLElement>(".titleBar, .titleDrag");
+    if (!titleBars.length) return false;
+
+    titleBars.forEach((element) => element.setAttribute("data-tauri-drag-region", ""));
+    document
+      .querySelectorAll<HTMLElement>(".windowButtons, .windowButtons button, .windowButtons svg, .windowButtons path, .windowButtons rect")
+      .forEach((element) => element.setAttribute("data-tauri-drag-region", "false"));
+    return true;
+  };
+
+  if (apply()) return;
+
+  const observer = new MutationObserver(() => {
+    if (apply()) observer.disconnect();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
 }
 
 function installTauriCompatibilityBridge() {
@@ -54,61 +84,75 @@ function installTauriCompatibilityBridge() {
     return;
   }
 
+  const invoke = async <T = unknown>(command: string, args: Record<string, unknown> = {}) => {
+    const invokeCommand = desktopWindow.__TAURI_INTERNALS__?.invoke;
+    if (typeof invokeCommand !== "function") {
+      throw new Error("Tauri invoke bridge is unavailable");
+    }
+    return invokeCommand<T>(command, args);
+  };
+
   let settings = readJson<JsonRecord>(SETTINGS_KEY, {});
   let playlists = readJson<any[]>(PLAYLISTS_KEY, []);
   let songs = readJson<any[]>(SONGS_KEY, []);
 
-  const saveSongs = (nextSongs: any[]) => {
+  const rememberState = (nextSongs: unknown, nextSettings: unknown, nextPlaylists: unknown) => {
     songs = cloneArray(nextSongs);
+    settings = asObject(nextSettings);
+    playlists = cloneArray(nextPlaylists);
     writeJson(SONGS_KEY, songs);
-    return cloneArray(songs);
+    writeJson(SETTINGS_KEY, settings);
+    writeJson(PLAYLISTS_KEY, playlists);
   };
 
-  const patchOneSong = (id: string, patch: JsonRecord) => {
-    let updated: any | null = null;
-    const nextSongs = songs.map((song) => {
-      if (String(song?.id || "") !== String(id || "")) return song;
-      updated = { ...song, ...patch };
-      return updated;
-    });
-    saveSongs(nextSongs);
-    return updated;
-  };
+  const fallbackBootstrap = (error?: unknown) => ({
+    songs: cloneArray(songs),
+    settings: { ...settings },
+    playlists: cloneArray(playlists),
+    windowsIntegration: {
+      ok: true,
+      supported: false,
+      openAtLogin: false,
+      restoreState: "tauri-fallback"
+    },
+    database: {
+      ok: !error,
+      runtime: "tauri-local-fallback",
+      migrated: false,
+      legacyPreserved: true,
+      error: error instanceof Error ? error.message : error ? String(error) : undefined
+    },
+    discord: migrationPending("Discord activity"),
+    covers: {
+      ok: true,
+      count: songs.length,
+      runtime: "tauri-fallback"
+    }
+  });
 
   const api: Record<string, any> = {
-    bootstrap: async () => ({
-      songs: cloneArray(songs),
-      settings: { ...settings },
-      playlists: cloneArray(playlists),
-      windowsIntegration: {
-        ok: true,
-        supported: false,
-        openAtLogin: false,
-        restoreState: "tauri-compat"
-      },
-      database: {
-        ok: true,
-        runtime: "tauri-compat",
-        migrated: false
-      },
-      discord: migrationPending("Discord activity"),
-      covers: {
-        ok: true,
-        count: 0,
-        runtime: "tauri-compat"
+    bootstrap: async () => {
+      try {
+        const payload = await invoke<any>("bootstrap_localtify");
+        rememberState(payload?.songs, payload?.settings, payload?.playlists);
+        return payload;
+      } catch (error) {
+        console.error("[localtify] Tauri data bootstrap failed; using preserved fallback state.", error);
+        return fallbackBootstrap(error);
       }
-    }),
+    },
+
+    restoreLegacyData: async () => {
+      const payload = await invoke<any>("restore_localtify_legacy_data");
+      rememberState(payload?.songs, payload?.settings, payload?.playlists);
+      return payload;
+    },
 
     resolvePlaybackUrl: async (payload: JsonRecord = {}) => {
       const fallbackUrl = String(payload.fallbackUrl || "").trim();
       const filePath = String(payload.filePath || "").trim();
       if (fallbackUrl) {
-        return {
-          ok: true,
-          url: fallbackUrl,
-          filePath,
-          fileExists: true
-        };
+        return { ok: true, url: fallbackUrl, filePath, fileExists: true };
       }
       return migrationPending("Local-file playback URL resolution", {
         filePath,
@@ -117,7 +161,15 @@ function installTauriCompatibilityBridge() {
     },
 
     importSongs: async () => cloneArray(songs),
-    clearLibrary: async () => saveSongs([]),
+    clearLibrary: async () => {
+      try {
+        songs = cloneArray(await invoke<any[]>("clear_localtify_library"));
+      } catch {
+        songs = [];
+      }
+      writeJson(SONGS_KEY, songs);
+      return cloneArray(songs);
+    },
     repairMissingMetadata: async () => ({ ok: true, changedCount: 0, songs: cloneArray(songs) }),
 
     scanAlbumFolder: async () => migrationPending("Album-folder scanning", {
@@ -150,19 +202,51 @@ function installTauriCompatibilityBridge() {
 
     listPixelArt: async () => [],
     listPixelCovers: async () => [],
-    setPixelArtCover: async (id: string, coverPath: string) => patchOneSong(id, { coverPath }),
-    setSongCover: async (id: string, coverPath: string, coverSource = "custom") => patchOneSong(id, { coverPath, coverSource }),
-    patchSong: async (id: string, patch: JsonRecord) => patchOneSong(id, patch || {}),
-    patchSongs: async (ids: string[], patch: JsonRecord) => {
-      const idSet = new Set(cloneArray<string>(ids).map(String));
-      return saveSongs(songs.map((song) => idSet.has(String(song?.id || "")) ? { ...song, ...(patch || {}) } : song));
+    patchSong: async (id: string, patch: JsonRecord) => {
+      try {
+        const updated = await invoke<any>("patch_localtify_song", { id, patch });
+        if (updated) {
+          songs = songs.map((song) => String(song?.id || "") === String(id) ? updated : song);
+          writeJson(SONGS_KEY, songs);
+        }
+        return updated;
+      } catch {
+        let updated: any = null;
+        songs = songs.map((song) => {
+          if (String(song?.id || "") !== String(id)) return song;
+          updated = { ...song, ...(patch || {}) };
+          return updated;
+        });
+        writeJson(SONGS_KEY, songs);
+        return updated;
+      }
     },
-    deleteSong: async (id: string) => saveSongs(songs.filter((song) => String(song?.id || "") !== String(id || ""))),
-    randomizeSongCover: async (id: string) => songs.find((song) => String(song?.id || "") === String(id || "")) || null,
+    patchSongs: async (ids: string[], patch: JsonRecord) => {
+      try {
+        songs = cloneArray(await invoke<any[]>("patch_localtify_songs", { ids, patch }));
+      } catch {
+        const idSet = new Set(cloneArray<string>(ids).map(String));
+        songs = songs.map((song) => idSet.has(String(song?.id || "")) ? { ...song, ...(patch || {}) } : song);
+      }
+      writeJson(SONGS_KEY, songs);
+      return cloneArray(songs);
+    },
+    deleteSong: async (id: string) => {
+      try {
+        songs = cloneArray(await invoke<any[]>("delete_localtify_song", { id }));
+      } catch {
+        songs = songs.filter((song) => String(song?.id || "") !== String(id));
+      }
+      writeJson(SONGS_KEY, songs);
+      return cloneArray(songs);
+    },
+    setPixelArtCover: async (id: string, coverPath: string) => api.patchSong(id, { coverPath }),
+    setSongCover: async (id: string, coverPath: string, coverSource = "custom") => api.patchSong(id, { coverPath, coverSource }),
+    randomizeSongCover: async (id: string) => songs.find((song) => String(song?.id || "") === String(id)) || null,
     randomizeAllSongCovers: async () => cloneArray(songs),
     randomizeMissingSongCovers: async () => cloneArray(songs),
     randomizeSelectedSongCovers: async () => cloneArray(songs),
-    getCoverStats: async () => ({ ok: true, totalSongs: songs.length, runtime: "tauri-compat" }),
+    getCoverStats: async () => ({ ok: true, totalSongs: songs.length, runtime: "tauri-migration" }),
     rescanPixelArt: async () => ({ ok: true, count: 0 }),
     listBrokenCovers: async () => [],
     getLeastUsedCover: async () => null,
@@ -172,22 +256,55 @@ function installTauriCompatibilityBridge() {
     pickSongCover: async () => null,
     analyzeSongVolume: async () => null,
 
-    getSettings: async () => ({ ...settings }),
+    getSettings: async () => {
+      try {
+        settings = asObject(await invoke("get_localtify_settings"));
+        writeJson(SETTINGS_KEY, settings);
+      } catch {
+        // Preserve the last known settings snapshot.
+      }
+      return { ...settings };
+    },
     saveSettings: async (nextSettings: JsonRecord) => {
-      settings = { ...(nextSettings || {}) };
+      settings = asObject(nextSettings);
+      try {
+        settings = asObject(await invoke("save_localtify_settings", { settings }));
+      } catch {
+        // The local fallback remains recoverable even if Rust persistence fails.
+      }
       writeJson(SETTINGS_KEY, settings);
       return { ...settings };
     },
-    getPlaylists: async () => cloneArray(playlists),
+    getPlaylists: async () => {
+      try {
+        playlists = cloneArray(await invoke<any[]>("get_localtify_playlists"));
+        writeJson(PLAYLISTS_KEY, playlists);
+      } catch {
+        // Preserve the last known playlist snapshot.
+      }
+      return cloneArray(playlists);
+    },
     savePlaylists: async (nextPlaylists: any[]) => {
       playlists = cloneArray(nextPlaylists);
+      try {
+        playlists = cloneArray(await invoke<any[]>("save_localtify_playlists", { playlists }));
+      } catch {
+        // The local fallback remains recoverable even if Rust persistence fails.
+      }
       writeJson(PLAYLISTS_KEY, playlists);
       return cloneArray(playlists);
     },
 
-    updateBackupNow: async () => migrationPending("Database backup"),
-    repairDatabaseNow: async () => migrationPending("Database repair"),
-    getDatabaseStatus: async () => ({ ok: true, runtime: "tauri-compat", migrated: false }),
+    updateBackupNow: async () => invoke("backup_localtify_state"),
+    backupDatabaseNow: async () => invoke("backup_localtify_state"),
+    repairDatabaseNow: async () => api.getDatabaseStatus(),
+    getDatabaseStatus: async () => {
+      try {
+        return await invoke("localtify_database_status");
+      } catch (error) {
+        return { ...fallbackBootstrap(error).database, songCount: songs.length, playlistCount: playlists.length };
+      }
+    },
 
     setDiscordActivity: async () => migrationPending("Discord activity"),
     updateDiscordActivity: async () => migrationPending("Discord activity"),
@@ -201,17 +318,17 @@ function installTauriCompatibilityBridge() {
     setMinimizeToTray: async () => ({ ok: true, supported: false }),
     setStartWithWindows: async () => ({ ok: true, supported: false, openAtLogin: false }),
     getStartWithWindows: async () => ({ ok: true, supported: false, openAtLogin: false }),
-    getNativeMediaStatus: async () => ({ ok: true, supported: false, runtime: "tauri-compat" }),
+    getNativeMediaStatus: async () => ({ ok: true, supported: false, runtime: "tauri-migration" }),
 
     openDevTools: async () => false,
     toggleDevTools: async () => false,
     getPerformanceStatus: async () => ({
       ok: true,
-      runtime: "tauri-compat",
+      runtime: "tauri-migration",
       platform: navigator.platform || "unknown",
       logicalProcessors: navigator.hardwareConcurrency || 1
     }),
-    getGpuStatus: async () => ({ ok: true, runtime: "tauri-compat", available: false }),
+    getGpuStatus: async () => ({ ok: true, runtime: "tauri-migration", available: false }),
     getFeedbackStatus: async () => ({
       ok: false,
       configured: false,
@@ -222,9 +339,10 @@ function installTauriCompatibilityBridge() {
     }),
     sendFeedback: async () => migrationPending("Feedback sending"),
 
-    minimizeWindow: async () => false,
-    toggleMaximizeWindow: async () => false,
-    closeWindow: async () => false,
+    minimizeWindow: async () => invoke("localtify_window_minimize").then(() => true),
+    toggleMaximizeWindow: async () => invoke("localtify_window_toggle_maximize").then(() => true),
+    closeWindow: async () => invoke("localtify_window_close").then(() => true),
+    startWindowDrag: async () => invoke("localtify_window_start_dragging").then(() => true),
 
     checkForUpdates: async () => ({
       type: "dev",
@@ -289,8 +407,42 @@ function installTauriCompatibilityBridge() {
   };
   api.media = { pickAndConvert: api.pickAndConvertMedia };
   api.pixel = { list: api.listPixelArt };
+  api.songs = {
+    patch: api.patchSong,
+    patchMany: api.patchSongs,
+    delete: api.deleteSong,
+    setCover: api.setSongCover,
+    pickCover: api.pickSongCover,
+    randomCover: api.randomizeSongCover,
+    analyzeVolume: api.analyzeSongVolume
+  };
+  api.covers = {
+    listPixelArt: api.listPixelArt,
+    stats: api.getCoverStats,
+    rescan: api.rescanPixelArt,
+    randomizeAll: api.randomizeAllSongCovers,
+    randomizeMissing: api.randomizeMissingSongCovers,
+    randomizeSelected: api.randomizeSelectedSongCovers,
+    broken: api.listBrokenCovers,
+    leastUsed: api.getLeastUsedCover,
+    thumbnailStatus: api.getCoverThumbnailStatus,
+    warmThumbnails: api.warmCoverThumbnails,
+    cleanupCache: api.cleanupCoverCache
+  };
   api.settings = { get: api.getSettings, save: api.saveSettings };
   api.playlists = { get: api.getPlaylists, save: api.savePlaylists };
+  api.database = {
+    backupNow: api.updateBackupNow,
+    repairNow: api.repairDatabaseNow,
+    status: api.getDatabaseStatus,
+    restoreLegacyData: api.restoreLegacyData
+  };
+  api.discord = {
+    setActivity: api.setDiscordActivity,
+    clearActivity: api.clearDiscordActivity,
+    status: api.getDiscordStatus,
+    resetCache: api.resetDiscordCache
+  };
   api.nativeMedia = {
     updateState: api.updateNativeMediaState,
     sendPlayerCommand: api.sendPlayerCommand,
@@ -300,11 +452,22 @@ function installTauriCompatibilityBridge() {
     getStartWithWindows: api.getStartWithWindows,
     status: api.getNativeMediaStatus
   };
+  api.system = {
+    openDevTools: api.openDevTools,
+    toggleDevTools: api.toggleDevTools,
+    performanceStatus: api.getPerformanceStatus,
+    gpuStatus: api.getGpuStatus,
+    openExternal: api.openExternal,
+    minimizeWindow: api.minimizeWindow,
+    toggleMaximizeWindow: api.toggleMaximizeWindow,
+    closeWindow: api.closeWindow
+  };
 
   desktopWindow.localitfy = api;
   desktopWindow.__LOCALTIFY_DESKTOP_RUNTIME__ = "tauri-compat";
+  installTauriWindowRegions();
 
-  console.info("[localtify] Installed temporary Tauri compatibility bridge.");
+  console.info("[localtify] Installed Tauri migration bridge with protected legacy-data recovery.");
 }
 
 installTauriCompatibilityBridge();
