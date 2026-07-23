@@ -19,7 +19,7 @@ const localAppData =
   path.join(os.homedir(), "AppData", "Local");
 const cargoTargetDir = path.join(localAppData, "localtify", "cargo-target");
 const detectedCpuCount = Math.max(1, os.cpus()?.length || 1);
-const defaultCargoJobs = Math.max(2, Math.min(6, Math.ceil(detectedCpuCount / 2)));
+const defaultCargoJobs = Math.max(2, Math.min(4, Math.ceil(detectedCpuCount / 4)));
 const cargoJobs = process.env.CARGO_BUILD_JOBS?.trim() || String(defaultCargoJobs);
 
 mkdirSync(cargoTargetDir, { recursive: true });
@@ -28,7 +28,8 @@ const env = {
   ...process.env,
   CARGO_TARGET_DIR: cargoTargetDir,
   CARGO_BUILD_JOBS: cargoJobs,
-  CARGO_INCREMENTAL: process.env.CARGO_INCREMENTAL?.trim() || "1"
+  CARGO_INCREMENTAL: process.env.CARGO_INCREMENTAL?.trim() || "1",
+  CARGO_PROFILE_DEV_DEBUG: process.env.CARGO_PROFILE_DEV_DEBUG?.trim() || "0"
 };
 
 let command;
@@ -53,6 +54,7 @@ if (mode === "check") {
 console.log(`[localtify] Tauri mode: ${mode}`);
 console.log(`[localtify] Cargo target: ${cargoTargetDir}`);
 console.log(`[localtify] Cargo jobs: ${cargoJobs}/${detectedCpuCount}`);
+console.log("[localtify] Dev debug info: disabled");
 
 const child = spawn(command, args, {
   cwd: projectRoot,
