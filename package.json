@@ -15,7 +15,12 @@
   },
   "scripts": {
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
+    "dev:web": "vite --host 127.0.0.1",
     "build": "vite build",
+    "build:web": "vite build",
+    "tauri:dev": "node scripts/tauri-run.mjs dev",
+    "tauri:check": "node scripts/tauri-run.mjs check",
+    "tauri:build": "node scripts/tauri-run.mjs build",
     "clean:release": "node -e \"require('fs').rmSync('release',{recursive:true,force:true})\"",
     "dist": "npm run clean:release && npm run build && electron-builder --win nsis --x64",
     "publish": "npm run clean:release && npm run build && electron-builder --win nsis --x64 --publish always",
