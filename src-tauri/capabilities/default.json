@@ -4,13 +4,6 @@
   "description": "Desktop permissions for the localtify main window",
   "windows": ["main"],
   "permissions": [
-    "core:default",
-    "dialog:default",
-    "fs:default",
-    "notification:default",
-    "opener:default",
-    "os:default",
-    "process:default",
-    "store:default"
+    "core:default"
   ]
 }
