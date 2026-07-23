@@ -30,17 +30,8 @@ fn localtify_window_start_dragging(window: tauri::WebviewWindow) -> Result<(), S
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .setup(|app| {
-            if let Some(window) = app.get_webview_window("main") {
-                window.set_decorations(false)?;
-                window.show()?;
-                window.set_focus()?;
-            }
-            Ok(())
-        })
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Some(window) = app.get_webview_window("main") {
-                let _ = window.set_decorations(false);
                 let _ = window.show();
                 let _ = window.unminimize();
                 let _ = window.set_focus();
