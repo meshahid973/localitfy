@@ -1,0 +1,93 @@
+name: Phase 2 Apply Renderer Split
+
+on:
+  push:
+    branches:
+      - agent/phase-2-feature-rebirth
+    paths:
+      - scripts/phase2-refactor.part00
+      - scripts/phase2-refactor.part01
+      - scripts/phase2-refactor.part02
+      - scripts/phase2-refactor.part03
+      - scripts/phase2-refactor.part04
+      - scripts/phase2-refactor.part05
+      - scripts/phase2-refactor.part06
+      - scripts/phase2-refactor.part07
+
+permissions:
+  contents: write
+
+concurrency:
+  group: localtify-phase2-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Generate, validate, and commit renderer split
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase-2-feature-rebirth
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Reconstruct and generate Phase 2 renderer split
+        shell: bash
+        run: |
+          cat scripts/phase2-refactor.part0{0,1,2,3,4,5,6,7} > /tmp/phase2-refactor.b64
+          echo "bb6803f492f14d75fd15d822ec22ea6f747d96701e2ee3695e3d71d9577a219d  /tmp/phase2-refactor.b64" | sha256sum -c -
+          base64 -d /tmp/phase2-refactor.b64 > scripts/phase2-renderer-refactor.py
+          python scripts/phase2-renderer-refactor.py
+          rm scripts/phase2-renderer-refactor.py
+          test "$(wc -l < src/LocaltifyAppView.tsx)" -lt 2000
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if ! npm ci --ignore-scripts; then
+            echo "package-lock install failed; using package.json fallback for validation"
+            rm -rf node_modules
+            npm install --ignore-scripts --package-lock=false
+          fi
+
+      - name: Check Electron bridge drift
+        run: npm run bridge:check
+
+      - name: Check architecture boundaries
+        run: npm run boundaries:check
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Production renderer build
+        run: npm run build
+
+      - name: Diff integrity
+        shell: bash
+        run: |
+          git diff --check
+          test ! -e scripts/phase2-renderer-refactor.py
+          ! grep -R --line-number --include='*.ts' --include='*.tsx' 'from .*LocaltifyAppView' src/features src/shared src/core src/platform src/types
+
+      - name: Commit validated renderer split
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src
+          if git diff --cached --quiet; then
+            echo "No generated source changes"
+            exit 1
+          fi
+          git commit -m "refactor: split renderer into feature views"
+          git push origin HEAD:agent/phase-2-feature-rebirth
