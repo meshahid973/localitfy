@@ -1,0 +1,27 @@
+import { Download, Images, LibraryBig, MessageCircle, Palette, PlayCircle, Settings as SettingsIcon, SlidersHorizontal } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { CoverColorSyncMode } from "./theme.types";
+import type { Settings, SettingsCategory } from "./settings.types";
+import type { CoverMood } from "../covers/cover.types";
+
+export const settingsCategoryTabs: Array<{ id: SettingsCategory; label: string; description: string; icon: LucideIcon; keywords: string }> = [
+  { id: "appearance", label: "Appearance", description: "Theme, colors, and layout", icon: Palette, keywords: "appearance theme themes color colors accent custom dark light layout spacing corners density ambience glow sidebar cat pet mascot buddy" },
+  { id: "playback", label: "Playback", description: "Crossfade, speed, and volume", icon: PlayCircle, keywords: "playback play pause player audio crossfade gapless speed volume boost normalize normalization per song sleep timer queue repeat shuffle" },
+  { id: "discord", label: "Discord", description: "Privacy, text, and artwork", icon: MessageCircle, keywords: "discord rpc rich presence privacy mode status activity buttons artwork art image second line artist album time left play count title cleanup paused idle" },
+  { id: "library", label: "Library", description: "Imports, playlists, and metadata", icon: LibraryBig, keywords: "library import imports songs folders playlists queue metadata cleaner cleanup search rebuild title names artist album file local" },
+  { id: "downloads", label: "Downloads", description: "Queue, quality, and folders", icon: Download, keywords: "downloads download youtube yt-dlp ytdlp queue progress speed eta cancel retry failed clear finished folder quality mp3 flac wav format auto add clean title" },
+  { id: "covers", label: "Covers", description: "Cover art and cover tools", icon: Images, keywords: "cover covers artwork art pixel pixelart gallery randomize randomise rescan favorites hidden excluded album image glow" },
+  { id: "updates", label: "Updates", description: "Version and update settings", icon: Download, keywords: "update updates updater version changelog whats new release download install restart github check publish" },
+  { id: "about", label: "About", description: "Version only", icon: SettingsIcon, keywords: "about app info version localtify open source" },
+  { id: "advanced", label: "Advanced", description: "Maintenance tools", icon: SlidersHorizontal, keywords: "advanced diagnostics debug version update force source reset status app stats maintenance backup database safe storage settings linux autostart" }
+];
+export const coverMoodOptions: Array<{ id: CoverMood; label: string; note: string }> = [
+  { id: "all", label: "all covers", note: "everything that is not blocked" }, { id: "favorites", label: "favorites", note: "only covers you starred" }, { id: "leastUsed", label: "least used", note: "spread art more evenly" }, { id: "cute", label: "cute", note: "cats, anime, soft covers" }, { id: "space", label: "space", note: "stars, planets, glow" }, { id: "dark", label: "dark", note: "black, night, moody" }, { id: "cozy", label: "cozy", note: "peaceful and warm" }, { id: "energy", label: "energy", note: "bright and loud" }
+];
+export const coverColorSyncOptions: Array<{ id: CoverColorSyncMode; label: string; note: string }> = [
+  { id: "off", label: "off", note: "no cover tint, fastest look" }, { id: "subtle", label: "subtle", note: "tiny cover color around the app" }, { id: "normal", label: "normal", note: "balanced cover tint for daily use" }, { id: "strong", label: "strong", note: "bigger cover mood and player glow" }
+];
+export const defaultSettings: Settings = {
+  theme: "mint", themePanelCollapsed: false, customThemeEnabled: false, customThemeColor: "#8dffce", customThemeColor2: "#8ecbff", customThemeBackground: "#050517", customThemeSurface: "#151528", customThemeText: "#f5f3ff", customThemeHighlight: "#c084fc", customThemeProgress: "#8dffce", volume: 0.75, playerSize: 108, sidebarWidth: 249, compactPlayer: true, autoplayOnSelect: true, rememberLastSong: true, showVisualizer: true, showRightColumn: false, showAmbientGradient: true, coverColorSyncMode: "normal", showFloatingNotes: true, animeVisuals: true, animatedBackgrounds: true, gifVisualsMode: "loadingOnly", homeExpanded: true, heroExpanded: true, animatedGlow: true, softCorners: true, denseList: true, reducedMotion: false, catBuddyEnabled: false, showHeroBadge: true, simpleMode: false, lastSongId: "", homeBannerType: "dynamic", mediaCardBackground: "glassy", homeLayoutMode: "balanced", libraryRowStyle: "comfyRows", sidebarBehavior: "fixed", playerBackgroundStyle: "coverBlur", homeHeroCoverBrightness: 1, starsIntensity: "off", blurEffects: "normal", discordEnabled: true, discordShowPausedIdle: true, discordPrivacyMode: false, discordButtons: true, discordArtMode: "randomPixel", discordActivityStyle: "cute", discordTitleCleanup: "heavy", discordSecondLine: "artist", autoUpdateEnabled: true, autoUpdateNotifyOnly: true, crossfadeEnabled: true, crossfadeSeconds: 1.6, gaplessPlayback: true, volumeNormalization: true, perSongVolumeMemory: false, sleepTimerMinutes: 0, playbackSpeed: 1, rememberPlaybackPosition: true, skipSilence: false, minimizeToTray: false, startWithWindows: true, downloadQuality: "best", downloadFormat: "mp3", downloadAutoAdd: true, downloadCleanTitle: true, downloadFolder: ""
+};
+export const settingsCategorySpring = { type: "spring", stiffness: 430, damping: 36, mass: 0.68 } as const;
