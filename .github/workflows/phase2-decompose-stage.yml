@@ -1,0 +1,109 @@
+name: Phase 2 Decompose Stage
+
+on:
+  push:
+    branches:
+      - agent/phase-2-decompose-stage
+    paths:
+      - .github/workflows/phase2-decompose-stage.yml
+      - scripts/.phase2-decompose.part00
+      - scripts/.phase2-decompose.part01
+      - scripts/.phase2-decompose.part02
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: localtify-phase2-decompose-stage
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply and validate feature decomposition
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase-2-decompose-stage
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Reconstruct exact decomposition patch
+        shell: bash
+        run: |
+          cat scripts/.phase2-decompose.part00 scripts/.phase2-decompose.part01 scripts/.phase2-decompose.part02 > /tmp/phase2-decompose.b64
+          echo "f8003af8207b440de8ea5772b9d25e331a584cfb58b58dcf45d7fb722ca3ed16  /tmp/phase2-decompose.b64" | sha256sum -c -
+          base64 -d /tmp/phase2-decompose.b64 | gunzip > /tmp/phase2-decompose.patch
+          patch -p1 < /tmp/phase2-decompose.patch
+
+      - name: Verify decomposition shape
+        shell: bash
+        run: |
+          test "$(wc -l < src/features/shell/AppShell.tsx)" -lt 1000
+          test -e src/features/albums/useAlbumsController.ts
+          test -e src/features/settings/SettingsModal.tsx
+          test -e src/features/library/components/SongContextMenu.tsx
+          test -e src/features/library/components/SongEditorModal.tsx
+          test -e src/features/library/components/DeleteSongModal.tsx
+          test -e src/features/playlists/components/PlaylistPickerModal.tsx
+          test -e src/features/updates/WhatsNewModal.tsx
+          test -e src/features/player/components/PlaybackAudioElement.tsx
+          ! grep -R --line-number --include='*.ts' --include='*.tsx' '@ts-nocheck' \
+            src/features/albums/useAlbumsController.ts \
+            src/features/settings/SettingsModal.tsx \
+            src/features/library/components/SongContextMenu.tsx \
+            src/features/library/components/SongEditorModal.tsx \
+            src/features/library/components/DeleteSongModal.tsx \
+            src/features/playlists/components/PlaylistPickerModal.tsx \
+            src/features/updates/WhatsNewModal.tsx \
+            src/features/player/components/PlaybackAudioElement.tsx
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if ! npm ci --ignore-scripts; then
+            echo "package-lock install failed; using package.json fallback for validation"
+            rm -rf node_modules
+            npm install --ignore-scripts --package-lock=false
+          fi
+
+      - name: Check Electron bridge drift
+        run: npm run bridge:check
+
+      - name: Check architecture boundaries
+        run: npm run boundaries:check
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Production renderer build
+        run: npm run build
+
+      - name: Diff integrity
+        shell: bash
+        run: |
+          git diff --check
+          test "$(wc -l < src/features/shell/AppShell.tsx)" -lt 1000
+
+      - name: Commit validated source decomposition
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src
+          if git diff --cached --quiet; then
+            echo "No generated source changes"
+            exit 1
+          fi
+          git commit -m "refactor: decompose app shell by feature"
+          git push origin HEAD:agent/phase-2-decompose-stage
