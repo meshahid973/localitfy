@@ -14,10 +14,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: localtify-phase2-decompose-stage
-  cancel-in-progress: true
-
 jobs:
   apply:
     name: Apply and validate feature decomposition
