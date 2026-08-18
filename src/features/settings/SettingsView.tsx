@@ -1,0 +1,52 @@
+import { AnimatePresence, motion as Motion } from "motion/react";
+import { settingsCategorySpring } from "./settings.constants";
+
+export type SettingsViewProps = {
+  renderSettingsCategoryContent: any;
+  renderSettingsRail: any;
+  settings: any;
+  settingsCategory: any;
+};
+
+export default function SettingsView(props: SettingsViewProps) {
+  const {
+    renderSettingsCategoryContent,
+    renderSettingsRail,
+    settings,
+    settingsCategory
+  } = props;
+
+  return (
+
+              <section className="settingsPage settingsPageV027">
+                <div className="settingsHero panel settingsHeroV027">
+                  <div>
+                    <p className="eyebrow">localtify controls</p>
+                    <h3>settings</h3>
+                    <p className="softText">Simple settings up front. Diagnostics, repair, and debug-style tools live in Advanced.</p>
+                  </div>
+
+                </div>
+
+                <div className="settingsLayout settingsPageLayoutV027">
+                  {renderSettingsRail("page")}
+                  <div className="settingsCategoryContent settingsCategoryContentV027">
+                    <AnimatePresence mode="wait" initial={false}>
+                      <Motion.div
+                        key={`settings-page-${settingsCategory}`}
+                        className={`settingsCategoryMotion settingsCategoryMotion-${settingsCategory}`}
+                        data-settings-category={settingsCategory}
+                        initial={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
+                        animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                        exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                        transition={settings.reducedMotion ? { duration: 0.1 } : settingsCategorySpring}
+                      >
+                        {renderSettingsCategoryContent()}
+                      </Motion.div>
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </section>
+            
+  );
+}

@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 /* localtify 0.4.1 V395 playback settings cleanup + faster volume changes. */
 /* localtify 0.4.1 V396 audio engine stability pass. */
 /* localtify 0.4.1 V419 background-audio and settings-save stability. */
@@ -83,11 +83,9 @@ import "./onboarding-first-run.css";
 import "./player.css";
 import "./effects.css";
 
-import LocaltifyAppView, {
-  Cover,
-  VirtualHomeSongCards,
-  VirtualSongRows
-} from "./LocaltifyAppView";
+import LocaltifyAppView from "./LocaltifyAppView";
+import { Cover } from "./features/covers/Cover";
+import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
 import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
 import {
@@ -11779,7 +11777,3 @@ function MainModeApp() {
 export default function App() {
   return <MainModeApp />;
 }
-
-
-
-
