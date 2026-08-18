@@ -45,8 +45,7 @@ jobs:
       - name: Check architecture boundaries
         run: npm run boundaries:check
 
-      - name: TypeScript baseline
-        continue-on-error: true
+      - name: TypeScript
         run: npm run typecheck
 
       - name: Build renderer
