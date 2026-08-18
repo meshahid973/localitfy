@@ -6,10 +6,7 @@ export { applyLibraryOrder, cleanPlaylistList, cleanSongOrderIds, createImportAn
 export { buildSongSearchEntry, cleanArtistName, cleanMetadataField, cleanupSongTitle, compactSongKey, discordArtist, fileNameFromPath, getMetadataRepairPatch, heroTitleDensityClass, normalizeSearchText, prepareSearchQuery, prettyMeta, prettyTitle, previewTitle, rankSongsForSearch, removeBracketNoise, removeLooseNoiseWords, removeUrlNoise, sanitizeSongList, sanitizeSongRecord, scoreArtistGuess, scoreSongSearch, shortenWords, smartSongMetadata, splitArtistTitleCandidate, splitSearchTerms, stripAudioExtension, stripDuplicateCopySuffix, stripTrackNumber } from "./features/search";
 export { buildRuntimePixelArtAssets, cleanStringList, coverAverageColorCache, coverMoodName, getAmbientStyle, getCachedRuntimePixelArtAssets, getPixelArtAssetKey, getPixelAssetMoodTags, getRendererSafeImageUrl, getSongAmbientSource, getSongCoverUsageKeys, isRendererSafeImageUrl, normalizePixelArtFileName, pixelArtForSong, pixelArtUrl, runtimePixelArtImageUrl, seededUnit, songSignature, stableHash, useCoverAverageStyle, buildCoverAverageStyle } from "./features/covers";
 export { buildAnimatedThemeVisualStyle, buildRandomStarLayer, cleanCustomThemePreset, getCustomThemeColorPatch, hexToRgbString, hexToRgbaString, isCompleteHexColorInput, isRetiredAnimatedThemeId, isThemeId, makeCustomThemeColors, makeThemePresetStyle, normalizeCoverColorSyncMode, normalizeHexColor, normalizeHexInputDraft, normalizeThemeId, randomThemeHex, readSavedCustomThemePresets, writeSavedCustomThemePresets } from "./features/settings";
-export { buildDiscordSongSearchUrl, discordKeyFromFileName } from "./features/discord";
+export { buildDiscordPreview, buildDiscordSongSearchUrl, discordKeyFromFileName } from "./features/discord";
 export { friendlyUpdateError, updateLeaveAloneKey, updateRibbonTitle, updateStatusLabel, updateWasLeftAlone } from "./features/updates";
 export { cleanToastCopy } from "./features/shell";
 export { loadingScreenGif } from "./core/app.constants";
-
-// These view-coupled helpers are intentionally left for the next extraction cut.
-export { buildDiscordPreview } from "./LocaltifyAppView";
