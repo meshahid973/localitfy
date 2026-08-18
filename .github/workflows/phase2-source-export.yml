@@ -17,16 +17,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload renderer refactor sources
+      - name: Upload Phase 2 source snapshot
         uses: actions/upload-artifact@v4
         with:
-          name: phase2-refactor-sources
+          name: phase2-full-source
           if-no-files-found: error
           retention-days: 1
           path: |
-            src/App.tsx
-            src/LocaltifyAppView.tsx
-            src/App.css
-            src/home.css
-            src/themes.css
-            src/effects.css
+            src/**
+            scripts/**
+            .github/workflows/ci.yml
+            package.json
+            package-lock.json
+            tsconfig*.json
+            vite.config.ts
