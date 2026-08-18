@@ -59,7 +59,6 @@ import {
   trackLibraryViewChanged,
   trackDownloadsOpened,
   trackDiscordToggled,
-  trackUpdatePopupSeen,
   trackOnboardingCompleted,
   trackOnboardingSkipped,
   trackError,
@@ -94,6 +93,7 @@ import "./effects.css";
 import AppShell from "./features/shell/AppShell";
 import { useAppToast } from "./features/shell/useAppToast";
 import { usePlaylistsController } from "./features/playlists";
+import { useUpdatesController } from "./features/updates";
 import { Cover } from "./features/covers/Cover";
 import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
 import Onboarding from "./Onboarding";
@@ -124,10 +124,8 @@ import {
   THEME_SWATCH_COLORS,
   V013_DEFAULTS_KEY,
   V013_RELEASE_DEFAULTS,
-  WHATS_NEW_SEEN_KEY,
   coverColorSyncOptions,
   defaultSettings,
-  defaultUpdatePrompt,
   discordArtModeOptions,
   discordCleanupOptions,
   discordSecondLineOptions,
@@ -154,7 +152,6 @@ import {
   coverMoodName,
   createImportAnimationState,
   formatTime,
-  friendlyUpdateError,
   getAmbientStyle,
   getCachedRuntimePixelArtAssets,
   getCustomThemeColorPatch,
@@ -199,14 +196,12 @@ import {
   stableHash,
   stableSongSourceKey,
   updateStatusLabel,
-  updateWasLeftAlone,
   useCoverAverageStyle,
   useStableCallback,
   writeLocalJson,
   writeSavedCustomThemePresets
 } from "./localtifyUtils";
 import type {
-  AutoUpdateEvent,
   CoverColorSyncMode,
   CoverMood,
   CustomThemeColorKey,
@@ -231,7 +226,6 @@ import type {
   SongContextMenuState,
   SpotifyTrack,
   ThemeId,
-  UpdatePromptState,
   View
 } from "./localtifyTypes";
 
@@ -698,10 +692,6 @@ function MainModeApp() {
   const customThemeLivePatchRef = useRef<Partial<Settings>>({});
   const pendingCustomThemePreviewPatchRef = useRef<Partial<Settings>>({});
   const appRootRef = useRef<HTMLElement | null>(null);
-  const updateAnalyticsSeenRef = useRef("");
-  const updateNagTimerRef = useRef<number | null>(null);
-  const updateNagVersionRef = useRef("");
-  const updateNagStatusRef = useRef<"available" | "downloaded">("available");
   const analyticsSessionEndedRef = useRef(false);
   const analyticsViewRef = useRef<View>("home");
   const librarySnapshotSignatureRef = useRef("");
@@ -872,9 +862,28 @@ function MainModeApp() {
   const lastProgressStatePaintRef = useRef(0);
   const [statusText, setStatusText] = useState("ready to play");
   const [playerError, setPlayerError] = useState("");
-  const [updatePrompt, setUpdatePrompt] = useState<UpdatePromptState>(defaultUpdatePrompt);
-  const [, setLastUpdateCheckedLabel] = useState("not checked yet");
-  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const { appToast, showAppToast } = useAppToast();
+  const {
+    updatePrompt,
+    setUpdatePrompt,
+    whatsNewOpen,
+    setWhatsNewOpen,
+    openUpdateChangelog,
+    closeWhatsNew,
+    askUpdaterToDownload,
+    askUpdaterToInstall,
+    manualUpdateCheck,
+    skipAvailableUpdate,
+    clearUpdateNagTimer,
+    showUpdateNag,
+    showDebugUpdateAvailable
+  } = useUpdatesController({
+    ready,
+    autoUpdateEnabled: settings.autoUpdateEnabled,
+    analyticsViewRef,
+    setStatusText,
+    showAppToast
+  });
   const [now, setNow] = useState(new Date());
   const [screensaverVisible, setScreensaverVisible] = useState(false);
   const [screensaverPreviewActive, setScreensaverPreviewActive] = useState(false);
@@ -1130,23 +1139,6 @@ function MainModeApp() {
 
   // V313: onboarding is now a true first-run mini-app.
   // Do not auto-close it just because songs exist; import completion is handled inside Onboarding.
-
-  useEffect(() => {
-    if (!ready) return;
-
-    const seenVersion = window.localStorage.getItem(WHATS_NEW_SEEN_KEY);
-    if (seenVersion !== APP_VERSION) {
-      const timer = window.setTimeout(() => setWhatsNewOpen(true), 420);
-      return () => window.clearTimeout(timer);
-    }
-
-    return undefined;
-  }, [ready]);
-
-  function closeWhatsNew() {
-    window.localStorage.setItem(WHATS_NEW_SEEN_KEY, APP_VERSION);
-    setWhatsNewOpen(false);
-  }
 
   const settingsSearchQuery = normalizeSettingsSearch(deferredSettingsSearch);
 
@@ -1431,7 +1423,6 @@ function MainModeApp() {
   const songIdentityRef = useRef<string | null>(null);
   const songTransitionCounterRef = useRef(0);
   const [nowPlayingTransitionKey, setNowPlayingTransitionKey] = useState("empty:0");
-  const { appToast, showAppToast } = useAppToast();
   const {
     playlists,
     setPlaylists,
@@ -3722,335 +3713,6 @@ function MainModeApp() {
     return () => window.clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    if (!window.localitfy.onAutoUpdate) return;
-
-    const off = window.localitfy.onAutoUpdate((payload: AutoUpdateEvent) => {
-      if (!payload || typeof payload !== "object") return;
-
-      const version = payload.version || "latest";
-      const percent = clamp(Number(payload.percent || 0), 0, 100);
-
-      if (!payload.silent && (payload.type === "checking" || payload.type === "not-available" || payload.type === "available" || payload.type === "error" || payload.type === "dev")) {
-        setLastUpdateCheckedLabel(payload.type === "checking" ? "checking now" : "just now");
-      }
-
-      if (payload.type === "backup") {
-        setUpdatePrompt((old) => ({
-          ...old,
-          visible: old.visible,
-          backupPath: payload.backupPath || old.backupPath,
-          libraryBackedUp: Boolean(payload.libraryBackedUp),
-          message: old.message || payload.message || "your library has been backed up"
-        }));
-        return;
-      }
-
-      if (payload.type === "checking") {
-        if (payload.silent) return;
-        setUpdatePrompt({
-          visible: true,
-          status: "checking",
-          version: "",
-          percent: 0,
-          message: payload.message || "Checking for updates...",
-          error: ""
-        });
-        showAppToast("Checking for updates", "work");
-        return;
-      }
-
-      if (payload.type === "available") {
-        updateNagVersionRef.current = version;
-        updateNagStatusRef.current = "available";
-        if (version && updateWasLeftAlone(version)) {
-          return;
-        }
-        setUpdatePrompt({
-          visible: true,
-          status: "available",
-          version,
-          percent: 0,
-          message: payload.message || `localtify ${version} is ready to download.`,
-          error: "",
-          backupPath: payload.backupPath || "",
-          libraryBackedUp: Boolean(payload.libraryBackedUp),
-          releaseNotes: payload.releaseNotes || ""
-        });
-        showAppToast("Update available", "success");
-        return;
-      }
-
-      if (payload.type === "downloading") {
-        setUpdatePrompt((old) => ({
-          ...old,
-          visible: true,
-          status: "downloading",
-          percent,
-          message: payload.message || `Downloading update... ${Math.round(percent)}%`,
-          error: "",
-          backupPath: payload.backupPath || old.backupPath,
-          libraryBackedUp: Boolean(payload.libraryBackedUp || old.libraryBackedUp),
-          downloadedBytes: payload.downloadedBytes,
-          totalBytes: payload.totalBytes,
-          sizeBytes: payload.sizeBytes,
-          speedBytesPerSecond: payload.speedBytesPerSecond
-        }));
-        return;
-      }
-
-      if (payload.type === "downloaded") {
-        updateNagVersionRef.current = version || updateNagVersionRef.current || "latest";
-        updateNagStatusRef.current = "downloaded";
-        setUpdatePrompt((old) => ({
-          ...old,
-          visible: true,
-          status: "downloaded",
-          percent: 100,
-          version: version || old.version,
-          message: payload.message || "Update ready. Your library has been backed up. Restart localtify to install it.",
-          error: "",
-          backupPath: payload.backupPath || old.backupPath,
-          libraryBackedUp: Boolean(payload.libraryBackedUp || old.libraryBackedUp),
-          releaseNotes: payload.releaseNotes || old.releaseNotes
-        }));
-        showAppToast("Update ready to install", "success");
-        return;
-      }
-
-      if (payload.type === "not-available") {
-        if (payload.silent) return;
-        setUpdatePrompt(defaultUpdatePrompt);
-        setStatusText("localtify is up to date");
-        showAppToast("localtify is up to date", "success");
-        return;
-      }
-
-      if (payload.type === "dev") {
-        if (payload.silent) return;
-
-        // V179: dev/packaged-only update messages must never open the global top ribbon.
-        // The ribbon is reserved for real update states only, so the app does not look broken
-        // while testing with npm run dev.
-        setUpdatePrompt(defaultUpdatePrompt);
-        setStatusText("update checks work in the installed app");
-        showAppToast("Update checks work after installing the app", "work");
-        return;
-      }
-
-      if (payload.type === "error") {
-        if (payload.silent) return;
-        setUpdatePrompt({
-          visible: true,
-          status: "error",
-          version: "",
-          percent: 0,
-          message: friendlyUpdateError(payload.error || payload.message),
-          error: friendlyUpdateError(payload.error || payload.message)
-        });
-        showAppToast("Update check failed", "error");
-      }
-    });
-
-    return () => off();
-  }, []);
-
-  useEffect(() => {
-    if (!ready || !settings.autoUpdateEnabled || !window.localitfy.checkForUpdates) return;
-
-    const timer = window.setTimeout(() => {
-      window.localitfy.checkForUpdates?.({ silent: true }).catch(() => undefined);
-    }, 1800);
-
-    return () => window.clearTimeout(timer);
-  }, [ready, settings.autoUpdateEnabled]);
-
-  useEffect(() => {
-    return () => {
-      if (updateNagTimerRef.current) {
-        window.clearTimeout(updateNagTimerRef.current);
-        updateNagTimerRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!updatePrompt.visible) return;
-
-    const signature = [updatePrompt.status, updatePrompt.version || "none", updatePrompt.nagStage || 0].join(":");
-    if (updateAnalyticsSeenRef.current === signature) return;
-
-    updateAnalyticsSeenRef.current = signature;
-    trackUpdatePopupSeen({
-      update_status: updatePrompt.status,
-      current_version: APP_VERSION,
-      latest_version: updatePrompt.version || null,
-      current_view: analyticsViewRef.current,
-      has_error: Boolean(updatePrompt.error)
-    });
-  }, [updatePrompt.visible, updatePrompt.status, updatePrompt.version, updatePrompt.error, updatePrompt.nagStage]);
-
-  useEffect(() => {
-    if (!updatePrompt.visible) return;
-    if (updatePrompt.status !== "latest" && updatePrompt.status !== "dev") return;
-
-    const timer = window.setTimeout(() => {
-      setUpdatePrompt(defaultUpdatePrompt);
-    }, updatePrompt.status === "latest" ? 1400 : 2600);
-
-    return () => window.clearTimeout(timer);
-  }, [updatePrompt.visible, updatePrompt.status]);
-
-  async function askUpdaterToDownload() {
-    if (!window.localitfy.downloadUpdate) {
-      setUpdatePrompt((old) => ({
-        ...old,
-        visible: true,
-        status: "error",
-        message: "Could not check for updates. Try again later.",
-        error: "Updater is not available in this build."
-      }));
-      return;
-    }
-
-    setUpdatePrompt((old) => ({
-      ...old,
-      visible: true,
-      status: "downloading",
-      percent: 0,
-      message: "Backing up your library, then starting download...",
-      error: ""
-    }));
-
-    await window.localitfy.downloadUpdate().catch((error: unknown) => {
-      setUpdatePrompt((old) => ({
-        ...old,
-        visible: true,
-        status: "error",
-        message: friendlyUpdateError(error),
-        error: friendlyUpdateError(error)
-      }));
-    });
-  }
-
-  async function askUpdaterToInstall() {
-    if (!window.localitfy.installUpdate) return;
-    await window.localitfy.installUpdate().catch(() => {
-      setUpdatePrompt((old) => ({
-        ...old,
-        visible: true,
-        status: "error",
-        message: "Could not restart to install the update.",
-        error: "Could not restart to install the update."
-      }));
-    });
-  }
-
-  async function manualUpdateCheck() {
-    setLastUpdateCheckedLabel("checking now");
-
-    if (!window.localitfy.checkForUpdates) {
-      setUpdatePrompt({
-        visible: true,
-        status: "error",
-        version: "",
-        percent: 0,
-        message: "Could not check for updates. Try again later.",
-        error: "Updater is not available in this build."
-      });
-      setLastUpdateCheckedLabel("just now");
-      return;
-    }
-
-    setUpdatePrompt({
-      visible: true,
-      status: "checking",
-      version: "",
-      percent: 0,
-      message: "Checking for updates...",
-      error: ""
-    });
-
-    await window.localitfy.checkForUpdates({ silent: false }).catch((error: unknown) => {
-      setUpdatePrompt({
-        visible: true,
-        status: "error",
-        version: "",
-        percent: 0,
-        message: friendlyUpdateError(error),
-        error: friendlyUpdateError(error)
-      });
-      setLastUpdateCheckedLabel("just now");
-    });
-  }
-
-  function openUpdateChangelog() {
-    setWhatsNewOpen(true);
-  }
-
-  function clearUpdateNagTimer() {
-    if (updateNagTimerRef.current) {
-      window.clearTimeout(updateNagTimerRef.current);
-      updateNagTimerRef.current = null;
-    }
-  }
-
-  function showUpdateNag(stage: 1 | 2 | 3, versionInput?: string) {
-    const version = versionInput || updateNagVersionRef.current || updatePrompt.version || "latest";
-    if (updateWasLeftAlone(version)) return;
-
-    updateNagVersionRef.current = version;
-    setUpdatePrompt({
-      visible: true,
-      status: updateNagStatusRef.current,
-      version,
-      percent: updateNagStatusRef.current === "downloaded" ? 100 : 0,
-      nagStage: stage,
-      message: "",
-      error: "",
-      libraryBackedUp: true
-    });
-  }
-
-  function scheduleUpdateNag(versionInput?: string, stageInput?: 1 | 2 | 3, customDelayMs?: number, statusInput?: "available" | "downloaded") {
-    const version = versionInput || updatePrompt.version || updateNagVersionRef.current || "latest";
-    const stage = stageInput || 1;
-
-    if (updateWasLeftAlone(version)) return;
-
-    updateNagVersionRef.current = version;
-    updateNagStatusRef.current = statusInput || updateNagStatusRef.current || "available";
-    clearUpdateNagTimer();
-
-    const delayMs = typeof customDelayMs === "number"
-      ? customDelayMs
-      : stage === 1
-        ? 120_000
-        : 60_000;
-
-    updateNagTimerRef.current = window.setTimeout(() => {
-      updateNagTimerRef.current = null;
-      showUpdateNag(stage, version);
-    }, delayMs);
-  }
-
-  function handleUpdateLater() {
-    const currentStage = updatePrompt.nagStage || 0;
-    const nextStage = currentStage >= 2 ? 3 : currentStage === 1 ? 2 : 1;
-    const nextDelay = currentStage === 0 ? 120_000 : 60_000;
-    const version = updatePrompt.version || updateNagVersionRef.current || "latest";
-    const reminderStatus = updatePrompt.status === "downloaded" ? "downloaded" : "available";
-
-    setUpdatePrompt(defaultUpdatePrompt);
-    scheduleUpdateNag(version, nextStage, nextDelay, reminderStatus);
-    setStatusText("update reminder snoozed");
-  }
-
-
-  function skipAvailableUpdate() {
-    handleUpdateLater();
-  }
-
   function resetPlayCountTracker() {
     countPlayRef.current = false;
     playCountSongIdRef.current = "";
@@ -4221,46 +3883,35 @@ function MainModeApp() {
 
 
     if (command === "whatsnew" || command === "whatsnewtrue" || command === "showwhatsnew") {
-      setWhatsNewOpen(true);
+      openUpdateChangelog();
       setQuery("");
       showAppToast("what's new opened", "success");
       return;
     }
 
     if (command === "popup1" || command === "/popup1") {
-      clearUpdateNagTimer();
-      updateNagVersionRef.current = "test";
-      updateNagStatusRef.current = "available";
-      setUpdatePrompt({
-        visible: true,
-        status: "available",
-        version: "test",
-        percent: 0,
-        message: "localtify test update is ready to download.",
-        error: "",
-        libraryBackedUp: true
-      });
+      showDebugUpdateAvailable();
       setQuery("");
       return;
     }
 
     if (command === "popup2" || command === "/popup2") {
       clearUpdateNagTimer();
-      showUpdateNag(1, updatePrompt.version || updateNagVersionRef.current || "test");
+      showUpdateNag(1, updatePrompt.version || "test");
       setQuery("");
       return;
     }
 
     if (command === "popup3" || command === "/popup3") {
       clearUpdateNagTimer();
-      showUpdateNag(2, updatePrompt.version || updateNagVersionRef.current || "test");
+      showUpdateNag(2, updatePrompt.version || "test");
       setQuery("");
       return;
     }
 
     if (command === "popup4" || command === "/popup4") {
       clearUpdateNagTimer();
-      showUpdateNag(3, updatePrompt.version || updateNagVersionRef.current || "test");
+      showUpdateNag(3, updatePrompt.version || "test");
       setQuery("");
       return;
     }
