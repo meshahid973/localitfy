@@ -2,7 +2,7 @@
 export { clamp, collapseSpaces, formatTime, getGreeting, lower, normalizeUiText, safeNumber, toCssUrl } from "./shared/utils/format";
 export { useStableCallback } from "./shared/hooks/useStableCallback";
 export { makeLocalId, readLocalJson, writeLocalJson } from "./shared/storage/localStorage";
-export { applyLibraryOrder, cleanPlaylistList, cleanSongOrderIds, createImportAnimationState, getPlaylistDropSide, getSongPlaybackSourceKey, insertIdNearTarget, isPlayableSong, maybeApplyCoderpixelArtist, readPlaylistDraggedSongId, reorderIdList, reorderSongList, saveLibraryOrder, stableSongSourceKey } from "./features/library";
+export { applyLibraryOrder, cleanSongOrderIds, createImportAnimationState, getPlaylistDropSide, getSongPlaybackSourceKey, insertIdNearTarget, isPlayableSong, maybeApplyCoderpixelArtist, readPlaylistDraggedSongId, reorderIdList, reorderSongList, saveLibraryOrder, stableSongSourceKey } from "./features/library";
 export { buildSongSearchEntry, cleanArtistName, cleanMetadataField, cleanupSongTitle, compactSongKey, discordArtist, fileNameFromPath, getMetadataRepairPatch, heroTitleDensityClass, normalizeSearchText, prepareSearchQuery, prettyMeta, prettyTitle, previewTitle, rankSongsForSearch, removeBracketNoise, removeLooseNoiseWords, removeUrlNoise, sanitizeSongList, sanitizeSongRecord, scoreArtistGuess, scoreSongSearch, shortenWords, smartSongMetadata, splitArtistTitleCandidate, splitSearchTerms, stripAudioExtension, stripDuplicateCopySuffix, stripTrackNumber } from "./features/search";
 export { normalizeSettingsSearch, resolveSettingsCategoryFromSearch, settingsTabMatchesSearch } from "./features/settings/settings.search";
 export { buildRuntimePixelArtAssets, cleanStringList, coverAverageColorCache, coverMoodName, getAmbientStyle, getCachedRuntimePixelArtAssets, getPixelArtAssetKey, getPixelAssetMoodTags, getRendererSafeImageUrl, getSongAmbientSource, getSongCoverUsageKeys, isRendererSafeImageUrl, normalizePixelArtFileName, pixelArtForSong, pixelArtUrl, runtimePixelArtImageUrl, seededUnit, songSignature, stableHash, useCoverAverageStyle, buildCoverAverageStyle } from "./features/covers";
@@ -11,3 +11,5 @@ export { buildDiscordPreview, buildDiscordSongSearchUrl, discordKeyFromFileName 
 export { friendlyUpdateError, updateLeaveAloneKey, updateRibbonTitle, updateStatusLabel, updateWasLeftAlone } from "./features/updates";
 export { cleanToastCopy } from "./features/shell";
 export { loadingScreenGif } from "./core/app.constants";
+
+export { cleanPlaylistList } from "./features/playlists";

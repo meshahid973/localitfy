@@ -1,5 +1,4 @@
 export const PLAYBACK_URL_CACHE_TTL_MS = 20 * 60 * 1000;
-export const PLAYLIST_STORAGE_KEY = "localitfy.playlists.v1";
 export const QUEUE_STORAGE_KEY = "localitfy.queue.v1";
 export const QUEUE_HISTORY_STORAGE_KEY = "localitfy.queueHistory.v1";
 export const REPEAT_PLAYLIST_STORAGE_KEY = "localitfy.repeatPlaylist.v1";

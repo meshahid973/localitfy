@@ -92,6 +92,8 @@ import "./player.css";
 import "./effects.css";
 
 import AppShell from "./features/shell/AppShell";
+import { useAppToast } from "./features/shell/useAppToast";
+import { usePlaylistsController } from "./features/playlists";
 import { Cover } from "./features/covers/Cover";
 import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
 import Onboarding from "./Onboarding";
@@ -148,7 +150,6 @@ import {
   cleanPlaylistList,
   cleanSongOrderIds,
   cleanStringList,
-  cleanToastCopy,
   collapseSpaces,
   coverMoodName,
   createImportAnimationState,
@@ -205,7 +206,6 @@ import {
   writeSavedCustomThemePresets
 } from "./localtifyUtils";
 import type {
-  AppToastKind,
   AutoUpdateEvent,
   CoverColorSyncMode,
   CoverMood,
@@ -614,7 +614,6 @@ function MainModeApp() {
   const backgroundAudioRepairTimerRef = useRef<number | null>(null);
   const analyticsWorkerRef = useRef<Worker | null>(null);
   const analyticsWorkerRequestRef = useRef(0);
-  const playlistSaveTimerRef = useRef<number | null>(null);
   const playerResizeFrameRef = useRef<number | null>(null);
   const sidebarResizeFrameRef = useRef<number | null>(null);
   const pendingPlayRef = useRef(false);
@@ -629,7 +628,6 @@ function MainModeApp() {
   const playbackUrlPendingRef = useRef<Map<string, Promise<PlaybackUrlResult>>>(new Map());
   const bootedRef = useRef(false);
   const lastQueueHistoryRef = useRef("");
-  const toastTimerRef = useRef<number | null>(null);
   const importOverlayTimerRef = useRef<number | null>(null);
   const songRef = useRef<Song | null>(null);
   const timeRef = useRef(0);
@@ -1303,21 +1301,6 @@ function MainModeApp() {
 
     const validSongIds: Set<string> = new Set(songs.map((song) => song.id));
     setCoverSelectedSongIds((oldIds) => cleanSongOrderIds(oldIds, validSongIds));
-    setPlaylists((items) => {
-      let changed = false;
-
-      const next = items.map((playlist) => {
-        const cleanIds = cleanSongOrderIds(playlist.songIds, validSongIds);
-        if (cleanIds.length !== playlist.songIds.length || cleanIds.some((id, index) => id !== playlist.songIds[index])) {
-          changed = true;
-          return { ...playlist, songIds: cleanIds };
-        }
-
-        return playlist;
-      });
-
-      return changed ? next : items;
-    });
   }, [songs]);
 
   const currentSong = useMemo(() => {
@@ -1448,29 +1431,55 @@ function MainModeApp() {
   const songIdentityRef = useRef<string | null>(null);
   const songTransitionCounterRef = useRef(0);
   const [nowPlayingTransitionKey, setNowPlayingTransitionKey] = useState("empty:0");
-  const [playlists, setPlaylists] = useState<Playlist[]>(() => readLocalJson<Playlist[]>(PLAYLIST_STORAGE_KEY, []));
+  const { appToast, showAppToast } = useAppToast();
+  const {
+    playlists,
+    setPlaylists,
+    newPlaylistName,
+    setNewPlaylistName,
+    playlistPickerName,
+    setPlaylistPickerName,
+    activePlaylistId,
+    setActivePlaylistId,
+    selectedPlaylistId,
+    setSelectedPlaylistId,
+    playlistPickerSong,
+    setPlaylistPickerSong,
+    playlistDragOverPlaylistId,
+    setPlaylistDragOverPlaylistId,
+    renamingPlaylistId,
+    renamingPlaylistName,
+    setRenamingPlaylistName,
+    createPlaylist,
+    createPlaylistWithSong,
+    removePlaylist,
+    startRenamePlaylist,
+    cancelRenamePlaylist,
+    savePlaylistRename,
+    duplicatePlaylist,
+    openPlaylist,
+    openPlaylistPicker: openPlaylistPickerCore,
+    addSongToPlaylist,
+    removeSongFromPlaylist,
+    toggleSongPlaylist,
+    handlePlaylistSongDrop,
+    handlePlaylistSongAppend
+  } = usePlaylistsController({
+    songs,
+    bootedRef,
+    changeView,
+    setStatusText,
+    showAppToast
+  });
   const [playQueue, setPlayQueue] = useState<string[]>(() => readLocalJson<string[]>(QUEUE_STORAGE_KEY, []));
   const [queueHistory, setQueueHistory] = useState<QueueHistoryItem[]>(() => readLocalJson<QueueHistoryItem[]>(QUEUE_HISTORY_STORAGE_KEY, []));
-  const [newPlaylistName, setNewPlaylistName] = useState("");
-  const [playlistPickerName, setPlaylistPickerName] = useState("");
   const [repeatPlaylist, setRepeatPlaylist] = useState(() => readLocalJson<boolean>(REPEAT_PLAYLIST_STORAGE_KEY, false));
-  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
-  const [playlistPickerSong, setPlaylistPickerSong] = useState<Song | null>(null);
-  const [playlistDragOverPlaylistId, setPlaylistDragOverPlaylistId] = useState("");
-  const [renamingPlaylistId, setRenamingPlaylistId] = useState<string | null>(null);
-  const [renamingPlaylistName, setRenamingPlaylistName] = useState("");
   const [songContextMenu, setSongContextMenu] = useState<SongContextMenuState | null>(null);
   const [pixelArtBusy, setPixelArtBusy] = useState(false);
   const [libraryScanBusy, setLibraryScanBusy] = useState(false);
   const [libraryScanMessage, setLibraryScanMessage] = useState("instant search index ready");
   const [metadataCleanPreview, setMetadataCleanPreview] = useState<any | null>(null);
   const [metadataUndoItems, setMetadataUndoItems] = useState<any[]>([]);
-  const [appToast, setAppToast] = useState<{
-    id: number;
-    message: string;
-    kind: AppToastKind;
-  } | null>(null);
   const [importAnimation, setImportAnimation] = useState<ImportAnimationState>(() =>
     createImportAnimationState()
   );
@@ -1622,25 +1631,6 @@ function MainModeApp() {
     setNowPlayingTransitionKey(`${songIdentity}:${songTransitionCounterRef.current}`);
   }, [songIdentity]);
 
-  useEffect(() => {
-    if (!bootedRef.current) return;
-
-    const cleanedPlaylists = cleanPlaylistList(playlists);
-
-    writeLocalJson(PLAYLIST_STORAGE_KEY, cleanedPlaylists);
-
-    const savePlaylists = window.localitfy.savePlaylists;
-    if (!savePlaylists) return;
-
-    if (playlistSaveTimerRef.current !== null) {
-      window.clearTimeout(playlistSaveTimerRef.current);
-    }
-
-    playlistSaveTimerRef.current = window.setTimeout(() => {
-      playlistSaveTimerRef.current = null;
-      savePlaylists(cleanedPlaylists).catch(() => undefined);
-    }, 140);
-  }, [playlists]);
 
   useEffect(() => {
     writeLocalJson(QUEUE_STORAGE_KEY, playQueue);
@@ -1675,10 +1665,6 @@ function MainModeApp() {
 
   useEffect(() => {
     return () => {
-      if (toastTimerRef.current) {
-        window.clearTimeout(toastTimerRef.current);
-      }
-
       if (importOverlayTimerRef.current) {
         window.clearTimeout(importOverlayTimerRef.current);
       }
@@ -1697,11 +1683,6 @@ function MainModeApp() {
         customThemeQuietCommitTimerRef.current = null;
       }
       customThemeQuietPatchRef.current = {};
-
-      if (playlistSaveTimerRef.current !== null) {
-        window.clearTimeout(playlistSaveTimerRef.current);
-        playlistSaveTimerRef.current = null;
-      }
 
       if (customThemePreviewFrameRef.current !== null) {
         window.cancelAnimationFrame(customThemePreviewFrameRef.current);
@@ -2495,18 +2476,6 @@ function MainModeApp() {
     event.dataTransfer.setDragImage(preview, 18, 18);
   }
 
-  function showAppToast(message: string, kind: AppToastKind = "info") {
-    if (toastTimerRef.current) {
-      window.clearTimeout(toastTimerRef.current);
-    }
-
-    setAppToast({ id: Date.now(), message: cleanToastCopy(message, kind), kind });
-
-    toastTimerRef.current = window.setTimeout(() => {
-      setAppToast(null);
-      toastTimerRef.current = null;
-    }, kind === "work" ? 1900 : 2600);
-  }
 
 
   useEffect(() => {
@@ -8227,159 +8196,9 @@ function MainModeApp() {
     }
   }
 
-  function normalizePlaylistName(sourceName: string, fallbackName: string) {
-    return (sourceName.trim() || fallbackName).slice(0, 120);
-  }
-
-  function createPlaylist(forcedName?: string) {
-    const sourceName = typeof forcedName === "string" ? forcedName : newPlaylistName;
-    const fallbackName = `playlist ${playlists.length + 1}`;
-    const name = normalizePlaylistName(sourceName, fallbackName);
-    const existingPlaylist = playlists.find(
-      (playlist) => playlist.name.trim().toLowerCase() === name.toLowerCase()
-    );
-
-    if (existingPlaylist) {
-      setSelectedPlaylistId(existingPlaylist.id);
-      setStatusText("playlist already exists");
-      showAppToast("playlist already exists", "info");
-      return existingPlaylist.id;
-    }
-
-    const playlist: Playlist = { id: makeLocalId("playlist"), name, songIds: [], createdAt: Date.now() };
-
-    setPlaylists((items) => [playlist, ...items]);
-    setSelectedPlaylistId(playlist.id);
-    if (typeof forcedName === "string") setPlaylistPickerName("");
-    else setNewPlaylistName("");
-
-    showAppToast("playlist created", "success");
-    setStatusText(`created playlist: ${name}`);
-    return playlist.id;
-  }
-
-  function createPlaylistWithSong(songId: string, forcedName: string) {
-    const sourceName = forcedName.trim();
-    if (!sourceName || !songsById.has(songId)) return;
-
-    const name = normalizePlaylistName(sourceName, `playlist ${playlists.length + 1}`);
-    const existingPlaylist = playlists.find(
-      (playlist) => playlist.name.trim().toLowerCase() === name.toLowerCase()
-    );
-
-    if (existingPlaylist) {
-      addSongToPlaylist(existingPlaylist.id, songId);
-      setSelectedPlaylistId(existingPlaylist.id);
-      setPlaylistPickerSong(null);
-      setPlaylistPickerName("");
-      return existingPlaylist.id;
-    }
-
-    const playlist: Playlist = {
-      id: makeLocalId("playlist"),
-      name,
-      songIds: [songId],
-      createdAt: Date.now()
-    };
-
-    setPlaylists((items) => [playlist, ...items]);
-    setSelectedPlaylistId(playlist.id);
-    setPlaylistPickerSong(null);
-    setPlaylistPickerName("");
-    setStatusText(`added to ${name}`);
-    showAppToast(`added to ${name}`, "success");
-    return playlist.id;
-  }
-
-  function removePlaylist(playlistId: string) {
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!playlist) return;
-
-    const shouldRemove = window.confirm(`Delete "${playlist.name}"? Songs stay in your library.`);
-    if (!shouldRemove) return;
-
-    setPlaylists((items) => items.filter((item) => item.id !== playlistId));
-    setSelectedPlaylistId((id) => (id === playlistId ? null : id));
-    setActivePlaylistId((id) => (id === playlistId ? null : id));
-    if (renamingPlaylistId === playlistId) {
-      setRenamingPlaylistId(null);
-      setRenamingPlaylistName("");
-    }
-    setStatusText(`removed ${playlist.name}`);
-    showAppToast("playlist deleted", "success");
-  }
-
-  function startRenamePlaylist(playlist: Playlist) {
-    setRenamingPlaylistId(playlist.id);
-    setRenamingPlaylistName(playlist.name);
-    setSelectedPlaylistId(playlist.id);
-  }
-
-  function cancelRenamePlaylist() {
-    setRenamingPlaylistId(null);
-    setRenamingPlaylistName("");
-  }
-
-  function savePlaylistRename(playlistId: string) {
-    const current = playlists.find((playlist) => playlist.id === playlistId);
-    if (!current) return;
-
-    const nextName = renamingPlaylistName.trim().slice(0, 120) || current.name;
-    const duplicate = playlists.some(
-      (playlist) => playlist.id !== playlistId && playlist.name.trim().toLowerCase() === nextName.toLowerCase()
-    );
-
-    if (duplicate) {
-      setStatusText("playlist name already exists");
-      showAppToast("playlist name already exists", "info");
-      return;
-    }
-
-    setPlaylists((items) =>
-      items.map((playlist) => (playlist.id === playlistId ? { ...playlist, name: nextName } : playlist))
-    );
-    setRenamingPlaylistId(null);
-    setRenamingPlaylistName("");
-    setStatusText(`renamed playlist to ${nextName}`);
-    showAppToast("playlist renamed", "success");
-  }
-
-  function duplicatePlaylist(playlistId: string) {
-    const source = playlists.find((playlist) => playlist.id === playlistId);
-    if (!source) return;
-
-    const existingNames = new Set(playlists.map((playlist) => playlist.name.trim().toLowerCase()));
-    const baseName = `${source.name} copy`.trim();
-    let name = baseName;
-    let index = 2;
-
-    while (existingNames.has(name.toLowerCase())) {
-      name = `${baseName} ${index}`;
-      index += 1;
-    }
-
-    const copy: Playlist = {
-      id: makeLocalId("playlist"),
-      name,
-      songIds: [...source.songIds],
-      createdAt: Date.now()
-    };
-
-    setPlaylists((items) => [copy, ...items]);
-    setSelectedPlaylistId(copy.id);
-    setStatusText(`duplicated ${source.name}`);
-    showAppToast("playlist duplicated", "success");
-  }
-
-  function openPlaylist(playlistId: string) {
-    setSelectedPlaylistId(playlistId);
-    changeView("playlists", "unknown");
-  }
-
   function openPlaylistPicker(song: Song) {
     setSongContextMenu(null);
-    setPlaylistPickerName("");
-    setPlaylistPickerSong(song);
+    openPlaylistPickerCore(song);
   }
 
   function openSongContextMenu(event: ReactMouseEvent<HTMLElement>, song: Song) {
@@ -8393,85 +8212,6 @@ function MainModeApp() {
     const y = Math.min(event.clientY, Math.max(margin, window.innerHeight - menuHeight - margin));
 
     setSongContextMenu({ songId: song.id, x, y });
-  }
-
-  function addSongToPlaylist(playlistId: string, songId: string) {
-    const song = songsById.get(songId);
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!song || !playlist) return;
-
-    if (playlist.songIds.includes(songId)) {
-      setStatusText("song is already in that playlist");
-      return;
-    }
-
-    setPlaylists((items) =>
-      items.map((item) =>
-        item.id === playlistId ? { ...item, songIds: [...item.songIds, songId] } : item
-      )
-    );
-
-    setSelectedPlaylistId(playlistId);
-    setStatusText(`added ${prettyTitle(song.title, 4)} to ${playlist.name}`);
-    showAppToast("added to playlist", "success");
-
-    if (playlistPickerSong?.id === songId) {
-      setPlaylistPickerSong(null);
-      setPlaylistPickerName("");
-    }
-  }
-
-  function removeSongFromPlaylist(playlistId: string, songId: string) {
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!playlist) return;
-
-    setPlaylists((items) =>
-      items.map((item) =>
-        item.id === playlistId ? { ...item, songIds: item.songIds.filter((id) => id !== songId) } : item
-      )
-    );
-
-    setStatusText(`removed from ${playlist.name}`);
-    showAppToast("removed from playlist", "success");
-  }
-
-  function toggleSongPlaylist(playlistId: string, songId: string) {
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!playlist) return;
-
-    if (playlist.songIds.includes(songId)) {
-      removeSongFromPlaylist(playlistId, songId);
-      return;
-    }
-
-    addSongToPlaylist(playlistId, songId);
-  }
-
-  function handlePlaylistSongDrop(playlistId: string, songId: string, targetSongId: string, side: LibraryDropSide) {
-    if (!playlistId || !songId || !targetSongId || !songsById.has(songId) || songId === targetSongId) return;
-
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!playlist) return;
-
-    const nextIds = playlist.songIds.includes(songId)
-      ? reorderIdList(playlist.songIds, songId, targetSongId, side)
-      : insertIdNearTarget(playlist.songIds, songId, targetSongId, side);
-
-    if (nextIds.length === playlist.songIds.length && nextIds.every((id, index) => id === playlist.songIds[index])) {
-      return;
-    }
-
-    setPlaylists((items) =>
-      items.map((item) => (item.id === playlistId ? { ...item, songIds: nextIds } : item))
-    );
-    setSelectedPlaylistId(playlistId);
-    setStatusText(playlist.songIds.includes(songId) ? "playlist order updated" : `added to ${playlist.name}`);
-    showAppToast(playlist.songIds.includes(songId) ? "playlist order updated" : "added to playlist", "success");
-  }
-
-  function handlePlaylistSongAppend(playlistId: string, songId: string) {
-    if (!playlistId || !songId || !songsById.has(songId)) return;
-    addSongToPlaylist(playlistId, songId);
   }
 
   function handlePlaylistShelfDragOver(event: DragEvent<HTMLElement>, playlistId: string) {
