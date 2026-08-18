@@ -1,14 +1,6 @@
 name: Phase 2 Decompose Stage
 
 on:
-  push:
-    branches:
-      - agent/phase-2-decompose-stage
-    paths:
-      - .github/workflows/phase2-decompose-stage.yml
-      - scripts/.phase2-decompose.part00
-      - scripts/.phase2-decompose.part01
-      - scripts/.phase2-decompose.part02
   pull_request:
     branches:
       - agent/phase-2-feature-rebirth
