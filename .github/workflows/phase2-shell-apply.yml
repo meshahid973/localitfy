@@ -1,0 +1,86 @@
+name: Phase 2 Shell Ownership Move
+
+on:
+  push:
+    branches:
+      - agent/phase-2-feature-rebirth
+    paths:
+      - scripts/phase2-shell-move.py
+      - .github/workflows/phase2-shell-apply.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: localtify-phase2-shell-move
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Move shell, validate, and commit
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Phase 2 branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase-2-feature-rebirth
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Apply shell ownership move
+        run: python scripts/phase2-shell-move.py
+
+      - name: Verify retired monolith
+        shell: bash
+        run: |
+          test ! -e src/LocaltifyAppView.tsx
+          test -e src/features/shell/AppShell.tsx
+          ! grep -R --line-number --include='*.ts' --include='*.tsx' 'LocaltifyAppView' src
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if ! npm ci --ignore-scripts; then
+            echo "package-lock install failed; using package.json fallback for validation"
+            rm -rf node_modules
+            npm install --ignore-scripts --package-lock=false
+          fi
+
+      - name: Check Electron bridge drift
+        run: npm run bridge:check
+
+      - name: Check architecture boundaries
+        run: npm run boundaries:check
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Production renderer build
+        run: npm run build
+
+      - name: Diff integrity
+        shell: bash
+        run: |
+          git diff --check
+          git status --short
+
+      - name: Commit validated shell move
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.tsx src/features/shell/AppShell.tsx src/LocaltifyAppView.tsx scripts/check-phase1-boundaries.mjs
+          if git diff --cached --quiet; then
+            echo "No shell migration changes were generated"
+            exit 1
+          fi
+          git commit -m "refactor: move renderer composition into app shell"
+          git push origin HEAD:agent/phase-2-feature-rebirth
