@@ -9,6 +9,14 @@ on:
       - scripts/.phase2-decompose.part00
       - scripts/.phase2-decompose.part01
       - scripts/.phase2-decompose.part02
+  pull_request:
+    branches:
+      - agent/phase-2-feature-rebirth
+    paths:
+      - .github/workflows/phase2-decompose-stage.yml
+      - scripts/.phase2-decompose.part00
+      - scripts/.phase2-decompose.part01
+      - scripts/.phase2-decompose.part02
   workflow_dispatch:
 
 permissions:
