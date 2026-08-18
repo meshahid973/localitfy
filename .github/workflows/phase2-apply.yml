@@ -1,10 +1,11 @@
 name: Phase 2 Apply Renderer Split
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/phase-2-feature-rebirth
+      - agent/phase-1-foundation-reset
     paths:
+      - .github/workflows/phase2-apply.yml
       - scripts/phase2-refactor.part00
       - scripts/phase2-refactor.part01
       - scripts/phase2-refactor.part02
