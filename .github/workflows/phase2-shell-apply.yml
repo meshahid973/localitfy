@@ -7,6 +7,12 @@ on:
     paths:
       - scripts/phase2-shell-move.py
       - .github/workflows/phase2-shell-apply.yml
+  pull_request:
+    branches:
+      - agent/phase-1-foundation-reset
+    paths:
+      - scripts/phase2-shell-move.py
+      - .github/workflows/phase2-shell-apply.yml
   workflow_dispatch:
 
 permissions:
