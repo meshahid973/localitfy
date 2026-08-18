@@ -1,4 +1,5 @@
 name: Phase 2 Apply Renderer Split
+# Rerun gate after the explicit legacy download URL export fix.
 
 on:
   pull_request:
