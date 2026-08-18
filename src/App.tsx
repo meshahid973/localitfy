@@ -83,7 +83,7 @@ import "./onboarding-first-run.css";
 import "./player.css";
 import "./effects.css";
 
-import LocaltifyAppView from "./LocaltifyAppView";
+import AppShell from "./features/shell/AppShell";
 import { Cover } from "./features/covers/Cover";
 import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
 import Onboarding from "./Onboarding";
@@ -11767,7 +11767,7 @@ function MainModeApp() {
 
   return (
     <>
-      <LocaltifyAppView {...localtifyAppViewProps} />
+      <AppShell {...localtifyAppViewProps} />
       <CatBuddy enabled={settings.catBuddyEnabled === true} reducedMotion={settings.reducedMotion === true} />
       {renderFeedbackPrompt()}
     </>

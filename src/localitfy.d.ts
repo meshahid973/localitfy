@@ -1,4 +1,4 @@
-﻿export {};
+export {};
 
 
 type LocalitfyFeedbackStatus = {
@@ -174,6 +174,8 @@ declare global {
     rootPath?: string;
     changedCount: number;
     skippedDuplicates?: number;
+    duplicateCount?: number;
+    repairedExistingCount?: number;
     songs: any[];
     albums: LocalitfyImportedFolderAlbum[];
     message?: string;

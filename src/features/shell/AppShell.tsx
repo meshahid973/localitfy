@@ -1,51 +1,47 @@
-// @ts-nocheck
-import { lazy, Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
-import type { CSSProperties } from "react";
-import { Heart, HeartOff, ImagePlus, Save, Shuffle, Trash2, X } from "lucide-react";
-import UpdateIsland from "./app/UpdateIsland";
-import TitleBar from "./features/shell/TitleBar";
-import HomeView from "./features/home/HomeView";
-import LibraryView from "./features/library/LibraryView";
-import AlbumsView from "./features/albums/AlbumsView";
-import PlaylistsView from "./features/playlists/PlaylistsView";
-import CoversView from "./features/covers/CoversView";
-import AnalyticsView from "./features/analytics/AnalyticsView";
-import SettingsView from "./features/settings/SettingsView";
-import DownloadsView from "./features/downloads/DownloadsView";
-import PlayerBar from "./features/player/components/PlayerBar";
-import Onboarding from "./Onboarding";
-import { Cover } from "./features/covers/Cover";
-import { displaySongPickerSublineV444, displaySongTitleV444 } from "./features/library/components/SongRows";
-import {
-  CheckMiniIcon, EmptyCoverIcon, LocaltifyStateCard, MascotHelperBubble, MascotStateArt, MetaDividerDot,
-  PlusMiniIcon, ResultStatusIcon, UpdateStatusIcon, WindowCloseIcon, mascotStateForToast
-} from "./shared/ui/LocaltifyViewUi";
-import type { Song } from "./features/library/song.types";
-import type { LocalAlbumEntry, ManualLocalAlbum } from "./features/albums/album.types";
+import type { CSSProperties, SyntheticEvent } from "react";
+import { FolderPlus, Heart, HeartOff, ImagePlus, Pencil, Play, Plus, Save, Shuffle, SkipForward, Trash2, X } from "lucide-react";
+import UpdateIsland from "../../app/UpdateIsland";
+import TitleBar from "./TitleBar";
+import HomeView from "../home/HomeView";
+import LibraryView from "../library/LibraryView";
+import AlbumsView from "../albums/AlbumsView";
+import PlaylistsView from "../playlists/PlaylistsView";
+import CoversView from "../covers/CoversView";
+import AnalyticsView from "../analytics/AnalyticsView";
+import SettingsView from "../settings/SettingsView";
+import DownloadsView from "../downloads/DownloadsView";
+import PlayerBar from "../player/components/PlayerBar";
+import Onboarding from "../../Onboarding";
+import { Cover } from "../covers/Cover";
+import { displaySongPickerSublineV444, displaySongTitleV444 } from "../library/components/SongRows";
+import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon, mascotStateForToast } from "../../shared/ui/LocaltifyViewUi";
+import type { LocaltifyStateCardTone, MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
+import type { Song } from "../library/song.types";
+import type { LocalAlbumEntry, ManualLocalAlbum } from "../albums/album.types";
 import {
   MANUAL_LOCAL_ALBUMS_STORAGE_KEY, albumSongSearchMatches, albumTrackIds, buildLocalAlbumEntries, buildManualAlbumEntries,
   buildManualAlbumSongIdSet, cleanManualAlbumArtist, cleanManualAlbumTitle, cleanManualAlbumYear, filterAndSortAlbums,
   folderAlbumPathContains, getAlbumYear, isUsefulAlbumName, makeAlbumCoverSong, normalizeAlbumValue, normalizeFolderAlbumPathKey,
   normalizeManualLocalAlbums, resizeAlbumCoverFile, suggestAlbumArtistFromSongs, uniqueCleanArtistsFromSongs, uniquePlayableSongIds
-} from "./features/albums/album.runtime";
-import { getSongPlaybackSourceKey, isPlayableSong, saveLibraryOrder } from "./features/library";
-import { makeLocalId, readLocalJson, writeLocalJson } from "./shared/storage/localStorage";
-import { clamp, formatTime, toCssUrl } from "./shared/utils/format";
-import { getAmbientStyle, getRendererSafeImageUrl, getSongAmbientSource } from "./features/covers/cover.ambient";
-import { coverMoodName, pixelArtUrl } from "./features/covers";
-import { prettyMeta, prettyTitle } from "./features/search";
-import { navItems, sidebarNavGroups } from "./features/shell/navigation.constants";
-import { coverMoodOptions, settingsCategorySpring } from "./features/settings/settings.constants";
+} from "../albums/album.runtime";
+import { getSongPlaybackSourceKey, isPlayableSong, saveLibraryOrder } from "../library";
+import { makeLocalId, readLocalJson, writeLocalJson } from "../../shared/storage/localStorage";
+import { clamp, formatTime } from "../../shared/utils/format";
+import { getRendererSafeImageUrl } from "../covers/cover.ambient";
+import { prettyMeta, prettyTitle } from "../search";
+import { navItems, sidebarNavGroups } from "./navigation.constants";
+import { settingsCategorySpring } from "../settings/settings.constants";
 import {
   APP_VERSION, defaultUpdatePrompt, updateRibbonChildSpring, updateRibbonEnterSpring, whatsNewItems
-} from "./features/updates/update.constants";
-import { updateRibbonTitle } from "./features/updates/update.utils";
-import { yukariUpdateImage } from "./core/app.constants";
+} from "../updates/update.constants";
+import { updateRibbonTitle } from "../updates/update.utils";
+import { yukariUpdateImage } from "../../core/app.constants";
 
-export type LocaltifyAppViewProps = Record<string, any>;
+export type AppShellProps = Record<string, any>;
 
-export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
+export default function AppShell(props: AppShellProps) {
   const {
     appRootRef,
     settings,
@@ -65,7 +61,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     draggedSongId,
     isPlaying,
     isThreeAm,
-    misideModeActive,
     secretMode,
     themePresetStyle,
     animatedThemeVisualStyle,
@@ -80,8 +75,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     draggedSongTitle,
     showStarBackdrop,
     updatePrompt,
-    openUpdateChangelog,
-    skipAvailableUpdate,
     askUpdaterToDownload,
     askUpdaterToInstall,
     manualUpdateCheck,
@@ -99,12 +92,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setSongs,
     setLibraryScanBusy,
     setLibraryScanMessage,
-    setImportAnimation,
     libraryScanBusy,
     pixelArtBusy,
     libraryScanMessage,
     onboardingOpen,
-    currentTheme,
     handleOnboardingTheme,
     handleOnboardingDiscord,
     handleOnboardingImportMusic,
@@ -214,9 +205,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     libraryHealthLabel,
     analyticsStatCards,
     analyticsRecapCards,
-    topArtists,
     recentImportWeekCount,
-    recentlyAdded,
     neverPlayedSongs,
     missingFileCount,
     libraryLengthLabel,
@@ -233,8 +222,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     downloadAudioLinks,
     downloadBusy,
     cancelCurrentDownload,
-    setDownloadResults,
-    setDownloadQueue,
     downloadResults,
     downloadQueue,
     spotifyUrl,
@@ -251,12 +238,7 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     setSpotifyTracks,
     spotifyLoggedIn,
     spotifyLoginBusy,
-    spotifyShowCookieInput,
-    setSpotifyShowCookieInput,
-    spotifyCookieDraft,
-    setSpotifyCookieDraft,
     handleSpotifyLogin,
-    handleSpotifySetCookie,
     handleSpotifyLogout,
     ready,
     retryDownload,
@@ -347,7 +329,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     pendingPlayRef,
     setIsPlaying,
     saveDuration,
-    currentTime,
     timeRef,
     tickPlayCountTracker,
     songRef,
@@ -361,7 +342,6 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
     stopFade,
     stopCrossfadeAuto,
     stopProgressLoop
-
   } = props;
 
   useEffect(() => {
@@ -634,10 +614,10 @@ export default function LocaltifyAppView(props: LocaltifyAppViewProps) {
           coverPath: String(album.coverPath || ""),
           coverSource: String(album.coverSource || ""),
           embeddedCoverPath: String(album.embeddedCoverPath || ""),
-          songIds: Array.isArray(album.songIds) ? [...new Set(album.songIds.map((id: unknown) => String(id || "").trim()).filter(Boolean))] : [],
+          songIds: Array.isArray(album.songIds) ? [...new Set<string>(album.songIds.map((id: unknown) => String(id || "").trim()).filter((id: string) => Boolean(id)))] : [],
           createdAt: Number(album.createdAt) || now,
           updatedAt: Number(album.updatedAt) || now,
-          sourceType: "folder",
+          sourceType: "folder" as const,
           sourcePath: String(album.sourcePath || ""),
           folderCoverPath: String(album.folderCoverPath || ""),
           importedAt: Number(album.importedAt) || now

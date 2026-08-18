@@ -22,3 +22,9 @@ for (const absolute of files) {
 }
 if (violations.length) { console.error("[phase-boundaries] Architecture boundary violation(s):"); for (const violation of violations) console.error(`  - ${violation}`); process.exit(1); }
 console.log(`[phase-boundaries] OK: checked ${files.length} TypeScript source files; no domain/shared code depends on renderer monoliths.`);
+
+
+if (fs.existsSync(path.join(root, "src", "LocaltifyAppView.tsx"))) {
+  console.error("[phase-boundaries] LocaltifyAppView.tsx must stay deleted after Phase 2 shell migration.");
+  process.exit(1);
+}
