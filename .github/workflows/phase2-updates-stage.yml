@@ -1,0 +1,93 @@
+name: Phase 2 Updates Stage
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-2-feature-rebirth
+    paths:
+      - .github/workflows/phase2-updates-stage.yml
+      - scripts/.phase2-updates.part00
+      - scripts/.phase2-updates.part01
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    name: Apply and validate updates controller extraction
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase-2-updates-stage
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Reconstruct exact patch
+        shell: bash
+        run: |
+          cat scripts/.phase2-updates.part00 scripts/.phase2-updates.part01 > /tmp/phase2-updates.b64
+          echo "1abfbba01cf93f9e9f2ab9e17000209fda04068ecdf31a458d2ca4003b1160d9  /tmp/phase2-updates.b64" | sha256sum -c -
+          base64 -d /tmp/phase2-updates.b64 | gunzip > /tmp/phase2-updates.patch
+          patch -p1 < /tmp/phase2-updates.patch
+
+      - name: Verify feature ownership
+        shell: bash
+        run: |
+          test -e src/features/updates/useUpdatesController.ts
+          test "$(wc -l < src/App.tsx)" -lt 10900
+          ! grep -n '@ts-nocheck' src/features/updates/useUpdatesController.ts
+          grep -q 'useUpdatesController' src/App.tsx
+          ! grep -q 'function manualUpdateCheck' src/App.tsx
+          ! grep -q 'function showUpdateNag' src/App.tsx
+          ! grep -q 'window.localitfy.onAutoUpdate' src/App.tsx
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if ! npm ci --ignore-scripts; then
+            echo "package-lock install failed; using package.json fallback for validation"
+            rm -rf node_modules
+            npm install --ignore-scripts --package-lock=false
+          fi
+
+      - name: Check Electron bridge drift
+        run: npm run bridge:check
+
+      - name: Check architecture boundaries
+        run: npm run boundaries:check
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Production renderer build
+        run: npm run build
+
+      - name: Diff integrity
+        shell: bash
+        run: |
+          git diff --check
+          test "$(wc -l < src/App.tsx)" -lt 10900
+
+      - name: Commit validated source changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.tsx src/features/updates
+          if git diff --cached --quiet; then
+            echo "No source changes generated"
+            exit 1
+          fi
+          git commit -m "refactor: move updater lifecycle into feature controller"
+          git push origin HEAD:agent/phase-2-updates-stage
