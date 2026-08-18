@@ -1,0 +1,32 @@
+name: Phase 2 Source Export
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-1-foundation-reset
+
+permissions:
+  contents: read
+
+jobs:
+  export-source:
+    name: Export refactor sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload renderer refactor sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2-refactor-sources
+          if-no-files-found: error
+          retention-days: 1
+          path: |
+            src/App.tsx
+            src/LocaltifyAppView.tsx
+            src/App.css
+            src/home.css
+            src/themes.css
+            src/effects.css
