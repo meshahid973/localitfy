@@ -7,6 +7,8 @@ on:
     paths:
       - .github/workflows/phase2-download-runtime-stage.yml
       - scripts/.phase2-download-runtime.b64
+      - scripts/.phase2-download-runtime.part01
+      - scripts/.phase2-download-runtime.part02
   workflow_dispatch:
 
 permissions:
@@ -35,7 +37,7 @@ jobs:
       - name: Reconstruct exact patch
         shell: bash
         run: |
-          cp scripts/.phase2-download-runtime.b64 /tmp/phase2-download-runtime.b64
+          cat scripts/.phase2-download-runtime.b64 scripts/.phase2-download-runtime.part01 scripts/.phase2-download-runtime.part02 > /tmp/phase2-download-runtime.b64
           echo "46d269c1a91e13e1d599baec4490dc1206a49fd1dd93a6bbc3db8a221427373c  /tmp/phase2-download-runtime.b64" | sha256sum -c -
           base64 -d /tmp/phase2-download-runtime.b64 | gunzip > /tmp/phase2-download-runtime.patch
           patch -p1 < /tmp/phase2-download-runtime.patch
