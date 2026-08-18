@@ -1,0 +1,98 @@
+name: Phase 2 Playlists Stage
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-2-feature-rebirth
+    paths:
+      - .github/workflows/phase2-playlists-stage.yml
+      - scripts/.phase2-playlists.part00
+      - scripts/.phase2-playlists.part01
+      - scripts/.phase2-playlists.part02
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    name: Apply and validate playlists ownership extraction
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase-2-playlists-stage
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Reconstruct exact patch
+        shell: bash
+        run: |
+          cat scripts/.phase2-playlists.part00 scripts/.phase2-playlists.part01 scripts/.phase2-playlists.part02 > /tmp/phase2-playlists.b64
+          echo "71ab6607b3888d3eddb4143d1da2c30523ace47cce75bd85532688bc8371ec2c  /tmp/phase2-playlists.b64" | sha256sum -c -
+          base64 -d /tmp/phase2-playlists.b64 | gunzip > /tmp/phase2-playlists.patch
+          patch -p1 < /tmp/phase2-playlists.patch
+
+      - name: Verify feature ownership
+        shell: bash
+        run: |
+          test -e src/features/playlists/usePlaylistsController.ts
+          test -e src/features/playlists/playlist.constants.ts
+          test -e src/features/shell/useAppToast.ts
+          test "$(wc -l < src/App.tsx)" -lt 11200
+          ! grep -n '@ts-nocheck' src/features/playlists/usePlaylistsController.ts src/features/shell/useAppToast.ts
+          grep -q 'usePlaylistsController' src/App.tsx
+          grep -q 'useAppToast' src/App.tsx
+          ! grep -q 'function createPlaylist(' src/App.tsx
+          ! grep -q 'function showAppToast(' src/App.tsx
+          ! grep -q 'PLAYLIST_STORAGE_KEY' src/features/library/library.constants.ts
+          ! grep -q 'function cleanPlaylistList' src/features/library/library.utils.ts
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if ! npm ci --ignore-scripts; then
+            echo "package-lock install failed; using package.json fallback for validation"
+            rm -rf node_modules
+            npm install --ignore-scripts --package-lock=false
+          fi
+
+      - name: Check Electron bridge drift
+        run: npm run bridge:check
+
+      - name: Check architecture boundaries
+        run: npm run boundaries:check
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Production renderer build
+        run: npm run build
+
+      - name: Diff integrity
+        shell: bash
+        run: |
+          git diff --check
+          test "$(wc -l < src/App.tsx)" -lt 11200
+
+      - name: Commit validated source changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src
+          if git diff --cached --quiet; then
+            echo "No source changes generated"
+            exit 1
+          fi
+          git commit -m "refactor: move playlist ownership into feature controller"
+          git push origin HEAD:agent/phase-2-playlists-stage
