@@ -1,9 +1,9 @@
 name: Phase 2 Snapshot Export
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/phase-2-feature-rebirth
+      - agent/phase-1-foundation-reset
     paths:
       - .github/workflows/phase2-snapshot.yml
   workflow_dispatch:
@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: agent/phase-2-feature-rebirth
       - name: Pack current source
         run: |
           tar -czf /tmp/localtify-phase2.tgz \
