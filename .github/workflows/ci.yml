@@ -36,6 +36,9 @@ jobs:
       - name: Check Electron bridge drift
         run: npm run bridge:check
 
+      - name: Check Phase 1 architecture boundaries
+        run: npm run boundaries:check
+
       # Phase 1 starts by exposing existing TypeScript debt without blocking the
       # stable renderer build. Remove continue-on-error once the baseline is
       # clean; new/extracted modules must still be typed.
