@@ -107,6 +107,22 @@ jobs:
               '  cute = false,\n  mascotState'
           )
           p.write_text(s, encoding="utf-8")
+
+          # App should import runtime feature values from their canonical owner,
+          # not through the legacy constants compatibility barrel.
+          p = Path("src/App.tsx")
+          s = p.read_text(encoding="utf-8")
+          s = s.replace('  LOCALITIFY_DOWNLOAD_URL,\n', '')
+          marker = 'import {\n  applyLibraryOrder,'
+          if 'from "./features/discord/discord.constants";' not in s:
+              s = s.replace(marker, 'import { LOCALITIFY_DOWNLOAD_URL } from "./features/discord/discord.constants";\n' + marker, 1)
+          p.write_text(s, encoding="utf-8")
+
+          p = Path("src/features/shell/TitleBar.tsx")
+          s = p.read_text(encoding="utf-8")
+          if 'export default function TitleBar' not in s:
+              s = s.replace('function TitleBar(', 'export default function TitleBar(', 1)
+          p.write_text(s, encoding="utf-8")
           PY
 
       - name: Install dependencies
