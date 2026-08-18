@@ -52,6 +52,63 @@ jobs:
           rm scripts/phase2-renderer-refactor.py
           test "$(wc -l < src/LocaltifyAppView.tsx)" -lt 2000
 
+      - name: Normalize generated feature contracts
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def drop_bindings(path, names):
+              p = Path(path)
+              lines = p.read_text(encoding="utf-8").splitlines()
+              cleaned = []
+              for line in lines:
+                  if line.startswith("    ") and line.strip().rstrip(",") in names:
+                      continue
+                  cleaned.append(line)
+              p.write_text("\n".join(cleaned) + "\n", encoding="utf-8")
+
+          drop_bindings("src/features/albums/AlbumsView.tsx", {"ready"})
+          drop_bindings("src/features/analytics/AnalyticsView.tsx", {"ready"})
+          drop_bindings("src/features/covers/CoversView.tsx", {"now"})
+          drop_bindings("src/features/downloads/DownloadsView.tsx", {"downloadResults", "playlists", "progress", "ready"})
+          drop_bindings("src/features/home/HomeView.tsx", {"now"})
+          drop_bindings("src/features/library/LibraryView.tsx", {"now", "playlists"})
+          drop_bindings("src/features/playlists/PlaylistsView.tsx", {"playlists", "selectedPlaylistId"})
+
+          p = Path("src/features/albums/album.runtime.ts")
+          s = p.read_text(encoding="utf-8").replace(
+              'import { prettyMeta, prettyTitle } from "../search/search.utils";',
+              'import { prettyMeta } from "../search/search.utils";'
+          )
+          p.write_text(s, encoding="utf-8")
+
+          p = Path("src/features/albums/index.ts")
+          s = p.read_text(encoding="utf-8").replace('export * from "./album.utils";\n', '')
+          p.write_text(s, encoding="utf-8")
+
+          p = Path("src/features/library/components/SongRows.tsx")
+          s = p.read_text(encoding="utf-8").replace(
+              '  onOpenEditor: (song: Song) => void;',
+              '  onOpenEditor?: (song: Song) => void;'
+          )
+          p.write_text(s, encoding="utf-8")
+
+          p = Path("src/features/playlists/components/VirtualPlaylistTrackList.tsx")
+          s = p.read_text(encoding="utf-8").replace(
+              'import { collapseSpaces, formatTime, lower } from "../../../shared/utils/format";',
+              'import { formatTime } from "../../../shared/utils/format";'
+          )
+          p.write_text(s, encoding="utf-8")
+
+          p = Path("src/shared/ui/LocaltifyViewUi.tsx")
+          s = p.read_text(encoding="utf-8").replace(
+              '  cute = false,\n  badge = "♪",\n  mascotState',
+              '  cute = false,\n  mascotState'
+          )
+          p.write_text(s, encoding="utf-8")
+          PY
+
       - name: Install dependencies
         shell: bash
         run: |
