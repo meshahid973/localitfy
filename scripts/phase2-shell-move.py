@@ -116,6 +116,8 @@ text = text.replace(
     'songIds: Array.isArray(album.songIds) ? [...new Set(album.songIds.map((id: unknown) => String(id || "").trim()).filter(Boolean))] : [],',
     'songIds: Array.isArray(album.songIds) ? [...new Set<string>(album.songIds.map((id: unknown) => String(id || "").trim()).filter((id: string) => Boolean(id)))] : [],'
 )
+# Preserve the discriminated union instead of widening this mapped literal to string.
+text = text.replace('sourceType: "folder",', 'sourceType: "folder" as const,')
 
 text = text.replace('export type LocaltifyAppViewProps = Record<string, any>;', 'export type AppShellProps = Record<string, any>;')
 text = text.replace('export default function LocaltifyAppView(props: LocaltifyAppViewProps) {', 'export default function AppShell(props: AppShellProps) {')
