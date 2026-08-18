@@ -42,6 +42,26 @@ jobs:
           base64 -d /tmp/phase2-decompose.b64 | gunzip > /tmp/phase2-decompose.patch
           patch -p1 < /tmp/phase2-decompose.patch
 
+      - name: Normalize typed AppShell imports
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("src/features/shell/AppShell.tsx")
+          s = p.read_text(encoding="utf-8")
+          if 'import { Cover } from "../covers/Cover";' not in s:
+              s = s.replace(
+                  'import CoversView from "../covers/CoversView";',
+                  'import CoversView from "../covers/CoversView";\nimport { Cover } from "../covers/Cover";'
+              )
+          if 'import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";' not in s:
+              s = s.replace(
+                  'import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon, mascotStateForToast } from "../../shared/ui/LocaltifyViewUi";',
+                  'import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon, mascotStateForToast } from "../../shared/ui/LocaltifyViewUi";\nimport type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";'
+              )
+          p.write_text(s, encoding="utf-8")
+          PY
+
       - name: Verify decomposition shape
         shell: bash
         run: |
