@@ -1,5 +1,4 @@
 name: Phase 2 Apply Renderer Split
-# Rerun gate after the explicit legacy download URL export fix.
 
 on:
   pull_request:
@@ -109,20 +108,20 @@ jobs:
           )
           p.write_text(s, encoding="utf-8")
 
-          p = Path("src/App.tsx")
-          s = p.read_text(encoding="utf-8")
-          s = s.replace('  LOCALITIFY_DOWNLOAD_URL,\n', '')
-          marker = 'import {\n  applyLibraryOrder,'
-          if 'import { LOCALITIFY_DOWNLOAD_URL } from "./features/discord/discord.constants";' not in s:
-              s = s.replace(marker, 'import { LOCALITIFY_DOWNLOAD_URL } from "./features/discord/discord.constants";\n' + marker, 1)
-          p.write_text(s, encoding="utf-8")
-
           p = Path("src/features/shell/TitleBar.tsx")
           s = p.read_text(encoding="utf-8")
           s = s.replace('export function TitleBar(', 'export default function TitleBar(', 1)
           if 'export default function TitleBar(' not in s:
               s = s.replace('function TitleBar(', 'export default function TitleBar(', 1)
           p.write_text(s, encoding="utf-8")
+
+          app = Path("src/App.tsx").read_text(encoding="utf-8")
+          assert app.count("LOCALITFY_DOWNLOAD_URL") >= 1, "expected Localtify compatibility symbol missing from App"
+          assert "LOCALITIFY_DOWNLOAD_URL" not in app, "incorrect Localitify spelling leaked into App"
+          constants = Path("src/localtifyConstants.ts").read_text(encoding="utf-8")
+          assert "export const LOCALITFY_DOWNLOAD_URL" in constants, "compatibility export missing"
+          discord_constants = Path("src/features/discord/discord.constants.ts").read_text(encoding="utf-8")
+          assert "export const LOCALITFY_DOWNLOAD_URL" in discord_constants, "canonical Discord export missing"
           PY
 
       - name: Install dependencies
