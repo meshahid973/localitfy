@@ -24,7 +24,7 @@ permissions:
 
 concurrency:
   group: localtify-phase2-decompose-stage
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   apply:
