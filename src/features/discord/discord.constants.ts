@@ -1,5 +1,5 @@
 import type { DiscordActivityStyle, DiscordArtMode, DiscordSecondLine, DiscordTitleCleanup } from "./discord.types";
-export const LOCALITIFY_DOWNLOAD_URL = "https://github.com/meshahid973/localitfy/releases/latest";
+export const LOCALITFY_DOWNLOAD_URL = "https://github.com/meshahid973/localitfy/releases/latest";
 export const DISCORD_LOGO_ASSET = "earthglow";
 export const discordStyleOptions: Array<{id:DiscordActivityStyle;name:string;note:string}> = [
   {id:"clean",name:"Clean",note:"Show the title and selected second line."},{id:"cute",name:"Cute",note:"Use a softer status style."},{id:"detailed",name:"Detailed",note:"Show artist, album, and time details."},{id:"minimal",name:"Minimal",note:"Show a simple title and artist."},{id:"meme",name:"Meme",note:"Use a lighter Discord status style."}
