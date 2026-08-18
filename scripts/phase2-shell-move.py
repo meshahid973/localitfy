@@ -11,6 +11,7 @@ if new.exists():
     raise SystemExit("src/features/shell/AppShell.tsx already exists")
 
 text = old.read_text(encoding="utf-8-sig")
+text = text.replace("// @ts-nocheck\n", "", 1)
 
 replacements = {
     'from "./app/UpdateIsland"': 'from "../../app/UpdateIsland"',
@@ -47,8 +48,8 @@ replacements = {
 for before, after in replacements.items():
     text = text.replace(before, after)
 
-# The old root monolith relied on ts-nocheck and had runtime JSX references that
-# were not actually imported. Fix those while moving the composition layer.
+# The old root monolith had runtime JSX references that were not actually
+# imported. Fix those while moving the composition layer into typed code.
 text = text.replace(
     'import { lazy, Suspense, useMemo, useRef, useState } from "react";',
     'import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";'
