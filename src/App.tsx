@@ -44,7 +44,6 @@ import {
   trackError,
   trackAcquisitionSource
 } from "./analytics";
-import type { LocaltifyAnalyticsSnapshot } from "./features/analytics/analyticsSnapshot";
 import { useAnalyticsRuntime } from "./features/analytics/useAnalyticsRuntime";
 import {
   enrichDownloadResultsWithLibraryMatches,
@@ -84,6 +83,31 @@ import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/compon
 import { useLibraryController } from "./features/library";
 import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
+import { PlayerPlayPauseMorphIcon } from "./features/player/PlayerPlayPauseMorphIcon";
+import { runLocaltifyIdleTask } from "./app/runtime/idle";
+import { formatAnalyticsDuration, localtifyAnalyticsNumber, localtifyAnalyticsString } from "./features/analytics/formatters";
+import { applyVisualCustomizationDefaults, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";
+import { getLocaltifyPlatformInfo } from "./app/platform";
+import {
+  FEEDBACK_CATEGORY_OPTIONS,
+  FEEDBACK_MESSAGE_MAX_LENGTH,
+  FEEDBACK_PROMPT_COPY,
+  FEEDBACK_PROMPT_DELAY_MS,
+  FEEDBACK_PROMPT_RETRY_DELAY_MS,
+  FEEDBACK_PROMPT_SEEN_KEY,
+  LOCALTIFY_041_WHATS_NEW_ITEMS,
+  shouldOpenFeedbackPromptFromGlobalSearch,
+  shouldOpenFeedbackPromptFromSettingsSearch
+} from "./features/feedback/feedbackPrompt";
+import {
+  markOnboardingSeenForThisRelease,
+  resetOnboardingForThisRelease,
+  shouldOpenOnboardingForThisRelease
+} from "./features/onboarding/onboardingRelease";
+import {
+  restoreCustomThemeAfterUpdate,
+  writeCustomThemeBackupPatch
+} from "./features/settings/customThemePersistence";
 import {
   APP_VERSION,
   BOOT_MIN_VISIBLE_MS,
@@ -98,7 +122,6 @@ import {
   LIBRARY_RENDER_BATCH_SIZE,
   LOCALITFY_DOWNLOAD_URL,
   LOCALITFY_SOURCE_URL,
-  ONBOARDING_STORAGE_KEY,
   PLAYBACK_URL_CACHE_TTL_MS,
   PLAYLIST_STORAGE_KEY,
   START_WITH_WINDOWS_DEFAULT_KEY,
@@ -190,336 +213,6 @@ import type {
 } from "./localtifyTypes";
 
 const SettingsCategoryContent = lazy(() => import("./SettingsCategoryContent"));
-
-
-const LOCALTFY_PLAYER_MORPH_PAUSE = {
-  left: "M5 5L9 5L9 19L5 19Z",
-  right: "M15 5L19 5L19 19L15 19Z"
-} as const;
-
-const LOCALTFY_PLAYER_MORPH_PLAY = {
-  left: "M7 5L13 8.5L13 15.5L7 19Z",
-  right: "M13 8.5L19 12L19 12L13 15.5Z"
-} as const;
-
-const LOCALTFY_PLAYER_MORPH_SPRING = {
-  type: "spring",
-  stiffness: 260,
-  damping: 26,
-  mass: 0.9
-} as const;
-
-function PlayerPlayPauseMorphIcon({ playing, className = "" }: { playing: boolean; className?: string }) {
-  const target = playing ? LOCALTFY_PLAYER_MORPH_PAUSE : LOCALTFY_PLAYER_MORPH_PLAY;
-
-  return (
-    <svg
-      className={`playerMorphIcon ${className}`.trim()}
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <Motion.path
-        animate={{ d: target.left }}
-        transition={LOCALTFY_PLAYER_MORPH_SPRING}
-        initial={false}
-      />
-      <Motion.path
-        animate={{ d: target.right }}
-        transition={LOCALTFY_PLAYER_MORPH_SPRING}
-        initial={false}
-      />
-    </svg>
-  );
-}
-
-
-function runLocaltifyIdleTask(task: () => void, timeout = 1400) {
-  const requestIdleCallback = (window as typeof window & {
-    requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
-  }).requestIdleCallback;
-
-  if (typeof requestIdleCallback === "function") {
-    requestIdleCallback(task, { timeout });
-    return;
-  }
-
-  window.setTimeout(task, 0);
-}
-
-
-function localtifyAnalyticsNumber(snapshot: LocaltifyAnalyticsSnapshot, key: string, fallback = 0) {
-  const value = Number(snapshot[key]);
-  return Number.isFinite(value) ? value : fallback;
-}
-
-function localtifyAnalyticsString(snapshot: LocaltifyAnalyticsSnapshot, key: string, fallback = "") {
-  const value = snapshot[key];
-  return typeof value === "string" && value.trim() ? value : fallback;
-}
-
-function formatAnalyticsDuration(seconds: number) {
-  const safeSeconds = Math.max(0, Math.round(Number(seconds) || 0));
-  const hours = Math.floor(safeSeconds / 3600);
-  const minutes = Math.floor((safeSeconds % 3600) / 60);
-
-  if (hours > 0) {
-    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
-  }
-
-  if (minutes > 0) return `${minutes}m`;
-  return `${safeSeconds}s`;
-}
-
-const VISUAL_CUSTOMIZATION_DEFAULTS = {
-  homeBannerType: "dynamic",
-  blurEffects: "normal",
-  mediaCardBackground: "glassy",
-  homeLayoutMode: "balanced",
-  libraryRowStyle: "comfyRows",
-  starsIntensity: "off",
-  sidebarBehavior: "fixed",
-  playerBackgroundStyle: "coverBlur"
-} as const;
-
-function normalizeVisualChoice(value: unknown, allowed: readonly string[], fallback: string) {
-  return typeof value === "string" && allowed.includes(value) ? value : fallback;
-}
-
-
-function applyVisualCustomizationDefaults<T extends Record<string, any>>(settings: T): T {
-  return {
-    ...settings,
-    homeBannerType: normalizeVisualChoice(settings.homeBannerType, ["dynamic", "albumCover", "cleanBlack", "none"], VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType),
-    // Blur strength is no longer exposed as a setting. Keep the app on the stable default.
-    blurEffects: VISUAL_CUSTOMIZATION_DEFAULTS.blurEffects,
-    mediaCardBackground: normalizeVisualChoice(settings.mediaCardBackground, ["solid", "glassy", "oledFlat"], VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground),
-    homeLayoutMode: normalizeVisualChoice(settings.homeLayoutMode, ["compact", "balanced", "bigHero"], VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode),
-    libraryRowStyle: normalizeVisualChoice(settings.libraryRowStyle, ["compactRows", "comfyRows", "coverCards", "listOnly"], VISUAL_CUSTOMIZATION_DEFAULTS.libraryRowStyle),
-    starsIntensity: normalizeVisualChoice(settings.starsIntensity, ["off", "subtle", "normal", "bright"], "off"),
-    sidebarBehavior: normalizeVisualChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
-    playerBackgroundStyle: normalizeVisualChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
-    homeHeroCoverBrightness: Number.isFinite(Number(settings.homeHeroCoverBrightness)) ? Math.min(1.55, Math.max(0.65, Number(settings.homeHeroCoverBrightness))) : 1,
-    // V385: visible Appearance toggle. Default ON so the current cover-blur look stays enabled.
-    quickLibraryMoreBlur: settings.quickLibraryMoreBlur !== false,
-    catBuddyEnabled: settings.catBuddyEnabled === true
-  };
-}
-
-
-type LocaltifyPlatformInfo = {
-  id: "windows" | "linux" | "mac" | "unknown";
-  label: string;
-  releaseLabel: string;
-  startupSettingSupported: boolean;
-  desktopControlsLabel: string;
-  desktopControlsHelp: string;
-  startupSettingLabel: string;
-  startupSettingHelp: string;
-  linuxInstallNotes: string[];
-};
-
-function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
-  const userAgent = typeof navigator !== "undefined" ? String(navigator.userAgent || "").toLowerCase() : "";
-  const platform = typeof navigator !== "undefined" ? String(navigator.platform || "").toLowerCase() : "";
-
-  const isLinux = /linux|x11|wayland/.test(userAgent) || platform.includes("linux");
-  const isMac = /mac os|macintosh|darwin/.test(userAgent) || platform.includes("mac");
-  const isWindows = /windows|win32|win64|wow64/.test(userAgent) || platform.includes("win");
-
-  if (isLinux) {
-    return {
-      id: "linux",
-      label: "Linux",
-      releaseLabel: "AppImage / RPM / DEB",
-      startupSettingSupported: false,
-      desktopControlsLabel: "Linux desktop controls",
-      desktopControlsHelp: "Tray and media keys work where your Linux desktop environment exposes them. Windows startup is hidden here because Linux uses desktop-specific autostart files.",
-      startupSettingLabel: "Start localtify with Linux",
-      startupSettingHelp: "Linux autostart will be added later through a proper desktop-entry flow.",
-      linuxInstallNotes: [
-        "AppImage: chmod +x localtify-0.4.1-x86_64.AppImage, then run it directly.",
-        "RPM: for Fedora, openSUSE, and RHEL-style distros.",
-        "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
-      ]
-    };
-  }
-
-  if (isMac) {
-    return {
-      id: "mac",
-      label: "macOS",
-      releaseLabel: "macOS build not published yet",
-      startupSettingSupported: false,
-      desktopControlsLabel: "macOS desktop controls",
-      desktopControlsHelp: "macOS support is not part of this release yet. This page keeps Windows-only startup controls hidden.",
-      startupSettingLabel: "Start localtify with macOS",
-      startupSettingHelp: "macOS autostart will be added later when a signed macOS build exists.",
-      linuxInstallNotes: []
-    };
-  }
-
-  return {
-    id: isWindows ? "windows" : "unknown",
-    label: isWindows ? "Windows" : "Unknown desktop",
-    releaseLabel: isWindows ? "NSIS installer" : "Desktop build",
-    startupSettingSupported: isWindows,
-    desktopControlsLabel: isWindows ? "Windows controls" : "Desktop controls",
-    desktopControlsHelp: isWindows
-      ? "Use keyboard media keys, taskbar buttons, tray controls, and Windows now playing."
-      : "Tray and media keys are available where the current desktop environment supports them.",
-    startupSettingLabel: "Start localtify when Windows starts",
-    startupSettingHelp: "Enabled by default so the player is ready after you sign in. You can turn it off anytime.",
-    linuxInstallNotes: []
-  };
-}
-
-const ONBOARDING_RELEASE_SHOWCASE_KEY = `localitfy.onboarding.release-showcase.${APP_VERSION}`;
-
-const FEEDBACK_PROMPT_SEEN_KEY = "localitfy.feedbackPrompt.seen.v1";
-const FEEDBACK_PROMPT_DELAY_MS = 40_000;
-const FEEDBACK_PROMPT_RETRY_DELAY_MS = 15_000;
-const FEEDBACK_MESSAGE_MAX_LENGTH = 1_500;
-const LOCALTIFY_041_WHATS_NEW_ITEMS = [
-  "0.4.1 is a quick hotfix for the album library importer freezing during big nested-folder scans.",
-  "Bulk album scanning now treats nested folders safer, so artist folders do not steal covers from child album folders.",
-  "Album import progress is throttled more carefully so the app stays responsive during large imports.",
-  "Linux AppImage startup and update-check noise from the 0.4.0 release path were cleaned up.",
-  "Small release cleanup: version text, Linux install copy, and old development comments were tidied."
-] as const;
-
-const FEEDBACK_PROMPT_COPY = {
-  title: "Thanks for using localtify!",
-  body:
-    "really it has been amazing for users like you to keep using the app which make me want to update the app even more, why did this popup come? Well as you may know or may also have experienced localtify has few here and there visual or ui bugs in the app and that probably has made you angry. or maybe you really want a feature to be added.",
-  footer:
-    "Which is why below me theres a message box where you can send bug reports and suggestions. and I will be actively reviewing them! (also you can type feeback in search bar)"
-} as const;
-
-const FEEDBACK_CATEGORY_OPTIONS = [
-  { id: "bug", label: "Bug" },
-  { id: "ui", label: "UI issue" },
-  { id: "feature", label: "Feature request" },
-  { id: "other", label: "Other" }
-] as const;
-
-function shouldOpenFeedbackPromptFromSettingsSearch(value: string) {
-  const query = value.trim().toLowerCase();
-  return query === "/feedback" || query === "feedback";
-}
-
-function shouldOpenFeedbackPromptFromGlobalSearch(value: string) {
-  const query = value.trim().toLowerCase();
-  return query === "/feedback" || query === "feedback";
-}
-
-
-function shouldOpenOnboardingForThisRelease() {
-  try {
-    const oldOnboardingDone = window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === "done";
-    const releaseShowcaseDone = window.localStorage.getItem(ONBOARDING_RELEASE_SHOWCASE_KEY) === "done";
-
-    // New users still see onboarding because the normal onboarding key is missing.
-    // Existing users also see the new v0.4.1 onboarding once because the release key is missing.
-    return !oldOnboardingDone || !releaseShowcaseDone;
-  } catch {
-    return true;
-  }
-}
-
-function markOnboardingSeenForThisRelease() {
-  try {
-    window.localStorage.setItem(ONBOARDING_STORAGE_KEY, "done");
-    window.localStorage.setItem(ONBOARDING_RELEASE_SHOWCASE_KEY, "done");
-  } catch {
-    // Storage can fail in locked-down environments. Never block the player.
-  }
-}
-
-function resetOnboardingForThisRelease() {
-  try {
-    window.localStorage.removeItem(ONBOARDING_STORAGE_KEY);
-    window.localStorage.removeItem(ONBOARDING_RELEASE_SHOWCASE_KEY);
-  } catch {
-    // Ignore reset storage errors.
-  }
-}
-
-
-const CUSTOM_THEME_UPDATE_BACKUP_KEY = "localitfy.customThemeBackup.v1";
-
-const CUSTOM_THEME_PERSIST_KEYS = [
-  "customThemeEnabled",
-  "customThemeColor",
-  "customThemeColor2",
-  "customThemeBackground",
-  "customThemeSurface",
-  "customThemeText",
-  "customThemeHighlight",
-  "customThemeProgress"
-] as const;
-
-function readCustomThemeBackupPatch(): Partial<Settings> {
-  try {
-    const raw = window.localStorage.getItem(CUSTOM_THEME_UPDATE_BACKUP_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as Partial<Settings>;
-    return extractCustomThemePersistencePatch(parsed);
-  } catch {
-    return {};
-  }
-}
-
-function extractCustomThemePersistencePatch(source: Partial<Settings> | null | undefined): Partial<Settings> {
-  if (!source || typeof source !== "object") return {};
-
-  const hasCustomTheme =
-    source.customThemeEnabled === true ||
-    CUSTOM_THEME_PERSIST_KEYS.some((key) => {
-      if (key === "customThemeEnabled") return false;
-      return typeof source[key] === "string" && String(source[key] || "").trim().length > 0;
-    });
-
-  if (!hasCustomTheme) return {};
-
-  const patch: Partial<Settings> = {
-    customThemeEnabled: true
-  };
-
-  for (const key of CUSTOM_THEME_PERSIST_KEYS) {
-    const value = source[key];
-    if (typeof value === "undefined") continue;
-    (patch as any)[key] = value;
-  }
-
-  patch.customThemeEnabled = true;
-  return patch;
-}
-
-function writeCustomThemeBackupPatch(source: Partial<Settings> | null | undefined) {
-  const patch = extractCustomThemePersistencePatch(source);
-  if (!Object.keys(patch).length) return;
-
-  try {
-    window.localStorage.setItem(CUSTOM_THEME_UPDATE_BACKUP_KEY, JSON.stringify(patch));
-  } catch {
-    // Theme backup must never block settings saves.
-  }
-}
-
-function restoreCustomThemeAfterUpdate(nextSettings: Settings, storedSettings: Partial<Settings>) {
-  const storedPatch = extractCustomThemePersistencePatch(storedSettings);
-  const backupPatch = readCustomThemeBackupPatch();
-  const patch = Object.keys(storedPatch).length ? storedPatch : backupPatch;
-
-  if (!Object.keys(patch).length) return false;
-
-  Object.assign(nextSettings, patch, { customThemeEnabled: true });
-  writeCustomThemeBackupPatch(nextSettings);
-  return true;
-}
 
 
 function MainModeApp() {
