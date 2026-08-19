@@ -19,7 +19,7 @@
     "typecheck": "tsc -b --pretty false",
     "bridge:check": "node scripts/check-electron-bridge-contract.mjs",
     "boundaries:check": "node scripts/check-phase1-boundaries.mjs",
-    "check": "npm run bridge:check && npm run boundaries:check && npm test && npm run typecheck && npm run build",
+    "check": "npm run bridge:check && npm run boundaries:check && npm test && npm run typecheck && npm run build && npm run db:recovery-test",
     "clean:release": "node -e \"require('fs').rmSync('release',{recursive:true,force:true})\"",
     "dist": "npm run clean:release && npm run build && electron-builder --win nsis --x64",
     "publish": "npm run clean:release && npm run build && electron-builder --win nsis --x64 --publish always",
@@ -33,8 +33,8 @@
     "chunks:audit": "node -e \"const fs=require('fs'),p='dist/assets'; if(!fs.existsSync(p)){console.log('run npm run build first'); process.exit(0)}; fs.readdirSync(p).map(n=>({n,s:fs.statSync(p+'/'+n).size})).sort((a,b)=>b.s-a.s).slice(0,30).forEach(x=>console.log((x.s/1024).toFixed(1)+' KB  '+x.n))\"",
     "test": "node scripts/run-node-tests.mjs",
     "performance:check": "node scripts/check-performance-budgets.mjs",
-    "db:recovery-test": "node scripts/test-database-recovery.cjs",
-    "hardening:check": "npm run check && npm run db:recovery-test"
+    "db:recovery-test": "node scripts/run-electron-node.cjs scripts/test-database-recovery.cjs",
+    "hardening:check": "npm run check && npm run performance:check"
   },
   "dependencies": {
     "better-sqlite3": "^12.5.0",
