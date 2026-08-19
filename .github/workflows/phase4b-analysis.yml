@@ -1,0 +1,49 @@
+name: Phase 4B Analysis
+
+on:
+  push:
+    branches:
+      - agent/phase-4b-runtime-monolith-reduction
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect runtime hot spots
+        shell: bash
+        run: |
+          set -e
+          echo '=== sizes ==='
+          wc -lc src/App.tsx electron/main.cjs src/App.css electron/rpc.cjs
+          echo '=== Discord renderer call sites ==='
+          grep -nE 'setDiscordActivity|updateDiscordActivity|discordForceNewAsset|discordSelectionNonce|resetDiscord' src/App.tsx || true
+          echo '=== main.cjs top-level declarations ==='
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          for file in ['src/App.tsx','electron/main.cjs']:
+              text=Path(file).read_text(encoding='utf-8-sig')
+              lines=text.splitlines()
+              print(f'--- {file} ({len(lines)} lines) ---')
+              depth=0
+              in_block=False
+              for i,line in enumerate(lines,1):
+                  stripped=line.strip()
+                  if depth==0 and re.match(r'^(async\s+)?function\s+[A-Za-z0-9_]+\s*\(', stripped):
+                      print(f'{i}: {stripped[:140]}')
+                  if depth==0 and re.match(r'^(const|let)\s+[A-Za-z0-9_]+\s*=\s*(async\s*)?\(', stripped):
+                      print(f'{i}: {stripped[:140]}')
+                  # lightweight brace tracking, enough for top-level inventory
+                  s=re.sub(r'//.*$','',line)
+                  depth += s.count('{') - s.count('}')
+                  depth=max(depth,0)
+          PY
+          echo '=== IPC registrations ==='
+          grep -nE 'handleIpc\(|ipcMain\.handle\(' electron/main.cjs || true
+          echo '=== App render sections ==='
+          grep -nE '^function MainModeApp|const .*View = \(|const .*Props = |if \(!ready\)|if \(onboardingOpen' src/App.tsx | head -n 250 || true
