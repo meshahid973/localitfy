@@ -51,6 +51,7 @@ jobs:
           source = source.replace('DEFAULTS.', 'VISUAL_CUSTOMIZATION_DEFAULTS.')
           visual.write_text(source, encoding='utf-8')
           PY
+          python scripts/phase4b/apply-checkpoint3.py
       - name: Diff sanity
         run: git diff --check
       - name: Install exact desktop dependencies
@@ -71,5 +72,5 @@ jobs:
           git config user.email "noreply@openai.com"
           git add src electron tests
           git diff --cached --check
-          git commit -m "Phase 4B.3: extract renderer policy ownership"
+          git commit -m "Phase 4B.3: extract renderer runtime ownership"
           git push origin HEAD:agent/phase-4b-runtime-monolith-reduction
