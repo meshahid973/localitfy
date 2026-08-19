@@ -3,7 +3,7 @@ import { Cover } from "../../covers/Cover";
 import { prettyMeta, prettyTitle } from "../../search";
 import type { Song, SongContextMenuState } from "../song.types";
 
-type SongContextMenuProps = {
+export type SongContextMenuProps = {
   state: SongContextMenuState | null;
   songsById: Map<string, Song>;
   onClose: () => void;

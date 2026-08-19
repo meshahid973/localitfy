@@ -1,7 +1,7 @@
 import { prettyTitle } from "../../search";
 import type { Song } from "../song.types";
 
-type DeleteSongModalProps = {
+export type DeleteSongModalProps = {
   song: Song | null;
   busy: boolean;
   onClose: () => void;

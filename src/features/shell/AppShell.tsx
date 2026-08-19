@@ -14,8 +14,6 @@ import AnalyticsView from "../analytics/AnalyticsView";
 import SettingsView from "../settings/SettingsView";
 import SettingsModal from "../settings/SettingsModal";
 import DownloadsView from "../downloads/DownloadsView";
-import { getDownloadPageState } from "../downloads/downloadState";
-import { downloadStatusLabel, spotifyTrackStatusLabel } from "../downloads/download.selectors";
 import PlayerBar from "../player/components/PlayerBar";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import Onboarding from "../../Onboarding";
@@ -26,9 +24,9 @@ import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon, mascotStateForToast 
 import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
 import PlaylistPickerModal from "../playlists/components/PlaylistPickerModal";
 import WhatsNewModal from "../updates/WhatsNewModal";
-import { useAlbumsController } from "../albums/useAlbumsController";
 import { clamp } from "../../shared/utils/format";
 import { prettyTitle } from "../search";
+import type { AppShellProps } from "./appShell.contract";
 import { navItems, sidebarNavGroups } from "./navigation.constants";
 import {
   APP_VERSION, defaultUpdatePrompt, updateRibbonChildSpring, updateRibbonEnterSpring
@@ -36,373 +34,49 @@ import {
 import { updateRibbonTitle } from "../updates/update.utils";
 import { yukariUpdateImage } from "../../core/app.constants";
 
-export type AppShellProps = Record<string, any>;
+export type { AppShellProps } from "./appShell.contract";
 
 export default function AppShell(props: AppShellProps) {
   const {
-    appRootRef,
-    settings,
-    platformInfo,
-    themeMotionReady,
-    showTopUpdateRibbon,
-    isViewSwitching,
-    view,
-    heroMotion,
-    heroMotionAppClass,
-    homeEntranceSettledClass,
-    isSeeking,
-    isVolumeDragging,
-    isAppBackgrounded,
-    scrollBusyRef,
-    themeSettling,
-    draggedSongId,
-    isPlaying,
-    isThreeAm,
-    secretMode,
-    themePresetStyle,
-    animatedThemeVisualStyle,
-    customThemeStyle,
-    effectiveTheme,
-    screensaverPreviewActive,
-    screensaverVisible,
-    effectiveAmbient,
-    effectiveCoverColorSyncMode,
-    effectiveNotes,
-    statusText,
-    draggedSongTitle,
-    showStarBackdrop,
-    updatePrompt,
-    askUpdaterToDownload,
-    askUpdaterToInstall,
-    manualUpdateCheck,
-    setUpdatePrompt,
-    progress,
-    dismissScreensaverFromActivity,
-    setScreensaverVisible,
-    screensaverVisualSource,
-    secretBurst,
-    secretToast,
-    starParticleStyles,
-    appToast,
-    importAnimation,
-    songs,
-    setSongs,
-    setLibraryScanBusy,
-    setLibraryScanMessage,
-    libraryScanBusy,
-    pixelArtBusy,
-    libraryScanMessage,
-    onboardingOpen,
-    handleOnboardingTheme,
-    handleOnboardingDiscord,
-    handleOnboardingImportMusic,
-    handleOnboardingDownloads,
-    handleOnboardingStartListening,
-    skipOnboarding,
-    effectiveSimpleMode,
-    simpleModeView,
-    changeView,
-    importSongs,
-    startSidebarResize,
-    contentRef,
-    headerHint,
-    greeting,
-    playlists,
-    query,
-    handleSearchInput,
-    heroMotionClass,
-    heroTitleClass,
-    ambientStyle,
-    now,
-    nowPlayingTransitionKey,
-    nowPlayingSongMotionClass,
-    currentNowPlayingLabel,
-    currentSong,
-    heroDisplayTitle,
-    heroDisplayArtist,
-    playerError,
-    toggleHeroExpanded,
-    openCoversViewWithCurrentSong,
-    homeListenNowSongs,
-    shuffleLibrarySongsAction,
-    playableSongCount,
-    currentId,
-    selectSong,
-    updateSetting,
-    homeFreshShelfSongs,
-    homeDashboardClass,
-    renderHomeSongCards,
-    filteredSongs,
-    renderSongRows,
-    showHomeSideCards,
-    mostPlayed,
-    likedSongs,
-    totalPlays,
-    totalMinutes,
-    topSongs,
-    libraryAlbumCount,
-    libraryArtistCount,
-    handleLibraryAreaDragOver,
-    handleLibraryAreaDragLeave,
-    handleLibraryAreaDrop,
-    visibleSongs,
-    libraryFilterMode,
-    setLibraryFilterMode,
-    missingSongs,
-    selectedPlaylist,
-    selectedPlaylistSongs,
-    selectedPlaylistDuration,
-    renderPlaylistCollage,
-    playPlaylist,
-    startRenamePlaylist,
-    duplicatePlaylist,
-    createPlaylist,
-    newPlaylistName,
-    setNewPlaylistName,
-    playlistSummaries,
-    activePlaylistId,
-    playlistDragOverPlaylistId,
-    setSelectedPlaylistId,
-    handlePlaylistShelfDragOver,
-    handlePlaylistShelfDragLeave,
-    handlePlaylistShelfDrop,
-    renamingPlaylistId,
-    savePlaylistRename,
-    renamingPlaylistName,
-    setRenamingPlaylistName,
-    cancelRenamePlaylist,
-    removePlaylist,
-    selectedPlaylistId,
-    selectPlaylistSongAction,
-    startPlaylistSongDragAction,
-    dropPlaylistSongAction,
-    appendPlaylistSongAction,
-    endPlaylistSongDragAction,
-    openPlaylistSongContextMenuAction,
-    removePlaylistSongAction,
-    selectedCoverSongs,
-    coverGalleryMood,
-    coverMoodCounts,
-    coverStats,
-    filteredCoverGalleryAssets,
-    coverPickerSongList,
-    coverSelectedSongIds,
-    setCoverGalleryMood,
-    randomizeSelectedCovers,
-    rescanPixelArtFolder,
-    selectCurrentSongForCovers,
-    selectVisibleSongsForCovers,
-    setCoverSelectedSongIds,
-    toggleCoverSongSelection,
-    applyCoverAssetToSelection,
-    togglePixelCoverFavorite,
-    togglePixelCoverExcluded,
-    playedPercent,
-    likedPercent,
-    libraryHealthLabel,
-    analyticsStatCards,
-    analyticsRecapCards,
-    recentImportWeekCount,
-    neverPlayedSongs,
-    missingFileCount,
-    libraryLengthLabel,
-    averageSongSeconds,
-    longestSong,
-    renderSettingsRail,
-    settingsCategory,
-    renderSettingsCategoryContent,
-    setSettingsCategory,
-    downloadsTab,
-    setDownloadsTab,
-    downloadText,
-    setDownloadText,
-    downloadAudioLinks,
-    downloadBusy,
-    cancelCurrentDownload,
-    downloadResults,
-    downloadQueue,
-    spotifyUrl,
-    setSpotifyUrl,
-    setSpotifyFetchError,
-    spotifyFetchBusy,
-    spotifyDownloadBusy,
-    fetchSpotifyTracks,
-    spotifyFetchError,
-    spotifyTracks,
-    setSpotifySelectedIds,
-    spotifySelectedIds,
-    downloadSpotifyTracks,
-    setSpotifyTracks,
-    spotifyLoggedIn,
-    spotifyLoginBusy,
-    handleSpotifyLogin,
-    handleSpotifyLogout,
-    ready,
-    retryDownload,
-    retrySpotifyTrack,
-    clearFailedDownloads,
-    clearFinishedDownloads,
-    openDownloadedSongInLibrary,
-    convertLocalMedia,
-    convertBusy,
-    convertMessage,
-    convertProgress,
-    queueDropHot,
-    handlePlayerDragOver,
-    handlePlayerDragLeave,
-    handlePlayerDrop,
-    startPlayerResize,
-    isShuffle,
-    setIsShuffle,
-    playPrevious,
-    playButtonBurst,
-    togglePlay,
-    playNext,
-    repeatMode,
-    toggleRepeat,
-    repeatButtonAriaLabel,
-    repeatButtonTitle,
-    repeatButtonStateText,
-    progressTimeLabelRefs,
-    displayedTime,
-    progressInputRefs,
-    displayedProgress,
-    progressRangeStyle,
-    startSeekPreview,
-    previewSeek,
-    commitSeek,
-    progressDurationLabelRefs,
-    currentDuration,
-    volumeDraft,
-    volumeRangeStyle,
-    volumeDraftRef,
-    setIsVolumeDragging,
-    previewVolume,
-    commitVolume,
-    settingsOpen,
-    setSettingsOpen,
-    songContextMenu,
-    songsById,
-    setSongContextMenu,
-    queueSong,
-    playAlbumSongs,
-    shuffleAlbumSongs,
-    queueAlbumSongs,
-    openPlaylistPicker,
-    toggleLike,
-    openEditor,
-    whatsNewOpen,
-    closeWhatsNew,
-    editorSong,
-    setEditorSong,
-    randomizeCover,
-    pickCover,
-    editTitle,
-    setEditTitle,
-    editArtist,
-    setEditArtist,
-    editAlbum,
-    setEditAlbum,
-    toggleSongPlaylist,
-    askRemoveSong,
-    saveEditor,
-    playlistPickerSong,
-    setPlaylistPickerSong,
-    setPlaylistPickerName,
-    addSongToPlaylist,
-    playlistPickerName,
-    createPlaylistWithSong,
-    deleteTarget,
-    deleteBusy,
-    setDeleteTarget,
-    removeSong,
-    removeMissingSongs,
-    audioRef,
-    handleAudioTimeUpdate,
-    handleAudioPause,
-    handleAudioEnded,
-    handleCanPlay,
-    handlePlaying,
-    pendingPlayRef,
-    setIsPlaying,
-    saveDuration,
-    timeRef,
-    tickPlayCountTracker,
-    songRef,
-    markSongCompletedForPlayCount,
-    patchSongLocal,
-    playbackUrlCacheRef,
-    setPlayerError,
-    getAudioErrorText,
-    setStatusText,
-    resetPlayCountTracker,
-    stopFade,
-    stopCrossfadeAuto,
-    stopProgressLoop
+    frame, updates, screensaver, effects, onboarding, navigation,
+    home, library, albums, playlists, covers, analytics, settingsView, downloads,
+    playerBar, modals, playbackAudio
   } = props;
 
-  const safeMissingSongs = Array.isArray(missingSongs) ? missingSongs : [];
-  const showingMissingFiles = view === "library" && libraryFilterMode === "missing";
-  const libraryMissingLabel = `${missingFileCount || safeMissingSongs.length} missing file${(missingFileCount || safeMissingSongs.length) === 1 ? "" : "s"}`;
-
-  const albumsController = useAlbumsController({
-    view,
-    reducedMotion: settings.reducedMotion,
-    songs,
-    songsById,
-    setSongs,
-    setLibraryScanBusy,
-    setLibraryScanMessage,
-    setStatusText,
-    patchSongLocal
-  });
+  const {
+    appRootRef, settings, platformInfo, themeMotionReady, showTopUpdateRibbon, isViewSwitching,
+    heroMotion, heroMotionAppClass, homeEntranceSettledClass, isAppBackgrounded, scrollBusyRef,
+    themeSettling, themePresetStyle, animatedThemeVisualStyle, customThemeStyle, effectiveTheme,
+    effectiveAmbient, effectiveCoverColorSyncMode, effectiveNotes, statusText, draggedSongTitle,
+    showStarBackdrop
+  } = frame;
+  const { updatePrompt, askUpdaterToDownload, askUpdaterToInstall, manualUpdateCheck, setUpdatePrompt } = updates;
+  const {
+    previewActive: screensaverPreviewActive, visible: screensaverVisible,
+    dismissFromActivity: dismissScreensaverFromActivity, setVisible: setScreensaverVisible,
+    visualSource: screensaverVisualSource
+  } = screensaver;
+  const {
+    secretMode, secretBurst, secretToast, starParticleStyles, appToast, importAnimation,
+    libraryScanBusy, pixelArtBusy, libraryScanMessage
+  } = effects;
+  const { open: onboardingOpen, ...onboardingProps } = onboarding;
+  const {
+    effectiveSimpleMode, simpleModeView, view, changeView, importSongs, startSidebarResize,
+    contentRef, headerHint, greeting, query, handleSearchInput
+  } = navigation;
+  const { isSeeking, isVolumeDragging, draggedSongId, isPlaying } = playerBar;
+  const { isThreeAm } = home;
 
   const homeHeroCoverBrightness = clamp(Number(settings.homeHeroCoverBrightness ?? 1), 0.65, 1.55);
   const homeHeroCoverContrast = clamp(1.02 + (homeHeroCoverBrightness - 1) * 0.08, 0.98, 1.08);
   const homeHeroCoverSaturation = clamp(1.04 + (homeHeroCoverBrightness - 1) * 0.14, 1, 1.14);
   const homeHeroCoverGlowBrightness = clamp(0.72 + (homeHeroCoverBrightness - 1) * 0.34, 0.62, 0.92);
-  const platformId = String((platformInfo as any)?.id || "unknown").toLowerCase();
+  const platformId = String(platformInfo.id || "unknown").toLowerCase();
   const mascotDebugMode =
     typeof window !== "undefined" &&
     window.localStorage.getItem("localtify:mascotDebug") === "1";
-  const downloadPageState = getDownloadPageState({
-    downloadBusy,
-    spotifyDownloadBusy,
-    convertBusy,
-    downloadQueue,
-    downloadResults,
-    spotifyFetchError
-  });
-  const {
-    mascotState: downloadMascotState,
-    tone: downloadMascotTone,
-    title: downloadMascotTitle,
-    message: downloadMascotMessage,
-    hasFailed: downloadHasFailure,
-    failedQueueItems: failedDownloadQueueItems,
-    finishedQueueItems: finishedDownloadQueueItems,
-    failedResults: failedDownloadResults,
-    firstError: firstDownloadError
-  } = downloadPageState;
-  const visibleDownloadQueueItems = downloadQueue.filter((item: any) => !["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase()));
-  const visibleDownloadResults = downloadResults.filter((item: any) => !(item && item.ok === false));
-  const copyDownloadError = async (errorText?: string) => {
-    const text = String(errorText || firstDownloadError || "No download error found.");
-    try {
-      await navigator.clipboard?.writeText(text);
-      setStatusText("download error copied");
-    } catch {
-      setStatusText(text);
-    }
-  };
-  const retryFailedDownloads = () => {
-    failedDownloadQueueItems.forEach((item: any) => {
-      void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "");
-    });
-    failedDownloadResults.forEach((item: any) => {
-      void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "");
-    });
-  };
+
 
   return (
     <main
@@ -600,18 +274,7 @@ export default function AppShell(props: AppShellProps) {
 
       {onboardingOpen ? (
         <Suspense fallback={null}>
-          <Onboarding
-            appVersion={APP_VERSION}
-            songsCount={songs.length}
-            currentTheme={settings.customThemeEnabled ? "custom" : settings.theme}
-            discordEnabled={settings.discordEnabled}
-            onChooseTheme={handleOnboardingTheme}
-            onSetDiscordEnabled={handleOnboardingDiscord}
-            onImportMusic={handleOnboardingImportMusic}
-            onOpenDownloads={handleOnboardingDownloads}
-            onStartListening={handleOnboardingStartListening}
-            onSkip={skipOnboarding}
-          />
+          <Onboarding appVersion={APP_VERSION} {...onboardingProps} />
         </Suspense>
       ) : null}
 
@@ -761,117 +424,43 @@ export default function AppShell(props: AppShellProps) {
               className={`pageTransition pageTransition-${view}`}
               data-view={view}
             >
-              {view === "home" ? <HomeView {...{ ambientStyle, currentId, currentNowPlayingLabel, currentSong, filteredSongs, heroDisplayArtist, heroDisplayTitle, heroMotionClass, heroTitleClass, homeDashboardClass, homeFreshShelfSongs, homeListenNowSongs, isPlaying, isThreeAm, likedSongs, mostPlayed, now, nowPlayingSongMotionClass, nowPlayingTransitionKey, openCoversViewWithCurrentSong, playableSongCount, playerError, renderHomeSongCards, renderSongRows, selectSong, settings, showHomeSideCards, shuffleLibrarySongsAction, songs, toggleHeroExpanded, topSongs, totalMinutes, totalPlays, updateSetting }} /> : null}
+              {view === "home" ? <HomeView {...home} /> : null}
 
-            {(view === "library" || view === "liked") ? <LibraryView {...{ changeView, deleteBusy, handleLibraryAreaDragLeave, handleLibraryAreaDragOver, handleLibraryAreaDrop, handleSearchInput, importSongs, libraryAlbumCount, libraryArtistCount, libraryMissingLabel, missingFileCount, now, playlists, query, removeMissingSongs, renderHomeSongCards, renderSongRows, setLibraryFilterMode, settings, showingMissingFiles, shuffleLibrarySongsAction, songs, view, visibleSongs }} /> : null}
-
-
-            {view === "albums" ? <AlbumsView {...albumsController} {...{ currentId, currentSong, openPlaylistPicker, playAlbumSongs, queueAlbumSongs, ready, selectSong, shuffleAlbumSongs, songs, toggleLike }} /> : null}
-
-            {view === "playlists" ? <PlaylistsView {...{ activePlaylistId, appendPlaylistSongAction, cancelRenamePlaylist, createPlaylist, currentId, draggedSongId, dropPlaylistSongAction, duplicatePlaylist, endPlaylistSongDragAction, handlePlaylistShelfDragLeave, handlePlaylistShelfDragOver, handlePlaylistShelfDrop, importSongs, isPlaying, newPlaylistName, openPlaylistSongContextMenuAction, playPlaylist, playlistDragOverPlaylistId, playlistSummaries, playlists, removePlaylist, removePlaylistSongAction, renamingPlaylistId, renamingPlaylistName, renderPlaylistCollage, savePlaylistRename, selectPlaylistSongAction, selectedPlaylist, selectedPlaylistDuration, selectedPlaylistId, selectedPlaylistSongs, setNewPlaylistName, setRenamingPlaylistName, setSelectedPlaylistId, songs, startPlaylistSongDragAction, startRenamePlaylist }} /> : null}
-
-            {view === "covers" ? <CoversView {...{ ambientStyle, applyCoverAssetToSelection, coverGalleryMood, coverMoodCounts, coverPickerSongList, coverSelectedSongIds, coverStats, currentSong, filteredCoverGalleryAssets, importSongs, now, pixelArtBusy, randomizeSelectedCovers, rescanPixelArtFolder, selectCurrentSongForCovers, selectVisibleSongsForCovers, selectedCoverSongs, setCoverGalleryMood, setCoverSelectedSongIds, songs, toggleCoverSongSelection, togglePixelCoverExcluded, togglePixelCoverFavorite }} /> : null}
-
-            {view === "analytics" ? <AnalyticsView {...{ analyticsRecapCards, analyticsStatCards, averageSongSeconds, importSongs, libraryHealthLabel, libraryLengthLabel, likedPercent, longestSong, missingFileCount, neverPlayedSongs, playedPercent, ready, recentImportWeekCount, songs }} /> : null}
+            {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}
 
 
-            {view === "settings" ? <SettingsView {...{ renderSettingsCategoryContent, renderSettingsRail, settings, settingsCategory }} /> : null}
+            {view === "albums" ? <AlbumsView {...albums} /> : null}
 
-            {view === "downloads" ? <DownloadsView {...{ downloadMascotState, downloadMascotTone, cancelCurrentDownload, changeView, clearFailedDownloads, clearFinishedDownloads, convertBusy, convertLocalMedia, convertMessage, convertProgress, copyDownloadError, downloadAudioLinks, downloadBusy, downloadHasFailure, downloadMascotMessage, downloadMascotTitle, downloadResults, downloadSpotifyTracks, downloadStatusLabel, downloadText, downloadsTab, failedDownloadQueueItems, failedDownloadResults, fetchSpotifyTracks, finishedDownloadQueueItems, handleSpotifyLogin, handleSpotifyLogout, openDownloadedSongInLibrary, playlists, progress, ready, retryDownload, retryFailedDownloads, retrySpotifyTrack, setDownloadText, setDownloadsTab, setSettingsCategory, setSpotifyFetchError, setSpotifySelectedIds, setSpotifyTracks, setSpotifyUrl, settings, spotifyDownloadBusy, spotifyFetchBusy, spotifyFetchError, spotifyLoggedIn, spotifyLoginBusy, spotifySelectedIds, spotifyTrackStatusLabel, spotifyTracks, spotifyUrl, visibleDownloadQueueItems, visibleDownloadResults }} /> : null}
+            {view === "playlists" ? <PlaylistsView {...playlists} /> : null}
+
+            {view === "covers" ? <CoversView {...covers} /> : null}
+
+            {view === "analytics" ? <AnalyticsView {...analytics} /> : null}
+
+
+            {view === "settings" ? <SettingsView {...settingsView} /> : null}
+
+            {view === "downloads" ? <DownloadsView {...downloads} /> : null}
             </div>
           </section>
 
-<PlayerBar {...{ ambientStyle, commitSeek, commitVolume, currentDuration, currentSong, displayedProgress, displayedTime, draggedSongId, effectiveAmbient, effectiveCoverColorSyncMode, handlePlayerDragLeave, handlePlayerDragOver, handlePlayerDrop, isPlaying, isSeeking, isShuffle, isVolumeDragging, nowPlayingSongMotionClass, nowPlayingTransitionKey, playButtonBurst, playNext, playPrevious, previewSeek, previewVolume, progressDurationLabelRefs, progressInputRefs, progressRangeStyle, progressTimeLabelRefs, queueDropHot, repeatButtonAriaLabel, repeatButtonStateText, repeatButtonTitle, repeatMode, setIsShuffle, setIsVolumeDragging, settings, startPlayerResize, startSeekPreview, togglePlay, toggleRepeat, updateSetting, volumeDraft, volumeDraftRef, volumeRangeStyle }} />
+<PlayerBar {...playerBar} />
         </div>
       )}
 
-      <SettingsModal
-        open={Boolean(settingsOpen)}
-        onClose={() => setSettingsOpen(false)}
-        settingsCategory={settingsCategory}
-        reducedMotion={Boolean(settings.reducedMotion)}
-        renderSettingsRail={renderSettingsRail}
-        renderSettingsCategoryContent={renderSettingsCategoryContent}
-      />
+      <SettingsModal {...modals.settings} />
 
-      <SongContextMenu
-        state={songContextMenu}
-        songsById={songsById}
-        onClose={() => setSongContextMenu(null)}
-        selectSong={selectSong}
-        queueSong={queueSong}
-        openEditor={openEditor}
-        openPlaylistPicker={openPlaylistPicker}
-        toggleLike={toggleLike}
-        askRemoveSong={askRemoveSong}
-      />
+      <SongContextMenu {...modals.songContextMenu} />
 
-      <WhatsNewModal open={Boolean(whatsNewOpen)} onClose={closeWhatsNew} />
+      <WhatsNewModal {...modals.whatsNew} />
 
-      <SongEditorModal
-        song={editorSong}
-        onClose={() => setEditorSong(null)}
-        pixelArtBusy={Boolean(pixelArtBusy)}
-        randomizeCover={randomizeCover}
-        pickCover={pickCover}
-        editTitle={editTitle}
-        setEditTitle={setEditTitle}
-        editArtist={editArtist}
-        setEditArtist={setEditArtist}
-        editAlbum={editAlbum}
-        setEditAlbum={setEditAlbum}
-        playlists={playlists}
-        toggleSongPlaylist={toggleSongPlaylist}
-        toggleLike={toggleLike}
-        askRemoveSong={askRemoveSong}
-        saveEditor={saveEditor}
-      />
+      <SongEditorModal {...modals.songEditor} />
 
-      <PlaylistPickerModal
-        song={playlistPickerSong}
-        name={playlistPickerName}
-        setName={setPlaylistPickerName}
-        onClose={() => { setPlaylistPickerSong(null); setPlaylistPickerName(""); }}
-        playlists={playlists}
-        songsById={songsById}
-        renderPlaylistCollage={renderPlaylistCollage}
-        addSongToPlaylist={addSongToPlaylist}
-        createPlaylistWithSong={createPlaylistWithSong}
-      />
+      <PlaylistPickerModal {...modals.playlistPicker} />
 
-      <DeleteSongModal
-        song={deleteTarget}
-        busy={Boolean(deleteBusy)}
-        onClose={() => setDeleteTarget(null)}
-        removeSong={removeSong}
-      />
+      <DeleteSongModal {...modals.deleteSong} />
 
-      <PlaybackAudioElement
-        audioRef={audioRef}
-        currentSong={currentSong}
-        songRef={songRef}
-        pendingPlayRef={pendingPlayRef}
-        playbackUrlCacheRef={playbackUrlCacheRef}
-        timeRef={timeRef}
-        handleCanPlay={handleCanPlay}
-        handlePlaying={handlePlaying}
-        handleAudioPause={handleAudioPause}
-        handleAudioTimeUpdate={handleAudioTimeUpdate}
-        handleAudioEnded={handleAudioEnded}
-        setIsPlaying={setIsPlaying}
-        saveDuration={saveDuration}
-        tickPlayCountTracker={tickPlayCountTracker}
-        markSongCompletedForPlayCount={markSongCompletedForPlayCount}
-        patchSongLocal={patchSongLocal}
-        playNext={playNext}
-        setPlayerError={setPlayerError}
-        getAudioErrorText={getAudioErrorText}
-        setStatusText={setStatusText}
-        resetPlayCountTracker={resetPlayCountTracker}
-        stopFade={stopFade}
-        stopCrossfadeAuto={stopCrossfadeAuto}
-        stopProgressLoop={stopProgressLoop}
-      />
+      <PlaybackAudioElement {...playbackAudio} />
     </main>
   );
 }

@@ -29,7 +29,7 @@ type StepMeta = {
   title: string;
 };
 
-type OnboardingProps = {
+export type OnboardingProps = {
   appVersion: string;
   songsCount: number;
   currentTheme?: string;

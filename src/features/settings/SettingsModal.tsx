@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import type { SettingsCategory } from "./settings.types";
 import { settingsCategorySpring } from "./settings.constants";
 
-type SettingsModalProps = {
+export type SettingsModalProps = {
   open: boolean;
   onClose: () => void;
   settingsCategory: SettingsCategory;

@@ -2,7 +2,7 @@ import type { MutableRefObject, SyntheticEvent } from "react";
 import type { Song } from "../../library/song.types";
 import { getSongPlaybackSourceKey } from "../../library";
 
-type PlaybackAudioElementProps = {
+export type PlaybackAudioElementProps = {
   audioRef: MutableRefObject<HTMLAudioElement | null>;
   currentSong: Song | null;
   songRef: MutableRefObject<Song | null>;

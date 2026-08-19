@@ -5,7 +5,7 @@ import { formatTime } from "../../../shared/utils/format";
 import type { Playlist } from "../../playlists/playlist.types";
 import type { Song } from "../song.types";
 
-type SongEditorModalProps = {
+export type SongEditorModalProps = {
   song: Song | null;
   onClose: () => void;
   pixelArtBusy: boolean;
