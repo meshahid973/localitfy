@@ -1,4 +1,4 @@
-﻿import posthog from "posthog-js";
+import posthog from "posthog-js";
 
 export type AnalyticsValue = string | number | boolean | null | undefined;
 export type AnalyticsProperties = Record<string, AnalyticsValue>;
@@ -460,7 +460,6 @@ function addAudienceBuckets(properties: AnalyticsProperties = {}): AnalyticsProp
 function getDeviceProperties(): AnalyticsProperties {
   const userAgent = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
   const platform = typeof navigator !== "undefined" ? navigator.platform || "unknown" : "unknown";
-  const language = typeof navigator !== "undefined" ? navigator.language || "unknown" : "unknown";
 
   let osName = "unknown";
   if (userAgent.includes("Win")) osName = "windows";
@@ -1292,4 +1291,3 @@ export function resetLocaltifyAnalyticsIdentity(): void {
 
   identifyInstall();
 }
-

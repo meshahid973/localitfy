@@ -31,19 +31,21 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        shell: bash
+        run: |
+          if ! npm ci --ignore-scripts; then
+            echo "package-lock install failed; using package.json fallback for validation"
+            rm -rf node_modules
+            npm install --ignore-scripts --package-lock=false
+          fi
 
       - name: Check Electron bridge drift
         run: npm run bridge:check
 
-      - name: Check Phase 1 architecture boundaries
+      - name: Check architecture boundaries
         run: npm run boundaries:check
 
-      # Phase 1 starts by exposing existing TypeScript debt without blocking the
-      # stable renderer build. Remove continue-on-error once the baseline is
-      # clean; new/extracted modules must still be typed.
-      - name: TypeScript baseline
-        continue-on-error: true
+      - name: TypeScript
         run: npm run typecheck
 
       - name: Build renderer

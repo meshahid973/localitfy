@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 /* localtify 0.4.1 V395 playback settings cleanup + faster volume changes. */
 /* localtify 0.4.1 V396 audio engine stability pass. */
 /* localtify 0.4.1 V419 background-audio and settings-save stability. */
@@ -59,7 +59,6 @@ import {
   trackLibraryViewChanged,
   trackDownloadsOpened,
   trackDiscordToggled,
-  trackUpdatePopupSeen,
   trackOnboardingCompleted,
   trackOnboardingSkipped,
   trackError,
@@ -69,6 +68,14 @@ import {
   trackAcquisitionSource
 } from "./analytics";
 import { createLocaltifyLibraryWorker, makeLocaltifyAnalyticsSnapshotFallback, type LocaltifyAnalyticsSnapshot } from "./features/analytics/analyticsSnapshot";
+import {
+  enrichDownloadResultsWithLibraryMatches,
+  formatSpotifyPrivatePlaylistMessage,
+  friendlyDownloadError,
+  makeQueuedDownloads,
+  parseDownloadUrls,
+  useDownloadsRuntime
+} from "./features/downloads/useDownloadsRuntime";
 import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/600.css";
 import "@fontsource/space-grotesk/700.css";
@@ -83,11 +90,12 @@ import "./onboarding-first-run.css";
 import "./player.css";
 import "./effects.css";
 
-import LocaltifyAppView, {
-  Cover,
-  VirtualHomeSongCards,
-  VirtualSongRows
-} from "./LocaltifyAppView";
+import AppShell from "./features/shell/AppShell";
+import { useAppToast } from "./features/shell/useAppToast";
+import { usePlaylistsController } from "./features/playlists";
+import { useUpdatesController } from "./features/updates";
+import { Cover } from "./features/covers/Cover";
+import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
 import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
 import {
@@ -116,10 +124,8 @@ import {
   THEME_SWATCH_COLORS,
   V013_DEFAULTS_KEY,
   V013_RELEASE_DEFAULTS,
-  WHATS_NEW_SEEN_KEY,
   coverColorSyncOptions,
   defaultSettings,
-  defaultUpdatePrompt,
   discordArtModeOptions,
   discordCleanupOptions,
   discordSecondLineOptions,
@@ -142,12 +148,10 @@ import {
   cleanPlaylistList,
   cleanSongOrderIds,
   cleanStringList,
-  cleanToastCopy,
   collapseSpaces,
   coverMoodName,
   createImportAnimationState,
   formatTime,
-  friendlyUpdateError,
   getAmbientStyle,
   getCachedRuntimePixelArtAssets,
   getCustomThemeColorPatch,
@@ -192,15 +196,12 @@ import {
   stableHash,
   stableSongSourceKey,
   updateStatusLabel,
-  updateWasLeftAlone,
   useCoverAverageStyle,
   useStableCallback,
   writeLocalJson,
   writeSavedCustomThemePresets
 } from "./localtifyUtils";
 import type {
-  AppToastKind,
-  AutoUpdateEvent,
   CoverColorSyncMode,
   CoverMood,
   CustomThemeColorKey,
@@ -225,7 +226,6 @@ import type {
   SongContextMenuState,
   SpotifyTrack,
   ThemeId,
-  UpdatePromptState,
   View
 } from "./localtifyTypes";
 
@@ -608,7 +608,6 @@ function MainModeApp() {
   const backgroundAudioRepairTimerRef = useRef<number | null>(null);
   const analyticsWorkerRef = useRef<Worker | null>(null);
   const analyticsWorkerRequestRef = useRef(0);
-  const playlistSaveTimerRef = useRef<number | null>(null);
   const playerResizeFrameRef = useRef<number | null>(null);
   const sidebarResizeFrameRef = useRef<number | null>(null);
   const pendingPlayRef = useRef(false);
@@ -623,7 +622,6 @@ function MainModeApp() {
   const playbackUrlPendingRef = useRef<Map<string, Promise<PlaybackUrlResult>>>(new Map());
   const bootedRef = useRef(false);
   const lastQueueHistoryRef = useRef("");
-  const toastTimerRef = useRef<number | null>(null);
   const importOverlayTimerRef = useRef<number | null>(null);
   const songRef = useRef<Song | null>(null);
   const timeRef = useRef(0);
@@ -694,10 +692,6 @@ function MainModeApp() {
   const customThemeLivePatchRef = useRef<Partial<Settings>>({});
   const pendingCustomThemePreviewPatchRef = useRef<Partial<Settings>>({});
   const appRootRef = useRef<HTMLElement | null>(null);
-  const updateAnalyticsSeenRef = useRef("");
-  const updateNagTimerRef = useRef<number | null>(null);
-  const updateNagVersionRef = useRef("");
-  const updateNagStatusRef = useRef<"available" | "downloaded">("available");
   const analyticsSessionEndedRef = useRef(false);
   const analyticsViewRef = useRef<View>("home");
   const librarySnapshotSignatureRef = useRef("");
@@ -868,9 +862,28 @@ function MainModeApp() {
   const lastProgressStatePaintRef = useRef(0);
   const [statusText, setStatusText] = useState("ready to play");
   const [playerError, setPlayerError] = useState("");
-  const [updatePrompt, setUpdatePrompt] = useState<UpdatePromptState>(defaultUpdatePrompt);
-  const [, setLastUpdateCheckedLabel] = useState("not checked yet");
-  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const { appToast, showAppToast } = useAppToast();
+  const {
+    updatePrompt,
+    setUpdatePrompt,
+    whatsNewOpen,
+    setWhatsNewOpen,
+    openUpdateChangelog,
+    closeWhatsNew,
+    askUpdaterToDownload,
+    askUpdaterToInstall,
+    manualUpdateCheck,
+    skipAvailableUpdate,
+    clearUpdateNagTimer,
+    showUpdateNag,
+    showDebugUpdateAvailable
+  } = useUpdatesController({
+    ready,
+    autoUpdateEnabled: settings.autoUpdateEnabled,
+    analyticsViewRef,
+    setStatusText,
+    showAppToast
+  });
   const [now, setNow] = useState(new Date());
   const [screensaverVisible, setScreensaverVisible] = useState(false);
   const [screensaverPreviewActive, setScreensaverPreviewActive] = useState(false);
@@ -878,35 +891,39 @@ function MainModeApp() {
   const screensaverPreviewTimerRef = useRef<number | null>(null);
   const screensaverIgnoreActivityUntilRef = useRef(0);
 
-  const [downloadText, setDownloadText] = useState("");
-  const [downloadBusy, setDownloadBusy] = useState(false);
-  const [downloadResults, setDownloadResults] = useState<DownloadResult[]>([]);
-  const [downloadQueue, setDownloadQueue] = useState<DownloadQueueItem[]>([]);
-  const [downloadFolderLabel, setDownloadFolderLabel] = useState("");
-
-  const [convertBusy, setConvertBusy] = useState(false);
-  const [convertProgress, setConvertProgress] = useState(0);
-  const [convertMessage, setConvertMessage] = useState("");
-
-  // -- Spotify import ------------------------------------------
-  const [downloadsTab, setDownloadsTab] = useState<"youtube" | "spotify">("youtube");
-  const [spotifyUrl, setSpotifyUrl] = useState("");
-  const [spotifyTracks, setSpotifyTracks] = useState<SpotifyTrack[]>([]);
-  const [spotifySourceName, setSpotifySourceName] = useState("");
-  const [spotifySourceType, setSpotifySourceType] = useState("");
-  const [spotifyFetchBusy, setSpotifyFetchBusy] = useState(false);
-  const [spotifyFetchError, setSpotifyFetchError] = useState("");
-  const [spotifySelectedIds, setSpotifySelectedIds] = useState<Set<string>>(new Set());
-  const [spotifyDownloadBusy, setSpotifyDownloadBusy] = useState(false);
-  const [spotifyLoggedIn, setSpotifyLoggedIn] = useState(false);
-  const [spotifyConnectionReady, setSpotifyConnectionReady] = useState(true);
-  const [spotifyNeedsClientId, setSpotifyNeedsClientId] = useState(false);
-  const [spotifyConnectionMode, setSpotifyConnectionMode] = useState("oauth-pkce");
-  const [spotifyRedirectUri, setSpotifyRedirectUri] = useState("http://127.0.0.1:43877/spotify/callback");
-  const [spotifyLoginBusy, setSpotifyLoginBusy] = useState(false);
-  const [spotifyShowCookieInput, setSpotifyShowCookieInput] = useState(false);
-  const [spotifyCookieDraft, setSpotifyCookieDraft] = useState("");
-  // ------------------------------------------------------------
+  const {
+    downloadText, setDownloadText,
+    downloadBusy, setDownloadBusy,
+    downloadResults, setDownloadResults,
+    downloadQueue, setDownloadQueue,
+    downloadFolderLabel, setDownloadFolderLabel,
+    convertBusy, setConvertBusy,
+    convertProgress, setConvertProgress,
+    convertMessage, setConvertMessage,
+    downloadsTab, setDownloadsTab,
+    spotifyUrl, setSpotifyUrl,
+    spotifyTracks, setSpotifyTracks,
+    spotifySourceName, setSpotifySourceName,
+    spotifySourceType, setSpotifySourceType,
+    spotifyFetchBusy, setSpotifyFetchBusy,
+    spotifyFetchError, setSpotifyFetchError,
+    spotifySelectedIds, setSpotifySelectedIds,
+    spotifyDownloadBusy, setSpotifyDownloadBusy,
+    spotifyLoggedIn, setSpotifyLoggedIn,
+    spotifyConnectionReady, setSpotifyConnectionReady,
+    spotifyNeedsClientId, setSpotifyNeedsClientId,
+    spotifyConnectionMode, setSpotifyConnectionMode,
+    spotifyRedirectUri, setSpotifyRedirectUri,
+    spotifyLoginBusy, setSpotifyLoginBusy,
+    spotifyShowCookieInput, setSpotifyShowCookieInput,
+    spotifyCookieDraft, setSpotifyCookieDraft,
+    handleSpotifyLogin,
+    handleSpotifySetCookie,
+    handleSpotifyLogout,
+    fetchSpotifyTracks,
+    updateSpotifyConnectionState,
+    syncDownloadFilesToQueue
+  } = useDownloadsRuntime({ ready, songs, setStatusText, setPlayerError });
 
   const [secretMode, setSecretMode] = useState<SecretMode>("none");
   const [secretToast, setSecretToast] = useState("");
@@ -1123,23 +1140,6 @@ function MainModeApp() {
   // V313: onboarding is now a true first-run mini-app.
   // Do not auto-close it just because songs exist; import completion is handled inside Onboarding.
 
-  useEffect(() => {
-    if (!ready) return;
-
-    const seenVersion = window.localStorage.getItem(WHATS_NEW_SEEN_KEY);
-    if (seenVersion !== APP_VERSION) {
-      const timer = window.setTimeout(() => setWhatsNewOpen(true), 420);
-      return () => window.clearTimeout(timer);
-    }
-
-    return undefined;
-  }, [ready]);
-
-  function closeWhatsNew() {
-    window.localStorage.setItem(WHATS_NEW_SEEN_KEY, APP_VERSION);
-    setWhatsNewOpen(false);
-  }
-
   const settingsSearchQuery = normalizeSettingsSearch(deferredSettingsSearch);
 
   const visibleSettingsTabs = useMemo(() => {
@@ -1293,21 +1293,6 @@ function MainModeApp() {
 
     const validSongIds: Set<string> = new Set(songs.map((song) => song.id));
     setCoverSelectedSongIds((oldIds) => cleanSongOrderIds(oldIds, validSongIds));
-    setPlaylists((items) => {
-      let changed = false;
-
-      const next = items.map((playlist) => {
-        const cleanIds = cleanSongOrderIds(playlist.songIds, validSongIds);
-        if (cleanIds.length !== playlist.songIds.length || cleanIds.some((id, index) => id !== playlist.songIds[index])) {
-          changed = true;
-          return { ...playlist, songIds: cleanIds };
-        }
-
-        return playlist;
-      });
-
-      return changed ? next : items;
-    });
   }, [songs]);
 
   const currentSong = useMemo(() => {
@@ -1438,29 +1423,54 @@ function MainModeApp() {
   const songIdentityRef = useRef<string | null>(null);
   const songTransitionCounterRef = useRef(0);
   const [nowPlayingTransitionKey, setNowPlayingTransitionKey] = useState("empty:0");
-  const [playlists, setPlaylists] = useState<Playlist[]>(() => readLocalJson<Playlist[]>(PLAYLIST_STORAGE_KEY, []));
+  const {
+    playlists,
+    setPlaylists,
+    newPlaylistName,
+    setNewPlaylistName,
+    playlistPickerName,
+    setPlaylistPickerName,
+    activePlaylistId,
+    setActivePlaylistId,
+    selectedPlaylistId,
+    setSelectedPlaylistId,
+    playlistPickerSong,
+    setPlaylistPickerSong,
+    playlistDragOverPlaylistId,
+    setPlaylistDragOverPlaylistId,
+    renamingPlaylistId,
+    renamingPlaylistName,
+    setRenamingPlaylistName,
+    createPlaylist,
+    createPlaylistWithSong,
+    removePlaylist,
+    startRenamePlaylist,
+    cancelRenamePlaylist,
+    savePlaylistRename,
+    duplicatePlaylist,
+    openPlaylist,
+    openPlaylistPicker: openPlaylistPickerCore,
+    addSongToPlaylist,
+    removeSongFromPlaylist,
+    toggleSongPlaylist,
+    handlePlaylistSongDrop,
+    handlePlaylistSongAppend
+  } = usePlaylistsController({
+    songs,
+    bootedRef,
+    changeView,
+    setStatusText,
+    showAppToast
+  });
   const [playQueue, setPlayQueue] = useState<string[]>(() => readLocalJson<string[]>(QUEUE_STORAGE_KEY, []));
   const [queueHistory, setQueueHistory] = useState<QueueHistoryItem[]>(() => readLocalJson<QueueHistoryItem[]>(QUEUE_HISTORY_STORAGE_KEY, []));
-  const [newPlaylistName, setNewPlaylistName] = useState("");
-  const [playlistPickerName, setPlaylistPickerName] = useState("");
   const [repeatPlaylist, setRepeatPlaylist] = useState(() => readLocalJson<boolean>(REPEAT_PLAYLIST_STORAGE_KEY, false));
-  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
-  const [playlistPickerSong, setPlaylistPickerSong] = useState<Song | null>(null);
-  const [playlistDragOverPlaylistId, setPlaylistDragOverPlaylistId] = useState("");
-  const [renamingPlaylistId, setRenamingPlaylistId] = useState<string | null>(null);
-  const [renamingPlaylistName, setRenamingPlaylistName] = useState("");
   const [songContextMenu, setSongContextMenu] = useState<SongContextMenuState | null>(null);
   const [pixelArtBusy, setPixelArtBusy] = useState(false);
   const [libraryScanBusy, setLibraryScanBusy] = useState(false);
   const [libraryScanMessage, setLibraryScanMessage] = useState("instant search index ready");
   const [metadataCleanPreview, setMetadataCleanPreview] = useState<any | null>(null);
   const [metadataUndoItems, setMetadataUndoItems] = useState<any[]>([]);
-  const [appToast, setAppToast] = useState<{
-    id: number;
-    message: string;
-    kind: AppToastKind;
-  } | null>(null);
   const [importAnimation, setImportAnimation] = useState<ImportAnimationState>(() =>
     createImportAnimationState()
   );
@@ -1612,25 +1622,6 @@ function MainModeApp() {
     setNowPlayingTransitionKey(`${songIdentity}:${songTransitionCounterRef.current}`);
   }, [songIdentity]);
 
-  useEffect(() => {
-    if (!bootedRef.current) return;
-
-    const cleanedPlaylists = cleanPlaylistList(playlists);
-
-    writeLocalJson(PLAYLIST_STORAGE_KEY, cleanedPlaylists);
-
-    const savePlaylists = window.localitfy.savePlaylists;
-    if (!savePlaylists) return;
-
-    if (playlistSaveTimerRef.current !== null) {
-      window.clearTimeout(playlistSaveTimerRef.current);
-    }
-
-    playlistSaveTimerRef.current = window.setTimeout(() => {
-      playlistSaveTimerRef.current = null;
-      savePlaylists(cleanedPlaylists).catch(() => undefined);
-    }, 140);
-  }, [playlists]);
 
   useEffect(() => {
     writeLocalJson(QUEUE_STORAGE_KEY, playQueue);
@@ -1665,10 +1656,6 @@ function MainModeApp() {
 
   useEffect(() => {
     return () => {
-      if (toastTimerRef.current) {
-        window.clearTimeout(toastTimerRef.current);
-      }
-
       if (importOverlayTimerRef.current) {
         window.clearTimeout(importOverlayTimerRef.current);
       }
@@ -1687,11 +1674,6 @@ function MainModeApp() {
         customThemeQuietCommitTimerRef.current = null;
       }
       customThemeQuietPatchRef.current = {};
-
-      if (playlistSaveTimerRef.current !== null) {
-        window.clearTimeout(playlistSaveTimerRef.current);
-        playlistSaveTimerRef.current = null;
-      }
 
       if (customThemePreviewFrameRef.current !== null) {
         window.cancelAnimationFrame(customThemePreviewFrameRef.current);
@@ -2485,18 +2467,6 @@ function MainModeApp() {
     event.dataTransfer.setDragImage(preview, 18, 18);
   }
 
-  function showAppToast(message: string, kind: AppToastKind = "info") {
-    if (toastTimerRef.current) {
-      window.clearTimeout(toastTimerRef.current);
-    }
-
-    setAppToast({ id: Date.now(), message: cleanToastCopy(message, kind), kind });
-
-    toastTimerRef.current = window.setTimeout(() => {
-      setAppToast(null);
-      toastTimerRef.current = null;
-    }, kind === "work" ? 1900 : 2600);
-  }
 
 
   useEffect(() => {
@@ -3743,335 +3713,6 @@ function MainModeApp() {
     return () => window.clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    if (!window.localitfy.onAutoUpdate) return;
-
-    const off = window.localitfy.onAutoUpdate((payload: AutoUpdateEvent) => {
-      if (!payload || typeof payload !== "object") return;
-
-      const version = payload.version || "latest";
-      const percent = clamp(Number(payload.percent || 0), 0, 100);
-
-      if (!payload.silent && (payload.type === "checking" || payload.type === "not-available" || payload.type === "available" || payload.type === "error" || payload.type === "dev")) {
-        setLastUpdateCheckedLabel(payload.type === "checking" ? "checking now" : "just now");
-      }
-
-      if (payload.type === "backup") {
-        setUpdatePrompt((old) => ({
-          ...old,
-          visible: old.visible,
-          backupPath: payload.backupPath || old.backupPath,
-          libraryBackedUp: Boolean(payload.libraryBackedUp),
-          message: old.message || payload.message || "your library has been backed up"
-        }));
-        return;
-      }
-
-      if (payload.type === "checking") {
-        if (payload.silent) return;
-        setUpdatePrompt({
-          visible: true,
-          status: "checking",
-          version: "",
-          percent: 0,
-          message: payload.message || "Checking for updates...",
-          error: ""
-        });
-        showAppToast("Checking for updates", "work");
-        return;
-      }
-
-      if (payload.type === "available") {
-        updateNagVersionRef.current = version;
-        updateNagStatusRef.current = "available";
-        if (version && updateWasLeftAlone(version)) {
-          return;
-        }
-        setUpdatePrompt({
-          visible: true,
-          status: "available",
-          version,
-          percent: 0,
-          message: payload.message || `localtify ${version} is ready to download.`,
-          error: "",
-          backupPath: payload.backupPath || "",
-          libraryBackedUp: Boolean(payload.libraryBackedUp),
-          releaseNotes: payload.releaseNotes || ""
-        });
-        showAppToast("Update available", "success");
-        return;
-      }
-
-      if (payload.type === "downloading") {
-        setUpdatePrompt((old) => ({
-          ...old,
-          visible: true,
-          status: "downloading",
-          percent,
-          message: payload.message || `Downloading update... ${Math.round(percent)}%`,
-          error: "",
-          backupPath: payload.backupPath || old.backupPath,
-          libraryBackedUp: Boolean(payload.libraryBackedUp || old.libraryBackedUp),
-          downloadedBytes: payload.downloadedBytes,
-          totalBytes: payload.totalBytes,
-          sizeBytes: payload.sizeBytes,
-          speedBytesPerSecond: payload.speedBytesPerSecond
-        }));
-        return;
-      }
-
-      if (payload.type === "downloaded") {
-        updateNagVersionRef.current = version || updateNagVersionRef.current || "latest";
-        updateNagStatusRef.current = "downloaded";
-        setUpdatePrompt((old) => ({
-          ...old,
-          visible: true,
-          status: "downloaded",
-          percent: 100,
-          version: version || old.version,
-          message: payload.message || "Update ready. Your library has been backed up. Restart localtify to install it.",
-          error: "",
-          backupPath: payload.backupPath || old.backupPath,
-          libraryBackedUp: Boolean(payload.libraryBackedUp || old.libraryBackedUp),
-          releaseNotes: payload.releaseNotes || old.releaseNotes
-        }));
-        showAppToast("Update ready to install", "success");
-        return;
-      }
-
-      if (payload.type === "not-available") {
-        if (payload.silent) return;
-        setUpdatePrompt(defaultUpdatePrompt);
-        setStatusText("localtify is up to date");
-        showAppToast("localtify is up to date", "success");
-        return;
-      }
-
-      if (payload.type === "dev") {
-        if (payload.silent) return;
-
-        // V179: dev/packaged-only update messages must never open the global top ribbon.
-        // The ribbon is reserved for real update states only, so the app does not look broken
-        // while testing with npm run dev.
-        setUpdatePrompt(defaultUpdatePrompt);
-        setStatusText("update checks work in the installed app");
-        showAppToast("Update checks work after installing the app", "work");
-        return;
-      }
-
-      if (payload.type === "error") {
-        if (payload.silent) return;
-        setUpdatePrompt({
-          visible: true,
-          status: "error",
-          version: "",
-          percent: 0,
-          message: friendlyUpdateError(payload.error || payload.message),
-          error: friendlyUpdateError(payload.error || payload.message)
-        });
-        showAppToast("Update check failed", "error");
-      }
-    });
-
-    return () => off();
-  }, []);
-
-  useEffect(() => {
-    if (!ready || !settings.autoUpdateEnabled || !window.localitfy.checkForUpdates) return;
-
-    const timer = window.setTimeout(() => {
-      window.localitfy.checkForUpdates?.({ silent: true }).catch(() => undefined);
-    }, 1800);
-
-    return () => window.clearTimeout(timer);
-  }, [ready, settings.autoUpdateEnabled]);
-
-  useEffect(() => {
-    return () => {
-      if (updateNagTimerRef.current) {
-        window.clearTimeout(updateNagTimerRef.current);
-        updateNagTimerRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!updatePrompt.visible) return;
-
-    const signature = [updatePrompt.status, updatePrompt.version || "none", updatePrompt.nagStage || 0].join(":");
-    if (updateAnalyticsSeenRef.current === signature) return;
-
-    updateAnalyticsSeenRef.current = signature;
-    trackUpdatePopupSeen({
-      update_status: updatePrompt.status,
-      current_version: APP_VERSION,
-      latest_version: updatePrompt.version || null,
-      current_view: analyticsViewRef.current,
-      has_error: Boolean(updatePrompt.error)
-    });
-  }, [updatePrompt.visible, updatePrompt.status, updatePrompt.version, updatePrompt.error, updatePrompt.nagStage]);
-
-  useEffect(() => {
-    if (!updatePrompt.visible) return;
-    if (updatePrompt.status !== "latest" && updatePrompt.status !== "dev") return;
-
-    const timer = window.setTimeout(() => {
-      setUpdatePrompt(defaultUpdatePrompt);
-    }, updatePrompt.status === "latest" ? 1400 : 2600);
-
-    return () => window.clearTimeout(timer);
-  }, [updatePrompt.visible, updatePrompt.status]);
-
-  async function askUpdaterToDownload() {
-    if (!window.localitfy.downloadUpdate) {
-      setUpdatePrompt((old) => ({
-        ...old,
-        visible: true,
-        status: "error",
-        message: "Could not check for updates. Try again later.",
-        error: "Updater is not available in this build."
-      }));
-      return;
-    }
-
-    setUpdatePrompt((old) => ({
-      ...old,
-      visible: true,
-      status: "downloading",
-      percent: 0,
-      message: "Backing up your library, then starting download...",
-      error: ""
-    }));
-
-    await window.localitfy.downloadUpdate().catch((error: unknown) => {
-      setUpdatePrompt((old) => ({
-        ...old,
-        visible: true,
-        status: "error",
-        message: friendlyUpdateError(error),
-        error: friendlyUpdateError(error)
-      }));
-    });
-  }
-
-  async function askUpdaterToInstall() {
-    if (!window.localitfy.installUpdate) return;
-    await window.localitfy.installUpdate().catch(() => {
-      setUpdatePrompt((old) => ({
-        ...old,
-        visible: true,
-        status: "error",
-        message: "Could not restart to install the update.",
-        error: "Could not restart to install the update."
-      }));
-    });
-  }
-
-  async function manualUpdateCheck() {
-    setLastUpdateCheckedLabel("checking now");
-
-    if (!window.localitfy.checkForUpdates) {
-      setUpdatePrompt({
-        visible: true,
-        status: "error",
-        version: "",
-        percent: 0,
-        message: "Could not check for updates. Try again later.",
-        error: "Updater is not available in this build."
-      });
-      setLastUpdateCheckedLabel("just now");
-      return;
-    }
-
-    setUpdatePrompt({
-      visible: true,
-      status: "checking",
-      version: "",
-      percent: 0,
-      message: "Checking for updates...",
-      error: ""
-    });
-
-    await window.localitfy.checkForUpdates({ silent: false }).catch((error: unknown) => {
-      setUpdatePrompt({
-        visible: true,
-        status: "error",
-        version: "",
-        percent: 0,
-        message: friendlyUpdateError(error),
-        error: friendlyUpdateError(error)
-      });
-      setLastUpdateCheckedLabel("just now");
-    });
-  }
-
-  function openUpdateChangelog() {
-    setWhatsNewOpen(true);
-  }
-
-  function clearUpdateNagTimer() {
-    if (updateNagTimerRef.current) {
-      window.clearTimeout(updateNagTimerRef.current);
-      updateNagTimerRef.current = null;
-    }
-  }
-
-  function showUpdateNag(stage: 1 | 2 | 3, versionInput?: string) {
-    const version = versionInput || updateNagVersionRef.current || updatePrompt.version || "latest";
-    if (updateWasLeftAlone(version)) return;
-
-    updateNagVersionRef.current = version;
-    setUpdatePrompt({
-      visible: true,
-      status: updateNagStatusRef.current,
-      version,
-      percent: updateNagStatusRef.current === "downloaded" ? 100 : 0,
-      nagStage: stage,
-      message: "",
-      error: "",
-      libraryBackedUp: true
-    });
-  }
-
-  function scheduleUpdateNag(versionInput?: string, stageInput?: 1 | 2 | 3, customDelayMs?: number, statusInput?: "available" | "downloaded") {
-    const version = versionInput || updatePrompt.version || updateNagVersionRef.current || "latest";
-    const stage = stageInput || 1;
-
-    if (updateWasLeftAlone(version)) return;
-
-    updateNagVersionRef.current = version;
-    updateNagStatusRef.current = statusInput || updateNagStatusRef.current || "available";
-    clearUpdateNagTimer();
-
-    const delayMs = typeof customDelayMs === "number"
-      ? customDelayMs
-      : stage === 1
-        ? 120_000
-        : 60_000;
-
-    updateNagTimerRef.current = window.setTimeout(() => {
-      updateNagTimerRef.current = null;
-      showUpdateNag(stage, version);
-    }, delayMs);
-  }
-
-  function handleUpdateLater() {
-    const currentStage = updatePrompt.nagStage || 0;
-    const nextStage = currentStage >= 2 ? 3 : currentStage === 1 ? 2 : 1;
-    const nextDelay = currentStage === 0 ? 120_000 : 60_000;
-    const version = updatePrompt.version || updateNagVersionRef.current || "latest";
-    const reminderStatus = updatePrompt.status === "downloaded" ? "downloaded" : "available";
-
-    setUpdatePrompt(defaultUpdatePrompt);
-    scheduleUpdateNag(version, nextStage, nextDelay, reminderStatus);
-    setStatusText("update reminder snoozed");
-  }
-
-
-  function skipAvailableUpdate() {
-    handleUpdateLater();
-  }
-
   function resetPlayCountTracker() {
     countPlayRef.current = false;
     playCountSongIdRef.current = "";
@@ -4242,46 +3883,35 @@ function MainModeApp() {
 
 
     if (command === "whatsnew" || command === "whatsnewtrue" || command === "showwhatsnew") {
-      setWhatsNewOpen(true);
+      openUpdateChangelog();
       setQuery("");
       showAppToast("what's new opened", "success");
       return;
     }
 
     if (command === "popup1" || command === "/popup1") {
-      clearUpdateNagTimer();
-      updateNagVersionRef.current = "test";
-      updateNagStatusRef.current = "available";
-      setUpdatePrompt({
-        visible: true,
-        status: "available",
-        version: "test",
-        percent: 0,
-        message: "localtify test update is ready to download.",
-        error: "",
-        libraryBackedUp: true
-      });
+      showDebugUpdateAvailable();
       setQuery("");
       return;
     }
 
     if (command === "popup2" || command === "/popup2") {
       clearUpdateNagTimer();
-      showUpdateNag(1, updatePrompt.version || updateNagVersionRef.current || "test");
+      showUpdateNag(1, updatePrompt.version || "test");
       setQuery("");
       return;
     }
 
     if (command === "popup3" || command === "/popup3") {
       clearUpdateNagTimer();
-      showUpdateNag(2, updatePrompt.version || updateNagVersionRef.current || "test");
+      showUpdateNag(2, updatePrompt.version || "test");
       setQuery("");
       return;
     }
 
     if (command === "popup4" || command === "/popup4") {
       clearUpdateNagTimer();
-      showUpdateNag(3, updatePrompt.version || updateNagVersionRef.current || "test");
+      showUpdateNag(3, updatePrompt.version || "test");
       setQuery("");
       return;
     }
@@ -7626,150 +7256,6 @@ function MainModeApp() {
     }
   }
 
-  function parseDownloadUrls(text: string) {
-    return text
-      .split(/\r?\n|,/) 
-      .map((url) => url.trim())
-      .filter(Boolean);
-  }
-
-  function makeQueuedDownloads(urls: string[]): DownloadQueueItem[] {
-    return urls.map((url, index) => ({
-      id: `${Date.now()}-${index}`,
-      url,
-      title: `download ${index + 1}`,
-      source: "youtube",
-      status: "queued",
-      progress: 0,
-      message: "Queued..."
-    }));
-  }
-
-  function friendlyDownloadError(error: unknown, fallback = "Download failed. Try again or check the link.") {
-    const raw = String(error || "").trim();
-    const lowerMessage = raw.toLowerCase();
-
-    if (!raw) return fallback;
-    if (/invalid url|unsupported url|not a url|url/i.test(lowerMessage) && /invalid|unsupported|malformed|empty/.test(lowerMessage)) {
-      return "Invalid URL. Paste a normal YouTube/Spotify link and retry.";
-    }
-    if (/yt-dlp|ytdlp|youtube-dl|no such file|not installed|spawn/.test(lowerMessage)) {
-      return "yt-dlp could not run. Check the bundled downloader setup, then retry.";
-    }
-    if (/eacces|eperm|permission|access denied|forbidden|403|folder|directory|write|readonly|read-only/.test(lowerMessage)) {
-      return "Permission or folder error. Choose a writable downloads folder and retry.";
-    }
-    if (/private|unavailable|not available|members-only|login|required|age restricted|sign in/.test(lowerMessage)) {
-      return "This source looks private or unavailable. Try a public link.";
-    }
-    if (/copyright|blocked|restricted|region|geo/.test(lowerMessage)) {
-      return "This source is blocked or region restricted.";
-    }
-    if (/network|timeout|timed out|socket|econn|dns|connection|internet|fetch failed/.test(lowerMessage)) {
-      return "Network problem while downloading. Check your connection and retry.";
-    }
-    if (/rate|429|too many|captcha|bot/.test(lowerMessage)) {
-      return "The source rate-limited or blocked the request. Wait a bit, then retry.";
-    }
-    if (/ffmpeg|convert|conversion/.test(lowerMessage)) {
-      return "Downloaded, but conversion failed. Check FFmpeg/download setup.";
-    }
-    if (/no audio|audio only|format|no formats|requested format|unable to extract|extractor/.test(lowerMessage)) {
-      return "No usable audio was found for this link.";
-    }
-
-    return raw.length > 170 ? `${raw.slice(0, 167)}...` : raw;
-  }
-
-  function findDownloadedSongMatch(result: DownloadResult, librarySongs: Song[]) {
-    const filePath = String(result.filePath || "").trim().toLowerCase();
-    const filename = String(result.filename || "").trim().toLowerCase();
-    const spotifyTrackId = String((result as any).spotifyTrackId || "").trim();
-
-    if (spotifyTrackId) {
-      const exactSpotify = librarySongs.find((song) => String((song as any).sourceTrackId || "").trim() === spotifyTrackId);
-      if (exactSpotify) return exactSpotify;
-    }
-
-    if (filePath) {
-      const exact = librarySongs.find((song) => String(song.filePath || "").trim().toLowerCase() === filePath);
-      if (exact) return exact;
-    }
-
-    if (filename) {
-      return librarySongs.find((song) => {
-        const songPath = String(song.filePath || "").trim().toLowerCase();
-        return songPath.endsWith(filename);
-      }) || null;
-    }
-
-    return null;
-  }
-
-  function enrichDownloadResultsWithLibraryMatches(results: DownloadResult[], librarySongs: Song[]) {
-    return results.map((result) => {
-      const match = result.ok ? findDownloadedSongMatch(result, librarySongs) : null;
-      const importedToLibrary = Boolean(match);
-      const cleanedError = result.ok ? "" : friendlyDownloadError(result.error || result.url || "Download failed.");
-
-      return {
-        ...result,
-        importedToLibrary,
-        librarySongId: match?.id || "",
-        error: cleanedError || result.error,
-        statusLabel: result.ok
-          ? importedToLibrary
-            ? "Added to library"
-            : "Downloaded, not imported"
-          : "Failed — retry available"
-      };
-    });
-  }
-
-  function syncDownloadFilesToQueue(results: DownloadResult[], librarySongs: Song[] = songs) {
-    if (!results.length) return;
-
-    const enrichedResults = enrichDownloadResultsWithLibraryMatches(results, librarySongs);
-
-    setDownloadQueue((current) => {
-      const next = [...current];
-      enrichedResults.forEach((result) => {
-        const resultSpotifyTrackId = String((result as any).spotifyTrackId || "").trim();
-        const index = next.findIndex((item) =>
-          (resultSpotifyTrackId && String((item as any).spotifyTrackId || "").trim() === resultSpotifyTrackId) ||
-          item.url === result.url ||
-          (result.filename && item.filename === result.filename) ||
-          (result.filePath && item.filePath === result.filePath)
-        );
-
-        if (index === -1) return;
-
-        next[index] = {
-          ...next[index],
-          status: result.ok ? "done" : "failed",
-          progress: 100,
-          message: result.ok
-            ? result.importedToLibrary
-              ? "Added to library"
-              : "Downloaded, but not imported"
-            : friendlyDownloadError(result.error || "Download failed."),
-          filePath: result.filePath,
-          filename: result.filename,
-          error: result.ok ? "" : friendlyDownloadError(result.error || "Download failed."),
-          importedToLibrary: result.importedToLibrary,
-          librarySongId: result.librarySongId,
-          statusLabel: result.statusLabel,
-          spotifyTrackId: (result as any).spotifyTrackId || (next[index] as any).spotifyTrackId,
-          spotifyUrl: (result as any).spotifyUrl || (next[index] as any).spotifyUrl,
-          providerUrl: (result as any).providerUrl || (next[index] as any).providerUrl,
-          matchScore: (result as any).matchScore,
-          title: result.filename || next[index].title
-        };
-      });
-      return next;
-    });
-  }
-
   function clearFailedDownloads() {
     setDownloadQueue((items) => items.filter((item) => item.status !== "failed" && item.status !== "cancelled"));
     setDownloadResults((items) => items.filter((item: any) => item.ok));
@@ -7987,232 +7473,7 @@ function MainModeApp() {
     }
   }
 
-  // -- Spotify auth + import functions --------------------------------------
-  function updateSpotifyConnectionState(res: any = {}) {
-    const hasReadyValue = Object.prototype.hasOwnProperty.call(res || {}, "ready") || Object.prototype.hasOwnProperty.call(res || {}, "ok");
-    const fallbackAvailable = Boolean(res?.fallbackAvailable || res?.publicOnly || res?.mode === "public-fallback");
-    const ready = hasReadyValue ? Boolean(res?.ready ?? res?.ok ?? fallbackAvailable) : true;
-    const loggedIn = Boolean(res?.loggedIn);
-    const needsClientId = Boolean(res?.needsClientId) && !fallbackAvailable;
-
-    setSpotifyConnectionReady(ready || fallbackAvailable);
-    setSpotifyNeedsClientId(needsClientId);
-    setSpotifyConnectionMode(String(res?.mode || (fallbackAvailable ? "public-fallback" : "oauth-pkce")));
-    if (res?.redirectUri) setSpotifyRedirectUri(String(res.redirectUri));
-    setSpotifyLoggedIn(loggedIn || Boolean(res?.ok && fallbackAvailable));
-
-    return { ready: ready || fallbackAvailable, loggedIn: loggedIn || Boolean(res?.ok && fallbackAvailable), fallbackAvailable };
-  }
-
-  function formatSpotifyPrivatePlaylistMessage(rawMessage = "", hint = "") {
-    const message = String(rawMessage || "Failed to fetch Spotify tracks.").trim();
-    const cleanHint = String(hint || "").trim();
-    const looksPrivate = /private|public|profile|could not read|could not expose|404|403|blocked/i.test(`${message} ${cleanHint}`);
-
-    if (!looksPrivate) return cleanHint ? `${message}\n\nTip: ${cleanHint}` : message;
-
-    return [
-      "Spotify could not read this playlist.",
-      "Make sure it is public on your Spotify profile, not only shareable by link.",
-      "Open Spotify ? playlist menu ? add to profile / make public, then paste the link again."
-    ].join("\n");
-  }
-
-  useEffect(() => {
-    if (downloadsTab !== "spotify" || !ready) return;
-
-    let cancelled = false;
-
-    Promise.resolve((window.localitfy as any).spotifyCheck?.())
-      .then((res: any) => {
-        if (cancelled) return;
-        updateSpotifyConnectionState(res || { ready: true, loggedIn: false, mode: "oauth-pkce" });
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setSpotifyConnectionReady(true);
-        setSpotifyNeedsClientId(false);
-        setSpotifyConnectionMode("oauth-pkce");
-        setSpotifyLoggedIn(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [downloadsTab, ready]);
-
-  async function handleSpotifyLogin() {
-    if (spotifyLoginBusy) return;
-
-    setSpotifyLoginBusy(true);
-    setSpotifyFetchError("");
-    setStatusText("opening spotify login...");
-
-    try {
-      const bridge = (window.localitfy as any);
-      if (!bridge?.spotifyLogin) {
-        setSpotifyFetchError("Spotify login is not wired in preload/main yet.");
-        setStatusText("spotify login unavailable");
-        return;
-      }
-
-      const res = await bridge.spotifyLogin();
-      const state = updateSpotifyConnectionState(res || {});
-
-      if (!res?.ok && !state.loggedIn && !state.fallbackAvailable) {
-        const message = res?.needsClientId
-          ? "Spotify public import fallback is not available in this build. Replace electron/main.cjs with the v315 Spotify public fallback file."
-          : res?.error || "Spotify login cancelled.";
-        setSpotifyFetchError(message);
-        setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
-      } else {
-        setSpotifyFetchError("");
-        setStatusText(state.fallbackAvailable && !res?.loggedIn ? "spotify public import ready — paste a link" : "spotify connected — paste a link to fetch tracks");
-      }
-    } catch (error) {
-      const message = String((error as Error)?.message || "Spotify login failed.");
-      setSpotifyFetchError(message);
-      setStatusText(/cancel/i.test(message) ? "spotify login cancelled" : "spotify connection failed");
-    } finally {
-      setSpotifyLoginBusy(false);
-    }
-  }
-
-  async function handleSpotifySetCookie(sp_dc: string) {
-    const value = sp_dc.trim();
-    if (!value) return;
-
-    setSpotifyLoginBusy(true);
-    setSpotifyFetchError("");
-
-    try {
-      const bridge = (window.localitfy as any);
-      if (!bridge?.spotifySetCookie) {
-        setSpotifyFetchError("Spotify cookie login is not wired in preload/main yet.");
-        return;
-      }
-
-      const res = await bridge.spotifySetCookie(value);
-      updateSpotifyConnectionState(res || { ready: true, loggedIn: Boolean(res?.ok) });
-      if (res?.ok) {
-        setSpotifyShowCookieInput(false);
-        setSpotifyCookieDraft("");
-        setStatusText("connected to spotify");
-      } else {
-        setSpotifyFetchError(res?.error || "Invalid sp_dc cookie.");
-      }
-    } catch (error) {
-      setSpotifyFetchError(String((error as Error)?.message || "Cookie save failed."));
-    } finally {
-      setSpotifyLoginBusy(false);
-    }
-  }
-
-  async function handleSpotifyLogout() {
-    try {
-      const res = await (window.localitfy as any).spotifyLogout?.();
-      updateSpotifyConnectionState(res || { ready: true, loggedIn: false, mode: "oauth-pkce" });
-    } catch {
-      setSpotifyConnectionReady(true);
-      setSpotifyNeedsClientId(false);
-      setSpotifyLoggedIn(false);
-    }
-
-    setSpotifyTracks([]);
-    setSpotifySelectedIds(new Set());
-    setSpotifyUrl("");
-    setSpotifyFetchError("");
-    setSpotifyShowCookieInput(false);
-    setSpotifyCookieDraft("");
-    setStatusText("disconnected from spotify");
-  }
-
-  async function fetchSpotifyTracks() {
-    const cleanUrl = spotifyUrl.trim();
-    if (!cleanUrl) return;
-
-    setSpotifyFetchBusy(true);
-    setSpotifyFetchError("");
-    setSpotifyTracks([]);
-    setSpotifySelectedIds(new Set());
-    setSpotifySourceName("");
-    setSpotifySourceType("");
-    setPlayerError("");
-    setStatusText("fetching spotify tracks...");
-
-    try {
-      const bridge = (window.localitfy as any);
-      const checkRes = await Promise.resolve(bridge?.spotifyCheck?.()).catch(() => null);
-      if (checkRes) {
-        const connection = updateSpotifyConnectionState(checkRes);
-        if ((!connection.ready || checkRes?.needsClientId) && !connection.fallbackAvailable) {
-          const message = "Spotify public import is not ready in this build. Replace electron/main.cjs with the v315 Spotify public fallback file.";
-          setSpotifyFetchError(message);
-          setStatusText("spotify setup needed");
-          return;
-        }
-      }
-
-      const spotifyFetchBridge = bridge?.spotifyFetch || bridge?.spotifyFetchTracks;
-      if (!spotifyFetchBridge) {
-        setSpotifyFetchError("Spotify fetch is not wired in preload/main yet.");
-        setStatusText("spotify fetch unavailable");
-        return;
-      }
-
-      const result = bridge?.spotifyFetch
-        ? await spotifyFetchBridge({ url: cleanUrl })
-        : await spotifyFetchBridge(cleanUrl);
-
-      if (result?.loggedIn !== undefined || result?.ready !== undefined || result?.mode) {
-        updateSpotifyConnectionState(result);
-      }
-
-      if (result?.error) {
-        const message = formatSpotifyPrivatePlaylistMessage(result.error, result.hint);
-        setSpotifyFetchError(message);
-        setStatusText(/public|private|profile/i.test(message) ? "spotify playlist not public" : "spotify fetch failed");
-        return;
-      }
-
-      if (!result || !Array.isArray(result.tracks) || !result.tracks.length) {
-        setSpotifyFetchError("No tracks found. Make sure the link is a public Spotify playlist, album, or track.");
-        setStatusText("no spotify tracks found");
-        return;
-      }
-
-      const tracks: SpotifyTrack[] = result.tracks.map((t: SpotifyTrack, i: number) => ({
-        ...t,
-        id: t.id || `spt_${i}`,
-        title: (t.title || (t as any).name || "unknown track").trim(),
-        artist: (t.artist || (t as any).artists || "").trim(),
-        albumName: (t.albumName || (t as any).album || "").trim(),
-        coverUrl: (t.coverUrl || (t as any).spotifyCoverUrl || (t as any).albumCoverUrl || "").trim(),
-        spotifyUrl: String((t as any).spotifyUrl || "").trim(),
-        isrc: String((t as any).isrc || "").trim(),
-        durationMs: Number((t as any).durationMs || 0) || undefined
-      }));
-
-      const sourceName = String(result.playlistName || result.name || result.title || "").trim();
-      const sourceType = String(result.type || "").trim();
-      const finalSourceType = sourceType || (tracks.length === 1 ? "track" : "playlist");
-
-      setSpotifySourceName(sourceName || (finalSourceType === "album" ? "Spotify Album" : finalSourceType === "track" ? "Spotify Track" : "Spotify Playlist"));
-      setSpotifySourceType(finalSourceType);
-      setSpotifyTracks(tracks);
-      setSpotifySelectedIds(new Set(tracks.map((t) => t.id)));
-      setSpotifyFetchError("");
-      setStatusText(`fetched ${tracks.length} track${tracks.length !== 1 ? "s" : ""} from spotify`);
-    } catch (error) {
-      const message = formatSpotifyPrivatePlaylistMessage(String((error as Error)?.message || "Failed to fetch Spotify tracks."));
-      setSpotifyFetchError(message);
-      setStatusText(/public|private|profile/i.test(message) ? "spotify playlist not public" : "spotify fetch failed");
-      console.error("[localtify spotify fetch failed]", error);
-    } finally {
-      setSpotifyFetchBusy(false);
-    }
-  }
-
+  // Spotify import/download orchestration stays here until playlist/library side effects are isolated.
   function upsertSpotifyPlaylistFromImport(sourceName: string, importedSongs: Song[]) {
     const cleanIds = Array.from(new Set(importedSongs.map((song) => song.id).filter(Boolean)));
     if (!cleanIds.length) return null;
@@ -8586,159 +7847,9 @@ function MainModeApp() {
     }
   }
 
-  function normalizePlaylistName(sourceName: string, fallbackName: string) {
-    return (sourceName.trim() || fallbackName).slice(0, 120);
-  }
-
-  function createPlaylist(forcedName?: string) {
-    const sourceName = typeof forcedName === "string" ? forcedName : newPlaylistName;
-    const fallbackName = `playlist ${playlists.length + 1}`;
-    const name = normalizePlaylistName(sourceName, fallbackName);
-    const existingPlaylist = playlists.find(
-      (playlist) => playlist.name.trim().toLowerCase() === name.toLowerCase()
-    );
-
-    if (existingPlaylist) {
-      setSelectedPlaylistId(existingPlaylist.id);
-      setStatusText("playlist already exists");
-      showAppToast("playlist already exists", "info");
-      return existingPlaylist.id;
-    }
-
-    const playlist: Playlist = { id: makeLocalId("playlist"), name, songIds: [], createdAt: Date.now() };
-
-    setPlaylists((items) => [playlist, ...items]);
-    setSelectedPlaylistId(playlist.id);
-    if (typeof forcedName === "string") setPlaylistPickerName("");
-    else setNewPlaylistName("");
-
-    showAppToast("playlist created", "success");
-    setStatusText(`created playlist: ${name}`);
-    return playlist.id;
-  }
-
-  function createPlaylistWithSong(songId: string, forcedName: string) {
-    const sourceName = forcedName.trim();
-    if (!sourceName || !songsById.has(songId)) return;
-
-    const name = normalizePlaylistName(sourceName, `playlist ${playlists.length + 1}`);
-    const existingPlaylist = playlists.find(
-      (playlist) => playlist.name.trim().toLowerCase() === name.toLowerCase()
-    );
-
-    if (existingPlaylist) {
-      addSongToPlaylist(existingPlaylist.id, songId);
-      setSelectedPlaylistId(existingPlaylist.id);
-      setPlaylistPickerSong(null);
-      setPlaylistPickerName("");
-      return existingPlaylist.id;
-    }
-
-    const playlist: Playlist = {
-      id: makeLocalId("playlist"),
-      name,
-      songIds: [songId],
-      createdAt: Date.now()
-    };
-
-    setPlaylists((items) => [playlist, ...items]);
-    setSelectedPlaylistId(playlist.id);
-    setPlaylistPickerSong(null);
-    setPlaylistPickerName("");
-    setStatusText(`added to ${name}`);
-    showAppToast(`added to ${name}`, "success");
-    return playlist.id;
-  }
-
-  function removePlaylist(playlistId: string) {
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!playlist) return;
-
-    const shouldRemove = window.confirm(`Delete "${playlist.name}"? Songs stay in your library.`);
-    if (!shouldRemove) return;
-
-    setPlaylists((items) => items.filter((item) => item.id !== playlistId));
-    setSelectedPlaylistId((id) => (id === playlistId ? null : id));
-    setActivePlaylistId((id) => (id === playlistId ? null : id));
-    if (renamingPlaylistId === playlistId) {
-      setRenamingPlaylistId(null);
-      setRenamingPlaylistName("");
-    }
-    setStatusText(`removed ${playlist.name}`);
-    showAppToast("playlist deleted", "success");
-  }
-
-  function startRenamePlaylist(playlist: Playlist) {
-    setRenamingPlaylistId(playlist.id);
-    setRenamingPlaylistName(playlist.name);
-    setSelectedPlaylistId(playlist.id);
-  }
-
-  function cancelRenamePlaylist() {
-    setRenamingPlaylistId(null);
-    setRenamingPlaylistName("");
-  }
-
-  function savePlaylistRename(playlistId: string) {
-    const current = playlists.find((playlist) => playlist.id === playlistId);
-    if (!current) return;
-
-    const nextName = renamingPlaylistName.trim().slice(0, 120) || current.name;
-    const duplicate = playlists.some(
-      (playlist) => playlist.id !== playlistId && playlist.name.trim().toLowerCase() === nextName.toLowerCase()
-    );
-
-    if (duplicate) {
-      setStatusText("playlist name already exists");
-      showAppToast("playlist name already exists", "info");
-      return;
-    }
-
-    setPlaylists((items) =>
-      items.map((playlist) => (playlist.id === playlistId ? { ...playlist, name: nextName } : playlist))
-    );
-    setRenamingPlaylistId(null);
-    setRenamingPlaylistName("");
-    setStatusText(`renamed playlist to ${nextName}`);
-    showAppToast("playlist renamed", "success");
-  }
-
-  function duplicatePlaylist(playlistId: string) {
-    const source = playlists.find((playlist) => playlist.id === playlistId);
-    if (!source) return;
-
-    const existingNames = new Set(playlists.map((playlist) => playlist.name.trim().toLowerCase()));
-    const baseName = `${source.name} copy`.trim();
-    let name = baseName;
-    let index = 2;
-
-    while (existingNames.has(name.toLowerCase())) {
-      name = `${baseName} ${index}`;
-      index += 1;
-    }
-
-    const copy: Playlist = {
-      id: makeLocalId("playlist"),
-      name,
-      songIds: [...source.songIds],
-      createdAt: Date.now()
-    };
-
-    setPlaylists((items) => [copy, ...items]);
-    setSelectedPlaylistId(copy.id);
-    setStatusText(`duplicated ${source.name}`);
-    showAppToast("playlist duplicated", "success");
-  }
-
-  function openPlaylist(playlistId: string) {
-    setSelectedPlaylistId(playlistId);
-    changeView("playlists", "unknown");
-  }
-
   function openPlaylistPicker(song: Song) {
     setSongContextMenu(null);
-    setPlaylistPickerName("");
-    setPlaylistPickerSong(song);
+    openPlaylistPickerCore(song);
   }
 
   function openSongContextMenu(event: ReactMouseEvent<HTMLElement>, song: Song) {
@@ -8752,85 +7863,6 @@ function MainModeApp() {
     const y = Math.min(event.clientY, Math.max(margin, window.innerHeight - menuHeight - margin));
 
     setSongContextMenu({ songId: song.id, x, y });
-  }
-
-  function addSongToPlaylist(playlistId: string, songId: string) {
-    const song = songsById.get(songId);
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!song || !playlist) return;
-
-    if (playlist.songIds.includes(songId)) {
-      setStatusText("song is already in that playlist");
-      return;
-    }
-
-    setPlaylists((items) =>
-      items.map((item) =>
-        item.id === playlistId ? { ...item, songIds: [...item.songIds, songId] } : item
-      )
-    );
-
-    setSelectedPlaylistId(playlistId);
-    setStatusText(`added ${prettyTitle(song.title, 4)} to ${playlist.name}`);
-    showAppToast("added to playlist", "success");
-
-    if (playlistPickerSong?.id === songId) {
-      setPlaylistPickerSong(null);
-      setPlaylistPickerName("");
-    }
-  }
-
-  function removeSongFromPlaylist(playlistId: string, songId: string) {
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!playlist) return;
-
-    setPlaylists((items) =>
-      items.map((item) =>
-        item.id === playlistId ? { ...item, songIds: item.songIds.filter((id) => id !== songId) } : item
-      )
-    );
-
-    setStatusText(`removed from ${playlist.name}`);
-    showAppToast("removed from playlist", "success");
-  }
-
-  function toggleSongPlaylist(playlistId: string, songId: string) {
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!playlist) return;
-
-    if (playlist.songIds.includes(songId)) {
-      removeSongFromPlaylist(playlistId, songId);
-      return;
-    }
-
-    addSongToPlaylist(playlistId, songId);
-  }
-
-  function handlePlaylistSongDrop(playlistId: string, songId: string, targetSongId: string, side: LibraryDropSide) {
-    if (!playlistId || !songId || !targetSongId || !songsById.has(songId) || songId === targetSongId) return;
-
-    const playlist = playlists.find((item) => item.id === playlistId);
-    if (!playlist) return;
-
-    const nextIds = playlist.songIds.includes(songId)
-      ? reorderIdList(playlist.songIds, songId, targetSongId, side)
-      : insertIdNearTarget(playlist.songIds, songId, targetSongId, side);
-
-    if (nextIds.length === playlist.songIds.length && nextIds.every((id, index) => id === playlist.songIds[index])) {
-      return;
-    }
-
-    setPlaylists((items) =>
-      items.map((item) => (item.id === playlistId ? { ...item, songIds: nextIds } : item))
-    );
-    setSelectedPlaylistId(playlistId);
-    setStatusText(playlist.songIds.includes(songId) ? "playlist order updated" : `added to ${playlist.name}`);
-    showAppToast(playlist.songIds.includes(songId) ? "playlist order updated" : "added to playlist", "success");
-  }
-
-  function handlePlaylistSongAppend(playlistId: string, songId: string) {
-    if (!playlistId || !songId || !songsById.has(songId)) return;
-    addSongToPlaylist(playlistId, songId);
   }
 
   function handlePlaylistShelfDragOver(event: DragEvent<HTMLElement>, playlistId: string) {
@@ -11769,7 +10801,7 @@ function MainModeApp() {
 
   return (
     <>
-      <LocaltifyAppView {...localtifyAppViewProps} />
+      <AppShell {...localtifyAppViewProps} />
       <CatBuddy enabled={settings.catBuddyEnabled === true} reducedMotion={settings.reducedMotion === true} />
       {renderFeedbackPrompt()}
     </>
@@ -11779,7 +10811,3 @@ function MainModeApp() {
 export default function App() {
   return <MainModeApp />;
 }
-
-
-
-
