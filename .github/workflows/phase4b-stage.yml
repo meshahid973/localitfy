@@ -27,7 +27,10 @@ jobs:
           node-version: 22
           cache: npm
       - name: Apply checkpoint
-        run: python scripts/phase4b/apply-checkpoint1.py
+        shell: bash
+        run: |
+          sed -i 's/localitfyConstants/localtifyConstants/g' scripts/phase4b/apply-checkpoint1.py
+          python scripts/phase4b/apply-checkpoint1.py
       - name: Diff sanity
         run: git diff --check
       - name: Install exact desktop dependencies
