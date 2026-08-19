@@ -1,8 +1,10 @@
-﻿const Database = require("better-sqlite3");
+const Database = require("better-sqlite3");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
+const packageMetadata = require("../package.json");
 
+const APP_VERSION = String(packageMetadata?.version || "0.0.0");
 const SCHEMA_VERSION = 13;
 const BACKUP_KEEP_LIMIT = 8;
 
@@ -158,7 +160,7 @@ function setStoredSchemaVersion(database, version = SCHEMA_VERSION) {
         migratedAt = excluded.migratedAt,
         appVersion = excluded.appVersion
     `)
-    .run(version, now, "0.2.9");
+    .run(version, now, APP_VERSION);
 }
 
 function createSongsTable(database) {
@@ -233,18 +235,54 @@ function pruneOldBackups(databasePath) {
   }
 }
 
+function checkpointDatabaseForBackup(database) {
+  const rows = database.pragma("wal_checkpoint(FULL)");
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  const busy = Number(row?.busy || 0);
+  const logFrames = Number(row?.log || 0);
+  const checkpointedFrames = Number(row?.checkpointed || 0);
+
+  if (busy > 0 || checkpointedFrames < logFrames) {
+    throw new Error(
+      `database checkpoint incomplete before backup (busy=${busy}, checkpointed=${checkpointedFrames}, log=${logFrames})`
+    );
+  }
+
+  return { busy, logFrames, checkpointedFrames };
+}
+
+function verifyBackupDatabase(backupPath) {
+  let verificationDb = null;
+  try {
+    verificationDb = new Database(backupPath, { readonly: true, fileMustExist: true });
+    const result = verificationDb.pragma("integrity_check", { simple: true });
+    if (String(result || "").toLowerCase() !== "ok") {
+      throw new Error(`backup integrity check failed: ${String(result || "unknown result")}`);
+    }
+  } finally {
+    try { verificationDb?.close(); } catch { }
+  }
+}
+
 function backupDatabase(reason = "manual") {
-  if (!dbFilePath || !fs.existsSync(dbFilePath)) return "";
+  const database = ensureDb();
+  if (!dbFilePath || !fs.existsSync(dbFilePath)) {
+    throw new Error("database file is not available for backup");
+  }
+
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const safeReason = String(reason || "manual").replace(/[^a-z0-9_-]+/gi, "-").slice(0, 48) || "manual";
+  const backupPath = `${dbFilePath}.backup-${stamp}-${safeReason}.sqlite`;
 
   try {
-    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const backupPath = `${dbFilePath}.backup-${stamp}-${reason}.sqlite`;
+    checkpointDatabaseForBackup(database);
     fs.copyFileSync(dbFilePath, backupPath);
+    verifyBackupDatabase(backupPath);
     pruneOldBackups(dbFilePath);
     return backupPath;
   } catch (error) {
-    lastMigrationReport.errors.push(`backup failed: ${error?.message || error}`);
-    return "";
+    try { fs.rmSync(backupPath, { force: true }); } catch { }
+    throw new Error(`backup failed: ${error?.message || error}`);
   }
 }
 
@@ -565,18 +603,27 @@ function runMigrations(database) {
 
   const previousVersion = getStoredSchemaVersion(database);
   const shouldBackup = previousVersion !== SCHEMA_VERSION || !tableExists(database, "songs") || !tableExists(database, "settings") || !tableExists(database, "playlists") || !tableExists(database, "playlist_songs");
-  const backupPath = shouldBackup ? backupDatabase("migration") : "";
 
   lastMigrationReport = {
     ok: true,
     version: SCHEMA_VERSION,
     previousVersion,
     migrated: shouldBackup || previousVersion !== SCHEMA_VERSION,
-    backupPath,
+    backupPath: "",
     repairedRows: 0,
     addedColumns: [],
     errors: []
   };
+
+  if (shouldBackup) {
+    try {
+      lastMigrationReport.backupPath = backupDatabase("migration");
+    } catch (error) {
+      lastMigrationReport.ok = false;
+      lastMigrationReport.errors.push(error?.message || String(error));
+      throw error;
+    }
+  }
 
   const tx = database.transaction(() => {
     const songMigration = migrateSongsTable(database);
@@ -940,9 +987,10 @@ function savePlaylists(playlists) {
 
 function repairDatabaseNow() {
   const database = ensureDb();
+  const backupPath = backupDatabase("pre-repair");
   const repairedRows = repairBrokenRows(database);
   lastMigrationReport.repairedRows += repairedRows;
-  return getDatabaseStatus();
+  return { ...getDatabaseStatus(), repairBackupPath: backupPath };
 }
 
 function getDatabaseStatus() {

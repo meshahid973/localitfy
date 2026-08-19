@@ -2597,7 +2597,6 @@ function MainModeApp() {
 
       saveSettingsTimerRef.current = window.setTimeout(() => {
         writeCustomThemeBackupPatch(nextSettings);
-        writeCustomThemeBackupPatch(nextSettings);
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
         saveSettingsTimerRef.current = null;
       }, 360);
@@ -7555,7 +7554,7 @@ function MainModeApp() {
       const bridge = (window.localitfy as any);
       const spotifyDownloadBridge = bridge?.spotifyDownloadBatch || bridge?.spotdlDownloadBatch;
       if (!spotifyDownloadBridge) {
-        const message = "Spotify download is not wired in preload/main yet.";
+        const message = "Spotify downloading is unavailable in this build.";
         setSpotifyFetchError(message);
         setDownloadQueue((items) => items.map((item) => ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" })));
         setStatusText("spotify download failed");

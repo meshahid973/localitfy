@@ -207,7 +207,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
     try {
       const bridge = (window.localitfy as any);
       if (!bridge?.spotifyLogin) {
-        setSpotifyFetchError("Spotify login is not wired in preload/main yet.");
+        setSpotifyFetchError("Spotify login is unavailable in this build.");
         setStatusText("spotify login unavailable");
         return;
       }
@@ -217,7 +217,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
 
       if (!res?.ok && !state.loggedIn && !state.fallbackAvailable) {
         const message = res?.needsClientId
-          ? "Spotify public import fallback is not available in this build. Replace electron/main.cjs with the v315 Spotify public fallback file."
+          ? "Spotify connection is unavailable in this build. You can still retry with a public Spotify link when public import is available."
           : res?.error || "Spotify login cancelled.";
         setSpotifyFetchError(message);
         setStatusText(res?.cancelled ? "spotify login cancelled" : "spotify connection failed");
@@ -244,7 +244,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
     try {
       const bridge = (window.localitfy as any);
       if (!bridge?.spotifySetCookie) {
-        setSpotifyFetchError("Spotify cookie login is not wired in preload/main yet.");
+        setSpotifyFetchError("Spotify cookie login has been removed. Use Connect Spotify instead.");
         return;
       }
 
@@ -302,7 +302,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
       if (checkRes) {
         const connection = updateSpotifyConnectionState(checkRes);
         if ((!connection.ready || checkRes?.needsClientId) && !connection.fallbackAvailable) {
-          const message = "Spotify public import is not ready in this build. Replace electron/main.cjs with the v315 Spotify public fallback file.";
+          const message = "Spotify public import is unavailable in this build. Try Connect Spotify or retry later.";
           setSpotifyFetchError(message);
           setStatusText("spotify setup needed");
           return;
@@ -311,7 +311,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
 
       const spotifyFetchBridge = bridge?.spotifyFetch || bridge?.spotifyFetchTracks;
       if (!spotifyFetchBridge) {
-        setSpotifyFetchError("Spotify fetch is not wired in preload/main yet.");
+        setSpotifyFetchError("Spotify import is unavailable in this build.");
         setStatusText("spotify fetch unavailable");
         return;
       }
