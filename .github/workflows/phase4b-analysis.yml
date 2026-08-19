@@ -22,6 +22,10 @@ jobs:
           wc -lc src/App.tsx electron/main.cjs src/App.css electron/rpc.cjs
           echo '=== Discord renderer call sites ==='
           grep -nE 'setDiscordActivity|updateDiscordActivity|discordForceNewAsset|discordSelectionNonce|resetDiscord' src/App.tsx || true
+          echo '=== Discord asset selector ==='
+          grep -n -A90 -B30 'getLiveDiscordAssetKey' src/App.tsx || true
+          echo '=== MainModeApp internal functions/effects ==='
+          grep -nE '^  (async )?function |^  const [A-Za-z0-9_]+ = useCallback|^  useEffect\(' src/App.tsx | head -n 500 || true
           echo '=== main.cjs top-level declarations ==='
           python - <<'PY'
           from pathlib import Path
@@ -43,6 +47,6 @@ jobs:
                   depth=max(depth,0)
           PY
           echo '=== IPC registrations ==='
-          grep -nE 'handleIpc\(|ipcMain\.handle\(' electron/main.cjs || true
+          grep -nE 'ipcRouter\.handle\(' electron/main.cjs | head -n 300 || true
           echo '=== App render sections ==='
           grep -nE '^function MainModeApp|const .*View = \(|const .*Props = |if \(!ready\)|if \(onboardingOpen' src/App.tsx | head -n 250 || true
