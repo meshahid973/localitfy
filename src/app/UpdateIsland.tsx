@@ -19,7 +19,7 @@ function updateTone(status: string) {
   return "neutral";
 }
 
-type UpdateIslandProps = {
+export type UpdateIslandProps = {
   show: boolean;
   updatePrompt: any;
   appVersion: string;

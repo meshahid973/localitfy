@@ -5,7 +5,7 @@ import { displaySongPickerSublineV444, displaySongTitleV444 } from "../../librar
 import type { Song } from "../../library/song.types";
 import type { Playlist } from "../playlist.types";
 
-type PlaylistPickerModalProps = {
+export type PlaylistPickerModalProps = {
   song: Song | null;
   name: string;
   setName: (value: string) => void;

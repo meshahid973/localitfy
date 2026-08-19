@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { APP_VERSION, whatsNewItems } from "./update.constants";
 
-type WhatsNewModalProps = { open: boolean; onClose: () => void };
+export type WhatsNewModalProps = { open: boolean; onClose: () => void };
 
 export default function WhatsNewModal({ open, onClose }: WhatsNewModalProps) {
   if (!open) return null;
