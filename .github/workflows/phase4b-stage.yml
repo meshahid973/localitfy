@@ -32,6 +32,25 @@ jobs:
           sed -i 's/localitfyConstants/localtifyConstants/g' scripts/phase4b/apply-checkpoint1.py
           python scripts/phase4b/apply-checkpoint1.py
           python scripts/phase4b/apply-checkpoint2.py
+          python - <<'PY'
+          from pathlib import Path
+
+          app = Path('src/App.tsx')
+          text = app.read_text(encoding='utf-8')
+          text = text.replace('import type { LocaltifyAnalyticsSnapshot } from "./features/analytics/analyticsSnapshot";\n', '')
+          text = text.replace('  ONBOARDING_STORAGE_KEY,\n', '')
+          text = text.replace(
+              'import { applyVisualCustomizationDefaults } from "./features/settings/visualCustomization";',
+              'import { applyVisualCustomizationDefaults, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";'
+          )
+          app.write_text(text, encoding='utf-8')
+
+          visual = Path('src/features/settings/visualCustomization.ts')
+          source = visual.read_text(encoding='utf-8')
+          source = source.replace('const DEFAULTS = {', 'export const VISUAL_CUSTOMIZATION_DEFAULTS = {', 1)
+          source = source.replace('DEFAULTS.', 'VISUAL_CUSTOMIZATION_DEFAULTS.')
+          visual.write_text(source, encoding='utf-8')
+          PY
       - name: Diff sanity
         run: git diff --check
       - name: Install exact desktop dependencies
