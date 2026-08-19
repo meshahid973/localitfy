@@ -31,19 +31,16 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        shell: bash
-        run: |
-          if ! npm ci --ignore-scripts; then
-            echo "package-lock install failed; using package.json fallback for validation"
-            rm -rf node_modules
-            npm install --ignore-scripts --package-lock=false
-          fi
+        run: npm ci --ignore-scripts
 
       - name: Check Electron bridge drift
         run: npm run bridge:check
 
       - name: Check architecture boundaries
         run: npm run boundaries:check
+
+      - name: Node tests
+        run: npm test
 
       - name: TypeScript
         run: npm run typecheck

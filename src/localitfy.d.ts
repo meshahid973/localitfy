@@ -287,6 +287,39 @@ declare global {
   };
 
 
+
+  type LocalitfyPlaybackUrlResult = {
+    ok: boolean;
+    filePath?: string;
+    url?: string;
+    fileExists?: boolean;
+    sizeBytes?: number;
+    mtimeMs?: number;
+    cacheTtlMs?: number;
+    error?: string;
+  };
+
+  type LocalitfyMetadataRepairResult = {
+    ok: boolean;
+    changedCount?: number;
+    repairedCount?: number;
+    skippedCount?: number;
+    songs?: any[];
+    error?: string;
+  };
+
+  type LocalitfyDatabaseBackupResult = {
+    ok: boolean | string;
+    error?: string;
+  };
+
+  type LocalitfyDatabaseRepairResult = {
+    ok: boolean;
+    status?: Record<string, any>;
+    songs?: any[];
+    error?: string;
+  };
+
   type LocalitfyCoverThumbnailStatus = {
     ok: boolean;
     directory?: string;
@@ -358,8 +391,10 @@ declare global {
         discord?: Record<string, any>;
         covers?: Record<string, any>;
       }>;
+      resolvePlaybackUrl: (payload: { filePath: string }) => Promise<LocalitfyPlaybackUrlResult>;
 
       importSongs: () => Promise<any[]>;
+      repairMissingMetadata: (payload?: Record<string, any>) => Promise<LocalitfyMetadataRepairResult>;
       scanAlbumFolder?: (payload?: { mode?: "single" | "library" }) => Promise<LocalitfyAlbumFolderScanResult>;
       importAlbumFolder?: (payload: { scanId: string }) => Promise<LocalitfyAlbumFolderImportResult>;
       clearLibrary: () => Promise<any[]>;
@@ -424,6 +459,7 @@ declare global {
       getLeastUsedCover?: () => Promise<any | null>;
       getCoverThumbnailStatus?: () => Promise<LocalitfyCoverThumbnailStatus>;
       warmCoverThumbnails?: (payload?: { limit?: number; force?: boolean }) => Promise<LocalitfyCoverThumbnailWarmResult>;
+      cleanupCoverCache: () => Promise<LocalitfyCoverThumbnailStatus | LocalitfyCoverThumbnailWarmResult>;
 
       analyzeSongVolume?: (id: string) => Promise<any | null>;
 
@@ -433,21 +469,22 @@ declare global {
       getPlaylists?: () => Promise<LocalitfyPlaylistRecord[]>;
       savePlaylists?: (playlists: LocalitfyPlaylistRecord[]) => Promise<LocalitfyPlaylistRecord[]>;
 
+      setDiscordActivity: (payload: any) => Promise<any>;
       updateDiscordActivity: (payload: any) => Promise<any>;
       clearDiscordActivity: () => Promise<any>;
       getDiscordStatus?: () => Promise<any>;
+      resetDiscordCache: () => Promise<any>;
       resetDiscordActivity?: () => Promise<any>;
 
       getDatabaseStatus?: () => Promise<any>;
-      backupDatabase?: () => Promise<any>;
-      repairDatabase?: () => Promise<any>;
+      updateBackupNow: () => Promise<LocalitfyDatabaseBackupResult>;
+      repairDatabaseNow: () => Promise<LocalitfyDatabaseRepairResult>;
 
       checkForUpdates?: (payload?: { silent?: boolean }) => Promise<boolean>;
       downloadUpdate?: () => Promise<boolean>;
       installUpdate?: () => Promise<boolean>;
 
       onAutoUpdate?: (callback: (payload: AutoUpdateEvent) => void) => () => void;
-      onAutoUpdateEvent?: (callback: (payload: AutoUpdateEvent) => void) => () => void;
 
       sendPlayerCommand: (command: LocalitfyPlayerCommand) => Promise<{ ok: boolean; command?: LocalitfyPlayerCommand }> | Promise<boolean>;
 
@@ -481,6 +518,8 @@ declare global {
 
       spotifyCheck?: () => Promise<any>;
       spotifyLogin?: () => Promise<any>;
+      spotifyImportBrowser: () => Promise<any>;
+      spotifySetCookie: (payload: string | { spDc?: string }) => Promise<any>;
       spotifyLogout?: () => Promise<any>;
       spotifyFetch?: (payload: { url: string }) => Promise<any>;
       spotifyFetchTracks?: (url: string) => Promise<any>;
