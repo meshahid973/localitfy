@@ -310,6 +310,7 @@ export function usePlaylistsController({
     removeSongFromPlaylist,
     toggleSongPlaylist,
     handlePlaylistSongDrop,
-    handlePlaylistSongAppend
+    handlePlaylistSongAppend,
+    normalizePlaylistName
   };
 }

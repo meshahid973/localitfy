@@ -23,7 +23,7 @@ export function useUpdatesController({
 }: UpdatesControllerOptions) {
   const [updatePrompt, setUpdatePrompt] = useState<UpdatePromptState>(defaultUpdatePrompt);
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
-  const [, setLastUpdateCheckedLabel] = useState("not checked yet");
+  const [lastUpdateCheckedLabel, setLastUpdateCheckedLabel] = useState("not checked yet");
   const updateAnalyticsSeenRef = useRef("");
   const updateNagTimerRef = useRef<number | null>(null);
   const updateNagVersionRef = useRef("");
@@ -299,6 +299,7 @@ export function useUpdatesController({
     skipAvailableUpdate: handleUpdateLater,
     clearUpdateNagTimer,
     showUpdateNag,
-    showDebugUpdateAvailable
+    showDebugUpdateAvailable,
+    lastUpdateCheckedLabel
   };
 }

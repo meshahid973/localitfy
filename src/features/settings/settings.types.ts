@@ -35,6 +35,7 @@ export type Settings = {
   denseList: boolean;
   reducedMotion: boolean;
   catBuddyEnabled: boolean;
+  quickLibraryMoreBlur: boolean;
   showHeroBadge: boolean;
   simpleMode: boolean;
   lastSongId: string;

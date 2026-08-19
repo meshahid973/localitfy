@@ -1,4 +1,3 @@
-// @ts-nocheck
 /* localtify 0.4.1 V395 playback settings cleanup + faster volume changes. */
 /* localtify 0.4.1 V396 audio engine stability pass. */
 /* localtify 0.4.1 V419 background-audio and settings-save stability. */
@@ -7,41 +6,22 @@
 /* localtify 0.4.1 V423 like system + quick library modes. */
 /* localtify 0.4.1 V417 metadata cleaner stability pass. */
 /* localtify 0.4.1 V415 shuffle queue + context delete. */
-import { lazy, memo, startTransition, Suspense, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { lazy, startTransition, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
-import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent, ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { FastAverageColor } from "fast-average-color";
+import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
 import {
-  BarChart3,
-  Download,
   FolderPlus,
-  Heart,
-  Home,
   Images,
-  LibraryBig,
-  ListMusic,
-  MessageCircle,
-  Palette,
-  Pause,
-  Play,
-  PlayCircle,
-  Settings as SettingsIcon,
-  Shuffle,
   SkipBack,
   SkipForward,
-  SlidersHorizontal,
   Repeat2,
-  Volume2,
-  VolumeX,
   X,
   Send
 } from "lucide-react";
 import { useProximityMotion } from "./useProximityMotion";
 import { HtmlAudioEngine } from "./player/htmlAudioEngine";
 import { createPlayerController } from "./player/playerController";
-import type { PlayerController } from "./player/playerController";
+import { usePlayerRuntime } from "./features/player";
 import type { PlayerEngineSource } from "./player/PlayerEngine";
 import {
   initLocalitfyAnalytics,
@@ -62,15 +42,12 @@ import {
   trackOnboardingCompleted,
   trackOnboardingSkipped,
   trackError,
-  trackAudienceSnapshot,
-  trackMarketingSnapshot,
-  trackPlaylistSnapshot,
   trackAcquisitionSource
 } from "./analytics";
-import { createLocaltifyLibraryWorker, makeLocaltifyAnalyticsSnapshotFallback, type LocaltifyAnalyticsSnapshot } from "./features/analytics/analyticsSnapshot";
+import type { LocaltifyAnalyticsSnapshot } from "./features/analytics/analyticsSnapshot";
+import { useAnalyticsRuntime } from "./features/analytics/useAnalyticsRuntime";
 import {
   enrichDownloadResultsWithLibraryMatches,
-  formatSpotifyPrivatePlaylistMessage,
   friendlyDownloadError,
   makeQueuedDownloads,
   parseDownloadUrls,
@@ -92,10 +69,15 @@ import "./effects.css";
 
 import AppShell from "./features/shell/AppShell";
 import { useAppToast } from "./features/shell/useAppToast";
+import { useScreensaverController } from "./features/shell/useScreensaverController";
+import { useFeedbackController } from "./features/feedback";
 import { usePlaylistsController } from "./features/playlists";
 import { useUpdatesController } from "./features/updates";
+import { useSettingsController } from "./features/settings";
 import { Cover } from "./features/covers/Cover";
+import { useCoversController } from "./features/covers";
 import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
+import { useLibraryController } from "./features/library";
 import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
 import {
@@ -112,14 +94,8 @@ import {
   LIBRARY_RENDER_BATCH_SIZE,
   LOCALITFY_DOWNLOAD_URL,
   ONBOARDING_STORAGE_KEY,
-  PIXEL_ART_CACHE_TTL_MS,
-  PIXEL_COVER_EXCLUDED_STORAGE_KEY,
-  PIXEL_COVER_FAVORITES_STORAGE_KEY,
   PLAYBACK_URL_CACHE_TTL_MS,
   PLAYLIST_STORAGE_KEY,
-  QUEUE_HISTORY_STORAGE_KEY,
-  QUEUE_STORAGE_KEY,
-  REPEAT_PLAYLIST_STORAGE_KEY,
   START_WITH_WINDOWS_DEFAULT_KEY,
   THEME_SWATCH_COLORS,
   V013_DEFAULTS_KEY,
@@ -135,40 +111,29 @@ import {
   screensaverImage,
   settingsCategoryTabs,
   themes,
-  whatsNewItems
 } from "./localtifyConstants";
 import {
   applyLibraryOrder,
   buildAnimatedThemeVisualStyle,
   buildDiscordPreview,
   buildDiscordSongSearchUrl,
-  buildRuntimePixelArtAssets,
   buildSongSearchEntry,
   clamp,
   cleanPlaylistList,
-  cleanSongOrderIds,
-  cleanStringList,
   collapseSpaces,
-  coverMoodName,
   createImportAnimationState,
   formatTime,
   getAmbientStyle,
-  getCachedRuntimePixelArtAssets,
   getCustomThemeColorPatch,
   getGreeting,
   getMetadataRepairPatch,
-  getPixelArtAssetKey,
-  getPixelAssetMoodTags,
   getRendererSafeImageUrl,
   getSongAmbientSource,
-  getSongCoverUsageKeys,
   getSongPlaybackSourceKey,
   heroTitleDensityClass,
   hexToRgbString,
   hexToRgbaString,
-  insertIdNearTarget,
   isPlayableSong,
-  lower,
   makeCustomThemeColors,
   makeLocalId,
   makeThemePresetStyle,
@@ -178,52 +143,42 @@ import {
   normalizeHexInputDraft,
   normalizeSettingsSearch,
   normalizeThemeId,
-  pixelArtForSong,
   pixelArtUrl,
   prettyMeta,
   prettyTitle,
   randomThemeHex,
   rankSongsForSearch,
   readLocalJson,
-  readSavedCustomThemePresets,
-  reorderIdList,
   reorderSongList,
   resolveSettingsCategoryFromSearch,
   sanitizeSongList,
   saveLibraryOrder,
   settingsTabMatchesSearch,
-  songSignature,
-  stableHash,
   stableSongSourceKey,
   updateStatusLabel,
   useCoverAverageStyle,
   useStableCallback,
-  writeLocalJson,
   writeSavedCustomThemePresets
 } from "./localtifyUtils";
 import type {
   CoverColorSyncMode,
-  CoverMood,
   CustomThemeColorKey,
   CustomThemePreset,
   DiscordArtMode,
   DownloadQueueItem,
   DownloadResult,
-  ImportAnimationState,
   LibraryDropSide,
   LibraryDropTarget,
+  MetadataCleanPreview,
   PlaybackUrlCacheEntry,
   PlaybackUrlResult,
   Playlist,
   PlaylistSummary,
-  QueueHistoryItem,
-  RuntimePixelArtAsset,
   SecretMode,
   SecretTriggerMode,
   Settings,
   SettingsCategory,
   Song,
-  SongContextMenuState,
   SpotifyTrack,
   ThemeId,
   View
@@ -275,25 +230,6 @@ function PlayerPlayPauseMorphIcon({ playing, className = "" }: { playing: boolea
   );
 }
 
-
-const LOCALTIFY_V301_HEAVY_MOTION_VIEWS = new Set<View>([
-  "library",
-  "liked",
-  "albums",
-  "covers",
-  "downloads"
-]);
-
-const LOCALTIFY_V301_HEAVY_SETTINGS_CATEGORIES = new Set<SettingsCategory>([
-  "covers",
-  "library",
-  "advanced"
-]);
-
-function isLocaltifyV301HeavyMotionSurface(view: View, settingsCategory: SettingsCategory) {
-  if (LOCALTIFY_V301_HEAVY_MOTION_VIEWS.has(view)) return true;
-  return view === "settings" && LOCALTIFY_V301_HEAVY_SETTINGS_CATEGORIES.has(settingsCategory);
-}
 
 function runLocaltifyIdleTask(task: () => void, timeout = 1400) {
   const requestIdleCallback = (window as typeof window & {
@@ -464,8 +400,6 @@ const FEEDBACK_CATEGORY_OPTIONS = [
   { id: "other", label: "Other" }
 ] as const;
 
-type FeedbackCategoryId = typeof FEEDBACK_CATEGORY_OPTIONS[number]["id"];
-
 function shouldOpenFeedbackPromptFromSettingsSearch(value: string) {
   const query = value.trim().toLowerCase();
   return query === "/feedback" || query === "feedback";
@@ -585,63 +519,36 @@ function restoreCustomThemeAfterUpdate(nextSettings: Settings, storedSettings: P
 
 function MainModeApp() {
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const playerEngineRef = useRef<HtmlAudioEngine | null>(null);
-  const playerControllerRef = useRef<PlayerController | null>(null);
-  const crossfadeIntervalRef = useRef<number | null>(null);
-  const crossfadeAutoStartedRef = useRef(false);
-  const crossfadeAutoTargetRef = useRef("");
-  const crossfadeMainPauseGuardRef = useRef(false);
-  const crossfadeLastStartAtRef = useRef(0);
-  const crossfadeHandoffClearTimerRef = useRef<number | null>(null);
-  const crossfadeHandoffRef = useRef<{
-    songId: string;
-    url: string;
-    time: number;
-    volume: number;
-  } | null>(null);
-  const fadeIntervalRef = useRef<number | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const progressLoopTimeoutRef = useRef<number | null>(null);
-  const saveSettingsTimerRef = useRef<number | null>(null);
+  const {
+    audioRef, playerEngineRef, playerControllerRef,
+    crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
+    crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef, fadeIntervalRef,
+    animationFrameRef, progressLoopTimeoutRef, backgroundAudioRepairTimerRef, playerResizeFrameRef,
+    pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef, playCountLastTimeRef,
+    sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef, playbackUrlPendingRef,
+    lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef, volumeRef, lastNonZeroVolumeRef,
+    beatFrameRef, beatFrameTimerRef, beatAudioContextRef, beatAnalyserRef, beatSourceRef,
+    audioEffectDryGainRef, audioEffectWetGainRef, audioEffectDelayRef, audioEffectFeedbackGainRef,
+    audioEffectFilterRef, beatDataRef, beatSmoothRef, beatReactiveTargetCacheRef, beatLastPaintSignatureRef,
+    progressDomSignatureRef, isVolumeDragging, setIsVolumeDragging, volumeDraft, setVolumeDraft,
+    volumeDraftRef, volumeDraftFrameRef, liveVolumeFrameRef, liveVolumePendingPercentRef, fadeFrameRef,
+    currentId, setCurrentId, isPlaying, setIsPlaying, isShuffle, setIsShuffle, repeatMode, setRepeatMode,
+    currentTime, setCurrentTime, currentDuration, setCurrentDuration, isSeeking, setIsSeeking,
+    seekDraftPercent, setSeekDraftPercent, seekDraftPercentRef, isSeekingRef, seekDraftFrameRef,
+    progressInputRefs, progressTimeLabelRefs, progressDurationLabelRefs, lastProgressUiPaintRef,
+    lastProgressStatePaintRef, statusText, setStatusText, playerError, setPlayerError,
+    crossfadePreviewSongId, setCrossfadePreviewSongId, nowPlayingTransitionKey, setNowPlayingTransitionKey,
+    playQueue, setPlayQueue, setQueueHistory, repeatPlaylist, setRepeatPlaylist,
+    queueDropHot, setQueueDropHot, queueDropHotRef
+  } = usePlayerRuntime({ defaultVolume: defaultSettings.volume });
+
   const saveSettingsSerialRef = useRef(0);
-  const backgroundAudioRepairTimerRef = useRef<number | null>(null);
-  const analyticsWorkerRef = useRef<Worker | null>(null);
-  const analyticsWorkerRequestRef = useRef(0);
-  const playerResizeFrameRef = useRef<number | null>(null);
   const sidebarResizeFrameRef = useRef<number | null>(null);
-  const pendingPlayRef = useRef(false);
-  const countPlayRef = useRef(false);
-  const playCountSongIdRef = useRef("");
-  const playCountListenedRef = useRef(0);
-  const playCountLastTimeRef = useRef(0);
-  const sleepTimerRef = useRef<number | null>(null);
-  const positionSaveRef = useRef(0);
-  const nextAudioRef = useRef<HTMLAudioElement | null>(null);
-  const playbackUrlCacheRef = useRef<Map<string, PlaybackUrlCacheEntry>>(new Map());
-  const playbackUrlPendingRef = useRef<Map<string, Promise<PlaybackUrlResult>>>(new Map());
   const bootedRef = useRef(false);
-  const lastQueueHistoryRef = useRef("");
   const importOverlayTimerRef = useRef<number | null>(null);
-  const songRef = useRef<Song | null>(null);
-  const timeRef = useRef(0);
-  const durationRef = useRef(0);
-  const playingRef = useRef(false);
-  const volumeRef = useRef(0.75);
-  const lastNonZeroVolumeRef = useRef(0.75);
   const secretBufferRef = useRef("");
   const secretTimeoutRef = useRef<number | null>(null);
   const playButtonBurstTimerRef = useRef<number | null>(null);
-  const beatFrameRef = useRef<number | null>(null);
-  const beatFrameTimerRef = useRef<number | null>(null);
-  const beatAudioContextRef = useRef<AudioContext | null>(null);
-  const beatAnalyserRef = useRef<AnalyserNode | null>(null);
-  const beatSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const audioEffectDryGainRef = useRef<GainNode | null>(null);
-  const audioEffectWetGainRef = useRef<GainNode | null>(null);
-  const audioEffectDelayRef = useRef<DelayNode | null>(null);
-  const audioEffectFeedbackGainRef = useRef<GainNode | null>(null);
-  const audioEffectFilterRef = useRef<BiquadFilterNode | null>(null);
 
   useEffect(() => {
     const body = document.body;
@@ -663,14 +570,6 @@ function MainModeApp() {
     };
   }, []);
 
-  const beatDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
-  const beatSmoothRef = useRef({ bass: 0, mid: 0, energy: 0, phase: 0 });
-  const beatReactiveTargetCacheRef = useRef<{ nodes: HTMLElement[]; refreshedAt: number; songId: string }>({
-    nodes: [],
-    refreshedAt: 0,
-    songId: ""
-  });
-  const beatLastPaintSignatureRef = useRef("");
   const discordAssetBySongRef = useRef<Record<string, string>>({});
   const lastDiscordAssetKeyRef = useRef<string>("");
   const contentRef = useRef<HTMLElement | null>(null);
@@ -678,19 +577,10 @@ function MainModeApp() {
   const scrollBusyFrameRef = useRef<number | null>(null);
   const scrollIdleTimerRef = useRef<number | null>(null);
   const rendererQuietUntilRef = useRef(0);
-  const progressDomSignatureRef = useRef("");
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
-  const themeSettlingTimerRef = useRef<number | null>(null);
-  const customThemeCommitTimerRef = useRef<number | null>(null);
-  const customThemeQuietCommitTimerRef = useRef<number | null>(null);
-  const customThemeQuietPatchRef = useRef<Partial<Settings>>({});
-  const customThemePreviewFrameRef = useRef<number | null>(null);
-  const themePaintIdleTimerRef = useRef<number | null>(null);
   const viewSwitchTimerRef = useRef<number | null>(null);
   const heroReflowTimerRef = useRef<number | null>(null);
   const heroCoverMotionTimerRef = useRef<number | null>(null);
-  const customThemeLivePatchRef = useRef<Partial<Settings>>({});
-  const pendingCustomThemePreviewPatchRef = useRef<Partial<Settings>>({});
   const appRootRef = useRef<HTMLElement | null>(null);
   const analyticsSessionEndedRef = useRef(false);
   const analyticsViewRef = useRef<View>("home");
@@ -710,158 +600,76 @@ function MainModeApp() {
   const [bootStepIndex, setBootStepIndex] = useState(0);
   const [bootStage, setBootStage] = useState("starting localtify...");
   const [songs, setSongs] = useState<Song[]>([]);
-  const [settings, setSettings] = useState<Settings>(() => applyVisualCustomizationDefaults(defaultSettings as Settings));
-  const settingsRef = useRef(settings);
+  const {
+    settings, setSettings, settingsRef,
+    settingsOpen, setSettingsOpen,
+    settingsCategory, setSettingsCategory,
+    settingsSearch, setSettingsSearch, deferredSettingsSearch,
+    customThemeName, setCustomThemeName,
+    customThemeHexDrafts, setCustomThemeHexDrafts,
+    savedCustomThemes, setSavedCustomThemes,
+    themeSettling,
+    themeMotionReady, setThemeMotionReady,
+    saveSettingsTimerRef,
+    themeSettlingTimerRef,
+    customThemeCommitTimerRef,
+    customThemeQuietCommitTimerRef,
+    customThemeQuietPatchRef,
+    customThemePreviewFrameRef,
+    themePaintIdleTimerRef,
+    customThemeLivePatchRef,
+    pendingCustomThemePreviewPatchRef,
+    themeSettlingRef
+  } = useSettingsController({
+    initialSettings: () => applyVisualCustomizationDefaults(defaultSettings as Settings)
+  });
   const [heroMotion, setHeroMotion] = useState<"idle" | "expanding" | "compacting">("idle");
   const [homeEntranceSettled, setHomeEntranceSettled] = useState(false);
-  const [isVolumeDragging, setIsVolumeDragging] = useState(false);
-  const [volumeDraft, setVolumeDraft] = useState(() => Math.round(defaultSettings.volume * 100));
-  const volumeDraftRef = useRef(Math.round(defaultSettings.volume * 100));
-  const volumeDraftFrameRef = useRef<number | null>(null);
-  const liveVolumeFrameRef = useRef<number | null>(null);
-  const liveVolumePendingPercentRef = useRef(Math.round(defaultSettings.volume * 100));
-  const fadeFrameRef = useRef<number | null>(null);
   const [view, setView] = useState<View>("home");
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsCategory, setSettingsCategory] = useState<SettingsCategory>("appearance");
-  const [settingsSearch, setSettingsSearch] = useState("");
   const [isAppBackgrounded, setIsAppBackgrounded] = useState(() => (typeof document === "undefined" ? false : document.hidden));
   const isAppBackgroundedRef = useRef(isAppBackgrounded);
-  const [diagnosticsCopied, setDiagnosticsCopied] = useState(false);
-  const [performanceStatus, setPerformanceStatus] = useState<any | null>(null);
-  const feedbackPromptBlockersRef = useRef({
-    onboardingOpen: false,
-    settingsOpen: false,
-    whatsNewOpen: false,
-    editorOpen: false,
-    playlistPickerOpen: false,
-    deleteOpen: false,
-    importBusy: false,
-    downloadBusy: false,
-    spotifyDownloadBusy: false,
-    libraryScanBusy: false
-  });
-  const [feedbackPromptOpen, setFeedbackPromptOpen] = useState(false);
-  const [feedbackPromptManualOpen, setFeedbackPromptManualOpen] = useState(false);
-  const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategoryId>("bug");
-  const [feedbackMessage, setFeedbackMessage] = useState("");
-  const [feedbackSendBusy, setFeedbackSendBusy] = useState(false);
-  const [feedbackStatus, setFeedbackStatus] = useState<{
-    kind: "idle" | "success" | "error";
-    message: string;
-  }>({ kind: "idle", message: "" });
-  const [feedbackConfigStatus, setFeedbackConfigStatus] = useState<{
-    ok?: boolean;
-    configured?: boolean;
-    valid?: boolean;
-    envName?: string;
-    status?: string;
-    label?: string;
-    message?: string;
-  } | null>(null);
-  const feedbackLastSentAtRef = useRef(0);
-  const deferredSettingsSearch = useDeferredValue(settingsSearch);
+  const {
+    diagnosticsCopied, setDiagnosticsCopied,
+    performanceStatus, setPerformanceStatus,
+    feedbackPromptBlockersRef,
+    feedbackPromptOpen, setFeedbackPromptOpen,
+    feedbackPromptManualOpen, setFeedbackPromptManualOpen,
+    feedbackCategory, setFeedbackCategory,
+    feedbackMessage, setFeedbackMessage,
+    feedbackSendBusy, setFeedbackSendBusy,
+    feedbackStatus, setFeedbackStatus,
+    feedbackConfigStatus, setFeedbackConfigStatus,
+    feedbackLastSentAtRef
+  } = useFeedbackController();
   const [isViewSwitching, setIsViewSwitching] = useState(false);
-  const [customThemeName, setCustomThemeName] = useState("My Custom Theme");
-  const [customThemeHexDrafts, setCustomThemeHexDrafts] = useState<Partial<Record<CustomThemeColorKey, string>>>({});
-  const [savedCustomThemes, setSavedCustomThemes] = useState<CustomThemePreset[]>(() => readSavedCustomThemePresets());
   const [onboardingOpen, setOnboardingOpen] = useState(() => shouldOpenOnboardingForThisRelease());
   const [onboardingDevPreview, setOnboardingDevPreview] = useState(false);
-  const [pixelArtAssets, setPixelArtAssets] = useState<RuntimePixelArtAsset[]>(() => getCachedRuntimePixelArtAssets());
-  const [coverGalleryMood, setCoverGalleryMood] = useState<CoverMood>("all");
-  const [coverSelectedSongIds, setCoverSelectedSongIds] = useState<string[]>([]);
-  const [favoritePixelCoverKeys, setFavoritePixelCoverKeys] = useState<string[]>(() =>
-    cleanStringList(readLocalJson<string[]>(PIXEL_COVER_FAVORITES_STORAGE_KEY, []))
-  );
-  const [excludedPixelCoverKeys, setExcludedPixelCoverKeys] = useState<string[]>(() =>
-    cleanStringList(readLocalJson<string[]>(PIXEL_COVER_EXCLUDED_STORAGE_KEY, []))
-  );
-  const pixelArtCacheRef = useRef<{
-    assets: RuntimePixelArtAsset[];
-    loadedAt: number;
-    pending: Promise<RuntimePixelArtAsset[]> | null;
-  }>({
-    assets: getCachedRuntimePixelArtAssets(),
-    loadedAt: 0,
-    pending: null
-  });
+  const {
+    editorSong, setEditorSong,
+    deleteTarget, setDeleteTarget,
+    deleteBusy, setDeleteBusy,
+    editTitle, setEditTitle,
+    editArtist, setEditArtist,
+    editAlbum, setEditAlbum,
+    query, setQuery, deferredQuery,
+    libraryFilterMode, setLibraryFilterMode,
+    libraryRenderLimit, setLibraryRenderLimit,
+    libraryRenderLimitRef, libraryListLengthRef,
+    songContextMenu, setSongContextMenu,
+    libraryScanBusy, setLibraryScanBusy,
+    libraryScanMessage, setLibraryScanMessage,
+    metadataCleanPreview, setMetadataCleanPreview,
+    metadataUndoItems, setMetadataUndoItems,
+    importAnimation, setImportAnimation,
+    draggedSongId, setDraggedSongId,
+    draggedSongTitle, setDraggedSongTitle,
+    libraryDragOverSongId, setLibraryDragOverSongId,
+    libraryDropSide, setLibraryDropSide,
+    draggedSongIdRef, libraryDragOverSongIdRef, libraryDropSideRef,
+    libraryDropPullRef, libraryDropVisualSongIdRef, libraryDropVisualSideRef,
+    librarySongElementRefs, pointerLibraryDragRef, pointerLibraryDragFrameRef
+  } = useLibraryController();
 
-  const loadPixelArtAssets = useCallback(async (force = false) => {
-    const cache = pixelArtCacheRef.current;
-    const nowMs = Date.now();
-
-    if (!force && cache.assets.length && nowMs - cache.loadedAt < PIXEL_ART_CACHE_TTL_MS) {
-      return cache.assets;
-    }
-
-    if (!force && cache.pending) {
-      return cache.pending;
-    }
-
-    if (!window.localitfy.listPixelArt) {
-      cache.assets = getCachedRuntimePixelArtAssets();
-      cache.loadedAt = nowMs;
-      return cache.assets;
-    }
-
-    let pending: Promise<RuntimePixelArtAsset[]>;
-    pending = window.localitfy
-      .listPixelArt()
-      .then((assets) => {
-        const runtimeAssets = buildRuntimePixelArtAssets(assets);
-        cache.assets = runtimeAssets;
-        cache.loadedAt = Date.now();
-        return runtimeAssets;
-      })
-      .catch(() => {
-        if (!cache.assets.length) {
-          cache.assets = getCachedRuntimePixelArtAssets();
-        }
-
-        cache.loadedAt = Date.now();
-        return cache.assets;
-      })
-      .finally(() => {
-        if (cache.pending === pending) {
-          cache.pending = null;
-        }
-      });
-
-    cache.pending = pending;
-    return pending;
-  }, []);
-  const [editorSong, setEditorSong] = useState<Song | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Song | null>(null);
-  const [deleteBusy, setDeleteBusy] = useState(false);
-
-  const [editTitle, setEditTitle] = useState("");
-  const [editArtist, setEditArtist] = useState("");
-  const [editAlbum, setEditAlbum] = useState("");
-
-  const [currentId, setCurrentId] = useState("");
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isShuffle, setIsShuffle] = useState(false);
-  const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("all");
-  const [query, setQuery] = useState("");
-  const deferredQuery = useDeferredValue(query);
-  const [libraryFilterMode, setLibraryFilterMode] = useState<"all" | "missing">("all");
-  const [libraryRenderLimit, setLibraryRenderLimit] = useState(INITIAL_LIBRARY_RENDER_LIMIT);
-  const libraryRenderLimitRef = useRef(INITIAL_LIBRARY_RENDER_LIMIT);
-  const libraryListLengthRef = useRef(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [currentDuration, setCurrentDuration] = useState(0);
-  const [isSeeking, setIsSeeking] = useState(false);
-  const [seekDraftPercent, setSeekDraftPercent] = useState(0);
-  const seekDraftPercentRef = useRef(0);
-  const isSeekingRef = useRef(false);
-  const seekDraftFrameRef = useRef(0);
-  const progressInputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const progressTimeLabelRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const progressDurationLabelRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const lastProgressUiPaintRef = useRef(0);
-  const lastProgressStatePaintRef = useRef(0);
-  const [statusText, setStatusText] = useState("ready to play");
-  const [playerError, setPlayerError] = useState("");
   const { appToast, showAppToast } = useAppToast();
   const {
     updatePrompt,
@@ -876,7 +684,8 @@ function MainModeApp() {
     skipAvailableUpdate,
     clearUpdateNagTimer,
     showUpdateNag,
-    showDebugUpdateAvailable
+    showDebugUpdateAvailable,
+    lastUpdateCheckedLabel
   } = useUpdatesController({
     ready,
     autoUpdateEnabled: settings.autoUpdateEnabled,
@@ -884,12 +693,14 @@ function MainModeApp() {
     setStatusText,
     showAppToast
   });
-  const [now, setNow] = useState(new Date());
-  const [screensaverVisible, setScreensaverVisible] = useState(false);
-  const [screensaverPreviewActive, setScreensaverPreviewActive] = useState(false);
-  const screensaverTimerRef = useRef<number | null>(null);
-  const screensaverPreviewTimerRef = useRef<number | null>(null);
-  const screensaverIgnoreActivityUntilRef = useRef(0);
+  const {
+    now, setNow,
+    screensaverVisible, setScreensaverVisible,
+    screensaverPreviewActive, setScreensaverPreviewActive,
+    screensaverTimerRef,
+    screensaverPreviewTimerRef,
+    screensaverIgnoreActivityUntilRef
+  } = useScreensaverController();
 
   const {
     downloadText, setDownloadText,
@@ -903,25 +714,24 @@ function MainModeApp() {
     downloadsTab, setDownloadsTab,
     spotifyUrl, setSpotifyUrl,
     spotifyTracks, setSpotifyTracks,
-    spotifySourceName, setSpotifySourceName,
-    spotifySourceType, setSpotifySourceType,
-    spotifyFetchBusy, setSpotifyFetchBusy,
+    spotifySourceName,
+    spotifySourceType,
+    spotifyFetchBusy,
     spotifyFetchError, setSpotifyFetchError,
     spotifySelectedIds, setSpotifySelectedIds,
     spotifyDownloadBusy, setSpotifyDownloadBusy,
-    spotifyLoggedIn, setSpotifyLoggedIn,
-    spotifyConnectionReady, setSpotifyConnectionReady,
-    spotifyNeedsClientId, setSpotifyNeedsClientId,
-    spotifyConnectionMode, setSpotifyConnectionMode,
-    spotifyRedirectUri, setSpotifyRedirectUri,
-    spotifyLoginBusy, setSpotifyLoginBusy,
+    spotifyLoggedIn,
+    spotifyConnectionReady,
+    spotifyNeedsClientId,
+    spotifyConnectionMode,
+    spotifyRedirectUri,
+    spotifyLoginBusy,
     spotifyShowCookieInput, setSpotifyShowCookieInput,
     spotifyCookieDraft, setSpotifyCookieDraft,
     handleSpotifyLogin,
     handleSpotifySetCookie,
     handleSpotifyLogout,
     fetchSpotifyTracks,
-    updateSpotifyConnectionState,
     syncDownloadFilesToQueue
   } = useDownloadsRuntime({ ready, songs, setStatusText, setPlayerError });
 
@@ -934,10 +744,6 @@ function MainModeApp() {
 
   const isThreeAm = now.getHours() === 3;
   const greeting = isThreeAm ? "late night local files" : getGreeting(now.getHours());
-
-  useEffect(() => {
-    settingsRef.current = settings;
-  }, [settings]);
 
   useEffect(() => {
     isAppBackgroundedRef.current = isAppBackgrounded;
@@ -1280,21 +1086,6 @@ function MainModeApp() {
       );
     };
   }, []);
-  useEffect(() => {
-    writeLocalJson(PIXEL_COVER_FAVORITES_STORAGE_KEY, favoritePixelCoverKeys);
-  }, [favoritePixelCoverKeys]);
-
-  useEffect(() => {
-    writeLocalJson(PIXEL_COVER_EXCLUDED_STORAGE_KEY, excludedPixelCoverKeys);
-  }, [excludedPixelCoverKeys]);
-
-  useEffect(() => {
-    if (!bootedRef.current) return;
-
-    const validSongIds: Set<string> = new Set(songs.map((song) => song.id));
-    setCoverSelectedSongIds((oldIds) => cleanSongOrderIds(oldIds, validSongIds));
-  }, [songs]);
-
   const currentSong = useMemo(() => {
     return songs.find((song) => song.id === currentId) ?? null;
   }, [songs, currentId]);
@@ -1324,7 +1115,6 @@ function MainModeApp() {
     return playerControllerRef.current;
   }
 
-  const [crossfadePreviewSongId, setCrossfadePreviewSongId] = useState("");
   const visualCurrentSong = useMemo(() => {
     if (!crossfadePreviewSongId) return currentSong;
     return songs.find((song) => song.id === crossfadePreviewSongId) ?? currentSong;
@@ -1422,7 +1212,6 @@ function MainModeApp() {
 
   const songIdentityRef = useRef<string | null>(null);
   const songTransitionCounterRef = useRef(0);
-  const [nowPlayingTransitionKey, setNowPlayingTransitionKey] = useState("empty:0");
   const {
     playlists,
     setPlaylists,
@@ -1454,7 +1243,8 @@ function MainModeApp() {
     removeSongFromPlaylist,
     toggleSongPlaylist,
     handlePlaylistSongDrop,
-    handlePlaylistSongAppend
+    handlePlaylistSongAppend,
+    normalizePlaylistName
   } = usePlaylistsController({
     songs,
     bootedRef,
@@ -1462,46 +1252,6 @@ function MainModeApp() {
     setStatusText,
     showAppToast
   });
-  const [playQueue, setPlayQueue] = useState<string[]>(() => readLocalJson<string[]>(QUEUE_STORAGE_KEY, []));
-  const [queueHistory, setQueueHistory] = useState<QueueHistoryItem[]>(() => readLocalJson<QueueHistoryItem[]>(QUEUE_HISTORY_STORAGE_KEY, []));
-  const [repeatPlaylist, setRepeatPlaylist] = useState(() => readLocalJson<boolean>(REPEAT_PLAYLIST_STORAGE_KEY, false));
-  const [songContextMenu, setSongContextMenu] = useState<SongContextMenuState | null>(null);
-  const [pixelArtBusy, setPixelArtBusy] = useState(false);
-  const [libraryScanBusy, setLibraryScanBusy] = useState(false);
-  const [libraryScanMessage, setLibraryScanMessage] = useState("instant search index ready");
-  const [metadataCleanPreview, setMetadataCleanPreview] = useState<any | null>(null);
-  const [metadataUndoItems, setMetadataUndoItems] = useState<any[]>([]);
-  const [importAnimation, setImportAnimation] = useState<ImportAnimationState>(() =>
-    createImportAnimationState()
-  );
-  const [draggedSongId, setDraggedSongId] = useState("");
-  const [draggedSongTitle, setDraggedSongTitle] = useState("");
-  const [libraryDragOverSongId, setLibraryDragOverSongId] = useState("");
-  const [libraryDropSide, setLibraryDropSide] = useState<LibraryDropSide>("after");
-  const [queueDropHot, setQueueDropHot] = useState(false);
-  const [themeSettling, setThemeSettling] = useState(false);
-  const [themeMotionReady, setThemeMotionReady] = useState(false);
-  const draggedSongIdRef = useRef("");
-  const libraryDragOverSongIdRef = useRef("");
-  const libraryDropSideRef = useRef<LibraryDropSide>("after");
-  const libraryDropPullRef = useRef(0);
-  const libraryDropVisualSongIdRef = useRef("");
-  const libraryDropVisualSideRef = useRef<LibraryDropSide>("after");
-  const librarySongElementRefs = useRef<Map<string, HTMLElement>>(new Map());
-  const pointerLibraryDragRef = useRef<{
-    songId: string;
-    originIndex: number;
-    pointerId: number;
-    startX: number;
-    startY: number;
-    active: boolean;
-    latestTargetId: string | null;
-    latestSide: LibraryDropSide;
-    sourceElement: HTMLElement | null;
-  } | null>(null);
-  const pointerLibraryDragFrameRef = useRef<number | null>(null);
-  const queueDropHotRef = useRef(false);
-  const themeSettlingRef = useRef(false);
   const songIdentity = useMemo(() => {
     if (!visualCurrentSong) return "empty";
     return [visualCurrentSong.id, visualCurrentSong.filePath, visualCurrentSong.title, visualCurrentSong.artist, visualCurrentSong.coverUrl]
@@ -1544,14 +1294,6 @@ function MainModeApp() {
   useEffect(() => {
     libraryDropSideRef.current = libraryDropSide;
   }, [libraryDropSide]);
-
-  useEffect(() => {
-    queueDropHotRef.current = queueDropHot;
-  }, [queueDropHot]);
-
-  useEffect(() => {
-    themeSettlingRef.current = themeSettling;
-  }, [themeSettling]);
 
   useEffect(() => {
     const node = contentRef.current;
@@ -1622,18 +1364,6 @@ function MainModeApp() {
     setNowPlayingTransitionKey(`${songIdentity}:${songTransitionCounterRef.current}`);
   }, [songIdentity]);
 
-
-  useEffect(() => {
-    writeLocalJson(QUEUE_STORAGE_KEY, playQueue);
-  }, [playQueue]);
-
-  useEffect(() => {
-    writeLocalJson(QUEUE_HISTORY_STORAGE_KEY, queueHistory);
-  }, [queueHistory]);
-
-  useEffect(() => {
-    writeLocalJson(REPEAT_PLAYLIST_STORAGE_KEY, repeatPlaylist);
-  }, [repeatPlaylist]);
 
   useEffect(() => {
     if (!songContextMenu) return;
@@ -1857,10 +1587,8 @@ function MainModeApp() {
     ).size;
     const downloadFolderStatus = downloadFolderLabel || settings.downloadFolder || "default downloads folder";
     const updateStatus = updatePrompt.visible
-      ? updateStatusLabel(updatePrompt)
-      : updatePrompt.lastCheckedAt
-        ? "checked"
-        : "not checked this session";
+      ? updateStatusLabel(updatePrompt.status)
+      : lastUpdateCheckedLabel;
     const feedbackWebhookStatus = feedbackConfigStatus?.configured
       ? feedbackConfigStatus.valid
         ? "enabled"
@@ -2708,178 +2436,17 @@ function MainModeApp() {
   );
 
 
-  const [analyticsAudienceSnapshot, setAnalyticsAudienceSnapshot] = useState<LocaltifyAnalyticsSnapshot>(() =>
-    makeLocaltifyAnalyticsSnapshotFallback({
-      activeView: view,
-      songs: [],
-      likedCount: 0,
-      playlists: [],
-      settings,
-      isShuffle,
-      repeatMode,
-      downloadResultCount: 0
-    })
-  );
-  const [analyticsAudienceSnapshotReady, setAnalyticsAudienceSnapshotReady] = useState(false);
-
-  useEffect(() => {
-    const requestId = analyticsWorkerRequestRef.current + 1;
-    analyticsWorkerRequestRef.current = requestId;
-    setAnalyticsAudienceSnapshotReady(false);
-
-    const workerPayload = {
-      type: "compute-analytics-snapshot",
-      requestId,
-      activeView: view,
-      songs,
-      likedCount: likedSongs.length,
-      playlists,
-      settings: {
-        discordEnabled: settings.discordEnabled,
-        discordPrivacyMode: settings.discordPrivacyMode,
-        discordButtons: settings.discordButtons,
-        discordArtMode: settings.discordArtMode,
-        discordActivityStyle: settings.discordActivityStyle,
-        startWithWindows: settings.startWithWindows,
-        minimizeToTray: settings.minimizeToTray,
-        customThemeEnabled: settings.customThemeEnabled,
-        theme: settings.theme,
-        coverColorSyncMode: settings.coverColorSyncMode,
-        compactPlayer: settings.compactPlayer,
-        simpleMode: settings.simpleMode,
-        reducedMotion: settings.reducedMotion,
-        crossfadeEnabled: settings.crossfadeEnabled,
-        gaplessPlayback: settings.gaplessPlayback,
-        volumeNormalization: settings.volumeNormalization,
-        perSongVolumeMemory: settings.perSongVolumeMemory,
-        playbackSpeed: settings.playbackSpeed
-      },
-      isShuffle,
-      repeatMode,
-      downloadResultCount: downloadResults.length
-    };
-
-    let cancelled = false;
-
-    const applySnapshot = (snapshot: LocaltifyAnalyticsSnapshot) => {
-      if (cancelled || analyticsWorkerRequestRef.current !== requestId) return;
-      setAnalyticsAudienceSnapshot(snapshot);
-      setAnalyticsAudienceSnapshotReady(true);
-    };
-
-    const applyFallback = () => {
-      runLocaltifyIdleTask(() => {
-        applySnapshot(makeLocaltifyAnalyticsSnapshotFallback(workerPayload));
-      }, 900);
-    };
-
-    const worker = analyticsWorkerRef.current || createLocaltifyLibraryWorker();
-
-    if (!worker) {
-      applyFallback();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    analyticsWorkerRef.current = worker;
-
-    const handleMessage = (event: MessageEvent) => {
-      const data = event.data || {};
-      if (data.type !== "analytics-snapshot" || data.requestId !== requestId) return;
-      applySnapshot(data.snapshot || makeLocaltifyAnalyticsSnapshotFallback(workerPayload));
-    };
-
-    const handleError = () => {
-      try {
-        worker.removeEventListener("message", handleMessage);
-        worker.removeEventListener("error", handleError);
-        worker.terminate();
-      } catch {
-        // Ignore worker shutdown errors.
-      }
-
-      if (analyticsWorkerRef.current === worker) {
-        analyticsWorkerRef.current = null;
-      }
-
-      applyFallback();
-    };
-
-    worker.addEventListener("message", handleMessage);
-    worker.addEventListener("error", handleError);
-
-    try {
-      worker.postMessage(workerPayload);
-    } catch {
-      handleError();
-    }
-
-    return () => {
-      cancelled = true;
-      worker.removeEventListener("message", handleMessage);
-      worker.removeEventListener("error", handleError);
-    };
-  }, [
-    songs,
-    likedSongs.length,
-    playlists,
+  const { analyticsAudienceSnapshot, analyticsAudienceSnapshotReady } = useAnalyticsRuntime({
+    ready,
     view,
-    settings.discordEnabled,
-    settings.discordPrivacyMode,
-    settings.discordButtons,
-    settings.discordArtMode,
-    settings.discordActivityStyle,
-    settings.startWithWindows,
-    settings.minimizeToTray,
-    settings.customThemeEnabled,
-    settings.theme,
-    settings.coverColorSyncMode,
-    settings.compactPlayer,
-    settings.simpleMode,
-    settings.reducedMotion,
-    settings.crossfadeEnabled,
-    settings.gaplessPlayback,
-    settings.volumeNormalization,
-    settings.perSongVolumeMemory,
-    settings.playbackSpeed,
+    songs,
+    likedCount: likedSongs.length,
+    playlists,
+    settings,
     isShuffle,
     repeatMode,
-    downloadResults.length
-  ]);
-
-  useEffect(() => {
-    return () => {
-      try {
-        analyticsWorkerRef.current?.terminate();
-      } catch {
-        // Ignore worker shutdown errors.
-      }
-      analyticsWorkerRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!ready || !analyticsAudienceSnapshotReady) return;
-    let cancelled = false;
-
-    runLocaltifyIdleTask(() => {
-      if (cancelled) return;
-      trackAudienceSnapshot(analyticsAudienceSnapshot);
-      trackMarketingSnapshot(analyticsAudienceSnapshot);
-      trackPlaylistSnapshot({
-        playlist_count: Number(analyticsAudienceSnapshot.playlist_count || 0),
-        playlist_song_total: Number(analyticsAudienceSnapshot.playlist_song_total || 0),
-        has_playlists: Boolean(analyticsAudienceSnapshot.has_playlists),
-        user_stage: String(analyticsAudienceSnapshot.user_stage || "new_no_library"),
-        audience_segment: String(analyticsAudienceSnapshot.audience_segment || "new_local_music_user")
-      });
-    }, 2600);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [ready, analyticsAudienceSnapshotReady, analyticsAudienceSnapshot]);
+    downloadResultCount: downloadResults.length
+  });
 
   const showHomeSideCards = settings.showRightColumn && !settings.homeExpanded;
   const homeDashboardClass = [
@@ -2915,11 +2482,6 @@ function MainModeApp() {
   const yearAlbumCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "year_album_count");
   const longestSongDuration = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "longest_song_duration");
   const longestSongTitle = localtifyAnalyticsString(analyticsAudienceSnapshot, "longest_song_title", "");
-
-  const activeSongs = useMemo(() => {
-    if (!songs.length || playedSongCount <= 0) return [];
-    return songs.filter((song) => (song.playCount || 0) > 0).slice(0, Math.min(40, playedSongCount));
-  }, [songs, playedSongCount]);
 
   const neverPlayedSongs = useMemo(() => {
     if (neverPlayedCount <= 0) return [] as Song[];
@@ -3178,160 +2740,53 @@ function MainModeApp() {
     }
   }, [currentSong?.id, currentDuration, currentSong?.duration, syncProgressDom]);
 
-  const pixelArtPool = useMemo(
-    () => (pixelArtAssets.length ? pixelArtAssets : getCachedRuntimePixelArtAssets()),
-    [pixelArtAssets]
-  );
-  const pixelArtUsageMap = useMemo(() => {
-    const map = new Map<string, number>();
-
-    songs.forEach((song) => {
-      const keys = getSongCoverUsageKeys(song);
-      keys.forEach((key) => map.set(key, (map.get(key) || 0) + 1));
-    });
-
-    return map;
-  }, [songs]);
-
-  const favoritePixelCoverKeySet = useMemo(() => new Set(favoritePixelCoverKeys), [favoritePixelCoverKeys]);
-  const excludedPixelCoverKeySet = useMemo(() => new Set(excludedPixelCoverKeys), [excludedPixelCoverKeys]);
-
-  const getRuntimePixelArtForSong = (song?: Song | null, salt = "") => {
-    const pool = pixelArtPool.length ? pixelArtPool : getCachedRuntimePixelArtAssets();
-    const index = stableHash(`${songSignature(song)}::${salt}`) % pool.length;
-    return pool[index] || pixelArtForSong(song);
-  };
-
-  const getPixelArtUsageKey = (asset: RuntimePixelArtAsset) => getPixelArtAssetKey(asset);
-
-  const pickBalancedPixelAsset = (
-    song: Song,
-    salt = "manual",
-    usageOverride?: Map<string, number>,
-    poolOverride?: RuntimePixelArtAsset[]
-  ): RuntimePixelArtAsset | null => {
-    const pool = (poolOverride || pixelArtPool).filter((asset) => {
-      if (!(asset.path || asset.url || asset.file)) return false;
-      return poolOverride ? true : !excludedPixelCoverKeySet.has(getPixelArtUsageKey(asset));
-    });
-    if (!pool.length) return null;
-
-    const usage = usageOverride || pixelArtUsageMap;
-    const currentKeys = new Set([song.coverPath, song.coverUrl].filter(Boolean) as string[]);
-    const randomSalt = `${Date.now()}::${Math.random()}::${salt}`;
-
-    const ranked = pool
-      .map((asset, index) => {
-        const key = getPixelArtUsageKey(asset);
-        const isCurrent = currentKeys.has(asset.path || "") || currentKeys.has(asset.url || "") || currentKeys.has(asset.file || "");
-
-        return {
-          asset,
-          key,
-          isCurrent,
-          usage: usage.get(key) || 0,
-          score: stableHash(`${songSignature(song)}::${randomSalt}::${index}::${asset.file}`)
-        };
-      })
-      .filter((entry) => pool.length <= 1 || !entry.isCurrent)
-      .sort((a, b) => a.usage - b.usage || a.score - b.score);
-
-    return ranked[0]?.asset || pool[0] || null;
-  };
-
-  const coverToolsActive = view === "covers" || (view === "settings" && (settingsCategory === "covers" || settingsCategory === "advanced"));
-
-  const coverGalleryAssets = useMemo(() => {
-    if (!coverToolsActive) return [];
-
-    return pixelArtPool.map((asset) => {
-      const key = getPixelArtUsageKey(asset);
-      const tags = getPixelAssetMoodTags(asset);
-      const usage = Math.max(
-        pixelArtUsageMap.get(key) || 0,
-        asset.url ? pixelArtUsageMap.get(asset.url) || 0 : 0,
-        asset.path ? pixelArtUsageMap.get(asset.path) || 0 : 0,
-        asset.file ? pixelArtUsageMap.get(asset.file) || 0 : 0
-      );
-
-      return {
-        asset,
-        key,
-        tags,
-        usage,
-        favorite: favoritePixelCoverKeySet.has(key),
-        excluded: excludedPixelCoverKeySet.has(key)
-      };
-    });
-  }, [coverToolsActive, pixelArtPool, pixelArtUsageMap, favoritePixelCoverKeySet, excludedPixelCoverKeySet]);
-
-  const coverMoodCounts = useMemo(() => {
-    const counts = new Map<CoverMood, number>();
-
-    coverGalleryAssets.forEach((entry) => {
-      if (!entry.excluded) counts.set("all", (counts.get("all") || 0) + 1);
-      if (entry.favorite && !entry.excluded) counts.set("favorites", (counts.get("favorites") || 0) + 1);
-      entry.tags.forEach((tag) => {
-        if (!entry.excluded) counts.set(tag, (counts.get(tag) || 0) + 1);
-      });
-    });
-
-    counts.set("leastUsed", coverGalleryAssets.filter((entry) => !entry.excluded).length);
-    return counts;
-  }, [coverGalleryAssets]);
-
-  const filteredCoverGalleryAssets = useMemo(() => {
-    const visible = coverGalleryAssets.filter((entry) => {
-      if (coverGalleryMood === "favorites") return entry.favorite && !entry.excluded;
-      if (coverGalleryMood === "leastUsed") return !entry.excluded;
-      if (coverGalleryMood === "all") return !entry.excluded;
-      return entry.tags.includes(coverGalleryMood) && !entry.excluded;
-    });
-
-    return visible.sort((a, b) => {
-      if (coverGalleryMood === "leastUsed") return a.usage - b.usage || a.asset.label.localeCompare(b.asset.label);
-      if (a.favorite !== b.favorite) return a.favorite ? -1 : 1;
-      return a.usage - b.usage || a.asset.label.localeCompare(b.asset.label);
-    });
-  }, [coverGalleryAssets, coverGalleryMood]);
-
-  const selectedCoverSongs = useMemo(() => {
-    return coverSelectedSongIds.map((songId) => songsById.get(songId)).filter((song): song is Song => Boolean(song));
-  }, [coverSelectedSongIds, songsById]);
-
-  const coverPickerSongList = useMemo(() => {
-    const source = query.trim() ? filteredSongs : songs;
-    return source.slice(0, 120);
-  }, [filteredSongs, query, songs]);
-
-  const missingCoverSongs = useMemo(() => {
-    return songs.filter((song) => {
-      const coverPath = String(song.coverPath || song.savedCoverPath || "").trim();
-      const coverUrl = String(song.coverUrl || song.coverThumbnailUrl || song.thumbnailUrl || "").trim();
-      const coverExists = typeof song.coverExists === "boolean" ? song.coverExists : true;
-      const usesFallbackCover = Boolean(song.usesFallbackCover || song.missingSavedCover);
-
-      return usesFallbackCover || !coverPath || coverExists === false || (!coverUrl && !coverPath);
-    });
-  }, [songs]);
-
-  const coverStats = useMemo(() => {
-    const usable = coverGalleryAssets.filter((entry) => !entry.excluded);
-    const used = usable.filter((entry) => entry.usage > 0);
-    const least = [...usable].sort((a, b) => a.usage - b.usage || a.asset.label.localeCompare(b.asset.label))[0] || null;
-    const most = [...usable].sort((a, b) => b.usage - a.usage || a.asset.label.localeCompare(b.asset.label))[0] || null;
-
-    return {
-      total: coverGalleryAssets.length,
-      usable: usable.length,
-      used: used.length,
-      favorites: favoritePixelCoverKeys.length,
-      excluded: excludedPixelCoverKeys.length,
-      missingSongs: missingCoverSongs.length,
-      least,
-      most
-    };
-  }, [coverGalleryAssets, favoritePixelCoverKeys.length, excludedPixelCoverKeys.length, missingCoverSongs.length]);
+  const {
+    pixelArtAssets,
+    setPixelArtAssets,
+    pixelArtBusy,
+    pixelArtPool,
+    loadPixelArtAssets,
+    getRuntimePixelArtForSong,
+    coverGalleryMood,
+    setCoverGalleryMood,
+    coverSelectedSongIds,
+    setCoverSelectedSongIds,
+    coverMoodCounts,
+    filteredCoverGalleryAssets,
+    selectedCoverSongs,
+    coverPickerSongList,
+    missingCoverSongs,
+    coverStats,
+    rescanPixelArtFolder,
+    randomizeCoverForSong,
+    resetCoverForSong,
+    randomizeMissingCoversAction,
+    cleanupCoverCacheAction,
+    chooseCoverFromPc,
+    randomizeAllCovers,
+    togglePixelCoverFavorite,
+    togglePixelCoverExcluded,
+    toggleCoverSongSelection,
+    selectCurrentSongForCovers,
+    selectVisibleSongsForCovers,
+    applyCoverAssetToSelection,
+    randomizeSelectedCovers
+  } = useCoversController({
+    songs,
+    songsById,
+    filteredSongs,
+    query,
+    currentSong,
+    view,
+    settingsCategory,
+    replaceSong,
+    commitSongs: commitSongsWithEditor,
+    setStatusText,
+    showAppToast,
+    onCoverAssetsChanged: () => {
+      discordAssetBySongRef.current = {};
+    }
+  });
 
   // Kept intentionally disabled: this preview was calculated every render but is not currently rendered.
   // Re-enable it only when the queue preview UI actually uses this value.
@@ -3494,8 +2949,6 @@ function MainModeApp() {
     };
 
     clearBeatTimers();
-
-    const shouldSleepBeatFx = isLocaltifyV301HeavyMotionSurface(view, settingsCategory);
 
     if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || document.hidden) {
       resetBeatVariables();
@@ -4132,9 +3585,7 @@ function MainModeApp() {
           if (!mounted) return;
           setPixelArtAssets(assets);
         })
-        .catch(() => {
-          if (mounted) setPixelArtAssets(getCachedRuntimePixelArtAssets());
-        });
+        .catch(() => undefined);
       bootedRef.current = true;
     }).catch((error) => {
       if (!mounted) return;
@@ -5105,8 +4556,6 @@ function MainModeApp() {
         audio.src = result.url;
         audio.load();
 
-        const savedPosition = 0;
-
         try {
           audio.currentTime = 0;
         } catch {
@@ -5322,7 +4771,7 @@ function MainModeApp() {
 
     if (target.kind === "queue" && typeof target.queuedIndex === "number") {
       setPlayQueue((queue) => queue.slice(target.queuedIndex + 1));
-    } else if (playQueue.length && target.kind !== "queue") {
+    } else if (playQueue.length) {
       const hasPlayableQueuedSong = playQueue.some((songId) => isPlayableSong(songsById.get(songId)));
       if (!hasPlayableQueuedSong) setPlayQueue([]);
     }
@@ -5450,7 +4899,7 @@ function MainModeApp() {
     }
 
     const target = getAutoTransitionTarget();
-    if (!target?.song || (target.kind !== "repeat-one" && target.song.id === current.id)) return;
+    if (!target?.song || target.song.id === current.id) return;
 
     crossfadeAutoStartedRef.current = true;
     crossfadeAutoTargetRef.current = target.song.id;
@@ -6389,70 +5838,10 @@ function MainModeApp() {
     }
   }
 
-  async function rescanPixelArtFolder() {
-    setPixelArtBusy(true);
-    setStatusText("rescanning pixel art folder...");
-    showAppToast("rescanning pixel art covers...", "work");
-
-    try {
-      const runtimeAssets = await loadPixelArtAssets(true);
-      setPixelArtAssets(runtimeAssets);
-      discordAssetBySongRef.current = {};
-      setStatusText(`found ${runtimeAssets.length} pixel art cover${runtimeAssets.length === 1 ? "" : "s"}`);
-      showAppToast(`found ${runtimeAssets.length} pixel art cover${runtimeAssets.length === 1 ? "" : "s"}`, "success");
-    } catch (error) {
-      console.error("[localitfy pixel art rescan error]", error);
-      setPixelArtAssets(getCachedRuntimePixelArtAssets());
-      setStatusText("pixel art rescan failed, using fallback art");
-      showAppToast("pixel art rescan failed safely", "error");
-    } finally {
-      setPixelArtBusy(false);
-    }
-  }
-
-  async function applyPixelAssetToSong(song: Song, asset: RuntimePixelArtAsset | null, successMessage = "pixel cover applied", announce = true) {
-    if (!song) return null;
-
-    try {
-      let updated: Song | null = null;
-      const publicCoverUrl = asset?.url || (asset?.file ? pixelArtUrl(asset.file) : "");
-
-      if (asset?.path && window.localitfy.setSongCover) {
-        updated = await window.localitfy.setSongCover(song.id, asset.path);
-      } else if (publicCoverUrl && window.localitfy.patchSong) {
-        updated = await window.localitfy.patchSong(song.id, {
-          coverPath: asset?.path || null,
-          coverUrl: publicCoverUrl
-        });
-      } else if (window.localitfy.randomizeSongCover) {
-        updated = await window.localitfy.randomizeSongCover(song.id);
-      }
-
-      if (updated) {
-        replaceSong(updated);
-        setStatusText(successMessage);
-        if (announce) showAppToast(successMessage, "success");
-        return updated;
-      }
-    } catch (error) {
-      console.error("[localitfy cover update error]", error);
-    }
-
-    setStatusText("cover update failed");
-    if (announce) showAppToast("cover update failed", "error");
-    return null;
-  }
-
-  async function randomizeCoverForSong(song: Song | null) {
-    if (!song || pixelArtBusy) return null;
-
-    setPixelArtBusy(true);
-    showAppToast("picking a fresh pixel cover...", "work");
-    try {
-      const asset = pickBalancedPixelAsset(song, "single");
-      return await applyPixelAssetToSong(song, asset, "cover randomized");
-    } finally {
-      setPixelArtBusy(false);
+  function commitSongsWithEditor(nextSongs: Song[]) {
+    setSongs(nextSongs);
+    if (editorSong) {
+      setEditorSong(nextSongs.find((song) => song.id === editorSong.id) || editorSong);
     }
   }
 
@@ -6469,359 +5858,15 @@ function MainModeApp() {
   }
 
   async function resetCoverForSongAction(song: Song | null) {
-    if (!song || pixelArtBusy) return null;
-
+    if (!song) return null;
     setSongContextMenu(null);
-    setPixelArtBusy(true);
-    setStatusText("resetting cover...");
-    showAppToast("resetting cover...", "work");
-
-    const optimistic = { ...song, coverPath: null, savedCoverPath: "", savedCoverExists: false, usesFallbackCover: true, missingSavedCover: true, coverUrl: null, coverThumbUrl: null, coverThumbnailUrl: null, thumbnailUrl: null };
-    replaceSong(optimistic as Song);
-
-    try {
-      const updated = await window.localitfy.patchSong(song.id, { coverPath: null, coverUrl: null });
-      if (updated) replaceSong(updated);
-      setStatusText("cover reset to default");
-      showAppToast("cover reset to default", "success");
-      return updated || optimistic;
-    } catch (error) {
-      console.error("[localitfy reset cover error]", error);
-      replaceSong(song);
-      setStatusText("cover reset failed");
-      showAppToast("cover reset failed", "error");
-      return null;
-    } finally {
-      setPixelArtBusy(false);
-    }
-  }
-
-  async function randomizeMissingCoversAction() {
-    if (pixelArtBusy) return;
-
-    setPixelArtBusy(true);
-    setStatusText("randomizing missing covers...");
-    showAppToast("randomizing missing covers...", "work");
-
-    try {
-      const updatedSongs = await window.localitfy.randomizeMissingSongCovers?.();
-      if (Array.isArray(updatedSongs)) {
-        setSongs(applyLibraryOrder(sanitizeSongList(updatedSongs)));
-      }
-
-      const changedCount = Array.isArray(updatedSongs) ? Math.max(0, missingCoverSongs.length) : 0;
-      setStatusText(changedCount ? `fixed ${changedCount} missing cover${changedCount === 1 ? "" : "s"}` : "missing cover scan complete");
-      showAppToast(changedCount ? `fixed ${changedCount} missing cover${changedCount === 1 ? "" : "s"}` : "missing cover scan complete", changedCount ? "success" : "info");
-    } catch (error) {
-      console.error("[localitfy missing cover randomize error]", error);
-      setStatusText("missing cover fix failed");
-      showAppToast("missing cover fix failed", "error");
-    } finally {
-      setPixelArtBusy(false);
-    }
-  }
-
-  async function cleanupCoverCacheAction() {
-    if (pixelArtBusy) return;
-
-    setPixelArtBusy(true);
-    setStatusText("cleaning cover cache...");
-    showAppToast("cleaning cover cache...", "work");
-
-    try {
-      const result = await window.localitfy.cleanupCoverCache?.();
-      const removed = Number(result?.removed || 0);
-      const message = removed
-        ? `cleaned ${removed} cached cover thumbnail${removed === 1 ? "" : "s"}`
-        : "cover cache already clean";
-
-      setStatusText(message);
-      showAppToast(message, removed ? "success" : "info");
-    } catch (error) {
-      console.error("[localitfy cover cache cleanup error]", error);
-      setStatusText("cover cache cleanup failed");
-      showAppToast("cover cache cleanup failed", "error");
-    } finally {
-      setPixelArtBusy(false);
-    }
-  }
-
-  async function chooseCoverFromPc(song: Song | null) {
-    if (!song || pixelArtBusy) return null;
-
-    setPixelArtBusy(true);
-    showAppToast("opening cover picker...", "work");
-    try {
-      const updated = await window.localitfy.pickSongCover(song.id);
-      replaceSong(updated);
-      setStatusText(updated ? "cover updated" : "cover unchanged");
-      showAppToast(updated ? "cover updated" : "cover unchanged", updated ? "success" : "info");
-      return updated;
-    } catch (error) {
-      console.error("[localitfy pick cover error]", error);
-      setStatusText("cover update failed");
-      showAppToast("cover update failed", "error");
-      return null;
-    } finally {
-      setPixelArtBusy(false);
-    }
-  }
-
-  async function randomizeAllCovers() {
-    if (!songs.length || pixelArtBusy) return;
-
-    setPixelArtBusy(true);
-    setStatusText("randomizing all pixel covers...");
-    showAppToast("randomizing pixel covers...", "work");
-
-    try {
-      let freshPixelArtPool = pixelArtPool.filter((asset) => !excludedPixelCoverKeySet.has(getPixelArtUsageKey(asset)));
-
-      if (!freshPixelArtPool.length) {
-        const runtimeAssets = await loadPixelArtAssets(false);
-        freshPixelArtPool = runtimeAssets.filter((asset) => !excludedPixelCoverKeySet.has(getPixelArtUsageKey(asset)));
-        setPixelArtAssets(runtimeAssets);
-      }
-
-      if (!freshPixelArtPool.length) {
-        freshPixelArtPool = getCachedRuntimePixelArtAssets();
-        setPixelArtAssets(freshPixelArtPool);
-      }
-
-      if (!freshPixelArtPool.length) {
-        setStatusText("no pixel art found");
-        showAppToast("add images to the pixelart folder first", "error");
-        return;
-      }
-
-      const nextSongs = [...songs];
-      const usage = new Map<string, number>();
-      let changedCount = 0;
-
-      for (const song of songs) {
-        const asset = pickBalancedPixelAsset(song, `all-${changedCount}`, usage, freshPixelArtPool);
-        let updated: Song | null = null;
-
-        const publicCoverUrl = asset?.url || (asset?.file ? pixelArtUrl(asset.file) : "");
-
-        if (asset?.path && window.localitfy.setSongCover) {
-          updated = await window.localitfy.setSongCover(song.id, asset.path);
-        } else if (publicCoverUrl && window.localitfy.patchSong) {
-          updated = await window.localitfy.patchSong(song.id, {
-            coverPath: asset?.path || null,
-            coverUrl: publicCoverUrl
-          });
-        } else if (window.localitfy.randomizeSongCover) {
-          updated = await window.localitfy.randomizeSongCover(song.id);
-        }
-
-        const finalSong = updated || (asset
-          ? {
-              ...song,
-              coverPath: asset.path || null,
-              coverUrl: publicCoverUrl || song.coverUrl
-            }
-          : null);
-
-        if (finalSong) {
-          const index = nextSongs.findIndex((candidate) => candidate.id === finalSong.id);
-          if (index !== -1) nextSongs[index] = finalSong;
-          const key = asset ? getPixelArtUsageKey(asset) : finalSong.coverPath || finalSong.coverUrl || finalSong.id;
-          usage.set(key, (usage.get(key) || 0) + 1);
-          changedCount += 1;
-        }
-      }
-
-      setSongs(nextSongs);
-      if (editorSong) {
-        const refreshedEditorSong = nextSongs.find((song) => song.id === editorSong.id) || editorSong;
-        setEditorSong(refreshedEditorSong);
-      }
-      setStatusText(changedCount ? `randomized ${changedCount} cover${changedCount === 1 ? "" : "s"}` : "no covers changed");
-      showAppToast(changedCount ? `randomized ${changedCount} cover${changedCount === 1 ? "" : "s"}` : "no covers changed", changedCount ? "success" : "info");
-    } catch (error) {
-      console.error("[localitfy randomize all covers error]", error);
-      setStatusText("randomize all covers failed");
-      showAppToast("randomize all covers failed", "error");
-    } finally {
-      setPixelArtBusy(false);
-    }
-  }
-
-  function togglePixelCoverFavorite(key: string) {
-    if (!key) return;
-
-    setFavoritePixelCoverKeys((oldKeys) => {
-      const set = new Set(oldKeys);
-      if (set.has(key)) set.delete(key);
-      else set.add(key);
-      return [...set];
-    });
-  }
-
-  function togglePixelCoverExcluded(key: string) {
-    if (!key) return;
-
-    setExcludedPixelCoverKeys((oldKeys) => {
-      const set = new Set(oldKeys);
-      if (set.has(key)) set.delete(key);
-      else set.add(key);
-      return [...set];
-    });
-  }
-
-  function toggleCoverSongSelection(songId: string) {
-    setCoverSelectedSongIds((oldIds) => {
-      if (oldIds.includes(songId)) return oldIds.filter((id) => id !== songId);
-      return [...oldIds, songId];
-    });
-  }
-
-  function selectCurrentSongForCovers() {
-    if (!currentSong) {
-      showAppToast("play or select a song first", "info");
-      return;
-    }
-
-    setCoverSelectedSongIds([currentSong.id]);
-    showAppToast("selected current song", "success");
-  }
-
-  function selectVisibleSongsForCovers() {
-    const nextIds = coverPickerSongList.map((song) => song.id);
-    setCoverSelectedSongIds(nextIds);
-    showAppToast(nextIds.length ? `selected ${nextIds.length} song${nextIds.length === 1 ? "" : "s"}` : "nothing to select", nextIds.length ? "success" : "info");
-  }
-
-  function getPixelArtPoolForMood(mood: CoverMood) {
-    const candidates = coverGalleryAssets.filter((entry) => {
-      if (entry.excluded) return false;
-      if (mood === "all") return true;
-      if (mood === "favorites") return entry.favorite;
-      if (mood === "leastUsed") return true;
-      return entry.tags.includes(mood);
-    });
-
-    const sorted = [...candidates].sort((a, b) => {
-      if (mood === "leastUsed") return a.usage - b.usage || a.asset.label.localeCompare(b.asset.label);
-      return a.usage - b.usage || a.asset.label.localeCompare(b.asset.label);
-    });
-
-    return sorted.map((entry) => entry.asset);
-  }
-
-  async function applyPixelAssetToSongs(targetSongs: Song[], asset: RuntimePixelArtAsset | null, finalMessage: string) {
-    if (!targetSongs.length || !asset || pixelArtBusy) return;
-
-    setPixelArtBusy(true);
-    setStatusText(finalMessage);
-    showAppToast(finalMessage, "work");
-
-    try {
-      let changedCount = 0;
-
-      for (const song of targetSongs) {
-        const updated = await applyPixelAssetToSong(song, asset, finalMessage, false);
-        if (updated) changedCount += 1;
-      }
-
-      setStatusText(changedCount ? `updated ${changedCount} cover${changedCount === 1 ? "" : "s"}` : "no covers changed");
-      showAppToast(changedCount ? `updated ${changedCount} cover${changedCount === 1 ? "" : "s"}` : "no covers changed", changedCount ? "success" : "info");
-    } finally {
-      setPixelArtBusy(false);
-    }
-  }
-
-  async function applyCoverAssetToSelection(asset: RuntimePixelArtAsset) {
-    const targetSongs = selectedCoverSongs.length ? selectedCoverSongs : currentSong ? [currentSong] : [];
-
-    if (!targetSongs.length) {
-      showAppToast("select a song first", "info");
-      return;
-    }
-
-    await applyPixelAssetToSongs(targetSongs, asset, `applying ${asset.label}`);
-  }
-
-  async function randomizeSelectedCovers(mood: CoverMood = coverGalleryMood) {
-    const targetSongs = selectedCoverSongs.length ? selectedCoverSongs : currentSong ? [currentSong] : [];
-
-    if (!targetSongs.length) {
-      showAppToast("select songs first", "info");
-      return;
-    }
-
-    const sourcePool = getPixelArtPoolForMood(mood);
-
-    if (!sourcePool.length) {
-      showAppToast(`no ${coverMoodName(mood)} covers ready`, "error");
-      return;
-    }
-
-    setPixelArtBusy(true);
-    setStatusText(`randomizing ${targetSongs.length} selected cover${targetSongs.length === 1 ? "" : "s"}...`);
-    showAppToast(`randomizing ${coverMoodName(mood)} covers...`, "work");
-
-    try {
-      const usage = new Map<string, number>(pixelArtUsageMap);
-      const nextSongs = [...songs];
-      let changedCount = 0;
-
-      for (const song of targetSongs) {
-        const asset = pickBalancedPixelAsset(song, `${mood}-${changedCount}`, usage, sourcePool);
-        if (!asset) continue;
-
-        let updated: Song | null = null;
-        const publicCoverUrl = asset.url || (asset.file ? pixelArtUrl(asset.file) : "");
-
-        if (asset.path && window.localitfy.setSongCover) {
-          updated = await window.localitfy.setSongCover(song.id, asset.path);
-        } else if (publicCoverUrl && window.localitfy.patchSong) {
-          updated = await window.localitfy.patchSong(song.id, {
-            coverPath: asset.path || null,
-            coverUrl: publicCoverUrl
-          });
-        } else if (window.localitfy.randomizeSongCover) {
-          updated = await window.localitfy.randomizeSongCover(song.id);
-        }
-
-        const finalSong = updated || (asset
-          ? {
-              ...song,
-              coverPath: asset.path || null,
-              coverUrl: publicCoverUrl || song.coverUrl
-            }
-          : null);
-
-        if (finalSong) {
-          const index = nextSongs.findIndex((candidate) => candidate.id === finalSong.id);
-          if (index !== -1) nextSongs[index] = finalSong;
-          const key = getPixelArtUsageKey(asset);
-          usage.set(key, (usage.get(key) || 0) + 1);
-          if (asset.url) usage.set(asset.url, (usage.get(asset.url) || 0) + 1);
-          if (asset.path) usage.set(asset.path, (usage.get(asset.path) || 0) + 1);
-          changedCount += 1;
-        }
-      }
-
-      setSongs(nextSongs);
-      if (editorSong) setEditorSong(nextSongs.find((song) => song.id === editorSong.id) || editorSong);
-      setStatusText(changedCount ? `randomized ${changedCount} selected cover${changedCount === 1 ? "" : "s"}` : "no covers changed");
-      showAppToast(changedCount ? `randomized ${changedCount} selected cover${changedCount === 1 ? "" : "s"}` : "no covers changed", changedCount ? "success" : "info");
-    } catch (error) {
-      console.error("[localitfy selected cover randomize error]", error);
-      setStatusText("selected cover randomize failed");
-      showAppToast("selected cover randomize failed", "error");
-    } finally {
-      setPixelArtBusy(false);
-    }
+    return resetCoverForSong(song);
   }
 
   function openCoversViewWithCurrentSong() {
     if (currentSong && !coverSelectedSongIds.includes(currentSong.id)) {
       setCoverSelectedSongIds([currentSong.id]);
     }
-
     changeView("covers", "unknown");
   }
 
@@ -6843,19 +5888,22 @@ function MainModeApp() {
   }
 
 
-  function buildMetadataCleanPreview(scope: "all" | "selected" = "all") {
+  function buildMetadataCleanPreview(scope: "all" | "selected" = "all"): MetadataCleanPreview {
     const selectedIds = new Set(coverSelectedSongIds);
     const targetSongs = scope === "selected" && selectedIds.size
       ? songs.filter((song) => selectedIds.has(song.id))
       : songs;
 
     const items = targetSongs.map((song) => {
-      const patch = getMetadataRepairPatch(song);
-      const fields = Object.keys(patch).filter((key) => key !== "playbackPosition");
+      const repair = getMetadataRepairPatch(song);
+      const patch: Partial<Pick<Song, "title" | "artist" | "album">> = {};
+      if (typeof repair.title === "string" && repair.title !== song.title) patch.title = repair.title;
+      if (typeof repair.artist === "string" && repair.artist !== song.artist) patch.artist = repair.artist;
+      if (typeof repair.album === "string" && repair.album !== song.album) patch.album = repair.album;
+      const fields = Object.keys(patch);
 
       return {
         id: song.id,
-        song,
         before: {
           title: song.title,
           artist: song.artist,
@@ -7616,12 +6664,12 @@ function MainModeApp() {
 
         const enrichedDownloadsBySpotifyId = new Map(
           enrichedDownloads
-            .map((item: any) => [String(item.spotifyTrackId || "").trim(), item])
+            .map((item: DownloadResult): [string, DownloadResult] => [String(item.spotifyTrackId || "").trim(), item])
             .filter(([id]) => Boolean(id))
         );
         const rawDownloadsBySpotifyId = new Map(
           downloads
-            .map((item: any) => [String(item.spotifyTrackId || "").trim(), item])
+            .map((item: DownloadResult): [string, DownloadResult] => [String(item.spotifyTrackId || "").trim(), item])
             .filter(([id]) => Boolean(id))
         );
 
@@ -9515,7 +8563,7 @@ function MainModeApp() {
       editorOpen: Boolean(editorSong),
       playlistPickerOpen: Boolean(playlistPickerSong),
       deleteOpen: Boolean(deleteTarget),
-      importBusy: Boolean(importAnimation?.visible) || libraryScanBusy,
+      importBusy: Boolean(importAnimation?.active) || libraryScanBusy,
       downloadBusy,
       spotifyDownloadBusy,
       libraryScanBusy
@@ -9524,7 +8572,7 @@ function MainModeApp() {
     deleteTarget,
     downloadBusy,
     editorSong,
-    importAnimation?.visible,
+    importAnimation?.active,
     libraryScanBusy,
     onboardingOpen,
     playlistPickerSong,
@@ -9727,7 +8775,7 @@ function MainModeApp() {
           playlistCount: playlists.length,
           downloadsFolder: downloadFolderLabel || settings.downloadFolder || "default downloads folder",
           discordRpc: settings.discordEnabled ? "enabled" : "disabled",
-          updateStatus: updatePrompt.visible ? updateStatusLabel(updatePrompt) : "not visible",
+          updateStatus: updatePrompt.visible ? updateStatusLabel(updatePrompt.status) : "not visible",
           feedbackWebhook: feedbackConfigStatus?.configured
             ? feedbackConfigStatus.valid
               ? "enabled"
@@ -10277,82 +9325,6 @@ function MainModeApp() {
     );
   }
 
-  function renderSidebarBehaviorRestoreCard() {
-    if (settingsCategory !== "appearance") return null;
-
-    const sidebarModeOptions: Array<{
-      id: "fixed" | "slim" | "hover";
-      label: string;
-      note: string;
-      preview: string;
-    }> = [
-      {
-        id: "fixed",
-        label: "Fixed",
-        note: "Full sidebar always visible.",
-        preview: "steady"
-      },
-      {
-        id: "slim",
-        label: "Slim",
-        note: "Icons only, more room for the app.",
-        preview: "compact"
-      },
-      {
-        id: "hover",
-        label: "Hover open",
-        note: "Slim normally, slides open when hovered.",
-        preview: "slide"
-      }
-    ];
-
-    return (
-      <section className="settingsPageCard sidebarBehaviorRestoreCardV327" aria-label="Sidebar behavior">
-        <div className="settingsSectionTitle sidebarBehaviorTitleV327">
-          <span>layout</span>
-          <strong>Sidebar behavior</strong>
-          <small>Bring back fixed, slim, or hover-open sidebar without restoring the noisy visual settings panel.</small>
-        </div>
-
-        <div className="sidebarBehaviorPreviewV327" data-mode={settings.sidebarBehavior || "fixed"} aria-hidden="true">
-          <span className="sidebarPreviewRailV327">
-            <i />
-            <i />
-            <i />
-          </span>
-          <span className="sidebarPreviewPanelV327">
-            <b />
-            <b />
-            <b />
-          </span>
-        </div>
-
-        <div className="sidebarBehaviorChoicesV327" role="group" aria-label="Choose sidebar behavior">
-          {sidebarModeOptions.map((option) => {
-            const active = (settings.sidebarBehavior || "fixed") === option.id;
-
-            return (
-              <button
-                key={option.id}
-                type="button"
-                className={`sidebarBehaviorChoiceV327 ${active ? "active" : ""}`}
-                onClick={() => updateSetting("sidebarBehavior", option.id)}
-                aria-pressed={active}
-              >
-                <span className="sidebarChoiceDotV327" aria-hidden="true" />
-                <span className="sidebarChoiceCopyV327">
-                  <strong>{option.label}</strong>
-                  <small>{option.note}</small>
-                </span>
-                <em>{option.preview}</em>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-    );
-  }
-
   function renderSettingsCategoryContent() {
     return (
       <>
@@ -10369,7 +9341,7 @@ function MainModeApp() {
         >
           <SettingsCategoryContent
           settingsCategory={settingsCategory}
-        setSettingsCategory={setSettingsCategory}
+        setSettingsCategory={(value: string) => setSettingsCategory(value as SettingsCategory)}
         currentTheme={currentTheme}
         settings={settings}
         updateSetting={updateSetting}
@@ -10644,7 +9616,6 @@ function MainModeApp() {
     recentImportWeekCount,
     recentlyAdded,
     neverPlayedSongs,
-    missingSongs,
     missingFileCount: effectiveMissingFileCount,
     libraryLengthLabel,
     averageSongSeconds,
