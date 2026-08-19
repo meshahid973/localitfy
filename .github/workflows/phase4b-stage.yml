@@ -26,11 +26,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Apply checkpoint
+      - name: Apply checkpoints
         shell: bash
         run: |
           sed -i 's/localitfyConstants/localtifyConstants/g' scripts/phase4b/apply-checkpoint1.py
           python scripts/phase4b/apply-checkpoint1.py
+          python scripts/phase4b/apply-checkpoint2.py
       - name: Diff sanity
         run: git diff --check
       - name: Install exact desktop dependencies
@@ -51,5 +52,5 @@ jobs:
           git config user.email "noreply@openai.com"
           git add src electron tests
           git diff --cached --check
-          git commit -m "Phase 4B.1-2: harden runtime recovery and Discord RPC"
+          git commit -m "Phase 4B.3: extract renderer policy ownership"
           git push origin HEAD:agent/phase-4b-runtime-monolith-reduction
