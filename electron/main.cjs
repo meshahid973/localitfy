@@ -1,6 +1,11 @@
-﻿/* localtify 0.4.1 V425 cover picker and cache cleanup. */
+/* localtify 0.4.1 V425 cover picker and cache cleanup. */
 /* localtify 0.4.1 V424 â€” Windows startup white-screen recovery. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
+const { createIpcRouter } = require("./ipc/router.cjs");
+const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes } = require("./runtime/protocols.cjs");
+const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings } = require("./runtime/windows.cjs");
+const { createElectronServiceRuntime } = require("./runtime/services.cjs");
+const { createDatabaseRepositories } = require("./db/repositories.cjs");
 const http = require("node:http");
 const https = require("node:https");
 const path = require("node:path");
@@ -11,25 +16,6 @@ const { pathToFileURL } = require("node:url");
 
 process.env.DOTENV_CONFIG_QUIET = process.env.DOTENV_CONFIG_QUIET || "true";
 process.env.DOTENVX_QUIET = process.env.DOTENVX_QUIET || "true";
-
-const LOCALTIFY_RENDERER_PROTOCOL = "localtify-renderer";
-
-try {
-  protocol.registerSchemesAsPrivileged([
-    {
-      scheme: LOCALTIFY_RENDERER_PROTOCOL,
-      privileges: {
-        standard: true,
-        secure: true,
-        supportFetchAPI: true,
-        corsEnabled: true,
-        stream: true
-      }
-    }
-  ]);
-} catch (error) {
-  console.log("[localtify renderer protocol scheme error]", error?.message || error);
-}
 
 function loadLocaltifyEnv() {
   const publicSpotifyClientId = "586c22791eb74d73b1c83db88f1d4c52";
@@ -158,29 +144,28 @@ function loadLocaltifyEnv() {
 }
 
 loadLocaltifyEnv();
+registerPrivilegedSchemes(protocol);
 
 const ffmpegStatic = require("ffmpeg-static");
 const { autoUpdater } = require("electron-updater");
 
-const {
-  initDatabase,
-  getSongs,
-  insertSongs,
-  patchSong,
-  deleteSong,
-  clearLibrary,
-  getSettings,
-  saveSettings,
-  getPlaylists,
-  savePlaylists,
-  backupDatabase,
-  repairDatabaseNow,
-  getDatabaseStatus
-} = require("./db.cjs");
+const databaseRepositories = createDatabaseRepositories(require("./db.cjs"));
+const initDatabase = databaseRepositories.database.init;
+const backupDatabase = databaseRepositories.database.backup;
+const repairDatabaseNow = databaseRepositories.database.repair;
+const getDatabaseStatus = databaseRepositories.database.status;
+const getSongs = databaseRepositories.songs.list;
+const insertSongs = databaseRepositories.songs.insertMany;
+const patchSong = databaseRepositories.songs.patch;
+const deleteSong = databaseRepositories.songs.remove;
+const clearLibrary = databaseRepositories.songs.clear;
+const getSettings = databaseRepositories.settings.get;
+const saveSettings = databaseRepositories.settings.save;
+const getPlaylists = databaseRepositories.playlists.get;
+const savePlaylists = databaseRepositories.playlists.save;
 
-const { setDiscordActivity, clearDiscordActivity, shutdownDiscordActivity, getDiscordStatus, resetDiscordActivityCache } = require("./rpc.cjs");
+const { setDiscordActivity, clearDiscordActivity, getDiscordStatus, resetDiscordActivityCache } = require("./rpc.cjs");
 const {
-  initDownloader,
   downloadAudioUrls,
   cancelActiveDownloads,
   convertLocalMediaFiles,
@@ -189,15 +174,15 @@ const {
 } = require("./downloader.cjs");
 
 const {
-  initMetadataService,
   readLocalAudioMetadata
 } = require("./metadata-service.cjs");
 
 const {
-  initCoverService,
   findFolderCover,
   resolveSongCover
 } = require("./cover-service.cjs");
+
+const ipcRouter = createIpcRouter(ipcMain);
 
 const isDev = !app.isPackaged;
 
@@ -210,7 +195,6 @@ app.on("second-instance", () => {
   showMainWindow();
 });
 
-const MEDIA_PROTOCOL = "localtify-media";
 const MEDIA_PROTOCOL_HOST = "file";
 const MEDIA_SERVER_HOST = "127.0.0.1";
 const MEDIA_SERVER_TOKEN = crypto.randomBytes(18).toString("hex");
@@ -228,24 +212,6 @@ const coverThumbnailUrlCache = new Map();
 const coverThumbnailQueue = new Map();
 let coverThumbnailWarmStarted = false;
 
-
-try {
-  protocol.registerSchemesAsPrivileged([
-    {
-      scheme: MEDIA_PROTOCOL,
-      privileges: {
-        standard: true,
-        secure: true,
-        supportFetchAPI: true,
-        stream: true,
-        corsEnabled: true,
-        bypassCSP: true
-      }
-    }
-  ]);
-} catch (error) {
-  console.log("[localitfy media protocol privilege error]", error?.message || error);
-}
 
 const APP_NAME = "localtify";
 const LEGACY_APP_DATA_NAME = "localitfy";
@@ -342,29 +308,6 @@ let mainWindowRendererRecoveredOnce = false;
 let startupLaunchStatus = { wasOpenedAtLogin: false, wasOpenedAsHidden: false };
 let lastAssignedCoverPath = "";
 
-
-const DEFAULT_WINDOW_TRANSLUCENCY = Object.freeze({
-  translucentWindow: true,
-  windowTransparency: 82,
-  windowBlur: 18,
-  transparentAppBackground: true
-});
-
-function clampTranslucentNumber(value, fallback, min, max) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return fallback;
-  return Math.max(min, Math.min(max, Math.round(number)));
-}
-
-function normalizeWindowTranslucencySettings(settings = {}) {
-  const source = settings && typeof settings === "object" ? settings : {};
-  return {
-    translucentWindow: Boolean(source.translucentWindow ?? DEFAULT_WINDOW_TRANSLUCENCY.translucentWindow),
-    windowTransparency: clampTranslucentNumber(source.windowTransparency, DEFAULT_WINDOW_TRANSLUCENCY.windowTransparency, 12, 88),
-    windowBlur: clampTranslucentNumber(source.windowBlur, DEFAULT_WINDOW_TRANSLUCENCY.windowBlur, 0, 36),
-    transparentAppBackground: source.transparentAppBackground !== false
-  };
-}
 
 function getSavedWindowTranslucencySettings() {
   try {
@@ -888,14 +831,14 @@ function updateNativeMediaState(payload = {}) {
 }
 
 function setupNativeWindowsMediaIpc() {
-  ipcMain.handle("localitfy:native-media-state", async (_event, payload = {}) => updateNativeMediaState(payload));
-  ipcMain.handle("localitfy:set-minimize-to-tray", async (_event, payload = {}) => {
+  ipcRouter.handle("localitfy:native-media-state", async (_event, payload = {}) => updateNativeMediaState(payload));
+  ipcRouter.handle("localitfy:set-minimize-to-tray", async (_event, payload = {}) => {
     minimizeToTray = typeof payload === "boolean" ? payload : Boolean(payload.enabled);
     if (minimizeToTray) ensureTray();
     updateTrayMenu();
     return { ok: true, minimizeToTray };
   });
-  ipcMain.handle("localitfy:set-start-with-windows", async (_event, payload = {}) => {
+  ipcRouter.handle("localitfy:set-start-with-windows", async (_event, payload = {}) => {
     const enabled = typeof payload === "boolean" ? payload : Boolean(payload.enabled);
     const status = setStartWithWindows(enabled);
     try {
@@ -905,8 +848,8 @@ function setupNativeWindowsMediaIpc() {
     }
     return { ...status, openAtLogin: Boolean(enabled) };
   });
-  ipcMain.handle("localitfy:get-start-with-windows", async () => getStartWithWindowsStatus());
-  ipcMain.handle("localitfy:native-media-status", async () => ({
+  ipcRouter.handle("localitfy:get-start-with-windows", async () => getStartWithWindowsStatus());
+  ipcRouter.handle("localitfy:native-media-status", async () => ({
     ok: true,
     state: nativeMediaState,
     minimizeToTray,
@@ -5310,13 +5253,20 @@ async function sendLocaltifyFeedback(payload = {}) {
 }
 
 
+let serviceRuntime = null;
+
 app.whenReady().then(async () => {
   registerLocaltifyRendererProtocol();
   registerLocaltifyMediaProtocol();
-  await startLocaltifyMediaServer();
-  initDownloader({ userDataPath: app.getPath("userData"), ffmpegPath: getFfmpegPath(), getCookiesFile: getYouTubeCookiesFile });
-  initMetadataService({ userDataPath: app.getPath("userData"), ffmpegPath: getFfmpegPath() });
-  initCoverService({ userDataPath: app.getPath("userData") });
+  serviceRuntime = createElectronServiceRuntime({
+    userDataPath: app.getPath("userData"),
+    ffmpegPath: getFfmpegPath(),
+    getCookiesFile: getYouTubeCookiesFile,
+    startMediaServer: startLocaltifyMediaServer,
+    stopMediaServer: stopLocaltifyMediaServer,
+    cleanupNativeWindowsMedia
+  });
+  await serviceRuntime.start();
   const databaseRecovery = restoreDatabaseFromOldUserDataIfNeeded();
   initDatabase(databaseRecovery.dbPath || path.join(app.getPath("userData"), SQLITE_FILE_NAME));
   try {
@@ -5331,22 +5281,22 @@ app.whenReady().then(async () => {
   }
   setupNativeWindowsMediaIpc();
 
-  ipcMain.handle("localitfy:open-devtools", async (event, payload = {}) => {
+  ipcRouter.handle("localitfy:open-devtools", async (event, payload = {}) => {
     const win = BrowserWindow.fromWebContents(event.sender) || mainWindow;
     return openLocaltifyDevTools(win, payload);
   });
 
-  ipcMain.handle("localitfy:toggle-devtools", async (event) => {
+  ipcRouter.handle("localitfy:toggle-devtools", async (event) => {
     const win = BrowserWindow.fromWebContents(event.sender) || mainWindow;
     return toggleLocaltifyDevTools(win);
   });
 
-  ipcMain.handle("localitfy:performance-status", async () => getLocaltifyPerformanceStatus());
-  ipcMain.handle("localitfy:gpu-status", async () => getLocaltifyPerformanceStatus());
-  ipcMain.handle("feedback:status", async () => getFeedbackStatus());
-  ipcMain.handle("feedback:send", async (_event, payload = {}) => sendLocaltifyFeedback(payload));
+  ipcRouter.handle("localitfy:performance-status", async () => getLocaltifyPerformanceStatus());
+  ipcRouter.handle("localitfy:gpu-status", async () => getLocaltifyPerformanceStatus());
+  ipcRouter.handle("feedback:status", async () => getFeedbackStatus());
+  ipcRouter.handle("feedback:send", async (_event, payload = {}) => sendLocaltifyFeedback(payload));
 
-  ipcMain.handle("app:bootstrap", async () => {
+  ipcRouter.handle("app:bootstrap", async () => {
     await yieldToMainLoop();
     scheduleCoverThumbnailWarmup();
     return {
@@ -5360,7 +5310,7 @@ app.whenReady().then(async () => {
     };
   });
 
-  ipcMain.handle("playback:resolve-url", async (_event, payload = {}) => {
+  ipcRouter.handle("playback:resolve-url", async (_event, payload = {}) => {
     try {
       const filePath = String(payload?.filePath || "").trim();
 
@@ -5398,21 +5348,21 @@ app.whenReady().then(async () => {
   });
 
   const pixelListHandler = async () => getPixelArtFiles().map((filePath) => ({ name: path.parse(filePath).name, key: path.parse(filePath).name, path: filePath, url: safeMediaUrl(filePath) }));
-  ipcMain.handle("pixel:list", pixelListHandler);
-  ipcMain.handle("art:list-pixel", pixelListHandler);
-  ipcMain.handle("covers:list-pixelart", async () => {
+  ipcRouter.handle("pixel:list", pixelListHandler);
+  ipcRouter.handle("art:list-pixel", pixelListHandler);
+  ipcRouter.handle("covers:list-pixelart", async () => {
     try { return listPixelCoversDetailed(); } catch (e) { console.log("[localitfy list covers error]", e?.message); return []; }
   });
-  ipcMain.handle("covers:stats", async () => {
+  ipcRouter.handle("covers:stats", async () => {
     try { return getCoverStats(); } catch (e) { console.log("[localitfy covers stats error]", e?.message); return {}; }
   });
-  ipcMain.handle("covers:rescan", async () => {
+  ipcRouter.handle("covers:rescan", async () => {
     clearPixelArtCache();
     clearFileInfoCache();
     await yieldToMainLoop();
     return buildRandomizeMissingSongCovers();
   });
-  ipcMain.handle("covers:randomize-all", async () => {
+  ipcRouter.handle("covers:randomize-all", async () => {
     await yieldToMainLoop();
     const covers = getPixelArtFiles();
     if (!covers.length) return listSongsShaped();
@@ -5423,11 +5373,11 @@ app.whenReady().then(async () => {
     }
     return listSongsShaped();
   });
-  ipcMain.handle("covers:randomize-missing", async () => {
+  ipcRouter.handle("covers:randomize-missing", async () => {
     await yieldToMainLoop();
     return buildRandomizeMissingSongCovers();
   });
-  ipcMain.handle("covers:randomize-selected", async (_event, ids) => {
+  ipcRouter.handle("covers:randomize-selected", async (_event, ids) => {
     await yieldToMainLoop();
     if (!Array.isArray(ids) || !ids.length) return listSongsShaped();
     const covers = getPixelArtFiles();
@@ -5441,16 +5391,16 @@ app.whenReady().then(async () => {
     }
     return listSongsShaped();
   });
-  ipcMain.handle("covers:broken", async () => {
+  ipcRouter.handle("covers:broken", async () => {
     try { return getCoverStats().brokenItems || []; } catch { return []; }
   });
-  ipcMain.handle("covers:least-used", async () => {
+  ipcRouter.handle("covers:least-used", async () => {
     try { return pickLeastUsedCover(getPixelArtFiles()); } catch { return ""; }
   });
-  ipcMain.handle("covers:thumbnail-status", async () => {
+  ipcRouter.handle("covers:thumbnail-status", async () => {
     try { return getCoverThumbnailStatus(); } catch (error) { return { ok: false, error: error?.message || "thumbnail status failed" }; }
   });
-  ipcMain.handle("covers:warm-thumbnails", async (_event, payload = {}) => {
+  ipcRouter.handle("covers:warm-thumbnails", async (_event, payload = {}) => {
     try {
       await yieldToMainLoop();
       return warmCoverThumbnails({
@@ -5468,14 +5418,14 @@ app.whenReady().then(async () => {
       };
     }
   });
-  ipcMain.handle("covers:cleanup-cache", async () => {
+  ipcRouter.handle("covers:cleanup-cache", async () => {
     try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; }
   });
-  ipcMain.handle("song:set-cover", async (_event, id, coverPath) => {
+  ipcRouter.handle("song:set-cover", async (_event, id, coverPath) => {
     const updated = patchSong(id, { coverPath });
     return updated ? shapeSong(updated) : null;
   });
-  ipcMain.handle("song:pick-cover", async (event, id) => {
+  ipcRouter.handle("song:pick-cover", async (event, id) => {
     const song = getSongs().find((item) => item.id === id);
     if (!song) return null;
 
@@ -5511,12 +5461,12 @@ app.whenReady().then(async () => {
       return shapeSong(song);
     }
   });
-  ipcMain.handle("song:analyze-volume", async (_event, id) => {
+  ipcRouter.handle("song:analyze-volume", async (_event, id) => {
     const target = getSongs().find((item) => item.id === id);
     if (!target) return { ok: false, volumeGain: 1, error: "song not in library database" };
     return analyzeVolumeGain(target.filePath);
   });
-  ipcMain.handle("library:import", async (event) => {
+  ipcRouter.handle("library:import", async (event) => {
     try {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
       const result = await openImportDialog(senderWindow);
@@ -5537,7 +5487,7 @@ app.whenReady().then(async () => {
     }
   });
 
-  ipcMain.handle("library:repair-missing-metadata", async (_event, payload = {}) => {
+  ipcRouter.handle("library:repair-missing-metadata", async (_event, payload = {}) => {
     try {
       return await repairMissingSongMetadata(payload);
     } catch (error) {
@@ -5547,7 +5497,7 @@ app.whenReady().then(async () => {
   });
 
 
-  ipcMain.handle("album:scan-folder", async (event, payload = {}) => {
+  ipcRouter.handle("album:scan-folder", async (event, payload = {}) => {
     try {
       return await handleAlbumFolderScan(event, payload);
     } catch (error) {
@@ -5556,7 +5506,7 @@ app.whenReady().then(async () => {
     }
   });
 
-  ipcMain.handle("album:import-folder", async (event, payload = {}) => {
+  ipcRouter.handle("album:import-folder", async (event, payload = {}) => {
     try {
       return await handleAlbumFolderImport(event, payload);
     } catch (error) {
@@ -5565,7 +5515,7 @@ app.whenReady().then(async () => {
     }
   });
 
-  ipcMain.handle("media:convert-pick", async (event, payload) => {
+  ipcRouter.handle("media:convert-pick", async (event, payload) => {
     try {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
       const dialogOptions = {
@@ -5606,7 +5556,7 @@ app.whenReady().then(async () => {
     }
   });
 
-  ipcMain.handle("download:audio", async (event, payload) => {
+  ipcRouter.handle("download:audio", async (event, payload) => {
     try {
       const urls = Array.isArray(payload?.urls) ? payload.urls : [payload?.url].filter(Boolean);
       const autoAdd = typeof payload?.autoAdd === "boolean" ? payload.autoAdd : true;
@@ -5651,31 +5601,31 @@ app.whenReady().then(async () => {
     }
   });
 
-  ipcMain.handle("download:cancel", async () => ({ cancelled: cancelActiveDownloads() }));
-  ipcMain.handle("download:choose-folder", async () => {
+  ipcRouter.handle("download:cancel", async () => ({ cancelled: cancelActiveDownloads() }));
+  ipcRouter.handle("download:choose-folder", async () => {
     const owner = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
     const result = await dialog.showOpenDialog(owner, { title: "Choose localtify download folder", properties: ["openDirectory", "createDirectory"] });
     if (result.canceled || !result.filePaths?.[0]) return { canceled: true, folder: "" };
     return { canceled: false, folder: result.filePaths[0] };
   });
-  ipcMain.handle("download:open-folder", async (_event, folder) => {
+  ipcRouter.handle("download:open-folder", async (_event, folder) => {
     const target = getDownloadDirectory(folder);
     await shell.openPath(target);
     return true;
   });
 
-  ipcMain.handle("song:patch", async (_event, id, patch) => {
+  ipcRouter.handle("song:patch", async (_event, id, patch) => {
     const updated = patchSong(id, patch);
     return updated ? shapeSong(updated) : null;
   });
-  ipcMain.handle("song:random-cover", async (_event, id) => {
+  ipcRouter.handle("song:random-cover", async (_event, id) => {
     const covers = getPixelArtFiles();
     const song = getSongs().find((item) => item.id === id);
     const chosen = pickLeastUsedCover(covers, song ? [song] : [], { avoidSelectedCurrent: true });
     const updated = patchSong(id, { coverPath: chosen });
     return updated ? shapeSong(updated) : null;
   });
-  ipcMain.handle("song:delete", async (_event, id) => {
+  ipcRouter.handle("song:delete", async (_event, id) => {
     try {
       deleteSong(id);
       return listSongsShaped();
@@ -5684,12 +5634,12 @@ app.whenReady().then(async () => {
       return listSongsShaped();
     }
   });
-  ipcMain.handle("library:clear", async () => {
+  ipcRouter.handle("library:clear", async () => {
     clearLibrary();
     return [];
   });
 
-  ipcMain.handle("library:refresh-download-folder", async (_event, payload = {}) => {
+  ipcRouter.handle("library:refresh-download-folder", async (_event, payload = {}) => {
     const target = getDownloadDirectory(payload?.folder || payload?.downloadFolder || "");
     const tracks = Array.isArray(payload?.tracks) ? payload.tracks : [];
     const refresh = await importNewAudioFilesFromDirectory(target, tracks);
@@ -5704,8 +5654,8 @@ app.whenReady().then(async () => {
     };
   });
 
-  ipcMain.handle("settings:get", async () => getSettings());
-  ipcMain.handle("settings:save", async (_event, settings) => {
+  ipcRouter.handle("settings:get", async () => getSettings());
+  ipcRouter.handle("settings:save", async (_event, settings) => {
     try {
       if (!settings || typeof settings !== "object") return getSettings();
       if (Object.prototype.hasOwnProperty.call(settings, "startWithWindows")) {
@@ -5723,8 +5673,8 @@ app.whenReady().then(async () => {
     }
   });
 
-  ipcMain.handle("localitfy:get-window-translucency", async () => getSavedWindowTranslucencySettings());
-  ipcMain.handle("localitfy:set-window-translucency", async (_event, payload = {}) => {
+  ipcRouter.handle("localitfy:get-window-translucency", async () => getSavedWindowTranslucencySettings());
+  ipcRouter.handle("localitfy:set-window-translucency", async (_event, payload = {}) => {
     try {
       const current = getSavedWindowTranslucencySettings();
       const next = normalizeWindowTranslucencySettings({ ...current, ...(payload || {}) });
@@ -5753,19 +5703,19 @@ app.whenReady().then(async () => {
       return { ok: false, error: error?.message || "could not update translucent window", ...getSavedWindowTranslucencySettings() };
     }
   });
-  ipcMain.handle("localitfy:restart-app", async () => {
+  ipcRouter.handle("localitfy:restart-app", async () => {
     restartForWindowTranslucency();
     return true;
   });
 
-  ipcMain.handle("playlists:get", async () => getPlaylists());
-  ipcMain.handle("playlists:save", async (_event, playlists) => {
+  ipcRouter.handle("playlists:get", async () => getPlaylists());
+  ipcRouter.handle("playlists:save", async (_event, playlists) => {
     try { return savePlaylists(playlists); } catch { return getPlaylists(); }
   });
-  ipcMain.handle("database:backup-now", async () => {
+  ipcRouter.handle("database:backup-now", async () => {
     try { return { ok: backupDatabase() }; } catch (e) { return { ok: false, error: e?.message }; }
   });
-  ipcMain.handle("database:repair-now", async () => {
+  ipcRouter.handle("database:repair-now", async () => {
     try {
       repairDatabaseNow();
       mediaTokenToPath.clear();
@@ -5775,16 +5725,16 @@ app.whenReady().then(async () => {
       return { ok: false, error: e?.message };
     }
   });
-  ipcMain.handle("database:status", async () => getDatabaseStatus());
+  ipcRouter.handle("database:status", async () => getDatabaseStatus());
 
-  ipcMain.handle("discord:set-activity", async (_event, payload) => {
+  ipcRouter.handle("discord:set-activity", async (_event, payload) => {
     try { return { ok: await setDiscordActivity(payload) }; } catch { return { ok: false }; }
   });
-  ipcMain.handle("discord:clear-activity", async () => {
+  ipcRouter.handle("discord:clear-activity", async () => {
     try { return { ok: await clearDiscordActivity() }; } catch { return { ok: false }; }
   });
-  ipcMain.handle("discord:status", async () => getDiscordStatus());
-  ipcMain.handle("discord:reset-cache", async () => {
+  ipcRouter.handle("discord:status", async () => getDiscordStatus());
+  ipcRouter.handle("discord:reset-cache", async () => {
     resetDiscordActivityCache();
     return true;
   });
@@ -5812,10 +5762,10 @@ app.whenReady().then(async () => {
     }
   };
 
-  ipcMain.handle("spotify-fetch", async (_event, payload = {}) => runSpotifyFetch(payload));
-  ipcMain.handle("spotify-fetch-tracks", async (_event, url) => runSpotifyFetch({ url }));
+  ipcRouter.handle("spotify-fetch", async (_event, payload = {}) => runSpotifyFetch(payload));
+  ipcRouter.handle("spotify-fetch-tracks", async (_event, url) => runSpotifyFetch({ url }));
 
-  ipcMain.handle("spotify-check", async () => {
+  ipcRouter.handle("spotify-check", async () => {
     const saved = readSpotifyOAuthToken();
     const hasClientId = Boolean(SPOTIFY_CLIENT_ID);
     return {
@@ -5831,9 +5781,9 @@ app.whenReady().then(async () => {
     };
   });
 
-  ipcMain.handle("spotify-login", async () => loginSpotifyOAuth());
+  ipcRouter.handle("spotify-login", async () => loginSpotifyOAuth());
 
-  ipcMain.handle("spotify-import-browser", async () => ({
+  ipcRouter.handle("spotify-import-browser", async () => ({
     ok: false,
     ready: true,
     loggedIn: Boolean(readSpotifyOAuthToken()?.refreshToken),
@@ -5845,7 +5795,7 @@ app.whenReady().then(async () => {
     error: "Browser-cookie Spotify import was removed. Use Connect Spotify, or paste a public Spotify link directly."
   }));
 
-  ipcMain.handle("spotify-set-cookie", async () => ({
+  ipcRouter.handle("spotify-set-cookie", async () => ({
     ok: false,
     ready: true,
     loggedIn: Boolean(readSpotifyOAuthToken()?.refreshToken),
@@ -5857,13 +5807,13 @@ app.whenReady().then(async () => {
     error: "Cookie login was removed. Use Connect Spotify, or paste a public Spotify link directly."
   }));
 
-  ipcMain.handle("spotify-logout", async () => {
+  ipcRouter.handle("spotify-logout", async () => {
     clearSpotifyOAuthToken();
     console.log("[localtify spotify] oauth token cleared");
     return { ok: true, ready: true, loggedIn: false, publicOnly: true, fallbackAvailable: true, mode: SPOTIFY_CLIENT_ID ? "oauth-pkce" : "public-fallback", needsClientId: false };
   });
 
-  ipcMain.handle("spotdl-check", async () => ({
+  ipcRouter.handle("spotdl-check", async () => ({
     ok: true,
     installed: true,
     engine: "localtify-ytdlp-bridge",
@@ -6032,30 +5982,30 @@ app.whenReady().then(async () => {
     }
   };
 
-  ipcMain.handle("spotify-download-batch", runSpotifyDownloadBatch);
-  ipcMain.handle("spotdl-download-batch", runSpotifyDownloadBatch);
+  ipcRouter.handle("spotify-download-batch", runSpotifyDownloadBatch);
+  ipcRouter.handle("spotdl-download-batch", runSpotifyDownloadBatch);
 
-  ipcMain.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
-  ipcMain.handle("localitfy:download-update", async () => downloadUpdate());
-  ipcMain.handle("localitfy:install-update", async () => installUpdate());
-  ipcMain.handle("localitfy:open-external", async (_event, url) => {
+  ipcRouter.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
+  ipcRouter.handle("localitfy:download-update", async () => downloadUpdate());
+  ipcRouter.handle("localitfy:install-update", async () => installUpdate());
+  ipcRouter.handle("localitfy:open-external", async (_event, url) => {
     const targetUrl = String(url || "").trim();
     if (!/^https?:\/\//i.test(targetUrl)) return { ok: false, reason: "invalid-url" };
     await shell.openExternal(targetUrl);
     return { ok: true };
   });
 
-  ipcMain.handle("window:minimize", async (event) => {
+  ipcRouter.handle("window:minimize", async (event) => {
     BrowserWindow.fromWebContents(event.sender)?.minimize();
     return true;
   });
-  ipcMain.handle("window:toggle-maximize", async (event) => {
+  ipcRouter.handle("window:toggle-maximize", async (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (!win) return false;
     win.isMaximized() ? win.unmaximize() : win.maximize();
     return true;
   });
-  ipcMain.handle("window:close", async (event) => {
+  ipcRouter.handle("window:close", async (event) => {
     BrowserWindow.fromWebContents(event.sender)?.close();
     return true;
   });
@@ -6079,9 +6029,12 @@ app.whenReady().then(async () => {
 
 app.on("before-quit", async () => {
   allowQuit = true;
-  await shutdownDiscordActivity("app-before-quit");
-  cleanupNativeWindowsMedia();
-  stopLocaltifyMediaServer();
+  if (serviceRuntime) {
+    await serviceRuntime.stop("app-before-quit");
+  } else {
+    try { cleanupNativeWindowsMedia(); } catch { }
+    try { stopLocaltifyMediaServer(); } catch { }
+  }
 });
 
 app.on("window-all-closed", () => {
