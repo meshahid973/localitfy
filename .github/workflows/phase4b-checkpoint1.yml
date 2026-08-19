@@ -1,0 +1,369 @@
+name: Phase 4B Checkpoint 1
+
+on:
+  push:
+    branches:
+      - agent/phase-4b-runtime-monolith-reduction
+
+permissions:
+  contents: write
+
+concurrency:
+  group: phase4b-checkpoint1
+  cancel-in-progress: true
+
+jobs:
+  patch-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/phase-4b-runtime-monolith-reduction
+          fetch-depth: 0
+
+      - name: Apply runtime reliability fixes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('.')
+          app_path = root / 'src/App.tsx'
+          app = app_path.read_text(encoding='utf-8-sig')
+
+          # Canonical source URL import.
+          if 'LOCALITFY_SOURCE_URL,' not in app:
+              app = app.replace('  LOCALITFY_DOWNLOAD_URL,\n', '  LOCALITFY_DOWNLOAD_URL,\n  LOCALITFY_SOURCE_URL,\n', 1)
+
+          # Persistent Discord payload dedupe survives effect restarts.
+          ref_anchor = '  const lastDiscordAssetKeyRef = useRef<string>("");\n'
+          if 'discordLastPayloadKeyRef' not in app:
+              if ref_anchor not in app:
+                  raise SystemExit('Discord ref anchor not found')
+              app = app.replace(ref_anchor, ref_anchor + '  const discordLastPayloadKeyRef = useRef<string>("");\n', 1)
+
+          app = app.replace('    let alive = true;\n    let lastPayloadKey = "";\n\n    const sendActivity = (reason = "tick") => {',
+                            '    let alive = true;\n\n    const sendActivity = () => {', 1)
+
+          # Reason is not state and must not defeat dedupe.
+          app = app.replace('        latestSettings.discordSecondLine,\n        chosenDiscordAsset,\n        reason\n      ].join("|");\n\n      if (payloadKey === lastPayloadKey) return;\n      lastPayloadKey = payloadKey;',
+                            '        latestSettings.discordSecondLine,\n        chosenDiscordAsset\n      ].join("|");\n\n      if (payloadKey === discordLastPayloadKeyRef.current) return;\n      discordLastPayloadKeyRef.current = payloadKey;', 1)
+
+          # Correct repository button and allow a failed send to retry.
+          app = app.replace('          discordGithubUrl: LOCALITFY_DOWNLOAD_URL,', '          discordGithubUrl: LOCALITFY_SOURCE_URL,', 1)
+          app = app.replace('        })\n        .catch(() => undefined);',
+                            '        })\n        .catch(() => {\n          if (discordLastPayloadKeyRef.current === payloadKey) {\n            discordLastPayloadKeyRef.current = "";\n          }\n        });', 1)
+          app = app.replace('    sendActivity("now");\n\n    const discordRefreshEveryMs = isAppBackgrounded ? 45000 : 15000;\n    const timer = window.setInterval(() => sendActivity("tick"), discordRefreshEveryMs);',
+                            '    sendActivity();\n\n    const discordRefreshEveryMs = isAppBackgrounded ? 45000 : 15000;\n    const timer = window.setInterval(sendActivity, discordRefreshEveryMs);', 1)
+
+          # Clearing Discord also clears the renderer-side signature.
+          app = app.replace('    if (!settings.discordEnabled) {\n      window.localitfy.clearDiscordActivity().catch(() => undefined);',
+                            '    if (!settings.discordEnabled) {\n      discordLastPayloadKeyRef.current = "";\n      window.localitfy.clearDiscordActivity().catch(() => undefined);', 1)
+
+          app_path.write_text(app, encoding='utf-8')
+
+          # Canonical Discord URLs.
+          discord_constants = root / 'src/features/discord/discord.constants.ts'
+          dc = discord_constants.read_text(encoding='utf-8-sig')
+          if 'LOCALITFY_SOURCE_URL' not in dc:
+              dc = dc.replace('export const LOCALITFY_DOWNLOAD_URL = "https://github.com/meshahid973/localitfy/releases/latest";\n',
+                              'export const LOCALITFY_DOWNLOAD_URL = "https://github.com/meshahid973/localitfy/releases/latest";\nexport const LOCALITFY_SOURCE_URL = "https://github.com/meshahid973/localitfy";\n', 1)
+          discord_constants.write_text(dc, encoding='utf-8')
+
+          barrel = root / 'src/localitfyConstants.ts'
+          bc = barrel.read_text(encoding='utf-8-sig')
+          bc = bc.replace('export const LOCALITFY_DOWNLOAD_URL = "https://github.com/meshahid973/localitfy/releases/latest";\n', '')
+          old_discord_export = 'export { DISCORD_ASSET_KEYS, DISCORD_HASH_ASSET_KEYS, DISCORD_LOGO_ASSET, DISCORD_NAMED_ASSET_KEYS, discordArtModeOptions, discordCleanupOptions, discordSecondLineOptions, discordStyleOptions } from "./features/discord/discord.constants";'
+          new_discord_export = 'export { LOCALITFY_DOWNLOAD_URL, LOCALITFY_SOURCE_URL, DISCORD_ASSET_KEYS, DISCORD_HASH_ASSET_KEYS, DISCORD_LOGO_ASSET, DISCORD_NAMED_ASSET_KEYS, discordArtModeOptions, discordCleanupOptions, discordSecondLineOptions, discordStyleOptions } from "./features/discord/discord.constants";'
+          if old_discord_export in bc:
+              bc = bc.replace(old_discord_export, new_discord_export, 1)
+          barrel.write_text(bc, encoding='utf-8')
+
+          # Same-song resume is not a new selection. Keep real restart/manual force behavior.
+          rpc_path = root / 'electron/rpc.cjs'
+          rpc = rpc_path.read_text(encoding='utf-8-sig')
+          resumed = '''  const resumedFresh =\n    songIdentity &&\n    songIdentity === dynamicDiscordAssetSongIdentity &&\n    isPlaying &&\n    !lastPayloadIsPlaying &&\n    currentTime <= 2 &&\n    now - lastDynamicAssetChangeAt > 1800;\n\n'''
+          rpc = rpc.replace(resumed, '', 1)
+          rpc = rpc.replace('    playbackRestarted ||\n    resumedFresh ||\n    manuallyForced', '    playbackRestarted ||\n    manuallyForced', 1)
+          rpc_path.write_text(rpc, encoding='utf-8')
+
+          # Bridge: expose existing restart IPC and one logs-folder action.
+          preload_path = root / 'electron/preload.cjs'
+          preload = preload_path.read_text(encoding='utf-8-sig')
+          bridge_anchor = '  toggleDevTools: () => ipcRenderer.invoke("localitfy:toggle-devtools"),\n'
+          if 'restartApp:' not in preload:
+              if bridge_anchor not in preload:
+                  raise SystemExit('preload runtime bridge anchor missing')
+              preload = preload.replace(bridge_anchor, bridge_anchor + '  restartApp: () => ipcRenderer.invoke("localitfy:restart-app"),\n  openLogsFolder: () => ipcRenderer.invoke("localitfy:open-logs"),\n', 1)
+          preload_path.write_text(preload, encoding='utf-8')
+
+          main_path = root / 'electron/main.cjs'
+          main = main_path.read_text(encoding='utf-8-sig')
+          restart_handler = '''  ipcRouter.handle("localitfy:restart-app", async () => {\n    restartForWindowTranslucency();\n    return true;\n  });\n'''
+          if 'localitfy:open-logs' not in main:
+              if restart_handler not in main:
+                  raise SystemExit('existing restart IPC handler missing')
+              logs_handler = restart_handler + '''  ipcRouter.handle("localitfy:open-logs", async () => {\n    try {\n      const logsPath = app.getPath("logs");\n      fs.mkdirSync(logsPath, { recursive: true });\n      const error = await shell.openPath(logsPath);\n      return error ? { ok: false, path: logsPath, error } : { ok: true, path: logsPath };\n    } catch (error) {\n      return { ok: false, error: error?.message || "could not open logs folder" };\n    }\n  });\n'''
+              main = main.replace(restart_handler, logs_handler, 1)
+          main_path.write_text(main, encoding='utf-8')
+
+          dts_path = root / 'src/localitfy.d.ts'
+          dts = dts_path.read_text(encoding='utf-8-sig')
+          dts_anchor = '      toggleDevTools?: () => Promise<any>;\n'
+          if 'restartApp?:' not in dts:
+              if dts_anchor not in dts:
+                  raise SystemExit('bridge type anchor missing')
+              dts = dts.replace(dts_anchor, dts_anchor + '      restartApp?: () => Promise<boolean>;\n      openLogsFolder?: () => Promise<{ ok: boolean; path?: string; error?: string }>;\n', 1)
+          dts_path.write_text(dts, encoding='utf-8')
+          PY
+
+          mkdir -p src/app
+          cat > src/app/AppErrorBoundary.tsx <<'EOF'
+          import { Component, type ErrorInfo, type ReactNode } from "react";
+          import "./app-error-boundary.css";
+
+          type AppErrorBoundaryProps = { children: ReactNode };
+          type AppErrorBoundaryState = {
+            error: Error | null;
+            componentStack: string;
+            copied: boolean;
+          };
+
+          function makeCrashReport(error: Error | null, componentStack: string) {
+            return [
+              "Localitfy renderer crash",
+              `Time: ${new Date().toISOString()}`,
+              `User agent: ${navigator.userAgent}`,
+              "",
+              error?.stack || error?.message || "Unknown renderer error",
+              componentStack ? `\nComponent stack:\n${componentStack}` : ""
+            ].filter(Boolean).join("\n");
+          }
+
+          async function copyText(text: string) {
+            try {
+              await navigator.clipboard.writeText(text);
+              return true;
+            } catch {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+              const copied = document.execCommand("copy");
+              textarea.remove();
+              return copied;
+            }
+          }
+
+          export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
+            state: AppErrorBoundaryState = { error: null, componentStack: "", copied: false };
+
+            static getDerivedStateFromError(error: Error): Partial<AppErrorBoundaryState> {
+              return { error };
+            }
+
+            componentDidCatch(error: Error, info: ErrorInfo) {
+              console.error("[localitfy renderer crash]", error, info.componentStack);
+              this.setState({ componentStack: info.componentStack || "" });
+            }
+
+            restart = async () => {
+              try {
+                const restarted = await window.localitfy?.restartApp?.();
+                if (restarted) return;
+              } catch {
+                // Fall back to a renderer reload when IPC is unavailable.
+              }
+              window.location.reload();
+            };
+
+            copyError = async () => {
+              const copied = await copyText(makeCrashReport(this.state.error, this.state.componentStack));
+              if (copied) {
+                this.setState({ copied: true });
+                window.setTimeout(() => this.setState({ copied: false }), 1800);
+              }
+            };
+
+            openLogs = async () => {
+              try {
+                const result = await window.localitfy?.openLogsFolder?.();
+                if (result?.ok) return;
+              } catch {
+                // DevTools is still useful when the logs bridge itself failed.
+              }
+              await window.localitfy?.openDevTools?.({ mode: "detach" }).catch(() => undefined);
+            };
+
+            render() {
+              if (!this.state.error) return this.props.children;
+
+              return (
+                <main className="appCrashBoundary" role="alert">
+                  <section className="appCrashCard">
+                    <span className="appCrashEyebrow">localtify recovery</span>
+                    <h1>Localitfy encountered an error</h1>
+                    <p>The player hit an unexpected renderer error. Your library stays on disk; restart the app or copy the diagnostic details.</p>
+                    <pre className="appCrashMessage">{this.state.error.message || "Unknown renderer error"}</pre>
+                    <div className="appCrashActions">
+                      <button type="button" className="appCrashPrimary" onClick={this.restart}>Restart</button>
+                      <button type="button" onClick={this.copyError}>{this.state.copied ? "Copied" : "Copy error"}</button>
+                      <button type="button" onClick={this.openLogs}>Open logs</button>
+                    </div>
+                  </section>
+                </main>
+              );
+            }
+          }
+          EOF
+
+          cat > src/app/app-error-boundary.css <<'EOF'
+          .appCrashBoundary {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 32px;
+            background: #000;
+            color: #f5f5f5;
+            font-family: "Space Grotesk", system-ui, sans-serif;
+          }
+
+          .appCrashCard {
+            width: min(680px, 100%);
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            background: rgba(15, 15, 18, 0.94);
+            box-shadow: 0 22px 70px rgba(0, 0, 0, 0.55);
+          }
+
+          .appCrashEyebrow {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            opacity: 0.58;
+          }
+
+          .appCrashCard h1 { margin: 0 0 10px; font-size: clamp(25px, 4vw, 38px); }
+          .appCrashCard p { margin: 0; line-height: 1.6; color: rgba(245, 245, 245, 0.7); }
+
+          .appCrashMessage {
+            margin: 22px 0 0;
+            padding: 14px 16px;
+            max-height: 180px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.035);
+            color: rgba(255, 255, 255, 0.78);
+            font: 12px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+          }
+
+          .appCrashActions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+          .appCrashActions button {
+            min-height: 42px;
+            padding: 0 17px;
+            border: 1px solid rgba(255, 255, 255, 0.13);
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            cursor: pointer;
+          }
+          .appCrashActions button:hover { background: rgba(255, 255, 255, 0.12); }
+          .appCrashActions .appCrashPrimary { background: #f2f2f2; color: #050505; border-color: transparent; font-weight: 700; }
+          .appCrashActions .appCrashPrimary:hover { background: #fff; }
+          EOF
+
+          python - <<'PY'
+          from pathlib import Path
+          main = Path('src/main.tsx')
+          text = main.read_text(encoding='utf-8-sig')
+          if 'AppErrorBoundary' not in text:
+              text = text.replace('import App from "./App";\n', 'import App from "./App";\nimport { AppErrorBoundary } from "./app/AppErrorBoundary";\n', 1)
+              text = text.replace('ReactDOM.createRoot(document.getElementById("root")!).render(<App />);', 'ReactDOM.createRoot(document.getElementById("root")!).render(\n  <AppErrorBoundary>\n    <App />\n  </AppErrorBoundary>\n);', 1)
+          main.write_text(text, encoding='utf-8')
+          PY
+
+          cat > tests/phase4/runtime-reliability.test.mjs <<'EOF'
+          import assert from "node:assert/strict";
+          import fs from "node:fs";
+          import path from "node:path";
+          import test from "node:test";
+          import { fileURLToPath } from "node:url";
+
+          const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+          const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
+
+          test("Discord renderer updates dedupe persistent state instead of timer reasons", () => {
+            const source = read("src/App.tsx");
+            assert.match(source, /discordLastPayloadKeyRef\s*=\s*useRef/);
+            assert.doesNotMatch(source, /chosenDiscordAsset,\s*reason\s*\]/);
+            assert.match(source, /discordGithubUrl:\s*LOCALITFY_SOURCE_URL/);
+          });
+
+          test("Discord RPC does not roll new art just for a fresh resume", () => {
+            const source = read("electron/rpc.cjs");
+            assert.doesNotMatch(source, /const resumedFresh\s*=/);
+            assert.doesNotMatch(source, /playbackRestarted\s*\|\|\s*resumedFresh/);
+          });
+
+          test("Discord download and source buttons have distinct canonical URLs", () => {
+            const constants = read("src/features/discord/discord.constants.ts");
+            assert.match(constants, /LOCALITFY_DOWNLOAD_URL\s*=\s*"https:\/\/github\.com\/meshahid973\/localitfy\/releases\/latest"/);
+            assert.match(constants, /LOCALITFY_SOURCE_URL\s*=\s*"https:\/\/github\.com\/meshahid973\/localitfy"/);
+          });
+
+          test("renderer root is protected by the Localitfy error boundary", () => {
+            const rootSource = read("src/main.tsx");
+            const boundary = read("src/app/AppErrorBoundary.tsx");
+            assert.match(rootSource, /<AppErrorBoundary>[\s\S]*<App \/>[\s\S]*<\/AppErrorBoundary>/);
+            assert.match(boundary, /Restart/);
+            assert.match(boundary, /Copy error/);
+            assert.match(boundary, /Open logs/);
+          });
+
+          test("error recovery bridge reuses restart IPC and exposes logs", () => {
+            const preload = read("electron/preload.cjs");
+            const main = read("electron/main.cjs");
+            assert.match(preload, /restartApp:.*localitfy:restart-app/);
+            assert.match(preload, /openLogsFolder:.*localitfy:open-logs/);
+            assert.equal((main.match(/ipcRouter\.handle\("localitfy:restart-app"/g) || []).length, 1);
+            assert.equal((main.match(/ipcRouter\.handle\("localitfy:open-logs"/g) || []).length, 1);
+          });
+          EOF
+
+          git diff --check
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install exact desktop dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate checkpoint
+        run: |
+          npm run check
+          npm run performance:check
+
+      - name: Commit checkpoint
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "Checkpoint already applied."
+            exit 0
+          fi
+          git config user.name "OpenAI Phase 4B"
+          git config user.email "noreply@openai.com"
+          git add src/App.tsx src/main.tsx src/app/AppErrorBoundary.tsx src/app/app-error-boundary.css src/features/discord/discord.constants.ts src/localitfyConstants.ts src/localitfy.d.ts electron/rpc.cjs electron/preload.cjs electron/main.cjs tests/phase4/runtime-reliability.test.mjs
+          git diff --cached --check
+          git commit -m "Phase 4B.1-2: harden runtime recovery and Discord RPC"
+          git push origin HEAD:agent/phase-4b-runtime-monolith-reduction
