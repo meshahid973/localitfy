@@ -1,0 +1,2937 @@
+.playerBar{
+  --player-size-used: var(--player-size-live, var(--player-size, 108px));
+  --player-control-size: clamp(34px, calc(var(--player-size-used) * 0.36), 40px);
+  --player-main-control-size: clamp(42px, calc(var(--player-size-used) * 0.45), 50px);
+  --player-art-size: clamp(46px, calc(var(--player-size-used) - 42px), 62px);
+  --player-progress-fill: rgb(var(--accent-rgb));
+  --player-track-base: rgba(255, 255, 255, 0.13);
+
+  position: relative !important;
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: var(--player-size-used) !important;
+  min-height: 74px !important;
+  display: grid !important;
+  grid-template-columns: minmax(220px, 350px) minmax(420px, 1fr) minmax(150px, 240px) !important;
+  grid-template-areas: "left center right" !important;
+  align-items: center !important;
+  gap: clamp(14px, 1.7vw, 24px) !important;
+  padding: 10px 18px 12px !important;
+  overflow: visible !important;
+  isolation: isolate !important;
+  contain: layout style !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.085) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.01)),
+    rgba(0, 0, 0, 0.9) !important;
+  box-shadow:
+    0 -18px 56px rgba(0, 0, 0, 0.56),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+  backdrop-filter: blur(18px) saturate(126%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(126%) !important;
+}
+
+.playerBar::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: -34px -26px -20px !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: 28px 28px 0 0 !important;
+  background:
+    radial-gradient(circle at 20% 48%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.18), transparent 34%),
+    radial-gradient(circle at 72% 35%, rgba(var(--accent-rgb), 0.13), transparent 42%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+  opacity: 0.22 !important;
+  filter: blur(30px) saturate(1.28) brightness(0.74) !important;
+  transform: translateZ(0) scale(1.06) !important;
+  transition:
+    opacity 180ms ease,
+    transform 220ms ease,
+    filter 220ms ease !important;
+}
+
+.playerBar::after{
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.84), rgba(0,0,0,0.56) 50%, rgba(0,0,0,0.72)),
+    radial-gradient(circle at 50% -20%, rgba(255,255,255,0.04), transparent 42%) !important;
+}
+
+.playerBar:hover::before{
+  opacity: 0.32 !important;
+  transform: translateZ(0) scale(1.08) !important;
+  filter: blur(31px) saturate(1.34) brightness(0.77) !important;
+}
+
+.playerBar[data-ambient="false"]::before,
+[data-ambient="off"] .playerBar::before{
+  opacity: 0 !important;
+}
+
+.playerLeft,
+.playerCenter,
+.playerRight,
+.controlRow,
+.progressRow,
+.volumeWrap{
+  min-width: 0 !important;
+  contain: layout style !important;
+}
+
+.playerLeft{
+  grid-area: left !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  overflow: hidden !important;
+}
+
+.playerCenter{
+  grid-area: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  align-items: center !important;
+  justify-items: center !important;
+  gap: 7px !important;
+  padding-top: 2px !important;
+  overflow: visible !important;
+}
+
+.playerRight{
+  grid-area: right !important;
+  width: 100% !important;
+  display: grid !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  gap: 7px !important;
+  overflow: visible !important;
+}
+
+.playerArtSwap{
+  flex: 0 0 auto !important;
+  display: grid !important;
+  place-items: center !important;
+  animation: localtifyPlayerArtIn 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.playerBar .smallArt{
+  width: var(--player-art-size) !important;
+  height: var(--player-art-size) !important;
+  min-width: var(--player-art-size) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.09) inset !important;
+  transform: translateZ(0) !important;
+  transition:
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 180ms ease !important;
+}
+
+.playerBar .smallArt img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+.playerLeft:hover .smallArt{
+  transform: translate3d(0, -1px, 0) scale(1.025) !important;
+  box-shadow:
+    0 14px 32px rgba(0,0,0,0.38),
+    0 0 0 1px rgba(var(--accent-rgb),0.18) inset !important;
+}
+
+.playerMeta{
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 3px !important;
+  overflow: hidden !important;
+}
+
+.playerMeta strong{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  display: block !important;
+  color: rgba(255,255,255,0.95) !important;
+  font-size: 13.5px !important;
+  line-height: 1.12 !important;
+  font-weight: 820 !important;
+  letter-spacing: -0.025em !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.playerMeta p{
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  color: rgba(255,255,255,0.52) !important;
+  font-size: 11.5px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.nowPlayingMiniCopySwap{
+  animation: localtifyPlayerCopyIn 230ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes localtifyPlayerCopyIn{
+  from{ opacity: 0; transform: translate3d(0, 5px, 0); }
+  to{ opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes localtifyPlayerArtIn{
+  from{ opacity: 0.72; transform: scale(0.985); }
+  to{ opacity: 1; transform: scale(1); }
+}
+
+.controlRow{
+  width: 100% !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.playerBar .circleButton,
+.playerBar .volumeIconButton,
+.playerBar .repeatButton{
+  width: var(--player-control-size) !important;
+  height: var(--player-control-size) !important;
+  min-width: var(--player-control-size) !important;
+  min-height: var(--player-control-size) !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  position: relative !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  color: rgba(255,255,255,0.92) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  -webkit-app-region: no-drag !important;
+  transform-origin: center center !important;
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms ease,
+    opacity 160ms ease !important;
+}
+
+.playerBar .circleButton:hover,
+.playerBar .volumeIconButton:hover,
+.playerBar .repeatButton:hover{
+  transform: translate3d(0, -1px, 0) scale(1.06) !important;
+  color: #fff !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+.playerBar .circleButton:active,
+.playerBar .volumeIconButton:active,
+.playerBar .repeatButton:active{
+  transform: translate3d(0, 0, 0) scale(0.94) !important;
+}
+
+.playerBar .circleButton.main{
+  width: var(--player-main-control-size) !important;
+  height: var(--player-main-control-size) !important;
+  min-width: var(--player-main-control-size) !important;
+  min-height: var(--player-main-control-size) !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: rgb(var(--accent-rgb)) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.12) inset,
+    0 0 28px rgba(var(--accent-rgb),0.24),
+    0 14px 34px rgba(0,0,0,0.28) !important;
+}
+
+.playerBar .circleButton.main:hover{
+  transform: translate3d(0, -1px, 0) scale(1.07) !important;
+  background: rgb(var(--accent-rgb)) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.14) inset,
+    0 0 34px rgba(var(--accent-rgb),0.34),
+    0 16px 38px rgba(0,0,0,0.32) !important;
+}
+
+.playerBar .circleButton.active,
+.playerBar .repeatButton.active{
+  color: rgb(var(--accent-rgb)) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.playerBar .playerControlIcon,
+.playerBar .circleButton svg,
+.playerBar .volumeIconButton svg,
+.playerBar .repeatButton svg{
+  width: 18px !important;
+  height: 18px !important;
+  display: block !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  pointer-events: none !important;
+}
+
+.playerBar .circleButton.main .playerControlIcon,
+.playerBar .circleButton.main svg{
+  width: 22px !important;
+  height: 22px !important;
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.playerBar .circleButton.main .playIcon{
+  transform: translateX(1px) !important;
+}
+
+.playButtonBurst{
+  animation: localtifyPlayButtonBurst 360ms cubic-bezier(0.18, 0.9, 0.2, 1.2) both !important;
+}
+
+@keyframes localtifyPlayButtonBurst{
+  0%{ transform: scale(0.94); }
+  42%{ transform: scale(1.12); }
+  100%{ transform: scale(1); }
+}
+
+.repeatButton{
+  overflow: visible !important;
+}
+
+.repeatStateMark{
+  position: absolute !important;
+  right: 4px !important;
+  bottom: 3px !important;
+  min-width: 12px !important;
+  height: 12px !important;
+  padding: 0 3px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  color: #ffffff !important;
+  background: rgba(var(--accent-rgb), 0.18) !important;
+  font-size: 8px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+.progressRow{
+  width: min(700px, 100%) !important;
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  overflow: visible !important;
+}
+
+.progressResetSweep{
+  animation: localtifyProgressIn 180ms ease-out both;
+}
+
+@keyframes localtifyProgressIn{
+  from{ opacity: 0.86; transform: translate3d(0, 1px, 0); }
+  to{ opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.progressRow span{
+  color: rgba(255,255,255,0.47) !important;
+  font-size: 11px !important;
+  font-weight: 720 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.progressRow input[type="range"],
+.volumeWrap input[type="range"]{
+  width: 100% !important;
+  height: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  outline: none !important;
+  background:
+    linear-gradient(
+      90deg,
+      var(--player-progress-fill) 0%,
+      var(--player-progress-fill) var(--range-progress, 0%),
+      var(--player-track-base) var(--range-progress, 0%),
+      var(--player-track-base) 100%
+    ) !important;
+  background-size: 100% 6px !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transform: translateZ(0) !important;
+  transition: filter 120ms ease, opacity 120ms ease, background-color 120ms ease !important;
+}
+
+.progressRow input[type="range"]:hover,
+.volumeWrap input[type="range"]:hover{
+  filter: brightness(1.08) !important;
+}
+
+.progressRow input[type="range"]::-webkit-slider-runnable-track,
+.volumeWrap input[type="range"]::-webkit-slider-runnable-track{
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.progressRow input[type="range"]::-webkit-slider-thumb,
+.volumeWrap input[type="range"]::-webkit-slider-thumb{
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 13px !important;
+  height: 13px !important;
+  margin-top: -3.5px !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  background: #fff !important;
+  box-shadow:
+    0 0 0 4px rgba(var(--accent-rgb),0.13),
+    0 0 16px rgba(var(--accent-rgb),0.25) !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  transition: opacity 120ms ease, transform 120ms ease, box-shadow 120ms ease !important;
+}
+
+.progressRow input[type="range"]:hover::-webkit-slider-thumb,
+.progressRow input[type="range"]:focus-visible::-webkit-slider-thumb,
+.volumeWrap input[type="range"]:hover::-webkit-slider-thumb,
+.volumeWrap input[type="range"]:focus-visible::-webkit-slider-thumb{
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+.progressRow input[type="range"]::-moz-range-track,
+.volumeWrap input[type="range"]::-moz-range-track{
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: var(--player-track-base) !important;
+  border: 0 !important;
+}
+
+.progressRow input[type="range"]::-moz-range-progress,
+.volumeWrap input[type="range"]::-moz-range-progress{
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: var(--player-progress-fill) !important;
+}
+
+.progressRow input[type="range"]::-moz-range-thumb,
+.volumeWrap input[type="range"]::-moz-range-thumb{
+  width: 13px !important;
+  height: 13px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  box-shadow:
+    0 0 0 4px rgba(var(--accent-rgb),0.13),
+    0 0 16px rgba(var(--accent-rgb),0.25) !important;
+  opacity: 0 !important;
+  transition: opacity 120ms ease, transform 120ms ease !important;
+}
+
+.progressRow input[type="range"]:hover::-moz-range-thumb,
+.progressRow input[type="range"]:focus-visible::-moz-range-thumb,
+.volumeWrap input[type="range"]:hover::-moz-range-thumb,
+.volumeWrap input[type="range"]:focus-visible::-moz-range-thumb{
+  opacity: 1 !important;
+}
+
+.volumeWrap{
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 9px !important;
+  color: rgba(255,255,255,0.55) !important;
+  font-size: 12px !important;
+}
+
+.volumeIconButton{
+  flex: 0 0 auto !important;
+}
+
+.playerResizeHandle{
+  position: absolute !important;
+  left: 50% !important;
+  top: -8px !important;
+  z-index: 4 !important;
+  width: 150px !important;
+  height: 14px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  cursor: ns-resize !important;
+  transform: translateX(-50%) !important;
+  -webkit-app-region: no-drag !important;
+}
+
+.playerResizeHandle::before{
+  display: none !important;
+  content: none !important;
+}
+
+.playerDropHint{
+  position: absolute !important;
+  left: 50% !important;
+  top: -34px !important;
+  z-index: 5 !important;
+  padding: 7px 12px !important;
+  border: 1px solid rgba(var(--accent-rgb),0.38) !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  background: rgba(0,0,0,0.72) !important;
+  box-shadow:
+    0 16px 36px rgba(0,0,0,0.35),
+    0 0 28px rgba(var(--accent-rgb),0.15) !important;
+  backdrop-filter: blur(12px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.03em !important;
+  text-transform: lowercase !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translate3d(-50%, 8px, 0) scale(0.96) !important;
+  transition: opacity 150ms ease, transform 150ms ease !important;
+}
+
+.playerBar.songDragActive .playerDropHint,
+.playerBar.queueDropHot .playerDropHint{
+  opacity: 1 !important;
+  transform: translate3d(-50%, 0, 0) scale(1) !important;
+}
+
+.playerBar.songDragActive,
+.playerBar.queueDropHot{
+  border-top-color: rgba(var(--accent-rgb),0.36) !important;
+  box-shadow:
+    0 -18px 58px rgba(0,0,0,0.58),
+    0 0 0 1px rgba(var(--accent-rgb),0.16) inset,
+    0 -10px 46px rgba(var(--accent-rgb),0.11) !important;
+}
+
+.playerBar.queueDropHot::before{
+  opacity: 0.42 !important;
+}
+
+.playerBar.playerPlaying .circleButton.main{
+  animation: localtifyPlayerMainBreath 2.8s ease-in-out infinite !important;
+}
+
+@keyframes localtifyPlayerMainBreath{
+  0%, 100%{
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.12) inset,
+      0 0 24px rgba(var(--accent-rgb),0.22),
+      0 14px 34px rgba(0,0,0,0.28);
+  }
+  50%{
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.14) inset,
+      0 0 34px rgba(var(--accent-rgb),0.32),
+      0 16px 38px rgba(0,0,0,0.32);
+  }
+}
+
+.app .playerBar .circleButton.active .playerControlIcon,
+.app .playerBar .circleButton.repeatButton.active .repeatStateMark{
+  animation: localtifyPlayerToggleBounce 440ms cubic-bezier(.2, .9, .2, 1.25) both !important;
+}
+
+.app .playerBar .volumeIconButton:active .playerControlIcon,
+.app .playerBar .volumeIconButton[aria-label*="restore"] .playerControlIcon{
+  animation: localtifyPlayerMuteNudge 320ms cubic-bezier(.2, .8, .2, 1.22) both !important;
+}
+
+@keyframes localtifyPlayerToggleBounce{
+  0%{ transform: translateY(0) scale(1); }
+  38%{ transform: translateY(-2px) scale(1.12); }
+  66%{ transform: translateY(1px) scale(.96); }
+  100%{ transform: translateY(0) scale(1); }
+}
+
+@keyframes localtifyPlayerMuteNudge{
+  0%{ transform: translateY(0) scale(1); }
+  45%{ transform: translateY(-1px) scale(1.12); }
+  100%{ transform: translateY(0) scale(1); }
+}
+
+body.localitfyThemePainting .app .playerBar::before,
+body.localitfyThemePainting .app .playerBar::after,
+.app.themeSettling .playerBar::before,
+.app.themeSettling .playerBar::after{
+  opacity: 0.28 !important;
+  filter: blur(28px) saturate(1.12) brightness(0.76) !important;
+  transition: opacity 120ms ease, filter 120ms ease !important;
+}
+
+body.localitfyThemePainting .app .progressRow input[type="range"],
+body.localitfyThemePainting .app .volumeWrap input[type="range"],
+.app.themeSettling .progressRow input[type="range"],
+.app.themeSettling .volumeWrap input[type="range"]{
+  transition: none !important;
+}
+
+[data-theme="oled"] .playerBar,
+.app[data-theme="oled"] .playerBar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.012)),
+    rgba(0, 0, 0, 0.92) !important;
+}
+
+[data-theme="oled"] .playerBar::before,
+.app[data-theme="oled"] .playerBar::before{
+  opacity: 0.16 !important;
+  filter: blur(32px) saturate(1.15) brightness(0.68) !important;
+}
+
+.app.viewSwitching .playerBar::before,
+.app.viewSwitching .playerBar::after{
+  animation-play-state: paused !important;
+  filter: none !important;
+  opacity: 0.16 !important;
+}
+
+.app.viewSwitching .playerBar{
+
+  filter: none !important;
+}
+
+.app.compactPlayer .playerBar{
+  --player-size-used: var(--player-size-live, var(--player-size, 92px));
+  --player-art-size: clamp(42px, calc(var(--player-size-used) - 34px), 56px);
+  min-height: 72px !important;
+  padding-top: 8px !important;
+  padding-bottom: 9px !important;
+}
+
+.app.compactPlayer .playerCenter{
+  gap: 5px !important;
+}
+
+.app.compactPlayer .controlRow{
+  min-height: 40px !important;
+}
+
+.app.compactPlayer .progressRow{
+  gap: 8px !important;
+}
+
+@media (max-width: 1180px){
+  .playerBar{
+    grid-template-columns: minmax(190px, 310px) minmax(280px, 1fr) 0 !important;
+  }
+
+  .playerRight{
+    display: none !important;
+  }
+
+  .progressRow{
+    width: min(760px, 100%) !important;
+  }
+}
+
+@media (max-width: 760px){
+  .playerBar{
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--player-size-used) !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: "center" !important;
+    align-content: center !important;
+    gap: 6px !important;
+    padding: 9px 12px 10px !important;
+    overflow: visible !important;
+  }
+
+  .playerLeft{
+    display: none !important;
+  }
+
+  .playerCenter{
+    width: 100% !important;
+    gap: 5px !important;
+    padding-top: 0 !important;
+  }
+
+  .controlRow{
+    min-height: 40px !important;
+    gap: 8px !important;
+  }
+
+  .playerBar .circleButton{
+    --player-control-size: 36px;
+  }
+
+  .playerBar .circleButton.main{
+    --player-main-control-size: 42px;
+  }
+
+  .progressRow{
+    width: 100% !important;
+    grid-template-columns: 38px minmax(0, 1fr) 38px !important;
+    gap: 7px !important;
+  }
+
+  .progressRow span{
+    font-size: 10px !important;
+  }
+}
+
+.playerBar{
+  --player-cover-sync-opacity: var(--cover-sync-player-opacity, 0.52);
+  --player-cover-sync-strength: var(--cover-sync-strength, 0.50);
+  --player-cover-sync-tint: var(--cover-sync-player-tint, 0.22);
+  --player-track-base: rgba(255,255,255,0.18);
+  --player-center-y: 8px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(var(--cover-rgb, var(--accent-rgb)), var(--player-cover-sync-tint)),
+      rgba(var(--accent-rgb), var(--player-cover-sync-tint)) 44%,
+      rgba(var(--progress-rgb, var(--accent-rgb)), var(--player-cover-sync-tint))
+    ),
+    color-mix(in oklab, var(--bg, #050508) 82%, rgb(var(--accent-rgb)) 8%) !important;
+  border-top-color: rgba(var(--accent-rgb), 0.24) !important;
+  box-shadow:
+    0 -18px 44px rgba(0,0,0,0.34),
+    inset 0 1px 0 rgba(255,255,255,0.045) !important;
+  backdrop-filter: blur(22px) saturate(1.16) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.16) !important;
+}
+
+.playerBar .playerCenter{
+  transform: translate3d(0, var(--player-center-y), 0) !important;
+  gap: 6px !important;
+  padding-top: 0 !important;
+
+}
+
+.playerBar .controlRow{
+  min-height: 42px !important;
+  gap: 18px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.playerBar::before{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -74px -130px -32px !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: 34px 34px 0 0 !important;
+  background:
+    radial-gradient(circle at 17% 52%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.26), transparent 35%),
+    radial-gradient(circle at 52% 48%, rgba(var(--accent-rgb), 0.20), transparent 43%),
+    radial-gradient(circle at 86% 48%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.18), transparent 39%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+  opacity: clamp(0.30, var(--player-cover-sync-opacity), 0.72) !important;
+  filter:
+    blur(38px)
+    saturate(1.72)
+    brightness(1.06) !important;
+  transform: scale(1.15) translateZ(0) !important;
+  transition:
+    opacity 220ms ease,
+    filter 260ms ease,
+    transform 260ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.playerBar::after{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.62),
+      rgba(var(--bg-rgb, 5, 5, 12), 0.34) 46%,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.60)
+    ),
+    radial-gradient(circle at 23% 52%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.15), transparent 34%),
+    radial-gradient(circle at 75% 50%, rgba(var(--accent-rgb), 0.12), transparent 38%) !important;
+}
+
+.playerBar:hover::before{
+  opacity: clamp(0.38, calc(var(--player-cover-sync-opacity) + 0.08), 0.76) !important;
+  filter:
+    blur(40px)
+    saturate(1.84)
+    brightness(1.10) !important;
+  transform: scale(1.17) translateZ(0) !important;
+}
+
+.playerBar[data-cover-sync="off"],
+.app[data-cover-sync="off"] .playerBar{
+  --player-cover-sync-opacity: 0;
+  --player-cover-sync-strength: 0;
+  --player-cover-sync-tint: 0;
+}
+
+.playerBar[data-cover-sync="subtle"],
+.app[data-cover-sync="subtle"] .playerBar{
+  --player-cover-sync-opacity: 0.36;
+  --player-cover-sync-strength: 0.30;
+  --player-cover-sync-tint: 0.14;
+}
+
+.playerBar[data-cover-sync="normal"],
+.app[data-cover-sync="normal"] .playerBar{
+  --player-cover-sync-opacity: 0.52;
+  --player-cover-sync-strength: 0.50;
+  --player-cover-sync-tint: 0.22;
+}
+
+.playerBar[data-cover-sync="strong"],
+.app[data-cover-sync="strong"] .playerBar{
+  --player-cover-sync-opacity: 0.66;
+  --player-cover-sync-strength: 0.72;
+  --player-cover-sync-tint: 0.30;
+}
+
+.playerBar[data-cover-sync="strong"]::after,
+.app[data-cover-sync="strong"] .playerBar::after{
+  background:
+    linear-gradient(
+      90deg,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.54),
+      rgba(var(--bg-rgb, 5, 5, 12), 0.26) 46%,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.54)
+    ),
+    radial-gradient(circle at 23% 52%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.22), transparent 36%),
+    radial-gradient(circle at 75% 50%, rgba(var(--accent-rgb), 0.18), transparent 40%) !important;
+}
+
+.playerBar[data-cover-sync="normal"]::after,
+.app[data-cover-sync="normal"] .playerBar::after{
+  background:
+    linear-gradient(
+      90deg,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.58),
+      rgba(var(--bg-rgb, 5, 5, 12), 0.30) 46%,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.58)
+    ),
+    radial-gradient(circle at 23% 52%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.18), transparent 35%),
+    radial-gradient(circle at 75% 50%, rgba(var(--accent-rgb), 0.14), transparent 38%) !important;
+}
+
+.playerBar[data-cover-sync="subtle"]::after,
+.app[data-cover-sync="subtle"] .playerBar::after{
+  background:
+    linear-gradient(
+      90deg,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.64),
+      rgba(var(--bg-rgb, 5, 5, 12), 0.38) 46%,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.64)
+    ),
+    radial-gradient(circle at 23% 52%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.12), transparent 34%),
+    radial-gradient(circle at 75% 50%, rgba(var(--accent-rgb), 0.10), transparent 38%) !important;
+}
+
+.playerBar[data-cover-sync="off"]::before,
+.playerBar[data-cover-sync="off"]::after,
+.app[data-cover-sync="off"] .playerBar::before,
+.app[data-cover-sync="off"] .playerBar::after,
+.playerBar[data-ambient="false"]::before,
+[data-ambient="off"] .playerBar::before,
+.playerBar[data-ambient="false"]::after,
+[data-ambient="off"] .playerBar::after{
+  opacity: 0 !important;
+  display: none !important;
+}
+
+.playerBar > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.playerBar .circleButton,
+.playerBar .volumeIconButton,
+.playerBar .repeatButton,
+.playerBar .playerControlButton,
+.playerBar .transportControls button{
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: rgba(255,255,255,0.74) !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: translateZ(0) !important;
+  transition:
+    color 160ms ease,
+    opacity 160ms ease,
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 180ms ease !important;
+}
+
+.playerBar .circleButton::before,
+.playerBar .circleButton::after,
+.playerBar .volumeIconButton::before,
+.playerBar .volumeIconButton::after,
+.playerBar .repeatButton::before,
+.playerBar .repeatButton::after,
+.playerBar .transportControls button::before,
+.playerBar .transportControls button::after{
+  content: none !important;
+  display: none !important;
+}
+
+.playerBar .circleButton:hover,
+.playerBar .volumeIconButton:hover,
+.playerBar .repeatButton:hover,
+.playerBar .playerControlButton:hover,
+.playerBar .transportControls button:hover{
+  color: #ffffff !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 0 8px rgba(var(--accent-rgb),0.24)) !important;
+  transform: translateY(-1px) scale(1.04) translateZ(0) !important;
+}
+
+.playerBar .circleButton:active,
+.playerBar .volumeIconButton:active,
+.playerBar .repeatButton:active,
+.playerBar .playerControlButton:active,
+.playerBar .transportControls button:active{
+  transform: translateY(0) scale(0.96) translateZ(0) !important;
+}
+
+.playerBar .circleButton.active,
+.playerBar .repeatButton.active,
+.playerBar .transportControls button.active{
+  color: rgb(var(--accent-rgb)) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 0 9px rgba(var(--accent-rgb),0.28)) !important;
+}
+
+.playerBar .circleButton.main,
+.playerBar .playPauseButton,
+.playerBar .transportControls .playButton{
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: rgb(var(--accent-rgb)) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 8px 22px rgba(var(--accent-rgb),0.20),
+    0 0 0 1px rgba(255,255,255,0.13) inset,
+    0 0 0 1px rgba(var(--accent-rgb),0.28) !important;
+  filter: none !important;
+}
+
+.playerBar .circleButton.main:hover,
+.playerBar .playPauseButton:hover,
+.playerBar .transportControls .playButton:hover{
+  background: color-mix(in oklab, rgb(var(--accent-rgb)) 88%, white 12%) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 10px 28px rgba(var(--accent-rgb),0.28),
+    0 0 0 1px rgba(255,255,255,0.16) inset,
+    0 0 0 1px rgba(var(--accent-rgb),0.36) !important;
+  transform: translateY(-1px) scale(1.035) translateZ(0) !important;
+}
+
+.playerBar .circleButton.main:active,
+.playerBar .playPauseButton:active,
+.playerBar .transportControls .playButton:active{
+  transform: translateY(0) scale(0.96) translateZ(0) !important;
+}
+
+.playerBar .playerControlIcon,
+.playerBar .circleButton svg,
+.playerBar .volumeIconButton svg,
+.playerBar .repeatButton svg,
+.playerBar .playerControlButton svg,
+.playerBar .transportControls svg{
+  display: block !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  filter: none !important;
+  pointer-events: none !important;
+}
+
+.playerBar .circleButton:not(.main) .playerControlIcon,
+.playerBar .circleButton:not(.main) svg,
+.playerBar .volumeIconButton svg,
+.playerBar .repeatButton svg{
+  width: 17px !important;
+  height: 17px !important;
+  fill: none !important;
+}
+
+.playerBar .circleButton.main .playerControlIcon,
+.playerBar .circleButton.main svg,
+.playerBar .circleButton.main svg *,
+.playerBar .playPauseButton svg,
+.playerBar .playPauseButton svg *,
+.playerBar .transportControls .playButton svg,
+.playerBar .transportControls .playButton svg *{
+  width: 19px !important;
+  height: 19px !important;
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+  fill-opacity: 1 !important;
+}
+
+.playerBar .circleButton.main .playIcon,
+.playerBar .playPauseButton .playIcon{
+  transform: translateX(1px) !important;
+}
+
+.playerBar .repeatStateMark{
+  right: 2px !important;
+  bottom: 1px !important;
+  min-width: 11px !important;
+  height: 11px !important;
+  color: #ffffff !important;
+  background: rgba(var(--accent-rgb),0.82) !important;
+  box-shadow: none !important;
+}
+
+.playerBar .progressRow{
+  width: min(700px, 100%) !important;
+}
+
+.playerBar .progressRow input[type="range"],
+.playerBar .volumeWrap input[type="range"]{
+  background:
+    linear-gradient(
+      90deg,
+      var(--player-progress-fill) 0%,
+      var(--player-progress-fill) var(--range-progress, 0%),
+      rgba(255,255,255,0.20) var(--range-progress, 0%),
+      rgba(255,255,255,0.20) 100%
+    ) !important;
+  background-size: 100% 6px !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.playerBar .progressRow input[type="range"]::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]::-webkit-slider-thumb{
+  opacity: 0 !important;
+}
+
+.playerBar .progressRow input[type="range"]:hover::-webkit-slider-thumb,
+.playerBar .progressRow input[type="range"]:focus-visible::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:hover::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:focus-visible::-webkit-slider-thumb{
+  opacity: 1 !important;
+}
+
+@media (max-width: 900px){
+  .playerBar .playerCenter{
+    transform: translate3d(0, 4px, 0) !important;
+  }
+}
+
+.playerBar{
+  --player-center-y: 11px;
+  --player-side-y: 5px;
+  --player-cover-sync-opacity: var(--cover-sync-player-opacity, 0.54);
+  --player-cover-sync-tint: var(--cover-sync-player-tint, 0.20);
+  overflow: visible !important;
+  border-top-color: rgba(var(--accent-rgb), 0.16) !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(var(--cover-rgb, var(--accent-rgb)), calc(var(--player-cover-sync-tint) * 0.72)),
+      rgba(var(--accent-rgb), calc(var(--player-cover-sync-tint) * 0.48)) 48%,
+      rgba(var(--progress-rgb, var(--accent-rgb)), calc(var(--player-cover-sync-tint) * 0.58))
+    ),
+    rgba(0, 0, 0, 0.90) !important;
+  box-shadow:
+    0 -12px 36px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.026) !important;
+  transition:
+    border-color 420ms ease,
+    background 520ms ease,
+    box-shadow 520ms ease !important;
+}
+
+.playerBar::before{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -58px -170px -36px !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: 46px 46px 0 0 !important;
+  background:
+    radial-gradient(circle at 13% 68%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.34), transparent 31%),
+    radial-gradient(circle at 49% 54%, rgba(var(--accent-rgb), 0.24), transparent 43%),
+    radial-gradient(circle at 84% 62%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.20), transparent 37%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+  opacity: clamp(0.30, var(--player-cover-sync-opacity), 0.70) !important;
+  filter: blur(54px) saturate(1.78) brightness(1.08) !important;
+  transform: translate3d(0, 6px, 0) scale(1.20) !important;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.08) 8%,
+    rgba(0, 0, 0, 0.38) 24%,
+    rgba(0, 0, 0, 0.86) 52%,
+    #000 100%
+  ) !important;
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.08) 8%,
+    rgba(0, 0, 0, 0.38) 24%,
+    rgba(0, 0, 0, 0.86) 52%,
+    #000 100%
+  ) !important;
+  transition:
+    opacity 620ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 720ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 760ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+
+}
+
+.playerBar::after{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.28) 0%,
+      rgba(0, 0, 0, 0.20) 42%,
+      rgba(0, 0, 0, 0.42) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.62),
+      rgba(var(--bg-rgb, 5, 5, 12), 0.28) 50%,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.58)
+    ) !important;
+  transition:
+    opacity 520ms ease,
+    background 620ms ease !important;
+}
+
+.playerBar:hover{
+  border-top-color: rgba(var(--accent-rgb), 0.22) !important;
+  box-shadow:
+    0 -14px 40px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.032) !important;
+}
+
+.playerBar:hover::before{
+  opacity: clamp(0.36, calc(var(--player-cover-sync-opacity) + 0.07), 0.74) !important;
+  filter: blur(58px) saturate(1.88) brightness(1.12) !important;
+  transform: translate3d(0, 2px, 0) scale(1.23) !important;
+}
+
+.playerBar:hover::after{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.22) 0%,
+      rgba(0, 0, 0, 0.17) 44%,
+      rgba(0, 0, 0, 0.38) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.58),
+      rgba(var(--bg-rgb, 5, 5, 12), 0.24) 50%,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.54)
+    ) !important;
+}
+
+.playerBar .playerLeft{
+  transform: translate3d(0, var(--player-side-y), 0) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.playerBar .playerLeft:hover{
+  transform: translate3d(0, calc(var(--player-side-y) - 1px), 0) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.playerBar .playerCenter{
+  transform: translate3d(0, var(--player-center-y), 0) !important;
+}
+
+.playerBar .playerRight{
+  transform: translate3d(0, 4px, 0) !important;
+}
+
+.playerBar .smallArt{
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset !important;
+  transition:
+    transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 360ms ease,
+    filter 360ms ease !important;
+}
+
+.playerBar .playerLeft:hover .smallArt{
+  transform: translate3d(0, -1px, 0) scale(1.025) !important;
+  filter: saturate(1.08) brightness(1.04) !important;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.34),
+    0 0 34px rgba(var(--cover-rgb, var(--accent-rgb)), 0.22),
+    0 0 0 1px rgba(var(--accent-rgb), 0.14) inset !important;
+}
+
+.playerBar[data-cover-sync="subtle"],
+.app[data-cover-sync="subtle"] .playerBar{
+  --player-cover-sync-opacity: 0.38;
+  --player-cover-sync-tint: 0.12;
+}
+
+.playerBar[data-cover-sync="normal"],
+.app[data-cover-sync="normal"] .playerBar{
+  --player-cover-sync-opacity: 0.54;
+  --player-cover-sync-tint: 0.20;
+}
+
+.playerBar[data-cover-sync="strong"],
+.app[data-cover-sync="strong"] .playerBar{
+  --player-cover-sync-opacity: 0.68;
+  --player-cover-sync-tint: 0.28;
+}
+
+.playerBar[data-cover-sync="off"],
+.app[data-cover-sync="off"] .playerBar{
+  --player-cover-sync-opacity: 0;
+  --player-cover-sync-tint: 0;
+}
+
+.playerBar[data-cover-sync="off"]::before,
+.app[data-cover-sync="off"] .playerBar::before,
+.playerBar[data-ambient="false"]::before,
+[data-ambient="off"] .playerBar::before{
+  opacity: 0 !important;
+  display: none !important;
+}
+
+.playerBar .circleButton.main svg,
+.playerBar .circleButton.main svg *,
+.playerBar .playPauseButton svg,
+.playerBar .playPauseButton svg *,
+.playerBar .transportControls .playButton svg,
+.playerBar .transportControls .playButton svg *{
+  color: #fff !important;
+  stroke: #fff !important;
+  fill: #fff !important;
+  fill-opacity: 1 !important;
+}
+
+.playerBar .circleButton:not(.main),
+.playerBar .volumeIconButton,
+.playerBar .repeatButton{
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+@media (max-width: 900px){
+  .playerBar{
+    --player-center-y: 7px;
+    --player-side-y: 3px;
+  }
+
+  .playerBar::before{
+    inset: -42px -110px -28px !important;
+    filter: blur(44px) saturate(1.60) brightness(1.04) !important;
+  }
+}
+
+.app[data-cover-sync="off"] .playerBar,
+.playerBar[data-cover-sync="off"]{
+  --player-cover-sync-opacity: 0.46 !important;
+  --player-cover-sync-tint: 0.24 !important;
+  --player-progress-fallback-opacity: 0.50;
+  --player-progress-fallback-tint: 0.22;
+  --player-track-base: rgba(255, 255, 255, 0.16) !important;
+  background:
+    radial-gradient(circle at 50% -38%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.22), transparent 45%),
+    radial-gradient(circle at 18% 48%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.16), transparent 34%),
+    radial-gradient(circle at 86% 46%, rgba(var(--accent-2-rgb, var(--progress-rgb, var(--accent-rgb))), 0.12), transparent 38%),
+    linear-gradient(
+      90deg,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.94),
+      rgba(var(--progress-rgb, var(--accent-rgb)), 0.16) 48%,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.92)
+    ) !important;
+  border-top-color: rgba(var(--progress-rgb, var(--accent-rgb)), 0.26) !important;
+  box-shadow:
+    0 -16px 44px rgba(0, 0, 0, 0.34),
+    0 -12px 52px rgba(var(--progress-rgb, var(--accent-rgb)), 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.032) !important;
+}
+
+.app[data-cover-sync="off"] .playerBar::before,
+.app[data-cover-sync="off"][data-ambient="off"] .playerBar::before,
+.playerBar[data-cover-sync="off"]::before,
+.playerBar[data-cover-sync="off"][data-ambient="false"]::before{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -54px -150px -34px !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: 46px 46px 0 0 !important;
+  background:
+    radial-gradient(circle at 16% 70%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.26), transparent 31%),
+    radial-gradient(circle at 50% 56%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.24), transparent 44%),
+    radial-gradient(circle at 84% 62%, rgba(var(--accent-2-rgb, var(--progress-rgb, var(--accent-rgb))), 0.16), transparent 38%) !important;
+  opacity: var(--player-progress-fallback-opacity, 0.50) !important;
+  filter: blur(58px) saturate(1.7) brightness(1.08) !important;
+  transform: translate3d(0, 6px, 0) scale(1.18) !important;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.08) 8%,
+    rgba(0, 0, 0, 0.42) 25%,
+    rgba(0, 0, 0, 0.88) 54%,
+    #000 100%
+  ) !important;
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.08) 8%,
+    rgba(0, 0, 0, 0.42) 25%,
+    rgba(0, 0, 0, 0.88) 54%,
+    #000 100%
+  ) !important;
+  transition:
+    opacity 620ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 720ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 760ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.app[data-cover-sync="off"] .playerBar::after,
+.app[data-cover-sync="off"][data-ambient="off"] .playerBar::after,
+.playerBar[data-cover-sync="off"]::after,
+.playerBar[data-cover-sync="off"][data-ambient="false"]::after{
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  opacity: 1 !important;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.18) 0%,
+      rgba(0, 0, 0, 0.22) 48%,
+      rgba(0, 0, 0, 0.44) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.68),
+      rgba(var(--progress-rgb, var(--accent-rgb)), 0.18) 50%,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.64)
+    ) !important;
+  transition:
+    opacity 520ms ease,
+    background 620ms ease !important;
+}
+
+.app[data-cover-sync="off"] .playerBar:hover,
+.playerBar[data-cover-sync="off"]:hover{
+  border-top-color: rgba(var(--progress-rgb, var(--accent-rgb)), 0.34) !important;
+  box-shadow:
+    0 -16px 46px rgba(0, 0, 0, 0.32),
+    0 -16px 62px rgba(var(--progress-rgb, var(--accent-rgb)), 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+.app[data-cover-sync="off"] .playerBar:hover::before,
+.playerBar[data-cover-sync="off"]:hover::before{
+  opacity: 0.60 !important;
+  filter: blur(62px) saturate(1.82) brightness(1.12) !important;
+  transform: translate3d(0, 2px, 0) scale(1.22) !important;
+}
+
+.app[data-cover-sync="off"] .playerBar:hover::after,
+.playerBar[data-cover-sync="off"]:hover::after{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(0, 0, 0, 0.18) 48%,
+      rgba(0, 0, 0, 0.39) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.62),
+      rgba(var(--progress-rgb, var(--accent-rgb)), 0.23) 50%,
+      rgba(var(--bg-rgb, 5, 5, 12), 0.60)
+    ) !important;
+}
+
+.app[data-custom-theme="true"] .themeColorTile[data-token="progress"],
+.app[data-custom-theme="true"] .themeColorCard[data-token="progress"],
+.app[data-custom-theme="true"] .themeColorButton[data-token="progress"]{
+  background:
+    radial-gradient(circle at 18% 50%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.22), transparent 42%),
+    rgba(var(--progress-rgb, var(--accent-rgb)), 0.08) !important;
+  border-color: rgba(var(--progress-rgb, var(--accent-rgb)), 0.26) !important;
+}
+
+.playerBar .playerLeft,
+.playerBar .playerLeft:hover,
+.playerBar .playerLeft:focus-within{
+  transform: translate3d(0, var(--player-side-y), 0) !important;
+  filter: none !important;
+}
+
+.playerBar .smallArt,
+.playerBar .smallArt:hover,
+.playerBar .playerLeft:hover .smallArt,
+.playerBar .playerLeft:focus-within .smallArt{
+  transform: translate3d(0,0,0) scale(1) !important;
+  filter: none !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--player-accent-rgb), .2),
+    0 18px 42px rgba(var(--player-accent-rgb), var(--player-ambience-opacity, .18)) !important;
+}
+
+.playerBar .smallArt::before,
+.playerBar .smallArt::after,
+.playerBar .playerLeft:hover .smallArt::before,
+.playerBar .playerLeft:hover .smallArt::after{
+  opacity: var(--player-cover-glow-opacity, .44) !important;
+  transform: translate3d(0,0,0) scale(1) !important;
+  animation-play-state: paused !important;
+}
+
+.playerBar .smallArt img,
+.playerBar .playerLeft:hover .smallArt img{
+  transform: translate3d(0,0,0) scale(1) !important;
+  filter: none !important;
+}
+
+.playerBar :where(.controlButton,.secondaryControl,.volumeButton,.playerIconButton):not(.primary):not(.playButton):not(.active){
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+.playerBar :where(.controlButton,.secondaryControl,.volumeButton,.playerIconButton):not(.primary):not(.playButton):not(.active):hover{
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+  transform: translate3d(0,-1px,0) !important;
+}
+
+.playerBar :where(.playButton,.primary,.primaryControl) svg,
+.playerBar :where(.playButton,.primary,.primaryControl) svg *,
+.playerBar :where(.playButton,.primary,.primaryControl) .playIcon,
+.playerBar :where(.playButton,.primary,.primaryControl) .icon{
+  color: #fff !important;
+  stroke: #fff !important;
+  fill: currentColor !important;
+}
+.controlRow .queueDrawerButton {
+  position: relative;
+}
+
+.controlRow .queueDrawerButton:not(.active) {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.queueButtonBadge {
+  position: absolute;
+  right: -5px;
+  top: -7px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: color-mix(in srgb, var(--progress, var(--accent)) 86%, #fff 14%);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--progress, var(--accent)) 38%, transparent);
+  pointer-events: none;
+}
+
+.queueDrawerLayer {
+  position: fixed;
+  inset: 26px 22px calc(var(--player-height, 108px) + 18px) 0;
+  z-index: 8700;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: auto;
+  background: transparent;
+}
+
+.queueDrawer {
+  width: min(430px, calc(100vw - var(--sidebar-width, 250px) - 42px));
+  height: 100%;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, var(--accent) 28%);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 36%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, #050507 8%), color-mix(in srgb, var(--background) 96%, #050507 4%));
+  box-shadow:
+    0 26px 90px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  padding: 18px;
+  overflow: hidden;
+  animation: queueDrawerIn 220ms cubic-bezier(.2, .8, .2, 1);
+}
+
+@keyframes queueDrawerIn {
+  from {
+    opacity: 0;
+    transform: translateX(22px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.queueDrawerHeader,
+.queueSectionHeader,
+.queueNowSong,
+.queueDrawerItem,
+.queueItemActions,
+.queueDrawerFooter {
+  display: flex;
+  align-items: center;
+}
+
+.queueDrawerHeader {
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.queueDrawerHeader h2 {
+  margin: 2px 0 2px;
+  color: var(--text);
+  font-size: 31px;
+  letter-spacing: -0.055em;
+  line-height: 0.94;
+}
+
+.queueDrawerHeader span,
+.queueDrawerHeader .eyebrow,
+.queueNowLabel,
+.queueSectionHeader small,
+.queueItemCopy small,
+.queueEmptyState small {
+  color: var(--muted);
+}
+
+.queueCloseButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, var(--accent) 30%);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.queueCloseButton:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 62%, var(--border) 38%);
+  background: color-mix(in srgb, var(--surface) 86%, var(--accent) 14%);
+}
+
+.queueNowCard,
+.queueDrawerSection {
+  border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  padding: 13px;
+}
+
+.queueNowCard {
+  display: grid;
+  gap: 10px;
+}
+
+.queueNowLabel {
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.queueNowSong {
+  gap: 12px;
+  min-width: 0;
+}
+
+.queueNowSong strong,
+.queueItemCopy strong {
+  display: block;
+  color: var(--text);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queueNowSong small,
+.queueItemCopy small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queueNowArt,
+.queueItemArt {
+  object-fit: cover;
+  background: color-mix(in srgb, var(--surface) 72%, #000 28%);
+  flex: 0 0 auto;
+}
+
+.queueNowArt {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+}
+
+.queueItemArt {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+}
+
+.queueDrawerSection {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.queueSectionHeader {
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
+}
+
+.queueSectionHeader strong {
+  display: block;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.queueSectionHeader small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.queueTextButton {
+  border: 1px solid color-mix(in srgb, var(--border) 72%, var(--accent) 28%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 68%, transparent);
+  color: var(--text);
+  padding: 8px 11px;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.queueTextButton:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+}
+
+.queueDrawerList {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent) 42%, transparent) transparent;
+}
+
+.queueDrawerItem {
+  gap: 10px;
+  min-width: 0;
+  border-radius: 17px;
+  border: 1px solid color-mix(in srgb, var(--border) 54%, transparent);
+  background: color-mix(in srgb, var(--background) 72%, var(--surface) 28%);
+  padding: 8px;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.queueDrawerItem:hover,
+.queueDrawerItem:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border) 50%);
+  background: color-mix(in srgb, var(--surface) 84%, var(--background) 16%);
+}
+
+.queueDrawerItem.isQueued {
+  cursor: grab;
+}
+
+.queueDrawerItem.isQueued:active {
+  cursor: grabbing;
+}
+
+.queueItemIndex {
+  width: 24px;
+  flex: 0 0 24px;
+  color: color-mix(in srgb, var(--muted) 78%, var(--accent) 22%);
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+  user-select: none;
+}
+
+.queueItemCopy {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.queueItemDuration {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.queueItemActions {
+  gap: 5px;
+  opacity: .86;
+}
+
+.queueItemActions button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+  transition: color 150ms ease, transform 150ms ease, background-color 150ms ease;
+}
+
+.queueItemActions button:hover {
+  color: #fff;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  transform: translateY(-1px);
+}
+
+.queueEmptyState {
+  min-height: 180px;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 4px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--background) 58%, transparent);
+}
+
+.queueEmptyState strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+@media (max-width: 900px) {
+  .queueDrawerLayer {
+    inset: 16px 12px calc(var(--player-height, 108px) + 12px) 12px;
+  }
+
+  .queueDrawer {
+    width: 100%;
+    min-height: 460px;
+  }
+
+  .queueItemDuration {
+    display: none;
+  }
+}
+
+.playerBar {
+  --player-content-y: 7px;
+}
+
+.playerBar .playerLeft,
+.playerBar .playerCenter,
+.playerBar .volumeWrap {
+  transform: translateY(var(--player-content-y));
+}
+
+.playerBar .playerCenter {
+  padding-top: 2px;
+}
+
+.playerBar .playerControls {
+  margin-bottom: 8px;
+}
+
+.playerBar .playerButton,
+.playerBar .circleButton,
+.playerBar .volumeIconButton,
+.playerBar .miniToggleButton,
+.playerBar .playerThumb,
+.playerBar .playerCover {
+  rotate: 0deg !important;
+  transform-style: flat !important;
+  perspective: none !important;
+}
+
+.playerBar .playerCover:hover,
+.playerBar .playerThumb:hover,
+.playerBar .playerButton:hover,
+.playerBar .circleButton:hover,
+.playerBar .volumeIconButton:hover,
+.playerBar .miniToggleButton:hover {
+  rotate: 0deg !important;
+}
+
+@media (max-width: 1180px) {
+  .playerBar {
+    --player-content-y: 4px;
+  }
+}
+
+.playerBar{
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  clip-path: inset(-86px 0 0 0) !important;
+  contain: layout style !important;
+}
+
+.playerBar::before{
+  inset: -58px 0 -36px 0 !important;
+  border-radius: 34px 34px 0 0 !important;
+  transform: translate3d(0, 6px, 0) scale(1.06) !important;
+}
+
+.playerBar:hover::before{
+  transform: translate3d(0, 5px, 0) scale(1.075) !important;
+}
+
+.playerBar::after{
+  inset: 0 !important;
+  border-radius: 0 !important;
+}
+
+.playerBar .playerLeft,
+.playerBar .playerCenter,
+.playerBar .playerRight,
+.playerBar .volumeWrap{
+  min-width: 0 !important;
+}
+
+@media (max-width: 900px){
+  .playerBar{
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    clip-path: inset(-66px 0 0 0) !important;
+  }
+}
+
+.playerBar{
+  --player-left-y: 12px;
+  --player-volume-y: 12px;
+}
+
+.playerBar .playerLeft,
+.playerBar .playerLeft:hover,
+.playerBar .playerLeft:focus-within{
+  align-self: center !important;
+  transform: translate3d(0, var(--player-left-y), 0) !important;
+}
+
+.playerBar .playerRight{
+  align-self: center !important;
+  transform: translate3d(0, var(--player-volume-y), 0) !important;
+}
+
+.playerBar .volumeWrap{
+  align-self: center !important;
+  transform: none !important;
+}
+
+@media (max-width: 900px){
+  .playerBar{
+    --player-left-y: 8px;
+    --player-volume-y: 8px;
+  }
+}
+
+.playerBar .volumeWrap{
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.playerBar .volumeWrap input[type="range"]{
+  width: clamp(112px, 9vw, 178px) !important;
+  height: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  accent-color: var(--accent) !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-webkit-slider-runnable-track{
+  height: 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, .075) !important;
+  background:
+    linear-gradient(90deg, var(--accent) var(--volume-percent, 72%), rgba(255,255,255,.16) var(--volume-percent, 72%)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 18px rgba(var(--accent-rgb), .10) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin-top: 4px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: 0 !important;
+  transition: width 150ms ease, height 150ms ease, margin-top 150ms ease, opacity 150ms ease, box-shadow 150ms ease !important;
+}
+
+.playerBar .volumeWrap:hover input[type="range"]::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:focus-visible::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:active::-webkit-slider-thumb{
+  width: 12px !important;
+  height: 12px !important;
+  margin-top: -3px !important;
+  border: 2px solid rgba(255, 255, 255, .92) !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .12), 0 0 18px rgba(var(--accent-rgb), .34) !important;
+  opacity: 1 !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-track{
+  height: 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, .075) !important;
+  background: rgba(255, 255, 255, .16) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-thumb{
+  width: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+.playerBar .volumeWrap:hover input[type="range"]::-moz-range-thumb,
+.playerBar .volumeWrap input[type="range"]:focus-visible::-moz-range-thumb,
+.playerBar .volumeWrap input[type="range"]:active::-moz-range-thumb{
+  width: 12px !important;
+  height: 12px !important;
+  border: 2px solid rgba(255, 255, 255, .92) !important;
+  background: var(--accent) !important;
+  opacity: 1 !important;
+}
+
+.playerBar .volumeWrap{
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag !important;
+}
+
+.playerBar .volumeWrap input[type="range"]{
+  position: relative !important;
+  z-index: 3 !important;
+  width: clamp(118px, 9vw, 178px) !important;
+  min-width: 118px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-app-region: no-drag !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-webkit-slider-runnable-track{
+  height: 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, .08) !important;
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent) 0%,
+      var(--accent) var(--volume-percent, var(--range-progress, 72%)),
+      rgba(255,255,255,.16) var(--volume-percent, var(--range-progress, 72%)),
+      rgba(255,255,255,.16) 100%
+    ) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 18px rgba(var(--accent-rgb), .10) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none !important;
+  width: 14px !important;
+  height: 14px !important;
+  margin-top: -4px !important;
+  border: 2px solid rgba(255,255,255,.92) !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .10), 0 0 16px rgba(var(--accent-rgb), .28) !important;
+  opacity: .001 !important;
+  transform: scale(.86) !important;
+  transition: opacity 140ms ease, transform 140ms ease, box-shadow 140ms ease !important;
+}
+
+.playerBar .volumeWrap:hover input[type="range"]::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:focus-visible::-webkit-slider-thumb,
+.playerBar .volumeWrap input[type="range"]:active::-webkit-slider-thumb{
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-track{
+  height: 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, .08) !important;
+  background: rgba(255,255,255,.16) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-progress{
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+}
+
+.playerBar .volumeWrap input[type="range"]::-moz-range-thumb{
+  width: 14px !important;
+  height: 14px !important;
+  border: 2px solid rgba(255,255,255,.92) !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .10), 0 0 16px rgba(var(--accent-rgb), .28) !important;
+  opacity: .001 !important;
+  transform: scale(.86) !important;
+}
+
+.playerBar .volumeWrap:hover input[type="range"]::-moz-range-thumb,
+.playerBar .volumeWrap input[type="range"]:focus-visible::-moz-range-thumb,
+.playerBar .volumeWrap input[type="range"]:active::-moz-range-thumb{
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+.playerBar .volumeWrap,
+.playerBar .volumeWrap *{
+  -webkit-app-region: no-drag !important;
+}
+
+.playerBar .volumeWrap input[type="range"]{
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.playerBar .volumeWrap::before,
+.playerBar .volumeWrap::after{
+  pointer-events: none !important;
+}
+
+.playerBar .controlRow > .circleButton{
+  display: inline-grid !important;
+  place-items: center !important;
+  justify-content: center !important;
+  align-content: center !important;
+  line-height: 0 !important;
+  text-align: center !important;
+}
+
+.playerBar .controlRow > .circleButton > .playerControlIcon,
+.playerBar .controlRow > .circleButton > svg{
+  position: static !important;
+  display: block !important;
+  margin: 0 auto !important;
+  flex: 0 0 auto !important;
+  inset: auto !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+  transform-box: fill-box !important;
+  transform-origin: center center !important;
+  pointer-events: none !important;
+}
+
+.playerBar .controlRow > .circleButton[aria-label="previous song"] > .playerControlIcon,
+.playerBar .controlRow > .circleButton[aria-label="previous song"] > svg{
+  transform: translateX(-2px) !important;
+}
+
+.playerBar .controlRow > .circleButton[aria-label="next song"] > .playerControlIcon,
+.playerBar .controlRow > .circleButton[aria-label="next song"] > svg{
+  transform: translateX(2px) !important;
+}
+
+.playerBar .controlRow > .circleButton.main > .playerControlIcon,
+.playerBar .controlRow > .circleButton.main > svg{
+  transform: none !important;
+}
+
+.playerBar .controlRow > .circleButton.main > .playIcon{
+  transform: translateX(1px) !important;
+}
+
+.playerBar{
+  overflow: visible !important;
+  clip-path: inset(-28px 0 0 0) !important;
+  border-top-color: rgba(var(--accent-rgb), 0.16) !important;
+  box-shadow:
+    0 -14px 42px rgba(0, 0, 0, 0.54),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
+}
+
+.playerBar::before{
+  inset: -24px 0 -22px 0 !important;
+  border-radius: 30px 30px 0 0 !important;
+  opacity: .24 !important;
+  background:
+    radial-gradient(ellipse at 50% 8%, rgba(var(--accent-rgb), 0.18), transparent 58%),
+    radial-gradient(circle at 22% 45%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.16), transparent 36%),
+    radial-gradient(circle at 76% 40%, rgba(var(--accent-rgb), 0.11), transparent 42%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+  filter: blur(28px) saturate(1.26) brightness(0.76) !important;
+  transform: translate3d(0, 2px, 0) scale(1.035) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 78%, transparent 100%) !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 78%, transparent 100%) !important;
+}
+
+.playerBar:hover::before{
+  opacity: .29 !important;
+  transform: translate3d(0, 1px, 0) scale(1.045) !important;
+}
+
+.playerBar::after{
+  border-radius: 0 !important;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.055), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.01)) !important;
+}
+
+.app[data-theme="stars"] .playerBar{
+  border-top-color: rgba(215, 213, 255, 0.18) !important;
+  background:
+    linear-gradient(180deg, rgba(215,213,255,0.032), rgba(143,220,255,0.014)),
+    rgba(2, 3, 12, 0.91) !important;
+}
+
+.app[data-theme="stars"] .playerBar::before{
+  opacity: .22 !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(215, 213, 255, 0.18), transparent 54%),
+    radial-gradient(circle at 20% 48%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.15), transparent 36%),
+    radial-gradient(circle at 76% 32%, rgba(143, 220, 255, 0.11), transparent 44%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+}
+
+@media (max-width: 900px){
+  .playerBar{
+    clip-path: inset(-22px 0 0 0) !important;
+  }
+
+  .playerBar::before{
+    inset: -18px 0 -18px 0 !important;
+  }
+}
+
+.appShell{
+  grid-template-rows: minmax(0, 1fr) var(--player-size-live, var(--player-size, 108px)) !important;
+}
+
+.playerBar{
+  align-self: stretch !important;
+  height: var(--player-size-live, var(--player-size, 108px)) !important;
+  min-height: 74px !important;
+  overflow: hidden !important;
+  clip-path: none !important;
+  border-top-color: rgba(var(--accent-rgb), 0.14) !important;
+}
+
+.playerBar::before{
+  inset: -18px 0 -18px 0 !important;
+  opacity: .18 !important;
+  filter: blur(26px) saturate(1.22) brightness(0.72) !important;
+  transform: translate3d(0, 0, 0) scale(1.025) !important;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 22px, #000 72%, transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px, #000 72%, transparent 100%) !important;
+}
+
+.playerBar::after{
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.035), transparent 38%),
+    rgba(0, 0, 0, 0.68) !important;
+}
+
+.app[data-theme="stars"] .playerBar{
+  background:
+    linear-gradient(180deg, rgba(215, 213, 255, 0.024), rgba(143, 220, 255, 0.010)),
+    rgba(2, 2, 10, 0.94) !important;
+}
+
+.app[data-theme="stars"] .playerBar::before{
+  opacity: .16 !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(215, 213, 255, 0.12), transparent 54%),
+    radial-gradient(circle at 20% 48%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.12), transparent 36%),
+    radial-gradient(circle at 76% 32%, rgba(143, 220, 255, 0.09), transparent 44%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+}
+
+@media (max-width: 900px){
+  .appShell{
+    grid-template-rows: minmax(0, 1fr) var(--player-size-live, var(--player-size, 96px)) !important;
+  }
+}
+
+@keyframes localtifyPlayerTitleInV143A{
+  0%{ opacity: 0; transform: translate3d(0, 7px, 0); filter: blur(4px); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+
+@keyframes localtifyPlayerTitleInV143B{
+  0%{ opacity: 0; transform: translate3d(0, 7px, 0); filter: blur(4px); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+
+@keyframes localtifyPlayerArtistInV143A{
+  0%{ opacity: 0; transform: translate3d(0, 5px, 0); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes localtifyPlayerArtistInV143B{
+  0%{ opacity: 0; transform: translate3d(0, 5px, 0); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes localtifyPlayerCoverInV143A{
+  0%{ opacity: .78; transform: translate3d(0, 2px, 0) scale(.965); }
+  52%{ opacity: 1; transform: translate3d(0, -1px, 0) scale(1.035); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes localtifyPlayerCoverInV143B{
+  0%{ opacity: .78; transform: translate3d(0, 2px, 0) scale(.965); }
+  52%{ opacity: 1; transform: translate3d(0, -1px, 0) scale(1.035); }
+  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+.playerBar .nowPlayingMiniTitleSwap.nowPlayingSongOdd{
+  animation: localtifyPlayerTitleInV143A 300ms cubic-bezier(.16, 1, .3, 1) both !important;
+
+}
+
+.playerBar .nowPlayingMiniTitleSwap.nowPlayingSongEven{
+  animation: localtifyPlayerTitleInV143B 300ms cubic-bezier(.16, 1, .3, 1) both !important;
+
+}
+
+.playerBar .nowPlayingMiniArtistSwap.nowPlayingSongOdd{
+  animation: localtifyPlayerArtistInV143A 260ms cubic-bezier(.16, 1, .3, 1) 44ms both !important;
+
+}
+
+.playerBar .nowPlayingMiniArtistSwap.nowPlayingSongEven{
+  animation: localtifyPlayerArtistInV143B 260ms cubic-bezier(.16, 1, .3, 1) 44ms both !important;
+
+}
+
+.playerBar .nowPlayingPlayerArtSwap.nowPlayingSongOdd .smallArt{
+  animation: localtifyPlayerCoverInV143A 340ms cubic-bezier(.16, 1, .3, 1) both !important;
+
+}
+
+.playerBar .nowPlayingPlayerArtSwap.nowPlayingSongEven .smallArt{
+  animation: localtifyPlayerCoverInV143B 340ms cubic-bezier(.16, 1, .3, 1) both !important;
+
+}
+
+.playerBar{
+  --player-track-base: rgba(255,255,255,0.18);
+  border-top: 1px solid rgba(255,255,255,0.105) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.050), rgba(255,255,255,0.012) 34%, rgba(255,255,255,0.004)),
+    linear-gradient(90deg, rgba(var(--cover-rgb, var(--accent-rgb)), 0.10), rgba(14, 10, 20, 0.82) 46%, rgba(var(--accent-rgb), 0.08)),
+    rgba(12, 9, 18, 0.86) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.052),
+    0 -18px 50px rgba(0,0,0,0.42) !important;
+  backdrop-filter: blur(10px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+}
+
+.playerBar::after{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.030), transparent 30%),
+    linear-gradient(90deg, rgba(0,0,0,0.46), rgba(0,0,0,0.20) 50%, rgba(0,0,0,0.36)),
+    radial-gradient(circle at 50% -18%, rgba(255,255,255,0.050), transparent 38%) !important;
+}
+
+.playerBar .smallArt{
+  box-shadow:
+    0 10px 22px rgba(0,0,0,0.26),
+    0 0 0 1px rgba(255,255,255,0.11),
+    0 0 22px rgba(var(--cover-rgb, var(--accent-rgb)), 0.08) !important;
+}
+
+.playerBar .circleButton,
+.playerBar .volumeIconButton,
+.playerBar .repeatButton{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.010)),
+    rgba(255,255,255,0.034) !important;
+  border: 1px solid rgba(255,255,255,0.080) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.036) !important;
+  backdrop-filter: blur(7px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(7px) saturate(112%) !important;
+}
+
+.playerBar .circleButton:hover,
+.playerBar .volumeIconButton:hover,
+.playerBar .repeatButton:hover{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.070), rgba(255,255,255,0.015)),
+    rgba(var(--accent-rgb),0.105) !important;
+  border-color: rgba(var(--accent-rgb),0.23) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.045),
+    0 10px 22px rgba(0,0,0,0.14) !important;
+}
+
+.playerBar .circleButton.main{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0.045)),
+    rgba(var(--accent-rgb),0.92) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 10px 28px rgba(var(--accent-rgb),0.18) !important;
+}
+
+.progressTrack,
+.volumeWrap input[type="range"]{
+  background: rgba(255,255,255,0.13) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
+}
+
+.playerBar .controlRow > .circleButton:not(.main):hover,
+.playerBar .controlRow > .repeatButton:hover,
+.playerBar .controlRow > .playerButton:not(.main):hover,
+.playerBar .controlRow > .playerControlButton:not(.main):hover,
+.playerBar .controlRow > .volumeIconButton:hover{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.playerBar .controlRow > .circleButton.main{
+  background: rgb(var(--accent-rgb)) !important;
+}
+
+.app[data-player-background="coverBlur"] .playerBar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.030), rgba(255,255,255,0.010)),
+    rgba(0,0,0,0.82) !important;
+  border-top-color: rgba(255,255,255,0.088) !important;
+  backdrop-filter: blur(18px) saturate(126%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(126%) !important;
+}
+
+.app[data-player-background="coverBlur"] .playerBar::before{
+  content: "" !important;
+  display: block !important;
+  opacity: 0.30 !important;
+  background:
+    radial-gradient(circle at 18% 52%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.24), transparent 36%),
+    radial-gradient(circle at 72% 34%, rgba(var(--accent-rgb), 0.16), transparent 44%),
+    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
+  filter: blur(32px) saturate(1.32) brightness(0.76) !important;
+  transform: translateZ(0) scale(1.07) !important;
+}
+
+.app[data-player-background="coverBlur"] .playerBar:hover::before{
+  opacity: 0.38 !important;
+  filter: blur(34px) saturate(1.38) brightness(0.78) !important;
+  transform: translateZ(0) scale(1.085) !important;
+}
+
+.app.compactPlayer[data-player-background="coverBlur"] .playerBar::before{
+  inset: -24px -22px -18px !important;
+  opacity: 0.32 !important;
+  filter: blur(28px) saturate(1.26) brightness(0.74) !important;
+  transform: translateZ(0) scale(1.055) !important;
+}
+
+.app.compactPlayer[data-player-background="coverBlur"] .playerBar:hover::before{
+  opacity: 0.38 !important;
+}
+
+.app[data-ambient="off"] .playerBar::before,
+.app[data-player-background="flat"] .playerBar::before,
+.app[data-player-background="oledBlack"] .playerBar::before,
+.playerBar[data-ambient="false"]::before{
+  opacity: 0 !important;
+  display: none !important;
+}
+
+.app[data-player-background="flat"] .playerBar{
+  background: rgba(5,5,9,0.95) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app[data-player-background="oledBlack"] .playerBar{
+  background: #000 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.playerBar .controlRow > .circleButton:not(.main),
+.playerBar .controlRow > .repeatButton,
+.playerBar .controlRow > .playerButton:not(.main),
+.playerBar .controlRow > .playerControlButton:not(.main),
+.playerBar .controlRow > .volumeIconButton{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  outline: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.playerBar .controlRow > .circleButton:not(.main)::before,
+.playerBar .controlRow > .circleButton:not(.main)::after,
+.playerBar .controlRow > .repeatButton::before,
+.playerBar .controlRow > .repeatButton::after,
+.playerBar .controlRow > .playerButton:not(.main)::before,
+.playerBar .controlRow > .playerButton:not(.main)::after,
+.playerBar .controlRow > .playerControlButton:not(.main)::before,
+.playerBar .controlRow > .playerControlButton:not(.main)::after,
+.playerBar .controlRow > .volumeIconButton::before,
+.playerBar .controlRow > .volumeIconButton::after{
+  content: none !important;
+  display: none !important;
+}
+
+.playerBar .controlRow > .circleButton:not(.main):hover,
+.playerBar .controlRow > .repeatButton:hover,
+.playerBar .controlRow > .playerButton:not(.main):hover,
+.playerBar .controlRow > .playerControlButton:not(.main):hover,
+.playerBar .controlRow > .volumeIconButton:hover{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: brightness(1.18) !important;
+}
+
+.playerBar .controlRow > .circleButton.main{
+  background: rgb(var(--accent-rgb)) !important;
+  box-shadow: 0 10px 24px rgba(var(--accent-rgb),0.22) !important;
+}
+
+/* localtify 0.3.9 V301 — smoother player paint path */
+body.localtifyPerfV301 .playerBar{
+  contain: layout paint style !important;
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+}
+
+body.localtifyPerfV301 .playerBar :is(
+  .playerLeft,
+  .playerCenter,
+  .playerRight,
+  .controlRow,
+  .progressRow,
+  .volumeWrap
+){
+  will-change: auto !important;
+  backface-visibility: hidden !important;
+}
+
+body.localtifyPerfV301 .playerBar :is(button, input, .circleButton, .playerButton, .volumeIconButton){
+  touch-action: manipulation !important;
+}
+
+body.localtifyPerfV301 .app.isScrolling .playerBar::before,
+body.localtifyPerfV301.localtifyBackgroundMode .playerBar::before{
+  opacity: 0.08 !important;
+  filter: blur(14px) saturate(1.08) brightness(0.72) !important;
+  transform: translateZ(0) scale(1.02) !important;
+}
+
+body.localtifyPerfV301 .app.isScrolling .playerBar:hover::before{
+  opacity: 0.12 !important;
+  filter: blur(16px) saturate(1.1) brightness(0.74) !important;
+}
+
+body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
+  will-change: auto !important;
+}
+
+/* localtify 0.4.0 — player control cleanup.
+   Fixes the visible player outline, removes the volume icon bubble,
+   and makes accent buttons readable on light/dark custom colors.
+*/
+.playerBar{
+  --player-main-readable: var(--player-main-button-text, var(--accent-contrast, #06100b));
+  --player-progress-fill: rgb(var(--accent-rgb)) !important;
+  border-top-color: transparent !important;
+  outline: 0 !important;
+  box-shadow:
+    0 -14px 42px rgba(0, 0, 0, 0.50) !important;
+}
+
+.playerBar:focus,
+.playerBar:focus-within{
+  outline: 0 !important;
+}
+
+.playerBar::after{
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.playerBar .circleButton.main{
+  color: var(--player-main-readable) !important;
+  background: rgb(var(--accent-rgb)) !important;
+  text-shadow: none !important;
+}
+
+.playerBar .circleButton.main:hover,
+.playerBar .circleButton.main:focus-visible{
+  color: var(--player-main-readable) !important;
+  background: rgb(var(--accent-rgb)) !important;
+}
+
+.playerBar .circleButton.main :is(svg, .playerControlIcon){
+  color: currentColor !important;
+  stroke: currentColor !important;
+  fill: currentColor !important;
+  fill-opacity: 0.08 !important;
+}
+
+/* The volume icon should be just an icon, not a second pill/bubble. */
+.playerBar .volumeWrap{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.playerBar .volumeIconButton,
+.playerBar .volumeIconButton:hover,
+.playerBar .volumeIconButton:focus,
+.playerBar .volumeIconButton:focus-visible,
+.playerBar .volumeIconButton:active{
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.playerBar .volumeIconButton::before,
+.playerBar .volumeIconButton::after{
+  display: none !important;
+  content: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.playerBar .volumeIconButton :is(svg, .playerControlIcon){
+  display: block !important;
+  margin: 0 !important;
+  color: rgba(255,255,255,.78) !important;
+  stroke: currentColor !important;
+  fill: none !important;
+}
+
+.playerBar .volumeIconButton:hover :is(svg, .playerControlIcon){
+  color: rgba(255,255,255,.96) !important;
+}
+
+.playerBar .progressRow input[type="range"],
+.playerBar .volumeWrap input[type="range"]{
+  outline: 0 !important;
+}
+
+.playerBar .progressRow input[type="range"]:focus-visible,
+.playerBar .volumeWrap input[type="range"]:focus-visible{
+  filter: brightness(1.1) !important;
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .18) !important;
+}
+
+
+/* v0.4.1: smooth play/pause path morph for the main player button */
+.playerMorphIcon{
+  width: 26px !important;
+  height: 26px !important;
+  display: block !important;
+  overflow: visible !important;
+  color: currentColor !important;
+  transform: translateZ(0) !important;
+  pointer-events: none !important;
+}
+
+.playerMorphIcon path{
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  stroke-width: 1.28 !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+  vector-effect: non-scaling-stroke !important;
+}
+
+.playerBar .circleButton.main .playerMorphIcon,
+.playerBar .playPauseButton .playerMorphIcon,
+.simpleControls .circleButton.main .playerMorphIcon{
+  color: #ffffff !important;
+}
+
+.playerBar .circleButton.main .playerMorphIcon{
+  width: 25px !important;
+  height: 25px !important;
+}
+
+.simpleControls .circleButton.main .playerMorphIcon{
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.playerBar .circleButton.main:active .playerMorphIcon,
+.simpleControls .circleButton.main:active .playerMorphIcon{
+  transform: scale(0.94) translateZ(0) !important;
+}
+
+
+/* v0.4.1: player CSS ownership pass — radius scale + morph icon sizing */
+.playerBar{
+  --player-radius-xs: 12px;
+  --player-radius-s: 16px;
+  --player-radius-m: 24px;
+}
+
+.playerBar .smallArt,
+.playerBar .queueItemArt{
+  border-radius: var(--player-radius-xs) !important;
+}
+
+.playerBar .queueNowArt,
+.playerBar .albumTrackCoverV318{
+  border-radius: var(--player-radius-s) !important;
+}
+
+.playerBar .queueDrawer,
+.playerBar .queueNowCard,
+.playerBar .queueDrawerSection{
+  border-radius: var(--player-radius-m) !important;
+}
+
+
+/* v0.4.1: small player icon polish + safer album delete confirmation */
+.playerBar .circleButton:not(.main) .playerControlIcon,
+.playerBar .circleButton:not(.main) svg,
+.playerBar .volumeIconButton svg,
+.playerBar .repeatButton svg{
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.playerBar .circleButton[aria-label="previous song"] svg,
+.playerBar .circleButton[aria-label="next song"] svg{
+  width: 20px !important;
+  height: 20px !important;
+  stroke-width: 2.35 !important;
+}
+
+.playerBar .circleButton.active,
+.playerBar .repeatButton.active{
+  color: rgb(var(--accent-rgb)) !important;
+  filter:
+    drop-shadow(0 0 8px rgba(var(--accent-rgb),0.28))
+    drop-shadow(0 0 18px rgba(var(--accent-rgb),0.12)) !important;
+}
+
+.playerBar .circleButton.active:hover,
+.playerBar .repeatButton.active:hover{
+  filter:
+    drop-shadow(0 0 10px rgba(var(--accent-rgb),0.34))
+    drop-shadow(0 0 22px rgba(var(--accent-rgb),0.16)) !important;
+}
+
+.playerBar .repeatStateMark{
+  right: 0 !important;
+  bottom: 0 !important;
+  min-width: 13px !important;
+  height: 13px !important;
+  padding: 0 4px !important;
+  border-radius: var(--player-radius-xs, 12px) !important;
+  background: rgb(var(--accent-rgb)) !important;
+  color: #fff !important;
+  font-size: 8px !important;
+  font-weight: 950 !important;
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,0.42),
+    0 0 12px rgba(var(--accent-rgb),0.34) !important;
+}
+
+.controlRow .queueButtonBadge,
+.playerBar .queueButtonBadge{
+  right: -6px !important;
+  top: -7px !important;
+  min-width: 17px !important;
+  height: 17px !important;
+  padding: 0 5px !important;
+  border-radius: var(--player-radius-xs, 12px) !important;
+  background: rgb(var(--accent-rgb)) !important;
+  color: #fff !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,0.44),
+    0 0 16px rgba(var(--accent-rgb),0.34) !important;
+}
+
+.heroGhost.danger.confirmArmed{
+  color: #fff !important;
+  border-color: rgba(255, 92, 137, 0.52) !important;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255, 92, 137, 0.24), transparent 44%),
+    rgba(255, 92, 137, 0.12) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 92, 137, 0.14) inset,
+    0 12px 30px rgba(255, 92, 137, 0.10) !important;
+}
+
+
+/* v0.4.1 performance ownership: player blur/glow safety */
+.app .playerBar{
+  --player-perf-blur: 32px;
+  --player-perf-opacity: 0.42;
+  --player-perf-hover-opacity: 0.50;
+  --player-perf-saturate: 1.42;
+  --player-perf-brightness: 1.00;
+  backdrop-filter: blur(14px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.08) !important;
+}
+
+.app .playerBar::before{
+  opacity: clamp(0.18, var(--player-perf-opacity), 0.58) !important;
+  filter:
+    blur(var(--player-perf-blur))
+    saturate(var(--player-perf-saturate))
+    brightness(var(--player-perf-brightness)) !important;
+  transform: translate3d(0, 4px, 0) scale(1.12) !important;
+  transition:
+    opacity 360ms ease,
+    filter 420ms ease,
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.app .playerBar:hover::before{
+  opacity: clamp(0.24, var(--player-perf-hover-opacity), 0.64) !important;
+  filter:
+    blur(calc(var(--player-perf-blur) + 4px))
+    saturate(calc(var(--player-perf-saturate) + 0.10))
+    brightness(1.04) !important;
+  transform: translate3d(0, 2px, 0) scale(1.14) !important;
+}
+
+.app.appBackgrounded .playerBar,
+body.localtifyWindowBackgrounded .app .playerBar,
+.app.reducedMotion .playerBar,
+.app[data-motion-level="reduced"] .playerBar,
+.app.viewSwitching .playerBar,
+.app.themeSettling .playerBar{
+  --player-perf-blur: 18px;
+  --player-perf-opacity: 0.14;
+  --player-perf-hover-opacity: 0.14;
+  --player-perf-saturate: 1.04;
+  --player-perf-brightness: 0.92;
+  backdrop-filter: blur(8px) saturate(1.02) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(1.02) !important;
+}
+
+.app.appBackgrounded .playerBar::before,
+body.localtifyWindowBackgrounded .app .playerBar::before,
+.app.reducedMotion .playerBar::before,
+.app[data-motion-level="reduced"] .playerBar::before,
+.app.viewSwitching .playerBar::before,
+.app.themeSettling .playerBar::before{
+  animation: none !important;
+  transition: opacity 120ms ease, filter 120ms ease !important;
+  transform: translate3d(0, 0, 0) scale(1.04) !important;
+}
+
+.app.appBackgrounded .playerBar:hover::before,
+body.localtifyWindowBackgrounded .app .playerBar:hover::before,
+.app.reducedMotion .playerBar:hover::before,
+.app[data-motion-level="reduced"] .playerBar:hover::before,
+.app.viewSwitching .playerBar:hover::before,
+.app.themeSettling .playerBar:hover::before{
+  opacity: var(--player-perf-hover-opacity) !important;
+  filter:
+    blur(var(--player-perf-blur))
+    saturate(var(--player-perf-saturate))
+    brightness(var(--player-perf-brightness)) !important;
+  transform: translate3d(0, 0, 0) scale(1.04) !important;
+}
+
+.app.appAudioPlaying:not(.playerScrubbing) .playerBar .smallArt,
+.app.appAudioPlaying:not(.playerScrubbing) .playerBar .smallArt img{
+  animation-play-state: paused !important;
+}
+
+.app.reducedMotion .playerBar .playButtonBurst,
+.app[data-motion-level="reduced"] .playerBar .playButtonBurst{
+  animation: none !important;
+}
+
+.app.viewSwitching .playerBar *,
+.app.themeSettling .playerBar *{
+  transition-duration: 80ms !important;
+}
+
