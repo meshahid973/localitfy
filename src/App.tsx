@@ -8807,73 +8807,6 @@ function MainModeApp() {
     updatePrompt
   ]);
 
-  if (!ready) {
-    const isBootError = Boolean(bootError);
-
-    if (onboardingOpen && !onboardingDevPreview && !isBootError) {
-      return (
-        <main className="onboardingBootBlank" aria-label="localtify is preparing onboarding">
-          <span>localtify</span>
-        </main>
-      );
-    }
-
-    const bootArtSrc = `${loadingScreenGif}#boot-${bootRetryKey}`;
-
-    return (
-      <main className={`loadingScreen bootScreen ${isBootError ? "bootScreenError" : ""}`} aria-label="localtify is loading">
-        <div className="bootGlow" aria-hidden="true" />
-
-        <section className="bootCard" role={isBootError ? "alert" : "status"} aria-live={isBootError ? "assertive" : "polite"}>
-          <div className="bootArtWrap" aria-hidden="true">
-            <img key={`boot-art-${bootRetryKey}`} className="bootArt" src={bootArtSrc} alt="" loading="eager" decoding="async" />
-            <span className="bootArtAura" />
-          </div>
-
-          <div className="bootCopy">
-            <div className="bootBrandRow">
-              <img className="bootLogo" src={localtifyLogo} alt="" aria-hidden="true" />
-              <span>localtify</span>
-            </div>
-
-            {isBootError ? (
-              <>
-                <h1>localtify had trouble starting</h1>
-                <p>{bootError}</p>
-                <div className="bootActions">
-                  <button type="button" className="bootButton bootButtonPrimary" onClick={retryStartup}>Retry</button>
-                  <button type="button" className="bootButton" onClick={copyStartupLog}>
-                    {bootLogCopied ? "Copied error" : "Open logs"}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h1>loading your library...</h1>
-                <p>{bootStage}</p>
-                <ul className="bootAssetList" aria-label="startup assets">
-                  {BOOT_STEPS.map((step, index) => {
-                    const state = index < bootStepIndex ? "done" : index === bootStepIndex ? "active" : "waiting";
-                    return (
-                      <li key={step.label} className={`bootAssetItem ${state}`}>
-                        <span className="bootAssetDot" aria-hidden="true" />
-                        <span className="bootAssetText">
-                          <strong>{step.label}</strong>
-                          <small>{step.detail}</small>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <div className="bootProgress" aria-hidden="true"><span /></div>
-              </>
-            )}
-          </div>
-        </section>
-      </main>
-    );
-  }
-
   const repeatButtonStateText = repeatMode === "one" ? "1" : repeatMode === "all" ? "all" : "";
   const repeatButtonTitle = repeatMode === "one" ? "Loop current song is on" : repeatMode === "all" ? "Loop library is on" : "Loop is off";
   const repeatButtonAriaLabel = repeatButtonTitle;
@@ -9876,6 +9809,73 @@ function MainModeApp() {
       stopProgressLoop
     }
   };
+
+  if (!ready) {
+    const isBootError = Boolean(bootError);
+
+    if (onboardingOpen && !onboardingDevPreview && !isBootError) {
+      return (
+        <main className="onboardingBootBlank" aria-label="localtify is preparing onboarding">
+          <span>localtify</span>
+        </main>
+      );
+    }
+
+    const bootArtSrc = `${loadingScreenGif}#boot-${bootRetryKey}`;
+
+    return (
+      <main className={`loadingScreen bootScreen ${isBootError ? "bootScreenError" : ""}`} aria-label="localtify is loading">
+        <div className="bootGlow" aria-hidden="true" />
+
+        <section className="bootCard" role={isBootError ? "alert" : "status"} aria-live={isBootError ? "assertive" : "polite"}>
+          <div className="bootArtWrap" aria-hidden="true">
+            <img key={`boot-art-${bootRetryKey}`} className="bootArt" src={bootArtSrc} alt="" loading="eager" decoding="async" />
+            <span className="bootArtAura" />
+          </div>
+
+          <div className="bootCopy">
+            <div className="bootBrandRow">
+              <img className="bootLogo" src={localtifyLogo} alt="" aria-hidden="true" />
+              <span>localtify</span>
+            </div>
+
+            {isBootError ? (
+              <>
+                <h1>localtify had trouble starting</h1>
+                <p>{bootError}</p>
+                <div className="bootActions">
+                  <button type="button" className="bootButton bootButtonPrimary" onClick={retryStartup}>Retry</button>
+                  <button type="button" className="bootButton" onClick={copyStartupLog}>
+                    {bootLogCopied ? "Copied error" : "Open logs"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h1>loading your library...</h1>
+                <p>{bootStage}</p>
+                <ul className="bootAssetList" aria-label="startup assets">
+                  {BOOT_STEPS.map((step, index) => {
+                    const state = index < bootStepIndex ? "done" : index === bootStepIndex ? "active" : "waiting";
+                    return (
+                      <li key={step.label} className={`bootAssetItem ${state}`}>
+                        <span className="bootAssetDot" aria-hidden="true" />
+                        <span className="bootAssetText">
+                          <strong>{step.label}</strong>
+                          <small>{step.detail}</small>
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <div className="bootProgress" aria-hidden="true"><span /></div>
+              </>
+            )}
+          </div>
+        </section>
+      </main>
+    );
+  }
 
 
   if (onboardingOpen || onboardingDevPreview) {
