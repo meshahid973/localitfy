@@ -3,3 +3,5 @@ export type * from "./engine/PlayerEngine";
 export * from "./engine/htmlAudioEngine";
 export * from "./engine/playerController";
 export { default as PlayerBar } from "./components/PlayerBar";
+
+export { usePlayerRuntime } from "./usePlayerRuntime";

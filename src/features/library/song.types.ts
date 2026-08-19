@@ -63,6 +63,27 @@ export type ImportAnimationState = {
   preview: Song[];
 };
 
+export type MetadataCleanPatch = Partial<Pick<Song, "title" | "artist" | "album">>;
+export type MetadataCleanPreviewItem = {
+  id: string;
+  before: Pick<Song, "title" | "artist" | "album">;
+  after: Pick<Song, "title" | "artist" | "album">;
+  patch: MetadataCleanPatch;
+  fields: string[];
+};
+export type MetadataCleanPreview = {
+  id: number;
+  scope: "all" | "selected";
+  totalCount: number;
+  changedCount: number;
+  skippedCount: number;
+  titleFixCount: number;
+  artistFixCount: number;
+  albumFixCount: number;
+  items: MetadataCleanPreviewItem[];
+};
+export type MetadataUndoItem = { id: string; patch: MetadataCleanPatch };
+
 export type LibraryDropSide = "before" | "after";
 export type LibraryDropTarget = { songId: string; side: LibraryDropSide; pull: number };
 export type SongContextMenuState = { songId: string; x: number; y: number };

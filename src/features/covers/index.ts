@@ -6,3 +6,5 @@ export * from "./cover.utils";
 export * from "./pixelArt";
 export * from "./cover.runtime";
 export * from "./cover.ambient";
+
+export { useCoversController } from "./useCoversController";

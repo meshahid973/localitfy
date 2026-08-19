@@ -232,6 +232,7 @@ declare global {
     hasSong?: boolean;
     minimizeToTray?: boolean;
     startWithWindows?: boolean;
+    platform?: "windows" | "linux" | "mac" | "unknown" | string;
   };
 
 
@@ -338,6 +339,15 @@ declare global {
     cached?: number;
     warnings?: string[];
     status?: LocalitfyCoverThumbnailStatus;
+    message?: string;
+    error?: string;
+  };
+
+  type LocalitfyCoverThumbnailCleanupResult = {
+    ok: boolean;
+    directory?: string;
+    removed?: number;
+    sizeBytes?: number;
     message?: string;
     error?: string;
   };
@@ -459,7 +469,7 @@ declare global {
       getLeastUsedCover?: () => Promise<any | null>;
       getCoverThumbnailStatus?: () => Promise<LocalitfyCoverThumbnailStatus>;
       warmCoverThumbnails?: (payload?: { limit?: number; force?: boolean }) => Promise<LocalitfyCoverThumbnailWarmResult>;
-      cleanupCoverCache: () => Promise<LocalitfyCoverThumbnailStatus | LocalitfyCoverThumbnailWarmResult>;
+      cleanupCoverCache: () => Promise<LocalitfyCoverThumbnailCleanupResult>;
 
       analyzeSongVolume?: (id: string) => Promise<any | null>;
 
