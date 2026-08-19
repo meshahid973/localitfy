@@ -509,6 +509,8 @@ declare global {
       getNativeMediaStatus?: () => Promise<any>;
       openDevTools?: (payload?: any) => Promise<any>;
       toggleDevTools?: () => Promise<any>;
+      restartApp?: () => Promise<boolean>;
+      openLogsFolder?: () => Promise<{ ok: boolean; path?: string; error?: string }>;
       getPerformanceStatus?: () => Promise<{
         ok: boolean;
         appVersion?: string;

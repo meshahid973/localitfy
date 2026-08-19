@@ -5707,6 +5707,16 @@ app.whenReady().then(async () => {
     restartForWindowTranslucency();
     return true;
   });
+  ipcRouter.handle("localitfy:open-logs", async () => {
+    try {
+      const logsPath = app.getPath("logs");
+      fs.mkdirSync(logsPath, { recursive: true });
+      const openError = await shell.openPath(logsPath);
+      return openError ? { ok: false, path: logsPath, error: openError } : { ok: true, path: logsPath };
+    } catch (error) {
+      return { ok: false, error: error?.message || "could not open logs folder" };
+    }
+  });
 
   ipcRouter.handle("playlists:get", async () => getPlaylists());
   ipcRouter.handle("playlists:save", async (_event, playlists) => {

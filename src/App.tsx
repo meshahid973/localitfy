@@ -97,6 +97,7 @@ import {
   INITIAL_LIBRARY_RENDER_LIMIT,
   LIBRARY_RENDER_BATCH_SIZE,
   LOCALITFY_DOWNLOAD_URL,
+  LOCALITFY_SOURCE_URL,
   ONBOARDING_STORAGE_KEY,
   PLAYBACK_URL_CACHE_TTL_MS,
   PLAYLIST_STORAGE_KEY,
@@ -576,6 +577,7 @@ function MainModeApp() {
 
   const discordAssetBySongRef = useRef<Record<string, string>>({});
   const lastDiscordAssetKeyRef = useRef<string>("");
+  const discordLastPayloadKeyRef = useRef<string>("");
   const contentRef = useRef<HTMLElement | null>(null);
   const scrollBusyRef = useRef(false);
   const scrollBusyFrameRef = useRef<number | null>(null);
@@ -4245,14 +4247,14 @@ function MainModeApp() {
     if (!ready) return;
 
     if (!settings.discordEnabled) {
+      discordLastPayloadKeyRef.current = "";
       window.localitfy.clearDiscordActivity().catch(() => undefined);
       return;
     }
 
     let alive = true;
-    let lastPayloadKey = "";
 
-    const sendActivity = (reason = "tick") => {
+    const sendActivity = () => {
       if (!alive) return;
 
       const audio = audioRef.current;
@@ -4301,12 +4303,11 @@ function MainModeApp() {
         latestSettings.discordActivityStyle,
         latestSettings.discordTitleCleanup,
         latestSettings.discordSecondLine,
-        chosenDiscordAsset,
-        reason
+        chosenDiscordAsset
       ].join("|");
 
-      if (payloadKey === lastPayloadKey) return;
-      lastPayloadKey = payloadKey;
+      if (payloadKey === discordLastPayloadKeyRef.current) return;
+      discordLastPayloadKeyRef.current = payloadKey;
 
       const localitfyBridge = window.localitfy as any;
       const sendDiscordActivity = localitfyBridge?.updateDiscordActivity || localitfyBridge?.setDiscordActivity;
@@ -4339,7 +4340,7 @@ function MainModeApp() {
           discordAssetPreview: "url" in pixel && pixel.url ? pixel.url : pixelArtUrl(pixel.file),
           discordFallbackAssets: [...DISCORD_ASSET_KEYS],
           discordOpenUrl: discordPrimaryUrl,
-          discordGithubUrl: LOCALITFY_DOWNLOAD_URL,
+          discordGithubUrl: LOCALITFY_SOURCE_URL,
           discordOpenLabel: discordPrimaryLabel,
           discordGithubLabel: "Get localtify",
           discordButtonLabels: [discordPrimaryLabel, "Get localtify"],
@@ -4348,13 +4349,17 @@ function MainModeApp() {
           discordActivityType: "listening",
           discordSmallImageMode: "player"
         })
-        .catch(() => undefined);
+        .catch(() => {
+          if (discordLastPayloadKeyRef.current === payloadKey) {
+            discordLastPayloadKeyRef.current = "";
+          }
+        });
     };
 
-    sendActivity("now");
+    sendActivity();
 
     const discordRefreshEveryMs = isAppBackgrounded ? 45000 : 15000;
-    const timer = window.setInterval(() => sendActivity("tick"), discordRefreshEveryMs);
+    const timer = window.setInterval(sendActivity, discordRefreshEveryMs);
 
     return () => {
       alive = false;
