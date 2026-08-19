@@ -163,6 +163,17 @@ function setStoredSchemaVersion(database, version = SCHEMA_VERSION) {
     .run(version, now, APP_VERSION);
 }
 
+function createSongsIndexes(database) {
+  database.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_songs_filePath ON songs(filePath);
+    CREATE INDEX IF NOT EXISTS idx_songs_title ON songs(title);
+    CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
+    CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
+    CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
+    CREATE INDEX IF NOT EXISTS idx_songs_coverSource ON songs(coverSource);
+  `);
+}
+
 function createSongsTable(database) {
   const columnSql = Object.entries(SONG_COLUMNS)
     .map(([name, definition]) => `${name} ${definition}`)
@@ -172,14 +183,9 @@ function createSongsTable(database) {
     CREATE TABLE IF NOT EXISTS songs (
       ${columnSql}
     );
-
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_songs_filePath ON songs(filePath);
-    CREATE INDEX IF NOT EXISTS idx_songs_title ON songs(title);
-    CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
-    CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
-    CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
-    CREATE INDEX IF NOT EXISTS idx_songs_coverSource ON songs(coverSource);
   `);
+
+  createSongsIndexes(database);
 }
 
 function createSettingsTable(database) {
@@ -446,6 +452,11 @@ function rebuildSongsTable(database) {
   }
 
   database.exec(`DROP TABLE IF EXISTS ${oldTable}`);
+  // Index names are database-global in SQLite. During a table rebuild the
+  // renamed legacy table can temporarily retain the old index names, causing
+  // CREATE INDEX IF NOT EXISTS to skip indexes for the new table. Recreate
+  // them after the legacy table (and its indexes) are gone.
+  createSongsIndexes(database);
   return repaired;
 }
 
@@ -543,6 +554,10 @@ function migrateSongsTable(database) {
   const mustRebuild =
     !columns.includes("id") ||
     !columns.includes("filePath") ||
+    // SQLite cannot add a column with CURRENT_TIMESTAMP as its default via
+    // ALTER TABLE. Rebuild legacy song tables that predate dateAdded instead
+    // of silently leaving the schema incomplete and crashing repair queries.
+    !columns.includes("dateAdded") ||
     columns.includes("file_path") ||
     columns.includes("path");
 

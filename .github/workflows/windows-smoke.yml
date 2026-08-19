@@ -1,0 +1,48 @@
+name: Windows Smoke
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  windows-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install exact dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Rebuild SQLite for Node recovery test
+        run: npm rebuild better-sqlite3
+
+      - name: Electron syntax smoke
+        shell: pwsh
+        run: |
+          node --check electron/main.cjs
+          node --check electron/preload.cjs
+          node --check electron/ipc/router.cjs
+          node --check electron/runtime/protocols.cjs
+          node --check electron/runtime/windows.cjs
+          node --check electron/runtime/services.cjs
+          node --check electron/db/repositories.cjs
+
+      - name: Architecture and renderer checks
+        run: npm run check
+
+      - name: Database migration and backup restore
+        run: npm run db:recovery-test
