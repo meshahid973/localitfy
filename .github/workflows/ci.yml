@@ -18,7 +18,7 @@ jobs:
   renderer:
     name: Renderer validation
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -30,11 +30,11 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+      - name: Install exact desktop dependencies
+        run: npm ci --no-audit --no-fund
 
-      - name: Rebuild SQLite for recovery tests
-        run: npm rebuild better-sqlite3
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Check Electron bridge drift
         run: npm run bridge:check
@@ -45,14 +45,14 @@ jobs:
       - name: Node tests
         run: npm test
 
-      - name: Database migration and backup restore
-        run: npm run db:recovery-test
-
       - name: TypeScript
         run: npm run typecheck
 
       - name: Build renderer
         run: npm run build
+
+      - name: Database migration and backup restore
+        run: npm run db:recovery-test
 
       - name: Performance budgets
         run: npm run performance:check

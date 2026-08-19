@@ -18,7 +18,7 @@ test("lockfile pins the valid asynckit tarball", () => {
 
 test("CI uses the committed lockfile without an unlocked install fallback", () => {
   const ci = read(".github/workflows/ci.yml");
-  assert.match(ci, /npm ci --ignore-scripts/);
+  assert.match(ci, /npm ci(?:\s|$)/);
   assert.doesNotMatch(ci, /package-lock=false|npm install --ignore-scripts/);
 });
 

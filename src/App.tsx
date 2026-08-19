@@ -8874,23 +8874,6 @@ function MainModeApp() {
     );
   }
 
-  if (onboardingOpen || onboardingDevPreview) {
-    return (
-      <Onboarding
-        appVersion={APP_VERSION}
-        songsCount={songs.length}
-        currentTheme={currentTheme?.id ?? settings.theme}
-        discordEnabled={settings.discordEnabled}
-        onChooseTheme={handleOnboardingTheme}
-        onSetDiscordEnabled={handleOnboardingDiscord}
-        onImportMusic={handleOnboardingImportMusic}
-        onOpenDownloads={handleOnboardingDownloads}
-        onStartListening={handleOnboardingStartListening}
-        onSkip={skipOnboarding}
-      />
-    );
-  }
-
   const repeatButtonStateText = repeatMode === "one" ? "1" : repeatMode === "all" ? "all" : "";
   const repeatButtonTitle = repeatMode === "one" ? "Loop current song is on" : repeatMode === "all" ? "Loop library is on" : "Loop is off";
   const repeatButtonAriaLabel = repeatButtonTitle;
@@ -9893,6 +9876,24 @@ function MainModeApp() {
       stopProgressLoop
     }
   };
+
+
+  if (onboardingOpen || onboardingDevPreview) {
+    return (
+      <Onboarding
+        appVersion={APP_VERSION}
+        songsCount={songs.length}
+        currentTheme={currentTheme?.id ?? settings.theme}
+        discordEnabled={settings.discordEnabled}
+        onChooseTheme={handleOnboardingTheme}
+        onSetDiscordEnabled={handleOnboardingDiscord}
+        onImportMusic={handleOnboardingImportMusic}
+        onOpenDownloads={handleOnboardingDownloads}
+        onStartListening={handleOnboardingStartListening}
+        onSkip={skipOnboarding}
+      />
+    );
+  }
 
   return (
     <>
