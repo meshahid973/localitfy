@@ -28,6 +28,9 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Apply App diagnostics ownership
+        run: node scripts/r1/apply-diagnostics-extraction.mjs
+
       - name: Apply sandbox hardening
         run: node scripts/r6/apply-electron-sandbox.mjs
 
