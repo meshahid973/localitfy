@@ -7,21 +7,35 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const write = process.argv.includes("--write");
 
-// These are the renderer-global styles loaded by main.tsx + App.tsx, in cascade order.
-// Component-scoped/lazy styles are intentionally excluded because their load timing differs.
-const STYLE_ORDER = [
-  "src/index.css",
-  "src/styles/tokens.css",
-  "src/features/shell/app-core.css",
-  "src/App.css",
-  "src/features/settings/themes.css",
-  "src/features/settings/settings.css",
-  "src/features/home/home.css",
-  "src/motion.css",
-  "src/onboarding-first-run.css",
-  "src/features/player/player.css",
-  "src/features/shell/effects.css"
-];
+function extractRelativeCssImports(modulePath) {
+  const absolute = path.join(root, modulePath);
+  const source = fs.readFileSync(absolute, "utf8");
+  const moduleDir = path.posix.dirname(modulePath.replaceAll("\\", "/"));
+  const imports = [];
+  const pattern = /^\s*import\s+["']([^"']+\.css)["'];?/gm;
+  for (const match of source.matchAll(pattern)) {
+    const specifier = match[1];
+    if (!specifier.startsWith(".")) continue;
+    const repoPath = path.posix.normalize(path.posix.join(moduleDir, specifier));
+    if (!fs.existsSync(path.join(root, repoPath))) {
+      throw new Error(`[css-cross-file] imported stylesheet does not exist: ${repoPath}`);
+    }
+    imports.push(repoPath);
+  }
+  return imports;
+}
+
+// main.tsx imports global base CSS before it imports App; App.tsx then imports the
+// renderer-wide feature styles in their actual cascade order. Component/lazy CSS
+// is intentionally excluded because its load timing can differ from this global chain.
+const STYLE_ORDER = [...new Set([
+  ...extractRelativeCssImports("src/main.tsx"),
+  ...extractRelativeCssImports("src/App.tsx")
+])];
+
+if (!STYLE_ORDER.includes("src/App.css")) {
+  throw new Error("[css-cross-file] renderer cascade discovery lost src/App.css");
+}
 
 function skipComment(text, index, end) {
   const close = text.indexOf("*/", index + 2);
@@ -263,7 +277,6 @@ function applyRemovals(text, rules) {
 
 const files = STYLE_ORDER.map((repoPath, fileIndex) => {
   const absolute = path.join(root, repoPath);
-  if (!fs.existsSync(absolute)) throw new Error(`[css-cross-file] missing renderer stylesheet: ${repoPath}`);
   const source = fs.readFileSync(absolute, "utf8");
   const rules = [];
   scanRuleList(source, 0, source.length, [], rules, fileIndex, repoPath);
@@ -292,7 +305,7 @@ for (const list of groups.values()) {
 
 if (!write) {
   if (!shadowed.length) {
-    console.log(`[css-cross-file] clean across ${files.length} renderer-global CSS file(s)`);
+    console.log(`[css-cross-file] clean across ${files.length} renderer-global CSS file(s): ${STYLE_ORDER.join(" -> ")}`);
     process.exit(0);
   }
   for (const { earlier, later } of shadowed.slice(0, 60)) {
