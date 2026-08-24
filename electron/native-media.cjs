@@ -13,6 +13,7 @@ const {
   nativeImage,
   globalShortcut
 } = require("electron");
+const { createWindowsStartupRuntime } = require("./runtime/windows.cjs");
 
 const MEDIA_CHANNEL = "player:command";
 
@@ -32,48 +33,13 @@ let currentState = {
 };
 
 
-function getLoginItemOptions(openAtLogin = false) {
-  const options = {
-    openAtLogin: Boolean(openAtLogin),
-    openAsHidden: false,
-    name: "localtify"
-  };
-
-  if (!app.isPackaged && process.defaultApp) {
-    options.path = process.execPath;
-    options.args = [app.getAppPath()];
-  }
-
-  return options;
-}
-
-function getStartWithWindowsStatus() {
-  if (process.platform !== "win32") return { ok: true, supported: false, openAtLogin: false };
-  try {
-    const current = app.getLoginItemSettings(getLoginItemOptions(false));
-    return {
-      ok: true,
-      supported: true,
-      openAtLogin: Boolean(current.openAtLogin),
-      openAsHidden: Boolean(current.openAsHidden),
-      wasOpenedAtLogin: Boolean(current.wasOpenedAtLogin),
-      wasOpenedAsHidden: Boolean(current.wasOpenedAsHidden),
-      restoreState: current.restoreState || ""
-    };
-  } catch (error) {
-    return { ok: false, supported: true, openAtLogin: false, error: error?.message || String(error || "startup setting failed") };
-  }
-}
-
-function setStartWithWindows(enabled) {
-  if (process.platform !== "win32") return { ok: true, supported: false, openAtLogin: false };
-  try {
-    app.setLoginItemSettings(getLoginItemOptions(Boolean(enabled)));
-    return getStartWithWindowsStatus();
-  } catch (error) {
-    return { ok: false, supported: true, openAtLogin: false, error: error?.message || String(error || "startup setting failed") };
-  }
-}
+const windowsStartupRuntime = createWindowsStartupRuntime({
+  app,
+  isDev: !app.isPackaged,
+  appName: "localtify"
+});
+const getStartWithWindowsStatus = windowsStartupRuntime.getStatus;
+const setStartWithWindows = windowsStartupRuntime.setEnabled;
 
 function safeSend(command) {
   const win = attachedWindow;
