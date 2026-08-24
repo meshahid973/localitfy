@@ -35,12 +35,6 @@
   z-index: 1;
 }
 
-.settingsHero h3{
-  margin: 6px 0 8px;
-  font-size: clamp(38px, 4.2vw, 62px);
-  line-height: 0.9;
-  letter-spacing: -0.075em;
-}
 
 .settingsHero .softText{
   max-width: 760px;
@@ -399,19 +393,7 @@
   gap: 12px;
 }
 
-.customThemePresetHeaderV025{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
 
-.customThemePresetGridV025,
-.savedThemeListV025{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
 
 .customThemePresetButtonV025,
 .savedThemeItemV025 button{
@@ -482,13 +464,6 @@
   background: rgba(255,255,255,0.035);
 }
 
-.customThemeTokenListV025,
-.themeTokenGrid,
-.simpleThemeTokenGridV025{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 12px;
-}
 
 .themeTokenCard,
 .simpleThemeTokenCardV025,
@@ -529,10 +504,6 @@
   box-shadow: 0 0 18px rgba(var(--lt-accent-rgb),0.14), inset 0 1px 0 rgba(255,255,255,0.18);
 }
 
-.themeTokenCopy{
-  display: grid;
-  gap: 3px;
-}
 
 .themeTokenCopy strong{
   color: var(--lt-text);
@@ -565,12 +536,6 @@
     rgba(7,7,12,0.76);
 }
 
-.metadataCleanerBody{
-  display: grid;
-  grid-template-columns: minmax(250px, 0.75fr) minmax(420px, 1.25fr);
-  gap: 18px;
-  align-items: stretch;
-}
 
 .metadataCleanerPreview{
   min-height: 174px;
@@ -593,13 +558,6 @@
   text-transform: uppercase;
 }
 
-.metadataCleanerPreview strong{
-  color: var(--lt-text);
-  font-size: clamp(24px, 3vw, 42px);
-  line-height: 0.96;
-  letter-spacing: -0.06em;
-  overflow-wrap: anywhere;
-}
 
 .metadataCleanerPreview small{
   display: inline-flex;
@@ -632,12 +590,6 @@
   align-items: start;
 }
 
-.settingsSwitchGrid,
-.settingsMiniGrid{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
-  gap: 12px;
-}
 
 .settingsMiniGrid.four{
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -656,21 +608,7 @@
   transition: transform 190ms cubic-bezier(.2,1.2,.18,1), border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
 }
 
-.settingsChoice strong{
-  color: var(--lt-text);
-  font-size: 15px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
 
-.settingsChoice small{
-  display: block;
-  max-width: 36ch;
-  color: var(--lt-muted);
-  font-size: 12px;
-  line-height: 1.35;
-  font-weight: 760;
-}
 
 .optionGrid{
   display: grid;
@@ -688,11 +626,6 @@
   gap: 8px;
 }
 
-.settingsChoice.active{
-  border-color: rgba(var(--lt-accent-rgb),0.48);
-  background: linear-gradient(180deg, rgba(var(--lt-accent-rgb),0.13), rgba(255,255,255,0.026));
-  box-shadow: 0 14px 34px rgba(0,0,0,0.28), 0 0 20px rgba(var(--lt-accent-rgb),0.1), inset 0 0 0 1px rgba(var(--lt-accent-rgb),0.08);
-}
 
 .settingsActionRow,
 .metadataActionRow,
@@ -775,22 +708,12 @@
   background: rgba(0,0,0,0.22);
 }
 
-.settingsPlaylistItem{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
 
 .settingsPlaylistItem strong{
   color: var(--lt-text);
   font-size: 14px;
 }
 
-.settingsPlaylistItem small{
-  color: var(--lt-muted);
-  font-size: 12px;
-}
 
 .settingsOverlay{
   position: fixed !important;
@@ -863,24 +786,7 @@
   grid-column: 1 / -1;
 }
 
-.settingsLabelLine{
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
 
-.settingsInfoDot{
-  width: 17px;
-  height: 17px;
-  border: 1px solid rgba(var(--lt-accent-rgb),0.34);
-  border-radius: 50%;
-  display: inline-grid;
-  place-items: center;
-  color: var(--lt-accent);
-  background: rgba(var(--lt-accent-rgb),0.08);
-  font-size: 10px;
-  font-weight: 950;
-}
 
 .cleanToggleLabel{
   min-height: 40px;
@@ -1036,10 +942,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   outline-offset: 3px;
 }
 
-.settingsSwitchGrid,
-.settingsMiniGrid{
-  gap: 14px;
-}
 
 .settingsChoice{
   isolation: isolate;
@@ -1053,9 +955,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   transform: translate3d(0,0,0);
 }
 
-.settingsChoice:active{
-  transform: translate3d(0,0,0) scale(0.995);
-}
 
 .settingsChoice:focus-visible{
   outline: none;
@@ -1114,10 +1013,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   transform: translate3d(0,0,0) scale(0.992) !important;
 }
 
-.settingsSwitchGrid,
-.settingsMiniGrid{
-  gap: 14px !important;
-}
 
 .settingsPage :focus-visible,
 .settingsPage :focus-visible,
@@ -1132,19 +1027,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   gap: 20px;
 }
 
-.settingsHero,
-.settingsPanelCard,
-.settingsPageCard{
-  background: linear-gradient(180deg, rgba(255,255,255,0.042), rgba(255,255,255,0.022)), rgba(8, 8, 13, 0.82) !important;
-  border-color: rgba(255,255,255,0.095) !important;
-  box-shadow: 0 18px 50px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.04) !important;
-  backdrop-filter: blur(12px) saturate(112%) !important;
-}
 
-.settingsHero{
-  min-height: 112px;
-  padding: 26px 30px;
-}
 
 .settingsThemeSelectPanel{
   display: grid;
@@ -1257,9 +1140,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   justify-items: start !important;
 }
 
-.settingsChoice:active{
-  transform: scale(0.995) !important;
-}
 
 .settingsChoice small{
   max-width: 100% !important;
@@ -1394,9 +1274,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   }
 }
 
-.settingsPage{
-  gap: 18px !important;
-}
 
 .settingsPageGrid{
   gap: 18px !important;
@@ -1526,12 +1403,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   opacity: .58 !important;
 }
 
-.themePickerLockNoteV026{
-  margin: 8px 0 0 !important;
-  color: rgba(255,255,255,.62) !important;
-  font-size: 12px !important;
-  line-height: 1.35 !important;
-}
 
 .cleanSettingsModal svg{
   stroke: currentColor !important;
@@ -1557,16 +1428,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   align-items: center !important;
 }
 
-.settingsHero h3{
-  margin: 4px 0 6px !important;
-  font-size: clamp(34px, 3.4vw, 52px) !important;
-  line-height: 0.94 !important;
-  letter-spacing: -0.065em !important;
-}
 
-.settingsHero .softText{
-  max-width: 720px !important;
-}
 
 .settingsQuickStartCard{
   padding: 20px !important;
@@ -1905,9 +1767,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
 }
 
-.discordSettingsGrid{
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-}
 
 .settingsHintText{
   margin: 12px 0 0;
@@ -2075,10 +1934,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   gap: 16px !important;
 }
 
-.discordHeroCard{
-  grid-template-columns: minmax(250px, .72fr) minmax(0, 1.28fr) !important;
-  gap: 16px !important;
-}
 
 .discordToggleGrid,
 .discordQuickSwitchGrid,
@@ -2172,17 +2027,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   gap: 18px !important;
 }
 
-.customThemeHeaderV027{
-  align-items: flex-start !important;
-  gap: 16px !important;
-}
 
-.settingsHeaderActionsV027{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 10px;
-}
 
 .settingsTextFieldV027{
   border: 1px solid rgba(var(--text-rgb), .12);
@@ -2682,10 +2527,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 @media (max-width: 900px){
-  .settingsCategoryContentV027 .customThemeHeaderV027,
-.settingsCategoryPage .customThemeHeaderV027{
-    grid-template-columns: 1fr !important;
-  }
 
   .settingsCategoryContentV027 .settingsHeaderActionsV027,
 .settingsCategoryPage .settingsHeaderActionsV027{
@@ -2956,11 +2797,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   background: color-mix(in oklab, var(--lt-surface, rgba(255,255,255,.05)) 82%, var(--lt-accent, #e65adf) 9%) !important;
 }
 
-.settingsUpdatesGrid{
-  grid-template-columns: minmax(0, 1.05fr) minmax(330px, .95fr) !important;
-  gap: 16px !important;
-  align-items: stretch !important;
-}
 
 .settingsUpdatesPage .settingsPanelCard,
 .settingsUpdatesPage .settingsFullWidthPanel{
@@ -3040,16 +2876,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   letter-spacing: .01em !important;
 }
 
-.settingsUpdatesPage .settingsUpdateMessage{
-  margin: 8px 0 14px !important;
-  padding: 14px 15px !important;
-  border-radius: 18px !important;
-  border: 1px solid color-mix(in oklab, var(--lt-accent, #e65adf) 34%, rgba(255,255,255,.10)) !important;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(var(--lt-accent-rgb, 230,90,223), .14), transparent 60%),
-    rgba(255,255,255,.038) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.055) !important;
-}
 
 .settingsUpdatesPage .settingsUpdateMessage strong{
   text-transform: none !important;
@@ -3069,10 +2895,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   background: rgba(255,95,138,.085) !important;
 }
 
-.settingsUpdatesPage .settingsUpdateActions{
-  margin-top: 12px !important;
-  gap: 9px !important;
-}
 
 .settingsUpdatesPage .settingsActionButton{
   min-height: 38px !important;
@@ -3085,14 +2907,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   transform: none !important;
 }
 
-.settingsUpdateBehaviorPanel .settingsMiniGrid{
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-}
 
-.settingsUpdatesPage .settingsFullWidthPanel{
-  padding: 18px !important;
-}
 
 .settingsReleaseList{
   list-style: none !important;
@@ -3119,9 +2934,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 @media (max-width: 1120px){
-  .settingsUpdatesGrid{
-    grid-template-columns: 1fr !important;
-  }
 
   .settingsUpdatesPage .settingsStatusCards{
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -3804,16 +3616,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   }
 }
 
-.settingsPage{
-  width: min(1400px, calc(100% - 24px)) !important;
-  padding: 0 12px 136px !important;
-  gap: 16px !important;
-}
 
-.settingsCategoryContent,
-.settingsCategoryContentV027{
-  padding: 16px 18px 40px !important;
-}
 
 .settingsLayout{
   grid-template-columns: 248px minmax(0, 1fr) !important;
@@ -3837,49 +3640,12 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   -webkit-backdrop-filter: blur(12px) saturate(115%) !important;
 }
 
-.settingsHero{
-  min-height: 96px !important;
-  padding: 20px 24px !important;
-  border-radius: 18px !important;
-}
 
-.settingsHero h3{
-  font-size: clamp(31px, 3.4vw, 46px) !important;
-  letter-spacing: -0.065em !important;
-}
 
-.settingsHero .softText{
-  font-size: 12px !important;
-  line-height: 1.4 !important;
-  color: rgba(255,255,255,0.72) !important;
-}
 
-.settingsCategoryHeader{
-  margin-bottom: 14px !important;
-  gap: 12px !important;
-  align-items: center !important;
-}
 
-.settingsCategoryHeader h4{
-  font-size: clamp(25px, 2vw, 34px) !important;
-  letter-spacing: -0.055em !important;
-  line-height: .97 !important;
-}
 
-.settingsCategoryHeader > span{
-  padding: 5px 10px !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  border-radius: 999px !important;
-  background: rgba(255,255,255,0.024) !important;
-  color: rgba(255,255,255,0.68) !important;
-  font-size: 10.5px !important;
-  font-weight: 800 !important;
-}
 
-.settingsPanelHeader,
-.settingsSectionTitle{
-  margin-bottom: 14px !important;
-}
 
 .settingsPanelHeader strong,
 .settingsSectionTitle strong,
@@ -3888,12 +3654,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   letter-spacing: -0.04em !important;
 }
 
-.settingsPanelHeader span,
-.settingsPanelHeader small,
-.settingsSectionTitle small{
-  font-size: 12px !important;
-  color: rgba(255,255,255,0.7) !important;
-}
 
 .settingsThemeSelectPanel{
   grid-template-columns: minmax(320px, .92fr) minmax(220px, 1fr) !important;
@@ -3937,12 +3697,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   gap: 8px !important;
 }
 
-.customThemeTokenListV025,
-.themeTokenGrid,
-.simpleThemeTokenGridV025{
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
-  gap: 10px !important;
-}
 
 .themeTokenCard,
 .simpleThemeTokenCardV025,
@@ -3995,19 +3749,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   border-radius: 16px !important;
 }
 
-.settingsChoice strong,
-.settingsResetButton strong{
-  font-size: 13.5px !important;
-  line-height: 1.08 !important;
-}
 
-.settingsChoice small,
-.settingsResetButton span{
-  font-size: 10.8px !important;
-  line-height: 1.28 !important;
-  color: rgba(255,255,255,0.64) !important;
-  max-width: 34ch !important;
-}
 
 .settingsInfoDot{
   width: 14px !important;
@@ -4387,15 +4129,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
 }
 
-.settingsDiagnosticCard{
-  min-width: 0 !important;
-}
 
-.settingsDiagnosticCard strong{
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
 
 .settingsDiagnosticsText{
   min-height: 170px !important;
@@ -4523,38 +4257,9 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   100% { transform: translateY(0) scale(1); }
 }
 
-.customThemeStudioV025,
-.themeEditorCard,
-.simpleThemeEditorGridV025,
-.customThemeEditorBodyV025{
-  position: relative;
-}
 
-.customThemeStudioV025,
-.themeEditorCard{
-  overflow: hidden !important;
-  border-color: rgba(var(--lt-accent-rgb), .18) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.02)),
-    rgba(8,8,14,.84) !important;
-  box-shadow:
-    0 18px 54px rgba(0,0,0,.32),
-    inset 0 1px 0 rgba(255,255,255,.042) !important;
-}
 
-.simpleThemeEditorHeadV025,
-.themeEditorHead{
-  align-items: stretch !important;
-  padding: 16px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  border-radius: 20px !important;
-  background: rgba(255,255,255,.028) !important;
-}
 
-.simpleThemeEditorHeadV025 .settingsSectionTitle,
-.themeEditorHead .settingsSectionTitle{
-  margin: 0 !important;
-}
 
 .simpleThemeActionsV025,
 .themeEditorQuickActions{
@@ -4562,25 +4267,8 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   align-content: center !important;
 }
 
-.simpleThemeActionsV025 .settingsTinyButton,
-.themeEditorQuickActions .settingsTinyButton,
-.themeEditorQuickActions .settingsActionButton{
-  min-height: 40px !important;
-  border-radius: 13px !important;
-}
 
-.customThemeTopV025{
-  grid-template-columns: minmax(240px, .72fr) minmax(360px, 1.28fr) !important;
-  gap: 14px !important;
-}
 
-.themeNameField,
-.settingsField{
-  border-radius: 18px !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.018)),
-    rgba(255,255,255,.028) !important;
-}
 
 .customThemePreviewV025,
 .simpleThemePreviewV025,
@@ -4599,39 +4287,10 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
     0 14px 34px rgba(0,0,0,.20) !important;
 }
 
-.themePreviewNowV025,
-.themePreviewCard{
-  min-height: 94px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background:
-    linear-gradient(135deg, rgba(var(--lt-accent-rgb), .12), rgba(255,255,255,.026)),
-    rgba(0,0,0,.26) !important;
-}
 
-.themePreviewPlayerV025,
-.themePreviewPlayer{
-  min-height: 74px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(0,0,0,.30) !important;
-}
 
-.customThemePresetSectionV025{
-  padding: 16px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  border-radius: 20px !important;
-  background: rgba(255,255,255,.026) !important;
-}
 
-.customThemePresetHeaderV025{
-  display: grid !important;
-  gap: 4px !important;
-}
 
-.customThemePresetGridV025,
-.savedThemeListV025{
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important;
-  gap: 10px !important;
-}
 
 .customThemePresetButtonV025,
 .savedThemeItemV025 button{
@@ -4643,30 +4302,8 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
 
-.customThemeTokenListV025,
-.themeTokenGrid,
-.simpleThemeTokenGridV025{
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-  gap: 10px !important;
-}
 
-.themeTokenCard,
-.simpleThemeTokenCardV025,
-.customThemeTokenRowV025{
-  min-height: 76px !important;
-  grid-template-columns: 42px minmax(0,1fr) auto !important;
-  gap: 12px !important;
-  padding: 13px 14px !important;
-  border-radius: 16px !important;
-  background: rgba(255,255,255,.030) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.030) !important;
-}
 
-.themeColorInput{
-  width: 38px !important;
-  height: 38px !important;
-  border-radius: 12px !important;
-}
 
 .themeTokenCopy strong{
   font-size: 13px !important;
@@ -5941,11 +5578,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   backdrop-filter: none;
 }
 
-.settingsHero,
-.settingsHeroV027,
-.settingsPageV027 > .settingsHero{
-  display: none;
-}
 
 .settingsLayout,
 .settingsPageLayoutV027,
@@ -6295,12 +5927,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   margin-bottom: 18px;
 }
 
-.settingsHeaderActionsV027{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 10px;
-}
 
 .customThemeBodyV027{
   display: grid;
@@ -6529,19 +6155,13 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   grid-template-columns: minmax(260px, 460px);
 }
 
-  .customThemeTokenGridV027{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
 @media (max-width: 760px){
   .customThemeHeaderV027{
     align-items: flex-start;
   }
 
-  .settingsHeaderActionsV027{
-    justify-content: flex-start;
-  }
 
   .customThemePresetRowV027,
 .savedThemeRowV027,
@@ -6560,62 +6180,15 @@ body.localitfyThemePainting .app *::after{
   animation-delay: 0ms !important;
 }
 
-body.localitfyThemePainting .ambientSurface::before,
-body.localitfyThemePainting .ambientSurface::after,
-body.localitfyThemePainting .secretLayer,
-body.localitfyThemePainting .floatingNotesLayer,
-body.localitfyThemePainting .settingsPanelCard,
-body.localitfyThemePainting .settingsPageCard,
-body.localitfyThemePainting .customThemeManagerV027,
-body.localitfyThemePainting .customThemeTokenV027{
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-}
 
-.customThemeManagerV027{
-  contain: layout paint;
-}
 
-.customThemeHeaderV027{
-  align-items: center;
-}
 
-.customThemeHeaderV027 strong{
-  font-size: 22px;
-  letter-spacing: -.035em;
-}
 
-.customThemeHeaderV027 span{
-  max-width: 56ch;
-  color: var(--lt-muted);
-  font-size: 12px;
-  line-height: 1.34;
-  font-weight: 760;
-}
 
-.customThemePresetRowV027{
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-}
 
-.customThemePresetButtonV027{
-  min-height: 66px;
-}
 
-.customThemeTokenGridV027{
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
 
-.customThemeTokenV027{
-  min-height: 92px;
-  grid-template-columns: 42px minmax(0, 1fr);
-  grid-template-rows: auto auto auto;
-}
 
-.customThemeColorPickerV032{
-  grid-row: 1 / 4;
-}
 
 .customThemeHexInputV032{
   grid-column: 2;
@@ -6627,9 +6200,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   margin-top: 3px;
 }
 
-.customThemeNativeColorInputV027{
-  cursor: pointer;
-}
 
 .customThemeTokenV027 > strong{
   font-size: 13px;
@@ -6641,16 +6211,10 @@ body.localitfyThemePainting .customThemeTokenV027{
 }
 
 @media (max-width: 1180px){
-  .customThemeTokenGridV027{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
 @media (max-width: 760px){
-  .customThemeTokenGridV027{
-    grid-template-columns: 1fr;
   }
-}
 
 .settingsCategoryContentV027 .settingsCategoryPage,
 .settingsCategoryPage,
@@ -6677,31 +6241,8 @@ body.localitfyThemePainting .discordSettingsPage{
   transform: none !important;
 }
 
-body.localitfyThemePainting .app,
-body.localitfyThemePainting .app *,
-body.localitfyThemePainting .app *::before,
-body.localitfyThemePainting .app *::after{
-  transition: none !important;
-  animation: none !important;
-}
 
-body.localitfyThemePainting .ambientSurface::before,
-body.localitfyThemePainting .ambientSurface::after,
-body.localitfyThemePainting .secretLayer,
-body.localitfyThemePainting .floatingNotesLayer,
-body.localitfyThemePainting .settingsPanelCard,
-body.localitfyThemePainting .settingsPageCard,
-body.localitfyThemePainting .customThemeManagerV027,
-body.localitfyThemePainting .customThemeTokenV027{
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-}
 
-.customThemeNativeColorInputV027{
-  cursor: pointer;
-}
 
 body.localitfyThemePainting,
 body.localitfyThemePainting *{
@@ -6730,88 +6271,23 @@ body.localitfyThemePainting .customThemeTokenV027{
   box-shadow: none !important;
 }
 
-.customThemeManagerV027{
-  contain: layout paint;
-}
 
-.customThemeHeaderV027{
-  align-items: center;
-}
 
-.customThemeHeaderV027 > div:first-child{
-  display: grid;
-  gap: 4px;
-}
 
-.customThemeHeaderV027 strong{
-  font-size: 20px;
-}
 
-.customThemeHeaderV027 span{
-  color: var(--lt-muted);
-  font-size: 12px;
-  line-height: 1.35;
-  font-weight: 760;
-}
 
-.customThemePresetRowV027{
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-}
 
-.customThemePresetButtonV027{
-  border: 1px solid rgba(255,255,255,.055);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.016)),
-    rgba(255,255,255,.018);
-}
 
-.customThemeTokenGridV027{
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
 
-.customThemeTokenV027{
-  min-height: 92px;
-  grid-template-columns: 44px minmax(0, 1fr);
-  grid-template-rows: auto auto 34px;
-  align-content: center;
-  border: 1px solid rgba(255,255,255,.052);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.040), rgba(255,255,255,.012)),
-    rgba(255,255,255,.016);
-}
 
-.customThemeColorPickerV032{
-  grid-row: 1 / 3;
-}
 
-.customThemeTokenV027 > strong{
-  grid-column: 2;
-  grid-row: 1;
-}
 
-.customThemeTokenV027 > small{
-  grid-column: 2;
-  grid-row: 2;
-}
 
-.customThemeHexInputV032{
-  grid-column: 1 / -1;
-  grid-row: 3;
-  width: 100%;
-  height: 34px;
-  margin-top: 4px;
-  border: 1px solid rgba(255,255,255,.055);
-  background: rgba(0,0,0,.18);
-}
 
 .customThemeNativeColorInputV027{
   cursor: pointer;
 }
 
-.customThemeColorPreviewV027{
-  transition: none !important;
-}
 
 .settingsCategoryPage,
 .settingsPanelCard,
@@ -7187,45 +6663,8 @@ body.localitfyThemePainting .toggleRow{
   opacity: .55 !important;
 }
 
-.feedbackPromptOverlayV331{
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 2147483000 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  display: grid !important;
-  place-items: center !important;
-  padding: 24px !important;
-  overflow: auto !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  background: radial-gradient(circle at 50% 28%, rgba(var(--lt-accent-rgb), 0.16), transparent 36%), rgba(0, 0, 0, 0.72) !important;
-  backdrop-filter: blur(18px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
-}
 
-.feedbackPromptCardV331{
-  position: relative !important;
-  z-index: 2147483001 !important;
-  width: min(620px, calc(100vw - 34px)) !important;
-  max-height: min(760px, calc(100vh - 50px)) !important;
-  overflow: auto !important;
-  padding: 18px !important;
-  border: 1px solid rgba(var(--lt-accent-rgb), 0.24) !important;
-  border-radius: 24px !important;
-  color: var(--lt-text) !important;
-  background: radial-gradient(circle at 86% 10%, rgba(var(--lt-accent-rgb), 0.13), transparent 32%), linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.024)), rgba(7, 7, 12, 0.96) !important;
-  box-shadow: 0 34px 110px rgba(0,0,0,0.72), 0 0 0 1px rgba(255,255,255,0.045) inset !important;
-}
 
-.feedbackPromptTopV331,
-.feedbackPromptActionsV331{
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 12px !important;
-}
 
 .feedbackPromptBrandV331{
   display: flex !important;
@@ -7292,9 +6731,6 @@ body.localitfyThemePainting .toggleRow{
   stroke: currentColor !important;
 }
 
-.feedbackPromptCopyV331{
-  margin: 18px 0 14px !important;
-}
 
 .feedbackPromptBadgeV331{
   display: inline-flex !important;
@@ -7306,27 +6742,8 @@ body.localitfyThemePainting .toggleRow{
   text-transform: uppercase !important;
 }
 
-.feedbackPromptCopyV331 h2{
-  margin: 0 !important;
-  color: #fff !important;
-  font-size: clamp(32px, 5vw, 48px) !important;
-  line-height: 0.92 !important;
-  letter-spacing: -0.075em !important;
-}
 
-.feedbackPromptCopyV331 p{
-  margin: 10px 0 0 !important;
-  color: rgba(255,255,255,0.68) !important;
-  font-size: 0.88rem !important;
-  line-height: 1.45 !important;
-}
 
-.feedbackCategoryRowV331{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-  margin: 0 0 12px !important;
-}
 
 .feedbackCategoryButtonV331{
   min-height: 38px !important;
@@ -7347,10 +6764,6 @@ body.localitfyThemePainting .toggleRow{
   background: rgba(var(--lt-accent-rgb),0.18) !important;
 }
 
-.feedbackTextareaWrapV331{
-  display: grid !important;
-  gap: 7px !important;
-}
 
 .feedbackTextareaWrapV331 > span,
 .feedbackTextareaWrapV331 small{
@@ -7400,9 +6813,6 @@ body.localitfyThemePainting .toggleRow{
   background: rgba(100,240,164,0.10) !important;
 }
 
-.feedbackPromptActionsV331{
-  margin-top: 14px !important;
-}
 
 .feedbackMaybeButtonV331,
 .feedbackSendButtonV331{
@@ -8232,53 +7642,10 @@ body.localitfyThemePainting .toggleRow{
   }
 }
 
-.bouncyHeroRangeRowV448{
-  min-height: 108px;
-  padding: 16px;
-  border: 1px solid rgba(var(--lt-accent-rgb), .18);
-  border-radius: 18px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px 16px;
-  align-items: center;
-  background:
-    radial-gradient(circle at var(--bouncy-progress, 50%) 100%, rgba(var(--lt-accent-rgb), .15), transparent 36%),
-    rgba(255,255,255,.026);
-}
 
-.bouncyHeroRangeCopyV448{
-  min-width: 0;
-  display: grid;
-  gap: 5px;
-}
 
-.bouncyHeroRangeCopyV448 strong{
-  color: var(--lt-text);
-  font-size: 17px;
-  line-height: 1;
-  letter-spacing: -.025em;
-}
 
-.bouncyHeroRangeCopyV448 small{
-  color: var(--lt-muted);
-  font-size: 12px;
-  line-height: 1.35;
-  font-weight: 760;
-}
 
-.bouncyHeroRangeValueV448{
-  min-width: 58px;
-  min-height: 34px;
-  padding: 0 11px;
-  border: 1px solid rgba(var(--lt-accent-rgb), .24);
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  color: var(--lt-accent);
-  background: rgba(var(--lt-accent-rgb), .08);
-  font-size: 13px;
-  font-weight: 950;
-}
 
 .bouncyHeroSliderShellV448{
   position: relative;
@@ -8606,10 +7973,6 @@ body.localitfyThemePainting .toggleRow{
   border-color: rgba(255,255,255,.065) !important;
 }
 
-.settingsContent :is(.settingsPanel,.settingsPageCard,.settingsPanelCard,.themePreviewCard)::before,
-.settingsContent :is(.settingsPanel,.settingsPageCard,.settingsPanelCard,.themePreviewCard)::after{
-  opacity: .18 !important;
-}
 
 .settingsContent :is(.settingsPanel,.settingsPageCard,.settingsPanelCard,.themePreviewCard).active{
   border-color: rgba(var(--lt-accent-rgb), .22) !important;
@@ -9104,21 +8467,8 @@ body.localitfyThemePainting .toggleRow{
     rgba(255,255,255,.022) !important;
 }
 
-.discordSettingsPage .settingsChoice.active{
-  border-color: rgba(var(--lt-accent-rgb),.28) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb),.095), rgba(255,255,255,.018)),
-    rgba(255,255,255,.018) !important;
-}
 
 /* Appearance bottom callout */
-.settingsAppearanceAdvancedCalloutV492{
-  border-color: rgba(var(--lt-accent-rgb),.14) !important;
-  background:
-    radial-gradient(circle at 92% 0%, rgba(var(--lt-accent-rgb),.10), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.017)),
-    rgba(7,7,12,.58) !important;
-}
 
 .settingsAppearanceAdvancedCalloutV492 .settingsPanelHeader{
   align-items: center !important;

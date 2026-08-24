@@ -129,12 +129,6 @@ button:disabled{
   background: #e54868;
 }
 
-.appShell{
-  height: calc(100vh - 36px);
-  display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr) 92px;
-}
 
 .sidebar{
   grid-row: 1 / 3;
@@ -210,19 +204,12 @@ button:disabled{
   box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.28);
 }
 
-.circleButton.active:not(.playerBar *){
-  color: #06100b;
-  background: var(--accent);
-}
 
 .panel{
   min-width: 0;
   padding: 16px;
 }
 
-.largePanel{
-  min-height: 420px;
-}
 
 .panel h3{
   margin: 5px 0 0;
@@ -275,16 +262,6 @@ button:disabled{
   border-color: rgba(var(--accent-rgb), 0.16);
 }
 
-.ambientSurface{
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  transition: border-color 260ms ease,
-    box-shadow 260ms ease,
-    transform 260ms ease,
-    background 260ms ease;
-
-}
 
 .ambientSurface::before{
   content: "";
@@ -303,26 +280,6 @@ button:disabled{
 
 }
 
-.ambientSurface::after{
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(
-      circle at var(--glow-x, 78%) var(--glow-y, 44%),
-      rgba(var(--accent-rgb), 0.12),
-      transparent 34%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.9),
-      rgba(0, 0, 0, 0.66) 46%,
-      rgba(0, 0, 0, 0.46)
-    );
-  opacity: 1;
-  transition: opacity 320ms ease;
-}
 
 .ambientSurface > *{
   position: relative;
@@ -444,10 +401,6 @@ button:disabled{
   opacity: 1;
 }
 
-.songRow.active{
-  border-color: rgba(var(--accent-rgb), 0.24);
-  background: rgba(var(--accent-rgb), 0.075);
-}
 
 .songButton{
   position: relative;
@@ -640,10 +593,6 @@ button:disabled{
   background: var(--surface-3);
 }
 
-.circleButton.main:not(.playerBar *){
-  color: #06100b;
-  background: var(--accent);
-}
 
 input[type="range"]{
   width: 100%;
@@ -677,13 +626,6 @@ input[type="range"]{
   color-scheme: dark;
 }
 
-.sliderWrap{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 52px;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 12px;
-}
 
 .editorActions{
   display: flex;
@@ -782,14 +724,7 @@ input[type="range"]{
   padding-bottom: 130px;
 }
 
-.analyticsLayout{
-  display: grid;
-  gap: 14px;
-}
 
-.downloadPanel{
-  max-width: 960px;
-}
 
 .downloadNotice{
   margin-top: 14px;
@@ -1085,9 +1020,6 @@ input[type="range"]{
   font-size: 34px;
 }
 
-[data-ambient="off"] .ambientSurface::before{
-  display: none;
-}
 
 [data-notes="off"] .eq{
   display: none;
@@ -1123,9 +1055,6 @@ input[type="range"]{
 }
 
 @media (max-width: 1180px){
-.appShell{
-  grid-template-columns: 212px minmax(0, 1fr);
-}
 
 .dashboardGrid{
   grid-template-columns: 1fr;
@@ -1231,15 +1160,7 @@ input[type="range"]{
   border-color: var(--accent-line);
 }
 
-.ambientSurface::before{
-  filter: blur(36px) saturate(1.25) contrast(1.04);
-  opacity: 0.14;
-}
 
-.ambientSurface::after{
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.45)),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0));
-}
 
 .circleButton.main:not(.playerBar *){
   position: relative;
@@ -1275,9 +1196,6 @@ input[type="range"]{
   transform: translate3d(0, -1px, 0);
 }
 
-.navItem:hover{
-  border-color: color-mix(in srgb, var(--accent) 26%, rgba(255, 255, 255, 0.1));
-}
 
 .editorModal{
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.012)),
@@ -1324,11 +1242,6 @@ input[type="range"]{
   color: rgba(255, 255, 255, 0.62);
 }
 
-.appShell{
-  height: calc(100vh - 34px);
-  grid-template-columns: 218px minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr) 88px;
-}
 
 .sidebar{
   padding: 16px 12px;
@@ -1378,24 +1291,12 @@ input[type="range"]{
   border-radius: 0;
 }
 
-.ambientSurface::before{
-  filter: blur(46px) saturate(1.28) brightness(0.9);
-  opacity: 0.26;
-  transform: scale(1.18);
-  transition: opacity var(--motion-slow) ease,
-    filter var(--motion-slow) ease,
-    transform var(--motion-slow) ease;
-}
 
 .ambientSurface:hover::before{
   opacity: 0.32;
   transform: scale(1.2);
 }
 
-.ambientSurface::after{
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.3)),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 38%);
-}
 
 .badge{
   color: var(--accent);
@@ -1433,25 +1334,9 @@ input[type="range"]{
   z-index: 2;
 }
 
-.statsGrid{
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
 
-.statCard{
-  border-radius: 13px;
-  background: rgba(255, 255, 255, 0.028);
-}
 
-.statCard strong{
-  font-size: 22px;
-}
 
-.circleButton.main:not(.playerBar *){
-  color: #051108;
-  background: var(--accent);
-  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.1),
-    0 10px 22px rgba(var(--accent-rgb), 0.13);
-}
 
 input[type="range"]::-webkit-slider-runnable-track{
   height: 4px;
@@ -1475,13 +1360,6 @@ input[type="range"]::-webkit-slider-thumb{
   background: rgba(255, 255, 255, 0.042);
 }
 
-.secretLayer{
-  position: fixed;
-  inset: 34px 0 88px 218px;
-  z-index: 25;
-  pointer-events: none;
-  overflow: hidden;
-}
 
 .secretRibbon{
   position: absolute;
@@ -1576,12 +1454,6 @@ input[type="range"]::-webkit-slider-thumb{
 }
 }
 
-.tinyMuted{
-  margin: 10px 2px 0;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.45;
-}
 
 .tinyMuted code{
   padding: 2px 5px;
@@ -1613,15 +1485,7 @@ input[type="range"]::-webkit-slider-thumb{
     var(--panel);
 }
 
-.ambientSurface::before{
-  opacity: 0.2;
-  filter: blur(42px) saturate(1.12) contrast(1.05);
-}
 
-.ambientSurface::after{
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0.46) 58%, rgba(0, 0, 0, 0.3)),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 42%);
-}
 
 .hero .badge{
   display: none !important;
@@ -1669,9 +1533,6 @@ input[type="range"]::-webkit-slider-thumb{
 }
 }
 
-button:active{
-  transform: scale(0.985) translateZ(0);
-}
 
 @media (hover: hover){
 .songRow:hover{
@@ -1932,10 +1793,6 @@ button:active,
   gap: 14px !important;
 }
 
-.statsGrid{
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
-  gap: 10px !important;
-}
 
 .statCard{
   min-height: 96px !important;
@@ -1998,12 +1855,6 @@ button:active,
   animation: secretEventIn 2600ms cubic-bezier(.2,.9,.2,1) forwards, discoShift 320ms steps(2,end) infinite;
 }
 
-.secretToast{
-  border-radius: 14px !important;
-  background: rgba(10,10,10,.88) !important;
-  border: 1px solid rgba(var(--accent-rgb), .42) !important;
-  box-shadow: 0 12px 34px rgba(0,0,0,.42) !important;
-}
 
 @keyframes secretEventIn {
   0% { opacity: 0; transform: scale(1.02); }
@@ -2158,12 +2009,6 @@ button:active,
   gap: 10px !important;
 }
 
-button{
-  transition: transform .16s cubic-bezier(.2,.9,.2,1),
-    background .16s ease,
-    border-color .16s ease,
-    box-shadow .16s ease !important;
-}
 
 button:hover{
   transform: translateY(-1px) !important;
@@ -2242,18 +2087,12 @@ button:active{
   to { opacity: 1; transform: translateY(0); filter: none; }
 }
 
-.tinyMuted{
-  color: var(--oled-muted) !important;
-}
 
 .app{
   --player-size: 92px;
   contain: layout style paint;
 }
 
-.appShell{
-  grid-template-rows: minmax(0, 1fr) var(--player-size, 92px) !important;
-}
 
 .content{
   scroll-behavior: smooth;
@@ -2473,20 +2312,7 @@ body.isResizingPlayer{
   font-size: 12px;
 }
 
-.ambientSurface::before{
-  opacity: 0.15;
-  filter: blur(42px) saturate(1.12) brightness(0.92);
-  transform: scale(1.16);
-  transition: opacity 220ms ease,
-    filter 220ms ease,
-    transform 220ms ease;
 
-}
-
-.ambientSurface::after{
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.58) 54%, rgba(0, 0, 0, 0.78)),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(0, 0, 0, 0.2));
-}
 
 .animatedGlow .ambientSurface::before{
   animation: localitfyAmbientFloat 8s ease-in-out infinite;
@@ -2615,20 +2441,7 @@ body.isResizingPlayer{
   background: rgba(255, 255, 255, 0.07);
 }
 
-.updateProgressTrack span{
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.75), rgb(var(--accent-rgb)));
-  transition: width 180ms ease;
-}
 
-.updateToastActions{
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
 
 .updateToastActions .softButton{
   min-height: 34px;
@@ -2742,11 +2555,6 @@ body.isResizingPlayer{
   font-variant-ligatures: none;
 }
 
-.ambientSurface::before{
-  transition: opacity 620ms ease,
-    transform 800ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 620ms ease !important;
-}
 
 .tinyMuted{
   color: var(--muted) !important;
@@ -2824,11 +2632,6 @@ body.isResizingPlayer{
   font-weight: 800;
 }
 
-.analyticsCardGridV005{
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
-}
 
 .analyticsCardGridV005 .statCard{
   min-height: 112px;
@@ -2850,15 +2653,7 @@ body.isResizingPlayer{
   font-size: 11px;
 }
 
-.analyticsBigCard{
-  grid-column: span 2;
-}
 
-.analyticsSplitGrid{
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
-  gap: 16px;
-}
 
 .analyticsBarsV005{
   display: grid;
@@ -2898,20 +2693,7 @@ body.isResizingPlayer{
   font-weight: 700;
 }
 
-.analyticsBarTrack{
-  height: 8px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-}
 
-.analyticsBarTrack i{
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.35), var(--accent));
-  box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.35);
-}
 
 .analyticsArtistList{
   gap: 8px;
@@ -2959,23 +2741,14 @@ body.isResizingPlayer{
 }
 
 @media (max-width: 1180px){
-.analyticsCardGridV005{
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
 
 .analyticsBigCard{
   grid-column: span 1;
 }
 
-.analyticsSplitGrid{
-  grid-template-columns: 1fr;
-}
 }
 
 @media (max-width: 760px){
-.analyticsCardGridV005{
-  grid-template-columns: 1fr;
-}
 
 .analyticsHeroPanel{
   align-items: flex-start;
@@ -3342,21 +3115,12 @@ button:active{
   font-size: 15px;
 }
 
-.circleButton.main:not(.playerBar *){
-  width: 48px;
-  height: 48px;
-  font-size: 17px;
-}
 
 .app{
   --player-size: 108px;
   --sidebar-width: 249px;
 }
 
-.appShell{
-  grid-template-columns: var(--sidebar-width, 249px) minmax(0, 1fr) !important;
-  grid-template-rows: minmax(0, 1fr) var(--player-size, 108px) !important;
-}
 
 .content{
   padding-bottom: calc(var(--player-size, 108px) + 48px) !important;
@@ -3722,10 +3486,6 @@ body,
   overflow: hidden !important;
 }
 
-.app{
-  width: 100vw !important;
-  height: 100vh !important;
-}
 
 .appShell{
   width: 100% !important;
@@ -3842,13 +3602,6 @@ body,
   background: transparent !important;
 }
 
-.updateToastLayer{
-  align-items: end !important;
-  justify-content: end !important;
-  padding: 22px !important;
-  background: rgba(0, 0, 0, 0.24) !important;
-  backdrop-filter: blur(4px) !important;
-}
 
 .updateToastCard{
   width: min(470px, calc(100vw - 28px)) !important;
@@ -3924,26 +3677,7 @@ body,
   line-height: 1.45 !important;
 }
 
-.updateToastMetaRow{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
 
-.updateVersionPill,
-.updateSafePill{
-  display: inline-flex;
-  min-height: 25px;
-  align-items: center;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(var(--accent-rgb), 0.22);
-  color: rgba(255, 255, 255, 0.76);
-  background: rgba(var(--accent-rgb), 0.08);
-  font-size: 11px;
-  font-weight: 850;
-}
 
 .updateSafePill{
   border-color: rgba(255, 255, 255, 0.09);
@@ -3993,11 +3727,6 @@ body,
     filter 170ms ease;
 }
 
-.updatePrimaryButton{
-  color: #061009;
-  background: var(--accent);
-  box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.16);
-}
 
 .updateGhostButton{
   color: rgba(255, 255, 255, 0.78);
@@ -4005,10 +3734,6 @@ body,
   background: rgba(255, 255, 255, 0.06);
 }
 
-.updatePrimaryButton:hover,
-.updateGhostButton:hover{
-  transform: translateY(-2px);
-}
 
 .updatePrimaryButton:hover{
   filter: brightness(1.04);
@@ -4055,41 +3780,16 @@ body,
   }
 }
 
-.updateToastCard{
-  width: min(500px, calc(100vw - 28px)) !important;
-  border-radius: 26px !important;
-}
 
 .updateToastText h3{
   margin: 2px 0 7px !important;
   letter-spacing: -0.07em !important;
 }
 
-.updateToastText p:not(.eyebrow){
-  color: rgba(255,255,255,0.7) !important;
-}
 
-.updateToastActions{
-  margin-top: 6px !important;
-}
 
-.updatePrimaryButton,
-.updateGhostButton{
-  min-height: 42px !important;
-  padding: 0 18px !important;
-  border-radius: 999px !important;
-  font-size: 13px !important;
-  letter-spacing: -0.01em !important;
-}
 
-.updatePrimaryButton{
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 74%, white 26%)) !important;
-  box-shadow: 0 16px 34px rgba(var(--accent-rgb), 0.22) !important;
-}
 
-.updateGhostButton{
-  background: rgba(255,255,255,0.065) !important;
-}
 
 .updatePrimaryButton:hover,
 .updateGhostButton:hover{
@@ -4122,10 +3822,6 @@ body,
   line-height: 1.52 !important;
 }
 
-.whatsNewCard ul{
-  gap: 10px !important;
-  margin: 0 0 20px !important;
-}
 
 .whatsNewCard li{
   padding: 12px 13px !important;
@@ -4148,11 +3844,6 @@ body,
   box-shadow: 0 14px 32px rgba(var(--accent-rgb), 0.18) !important;
 }
 
-.updateToastLayer {
-  padding: clamp(18px, 3vw, 34px) !important;
-  align-items: flex-end !important;
-  justify-content: flex-end !important;
-}
 
 .updateToastCard {
   width: min(520px, calc(100vw - 32px)) !important;

@@ -33,43 +33,8 @@
   -webkit-backdrop-filter: blur(18px) saturate(126%) !important;
 }
 
-.playerBar::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: -34px -26px -20px !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  border-radius: 28px 28px 0 0 !important;
-  background:
-    radial-gradient(circle at 20% 48%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.18), transparent 34%),
-    radial-gradient(circle at 72% 35%, rgba(var(--accent-rgb), 0.13), transparent 42%),
-    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-  opacity: 0.22 !important;
-  filter: blur(30px) saturate(1.28) brightness(0.74) !important;
-  transform: translateZ(0) scale(1.06) !important;
-  transition:
-    opacity 180ms ease,
-    transform 220ms ease,
-    filter 220ms ease !important;
-}
 
-.playerBar::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.84), rgba(0,0,0,0.56) 50%, rgba(0,0,0,0.72)),
-    radial-gradient(circle at 50% -20%, rgba(255,255,255,0.04), transparent 42%) !important;
-}
 
-.playerBar:hover::before{
-  opacity: 0.32 !important;
-  transform: translateZ(0) scale(1.08) !important;
-  filter: blur(31px) saturate(1.34) brightness(0.77) !important;
-}
 
 .playerBar[data-ambient="false"]::before,
 [data-ambient="off"] .playerBar::before{
@@ -760,58 +725,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   box-shadow: none !important;
 }
 
-.playerBar::before{
-  content: "" !important;
-  display: block !important;
-  position: absolute !important;
-  inset: -74px -130px -32px !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  border-radius: 34px 34px 0 0 !important;
-  background:
-    radial-gradient(circle at 17% 52%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.26), transparent 35%),
-    radial-gradient(circle at 52% 48%, rgba(var(--accent-rgb), 0.20), transparent 43%),
-    radial-gradient(circle at 86% 48%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.18), transparent 39%),
-    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-  opacity: clamp(0.30, var(--player-cover-sync-opacity), 0.72) !important;
-  filter:
-    blur(38px)
-    saturate(1.72)
-    brightness(1.06) !important;
-  transform: scale(1.15) translateZ(0) !important;
-  transition:
-    opacity 220ms ease,
-    filter 260ms ease,
-    transform 260ms cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
 
-.playerBar::after{
-  content: "" !important;
-  display: block !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(var(--bg-rgb, 5, 5, 12), 0.62),
-      rgba(var(--bg-rgb, 5, 5, 12), 0.34) 46%,
-      rgba(var(--bg-rgb, 5, 5, 12), 0.60)
-    ),
-    radial-gradient(circle at 23% 52%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.15), transparent 34%),
-    radial-gradient(circle at 75% 50%, rgba(var(--accent-rgb), 0.12), transparent 38%) !important;
-}
 
-.playerBar:hover::before{
-  opacity: clamp(0.38, calc(var(--player-cover-sync-opacity) + 0.08), 0.76) !important;
-  filter:
-    blur(40px)
-    saturate(1.84)
-    brightness(1.10) !important;
-  transform: scale(1.17) translateZ(0) !important;
-}
 
 .playerBar[data-cover-sync="off"],
 .app[data-cover-sync="off"] .playerBar{
@@ -1052,15 +967,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   transform: translateX(1px) !important;
 }
 
-.playerBar .repeatStateMark{
-  right: 2px !important;
-  bottom: 1px !important;
-  min-width: 11px !important;
-  height: 11px !important;
-  color: #ffffff !important;
-  background: rgba(var(--accent-rgb),0.82) !important;
-  box-shadow: none !important;
-}
 
 .playerBar .progressRow{
   width: min(700px, 100%) !important;
@@ -1235,9 +1141,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   transform: translate3d(0, var(--player-center-y), 0) !important;
 }
 
-.playerBar .playerRight{
-  transform: translate3d(0, 4px, 0) !important;
-}
 
 .playerBar .smallArt{
   box-shadow:
@@ -1921,15 +1824,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   contain: layout style !important;
 }
 
-.playerBar::before{
-  inset: -58px 0 -36px 0 !important;
-  border-radius: 34px 34px 0 0 !important;
-  transform: translate3d(0, 6px, 0) scale(1.06) !important;
-}
 
-.playerBar:hover::before{
-  transform: translate3d(0, 5px, 0) scale(1.075) !important;
-}
 
 .playerBar::after{
   inset: 0 !important;
@@ -2000,27 +1895,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   appearance: none !important;
 }
 
-.playerBar .volumeWrap input[type="range"]::-webkit-slider-runnable-track{
-  height: 8px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255, 255, 255, .075) !important;
-  background:
-    linear-gradient(90deg, var(--accent) var(--volume-percent, 72%), rgba(255,255,255,.16) var(--volume-percent, 72%)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 18px rgba(var(--accent-rgb), .10) !important;
-}
 
-.playerBar .volumeWrap input[type="range"]::-webkit-slider-thumb{
-  -webkit-appearance: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  margin-top: 4px !important;
-  border: 0 !important;
-  border-radius: 999px !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  opacity: 0 !important;
-  transition: width 150ms ease, height 150ms ease, margin-top 150ms ease, opacity 150ms ease, box-shadow 150ms ease !important;
-}
 
 .playerBar .volumeWrap:hover input[type="range"]::-webkit-slider-thumb,
 .playerBar .volumeWrap input[type="range"]:focus-visible::-webkit-slider-thumb,
@@ -2034,20 +1909,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   opacity: 1 !important;
 }
 
-.playerBar .volumeWrap input[type="range"]::-moz-range-track{
-  height: 8px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255, 255, 255, .075) !important;
-  background: rgba(255, 255, 255, .16) !important;
-}
 
-.playerBar .volumeWrap input[type="range"]::-moz-range-thumb{
-  width: 0 !important;
-  height: 0 !important;
-  border: 0 !important;
-  background: transparent !important;
-  opacity: 0 !important;
-}
 
 .playerBar .volumeWrap:hover input[type="range"]::-moz-range-thumb,
 .playerBar .volumeWrap input[type="range"]:focus-visible::-moz-range-thumb,
@@ -2253,14 +2115,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
     rgba(2, 3, 12, 0.91) !important;
 }
 
-.app[data-theme="stars"] .playerBar::before{
-  opacity: .22 !important;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(215, 213, 255, 0.18), transparent 54%),
-    radial-gradient(circle at 20% 48%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.15), transparent 36%),
-    radial-gradient(circle at 76% 32%, rgba(143, 220, 255, 0.11), transparent 44%),
-    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-}
 
 @media (max-width: 900px){
   .playerBar{
@@ -2294,11 +2148,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px, #000 72%, transparent 100%) !important;
 }
 
-.playerBar::after{
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.035), transparent 38%),
-    rgba(0, 0, 0, 0.68) !important;
-}
 
 .app[data-theme="stars"] .playerBar{
   background:
@@ -2451,20 +2300,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
 }
 
-.playerBar .controlRow > .circleButton:not(.main):hover,
-.playerBar .controlRow > .repeatButton:hover,
-.playerBar .controlRow > .playerButton:not(.main):hover,
-.playerBar .controlRow > .playerControlButton:not(.main):hover,
-.playerBar .controlRow > .volumeIconButton:hover{
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
 
-.playerBar .controlRow > .circleButton.main{
-  background: rgb(var(--accent-rgb)) !important;
-}
 
 .app[data-player-background="coverBlur"] .playerBar{
   background:

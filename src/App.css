@@ -17,17 +17,8 @@
   }
 }
 
-.libraryUtilityRail .compactHead .eyebrow{
-  font-size: 9px;
-}
 
-.libraryUtilityRail .muted-small{
-  font-size: 10px;
-}
 
-.app{
-  --accent-contrast: #06100b;
-}
 
 .libraryUtilityRail .compactHead .eyebrow{
   font-size: 9px !important;
@@ -153,11 +144,6 @@
   text-transform: lowercase !important;
 }
 
-.editor-tool-buttons{
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 7px !important;
-}
 
 .editor-tool-buttons button{
   min-height: 28px !important;
@@ -202,9 +188,6 @@
   padding: 0 16px !important;
 }
 
-.hero{
-  align-items: center !important;
-}
 
 .searchEasterWrap{
   position: relative;
@@ -250,16 +233,7 @@
   border-radius: 18px !important;
 }
 
-.circleButton:not(.playerBar *){
-  width: 38px !important;
-  height: 38px !important;
-  border-radius: 999px !important;
-}
 
-.circleButton.main:not(.playerBar *){
-  width: 43px !important;
-  height: 43px !important;
-}
 
 .headerBar{
   position: relative !important;
@@ -322,17 +296,11 @@
   backface-visibility: hidden;
 }
 
-.songRow:hover{
-  transform: translate3d(5px, 0, 0) !important;
-}
 
 .songRow:hover .songArt{
   transform: scale(1.045) translateZ(0) !important;
 }
 
-.headerBar{
-  animation: localitfyViewRise 360ms var(--ease-smooth) both;
-}
 
 .songRow{
   animation: localitfyRowIn 250ms var(--ease-smooth) both;
@@ -385,12 +353,6 @@
     0 14px 34px rgba(0, 0, 0, 0.25) !important;
 }
 
-.songRow.songDropTarget[data-drop-side="after"]{
-  box-shadow:
-    inset 0 -4px 0 rgba(var(--lt-accent-rgb), 0.95),
-    0 0 0 1px rgba(var(--lt-accent-rgb), 0.30),
-    0 14px 34px rgba(0, 0, 0, 0.25) !important;
-}
 
 @keyframes localitfyRankWiggle {
 
@@ -566,9 +528,6 @@
   animation-delay: 0ms !important;
 }
 
-.app .songRow:hover{
-  transform: translate3d(3px, 0, 0) !important;
-}
 
 .app .circleButton.main:not(.playerBar *){
   box-shadow:
@@ -1141,12 +1100,6 @@ html{
   transform: translateZ(0);
 }
 
-.app .ambientSurface{
-  isolation: isolate;
-  overflow: hidden;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-}
 
 .app .ambientSurface::before{
   pointer-events: none;
@@ -1187,10 +1140,6 @@ html{
   transform: translateZ(0);
 }
 
-.app{
-  --player-size-used: var(--player-size-live, var(--player-size, 108px));
-  --sidebar-width-used: var(--sidebar-width-live, var(--sidebar-width, 249px));
-}
 
 .toastStack{
   left: calc(var(--sidebar-width-used) + 22px) !important;
@@ -1444,9 +1393,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .whatsNewOverlay{ position: fixed; inset: 0; z-index: 1300; display: grid; place-items: center; padding: 24px; background: rgba(0,0,0,.72); backdrop-filter: blur(14px); animation: whatsNewFadeIn .17s ease both; }
 .whatsNewCard{ position: relative; width: min(430px, calc(100vw - 34px)); border-radius: 28px; border: 1px solid rgba(255,255,255,.12); background: #050505; box-shadow: 0 28px 80px rgba(0,0,0,.76); padding: 24px; animation: whatsNewPop .21s cubic-bezier(.16,1,.3,1) both; }
 .whatsNewCard h3{ margin: 4px 0 6px; color: #fff; font-size: 32px; letter-spacing: -.06em; }
-.whatsNewSubtext{ margin: 0 0 16px; color: rgba(255,255,255,.58); font-size: 13px; line-height: 1.5; }
-.whatsNewCard ul{ display: grid; gap: 8px; list-style: none; margin: 0 0 18px; padding: 0; }
-.whatsNewCard li{ padding: 11px 12px; border-radius: 16px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.075); color: rgba(255,255,255,.84); font-size: 13px; font-weight: 800; }
 .whatsNewClose{ position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.05); color: rgba(255,255,255,.7); cursor: pointer; }
 @keyframes whatsNewFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes whatsNewPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -1981,15 +1927,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   --shell-ease-soft: cubic-bezier(0.2, 0.82, 0.2, 1);
 }
 
-.app{
-  background:
-    radial-gradient(circle at 12% -8%, rgba(var(--lt-accent-rgb), 0.09), transparent 34%),
-    radial-gradient(circle at 92% 8%, rgba(var(--lt-accent-rgb), 0.055), transparent 34%),
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.013) 1px, transparent 1px),
-    #000 !important;
-  background-size: auto, auto, 42px 42px, 42px 42px, auto !important;
-}
 
 .panel{
   border-color: var(--shell-border) !important;
@@ -2342,27 +2279,6 @@ input[type="range"]{
   transform: translateY(-1px);
 }
 
-.navIcon{
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  color: color-mix(in oklab, var(--lt-accent) 72%, var(--lt-text) 28%);
-  background: color-mix(in oklab, var(--lt-accent) 9%, transparent);
-  border: 1px solid color-mix(in oklab, var(--lt-accent) 12%, transparent);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--lt-text) 6%, transparent);
-  transition:
-    color 220ms ease,
-    background 220ms ease,
-    border-color 220ms ease,
-    transform 220ms var(--shell-sidebar-ease),
-    box-shadow 220ms ease,
-    filter 220ms ease;
-}
 
 .mainAction{
   min-height: 50px !important;
@@ -2384,10 +2300,6 @@ input[type="range"]{
 @media (max-width: 920px){
 
 
-  .navIcon{
-    width: 36px;
-    height: 36px;
-  }
 
   .mainAction{
     min-height: 46px !important;
@@ -2419,27 +2331,6 @@ input[type="range"]{
   filter: none !important;
 }
 
-.navIcon{
-  width: 34px !important;
-  height: 34px !important;
-  display: grid !important;
-  place-items: center !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  color: color-mix(in oklab, var(--lt-accent) 70%, var(--lt-text) 30%) !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  font-size: 23px !important;
-  font-weight: 920 !important;
-  line-height: 1 !important;
-  transform: none !important;
-  filter: none !important;
-  transition:
-    color 190ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 190ms ease,
-    text-shadow 190ms ease !important;
-}
 
 @media (max-width: 920px){
 
@@ -2589,34 +2480,8 @@ body{
   letter-spacing: -0.018em;
 }
 
-.app .navIcon{
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  display: grid !important;
-  place-items: center !important;
-  color: color-mix(in oklab, var(--lt-accent) 76%, #ffffff 24%) !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
 
-.app .navLucideIcon{
-  display: block !important;
-  stroke: currentColor !important;
-  fill: currentColor !important;
-  fill-opacity: .16 !important;
-  stroke-width: 2.8 !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-}
 
-.app .navLucideIcon *{
-  stroke: currentColor !important;
-  fill: currentColor !important;
-  fill-opacity: .16 !important;
-}
 
 .app .songList{
   overflow-x: hidden !important;
@@ -2721,10 +2586,6 @@ body{
   -webkit-backdrop-filter: blur(18px);
 }
 
-.navLucideIcon{
-  fill: none !important;
-  stroke-width: 2.1;
-}
 
 .settingsThemeGrid{
   display: grid;
@@ -2803,18 +2664,7 @@ body{
   --page-line: color-mix(in oklab, var(--lt-accent, #64f0a4) 8%, var(--lt-text, #fff) 3%);
 }
 
-html{
-  background: var(--app-bg-solid, #000) !important;
-}
 
-.app{
-  background-color: var(--app-bg-solid) !important;
-  background-image:
-    linear-gradient(var(--app-grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--app-grid-line) 1px, transparent 1px) !important;
-  background-size: 42px 42px !important;
-  background-position: 0 0 !important;
-}
 
 [data-orb]{
   display: none !important;
@@ -2912,22 +2762,8 @@ html{
   --theme-topbar-bg: color-mix(in oklab, var(--theme-bg) 88%, var(--theme-accent) 7%);
 }
 
-html{
-  background: color-mix(in oklab, var(--theme-bg, #050506) 86%, var(--theme-accent, #8dffce) 8%) !important;
-}
 
-.app{
-  background: var(--theme-page-bg) !important;
-  background-size: 42px 42px, 42px 42px, auto !important;
-  color: var(--lt-text, #f6f4ff) !important;
-}
 
-.app::before{
-  display: none !important;
-  opacity: 0 !important;
-  background: none !important;
-  animation: none !important;
-}
 
 .shell{
   background: transparent !important;
@@ -2940,12 +2776,6 @@ html{
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--theme-accent) 7%, transparent) !important;
 }
 
-.importButton{
-  background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-2)) !important;
-  color: color-mix(in oklab, var(--theme-bg) 88%, #000 12%) !important;
-  border: 0 !important;
-  box-shadow: 0 10px 26px color-mix(in oklab, var(--theme-accent) 13%, transparent) !important;
-}
 
 .hero{
   background:
@@ -2956,20 +2786,7 @@ html{
   box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 5%, transparent), 0 14px 36px rgba(0,0,0,.18) !important;
 }
 
-.hero:hover{
-  background:
-    linear-gradient(135deg,
-      color-mix(in oklab, var(--theme-panel) 82%, var(--theme-accent) 8%),
-      color-mix(in oklab, var(--theme-bg) 84%, var(--theme-accent-2) 7%)) !important;
-  border-color: var(--theme-line-strong) !important;
-  box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 6%, transparent), 0 16px 40px rgba(0,0,0,.20) !important;
-}
 
-.coverAura::before{
-  display: block !important;
-  opacity: .28 !important;
-  filter: blur(20px) saturate(1.35) contrast(1.03) !important;
-}
 
 .coverAura:hover::before{
   opacity: .40 !important;
@@ -2988,9 +2805,6 @@ html{
   --localtify-line-soft: color-mix(in oklab, var(--lt-accent, #ff65df) 12%, rgba(255,255,255,.045));
 }
 
-html{
-  background: var(--localtify-page-bg) !important;
-}
 
 body{
   color: var(--lt-text, #f7f7f7) !important;
@@ -3132,13 +2946,7 @@ button:hover,
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--lt-accent, #ff6edb) 22%, transparent) !important;
 }
 
-.app .songRow{
-  contain: layout paint style;
-}
 
-.app .panel{
-  contain: layout style;
-}
 
 @supports (content-visibility: auto){
 
@@ -3683,28 +3491,12 @@ html{
   }
 }
 
-.app{
-  background-image: none !important;
-}
 
 .app::before{
   background: none !important;
 }
 
-.app.secret-fast{
-  --localtify-motion-speed: 0.62;
-}
 
-.app.secret-night::after{
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 42;
-  background: rgba(0, 0, 0, 0.24);
-  opacity: 0;
-  animation: localtifyNightFade 7200ms ease both;
-}
 
 @keyframes localtifyNightFade{
   0%{ opacity: 0; }
@@ -3869,9 +3661,6 @@ html{
   }
 }
 
-.app.secret-night::after{
-  background: rgba(0, 0, 0, 0.28) !important;
-}
 
 .app .secretLayer{
   position: fixed !important;
@@ -3886,13 +3675,6 @@ html{
   background: transparent !important;
 }
 
-.app .secretLayer::before,
-.app .secretLayer::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  pointer-events: none !important;
-}
 
 .app .secretLayer .secretAura{
   position: absolute !important;
@@ -3902,25 +3684,6 @@ html{
   display: block !important;
 }
 
-.app .secretRibbon{
-  position: fixed !important;
-  left: 50% !important;
-  top: 18px !important;
-  z-index: 1500 !important;
-  transform: translateX(-50%) !important;
-  padding: 9px 14px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(var(--lt-accent-rgb), .36) !important;
-  background: rgba(8, 8, 12, .72) !important;
-  color: var(--lt-text) !important;
-  backdrop-filter: blur(14px) saturate(125%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(125%) !important;
-  box-shadow: 0 14px 44px rgba(0, 0, 0, .34), 0 0 28px rgba(var(--lt-accent-rgb), .16) !important;
-  font-size: 12px !important;
-  font-weight: 950 !important;
-  letter-spacing: .02em !important;
-  animation: localtifyEggToastPop 420ms cubic-bezier(.18, 1.22, .26, 1) both !important;
-}
 
 @keyframes localtifyEggToastPop{
   0%{ opacity: 0; transform: translate3d(-50%, -12px, 0) scale(.94); }
@@ -3928,24 +3691,7 @@ html{
   100%{ opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); }
 }
 
-.app .secretLayer.disco::before{
-  opacity: .92 !important;
-  background:
-    linear-gradient(105deg, transparent 0 11%, rgba(var(--lt-accent-rgb), .36) 13%, transparent 19% 100%),
-    linear-gradient(78deg, transparent 0 43%, rgba(255,255,255,.14) 50%, transparent 58% 100%),
-    linear-gradient(255deg, transparent 0 12%, rgba(var(--accent-2-rgb), .28) 16%, transparent 23% 100%) !important;
-  filter: blur(7px) !important;
-  transform-origin: center top !important;
-  animation: localtifyStageSweepFixed 1.35s ease-in-out infinite alternate !important;
-}
 
-.app .secretLayer.disco::after{
-  opacity: .18 !important;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 78px, rgba(255,255,255,.26) 80px 82px, transparent 84px 150px),
-    repeating-linear-gradient(0deg, transparent 0 54px, rgba(var(--lt-accent-rgb), .20) 55px 57px, transparent 58px 118px) !important;
-  animation: localtifyStageGridFixed 2.8s linear infinite !important;
-}
 
 .app .secretLayer.disco .secretAura{
   background:
@@ -4001,7 +3747,6 @@ html{
   line-height: 1 !important;
   text-shadow: 0 0 8px rgba(255,255,255,.42), 0 0 18px rgba(255,255,255,.16) !important;
 }
-.app .secretLayer.stars .starParticleLarge::before{ font-size: calc(var(--size, 12px) * 1.35) !important; }
 
 @keyframes localtifyWhiteStarDriftWorking{
   0%{ transform: translate3d(0,0,0) scale(.76); opacity: calc(var(--alpha, .72) * .54); }
@@ -4009,13 +3754,6 @@ html{
   100%{ transform: translate3d(var(--dx, 18px), var(--dy, -18px), 0) scale(1.04); opacity: calc(var(--alpha, .72) * .92); }
 }
 
-.app .secretLayer.fast::before{
-  opacity: .64 !important;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 32px, rgba(255,255,255,.12) 34px 36px, transparent 38px 92px),
-    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .20), transparent) !important;
-  animation: localtifySpeedLinesWorking 520ms linear infinite !important;
-}
 
 .app .secretLayer.fast .secretAura{
   background: radial-gradient(circle at 50% 50%, rgba(var(--lt-accent-rgb), .14), transparent 38%) !important;
@@ -4042,16 +3780,6 @@ html{
   animation: none !important;
 }
 
-.app.secret-night::after{
-  content: "" !important;
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 1390 !important;
-  pointer-events: none !important;
-  background: rgba(0,0,0,.30) !important;
-  opacity: 1 !important;
-  animation: localtifyNightDimWorking 8600ms ease both !important;
-}
 
 @keyframes localtifyNightDimWorking{
   0%{ opacity: 0; }
@@ -5941,22 +5669,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-.app .topUpdateRibbonLayer,
-.topUpdateRibbonLayer{
-  position: fixed !important;
-  inset: 36px 0 auto 0 !important;
-  z-index: 2300 !important;
-  width: auto !important;
-  height: 48px !important;
-  min-height: 48px !important;
-  display: block !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  background: transparent !important;
-  pointer-events: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
@@ -5992,35 +5704,7 @@ body.localtifyBackgroundMode .ambientSurface,
   animation: localtifyTopUpdateRibbonIn 180ms cubic-bezier(.2,.85,.2,1) both !important;
 }
 
-.app .topUpdateRibbon::before,
-.topUpdateRibbon::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  pointer-events: none !important;
-  border-radius: 0 !important;
-  background:
-    radial-gradient(circle at 18% -80%, rgba(var(--lt-accent-rgb, 233,98,233), .22), transparent 52%),
-    linear-gradient(90deg, rgba(255,255,255,.045), transparent 35%, rgba(var(--lt-accent-rgb, 233,98,233), .08)) !important;
-  opacity: .86 !important;
-}
 
-.app .topUpdateRibbonIcon,
-.topUpdateRibbonIcon{
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  border-radius: 8px !important;
-  display: grid !important;
-  place-items: center !important;
-  border: 1px solid color-mix(in oklab, var(--lt-accent, #e962e9) 48%, rgba(255,255,255,.16)) !important;
-  background: rgba(var(--lt-accent-rgb, 233,98,233), .14) !important;
-  color: color-mix(in oklab, var(--lt-accent, #e962e9) 72%, white 28%) !important;
-  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb, 233,98,233), .15) !important;
-  font-size: 13px !important;
-  font-weight: 950 !important;
-  line-height: 1 !important;
-}
 
 .app .topUpdateRibbonText,
 .topUpdateRibbonText{
@@ -6031,32 +5715,7 @@ body.localtifyBackgroundMode .ambientSurface,
   gap: 10px !important;
 }
 
-.app .topUpdateRibbonText .eyebrow,
-.topUpdateRibbonText .eyebrow{
-  margin: 0 !important;
-  color: color-mix(in oklab, var(--lt-accent, #e962e9) 72%, white 28%) !important;
-  font-size: 10px !important;
-  line-height: 1 !important;
-  font-weight: 950 !important;
-  letter-spacing: .14em !important;
-  text-transform: uppercase !important;
-  white-space: nowrap !important;
-}
 
-.app .topUpdateRibbonText h3,
-.topUpdateRibbonText h3{
-  margin: 0 !important;
-  min-width: 0 !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 92%, var(--lt-accent, #e962e9) 8%) !important;
-  font-size: 13px !important;
-  line-height: 1.15 !important;
-  font-weight: 850 !important;
-  letter-spacing: .01em !important;
-  text-transform: none !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
 
 .app .topUpdateRibbonText p:not(.eyebrow),
 .topUpdateRibbonText p:not(.eyebrow){
@@ -6071,71 +5730,10 @@ body.localtifyBackgroundMode .ambientSurface,
   white-space: nowrap !important;
 }
 
-.app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta{
-  grid-column: auto !important;
-  margin: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 7px !important;
-  flex-wrap: nowrap !important;
-  min-width: max-content !important;
-}
 
-.app .topUpdateRibbon .updateVersionPill,
-.app .topUpdateRibbon .updateSafePill,
-.topUpdateRibbon .updateVersionPill,
-.topUpdateRibbon .updateSafePill{
-  height: 22px !important;
-  min-height: 22px !important;
-  padding: 0 8px !important;
-  border-radius: 999px !important;
-  background: rgba(0,0,0,.18) !important;
-  border: 1px solid rgba(255,255,255,.095) !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 76%, var(--lt-accent, #e962e9) 10%) !important;
-  font-size: 10.5px !important;
-  font-weight: 850 !important;
-  white-space: nowrap !important;
-}
 
-.app .topUpdateRibbonActions,
-.topUpdateRibbonActions{
-  grid-column: auto !important;
-  margin: 0 !important;
-  min-width: max-content !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 7px !important;
-  flex-wrap: nowrap !important;
-}
 
-.app .topUpdateRibbon .updatePrimaryButton,
-.app .topUpdateRibbon .updateGhostButton,
-.app .topUpdateRibbon .updateToastClose,
-.topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateToastClose{
-  height: 29px !important;
-  min-height: 29px !important;
-  min-width: 0 !important;
-  padding: 0 11px !important;
-  border-radius: 10px !important;
-  font-size: 11.5px !important;
-  font-weight: 850 !important;
-  line-height: 1 !important;
-  transform: none !important;
-  white-space: nowrap !important;
-}
 
-.app .topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateGhostButton{
-  background: rgba(255,255,255,.045) !important;
-  border: 1px solid rgba(255,255,255,.095) !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 76%, var(--lt-muted, #aaa) 24%) !important;
-  box-shadow: none !important;
-}
 
 .app .topUpdateRibbon .updateGhostButton:hover,
 .topUpdateRibbon .updateGhostButton:hover{
@@ -6145,13 +5743,6 @@ body.localtifyBackgroundMode .ambientSurface,
   color: var(--lt-text, #fff) !important;
 }
 
-.app .topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updatePrimaryButton{
-  background: color-mix(in oklab, var(--lt-accent, #e962e9) 84%, white 16%) !important;
-  border: 1px solid color-mix(in oklab, var(--lt-accent, #e962e9) 70%, white 30%) !important;
-  color: #070409 !important;
-  box-shadow: 0 10px 26px rgba(var(--lt-accent-rgb, 233,98,233), .15) !important;
-}
 
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
@@ -6179,14 +5770,6 @@ body.localtifyBackgroundMode .ambientSurface,
   overflow: hidden !important;
 }
 
-.app .topUpdateRibbonProgress span,
-.topUpdateRibbonProgress span{
-  display: block !important;
-  height: 100% !important;
-  border-radius: 0 !important;
-  background: color-mix(in oklab, var(--lt-accent, #e962e9) 82%, white 18%) !important;
-  box-shadow: 0 0 16px rgba(var(--lt-accent-rgb, 233,98,233), .36) !important;
-}
 
 @keyframes localtifyTopUpdateRibbonIn{
   from{ opacity: 0; transform: translateY(-6px); }
@@ -6285,73 +5868,10 @@ body.localtifyBackgroundMode .ambientSurface,
   -webkit-backdrop-filter: blur(16px) saturate(132%) !important;
 }
 
-.app .topUpdateRibbon::before,
-.topUpdateRibbon::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  pointer-events: none !important;
-  border-radius: 0 !important;
-  background:
-    radial-gradient(circle at 14% -140%, rgba(var(--lt-accent-rgb, 230,90,223), .20), transparent 48%),
-    linear-gradient(90deg, rgba(255,255,255,.035), transparent 34%, rgba(var(--lt-accent-rgb, 230,90,223), .045)) !important;
-  opacity: .72 !important;
-}
 
-.app .topUpdateRibbonIcon,
-.topUpdateRibbonIcon{
-  width: 21px !important;
-  height: 21px !important;
-  min-width: 21px !important;
-  border-radius: 7px !important;
-  display: grid !important;
-  place-items: center !important;
-  align-self: center !important;
-  justify-self: center !important;
-  border: 1px solid rgba(var(--lt-accent-rgb, 230,90,223), .28) !important;
-  background: rgba(var(--lt-accent-rgb, 230,90,223), .11) !important;
-  color: color-mix(in oklab, var(--lt-accent, #e65adf) 65%, white 35%) !important;
-  box-shadow: none !important;
-  font-size: 12px !important;
-  font-weight: 950 !important;
-  line-height: 1 !important;
-}
 
-.app .topUpdateRibbonText,
-.topUpdateRibbonText{
-  min-width: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  overflow: hidden !important;
-}
 
-.app .topUpdateRibbonText .eyebrow,
-.topUpdateRibbonText .eyebrow{
-  margin: 0 !important;
-  flex: 0 0 auto !important;
-  color: color-mix(in oklab, var(--lt-accent, #e65adf) 72%, white 28%) !important;
-  font-size: 10px !important;
-  line-height: 1 !important;
-  font-weight: 950 !important;
-  letter-spacing: .14em !important;
-  text-transform: uppercase !important;
-  white-space: nowrap !important;
-}
 
-.app .topUpdateRibbonText h3,
-.topUpdateRibbonText h3{
-  margin: 0 !important;
-  min-width: 0 !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 92%, var(--lt-accent, #e65adf) 8%) !important;
-  font-size: 12.5px !important;
-  line-height: 1.1 !important;
-  font-weight: 850 !important;
-  letter-spacing: .005em !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
 
 .app .topUpdateRibbonMeta,
 .topUpdateRibbonMeta{
@@ -6365,22 +5885,6 @@ body.localtifyBackgroundMode .ambientSurface,
   flex-wrap: nowrap !important;
 }
 
-.app .topUpdateRibbon .updateVersionPill,
-.app .topUpdateRibbon .updateSafePill,
-.topUpdateRibbon .updateVersionPill,
-.topUpdateRibbon .updateSafePill{
-  height: 22px !important;
-  min-height: 22px !important;
-  padding: 0 8px !important;
-  border-radius: 999px !important;
-  border: 0 !important;
-  background: rgba(255,255,255,.055) !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 78%, var(--lt-muted, #aaa) 22%) !important;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.055) !important;
-  font-size: 10px !important;
-  font-weight: 850 !important;
-  white-space: nowrap !important;
-}
 
 .app .topUpdateRibbon .updateSafePill.pending,
 .topUpdateRibbon .updateSafePill.pending{
@@ -6399,48 +5903,9 @@ body.localtifyBackgroundMode .ambientSurface,
   flex-wrap: nowrap !important;
 }
 
-.app .topUpdateRibbon .updatePrimaryButton,
-.app .topUpdateRibbon .updateGhostButton,
-.app .topUpdateRibbon .updateToastClose,
-.topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateToastClose{
-  height: 26px !important;
-  min-height: 26px !important;
-  min-width: 0 !important;
-  border-radius: 9px !important;
-  padding: 0 10px !important;
-  font-size: 10.8px !important;
-  font-weight: 850 !important;
-  line-height: 1 !important;
-  white-space: nowrap !important;
-  transform: none !important;
-  box-shadow: none !important;
-}
 
-.app .topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateGhostButton{
-  border: 0 !important;
-  background: rgba(255,255,255,.052) !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 78%, var(--lt-muted, #aaa) 22%) !important;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.055) !important;
-}
 
-.app .topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updatePrimaryButton{
-  border: 0 !important;
-  background: color-mix(in oklab, var(--lt-accent, #e65adf) 82%, white 18%) !important;
-  color: #080409 !important;
-  box-shadow: 0 8px 20px rgba(var(--lt-accent-rgb, 230,90,223), .14) !important;
-}
 
-.app .topUpdateRibbon .updateGhostButton:hover,
-.topUpdateRibbon .updateGhostButton:hover,
-.app .topUpdateRibbon .updatePrimaryButton:hover,
-.topUpdateRibbon .updatePrimaryButton:hover{
-  transform: none !important;
-  filter: brightness(1.04) !important;
-}
 
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
@@ -6482,14 +5947,6 @@ body.localtifyBackgroundMode .ambientSurface,
 
 @media (max-width: 720px){
 
-  .app .topUpdateRibbonLayer,
-.topUpdateRibbonLayer,
-.app .topUpdateRibbon,
-.topUpdateRibbon{
-    height: 42px !important;
-    min-height: 42px !important;
-    max-height: 42px !important;
-  }
 
   .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow,
@@ -6499,27 +5956,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-.app .topUpdateRibbonLayer,
-.topUpdateRibbonLayer{
-  position: fixed !important;
-  top: 36px !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: auto !important;
-  width: 100vw !important;
-  height: 42px !important;
-  min-height: 42px !important;
-  max-height: 42px !important;
-  z-index: 2350 !important;
-  display: block !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  pointer-events: none !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  overflow: visible !important;
-}
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
@@ -6556,59 +5992,10 @@ body.localtifyBackgroundMode .ambientSurface,
   -webkit-backdrop-filter: blur(16px) saturate(130%) !important;
 }
 
-.app .topUpdateRibbon::before,
-.topUpdateRibbon::before{
-  opacity: .44 !important;
-  background:
-    radial-gradient(circle at 18% -120%, rgba(var(--lt-accent-rgb, 230,90,223), .16), transparent 46%),
-    linear-gradient(90deg, rgba(255,255,255,.020), transparent 34%, rgba(var(--lt-accent-rgb, 230,90,223), .030)) !important;
-}
 
-.app .topUpdateRibbonMain,
-.topUpdateRibbonMain{
-  min-width: 0 !important;
-  height: 100% !important;
-  display: grid !important;
-  grid-template-columns: 22px minmax(0, 1fr) !important;
-  align-items: center !important;
-  column-gap: 10px !important;
-}
 
-.app .topUpdateRibbonRight,
-.topUpdateRibbonRight{
-  height: 100% !important;
-  min-width: max-content !important;
-  display: inline-grid !important;
-  grid-auto-flow: column !important;
-  align-items: center !important;
-  justify-content: end !important;
-  gap: 8px !important;
-}
 
-.app .topUpdateRibbonIcon,
-.topUpdateRibbonIcon{
-  align-self: center !important;
-  justify-self: center !important;
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  margin: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  line-height: 1 !important;
-  transform: none !important;
-}
 
-.app .topUpdateRibbonText,
-.topUpdateRibbonText{
-  height: 100% !important;
-  min-width: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 9px !important;
-  overflow: hidden !important;
-  transform: translateY(0) !important;
-}
 
 .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow,
@@ -6620,65 +6007,11 @@ body.localtifyBackgroundMode .ambientSurface,
   line-height: 1 !important;
 }
 
-.app .topUpdateRibbonText .eyebrow,
-.topUpdateRibbonText .eyebrow{
-  font-size: 10px !important;
-  letter-spacing: .13em !important;
-}
 
-.app .topUpdateRibbonText h3,
-.topUpdateRibbonText h3{
-  font-size: 12px !important;
-  font-weight: 850 !important;
-  max-width: min(68vw, 980px) !important;
-}
 
-.app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta,
-.app .topUpdateRibbonActions,
-.topUpdateRibbonActions{
-  height: 100% !important;
-  margin: 0 !important;
-  align-items: center !important;
-  align-content: center !important;
-  justify-content: end !important;
-  align-self: center !important;
-}
 
-.app .topUpdateRibbon .updateVersionPill,
-.app .topUpdateRibbon .updateSafePill,
-.topUpdateRibbon .updateVersionPill,
-.topUpdateRibbon .updateSafePill{
-  height: 22px !important;
-  min-height: 22px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1 !important;
-  margin: 0 !important;
-}
 
-.app .topUpdateRibbon .updatePrimaryButton,
-.app .topUpdateRibbon .updateGhostButton,
-.app .topUpdateRibbon .updateToastClose,
-.topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateToastClose{
-  height: 27px !important;
-  min-height: 27px !important;
-  display: inline-grid !important;
-  place-items: center !important;
-  align-self: center !important;
-  margin: 0 !important;
-  line-height: 1 !important;
-}
 
-.app .topUpdateRibbon .updateToastClose,
-.topUpdateRibbon .updateToastClose{
-  width: 27px !important;
-  min-width: 27px !important;
-  padding: 0 !important;
-}
 
 @media (max-width: 980px){
   .app .topUpdateRibbon,
@@ -7308,10 +6641,6 @@ body.localtifyBackgroundMode .ambientSurface,
   outline: none;
 }
 
-.app .topUpdateRibbonLayer,
-.topUpdateRibbonLayer{
-  overflow: visible !important;
-}
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
@@ -7333,10 +6662,6 @@ body.localtifyBackgroundMode .ambientSurface,
   animation: updateRibbonSheenV159 4.8s cubic-bezier(.16,1,.3,1) infinite !important;
 }
 
-.app .topUpdateRibbonIcon,
-.topUpdateRibbonIcon{
-  animation: updateIconPulseV159 2.6s ease-in-out infinite !important;
-}
 
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
@@ -7346,11 +6671,6 @@ body.localtifyBackgroundMode .ambientSurface,
     box-shadow 170ms ease !important;
 }
 
-.app .topUpdateRibbon .updatePrimaryButton:hover,
-.topUpdateRibbon .updatePrimaryButton:hover{
-  transform: translate3d(0,-1px,0) !important;
-  box-shadow: 0 10px 24px rgba(var(--lt-accent-rgb, 230,90,223), .22) !important;
-}
 
 .app .topUpdateRibbon .updateGhostButton,
 .app .topUpdateRibbon .updateToastClose,
@@ -9050,13 +8370,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.052) !important;
 }
 
-.app .topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updatePrimaryButton{
-  border: 0 !important;
-  background: color-mix(in oklab, var(--lt-accent, #e65adf) 82%, white 18%) !important;
-  color: #070409 !important;
-  box-shadow: 0 7px 16px rgba(var(--lt-accent-rgb, 230,90,223),0.13) !important;
-}
 
 .app .topUpdateRibbon .updateGhostButton:hover,
 .topUpdateRibbon .updateGhostButton:hover,
@@ -9113,11 +8426,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 }
 
 @media (max-width: 860px){
-  .app .topUpdateRibbonLayer,
-.topUpdateRibbonLayer{
-    left: 64px !important;
-    right: 118px !important;
-  }
 
   .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow,
@@ -9181,13 +8489,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 }
 
-.app .topUpdateRibbon::before,
-.topUpdateRibbon::before{
-  opacity: .42 !important;
-  background:
-    radial-gradient(circle at 7% 0%, rgba(var(--lt-accent-rgb, 230,90,223), 0.14), transparent 34%),
-    linear-gradient(90deg, rgba(255,255,255,0.030), transparent 44%) !important;
-}
 
 .app .topUpdateRibbonMeta,
 .topUpdateRibbonMeta,
@@ -9216,10 +8517,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   animation: localtifyUpdateIconPulseV195 3.8s ease-in-out infinite !important;
 }
 
-.app .topUpdateRibbonText,
-.topUpdateRibbonText{
-  gap: 7px !important;
-}
 
 .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow{
@@ -9227,11 +8524,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   letter-spacing: .105em !important;
 }
 
-.app .topUpdateRibbonText h3,
-.topUpdateRibbonText h3{
-  font-size: 11px !important;
-  color: rgba(255,255,255,0.86) !important;
-}
 
 .app .topUpdateRibbonRight,
 .topUpdateRibbonRight{
@@ -9289,16 +8581,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.058) !important;
 }
 
-.app .topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updatePrimaryButton{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0.04)),
-    color-mix(in oklab, var(--lt-accent, #e65adf) 84%, white 16%) !important;
-  color: #08030a !important;
-  box-shadow:
-    0 7px 15px rgba(var(--lt-accent-rgb, 230,90,223),0.16),
-    inset 0 1px 0 rgba(255,255,255,0.25) !important;
-}
 
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
@@ -10908,11 +10190,6 @@ body.isResizingPlayer .app *{
   height: 13px !important;
 }
 
-.app .topUpdateRibbonText,
-.topUpdateRibbonText{
-  min-width: 0 !important;
-  display: block !important;
-}
 
 .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow,
@@ -10921,17 +10198,6 @@ body.isResizingPlayer .app *{
   display: none !important;
 }
 
-.app .topUpdateRibbonText h3,
-.topUpdateRibbonText h3{
-  margin: 0 !important;
-  color: #fff !important;
-  font-size: 12px !important;
-  line-height: 1 !important;
-  letter-spacing: -.014em !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
 
 .app .topUpdateRibbonRight,
 .topUpdateRibbonRight{
@@ -10973,12 +10239,6 @@ body.isResizingPlayer .app *{
   background: rgba(255,255,255,.052) !important;
 }
 
-.app .topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updatePrimaryButton{
-  color: #06100b !important;
-  background: var(--lt-accent) !important;
-  box-shadow: 0 0 18px rgba(var(--lt-accent-rgb), .14) !important;
-}
 
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
@@ -11579,13 +10839,6 @@ body.isResizingPlayer .app *{
   opacity: 1 !important;
 }
 
-.app .search:hover,
-.app .searchEasterWrap .search:hover{
-  border-color: rgba(255,255,255,.19) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.066), rgba(255,255,255,.026)),
-    rgba(10, 10, 17, .92) !important;
-}
 
 .app .search:focus,
 .app .searchEasterWrap .search:focus{
@@ -11813,9 +11066,6 @@ body.isResizingPlayer .app *{
   color: color-mix(in oklab, rgba(255,255,255,.42) 62%, var(--lt-accent) 38%) !important;
 }
 
-.app .headerText h2{
-  transform: translate3d(0, 2px, 0) !important;
-}
 
 
 .app .searchEasterWrap{
@@ -11910,39 +11160,7 @@ body.isResizingPlayer .app *{
 }
 
 /* Lighter, prettier header stars: twinkle + drift with theme accent. */
-.app .content > .headerBar::before{
-  opacity: .76 !important;
-  filter: none !important;
-  background-size: 100% 100% !important;
-  background-image:
-    radial-gradient(circle at 4% 30%, rgba(255,255,255,.96) 0 1.3px, transparent 2px),
-    radial-gradient(circle at 10% 70%, rgba(var(--lt-accent-rgb),.92) 0 1.15px, transparent 1.95px),
-    radial-gradient(circle at 17% 21%, rgba(255,255,255,.78) 0 1px, transparent 1.85px),
-    radial-gradient(circle at 24% 60%, rgba(var(--lt-accent-rgb),.78) 0 1.1px, transparent 1.9px),
-    radial-gradient(circle at 34% 18%, rgba(255,255,255,.88) 0 1.15px, transparent 2px),
-    radial-gradient(circle at 42% 68%, rgba(var(--lt-accent-rgb),.86) 0 1.15px, transparent 2px),
-    radial-gradient(circle at 52% 28%, rgba(255,255,255,.84) 0 1.15px, transparent 2px),
-    radial-gradient(circle at 62% 70%, rgba(var(--lt-accent-rgb),.82) 0 1.15px, transparent 2px),
-    radial-gradient(circle at 74% 22%, rgba(255,255,255,.86) 0 1.05px, transparent 1.9px),
-    radial-gradient(circle at 84% 66%, rgba(var(--lt-accent-rgb),.78) 0 1.1px, transparent 1.95px),
-    radial-gradient(circle at 94% 32%, rgba(255,255,255,.84) 0 1px, transparent 1.85px) !important;
-  animation: localtifyHeaderStarsPulseV484 4.8s ease-in-out infinite !important;
-}
 
-.app .content > .headerBar::after{
-  opacity: .48 !important;
-  background-size: 118% 100% !important;
-  background-image:
-    radial-gradient(circle at 14% 44%, rgba(255,255,255,.72) 0 .95px, transparent 1.8px),
-    radial-gradient(circle at 28% 14%, rgba(var(--lt-accent-rgb),.56) 0 .85px, transparent 1.7px),
-    radial-gradient(circle at 39% 58%, rgba(255,255,255,.58) 0 .95px, transparent 1.8px),
-    radial-gradient(circle at 54% 22%, rgba(var(--lt-accent-rgb),.52) 0 .85px, transparent 1.7px),
-    radial-gradient(circle at 69% 46%, rgba(255,255,255,.60) 0 .95px, transparent 1.8px),
-    radial-gradient(circle at 82% 18%, rgba(var(--lt-accent-rgb),.48) 0 .85px, transparent 1.7px),
-    radial-gradient(circle at 92% 54%, rgba(255,255,255,.56) 0 .95px, transparent 1.8px),
-    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .035), transparent) !important;
-  animation: localtifyHeaderStarsDriftV484 10s ease-in-out infinite alternate !important;
-}
 
 @keyframes localtifyHeaderStarsPulseV484{
   0%{
@@ -12078,14 +11296,6 @@ body.isResizingPlayer .app *{
   opacity: .75 !important;
 }
 
-.app .topUpdateRibbonMain,
-.topUpdateRibbonMain{
-  min-width: 0 !important;
-  height: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-}
 
 .app .topUpdateRibbonIcon,
 .topUpdateRibbonIcon{
@@ -12100,14 +11310,6 @@ body.isResizingPlayer .app *{
   box-shadow: none !important;
 }
 
-.app .topUpdateRibbonText,
-.topUpdateRibbonText{
-  min-width: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 7px !important;
-  overflow: hidden !important;
-}
 
 
 .app .topUpdateRibbonText h3,
@@ -12135,13 +11337,6 @@ body.isResizingPlayer .app *{
 }
 
 
-.app .topUpdateRibbonActions,
-.topUpdateRibbonActions{
-  height: 100% !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 7px !important;
-}
 
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
@@ -12179,13 +11374,6 @@ body.isResizingPlayer .app *{
 }
 
 /* Proper contrast layer for the light theme. */
-.app[data-theme="mono"]{
-  background:
-    linear-gradient(rgba(61, 67, 92, .035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(61, 67, 92, .030) 1px, transparent 1px),
-    var(--lt-bg) !important;
-  background-size: 42px 42px !important;
-}
 
 .app[data-theme="mono"] :is(.panel, .ambientSurface, .sidebar, .playerBar, .settingsPageShell, .downloadPanel){
   border-color: rgba(72, 78, 104, .13) !important;
@@ -12207,10 +11395,6 @@ body.isResizingPlayer .app *{
     padding: 0 8px !important;
   }
 
-  .app .topUpdateRibbonText h3,
-  .topUpdateRibbonText h3{
-    font-size: 10px !important;
-  }
 
   .app .topUpdateRibbon .updatePrimaryButton,
   .topUpdateRibbon .updatePrimaryButton{
@@ -12225,18 +11409,8 @@ body.isResizingPlayer .app *{
 }
 
 /* Title/search spacing fix */
-.app .content > .headerBar{
-  min-height: 104px !important;
-  padding: 30px 22px 15px !important;
-}
 
-.app .headerText{
-  padding-top: 8px !important;
-}
 
-.app .headerTools.compactHeaderTools{
-  padding-top: 12px !important;
-}
 
 /* Organic stars: the positions drift, not just the whole layer. */
 .app .content > .headerBar::before{
@@ -12332,25 +11506,7 @@ body.isResizingPlayer .app *{
 }
 
 /* Much more visible full-width update ribbon, like a real top app notice. */
-.app .titleBar,
-.titleBar{
-  overflow: visible !important;
-}
 
-.app .topUpdateRibbonLayer,
-.topUpdateRibbonLayer{
-  position: fixed !important;
-  top: 36px !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: auto !important;
-  width: 100vw !important;
-  height: 35px !important;
-  min-height: 35px !important;
-  z-index: 4000 !important;
-  display: block !important;
-  pointer-events: none !important;
-}
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
@@ -12383,40 +11539,9 @@ body.isResizingPlayer .app *{
   overflow: hidden !important;
 }
 
-.app .topUpdateRibbonMain,
-.topUpdateRibbonMain{
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  min-width: 0 !important;
-  height: 100% !important;
-}
-
-.app .topUpdateRibbonIcon,
-.topUpdateRibbonIcon{
-  width: 16px !important;
-  height: 16px !important;
-  min-width: 16px !important;
-  color: #bdefff !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
 
 
-.app .topUpdateRibbonText h3,
-.topUpdateRibbonText h3{
-  margin: 0 !important;
-  min-width: 0 !important;
-  color: #eaffff !important;
-  font-size: 11.5px !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-  letter-spacing: .01em !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
+
 
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
@@ -12426,46 +11551,12 @@ body.isResizingPlayer .app *{
   height: 100% !important;
 }
 
-.app .topUpdateRibbon .updateReleaseLinkV486,
-.topUpdateRibbon .updateReleaseLinkV486{
-  height: 22px !important;
-  min-height: 22px !important;
-  padding: 0 9px !important;
-  border: 0 !important;
-  border-radius: 999px !important;
-  color: #dffaff !important;
-  background: rgba(255,255,255,.09) !important;
-  box-shadow: none !important;
-  font-size: 10.5px !important;
-  font-weight: 850 !important;
-  text-decoration: underline !important;
-  text-underline-offset: 2px !important;
-}
 
 
-.app .topUpdateRibbon .updateToastClose,
-.topUpdateRibbon .updateToastClose{
-  width: 23px !important;
-  height: 23px !important;
-  min-width: 23px !important;
-  color: rgba(234,255,255,.64) !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
 
 /* Reduce outline noise: only active/important areas should look outlined. */
-.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
-  border-color: var(--outline-calm-v486) !important;
-}
 
-.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
-  border-color: color-mix(in oklab, rgba(255,255,255,.075) 62%, var(--lt-accent) 38%) !important;
-}
 
-.app :is(.active,.playing,.selected):is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318){
-  border-color: var(--outline-active-v486) !important;
-}
 
 @media (max-width: 760px){
   .app .topUpdateRibbonText h3,
@@ -12486,18 +11577,8 @@ body.isResizingPlayer .app *{
   --outline-active-v487: color-mix(in oklab, rgba(255,255,255,.06) 30%, var(--lt-accent) 70%) !important;
 }
 
-.app .content > .headerBar{
-  min-height: 98px !important;
-  padding: 27px 22px 13px !important;
-}
 
-.app .headerText{
-  padding-top: 4px !important;
-}
 
-.app .headerTools.compactHeaderTools{
-  padding-top: 9px !important;
-}
 
 /* Star field: individual dot positions shift instead of one flat layer sliding. */
 .app .content > .headerBar::before{
@@ -12784,13 +11865,6 @@ body.isResizingPlayer .app *{
   opacity: .16 !important;
 }
 
-.app[data-theme="mono"] .search,
-.app[data-theme="mono"] .searchEasterWrap .search{
-  color: var(--lt-text) !important;
-  border-color: rgba(55,61,87,.18) !important;
-  background: rgba(255,255,255,.76) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.58), 0 8px 18px rgba(55,61,87,.09) !important;
-}
 
 .app[data-theme="mono"] .search::placeholder,
 .app[data-theme="mono"] .searchEasterWrap .search::placeholder{
@@ -12798,112 +11872,20 @@ body.isResizingPlayer .app *{
 }
 /* end localtify v487 */
 
-.app .content > .headerBar{
-  min-height: 102px !important;
-  padding: 28px 22px 15px !important;
-  overflow: visible !important;
-}
 
-.app .headerText{
-  padding-top: 7px !important;
-}
 
-.app .headerTools.compactHeaderTools{
-  padding-top: 13px !important;
-  overflow: visible !important;
-}
 
-.app .searchEasterWrap{
-  width: min(100%, 438px) !important;
-  padding: 4px !important;
-  margin: -4px -4px 0 0 !important;
-  overflow: visible !important;
-  contain: layout style !important;
-}
 
-.app .searchEasterWrap::before{
-  inset: 4px !important;
-  opacity: .58 !important;
-}
 
-.app .search,
-.app .searchEasterWrap .search{
-  min-height: 42px !important;
-  border-color: rgba(255,255,255,.18) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
-    rgba(8, 8, 14, .92) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.050),
-    0 7px 16px rgba(0,0,0,.16) !important;
-}
 
-.app .search:hover,
-.app .searchEasterWrap .search:hover,
-.app .search:focus,
-.app .searchEasterWrap .search:focus{
-  transform: none !important;
-  border-color: rgba(var(--lt-accent-rgb), .50) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.060),
-    0 0 0 2px rgba(var(--lt-accent-rgb), .13),
-    0 8px 18px rgba(0,0,0,.18) !important;
-}
 
 /* Update ribbon: black, cleaner, no release link. */
-.app .topUpdateRibbonLayer,
-.topUpdateRibbonLayer{
-  top: 36px !important;
-  height: 38px !important;
-  min-height: 38px !important;
-  z-index: 4100 !important;
-}
 
-.app .topUpdateRibbon,
-.topUpdateRibbon,
-.app .topUpdateRibbon.updateToastCard,
-.topUpdateRibbon.updateToastCard{
-  height: 38px !important;
-  min-height: 38px !important;
-  max-height: 38px !important;
-  padding: 0 12px !important;
-  border: 0 !important;
-  border-top: 1px solid rgba(255,255,255,.065) !important;
-  border-bottom: 1px solid rgba(var(--lt-accent-rgb), .34) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.010)),
-    #050507 !important;
-  color: rgba(255,255,255,.92) !important;
-  box-shadow:
-    0 7px 22px rgba(0,0,0,.38),
-    inset 0 1px 0 rgba(255,255,255,.055) !important;
-  backdrop-filter: blur(10px) saturate(118%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(118%) !important;
-}
 
-.app .topUpdateRibbon::before,
-.topUpdateRibbon::before{
-  background:
-    radial-gradient(circle at 0% 50%, rgba(var(--lt-accent-rgb), .18), transparent 34%),
-    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .08), transparent 48%) !important;
-  opacity: .72 !important;
-}
 
 
 /* Light mode search still readable and unclipped. */
-.app[data-theme="mono"] .searchEasterWrap{
-  overflow: visible !important;
-}
 
-.app[data-theme="mono"] .search,
-.app[data-theme="mono"] .searchEasterWrap .search{
-  color: var(--lt-text) !important;
-  border-color: rgba(55,61,87,.19) !important;
-  background: rgba(255,255,255,.86) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.65),
-    0 8px 18px rgba(55,61,87,.09) !important;
-}
 /* end localtify v488 */
 
 .app .content > .headerBar{

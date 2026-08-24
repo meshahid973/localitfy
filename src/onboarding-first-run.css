@@ -258,10 +258,6 @@
   margin-bottom: 7px;
 }
 
-.onboardingProgressTop strong {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 13px;
-}
 
 .onboardingProgressTrack {
   height: 6px;
@@ -699,9 +695,6 @@
 }
 
 @media (max-width: 1120px) {
-  .localitfyOnboardingShell {
-    width: min(960px, calc(100vw - 72px));
-  }
 
   .onboardingContentLayout.twoCol {
     grid-template-columns: 1fr;
@@ -713,11 +706,11 @@
 }
 
 @media (max-width: 860px) {
-  
 
-  
 
-  
+
+
+
 
   .onboardingV314,
   .onboardingV315 {
@@ -893,24 +886,10 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 }
 
 @media (max-width: 1120px){
-  .onboardingMascotPeekWrapV499{
-    right: clamp(-130px, -12vw, -92px);
-    width: clamp(170px, 19vw, 225px);
-    opacity: .88;
   }
-}
 
 @media (max-width: 860px){
-  .localitfyOnboardingShell{
-    overflow: hidden;
-  }
 
-  .onboardingMascotPeekWrapV499{
-    right: -98px;
-    top: 135px;
-    width: 170px;
-    opacity: .58;
-  }
 
   .onboardingMascotPeekSoftEdgeV499{
     display: none;
@@ -932,9 +911,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   overflow: visible;
 }
 
-.onboardingHeader{
-  padding-right: clamp(80px, 9vw, 132px);
-}
 
 .onboardingHeaderMeta,
 .onboardingStepTabs{
@@ -977,19 +953,11 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
     linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,.006));
 }
 
-.onboardingWelcomeV505{
-  grid-template-columns: minmax(300px, .92fr) minmax(0, 1.08fr);
-  padding-right: clamp(52px, 8vw, 108px);
-}
 
 .onboardingHeroCopy h2{
   max-width: 8.5ch;
 }
 
-.onboardingWelcomeV505 .onboardingHeroCopy h2{
-  max-width: 9.2ch;
-  font-size: clamp(54px, 5vw, 74px);
-}
 
 .onboardingWelcomeV505 .onboardingLead{
   max-width: 42ch;
@@ -1051,9 +1019,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   border-right: 1px solid rgba(var(--onboarding-accent-rgb), .16);
 }
 
-.onboardingBenefitGridV505{
-  gap: 10px;
-}
 
 .onboardingBenefitGridV505 > div{
   min-height: 104px;
@@ -1124,20 +1089,9 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 }
 
 @media (max-width: 1120px){
-  .localitfyOnboardingShell{
-    width: min(960px, calc(100vw - 80px));
-  }
 
-  .onboardingWelcomeV505{
-    padding-right: 0;
-  }
 
-  .onboardingMascotPeekWrapV499{
-    right: -154px;
-    width: 236px;
-    opacity: .88;
   }
-}
 
 @media (max-width: 860px){
   .localitfyOnboardingShell{
@@ -1149,9 +1103,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
     padding-right: 0;
   }
 
-  .onboardingWelcomeV505{
-    grid-template-columns: 1fr;
-  }
 
   .onboardingMascotBubbleV505::after{
     display: none;

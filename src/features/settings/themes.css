@@ -263,58 +263,6 @@
   --lt-danger: var(--danger, #ff6b8a);
 }
 
-.app[data-theme="mono"]{
-  --bg: #030303;
-  --bg-2: #030303;
-  --bg-3: #121212;
-  --panel: color-mix(in oklab, #121212 56%, #000);
-  --surface: color-mix(in oklab, #121212 42%, #000);
-  --surface-2: color-mix(in oklab, #121212 56%, #000);
-  --surface-3: color-mix(in oklab, #121212 72%, #000);
-  --text: #f8f8f8;
-  --text-2: color-mix(in oklab, #f8f8f8 78%, #000);
-  --muted: color-mix(in oklab, #f8f8f8 54%, #000);
-  --faint: color-mix(in oklab, #f8f8f8 34%, #000);
-  --line: color-mix(in oklab, #f4f4f5 18%, #000);
-  --line-2: color-mix(in oklab, #f4f4f5 28%, #000);
-  --accent: #f4f4f5;
-  --accent-2: #a1a1aa;
-  --highlight: #d4d4d8;
-  --progress: #f4f4f5;
-  --accent-rgb: 244, 244, 245;
-  --accent-2-rgb: 161, 161, 170;
-  --highlight-rgb: 212, 212, 216;
-  --progress-rgb: 244, 244, 245;
-  --accent-soft: rgba(244, 244, 245, 0.14);
-  --accent-line: rgba(244, 244, 245, 0.34);
-  --theme-accent: #f4f4f5;
-  --theme-accent-2: #a1a1aa;
-  --theme-highlight: #d4d4d8;
-  --theme-progress: #f4f4f5;
-  --theme-card-glass: rgba(244, 244, 245, 0.045);
-  --theme-card-border: rgba(244, 244, 245, 0.16);
-  --theme-hover-glass: rgba(244, 244, 245, 0.09);
-  --theme-hover-border: rgba(244, 244, 245, 0.32);
-  --card-rgb: 244, 244, 245;
-  --localtify-sidebar-bg: rgba(3, 3, 3, 0.98);
-  --localtify-sidebar-bg-2: rgba(18, 18, 18, 0.72);
-  --localtify-panel-bg: rgba(18, 18, 18, 0.52);
-  --localtify-panel-bg-2: rgba(3, 3, 3, 0.74);
-  --localtify-line-soft: rgba(244, 244, 245, 0.16);
-  --lt-bg: var(--bg);
-  --lt-bg-soft: var(--bg-2, var(--bg));
-  --lt-surface: var(--surface, var(--panel));
-  --lt-surface-soft: color-mix(in oklab, var(--surface, var(--panel)) 58%, transparent);
-  --lt-surface-raised: var(--surface-2, var(--panel));
-  --lt-text: var(--text);
-  --lt-muted: var(--muted, var(--text-2));
-  --lt-faint: var(--faint, var(--muted));
-  --lt-border: var(--line, rgba(255, 255, 255, 0.10));
-  --lt-border-strong: var(--line-2, var(--line, rgba(255, 255, 255, 0.18)));
-  --lt-accent: var(--accent);
-  --lt-accent-rgb: var(--accent-rgb);
-  --lt-danger: var(--danger, #ff6b8a);
-}
 
 .app[data-theme="rose"]{
   --bg: #0b0306;
@@ -2068,58 +2016,6 @@
 /* end localtify v485 theme polish */
 
 /* localtify v486 — light mode visibility and contrast final pass */
-.app[data-theme="mono"]{
-  color-scheme: light;
-  --bg: #f3f5fa;
-  --bg-2: #eef1f7;
-  --bg-3: #e3e7f1;
-  --panel: #eef1f7;
-  --surface: #f9fafc;
-  --surface-2: #e8ecf5;
-  --surface-3: #dce2ee;
-  --text: #343a55;
-  --text-2: #535a76;
-  --muted: #737a92;
-  --faint: #a0a6b7;
-  --line: rgba(55, 61, 87, .13);
-  --line-2: rgba(55, 61, 87, .22);
-  --accent: #56617f;
-  --accent-2: #7f8bad;
-  --highlight: #2e354f;
-  --progress: #56617f;
-  --accent-rgb: 86, 97, 127;
-  --accent-2-rgb: 127, 139, 173;
-  --highlight-rgb: 46, 53, 79;
-  --progress-rgb: 86, 97, 127;
-  --accent-soft: rgba(86, 97, 127, .10);
-  --accent-line: rgba(86, 97, 127, .22);
-  --theme-accent: #56617f;
-  --theme-accent-2: #7f8bad;
-  --theme-highlight: #2e354f;
-  --theme-progress: #56617f;
-  --theme-card-glass: rgba(55, 61, 87, .050);
-  --theme-card-border: rgba(55, 61, 87, .12);
-  --theme-hover-glass: rgba(55, 61, 87, .075);
-  --theme-hover-border: rgba(55, 61, 87, .20);
-  --card-rgb: 86, 97, 127;
-  --localtify-sidebar-bg: rgba(239, 242, 248, .97);
-  --localtify-sidebar-bg-2: rgba(226, 231, 241, .84);
-  --localtify-panel-bg: rgba(246, 248, 252, .78);
-  --localtify-panel-bg-2: rgba(236, 239, 247, .90);
-  --localtify-line-soft: rgba(55, 61, 87, .13);
-  --lt-bg: var(--bg);
-  --lt-bg-soft: var(--bg-2);
-  --lt-surface: var(--surface);
-  --lt-surface-soft: rgba(246, 248, 252, .78);
-  --lt-surface-raised: var(--surface-2);
-  --lt-text: var(--text);
-  --lt-muted: var(--muted);
-  --lt-faint: var(--faint);
-  --lt-border: var(--line);
-  --lt-border-strong: var(--line-2);
-  --lt-accent: var(--accent);
-  --lt-accent-rgb: var(--accent-rgb);
-}
 /* end localtify v486 */
 
 /* localtify v487 — light mode final contrast */
@@ -2178,33 +2074,7 @@
 /* end localtify v487 */
 
 /* localtify v488 — light mode shell/select contrast */
-.app[data-theme="mono"]{
-  color-scheme: light;
-  --bg: #f4f6fb;
-  --bg-2: #eef1f7;
-  --surface: #ffffff;
-  --surface-2: #e8ecf5;
-  --text: #343a55;
-  --muted: #6f768f;
-  --line: rgba(55,61,87,.12);
-  --line-2: rgba(55,61,87,.20);
-  --accent: #58617f;
-  --accent-rgb: 88, 97, 127;
-  --lt-bg: var(--bg);
-  --lt-surface: var(--surface);
-  --lt-text: var(--text);
-  --lt-muted: var(--muted);
-  --lt-border: var(--line);
-  --lt-border-strong: var(--line-2);
-  --lt-accent: var(--accent);
-  --lt-accent-rgb: var(--accent-rgb);
-}
 
-.app[data-theme="mono"] select,
-.app[data-theme="mono"] option{
-  color: #343a55 !important;
-  background: #ffffff !important;
-}
 /* end localtify v488 */
 
 /* localtify v489 — final light mode variables */
