@@ -7,21 +7,21 @@
   --player-track-base: rgba(255, 255, 255, 0.13);
 
   position: relative !important;
-  grid-column: 1 / -1 !important;
-  grid-row: 2 !important;
-  width: 100% !important;
-  min-width: 0 !important;
+
+
+
+
   height: var(--player-size-used) !important;
-  min-height: 74px !important;
+
   display: grid !important;
   grid-template-columns: minmax(220px, 350px) minmax(420px, 1fr) minmax(150px, 240px) !important;
   grid-template-areas: "left center right" !important;
   align-items: center !important;
   gap: clamp(14px, 1.7vw, 24px) !important;
   padding: 10px 18px 12px !important;
-  overflow: visible !important;
+
   isolation: isolate !important;
-  contain: layout style !important;
+
   border-top: 1px solid rgba(255, 255, 255, 0.085) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.01)),
@@ -226,7 +226,7 @@
   color: #ffffff !important;
   border: 0 !important;
   border-radius: 999px !important;
-  background: rgb(var(--accent-rgb)) !important;
+
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.12) inset,
     0 0 28px rgba(var(--accent-rgb),0.24),
@@ -245,7 +245,7 @@
 
 .playerBar .circleButton.active,
 .playerBar .repeatButton.active{
-  color: rgb(var(--accent-rgb)) !important;
+
   background: transparent !important;
   box-shadow: none !important;
   border: 0 !important;
@@ -690,7 +690,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   --player-cover-sync-opacity: var(--cover-sync-player-opacity, 0.52);
   --player-cover-sync-strength: var(--cover-sync-strength, 0.50);
   --player-cover-sync-tint: var(--cover-sync-player-tint, 0.22);
-  --player-track-base: rgba(255,255,255,0.18);
+
   --player-center-y: 8px;
 
   background:
@@ -710,7 +710,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar .playerCenter{
-  transform: translate3d(0, var(--player-center-y), 0) !important;
+
   gap: 6px !important;
   padding-top: 0 !important;
 
@@ -730,9 +730,9 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 .playerBar[data-cover-sync="off"],
 .app[data-cover-sync="off"] .playerBar{
-  --player-cover-sync-opacity: 0;
+
   --player-cover-sync-strength: 0;
-  --player-cover-sync-tint: 0;
+
 }
 
 .playerBar[data-cover-sync="subtle"],
@@ -1010,8 +1010,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   --player-side-y: 5px;
   --player-cover-sync-opacity: var(--cover-sync-player-opacity, 0.54);
   --player-cover-sync-tint: var(--cover-sync-player-tint, 0.20);
-  overflow: visible !important;
-  border-top-color: rgba(var(--accent-rgb), 0.16) !important;
+
+
   background:
     linear-gradient(
       90deg,
@@ -1072,7 +1072,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   content: "" !important;
   display: block !important;
   position: absolute !important;
-  inset: 0 !important;
+
   z-index: 0 !important;
   pointer-events: none !important;
   border-radius: inherit !important;
@@ -1819,7 +1819,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   max-width: 100% !important;
   min-width: 0 !important;
   box-sizing: border-box !important;
-  overflow: visible !important;
+
   clip-path: inset(-86px 0 0 0) !important;
   contain: layout style !important;
 }
@@ -1828,7 +1828,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 .playerBar::after{
   inset: 0 !important;
-  border-radius: 0 !important;
+
 }
 
 .playerBar .playerLeft,
@@ -1884,15 +1884,15 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .volumeWrap input[type="range"]{
   width: clamp(112px, 9vw, 178px) !important;
   height: 18px !important;
-  margin: 0 !important;
-  padding: 0 !important;
+
+
   border: 0 !important;
   outline: 0 !important;
-  background: transparent !important;
-  cursor: pointer !important;
+
+
   accent-color: var(--accent) !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
+
+
 }
 
 
@@ -1906,7 +1906,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   border: 2px solid rgba(255, 255, 255, .92) !important;
   background: var(--accent) !important;
   box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .12), 0 0 18px rgba(var(--accent-rgb), .34) !important;
-  opacity: 1 !important;
+
 }
 
 
@@ -1918,7 +1918,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   height: 12px !important;
   border: 2px solid rgba(255, 255, 255, .92) !important;
   background: var(--accent) !important;
-  opacity: 1 !important;
+
 }
 
 .playerBar .volumeWrap{
@@ -1927,15 +1927,15 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar .volumeWrap input[type="range"]{
-  position: relative !important;
+
   z-index: 3 !important;
   width: clamp(118px, 9vw, 178px) !important;
   min-width: 118px !important;
   height: 24px !important;
   padding: 0 !important;
   margin: 0 !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
+
+
   touch-action: none !important;
   user-select: none !important;
   -webkit-user-select: none !important;

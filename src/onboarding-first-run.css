@@ -150,7 +150,7 @@
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr) auto;
   gap: 14px;
-  padding: 22px 24px 20px;
+
   border-radius: 28px;
   border: 1px solid var(--panel-edge);
   background: linear-gradient(180deg, rgba(10, 10, 14, 0.92), rgba(8, 9, 14, 0.96));
@@ -345,7 +345,7 @@
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.055);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0.006));
-  overflow: hidden;
+
 }
 
 .onboardingSlide {
@@ -719,7 +719,7 @@
 
   .localitfyOnboardingShell {
     width: min(100%, calc(100vw - 32px));
-    min-height: 0;
+
     padding: 16px;
     border-radius: 22px;
   }
@@ -814,7 +814,7 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 /* localtify v499 — onboarding peeking mascot */
 .localitfyOnboardingShell{
   isolation: isolate;
-  overflow: visible;
+
 }
 
 .onboardingHeader,
@@ -905,7 +905,7 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 
 /* localtify v505 — onboarding first impression cleanup */
 .localitfyOnboardingShell{
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+
   width: min(1080px, calc(100vw - 190px));
   padding: 22px 24px 20px;
   overflow: visible;
@@ -1057,7 +1057,7 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   top: 54%;
   z-index: 6;
   width: clamp(220px, 17.5vw, 286px);
-  opacity: .98;
+
   filter:
     drop-shadow(0 26px 42px rgba(0, 0, 0, 0.38))
     drop-shadow(0 0 28px rgba(var(--onboarding-accent-rgb), 0.16));
@@ -1071,7 +1071,7 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   background:
     linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.022)),
     linear-gradient(90deg, rgba(var(--onboarding-accent-rgb), .06), rgba(7,8,12,.98) 42%, rgba(7,8,12,.88));
-  opacity: .98;
+
 }
 
 .onboardingSkip{

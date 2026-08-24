@@ -110,7 +110,7 @@ button:disabled:active{
 .heroLayoutMotion.heroLayoutPulseA,
 .heroLayoutMotion.heroLayoutPulseB{
   animation: localtifyHeroReflow 440ms var(--motion-ease) both;
-  transform-origin: top center;
+
 }
 
 .heroLayoutMotion .heroTextClean,
@@ -1294,7 +1294,7 @@ body.localtifyBackgroundMode .coverCard,
 
 .app .localtifyProximityTarget.localtifyProximityActive{
   transform-origin: center !important;
-  scale: var(--prox-scale, 1) !important;
+
   will-change: scale, border-color, background-color !important;
   transition:
     scale 80ms cubic-bezier(0.16, 1, 0.3, 1),

@@ -1095,7 +1095,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
   .coverGalleryCard,
   .coverGalleryCardCleanOnly
 ){
-  transition-property: background-color, border-color, opacity, transform !important;
+
   transition-duration: 90ms !important;
 }
 
@@ -1508,8 +1508,8 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   min-width: 48px !important;
   color: rgba(255,255,255,.74) !important;
   background: transparent !important;
-  display: inline-grid !important;
-  place-items: center !important;
+
+
 }
 
 .app[data-platform="linux"] .windowButtons button:hover{
@@ -1812,18 +1812,18 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 }
 
 .app .windowButtons button{
-  display: grid !important;
-  place-items: center !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
+
+
+
+
   color: rgba(255,255,255,0.72) !important;
   -webkit-font-smoothing: antialiased !important;
 }
 
 .app .windowButtons button svg{
   display: block !important;
-  width: 12px !important;
-  height: 12px !important;
+
+
   pointer-events: none !important;
   color: currentColor !important;
   transform: translateZ(0) !important;

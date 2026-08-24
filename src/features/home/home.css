@@ -142,7 +142,7 @@
 .heroArt{
   width: 172px;
   height: 172px;
-  border-radius: 14px;
+
   font-size: 88px;
   font-weight: 700;
 }
@@ -360,10 +360,6 @@
   border-color: rgba(255, 255, 255, 0.14);
 }
 
-.heroTitle{
-  letter-spacing: -0.075em;
-  text-wrap: balance;
-}
 
 
 .panel{
@@ -761,7 +757,7 @@ button,
 
 .hero{
   position: relative;
-  overflow: hidden;
+
   transform-origin: top center;
   transition: min-height 340ms cubic-bezier(.2,.85,.2,1),
     padding 280ms cubic-bezier(.2,.85,.2,1),
@@ -772,7 +768,7 @@ button,
 
 
 .heroExpanded{
-  min-height: clamp(330px, 34vh, 430px) !important;
+
   padding-block: clamp(34px, 4vh, 52px) !important;
   grid-template-columns: minmax(0, 1fr) clamp(190px, 16vw, 246px) !important;
   border-color: rgba(var(--accent-rgb), .24) !important;
@@ -799,7 +795,7 @@ button,
   font-size: 11px;
   font-weight: 900;
   letter-spacing: .015em;
-  text-transform: lowercase;
+
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .055);
 }
 
@@ -886,14 +882,6 @@ button,
   transform: translateZ(0);
 }
 
-.hero{
-  transform: translateZ(0);
-  transition: min-height 280ms cubic-bezier(0.16, 1, 0.3, 1),
-    padding 280ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 180ms ease,
-    background 180ms ease,
-    box-shadow 180ms ease !important;
-}
 
 .heroExpanded{
   min-height: clamp(360px, 42vh, 520px) !important;
@@ -1137,7 +1125,7 @@ button:active,
 
 .songRow strong{
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
-  unicode-bidi: isolate;
+
   letter-spacing: -0.01em;
 }
 
@@ -1279,7 +1267,7 @@ button:active{
   inset: 0;
   pointer-events: none;
   z-index: -2;
-  opacity: 0.18 !important;
+
   filter: saturate(1.06) blur(0.2px) !important;
   transition: opacity 900ms var(--song-change-ease),
     filter 900ms var(--song-change-ease),
@@ -1417,7 +1405,7 @@ button:active{
 .heroArt{
   width: clamp(150px, 13vw, 206px) !important;
   height: clamp(150px, 13vw, 206px) !important;
-  border-radius: 18px !important;
+
 }
 
 .dashboardGrid{
@@ -1467,7 +1455,7 @@ button:active{
   .navItem{
     padding-inline: 8px !important;
     text-align: center !important;
-    font-size: 0 !important;
+
   }
 
   .navItem::first-letter{
@@ -2299,8 +2287,8 @@ body.localitfyLibraryPointerDragging{
 .app .songRow.songDropTarget[data-drop-side="before"]::after{
   content: "" !important;
   position: absolute !important;
-  left: 12px !important;
-  right: 12px !important;
+
+
   height: 5px !important;
   border-radius: 999px !important;
   pointer-events: none !important;
@@ -3283,9 +3271,9 @@ body.localitfyLibraryPointerDragging{
   position: sticky !important;
   bottom: 0 !important;
   z-index: 2 !important;
-  display: flex !important;
-  justify-content: flex-end !important;
-  align-items: center !important;
+
+
+
   flex-wrap: wrap !important;
   gap: 11px !important;
   margin: 0 !important;
@@ -3748,10 +3736,10 @@ body.localitfyLibraryPointerDragging{
 }
 
 .hero.ambientSurface::before{
-  animation: none !important;
-  background: none !important;
+
+
   box-shadow: none !important;
-  opacity: 0 !important;
+
   pointer-events: none !important;
 }
 
@@ -3968,7 +3956,7 @@ body.localitfyLibraryPointerDragging{
   gap: 11px !important;
   padding: 8px 10px !important;
   border-radius: 15px !important;
-  background: transparent !important;
+
   border-color: transparent !important;
 }
 
@@ -4369,20 +4357,15 @@ body.localitfyLibraryPointerDragging{
 }
 
 .app .songRow{
-  isolation: isolate !important;
-  overflow: hidden !important;
+
+
   max-width: 100% !important;
   border-radius: 11px !important;
   background: color-mix(in oklab, var(--theme-accent, var(--accent)) 3%, rgba(255,255,255,.026)) !important;
   border: 1px solid color-mix(in oklab, var(--theme-accent, var(--accent)) 9%, rgba(255,255,255,.055)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
   transform: translateZ(0) !important;
-  transition:
-    transform 180ms cubic-bezier(.2,.8,.2,1),
-    background 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    filter 180ms ease !important;
+
 }
 
 
@@ -4433,11 +4416,11 @@ body.localitfyLibraryPointerDragging{
 }
 
 .app .songRow{
-  position: relative !important;
+
   isolation: isolate !important;
-  overflow: hidden !important;
+
   background: color-mix(in oklab, var(--theme-accent, var(--accent)) 3%, rgba(255,255,255,.024)) !important;
-  background-image: none !important;
+
   border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 10%, rgba(255,255,255,.055)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.022) !important;
   transform: translate3d(0, 0, 0) !important;
@@ -4450,7 +4433,7 @@ body.localitfyLibraryPointerDragging{
 }
 
 .app .songRow:hover{
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 6%, rgba(255,255,255,.028)) !important;
+
   background-image: none !important;
   border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 20%, rgba(255,255,255,.075)) !important;
   box-shadow:
@@ -4470,10 +4453,10 @@ body.localitfyLibraryPointerDragging{
 }
 
 .app .songButton{
-  background: transparent !important;
-  background-image: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
+
+
+
+
   outline: 0 !important;
 }
 
@@ -4836,12 +4819,12 @@ body.localitfyLibraryPointerDragging{
 }
 
 .app .hero.heroPremium::after{
-  content: "" !important;
-  position: absolute !important;
+
+
   inset: -18% -8% -18% 48% !important;
   z-index: -2 !important;
   display: block !important;
-  pointer-events: none !important;
+
   opacity: .30 !important;
   background:
     radial-gradient(circle at 54% 48%, color-mix(in oklab, var(--accent, #a98cff) 28%, transparent), transparent 38%),
@@ -4979,9 +4962,9 @@ body.localitfyLibraryPointerDragging{
 }
 
 .app .hero.heroPremium{
-  position: relative !important;
+
   overflow: hidden !important;
-  isolation: isolate !important;
+
   min-height: clamp(330px, 34vh, 430px) !important;
   border-radius: 22px !important;
   background:
@@ -5476,7 +5459,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 
 
 .homeListenCard{
-  position:relative;
+
   display:grid;
   grid-template-columns:72px 32px minmax(0, 1fr) auto;
   align-items:center;
@@ -6120,7 +6103,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 @media (max-width: 1100px){
   .app .hero.heroPremium.heroLayoutMotion.heroCompact,
   .app .hero.heroPremium.heroLayoutMotion.heroExpanded{
-    grid-template-columns: minmax(0, 1fr) !important;
+
     min-height: auto !important;
   }
 
@@ -6144,7 +6127,7 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   word-break: normal !important;
   text-wrap: balance !important;
   margin: 0 0 clamp(18px, 2vw, 30px) !important;
-  transform-origin: left center !important;
+
 }
 
 .app .hero.heroPremium.heroLayoutMotion .heroTitle.heroTitleMedium{
@@ -7944,9 +7927,9 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   box-sizing: border-box !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
-  border-radius: 24px !important;
-  overflow: hidden !important;
-  background-clip: padding-box !important;
+
+
+
   contain: layout paint style !important;
 }
 
@@ -8051,7 +8034,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   position: fixed;
   z-index: 11001;
   width: min(224px, calc(100vw - 24px));
-  padding: 9px;
+
   border: 1px solid rgba(var(--accent-rgb), 0.22);
   border-radius: 18px;
   color: var(--text);
@@ -8105,7 +8088,7 @@ body.localitfyThemePainting .heroCover .coverAura::before{
 
 .songContextMenu button{
   width: 100%;
-  min-height: 34px;
+
   display: flex;
   align-items: center;
   gap: 10px;
@@ -8354,16 +8337,16 @@ html body .content{
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) max-content 34px 34px 34px !important;
   align-items: center !important;
-  gap: 12px !important;
+
   padding: 12px 15px 12px 18px !important;
-  border-radius: 18px !important;
+
   overflow: hidden !important;
-  transform: none !important;
+
   background-clip: padding-box !important;
 }
 
 .app .libraryFullListV025 .songRow:hover{
-  transform: none !important;
+
   border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 28%, rgba(255,255,255,.075)) !important;
   background:
     linear-gradient(90deg,
@@ -8789,7 +8772,7 @@ html body .content{
 .downloadTextareaV031{
   width: 100%;
   min-height: 104px;
-  resize: vertical;
+
   padding: 15px 17px;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 18px;
@@ -9436,9 +9419,9 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
   --hero-v140-bounce: cubic-bezier(0.2, 1.35, 0.24, 1);
   position: relative !important;
   isolation: isolate !important;
-  overflow: clip !important;
-  contain: layout paint style !important;
-  transform-origin: center top !important;
+
+
+
   backface-visibility: hidden !important;
 
   transition:
@@ -10099,11 +10082,11 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .app .libraryPanelV025 .panelHead,
 .app .libraryPanelV025 .libraryPanelHeadV025{
   display: flex !important;
-  align-items: flex-end !important;
+
   justify-content: space-between !important;
   gap: 16px !important;
   padding-bottom: 14px !important;
-  margin-bottom: 8px !important;
+
   border-bottom: 1px solid rgba(255,255,255,.07) !important;
 }
 
@@ -10295,21 +10278,21 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
   order: 3 !important;
-  position: relative !important;
-  inset: auto !important;
-  display: block !important;
-  width: min(640px, 100%) !important;
-  max-width: min(640px, 100%) !important;
+
+
+
+
+
   margin: -8px 0 8px !important;
   padding: 0 !important;
-  transform: none !important;
+
   line-height: 1.08 !important;
   color: rgba(var(--text-rgb), .74) !important;
   font-size: clamp(13px, 1vw, 16px) !important;
   font-weight: 820 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+
+
+
   text-shadow: none !important;
 }
 
@@ -10741,10 +10724,10 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 .app .homeShelfStack .homeListenRail{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(280px, 1fr)) !important;
+
+
   gap: 14px 18px !important;
-  align-items: stretch !important;
+
   width: 100% !important;
   min-width: 0 !important;
   overflow: visible !important;
@@ -10752,9 +10735,9 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 .app .homeShelfStack .homeListenCard{
   --listen-card-cover-size: 82px;
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
+
+
+
   contain: layout paint !important;
   content-visibility: visible !important;
   display: block !important;
@@ -10763,7 +10746,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   min-height: 82px !important;
   height: 82px !important;
   padding: 0 !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
+
   border-radius: 14px !important;
   color: rgba(255,255,255,.98) !important;
   text-align: left !important;
@@ -10773,7 +10756,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.050),
     0 12px 26px rgba(0,0,0,.22) !important;
-  transform: translateZ(0) !important;
+
   transition:
     transform 170ms cubic-bezier(.16,1,.3,1),
     border-color 170ms ease,
@@ -10788,27 +10771,27 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 .app .homeShelfStack .homeListenCard .homeListenBackground{
-  position: absolute !important;
+
   inset: -26px -38px !important;
-  z-index: 0 !important;
+
   display: block !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
+
+
   border-radius: inherit !important;
   opacity: .52 !important;
   transform: scale(1.12) translateZ(0) !important;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenBackgroundImage{
-  position: absolute !important;
+
   inset: 0 !important;
   display: block !important;
   width: 100% !important;
   height: 100% !important;
   min-width: 100% !important;
   min-height: 100% !important;
-  object-fit: cover !important;
-  object-position: center !important;
+
+
   opacity: 1 !important;
   visibility: visible !important;
   filter: blur(24px) saturate(1.50) brightness(.76) contrast(1.02) !important;
@@ -10821,15 +10804,15 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 .app .homeShelfStack .homeListenCard .homeListenForeground{
-  position: relative !important;
+
   z-index: 5 !important;
-  display: grid !important;
-  grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
-  grid-template-areas: "cover copy time" !important;
-  align-items: center !important;
+
+
+
+
   column-gap: 18px !important;
   width: 100% !important;
-  height: 100% !important;
+
   min-width: 0 !important;
   margin: 0 !important;
   padding: 0 16px 0 0 !important;
@@ -10902,17 +10885,17 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 .app .homeShelfStack .homeListenCard .homeListenCopy{
-  grid-area: copy !important;
+
   align-self: center !important;
   justify-self: stretch !important;
-  display: grid !important;
+
   grid-template-columns: minmax(0, 1fr) !important;
-  gap: 5px !important;
-  min-width: 0 !important;
+
+
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  text-align: left !important;
+
   text-shadow: 0 2px 16px rgba(0,0,0,.68) !important;
 }
 
@@ -10921,15 +10904,15 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  min-width: 0 !important;
+
   margin: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255,255,255,.98) !important;
-  font-size: 15px !important;
-  font-weight: 950 !important;
-  line-height: 1.08 !important;
+
+
+
+
+
+
+
   letter-spacing: -.026em !important;
   text-align: left !important;
   opacity: 1 !important;
@@ -10941,33 +10924,33 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  min-width: 0 !important;
+
   margin: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255,255,255,.62) !important;
-  font-size: 12px !important;
-  font-weight: 780 !important;
-  line-height: 1.12 !important;
+
+
+
+
+
+
+
   text-align: left !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
 
 .app .homeShelfStack .homeListenCard .homeListenMeta{
-  grid-area: time !important;
+
   align-self: center !important;
-  justify-self: end !important;
-  min-width: max-content !important;
+
+
   margin: 0 !important;
   padding: 0 !important;
-  color: rgba(255,255,255,.68) !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
+
+
+
   line-height: 1 !important;
   text-align: right !important;
-  white-space: nowrap !important;
+
   text-shadow: 0 2px 16px rgba(0,0,0,.68) !important;
   opacity: 1 !important;
   visibility: visible !important;
@@ -10975,7 +10958,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 .app .homeShelfStack .homeListenCard:hover{
   transform: translateY(-2px) translateZ(0) !important;
-  border-color: rgba(255,255,255,.15) !important;
+
   background:
     linear-gradient(90deg, rgba(255,255,255,.082), rgba(255,255,255,.044)),
     rgba(48,46,50,.62) !important;
@@ -10998,14 +10981,11 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 .app .homeShelfStack .homeListenCard.active{
-  border-color: rgba(var(--lt-accent-rgb), .44) !important;
+
   background:
     linear-gradient(90deg, rgba(var(--lt-accent-rgb), .12), rgba(255,255,255,.036)),
     rgba(43, 40, 48, .64) !important;
-  box-shadow:
-    inset 3px 0 0 rgba(var(--lt-accent-rgb), .76),
-    inset 0 1px 0 rgba(255,255,255,.070),
-    0 16px 36px rgba(0,0,0,.30) !important;
+
 }
 
 .app .homeShelfStack .homeListenCard.active .homeListenBackground{
@@ -11687,7 +11667,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     "hero hero"
     "shelf detail"
     "builder builder";
-  gap: 16px;
+
   padding-bottom: 14px;
 }
 
@@ -11899,7 +11879,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .albumsGridV318{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
-  gap: 14px;
+
   max-height: min(590px, calc(100vh - 420px));
   overflow: auto;
   padding: 2px 6px 8px 2px;
@@ -11907,13 +11887,13 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 .albumCardV318{
   --album-card-delay: 0ms;
-  position: relative;
+
   min-width: 0;
   min-height: 260px;
   padding: 0;
   border: 1px solid rgba(255,255,255,.07);
-  border-radius: 22px;
-  overflow: hidden;
+
+
   color: var(--lt-text);
   background: rgba(255,255,255,.025);
   text-align: left;
@@ -11946,11 +11926,11 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 2;
+
   min-width: 0;
   display: grid;
   gap: 4px;
-  padding: 14px;
+
 }
 
 .albumCardMetaV318 small,
@@ -11965,7 +11945,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   display: block;
   min-width: 0;
   color: var(--lt-text);
-  font-size: 18px;
+
   line-height: 1.05;
   letter-spacing: -.035em;
   overflow: hidden;
@@ -12190,13 +12170,13 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .albumBuilderBodyV318{
   display: grid;
   grid-template-columns: minmax(280px, .72fr) minmax(420px, 1.28fr);
-  gap: 14px;
-  align-items: start;
+
+
 }
 
 .albumBuilderFieldsV318{
   display: grid;
-  gap: 10px;
+
 }
 
 .albumBuilderFieldsV318 label{
@@ -12223,7 +12203,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 .albumBuilderSearchRowV318{
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+
   gap: 10px;
   align-items: center;
 }
@@ -12313,7 +12293,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 .albumBuilderFooterV318{
   grid-column: 1 / -1;
   display: flex;
-  align-items: center;
+
   justify-content: space-between;
   gap: 14px;
   padding-top: 4px;
@@ -12352,7 +12332,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 
 @media (max-width: 1280px){
   .albumsPageV318{
-    grid-template-columns: 1fr;
+
     grid-template-areas:
       "hero"
       "detail"
@@ -12891,9 +12871,9 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
 
 
 .albumFolderImportSummaryV309 small{
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 850;
+
+
+
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -12903,21 +12883,21 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
 .albumFolderPreviewCoverV309{
   width: 72px;
   height: 72px;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 15px;
+
+
+
+
   color: rgba(var(--accent-rgb), 0.92);
   background: rgba(255,255,255,0.055);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
   font-size: 25px;
-  font-weight: 900;
+
 }
 
 .albumFolderPreviewCoverV309 img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+
+
+
   display: block;
 }
 
@@ -12938,7 +12918,7 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
 }
 
 .albumFolderPreviewCopyV309 b{
-  color: var(--faint);
+
   font-size: 10px;
   font-weight: 760;
 }
@@ -12946,12 +12926,12 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
 
 .albumFolderPreviewCopyV309 li{
   max-width: 100%;
-  padding: 4px 7px;
+
   border: 1px solid rgba(255, 184, 107, 0.24);
-  border-radius: 999px;
+
   color: rgba(255, 211, 154, 0.9);
   background: rgba(255, 184, 107, 0.08);
-  font-size: 10px;
+
   font-weight: 800;
 }
 
@@ -13285,11 +13265,11 @@ body.localtifyPerfV310 .app :is(
 
 .content > .headerBar,
 .headerBar{
-  position: relative !important;
-  top: auto !important;
+
+
   inset-block-start: auto !important;
-  z-index: 12 !important;
-  container-type: normal !important;
+
+
   transform: translateZ(0);
   backface-visibility: hidden;
   contain: layout style;
@@ -13449,10 +13429,10 @@ body.localtifyFocusRecovering .app .hero.heroPremium > .heroAmbiencePulse,
 
 .downloadQueueHeaderActions{
   display: inline-flex;
-  align-items: center;
+
   justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
+
+
 }
 
 .tinyDownloadAction{
@@ -16034,7 +16014,7 @@ body.localitfyThemePainting .homeSongRow{
   gap: 14px !important;
   margin: 10px 0 14px !important;
   padding: 12px 14px !important;
-  border: 0 !important;
+
   border-radius: 18px !important;
   background:
     linear-gradient(90deg, rgba(255,183,77,.12), rgba(var(--lt-accent-rgb),.05)),
@@ -16605,18 +16585,18 @@ body.localitfyThemePainting .homeSongRow{
 }
 
 .app .windowButtons button{
-  display: grid !important;
-  place-items: center !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
+
+
+
+
   color: rgba(255,255,255,0.72) !important;
   -webkit-font-smoothing: antialiased !important;
 }
 
 .app .windowButtons button svg{
   display: block !important;
-  width: 12px !important;
-  height: 12px !important;
+
+
   pointer-events: none !important;
   color: currentColor !important;
   transform: translateZ(0) !important;
@@ -17033,11 +17013,11 @@ body.localitfyThemePainting .homeSongRow{
 .coverEmptyImageShellV466{
   position: relative;
   width: 118px;
-  aspect-ratio: 1;
+
   display: grid;
   place-items: center;
   overflow: hidden;
-  margin-bottom: 4px;
+
   border: 1px solid rgba(255,255,255,.09);
   border-radius: 30px;
   background: rgba(255,255,255,.04);
@@ -17114,7 +17094,7 @@ body.localitfyThemePainting .homeSongRow{
   aspect-ratio: 1;
   display: grid;
   place-items: center;
-  overflow: visible !important;
+
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
