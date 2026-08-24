@@ -27,8 +27,8 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Merge adjacent duplicate selectors
-        run: node scripts/css-adjacent-merge.mjs --write
+      - name: Converge CSS dedup cleanup
+        run: npm run css:dedup:fix
 
       - name: Confirm all CSS dedup guards
         run: npm run css:dedup:check
@@ -48,12 +48,12 @@ jobs:
         shell: bash
         run: |
           if git diff --quiet; then
-            echo "No adjacent duplicate selectors found."
+            echo "CSS dedup is already at a stable fixed point."
             exit 0
           fi
           git config user.name "OpenAI R4 CSS Cleanup"
           git config user.email "noreply@openai.com"
           git add -- ':(glob)src/**/*.css'
           git diff --cached --check
-          git commit -m "R4: merge adjacent duplicate CSS selectors"
+          git commit -m "R4: converge CSS duplicate cleanup"
           git push origin HEAD:agent/r4-css-adjacent-merge
