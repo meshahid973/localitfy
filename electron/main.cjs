@@ -6,6 +6,7 @@ const { registerDiscordIpc } = require("./ipc/discord.cjs");
 const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes } = require("./runtime/protocols.cjs");
 const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
+const { loadLocaltifyEnv } = require("./runtime/environment.cjs");
 const { createDatabaseRepositories } = require("./db/repositories.cjs");
 const http = require("node:http");
 const https = require("node:https");
@@ -18,133 +19,7 @@ const { pathToFileURL } = require("node:url");
 process.env.DOTENV_CONFIG_QUIET = process.env.DOTENV_CONFIG_QUIET || "true";
 process.env.DOTENVX_QUIET = process.env.DOTENVX_QUIET || "true";
 
-function loadLocaltifyEnv() {
-  const publicSpotifyClientId = "586c22791eb74d73b1c83db88f1d4c52";
-
-  const safePath = (...parts) => {
-    try {
-      if (parts.some((part) => !part)) return "";
-      return path.join(...parts);
-    } catch {
-      return "";
-    }
-  };
-
-  const appPath = (() => {
-    try {
-      return typeof app.getAppPath === "function" ? app.getAppPath() : "";
-    } catch {
-      return "";
-    }
-  })();
-
-  const resourcePath = (() => {
-    try {
-      return process.resourcesPath || "";
-    } catch {
-      return "";
-    }
-  })();
-
-  const executableDir = (() => {
-    try {
-      return process.execPath ? path.dirname(process.execPath) : "";
-    } catch {
-      return "";
-    }
-  })();
-
-  const userDataPath = (() => {
-    try {
-      return typeof app.getPath === "function" ? app.getPath("userData") : "";
-    } catch {
-      return "";
-    }
-  })();
-
-  const possibleEnvPaths = (() => {
-    const seen = new Set();
-    return [
-      safePath(process.cwd(), ".env"),
-      safePath(process.cwd(), ".env.production"),
-      safePath(appPath, ".env"),
-      safePath(appPath, ".env.production"),
-      safePath(resourcePath, ".env"),
-      safePath(resourcePath, ".env.production"),
-      safePath(executableDir, ".env"),
-      safePath(executableDir, ".env.production"),
-      safePath(userDataPath, ".env"),
-      safePath(userDataPath, ".env.production"),
-      safePath(resourcePath, "app", ".env"),
-      safePath(resourcePath, "app", ".env.production")
-    ].filter(Boolean).filter((item) => {
-      const key = path.normalize(item).toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  })();
-
-  for (const envPath of possibleEnvPaths) {
-    try {
-      require("dotenv").config({ path: envPath, override: false });
-    } catch {
-      // dotenv is optional. The manual parser below is the fallback.
-    }
-
-    try {
-      if (!fs.existsSync(envPath)) continue;
-
-      const raw = fs.readFileSync(envPath, "utf-8");
-      let injected = 0;
-
-      for (const line of raw.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#")) continue;
-
-        const eqIndex = trimmed.indexOf("=");
-        if (eqIndex <= 0) continue;
-
-        const key = trimmed.slice(0, eqIndex).trim();
-        let value = trimmed.slice(eqIndex + 1).trim();
-
-        if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
-
-        if (
-          (value.startsWith('"') && value.endsWith('"')) ||
-          (value.startsWith("'") && value.endsWith("'"))
-        ) {
-          value = value.slice(1, -1);
-        }
-
-        if (typeof process.env[key] === "undefined") {
-          process.env[key] = value;
-          injected += 1;
-        }
-      }
-
-      if (injected > 0) {
-        console.log(`[localtify env] injected ${injected} value${injected === 1 ? "" : "s"} from ${envPath}`);
-      }
-    } catch (error) {
-      console.log("[localtify env] failed to read env file", envPath, error?.message || error);
-    }
-  }
-
-  // Spotify Client ID is public and safe to ship. Never ship a Spotify Client Secret.
-  process.env.SPOTIFY_CLIENT_ID =
-    process.env.SPOTIFY_CLIENT_ID ||
-    process.env.VITE_SPOTIFY_CLIENT_ID ||
-    process.env.VITE_PUBLIC_SPOTIFY_CLIENT_ID ||
-    publicSpotifyClientId;
-
-  process.env.VITE_PUBLIC_SPOTIFY_CLIENT_ID =
-    process.env.VITE_PUBLIC_SPOTIFY_CLIENT_ID ||
-    process.env.SPOTIFY_CLIENT_ID ||
-    publicSpotifyClientId;
-}
-
-loadLocaltifyEnv();
+loadLocaltifyEnv(app);
 registerPrivilegedSchemes(protocol);
 
 const ffmpegStatic = require("ffmpeg-static");

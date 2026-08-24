@@ -9,7 +9,7 @@ const MiB = 1024 * KiB;
 
 const sourceBudgets = [
   ["src/App.tsx", 360 * KiB],
-  ["electron/main.cjs", 210 * KiB],
+  ["electron/main.cjs", 204 * KiB],
   ["src/features/shell/AppShell.tsx", 32 * KiB]
 ];
 
