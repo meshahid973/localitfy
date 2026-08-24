@@ -7,6 +7,7 @@ const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes }
 const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
 const { loadLocaltifyEnv } = require("./runtime/environment.cjs");
+const { createUserDataRuntime } = require("./runtime/user-data.cjs");
 const { createDatabaseRepositories } = require("./db/repositories.cjs");
 const http = require("node:http");
 const https = require("node:https");
@@ -90,37 +91,15 @@ let coverThumbnailWarmStarted = false;
 
 
 const APP_NAME = "localtify";
-const LEGACY_APP_DATA_NAME = "localitfy";
-const SQLITE_FILE_NAME = "localitfy.sqlite";
 const APP_USER_MODEL_ID = "com.meshahid973.localitfy";
 
-function uniquePaths(items) {
-  const seen = new Set();
-  return items.filter((item) => {
-    const key = path.normalize(item).toLowerCase();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-function getStableUserDataPath() {
-  return path.join(app.getPath("appData"), LEGACY_APP_DATA_NAME);
-}
-
-function configureStableUserDataPath() {
-  try {
-    const stablePath = getStableUserDataPath();
-    fs.mkdirSync(stablePath, { recursive: true });
-    app.setPath("userData", stablePath);
-    return stablePath;
-  } catch (error) {
-    console.log("[localitfy userData path error]", error?.message || error);
-    return app.getPath("userData");
-  }
-}
-
-const STABLE_USER_DATA_PATH = configureStableUserDataPath();
+const userDataRuntime = createUserDataRuntime({
+  app,
+  legacyAppDataName: "localitfy",
+  sqliteFileName: "localitfy.sqlite"
+});
+userDataRuntime.configureStableUserDataPath();
+const restoreDatabaseFromOldUserDataIfNeeded = userDataRuntime.restoreDatabaseFromOldUserDataIfNeeded;
 
 try {
   app.setName(APP_NAME);
@@ -131,50 +110,6 @@ if (process.platform === "win32") {
   try {
     app.setAppUserModelId(APP_USER_MODEL_ID);
   } catch {
-  }
-}
-
-function getUserDataRecoveryCandidates() {
-  const appData = app.getPath("appData");
-  return uniquePaths([
-    STABLE_USER_DATA_PATH,
-    path.join(appData, "localtify"),
-    path.join(appData, "localitfy"),
-    path.join(appData, "Electron")
-  ]);
-}
-
-function getCandidateDatabaseInfo(dirPath) {
-  const filePath = path.join(dirPath, SQLITE_FILE_NAME);
-  try {
-    if (!fs.existsSync(filePath)) return null;
-    const stat = fs.statSync(filePath);
-    if (!stat.isFile() || stat.size <= 0) return null;
-    return { dirPath, filePath, size: stat.size, mtimeMs: stat.mtimeMs };
-  } catch {
-    return null;
-  }
-}
-
-function restoreDatabaseFromOldUserDataIfNeeded() {
-  const stableDbPath = path.join(app.getPath("userData"), SQLITE_FILE_NAME);
-  const stableInfo = getCandidateDatabaseInfo(app.getPath("userData"));
-  if (stableInfo) return { restored: false, dbPath: stableDbPath, source: stableInfo.filePath };
-  const candidates = getUserDataRecoveryCandidates()
-    .map(getCandidateDatabaseInfo)
-    .filter(Boolean)
-    .filter((item) => path.normalize(item.filePath).toLowerCase() !== path.normalize(stableDbPath).toLowerCase())
-    .sort((a, b) => (b.mtimeMs - a.mtimeMs) || (b.size - a.size));
-  const best = candidates[0];
-  if (!best) return { restored: false, dbPath: stableDbPath, source: "" };
-  try {
-    fs.mkdirSync(path.dirname(stableDbPath), { recursive: true });
-    fs.copyFileSync(best.filePath, stableDbPath);
-    console.log("[localitfy database restored]", { from: best.filePath, to: stableDbPath });
-    return { restored: true, dbPath: stableDbPath, source: best.filePath };
-  } catch (error) {
-    console.log("[localitfy database restore error]", error?.message || error);
-    return { restored: false, dbPath: stableDbPath, source: best.filePath, error: error?.message || String(error) };
   }
 }
 
