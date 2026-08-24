@@ -19,9 +19,13 @@ for (const absolute of files) {
   const app = /(?:from\s+["'][^"']*(?:\/|^)App["']|export\s+.*from\s+["'][^"']*(?:\/|^)App["'])/.test(source);
   if (view && repoPath !== "src/App.tsx") violations.push(`${repoPath}: dependency on LocaltifyAppView violates feature ownership`);
   if (protectedPrefixes.some((prefix) => repoPath.startsWith(prefix)) && (view || app)) violations.push(`${repoPath}: protected feature/type/shared/platform/core code may not depend on renderer monoliths`);
+  if (repoPath === "src/App.tsx") {
+    if (/from\s+["']\.\/localtifyConstants["']/.test(source)) violations.push("src/App.tsx: import feature constants from their canonical owners, not localtifyConstants.ts");
+    if (/from\s+["']\.\/localtifyUtils["']/.test(source)) violations.push("src/App.tsx: import helpers from their canonical owners, not localtifyUtils.ts");
+  }
 }
 if (violations.length) { console.error("[phase-boundaries] Architecture boundary violation(s):"); for (const violation of violations) console.error(`  - ${violation}`); process.exit(1); }
-console.log(`[phase-boundaries] OK: checked ${files.length} TypeScript source files; no domain/shared code depends on renderer monoliths.`);
+console.log(`[phase-boundaries] OK: checked ${files.length} TypeScript source files; no domain/shared code depends on renderer monoliths or App compatibility barrels.`);
 
 
 if (fs.existsSync(path.join(root, "src", "LocaltifyAppView.tsx"))) {
