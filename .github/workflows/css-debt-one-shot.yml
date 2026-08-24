@@ -1,6 +1,12 @@
 name: CSS debt one-shot
 
 on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+      - ready_for_review
   push:
     branches:
       - agent/css-debt-cleanup
