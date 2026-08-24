@@ -1,0 +1,52 @@
+name: R3 User Data Runtime
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/r3-user-data-runtime
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Apply user-data extraction
+        run: node scripts/r3/apply-user-data-extraction.mjs
+
+      - name: Diff sanity
+        run: git diff --check
+
+      - name: Install exact dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate Localtify
+        run: |
+          npm run check
+          npm run performance:check
+
+      - name: Commit validated extraction
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "User-data extraction is already applied."
+            exit 0
+          fi
+          git config user.name "OpenAI R3 User Data"
+          git config user.email "noreply@openai.com"
+          git add electron/main.cjs
+          git diff --cached --check
+          git commit -m "R3: move user-data recovery out of Electron main"
+          git push origin HEAD:agent/r3-user-data-runtime
