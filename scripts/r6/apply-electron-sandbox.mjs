@@ -94,6 +94,30 @@ if (Buffer.byteLength(main, "utf8") > 204 * 1024) throw new Error("[r6] electron
 
 fs.writeFileSync(mainPath, main);
 
+const appPath = "src/App.tsx";
+let appSource = fs.readFileSync(appPath, "utf8");
+const oldScreensaverCall = "  } = useScreensaverController();";
+const ownedScreensaverCall = `  } = useScreensaverController({\n    currentSongId: currentId,\n    isPlaying,\n    animeVisuals: settings.animeVisuals,\n    animatedBackgrounds: settings.animatedBackgrounds\n  });`;
+if (appSource.includes(oldScreensaverCall)) {
+  appSource = appSource.replace(oldScreensaverCall, ownedScreensaverCall);
+} else if (!appSource.includes("currentSongId: currentId")) {
+  throw new Error("[r1] screensaver controller call anchor missing");
+}
+
+const screensaverEffectStartMarker = `  useEffect(() => {\n    const clearScreensaverTimer = () => {`;
+const screensaverEffectEndMarker = `  }, [currentSong?.id, isPlaying, screensaverPreviewActive, screensaverVisible, settings.animeVisuals, settings.animatedBackgrounds]);\n\n`;
+const screensaverEffectStart = appSource.indexOf(screensaverEffectStartMarker);
+if (screensaverEffectStart >= 0) {
+  const screensaverEffectEndStart = appSource.indexOf(screensaverEffectEndMarker, screensaverEffectStart);
+  if (screensaverEffectEndStart < 0) throw new Error("[r1] screensaver runtime effect end anchor missing");
+  const screensaverEffectEnd = screensaverEffectEndStart + screensaverEffectEndMarker.length;
+  appSource = `${appSource.slice(0, screensaverEffectStart)}${appSource.slice(screensaverEffectEnd)}`;
+}
+if (appSource.includes("const armScreensaverTimer = () =>")) throw new Error("[r1] screensaver activity runtime still lives in App.tsx");
+if (!appSource.includes("useScreensaverController({")) throw new Error("[r1] screensaver controller ownership not installed");
+if (Buffer.byteLength(appSource, "utf8") > 320 * 1024) throw new Error("[r1] App.tsx still exceeds the 320 KiB architecture budget");
+fs.writeFileSync(appPath, appSource);
+
 const hardeningPath = "tests/phase3/hardening.test.mjs";
 let hardening = fs.readFileSync(hardeningPath, "utf8");
 hardening = hardening.replace(
@@ -111,4 +135,4 @@ const docPath = "docs/architecture/electron-sandbox.md";
 const doc = `# Electron sandbox and renderer trust boundary\n\n## Current security boundary\n\nLocalitfy now runs the main renderer with \`nodeIntegration: false\`, \`contextIsolation: true\`, \`webSecurity: true\`, and **sandbox enabled**. The Spotify OAuth child window remains sandboxed as well.\n\nThe preload bridge uses \`contextBridge\` + \`ipcRenderer\` only; it does not depend on arbitrary Node modules in renderer scope. Privileged work stays in the Electron main process behind named IPC handlers.\n\n## Navigation and child-window policy\n\nThe main renderer cannot create arbitrary child windows or attach webviews. Renderer-initiated navigation is restricted to Localitfy's packaged \`localitfy://app\` renderer, the exact packaged renderer directory used by the legacy \`file://\` fallback, and the loopback Vite origin during development. Arbitrary local HTML files are not trusted. External URLs must go through the explicit main-process external-open IPC path.\n\nBrowser permission requests are denied by default because Localitfy does not require camera, microphone, geolocation, notifications, MIDI, or other Chromium permissions for local playback.\n\n## IPC trust boundary\n\nEvery handler registered through the centralized IPC router is protected by a **trusted sender** check. Calls are accepted only when the sender is the current main Localitfy window's \`webContents\` **and** the IPC call originated from that webContents' main frame. Child windows, iframes, and unrelated renderer contexts cannot invoke privileged Localitfy IPC channels.\n\nThis is intentionally enforced in the router rather than copied into dozens of individual handlers so new IPC channels inherit the same security boundary automatically.\n\n## Main-process ownership\n\nNative icon discovery and image creation live in \`electron/runtime/icons.cjs\` rather than the main-process orchestrator. Window translucency state, restart, and reload behavior live in \`electron/runtime/translucency.cjs\`. These ownership boundaries keep \`electron/main.cjs\` under its architecture budget while preserving tray, taskbar, packaged-resource, and window behavior.\n\n## Non-negotiable invariants\n\n- \`nodeIntegration: false\`\n- \`contextIsolation: true\`\n- \`sandbox: true\`\n- \`webSecurity: true\`\n- \`webviewTag: false\`\n- insecure mixed-content execution disabled\n- drag/drop navigation disabled\n- renderer-created windows denied\n- renderer navigation restricted to Localitfy-owned origins/paths\n- browser permissions denied unless a future feature introduces an explicit reviewed allow-list\n- privileged IPC accepted only from the active main Localitfy renderer's main frame\n\nThe Windows and Linux/native smoke matrix is the release gate for keeping these guarantees compatible with playback, imports, downloads, updater controls, tray/media integration, startup-at-login, custom protocols, and OAuth.\n`;
 fs.writeFileSync(docPath, doc);
 
-console.log("[r6] enabled renderer sandbox, hardened navigation/IPC, and reduced main-process ownership");
+console.log("[r6] enabled renderer sandbox, hardened navigation/IPC, and reduced renderer/main-process ownership");
