@@ -14,11 +14,17 @@ test("feature styles have canonical ownership", () => {
     "./features/settings/themes.css",
     "./features/settings/settings.css",
     "./features/home/home.css",
+    "./features/shell/motion.css",
+    "./features/onboarding/onboarding.css",
     "./features/player/player.css",
     "./features/shell/effects.css"
   ]) assert.ok(app.includes(owned), `missing owned style import: ${owned}`);
-  assert.equal(fs.existsSync(path.join(root, "src/player.css")), false);
-  assert.equal(fs.existsSync(path.join(root, "src/settings.css")), false);
+  for (const obsolete of [
+    "src/player.css",
+    "src/settings.css",
+    "src/motion.css",
+    "src/onboarding-first-run.css"
+  ]) assert.equal(fs.existsSync(path.join(root, obsolete)), false, `obsolete style path still exists: ${obsolete}`);
 });
 
 test("main renderer sandbox is enabled and documented", () => {
@@ -44,5 +50,6 @@ test("main renderer sandbox is enabled and documented", () => {
 test("hardening is owned by local scripts and workflows stay removed", () => {
   assert.ok(fs.existsSync(path.join(root, "scripts/check-performance-budgets.mjs")));
   assert.ok(fs.existsSync(path.join(root, "scripts/test-database-recovery.cjs")));
+  assert.ok(fs.existsSync(path.join(root, "scripts/css-hygiene.mjs")));
   assert.equal(fs.existsSync(path.join(root, ".github/workflows")), false);
 });
