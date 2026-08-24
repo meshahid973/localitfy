@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AudioEffectRuntime } from "./audio/audioEffectRuntime";
 import { HtmlAudioEngine } from "./engine/htmlAudioEngine";
 import type { PlayerController } from "./engine/playerController";
 import type { PlaybackUrlCacheEntry, PlaybackUrlResult, Song } from "../library/song.types";
@@ -41,19 +42,14 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const timeRef = useRef(0);
   const durationRef = useRef(0);
   const playingRef = useRef(false);
+  // Master/user volume must stay separate from the currently rendered element
+  // volume, which may include normalization, per-song memory, fades, or crossfade.
   const volumeRef = useRef(defaultVolume);
+  const effectiveVolumeRef = useRef(defaultVolume);
   const lastNonZeroVolumeRef = useRef(defaultVolume);
   const beatFrameRef = useRef<number | null>(null);
   const beatFrameTimerRef = useRef<number | null>(null);
-  const beatAudioContextRef = useRef<AudioContext | null>(null);
-  const beatAnalyserRef = useRef<AnalyserNode | null>(null);
-  const beatSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const audioEffectDryGainRef = useRef<GainNode | null>(null);
-  const audioEffectWetGainRef = useRef<GainNode | null>(null);
-  const audioEffectDelayRef = useRef<DelayNode | null>(null);
-  const audioEffectFeedbackGainRef = useRef<GainNode | null>(null);
-  const audioEffectFilterRef = useRef<BiquadFilterNode | null>(null);
-  const beatDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const audioEffectRuntimeRef = useRef<AudioEffectRuntime | null>(null);
   const beatSmoothRef = useRef({ bass: 0, mid: 0, energy: 0, phase: 0 });
   const beatReactiveTargetCacheRef = useRef<{ nodes: HTMLElement[]; refreshedAt: number; songId: string }>({ nodes: [], refreshedAt: 0, songId: "" });
   const beatLastPaintSignatureRef = useRef("");
@@ -97,6 +93,44 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   useEffect(() => { writeLocalJson(REPEAT_PLAYLIST_STORAGE_KEY, repeatPlaylist); }, [repeatPlaylist]);
   useEffect(() => { queueDropHotRef.current = queueDropHot; }, [queueDropHot]);
 
+  useEffect(() => {
+    let retryTimer: number | null = null;
+
+    const resumeEffects = () => {
+      void audioEffectRuntimeRef.current?.resume();
+    };
+
+    const resumeEffectsWithRetry = () => {
+      resumeEffects();
+      if (retryTimer !== null) window.clearTimeout(retryTimer);
+      retryTimer = window.setTimeout(() => {
+        retryTimer = null;
+        resumeEffects();
+      }, 140);
+    };
+
+    const handleVisibility = () => {
+      if (!document.hidden) resumeEffectsWithRetry();
+    };
+
+    window.addEventListener("focus", resumeEffectsWithRetry);
+    window.addEventListener("pageshow", resumeEffectsWithRetry);
+    window.addEventListener("pointerdown", resumeEffects, { passive: true });
+    window.addEventListener("keydown", resumeEffects);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      if (retryTimer !== null) window.clearTimeout(retryTimer);
+      window.removeEventListener("focus", resumeEffectsWithRetry);
+      window.removeEventListener("pageshow", resumeEffectsWithRetry);
+      window.removeEventListener("pointerdown", resumeEffects);
+      window.removeEventListener("keydown", resumeEffects);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      audioEffectRuntimeRef.current?.dispose();
+      audioEffectRuntimeRef.current = null;
+    };
+  }, []);
+
   return {
     audioRef, playerEngineRef, playerControllerRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
@@ -105,12 +139,10 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
     playerResizeFrameRef, pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef,
     playCountLastTimeRef, sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef,
     playbackUrlPendingRef, lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef,
-    volumeRef, lastNonZeroVolumeRef, beatFrameRef, beatFrameTimerRef, beatAudioContextRef,
-    beatAnalyserRef, beatSourceRef, audioEffectDryGainRef, audioEffectWetGainRef,
-    audioEffectDelayRef, audioEffectFeedbackGainRef, audioEffectFilterRef, beatDataRef,
-    beatSmoothRef, beatReactiveTargetCacheRef, beatLastPaintSignatureRef, progressDomSignatureRef,
-    isVolumeDragging, setIsVolumeDragging, volumeDraft, setVolumeDraft, volumeDraftRef,
-    volumeDraftFrameRef, liveVolumeFrameRef, liveVolumePendingPercentRef, fadeFrameRef,
+    volumeRef, effectiveVolumeRef, lastNonZeroVolumeRef, beatFrameRef, beatFrameTimerRef,
+    audioEffectRuntimeRef, beatSmoothRef, beatReactiveTargetCacheRef, beatLastPaintSignatureRef,
+    progressDomSignatureRef, isVolumeDragging, setIsVolumeDragging, volumeDraft, setVolumeDraft,
+    volumeDraftRef, volumeDraftFrameRef, liveVolumeFrameRef, liveVolumePendingPercentRef, fadeFrameRef,
     currentId, setCurrentId, isPlaying, setIsPlaying, isShuffle, setIsShuffle,
     repeatMode, setRepeatMode, currentTime, setCurrentTime, currentDuration, setCurrentDuration,
     isSeeking, setIsSeeking, seekDraftPercent, setSeekDraftPercent, seekDraftPercentRef,
