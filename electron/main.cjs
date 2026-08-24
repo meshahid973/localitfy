@@ -4,7 +4,7 @@ const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeI
 const { createIpcRouter } = require("./ipc/router.cjs");
 const { registerDiscordIpc } = require("./ipc/discord.cjs");
 const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes } = require("./runtime/protocols.cjs");
-const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings } = require("./runtime/windows.cjs");
+const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings, createWindowsStartupRuntime } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
 const { loadLocaltifyEnv } = require("./runtime/environment.cjs");
 const { createUserDataRuntime } = require("./runtime/user-data.cjs");
@@ -300,74 +300,15 @@ let nativeMediaState = {
   hasSong: false
 };
 
-function getLoginItemOptions(openAtLogin = false) {
-  const options = {
-    openAtLogin: Boolean(openAtLogin),
-    openAsHidden: false,
-    name: APP_NAME
-  };
-  if (isDev && process.defaultApp) {
-    options.path = process.execPath;
-    options.args = [app.getAppPath()];
-  }
-  return options;
-}
-
-function getStartWithWindowsStatus() {
-  if (process.platform !== "win32") {
-    return { ok: true, supported: false, openAtLogin: false };
-  }
-  try {
-    const current = app.getLoginItemSettings(getLoginItemOptions(false));
-    return {
-      ok: true,
-      supported: true,
-      openAtLogin: Boolean(current.openAtLogin),
-      openAsHidden: Boolean(current.openAsHidden),
-      wasOpenedAtLogin: Boolean(current.wasOpenedAtLogin),
-      wasOpenedAsHidden: Boolean(current.wasOpenedAsHidden),
-      restoreState: current.restoreState || ""
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      supported: true,
-      openAtLogin: false,
-      error: error?.message || String(error || "startup setting failed")
-    };
-  }
-}
-
-function setStartWithWindows(enabled) {
-  if (process.platform !== "win32") {
-    return { ok: true, supported: false, openAtLogin: false };
-  }
-  try {
-    app.setLoginItemSettings(getLoginItemOptions(Boolean(enabled)));
-    return getStartWithWindowsStatus();
-  } catch (error) {
-    return {
-      ok: false,
-      supported: true,
-      openAtLogin: false,
-      error: error?.message || String(error || "startup setting failed")
-    };
-  }
-}
-
-function syncWindowsIntegrationSettings(settings = {}, options = {}) {
-  const hasSavedStartupChoice = Object.prototype.hasOwnProperty.call(settings || {}, "startWithWindows");
-  const startWithWindows = hasSavedStartupChoice ? Boolean(settings.startWithWindows) : true;
-  const startupStatus = setStartWithWindows(startWithWindows);
-  if (!hasSavedStartupChoice && options.persistDefault) {
-    try {
-      saveSettings({ startWithWindows: true });
-    } catch (error) {
-      console.log("[localitfy startup default save error]", error?.message || error);
-    }
-  }
-  return startupStatus;
-}
+const windowsStartupRuntime = createWindowsStartupRuntime({
+  app,
+  isDev,
+  appName: APP_NAME,
+  saveSettings
+});
+const getStartWithWindowsStatus = windowsStartupRuntime.getStatus;
+const setStartWithWindows = windowsStartupRuntime.setEnabled;
+const syncWindowsIntegrationSettings = windowsStartupRuntime.syncSettings;
 
 function sendPlayerCommand(command) {
   if (!command || typeof command !== "object") return false;
