@@ -102,12 +102,9 @@ source = source
   .replaceAll("volumeRef.current = safeTarget;", "effectiveVolumeRef.current = safeTarget;")
   .replaceAll("volumeRef.current = nextVolume;", "effectiveVolumeRef.current = nextVolume;");
 
-// The master volume sync is intentionally restored after the broad transient replacement.
-replaceOnce(
-  "master volume settings sync",
-  `    playingRef.current = isPlaying;\n    effectiveVolumeRef.current = settings.volume;\n\n    if (settings.volume > 0.01) {`,
-  `    playingRef.current = isPlaying;\n    volumeRef.current = settings.volume;\n\n    if (settings.volume > 0.01) {`
-);
+if (!source.includes(`    playingRef.current = isPlaying;\n    volumeRef.current = settings.volume;`)) {
+  throw new Error("[audio-migration] master volume settings sync changed unexpectedly");
+}
 
 replaceOnce(
   "master volume immediate update",
