@@ -25,9 +25,8 @@ html{
 
 button{
   font: inherit;
-}
 
-button{
+
   cursor: pointer;
 }
 
@@ -405,9 +404,8 @@ button:disabled{
 .songButton{
   position: relative;
   z-index: 1;
-}
 
-.songButton{
+
   min-width: 0;
   border: 0;
   display: grid;
@@ -432,9 +430,8 @@ button:disabled{
   background: var(--accent);
   transition: transform 120ms ease,
     filter 120ms ease;
-}
 
-.songArt{
+
   width: 42px;
   height: 42px;
   border-radius: 9px;
@@ -610,9 +607,8 @@ input[type="range"]{
     rgba(5, 5, 5, 0.94);
   background-size: 38px 38px;
   box-shadow: var(--shadow);
-}
 
-.editorModal{
+
   width: min(760px, calc(100vw - 40px));
 }
 
@@ -632,9 +628,8 @@ input[type="range"]{
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 14px;
-}
 
-.editorActions{
+
   justify-content: flex-end;
 }
 
@@ -1114,9 +1109,8 @@ input[type="range"]{
   width: 100%;
   height: 100%;
   border-radius: inherit;
-}
 
-.coverAura > img{
+
   display: block;
   object-fit: cover;
   user-select: none;
@@ -1221,9 +1215,8 @@ input[type="range"]{
   --motion-fast: 120ms;
   --motion-med: 190ms;
   --motion-slow: 420ms;
-}
 
-.app{
+
   background: #000;
   background-image: none;
   background-size: auto;
@@ -1259,9 +1252,8 @@ input[type="range"]{
   background: var(--surface);
   border: 1px solid transparent;
   box-shadow: none;
-}
 
-.navItem{
+
   border-radius: 11px;
 }
 
@@ -2146,9 +2138,8 @@ body.isResizingPlayer{
   --v003-line-2: rgba(255, 255, 255, 0.145);
   --v003-text-soft: rgba(255, 255, 255, 0.68);
   --v003-text-faint: rgba(255, 255, 255, 0.44);
-}
 
-.app{
+
   contain: layout style paint;
 }
 

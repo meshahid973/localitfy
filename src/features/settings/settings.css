@@ -1133,9 +1133,8 @@ body.localitfyThemePainting .app .themeTokenCard{
   background: rgba(255,255,255,0.032) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.03) !important;
   filter: none !important;
-}
 
-.settingsChoice{
+
   align-content: center !important;
   justify-items: start !important;
 }
@@ -2034,9 +2033,8 @@ body.localitfyThemePainting .app .themeTokenCard{
   background: rgba(var(--surface-rgb), .52);
   border-radius: 22px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
-}
 
-.settingsTextFieldV027{
+
   display: grid;
   gap: 10px;
   padding: 16px;
@@ -2337,11 +2335,8 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsMiniActionV027{
   border-color: transparent !important;
   box-shadow: none !important;
-}
 
-.settingsChoice,
-.settingsActionCardV027,
-.settingsMiniActionV027{
+
   background: rgba(255, 255, 255, .035) !important;
 }
 
