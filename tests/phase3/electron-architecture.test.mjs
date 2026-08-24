@@ -12,14 +12,15 @@ const { createIpcRouter } = require(path.join(root, "electron", "ipc", "router.c
 const { normalizeWindowTranslucencySettings } = require(path.join(root, "electron", "runtime", "windows.cjs"));
 const { createDatabaseRepositories } = require(path.join(root, "electron", "db", "repositories.cjs"));
 
-test("Electron main routes IPC through the duplicate-safe router", () => {
+test("Electron main routes IPC through the duplicate-safe trusted router", () => {
   const registered = [];
   const router = createIpcRouter({ handle: (channel) => registered.push(channel) });
   router.handle("phase3:test", async () => true);
   assert.deepEqual(registered, ["phase3:test"]);
   assert.throws(() => router.handle("phase3:test", async () => true), /duplicate IPC handler/);
   assert.equal(mainSource.includes("ipcMain.handle("), false);
-  assert.match(mainSource, /createIpcRouter\(ipcMain\)/);
+  assert.match(mainSource, /createIpcRouter\(ipcMain,\s*\{/);
+  assert.match(mainSource, /isTrustedEvent:\s*\(event\)\s*=>\s*isTrustedMainFrameIpcEvent\(event, mainWindow\)/);
 });
 
 test("window normalization is owned outside main", () => {
