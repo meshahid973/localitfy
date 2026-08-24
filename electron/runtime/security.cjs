@@ -1,5 +1,8 @@
 "use strict";
 
+const path = require("node:path");
+const { fileURLToPath } = require("node:url");
+
 function normalizeUrl(rawUrl) {
   try {
     return new URL(String(rawUrl || ""));
@@ -8,12 +11,33 @@ function normalizeUrl(rawUrl) {
   }
 }
 
+function normalizeFilePath(filePath) {
+  const resolved = path.resolve(String(filePath || ""));
+  return process.platform === "win32" ? resolved.toLowerCase() : resolved;
+}
+
+function isFileInsideRoot(filePath, rootPath) {
+  if (!filePath || !rootPath) return false;
+  const candidate = normalizeFilePath(filePath);
+  const root = normalizeFilePath(rootPath);
+  if (candidate === root) return true;
+  return candidate.startsWith(`${root}${path.sep}`);
+}
+
 function isAllowedRendererNavigation(rawUrl, options = {}) {
   const parsed = normalizeUrl(rawUrl);
   if (!parsed) return false;
 
   if (parsed.protocol === "localitfy:" && parsed.hostname === "app") return true;
-  if (parsed.protocol === "file:") return options.allowFileRenderer !== false;
+
+  if (parsed.protocol === "file:") {
+    if (!options.rendererFileRoot) return false;
+    try {
+      return isFileInsideRoot(fileURLToPath(parsed), options.rendererFileRoot);
+    } catch {
+      return false;
+    }
+  }
 
   if (options.isDev && parsed.protocol === "http:") {
     const hostname = parsed.hostname.toLowerCase();
@@ -22,6 +46,17 @@ function isAllowedRendererNavigation(rawUrl, options = {}) {
   }
 
   return false;
+}
+
+function isTrustedMainFrameIpcEvent(event, win) {
+  try {
+    if (!event || !win || win.isDestroyed?.()) return false;
+    const webContents = win.webContents;
+    if (!webContents || event.sender !== webContents) return false;
+    return Boolean(event.senderFrame && event.senderFrame === webContents.mainFrame);
+  } catch {
+    return false;
+  }
 }
 
 function installRendererSecurityGuards(win, options = {}) {
@@ -33,13 +68,13 @@ function installRendererSecurityGuards(win, options = {}) {
     webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   }
 
-  if (typeof webContents.on === "function") {
-    webContents.on("will-navigate", (event, targetUrl) => {
-      if (!isAllowedRendererNavigation(targetUrl, options)) {
-        event.preventDefault();
-      }
-    });
+  const blockUntrustedNavigation = (event, targetUrl) => {
+    if (!isAllowedRendererNavigation(targetUrl, options)) event.preventDefault();
+  };
 
+  if (typeof webContents.on === "function") {
+    webContents.on("will-navigate", blockUntrustedNavigation);
+    webContents.on("will-redirect", blockUntrustedNavigation);
     webContents.on("will-attach-webview", (event) => {
       event.preventDefault();
     });
@@ -66,6 +101,8 @@ function installSessionPermissionGuards(electronSession) {
 
 module.exports = {
   isAllowedRendererNavigation,
+  isFileInsideRoot,
+  isTrustedMainFrameIpcEvent,
   installRendererSecurityGuards,
   installSessionPermissionGuards
 };
