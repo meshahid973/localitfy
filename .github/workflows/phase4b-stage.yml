@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: phase4b-stage-${{ github.ref }}
@@ -34,7 +35,6 @@ jobs:
 
           app_path = Path('src/App.tsx')
           app = app_path.read_text(encoding='utf-8-sig')
-
           hook_path = Path('src/features/discord/useDiscordActivityRuntime.ts')
           if not hook_path.exists():
             raise SystemExit('Typed Discord runtime module is missing')
@@ -59,7 +59,6 @@ jobs:
             replacement = '''  useDiscordActivityRuntime({\n    ready,\n    settings,\n    currentSong,\n    isPlaying,\n    songCount: songs.length,\n    songIndexById,\n    mostPlayedId: mostPlayed?.id || "",\n    mostPlayedTitle: mostPlayed?.title || "",\n    pixelArtVersion: pixelArtAssets.length,\n    isAppBackgrounded,\n    audioRef,\n    songRef,\n    timeRef,\n    durationRef,\n    playingRef,\n    getRuntimePixelArtForSong,\n    getLiveDiscordAssetKey\n  });'''
             app = app[:start] + replacement + app[end:]
 
-          # These were owned only by the inline Discord effect. Keep noUnusedLocals strict.
           for dead_import in [
             '  DISCORD_ASSET_KEYS,\n',
             '  LOCALITFY_DOWNLOAD_URL,\n',
@@ -79,11 +78,32 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Validate integration
+        id: validate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          npm run typecheck
-          npm test
-          npm run build
-          npm run performance:check
+          set +e
+          {
+            npm run typecheck &&
+            npm test &&
+            npm run build &&
+            npm run performance:check
+          } > /tmp/phase4b-validation.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/phase4b-validation.log
+          if [ "$status" -ne 0 ]; then
+            {
+              echo 'Phase 4B staging validation failed on the Discord renderer integration.'
+              echo
+              echo '```text'
+              tail -n 120 /tmp/phase4b-validation.log
+              echo '```'
+            } > /tmp/phase4b-pr-comment.md
+            gh pr comment 22 --body-file /tmp/phase4b-pr-comment.md || true
+            exit "$status"
+          fi
 
       - name: Commit validated checkpoint
         shell: bash
