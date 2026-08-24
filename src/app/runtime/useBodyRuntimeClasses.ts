@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 type BodyRuntimeClassOptions = {
   isAppBackgrounded: boolean;
+  isAppBackgroundedRef: { current: boolean };
   isPlaying: boolean;
   wantsMoreBlur: boolean;
 };
@@ -19,6 +20,7 @@ const OWNED_PERF_DATASETS = new Set(["v319", "v318", "v310", "v307", "v305", "v3
 
 export function useBodyRuntimeClasses({
   isAppBackgrounded,
+  isAppBackgroundedRef,
   isPlaying,
   wantsMoreBlur
 }: BodyRuntimeClassOptions) {
@@ -43,9 +45,10 @@ export function useBodyRuntimeClasses({
   }, []);
 
   useEffect(() => {
+    isAppBackgroundedRef.current = isAppBackgrounded;
     document.body.classList.toggle("localtifyBackgroundMode", isAppBackgrounded);
     return () => document.body.classList.remove("localtifyBackgroundMode");
-  }, [isAppBackgrounded]);
+  }, [isAppBackgrounded, isAppBackgroundedRef]);
 
   useEffect(() => {
     const body = document.body;
