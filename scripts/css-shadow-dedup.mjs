@@ -271,6 +271,7 @@ function applyRemovals(text, shadowed) {
     else if (output[end] === "\n") end += 1;
     output = output.slice(0, rule.start) + output.slice(end);
   }
+  output = output.replace(/^[\t ]+$/gm, "");
   return { output, removed: rules.length };
 }
 
