@@ -2,6 +2,7 @@ import type { DiscordActivityStyle, DiscordArtMode, DiscordSecondLine, DiscordTi
 import type { CoverColorSyncMode, ThemeId } from "./theme.types";
 
 export type SettingsCategory = "appearance" | "playback" | "discord" | "library" | "downloads" | "covers" | "updates" | "about" | "advanced" | "metadata";
+export type AudioEffectMode = "normal" | "nightcore" | "daycore";
 
 export type Settings = {
   theme: ThemeId;
@@ -66,6 +67,9 @@ export type Settings = {
   perSongVolumeMemory: boolean;
   sleepTimerMinutes: number;
   playbackSpeed: number;
+  audioEffectMode: AudioEffectMode;
+  audioEffectAmount: number;
+  audioReverbAmount: number;
   rememberPlaybackPosition: boolean;
   skipSilence: boolean;
   minimizeToTray: boolean;
