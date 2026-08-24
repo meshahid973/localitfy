@@ -61,7 +61,7 @@ jobs:
           fi
           git config user.name "OpenAI R6 Sandbox"
           git config user.email "noreply@openai.com"
-          git add electron/main.cjs tests/phase3/hardening.test.mjs docs/architecture/electron-sandbox.md
+          git add electron/main.cjs src/App.tsx tests/phase3/hardening.test.mjs docs/architecture/electron-sandbox.md
           git diff --cached --check
           git commit -m "R6: enable sandboxed renderer trust boundary"
           git push origin HEAD:agent/r6-electron-sandbox
