@@ -5,7 +5,8 @@ const scripts = [
   "scripts/css-property-dedup.mjs",
   "scripts/css-shadow-dedup.mjs",
   "scripts/css-adjacent-merge.mjs",
-  "scripts/css-cross-file-dedup.mjs"
+  "scripts/css-cross-file-dedup.mjs",
+  "scripts/css-hygiene.mjs"
 ];
 
 function run(script, args = [], inherit = true) {
