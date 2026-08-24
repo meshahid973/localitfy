@@ -85,6 +85,7 @@ import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
 import { PlayerPlayPauseMorphIcon } from "./features/player/PlayerPlayPauseMorphIcon";
 import { runLocaltifyIdleTask } from "./app/runtime/idle";
+import { useBodyRuntimeClasses } from "./app/runtime/useBodyRuntimeClasses";
 import { formatAnalyticsDuration, localtifyAnalyticsNumber, localtifyAnalyticsString } from "./features/analytics/formatters";
 import { applyVisualCustomizationDefaults, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";
 import { getLocaltifyPlatformInfo } from "./app/platform";
@@ -197,28 +198,19 @@ import { buildDiscordPreview, buildDiscordSongSearchUrl } from "./features/disco
 import { updateStatusLabel } from "./features/updates";
 import { cleanPlaylistList } from "./features/playlists";
 import type {
-  CoverColorSyncMode,
-  CustomThemeColorKey,
-  CustomThemePreset,
-  DiscordArtMode,
-  DownloadQueueItem,
-  DownloadResult,
   LibraryDropSide,
   LibraryDropTarget,
   MetadataCleanPreview,
   PlaybackUrlCacheEntry,
   PlaybackUrlResult,
-  Playlist,
-  PlaylistSummary,
-  SecretMode,
-  SecretTriggerMode,
-  Settings,
-  SettingsCategory,
-  Song,
-  SpotifyTrack,
-  ThemeId,
-  View
-} from "./localtifyTypes";
+  Song
+} from "./features/library/song.types";
+import type { DownloadQueueItem, DownloadResult, SpotifyTrack } from "./features/downloads/download.types";
+import type { Settings, SettingsCategory, CustomThemeColorKey, CustomThemePreset } from "./features/settings/settings.types";
+import type { CoverColorSyncMode, SecretMode, SecretTriggerMode, ThemeId } from "./features/settings/theme.types";
+import type { DiscordArtMode } from "./features/discord/discord.types";
+import type { Playlist, PlaylistSummary } from "./features/playlists/playlist.types";
+import type { View } from "./features/shell/view.types";
 
 const SettingsCategoryContent = lazy(() => import("./SettingsCategoryContent"));
 
@@ -255,26 +247,6 @@ function MainModeApp() {
   const secretBufferRef = useRef("");
   const secretTimeoutRef = useRef<number | null>(null);
   const playButtonBurstTimerRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const body = document.body;
-    const syncFocusClass = () => {
-      const backgrounded = document.hidden || !document.hasFocus();
-      body.classList.toggle("localtifyWindowBackgrounded", backgrounded);
-    };
-
-    syncFocusClass();
-    window.addEventListener("focus", syncFocusClass);
-    window.addEventListener("blur", syncFocusClass);
-    document.addEventListener("visibilitychange", syncFocusClass);
-
-    return () => {
-      window.removeEventListener("focus", syncFocusClass);
-      window.removeEventListener("blur", syncFocusClass);
-      document.removeEventListener("visibilitychange", syncFocusClass);
-      body.classList.remove("localtifyWindowBackgrounded");
-    };
-  }, []);
 
   const discordAssetBySongRef = useRef<Record<string, string>>({});
   const lastDiscordAssetKeyRef = useRef<string>("");
@@ -444,50 +416,12 @@ function MainModeApp() {
   const isThreeAm = now.getHours() === 3;
   const greeting = isThreeAm ? "late night local files" : getGreeting(now.getHours());
 
-  useEffect(() => {
-    isAppBackgroundedRef.current = isAppBackgrounded;
-    document.body.classList.toggle("localtifyBackgroundMode", isAppBackgrounded);
-
-    return () => {
-      document.body.classList.remove("localtifyBackgroundMode");
-    };
-  }, [isAppBackgrounded]);
-
-  useEffect(() => {
-    const body = document.body;
-
-    body.classList.add("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyPerfV319", "localtifyGpuFriendly");
-    body.dataset.localtifyPerf = "v319";
-
-    return () => {
-      body.classList.remove("localtifyPerfV301", "localtifyPerfV303", "localtifyPerfV307", "localtifyPerfV310", "localtifyPerfV319", "localtifyGpuFriendly");
-      if (["v319", "v318", "v310", "v307", "v305", "v304", "v303", "v301"].includes(String(body.dataset.localtifyPerf || ""))) {
-        delete body.dataset.localtifyPerf;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const body = document.body;
-    body.classList.toggle("localtifyAudioPlaying", Boolean(isPlaying));
-
-    return () => {
-      body.classList.remove("localtifyAudioPlaying");
-    };
-  }, [isPlaying]);
-
-  useEffect(() => {
-    const body = document.body;
-    const wantsMoreBlur = settings.quickLibraryMoreBlur !== false;
-
-    body.classList.toggle("localtifyWantMoreBlur", wantsMoreBlur);
-    body.classList.toggle("localtifyNoMoreBlur", !wantsMoreBlur);
-
-    return () => {
-      body.classList.remove("localtifyWantMoreBlur");
-      body.classList.remove("localtifyNoMoreBlur");
-    };
-  }, [settings.quickLibraryMoreBlur]);
+  useBodyRuntimeClasses({
+    isAppBackgrounded,
+    isAppBackgroundedRef,
+    isPlaying,
+    wantsMoreBlur: settings.quickLibraryMoreBlur !== false
+  });
 
   function resumeAudioContextSafely() {
     const context = beatAudioContextRef.current;
