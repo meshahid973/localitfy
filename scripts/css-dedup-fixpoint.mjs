@@ -4,7 +4,8 @@ import { spawnSync } from "node:child_process";
 const scripts = [
   "scripts/css-property-dedup.mjs",
   "scripts/css-shadow-dedup.mjs",
-  "scripts/css-adjacent-merge.mjs"
+  "scripts/css-adjacent-merge.mjs",
+  "scripts/css-cross-file-dedup.mjs"
 ];
 
 function run(script, args = [], inherit = true) {
