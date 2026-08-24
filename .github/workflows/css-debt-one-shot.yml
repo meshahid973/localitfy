@@ -43,6 +43,13 @@ jobs:
           set -o pipefail
           npm run css:dedup:fix 2>&1 | tee css-cleanup.log
 
+      - name: Remove one-shot scaffolding from merge candidate
+        shell: bash
+        run: |
+          rm -f .github/workflows/css-debt-one-shot.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
       - name: Verify hardening gate
         id: hardening
         shell: bash
@@ -50,13 +57,14 @@ jobs:
           set -o pipefail
           npm run hardening:check 2>&1 | tee hardening.log
 
-      - name: Commit generated CSS cleanup
+      - name: Commit cleaned CSS and remove one-shot runner
         if: success()
         shell: bash
         run: |
           git add -- ':(glob)src/**/*.css' 'src/*.css'
+          git add -u -- .github/workflows/css-debt-one-shot.yml
           if git diff --cached --quiet; then
-            echo 'No CSS changes remained after fixed-point cleanup.'
+            echo 'No generated cleanup remained to commit.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
