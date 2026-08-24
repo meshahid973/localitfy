@@ -1,0 +1,59 @@
+name: R4 CSS Adjacent Merge
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: r4-css-adjacent-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/r4-css-adjacent-merge
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Merge adjacent duplicate selectors
+        run: node scripts/css-adjacent-merge.mjs --write
+
+      - name: Confirm all CSS dedup guards
+        run: npm run css:dedup:check
+
+      - name: Diff sanity
+        run: git diff --check
+
+      - name: Install exact dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate Localtify
+        run: |
+          npm run check
+          npm run performance:check
+
+      - name: Commit validated CSS cleanup
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No adjacent duplicate selectors found."
+            exit 0
+          fi
+          git config user.name "OpenAI R4 CSS Cleanup"
+          git config user.email "noreply@openai.com"
+          git add -- ':(glob)src/**/*.css'
+          git diff --cached --check
+          git commit -m "R4: merge adjacent duplicate CSS selectors"
+          git push origin HEAD:agent/r4-css-adjacent-merge
