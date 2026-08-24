@@ -38,6 +38,7 @@ jobs:
           node --check electron/ipc/router.cjs
           node --check electron/runtime/security.cjs
           node --check electron/runtime/icons.cjs
+          node --check electron/runtime/translucency.cjs
           node --test tests/phase3/security-runtime.test.mjs
 
       - name: Diff sanity
