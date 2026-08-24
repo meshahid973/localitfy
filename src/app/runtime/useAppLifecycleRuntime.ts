@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import type { View } from "../../features/shell/view.types";
 
@@ -18,7 +18,6 @@ type LifecycleAnalytics = {
 type AppLifecycleRuntimeOptions = {
   appVersion: string;
   analytics: LifecycleAnalytics;
-  analyticsSessionEndedRef: MutableRefObject<boolean>;
   analyticsViewRef: MutableRefObject<View>;
   appRootRef: MutableRefObject<HTMLElement | null>;
   playingRef: MutableRefObject<boolean>;
@@ -29,13 +28,14 @@ type AppLifecycleRuntimeOptions = {
 export function useAppLifecycleRuntime({
   appVersion,
   analytics,
-  analyticsSessionEndedRef,
   analyticsViewRef,
   appRootRef,
   playingRef,
   setIsAppBackgrounded,
   repairPlaybackAfterAppReturns
 }: AppLifecycleRuntimeOptions) {
+  const analyticsSessionEndedRef = useRef(false);
+
   useEffect(() => {
     let analyticsLaunchCancelled = false;
     const analyticsLaunchTimer = window.setTimeout(() => {
