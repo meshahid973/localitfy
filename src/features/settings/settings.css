@@ -650,7 +650,7 @@
 }
 
 .settingsPlainList{
-  margin: 0;
+
   padding: 0;
   list-style: none;
   display: grid;
@@ -669,7 +669,7 @@
 }
 
 .statusGrid{
-  display: grid;
+
   grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
@@ -680,21 +680,21 @@
   padding: 13px;
   border: 1px solid rgba(255,255,255,0.075);
   border-radius: 16px;
-  display: grid;
+
   align-content: center;
   gap: 4px;
   background: rgba(255,255,255,0.026);
 }
 
 .statusGrid strong{
-  color: var(--lt-text);
+
   font-size: 22px;
   line-height: 1;
 }
 
 .statusGrid small{
-  color: var(--lt-muted);
-  font-size: 11px;
+
+
   font-weight: 850;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -951,7 +951,7 @@ body.localitfyThemePainting .app .themeTokenCard{
     linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02)),
     rgba(7,7,12,0.58);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
-  filter: none !important;
+
   transform: translate3d(0,0,0);
 }
 
@@ -1123,9 +1123,9 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsChoice{
   min-height: 66px !important;
-  display: grid !important;
+
   grid-template-columns: minmax(0, 1fr) auto !important;
-  align-items: center !important;
+
   gap: 14px !important;
   padding: 14px 16px !important;
   border-radius: 15px !important;
@@ -1495,7 +1495,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   .settingsHero,
 .settingsPanelCard,
 .settingsPageCard{
-    padding: 16px !important;
+
     border-radius: 17px !important;
   }
 
@@ -1734,14 +1734,14 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .discordSettingsPage{
   display: grid !important;
-  gap: 14px !important;
+
 }
 
 .discordHeroCard{
   display: grid !important;
   grid-template-columns: minmax(230px, .78fr) minmax(0, 1.22fr) !important;
-  gap: 14px !important;
-  align-items: stretch !important;
+
+
 }
 
 .discordHeroCopy{
@@ -2395,10 +2395,10 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsCategoryPage .customThemeHeaderV027{
   position: relative !important;
   z-index: 1 !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
+
+
   align-items: start !important;
-  gap: 16px !important;
+
   padding: 0 0 16px !important;
   border-bottom: 1px solid rgba(var(--text-rgb), .075) !important;
 }
@@ -2419,8 +2419,8 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsCategoryPage .settingsHeaderActionsV027{
   display: flex !important;
   flex-wrap: wrap !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
+
+
   gap: 9px !important;
   max-width: 520px !important;
 }
@@ -2530,7 +2530,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
   .settingsCategoryContentV027 .settingsHeaderActionsV027,
 .settingsCategoryPage .settingsHeaderActionsV027{
-    justify-content: flex-start !important;
+
     max-width: none !important;
   }
 }
@@ -2827,9 +2827,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsUpdatesPage .settingsPanelHeader strong{
-  font-size: 18px !important;
+
   line-height: 1.05 !important;
-  letter-spacing: -.035em !important;
+
   color: var(--lt-text, #fff) !important;
 }
 
@@ -2880,7 +2880,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsUpdatesPage .settingsUpdateMessage strong{
   text-transform: none !important;
   font-size: 14px !important;
-  letter-spacing: -.01em !important;
+
 }
 
 .settingsUpdatesPage .settingsUpdateMessage span{
@@ -2919,7 +2919,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsReleaseList li{
   position: relative !important;
-  display: flex !important;
+
   align-items: flex-start !important;
   gap: 10px !important;
   min-height: 42px !important;
@@ -3688,7 +3688,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .customThemeHeaderV027{
   gap: 14px !important;
-  align-items: center !important;
+
 }
 
 .settingsHeaderActionsV027,
@@ -4274,10 +4274,10 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 .simpleThemePreviewV025,
 .themeEditorPreview{
   position: relative;
-  overflow: hidden !important;
+
   min-height: 188px !important;
   border-radius: 22px !important;
-  border-color: rgba(var(--lt-accent-rgb), .20) !important;
+
   background:
     radial-gradient(circle at 85% 10%, rgba(var(--lt-accent-rgb), .18), transparent 36%),
     linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.018)),
@@ -4319,8 +4319,8 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   min-width: 82px;
   text-align: center;
   color: rgba(255,255,255,.78) !important;
-  background: rgba(0,0,0,.24) !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
+
+
 }
 
 .accentTextInput,
@@ -6100,7 +6100,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   width: 100%;
   height: 100%;
   opacity: 0;
-  cursor: pointer;
+
 }
 
 .customThemeTokenV027 > strong{
@@ -6108,7 +6108,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   grid-row: 1;
   min-width: 0;
   color: var(--lt-text);
-  font-size: 13px;
+
   line-height: 1.08;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -6733,7 +6733,7 @@ body.localitfyThemePainting .toggleRow{
 
 
 .feedbackPromptBadgeV331{
-  display: inline-flex !important;
+
   margin-bottom: 8px !important;
   color: var(--lt-accent) !important;
   font-size: 0.68rem !important;
@@ -6746,8 +6746,8 @@ body.localitfyThemePainting .toggleRow{
 
 
 .feedbackCategoryButtonV331{
-  min-height: 38px !important;
-  padding: 8px 10px !important;
+
+
   border: 1px solid rgba(255,255,255,0.095) !important;
   border-radius: 13px !important;
   color: rgba(255,255,255,0.76) !important;
@@ -6773,8 +6773,8 @@ body.localitfyThemePainting .toggleRow{
 }
 
 .feedbackTextareaWrapV331 textarea{
-  width: 100% !important;
-  min-height: 154px !important;
+
+
   resize: vertical !important;
   padding: 13px 14px !important;
   border: 1px solid rgba(255,255,255,0.10) !important;
@@ -6783,7 +6783,7 @@ body.localitfyThemePainting .toggleRow{
   outline: none !important;
   background: rgba(255,255,255,0.055) !important;
   font: inherit !important;
-  line-height: 1.45 !important;
+
 }
 
 .feedbackTextareaWrapV331 textarea:focus{
