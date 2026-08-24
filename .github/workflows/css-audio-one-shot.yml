@@ -1,0 +1,65 @@
+name: CSS audio one-shot
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: css-audio-one-shot-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  migrate-verify-commit:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'agent/css-audio-stability'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout cleanup branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/css-audio-stability
+          fetch-depth: 0
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Materialize audio runtime ownership
+        run: node scripts/migrate-player-audio-runtime.mjs
+
+      - name: Materialize CSS ownership
+        run: node scripts/migrate-css-ownership.mjs
+
+      - name: Clean CSS to fixed point
+        run: npm run css:dedup:fix
+
+      - name: Remove one-shot scaffolding from merge candidate
+        run: |
+          rm -f .github/workflows/css-audio-one-shot.yml
+          rm -f scripts/migrate-player-audio-runtime.mjs scripts/migrate-css-ownership.mjs
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
+      - name: Verify full hardening gate
+        run: npm run hardening:check
+
+      - name: Commit final cleanup tree
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No materialized changes remained to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'player: stabilize audio effects and organize CSS ownership'
+          git push origin HEAD:agent/css-audio-stability
