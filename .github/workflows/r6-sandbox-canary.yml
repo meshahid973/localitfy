@@ -1,0 +1,65 @@
+name: R6 Electron Sandbox Canary
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: r6-electron-sandbox-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sandbox-canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/r6-electron-sandbox
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Apply sandbox hardening
+        run: node scripts/r6/apply-electron-sandbox.mjs
+
+      - name: Security syntax and unit canary
+        run: |
+          node --check electron/main.cjs
+          node --check electron/preload.cjs
+          node --check electron/ipc/router.cjs
+          node --check electron/runtime/security.cjs
+          node --test tests/phase3/security-runtime.test.mjs
+
+      - name: Diff sanity
+        run: git diff --check
+
+      - name: Install exact desktop dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Full regression and performance gate
+        run: |
+          npm run check
+          npm run performance:check
+
+      - name: Commit validated sandbox hardening
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "Sandbox hardening is already applied."
+            exit 0
+          fi
+          git config user.name "OpenAI R6 Sandbox"
+          git config user.email "noreply@openai.com"
+          git add electron/main.cjs tests/phase3/hardening.test.mjs docs/architecture/electron-sandbox.md
+          git diff --cached --check
+          git commit -m "R6: enable sandboxed renderer trust boundary"
+          git push origin HEAD:agent/r6-electron-sandbox
