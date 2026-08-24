@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - agent/phase-4b-runtime-monolith-reduction
-  pull_request:
 
 permissions:
   contents: write
@@ -26,51 +25,64 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Apply checkpoints
+
+      - name: Extract Discord IPC routing
         shell: bash
         run: |
-          sed -i 's/localitfyConstants/localtifyConstants/g' scripts/phase4b/apply-checkpoint1.py
-          python scripts/phase4b/apply-checkpoint1.py
-          python scripts/phase4b/apply-checkpoint2.py
           python - <<'PY'
           from pathlib import Path
 
-          app = Path('src/App.tsx')
-          text = app.read_text(encoding='utf-8')
-          text = text.replace('import type { LocaltifyAnalyticsSnapshot } from "./features/analytics/analyticsSnapshot";\n', '')
-          text = text.replace('  ONBOARDING_STORAGE_KEY,\n', '')
-          text = text.replace(
-              'import { applyVisualCustomizationDefaults } from "./features/settings/visualCustomization";',
-              'import { applyVisualCustomizationDefaults, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";'
-          )
-          app.write_text(text, encoding='utf-8')
+          module_path = Path('electron/ipc/discord.cjs')
+          module_source = '''"use strict";\n\nfunction registerDiscordIpc(ipcRouter, services = {}) {\n  if (!ipcRouter || typeof ipcRouter.handle !== "function") {\n    throw new TypeError("registerDiscordIpc requires an IPC router");\n  }\n\n  const {\n    setDiscordActivity,\n    clearDiscordActivity,\n    getDiscordStatus,\n    resetDiscordActivityCache\n  } = services;\n\n  ipcRouter.handle("discord:set-activity", async (_event, payload) => {\n    try { return { ok: await setDiscordActivity(payload) }; } catch { return { ok: false }; }\n  });\n  ipcRouter.handle("discord:clear-activity", async () => {\n    try { return { ok: await clearDiscordActivity() }; } catch { return { ok: false }; }\n  });\n  ipcRouter.handle("discord:status", async () => getDiscordStatus());\n  ipcRouter.handle("discord:reset-cache", async () => {\n    resetDiscordActivityCache();\n    return true;\n  });\n}\n\nmodule.exports = { registerDiscordIpc };\n'''
+          module_path.write_text(module_source, encoding='utf-8')
 
-          visual = Path('src/features/settings/visualCustomization.ts')
-          source = visual.read_text(encoding='utf-8')
-          source = source.replace('const DEFAULTS = {', 'export const VISUAL_CUSTOMIZATION_DEFAULTS = {', 1)
-          source = source.replace('DEFAULTS.', 'VISUAL_CUSTOMIZATION_DEFAULTS.')
-          visual.write_text(source, encoding='utf-8')
+          main_path = Path('electron/main.cjs')
+          main = main_path.read_text(encoding='utf-8-sig')
+
+          import_anchor = 'const { createIpcRouter } = require("./ipc/router.cjs");\n'
+          import_line = 'const { registerDiscordIpc } = require("./ipc/discord.cjs");\n'
+          if import_line not in main:
+            if import_anchor not in main:
+              raise SystemExit('IPC router import anchor not found')
+            main = main.replace(import_anchor, import_anchor + import_line, 1)
+
+          old = '''  ipcRouter.handle("discord:set-activity", async (_event, payload) => {\n    try { return { ok: await setDiscordActivity(payload) }; } catch { return { ok: false }; }\n  });\n  ipcRouter.handle("discord:clear-activity", async () => {\n    try { return { ok: await clearDiscordActivity() }; } catch { return { ok: false }; }\n  });\n  ipcRouter.handle("discord:status", async () => getDiscordStatus());\n  ipcRouter.handle("discord:reset-cache", async () => {\n    resetDiscordActivityCache();\n    return true;\n  });\n'''
+          new = '''  registerDiscordIpc(ipcRouter, {\n    setDiscordActivity,\n    clearDiscordActivity,\n    getDiscordStatus,\n    resetDiscordActivityCache\n  });\n'''
+
+          if old in main:
+            main = main.replace(old, new, 1)
+          elif new not in main:
+            raise SystemExit('Current Discord IPC block not found; refusing a fuzzy edit')
+
+          main_path.write_text(main, encoding='utf-8')
           PY
-          python scripts/phase4b/apply-checkpoint3.py
+
       - name: Diff sanity
         run: git diff --check
+
+      - name: Syntax smoke
+        run: |
+          node --check electron/main.cjs
+          node --check electron/ipc/discord.cjs
+
       - name: Install exact desktop dependencies
         run: npm ci --no-audit --no-fund
+
       - name: Full validation
         run: |
           npm run check
           npm run performance:check
+
       - name: Commit validated checkpoint
-        if: github.event_name == 'push'
         shell: bash
         run: |
           if git diff --quiet; then
-            echo "No staged source changes."
+            echo "No source changes."
             exit 0
           fi
           git config user.name "OpenAI Phase 4B"
           git config user.email "noreply@openai.com"
-          git add src electron tests
+          git add electron/main.cjs electron/ipc/discord.cjs
           git diff --cached --check
-          git commit -m "Phase 4B.3: extract renderer runtime ownership"
+          git commit -m "Phase 4B.4: extract Discord IPC routing"
           git push origin HEAD:agent/phase-4b-runtime-monolith-reduction
