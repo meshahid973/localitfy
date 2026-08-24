@@ -137,9 +137,8 @@
   background: var(--accent);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12),
     0 18px 48px rgba(0, 0, 0, 0.36);
-}
 
-.heroArt{
+
   width: 172px;
   height: 172px;
 
@@ -362,14 +361,6 @@
 
 
 
-.panel{
-  border-radius: 15px;
-  border-color: rgba(255, 255, 255, 0.075);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.014)),
-    rgba(0, 0, 0, 0.58);
-  backdrop-filter: blur(18px) saturate(118%);
-  box-shadow: none;
-}
 
 .panelHead{
   padding-bottom: 2px;
@@ -3115,9 +3106,8 @@ body.localitfyLibraryPointerDragging{
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
 
-.editorMiniStats strong{
+
   color: var(--text);
   font-size: 13px;
   font-weight: 700;
@@ -3451,9 +3441,8 @@ body.localitfyLibraryPointerDragging{
   box-shadow: var(--home-ref-shadow-soft) !important;
   backdrop-filter: blur(18px) saturate(128%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(128%) !important;
-}
 
-.panel{
+
   border-radius: var(--home-ref-radius) !important;
 }
 
@@ -3600,9 +3589,8 @@ body.localitfyLibraryPointerDragging{
     0 18px 44px rgba(0, 0, 0, 0.50),
     0 0 0 1px rgba(255,255,255,0.035),
     0 0 34px rgba(var(--accent-rgb), 0.16) !important;
-}
 
-.heroArt{
+
   border-radius: 18px !important;
 }
 

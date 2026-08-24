@@ -456,9 +456,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
 
-.tinyScanner strong{
+
   font-size: 12px;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -643,9 +642,8 @@
 .importPanelHead{
   position: relative;
   z-index: 2;
-}
 
-.importPanelHead{
+
   display: grid;
   gap: 7px;
   padding-right: 150px;
@@ -760,9 +758,8 @@
   min-height: 0 !important;
   height: auto !important;
   border-radius: 18px !important;
-}
 
-.importCoverTile .coverAura{
+
   box-shadow:
     0 14px 34px rgba(0, 0, 0, 0.34),
     0 0 0 1px rgba(255, 255, 255, 0.08) !important;
@@ -1044,9 +1041,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
 
-.localitfyDragPreviewText strong{
+
   font-size: 12px;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -1619,9 +1615,8 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
 
-.editorMiniStats strong{
+
   color: var(--lt-text);
   font-size: 13px;
   font-weight: 700;
@@ -1932,9 +1927,8 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
     0 18px 48px rgba(0, 0, 0, 0.18) !important;
   backdrop-filter: blur(18px) saturate(135%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(135%) !important;
-}
 
-.panel{
+
   transition:
     border-color 220ms ease,
     background-color 220ms ease,
@@ -2456,9 +2450,8 @@ body{
 
 .app{
   font-family: var(--font-body) !important;
-}
 
-.app{
+
   font-weight: 720;
   letter-spacing: -0.018em;
 }
@@ -2949,9 +2942,8 @@ button:hover,
 @supports (content-visibility: auto){
   .app .songList .songRow{
     content-visibility: auto;
-  }
 
-  .app .songList .songRow{
+
     contain-intrinsic-size: 68px;
   }
 
@@ -3088,9 +3080,8 @@ body.localitfyThemePainting .app *{
   -webkit-mask-image: none !important;
   mask-image: none !important;
   opacity: 1 !important;
-}
 
-.navDivider{
+
   margin-top: 18px !important;
   margin-bottom: 18px !important;
 }
@@ -3369,9 +3360,8 @@ html{
   background: linear-gradient(110deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.055));
   background-size: 230% 100%;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
 
-.skeletonCoverBlock{
+
   width: 138px;
   aspect-ratio: 1;
   border-radius: 24px;
