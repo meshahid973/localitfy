@@ -1,0 +1,56 @@
+name: R5 CatBuddy Types
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: r5-catbuddy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  types:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/r5-catbuddy-types
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Apply CatBuddy typing cleanup
+        run: node scripts/r5/apply-catbuddy-types.mjs
+
+      - name: Diff sanity
+        run: git diff --check
+
+      - name: Install exact dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate Localtify
+        run: |
+          npm run check
+          npm run performance:check
+
+      - name: Commit validated CatBuddy typing
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "CatBuddy typing cleanup is already applied."
+            exit 0
+          fi
+          git config user.name "OpenAI R5 CatBuddy"
+          git config user.email "noreply@openai.com"
+          git add src/CatBuddy.tsx scripts/check-phase1-boundaries.mjs
+          git diff --cached --check
+          git commit -m "R5: remove final ts-nocheck"
+          git push origin HEAD:agent/r5-catbuddy-types
