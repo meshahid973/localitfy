@@ -21,15 +21,24 @@ test("feature styles have canonical ownership", () => {
   assert.equal(fs.existsSync(path.join(root, "src/settings.css")), false);
 });
 
-test("sandbox state is explicit and documented", () => {
+test("main renderer sandbox is enabled and documented", () => {
   const main = read("electron/main.cjs");
   const doc = read("docs/architecture/electron-sandbox.md");
   assert.match(main, /nodeIntegration:\s*false/);
   assert.match(main, /contextIsolation:\s*true/);
-  assert.match(main, /sandbox:\s*false/);
   assert.match(main, /sandbox:\s*true/);
-  assert.match(doc, /compatibility checkpoint/i);
-  assert.match(doc, /sandbox-enabled canary build/i);
+  assert.doesNotMatch(main, /sandbox:\s*false/);
+  assert.match(main, /webviewTag:\s*false/);
+  assert.match(main, /allowRunningInsecureContent:\s*false/);
+  assert.match(main, /navigateOnDragDrop:\s*false/);
+  assert.match(main, /isTrustedMainFrameIpcEvent/);
+  assert.match(main, /rendererFileRoot/);
+  assert.match(main, /installRendererSecurityGuards/);
+  assert.match(main, /createIconRuntime/);
+  assert.match(main, /createWindowTranslucencyRuntime/);
+  assert.match(doc, /sandbox enabled/i);
+  assert.match(doc, /trusted sender/i);
+  assert.match(doc, /main frame/i);
 });
 
 test("hardening scripts and Windows smoke workflow are present", () => {

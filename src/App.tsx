@@ -72,6 +72,7 @@ import AppShell from "./features/shell/AppShell";
 import type { AppShellProps } from "./features/shell/appShell.contract";
 import { useAppToast } from "./features/shell/useAppToast";
 import { useScreensaverController } from "./features/shell/useScreensaverController";
+import { useDiagnosticsInfo } from "./features/shell/useDiagnosticsInfo";
 import { useFeedbackController } from "./features/feedback";
 import { usePlaylistsController } from "./features/playlists";
 import { useAlbumsController } from "./features/albums/useAlbumsController";
@@ -196,7 +197,6 @@ import {
   writeSavedCustomThemePresets
 } from "./features/settings";
 import { buildDiscordPreview, buildDiscordSongSearchUrl } from "./features/discord";
-import { updateStatusLabel } from "./features/updates";
 import { cleanPlaylistList } from "./features/playlists";
 import type {
   LibraryDropSide,
@@ -379,7 +379,12 @@ function MainModeApp() {
     screensaverTimerRef,
     screensaverPreviewTimerRef,
     screensaverIgnoreActivityUntilRef
-  } = useScreensaverController();
+  } = useScreensaverController({
+    currentSongId: currentId,
+    isPlaying,
+    animeVisuals: settings.animeVisuals,
+    animatedBackgrounds: settings.animatedBackgrounds
+  });
 
   const {
     downloadText, setDownloadText,
@@ -681,62 +686,6 @@ function MainModeApp() {
       setStatusText("screensaver preview opened");
     }, delayMs);
   }
-
-  useEffect(() => {
-    const clearScreensaverTimer = () => {
-      if (screensaverTimerRef.current) {
-        window.clearTimeout(screensaverTimerRef.current);
-        screensaverTimerRef.current = null;
-      }
-    };
-
-    const canShowScreensaver = screensaverPreviewActive || (settings.animeVisuals && settings.animatedBackgrounds && !isPlaying);
-
-    const armScreensaverTimer = () => {
-      clearScreensaverTimer();
-      if (!canShowScreensaver) return;
-      screensaverTimerRef.current = window.setTimeout(() => {
-        screensaverIgnoreActivityUntilRef.current = Date.now() + 1000;
-        setScreensaverPreviewActive(false);
-        setScreensaverVisible(true);
-      }, 5 * 60 * 1000);
-    };
-
-    let lastPointerMoveAt = 0;
-
-    const handleUserActivity = () => {
-      if (Date.now() < screensaverIgnoreActivityUntilRef.current) return;
-      setScreensaverVisible(false);
-      armScreensaverTimer();
-    };
-
-    const handlePointerMoveActivity = () => {
-      const now = Date.now();
-      if (!screensaverVisible && now - lastPointerMoveAt < 1400) return;
-      lastPointerMoveAt = now;
-      handleUserActivity();
-    };
-
-    if (!canShowScreensaver) {
-      setScreensaverVisible(false);
-      clearScreensaverTimer();
-      return clearScreensaverTimer;
-    }
-
-    armScreensaverTimer();
-    window.addEventListener("pointerdown", handleUserActivity, { passive: true });
-    window.addEventListener("keydown", handleUserActivity);
-    window.addEventListener("wheel", handleUserActivity, { passive: true });
-    window.addEventListener("pointermove", handlePointerMoveActivity, { passive: true });
-
-    return () => {
-      clearScreensaverTimer();
-      window.removeEventListener("pointerdown", handleUserActivity);
-      window.removeEventListener("keydown", handleUserActivity);
-      window.removeEventListener("wheel", handleUserActivity);
-      window.removeEventListener("pointermove", handlePointerMoveActivity);
-    };
-  }, [currentSong?.id, isPlaying, screensaverPreviewActive, screensaverVisible, settings.animeVisuals, settings.animatedBackgrounds]);
 
   const heroDisplayTitle = visualCurrentSong ? prettyTitle(visualCurrentSong.title, 9) : "drop in your music";
   const heroDisplayArtist = visualCurrentSong ? prettyMeta(visualCurrentSong.artist) : "import songs to start listening";
@@ -1106,125 +1055,19 @@ function MainModeApp() {
     };
   }, [ready]);
 
-  const diagnosticsInfo = useMemo(() => {
-    const themeLabel = settings.customThemeEnabled ? `${currentTheme.name} + custom colors` : currentTheme.name;
-    const discordStatus = settings.discordEnabled ? "enabled" : "disabled";
-    const startupStatus = platformInfo.startupSettingSupported
-      ? (settings.startWithWindows ? "enabled" : "disabled")
-      : "not supported on this platform";
-    const libraryAlbumCount = new Set(
-      songs
-        .map((song) => String(song.album || "").trim().toLowerCase())
-        .filter((album) => album && album !== "unknown album")
-    ).size;
-    const downloadFolderStatus = downloadFolderLabel || settings.downloadFolder || "default downloads folder";
-    const updateStatus = updatePrompt.visible
-      ? updateStatusLabel(updatePrompt.status)
-      : lastUpdateCheckedLabel;
-    const feedbackWebhookStatus = feedbackConfigStatus?.configured
-      ? feedbackConfigStatus.valid
-        ? "enabled"
-        : "configured but invalid"
-      : "not configured";
-    const electronVersion = String(performanceStatus?.electronVersion || "not reported yet");
-    const chromeVersion = String(performanceStatus?.chromeVersion || "not reported yet");
-    const packageSupport = platformInfo.id === "windows"
-      ? "Windows: full support"
-      : platformInfo.id === "linux"
-        ? "Linux: AppImage / DEB / RPM supported"
-        : platformInfo.id === "mac"
-          ? "macOS: not officially supported yet"
-          : "desktop support: unknown platform";
-
-    const items = [
-      { label: "app version", value: APP_VERSION },
-      { label: "platform", value: platformInfo.label },
-      { label: "Electron", value: electronVersion },
-      { label: "Chromium", value: chromeVersion },
-      { label: "song count", value: String(songs.length) },
-      { label: "playlist count", value: String(playlists.length) },
-      { label: "album count", value: String(libraryAlbumCount) },
-      { label: "downloads folder", value: downloadFolderStatus },
-      { label: "Discord RPC", value: discordStatus },
-      { label: "update status", value: updateStatus },
-      { label: "feedback webhook", value: feedbackWebhookStatus },
-      { label: "startup status", value: startupStatus },
-      { label: "platform support", value: packageSupport }
-    ];
-
-    return {
-      items,
-      copyText: [
-        `localtify version: ${APP_VERSION}`,
-        `platform: ${platformInfo.label}`,
-        `release package: ${platformInfo.releaseLabel}`,
-        `electron: ${electronVersion}`,
-        `chromium: ${chromeVersion}`,
-        `song count: ${songs.length}`,
-        `playlist count: ${playlists.length}`,
-        `album count: ${libraryAlbumCount}`,
-        `downloads folder: ${downloadFolderStatus}`,
-        `theme: ${themeLabel}`,
-        `Discord RPC: ${discordStatus}`,
-        `update status: ${updateStatus}`,
-        `feedback webhook: ${feedbackWebhookStatus}`,
-        `startup status: ${startupStatus}`,
-        `platform support: ${packageSupport}`
-      ].join("\n")
-    };
-  }, [
-    currentTheme.name,
+  const { diagnosticsInfo, copyDiagnosticsInfo } = useDiagnosticsInfo({
+    currentThemeName: currentTheme.name,
     downloadFolderLabel,
-    performanceStatus?.chromeVersion,
-    performanceStatus?.electronVersion,
-    feedbackConfigStatus?.configured,
-    feedbackConfigStatus?.valid,
-    platformInfo.id,
-    platformInfo.label,
-    platformInfo.releaseLabel,
-    platformInfo.startupSettingSupported,
-    playlists.length,
-    settings.customThemeEnabled,
-    settings.discordEnabled,
-    settings.downloadFolder,
-    settings.startWithWindows,
+    performanceStatus,
+    feedbackConfigStatus,
+    platformInfo,
+    playlistCount: playlists.length,
+    settings,
     songs,
-    updatePrompt
-  ]);
-
-  const copyDiagnosticsInfo = useCallback(async () => {
-    const textToCopy = diagnosticsInfo.copyText;
-    let copied = false;
-
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(textToCopy);
-        copied = true;
-      }
-    } catch {
-      copied = false;
-    }
-
-    if (!copied) {
-      try {
-        const textarea = document.createElement("textarea");
-        textarea.value = textToCopy;
-        textarea.setAttribute("readonly", "true");
-        textarea.style.position = "fixed";
-        textarea.style.left = "-9999px";
-        textarea.style.top = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
-        copied = document.execCommand("copy");
-        document.body.removeChild(textarea);
-      } catch {
-        copied = false;
-      }
-    }
-
-    setDiagnosticsCopied(true);
-    window.setTimeout(() => setDiagnosticsCopied(false), copied ? 1500 : 2200);
-  }, [diagnosticsInfo.copyText]);
+    updatePrompt,
+    lastUpdateCheckedLabel,
+    setDiagnosticsCopied
+  });
 
   const selectedCoverColorSyncMode = normalizeCoverColorSyncMode(
     settings.coverColorSyncMode ?? (settings.showAmbientGradient ? "normal" : "off")
