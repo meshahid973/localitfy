@@ -24,12 +24,6 @@ import { createPlayerController } from "./player/playerController";
 import { usePlayerRuntime } from "./features/player";
 import type { PlayerEngineSource } from "./player/PlayerEngine";
 import {
-  initLocalitfyAnalytics,
-  trackAppLaunched,
-  trackAppSessionEnded,
-  trackAppActive,
-  trackAppBackgrounded,
-  trackAppForegrounded,
   trackAppView,
   trackSettingsOpened,
   trackThemeChanged,
@@ -41,8 +35,7 @@ import {
   trackDiscordToggled,
   trackOnboardingCompleted,
   trackOnboardingSkipped,
-  trackError,
-  trackAcquisitionSource
+  trackError
 } from "./analytics";
 import { useAnalyticsRuntime } from "./features/analytics/useAnalyticsRuntime";
 import {
@@ -86,6 +79,7 @@ import CatBuddy from "./CatBuddy";
 import { PlayerPlayPauseMorphIcon } from "./features/player/PlayerPlayPauseMorphIcon";
 import { runLocaltifyIdleTask } from "./app/runtime/idle";
 import { useBodyRuntimeClasses } from "./app/runtime/useBodyRuntimeClasses";
+import { useAppLifecycleRuntime } from "./app/runtime/useAppLifecycleRuntime";
 import { formatAnalyticsDuration, localtifyAnalyticsNumber, localtifyAnalyticsString } from "./features/analytics/formatters";
 import { applyVisualCustomizationDefaults, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";
 import { getLocaltifyPlatformInfo } from "./app/platform";
@@ -261,7 +255,6 @@ function MainModeApp() {
   const heroReflowTimerRef = useRef<number | null>(null);
   const heroCoverMotionTimerRef = useRef<number | null>(null);
   const appRootRef = useRef<HTMLElement | null>(null);
-  const analyticsSessionEndedRef = useRef(false);
   const analyticsViewRef = useRef<View>("home");
   const librarySnapshotSignatureRef = useRef("");
   const libraryOrderSaveTimerRef = useRef<number | null>(null);
@@ -456,125 +449,14 @@ function MainModeApp() {
       });
   }
 
-  useEffect(() => {
-    let analyticsLaunchCancelled = false;
-    const analyticsLaunchTimer = window.setTimeout(() => {
-      if (analyticsLaunchCancelled) return;
-      const analyticsReady = initLocalitfyAnalytics(APP_VERSION);
-
-      if (analyticsReady) {
-        trackAppLaunched({ initial_view: analyticsViewRef.current });
-        trackAppActive({ reason: "launch", current_view: analyticsViewRef.current });
-        trackAcquisitionSource({ source: "direct_app_launch", initial_view: analyticsViewRef.current });
-      }
-    }, 950);
-
-    const finishAnalyticsSession = (reason: "beforeunload" | "unmount") => {
-      if (analyticsSessionEndedRef.current) return;
-      analyticsSessionEndedRef.current = true;
-      trackAppSessionEnded({ reason, current_view: analyticsViewRef.current });
-    };
-
-    const handleBeforeUnload = () => {
-      finishAnalyticsSession("beforeunload");
-    };
-
-    let focusRepairTimer = 0;
-
-    const repairHeroAmbienceAfterFocus = () => {
-      if (focusRepairTimer) {
-        window.clearTimeout(focusRepairTimer);
-      }
-
-      // V319: Windows/Electron can occasionally restore the cover pseudo-layer
-      // without reapplying the blur filter after alt-tab. Toggling a short body
-      // class forces a compositor repaint without changing the user setting.
-      document.body.classList.add("localtifyFocusRecovering");
-      appRootRef.current?.classList.add("localtifyHeroAmbienceRecovering");
-
-      focusRepairTimer = window.setTimeout(() => {
-        document.body.classList.remove("localtifyFocusRecovering");
-        appRootRef.current?.classList.remove("localtifyHeroAmbienceRecovering");
-        focusRepairTimer = 0;
-      }, 420);
-    };
-
-    const handleVisibilityChange = () => {
-      const hidden = document.hidden;
-      setIsAppBackgrounded(hidden);
-
-      if (hidden) {
-        repairPlaybackAfterAppReturns("background-tick");
-        trackAppBackgrounded({ reason: "visibility_hidden", current_view: analyticsViewRef.current });
-        return;
-      }
-
-      repairPlaybackAfterAppReturns("visibility");
-      repairHeroAmbienceAfterFocus();
-      trackAppForegrounded({ reason: "visibility_visible", current_view: analyticsViewRef.current });
-      trackAppActive({ reason: "visibility_visible", current_view: analyticsViewRef.current });
-    };
-
-    const handleFocus = () => {
-      if (!document.hidden) {
-        setIsAppBackgrounded(false);
-        repairPlaybackAfterAppReturns("focus");
-        repairHeroAmbienceAfterFocus();
-      }
-      trackAppActive({ reason: "window_focus", current_view: analyticsViewRef.current });
-    };
-
-    const handleBlur = () => {
-      if (document.hidden) setIsAppBackgrounded(true);
-      trackAppBackgrounded({ reason: "window_blur", current_view: analyticsViewRef.current });
-    };
-
-    const handleWindowError = (event: ErrorEvent) => {
-      trackError("renderer_error", event.message || event.error?.name || "unknown renderer error", {
-        current_view: analyticsViewRef.current
-      });
-    };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      const reason = event.reason instanceof Error ? event.reason.message : String(event.reason || "unknown rejection");
-      trackError("unhandled_rejection", reason, { current_view: analyticsViewRef.current });
-    };
-
-    const heartbeatTimer = window.setInterval(() => {
-      if (!document.hidden) {
-        trackAppActive({ reason: "heartbeat", current_view: analyticsViewRef.current });
-      }
-    }, 300_000);
-
-    const backgroundAudioKeeper = window.setInterval(() => {
-      if (!document.hidden || !playingRef.current) return;
-      repairPlaybackAfterAppReturns("background-tick");
-    }, 1800);
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("focus", handleFocus);
-    window.addEventListener("blur", handleBlur);
-    window.addEventListener("error", handleWindowError);
-    window.addEventListener("unhandledrejection", handleUnhandledRejection);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      analyticsLaunchCancelled = true;
-      window.clearTimeout(analyticsLaunchTimer);
-      if (focusRepairTimer) window.clearTimeout(focusRepairTimer);
-      document.body.classList.remove("localtifyFocusRecovering");
-      appRootRef.current?.classList.remove("localtifyHeroAmbienceRecovering");
-      finishAnalyticsSession("unmount");
-      window.clearInterval(heartbeatTimer);
-      window.clearInterval(backgroundAudioKeeper);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("focus", handleFocus);
-      window.removeEventListener("blur", handleBlur);
-      window.removeEventListener("error", handleWindowError);
-      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
+  useAppLifecycleRuntime({
+    appVersion: APP_VERSION,
+    analyticsViewRef,
+    appRootRef,
+    playingRef,
+    setIsAppBackgrounded,
+    repairPlaybackAfterAppReturns
+  });
 
   // V313: onboarding is now a true first-run mini-app.
   // Do not auto-close it just because songs exist; import completion is handled inside Onboarding.
