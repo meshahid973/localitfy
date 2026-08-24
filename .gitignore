@@ -48,7 +48,6 @@ pixelart_backup_*/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-!.vscode/settings.json
 .idea/
 .DS_Store
 Thumbs.db
@@ -69,7 +68,3 @@ a
 analytics/exports/
 analytics/private/
 posthog-export*a
-
-# Local asset compression backups
-localtify_asset_backups/
-

@@ -41,8 +41,8 @@ test("main renderer sandbox is enabled and documented", () => {
   assert.match(doc, /main frame/i);
 });
 
-test("hardening scripts and Windows smoke workflow are present", () => {
+test("hardening is owned by local scripts and workflows stay removed", () => {
   assert.ok(fs.existsSync(path.join(root, "scripts/check-performance-budgets.mjs")));
   assert.ok(fs.existsSync(path.join(root, "scripts/test-database-recovery.cjs")));
-  assert.ok(fs.existsSync(path.join(root, ".github/workflows/windows-smoke.yml")));
+  assert.equal(fs.existsSync(path.join(root, ".github/workflows")), false);
 });

@@ -16,10 +16,16 @@ test("lockfile pins the valid asynckit tarball", () => {
   assert.equal(lock.packages?.["node_modules/form-data"]?.dependencies?.asynckit, "^0.4.0");
 });
 
-test("CI uses the committed lockfile without an unlocked install fallback", () => {
-  const ci = read(".github/workflows/ci.yml");
-  assert.match(ci, /npm ci(?:\s|$)/);
-  assert.doesNotMatch(ci, /package-lock=false|npm install --ignore-scripts/);
+test("local validation is owned by deterministic package scripts", () => {
+  const pkg = JSON.parse(read("package.json"));
+  const scripts = pkg.scripts || {};
+  assert.match(String(scripts.check || ""), /bridge:check/);
+  assert.match(String(scripts.check || ""), /boundaries:check/);
+  assert.match(String(scripts.check || ""), /css:dedup:check/);
+  assert.match(String(scripts.check || ""), /typecheck/);
+  assert.match(String(scripts.check || ""), /build/);
+  assert.match(String(scripts["hardening:check"] || ""), /performance:check/);
+  assert.doesNotMatch(JSON.stringify(scripts), /package-lock=false|npm install --ignore-scripts/);
 });
 
 test("database backups checkpoint WAL and verify the copied database", () => {

@@ -251,7 +251,18 @@ function duplicateKey(declaration) {
   return `${declaration.property}\u0000${declaration.important ? "important" : "normal"}\u0000${declaration.value}`;
 }
 
-function findDuplicateDeclarations(text) {
+function effectiveDeclarations(rule) {
+  const winners = new Map();
+  for (const declaration of rule.declarations) {
+    const previous = winners.get(declaration.property);
+    if (!previous || declaration.important || !previous.important) {
+      winners.set(declaration.property, declaration);
+    }
+  }
+  return winners;
+}
+
+function findRedundantDeclarations(text) {
   const rules = [];
   scanRuleList(text, 0, text.length, [], rules);
 
@@ -263,23 +274,54 @@ function findDuplicateDeclarations(text) {
     groups.set(key, list);
   }
 
-  const duplicates = [];
-  for (const list of groups.values()) {
-    const declarations = list
-      .flatMap((rule) => rule.declarations.map((declaration) => ({ ...declaration, rule })))
-      .sort((a, b) => a.start - b.start);
-    const lastByValue = new Map();
+  const redundant = new Map();
+  const remember = (earlier, later, kind) => {
+    const key = `${earlier.start}:${earlier.end}`;
+    if (!redundant.has(key)) redundant.set(key, { earlier, later, kind });
+  };
 
-    for (let index = declarations.length - 1; index >= 0; index -= 1) {
-      const declaration = declarations[index];
-      const key = duplicateKey(declaration);
-      const later = lastByValue.get(key);
-      if (later) duplicates.push({ earlier: declaration, later });
-      else lastByValue.set(key, declaration);
+  for (const list of groups.values()) {
+    // Exact duplicate declarations are safe to remove even when they live in the
+    // same block. This intentionally does not collapse different-value fallback
+    // declarations inside one block.
+    for (const rule of list) {
+      const lastByValue = new Map();
+      for (let index = rule.declarations.length - 1; index >= 0; index -= 1) {
+        const declaration = rule.declarations[index];
+        const key = duplicateKey(declaration);
+        const later = lastByValue.get(key);
+        if (later) remember(declaration, later, "exact");
+        else lastByValue.set(key, declaration);
+      }
+    }
+
+    // Historical App.css debt often repeats the same selector many blocks later.
+    // In that case an earlier declaration of the same property is unreachable in
+    // the final cascade. Keep custom properties and same-block fallback chains;
+    // only prune declarations shadowed by a later *rule block* with the exact same
+    // selector and at-rule context.
+    const laterByProperty = new Map();
+    for (let ruleIndex = list.length - 1; ruleIndex >= 0; ruleIndex -= 1) {
+      const rule = list[ruleIndex];
+      for (const declaration of rule.declarations) {
+        if (declaration.property.startsWith("--")) continue;
+        const later = laterByProperty.get(declaration.property);
+        if (!later) continue;
+        if (declaration.important && !later.important) continue;
+        remember(declaration, later, "shadowed");
+      }
+
+      for (const [property, winner] of effectiveDeclarations(rule)) {
+        if (property.startsWith("--")) continue;
+        const existing = laterByProperty.get(property);
+        if (!existing || winner.important || !existing.important) {
+          laterByProperty.set(property, winner);
+        }
+      }
     }
   }
 
-  return duplicates.sort((a, b) => a.earlier.start - b.earlier.start);
+  return [...redundant.values()].sort((a, b) => a.earlier.start - b.earlier.start);
 }
 
 function lineNumber(text, offset) {
@@ -290,11 +332,9 @@ function lineNumber(text, offset) {
   return line;
 }
 
-function applyRemovals(text, duplicates) {
+function applyRemovals(text, redundant) {
   const unique = new Map();
-  for (const { earlier } of duplicates) {
-    unique.set(`${earlier.start}:${earlier.end}`, earlier);
-  }
+  for (const { earlier } of redundant) unique.set(`${earlier.start}:${earlier.end}`, earlier);
 
   const removals = [...unique.values()].sort((a, b) => b.start - a.start);
   let output = text;
@@ -308,48 +348,50 @@ function applyRemovals(text, duplicates) {
 
 const cssFiles = walkCss(srcRoot);
 let total = 0;
+let exactTotal = 0;
+let shadowedTotal = 0;
 let changedFiles = 0;
 let bytesSaved = 0;
 
 for (const file of cssFiles) {
   const source = fs.readFileSync(file, "utf8");
-  const duplicates = findDuplicateDeclarations(source);
-  if (!duplicates.length) continue;
+  const redundant = findRedundantDeclarations(source);
+  if (!redundant.length) continue;
 
   const repoPath = path.relative(root, file).split(path.sep).join("/");
-  total += duplicates.length;
+  total += redundant.length;
+  exactTotal += redundant.filter((entry) => entry.kind === "exact").length;
+  shadowedTotal += redundant.filter((entry) => entry.kind === "shadowed").length;
 
   if (!write) {
-    for (const { earlier, later } of duplicates.slice(0, 40)) {
+    for (const { earlier, later, kind } of redundant.slice(0, 60)) {
       console.error(
-        `[css-property-dedup] ${repoPath}:${lineNumber(source, earlier.start)} ${earlier.property}: ${earlier.value} duplicates line ${lineNumber(source, later.start)}`
+        `[css-property-dedup] ${repoPath}:${lineNumber(source, earlier.start)} ${earlier.property}: ${earlier.value} ${kind === "exact" ? "duplicates" : "is shadowed by"} line ${lineNumber(source, later.start)}`
       );
     }
-    if (duplicates.length > 40) {
-      console.error(`[css-property-dedup] ${repoPath}: ... ${duplicates.length - 40} more`);
-    }
+    if (redundant.length > 60) console.error(`[css-property-dedup] ${repoPath}: ... ${redundant.length - 60} more`);
     continue;
   }
 
-  const { output, removed } = applyRemovals(source, duplicates);
+  const { output, removed } = applyRemovals(source, redundant);
   if (output !== source) {
     fs.writeFileSync(file, output);
     changedFiles += 1;
     bytesSaved += Buffer.byteLength(source) - Buffer.byteLength(output);
-    console.log(`[css-property-dedup] cleaned ${repoPath}: ${removed} exact duplicate declaration(s)`);
+    console.log(`[css-property-dedup] cleaned ${repoPath}: ${removed} redundant declaration(s)`);
   }
 }
 
 if (write) {
   console.log(
-    `[css-property-dedup] removed ${total} exact duplicate declaration(s) from ${changedFiles} file(s); saved ${bytesSaved} bytes`
+    `[css-property-dedup] removed ${total} redundant declaration(s) (${exactTotal} exact, ${shadowedTotal} shadowed) from ${changedFiles} file(s); saved ${bytesSaved} bytes`
   );
   process.exit(0);
 }
 
 if (total > 0) {
   console.error(
-    `[css-property-dedup] found ${total} exact duplicate declaration(s). Run: node scripts/css-property-dedup.mjs --write`
+    `[css-property-dedup] found ${total} redundant declaration(s) (${exactTotal} exact, ${shadowedTotal} shadowed). Run: node scripts/css-property-dedup.mjs --write`
   );
   process.exit(1);
 }

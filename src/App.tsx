@@ -76,7 +76,7 @@ import { useDiagnosticsInfo } from "./features/shell/useDiagnosticsInfo";
 import { useFeedbackController } from "./features/feedback";
 import { usePlaylistsController } from "./features/playlists";
 import { useAlbumsController } from "./features/albums/useAlbumsController";
-import { useUpdatesController } from "./features/updates";
+import { updateStatusLabel, useUpdatesController } from "./features/updates";
 import { useSettingsController } from "./features/settings";
 import { Cover } from "./features/covers/Cover";
 import { useCoversController } from "./features/covers";
@@ -376,7 +376,6 @@ function MainModeApp() {
     now, setNow,
     screensaverVisible, setScreensaverVisible,
     screensaverPreviewActive, setScreensaverPreviewActive,
-    screensaverTimerRef,
     screensaverPreviewTimerRef,
     screensaverIgnoreActivityUntilRef
   } = useScreensaverController({
