@@ -1,4 +1,4 @@
-﻿const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("localitfy", {
   bootstrap: () => ipcRenderer.invoke("app:bootstrap"),
@@ -63,6 +63,8 @@ contextBridge.exposeInMainWorld("localitfy", {
 
   openDevTools: (payload) => ipcRenderer.invoke("localitfy:open-devtools", payload),
   toggleDevTools: () => ipcRenderer.invoke("localitfy:toggle-devtools"),
+  restartApp: () => ipcRenderer.invoke("localitfy:restart-app"),
+  openLogsFolder: () => ipcRenderer.invoke("localitfy:open-logs"),
   getPerformanceStatus: () => ipcRenderer.invoke("localitfy:performance-status"),
   getGpuStatus: () => ipcRenderer.invoke("localitfy:gpu-status"),
   getFeedbackStatus: () => ipcRenderer.invoke("feedback:status"),

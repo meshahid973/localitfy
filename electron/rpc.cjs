@@ -1,4 +1,4 @@
-﻿const RPC = require("discord-rpc");
+const RPC = require("discord-rpc");
 
 const CLIENT_ID = "1499896817138012271";
 
@@ -521,14 +521,6 @@ function shouldRollNewDiscordAsset(payload = {}) {
     currentTime <= 2 &&
     lastPayloadCurrentTime > 5;
 
-  const resumedFresh =
-    songIdentity &&
-    songIdentity === dynamicDiscordAssetSongIdentity &&
-    isPlaying &&
-    !lastPayloadIsPlaying &&
-    currentTime <= 2 &&
-    now - lastDynamicAssetChangeAt > 1800;
-
   const manuallyForced =
     payload?.discordForceNewAsset === true ||
     payload?.discordForceRefresh === true ||
@@ -540,7 +532,6 @@ function shouldRollNewDiscordAsset(payload = {}) {
     selectionChanged ||
     clickedBackToSong ||
     playbackRestarted ||
-    resumedFresh ||
     manuallyForced
   );
 }

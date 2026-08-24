@@ -2,6 +2,7 @@
 /* localtify 0.4.1 V424 â€” Windows startup white-screen recovery. */
 const { app, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
 const { createIpcRouter } = require("./ipc/router.cjs");
+const { registerDiscordIpc } = require("./ipc/discord.cjs");
 const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes } = require("./runtime/protocols.cjs");
 const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
@@ -5707,6 +5708,16 @@ app.whenReady().then(async () => {
     restartForWindowTranslucency();
     return true;
   });
+  ipcRouter.handle("localitfy:open-logs", async () => {
+    try {
+      const logsPath = app.getPath("logs");
+      fs.mkdirSync(logsPath, { recursive: true });
+      const openError = await shell.openPath(logsPath);
+      return openError ? { ok: false, path: logsPath, error: openError } : { ok: true, path: logsPath };
+    } catch (error) {
+      return { ok: false, error: error?.message || "could not open logs folder" };
+    }
+  });
 
   ipcRouter.handle("playlists:get", async () => getPlaylists());
   ipcRouter.handle("playlists:save", async (_event, playlists) => {
@@ -5727,16 +5738,11 @@ app.whenReady().then(async () => {
   });
   ipcRouter.handle("database:status", async () => getDatabaseStatus());
 
-  ipcRouter.handle("discord:set-activity", async (_event, payload) => {
-    try { return { ok: await setDiscordActivity(payload) }; } catch { return { ok: false }; }
-  });
-  ipcRouter.handle("discord:clear-activity", async () => {
-    try { return { ok: await clearDiscordActivity() }; } catch { return { ok: false }; }
-  });
-  ipcRouter.handle("discord:status", async () => getDiscordStatus());
-  ipcRouter.handle("discord:reset-cache", async () => {
-    resetDiscordActivityCache();
-    return true;
+  registerDiscordIpc(ipcRouter, {
+    setDiscordActivity,
+    clearDiscordActivity,
+    getDiscordStatus,
+    resetDiscordActivityCache
   });
 
   // â”€â”€ Spotify: fetch public track metadata through OAuth PKCE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

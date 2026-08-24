@@ -1,0 +1,120 @@
+name: Phase 4B Stage
+
+on:
+  push:
+    branches:
+      - agent/phase-4b-runtime-monolith-reduction
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: phase4b-stage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checkpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/phase-4b-runtime-monolith-reduction
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Integrate typed Discord renderer runtime
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app_path = Path('src/App.tsx')
+          app = app_path.read_text(encoding='utf-8-sig')
+          hook_path = Path('src/features/discord/useDiscordActivityRuntime.ts')
+          if not hook_path.exists():
+            raise SystemExit('Typed Discord runtime module is missing')
+
+          import_anchor = 'import { getLocaltifyPlatformInfo } from "./app/platform";\n'
+          import_line = 'import { useDiscordActivityRuntime } from "./features/discord/useDiscordActivityRuntime";\n'
+          if import_line not in app:
+            if import_anchor not in app:
+              raise SystemExit('Discord runtime import anchor not found')
+            app = app.replace(import_anchor, import_anchor + import_line, 1)
+
+          app = app.replace('  const discordLastPayloadKeyRef = useRef<string>("");\n', '', 1)
+
+          start_marker = '  const discordSettingsRef = useRef(settings);\n'
+          end_marker = '\n\n\n  useEffect(() => {\n    if (sleepTimerRef.current !== null) {'
+          start = app.find(start_marker)
+          end = app.find(end_marker, start)
+          if start < 0 or end < 0:
+            if '  useDiscordActivityRuntime({\n' not in app:
+              raise SystemExit(f'Discord effect markers not found (start={start}, end={end}); refusing fuzzy edit')
+          else:
+            replacement = '''  useDiscordActivityRuntime({\n    ready,\n    settings,\n    currentSong,\n    isPlaying,\n    songCount: songs.length,\n    songIndexById,\n    mostPlayedId: mostPlayed?.id || "",\n    mostPlayedTitle: mostPlayed?.title || "",\n    pixelArtVersion: pixelArtAssets.length,\n    isAppBackgrounded,\n    audioRef,\n    songRef,\n    timeRef,\n    durationRef,\n    playingRef,\n    getRuntimePixelArtForSong,\n    getLiveDiscordAssetKey\n  });'''
+            app = app[:start] + replacement + app[end:]
+
+          for dead_import in [
+            '  DISCORD_ASSET_KEYS,\n',
+            '  LOCALITFY_DOWNLOAD_URL,\n',
+            '  LOCALITFY_SOURCE_URL,\n',
+            '  buildDiscordSongSearchUrl,\n',
+            '  pixelArtUrl,\n'
+          ]:
+            app = app.replace(dead_import, '', 1)
+
+          app_path.write_text(app, encoding='utf-8')
+          PY
+
+      - name: Diff sanity
+        run: git diff --check
+
+      - name: Install exact desktop dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate integration
+        id: validate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          {
+            npm run typecheck &&
+            npm test &&
+            npm run build &&
+            npm run performance:check
+          } > /tmp/phase4b-validation.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/phase4b-validation.log
+          if [ "$status" -ne 0 ]; then
+            {
+              echo 'Phase 4B staging validation failed on the Discord renderer integration.'
+              echo
+              echo '```text'
+              tail -n 120 /tmp/phase4b-validation.log
+              echo '```'
+            } > /tmp/phase4b-pr-comment.md
+            gh pr comment 22 --body-file /tmp/phase4b-pr-comment.md || true
+            exit "$status"
+          fi
+
+      - name: Commit validated checkpoint
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No source changes."
+            exit 0
+          fi
+          git config user.name "OpenAI Phase 4B"
+          git config user.email "noreply@openai.com"
+          git add src/App.tsx src/features/discord/useDiscordActivityRuntime.ts
+          git diff --cached --check
+          git commit -m "Phase 4B.3: integrate Discord renderer runtime"
+          git push origin HEAD:agent/phase-4b-runtime-monolith-reduction

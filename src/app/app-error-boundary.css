@@ -1,0 +1,11 @@
+.appCrashBoundary { min-height: 100vh; display: grid; place-items: center; padding: 32px; background: #000; color: #f5f5f5; font-family: "Space Grotesk", system-ui, sans-serif; }
+.appCrashCard { width: min(680px, 100%); padding: 30px; border: 1px solid rgba(255,255,255,.12); border-radius: 20px; background: rgba(15,15,18,.94); box-shadow: 0 22px 70px rgba(0,0,0,.55); }
+.appCrashEyebrow { display: block; margin-bottom: 10px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: .58; }
+.appCrashCard h1 { margin: 0 0 10px; font-size: clamp(25px,4vw,38px); }
+.appCrashCard p { margin: 0; line-height: 1.6; color: rgba(245,245,245,.7); }
+.appCrashMessage { margin: 22px 0 0; padding: 14px 16px; max-height: 180px; overflow: auto; white-space: pre-wrap; word-break: break-word; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; background: rgba(255,255,255,.035); color: rgba(255,255,255,.78); font: 12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; }
+.appCrashActions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.appCrashActions button { min-height: 42px; padding: 0 17px; border: 1px solid rgba(255,255,255,.13); border-radius: 11px; background: rgba(255,255,255,.07); color: #fff; cursor: pointer; }
+.appCrashActions button:hover { background: rgba(255,255,255,.12); }
+.appCrashActions .appCrashPrimary { background: #f2f2f2; color: #050505; border-color: transparent; font-weight: 700; }
+.appCrashActions .appCrashPrimary:hover { background: #fff; }
