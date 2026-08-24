@@ -1,8 +1,9 @@
-function createIpcRouter(ipcMain) {
+function createIpcRouter(ipcMain, options = {}) {
   if (!ipcMain || typeof ipcMain.handle !== "function") {
     throw new TypeError("ipcMain.handle is required");
   }
 
+  const isTrustedEvent = typeof options.isTrustedEvent === "function" ? options.isTrustedEvent : null;
   const channels = new Set();
 
   function handle(channel, handler) {
@@ -12,7 +13,12 @@ function createIpcRouter(ipcMain) {
     if (channels.has(normalizedChannel)) throw new Error(`duplicate IPC handler: ${normalizedChannel}`);
 
     channels.add(normalizedChannel);
-    ipcMain.handle(normalizedChannel, handler);
+    ipcMain.handle(normalizedChannel, async (event, ...args) => {
+      if (isTrustedEvent && !isTrustedEvent(event, normalizedChannel)) {
+        throw new Error(`untrusted IPC sender: ${normalizedChannel}`);
+      }
+      return handler(event, ...args);
+    });
     return normalizedChannel;
   }
 

@@ -8,6 +8,9 @@ const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings, create
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
 const { loadLocaltifyEnv } = require("./runtime/environment.cjs");
 const { createUserDataRuntime } = require("./runtime/user-data.cjs");
+const { createWindowTranslucencyRuntime } = require("./runtime/translucency.cjs");
+const { createIconRuntime } = require("./runtime/icons.cjs");
+const { installRendererSecurityGuards, installSessionPermissionGuards, isTrustedMainFrameIpcEvent } = require("./runtime/security.cjs");
 const { createDatabaseRepositories } = require("./db/repositories.cjs");
 const http = require("node:http");
 const https = require("node:https");
@@ -59,7 +62,9 @@ const {
   resolveSongCover
 } = require("./cover-service.cjs");
 
-const ipcRouter = createIpcRouter(ipcMain);
+const ipcRouter = createIpcRouter(ipcMain, {
+  isTrustedEvent: (event) => isTrustedMainFrameIpcEvent(event, mainWindow)
+});
 
 const isDev = !app.isPackaged;
 
@@ -120,107 +125,19 @@ let startupLaunchStatus = { wasOpenedAtLogin: false, wasOpenedAsHidden: false };
 let lastAssignedCoverPath = "";
 
 
-function getSavedWindowTranslucencySettings() {
-  try {
-    return normalizeWindowTranslucencySettings(getSettings());
-  } catch {
-    return normalizeWindowTranslucencySettings();
-  }
-}
-
-function applyWindowTranslucencyToWindow(win, settings = getSavedWindowTranslucencySettings()) {
-  if (!win || win.isDestroyed()) return settings;
-  const next = normalizeWindowTranslucencySettings(settings);
-
-  try {
-    // Never let the native window show Chromium's default white while Windows is
-    // still starting. The renderer/CSS can still draw the glass UI on top.
-    win.setBackgroundColor("#090012");
-  } catch (error) {
-    console.log("[localtify window background error]", error?.message || error);
-  }
-
-  try {
-    if (process.platform === "win32" && typeof win.setBackgroundMaterial === "function") {
-      // Keep this stable on Windows boot. DWM/acrylic can be late during login,
-      // so Localtify uses CSS glass and a dark native background instead.
-      win.setBackgroundMaterial('none');
-    }
-  } catch (error) {
-    console.log("[localtify window material error]", error?.message || error);
-  }
-
-  try {
-    if (process.platform === "darwin" && typeof win.setVibrancy === "function") {
-      win.setVibrancy(next.translucentWindow ? "dark" : null);
-    }
-  } catch (error) {
-    console.log("[localtify vibrancy error]", error?.message || error);
-  }
-
-  try {
-    win.webContents?.send("localitfy:window-translucency-state", next);
-  } catch {
-  }
-
-  return next;
-}
-
-function restartForWindowTranslucency() {
-  try {
-    allowQuit = true;
-    app.relaunch();
-  } catch (error) {
-    console.log("[localtify relaunch error]", error?.message || error);
-  }
-
-  setTimeout(() => {
-    try { app.exit(0); } catch { process.exit(0); }
-  }, 120);
-}
-
-function reloadMainWindowForTranslucency() {
-  const previousWindow = mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
-  const previousBounds = (() => {
-    try { return previousWindow ? previousWindow.getBounds() : null; } catch { return null; }
-  })();
-  const wasMaximized = (() => {
-    try { return Boolean(previousWindow?.isMaximized?.()); } catch { return false; }
-  })();
-  const wasFullScreen = (() => {
-    try { return Boolean(previousWindow?.isFullScreen?.()); } catch { return false; }
-  })();
-
-  try {
-    if (previousWindow) {
-      previousWindow.removeAllListeners("close");
-      previousWindow.destroy();
-    }
-  } catch (error) {
-    console.log("[localtify translucent window reload destroy error]", error?.message || error);
-  }
-
-  mainWindow = null;
-
-  setTimeout(() => {
-    try {
-      createWindow();
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        if (previousBounds) {
-          try { mainWindow.setBounds(previousBounds); } catch {}
-        }
-        if (wasMaximized) {
-          try { mainWindow.maximize(); } catch {}
-        }
-        if (wasFullScreen) {
-          try { mainWindow.setFullScreen(true); } catch {}
-        }
-      }
-    } catch (error) {
-      console.log("[localtify translucent window reload error]", error?.message || error);
-    }
-  }, 80);
-}
+const {
+  getSavedWindowTranslucencySettings,
+  applyWindowTranslucencyToWindow,
+  restartForWindowTranslucency,
+  reloadMainWindowForTranslucency
+} = createWindowTranslucencyRuntime({
+  app,
+  getSettings,
+  getMainWindow: () => mainWindow,
+  setMainWindow: (win) => { mainWindow = win; },
+  createWindow,
+  setAllowQuit: (value) => { allowQuit = Boolean(value); }
+});
 
 const UPDATE_CHECK_STARTUP_DELAY_MS = 2200;
 const PIXEL_ART_CACHE_TTL_MS = 30_000;
@@ -338,88 +255,11 @@ function showMainWindow() {
   return true;
 }
 
-function createSvgNativeImage(iconName) {
-  const iconPaths = {
-    previous: "M17 18V6h-2v5.2L7 6v12l8-5.2V18h2z",
-    next: "M7 6v12l8-5.2V18h2V6h-2v5.2L7 6z",
-    play: "M8 5v14l11-7L8 5z",
-    pause: "M7 5h4v14H7V5zm6 0h4v14h-4V5z",
-    stop: "M7 7h10v10H7V7z"
-  };
-  const pathData = iconPaths[iconName] || iconPaths.play;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="white" d="${pathData}"/></svg>`;
-  return nativeImage.createFromDataURL(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
-}
-
-function safePathJoin(...parts) {
-  try {
-    if (parts.some((part) => !part)) return "";
-    return path.join(...parts);
-  } catch {
-    return "";
-  }
-}
-
-function getAppIconPathCandidates() {
-  const appPath = (() => {
-    try { return app.getAppPath(); } catch { return ""; }
-  })();
-  return [
-    safePathJoin(process.cwd(), "build", "icon.ico"),
-    safePathJoin(__dirname, "build", "icon.ico"),
-    safePathJoin(__dirname, "..", "build", "icon.ico"),
-    safePathJoin(appPath, "build", "icon.ico"),
-    safePathJoin(process.resourcesPath || "", "build", "icon.ico"),
-    safePathJoin(process.resourcesPath || "", "app", "build", "icon.ico"),
-    safePathJoin(process.resourcesPath || "", "app.asar.unpacked", "build", "icon.ico"),
-    safePathJoin(__dirname, "assets", "icon.ico"),
-    safePathJoin(__dirname, "assets", "icon.png"),
-    safePathJoin(__dirname, "assets", "logo.png"),
-    safePathJoin(__dirname, "..", "assets", "icon.ico"),
-    safePathJoin(__dirname, "..", "assets", "icon.png"),
-    safePathJoin(__dirname, "..", "assets", "logo.png"),
-    safePathJoin(process.resourcesPath || "", "assets", "icon.ico"),
-    safePathJoin(process.resourcesPath || "", "assets", "icon.png"),
-    safePathJoin(process.resourcesPath || "", "icon.ico"),
-    safePathJoin(process.cwd(), "assets", "icon.ico"),
-    safePathJoin(process.cwd(), "assets", "icon.png"),
-    safePathJoin(process.cwd(), "public", "logo.png")
-  ].filter(Boolean);
-}
-
-function getAppIconPath() {
-  for (const iconPath of getAppIconPathCandidates()) {
-    try {
-      if (iconPath && fs.existsSync(iconPath)) return iconPath;
-    } catch {
-    }
-  }
-  return "";
-}
-
-function loadAppIcon(size = 0) {
-  const iconPath = getAppIconPath();
-  if (iconPath) {
-    try {
-      const image = nativeImage.createFromPath(iconPath);
-      if (!image.isEmpty()) {
-        return size ? image.resize({ width: size, height: size }) : image;
-      }
-    } catch (error) {
-      console.log("[localitfy icon load error]", error?.message || error);
-    }
-  }
-  const fallback = createSvgNativeImage(nativeMediaState.isPlaying ? "pause" : "play");
-  return size ? fallback.resize({ width: size, height: size }) : fallback;
-}
-
-function loadTrayIcon() {
-  return loadAppIcon(16);
-}
-
-function createThumbarIcon(iconName) {
-  return createSvgNativeImage(iconName).resize({ width: 20, height: 20 });
-}
+const { loadAppIcon, loadTrayIcon, createThumbarIcon } = createIconRuntime({
+  app,
+  nativeImage,
+  getIsPlaying: () => nativeMediaState.isPlaying
+});
 
 function getNativeMediaTitle() {
   if (!nativeMediaState.hasSong) return "localtify";
@@ -4524,9 +4364,12 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: false,
+      sandbox: true,
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,
+      webviewTag: false,
+      allowRunningInsecureContent: false,
+      navigateOnDragDrop: false,
       // Keeps playback/render timers alive when Windows opens the app in the
       // background during login or the user alt-tabs quickly.
       backgroundThrottling: false
@@ -4536,6 +4379,11 @@ function createWindow() {
   applyWindowTranslucencyToWindow(mainWindow, windowTranslucency);
 
   const rendererIndexPath = isDev ? "" : getRendererIndexPath();
+  installRendererSecurityGuards(mainWindow, {
+    isDev,
+    rendererFileRoot: rendererIndexPath ? path.dirname(rendererIndexPath) : ""
+  });
+  installSessionPermissionGuards(mainWindow.webContents?.session);
 
   mainWindow.webContents.on("dom-ready", () => {
     hardenRendererBackground(mainWindow);
