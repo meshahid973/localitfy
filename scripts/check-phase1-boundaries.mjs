@@ -22,6 +22,7 @@ for (const absolute of files) {
   if (repoPath === "src/App.tsx") {
     if (/from\s+["']\.\/localtifyConstants["']/.test(source)) violations.push("src/App.tsx: import feature constants from their canonical owners, not localtifyConstants.ts");
     if (/from\s+["']\.\/localtifyUtils["']/.test(source)) violations.push("src/App.tsx: import helpers from their canonical owners, not localtifyUtils.ts");
+    if (/from\s+["']\.\/localtifyTypes["']/.test(source)) violations.push("src/App.tsx: import types from their canonical owners, not localtifyTypes.ts");
   }
 }
 if (violations.length) { console.error("[phase-boundaries] Architecture boundary violation(s):"); for (const violation of violations) console.error(`  - ${violation}`); process.exit(1); }
