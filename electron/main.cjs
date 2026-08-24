@@ -5079,7 +5079,7 @@ app.whenReady().then(async () => {
   });
   await serviceRuntime.start();
   const databaseRecovery = restoreDatabaseFromOldUserDataIfNeeded();
-  initDatabase(databaseRecovery.dbPath || path.join(app.getPath("userData"), SQLITE_FILE_NAME));
+  initDatabase(databaseRecovery.dbPath || path.join(app.getPath("userData"), userDataRuntime.sqliteFileName));
   try {
     const savedSettings = getSettings();
     minimizeToTray = Boolean(savedSettings?.minimizeToTray);
@@ -5116,7 +5116,7 @@ app.whenReady().then(async () => {
       playlists: getPlaylists(),
       windowsIntegration: getStartWithWindowsStatus(),
       windowTranslucency: getSavedWindowTranslucencySettings(),
-      database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: LEGACY_APP_DATA_NAME },
+      database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: userDataRuntime.dataFolderName },
       discord: getDiscordStatus()
     };
   });

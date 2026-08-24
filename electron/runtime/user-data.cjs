@@ -99,6 +99,8 @@ function createUserDataRuntime(options = {}) {
   }
 
   return Object.freeze({
+    dataFolderName: legacyAppDataName,
+    sqliteFileName,
     getStableUserDataPath,
     configureStableUserDataPath,
     getUserDataRecoveryCandidates,

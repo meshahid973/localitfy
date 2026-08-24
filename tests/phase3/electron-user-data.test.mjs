@@ -17,6 +17,13 @@ test("Electron user-data recovery is owned outside main", () => {
   assert.equal(mainSource.includes("function getCandidateDatabaseInfo("), false);
 });
 
+test("Electron bootstrap reads user-data policy from the runtime owner", () => {
+  assert.equal(/\bLEGACY_APP_DATA_NAME\b/.test(mainSource), false);
+  assert.equal(/\bSQLITE_FILE_NAME\b/.test(mainSource), false);
+  assert.match(mainSource, /userDataRuntime\.dataFolderName/);
+  assert.match(mainSource, /userDataRuntime\.sqliteFileName/);
+});
+
 test("user-data runtime configures the legacy stable directory and dedupes recovery candidates", () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-user-data-"));
   const paths = {
@@ -36,6 +43,9 @@ test("user-data runtime configures the legacy stable directory and dedupes recov
   };
 
   const runtime = createUserDataRuntime({ app: fakeApp });
+  assert.equal(runtime.dataFolderName, "localitfy");
+  assert.equal(runtime.sqliteFileName, "localitfy.sqlite");
+
   const stable = runtime.configureStableUserDataPath();
   assert.equal(stable, path.join(paths.appData, "localitfy"));
   assert.equal(paths.userData, stable);
