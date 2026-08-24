@@ -36,6 +36,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Repair App typecheck debt
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/App.tsx')
+          source = path.read_text(encoding='utf-8')
+
+          old_import = 'import { useUpdatesController } from "./features/updates";'
+          new_import = 'import { updateStatusLabel, useUpdatesController } from "./features/updates";'
+          if old_import not in source:
+              raise SystemExit('expected updates import not found')
+          source = source.replace(old_import, new_import, 1)
+
+          dead_binding = '    screensaverTimerRef,\n'
+          if dead_binding not in source:
+              raise SystemExit('expected unused screensaverTimerRef binding not found')
+          source = source.replace(dead_binding, '', 1)
+
+          path.write_text(source, encoding='utf-8')
+          PY
+
       - name: Materialize fixed-point CSS cleanup
         id: css
         shell: bash
@@ -57,10 +79,11 @@ jobs:
           set -o pipefail
           npm run hardening:check 2>&1 | tee hardening.log
 
-      - name: Commit cleaned CSS and remove one-shot runner
+      - name: Commit final cleanup tree
         if: success()
         shell: bash
         run: |
+          git add src/App.tsx
           git add -- ':(glob)src/**/*.css' 'src/*.css'
           git add -u -- .github/workflows/css-debt-one-shot.yml
           if git diff --cached --quiet; then
