@@ -1050,20 +1050,6 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
    Permanent composite targets + worker-backed reductions.
    Important: this does NOT remove image blur, cover tint, hero blur, or player blur. */
 
-.app :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem
-){
-  contain: layout paint;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: transform;
-}
 
 .app :is(
   .homeFreshCard,
@@ -1515,16 +1501,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   -webkit-backdrop-filter: none !important;
 }
 
-.app[data-platform="linux"] .titleDrag{
-  min-width: 0 !important;
-  padding-left: 13px !important;
-  gap: 8px !important;
-}
 
-.app[data-platform="linux"] .titleLogoImage{
-  width: 19px !important;
-  height: 19px !important;
-}
 
 .app[data-platform="linux"] .windowButtons button{
   width: 48px !important;

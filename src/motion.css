@@ -1357,38 +1357,16 @@ body.localtifyBackgroundMode .coverCard,
   animation-play-state: running !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding{
-  animation: localtifyHeroCardExpandV140 780ms cubic-bezier(0.2, 1.32, 0.22, 1) both !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting{
-  animation: localtifyHeroCardCompactV140 660ms cubic-bezier(0.18, 0.98, 0.2, 1) both !important;
-}
 
 .app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding::before,
 .app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting::before{
   animation: localtifyHeroAmbiencePulseV140 820ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroTextClean,
-.app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroText,
-.app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroQuickActions{
-  transform: translate3d(0, -12px, 0) scale(1.03) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .heroTextClean,
-.app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .heroText,
-.app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .heroQuickActions{
-  transform: translate3d(0, 4px, 0) scale(0.992) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroTitle{
-  transform: translate3d(0, -9px, 0) scale(1.022) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .heroTitle{
-  transform: translate3d(0, 3px, 0) scale(0.992) !important;
-}
 
 .app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroArtWrap,
 .app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .coverAura{
@@ -1400,13 +1378,7 @@ body.localtifyBackgroundMode .coverCard,
   transform: translate3d(4px, 3px, 0) scale(0.948) !important;
 }
 
-.app .homeShelfStack.heroMotionExpanding{
-  animation: localtifyShelfExpandBounceV140 820ms cubic-bezier(0.2, 1.32, 0.22, 1) both !important;
-}
 
-.app .homeShelfStack.heroMotionCompacting{
-  animation: localtifyShelfCompactBounceV140 660ms cubic-bezier(0.18, 0.98, 0.2, 1) both !important;
-}
 
 .app .homeShelfStack.heroMotionExpanding .homeListenPanel,
 .app .homeShelfStack.heroMotionExpanding .homeFreshPanel,
@@ -1421,8 +1393,6 @@ body.localtifyBackgroundMode .coverCard,
 }
 
 .app .homeShelfStack.heroMotionExpanding .homeListenPanel{ animation-delay: 0ms !important; }
-.app .homeShelfStack.heroMotionExpanding .homeFreshPanel{ animation-delay: 34ms !important; }
-.app .homeShelfStack.heroMotionExpanding .homeLibraryPanel{ animation-delay: 58ms !important; }
 
 @keyframes localtifyHeroCardExpandV140{
   0%{ transform: translate3d(0, 10px, 0) scale(0.992); opacity: 0.99; }
@@ -1495,12 +1465,6 @@ body.localtifyBackgroundMode .coverCard,
   will-change: transform, opacity !important;
 }
 
-.app.heroMotionActive .content > .pageTransition,
-.app.heroMotionActive .content > .pageTransition > *{
-  animation: none !important;
-  animation-delay: 0ms !important;
-  animation-fill-mode: none !important;
-}
 
 .app .localtifyProximityTarget{
   transform-origin: center !important;
@@ -2306,13 +2270,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
     box-shadow 150ms ease !important;
 }
 
-.app .coverPreviewApplyButton:hover:not(:disabled),
-.app .coverGalleryPreviewBar button:hover:not(:disabled),
-.app .coverGalleryActions button:hover:not(:disabled),
-.app .coverSongTools button:hover:not(:disabled),
-.app .coverGalleryToolbar button:hover:not(:disabled){
-  transform: translate3d(0, -1px, 0) !important;
-}
 
 @keyframes localtifyCoverStudioIn{
   from{ opacity: 0; transform: translate3d(0, 8px, 0) scale(0.992); }

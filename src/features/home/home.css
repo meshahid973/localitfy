@@ -61,14 +61,7 @@
     box-shadow 120ms ease;
 }
 
-.search::placeholder{
-  color: var(--faint);
-}
 
-.search:focus{
-  border-color: var(--accent-line);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.075);
-}
 
 .panel{
   border: 1px solid var(--lt-border);
@@ -85,12 +78,6 @@
   gap: 12px;
 }
 
-.hero.ambientSurface:hover{
-  border-color: rgba(var(--accent-rgb), 0.34);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.52),
-    0 0 0 1px rgba(var(--accent-rgb), 0.08) inset,
-    0 0 42px rgba(var(--accent-rgb), 0.11);
-}
 
 .hero.ambientSurface:hover::before{
   opacity: 0.24;
@@ -265,15 +252,7 @@
   display: none;
 }
 
-.editorGrid{
-  grid-template-columns: 1fr;
-}
 
-.editorCover{
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1 / 1;
-}
 
 .headerBar{
   display: grid;
@@ -318,16 +297,7 @@
   filter: blur(30px) saturate(1.32);
 }
 
-.heroArt.coverAura:hover::before{
-  opacity: 0.58;
-  transform: scale(1.03);
-}
 
-.simpleProgress input[type="range"]{
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.11);
-}
 
 .simpleProgress input[type="range"]::-webkit-slider-thumb{
   width: 14px;
@@ -338,10 +308,6 @@
   box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.12);
 }
 
-.panel{
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.018)),
-    rgba(0, 0, 0, 0.36);
-}
 
 .downloadTextarea{
   transition: border-color 120ms ease,
@@ -354,22 +320,11 @@
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.08);
 }
 
-.content{
-  background: linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
-    #000 !important;
-  background-size: 42px 42px;
-}
 
 .content::before{
   display: none !important;
 }
 
-.logoIcon{
-  border-radius: 11px;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.2),
-    0 12px 24px rgba(var(--accent-rgb), 0.12);
-}
 
 .mainAction,
 .heroMain,
@@ -384,12 +339,6 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.mainAction{
-  min-height: 40px;
-  border-radius: 999px;
-  color: #031007;
-  box-shadow: none;
-}
 
 .heroGhost,
 .softButton,
@@ -416,10 +365,6 @@
   text-wrap: balance;
 }
 
-.heroArt{
-  background: #111;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
 
 .panel{
   border-radius: 15px;
@@ -434,14 +379,7 @@
   padding-bottom: 2px;
 }
 
-.simpleProgress input[type="range"]{
-  height: 4px;
-}
 
-.search:focus{
-  background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.045)),
-    rgba(0,0,0,.35);
-}
 
 .app .hero.heroPremium .heroText.heroTextClean{
   position: relative !important;
@@ -463,9 +401,6 @@
   transition: transform 420ms cubic-bezier(.16,1,.3,1), opacity 240ms ease !important;
 }
 
-.app .hero.heroPremium.heroExpanded .heroText.heroTextClean{
-  transform: translate3d(0, -36px, 0) !important;
-}
 
 .app .hero.heroPremium .heroText.heroTextClean > .eyebrow{
   position: relative !important;
@@ -575,9 +510,6 @@
   }
 }
 
-.heroArtWrap{
-  justify-self: end;
-}
 
 .heroArt{
   width: 144px;
@@ -588,9 +520,6 @@
     0 0 44px rgba(var(--accent-rgb), 0.15);
 }
 
-.navItem{
-  border-radius: 9px;
-}
 
 @media (max-width: 1180px){
 .compactHeaderTools .search{
@@ -688,9 +617,6 @@ button,
     background 220ms ease !important;
 }
 
-.homeLibraryCompact{
-  min-height: clamp(360px, calc(100vh - 420px), 520px);
-}
 
 .homeLibraryExpanded{
   min-height: calc(100vh - 386px);
@@ -722,11 +648,6 @@ button,
   gap: 2px;
 }
 
-.homeSongList{
-  transition: max-height 280ms cubic-bezier(.2,.8,.2,1),
-    gap 220ms ease,
-    padding 220ms ease;
-}
 
 .homeLibraryExpanded .homeSongList{
   max-height: calc(100vh - 300px);
@@ -849,9 +770,6 @@ button,
     box-shadow 220ms ease !important;
 }
 
-.heroCompact{
-  min-height: 210px;
-}
 
 .heroExpanded{
   min-height: clamp(330px, 34vh, 430px) !important;
@@ -863,10 +781,6 @@ button,
     inset 0 -1px 0 rgba(var(--accent-rgb), .17) !important;
 }
 
-.heroExpanded .heroTitle{
-  font-size: clamp(54px, 6.2vw, 94px) !important;
-  line-height: .92;
-}
 
 .heroExpanded .heroArt{
   width: clamp(150px, 13vw, 210px) !important;
@@ -937,10 +851,6 @@ button,
   white-space: nowrap;
 }
 
-.homeLibraryExpanded{
-  min-height: clamp(520px, calc(100vh - 350px), 760px) !important;
-  max-height: none !important;
-}
 
 [data-hero-expanded="on"] .homeLibraryCompact{
   min-height: clamp(330px, calc(100vh - 550px), 460px) !important;
@@ -991,14 +901,7 @@ button,
   align-items: center !important;
 }
 
-.heroCompact{
-  min-height: 254px !important;
-}
 
-.heroExpanded .heroArt{
-  width: clamp(188px, 13vw, 240px) !important;
-  height: clamp(188px, 13vw, 240px) !important;
-}
 
 .heroTinyButton{
   min-height: 28px !important;
@@ -1009,9 +912,6 @@ button,
   text-transform: lowercase;
 }
 
-.heroExpandedShelf{
-  animation: shelfDrop 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
 
 .homeLibraryPanel{
   min-height: 0 !important;
@@ -1021,9 +921,6 @@ button,
   min-height: 360px !important;
 }
 
-.homeLibraryExpanded{
-  min-height: clamp(520px, 64vh, 760px) !important;
-}
 
 
 .content,
@@ -1105,22 +1002,12 @@ button:active,
   object-fit: cover;
 }
 
-.panel{
-  border-color: rgba(255, 255, 255, 0.075) !important;
-}
 
 .songRow{
   contain: layout paint;
 }
 
-.songRow:hover{
-  border-color: rgba(var(--accent-rgb), 0.22) !important;
-}
 
-.songRow.active{
-  border-color: rgba(var(--accent-rgb), 0.42) !important;
-  background: rgba(var(--accent-rgb), 0.09) !important;
-}
 
 
 [data-ambient="on"] .hero.ambientSurface{
@@ -1189,23 +1076,7 @@ button:active,
   backface-visibility: hidden;
 }
 
-.hero.ambientSurface{
-  transition: min-height 560ms var(--expand-smooth-ease),
-    max-height 560ms var(--expand-smooth-ease),
-    height 560ms var(--expand-smooth-ease),
-    padding 500ms var(--expand-smooth-ease),
-    grid-template-columns 560ms var(--expand-smooth-ease),
-    gap 440ms var(--expand-smooth-ease),
-    border-color 420ms var(--expand-smooth-ease),
-    box-shadow 620ms var(--expand-smooth-ease),
-    transform 520ms var(--expand-smooth-ease),
-    filter 520ms var(--expand-smooth-ease),
-    background 520ms var(--expand-smooth-ease) !important;
-}
 
-.heroCompact{
-  min-height: 210px !important;
-}
 
 .heroExpanded{
   min-height: clamp(330px, 34vh, 430px) !important;
@@ -1226,17 +1097,6 @@ button:active,
   animation: localitfyShelfDropSmooth 520ms var(--expand-smooth-ease) both !important;
 }
 
-.homeLibraryPanel{
-  transition: min-height 620ms var(--expand-smooth-ease),
-    max-height 620ms var(--expand-smooth-ease),
-    height 620ms var(--expand-smooth-ease),
-    padding 520ms var(--expand-smooth-ease),
-    margin 520ms var(--expand-smooth-ease),
-    border-color 420ms var(--expand-smooth-ease),
-    box-shadow 560ms var(--expand-smooth-ease),
-    background 520ms var(--expand-smooth-ease),
-    transform 520ms var(--expand-smooth-ease) !important;
-}
 
 .homeLibraryExpanded{
   animation: localitfyLibraryExpandSmooth 620ms var(--expand-smooth-ease) both !important;
@@ -1294,12 +1154,6 @@ button:active,
     padding 520ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.hero:hover{
-  border-color: rgba(var(--accent-rgb), 0.28) !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.08),
-    0 22px 82px rgba(var(--accent-rgb), 0.075),
-    var(--shadow-soft) !important;
-}
 
 .hero:hover::after{
   opacity: 0.9 !important;
@@ -1347,15 +1201,7 @@ button:active,
 }
 
 
-.hero.ambientSurface:hover::before{
-  opacity: 0.2 !important;
-  filter: blur(30px) saturate(1.16) !important;
-  transform: scale(1.12) translate3d(-8px, -4px, 0) !important;
-}
 
-.hero.ambientSurface:hover{
-  transform: translateY(-2px) translateZ(0);
-}
 
 .nowPlayingCopySwap{
   animation: nowPlayingFadeSlide 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -1447,11 +1293,6 @@ button:active{
     radial-gradient(circle at 82% 45%, rgba(var(--accent-rgb), 0.16), transparent 34%) !important;
 }
 
-.hero.ambientSurface:hover::before{
-  opacity: 0.24 !important;
-  filter: saturate(1.12) blur(0) !important;
-  transform: scale(1.006) !important;
-}
 
 .heroMain{
   animation: localitfySongCopyIn 620ms var(--song-change-ease) both !important;
@@ -1497,10 +1338,6 @@ button:active{
 }
 
 
-.heroExpanded{
-  min-height: clamp(270px, 28vh, 350px) !important;
-  padding-block: clamp(24px, 3vh, 38px) !important;
-}
 
 .heroExpanded .heroTitle{
   font-size: clamp(46px, 5.5vw, 78px) !important;
@@ -1626,9 +1463,6 @@ button:active{
   padding-inline: 9px !important;
 }
 
-  .logoWrap h1{
-    display: none !important;
-  }
 
   .navItem{
     padding-inline: 8px !important;
@@ -1814,10 +1648,6 @@ button:active{
   line-height: 0.92 !important;
 }
 
-.app .heroMetaLine{
-  margin-top: 1px !important;
-  transform: translateY(-2px) translateZ(0) !important;
-}
 
 .app .hero{
   transform: translateZ(0);
@@ -1848,9 +1678,6 @@ button:active{
     box-shadow 260ms ease !important;
 }
 
-.app .heroArt:hover img{
-  transform: scale(1.028) translateZ(0) !important;
-}
 
 .app .pageTransition > .hero{
   animation: none !important;
@@ -1962,11 +1789,6 @@ button:active{
   }
 }
 
-.app .hero.heroPremium{
-  position: relative !important;
-  overflow: hidden !important;
-  isolation: isolate !important;
-}
 
 .app .heroAmbiencePulse{
   position: absolute;
@@ -2060,9 +1882,6 @@ button:active{
     0 0 58px rgba(var(--accent-rgb), 0.12) !important;
 }
 
-.app .simpleHero.heroLayoutMotion.simpleHeroCompact{
-  min-height: clamp(250px, 32vh, 320px) !important;
-}
 
 .app .simpleHero.heroLayoutMotion.simpleHeroExpanded{
   min-height: clamp(360px, 48vh, 520px) !important;
@@ -2339,13 +2158,6 @@ button:active{
   transform-style: flat;
 }
 
-.app .homeLibraryPanel{
-  border-color: rgba(var(--lt-accent-rgb), 0.2) !important;
-  box-shadow:
-    0 18px 70px rgba(0, 0, 0, 0.46),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 4px 0 0 rgba(var(--lt-accent-rgb), 0.72) !important;
-}
 
 .app .heroPremium{
   border-color: rgba(var(--accent-rgb), 0.18) !important;
@@ -2481,15 +2293,7 @@ body.localitfyLibraryPointerDragging{
     opacity 130ms ease !important;
 }
 
-.app .songRow.songDropTarget[data-drop-side="before"]::after{
-  top: -8px !important;
-  bottom: auto !important;
-}
 
-.app .songRow.songDropTarget[data-drop-side="after"]::after{
-  bottom: -8px !important;
-  top: auto !important;
-}
 
 
 .app .songRow.songDropTarget[data-drop-side="before"]::after{
@@ -2504,13 +2308,7 @@ body.localitfyLibraryPointerDragging{
   box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.5) !important;
 }
 
-.app .songRow.songDropTarget[data-drop-side="before"]::after{
-  top: -10px !important;
-}
 
-.app .songRow.songDropTarget[data-drop-side="after"]::after{
-  bottom: -10px !important;
-}
 
 
 .coverStudioCleanLayout{
@@ -3498,15 +3296,7 @@ body.localitfyLibraryPointerDragging{
   backdrop-filter: blur(18px) saturate(140%) !important;
 }
 
-.editorActionsBetter .heroMain{
-  min-width: 146px !important;
-}
 
-.editorActionsBetter .dangerButton{
-  color: #ffdce7 !important;
-  border: 1px solid rgba(255, 96, 140, 0.3) !important;
-  background: rgba(255, 74, 123, 0.12) !important;
-}
 
 @media (max-width: 860px){
   .editorModalWrap{
@@ -3720,13 +3510,6 @@ body.localitfyLibraryPointerDragging{
   transform: scale(1.2) translate3d(-10px, -4px, 0) !important;
 }
 
-.hero.ambientSurface:hover{
-  border-color: rgba(var(--accent-rgb), 0.34) !important;
-  box-shadow:
-    0 26px 86px rgba(0, 0, 0, 0.56),
-    0 0 0 1px rgba(var(--accent-rgb), 0.10) inset,
-    0 0 52px rgba(var(--accent-rgb), 0.11) !important;
-}
 
 .heroTitle{
   margin-top: 10px !important;
@@ -3746,16 +3529,6 @@ body.localitfyLibraryPointerDragging{
   line-height: 1.55 !important;
 }
 
-.logoIcon{
-  color: #06100b !important;
-  background:
-    radial-gradient(circle at 30% 22%, rgba(255,255,255,0.48), transparent 28%),
-    var(--accent) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.32),
-    0 14px 34px rgba(var(--accent-rgb), 0.18) !important;
-}
 
 .search{
   color: var(--home-ref-text) !important;
@@ -3850,14 +3623,7 @@ body.localitfyLibraryPointerDragging{
 }
 
 
-.heroArt.coverAura::before{
-  opacity: 0.38 !important;
-  filter: blur(28px) saturate(1.35) !important;
-}
 
-.heroArt.coverAura:hover::before{
-  opacity: 0.58 !important;
-}
 
 
 .songRow{
@@ -3867,19 +3633,7 @@ body.localitfyLibraryPointerDragging{
     rgba(8, 8, 10, 0.70) !important;
 }
 
-.songRow:hover{
-  transform: translateX(3px) translateZ(0) !important;
-}
 
-.songRow.active{
-  border-color: rgba(var(--accent-rgb), 0.42) !important;
-  background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.12), rgba(255,255,255,0.025)),
-    rgba(10, 10, 12, 0.82) !important;
-  box-shadow:
-    inset 3px 0 0 rgba(var(--accent-rgb), 0.86),
-    0 12px 30px rgba(0,0,0,0.28) !important;
-}
 
 .songRow::before{
   background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.13), transparent 46%) !important;
@@ -4038,32 +3792,9 @@ body.localitfyLibraryPointerDragging{
     inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
 }
 
-.homeLibraryPanel:hover{
-  background: inherit !important;
-  border-color: inherit !important;
-  box-shadow: inherit !important;
-  transform: none !important;
-}
 
 
-.songRow{
-  background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.024), rgba(255, 255, 255, 0.014)),
-    rgba(255, 255, 255, 0.014) !important;
-  border-color: rgba(var(--accent-rgb), 0.095) !important;
-  box-shadow: none !important;
-}
 
-.songRow:hover{
-  background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.070), rgba(255, 255, 255, 0.020)),
-    rgba(255, 255, 255, 0.016) !important;
-  border-color: rgba(var(--accent-rgb), 0.24) !important;
-  box-shadow:
-    inset 3px 0 0 rgba(var(--accent-rgb), 0.38),
-    0 10px 26px rgba(0, 0, 0, 0.18) !important;
-  transform: translateY(-1px) translateZ(0) !important;
-}
 
 .songRow.active{
   background:
@@ -4222,39 +3953,11 @@ body.localitfyLibraryPointerDragging{
     transform 260ms var(--shell-sidebar-ease, cubic-bezier(0.16, 1, 0.3, 1)) !important;
 }
 
-.homeLibraryPanel:hover{
-  background:
-    linear-gradient(180deg, color-mix(in oklab, var(--lt-accent) 7%, transparent), transparent 72%),
-    color-mix(in oklab, var(--lt-accent) 4%, rgba(0, 0, 0, 0.42)) !important;
-  border-color: color-mix(in oklab, var(--lt-accent) 22%, transparent) !important;
-  box-shadow:
-    0 18px 54px rgba(0, 0, 0, 0.28),
-    0 0 0 1px color-mix(in oklab, var(--lt-accent) 6%, transparent) inset !important;
-}
 
 
-.songRow:hover{
-  background:
-    linear-gradient(90deg, color-mix(in oklab, var(--accent) 10%, transparent), transparent 78%),
-    color-mix(in oklab, var(--accent) 6%, rgba(0, 0, 0, 0.28)) !important;
-  border-color: color-mix(in oklab, var(--accent) 26%, transparent) !important;
-  transform: translateY(-2px) translateZ(0) !important;
-  box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.20),
-    0 0 16px color-mix(in oklab, var(--accent) 8%, transparent) !important;
-}
 
 
-.hero.ambientSurface:hover{
-  border-color: color-mix(in oklab, var(--accent) 28%, transparent) !important;
-  box-shadow:
-    0 22px 70px rgba(0, 0, 0, 0.38),
-    0 0 30px color-mix(in oklab, var(--accent) 9%, transparent) !important;
-}
 
-.nav{
-  gap: 8px !important;
-}
 
 .navItem{
   min-height: 56px !important;
@@ -4269,36 +3972,15 @@ body.localitfyLibraryPointerDragging{
   border-color: transparent !important;
 }
 
-.navItem:hover{
-  background: color-mix(in oklab, var(--accent) 11%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent) 24%, transparent) !important;
-  transform: translate3d(4px, -1px, 0) !important;
-}
 
-.navItem.active{
-  background: color-mix(in oklab, var(--accent) 16%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent) 34%, transparent) !important;
-}
 
 @media (max-width: 920px){
-  .navItem{
-    min-height: 52px !important;
-    grid-template-columns: 1fr !important;
-    justify-items: center !important;
-    padding: 7px !important;
-    font-size: 0 !important;
-  }
 
   .navText{
     display: none !important;
   }
 
-  .navIcon{
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 18px !important;
   }
-}
 
 .sidebarModeSwitch{
   display: none !important;
@@ -4426,14 +4108,6 @@ body.localitfyLibraryPointerDragging{
 }
 
 
-.songRow:hover{
-  transform: translateX(2px) !important;
-  background:
-    linear-gradient(90deg, color-mix(in oklab, var(--accent) 9%, transparent), rgba(255,255,255,.018) 64%),
-    rgba(0,0,0,.38) !important;
-  border-color: color-mix(in oklab, var(--accent) 20%, transparent) !important;
-  box-shadow: inset 3px 0 0 color-mix(in oklab, var(--accent) 28%, transparent) !important;
-}
 
 .homeLibraryPanel:hover{
   transform: translateY(-1px) !important;
@@ -4472,53 +4146,9 @@ body.localitfyLibraryPointerDragging{
   filter: brightness(1.07) saturate(1.1) !important;
 }
 
-.app .songList{
-  gap: 9px !important;
-}
 
-.app .songRow{
-  isolation: isolate !important;
-  overflow: hidden !important;
-  border-radius: 14px !important;
-  background:
-    linear-gradient(180deg, color-mix(in oklab, var(--accent) 4%, transparent), transparent 86%),
-    color-mix(in oklab, var(--surface-2, rgba(255,255,255,.035)) 70%, transparent) !important;
-  border: 1px solid color-mix(in oklab, var(--accent) 10%, var(--line, rgba(255,255,255,.08))) !important;
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--text, #fff) 4%, transparent),
-    0 0 0 0 transparent !important;
-  transform: translateZ(0) !important;
-  transition:
-    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 210ms cubic-bezier(0.16, 1, 0.3, 1),
-    background 210ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 210ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 180ms ease !important;
-}
 
-.app .songRow:hover{
-  transform: translate3d(2px, -1px, 0) !important;
-  background:
-    linear-gradient(180deg, color-mix(in oklab, var(--accent) 7%, transparent), transparent 90%),
-    color-mix(in oklab, var(--surface-2, rgba(255,255,255,.04)) 76%, var(--accent) 5%) !important;
-  border-color: color-mix(in oklab, var(--accent) 23%, var(--line, rgba(255,255,255,.08))) !important;
-  box-shadow:
-    inset 2px 0 0 color-mix(in oklab, var(--accent) 44%, transparent),
-    inset 0 1px 0 color-mix(in oklab, var(--text, #fff) 5%, transparent),
-    0 10px 24px rgba(0,0,0,.18) !important;
-}
 
-.app .songRow.active{
-  background:
-    linear-gradient(180deg, color-mix(in oklab, var(--accent) 8%, transparent), transparent 90%),
-    color-mix(in oklab, var(--surface-2, rgba(255,255,255,.04)) 78%, var(--accent) 6%) !important;
-  border-color: color-mix(in oklab, var(--accent) 30%, var(--line, rgba(255,255,255,.08))) !important;
-  box-shadow:
-    inset 3px 0 0 color-mix(in oklab, var(--accent) 78%, transparent),
-    inset 0 1px 0 color-mix(in oklab, var(--text, #fff) 5%, transparent),
-    0 8px 22px rgba(0,0,0,.18) !important;
-}
 
 .app .songRow.active:hover{
   transform: translate3d(2px, -1px, 0) !important;
@@ -4755,36 +4385,10 @@ body.localitfyLibraryPointerDragging{
     filter 180ms ease !important;
 }
 
-.app .songRow:hover{
-  transform: translateY(-1px) !important;
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 7%, rgba(255,255,255,.030)) !important;
-  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 18%, rgba(255,255,255,.07)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 8px 24px rgba(0,0,0,.20) !important;
-}
 
-.app .songRow.active{
-  background: color-mix(in oklab, var(--theme-accent, var(--accent)) 6%, rgba(255,255,255,.028)) !important;
-  border-color: color-mix(in oklab, var(--theme-accent, var(--accent)) 22%, rgba(255,255,255,.07)) !important;
-  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--theme-accent, var(--accent)) 65%, transparent), inset 0 1px 0 rgba(255,255,255,.035) !important;
-}
 
-.app .songRow:not(.songDropTarget)::before{
-  content: none !important;
-  display: none !important;
-  opacity: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
-}
 
-.app .songButton{
-  background: transparent !important;
-  box-shadow: none !important;
-}
 
-.app .songRow:hover .songArt{
-  transform: translateY(-2px) scale(1.025) !important;
-  filter: brightness(1.06) saturate(1.08) !important;
-}
 
 .app .iconAction,
 .app .circleButton:not(.playerBar *),
@@ -4882,10 +4486,6 @@ body.localitfyLibraryPointerDragging{
   box-shadow: none !important;
 }
 
-.app .songRow:hover .songArt{
-  transform: translate3d(0, -1px, 0) scale(1.012) !important;
-  filter: brightness(1.025) saturate(1.04) !important;
-}
 
 .app .songArt{
   transition:
@@ -4966,13 +4566,6 @@ body.localitfyLibraryPointerDragging{
   display: none !important;
 }
 
-.songRow:hover{
-  background:
-    linear-gradient(90deg, color-mix(in oklab, var(--accent) 10%, transparent), transparent 70%),
-    color-mix(in oklab, var(--surface) 70%, transparent) !important;
-  transform: translateY(-1px) !important;
-  border-color: color-mix(in oklab, var(--accent) 28%, transparent) !important;
-}
 
 
 .homeView{
@@ -4982,17 +4575,7 @@ body.localitfyLibraryPointerDragging{
 }
 
 
-.songRow{
-  background: color-mix(in oklab, var(--theme-accent) 3.5%, rgba(255,255,255,.014)) !important;
-  border-color: color-mix(in oklab, var(--theme-accent) 12%, rgba(255,255,255,.055)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.026) !important;
-}
 
-.songRow:hover{
-  background: color-mix(in oklab, var(--theme-accent) 8.5%, transparent) !important;
-  border-color: color-mix(in oklab, var(--theme-accent) 28%, rgba(255,255,255,.09)) !important;
-  transform: translateY(-1px) !important;
-}
 
 .hero.ambientSurface::before,
 .hero.ambientSurface::after,
@@ -5012,22 +4595,7 @@ body.localitfyLibraryPointerDragging{
   animation: none !important;
 }
 
-.hero{
-  background:
-    linear-gradient(135deg,
-      color-mix(in oklab, var(--bg-2, #070707) 84%, var(--accent, #8dffce) 6%),
-      color-mix(in oklab, var(--bg, #000) 86%, var(--accent-2, var(--accent, #8dffce)) 5%)) !important;
-  border: 1px solid color-mix(in oklab, var(--accent, #8dffce) 14%, rgba(255,255,255,.04)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 14px 34px rgba(0,0,0,.18) !important;
-}
 
-.hero:hover{
-  background:
-    linear-gradient(135deg,
-      color-mix(in oklab, var(--bg-2, #070707) 80%, var(--accent, #8dffce) 9%),
-      color-mix(in oklab, var(--bg, #000) 84%, var(--accent-2, var(--accent, #8dffce)) 7%)) !important;
-  border-color: color-mix(in oklab, var(--accent, #8dffce) 23%, rgba(255,255,255,.05)) !important;
-}
 
 .songRow{
   background: color-mix(in oklab, var(--bg-2, #080808) 82%, var(--accent, #8dffce) 4%) !important;
@@ -5035,12 +4603,6 @@ body.localitfyLibraryPointerDragging{
   box-shadow: none !important;
 }
 
-.songRow:hover{
-  transform: translateY(-2px) !important;
-  background: color-mix(in oklab, var(--accent, #8dffce) 10%, transparent) !important;
-  border-color: color-mix(in oklab, var(--accent, #8dffce) 24%, rgba(255,255,255,.05)) !important;
-  box-shadow: 0 12px 26px rgba(0,0,0,.18) !important;
-}
 
 .songRow.active{
   background: color-mix(in oklab, var(--accent, #8dffce) 17%, var(--bg-2, #080808)) !important;
@@ -5048,11 +4610,6 @@ body.localitfyLibraryPointerDragging{
 }
 
 
-.coverAura::before{
-  display: block !important;
-  opacity: .28 !important;
-  filter: blur(20px) saturate(1.35) contrast(1.03) !important;
-}
 
 
 .homeView{
@@ -5244,11 +4801,6 @@ body.localitfyLibraryPointerDragging{
   backdrop-filter: none !important;
 }
 
-.app .hero.heroPremium{
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-}
 
 .app .hero.heroPremium{
   min-height: clamp(330px, 36vh, 430px) !important;
@@ -5922,11 +5474,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   box-shadow:none;
 }
 
-.homeListenRail{
-  display:grid;
-  grid-template-columns:repeat(3, minmax(220px, 1fr));
-  gap:12px;
-}
 
 .homeListenCard{
   position:relative;
@@ -5989,35 +5536,9 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   letter-spacing:.02em;
 }
 
-.homeListenCopy{
-  display:grid;
-  min-width:0;
-  gap:4px;
-}
 
-.homeListenCopy strong{
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-weight:950;
-  letter-spacing:-.035em;
-}
 
-.homeListenCopy small{
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:var(--textMuted, rgba(255,255,255,.58));
-  font-size:.75rem;
-  font-weight:850;
-}
 
-.homeListenMeta{
-  color:var(--textMuted, rgba(255,255,255,.58));
-  font-size:.76rem;
-  font-weight:900;
-  white-space:nowrap;
-}
 
 .homeFreshRail{
   display:grid;
@@ -6095,23 +5616,9 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     border-radius:20px;
   }
 
-  .homeShelfHeader{
-    align-items:flex-start;
-    flex-direction:column;
-  }
 
-  .homeListenRail{
-    grid-template-columns:1fr;
-  }
 
-  .homeListenCard{
-    grid-template-columns:60px 28px minmax(0, 1fr);
-  }
 
-  .homeListenCover{
-    width:60px;
-    height:56px;
-  }
 
   .homeListenMeta{
     display:none;
@@ -6545,83 +6052,10 @@ body.localitfySongDragging .app .hero.heroPremium::before{
   opacity: min(var(--cover-sync-hero-opacity, 0.18), 0.18) !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion{
-  transform-origin: center top !important;
 
-  transition:
-    min-height 720ms cubic-bezier(0.16, 1, 0.3, 1),
-    grid-template-columns 720ms cubic-bezier(0.16, 1, 0.3, 1),
-    padding 640ms cubic-bezier(0.16, 1, 0.3, 1),
-    gap 640ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 360ms ease,
-    box-shadow 640ms cubic-bezier(0.16, 1, 0.3, 1),
-    background 520ms ease,
-    transform 620ms cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion.heroCompact{
-  min-height: clamp(250px, 25vh, 318px) !important;
-  grid-template-columns: minmax(0, 1fr) clamp(176px, 14.5vw, 230px) !important;
-  gap: clamp(22px, 3vw, 42px) !important;
-  padding: clamp(26px, 2.8vw, 42px) clamp(30px, 4.2vw, 58px) !important;
-  border-color: rgba(var(--accent-rgb), 0.18) !important;
-  box-shadow:
-    0 18px 70px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded{
-  min-height: clamp(360px, 40vh, 520px) !important;
-  grid-template-columns: minmax(0, 1fr) clamp(224px, 19vw, 324px) !important;
-  gap: clamp(28px, 4vw, 64px) !important;
-  padding: clamp(38px, 4.4vw, 68px) clamp(38px, 5vw, 76px) !important;
-  border-color: rgba(var(--accent-rgb), 0.30) !important;
-  box-shadow:
-    0 30px 96px rgba(0, 0, 0, 0.52),
-    0 0 0 1px rgba(var(--accent-rgb), 0.08) inset,
-    0 0 58px rgba(var(--accent-rgb), 0.12) !important;
-}.app .hero.heroPremium.heroLayoutMotion .heroText{
-  transform-origin: left center !important;
-  transition:
-    transform 680ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 380ms ease,
-    filter 420ms ease !important;
-}.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText{
-  transform: translate3d(0, -5px, 0) scale(1.012) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion .heroTitle{
-  transition:
-    font-size 720ms cubic-bezier(0.16, 1, 0.3, 1),
-    line-height 720ms cubic-bezier(0.16, 1, 0.3, 1),
-    letter-spacing 540ms ease,
-    transform 680ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 420ms ease !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion .heroArtWrap{
-  align-self: center !important;
-  justify-self: end !important;
-  aspect-ratio: 1 / 1 !important;
-  transform-origin: center center !important;
-  transition:
-    width 720ms cubic-bezier(0.16, 1, 0.3, 1),
-    height 720ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 720ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 440ms ease !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap{
-  width: clamp(176px, 14.5vw, 230px) !important;
-  height: clamp(176px, 14.5vw, 230px) !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
-}
-
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap{
-  width: clamp(224px, 19vw, 324px) !important;
-  height: clamp(224px, 19vw, 324px) !important;
-  transform: translate3d(-10px, -2px, 0) scale(1.025) !important;
-}
 
 .app .hero.heroPremium.heroLayoutMotion .heroArt{
   width: 100% !important;
@@ -6632,12 +6066,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     transform 680ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion .heroArtWrap::before{
-  transition:
-    opacity 520ms ease,
-    filter 620ms ease,
-    transform 720ms cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
 
 .app .hero.heroPremium.heroLayoutMotion .heroTinyButton{
   transition:
@@ -6747,35 +6175,10 @@ body.localitfySongDragging .app .hero.heroPremium::before{
     opacity 360ms ease !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroCompact .heroArtWrap{
-  transform: translate3d(0, 0, 0) scale(0.96) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroArtWrap{
-  transform: translate3d(0, -3px, 0) scale(1.035) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion .heroTinyButton,
-.app .hero.heroPremium.heroLayoutMotion .heroMain,
-.app .hero.heroPremium.heroLayoutMotion .heroGhost{
-  transition:
-    transform 190ms cubic-bezier(0.2, 1.35, 0.28, 1),
-    box-shadow 180ms ease,
-    border-color 180ms ease,
-    background 180ms ease !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion .heroTinyButton:hover,
-.app .hero.heroPremium.heroLayoutMotion .heroMain:hover,
-.app .hero.heroPremium.heroLayoutMotion .heroGhost:hover{
-  transform: translate3d(0, -2px, 0) scale(1.025) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion .heroTinyButton:active,
-.app .hero.heroPremium.heroLayoutMotion .heroMain:active,
-.app .hero.heroPremium.heroLayoutMotion .heroGhost:active{
-  transform: translate3d(0, 1px, 0) scale(0.97) !important;
-}
 
 .app .search{
   transform-origin: left center;
@@ -6796,10 +6199,6 @@ body.localitfySongDragging .app .hero.heroPremium::before{
 }
 
 
-body.localitfyLibraryPointerDragging,
-body.localitfySongDragging{
-  cursor: grabbing;
-}
 
 .app[data-theme] .editorModal,
 .app[data-theme] .editorModal:hover,
@@ -7294,9 +6693,6 @@ body.localitfyNoSelect *{
 }
 
 
-.app .songRow{
-  grid-template-columns: minmax(0, 1fr) 72px 38px 38px !important;
-}
 
 .app .songInfo.songDurationInfo{
   display: inline-flex !important;
@@ -7308,14 +6704,8 @@ body.localitfyNoSelect *{
 
 
 @media (max-width: 720px){
-  .app .songRow{
-    grid-template-columns: minmax(0, 1fr) 38px 38px !important;
-  }
 
-  .app .songInfo.songDurationInfo{
-    display: none !important;
   }
-}
 
 .homePage,
 .homePage::before,
@@ -7737,9 +7127,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   contain-intrinsic-size: 1px 72px;
 }
 
-.app .songRow{
-  grid-template-columns: minmax(0, 1fr) 72px 38px 38px 38px !important;
-}
 
 .app .playlistAddAction{
   font-size: 18px !important;
@@ -8272,9 +7659,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   font-weight: 800;
 }
 
-.app .playlistTracksHead{
-  align-items: center;
-}
 
 .app .playlistTrackGrip{
   color: rgba(255,255,255,.32);
@@ -8283,12 +7667,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   user-select: none;
 }
 
-.app .playlistTrackIndex{
-  color: rgba(255,255,255,.46);
-  font-size: 12px;
-  font-weight: 900;
-  text-align: center;
-}
 
 .app .playlistEmptyState{
   display: grid;
@@ -8590,10 +7968,6 @@ body.localitfyThemePainting .heroCover .coverAura::before{
   }
 }
 
-.app .playlistHeroActions{
-  flex-wrap: wrap;
-  align-items: center;
-}
 
 .app .playlistHeroActions .softButton,
 .app .playlistHeroActions .heroMain{
@@ -8956,10 +8330,6 @@ html body .content{
   box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
-.app .libraryPanelV025{
-  overflow: hidden !important;
-  border-radius: 24px !important;
-}
 
 .app .libraryListHeaderV025{
   grid-template-columns: minmax(0, 1fr) auto !important;
@@ -9024,13 +8394,6 @@ html body .content{
   overflow: hidden !important;
 }
 
-.app .libraryFullListV025 .songMeta strong,
-.app .libraryFullListV025 .songMeta small{
-  max-width: 100% !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
 
 .app .libraryFullListV025 .songDurationInfo{
   display: inline-flex !important;
@@ -9059,14 +8422,8 @@ html body .content{
     grid-template-columns: 1fr !important;
   }
 
-  .app .libraryFullListV025 .songRow{
-    grid-template-columns: minmax(0, 1fr) 34px 34px 34px !important;
-  }
 
-  .app .libraryFullListV025 .songDurationInfo{
-    display: none !important;
   }
-}
 
 
 .app .songRow,
@@ -9364,11 +8721,6 @@ html body .content{
   box-shadow: inherit !important;
 }
 
-.downloadTabStrip{
-  display: flex;
-  gap: 7px;
-  margin: 15px 0 12px;
-}
 
 .downloadTab{
   display: inline-flex;
@@ -10026,33 +9378,8 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
   z-index: 2 !important;
 }
 
-.app .hero.heroPremium.heroTitleTiny .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroTitleTiny .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleTiny .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleTiny .heroTitle{
-  font-size: clamp(54px, 5.45vw, 86px) !important;
-  line-height: .9 !important;
-  letter-spacing: -0.07em !important;
-  max-width: min(760px, 54vw) !important;
-}
 
-.app .hero.heroPremium.heroTitleShort .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroTitleShort .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleShort .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleShort .heroTitle{
-  font-size: clamp(60px, 6.05vw, 98px) !important;
-  line-height: .9 !important;
-  letter-spacing: -0.073em !important;
-  max-width: min(860px, 58vw) !important;
-}
 
-.app .hero.heroPremium.heroTitleNormal .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroTitleNormal .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroCompact.heroTitleNormal .heroTitle,
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded.heroTitleNormal .heroTitle{
-  font-size: clamp(58px, 7vw, 112px) !important;
-  max-width: min(1020px, 63vw) !important;
-}
 
 .app .hero.heroPremium.heroTitleLong .heroTitle,
 .app .hero.heroPremium.heroLayoutMotion.heroTitleLong .heroTitle,
@@ -10304,11 +9631,6 @@ body.localitfySongDragging .app .hero.heroPremium .heroCoverGhost{
   transform: translate3d(0, 1px, 0) scale(0.975) !important;
 }
 
-.app .homeShelfStack{
-  contain: layout paint style !important;
-  transform-origin: center top !important;
-
-}
 
 .app .homeShelfPanel,
 .app .homeListenPanel,
@@ -10785,11 +10107,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   border-bottom: 1px solid rgba(255,255,255,.07) !important;
 }
 
-.app .libraryPanelTitleV025 h3{
-  margin: 0 !important;
-  font-size: clamp(1.65rem, 2.8vw, 2.45rem) !important;
-  letter-spacing: -.055em !important;
-}
 
 .app .libraryQuickMetaV201{
   display: flex !important;
@@ -10836,17 +10153,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   opacity: .42 !important;
 }
 
-.app .libraryFullListV025 .songRow:hover{
-  background:
-    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .095), rgba(255,255,255,.022)),
-    rgba(22, 17, 32, .64) !important;
-}
 
-.app .libraryFullListV025 .songRow.active{
-  background:
-    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .15), rgba(255,255,255,.026)),
-    rgba(28, 20, 39, .70) !important;
-}
 
 
 .app :where(.misideEggNotice,.misideWhisper,.lateNightWarning){
@@ -10962,9 +10269,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   overflow: visible !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean{
-  transform: translate3d(0, -34px, 0) scale(1) !important;
-}
 
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .eyebrow{
   order: 1 !important;
@@ -10988,9 +10292,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   max-height: none !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroTitleLong .heroText.heroTextClean > .heroTitle{
-  line-height: .86 !important;
-}
 
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
   order: 3 !important;
@@ -11016,61 +10317,23 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   margin-top: -18px !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
-  order: 4 !important;
-  position: relative !important;
-  inset: auto !important;
-  z-index: 12 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
-  width: auto !important;
-  max-width: min(100%, 640px) !important;
-  margin: 0 !important;
-  padding: 3px !important;
-  transform: none !important;
-  opacity: 1 !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions .heroTinyButton{
-  height: 31px !important;
-  min-height: 31px !important;
-  padding: 0 13px !important;
-}
 
 @media (max-width: 900px){
-  .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean{
-    max-width: 100% !important;
-    transform: translate3d(0, -12px, 0) scale(1) !important;
-  }
 
-  .app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean{
-    transform: translate3d(0, -18px, 0) scale(1) !important;
-  }
 
-  .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroTitle{
-    max-width: 100% !important;
-  }
 
   .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
     margin-top: -7px !important;
   }
 
-  .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
-    flex-wrap: wrap !important;
   }
-}
 
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean{
   max-width: min(920px, 64vw) !important;
   transform: translate3d(0, -8px, 0) !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean{
-  transform: translate3d(0, -14px, 0) !important;
-}
 
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .eyebrow{
   margin: 0 0 14px !important;
@@ -11097,16 +10360,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   letter-spacing: -0.015em !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean > .heroArtistLine{
-  margin: 2px 0 16px !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
-  gap: 9px !important;
-  margin: 0 !important;
-  padding: 4px !important;
-  max-width: min(100%, 680px) !important;
-}
 
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions .heroTinyButton{
   min-height: 34px !important;
@@ -11135,28 +10389,14 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     margin: 0 0 12px !important;
   }
 
-  .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
-    flex-wrap: wrap !important;
   }
-}
 
 .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroTitle{
   margin-bottom: 2px !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
-  margin: -2px 0 10px !important;
-  transform: translate3d(0, -4px, 0) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean > .heroArtistLine{
-  margin: -2px 0 12px !important;
-  transform: translate3d(0, -4px, 0) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
-  transform: translate3d(0, -4px, 0) !important;
-}
 
 @media (max-width: 900px){
   .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroTitle{
@@ -11239,14 +10479,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   line-height: 1.14 !important;
 }
 
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean > .heroArtistLine{
-  margin: -0.02em 0 10px !important;
-  transform: translate3d(0, -7px, 0) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
-  transform: translate3d(0, -7px, 0) !important;
-}
 
 @media (max-width: 900px){
   .app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroTitle,
@@ -11452,231 +10685,20 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   }
 }
 
-.app .homeShelfStack .homeListenPanel{
-  overflow: hidden !important;
-}
 
-.app .homeShelfStack .homeListenRail{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(270px, 1fr)) !important;
-  gap: 12px 16px !important;
-  align-items: stretch !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  overflow: visible !important;
-}
 
-.app .homeShelfStack .homeListenCard{
-  --listen-card-cover-size: 72px;
-  position: relative !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-  contain: layout paint !important;
-  content-visibility: visible !important;
-  display: block !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 84px !important;
-  height: 84px !important;
-  padding: 0 !important;
-  border: 1px solid rgba(255, 255, 255, 0.088) !important;
-  border-radius: 18px !important;
-  color: rgba(255, 255, 255, 0.98) !important;
-  text-align: left !important;
-  background:
-    linear-gradient(90deg, rgba(3, 3, 8, 0.78) 0%, rgba(5, 4, 12, 0.46) 44%, rgba(3, 3, 8, 0.76) 100%),
-    rgba(5, 4, 12, 0.80) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.055),
-    0 12px 28px rgba(0, 0, 0, 0.20) !important;
-  transform: translateZ(0) !important;
-  transition:
-    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 200ms ease !important;
-}
 
-.app .homeShelfStack .homeListenCard .homeListenBackground{
-  position: absolute !important;
-  inset: -38px -54px !important;
-  z-index: 0 !important;
-  display: block !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  border-radius: inherit !important;
-  opacity: 0.72 !important;
-  transform: scale(1.16) translateZ(0) !important;
-}
 
-.app .homeShelfStack .homeListenCard .homeListenBackgroundImage{
-  position: absolute !important;
-  inset: 0 !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  object-fit: cover !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: blur(28px) saturate(1.85) brightness(1.02) contrast(1.10) !important;
-  transform: scale(1.22) translateZ(0) !important;
-  transform-origin: center !important;
-}
 
-.app .homeShelfStack .homeListenCard .homeListenForeground{
-  position: relative !important;
-  z-index: 5 !important;
-  display: grid !important;
-  grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
-  grid-template-areas: "cover copy time" !important;
-  align-items: center !important;
-  column-gap: 14px !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  padding: 10px 15px 10px 10px !important;
-  border-radius: inherit !important;
-  background:
-    linear-gradient(90deg, rgba(2, 2, 7, 0.72) 0%, rgba(2, 2, 7, 0.28) 38%, rgba(2, 2, 7, 0.72) 100%),
-    radial-gradient(circle at 22% 50%, rgba(255, 255, 255, 0.055), transparent 35%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.050), transparent 56%) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: none !important;
-}
 
-.app .homeShelfStack .homeListenCard .homeListenCover,
-.app .homeShelfStack .homeListenCard .coverAura.homeListenCover{
-  grid-area: cover !important;
-  align-self: center !important;
-  justify-self: start !important;
-  display: block !important;
-  flex: 0 0 var(--listen-card-cover-size) !important;
-  width: var(--listen-card-cover-size) !important;
-  min-width: var(--listen-card-cover-size) !important;
-  max-width: var(--listen-card-cover-size) !important;
-  height: 64px !important;
-  min-height: 64px !important;
-  max-height: 64px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border-radius: 14px !important;
-  overflow: hidden !important;
-  background: rgba(0, 0, 0, 0.48) !important;
-  box-shadow:
-    0 12px 26px rgba(0, 0, 0, 0.42),
-    0 0 0 1px rgba(255, 255, 255, 0.12) !important;
-  transform: none !important;
-}
 
-.app .homeShelfStack .homeListenCard .homeListenCover img,
-.app .homeShelfStack .homeListenCard .homeListenCover .coverImage,
-.app .homeShelfStack .homeListenCard .coverAura.homeListenCover img,
-.app .homeShelfStack .homeListenCard .coverAura.homeListenCover .coverImage{
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  object-fit: cover !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: none !important;
-  transform: none !important;
-}
 
-.app .homeShelfStack .homeListenCard .homeListenCopy{
-  grid-area: copy !important;
-  align-self: center !important;
-  justify-self: stretch !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: 5px !important;
-  min-width: 0 !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  text-align: left !important;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.82) !important;
-}
 
-.app .homeShelfStack .homeListenCard .homeListenTitle,
-.app .homeShelfStack .homeListenCard .homeListenCopy strong{
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255, 255, 255, 0.99) !important;
-  font-size: 14px !important;
-  font-weight: 950 !important;
-  line-height: 1.12 !important;
-  letter-spacing: -0.028em !important;
-  text-align: left !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
 
-.app .homeShelfStack .homeListenCard .homeListenArtist,
-.app .homeShelfStack .homeListenCard .homeListenCopy small{
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: rgba(255, 255, 255, 0.70) !important;
-  font-size: 12px !important;
-  font-weight: 790 !important;
-  line-height: 1.16 !important;
-  text-align: left !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
 
-.app .homeShelfStack .homeListenCard .homeListenMeta{
-  grid-area: time !important;
-  align-self: center !important;
-  justify-self: end !important;
-  min-width: max-content !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  color: rgba(255, 255, 255, 0.74) !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  text-align: right !important;
-  white-space: nowrap !important;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.82) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
 
-.app .homeShelfStack .homeListenCard:hover{
-  transform: translateY(-2px) translateZ(0) !important;
-  border-color: rgba(var(--lt-accent-rgb), 0.34) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.070),
-    0 16px 34px rgba(0, 0, 0, 0.26),
-    0 0 26px rgba(var(--lt-accent-rgb), 0.08) !important;
-}
 
-.app .homeShelfStack .homeListenCard:hover .homeListenBackground{
-  opacity: 0.86 !important;
-}
 
-.app .homeShelfStack .homeListenCard:hover .homeListenBackgroundImage{
-  filter: blur(32px) saturate(2.08) brightness(1.10) contrast(1.12) !important;
-  transform: scale(1.26) translate3d(1.5%, -1%, 0) !important;
-}
 
 .app .homeShelfStack .homeListenCard:hover .homeListenForeground{
   background:
@@ -11685,59 +10707,19 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     linear-gradient(180deg, rgba(255, 255, 255, 0.060), transparent 54%) !important;
 }
 
-.app .homeShelfStack .homeListenCard.active{
-  border-color: rgba(var(--lt-accent-rgb), 0.50) !important;
-  box-shadow:
-    inset 2px 0 0 rgba(var(--lt-accent-rgb), 0.82),
-    inset 0 1px 0 rgba(255, 255, 255, 0.070),
-    0 16px 38px rgba(0, 0, 0, 0.28),
-    0 0 30px rgba(var(--lt-accent-rgb), 0.10) !important;
-}
 
-.app .homeShelfStack .homeListenCard.active .homeListenBackground{
-  opacity: 0.92 !important;
-}
 
-.app .homeShelfStack .homeListenCard.active .homeListenForeground{
-  background:
-    linear-gradient(90deg, rgba(2, 2, 7, 0.62) 0%, rgba(2, 2, 7, 0.22) 40%, rgba(2, 2, 7, 0.62) 100%),
-    radial-gradient(circle at 18% 50%, rgba(var(--lt-accent-rgb), 0.14), transparent 32%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.065), transparent 54%) !important;
-}
 
 @media (max-width: 1500px){
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(3, minmax(260px, 1fr)) !important;
   }
-}
 
 @media (max-width: 1040px){
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(2, minmax(240px, 1fr)) !important;
   }
-}
 
 @media (max-width: 680px){
-  .app .homeShelfStack .homeShelfHeader{
-    align-items: flex-start !important;
-    flex-direction: column !important;
-  }
 
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: 1fr !important;
-  }
 
-  .app .homeShelfStack .homeListenCard{
-    --listen-card-cover-size: 64px;
-    min-height: 76px !important;
-    height: 76px !important;
-  }
 
-  .app .homeShelfStack .homeListenCard .homeListenForeground{
-    grid-template-columns: var(--listen-card-cover-size) minmax(0, 1fr) max-content !important;
-    padding: 9px 12px 9px 9px !important;
-    column-gap: 12px !important;
-  }
 
   .app .homeShelfStack .homeListenCard .homeListenCover,
   .app .homeShelfStack .homeListenCard .coverAura.homeListenCover{
@@ -11746,10 +10728,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     max-height: 56px !important;
   }
 
-  .app .homeShelfStack .homeListenCard .homeListenMeta{
-    display: none !important;
   }
-}
 
 .app .homeShelfStack .homeListenPanel{
   padding: clamp(16px, 1.5vw, 22px) !important;
@@ -12005,9 +10984,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     0 16px 34px rgba(0,0,0,.28) !important;
 }
 
-.app .homeShelfStack .homeListenCard:hover .homeListenBackground{
-  opacity: .68 !important;
-}
 
 .app .homeShelfStack .homeListenCard:hover .homeListenBackgroundImage{
   filter: blur(26px) saturate(1.72) brightness(.86) contrast(1.06) !important;
@@ -12046,16 +11022,10 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
 }
 
 @media (max-width: 1500px){
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(3, minmax(270px, 1fr)) !important;
   }
-}
 
 @media (max-width: 1040px){
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: repeat(2, minmax(250px, 1fr)) !important;
   }
-}
 
 @media (max-width: 680px){
   .app .homeShelfStack .homeShelfHeader{
@@ -12063,9 +11033,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     flex-direction: column !important;
   }
 
-  .app .homeShelfStack .homeListenRail{
-    grid-template-columns: 1fr !important;
-  }
 
   .app .homeShelfStack .homeListenCard{
     --listen-card-cover-size: 74px;
@@ -12963,22 +11930,8 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   box-shadow: 0 22px 42px rgba(0,0,0,.28);
 }
 
-.albumCardCoverV318{
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  height: auto;
-  border-radius: 0;
-}
 
-.albumCardV318 .coverImage{
-  transition: transform 220ms cubic-bezier(.16,1,.3,1), filter 220ms ease;
-}
 
-.albumCardV318:hover .coverImage,
-.albumCardV318.active .coverImage{
-  transform: scale(1.035);
-  filter: saturate(1.08) contrast(1.04);
-}
 
 .albumCardSheenV318{
   position: absolute;
@@ -13071,12 +12024,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   z-index: 2;
 }
 
-.albumDetailCoverV318{
-  width: 178px;
-  height: 178px;
-  border-radius: 24px;
-  box-shadow: 0 28px 54px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.1);
-}
 
 .albumDetailCopyV318{
   min-width: 0;
@@ -13085,22 +12032,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   justify-items: start;
 }
 
-.albumDetailCopyV318 h3{
-  max-width: 100%;
-  margin: 5px 0 6px;
-  color: var(--text);
-  font-size: clamp(38px, 4.4vw, 68px);
-  line-height: .88;
-  letter-spacing: -.085em;
-  overflow-wrap: anywhere;
-}
 
-.albumDetailCopyV318 p:not(.eyebrow){
-  margin: 0;
-  color: rgba(var(--text-rgb), .72);
-  font-size: 15px;
-  font-weight: 820;
-}
 
 .albumMetaPillsV318,
 .albumActionRowV318{
@@ -13185,11 +12117,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   font-weight: 900;
 }
 
-.albumTrackCoverV318{
-  width: 48px;
-  height: 48px;
-  border-radius: 13px;
-}
 
 .albumTrackMainV318 strong{
   display: block;
@@ -13346,11 +12273,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   background: rgba(var(--accent-rgb), .075);
 }
 
-.albumBuilderSongCoverV318{
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-}
 
 .albumBuilderSongGridV318 strong,
 .albumBuilderSongGridV318 small{
@@ -13443,10 +12365,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
     max-height: 560px;
   }
 
-  .albumBuilderBodyV318{
-    grid-template-columns: 1fr;
   }
-}
 
 @media (max-width: 820px){
   .albumsHeroPanelV318,
@@ -13602,12 +12521,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   font-size: 18px;
 }
 
-.albumDetailHeroV318{
-  min-height: 188px;
-  grid-template-columns: 142px minmax(0, 1fr);
-  padding: 18px;
-  gap: 18px;
-}
 
 .albumDetailCoverV318{
   width: 142px;
@@ -13625,16 +12538,7 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   object-position: center;
 }
 
-.albumDetailCopyV318 h3{
-  font-size: clamp(34px, 3.4vw, 58px);
-}
 
-.albumTrackListV318{
-  max-height: min(408px, calc(100vh - 540px));
-  min-height: 220px;
-  gap: 7px;
-  padding: 12px 2px 2px;
-}
 
 .albumTrackRowV318{
   min-height: 58px;
@@ -13650,11 +12554,6 @@ body.localitfyHeroReflowing .app.homeEntranceSettled :is(.homeSection,.homeShelf
   background: rgba(255,255,255,.035);
 }
 
-.albumTrackRowV318.active{
-  transform: none;
-  border-color: rgba(var(--accent-rgb), .26);
-  background: linear-gradient(90deg, rgba(var(--accent-rgb), .10), rgba(255,255,255,.018));
-}
 
 .albumTrackCoverV318{
   width: 42px;
@@ -13968,34 +12867,8 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
 }
 
 
-.albumFolderImportPanelV309{
-  display: grid;
-  gap: 16px;
-  padding: clamp(18px, 2vw, 24px);
-  border: 1px solid rgba(var(--lt-accent-rgb), 0.18);
-  border-radius: 22px;
-  background:
-    linear-gradient(135deg, rgba(var(--lt-accent-rgb), 0.075), rgba(255,255,255,0.026) 46%, rgba(0,0,0,0.36)),
-    rgba(7, 7, 12, 0.74);
-  box-shadow:
-    0 22px 68px rgba(0,0,0,0.34),
-    inset 0 1px 0 rgba(255,255,255,0.055);
-  overflow: hidden;
-}
 
-.albumFolderImportHeaderV309{
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
-}
 
-.albumFolderImportHeaderV309 h3{
-  margin: 5px 0 7px;
-  font-size: clamp(28px, 3vw, 44px);
-  line-height: 0.92;
-  letter-spacing: -0.065em;
-}
 
 .albumFolderImportHeaderV309 p{
   max-width: 760px;
@@ -14014,29 +12887,8 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
   gap: 10px;
 }
 
-.albumFolderImportSummaryV309{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
 
-.albumFolderImportSummaryV309 span{
-  min-height: 74px;
-  padding: 14px;
-  display: grid;
-  align-content: center;
-  gap: 4px;
-  border: 1px solid rgba(255,255,255,0.075);
-  border-radius: 16px;
-  background: rgba(255,255,255,0.04);
-}
 
-.albumFolderImportSummaryV309 strong{
-  color: var(--text);
-  font-size: 26px;
-  line-height: 1;
-  letter-spacing: -0.05em;
-}
 
 .albumFolderImportSummaryV309 small{
   color: var(--muted);
@@ -14046,24 +12898,7 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
   text-transform: uppercase;
 }
 
-.albumFolderPreviewGridV309{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
-  gap: 12px;
-}
 
-.albumFolderPreviewCardV309{
-  min-width: 0;
-  display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.022)),
-    rgba(0,0,0,0.32);
-}
 
 .albumFolderPreviewCoverV309{
   width: 72px;
@@ -14086,27 +12921,8 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
   display: block;
 }
 
-.albumFolderPreviewCopyV309{
-  min-width: 0;
-  display: grid;
-  gap: 4px;
-}
 
-.albumFolderPreviewCopyV309 strong,
-.albumFolderPreviewCopyV309 small,
-.albumFolderPreviewCopyV309 em,
-.albumFolderPreviewCopyV309 b{
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
-.albumFolderPreviewCopyV309 strong{
-  color: var(--text);
-  font-size: 15px;
-  letter-spacing: -0.025em;
-}
 
 .albumFolderPreviewCopyV309 small{
   color: var(--text-2);
@@ -14127,14 +12943,6 @@ body.localtifyPerfV303 .app.isScrolling .coverGalleryImageShellCleanOnly{
   font-weight: 760;
 }
 
-.albumFolderPreviewCopyV309 ul{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin: 4px 0 0;
-  padding: 0;
-  list-style: none;
-}
 
 .albumFolderPreviewCopyV309 li{
   max-width: 100%;
@@ -16347,13 +15155,7 @@ body.localtifyWantMoreBlur .app .homeAlbumCard.active::before{
   padding-top: 2px !important;
 }
 
-.app .albumTrackRowV318{
-  grid-template-columns: minmax(0, 1fr) auto 34px 34px !important;
-}
 
-.app .albumTrackRowV318 .iconAction:nth-of-type(n + 3){
-  display: none !important;
-}
 
 .app .songRow{
   grid-template-columns: minmax(0, 1fr) auto 34px 34px !important;
@@ -16921,12 +15723,6 @@ body.localitfyThemePainting .app .homeAlbumCard:hover{
   border-left-width: 1px !important;
 }
 
-.homeShelfPanel::before,
-.homeShelfPanel::after,
-.homeLibraryPanel::before,
-.homeLibraryPanel::after{
-  pointer-events: none !important;
-}
 
 .homeAlbumCard,
 .recentCoverCard,
@@ -17230,10 +16026,6 @@ body.localitfyThemePainting .homeSongRow{
   letter-spacing: -.03em !important;
 }
 
-.app .libraryQuickMetaV039 .is-warning{
-  color: color-mix(in oklab, #ffd28a 78%, var(--lt-text, #fff) 22%) !important;
-  background: rgba(255,185,91,.075) !important;
-}
 
 .app .libraryMissingStripV039{
   display: flex !important;
@@ -17257,17 +16049,7 @@ body.localitfyThemePainting .homeSongRow{
   display: block !important;
 }
 
-.app .libraryMissingStripV039 strong{
-  color: color-mix(in oklab, #ffd58c 72%, var(--lt-text, #fff) 28%) !important;
-  font-size: .92rem !important;
-  letter-spacing: -.02em !important;
-}
 
-.app .libraryMissingStripV039 span{
-  margin-top: 2px !important;
-  color: var(--lt-muted, rgba(255,255,255,.72)) !important;
-  font-size: .78rem !important;
-}
 
 .app .libraryMissingActionsV039{
   display: inline-flex !important;
@@ -17291,16 +16073,7 @@ body.localitfyThemePainting .homeSongRow{
   transition: background 160ms ease, transform 160ms ease, color 160ms ease !important;
 }
 
-.app .libraryMissingActionsV039 button:hover,
-.app .shuffleLibraryButtonV025:hover{
-  transform: translateY(-1px) !important;
-  background: rgba(var(--lt-accent-rgb), .16) !important;
-}
 
-.app .libraryMissingActionsV039 button.active{
-  color: #09050d !important;
-  background: color-mix(in oklab, var(--lt-accent, #ff65df) 82%, #fff 18%) !important;
-}
 
 .app .libraryListHeaderV025{
   position: sticky !important;
@@ -17343,16 +16116,6 @@ body.localitfyThemePainting .homeSongRow{
   transform: none !important;
 }
 
-.app .libraryFullListV025 .songRow:hover{
-  transform: none !important;
-  background:
-    linear-gradient(90deg, rgba(var(--lt-accent-rgb), .105), rgba(255,255,255,.018)),
-    rgba(22, 16, 32, .68) !important;
-  box-shadow:
-    inset 3px 0 0 rgba(var(--lt-accent-rgb), .46),
-    inset 0 1px 0 rgba(255,255,255,.045),
-    0 12px 34px rgba(0,0,0,.14) !important;
-}
 
 .app .libraryFullListV025 .songRow.active{
   background:
@@ -17364,19 +16127,7 @@ body.localitfyThemePainting .homeSongRow{
     0 12px 34px rgba(0,0,0,.15) !important;
 }
 
-.app .libraryFullListV025 .songRow.songMissingFileV039{
-  background:
-    linear-gradient(90deg, rgba(255,184,77,.10), rgba(255,255,255,.014)),
-    rgba(19, 13, 22, .62) !important;
-  box-shadow:
-    inset 3px 0 0 rgba(255,190,91,.62),
-    inset 0 1px 0 rgba(255,255,255,.035) !important;
-}
 
-.app .libraryFullListV025 .songRow.songMissingFileV039 .songMeta small,
-.app .libraryFullListV025 .songRow.songMissingFileV039 .songDurationInfo{
-  color: color-mix(in oklab, #ffd28a 74%, var(--lt-text, #fff) 26%) !important;
-}
 
 .app .libraryFullListV025 .songButton,
 .app .libraryFullListV025 .songMeta{
@@ -17499,14 +16250,7 @@ body.localitfyThemePainting .homeSongRow{
   background: rgba(var(--lt-accent-rgb), .16) !important;
 }
 
-.app .libraryMissingActionsV039 .dangerGhostV039{
-  color: color-mix(in oklab, #ff7f9d 72%, var(--lt-text, #fff) 28%) !important;
-  background: rgba(255, 95, 132, .09) !important;
-}
 
-.app .libraryMissingActionsV039 .dangerGhostV039:hover{
-  background: rgba(255, 95, 132, .14) !important;
-}
 
 .app .libraryListHeaderV025{
   top: 50px !important;
@@ -18185,13 +16929,6 @@ body.localitfyThemePainting .homeSongRow{
 /* end localtify v465 home compositor guard */
 
 /* localtify v466 — cute calm empty states */
-.emptyStateCenterV466{
-  min-height: min(52vh, 520px);
-  display: grid !important;
-  place-items: center !important;
-  align-content: center !important;
-  padding: clamp(18px, 3vw, 34px) !important;
-}
 
 .localtifyStateCardV373.localtifyStateCardCuteV466{
   width: min(100%, 720px);
@@ -18228,36 +16965,8 @@ body.localitfyThemePainting .homeSongRow{
     rgba(4, 4, 8, .78);
 }
 
-.localtifyEmptyArtV466{
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-width: 0;
-}
 
-.localtifyEmptyImageShellV466{
-  width: clamp(112px, 12vw, 156px);
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 34px;
-  background:
-    radial-gradient(circle at 34% 26%, rgba(var(--lt-accent-rgb), .12), transparent 46%),
-    rgba(255,255,255,.035);
-  box-shadow:
-    0 16px 38px rgba(0,0,0,.34),
-    inset 0 1px 0 rgba(255,255,255,.055);
-}
 
-.localtifyEmptyImageShellV466 img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  image-rendering: auto;
-  filter: saturate(1.04) contrast(1.02);
-}
 
 .localtifyEmptyBadgeV466{
   position: absolute;
@@ -18334,11 +17043,6 @@ body.localitfyThemePainting .homeSongRow{
   background: rgba(255,255,255,.04);
 }
 
-.coverEmptyImageShellV466 img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 
 .coverEmptyImageShellV466 em{
   position: absolute;
@@ -18981,21 +17685,6 @@ body.localitfyThemePainting .homeSongRow{
 /* end localtify v482 consolidated home cleanup */
 
 /* localtify v484 — home panel outline uses theme accent, not fixed pink */
-.app :is(
-  .hero,
-  .heroPremium,
-  .heroCompact,
-  .homeListenCard,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .coverGalleryCard,
-  .coverGridCard,
-  .playlistCard,
-  .albumCard,
-  .songRow
-):not(.playerBar){
-  border-color: color-mix(in oklab, rgba(255,255,255,.07) 58%, var(--lt-accent) 42%) !important;
-}
 
 .app :is(
   .hero,
@@ -19024,21 +17713,6 @@ body.localitfyThemePainting .homeSongRow{
 /* end localtify v484 */
 
 /* localtify v486 — reduce excessive home outlines */
-.app :is(
-  .hero,
-  .heroPremium,
-  .heroCompact,
-  .homeListenCard,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .coverGalleryCard,
-  .coverGridCard,
-  .playlistCard,
-  .albumCard,
-  .songRow
-):not(.playerBar){
-  border-color: color-mix(in oklab, rgba(255,255,255,.055) 78%, var(--lt-accent) 22%) !important;
-}
 
 .app :is(
   .homeListenCard.active,
@@ -19058,9 +17732,6 @@ body.localitfyThemePainting .homeSongRow{
   border-color: color-mix(in oklab, rgba(255,255,255,.075) 62%, var(--lt-accent) 38%) !important;
 }
 
-.app[data-theme="mono"] :is(.hero,.heroPremium,.panel,.homeListenCard,.homeAlbumCard,.homeFreshCard,.albumCard,.songRow){
-  border-color: rgba(55,61,87,.12) !important;
-}
 
 .app[data-theme="mono"] :is(.homeListenCard.active,.homeListenCard.playing,.songRow.active,.songRow.playing){
   border-color: rgba(86,97,127,.36) !important;
@@ -19068,68 +17739,19 @@ body.localitfyThemePainting .homeSongRow{
 /* end localtify v486 */
 
 /* localtify v487 — hero text raise, quick action simplify, outline cleanup */
-.app .hero.heroPremium .heroText.heroTextClean{
-  transform: translate3d(0, -54px, 0) !important;
-}
 
-.app .hero.heroPremium.heroExpanded .heroText.heroTextClean{
-  transform: translate3d(0, -68px, 0) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean{
-  transform: translate3d(0, -52px, 0) scale(1) !important;
-}
 
-.app .hero.heroPremium.heroLayoutMotion.heroExpanded .heroText.heroTextClean{
-  transform: translate3d(0, -66px, 0) scale(1) !important;
-}
 
-.app .hero.heroPremium .heroText.heroTextClean > .eyebrow{
-  margin-bottom: 10px !important;
-}
 
 .app .hero.heroPremium .heroText.heroTextClean > .heroTitle{
   line-height: .88 !important;
 }
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroArtistLine,
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
-  margin-top: -10px !important;
-  margin-bottom: 7px !important;
-}
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions,
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
-  gap: 6px !important;
-  padding: 0 !important;
-  margin-top: 0 !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton,
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions .heroTinyButton{
-  height: 28px !important;
-  min-height: 28px !important;
-  padding: 0 11px !important;
-  border-radius: 999px !important;
-  font-size: 10px !important;
-  font-weight: 850 !important;
-  box-shadow: none !important;
-}
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:first-child{
-  background: color-mix(in oklab, var(--lt-accent) 70%, #fff 30%) !important;
-  color: color-mix(in oklab, var(--lt-bg) 80%, #000 20%) !important;
-  border-color: transparent !important;
-}
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:not(:first-child){
-  background: rgba(255,255,255,.055) !important;
-  color: rgba(var(--text-rgb), .76) !important;
-  border-color: rgba(255,255,255,.08) !important;
-}
 
 .app :is(
   .hero,
@@ -19156,10 +17778,6 @@ body.localitfyThemePainting .homeSongRow{
   background-color: rgba(246,248,252,.74) !important;
 }
 
-.app[data-theme="mono"] .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:first-child{
-  background: #58617f !important;
-  color: #fff !important;
-}
 /* end localtify v487 */
 
 /* localtify v488 — hero spacing correction + simple quick actions */
@@ -19183,45 +17801,10 @@ body.localitfyThemePainting .homeSongRow{
   margin-bottom: 9px !important;
 }
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroArtistLine,
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroArtistLine{
-  margin-top: -4px !important;
-  margin-bottom: 11px !important;
-}
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions,
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions{
-  gap: 6px !important;
-  padding: 0 !important;
-  margin-top: 0 !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton,
-.app .hero.heroPremium.heroLayoutMotion .heroText.heroTextClean > .heroQuickActions .heroTinyButton{
-  height: 27px !important;
-  min-height: 27px !important;
-  padding: 0 11px !important;
-  border-radius: 999px !important;
-  font-size: 10px !important;
-  font-weight: 850 !important;
-  box-shadow: none !important;
-  text-transform: lowercase !important;
-}
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:first-child{
-  background: color-mix(in oklab, var(--lt-accent) 70%, #ffffff 30%) !important;
-  color: color-mix(in oklab, var(--lt-bg) 80%, #000 20%) !important;
-  border-color: transparent !important;
-}
 
-.app .hero.heroPremium .heroText.heroTextClean > .heroQuickActions .heroTinyButton:not(:first-child){
-  background: rgba(255,255,255,.055) !important;
-  color: rgba(var(--text-rgb), .76) !important;
-  border-color: rgba(255,255,255,.065) !important;
-}
 
 @media (max-width: 900px){
   .app .hero.heroPremium .heroText.heroTextClean,
@@ -19334,64 +17917,12 @@ body.localitfyThemePainting .homeSongRow{
 /* end localtify v495 */
 
 /* localtify v496 — mascot state art */
-.mascotStateArtV496{
-  display: block;
-  width: var(--mascot-size, 112px);
-  height: var(--mascot-size, 112px);
-  object-fit: contain;
-  user-select: none;
-  pointer-events: none;
-  image-rendering: auto;
-  transform: translateZ(0);
-  filter:
-    drop-shadow(0 16px 24px rgba(0,0,0,.32))
-    drop-shadow(0 0 18px rgba(var(--lt-accent-rgb), .12));
-}
 
-.localtifyEmptyImageShellV466 .mascotStateArtV496,
-.localtifyEmptyMascotV496{
-  --mascot-size: clamp(132px, 16vw, 210px);
-  margin: 0 auto;
-}
 
-.mascotEmptyStateV496,
-.playlistMascotEmptyV496{
-  min-height: 176px !important;
-  display: grid !important;
-  grid-template-columns: minmax(94px, 140px) minmax(0, 1fr) !important;
-  align-items: center !important;
-  gap: 18px !important;
-  padding: 18px !important;
-  text-align: left !important;
-}
 
-.emptyStateMascotV496,
-.playlistEmptyMascotV496{
-  --mascot-size: clamp(96px, 10vw, 132px);
-  justify-self: center;
-}
 
-.mascotEmptyCopyV496{
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-}
 
-.mascotEmptyCopyV496 strong{
-  color: var(--lt-text, #fff);
-  font-size: clamp(20px, 2vw, 30px);
-  letter-spacing: -.055em;
-  line-height: .96;
-}
 
-.mascotEmptyCopyV496 p{
-  max-width: 480px;
-  margin: 0;
-  color: var(--lt-muted, rgba(255,255,255,.62));
-  font-size: 13px;
-  font-weight: 760;
-  line-height: 1.35;
-}
 
 .appToastMascotHostV496{
   padding-left: 9px !important;
@@ -19405,45 +17936,20 @@ body.localitfyThemePainting .homeSongRow{
     drop-shadow(0 0 10px rgba(var(--lt-accent-rgb), .16));
 }
 
-.tinyScannerMascotHostV496{
-  min-height: 58px;
-  padding-left: 10px !important;
-}
 
-.tinyScannerMascotV496{
-  --mascot-size: 42px;
-  flex: 0 0 auto;
-}
 
-.importPanelHeadMascotV496{
-  min-height: 112px;
-  padding-left: clamp(104px, 11vw, 132px) !important;
-}
 
-.importMascotV496{
-  --mascot-size: clamp(82px, 9vw, 112px);
-  position: absolute;
-  left: 22px;
-  top: 18px;
-  z-index: 3;
-}
 
 .localtifyStateCardCuteV466 .localtifyEmptyCaptionV467{
   margin-top: 8px !important;
 }
 
-.mascotState-happy{
-  animation: mascotHappyFloatV496 3.2s ease-in-out infinite;
-}
 
 .mascotState-question,
 .mascotState-confused{
   animation: mascotQuestionFloatV496 3.7s ease-in-out infinite;
 }
 
-.mascotState-warning{
-  animation: mascotWarningPulseV496 2.6s ease-in-out infinite;
-}
 
 @keyframes mascotHappyFloatV496{
   0%,100%{ transform: translate3d(0,0,0) rotate(-1deg); }
@@ -19877,9 +18383,6 @@ body.localitfyThemePainting .homeSongRow{
   margin: -10px 0;
 }
 
-.downloadQueueTop{
-  grid-template-columns: auto auto minmax(0, 1fr) auto !important;
-}
 
 .downloadQueueMascotV501{
   --mascot-size: 42px;
