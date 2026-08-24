@@ -145,10 +145,10 @@
 .localitfyOnboardingShell {
   position: relative;
   z-index: 2;
-  width: min(1080px, calc(100vw - 160px));
-  min-height: 560px;
+
+
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+
   gap: 14px;
 
   border-radius: 28px;
@@ -158,7 +158,7 @@
   opacity: 0;
   transform: translate3d(0, 38px, 0) scale(0.982);
   transition: opacity 300ms ease, transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
+
 }
 
 .onboardingStageCard .localitfyOnboardingShell {
@@ -255,7 +255,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 7px;
+
 }
 
 
@@ -340,17 +340,17 @@
 }
 
 .onboardingBody {
-  min-height: 340px;
+
   padding: 0;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.055);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0.006));
+
 
 }
 
 .onboardingSlide {
   height: 100%;
-  padding: 28px 30px;
+
   animation-duration: 320ms;
   animation-fill-mode: both;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
@@ -383,7 +383,7 @@
   font-size: clamp(58px, 5.4vw, 76px);
   line-height: 0.9;
   letter-spacing: -0.085em;
-  max-width: 7ch;
+
 }
 
 .onboardingLead {
@@ -828,17 +828,15 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 
 .onboardingMascotPeekWrapV499{
   position: absolute;
-  right: clamp(-118px, -6.4vw, -72px);
-  top: 47%;
-  z-index: 2;
-  width: clamp(190px, 16vw, 255px);
+
+
+
+
   aspect-ratio: 726 / 915;
   pointer-events: none;
-  opacity: 0.96;
+
   transform: translate3d(0, -50%, 0);
-  filter:
-    drop-shadow(0 24px 36px rgba(0, 0, 0, 0.34))
-    drop-shadow(0 0 24px rgba(var(--onboarding-accent-rgb), 0.14));
+
 }
 
 .onboardingMascotPeekImageV499{
@@ -846,7 +844,7 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   height: 100%;
   display: block;
   object-fit: contain;
-  object-position: center;
+
   user-select: none;
   -webkit-user-drag: none;
   transform: translateZ(0);
@@ -854,20 +852,18 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 
 .onboardingMascotPeekSoftEdgeV499{
   position: absolute;
-  right: clamp(42px, 4.1vw, 62px);
-  top: 8.5%;
-  width: clamp(20px, 2.2vw, 34px);
-  height: 82%;
+
+
+
+
   border-radius: 999px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.025)),
-    linear-gradient(90deg, rgba(var(--onboarding-accent-rgb), .08), rgba(7,8,12,.96) 42%, rgba(7,8,12,.82));
+
   border: 1px solid rgba(var(--onboarding-accent-rgb), .14);
   box-shadow:
     0 14px 34px rgba(0,0,0,.30),
     inset 1px 0 0 rgba(255,255,255,.08),
     inset -1px 0 0 rgba(0,0,0,.42);
-  opacity: .96;
+
 }
 
 .onboardingStageCard .onboardingMascotPeekWrapV499{
@@ -906,7 +902,7 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 /* localtify v505 — onboarding first impression cleanup */
 .localitfyOnboardingShell{
 
-  width: min(1080px, calc(100vw - 190px));
+
   padding: 22px 24px 20px;
   overflow: visible;
 }
@@ -946,7 +942,7 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 .onboardingBody{
   position: relative;
   z-index: 4;
-  min-height: 360px;
+
   border-color: rgba(255,255,255,.045);
   background:
     radial-gradient(circle at 102% 48%, rgba(var(--onboarding-accent-rgb), .07), transparent 28%),
@@ -960,7 +956,7 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 
 
 .onboardingWelcomeV505 .onboardingLead{
-  max-width: 42ch;
+
   color: rgba(255,255,255,.68);
 }
 
@@ -1021,13 +1017,11 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 
 
 .onboardingBenefitGridV505 > div{
-  min-height: 104px;
-  padding: 16px 16px 15px;
+
+
   border-radius: 18px;
   border-color: rgba(255,255,255,.055);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.014)),
-    rgba(255,255,255,.018);
+
   box-shadow: none;
 }
 
@@ -1041,22 +1035,22 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 
 .onboardingBenefitGridV505 b{
   margin-bottom: 8px;
-  font-size: 15px;
+
   line-height: 1.08;
   letter-spacing: -.025em;
 }
 
 .onboardingBenefitGridV505 small{
   color: rgba(255,255,255,.56);
-  font-size: 12.5px;
-  line-height: 1.45;
+
+
 }
 
 .onboardingMascotPeekWrapV499{
-  right: clamp(-178px, -12vw, -136px);
-  top: 54%;
-  z-index: 6;
-  width: clamp(220px, 17.5vw, 286px);
+
+
+
+
 
   filter:
     drop-shadow(0 26px 42px rgba(0, 0, 0, 0.38))
@@ -1064,10 +1058,10 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 }
 
 .onboardingMascotPeekSoftEdgeV499{
-  right: clamp(54px, 4.6vw, 72px);
-  top: 7%;
-  width: clamp(22px, 2.2vw, 36px);
-  height: 84%;
+
+
+
+
   background:
     linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.022)),
     linear-gradient(90deg, rgba(var(--onboarding-accent-rgb), .06), rgba(7,8,12,.98) 42%, rgba(7,8,12,.88));
@@ -1079,7 +1073,7 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 }
 
 .onboardingSkip::after{
-  content: " — nothing is locked";
+
   color: rgba(255,255,255,.36);
   font-weight: 750;
 }

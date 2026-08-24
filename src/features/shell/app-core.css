@@ -68,23 +68,23 @@ button:disabled{
 }
 
 .app{
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background: var(--bg);
+
+
+
+
   transition: background-color 320ms cubic-bezier(0.16, 1, 0.3, 1), background 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .titleBar{
-  height: 36px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
   user-select: none;
   -webkit-app-region: drag;
-  background: rgba(0, 0, 0, 0.9);
-  border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(16px);
+
+
+
 }
 
 .titleDrag{
@@ -93,8 +93,8 @@ button:disabled{
   display: flex;
   align-items: center;
   gap: 9px;
-  color: var(--text-2);
-  font-size: 12px;
+
+
   font-weight: 760;
 }
 
@@ -132,13 +132,13 @@ button:disabled{
 .sidebar{
   grid-row: 1 / 3;
   min-height: 0;
-  padding: 18px 14px;
+
   display: flex;
   flex-direction: column;
 
-  background: rgba(0, 0, 0, 0.76);
+
   border-right: 1px solid var(--line);
-  backdrop-filter: blur(18px);
+
 }
 
 .content{
@@ -146,22 +146,16 @@ button:disabled{
   min-height: 0;
   overflow: auto;
   padding: 22px;
-  background: #000;
+
   background-size: auto;
 }
 
-.logoWrap{
-  min-height: 54px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 
 .logoWrap h1{
   margin: 0;
-  font-size: 23px;
+
   line-height: 1;
-  letter-spacing: -0.055em;
+
 }
 
 .logoWrap p{
@@ -170,18 +164,14 @@ button:disabled{
   font-size: 12px;
 }
 
-.nav{
-  display: grid;
-  gap: 5px;
-}
 
 .navItem{
   height: 39px;
   padding: 0 12px;
 
-  border-radius: 10px;
+
   color: var(--muted);
-  background: #000;
+
   text-align: left;
   font-weight: 760;
   transition: color 120ms ease,
@@ -190,18 +180,7 @@ button:disabled{
     transform 120ms ease;
 }
 
-.navItem:hover{
-  color: var(--text);
-  background: var(--surface-2);
-  transform: translateX(2px);
-}
 
-.navItem.active{
-  color: var(--text);
-  background: var(--accent-soft);
-  border-color: var(--accent-line);
-
-}
 
 
 .panel{
@@ -252,10 +231,10 @@ button:disabled{
 }
 
 .hero{
-  min-height: 254px;
+
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 210px;
+
   gap: 24px;
   align-items: center;
   border-color: rgba(var(--accent-rgb), 0.16);
@@ -265,17 +244,16 @@ button:disabled{
 .ambientSurface::before{
 
 
-  inset: -52px;
-  z-index: 0;
-  background-image: var(--cover-url, none);
-  background-position: 50% 50%;
-  background-size: cover;
-  filter: blur(42px) saturate(1.12);
-  transform: scale(1.16);
-  opacity: 0.13;
 
-  transition: opacity 420ms ease,
-    transform 520ms cubic-bezier(0.2, 0.9, 0.2, 1);
+
+
+
+
+
+
+
+
+
 
 }
 
@@ -364,20 +342,18 @@ button:disabled{
 }
 
 .songRow{
-  min-height: 56px;
+
   position: relative;
   overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 72px 72px 38px 38px 38px;
   gap: 8px;
   align-items: center;
-  padding: 7px;
+
   border: 1px solid transparent;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.034);
-  transition: transform 120ms ease,
-    background 120ms ease,
-    border-color 120ms ease;
+
+
+
 }
 
 .songRow::before{
@@ -390,11 +366,6 @@ button:disabled{
   transition: opacity 120ms ease;
 }
 
-.songRow:hover{
-  transform: translateX(2px);
-  border-color: var(--line-2);
-  background: rgba(255, 255, 255, 0.052);
-}
 
 .songRow:hover::before{
   opacity: 1;
@@ -403,7 +374,7 @@ button:disabled{
 
 .songButton{
   position: relative;
-  z-index: 1;
+
 
 
   min-width: 0;
@@ -494,8 +465,8 @@ button:disabled{
 }
 
 .statsGrid{
-  display: grid;
-  gap: 10px;
+
+
   margin-top: 14px;
 }
 
@@ -503,8 +474,8 @@ button:disabled{
   min-width: 0;
   padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 11px;
-  background: rgba(0, 0, 0, 0.28);
+
+
 }
 
 .statCard span{
@@ -514,7 +485,7 @@ button:disabled{
 
 .statCard strong{
   margin-top: 8px;
-  font-size: 23px;
+
   letter-spacing: -0.045em;
 }
 
@@ -525,14 +496,14 @@ button:disabled{
 }
 
 .miniBars{
-  height: 92px;
+
   display: flex;
   align-items: end;
-  gap: 10px;
-  padding: 14px;
+
+
   border: 1px solid var(--line);
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.035);
+
+
 }
 
 .miniBars div{
@@ -544,17 +515,17 @@ button:disabled{
 
 .topList{
   display: grid;
-  gap: 8px;
+
   margin-top: 12px;
 }
 
 .topRow{
   min-width: 0;
   border: 1px solid transparent;
-  border-radius: 10px;
+
   padding: 10px;
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
+
   gap: 8px;
   color: var(--text);
   background: rgba(255, 255, 255, 0.04);
@@ -574,21 +545,7 @@ button:disabled{
   color: var(--muted);
 }
 
-.circleButton:not(.playerBar *){
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 11px;
-  color: var(--text);
-  background: var(--surface-2);
-  transition: transform 120ms ease,
-    background 120ms ease;
-}
 
-.circleButton:hover:not(.playerBar *){
-  transform: translateY(-1px);
-  background: var(--surface-3);
-}
 
 
 input[type="range"]{
@@ -602,9 +559,7 @@ input[type="range"]{
   max-height: calc(100vh - 78px);
   overflow: auto;
   padding: 20px;
-  background: linear-gradient(rgba(255, 255, 255, 0.016) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.016) 1px, transparent 1px),
-    rgba(5, 5, 5, 0.94);
+
   background-size: 38px 38px;
   box-shadow: var(--shadow);
 
@@ -626,7 +581,7 @@ input[type="range"]{
 .editorActions{
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+
   margin-top: 14px;
 
 
@@ -739,10 +694,10 @@ input[type="range"]{
   margin-top: 14px;
   padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+
   outline: none;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.045);
+
   font: inherit;
   line-height: 1.5;
 }
@@ -1035,9 +990,6 @@ input[type="range"]{
   height: 10px;
 }
 
-::-webkit-scrollbar-track{
-  background: rgba(0, 0, 0, 0.45);
-}
 
 ::-webkit-scrollbar-thumb{
   background: rgba(255, 255, 255, 0.13);
@@ -1045,9 +997,6 @@ input[type="range"]{
   border-radius: var(--pill);
 }
 
-::-webkit-scrollbar-thumb:hover{
-  background: rgba(var(--accent-rgb), 0.32);
-}
 
 @media (max-width: 1180px){
 
@@ -1099,9 +1048,6 @@ input[type="range"]{
     0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.coverAura.hasCover::before{
-  opacity: 0.34;
-}
 
 .coverAura > img{
   position: relative;
@@ -1124,10 +1070,6 @@ input[type="range"]{
   display: grid;
   place-items: center;
 }
-.songRow.active{
-  box-shadow: inset 2px 0 0 var(--accent),
-    0 12px 34px rgba(0, 0, 0, 0.24);
-}
 
 .songRow.active .songIndex{
   color: var(--accent);
@@ -1144,15 +1086,7 @@ input[type="range"]{
   opacity: 0.78;
 }
 
-.hero{
-  transition: border-color 180ms ease,
-    background-color 180ms ease,
-    transform 180ms ease;
-}
 
-.hero:hover{
-  border-color: var(--accent-line);
-}
 
 
 
@@ -1217,9 +1151,9 @@ input[type="range"]{
   --motion-slow: 420ms;
 
 
-  background: #000;
+
   background-image: none;
-  background-size: auto;
+
 }
 
 .titleBar{
@@ -1239,43 +1173,20 @@ input[type="range"]{
 .sidebar{
   padding: 16px 12px;
   gap: 14px;
-  background: rgba(0, 0, 0, 0.72);
+
   backdrop-filter: blur(18px) saturate(120%);
 }
 
-.logoWrap h1{
-  font-size: 21px;
-  letter-spacing: -0.045em;
-}
-
-.navItem{
-  background: var(--surface);
-  border: 1px solid transparent;
-  box-shadow: none;
 
 
-  border-radius: 11px;
-}
 
-.navItem.active{
-  background: rgba(var(--accent-rgb), 0.13);
-  border-color: rgba(var(--accent-rgb), 0.34);
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.28);
-}
-
-.navItem:hover{
-  background: var(--surface-hover);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translate3d(0, -1px, 0);
-}
 
 .hero{
-  min-height: 260px;
-  padding: 28px;
-  border-radius: 0;
+
+
+
   border-inline: 0;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.28)),
-    rgba(255, 255, 255, 0.025);
+
   box-shadow: none;
 }
 
@@ -1284,10 +1195,6 @@ input[type="range"]{
 }
 
 
-.ambientSurface:hover::before{
-  opacity: 0.32;
-  transform: scale(1.2);
-}
 
 
 .badge{
@@ -1298,7 +1205,7 @@ input[type="range"]{
 
 .songRow{
   min-height: 54px;
-  border-radius: 12px;
+
   padding: 6px 8px;
   background: rgba(255, 255, 255, 0.035);
 }
@@ -1317,10 +1224,6 @@ input[type="range"]{
   opacity: 1;
 }
 
-.songRow.active{
-  background: rgba(var(--accent-rgb), 0.095);
-  border-color: rgba(var(--accent-rgb), 0.28);
-}
 
 .songButton{
   z-index: 2;
@@ -1358,27 +1261,27 @@ input[type="range"]::-webkit-slider-thumb{
 
 
   transform: translateX(-50%);
-  padding: 9px 13px;
-  border: 1px solid rgba(var(--accent-rgb), 0.24);
 
 
-  background: rgba(0, 0, 0, 0.62);
-  backdrop-filter: blur(16px);
 
-  font-weight: 900;
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.34);
-  animation: secretToast 5200ms ease both;
+
+
+
+
+
+
+
 }
 
 .secretLayer span{
 
-  width: 10px;
-  height: 10px;
+
+
   border-radius: 999px;
   background: var(--accent);
   box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.45);
 
-  animation: secretFloat 2600ms ease-in-out infinite;
+
 }
 
 .secretLayer span:nth-child(2){
@@ -1418,9 +1321,6 @@ input[type="range"]::-webkit-slider-thumb{
 }
 
 @media (max-width: 1180px){
-.appShell{
-  grid-template-columns: 206px minmax(0, 1fr);
-}
 
 .secretLayer{
   left: 206px;
@@ -1487,9 +1387,6 @@ input[type="range"]::-webkit-slider-thumb{
   display: none;
 }
 
-.panel{
-  border-radius: 10px;
-}
 
 .largePanel{
   min-height: 400px;
@@ -1537,19 +1434,19 @@ input[type="range"]::-webkit-slider-thumb{
 }
 
 .miniBars{
-  height: 72px;
+
   gap: 8px;
   padding: 12px;
-  border-radius: 14px;
+
 }
 
 .secretLayer{
 
 
-  z-index: 75;
 
 
-  contain: layout paint style;
+
+
 }
 
 .secretRibbon{
@@ -1724,17 +1621,7 @@ input[type="range"]::-webkit-slider-thumb{
   content: none !important;
 }
 
-.app{
-  background: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
-    #000 !important;
-  background-size: 46px 46px, 46px 46px, auto !important;
-}
 
-.content{
-  background: linear-gradient(180deg, rgba(255,255,255,.018), transparent 280px),
-    transparent !important;
-}
 
 button:active,
 .songRow:active,
@@ -1754,13 +1641,13 @@ button:active,
   position: absolute !important;
   inset: -2px !important;
   z-index: 0 !important;
-  opacity: .72 !important;
+
   background-image: linear-gradient(90deg, rgba(0,0,0,.86) 0%, rgba(0,0,0,.42) 44%, rgba(0,0,0,.2) 100%),
     var(--cover-url, none) !important;
   background-size: cover !important;
   background-position: center !important;
-  filter: blur(24px) saturate(1.18) brightness(.66) !important;
-  transform: scale(1.04) !important;
+
+
   pointer-events: none !important;
 }
 
@@ -1776,9 +1663,6 @@ button:active,
     linear-gradient(180deg, rgba(255,255,255,.035), transparent 34%) !important;
 }
 
-.editorActions{
-  gap: 8px !important;
-}
 
 .analyticsLayout{
   display: grid !important;
@@ -1815,11 +1699,11 @@ button:active,
 }
 
 .secretLayer{
-  position: fixed;
-  inset: 36px 0 96px;
-  z-index: 28;
-  pointer-events: none;
-  overflow: hidden;
+
+
+
+
+
   opacity: 0;
   animation: secretEventIn 2400ms cubic-bezier(.2,.9,.2,1) forwards;
 }
@@ -1883,12 +1767,6 @@ button:active,
 }
 }
 
-[data-orb]{
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  animation: none !important;
-}
 
 .secretLayer{
   position: fixed !important;
@@ -2098,9 +1976,6 @@ button:active{
   to { opacity: 1; transform: translateX(0); }
 }
 
-.navItem:hover{
-  transform: translateX(4px) translateZ(0) !important;
-}
 
 @keyframes shelfDrop {
   from { opacity: 0; transform: translateY(-8px); }
@@ -2169,9 +2044,6 @@ body.isResizingPlayer{
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 10px) !important;
 }
 
-[data-ambient="off"] .ambientSurface::before{
-  display: none !important;
-}
 
 [data-ambient="off"] .ambientSurface::after{
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.58)) !important;
@@ -2179,8 +2051,8 @@ body.isResizingPlayer{
 
 .tinyMuted{
   margin: 0 !important;
-  color: var(--v003-text-faint) !important;
-  font-size: 11px !important;
+
+
   line-height: 1.35 !important;
 }
 
@@ -2191,10 +2063,10 @@ body.isResizingPlayer{
   gap: 10px !important;
   min-height: 42px !important;
   margin-bottom: 9px !important;
-  padding: 9px 10px !important;
-  border: 1px solid var(--v003-line) !important;
-  border-radius: 12px !important;
-  background: var(--v003-panel-2) !important;
+
+
+
+
 }
 
 .sliderWrap strong{
@@ -2204,12 +2076,9 @@ body.isResizingPlayer{
   white-space: nowrap !important;
 }
 
-[data-orb]{
-  pointer-events: none !important;
-}
 
 .appShell{
-  grid-template-columns: var(--sidebar-width, 236px) minmax(0, 1fr) !important;
+
   transition: grid-template-columns 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
   contain: layout paint size;
 }
@@ -2289,10 +2158,10 @@ body.isResizingPlayer{
 
 .sliderWrap{
   margin-top: 10px;
-  padding: 10px 12px !important;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.075);
-  background: rgba(255, 255, 255, 0.025);
+
+
+
+
 }
 
 .sliderWrap span{
@@ -2324,85 +2193,84 @@ body.isResizingPlayer{
   z-index: 9999;
   display: grid;
   place-items: center;
-  padding: 22px;
-  background: rgba(0, 0, 0, 0.58);
+
+
   animation: updateLayerIn 180ms ease both;
   -webkit-app-region: no-drag;
 }
 
 .updateToastCard{
   position: relative;
-  width: min(460px, calc(100vw - 36px));
-  overflow: hidden;
-  border: 1px solid rgba(var(--accent-rgb), 0.28);
-  border-radius: 24px;
-  background: radial-gradient(circle at 12% 0%, rgba(var(--accent-rgb), 0.13), transparent 34%),
-    linear-gradient(180deg, rgba(18, 18, 18, 0.98), rgba(0, 0, 0, 0.98));
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(255, 255, 255, 0.035) inset;
-  padding: 22px;
-  transform-origin: center;
-  animation: updateCardIn 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+
+
+
+
+
+
+
+
 }
 
 .updateToastCard::before{
   content: "";
   position: absolute;
-  inset: 0;
+
   pointer-events: none;
-  background: linear-gradient(120deg, transparent, rgba(var(--accent-rgb), 0.11), transparent);
+
   transform: translateX(-110%);
   animation: updateShine 1.8s ease 260ms 1;
 }
 
 .updateToastClose{
   position: absolute;
-  top: 14px;
-  right: 14px;
+
+
   z-index: 2;
-  width: 32px;
-  height: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
-  color: rgba(255, 255, 255, 0.76);
-  background: rgba(255, 255, 255, 0.055);
+
+
+
+
+
+
   cursor: pointer;
-  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+
 }
 
 .updateToastClose:hover{
-  transform: translateY(-1px);
+
   border-color: rgba(var(--accent-rgb), 0.35);
-  background: rgba(var(--accent-rgb), 0.12);
+
 }
 
 .updateToastIcon{
-  width: 58px;
-  height: 58px;
-  display: grid;
-  place-items: center;
+
+
+
+
   margin-bottom: 16px;
-  border-radius: 20px;
+
   border: 1px solid rgba(var(--accent-rgb), 0.28);
-  color: rgb(var(--accent-rgb));
-  background: rgba(var(--accent-rgb), 0.11);
-  box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.2);
-  font-size: 28px;
-  font-weight: 900;
+
+
+
+
+
 }
 
 .updateToastText h3{
-  margin: 2px 0 8px;
+
   color: #fff;
-  font-size: clamp(24px, 3vw, 34px);
-  line-height: 0.95;
-  letter-spacing: -0.065em;
+
+
+
 }
 
 .updateToastText p:not(.eyebrow){
-  max-width: 34rem;
+
   margin: 0;
-  color: rgba(255, 255, 255, 0.64);
-  line-height: 1.45;
+
+
 }
 
 .updateVersionPill{
@@ -2420,21 +2288,21 @@ body.isResizingPlayer{
 
 .updateProgressTrack{
   width: 100%;
-  height: 10px;
-  margin-top: 18px;
-  overflow: hidden;
-  border-radius: 999px;
+
+
+
+
   border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.07);
+
 }
 
 
 
 .updateToastActions .softButton{
-  min-height: 34px;
-  padding: 0 14px;
-  border-radius: 13px;
-  font-size: 12px;
+
+
+
+
   text-transform: lowercase;
 }
 
@@ -2443,9 +2311,9 @@ body.isResizingPlayer{
 }
 
 .updateToastCard.error .updateToastIcon{
-  color: #ff7373;
+
   border-color: rgba(255, 85, 85, 0.34);
-  background: rgba(255, 85, 85, 0.1);
+
   box-shadow: 0 0 28px rgba(255, 85, 85, 0.13);
 }
 
@@ -2538,7 +2406,7 @@ body.isResizingPlayer{
 }
 
 .app{
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+
   font-variant-ligatures: none;
 }
 
@@ -2567,11 +2435,11 @@ body.isResizingPlayer{
   display: grid !important;
   grid-template-columns: 1fr !important;
 
-  padding-bottom: calc(var(--player-size, 92px) + 40px);
+
 }
 
 .analyticsHeroPanel{
-  min-height: 180px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2648,13 +2516,13 @@ body.isResizingPlayer{
 }
 
 .analyticsBarRow{
-  min-height: 52px;
+
   display: grid;
-  grid-template-columns: 44px minmax(160px, 0.8fr) minmax(120px, 1fr) 72px;
+
   align-items: center;
   gap: 12px;
   border: 1px solid var(--line);
-  border-radius: 15px;
+
   padding: 9px 12px;
   background: rgba(255, 255, 255, 0.026);
   color: var(--text);
@@ -2852,34 +2720,14 @@ body.isResizingPlayer{
   font-weight: 800;
 }
 
-.hero.ambientSurface{
-  transition: min-height 560ms cubic-bezier(0.16, 1, 0.3, 1),
-    height 560ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 220ms ease,
-    box-shadow 360ms ease,
-    transform 360ms ease,
-    background 420ms ease !important;
-}
 
-.hero.ambientSurface::before{
-  transition: opacity 520ms ease, transform 900ms cubic-bezier(0.16, 1, 0.3, 1), filter 520ms ease !important;
 
-}
-
-.hero.ambientSurface:hover::before{
-  opacity: 0.38 !important;
-  transform: translate3d(-18px, -8px, 0) scale(1.04) !important;
-}
 
 .hero.ambientSurface:hover::after{
   opacity: 0.26 !important;
   transform: translate3d(18px, 10px, 0) scale(1.08) !important;
 }
 
-.hero.ambientSurface:hover{
-  border-color: rgba(var(--accent-rgb), 0.34) !important;
-  box-shadow: 0 26px 88px rgba(var(--accent-rgb), 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
-}
 
 @media (max-width: 1180px){
 .analyticsCardGridV005{
@@ -2924,10 +2772,6 @@ body.isResizingPlayer{
     box-shadow 190ms ease !important;
 }
 
-.songRow:hover{
-  transform: translateX(4px) translateZ(0) !important;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18) !important;
-}
 
 .songRow.active{
   animation: activeRowGlow 2.4s ease-in-out infinite;
@@ -2938,13 +2782,6 @@ body.isResizingPlayer{
   50% { box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.22), 0 0 28px rgba(var(--accent-rgb), 0.08); }
 }
 
-.ambientSurface::before{
-  transition: opacity 560ms ease,
-    filter 700ms ease,
-    transform 760ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-position 900ms ease,
-    background 620ms ease !important;
-}
 
 input[type="range"]{
   transition: filter 170ms ease, opacity 170ms ease !important;
@@ -3059,13 +2896,7 @@ button{
     box-shadow 190ms ease !important;
 }
 
-button:hover{
-  transform: translateY(-1px) translateZ(0);
-}
 
-button:active{
-  transform: translateY(0) scale(0.97) translateZ(0);
-}
 
 :root{
   --song-change-ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -3096,9 +2927,9 @@ button:active{
 }
 
 .circleButton:not(.playerBar *){
-  width: 42px;
-  height: 42px;
-  border-radius: 13px;
+
+
+
   font-size: 15px;
 }
 
@@ -3127,10 +2958,6 @@ button:active{
   line-height: 1 !important;
 }
 
-.circleButton:hover:not(.playerBar *){
-  border-color: rgba(255, 255, 255, 0.16) !important;
-  background: rgba(255, 255, 255, 0.105) !important;
-}
 
 .circleButton.main:not(.playerBar *){
   width: 46px !important;
@@ -3143,11 +2970,6 @@ button:active{
   font-size: 15px !important;
 }
 
-.circleButton.active:not(.playerBar *){
-  color: #050505 !important;
-  border-color: rgba(var(--accent-rgb), 0.58) !important;
-  background: var(--accent) !important;
-}
 @media (max-width: 760px){
 .appShell{
   grid-template-columns: 1fr !important;
@@ -3211,12 +3033,6 @@ button:active{
   background-size: auto !important;
 }
 
-.app {
-  background:
-    radial-gradient(circle at 50% 100%, rgba(var(--player-ambient-rgb, var(--accent-rgb)), 0.075), transparent 46%),
-    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.10), transparent 31%),
-    var(--bg) !important;
-}
 
 .app,
 .app .content,
@@ -3302,12 +3118,12 @@ button:active{
   gap: 10px !important;
   margin: 0 !important;
   padding: 7px 10px !important;
-  border-radius: 14px !important;
+
   color: rgba(255, 255, 255, 0.68) !important;
   background: transparent !important;
   border: 1px solid transparent !important;
   box-shadow: none !important;
-  transform: none !important;
+
   filter: none !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
@@ -3591,19 +3407,17 @@ body,
 
 
 .updateToastCard{
-  width: min(470px, calc(100vw - 28px)) !important;
+
   display: grid !important;
   grid-template-columns: 58px minmax(0, 1fr) !important;
   gap: 14px !important;
   padding: 18px !important;
 
-  border: 1px solid rgba(var(--accent-rgb), 0.28) !important;
-  background: linear-gradient(180deg, rgba(18, 18, 18, 0.94), rgba(3, 3, 3, 0.92)) !important;
-  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.58),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
-    0 0 55px rgba(var(--accent-rgb), 0.14) !important;
-  backdrop-filter: blur(28px) saturate(135%) !important;
-  animation: localtifyUpdateCardIn 220ms cubic-bezier(.2,.9,.2,1) both !important;
+
+
+
+
+
 }
 
 .updateToastCard::before{
@@ -3611,7 +3425,7 @@ body,
   border-radius: inherit !important;
   background: radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb), 0.2), transparent 42%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.075), transparent 42%) !important;
-  opacity: 0.9 !important;
+
 }
 
 .updateToastClose{
@@ -3619,10 +3433,10 @@ body,
   right: 12px !important;
   width: 34px !important;
   height: 34px !important;
-  border-radius: 12px !important;
+
   color: rgba(255, 255, 255, 0.76) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+
+
   transition: transform 160ms ease, background-color 160ms ease, color 160ms ease !important;
 }
 
@@ -3652,16 +3466,16 @@ body,
 }
 
 .updateToastText h3{
-  margin: 3px 0 6px !important;
+
   font-size: 24px !important;
 
-  letter-spacing: -0.065em !important;
+
 }
 
 .updateToastText p:not(.eyebrow){
   max-width: 38rem !important;
-  color: rgba(255, 255, 255, 0.66) !important;
-  line-height: 1.45 !important;
+
+
 }
 
 
@@ -3678,16 +3492,16 @@ body,
   margin: 2px 0 0 !important;
 
 
-  background: rgba(255, 255, 255, 0.09) !important;
+
 }
 
 .updateProgressTrack span{
 
   display: block !important;
 
-  background: linear-gradient(90deg, var(--accent), rgba(255, 255, 255, 0.86)) !important;
-  box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.28) !important;
-  transition: width 220ms ease !important;
+
+
+
 }
 
 .updateToastActions{
@@ -3695,42 +3509,38 @@ body,
 
 
 
-  gap: 9px !important;
-  margin-top: 2px !important;
+
+
 }
 
 .updatePrimaryButton,
 .updateGhostButton{
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: 999px;
-  font-weight: 900;
+
+
+
+
   border: 1px solid transparent;
   cursor: pointer;
-  transition: transform 170ms ease,
-    background-color 170ms ease,
-    border-color 170ms ease,
-    box-shadow 170ms ease,
-    filter 170ms ease;
+
 }
 
 
 .updateGhostButton{
-  color: rgba(255, 255, 255, 0.78);
+
   border-color: rgba(255, 255, 255, 0.09);
-  background: rgba(255, 255, 255, 0.06);
+
 }
 
 
 .updatePrimaryButton:hover{
   filter: brightness(1.04);
-  box-shadow: 0 16px 34px rgba(var(--accent-rgb), 0.24);
+
 }
 
 .updateGhostButton:hover{
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.1);
+
+
 }
 
 .updateToastCard.error .updateToastIcon{
@@ -3770,7 +3580,7 @@ body,
 
 .updateToastText h3{
   margin: 2px 0 7px !important;
-  letter-spacing: -0.07em !important;
+
 }
 
 
@@ -3811,7 +3621,7 @@ body,
 
 
 .whatsNewCard li{
-  padding: 12px 13px !important;
+
   border-radius: 16px !important;
   background: rgba(255,255,255,0.05) !important;
   border: 1px solid rgba(255,255,255,0.07) !important;
@@ -3833,14 +3643,14 @@ body,
 
 
 .updateToastCard {
-  width: min(520px, calc(100vw - 32px)) !important;
+
   border-radius: 24px !important;
   border: 1px solid rgba(255,255,255,0.13) !important;
   background: rgba(9, 10, 12, 0.86) !important;
   backdrop-filter: blur(24px) saturate(145%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(145%) !important;
   box-shadow: 0 24px 70px rgba(0,0,0,0.52), inset 0 1px 0 rgba(255,255,255,0.08) !important;
-  overflow: hidden !important;
+
 }
 
 .updateToastCard::before {
@@ -5117,14 +4927,7 @@ line-clamp: 2 !important;
 }
 
 /* V309 low-lag guardrails. */
-.app img{
-  -webkit-user-drag: none;
-  user-select: none;
-}
 
-.app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
-  transform: translateZ(0);
-}
 
 /* localtify 0.3.9 V301 — core compositor hints */
 body.localtifyPerfV301{

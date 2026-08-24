@@ -1,10 +1,10 @@
 .settingsPage{
-  width: 100%;
-  max-width: none;
+
+
   margin: 0;
-  padding: 0 22px 132px;
+
   display: grid;
-  gap: 22px;
+
   color: var(--lt-text);
 }
 
@@ -14,19 +14,17 @@
 
 .settingsHero{
   position: relative;
-  min-height: 124px;
-  padding: 28px 32px;
+
+
   display: flex;
-  align-items: center;
+
   justify-content: space-between;
   gap: 20px;
   overflow: hidden;
   border: 1px solid rgba(var(--lt-accent-rgb), 0.2);
-  border-radius: 20px;
-  background:
-    linear-gradient(135deg, rgba(var(--lt-accent-rgb), 0.105), rgba(255,255,255,0.028) 48%, rgba(0,0,0,0.32)),
-    rgba(8, 8, 12, 0.78);
-  box-shadow: 0 24px 76px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.055);
+
+
+
   backdrop-filter: blur(18px) saturate(125%);
 }
 
@@ -37,24 +35,22 @@
 
 
 .settingsHero .softText{
-  max-width: 760px;
+
   margin: 0;
-  color: var(--lt-muted);
-  font-size: 14px;
-  line-height: 1.45;
+
+
+
 }
 
 .settingsPanelCard,
 .settingsPageCard{
   position: relative;
   overflow: hidden;
-  padding: 28px;
+
   border: 1px solid rgba(255,255,255,0.085);
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.024)),
-    rgba(7, 7, 12, 0.72);
-  box-shadow: 0 18px 54px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.045);
+
+
+
   backdrop-filter: blur(18px) saturate(120%);
   transition: transform 220ms cubic-bezier(.2,.9,.18,1), border-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
 }
@@ -257,9 +253,9 @@
 }
 
 .customThemeTopV025{
-  display: grid;
-  grid-template-columns: minmax(220px, 0.82fr) minmax(360px, 1.18fr);
-  gap: 18px;
+
+
+
   align-items: stretch;
 }
 
@@ -367,16 +363,16 @@
 }
 
 .previewPlayButton{
-  color: var(--lt-text);
+
   font-size: 16px;
 }
 
 .themePreviewProgress{
-  height: 7px;
+
   flex: 1;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255,255,255,0.14);
+
 }
 
 .themePreviewProgress span{
@@ -384,8 +380,8 @@
   width: 62%;
   height: 100%;
   border-radius: inherit;
-  background: var(--lt-accent);
-  box-shadow: 0 0 20px rgba(var(--lt-accent-rgb),0.42);
+
+
 }
 
 .customThemePresetSectionV025{
@@ -398,19 +394,17 @@
 .customThemePresetButtonV025,
 .savedThemeItemV025 button{
   position: relative;
-  min-height: 78px;
+
   padding: 14px 16px;
   border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 18px;
+
   display: flex;
   align-items: center;
   gap: 14px;
   overflow: hidden;
   color: var(--lt-text);
   text-align: left;
-  background:
-    radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--preset-accent, var(--lt-accent)) 24%, transparent), transparent 38%),
-    linear-gradient(135deg, color-mix(in srgb, var(--preset-surface, #171724) 82%, transparent), color-mix(in srgb, var(--preset-bg, #050510) 86%, transparent));
+
   transition: transform 190ms cubic-bezier(.2,1.15,.18,1), border-color 190ms ease, box-shadow 190ms ease;
 }
 
@@ -469,24 +463,24 @@
 .simpleThemeTokenCardV025,
 .customThemeTokenRowV025{
   position: relative;
-  min-height: 92px;
-  padding: 15px 16px;
-  border: 1px solid rgba(255,255,255,0.075);
-  border-radius: 18px;
-  display: grid;
-  grid-template-columns: 48px 50px minmax(0,1fr) auto;
-  gap: 12px;
-  align-items: center;
-  background: rgba(255,255,255,0.026);
+
+
+
+
+
+
+
+
+
   transition: transform 180ms cubic-bezier(.2,.9,.18,1), border-color 180ms ease, background 180ms ease;
 }
 
 .themeColorInput{
-  width: 44px;
-  height: 44px;
+
+
   padding: 0;
   border: 0;
-  border-radius: 14px;
+
   background: transparent;
   cursor: pointer;
 }
@@ -498,22 +492,22 @@
 }
 
 .themeTokenVisual{
-  width: 32px;
-  height: 32px;
-  border-radius: 12px;
+
+
+
   box-shadow: 0 0 18px rgba(var(--lt-accent-rgb),0.14), inset 0 1px 0 rgba(255,255,255,0.18);
 }
 
 
 .themeTokenCopy strong{
   color: var(--lt-text);
-  font-size: 14px;
+
   line-height: 1.1;
 }
 
 .themeTokenCopy small{
   color: var(--lt-muted);
-  font-size: 12px;
+
   line-height: 1.25;
   font-weight: 750;
 }
@@ -539,7 +533,7 @@
 
 .metadataCleanerPreview{
   min-height: 174px;
-  padding: 22px;
+
   border: 1px solid rgba(255,255,255,0.075);
   border-radius: 20px;
   display: grid;
@@ -551,22 +545,22 @@
 }
 
 .metadataCleanerPreview span{
-  color: var(--lt-accent);
-  font-size: 10px;
+
+
   font-weight: 900;
-  letter-spacing: 0.17em;
+
   text-transform: uppercase;
 }
 
 
 .metadataCleanerPreview small{
   display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  padding: 8px 11px;
-  border-radius: 999px;
-  color: #08070c;
-  background: var(--lt-accent);
+
+
+
+
+
+
   font-size: 12px;
   font-weight: 950;
   overflow-wrap: anywhere;
@@ -579,15 +573,15 @@
 
 .metadataCleanerModes{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 10px;
+
+
 }
 
 .settingsPageGrid{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
-  align-items: start;
+
+
 }
 
 
@@ -597,14 +591,14 @@
 
 .settingsChoice{
   position: relative;
-  min-height: 86px;
-  padding: 16px 17px;
-  border: 1px solid rgba(255,255,255,0.075);
-  border-radius: 18px;
+
+
+
+
   color: var(--lt-text);
   text-align: left;
-  background: rgba(255,255,255,0.027);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.026);
+
+
   transition: transform 190ms cubic-bezier(.2,1.2,.18,1), border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
 }
 
@@ -612,18 +606,18 @@
 
 .optionGrid{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 10px;
+
+
 }
 
 .optionGrid.two{ grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 .optionGrid.three{ grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
 
 .settingsChoice{
-  min-height: 94px;
-  display: grid;
-  align-content: center;
-  gap: 8px;
+
+
+
+
 }
 
 
@@ -651,7 +645,7 @@
 
 .settingsPlainList{
 
-  padding: 0;
+
   list-style: none;
   display: grid;
   gap: 10px;
@@ -670,32 +664,32 @@
 
 .statusGrid{
 
-  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
-  gap: 10px;
+
+
   margin-bottom: 14px;
 }
 
 .statusGrid span{
   min-height: 72px;
-  padding: 13px;
-  border: 1px solid rgba(255,255,255,0.075);
-  border-radius: 16px;
+
+
+
 
   align-content: center;
-  gap: 4px;
-  background: rgba(255,255,255,0.026);
+
+
 }
 
 .statusGrid strong{
 
-  font-size: 22px;
+
   line-height: 1;
 }
 
 .statusGrid small{
 
 
-  font-weight: 850;
+
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -723,8 +717,8 @@
   place-items: center !important;
   padding: 18px !important;
   overflow: auto !important;
-  background: rgba(0,0,0,0.58) !important;
-  backdrop-filter: blur(18px) saturate(120%) !important;
+
+
 }
 
 .settingsModal,
@@ -757,18 +751,18 @@
 }
 
 .settingsLayout{
-  width: 100%;
-  height: min(720px, calc(100vh - 250px));
+
+
   display: grid;
-  grid-template-columns: 255px minmax(0, 1fr);
-  overflow: hidden;
+
+
 }
 
 .settingsCategoryContent{
   width: 100%;
-  min-width: 0;
+
   padding: 18px;
-  overflow: auto;
+
 }
 
 .settingsCategoryPage{
@@ -947,10 +941,8 @@ body.localitfyThemePainting .app .themeTokenCard{
   isolation: isolate;
   overflow: hidden;
   border-color: rgba(255,255,255,0.085);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02)),
-    rgba(7,7,12,0.58);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
+
+
 
   transform: translate3d(0,0,0);
 }
@@ -968,7 +960,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsChoice small{
-  max-width: none;
+
   overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
@@ -1023,17 +1015,17 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage{
-  max-width: 1180px;
-  gap: 20px;
+
+
 }
 
 
 
 .settingsThemeSelectPanel{
   display: grid;
-  grid-template-columns: minmax(260px, 420px) minmax(220px, 1fr);
-  gap: 14px;
-  align-items: stretch;
+
+
+
   margin-top: 2px;
 }
 
@@ -1117,18 +1109,18 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsSwitchGrid,
 .settingsMiniGrid{
   display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 10px !important;
+
+
 }
 
 .settingsChoice{
-  min-height: 66px !important;
+
 
   grid-template-columns: minmax(0, 1fr) auto !important;
 
   gap: 14px !important;
-  padding: 14px 16px !important;
-  border-radius: 15px !important;
+
+
   border: 1px solid rgba(255,255,255,0.09) !important;
   background: rgba(255,255,255,0.032) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.03) !important;
@@ -1275,7 +1267,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 
 .settingsPageGrid{
-  gap: 18px !important;
+
   align-items: stretch !important;
 }
 
@@ -1329,9 +1321,9 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .themePickerLockNoteV026{
-  margin: 8px 0 0 !important;
-  color: rgba(255,255,255,.62) !important;
-  font-size: 12px !important;
+
+
+
   font-weight: 800 !important;
 }
 
@@ -1417,13 +1409,13 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage{
-  gap: 14px !important;
-  padding-bottom: calc(var(--player-size-used, 92px) + 34px) !important;
+
+
 }
 
 .settingsHero{
-  min-height: auto !important;
-  padding: 20px 22px !important;
+
+
   align-items: center !important;
 }
 
@@ -1691,7 +1683,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsCategoryContentV027{
   padding: 15px !important;
-  overflow: auto !important;
+
   scrollbar-gutter: auto;
   contain: layout paint;
 }
@@ -1738,7 +1730,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .discordHeroCard{
   display: grid !important;
-  grid-template-columns: minmax(230px, .78fr) minmax(0, 1.22fr) !important;
+
 
 
 }
@@ -1751,13 +1743,13 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .discordHeroCopy strong{
   color: var(--lt-text);
-  font-size: 19px;
+
   letter-spacing: -.035em;
 }
 
 .discordHeroCopy span{
   color: var(--lt-muted);
-  font-size: 13px;
+
   line-height: 1.45;
   font-weight: 760;
 }
@@ -1838,7 +1830,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   gap: 3px;
   border: 1px solid rgba(255,255,255,.065);
   border-radius: 14px;
-  background: rgba(255,255,255,.026);
+
 }
 
 .statusGrid strong{
@@ -1942,7 +1934,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .discordSettingsGrid{
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+
   gap: 16px !important;
 }
 
@@ -2078,7 +2070,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 .settingsPage{
-  width: min(1280px, calc(100vw - 36px)) !important;
+
   max-width: 1280px !important;
   min-height: 100% !important;
   overflow: visible !important;
@@ -2092,7 +2084,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   max-height: none !important;
   overflow: visible !important;
   align-items: start !important;
-  grid-template-columns: minmax(230px, 270px) minmax(0, 1fr) !important;
+
 }
 
 .settingsCategoryContent{
@@ -2232,22 +2224,22 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsResetGrid{
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+
+
 }
 
 .settingsResetButton{
-  min-height: 92px;
+
   border: 1px solid color-mix(in srgb, var(--lt-border, rgba(255,255,255,.14)) 78%, var(--lt-accent, #ed28f0) 22%);
   background: color-mix(in srgb, var(--lt-surface, #151019) 90%, transparent);
   color: var(--lt-text, #f7f3ff);
-  border-radius: 20px;
-  padding: 16px;
+
+
   text-align: left;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
+
   cursor: pointer;
   transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
@@ -2265,7 +2257,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 
 .settingsResetButton.danger{
   grid-column: 1 / -1;
-  border-color: color-mix(in srgb, #ff5f8a 42%, var(--lt-border, rgba(255,255,255,.14)));
+
 }
 
 .app.viewSwitching .settingsStatusCards span,
@@ -2373,7 +2365,7 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsCategoryContentV027 .customThemeManagerV027,
 .settingsCategoryPage .customThemeManagerV027{
   position: relative !important;
-  overflow: hidden !important;
+
   gap: 18px !important;
   padding: 20px 20px 22px !important;
   border-radius: 28px !important;
@@ -2392,7 +2384,7 @@ body.localitfyThemePainting .app .themeTokenCard{
   z-index: 1 !important;
 
 
-  align-items: start !important;
+
 
   padding: 0 0 16px !important;
   border-bottom: 1px solid rgba(var(--text-rgb), .075) !important;
@@ -2618,14 +2610,14 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsCopyInfoButton{
-  min-width: 132px;
+
   justify-content: center;
   white-space: nowrap;
 }
 
 .settingsDiagnosticsGrid{
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+
   gap: 12px;
 }
 
@@ -2652,25 +2644,25 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .settingsDiagnosticCard strong{
-  overflow: hidden;
+
   color: var(--lt-text);
-  font-size: clamp(18px, 1.8vw, 28px);
-  line-height: 1;
+
+
   letter-spacing: -0.045em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+
+
 }
 
 .settingsDiagnosticsText{
   width: 100%;
-  min-height: 154px;
+
   resize: vertical;
   padding: 16px;
   border: 1px solid rgba(255,255,255,0.09);
   border-radius: 18px;
   outline: none;
   color: rgba(255,255,255,0.86);
-  background: rgba(0,0,0,0.36);
+
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
   font: 700 13px/1.65 "Space Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -2770,7 +2762,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsCategoryPage.settingsUpdatesPage{
   display: grid !important;
-  gap: 18px !important;
+
 }
 
 .settingsCategoryPage.settingsUpdatesPage .settingsCategoryHeader{
@@ -2797,14 +2789,10 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsUpdatesPage .settingsFullWidthPanel{
   position: relative !important;
   overflow: hidden !important;
-  border-radius: 22px !important;
-  border: 1px solid color-mix(in oklab, var(--lt-accent, #e65adf) 24%, rgba(255,255,255,.10)) !important;
-  background:
-    radial-gradient(circle at 12% 0%, rgba(var(--lt-accent-rgb, 230,90,223), .13), transparent 38%),
-    linear-gradient(145deg, rgba(255,255,255,.052), rgba(255,255,255,.025) 48%, rgba(0,0,0,.18)) !important;
-  box-shadow:
-    0 24px 70px rgba(0,0,0,.36),
-    inset 0 1px 0 rgba(255,255,255,.06) !important;
+
+
+
+
   backdrop-filter: blur(18px) saturate(125%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(125%) !important;
 }
@@ -2818,7 +2806,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsUpdatesPage .settingsPanelHeader{
   align-items: flex-start !important;
   gap: 14px !important;
-  margin-bottom: 14px !important;
+
 }
 
 .settingsUpdatesPage .settingsPanelHeader strong{
@@ -2874,15 +2862,15 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsUpdatesPage .settingsUpdateMessage strong{
   text-transform: none !important;
-  font-size: 14px !important;
+
 
 }
 
 .settingsUpdatesPage .settingsUpdateMessage span{
   max-width: 72ch !important;
-  color: color-mix(in oklab, var(--lt-muted, rgba(255,255,255,.62)) 92%, var(--lt-text, #fff) 8%) !important;
-  font-size: 13px !important;
-  line-height: 1.35 !important;
+
+
+
 }
 
 .settingsUpdatesPage .settingsUpdateMessage-error{
@@ -2892,13 +2880,13 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 
 .settingsUpdatesPage .settingsActionButton{
-  min-height: 38px !important;
-  padding: 0 14px !important;
-  border-radius: 14px !important;
-  border: 1px solid color-mix(in oklab, var(--lt-accent, #e65adf) 24%, rgba(255,255,255,.12)) !important;
-  background: rgba(255,255,255,.052) !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 82%, var(--lt-accent, #e65adf) 18%) !important;
-  box-shadow: none !important;
+
+
+
+
+
+
+
   transform: none !important;
 }
 
@@ -2909,22 +2897,22 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   padding: 0 !important;
   margin: 12px 0 0 !important;
   display: grid !important;
-  gap: 9px !important;
+
 }
 
 .settingsReleaseList li{
   position: relative !important;
 
-  align-items: flex-start !important;
+
   gap: 10px !important;
-  min-height: 42px !important;
-  padding: 12px 14px 12px 36px !important;
-  border-radius: 15px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(255,255,255,.038) !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 76%, var(--lt-muted, #aaa) 24%) !important;
-  font-size: 13px !important;
-  font-weight: 780 !important;
+
+
+
+
+
+
+
+
   line-height: 1.35 !important;
 }
 
@@ -2963,9 +2951,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   background:
     radial-gradient(circle at 10% -18%, rgba(var(--lt-accent-rgb, 230,90,223), .105), transparent 42%),
     linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.020) 58%, rgba(0,0,0,.16)) !important;
-  box-shadow:
-    0 18px 52px rgba(0,0,0,.30),
-    inset 0 1px 0 rgba(255,255,255,.045) !important;
+
 }
 
 .settingsUpdatesPage .settingsPanelHeader{
@@ -2989,7 +2975,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsUpdateSummary{
   display: grid !important;
   gap: 11px !important;
-  margin: 8px 0 12px !important;
+
 }
 
 .settingsUpdateCurrent{
@@ -3696,13 +3682,11 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .themeTokenCard,
 .simpleThemeTokenCardV025,
 .customThemeTokenRowV025{
-  min-height: 72px !important;
-  padding: 12px !important;
+
+
   border: 1px solid rgba(255,255,255,0.055) !important;
-  border-radius: 16px !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
-    rgba(255,255,255,0.012) !important;
+
+
 }
 
 .settingsSelectField select,
@@ -3771,7 +3755,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .discordHeroCard{
-  grid-template-columns: minmax(220px, .84fr) minmax(0, 1.16fr) !important;
+
   gap: 14px !important;
 }
 
@@ -4026,10 +4010,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   }
 }
 
-.app img{
-  -webkit-user-drag: none;
-  user-select: none;
-}
 
 .app :is(.songRow,.libraryRow,.homeListenCard,.homeAlbumCard,.homeFreshCard,.coverGalleryCard,.settingsPageCard,.panel){
   transform: translateZ(0);
@@ -4127,7 +4107,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 
 
 .settingsDiagnosticsText{
-  min-height: 170px !important;
+
   max-height: 360px !important;
   overflow: auto !important;
 }
@@ -4177,7 +4157,7 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 }
 
 .feedbackSettingsButtonV329{
-  border: 0;
+
   border-radius: 16px;
   padding: 12px 16px;
   font: inherit;
@@ -4270,13 +4250,10 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 .themeEditorPreview{
   position: relative;
 
-  min-height: 188px !important;
-  border-radius: 22px !important;
 
-  background:
-    radial-gradient(circle at 85% 10%, rgba(var(--lt-accent-rgb), .18), transparent 36%),
-    linear-gradient(180deg, rgba(255,255,255,.046), rgba(255,255,255,.018)),
-    rgba(0,0,0,.24) !important;
+
+
+
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.05),
     0 14px 34px rgba(0,0,0,.20) !important;
@@ -4311,9 +4288,9 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 .themeTokenCard code,
 .simpleThemeTokenCardV025 code,
 .customThemeTokenRowV025 code{
-  min-width: 82px;
+
   text-align: center;
-  color: rgba(255,255,255,.78) !important;
+
 
 
 }
@@ -4338,13 +4315,13 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 
 .playbackModeGridV343{
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+
+
 }
 
 .playbackModeChoiceV343{
-  min-height: 92px;
-  padding: 14px;
+
+
   border-radius: 17px;
   border: 1px solid rgba(255,255,255,.082);
   display: grid;
@@ -5133,10 +5110,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   }
 }
 
-:root{
-  --resize-dur: 300ms;
-  --resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
 
 @supports (interpolate-size: allow-keywords){
   :root{
@@ -5169,9 +5142,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
     box-shadow 180ms ease !important;
 }
 
-.settingsCategoryMotion{
-  transform-origin: top center;
-}
 
 .settingsCategoryMotion > .settingsPageCard,
 .settingsCategoryMotion > .settingsPanelCard,
@@ -5349,10 +5319,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   gap: 8px;
   overflow-x: hidden;
   overflow-y: auto;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.006)),
-    rgba(7,6,12,.48);
-  box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
+
+
   scrollbar-gutter: stable;
 }
 
@@ -5917,7 +5885,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .customThemeHeaderV027{
-  align-items: center;
+
   gap: 16px;
   margin-bottom: 18px;
 }
@@ -5925,8 +5893,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .customThemeBodyV027{
   display: grid;
-  grid-template-columns: minmax(260px, 460px);
-  gap: 16px;
+
+
   align-items: stretch;
 }
 
@@ -5968,15 +5936,15 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .customThemePresetRowV027{
   margin-top: 14px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(154px, 1fr));
-  gap: 10px;
+
+
   align-items: stretch;
 }
 
 .customThemePresetButtonV027{
-  min-height: 70px;
+
   padding: 12px 13px;
-  border: 0;
+
   border-radius: 16px;
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr);
@@ -5985,9 +5953,7 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   row-gap: 2px;
   align-items: center;
   color: var(--lt-text);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.014)),
-    rgba(255,255,255,.020);
+
   text-align: left;
   cursor: pointer;
   transition:
@@ -6051,31 +6017,29 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .customThemeTokenGridV027{
   margin-top: 16px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+
+
 }
 
 .customThemeTokenV027{
-  min-height: 76px;
+
   padding: 12px 14px;
-  border: 0;
+
   border-radius: 16px;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) minmax(84px, auto);
-  grid-template-rows: auto auto;
+
+
   column-gap: 12px;
   row-gap: 3px;
   align-items: center;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.036), rgba(255,255,255,.012)),
-    rgba(255,255,255,.018);
+
 }
 
 .customThemeColorPickerV032{
-  grid-column: 1;
-  grid-row: 1 / 3;
-  width: 38px;
-  height: 38px;
+
+
+
+
   position: relative;
   display: block;
 }
@@ -6099,40 +6063,40 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 .customThemeTokenV027 > strong{
-  grid-column: 2;
-  grid-row: 1;
+
+
   min-width: 0;
   color: var(--lt-text);
 
   line-height: 1.08;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+
+
+
 }
 
 .customThemeTokenV027 > small{
-  grid-column: 2;
-  grid-row: 2;
+
+
   min-width: 0;
   color: var(--lt-muted);
-  font-size: 11px;
-  line-height: 1.22;
+
+
   font-weight: 740;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+
+
+
 }
 
 .customThemeHexInputV032{
-  grid-column: 3;
-  grid-row: 1 / 3;
-  width: 86px;
-  height: 34px;
+
+
+
+
   padding: 0 10px;
-  border: 0;
+
   border-radius: 12px;
   color: var(--lt-text);
-  background: rgba(0,0,0,.18);
+
   font: inherit;
   font-size: 11px;
   font-weight: 850;
@@ -6186,13 +6150,13 @@ body.localitfyThemePainting .app *::after{
 
 
 .customThemeHexInputV032{
-  grid-column: 2;
-  grid-row: 3;
-  width: 100%;
+
+
+
   max-width: 118px;
-  height: 30px;
+
   justify-self: start;
-  margin-top: 3px;
+
 }
 
 
@@ -6878,163 +6842,25 @@ body.localitfyThemePainting .toggleRow{
 /* localtify 0.4.0 — packaged feedback modal lock.
    Keep feedback popup identical in dev and packaged builds.
 */
-.feedbackPromptOverlayV331{
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 2147483000 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  min-width: 100vw !important;
-  min-height: 100vh !important;
-  display: grid !important;
-  place-items: center !important;
-  padding: clamp(16px, 2.2vw, 30px) !important;
-  overflow: auto !important;
-  isolation: isolate !important;
-  pointer-events: auto !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  background:
-    radial-gradient(circle at 50% 28%, rgba(var(--lt-accent-rgb), 0.17), transparent 38%),
-    rgba(0, 0, 0, 0.74) !important;
-  backdrop-filter: blur(18px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
-}
 
-.feedbackPromptOverlayV331 *{
-  box-sizing: border-box !important;
-}
 
-.feedbackPromptCardV331{
-  position: relative !important;
-  z-index: 2147483001 !important;
-  width: min(620px, calc(100vw - 34px)) !important;
-  max-width: min(620px, calc(100vw - 34px)) !important;
-  max-height: min(760px, calc(100vh - 48px)) !important;
-  overflow: auto !important;
-  display: block !important;
-  padding: 18px !important;
-  border: 1px solid rgba(var(--lt-accent-rgb), 0.24) !important;
-  border-radius: 24px !important;
-  color: var(--lt-text) !important;
-  background:
-    radial-gradient(circle at 86% 10%, rgba(var(--lt-accent-rgb), 0.13), transparent 32%),
-    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.026)),
-    rgba(7, 7, 12, 0.985) !important;
-  box-shadow:
-    0 34px 110px rgba(0,0,0,0.74),
-    0 0 0 1px rgba(255,255,255,0.045) inset !important;
-  transform-origin: center center !important;
-}
 
-.feedbackPromptTopV331,
-.feedbackPromptActionsV331{
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 12px !important;
-}
 
-.feedbackPromptCopyV331{
-  display: block !important;
-  margin: 18px 0 14px !important;
-}
 
-.feedbackPromptBadgeV331{
-  display: inline-flex !important;
-  margin: 0 0 8px !important;
-  line-height: 1 !important;
-}
 
-.feedbackPromptCopyV331 h2{
-  display: block !important;
-  margin: 0 0 12px !important;
-  padding: 0 !important;
-  max-width: 100% !important;
-  color: #fff !important;
-  font-size: clamp(32px, 3.7vw, 46px) !important;
-  line-height: 0.96 !important;
-  letter-spacing: -0.075em !important;
-  white-space: normal !important;
-  text-wrap: balance !important;
-}
 
-.feedbackPromptCopyV331 p{
-  display: block !important;
-  margin: 10px 0 0 !important;
-  padding: 0 !important;
-  max-width: 100% !important;
-  color: rgba(255,255,255,0.70) !important;
-  font-size: 0.88rem !important;
-  font-weight: 760 !important;
-  line-height: 1.48 !important;
-  letter-spacing: -0.012em !important;
-  white-space: normal !important;
-}
 
-.feedbackCategoryRowV331{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-  margin: 0 0 12px !important;
-}
 
-.feedbackCategoryButtonV331{
-  min-width: 0 !important;
-  min-height: 38px !important;
-  display: grid !important;
-  place-items: center !important;
-  padding: 8px 10px !important;
-  line-height: 1 !important;
-}
 
-.feedbackTextareaWrapV331{
-  display: grid !important;
-  gap: 7px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-}
 
-.feedbackTextareaWrapV331 textarea{
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 154px !important;
-  max-height: min(260px, 32vh) !important;
-  display: block !important;
-  line-height: 1.45 !important;
-}
 
-.feedbackPromptActionsV331{
-  margin-top: 14px !important;
-}
 
-.feedbackMaybeButtonV331,
-.feedbackSendButtonV331,
-.feedbackPromptCloseV331{
-  flex: 0 0 auto !important;
-}
 
 @media (max-width: 720px){
-  .feedbackPromptOverlayV331{
-    place-items: start center !important;
-    padding: 14px !important;
-  }
 
-  .feedbackPromptCardV331{
-    width: calc(100vw - 28px) !important;
-    max-width: calc(100vw - 28px) !important;
-    max-height: calc(100vh - 28px) !important;
-    border-radius: 20px !important;
-  }
 
-  .feedbackPromptCopyV331 h2{
-    font-size: clamp(30px, 9vw, 42px) !important;
-  }
 
-  .feedbackCategoryRowV331{
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
-}
 
 .metadataCleanerPanelV440{
   border-color: rgba(var(--lt-accent-rgb),0.16) !important;

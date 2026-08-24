@@ -98,9 +98,6 @@ button:disabled:active{
   will-change: opacity, transform;
 }
 
-.nowPlayingMiniCopySwap{
-  animation: localtifyMiniCopyIn 260ms var(--motion-ease) both;
-}
 
 .nowPlayingArtSwap,
 .simpleHeroArtSwap{
@@ -304,8 +301,8 @@ body.localitfySongDragging .app .coverAura::before{
 
 .heroLayoutMotion.heroLayoutPulseA,
 .heroLayoutMotion.heroLayoutPulseB{
-  animation-duration: 720ms !important;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+
+
   animation-fill-mode: both !important;
   transform-origin: top center;
 }
@@ -1295,12 +1292,8 @@ body.localtifyBackgroundMode .coverCard,
 .app .localtifyProximityTarget.localtifyProximityActive{
   transform-origin: center !important;
 
-  will-change: scale, border-color, background-color !important;
-  transition:
-    scale 80ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 105ms ease,
-    background-color 105ms ease,
-    box-shadow 105ms ease !important;
+
+
 }
 
 .app :is(
@@ -1476,11 +1469,7 @@ body.localtifyBackgroundMode .coverCard,
 .app .localtifyProximityTarget.localtifyProximityActive{
   scale: var(--prox-scale, 1) !important;
   will-change: scale, background-color, border-color, box-shadow !important;
-  transition:
-    scale 72ms cubic-bezier(.16, 1, .3, 1),
-    background-color 88ms ease,
-    border-color 88ms ease,
-    box-shadow 88ms ease !important;
+
 }
 
 .app :is(
@@ -2389,7 +2378,7 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
   --prox-shift-x: 0px;
   transform-origin: 50% 50% !important;
   will-change: transform;
-  transition: transform .25s cubic-bezier(.22, 1, .36, 1) !important;
+
   backface-visibility: hidden;
   filter: none !important;
 }
@@ -2631,30 +2620,7 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
 }
 
 
-.inlineGlyphIcon,
-.emptyCoverIcon,
-.playingBarsIcon,
-.updateMiniIcon,
-.checkMiniIcon,
-.plusMiniIcon,
-.alertMiniIcon,
-.infoMiniIcon{
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  color: currentColor;
-  vertical-align: -0.15em;
-}
 
-.localitfyDragPreviewOrb[data-kind=liked]::before,
-.localitfyDragPreviewOrb[data-kind=song]::before{
-  content: "";
-  width: 9px;
-  height: 9px;
-  display: block;
-  border-radius: 999px;
-  background: currentColor;
-}
 
 /* localtify v459 reduced motion owner */
 :root{

@@ -862,10 +862,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
   visibility: visible !important;
   transform: translate3d(0,0,0) !important;
   pointer-events: auto !important;
-  transition:
-    opacity 190ms ease 170ms,
-    transform 260ms var(--lt-sidebar-ease) 140ms,
-    visibility 0ms linear !important;
+
 }
 
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText,
@@ -1493,8 +1490,8 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 }
 
 .app[data-platform="linux"] .titleBar{
-  height: var(--linux-titlebar-height) !important;
-  min-height: var(--linux-titlebar-height) !important;
+
+
   background: rgba(0, 0, 0, 0.96) !important;
   border-bottom: 1px solid rgba(255,255,255,0.105) !important;
   backdrop-filter: none !important;
@@ -1504,16 +1501,16 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 
 
 .app[data-platform="linux"] .windowButtons button{
-  width: 48px !important;
-  min-width: 48px !important;
-  color: rgba(255,255,255,.74) !important;
+
+
+
   background: transparent !important;
 
 
 }
 
 .app[data-platform="linux"] .windowButtons button:hover{
-  color: #fff !important;
+
   background: rgba(255,255,255,.105) !important;
 }
 
@@ -1816,7 +1813,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 
 
 
-  color: rgba(255,255,255,0.72) !important;
+
   -webkit-font-smoothing: antialiased !important;
 }
 
