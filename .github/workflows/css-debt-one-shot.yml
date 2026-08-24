@@ -1,0 +1,48 @@
+name: CSS debt one-shot
+
+on:
+  push:
+    branches:
+      - agent/css-debt-cleanup
+
+permissions:
+  contents: write
+
+jobs:
+  clean-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cleanup branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/css-debt-cleanup
+          fetch-depth: 0
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Materialize fixed-point CSS cleanup
+        run: npm run css:dedup:fix
+
+      - name: Verify hardening gate
+        run: npm run hardening:check
+
+      - name: Commit generated CSS cleanup
+        shell: bash
+        run: |
+          git add -- ':(glob)src/**/*.css' 'src/*.css'
+          if git diff --cached --quiet; then
+            echo 'No CSS changes remained after fixed-point cleanup.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'R4: materialize CSS duplicate cleanup'
+          git push origin HEAD:agent/css-debt-cleanup
