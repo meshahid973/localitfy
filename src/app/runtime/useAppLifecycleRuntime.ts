@@ -1,30 +1,33 @@
 import { useEffect, useRef } from "react";
-import type { Dispatch, RefObject, SetStateAction } from "react";
-import {
-  initLocalitfyAnalytics,
-  trackAcquisitionSource,
-  trackAppActive,
-  trackAppBackgrounded,
-  trackAppForegrounded,
-  trackAppLaunched,
-  trackAppSessionEnded,
-  trackError
-} from "../../analytics";
+import type { MutableRefObject } from "react";
 import type { View } from "../../features/shell/view.types";
 
 export type AppReturnRepairReason = "focus" | "visibility" | "background-tick";
 
+type LifecycleAnalytics = {
+  init: (appVersion: string) => boolean;
+  appLaunched: (properties: { initial_view: View }) => void;
+  appSessionEnded: (properties: { reason: "beforeunload" | "unmount"; current_view: View }) => void;
+  appActive: (properties: { reason: string; current_view: View }) => void;
+  appBackgrounded: (properties: { reason: string; current_view: View }) => void;
+  appForegrounded: (properties: { reason: string; current_view: View }) => void;
+  acquisitionSource: (properties: { source: string; initial_view: View }) => void;
+  error: (name: string, message: string, properties: { current_view: View }) => void;
+};
+
 type AppLifecycleRuntimeOptions = {
   appVersion: string;
-  analyticsViewRef: RefObject<View>;
-  appRootRef: RefObject<HTMLElement | null>;
-  playingRef: RefObject<boolean>;
-  setIsAppBackgrounded: Dispatch<SetStateAction<boolean>>;
+  analytics: LifecycleAnalytics;
+  analyticsViewRef: MutableRefObject<View>;
+  appRootRef: MutableRefObject<HTMLElement | null>;
+  playingRef: MutableRefObject<boolean>;
+  setIsAppBackgrounded: (backgrounded: boolean) => void;
   repairPlaybackAfterAppReturns: (reason: AppReturnRepairReason) => void;
 };
 
 export function useAppLifecycleRuntime({
   appVersion,
+  analytics,
   analyticsViewRef,
   appRootRef,
   playingRef,
@@ -37,25 +40,22 @@ export function useAppLifecycleRuntime({
     let analyticsLaunchCancelled = false;
     const analyticsLaunchTimer = window.setTimeout(() => {
       if (analyticsLaunchCancelled) return;
-      const analyticsReady = initLocalitfyAnalytics(appVersion);
+      const analyticsReady = analytics.init(appVersion);
 
       if (analyticsReady) {
-        trackAppLaunched({ initial_view: analyticsViewRef.current });
-        trackAppActive({ reason: "launch", current_view: analyticsViewRef.current });
-        trackAcquisitionSource({ source: "direct_app_launch", initial_view: analyticsViewRef.current });
+        analytics.appLaunched({ initial_view: analyticsViewRef.current });
+        analytics.appActive({ reason: "launch", current_view: analyticsViewRef.current });
+        analytics.acquisitionSource({ source: "direct_app_launch", initial_view: analyticsViewRef.current });
       }
     }, 950);
 
     const finishAnalyticsSession = (reason: "beforeunload" | "unmount") => {
       if (analyticsSessionEndedRef.current) return;
       analyticsSessionEndedRef.current = true;
-      trackAppSessionEnded({ reason, current_view: analyticsViewRef.current });
+      analytics.appSessionEnded({ reason, current_view: analyticsViewRef.current });
     };
 
-    const handleBeforeUnload = () => {
-      finishAnalyticsSession("beforeunload");
-    };
-
+    const handleBeforeUnload = () => finishAnalyticsSession("beforeunload");
     let focusRepairTimer = 0;
 
     const repairHeroAmbienceAfterFocus = () => {
@@ -77,14 +77,14 @@ export function useAppLifecycleRuntime({
 
       if (hidden) {
         repairPlaybackAfterAppReturns("background-tick");
-        trackAppBackgrounded({ reason: "visibility_hidden", current_view: analyticsViewRef.current });
+        analytics.appBackgrounded({ reason: "visibility_hidden", current_view: analyticsViewRef.current });
         return;
       }
 
       repairPlaybackAfterAppReturns("visibility");
       repairHeroAmbienceAfterFocus();
-      trackAppForegrounded({ reason: "visibility_visible", current_view: analyticsViewRef.current });
-      trackAppActive({ reason: "visibility_visible", current_view: analyticsViewRef.current });
+      analytics.appForegrounded({ reason: "visibility_visible", current_view: analyticsViewRef.current });
+      analytics.appActive({ reason: "visibility_visible", current_view: analyticsViewRef.current });
     };
 
     const handleFocus = () => {
@@ -93,29 +93,27 @@ export function useAppLifecycleRuntime({
         repairPlaybackAfterAppReturns("focus");
         repairHeroAmbienceAfterFocus();
       }
-      trackAppActive({ reason: "window_focus", current_view: analyticsViewRef.current });
+      analytics.appActive({ reason: "window_focus", current_view: analyticsViewRef.current });
     };
 
     const handleBlur = () => {
       if (document.hidden) setIsAppBackgrounded(true);
-      trackAppBackgrounded({ reason: "window_blur", current_view: analyticsViewRef.current });
+      analytics.appBackgrounded({ reason: "window_blur", current_view: analyticsViewRef.current });
     };
 
     const handleWindowError = (event: ErrorEvent) => {
-      trackError("renderer_error", event.message || event.error?.name || "unknown renderer error", {
+      analytics.error("renderer_error", event.message || event.error?.name || "unknown renderer error", {
         current_view: analyticsViewRef.current
       });
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       const reason = event.reason instanceof Error ? event.reason.message : String(event.reason || "unknown rejection");
-      trackError("unhandled_rejection", reason, { current_view: analyticsViewRef.current });
+      analytics.error("unhandled_rejection", reason, { current_view: analyticsViewRef.current });
     };
 
     const heartbeatTimer = window.setInterval(() => {
-      if (!document.hidden) {
-        trackAppActive({ reason: "heartbeat", current_view: analyticsViewRef.current });
-      }
+      if (!document.hidden) analytics.appActive({ reason: "heartbeat", current_view: analyticsViewRef.current });
     }, 300_000);
 
     const backgroundAudioKeeper = window.setInterval(() => {

@@ -24,6 +24,13 @@ import { createPlayerController } from "./player/playerController";
 import { usePlayerRuntime } from "./features/player";
 import type { PlayerEngineSource } from "./player/PlayerEngine";
 import {
+  initLocalitfyAnalytics,
+  trackAcquisitionSource,
+  trackAppActive,
+  trackAppBackgrounded,
+  trackAppForegrounded,
+  trackAppLaunched,
+  trackAppSessionEnded,
   trackAppView,
   trackSettingsOpened,
   trackThemeChanged,
@@ -451,6 +458,16 @@ function MainModeApp() {
 
   useAppLifecycleRuntime({
     appVersion: APP_VERSION,
+    analytics: {
+      init: initLocalitfyAnalytics,
+      appLaunched: trackAppLaunched,
+      appSessionEnded: trackAppSessionEnded,
+      appActive: trackAppActive,
+      appBackgrounded: trackAppBackgrounded,
+      appForegrounded: trackAppForegrounded,
+      acquisitionSource: trackAcquisitionSource,
+      error: trackError
+    },
     analyticsViewRef,
     appRootRef,
     playingRef,
