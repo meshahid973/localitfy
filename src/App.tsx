@@ -109,85 +109,93 @@ import {
   writeCustomThemeBackupPatch
 } from "./features/settings/customThemePersistence";
 import {
-  APP_VERSION,
   BOOT_MIN_VISIBLE_MS,
   BOOT_STEPS,
-  BUILT_IN_CUSTOM_THEME_PRESETS,
-  CODERPIXEL_ARTIST_EASTER_EGG,
   CUSTOM_THEME_COMMIT_DELAY_MS,
-  DISCORD_ASSET_KEYS,
-  DISCORD_LOGO_ASSET,
   HOME_GRID_RENDER_LIMIT,
   INITIAL_LIBRARY_RENDER_LIMIT,
   LIBRARY_RENDER_BATCH_SIZE,
-  LOCALITFY_DOWNLOAD_URL,
-  LOCALITFY_SOURCE_URL,
-  PLAYBACK_URL_CACHE_TTL_MS,
-  PLAYLIST_STORAGE_KEY,
   START_WITH_WINDOWS_DEFAULT_KEY,
-  THEME_SWATCH_COLORS,
   V013_DEFAULTS_KEY,
+  loadingScreenGif,
+  localtifyLogo,
+  screensaverImage
+} from "./core/app.constants";
+import {
+  CODERPIXEL_ARTIST_EASTER_EGG,
+  PLAYBACK_URL_CACHE_TTL_MS
+} from "./features/library/library.constants";
+import {
   V013_RELEASE_DEFAULTS,
   coverColorSyncOptions,
   defaultSettings,
+  settingsCategoryTabs
+} from "./features/settings/settings.constants";
+import { THEME_SWATCH_COLORS, themes } from "./features/settings/theme.constants";
+import { BUILT_IN_CUSTOM_THEME_PRESETS } from "./features/settings/customTheme";
+import { APP_VERSION } from "./features/updates/update.constants";
+import {
+  DISCORD_ASSET_KEYS,
+  DISCORD_LOGO_ASSET,
+  LOCALITFY_DOWNLOAD_URL,
+  LOCALITFY_SOURCE_URL,
   discordArtModeOptions,
   discordCleanupOptions,
   discordSecondLineOptions,
-  discordStyleOptions,
-  loadingScreenGif,
-  localtifyLogo,
-  screensaverImage,
-  settingsCategoryTabs,
-  themes,
-} from "./localtifyConstants";
+  discordStyleOptions
+} from "./features/discord/discord.constants";
+import { PLAYLIST_STORAGE_KEY } from "./features/playlists/playlist.constants";
+import { clamp, collapseSpaces, formatTime, getGreeting } from "./shared/utils/format";
+import { useStableCallback } from "./shared/hooks/useStableCallback";
+import { makeLocalId, readLocalJson } from "./shared/storage/localStorage";
 import {
   applyLibraryOrder,
-  buildAnimatedThemeVisualStyle,
-  buildDiscordPreview,
-  buildDiscordSongSearchUrl,
-  buildSongSearchEntry,
-  clamp,
-  cleanPlaylistList,
-  collapseSpaces,
   createImportAnimationState,
-  formatTime,
-  getAmbientStyle,
-  getCustomThemeColorPatch,
-  getGreeting,
+  getSongPlaybackSourceKey,
+  isPlayableSong,
+  maybeApplyCoderpixelArtist,
+  reorderSongList,
+  saveLibraryOrder,
+  stableSongSourceKey
+} from "./features/library";
+import {
+  buildSongSearchEntry,
   getMetadataRepairPatch,
+  heroTitleDensityClass,
+  prettyMeta,
+  prettyTitle,
+  rankSongsForSearch,
+  sanitizeSongList
+} from "./features/search";
+import {
+  normalizeSettingsSearch,
+  resolveSettingsCategoryFromSearch,
+  settingsTabMatchesSearch
+} from "./features/settings/settings.search";
+import {
+  getAmbientStyle,
   getRendererSafeImageUrl,
   getSongAmbientSource,
-  getSongPlaybackSourceKey,
-  heroTitleDensityClass,
+  pixelArtUrl,
+  useCoverAverageStyle
+} from "./features/covers";
+import {
+  buildAnimatedThemeVisualStyle,
+  getCustomThemeColorPatch,
   hexToRgbString,
   hexToRgbaString,
-  isPlayableSong,
   makeCustomThemeColors,
-  makeLocalId,
   makeThemePresetStyle,
-  maybeApplyCoderpixelArtist,
   normalizeCoverColorSyncMode,
   normalizeHexColor,
   normalizeHexInputDraft,
-  normalizeSettingsSearch,
   normalizeThemeId,
-  pixelArtUrl,
-  prettyMeta,
-  prettyTitle,
   randomThemeHex,
-  rankSongsForSearch,
-  readLocalJson,
-  reorderSongList,
-  resolveSettingsCategoryFromSearch,
-  sanitizeSongList,
-  saveLibraryOrder,
-  settingsTabMatchesSearch,
-  stableSongSourceKey,
-  updateStatusLabel,
-  useCoverAverageStyle,
-  useStableCallback,
   writeSavedCustomThemePresets
-} from "./localtifyUtils";
+} from "./features/settings";
+import { buildDiscordPreview, buildDiscordSongSearchUrl } from "./features/discord";
+import { updateStatusLabel } from "./features/updates";
+import { cleanPlaylistList } from "./features/playlists";
 import type {
   CoverColorSyncMode,
   CustomThemeColorKey,
