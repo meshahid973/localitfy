@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const srcRoot = path.join(root, "src");
-const knownTsNoCheck = new Set(["src/CatBuddy.tsx", "src/app/UpdateIsland.tsx"]);
+const knownTsNoCheck = new Set(["src/CatBuddy.tsx"]);
 const protectedPrefixes = ["src/features/", "src/types/", "src/shared/", "src/platform/", "src/core/"];
 const codeExtensions = new Set([".ts", ".tsx"]);
 function toRepoPath(filePath) { return path.relative(root, filePath).split(path.sep).join("/"); }

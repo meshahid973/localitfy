@@ -1,18 +1,22 @@
-﻿// @ts-nocheck
 import { AnimatePresence, motion as Motion } from "motion/react";
-import { Surface, SurfaceActions, SurfaceBody, SurfaceHeader } from "../ui/Surface";
+import type { ComponentType } from "react";
+import type { MotionProps, Transition } from "motion/react";
+import { Surface, SurfaceActions, SurfaceBody, SurfaceHeader } from "../shared/ui/Surface";
 import {
   createVerticalDragConstraints,
   physicalDragDefaults,
   updateIslandDragBounds
-} from "../motion/physicalDrag";
+} from "../shared/motion/physicalDrag";
+import type { UpdatePromptState } from "../features/updates/update.types";
+
+type UpdateIslandTone = "neutral" | "accent" | "success" | "danger";
 
 function clampPercent(value: number) {
   if (!Number.isFinite(Number(value))) return 0;
   return Math.min(100, Math.max(0, Number(value)));
 }
 
-function updateTone(status: string) {
+function updateTone(status: UpdatePromptState["status"]): UpdateIslandTone {
   if (status === "downloaded") return "success";
   if (status === "error") return "danger";
   if (status === "downloading" || status === "available") return "accent";
@@ -21,15 +25,15 @@ function updateTone(status: string) {
 
 export type UpdateIslandProps = {
   show: boolean;
-  updatePrompt: any;
+  updatePrompt: UpdatePromptState;
   appVersion: string;
   reducedMotion: boolean;
   yukariUpdateImage: string;
-  enterSpring: any;
-  childSpring: any;
-  titleForPrompt: (prompt: any) => string;
-  StatusIcon: (props: { status: string }) => JSX.Element;
-  CloseIcon: () => JSX.Element;
+  enterSpring: Transition;
+  childSpring: Transition;
+  titleForPrompt: (prompt: UpdatePromptState) => string;
+  StatusIcon: ComponentType<{ status: string }>;
+  CloseIcon: ComponentType;
   onDownload: () => void;
   onInstall: () => void;
   onCheckAgain: () => void;
@@ -57,7 +61,7 @@ export default function UpdateIsland({
   const showClose = updatePrompt.status !== "downloading";
   const surfaceTone = updateTone(updatePrompt.status);
 
-  const dragProps = reducedMotion
+  const dragProps: MotionProps = reducedMotion
     ? {}
     : {
         drag: "y",
@@ -136,7 +140,6 @@ export default function UpdateIsland({
               exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
               transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.12 }}
             >
-
               <SurfaceActions
                 as={Motion.div}
                 density="compact"
@@ -190,4 +193,3 @@ export default function UpdateIsland({
     </AnimatePresence>
   );
 }
-
