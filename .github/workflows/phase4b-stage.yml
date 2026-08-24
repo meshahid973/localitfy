@@ -26,44 +26,41 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Extract Discord IPC routing
+      - name: Extract Discord renderer runtime
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          module_path = Path('electron/ipc/discord.cjs')
-          module_source = '''"use strict";\n\nfunction registerDiscordIpc(ipcRouter, services = {}) {\n  if (!ipcRouter || typeof ipcRouter.handle !== "function") {\n    throw new TypeError("registerDiscordIpc requires an IPC router");\n  }\n\n  const {\n    setDiscordActivity,\n    clearDiscordActivity,\n    getDiscordStatus,\n    resetDiscordActivityCache\n  } = services;\n\n  ipcRouter.handle("discord:set-activity", async (_event, payload) => {\n    try { return { ok: await setDiscordActivity(payload) }; } catch { return { ok: false }; }\n  });\n  ipcRouter.handle("discord:clear-activity", async () => {\n    try { return { ok: await clearDiscordActivity() }; } catch { return { ok: false }; }\n  });\n  ipcRouter.handle("discord:status", async () => getDiscordStatus());\n  ipcRouter.handle("discord:reset-cache", async () => {\n    resetDiscordActivityCache();\n    return true;\n  });\n}\n\nmodule.exports = { registerDiscordIpc };\n'''
-          module_path.write_text(module_source, encoding='utf-8')
+          hook_path = Path('src/features/discord/useDiscordActivityRuntime.ts')
+          hook_path.write_text('''import { useEffect, useRef } from "react";\nimport type { DiscordArtMode, Settings, Song } from "../../localtifyTypes";\nimport type { RuntimePixelArtAsset } from "../covers/cover.types";\nimport { pixelArtUrl } from "../covers/pixelArt";\nimport { DISCORD_ASSET_KEYS, LOCALITFY_DOWNLOAD_URL, LOCALITFY_SOURCE_URL } from "./discord.constants";\nimport { buildDiscordSongSearchUrl } from "./discord.utils";\n\ntype CurrentRef<T> = { current: T };\n\ntype DiscordActivityRuntimeOptions = {\n  ready: boolean;\n  settings: Settings;\n  currentSong: Song | null;\n  isPlaying: boolean;\n  songCount: number;\n  songIndexById: ReadonlyMap<string, number>;\n  mostPlayedId: string;\n  mostPlayedTitle: string;\n  pixelArtVersion: number;\n  isAppBackgrounded: boolean;\n  audioRef: CurrentRef<HTMLAudioElement | null>;\n  songRef: CurrentRef<Song | null>;\n  timeRef: CurrentRef<number>;\n  durationRef: CurrentRef<number>;\n  playingRef: CurrentRef<boolean>;\n  getRuntimePixelArtForSong: (song: Song | null, seed: string) => RuntimePixelArtAsset;\n  getLiveDiscordAssetKey: (song: Song | null, songIndex: number, mode: DiscordArtMode) => string | undefined;\n};\n\nexport function useDiscordActivityRuntime(options: DiscordActivityRuntimeOptions) {\n  const {\n    ready, settings, currentSong, isPlaying, songCount, songIndexById, mostPlayedId, mostPlayedTitle,\n    pixelArtVersion, isAppBackgrounded, audioRef, songRef, timeRef, durationRef, playingRef,\n    getRuntimePixelArtForSong, getLiveDiscordAssetKey\n  } = options;\n\n  const settingsRef = useRef(settings);\n  const lastPayloadKeyRef = useRef("");\n\n  useEffect(() => {\n    settingsRef.current = settings;\n  }, [settings]);\n\n  useEffect(() => {\n    if (!ready) return;\n\n    if (!settings.discordEnabled) {\n      lastPayloadKeyRef.current = "";\n      window.localitfy.clearDiscordActivity().catch(() => undefined);\n      return;\n    }\n\n    let alive = true;\n\n    const sendActivity = () => {\n      if (!alive) return;\n\n      const audio = audioRef.current;\n      const song = songRef.current;\n      const latestSettings = settingsRef.current;\n      const safeCurrentTime = Number.isFinite(audio?.currentTime)\n        ? Math.floor(audio?.currentTime || 0)\n        : Math.floor(timeRef.current || 0);\n      const safeDuration = Number.isFinite(audio?.duration)\n        ? Math.floor(audio?.duration || 0)\n        : Math.floor(durationRef.current || song?.duration || 0);\n\n      const pixel = getRuntimePixelArtForSong(song, "rpc-preview");\n      const backupPixel = getRuntimePixelArtForSong(song, "rpc-backup");\n      const songIndex = song ? songIndexById.get(song.id) ?? -1 : -1;\n      const chosenDiscordAsset = getLiveDiscordAssetKey(song, songIndex, latestSettings.discordArtMode);\n      const songSearchUrl = buildDiscordSongSearchUrl(song?.title || "", song?.artist || "");\n      const hasSong = Boolean(song?.title);\n      const primaryLabel = latestSettings.discordPrivacyMode || !hasSong\n        ? "Download localtify"\n        : "Search this song on YouTube";\n      const primaryUrl = latestSettings.discordPrivacyMode || !hasSong\n        ? LOCALITFY_DOWNLOAD_URL\n        : songSearchUrl;\n\n      const payloadKey = [\n        song?.id || "idle", song?.title || "", song?.artist || "", song?.album || "",\n        song?.playCount || 0, song?.liked ? "liked" : "plain",\n        playingRef.current ? "playing" : "paused", safeDuration, Math.floor(safeCurrentTime / 15),\n        songCount, mostPlayedId, latestSettings.discordEnabled, latestSettings.discordShowPausedIdle,\n        latestSettings.discordPrivacyMode, latestSettings.discordButtons, latestSettings.discordArtMode,\n        latestSettings.discordActivityStyle, latestSettings.discordTitleCleanup, latestSettings.discordSecondLine,\n        chosenDiscordAsset\n      ].join("|");\n\n      if (payloadKey === lastPayloadKeyRef.current) return;\n      lastPayloadKeyRef.current = payloadKey;\n\n      const sendDiscordActivity = window.localitfy.updateDiscordActivity || window.localitfy.setDiscordActivity;\n      if (!sendDiscordActivity) return;\n\n      sendDiscordActivity({\n        isPlaying: playingRef.current,\n        songId: song?.id || "",\n        title: song?.title || "",\n        artist: song?.artist || "",\n        album: song?.album || "",\n        playCount: song?.playCount || 0,\n        liked: song?.liked || false,\n        currentTime: safeCurrentTime,\n        duration: safeDuration,\n        songCount,\n        mostPlayedTitle,\n        discordEnabled: latestSettings.discordEnabled,\n        discordShowPausedIdle: latestSettings.discordShowPausedIdle,\n        discordPrivacyMode: latestSettings.discordPrivacyMode,\n        discordButtons: latestSettings.discordButtons,\n        discordArtMode: latestSettings.discordArtMode,\n        discordActivityStyle: latestSettings.discordActivityStyle,\n        discordTitleCleanup: latestSettings.discordTitleCleanup,\n        discordSecondLine: latestSettings.discordSecondLine,\n        discordAssetKey: chosenDiscordAsset,\n        discordAltAssetKey: backupPixel.discordKey,\n        discordAssetLabel: pixel.label,\n        discordAssetPreview: pixel.url || pixelArtUrl(pixel.file),\n        discordFallbackAssets: [...DISCORD_ASSET_KEYS],\n        discordOpenUrl: primaryUrl,\n        discordGithubUrl: LOCALITFY_SOURCE_URL,\n        discordOpenLabel: primaryLabel,\n        discordGithubLabel: "Get localtify",\n        discordButtonLabels: [primaryLabel, "Get localtify"],\n        discordButtonRetry: true,\n        discordActivityName: "localtify",\n        discordActivityType: "listening",\n        discordSmallImageMode: "player"\n      }).catch(() => {\n        if (lastPayloadKeyRef.current === payloadKey) lastPayloadKeyRef.current = "";\n      });\n    };\n\n    sendActivity();\n    const refreshEveryMs = isAppBackgrounded ? 45_000 : 15_000;\n    const timer = window.setInterval(sendActivity, refreshEveryMs);\n\n    return () => {\n      alive = false;\n      window.clearInterval(timer);\n    };\n  }, [\n    ready, currentSong?.id, currentSong?.title, currentSong?.artist, currentSong?.album,\n    currentSong?.playCount, currentSong?.liked, isPlaying, songCount, songIndexById, mostPlayedId,\n    settings.discordEnabled, settings.discordShowPausedIdle, settings.discordPrivacyMode, settings.discordButtons,\n    settings.discordArtMode, settings.discordActivityStyle, settings.discordTitleCleanup, settings.discordSecondLine,\n    pixelArtVersion, isAppBackgrounded\n  ]);\n}\n''', encoding='utf-8')
 
-          main_path = Path('electron/main.cjs')
-          main = main_path.read_text(encoding='utf-8-sig')
+          app_path = Path('src/App.tsx')
+          app = app_path.read_text(encoding='utf-8-sig')
 
-          import_anchor = 'const { createIpcRouter } = require("./ipc/router.cjs");\n'
-          import_line = 'const { registerDiscordIpc } = require("./ipc/discord.cjs");\n'
-          if import_line not in main:
-            if import_anchor not in main:
-              raise SystemExit('IPC router import anchor not found')
-            main = main.replace(import_anchor, import_anchor + import_line, 1)
+          import_anchor = 'import { getLocaltifyPlatformInfo } from "./app/platform";\n'
+          import_line = 'import { useDiscordActivityRuntime } from "./features/discord/useDiscordActivityRuntime";\n'
+          if import_line not in app:
+            if import_anchor not in app:
+              raise SystemExit('Discord runtime import anchor not found')
+            app = app.replace(import_anchor, import_anchor + import_line, 1)
 
-          old = '''  ipcRouter.handle("discord:set-activity", async (_event, payload) => {\n    try { return { ok: await setDiscordActivity(payload) }; } catch { return { ok: false }; }\n  });\n  ipcRouter.handle("discord:clear-activity", async () => {\n    try { return { ok: await clearDiscordActivity() }; } catch { return { ok: false }; }\n  });\n  ipcRouter.handle("discord:status", async () => getDiscordStatus());\n  ipcRouter.handle("discord:reset-cache", async () => {\n    resetDiscordActivityCache();\n    return true;\n  });\n'''
-          new = '''  registerDiscordIpc(ipcRouter, {\n    setDiscordActivity,\n    clearDiscordActivity,\n    getDiscordStatus,\n    resetDiscordActivityCache\n  });\n'''
+          app = app.replace('  const discordLastPayloadKeyRef = useRef<string>("");\n', '', 1)
 
-          if old in main:
-            main = main.replace(old, new, 1)
-          elif new not in main:
-            raise SystemExit('Current Discord IPC block not found; refusing a fuzzy edit')
+          start_marker = '  const discordSettingsRef = useRef(settings);\n'
+          end_marker = '\n\n\n  useEffect(() => {\n    if (sleepTimerRef.current !== null) {'
+          start = app.find(start_marker)
+          end = app.find(end_marker, start)
+          if start < 0 or end < 0:
+            raise SystemExit(f'Discord effect markers not found (start={start}, end={end}); refusing fuzzy edit')
 
-          main_path.write_text(main, encoding='utf-8')
+          replacement = '''  useDiscordActivityRuntime({\n    ready,\n    settings,\n    currentSong,\n    isPlaying,\n    songCount: songs.length,\n    songIndexById,\n    mostPlayedId: mostPlayed?.id || "",\n    mostPlayedTitle: mostPlayed?.title || "",\n    pixelArtVersion: pixelArtAssets.length,\n    isAppBackgrounded,\n    audioRef,\n    songRef,\n    timeRef,\n    durationRef,\n    playingRef,\n    getRuntimePixelArtForSong,\n    getLiveDiscordAssetKey\n  });'''
+          app = app[:start] + replacement + app[end:]
+          app_path.write_text(app, encoding='utf-8')
           PY
 
       - name: Diff sanity
         run: git diff --check
-
-      - name: Syntax smoke
-        run: |
-          node --check electron/main.cjs
-          node --check electron/ipc/discord.cjs
 
       - name: Install exact desktop dependencies
         run: npm ci --no-audit --no-fund
@@ -82,7 +79,7 @@ jobs:
           fi
           git config user.name "OpenAI Phase 4B"
           git config user.email "noreply@openai.com"
-          git add electron/main.cjs electron/ipc/discord.cjs
+          git add src/App.tsx src/features/discord/useDiscordActivityRuntime.ts
           git diff --cached --check
-          git commit -m "Phase 4B.4: extract Discord IPC routing"
+          git commit -m "Phase 4B.3: extract Discord renderer runtime"
           git push origin HEAD:agent/phase-4b-runtime-monolith-reduction
