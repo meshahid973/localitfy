@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import "./cat-buddy.css";
 
@@ -150,8 +149,14 @@ function pickIdleAction() {
   return actions[Math.floor(Math.random() * actions.length)] || "sitting";
 }
 
-function getCatSingletonKey() {
-  return "__localtifyCatBuddyPrimaryV405";
+const CAT_BUDDY_SINGLETON_KEY = "__localtifyCatBuddyPrimaryV405" as const;
+
+type CatBuddyWindow = Window & {
+  __localtifyCatBuddyPrimaryV405?: string;
+};
+
+function getCatSingletonWindow() {
+  return window as CatBuddyWindow;
 }
 
 function actionDuration(animation: CatAnimationId, wantedDuration: number) {
@@ -198,21 +203,21 @@ export default function CatBuddy({ enabled, reducedMotion = false }: CatBuddyPro
   useEffect(() => {
     if (!enabled) return;
 
-    const key = getCatSingletonKey();
+    const catWindow = getCatSingletonWindow();
     const ownId = instanceIdRef.current;
-    const existing = (window as any)[key];
+    const existing = catWindow[CAT_BUDDY_SINGLETON_KEY];
 
     if (existing && existing !== ownId) {
       setIsPrimary(false);
       return;
     }
 
-    (window as any)[key] = ownId;
+    catWindow[CAT_BUDDY_SINGLETON_KEY] = ownId;
     setIsPrimary(true);
 
     return () => {
-      if ((window as any)[key] === ownId) {
-        delete (window as any)[key];
+      if (catWindow[CAT_BUDDY_SINGLETON_KEY] === ownId) {
+        delete catWindow[CAT_BUDDY_SINGLETON_KEY];
       }
     };
   }, [enabled]);
