@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import type { View } from "../../features/shell/view.types";
 
@@ -35,6 +35,11 @@ export function useAppLifecycleRuntime({
   repairPlaybackAfterAppReturns
 }: AppLifecycleRuntimeOptions) {
   const analyticsSessionEndedRef = useRef(false);
+  const repairPlaybackAfterAppReturnsRef = useRef(repairPlaybackAfterAppReturns);
+
+  useLayoutEffect(() => {
+    repairPlaybackAfterAppReturnsRef.current = repairPlaybackAfterAppReturns;
+  }, [repairPlaybackAfterAppReturns]);
 
   useEffect(() => {
     let analyticsLaunchCancelled = false;
@@ -71,17 +76,21 @@ export function useAppLifecycleRuntime({
       }, 420);
     };
 
+    const repairPlayback = (reason: AppReturnRepairReason) => {
+      repairPlaybackAfterAppReturnsRef.current(reason);
+    };
+
     const handleVisibilityChange = () => {
       const hidden = document.hidden;
       setIsAppBackgrounded(hidden);
 
       if (hidden) {
-        repairPlaybackAfterAppReturns("background-tick");
+        repairPlayback("background-tick");
         analytics.appBackgrounded({ reason: "visibility_hidden", current_view: analyticsViewRef.current });
         return;
       }
 
-      repairPlaybackAfterAppReturns("visibility");
+      repairPlayback("visibility");
       repairHeroAmbienceAfterFocus();
       analytics.appForegrounded({ reason: "visibility_visible", current_view: analyticsViewRef.current });
       analytics.appActive({ reason: "visibility_visible", current_view: analyticsViewRef.current });
@@ -90,7 +99,7 @@ export function useAppLifecycleRuntime({
     const handleFocus = () => {
       if (!document.hidden) {
         setIsAppBackgrounded(false);
-        repairPlaybackAfterAppReturns("focus");
+        repairPlayback("focus");
         repairHeroAmbienceAfterFocus();
       }
       analytics.appActive({ reason: "window_focus", current_view: analyticsViewRef.current });
@@ -118,7 +127,7 @@ export function useAppLifecycleRuntime({
 
     const backgroundAudioKeeper = window.setInterval(() => {
       if (!document.hidden || !playingRef.current) return;
-      repairPlaybackAfterAppReturns("background-tick");
+      repairPlayback("background-tick");
     }, 1800);
 
     window.addEventListener("beforeunload", handleBeforeUnload);

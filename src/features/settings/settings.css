@@ -24,7 +24,6 @@
   border: 1px solid rgba(var(--lt-accent-rgb), 0.2);
 
 
-
   backdrop-filter: blur(18px) saturate(125%);
 }
 
@@ -39,7 +38,6 @@
   margin: 0;
 
 
-
 }
 
 .settingsPanelCard,
@@ -48,7 +46,6 @@
   overflow: hidden;
 
   border: 1px solid rgba(255,255,255,0.085);
-
 
 
   backdrop-filter: blur(18px) saturate(120%);
@@ -255,7 +252,6 @@
 .customThemeTopV025{
 
 
-
   align-items: stretch;
 }
 
@@ -390,7 +386,6 @@
 }
 
 
-
 .customThemePresetButtonV025,
 .savedThemeItemV025 button{
   position: relative;
@@ -465,13 +460,6 @@
   position: relative;
 
 
-
-
-
-
-
-
-
   transition: transform 180ms cubic-bezier(.2,.9,.18,1), border-color 180ms ease, background 180ms ease;
 }
 
@@ -492,7 +480,6 @@
 }
 
 .themeTokenVisual{
-
 
 
   box-shadow: 0 0 18px rgba(var(--lt-accent-rgb),0.14), inset 0 1px 0 rgba(255,255,255,0.18);
@@ -557,10 +544,6 @@
   display: inline-flex;
 
 
-
-
-
-
   font-size: 12px;
   font-weight: 950;
   overflow-wrap: anywhere;
@@ -593,15 +576,12 @@
   position: relative;
 
 
-
-
   color: var(--lt-text);
   text-align: left;
 
 
   transition: transform 190ms cubic-bezier(.2,1.2,.18,1), border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
 }
-
 
 
 .optionGrid{
@@ -614,8 +594,6 @@
 .optionGrid.three{ grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
 
 .settingsChoice{
-
-
 
 
 }
@@ -665,14 +643,11 @@
 .statusGrid{
 
 
-
   margin-bottom: 14px;
 }
 
 .statusGrid span{
   min-height: 72px;
-
-
 
 
   align-content: center;
@@ -687,7 +662,6 @@
 }
 
 .statusGrid small{
-
 
 
   text-transform: uppercase;
@@ -779,7 +753,6 @@
 .settingsWideCard{
   grid-column: 1 / -1;
 }
-
 
 
 .cleanToggleLabel{
@@ -943,7 +916,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   border-color: rgba(255,255,255,0.085);
 
 
-
   transform: translate3d(0,0,0);
 }
 
@@ -1020,10 +992,8 @@ body.localitfyThemePainting .app .themeTokenCard{
 }
 
 
-
 .settingsThemeSelectPanel{
   display: grid;
-
 
 
   margin-top: 2px;
@@ -1323,7 +1293,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .themePickerLockNoteV026{
 
 
-
   font-weight: 800 !important;
 }
 
@@ -1418,7 +1387,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 
   align-items: center !important;
 }
-
 
 
 .settingsQuickStartCard{
@@ -1732,7 +1700,6 @@ body.localitfyThemePainting .app .themeTokenCard{
   display: grid !important;
 
 
-
 }
 
 .discordHeroCopy{
@@ -2017,7 +1984,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .customThemeManagerV027{
   gap: 18px !important;
 }
-
 
 
 .settingsTextFieldV027{
@@ -2382,8 +2348,6 @@ body.localitfyThemePainting .app .themeTokenCard{
 .settingsCategoryPage .customThemeHeaderV027{
   position: relative !important;
   z-index: 1 !important;
-
-
 
 
   padding: 0 0 16px !important;
@@ -2791,8 +2755,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   overflow: hidden !important;
 
 
-
-
   backdrop-filter: blur(18px) saturate(125%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(125%) !important;
 }
@@ -2870,7 +2832,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   max-width: 72ch !important;
 
 
-
 }
 
 .settingsUpdatesPage .settingsUpdateMessage-error{
@@ -2882,14 +2843,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .settingsUpdatesPage .settingsActionButton{
 
 
-
-
-
-
-
   transform: none !important;
 }
-
 
 
 .settingsReleaseList{
@@ -2905,12 +2860,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 
   gap: 10px !important;
-
-
-
-
-
-
 
 
   line-height: 1.35 !important;
@@ -3598,7 +3547,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 }
 
 
-
 .settingsLayout{
   grid-template-columns: 248px minmax(0, 1fr) !important;
 }
@@ -3620,12 +3568,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   backdrop-filter: blur(12px) saturate(115%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(115%) !important;
 }
-
-
-
-
-
-
 
 
 .settingsPanelHeader strong,
@@ -3727,7 +3669,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   padding: 13px 14px !important;
   border-radius: 16px !important;
 }
-
 
 
 .settingsInfoDot{
@@ -4105,7 +4046,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 }
 
 
-
 .settingsDiagnosticsText{
 
   max-height: 360px !important;
@@ -4233,16 +4173,11 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 }
 
 
-
-
-
 .simpleThemeActionsV025,
 .themeEditorQuickActions{
   min-width: 0 !important;
   align-content: center !important;
 }
-
-
 
 
 .customThemePreviewV025,
@@ -4251,17 +4186,10 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
   position: relative;
 
 
-
-
-
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.05),
     0 14px 34px rgba(0,0,0,.20) !important;
 }
-
-
-
-
 
 
 .customThemePresetButtonV025,
@@ -4273,8 +4201,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
     rgba(255,255,255,.026) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
-
-
 
 
 .themeTokenCopy strong{
@@ -4290,7 +4216,6 @@ body.localtifyPerfV301 .settingsPage :is(.settingsPageCard, .settingsPanelCard){
 .customThemeTokenRowV025 code{
 
   text-align: center;
-
 
 
 }
@@ -6038,8 +5963,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 .customThemeColorPickerV032{
 
 
-
-
   position: relative;
   display: block;
 }
@@ -6071,7 +5994,6 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   line-height: 1.08;
 
 
-
 }
 
 .customThemeTokenV027 > small{
@@ -6084,12 +6006,9 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
   font-weight: 740;
 
 
-
 }
 
 .customThemeHexInputV032{
-
-
 
 
   padding: 0 10px;
@@ -6140,17 +6059,7 @@ body.localitfyThemePainting .app *::after{
 }
 
 
-
-
-
-
-
-
-
-
-
 .customThemeHexInputV032{
-
 
 
   max-width: 118px;
@@ -6201,8 +6110,6 @@ body.localitfyThemePainting .discordSettingsPage{
 }
 
 
-
-
 body.localitfyThemePainting,
 body.localitfyThemePainting *{
   cursor: default;
@@ -6229,18 +6136,6 @@ body.localitfyThemePainting .customThemeTokenV027{
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 .customThemeNativeColorInputV027{
@@ -6623,8 +6518,6 @@ body.localitfyThemePainting .toggleRow{
 }
 
 
-
-
 .feedbackPromptBrandV331{
   display: flex !important;
   align-items: center !important;
@@ -6700,8 +6593,6 @@ body.localitfyThemePainting .toggleRow{
   letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
 }
-
-
 
 
 .feedbackCategoryButtonV331{
@@ -6844,20 +6735,7 @@ body.localitfyThemePainting .toggleRow{
 */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 @media (max-width: 720px){
-
 
 
   }
@@ -7462,10 +7340,6 @@ body.localitfyThemePainting .toggleRow{
     grid-template-columns: 1fr !important;
   }
 }
-
-
-
-
 
 
 .bouncyHeroSliderShellV448{

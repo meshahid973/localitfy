@@ -708,10 +708,6 @@
 @media (max-width: 860px) {
 
 
-
-
-
-
   .onboardingV314,
   .onboardingV315 {
     padding: 16px;
@@ -830,8 +826,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   position: absolute;
 
 
-
-
   aspect-ratio: 726 / 915;
   pointer-events: none;
 
@@ -852,8 +846,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 
 .onboardingMascotPeekSoftEdgeV499{
   position: absolute;
-
-
 
 
   border-radius: 999px;
@@ -1049,17 +1041,12 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 .onboardingMascotPeekWrapV499{
 
 
-
-
-
   filter:
     drop-shadow(0 26px 42px rgba(0, 0, 0, 0.38))
     drop-shadow(0 0 28px rgba(var(--onboarding-accent-rgb), 0.16));
 }
 
 .onboardingMascotPeekSoftEdgeV499{
-
-
 
 
   background:

@@ -3,7 +3,6 @@
   margin-top: 3px;
 
 
-
 }
 
 @keyframes softPanelIn {
@@ -16,8 +15,6 @@
     transform: translateY(0) scale(1);
   }
 }
-
-
 
 
 .libraryUtilityRail .compactHead .eyebrow{
@@ -45,10 +42,7 @@
 .editorModal{
 
 
-
   padding: 20px !important;
-
-
 
 
 }
@@ -223,7 +217,6 @@
 }
 
 
-
 .headerBar{
   position: relative !important;
   top: auto !important;
@@ -283,8 +276,6 @@
 }
 
 
-
-
 .songRow{
   animation: localitfyRowIn 250ms var(--ease-smooth) both;
 }
@@ -328,7 +319,6 @@
     transform: translate3d(0, 0, 0);
   }
 }
-
 
 
 @keyframes localitfyRankWiggle {
@@ -1060,8 +1050,6 @@ html{
 }
 
 
-
-
 .app .ambientSurface::before{
   opacity: 0.14;
 }
@@ -1483,7 +1471,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 
-
 .editorGridBetter{
   min-height: 0 !important;
   overflow: auto !important;
@@ -1492,12 +1479,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) !important;
   gap: 22px !important;
 }
-
-
-
-
-
-
 
 
 .editorMiniStats{
@@ -1515,30 +1496,11 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 
-
 .editorFieldsBetter{
   min-width: 0 !important;
   display: grid !important;
   gap: 14px !important;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 .editorActionsBetter{
@@ -1559,23 +1521,10 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 
-
 @media (max-width: 860px){
 
 
-
-
-
-
   }
-
-
-
-
-
-
-
-
 
 
 @media (max-width: 760px){
@@ -1645,7 +1594,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 .ambientSurface::before{
 
 
-
   transform: scale(1.12) !important;
   transition:
     opacity 520ms ease,
@@ -1686,7 +1634,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 }
 
 .coverAura::before{
-
 
 
   transform: scale(0.92) !important;
@@ -1735,7 +1682,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
     box-shadow 180ms ease,
     transform 180ms var(--shell-ease) !important;
 }
-
 
 
 .songRow.active{
@@ -1938,7 +1884,6 @@ input[type="range"]{
 @media (max-width: 920px){
 
 
-
   .mainAction{
     min-height: 46px !important;
     padding-inline: 0 !important;
@@ -1987,12 +1932,7 @@ input[type="range"]{
 .navIcon{
 
 
-
-
-
-
   background-image: none !important;
-
 
 
   font-size: 23px !important;
@@ -2099,9 +2039,6 @@ body{
 }
 
 
-
-
-
 .app .songRow{
   max-width: 100% !important;
   isolation: isolate !important;
@@ -2112,7 +2049,6 @@ body{
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
   filter: none !important;
 }
-
 
 
 .app .songRow.active{
@@ -2146,10 +2082,6 @@ body{
 .app .navIcon{
 
 
-
-
-
-
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -2160,8 +2092,6 @@ body{
 
 .app .navLucideIcon{
   display: block !important;
-
-
 
 
   stroke-linecap: round !important;
@@ -2188,7 +2118,6 @@ body{
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
-
 
 
 .softButton{
@@ -2257,7 +2186,6 @@ body{
   --sidebar-line: color-mix(in oklab, var(--lt-accent, #64f0a4) 18%, var(--lt-border, rgba(255,255,255,.08)) 82%);
   --page-line: color-mix(in oklab, var(--lt-accent, #64f0a4) 8%, var(--lt-text, #fff) 3%);
 }
-
 
 
 [data-orb]{
@@ -2357,8 +2285,6 @@ body{
 }
 
 
-
-
 .shell{
   background: transparent !important;
 }
@@ -2369,9 +2295,6 @@ body{
   border-top: 1px solid var(--theme-line) !important;
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--theme-accent) 7%, transparent) !important;
 }
-
-
-
 
 
 .coverAura:hover::before{
@@ -2407,7 +2330,6 @@ body{
   border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 18%, transparent) !important;
   box-shadow: none !important;
 }
-
 
 
 .app::before{
@@ -2514,7 +2436,6 @@ button:hover,
   outline: none !important;
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--lt-accent, #ff6edb) 22%, transparent) !important;
 }
-
 
 
 @supports (content-visibility: auto){
@@ -2658,7 +2579,6 @@ body.localitfyThemePainting .app *{
 .navLucideIcon{
   width: 25px !important;
   height: 25px !important;
-
 
 
   filter: drop-shadow(0 0 10px rgba(var(--lt-accent-rgb), 0.10));
@@ -3044,7 +2964,6 @@ html{
 }
 
 
-
 @keyframes localtifyNightFade{
   0%{ opacity: 0; }
   16%, 82%{ opacity: 1; }
@@ -3212,12 +3131,7 @@ html{
 .app .secretLayer{
 
 
-
-
-
-
   transform: none !important;
-
 
 
 }
@@ -3237,7 +3151,6 @@ html{
   62%{ opacity: 1; transform: translate3d(-50%, 2px, 0) scale(1.025); }
   100%{ opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); }
 }
-
 
 
 .app .secretLayer.disco .secretAura{
@@ -3342,8 +3255,6 @@ html{
 
 .app .secretLayer{
   position: fixed !important;
-
-
 
 
   background: transparent !important;
@@ -5221,28 +5132,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbon{
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
 
 
 .app .topUpdateRibbonText,
@@ -5253,7 +5143,6 @@ body.localtifyBackgroundMode .ambientSurface,
 
 
 }
-
 
 
 .app .topUpdateRibbonText p:not(.eyebrow),
@@ -5268,10 +5157,6 @@ body.localtifyBackgroundMode .ambientSurface,
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
-
-
-
-
 
 
 .app .topUpdateRibbon .updateGhostButton:hover,
@@ -5290,11 +5175,7 @@ body.localtifyBackgroundMode .ambientSurface,
   position: static !important;
 
 
-
-
-
 }
-
 
 
 @keyframes localtifyTopUpdateRibbonIn{
@@ -5348,30 +5229,7 @@ body.localtifyBackgroundMode .ambientSurface,
 .topUpdateRibbon{
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
-
 
 
 .app .topUpdateRibbonMeta,
@@ -5399,22 +5257,12 @@ body.localtifyBackgroundMode .ambientSurface,
   min-width: max-content !important;
 
 
-
-
   flex-wrap: nowrap !important;
 }
 
 
-
-
-
-
 .app .topUpdateRibbonProgress,
 .topUpdateRibbonProgress{
-
-
-
-
 
 
   grid-column: auto !important;
@@ -5447,12 +5295,6 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 
-
-
-
-
-
-
 .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow,
 .app .topUpdateRibbonText h3,
@@ -5462,11 +5304,6 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: none !important;
   line-height: 1 !important;
 }
-
-
-
-
-
 
 
 @media (max-width: 980px){
@@ -7596,18 +7433,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbonLayer{
 
 
-
-
-
-
-
-
-
-
-
-
-
-
   margin: 0 !important;
 
   background: transparent !important;
@@ -7623,23 +7448,10 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   --ribbon-h: 30px !important;
 
 
-
-
-
-
   margin: 0 auto !important;
 
 
-
-
-
-
-
   outline: 0 !important;
-
-
-
-
 
 
   -webkit-app-region: no-drag !important;
@@ -7647,8 +7459,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 .app .topUpdateRibbon::before,
 .topUpdateRibbon::before{
-
-
 
 
   border-radius: inherit !important;
@@ -7668,15 +7478,8 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbonIcon{
 
 
-
-
-
-
-
   align-self: center !important;
   justify-self: center !important;
-
-
 
 
   font-size: 10.5px !important;
@@ -7689,8 +7492,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbonText{
 
   height: 100% !important;
-
-
 
 
   transform: none !important;
@@ -7716,12 +7517,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   max-width: 100% !important;
 
 
-
-
-
-
-
-
   transform: none !important;
 }
 
@@ -7734,9 +7529,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbonRight{
 
 
-
   grid-auto-flow: column !important;
-
 
 
 }
@@ -7807,7 +7600,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   border: 0 !important;
 
 
-
 }
 
 
@@ -7822,9 +7614,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 .app .topUpdateRibbonProgress,
 .topUpdateRibbonProgress{
-
-
-
 
 
   margin: 0 !important;
@@ -7887,9 +7676,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbonLayer{
 
 
-
-
-
   max-height: 28px !important;
 
 
@@ -7902,15 +7688,9 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   max-width: 100% !important;
 
 
-
-
-
   column-gap: 8px !important;
 
   border-color: rgba(var(--lt-accent-rgb, 230,90,223), 0.20) !important;
-
-
-
 
 
 }
@@ -7932,7 +7712,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 }
 
 
-
 .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow{
   font-size: 9px !important;
@@ -7944,19 +7723,12 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbonRight{
 
 
-
-
-
-
   pointer-events: auto !important;
   -webkit-app-region: no-drag !important;
 }
 
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
-
-
-
 
 
   pointer-events: auto !important;
@@ -8001,11 +7773,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbon .updateToastClose{
 
 
-
-
-
-
-
 }
 
 .app .topUpdateRibbon .updateGhostButton:hover,
@@ -8032,7 +7799,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbon .updateToastClose:hover{
 
 
-
   filter: none !important;
 }
 
@@ -8048,8 +7814,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 .app .topUpdateRibbonProgress,
 .topUpdateRibbonProgress{
-
-
 
 
   opacity: .78 !important;
@@ -8989,7 +8753,6 @@ body,
 }
 
 
-
 .navText{
   min-width: 0;
   display: grid;
@@ -9335,21 +9098,9 @@ body.isResizingPlayer .app *{
 }
 
 
-
-
-
 /* localtify 0.4.0 — no glyph UI icons + full app modal overlay.
    Uses inline SVGs so packaged builds do not depend on font glyph rendering.
 */
-
-
-
-
-
-
-
-
-
 
 
 /* localtify 0.4.0 — titlebar hover colors.
@@ -9357,14 +9108,8 @@ body.isResizingPlayer .app *{
 */
 
 
-
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
-
-
-
-
-
 
 
   align-items: flex-start !important;
@@ -9376,20 +9121,6 @@ body.isResizingPlayer .app *{
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   animation: localtifyTopIslandInV454 420ms cubic-bezier(.16,1,.3,1) both !important;
@@ -9416,11 +9147,8 @@ body.isResizingPlayer .app *{
 .topUpdateRibbonIcon{
 
 
-
-
   display: grid !important;
   place-items: center !important;
-
 
 
   animation: none !important;
@@ -9443,7 +9171,6 @@ body.isResizingPlayer .app *{
 
 .app .topUpdateRibbonRight,
 .topUpdateRibbonRight{
-
 
 
   justify-content: flex-end !important;
@@ -9486,12 +9213,10 @@ body.isResizingPlayer .app *{
 .topUpdateRibbon .updateToastClose{
 
 
-
   padding: 0 !important;
   margin-left: 2px !important;
   display: grid !important;
   place-items: center !important;
-
 
 
 }
@@ -10031,9 +9756,7 @@ body.isResizingPlayer .app *{
   width: 100% !important;
 
 
-
   border-radius: 999px !important;
-
 
 
   outline: none !important;
@@ -10059,7 +9782,6 @@ body.isResizingPlayer .app *{
 .app .search:focus,
 .app .searchEasterWrap .search:focus{
   color: #fff !important;
-
 
 
   will-change: transform, border-color, box-shadow !important;
@@ -10280,7 +10002,6 @@ body.isResizingPlayer .app *{
 }
 
 
-
 .app .searchEasterWrap{
 
   margin-top: 1px !important;
@@ -10445,8 +10166,6 @@ body.isResizingPlayer .app *{
   inset: 36px 0 auto 0 !important;
 
 
-
-
 }
 
 
@@ -10454,22 +10173,8 @@ body.isResizingPlayer .app *{
 .topUpdateRibbon{
 
 
-
-
-
-
-
-
-
-
-
-
   border-top: 1px solid color-mix(in oklab, var(--lt-accent) 30%, transparent) !important;
   border-bottom: 1px solid color-mix(in oklab, var(--lt-accent) 44%, rgba(255,255,255,.06)) !important;
-
-
-
-
 
 
 }
@@ -10501,27 +10206,16 @@ body.isResizingPlayer .app *{
 .topUpdateRibbonIcon{
 
 
-
   margin: 0 !important;
 
   border-radius: 4px !important;
 
 
-
 }
-
 
 
 .app .topUpdateRibbonText h3,
 .topUpdateRibbonText h3{
-
-
-
-
-
-
-
-
 
 
   text-transform: none !important;
@@ -10537,17 +10231,8 @@ body.isResizingPlayer .app *{
 }
 
 
-
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
-
-
-
-
-
-
-
-
 
 
   line-height: 1 !important;
@@ -10558,10 +10243,7 @@ body.isResizingPlayer .app *{
 .topUpdateRibbon .updateToastClose{
 
 
-
-
   border-radius: 6px !important;
-
 
 
 }
@@ -10611,11 +10293,8 @@ body.isResizingPlayer .app *{
 /* Title/search spacing fix */
 
 
-
 /* Organic stars: the positions drift, not just the whole layer. */
 .app .content > .headerBar::before{
-
-
 
 
   background-image:
@@ -10730,9 +10409,6 @@ body.isResizingPlayer .app *{
 }
 
 
-
-
-
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
   display: inline-flex !important;
@@ -10742,10 +10418,7 @@ body.isResizingPlayer .app *{
 }
 
 
-
-
 /* Reduce outline noise: only active/important areas should look outlined. */
-
 
 
 @media (max-width: 760px){
@@ -10766,8 +10439,6 @@ body.isResizingPlayer .app *{
   --outline-hover-v487: color-mix(in oklab, rgba(255,255,255,.065) 68%, var(--lt-accent) 32%) !important;
   --outline-active-v487: color-mix(in oklab, rgba(255,255,255,.06) 30%, var(--lt-accent) 70%) !important;
 }
-
-
 
 
 /* Star field: individual dot positions shift instead of one flat layer sliding. */
@@ -10870,7 +10541,6 @@ body.isResizingPlayer .app *{
   width: 100vw !important;
 
 
-
   display: block !important;
   pointer-events: none !important;
 }
@@ -10889,17 +10559,10 @@ body.isResizingPlayer .app *{
   width: 100vw !important;
 
 
-
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) auto !important;
   align-items: center !important;
   gap: 12px !important;
-
-
-
-
-
-
 
 
   overflow: hidden !important;
@@ -10996,8 +10659,6 @@ body.isResizingPlayer .app *{
   border-radius: 999px !important;
 
 
-
-
   font-size: 10.5px !important;
   font-weight: 950 !important;
 }
@@ -11059,15 +10720,7 @@ body.isResizingPlayer .app *{
 /* end localtify v487 */
 
 
-
-
-
-
-
-
 /* Update ribbon: black, cleaner, no release link. */
-
-
 
 
 /* Light mode search still readable and unclipped. */
