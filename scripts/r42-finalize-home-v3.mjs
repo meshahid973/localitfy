@@ -55,7 +55,7 @@ for (const key of [
   "filteredSongs", "homeDashboardClass", "likedSongs", "mostPlayed", "now", "renderHomeSongCards",
   "renderSongRows", "showHomeSideCards", "songs", "topSongs", "totalMinutes", "totalPlays", "updateSetting"
 ]) {
-  homeBlock = homeBlock.replace(new RegExp(`^\\s{6}${key},\\n`, "m"), "");
+  homeBlock = homeBlock.replace(new RegExp(`^\\s{6}${key},?\\n`, "m"), "");
 }
 app = app.slice(0, homeStart) + homeBlock + app.slice(homeEnd);
 
