@@ -32,10 +32,22 @@ test("player morph icon has one implementation and one feature owner", () => {
   assert.doesNotMatch(read("src/shared/ui/LocaltifyViewUi.tsx"), /function PlayerPlayPauseMorphIcon/);
 });
 
-test("unused CSS selector pruning is part of the hardening gate", () => {
-  const pkg = JSON.parse(read("package.json"));
-  assert.match(pkg.scripts["css:dedup:check"], /css-unused-selectors\.mjs/);
-  assert.match(read("scripts/css-dedup-fixpoint.mjs"), /css-unused-selectors\.mjs/);
+test("unused CSS analysis can never mutate renderer styles", () => {
+  const audit = read("scripts/css-unused-selectors.mjs");
+  const fixpoint = read("scripts/css-dedup-fixpoint.mjs");
+  assert.doesNotMatch(audit, /writeFileSync|rmSync|unlinkSync/);
+  assert.doesNotMatch(fixpoint, /css-unused-selectors\.mjs/);
+  assert.match(audit, /advisory only/i);
+});
+
+test("critical renderer shell style contracts stay present", () => {
+  const core = read("src/features/shell/app-core.css");
+  const app = read("src/App.css");
+  const home = read("src/features/home/home.css");
+  assert.match(core, /\.sidebar\s*\{/);
+  assert.match(core, /\.content\s*\{/);
+  assert.match(app + core, /\.appShell\s*\{/);
+  assert.match(home, /\.home/);
 });
 
 test("lazy settings content stays out of the static settings barrel", () => {
