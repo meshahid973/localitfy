@@ -143,4 +143,12 @@ shell = shell.replace(/\n\s*data-home-expanded=\{settings\.homeExpanded \? "on" 
 if (!shell.includes("data-view={view}")) shell = shell.replace("      data-platform={platformId}", "      data-view={view}\n      data-platform={platformId}");
 fs.writeFileSync(shellPath, shell);
 
-console.log("[home-v2] finalized Home v2 ownership and retired legacy Home selectors");
+const crossPath = path.join(root, "scripts/css-cross-file-dedup.mjs");
+let cross = fs.readFileSync(crossPath, "utf8");
+cross = cross.replace(
+  'if (STYLE_ORDER.at(-2) !== "src/features/shell/release.css" || STYLE_ORDER.at(-1) !== "src/features/shell/performance.css") {\n  throw new Error(`[css-cross-file] renderer cascade must end in release.css -> performance.css, got ${STYLE_ORDER.slice(-2).join(" -> ") || "nothing"}`);\n}',
+  'if (STYLE_ORDER.at(-1) !== "src/features/shell/performance.css") {\n  throw new Error(`[css-cross-file] renderer cascade must end in performance.css, got ${STYLE_ORDER.at(-1) || "nothing"}`);\n}'
+);
+fs.writeFileSync(crossPath, cross);
+
+console.log("[home-v2] finalized Home v2 ownership, retired legacy selectors, and updated cascade validation");
