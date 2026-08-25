@@ -22,6 +22,7 @@ import { useProximityMotion } from "./useProximityMotion";
 import { HtmlAudioEngine } from "./player/htmlAudioEngine";
 import { createPlayerController } from "./player/playerController";
 import { usePlayerRuntime } from "./features/player";
+import { AudioEffectRuntime } from "./features/player/audio/audioEffectRuntime";
 import type { PlayerEngineSource } from "./player/PlayerEngine";
 import {
   initLocalitfyAnalytics,
@@ -63,8 +64,8 @@ import "./App.css";
 import "./features/settings/themes.css";
 import "./features/settings/settings.css";
 import "./features/home/home.css";
-import "./motion.css";
-import "./onboarding-first-run.css";
+import "./features/shell/motion.css";
+import "./features/onboarding/onboarding.css";
 import "./features/player/player.css";
 import "./features/shell/effects.css";
 
@@ -225,10 +226,9 @@ function MainModeApp() {
     animationFrameRef, progressLoopTimeoutRef, backgroundAudioRepairTimerRef, playerResizeFrameRef,
     pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef, playCountLastTimeRef,
     sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef, playbackUrlPendingRef,
-    lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef, volumeRef, lastNonZeroVolumeRef,
-    beatFrameRef, beatFrameTimerRef, beatAudioContextRef, beatAnalyserRef, beatSourceRef,
-    audioEffectDryGainRef, audioEffectWetGainRef, audioEffectDelayRef, audioEffectFeedbackGainRef,
-    audioEffectFilterRef, beatDataRef, beatSmoothRef, beatReactiveTargetCacheRef, beatLastPaintSignatureRef,
+    lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef, volumeRef, effectiveVolumeRef, lastNonZeroVolumeRef,
+    beatFrameRef, beatFrameTimerRef, audioEffectRuntimeRef,
+    beatSmoothRef, beatReactiveTargetCacheRef, beatLastPaintSignatureRef,
     progressDomSignatureRef, isVolumeDragging, setIsVolumeDragging, volumeDraft, setVolumeDraft,
     volumeDraftRef, volumeDraftFrameRef, liveVolumeFrameRef, liveVolumePendingPercentRef, fadeFrameRef,
     currentId, setCurrentId, isPlaying, setIsPlaying, isShuffle, setIsShuffle, repeatMode, setRepeatMode,
@@ -428,9 +428,7 @@ function MainModeApp() {
   });
 
   function resumeAudioContextSafely() {
-    const context = beatAudioContextRef.current;
-    if (!context || context.state !== "suspended") return;
-    void context.resume().catch(() => undefined);
+    void audioEffectRuntimeRef.current?.resume();
   }
 
   function repairPlaybackAfterAppReturns(reason: "focus" | "visibility" | "background-tick") {
@@ -443,7 +441,10 @@ function MainModeApp() {
     if (!songRef.current) return;
 
     applyPlaybackRateSettings(audio);
-    setAudioElementVolume(audio, getTargetAudioVolume(songRef.current));
+    const repairedVolume = getTargetAudioVolume(songRef.current);
+    setAudioElementVolume(audio, repairedVolume);
+    effectiveVolumeRef.current = repairedVolume;
+    syncAudioEffectGraph(audio);
 
     if (!audio.paused) return;
 
@@ -2340,34 +2341,7 @@ function MainModeApp() {
     const ensureAnalyser = () => {
       const audio = audioRef.current;
       if (!audio) return null;
-
-      if (beatAnalyserRef.current) return beatAnalyserRef.current;
-
-      const AudioContextCtor =
-        window.AudioContext ||
-        (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-
-      if (!AudioContextCtor) return null;
-
-      try {
-        const context = beatAudioContextRef.current || new AudioContextCtor({ latencyHint: "playback" });
-        beatAudioContextRef.current = context;
-
-        const analyser = context.createAnalyser();
-        analyser.fftSize = 128;
-        analyser.smoothingTimeConstant = 0.88;
-
-        const source = beatSourceRef.current || context.createMediaElementSource(audio);
-        beatSourceRef.current = source;
-
-        beatAnalyserRef.current = analyser;
-        beatDataRef.current = new Uint8Array(analyser.frequencyBinCount);
-        syncAudioEffectGraph(audio);
-
-        return analyser;
-      } catch {
-        return null;
-      }
+      return getAudioEffectRuntime().ensureAnalyser(audio, getAudioEffectInput());
     };
 
     const getBeatTargets = (now: number) => {
@@ -2413,10 +2387,7 @@ function MainModeApp() {
       }
     };
 
-    const context = beatAudioContextRef.current;
-    if (context?.state === "suspended") {
-      void context.resume().catch(() => undefined);
-    }
+    void audioEffectRuntimeRef.current?.resume();
 
     let lastPaint = 0;
     let hiddenResetDone = false;
@@ -2453,11 +2424,12 @@ function MainModeApp() {
       const frameBudgetMs = view === "home" ? 520 : 760;
 
       if (now - lastPaint >= frameBudgetMs) {
-        const analyser = ensureAnalyser();
-        const data = analyser ? beatDataRef.current : null;
+        const analyserSnapshot = ensureAnalyser();
+        const analyser = analyserSnapshot?.analyser ?? null;
+        const data = analyserSnapshot?.data ?? null;
         const audio = audioRef.current;
         const time = Number.isFinite(audio?.currentTime || 0) ? audio?.currentTime || 0 : 0;
-        const safeVolume = clamp(volumeRef.current || settings.volume || 0.75, 0.16, 1);
+        const safeVolume = clamp(effectiveVolumeRef.current || volumeRef.current || settings.volume || 0.75, 0.16, 1);
 
         let bass = 0;
         let mid = 0;
@@ -2528,7 +2500,7 @@ function MainModeApp() {
     return () => {
       clearBeatTimers();
     };
-  }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, view, settingsCategory, isViewSwitching, isSeeking, isVolumeDragging]);
+  }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, settings.playbackSpeed, settings.audioEffectMode, settings.audioEffectAmount, settings.audioReverbAmount, view, settingsCategory, isViewSwitching, isSeeking, isVolumeDragging]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000);
@@ -3255,42 +3227,25 @@ function MainModeApp() {
     };
   }, []);
 
-  function getAudioEffectMode() {
-    return String((settings as any).audioEffectMode || "normal") as "normal" | "nightcore" | "daycore";
+  function getAudioEffectRuntime() {
+    if (!audioEffectRuntimeRef.current) {
+      audioEffectRuntimeRef.current = new AudioEffectRuntime();
+    }
+    return audioEffectRuntimeRef.current;
   }
 
-  function getAudioEffectAmount() {
-    return 50;
-  }
-
-  function getAudioReverbAmount() {
-    return 0;
+  function getAudioEffectInput() {
+    return {
+      mode: settings.audioEffectMode,
+      baseRate: settings.playbackSpeed,
+      effectAmount: settings.audioEffectAmount,
+      reverbAmount: settings.audioReverbAmount
+    };
   }
 
   function disposeAudioEngine() {
-    try { beatSourceRef.current?.disconnect(); } catch {}
-    try { beatAnalyserRef.current?.disconnect(); } catch {}
-    try { audioEffectDryGainRef.current?.disconnect(); } catch {}
-    try { audioEffectWetGainRef.current?.disconnect(); } catch {}
-    try { audioEffectDelayRef.current?.disconnect(); } catch {}
-    try { audioEffectFeedbackGainRef.current?.disconnect(); } catch {}
-    try { audioEffectFilterRef.current?.disconnect(); } catch {}
-
-    beatAnalyserRef.current = null;
-    beatDataRef.current = null;
-    audioEffectDryGainRef.current = null;
-    audioEffectWetGainRef.current = null;
-    audioEffectDelayRef.current = null;
-    audioEffectFeedbackGainRef.current = null;
-    audioEffectFilterRef.current = null;
-
-    const context = beatAudioContextRef.current;
-    beatAudioContextRef.current = null;
-    beatSourceRef.current = null;
-
-    if (context && context.state !== "closed") {
-      void context.close().catch(() => undefined);
-    }
+    audioEffectRuntimeRef.current?.dispose();
+    audioEffectRuntimeRef.current = null;
   }
 
   function setAudioElementVolume(audio: HTMLAudioElement | null | undefined, volume: number) {
@@ -3315,78 +3270,14 @@ function MainModeApp() {
     }
   }
 
-  function getEffectivePlaybackRate() {
-    const baseRate = clamp(Number(settings.playbackSpeed) || 1, 0.5, 2);
-    const mode = getAudioEffectMode();
-    const amount = getAudioEffectAmount() / 100;
-
-    if (mode === "nightcore") return clamp(baseRate * (1.08 + amount * 0.14), 0.5, 2);
-    if (mode === "daycore") return clamp(baseRate * (0.96 - amount * 0.14), 0.5, 2);
-
-    return baseRate;
-  }
-
   function applyPlaybackRateSettings(audio: HTMLAudioElement | null | undefined) {
     if (!audio) return;
-
-    const mode = getAudioEffectMode();
-    const rate = getEffectivePlaybackRate();
-
-    audio.playbackRate = rate;
-
-    // Nightcore/daycore should change pitch too, not just tempo.
-    try {
-      (audio as any).preservesPitch = mode === "normal";
-      (audio as any).mozPreservesPitch = mode === "normal";
-      (audio as any).webkitPreservesPitch = mode === "normal";
-    } catch {
-      // Older Chromium builds can ignore pitch flags safely.
-    }
+    getAudioEffectRuntime().apply(audio, getAudioEffectInput());
   }
 
   function syncAudioEffectGraph(audio: HTMLAudioElement | null | undefined) {
     if (!audio || audio !== audioRef.current) return;
-
-    const needsAnalyser = Boolean(beatAnalyserRef.current);
-    const reverbAmount = getAudioReverbAmount() / 100;
-    const needsGraph = needsAnalyser || reverbAmount > 0.01 || Boolean(beatSourceRef.current);
-
-    if (!needsGraph) return;
-
-    const AudioContextCtor =
-      window.AudioContext ||
-      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-
-    if (!AudioContextCtor) return;
-
-    try {
-      const context = beatAudioContextRef.current || new AudioContextCtor({ latencyHint: "playback" });
-      beatAudioContextRef.current = context;
-
-      if (context.state === "suspended") {
-        void context.resume().catch(() => undefined);
-      }
-
-      const source = beatSourceRef.current || context.createMediaElementSource(audio);
-      beatSourceRef.current = source;
-
-      const dryGain = audioEffectDryGainRef.current || context.createGain();
-      audioEffectDryGainRef.current = dryGain;
-
-      try { source.disconnect(); } catch {}
-      try { dryGain.disconnect(); } catch {}
-      try { beatAnalyserRef.current?.disconnect(); } catch {}
-
-      dryGain.gain.value = 1;
-      source.connect(dryGain);
-      dryGain.connect(context.destination);
-
-      if (needsAnalyser && beatAnalyserRef.current) {
-        source.connect(beatAnalyserRef.current);
-      }
-    } catch {
-      // Keep normal HTMLAudio playback alive if WebAudio cannot attach.
-    }
+    getAudioEffectRuntime().apply(audio, getAudioEffectInput());
   }
 
   const getTargetAudioVolume = useCallback(
@@ -3406,15 +3297,18 @@ function MainModeApp() {
 
       setAudioElementVolume(audio, safeVolume);
       applyPlaybackRateSettings(audio);
+      syncAudioEffectGraph(audio);
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
-      volumeRef.current = safeVolume;
+      effectiveVolumeRef.current = safeVolume;
       return safeVolume;
     },
     [
       getTargetAudioVolume,
       settings.playbackSpeed,
       settings.gaplessPlayback,
-      (settings as any).audioEffectMode
+      settings.audioEffectMode,
+      settings.audioEffectAmount,
+      settings.audioReverbAmount
     ]
   );
 
@@ -3906,7 +3800,7 @@ function MainModeApp() {
           audio.currentTime = Math.max(0, handoff.time || 0);
           const handoffVolume = clamp(handoff.volume || getTargetAudioVolume(currentSong), 0, 1);
           setAudioElementVolume(audio, handoffVolume);
-          volumeRef.current = handoffVolume;
+          effectiveVolumeRef.current = handoffVolume;
 
           if (isPlaying || pendingPlayRef.current) {
             void audio.play().catch(() => undefined);
@@ -4471,7 +4365,7 @@ function MainModeApp() {
 
     if (safeDuration <= 0 || Math.abs(delta) < 0.002) {
       setAudioElementVolume(audio, safeTarget);
-      volumeRef.current = safeTarget;
+      effectiveVolumeRef.current = safeTarget;
       if (onDone) onDone();
       return;
     }
@@ -4484,7 +4378,7 @@ function MainModeApp() {
       const nextVolume = clamp(startVolume + delta * eased, 0, 1);
 
       setAudioElementVolume(audio, nextVolume);
-      volumeRef.current = nextVolume;
+      effectiveVolumeRef.current = nextVolume;
 
       if (progressValue >= 1) {
         fadeFrameRef.current = null;
@@ -4560,7 +4454,7 @@ function MainModeApp() {
       audio.preload = settings.gaplessPlayback ? "auto" : "metadata";
       syncAudioEffectGraph(audio);
       resumeAudioContextSafely();
-      volumeRef.current = safeVolume;
+      effectiveVolumeRef.current = safeVolume;
 
       if (playerController) {
         playerController.load(buildPlayerEngineSource(song, playbackUrl.url));
@@ -7393,7 +7287,7 @@ function MainModeApp() {
       liveVolumeFrameRef.current = null;
       setAudioElementVolume(audioRef.current, safeVolume);
       setAudioElementVolume(nextAudioRef.current, safeVolume);
-      volumeRef.current = safeVolume;
+      effectiveVolumeRef.current = safeVolume;
 
       if (safeVolume > 0.001) {
         lastNonZeroVolumeRef.current = baseVolume;
@@ -7408,6 +7302,7 @@ function MainModeApp() {
     const safePercent = Math.round(safeVolume * 100);
     const nextSettings = { ...settings, volume: safeVolume };
 
+    volumeRef.current = safeVolume;
     volumeDraftRef.current = safePercent;
     setVolumeDraft(safePercent);
     applyLiveVolumePercent(safePercent);
@@ -8555,46 +8450,6 @@ function MainModeApp() {
   }
 
 
-  function renderAudioEffectsCard() {
-    if (settingsCategory !== "playback") return null;
-
-    const effectMode = getAudioEffectMode();
-
-    const modeOptions: Array<{
-      id: "normal" | "nightcore" | "daycore";
-      label: string;
-      note: string;
-    }> = [
-      { id: "normal", label: "Normal", note: "Uses the speed and volume controls above." },
-      { id: "nightcore", label: "Nightcore", note: "Higher pitch with a faster preset." },
-      { id: "daycore", label: "Daycore", note: "Lower pitch with a slower preset." }
-    ];
-
-    return (
-      <section className="settingsPageCard playbackLabCardV343" aria-label="Pitch presets">
-        <div className="settingsSectionTitle">
-          <span>optional sound preset</span>
-          <strong>Pitch presets</strong>
-          <small>Normal is the clean default. Nightcore and Daycore are one-tap styles, not extra volume or speed sliders.</small>
-        </div>
-
-        <div className="playbackModeGridV343">
-          {modeOptions.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              className={`playbackModeChoiceV343 ${effectMode === option.id ? "active" : ""}`}
-              onClick={() => void updateSetting("audioEffectMode" as any, option.id as any, true)}
-              aria-pressed={effectMode === option.id}
-            >
-              <strong>{option.label}</strong>
-              <small>{option.note}</small>
-            </button>
-          ))}
-        </div>
-      </section>
-    );
-  }
 
   function renderSettingsCategoryContent() {
     return (
@@ -8697,7 +8552,6 @@ function MainModeApp() {
         resetAllSettingsSafely={resetAllSettingsSafely}
         />
         </Suspense>
-        {renderAudioEffectsCard()}
         {renderFeedbackSettingsCard()}
       </>
     );

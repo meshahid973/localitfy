@@ -1293,7 +1293,6 @@ body.localtifyBackgroundMode .coverCard,
   transform-origin: center !important;
 
 
-
 }
 
 .app :is(
@@ -1351,14 +1350,10 @@ body.localtifyBackgroundMode .coverCard,
 }
 
 
-
 .app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding::before,
 .app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting::before{
   animation: localtifyHeroAmbiencePulseV140 820ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
-
-
-
 
 
 .app .hero.heroPremium.heroLayoutMotion.heroMotionExpanding .heroArtWrap,
@@ -1370,7 +1365,6 @@ body.localtifyBackgroundMode .coverCard,
 .app .hero.heroPremium.heroLayoutMotion.heroMotionCompacting .coverAura{
   transform: translate3d(4px, 3px, 0) scale(0.948) !important;
 }
-
 
 
 .app .homeShelfStack.heroMotionExpanding .homeListenPanel,
@@ -2618,8 +2612,6 @@ body.localitfyDropCommitted .app :is(.songRow,.homeAlbumCard,.homeListenCard,.pl
     will-change: auto;
   }
 }
-
-
 
 
 /* localtify v459 reduced motion owner */

@@ -1991,14 +1991,7 @@
   --localtify-line-soft: rgba(78, 85, 116, .14);
 
 
-
   --lt-surface-soft: rgba(232, 235, 242, .72);
-
-
-
-
-
-
 
 
   --lt-danger: #c24162;
@@ -2066,8 +2059,6 @@
 
 
   --lt-faint: var(--faint);
-
-
 
 
 }

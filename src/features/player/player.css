@@ -9,10 +9,6 @@
   position: relative !important;
 
 
-
-
-
-
   display: grid !important;
   grid-template-columns: minmax(220px, 350px) minmax(420px, 1fr) minmax(150px, 240px) !important;
   grid-template-areas: "left center right" !important;
@@ -23,13 +19,7 @@
   isolation: isolate !important;
 
 
-
-
-
-
 }
-
-
 
 
 .playerBar[data-ambient="false"]::before,
@@ -683,10 +673,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   --player-center-y: 8px;
 
 
-
-
-
-
 }
 
 .playerBar .playerCenter{
@@ -704,8 +690,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   border: 0 !important;
   box-shadow: none !important;
 }
-
-
 
 
 .playerBar[data-cover-sync="off"],
@@ -992,8 +976,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   --player-cover-sync-tint: var(--cover-sync-player-tint, 0.20);
 
 
-
-
   transition:
     border-color 420ms ease,
     background 520ms ease,
@@ -1007,11 +989,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
   z-index: 0 !important;
   pointer-events: none !important;
-
-
-
-
-
 
 
   transition:
@@ -1764,7 +1741,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 
-
 .playerBar::after{
   inset: 0 !important;
 
@@ -1823,8 +1799,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .volumeWrap input[type="range"]{
 
 
-
-
   border: 0 !important;
   outline: 0 !important;
 
@@ -1833,7 +1807,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 
 }
-
 
 
 .playerBar .volumeWrap:hover input[type="range"]::-webkit-slider-thumb,
@@ -1847,7 +1820,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .12), 0 0 18px rgba(var(--accent-rgb), .34) !important;
 
 }
-
 
 
 .playerBar .volumeWrap:hover input[type="range"]::-moz-range-thumb,
@@ -1873,7 +1845,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   height: 24px !important;
   padding: 0 !important;
   margin: 0 !important;
-
 
 
   user-select: none !important;
@@ -2014,8 +1985,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar{
 
 
-
-
 }
 
 .playerBar::before{
@@ -2027,8 +1996,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
     radial-gradient(circle at 22% 45%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.16), transparent 36%),
     radial-gradient(circle at 76% 40%, rgba(var(--accent-rgb), 0.11), transparent 42%),
     var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-
-
 
 
 }
@@ -2228,7 +2195,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   background: rgba(255,255,255,0.13) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
 }
-
 
 
 .app[data-player-background="coverBlur"] .playerBar{
@@ -2699,4 +2665,3 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 .app.themeSettling .playerBar *{
   transition-duration: 80ms !important;
 }
-

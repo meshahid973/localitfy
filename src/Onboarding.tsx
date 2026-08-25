@@ -1,7 +1,6 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Circle, Cloud, Heart, Leaf, Moon, Square } from "lucide-react";
-import "./onboarding-first-run.css";
 
 const ONBOARDING_AUDIO_SRC = new URL("./assets/onboarding.mp3", import.meta.url).href;
 const LOCALTIFY_LOGO_SRC = new URL("./assets/logo.png", import.meta.url).href;

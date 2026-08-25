@@ -70,8 +70,6 @@ button:disabled{
 .app{
 
 
-
-
   transition: background-color 320ms cubic-bezier(0.16, 1, 0.3, 1), background 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -82,7 +80,6 @@ button:disabled{
   justify-content: space-between;
   user-select: none;
   -webkit-app-region: drag;
-
 
 
 }
@@ -181,8 +178,6 @@ button:disabled{
 }
 
 
-
-
 .panel{
   min-width: 0;
   padding: 16px;
@@ -242,17 +237,6 @@ button:disabled{
 
 
 .ambientSurface::before{
-
-
-
-
-
-
-
-
-
-
-
 
 
 }
@@ -353,7 +337,6 @@ button:disabled{
   border: 1px solid transparent;
 
 
-
 }
 
 .songRow::before{
@@ -374,7 +357,6 @@ button:disabled{
 
 .songButton{
   position: relative;
-
 
 
   min-width: 0;
@@ -546,8 +528,6 @@ button:disabled{
 }
 
 
-
-
 input[type="range"]{
   width: 100%;
   accent-color: var(--accent);
@@ -673,7 +653,6 @@ input[type="range"]{
   padding-right: 4px;
   padding-bottom: 130px;
 }
-
 
 
 .downloadNotice{
@@ -1087,9 +1066,6 @@ input[type="range"]{
 }
 
 
-
-
-
 .circleButton.main:not(.playerBar *){
   position: relative;
   overflow: hidden;
@@ -1151,7 +1127,6 @@ input[type="range"]{
   --motion-slow: 420ms;
 
 
-
   background-image: none;
 
 }
@@ -1178,11 +1153,7 @@ input[type="range"]{
 }
 
 
-
-
-
 .hero{
-
 
 
   border-inline: 0;
@@ -1193,8 +1164,6 @@ input[type="range"]{
 .hero::before{
   border-radius: 0;
 }
-
-
 
 
 .badge{
@@ -1230,9 +1199,6 @@ input[type="range"]{
 }
 
 
-
-
-
 input[type="range"]::-webkit-slider-runnable-track{
   height: 4px;
   border-radius: 999px;
@@ -1259,22 +1225,12 @@ input[type="range"]::-webkit-slider-thumb{
 .secretRibbon{
 
 
-
   transform: translateX(-50%);
-
-
-
-
-
-
-
-
 
 
 }
 
 .secretLayer span{
-
 
 
   border-radius: 999px;
@@ -1378,7 +1334,6 @@ input[type="range"]::-webkit-slider-thumb{
 }
 
 
-
 .hero .badge{
   display: none !important;
 }
@@ -1441,10 +1396,6 @@ input[type="range"]::-webkit-slider-thumb{
 }
 
 .secretLayer{
-
-
-
-
 
 
 }
@@ -1622,7 +1573,6 @@ input[type="range"]::-webkit-slider-thumb{
 }
 
 
-
 button:active,
 .songRow:active,
 .iconAction:active,
@@ -1699,9 +1649,6 @@ button:active,
 }
 
 .secretLayer{
-
-
-
 
 
   opacity: 0;
@@ -1958,8 +1905,6 @@ button:active{
 }
 
 
-
-
 .content{
   scroll-behavior: smooth;
 
@@ -2065,8 +2010,6 @@ body.isResizingPlayer{
   margin-bottom: 9px !important;
 
 
-
-
 }
 
 .sliderWrap strong{
@@ -2160,14 +2103,11 @@ body.isResizingPlayer{
   margin-top: 10px;
 
 
-
-
 }
 
 .sliderWrap span{
   font-size: 12px;
 }
-
 
 
 .animatedGlow .ambientSurface::before{
@@ -2203,13 +2143,6 @@ body.isResizingPlayer{
   position: relative;
 
 
-
-
-
-
-
-
-
 }
 
 .updateToastCard::before{
@@ -2229,10 +2162,6 @@ body.isResizingPlayer{
   z-index: 2;
 
 
-
-
-
-
   cursor: pointer;
 
 }
@@ -2246,14 +2175,9 @@ body.isResizingPlayer{
 .updateToastIcon{
 
 
-
-
   margin-bottom: 16px;
 
   border: 1px solid rgba(var(--accent-rgb), 0.28);
-
-
-
 
 
 }
@@ -2261,7 +2185,6 @@ body.isResizingPlayer{
 .updateToastText h3{
 
   color: #fff;
-
 
 
 }
@@ -2290,17 +2213,12 @@ body.isResizingPlayer{
   width: 100%;
 
 
-
-
   border: 1px solid rgba(255, 255, 255, 0.07);
 
 }
 
 
-
 .updateToastActions .softButton{
-
-
 
 
   text-transform: lowercase;
@@ -2509,7 +2427,6 @@ body.isResizingPlayer{
 }
 
 
-
 .analyticsBarsV005{
   display: grid;
   gap: 9px;
@@ -2547,7 +2464,6 @@ body.isResizingPlayer{
   font-size: 11px;
   font-weight: 700;
 }
-
 
 
 .analyticsArtistList{
@@ -2719,8 +2635,6 @@ body.isResizingPlayer{
   font-size: 11px;
   font-weight: 800;
 }
-
-
 
 
 .hero.ambientSurface:hover::after{
@@ -2897,7 +2811,6 @@ button{
 }
 
 
-
 :root{
   --song-change-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --soft-hover-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -2927,7 +2840,6 @@ button{
 }
 
 .circleButton:not(.playerBar *){
-
 
 
   font-size: 15px;
@@ -3314,9 +3226,7 @@ body,
   grid-row: 1 !important;
 
 
-
   min-height: 0 !important;
-
 
 
   overscroll-behavior: contain !important;
@@ -3414,10 +3324,6 @@ body,
   padding: 18px !important;
 
 
-
-
-
-
 }
 
 .updateToastCard::before{
@@ -3479,7 +3385,6 @@ body,
 }
 
 
-
 .updateSafePill{
   border-color: rgba(255, 255, 255, 0.09);
   color: rgba(255, 255, 255, 0.58);
@@ -3492,14 +3397,11 @@ body,
   margin: 2px 0 0 !important;
 
 
-
 }
 
 .updateProgressTrack span{
 
   display: block !important;
-
-
 
 
 }
@@ -3508,15 +3410,10 @@ body,
   grid-column: 1 / -1 !important;
 
 
-
-
-
 }
 
 .updatePrimaryButton,
 .updateGhostButton{
-
-
 
 
   border: 1px solid transparent;
@@ -3582,10 +3479,6 @@ body,
   margin: 2px 0 7px !important;
 
 }
-
-
-
-
 
 
 .updatePrimaryButton:hover,
@@ -3718,8 +3611,6 @@ body,
 
 .updateToastActions {
   display: flex !important;
-
-
 
 
   margin-top: 20px !important;
@@ -5292,4 +5183,3 @@ body.localtifyPerfV301 .sidebar{
   }
 }
 /* V471 DISCORD SIDEBAR PILL END */
-

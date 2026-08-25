@@ -1499,9 +1499,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 }
 
 
-
 .app[data-platform="linux"] .windowButtons button{
-
 
 
   background: transparent !important;
@@ -1809,9 +1807,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 }
 
 .app .windowButtons button{
-
-
-
 
 
   -webkit-font-smoothing: antialiased !important;
