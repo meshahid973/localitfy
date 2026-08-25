@@ -9,12 +9,18 @@ import { fileURLToPath } from "node:url";
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const mainSource = fs.readFileSync(path.join(root, "electron", "main.cjs"), "utf8");
-const { createUserDataRuntime } = require(path.join(root, "electron", "runtime", "user-data.cjs"));
+const { createUserDataRuntime, uniquePaths } = require(path.join(root, "electron", "runtime", "user-data.cjs"));
 
 test("Electron user-data recovery is owned outside main", () => {
   assert.match(mainSource, /runtime\/user-data\.cjs/);
   assert.equal(mainSource.includes("function restoreDatabaseFromOldUserDataIfNeeded()"), false);
   assert.equal(mainSource.includes("function getCandidateDatabaseInfo("), false);
+});
+
+test("Electron main imports the shared uniquePaths helper instead of referencing an undefined free variable", () => {
+  assert.match(mainSource, /\{\s*uniquePaths\s*,\s*createUserDataRuntime\s*\}\s*=\s*require\("\.\/runtime\/user-data\.cjs"\)/);
+  assert.equal(typeof uniquePaths, "function");
+  assert.deepEqual(uniquePaths(["A", "a", "B"]), ["A", "B"]);
 });
 
 test("Electron bootstrap reads user-data policy from the runtime owner", () => {
