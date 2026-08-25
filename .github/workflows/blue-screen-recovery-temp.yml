@@ -21,15 +21,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Remove temporary workflow from candidate
-        run: |
-          rm -f .github/workflows/blue-screen-recovery-temp.yml
-          rmdir .github/workflows 2>/dev/null || true
-          rmdir .github 2>/dev/null || true
-      - name: Full hardening
-        run: |
-          git diff --check
-          npm run hardening:check
       - name: Live Electron renderer smoke
         shell: bash
         run: |
@@ -44,70 +35,18 @@ jobs:
             kill "$VITE_PID" 2>/dev/null || true
           }
           trap cleanup EXIT
-          for i in $(seq 1 60); do
-            if curl -fsS http://127.0.0.1:9222/json/list > /tmp/localtify-targets.json; then break; fi
-            sleep 0.5
-          done
-          sleep 4
-          node <<'NODE'
-          const fs = require('node:fs');
-          const targets = JSON.parse(fs.readFileSync('/tmp/localtify-targets.json','utf8'));
-          const target = targets.find((item) => /localhost:5173|127\.0\.0\.1:5173/.test(item.url || ''));
-          if (!target?.webSocketDebuggerUrl) throw new Error('Localtify renderer target not found');
-          const ws = new WebSocket(target.webSocketDebuggerUrl);
-          let nextId = 1;
-          const pending = new Map();
-          ws.onmessage = (event) => {
-            const msg = JSON.parse(event.data);
-            if (msg.id && pending.has(msg.id)) {
-              pending.get(msg.id)(msg);
-              pending.delete(msg.id);
-            }
-          };
-          const call = (method, params = {}) => new Promise((resolve, reject) => {
-            const id = nextId++;
-            const timer = setTimeout(() => { pending.delete(id); reject(new Error(`${method} timed out`)); }, 10000);
-            pending.set(id, (msg) => { clearTimeout(timer); msg.error ? reject(new Error(JSON.stringify(msg.error))) : resolve(msg.result); });
-            ws.send(JSON.stringify({ id, method, params }));
-          });
-          ws.onopen = async () => {
-            try {
-              const expression = `(() => {
-                const root = document.getElementById('root');
-                const app = document.querySelector('.app');
-                const shell = document.querySelector('.appShell, .simpleShell');
-                const sidebar = document.querySelector('.sidebar');
-                const content = document.querySelector('.content');
-                const snap = (el) => {
-                  if (!el) return null;
-                  const r = el.getBoundingClientRect();
-                  const s = getComputedStyle(el);
-                  return { width:r.width, height:r.height, display:s.display, visibility:s.visibility, opacity:Number(s.opacity) };
-                };
-                return { rootChildren:root?.childElementCount || 0, app:snap(app), shell:snap(shell), sidebar:snap(sidebar), content:snap(content), title:document.title, text:(document.body.innerText || '').slice(0,300) };
-              })()`;
-              const result = await call('Runtime.evaluate', { expression, returnByValue: true });
-              const value = result?.result?.value;
-              console.log('[renderer-smoke]', JSON.stringify(value));
-              const visible = (x) => x && x.width > 100 && x.height > 100 && x.display !== 'none' && x.visibility !== 'hidden' && x.opacity > 0.05;
-              if (!value || value.rootChildren < 1 || !visible(value.app) || !visible(value.shell)) {
-                throw new Error(`renderer shell is not visibly mounted: ${JSON.stringify(value)}`);
-              }
-              ws.close();
-              process.exit(0);
-            } catch (error) {
-              console.error(error);
-              ws.close();
-              process.exit(1);
-            }
-          };
-          ws.onerror = (event) => { console.error('CDP websocket error', event.message || event); process.exit(1); };
-NODE
-          if grep -q '\[localitfy renderer crash\]' /tmp/localtify-electron.log; then
-            cat /tmp/localtify-electron.log
-            exit 1
-          fi
-      - name: Commit validator removal
+          node scripts/renderer-smoke-temp.cjs
+      - name: Remove temporary validation files
+        run: |
+          rm -f .github/workflows/blue-screen-recovery-temp.yml
+          rm -f scripts/renderer-smoke-temp.cjs
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+      - name: Full hardening on final tree
+        run: |
+          git diff --check
+          npm run hardening:check
+      - name: Commit temporary-file removal
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
