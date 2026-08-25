@@ -14,9 +14,10 @@ function normalizeChoice(value: unknown, allowed: readonly string[], fallback: s
 }
 
 export function applyVisualCustomizationDefaults<T extends Record<string, any>>(settings: T): T {
-  // These keys belonged to the removed Home Quick Library/right-column layout.
-  // Strip them from both defaults and persisted settings so old installs cannot
-  // silently re-enable the retired layout or its extra-blur compositor path.
+  // Retired Home Quick Library values are discarded from persisted settings.
+  // Keep explicit false compatibility values until the last giant App-shell
+  // references are removed, so old boolean checks cannot interpret undefined
+  // as an opt-in (notably `quickLibraryMoreBlur !== false`).
   const {
     homeExpanded: _retiredHomeExpanded,
     quickLibraryMoreBlur: _retiredQuickLibraryMoreBlur,
@@ -26,6 +27,9 @@ export function applyVisualCustomizationDefaults<T extends Record<string, any>>(
 
   return {
     ...rest,
+    homeExpanded: false,
+    quickLibraryMoreBlur: false,
+    showRightColumn: false,
     homeBannerType: normalizeChoice(settings.homeBannerType, ["dynamic", "albumCover", "cleanBlack", "none"], VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType),
     blurEffects: VISUAL_CUSTOMIZATION_DEFAULTS.blurEffects,
     mediaCardBackground: normalizeChoice(settings.mediaCardBackground, ["solid", "glassy", "oledFlat"], VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground),
