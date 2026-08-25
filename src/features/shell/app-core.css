@@ -148,6 +148,20 @@ button:disabled{
 }
 
 
+.logoWrap h1{
+  margin: 0;
+
+  line-height: 1;
+
+}
+
+.logoWrap p{
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+
 .navItem{
   height: 39px;
   padding: 0 12px;
@@ -1754,6 +1768,11 @@ button:active,
   animation: localitfyRain 1s linear infinite;
 }
 
+.secretLayer.vinyl::before{
+  opacity: .46;
+  background: repeating-radial-gradient(circle at 50% 50%, transparent 0 20px, rgba(var(--accent-rgb), .18) 22px 23px, transparent 24px 42px);
+  animation: localitfyVinylSpin 4s linear infinite;
+}
 
 .secretToast{
   position: fixed !important;
@@ -1982,6 +2001,24 @@ body.isResizingPlayer{
   line-height: 1.35 !important;
 }
 
+.sliderWrap{
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 54px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-height: 42px !important;
+  margin-bottom: 9px !important;
+
+
+}
+
+.sliderWrap strong{
+  color: var(--v003-text-soft) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
 
 .appShell{
 
@@ -2060,6 +2097,16 @@ body.isResizingPlayer{
 
 .isResizingSidebar .appShell{
   transition: none !important;
+}
+
+.sliderWrap{
+  margin-top: 10px;
+
+
+}
+
+.sliderWrap span{
+  font-size: 12px;
 }
 
 
@@ -2295,6 +2342,12 @@ body.isResizingPlayer{
   font-weight: 700 !important;
 }
 
+.sliderWrap{
+  border-radius: 16px !important;
+  border: 1px solid var(--line) !important;
+  background: rgba(255, 255, 255, 0.022) !important;
+  padding: 12px !important;
+}
 
 .analyticsV005{
   display: grid !important;
@@ -2952,6 +3005,12 @@ button{
   box-shadow: none !important;
 }
 
+.app .logoWrap{
+  padding-inline: 4px !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
 
 .app .nav{
   width: 100% !important;
@@ -3068,6 +3127,7 @@ button{
 }
 .app,
 .appShell,
+.mainView,
 .content,
 .mainContent,
 .pageShell,
@@ -3076,8 +3136,9 @@ button{
 .settingsPage,
 .coverStudio,
 .playlistPage,
+.homePage,
 .libraryView,
-.scrollContent{
+.scrollContent {
   background-image: none !important;
 }
 
@@ -3085,6 +3146,8 @@ button{
 .app::after,
 .appShell::before,
 .appShell::after,
+.mainView::before,
+.mainView::after,
 .content::before,
 .content::after,
 .mainContent::before,
@@ -3098,7 +3161,9 @@ button{
 .coverStudio::before,
 .coverStudio::after,
 .playlistPage::before,
-.playlistPage::after{
+.playlistPage::after,
+.homePage::before,
+.homePage::after {
   background-image: none !important;
   background-size: auto !important;
   opacity: 0 !important;

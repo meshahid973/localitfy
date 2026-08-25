@@ -591,7 +591,7 @@
 }
 
 .optionGrid.two{ grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
-
+.optionGrid.three{ grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
 
 .settingsChoice{
 
@@ -3737,6 +3737,8 @@ body.localitfyThemePainting .settingsCategoryPage .customThemeManagerV027{
 
 .settingsPage [data-orb],
 .settingsPage [data-orb],
+.settingsPage .floatingNote,
+.settingsPage .floatingNote,
 .settingsPage .ambientParticle,
 .settingsPage .ambientParticle{
   display: none !important;

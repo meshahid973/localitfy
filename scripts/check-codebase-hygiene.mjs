@@ -25,6 +25,12 @@ const forbiddenFiles = [
   "src/types/theme.ts"
 ];
 
+// Some assets intentionally exist in two ownership domains: one renderer asset and
+// one electron-builder resource. They are not accidental source duplication.
+const allowedExactDuplicateGroups = [
+  new Set(["build/icon.png", "src/assets/logo.png"])
+];
+
 function walk(directory) {
   const out = [];
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -37,6 +43,12 @@ function walk(directory) {
 }
 function repoPath(file) { return path.relative(root, file).split(path.sep).join("/"); }
 function hash(file) { return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex"); }
+function isAllowedDuplicateGroup(group) {
+  const actual = new Set(group);
+  return allowedExactDuplicateGroups.some((allowed) =>
+    allowed.size === actual.size && [...allowed].every((item) => actual.has(item))
+  );
+}
 
 const violations = [];
 for (const relative of forbiddenFiles) {
@@ -57,7 +69,9 @@ for (const file of files) {
   byHash.set(key, group);
 }
 for (const group of byHash.values()) {
-  if (group.length > 1) violations.push(`exact duplicate files: ${group.join(" | ")}`);
+  if (group.length > 1 && !isAllowedDuplicateGroup(group)) {
+    violations.push(`exact duplicate files: ${group.join(" | ")}`);
+  }
 }
 
 const sharedUi = path.join(root, "src/shared/ui/LocaltifyViewUi.tsx");
@@ -87,4 +101,4 @@ if (violations.length) {
   for (const violation of violations) console.error(`  - ${violation}`);
   process.exit(1);
 }
-console.log("[codebase-hygiene] OK: no exact duplicate tracked files, legacy compatibility shims, or duplicate player morph component.");
+console.log("[codebase-hygiene] OK: no accidental exact duplicate files, legacy compatibility shims, or duplicate player morph component.");

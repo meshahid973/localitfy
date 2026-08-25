@@ -7,7 +7,7 @@ const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes }
 const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings, createWindowsStartupRuntime } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
 const { loadLocaltifyEnv } = require("./runtime/environment.cjs");
-const { createUserDataRuntime } = require("./runtime/user-data.cjs");
+const { uniquePaths, createUserDataRuntime } = require("./runtime/user-data.cjs");
 const { createWindowTranslucencyRuntime } = require("./runtime/translucency.cjs");
 const { createIconRuntime } = require("./runtime/icons.cjs");
 const { installRendererSecurityGuards, installSessionPermissionGuards, isTrustedMainFrameIpcEvent } = require("./runtime/security.cjs");
