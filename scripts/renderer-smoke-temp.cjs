@@ -39,6 +39,7 @@ async function evaluate(target, expression) {
   await sleep(4000);
   const result = await evaluate(target, `(() => {
     const root = document.getElementById('root');
+    const first = root?.firstElementChild || null;
     const app = document.querySelector('.app');
     const shell = document.querySelector('.appShell, .simpleShell');
     const sidebar = document.querySelector('.sidebar');
@@ -51,19 +52,22 @@ async function evaluate(target, expression) {
     };
     return {
       rootChildren: root?.childElementCount || 0,
-      app: snap(app), shell: snap(shell), sidebar: snap(sidebar), content: snap(content),
+      first: snap(first), app: snap(app), shell: snap(shell), sidebar: snap(sidebar), content: snap(content),
       title: document.title,
-      text: (document.body.innerText || '').slice(0, 300)
+      text: (document.body.innerText || '').slice(0, 500)
     };
   })()`);
   console.log('[renderer-smoke]', JSON.stringify(result));
   const visible = (value) => value && value.width > 100 && value.height > 100 && value.display !== 'none' && value.visibility !== 'hidden' && value.opacity > 0.05;
-  if (!result || result.rootChildren < 1 || !visible(result.app) || !visible(result.shell)) {
-    throw new Error(`renderer shell is not visibly mounted: ${JSON.stringify(result)}`);
+  const mainVisible = visible(result?.app) && visible(result?.shell);
+  const onboardingVisible = visible(result?.first) && /LOCALTIFY SETUP|FIRST RUN|WELCOME/i.test(result?.text || '');
+  if (!result || result.rootChildren < 1 || (!mainVisible && !onboardingVisible)) {
+    throw new Error(`renderer has no visible application surface: ${JSON.stringify(result)}`);
   }
   if (fs.existsSync('/tmp/localtify-electron.log')) {
     const log = fs.readFileSync('/tmp/localtify-electron.log', 'utf8');
     if (log.includes('[localitfy renderer crash]')) throw new Error('renderer crash was logged');
+    if (log.includes('[localitfy pixelart directory error]')) throw new Error('pixelart directory runtime error was logged');
   }
 })().catch((error) => {
   console.error(error);
