@@ -89,7 +89,13 @@
   border-radius: 9px !important;
 }
 
-/* The removed Quick Library must never reserve home layout space. */
+/* Quick Library is retired. Guard against stale HMR markup and remove its Simple Mode toggle. */
+.app .homeLibraryPanel,
+.app .homeLibraryActions,
+.app .simpleLibraryHead .expandLibraryButton{
+  display: none !important;
+}
+
 .app .homeShelfStack{
   margin-bottom: 0 !important;
 }
