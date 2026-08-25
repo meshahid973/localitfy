@@ -1,0 +1,140 @@
+name: Deep cleanup one-shot
+
+on:
+  push:
+    branches: [agent/deep-css-react-cleanup]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deep-cleanup-one-shot
+  cancel-in-progress: true
+
+jobs:
+  cleanup-verify-commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout cleanup branch without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          ref: agent/deep-css-react-cleanup
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Remove compatibility layers and React duplication
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, re
+
+          def replace(path, before, after):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8-sig')
+              if before not in text:
+                  raise SystemExit(f'missing expected text in {path}: {before}')
+              p.write_text(text.replace(before, after, 1), encoding='utf-8')
+
+          # App now imports canonical feature owners directly.
+          replace('src/App.tsx', 'from "./player/htmlAudioEngine";', 'from "./features/player/engine/htmlAudioEngine";')
+          replace('src/App.tsx', 'from "./player/playerController";', 'from "./features/player/engine/playerController";')
+          replace('src/App.tsx', 'from "./player/PlayerEngine";', 'from "./features/player/engine/PlayerEngine";')
+          replace('src/App.tsx', 'lazy(() => import("./SettingsCategoryContent"))', 'lazy(() => import("./features/settings/SettingsCategoryContent"))')
+
+          # Discord runtime no longer reaches through the Phase-2 type barrel.
+          replace(
+              'src/features/discord/useDiscordActivityRuntime.ts',
+              'import type { DiscordArtMode, Settings, Song } from "../../localtifyTypes";',
+              'import type { DiscordArtMode } from "./discord.types";\nimport type { Settings } from "../settings/settings.types";\nimport type { Song } from "../library/song.types";'
+          )
+
+          # Remove the second identical player morph component from the shared UI grab-bag.
+          p = Path('src/shared/ui/LocaltifyViewUi.tsx')
+          text = p.read_text(encoding='utf-8-sig')
+          text = text.replace('import { motion as Motion } from "motion/react";\n', '', 1)
+          start = text.find('const LOCALTFY_PLAYER_MORPH_PAUSE =')
+          end = text.find('const MASCOT_STATE_IMAGE_SRC =')
+          if start < 0 or end < 0 or end <= start:
+              raise SystemExit('could not locate duplicate player morph component block')
+          text = text[:start] + text[end:]
+          if 'PlayerPlayPauseMorphIcon' in text or 'LOCALTFY_PLAYER_MORPH_' in text:
+              raise SystemExit('duplicate player morph implementation remains in shared UI')
+          p.write_text(text, encoding='utf-8')
+
+          # Canonicalize duplicated mascot binaries on src/assets.
+          replace('src/features/covers/components/CoverCuteEmptyState.tsx', '../assets/empty-state.png', '../../../assets/empty-state.png')
+          replace('src/features/settings/categories/AppearanceSettings.tsx', '../assets/info-state.png', '../../../assets/info-state.png')
+          replace('src/features/settings/categories/AdvancedSettings.tsx', '../assets/danger-state.png', '../../../assets/danger-state.png')
+
+          # Make the new hygiene gate permanent.
+          pkg_path = Path('package.json')
+          pkg = json.loads(pkg_path.read_text())
+          pkg['scripts']['boundaries:check'] = 'node scripts/check-phase1-boundaries.mjs && node scripts/check-codebase-hygiene.mjs'
+          pkg_path.write_text(json.dumps(pkg, indent=2) + '\n')
+
+          # Regression coverage for this cleanup.
+          test = '''import assert from "node:assert/strict";\nimport fs from "node:fs";\nimport path from "node:path";\nimport test from "node:test";\nimport { fileURLToPath } from "node:url";\n\nconst root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");\nconst read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");\n\ntest("legacy compatibility shims stay deleted", () => {\n  const forbidden = [\n    "src/localtifyConstants.ts", "src/localtifyUtils.ts", "src/localtifyTypes.ts", "src/localtifyAssets.ts",\n    "src/SettingsCategoryContent.tsx", "src/cover.tsx", "src/ui/Surface.tsx", "src/motion/physicalDrag.ts",\n    "src/player/PlayerEngine.ts", "src/player/htmlAudioEngine.ts", "src/player/playerController.ts",\n    "src/types/downloads.ts", "src/types/playlists.ts", "src/types/settings.ts", "src/types/song.ts", "src/types/theme.ts"\n  ];\n  for (const relative of forbidden) assert.equal(fs.existsSync(path.join(root, relative)), false, `${relative} must stay deleted`);\n});\n\ntest("App and Discord use canonical feature owners", () => {\n  const app = read("src/App.tsx");\n  const discord = read("src/features/discord/useDiscordActivityRuntime.ts");\n  assert.match(app, /features\\/player\\/engine\\/htmlAudioEngine/);\n  assert.match(app, /features\\/settings\\/SettingsCategoryContent/);\n  assert.doesNotMatch(app, /["']\\.\\/player\\//);\n  assert.doesNotMatch(discord, /localtifyTypes/);\n});\n\ntest("player morph icon has one implementation", () => {\n  assert.match(read("src/features/player/PlayerPlayPauseMorphIcon.tsx"), /function PlayerPlayPauseMorphIcon/);\n  assert.doesNotMatch(read("src/shared/ui/LocaltifyViewUi.tsx"), /function PlayerPlayPauseMorphIcon/);\n});\n\ntest("unused CSS selector pruning is part of the hardening gate", () => {\n  const pkg = JSON.parse(read("package.json"));\n  assert.match(pkg.scripts["css:dedup:check"], /css-unused-selectors\\.mjs/);\n  assert.match(read("scripts/css-dedup-fixpoint.mjs"), /css-unused-selectors\\.mjs/);\n});\n'''
+          Path('tests/phase4/deep-cleanup.test.mjs').write_text(test)
+          PY
+
+          rm -f \
+            'build/icon copy.ico' \
+            'public/snakegame (1).html' \
+            'pixelart/39953e8719fcdbdd595a3b52a902290a.jpg' \
+            'pixelart/goatgoat.png' \
+            'src/features/covers/assets/empty-state.png' \
+            'src/features/settings/assets/danger-state.png' \
+            'src/features/settings/assets/info-state.png' \
+            'src/localtifyConstants.ts' \
+            'src/localtifyUtils.ts' \
+            'src/localtifyTypes.ts' \
+            'src/localtifyAssets.ts' \
+            'src/SettingsCategoryContent.tsx' \
+            'src/cover.tsx' \
+            'src/ui/Surface.tsx' \
+            'src/motion/physicalDrag.ts' \
+            'src/player/PlayerEngine.ts' \
+            'src/player/htmlAudioEngine.ts' \
+            'src/player/playerController.ts' \
+            'src/types/downloads.ts' \
+            'src/types/playlists.ts' \
+            'src/types/settings.ts' \
+            'src/types/song.ts' \
+            'src/types/theme.ts'
+          rmdir src/player src/types src/ui src/motion 2>/dev/null || true
+          rmdir src/features/covers/assets src/features/settings/assets 2>/dev/null || true
+
+      - name: Prune dead CSS and reach fixed point
+        run: npm run css:dedup:fix
+
+      - name: Remove temporary audit and workflow scaffolding
+        run: |
+          rm -f scripts/deep-cleanup-audit.mjs
+          rm -f .github/workflows/deep-cleanup-audit.yml .github/workflows/deep-cleanup-one-shot.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
+      - name: Verify exact final tree
+        run: |
+          git diff --check
+          npm run hardening:check
+          node scripts/check-codebase-hygiene.mjs
+
+      - name: Commit and push verified cleanup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add -A
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'cleanup: remove CSS debt, duplicate assets, and React shims'
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:agent/deep-css-react-cleanup
