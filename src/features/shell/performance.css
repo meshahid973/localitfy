@@ -1,8 +1,7 @@
 /*
  * Localtify renderer performance policy.
  *
- * This file is imported after the historical feature styles and is the single
- * owner for temporary performance degradation while the renderer is busy.
+ * Single owner for temporary visual degradation while the renderer is busy.
  * Visual identity stays intact at rest; expensive compositor/filter work sleeps
  * only while scrolling, backgrounded, scrubbing, dragging, or theme-painting.
  */
@@ -64,7 +63,6 @@ body.localtifyPerf .app.isScrolling[data-card-background="glassy"] :where(
   .homeShelfPanel,
   .homeListenPanel,
   .homeFreshPanel,
-  .homeLibraryPanel,
   .homeAlbumPanel,
   .albumsHeroV318,
   .albumsShelfPanelV318,
@@ -161,25 +159,10 @@ body.localtifyWindowBackgrounded .app .hero.ambientSurface::before,
 body.localtifyWindowBackgrounded .app .playerBar::before,
 body.localtifyWindowBackgrounded .app .playerBar::after,
 body.localtifyBackgroundMode .app .hero.ambientSurface::before,
-body.localtifyBackgroundMode .app .playerBar::before,
-body.localtifyBackgroundMode .app .playerBar::after {
+body.localtifyBackgroundMode .app .playerBar::after,
+body.localtifyBackgroundMode .app .playerBar::before {
   animation: none !important;
   filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Extra blur is an explicit opt-in. The default path stays compositor-friendly. */
-body.localtifyNoMoreBlur .app[data-card-background="glassy"] :where(
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem
-) {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
