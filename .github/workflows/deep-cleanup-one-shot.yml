@@ -31,11 +31,36 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Keep unused-selector pruning conservative
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/css-unused-selectors.mjs')
+          source = p.read_text()
+          old = '''function classIsLive(name) {
+            if (knownDynamicClasses.has(name) || referenceText.includes(name)) return true;
+            for (const prefix of dynamicPrefixes) if (prefix.length >= 3 && name.startsWith(prefix)) return true;
+            for (const suffix of dynamicSuffixes) if (suffix.length >= 3 && name.endsWith(suffix)) return true;
+            return false;
+          }'''
+          new = '''function classIsLive(name) {
+            if (knownDynamicClasses.has(name) || referenceText.includes(name)) return true;
+            for (const prefix of dynamicPrefixes) if (prefix.length >= 3 && name.startsWith(prefix)) return true;
+            for (const suffix of dynamicSuffixes) if (suffix.length >= 3 && name.endsWith(suffix)) return true;
+            const semanticFragments = name.split(/(?=[A-Z])|[-_]/).filter((part) => part.length >= 5);
+            if (semanticFragments.some((part) => referenceText.includes(part))) return true;
+            return false;
+          }'''
+          if old not in source:
+              raise SystemExit('classIsLive source changed unexpectedly')
+          p.write_text(source.replace(old, new, 1))
+          PY
+
       - name: Remove compatibility layers and React duplication
         run: |
           python - <<'PY'
           from pathlib import Path
-          import json, re
+          import json
 
           def replace(path, before, after):
               p = Path(path)
@@ -44,20 +69,17 @@ jobs:
                   raise SystemExit(f'missing expected text in {path}: {before}')
               p.write_text(text.replace(before, after, 1), encoding='utf-8')
 
-          # App now imports canonical feature owners directly.
           replace('src/App.tsx', 'from "./player/htmlAudioEngine";', 'from "./features/player/engine/htmlAudioEngine";')
           replace('src/App.tsx', 'from "./player/playerController";', 'from "./features/player/engine/playerController";')
           replace('src/App.tsx', 'from "./player/PlayerEngine";', 'from "./features/player/engine/PlayerEngine";')
           replace('src/App.tsx', 'lazy(() => import("./SettingsCategoryContent"))', 'lazy(() => import("./features/settings/SettingsCategoryContent"))')
 
-          # Discord runtime no longer reaches through the Phase-2 type barrel.
           replace(
               'src/features/discord/useDiscordActivityRuntime.ts',
               'import type { DiscordArtMode, Settings, Song } from "../../localtifyTypes";',
               'import type { DiscordArtMode } from "./discord.types";\nimport type { Settings } from "../settings/settings.types";\nimport type { Song } from "../library/song.types";'
           )
 
-          # Remove the second identical player morph component from the shared UI grab-bag.
           p = Path('src/shared/ui/LocaltifyViewUi.tsx')
           text = p.read_text(encoding='utf-8-sig')
           text = text.replace('import { motion as Motion } from "motion/react";\n', '', 1)
@@ -70,18 +92,15 @@ jobs:
               raise SystemExit('duplicate player morph implementation remains in shared UI')
           p.write_text(text, encoding='utf-8')
 
-          # Canonicalize duplicated mascot binaries on src/assets.
           replace('src/features/covers/components/CoverCuteEmptyState.tsx', '../assets/empty-state.png', '../../../assets/empty-state.png')
           replace('src/features/settings/categories/AppearanceSettings.tsx', '../assets/info-state.png', '../../../assets/info-state.png')
           replace('src/features/settings/categories/AdvancedSettings.tsx', '../assets/danger-state.png', '../../../assets/danger-state.png')
 
-          # Make the new hygiene gate permanent.
           pkg_path = Path('package.json')
           pkg = json.loads(pkg_path.read_text())
           pkg['scripts']['boundaries:check'] = 'node scripts/check-phase1-boundaries.mjs && node scripts/check-codebase-hygiene.mjs'
           pkg_path.write_text(json.dumps(pkg, indent=2) + '\n')
 
-          # Regression coverage for this cleanup.
           test = '''import assert from "node:assert/strict";\nimport fs from "node:fs";\nimport path from "node:path";\nimport test from "node:test";\nimport { fileURLToPath } from "node:url";\n\nconst root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");\nconst read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");\n\ntest("legacy compatibility shims stay deleted", () => {\n  const forbidden = [\n    "src/localtifyConstants.ts", "src/localtifyUtils.ts", "src/localtifyTypes.ts", "src/localtifyAssets.ts",\n    "src/SettingsCategoryContent.tsx", "src/cover.tsx", "src/ui/Surface.tsx", "src/motion/physicalDrag.ts",\n    "src/player/PlayerEngine.ts", "src/player/htmlAudioEngine.ts", "src/player/playerController.ts",\n    "src/types/downloads.ts", "src/types/playlists.ts", "src/types/settings.ts", "src/types/song.ts", "src/types/theme.ts"\n  ];\n  for (const relative of forbidden) assert.equal(fs.existsSync(path.join(root, relative)), false, `${relative} must stay deleted`);\n});\n\ntest("App and Discord use canonical feature owners", () => {\n  const app = read("src/App.tsx");\n  const discord = read("src/features/discord/useDiscordActivityRuntime.ts");\n  assert.match(app, /features\\/player\\/engine\\/htmlAudioEngine/);\n  assert.match(app, /features\\/settings\\/SettingsCategoryContent/);\n  assert.doesNotMatch(app, /["']\\.\\/player\\//);\n  assert.doesNotMatch(discord, /localtifyTypes/);\n});\n\ntest("player morph icon has one implementation", () => {\n  assert.match(read("src/features/player/PlayerPlayPauseMorphIcon.tsx"), /function PlayerPlayPauseMorphIcon/);\n  assert.doesNotMatch(read("src/shared/ui/LocaltifyViewUi.tsx"), /function PlayerPlayPauseMorphIcon/);\n});\n\ntest("unused CSS selector pruning is part of the hardening gate", () => {\n  const pkg = JSON.parse(read("package.json"));\n  assert.match(pkg.scripts["css:dedup:check"], /css-unused-selectors\\.mjs/);\n  assert.match(read("scripts/css-dedup-fixpoint.mjs"), /css-unused-selectors\\.mjs/);\n});\n'''
           Path('tests/phase4/deep-cleanup.test.mjs').write_text(test)
           PY
