@@ -14,8 +14,18 @@ function normalizeChoice(value: unknown, allowed: readonly string[], fallback: s
 }
 
 export function applyVisualCustomizationDefaults<T extends Record<string, any>>(settings: T): T {
+  // These keys belonged to the removed Home Quick Library/right-column layout.
+  // Strip them from both defaults and persisted settings so old installs cannot
+  // silently re-enable the retired layout or its extra-blur compositor path.
+  const {
+    homeExpanded: _retiredHomeExpanded,
+    quickLibraryMoreBlur: _retiredQuickLibraryMoreBlur,
+    showRightColumn: _retiredShowRightColumn,
+    ...rest
+  } = settings;
+
   return {
-    ...settings,
+    ...rest,
     homeBannerType: normalizeChoice(settings.homeBannerType, ["dynamic", "albumCover", "cleanBlack", "none"], VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType),
     blurEffects: VISUAL_CUSTOMIZATION_DEFAULTS.blurEffects,
     mediaCardBackground: normalizeChoice(settings.mediaCardBackground, ["solid", "glassy", "oledFlat"], VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground),
@@ -25,8 +35,6 @@ export function applyVisualCustomizationDefaults<T extends Record<string, any>>(
     sidebarBehavior: normalizeChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
     playerBackgroundStyle: normalizeChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
     homeHeroCoverBrightness: Number.isFinite(Number(settings.homeHeroCoverBrightness)) ? Math.min(1.55, Math.max(0.65, Number(settings.homeHeroCoverBrightness))) : 1,
-    // Extra blur has a measurable compositor cost on dense libraries. Keep it opt-in.
-    quickLibraryMoreBlur: settings.quickLibraryMoreBlur === true,
     catBuddyEnabled: settings.catBuddyEnabled === true
-  };
+  } as T;
 }
