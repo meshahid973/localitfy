@@ -1,12 +1,14 @@
 import process from "node:process";
 import { spawnSync } from "node:child_process";
 
+// Only deterministic, cascade-safe transforms belong in the automatic fixer.
+// Unused-selector detection is intentionally advisory because Localitfy builds
+// several class names dynamically at runtime and static reachability can lie.
 const scripts = [
   "scripts/css-property-dedup.mjs",
   "scripts/css-shadow-dedup.mjs",
   "scripts/css-adjacent-merge.mjs",
   "scripts/css-cross-file-dedup.mjs",
-  "scripts/css-unused-selectors.mjs",
   "scripts/css-hygiene.mjs"
 ];
 
