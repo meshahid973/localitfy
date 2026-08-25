@@ -72,10 +72,12 @@ for (const file of srcFiles) {
   for (const match of source.matchAll(/(?:from\s*|import\s*\()\s*["']([^"']+)["']/g)) {
     const specifier = match[1];
     if (/localtify(?:Constants|Utils|Types|Assets)$/.test(specifier)) violations.push(`${relative}: imports removed compatibility barrel ${specifier}`);
-    if (/^(?:\.\.\/|\.\/)*(?:player|types|ui|motion)\//.test(specifier) && !specifier.includes("features/player") && !specifier.includes("shared/ui") && !specifier.includes("shared/motion")) {
+    if (specifier.startsWith(".")) {
       const resolved = path.resolve(path.dirname(file), specifier);
       const legacyRoots = [path.join(root,"src/player"), path.join(root,"src/types"), path.join(root,"src/ui"), path.join(root,"src/motion")];
-      if (legacyRoots.some((legacyRoot) => resolved === legacyRoot || resolved.startsWith(`${legacyRoot}${path.sep}`))) violations.push(`${relative}: imports legacy compatibility path ${specifier}`);
+      if (legacyRoots.some((legacyRoot) => resolved === legacyRoot || resolved.startsWith(`${legacyRoot}${path.sep}`))) {
+        violations.push(`${relative}: imports legacy compatibility path ${specifier}`);
+      }
     }
   }
 }
@@ -85,4 +87,4 @@ if (violations.length) {
   for (const violation of violations) console.error(`  - ${violation}`);
   process.exit(1);
 }
-console.log(`[codebase-hygiene] OK: no exact duplicate tracked files, legacy compatibility shims, or duplicate player morph component.`);
+console.log("[codebase-hygiene] OK: no exact duplicate tracked files, legacy compatibility shims, or duplicate player morph component.");
