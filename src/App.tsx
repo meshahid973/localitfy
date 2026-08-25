@@ -19,10 +19,10 @@ import {
   Send
 } from "lucide-react";
 import { useProximityMotion } from "./useProximityMotion";
-import { HtmlAudioEngine } from "./player/htmlAudioEngine";
-import { createPlayerController } from "./player/playerController";
+import { HtmlAudioEngine } from "./features/player/engine/htmlAudioEngine";
+import { createPlayerController } from "./features/player/engine/playerController";
 import { usePlayerRuntime } from "./features/player";
-import type { PlayerEngineSource } from "./player/PlayerEngine";
+import type { PlayerEngineSource } from "./features/player/engine/PlayerEngine";
 import {
   initLocalitfyAnalytics,
   trackAcquisitionSource,
@@ -213,7 +213,7 @@ import type { DiscordArtMode } from "./features/discord/discord.types";
 import type { Playlist, PlaylistSummary } from "./features/playlists/playlist.types";
 import type { View } from "./features/shell/view.types";
 
-const SettingsCategoryContent = lazy(() => import("./SettingsCategoryContent"));
+const SettingsCategoryContent = lazy(() => import("./features/settings/SettingsCategoryContent"));
 
 
 function MainModeApp() {

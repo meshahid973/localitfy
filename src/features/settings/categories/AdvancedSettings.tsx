@@ -2,7 +2,7 @@ import type { Settings } from "../settings.types";
 import type { DiagnosticsInfo, PlatformInfoLike, SongLike, UpdateSetting } from "../settings.shared";
 import { ToggleRow } from "../settings.shared";
 import type { UpdatePromptState } from "../../updates/update.types";
-const DANGER_MASCOT_SRC = new URL("../assets/danger-state.png", import.meta.url).href;
+const DANGER_MASCOT_SRC = new URL("../../../assets/danger-state.png", import.meta.url).href;
 
 export type AdvancedSettingsProps = {
   settings: Settings; updateSetting: UpdateSetting; appVersion: string; diagnosticsInfo: DiagnosticsInfo; diagnosticsCopied: boolean; copyDiagnosticsInfo: () => void;

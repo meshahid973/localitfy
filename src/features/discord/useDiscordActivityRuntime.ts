@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
-import type { DiscordArtMode, Settings, Song } from "../../localtifyTypes";
+import type { DiscordArtMode } from "./discord.types";
+import type { Settings } from "../settings/settings.types";
+import type { Song } from "../library/song.types";
 import type { RuntimePixelArtAsset } from "../covers/cover.types";
 import { pixelArtUrl } from "../covers/pixelArt";
 import { DISCORD_ASSET_KEYS, LOCALITFY_DOWNLOAD_URL, LOCALITFY_SOURCE_URL } from "./discord.constants";
