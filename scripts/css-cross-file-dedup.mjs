@@ -15,12 +15,18 @@ function resolveRelativeImport(modulePath, specifier) {
 function extractModuleImports(modulePath) {
   const source = fs.readFileSync(path.join(root, modulePath), "utf8");
   const imports = [];
-  const pattern = /^\s*import(?:[\s\S]*?\sfrom\s+)?["']([^"']+)["'];?/gm;
-  for (const match of source.matchAll(pattern)) {
-    const specifier = match[1];
+
+  // We only need renderer entrypoint imports here. CSS side-effect imports and
+  // the App import are single-line statements; parsing one line at a time keeps
+  // a side-effect CSS import from being swallowed by the following `from` import.
+  for (const line of source.split(/\r?\n/)) {
+    const sideEffect = line.match(/^\s*import\s+["']([^"']+)["'];?\s*$/);
+    const fromImport = line.match(/^\s*import\s+.+?\s+from\s+["']([^"']+)["'];?\s*$/);
+    const specifier = sideEffect?.[1] || fromImport?.[1] || "";
     if (!specifier.startsWith(".")) continue;
     imports.push({ specifier, repoPath: resolveRelativeImport(modulePath, specifier) });
   }
+
   return imports;
 }
 
@@ -50,11 +56,11 @@ for (const entry of mainImports) {
 }
 const STYLE_ORDER = [...new Set(ordered)];
 
-if (!STYLE_ORDER.includes("src/App.css")) {
-  throw new Error("[css-cross-file] renderer cascade discovery lost src/App.css");
+if (!STYLE_ORDER.includes("src/index.css") || !STYLE_ORDER.includes("src/App.css")) {
+  throw new Error(`[css-cross-file] renderer cascade discovery is incomplete: ${STYLE_ORDER.join(" -> ")}`);
 }
-if (STYLE_ORDER.at(-1) !== "src/features/shell/performance.css") {
-  throw new Error(`[css-cross-file] renderer cascade must end in performance.css, got ${STYLE_ORDER.at(-1) || "nothing"}`);
+if (STYLE_ORDER.at(-2) !== "src/features/shell/release.css" || STYLE_ORDER.at(-1) !== "src/features/shell/performance.css") {
+  throw new Error(`[css-cross-file] renderer cascade must end in release.css -> performance.css, got ${STYLE_ORDER.slice(-2).join(" -> ") || "nothing"}`);
 }
 
 function skipComment(text, index, end) {
