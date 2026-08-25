@@ -32,9 +32,10 @@ const retiredHomeTokens = [
 
 reject("src/features/home/HomeView.tsx", retiredHomeTokens);
 reject("src/features/home/home.css", retiredHomeTokens);
+for (const css of ["src/App.css", "src/features/shell/motion.css", "src/features/shell/performance.css"]) reject(css, retiredHomeTokens.slice(1));
 reject("src/features/settings/categories/AdvancedSettings.tsx", ["Right side cards"]);
 reject("src/app/runtime/useBodyRuntimeClasses.ts", ["localtifyWantMoreBlur", "localtifyNoMoreBlur"]);
-reject("src/features/shell/performance.css", ["homeLibraryPanel", "localtifyNoMoreBlur", "localtifyWantMoreBlur"]);
+reject("src/features/shell/performance.css", ["localtifyNoMoreBlur", "localtifyWantMoreBlur"]);
 
 const proximityShim = read("src/useProximityMotion.ts").trim();
 if (proximityShim !== 'export { useProximityMotion } from "./features/shell/useProximityMotion";') {
@@ -52,6 +53,12 @@ if (homeBytes > 24 * 1024) failures.push(`src/features/home/home.css: ${homeByte
 
 const app = read("src/App.tsx");
 if (!app.includes('import "./features/home/home.css";')) failures.push("src/App.tsx: canonical Home stylesheet import is missing");
+
+const shell = read("src/features/shell/AppShell.tsx");
+if (shell.includes("moreQuickLibraryBlur") || shell.includes("lessQuickLibraryBlur") || shell.includes("data-home-expanded")) {
+  failures.push("src/features/shell/AppShell.tsx: retired Quick Library runtime ownership remains");
+}
+if (!shell.includes("data-view={view}")) failures.push("src/features/shell/AppShell.tsx: data-view ownership marker is missing");
 
 const main = read("src/main.tsx");
 if (main.includes("release.css")) failures.push("src/main.tsx: obsolete release.css override layer returned");
