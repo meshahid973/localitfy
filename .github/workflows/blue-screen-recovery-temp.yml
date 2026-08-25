@@ -28,14 +28,20 @@ jobs:
           ./node_modules/.bin/vite --host 127.0.0.1 > /tmp/localtify-vite.log 2>&1 &
           VITE_PID=$!
           ./node_modules/.bin/wait-on tcp:5173
-          xvfb-run -a ./node_modules/.bin/electron . --remote-debugging-port=9222 > /tmp/localtify-electron.log 2>&1 &
+          xvfb-run -a ./node_modules/.bin/electron --remote-debugging-port=9222 . > /tmp/localtify-electron.log 2>&1 &
           ELECTRON_PID=$!
           cleanup() {
             kill "$ELECTRON_PID" 2>/dev/null || true
             kill "$VITE_PID" 2>/dev/null || true
           }
           trap cleanup EXIT
-          node scripts/renderer-smoke-temp.cjs
+          if ! node scripts/renderer-smoke-temp.cjs; then
+            echo '--- electron log ---'
+            cat /tmp/localtify-electron.log || true
+            echo '--- vite log ---'
+            cat /tmp/localtify-vite.log || true
+            exit 1
+          fi
       - name: Remove temporary validation files
         run: |
           rm -f .github/workflows/blue-screen-recovery-temp.yml
