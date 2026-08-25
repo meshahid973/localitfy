@@ -49,6 +49,27 @@ jobs:
       - name: Materialize audio runtime ownership
         run: node scripts/migrate-player-audio-runtime.mjs
 
+      - name: Remove legacy duplicate audio-effects card
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          path = Path('src/App.tsx')
+          source = path.read_text()
+          pattern = r'\n  function renderAudioEffectsCard\(\) \{.*?\n  function renderSettingsCategoryContent\(\) \{'
+          replacement = '\n\n  function renderSettingsCategoryContent() {'
+          source, count = re.subn(pattern, replacement, source, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit(f'expected one legacy audio-effects card, found {count}')
+          marker = '\n        {renderAudioEffectsCard()}'
+          if marker not in source:
+              raise SystemExit('legacy audio-effects render call not found')
+          source = source.replace(marker, '', 1)
+          if 'getAudioEffectMode()' in source:
+              raise SystemExit('stale getAudioEffectMode call remains after legacy card removal')
+          path.write_text(source)
+          PY
+
       - name: Materialize CSS ownership
         run: node scripts/migrate-css-ownership.mjs
 
