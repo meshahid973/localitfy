@@ -17,13 +17,21 @@ function reject(relativePath, tokens) {
   }
 }
 
-reject("src/features/home/HomeView.tsx", [
+const retiredHomeTokens = [
   "quick library",
   "homeLibraryPanel",
   "homeLibraryActions",
-  "renderHomeSongCards",
-  "renderSongRows"
-]);
+  "homeShelfPanel",
+  "homeShelfStack",
+  "homeListenCard",
+  "homeFreshCard",
+  "homeFreshRail",
+  "heroQuickActions",
+  "heroTinyButton"
+];
+
+reject("src/features/home/HomeView.tsx", retiredHomeTokens);
+reject("src/features/home/home.css", retiredHomeTokens);
 reject("src/features/settings/categories/AdvancedSettings.tsx", ["Right side cards"]);
 reject("src/app/runtime/useBodyRuntimeClasses.ts", ["localtifyWantMoreBlur", "localtifyNoMoreBlur"]);
 reject("src/features/shell/performance.css", ["homeLibraryPanel", "localtifyNoMoreBlur", "localtifyWantMoreBlur"]);
@@ -38,17 +46,24 @@ const motionBytes = fs.statSync(motionPath).size;
 if (motionBytes > 20 * 1024) failures.push(`src/features/shell/motion.css: ${motionBytes} bytes exceeds 20 KiB ownership budget`);
 reject("src/features/shell/motion.css", ["localtifyProximity", "VelocityMotionV320", "VelocityMotionV430"]);
 
+const homePath = path.join(root, "src/features/home/home.css");
+const homeBytes = fs.statSync(homePath).size;
+if (homeBytes > 24 * 1024) failures.push(`src/features/home/home.css: ${homeBytes} bytes exceeds 24 KiB Home ownership budget`);
+
+const app = read("src/App.tsx");
+if (!app.includes('import "./features/home/home.css";')) failures.push("src/App.tsx: canonical Home stylesheet import is missing");
+
 const main = read("src/main.tsx");
+if (main.includes("release.css")) failures.push("src/main.tsx: obsolete release.css override layer returned");
 const appImport = main.indexOf('import App from "./App";');
-const releaseImport = main.indexOf('import "./features/shell/release.css";');
 const perfImport = main.indexOf('import "./features/shell/performance.css";');
-if (appImport < 0 || releaseImport < appImport || perfImport < releaseImport) {
-  failures.push("src/main.tsx: App CSS must load before release.css, with performance.css last");
-}
+if (appImport < 0 || perfImport < appImport) failures.push("src/main.tsx: performance.css must remain the final renderer policy after App CSS");
+
+if (fs.existsSync(path.join(root, "src/features/shell/release.css"))) failures.push("src/features/shell/release.css: obsolete override file must stay deleted");
 
 if (failures.length) {
   console.error("[release-ui-ownership] failures:\n- " + failures.join("\n- "));
   process.exit(1);
 }
 
-console.log(`[release-ui-ownership] OK; canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB and retired Home UI cannot reappear.`);
+console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, and retired Home UI cannot reappear.`);
