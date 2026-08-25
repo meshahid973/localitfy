@@ -1,9 +1,8 @@
 import type { CSSProperties } from "react";
-import { Images, Maximize2, Minimize2 } from "lucide-react";
+import { Images, Maximize2, Minimize2, Play, Shuffle } from "lucide-react";
 import { Cover } from "../covers/Cover";
 import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
-import { getAmbientStyle, getSongAmbientSource } from "../covers/cover.ambient";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 
 export type HomeViewProps = {
@@ -56,173 +55,154 @@ export default function HomeView(props: HomeViewProps) {
     toggleHeroExpanded
   } = props;
 
+  const listenNowSongs = Array.isArray(homeListenNowSongs) ? homeListenNowSongs.slice(0, 6) : [];
+  const rotationSongs = Array.isArray(homeFreshShelfSongs) ? homeFreshShelfSongs.slice(0, 10) : [];
+
   return (
-    <>
+    <div className="homePage">
       <section
-        className={`hero heroPremium ambientSurface heroLayoutMotion ${settings.heroExpanded ? "heroExpanded" : "heroCompact"} ${heroMotionClass} ${heroTitleClass}`}
-        style={{ ...ambientStyle, "--hero-motion-seed": nowPlayingTransitionKey } as CSSProperties}
+        className={`homeHero ${settings.heroExpanded ? "homeHeroExpanded" : "homeHeroCompact"} ${heroMotionClass}`}
+        style={{ ...ambientStyle, "--home-motion-seed": nowPlayingTransitionKey } as CSSProperties}
+        aria-label="now playing"
       >
-        <div className="heroAmbiencePulse" aria-hidden="true" />
-        <div className={`heroCoverGhost ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey} aria-hidden="true" />
+        <div className="homeHeroMedia" aria-hidden="true">
+          <Cover song={currentSong} className={`homeHeroArtwork ${nowPlayingSongMotionClass}`} priority="high" />
+          <div className="homeHeroMediaShade" />
+        </div>
 
-        <div className={`heroText heroTextClean nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-          <p className={`eyebrow nowPlayingEyebrowSwap ${nowPlayingSongMotionClass}`} title={currentNowPlayingLabel}>
-            {currentNowPlayingLabel}
-          </p>
+        <div className={`homeHeroContent nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
+          <div className="homeHeroKickerRow">
+            <span className="homeHeroKicker">{currentNowPlayingLabel || "now playing"}</span>
+            {currentSong ? <span className={`homeHeroPlayingDot ${isPlaying ? "isPlaying" : ""}`} aria-hidden="true" /> : null}
+          </div>
 
-          <h3 className={`heroTitle nowPlayingTitleSwap ${nowPlayingSongMotionClass}`} title={currentSong ? currentSong.title : "drop in your music"}>
+          <h3 className={`homeHeroTitle ${heroTitleClass}`} title={currentSong ? currentSong.title : "drop in your music"}>
             {heroDisplayTitle}
           </h3>
 
-          <p className={`heroArtistLine nowPlayingArtistSwap ${nowPlayingSongMotionClass}`} title={currentSong ? currentSong.artist || "unknown artist" : "import songs to start listening"}>
+          <p className="homeHeroArtist" title={currentSong ? currentSong.artist || "unknown artist" : "import songs to start listening"}>
             {heroDisplayArtist}
           </p>
 
-          {playerError ? <div className="warningBox">{playerError}</div> : null}
+          {playerError ? <div className="homeHeroNotice homeHeroNoticeError">{playerError}</div> : null}
           {isThreeAm && settings.volume > 0.8 ? (
-            <div className="warningBox lateNightWarning">volume is above 80% · late night ears deserve mercy.</div>
+            <div className="homeHeroNotice">volume is above 80% · late night ears deserve mercy.</div>
           ) : null}
 
-          <div className="heroQuickActions" aria-label="now playing actions">
+          <div className="homeHeroActions">
             <button
-              className="heroTinyButton heroTinyButtonPrimary"
+              className="homeHeroAction homeHeroActionPrimary"
               type="button"
-              onClick={toggleHeroExpanded}
-              aria-pressed={settings.heroExpanded}
-              title={settings.heroExpanded ? "collapse the now playing banner" : "expand the now playing banner"}
+              onClick={shuffleLibrarySongsAction}
+              disabled={(playableSongCount || 0) < 2}
+              title="Shuffle the whole library"
             >
-              {settings.heroExpanded ? <Minimize2 size={14} strokeWidth={2.2} aria-hidden="true" /> : <Maximize2 size={14} strokeWidth={2.2} aria-hidden="true" />}
-              <span>{settings.heroExpanded ? "collapse" : "expand"}</span>
+              <Shuffle size={16} strokeWidth={2.2} aria-hidden="true" />
+              <span>shuffle library</span>
             </button>
 
             <button
-              className="heroTinyButton heroTinyButtonSecondary"
+              className="homeHeroAction homeHeroActionSecondary"
               type="button"
               onClick={openCoversViewWithCurrentSong}
-              title="open pixel cover gallery"
+              title="Open pixel cover gallery"
             >
-              <Images size={14} strokeWidth={2.2} aria-hidden="true" />
+              <Images size={16} strokeWidth={2.2} aria-hidden="true" />
               <span>covers</span>
             </button>
           </div>
         </div>
 
-        <div className={`heroArtWrap nowPlayingArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-          <Cover song={currentSong} className="heroArt" priority="high" />
-        </div>
+        <button
+          className="homeHeroSizeToggle"
+          type="button"
+          onClick={toggleHeroExpanded}
+          aria-pressed={settings.heroExpanded}
+          title={settings.heroExpanded ? "Use compact hero" : "Expand hero"}
+        >
+          {settings.heroExpanded ? <Minimize2 size={17} strokeWidth={2.1} aria-hidden="true" /> : <Maximize2 size={17} strokeWidth={2.1} aria-hidden="true" />}
+          <span className="srOnly">{settings.heroExpanded ? "compact hero" : "expand hero"}</span>
+        </button>
       </section>
 
-      <section className={`homeShelfStack ${heroMotionClass}`} aria-label="home music shelves">
-        <section className="homeShelfPanel homeListenPanel">
-          <div className="homeShelfHeader">
-            <div>
-              <p className="eyebrow">local picks</p>
-              <h3>Listen now</h3>
-            </div>
-            <div className="homeShelfActions">
-              <span>{playableSongCount || 0} playable</span>
-              <button
-                className="homeShelfActionButton"
-                type="button"
-                onClick={shuffleLibrarySongsAction}
-                disabled={(playableSongCount || 0) < 2}
-                title="Shuffle the whole library and fill the queue"
-              >
-                shuffle library
-              </button>
-            </div>
+      <section className="homeSection homeListenSection" aria-labelledby="home-listen-title">
+        <header className="homeSectionHeader">
+          <div>
+            <span className="homeSectionEyebrow">made from your library</span>
+            <h3 id="home-listen-title">Listen now</h3>
           </div>
+          <span className="homeSectionMeta">{playableSongCount || 0} playable</span>
+        </header>
 
-          <div className="homeListenRail">
-            {homeListenNowSongs.length ? (
-              homeListenNowSongs.map((song: any, index: number) => {
-                const active = song.id === currentId;
-                const listenAmbienceSource = getSongAmbientSource(song);
-                const listenAmbienceStyle = getAmbientStyle(listenAmbienceSource) ?? {};
-
-                return (
-                  <button
-                    key={song.id}
-                    className={`homeListenCard ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""}`}
-                    data-cover-ambience={listenAmbienceSource ? "on" : "off"}
-                    type="button"
-                    onClick={() => void selectSong(song.id, true)}
-                    title={`play ${song.title}`}
-                    style={{ "--card-delay": `${index * 48}ms`, ...listenAmbienceStyle } as CSSProperties}
-                  >
-                    {listenAmbienceSource ? (
-                      <span className="homeListenBackground" aria-hidden="true">
-                        <img
-                          className="homeListenBackgroundImage"
-                          src={listenAmbienceSource}
-                          alt=""
-                          width={520}
-                          height={164}
-                          loading="lazy"
-                          decoding="async"
-                          fetchPriority="low"
-                          referrerPolicy="no-referrer"
-                          draggable={false}
-                        />
-                      </span>
-                    ) : null}
-
-                    <span className="homeListenForeground">
-                      <Cover song={song} className="homeListenCover" />
-                      <span className="homeListenCopy">
-                        <strong className="homeListenTitle">{prettyTitle(song.title, 5)}</strong>
-                        <small className="homeListenArtist">{prettyMeta(song.artist)}</small>
-                      </span>
-                      <span className="homeListenMeta">{formatTime(song.duration || 0)}</span>
-                    </span>
-                  </button>
-                );
-              })
-            ) : (
-              <div className="emptyState homeShelfEmpty homeShelfMascotEmptyV501">
-                <MascotStateArt state="empty" className="homeShelfEmptyMascotV501" />
-                <span className="mascotEmptyCopyV496">
-                  <strong>no songs yet</strong>
-                  <p>Import songs to start building your local library.</p>
-                </span>
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section className="homeShelfPanel homeFreshPanel">
-          <div className="homeShelfHeader">
-            <div>
-              <p className="eyebrow">fresh shelf</p>
-              <h3>recent covers</h3>
-            </div>
-          </div>
-
-          <div className="homeFreshRail">
-            {homeFreshShelfSongs.length ? (
-              homeFreshShelfSongs.map((song: any, index: number) => (
+        {listenNowSongs.length ? (
+          <div className="homeListenGrid">
+            {listenNowSongs.map((song: any) => {
+              const active = song.id === currentId;
+              return (
                 <button
                   key={song.id}
-                  className={`homeFreshCard ${song.id === currentId ? "active" : ""} ${song.id === currentId && isPlaying ? "playing" : ""}`}
+                  className={`homeListenRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""}`}
                   type="button"
                   onClick={() => void selectSong(song.id, true)}
                   title={`play ${song.title}`}
-                  style={{ "--card-delay": `${index * 42}ms` } as CSSProperties}
                 >
-                  <Cover song={song} className="homeFreshCover" />
+                  <span className="homeListenCoverWrap">
+                    <Cover song={song} className="homeListenCover" />
+                    <span className="homeListenPlay" aria-hidden="true"><Play size={13} fill="currentColor" /></span>
+                  </span>
+                  <span className="homeListenCopy">
+                    <strong>{prettyTitle(song.title, 6)}</strong>
+                    <small>{prettyMeta(song.artist)}</small>
+                  </span>
+                  <span className="homeListenTime">{formatTime(song.duration || 0)}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="homeEmptyState">
+            <MascotStateArt state="empty" className="homeEmptyMascot" />
+            <div><strong>your home is quiet</strong><span>import music and Localtify will build this section for you.</span></div>
+          </div>
+        )}
+      </section>
+
+      <section className="homeSection homeRotationSection" aria-labelledby="home-rotation-title">
+        <header className="homeSectionHeader">
+          <div>
+            <span className="homeSectionEyebrow">fresh shelf</span>
+            <h3 id="home-rotation-title">Recent rotation</h3>
+          </div>
+        </header>
+
+        {rotationSongs.length ? (
+          <div className="homeRotationRail">
+            {rotationSongs.map((song: any) => {
+              const active = song.id === currentId;
+              return (
+                <button
+                  key={song.id}
+                  className={`homeRotationCard ${active ? "active" : ""}`}
+                  type="button"
+                  onClick={() => void selectSong(song.id, true)}
+                  title={`play ${song.title}`}
+                >
+                  <span className="homeRotationCoverWrap">
+                    <Cover song={song} className="homeRotationCover" />
+                    {active && isPlaying ? <span className="homeRotationPlaying" aria-hidden="true"><i /><i /><i /></span> : null}
+                  </span>
                   <strong>{prettyTitle(song.title, 4)}</strong>
                   <small>{prettyMeta(song.artist)}</small>
                 </button>
-              ))
-            ) : (
-              <div className="emptyState homeShelfEmpty">
-                <strong>nothing to show yet</strong>
-                <p>your newest covers appear here after import.</p>
-              </div>
-            )}
+              );
+            })}
           </div>
-        </section>
+        ) : (
+          <div className="homeEmptyState homeEmptyStateCompact">
+            <div><strong>nothing recent yet</strong><span>newly imported covers will show up here.</span></div>
+          </div>
+        )}
       </section>
-    </>
+    </div>
   );
 }
