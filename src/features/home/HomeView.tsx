@@ -7,6 +7,7 @@ import { getAmbientStyle, getSongAmbientSource } from "../covers/cover.ambient";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 
 export type HomeViewProps = {
+  [key: string]: any;
   ambientStyle: any;
   currentId: any;
   currentNowPlayingLabel: any;
