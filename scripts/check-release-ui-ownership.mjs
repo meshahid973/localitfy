@@ -32,6 +32,9 @@ const retiredHomeTokens = [
 
 reject("src/features/home/HomeView.tsx", retiredHomeTokens);
 reject("src/features/home/home.css", retiredHomeTokens);
+reject("src/App.tsx", ["quickLibraryMoreBlur", "showHomeSideCards", "homeDashboardClass", "settings.homeExpanded", "settings.showRightColumn"]);
+reject("src/features/settings/settings.types.ts", ["homeExpanded:", "showRightColumn:", "quickLibraryMoreBlur:"]);
+reject("src/features/settings/settings.constants.ts", ["homeExpanded:", "showRightColumn:", "quickLibraryMoreBlur:"]);
 for (const css of ["src/App.css", "src/features/shell/motion.css", "src/features/shell/performance.css"]) reject(css, retiredHomeTokens.slice(1));
 reject("src/features/settings/categories/AdvancedSettings.tsx", ["Right side cards"]);
 reject("src/app/runtime/useBodyRuntimeClasses.ts", ["localtifyWantMoreBlur", "localtifyNoMoreBlur"]);
@@ -47,9 +50,14 @@ const motionBytes = fs.statSync(motionPath).size;
 if (motionBytes > 20 * 1024) failures.push(`src/features/shell/motion.css: ${motionBytes} bytes exceeds 20 KiB ownership budget`);
 reject("src/features/shell/motion.css", ["localtifyProximity", "VelocityMotionV320", "VelocityMotionV430"]);
 
+const homeViewSource = read("src/features/home/HomeView.tsx");
+if (homeViewSource.includes("[key: string]: any")) failures.push("src/features/home/HomeView.tsx: loose index signature returned");
+
 const homePath = path.join(root, "src/features/home/home.css");
 const homeBytes = fs.statSync(homePath).size;
 if (homeBytes > 24 * 1024) failures.push(`src/features/home/home.css: ${homeBytes} bytes exceeds 24 KiB Home ownership budget`);
+const homeCss = read("src/features/home/home.css");
+if (!homeCss.includes("data-view=\"home\"")) failures.push("src/features/home/home.css: Home header rules must be scoped to data-view=home");
 
 const app = read("src/App.tsx");
 if (!app.includes('import "./features/home/home.css";')) failures.push("src/App.tsx: canonical Home stylesheet import is missing");

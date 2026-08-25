@@ -3,7 +3,6 @@
 /* localtify 0.4.1 V419 background-audio and settings-save stability. */
 /* localtify 0.4.1 V418 missing-file recovery actions. */
 /* localtify 0.4.1 V425 cover tools + metadata cleaner preview. */
-/* localtify 0.4.1 V423 like system + quick library modes. */
 /* localtify 0.4.1 V417 metadata cleaner stability pass. */
 /* localtify 0.4.1 V415 shuffle queue + context delete. */
 import { lazy, startTransition, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -115,7 +114,6 @@ import {
   BOOT_MIN_VISIBLE_MS,
   BOOT_STEPS,
   CUSTOM_THEME_COMMIT_DELAY_MS,
-  HOME_GRID_RENDER_LIMIT,
   INITIAL_LIBRARY_RENDER_LIMIT,
   LIBRARY_RENDER_BATCH_SIZE,
   START_WITH_WINDOWS_DEFAULT_KEY,
@@ -422,8 +420,7 @@ function MainModeApp() {
   useBodyRuntimeClasses({
     isAppBackgrounded,
     isAppBackgroundedRef,
-    isPlaying,
-    wantsMoreBlur: settings.quickLibraryMoreBlur !== false
+    isPlaying
   });
 
   function resumeAudioContextSafely() {
@@ -562,14 +559,12 @@ function MainModeApp() {
   }
 
   useEffect(() => {
-    if (view !== "home" && view !== "library" && view !== "liked") return;
+    if (view !== "library" && view !== "liked") return;
+    if (libraryRenderLimitRef.current === INITIAL_LIBRARY_RENDER_LIMIT) return;
 
-    const nextLimit = view === "home" && settings.homeExpanded ? HOME_GRID_RENDER_LIMIT : INITIAL_LIBRARY_RENDER_LIMIT;
-    if (libraryRenderLimitRef.current === nextLimit) return;
-
-    libraryRenderLimitRef.current = nextLimit;
-    setLibraryRenderLimit(nextLimit);
-  }, [view, deferredQuery, settings.homeExpanded, settings.denseList]);
+    libraryRenderLimitRef.current = INITIAL_LIBRARY_RENDER_LIMIT;
+    setLibraryRenderLimit(INITIAL_LIBRARY_RENDER_LIMIT);
+  }, [view, deferredQuery, settings.denseList]);
 
   useEffect(() => {
     analyticsViewRef.current = view;
@@ -1821,15 +1816,6 @@ function MainModeApp() {
     repeatMode,
     downloadResultCount: downloadResults.length
   });
-
-  const showHomeSideCards = settings.showRightColumn && !settings.homeExpanded;
-  const homeDashboardClass = [
-    "dashboardGrid",
-    showHomeSideCards ? "" : "singleColumn",
-    settings.homeExpanded ? "homeExpandedGrid" : "homeCompactGrid"
-  ]
-    .filter(Boolean)
-    .join(" ");
 
   const totalPlays = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_plays");
   const libraryAlbumCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "album_count");
@@ -4685,7 +4671,6 @@ function MainModeApp() {
       key === "starsIntensity" ||
       key === "sidebarBehavior" ||
       key === "playerBackgroundStyle" ||
-      key === "quickLibraryMoreBlur" ||
       key === "catBuddyEnabled"
     ) {
       kickThemeSettle();
@@ -4828,9 +4813,7 @@ function MainModeApp() {
   function resetLibraryLayoutSettings() {
     void updateSettingsPatch({
       sidebarWidth: defaultSettings.sidebarWidth,
-      showRightColumn: defaultSettings.showRightColumn,
       denseList: defaultSettings.denseList,
-      homeExpanded: defaultSettings.homeExpanded,
       heroExpanded: defaultSettings.heroExpanded,
       showHeroBadge: defaultSettings.showHeroBadge
     });
@@ -8193,7 +8176,7 @@ function MainModeApp() {
         </div>
       </section>
 
-      <section className={`simpleLibraryPanel ${settings.homeExpanded ? "simpleLibraryExpanded" : "simpleLibraryCompact"}`}>
+      <section className="simpleLibraryPanel">
         <div className="simpleLibraryHead">
           <div className="simpleLibraryTitle">
             <strong>library</strong>
@@ -8207,21 +8190,10 @@ function MainModeApp() {
               onChange={(event) => handleSearchInput(event.currentTarget.value)}
               placeholder="search songs... try /feedback"
             />
-
-            <button
-              className="expandLibraryButton"
-              type="button"
-              onClick={() => updateSetting("homeExpanded", !settings.homeExpanded)}
-              aria-pressed={settings.homeExpanded}
-            >
-              {settings.homeExpanded ? "compact" : "expand"}
-            </button>
           </div>
         </div>
 
-        {settings.homeExpanded
-          ? renderHomeSongCards(filteredSongs, "homeAlbumGrid simpleAlbumGrid")
-          : renderSongRows(filteredSongs, "songList simpleList")}
+        {renderSongRows(filteredSongs, "songList simpleList")}
       </section>
     </section>
   );
@@ -8698,36 +8670,23 @@ function MainModeApp() {
       currentId,
       currentNowPlayingLabel,
       currentSong: visualCurrentSong,
-      filteredSongs,
       heroDisplayArtist,
       heroDisplayTitle,
       heroMotionClass,
       heroTitleClass,
-      homeDashboardClass,
       homeFreshShelfSongs,
       homeListenNowSongs,
       isPlaying,
       isThreeAm,
-      likedSongs,
-      mostPlayed,
-      now,
       nowPlayingSongMotionClass,
       nowPlayingTransitionKey,
       openCoversViewWithCurrentSong,
       playableSongCount: playableSongs.length,
       playerError,
-      renderHomeSongCards,
-      renderSongRows,
       selectSong,
       settings,
-      showHomeSideCards,
       shuffleLibrarySongsAction,
-      songs,
       toggleHeroExpanded,
-      topSongs,
-      totalMinutes,
-      totalPlays,
-      updateSetting
     },
     library: {
       changeView,

@@ -4,8 +4,6 @@ type BodyRuntimeClassOptions = {
   isAppBackgrounded: boolean;
   isAppBackgroundedRef: { current: boolean };
   isPlaying: boolean;
-  /** Compatibility input while the App shell finishes shedding the retired Quick Library option. */
-  wantsMoreBlur?: boolean;
 };
 
 const PERFORMANCE_CLASS = "localtifyPerf";

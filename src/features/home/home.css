@@ -6,26 +6,29 @@
 
 .homePage {
   display: grid;
-  gap: 22px;
+  gap: 20px;
   min-width: 0;
   padding: 0 0 34px;
 }
 
 /* Home header spacing: keep the greeting close to the title bar like the new layout. */
-.app .headerBar {
-  min-height: 54px;
+.app[data-view="home"] .headerBar {
+  min-height: 48px;
+  margin-bottom: 10px;
 }
 
-.app .headerText {
+.app[data-view="home"] .headerText {
   align-self: flex-start;
-  margin-top: -8px;
+  margin-top: -10px;
 }
 
-.app .headerText h2 {
+.app[data-view="home"] .headerText h2 {
   margin-top: 0;
+  font-size: clamp(28px, 2.7vw, 42px);
+  line-height: .92;
 }
 
-.app .headerText > .eyebrow + h2 {
+.app[data-view="home"] .headerText > .eyebrow + h2 {
   margin-top: 4px;
 }
 
@@ -33,12 +36,12 @@
 .homeHero {
   position: relative;
   isolation: isolate;
-  min-height: 238px;
+  min-height: 226px;
   overflow: hidden;
   display: flex;
   align-items: stretch;
   border: 1px solid rgba(var(--accent-rgb), 0.18);
-  border-radius: 20px;
+  border-radius: 16px;
   background:
     radial-gradient(circle at 20% 20%, rgba(var(--accent-rgb), 0.08), transparent 34%),
     #08090c;
@@ -47,11 +50,11 @@
 }
 
 .homeHeroExpanded {
-  min-height: clamp(264px, 29vh, 324px);
+  min-height: clamp(248px, 27vh, 300px);
 }
 
 .homeHeroCompact {
-  min-height: 218px;
+  min-height: 208px;
 }
 
 .homeHero:focus-within,
@@ -62,7 +65,7 @@
 .homeHeroMedia {
   position: absolute;
   z-index: -2;
-  inset: 0 0 0 42%;
+  inset: 0 0 0 46%;
   overflow: hidden;
   pointer-events: none;
   background: #0c0d10;
@@ -100,13 +103,13 @@
 .homeHeroContent {
   position: relative;
   z-index: 2;
-  width: min(64%, 820px);
+  width: min(60%, 760px);
   min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: clamp(28px, 3.2vw, 46px);
+  padding: clamp(26px, 2.8vw, 40px);
 }
 
 .homeHeroKickerRow {
@@ -145,7 +148,7 @@
   -webkit-line-clamp: 2;
   line-clamp: 2;
   color: var(--text);
-  font-size: clamp(38px, 5.3vw, 76px);
+  font-size: clamp(36px, 4.7vw, 68px);
   font-weight: 900;
   line-height: 0.91;
   letter-spacing: -0.072em;
@@ -220,6 +223,14 @@
 
 .homeHeroAction:active:not(:disabled) {
   transform: scale(0.975);
+}
+
+.homeHeroAction:focus-visible,
+.homeHeroSizeToggle:focus-visible,
+.homeListenRow:focus-visible,
+.homeRotationCard:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), .78);
+  outline-offset: 2px;
 }
 
 .homeHeroAction:disabled {
@@ -575,6 +586,26 @@
   border: 0;
 }
 
+@media (min-width: 1500px) {
+  .homeListenGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .homeListenRow {
+    min-height: 58px;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+  }
+
+  .homeListenCoverWrap {
+    width: 44px;
+    height: 44px;
+  }
+
+  .homeHeroMedia {
+    left: 48%;
+  }
+}
+
 @media (max-width: 1180px) {
   .homeHeroMedia {
     left: 38%;
@@ -590,7 +621,7 @@
 }
 
 @media (max-width: 900px) {
-  .app .headerText {
+  .app[data-view="home"] .headerText {
     margin-top: -4px;
   }
 
