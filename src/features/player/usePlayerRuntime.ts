@@ -50,6 +50,9 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const beatFrameRef = useRef<number | null>(null);
   const beatFrameTimerRef = useRef<number | null>(null);
   const audioEffectRuntimeRef = useRef<AudioEffectRuntime | null>(null);
+  if (audioEffectRuntimeRef.current === null) {
+    audioEffectRuntimeRef.current = new AudioEffectRuntime();
+  }
   const beatSmoothRef = useRef({ bass: 0, mid: 0, energy: 0, phase: 0 });
   const beatReactiveTargetCacheRef = useRef<{ nodes: HTMLElement[]; refreshedAt: number; songId: string }>({ nodes: [], refreshedAt: 0, songId: "" });
   const beatLastPaintSignatureRef = useRef("");

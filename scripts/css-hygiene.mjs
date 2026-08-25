@@ -39,7 +39,8 @@ function normalizeCss(source) {
   }
 
   while (output.length && output[output.length - 1] === "") output.pop();
-  return `${output.join("\n").replace(/\n{4,}/g, "\n\n\n")}${newline}`.replace(/\n/g, newline);
+  const normalizedBody = output.join("\n").replace(/\n{4,}/g, "\n\n\n");
+  return `${normalizedBody.replace(/\n/g, newline)}${newline}`;
 }
 
 const dirty = [];

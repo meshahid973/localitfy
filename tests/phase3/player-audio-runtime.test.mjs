@@ -11,6 +11,7 @@ test("audio effects are typed and owned by the player runtime", () => {
   const settingsTypes = read("src/features/settings/settings.types.ts");
   const settingsDefaults = read("src/features/settings/settings.constants.ts");
   const runtime = read("src/features/player/audio/audioEffectRuntime.ts");
+  const playerRuntime = read("src/features/player/usePlayerRuntime.ts");
   const app = read("src/App.tsx");
 
   assert.match(settingsTypes, /audioEffectMode:\s*AudioEffectMode/);
@@ -25,7 +26,10 @@ test("audio effects are typed and owned by the player runtime", () => {
   assert.match(runtime, /this\.feedback\.connect\(this\.delay\)/);
   assert.match(runtime, /requestedReverb/);
 
-  assert.match(app, /AudioEffectRuntime/);
+  assert.match(playerRuntime, /new AudioEffectRuntime\(\)/);
+  assert.match(playerRuntime, /audioEffectRuntimeRef/);
+  assert.doesNotMatch(app, /import \{ AudioEffectRuntime \}/);
+  assert.doesNotMatch(app, /new AudioEffectRuntime\(\)/);
   assert.match(app, /audioEffectRuntimeRef/);
   assert.match(app, /effectiveVolumeRef/);
   assert.doesNotMatch(app, /beatAudioContextRef|audioEffectDryGainRef|audioEffectWetGainRef|audioEffectDelayRef|audioEffectFeedbackGainRef|audioEffectFilterRef/);
@@ -33,6 +37,7 @@ test("audio effects are typed and owned by the player runtime", () => {
 
 test("focus and visibility repairs use the latest playback callback", () => {
   const lifecycle = read("src/app/runtime/useAppLifecycleRuntime.ts");
+  assert.match(lifecycle, /useLayoutEffect\(\(\) => \{/);
   assert.match(lifecycle, /repairPlaybackAfterAppReturnsRef\.current\s*=\s*repairPlaybackAfterAppReturns/);
   assert.match(lifecycle, /repairPlaybackAfterAppReturnsRef\.current\(reason\)/);
 });

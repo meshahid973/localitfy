@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import type { View } from "../../features/shell/view.types";
 
@@ -36,7 +36,10 @@ export function useAppLifecycleRuntime({
 }: AppLifecycleRuntimeOptions) {
   const analyticsSessionEndedRef = useRef(false);
   const repairPlaybackAfterAppReturnsRef = useRef(repairPlaybackAfterAppReturns);
-  repairPlaybackAfterAppReturnsRef.current = repairPlaybackAfterAppReturns;
+
+  useLayoutEffect(() => {
+    repairPlaybackAfterAppReturnsRef.current = repairPlaybackAfterAppReturns;
+  }, [repairPlaybackAfterAppReturns]);
 
   useEffect(() => {
     let analyticsLaunchCancelled = false;

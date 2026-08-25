@@ -22,7 +22,6 @@ import { useProximityMotion } from "./useProximityMotion";
 import { HtmlAudioEngine } from "./player/htmlAudioEngine";
 import { createPlayerController } from "./player/playerController";
 import { usePlayerRuntime } from "./features/player";
-import { AudioEffectRuntime } from "./features/player/audio/audioEffectRuntime";
 import type { PlayerEngineSource } from "./player/PlayerEngine";
 import {
   initLocalitfyAnalytics,
@@ -3228,10 +3227,9 @@ function MainModeApp() {
   }, []);
 
   function getAudioEffectRuntime() {
-    if (!audioEffectRuntimeRef.current) {
-      audioEffectRuntimeRef.current = new AudioEffectRuntime();
-    }
-    return audioEffectRuntimeRef.current;
+    const runtime = audioEffectRuntimeRef.current;
+    if (!runtime) throw new Error("player audio effect runtime unavailable");
+    return runtime;
   }
 
   function getAudioEffectInput() {
