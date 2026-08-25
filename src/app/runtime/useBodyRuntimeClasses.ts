@@ -7,16 +7,17 @@ type BodyRuntimeClassOptions = {
   wantsMoreBlur: boolean;
 };
 
-const PERFORMANCE_CLASSES = [
+const PERFORMANCE_CLASS = "localtifyPerf";
+const PERFORMANCE_DATASET = "current";
+const LEGACY_PERFORMANCE_CLASSES = [
   "localtifyPerfV301",
   "localtifyPerfV303",
+  "localtifyPerfV305",
   "localtifyPerfV307",
   "localtifyPerfV310",
   "localtifyPerfV319",
   "localtifyGpuFriendly"
 ] as const;
-
-const OWNED_PERF_DATASETS = new Set(["v319", "v318", "v310", "v307", "v305", "v304", "v303", "v301"]);
 
 export function useBodyRuntimeClasses({
   isAppBackgrounded,
@@ -52,14 +53,16 @@ export function useBodyRuntimeClasses({
 
   useEffect(() => {
     const body = document.body;
-    body.classList.add(...PERFORMANCE_CLASSES);
-    body.dataset.localtifyPerf = "v319";
+
+    // A single current owner replaces years of mutually contradictory V30x
+    // performance classes. Removing them also makes hot reload recover cleanly.
+    body.classList.remove(...LEGACY_PERFORMANCE_CLASSES);
+    body.classList.add(PERFORMANCE_CLASS);
+    body.dataset.localtifyPerf = PERFORMANCE_DATASET;
 
     return () => {
-      body.classList.remove(...PERFORMANCE_CLASSES);
-      if (OWNED_PERF_DATASETS.has(String(body.dataset.localtifyPerf || ""))) {
-        delete body.dataset.localtifyPerf;
-      }
+      body.classList.remove(PERFORMANCE_CLASS, ...LEGACY_PERFORMANCE_CLASSES);
+      if (body.dataset.localtifyPerf === PERFORMANCE_DATASET) delete body.dataset.localtifyPerf;
     };
   }, []);
 
