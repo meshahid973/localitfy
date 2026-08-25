@@ -6,6 +6,7 @@ const scripts = [
   "scripts/css-shadow-dedup.mjs",
   "scripts/css-adjacent-merge.mjs",
   "scripts/css-cross-file-dedup.mjs",
+  "scripts/css-unused-selectors.mjs",
   "scripts/css-hygiene.mjs"
 ];
 
