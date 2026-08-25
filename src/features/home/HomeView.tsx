@@ -4,30 +4,31 @@ import { Cover } from "../covers/Cover";
 import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
+import type { Song } from "../library/song.types";
+import type { Settings } from "../settings/settings.types";
 
 export type HomeViewProps = {
-  [key: string]: any;
-  ambientStyle: any;
-  currentId: any;
-  currentNowPlayingLabel: any;
-  currentSong: any;
-  heroDisplayArtist: any;
-  heroDisplayTitle: any;
-  heroMotionClass: any;
-  heroTitleClass: any;
-  homeFreshShelfSongs: any;
-  homeListenNowSongs: any;
-  isPlaying: any;
-  isThreeAm: any;
-  nowPlayingSongMotionClass: any;
-  nowPlayingTransitionKey: any;
-  openCoversViewWithCurrentSong: any;
-  playableSongCount: any;
-  playerError: any;
-  selectSong: any;
-  settings: any;
-  shuffleLibrarySongsAction: any;
-  toggleHeroExpanded: any;
+  ambientStyle: CSSProperties;
+  currentId: string | null;
+  currentNowPlayingLabel: string;
+  currentSong: Song | null;
+  heroDisplayArtist: string;
+  heroDisplayTitle: string;
+  heroMotionClass: string;
+  heroTitleClass: string;
+  homeFreshShelfSongs: readonly Song[];
+  homeListenNowSongs: readonly Song[];
+  isPlaying: boolean;
+  isThreeAm: boolean;
+  nowPlayingSongMotionClass: string;
+  nowPlayingTransitionKey: string;
+  openCoversViewWithCurrentSong: () => unknown;
+  playableSongCount: number;
+  playerError: string | null;
+  selectSong: (songId: string, shouldPlay?: boolean) => unknown;
+  settings: Pick<Settings, "heroExpanded" | "volume">;
+  shuffleLibrarySongsAction: () => unknown;
+  toggleHeroExpanded: () => unknown;
 };
 
 export default function HomeView(props: HomeViewProps) {
@@ -55,8 +56,8 @@ export default function HomeView(props: HomeViewProps) {
     toggleHeroExpanded
   } = props;
 
-  const listenNowSongs = Array.isArray(homeListenNowSongs) ? homeListenNowSongs.slice(0, 6) : [];
-  const rotationSongs = Array.isArray(homeFreshShelfSongs) ? homeFreshShelfSongs.slice(0, 10) : [];
+  const listenNowSongs = homeListenNowSongs.slice(0, 6);
+  const rotationSongs = homeFreshShelfSongs.slice(0, 10);
 
   return (
     <div className="homePage">
@@ -94,7 +95,7 @@ export default function HomeView(props: HomeViewProps) {
               className="homeHeroAction homeHeroActionPrimary"
               type="button"
               onClick={shuffleLibrarySongsAction}
-              disabled={(playableSongCount || 0) < 2}
+              disabled={playableSongCount < 2}
               title="Shuffle the whole library"
             >
               <Shuffle size={16} strokeWidth={2.2} aria-hidden="true" />
@@ -131,12 +132,12 @@ export default function HomeView(props: HomeViewProps) {
             <span className="homeSectionEyebrow">made from your library</span>
             <h3 id="home-listen-title">Listen now</h3>
           </div>
-          <span className="homeSectionMeta">{playableSongCount || 0} playable</span>
+          <span className="homeSectionMeta">{playableSongCount} playable</span>
         </header>
 
         {listenNowSongs.length ? (
           <div className="homeListenGrid">
-            {listenNowSongs.map((song: any) => {
+            {listenNowSongs.map((song) => {
               const active = song.id === currentId;
               return (
                 <button
@@ -177,7 +178,7 @@ export default function HomeView(props: HomeViewProps) {
 
         {rotationSongs.length ? (
           <div className="homeRotationRail">
-            {rotationSongs.map((song: any) => {
+            {rotationSongs.map((song) => {
               const active = song.id === currentId;
               return (
                 <button
