@@ -1,0 +1,23 @@
+name: Dependency audit temp
+
+on:
+  push:
+    branches: [agent/deep-css-react-cleanup]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Show audit report
+        run: npm audit --json || true
