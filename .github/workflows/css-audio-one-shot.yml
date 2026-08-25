@@ -33,6 +33,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Tighten temporary migration guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/migrate-player-audio-runtime.mjs')
+          source = path.read_text()
+          old = 'if (source.includes(deadName)) throw new Error(`[audio-migration] stale legacy symbol remains: ${deadName}`);'
+          new = 'if (source.includes(`function ${deadName}(`) || source.includes(`const ${deadName} =`)) throw new Error(`[audio-migration] stale legacy declaration remains: ${deadName}`);'
+          if old not in source:
+              raise SystemExit('migration guard source not found')
+          path.write_text(source.replace(old, new))
+          PY
+
       - name: Materialize audio runtime ownership
         run: node scripts/migrate-player-audio-runtime.mjs
 
