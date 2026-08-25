@@ -2,7 +2,7 @@ name: r42 Home v3 finalizer
 
 on:
   pull_request:
-    types: [ready_for_review]
+    types: [ready_for_review, synchronize]
 
 permissions:
   contents: write
@@ -35,6 +35,8 @@ jobs:
         run: |
           rm -f .github/workflows/r42-home-v3-finalize.yml
           rm -f scripts/r42-finalize-home-v3.mjs
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
 
       - name: Full release gate
         run: npm run release:check
