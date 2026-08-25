@@ -1155,19 +1155,6 @@ body.localitfySongDragging .songRow{
   height: 3px;
 }
 
-.homeAlbumCard.songDropTarget[data-drop-side="before"]::before{
-  top: 12px;
-  bottom: 12px;
-  left: -4px;
-  width: 3px;
-}
-
-.homeAlbumCard.songDropTarget[data-drop-side="after"]::before{
-  top: 12px;
-  bottom: 12px;
-  right: -4px;
-  width: 3px;
-}
 
 body.isResizingSidebar .ambientSurface::before{
   animation: none !important;
@@ -1175,9 +1162,6 @@ body.isResizingSidebar .ambientSurface::before{
   filter: none !important;
 }
 
-body.isResizingSidebar .homeAlbumCard{
-  transition: none !important;
-}
 
 body.isResizingSidebar{
   text-rendering: optimizeSpeed;
@@ -1214,11 +1198,6 @@ body.isResizingSidebar{
   transition-duration: 90ms !important;
 }
 
-body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::before{
-  opacity: 0 !important;
-  filter: none !important;
-  animation: none !important;
-}
 
 :root{
   --flat-bg: #000000;
@@ -1259,10 +1238,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   box-shadow: none !important;
 }
 
-.app.flatNoGradientUI .hero.heroPremium{
-  background: var(--custom-bg) !important;
-  border-color: var(--flat-border-strong) !important;
-}
 
 .app.flatNoGradientUI .sidebarNav button,
 .app.flatNoGradientUI .navButton,
@@ -1296,11 +1271,10 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
 
 .app.flatNoGradientUI .sidebarNav button.active,
 .app.flatNoGradientUI .navButton.active,
-.app.flatNoGradientUI .homeAlbumCard.active,
 .app.flatNoGradientUI .songRow.active,
 .app.flatNoGradientUI .themeItem.active,
 .app.flatNoGradientUI .iconAction.liked,
-.app.flatNoGradientUI .primaryButton{
+.app.flatNoGradientUI .primaryButton {
   background: var(--lt-accent) !important;
   background-image: none !important;
   color: #050505 !important;
@@ -1313,10 +1287,6 @@ body.isResizingSidebar .app :is(.ambientSurface, .coverAura, .heroArtWrap)::befo
   z-index: 4 !important;
 }
 
-.app.flatNoGradientUI .homeAlbumCard:hover{
-  transform: translate3d(0, -1px, 0) !important;
-  border-color: rgba(var(--lt-accent-rgb), 0.42) !important;
-}
 
 .app.flatNoGradientUI.themeSettling *{
   transition-duration: 1ms !important;
@@ -2061,10 +2031,8 @@ body{
 
 .app .songRow,
 .app .topRow,
-.app .homeAlbumCard,
 .app .simpleAlbumCard,
 .app .songArt,
-.app .heroArt,
 .app .panel,
 .app .hero,
 .app .simpleHero,
@@ -2073,7 +2041,7 @@ body{
 .app .mainAction,
 .app .softButton,
 .app .heroGhost,
-.app .simpleGhost{
+.app .simpleGhost {
   transition: none !important;
   animation: none !important;
   transform: none !important;
@@ -2465,9 +2433,6 @@ button:hover,
     contain-intrinsic-size: 54px;
   }
 
-  .app .homeAlbumGrid .homeAlbumCard{
-    contain-intrinsic-size: 230px 290px;
-  }
 
 }
 
@@ -2654,11 +2619,6 @@ html{
 }
 
 
-.homeShelfPanel{
-  contain: layout paint style;
-}
-
-
 .app{
 
   background-repeat: no-repeat !important;
@@ -2691,56 +2651,42 @@ html{
 }
 
 .homeHeroCard,
-.homeShelfPanel,
 .libraryPanelV025,
 .coverStudioRoot,
 .analyticsPage,
 .downloadsPage,
 .editorModal,
 .deleteModal,
-.whatsNewCard{
+.whatsNewCard {
   transform-origin: center;
   contain: layout paint style;
 }
 
 .homeHeroCard,
-.homeListenCard,
-.homeFreshCard,
-.homeAlbumCard,
 .songRow,
 .navButton,
-.sidebarAction{
+.sidebarAction {
   transition-timing-function: var(--motion-smooth);
 }
 
-.homeListenCard:hover{
-  background-color: color-mix(in srgb, var(--surface-raised, #191622) 78%, var(--lt-accent, #ff65c8) 11%) !important;
-  border-color: color-mix(in srgb, var(--lt-accent, #ff65c8) 34%, transparent) !important;
-  box-shadow: 0 18px 42px color-mix(in srgb, var(--lt-accent, #ff65c8) 10%, transparent);
-}
 
 .hero,
-.homeShelfPanel,
-.homeLibraryPanel,
 .libraryPanelV025,
 .coverStudioRoot,
 .analyticsPage,
 .downloadsPage,
 .editorModal,
 .deleteModal,
-.whatsNewCard{
+.whatsNewCard {
   transform-origin: center;
   contain: layout paint style;
 }
 
 .hero,
-.homeListenCard,
-.homeFreshCard,
-.homeAlbumCard,
 .songRow,
 .navButton,
 .sidebarAction,
-.transportButton{
+.transportButton {
   transition-timing-function: var(--motion-smooth);
 }
 
@@ -4202,8 +4148,7 @@ body.localitfyThemePainting .app .ambientSurface::after{
 .settingsPanel,
 .settingsPanelShell,
 .libraryPanel,
-.homeLibraryPanel,
-.simpleLibraryPanel{
+.simpleLibraryPanel {
   --grid-line: transparent !important;
   --app-grid-line: transparent !important;
   --page-line: transparent !important;
@@ -4368,8 +4313,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 
 .coverGalleryGrid,
 .libraryGrid,
-.homeAlbums,
-.homeAlbumGrid{
+.homeAlbums {
   content-visibility: auto;
   contain-intrinsic-size: 720px;
 }
@@ -4444,21 +4388,17 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 .app.isScrolling .libraryCard,
 .app.isScrolling .songCard,
 .app.isScrolling .coverCard,
-.app.isScrolling .homeListenCard,
-.app.isScrolling .homeFreshCard,
 .app.isScrolling .panel,
 .app.playerScrubbing .playerBar,
 .app.playerScrubbing .progressInput,
-.app.playerScrubbing .volumeSlider{
+.app.playerScrubbing .volumeSlider {
   transition-duration: 0s !important;
 }
 
 .homeSection,
 .coverGalleryCard,
 .libraryCard,
-.songCard,
-.homeFreshCard,
-.homeListenCard{
+.songCard {
   content-visibility: auto;
   contain-intrinsic-size: 1px 280px;
 }
@@ -5368,16 +5308,6 @@ body.localtifyBackgroundMode .ambientSurface,
   height: clamp(320px, calc(100vh - 430px), 640px);
 }
 
-.homeAlbumGrid.virtualSongViewport{
-  display: block !important;
-  height: clamp(420px, calc(100vh - 390px), 740px);
-  min-height: 320px;
-  padding: 2px 8px 18px 2px !important;
-}
-
-.homeAlbumGrid.simpleAlbumGrid.virtualSongViewport{
-  height: clamp(320px, calc(100vh - 430px), 620px);
-}
 
 .virtualSongCanvas{
   position: relative;
@@ -5415,11 +5345,6 @@ body.localtifyBackgroundMode .ambientSurface,
   contain: layout paint style;
 }
 
-.virtualHomeGridRow .homeAlbumCard{
-  min-width: 0;
-  width: 100%;
-  margin: 0 !important;
-}
 
 .virtualSongViewport::-webkit-scrollbar{
   width: 8px;
@@ -5447,8 +5372,7 @@ body.localtifyBackgroundMode .ambientSurface,
   --ambient-cover-rgb: var(--cover-rgb, var(--lt-accent-rgb));
 }
 
-.app[data-cover-sync]:not([data-cover-sync="off"]) .heroArtWrap,
-.app[data-cover-sync]:not([data-cover-sync="off"]) .playerBar{
+.app[data-cover-sync]:not([data-cover-sync="off"]) .playerBar {
   --player-ambient-rgb: var(--cover-rgb, var(--lt-accent-rgb));
 }
 
@@ -6219,317 +6143,6 @@ body.localtifyBackgroundMode .ambientSurface,
   --hero-actions-shadow-v164: 0 16px 42px rgba(0, 0, 0, .30), 0 0 30px rgba(var(--lt-accent-rgb), .075);
 }
 
-.app .heroPremium{
-  position: relative !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) clamp(150px, 14vw, 250px) !important;
-  align-items: center !important;
-  column-gap: clamp(24px, 4vw, 72px) !important;
-  min-height: clamp(318px, 34vh, 448px) !important;
-  padding: clamp(30px, 3.5vw, 58px) clamp(34px, 4.2vw, 76px) !important;
-  overflow: hidden !important;
-}
-
-.app .heroPremium.heroCompact{
-  min-height: clamp(294px, 30vh, 372px) !important;
-}
-
-.app .heroPremium.heroExpanded{
-  min-height: clamp(348px, 38vh, 492px) !important;
-}
-
-.app .heroPremium .heroTextClean,
-.app .heroPremium .heroText{
-  min-width: 0 !important;
-  max-width: min(100%, 1120px) !important;
-  width: 100% !important;
-  align-self: center !important;
-  justify-self: stretch !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  grid-auto-rows: auto !important;
-  align-content: center !important;
-  justify-items: start !important;
-  gap: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: visible !important;
-}
-
-.app .heroPremium .eyebrow,
-.app .heroPremium .nowPlayingEyebrowSwap{
-  margin: 0 0 clamp(13px, 1.45vw, 20px) !important;
-  position: relative !important;
-  z-index: 4 !important;
-}
-
-.app .heroPremium .heroTitle,
-.app .heroPremium .nowPlayingTitleSwap{
-  position: relative !important;
-  z-index: 3 !important;
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  line-clamp: 2 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  overflow-wrap: anywhere !important;
-  word-break: normal !important;
-  white-space: normal !important;
-  max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 470px)) !important;
-  max-height: 1.84em !important;
-  margin: 0 !important;
-  padding: 0 0 .035em !important;
-  line-height: .92 !important;
-  letter-spacing: clamp(-.085em, -.45vw, -.055em) !important;
-}
-
-.app .heroPremium.heroTitleTiny .heroTitle,
-.app .heroPremium.heroTitleTiny .nowPlayingTitleSwap{
-  font-size: clamp(66px, 7vw, 124px) !important;
-}
-
-.app .heroPremium.heroTitleShort .heroTitle,
-.app .heroPremium.heroTitleShort .nowPlayingTitleSwap{
-  font-size: clamp(60px, 6.2vw, 108px) !important;
-}
-
-.app .heroPremium.heroTitleNormal .heroTitle,
-.app .heroPremium.heroTitleNormal .nowPlayingTitleSwap,
-.app .heroPremium .heroTitle,
-.app .heroPremium .nowPlayingTitleSwap{
-  font-size: clamp(52px, 5.25vw, 88px) !important;
-}
-
-.app .heroPremium.heroTitleLong .heroTitle,
-.app .heroPremium.heroTitleLong .nowPlayingTitleSwap{
-  font-size: clamp(44px, 4.6vw, 76px) !important;
-}
-
-.app .heroPremium.heroCompact.heroTitleTiny .heroTitle,
-.app .heroPremium.heroCompact.heroTitleTiny .nowPlayingTitleSwap{
-  font-size: clamp(58px, 5.8vw, 98px) !important;
-}
-
-.app .heroPremium.heroCompact.heroTitleShort .heroTitle,
-.app .heroPremium.heroCompact.heroTitleShort .nowPlayingTitleSwap{
-  font-size: clamp(54px, 5.2vw, 86px) !important;
-}
-
-.app .heroPremium.heroCompact.heroTitleNormal .heroTitle,
-.app .heroPremium.heroCompact.heroTitleNormal .nowPlayingTitleSwap,
-.app .heroPremium.heroCompact .heroTitle,
-.app .heroPremium.heroCompact .nowPlayingTitleSwap{
-  font-size: clamp(46px, 4.35vw, 72px) !important;
-}
-
-.app .heroPremium.heroCompact.heroTitleLong .heroTitle,
-.app .heroPremium.heroCompact.heroTitleLong .nowPlayingTitleSwap{
-  font-size: clamp(38px, 3.85vw, 62px) !important;
-}
-
-.app .heroPremium.heroExpanded.heroTitleNormal .heroTitle,
-.app .heroPremium.heroExpanded.heroTitleNormal .nowPlayingTitleSwap{
-  font-size: clamp(56px, 5.55vw, 94px) !important;
-}
-
-.app .heroPremium.heroExpanded.heroTitleLong .heroTitle,
-.app .heroPremium.heroExpanded.heroTitleLong .nowPlayingTitleSwap{
-  font-size: clamp(46px, 4.85vw, 82px) !important;
-}
-
-.app .heroPremium .heroArtistLine,
-.app .heroPremium .nowPlayingArtistSwap{
-  position: relative !important;
-  z-index: 4 !important;
-  display: block !important;
-  max-width: min(760px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 500px)) !important;
-  margin: clamp(16px, 1.45vw, 24px) 0 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  line-height: 1.2 !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-.app .heroPremium .heroQuickActions{
-  position: relative !important;
-  inset: auto !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  z-index: 5 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  flex-wrap: wrap !important;
-  gap: 8px !important;
-  width: fit-content !important;
-  max-width: min(100%, 520px) !important;
-  margin: clamp(10px, 1.05vw, 16px) 0 0 !important;
-  padding: 6px !important;
-  border-radius: 999px !important;
-  border: 1px solid var(--hero-actions-border-v164) !important;
-  color: rgba(255, 255, 255, .92) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03)),
-    radial-gradient(circle at 16% 0%, rgba(var(--lt-accent-rgb), .18), transparent 58%),
-    var(--hero-actions-bg-v164) !important;
-  box-shadow:
-    var(--hero-actions-shadow-v164),
-    inset 0 1px 0 rgba(255, 255, 255, .11),
-    inset 0 -1px 0 rgba(0, 0, 0, .20) !important;
-  backdrop-filter: blur(18px) saturate(1.28) brightness(1.04) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(1.28) brightness(1.04) !important;
-  transform: translate3d(0, 0, 0) !important;
-  animation: localtifyHeroActionsSettleV164 360ms var(--hero-actions-pop-v164) both !important;
-}
-
-.app .heroPremium .heroQuickActions::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: -12px !important;
-  z-index: -2 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: .48 !important;
-  background:
-    radial-gradient(circle at 22% 52%, rgba(var(--lt-accent-rgb), .22), transparent 56%),
-    radial-gradient(circle at 84% 28%, rgba(255, 255, 255, .08), transparent 46%) !important;
-  filter: blur(16px) !important;
-}
-
-.app .heroPremium .heroQuickActions::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: 1px !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: .70 !important;
-  background: linear-gradient(120deg, rgba(255, 255, 255, .13), transparent 22%, transparent 72%, rgba(255, 255, 255, .065)) !important;
-}
-
-.app .heroPremium .heroTinyButton{
-  position: relative !important;
-  isolation: isolate !important;
-  min-height: 35px !important;
-  height: 35px !important;
-  padding: 0 15px !important;
-  border: 1px solid rgba(255, 255, 255, .13) !important;
-  border-radius: 999px !important;
-  overflow: hidden !important;
-  color: rgba(255, 255, 255, .92) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .045)),
-    rgba(255, 255, 255, .06) !important;
-  box-shadow:
-    0 8px 22px rgba(0, 0, 0, .20),
-    inset 0 1px 0 rgba(255, 255, 255, .11),
-    inset 0 -1px 0 rgba(0, 0, 0, .16) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  letter-spacing: -.015em !important;
-  text-transform: lowercase !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
-  transform-origin: center !important;
-  transition:
-    transform 155ms var(--hero-actions-ease-v164),
-    color 155ms ease,
-    background-color 155ms ease,
-    border-color 155ms ease,
-    box-shadow 155ms ease,
-    filter 155ms ease !important;
-}
-
-.app .heroPremium .heroTinyButton::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: -1 !important;
-  border-radius: inherit !important;
-  opacity: 0 !important;
-  background: radial-gradient(circle at 50% 20%, rgba(var(--lt-accent-rgb), .28), transparent 68%) !important;
-  transition: opacity 160ms ease !important;
-}
-
-.app .heroPremium .heroTinyButton::after{
-  content: "" !important;
-  position: absolute !important;
-  top: 1px !important;
-  bottom: 1px !important;
-  left: -46% !important;
-  width: 42% !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: 0 !important;
-  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .24), transparent) !important;
-  transform: translate3d(-12px, 0, 0) skewX(-12deg) !important;
-  transition: opacity 160ms ease, left 430ms var(--hero-actions-ease-v164) !important;
-}
-
-.app .heroPremium .heroTinyButton:hover{
-  color: #fff !important;
-  border-color: rgba(var(--lt-accent-rgb), .50) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .055)),
-    rgba(var(--lt-accent-rgb), .14) !important;
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, .26),
-    0 0 28px rgba(var(--lt-accent-rgb), .16),
-    inset 0 1px 0 rgba(255, 255, 255, .14) !important;
-  transform: translate3d(0, -2px, 0) scale(1.035) !important;
-}
-
-.app .heroPremium .heroTinyButton:hover::before{
-  opacity: 1 !important;
-}
-
-.app .heroPremium .heroTinyButton:hover::after{
-  left: 112% !important;
-  opacity: 1 !important;
-}
-
-.app .heroPremium .heroTinyButton:active{
-  transform: translate3d(0, 0, 0) scale(.925) !important;
-  filter: brightness(.96) saturate(1.08) !important;
-  transition-duration: 78ms !important;
-}
-
-.app .heroPremium .heroTinyButton[aria-pressed="true"]{
-  color: var(--accent-contrast, #09070c) !important;
-  border-color: rgba(var(--lt-accent-rgb), .38) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .23), rgba(255, 255, 255, .07)),
-    var(--lt-accent) !important;
-  box-shadow:
-    0 12px 32px rgba(var(--lt-accent-rgb), .27),
-    inset 0 1px 0 rgba(255, 255, 255, .24),
-    inset 0 -1px 0 rgba(0, 0, 0, .14) !important;
-}
-
-.app .heroPremium .heroArtWrap{
-  justify-self: end !important;
-  align-self: center !important;
-  width: clamp(150px, 14vw, 250px) !important;
-  max-width: 100% !important;
-  z-index: 2 !important;
-}
-
-.app .heroPremium .heroArt{
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1 / 1 !important;
-  object-fit: cover !important;
-}
-
-.app .heroLayoutMotion.heroLayoutPulseA .heroQuickActions,
-.app .heroLayoutMotion.heroLayoutPulseB .heroQuickActions{
-  animation: localtifyHeroActionsSettleV164 360ms var(--hero-actions-pop-v164) both !important;
-}
 
 @keyframes localtifyHeroActionsSettleV164{
   0%{
@@ -6558,69 +6171,18 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 @media (max-width: 1320px){
-  .app .heroPremium{
-    grid-template-columns: minmax(0, 1fr) clamp(132px, 14vw, 204px) !important;
-    column-gap: clamp(18px, 3vw, 44px) !important;
-    padding-inline: clamp(26px, 3.3vw, 54px) !important;
-  }
 
-  .app .heroPremium .heroTitle,
-.app .heroPremium .nowPlayingTitleSwap{
-    max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 340px)) !important;
-  }
 
-  .app .heroPremium .heroArtistLine,
-.app .heroPremium .nowPlayingArtistSwap{
-    max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 360px)) !important;
-  }
 }
 
 @media (max-width: 980px){
-  .app .heroPremium{
-    grid-template-columns: minmax(0, 1fr) !important;
-    min-height: auto !important;
-    padding: 28px !important;
-  }
 
-  .app .heroPremium .heroArtWrap{
-    display: none !important;
-  }
 
-  .app .heroPremium .heroTitle,
-.app .heroPremium .nowPlayingTitleSwap{
-    max-width: 100% !important;
-    font-size: clamp(40px, 9vw, 70px) !important;
-  }
-
-  .app .heroPremium .heroArtistLine,
-.app .heroPremium .nowPlayingArtistSwap{
-    max-width: 100% !important;
-  }
-
-  .app .heroPremium .heroQuickActions{
-    max-width: 100% !important;
-  }
 }
 
 @media (max-width: 640px){
-  .app .heroPremium{
-    padding: 22px !important;
-  }
 
-  .app .heroPremium .heroTitle,
-.app .heroPremium .nowPlayingTitleSwap{
-    font-size: clamp(34px, 11vw, 56px) !important;
-  }
 
-  .app .heroPremium .heroQuickActions{
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  .app .heroPremium .heroTinyButton{
-    flex: 1 1 auto !important;
-    min-width: 120px !important;
-  }
 }
 
 .app{
@@ -6631,328 +6193,6 @@ body.localtifyBackgroundMode .ambientSurface,
   --hero-v165-action-pop: cubic-bezier(.18, 1.24, .22, 1);
 }
 
-.app .pageTransition.pageTransition-home .hero.heroPremium,
-.app .pageTransition[data-view="home"] .hero.heroPremium{
-  position: relative !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) clamp(138px, 13.2vw, 226px) !important;
-  column-gap: clamp(22px, 3.8vw, 70px) !important;
-  align-items: center !important;
-  min-height: clamp(282px, 29vh, 354px) !important;
-  padding: clamp(26px, 3.1vw, 52px) var(--hero-v165-left-pad) !important;
-  overflow: hidden !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded{
-  min-height: clamp(316px, 34vh, 430px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText{
-  position: relative !important;
-  z-index: 8 !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: clamp(220px, 23vh, 286px) !important;
-  max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 360px)) !important;
-  padding: 0 0 var(--hero-v165-bottom-safe) !important;
-  margin: 0 !important;
-  overflow: visible !important;
-  align-self: center !important;
-  justify-self: stretch !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .eyebrow.nowPlayingEyebrowSwap,
-.app .pageTransition.pageTransition-home .hero.heroPremium .eyebrow,
-.app .pageTransition[data-view="home"] .hero.heroPremium .eyebrow.nowPlayingEyebrowSwap,
-.app .pageTransition[data-view="home"] .hero.heroPremium .eyebrow{
-  display: block !important;
-  margin: 0 0 clamp(10px, 1.1vw, 16px) !important;
-  padding: 0 !important;
-  line-height: 1.05 !important;
-  transform: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle.nowPlayingTitleSwap,
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle.nowPlayingTitleSwap,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
-  position: relative !important;
-  z-index: 4 !important;
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  line-clamp: 2 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: normal !important;
-  word-break: normal !important;
-  overflow-wrap: anywhere !important;
-  max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 430px)) !important;
-  max-height: 1.78em !important;
-  margin: 0 !important;
-  padding: 0 0 .04em !important;
-  line-height: .89 !important;
-  letter-spacing: clamp(-.078em, -.38vw, -.052em) !important;
-  font-size: clamp(42px, 4.05vw, 68px) !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleTiny .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleTiny .heroText.heroTextClean .heroTitle{
-  font-size: clamp(56px, 5.4vw, 92px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleShort .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleShort .heroText.heroTextClean .heroTitle{
-  font-size: clamp(50px, 4.75vw, 78px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleNormal .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleNormal .heroText.heroTextClean .heroTitle{
-  font-size: clamp(42px, 4.0vw, 64px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
-  font-size: clamp(34px, 3.25vw, 54px) !important;
-  max-height: 1.82em !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded.heroTitleNormal .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded.heroTitleNormal .heroText.heroTextClean .heroTitle{
-  font-size: clamp(46px, 4.45vw, 76px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium.heroExpanded.heroTitleLong .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroExpanded.heroTitleLong .heroText.heroTextClean .heroTitle{
-  font-size: clamp(38px, 3.7vw, 62px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroArtistLine.nowPlayingArtistSwap,
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroArtistLine,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroArtistLine.nowPlayingArtistSwap,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroArtistLine{
-  position: absolute !important;
-  left: 0 !important;
-  right: auto !important;
-  bottom: clamp(48px, 4.6vw, 60px) !important;
-  z-index: 9 !important;
-  display: block !important;
-  width: min(620px, 100%) !important;
-  max-width: min(620px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 430px)) !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  line-height: 1.18 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  transform: none !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroQuickActions,
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroQuickActions,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions{
-  position: absolute !important;
-  left: 0 !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: 0 !important;
-  z-index: 12 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
-  width: fit-content !important;
-  max-width: min(100%, 520px) !important;
-  min-height: var(--hero-v165-action-height) !important;
-  margin: 0 !important;
-  padding: 5px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255, 255, 255, .12) !important;
-  color: rgba(255, 255, 255, .92) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .105), rgba(255, 255, 255, .035)),
-    radial-gradient(circle at 14% 0%, rgba(var(--lt-accent-rgb), .22), transparent 58%),
-    rgba(9, 6, 14, .54) !important;
-  box-shadow:
-    0 16px 42px rgba(0, 0, 0, .34),
-    0 0 30px rgba(var(--lt-accent-rgb), .095),
-    inset 0 1px 0 rgba(255, 255, 255, .11),
-    inset 0 -1px 0 rgba(0, 0, 0, .20) !important;
-  backdrop-filter: blur(18px) saturate(1.32) brightness(1.04) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(1.32) brightness(1.04) !important;
-  transform: translate3d(0, 0, 0) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  animation: localtifyHeroActionsSettleV165 320ms var(--hero-v165-action-pop) both !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions::before,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: -10px !important;
-  z-index: -2 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: .50 !important;
-  background:
-    radial-gradient(circle at 24% 52%, rgba(var(--lt-accent-rgb), .25), transparent 58%),
-    radial-gradient(circle at 88% 30%, rgba(255, 255, 255, .08), transparent 50%) !important;
-  filter: blur(15px) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions::after,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions::after{
-  content: "" !important;
-  position: absolute !important;
-  inset: 1px !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: .72 !important;
-  background: linear-gradient(120deg, rgba(255, 255, 255, .13), transparent 24%, transparent 72%, rgba(255, 255, 255, .065)) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton{
-  position: relative !important;
-  isolation: isolate !important;
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 0 !important;
-  min-height: 32px !important;
-  height: 32px !important;
-  padding: 0 14px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255, 255, 255, .13) !important;
-  overflow: hidden !important;
-  color: rgba(255, 255, 255, .91) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .045)),
-    rgba(255, 255, 255, .06) !important;
-  box-shadow:
-    0 8px 22px rgba(0, 0, 0, .20),
-    inset 0 1px 0 rgba(255, 255, 255, .11),
-    inset 0 -1px 0 rgba(0, 0, 0, .16) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  letter-spacing: -.015em !important;
-  line-height: 1 !important;
-  text-transform: lowercase !important;
-  white-space: nowrap !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
-  transform-origin: center !important;
-  transition:
-    transform 145ms var(--hero-v165-action-ease),
-    color 145ms ease,
-    background-color 145ms ease,
-    border-color 145ms ease,
-    box-shadow 145ms ease,
-    filter 145ms ease !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton::before,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton::before{
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: -1 !important;
-  border-radius: inherit !important;
-  opacity: 0 !important;
-  background: radial-gradient(circle at 50% 20%, rgba(var(--lt-accent-rgb), .28), transparent 68%) !important;
-  transition: opacity 150ms ease !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton::after,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton::after{
-  content: "" !important;
-  position: absolute !important;
-  top: 1px !important;
-  bottom: 1px !important;
-  left: -46% !important;
-  width: 42% !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  border-radius: inherit !important;
-  opacity: 0 !important;
-  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .24), transparent) !important;
-  transform: translate3d(-12px, 0, 0) skewX(-12deg) !important;
-  transition: opacity 150ms ease, left 380ms var(--hero-v165-action-ease) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton:hover,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton:hover{
-  color: #fff !important;
-  border-color: rgba(var(--lt-accent-rgb), .50) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .055)),
-    rgba(var(--lt-accent-rgb), .14) !important;
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, .26),
-    0 0 28px rgba(var(--lt-accent-rgb), .16),
-    inset 0 1px 0 rgba(255, 255, 255, .14) !important;
-  transform: translate3d(0, -2px, 0) scale(1.035) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton:hover::before,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton:hover::before{
-  opacity: 1 !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton:hover::after,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton:hover::after{
-  left: 112% !important;
-  opacity: 1 !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton:active,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton:active{
-  transform: translate3d(0, 0, 0) scale(.92) !important;
-  filter: brightness(.96) saturate(1.08) !important;
-  transition-duration: 72ms !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton[aria-pressed="true"],
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton[aria-pressed="true"]{
-  color: var(--accent-contrast, #09070c) !important;
-  border-color: rgba(var(--lt-accent-rgb), .38) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .23), rgba(255, 255, 255, .07)),
-    var(--lt-accent) !important;
-  box-shadow:
-    0 12px 32px rgba(var(--lt-accent-rgb), .27),
-    inset 0 1px 0 rgba(255, 255, 255, .24),
-    inset 0 -1px 0 rgba(0, 0, 0, .14) !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroArtWrap,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroArtWrap{
-  justify-self: end !important;
-  align-self: center !important;
-  width: clamp(138px, 13.2vw, 226px) !important;
-  max-width: 100% !important;
-  z-index: 2 !important;
-}
-
-.app .pageTransition.pageTransition-home .hero.heroPremium .heroArt,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroArt{
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1 / 1 !important;
-  object-fit: cover !important;
-}
 
 @keyframes localtifyHeroActionsSettleV165{
   0%{
@@ -6974,28 +6214,7 @@ body.localtifyBackgroundMode .ambientSurface,
     --hero-v165-bottom-safe: clamp(88px, 8.2vw, 110px);
   }
 
-  .app .pageTransition.pageTransition-home .hero.heroPremium,
-.app .pageTransition[data-view="home"] .hero.heroPremium{
-    grid-template-columns: minmax(0, 1fr) clamp(128px, 13vw, 196px) !important;
-    column-gap: clamp(16px, 2.8vw, 42px) !important;
-    padding-inline: clamp(28px, 3.2vw, 54px) !important;
-  }
 
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean{
-    max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 300px)) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
-    max-width: min(100%, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 320px)) !important;
-    font-size: clamp(38px, 4.05vw, 62px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
-    font-size: clamp(32px, 3.45vw, 52px) !important;
-  }
 }
 
 @media (max-width: 980px){
@@ -7003,38 +6222,7 @@ body.localtifyBackgroundMode .ambientSurface,
     --hero-v165-bottom-safe: 94px;
   }
 
-  .app .pageTransition.pageTransition-home .hero.heroPremium,
-.app .pageTransition[data-view="home"] .hero.heroPremium{
-    grid-template-columns: minmax(0, 1fr) !important;
-    min-height: clamp(286px, 34vh, 380px) !important;
-    padding: 26px !important;
-  }
 
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroArtWrap,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroArtWrap{
-    display: none !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean{
-    max-width: 100% !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
-    max-width: 100% !important;
-    font-size: clamp(36px, 8.8vw, 66px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium.heroTitleLong .heroText.heroTextClean .heroTitle{
-    font-size: clamp(32px, 7.6vw, 54px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroArtistLine,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroArtistLine{
-    max-width: 100% !important;
-  }
 }
 
 @media (max-width: 640px){
@@ -7042,28 +6230,7 @@ body.localtifyBackgroundMode .ambientSurface,
     --hero-v165-bottom-safe: 102px;
   }
 
-  .app .pageTransition.pageTransition-home .hero.heroPremium,
-.app .pageTransition[data-view="home"] .hero.heroPremium{
-    padding: 22px !important;
-    min-height: 292px !important;
-  }
 
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroText.heroTextClean .heroTitle,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroText.heroTextClean .heroTitle{
-    font-size: clamp(32px, 10vw, 52px) !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroQuickActions,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroQuickActions{
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  .app .pageTransition.pageTransition-home .hero.heroPremium .heroTinyButton,
-.app .pageTransition[data-view="home"] .hero.heroPremium .heroTinyButton{
-    flex: 1 1 0 !important;
-    padding-inline: 10px !important;
-  }
 }
 
 .app{
@@ -7997,55 +7164,6 @@ the last imported CSS layer. */
   to{ transform: translate3d(112px,-74px,0); }
 }
 
-:is(
-  .songRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .libraryRow,
-  .libraryCard,
-  .libraryCardV025,
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .coverTile,
-  .coverGalleryCard,
-  .settingSwitchCard,
-  .settingsChoice,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .settingsResetButton,
-  .toggleRow,
-  .rangeRow,
-  .visualOptionButtonV205,
-  .visualOptionGroupV205
-).localtifyProximityTarget,
-:is(
-  .songRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .libraryRow,
-  .libraryCard,
-  .libraryCardV025,
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .coverTile,
-  .coverGalleryCard,
-  .settingSwitchCard,
-  .settingsChoice,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .settingsResetButton,
-  .toggleRow,
-  .rangeRow,
-  .visualOptionButtonV205,
-  .visualOptionGroupV205
-).localtifyProximityActive{
-  transform: none !important;
-  filter: none !important;
-  box-shadow: inherit !important;
-  background-image: inherit !important;
-}
 
 .app .playerBar > :where(.playerLeft,.playerCenter,.playerRight,.controlRow,.progressRow,.volumeWrap){
   contain: layout style !important;
@@ -8153,72 +7271,17 @@ body.localtifyPerfV301 .app{
   contain: layout style paint;
 }
 
-body.localtifyPerfV301 .app :is(
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .downloadQueueItem,
-  .spotifyTrackCard,
-  .albumCard,
-  .albumShelfCard,
-  .libraryCard
-){
-  contain: layout paint style;
-  backface-visibility: hidden;
-}
 
 @supports (content-visibility: auto){
-  body.localtifyPerfV301 .app :is(
-    .homeAlbumCard,
-    .homeListenCard,
-    .homeFreshCard,
-    .playlistTrackRow,
-    .playlistSongRow,
-    .downloadQueueItem,
-    .spotifyTrackCard,
-    .albumCard,
-    .albumShelfCard,
-    .libraryCard
-  ){
-    content-visibility: auto;
-    contain-intrinsic-size: 96px 220px;
-  }
 
-  body.localtifyPerfV301 .app :is(.homeAlbumCard, .albumCard, .albumShelfCard){
-    contain-intrinsic-size: 220px 180px;
-  }
+
 }
 
-body.localtifyPerfV301 .app.isScrolling :is(
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .downloadQueueItem,
-  .spotifyTrackCard,
-  .albumCard,
-  .libraryCard,
-  .songRow,
-  .libraryRow
-){
-  transition-duration: 80ms !important;
-  animation: none !important;
-  will-change: auto !important;
-}
 
-body.localtifyPerfV301 .app.isScrolling .homeAlbumCard::before,
-body.localtifyPerfV301 .app.isScrolling .homeAlbumCard::after,
-body.localtifyPerfV301 .app.isScrolling .homeListenCard::before,
-body.localtifyPerfV301 .app.isScrolling .homeListenCard::after,
-body.localtifyPerfV301 .app.isScrolling .homeFreshCard::before,
-body.localtifyPerfV301 .app.isScrolling .homeFreshCard::after,
 body.localtifyPerfV301 .app.isScrolling .albumCard::before,
 body.localtifyPerfV301 .app.isScrolling .albumCard::after,
 body.localtifyPerfV301 .app.isScrolling .libraryCard::before,
-body.localtifyPerfV301 .app.isScrolling .libraryCard::after{
+body.localtifyPerfV301 .app.isScrolling .libraryCard::after {
   opacity: 0 !important;
   filter: none !important;
   animation: none !important;
@@ -8239,53 +7302,12 @@ body.localitfyThemePainting .app{
   contain: paint style !important;
 }
 
-body.localitfyThemePainting .app :is(
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .songRow,
-  .libraryRow,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .customThemeManagerV027,
-  .customThemeTokenV027,
-  .playerBar
-){
-  transition-property: background-color, border-color, color, opacity !important;
-  transition-duration: 0ms !important;
-  animation-play-state: paused !important;
-  contain: paint style !important;
-}
 
 /* Keep blur layers alive during theme painting. Old performance patches sometimes killed these. */
-body.localitfyThemePainting .app :is(
-  .homeListenBackgroundImage,
-  .heroAmbiencePulse,
-  .coverAura,
-  .coverAura::before,
-  .coverAura::after,
-  .playerBar::before,
-  .playerBar::after,
-  .ambientSurface::before,
-  .ambientSurface::after
-){
-  transform: translateZ(0) !important;
-  backface-visibility: hidden !important;
-}
+
 
 /* Do not run expensive hover/lift work while dragging a color picker. */
-body.localitfyThemePainting .app :is(
-  .homeAlbumCard:hover,
-  .homeFreshCard:hover,
-  .homeListenCard:hover,
-  .settingsChoice:hover,
-  .settingsTinyButton:hover,
-  .customThemePresetButtonV027:hover,
-  .customThemeTokenV027:hover
-){
-  transform: translateZ(0) !important;
-  box-shadow: inherit !important;
-}
+
 
 @keyframes localtifySidebarIconPopV421{
   0%{ transform: translate3d(0,0,0) scale(1) rotate(0deg); }
@@ -8805,10 +7827,9 @@ body,
 .headerBar,
 .pageTransition,
 .homeSection,
-.homeLibraryPanel,
 .settingsCategoryPage,
 .settingsPanelCard,
-.settingsPageCard{
+.settingsPageCard {
   animation: none;
 }
 
@@ -9873,23 +8894,6 @@ body.isResizingPlayer .app *{
   border-color: rgba(255, 90, 126, .25) !important;
 }
 
-.app :is(
-  button,
-  .navItem,
-  .songRow,
-  .libraryRow,
-  .albumTrackRowV318,
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .downloadQueueItem,
-  .downloadResultV326,
-  .spotifyTrackItem,
-  .panel,
-  .ambientSurface
-):not(:hover):not(:focus-visible):not(:active):not(.active):not(.playing):not(.localtifyProximityActive){
-  will-change: auto !important;
-}
 
 .app :is(
   .content,

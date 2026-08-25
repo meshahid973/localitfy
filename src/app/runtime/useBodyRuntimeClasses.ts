@@ -4,25 +4,24 @@ type BodyRuntimeClassOptions = {
   isAppBackgrounded: boolean;
   isAppBackgroundedRef: { current: boolean };
   isPlaying: boolean;
-  wantsMoreBlur: boolean;
 };
 
-const PERFORMANCE_CLASSES = [
+const PERFORMANCE_CLASS = "localtifyPerf";
+const PERFORMANCE_DATASET = "current";
+const LEGACY_PERFORMANCE_CLASSES = [
   "localtifyPerfV301",
   "localtifyPerfV303",
+  "localtifyPerfV305",
   "localtifyPerfV307",
   "localtifyPerfV310",
   "localtifyPerfV319",
   "localtifyGpuFriendly"
 ] as const;
 
-const OWNED_PERF_DATASETS = new Set(["v319", "v318", "v310", "v307", "v305", "v304", "v303", "v301"]);
-
 export function useBodyRuntimeClasses({
   isAppBackgrounded,
   isAppBackgroundedRef,
-  isPlaying,
-  wantsMoreBlur
+  isPlaying
 }: BodyRuntimeClassOptions) {
   useEffect(() => {
     const body = document.body;
@@ -52,14 +51,14 @@ export function useBodyRuntimeClasses({
 
   useEffect(() => {
     const body = document.body;
-    body.classList.add(...PERFORMANCE_CLASSES);
-    body.dataset.localtifyPerf = "v319";
+
+    body.classList.remove(...LEGACY_PERFORMANCE_CLASSES);
+    body.classList.add(PERFORMANCE_CLASS);
+    body.dataset.localtifyPerf = PERFORMANCE_DATASET;
 
     return () => {
-      body.classList.remove(...PERFORMANCE_CLASSES);
-      if (OWNED_PERF_DATASETS.has(String(body.dataset.localtifyPerf || ""))) {
-        delete body.dataset.localtifyPerf;
-      }
+      body.classList.remove(PERFORMANCE_CLASS, ...LEGACY_PERFORMANCE_CLASSES);
+      if (body.dataset.localtifyPerf === PERFORMANCE_DATASET) delete body.dataset.localtifyPerf;
     };
   }, []);
 
@@ -67,15 +66,4 @@ export function useBodyRuntimeClasses({
     document.body.classList.toggle("localtifyAudioPlaying", isPlaying);
     return () => document.body.classList.remove("localtifyAudioPlaying");
   }, [isPlaying]);
-
-  useEffect(() => {
-    const body = document.body;
-    body.classList.toggle("localtifyWantMoreBlur", wantsMoreBlur);
-    body.classList.toggle("localtifyNoMoreBlur", !wantsMoreBlur);
-
-    return () => {
-      body.classList.remove("localtifyWantMoreBlur");
-      body.classList.remove("localtifyNoMoreBlur");
-    };
-  }, [wantsMoreBlur]);
 }

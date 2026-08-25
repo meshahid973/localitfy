@@ -22,9 +22,7 @@ export type Settings = {
   autoplayOnSelect: boolean;
   rememberLastSong: boolean;
   showVisualizer: boolean;
-  homeExpanded: boolean;
   heroExpanded: boolean;
-  showRightColumn: boolean;
   showAmbientGradient: boolean;
   coverColorSyncMode: CoverColorSyncMode;
   showFloatingNotes: boolean;
@@ -36,7 +34,6 @@ export type Settings = {
   denseList: boolean;
   reducedMotion: boolean;
   catBuddyEnabled: boolean;
-  quickLibraryMoreBlur: boolean;
   showHeroBadge: boolean;
   simpleMode: boolean;
   lastSongId: string;

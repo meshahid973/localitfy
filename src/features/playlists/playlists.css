@@ -1,0 +1,53 @@
+/* Playlist-owned layout for TanStack virtual rows. Motion does not own geometry. */
+.app .playlistTrackRow.virtualPlaylistTrackRow {
+  --playlist-row-step: 72px;
+  --playlist-row-fallback-y: calc(var(--playlist-stagger, 0) * var(--playlist-row-step));
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 4px !important;
+  width: calc(100% - 4px) !important;
+  max-width: calc(100% - 4px) !important;
+  transform: translate3d(0, var(--playlist-row-y, var(--playlist-row-fallback-y)), 0) !important;
+  scale: 1 !important;
+  will-change: transform !important;
+}
+
+.app .playlistTrackRow.virtualPlaylistTrackRow:hover,
+.app.appAudioPlaying .playlistTrackRow.virtualPlaylistTrackRow:hover,
+.app:not(.songDragActive) .playlistTrackRow.virtualPlaylistTrackRow:hover {
+  transform: translate3d(0, var(--playlist-row-y, var(--playlist-row-fallback-y)), 0) !important;
+  scale: 1 !important;
+}
+
+.app.songDragActive .playlistTrackRow.virtualPlaylistTrackRow {
+  transform: translate3d(0, var(--playlist-row-y, var(--playlist-row-fallback-y)), 0) !important;
+}
+
+.app.songDragActive .playlistTrackRow.virtualPlaylistTrackRow.songDragging {
+  transform: translate3d(0, calc(var(--playlist-row-y, var(--playlist-row-fallback-y)) - 5px), 0) !important;
+  scale: 1.012 !important;
+}
+
+.app.songDragActive .playlistTrackRow.virtualPlaylistTrackRow.songDropTarget[data-drop-side="before"] {
+  transform: translate3d(var(--drop-push, 0px), calc(var(--playlist-row-y, var(--playlist-row-fallback-y)) + 7px), 0) !important;
+  scale: 1.004 !important;
+}
+
+.app.songDragActive .playlistTrackRow.virtualPlaylistTrackRow.songDropTarget[data-drop-side="after"] {
+  transform: translate3d(var(--drop-push, 0px), calc(var(--playlist-row-y, var(--playlist-row-fallback-y)) - 7px), 0) !important;
+  scale: 1.004 !important;
+}
+
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(1) { --playlist-stagger: 0; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(2) { --playlist-stagger: 1; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(3) { --playlist-stagger: 2; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(4) { --playlist-stagger: 3; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(5) { --playlist-stagger: 4; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(6) { --playlist-stagger: 5; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(7) { --playlist-stagger: 6; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(8) { --playlist-stagger: 7; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(9) { --playlist-stagger: 8; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(10) { --playlist-stagger: 9; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(11) { --playlist-stagger: 10; }
+.app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(12) { --playlist-stagger: 11; }

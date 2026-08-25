@@ -1,0 +1,90 @@
+/*
+ * Localtify renderer performance policy.
+ *
+ * Single owner for temporary visual degradation while the renderer is busy.
+ * Visual identity stays intact at rest; expensive compositor/filter work sleeps
+ * only while scrolling, backgrounded, scrubbing, dragging, or theme-painting.
+ */
+
+/* Dense virtualized/list content should not reserve a GPU layer per row forever. */
+body.localtifyPerf .app :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem
+) {
+  will-change: auto !important;
+}
+
+body.localtifyPerf .app :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem
+):not(:hover):not(.playing):not(.songDragging):not(.songDropTarget) {
+  transform: none !important;
+  backface-visibility: visible !important;
+}
+
+/* Scrolling is the hottest paint path. Keep geometry and text, pause decoration. */
+
+
+/* Large translucent panes are much more expensive than thumbnail paint. */
+
+
+/* Keep actual cover thumbnails sharp; sleep only large decorative blur layers. */
+
+
+body.localtifyPerf .app.isScrolling .hero.ambientSurface::before,
+body.localtifyPerf .app.isScrolling .playerBar::before,
+body.localtifyPerf .app.isScrolling .playerBar::after {
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Input-critical states get the same cheap-paint policy. */
+
+
+/* A hidden/background window should spend essentially nothing on decoration. */
+body.localtifyWindowBackgrounded .app,
+body.localtifyBackgroundMode .app {
+  --active-song-glow-opacity: 0 !important;
+}
+
+
+body.localtifyWindowBackgrounded .app .hero.ambientSurface::before,
+body.localtifyWindowBackgrounded .app .playerBar::before,
+body.localtifyWindowBackgrounded .app .playerBar::after,
+body.localtifyBackgroundMode .app .hero.ambientSurface::before,
+body.localtifyBackgroundMode .app .playerBar::after,
+body.localtifyBackgroundMode .app .playerBar::before {
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Respect both the app preference and OS preference without selector fights. */
+.app.reducedMotion *,
+.app[data-motion-level="reduced"] * {
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app *,
+  .app *::before,
+  .app *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

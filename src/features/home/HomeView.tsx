@@ -1,45 +1,34 @@
 import type { CSSProperties } from "react";
+import { Images, Maximize2, Minimize2, Play, Shuffle } from "lucide-react";
 import { Cover } from "../covers/Cover";
 import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
-import { getAmbientStyle, getSongAmbientSource } from "../covers/cover.ambient";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
+import type { Song } from "../library/song.types";
+import type { Settings } from "../settings/settings.types";
 
 export type HomeViewProps = {
-  ambientStyle: any;
-  currentId: any;
-  currentNowPlayingLabel: any;
-  currentSong: any;
-  filteredSongs: any;
-  heroDisplayArtist: any;
-  heroDisplayTitle: any;
-  heroMotionClass: any;
-  heroTitleClass: any;
-  homeDashboardClass: any;
-  homeFreshShelfSongs: any;
-  homeListenNowSongs: any;
-  isPlaying: any;
-  isThreeAm: any;
-  likedSongs: any;
-  mostPlayed: any;
-  now: any;
-  nowPlayingSongMotionClass: any;
-  nowPlayingTransitionKey: any;
-  openCoversViewWithCurrentSong: any;
-  playableSongCount: any;
-  playerError: any;
-  renderHomeSongCards: any;
-  renderSongRows: any;
-  selectSong: any;
-  settings: any;
-  showHomeSideCards: any;
-  shuffleLibrarySongsAction: any;
-  songs: any;
-  toggleHeroExpanded: any;
-  topSongs: any;
-  totalMinutes: any;
-  totalPlays: any;
-  updateSetting: any;
+  ambientStyle: CSSProperties;
+  currentId: string | null;
+  currentNowPlayingLabel: string;
+  currentSong: Song | null;
+  heroDisplayArtist: string;
+  heroDisplayTitle: string;
+  heroMotionClass: string;
+  heroTitleClass: string;
+  homeFreshShelfSongs: readonly Song[];
+  homeListenNowSongs: readonly Song[];
+  isPlaying: boolean;
+  isThreeAm: boolean;
+  nowPlayingSongMotionClass: string;
+  nowPlayingTransitionKey: string;
+  openCoversViewWithCurrentSong: () => unknown;
+  playableSongCount: number;
+  playerError: string | null;
+  selectSong: (songId: string, shouldPlay?: boolean) => unknown;
+  settings: Pick<Settings, "heroExpanded" | "volume">;
+  shuffleLibrarySongsAction: () => unknown;
+  toggleHeroExpanded: () => unknown;
 };
 
 export default function HomeView(props: HomeViewProps) {
@@ -48,299 +37,173 @@ export default function HomeView(props: HomeViewProps) {
     currentId,
     currentNowPlayingLabel,
     currentSong,
-    filteredSongs,
     heroDisplayArtist,
     heroDisplayTitle,
     heroMotionClass,
     heroTitleClass,
-    homeDashboardClass,
     homeFreshShelfSongs,
     homeListenNowSongs,
     isPlaying,
     isThreeAm,
-    likedSongs,
-    mostPlayed,
     nowPlayingSongMotionClass,
     nowPlayingTransitionKey,
     openCoversViewWithCurrentSong,
     playableSongCount,
     playerError,
-    renderHomeSongCards,
-    renderSongRows,
     selectSong,
     settings,
-    showHomeSideCards,
     shuffleLibrarySongsAction,
-    songs,
-    toggleHeroExpanded,
-    topSongs,
-    totalMinutes,
-    totalPlays,
-    updateSetting
+    toggleHeroExpanded
   } = props;
 
+  const listenNowSongs = homeListenNowSongs.slice(0, 6);
+  const rotationSongs = homeFreshShelfSongs.slice(0, 10);
+
   return (
+    <div className="homePage">
+      <section
+        className={`homeHero ${settings.heroExpanded ? "homeHeroExpanded" : "homeHeroCompact"} ${heroMotionClass}`}
+        style={{ ...ambientStyle, "--home-motion-seed": nowPlayingTransitionKey } as CSSProperties}
+        aria-label="now playing"
+      >
+        <div className="homeHeroMedia" aria-hidden="true">
+          <Cover song={currentSong} className={`homeHeroArtwork ${nowPlayingSongMotionClass}`} priority="high" />
+          <div className="homeHeroMediaShade" />
+        </div>
 
-              <>
-                <section
-                  className={`hero heroPremium ambientSurface heroLayoutMotion ${settings.heroExpanded ? "heroExpanded" : "heroCompact"} ${heroMotionClass} ${heroTitleClass}`}
-                  style={{ ...ambientStyle, "--hero-motion-seed": nowPlayingTransitionKey } as CSSProperties}
+        <div className={`homeHeroContent nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
+          <div className="homeHeroKickerRow">
+            <span className="homeHeroKicker">{currentNowPlayingLabel || "now playing"}</span>
+            {currentSong ? <span className={`homeHeroPlayingDot ${isPlaying ? "isPlaying" : ""}`} aria-hidden="true" /> : null}
+          </div>
+
+          <h3 className={`homeHeroTitle ${heroTitleClass}`} title={currentSong ? currentSong.title : "drop in your music"}>
+            {heroDisplayTitle}
+          </h3>
+
+          <p className="homeHeroArtist" title={currentSong ? currentSong.artist || "unknown artist" : "import songs to start listening"}>
+            {heroDisplayArtist}
+          </p>
+
+          {playerError ? <div className="homeHeroNotice homeHeroNoticeError">{playerError}</div> : null}
+          {isThreeAm && settings.volume > 0.8 ? (
+            <div className="homeHeroNotice">volume is above 80% · late night ears deserve mercy.</div>
+          ) : null}
+
+          <div className="homeHeroActions">
+            <button
+              className="homeHeroAction homeHeroActionPrimary"
+              type="button"
+              onClick={shuffleLibrarySongsAction}
+              disabled={playableSongCount < 2}
+              title="Shuffle the whole library"
+            >
+              <Shuffle size={16} strokeWidth={2.2} aria-hidden="true" />
+              <span>shuffle library</span>
+            </button>
+
+            <button
+              className="homeHeroAction homeHeroActionSecondary"
+              type="button"
+              onClick={openCoversViewWithCurrentSong}
+              title="Open pixel cover gallery"
+            >
+              <Images size={16} strokeWidth={2.2} aria-hidden="true" />
+              <span>covers</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          className="homeHeroSizeToggle"
+          type="button"
+          onClick={toggleHeroExpanded}
+          aria-pressed={settings.heroExpanded}
+          title={settings.heroExpanded ? "Use compact hero" : "Expand hero"}
+        >
+          {settings.heroExpanded ? <Minimize2 size={17} strokeWidth={2.1} aria-hidden="true" /> : <Maximize2 size={17} strokeWidth={2.1} aria-hidden="true" />}
+          <span className="srOnly">{settings.heroExpanded ? "compact hero" : "expand hero"}</span>
+        </button>
+      </section>
+
+      <section className="homeSection homeListenSection" aria-labelledby="home-listen-title">
+        <header className="homeSectionHeader">
+          <div>
+            <span className="homeSectionEyebrow">made from your library</span>
+            <h3 id="home-listen-title">Listen now</h3>
+          </div>
+          <span className="homeSectionMeta">{playableSongCount} playable</span>
+        </header>
+
+        {listenNowSongs.length ? (
+          <div className="homeListenGrid">
+            {listenNowSongs.map((song) => {
+              const active = song.id === currentId;
+              return (
+                <button
+                  key={song.id}
+                  className={`homeListenRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""}`}
+                  type="button"
+                  onClick={() => void selectSong(song.id, true)}
+                  title={`play ${song.title}`}
                 >
-                  <div className="heroAmbiencePulse" aria-hidden="true" />
-                  <div className={`heroCoverGhost ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey} aria-hidden="true" />
-                  <div className={`heroText heroTextClean nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-                    <p className={`eyebrow nowPlayingEyebrowSwap ${nowPlayingSongMotionClass}`} title={currentNowPlayingLabel}>{currentNowPlayingLabel}</p>
+                  <span className="homeListenCoverWrap">
+                    <Cover song={song} className="homeListenCover" />
+                    <span className="homeListenPlay" aria-hidden="true"><Play size={13} fill="currentColor" /></span>
+                  </span>
+                  <span className="homeListenCopy">
+                    <strong>{prettyTitle(song.title, 6)}</strong>
+                    <small>{prettyMeta(song.artist)}</small>
+                  </span>
+                  <span className="homeListenTime">{formatTime(song.duration || 0)}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="homeEmptyState">
+            <MascotStateArt state="empty" className="homeEmptyMascot" />
+            <div><strong>your home is quiet</strong><span>import music and Localtify will build this section for you.</span></div>
+          </div>
+        )}
+      </section>
 
-                    <h3 className={`heroTitle nowPlayingTitleSwap ${nowPlayingSongMotionClass}`} title={currentSong ? currentSong.title : "drop in your music"}>
-                      {heroDisplayTitle}
-                    </h3>
-                    <p className={`heroArtistLine nowPlayingArtistSwap ${nowPlayingSongMotionClass}`} title={currentSong ? currentSong.artist || "unknown artist" : "import songs to start listening"}>
-                      {heroDisplayArtist}
-                    </p>
+      <section className="homeSection homeRotationSection" aria-labelledby="home-rotation-title">
+        <header className="homeSectionHeader">
+          <div>
+            <span className="homeSectionEyebrow">fresh shelf</span>
+            <h3 id="home-rotation-title">Recent rotation</h3>
+          </div>
+        </header>
 
-                    {playerError ? <div className="warningBox">{playerError}</div> : null}
-                    {isThreeAm && settings.volume > 0.8 ? (
-                      <div className="warningBox lateNightWarning">volume is above 80% � late night ears deserve mercy.</div>
-                    ) : null}
-                    <div className="heroQuickActions">
-                      <button
-                        className="heroTinyButton"
-                        type="button"
-                        onClick={toggleHeroExpanded}
-                        aria-pressed={settings.heroExpanded}
-                        title={settings.heroExpanded ? "shrink the now playing banner" : "expand the now playing banner"}
-                      >
-                        {settings.heroExpanded ? "compact player" : "expand player"}
-                      </button>
-
-                      <button
-                        className="heroTinyButton"
-                        type="button"
-                        onClick={openCoversViewWithCurrentSong}
-                        title="open pixel cover gallery"
-                      >
-                        covers
-                      </button>
-                    </div>
-
-                                      </div>
-
-                  <div className={`heroArtWrap nowPlayingArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-                    <Cover song={currentSong} className="heroArt" priority="high" />
-
-                  </div>
-                </section>
-
-                <section className={`homeShelfStack ${heroMotionClass}`} aria-label="home music shelves">
-                  <section className="homeShelfPanel homeListenPanel">
-                    <div className="homeShelfHeader">
-                      <div>
-                        <p className="eyebrow">local picks</p>
-                        <h3>Listen now</h3>
-                      </div>
-                      <div className="homeShelfActions">
-                        <span>{playableSongCount || 0} playable</span>
-                        <button
-                          className="homeShelfActionButton"
-                          type="button"
-                          onClick={shuffleLibrarySongsAction}
-                          disabled={(playableSongCount || 0) < 2}
-                          title="Shuffle the whole library and fill the queue"
-                        >
-                          shuffle library
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="homeListenRail">
-                      {homeListenNowSongs.length ? (
-                        homeListenNowSongs.map((song, index) => {
-                          const active = song.id === currentId;
-                          const listenAmbienceSource = getSongAmbientSource(song);
-                          const listenAmbienceStyle = getAmbientStyle(listenAmbienceSource) ?? {};
-
-                          return (
-                            <button
-                              key={song.id}
-                              className={`homeListenCard ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""}`}
-                              data-cover-ambience={listenAmbienceSource ? "on" : "off"}
-                              type="button"
-                              onClick={() => void selectSong(song.id, true)}
-                              title={`play ${song.title}`}
-                              style={{
-                                "--card-delay": `${index * 48}ms`,
-                                ...listenAmbienceStyle
-                              } as CSSProperties}
-                            >
-                              {listenAmbienceSource ? (
-                                <span className="homeListenBackground" aria-hidden="true">
-                                  <img
-                                    className="homeListenBackgroundImage"
-                                    src={listenAmbienceSource}
-                                    alt=""
-                                    width={520}
-                                    height={164}
-                                    loading="lazy"
-                                    decoding="async"
-                                    fetchPriority="low"
-                                    referrerPolicy="no-referrer"
-                                    draggable={false}
-                                  />
-                                </span>
-                              ) : null}
-
-                              <span className="homeListenForeground">
-                                <Cover song={song} className="homeListenCover" />
-                                <span className="homeListenCopy">
-                                  <strong className="homeListenTitle">{prettyTitle(song.title, 5)}</strong>
-                                  <small className="homeListenArtist">{prettyMeta(song.artist)}</small>
-                                </span>
-                                <span className="homeListenMeta">{formatTime(song.duration || 0)}</span>
-                              </span>
-                            </button>
-                          );
-                        })
-                      ) : (
-                        <div className="emptyState homeShelfEmpty homeShelfMascotEmptyV501">
-                          <MascotStateArt state="empty" className="homeShelfEmptyMascotV501" />
-                          <span className="mascotEmptyCopyV496">
-                            <strong>no songs yet</strong>
-                            <p>Import songs to start building your local library.</p>
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </section>
-
-                  <section className="homeShelfPanel homeFreshPanel">
-                    <div className="homeShelfHeader">
-                      <div>
-                        <p className="eyebrow">fresh shelf</p>
-                        <h3>recent covers</h3>
-                      </div>
-                    </div>
-
-                    <div className="homeFreshRail">
-                      {homeFreshShelfSongs.length ? (
-                        homeFreshShelfSongs.map((song, index) => (
-                          <button
-                            key={song.id}
-                            className={`homeFreshCard ${song.id === currentId ? "active" : ""} ${song.id === currentId && isPlaying ? "playing" : ""}`}
-                            type="button"
-                            onClick={() => void selectSong(song.id, true)}
-                            title={`play ${song.title}`}
-                            style={{ "--card-delay": `${index * 42}ms` } as CSSProperties}
-                          >
-                            <Cover song={song} className="homeFreshCover" />
-                            <strong>{prettyTitle(song.title, 4)}</strong>
-                            <small>{prettyMeta(song.artist)}</small>
-                          </button>
-                        ))
-                      ) : (
-                        <div className="emptyState homeShelfEmpty">
-                          <strong>nothing to show yet</strong>
-                          <p>your newest covers appear here after import.</p>
-                        </div>
-                      )}
-                    </div>
-                  </section>
-                </section>
-
-                <section className={homeDashboardClass}>
-                  <section className={`panel largePanel homeLibraryPanel ${settings.homeExpanded ? "homeLibraryExpanded" : "homeLibraryCompact"}`}>
-                    <div className="panelHead">
-                      <div>
-                        <p className="eyebrow">library</p>
-                        <h3>quick library</h3>
-                      </div>
-                      <div className="homeLibraryActions">
-                        <span>{songs.length} song{songs.length === 1 ? "" : "s"}</span>
-                        <button
-                          className="expandLibraryButton"
-                          type="button"
-                          onClick={() => updateSetting("homeExpanded", !settings.homeExpanded)}
-                          aria-pressed={settings.homeExpanded}
-                          title={settings.homeExpanded ? "compact quick library" : "expand quick library"}
-                        >
-                          {settings.homeExpanded ? "compact" : "expand"}
-                        </button>
-                      </div>
-                    </div>
-
-                    {settings.homeExpanded
-                      ? renderHomeSongCards(filteredSongs, "homeAlbumGrid")
-                      : renderSongRows(filteredSongs, "songList homeSongList")}
-                  </section>
-
-                  {showHomeSideCards ? (
-                    <aside className="stack">
-                      <section className="panel">
-                        <p className="eyebrow">analytics</p>
-                        <h3>quick stats</h3>
-
-                        <div className="statsGrid">
-                          <div className="statCard">
-                            <span>most played</span>
-                            <strong>{mostPlayed ? prettyTitle(mostPlayed.title, 5) : "none yet"}</strong>
-                          </div>
-
-                          <div className="statRowSmall">
-                            <div className="statCard">
-                              <span>liked</span>
-                              <strong>{likedSongs.length}</strong>
-                            </div>
-
-                            <div className="statCard">
-                              <span>plays</span>
-                              <strong>{totalPlays}</strong>
-                            </div>
-                          </div>
-
-                          <div className="statCard">
-                            <span>minutes listened</span>
-                            <strong>{totalMinutes}</strong>
-                          </div>
-
-                          <div className="miniBars">
-                            {(topSongs.length ? topSongs : songs.slice(0, 6)).map((song) => (
-                              <div
-                                key={song.id}
-                                title={`${song.title}: ${song.playCount} plays`}
-                                style={{
-                                  height: `${Math.max(14, Math.min(100, song.playCount * 18 || 14))}%`
-                                }}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </section>
-
-                      <section className="panel">
-                        <div className="panelHead">
-                          <div>
-                            <p className="eyebrow">top songs</p>
-                            <h3>little chart</h3>
-                          </div>
-                        </div>
-
-                        <div className="topList">
-                          {topSongs.length ? (
-                            topSongs.map((song, index) => (
-                              <button key={song.id} className="topRow" onClick={() => void selectSong(song.id, true)}>
-                                <span>{index + 1}</span>
-                                <strong>{prettyTitle(song.title, 5)}</strong>
-                                <small>{song.playCount} plays</small>
-                              </button>
-                            ))
-                          ) : (
-                            <p className="softText">play some songs and your little chart appears here.</p>
-                          )}
-                        </div>
-                      </section>
-                    </aside>
-                  ) : null}
-                </section>
-              </>
-            
+        {rotationSongs.length ? (
+          <div className="homeRotationRail">
+            {rotationSongs.map((song) => {
+              const active = song.id === currentId;
+              return (
+                <button
+                  key={song.id}
+                  className={`homeRotationCard ${active ? "active" : ""}`}
+                  type="button"
+                  onClick={() => void selectSong(song.id, true)}
+                  title={`play ${song.title}`}
+                >
+                  <span className="homeRotationCoverWrap">
+                    <Cover song={song} className="homeRotationCover" />
+                    {active && isPlaying ? <span className="homeRotationPlaying" aria-hidden="true"><i /><i /><i /></span> : null}
+                  </span>
+                  <strong>{prettyTitle(song.title, 4)}</strong>
+                  <small>{prettyMeta(song.artist)}</small>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="homeEmptyState homeEmptyStateCompact">
+            <div><strong>nothing recent yet</strong><span>newly imported covers will show up here.</span></div>
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
