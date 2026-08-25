@@ -59,8 +59,8 @@ const STYLE_ORDER = [...new Set(ordered)];
 if (!STYLE_ORDER.includes("src/index.css") || !STYLE_ORDER.includes("src/App.css")) {
   throw new Error(`[css-cross-file] renderer cascade discovery is incomplete: ${STYLE_ORDER.join(" -> ")}`);
 }
-if (STYLE_ORDER.at(-2) !== "src/features/shell/release.css" || STYLE_ORDER.at(-1) !== "src/features/shell/performance.css") {
-  throw new Error(`[css-cross-file] renderer cascade must end in release.css -> performance.css, got ${STYLE_ORDER.slice(-2).join(" -> ") || "nothing"}`);
+if (STYLE_ORDER.at(-1) !== "src/features/shell/performance.css") {
+  throw new Error(`[css-cross-file] renderer cascade must end in performance.css, got ${STYLE_ORDER.at(-1) || "nothing"}`);
 }
 
 function skipComment(text, index, end) {

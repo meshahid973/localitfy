@@ -140,101 +140,10 @@ button:disabled:active {
 }
 
 /* Hero expand/compact keeps one owner and no duplicate V140/V142 keyframes. */
-.heroLayoutMotion .heroTextClean,
-.heroLayoutMotion .heroText,
-.heroLayoutMotion .heroTitle,
-.heroLayoutMotion .heroArtistLine,
-.heroLayoutMotion .heroQuickActions,
-.heroLayoutMotion .heroArtWrap,
-.heroLayoutMotion .heroTinyButton {
-  transition-property: transform, opacity;
-  transition-duration: 420ms;
-  transition-timing-function: var(--motion-soft);
-}
 
-.heroLayoutMotion.heroMotionExpanding {
-  animation: localtifyHeroExpand 440ms var(--motion-soft) both;
-}
-
-.heroLayoutMotion.heroMotionCompacting {
-  animation: localtifyHeroCompact 380ms var(--motion-soft) both;
-}
-
-.heroLayoutMotion.heroExpanded .heroTextClean {
-  transform: translate3d(0, -2px, 0);
-}
-
-.heroLayoutMotion.heroExpanded .heroArtWrap {
-  transform: translate3d(-4px, 0, 0) scale(1.025);
-}
-
-.heroExpandedShelf,
-.heroExpandedShelf > div {
-  animation: localtifyShelfIn 300ms var(--motion-ease) both;
-}
-
-.heroExpandedShelf > div:nth-child(1) { animation-delay: 40ms; }
-.heroExpandedShelf > div:nth-child(2) { animation-delay: 70ms; }
-.heroExpandedShelf > div:nth-child(3) { animation-delay: 100ms; }
-
-.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting),
-.homeEntranceSettled .homeShelfStack:not(.heroMotionExpanding):not(.heroMotionCompacting) :where(
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .homeListenRail,
-  .homeFreshRail,
-  .homeListenCard,
-  .homeFreshCard
-) {
-  opacity: 1 !important;
-  transform: none !important;
-  animation: none !important;
-}
 
 /* Cards use transitions only. No blanket entry animation for virtualized content. */
-.app :where(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly,
-  .settingsThemeCard,
-  .settingSwitchCard,
-  .settingsChoice,
-  .coverSyncChoice,
-  .statCard
-) {
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    box-shadow 180ms ease,
-    opacity 150ms ease,
-    transform 180ms var(--motion-ease);
-}
 
-.app:not(.songDragActive) :where(
-  .songRow,
-  .libraryRow,
-  .playlistSongRow,
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly,
-  .settingsThemeCard,
-  .settingSwitchCard,
-  .settingsChoice,
-  .coverSyncChoice
-):hover {
-  transform: translate3d(0, -1px, 0);
-}
 
 /* Playlist virtual rows own their Y transform in playlists.css; never override it here. */
 .app .playlistTrackRow.virtualPlaylistTrackRow,
@@ -247,46 +156,12 @@ button:disabled:active {
 }
 
 /* Dragging promotes only the rows currently involved in the interaction. */
-.app.songDragActive :is(
-  .songRow,
-  .homeAlbumCard,
-  .homeListenCard,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .libraryRow
-) {
-  transition:
-    transform 170ms var(--motion-pop),
-    opacity 110ms ease,
-    border-color 120ms ease,
-    background-color 120ms ease;
-}
 
-.app.songDragActive :is(
-  .songRow,
-  .homeAlbumCard,
-  .homeListenCard,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .libraryRow
-).songDragging {
-  opacity: 0.76;
-}
 
 .localitfyDragPreview {
   animation: localtifyDragPreviewIn 130ms var(--motion-ease) both;
 }
 
-body.localitfyDropCommitted .app :is(
-  .songRow,
-  .homeAlbumCard,
-  .homeListenCard,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .libraryRow
-) {
-  animation: localtifyDropSettle 260ms var(--motion-pop) both;
-}
 
 /* Settings category content gets one container transition instead of animating every child. */
 .settingsCategoryMotion {
@@ -343,21 +218,6 @@ body.localitfyBackgroundMode *,
   animation-play-state: paused;
 }
 
-.app.isScrolling :where(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly
-) {
-  animation: none !important;
-  transition: none !important;
-}
 
 /* Reduced motion has one selector contract matching AppShell's data-motion-level. */
 .app.reducedMotion *,

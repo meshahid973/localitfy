@@ -577,7 +577,7 @@
 
 @media (max-width: 1180px) {
   .homeHeroMedia {
-    inset-left: 38%;
+    left: 38%;
   }
 
   .homeHeroContent {

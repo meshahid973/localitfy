@@ -33,64 +33,13 @@ body.localtifyPerf .app :is(
 }
 
 /* Scrolling is the hottest paint path. Keep geometry and text, pause decoration. */
-body.localtifyPerf .app.isScrolling :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem,
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .homeShelfPanel
-) {
-  animation: none !important;
-  transition: none !important;
-  will-change: auto !important;
-}
+
 
 /* Large translucent panes are much more expensive than thumbnail paint. */
-body.localtifyPerf .app.isScrolling[data-card-background="glassy"] :where(
-  .panel,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeAlbumPanel,
-  .albumsHeroV318,
-  .albumsShelfPanelV318,
-  .albumDetailPanelV318,
-  .albumBuilderPanelV318,
-  .downloadCard,
-  .coverGalleryPanelClean,
-  .coverTargetPanelCleanOnly,
-  .playlistHero,
-  .statCard
-) {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
+
 
 /* Keep actual cover thumbnails sharp; sleep only large decorative blur layers. */
-body.localtifyPerf .app.isScrolling :is(
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .coverGalleryImageCleanOnly,
-  .screensaverGlow
-) {
-  animation: none !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
+
 
 body.localtifyPerf .app.isScrolling .hero.ambientSurface::before,
 body.localtifyPerf .app.isScrolling .playerBar::before,
@@ -102,30 +51,7 @@ body.localtifyPerf .app.isScrolling .playerBar::after {
 }
 
 /* Input-critical states get the same cheap-paint policy. */
-body.localtifyPerf .app:is(.playerScrubbing, .songDragActive, .themeSettling) :is(
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .coverGalleryImageCleanOnly
-) {
-  animation: none !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
 
-body.localtifyPerf .app:is(.playerScrubbing, .songDragActive, .themeSettling) :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard
-) {
-  transition-duration: 0ms !important;
-  will-change: auto !important;
-}
 
 /* A hidden/background window should spend essentially nothing on decoration. */
 body.localtifyWindowBackgrounded .app,
@@ -133,27 +59,6 @@ body.localtifyBackgroundMode .app {
   --active-song-glow-opacity: 0 !important;
 }
 
-body.localtifyWindowBackgrounded .app :is(
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .localtifyStarsBackdrop,
-  .localtifyStarsLayer,
-  .coverGalleryImageCleanOnly
-),
-body.localtifyBackgroundMode .app :is(
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .localtifyStarsBackdrop,
-  .localtifyStarsLayer,
-  .coverGalleryImageCleanOnly
-) {
-  animation: none !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
 
 body.localtifyWindowBackgrounded .app .hero.ambientSurface::before,
 body.localtifyWindowBackgrounded .app .playerBar::before,
