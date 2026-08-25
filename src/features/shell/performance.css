@@ -1,0 +1,202 @@
+/*
+ * Localtify renderer performance policy.
+ *
+ * This file is imported after the historical feature styles and is the single
+ * owner for temporary performance degradation while the renderer is busy.
+ * Visual identity stays intact at rest; expensive compositor/filter work sleeps
+ * only while scrolling, backgrounded, scrubbing, dragging, or theme-painting.
+ */
+
+/* Dense virtualized/list content should not reserve a GPU layer per row forever. */
+body.localtifyPerf .app :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem
+) {
+  will-change: auto !important;
+}
+
+body.localtifyPerf .app :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem
+):not(:hover):not(.playing):not(.songDragging):not(.songDropTarget) {
+  transform: none !important;
+  backface-visibility: visible !important;
+}
+
+/* Scrolling is the hottest paint path. Keep geometry and text, pause decoration. */
+body.localtifyPerf .app.isScrolling :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem,
+  .homeFreshCard,
+  .homeListenCard,
+  .homeAlbumCard,
+  .coverGalleryCard,
+  .coverGalleryCardCleanOnly,
+  .settingsPageCard,
+  .settingsPanelCard,
+  .homeShelfPanel
+) {
+  animation: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
+
+/* Large translucent panes are much more expensive than thumbnail paint. */
+body.localtifyPerf .app.isScrolling[data-card-background="glassy"] :where(
+  .panel,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .homeShelfPanel,
+  .homeListenPanel,
+  .homeFreshPanel,
+  .homeLibraryPanel,
+  .homeAlbumPanel,
+  .albumsHeroV318,
+  .albumsShelfPanelV318,
+  .albumDetailPanelV318,
+  .albumBuilderPanelV318,
+  .downloadCard,
+  .coverGalleryPanelClean,
+  .coverTargetPanelCleanOnly,
+  .playlistHero,
+  .statCard
+) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Keep actual cover thumbnails sharp; sleep only large decorative blur layers. */
+body.localtifyPerf .app.isScrolling :is(
+  .heroAmbiencePulse,
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .coverGalleryImageCleanOnly,
+  .screensaverGlow
+) {
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.localtifyPerf .app.isScrolling .hero.ambientSurface::before,
+body.localtifyPerf .app.isScrolling .playerBar::before,
+body.localtifyPerf .app.isScrolling .playerBar::after {
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Input-critical states get the same cheap-paint policy. */
+body.localtifyPerf .app:is(.playerScrubbing, .songDragActive, .themeSettling) :is(
+  .heroAmbiencePulse,
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .coverGalleryImageCleanOnly
+) {
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.localtifyPerf .app:is(.playerScrubbing, .songDragActive, .themeSettling) :is(
+  .songRow,
+  .libraryRow,
+  .playlistTrackRow,
+  .playlistSongRow,
+  .homeFreshCard,
+  .homeListenCard,
+  .homeAlbumCard
+) {
+  transition-duration: 0ms !important;
+  will-change: auto !important;
+}
+
+/* A hidden/background window should spend essentially nothing on decoration. */
+body.localtifyWindowBackgrounded .app,
+body.localtifyBackgroundMode .app {
+  --active-song-glow-opacity: 0 !important;
+}
+
+body.localtifyWindowBackgrounded .app :is(
+  .heroAmbiencePulse,
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .localtifyStarsBackdrop,
+  .localtifyStarsLayer,
+  .coverGalleryImageCleanOnly
+),
+body.localtifyBackgroundMode .app :is(
+  .heroAmbiencePulse,
+  .homeListenBackground,
+  .homeListenBackgroundImage,
+  .localtifyStarsBackdrop,
+  .localtifyStarsLayer,
+  .coverGalleryImageCleanOnly
+) {
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.localtifyWindowBackgrounded .app .hero.ambientSurface::before,
+body.localtifyWindowBackgrounded .app .playerBar::before,
+body.localtifyWindowBackgrounded .app .playerBar::after,
+body.localtifyBackgroundMode .app .hero.ambientSurface::before,
+body.localtifyBackgroundMode .app .playerBar::before,
+body.localtifyBackgroundMode .app .playerBar::after {
+  animation: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Extra blur is an explicit opt-in. The default path stays compositor-friendly. */
+body.localtifyNoMoreBlur .app[data-card-background="glassy"] :where(
+  .homeListenCard,
+  .homeFreshCard,
+  .homeAlbumCard,
+  .songRow,
+  .libraryRow,
+  .albumTrackRowV318,
+  .spotifyTrackItem,
+  .downloadQueueItem
+) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Respect both the app preference and OS preference without selector fights. */
+.app.reducedMotion *,
+.app[data-motion-level="reduced"] * {
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app *,
+  .app *::before,
+  .app *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
