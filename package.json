@@ -18,7 +18,7 @@
     "build": "vite build",
     "typecheck": "tsc -b --pretty false",
     "bridge:check": "node scripts/check-electron-bridge-contract.mjs",
-    "boundaries:check": "node scripts/check-phase1-boundaries.mjs && node scripts/check-codebase-hygiene.mjs",
+    "boundaries:check": "node scripts/check-phase1-boundaries.mjs && node scripts/check-codebase-hygiene.mjs && node scripts/check-release-ui-ownership.mjs",
     "css:dedup:check": "node scripts/css-property-dedup.mjs && node scripts/css-shadow-dedup.mjs && node scripts/css-adjacent-merge.mjs && node scripts/css-cross-file-dedup.mjs && node scripts/css-animation-ownership.mjs && node scripts/css-unused-selectors.mjs && node scripts/css-hygiene.mjs",
     "css:dedup:cross": "node scripts/css-cross-file-dedup.mjs",
     "css:animation:check": "node scripts/css-animation-ownership.mjs",
@@ -40,6 +40,7 @@
     "performance:check": "node scripts/check-performance-budgets.mjs",
     "db:recovery-test": "node scripts/run-electron-node.cjs scripts/test-database-recovery.cjs",
     "hardening:check": "npm run check && npm run performance:check",
+    "release:check": "npm run hardening:check && npm run assets:compress:dry && npm run chunks:audit",
     "css:hygiene": "node scripts/css-hygiene.mjs"
   },
   "dependencies": {
