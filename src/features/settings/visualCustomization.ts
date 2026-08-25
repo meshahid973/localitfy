@@ -25,7 +25,8 @@ export function applyVisualCustomizationDefaults<T extends Record<string, any>>(
     sidebarBehavior: normalizeChoice(settings.sidebarBehavior, ["fixed", "slim", "hover"], VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior),
     playerBackgroundStyle: normalizeChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
     homeHeroCoverBrightness: Number.isFinite(Number(settings.homeHeroCoverBrightness)) ? Math.min(1.55, Math.max(0.65, Number(settings.homeHeroCoverBrightness))) : 1,
-    quickLibraryMoreBlur: settings.quickLibraryMoreBlur !== false,
+    // Extra blur has a measurable compositor cost on dense libraries. Keep it opt-in.
+    quickLibraryMoreBlur: settings.quickLibraryMoreBlur === true,
     catBuddyEnabled: settings.catBuddyEnabled === true
   };
 }
