@@ -28,7 +28,7 @@ jobs:
           ./node_modules/.bin/vite --host 127.0.0.1 > /tmp/localtify-vite.log 2>&1 &
           VITE_PID=$!
           ./node_modules/.bin/wait-on tcp:5173
-          xvfb-run -a ./node_modules/.bin/electron --remote-debugging-port=9222 . > /tmp/localtify-electron.log 2>&1 &
+          xvfb-run -a ./node_modules/.bin/electron --no-sandbox --remote-debugging-port=9222 . > /tmp/localtify-electron.log 2>&1 &
           ELECTRON_PID=$!
           cleanup() {
             kill "$ELECTRON_PID" 2>/dev/null || true
