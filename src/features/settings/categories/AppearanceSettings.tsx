@@ -3,7 +3,7 @@ import type { Settings } from "../settings.types";
 import type { ThemeId } from "../theme.types";
 import type { ChoiceOption, CustomThemePresetOption, CustomThemeTokenOption, ThemeOption, UpdateSetting } from "../settings.shared";
 
-const INFO_MASCOT_SRC = new URL("../assets/info-state.png", import.meta.url).href;
+const INFO_MASCOT_SRC = new URL("../../../assets/info-state.png", import.meta.url).href;
 const COMPLETE_HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 const cleanDraft = (value: string) => `#${String(value || "").trim().replace(/[^#0-9a-fA-F]/g, "").replace(/#/g, "")}`.slice(0, 7);
 const complete = (value: string) => COMPLETE_HEX_COLOR_RE.test(String(value || "").trim());

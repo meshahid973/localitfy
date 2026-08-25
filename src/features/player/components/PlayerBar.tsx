@@ -1,6 +1,6 @@
 import { Repeat2, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { Cover } from "../../covers/Cover";
-import { PlayerPlayPauseMorphIcon } from "../../../shared/ui/LocaltifyViewUi";
+import { PlayerPlayPauseMorphIcon } from "../PlayerPlayPauseMorphIcon";
 import { formatTime } from "../../../shared/utils/format";
 import { prettyMeta, prettyTitle } from "../../search/search.utils";
 

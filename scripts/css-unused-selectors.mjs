@@ -47,6 +47,8 @@ function classIsLive(name) {
   if (knownDynamicClasses.has(name) || referenceText.includes(name)) return true;
   for (const prefix of dynamicPrefixes) if (prefix.length >= 3 && name.startsWith(prefix)) return true;
   for (const suffix of dynamicSuffixes) if (suffix.length >= 3 && name.endsWith(suffix)) return true;
+  const semanticFragments = name.split(/(?=[A-Z])|[-_]/).filter((part) => part.length >= 5);
+  if (semanticFragments.some((part) => referenceText.includes(part))) return true;
   return false;
 }
 function selectorCanBePruned(selector) {
