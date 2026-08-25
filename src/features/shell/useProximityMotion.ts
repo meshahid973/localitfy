@@ -41,11 +41,11 @@ const LEGACY_PROPERTIES = [
 ] as const;
 
 function clearLegacyProximityState(root: HTMLElement) {
-  for (const element of root.querySelectorAll<HTMLElement>(LEGACY_PROXIMITY_SELECTOR)) {
+  root.querySelectorAll<HTMLElement>(LEGACY_PROXIMITY_SELECTOR).forEach((element) => {
     element.classList.remove(...LEGACY_CLASSES);
-    for (const property of LEGACY_PROPERTIES) element.style.removeProperty(property);
+    LEGACY_PROPERTIES.forEach((property) => element.style.removeProperty(property));
     delete element.dataset.localtifyProxSignature;
-  }
+  });
 }
 
 /**
