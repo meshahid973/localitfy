@@ -7,34 +7,54 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const write = process.argv.includes("--write");
 
-function extractRelativeCssImports(modulePath) {
-  const absolute = path.join(root, modulePath);
-  const source = fs.readFileSync(absolute, "utf8");
+function resolveRelativeImport(modulePath, specifier) {
   const moduleDir = path.posix.dirname(modulePath.replaceAll("\\", "/"));
+  return path.posix.normalize(path.posix.join(moduleDir, specifier));
+}
+
+function extractModuleImports(modulePath) {
+  const source = fs.readFileSync(path.join(root, modulePath), "utf8");
   const imports = [];
-  const pattern = /^\s*import\s+["']([^"']+\.css)["'];?/gm;
+  const pattern = /^\s*import(?:[\s\S]*?\sfrom\s+)?["']([^"']+)["'];?/gm;
   for (const match of source.matchAll(pattern)) {
     const specifier = match[1];
     if (!specifier.startsWith(".")) continue;
-    const repoPath = path.posix.normalize(path.posix.join(moduleDir, specifier));
-    if (!fs.existsSync(path.join(root, repoPath))) {
-      throw new Error(`[css-cross-file] imported stylesheet does not exist: ${repoPath}`);
-    }
-    imports.push(repoPath);
+    imports.push({ specifier, repoPath: resolveRelativeImport(modulePath, specifier) });
   }
   return imports;
 }
 
-// main.tsx imports global base CSS before it imports App; App.tsx then imports the
-// renderer-wide feature styles in their actual cascade order. Component/lazy CSS
-// is intentionally excluded because its load timing can differ from this global chain.
-const STYLE_ORDER = [...new Set([
-  ...extractRelativeCssImports("src/main.tsx"),
-  ...extractRelativeCssImports("src/App.tsx")
-])];
+function cssImports(modulePath) {
+  return extractModuleImports(modulePath)
+    .filter(({ specifier }) => specifier.endsWith(".css"))
+    .map(({ repoPath }) => {
+      if (!fs.existsSync(path.join(root, repoPath))) throw new Error(`[css-cross-file] imported stylesheet does not exist: ${repoPath}`);
+      return repoPath;
+    });
+}
+
+// Follow the renderer's actual dependency order. App's CSS dependencies are
+// expanded exactly where main.tsx imports App, so final owner styles imported
+// after App stay final in both Chromium and this validator.
+const appCss = cssImports("src/App.tsx");
+const mainImports = extractModuleImports("src/main.tsx");
+const ordered = [];
+for (const entry of mainImports) {
+  if (entry.specifier === "./App" || entry.specifier === "./App.tsx") {
+    ordered.push(...appCss);
+    continue;
+  }
+  if (!entry.specifier.endsWith(".css")) continue;
+  if (!fs.existsSync(path.join(root, entry.repoPath))) throw new Error(`[css-cross-file] imported stylesheet does not exist: ${entry.repoPath}`);
+  ordered.push(entry.repoPath);
+}
+const STYLE_ORDER = [...new Set(ordered)];
 
 if (!STYLE_ORDER.includes("src/App.css")) {
   throw new Error("[css-cross-file] renderer cascade discovery lost src/App.css");
+}
+if (STYLE_ORDER.at(-1) !== "src/features/shell/performance.css") {
+  throw new Error(`[css-cross-file] renderer cascade must end in performance.css, got ${STYLE_ORDER.at(-1) || "nothing"}`);
 }
 
 function skipComment(text, index, end) {
@@ -94,9 +114,7 @@ function findStatementBoundary(text, start, end) {
     else if (char === ")") paren = Math.max(0, paren - 1);
     else if (char === "[") bracket += 1;
     else if (char === "]") bracket = Math.max(0, bracket - 1);
-    else if (paren === 0 && bracket === 0 && (char === "{" || char === ";")) {
-      return { index: cursor, char };
-    }
+    else if (paren === 0 && bracket === 0 && (char === "{" || char === ";")) return { index: cursor, char };
   }
   return null;
 }
@@ -165,8 +183,6 @@ function parseDeclaration(chunk) {
 }
 
 function parseDeclarations(body) {
-  // Nested CSS is deliberately ignored. This pass only removes simple rules where
-  // the cascade proof is straightforward.
   if (body.includes("{")) return null;
   const declarations = new Map();
   for (const chunk of splitDeclarations(body)) {
@@ -221,21 +237,11 @@ function scanRuleList(text, start, end, context, rules, fileIndex, repoPath) {
     const bodyEnd = close;
 
     if (normalized.startsWith("@")) {
-      if (isContainerAtRule(normalized) && !isKeyframes(normalized)) {
-        scanRuleList(text, bodyStart, bodyEnd, [...context, normalized], rules, fileIndex, repoPath);
-      }
+      if (isContainerAtRule(normalized) && !isKeyframes(normalized)) scanRuleList(text, bodyStart, bodyEnd, [...context, normalized], rules, fileIndex, repoPath);
     } else if (!context.some(isKeyframes)) {
       const declarations = parseDeclarations(text.slice(bodyStart, bodyEnd));
       if (declarations) {
-        rules.push({
-          selector: normalized,
-          context: context.join("\n"),
-          start: statementStart,
-          end: close + 1,
-          declarations,
-          fileIndex,
-          repoPath
-        });
+        rules.push({ selector: normalized, context: context.join("\n"), start: statementStart, end: close + 1, declarations, fileIndex, repoPath });
       }
     }
     cursor = close + 1;
@@ -311,9 +317,7 @@ if (!write) {
   for (const { earlier, later } of shadowed.slice(0, 60)) {
     const earlierFile = files[earlier.fileIndex];
     const laterFile = files[later.fileIndex];
-    console.error(
-      `[css-cross-file] ${earlier.repoPath}:${lineNumber(earlierFile.source, earlier.start)} ${earlier.selector} is fully shadowed by ${later.repoPath}:${lineNumber(laterFile.source, later.start)}`
-    );
+    console.error(`[css-cross-file] ${earlier.repoPath}:${lineNumber(earlierFile.source, earlier.start)} ${earlier.selector} is fully shadowed by ${later.repoPath}:${lineNumber(laterFile.source, later.start)}`);
   }
   if (shadowed.length > 60) console.error(`[css-cross-file] ... ${shadowed.length - 60} more`);
   console.error(`[css-cross-file] found ${shadowed.length} cross-file shadowed block(s). Run: node scripts/css-cross-file-dedup.mjs --write`);
