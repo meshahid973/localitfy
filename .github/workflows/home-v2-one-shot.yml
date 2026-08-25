@@ -32,6 +32,8 @@ jobs:
         run: |
           rm -f scripts/finalize-home-v2.mjs
           rm -f .github/workflows/home-v2-one-shot.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
 
       - run: npm run release:check
 
