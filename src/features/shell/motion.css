@@ -710,6 +710,8 @@ body.localitfyDropCommitted .app .songRow{
   100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
+.pageView,
+.mainView,
 .settingsCategoryPage{
   animation-timing-function: cubic-bezier(.2,.84,.26,1) !important;
 }

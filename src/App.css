@@ -1897,6 +1897,23 @@ input[type="range"]{
   }
 }
 
+.logoIcon{
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--lt-accent) !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  font-size: 26px !important;
+  line-height: 1 !important;
+  text-shadow: 0 0 14px color-mix(in oklab, var(--lt-accent) 32%, transparent) !important;
+  transform: none !important;
+  filter: none !important;
+}
+
 
 @media (max-width: 920px){
 
@@ -2308,9 +2325,16 @@ body{
   color: var(--lt-text, #f7f7f7) !important;
 }
 
+.logoPill{
+  background: color-mix(in oklab, var(--localtify-sidebar-bg) 82%, var(--lt-accent, #ff65df) 8%) !important;
+  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 18%, transparent) !important;
+  box-shadow: none !important;
+}
+
 
 .app::before{
-
+  display: none !important;
+  opacity: 0 !important;
 
   box-shadow: none !important;
   animation: none !important;
@@ -2370,6 +2394,10 @@ button:hover,
   display: none !important;
 }
 
+.app[data-theme] .titlebar{
+  background: color-mix(in srgb, var(--lt-accent, #ff6edb) 5%, #050505) !important;
+  border-color: color-mix(in srgb, var(--lt-accent, #ff6edb) 24%, transparent) !important;
+}
 
 .app[data-theme] .main{
   background:
@@ -2662,6 +2690,7 @@ html{
   background-image: none !important;
 }
 
+.homeHeroCard,
 .homeShelfPanel,
 .libraryPanelV025,
 .coverStudioRoot,
@@ -2674,6 +2703,7 @@ html{
   contain: layout paint style;
 }
 
+.homeHeroCard,
 .homeListenCard,
 .homeFreshCard,
 .homeAlbumCard,
@@ -3568,12 +3598,18 @@ html{
 }
 
 .app,
-.app::before{
+.app::before,
+.mainView,
+.mainView::before,
+.homeView,
+.homeView::before{
   background-image: none !important;
   background-size: auto !important;
 }
 
-.app::before{
+.app::before,
+.mainView::before,
+.homeView::before{
   opacity: 0 !important;
   display: none !important;
 }
@@ -3669,6 +3705,7 @@ button svg,
 .mainContent,
 .contentShell,
 .view,
+.homeView,
 .libraryView,
 .coverStudioView,
 .settingsView{
@@ -3834,7 +3871,9 @@ button{
 .app.viewSwitching .ambientSurface::before,
 .app.viewSwitching .ambientSurface::after,
 .app.viewSwitching .coverAura,
-.app.viewSwitching .albumAura{
+.app.viewSwitching .heroGlow,
+.app.viewSwitching .albumAura,
+.app.viewSwitching .floatingNote{
   animation-play-state: paused !important;
   opacity: .28 !important;
   filter: none !important;
@@ -3875,6 +3914,7 @@ button{
 }
 
 .navLucideIcon,
+.navItemIcon,
 .navIcon{
   transform-origin: center;
   transition: transform 260ms cubic-bezier(.22,.9,.28,1), color 220ms ease, opacity 220ms ease, filter 220ms ease;
@@ -3905,6 +3945,7 @@ button{
 .app,
 .app::before,
 .app::after,
+.homeView,
 .libraryView,
 .settingsPage,
 .analyticsView,
@@ -3989,7 +4030,8 @@ button{
 
 .app.viewSwitching .ambientSurface::before,
 .app.viewSwitching .ambientSurface::after,
-.app.viewSwitching .coverAura{
+.app.viewSwitching .coverAura,
+.app.viewSwitching .heroGlow{
   animation-play-state: paused;
   filter: none;
   opacity: .18;
@@ -4073,6 +4115,9 @@ button{
 .app,
 .app::before,
 .app::after,
+.mainView,
+.mainView::before,
+.mainView::after,
 .contentScroller,
 .contentScroller::before,
 .contentScroller::after{
@@ -4126,7 +4171,7 @@ body.localitfyThemePainting .app .ambientSurface::after{
   --grid-line: transparent !important;
   --app-grid-line: transparent !important;
   --page-line: transparent !important;
-
+  background-image: none !important;
   background-size: auto !important;
 }
 
@@ -4138,15 +4183,18 @@ body.localitfyThemePainting .app .ambientSurface::after{
 .contentScroller::after,
 .simpleShell::before,
 .simpleShell::after{
-
-
+  background-image: none !important;
+  background-size: auto !important;
 }
 
 .app,
+.mainView,
 .mainContent,
 .contentScroller,
 .simpleShell,
 .page,
+.homePage,
+.homeView,
 .settingsPage,
 .settingsContent,
 .settingsBody,
@@ -4163,6 +4211,7 @@ body.localitfyThemePainting .app .ambientSurface::after{
 }
 
 .app,
+.mainView,
 .mainContent,
 .contentScroller,
 .simpleShell{
@@ -4171,6 +4220,8 @@ body.localitfyThemePainting .app .ambientSurface::after{
 
 .app::before,
 .app::after,
+.mainView::before,
+.mainView::after,
 .mainContent::before,
 .mainContent::after,
 .contentScroller::before,
@@ -4190,6 +4241,8 @@ body,
 .contentScroller,
 .page,
 .pageShell,
+.homePage,
+.homeView,
 .libraryView,
 .likedView,
 .analyticsView,
@@ -4221,6 +4274,8 @@ body,
 .contentScroller::after,
 .page::before,
 .page::after,
+.homeView::before,
+.homeView::after,
 .libraryView::before,
 .libraryView::after,
 .settingsView::before,
@@ -4343,12 +4398,34 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
   background: transparent !important;
 }
 
+.sideNav,
 .sidebarNav{
   overflow: hidden !important;
   contain: layout paint style;
 }
 
+.sideItem{
+  overflow: hidden !important;
+  contain: paint;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease !important;
+}
 
+.sideItem::before,
+.sideItem::after,
+.sideItem.active::before,
+.sideItem.active::after{
+  inset: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  transform: none !important;
+  pointer-events: none !important;
+}
+
+.sideItem.active,
 .sideItem[aria-current="page"]{
 
   border-left-color: rgba(var(--lt-accent-rgb), 0.55) !important;
@@ -4386,6 +4463,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
   contain-intrinsic-size: 1px 280px;
 }
 
+.sideItem.active,
 .sideItem[aria-current="page"]{
   border-left-width: 1px !important;
   border-left-style: solid !important;
@@ -4406,11 +4484,13 @@ body,
 #root,
 .app,
 .mainShell,
+.mainArea,
 .mainContent,
 .appContent,
 .contentShell,
 .pageShell,
 .pageSurface,
+.homePage,
 .libraryPage,
 .likedPage,
 .coversPage,
@@ -4421,6 +4501,7 @@ body,
 .coverStudio,
 .panel,
 .hero,
+.heroCard,
 .libraryPanel,
 .settingsPanel{
   background-image: none !important;
@@ -4436,6 +4517,8 @@ body::after,
 .app::after,
 .mainShell::before,
 .mainShell::after,
+.mainArea::before,
+.mainArea::after,
 .mainContent::before,
 .mainContent::after,
 .appContent::before,
@@ -4446,6 +4529,8 @@ body::after,
 .pageShell::after,
 .pageSurface::before,
 .pageSurface::after,
+.homePage::before,
+.homePage::after,
 .libraryPage::before,
 .libraryPage::after,
 .coversPage::before,
@@ -4460,6 +4545,8 @@ body::after,
 .panel::after,
 .hero::before,
 .hero::after,
+.heroCard::before,
+.heroCard::after,
 .libraryPanel::before,
 .libraryPanel::after,
 .settingsPanel::before,
@@ -4475,6 +4562,7 @@ body::after,
 .playlistSongRow,
 .settingCard,
 .panel,
+.heroCard,
 .sidebarItem{
   rotate: 0deg !important;
   transform-style: flat !important;
@@ -4739,11 +4827,13 @@ body.localtifyBackgroundMode .ambientSurface,
 body.localtifyBackgroundMode .app::before,
 body.localtifyBackgroundMode .app::after,
 body.localtifyBackgroundMode .coverAura,
+body.localtifyBackgroundMode .heroGlow,
 body.localtifyBackgroundMode .heroBackground,
 body.localtifyBackgroundMode .nowPlayingAura,
 body.localtifyBackgroundMode .visualizer,
 .app.appBackgrounded .ambientSurface,
 .app.appBackgrounded .coverAura,
+.app.appBackgrounded .heroGlow,
 .app.appBackgrounded .heroBackground,
 .app.appBackgrounded .nowPlayingAura,
 .app.appBackgrounded .visualizer{
@@ -8628,7 +8718,13 @@ body,
 }
 
 /* Sidebar controls: solid, theme-aware, no blur/glass. */
-
+.logoWrap{
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
 
 .nav{
   display: grid;
@@ -8738,7 +8834,9 @@ body.isResizingPlayer .app *{
     padding: 0;
   }
 
-  .navText{
+  .navText,
+  .logoWrap h1,
+  .logoWrap p{
     display: none;
   }
 
