@@ -14,19 +14,11 @@ function normalizeChoice(value: unknown, allowed: readonly string[], fallback: s
 }
 
 export function applyVisualCustomizationDefaults<T extends Record<string, any>>(settings: T): T {
-  // Retired Home Quick Library values are discarded from persisted settings.
-  // Keep explicit false compatibility values until the last giant App-shell
-  // references are removed, so old boolean checks cannot interpret undefined
-  // as an opt-in (notably `quickLibraryMoreBlur !== false`).
-  const {
-    homeExpanded: _retiredHomeExpanded,
-    quickLibraryMoreBlur: _retiredQuickLibraryMoreBlur,
-    showRightColumn: _retiredShowRightColumn,
-    ...rest
-  } = settings;
-
+  // Retired Home Quick Library values remain explicitly false until their final
+  // compatibility fields disappear from Settings. Spreading T first preserves
+  // the caller's concrete settings shape without an unsafe generic cast.
   return {
-    ...rest,
+    ...settings,
     homeExpanded: false,
     quickLibraryMoreBlur: false,
     showRightColumn: false,
@@ -40,5 +32,5 @@ export function applyVisualCustomizationDefaults<T extends Record<string, any>>(
     playerBackgroundStyle: normalizeChoice(settings.playerBackgroundStyle, ["flat", "coverBlur", "oledBlack"], VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle),
     homeHeroCoverBrightness: Number.isFinite(Number(settings.homeHeroCoverBrightness)) ? Math.min(1.55, Math.max(0.65, Number(settings.homeHeroCoverBrightness))) : 1,
     catBuddyEnabled: settings.catBuddyEnabled === true
-  } as T;
+  };
 }
