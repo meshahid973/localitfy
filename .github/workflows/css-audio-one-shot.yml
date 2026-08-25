@@ -73,6 +73,18 @@ jobs:
       - name: Materialize CSS ownership
         run: node scripts/migrate-css-ownership.mjs
 
+      - name: Remove duplicate legacy onboarding CSS import
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/Onboarding.tsx')
+          source = path.read_text()
+          old = 'import "./onboarding-first-run.css";\n'
+          if old not in source:
+              raise SystemExit('legacy Onboarding CSS import not found')
+          path.write_text(source.replace(old, '', 1))
+          PY
+
       - name: Clean CSS to fixed point
         run: npm run css:dedup:fix
 
