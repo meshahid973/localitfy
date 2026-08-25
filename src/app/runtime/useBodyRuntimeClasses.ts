@@ -4,7 +4,8 @@ type BodyRuntimeClassOptions = {
   isAppBackgrounded: boolean;
   isAppBackgroundedRef: { current: boolean };
   isPlaying: boolean;
-  wantsMoreBlur: boolean;
+  /** Compatibility input while the App shell finishes shedding the retired Quick Library option. */
+  wantsMoreBlur?: boolean;
 };
 
 const PERFORMANCE_CLASS = "localtifyPerf";
@@ -22,8 +23,7 @@ const LEGACY_PERFORMANCE_CLASSES = [
 export function useBodyRuntimeClasses({
   isAppBackgrounded,
   isAppBackgroundedRef,
-  isPlaying,
-  wantsMoreBlur
+  isPlaying
 }: BodyRuntimeClassOptions) {
   useEffect(() => {
     const body = document.body;
@@ -54,8 +54,6 @@ export function useBodyRuntimeClasses({
   useEffect(() => {
     const body = document.body;
 
-    // A single current owner replaces years of mutually contradictory V30x
-    // performance classes. Removing them also makes hot reload recover cleanly.
     body.classList.remove(...LEGACY_PERFORMANCE_CLASSES);
     body.classList.add(PERFORMANCE_CLASS);
     body.dataset.localtifyPerf = PERFORMANCE_DATASET;
@@ -70,15 +68,4 @@ export function useBodyRuntimeClasses({
     document.body.classList.toggle("localtifyAudioPlaying", isPlaying);
     return () => document.body.classList.remove("localtifyAudioPlaying");
   }, [isPlaying]);
-
-  useEffect(() => {
-    const body = document.body;
-    body.classList.toggle("localtifyWantMoreBlur", wantsMoreBlur);
-    body.classList.toggle("localtifyNoMoreBlur", !wantsMoreBlur);
-
-    return () => {
-      body.classList.remove("localtifyWantMoreBlur");
-      body.classList.remove("localtifyNoMoreBlur");
-    };
-  }, [wantsMoreBlur]);
 }
