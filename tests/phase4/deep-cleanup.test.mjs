@@ -37,3 +37,9 @@ test("unused CSS selector pruning is part of the hardening gate", () => {
   assert.match(pkg.scripts["css:dedup:check"], /css-unused-selectors\.mjs/);
   assert.match(read("scripts/css-dedup-fixpoint.mjs"), /css-unused-selectors\.mjs/);
 });
+
+test("lazy settings content stays out of the static settings barrel", () => {
+  const barrel = read("src/features/settings/index.ts");
+  assert.doesNotMatch(barrel, /SettingsCategoryContent/);
+  assert.match(read("src/App.tsx"), /lazy\(\(\) => import\("\.\/features\/settings\/SettingsCategoryContent"\)\)/);
+});
