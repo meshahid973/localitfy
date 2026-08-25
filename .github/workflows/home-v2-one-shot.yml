@@ -1,0 +1,49 @@
+name: Home v2 one-shot validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize, ready_for_review]
+
+permissions:
+  contents: write
+
+jobs:
+  validate-home-v2:
+    if: github.head_ref == 'agent/perf-css-ownership-repair'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: node scripts/finalize-home-v2.mjs
+      - run: npm run css:dedup:fix
+
+      - name: Remove one-shot scaffolding before validation
+        shell: bash
+        run: |
+          rm -f scripts/finalize-home-v2.mjs
+          rm -f .github/workflows/home-v2-one-shot.yml
+
+      - run: npm run release:check
+
+      - name: Commit verified Home v2 tree
+        shell: bash
+        run: |
+          git config user.name "localtify-release-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit"
+            exit 0
+          fi
+          git commit -m "ui: finalize Home v2 release cleanup"
+          git push origin HEAD:${{ github.head_ref }}
