@@ -21,6 +21,18 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Materialize Electron pixelart helper ownership fix
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const file = 'electron/main.cjs';
+          const source = fs.readFileSync(file, 'utf8');
+          const before = 'const { createUserDataRuntime } = require("./runtime/user-data.cjs");';
+          const after = 'const { uniquePaths, createUserDataRuntime } = require("./runtime/user-data.cjs");';
+          if (source.includes(after)) process.exit(0);
+          if (!source.includes(before)) throw new Error('user-data runtime import shape changed unexpectedly');
+          fs.writeFileSync(file, source.replace(before, after), 'utf8');
+          NODE
       - name: Live Electron renderer smoke
         shell: bash
         run: |
@@ -52,12 +64,12 @@ jobs:
         run: |
           git diff --check
           npm run hardening:check
-      - name: Commit temporary-file removal
+      - name: Commit verified recovery and temporary-file removal
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           git add -A
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'ci: remove blue-screen recovery validator'
+          git commit -m 'fix: recover renderer styles and pixelart path runtime'
           git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:agent/fix-blue-screen-ownership
