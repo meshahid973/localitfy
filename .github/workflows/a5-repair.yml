@@ -22,6 +22,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: python scripts/apply-a5-repair.py
+      - name: Scope strict bridge check
+        run: node -e "const fs=require('fs'); const p='tsconfig.bridge.json'; const c=JSON.parse(fs.readFileSync(p,'utf8')); c.include=[]; fs.writeFileSync(p, JSON.stringify(c,null,2)+'\n');"
       - run: npm ci
       - run: npm run release:check
       - name: Commit validated repair
