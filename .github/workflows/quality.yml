@@ -37,10 +37,8 @@ jobs:
       - run: npm ci
       - run: npm run check
       - name: Electron runtime smoke
-        timeout-minutes: 2
-        shell: pwsh
-        run: >-
-          npx electron -e "const { app } = require('electron'); app.whenReady().then(() => { console.log('electron-ready', process.versions.electron); app.quit(); });"
+        timeout-minutes: 1
+        run: npx electron scripts/ci-electron-smoke.cjs
 
   discord-activity:
     runs-on: ubuntu-latest
