@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/a3-repair.yml
       - scripts/apply-a3-repair.mjs
+      - tests/phase3/hardening.test.mjs
 
 permissions:
   contents: write

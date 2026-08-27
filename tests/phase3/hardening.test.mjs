@@ -58,5 +58,5 @@ test("hardening stays enforced locally and in CI", () => {
   assert.match(workflow, /ubuntu-latest/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /npm run release:check/);
-  assert.match(workflow, /electron-ready/);
+  assert.match(workflow, /ci-electron-smoke\.cjs/);
 });
