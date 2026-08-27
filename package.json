@@ -17,7 +17,7 @@
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
     "build": "vite build",
     "typecheck": "tsc -b --pretty false",
-    "bridge:check": "node scripts/check-electron-bridge-contract.mjs",
+    "bridge:check": "node scripts/check-electron-bridge-contract.mjs && npm run bridge:typecheck",
     "boundaries:check": "node scripts/check-phase1-boundaries.mjs && node scripts/check-codebase-hygiene.mjs && node scripts/check-release-ui-ownership.mjs",
     "css:dedup:check": "node scripts/css-property-dedup.mjs && node scripts/css-shadow-dedup.mjs && node scripts/css-adjacent-merge.mjs && node scripts/css-cross-file-dedup.mjs && node scripts/css-animation-ownership.mjs && node scripts/css-unused-selectors.mjs && node scripts/css-hygiene.mjs",
     "css:dedup:cross": "node scripts/css-cross-file-dedup.mjs",
@@ -41,7 +41,8 @@
     "db:recovery-test": "node scripts/run-electron-node.cjs scripts/test-database-recovery.cjs",
     "hardening:check": "npm run check && npm run performance:check",
     "release:check": "npm run hardening:check && npm run assets:compress:dry && npm run chunks:audit",
-    "css:hygiene": "node scripts/css-hygiene.mjs"
+    "css:hygiene": "node scripts/css-hygiene.mjs",
+    "bridge:typecheck": "tsc -p tsconfig.bridge.json --pretty false"
   },
   "dependencies": {
     "better-sqlite3": "^12.5.0",

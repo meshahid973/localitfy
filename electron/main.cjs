@@ -5030,7 +5030,15 @@ app.whenReady().then(async () => {
   ipcRouter.handle("song:analyze-volume", async (_event, id) => {
     const target = getSongs().find((item) => item.id === id);
     if (!target) return { ok: false, volumeGain: 1, error: "song not in library database" };
-    return analyzeVolumeGain(target.filePath);
+
+    const analysis = await analyzeVolumeGain(target.filePath);
+    if (!analysis?.ok) return analysis;
+
+    const updated = patchSong(id, { volumeGain: analysis.volumeGain });
+    return {
+      ...analysis,
+      song: updated ? shapeSong(updated) : shapeSong(target)
+    };
   });
   ipcRouter.handle("library:import", async (event) => {
     try {

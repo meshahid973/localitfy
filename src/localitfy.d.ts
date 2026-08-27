@@ -1,3 +1,6 @@
+import type { Song } from "./features/library/song.types";
+import type { Settings } from "./features/settings/settings.types";
+
 export {};
 
 
@@ -119,8 +122,6 @@ declare global {
     coverUpdatedAt?: string | null;
     durationMs?: number;
     coverUrl?: string;
-    coverPath?: string;
-    coverSource?: string;
     embeddedCoverPath?: string;
     coverThumbUrl?: string;
     coverThumbnailUrl?: string;
@@ -176,7 +177,7 @@ declare global {
     skippedDuplicates?: number;
     duplicateCount?: number;
     repairedExistingCount?: number;
-    songs: any[];
+    songs: Song[];
     albums: LocalitfyImportedFolderAlbum[];
     message?: string;
     error?: string;
@@ -252,7 +253,7 @@ declare global {
       | string;
     value?: number | string;
     source?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 
   type AutoUpdateEvent = {
@@ -279,7 +280,7 @@ declare global {
     message: string;
     appVersion?: string;
     platform?: string;
-    diagnostics?: Record<string, any>;
+    diagnostics?: Record<string, unknown>;
   };
 
   type LocalitfyFeedbackResult = {
@@ -288,6 +289,16 @@ declare global {
   };
 
 
+
+  type LocalitfyVolumeAnalysisResult = {
+    ok: boolean;
+    song?: Song;
+    volumeGain?: number;
+    meanVolumeDb?: number;
+    maxVolumeDb?: number;
+    gainDb?: number;
+    error?: string;
+  };
 
   type LocalitfyPlaybackUrlResult = {
     ok: boolean;
@@ -305,7 +316,7 @@ declare global {
     changedCount?: number;
     repairedCount?: number;
     skippedCount?: number;
-    songs?: any[];
+    songs?: Song[];
     error?: string;
   };
 
@@ -316,8 +327,8 @@ declare global {
 
   type LocalitfyDatabaseRepairResult = {
     ok: boolean;
-    status?: Record<string, any>;
-    songs?: any[];
+    status?: Record<string, unknown>;
+    songs?: Song[];
     error?: string;
   };
 
@@ -377,7 +388,7 @@ declare global {
     downloadFolder: string;
     downloads: LocalitfyDownloadResult[];
     changedCount?: number;
-    songs?: any[];
+    songs?: Song[];
     importedFilePaths?: string[];
     spotifyImportedSongIds?: string[];
     spotifyImportMap?: Array<{
@@ -393,21 +404,21 @@ declare global {
   interface Window {
     localitfy: {
       bootstrap: () => Promise<{
-        songs: any[];
-        settings: Record<string, any>;
+        songs: Song[];
+        settings: Partial<Settings>;
         playlists?: LocalitfyPlaylistRecord[];
         windowsIntegration?: LocalitfyWindowsStartupStatus;
-        database?: Record<string, any>;
-        discord?: Record<string, any>;
-        covers?: Record<string, any>;
+        database?: Record<string, unknown>;
+        discord?: Record<string, unknown>;
+        covers?: Record<string, unknown>;
       }>;
       resolvePlaybackUrl: (payload: { filePath: string }) => Promise<LocalitfyPlaybackUrlResult>;
 
-      importSongs: () => Promise<any[]>;
+      importSongs: () => Promise<Song[]>;
       repairMissingMetadata: (payload?: Record<string, any>) => Promise<LocalitfyMetadataRepairResult>;
       scanAlbumFolder?: (payload?: { mode?: "single" | "library" }) => Promise<LocalitfyAlbumFolderScanResult>;
       importAlbumFolder?: (payload: { scanId: string }) => Promise<LocalitfyAlbumFolderImportResult>;
-      clearLibrary: () => Promise<any[]>;
+      clearLibrary: () => Promise<Song[]>;
 
       downloadAudioUrls: (payload: {
         urls?: string[] | string;
@@ -423,7 +434,7 @@ declare global {
         downloadFolder: string;
         downloads: LocalitfyDownloadResult[];
         changedCount: number;
-        songs: any[];
+        songs: Song[];
         autoAdd?: boolean;
       }>;
 
@@ -437,7 +448,7 @@ declare global {
         downloadFolder: string;
         conversions: LocalitfyConversionResult[];
         changedCount: number;
-        songs: any[];
+        songs: Song[];
       }>;
 
       listPixelArt?: () => Promise<PixelArtBridgeAsset[]>;
@@ -450,18 +461,18 @@ declare global {
         }>
       >;
 
-      setPixelArtCover?: (id: string, coverPath: string) => Promise<any | null>;
-      setSongCover?: (id: string, coverPath: string) => Promise<any | null>;
+      setPixelArtCover?: (id: string, coverPath: string) => Promise<Song | null>;
+      setSongCover?: (id: string, coverPath: string) => Promise<Song | null>;
 
-      patchSong: (id: string, patch: any) => Promise<any | null>;
-      deleteSong: (id: string) => Promise<any[]>;
+      patchSong: (id: string, patch: Partial<Song>) => Promise<Song | null>;
+      deleteSong: (id: string) => Promise<Song[]>;
 
-      randomizeSongCover: (id: string) => Promise<any | null>;
-      randomizeAllSongCovers?: () => Promise<any[]>;
-      randomizeMissingSongCovers?: () => Promise<any[]>;
-      randomizeSelectedSongCovers?: (ids: string[]) => Promise<any[]>;
+      randomizeSongCover: (id: string) => Promise<Song | null>;
+      randomizeAllSongCovers?: () => Promise<Song[]>;
+      randomizeMissingSongCovers?: () => Promise<Song[]>;
+      randomizeSelectedSongCovers?: (ids: string[]) => Promise<Song[]>;
 
-      pickSongCover: (id: string) => Promise<any | null>;
+      pickSongCover: (id: string) => Promise<Song | null>;
 
       getCoverStats?: () => Promise<any>;
       rescanPixelArt?: () => Promise<any>;
@@ -471,10 +482,10 @@ declare global {
       warmCoverThumbnails?: (payload?: { limit?: number; force?: boolean }) => Promise<LocalitfyCoverThumbnailWarmResult>;
       cleanupCoverCache: () => Promise<LocalitfyCoverThumbnailCleanupResult>;
 
-      analyzeSongVolume?: (id: string) => Promise<any | null>;
+      analyzeSongVolume?: (id: string) => Promise<LocalitfyVolumeAnalysisResult>;
 
-      getSettings: () => Promise<Record<string, any>>;
-      saveSettings: (settings: any) => Promise<Record<string, any>>;
+      getSettings: () => Promise<Partial<Settings>>;
+      saveSettings: (settings: Partial<Settings>) => Promise<Partial<Settings>>;
 
       getPlaylists?: () => Promise<LocalitfyPlaylistRecord[]>;
       savePlaylists?: (playlists: LocalitfyPlaylistRecord[]) => Promise<LocalitfyPlaylistRecord[]>;
@@ -520,10 +531,10 @@ declare global {
         platform?: string;
         arch?: string;
         isPackaged?: boolean;
-        gpuFeatureStatus?: Record<string, any>;
-        window?: Record<string, any>;
+        gpuFeatureStatus?: Record<string, unknown>;
+        window?: Record<string, unknown>;
       }>;
-      getGpuStatus?: () => Promise<any>;
+      getGpuStatus?: () => Promise<unknown>;
       sendFeedback?: (payload: LocalitfyFeedbackPayload) => Promise<LocalitfyFeedbackResult>;
       getFeedbackStatus?: () => Promise<LocalitfyFeedbackStatus>;
       openExternal?: (url: string) => Promise<{ ok: boolean; reason?: string }>;
@@ -536,8 +547,8 @@ declare global {
       spotifyFetch?: (payload: { url: string }) => Promise<any>;
       spotifyFetchTracks?: (url: string) => Promise<any>;
       spotdlCheck?: () => Promise<any>;
-      spotdlDownloadBatch?: (payload: { tracks: LocalitfySpotifyTrackPayload[]; options?: any; sourceName?: string; sourceType?: string }) => Promise<LocalitfySpotifyDownloadBatchResult>;
-      spotifyDownloadBatch?: (payload: { tracks: LocalitfySpotifyTrackPayload[]; options?: any; sourceName?: string; sourceType?: string }) => Promise<LocalitfySpotifyDownloadBatchResult>;
+      spotdlDownloadBatch?: (payload: { tracks: LocalitfySpotifyTrackPayload[]; options?: Record<string, unknown>; sourceName?: string; sourceType?: string }) => Promise<LocalitfySpotifyDownloadBatchResult>;
+      spotifyDownloadBatch?: (payload: { tracks: LocalitfySpotifyTrackPayload[]; options?: Record<string, unknown>; sourceName?: string; sourceType?: string }) => Promise<LocalitfySpotifyDownloadBatchResult>;
       onSpotdlTrackDone?: (callback: (payload: LocalitfyDownloadProgressPayload | LocalitfyDownloadResult) => void) => () => void;
 
       onAlbumFolderImportProgress?: (callback: (payload: LocalitfyAlbumFolderProgressPayload) => void) => () => void;

@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noEmit": true
+  },
+  "files": [
+    "src/localitfy.d.ts"
+  ],
+  "include": []
+}
