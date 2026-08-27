@@ -14,15 +14,20 @@ const {
   installRendererSecurityGuards,
   installSessionPermissionGuards
 } = require(path.join(root, "electron", "runtime", "security.cjs"));
+const { LOCALTIFY_RENDERER_PROTOCOL } = require(path.join(root, "electron", "runtime", "protocols.cjs"));
 const { createIpcRouter } = require(path.join(root, "electron", "ipc", "router.cjs"));
 
 test("renderer navigation stays inside Localtify-owned origins", () => {
   const rendererRoot = path.join(root, "dist");
   const insideFile = pathToFileURL(path.join(rendererRoot, "index.html")).href;
   const outsideFile = pathToFileURL(path.join(root, "package.json")).href;
+  const rendererUrl = `${LOCALTIFY_RENDERER_PROTOCOL}://app/index.html`;
+  const wrongHostUrl = `${LOCALTIFY_RENDERER_PROTOCOL}://evil/index.html`;
 
-  assert.equal(isAllowedRendererNavigation("localitfy://app/index.html", { rendererFileRoot: rendererRoot }), true);
-  assert.equal(isAllowedRendererNavigation("localitfy://evil/index.html", { rendererFileRoot: rendererRoot }), false);
+  assert.equal(LOCALTIFY_RENDERER_PROTOCOL, "localtify-renderer");
+  assert.equal(isAllowedRendererNavigation(rendererUrl, { rendererFileRoot: rendererRoot }), true);
+  assert.equal(isAllowedRendererNavigation(wrongHostUrl, { rendererFileRoot: rendererRoot }), false);
+  assert.equal(isAllowedRendererNavigation("localitfy://app/index.html", { rendererFileRoot: rendererRoot }), false);
   assert.equal(isAllowedRendererNavigation(insideFile, { rendererFileRoot: rendererRoot }), true);
   assert.equal(isAllowedRendererNavigation(outsideFile, { rendererFileRoot: rendererRoot }), false);
   assert.equal(isAllowedRendererNavigation("file:///tmp/untrusted.html", {}), false);

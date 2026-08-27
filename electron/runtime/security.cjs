@@ -2,6 +2,7 @@
 
 const path = require("node:path");
 const { fileURLToPath } = require("node:url");
+const { LOCALTIFY_RENDERER_PROTOCOL } = require("./protocols.cjs");
 
 function normalizeUrl(rawUrl) {
   try {
@@ -28,7 +29,7 @@ function isAllowedRendererNavigation(rawUrl, options = {}) {
   const parsed = normalizeUrl(rawUrl);
   if (!parsed) return false;
 
-  if (parsed.protocol === "localitfy:" && parsed.hostname === "app") return true;
+  if (parsed.protocol === `${LOCALTIFY_RENDERER_PROTOCOL}:` && parsed.hostname === "app") return true;
 
   if (parsed.protocol === "file:") {
     if (!options.rendererFileRoot) return false;
