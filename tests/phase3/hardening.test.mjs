@@ -47,9 +47,16 @@ test("main renderer sandbox is enabled and documented", () => {
   assert.match(doc, /main frame/i);
 });
 
-test("hardening is owned by local scripts and workflows stay removed", () => {
+test("hardening stays enforced locally and in CI", () => {
   assert.ok(fs.existsSync(path.join(root, "scripts/check-performance-budgets.mjs")));
   assert.ok(fs.existsSync(path.join(root, "scripts/test-database-recovery.cjs")));
   assert.ok(fs.existsSync(path.join(root, "scripts/css-hygiene.mjs")));
-  assert.equal(fs.existsSync(path.join(root, ".github/workflows")), false);
+
+  const workflowPath = path.join(root, ".github", "workflows", "quality.yml");
+  assert.equal(fs.existsSync(workflowPath), true, "quality workflow must stay present");
+  const workflow = fs.readFileSync(workflowPath, "utf8");
+  assert.match(workflow, /ubuntu-latest/);
+  assert.match(workflow, /windows-latest/);
+  assert.match(workflow, /npm run release:check/);
+  assert.match(workflow, /electron-ready/);
 });
