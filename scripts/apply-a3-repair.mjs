@@ -25,43 +25,50 @@ edit("electron/runtime/services.cjs", (source) => {
 });
 
 edit("electron/downloader.cjs", (source) => {
+  if (!source.includes("let _getCookiesFile = null;")) throw new Error("downloader: cookie callback state missing");
   source = source.replace("let _getCookiesFile = null;\n", "");
   source = source.replace("function initDownloader({ userDataPath, ffmpegPath, getCookiesFile }) {", "function initDownloader({ userDataPath, ffmpegPath }) {");
   source = source.replace("  if (getCookiesFile) _getCookiesFile = getCookiesFile;\n", "");
 
   const setupMarker = "// ====================== YT-DLP SETUP ======================";
   if (!source.includes(setupMarker)) throw new Error("downloader: setup marker missing");
-  source = source.replace(setupMarker, `function getOptInBrowserCookieSource() {
-  if (process.env.LOCALTIFY_ALLOW_BROWSER_COOKIES !== "1") return "";
-  const requested = String(process.env.LOCALTIFY_BROWSER_COOKIE_SOURCE || "").trim().toLowerCase();
-  const allowed = process.platform === "win32"
-    ? ["chrome", "edge", "firefox"]
-    : ["chrome", "firefox", "chromium"];
-  return allowed.includes(requested) ? requested : "";
-}
-
-${setupMarker}`);
+  source = source.replace(setupMarker, [
+    "function getOptInBrowserCookieSource() {",
+    "  if (process.env.LOCALTIFY_ALLOW_BROWSER_COOKIES !== \"1\") return \"\";",
+    "  const requested = String(process.env.LOCALTIFY_BROWSER_COOKIE_SOURCE || \"\").trim().toLowerCase();",
+    "  const allowed = process.platform === \"win32\"",
+    "    ? [\"chrome\", \"edge\", \"firefox\"]",
+    "    : [\"chrome\", \"firefox\", \"chromium\"];",
+    "  return allowed.includes(requested) ? requested : \"\";",
+    "}",
+    "",
+    setupMarker
+  ].join("\n"));
 
   const strategyBlock = /\n  if \(_getCookiesFile\) \{[\s\S]*?\n  for \(const browser of browsers\) \{\n    strategies\.push\(\{ label: `\$\{browser\} cookies`, args: withFfmpeg\(\[\.\.\.base, "--cookies-from-browser", browser\]\) \}\);\n  \}/;
   if (!strategyBlock.test(source)) throw new Error("downloader: automatic cookie strategy block missing");
-  source = source.replace(strategyBlock, `
-  const browserCookieSource = getOptInBrowserCookieSource();
-  if (browserCookieSource) {
-    strategies.push({
-      label: `${"${browserCookieSource}"} cookies (explicit opt-in)`,
-      args: withFfmpeg([...base, "--cookies-from-browser", browserCookieSource])
-    });
-  }`);
+  source = source.replace(strategyBlock, [
+    "",
+    "  const browserCookieSource = getOptInBrowserCookieSource();",
+    "  if (browserCookieSource) {",
+    "    strategies.push({",
+    "      label: browserCookieSource + \" cookies (explicit opt-in)\",",
+    "      args: withFfmpeg([...base, \"--cookies-from-browser\", browserCookieSource])",
+    "    });",
+    "  }"
+  ].join("\n"));
 
   const searchBlock = /\n    if \(_getCookiesFile\) \{[\s\S]*?\n    \}\n\n    for \(const args of attempts\)/;
   if (!searchBlock.test(source)) throw new Error("downloader: search cookie block missing");
-  source = source.replace(searchBlock, `
-    const browserCookieSource = getOptInBrowserCookieSource();
-    if (browserCookieSource) {
-      attempts.push([...baseArgs, "--cookies-from-browser", browserCookieSource]);
-    }
-
-    for (const args of attempts)`);
+  source = source.replace(searchBlock, [
+    "",
+    "    const browserCookieSource = getOptInBrowserCookieSource();",
+    "    if (browserCookieSource) {",
+    "      attempts.push([...baseArgs, \"--cookies-from-browser\", browserCookieSource]);",
+    "    }",
+    "",
+    "    for (const args of attempts)"
+  ].join("\n"));
 
   if (source.includes("_getCookiesFile") || source.includes("getCookiesFile")) throw new Error("downloader: cookie callback residue remains");
   return source;
