@@ -1,20 +1,15 @@
-﻿const fs = require("node:fs");
+const fs = require("node:fs");
 const path = require("node:path");
-const os = require("node:os");
 const crypto = require("node:crypto");
+const { execFile, spawn } = require("node:child_process");
 
-const ffmpeg = require("fluent-ffmpeg");
 const ffmpegStatic = require("ffmpeg-static");
 const sanitize = require("sanitize-filename");
-
-const YTDlpWrapModule = require("yt-dlp-wrap");
-const YTDlpWrap = YTDlpWrapModule.default ?? YTDlpWrapModule;
-
-if (ffmpegStatic) ffmpeg.setFfmpegPath(ffmpegStatic);
+const { ensureYtDlpBinary, spawnYtDlp } = require("./runtime/yt-dlp.cjs");
 
 let _userDataPath = null;
 let _ffmpegPath = ffmpegStatic || null;
-let _ytDlpWrap = null;
+let _ytDlpBinaryPath = null;
 const activeDownloadProcesses = new Set();
 let activeDownloadCancelled = false;
 
@@ -25,10 +20,7 @@ const MEDIA_EXTENSIONS = new Set([
 
 function initDownloader({ userDataPath, ffmpegPath }) {
   _userDataPath = userDataPath;
-  if (ffmpegPath) {
-    _ffmpegPath = ffmpegPath;
-    try { ffmpeg.setFfmpegPath(_ffmpegPath); } catch { /* keep fallback */ }
-  }
+  if (ffmpegPath) _ffmpegPath = ffmpegPath;
 }
 
 function isSupportedMediaPath(filePath) {
@@ -67,30 +59,10 @@ function getOptInBrowserCookieSource() {
 
 // ====================== YT-DLP SETUP ======================
 async function getYtDlp() {
-  if (_ytDlpWrap) return _ytDlpWrap;
-
-  const binDir = path.join(_userDataPath || os.homedir(), "localitfy-bin");
-  fs.mkdirSync(binDir, { recursive: true });
-
-  const binaryName = process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp";
-  const binaryPath = path.join(binDir, binaryName);
-
-  if (!fs.existsSync(binaryPath)) {
-    console.log("[localitfy] downloading yt-dlp binary...");
-    await YTDlpWrap.downloadFromGithub(binaryPath);
-    console.log("[localitfy] yt-dlp ready at", binaryPath);
-  }
-
-  if (process.platform !== "win32") {
-    try {
-      fs.chmodSync(binaryPath, 0o755);
-    } catch (error) {
-      console.log("[localitfy] yt-dlp chmod warning", error?.message || error);
-    }
-  }
-
-  _ytDlpWrap = new YTDlpWrap(binaryPath);
-  return _ytDlpWrap;
+  if (_ytDlpBinaryPath && fs.existsSync(_ytDlpBinaryPath)) return _ytDlpBinaryPath;
+  const resolved = await ensureYtDlpBinary({ userDataPath: _userDataPath });
+  _ytDlpBinaryPath = resolved.path;
+  return _ytDlpBinaryPath;
 }
 
 // ====================== DOWNLOAD OPTIONS ======================
@@ -233,13 +205,40 @@ function buildProgressPayload(job, p) {
 }
 
 // ====================== RUN YT-DLP ======================
+function parseYtDlpProgressLine(line) {
+  const text = String(line || "");
+  const percentMatch = text.match(/\[download\]\s+(\d+(?:\.\d+)?)%/i);
+  if (!percentMatch) return null;
+  const speedMatch = text.match(/\bat\s+([^\s]+\/s)/i);
+  const sizeMatch = text.match(/\bof\s+~?\s*([^\s]+)(?:\s+at|\s+ETA|$)/i);
+  const etaMatch = text.match(/\bETA\s+([0-9:]+)/i);
+  return {
+    percent: Number(percentMatch[1] || 0),
+    currentSpeed: speedMatch?.[1] || null,
+    totalSize: sizeMatch?.[1] || null,
+    eta: etaMatch?.[1] || null
+  };
+}
+
 function runYtDlp(ytDlp, args, onProgress, job) {
   return new Promise((resolve, reject) => {
     activeDownloadCancelled = false;
-    const proc = ytDlp.exec(args);
+    const proc = spawnYtDlp(ytDlp, args);
     activeDownloadProcesses.add(proc);
+    let outputBuffer = "";
 
-    proc.on("progress", (p) => onProgress?.(buildProgressPayload(job, p)));
+    const consume = (chunk) => {
+      outputBuffer += chunk.toString();
+      const lines = outputBuffer.split(/\r?\n/);
+      outputBuffer = lines.pop() || "";
+      for (const line of lines) {
+        const progress = parseYtDlpProgressLine(line);
+        if (progress) onProgress?.(buildProgressPayload(job, progress));
+      }
+    };
+
+    proc.stdout?.on("data", consume);
+    proc.stderr?.on("data", consume);
     proc.on("error", (err) => {
       activeDownloadProcesses.delete(proc);
       reject(new Error(err?.message || String(err)));
@@ -334,46 +333,74 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
 }
 
 // ====================== CONVERSION ======================
-function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, deleteAfter = false) {
-  return new Promise((resolve) => {
-    if (!fs.existsSync(inputPath)) {
-      return resolve({ ok: false, error: "File not found" });
-    }
+function parseFfmpegTimestampSeconds(value = "") {
+  const match = String(value || "").match(/(\d{1,3}):(\d{2}):(\d{2}(?:\.\d+)?)/);
+  if (!match) return 0;
+  return Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]);
+}
 
+function probeMediaDurationSeconds(inputPath) {
+  return new Promise((resolve) => {
+    if (!_ffmpegPath || !fs.existsSync(_ffmpegPath)) return resolve(0);
+    execFile(
+      _ffmpegPath,
+      ["-hide_banner", "-nostdin", "-i", inputPath],
+      { windowsHide: true, timeout: 15000, maxBuffer: 4 * 1024 * 1024 },
+      (_error, stdout, stderr) => {
+        const match = `${stdout || ""}\n${stderr || ""}`.match(/Duration:\s*(\d{1,3}:\d{2}:\d{2}(?:\.\d+)?)/i);
+        resolve(match ? parseFfmpegTimestampSeconds(match[1]) : 0);
+      }
+    );
+  });
+}
+
+function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, deleteAfter = false) {
+  return new Promise(async (resolve) => {
+    if (!fs.existsSync(inputPath)) return resolve({ ok: false, error: "File not found" });
+    if (!_ffmpegPath || !fs.existsSync(_ffmpegPath)) return resolve({ ok: false, error: "FFmpeg is unavailable" });
+
+    fs.mkdirSync(outputDirectory, { recursive: true });
     const baseName = sanitizeFilename(path.parse(inputPath).name);
     const outputPath = uniquePath(outputDirectory, `${baseName}.mp3`);
+    const durationSeconds = await probeMediaDurationSeconds(inputPath);
+    const safeBitrate = Math.max(64, Math.min(320, Number(bitrate) || 192));
+    let lastPercent = -1;
 
-    onProgress?.({
-      type: "convert",
-      file: baseName,
-      progress: 0,
-      speed: null,
-      message: "Converting to MP3..."
+    onProgress?.({ type: "convert", file: baseName, progress: 0, speed: null, message: "Converting to MP3..." });
+
+    const proc = spawn(
+      _ffmpegPath,
+      ["-hide_banner", "-nostdin", "-y", "-i", inputPath, "-vn", "-c:a", "libmp3lame", "-b:a", `${safeBitrate}k`, "-threads", "0", outputPath],
+      { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] }
+    );
+    activeDownloadProcesses.add(proc);
+
+    proc.stderr?.on("data", (chunk) => {
+      if (!durationSeconds) return;
+      for (const match of chunk.toString().matchAll(/time=(\d{1,3}:\d{2}:\d{2}(?:\.\d+)?)/g)) {
+        const elapsed = parseFfmpegTimestampSeconds(match[1]);
+        const percent = Math.max(0, Math.min(99, Math.floor((elapsed / durationSeconds) * 100)));
+        if (percent === lastPercent) continue;
+        lastPercent = percent;
+        onProgress?.({ type: "convert", file: baseName, progress: percent, speed: null, message: `Converting... ${percent}%` });
+      }
     });
 
-    ffmpeg(inputPath)
-      .audioBitrate(bitrate)
-      .noVideo()
-      .format("mp3")
-      .outputOptions(["-threads", "0"])
-      .on("progress", (p) => {
-        const percent = Math.floor(p.percent || 0);
-        const kbps = p.currentKbps ? `${Math.round(p.currentKbps)} kbps` : null;
-        onProgress?.({
-          type: "convert",
-          file: baseName,
-          progress: percent,
-          speed: kbps,
-          message: `Converting... ${percent}%${kbps ? `  â€¢  ${kbps}` : ""}`
-        });
-      })
-      .on("end", () => {
-        if (deleteAfter) { try { fs.unlinkSync(inputPath); } catch { /* ignore */ } }
-        onProgress?.({ type: "convert", file: baseName, progress: 100, speed: null, message: "Done" });
-        resolve({ ok: true, filePath: outputPath, filename: path.basename(outputPath) });
-      })
-      .on("error", (err) => resolve({ ok: false, error: err.message }))
-      .save(outputPath);
+    proc.on("error", (error) => {
+      activeDownloadProcesses.delete(proc);
+      resolve({ ok: false, error: error?.message || "FFmpeg failed" });
+    });
+    proc.on("close", (code) => {
+      activeDownloadProcesses.delete(proc);
+      if (code !== 0 || !fs.existsSync(outputPath)) {
+        try { fs.rmSync(outputPath, { force: true }); } catch {}
+        resolve({ ok: false, error: `FFmpeg exited with code ${code}` });
+        return;
+      }
+      if (deleteAfter) { try { fs.unlinkSync(inputPath); } catch {} }
+      onProgress?.({ type: "convert", file: baseName, progress: 100, speed: null, message: "Done" });
+      resolve({ ok: true, filePath: outputPath, filename: path.basename(outputPath) });
+    });
   });
 }
 
@@ -509,25 +536,18 @@ function getCandidateUrl(candidate = {}) {
 function runYtDlpJson(ytDlp, args) {
   return new Promise((resolve, reject) => {
     activeDownloadCancelled = false;
-    const proc = ytDlp.exec(args);
+    const proc = spawnYtDlp(ytDlp, args);
     activeDownloadProcesses.add(proc);
 
     let stdout = "";
     let stderr = "";
-
-    proc.stdout?.on("data", (chunk) => {
-      stdout += chunk.toString();
-    });
-
-    proc.stderr?.on("data", (chunk) => {
-      stderr += chunk.toString();
-    });
+    proc.stdout?.on("data", (chunk) => { stdout += chunk.toString(); });
+    proc.stderr?.on("data", (chunk) => { stderr += chunk.toString(); });
 
     proc.on("error", (err) => {
       activeDownloadProcesses.delete(proc);
       reject(new Error(err?.message || String(err)));
     });
-
     proc.on("close", (code) => {
       activeDownloadProcesses.delete(proc);
       if (activeDownloadCancelled) return reject(new Error("Download cancelled"));
