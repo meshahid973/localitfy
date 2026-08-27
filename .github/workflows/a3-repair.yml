@@ -1,0 +1,33 @@
+name: a3-repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/a3-repair.yml
+      - scripts/apply-a3-repair.mjs
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: node scripts/apply-a3-repair.mjs
+      - run: npm ci
+      - run: npm run release:check
+      - name: Commit validated repair
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add electron/main.cjs electron/runtime/services.cjs electron/downloader.cjs tests/phase3/downloader-privacy.test.mjs
+          git commit -m "downloader privacy fixed"
+          git push origin HEAD:main
