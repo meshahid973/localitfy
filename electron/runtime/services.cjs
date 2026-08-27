@@ -7,7 +7,6 @@ function createElectronServiceRuntime(options = {}) {
   const {
     userDataPath,
     ffmpegPath,
-    getCookiesFile,
     startMediaServer,
     stopMediaServer,
     cleanupNativeWindowsMedia
@@ -22,7 +21,7 @@ function createElectronServiceRuntime(options = {}) {
     stopped = false;
 
     if (typeof startMediaServer === "function") await startMediaServer();
-    initDownloader({ userDataPath, ffmpegPath, getCookiesFile });
+    initDownloader({ userDataPath, ffmpegPath });
     initMetadataService({ userDataPath, ffmpegPath });
     initCoverService({ userDataPath });
     return true;

@@ -15,7 +15,6 @@ if (ffmpegStatic) ffmpeg.setFfmpegPath(ffmpegStatic);
 let _userDataPath = null;
 let _ffmpegPath = ffmpegStatic || null;
 let _ytDlpWrap = null;
-let _getCookiesFile = null;
 const activeDownloadProcesses = new Set();
 let activeDownloadCancelled = false;
 
@@ -24,13 +23,12 @@ const MEDIA_EXTENSIONS = new Set([
   ".mp4", ".webm", ".mkv", ".mov", ".avi", ".m4v"
 ]);
 
-function initDownloader({ userDataPath, ffmpegPath, getCookiesFile }) {
+function initDownloader({ userDataPath, ffmpegPath }) {
   _userDataPath = userDataPath;
   if (ffmpegPath) {
     _ffmpegPath = ffmpegPath;
     try { ffmpeg.setFfmpegPath(_ffmpegPath); } catch { /* keep fallback */ }
   }
-  if (getCookiesFile) _getCookiesFile = getCookiesFile;
 }
 
 function isSupportedMediaPath(filePath) {
@@ -56,6 +54,15 @@ function uniquePath(directory, filename) {
 function parseUrls(input) {
   if (Array.isArray(input)) return input.map(String).map(u => u.trim()).filter(Boolean);
   return String(input || "").split(/\r?\n/).map(u => u.trim()).filter(Boolean);
+}
+
+function getOptInBrowserCookieSource() {
+  if (process.env.LOCALTIFY_ALLOW_BROWSER_COOKIES !== "1") return "";
+  const requested = String(process.env.LOCALTIFY_BROWSER_COOKIE_SOURCE || "").trim().toLowerCase();
+  const allowed = process.platform === "win32"
+    ? ["chrome", "edge", "firefox"]
+    : ["chrome", "firefox", "chromium"];
+  return allowed.includes(requested) ? requested : "";
 }
 
 // ====================== YT-DLP SETUP ======================
@@ -160,18 +167,12 @@ async function buildStrategies(url, outputTemplate, options = {}) {
     args: withFfmpeg([...base, "--extractor-args", "youtube:player_client=tv_embedded"])
   });
 
-  if (_getCookiesFile) {
-    try {
-      const cookiesFile = await _getCookiesFile();
-      if (cookiesFile && fs.existsSync(cookiesFile)) {
-        strategies.push({ label: "session cookies", args: withFfmpeg([...base, "--cookies", cookiesFile]) });
-      }
-    } catch { /* non-fatal */ }
-  }
-
-  const browsers = process.platform === "win32" ? ["chrome", "edge", "firefox"] : ["chrome", "firefox", "chromium"];
-  for (const browser of browsers) {
-    strategies.push({ label: `${browser} cookies`, args: withFfmpeg([...base, "--cookies-from-browser", browser]) });
+  const browserCookieSource = getOptInBrowserCookieSource();
+  if (browserCookieSource) {
+    strategies.push({
+      label: browserCookieSource + " cookies (explicit opt-in)",
+      args: withFfmpeg([...base, "--cookies-from-browser", browserCookieSource])
+    });
   }
 
   return strategies;
@@ -589,15 +590,9 @@ async function searchSpotifyYoutubeCandidates(track, limit = 8) {
 
     const attempts = [baseArgs];
 
-    if (_getCookiesFile) {
-      try {
-        const cookiesFile = await _getCookiesFile();
-        if (cookiesFile && fs.existsSync(cookiesFile)) {
-          attempts.push([...baseArgs, "--cookies", cookiesFile]);
-        }
-      } catch {
-        // Metadata search can still work without cookies.
-      }
+    const browserCookieSource = getOptInBrowserCookieSource();
+    if (browserCookieSource) {
+      attempts.push([...baseArgs, "--cookies-from-browser", browserCookieSource]);
     }
 
     for (const args of attempts) {
