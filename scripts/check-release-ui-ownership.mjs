@@ -87,7 +87,7 @@ const cssOwnershipBudgets = [
   ["src/features/player/player.css", 160 * 1024],
   ["src/features/shell/effects.css", 96 * 1024],
   ["src/shared/ui/view-ui.css", 16 * 1024],
-  ["src/styles/view-shell.css", 16 * 1024],
+  ["src/styles/view-shell.css", 36 * 1024],
   ["src/features/library/library.css", 20 * 1024],
   ["src/features/albums/albums.css", 36 * 1024],
   ["src/features/playlists/playlists.css", 32 * 1024],
@@ -147,6 +147,22 @@ for (const ownedImport of rendererFeatureStyles) {
   if (main.indexOf(statement) > perfImport) failures.push(`src/main.tsx: ${ownedImport} must load before performance.css`);
 }
 
+const workspaceCss = read("src/styles/view-shell.css");
+for (const requiredSelector of [
+  ".appShell",
+  ".sidebar",
+  ".pageTransition:not(.pageTransition-home)",
+  ".libraryPanelV025",
+  ".albumsPageV318",
+  ".playlistsPage",
+  ".coverStudioLayout",
+  ".downloadsLayoutV031",
+  ".analyticsStudioV339",
+  ".settingsPageV027"
+]) {
+  if (!workspaceCss.includes(requiredSelector)) failures.push(`src/styles/view-shell.css: shared workspace lost ${requiredSelector}`);
+}
+
 for (const forbiddenHomeSelector of [
   ".libraryPanelV025",
   ".albumsPageV318",
@@ -166,4 +182,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, feature CSS owners plus the shared non-Home shell are present and budgeted.`);
+console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, and the unified workspace skin is present and budgeted.`);
