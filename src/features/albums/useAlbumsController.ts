@@ -158,7 +158,7 @@ export function useAlbumsController({
     if (albumFolderImportBusy) return;
 
     if (!window.localitfy?.scanAlbumFolder) {
-      const message = "album folder import bridge missing � restart Localtify after replacing electron/preload.cjs and electron/main.cjs";
+      const message = "album folder import bridge missing — restart Localtify after replacing electron/preload.cjs and electron/main.cjs";
       setAlbumFolderImportMessage(message);
       setAlbumFolderImportProgress({ type: "error", mode, message });
       setStatusText?.("album import bridge missing");
