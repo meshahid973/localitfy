@@ -26,6 +26,7 @@ jobs:
       - name: Remove exact cross-file CSS shadows
         run: |
           node scripts/css-cross-file-dedup.mjs --write
+          node scripts/css-hygiene.mjs --write
           git diff --stat
       - name: Validate final repository shape
         run: |
