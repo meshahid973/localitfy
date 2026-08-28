@@ -7,41 +7,45 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
-const nonHomeViews = ["library", "liked", "albums", "playlists", "covers", "analytics", "downloads", "settings"];
+const pageRoots = [
+  ".libraryPanelV025",
+  ".albumsPageV318",
+  ".playlistsPage",
+  ".coverStudioLayout",
+  ".downloadsLayoutV031",
+  ".analyticsStudioV339",
+  ".settingsPageV027"
+];
 
-test("non-Home pages share one viewport/header policy", () => {
+test("all pages share one responsive workspace and sidebar", () => {
   const main = read("src/main.tsx");
   const css = read("src/styles/view-shell.css");
 
-  assert.equal(main.includes('import "./styles/view-shell.css";'), true, "shared view shell is not loaded");
-  assert.ok(main.indexOf('import "./styles/view-shell.css";') < main.indexOf('import "./features/shell/performance.css";'), "view shell must load before performance policy");
-  assert.equal(css.includes(".pageTransition-home"), false, "shared non-Home shell must not style Home");
+  assert.equal(main.includes('import "./styles/view-shell.css";'), true, "shared workspace is not loaded");
+  assert.ok(main.indexOf('import "./styles/view-shell.css";') < main.indexOf('import "./features/shell/performance.css";'), "workspace must load before performance policy");
 
-  for (const view of nonHomeViews) {
-    assert.equal(css.includes(`.pageTransition-${view}`), true, `${view} is missing from shared page shell`);
+  for (const marker of [
+    ".appShell",
+    ".sidebar",
+    ".navItem",
+    "--workspace-max: 1560px",
+    "grid-template-columns: clamp(218px",
+    ".pageTransition:not(.pageTransition-home)"
+  ]) {
+    assert.equal(css.includes(marker), true, `shared workspace lost ${marker}`);
+  }
+
+  for (const pageRoot of pageRoots) {
+    assert.equal(css.includes(pageRoot), true, `${pageRoot} is not normalized by the shared workspace`);
   }
 });
 
-test("shared page shell does not steal feature component ownership", () => {
+test("Home keeps its content ownership while the workspace owns cross-page chrome", () => {
+  const home = read("src/features/home/home.css");
   const css = read("src/styles/view-shell.css");
-  const forbiddenFeatureSelectors = [
-    ".libraryPanelV025",
-    ".albumsPageV318",
-    ".albumCardV318",
-    ".playlistsPage",
-    ".playlistTrackRow",
-    ".coverStudioLayout",
-    ".coverGalleryCardCleanOnly",
-    ".downloadsLayoutV031",
-    ".spotifyTrackItemV326",
-    ".analyticsStudioV339",
-    ".analyticsRecapCardV339",
-    ".settingsPageV027"
-  ];
 
-  for (const selector of forbiddenFeatureSelectors) {
-    assert.equal(css.includes(selector), false, `shared view shell must not own ${selector}`);
-  }
-
-  assert.ok(Buffer.byteLength(css) < 16 * 1024, "shared page shell exceeded its 16 KiB budget");
+  assert.equal(home.includes(".sidebar"), false, "Home must not create a second sidebar design");
+  assert.equal(home.includes("--sidebar-width:"), false, "Home must not force a different sidebar width");
+  assert.equal(css.includes(".pageTransition-home .homeJumpBack"), false, "workspace must not own Home feature internals");
+  assert.ok(Buffer.byteLength(css) < 36 * 1024, "shared workspace exceeded its 36 KiB ownership budget");
 });
