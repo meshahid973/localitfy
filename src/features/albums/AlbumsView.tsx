@@ -211,7 +211,7 @@ export default function AlbumsView(props: AlbumsViewProps) {
                               <div className="albumFolderPreviewCopyV309">
                                 <strong title={album.title}>{album.title}</strong>
                                 <small title={album.artist}>{album.artist}</small>
-                                <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` � ${album.duplicateCount} already added` : ""}</em>
+                                <em>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.duplicateCount ? ` · ${album.duplicateCount} already added` : ""}</em>
                                 {album.sourcePath ? <b title={album.sourcePath}>{album.sourcePath}</b> : null}
                                 {album.warnings?.length ? (
                                   <ul>
