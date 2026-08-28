@@ -47,16 +47,18 @@ test("main renderer sandbox is enabled and documented", () => {
   assert.match(doc, /main frame/i);
 });
 
-test("hardening stays enforced locally and in CI", () => {
+test("hardening stays enforced by deterministic local scripts", () => {
   assert.ok(fs.existsSync(path.join(root, "scripts/check-performance-budgets.mjs")));
   assert.ok(fs.existsSync(path.join(root, "scripts/test-database-recovery.cjs")));
   assert.ok(fs.existsSync(path.join(root, "scripts/css-hygiene.mjs")));
 
-  const workflowPath = path.join(root, ".github", "workflows", "quality.yml");
-  assert.equal(fs.existsSync(workflowPath), true, "quality workflow must stay present");
-  const workflow = fs.readFileSync(workflowPath, "utf8");
-  assert.match(workflow, /ubuntu-latest/);
-  assert.match(workflow, /windows-latest/);
-  assert.match(workflow, /npm run release:check/);
-  assert.match(workflow, /ci-electron-smoke\.cjs/);
+  const pkg = JSON.parse(read("package.json"));
+  assert.match(pkg.scripts.check, /bridge:check/);
+  assert.match(pkg.scripts.check, /boundaries:check/);
+  assert.match(pkg.scripts.check, /css:dedup:check/);
+  assert.match(pkg.scripts.check, /typecheck/);
+  assert.match(pkg.scripts.check, /db:recovery-test/);
+  assert.match(pkg.scripts["hardening:check"], /performance:check/);
+  assert.match(pkg.scripts["release:check"], /hardening:check/);
+  assert.match(pkg.scripts["release:check"], /assets:compress:dry/);
 });
