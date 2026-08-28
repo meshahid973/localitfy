@@ -11,7 +11,6 @@ import "./features/playlists/playlists.css";
 import "./features/covers/covers.css";
 import "./features/downloads/downloads.css";
 import "./features/analytics/analytics.css";
-import "./features/home/home-polish.css";
 
 /* Performance overrides intentionally stay last in the renderer cascade. */
 import "./features/shell/performance.css";
