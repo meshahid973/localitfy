@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,6 +34,58 @@ def move_text(src: str, dst: str, transform=None) -> None:
     src_path.unlink()
 
 
+def safe_css_split(text: str, target_bytes: int) -> int:
+    depth = 0
+    in_comment = False
+    quote = None
+    escaped = False
+    candidates = []
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        nxt = text[i + 1] if i + 1 < len(text) else ""
+        if in_comment:
+            if ch == "*" and nxt == "/":
+                in_comment = False
+                i += 2
+                continue
+            i += 1
+            continue
+        if quote:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == quote:
+                quote = None
+            i += 1
+            continue
+        if ch == "/" and nxt == "*":
+            in_comment = True
+            i += 2
+            continue
+        if ch in ('"', "'"):
+            quote = ch
+            i += 1
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth < 0:
+                raise RuntimeError("settings.css has an unmatched closing brace")
+            if depth == 0:
+                boundary = i + 1
+                candidates.append((len(text[:boundary].encode("utf-8")), boundary))
+        i += 1
+    if depth != 0 or in_comment or quote:
+        raise RuntimeError("settings.css is not balanced enough to split safely")
+    eligible = [item for item in candidates if 128 * 1024 <= item[0] <= 152 * 1024]
+    if not eligible:
+        raise RuntimeError("no safe top-level CSS boundary found between 128 and 152 KiB")
+    return min(eligible, key=lambda item: abs(item[0] - target_bytes))[1]
+
+
 # Move real UI implementations under their feature owners.
 move_text(
     "src/Onboarding.tsx",
@@ -64,19 +115,11 @@ home_css = replace_once(home_css, 'brightness(calc(var(--home-hero-cover-brightn
 home_css = replace_once(home_css, 'saturate(calc(var(--home-hero-cover-saturation, 1.04) * 0.86))', 'saturate(var(--home-hero-cover-saturation, 1.04))', "Home saturation")
 write("src/features/home/home.css", home_css)
 
-# Preserve the Settings cascade exactly while separating later versioned polish.
-# Version comments are top-level ownership boundaries in this historical file.
+# Preserve the Settings cascade exactly while splitting only at a complete top-level CSS block.
 settings = read("src/features/settings/settings.css")
-markers = []
-for match in re.finditer(r"(?m)^/\* localtify\s+v", settings, flags=re.IGNORECASE):
-    byte_offset = len(settings[:match.start()].encode("utf-8"))
-    if 100 * 1024 <= byte_offset <= 148 * 1024:
-        markers.append((byte_offset, match.start()))
-if not markers:
-    raise RuntimeError("no safe Localtify version boundary found between 100 and 148 KiB")
-_, split_at = max(markers)
+split_at = safe_css_split(settings, 144 * 1024)
 base = settings[:split_at].rstrip() + "\n"
-polish = "/* Settings later-version polish and declutter overrides. Imported immediately after settings.css. */\n\n" + settings[split_at:].lstrip()
+polish = "/* Settings later-stage polish and declutter overrides. Imported immediately after settings.css. */\n\n" + settings[split_at:].lstrip()
 base_bytes = len(base.encode("utf-8"))
 polish_bytes = len(polish.encode("utf-8"))
 if base_bytes > 160 * 1024:
