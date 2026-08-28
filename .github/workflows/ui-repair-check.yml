@@ -25,4 +25,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run release:check
+      - name: Validate repository without temporary workflow
+        run: |
+          rm -f .github/workflows/ui-repair-check.yml
+          npm run release:check
