@@ -1,4 +1,4 @@
-﻿// localtify 0.3.9 V365 â€” background library analytics worker.
+// localtify 0.3.9 V365 — background library analytics worker.
 // Heavy library reductions live here so the renderer can keep scrolling/playback smooth.
 
 type LocaltifyWorkerSong = {
@@ -22,7 +22,7 @@ type LocaltifyWorkerPayload = {
   songs?: LocaltifyWorkerSong[];
   likedCount?: number;
   playlists?: LocaltifyWorkerPlaylist[];
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
   isShuffle?: boolean;
   repeatMode?: string;
   downloadResultCount?: number;
@@ -220,5 +220,3 @@ self.onmessage = (event: MessageEvent<LocaltifyWorkerPayload>) => {
 };
 
 export {};
-
-
