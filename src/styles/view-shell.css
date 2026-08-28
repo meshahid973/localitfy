@@ -1,0 +1,331 @@
+/* Shared shell for non-Home views.
+   Feature stylesheets own their cards, grids and internal component geometry. */
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) {
+  --view-shell-max-width: 1440px;
+  --view-shell-border: color-mix(in srgb, var(--lt-border) 72%, transparent);
+  --view-shell-border-strong: color-mix(in srgb, var(--lt-border-strong) 74%, transparent);
+  --view-shell-surface: color-mix(in srgb, var(--lt-bg-elevated) 94%, var(--lt-accent) 6%);
+  --view-shell-surface-soft: color-mix(in srgb, var(--lt-bg-elevated) 97%, var(--lt-accent) 3%);
+  --view-shell-text-muted: color-mix(in srgb, var(--lt-text) 62%, transparent);
+
+  min-width: 0;
+  padding: 0 clamp(16px, 2.1vw, 34px) 42px;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 78% -12%, rgba(var(--lt-accent-rgb), 0.055), transparent 34%),
+    linear-gradient(180deg, color-mix(in srgb, var(--lt-bg) 96%, black 4%), var(--lt-bg));
+}
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) > .headerBar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  width: min(var(--view-shell-max-width), 100%);
+  min-height: 70px;
+  margin: 0 auto 15px;
+  padding: 17px 2px 11px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--view-shell-border);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--lt-bg) 96%, transparent) 0%,
+    color-mix(in srgb, var(--lt-bg) 91%, transparent) 76%,
+    transparent 100%
+  );
+  backdrop-filter: blur(14px) saturate(112%);
+  -webkit-backdrop-filter: blur(14px) saturate(112%);
+}
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) > .headerBar .headerText {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) > .headerBar .headerText > .eyebrow {
+  margin: 0;
+  color: color-mix(in srgb, var(--lt-accent) 72%, var(--lt-text-muted));
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) > .headerBar .headerText > h2 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--lt-text);
+  font-size: clamp(24px, 2.1vw, 32px);
+  font-weight: 690;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) > .headerBar .headerTools {
+  min-width: 0;
+  flex: 0 1 340px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) > .headerBar .searchEasterWrap {
+  width: min(320px, 100%);
+  min-width: 0;
+}
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) > .headerBar .search {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--view-shell-border);
+  border-radius: 10px;
+  outline: none;
+  color: var(--lt-text);
+  background: color-mix(in srgb, var(--lt-bg-elevated) 91%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  font: inherit;
+  font-size: 9px;
+  transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) > .headerBar .search::placeholder {
+  color: var(--lt-text-faint);
+}
+
+.content:has(> .headerBar + .pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+)) > .headerBar .search:focus {
+  border-color: color-mix(in srgb, var(--lt-accent) 48%, transparent);
+  background: color-mix(in srgb, var(--lt-bg-elevated) 96%, black 4%);
+  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), 0.055);
+}
+
+.pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+) {
+  width: min(var(--view-shell-max-width, 1440px), 100%);
+  min-width: 0;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+) .panel {
+  border-color: var(--view-shell-border, var(--lt-border));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.017), transparent 44%),
+    var(--view-shell-surface, var(--lt-surface));
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.16);
+}
+
+.pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+) :is(input, textarea, select) {
+  color-scheme: dark;
+}
+
+.pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+) :is(button, input, textarea, select, a):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--lt-accent) 72%, white 10%);
+  outline-offset: 2px;
+}
+
+.pageTransition:is(
+  .pageTransition-library,
+  .pageTransition-liked,
+  .pageTransition-albums,
+  .pageTransition-playlists,
+  .pageTransition-covers,
+  .pageTransition-analytics,
+  .pageTransition-downloads,
+  .pageTransition-settings
+) :is(.softText, .panelHead p:not(.eyebrow)) {
+  color: var(--view-shell-text-muted, var(--lt-text-muted));
+}
+
+@media (max-width: 760px) {
+  .content:has(> .headerBar + .pageTransition:is(
+    .pageTransition-library,
+    .pageTransition-liked,
+    .pageTransition-albums,
+    .pageTransition-playlists,
+    .pageTransition-covers,
+    .pageTransition-analytics,
+    .pageTransition-downloads,
+    .pageTransition-settings
+  )) {
+    padding-inline: 12px;
+    padding-bottom: 28px;
+  }
+
+  .content:has(> .headerBar + .pageTransition:is(
+    .pageTransition-library,
+    .pageTransition-liked,
+    .pageTransition-albums,
+    .pageTransition-playlists,
+    .pageTransition-covers,
+    .pageTransition-analytics,
+    .pageTransition-downloads,
+    .pageTransition-settings
+  )) > .headerBar {
+    position: relative;
+    min-height: 0;
+    margin-bottom: 12px;
+    padding: 14px 1px 10px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .content:has(> .headerBar + .pageTransition:is(
+    .pageTransition-library,
+    .pageTransition-liked,
+    .pageTransition-albums,
+    .pageTransition-playlists,
+    .pageTransition-covers,
+    .pageTransition-analytics,
+    .pageTransition-downloads,
+    .pageTransition-settings
+  )) > .headerBar .headerTools,
+  .content:has(> .headerBar + .pageTransition:is(
+    .pageTransition-library,
+    .pageTransition-liked,
+    .pageTransition-albums,
+    .pageTransition-playlists,
+    .pageTransition-covers,
+    .pageTransition-analytics,
+    .pageTransition-downloads,
+    .pageTransition-settings
+  )) > .headerBar .searchEasterWrap {
+    width: 100%;
+    flex-basis: auto;
+  }
+}
