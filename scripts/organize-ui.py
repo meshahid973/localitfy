@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -57,24 +58,31 @@ shell = read("src/features/shell/AppShell.tsx")
 shell = replace_once(shell, 'import Onboarding from "../../Onboarding";', 'import Onboarding from "../onboarding/Onboarding";', "AppShell onboarding import")
 write("src/features/shell/AppShell.tsx", shell)
 
-# Fix experimental CSS calc multiplication: darkness is already owned by overlays.
+# Avoid unsupported CSS multiplication; the Home overlays own image dimming.
 home_css = read("src/features/home/home.css")
 home_css = replace_once(home_css, 'brightness(calc(var(--home-hero-cover-brightness, 1) * 0.72))', 'brightness(var(--home-hero-cover-brightness, 1))', "Home brightness")
 home_css = replace_once(home_css, 'saturate(calc(var(--home-hero-cover-saturation, 1.04) * 0.86))', 'saturate(var(--home-hero-cover-saturation, 1.04))', "Home saturation")
 write("src/features/home/home.css", home_css)
 
-# Preserve the Settings cascade exactly while separating late polish/declutter overrides.
+# Preserve the Settings cascade exactly while separating later versioned polish.
+# Version comments are top-level ownership boundaries in this historical file.
 settings = read("src/features/settings/settings.css")
-marker = "/* localtify v487 — settings light mode contrast */"
-split_at = settings.find(marker)
-if split_at < 0:
-    raise RuntimeError("settings polish marker not found")
+markers = []
+for match in re.finditer(r"(?m)^/\* localtify\s+v", settings, flags=re.IGNORECASE):
+    byte_offset = len(settings[:match.start()].encode("utf-8"))
+    if 100 * 1024 <= byte_offset <= 148 * 1024:
+        markers.append((byte_offset, match.start()))
+if not markers:
+    raise RuntimeError("no safe Localtify version boundary found between 100 and 148 KiB")
+_, split_at = max(markers)
 base = settings[:split_at].rstrip() + "\n"
-polish = "/* Settings late-stage polish and declutter overrides. Imported immediately after settings.css. */\n\n" + settings[split_at:].lstrip()
-if len(base.encode("utf-8")) > 160 * 1024:
-    raise RuntimeError(f"settings.css base remains too large: {len(base.encode('utf-8'))} bytes")
-if len(polish.encode("utf-8")) > 112 * 1024:
-    raise RuntimeError(f"settings-polish.css too large: {len(polish.encode('utf-8'))} bytes")
+polish = "/* Settings later-version polish and declutter overrides. Imported immediately after settings.css. */\n\n" + settings[split_at:].lstrip()
+base_bytes = len(base.encode("utf-8"))
+polish_bytes = len(polish.encode("utf-8"))
+if base_bytes > 160 * 1024:
+    raise RuntimeError(f"settings.css base remains too large: {base_bytes} bytes")
+if polish_bytes > 112 * 1024:
+    raise RuntimeError(f"settings-polish.css too large: {polish_bytes} bytes")
 write("src/features/settings/settings.css", base)
 write("src/features/settings/settings-polish.css", polish)
 
@@ -93,6 +101,6 @@ ownership = replace_once(
 )
 write("scripts/check-release-ui-ownership.mjs", ownership)
 
-print(f"settings.css: {len(base.encode('utf-8'))} bytes")
-print(f"settings-polish.css: {len(polish.encode('utf-8'))} bytes")
+print(f"settings.css: {base_bytes} bytes")
+print(f"settings-polish.css: {polish_bytes} bytes")
 print("UI ownership migration prepared")
