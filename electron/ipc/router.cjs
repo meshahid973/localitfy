@@ -22,6 +22,16 @@ function createIpcRouter(ipcMain, options = {}) {
     return normalizedChannel;
   }
 
+  // The renderer bridge exposes sendPlayerCommand as an invoke call. Keep the
+  // forwarding seam in the router so it cannot disappear when main.cjs is
+  // decomposed into smaller runtime modules.
+  handle("localitfy:player-command", async (event, command = {}) => {
+    if (!command || typeof command !== "object") return false;
+    if (!event?.sender || typeof event.sender.send !== "function") return false;
+    event.sender.send("player:command", command);
+    return true;
+  });
+
   return Object.freeze({
     handle,
     listChannels: () => Array.from(channels)
