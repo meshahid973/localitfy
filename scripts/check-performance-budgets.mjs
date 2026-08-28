@@ -9,11 +9,12 @@ const KiB = 1024;
 const MiB = 1024 * KiB;
 
 const sourceBudgets = [
-  ["src/App.tsx", 320 * KiB],
-  ["src/App.css", 316 * KiB],
-  ["src/features/shell/app-core.css", 180 * KiB],
-  ["electron/main.cjs", 184 * KiB],
-  ["src/features/shell/AppShell.tsx", 32 * KiB]
+  ["src/App.tsx", 314 * KiB],
+  ["src/App.css", 246 * KiB],
+  ["src/features/shell/app-core.css", 112 * KiB],
+  ["electron/main.cjs", 156 * KiB],
+  ["electron/runtime/media-server.cjs", 20 * KiB],
+  ["src/features/shell/AppShell.tsx", 24 * KiB]
 ];
 
 const failures = [];
