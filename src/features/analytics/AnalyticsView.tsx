@@ -2,7 +2,6 @@ import type { CSSProperties } from "react";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
 import { prettyTitle } from "../search/search.utils";
-import "./analytics.css";
 
 export type AnalyticsViewProps = {
   analyticsRecapCards: any;
