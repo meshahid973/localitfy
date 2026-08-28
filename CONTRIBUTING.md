@@ -1,4 +1,4 @@
-﻿# Contributing to localtify
+# Contributing to localtify
 
 <p align="center">
   <strong>Thanks for wanting to help localtify.</strong>
@@ -22,9 +22,7 @@ localtify is still growing, so every helpful contribution matters.
 
 You do not need to be a perfect developer to help. Small fixes, bug reports, UI polish, better wording, screenshots, and documentation improvements are all useful.
 
-The main goal is simple.
-
-Make a clear change, test it, and explain what you did.
+The main goal is simple: make a clear change, test it locally, and explain what you did.
 
 ---
 
@@ -40,21 +38,9 @@ Make a clear change, test it, and explain what you did.
 | Styling     | CSS              |
 | Updates     | electron-builder |
 
-The public app name is:
+The public app name is `localtify`. Some internal names still use the older spelling `localitfy` for compatibility.
 
-```txt
-localtify
-```
-
-Some internal names still use the older spelling:
-
-```txt
-localitfy
-```
-
-That spelling is kept for compatibility. Please do not rename it unless there is a proper migration plan.
-
-Important internal names:
+Important compatibility names:
 
 ```txt
 window.localitfy
@@ -62,56 +48,58 @@ localitfy:* IPC channels
 com.meshahid973.localitfy
 ```
 
-Changing these randomly can break existing installs, saved settings, app data, updates, or the preload bridge.
+Do not rename those without a proper migration. Existing installs, saved settings, user data, updates, and the preload bridge depend on them.
 
 ---
 
 ## Quick start
 
-### 1. Fork the repo
-
-Click **Fork** on GitHub.
-
-### 2. Clone your fork
+### 1. Clone your fork
 
 ```bash
 git clone https://github.com/meshahid973/localitfy.git
 cd localitfy
 ```
 
-### 3. Install dependencies
+### 2. Install dependencies
+
+For a clean checkout, prefer the lockfile-exact install:
 
 ```bash
-npm install
+npm ci
 ```
 
-### 4. Create your local environment file
+Use `npm install` only when you intentionally need to update dependency metadata.
 
-On Windows PowerShell:
+### 3. Create your local environment file
+
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-On macOS or Linux:
+macOS or Linux:
 
 ```bash
 cp .env.example .env
 ```
 
-For normal development, you can leave most values empty.
+For normal development, most optional values may stay empty.
 
-### 5. Start the app
+### 4. Start the app
 
 ```bash
 npm run dev
 ```
 
-### 6. Build before opening a pull request
+### 5. Run the complete local gate before opening a pull request
 
 ```bash
-npm run build
+npm run release:check
 ```
+
+`release:check` is the canonical local validation gate. It covers the repository checks, tests, TypeScript/build validation, database recovery, hardening checks, CSS ownership/dedup checks, and performance budgets that are available for the current platform.
 
 ---
 
@@ -134,68 +122,37 @@ docs/update-readme
 refactor/player-css
 ```
 
-Try to keep your pull request focused on one thing. A small clean change is much easier to review than one huge pull request that edits the whole app.
+Keep changes focused when possible. For larger architecture repairs, preserve behavior first and split ownership along existing feature boundaries rather than creating compatibility copies.
 
 ---
 
-## Good first contributions
+## CSS ownership
 
-If you are new, these are good places to start.
+Static "unused selector" analysis is advisory only. Localtify creates classes dynamically at runtime, so do not mass-delete selectors just because a static scanner cannot see them.
 
-<table>
-  <tr>
-    <td><strong>UI fixes</strong></td>
-    <td>Fix spacing, alignment, button states, hover states, or empty screens.</td>
-  </tr>
-  <tr>
-    <td><strong>Docs</strong></td>
-    <td>Improve README text, setup steps, screenshots, or wording.</td>
-  </tr>
-  <tr>
-    <td><strong>Bug reports</strong></td>
-    <td>Report crashes, broken layouts, confusing behavior, or missing details.</td>
-  </tr>
-  <tr>
-    <td><strong>Accessibility</strong></td>
-    <td>Improve labels, focus states, keyboard support, or contrast.</td>
-  </tr>
-  <tr>
-    <td><strong>CSS cleanup</strong></td>
-    <td>Move styles to the right file and remove old patchy rules.</td>
-  </tr>
-</table>
+Move styles to the feature that owns the UI and preserve cascade/import order while doing so.
 
----
+| File / area | Primary ownership |
+| --- | --- |
+| `src/features/shell/app-core.css` | shell, sidebar, titlebar, shared frame layout |
+| `src/App.css` | legacy/shared app-level rules not yet migrated |
+| `src/features/home/home.css` | Home only |
+| `src/features/player/player.css` | player controls and player surfaces |
+| `src/features/settings/settings.css` | Settings UI |
+| `src/features/settings/themes.css` | theme variables/mappings |
+| `src/features/shell/motion.css` | shared motion policy |
+| `src/features/shell/effects.css` | shared visual effects |
+| `src/features/onboarding/onboarding.css` | onboarding |
 
-## CSS guide
+Library, Albums, Playlists, Covers, Downloads, and other feature UI should move toward their own feature-owned styles rather than accumulating new rules in `App.css` or `home.css`.
 
-localtify has many CSS files. Please edit the file that owns the thing you are fixing.
+Run the CSS checks after ownership changes:
 
-| File              | What it owns                                         |
-| ----------------- | ---------------------------------------------------- |
-| `app-core.css`    | App shell, sidebar, titlebar, layout, update popup   |
-| `App.css`         | Older shared app level styles                        |
-| `home.css`        | Home page, library, albums, playlists, song cards    |
-| `player.css`      | Bottom player, progress bar, volume, player controls |
-| `settings.css`    | Settings page and settings cards                     |
-| `themes.css`      | Theme variables and theme mappings                   |
-| `motion.css`      | Animations and transitions                           |
-| `effects.css`     | Small visual effects and decorative effects          |
-| `mini-player.css` | Detached mini-player window                          |
-
-Simple rule:
-
-| If you are fixing | Edit this first   |
-| ----------------- | ----------------- |
-| Player issue      | `player.css`      |
-| Settings issue    | `settings.css`    |
-| Home page issue   | `home.css`        |
-| Album page issue  | `home.css`        |
-| Theme issue       | `themes.css`      |
-| Animation issue   | `motion.css`      |
-| Mini-player issue | `mini-player.css` |
-
-Please do not add random fixes at the bottom of unrelated CSS files. It makes future bugs harder to fix.
+```bash
+npm run css:dedup:check
+npm run boundaries:check
+npm run performance:check
+```
 
 ---
 
@@ -203,10 +160,11 @@ Please do not add random fixes at the bottom of unrelated CSS files. It makes fu
 
 Be careful with anything that touches user data.
 
-Important areas:
+Important areas include:
 
 ```txt
 electron/db.cjs
+electron/db/
 playlist saving
 settings saving
 song metadata
@@ -215,34 +173,46 @@ migrations
 backups
 ```
 
-Users should not lose their library, playlists, covers, or settings after an update.
+Users should not lose their library, playlists, covers, or settings after an update. If a change touches the database, explain what changed, why it changed, whether a migration is required, and how old data was tested.
 
-If your change touches the database, explain:
+Do not rename the app-data folder or database paths without a migration.
+
+---
+
+## Electron and preload changes
+
+Keep privileged work behind the preload bridge and centralized trusted IPC router. Do not add ad-hoc `ipcMain.handle` ownership in unrelated modules.
+
+When changing Electron runtime code, preserve these invariants:
 
 ```txt
-What changed
-Why it changed
-Whether it needs a migration
-How you tested old user data
+nodeIntegration: false
+contextIsolation: true
+sandbox: true
+webSecurity: true
+webviewTag: false
+renderer navigation restricted to Localtify-owned origins
+browser permissions denied by default
+privileged IPC restricted to the active Localtify main frame
 ```
 
-Do not change the app data folder name unless it is part of a proper migration.
+Do not silently add browser-cookie extraction or persist browser cookies for download features.
 
 ---
 
 ## Pull request checklist
 
-Before opening a pull request, please check this:
+Before opening a pull request:
 
-* `npm run dev` starts the app
-* `npm run build` works
-* no private files are committed
-* UI changes include screenshots if possible
-* database changes are explained clearly
-* settings changes are explained clearly
-* updater, preload, IPC, and app data changes are mentioned clearly
+* `npm run release:check` passes locally
+* `npm run dev` starts the app for runtime/UI changes
+* no private/generated files are committed
+* UI changes include screenshots when useful
+* database/settings/updater/preload/IPC/app-data changes are called out clearly
+* dynamic CSS was not deleted solely because a static selector scan said it was unused
+* compatibility names and user-data paths were preserved
 
-Use this format in your pull request:
+Use this format:
 
 ```txt
 What changed:
@@ -252,13 +222,9 @@ Screenshots:
 Anything risky:
 ```
 
-If you are new, do not worry about writing a perfect pull request. Just explain your change in normal words.
-
 ---
 
 ## Files you should not commit
-
-Do not commit private files, generated files, or local user data.
 
 ```txt
 .env
@@ -285,71 +251,37 @@ Use `.env.example` for public example values.
 
 Please avoid:
 
-* renaming `localitfy` internal APIs without discussion
+* renaming `localitfy` compatibility APIs without a migration
 * changing IPC names randomly
-* removing features without asking
-* rewriting huge parts of the app in one pull request
-* mixing unrelated fixes together
-* adding heavy animations that make the app lag
-* committing private keys, tokens, logs, or local database files
+* bypassing the trusted IPC router
+* removing features as part of an unrelated refactor
+* creating duplicate compatibility owners instead of moving ownership
+* adding expensive always-on renderer work
+* destructive static CSS pruning
+* committing private keys, tokens, logs, databases, downloaded media, or generated releases
 
 ---
 
 ## Testing tips
 
-When testing UI changes, check these pages:
+For UI changes, check Home, Library, Albums, Playlists, Covers, Downloads, Settings, the bottom player, and sidebar states.
 
-```txt
-Home
-Library
-Albums
-Downloads
-Settings
-Bottom player
-Sidebar collapsed
-Sidebar expanded
+For playback changes, test Play, Pause, Next, Previous, Shuffle, Repeat, Queue, Volume, background/focus recovery, and media keys where supported.
+
+For import/download changes, start with a small file or small batch, then check the resulting database/library rows and cover metadata.
+
+For Electron changes, also run:
+
+```bash
+npm run hardening:check
+npm run bridge:check
+npm run db:recovery-test
 ```
-
-If your change affects playback, test:
-
-```txt
-Play
-Pause
-Next
-Previous
-Shuffle
-Repeat
-Queue
-Volume
-```
-
-If your change affects imports or downloads, test with a small file first.
 
 ---
 
 ## Reporting bugs
 
-A good bug report includes:
-
-```txt
-What you expected to happen
-What actually happened
-Steps to reproduce it
-Screenshots or screen recordings
-Error messages from the terminal
-Your operating system
-Your localtify version
-```
-
-Screenshots help a lot. Terminal logs also help a lot.
-
----
-
-## Need help?
-
-Open an issue if you are stuck or unsure.
-
-You can also open a pull request even if your change is not perfect yet. Just say what you need help with.
+A useful bug report includes what you expected, what happened, steps to reproduce, screenshots or recordings, terminal errors, operating system, and localtify version.
 
 Thanks for helping localtify improve.
-
