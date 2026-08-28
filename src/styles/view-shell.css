@@ -1,7 +1,7 @@
 /* Shared shell for non-Home views.
    Feature stylesheets own their cards, grids and internal component geometry. */
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -14,8 +14,8 @@
   --view-shell-max-width: 1440px;
   --view-shell-border: color-mix(in srgb, var(--lt-border) 72%, transparent);
   --view-shell-border-strong: color-mix(in srgb, var(--lt-border-strong) 74%, transparent);
-  --view-shell-surface: color-mix(in srgb, var(--lt-bg-elevated) 94%, var(--lt-accent) 6%);
-  --view-shell-surface-soft: color-mix(in srgb, var(--lt-bg-elevated) 97%, var(--lt-accent) 3%);
+  --view-shell-surface: color-mix(in srgb, var(--lt-surface) 94%, var(--lt-accent) 6%);
+  --view-shell-surface-soft: color-mix(in srgb, var(--lt-surface) 97%, var(--lt-accent) 3%);
   --view-shell-text-muted: color-mix(in srgb, var(--lt-text) 62%, transparent);
 
   min-width: 0;
@@ -26,7 +26,7 @@
     linear-gradient(180deg, color-mix(in srgb, var(--lt-bg) 96%, black 4%), var(--lt-bg));
 }
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -58,7 +58,7 @@
   -webkit-backdrop-filter: blur(14px) saturate(112%);
 }
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -73,7 +73,7 @@
   gap: 4px;
 }
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -91,7 +91,7 @@
   text-transform: uppercase;
 }
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -112,7 +112,7 @@
   white-space: nowrap;
 }
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -129,7 +129,7 @@
   justify-content: flex-end;
 }
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -143,7 +143,7 @@
   min-width: 0;
 }
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -161,14 +161,14 @@
   border-radius: 10px;
   outline: none;
   color: var(--lt-text);
-  background: color-mix(in srgb, var(--lt-bg-elevated) 91%, transparent);
+  background: color-mix(in srgb, var(--lt-surface) 91%, transparent);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
   font: inherit;
   font-size: 9px;
   transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
 }
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -181,7 +181,7 @@
   color: var(--lt-text-faint);
 }
 
-.content:has(> .headerBar + .pageTransition:is(
+.content:has(> .pageTransition:is(
   .pageTransition-library,
   .pageTransition-liked,
   .pageTransition-albums,
@@ -192,7 +192,7 @@
   .pageTransition-settings
 )) > .headerBar .search:focus {
   border-color: color-mix(in srgb, var(--lt-accent) 48%, transparent);
-  background: color-mix(in srgb, var(--lt-bg-elevated) 96%, black 4%);
+  background: color-mix(in srgb, var(--lt-surface) 96%, black 4%);
   box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), 0.055);
 }
 
@@ -270,7 +270,7 @@
 }
 
 @media (max-width: 760px) {
-  .content:has(> .headerBar + .pageTransition:is(
+  .content:has(> .pageTransition:is(
     .pageTransition-library,
     .pageTransition-liked,
     .pageTransition-albums,
@@ -284,7 +284,7 @@
     padding-bottom: 28px;
   }
 
-  .content:has(> .headerBar + .pageTransition:is(
+  .content:has(> .pageTransition:is(
     .pageTransition-library,
     .pageTransition-liked,
     .pageTransition-albums,
@@ -305,7 +305,7 @@
     -webkit-backdrop-filter: none;
   }
 
-  .content:has(> .headerBar + .pageTransition:is(
+  .content:has(> .pageTransition:is(
     .pageTransition-library,
     .pageTransition-liked,
     .pageTransition-albums,
@@ -315,7 +315,7 @@
     .pageTransition-downloads,
     .pageTransition-settings
   )) > .headerBar .headerTools,
-  .content:has(> .headerBar + .pageTransition:is(
+  .content:has(> .pageTransition:is(
     .pageTransition-library,
     .pageTransition-liked,
     .pageTransition-albums,
