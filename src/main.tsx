@@ -12,6 +12,9 @@ import "./features/covers/covers.css";
 import "./features/downloads/downloads.css";
 import "./features/analytics/analytics.css";
 
+/* Shared non-Home viewport/header policy. Feature CSS still owns page internals. */
+import "./styles/view-shell.css";
+
 /* Performance overrides intentionally stay last in the renderer cascade. */
 import "./features/shell/performance.css";
 
