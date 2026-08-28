@@ -57,7 +57,6 @@ function getOptInBrowserCookieSource() {
   return allowed.includes(requested) ? requested : "";
 }
 
-// ====================== YT-DLP SETUP ======================
 async function getYtDlp() {
   if (_ytDlpBinaryPath && fs.existsSync(_ytDlpBinaryPath)) return _ytDlpBinaryPath;
   const resolved = await ensureYtDlpBinary({ userDataPath: _userDataPath });
@@ -65,7 +64,6 @@ async function getYtDlp() {
   return _ytDlpBinaryPath;
 }
 
-// ====================== DOWNLOAD OPTIONS ======================
 function safeDownloadFormat(value) {
   const next = String(value || "mp3").toLowerCase();
   return ["mp3", "flac", "wav", "m4a"].includes(next) ? next : "mp3";
@@ -90,7 +88,6 @@ function cleanDownloadedTitle(name) {
     .trim() || "audio";
 }
 
-// ====================== SPEED ARGS ======================
 function getBaseArgs(url, outputTemplate, options = {}) {
   const format = safeDownloadFormat(options.format);
   const quality = safeDownloadQuality(options.quality);
@@ -150,7 +147,6 @@ async function buildStrategies(url, outputTemplate, options = {}) {
   return strategies;
 }
 
-// ====================== PROGRESS PARSING ======================
 function formatSpeed(raw) {
   if (!raw) return null;
   if (typeof raw === "string") return raw.replace("MiB/s", " MB/s").replace("KiB/s", " KB/s").replace("GiB/s", " GB/s").trim();
@@ -180,8 +176,8 @@ function buildProgressPayload(job, p) {
   const eta = p?.eta ?? null;
   let message = "Downloading audio...";
   if (percent >= 88) message = `Converting to ${String(job.format || "mp3").toUpperCase()}...`;
-  if (speed) message += `  â€¢  ${speed}`;
-  if (eta && eta !== "00:00") message += `  â€¢  ETA ${eta}`;
+  if (speed) message += `  •  ${speed}`;
+  if (eta && eta !== "00:00") message += `  •  ETA ${eta}`;
 
   return {
     type: "download",
@@ -204,7 +200,6 @@ function buildProgressPayload(job, p) {
   };
 }
 
-// ====================== RUN YT-DLP ======================
 function parseYtDlpProgressLine(line) {
   const text = String(line || "");
   const percentMatch = text.match(/\[download\]\s+(\d+(?:\.\d+)?)%/i);
@@ -252,7 +247,6 @@ function runYtDlp(ytDlp, args, onProgress, job) {
   });
 }
 
-// ====================== YOUTUBE DOWNLOAD ======================
 async function downloadYouTube(url, destinationDirectory, onProgress, options = {}, job = {}) {
   try {
     fs.mkdirSync(destinationDirectory, { recursive: true });
@@ -332,7 +326,6 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
   }
 }
 
-// ====================== CONVERSION ======================
 function parseFfmpegTimestampSeconds(value = "") {
   const match = String(value || "").match(/(\d{1,3}):(\d{2}):(\d{2}(?:\.\d+)?)/);
   if (!match) return 0;
@@ -404,20 +397,12 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
   });
 }
 
-// ====================== SPOTIFY DOWNLOAD ======================
-// Spotify downloads use Spotify metadata as identity, then choose a safe
-// YouTube audio candidate. Never use ytsearch1 first-result downloading here;
-// that is what caused same-name songs to import as the wrong audio.
-
 function normalizeSpotifyMatchText(value = "") {
   return String(value || "")
     .toLowerCase()
+    .replace(/[‘’'`´]/g, "")
     .replace(/&/g, " and ")
-    .replace(/[''`Â´]/g, "")
     .replace(/\b(feat|ft|featuring)\.?\b/g, " ")
-    // Keep the words inside brackets. Removing the whole bracket made real
-    // Spotify identities like "slowed", "remix", or "with Future" look absent,
-    // then the safe matcher rejected good YouTube results.
     .replace(/[()\[\]{}]/g, " ")
     .replace(/[^a-z0-9]+/g, " ")
     .replace(/\s+/g, " ")
@@ -570,7 +555,6 @@ function parseYtDlpJsonLines(raw) {
     if (Array.isArray(parsed?.entries)) return parsed.entries.filter(Boolean);
     if (parsed && typeof parsed === "object") return [parsed];
   } catch {
-    // yt-dlp --dump-json often writes one JSON object per line.
   }
 
   for (const line of text.split(/\r?\n/)) {
@@ -582,7 +566,6 @@ function parseYtDlpJsonLines(raw) {
       if (Array.isArray(parsed?.entries)) candidates.push(...parsed.entries.filter(Boolean));
       else if (parsed && typeof parsed === "object") candidates.push(parsed);
     } catch {
-      // Ignore non-JSON logging lines.
     }
   }
 
@@ -789,9 +772,6 @@ async function findSpotifyYoutubeMatch(track = {}, onProgress, job = {}) {
   if (!best || !best.matchOk) {
     const fallbackUrl = buildSpotifyDirectSearchFallbackUrl(track, best);
 
-    // Public Spotify fallback can have weak/missing artist data. If the safe
-    // metadata pre-check cannot find candidates, do not instantly fail the
-    // selected track. Let yt-dlp perform one direct search/download attempt.
     if (fallbackUrl) {
       onProgress?.({
         type: "download",
@@ -926,7 +906,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
       ...basePayload,
       status: "downloading",
       progress: 2,
-      message: `Finding safe match: "${artist ? `${artist} â€” ` : ""}${title}"`
+      message: `Finding safe match: "${artist ? `${artist} — ` : ""}${title}"`
     });
 
     let match;
@@ -1022,7 +1002,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
 
         continue;
       } catch {
-        // Rename failed â€” keep the original filename but still keep identity fields.
+        // Rename failed — keep the original filename but still keep identity fields.
       }
     }
 
@@ -1035,7 +1015,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
         progress: 100,
         providerUrl: match.providerUrl,
         error: dlResult.error,
-        message: String(dlResult.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed â€” retry?"
+        message: String(dlResult.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?"
       });
     }
 
@@ -1045,7 +1025,6 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
   return { downloadFolder: destinationDirectory, downloads: results };
 }
 
-// ====================== PUBLIC API ======================
 async function downloadAudioUrls(input, destinationDirectory, onProgress, options = {}) {
   const urls = parseUrls(input);
   const results = [];
@@ -1063,7 +1042,7 @@ async function downloadAudioUrls(input, destinationDirectory, onProgress, option
       : { ok: false, url, error: "Only YouTube URLs are supported" };
 
     if (!result.ok) {
-      onProgress?.({ type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed â€” retry?" });
+      onProgress?.({ type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?" });
     }
 
     results.push(result);
@@ -1081,7 +1060,7 @@ function cancelActiveDownloads() {
       proc.kill("SIGTERM");
       killed = true;
     } catch {
-      try { proc.kill(); killed = true; } catch { /* ignore */ }
+      try { proc.kill(); killed = true; } catch { }
     }
   }
   return killed;
@@ -1105,4 +1084,3 @@ module.exports = {
   isSupportedMediaPath,
   cancelActiveDownloads
 };
-
