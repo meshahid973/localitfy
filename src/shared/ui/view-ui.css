@@ -217,18 +217,6 @@
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.metaDividerDot {
-  width: 3px;
-  height: 3px;
-  display: inline-block;
-  flex: 0 0 auto;
-  margin: 0 7px;
-  border-radius: 50%;
-  vertical-align: middle;
-  background: currentColor;
-  opacity: 0.42;
-}
-
 @media (max-width: 720px) {
   .localtifyStateCardV373:not(.localtifyStateCardCuteV466) {
     grid-template-columns: 1fr;
