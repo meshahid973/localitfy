@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import "./view-ui.css";
 
 const MASCOT_STATE_IMAGE_SRC = {
   empty: new URL("../../assets/empty-state.png", import.meta.url).href,
@@ -42,7 +41,6 @@ export function mascotStateForToast(kind?: string): MascotStateKey {
   if (kind === "work") return "loading";
   return "info";
 }
-
 
 export function WindowMinimizeIcon() {
   return (
