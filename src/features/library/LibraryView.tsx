@@ -1,5 +1,4 @@
 import { LocaltifyStateCard, MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
-import "./library.css";
 
 export type LibraryViewProps = {
   changeView: any;
