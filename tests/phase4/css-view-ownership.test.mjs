@@ -21,7 +21,11 @@ test("renderer explicitly imports every feature-owned stylesheet", () => {
   const main = read("src/main.tsx");
 
   for (const [specifier, , , label] of owners) {
-    assert.match(main, new RegExp(`import\\s+["']${specifier.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}["']`), `${label} stylesheet is missing from the renderer style manifest`);
+    assert.equal(
+      main.includes(`import "${specifier}";`) || main.includes(`import '${specifier}';`),
+      true,
+      `${label} stylesheet is missing from the renderer style manifest`
+    );
   }
 
   const cssImports = [...main.matchAll(/^\s*import\s+["']([^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
@@ -32,7 +36,7 @@ test("critical view selectors cannot be deleted by CSS cleanup", () => {
   for (const [, file, selector, label] of owners) {
     assert.equal(fs.existsSync(path.join(root, file)), true, `${label} stylesheet was deleted`);
     const css = read(file);
-    assert.match(css, new RegExp(selector.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")), `${label} lost its root selector ${selector}`);
+    assert.equal(css.includes(selector), true, `${label} lost its root selector ${selector}`);
     assert.ok(Buffer.byteLength(css) > 400, `${label} stylesheet is suspiciously empty`);
   }
 });
