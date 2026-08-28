@@ -1,5 +1,3 @@
-import "./playlists.css";
-
 export * from "./playlist.constants";
 export type * from "./playlist.types";
 export * from "./playlist.utils";
