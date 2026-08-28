@@ -28,22 +28,30 @@ test("Home keeps the compact reference music hierarchy", () => {
   assert.equal(source.includes("homeSectionMeta"), false, "Home count metadata clutter returned");
 });
 
-test("Home owns one compact scoped stylesheet", () => {
+test("Home owns content while the shared workspace owns the sidebar", () => {
   const css = read("src/features/home/home.css");
+  const workspace = read("src/styles/view-shell.css");
   const main = read("src/main.tsx");
 
   for (const marker of [
-    ".app:has(.pageTransition-home) .sidebar",
     ".app:has(.pageTransition-home) .content",
     ".homeJumpBack",
     ".homeListenGrid",
     ".homeArtistRail",
-    ".homeReleaseRail"
+    ".homeReleaseRail",
+    "width: min(1560px"
   ]) {
     assert.equal(css.includes(marker), true, `Home CSS lost ${marker}`);
+  }
+
+  assert.equal(css.includes(".app:has(.pageTransition-home) .sidebar"), false, "Home must not own a second sidebar layout");
+  assert.equal(css.includes("--sidebar-width:"), false, "Home must not override the shared sidebar width");
+  for (const marker of [".appShell", ".sidebar", ".navItem", ".pageTransition:not(.pageTransition-home)"]) {
+    assert.equal(workspace.includes(marker), true, `shared workspace lost ${marker}`);
   }
 
   assert.equal(fs.existsSync(path.join(root, "src/features/home/home-polish.css")), false, "Home polish override layer returned");
   assert.equal(main.includes("home-polish.css"), false, "renderer still imports the removed Home polish layer");
   assert.ok(Buffer.byteLength(css) < 24 * 1024, "Home CSS exceeded its 24 KiB ownership budget");
+  assert.ok(Buffer.byteLength(workspace) < 36 * 1024, "shared workspace CSS exceeded its 36 KiB ownership budget");
 });
