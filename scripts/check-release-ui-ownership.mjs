@@ -87,6 +87,7 @@ const cssOwnershipBudgets = [
   ["src/features/player/player.css", 160 * 1024],
   ["src/features/shell/effects.css", 96 * 1024],
   ["src/shared/ui/view-ui.css", 16 * 1024],
+  ["src/styles/view-shell.css", 16 * 1024],
   ["src/features/library/library.css", 20 * 1024],
   ["src/features/albums/albums.css", 36 * 1024],
   ["src/features/playlists/playlists.css", 32 * 1024],
@@ -137,7 +138,8 @@ const rendererFeatureStyles = [
   "./features/playlists/playlists.css",
   "./features/covers/covers.css",
   "./features/downloads/downloads.css",
-  "./features/analytics/analytics.css"
+  "./features/analytics/analytics.css",
+  "./styles/view-shell.css"
 ];
 for (const ownedImport of rendererFeatureStyles) {
   const statement = `import "${ownedImport}";`;
@@ -164,4 +166,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, feature CSS owners are present and budgeted, and Home has one scoped stylesheet owner.`);
+console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, feature CSS owners plus the shared non-Home shell are present and budgeted.`);
