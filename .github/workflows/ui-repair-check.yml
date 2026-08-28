@@ -23,6 +23,10 @@ jobs:
       - name: Apply organization migration
         run: python scripts/organize-ui.py
       - run: npm ci
+      - name: Remove exact cross-file CSS shadows
+        run: |
+          node scripts/css-cross-file-dedup.mjs --write
+          git diff --stat
       - name: Validate final repository shape
         run: |
           rm -f .github/workflows/ui-repair-check.yml scripts/organize-ui.py
