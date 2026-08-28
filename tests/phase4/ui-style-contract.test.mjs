@@ -15,7 +15,7 @@ const contracts = [
   ["Covers", "src/features/covers/covers.css", [".coverStudioLayout", ".coverStudioHero", ".coverStudioBody", ".coverVirtualGalleryViewport", ".coverGalleryCardCleanOnly"]],
   ["Downloads", "src/features/downloads/downloads.css", [".downloadsLayoutV031", ".downloadPanelV031", ".downloadTabStrip", ".spotifyTrackItemV326", ".downloadQueuePanel", ".converterBoxV031"]],
   ["Analytics", "src/features/analytics/analytics.css", [".analyticsStudioV339", ".analyticsHeroV339", ".analyticsRecapGridV339", ".analyticsRecapCardV339", ".analyticsMiniGridV339"]],
-  ["Settings", "src/features/settings/settings.css", [".settingsPageV027", ".settingsHero", ".settingsLayout", ".settingsCategoryList", ".settingsContent"]],
+  ["Settings", "src/features/settings/settings.css", [".settingsPageV027", ".settingsHeroV027", ".settingsPageLayoutV027", ".settingsCategoryContentV027", ".settingsCategoryMotion"]],
   ["Player", "src/features/player/player.css", [".playerBar", ".playerLeft", ".playerCenter", ".controlRow", ".progressRow", ".playerRight", ".volumeWrap"]]
 ];
 
