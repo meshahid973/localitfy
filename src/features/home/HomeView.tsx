@@ -55,8 +55,8 @@ export default function HomeView(props: HomeViewProps) {
     toggleHeroExpanded
   } = props;
 
-  const continueSongs = (homeFreshShelfSongs.length ? homeFreshShelfSongs : homeListenNowSongs).slice(0, 9);
   const listenNowSongs = homeListenNowSongs.slice(0, 8);
+  const newReleaseSongs = (homeFreshShelfSongs.length ? homeFreshShelfSongs : homeListenNowSongs).slice(0, 10);
   const artistKeys = new Set<string>();
   const artistSongs = [...homeListenNowSongs, ...homeFreshShelfSongs]
     .filter((song) => {
@@ -65,7 +65,7 @@ export default function HomeView(props: HomeViewProps) {
       artistKeys.add(key);
       return true;
     })
-    .slice(0, 8);
+    .slice(0, 10);
 
   const homeStyle = {
     ...ambientStyle,
@@ -82,130 +82,49 @@ export default function HomeView(props: HomeViewProps) {
 
   return (
     <div className="homePage" style={homeStyle}>
+      <header className="homeTopBar">
+        <h1>Home</h1>
+        <button className="homeCustomizeButton" type="button" onClick={openCoversViewWithCurrentSong}>
+          <Images size={13} strokeWidth={2.1} aria-hidden="true" />
+          <span>Customize Home</span>
+        </button>
+      </header>
+
       <section
-        className={`homeHero ${settings.heroExpanded ? "homeHeroExpanded" : "homeHeroCompact"} ${heroMotionClass}`}
-        aria-label="featured local track"
+        className={`homeJumpBack ${settings.heroExpanded ? "expanded" : "compact"} ${heroMotionClass}`}
+        aria-label="jump back in"
       >
-        <div className="homeHeroMedia" aria-hidden="true">
-          <Cover song={currentSong} className={`homeHeroArtwork ${nowPlayingSongMotionClass}`} priority="high" />
-          <div className="homeHeroMediaShade" />
-        </div>
+        <div className={`homeJumpCopy nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
+          <span className="homeJumpEyebrow">↻ JUMP BACK IN</span>
+          <h2 className={heroTitleClass} title={currentSong?.title || "drop in your music"}>{heroDisplayTitle}</h2>
+          <p>{heroDisplayArtist}</p>
 
-        <div className={`homeHeroContent nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-          <div className="homeHeroKickerRow">
-            <span className="homeHeroKicker">{currentNowPlayingLabel || "featured track"}</span>
-            {currentSong ? <span className={`homeHeroPlayingDot ${isPlaying ? "isPlaying" : ""}`} aria-hidden="true" /> : null}
-          </div>
+          {playerError ? <div className="homeInlineNotice error">{playerError}</div> : null}
+          {isThreeAm && settings.volume > 0.8 ? <div className="homeInlineNotice">volume is above 80% · late night ears deserve mercy.</div> : null}
 
-          <h3 className={`homeHeroTitle ${heroTitleClass}`} title={currentSong ? currentSong.title : "drop in your music"}>
-            {heroDisplayTitle}
-          </h3>
-
-          <p className="homeHeroArtist" title={currentSong ? currentSong.artist || "unknown artist" : "import songs to start listening"}>
-            {heroDisplayArtist}
-          </p>
-
-          {playerError ? <div className="homeHeroNotice homeHeroNoticeError">{playerError}</div> : null}
-          {isThreeAm && settings.volume > 0.8 ? (
-            <div className="homeHeroNotice">volume is above 80% · late night ears deserve mercy.</div>
-          ) : null}
-
-          <div className="homeHeroActions">
-            <button
-              className="homeHeroAction homeHeroActionPrimary"
-              type="button"
-              onClick={startListening}
-              disabled={!currentSong && playableSongCount === 0}
-            >
-              <Play size={14} fill="currentColor" strokeWidth={2.2} aria-hidden="true" />
-              <span>start listening</span>
+          <div className="homeJumpActions">
+            <button className="homeStartButton" type="button" onClick={startListening} disabled={!currentSong && playableSongCount === 0}>
+              <Play size={12} fill="currentColor" strokeWidth={2.3} aria-hidden="true" />
+              <span>Start Listening</span>
             </button>
-
-            <button
-              className="homeHeroAction homeHeroActionSecondary"
-              type="button"
-              onClick={shuffleLibrarySongsAction}
-              disabled={playableSongCount < 2}
-              title="Shuffle the whole library"
-            >
+            <button className="homeRoundButton" type="button" onClick={shuffleLibrarySongsAction} disabled={playableSongCount < 2} aria-label="shuffle library" title="Shuffle library">
               <Shuffle size={14} strokeWidth={2.2} aria-hidden="true" />
-              <span>shuffle</span>
+            </button>
+            <button className="homeRoundButton" type="button" onClick={toggleHeroExpanded} aria-label={settings.heroExpanded ? "use compact hero" : "expand hero"} title={settings.heroExpanded ? "Use compact hero" : "Expand hero"}>
+              {settings.heroExpanded ? <Minimize2 size={14} strokeWidth={2.1} aria-hidden="true" /> : <Maximize2 size={14} strokeWidth={2.1} aria-hidden="true" />}
             </button>
           </div>
         </div>
 
-        <div className="homeHeroUtilities">
-          <button
-            className="homeHeroUtility"
-            type="button"
-            onClick={openCoversViewWithCurrentSong}
-            title="Open pixel cover gallery"
-            aria-label="open pixel cover gallery"
-          >
-            <Images size={16} strokeWidth={2.1} aria-hidden="true" />
-          </button>
-          <button
-            className="homeHeroUtility"
-            type="button"
-            onClick={toggleHeroExpanded}
-            aria-pressed={settings.heroExpanded}
-            title={settings.heroExpanded ? "Use compact hero" : "Expand hero"}
-            aria-label={settings.heroExpanded ? "use compact hero" : "expand hero"}
-          >
-            {settings.heroExpanded ? <Minimize2 size={16} strokeWidth={2.1} aria-hidden="true" /> : <Maximize2 size={16} strokeWidth={2.1} aria-hidden="true" />}
-          </button>
-        </div>
-      </section>
-
-      <section className="homeSection homeContinueSection" aria-labelledby="home-continue-title">
-        <header className="homeSectionHeader">
-          <div>
-            <span className="homeSectionEyebrow">library</span>
-            <h3 id="home-continue-title">Continue listening</h3>
+        {currentSong ? (
+          <div className="homeJumpArtwork" aria-hidden="true">
+            <Cover song={currentSong} className="homeJumpCover" priority="high" />
           </div>
-        </header>
-
-        {continueSongs.length ? (
-          <div className="homeContinueRail">
-            {continueSongs.map((song) => {
-              const active = song.id === currentId;
-              return (
-                <button
-                  key={song.id}
-                  className={`homeContinueCard ${active ? "active" : ""}`}
-                  type="button"
-                  onClick={() => void selectSong(song.id, true)}
-                  title={`play ${song.title}`}
-                >
-                  <span className="homeContinueCoverWrap">
-                    <Cover song={song} className="homeContinueCover" />
-                    <span className="homeContinueHoverPlay" aria-hidden="true"><Play size={16} fill="currentColor" /></span>
-                    {active && isPlaying ? <span className="homeContinuePlaying" aria-hidden="true"><i /><i /><i /></span> : null}
-                  </span>
-                  <span className="homeContinueCopy">
-                    <strong>{prettyTitle(song.title, 5)}</strong>
-                    <small>{prettyMeta(song.artist)}</small>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="homeEmptyState">
-            <MascotStateArt state="empty" className="homeEmptyMascot" />
-            <div><strong>your home is quiet</strong><span>import music and Localtify will build this shelf for you.</span></div>
-          </div>
-        )}
+        ) : null}
       </section>
 
       <section className="homeSection homeListenSection" aria-labelledby="home-listen-title">
-        <header className="homeSectionHeader">
-          <div>
-            <span className="homeSectionEyebrow">music</span>
-            <h3 id="home-listen-title">Listen now</h3>
-          </div>
-        </header>
-
+        <h3 id="home-listen-title">Listen now</h3>
         {listenNowSongs.length ? (
           <div className="homeListenGrid">
             {listenNowSongs.map((song) => {
@@ -218,30 +137,27 @@ export default function HomeView(props: HomeViewProps) {
                   onClick={() => void selectSong(song.id, true)}
                   title={`play ${song.title}`}
                 >
-                  <span className="homeListenCoverWrap">
-                    <Cover song={song} className="homeListenCover" />
-                    <span className="homeListenPlay" aria-hidden="true"><Play size={12} fill="currentColor" /></span>
-                  </span>
+                  <Cover song={song} className="homeListenCover" />
                   <span className="homeListenCopy">
                     <strong>{prettyTitle(song.title, 6)}</strong>
                     <small>{prettyMeta(song.artist)}</small>
                   </span>
+                  <span className="homeListenPlay" aria-hidden="true"><Play size={12} fill="currentColor" /></span>
                 </button>
               );
             })}
           </div>
-        ) : null}
+        ) : (
+          <div className="homeEmptyState">
+            <MascotStateArt state="empty" className="homeEmptyMascot" />
+            <div><strong>your home is quiet</strong><span>import music and Localtify will build this page for you.</span></div>
+          </div>
+        )}
       </section>
 
       {artistSongs.length ? (
         <section className="homeSection homeArtistsSection" aria-labelledby="home-artists-title">
-          <header className="homeSectionHeader">
-            <div>
-              <span className="homeSectionEyebrow">artists</span>
-              <h3 id="home-artists-title">Top artists</h3>
-            </div>
-          </header>
-
+          <h3 id="home-artists-title">Top Artists</h3>
           <div className="homeArtistRail">
             {artistSongs.map((song) => (
               <button
@@ -253,7 +169,7 @@ export default function HomeView(props: HomeViewProps) {
               >
                 <span className="homeArtistCoverWrap">
                   <Cover song={song} className="homeArtistCover" />
-                  <span className="homeArtistPlay" aria-hidden="true"><Play size={14} fill="currentColor" /></span>
+                  <span className="homeArtistPlay" aria-hidden="true"><Play size={13} fill="currentColor" /></span>
                 </span>
                 <strong>{prettyMeta(song.artist || "unknown artist")}</strong>
               </button>
@@ -261,6 +177,34 @@ export default function HomeView(props: HomeViewProps) {
           </div>
         </section>
       ) : null}
+
+      {newReleaseSongs.length ? (
+        <section className="homeSection homeReleasesSection" aria-labelledby="home-releases-title">
+          <h3 id="home-releases-title">New Releases</h3>
+          <div className="homeReleaseRail">
+            {newReleaseSongs.map((song) => (
+              <button
+                key={song.id}
+                className={`homeReleaseCard ${song.id === currentId ? "active" : ""}`}
+                type="button"
+                onClick={() => void selectSong(song.id, true)}
+                title={`play ${song.title}`}
+              >
+                <span className="homeReleaseCoverWrap">
+                  <Cover song={song} className="homeReleaseCover" />
+                  <span className="homeReleasePlay" aria-hidden="true"><Play size={15} fill="currentColor" /></span>
+                </span>
+                <span className="homeReleaseCopy">
+                  <strong>{prettyTitle(song.title, 5)}</strong>
+                  <small>{prettyMeta(song.artist)}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <span className="homeNowPlayingLabel" aria-hidden="true">{currentNowPlayingLabel}</span>
     </div>
   );
 }
