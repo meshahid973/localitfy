@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -10,7 +11,8 @@ const MiB = 1024 * KiB;
 const sourceBudgets = [
   ["src/App.tsx", 320 * KiB],
   ["src/App.css", 316 * KiB],
-  ["electron/main.cjs", 192 * KiB],
+  ["src/features/shell/app-core.css", 180 * KiB],
+  ["electron/main.cjs", 184 * KiB],
   ["src/features/shell/AppShell.tsx", 32 * KiB]
 ];
 
@@ -50,6 +52,20 @@ if (fs.existsSync(assetsDir)) {
   if (totalCss > 3 * MiB) failures.push(`total CSS: ${totalCss} > ${3 * MiB} bytes`);
 } else {
   console.log("[performance] dist/assets not present; source budgets only");
+}
+
+const benchmarkPath = path.join(root, "scripts", "benchmark-runtime.mjs");
+if (!fs.existsSync(benchmarkPath)) {
+  failures.push("scripts/benchmark-runtime.mjs: missing");
+} else {
+  const benchmark = spawnSync(process.execPath, [benchmarkPath, "--check"], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+  if (benchmark.stdout) process.stdout.write(benchmark.stdout);
+  if (benchmark.stderr) process.stderr.write(benchmark.stderr);
+  if (benchmark.status !== 0) failures.push(`runtime benchmark exited with ${benchmark.status ?? "unknown"}`);
 }
 
 if (failures.length) {
