@@ -3,7 +3,6 @@ import type { Settings } from "./features/settings/settings.types";
 
 export {};
 
-
 type LocalitfyFeedbackStatus = {
   ok: boolean;
   configured: boolean;
@@ -206,7 +205,6 @@ declare global {
     message?: string;
   };
 
-
   type LocalitfyWindowsStartupStatus = {
     ok: boolean;
     supported: boolean;
@@ -236,6 +234,15 @@ declare global {
     platform?: "windows" | "linux" | "mac" | "unknown" | string;
   };
 
+  type LocalitfyNativeMediaStatus = {
+    ok: boolean;
+    state?: LocalitfyNativeMediaState;
+    minimizeToTray?: boolean;
+    startWithWindows?: LocalitfyWindowsStartupStatus;
+    trayReady?: boolean;
+    mediaKeysRegistered?: boolean;
+    error?: string;
+  };
 
   type LocalitfyPlayerCommand = {
     type:
@@ -274,7 +281,6 @@ declare global {
     releaseNotes?: string;
   };
 
-
   type LocalitfyFeedbackPayload = {
     category: "bug" | "ui" | "feature" | "other";
     message: string;
@@ -285,10 +291,11 @@ declare global {
 
   type LocalitfyFeedbackResult = {
     ok: boolean;
+    code?: string;
+    statusCode?: number;
+    envName?: string;
     error?: string;
   };
-
-
 
   type LocalitfyVolumeAnalysisResult = {
     ok: boolean;
@@ -325,11 +332,41 @@ declare global {
     error?: string;
   };
 
+  type LocalitfyDatabaseStatus = {
+    path?: string;
+    schemaVersion?: number;
+    expectedSchemaVersion?: number;
+    songCount?: number;
+    settingsCount?: number;
+    playlistCount?: number;
+    playlistSongCount?: number;
+    missingPathRows?: number;
+    missingDurationRows?: number;
+    lastMigration?: Record<string, unknown>;
+    [key: string]: unknown;
+  };
+
   type LocalitfyDatabaseRepairResult = {
     ok: boolean;
-    status?: Record<string, unknown>;
+    status?: LocalitfyDatabaseStatus;
     songs?: Song[];
     error?: string;
+  };
+
+  type LocalitfyCoverBrokenItem = {
+    id: string;
+    title?: string;
+    coverPath?: string;
+  };
+
+  type LocalitfyCoverStats = {
+    pixelDir?: string;
+    coverCount?: number;
+    songCount?: number;
+    songsWithCovers?: number;
+    songsMissingCovers?: number;
+    songsWithBrokenCovers?: number;
+    brokenItems?: LocalitfyCoverBrokenItem[];
   };
 
   type LocalitfyCoverThumbnailStatus = {
@@ -363,6 +400,34 @@ declare global {
     error?: string;
   };
 
+  type LocalitfyDiscordActivityPayload = Record<string, unknown>;
+  type LocalitfyDiscordResult = {
+    ok?: boolean;
+    status?: string;
+    error?: string;
+    [key: string]: unknown;
+  };
+
+  type LocalitfyDevToolsResult = {
+    ok: boolean;
+    opened?: boolean;
+    mode?: string;
+    gpuFeatureStatus?: Record<string, unknown>;
+    error?: string;
+  };
+
+  type LocalitfySpotifyStatus = {
+    ok: boolean;
+    ready?: boolean;
+    loggedIn?: boolean;
+    publicOnly?: boolean;
+    fallbackAvailable?: boolean;
+    mode?: "oauth-pkce" | "public-fallback" | string;
+    needsClientId?: boolean;
+    redirectUri?: string;
+    message?: string;
+    error?: string;
+  };
 
   type LocalitfySpotifyTrackPayload = {
     id?: string;
@@ -382,6 +447,18 @@ declare global {
     isrc?: string;
     duration?: number;
     durationMs?: number;
+  };
+
+  type LocalitfySpotifyFetchResult = {
+    ok: boolean;
+    name?: string;
+    playlistName?: string;
+    type?: "playlist" | "album" | "track" | string;
+    publicOnly?: boolean;
+    fallback?: boolean;
+    tracks: LocalitfySpotifyTrackPayload[];
+    hint?: string;
+    error?: string;
   };
 
   type LocalitfySpotifyDownloadBatchResult = {
@@ -408,14 +485,14 @@ declare global {
         settings: Partial<Settings>;
         playlists?: LocalitfyPlaylistRecord[];
         windowsIntegration?: LocalitfyWindowsStartupStatus;
-        database?: Record<string, unknown>;
+        database?: LocalitfyDatabaseStatus;
         discord?: Record<string, unknown>;
         covers?: Record<string, unknown>;
       }>;
       resolvePlaybackUrl: (payload: { filePath: string }) => Promise<LocalitfyPlaybackUrlResult>;
 
       importSongs: () => Promise<Song[]>;
-      repairMissingMetadata: (payload?: Record<string, any>) => Promise<LocalitfyMetadataRepairResult>;
+      repairMissingMetadata: (payload?: Record<string, unknown>) => Promise<LocalitfyMetadataRepairResult>;
       scanAlbumFolder?: (payload?: { mode?: "single" | "library" }) => Promise<LocalitfyAlbumFolderScanResult>;
       importAlbumFolder?: (payload: { scanId: string }) => Promise<LocalitfyAlbumFolderImportResult>;
       clearLibrary: () => Promise<Song[]>;
@@ -442,9 +519,7 @@ declare global {
       chooseDownloadFolder: () => Promise<{ canceled: boolean; folder: string }>;
       openDownloadsFolder: (folder?: string) => Promise<boolean>;
 
-      pickAndConvertMedia: (payload: {
-        bitrate?: number;
-      }) => Promise<{
+      pickAndConvertMedia: (payload: { bitrate?: number }) => Promise<{
         downloadFolder: string;
         conversions: LocalitfyConversionResult[];
         changedCount: number;
@@ -452,14 +527,7 @@ declare global {
       }>;
 
       listPixelArt?: () => Promise<PixelArtBridgeAsset[]>;
-      listPixelCovers?: () => Promise<
-        Array<{
-          name: string;
-          key?: string;
-          path: string;
-          url: string;
-        }>
-      >;
+      listPixelCovers?: () => Promise<Array<{ name: string; key?: string; path: string; url: string }>>;
 
       setPixelArtCover?: (id: string, coverPath: string) => Promise<Song | null>;
       setSongCover?: (id: string, coverPath: string) => Promise<Song | null>;
@@ -474,10 +542,10 @@ declare global {
 
       pickSongCover: (id: string) => Promise<Song | null>;
 
-      getCoverStats?: () => Promise<any>;
-      rescanPixelArt?: () => Promise<any>;
-      listBrokenCovers?: () => Promise<any[]>;
-      getLeastUsedCover?: () => Promise<any | null>;
+      getCoverStats?: () => Promise<LocalitfyCoverStats>;
+      rescanPixelArt?: () => Promise<Song[]>;
+      listBrokenCovers?: () => Promise<LocalitfyCoverBrokenItem[]>;
+      getLeastUsedCover?: () => Promise<string | null>;
       getCoverThumbnailStatus?: () => Promise<LocalitfyCoverThumbnailStatus>;
       warmCoverThumbnails?: (payload?: { limit?: number; force?: boolean }) => Promise<LocalitfyCoverThumbnailWarmResult>;
       cleanupCoverCache: () => Promise<LocalitfyCoverThumbnailCleanupResult>;
@@ -490,21 +558,20 @@ declare global {
       getPlaylists?: () => Promise<LocalitfyPlaylistRecord[]>;
       savePlaylists?: (playlists: LocalitfyPlaylistRecord[]) => Promise<LocalitfyPlaylistRecord[]>;
 
-      setDiscordActivity: (payload: any) => Promise<any>;
-      updateDiscordActivity: (payload: any) => Promise<any>;
-      clearDiscordActivity: () => Promise<any>;
-      getDiscordStatus?: () => Promise<any>;
-      resetDiscordCache: () => Promise<any>;
-      resetDiscordActivity?: () => Promise<any>;
+      setDiscordActivity: (payload: LocalitfyDiscordActivityPayload) => Promise<LocalitfyDiscordResult>;
+      updateDiscordActivity: (payload: LocalitfyDiscordActivityPayload) => Promise<LocalitfyDiscordResult>;
+      clearDiscordActivity: () => Promise<LocalitfyDiscordResult>;
+      getDiscordStatus?: () => Promise<LocalitfyDiscordResult>;
+      resetDiscordCache: () => Promise<LocalitfyDiscordResult>;
+      resetDiscordActivity?: () => Promise<LocalitfyDiscordResult>;
 
-      getDatabaseStatus?: () => Promise<any>;
+      getDatabaseStatus?: () => Promise<LocalitfyDatabaseStatus>;
       updateBackupNow: () => Promise<LocalitfyDatabaseBackupResult>;
       repairDatabaseNow: () => Promise<LocalitfyDatabaseRepairResult>;
 
       checkForUpdates?: (payload?: { silent?: boolean }) => Promise<boolean>;
       downloadUpdate?: () => Promise<boolean>;
       installUpdate?: () => Promise<boolean>;
-
       onAutoUpdate?: (callback: (payload: AutoUpdateEvent) => void) => () => void;
 
       sendPlayerCommand: (command: LocalitfyPlayerCommand) => Promise<{ ok: boolean; command?: LocalitfyPlayerCommand }> | Promise<boolean>;
@@ -517,9 +584,9 @@ declare global {
       setMinimizeToTray?: (enabled: boolean) => Promise<boolean | { ok: boolean; minimizeToTray: boolean }>;
       setStartWithWindows?: (enabled: boolean) => Promise<LocalitfyWindowsStartupStatus>;
       getStartWithWindows?: () => Promise<LocalitfyWindowsStartupStatus>;
-      getNativeMediaStatus?: () => Promise<any>;
-      openDevTools?: (payload?: any) => Promise<any>;
-      toggleDevTools?: () => Promise<any>;
+      getNativeMediaStatus?: () => Promise<LocalitfyNativeMediaStatus>;
+      openDevTools?: (payload?: { mode?: string }) => Promise<LocalitfyDevToolsResult>;
+      toggleDevTools?: () => Promise<LocalitfyDevToolsResult>;
       restartApp?: () => Promise<boolean>;
       openLogsFolder?: () => Promise<{ ok: boolean; path?: string; error?: string }>;
       getPerformanceStatus?: () => Promise<{
@@ -539,14 +606,14 @@ declare global {
       getFeedbackStatus?: () => Promise<LocalitfyFeedbackStatus>;
       openExternal?: (url: string) => Promise<{ ok: boolean; reason?: string }>;
 
-      spotifyCheck?: () => Promise<any>;
-      spotifyLogin?: () => Promise<any>;
-      spotifyImportBrowser: () => Promise<any>;
-      spotifySetCookie: (payload: string | { spDc?: string }) => Promise<any>;
-      spotifyLogout?: () => Promise<any>;
-      spotifyFetch?: (payload: { url: string }) => Promise<any>;
-      spotifyFetchTracks?: (url: string) => Promise<any>;
-      spotdlCheck?: () => Promise<any>;
+      spotifyCheck?: () => Promise<LocalitfySpotifyStatus>;
+      spotifyLogin?: () => Promise<LocalitfySpotifyStatus>;
+      spotifyImportBrowser: () => Promise<LocalitfySpotifyStatus>;
+      spotifySetCookie: (payload: string | { spDc?: string }) => Promise<LocalitfySpotifyStatus>;
+      spotifyLogout?: () => Promise<LocalitfySpotifyStatus>;
+      spotifyFetch?: (payload: { url: string }) => Promise<LocalitfySpotifyFetchResult>;
+      spotifyFetchTracks?: (url: string) => Promise<LocalitfySpotifyFetchResult>;
+      spotdlCheck?: () => Promise<{ ok: boolean; installed?: boolean; engine?: string; message?: string; error?: string }>;
       spotdlDownloadBatch?: (payload: { tracks: LocalitfySpotifyTrackPayload[]; options?: Record<string, unknown>; sourceName?: string; sourceType?: string }) => Promise<LocalitfySpotifyDownloadBatchResult>;
       spotifyDownloadBatch?: (payload: { tracks: LocalitfySpotifyTrackPayload[]; options?: Record<string, unknown>; sourceName?: string; sourceType?: string }) => Promise<LocalitfySpotifyDownloadBatchResult>;
       onSpotdlTrackDone?: (callback: (payload: LocalitfyDownloadProgressPayload | LocalitfyDownloadResult) => void) => () => void;
@@ -557,4 +624,3 @@ declare global {
     };
   }
 }
-
