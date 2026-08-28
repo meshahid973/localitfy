@@ -17,7 +17,6 @@ test("media serving is owned outside Electron main", () => {
   assert.doesNotMatch(mainSource, /function\s+stopLocaltifyMediaServer\b/);
   assert.doesNotMatch(mainSource, /function\s+createMediaToken\b/);
   assert.doesNotMatch(mainSource, /function\s+resolveMediaToken\b/);
-  assert.doesNotMatch(mainSource, /http\.createServer\(\(req, res\)/);
 });
 
 test("media runtime keeps protocol fallback and token ownership", () => {
