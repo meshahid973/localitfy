@@ -80,10 +80,22 @@ const cssOwnershipBudgets = [
   ["src/features/shell/app-core.css", 112 * 1024],
   ["src/features/settings/settings.css", 160 * 1024],
   ["src/features/player/player.css", 160 * 1024],
-  ["src/features/shell/effects.css", 96 * 1024]
+  ["src/features/shell/effects.css", 96 * 1024],
+  ["src/shared/ui/view-ui.css", 16 * 1024],
+  ["src/features/library/library.css", 20 * 1024],
+  ["src/features/albums/albums.css", 36 * 1024],
+  ["src/features/playlists/playlists.css", 32 * 1024],
+  ["src/features/covers/covers.css", 32 * 1024],
+  ["src/features/downloads/downloads.css", 36 * 1024],
+  ["src/features/analytics/analytics.css", 24 * 1024]
 ];
 for (const [relativePath, maxBytes] of cssOwnershipBudgets) {
-  const bytes = fs.statSync(path.join(root, relativePath)).size;
+  const absolutePath = path.join(root, relativePath);
+  if (!fs.existsSync(absolutePath)) {
+    failures.push(`${relativePath}: required stylesheet owner is missing`);
+    continue;
+  }
+  const bytes = fs.statSync(absolutePath).size;
   if (bytes > maxBytes) failures.push(`${relativePath}: ${(bytes / 1024).toFixed(1)} KiB exceeds ${(maxBytes / 1024).toFixed(0)} KiB ownership budget`);
 }
 
@@ -112,6 +124,33 @@ const appImport = main.indexOf('import App from "./App";');
 const perfImport = main.indexOf('import "./features/shell/performance.css";');
 if (appImport < 0 || perfImport < appImport) failures.push("src/main.tsx: performance.css must remain the final renderer policy after App CSS");
 
+const rendererFeatureStyles = [
+  "./shared/ui/view-ui.css",
+  "./features/library/library.css",
+  "./features/albums/albums.css",
+  "./features/playlists/playlists.css",
+  "./features/covers/covers.css",
+  "./features/downloads/downloads.css",
+  "./features/analytics/analytics.css"
+];
+for (const ownedImport of rendererFeatureStyles) {
+  const statement = `import "${ownedImport}";`;
+  if (!main.includes(statement)) failures.push(`src/main.tsx: missing feature stylesheet owner ${ownedImport}`);
+  if (main.indexOf(statement) > perfImport) failures.push(`src/main.tsx: ${ownedImport} must load before performance.css`);
+}
+
+for (const forbiddenHomeSelector of [
+  ".libraryPanelV025",
+  ".albumsPageV318",
+  ".playlistsPage",
+  ".coverStudioLayout",
+  ".downloadsLayoutV031",
+  ".analyticsStudioV339",
+  ".localtifyStateCardV373"
+]) {
+  if (homeCss.includes(forbiddenHomeSelector)) failures.push(`src/features/home/home.css: foreign selector returned: ${forbiddenHomeSelector}`);
+}
+
 if (fs.existsSync(path.join(root, "src/features/shell/release.css"))) failures.push("src/features/shell/release.css: obsolete override file must stay deleted");
 
 if (failures.length) {
@@ -119,4 +158,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, feature CSS budgets are locked, and no new root compatibility imports are allowed.`);
+console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, feature CSS owners are present and budgeted, and no new root compatibility imports are allowed.`);
