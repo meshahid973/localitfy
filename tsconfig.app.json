@@ -1,4 +1,4 @@
-﻿{
+{
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "es2023",
@@ -12,6 +12,8 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
+    "forceConsistentCasingInFileNames": true,
+    "useUnknownInCatchVariables": true,
     "noEmit": true,
     "jsx": "react-jsx",
 
@@ -21,6 +23,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "electron/native-media.cjs"]
+  "include": ["src"]
 }
-
