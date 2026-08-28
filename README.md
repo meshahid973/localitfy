@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # localtify
 
@@ -37,7 +37,7 @@ It takes the songs you already have and turns them into a proper music library w
 
 It is built for people who like owning their music, organizing their own library, and making local songs feel clean, personal, and modern again.
 
-localtify is not a streaming service. It does not need an account, it does not put ads between your songs, and it does not move your music into someone elseâ€™s cloud.
+localtify is not a streaming service. It does not need an account, it does not put ads between your songs, and it does not move your music into someone else's cloud.
 
 ---
 
@@ -68,7 +68,6 @@ Get the latest version from the Releases page:
     <img alt="Download localtify" src="https://img.shields.io/badge/download-localtify-8dffce?style=for-the-badge&labelColor=050505">
   </a>
 </p>
-
 
 ## Star History
 
@@ -229,6 +228,12 @@ Run localtify in development mode:
 npm run dev
 ```
 
+Run the full local validation gate:
+
+```bash
+npm run release:check
+```
+
 Build the frontend:
 
 ```bash
@@ -253,27 +258,31 @@ The finished app files will be created inside the `release` folder.
 
 ## Common commands
 
-| Command                 | What it does                             |
-| ----------------------- | ---------------------------------------- |
-| `npm run dev`           | Starts localtify in development mode     |
-| `npm run build`         | Builds the renderer                      |
-| `npm run dist`          | Builds the Windows installer             |
-| `npm run publish`       | Builds and publishes the Windows release |
-| `npm run dist:linux`    | Builds Linux AppImage, DEB, and RPM      |
-| `npm run publish:linux` | Builds and publishes Linux release files |
-| `npm run chunks:audit`  | Shows the biggest built frontend files   |
+| Command                  | What it does                                      |
+| ------------------------ | ------------------------------------------------- |
+| `npm run dev`            | Starts localtify in development mode              |
+| `npm run check`          | Runs bridge, architecture, CSS, tests and build   |
+| `npm run release:check`  | Runs the complete local release validation gate   |
+| `npm run build`          | Builds the renderer                               |
+| `npm run dist`           | Builds the Windows installer                      |
+| `npm run publish`        | Builds and publishes the Windows release          |
+| `npm run dist:linux`     | Builds Linux AppImage, DEB, and RPM               |
+| `npm run publish:linux`  | Builds and publishes Linux release files          |
+| `npm run chunks:audit`   | Shows the biggest built frontend files            |
 
 ---
 
 ## Project structure
 
 ```txt
-src/           React app and UI
-electron/      Electron main process, preload, database, updater, Discord, desktop features
-pixelart/      bundled pixel art cover images
-public/        public static files
-build/         app icons and build resources
-screenshots/   README and release images
+src/                 React app and feature-owned UI
+electron/            Electron main process and native services
+electron/runtime/    focused native runtime owners such as updater and media serving
+electron/ipc/        IPC routing and domain registration
+pixelart/            bundled pixel art cover images
+public/              public static files
+build/               app icons and build resources
+screenshots/         README and release images
 ```
 
 ---
@@ -311,33 +320,21 @@ These are kept for compatibility with older installs.
 
 ## CSS ownership
 
-localtify has a lot of CSS, so please keep styles in the correct file.
+Keep styles with their feature owner. `App.css` is retained only for older shared app-level rules that have not yet been safely migrated.
 
 | File              | What it owns                                      |
 | ----------------- | ------------------------------------------------- |
 | `app-core.css`    | app shell, titlebar, base layout                  |
-| `App.css`         | older shared app level styles                     |
-| `home.css`        | home page, library, albums, playlists, song cards |
+| `App.css`         | remaining older shared app-level styles          |
+| `home.css`        | Home feature                                      |
 | `player.css`      | bottom player, progress bar, volume, controls     |
 | `settings.css`    | settings page and settings cards                  |
 | `themes.css`      | theme variables and theme mappings                |
-| `motion.css`      | animations and transitions                        |
-| `effects.css`     | active song glow and small visual effects         |
+| `motion.css`      | shared animations and transitions                 |
+| `effects.css`     | active-song and small shared visual effects       |
 | `mini-player.css` | detached mini player window                       |
 
-Simple guide:
-
-```txt
-player issue      -> player.css
-settings issue    -> settings.css
-home card bug     -> home.css
-album page bug    -> home.css
-theme variable    -> themes.css
-animation issue   -> motion.css
-mini player bug   -> mini-player.css
-```
-
-Please avoid random fixes at the bottom of unrelated CSS files. It makes future bugs harder to fix.
+Do not automatically delete CSS merely because a static selector scan says it looks unused. Localtify has dynamic runtime classes. The unused-selector audit is advisory; deterministic duplicate/shadow cleanup is the safe automated path.
 
 ---
 
@@ -351,7 +348,7 @@ Before opening a pull request, run:
 
 ```bash
 npm install
-npm run build
+npm run release:check
 ```
 
 When making a pull request, please include:
@@ -375,6 +372,7 @@ localtify is built around local music.
 Your songs stay on your computer.
 You do not need an account.
 Discord activity is optional and can be turned off in settings.
+Browser-cookie access for the downloader is disabled by default and must be explicitly opted into.
 
 Please do not commit private files such as:
 
@@ -424,66 +422,39 @@ Check what changed:
 git status
 ```
 
-Add the files you want to push:
+Add the files you want to push, commit them with a focused message, then push directly to the intended branch.
 
 ```bash
-git add README.md src electron package.json package-lock.json .gitignore .env.example public pixelart build screenshots
-```
-
-Commit the changes:
-
-```bash
-git commit -m "docs: update readme"
-```
-
-Push to GitHub:
-
-```bash
+git add <files>
+git commit -m "feature fixed"
 git push
-```
-
-For the first push from a new local folder:
-
-```bash
-git push -u origin main
 ```
 
 ---
 
 ## How to publish a new app release
 
-Make sure the version is correct in:
+Make sure the version is correct in `package.json` and in the app's visible version metadata.
 
-```txt
-package.json
-the app version shown inside localtify
-```
-
-Build the app:
+Run the release gate before packaging:
 
 ```bash
-npm run build
+npm run release:check
 ```
 
-Build the Windows installer:
+Build and publish Windows:
 
 ```bash
 npm run dist
-```
-
-Publish the Windows release:
-
-```bash
 npm run publish
 ```
 
-Build Linux packages:
+Build and publish Linux:
 
 ```bash
 npm run dist:linux
+npm run publish:linux
 ```
-
-Linux release builds can also be created through GitHub Actions.
 
 ---
 
@@ -491,6 +462,7 @@ Linux release builds can also be created through GitHub Actions.
 
 Before publishing a release, check:
 
+* `npm run release:check` passes
 * the app opens
 * songs still load
 * playback works for imported and existing songs
@@ -512,7 +484,6 @@ Before publishing a release, check:
 * Linux packages build successfully
 * app name says localtify
 * icon looks correct
-* `npm run build` passes
 * installer builds successfully
 * `.env`, `node_modules`, `dist`, and `release` are not committed
 
@@ -530,4 +501,3 @@ Before publishing a release, check:
 ## License
 
 MIT License
-
