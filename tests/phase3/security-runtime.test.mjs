@@ -11,6 +11,7 @@ const {
   isAllowedRendererNavigation,
   isFileInsideRoot,
   isTrustedMainFrameIpcEvent,
+  isTrustedRendererFrameUrl,
   installRendererSecurityGuards,
   installSessionPermissionGuards
 } = require(path.join(root, "electron", "runtime", "security.cjs"));
@@ -45,15 +46,25 @@ test("packaged file fallback is directory scoped", () => {
   assert.equal(isFileInsideRoot(path.join(root, "package.json"), rendererRoot), false);
 });
 
-test("privileged IPC trusts only the main frame", () => {
-  const mainFrame = { id: "main" };
-  const webContents = { mainFrame };
+test("privileged IPC trusts only the active Localtify main frame", () => {
+  const rendererUrl = `${LOCALTIFY_RENDERER_PROTOCOL}://app/index.html`;
+  const mainFrame = { id: "main", url: rendererUrl };
+  const webContents = { mainFrame, getURL: () => rendererUrl };
   const win = { isDestroyed: () => false, webContents };
 
+  assert.equal(isTrustedRendererFrameUrl(rendererUrl), true);
+  assert.equal(isTrustedRendererFrameUrl("http://127.0.0.1:5173/"), true);
+  assert.equal(isTrustedRendererFrameUrl("https://example.com/"), false);
   assert.equal(isTrustedMainFrameIpcEvent({ sender: webContents, senderFrame: mainFrame }, win), true);
-  assert.equal(isTrustedMainFrameIpcEvent({ sender: webContents, senderFrame: { id: "iframe" } }, win), false);
+  assert.equal(isTrustedMainFrameIpcEvent({ sender: webContents, senderFrame: { id: "iframe", url: rendererUrl } }, win), false);
   assert.equal(isTrustedMainFrameIpcEvent({ sender: {}, senderFrame: mainFrame }, win), false);
+  assert.equal(isTrustedMainFrameIpcEvent({ sender: webContents, senderFrame: { ...mainFrame, url: "https://example.com/" } }, win), false);
   assert.equal(isTrustedMainFrameIpcEvent(null, win), false);
+
+  const foreignFrame = { id: "main", url: "https://example.com/" };
+  const foreignContents = { mainFrame: foreignFrame, getURL: () => "https://example.com/" };
+  const foreignWin = { isDestroyed: () => false, webContents: foreignContents };
+  assert.equal(isTrustedMainFrameIpcEvent({ sender: foreignContents, senderFrame: foreignFrame }, foreignWin), false);
 });
 
 test("IPC router rejects untrusted senders before invoking handlers", async () => {
