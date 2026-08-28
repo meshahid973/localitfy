@@ -14,13 +14,26 @@ const { createDatabaseRepositories } = require(path.join(root, "electron", "db",
 
 test("Electron main routes IPC through the duplicate-safe trusted router", () => {
   const registered = [];
-  const router = createIpcRouter({ handle: (channel) => registered.push(channel) });
+  const handlers = new Map();
+  const router = createIpcRouter({
+    handle: (channel, handler) => {
+      registered.push(channel);
+      handlers.set(channel, handler);
+    }
+  });
   router.handle("phase3:test", async () => true);
-  assert.deepEqual(registered, ["phase3:test"]);
+  assert.deepEqual(registered, ["localitfy:player-command", "phase3:test"]);
   assert.throws(() => router.handle("phase3:test", async () => true), /duplicate IPC handler/);
   assert.equal(mainSource.includes("ipcMain.handle("), false);
   assert.match(mainSource, /createIpcRouter\(ipcMain,\s*\{/);
   assert.match(mainSource, /isTrustedEvent:\s*\(event\)\s*=>\s*isTrustedMainFrameIpcEvent\(event, mainWindow\)/);
+
+  const sent = [];
+  const trustedEvent = { sender: { send: (channel, payload) => sent.push([channel, payload]) } };
+  return handlers.get("localitfy:player-command")(trustedEvent, { type: "next" }).then((ok) => {
+    assert.equal(ok, true);
+    assert.deepEqual(sent, [["player:command", { type: "next" }]]);
+  });
 });
 
 test("window normalization is owned outside main", () => {
