@@ -40,9 +40,25 @@ reject("src/features/settings/categories/AdvancedSettings.tsx", ["Right side car
 reject("src/app/runtime/useBodyRuntimeClasses.ts", ["localtifyWantMoreBlur", "localtifyNoMoreBlur"]);
 reject("src/features/shell/performance.css", ["localtifyNoMoreBlur", "localtifyWantMoreBlur"]);
 
-const proximityShim = read("src/useProximityMotion.ts").trim();
-if (proximityShim !== 'export { useProximityMotion } from "./features/shell/useProximityMotion";') {
-  failures.push("src/useProximityMotion.ts: root module must stay a compatibility re-export; no second motion owner");
+const proximityShimPath = path.join(root, "src/useProximityMotion.ts");
+if (!fs.existsSync(proximityShimPath)) {
+  failures.push("src/useProximityMotion.ts: compatibility seam is missing before App import migration");
+} else {
+  const proximityShim = read("src/useProximityMotion.ts").trim();
+  if (proximityShim !== 'export { useProximityMotion } from "./features/shell/useProximityMotion";') {
+    failures.push("src/useProximityMotion.ts: root module must remain a pure compatibility re-export; no second motion owner");
+  }
+}
+
+const appSource = read("src/App.tsx");
+const rootCompatibilityImports = [...appSource.matchAll(/from\s+["']\.\/(?!features\/|app\/|core\/|shared\/|platform\/|analytics(?:["']))([^"']+)["']/g)]
+  .map((match) => match[1])
+  .filter((specifier) => specifier !== "useProximityMotion");
+if (rootCompatibilityImports.length) {
+  failures.push(`src/App.tsx: new root compatibility imports are forbidden: ${rootCompatibilityImports.join(", ")}`);
+}
+if ((appSource.match(/from\s+["']\.\/useProximityMotion["']/g) || []).length > 1) {
+  failures.push("src/App.tsx: proximity compatibility import must occur at most once");
 }
 
 const motionPath = path.join(root, "src/features/shell/motion.css");
@@ -59,8 +75,30 @@ if (homeBytes > 24 * 1024) failures.push(`src/features/home/home.css: ${homeByte
 const homeCss = read("src/features/home/home.css");
 if (!homeCss.includes("data-view=\"home\"")) failures.push("src/features/home/home.css: Home header rules must be scoped to data-view=home");
 
-const app = read("src/App.tsx");
-if (!app.includes('import "./features/home/home.css";')) failures.push("src/App.tsx: canonical Home stylesheet import is missing");
+const cssOwnershipBudgets = [
+  ["src/App.css", 246 * 1024],
+  ["src/features/shell/app-core.css", 112 * 1024],
+  ["src/features/settings/settings.css", 160 * 1024],
+  ["src/features/player/player.css", 160 * 1024],
+  ["src/features/shell/effects.css", 96 * 1024]
+];
+for (const [relativePath, maxBytes] of cssOwnershipBudgets) {
+  const bytes = fs.statSync(path.join(root, relativePath)).size;
+  if (bytes > maxBytes) failures.push(`${relativePath}: ${(bytes / 1024).toFixed(1)} KiB exceeds ${(maxBytes / 1024).toFixed(0)} KiB ownership budget`);
+}
+
+for (const ownedImport of [
+  './features/shell/app-core.css',
+  './features/settings/themes.css',
+  './features/settings/settings.css',
+  './features/home/home.css',
+  './features/shell/motion.css',
+  './features/onboarding/onboarding.css',
+  './features/player/player.css',
+  './features/shell/effects.css'
+]) {
+  if (!appSource.includes(`import "${ownedImport}";`)) failures.push(`src/App.tsx: missing canonical owned stylesheet ${ownedImport}`);
+}
 
 const shell = read("src/features/shell/AppShell.tsx");
 if (shell.includes("moreQuickLibraryBlur") || shell.includes("lessQuickLibraryBlur") || shell.includes("data-home-expanded")) {
@@ -81,4 +119,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, and retired Home UI cannot reappear.`);
+console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, feature CSS budgets are locked, and no new root compatibility imports are allowed.`);
