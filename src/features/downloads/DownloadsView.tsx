@@ -329,7 +329,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                                       <span className="spotifySourceBadge">Spotify</span>
                                       <span className={`spotifyTrackStatus ${statusLabel.replace(/\s+/g, "-")}`}>{statusLabel}</span>
                                     </div>
-                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` � ${track.albumName}` : ""}</p>
+                                    <p>{track.artist || "artist will be matched during download"}{track.albumName ? ` · ${track.albumName}` : ""}</p>
                                     {track.downloadMessage ? <small>{track.downloadMessage}</small> : null}
                                     {track.downloadError ? <small className="spotifyTrackError">{track.downloadError}</small> : null}
                                   </div>
