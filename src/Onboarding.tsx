@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Circle, Cloud, Heart, Leaf, Moon, Square } from "lucide-react";
 
@@ -363,8 +363,6 @@ export default function Onboarding({
               <strong id="onboardingTitle">make it yours first</strong>
             </div>
           </div>
-
-
         </header>
 
         <div className="onboardingProgress" aria-label={`setup progress ${step + 1} of ${STEPS.length}`}>
@@ -395,7 +393,7 @@ export default function Onboarding({
                   <div><b>Play local songs beautifully</b><small>A clean player, queue, search, and smooth browsing.</small></div>
                   <div><b>Fix covers and messy metadata</b><small>Repair missing covers and keep your library tidy.</small></div>
                   <div><b>Download and import without chaos</b><small>Links, retries, conversion, and auto-add when needed.</small></div>
-                  <div><b>Optional Discord presence</b><small>Show what youâ€™re listening to only when you want it on.</small></div>
+                  <div><b>Optional Discord presence</b><small>Show what you’re listening to only when you want it on.</small></div>
                 </div>
               </div>
             )}
@@ -495,7 +493,7 @@ export default function Onboarding({
                   <button type="button" className="onboardingMiniPrimary full" onClick={prepareDownloads} disabled={busy}>
                     {downloadPrepared ? "downloads noted" : "show me downloads later"}
                   </button>
-                  {downloadPrepared ? <small className="downloadPrepared">done â€” after setup, open Downloads from the sidebar.</small> : null}
+                  {downloadPrepared ? <small className="downloadPrepared">done — after setup, open Downloads from the sidebar.</small> : null}
                 </div>
               </div>
             )}
@@ -542,4 +540,3 @@ export default function Onboarding({
     </main>
   );
 }
-
