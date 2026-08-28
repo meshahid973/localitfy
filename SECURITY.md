@@ -1,4 +1,4 @@
-﻿# Security Policy
+# Security Policy
 
 <p align="center">
   <strong>Security matters for localtify.</strong>
@@ -22,11 +22,21 @@ localtify is still early in development, so security fixes are focused on the ne
 
 | Version   | Support status  |
 | --------- | --------------- |
-| `0.3.7`   | Supported       |
-| `0.3.x`   | Limited support |
-| `< 0.3.0` | Not supported   |
+| `0.4.1`   | Supported       |
+| `0.4.x`   | Limited support |
+| `< 0.4.0` | Not supported   |
 
 If you are using an older version, please update to the latest release first. The issue may already be fixed in a newer build.
+
+---
+
+## Security model
+
+The desktop renderer runs with Electron sandboxing, context isolation, web security, Node integration disabled, webviews disabled, and browser permissions denied by default. Privileged work is exposed only through the preload bridge and the trusted IPC router.
+
+Packaged renderer navigation is restricted to the Localtify-owned `localtify-renderer://app` origin (with the packaged `file://` fallback scoped to the built renderer directory). Development navigation is restricted to the loopback Vite origin. New renderer-created windows are denied.
+
+Local playback URLs are served only from the loopback media runtime using opaque per-file tokens. Downloader browser-cookie extraction is disabled by default; Localtify does not silently dump browser cookies to disk.
 
 ---
 
@@ -83,4 +93,3 @@ Please do not publicly share exploit details before a fix is released.
 This helps protect users while the issue is being checked and fixed.
 
 Thanks for helping keep localtify safe.
-
