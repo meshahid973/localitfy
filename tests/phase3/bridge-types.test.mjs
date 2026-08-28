@@ -16,9 +16,7 @@ test("Electron bridge has a dedicated strict TypeScript contract", () => {
   assert.match(pkg.scripts["bridge:check"], /bridge:typecheck/);
   assert.match(declarations, /import type \{ Song \}/);
   assert.match(declarations, /import type \{ Settings \}/);
-  assert.doesNotMatch(declarations, /songs\??: any\[\]/);
-  assert.doesNotMatch(declarations, /patchSong: \(id: string, patch: any\)/);
-  assert.doesNotMatch(declarations, /diagnostics\?: Record<string, any>/);
+  assert.doesNotMatch(declarations, /\bany\b/, "preload declarations must not fall back to explicit any");
 });
 
 test("album folder preview does not redeclare cover fields", () => {
