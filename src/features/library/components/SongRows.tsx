@@ -53,7 +53,7 @@ export function displaySongArtistV444(song: Pick<Song, "title" | "artist">) {
 export function displaySongPickerSublineV444(song: Pick<Song, "title" | "artist">) {
   const artist = displaySongArtistV444(song);
   if (!artist || artist === "unknown artist") return "Pick a playlist or make a new one.";
-  return `${artist} � Pick a playlist or make a new one.`;
+  return `${artist} · Pick a playlist or make a new one.`;
 }
 
 export type SongInteractionHandlers = {
