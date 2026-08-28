@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import "./view-ui.css";
 
 const MASCOT_STATE_IMAGE_SRC = {
   empty: new URL("../../assets/empty-state.png", import.meta.url).href,
@@ -148,7 +149,6 @@ export function ResultStatusIcon({ failed, imported }: { failed: boolean; import
   return <InfoMiniIcon />;
 }
 
-
 export function MetaDividerDot() {
   return <span className="metaDividerDot" aria-hidden="true" />;
 }
@@ -161,7 +161,6 @@ function mascotStateForTone(tone: LocaltifyStateCardTone, cute = false): MascotS
   if (tone === "error") return "error";
   return cute ? "empty" : "info";
 }
-
 
 export function LocaltifyStateCard({
   tone = "info",
@@ -216,7 +215,6 @@ export function LocaltifyStateCard({
     </div>
   );
 }
-
 
 export function MascotHelperBubble({
   state = "info",
