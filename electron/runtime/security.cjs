@@ -49,12 +49,37 @@ function isAllowedRendererNavigation(rawUrl, options = {}) {
   return false;
 }
 
+function isTrustedRendererFrameUrl(rawUrl) {
+  const parsed = normalizeUrl(rawUrl);
+  if (!parsed) return false;
+
+  if (parsed.protocol === `${LOCALTIFY_RENDERER_PROTOCOL}:`) {
+    return parsed.hostname === "app";
+  }
+
+  if (parsed.protocol === "http:") {
+    const hostname = parsed.hostname.toLowerCase();
+    const isLoopback = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+    return isLoopback && parsed.port === "5173";
+  }
+
+  // Packaged Windows/macOS can fall back to loadFile() if the custom protocol
+  // fails. The navigation guard already scopes file:// navigation to dist; here
+  // we additionally require the IPC frame URL to be the active main-frame URL.
+  return parsed.protocol === "file:";
+}
+
 function isTrustedMainFrameIpcEvent(event, win) {
   try {
     if (!event || !win || win.isDestroyed?.()) return false;
     const webContents = win.webContents;
     if (!webContents || event.sender !== webContents) return false;
-    return Boolean(event.senderFrame && event.senderFrame === webContents.mainFrame);
+    if (!event.senderFrame || event.senderFrame !== webContents.mainFrame) return false;
+
+    const frameUrl = String(event.senderFrame.url || "");
+    const activeUrl = String(webContents.getURL?.() || frameUrl);
+    if (!frameUrl || !activeUrl || frameUrl !== activeUrl) return false;
+    return isTrustedRendererFrameUrl(frameUrl);
   } catch {
     return false;
   }
@@ -104,6 +129,7 @@ module.exports = {
   isAllowedRendererNavigation,
   isFileInsideRoot,
   isTrustedMainFrameIpcEvent,
+  isTrustedRendererFrameUrl,
   installRendererSecurityGuards,
   installSessionPermissionGuards
 };
