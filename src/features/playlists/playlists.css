@@ -1,4 +1,495 @@
-/* Playlist-owned layout for TanStack virtual rows. Motion does not own geometry. */
+/* Playlist view ownership. Layout, cards, rows, and virtual-row geometry live here. */
+.playlistsPage {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+  padding-bottom: 30px;
+}
+
+.playlistTopGrid {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.7fr);
+  gap: 14px;
+}
+
+.playlistsPage .panel {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: var(--lt-radius-md);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.022), transparent 36%),
+    rgba(8, 9, 14, 0.78);
+  box-shadow: var(--lt-shadow-low);
+}
+
+.playlistHeroPanel {
+  position: relative;
+  overflow: hidden;
+  min-height: 190px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 148px;
+  grid-template-areas:
+    "copy collage"
+    "actions collage";
+  align-items: center;
+  gap: 14px 22px;
+  padding: 22px;
+}
+
+.playlistHeroPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 80% 25%, rgba(var(--accent-rgb), 0.10), transparent 36%);
+}
+
+.playlistHeroCopy {
+  position: relative;
+  z-index: 1;
+  grid-area: copy;
+  min-width: 0;
+  align-self: end;
+}
+
+.playlistHeroCopy > .eyebrow,
+.playlistCreatePanel > .eyebrow,
+.playlistTracksTitleBlock > .eyebrow,
+.playlistShelfPanel .eyebrow {
+  margin: 0 0 5px;
+}
+
+.playlistHeroCopy > h3,
+.playlistCreatePanel > h3,
+.playlistTracksTitleBlock > h3,
+.playlistShelfPanel .panelHead h3 {
+  margin: 0;
+  color: var(--text);
+  font-weight: 880;
+  letter-spacing: -0.045em;
+}
+
+.playlistHeroCopy > h3 {
+  max-width: 680px;
+  overflow: hidden;
+  font-size: clamp(25px, 2.6vw, 40px);
+  line-height: 0.98;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playlistHeroCopy > p:not(.eyebrow) {
+  margin: 9px 0 0;
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.playlistHeroActions {
+  position: relative;
+  z-index: 1;
+  grid-area: actions;
+  align-self: start;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.playlistHeroActions > button {
+  min-height: 34px;
+}
+
+.playlistHeroCollage {
+  position: relative;
+  z-index: 1;
+  grid-area: collage;
+  width: 148px;
+  height: 148px;
+  justify-self: end;
+}
+
+.playlistCoverCollage {
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.30);
+}
+
+.playlistCoverTile {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.playlistCoverTile:nth-child(1),
+.playlistCoverTile:nth-child(2) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.playlistCoverTile:nth-child(1),
+.playlistCoverTile:nth-child(3) {
+  border-right: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.playlistCoverImage,
+.playlistCoverImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.playlistCoverTile.empty {
+  color: rgba(255, 255, 255, 0.28);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(var(--accent-rgb), 0.06), transparent 62%),
+    rgba(255, 255, 255, 0.018);
+}
+
+.playlistEmptyCollage {
+  box-shadow: none;
+}
+
+.playlistCreatePanel {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 22px;
+}
+
+.playlistCreatePanel > h3 {
+  font-size: 22px;
+}
+
+.playlistCreatePanel > .softText {
+  max-width: 420px;
+  margin: 8px 0 15px;
+  color: var(--text-2);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.playlistCreateForm,
+.playlistRenameForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.playlistCreateForm > input,
+.playlistRenameForm > input {
+  min-width: 0;
+  flex: 1 1 auto;
+  height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  outline: none;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.24);
+  font: inherit;
+  font-size: 10px;
+}
+
+.playlistCreateForm > input:focus,
+.playlistRenameForm > input:focus {
+  border-color: rgba(var(--accent-rgb), 0.44);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.07);
+}
+
+.playlistContentGrid {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.55fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.playlistShelfPanel,
+.playlistTracksPanel {
+  min-width: 0;
+  padding: 18px;
+}
+
+.playlistShelfPanel .panelHead,
+.playlistTracksHead {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.playlistShelfPanel .panelHead h3,
+.playlistTracksTitleBlock > h3 {
+  font-size: 18px;
+}
+
+.playlistShelfGrid {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 10px;
+}
+
+.playlistShelfCard {
+  min-width: 0;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  grid-template-areas:
+    "cover meta"
+    "cover hint";
+  align-items: center;
+  gap: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 13px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.025);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+
+.playlistShelfCard:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--accent-rgb), 0.22);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.playlistShelfCard.active,
+.playlistShelfCard.playing {
+  border-color: rgba(var(--accent-rgb), 0.38);
+  background: rgba(var(--accent-rgb), 0.075);
+}
+
+.playlistShelfCard.dropTarget {
+  border-color: rgba(var(--accent-rgb), 0.58);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.16), 0 0 0 3px rgba(var(--accent-rgb), 0.055);
+}
+
+.playlistShelfCard > .playlistCoverCollage {
+  grid-area: cover;
+  width: 62px;
+  height: 62px;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.playlistShelfMeta {
+  grid-area: meta;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.playlistShelfMeta > strong,
+.playlistShelfMeta > small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playlistShelfMeta > strong {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.playlistShelfMeta > small,
+.playlistShelfDropHint {
+  color: var(--faint);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.playlistShelfDropHint {
+  grid-area: hint;
+  align-self: start;
+  color: rgba(var(--accent-rgb), 0.72);
+}
+
+.playlistTracksPanel {
+  min-height: 420px;
+}
+
+.playlistTracksTitleBlock {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.playlistManageActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.playlistTrackList {
+  position: relative;
+  min-width: 0;
+  height: clamp(320px, 48vh, 560px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.virtualPlaylistTrackCanvas {
+  position: relative;
+  min-width: 0;
+}
+
+.playlistTrackRow {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto 34px;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 11px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.024);
+  transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.playlistTrackRow:hover {
+  border-color: rgba(var(--accent-rgb), 0.20);
+  background: rgba(255, 255, 255, 0.038);
+}
+
+.playlistTrackRow.active {
+  border-color: rgba(var(--accent-rgb), 0.38);
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.09), rgba(255, 255, 255, 0.025));
+}
+
+.playlistTrackRow.songDropTarget {
+  border-color: rgba(var(--accent-rgb), 0.56);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.12);
+}
+
+.playlistTrackGrip {
+  display: grid;
+  place-items: center;
+  color: var(--faint);
+  cursor: grab;
+}
+
+.playlistTrackMain {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 24px 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.playlistTrackIndex {
+  display: grid;
+  place-items: center;
+  color: var(--faint);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.playlistTrackCover,
+.playlistTrackCover img {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.playlistTrackText {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.playlistTrackText > strong,
+.playlistTrackText > small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playlistTrackText > strong {
+  color: rgba(255, 255, 255, 0.90);
+  font-size: 10px;
+  font-weight: 830;
+}
+
+.playlistTrackText > small {
+  color: var(--faint);
+  font-size: 8px;
+}
+
+.playlistTrackDuration {
+  padding: 0 4px;
+  color: var(--text-2);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.playlistEmptyState {
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: var(--text-2);
+  background: rgba(255, 255, 255, 0.012);
+  text-align: center;
+}
+
+.playlistEmptyMascotV496 {
+  width: 150px;
+  height: 170px;
+}
+
+.mascotEmptyCopyV496 {
+  max-width: 360px;
+  display: grid;
+  gap: 4px;
+}
+
+.mascotEmptyCopyV496 > strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.mascotEmptyCopyV496 > p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.playlistDropEmpty {
+  border-color: rgba(var(--accent-rgb), 0.22);
+}
+
+/* TanStack virtual rows: motion does not own geometry. */
 .app .playlistTrackRow.virtualPlaylistTrackRow {
   --playlist-row-step: 72px;
   --playlist-row-fallback-y: calc(var(--playlist-stagger, 0) * var(--playlist-row-step));
@@ -51,3 +542,51 @@
 .app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(10) { --playlist-stagger: 9; }
 .app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(11) { --playlist-stagger: 10; }
 .app .virtualPlaylistTrackCanvas > .playlistTrackRow.virtualPlaylistTrackRow:nth-child(12) { --playlist-stagger: 11; }
+
+@media (max-width: 980px) {
+  .playlistTopGrid,
+  .playlistContentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .playlistCreatePanel {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .playlistHeroPanel {
+    grid-template-columns: minmax(0, 1fr) 104px;
+    padding: 16px;
+  }
+
+  .playlistHeroCollage {
+    width: 104px;
+    height: 104px;
+  }
+
+  .playlistShelfPanel,
+  .playlistTracksPanel {
+    padding: 13px;
+  }
+
+  .playlistShelfGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .playlistTracksHead {
+    flex-direction: column;
+  }
+
+  .playlistManageActions {
+    justify-content: flex-start;
+  }
+
+  .playlistTrackRow {
+    grid-template-columns: minmax(0, 1fr) auto 32px;
+  }
+
+  .playlistTrackGrip {
+    display: none;
+  }
+}
