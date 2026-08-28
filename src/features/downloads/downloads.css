@@ -1,0 +1,475 @@
+/* Downloads view ownership. */
+.downloadsLayoutV031 {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+  padding-bottom: 30px;
+}
+
+.downloadPanelV031 {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: var(--lt-radius-md);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.022), transparent 34%),
+    rgba(8, 9, 14, 0.80);
+  box-shadow: var(--lt-shadow-low);
+}
+
+.downloadHeroHead,
+.downloadQueuePanel .panelHead,
+.downloadResultsHeadV502 {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.downloadHeroHead h3,
+.downloadQueuePanel .panelHead h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 880;
+  letter-spacing: -0.04em;
+}
+
+.downloadHeroHead .eyebrow,
+.downloadQueuePanel .eyebrow {
+  margin: 0 0 5px;
+}
+
+.downloadHeroHead .softText {
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 10px;
+}
+
+.downloadHeroActionsCompactV475,
+.downloadActionsV031,
+.downloadQueueHeaderActionsV502,
+.downloadQueueActions,
+.downloadResultsHeadV502 > div,
+.downloadResultActionsV502,
+.spotifyAuthActions,
+.spotifySelectActions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.downloadTabStrip {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+  background: rgba(0,0,0,.16);
+}
+
+.downloadTab {
+  min-height: 34px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--text-2);
+  background: transparent;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.downloadTab:hover,
+.downloadTab.active {
+  color: var(--text);
+  border-color: rgba(var(--accent-rgb), .24);
+  background: rgba(var(--accent-rgb), .075);
+}
+
+.spotifyTabDot,
+.spotifyAuthDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1ed760;
+  box-shadow: 0 0 10px rgba(30,215,96,.35);
+}
+
+.downloadTextareaV031 {
+  width: 100%;
+  min-width: 0;
+  min-height: 118px;
+  padding: 12px;
+  resize: vertical;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  outline: none;
+  color: var(--text);
+  background: rgba(0,0,0,.25);
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.downloadTextareaV031:focus,
+.spotifyUrlInput:focus {
+  border-color: rgba(var(--accent-rgb), .40);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .055);
+}
+
+.downloadActionsV031 {
+  justify-content: flex-start;
+}
+
+.spotifyAuthCard {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 12px;
+  background: rgba(255,255,255,.022);
+}
+
+.spotifyAuthCard.loggedIn {
+  border-color: rgba(30,215,96,.22);
+  background: rgba(30,215,96,.035);
+}
+
+.spotifyAuthLeft {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spotifyAuthLeft > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.spotifyAuthLeft strong {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.spotifyAuthLeft p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 9px;
+}
+
+.spotifyUrlRow {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 8px;
+}
+
+.spotifyUrlInput {
+  min-height: 36px;
+  height: 36px;
+  resize: none;
+}
+
+.spotifyErrorV326 {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255,79,115,.22);
+  border-radius: 11px;
+  background: rgba(255,79,115,.055);
+}
+
+.spotifyErrorV326 > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.spotifyErrorV326 strong { color: #ff9caf; font-size: 10px; }
+.spotifyErrorV326 span { color: var(--text-2); font-size: 9px; line-height: 1.4; }
+
+.spotifyTrackList,
+.downloadQueuePanel,
+.converterBoxV031,
+.downloadResultsV031 {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 13px;
+  background: rgba(255,255,255,.018);
+}
+
+.spotifyTrackListHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.spotifyTrackListHead > strong {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.spotifyTrackItems,
+.downloadQueueList,
+.downloadResultsV031 {
+  display: grid;
+  gap: 7px;
+}
+
+.spotifyTrackItems {
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+}
+
+.spotifyTrackItemV326 {
+  min-width: 0;
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 48px minmax(0,1fr) 28px auto;
+  align-items: center;
+  gap: 9px;
+  padding: 7px;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 10px;
+  color: var(--text);
+  background: rgba(255,255,255,.017);
+  text-align: left;
+  cursor: pointer;
+}
+
+.spotifyTrackItemV326:hover,
+.spotifyTrackItemV326.selected {
+  border-color: rgba(var(--accent-rgb), .28);
+  background: rgba(var(--accent-rgb), .055);
+}
+
+.spotifyTrackItemV326.failed { border-color: rgba(255,79,115,.24); }
+.spotifyTrackItemV326.done { border-color: rgba(67,234,139,.20); }
+
+.spotifyTrackArt,
+.spotifyTrackArt img {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.spotifyTrackIndex {
+  display: grid;
+  place-items: center;
+  color: var(--faint);
+  font-size: 9px;
+}
+
+.spotifyTrackMeta {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.spotifyTrackTitleLine {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spotifyTrackTitleLine > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spotifySourceBadge,
+.spotifyTrackStatus,
+.downloadSourceBadgeV338,
+.downloadWarnBadgeV338,
+.downloadErrorBadgeV338 {
+  flex: 0 0 auto;
+  padding: 3px 6px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 999px;
+  color: var(--faint);
+  background: rgba(255,255,255,.025);
+  font-size: 7px;
+  font-weight: 850;
+}
+
+.spotifySourceBadge { color: #7df0a4; border-color: rgba(30,215,96,.18); background: rgba(30,215,96,.05); }
+.spotifyTrackMeta > p { margin: 0; overflow: hidden; color: var(--text-2); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.spotifyTrackMeta > small { color: var(--faint); font-size: 7px; }
+.spotifyTrackMeta > .spotifyTrackError { color: #ff9caf; }
+.spotifyTrackCheck { display: grid; place-items: center; color: var(--accent); }
+.spotifyRetryButton { padding: 5px 7px; border-radius: 8px; color: #ff9caf; background: rgba(255,79,115,.07); font-size: 8px; font-weight: 850; cursor: pointer; }
+
+.downloadQueuePanel .panelHead {
+  margin-bottom: 10px;
+}
+
+.downloadQueueHeaderActionsV502 {
+  justify-content: flex-end;
+}
+
+.downloadQueueHeaderActionsV502 > span {
+  align-self: center;
+  color: var(--faint);
+  font-size: 8px;
+}
+
+.tinyDownloadAction {
+  min-height: 27px;
+  padding: 0 8px;
+  font-size: 8px;
+}
+
+.dangerTinyDownloadActionV502 { color: #ff9caf; }
+
+.downloadQueueItemV338 {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 10px;
+  background: rgba(255,255,255,.017);
+}
+
+.downloadQueueItemV338.failed,
+.downloadQueueItemV338.cancelled { border-color: rgba(255,79,115,.20); }
+.downloadQueueItemV338.done { border-color: rgba(67,234,139,.16); }
+
+.downloadQueueTop {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 28px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.downloadQueueIndex { color: var(--faint); font-size: 8px; font-variant-numeric: tabular-nums; }
+.downloadQueueTop > div { min-width: 0; display: grid; gap: 2px; }
+.downloadQueueTop strong,
+.downloadQueueTop p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.downloadQueueTop strong { color: var(--text); font-size: 9px; }
+.downloadQueueTop p { margin: 0; color: var(--faint); font-size: 8px; }
+.downloadQueueTop > small { color: var(--text-2); font-size: 8px; font-variant-numeric: tabular-nums; }
+
+.downloadQueueTrack,
+.converterTrack {
+  height: 4px;
+  overflow: hidden;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.055);
+}
+
+.downloadQueueTrack > i,
+.converterTrack > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.downloadQueueMeta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+  color: var(--faint);
+  font-size: 7px;
+}
+
+.downloadWarnBadgeV338 { color: #ffd49b; border-color: rgba(255,183,92,.18); }
+.downloadErrorBadgeV338 { max-width: 420px; overflow: hidden; color: #ff9caf; border-color: rgba(255,79,115,.18); text-overflow: ellipsis; white-space: nowrap; }
+.downloadQueueActions { margin-top: 8px; }
+
+.converterBoxV031 {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.converterBoxV031 > div:first-child { min-width: 0; }
+.converterBoxV031 > div:first-child > strong { color: var(--text); font-size: 11px; }
+.converterBoxV031 > div:first-child > p { margin: 4px 0 0; color: var(--text-2); font-size: 9px; }
+.converterMascotV501 { width: 66px; height: 66px; }
+.converterProgress { grid-column: 1 / -1; display: grid; gap: 6px; }
+.converterProgress > div:first-child { display: flex; justify-content: space-between; gap: 10px; color: var(--faint); font-size: 8px; }
+
+.downloadResultsHeadV502 {
+  align-items: center;
+}
+
+.downloadResultsHeadV502 > strong {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.downloadResultV326 {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 10px;
+  background: rgba(255,255,255,.016);
+}
+
+.downloadResultV326.ok { border-color: rgba(67,234,139,.18); }
+.downloadResultV326.warn { border-color: rgba(255,183,92,.18); }
+.downloadResultV326.bad { border-color: rgba(255,79,115,.22); }
+.downloadResultV326 > span:first-child { display: grid; place-items: center; color: var(--accent); }
+.downloadResultV326 > div { min-width: 0; display: grid; gap: 2px; }
+.downloadResultV326 strong { color: var(--text); font-size: 9px; }
+.downloadResultV326 p { margin: 0; overflow: hidden; color: var(--text-2); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.downloadResultAddedV338 { color: #7af2ad; font-size: 7px; }
+.downloadResultWarnV338 { color: #ffd49b; font-size: 7px; }
+
+@media (max-width: 760px) {
+  .downloadPanelV031 { padding: 14px; }
+  .downloadHeroHead,
+  .spotifyAuthCard,
+  .downloadQueuePanel .panelHead,
+  .downloadResultsHeadV502 { align-items: flex-start; flex-direction: column; }
+  .downloadQueueHeaderActionsV502 { justify-content: flex-start; }
+  .spotifyUrlRow { grid-template-columns: 1fr; }
+  .spotifyTrackItemV326 { grid-template-columns: 42px minmax(0,1fr) 26px; }
+  .spotifyTrackArt,
+  .spotifyTrackArt img { width: 42px; height: 42px; }
+  .spotifyRetryButton { grid-column: 1 / -1; }
+  .converterBoxV031 { grid-template-columns: 1fr auto; }
+  .converterMascotV501 { display: none; }
+  .downloadResultV326 { grid-template-columns: 28px minmax(0,1fr); }
+  .downloadResultV326 > button,
+  .downloadResultActionsV502 { grid-column: 1 / -1; justify-self: start; }
+}
