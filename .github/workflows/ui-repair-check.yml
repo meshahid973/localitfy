@@ -1,0 +1,28 @@
+name: UI repair check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ui-repair-check.yml"
+      - "src/features/home/**"
+      - "tests/phase4/home-layout.test.mjs"
+      - "scripts/check-release-ui-ownership.mjs"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: read
+
+jobs:
+  release-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run release:check
