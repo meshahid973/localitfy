@@ -1,0 +1,250 @@
+/* Shared view-state UI only. Feature layouts belong to their feature stylesheets. */
+.mascotStateArtV496 {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+.localtifyStateCardV373 {
+  width: 100%;
+  min-width: 0;
+  min-height: 148px;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(var(--accent-rgb), 0.14);
+  border-radius: var(--lt-radius-md);
+  color: var(--text);
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.035), rgba(255, 255, 255, 0.012)),
+    rgba(8, 8, 13, 0.78);
+  box-shadow: var(--lt-shadow-low);
+  text-align: left;
+  overflow: hidden;
+}
+
+.localtifyStateCardV373.warning {
+  border-color: rgba(255, 198, 91, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 198, 91, 0.06), rgba(255, 255, 255, 0.012)),
+    rgba(8, 8, 13, 0.78);
+}
+
+.localtifyStateCardV373.error {
+  border-color: rgba(255, 88, 116, 0.25);
+  background:
+    linear-gradient(180deg, rgba(255, 88, 116, 0.07), rgba(255, 255, 255, 0.012)),
+    rgba(8, 8, 13, 0.78);
+}
+
+.localtifyStateCardV373.success {
+  border-color: rgba(67, 234, 139, 0.24);
+  background:
+    linear-gradient(180deg, rgba(67, 234, 139, 0.06), rgba(255, 255, 255, 0.012)),
+    rgba(8, 8, 13, 0.78);
+}
+
+.localtifyStateIconV373 {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border-radius: 14px;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.09);
+}
+
+.localtifyStateCardV373.warning .localtifyStateIconV373 {
+  color: #ffd477;
+  border-color: rgba(255, 198, 91, 0.22);
+  background: rgba(255, 198, 91, 0.10);
+}
+
+.localtifyStateCardV373.error .localtifyStateIconV373 {
+  color: #ff8aa0;
+  border-color: rgba(255, 88, 116, 0.24);
+  background: rgba(255, 88, 116, 0.10);
+}
+
+.localtifyStateCardV373.success .localtifyStateIconV373 {
+  color: #7af2ad;
+  border-color: rgba(67, 234, 139, 0.24);
+  background: rgba(67, 234, 139, 0.10);
+}
+
+.localtifyStateCopyV373 {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.localtifyStateCopyV373 > .eyebrow {
+  margin: 0 0 2px;
+}
+
+.localtifyStateCopyV373 > strong {
+  color: var(--text);
+  font-size: clamp(17px, 1.6vw, 22px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.localtifyStateCopyV373 > span {
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.localtifyStateCopyV373 > small {
+  color: var(--faint);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.localtifyStateActionsV373 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+}
+
+.localtifyStateCardCenteredV466 {
+  justify-items: center;
+  text-align: center;
+}
+
+.localtifyStateCardV373.localtifyStateCardCuteV466 {
+  width: min(100%, 560px);
+  min-height: 0;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 8px;
+  margin: auto;
+  padding: clamp(20px, 3vw, 34px);
+  text-align: center;
+}
+
+.localtifyEmptyArtV466 {
+  width: min(210px, 42vw);
+  height: clamp(150px, 23vh, 230px);
+  display: grid;
+  place-items: center;
+}
+
+.localtifyEmptyImageShellV466 {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.localtifyEmptyMascotV496 {
+  width: 100%;
+  height: 100%;
+  max-width: 210px;
+  max-height: 230px;
+}
+
+.localtifyEmptyCaptionV467 {
+  max-width: 390px;
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.localtifyEmptyActionsV467 {
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.mascotHelperBubbleV501 {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--lt-border);
+  border-radius: var(--lt-radius-md);
+  background: var(--lt-glass-bg);
+  backdrop-filter: blur(var(--lt-blur-soft));
+}
+
+.mascotHelperArtV501 {
+  width: 72px;
+  height: 72px;
+}
+
+.mascotHelperCopyV501 {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.mascotHelperCopyV501 > .eyebrow {
+  margin: 0;
+}
+
+.mascotHelperCopyV501 > strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.mascotHelperCopyV501 > span {
+  color: var(--text-2);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.mascotHelperActionsV501 {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mascotHelperBubbleV501.noMascotV511 {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.metaDividerDot {
+  width: 3px;
+  height: 3px;
+  display: inline-block;
+  flex: 0 0 auto;
+  margin: 0 7px;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: currentColor;
+  opacity: 0.42;
+}
+
+@media (max-width: 720px) {
+  .localtifyStateCardV373:not(.localtifyStateCardCuteV466) {
+    grid-template-columns: 1fr;
+  }
+
+  .localtifyStateIconV373 {
+    width: 38px;
+    height: 38px;
+  }
+
+  .mascotHelperBubbleV501,
+  .mascotHelperBubbleV501.noMascotV511 {
+    grid-template-columns: 1fr;
+  }
+
+  .mascotHelperActionsV501 {
+    justify-content: flex-start;
+  }
+}
