@@ -28,6 +28,24 @@ const retiredHomeTokens = [
   "heroTinyButton"
 ];
 
+const retiredPageStyles = [
+  "src/features/library/library.css",
+  "src/features/albums/albums.css",
+  "src/features/playlists/playlists.css",
+  "src/features/covers/covers.css",
+  "src/features/downloads/downloads.css",
+  "src/features/analytics/analytics.css"
+];
+
+const resetPageRoots = [
+  ".libraryPanelV025",
+  ".albumsPageV318",
+  ".playlistsPage",
+  ".coverStudioLayout",
+  ".downloadsLayoutV031",
+  ".analyticsStudioV339"
+];
+
 reject("src/features/home/HomeView.tsx", retiredHomeTokens);
 reject("src/features/home/home.css", retiredHomeTokens);
 reject("src/App.tsx", ["quickLibraryMoreBlur", "showHomeSideCards", "homeDashboardClass", "settings.homeExpanded", "settings.showRightColumn"]);
@@ -39,23 +57,17 @@ for (const marker of ["JUMP BACK IN", "Listen now", "Most listened", "New Releas
   if (!homeViewSource.includes(marker)) failures.push(`src/features/home/HomeView.tsx: missing Home hierarchy marker ${marker}`);
 }
 if (homeViewSource.includes("Top Artists")) failures.push("src/features/home/HomeView.tsx: retired Top Artists label returned");
-if (!homeViewSource.includes('style={{ transform: "none" }}')) failures.push("src/features/home/HomeView.tsx: hover clipping guard is missing");
+if (homeViewSource.includes('style={{ transform: "none" }}')) failures.push("src/features/home/HomeView.tsx: CSS behavior leaked back into inline styles");
 
 const homePath = path.join(root, "src/features/home/home.css");
 const homeBytes = fs.statSync(homePath).size;
-if (homeBytes > 24 * 1024) failures.push(`src/features/home/home.css: ${homeBytes} bytes exceeds 24 KiB Home ownership budget`);
 const homeCss = read("src/features/home/home.css");
+if (homeBytes > 20 * 1024) failures.push(`src/features/home/home.css: ${homeBytes} bytes exceeds 20 KiB Home ownership budget`);
 if (!homeCss.includes(".app:has(.pageTransition-home)")) failures.push("src/features/home/home.css: Home shell rules must stay scoped through .pageTransition-home");
+if (!homeCss.includes("width: 100%")) failures.push("src/features/home/home.css: Home must fill the available content pane");
+if (homeCss.includes("width: min(1560px") || homeCss.includes("width: min(1640px")) failures.push("src/features/home/home.css: retired desktop max-width returned");
 if (exists("src/features/home/home-polish.css")) failures.push("src/features/home/home-polish.css: duplicate Home override layer must stay removed");
 
-const retiredPageStyles = [
-  "src/features/library/library.css",
-  "src/features/albums/albums.css",
-  "src/features/playlists/playlists.css",
-  "src/features/covers/covers.css",
-  "src/features/downloads/downloads.css",
-  "src/features/analytics/analytics.css"
-];
 for (const relativePath of retiredPageStyles) {
   if (exists(relativePath)) failures.push(`${relativePath}: retired page design returned before its rebuild`);
 }
@@ -63,12 +75,13 @@ for (const relativePath of retiredPageStyles) {
 for (const [relativePath, maxBytes] of [
   ["src/App.css", 246 * 1024],
   ["src/features/shell/app-core.css", 112 * 1024],
-  ["src/features/settings/settings.css", 24 * 1024],
+  ["src/features/settings/themes.css", 84 * 1024],
+  ["src/features/settings/settings.css", 8 * 1024],
   ["src/features/player/player.css", 160 * 1024],
   ["src/features/shell/effects.css", 96 * 1024],
   ["src/shared/ui/view-ui.css", 16 * 1024],
-  ["src/styles/page-foundation.css", 16 * 1024],
-  ["src/styles/view-shell.css", 24 * 1024]
+  ["src/styles/page-foundation.css", 8 * 1024],
+  ["src/styles/view-shell.css", 20 * 1024]
 ]) {
   if (!exists(relativePath)) {
     failures.push(`${relativePath}: required stylesheet owner is missing`);
@@ -97,8 +110,8 @@ if (main.includes("release.css")) failures.push("src/main.tsx: obsolete release.
 if (main.includes("home-polish.css")) failures.push("src/main.tsx: duplicate Home polish import returned");
 for (const ownedImport of [
   "./shared/ui/view-ui.css",
-  "./styles/page-foundation.css",
   "./styles/view-shell.css",
+  "./styles/page-foundation.css",
   "./features/shell/performance.css"
 ]) {
   if (!main.includes(`import "${ownedImport}";`)) failures.push(`src/main.tsx: missing renderer stylesheet ${ownedImport}`);
@@ -112,6 +125,8 @@ if (perfImport < 0) failures.push("src/main.tsx: performance.css is missing");
 
 const workspaceCss = read("src/styles/view-shell.css");
 for (const marker of [
+  "--workspace-sidebar-expanded",
+  "--workspace-sidebar-current",
   ".appShell",
   ".sidebar",
   '[data-sidebar-behavior="slim"]',
@@ -120,16 +135,30 @@ for (const marker of [
 ]) {
   if (!workspaceCss.includes(marker)) failures.push(`src/styles/view-shell.css: shared shell lost ${marker}`);
 }
-for (const forbiddenPageSelector of [
-  ".libraryPanelV025",
-  ".albumsPageV318",
-  ".playlistsPage",
-  ".coverStudioLayout",
-  ".downloadsLayoutV031",
-  ".analyticsStudioV339",
-  ".settingsPageV027"
-]) {
+if (workspaceCss.includes("--workspace-max")) failures.push("src/styles/view-shell.css: retired workspace max-width returned");
+for (const forbiddenPageSelector of [...resetPageRoots, ".settingsPageV027"]) {
   if (workspaceCss.includes(forbiddenPageSelector)) failures.push(`src/styles/view-shell.css: page design leaked into shell: ${forbiddenPageSelector}`);
+}
+
+const globalVisualOwners = [
+  "src/App.css",
+  "src/features/shell/app-core.css",
+  "src/features/shell/effects.css",
+  "src/features/settings/themes.css"
+];
+for (const relativePath of globalVisualOwners) {
+  const source = read(relativePath);
+  for (const selector of resetPageRoots) {
+    if (source.includes(selector)) failures.push(`${relativePath}: reset page root leaked into global visual owner: ${selector}`);
+  }
+}
+
+const foundation = read("src/styles/page-foundation.css");
+for (const selector of resetPageRoots) {
+  if (!foundation.includes(selector)) failures.push(`src/styles/page-foundation.css: structural reset root missing ${selector}`);
+}
+for (const visualToken of ["linear-gradient(", "radial-gradient(", "text-shadow:"]) {
+  if (foundation.includes(visualToken)) failures.push(`src/styles/page-foundation.css: visual styling leaked into structural foundation: ${visualToken}`);
 }
 
 const settingsView = read("src/features/settings/SettingsView.tsx");
@@ -142,4 +171,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, page designs are reset, and sidebar modes are shell-owned.`);
+console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, page designs are reset, and shell geometry has one owner.`);
