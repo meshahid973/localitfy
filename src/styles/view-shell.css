@@ -1,25 +1,30 @@
-/* Shared desktop shell only. Page-specific visuals belong to the page being rebuilt. */
+/* Shared application shell only. Page visuals belong to Home or future page owners. */
 
 .app {
   --workspace-bg: #06131a;
   --workspace-sidebar: #07131b;
-  --workspace-surface: #0d1d26;
   --workspace-border: rgba(125, 164, 187, 0.08);
   --workspace-text: #c8d5dc;
   --workspace-muted: #7891a0;
   --workspace-accent: #79a7c4;
-  --workspace-max: 1560px;
+  --workspace-sidebar-expanded: clamp(218px, var(--sidebar-width, 236px), 264px);
+  --workspace-sidebar-current: var(--workspace-sidebar-expanded);
+}
+
+.app[data-sidebar-behavior="slim"],
+.app[data-sidebar-behavior="hover"] {
+  --workspace-sidebar-current: 76px;
 }
 
 .appShell {
-  grid-template-columns: clamp(218px, var(--sidebar-width, 236px), 264px) minmax(0, 1fr) !important;
+  grid-template-columns: var(--workspace-sidebar-current) minmax(0, 1fr) !important;
   overflow: visible !important;
 }
 
 .sidebar {
   position: relative !important;
   z-index: 40;
-  width: clamp(218px, var(--sidebar-width, 236px), 264px) !important;
+  width: var(--workspace-sidebar-current) !important;
   min-width: 0 !important;
   overflow: visible !important;
   border-right: 1px solid rgba(138, 178, 204, 0.09) !important;
@@ -31,8 +36,8 @@
   width: 100%;
   min-height: 0;
   padding: clamp(22px, 2.2vh, 30px) 14px 14px !important;
-  overflow-y: auto;
   overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-width: none;
 }
 
@@ -169,17 +174,7 @@
 }
 .sidebarResizeHandle:hover { opacity: .45 !important; }
 
-/* Slim is a true icon rail: no clipped labels or half-visible group names. */
-.app[data-sidebar-behavior="slim"] .appShell,
-.app[data-sidebar-behavior="hover"] .appShell {
-  grid-template-columns: 76px minmax(0, 1fr) !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar,
-.app[data-sidebar-behavior="hover"] .sidebar {
-  width: 76px !important;
-}
-
+/* Slim is a true icon rail. */
 .app[data-sidebar-behavior="slim"] .sidebarNavGroupsV467,
 .app[data-sidebar-behavior="hover"] .sidebarNavGroupsV467 {
   padding-inline: 8px !important;
@@ -217,9 +212,9 @@
   display: none !important;
 }
 
-/* Hover mode expands over the canvas without shifting page content. */
+/* Hover mode expands over the content without changing the grid track. */
 .app[data-sidebar-behavior="hover"] .sidebar:is(:hover, :focus-within) {
-  width: clamp(218px, var(--sidebar-width, 236px), 264px) !important;
+  width: var(--workspace-sidebar-expanded) !important;
   box-shadow: 22px 0 42px rgba(0, 0, 0, .24) !important;
 }
 
@@ -266,9 +261,9 @@
   position: relative !important;
   top: auto !important;
   z-index: 10 !important;
-  width: min(var(--workspace-max), 100%) !important;
+  width: 100% !important;
   min-height: 58px !important;
-  margin: 0 auto clamp(22px, 2vw, 32px) !important;
+  margin: 0 0 clamp(22px, 2vw, 32px) !important;
   padding: 0 0 15px !important;
   display: flex !important;
   align-items: flex-end !important;
@@ -331,38 +326,29 @@
 }
 
 .pageTransition:not(.pageTransition-home) {
-  width: min(var(--workspace-max), 100%) !important;
+  width: 100% !important;
   min-width: 0 !important;
-  margin: 0 auto !important;
+  margin: 0 !important;
   padding: 0 0 clamp(36px, 4vh, 60px) !important;
 }
 
-@media (min-width: 1800px) {
-  .app { --workspace-max: 1640px; }
-}
-
 @media (max-width: 1180px) {
-  .app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .appShell {
-    grid-template-columns: 208px minmax(0, 1fr) !important;
-  }
-  .app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) .sidebar {
-    width: 208px !important;
+  .app:not([data-sidebar-behavior="slim"]):not([data-sidebar-behavior="hover"]) {
+    --workspace-sidebar-current: 208px;
   }
   .content { padding-inline: 24px !important; }
 }
 
 @media (max-width: 780px) {
-  .appShell,
-  .app[data-sidebar-behavior="slim"] .appShell,
-  .app[data-sidebar-behavior="hover"] .appShell {
-    grid-template-columns: 72px minmax(0, 1fr) !important;
+  .app,
+  .app[data-sidebar-behavior="slim"],
+  .app[data-sidebar-behavior="hover"] {
+    --workspace-sidebar-current: 72px;
+    --workspace-sidebar-expanded: 72px;
   }
 
   .sidebar,
-  .app[data-sidebar-behavior="slim"] .sidebar,
-  .app[data-sidebar-behavior="hover"] .sidebar,
   .app[data-sidebar-behavior="hover"] .sidebar:is(:hover, :focus-within) {
-    width: 72px !important;
     box-shadow: none !important;
   }
 
@@ -402,8 +388,17 @@
 
   .sidebarResizeHandle { display: none !important; }
   .content { padding: 18px 14px 34px !important; }
-  .headerBar { min-height: 0 !important; align-items: flex-start !important; flex-direction: column !important; gap: 12px !important; }
+  .headerBar {
+    min-height: 0 !important;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
   .headerTools,
   .compactHeaderTools,
-  .searchEasterWrap { width: 100% !important; min-width: 0 !important; flex-basis: auto !important; }
+  .searchEasterWrap {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex-basis: auto !important;
+  }
 }
