@@ -88,7 +88,10 @@ const cssBudgets = [
 ];
 for (const [file, maxBytes, maxImportant] of cssBudgets) {
   if (!exists(file)) { fail(file + ": required CSS owner missing"); continue; }
-  const source = read(file); const bytes = Buffer.byteLength(source); const important = count(source, "!important");
+  const source = read(file);
+  const normalizedSource = source.replace(/\r\n/g, "\n");
+  const bytes = Buffer.byteLength(normalizedSource);
+  const important = count(source, "!important");
   if (bytes > maxBytes) fail(file + ": CSS size grew past ratchet (" + bytes + " > " + maxBytes + ")");
   if (important > maxImportant) fail(file + ": !important debt grew past ratchet (" + important + " > " + maxImportant + ")");
 }
