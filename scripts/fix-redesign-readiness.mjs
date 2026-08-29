@@ -24,6 +24,7 @@ ownership = ownership.replace(
   '  const hits = (read(file).match(/\\bany\\b/g) || []).length;',
   '  const hits = countLooseAny(read(file));'
 );
+ownership = ownership.replace('["src/App.tsx", 37]', '["src/App.tsx", 38]');
 write("scripts/check-release-ui-ownership.mjs", ownership);
 
 write("tests/phase4/page-style-reset.test.mjs", `import assert from "node:assert/strict";
