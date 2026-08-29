@@ -136,7 +136,6 @@ export default function HomeView(props: HomeViewProps) {
                   type="button"
                   onClick={() => void selectSong(song.id, true)}
                   title={`play ${song.title}`}
-                  style={{ transform: "none" }}
                 >
                   <Cover song={song} className="homeListenCover" />
                   <span className="homeListenCopy">
@@ -168,7 +167,7 @@ export default function HomeView(props: HomeViewProps) {
                 onClick={() => void selectSong(song.id, true)}
                 title={`play ${song.artist || song.title}`}
               >
-                <span className="homeArtistCoverWrap" style={{ transform: "none" }}>
+                <span className="homeArtistCoverWrap">
                   <Cover song={song} className="homeArtistCover" />
                   <span className="homeArtistPlay" aria-hidden="true"><Play size={13} fill="currentColor" /></span>
                 </span>
@@ -191,7 +190,7 @@ export default function HomeView(props: HomeViewProps) {
                 onClick={() => void selectSong(song.id, true)}
                 title={`play ${song.title}`}
               >
-                <span className="homeReleaseCoverWrap" style={{ transform: "none" }}>
+                <span className="homeReleaseCoverWrap">
                   <Cover song={song} className="homeReleaseCover" />
                   <span className="homeReleasePlay" aria-hidden="true"><Play size={15} fill="currentColor" /></span>
                 </span>
