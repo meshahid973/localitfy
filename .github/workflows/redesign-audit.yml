@@ -1,0 +1,22 @@
+name: redesign audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/redesign-audit.yml
+      - scripts/audit-redesign-readiness.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/audit-redesign-readiness.mjs
