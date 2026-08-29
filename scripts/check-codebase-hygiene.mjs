@@ -65,10 +65,18 @@ for (const relative of forbiddenFiles) {
   if (fs.existsSync(path.join(root, relative))) violations.push(`${relative}: legacy compatibility file must stay deleted`);
 }
 
+const qualityWorkflow = path.join(root, ".github", "workflows", "quality.yml");
+if (!fs.existsSync(qualityWorkflow)) {
+  violations.push(".github/workflows/quality.yml: permanent quality workflow must exist");
+}
 const workflowDirectory = path.join(root, ".github", "workflows");
 if (fs.existsSync(workflowDirectory)) {
+  const allowedWorkflows = new Set([".github/workflows/quality.yml"]);
   const workflowFiles = walk(workflowDirectory).filter((file) => fs.statSync(file).isFile());
-  if (workflowFiles.length) violations.push(`.github/workflows: workflows are intentionally disabled; found ${workflowFiles.map(repoPath).join(", ")}`);
+  for (const file of workflowFiles) {
+    const relative = repoPath(file);
+    if (!allowedWorkflows.has(relative)) violations.push(`${relative}: temporary or unowned workflow must not remain in the repository`);
+  }
 }
 
 const repairScripts = walk(path.join(root, "scripts")).filter((file) => /^apply-a\d|repair-a\d|fix-a\d/i.test(path.basename(file)));
@@ -128,4 +136,4 @@ if (violations.length) {
   for (const violation of violations) console.error(`  - ${violation}`);
   process.exit(1);
 }
-console.log("[codebase-hygiene] OK: no accidental duplicates, legacy shims, temporary repair files, workflows, or mojibake.");
+console.log("[codebase-hygiene] OK: no accidental duplicates, legacy shims, temporary repair files/workflows, or mojibake; permanent CI is present.");
