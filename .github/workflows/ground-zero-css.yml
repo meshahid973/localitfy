@@ -1,4 +1,5 @@
 # Ground-zero validator; self-removes before release validation.
+# Final rerun after album-import regression assertion repair.
 name: ground zero css
 
 on:
