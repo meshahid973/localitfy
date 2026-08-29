@@ -6,6 +6,60 @@
   box-sizing: border-box;
 }
 
+/* Neutralize historical App.css/page chrome without touching Home or the player. */
+.pageTransition:not(.pageTransition-home) :is(
+  .panel,
+  .libraryPanelV025,
+  .likedLibraryPanelV025,
+  .libraryQuickMetaV039 > span,
+  .libraryMissingStripV039,
+  .songRow,
+  .albumsHeroPanelV318,
+  .albumCardV318,
+  .albumDetailPanelV318,
+  .albumBuilderPanelV318,
+  .playlistHeroPanel,
+  .playlistCreatePanel,
+  .playlistCard,
+  .playlistTracksPanel,
+  .playlistTrackRow,
+  .coverStudioHero,
+  .coverGalleryCardCleanOnly,
+  .downloadPanelV031,
+  .downloadQueuePanel,
+  .converterBoxV031,
+  .spotifyTrackItemV326,
+  .analyticsHeroV339,
+  .analyticsRecapCardV339,
+  .analyticsSnapshotCardV339,
+  .analyticsMiniCardV339,
+  .analyticsSharePanelV339,
+  .settingsHeroV027,
+  .settingsPanelCard,
+  .settingsPageCard,
+  .settingsFocusPanelV491
+) {
+  border-color: transparent !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.pageTransition:not(.pageTransition-home) :is(
+  .softButton,
+  .mainAction,
+  .heroMain,
+  .heroGhost,
+  .shuffleLibraryButtonV025,
+  .settingsTinyButton,
+  .settingsActionButton
+) {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
 .pageTransition:not(.pageTransition-home) :is(button, input, select, textarea) {
   font: inherit;
 }
