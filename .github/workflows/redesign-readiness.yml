@@ -1,4 +1,4 @@
-# Final rerun after restoring permanent-CI hygiene ownership.
+# Final rerun after restoring permanent-CI hygiene ownership and precise debt assertions.
 name: redesign readiness
 
 on:
@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/redesign-readiness.yml
       - scripts/apply-redesign-readiness.mjs
+      - scripts/fix-redesign-readiness.mjs
 
 permissions:
   contents: write
@@ -24,13 +25,16 @@ jobs:
           node-version: 22
           cache: npm
       - name: Apply audited repair
-        run: node scripts/apply-redesign-readiness.mjs
+        run: |
+          node scripts/apply-redesign-readiness.mjs
+          node scripts/fix-redesign-readiness.mjs
       - name: Remove temporary audit and repair tools
         run: |
           rm -f .github/workflows/redesign-audit.yml
           rm -f .github/workflows/redesign-readiness.yml
           rm -f scripts/audit-redesign-readiness.mjs
           rm -f scripts/apply-redesign-readiness.mjs
+          rm -f scripts/fix-redesign-readiness.mjs
       - name: Install dependencies
         run: npm ci
       - name: Deduplicate CSS
