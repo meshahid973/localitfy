@@ -17,6 +17,65 @@ const selectorReplacement = `function selectorOwnsResetPage(selector) {
 if (!source.includes(selectorNeedle)) throw new Error("selector safety insertion point missing");
 source = source.replace(selectorNeedle, selectorReplacement);
 
+const functionalInsertPoint = `function selectorOwnsLegacySidebarMode(selector) {`;
+const functionalHelpers = `function findMatchingSelectorParen(text, open) {
+  let depth = 1;
+  for (let cursor = open + 1; cursor < text.length; cursor += 1) {
+    const char = text[cursor];
+    if (char === "/" && text[cursor + 1] === "*") {
+      cursor = skipComment(text, cursor, text.length) - 1;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      cursor = skipString(text, cursor, text.length) - 1;
+      continue;
+    }
+    if (char === "(") depth += 1;
+    else if (char === ")") {
+      depth -= 1;
+      if (depth === 0) return cursor;
+    }
+  }
+  return -1;
+}
+
+function sanitizePageFunctionalLists(selector) {
+  let output = "";
+  let cursor = 0;
+  const functionalPattern = /:(is|where)\\(/gi;
+  while (cursor < selector.length) {
+    functionalPattern.lastIndex = cursor;
+    const match = functionalPattern.exec(selector);
+    if (!match) {
+      output += selector.slice(cursor);
+      break;
+    }
+    output += selector.slice(cursor, match.index);
+    const open = match.index + match[0].length - 1;
+    const close = findMatchingSelectorParen(selector, open);
+    if (close < 0) return selector;
+    const args = splitSelectorList(selector.slice(open + 1, close))
+      .map(sanitizePageFunctionalLists)
+      .filter(Boolean)
+      .filter((argument) => !selectorOwnsResetPage(argument));
+    if (!args.length) return "";
+    output += \`:\${match[1]}(\${args.join(", ")})\`;
+    cursor = close + 1;
+  }
+  return output.trim();
+}
+
+`;
+if (!source.includes(functionalInsertPoint)) throw new Error("functional selector insertion point missing");
+source = source.replace(functionalInsertPoint, functionalHelpers + functionalInsertPoint);
+
+const selectorListNeedle = `    const selectors = splitSelectorList(preludeRaw);`;
+const selectorListReplacement = `    const selectors = splitSelectorList(preludeRaw)
+      .map(sanitizePageFunctionalLists)
+      .filter(Boolean);`;
+if (!source.includes(selectorListNeedle)) throw new Error("selector list sanitizer insertion point missing");
+source = source.replace(selectorListNeedle, selectorListReplacement);
+
 const matcherNeedle = `const pageMatchers = \${JSON.stringify(pageClassMatchers.map((matcher) => matcher.source))};
 const isPageClass = (name) => pageMatchers.some((source) => new RegExp(source, "i").test(name));`;
 const matcherReplacement = `const forbiddenPageTokens = [
