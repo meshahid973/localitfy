@@ -21,15 +21,14 @@ function countLooseAny(source) {
 const fail = (message) => failures.push(message);
 
 const retiredPageStyles = [
-  "src/features/library/library.css", "src/features/albums/albums.css", "src/features/playlists/playlists.css",
+  "src/features/albums/albums.css", "src/features/playlists/playlists.css",
   "src/features/covers/covers.css", "src/features/downloads/downloads.css", "src/features/analytics/analytics.css"
 ];
-const resetRoots = [".libraryPanelV025", ".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339", ".settingsPageV027"];
+const resetRoots = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339", ".settingsPageV027"];
 const resetSources = [
-  ["src/features/library/LibraryView.tsx", "library"], ["src/features/albums/AlbumsView.tsx", "albums"],
-  ["src/features/playlists/PlaylistsView.tsx", "playlists"], ["src/features/downloads/DownloadsView.tsx", "downloads"],
-  ["src/features/analytics/AnalyticsView.tsx", "analytics"], ["src/features/covers/CoverStudio.tsx", "covers"],
-  ["src/features/settings/SettingsView.tsx", "settings"]
+  ["src/features/albums/AlbumsView.tsx", "albums"], ["src/features/playlists/PlaylistsView.tsx", "playlists"],
+  ["src/features/downloads/DownloadsView.tsx", "downloads"], ["src/features/analytics/AnalyticsView.tsx", "analytics"],
+  ["src/features/covers/CoverStudio.tsx", "covers"], ["src/features/settings/SettingsView.tsx", "settings"]
 ];
 
 for (const file of retiredPageStyles) if (exists(file)) fail(file + ": retired page CSS returned before redesign");
@@ -42,12 +41,17 @@ if (appCssImports.length !== 1 || appCssImports[0] !== "./App.css") fail("App.ts
 
 const requiredOwners = [
   ["src/features/home/HomeView.tsx", './home.css'],
+  ["src/features/library/LibraryView.tsx", './library.css'],
   ["src/Onboarding.tsx", './features/onboarding/onboarding.css'],
   ["src/features/player/components/PlayerBar.tsx", '../player.css'],
   ["src/features/settings/SettingsView.tsx", './settings.css'],
   ["src/features/settings/SettingsModal.tsx", './settings.css']
 ];
 for (const [file, specifier] of requiredOwners) if (!read(file).includes('import "' + specifier + '";')) fail(file + ": missing co-located CSS owner " + specifier);
+
+const library = read("src/features/library/LibraryView.tsx");
+if (!library.includes('data-page-section="library"')) fail("LibraryView lost its page owner marker");
+if (library.includes('data-page-state="reset"')) fail("LibraryView returned to temporary reset mode after redesign started");
 
 const shell = read("src/features/shell/AppShell.tsx");
 for (const specifier of ["./app-core.css", "./motion.css", "./effects.css", "../../styles/view-shell.css"]) if (!shell.includes('import "' + specifier + '";')) fail("AppShell missing shell CSS owner " + specifier);
@@ -70,21 +74,25 @@ const foundation = read("src/styles/page-foundation.css");
 if (!foundation.includes('[data-page-section][data-page-state="reset"]')) fail("page foundation is not reset-state gated");
 if (/\[data-page-section\](?!\[data-page-state="reset"\])/.test(foundation)) fail("page foundation contains an ungated page-section selector");
 for (const rootSelector of resetRoots) {
-  const index = foundation.indexOf(rootSelector);
-  if (index < 0) fail("page foundation lost structural reset selector " + rootSelector);
+  if (!foundation.includes(rootSelector)) fail("page foundation lost structural reset selector " + rootSelector);
+}
+for (const libraryToken of [".libraryPanel", ".libraryQuick", ".libraryMissing", ".libraryFullList", ".libraryCoverCards"]) {
+  if (foundation.includes(libraryToken)) fail("page foundation still owns rebuilt Library token " + libraryToken);
 }
 for (const token of ["linear-gradient(", "radial-gradient("]) if (foundation.includes(token)) fail("visual skin leaked into page foundation: " + token);
 
 for (const file of ["src/App.css", "src/features/shell/app-core.css", "src/features/shell/effects.css", "src/styles/themes.css", "src/styles/view-shell.css"]) {
   const source = read(file).replace(/\/\*[\s\S]*?\*\//g, " ");
   for (const selector of resetRoots) if (source.includes(selector)) fail(file + ": rebuild page selector leaked into global owner: " + selector);
+  if (file !== "src/styles/view-shell.css" && source.includes(".libraryPage")) fail(file + ": rebuilt Library root leaked into global owner");
 }
 
 const cssBudgets = [
   ["src/App.css", 238 * 1024, 2209], ["src/features/shell/app-core.css", 80 * 1024, 664],
   ["src/features/player/player.css", 75 * 1024, 819], ["src/features/shell/effects.css", 65 * 1024, 662],
   ["src/styles/themes.css", 83 * 1024, 2], ["src/styles/view-shell.css", 20 * 1024, 190],
-  ["src/styles/page-foundation.css", 8 * 1024, 12], ["src/features/home/home.css", 20 * 1024, 11]
+  ["src/styles/page-foundation.css", 8 * 1024, 12], ["src/features/home/home.css", 20 * 1024, 11],
+  ["src/features/library/library.css", 24 * 1024, 90]
 ];
 for (const [file, maxBytes, maxImportant] of cssBudgets) {
   if (!exists(file)) { fail(file + ": required CSS owner missing"); continue; }
