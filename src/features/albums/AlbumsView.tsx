@@ -140,7 +140,7 @@ export default function AlbumsView(props: AlbumsViewProps) {
 
   return (
 
-              <section className="albumsPageV318">
+              <section data-page-section="albums" className="albumsPageV318">
                 <section className="albumsHeroPanelV318">
                   <div className="albumsHeroArtClusterV318" aria-hidden="true">
                     {(selectedAlbum?.songs || localAlbums[0]?.songs || songs).slice(0, 4).map((song, index) => (

@@ -211,12 +211,6 @@ button:disabled{
   gap: 18px;
 }
 
-.headerText h2{
-  margin: 4px 0 0;
-  font-size: clamp(34px, 3.8vw, 54px);
-  line-height: 0.92;
-  letter-spacing: -0.075em;
-}
 
 .headerTools{
   display: flex;
@@ -655,153 +649,6 @@ input[type="range"]{
 }
 
 
-.downloadNotice{
-  margin-top: 14px;
-  padding: 12px 14px;
-  border: 1px solid rgba(var(--accent-rgb), 0.18);
-  border-radius: 10px;
-  color: var(--muted);
-  background: rgba(var(--accent-rgb), 0.05);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.downloadTextarea{
-  width: 100%;
-  min-height: 220px;
-  resize: vertical;
-  margin-top: 14px;
-  padding: 14px;
-  border: 1px solid var(--line);
-
-  outline: none;
-  color: var(--text);
-
-  font: inherit;
-  line-height: 1.5;
-}
-
-.downloadActions{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.downloadResults{
-  display: grid;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.downloadResults > strong{
-  color: var(--accent);
-  font-size: 13px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.downloadResult{
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-  padding: 10px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.042);
-}
-
-.downloadResult span{
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  font-weight: 900;
-}
-
-.downloadResult.ok span{
-  color: #06100b;
-  background: var(--accent);
-}
-
-.downloadResult.bad span{
-  color: #fff;
-  background: var(--danger);
-}
-
-.downloadResult strong{
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.downloadResult p{
-  margin: 3px 0 0;
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.converterBox{
-  display: grid;
-  gap: 12px;
-  margin-top: 14px;
-  padding: 14px;
-  border: 1px solid rgba(var(--accent-rgb), 0.18);
-  border-radius: 10px;
-
-}
-
-.converterBox strong{
-  display: block;
-  color: var(--text);
-  font-size: 15px;
-}
-
-.converterBox p{
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.converterProgress{
-  display: grid;
-  gap: 8px;
-}
-
-.converterProgress > div:first-child{
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.converterProgress strong{
-  color: var(--accent);
-  font-size: 12px;
-}
-
-.converterTrack{
-  height: 10px;
-  overflow: hidden;
-  border-radius: var(--pill);
-  background: rgba(255, 255, 255, 0.09);
-}
-
-.converterTrack i{
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--accent);
-  transition: width 200ms ease;
-}
-
 .dangerButton{
   min-height: 38px;
   padding: 0 15px;
@@ -1208,19 +1055,6 @@ input[type="range"]::-webkit-slider-thumb{
   margin-top: -5px;
 }
 
-.downloadPanel{
-  max-width: 980px;
-}
-
-.downloadTextarea{
-  border-radius: 13px;
-  background: rgba(255, 255, 255, 0.042);
-}
-
-.converterBox{
-  background: rgba(255, 255, 255, 0.042);
-}
-
 
 .secretRibbon{
 
@@ -1351,10 +1185,6 @@ input[type="range"]::-webkit-slider-thumb{
   border-radius: 9px;
 }
 
-.sidebar{
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.018), transparent),
-    rgba(0, 0, 0, 0.9);
-}
 
 .circleButton:not(.playerBar *),
 .iconAction{
@@ -1384,9 +1214,6 @@ input[type="range"]::-webkit-slider-thumb{
 }
 }
 
-.analyticsLayout .panel{
-  padding: 15px;
-}
 
 .miniBars{
 
@@ -1611,12 +1438,6 @@ button:active,
   background: linear-gradient(90deg, rgba(0,0,0,.72), rgba(0,0,0,.28) 55%, rgba(0,0,0,.38)),
     repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 1px, transparent 1px 9px),
     linear-gradient(180deg, rgba(255,255,255,.035), transparent 34%) !important;
-}
-
-
-.analyticsLayout{
-  display: grid !important;
-  gap: 14px !important;
 }
 
 
@@ -2349,130 +2170,6 @@ body.isResizingPlayer{
   padding: 12px !important;
 }
 
-.analyticsV005{
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-
-
-}
-
-.analyticsHeroPanel{
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 22px;
-  padding: 24px !important;
-}
-
-.analyticsHeroText h3{
-  margin: 0;
-  font-size: clamp(32px, 4vw, 62px);
-  letter-spacing: -0.08em;
-  line-height: 0.9;
-}
-
-.analyticsHeroText p:not(.eyebrow){
-  max-width: 760px;
-  color: var(--text-2);
-  font-size: 14px;
-}
-
-.analyticsHeroMeter{
-  width: 132px;
-  height: 132px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  border-radius: 38px;
-  border: 1px solid var(--accent-line);
-  background: radial-gradient(circle at 50% 30%, rgba(var(--accent-rgb), 0.2), transparent 60%),
-    rgba(0, 0, 0, 0.36);
-  box-shadow: 0 0 56px rgba(var(--accent-rgb), 0.12);
-}
-
-.analyticsHeroMeter span{
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: -0.06em;
-  color: var(--accent);
-}
-
-.analyticsHeroMeter small{
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
-}
-
-
-.analyticsCardGridV005 .statCard{
-  min-height: 112px;
-  padding: 16px !important;
-  border-radius: 18px !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012)),
-    rgba(0, 0, 0, 0.62) !important;
-}
-
-.analyticsCardGridV005 .statCard strong{
-  font-size: clamp(20px, 2vw, 32px);
-  letter-spacing: -0.05em;
-  line-height: 0.95;
-}
-
-.analyticsCardGridV005 .statCard small{
-  margin-top: auto;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-
-.analyticsBarsV005{
-  display: grid;
-  gap: 9px;
-}
-
-.analyticsBarRow{
-
-  display: grid;
-
-  align-items: center;
-  gap: 12px;
-  border: 1px solid var(--line);
-
-  padding: 9px 12px;
-  background: rgba(255, 255, 255, 0.026);
-  color: var(--text);
-  text-align: left;
-  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
-}
-
-.analyticsBarRow:hover{
-  transform: translateX(3px);
-  border-color: var(--accent-line);
-  background: rgba(var(--accent-rgb), 0.08);
-}
-
-.analyticsBarRow span{
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: rgba(var(--accent-rgb), 0.1);
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-
-.analyticsArtistList{
-  gap: 8px;
-}
-
-.analyticsArtistRow{
-  cursor: default !important;
-}
 
 .recentImportStrip{
   display: grid;
@@ -2513,26 +2210,12 @@ body.isResizingPlayer{
 
 @media (max-width: 1180px){
 
-.analyticsBigCard{
-  grid-column: span 1;
-}
 
 }
 
 @media (max-width: 760px){
 
-.analyticsHeroPanel{
-  align-items: flex-start;
-  flex-direction: column;
-}
 
-.analyticsBarRow{
-  grid-template-columns: 34px 1fr;
-}
-
-.analyticsBarTrack{
-  grid-column: 2;
-}
 }
 
 :root{
@@ -2556,86 +2239,6 @@ body.isResizingPlayer{
   margin-top: 10px !important;
 }
 
-.analyticsV005{
-  gap: 16px !important;
-  padding-bottom: calc(var(--player-size, 92px) + 34px) !important;
-}
-
-.analyticsHeroPanel{
-  min-height: 190px !important;
-  border-color: rgba(var(--accent-rgb), 0.18) !important;
-  overflow: hidden !important;
-}
-
-.analyticsHeroPanel::after{
-  content: "";
-  position: absolute;
-  inset: auto 18px 18px auto;
-  width: 220px;
-  height: 220px;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.12), transparent 64%);
-  pointer-events: none;
-  transform: translate3d(0, 0, 0);
-}
-
-.analyticsCardGridV005{
-  display: grid !important;
-  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-}
-
-.analyticsBigCard{
-  grid-column: span 2 !important;
-}
-
-.analyticsSplitGrid{
-  display: grid !important;
-  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr) !important;
-  gap: 16px !important;
-}
-
-.analyticsBarRow{
-  grid-template-columns: 34px minmax(120px, 1fr) minmax(160px, 2fr) 72px !important;
-  min-height: 44px !important;
-  border-radius: 13px !important;
-}
-
-.analyticsHealthPanel{
-  overflow: hidden !important;
-}
-
-.analyticsHealthGrid{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.analyticsHealthGrid > div{
-  min-height: 92px;
-  padding: 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: radial-gradient(circle at 20% 15%, rgba(var(--accent-rgb), 0.11), transparent 44%),
-    rgba(255, 255, 255, 0.026);
-}
-
-.analyticsHealthGrid strong{
-  display: block;
-  font-size: clamp(22px, 3vw, 34px);
-  letter-spacing: -0.06em;
-  line-height: 1;
-}
-
-.analyticsHealthGrid small{
-  display: block;
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
-}
-
 
 .hero.ambientSurface:hover::after{
   opacity: 0.26 !important;
@@ -2644,28 +2247,15 @@ body.isResizingPlayer{
 
 
 @media (max-width: 1180px){
-.analyticsCardGridV005{
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-}
 
-.analyticsSplitGrid{
-  grid-template-columns: 1fr 1fr !important;
-}
+
 }
 
 @media (max-width: 760px){
-.analyticsCardGridV005{
-  grid-template-columns: 1fr !important;
+
+
 }
 
-.analyticsBigCard{
-  grid-column: span 1 !important;
-}
-}
-
-.sidebar{
-  overflow: visible !important;
-}
 
 .app{
   -webkit-font-smoothing: antialiased;
@@ -2940,7 +2530,7 @@ button{
 .app::before,
 .content::before,
 .loadingScreen::before,
-.editorModal::before {
+.editorModal::before{
   background-image: none !important;
   background-size: auto !important;
 }
@@ -2948,14 +2538,8 @@ button{
 
 .app,
 .app .content,
-.app .libraryWrap,
-.app .librarySection,
 .app .panel,
-.app .settingsPage,
-.app .coverStudio,
 .app .coverPage,
-.app .downloadsPage,
-.app .analyticsPage,
 .app .editorModal,
 .app .loadingScreen{
   background-image: none !important;
@@ -3132,13 +2716,8 @@ button{
 .mainContent,
 .pageShell,
 .pageSurface,
-.libraryShell,
-.settingsPage,
-.coverStudio,
-.playlistPage,
 .homePage,
-.libraryView,
-.scrollContent {
+.scrollContent{
   background-image: none !important;
 }
 
@@ -3154,16 +2733,8 @@ button{
 .mainContent::after,
 .pageShell::before,
 .pageShell::after,
-.libraryShell::before,
-.libraryShell::after,
-.settingsPage::before,
-.settingsPage::after,
-.coverStudio::before,
-.coverStudio::after,
-.playlistPage::before,
-.playlistPage::after,
 .homePage::before,
-.homePage::after {
+.homePage::after{
   background-image: none !important;
   background-size: auto !important;
   opacity: 0 !important;
@@ -3173,8 +2744,6 @@ button{
 .sidebarItem:hover,
 .navItem,
 .navItem:hover,
-.libraryCard,
-.libraryCard:hover,
 .songCard,
 .songCard:hover,
 .coverCard,
@@ -3182,7 +2751,7 @@ button{
 .panel,
 .panel:hover,
 .card,
-.card:hover {
+.card:hover{
   rotate: 0deg !important;
   transform-style: flat !important;
   perspective: none !important;
@@ -3254,7 +2823,7 @@ body,
   }
 
   .app .sidebar,
-  .app .sidebarResizeHandle{
+.app .sidebarResizeHandle{
     display: none !important;
   }
 
@@ -3469,7 +3038,7 @@ body,
   }
 
   .updatePrimaryButton,
-  .updateGhostButton{
+.updateGhostButton{
     flex: 1 1 100%;
   }
 }
@@ -3535,7 +3104,7 @@ body,
 }
 
 
-.updateToastCard {
+.updateToastCard{
 
   border-radius: 24px !important;
   border: 1px solid rgba(255,255,255,0.13) !important;
@@ -3546,22 +3115,22 @@ body,
 
 }
 
-.updateToastCard::before {
+.updateToastCard::before{
   opacity: 0.32 !important;
   filter: blur(18px) !important;
 }
 
-.updateToastText h3 {
+.updateToastText h3{
   letter-spacing: -0.045em !important;
   line-height: 0.98 !important;
 }
 
-.updateToastText p:not(.eyebrow) {
+.updateToastText p:not(.eyebrow){
   color: rgba(255,255,255,0.68) !important;
   line-height: 1.55 !important;
 }
 
-.updateToastMetaRow {
+.updateToastMetaRow{
   display: flex !important;
   flex-wrap: wrap !important;
   gap: 8px !important;
@@ -3569,7 +3138,7 @@ body,
 }
 
 .updateVersionPill,
-.updateSafePill {
+.updateSafePill{
   min-height: 30px !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -3583,17 +3152,17 @@ body,
   letter-spacing: 0.01em !important;
 }
 
-.updateSafePill.ok {
+.updateSafePill.ok{
   border-color: rgba(var(--accent-rgb), 0.28) !important;
   background: rgba(var(--accent-rgb), 0.12) !important;
   color: rgba(255,255,255,0.88) !important;
 }
 
-.updateSafePill.pending {
+.updateSafePill.pending{
   color: rgba(255,255,255,0.62) !important;
 }
 
-.updateProgressTrack {
+.updateProgressTrack{
   height: 8px !important;
   border-radius: 999px !important;
   background: rgba(255,255,255,0.11) !important;
@@ -3601,7 +3170,7 @@ body,
   margin-top: 18px !important;
 }
 
-.updateProgressTrack span {
+.updateProgressTrack span{
   height: 100% !important;
   border-radius: inherit !important;
   background: rgba(var(--accent-rgb), 0.95) !important;
@@ -3609,7 +3178,7 @@ body,
   transition: width 320ms ease !important;
 }
 
-.updateToastActions {
+.updateToastActions{
   display: flex !important;
 
 
@@ -3617,7 +3186,7 @@ body,
 }
 
 .updatePrimaryButton,
-.updateGhostButton {
+.updateGhostButton{
   min-height: 40px !important;
   border-radius: 15px !important;
   padding: 0 15px !important;
@@ -3627,430 +3196,37 @@ body,
   transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease !important;
 }
 
-.updateGhostButton {
+.updateGhostButton{
   background: rgba(255,255,255,0.055) !important;
   border: 1px solid rgba(255,255,255,0.12) !important;
   color: rgba(255,255,255,0.76) !important;
   box-shadow: none !important;
 }
 
-.updateGhostButton:hover {
+.updateGhostButton:hover{
   transform: translateY(-1px) !important;
   background: rgba(255,255,255,0.085) !important;
   border-color: rgba(255,255,255,0.2) !important;
 }
 
-.updatePrimaryButton {
+.updatePrimaryButton{
   background: rgba(var(--accent-rgb), 0.94) !important;
   border: 1px solid rgba(var(--accent-rgb), 0.9) !important;
   color: #050505 !important;
   box-shadow: 0 12px 34px rgba(var(--accent-rgb),0.2) !important;
 }
 
-.updatePrimaryButton:hover {
+.updatePrimaryButton:hover{
   transform: translateY(-1px) !important;
   box-shadow: 0 18px 44px rgba(var(--accent-rgb),0.26) !important;
 }
 
-.updateToastClose {
+.updateToastClose{
   border-radius: 999px !important;
   background: rgba(255,255,255,0.06) !important;
   border: 1px solid rgba(255,255,255,0.1) !important;
 }
 
-.analyticsV030{
-  width: min(100%, 100%);
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: 16px !important;
-  padding-bottom: calc(var(--player-size, 108px) + 44px) !important;
-  overflow: visible !important;
-}
-
-.analyticsHeroPanelV030{
-  position: relative !important;
-  min-height: 196px !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: 26px !important;
-  padding: 26px !important;
-  overflow: hidden !important;
-  border-radius: 28px !important;
-  border-color: color-mix(in srgb, var(--accent) 22%, transparent) !important;
-  background:
-    radial-gradient(circle at 30% 40%, rgba(var(--accent-rgb), .11), transparent 48%),
-    rgba(0, 0, 0, .42) !important;
-}
-
-.analyticsHeroPanelV030::after{
-  display: none !important;
-}
-
-.analyticsHeroTextV030{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 10px !important;
-}
-
-.analyticsHeroTextV030 h3{
-  margin: 0 !important;
-  max-width: 820px !important;
-  font-size: clamp(40px, 5.2vw, 76px) !important;
-  line-height: .88 !important;
-  letter-spacing: -.075em !important;
-  overflow-wrap: anywhere !important;
-}
-
-.analyticsHeroTextV030 p:not(.eyebrow){
-  max-width: 820px !important;
-  margin: 0 !important;
-  color: color-mix(in srgb, var(--text) 72%, var(--muted)) !important;
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  line-height: 1.45 !important;
-}
-
-.analyticsHeroPills{
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-top: 2px !important;
-}
-
-.analyticsHeroPills span{
-  min-height: 30px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  border-radius: 999px !important;
-  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent) !important;
-  background: rgba(255, 255, 255, .045) !important;
-  padding: 7px 11px !important;
-  color: color-mix(in srgb, var(--text) 88%, var(--accent)) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  white-space: nowrap !important;
-}
-
-.analyticsHeroVisual{
-  width: 164px !important;
-  min-width: 164px !important;
-  display: grid !important;
-  justify-items: center !important;
-  gap: 7px !important;
-  padding: 12px !important;
-  border-radius: 24px !important;
-  border: 1px solid rgba(255, 255, 255, .09) !important;
-  background: rgba(0, 0, 0, .28) !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, .22) !important;
-}
-
-.analyticsHeroCover{
-  width: 118px !important;
-  height: 118px !important;
-  border-radius: 22px !important;
-  overflow: hidden !important;
-  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent) !important;
-  background: rgba(0, 0, 0, .32) !important;
-  box-shadow: 0 0 38px rgba(var(--accent-rgb), .16) !important;
-}
-
-.analyticsHeroCover img,
-.analyticsHeroCoverArt{
-  width: 100% !important;
-  height: 100% !important;
-  display: block !important;
-  object-fit: cover !important;
-}
-
-.analyticsHeroVisual > span{
-  color: var(--text) !important;
-  font-size: 11px !important;
-  font-weight: 950 !important;
-  text-transform: lowercase !important;
-}
-
-.analyticsHeroVisual > small{
-  color: var(--muted) !important;
-  font-size: 10.5px !important;
-  font-weight: 850 !important;
-  text-align: center !important;
-}
-
-.analyticsCardGridV030{
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
-  gap: 12px !important;
-  align-items: stretch !important;
-}
-
-.analyticsMetricCard{
-  min-width: 0 !important;
-  min-height: 126px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-  padding: 18px !important;
-  overflow: hidden !important;
-  border-radius: 20px !important;
-  border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .014)),
-    rgba(0, 0, 0, .36) !important;
-}
-
-.analyticsMetricWide{
-  grid-column: span 2 !important;
-}
-
-.analyticsMetricCard span{
-  max-width: 100% !important;
-  color: color-mix(in srgb, var(--muted) 78%, var(--accent)) !important;
-  font-size: 11px !important;
-  font-weight: 950 !important;
-  letter-spacing: .06em !important;
-  text-transform: lowercase !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsMetricCard strong{
-  max-width: 100% !important;
-  display: block !important;
-  color: var(--text) !important;
-  font-size: clamp(25px, 2.1vw, 38px) !important;
-  font-weight: 950 !important;
-  letter-spacing: -.06em !important;
-  line-height: .96 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsMetricCard small{
-  max-width: 100% !important;
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 850 !important;
-  line-height: 1.35 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsSplitGridV030{
-  display: grid !important;
-  grid-template-columns: minmax(0, 1.35fr) minmax(330px, .65fr) !important;
-  gap: 16px !important;
-  align-items: start !important;
-}
-
-.analyticsChartPanelV030,
-.analyticsSidePanelV030,
-.analyticsHealthPanelV030,
-.analyticsRecentPanelV030{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  border-radius: 24px !important;
-}
-
-.analyticsPanelHeadV030{
-  gap: 12px !important;
-  margin-bottom: 14px !important;
-  padding-bottom: 12px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, .075) !important;
-}
-
-.analyticsPanelHeadV030 h3{
-  margin: 0 !important;
-  font-size: clamp(22px, 2vw, 34px) !important;
-  line-height: .95 !important;
-  letter-spacing: -.055em !important;
-}
-
-.analyticsPanelHeadV030 > span{
-  flex: 0 0 auto !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255, 255, 255, .075) !important;
-  background: rgba(255, 255, 255, .04) !important;
-  padding: 7px 10px !important;
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-}
-
-.analyticsBarsV030{
-  display: grid !important;
-  gap: 9px !important;
-}
-
-.analyticsBarRowV030{
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 58px !important;
-  display: grid !important;
-  grid-template-columns: 42px minmax(150px, .72fr) minmax(170px, 1.25fr) 86px !important;
-  align-items: center !important;
-  gap: 12px !important;
-  border: 1px solid rgba(255, 255, 255, .075) !important;
-  border-radius: 16px !important;
-  padding: 10px 12px !important;
-  background: rgba(255, 255, 255, .028) !important;
-  color: var(--text) !important;
-  cursor: pointer !important;
-  text-align: left !important;
-  transition: transform 170ms ease, border-color 170ms ease, background-color 170ms ease, box-shadow 170ms ease !important;
-}
-
-.analyticsBarRowV030:hover{
-  transform: translate3d(2px, -1px, 0) !important;
-  border-color: color-mix(in srgb, var(--accent) 36%, transparent) !important;
-  background: rgba(var(--accent-rgb), .075) !important;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, .18) !important;
-}
-
-.analyticsRank{
-  width: 31px !important;
-  height: 31px !important;
-  display: grid !important;
-  place-items: center !important;
-  border-radius: 11px !important;
-  background: rgba(var(--accent-rgb), .11) !important;
-  color: var(--accent) !important;
-  font-size: 11px !important;
-  font-weight: 950 !important;
-}
-
-.analyticsSongText{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 3px !important;
-}
-
-.analyticsSongText strong{
-  max-width: 100% !important;
-  font-size: 14px !important;
-  font-weight: 950 !important;
-  line-height: 1.12 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsSongText small,
-.analyticsBarValue{
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 850 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsBarTrack{
-  min-width: 0 !important;
-  height: 8px !important;
-  overflow: hidden !important;
-  border-radius: 999px !important;
-  background: rgba(255, 255, 255, .095) !important;
-}
-
-.analyticsBarTrack i{
-  display: block !important;
-  height: 100% !important;
-  border-radius: inherit !important;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 50%, transparent), var(--accent)) !important;
-  box-shadow: 0 0 18px rgba(var(--accent-rgb), .28) !important;
-}
-
-.analyticsBarValue{
-  justify-self: end !important;
-  text-align: right !important;
-}
-
-.analyticsArtistListV030{
-  display: grid !important;
-  gap: 9px !important;
-}
-
-.analyticsArtistRowV030{
-  min-height: 50px !important;
-  display: grid !important;
-  grid-template-columns: 34px minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: 12px !important;
-  padding: 10px 12px !important;
-  border-radius: 15px !important;
-  background: rgba(255, 255, 255, .028) !important;
-  border: 1px solid rgba(255, 255, 255, .075) !important;
-}
-
-.analyticsArtistRowV030 span{
-  width: 28px !important;
-  height: 28px !important;
-  display: grid !important;
-  place-items: center !important;
-  border-radius: 10px !important;
-  background: rgba(255, 255, 255, .045) !important;
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 950 !important;
-}
-
-.analyticsArtistRowV030 strong{
-  min-width: 0 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsArtistRowV030 small{
-  white-space: nowrap !important;
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 850 !important;
-}
-
-.analyticsHealthGridV030{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-  margin-bottom: 12px !important;
-}
-
-.analyticsHealthGridV030 > div{
-  min-width: 0 !important;
-  min-height: 96px !important;
-  display: grid !important;
-  align-content: space-between !important;
-  gap: 8px !important;
-  padding: 14px !important;
-  border-radius: 17px !important;
-  border: 1px solid rgba(255, 255, 255, .075) !important;
-  background: rgba(255, 255, 255, .028) !important;
-}
-
-.analyticsHealthGridV030 strong{
-  color: var(--text) !important;
-  font-size: clamp(22px, 2.2vw, 34px) !important;
-  font-weight: 950 !important;
-  letter-spacing: -.055em !important;
-  line-height: .95 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsHealthGridV030 small{
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 850 !important;
-  line-height: 1.35 !important;
-}
 
 .recentImportStripV030{
   display: grid !important;
@@ -4135,65 +3311,21 @@ line-clamp: 2 !important;
 }
 
 @media (max-width: 1320px){
-  .analyticsMetricWide{
-    grid-column: span 1 !important;
-  }
 
-  .analyticsSplitGridV030{
-    grid-template-columns: 1fr !important;
-  }
+
 }
 
 @media (max-width: 900px){
-  .analyticsHeroPanelV030{
-    grid-template-columns: 1fr !important;
-    justify-items: start !important;
-  }
 
-  .analyticsHeroVisual{
-    width: 100% !important;
-    grid-template-columns: auto 1fr !important;
-    justify-items: start !important;
-    align-items: center !important;
-  }
 
-  .analyticsHeroCover{
-    width: 74px !important;
-    height: 74px !important;
-    grid-row: span 2 !important;
-  }
-
-  .analyticsBarRowV030{
-    grid-template-columns: 38px minmax(0, 1fr) 72px !important;
-  }
-
-  .analyticsBarTrack{
-    grid-column: 2 / -1 !important;
-  }
-
-  .analyticsHealthGridV030{
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
 }
 
 @media (max-width: 620px){
-  .analyticsCardGridV030,
-  .analyticsHealthGridV030,
   .recentImportStripV030{
     grid-template-columns: 1fr !important;
   }
 
-  .analyticsHeroTextV030 h3{
-    font-size: clamp(34px, 14vw, 52px) !important;
-  }
 
-  .analyticsArtistRowV030{
-    grid-template-columns: 32px minmax(0, 1fr) !important;
-  }
-
-  .analyticsArtistRowV030 small{
-    grid-column: 2 !important;
-  }
 }
 
 .updateToastLayer{
@@ -4276,401 +3408,20 @@ line-clamp: 2 !important;
   min-width: 116px !important;
 }
 
-.analyticsLocalV030{
-  width: 100% !important;
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 16px !important;
-  padding-bottom: 22px !important;
-  overflow: visible !important;
-}
-
-.analyticsLocalV030 *{
-  box-sizing: border-box !important;
-}
-
-.analyticsLocalHero,
-.analyticsLocalPanel,
-.analyticsLocalCard{
-  border-radius: 24px !important;
-  overflow: hidden !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)),
-    rgba(8, 8, 10, .72) !important;
-  border: 1px solid rgba(255,255,255,.08) !important;
-  box-shadow: 0 18px 50px rgba(0,0,0,.24) !important;
-}
-
-.analyticsLocalHero{
-  min-width: 0 !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: clamp(18px, 3vw, 34px) !important;
-  padding: clamp(22px, 3vw, 34px) !important;
-}
-
-.analyticsLocalHeroCopy{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 10px !important;
-}
-
-.analyticsLocalHeroCopy h3{
-  margin: 0 !important;
-  color: var(--text) !important;
-  font-size: clamp(38px, 6vw, 78px) !important;
-  line-height: .9 !important;
-  letter-spacing: -.07em !important;
-  font-weight: 950 !important;
-}
-
-.analyticsLocalHeroCopy p:not(.eyebrow){
-  max-width: 760px !important;
-  margin: 0 !important;
-  color: var(--muted) !important;
-  font-size: 14px !important;
-  line-height: 1.55 !important;
-  font-weight: 700 !important;
-}
-
-.analyticsLocalHeroStats{
-  min-width: 280px !important;
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-}
-
-.analyticsLocalHeroStats span{
-  min-width: 0 !important;
-  min-height: 88px !important;
-  display: grid !important;
-  align-content: center !important;
-  gap: 5px !important;
-  padding: 14px !important;
-  border-radius: 18px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(255,255,255,.04) !important;
-}
-
-.analyticsLocalHeroStats strong{
-  min-width: 0 !important;
-  color: var(--text) !important;
-  font-size: clamp(20px, 2.2vw, 34px) !important;
-  line-height: .98 !important;
-  font-weight: 950 !important;
-  letter-spacing: -.05em !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsLocalHeroStats small{
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  text-transform: lowercase !important;
-}
-
-.analyticsLocalGrid{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-}
-
-.analyticsLocalCard{
-  min-width: 0 !important;
-  min-height: 128px !important;
-  display: grid !important;
-  align-content: space-between !important;
-  gap: 10px !important;
-  padding: 18px !important;
-}
-
-.analyticsLocalCardWide{
-  grid-column: span 2 !important;
-}
-
-.analyticsLocalCard span{
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 950 !important;
-  letter-spacing: .04em !important;
-  text-transform: lowercase !important;
-}
-
-.analyticsLocalCard strong{
-  min-width: 0 !important;
-  max-width: 100% !important;
-  color: var(--text) !important;
-  font-size: clamp(25px, 3.2vw, 44px) !important;
-  line-height: .95 !important;
-  font-weight: 950 !important;
-  letter-spacing: -.06em !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsLocalCard small{
-  max-width: 100% !important;
-  color: var(--muted) !important;
-  font-size: 11.5px !important;
-  line-height: 1.35 !important;
-  font-weight: 800 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsLocalSplit{
-  display: grid !important;
-  grid-template-columns: minmax(0, 1.08fr) minmax(340px, .92fr) !important;
-  gap: 16px !important;
-  align-items: start !important;
-}
-
-.analyticsLocalPanel{
-  min-width: 0 !important;
-  padding: 18px !important;
-}
-
-.analyticsLocalPanelHead{
-  min-width: 0 !important;
-  display: flex !important;
-  align-items: flex-start !important;
-  justify-content: space-between !important;
-  gap: 12px !important;
-  margin-bottom: 14px !important;
-  padding-bottom: 12px !important;
-  border-bottom: 1px solid rgba(255,255,255,.075) !important;
-}
-
-.analyticsLocalPanelHead h3{
-  margin: 0 !important;
-  color: var(--text) !important;
-  font-size: clamp(22px, 2.2vw, 32px) !important;
-  line-height: .95 !important;
-  letter-spacing: -.055em !important;
-  font-weight: 950 !important;
-}
-
-.analyticsLocalPanelHead > span{
-  flex: 0 0 auto !important;
-  max-width: 170px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(255,255,255,.04) !important;
-  padding: 7px 10px !important;
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-}
-
-.analyticsLocalArtistList,
-.analyticsLocalRecentList{
-  display: grid !important;
-  gap: 9px !important;
-}
-
-.analyticsLocalArtistRow{
-  min-width: 0 !important;
-  min-height: 62px !important;
-  display: grid !important;
-  grid-template-columns: 42px minmax(0, 1fr) minmax(86px, 28%) !important;
-  align-items: center !important;
-  gap: 12px !important;
-  padding: 11px 12px !important;
-  border-radius: 17px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(255,255,255,.03) !important;
-}
-
-.analyticsLocalArtistRow > span{
-  width: 31px !important;
-  height: 31px !important;
-  display: grid !important;
-  place-items: center !important;
-  border-radius: 11px !important;
-  background: rgba(var(--accent-rgb), .12) !important;
-  color: var(--accent) !important;
-  font-size: 11px !important;
-  font-weight: 950 !important;
-}
-
-.analyticsLocalArtistRow div,
-.analyticsLocalRecentRow div{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 3px !important;
-}
-
-.analyticsLocalArtistRow strong,
-.analyticsLocalRecentRow strong{
-  min-width: 0 !important;
-  color: var(--text) !important;
-  font-size: 13.5px !important;
-  line-height: 1.15 !important;
-  font-weight: 950 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsLocalArtistRow small,
-.analyticsLocalRecentRow small{
-  min-width: 0 !important;
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 820 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsLocalArtistRow i{
-  min-width: 0 !important;
-  height: 7px !important;
-  display: block !important;
-  overflow: hidden !important;
-  border-radius: 999px !important;
-  background: rgba(255,255,255,.10) !important;
-}
-
-.analyticsLocalArtistRow i b{
-  display: block !important;
-  height: 100% !important;
-  border-radius: inherit !important;
-  background: var(--accent) !important;
-  box-shadow: 0 0 16px rgba(var(--accent-rgb), .24) !important;
-}
-
-.analyticsLocalRecentRow{
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 62px !important;
-  display: grid !important;
-  grid-template-columns: 42px minmax(0, 1fr) !important;
-  align-items: center !important;
-  gap: 11px !important;
-  padding: 10px 12px !important;
-  border-radius: 17px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(255,255,255,.03) !important;
-  color: var(--text) !important;
-  text-align: left !important;
-  cursor: pointer !important;
-  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease !important;
-}
-
-.analyticsLocalRecentRow:hover{
-  transform: translate3d(0, -1px, 0) !important;
-  border-color: color-mix(in srgb, var(--accent) 34%, transparent) !important;
-  background: rgba(var(--accent-rgb), .07) !important;
-}
-
-.analyticsLocalRecentArt{
-  width: 42px !important;
-  height: 42px !important;
-  border-radius: 12px !important;
-  object-fit: cover !important;
-  overflow: hidden !important;
-}
-
-.analyticsLocalHealthPanel{
-  padding-bottom: 16px !important;
-}
-
-.analyticsLocalHealthGrid{
-  display: grid !important;
-  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-  margin-bottom: 12px !important;
-}
-
-.analyticsLocalHealthGrid > div{
-  min-width: 0 !important;
-  min-height: 90px !important;
-  display: grid !important;
-  align-content: space-between !important;
-  gap: 8px !important;
-  padding: 13px !important;
-  border-radius: 17px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(255,255,255,.03) !important;
-}
-
-.analyticsLocalHealthGrid strong{
-  color: var(--text) !important;
-  font-size: clamp(20px, 2vw, 30px) !important;
-  line-height: .95 !important;
-  font-weight: 950 !important;
-  letter-spacing: -.055em !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsLocalHealthGrid small{
-  color: var(--muted) !important;
-  font-size: 10.5px !important;
-  font-weight: 850 !important;
-  line-height: 1.3 !important;
-}
-
-.analyticsLocalV030 .softText{
-  margin: 0 !important;
-  color: var(--muted) !important;
-  line-height: 1.45 !important;
-}
 
 @media (max-width: 1280px){
-  .analyticsLocalGrid{
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
 
-  .analyticsLocalHealthGrid{
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  }
+
 }
 
 @media (max-width: 980px){
-  .analyticsLocalHero,
-  .analyticsLocalSplit{
-    grid-template-columns: 1fr !important;
-  }
 
-  .analyticsLocalHeroStats{
-    width: 100% !important;
-    min-width: 0 !important;
-  }
 
-  .analyticsLocalGrid{
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .analyticsLocalCardWide{
-    grid-column: span 1 !important;
-  }
 }
 
 @media (max-width: 640px){
-  .analyticsLocalHeroStats,
-  .analyticsLocalGrid,
-  .analyticsLocalHealthGrid{
-    grid-template-columns: 1fr !important;
-  }
 
-  .analyticsLocalArtistRow{
-    grid-template-columns: 38px minmax(0, 1fr) !important;
-  }
 
-  .analyticsLocalArtistRow i{
-    grid-column: 2 / -1 !important;
-  }
 }
 
 .app{
@@ -4684,7 +3435,7 @@ line-clamp: 2 !important;
   --button-shadow: 0 14px 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.055);
 }
 
-.app :is(.mainAction,.heroMain,.simpleAction,.updatePrimaryButton,.aboutActionButton.primary,.settingsActionButton.primary,.primaryButton){
+.app :is(.mainAction, .heroMain, .simpleAction, .updatePrimaryButton, .aboutActionButton.primary, .settingsActionButton.primary, .primaryButton){
   min-height: var(--button-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -4702,7 +3453,7 @@ line-clamp: 2 !important;
   cursor: pointer !important;
 }
 
-.app :is(.softButton,.heroGhost,.simpleGhost,.updateGhostButton,.toolButton,.tabButton,.navButton,.settingsActionButton,.settingsTinyButton,.aboutActionButton):not(.primary):not(.danger):not(.main){
+.app :is(.softButton, .heroGhost, .simpleGhost, .updateGhostButton, .toolButton, .tabButton, .navButton, .settingsActionButton, .settingsTinyButton, .aboutActionButton):not(.primary):not(.danger):not(.main){
   min-height: var(--button-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -4719,13 +3470,13 @@ line-clamp: 2 !important;
   cursor: pointer !important;
 }
 
-.app :is(.mainAction,.heroMain,.simpleAction,.updatePrimaryButton,.aboutActionButton.primary,.settingsActionButton.primary,.primaryButton):hover{
+.app :is(.mainAction, .heroMain, .simpleAction, .updatePrimaryButton, .aboutActionButton.primary, .settingsActionButton.primary, .primaryButton):hover{
   border-color: color-mix(in srgb, var(--accent) 66%, rgba(255,255,255,.18)) !important;
   box-shadow: 0 16px 36px rgba(var(--accent-rgb), .2), inset 0 1px 0 rgba(255,255,255,.2) !important;
   filter: none !important;
 }
 
-.app :is(.softButton,.heroGhost,.simpleGhost,.updateGhostButton,.toolButton,.tabButton,.navButton,.settingsActionButton,.settingsTinyButton,.aboutActionButton):not(.primary):not(.danger):not(.main):hover{
+.app :is(.softButton, .heroGhost, .simpleGhost, .updateGhostButton, .toolButton, .tabButton, .navButton, .settingsActionButton, .settingsTinyButton, .aboutActionButton):not(.primary):not(.danger):not(.main):hover{
   border-color: color-mix(in srgb, var(--accent) 32%, rgba(255,255,255,.14)) !important;
   background: var(--button-bg-hover) !important;
   color: rgba(255,255,255,.96) !important;
@@ -4733,7 +3484,7 @@ line-clamp: 2 !important;
   filter: none !important;
 }
 
-.app :is(.dangerButton,.danger,.settingsDangerButton,.deleteButton,.removeButton,.resetButton){
+.app :is(.dangerButton, .danger, .settingsDangerButton, .deleteButton, .removeButton, .resetButton){
   min-height: var(--button-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -4748,14 +3499,14 @@ line-clamp: 2 !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
-.app :is(.dangerButton,.danger,.settingsDangerButton,.deleteButton,.removeButton,.resetButton):hover{
+.app :is(.dangerButton, .danger, .settingsDangerButton, .deleteButton, .removeButton, .resetButton):hover{
   border-color: rgba(255,92,122,.4) !important;
   background: rgba(255,68,104,.12) !important;
   color: #ffd2dc !important;
   filter: none !important;
 }
 
-.app :is(.iconAction,.songMenuButton,.closeModalButton,.updateToastClose),
+.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose),
 .app :is(.circleButton):not(.playerBar *){
   width: 38px !important;
   height: 38px !important;
@@ -4771,7 +3522,7 @@ line-clamp: 2 !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 
-.app :is(.iconAction,.songMenuButton,.closeModalButton,.updateToastClose):hover,
+.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose):hover,
 .app :is(.circleButton):not(.playerBar *):hover{
   border-color: color-mix(in srgb, var(--accent) 30%, rgba(255,255,255,.12)) !important;
   background: rgba(255,255,255,.07) !important;
@@ -4779,7 +3530,7 @@ line-clamp: 2 !important;
   box-shadow: 0 12px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.055) !important;
 }
 
-.app :is(.tinyToggle,.sidebarThemeOption,.themeChip,.filterChip,.pillButton,.smallPillButton){
+.app :is(.tinyToggle, .sidebarThemeOption, .themeChip, .filterChip, .pillButton, .smallPillButton){
   min-height: var(--button-height-sm) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -4793,15 +3544,15 @@ line-clamp: 2 !important;
   font-weight: 850 !important;
 }
 
-.app :is(.tinyToggle,.sidebarThemeOption,.themeChip,.filterChip,.pillButton,.smallPillButton):hover,
-.app :is(.tinyToggle,.sidebarThemeOption,.themeChip,.filterChip,.pillButton,.smallPillButton).active,
-.app :is(.tinyToggle,.sidebarThemeOption,.themeChip,.filterChip,.pillButton,.smallPillButton)[aria-pressed="true"]{
+.app :is(.tinyToggle, .sidebarThemeOption, .themeChip, .filterChip, .pillButton, .smallPillButton):hover,
+.app :is(.tinyToggle, .sidebarThemeOption, .themeChip, .filterChip, .pillButton, .smallPillButton).active,
+.app :is(.tinyToggle, .sidebarThemeOption, .themeChip, .filterChip, .pillButton, .smallPillButton)[aria-pressed="true"]{
   border-color: color-mix(in srgb, var(--accent) 34%, rgba(255,255,255,.12)) !important;
   background: rgba(var(--accent-rgb), .11) !important;
   color: rgba(255,255,255,.96) !important;
 }
 
-.app :is(button,a,[role="button"]):focus-visible{
+.app :is(button, a, [role="button"]):focus-visible{
   outline: 2px solid rgba(var(--accent-rgb), .58) !important;
   outline-offset: 3px !important;
 }
@@ -4841,268 +3592,15 @@ body.localtifyPerfV301 .sidebar{
 
 /* localtify 0.3.9 V324 — lightweight analytics / recap page.
    Replaces the old heavy local analytics layout with simple recap cards. */
-.analyticsLiteV324{
-  width: 100% !important;
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 14px !important;
-  padding-bottom: 24px !important;
-}
 
-.analyticsLiteHeroV324,
-.analyticsLitePanelV324,
-.analyticsRecapCardV324,
-.analyticsLiteStatV324{
-  min-width: 0 !important;
-  overflow: hidden !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.042), rgba(255,255,255,.018)),
-    rgba(8,8,10,.70) !important;
-  box-shadow: 0 14px 34px rgba(0,0,0,.22) !important;
-  backdrop-filter: blur(12px) saturate(114%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(114%) !important;
-  contain: layout paint style;
-}
-
-.analyticsLiteHeroV324{
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
-  gap: clamp(16px, 2.6vw, 28px) !important;
-  align-items: center !important;
-  padding: clamp(20px, 2.8vw, 30px) !important;
-  border-radius: 24px !important;
-}
-
-.analyticsLiteHeroCopyV324{
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 9px !important;
-}
-
-.analyticsLiteHeroCopyV324 h3{
-  margin: 0 !important;
-  color: var(--text) !important;
-  font-size: clamp(36px, 5vw, 68px) !important;
-  line-height: .9 !important;
-  letter-spacing: -.07em !important;
-  font-weight: 950 !important;
-}
-
-.analyticsLiteHeroCopyV324 p:not(.eyebrow){
-  max-width: 720px !important;
-  margin: 0 !important;
-  color: var(--muted) !important;
-  font-size: 13.5px !important;
-  line-height: 1.5 !important;
-  font-weight: 760 !important;
-}
-
-.analyticsLiteHeroStatsV324{
-  min-width: min(330px, 34vw) !important;
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0,1fr)) !important;
-  gap: 8px !important;
-}
-
-.analyticsLiteHeroStatsV324 span,
-.analyticsRecapCardV324,
-.analyticsLiteStatV324{
-  border-radius: 18px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(255,255,255,.035) !important;
-}
-
-.analyticsLiteHeroStatsV324 span{
-  min-width: 0 !important;
-  min-height: 78px !important;
-  display: grid !important;
-  align-content: center !important;
-  gap: 4px !important;
-  padding: 12px !important;
-}
-
-.analyticsLiteHeroStatsV324 strong,
-.analyticsRecapCardV324 strong,
-.analyticsLiteStatV324 strong{
-  min-width: 0 !important;
-  max-width: 100% !important;
-  color: var(--text) !important;
-  line-height: .96 !important;
-  font-weight: 950 !important;
-  letter-spacing: -.055em !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.analyticsLiteHeroStatsV324 strong{
-  font-size: clamp(19px, 2vw, 30px) !important;
-}
-
-.analyticsLiteHeroStatsV324 small,
-.analyticsRecapCardV324 span,
-.analyticsLiteStatV324 span,
-.analyticsRecapCardV324 small,
-.analyticsLiteStatV324 small,
-.analyticsRecapCardV324 em{
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  line-height: 1.35 !important;
-  font-weight: 820 !important;
-  font-style: normal !important;
-}
-
-.analyticsRecapGridV324{
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-}
-
-.analyticsRecapCardV324{
-  min-height: 150px !important;
-  display: grid !important;
-  align-content: space-between !important;
-  gap: 8px !important;
-  padding: 17px !important;
-}
-
-.analyticsRecapCardV324 span,
-.analyticsLiteStatV324 span{
-  color: var(--accent) !important;
-  font-weight: 950 !important;
-  letter-spacing: .08em !important;
-  text-transform: uppercase !important;
-  font-size: 10px !important;
-}
-
-.analyticsRecapCardV324 strong{
-  font-size: clamp(25px, 3vw, 42px) !important;
-}
-
-.analyticsRecapCardV324 em{
-  width: fit-content !important;
-  max-width: 100% !important;
-  padding: 5px 8px !important;
-  border-radius: 999px !important;
-  color: rgba(var(--accent-rgb), .92) !important;
-  background: rgba(var(--accent-rgb), .10) !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-.analyticsLiteGridV324{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-}
-
-.analyticsLiteStatV324{
-  min-height: 106px !important;
-  display: grid !important;
-  align-content: space-between !important;
-  gap: 8px !important;
-  padding: 15px !important;
-}
-
-.analyticsLiteStatV324 strong{
-  font-size: clamp(22px, 2.4vw, 34px) !important;
-}
-
-.analyticsLitePanelV324{
-  padding: 18px !important;
-  border-radius: 22px !important;
-}
-
-.analyticsLitePanelHeadV324{
-  display: flex !important;
-  align-items: flex-start !important;
-  justify-content: space-between !important;
-  gap: 12px !important;
-  padding-bottom: 12px !important;
-  margin-bottom: 14px !important;
-  border-bottom: 1px solid rgba(255,255,255,.075) !important;
-}
-
-.analyticsLitePanelHeadV324 h3{
-  margin: 0 !important;
-  color: var(--text) !important;
-  font-size: clamp(22px, 2vw, 32px) !important;
-  line-height: .95 !important;
-  letter-spacing: -.055em !important;
-}
-
-.analyticsLitePanelHeadV324 > span{
-  flex: 0 0 auto !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255,255,255,.075) !important;
-  background: rgba(255,255,255,.04) !important;
-  padding: 7px 10px !important;
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-}
-
-.analyticsLiteCopyGridV324{
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-}
-
-.analyticsLiteCopyGridV324 > div{
-  min-width: 0 !important;
-  min-height: 98px !important;
-  display: grid !important;
-  gap: 6px !important;
-  align-content: start !important;
-  padding: 14px !important;
-  border-radius: 16px !important;
-  border: 1px solid rgba(255,255,255,.07) !important;
-  background: rgba(255,255,255,.032) !important;
-}
-
-.analyticsLiteCopyGridV324 strong{
-  color: var(--text) !important;
-  font-size: 14px !important;
-  font-weight: 950 !important;
-}
-
-.analyticsLiteCopyGridV324 p,
-.analyticsLiteNoteV324{
-  margin: 0 !important;
-  color: var(--muted) !important;
-  font-size: 12px !important;
-  line-height: 1.45 !important;
-  font-weight: 750 !important;
-}
-
-.analyticsLiteNoteV324{
-  margin-top: 12px !important;
-}
 
 @media (max-width: 1040px){
-  .analyticsLiteHeroV324,
-  .analyticsRecapGridV324,
-  .analyticsLiteCopyGridV324{
-    grid-template-columns: 1fr !important;
-  }
 
-  .analyticsLiteHeroStatsV324{
-    width: 100% !important;
-    min-width: 0 !important;
-  }
 
-  .analyticsLiteGridV324{
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
 }
 
 @media (max-width: 640px){
-  .analyticsLiteHeroStatsV324,
-  .analyticsLiteGridV324{
-    grid-template-columns: 1fr !important;
-  }
+
 }
 
 /* V471 DISCORD SIDEBAR PILL START

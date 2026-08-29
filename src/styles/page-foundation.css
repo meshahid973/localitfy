@@ -1,13 +1,22 @@
-/* Temporary non-Home page structure.
-   This file intentionally contains layout/accessibility only; visual redesigns come later. */
+/* Ground-zero structure for pages awaiting redesign. No page visual skin belongs here. */
 
 .pageTransition:not(.pageTransition-home),
 .pageTransition:not(.pageTransition-home) * {
   box-sizing: border-box;
 }
 
-/* Neutralize historical App.css/page chrome without touching Home or the player. */
-.pageTransition:not(.pageTransition-home) :is(
+.pageTransition:not(.pageTransition-home) [data-page-section] {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+/* Remove inherited historical surfaces while preserving layout and interaction. */
+.pageTransition:not(.pageTransition-home) [data-page-section] :where(
   .panel,
   .libraryPanelV025,
   .likedLibraryPanelV025,
@@ -20,10 +29,12 @@
   .albumBuilderPanelV318,
   .playlistHeroPanel,
   .playlistCreatePanel,
-  .playlistCard,
+  .playlistShelfPanel,
   .playlistTracksPanel,
   .playlistTrackRow,
   .coverStudioHero,
+  .coverSelectedSongsPanel,
+  .coverGalleryPanel,
   .coverGalleryCardCleanOnly,
   .downloadPanelV031,
   .downloadQueuePanel,
@@ -40,14 +51,17 @@
   .settingsFocusPanelV491
 ) {
   border-color: transparent !important;
+  border-image: none !important;
   background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
+  text-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  filter: none !important;
 }
 
-.pageTransition:not(.pageTransition-home) :is(
+.pageTransition:not(.pageTransition-home) [data-page-section] :where(
   .softButton,
   .mainAction,
   .heroMain,
@@ -58,13 +72,15 @@
 ) {
   background-image: none !important;
   box-shadow: none !important;
+  filter: none !important;
 }
 
-.pageTransition:not(.pageTransition-home) :is(button, input, select, textarea) {
+.pageTransition:not(.pageTransition-home) [data-page-section] :where(button, input, select, textarea) {
+  max-width: 100%;
   font: inherit;
 }
 
-.pageTransition:not(.pageTransition-home) :is(button, [role="button"]) {
+.pageTransition:not(.pageTransition-home) [data-page-section] :where(button, [role="button"]) {
   cursor: pointer;
 }
 
@@ -74,7 +90,8 @@
 .playlistsPage,
 .coverStudioLayout,
 .downloadsLayoutV031,
-.analyticsStudioV339 {
+.analyticsStudioV339,
+.settingsPageV027 {
   width: 100%;
   min-width: 0;
 }
@@ -90,25 +107,33 @@
 .libraryPanelHeadV025,
 .libraryPanelActionsV025,
 .libraryMissingActionsV039,
-.panelHead {
+.panelHead,
+.downloadActionRow,
+.converterActions,
+.downloadTabStrip {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.libraryPanelTitleV025,
-.libraryMissingStripV039 > div:not(.libraryMissingActionsV039) {
-  min-width: 0;
-  display: grid;
-  gap: 4px;
+.libraryPanelHeadV025,
+.panelHead {
+  justify-content: space-between;
 }
 
-.libraryQuickMetaV039 {
+.libraryQuickMetaV039,
+.libraryCoverCardsGridV321,
+.albumsGridV318,
+.playlistShelfGrid,
+.coverGalleryGrid,
+.analyticsRecapGridV339,
+.analyticsMiniGridV339,
+.settingsThemeGrid {
+  min-width: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
 }
 
 .libraryMissingStripV039 {
@@ -120,73 +145,7 @@
 
 .libraryFullListV025,
 .libraryCoverCardShellV321,
-.virtualSongViewport {
-  min-width: 0;
-  min-height: 0;
-  overflow: auto;
-  overscroll-behavior: contain;
-}
-
-.libraryCoverCardsGridV321,
-.albumsGridV318,
-.playlistShelfGrid,
-.coverGalleryGrid,
-.analyticsRecapGridV339,
-.analyticsMiniGridV339 {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.albumsPageV318,
-.playlistsPage,
-.analyticsStudioV339 {
-  display: grid;
-  gap: 18px;
-}
-
-.albumsHeroPanelV318,
-.playlistHeroPanel,
-.analyticsHeroV339 {
-  min-width: 0;
-  display: grid;
-  gap: 16px;
-}
-
-.albumDetailPanelV318,
-.albumBuilderPanelV318,
-.playlistTracksPanel,
-.playlistCreatePanel,
-.downloadPanelV031,
-.downloadQueuePanel,
-.converterBoxV031,
-.analyticsSharePanelV339 {
-  min-width: 0;
-}
-
-.playlistTopGrid,
-.playlistContentGrid,
-.downloadsLayoutV031,
-.coverStudioBody {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, .42fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.playlistTrackRow,
-.spotifyTrackItemV326,
-.songRow {
-  min-width: 0;
-}
-
-.coverStudioLayout {
-  display: grid;
-  gap: 16px;
-}
-
+.virtualSongViewport,
 .coverVirtualGalleryViewport,
 .coverGalleryViewport,
 .downloadQueueList,
@@ -194,52 +153,67 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
-.downloadPanelV031,
-.downloadQueuePanel {
+.albumsPageV318,
+.playlistsPage,
+.coverStudioLayout,
+.analyticsStudioV339,
+.settingsPageV027 {
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
-.downloadTabStrip,
-.downloadActionRow,
-.converterActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+.playlistTopGrid,
+.playlistContentGrid,
+.downloadsLayoutV031,
+.coverStudioBody,
+.settingsLayout,
+.settingsPageLayoutV027 {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, .42fr);
+  gap: 16px;
+  align-items: start;
 }
 
-.analyticsRecapGridV339,
-.analyticsMiniGridV339 {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+.settingsLayout,
+.settingsPageLayoutV027 {
+  grid-template-columns: minmax(190px, 230px) minmax(0, 1fr);
+}
+
+.playlistTrackRow,
+.spotifyTrackItemV326,
+.songRow,
+.albumCardV318 {
+  min-width: 0;
 }
 
 @media (max-width: 1180px) {
   .playlistTopGrid,
   .playlistContentGrid,
   .downloadsLayoutV031,
-  .coverStudioBody {
+  .coverStudioBody,
+  .settingsLayout,
+  .settingsPageLayoutV027 {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 760px) {
-  .libraryQuickMetaV039 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .libraryMissingStripV039 {
     grid-template-columns: 1fr;
   }
 
+  .libraryQuickMetaV039,
   .libraryCoverCardsGridV321,
   .albumsGridV318,
   .playlistShelfGrid,
   .coverGalleryGrid,
   .analyticsRecapGridV339,
-  .analyticsMiniGridV339 {
-    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  .analyticsMiniGridV339,
+  .settingsThemeGrid {
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   }
 }

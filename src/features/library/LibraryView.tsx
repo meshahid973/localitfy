@@ -54,7 +54,7 @@ export default function LibraryView(props: LibraryViewProps) {
   } = props;
 
   return (
-    <section className={`panel fillPanel libraryPanelV025 ${view === "liked" ? "likedPanel likedLibraryPanelV025" : ""}`}>
+    <section data-page-section="library" className={`panel fillPanel libraryPanelV025 ${view === "liked" ? "likedPanel likedLibraryPanelV025" : ""}`}>
       <div className="panelHead libraryPanelHead libraryPanelHeadV025">
         <div className="libraryPanelTitleV025">
           <p className="eyebrow">{view === "liked" ? "liked" : "library"}</p>

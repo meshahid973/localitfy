@@ -112,7 +112,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
 
   return (
 
-              <section className="downloadsLayout downloadsLayoutV031">
+              <section data-page-section="downloads" className="downloadsLayout downloadsLayoutV031">
                 <section className="panel downloadPanel downloadPanelV031">
                   <div className="panelHead downloadHeroHead">
                     <div>

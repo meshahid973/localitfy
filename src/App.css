@@ -17,19 +17,9 @@
 }
 
 
-.libraryUtilityRail .compactHead .eyebrow{
-  font-size: 9px !important;
-  letter-spacing: 0.14em !important;
-}
-
-.libraryUtilityRail .muted-small{
-  font-size: 10px !important;
-  line-height: 1.35 !important;
-}
-
 .modalWrap{
   position: fixed !important;
-  inset: 34px 0 88px 218px !important;
+  inset: 34px 0 88px var(--workspace-sidebar-current, 236px) !important;
   z-index: 80 !important;
   display: grid !important;
   place-items: center !important;
@@ -193,19 +183,10 @@
 }
 
 
-.headerText h2{
-  font-size: clamp(34px, 3.55vw, 54px) !important;
-  line-height: 0.9 !important;
-
-}
-
 .compactHeaderTools{
   align-items: center !important;
 }
 
-.searchEasterWrap{
-  min-width: min(430px, 34vw) !important;
-}
 
 .hero{
   min-height: clamp(250px, 30vh, 350px) !important;
@@ -396,13 +377,13 @@
 
 .tinyScanner{
   position: fixed;
-  left: calc(var(--sidebar-width, 249px) + 22px);
+  left: calc(var(--workspace-sidebar-current, 236px) + 22px);
   bottom: 118px;
   z-index: 110;
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  width: min(360px, calc(100vw - var(--sidebar-width, 249px) - 42px));
+  width: min(360px, calc(100vw - var(--workspace-sidebar-current, 236px) - 42px));
   padding: 11px 13px;
   border: 1px solid rgba(var(--lt-accent-rgb, 141, 255, 206), 0.2);
   border-radius: 18px;
@@ -1084,8 +1065,8 @@ html{
 
 
 .toastStack{
-  left: calc(var(--sidebar-width-used) + 22px) !important;
-  width: min(360px, calc(100vw - var(--sidebar-width-used) - 42px)) !important;
+  left: calc(var(--workspace-sidebar-current, 236px) + 22px) !important;
+  width: min(360px, calc(100vw - var(--workspace-sidebar-current, 236px) - 42px)) !important;
 }
 
 .localitfyNoSelect{
@@ -1274,7 +1255,7 @@ body.isResizingSidebar{
 .app.flatNoGradientUI .songRow.active,
 .app.flatNoGradientUI .themeItem.active,
 .app.flatNoGradientUI .iconAction.liked,
-.app.flatNoGradientUI .primaryButton {
+.app.flatNoGradientUI .primaryButton{
   background: var(--lt-accent) !important;
   background-image: none !important;
   color: #050505 !important;
@@ -1637,7 +1618,6 @@ body.isResizingSidebar{
 
 .songRow,
 .topRow,
-.downloadResult,
 .iconAction,
 .circleButton:not(.playerBar *),
 .softButton,
@@ -1688,9 +1668,7 @@ body.isResizingSidebar{
 .circleButton.main:not(.playerBar *),
 .mainAction,
 .heroMain,
-.iconAction.liked,
-.downloadResult.ok span,
-.converterTrack i{
+.iconAction.liked{
   color: #04100a !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 42%),
@@ -2041,7 +2019,7 @@ body{
 .app .mainAction,
 .app .softButton,
 .app .heroGhost,
-.app .simpleGhost {
+.app .simpleGhost{
   transition: none !important;
   animation: none !important;
   transform: none !important;
@@ -2077,14 +2055,6 @@ body{
 .app{
   --control-circle: 42px;
   --control-circle-main: 48px;
-}
-
-.headerBar{
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
 }
 
 
@@ -2452,40 +2422,6 @@ body.localitfyThemePainting .app *{
   transition-duration: 80ms !important;
 }
 
-.libraryRenderNotice{
-  grid-column: 1 / -1;
-  width: 100%;
-  min-height: 58px;
-  margin: 8px 0 2px;
-  padding: 13px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: rgba(255, 255, 255, 0.68);
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(var(--lt-accent-rgb), 0.18);
-  border-radius: 14px;
-  contain: layout paint style;
-}
-
-.libraryLoadMoreButton{
-  min-height: 34px;
-  padding: 0 14px;
-  border: 1px solid rgba(var(--lt-accent-rgb), 0.28);
-  border-radius: 999px;
-  color: var(--lt-text);
-  background: rgba(var(--lt-accent-rgb), 0.13);
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.libraryLoadMoreButton:hover{
-  background: rgba(var(--lt-accent-rgb), 0.2);
-  transform: translate3d(0, -1px, 0);
-}
 
 .navMain{
   flex: 0 0 auto;
@@ -2651,13 +2587,9 @@ html{
 }
 
 .homeHeroCard,
-.libraryPanelV025,
-.coverStudioRoot,
-.analyticsPage,
-.downloadsPage,
 .editorModal,
 .deleteModal,
-.whatsNewCard {
+.whatsNewCard{
   transform-origin: center;
   contain: layout paint style;
 }
@@ -2665,19 +2597,15 @@ html{
 .homeHeroCard,
 .songRow,
 .navButton,
-.sidebarAction {
+.sidebarAction{
   transition-timing-function: var(--motion-smooth);
 }
 
 
 .hero,
-.libraryPanelV025,
-.coverStudioRoot,
-.analyticsPage,
-.downloadsPage,
 .editorModal,
 .deleteModal,
-.whatsNewCard {
+.whatsNewCard{
   transform-origin: center;
   contain: layout paint style;
 }
@@ -2686,7 +2614,7 @@ html{
 .songRow,
 .navButton,
 .sidebarAction,
-.transportButton {
+.transportButton{
   transition-timing-function: var(--motion-smooth);
 }
 
@@ -3413,134 +3341,10 @@ html{
     0 0 12px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 28%, transparent) !important;
 }
 
-.downloadPanel{
-  overflow: hidden !important;
-}
-
-.downloadPanel .panelHead{
-  align-items: center !important;
-  gap: 18px !important;
-}
-
-.downloadPanel .softButton,
-.downloadPanel .heroMain,
-.downloadPanel .heroGhost{
-  font: inherit !important;
-  font-weight: 850 !important;
-  letter-spacing: -.01em !important;
-  border-radius: 14px !important;
-  min-height: 42px !important;
-  padding: 0 18px !important;
-  outline: none !important;
-  white-space: nowrap !important;
-  transform: translateZ(0) !important;
-  transition:
-    transform 190ms cubic-bezier(.18, 1.35, .25, 1),
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 160ms ease,
-    box-shadow 200ms ease !important;
-}
-
-.downloadPanel .softButton:focus,
-.downloadPanel .heroMain:focus,
-.downloadPanel .heroGhost:focus{
-  outline: none !important;
-}
-
-.downloadPanel .softButton:focus-visible,
-.downloadPanel .heroMain:focus-visible,
-.downloadPanel .heroGhost:focus-visible{
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 18%, transparent) !important;
-}
-
-.downloadPanel .converterBox{
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: 18px !important;
-  padding: 20px !important;
-  border-radius: 18px !important;
-  border: 1px solid color-mix(in oklab, var(--theme-line, rgba(255,255,255,.12)) 84%, transparent) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
-    color-mix(in oklab, var(--theme-surface, #15131f) 82%, transparent) !important;
-  box-shadow: none !important;
-}
-
-.downloadPanel .converterBox .heroMain,
-.downloadPanel .downloadActions .heroMain{
-  width: auto !important;
-  justify-self: end !important;
-  border: 1px solid color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 58%, transparent) !important;
-  color: #08040b !important;
-  background: var(--theme-progress, var(--lt-accent)) !important;
-  box-shadow:
-    0 12px 30px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 22%, transparent),
-    inset 0 1px 0 rgba(255,255,255,.32) !important;
-}
-
-.downloadPanel .converterBox .heroMain:hover,
-.downloadPanel .downloadActions .heroMain:hover{
-  transform: translateY(-1px) scale(1.015) !important;
-  box-shadow:
-    0 16px 38px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 28%, transparent),
-    inset 0 1px 0 rgba(255,255,255,.36) !important;
-}
-
-.downloadPanel .converterBox .heroMain:active,
-.downloadPanel .downloadActions .heroMain:active{
-  transform: translateY(1px) scale(.985) !important;
-}
-
-.downloadPanel .downloadActions{
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  flex-wrap: wrap !important;
-  gap: 12px !important;
-  margin-top: 14px !important;
-}
-
-.downloadPanel .downloadActions .heroGhost,
-.downloadPanel .softButton{
-  border: 1px solid color-mix(in oklab, var(--theme-line, rgba(255,255,255,.14)) 90%, transparent) !important;
-  color: color-mix(in oklab, var(--theme-text, #fff) 90%, transparent) !important;
-  background: color-mix(in oklab, var(--theme-surface, #15131f) 78%, transparent) !important;
-  box-shadow: none !important;
-}
-
-.downloadPanel .downloadActions .heroGhost:hover,
-.downloadPanel .softButton:hover{
-  transform: translateY(-1px) scale(1.012) !important;
-  border-color: color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 32%, var(--theme-line, rgba(255,255,255,.14))) !important;
-  background: color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 10%, var(--theme-surface, #15131f)) !important;
-}
-
-.downloadPanel .downloadTextarea,
-.downloadPanel .downloadNotice{
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  outline: none !important;
-}
-
-.downloadPanel .downloadTextarea:focus{
-  border-color: color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 38%, var(--theme-line, rgba(255,255,255,.16))) !important;
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 10%, transparent) !important;
-}
 
 @media (max-width: 920px){
-  .downloadPanel .converterBox{
-    grid-template-columns: 1fr !important;
-  }
 
-  .downloadPanel .converterBox .heroMain,
-.downloadPanel .downloadActions .heroMain,
-.downloadPanel .downloadActions .heroGhost{
-    width: 100% !important;
-    justify-self: stretch !important;
-  }
+
 }
 
 .app,
@@ -3565,9 +3369,7 @@ html{
 .songRow.isActive,
 .songCard.active,
 .songCard.playing,
-.songCard.isPlaying,
-.coverSongRow.active,
-.coverSongRow.selected{
+.songCard.isPlaying{
   color: #ffffff !important;
   -webkit-text-fill-color: initial !important;
 }
@@ -3577,9 +3379,7 @@ html{
 .songRow.isActive *,
 .songCard.active *,
 .songCard.playing *,
-.songCard.isPlaying *,
-.coverSongRow.active *,
-.coverSongRow.selected *{
+.songCard.isPlaying *{
   color: inherit !important;
   -webkit-text-fill-color: currentColor !important;
 }
@@ -3652,15 +3452,12 @@ button svg,
 .contentShell,
 .view,
 .homeView,
-.libraryView,
-.coverStudioView,
 .settingsView{
   scrollbar-gutter: auto;
 }
 
 .songCard,
 .songRow,
-.libraryRow,
 .coverCard,
 .panel,
 .sectionCard,
@@ -3679,7 +3476,6 @@ button{
 
 .app .songCard:hover,
 .app .songRow:hover,
-.app .libraryRow:hover,
 .app .coverCard:hover,
 .app .sectionCard:hover,
 .app .statCard:hover{
@@ -3801,15 +3597,9 @@ button{
   transform: translate3d(0, 0, 0) !important;
 }
 
-.settingsPage{
-  scroll-padding-bottom: 128px !important;
-}
 
 .app.viewSwitching .mainContent,
-.app.viewSwitching .homeShell,
-.app.viewSwitching .libraryPanel,
-.app.viewSwitching .settingsPage,
-.app.viewSwitching .coverStudioPage{
+.app.viewSwitching .homeShell{
   transition-duration: 90ms !important;
   animation-duration: 90ms !important;
 }
@@ -3891,12 +3681,7 @@ button{
 .app,
 .app::before,
 .app::after,
-.homeView,
-.libraryView,
-.settingsPage,
-.analyticsView,
-.downloadsView,
-.coverStudioView{
+.homeView{
   background-image: none !important;
   background-size: auto !important;
 }
@@ -3967,10 +3752,7 @@ button{
 }
 
 .app.viewSwitching .ambientSurface,
-.app.viewSwitching .heroShell,
-.app.viewSwitching .settingsPage,
-.app.viewSwitching .libraryPanel,
-.app.viewSwitching .coverStudioPage{
+.app.viewSwitching .heroShell{
   transition-duration: 90ms;
 }
 
@@ -4141,14 +3923,12 @@ body.localitfyThemePainting .app .ambientSurface::after{
 .page,
 .homePage,
 .homeView,
-.settingsPage,
 .settingsContent,
 .settingsBody,
 .settingsScroll,
 .settingsPanel,
 .settingsPanelShell,
-.libraryPanel,
-.simpleLibraryPanel {
+.simpleLibraryPanel{
   --grid-line: transparent !important;
   --app-grid-line: transparent !important;
   --page-line: transparent !important;
@@ -4188,13 +3968,9 @@ body,
 .pageShell,
 .homePage,
 .homeView,
-.libraryView,
 .likedView,
-.analyticsView,
-.downloadsView,
 .coversView,
 .settingsView,
-.settingsPage,
 .settingsContent,
 .settingsBody,
 .settingsScroll,
@@ -4221,12 +3997,8 @@ body,
 .page::after,
 .homeView::before,
 .homeView::after,
-.libraryView::before,
-.libraryView::after,
 .settingsView::before,
 .settingsView::after,
-.settingsPage::before,
-.settingsPage::after,
 .settingsContent::before,
 .settingsContent::after,
 .settingsBody::before,
@@ -4258,7 +4030,7 @@ body,
   background-size: auto !important;
 }
 
-body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.ambientParticle,.homePulse,.coverSpark,.softOrbit){
+body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote, .secretLayer, .ambientParticle, .homePulse, .coverSpark, .softOrbit){
   animation-play-state: paused !important;
 }
 
@@ -4303,17 +4075,11 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
 .homeSection,
 .panel,
 .settingsPanel,
-.settingsPanelCard,
-.coverStudioShell,
-.coverGalleryPanel,
-.analyticsCard,
-.downloadsPanel{
+.settingsPanelCard{
   contain: layout paint style;
 }
 
-.coverGalleryGrid,
-.libraryGrid,
-.homeAlbums {
+.homeAlbums{
   content-visibility: auto;
   contain-intrinsic-size: 720px;
 }
@@ -4385,20 +4151,17 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote,.secretLayer,.
   animation-play-state: paused !important;
 }
 
-.app.isScrolling .libraryCard,
 .app.isScrolling .songCard,
 .app.isScrolling .coverCard,
 .app.isScrolling .panel,
 .app.playerScrubbing .playerBar,
 .app.playerScrubbing .progressInput,
-.app.playerScrubbing .volumeSlider {
+.app.playerScrubbing .volumeSlider{
   transition-duration: 0s !important;
 }
 
 .homeSection,
-.coverGalleryCard,
-.libraryCard,
-.songCard {
+.songCard{
   content-visibility: auto;
   contain-intrinsic-size: 1px 280px;
 }
@@ -4431,18 +4194,11 @@ body,
 .pageShell,
 .pageSurface,
 .homePage,
-.libraryPage,
 .likedPage,
 .coversPage,
-.analyticsPage,
-.downloadsPage,
-.settingsPage,
-.playlistPage,
-.coverStudio,
 .panel,
 .hero,
 .heroCard,
-.libraryPanel,
 .settingsPanel{
   background-image: none !important;
 }
@@ -4471,24 +4227,14 @@ body::after,
 .pageSurface::after,
 .homePage::before,
 .homePage::after,
-.libraryPage::before,
-.libraryPage::after,
 .coversPage::before,
 .coversPage::after,
-.settingsPage::before,
-.settingsPage::after,
-.playlistPage::before,
-.playlistPage::after,
-.coverStudio::before,
-.coverStudio::after,
 .panel::before,
 .panel::after,
 .hero::before,
 .hero::after,
 .heroCard::before,
 .heroCard::after,
-.libraryPanel::before,
-.libraryPanel::after,
 .settingsPanel::before,
 .settingsPanel::after{
   background-image: none !important;
@@ -4496,7 +4242,6 @@ body::after,
 }
 
 .songCard,
-.libraryCard,
 .coverCard,
 .playlistCard,
 .playlistSongRow,
@@ -4786,11 +4531,6 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 .homeShelf,
-.libraryListWrap,
-.analyticsPanel,
-.analyticsGrid,
-.downloadQueuePanel,
-.coverStudioPanel,
 .settingsSection,
 .settingsCard,
 .songListPanel,
@@ -4804,7 +4544,7 @@ body.localtifyBackgroundMode .ambientSurface,
   position: fixed !important;
   inset: 50px 22px auto auto !important;
   z-index: 2400 !important;
-  width: min(520px, calc(100vw - var(--sidebar-width, 249px) - 56px)) !important;
+  width: min(520px, calc(100vw - var(--workspace-sidebar-current, 236px) - 56px)) !important;
   min-height: 0 !important;
   display: flex !important;
   align-items: flex-start !important;
@@ -5372,7 +5112,7 @@ body.localtifyBackgroundMode .ambientSurface,
   --ambient-cover-rgb: var(--cover-rgb, var(--lt-accent-rgb));
 }
 
-.app[data-cover-sync]:not([data-cover-sync="off"]) .playerBar {
+.app[data-cover-sync]:not([data-cover-sync="off"]) .playerBar{
   --player-ambient-rgb: var(--cover-rgb, var(--lt-accent-rgb));
 }
 
@@ -7165,17 +6905,11 @@ the last imported CSS layer. */
 }
 
 
-.app .playerBar > :where(.playerLeft,.playerCenter,.playerRight,.controlRow,.progressRow,.volumeWrap){
+.app .playerBar > :where(.playerLeft, .playerCenter, .playerRight, .controlRow, .progressRow, .volumeWrap){
   contain: layout style !important;
 }
 
-.app :where(
-  .secretLayer.arcadeGhost,
-  .lateNightNoteLayer,
-  .lateNightWarning,
-  .misideWhisper,
-  .misideEggNotice
-){
+.app :where(.secretLayer.arcadeGhost, .lateNightNoteLayer, .lateNightWarning, .misideWhisper, .misideEggNotice){
   display: none !important;
   animation: none !important;
   pointer-events: none !important;
@@ -7185,39 +6919,12 @@ the last imported CSS layer. */
   display: none !important;
 }
 
-.app :where(
-  .settingsPanelCard,
-  .settingsPageCard,
-  .settingSwitchCard,
-  .settingsResetButton,
-  .settingsChoice,
-  .coverSyncChoice,
-  .songRow,
-  .libraryCard,
-  .libraryCardV025,
-  .coverTile,
-  .coverGalleryCard
-).localtifyProximityActive{
+.app :where(.settingsPanelCard, .settingSwitchCard, .settingsResetButton, .settingsChoice, .coverSyncChoice, .songRow, .coverTile).localtifyProximityActive{
   transform: none !important;
   box-shadow: inherit !important;
   background-image: inherit !important;
 }
 
-.app .playlistTrackMain,
-.app .playlistTrackMain:hover,
-.app .playlistTrackMain:active,
-.app .playlistTrackMain:focus,
-.app .playlistTrackMain:focus-visible,
-.app .playlistTrackRow > .iconAction,
-.app .playlistTrackRow > .iconAction:hover,
-.app .playlistTrackRow > .iconAction:active{
-  transform: none !important;
-  translate: none !important;
-  scale: none !important;
-  rotate: none !important;
-  filter: none !important;
-  text-shadow: none !important;
-}
 
 .app .secretLayer.stars,
 .app .secretLayer.stars .secretRibbon,
@@ -7277,15 +6984,6 @@ body.localtifyPerfV301 .app{
 
 }
 
-
-body.localtifyPerfV301 .app.isScrolling .albumCard::before,
-body.localtifyPerfV301 .app.isScrolling .albumCard::after,
-body.localtifyPerfV301 .app.isScrolling .libraryCard::before,
-body.localtifyPerfV301 .app.isScrolling .libraryCard::after {
-  opacity: 0 !important;
-  filter: none !important;
-  animation: none !important;
-}
 
 body.localtifyPerfV301 .app :is(.localtifyStarsBackdrop, .localtifyStarsLayer, .ambientOrb, .lightOrb){
   display: none !important;
@@ -7619,7 +7317,7 @@ body,
 .app{
   --player-size-used: var(--player-size-live, var(--player-size, 92px));
   --sidebar-width-release: 236px;
-  --sidebar-width-used: var(--sidebar-width-release);
+  --sidebar-width-used: var(--workspace-sidebar-current, 236px);
   --sidebar-bg-release:
     linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38)),
     var(--lt-bg, #000);
@@ -7641,7 +7339,7 @@ body,
 .appShell{
   height: calc(100vh - 36px);
   display: grid;
-  grid-template-columns: var(--sidebar-width-release) minmax(0, 1fr);
+  grid-template-columns: var(--workspace-sidebar-current, 236px) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) var(--player-size-used);
   overflow: hidden;
   gap: 0 !important;
@@ -7653,16 +7351,14 @@ body,
 /* Fixed sidebar: not transparent, not glass, and content cannot slide underneath it. */
 .sidebar,
 .app .sidebar,
-.app[data-sidebar-behavior="hover"] .sidebar,
-.app.sidebarHoverShiftEnabled .sidebar,
-.app.sidebarHoverOpen .sidebar{
+.app.sidebarHoverShiftEnabled .sidebar{
   grid-column: 1;
   grid-row: 1 / 3;
   position: relative;
   z-index: 20;
-  width: var(--sidebar-width-release);
-  min-width: var(--sidebar-width-release);
-  max-width: var(--sidebar-width-release);
+  width: var(--workspace-sidebar-current, 236px);
+  min-width: var(--workspace-sidebar-current, 236px);
+  max-width: var(--workspace-sidebar-current, 236px);
   height: 100%;
   padding: 16px 12px;
   display: flex;
@@ -7683,8 +7379,7 @@ body,
 }
 
 .sidebar:hover,
-.app .sidebar:hover,
-.app[data-sidebar-behavior="hover"] .sidebar:hover{
+.app .sidebar:hover{
   background: var(--sidebar-bg-release);
   background-color: var(--lt-bg, #000);
   background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
@@ -7703,8 +7398,7 @@ body,
 /* Main content starts after the actual sidebar. */
 .content,
 .app .content,
-.app.sidebarHoverShiftEnabled .content,
-.app.sidebarHoverOpen .content{
+.app.sidebarHoverShiftEnabled .content{
   grid-column: 2;
   grid-row: 1;
   min-width: 0;
@@ -7724,20 +7418,7 @@ body,
 
 
 /* Disable the broken sidebar hover mode for 0.3.9 release. */
-.app[data-sidebar-behavior="hover"]{
-  --sidebar-width: var(--sidebar-width-release);
-}
 
-.app[data-sidebar-behavior="hover"] .appShell{
-  grid-template-columns: var(--sidebar-width-release) minmax(0, 1fr);
-  transition: none;
-}
-
-.app[data-sidebar-behavior="hover"] .content,
-.app[data-sidebar-behavior="hover"].sidebarHoverOpen .content{
-  transform: none;
-  transition: none;
-}
 
 /* Sidebar controls: solid, theme-aware, no blur/glass. */
 .logoWrap{
@@ -7774,12 +7455,6 @@ body,
   transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
 }
 
-
-.navText{
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
 
 .navText strong,
 .navText span{
@@ -7818,8 +7493,8 @@ body,
 }
 
 .toastStack{
-  left: calc(var(--sidebar-width-release) + 22px);
-  width: min(360px, calc(100vw - var(--sidebar-width-release) - 42px));
+  left: calc(var(--workspace-sidebar-current, 236px) + 22px);
+  width: min(360px, calc(100vw - var(--workspace-sidebar-current, 236px) - 42px));
 }
 
 /* Release performance: stop repeated entrance animations from repainting the page. */
@@ -7828,8 +7503,7 @@ body,
 .pageTransition,
 .homeSection,
 .settingsCategoryPage,
-.settingsPanelCard,
-.settingsPageCard {
+.settingsPanelCard{
   animation: none;
 }
 
@@ -7856,8 +7530,8 @@ body.isResizingPlayer .app *{
   }
 
   .navText,
-  .logoWrap h1,
-  .logoWrap p{
+.logoWrap h1,
+.logoWrap p{
     display: none;
   }
 
@@ -8001,26 +7675,12 @@ body.isResizingPlayer .app *{
   --progress-contrast: var(--button-text-on-progress, var(--accent-contrast));
 }
 
-.app :is(
-  .mainAction,
-  .heroMain,
-  .circleButton.main:not(.playerBar *),
-  .settingsActionButton.isPrimary,
-  .settingsTinyButton.isPrimary,
-  .editor-playlist-list button.is-on
-){
+.app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *), .settingsActionButton.isPrimary, .settingsTinyButton.isPrimary, .editor-playlist-list button.is-on){
   color: var(--accent-contrast) !important;
   text-shadow: none !important;
 }
 
-.app :is(
-  .mainAction,
-  .heroMain,
-  .circleButton.main:not(.playerBar *),
-  .settingsActionButton.isPrimary,
-  .settingsTinyButton.isPrimary,
-  .editor-playlist-list button.is-on
-) :is(svg, .buttonInlineIcon, .settingsThemeIcon){
+.app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *), .settingsActionButton.isPrimary, .settingsTinyButton.isPrimary, .editor-playlist-list button.is-on) :is(svg, .buttonInlineIcon, .settingsThemeIcon){
   color: currentColor !important;
   stroke: currentColor !important;
   fill: none;
@@ -8061,33 +7721,6 @@ body.isResizingPlayer .app *{
   white-space: nowrap !important;
 }
 
-.app[data-sidebar-behavior="slim"] .sidebar .mainAction.importMainAction,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction.importMainAction{
-  width: 50px !important;
-  min-width: 50px !important;
-  height: 50px !important;
-  min-height: 50px !important;
-  padding: 0 !important;
-  margin-inline: auto !important;
-  display: grid !important;
-  place-items: center !important;
-  grid-auto-flow: row !important;
-  gap: 0 !important;
-  border-radius: 17px !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .mainAction.importMainAction .buttonInlineIcon,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction.importMainAction .buttonInlineIcon{
-  width: 20px !important;
-  height: 20px !important;
-  margin: 0 !important;
-  transform: none !important;
-}
-
-.app[data-sidebar-behavior="slim"] .sidebar .mainAction.importMainAction .buttonLabel,
-.app[data-sidebar-behavior="hover"] .sidebar:not(:hover):not(:focus-within) .mainAction.importMainAction .buttonLabel{
-  display: none !important;
-}
 
 .app .playerBar,
 .app .playerBar::before,
@@ -8148,10 +7781,8 @@ body.isResizingPlayer .app *{
 }
 
 .app .topUpdateRibbon.available,
-.app .topUpdateRibbon.downloaded,
-.topUpdateRibbon.available,
-.topUpdateRibbon.downloaded{
-  width: min(1240px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 116px)) !important;
+.topUpdateRibbon.available{
+  width: min(1240px, calc(100vw - var(--workspace-sidebar-current, 236px) - 116px)) !important;
   animation: localtifyTopIslandPopV454 560ms cubic-bezier(.16,1,.3,1) both !important;
 }
 
@@ -8266,9 +7897,9 @@ body.isResizingPlayer .app *{
 }
 
 @keyframes localtifyTopIslandPopV454{
-  0%{ opacity: 0; width: min(620px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 320px)); transform: translate3d(0,-12px,0) scale(.94); filter: blur(5px); }
-  58%{ opacity: 1; width: min(1260px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 96px)); transform: translate3d(0,0,0) scale(1.006); filter: blur(0); }
-  100%{ opacity: 1; width: min(1240px, calc(100vw - var(--sidebar-width-used, var(--sidebar-width, 249px)) - 116px)); transform: translate3d(0,0,0) scale(1); filter: blur(0); }
+  0%{ opacity: 0; width: min(620px, calc(100vw - var(--workspace-sidebar-current, 236px) - 320px)); transform: translate3d(0,-12px,0) scale(.94); filter: blur(5px); }
+  58%{ opacity: 1; width: min(1260px, calc(100vw - var(--workspace-sidebar-current, 236px) - 96px)); transform: translate3d(0,0,0) scale(1.006); filter: blur(0); }
+  100%{ opacity: 1; width: min(1240px, calc(100vw - var(--workspace-sidebar-current, 236px) - 116px)); transform: translate3d(0,0,0) scale(1); filter: blur(0); }
 }
 
 .sidebarNavGroupsV467{
@@ -8438,8 +8069,8 @@ body.isResizingPlayer .app *{
   }
 
   .app .sidebar .navItem,
-  .app .sidebar .navItem:hover,
-  .app .sidebar .navItem.active{
+.app .sidebar .navItem:hover,
+.app .sidebar .navItem.active{
     transform: none !important;
   }
 }
@@ -8547,9 +8178,9 @@ body.isResizingPlayer .app *{
 
 @media (max-width: 860px){
   .app .mainAction.importMainAction.iconTextButton,
-  .app .mainAction.importMainAction.iconTextButton:hover,
-  .app .mainAction.importMainAction.iconTextButton:focus-visible,
-  .app .mainAction.importMainAction.iconTextButton:active{
+.app .mainAction.importMainAction.iconTextButton:hover,
+.app .mainAction.importMainAction.iconTextButton:focus-visible,
+.app .mainAction.importMainAction.iconTextButton:active{
     transform: none !important;
   }
 
@@ -8565,15 +8196,15 @@ body.isResizingPlayer .app *{
 }
 
 /* General readable surfaces: keep blur/motion, just make text/borders less muddy. */
-.app :is(.panel, .ambientSurface, .headerBar, .sidebar, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel){
+.app :is(.panel, .ambientSurface, .headerBar, .sidebar){
   color: rgba(var(--text-rgb), .90);
 }
 
-.app :is(.panel, .ambientSurface, .downloadPanel, .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel){
+.app :is(.panel, .ambientSurface){
   border-color: rgba(255,255,255,.105);
 }
 
-.app :is(.softText, .panel p, .navText small, .downloadNotice, .converterBoxV031 p){
+.app :is(.softText, .panel p, .navText small){
   color: rgba(var(--text-rgb), .68);
 }
 
@@ -8809,24 +8440,7 @@ body.isResizingPlayer .app *{
 }
 
 /* Calm panel hierarchy, consolidated from v478. */
-.app :is(
-  .panel,
-  .ambientSurface,
-  .settingsPanel,
-  .settingsCard,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .downloadPanel,
-  .playlistHeroPanel,
-  .playlistCreatePanel,
-  .playlistShelfPanel,
-  .playlistTracksPanel,
-  .analyticsStudioV339 > section,
-  .albumsHeroPanelV318,
-  .albumsShelfPanelV318,
-  .albumDetailPanelV318,
-  .albumBuilderPanelV318
-):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon){
 
   background:
     linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.012)),
@@ -8839,22 +8453,7 @@ body.isResizingPlayer .app *{
   contain: layout paint style;
 }
 
-.app :is(
-  .panel,
-  .ambientSurface,
-  .settingsCard,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .downloadPanel,
-  .playlistHeroPanel,
-  .playlistCreatePanel,
-  .playlistShelfPanel,
-  .playlistTracksPanel,
-  .albumsHeroPanelV318,
-  .albumsShelfPanelV318,
-  .albumDetailPanelV318,
-  .albumBuilderPanelV318
-):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon):hover{
 
   background:
     linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.016)),
@@ -8864,15 +8463,7 @@ body.isResizingPlayer .app *{
     var(--panel-calm-shadow-hover) !important;
 }
 
-.app :is(.active, .selected, .playing, .isActive, .downloaded, .loggedIn):is(
-  .panel,
-  .ambientSurface,
-  .settingsCard,
-  .settingsPageCard,
-  .downloadPanel,
-  .albumDetailPanelV318,
-  .albumsShelfPanelV318
-){
+.app :is(.active, .selected, .playing, .isActive, .loggedIn):is(.panel, .ambientSurface, .settingsCard){
   border-color: rgba(var(--lt-accent-rgb), .22) !important;
   background:
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .070), rgba(255,255,255,.014)),
@@ -8895,24 +8486,11 @@ body.isResizingPlayer .app *{
 }
 
 
-.app :is(
-  .content,
-  .pageTransition,
-  .songList,
-  .libraryList,
-  .albumTrackListV318,
-  .downloadQueueList,
-  .spotifyTrackItems,
-  .coverGalleryGridCleanOnly,
-  .playlistTrackList
-){
+.app :is(.content, .pageTransition, .songList){
   overscroll-behavior: contain;
   contain: layout style;
 }
 
-.app :is(.albumTrackListV318, .downloadQueueList, .spotifyTrackItems, .playlistTrackList){
-  scrollbar-gutter: stable;
-}
 
 .app[data-reduce-motion="true"] .content > .headerBar::before,
 .app[data-reduce-motion="true"] .content > .headerBar::after{
@@ -9053,43 +8631,11 @@ body.isResizingPlayer .app *{
 }
 
 /* Accent-driven calm outlines instead of fixed pink borders. */
-.app :is(
-  .panel,
-  .ambientSurface,
-  .settingsPanel,
-  .settingsCard,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .downloadPanel,
-  .playlistHeroPanel,
-  .playlistCreatePanel,
-  .playlistShelfPanel,
-  .playlistTracksPanel,
-  .analyticsStudioV339 > section,
-  .albumsHeroPanelV318,
-  .albumsShelfPanelV318,
-  .albumDetailPanelV318,
-  .albumBuilderPanelV318
-):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--panel-calm-outline-soft) !important;
 }
 
-.app :is(
-  .panel,
-  .ambientSurface,
-  .settingsCard,
-  .settingsPageCard,
-  .settingsPanelCard,
-  .downloadPanel,
-  .playlistHeroPanel,
-  .playlistCreatePanel,
-  .playlistShelfPanel,
-  .playlistTracksPanel,
-  .albumsHeroPanelV318,
-  .albumsShelfPanelV318,
-  .albumDetailPanelV318,
-  .albumBuilderPanelV318
-):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon):hover{
   border-color: var(--panel-calm-outline-strong) !important;
 }
 
@@ -9261,12 +8807,12 @@ body.isResizingPlayer .app *{
 
 /* Proper contrast layer for the light theme. */
 
-.app[data-theme="mono"] :is(.panel, .ambientSurface, .sidebar, .playerBar, .settingsPageShell, .downloadPanel){
+.app[data-theme="mono"] :is(.panel, .ambientSurface, .sidebar, .playerBar){
   border-color: rgba(72, 78, 104, .13) !important;
 }
 
 .app[data-theme="mono"] .headerText h2,
-.app[data-theme="mono"] :is(h1,h2,h3,h4,strong){
+.app[data-theme="mono"] :is(h1, h2, h3, h4, strong){
   color: var(--lt-text) !important;
 }
 
@@ -9276,14 +8822,14 @@ body.isResizingPlayer .app *{
 
 @media (max-width: 760px){
   .app .topUpdateRibbon,
-  .topUpdateRibbon{
+.topUpdateRibbon{
     grid-template-columns: minmax(0, 1fr) auto !important;
     padding: 0 8px !important;
   }
 
 
   .app .topUpdateRibbon .updatePrimaryButton,
-  .topUpdateRibbon .updatePrimaryButton{
+.topUpdateRibbon .updatePrimaryButton{
     display: none !important;
   }
 }
@@ -9427,12 +8973,12 @@ body.isResizingPlayer .app *{
 
 @media (max-width: 760px){
   .app .topUpdateRibbonText h3,
-  .topUpdateRibbonText h3{
+.topUpdateRibbonText h3{
     font-size: 10.5px !important;
   }
 
   .app .topUpdateRibbon .updateReleaseLinkV486,
-  .topUpdateRibbon .updateReleaseLinkV486{
+.topUpdateRibbon .updateReleaseLinkV486{
     display: none !important;
   }
 }
@@ -9679,15 +9225,15 @@ body.isResizingPlayer .app *{
 }
 
 /* Fewer outlines globally. Accent outline is mostly active/important only. */
-.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface, .settingsCard):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--outline-calm-v487) !important;
 }
 
-.app :is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface, .settingsCard):not(.playerBar):not(.topUpdateRibbon):hover{
   border-color: var(--outline-hover-v487) !important;
 }
 
-.app :is(.active,.playing,.selected):is(.panel,.ambientSurface,.settingsCard,.downloadPanel,.albumDetailPanelV318,.albumsShelfPanelV318){
+.app :is(.active, .playing, .selected):is(.panel, .ambientSurface, .settingsCard){
   border-color: var(--outline-active-v487) !important;
 }
 
@@ -9898,19 +9444,19 @@ body.isResizingPlayer .app *{
   outline: 0 !important;
 }
 
-.app .sidebar :is(.navItem,.navIcon,.sidebarToolButton,.sidebarGroupLabelV467,.mainAction),
-.sidebar :is(.navItem,.navIcon,.sidebarToolButton,.sidebarGroupLabelV467,.mainAction){
+.app .sidebar :is(.navItem, .navIcon, .sidebarToolButton, .sidebarGroupLabelV467, .mainAction),
+.sidebar :is(.navItem, .navIcon, .sidebarToolButton, .sidebarGroupLabelV467, .mainAction){
   outline: 0 !important;
   box-shadow: none !important;
 }
 
-.app .sidebar :is(.navItem,.sidebarToolButton),
-.sidebar :is(.navItem,.sidebarToolButton){
+.app .sidebar :is(.navItem, .sidebarToolButton),
+.sidebar :is(.navItem, .sidebarToolButton){
   border-color: transparent !important;
 }
 
-.app .sidebar :is(.navItem.active,.navItem[aria-current="page"],.sidebarToolButton.active),
-.sidebar :is(.navItem.active,.navItem[aria-current="page"],.sidebarToolButton.active){
+.app .sidebar :is(.navItem.active, .navItem[aria-current="page"], .sidebarToolButton.active),
+.sidebar :is(.navItem.active, .navItem[aria-current="page"], .sidebarToolButton.active){
   border-color: transparent !important;
   box-shadow: none !important;
   background:

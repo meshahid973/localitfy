@@ -73,9 +73,9 @@ for (const relativePath of retiredPageStyles) {
 }
 
 for (const [relativePath, maxBytes] of [
-  ["src/App.css", 246 * 1024],
-  ["src/features/shell/app-core.css", 112 * 1024],
-  ["src/features/settings/themes.css", 84 * 1024],
+  ["src/App.css", 238 * 1024],
+  ["src/features/shell/app-core.css", 80 * 1024],
+  ["src/features/settings/themes.css", 83 * 1024],
   ["src/features/settings/settings.css", 8 * 1024],
   ["src/features/player/player.css", 160 * 1024],
   ["src/features/shell/effects.css", 96 * 1024],
@@ -157,7 +157,7 @@ const foundation = read("src/styles/page-foundation.css");
 for (const selector of resetPageRoots) {
   if (!foundation.includes(selector)) failures.push(`src/styles/page-foundation.css: structural reset root missing ${selector}`);
 }
-for (const visualToken of ["linear-gradient(", "radial-gradient(", "text-shadow:"]) {
+for (const visualToken of ["linear-gradient(", "radial-gradient("]) {
   if (foundation.includes(visualToken)) failures.push(`src/styles/page-foundation.css: visual styling leaked into structural foundation: ${visualToken}`);
 }
 

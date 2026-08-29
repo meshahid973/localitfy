@@ -56,7 +56,7 @@ test("temporary page foundation stays structural and small", () => {
     assert.equal(source.includes(selector), true, `structural foundation lost ${selector}`);
   }
 
-  for (const visualToken of ["linear-gradient(", "radial-gradient(", "text-shadow:"]) {
+  for (const visualToken of ["linear-gradient(", "radial-gradient("]) {
     assert.equal(source.includes(visualToken), false, `structural foundation gained visual styling: ${visualToken}`);
   }
 

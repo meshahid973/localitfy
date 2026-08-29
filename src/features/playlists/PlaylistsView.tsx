@@ -83,7 +83,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   } = props;
 
   return (
-    <section className="playlistsPage playlistPageV029">
+    <section data-page-section="playlists" className="playlistsPage playlistPageV029">
       <div className="playlistTopGrid">
         <section className="panel playlistHeroPanel">
           <div className="playlistHeroCopy">

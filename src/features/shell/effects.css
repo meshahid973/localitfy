@@ -1,14 +1,6 @@
 /* localtify V324 — effects owner. No window transparency. No standalone ambience orbs. Smooth visual settings. */
 
-.app[data-playing="on"] :is(
-  .songRow.playing .songArt.coverAura,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .libraryRow.playing .songArt.coverAura
-){
+.app[data-playing="on"] :is(.songRow.playing .songArt.coverAura, .homeAlbumCard.playing .homeAlbumArt.coverAura, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura){
   position: relative !important;
   isolation: isolate !important;
   contain: paint !important;
@@ -16,27 +8,14 @@
   transition: transform 135ms cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-.app[data-playing="on"] :is(
-  .songRow.playing .songArt.coverAura,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .libraryRow.playing .songArt.coverAura
-)::before{
+.app[data-playing="on"] :is(.songRow.playing .songArt.coverAura, .homeAlbumCard.playing .homeAlbumArt.coverAura, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura)::before{
   opacity: min(var(--active-song-glow-opacity, 0.28), 0.34) !important;
   filter: blur(14px) saturate(1.18) !important;
   transform: translateZ(0) scale(var(--active-song-glow-scale, 1.01)) !important;
   transition: opacity 120ms linear, transform 120ms linear !important;
 }
 
-.app[data-playing="on"] :is(
-  .songRow.playing,
-  .playlistTrackRow.playing,
-  .playlistSongRow.playing,
-  .libraryRow.playing
-) :is(.songArt, .smallArt, .coverAura){
+.app[data-playing="on"] :is(.songRow.playing, .playlistSongRow.playing) :is(.songArt, .smallArt, .coverAura){
   filter: saturate(1.05) contrast(1.02) !important;
 }
 
@@ -44,23 +23,7 @@
   display: block;
 }
 
-.app :is(
-  .ambientOrb,
-  .sideAmbienceOrb,
-  .lightOrb,
-  .ambientSurfaceGlow,
-  .orb,
-  .localtifyStarsBackdrop,
-  .localtifyStarsLayer,
-  .localtifyStarParticle,
-  .localtifyStarsNebula,
-  .localtifyStarSweep,
-  .themeBackdrop,
-  .animatedThemeBackdrop,
-  .backgroundGradient,
-  .appBackdrop,
-  .appBackgroundLayer
-){
+.app :is(.ambientOrb, .sideAmbienceOrb, .lightOrb, .ambientSurfaceGlow, .orb, .localtifyStarsBackdrop, .localtifyStarsLayer, .localtifyStarParticle, .localtifyStarsNebula, .localtifyStarSweep, .themeBackdrop, .animatedThemeBackdrop, .backgroundGradient, .appBackdrop, .appBackgroundLayer){
   display: none !important;
   opacity: 0 !important;
   background: none !important;
@@ -183,37 +146,37 @@
   --v321-card-shadow: none;
 }
 
-.app :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard){
+.app :where(.panel, .settingsPanelCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .coverTargetPanelCleanOnly, .statCard){
   background: var(--v321-panel-bg) !important;
   border-color: var(--v321-panel-border) !important;
   box-shadow: var(--v321-card-shadow) !important;
   transition: background-color var(--v321-fast), border-color var(--v321-fast), box-shadow var(--v321-fast), transform var(--v321-fast) !important;
 }
 
-.app[data-card-background="glassy"] :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard){
+.app[data-card-background="glassy"] :where(.panel, .settingsPanelCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .coverTargetPanelCleanOnly, .statCard){
   backdrop-filter: blur(16px) saturate(1.08) !important;
   -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
 }
 
-.app[data-card-background="solid"] :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard),
-.app[data-card-background="oledFlat"] :where(.panel, .settingsPanelCard, .settingsPageCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .albumsHeroV318, .albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .downloadCard, .coverGalleryPanelClean, .coverTargetPanelCleanOnly, .playlistHero, .statCard){
+.app[data-card-background="solid"] :where(.panel, .settingsPanelCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .coverTargetPanelCleanOnly, .statCard),
+.app[data-card-background="oledFlat"] :where(.panel, .settingsPanelCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumPanel, .coverTargetPanelCleanOnly, .statCard){
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-.app[data-card-background="solid"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .albumCardV318, .albumTrackRowV318, .albumSongPickerRowV318){
+.app[data-card-background="solid"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow){
   background: rgba(18, 17, 24, 0.96) !important;
   border-color: rgba(255, 255, 255, 0.07) !important;
   box-shadow: none !important;
 }
 
-.app[data-card-background="glassy"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .albumCardV318, .albumTrackRowV318, .albumSongPickerRowV318){
+.app[data-card-background="glassy"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow){
   background: rgba(19, 17, 25, 0.58) !important;
   border-color: rgba(255, 255, 255, 0.095) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
 }
 
-.app[data-card-background="oledFlat"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow, .libraryCard, .libraryCardV025, .albumCardV318, .albumTrackRowV318, .albumSongPickerRowV318){
+.app[data-card-background="oledFlat"] :where(.homeListenCard, .homeFreshCard, .homeAlbumCard, .songRow){
   background: rgba(2, 2, 6, 0.98) !important;
   border-color: rgba(255, 255, 255, 0.052) !important;
   box-shadow: none !important;
@@ -388,23 +351,6 @@
   grid-template-columns: 34px minmax(0, 1fr) !important;
 }
 
-.app[data-library-row-style="coverCards"] .libraryListHeaderV025{
-  display: none !important;
-}
-
-.app[data-library-row-style="coverCards"] .libraryCoverCardShellV321{
-  min-height: 520px !important;
-  overflow: hidden !important;
-}
-
-.app[data-library-row-style="coverCards"] .libraryCoverCardsGridV321{
-  height: min(62vh, 720px) !important;
-  min-height: 520px !important;
-}
-
-.app[data-library-row-style="coverCards"] .libraryCoverCardsGridV321 .virtualHomeGridRow{
-  gap: 16px !important;
-}
 
 .app[data-player-background="flat"] .playerBar{
   background: rgba(8, 8, 12, 0.94) !important;
@@ -460,26 +406,13 @@
 }
 
 /* localtify 0.3.9 V301 — effects sleep when renderer is busy */
-body.localtifyPerfV301 .app.isScrolling :is(
-  .songRow.playing .songArt.coverAura,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .libraryRow.playing .songArt.coverAura
-)::before{
+body.localtifyPerfV301 .app.isScrolling :is(.songRow.playing .songArt.coverAura, .homeAlbumCard.playing .homeAlbumArt.coverAura, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura)::before{
   opacity: 0 !important;
   filter: none !important;
   transform: none !important;
 }
 
-body.localtifyPerfV301 .app.isScrolling :is(
-  .songRow.playing,
-  .playlistTrackRow.playing,
-  .playlistSongRow.playing,
-  .libraryRow.playing
-) :is(.songArt, .smallArt, .coverAura){
+body.localtifyPerfV301 .app.isScrolling :is(.songRow.playing, .playlistSongRow.playing) :is(.songArt, .smallArt, .coverAura){
   filter: none !important;
 }
 
@@ -495,17 +428,7 @@ body.localtifyPerfV301.localtifyBackgroundMode .app .homeFreshCover::before{
 }
 
 /* localtify 0.3.9 V303 — profiler fix: sleep expensive paint while scrolling/audio analyser is busy */
-body.localtifyPerfV303 .app.isScrolling :is(
-  .heroAmbiencePulse,
-  .coverAura::before,
-  .songArt::before,
-  .homeAlbumArt::before,
-  .homeListenCover::before,
-  .homeFreshCover::before,
-  .playlistTrackCover::before,
-  .playlistSongRow .playlistTrackCover::before,
-  .playerBar::before
-){
+body.localtifyPerfV303 .app.isScrolling :is(.heroAmbiencePulse, .coverAura::before, .songArt::before, .homeAlbumArt::before, .homeListenCover::before, .homeFreshCover::before, .playerBar::before){
   opacity: 0 !important;
   filter: none !important;
   animation: none !important;
@@ -513,34 +436,14 @@ body.localtifyPerfV303 .app.isScrolling :is(
   transform: none !important;
 }
 
-body.localtifyPerfV303 .app.isScrolling :is(
-  .coverGalleryCard,
-  .coverGalleryImageButtonCleanOnly,
-  .coverSongPick,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .homeListenCard,
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .settingsPageCard,
-  .settingsPanelCard
-){
+body.localtifyPerfV303 .app.isScrolling :is(.homeAlbumCard, .homeFreshCard, .homeListenCard, .songRow, .playlistSongRow, .settingsPanelCard){
   transition-property: background-color, border-color, color, opacity !important;
   transition-duration: 90ms !important;
   filter: none !important;
   box-shadow: none !important;
 }
 
-body.localtifyPerfV303 .app.isScrolling :is(
-  .coverGalleryImageCleanOnly,
-  .coverGalleryImagePlaceholderCleanOnly,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .localtifyStarsLayer,
-  .localtifyStarsBackdrop
-){
+body.localtifyPerfV303 .app.isScrolling :is(.homeListenBackground, .homeListenBackgroundImage, .localtifyStarsLayer, .localtifyStarsBackdrop){
   animation: none !important;
   transition: none !important;
   filter: none !important;
@@ -554,67 +457,25 @@ body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::after{
 }
 
 /* localtify 0.3.9 V305 — keep audio smooth by sleeping expensive paint while the renderer is busy. */
-.app.localtifyInteractionBusy :is(
-  .coverAura::before,
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .homeAlbumArt::before,
-  .homeFreshCover::before,
-  .songArt::before,
-  .playlistTrackCover::before,
-  .playerBar::before
-){
+.app.localtifyInteractionBusy :is(.coverAura::before, .heroAmbiencePulse, .homeListenBackground, .homeListenBackgroundImage, .homeAlbumArt::before, .homeFreshCover::before, .songArt::before, .playerBar::before){
   opacity: 0 !important;
   filter: none !important;
   animation: none !important;
   transition: none !important;
 }
 
-.app.localtifyInteractionBusy :is(
-  .nowPlayingCopySwap,
-  .nowPlayingArtSwap,
-  .simpleHeroArtSwap,
-  .homeAlbumCard,
-  .homeListenCard,
-  .homeFreshCard,
-  .songRow,
-  .playlistTrackRow,
-  .playlistSongRow
-){
+.app.localtifyInteractionBusy :is(.nowPlayingCopySwap, .nowPlayingArtSwap, .simpleHeroArtSwap, .homeAlbumCard, .homeListenCard, .homeFreshCard, .songRow, .playlistSongRow){
   animation: none !important;
   transition-duration: 0ms !important;
 }
 
-body.localtifyAudioPlaying .app :is(
-  .localtifyProximityActive,
-  .proximityActive,
-  [data-proximity-active="true"]
-){
+body.localtifyAudioPlaying .app :is(.localtifyProximityActive, .proximityActive, [data-proximity-active="true"]){
   transform: none !important;
   filter: none !important;
 }
 
 /* localtify 0.3.9 V305 — harsher paint suppression while audio plays / scrolling */
-body.localtifyPerfV305 .app.isScrolling :is(
-  .hero.heroPremium,
-  .homeShelfStack,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel,
-  .coverQuickApplyBar,
-  .coverGalleryCardCleanOnly,
-  .coverGalleryImageButtonCleanOnly,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .homeListenCard,
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .playerBar
-){
+body.localtifyPerfV305 .app.isScrolling :is(.hero.heroPremium, .homeShelfStack, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel, .homeAlbumCard, .homeFreshCard, .homeListenCard, .songRow, .playlistSongRow, .playerBar){
   animation: none !important;
   transition-duration: 0ms !important;
   transition-delay: 0ms !important;
@@ -622,50 +483,17 @@ body.localtifyPerfV305 .app.isScrolling :is(
   filter: none !important;
 }
 
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(
-  .coverAura,
-  .coverAura::before,
-  .coverAura::after,
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .homeAlbumArt::before,
-  .homeFreshCover::before,
-  .songArt::before,
-  .playerBar::before,
-  .playerBar::after,
-  .coverGalleryImageCleanOnly
-){
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(.coverAura, .coverAura::before, .coverAura::after, .heroAmbiencePulse, .homeListenBackground, .homeListenBackgroundImage, .homeAlbumArt::before, .homeFreshCover::before, .songArt::before, .playerBar::before, .playerBar::after){
   animation: none !important;
   filter: none !important;
 }
 
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(
-  .nowPlayingCopySwap,
-  .nowPlayingArtSwap,
-  .simpleHeroArtSwap,
-  .homeAlbumCard,
-  .homeFreshCard,
-  .homeListenCard,
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .coverGalleryCardCleanOnly,
-  .coverSongPickVirtual
-){
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(.nowPlayingCopySwap, .nowPlayingArtSwap, .simpleHeroArtSwap, .homeAlbumCard, .homeFreshCard, .homeListenCard, .songRow, .playlistSongRow){
   transition-duration: 80ms !important;
   animation-duration: 80ms !important;
 }
 
-body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(
-  .hero.heroPremium.heroLayoutMotion,
-  .homeShelfStack,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel,
-  .homeLibraryPanel
-){
+body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(.hero.heroPremium.heroLayoutMotion, .homeShelfStack, .homeShelfPanel, .homeListenPanel, .homeFreshPanel, .homeLibraryPanel){
   animation: none !important;
   transition-duration: 120ms !important;
   filter: none !important;
@@ -951,27 +779,19 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarResiz
 }
 
 /* Home-specific hover perf: do not let sidebar hover restart expensive card filters. */
-main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .homeShelfPanel,
-  .homeListenPanel,
-  .homeFreshPanel
-){
+main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(.homeListenCard, .homeFreshCard, .homeAlbumCard, .homeShelfPanel, .homeListenPanel, .homeFreshPanel){
   transition-property: background-color, border-color, opacity !important;
   filter: none !important;
 }
 
 @media (max-width: 900px){
   main.app.app[data-sidebar-behavior="hover"] > .appShell,
-  main.app.app[data-sidebar-behavior="slim"] > .appShell{
+main.app.app[data-sidebar-behavior="slim"] > .appShell{
     grid-template-columns: var(--lt-sidebar-closed) minmax(0, 1fr) !important;
   }
 
   main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
-  main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar{
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar{
     width: var(--lt-sidebar-closed) !important;
     min-width: var(--lt-sidebar-closed) !important;
     max-width: var(--lt-sidebar-closed) !important;
@@ -980,9 +800,9 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
 
 @media (prefers-reduced-motion: reduce){
   main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
-  main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
-  main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
-  main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
     transition: none !important;
   }
 }
@@ -1048,28 +868,13 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
    Important: this does NOT remove image blur, cover tint, hero blur, or player blur. */
 
 
-.app :is(
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly,
-  .albumCardV318,
-  .playlistCard
-){
+.app :is(.homeFreshCard, .homeListenCard, .homeAlbumCard, .playlistCard){
   contain: layout paint style;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-.app :is(
-  .libraryList,
-  .playlistSongList,
-  .coverSongList,
-  .spotifyTrackItems,
-  .downloadQueueList,
-  .coverGalleryViewport
-){
+.app :is(.playlistSongList){
   contain: layout style paint;
   overscroll-behavior: contain;
   transform: translateZ(0);
@@ -1078,84 +883,30 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
 
 /* Scroll defense: reduce transition churn only.
    Do not disable filter/backdrop-filter because Localtify's cover blur uses those. */
-.app.isScrolling :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem,
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly
-){
+.app.isScrolling :is(.songRow, .playlistSongRow, .homeFreshCard, .homeListenCard, .homeAlbumCard){
 
   transition-duration: 90ms !important;
 }
 
 /* Override older V303/V305 performance blocks that killed blur while audio played or while scrolling. */
-body.localtifyPerfV303 .app.isScrolling :is(
-  .coverGalleryImageCleanOnly,
-  .coverGalleryImagePlaceholderCleanOnly,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .playerBar::before,
-  .playerBar::after
-),
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(
-  .coverAura,
-  .coverAura::before,
-  .coverAura::after,
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .homeAlbumArt::before,
-  .homeFreshCover::before,
-  .songArt::before,
-  .playerBar::before,
-  .playerBar::after,
-  .coverGalleryImageCleanOnly
-){
+body.localtifyPerfV303 .app.isScrolling :is(.homeListenBackground, .homeListenBackgroundImage, .playerBar::before, .playerBar::after),
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(.coverAura, .coverAura::before, .coverAura::after, .heroAmbiencePulse, .homeListenBackground, .homeListenBackgroundImage, .homeAlbumArt::before, .homeFreshCover::before, .songArt::before, .playerBar::before, .playerBar::after){
   filter: revert !important;
 }
 
 /* Keep sidebar hover cheap without deleting card blur. */
-main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
-  .homeListenCard,
-  .homeFreshCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly,
-  .spotifyTrackItem
-){
+main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(.homeListenCard, .homeFreshCard, .homeAlbumCard){
   transition-property: background-color, border-color, opacity, transform !important;
   contain: paint style;
 }
 
-main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(
-  .homeListenCard img,
-  .homeFreshCard img,
-  .homeAlbumCard img,
-  .coverGalleryCard img,
-  .coverGalleryCardCleanOnly img,
-  .homeListenBackgroundImage
-){
+main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is(.homeListenCard img, .homeFreshCard img, .homeAlbumCard img, .homeListenBackgroundImage){
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
 /* Explicitly keep these blur/tint systems alive. */
-.app :is(
-  .heroAmbiencePulse,
-  .homeListenBackgroundImage,
-  .playerBar::before,
-  .playerBar::after,
-  .coverAura::before,
-  .coverAura::after
-){
+.app :is(.heroAmbiencePulse, .homeListenBackgroundImage, .playerBar::before, .playerBar::after, .coverAura::before, .coverAura::after){
   backface-visibility: hidden;
   transform: translateZ(0);
 }
@@ -1163,15 +914,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
 /* localtify 0.3.9 V365 — analytics + compositor polish.
    Keep blur/cover ambience alive while moving row/card motion onto safer composite paths. */
 
-.app :is(
-  .songRow.playing .songArt.coverAura,
-  .libraryRow.playing .songArt.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura
-){
+.app :is(.songRow.playing .songArt.coverAura, .homeAlbumCard.playing .homeAlbumArt.coverAura, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura){
   position: relative !important;
   isolation: isolate !important;
   contain: layout paint style !important;
@@ -1182,15 +925,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
 
 /* Keep high-density rows permanently ready for scrolling.
    This only promotes geometry; it does not turn off filters or blur. */
-.app :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem
-){
+.app :is(.songRow, .playlistSongRow){
   contain: layout paint !important;
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -1198,42 +933,14 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
 }
 
 /* Active scroll should reduce animation churn, not remove visual identity. */
-.app.isScrolling :is(
-  .songRow,
-  .libraryRow,
-  .playlistTrackRow,
-  .playlistSongRow,
-  .albumTrackRowV318,
-  .spotifyTrackItem,
-  .downloadQueueItem,
-  .homeFreshCard,
-  .homeListenCard,
-  .homeAlbumCard,
-  .coverGalleryCard,
-  .coverGalleryCardCleanOnly
-){
+.app.isScrolling :is(.songRow, .playlistSongRow, .homeFreshCard, .homeListenCard, .homeAlbumCard){
   transition-property: background-color, border-color, opacity, transform !important;
   transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
 /* Undo old scroll/audio rules that tried to kill blur-heavy layers. */
-body.localtifyPerfV303 .app.isScrolling :is(
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .coverGalleryImageCleanOnly,
-  .playerBar::before,
-  .playerBar::after
-),
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(
-  .heroAmbiencePulse,
-  .homeListenBackground,
-  .homeListenBackgroundImage,
-  .homeAlbumArt::before,
-  .homeFreshCover::before,
-  .playerBar::before,
-  .playerBar::after,
-  .coverGalleryImageCleanOnly
-){
+body.localtifyPerfV303 .app.isScrolling :is(.homeListenBackground, .homeListenBackgroundImage, .playerBar::before, .playerBar::after),
+body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeListenBackground, .homeListenBackgroundImage, .homeAlbumArt::before, .homeFreshCover::before, .playerBar::before, .playerBar::after){
   filter: revert !important;
   backdrop-filter: revert !important;
   -webkit-backdrop-filter: revert !important;
@@ -1465,8 +1172,8 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 
 @media (prefers-reduced-motion: reduce){
   main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468,
-  main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover .navIconMotionV468,
-  main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
+main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover .navIconMotionV468,
+main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path, circle, rect, line, polyline, polygon){
     animation: none !important;
     transform: none !important;
     stroke-dasharray: none !important;
@@ -1526,7 +1233,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 }
 
 .app[data-platform="linux"] .content,
-.app[data-platform="linux"] .settingsPage,
 .app[data-platform="linux"] .simpleShell{
   scrollbar-gutter: stable !important;
 }
@@ -1550,27 +1256,12 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   background: rgba(var(--accent-rgb), .64) !important;
 }
 
-.app[data-platform="linux"] :is(
-  .panel,
-  .settingsHero,
-  .settingsPanelCard,
-  .settingsPageCard,
-  .libraryPanelV025,
-  .downloadPanel,
-  .downloadPanelV031,
-  .spotifyFlowPanelV256,
-  .albumFolderImportPanelV308,
-  .albumFolderImportPanelV309,
-  .modalWrap,
-  .editorModal,
-  .playerBar,
-  .sidebar
-){
+.app[data-platform="linux"] :is(.panel, .settingsPanelCard, .modalWrap, .editorModal, .playerBar, .sidebar){
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-.app[data-platform="linux"] :is(.panel, .settingsPanelCard, .settingsPageCard, .libraryPanelV025){
+.app[data-platform="linux"] :is(.panel, .settingsPanelCard){
   background-color: var(--linux-surface-solid) !important;
 }
 
@@ -1592,15 +1283,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   transform: translateZ(0) scale(1.025) !important;
 }
 
-.app[data-platform="linux"][data-playing="on"] :is(
-  .songRow.playing .songArt.coverAura,
-  .homeAlbumCard.playing .homeAlbumArt.coverAura,
-  .homeListenCard.playing .homeListenCover.coverAura,
-  .homeFreshCard.playing .homeFreshCover.coverAura,
-  .playlistTrackRow.playing .playlistTrackCover,
-  .playlistSongRow.playing .playlistTrackCover,
-  .libraryRow.playing .songArt.coverAura
-)::before{
+.app[data-platform="linux"][data-playing="on"] :is(.songRow.playing .songArt.coverAura, .homeAlbumCard.playing .homeAlbumArt.coverAura, .homeListenCard.playing .homeListenCover.coverAura, .homeFreshCard.playing .homeFreshCover.coverAura)::before{
   opacity: .18 !important;
   filter: blur(10px) saturate(1.06) !important;
 }
@@ -1616,8 +1299,8 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 
 @media (prefers-reduced-motion: reduce){
   .app[data-platform="linux"] *,
-  .app[data-platform="linux"] *::before,
-  .app[data-platform="linux"] *::after{
+.app[data-platform="linux"] *::before,
+.app[data-platform="linux"] *::after{
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
@@ -1857,12 +1540,8 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 .app .windowButtons button svg,
 .inlineGlyphIcon,
 .emptyCoverIconSlot svg,
-.playlistCoverTile.empty svg,
-.spotifyTrackCheck svg,
-.albumBuilderSongGridV318 button b svg,
 .localtifyStateIconV373 svg,
-.updateToastIcon svg,
-.downloadResultV326 > span svg{
+.updateToastIcon svg{
   display: block !important;
   width: 1em !important;
   height: 1em !important;
@@ -1877,15 +1556,13 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   height: 12px !important;
 }
 
-.songIndex .playingBarsIcon,
-.playlistTrackIndex .playingBarsIcon{
+.songIndex .playingBarsIcon{
   width: 13px !important;
   height: 13px !important;
   opacity: .95 !important;
 }
 
-.emptyCoverIconSlot,
-.playlistCoverTile.empty span{
+.emptyCoverIconSlot{
   display: grid !important;
   place-items: center !important;
   width: 100% !important;
@@ -1893,29 +1570,16 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   color: rgba(255,255,255,0.58) !important;
 }
 
-.playlistCoverTile.empty{
-  display: grid !important;
-  place-items: center !important;
-}
 
-.albumBuilderSongGridV318 button b,
-.spotifyTrackCheck,
-.downloadResultV326 > span,
 .localtifyStateIconV373,
 .updateToastIcon{
   display: grid !important;
   place-items: center !important;
 }
 
-.albumBuilderSongGridV318 button b svg,
-.spotifyTrackCheck svg{
-  width: 14px !important;
-  height: 14px !important;
-}
 
 .localtifyStateIconV373 svg,
-.updateToastIcon svg,
-.downloadResultV326 > span svg{
+.updateToastIcon svg{
   width: 18px !important;
   height: 18px !important;
 }
@@ -1951,86 +1615,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 /* localtify 0.4.0 — missing library actions + playlist dark polish.
    Missing files are clearly red, and playlist panels no longer get a separate bright grey wash.
 */
-.app .libraryMissingStripV039{
-  border: 1px solid rgba(255, 79, 115, 0.26) !important;
-  background:
-    linear-gradient(90deg, rgba(255, 79, 115, 0.18), rgba(95, 23, 46, 0.12)),
-    rgba(18, 8, 14, 0.82) !important;
-  box-shadow:
-    inset 3px 0 0 rgba(255, 79, 115, 0.86),
-    0 12px 34px rgba(0,0,0,0.22),
-    inset 0 1px 0 rgba(255,255,255,0.045) !important;
-}
 
-.app .libraryMissingStripV039 strong{
-  color: #ffd4dc !important;
-}
-
-.app .libraryMissingStripV039 span{
-  color: rgba(255, 226, 232, 0.74) !important;
-}
-
-.app .libraryMissingActionsV039 button{
-  pointer-events: auto !important;
-  position: relative !important;
-  z-index: 2 !important;
-  min-height: 30px !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: rgba(255, 234, 238, 0.86) !important;
-  background: rgba(255, 255, 255, 0.065) !important;
-}
-
-.app .libraryMissingActionsV039 button:hover,
-.app .libraryMissingActionsV039 button.active{
-  border-color: rgba(255, 113, 141, 0.36) !important;
-  color: #fff !important;
-  background: rgba(255, 79, 115, 0.18) !important;
-}
-
-.app .libraryMissingActionsV039 .dangerGhostV039{
-  color: #ffd1dc !important;
-  background: rgba(255, 79, 115, 0.14) !important;
-}
-
-.app .libraryMissingActionsV039 .dangerGhostV039:hover{
-  background: rgba(255, 79, 115, 0.25) !important;
-}
-
-.app .playlistHeroPanel,
-.app .playlistCreatePanel,
-.app .playlistShelfPanel,
-.app .playlistTracksPanel{
-  border-color: rgba(255,255,255,.075) !important;
-  background:
-    radial-gradient(circle at 18% 2%, rgba(var(--accent-rgb), .075), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.012)),
-    rgba(7, 4, 11, .88) !important;
-  box-shadow:
-    0 24px 80px rgba(0,0,0,.46),
-    inset 0 1px 0 rgba(255,255,255,.045) !important;
-}
-
-.app .playlistHeroPanel::before{
-  opacity: .22 !important;
-}
-
-.app .playlistShelfCard{
-  background: rgba(12, 8, 17, .72) !important;
-  border-color: rgba(255,255,255,.075) !important;
-}
-
-.app .playlistShelfCard:hover{
-  background: rgba(18, 12, 24, .86) !important;
-  border-color: rgba(var(--accent-rgb), .19) !important;
-}
-
-.app .playlistShelfCard.active,
-.app .playlistShelfCard.playing{
-  background:
-    linear-gradient(90deg, rgba(var(--accent-rgb), .105), rgba(255,255,255,.026)),
-    rgba(13, 8, 18, .88) !important;
-  border-color: rgba(var(--accent-rgb), .24) !important;
-}
 
 .metaDividerDot{
   display: inline-block !important;
@@ -2043,21 +1628,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   opacity: .42 !important;
 }
 
-.playlistShelfMeta small{
-  display: flex !important;
-  align-items: center !important;
-  gap: 0 !important;
-}
-
-.playlistCoverTile.empty{
-  color: rgba(255,255,255,.56) !important;
-  background: rgba(255,255,255,.045) !important;
-}
-
-.playlistCoverTile.empty svg{
-  width: 18px !important;
-  height: 18px !important;
-}
 
 /* localtify 0.4.0 — home shelf ownership cleanup.
    Recent covers is display-only now; quick library owns expand/compact.
@@ -2083,8 +1653,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 .app .homeFreshCard,
 .app .homeListenCard,
 .app .homeAlbumCard,
-.app .songRow,
-.app .libraryRow{
+.app .songRow{
   content-visibility: auto;
   contain-intrinsic-size: 92px 132px;
 }
@@ -2093,19 +1662,14 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 .app .homeFreshCard :is(img, .coverAura),
 .app .homeListenCard :is(img, .coverAura),
 .app .homeAlbumCard :is(img, .coverAura),
-.app .songRow :is(img, .coverAura),
-.app .libraryRow :is(img, .coverAura){
+.app .songRow :is(img, .coverAura){
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
 .app .homeFreshRail,
 .app .homeListenGrid,
-.app .homeAlbumGrid,
-.app .libraryList,
-.app .albumShelfGridV318,
-.app .playlistTrackList,
-.app .coverGalleryGridCleanOnly{
+.app .homeAlbumGrid{
   content-visibility: auto;
   contain-intrinsic-size: 1px 720px;
   contain: layout paint style;
@@ -2115,23 +1679,19 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
 .app .homeListenCard,
 .app .homeAlbumCard,
 .app .songRow,
-.app .libraryRow,
-.app .playlistTrackRow,
-.app .playlistSongRow,
-.app .albumCardV318,
-.app .coverGalleryCardCleanOnly{
+.app .playlistSongRow{
   content-visibility: auto;
   contain-intrinsic-size: 120px 150px;
   contain: layout paint style;
 }
 
-.app :is(.homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow, .albumCardV318, .coverGalleryCardCleanOnly) img{
+.app :is(.homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .playlistSongRow) img{
   content-visibility: auto;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-.app :is(.localtifyProximityTarget, .homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .libraryRow, .playlistTrackRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
+.app :is(.localtifyProximityTarget, .homeFreshCard, .homeListenCard, .homeAlbumCard, .songRow, .playlistSongRow):not(.localtifyProximityActive):not(.playing):not(:hover){
   will-change: auto;
 }
 
@@ -2195,42 +1755,17 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   color: rgba(255,255,255,.94) !important;
 }
 
-.app[data-platform="linux"] :is(
-  .content,
-  .sidebar,
-  .pageTransition,
-  .songList,
-  .libraryList,
-  .albumTrackListV318,
-  .downloadQueueList,
-  .spotifyTrackItems,
-  .playlistTrackList,
-  .settingsContent
-){
+.app[data-platform="linux"] :is(.content, .sidebar, .pageTransition, .songList, .settingsContent){
   scrollbar-width: thin;
   scrollbar-color: rgba(var(--lt-accent-rgb), .34) rgba(255,255,255,.055);
 }
 
-.app[data-platform="linux"] :is(
-  .songRow,
-  .libraryRow,
-  .albumTrackRowV318,
-  .downloadQueueItem,
-  .spotifyTrackItem,
-  .playlistTrackRow
-){
+.app[data-platform="linux"] :is(.songRow){
   backface-visibility: hidden;
   transform: translate3d(0,0,0);
 }
 
-.app[data-platform="linux"] :is(
-  .songRow,
-  .libraryRow,
-  .albumTrackRowV318,
-  .downloadQueueItem,
-  .spotifyTrackItem,
-  .playlistTrackRow
-):not(:hover):not(.active):not(.playing):not(:focus-visible){
+.app[data-platform="linux"] :is(.songRow):not(:hover):not(.active):not(.playing):not(:focus-visible){
   will-change: auto !important;
 }
 
@@ -2238,9 +1773,5 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIconMotionV4
   font-family: inherit;
 }
 
-.app[data-platform="linux"] .downloadTextareaV031,
-.app[data-platform="linux"] .spotifyUrlInput{
-  caret-color: rgba(var(--lt-accent-rgb), .95);
-}
 
 /* end localtify v483 Linux desktop polish */

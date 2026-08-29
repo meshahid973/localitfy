@@ -19,7 +19,7 @@ export default function SettingsView(props: SettingsViewProps) {
   } = props;
 
   return (
-    <section className="settingsPage settingsPageV027">
+    <section data-page-section="settings" className="settingsPage settingsPageV027">
       <div className="settingsHero panel settingsHeroV027">
         <div>
           <p className="eyebrow">localtify controls</p>

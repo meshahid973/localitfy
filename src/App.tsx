@@ -17,7 +17,7 @@ import {
   X,
   Send
 } from "lucide-react";
-import { useProximityMotion } from "./useProximityMotion";
+import { useProximityMotion } from "./features/shell/useProximityMotion";
 import { HtmlAudioEngine } from "./features/player/engine/htmlAudioEngine";
 import { createPlayerController } from "./features/player/engine/playerController";
 import { usePlayerRuntime } from "./features/player";

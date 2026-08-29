@@ -38,7 +38,7 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
   } = props;
 
   return (
-    <section className="analyticsStudioV339" aria-label="lightweight listening recap">
+    <section data-page-section="analytics" className="analyticsStudioV339" aria-label="lightweight listening recap">
       <section className="analyticsHeroV339">
         <div className="analyticsHeroCopyV339">
           <p className="eyebrow">local recap</p>
