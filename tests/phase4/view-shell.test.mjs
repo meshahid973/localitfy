@@ -17,7 +17,7 @@ const retiredPageSelectors = [
   ".settingsPageV027"
 ];
 
-test("shared shell owns viewport and sidebar behavior only", () => {
+test("shared shell owns viewport and responsive sidebar behavior only", () => {
   const main = read("src/main.tsx");
   const css = read("src/styles/view-shell.css");
 
@@ -27,13 +27,18 @@ test("shared shell owns viewport and sidebar behavior only", () => {
   assert.equal(css.includes(".pageTransition-home"), true, "shared shell lost its Home exclusion boundary");
 
   for (const marker of [
+    "--workspace-sidebar-expanded",
+    "--workspace-sidebar-current",
+    "grid-template-columns: var(--workspace-sidebar-current)",
     '[data-sidebar-behavior="slim"]',
     '[data-sidebar-behavior="hover"]',
     ":focus-within",
-    "grid-template-columns: 76px"
+    "--workspace-sidebar-current: 76px"
   ]) {
     assert.equal(css.includes(marker), true, `sidebar behavior guard is missing ${marker}`);
   }
+
+  assert.equal(css.includes("--workspace-max"), false, "retired centered workspace cap returned");
 });
 
 test("shared shell no longer owns page designs", () => {
@@ -41,5 +46,5 @@ test("shared shell no longer owns page designs", () => {
   for (const selector of retiredPageSelectors) {
     assert.equal(css.includes(selector), false, `shared shell still styles retired page selector ${selector}`);
   }
-  assert.ok(Buffer.byteLength(css) < 24 * 1024, "shared shell exceeded its 24 KiB budget");
+  assert.ok(Buffer.byteLength(css) < 20 * 1024, "shared shell exceeded its 20 KiB budget");
 });
