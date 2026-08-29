@@ -1,3 +1,4 @@
+# Ground-zero validator; self-removes before release validation.
 name: ground zero css
 
 on:
