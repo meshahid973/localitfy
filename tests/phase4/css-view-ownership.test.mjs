@@ -23,7 +23,7 @@ test("renderer style manifest is intentionally small during page rebuild", () =>
   for (const specifier of [
     "./shared/ui/view-ui.css",
     "./styles/page-foundation.css",
-    "./styles/view-shell.css",
+    "./styles/themes.css",
     "./features/shell/performance.css"
   ]) {
     assert.equal(cssImports.includes(specifier), true, `${specifier} is missing from the renderer manifest`);

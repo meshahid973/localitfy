@@ -1,3 +1,4 @@
+import "./home.css";
 import type { CSSProperties } from "react";
 import { Images, Maximize2, Minimize2, Play, Shuffle } from "lucide-react";
 import { Cover } from "../covers/Cover";

@@ -1,3 +1,4 @@
+import "./features/onboarding/onboarding.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Circle, Cloud, Heart, Leaf, Moon, Square } from "lucide-react";

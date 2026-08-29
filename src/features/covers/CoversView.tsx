@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { CoverSong, CoverStudioProps } from "./cover.types";
 import { Cover } from "./Cover";
 import CoverStudio from "./CoverStudio";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
@@ -7,30 +8,17 @@ import { coverMoodName } from "./cover.runtime";
 import { pixelArtUrl } from "./pixelArt";
 import { coverMoodOptions } from "../settings/settings.constants";
 
-export type CoversViewProps = {
-  ambientStyle: any;
-  applyCoverAssetToSelection: any;
-  coverGalleryMood: any;
-  coverMoodCounts: any;
-  coverPickerSongList: any;
-  coverSelectedSongIds: any;
-  coverStats: any;
-  currentSong: any;
-  filteredCoverGalleryAssets: any;
-  importSongs: any;
-  now: any;
-  pixelArtBusy: any;
-  randomizeSelectedCovers: any;
-  rescanPixelArtFolder: any;
-  selectCurrentSongForCovers: any;
-  selectVisibleSongsForCovers: any;
-  selectedCoverSongs: any;
-  setCoverGalleryMood: any;
-  setCoverSelectedSongIds: any;
-  songs: any;
-  toggleCoverSongSelection: any;
-  togglePixelCoverExcluded: any;
-  togglePixelCoverFavorite: any;
+export type CoversViewProps = Pick<CoverStudioProps,
+  | "ambientStyle" | "applyCoverAssetToSelection" | "coverGalleryMood" | "coverMoodCounts"
+  | "coverPickerSongList" | "coverSelectedSongIds" | "coverStats" | "currentSong"
+  | "filteredCoverGalleryAssets" | "pixelArtBusy" | "randomizeSelectedCovers" | "rescanPixelArtFolder"
+  | "selectCurrentSongForCovers" | "selectVisibleSongsForCovers" | "selectedCoverSongs"
+  | "setCoverGalleryMood" | "setCoverSelectedSongIds" | "toggleCoverSongSelection"
+  | "togglePixelCoverExcluded" | "togglePixelCoverFavorite"
+> & {
+  importSongs: () => unknown;
+  now: unknown;
+  songs: CoverSong[];
 };
 
 export default function CoversView(props: CoversViewProps) {

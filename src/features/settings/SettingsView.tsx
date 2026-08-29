@@ -1,3 +1,4 @@
+import "./settings.css";
 import type { ReactNode } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import { settingsCategorySpring } from "./settings.constants";
@@ -19,7 +20,7 @@ export default function SettingsView(props: SettingsViewProps) {
   } = props;
 
   return (
-    <section data-page-section="settings" className="settingsPage settingsPageV027">
+    <section data-page-section="settings" data-page-state="reset" className="settingsPage settingsPageV027">
       <div className="settingsHero panel settingsHeroV027">
         <div>
           <p className="eyebrow">localtify controls</p>

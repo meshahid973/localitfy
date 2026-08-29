@@ -3,10 +3,16 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { AppErrorBoundary } from "./app/AppErrorBoundary";
 
-/* Shared UI and temporary structural foundations only. Page designs are rebuilt independently. */
+/* Global typography, design tokens, and theme variables. */
+import "@fontsource/space-grotesk/500.css";
+import "@fontsource/space-grotesk/600.css";
+import "@fontsource/space-grotesk/700.css";
+import "./styles/tokens.css";
+import "./styles/themes.css";
+
+/* Shared renderer primitives and temporary reset foundation. */
 import "./shared/ui/view-ui.css";
 import "./styles/page-foundation.css";
-import "./styles/view-shell.css";
 
 /* Performance overrides intentionally stay last in the renderer cascade. */
 import "./features/shell/performance.css";

@@ -139,7 +139,7 @@ Move styles to the feature that owns the UI and preserve cascade/import order wh
 | `src/features/home/home.css` | Home only |
 | `src/features/player/player.css` | player controls and player surfaces |
 | `src/features/settings/settings.css` | Settings UI |
-| `src/features/settings/themes.css` | theme variables/mappings |
+| `src/styles/themes.css` | theme variables/mappings |
 | `src/features/shell/motion.css` | shared motion policy |
 | `src/features/shell/effects.css` | shared visual effects |
 | `src/features/onboarding/onboarding.css` | onboarding |

@@ -5,170 +5,110 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const failures = [];
-const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
-const exists = (relativePath) => fs.existsSync(path.join(root, relativePath));
-
-function reject(relativePath, tokens) {
-  const source = read(relativePath).toLowerCase();
-  for (const token of tokens) {
-    if (source.includes(token.toLowerCase())) failures.push(`${relativePath}: retired token remains: ${token}`);
-  }
+const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
+const exists = (relative) => fs.existsSync(path.join(root, relative));
+const count = (source, token) => source.split(token).length - 1;
+function countLooseAny(source) {
+  const patterns = [
+    /:\s*any\b/g,
+    /\bas\s+any\b/g,
+    /<\s*any\s*>/g,
+    /\bany\s*\[\s*\]/g,
+    /\b(?:Record|Array|Promise|Map|Set)<[^>]*\bany\b[^>]*>/g
+  ];
+  return patterns.reduce((total, pattern) => total + (source.match(pattern) || []).length, 0);
 }
-
-const retiredHomeTokens = [
-  "quick library",
-  "homeLibraryPanel",
-  "homeLibraryActions",
-  "homeShelfPanel",
-  "homeShelfStack",
-  "homeListenCard",
-  "homeFreshCard",
-  "homeFreshRail",
-  "heroQuickActions",
-  "heroTinyButton"
-];
+const fail = (message) => failures.push(message);
 
 const retiredPageStyles = [
-  "src/features/library/library.css",
-  "src/features/albums/albums.css",
-  "src/features/playlists/playlists.css",
-  "src/features/covers/covers.css",
-  "src/features/downloads/downloads.css",
-  "src/features/analytics/analytics.css"
+  "src/features/library/library.css", "src/features/albums/albums.css", "src/features/playlists/playlists.css",
+  "src/features/covers/covers.css", "src/features/downloads/downloads.css", "src/features/analytics/analytics.css"
+];
+const resetRoots = [".libraryPanelV025", ".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339", ".settingsPageV027"];
+const resetSources = [
+  ["src/features/library/LibraryView.tsx", "library"], ["src/features/albums/AlbumsView.tsx", "albums"],
+  ["src/features/playlists/PlaylistsView.tsx", "playlists"], ["src/features/downloads/DownloadsView.tsx", "downloads"],
+  ["src/features/analytics/AnalyticsView.tsx", "analytics"], ["src/features/covers/CoverStudio.tsx", "covers"],
+  ["src/features/settings/SettingsView.tsx", "settings"]
 ];
 
-const resetPageRoots = [
-  ".libraryPanelV025",
-  ".albumsPageV318",
-  ".playlistsPage",
-  ".coverStudioLayout",
-  ".downloadsLayoutV031",
-  ".analyticsStudioV339"
+for (const file of retiredPageStyles) if (exists(file)) fail(file + ": retired page CSS returned before redesign");
+if (exists("src/features/settings/themes.css")) fail("global theme CSS returned to Settings ownership");
+if (!exists("src/styles/themes.css")) fail("src/styles/themes.css is missing");
+
+const app = read("src/App.tsx");
+const appCssImports = [...app.matchAll(/import\s+["']([^"']+\.css)["']/g)].map((match) => match[1]);
+if (appCssImports.length !== 1 || appCssImports[0] !== "./App.css") fail("App.tsx must own only legacy App.css; feature CSS must be co-located");
+
+const requiredOwners = [
+  ["src/features/home/HomeView.tsx", './home.css'],
+  ["src/Onboarding.tsx", './features/onboarding/onboarding.css'],
+  ["src/features/player/components/PlayerBar.tsx", '../player.css'],
+  ["src/features/settings/SettingsView.tsx", './settings.css'],
+  ["src/features/settings/SettingsModal.tsx", './settings.css']
 ];
+for (const [file, specifier] of requiredOwners) if (!read(file).includes('import "' + specifier + '";')) fail(file + ": missing co-located CSS owner " + specifier);
 
-reject("src/features/home/HomeView.tsx", retiredHomeTokens);
-reject("src/features/home/home.css", retiredHomeTokens);
-reject("src/App.tsx", ["quickLibraryMoreBlur", "showHomeSideCards", "homeDashboardClass", "settings.homeExpanded", "settings.showRightColumn"]);
-reject("src/features/settings/settings.types.ts", ["homeExpanded:", "showRightColumn:", "quickLibraryMoreBlur:"]);
-reject("src/features/settings/settings.constants.ts", ["homeExpanded:", "showRightColumn:", "quickLibraryMoreBlur:"]);
-
-const homeViewSource = read("src/features/home/HomeView.tsx");
-for (const marker of ["JUMP BACK IN", "Listen now", "Most listened", "New Releases"]) {
-  if (!homeViewSource.includes(marker)) failures.push(`src/features/home/HomeView.tsx: missing Home hierarchy marker ${marker}`);
-}
-if (homeViewSource.includes("Top Artists")) failures.push("src/features/home/HomeView.tsx: retired Top Artists label returned");
-if (homeViewSource.includes('style={{ transform: "none" }}')) failures.push("src/features/home/HomeView.tsx: CSS behavior leaked back into inline styles");
-
-const homePath = path.join(root, "src/features/home/home.css");
-const homeBytes = fs.statSync(homePath).size;
-const homeCss = read("src/features/home/home.css");
-if (homeBytes > 20 * 1024) failures.push(`src/features/home/home.css: ${homeBytes} bytes exceeds 20 KiB Home ownership budget`);
-if (!homeCss.includes(".app:has(.pageTransition-home)")) failures.push("src/features/home/home.css: Home shell rules must stay scoped through .pageTransition-home");
-if (!homeCss.includes("width: 100%")) failures.push("src/features/home/home.css: Home must fill the available content pane");
-if (homeCss.includes("width: min(1560px") || homeCss.includes("width: min(1640px")) failures.push("src/features/home/home.css: retired desktop max-width returned");
-if (exists("src/features/home/home-polish.css")) failures.push("src/features/home/home-polish.css: duplicate Home override layer must stay removed");
-
-for (const relativePath of retiredPageStyles) {
-  if (exists(relativePath)) failures.push(`${relativePath}: retired page design returned before its rebuild`);
-}
-
-for (const [relativePath, maxBytes] of [
-  ["src/App.css", 238 * 1024],
-  ["src/features/shell/app-core.css", 80 * 1024],
-  ["src/features/settings/themes.css", 83 * 1024],
-  ["src/features/settings/settings.css", 8 * 1024],
-  ["src/features/player/player.css", 160 * 1024],
-  ["src/features/shell/effects.css", 96 * 1024],
-  ["src/shared/ui/view-ui.css", 16 * 1024],
-  ["src/styles/page-foundation.css", 8 * 1024],
-  ["src/styles/view-shell.css", 20 * 1024]
-]) {
-  if (!exists(relativePath)) {
-    failures.push(`${relativePath}: required stylesheet owner is missing`);
-    continue;
-  }
-  const bytes = fs.statSync(path.join(root, relativePath)).size;
-  if (bytes > maxBytes) failures.push(`${relativePath}: ${(bytes / 1024).toFixed(1)} KiB exceeds ${(maxBytes / 1024).toFixed(0)} KiB ownership budget`);
-}
-
-const appSource = read("src/App.tsx");
-for (const ownedImport of [
-  './features/shell/app-core.css',
-  './features/settings/themes.css',
-  './features/settings/settings.css',
-  './features/home/home.css',
-  './features/shell/motion.css',
-  './features/onboarding/onboarding.css',
-  './features/player/player.css',
-  './features/shell/effects.css'
-]) {
-  if (!appSource.includes(`import "${ownedImport}";`)) failures.push(`src/App.tsx: missing canonical owned stylesheet ${ownedImport}`);
+const shell = read("src/features/shell/AppShell.tsx");
+for (const specifier of ["./app-core.css", "./motion.css", "./effects.css", "../../styles/view-shell.css"]) if (!shell.includes('import "' + specifier + '";')) fail("AppShell missing shell CSS owner " + specifier);
+for (const modulePath of ["library/LibraryView", "albums/AlbumsView", "playlists/PlaylistsView", "covers/CoversView", "analytics/AnalyticsView", "settings/SettingsView", "downloads/DownloadsView"]) {
+  if (!shell.includes('lazy(() => import("../' + modulePath + '"))')) fail("AppShell must lazy-load " + modulePath);
 }
 
 const main = read("src/main.tsx");
-if (main.includes("release.css")) failures.push("src/main.tsx: obsolete release.css override layer returned");
-if (main.includes("home-polish.css")) failures.push("src/main.tsx: duplicate Home polish import returned");
-for (const ownedImport of [
-  "./shared/ui/view-ui.css",
-  "./styles/view-shell.css",
-  "./styles/page-foundation.css",
-  "./features/shell/performance.css"
-]) {
-  if (!main.includes(`import "${ownedImport}";`)) failures.push(`src/main.tsx: missing renderer stylesheet ${ownedImport}`);
+for (const specifier of ["@fontsource/space-grotesk/500.css", "@fontsource/space-grotesk/600.css", "@fontsource/space-grotesk/700.css", "./styles/tokens.css", "./styles/themes.css", "./shared/ui/view-ui.css", "./styles/page-foundation.css", "./features/shell/performance.css"]) {
+  if (!main.includes('import "' + specifier + '";')) fail("main.tsx missing global stylesheet " + specifier);
 }
-for (const relativePath of retiredPageStyles) {
-  const specifier = relativePath.replace(/^src\//, "./");
-  if (main.includes(specifier)) failures.push(`src/main.tsx: retired page stylesheet still imported ${specifier}`);
-}
-const perfImport = main.indexOf('import "./features/shell/performance.css";');
-if (perfImport < 0) failures.push("src/main.tsx: performance.css is missing");
+const mainCssImports = [...main.matchAll(/import\s+["']([^"']+\.css)["']/g)].map((match) => match[1]);
+if (mainCssImports.at(-1) !== "./features/shell/performance.css") fail("performance.css must remain the final renderer CSS import");
 
-const workspaceCss = read("src/styles/view-shell.css");
-for (const marker of [
-  "--workspace-sidebar-expanded",
-  "--workspace-sidebar-current",
-  ".appShell",
-  ".sidebar",
-  '[data-sidebar-behavior="slim"]',
-  '[data-sidebar-behavior="hover"]',
-  ".pageTransition:not(.pageTransition-home)"
-]) {
-  if (!workspaceCss.includes(marker)) failures.push(`src/styles/view-shell.css: shared shell lost ${marker}`);
+for (const [file, section] of resetSources) {
+  const source = read(file);
+  if (!source.includes('data-page-section="' + section + '" data-page-state="reset"')) fail(file + ": reset page must opt into data-page-state=reset");
 }
-if (workspaceCss.includes("--workspace-max")) failures.push("src/styles/view-shell.css: retired workspace max-width returned");
-for (const forbiddenPageSelector of [...resetPageRoots, ".settingsPageV027"]) {
-  if (workspaceCss.includes(forbiddenPageSelector)) failures.push(`src/styles/view-shell.css: page design leaked into shell: ${forbiddenPageSelector}`);
-}
-
-const globalVisualOwners = [
-  "src/App.css",
-  "src/features/shell/app-core.css",
-  "src/features/shell/effects.css",
-  "src/features/settings/themes.css"
-];
-for (const relativePath of globalVisualOwners) {
-  const source = read(relativePath);
-  for (const selector of resetPageRoots) {
-    if (source.includes(selector)) failures.push(`${relativePath}: reset page root leaked into global visual owner: ${selector}`);
-  }
-}
-
 const foundation = read("src/styles/page-foundation.css");
-for (const selector of resetPageRoots) {
-  if (!foundation.includes(selector)) failures.push(`src/styles/page-foundation.css: structural reset root missing ${selector}`);
+if (!foundation.includes('[data-page-section][data-page-state="reset"]')) fail("page foundation is not reset-state gated");
+if (/\[data-page-section\](?!\[data-page-state="reset"\])/.test(foundation)) fail("page foundation contains an ungated page-section selector");
+for (const rootSelector of resetRoots) {
+  const index = foundation.indexOf(rootSelector);
+  if (index < 0) fail("page foundation lost structural reset selector " + rootSelector);
 }
-for (const visualToken of ["linear-gradient(", "radial-gradient("]) {
-  if (foundation.includes(visualToken)) failures.push(`src/styles/page-foundation.css: visual styling leaked into structural foundation: ${visualToken}`);
+for (const token of ["linear-gradient(", "radial-gradient("]) if (foundation.includes(token)) fail("visual skin leaked into page foundation: " + token);
+
+for (const file of ["src/App.css", "src/features/shell/app-core.css", "src/features/shell/effects.css", "src/styles/themes.css", "src/styles/view-shell.css"]) {
+  const source = read(file).replace(/\/\*[\s\S]*?\*\//g, " ");
+  for (const selector of resetRoots) if (source.includes(selector)) fail(file + ": rebuild page selector leaked into global owner: " + selector);
 }
 
-const settingsView = read("src/features/settings/SettingsView.tsx");
-if (settingsView.includes(": any")) failures.push("src/features/settings/SettingsView.tsx: loose any props returned");
-const settingsCss = read("src/features/settings/settings.css");
-if (!settingsCss.includes("Visual redesign intentionally removed")) failures.push("src/features/settings/settings.css: settings reset marker is missing");
+const cssBudgets = [
+  ["src/App.css", 238 * 1024, 2209], ["src/features/shell/app-core.css", 80 * 1024, 664],
+  ["src/features/player/player.css", 75 * 1024, 819], ["src/features/shell/effects.css", 65 * 1024, 662],
+  ["src/styles/themes.css", 83 * 1024, 2], ["src/styles/view-shell.css", 20 * 1024, 190],
+  ["src/styles/page-foundation.css", 8 * 1024, 12], ["src/features/home/home.css", 20 * 1024, 11]
+];
+for (const [file, maxBytes, maxImportant] of cssBudgets) {
+  if (!exists(file)) { fail(file + ": required CSS owner missing"); continue; }
+  const source = read(file); const bytes = Buffer.byteLength(source); const important = count(source, "!important");
+  if (bytes > maxBytes) fail(file + ": CSS size grew past ratchet (" + bytes + " > " + maxBytes + ")");
+  if (important > maxImportant) fail(file + ": !important debt grew past ratchet (" + important + " > " + maxImportant + ")");
+}
+
+const anyBudgets = [
+  ["src/App.tsx", 38], ["src/features/albums/AlbumsView.tsx", 69], ["src/features/downloads/DownloadsView.tsx", 54],
+  ["src/features/playlists/PlaylistsView.tsx", 37], ["src/features/player/components/PlayerBar.tsx", 0],
+  ["src/features/library/LibraryView.tsx", 0], ["src/features/covers/CoversView.tsx", 0],
+  ["src/features/analytics/AnalyticsView.tsx", 0], ["src/features/analytics/analyticsSnapshot.ts", 0]
+];
+for (const [file, maxAny] of anyBudgets) {
+  const hits = countLooseAny(read(file));
+  if (hits > maxAny) fail(file + ": any debt grew past ratchet (" + hits + " > " + maxAny + ")");
+}
+
+if (!exists(".github/workflows/quality.yml")) fail("permanent quality workflow is missing");
+if (!exists("scripts/ci-electron-smoke.cjs")) fail("Electron CI smoke script is missing");
 
 if (failures.length) {
   console.error("[release-ui-ownership] failures:\n- " + failures.join("\n- "));
   process.exit(1);
 }
-
-console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, page designs are reset, and shell geometry has one owner.`);
+console.log("[release-ui-ownership] OK; CSS ownership, reset gating, CI, lazy page boundaries, and debt ratchets are enforced.");

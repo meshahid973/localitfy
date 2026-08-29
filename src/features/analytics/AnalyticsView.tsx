@@ -2,22 +2,25 @@ import type { CSSProperties } from "react";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
 import { prettyTitle } from "../search/search.utils";
+import type { Song } from "../library/song.types";
 
+export type AnalyticsRecapCard = { label: string; value: string; note: string; meta: string; progress?: number };
+export type AnalyticsStatCard = { label: string; value: string; note: string };
 export type AnalyticsViewProps = {
-  analyticsRecapCards: any;
-  analyticsStatCards: any;
-  averageSongSeconds: any;
-  importSongs: any;
-  libraryHealthLabel: any;
-  libraryLengthLabel: any;
-  likedPercent: any;
-  longestSong: any;
-  missingFileCount: any;
-  neverPlayedSongs: any;
-  playedPercent: any;
-  ready: any;
-  recentImportWeekCount: any;
-  songs: any;
+  analyticsRecapCards: AnalyticsRecapCard[];
+  analyticsStatCards: AnalyticsStatCard[];
+  averageSongSeconds: number;
+  importSongs: () => unknown;
+  libraryHealthLabel: string;
+  libraryLengthLabel: string;
+  likedPercent: number;
+  longestSong: Song | null;
+  missingFileCount: number;
+  neverPlayedSongs: Song[];
+  playedPercent: number;
+  ready: boolean;
+  recentImportWeekCount: number;
+  songs: Song[];
 };
 
 export default function AnalyticsView(props: AnalyticsViewProps) {
@@ -38,7 +41,7 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
   } = props;
 
   return (
-    <section data-page-section="analytics" className="analyticsStudioV339" aria-label="lightweight listening recap">
+    <section data-page-section="analytics" data-page-state="reset" className="analyticsStudioV339" aria-label="lightweight listening recap">
       <section className="analyticsHeroV339">
         <div className="analyticsHeroCopyV339">
           <p className="eyebrow">local recap</p>

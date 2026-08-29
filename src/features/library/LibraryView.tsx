@@ -1,30 +1,35 @@
+import type { DragEventHandler, ReactNode } from "react";
 import { LocaltifyStateCard, MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
+import type { Song } from "./song.types";
+import type { Playlist } from "../playlists/playlist.types";
+import type { Settings } from "../settings/settings.types";
+import type { View } from "../shell/view.types";
 
 export type LibraryViewProps = {
-  changeView: any;
-  deleteBusy: any;
-  handleLibraryAreaDragLeave: any;
-  handleLibraryAreaDragOver: any;
-  handleLibraryAreaDrop: any;
-  handleSearchInput: any;
-  importSongs: any;
-  libraryAlbumCount: any;
-  libraryArtistCount: any;
-  libraryMissingLabel: any;
-  missingFileCount: any;
-  now: any;
-  playlists: any;
-  query: any;
-  removeMissingSongs: any;
-  renderHomeSongCards: any;
-  renderSongRows: any;
-  setLibraryFilterMode: any;
-  settings: any;
-  showingMissingFiles: any;
-  shuffleLibrarySongsAction: any;
-  songs: any;
-  view: any;
-  visibleSongs: any;
+  changeView: (view: View, source?: string) => unknown;
+  deleteBusy: boolean;
+  handleLibraryAreaDragLeave: DragEventHandler<HTMLDivElement>;
+  handleLibraryAreaDragOver: DragEventHandler<HTMLDivElement>;
+  handleLibraryAreaDrop: DragEventHandler<HTMLDivElement>;
+  handleSearchInput: (value: string) => unknown;
+  importSongs: () => unknown;
+  libraryAlbumCount: number;
+  libraryArtistCount: number;
+  libraryMissingLabel: string;
+  missingFileCount: number;
+  now: unknown;
+  playlists: Playlist[];
+  query: string;
+  removeMissingSongs: () => Promise<unknown> | unknown;
+  renderHomeSongCards: (songs: Song[], className?: string) => ReactNode;
+  renderSongRows: (songs: Song[], className?: string) => ReactNode;
+  setLibraryFilterMode?: (mode: "all" | "missing") => unknown;
+  settings: Pick<Settings, "libraryRowStyle">;
+  showingMissingFiles: boolean;
+  shuffleLibrarySongsAction: () => unknown;
+  songs: Song[];
+  view: View;
+  visibleSongs: Song[];
 };
 
 export default function LibraryView(props: LibraryViewProps) {
@@ -54,7 +59,7 @@ export default function LibraryView(props: LibraryViewProps) {
   } = props;
 
   return (
-    <section data-page-section="library" className={`panel fillPanel libraryPanelV025 ${view === "liked" ? "likedPanel likedLibraryPanelV025" : ""}`}>
+    <section data-page-section="library" data-page-state="reset" className={`panel fillPanel libraryPanelV025 ${view === "liked" ? "likedPanel likedLibraryPanelV025" : ""}`}>
       <div className="panelHead libraryPanelHead libraryPanelHeadV025">
         <div className="libraryPanelTitleV025">
           <p className="eyebrow">{view === "liked" ? "liked" : "library"}</p>

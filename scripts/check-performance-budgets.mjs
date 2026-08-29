@@ -12,7 +12,7 @@ const sourceBudgets = [
   ["src/App.tsx", 314 * KiB],
   ["src/App.css", 238 * KiB],
   ["src/features/shell/app-core.css", 80 * KiB],
-  ["src/features/settings/themes.css", 83 * KiB],
+  ["src/styles/themes.css", 83 * KiB],
   ["src/features/settings/settings.css", 8 * KiB],
   ["src/features/home/home.css", 20 * KiB],
   ["src/styles/view-shell.css", 20 * KiB],

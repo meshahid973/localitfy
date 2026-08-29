@@ -1,19 +1,12 @@
-import { Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { FolderPlus } from "lucide-react";
 import UpdateIsland from "../../app/UpdateIsland";
 import TitleBar from "./TitleBar";
 import HomeView from "../home/HomeView";
-import LibraryView from "../library/LibraryView";
-import AlbumsView from "../albums/AlbumsView";
-import PlaylistsView from "../playlists/PlaylistsView";
-import CoversView from "../covers/CoversView";
 import { Cover } from "../covers/Cover";
-import AnalyticsView from "../analytics/AnalyticsView";
-import SettingsView from "../settings/SettingsView";
 import SettingsModal from "../settings/SettingsModal";
-import DownloadsView from "../downloads/DownloadsView";
 import PlayerBar from "../player/components/PlayerBar";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import Onboarding from "../../Onboarding";
@@ -33,6 +26,18 @@ import {
 } from "../updates/update.constants";
 import { updateRibbonTitle } from "../updates/update.utils";
 import { yukariUpdateImage } from "../../core/app.constants";
+import "./app-core.css";
+import "./motion.css";
+import "./effects.css";
+import "../../styles/view-shell.css";
+
+const LibraryView = lazy(() => import("../library/LibraryView"));
+const AlbumsView = lazy(() => import("../albums/AlbumsView"));
+const PlaylistsView = lazy(() => import("../playlists/PlaylistsView"));
+const CoversView = lazy(() => import("../covers/CoversView"));
+const AnalyticsView = lazy(() => import("../analytics/AnalyticsView"));
+const SettingsView = lazy(() => import("../settings/SettingsView"));
+const DownloadsView = lazy(() => import("../downloads/DownloadsView"));
 
 export type { AppShellProps } from "./appShell.contract";
 
@@ -425,21 +430,15 @@ export default function AppShell(props: AppShellProps) {
             >
               {view === "home" ? <HomeView {...home} /> : null}
 
-            {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}
-
-
-            {view === "albums" ? <AlbumsView {...albums} /> : null}
-
-            {view === "playlists" ? <PlaylistsView {...playlists} /> : null}
-
-            {view === "covers" ? <CoversView {...covers} /> : null}
-
-            {view === "analytics" ? <AnalyticsView {...analytics} /> : null}
-
-
-            {view === "settings" ? <SettingsView {...settingsView} /> : null}
-
-            {view === "downloads" ? <DownloadsView {...downloads} /> : null}
+              <Suspense fallback={null}>
+                {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}
+                {view === "albums" ? <AlbumsView {...albums} /> : null}
+                {view === "playlists" ? <PlaylistsView {...playlists} /> : null}
+                {view === "covers" ? <CoversView {...covers} /> : null}
+                {view === "analytics" ? <AnalyticsView {...analytics} /> : null}
+                {view === "settings" ? <SettingsView {...settingsView} /> : null}
+                {view === "downloads" ? <DownloadsView {...downloads} /> : null}
+              </Suspense>
             </div>
           </section>
 

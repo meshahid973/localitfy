@@ -1,3 +1,4 @@
+import "./settings.css";
 import type { ReactNode } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import { X } from "lucide-react";

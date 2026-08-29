@@ -53,19 +53,7 @@ import {
 } from "./features/downloads/useDownloadsRuntime";
 import { getDownloadPageState } from "./features/downloads/downloadState";
 import { downloadStatusLabel, spotifyTrackStatusLabel } from "./features/downloads/download.selectors";
-import "@fontsource/space-grotesk/500.css";
-import "@fontsource/space-grotesk/600.css";
-import "@fontsource/space-grotesk/700.css";
-import "./styles/tokens.css";
-import "./features/shell/app-core.css";
 import "./App.css";
-import "./features/settings/themes.css";
-import "./features/settings/settings.css";
-import "./features/home/home.css";
-import "./features/shell/motion.css";
-import "./features/onboarding/onboarding.css";
-import "./features/player/player.css";
-import "./features/shell/effects.css";
 
 import AppShell from "./features/shell/AppShell";
 import type { AppShellProps } from "./features/shell/appShell.contract";

@@ -1,27 +1,23 @@
+import type { Song } from "../library/song.types";
+import type { Playlist } from "../playlists/playlist.types";
+import type { Settings } from "../settings/settings.types";
+import type { RepeatMode } from "../player/player.types";
+
 export type LocaltifyAnalyticsSnapshot = Record<string, string | number | boolean>;
 
 export type LocaltifyAnalyticsSnapshotInput = {
   activeView: string;
-  songs?: any[];
+  songs?: Song[];
   likedCount?: number;
-  playlists?: any[];
-  settings?: Record<string, any>;
+  playlists?: Playlist[];
+  settings?: Partial<Settings>;
   isShuffle?: boolean;
-  repeatMode?: string;
+  repeatMode?: RepeatMode;
   downloadResultCount?: number;
 };
 
 
-export function computeLocaltifyAnalyticsSnapshot(input: {
-  activeView: string;
-  songs?: any[];
-  likedCount?: number;
-  playlists?: any[];
-  settings?: Record<string, any>;
-  isShuffle?: boolean;
-  repeatMode?: string;
-  downloadResultCount?: number;
-}): LocaltifyAnalyticsSnapshot {
+export function computeLocaltifyAnalyticsSnapshot(input: LocaltifyAnalyticsSnapshotInput): LocaltifyAnalyticsSnapshot {
   const songs = Array.isArray(input.songs) ? input.songs : [];
   const playlists = Array.isArray(input.playlists) ? input.playlists : [];
   const settings = input.settings || {};
