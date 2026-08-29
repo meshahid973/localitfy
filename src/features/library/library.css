@@ -1,0 +1,500 @@
+/* Library owns the Library + Liked presentation. Home remains the visual reference. */
+
+.app:has(.libraryPage) .content {
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  background: #06131a !important;
+}
+
+.app:has(.libraryPage) .headerBar {
+  display: none !important;
+}
+
+.app:has(.libraryPage) .pageTransition {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.libraryPage {
+  --library-surface: #0d1d26;
+  --library-surface-hover: #11232d;
+  --library-surface-active: #122630;
+  --library-border: rgba(125, 164, 187, .09);
+  --library-border-strong: rgba(125, 164, 187, .17);
+  --library-text: #aebdc5;
+  --library-muted: #607987;
+  --library-faint: #425c6b;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: clamp(30px, 3vw, 52px) clamp(24px, 3vw, 58px) clamp(78px, 7vh, 108px);
+  display: grid;
+  align-content: start;
+  gap: clamp(24px, 2.2vw, 36px);
+  color: var(--library-text);
+  background:
+    radial-gradient(circle at 82% -12%, rgba(var(--cover-rgb, 57, 100, 119), .075), transparent 34%),
+    #06131a;
+}
+
+.libraryTopBar {
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(135, 177, 202, .08);
+}
+
+.libraryHeading {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.libraryEyebrow {
+  margin: 0;
+  color: #79a7c4;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.libraryHeading h1 {
+  margin: 0;
+  color: #c9d5dc;
+  font-size: clamp(25px, 1.7vw, 34px);
+  font-weight: 680;
+  line-height: .95;
+  letter-spacing: -.045em;
+}
+
+.libraryHeading p:last-child {
+  max-width: 620px;
+  margin: 0;
+  color: #526d7b;
+  font-size: clamp(9px, .62vw, 11px);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.libraryTopTools {
+  min-width: min(470px, 44vw);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.librarySearch {
+  width: min(390px, 36vw);
+  min-width: 190px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--library-border);
+  border-radius: 999px;
+  outline: none;
+  color: #c8d5dc;
+  background: #0b1921;
+  font: inherit;
+  font-size: 9px;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.librarySearch::placeholder { color: #4d6572; }
+.librarySearch:hover { border-color: rgba(125, 164, 187, .14); }
+.librarySearch:focus {
+  border-color: rgba(121, 167, 196, .34);
+  background: #0d1d26;
+  box-shadow: 0 0 0 3px rgba(121, 167, 196, .05);
+}
+
+.libraryAction,
+.libraryMissingActions button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--library-border);
+  border-radius: 999px;
+  color: #879da9;
+  background: rgba(111, 155, 180, .045);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 760;
+  cursor: pointer;
+  transition: color 130ms ease, border-color 130ms ease, background-color 130ms ease;
+}
+
+.libraryAction:hover:not(:disabled),
+.libraryMissingActions button:hover:not(:disabled) {
+  color: #d0dde3;
+  border-color: rgba(125, 164, 187, .19);
+  background: rgba(111, 155, 180, .085);
+}
+
+.libraryAction:disabled,
+.libraryMissingActions button:disabled { opacity: .38; cursor: not-allowed; }
+.libraryAction:focus-visible,
+.libraryMissingActions button:focus-visible,
+.librarySearch:focus-visible {
+  outline: 2px solid rgba(119, 166, 194, .58);
+  outline-offset: 2px;
+}
+
+.libraryStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.libraryStat {
+  min-width: 0;
+  min-height: 82px;
+  padding: 15px 17px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  border: 1px solid var(--library-border);
+  border-radius: 10px;
+  background: var(--library-surface);
+}
+
+.libraryStat strong {
+  overflow: hidden;
+  color: #b2c0c8;
+  font-size: clamp(19px, 1.35vw, 26px);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -.04em;
+  text-overflow: ellipsis;
+}
+
+.libraryStat span {
+  color: #506b79;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.libraryStat.warning { border-color: rgba(184, 139, 94, .18); }
+.libraryStat.warning strong { color: #bb9572; }
+
+.libraryMissingBanner {
+  min-width: 0;
+  padding: 13px 15px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid rgba(184, 139, 94, .15);
+  border-radius: 10px;
+  background: rgba(125, 86, 53, .055);
+}
+
+.libraryMissingMascot {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.libraryMissingCopy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.libraryMissingCopy strong {
+  overflow: hidden;
+  color: #b6a08b;
+  font-size: 10px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.libraryMissingCopy span {
+  color: #6f675e;
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.libraryMissingActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.libraryMissingActions button {
+  min-height: 30px;
+  padding-inline: 10px;
+  border-radius: 7px;
+  font-size: 8px;
+}
+
+.libraryMissingActions button.active {
+  color: #cbd9df;
+  border-color: rgba(121, 167, 196, .24);
+  background: rgba(121, 167, 196, .11);
+}
+
+.libraryMissingActions .danger {
+  color: #aa7780;
+  border-color: rgba(170, 91, 107, .14);
+}
+
+.libraryTracks {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.libraryTracksHead {
+  min-width: 0;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.libraryTracksHead > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.libraryTracksHead h2 {
+  margin: 0;
+  color: #aebdc5;
+  font-size: clamp(18px, 1.15vw, 23px);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+
+.libraryTracksHead p {
+  margin: 0;
+  color: #4e6877;
+  font-size: 8px;
+  font-weight: 620;
+}
+
+.libraryCount {
+  flex: 0 0 auto;
+  color: #506b79;
+  font-size: 8px;
+  font-weight: 760;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.libraryTrackSurface {
+  min-width: 0;
+  min-height: 0;
+  padding: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(125, 164, 187, .075);
+  border-radius: 11px;
+  background: rgba(13, 29, 38, .64);
+}
+
+.libraryTrackSurface .virtualSongViewport,
+.libraryTrackSurface.virtualSongViewport,
+.libraryTrackSurface .libraryFullListV025,
+.libraryTrackSurface.libraryFullListV025 {
+  min-width: 0;
+  min-height: 0;
+  max-height: min(62vh, 760px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(115, 151, 171, .18) transparent;
+}
+
+.libraryPage .virtualSongCanvas { position: relative; width: 100%; }
+.libraryPage .virtualSongItem { position: absolute; inset: 0 0 auto; width: 100%; }
+
+.libraryPage .songRow {
+  min-width: 0 !important;
+  min-height: 66px !important;
+  margin: 2px 0 !important;
+  padding: 5px 8px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 64px 34px 34px !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border: 1px solid transparent !important;
+  border-radius: 8px !important;
+  color: #8ea3ae !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: border-color 120ms ease, background-color 120ms ease !important;
+}
+
+.libraryPage .songRow:hover {
+  border-color: rgba(125, 164, 187, .08) !important;
+  background: rgba(17, 35, 45, .76) !important;
+}
+
+.libraryPage .songRow.active {
+  border-color: rgba(121, 167, 196, .18) !important;
+  background: rgba(18, 38, 48, .88) !important;
+}
+
+.libraryPage .songButton {
+  min-width: 0 !important;
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns: 30px 48px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 0 !important;
+  color: inherit !important;
+  background: transparent !important;
+  text-align: left !important;
+}
+
+.libraryPage .songIndex {
+  color: #486473 !important;
+  font-size: 8px !important;
+  font-weight: 720 !important;
+  text-align: center !important;
+}
+
+.libraryPage .songArt,
+.libraryPage .songArt .coverImage {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 7px !important;
+  object-fit: cover !important;
+}
+
+.libraryPage .songMeta {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 3px !important;
+}
+
+.libraryPage .songMeta strong,
+.libraryPage .songMeta small {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.libraryPage .songMeta strong {
+  color: #9fb2bc !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+
+.libraryPage .songMeta small {
+  color: #506c7b !important;
+  font-size: 8px !important;
+  font-weight: 600 !important;
+}
+
+.libraryPage .songInfo {
+  color: #536e7d !important;
+  font-size: 8px !important;
+  font-weight: 650 !important;
+}
+
+.libraryPage .iconAction {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid transparent !important;
+  border-radius: 50% !important;
+  color: #617c8a !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.libraryPage .iconAction:hover {
+  color: #bdccd3 !important;
+  border-color: rgba(125, 164, 187, .09) !important;
+  background: rgba(111, 155, 180, .07) !important;
+}
+
+.libraryCoverCards {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 13px;
+}
+
+.libraryPage .homeAlbumCard {
+  min-width: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  color: inherit !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.libraryPage .homeAlbumArt,
+.libraryPage .homeAlbumArt .coverImage { border-radius: 8px !important; }
+.libraryPage .homeAlbumMeta strong { color: #93a8b2 !important; }
+.libraryPage .homeAlbumMeta small,
+.libraryPage .homeAlbumStats { color: #4f6876 !important; }
+
+.libraryEmpty {
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(125, 164, 187, .07);
+  border-radius: 11px;
+  background: rgba(13, 29, 38, .45);
+}
+
+.libraryEmpty .localtifyStateCardV373 {
+  max-width: 560px;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 1180px) {
+  .libraryPage { padding-inline: 24px; }
+  .libraryStats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .libraryTopTools { min-width: 0; }
+  .librarySearch { width: min(320px, 36vw); }
+}
+
+@media (max-width: 820px) {
+  .libraryPage { padding: 24px 18px 72px; gap: 22px; }
+  .libraryTopBar { align-items: stretch; flex-direction: column; gap: 16px; }
+  .libraryTopTools { width: 100%; justify-content: stretch; }
+  .librarySearch { width: 100%; min-width: 0; flex: 1 1 auto; }
+  .libraryStats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .libraryMissingBanner { grid-template-columns: auto minmax(0, 1fr); }
+  .libraryMissingActions { grid-column: 1 / -1; justify-content: flex-start; }
+  .libraryPage .songRow { grid-template-columns: minmax(0, 1fr) 32px 32px !important; }
+  .libraryPage .songDurationInfo { display: none !important; }
+}
+
+@media (max-width: 560px) {
+  .libraryTopTools { flex-wrap: wrap; }
+  .librarySearch { flex-basis: 100%; }
+  .libraryAction { flex: 1 1 auto; }
+  .libraryStats { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .libraryStat { min-height: 70px; padding: 12px; }
+  .libraryTrackSurface { padding: 3px; }
+  .libraryPage .songRow { min-height: 60px !important; padding-inline: 4px !important; }
+  .libraryPage .songButton { grid-template-columns: 22px 42px minmax(0, 1fr) !important; gap: 8px !important; }
+  .libraryPage .songArt,
+  .libraryPage .songArt .coverImage { width: 42px !important; height: 42px !important; }
+}
