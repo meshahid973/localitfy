@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
 
-test("Home keeps the compact reference music hierarchy", () => {
+test("Home keeps the reference music hierarchy without renderer hacks", () => {
   const source = read("src/features/home/HomeView.tsx");
 
   for (const marker of [
@@ -27,10 +27,10 @@ test("Home keeps the compact reference music hierarchy", () => {
   assert.equal(source.includes("Continue listening"), false, "old Continue listening shelf returned");
   assert.equal(source.includes("homeRotationRail"), false, "retired circular Recent rotation layout returned");
   assert.equal(source.includes("homeSectionMeta"), false, "Home count metadata clutter returned");
-  assert.equal(source.includes('style={{ transform: "none" }}'), true, "Home hover clipping guard is missing");
+  assert.equal(source.includes('style={{ transform: "none" }}'), false, "layout fixes must live in Home CSS, not inline style hacks");
 });
 
-test("Home owns content while the shared workspace owns sidebar behavior", () => {
+test("Home fills the content pane while the shell owns sidebar geometry", () => {
   const css = read("src/features/home/home.css");
   const workspace = read("src/styles/view-shell.css");
   const main = read("src/main.tsx");
@@ -41,26 +41,32 @@ test("Home owns content while the shared workspace owns sidebar behavior", () =>
     ".homeListenGrid",
     ".homeArtistRail",
     ".homeReleaseRail",
-    "width: min(1560px"
+    "width: 100%",
+    "--workspace-sidebar-current"
   ]) {
-    assert.equal(css.includes(marker), true, `Home CSS lost ${marker}`);
+    assert.equal(css.includes(marker) || workspace.includes(marker), true, `full-width Home architecture lost ${marker}`);
   }
 
+  assert.equal(css.includes("width: min(1560px"), false, "desktop Home max-width returned");
+  assert.equal(css.includes("width: min(1640px"), false, "wide-screen Home max-width returned");
   assert.equal(css.includes(".app:has(.pageTransition-home) .sidebar"), false, "Home must not own a second sidebar layout");
-  assert.equal(css.includes("--sidebar-width:"), false, "Home must not override the shared sidebar width");
+  assert.equal(css.includes("--sidebar-width:"), false, "Home must not redefine the persisted sidebar setting");
 
   for (const marker of [
+    "--workspace-sidebar-expanded",
+    "--workspace-sidebar-current",
     ".appShell",
     ".sidebar",
     '[data-sidebar-behavior="slim"]',
     '[data-sidebar-behavior="hover"]',
     ".pageTransition:not(.pageTransition-home)"
   ]) {
-    assert.equal(workspace.includes(marker), true, `shared workspace lost ${marker}`);
+    assert.equal(workspace.includes(marker), true, `shared shell lost ${marker}`);
   }
 
+  assert.equal(workspace.includes("--workspace-max"), false, "retired workspace max-width returned");
   assert.equal(fs.existsSync(path.join(root, "src/features/home/home-polish.css")), false, "Home polish override layer returned");
   assert.equal(main.includes("home-polish.css"), false, "renderer still imports the removed Home polish layer");
-  assert.ok(Buffer.byteLength(css) < 24 * 1024, "Home CSS exceeded its 24 KiB ownership budget");
-  assert.ok(Buffer.byteLength(workspace) < 24 * 1024, "shared shell CSS exceeded its 24 KiB ownership budget");
+  assert.ok(Buffer.byteLength(css) < 20 * 1024, "Home CSS exceeded its 20 KiB ownership budget");
+  assert.ok(Buffer.byteLength(workspace) < 20 * 1024, "shared shell CSS exceeded its 20 KiB ownership budget");
 });
