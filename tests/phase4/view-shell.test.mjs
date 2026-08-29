@@ -7,15 +7,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
-const retiredPageSelectors = [
-  ".libraryPanelV025",
-  ".albumsPageV318",
-  ".playlistsPage",
-  ".coverStudioLayout",
-  ".downloadsLayoutV031",
-  ".analyticsStudioV339",
-  ".settingsPageV027"
-];
+const resetPageSelectors = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339", ".settingsPageV027"];
 
 test("shared shell owns viewport and responsive sidebar behavior only", () => {
   const main = read("src/main.tsx");
@@ -31,11 +23,12 @@ test("shared shell owns viewport and responsive sidebar behavior only", () => {
   for (const marker of [
     "--workspace-sidebar-expanded",
     "--workspace-sidebar-current",
+    "--workspace-sidebar-rail: 68px",
     "grid-template-columns: var(--workspace-sidebar-current)",
     '[data-sidebar-behavior="slim"]',
     '[data-sidebar-behavior="hover"]',
     ":focus-within",
-    "--workspace-sidebar-current: 76px"
+    'content: "LOCALTIFY"'
   ]) {
     assert.equal(css.includes(marker), true, "sidebar behavior guard is missing " + marker);
   }
@@ -43,10 +36,9 @@ test("shared shell owns viewport and responsive sidebar behavior only", () => {
   assert.equal(css.includes("--workspace-max"), false, "retired centered workspace cap returned");
 });
 
-test("shared shell no longer owns page designs", () => {
+test("shared shell no longer owns feature page designs", () => {
   const css = read("src/styles/view-shell.css");
-  for (const selector of retiredPageSelectors) {
-    assert.equal(css.includes(selector), false, "shared shell still styles retired page selector " + selector);
-  }
-  assert.ok(Buffer.byteLength(css) < 20 * 1024, "shared shell exceeded its 20 KiB budget");
+  for (const selector of resetPageSelectors) assert.equal(css.includes(selector), false, "shared shell still styles reset page selector " + selector);
+  assert.equal(css.includes(".libraryPage"), false, "Library design leaked into the shell owner");
+  assert.ok(Buffer.byteLength(css.replace(/\r\n/g, "\n")) < 20 * 1024, "shared shell exceeded its 20 KiB budget");
 });
