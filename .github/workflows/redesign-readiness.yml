@@ -1,4 +1,3 @@
-# Final rerun after restoring permanent-CI hygiene ownership, precise debt assertions, and co-located ownership tests.
 name: redesign readiness
 
 on:
@@ -30,14 +29,6 @@ jobs:
           node scripts/apply-redesign-readiness.mjs
           node scripts/fix-redesign-readiness.mjs
           node scripts/fix-redesign-ownership-tests.mjs
-      - name: Remove temporary audit and repair tools
-        run: |
-          rm -f .github/workflows/redesign-audit.yml
-          rm -f .github/workflows/redesign-readiness.yml
-          rm -f scripts/audit-redesign-readiness.mjs
-          rm -f scripts/apply-redesign-readiness.mjs
-          rm -f scripts/fix-redesign-readiness.mjs
-          rm -f scripts/fix-redesign-ownership-tests.mjs
       - name: Install dependencies
         run: npm ci
       - name: Deduplicate CSS
