@@ -58,7 +58,7 @@ export default function HomeView(props: HomeViewProps) {
   const listenNowSongs = homeListenNowSongs.slice(0, 8);
   const newReleaseSongs = (homeFreshShelfSongs.length ? homeFreshShelfSongs : homeListenNowSongs).slice(0, 10);
   const artistKeys = new Set<string>();
-  const artistSongs = [...homeListenNowSongs, ...homeFreshShelfSongs]
+  const mostListenedSongs = [...homeListenNowSongs, ...homeFreshShelfSongs]
     .filter((song) => {
       const key = String(song.artist || "unknown artist").trim().toLowerCase() || "unknown artist";
       if (artistKeys.has(key)) return false;
@@ -136,6 +136,7 @@ export default function HomeView(props: HomeViewProps) {
                   type="button"
                   onClick={() => void selectSong(song.id, true)}
                   title={`play ${song.title}`}
+                  style={{ transform: "none" }}
                 >
                   <Cover song={song} className="homeListenCover" />
                   <span className="homeListenCopy">
@@ -155,11 +156,11 @@ export default function HomeView(props: HomeViewProps) {
         )}
       </section>
 
-      {artistSongs.length ? (
-        <section className="homeSection homeArtistsSection" aria-labelledby="home-artists-title">
-          <h3 id="home-artists-title">Top Artists</h3>
+      {mostListenedSongs.length ? (
+        <section className="homeSection homeArtistsSection" aria-labelledby="home-most-listened-title">
+          <h3 id="home-most-listened-title">Most listened</h3>
           <div className="homeArtistRail">
-            {artistSongs.map((song) => (
+            {mostListenedSongs.map((song) => (
               <button
                 key={`${song.id}-${song.artist || "unknown"}`}
                 className="homeArtistCard"
@@ -167,7 +168,7 @@ export default function HomeView(props: HomeViewProps) {
                 onClick={() => void selectSong(song.id, true)}
                 title={`play ${song.artist || song.title}`}
               >
-                <span className="homeArtistCoverWrap">
+                <span className="homeArtistCoverWrap" style={{ transform: "none" }}>
                   <Cover song={song} className="homeArtistCover" />
                   <span className="homeArtistPlay" aria-hidden="true"><Play size={13} fill="currentColor" /></span>
                 </span>
@@ -190,7 +191,7 @@ export default function HomeView(props: HomeViewProps) {
                 onClick={() => void selectSong(song.id, true)}
                 title={`play ${song.title}`}
               >
-                <span className="homeReleaseCoverWrap">
+                <span className="homeReleaseCoverWrap" style={{ transform: "none" }}>
                   <Cover song={song} className="homeReleaseCover" />
                   <span className="homeReleasePlay" aria-hidden="true"><Play size={15} fill="currentColor" /></span>
                 </span>

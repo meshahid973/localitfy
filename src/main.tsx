@@ -3,16 +3,9 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { AppErrorBoundary } from "./app/AppErrorBoundary";
 
-/* Explicit feature-style manifest. Keep feature ownership visible and auditable. */
+/* Shared UI and temporary structural foundations only. Page designs are rebuilt independently. */
 import "./shared/ui/view-ui.css";
-import "./features/library/library.css";
-import "./features/albums/albums.css";
-import "./features/playlists/playlists.css";
-import "./features/covers/covers.css";
-import "./features/downloads/downloads.css";
-import "./features/analytics/analytics.css";
-
-/* Shared non-Home viewport/header policy. Feature CSS still owns page internals. */
+import "./styles/page-foundation.css";
 import "./styles/view-shell.css";
 
 /* Performance overrides intentionally stay last in the renderer cascade. */

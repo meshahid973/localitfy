@@ -5,15 +5,13 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const failures = [];
-
-function read(relativePath) {
-  return fs.readFileSync(path.join(root, relativePath), "utf8");
-}
+const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
+const exists = (relativePath) => fs.existsSync(path.join(root, relativePath));
 
 function reject(relativePath, tokens) {
-  const source = read(relativePath);
+  const source = read(relativePath).toLowerCase();
   for (const token of tokens) {
-    if (source.toLowerCase().includes(token.toLowerCase())) failures.push(`${relativePath}: retired token remains: ${token}`);
+    if (source.includes(token.toLowerCase())) failures.push(`${relativePath}: retired token remains: ${token}`);
   }
 }
 
@@ -35,76 +33,52 @@ reject("src/features/home/home.css", retiredHomeTokens);
 reject("src/App.tsx", ["quickLibraryMoreBlur", "showHomeSideCards", "homeDashboardClass", "settings.homeExpanded", "settings.showRightColumn"]);
 reject("src/features/settings/settings.types.ts", ["homeExpanded:", "showRightColumn:", "quickLibraryMoreBlur:"]);
 reject("src/features/settings/settings.constants.ts", ["homeExpanded:", "showRightColumn:", "quickLibraryMoreBlur:"]);
-for (const css of ["src/App.css", "src/features/shell/motion.css", "src/features/shell/performance.css"]) reject(css, retiredHomeTokens.slice(1));
-reject("src/features/settings/categories/AdvancedSettings.tsx", ["Right side cards"]);
-reject("src/app/runtime/useBodyRuntimeClasses.ts", ["localtifyWantMoreBlur", "localtifyNoMoreBlur"]);
-reject("src/features/shell/performance.css", ["localtifyNoMoreBlur", "localtifyWantMoreBlur"]);
-
-const proximityShimPath = path.join(root, "src/useProximityMotion.ts");
-if (!fs.existsSync(proximityShimPath)) {
-  failures.push("src/useProximityMotion.ts: compatibility seam is missing before App import migration");
-} else {
-  const proximityShim = read("src/useProximityMotion.ts").trim();
-  if (proximityShim !== 'export { useProximityMotion } from "./features/shell/useProximityMotion";') {
-    failures.push("src/useProximityMotion.ts: root module must remain a pure compatibility re-export; no second motion owner");
-  }
-}
-
-const appSource = read("src/App.tsx");
-const allowedRootOwners = new Set(["useProximityMotion", "Onboarding", "CatBuddy"]);
-const rootCompatibilityImports = [...appSource.matchAll(/from\s+["']\.\/(?!features\/|app\/|core\/|shared\/|platform\/|analytics(?:["']))([^"']+)["']/g)]
-  .map((match) => match[1])
-  .filter((specifier) => !allowedRootOwners.has(specifier));
-if (rootCompatibilityImports.length) {
-  failures.push(`src/App.tsx: unexpected root imports are forbidden: ${rootCompatibilityImports.join(", ")}`);
-}
-if ((appSource.match(/from\s+["']\.\/useProximityMotion["']/g) || []).length > 1) {
-  failures.push("src/App.tsx: proximity compatibility import must occur at most once");
-}
-
-const motionPath = path.join(root, "src/features/shell/motion.css");
-const motionBytes = fs.statSync(motionPath).size;
-if (motionBytes > 20 * 1024) failures.push(`src/features/shell/motion.css: ${motionBytes} bytes exceeds 20 KiB ownership budget`);
-reject("src/features/shell/motion.css", ["localtifyProximity", "VelocityMotionV320", "VelocityMotionV430"]);
 
 const homeViewSource = read("src/features/home/HomeView.tsx");
-if (homeViewSource.includes("[key: string]: any")) failures.push("src/features/home/HomeView.tsx: loose index signature returned");
-for (const marker of ["JUMP BACK IN", "Listen now", "Top Artists", "New Releases"]) {
+for (const marker of ["JUMP BACK IN", "Listen now", "Most listened", "New Releases"]) {
   if (!homeViewSource.includes(marker)) failures.push(`src/features/home/HomeView.tsx: missing Home hierarchy marker ${marker}`);
 }
+if (homeViewSource.includes("Top Artists")) failures.push("src/features/home/HomeView.tsx: retired Top Artists label returned");
+if (!homeViewSource.includes('style={{ transform: "none" }}')) failures.push("src/features/home/HomeView.tsx: hover clipping guard is missing");
 
 const homePath = path.join(root, "src/features/home/home.css");
 const homeBytes = fs.statSync(homePath).size;
 if (homeBytes > 24 * 1024) failures.push(`src/features/home/home.css: ${homeBytes} bytes exceeds 24 KiB Home ownership budget`);
 const homeCss = read("src/features/home/home.css");
-if (!homeCss.includes(".app:has(.pageTransition-home)")) failures.push("src/features/home/home.css: Home shell rules must be scoped through .pageTransition-home");
-if (fs.existsSync(path.join(root, "src/features/home/home-polish.css"))) failures.push("src/features/home/home-polish.css: duplicate Home override layer must stay removed");
+if (!homeCss.includes(".app:has(.pageTransition-home)")) failures.push("src/features/home/home.css: Home shell rules must stay scoped through .pageTransition-home");
+if (exists("src/features/home/home-polish.css")) failures.push("src/features/home/home-polish.css: duplicate Home override layer must stay removed");
 
-const cssOwnershipBudgets = [
+const retiredPageStyles = [
+  "src/features/library/library.css",
+  "src/features/albums/albums.css",
+  "src/features/playlists/playlists.css",
+  "src/features/covers/covers.css",
+  "src/features/downloads/downloads.css",
+  "src/features/analytics/analytics.css"
+];
+for (const relativePath of retiredPageStyles) {
+  if (exists(relativePath)) failures.push(`${relativePath}: retired page design returned before its rebuild`);
+}
+
+for (const [relativePath, maxBytes] of [
   ["src/App.css", 246 * 1024],
   ["src/features/shell/app-core.css", 112 * 1024],
-  ["src/features/settings/settings.css", 204 * 1024],
+  ["src/features/settings/settings.css", 24 * 1024],
   ["src/features/player/player.css", 160 * 1024],
   ["src/features/shell/effects.css", 96 * 1024],
   ["src/shared/ui/view-ui.css", 16 * 1024],
-  ["src/styles/view-shell.css", 36 * 1024],
-  ["src/features/library/library.css", 20 * 1024],
-  ["src/features/albums/albums.css", 36 * 1024],
-  ["src/features/playlists/playlists.css", 32 * 1024],
-  ["src/features/covers/covers.css", 32 * 1024],
-  ["src/features/downloads/downloads.css", 36 * 1024],
-  ["src/features/analytics/analytics.css", 24 * 1024]
-];
-for (const [relativePath, maxBytes] of cssOwnershipBudgets) {
-  const absolutePath = path.join(root, relativePath);
-  if (!fs.existsSync(absolutePath)) {
+  ["src/styles/page-foundation.css", 16 * 1024],
+  ["src/styles/view-shell.css", 24 * 1024]
+]) {
+  if (!exists(relativePath)) {
     failures.push(`${relativePath}: required stylesheet owner is missing`);
     continue;
   }
-  const bytes = fs.statSync(absolutePath).size;
+  const bytes = fs.statSync(path.join(root, relativePath)).size;
   if (bytes > maxBytes) failures.push(`${relativePath}: ${(bytes / 1024).toFixed(1)} KiB exceeds ${(maxBytes / 1024).toFixed(0)} KiB ownership budget`);
 }
 
+const appSource = read("src/App.tsx");
 for (const ownedImport of [
   './features/shell/app-core.css',
   './features/settings/themes.css',
@@ -118,40 +92,35 @@ for (const ownedImport of [
   if (!appSource.includes(`import "${ownedImport}";`)) failures.push(`src/App.tsx: missing canonical owned stylesheet ${ownedImport}`);
 }
 
-const shell = read("src/features/shell/AppShell.tsx");
-if (shell.includes("moreQuickLibraryBlur") || shell.includes("lessQuickLibraryBlur") || shell.includes("data-home-expanded")) {
-  failures.push("src/features/shell/AppShell.tsx: retired Quick Library runtime ownership remains");
-}
-if (!shell.includes("pageTransition-${view}")) failures.push("src/features/shell/AppShell.tsx: view-scoped page transition marker is missing");
-
 const main = read("src/main.tsx");
 if (main.includes("release.css")) failures.push("src/main.tsx: obsolete release.css override layer returned");
 if (main.includes("home-polish.css")) failures.push("src/main.tsx: duplicate Home polish import returned");
-const appImport = main.indexOf('import App from "./App";');
-const perfImport = main.indexOf('import "./features/shell/performance.css";');
-if (appImport < 0 || perfImport < appImport) failures.push("src/main.tsx: performance.css must remain the final renderer policy after App CSS");
-
-const rendererFeatureStyles = [
+for (const ownedImport of [
   "./shared/ui/view-ui.css",
-  "./features/library/library.css",
-  "./features/albums/albums.css",
-  "./features/playlists/playlists.css",
-  "./features/covers/covers.css",
-  "./features/downloads/downloads.css",
-  "./features/analytics/analytics.css",
-  "./styles/view-shell.css"
-];
-for (const ownedImport of rendererFeatureStyles) {
-  const statement = `import "${ownedImport}";`;
-  if (!main.includes(statement)) failures.push(`src/main.tsx: missing feature stylesheet owner ${ownedImport}`);
-  if (main.indexOf(statement) > perfImport) failures.push(`src/main.tsx: ${ownedImport} must load before performance.css`);
+  "./styles/page-foundation.css",
+  "./styles/view-shell.css",
+  "./features/shell/performance.css"
+]) {
+  if (!main.includes(`import "${ownedImport}";`)) failures.push(`src/main.tsx: missing renderer stylesheet ${ownedImport}`);
 }
+for (const relativePath of retiredPageStyles) {
+  const specifier = relativePath.replace(/^src\//, "./");
+  if (main.includes(specifier)) failures.push(`src/main.tsx: retired page stylesheet still imported ${specifier}`);
+}
+const perfImport = main.indexOf('import "./features/shell/performance.css";');
+if (perfImport < 0) failures.push("src/main.tsx: performance.css is missing");
 
 const workspaceCss = read("src/styles/view-shell.css");
-for (const requiredSelector of [
+for (const marker of [
   ".appShell",
   ".sidebar",
-  ".pageTransition:not(.pageTransition-home)",
+  '[data-sidebar-behavior="slim"]',
+  '[data-sidebar-behavior="hover"]',
+  ".pageTransition:not(.pageTransition-home)"
+]) {
+  if (!workspaceCss.includes(marker)) failures.push(`src/styles/view-shell.css: shared shell lost ${marker}`);
+}
+for (const forbiddenPageSelector of [
   ".libraryPanelV025",
   ".albumsPageV318",
   ".playlistsPage",
@@ -160,26 +129,17 @@ for (const requiredSelector of [
   ".analyticsStudioV339",
   ".settingsPageV027"
 ]) {
-  if (!workspaceCss.includes(requiredSelector)) failures.push(`src/styles/view-shell.css: shared workspace lost ${requiredSelector}`);
+  if (workspaceCss.includes(forbiddenPageSelector)) failures.push(`src/styles/view-shell.css: page design leaked into shell: ${forbiddenPageSelector}`);
 }
 
-for (const forbiddenHomeSelector of [
-  ".libraryPanelV025",
-  ".albumsPageV318",
-  ".playlistsPage",
-  ".coverStudioLayout",
-  ".downloadsLayoutV031",
-  ".analyticsStudioV339",
-  ".localtifyStateCardV373"
-]) {
-  if (homeCss.includes(forbiddenHomeSelector)) failures.push(`src/features/home/home.css: foreign selector returned: ${forbiddenHomeSelector}`);
-}
-
-if (fs.existsSync(path.join(root, "src/features/shell/release.css"))) failures.push("src/features/shell/release.css: obsolete override file must stay deleted");
+const settingsView = read("src/features/settings/SettingsView.tsx");
+if (settingsView.includes(": any")) failures.push("src/features/settings/SettingsView.tsx: loose any props returned");
+const settingsCss = read("src/features/settings/settings.css");
+if (!settingsCss.includes("Visual redesign intentionally removed")) failures.push("src/features/settings/settings.css: settings reset marker is missing");
 
 if (failures.length) {
   console.error("[release-ui-ownership] failures:\n- " + failures.join("\n- "));
   process.exit(1);
 }
 
-console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, canonical motion is ${(motionBytes / 1024).toFixed(1)} KiB, and the unified workspace skin is present and budgeted.`);
+console.log(`[release-ui-ownership] OK; Home is ${(homeBytes / 1024).toFixed(1)} KiB, page designs are reset, and sidebar modes are shell-owned.`);

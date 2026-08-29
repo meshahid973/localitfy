@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
-const pageRoots = [
+const retiredPageSelectors = [
   ".libraryPanelV025",
   ".albumsPageV318",
   ".playlistsPage",
@@ -17,35 +17,29 @@ const pageRoots = [
   ".settingsPageV027"
 ];
 
-test("all pages share one responsive workspace and sidebar", () => {
+test("shared shell owns viewport and sidebar behavior only", () => {
   const main = read("src/main.tsx");
   const css = read("src/styles/view-shell.css");
 
-  assert.equal(main.includes('import "./styles/view-shell.css";'), true, "shared workspace is not loaded");
-  assert.ok(main.indexOf('import "./styles/view-shell.css";') < main.indexOf('import "./features/shell/performance.css";'), "workspace must load before performance policy");
+  assert.equal(main.includes('import "./styles/view-shell.css";'), true, "shared shell is not loaded");
+  assert.equal(main.includes('import "./styles/page-foundation.css";'), true, "page foundation is not loaded");
+  assert.ok(main.indexOf('import "./styles/view-shell.css";') < main.indexOf('import "./features/shell/performance.css";'), "shell must load before performance policy");
+  assert.equal(css.includes(".pageTransition-home"), true, "shared shell lost its Home exclusion boundary");
 
   for (const marker of [
-    ".appShell",
-    ".sidebar",
-    ".navItem",
-    "--workspace-max: 1560px",
-    "grid-template-columns: clamp(218px",
-    ".pageTransition:not(.pageTransition-home)"
+    '[data-sidebar-behavior="slim"]',
+    '[data-sidebar-behavior="hover"]',
+    ":focus-within",
+    "grid-template-columns: 76px"
   ]) {
-    assert.equal(css.includes(marker), true, `shared workspace lost ${marker}`);
-  }
-
-  for (const pageRoot of pageRoots) {
-    assert.equal(css.includes(pageRoot), true, `${pageRoot} is not normalized by the shared workspace`);
+    assert.equal(css.includes(marker), true, `sidebar behavior guard is missing ${marker}`);
   }
 });
 
-test("Home keeps its content ownership while the workspace owns cross-page chrome", () => {
-  const home = read("src/features/home/home.css");
+test("shared shell no longer owns page designs", () => {
   const css = read("src/styles/view-shell.css");
-
-  assert.equal(home.includes(".sidebar"), false, "Home must not create a second sidebar design");
-  assert.equal(home.includes("--sidebar-width:"), false, "Home must not force a different sidebar width");
-  assert.equal(css.includes(".pageTransition-home .homeJumpBack"), false, "workspace must not own Home feature internals");
-  assert.ok(Buffer.byteLength(css) < 36 * 1024, "shared workspace exceeded its 36 KiB ownership budget");
+  for (const selector of retiredPageSelectors) {
+    assert.equal(css.includes(selector), false, `shared shell still styles retired page selector ${selector}`);
+  }
+  assert.ok(Buffer.byteLength(css) < 24 * 1024, "shared shell exceeded its 24 KiB budget");
 });

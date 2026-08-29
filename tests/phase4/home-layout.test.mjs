@@ -13,7 +13,7 @@ test("Home keeps the compact reference music hierarchy", () => {
   for (const marker of [
     "JUMP BACK IN",
     "Listen now",
-    "Top Artists",
+    "Most listened",
     "New Releases",
     "homeListenGrid",
     "homeArtistRail",
@@ -23,12 +23,14 @@ test("Home keeps the compact reference music hierarchy", () => {
     assert.equal(source.includes(marker), true, `Home lost ${marker}`);
   }
 
+  assert.equal(source.includes("Top Artists"), false, "retired Top Artists label returned");
   assert.equal(source.includes("Continue listening"), false, "old Continue listening shelf returned");
   assert.equal(source.includes("homeRotationRail"), false, "retired circular Recent rotation layout returned");
   assert.equal(source.includes("homeSectionMeta"), false, "Home count metadata clutter returned");
+  assert.equal(source.includes('style={{ transform: "none" }}'), true, "Home hover clipping guard is missing");
 });
 
-test("Home owns content while the shared workspace owns the sidebar", () => {
+test("Home owns content while the shared workspace owns sidebar behavior", () => {
   const css = read("src/features/home/home.css");
   const workspace = read("src/styles/view-shell.css");
   const main = read("src/main.tsx");
@@ -46,12 +48,19 @@ test("Home owns content while the shared workspace owns the sidebar", () => {
 
   assert.equal(css.includes(".app:has(.pageTransition-home) .sidebar"), false, "Home must not own a second sidebar layout");
   assert.equal(css.includes("--sidebar-width:"), false, "Home must not override the shared sidebar width");
-  for (const marker of [".appShell", ".sidebar", ".navItem", ".pageTransition:not(.pageTransition-home)"]) {
+
+  for (const marker of [
+    ".appShell",
+    ".sidebar",
+    '[data-sidebar-behavior="slim"]',
+    '[data-sidebar-behavior="hover"]',
+    ".pageTransition:not(.pageTransition-home)"
+  ]) {
     assert.equal(workspace.includes(marker), true, `shared workspace lost ${marker}`);
   }
 
   assert.equal(fs.existsSync(path.join(root, "src/features/home/home-polish.css")), false, "Home polish override layer returned");
   assert.equal(main.includes("home-polish.css"), false, "renderer still imports the removed Home polish layer");
   assert.ok(Buffer.byteLength(css) < 24 * 1024, "Home CSS exceeded its 24 KiB ownership budget");
-  assert.ok(Buffer.byteLength(workspace) < 36 * 1024, "shared workspace CSS exceeded its 36 KiB ownership budget");
+  assert.ok(Buffer.byteLength(workspace) < 24 * 1024, "shared shell CSS exceeded its 24 KiB ownership budget");
 });

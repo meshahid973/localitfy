@@ -7,41 +7,41 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
-const owners = [
-  ["./shared/ui/view-ui.css", "src/shared/ui/view-ui.css", ".localtifyStateCardV373", "LocaltifyStateCard"],
-  ["./features/library/library.css", "src/features/library/library.css", ".libraryPanelV025", "Library/Liked"],
-  ["./features/albums/albums.css", "src/features/albums/albums.css", ".albumsPageV318", "Albums"],
-  ["./features/playlists/playlists.css", "src/features/playlists/playlists.css", ".playlistsPage", "Playlists"],
-  ["./features/covers/covers.css", "src/features/covers/covers.css", ".coverStudioLayout", "Covers"],
-  ["./features/downloads/downloads.css", "src/features/downloads/downloads.css", ".downloadsLayoutV031", "Downloads"],
-  ["./features/analytics/analytics.css", "src/features/analytics/analytics.css", ".analyticsStudioV339", "Analytics"]
+const retiredPageStyles = [
+  "src/features/library/library.css",
+  "src/features/albums/albums.css",
+  "src/features/playlists/playlists.css",
+  "src/features/covers/covers.css",
+  "src/features/downloads/downloads.css",
+  "src/features/analytics/analytics.css"
 ];
 
-test("renderer explicitly imports every feature-owned stylesheet", () => {
+test("renderer style manifest is intentionally small during page rebuild", () => {
   const main = read("src/main.tsx");
+  const cssImports = [...main.matchAll(/^\s*import\s+["']([^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
 
-  for (const [specifier, , , label] of owners) {
-    assert.equal(
-      main.includes(`import "${specifier}";`) || main.includes(`import '${specifier}';`),
-      true,
-      `${label} stylesheet is missing from the renderer style manifest`
-    );
+  for (const specifier of [
+    "./shared/ui/view-ui.css",
+    "./styles/page-foundation.css",
+    "./styles/view-shell.css",
+    "./features/shell/performance.css"
+  ]) {
+    assert.equal(cssImports.includes(specifier), true, `${specifier} is missing from the renderer manifest`);
   }
 
-  const cssImports = [...main.matchAll(/^\s*import\s+["']([^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
   assert.equal(cssImports.at(-1), "./features/shell/performance.css", "performance.css must remain the final renderer stylesheet");
 });
 
-test("critical view selectors cannot be deleted by CSS cleanup", () => {
-  for (const [, file, selector, label] of owners) {
-    assert.equal(fs.existsSync(path.join(root, file)), true, `${label} stylesheet was deleted`);
-    const css = read(file);
-    assert.equal(css.includes(selector), true, `${label} lost its root selector ${selector}`);
-    assert.ok(Buffer.byteLength(css) > 400, `${label} stylesheet is suspiciously empty`);
+test("retired page designs cannot silently return", () => {
+  const main = read("src/main.tsx");
+
+  for (const file of retiredPageStyles) {
+    assert.equal(fs.existsSync(path.join(root, file)), false, `${file} returned before its redesign`);
+    assert.equal(main.includes(file.replace(/^src\//, "./")), false, `${file} returned to the renderer manifest`);
   }
 });
 
-test("repaired views keep feature CSS out of the Home owner", () => {
+test("Home remains isolated from future page redesigns", () => {
   const home = read("src/features/home/home.css");
   const forbidden = [
     ".libraryPanelV025",
@@ -54,6 +54,6 @@ test("repaired views keep feature CSS out of the Home owner", () => {
   ];
 
   for (const selector of forbidden) {
-    assert.equal(home.includes(selector), false, `${selector} must not drift back into home.css`);
+    assert.equal(home.includes(selector), false, `${selector} must not drift into home.css`);
   }
 });
