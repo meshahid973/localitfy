@@ -20,7 +20,7 @@ test("bulk album scanning stays bounded and yields to Electron", () => {
   assert.ok(Number.isFinite(depth) && depth > 0 && depth <= 6, "album library recursion must stay bounded");
   assert.ok(Number.isFinite(scanYield) && scanYield > 0 && scanYield <= 16, "album scan must periodically yield to the event loop");
   assert.ok(Number.isFinite(importYield) && importYield > 0 && importYield <= 24, "album import must periodically yield to the event loop");
-  assert.match(main, /await\s+yieldAlbumFolderWork\(\)/, "album folder work no longer yields to Electron");
+  assert.match(main, /await\s+yieldToMainLoop\(\)/, "album folder work no longer yields to Electron");
 });
 
 test("nested album scans prefer each album folder's own cover", () => {
