@@ -15,17 +15,14 @@
   gap: 16px;
 }
 
-/* Neutralize historical global surfaces only while the page explicitly opts into reset mode. */
 .pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(
-  .panel, .libraryPanelV025, .likedLibraryPanelV025, .libraryQuickMetaV039 > span,
-  .libraryMissingStripV039, .songRow, .albumsHeroPanelV318, .albumCardV318,
-  .albumDetailPanelV318, .albumBuilderPanelV318, .playlistHeroPanel, .playlistCreatePanel,
-  .playlistShelfPanel, .playlistTracksPanel, .playlistTrackRow, .coverStudioHero,
-  .coverSelectedSongsPanel, .coverGalleryPanel, .coverGalleryCardCleanOnly, .downloadPanelV031,
-  .downloadQueuePanel, .converterBoxV031, .spotifyTrackItemV326, .analyticsHeroV339,
-  .analyticsRecapCardV339, .analyticsSnapshotCardV339, .analyticsMiniCardV339,
-  .analyticsSharePanelV339, .settingsHeroV027, .settingsPanelCard, .settingsPageCard,
-  .settingsFocusPanelV491
+  .panel, .albumsHeroPanelV318, .albumCardV318, .albumDetailPanelV318, .albumBuilderPanelV318,
+  .playlistHeroPanel, .playlistCreatePanel, .playlistShelfPanel, .playlistTracksPanel,
+  .playlistTrackRow, .coverStudioHero, .coverSelectedSongsPanel, .coverGalleryPanel,
+  .coverGalleryCardCleanOnly, .downloadPanelV031, .downloadQueuePanel, .converterBoxV031,
+  .spotifyTrackItemV326, .analyticsHeroV339, .analyticsRecapCardV339,
+  .analyticsSnapshotCardV339, .analyticsMiniCardV339, .analyticsSharePanelV339,
+  .settingsHeroV027, .settingsPanelCard, .settingsPageCard, .settingsFocusPanelV491
 ) {
   border-color: transparent !important;
   border-image: none !important;
@@ -38,59 +35,47 @@
   filter: none !important;
 }
 
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.softButton, .mainAction, .heroMain, .heroGhost, .shuffleLibraryButtonV025, .settingsTinyButton, .settingsActionButton) {
+.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.softButton, .mainAction, .heroMain, .heroGhost, .settingsTinyButton, .settingsActionButton) {
   background-image: none !important;
   box-shadow: none !important;
   filter: none !important;
 }
 
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(button, input, select, textarea) { max-width: 100%; font: inherit; }
+.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(button, input, select, textarea) {
+  max-width: 100%;
+  font: inherit;
+}
+
 .pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(button, [role="button"]) { cursor: pointer; }
 
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"]:where(.libraryPanelV025, .likedLibraryPanelV025, .albumsPageV318, .playlistsPage, .coverStudioLayout, .downloadsLayoutV031, .analyticsStudioV339, .settingsPageV027) {
+.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"]:where(.albumsPageV318, .playlistsPage, .coverStudioLayout, .downloadsLayoutV031, .analyticsStudioV339, .settingsPageV027) {
   width: 100%;
   min-width: 0;
+  display: grid;
+  gap: 16px;
 }
 
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"]:where(.libraryPanelV025, .likedLibraryPanelV025) {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.libraryPanelHeadV025, .libraryPanelActionsV025, .libraryMissingActionsV039, .panelHead, .downloadActionRow, .converterActions, .downloadTabStrip) {
+.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.panelHead, .downloadActionRow, .converterActions, .downloadTabStrip) {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.libraryPanelHeadV025, .panelHead) { justify-content: space-between; }
 
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.libraryQuickMetaV039, .libraryCoverCardsGridV321, .albumsGridV318, .playlistShelfGrid, .coverGalleryGrid, .analyticsRecapGridV339, .analyticsMiniGridV339, .settingsThemeGrid) {
+.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] .panelHead { justify-content: space-between; }
+
+.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.albumsGridV318, .playlistShelfGrid, .coverGalleryGrid, .analyticsRecapGridV339, .analyticsMiniGridV339, .settingsThemeGrid) {
   min-width: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
 }
 
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] .libraryMissingStripV039 {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-}
-
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.libraryFullListV025, .libraryCoverCardShellV321, .virtualSongViewport, .coverVirtualGalleryViewport, .coverGalleryViewport, .downloadQueueList, .spotifyTrackList) {
+.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.coverVirtualGalleryViewport, .coverGalleryViewport, .downloadQueueList, .spotifyTrackList) {
   min-width: 0;
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
-}
-
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"]:where(.albumsPageV318, .playlistsPage, .coverStudioLayout, .analyticsStudioV339, .settingsPageV027) {
-  display: grid;
-  gap: 16px;
 }
 
 .pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.playlistTopGrid, .playlistContentGrid, .downloadsLayoutV031, .coverStudioBody, .settingsLayout, .settingsPageLayoutV027),
@@ -102,17 +87,21 @@
   align-items: start;
 }
 
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.settingsLayout, .settingsPageLayoutV027) { grid-template-columns: minmax(190px, 230px) minmax(0, 1fr); }
-.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.playlistTrackRow, .spotifyTrackItemV326, .songRow, .albumCardV318) { min-width: 0; }
+.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.settingsLayout, .settingsPageLayoutV027) {
+  grid-template-columns: minmax(190px, 230px) minmax(0, 1fr);
+}
+
+.pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.playlistTrackRow, .spotifyTrackItemV326, .albumCardV318) { min-width: 0; }
 
 @media (max-width: 1180px) {
   .pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.playlistTopGrid, .playlistContentGrid, .downloadsLayoutV031, .coverStudioBody, .settingsLayout, .settingsPageLayoutV027),
-  .pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"].downloadsLayoutV031 { grid-template-columns: 1fr; }
+  .pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"].downloadsLayoutV031 {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
-  .pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] .libraryMissingStripV039 { grid-template-columns: 1fr; }
-  .pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.libraryQuickMetaV039, .libraryCoverCardsGridV321, .albumsGridV318, .playlistShelfGrid, .coverGalleryGrid, .analyticsRecapGridV339, .analyticsMiniGridV339, .settingsThemeGrid) {
+  .pageTransition:not(.pageTransition-home) [data-page-section][data-page-state="reset"] :where(.albumsGridV318, .playlistShelfGrid, .coverGalleryGrid, .analyticsRecapGridV339, .analyticsMiniGridV339, .settingsThemeGrid) {
     grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   }
 }
