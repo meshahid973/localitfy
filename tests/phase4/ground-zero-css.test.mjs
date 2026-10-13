@@ -8,13 +8,23 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 const megaFiles = ["src/App.css", "src/features/shell/app-core.css", "src/styles/themes.css", "src/features/shell/effects.css"];
 const forbiddenPageTokens = [".libraryPage", ".libraryPanel", ".libraryQuick", ".libraryMissing", ".albumsPage", ".albumsHero", ".albumCard", ".playlistsPage", ".playlistHero", ".coverStudio", ".downloadsLayout", ".downloadPanel", ".spotifyTrack", ".analytics", ".settingsPage", ".settingsHero"];
-const resetPages = [
-  ["src/features/albums/AlbumsView.tsx", "albums"],
-  ["src/features/covers/CoverStudio.tsx", "covers"]
-];
 
-test("only pages awaiting redesign opt into temporary reset mode", () => {
-  for (const [relative, section] of resetPages) assert.ok(read(relative).includes('data-page-section="' + section + '" data-page-state="reset"'), relative + " is not reset-state gated");
+test("all finished pages are outside temporary reset mode", () => {
+  const finished = [
+    ["src/features/library/LibraryView.tsx", "library"],
+    ["src/features/artists/ArtistsView.tsx", "artists"],
+    ["src/features/albums/AlbumsView.tsx", "albums"],
+    ["src/features/playlists/PlaylistsView.tsx", "playlists"],
+    ["src/features/covers/CoverStudio.tsx", "covers"],
+    ["src/features/downloads/DownloadsView.tsx", "downloads"],
+    ["src/features/analytics/AnalyticsView.tsx", "analytics"],
+    ["src/features/settings/SettingsView.tsx", "settings"]
+  ];
+  for (const [file, section] of finished) {
+    const source = read(file);
+    assert.ok(source.includes('data-page-section="' + section + '"'), file);
+    assert.equal(source.includes('data-page-state="reset"'), false, file);
+  }
 });
 
 test("Library is no longer a ground-zero page", () => {

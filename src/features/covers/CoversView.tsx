@@ -1,3 +1,4 @@
+import "./covers.css";
 import { Suspense } from "react";
 import type { CoverSong, CoverStudioProps } from "./cover.types";
 import { Cover } from "./Cover";

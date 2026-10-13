@@ -7,18 +7,20 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
 
-const retiredPageStyles = [
+const rebuiltPageStyles = [
   "src/features/albums/albums.css",
-  "src/features/covers/covers.css",
+  "src/features/covers/covers.css"
 ];
 const resetPageRoots = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339"];
 
-test("unfinished pages keep retired styles removed", () => {
+test("album and covers styles are owned by their views", () => {
   const main = read("src/main.tsx");
-  for (const relativePath of retiredPageStyles) {
-    assert.equal(fs.existsSync(path.join(root, relativePath)), false, relativePath + " returned before its redesign");
-    assert.equal(main.includes(relativePath.replace(/^src\//, "./")), false, relativePath + " returned to the renderer manifest");
+  for (const relativePath of rebuiltPageStyles) {
+    assert.ok(fs.existsSync(path.join(root, relativePath)), relativePath + " needs its feature CSS");
+    assert.equal(main.includes(relativePath.replace(/^src\//, "./")), false, "feature CSS must remain lazy");
   }
+  assert.ok(read("src/features/albums/AlbumsView.tsx").includes('import "./albums.css";'));
+  assert.ok(read("src/features/covers/CoversView.tsx").includes('import "./covers.css";'));
 });
 
 test("global visual owners cannot reclaim reset page roots", () => {

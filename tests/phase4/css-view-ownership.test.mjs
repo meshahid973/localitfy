@@ -7,9 +7,9 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
-const retiredPageStyles = [
-  "src/features/albums/albums.css",
-  "src/features/covers/covers.css",
+const featureStyles = [
+  ["src/features/albums/AlbumsView.tsx", "src/features/albums/albums.css"],
+  ["src/features/covers/CoversView.tsx", "src/features/covers/covers.css"]
 ];
 
 test("renderer style manifest stays global-only during page rebuild", () => {
@@ -22,11 +22,12 @@ test("renderer style manifest stays global-only during page rebuild", () => {
   assert.equal(cssImports.at(-1), "./features/shell/performance.css", "performance.css must remain the final renderer stylesheet");
 });
 
-test("unfinished pages keep retired styles removed", () => {
+test("album and cover styles belong to their feature modules", () => {
   const main = read("src/main.tsx");
-  for (const file of retiredPageStyles) {
-    assert.equal(fs.existsSync(path.join(root, file)), false, `${file} returned before its redesign`);
-    assert.equal(main.includes(file.replace(/^src\//, "./")), false, `${file} returned to the renderer manifest`);
+  for (const [view, style] of featureStyles) {
+    assert.ok(fs.existsSync(path.join(root, style)), style);
+    assert.ok(read(view).includes('import "./' + path.basename(style) + '";'), view);
+    assert.ok(!main.includes(style.replace(/^src\//, "./")), "feature CSS must not load globally");
   }
 });
 
