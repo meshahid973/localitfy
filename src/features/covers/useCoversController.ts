@@ -466,7 +466,6 @@ export function useCoversController({
     }
   }
 
-  const togglePixelCoverFavorite = (key: string) => key && setFavoritePixelCoverKeys((oldKeys) => oldKeys.includes(key) ? oldKeys.filter((item) => item !== key) : [...oldKeys, key]);
   const togglePixelCoverExcluded = (key: string) => key && setExcludedPixelCoverKeys((oldKeys) => oldKeys.includes(key) ? oldKeys.filter((item) => item !== key) : [...oldKeys, key]);
   const toggleCoverSongSelection = (songId: string) => setCoverSelectedSongIds((oldIds) => oldIds.includes(songId) ? oldIds.filter((id) => id !== songId) : [...oldIds, songId]);
 
@@ -579,7 +578,6 @@ export function useCoversController({
     cleanupCoverCacheAction,
     chooseCoverFromPc,
     randomizeAllCovers,
-    togglePixelCoverFavorite,
     togglePixelCoverExcluded,
     toggleCoverSongSelection,
     selectCurrentSongForCovers,
