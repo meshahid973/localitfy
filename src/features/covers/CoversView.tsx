@@ -15,10 +15,9 @@ export type CoversViewProps = Pick<CoverStudioProps,
   | "filteredCoverGalleryAssets" | "pixelArtBusy" | "randomizeSelectedCovers" | "rescanPixelArtFolder"
   | "selectCurrentSongForCovers" | "selectVisibleSongsForCovers" | "selectedCoverSongs"
   | "setCoverGalleryMood" | "setCoverSelectedSongIds" | "toggleCoverSongSelection"
-  | "togglePixelCoverExcluded" | "togglePixelCoverFavorite"
+  | "togglePixelCoverExcluded" | "missingCoverSongs" | "randomizeMissingCovers" | "cleanupCoverCache"
 > & {
   importSongs: () => unknown;
-  now: unknown;
   songs: CoverSong[];
 };
 
@@ -29,6 +28,9 @@ export default function CoversView(props: CoversViewProps) {
     coverGalleryMood,
     coverMoodCounts,
     coverPickerSongList,
+    missingCoverSongs,
+    randomizeMissingCovers,
+    cleanupCoverCache,
     coverSelectedSongIds,
     coverStats,
     currentSong,
@@ -45,7 +47,6 @@ export default function CoversView(props: CoversViewProps) {
     songs,
     toggleCoverSongSelection,
     togglePixelCoverExcluded,
-    togglePixelCoverFavorite
   } = props;
 
   return (
@@ -103,6 +104,9 @@ export default function CoversView(props: CoversViewProps) {
                 coverStats={coverStats}
                 filteredCoverGalleryAssets={filteredCoverGalleryAssets}
                 coverPickerSongList={coverPickerSongList}
+                missingCoverSongs={missingCoverSongs}
+                randomizeMissingCovers={randomizeMissingCovers}
+                cleanupCoverCache={cleanupCoverCache}
                 coverSelectedSongIds={coverSelectedSongIds}
                 CoverComponent={Cover}
                 prettyTitle={prettyTitle}
@@ -117,7 +121,6 @@ export default function CoversView(props: CoversViewProps) {
                 setCoverSelectedSongIds={setCoverSelectedSongIds}
                 toggleCoverSongSelection={toggleCoverSongSelection}
                 applyCoverAssetToSelection={applyCoverAssetToSelection}
-                togglePixelCoverFavorite={togglePixelCoverFavorite}
                 togglePixelCoverExcluded={togglePixelCoverExcluded}
                 />
               </Suspense>

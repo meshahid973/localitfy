@@ -19,7 +19,6 @@ export type DownloadsViewProps = {
   downloadHasFailure: any;
   downloadMascotMessage: any;
   downloadMascotTitle: any;
-  downloadResults: any;
   downloadSpotifyTracks: any;
   downloadStatusLabel: any;
   downloadText: any;
@@ -31,9 +30,6 @@ export type DownloadsViewProps = {
   handleSpotifyLogin: any;
   handleSpotifyLogout: any;
   openDownloadedSongInLibrary: any;
-  playlists: any;
-  progress: any;
-  ready: any;
   retryDownload: any;
   retryFailedDownloads: any;
   retrySpotifyTrack: any;

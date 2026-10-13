@@ -58,7 +58,6 @@ export type AlbumsViewProps = {
   openPlaylistPicker: any;
   playAlbumSongs: any;
   queueAlbumSongs: any;
-  ready: any;
   saveManualAlbumFromDraft: any;
   scanAlbumFolderImport: any;
   selectSong: any;

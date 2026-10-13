@@ -19,7 +19,6 @@ export type AnalyticsViewProps = {
   missingFileCount: number;
   neverPlayedSongs: Song[];
   playedPercent: number;
-  ready: boolean;
   recentImportWeekCount: number;
   songs: Song[];
 };

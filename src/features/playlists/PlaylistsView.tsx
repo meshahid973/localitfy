@@ -25,7 +25,6 @@ export type PlaylistsViewProps = {
   playPlaylist: any;
   playlistDragOverPlaylistId: any;
   playlistSummaries: any;
-  playlists: any;
   removePlaylist: any;
   removePlaylistSongAction: any;
   renamingPlaylistId: any;
@@ -34,7 +33,6 @@ export type PlaylistsViewProps = {
   selectPlaylistSongAction: any;
   selectedPlaylist: any;
   selectedPlaylistDuration: any;
-  selectedPlaylistId: any;
   selectedPlaylistSongs: any;
   setNewPlaylistName: any;
   setRenamingPlaylistName: any;

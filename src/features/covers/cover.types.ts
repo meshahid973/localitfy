@@ -62,6 +62,5 @@ export type CoverStudioProps = {
   setCoverSelectedSongIds: Dispatch<SetStateAction<string[]>>;
   toggleCoverSongSelection: (songId: string) => void;
   applyCoverAssetToSelection: (asset: RuntimePixelArtAsset) => void | Promise<void>;
-  togglePixelCoverFavorite?: (key: string) => void;
   togglePixelCoverExcluded: (key: string) => void;
 };
