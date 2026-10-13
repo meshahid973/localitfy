@@ -2,6 +2,7 @@ import "./playlists.css";
 import type { CSSProperties } from "react";
 import { EmptyCoverIcon, LocaltifyStateCard, MetaDividerDot, PlusMiniIcon } from "../../shared/ui/LocaltifyViewUi";
 import { VirtualPlaylistTrackList } from "./components/VirtualPlaylistTrackList";
+import PlaylistCoverCollage from "./components/PlaylistCoverCollage";
 import { formatTime } from "../../shared/utils/format";
 
 export type PlaylistsViewProps = {
@@ -29,7 +30,6 @@ export type PlaylistsViewProps = {
   removePlaylistSongAction: any;
   renamingPlaylistId: any;
   renamingPlaylistName: any;
-  renderPlaylistCollage: any;
   savePlaylistRename: any;
   selectPlaylistSongAction: any;
   selectedPlaylist: any;
@@ -69,7 +69,6 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
     removePlaylistSongAction,
     renamingPlaylistId,
     renamingPlaylistName,
-    renderPlaylistCollage,
     savePlaylistRename,
     selectPlaylistSongAction,
     selectedPlaylist,
@@ -103,7 +102,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             </p>
           </div>
 
-          {selectedPlaylist ? renderPlaylistCollage(selectedPlaylistSongs, "playlistHeroCollage playlistCoverCollage") : (
+          {selectedPlaylist ? <PlaylistCoverCollage songs={selectedPlaylistSongs} className="playlistHeroCollage playlistCoverCollage" /> : (
             <div className="playlistHeroCollage playlistCoverCollage playlistEmptyCollage" aria-hidden="true">
               <div className="playlistCoverTile empty"><span><EmptyCoverIcon /></span></div>
               <div className="playlistCoverTile empty"><span><PlusMiniIcon /></span></div>
@@ -186,7 +185,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
                 onDrop={(event) => handlePlaylistShelfDrop(event, playlist.id)}
                 title="drop a song here to add it"
               >
-                {renderPlaylistCollage(previewSongs)}
+                <PlaylistCoverCollage songs={previewSongs} />
                 <span className="playlistShelfMeta">
                   <strong>{playlist.name}</strong>
                   <small>{songCount} song{songCount === 1 ? "" : "s"}<MetaDividerDot />{formatTime(duration)}</small>

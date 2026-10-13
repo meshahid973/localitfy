@@ -10,7 +10,6 @@ import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
 import {
   FolderPlus,
-  Images,
   SkipBack,
   SkipForward,
   Repeat2,
@@ -7578,22 +7577,6 @@ function MainModeApp() {
     await chooseCoverFromPc(editorSong);
   }
 
-  function renderPlaylistCollage(list: Song[], className = "playlistCoverCollage") {
-    const coverSongs = list.slice(0, 4);
-    const tiles = Array.from({ length: 4 }, (_, index) => coverSongs[index] ?? null);
-
-    return (
-      <div className={className} aria-hidden="true">
-        {tiles.map((song, index) => (
-          <div className={song ? "playlistCoverTile" : "playlistCoverTile empty"} key={song ? `${song.id}-${index}` : `empty-${index}`}>
-            {song ? <Cover song={song} className="playlistCoverImage" /> : <span><Images size={18} aria-hidden="true" /></span>}
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-
   function renderSongRows(list: Song[], className = "songList fullList") {
     return (
       <VirtualSongRows
@@ -8636,7 +8619,7 @@ function MainModeApp() {
       removePlaylistSongAction,
       renamingPlaylistId,
       renamingPlaylistName,
-      renderPlaylistCollage,
+
       savePlaylistRename,
       selectPlaylistSongAction,
       selectedPlaylist,
@@ -8846,7 +8829,7 @@ function MainModeApp() {
         onClose: () => { setPlaylistPickerSong(null); setPlaylistPickerName(""); },
         playlists,
         songsById,
-        renderPlaylistCollage,
+
         addSongToPlaylist,
         createPlaylistWithSong
       },

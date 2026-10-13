@@ -1,9 +1,9 @@
-import type { ReactNode } from "react";
 import { X } from "lucide-react";
 import { MascotStateArt } from "../../../shared/ui/LocaltifyViewUi";
 import { displaySongPickerSublineV444, displaySongTitleV444 } from "../../library/components/SongRows";
 import type { Song } from "../../library/song.types";
 import type { Playlist } from "../playlist.types";
+import PlaylistCoverCollage from "./PlaylistCoverCollage";
 
 export type PlaylistPickerModalProps = {
   song: Song | null;
@@ -12,13 +12,12 @@ export type PlaylistPickerModalProps = {
   onClose: () => void;
   playlists: Playlist[];
   songsById: Map<string, Song>;
-  renderPlaylistCollage: (songs: Song[], className: string) => ReactNode;
   addSongToPlaylist: (playlistId: string, songId: string) => unknown;
   createPlaylistWithSong: (songId: string, name: string) => unknown;
 };
 
 export default function PlaylistPickerModal({
-  song, name, setName, onClose, playlists, songsById, renderPlaylistCollage,
+  song, name, setName, onClose, playlists, songsById,
   addSongToPlaylist, createPlaylistWithSong
 }: PlaylistPickerModalProps) {
   if (!song) return null;
@@ -39,7 +38,7 @@ export default function PlaylistPickerModal({
             const previewSongs = playlist.songIds.slice(0, 4).map((songId) => songsById.get(songId)).filter((item): item is Song => Boolean(item));
             return (
               <button key={playlist.id} className={`playlistPickerItem ${added ? "active" : ""}`} type="button" disabled={added} onClick={() => addSongToPlaylist(playlist.id, song.id)}>
-                {renderPlaylistCollage(previewSongs, "playlistPickerCollage playlistCoverCollage")}
+                <PlaylistCoverCollage songs={previewSongs} className="playlistPickerCollage playlistCoverCollage" />
                 <span><strong>{playlist.name}</strong><small>{added ? "already added" : `${playlist.songIds.length} song${playlist.songIds.length === 1 ? "" : "s"}`}</small></span>
                 <em>{added ? "added" : "add"}</em>
               </button>
