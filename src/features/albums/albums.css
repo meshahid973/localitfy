@@ -1,0 +1,164 @@
+
+/* Albums owns its browsing, import preview, and album editor layouts. */
+.albumsPageV318 {
+  --albums-surface: #0d1d26;
+  --albums-elevated: #112630;
+  --albums-border: rgba(125, 164, 187, .13);
+  --albums-text: #d3e0e7;
+  --albums-muted: #809aa8;
+  width: 100%;
+  min-width: 0;
+  padding: clamp(22px, 3vw, 44px) clamp(20px, 3vw, 50px) 104px;
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  color: var(--albums-text);
+}
+.albumsPageV318 *, .albumsPageV318 *::before, .albumsPageV318 *::after { box-sizing: border-box; }
+.albumsPageV318 .eyebrow { margin: 0 0 8px; color: #80b0cd; font-size: 11px; font-weight: 800; letter-spacing: .1em; }
+.albumsPageV318 h3 { margin: 0; color: #dce6ea; font-size: 20px; line-height: 1.2; font-weight: 720; letter-spacing: -.03em; }
+.albumsPageV318 button { cursor: pointer; }
+.albumsPageV318 button:disabled { cursor: not-allowed; opacity: .45; }
+.albumsPageV318 :is(button,input,select):focus-visible { outline: 2px solid #86b4ce; outline-offset: 2px; }
+.albumsPageV318 :is(.mainAction,.heroGhost,.settingsTinyButton) { min-height: 37px; }
+.albumsPageV318 :is(.albumsHeroPanelV318,.albumsShelfPanelV318,.albumDetailPanelV318,.albumBuilderPanelV318,.albumFolderImportPanelV309) {
+  min-width: 0;
+  border: 1px solid var(--albums-border);
+  border-radius: 15px;
+  background: var(--albums-surface);
+}
+.albumsHeroPanelV318 { padding: 22px; display: grid; grid-template-columns: 140px minmax(0,1fr) minmax(190px,auto); align-items: center; gap: 23px; }
+.albumsHeroArtClusterV318 { display: grid; grid-template-columns: repeat(2,1fr); aspect-ratio: 1; gap: 4px; overflow: hidden; border-radius: 12px; background: #162a35; }
+.albumsHeroMiniCoverV318 { min-width: 0; width: 100%; height: 100%; display: block; overflow: hidden; }
+.albumsHeroMiniCoverV318 img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.albumsHeroCopyV318 { min-width: 0; }
+.albumsHeroCopyV318 h3 { font-size: clamp(22px,2vw,30px); }
+.albumsHeroCopyV318 > p:not(.eyebrow) { margin: 10px 0 17px; color: var(--albums-muted); font-size: 13px; line-height: 1.55; }
+.albumsHeroActionsV318 { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+.albumsHeroStatsV318 { display: grid; gap: 10px; min-width: 150px; }
+.albumsHeroStatsV318 > span { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 11px 13px; border: 1px solid var(--albums-border); border-radius: 10px; background: #112630; }
+.albumsHeroStatsV318 strong { color: var(--albums-text); font-size: 20px; line-height: 1; font-weight: 700; }
+.albumsHeroStatsV318 small { color: var(--albums-muted); font-size: 11px; white-space: nowrap; }
+.albumsShelfPanelV318, .albumDetailPanelV318, .albumBuilderPanelV318, .albumFolderImportPanelV309 { display: grid; align-content: start; gap: 18px; padding: 21px; }
+.albumsToolbarV318, .albumBuilderHeaderV318, .albumFolderImportHeaderV309 {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 13px; min-width: 0;
+}
+.albumsControlsV318, .albumFolderImportActionsV309, .albumFolderImportFooterV309 { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.albumsPageV318 :is(input:not([type="file"]), select) {
+  min-width: 0; min-height: 40px; padding: 9px 12px; border: 1px solid rgba(125,164,187,.22);
+  border-radius: 9px; background: #091923; color: var(--albums-text); font: inherit; font-size: 13px; outline: none;
+}
+.albumsPageV318 input::placeholder { color: #6b8492; }
+.albumsControlsV318 input { flex: 1 1 190px; min-width: 180px; }
+.albumsControlsV318 select { min-width: 130px; color-scheme: dark; }
+.albumsGridV318 { min-width: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(180px,100%),1fr)); gap: 15px; align-items: start; }
+.albumCardV318 { min-width: 0; display: grid; align-content: start; gap: 9px; padding: 11px; border: 1px solid var(--albums-border); border-radius: 12px; background: #10242f; color: var(--albums-text); text-align: left; font: inherit; cursor: pointer; }
+.albumCardV318:hover { border-color: rgba(125,164,187,.3); background: #142d39; }
+.albumCardV318.active { border-color: rgba(var(--lt-accent-rgb,121,167,196),.49); background: rgba(var(--lt-accent-rgb,121,167,196),.12); }
+.albumCardCoverV318 { width: 100%; aspect-ratio: 1; display: block; overflow: hidden; border-radius: 8px; background: #152c37; }
+.albumCardCoverV318 img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.albumCardSheenV318 { display: none; }
+.albumCardMetaV318 { display: grid; gap: 5px; min-width: 0; }
+.albumCardMetaV318 small { color: #8ab1c3; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.albumCardMetaV318 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 700; }
+.albumCardMetaV318 em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--albums-muted); font-style: normal; }
+.albumCardMetaV318 b { color: #91aebc; font-size: 11px; font-weight: 600; }
+.albumDetailHeroV318 { position: relative; min-width: 0; display: grid; grid-template-columns: 180px minmax(0,1fr); gap: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--albums-border); }
+.albumDetailCoverV318 { display: block; width: 180px; height: 180px; overflow: hidden; border-radius: 12px; background: #162e39; }
+.albumDetailCoverV318 img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.albumDetailCopyV318 { min-width: 0; align-self: center; }
+.albumDetailCopyV318 h3 { overflow-wrap: anywhere; font-size: clamp(22px,2.1vw,31px); }
+.albumDetailCopyV318 > p:not(.eyebrow) { margin: 8px 0 13px; color: var(--albums-muted); font-size: 13px; }
+.albumMetaPillsV318 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.albumMetaPillsV318 > span { padding: 6px 10px; border: 1px solid var(--albums-border); border-radius: 7px; color: #a2b8c3; font-size: 11px; }
+.albumActionRowV318 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+.albumTrackListV318 { min-width: 0; max-height: min(60vh,720px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.albumTrackRowV318 { min-width: 0; min-height: 65px; display: grid; grid-template-columns: minmax(0,1fr) 48px 34px 34px; align-items: center; gap: 10px; border-bottom: 1px solid rgba(125,164,187,.1); padding: 9px 6px; }
+.albumTrackRowV318:hover { background: #122833; }
+.albumTrackRowV318.active { background: rgba(var(--lt-accent-rgb,121,167,196),.1); }
+.albumTrackMainV318 { min-width: 0; display: grid; grid-template-columns: 28px 46px minmax(0,1fr); align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; text-align: left; color: var(--albums-text); font: inherit; cursor: pointer; }
+.albumTrackMainV318 > span:first-child { color: #718e9d; font-size: 11px; font-variant-numeric: tabular-nums; }
+.albumTrackCoverV318,.albumTrackCoverV318 img { width: 46px; height: 46px; border-radius: 7px; object-fit: cover; }
+.albumTrackMainV318 > span:last-child { min-width: 0; display: grid; gap: 4px; }
+.albumTrackMainV318 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--albums-text); font-size: 13px; font-weight: 680; }
+.albumTrackMainV318 small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--albums-muted); font-size: 11px; }
+.albumTrackDurationV318 { color: var(--albums-muted); font-size: 11px; text-align: right; }
+.albumTrackRowV318 .iconAction { width: 33px; height: 33px; min-width: 0; padding: 0; border: 0; background: transparent; color: #83a2b1; cursor: pointer; display: grid; place-items: center; }
+.albumTrackRowV318 .iconAction:hover { color: #bfd7e5; }
+.albumFolderImportHeaderV309 > div:first-child { min-width: 0; }
+.albumFolderImportHeaderV309 p:not(.eyebrow) { max-width: 690px; margin: 7px 0 0; color: var(--albums-muted); font-size: 12px; line-height: 1.5; }
+.albumFolderProgressV309 { display: grid; gap: 8px; }
+.albumFolderProgressV309 > span { display: block; height: 6px; background: #203744; border-radius: 99px; overflow: hidden; }
+.albumFolderProgressV309 i { display: block; height: 100%; background: #86b4ce; border-radius: inherit; }
+.albumFolderProgressV309 small { color: var(--albums-muted); font-size: 11px; }
+.albumFolderImportSummaryV309 { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.albumFolderImportSummaryV309 > span { display: grid; gap: 5px; padding: 14px; border: 1px solid var(--albums-border); background: var(--albums-elevated); border-radius: 9px; }
+.albumFolderImportSummaryV309 strong { font-size: 21px; }
+.albumFolderImportSummaryV309 small { color: var(--albums-muted); font-size: 11px; }
+.albumFolderPreviewGridV309 { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(260px,100%),1fr)); gap: 10px; }
+.albumFolderPreviewCardV309 { min-width: 0; display: grid; grid-template-columns: 82px minmax(0,1fr); gap: 13px; padding: 12px; border: 1px solid var(--albums-border); border-radius: 10px; background: #112530; }
+.albumFolderPreviewCoverV309 { width: 82px; height: 82px; overflow: hidden; background: #162b35; border-radius: 7px; }
+.albumFolderPreviewCoverV309 img { width: 100%; height: 100%; object-fit: cover; }
+.albumFolderPreviewCopyV309 { min-width: 0; display: grid; align-content: start; gap: 5px; }
+.albumFolderPreviewCopyV309 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.albumFolderPreviewCopyV309 small,.albumFolderPreviewCopyV309 em,.albumFolderPreviewCopyV309 b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--albums-muted); font-size: 11px; font-style: normal; font-weight: 500; }
+.albumFolderPreviewCopyV309 ul { margin: 4px 0 0; padding-left: 15px; color: #d0b8a3; font-size: 11px; }
+.albumFolderEmptyV309 { padding: 15px; border: 1px dashed var(--albums-border); border-radius: 9px; }
+.albumFolderEmptyV309 p { font-size: 12px; color: var(--albums-muted); }
+.albumBuilderHeaderV318 { padding-bottom: 13px; border-bottom: 1px solid var(--albums-border); }
+.albumBuilderBodyV318 { min-width: 0; display: grid; gap: 20px; }
+.albumBuilderFieldsV318 { min-width: 0; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: start; gap: 14px; }
+.albumBuilderFieldsV318 > label { min-width: 0; display: grid; gap: 8px; color: #a8bfca; font-size: 12px; }
+.albumBuilderFieldsV318 > label > input { width: 100%; }
+.albumBuilderCoverPickerV319 { min-width: 0; grid-column: 1/-1; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.albumBuilderCoverPreviewV319,.albumBuilderCoverPreviewV319 img { width: 78px; height: 78px; object-fit: cover; border-radius: 9px; }
+.albumBuilderCoverCopyV319 { display: grid; gap: 5px; }
+.albumBuilderCoverCopyV319 strong { font-size: 13px; }
+.albumBuilderCoverCopyV319 > span { color: var(--albums-muted); font-size: 12px; }
+.albumBuilderCoverActionsV319,.albumBuilderActionsV318 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.albumCoverFileInputV319 { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.albumBuilderArtistToolsV320 { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; }
+.albumBuilderArtistToolsV320 small { color: var(--albums-muted); font-size: 11px; }
+.albumBuilderPickerV318 { display: grid; gap: 10px; min-width: 0; }
+.albumBuilderSearchRowV318 { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.albumBuilderSearchRowV318 input { min-width: 220px; flex: 1 1 260px; }
+.albumBuilderSearchRowV318 > span { color: var(--albums-muted); font-size: 12px; }
+.albumBuilderSongGridV318 { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(225px,100%),1fr)); gap: 9px; max-height: min(45vh,440px); overflow-y: auto; }
+.albumBuilderSongGridV318 button { min-width: 0; display: grid; grid-template-columns: 42px minmax(0,1fr) 20px; align-items: center; gap: 9px; padding: 8px; border: 1px solid var(--albums-border); border-radius: 9px; background: #112631; color: var(--albums-text); text-align: left; font: inherit; }
+.albumBuilderSongGridV318 button:hover { background: #16313f; }
+.albumBuilderSongGridV318 button.selected { border-color: rgba(var(--lt-accent-rgb,121,167,196),.45); }
+.albumBuilderSongCoverV318,.albumBuilderSongCoverV318 img { width: 42px; height: 42px; border-radius: 6px; object-fit: cover; }
+.albumBuilderSongGridV318 button > span { min-width: 0; display: grid; gap: 4px; }
+.albumBuilderSongGridV318 strong { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; }
+.albumBuilderSongGridV318 small { color: var(--albums-muted); font-size: 11px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.albumBuilderFooterV318 { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; border-top: 1px solid var(--albums-border); padding-top: 15px; }
+.albumBuilderPreviewV318 { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.albumBuilderPreviewCoverV318,.albumBuilderPreviewCoverV318 img { width: 46px; height: 46px; border-radius: 7px; object-fit: cover; }
+.albumBuilderPreviewV318 > span { color: var(--albums-muted); font-size: 12px; }
+.albumBuilderClosedTextV318 { color: var(--albums-muted); font-size: 12px; }
+@media (max-width: 1150px) {
+  .albumsHeroPanelV318 { grid-template-columns: 110px minmax(0,1fr); }
+  .albumsHeroStatsV318 { grid-column: 1/-1; grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .albumBuilderFieldsV318 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 740px) {
+  .albumsPageV318 { padding: 18px 14px 95px; }
+  .albumsHeroPanelV318 { grid-template-columns: 80px minmax(0,1fr); padding: 15px; gap: 15px; }
+  .albumsHeroStatsV318 { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+  .albumsHeroStatsV318 > span { display: grid; gap: 4px; padding: 10px; }
+  .albumsShelfPanelV318,.albumDetailPanelV318,.albumBuilderPanelV318,.albumFolderImportPanelV309 { padding: 15px; }
+  .albumDetailHeroV318 { grid-template-columns: 105px minmax(0,1fr); gap: 13px; }
+  .albumDetailCoverV318 { width: 105px; height: 105px; }
+  .albumBuilderFieldsV318 { grid-template-columns: 1fr; }
+  .albumFolderImportSummaryV309 { grid-template-columns: 1fr; }
+  .albumTrackRowV318 { grid-template-columns: minmax(0,1fr) 32px 32px; gap: 5px; }
+  .albumTrackDurationV318 { display: none; }
+  .albumTrackMainV318 { grid-template-columns: 17px 40px minmax(0,1fr); gap: 7px; }
+  .albumTrackCoverV318,.albumTrackCoverV318 img { width: 40px; height: 40px; }
+}
+@media (max-width: 430px) {
+  .albumsHeroPanelV318 { grid-template-columns: 1fr; }
+  .albumsHeroArtClusterV318 { width: 90px; }
+  .albumsHeroStatsV318 { grid-template-columns: 1fr; }
+  .albumDetailHeroV318 { grid-template-columns: 1fr; }
+}
