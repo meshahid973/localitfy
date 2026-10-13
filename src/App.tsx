@@ -267,7 +267,6 @@ function MainModeApp() {
   const [songs, setSongs] = useState<Song[]>([]);
   const {
     settings, setSettings, settingsRef,
-    settingsOpen, setSettingsOpen,
     settingsCategory, setSettingsCategory,
     settingsSearch, setSettingsSearch, deferredSettingsSearch,
     customThemeName, setCustomThemeName,
@@ -504,7 +503,6 @@ function MainModeApp() {
   function openSettingsPanel(category: SettingsCategory = "appearance") {
     trackSettingsOpened();
     setSettingsCategory(category);
-    setSettingsOpen(false);
     setEditorSong(null);
     setDeleteTarget(null);
     changeView("settings", "settings");
@@ -2597,7 +2595,6 @@ function MainModeApp() {
   function openOnboardingDevPreview() {
     setOnboardingDevPreview(true);
     setOnboardingOpen(true);
-    setSettingsOpen(false);
     setEditorSong(null);
     setDeleteTarget(null);
     changeView("home", "unknown");
@@ -2611,7 +2608,6 @@ function MainModeApp() {
     if (shouldOpenFeedbackPromptFromGlobalSearch(value)) {
       setQuery("");
       setSettingsSearch("");
-      setSettingsOpen(false);
       setFeedbackCategory("bug");
       openFeedbackPrompt(true);
       setStatusText("feedback box opened");
@@ -2721,10 +2717,6 @@ function MainModeApp() {
 
     const cleanQuery = nextQuery.trim();
     if (!cleanQuery) return;
-
-    if (settingsOpen) {
-      setSettingsOpen(false);
-    }
 
     if (view !== "library" && view !== "liked") {
       changeView("library", "unknown");
@@ -7785,7 +7777,6 @@ function MainModeApp() {
   useEffect(() => {
     feedbackPromptBlockersRef.current = {
       onboardingOpen,
-      settingsOpen,
       whatsNewOpen,
       editorOpen: Boolean(editorSong),
       playlistPickerOpen: Boolean(playlistPickerSong),
@@ -7803,7 +7794,6 @@ function MainModeApp() {
     libraryScanBusy,
     onboardingOpen,
     playlistPickerSong,
-    settingsOpen,
     spotifyDownloadBusy,
     whatsNewOpen
   ]);
@@ -7830,7 +7820,6 @@ function MainModeApp() {
 
     return (
       blockers.onboardingOpen ||
-      blockers.settingsOpen ||
       blockers.whatsNewOpen ||
       blockers.editorOpen ||
       blockers.playlistPickerOpen ||
@@ -7862,7 +7851,6 @@ function MainModeApp() {
     const openFeedbackNow = () => {
       setQuery("");
       setSettingsSearch("");
-      setSettingsOpen(false);
       setFeedbackCategory("bug");
       openFeedbackPrompt(true);
       setStatusText("feedback box opened");
@@ -8921,14 +8909,6 @@ function MainModeApp() {
       volumeRangeStyle
     },
     modals: {
-      settings: {
-        open: Boolean(settingsOpen),
-        onClose: () => setSettingsOpen(false),
-        settingsCategory,
-        reducedMotion: Boolean(settings.reducedMotion),
-        renderSettingsRail,
-        renderSettingsCategoryContent
-      },
       songContextMenu: {
         state: songContextMenu,
         songsById,

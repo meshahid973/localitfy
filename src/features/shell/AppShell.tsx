@@ -6,7 +6,6 @@ import UpdateIsland from "../../app/UpdateIsland";
 import TitleBar from "./TitleBar";
 import HomeView from "../home/HomeView";
 import { Cover } from "../covers/Cover";
-import SettingsModal from "../settings/SettingsModal";
 import PlayerBar from "../player/components/PlayerBar";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import Onboarding from "../../Onboarding";
@@ -448,8 +447,6 @@ export default function AppShell(props: AppShellProps) {
 <PlayerBar {...playerBar} />
         </div>
       )}
-
-      <SettingsModal {...modals.settings} />
 
       <SongContextMenu {...modals.songContextMenu} />
 

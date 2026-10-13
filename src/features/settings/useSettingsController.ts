@@ -9,7 +9,6 @@ export type UseSettingsControllerOptions = {
 export function useSettingsController({ initialSettings }: UseSettingsControllerOptions) {
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const settingsRef = useRef(settings);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsCategory, setSettingsCategory] = useState<SettingsCategory>("appearance");
   const [settingsSearch, setSettingsSearch] = useState("");
   const deferredSettingsSearch = useDeferredValue(settingsSearch);
@@ -40,7 +39,6 @@ export function useSettingsController({ initialSettings }: UseSettingsController
 
   return {
     settings, setSettings, settingsRef,
-    settingsOpen, setSettingsOpen,
     settingsCategory, setSettingsCategory,
     settingsSearch, setSettingsSearch, deferredSettingsSearch,
     customThemeName, setCustomThemeName,

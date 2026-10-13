@@ -30,7 +30,6 @@ export function useFeedbackController() {
   const [performanceStatus, setPerformanceStatus] = useState<LocaltifyPerformanceStatus | null>(null);
   const feedbackPromptBlockersRef = useRef({
     onboardingOpen: false,
-    settingsOpen: false,
     whatsNewOpen: false,
     editorOpen: false,
     playlistPickerOpen: false,
