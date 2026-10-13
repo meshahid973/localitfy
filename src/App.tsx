@@ -177,9 +177,7 @@ import {
   makeThemePresetStyle,
   normalizeCoverColorSyncMode,
   normalizeHexColor,
-  normalizeHexInputDraft,
   normalizeThemeId,
-  randomThemeHex,
   writeSavedCustomThemePresets
 } from "./features/settings";
 import { buildDiscordPreview, buildDiscordSongSearchUrl } from "./features/discord";
@@ -222,7 +220,7 @@ function MainModeApp() {
     progressInputRefs, progressTimeLabelRefs, progressDurationLabelRefs, lastProgressUiPaintRef,
     lastProgressStatePaintRef, statusText, setStatusText, playerError, setPlayerError,
     crossfadePreviewSongId, setCrossfadePreviewSongId, nowPlayingTransitionKey, setNowPlayingTransitionKey,
-    playQueue, setPlayQueue, setQueueHistory, repeatPlaylist, setRepeatPlaylist,
+    playQueue, setPlayQueue, setQueueHistory, repeatPlaylist,
     queueDropHot, setQueueDropHot, queueDropHotRef
   } = usePlayerRuntime({ defaultVolume: defaultSettings.volume });
 
@@ -269,7 +267,7 @@ function MainModeApp() {
     settingsCategory, setSettingsCategory,
     settingsSearch, setSettingsSearch, deferredSettingsSearch,
     customThemeName, setCustomThemeName,
-    customThemeHexDrafts, setCustomThemeHexDrafts,
+    setCustomThemeHexDrafts,
     savedCustomThemes, setSavedCustomThemes,
     themeSettling,
     themeMotionReady, setThemeMotionReady,
@@ -338,13 +336,11 @@ function MainModeApp() {
     updatePrompt,
     setUpdatePrompt,
     whatsNewOpen,
-    setWhatsNewOpen,
     openUpdateChangelog,
     closeWhatsNew,
     askUpdaterToDownload,
     askUpdaterToInstall,
     manualUpdateCheck,
-    skipAvailableUpdate,
     clearUpdateNagTimer,
     showUpdateNag,
     showDebugUpdateAvailable,
@@ -698,7 +694,6 @@ function MainModeApp() {
     cancelRenamePlaylist,
     savePlaylistRename,
     duplicatePlaylist,
-    openPlaylist,
     openPlaylistPicker: openPlaylistPickerCore,
     addSongToPlaylist,
     removeSongFromPlaylist,
@@ -1416,11 +1411,6 @@ function MainModeApp() {
     queueQuietCustomThemeColorPatch({ [key]: safeColor } as Partial<Settings>);
   }
 
-  function handleCustomThemeHexDraftChange(key: CustomThemeColorKey, value: string) {
-    const draft = normalizeHexInputDraft(value);
-    setCustomThemeHexDrafts((old) => ({ ...old, [key]: draft }));
-  }
-
   function commitCustomThemeHexDraft(key: CustomThemeColorKey, value: string, fallback: string) {
     const safeColor = normalizeHexColor(value, fallback);
     setCustomThemeHexDrafts((old) => {
@@ -1448,24 +1438,6 @@ function MainModeApp() {
     setCustomThemeHexDrafts({});
     setCustomThemeName(preset.name || "My Custom Theme");
     stageCustomThemePatch(preset.colors, 0);
-  }
-
-  function randomizeCustomThemePalette() {
-    const basePreset = BUILT_IN_CUSTOM_THEME_PRESETS[Math.floor(Math.random() * BUILT_IN_CUSTOM_THEME_PRESETS.length)] || BUILT_IN_CUSTOM_THEME_PRESETS[0];
-    const accent = randomThemeHex();
-    const accent2 = randomThemeHex();
-
-    setCustomThemeName("My Custom Theme");
-    stageCustomThemePatch(
-      makeCustomThemeColors({
-        ...basePreset.colors,
-        customThemeColor: accent,
-        customThemeColor2: accent2,
-        customThemeHighlight: accent,
-        customThemeProgress: accent
-      }),
-      0
-    );
   }
 
   function resetCustomThemePalette() {
@@ -6165,11 +6137,6 @@ function MainModeApp() {
     setStatusText(next ? "queued next" : "added to queue");
   }
 
-  function clearQueue() {
-    setPlayQueue([]);
-    setStatusText("queue cleared");
-  }
-
   function normalizeAlbumQueueSongIds(songIds: string[]) {
     const seen = new Set<string>();
     return songIds
@@ -8377,6 +8344,8 @@ function MainModeApp() {
         saveCurrentCustomThemePreset={saveCurrentCustomThemePreset}
         customThemeName={customThemeName}
         setCustomThemeName={setCustomThemeName}
+        savedCustomThemes={savedCustomThemes}
+        removeSavedCustomThemePreset={removeSavedCustomThemePreset}
         BUILT_IN_CUSTOM_THEME_PRESETS={BUILT_IN_CUSTOM_THEME_PRESETS}
         applyCustomThemePreset={applyCustomThemePreset}
         customThemeTokens={customThemeTokens}

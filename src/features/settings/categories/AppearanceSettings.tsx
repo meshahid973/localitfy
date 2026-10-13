@@ -19,6 +19,8 @@ export type AppearanceSettingsProps = {
   customThemeName: string;
   setCustomThemeName: (value: string) => void;
   builtInCustomThemePresets: ReadonlyArray<CustomThemePresetOption>;
+  savedCustomThemes: ReadonlyArray<CustomThemePresetOption>;
+  removeSavedCustomThemePreset: (id: string) => void;
   applyCustomThemePreset: (preset: CustomThemePresetOption) => void;
   customThemeTokens: ReadonlyArray<CustomThemeTokenOption>;
   commitCustomThemeHexDraft: (key: string, value: string, fallback: string) => void;
@@ -64,6 +66,18 @@ export default function AppearanceSettings(props: AppearanceSettingsProps) {
       <div className="settingsPanelHeader customThemeHeaderV027 customThemeHeaderCleanV491"><div><strong>Accent / custom colors</strong><span>Keep it simple: turn on live colors, pick a preset, adjust colors, then save or reset.</span></div><div className="settingsHeaderActionsV027 settingsHeaderActionsCleanV491"><label className="cleanToggleLabel"><input type="checkbox" checked={settings.customThemeEnabled} onChange={(event) => updateSetting("customThemeEnabled", event.currentTarget.checked)} /><span>{settings.customThemeEnabled ? "Live colors on" : "Live colors off"}</span></label><button className="settingsTinyButton" type="button" onClick={props.resetCustomThemePalette}>Reset</button><button className="settingsTinyButton" type="button" onClick={props.saveCurrentCustomThemePreset}>Save</button></div></div>
       <div className="customThemeBodyV027 customThemeBodyCleanV491"><label className="settingsTextFieldV027 settingsTextFieldCleanV491"><span>Name</span><input value={props.customThemeName} onChange={(event) => props.setCustomThemeName(event.currentTarget.value)} aria-label="Custom colors name" /></label></div>
       <div className="customThemePresetRowV027 customThemePresetRowCleanV491" aria-label="Custom color presets">{props.builtInCustomThemePresets.slice(0, 4).map((preset) => <button key={preset.name} className="customThemePresetButtonV027 customThemePresetButtonCleanV491" type="button" onClick={() => props.applyCustomThemePreset(preset)}><span style={{ background: preset.colors.customThemeColor }} aria-hidden="true" /><strong>{preset.name}</strong><small>{preset.note}</small></button>)}</div>
+      {props.savedCustomThemes.length ? <details className="settingsSavedThemes">
+        <summary>Saved themes ({props.savedCustomThemes.length})</summary>
+        <div className="settingsSavedThemesList">
+          {props.savedCustomThemes.map((preset) => <div className="settingsSavedTheme" key={preset.id}>
+            <button type="button" onClick={() => props.applyCustomThemePreset(preset)}>
+              <span className="settingsThemeDot" style={{ background: preset.colors.customThemeColor }} aria-hidden="true" />
+              <span>{preset.name}</span>
+            </button>
+            <button type="button" className="settingsTinyButton" onClick={() => props.removeSavedCustomThemePreset(preset.id)} aria-label={`Remove ${preset.name}`}>Remove</button>
+          </div>)}
+        </div>
+      </details> : null}
       <div className="customThemeTokenGridV027 customThemeTokenGridCleanV491">{customThemeTokens.slice(0, 6).map((token) => { const draft = drafts[token.key] ?? token.value; const preview = complete(draft) ? draft : token.value; return <div className="customThemeTokenV027 customThemeTokenCleanV491" key={token.key}><label className="customThemeColorPickerV032" title={`Pick ${token.label.toLowerCase()} color`}><span className="customThemeColorPreviewV027" style={{ background: preview }} aria-hidden="true" /><input className="customThemeNativeColorInputV027" type="color" value={preview} onInput={(event) => { const next = event.currentTarget.value; if (complete(next)) setDraft(token.key, next, token.value); }} onChange={(event) => applyDraft(token.key, event.currentTarget.value, token.value)} aria-label={`${token.label} color picker`} /></label><strong>{token.label}</strong><input className="customThemeHexInputV032" type="text" spellCheck={false} autoCapitalize="off" maxLength={7} value={draft} onChange={(event) => setDraft(token.key, event.currentTarget.value, token.value)} onBlur={(event) => applyDraft(token.key, event.currentTarget.value, token.value)} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); if (event.key === "Escape") { setDraft(token.key, token.value); event.currentTarget.blur(); } }} aria-label={`${token.label} hex color code`} /></div>; })}</div>
     </div>
     <div className="settingsPanelCard settingsFocusPanelV491 settingsLiveCoverColorsV491"><div className="settingsPanelHeader"><div><strong>Live cover colors</strong><span>Controls how much album art color is allowed to tint the app and player.</span></div></div><div className="settingsChoiceRowV491" role="group" aria-label="Live cover color strength">{props.coverColorSyncOptions.map((option) => { const active = props.selectedCoverColorSyncMode === option.id; const label = option.label || option.name || option.id; const note = option.note || (option.id === "off" ? "no cover tint" : option.id === "subtle" ? "tiny cover tint" : option.id === "strong" ? "bigger cover mood" : "balanced cover tint"); return <button key={option.id} type="button" className={`settingsChoicePillV491 ${active ? "active" : ""}`} onClick={() => void props.updateCoverColorSyncMode(option.id)} aria-pressed={active}><strong>{label}</strong><span>{note}</span></button>; })}</div></div>

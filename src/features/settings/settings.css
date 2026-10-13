@@ -213,3 +213,9 @@
   .settingsCategoryRail nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
   .settingsCategoryButton { flex: 0 0 155px; }
 }
+
+.settingsSavedThemes summary { cursor: pointer; font-weight: 650; padding: 4px 0; }
+.settingsSavedThemesList { display: grid; gap: 6px; padding: 8px 0; }
+.settingsSavedTheme { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
+.settingsSavedTheme > button:first-child { display: flex; align-items: center; gap: 10px; min-width: 0; text-align: left; }
+.settingsSavedTheme > button:first-child span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
