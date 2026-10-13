@@ -20,9 +20,10 @@ function countLooseAny(source) {
 }
 const fail = (message) => failures.push(message);
 
-const retiredPageStyles = [
+const rebuiltPageStyles = [
   "src/features/albums/albums.css", "src/features/playlists/playlists.css",
-  "src/features/covers/covers.css", "src/features/downloads/downloads.css", "src/features/analytics/analytics.css"
+  "src/features/covers/covers.css", "src/features/downloads/downloads.css",
+  "src/features/analytics/analytics.css", "src/features/settings/settings.css"
 ];
 const resetRoots = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339", ".settingsPageV027"];
 const resetSources = [
@@ -31,7 +32,7 @@ const resetSources = [
   ["src/features/covers/CoverStudio.tsx", "covers"], ["src/features/settings/SettingsView.tsx", "settings"]
 ];
 
-for (const file of retiredPageStyles) if (exists(file)) fail(file + ": retired page CSS returned before redesign");
+for (const file of rebuiltPageStyles) if (!exists(file)) fail(file + ": rebuilt page CSS is missing");
 if (exists("src/features/settings/themes.css")) fail("global theme CSS returned to Settings ownership");
 if (!exists("src/styles/themes.css")) fail("src/styles/themes.css is missing");
 
@@ -46,7 +47,11 @@ const requiredOwners = [
   ["src/Onboarding.tsx", './features/onboarding/onboarding.css'],
   ["src/features/player/components/PlayerBar.tsx", '../player.css'],
   ["src/features/settings/SettingsView.tsx", './settings.css'],
-  ["src/features/settings/SettingsModal.tsx", './settings.css']
+  ["src/features/albums/AlbumsView.tsx", './albums.css'],
+  ["src/features/playlists/PlaylistsView.tsx", './playlists.css'],
+  ["src/features/covers/CoversView.tsx", './covers.css'],
+  ["src/features/downloads/DownloadsView.tsx", './downloads.css'],
+  ["src/features/analytics/AnalyticsView.tsx", './analytics.css']
 ];
 for (const [file, specifier] of requiredOwners) if (!read(file).includes('import "' + specifier + '";')) fail(file + ": missing co-located CSS owner " + specifier);
 
@@ -69,7 +74,8 @@ if (mainCssImports.at(-1) !== "./features/shell/performance.css") fail("performa
 
 for (const [file, section] of resetSources) {
   const source = read(file);
-  if (!source.includes('data-page-section="' + section + '" data-page-state="reset"')) fail(file + ": reset page must opt into data-page-state=reset");
+  if (!source.includes('data-page-section="' + section + '"')) fail(file + ": missing page owner marker");
+  if (source.includes('data-page-state="reset"')) fail(file + ": rebuilt page must not use reset mode");
 }
 const foundation = read("src/styles/page-foundation.css");
 if (!foundation.includes('[data-page-section][data-page-state="reset"]')) fail("page foundation is not reset-state gated");
@@ -123,4 +129,4 @@ if (failures.length) {
   console.error("[release-ui-ownership] failures:\n- " + failures.join("\n- "));
   process.exit(1);
 }
-console.log("[release-ui-ownership] OK; CSS ownership, reset gating, CI, lazy page boundaries, and debt ratchets are enforced.");
+console.log("[release-ui-ownership] OK; feature CSS, page ownership, CI, lazy boundaries, and debt ratchets are enforced.");
