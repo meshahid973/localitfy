@@ -1,0 +1,117 @@
+
+/* Covers owns the song picker and virtualized gallery. */
+.coverStudioLayout {
+  --cover-edge: rgba(125, 164, 187, .13);
+  --cover-surface: #0d1d26;
+  --cover-raised: #122833;
+  --cover-text: #d2e0e7;
+  --cover-muted: #829aa8;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: clamp(22px,3vw,42px) clamp(18px,3vw,50px) 100px;
+  color: var(--cover-text);
+}
+.coverStudioLayout *, .coverStudioLayout *::before, .coverStudioLayout *::after { box-sizing: border-box; }
+.coverStudioLayout .panel { min-width: 0; background: var(--cover-surface) !important; border: 1px solid var(--cover-edge) !important; border-radius: 14px; box-shadow: none !important; }
+.coverStudioLayout .eyebrow { margin: 0 0 8px; color: #85b1c9; font-size: 11px; font-weight: 800; letter-spacing: .11em; }
+.coverStudioLayout h3 { margin: 0; color: #dce8ed; font-size: clamp(17px,1.6vw,24px); font-weight: 720; letter-spacing: -.03em; }
+.coverStudioLayout button { cursor: pointer; }
+.coverStudioLayout button:disabled { opacity: .45; cursor: not-allowed; }
+.coverStudioLayout :is(button,input):focus-visible { outline: 2px solid #7eafcd; outline-offset: 2px; }
+.coverStudioHero { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 17px; padding: 20px 23px; }
+.coverStudioHeroText { flex: 1 1 340px; min-width: 0; }
+.coverStudioHeroText h3 { font-size: clamp(23px,2vw,31px); }
+.coverStudioHeroText > p:last-child { max-width: 610px; margin: 9px 0 0; color: var(--cover-muted); font-size: 13px; line-height: 1.55; }
+.coverStudioHeroActions { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+.coverStudioHeroActions button:not(.heroMain),.coverStudioLayout .coverSongTools button,
+.coverStudioLayout .coverMoodTabs button,.coverStudioLayout .coverGalleryToolbar button,
+.coverStudioLayout .coverQuickPreview button,.coverStudioLayout .coverApplyButton,
+.coverStudioLayout .coverRecentInline button,.coverStudioLayout .coverHideButton {
+  min-height: 35px; padding: 7px 12px; border: 1px solid var(--cover-edge);
+  border-radius: 8px; color: #a9bec9; background: #112630; font: inherit; font-size: 12px;
+}
+.coverStudioHeroActions button:not(.heroMain):hover,.coverStudioLayout .coverSongTools button:hover,
+.coverStudioLayout .coverMoodTabs button:hover,.coverStudioLayout .coverGalleryToolbar button:hover {
+  border-color: rgba(125,164,187,.29); background: #17313d; color: #d2e0e7;
+}
+.coverApplyToast { min-width: 0; padding: 10px 13px; border: 1px solid rgba(var(--lt-accent-rgb,121,167,196),.28); border-radius: 9px; background: rgba(var(--lt-accent-rgb,121,167,196),.08); color: var(--cover-text); font-size: 12px; }
+.coverMoodTabs { min-width: 0; display: flex; flex-wrap: wrap; gap: 7px; }
+.coverStudioLayout .coverMoodTabs button { display: inline-flex; align-items: center; gap: 10px; padding: 7px 13px; }
+.coverStudioLayout .coverMoodTabs button strong { font-size: 10px; color: #8dadbd; }
+.coverStudioLayout .coverMoodTabs button.active,.coverStudioLayout .coverSongTools button.active { border-color: rgba(var(--lt-accent-rgb,121,167,196),.48); background: rgba(var(--lt-accent-rgb,121,167,196),.13); color: #dcebf0; }
+.coverStudioBody { min-width: 0; display: grid; grid-template-columns: clamp(270px,27vw,355px) minmax(0,1fr); align-items: start; gap: 17px; }
+.coverSelectedSongsPanel,.coverGalleryPanel { min-width: 0; padding: 18px; display: grid; align-content: start; gap: 14px; }
+.coverPanelHeadClean,.coverGalleryHeaderClean { min-width: 0; display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.coverStudioLayout :is(.coverPanelHeadClean,.coverGalleryHeaderClean) > span { color: var(--cover-muted); font-size: 11px; }
+.coverSongSearchWrap,.coverGalleryToolbarClean { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.coverStudioSearchInput { flex: 1 1 auto; min-width: 0; width: 100%; min-height: 39px; padding: 8px 12px; border: 1px solid rgba(125,164,187,.24); border-radius: 9px; background: #091923; color: var(--cover-text); font: inherit; font-size: 13px; outline: none; }
+.coverStudioSearchInput::placeholder { color: #6b8795; }
+.coverSongTools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.coverStudioLayout .coverSongTools button { min-height: 32px; padding: 6px 9px; font-size: 11px; }
+.coverSongListVirtual { position: relative; width: 100%; min-width: 0; height: min(57vh,640px); min-height: 320px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.coverSongVirtualCanvas { position: relative; width: 100%; min-width: 0; }
+.coverStudioLayout .coverSongPickVirtual {
+  position: absolute; top: 0; left: 0; width: 100%; min-width: 0;
+  height: 54px; display: grid; grid-template-columns: 38px minmax(0,1fr) 20px;
+  align-items: center; gap: 10px; padding: 7px 9px; border: 1px solid transparent;
+  border-bottom-color: rgba(125,164,187,.1); border-radius: 7px;
+  background: transparent; text-align: left; color: var(--cover-text); font: inherit;
+}
+.coverStudioLayout .coverSongPickVirtual:hover { background: #152d39; }
+.coverStudioLayout .coverSongPickVirtual.active { border-color: rgba(var(--lt-accent-rgb,121,167,196),.3); background: rgba(var(--lt-accent-rgb,121,167,196),.09); }
+.coverSongThumb,.coverSongThumb img { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; }
+.coverSongPickVirtual > span:not(.coverSongThumb) { display: grid; min-width: 0; gap: 4px; }
+.coverSongPickVirtual strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 700; color: #d6e4e9; }
+.coverSongPickVirtual small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; color: var(--cover-muted); }
+.coverSongPickVirtual em { color: #a3c2d1; text-align: center; font-size: 15px; font-weight: 700; font-style: normal; }
+.coverQuickApplyBar { min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 15px; padding: 13px 15px; border: 1px solid var(--cover-edge); border-radius: 10px; background: #112630; }
+.coverQuickPreview { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.coverStudioMiniSongArt,.coverStudioMiniSongArt img { width: 47px; height: 47px; border-radius: 7px; object-fit: cover; }
+.coverQuickPreview > span[aria-hidden="true"] { color: #91aeba; }
+.coverQuickPreview .coverGalleryImageShellCleanOnly,.coverQuickPreview .coverPreviewEmpty { width: 47px; height: 47px; }
+.coverQuickPreview .coverGalleryImageShellCleanOnly img { width: 47px; height: 47px; }
+.coverRecentInline { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.coverRecentInline > strong { font-size: 11px; color: var(--cover-muted); }
+.coverStudioLayout .coverRecentInline button { padding: 2px; min-height: 32px; width: 34px; height: 34px; }
+.coverRecentInline .coverGalleryImageShellCleanOnly { height: 28px; width: 28px; }
+.coverRecentInline .coverGalleryImageShellCleanOnly img { height: 28px; width: 28px; }
+.coverGalleryGridCleanOnly { position: relative; min-width: 0; width: 100%; height: min(65vh,660px); min-height: 310px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: thin; }
+.coverGalleryVirtualCanvasCleanOnly { position: relative; width: 100%; min-width: 0; }
+.coverGalleryVirtualRowCleanOnly {
+  position: absolute; left: 0; top: 0; width: 100%; height: 184px;
+  display: grid; align-items: start; gap: 9px; padding: 3px 2px; min-width: 0;
+}
+.coverGalleryCardCleanOnly { min-width: 0; height: 176px; display: grid; grid-template-rows: 100px minmax(0,1fr) auto; gap: 4px; padding: 6px; border: 1px solid var(--cover-edge); border-radius: 10px; background: #112630; overflow: hidden; }
+.coverGalleryCardCleanOnly:hover { border-color: rgba(125,164,187,.3); background: #17313e; }
+.coverGalleryCardCleanOnly.excluded { opacity: .55; }
+.coverStudioLayout .coverGalleryImageButtonCleanOnly { min-width: 0; width: 100%; height: 100px; display: block; padding: 0; border: 0; border-radius: 6px; overflow: hidden; background: #172c36; cursor: pointer; }
+.coverGalleryImageShellCleanOnly { position: relative; display: grid; place-items: center; min-width: 0; width: 100%; height: 100%; overflow: hidden; border-radius: inherit; background: #152d38; }
+.coverGalleryImagePlaceholderCleanOnly { color: #7293a3; font-size: 22px; }
+.coverGalleryImageCleanOnly { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
+.coverGalleryInfoCleanOnly { min-width: 0; display: grid; gap: 2px; align-content: center; }
+.coverGalleryInfoCleanOnly strong,.coverGalleryInfoCleanOnly small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.coverGalleryInfoCleanOnly strong { color: #d4e2e8; font-size: 11px; }
+.coverGalleryInfoCleanOnly small { color: var(--cover-muted); font-size: 10px; }
+.coverGalleryActionsCleanOnly { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.coverStudioLayout .coverGalleryActionsCleanOnly button { min-height: 23px; max-height: 25px; }
+.coverStudioLayout .coverHideButton { padding: 3px 8px; font-size: 12px; }
+.coverStudioLayout .coverApplyButton { padding: 3px 9px; font-size: 11px; }
+.coverStudioLayout .coverEmptyState { min-height: 190px; width: 100%; padding: 20px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px; }
+.coverStudioLayout .coverEmptyImageShellV466 { max-width: 115px; max-height: 115px; overflow: hidden; }
+.coverStudioLayout .coverEmptyImageShellV466 img { max-width: 115px; max-height: 115px; object-fit: contain; }
+.coverStudioLayout .coverEmptyCaptionV467 { font-size: 12px; color: var(--cover-muted); text-align: center; }
+.coverStudioLayout .coverPreviewEmpty { display: grid; place-items: center; border-radius: 7px; background: #182d38; color: #7897a7; }
+@media (max-width: 1150px) {
+  .coverStudioBody { grid-template-columns: 1fr; }
+  .coverSongListVirtual { height: 280px; min-height: 200px; }
+}
+@media (max-width: 700px) {
+  .coverStudioLayout { padding: 18px 14px 95px; }
+  .coverStudioHero { padding: 16px; }
+  .coverSelectedSongsPanel,.coverGalleryPanel { padding: 13px; }
+  .coverGalleryVirtualRowCleanOnly { gap: 5px; }
+  .coverGalleryCardCleanOnly { padding: 4px; }
+}
