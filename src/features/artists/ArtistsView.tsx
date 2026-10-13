@@ -101,6 +101,9 @@ export default function ArtistsView({
   const [artistDetailView, setArtistDetailView] = useState<"songs" | "albums">("songs");
   const [selectedArtistAlbumId, setSelectedArtistAlbumId] = useState<string | null>(null);
   const artistDrawerRef = useRef<HTMLElement | null>(null);
+  const artistTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const [artistLimit, setArtistLimit] = useState(150);
+  const [trackLimit, setTrackLimit] = useState(200);
   const artists = useMemo(() => buildArtists(songs), [songs]);
   const visibleArtists = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
@@ -111,14 +114,42 @@ export default function ArtistsView({
   }, [artists, query]);
   const selectedArtist = selectedArtistId ? artists.find((artist) => artist.id === selectedArtistId) || null : null;
 
+  useEffect(() => setArtistLimit(150), [query]);
+
   useEffect(() => {
-    if (!selectedArtist) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedArtistId(null);
+    if (!selectedArtistId) return;
+    const dialog = artistDrawerRef.current;
+    dialog?.querySelector<HTMLButtonElement>(".artistDrawerClose")?.focus();
+    const handleDialogKeys = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeArtist();
+        return;
+      }
+      if (event.key !== "Tab" || !dialog) return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )).filter((element) => element.getClientRects().length > 0);
+      if (!focusable.length) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || !dialog.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !dialog.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedArtist]);
+    window.addEventListener("keydown", handleDialogKeys, true);
+    return () => window.removeEventListener("keydown", handleDialogKeys, true);
+  }, [selectedArtistId]);
 
   useEffect(() => {
     const resetDrawerScroll = () => {
@@ -139,10 +170,22 @@ export default function ArtistsView({
     : null;
   const visibleArtistSongs = selectedArtistAlbum?.songs || selectedArtist?.songs || [];
 
-  function openArtist(artistId: string) {
+  function closeArtist(restoreFocus = true) {
+    setSelectedArtistId(null);
+    if (restoreFocus) {
+      const trigger = artistTriggerRef.current;
+      window.requestAnimationFrame(() => {
+        if (trigger?.isConnected) trigger.focus();
+      });
+    }
+  }
+
+  function openArtist(artistId: string, trigger: HTMLButtonElement) {
+    artistTriggerRef.current = trigger;
     setSelectedArtistId(artistId);
     setArtistDetailView("songs");
     setSelectedArtistAlbumId(null);
+    setTrackLimit(200);
   }
 
   return (
@@ -165,13 +208,14 @@ export default function ArtistsView({
       </header>
 
       {visibleArtists.length ? (
+        <>
         <div className="artistsGrid">
-          {visibleArtists.map((artist) => (
+          {visibleArtists.slice(0, artistLimit).map((artist) => (
             <button
               key={artist.id}
               type="button"
               className="artistCard"
-              onClick={() => openArtist(artist.id)}
+              onClick={(event) => openArtist(artist.id, event.currentTarget)}
               aria-label={`open ${artist.name}`}
             >
               <Cover song={artist.coverSong} className="artistCardCover" />
@@ -182,6 +226,10 @@ export default function ArtistsView({
             </button>
           ))}
         </div>
+        {visibleArtists.length > artistLimit ? (
+          <button type="button" className="softButton artistLoadMore" onClick={() => setArtistLimit((limit) => limit + 150)}>show more artists</button>
+        ) : null}
+        </>
       ) : (
         <LocaltifyStateCard
           centered
@@ -195,10 +243,10 @@ export default function ArtistsView({
 
       {selectedArtist ? createPortal(
         <div className="artistDrawerBackdrop" onMouseDown={(event) => {
-          if (event.currentTarget === event.target) setSelectedArtistId(null);
+          if (event.currentTarget === event.target) closeArtist();
         }}>
-          <section ref={artistDrawerRef} className="artistDrawer" role="dialog" aria-modal="true" aria-label={`${selectedArtist.name} artist details`}>
-            <button className="artistDrawerClose" type="button" onClick={() => setSelectedArtistId(null)} aria-label="close artist details">×</button>
+          <section ref={artistDrawerRef} className="artistDrawer" role="dialog" aria-modal="true" tabIndex={-1} aria-label={`${selectedArtist.name} artist details`}>
+            <button className="artistDrawerClose" type="button" onClick={() => closeArtist()} aria-label="close artist details">×</button>
             <div className="artistDrawerHero">
               <Cover song={selectedArtist.coverSong} className="artistDrawerCover" />
               <div>
@@ -246,6 +294,7 @@ export default function ArtistsView({
                         artistDrawerRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
                         setSelectedArtistAlbumId(album.id);
                         setArtistDetailView("songs");
+                        setTrackLimit(200);
                       }}
                       aria-label={`view ${album.title} songs`}
                     >
@@ -269,7 +318,7 @@ export default function ArtistsView({
                   </div>
                 ) : null}
                 <div className="artistTrackList">
-                  {visibleArtistSongs.map((song, index) => (
+                  {visibleArtistSongs.slice(0, trackLimit).map((song, index) => (
                     <article key={song.id} className={`artistTrackRow ${song.id === currentId ? "active" : ""}`}>
                       <button type="button" className="artistTrackMain" onClick={() => void selectSong(song.id, true)}>
                         <span>{String(index + 1).padStart(2, "0")}</span>
@@ -283,10 +332,17 @@ export default function ArtistsView({
                       <button className={`iconAction likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`} type="button" onClick={() => toggleLike(song.id)} aria-label={song.liked ? "unlike song" : "like song"} aria-pressed={song.liked}>
                         <LikeHeartAnimationV443 liked={song.liked} />
                       </button>
-                      <button className="iconAction" type="button" onClick={() => openPlaylistPicker(song)} aria-label="add to playlist">+</button>
+                      <button className="iconAction" type="button" onClick={() => {
+                        closeArtist(false);
+                        openPlaylistPicker(song);
+                        window.requestAnimationFrame(() => document.querySelector<HTMLButtonElement>(".playlistPickerModal .closeModalButton")?.focus());
+                      }} aria-label="add to playlist">+</button>
                     </article>
                   ))}
                 </div>
+                {visibleArtistSongs.length > trackLimit ? (
+                  <button type="button" className="softButton artistLoadMore" onClick={() => setTrackLimit((limit) => limit + 200)}>show more tracks</button>
+                ) : null}
               </div>
             )}
           </section>

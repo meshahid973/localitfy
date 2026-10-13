@@ -1808,8 +1808,7 @@ function MainModeApp() {
 
   const totalPlays = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_plays");
   const libraryAlbumCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "album_count");
-  const libraryArtistCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "artist_count");
-  const artistsViewArtistCount = useMemo(() => {
+  const libraryArtistCount = useMemo(() => {
     const artistNames = new Set<string>();
     for (const song of songs) {
       for (const credit of splitArtistCredits(song.artist)) artistNames.add(credit.toLocaleLowerCase());
@@ -2151,7 +2150,7 @@ function MainModeApp() {
     }
 
     if (view === "library") return "";
-    if (view === "artists") return `${artistsViewArtistCount} artist${artistsViewArtistCount === 1 ? "" : "s"} in your local library`;
+    if (view === "artists") return `${libraryArtistCount} artist${libraryArtistCount === 1 ? "" : "s"} in your local library`;
     if (view === "albums") return "local albums from metadata and your custom collections";
     if (view === "playlists") return `${playlists.length} playlist${playlists.length === 1 ? "" : "s"}`;
     if (view === "liked") return `${likedSongs.length} liked track${likedSongs.length === 1 ? "" : "s"}`;
@@ -2159,7 +2158,7 @@ function MainModeApp() {
     if (view === "downloads") return "download direct audio links and import them automatically";
     if (view === "settings") return "theme, playback, discord, library, and advanced controls";
     return "your listening numbers and favorite tracks";
-  }, [view, isPlaying, currentSong, songs.length, filteredSongs.length, likedSongs.length, playlists.length, libraryAlbumCount, artistsViewArtistCount, isThreeAm, coverStats.usable, coverStats.favorites]);
+  }, [view, isPlaying, currentSong, songs.length, filteredSongs.length, likedSongs.length, playlists.length, libraryAlbumCount, libraryArtistCount, isThreeAm, coverStats.usable, coverStats.favorites]);
 
   const discordPreview = useMemo(() => buildDiscordPreview({
     settings,

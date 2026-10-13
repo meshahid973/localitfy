@@ -1,12 +1,16 @@
 const ARTIST_CREDIT_SEPARATOR = /;|\s+feat\.?\s+/gi;
 
 function cleanArtistCredit(value: unknown) {
-  return String(value || "unknown artist").trim().replace(/\s+/g, " ") || "unknown artist";
+  return String(value ?? "").trim().replace(/\s+/g, " ");
 }
 
 export function splitArtistCredits(value: unknown) {
-  const names = cleanArtistCredit(value).split(ARTIST_CREDIT_SEPARATOR).map(cleanArtistCredit);
+  const raw = cleanArtistCredit(value);
+  const names = raw ? raw.split(ARTIST_CREDIT_SEPARATOR).map(cleanArtistCredit).filter(Boolean) : [];
   const uniqueNames = new Map<string, string>();
-  for (const name of names) uniqueNames.set(name.toLocaleLowerCase(), name);
-  return [...uniqueNames.values()];
+  for (const name of names) {
+    const key = name.toLocaleLowerCase();
+    if (!uniqueNames.has(key)) uniqueNames.set(key, name);
+  }
+  return uniqueNames.size ? [...uniqueNames.values()] : ["unknown artist"];
 }
