@@ -17,11 +17,11 @@ export default function SettingsView({
   renderSettingsCategoryContent, settingsRail, settings, settingsCategory
 }: SettingsViewProps) {
   return (
-    <section data-page-section="settings" data-page-state="reset" className="settingsPage settingsPageV027">
-      <header className="settingsPageHeader">
-        <div><p className="eyebrow">preferences</p><h2>Settings</h2>
-          <p>Choose how Localtify looks and plays your music.</p></div>
-      </header>
+    <section data-page-section="settings" className="settingsPage settingsPageV027">
+      <div className="settingsPageIntro">
+        <span className="eyebrow">Preferences</span>
+        <p>Personalize your player and manage your library.</p>
+      </div>
       <div className="settingsLayout settingsPageLayoutV027">
         <SettingsRail {...settingsRail} />
         <div className="settingsCategoryContent settingsCategoryContentV027">

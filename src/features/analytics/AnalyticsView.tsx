@@ -1,3 +1,4 @@
+import "./analytics.css";
 import type { CSSProperties } from "react";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
@@ -41,7 +42,7 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
   } = props;
 
   return (
-    <section data-page-section="analytics" data-page-state="reset" className="analyticsStudioV339" aria-label="lightweight listening recap">
+    <section data-page-section="analytics" className="analyticsStudioV339" aria-label="lightweight listening recap">
       <section className="analyticsHeroV339">
         <div className="analyticsHeroCopyV339">
           <p className="eyebrow">local recap</p>

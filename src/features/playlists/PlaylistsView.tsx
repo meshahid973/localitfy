@@ -1,3 +1,4 @@
+import "./playlists.css";
 import type { CSSProperties } from "react";
 import { EmptyCoverIcon, LocaltifyStateCard, MetaDividerDot, PlusMiniIcon } from "../../shared/ui/LocaltifyViewUi";
 import { VirtualPlaylistTrackList } from "./components/VirtualPlaylistTrackList";
@@ -83,7 +84,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   } = props;
 
   return (
-    <section data-page-section="playlists" data-page-state="reset" className="playlistsPage playlistPageV029">
+    <section data-page-section="playlists" className="playlistsPage playlistPageV029">
       <div className="playlistTopGrid">
         <section className="panel playlistHeroPanel">
           <div className="playlistHeroCopy">
@@ -155,7 +156,8 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             <input
               value={newPlaylistName}
               onChange={(event) => setNewPlaylistName(event.currentTarget.value)}
-              placeholder="playlist name"
+              placeholder="Give your playlist a name"
+              aria-label="New playlist name"
             />
             <button className="mainAction" type="submit">new playlist</button>
           </form>
@@ -203,8 +205,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
                 detail={songs.length ? "Tip: you can also drag songs into a playlist card." : "Playlists are local and private."}
                 actions={songs.length ? (
                   <button className="mainAction" type="button" onClick={() => {
-                    if (!newPlaylistName.trim()) setNewPlaylistName("my mix");
-                    window.setTimeout(() => createPlaylist(), 0);
+                    createPlaylist(newPlaylistName.trim() || "my mix");
                   }}>
                     create playlist
                   </button>

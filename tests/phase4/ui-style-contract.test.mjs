@@ -9,10 +9,7 @@ const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
 const retiredPageStyles = [
   "src/features/albums/albums.css",
-  "src/features/playlists/playlists.css",
   "src/features/covers/covers.css",
-  "src/features/downloads/downloads.css",
-  "src/features/analytics/analytics.css"
 ];
 
 test("only pages still awaiting redesign keep retired styles removed", () => {
@@ -35,6 +32,9 @@ test("permanent visual owners remain explicit and co-located", () => {
   const artists = read("src/features/artists/ArtistsView.tsx");
   const player = read("src/features/player/components/PlayerBar.tsx");
   const settingsView = read("src/features/settings/SettingsView.tsx");
+  const playlists = read("src/features/playlists/PlaylistsView.tsx");
+  const downloads = read("src/features/downloads/DownloadsView.tsx");
+  const analytics = read("src/features/analytics/AnalyticsView.tsx");
   const settingsRail = read("src/features/settings/SettingsRail.tsx");
   const shell = read("src/features/shell/AppShell.tsx");
 
@@ -45,6 +45,10 @@ test("permanent visual owners remain explicit and co-located", () => {
   assert.equal(artists.includes('import "./artists.css";'), true, "ArtistsView must own Artists CSS");
   assert.equal(player.includes('import "../player.css";'), true, "PlayerBar must own player CSS");
   assert.equal(settingsView.includes('import "./settings.css";'), true, "SettingsView must own settings CSS");
+  for (const [source, name] of [[playlists, "playlists"], [downloads, "downloads"], [analytics, "analytics"]]) {
+    assert.ok(source.includes('import "./' + name + '.css";'), name + " needs a local stylesheet");
+    assert.ok(fs.existsSync(path.join(root, "src/features/" + name + "/" + name + ".css")));
+  }
   assert.equal(settingsRail.includes('aria-label="Settings sections"'), true, "Settings navigation should have its own accessible component");
   for (const specifier of ["./app-core.css", "./motion.css", "./effects.css", "../../styles/view-shell.css"]) {
     assert.equal(shell.includes('import "' + specifier + '";'), true, specifier + " is missing from AppShell ownership");

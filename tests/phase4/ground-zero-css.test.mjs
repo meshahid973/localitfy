@@ -10,11 +10,10 @@ const megaFiles = ["src/App.css", "src/features/shell/app-core.css", "src/styles
 const forbiddenPageTokens = [".libraryPage", ".libraryPanel", ".libraryQuick", ".libraryMissing", ".albumsPage", ".albumsHero", ".albumCard", ".playlistsPage", ".playlistHero", ".coverStudio", ".downloadsLayout", ".downloadPanel", ".spotifyTrack", ".analytics", ".settingsPage", ".settingsHero"];
 const resetPages = [
   ["src/features/albums/AlbumsView.tsx", "albums"], ["src/features/playlists/PlaylistsView.tsx", "playlists"],
-  ["src/features/downloads/DownloadsView.tsx", "downloads"], ["src/features/analytics/AnalyticsView.tsx", "analytics"],
-  ["src/features/covers/CoverStudio.tsx", "covers"], ["src/features/settings/SettingsView.tsx", "settings"]
+  ["src/features/covers/CoverStudio.tsx", "covers"]
 ];
 
-test("pages awaiting redesign explicitly opt into temporary reset mode", () => {
+test("only pages awaiting redesign opt into temporary reset mode", () => {
   for (const [relative, section] of resetPages) assert.ok(read(relative).includes('data-page-section="' + section + '" data-page-state="reset"'), relative + " is not reset-state gated");
 });
 
@@ -47,4 +46,17 @@ test("legacy root shim and sidebar geometry debt stay removed", () => {
   assert.ok(read("src/App.tsx").includes('from "./features/shell/useProximityMotion"'));
   const appCss = read("src/App.css");
   for (const token of ["var(--sidebar-width-release)", "var(--sidebar-width-used)", "var(--sidebar-width, 249px)", "88px 218px", '[data-sidebar-behavior="hover"]', '[data-sidebar-behavior="slim"]']) assert.equal(appCss.includes(token), false, token);
+});
+test("redesigned pages use their own styles without reset mode", () => {
+  for (const [path, section] of [
+    ["src/features/settings/SettingsView.tsx", "settings"],
+    ["src/features/playlists/PlaylistsView.tsx", "playlists"],
+    ["src/features/downloads/DownloadsView.tsx", "downloads"],
+    ["src/features/analytics/AnalyticsView.tsx", "analytics"]
+  ]) {
+    const source = read(path);
+    assert.ok(source.includes('data-page-section="' + section + '"'), path);
+    assert.ok(!source.includes('data-page-state="reset"'), path);
+    assert.ok(source.includes('import "./' + section + '.css";'), path);
+  }
 });
