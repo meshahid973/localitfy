@@ -68,7 +68,7 @@ export function useCoversController({
   const [pixelArtAssets, setPixelArtAssets] = useState<RuntimePixelArtAsset[]>(() => getCachedRuntimePixelArtAssets());
   const [coverGalleryMood, setCoverGalleryMood] = useState<CoverMood>("all");
   const [coverSelectedSongIds, setCoverSelectedSongIds] = useState<string[]>([]);
-  const [favoritePixelCoverKeys, setFavoritePixelCoverKeys] = useState<string[]>(() =>
+  const [favoritePixelCoverKeys] = useState<string[]>(() =>
     cleanStringList(readLocalJson<string[]>(PIXEL_COVER_FAVORITES_STORAGE_KEY, []))
   );
   const [excludedPixelCoverKeys, setExcludedPixelCoverKeys] = useState<string[]>(() =>
