@@ -9,7 +9,7 @@ const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 const megaFiles = ["src/App.css", "src/features/shell/app-core.css", "src/styles/themes.css", "src/features/shell/effects.css"];
 const forbiddenPageTokens = [".libraryPage", ".libraryPanel", ".libraryQuick", ".libraryMissing", ".albumsPage", ".albumsHero", ".albumCard", ".playlistsPage", ".playlistHero", ".coverStudio", ".downloadsLayout", ".downloadPanel", ".spotifyTrack", ".analytics", ".settingsPage", ".settingsHero"];
 const resetPages = [
-  ["src/features/albums/AlbumsView.tsx", "albums"], ["src/features/playlists/PlaylistsView.tsx", "playlists"],
+  ["src/features/albums/AlbumsView.tsx", "albums"],
   ["src/features/covers/CoverStudio.tsx", "covers"]
 ];
 

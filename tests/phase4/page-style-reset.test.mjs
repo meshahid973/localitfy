@@ -9,14 +9,11 @@ const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "u
 
 const retiredPageStyles = [
   "src/features/albums/albums.css",
-  "src/features/playlists/playlists.css",
   "src/features/covers/covers.css",
-  "src/features/downloads/downloads.css",
-  "src/features/analytics/analytics.css"
 ];
 const resetPageRoots = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339"];
 
-test("retired page design files stay deleted until their rebuild", () => {
+test("unfinished pages keep retired styles removed", () => {
   const main = read("src/main.tsx");
   for (const relativePath of retiredPageStyles) {
     assert.equal(fs.existsSync(path.join(root, relativePath)), false, relativePath + " returned before its redesign");
