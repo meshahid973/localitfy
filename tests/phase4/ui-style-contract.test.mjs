@@ -35,7 +35,7 @@ test("permanent visual owners remain explicit and co-located", () => {
   const artists = read("src/features/artists/ArtistsView.tsx");
   const player = read("src/features/player/components/PlayerBar.tsx");
   const settingsView = read("src/features/settings/SettingsView.tsx");
-  const settingsModal = read("src/features/settings/SettingsModal.tsx");
+  const settingsRail = read("src/features/settings/SettingsRail.tsx");
   const shell = read("src/features/shell/AppShell.tsx");
 
   const appCss = [...app.matchAll(/import\s+["']([^"']+\.css)["']/g)].map((match) => match[1]);
@@ -45,7 +45,7 @@ test("permanent visual owners remain explicit and co-located", () => {
   assert.equal(artists.includes('import "./artists.css";'), true, "ArtistsView must own Artists CSS");
   assert.equal(player.includes('import "../player.css";'), true, "PlayerBar must own player CSS");
   assert.equal(settingsView.includes('import "./settings.css";'), true, "SettingsView must own settings CSS");
-  assert.equal(settingsModal.includes('import "./settings.css";'), true, "SettingsModal must own settings CSS");
+  assert.equal(settingsRail.includes('aria-label="Settings sections"'), true, "Settings navigation should have its own accessible component");
   for (const specifier of ["./app-core.css", "./motion.css", "./effects.css", "../../styles/view-shell.css"]) {
     assert.equal(shell.includes('import "' + specifier + '";'), true, specifier + " is missing from AppShell ownership");
   }
@@ -55,5 +55,6 @@ test("permanent visual owners remain explicit and co-located", () => {
   }
 
   const settingsCss = read("src/features/settings/settings.css");
-  assert.equal(settingsCss.includes("Visual redesign intentionally removed"), true, "Settings should remain structure-only during redesign");
+  assert.equal(settingsCss.includes(".settingsCategoryRail nav"), true, "Settings layout should style its own navigation");
+  assert.equal(settingsCss.includes(".modalWrap"), false, "Settings styles must not affect unrelated modals");
 });

@@ -1,4 +1,4 @@
-/* Settings structure only. Visual redesign intentionally removed. */
+/* Settings page layout and locally scoped controls. */
 
 .settingsPage,
 .settingsPageV027 {
@@ -209,7 +209,7 @@
 .settingsSearchBoxV027 input { min-height: 38px; padding: 8px 10px; }
 .settingsSearchHintV027 { margin: 0 0 10px; font-size: 11px; }
 @media (max-width: 960px) {
-  .settingsCategoryRail { position: static; max-height: none; overflow: visible; }
+  .settingsCategoryRail { position: static; max-height: none; overflow: visible; grid-auto-flow: row; grid-auto-columns: auto; }
   .settingsCategoryRail nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
   .settingsCategoryButton { flex: 0 0 155px; }
 }
