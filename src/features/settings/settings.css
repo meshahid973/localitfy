@@ -8,11 +8,6 @@
   gap: 18px;
 }
 
-.settingsHero,
-.settingsHeroV027 {
-  min-width: 0;
-}
-
 .settingsLayout,
 .settingsPageLayoutV027,
 .settingsModalLayoutV027 {
@@ -167,40 +162,6 @@
   gap: 10px;
 }
 
-.settingsOverlay,
-.modalWrap {
-  position: fixed;
-  inset: 34px 0 var(--player-size, 108px) 0;
-  z-index: 90;
-  display: grid;
-  place-items: center;
-  padding: 18px;
-  overflow: auto;
-  background: rgba(0, 0, 0, .56);
-}
-
-.settingsModal,
-.cleanSettingsModal {
-  width: min(1040px, 100%);
-  max-height: min(760px, calc(100vh - var(--player-size, 108px) - 72px));
-  overflow: auto;
-  padding: 18px;
-  background: var(--workspace-bg, #06131a);
-}
-
-.modalHead,
-.cleanSettingsHead {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.closeModalButton {
-  flex: 0 0 auto;
-}
-
 @media (max-width: 960px) {
   .settingsLayout,
   .settingsPageLayoutV027,
@@ -232,4 +193,23 @@
   .themeEditorBody {
     grid-template-columns: 1fr;
   }
+}
+
+/* Page-only settings layout. */
+.settingsPageHeader { min-width: 0; padding: 8px 2px; }
+.settingsPageHeader h2 { margin: 4px 0 8px; font-size: clamp(24px, 3vw, 34px); line-height: 1.1; letter-spacing: -.03em; }
+.settingsPageHeader p:last-child { margin: 0; color: var(--text-2); font-size: 13px; }
+.settingsCategoryRail { position: sticky; top: 16px; max-height: min(780px, calc(100vh - 150px)); overflow-y: auto; padding: 4px; }
+.settingsCategoryRail nav { display: grid; gap: 5px; }
+.settingsCategoryButton { padding: 10px 12px; border-radius: 12px; cursor: pointer; }
+.settingsCategoryButton:focus-visible,
+.settingsSearchBoxV027 input:focus-visible { outline: 2px solid var(--lt-accent, currentColor); outline-offset: 2px; }
+.settingsCategoryButton[aria-current="page"] { background: rgba(var(--lt-accent-rgb, 141, 255, 206), .09); }
+.settingsSearchBoxV027 { display: grid; gap: 6px; margin-bottom: 8px; }
+.settingsSearchBoxV027 input { min-height: 38px; padding: 8px 10px; }
+.settingsSearchHintV027 { margin: 0 0 10px; font-size: 11px; }
+@media (max-width: 960px) {
+  .settingsCategoryRail { position: static; max-height: none; overflow: visible; }
+  .settingsCategoryRail nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
+  .settingsCategoryButton { flex: 0 0 155px; }
 }

@@ -86,7 +86,6 @@ import {
   FEEDBACK_PROMPT_DELAY_MS,
   FEEDBACK_PROMPT_RETRY_DELAY_MS,
   FEEDBACK_PROMPT_SEEN_KEY,
-  LOCALTIFY_041_WHATS_NEW_ITEMS,
   shouldOpenFeedbackPromptFromGlobalSearch,
   shouldOpenFeedbackPromptFromSettingsSearch
 } from "./features/feedback/feedbackPrompt";
@@ -8184,60 +8183,6 @@ function MainModeApp() {
 
 
 
-  function renderSettingsRail(mode: "page" | "modal" = "page") {
-    const shownTabs = visibleSettingsTabs;
-
-    return (
-      <aside className={`settingsCategoryRail settingsCategoryRailV027 ${mode === "page" ? "settingsCategoryRailPage" : "settingsCategoryRailModal"}`} aria-label="settings categories">
-        <label className="settingsSearchBoxV027">
-          <span>search settings</span>
-          <input
-            value={settingsSearch}
-            onChange={(event) => handleSettingsSearchInput(event.currentTarget.value)}
-            placeholder="Search settings"
-            aria-label="Search settings"
-          />
-        </label>
-
-        <p className="settingsSearchHintV027">{settingsSearchResultLabel}</p>
-
-        {shownTabs.length ? (
-          shownTabs.map((tab) => {
-            const Icon = tab.icon;
-
-            return (
-              <button
-                key={tab.id}
-                className={`settingsCategoryButton ${settingsCategory === tab.id ? "active" : ""}`}
-                type="button"
-                onClick={() => setSettingsCategory(tab.id)}
-                aria-pressed={settingsCategory === tab.id}
-              >
-                <span className="settingsCategoryIcon" aria-hidden="true">
-                  <Icon className="settingsLucideIcon" size={19} strokeWidth={2.05} fill="none" />
-                </span>
-                <span className="settingsCategoryCopy">
-                  <strong>{tab.label}</strong>
-                  <span>{tab.description}</span>
-                </span>
-              </button>
-            );
-          })
-        ) : (
-          <div className="settingsNoSearchResultsV027">
-            <strong>Nothing matched</strong>
-            <span>Try words like discord, privacy, theme, cover, update, volume.</span>
-          </div>
-        )}
-      </aside>
-    );
-  }
-
-
-
-
-
-
   function renderFeedbackSettingsCard() {
     if (settingsCategory !== "advanced") return null;
 
@@ -8428,19 +8373,13 @@ function MainModeApp() {
         visibleThemes={visibleThemes}
         THEME_SWATCH_COLORS={THEME_SWATCH_COLORS}
         effectiveTheme={effectiveTheme}
-        randomizeCustomThemePalette={randomizeCustomThemePalette}
         resetCustomThemePalette={resetCustomThemePalette}
         saveCurrentCustomThemePreset={saveCurrentCustomThemePreset}
         customThemeName={customThemeName}
         setCustomThemeName={setCustomThemeName}
-        currentSong={currentSong}
         BUILT_IN_CUSTOM_THEME_PRESETS={BUILT_IN_CUSTOM_THEME_PRESETS}
         applyCustomThemePreset={applyCustomThemePreset}
-        savedCustomThemes={savedCustomThemes}
-        removeSavedCustomThemePreset={removeSavedCustomThemePreset}
         customThemeTokens={customThemeTokens}
-        customThemeHexDrafts={customThemeHexDrafts}
-        handleCustomThemeHexDraftChange={handleCustomThemeHexDraftChange}
         commitCustomThemeHexDraft={commitCustomThemeHexDraft}
         previewCustomThemeColor={stageCustomThemeColor}
         coverColorSyncOptions={coverColorSyncOptions}
@@ -8462,21 +8401,8 @@ function MainModeApp() {
         undoLastMetadataCleanAction={undoLastMetadataCleanAction}
         metadataUndoCount={metadataUndoItems.length}
         rebuildSearchIndexAction={rebuildSearchIndexAction}
-        importSongs={importSongs}
-        importAnimation={importAnimation}
         libraryScanMessage={libraryScanMessage}
-        newPlaylistName={newPlaylistName}
-        setNewPlaylistName={setNewPlaylistName}
-        createPlaylist={createPlaylist}
         changeView={changeView}
-        clearQueue={clearQueue}
-        playQueue={playQueue}
-        repeatPlaylist={repeatPlaylist}
-        setRepeatPlaylist={setRepeatPlaylist}
-        playlists={playlists}
-        openPlaylist={openPlaylist}
-        playPlaylist={playPlaylist}
-        removePlaylist={removePlaylist}
         pixelArtAssets={pixelArtAssets}
         pixelArtBusy={pixelArtBusy}
         randomizeAllCovers={randomizeAllCovers}
@@ -8485,17 +8411,12 @@ function MainModeApp() {
         chooseDownloadFolder={chooseDownloadFolder}
         APP_VERSION={APP_VERSION}
         updatePrompt={updatePrompt}
-        updateStatusLabel={updateStatusLabel}
         manualUpdateCheck={manualUpdateCheck}
         askUpdaterToInstall={askUpdaterToInstall}
-        skipAvailableUpdate={skipAvailableUpdate}
-        setWhatsNewOpen={setWhatsNewOpen}
-        whatsNewItems={LOCALTIFY_041_WHATS_NEW_ITEMS}
         copyDiagnosticsInfo={copyDiagnosticsInfo}
         diagnosticsCopied={diagnosticsCopied}
         diagnosticsInfo={diagnosticsInfo}
         platformInfo={platformInfo}
-        likedSongs={likedSongs}
         libraryRenderLimitRef={libraryRenderLimitRef}
         INITIAL_LIBRARY_RENDER_LIMIT={INITIAL_LIBRARY_RENDER_LIMIT}
         setLibraryRenderLimit={setLibraryRenderLimit}
@@ -8803,7 +8724,14 @@ function MainModeApp() {
     },
     settingsView: {
       renderSettingsCategoryContent,
-      renderSettingsRail,
+      settingsRail: {
+        tabs: visibleSettingsTabs,
+        activeCategory: settingsCategory,
+        search: settingsSearch,
+        resultLabel: settingsSearchResultLabel,
+        onSearchChange: handleSettingsSearchInput,
+        onCategoryChange: setSettingsCategory
+      },
       settings,
       settingsCategory
     },

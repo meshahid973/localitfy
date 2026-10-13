@@ -65,8 +65,13 @@ export function RangeRow({ label, value, min, max, step, suffix, onChange }: {
         value={activeValue}
         style={{ ["--range-progress" as string]: `${clamp(fill, 0, 100)}%` } as CSSProperties}
         onPointerDown={() => { setEditing(true); setDraftValue(value); }}
-        onChange={(event) => setDraftValue(Number(event.currentTarget.value))}
+        onChange={(event) => {
+          const nextValue = Number(event.currentTarget.value);
+          setDraftValue(nextValue);
+          if (!editing) commit(nextValue);
+        }}
         onPointerUp={(event) => commit(Number(event.currentTarget.value))}
+        onPointerCancel={(event) => commit(Number(event.currentTarget.value))}
         onKeyUp={(event) => commit(Number(event.currentTarget.value))}
         onBlur={(event) => commit(Number(event.currentTarget.value))}
       />
