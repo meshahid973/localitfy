@@ -1,4 +1,3 @@
-.onboardingV314,
 .onboardingV315 {
   --panel-bg: rgba(10, 10, 14, 0.94);
   --panel-edge: rgba(255, 255, 255, 0.075);
@@ -168,7 +167,6 @@
 
 .onboardingHeader,
 .onboardingProgress,
-.onboardingStepTabs,
 .onboardingBody,
 .onboardingFooter {
   min-width: 0;
@@ -231,25 +229,6 @@
   letter-spacing: -0.065em;
 }
 
-.onboardingHeaderMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.onboardingHeaderMeta span {
-  min-height: 28px;
-  padding: 0 11px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--panel-edge);
-  background: rgba(255, 255, 255, 0.035);
-  color: var(--copy-muted);
-  font-size: 12px;
-  font-weight: 700;
-}
 
 .onboardingProgressTop {
   display: flex;
@@ -275,69 +254,6 @@
   transition: width 260ms ease;
 }
 
-.onboardingStepTabs {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.onboardingStepTabs button {
-  min-height: 34px;
-  padding: 0 11px;
-  border-radius: 14px;
-  border: 1px solid var(--panel-edge);
-  background: rgba(255, 255, 255, 0.028);
-  color: var(--copy-dim);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: flex-start;
-  transition: transform 200ms var(--squish), background-color 200ms ease, border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
-}
-
-.onboardingStepTabs button:hover:not(:disabled) {
-  transform: translateY(-2px) scale(1.012);
-  border-color: rgba(var(--onboarding-accent-rgb), 0.38);
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.onboardingStepTabs button:active:not(:disabled) {
-  transform: translateY(0) scale(0.975);
-}
-
-.onboardingStepTabs button b {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 11px;
-}
-
-.onboardingStepTabs button span {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: lowercase;
-}
-
-.onboardingStepTabs button.active,
-.onboardingStepTabs button.done {
-  border-color: rgba(var(--onboarding-accent-rgb), 0.38);
-}
-
-.onboardingStepTabs button.active {
-  background: rgba(var(--onboarding-accent-rgb), 0.12);
-  color: rgba(255, 255, 255, 0.96);
-}
-
-.onboardingStepTabs button.done b,
-.onboardingStepTabs button.active b {
-  background: var(--onboarding-accent);
-  color: #06110b;
-}
 
 .onboardingBody {
 
@@ -685,7 +601,6 @@
 .onboardingSkip:disabled,
 .onboardingBack:disabled,
 .onboardingContinue:disabled,
-.onboardingStepTabs button:disabled,
 .onboardingThemeChoice:disabled,
 .discordChoice:disabled {
   opacity: 0.48;
@@ -708,7 +623,6 @@
 @media (max-width: 860px) {
 
 
-  .onboardingV314,
   .onboardingV315 {
     padding: 16px;
   }
@@ -726,22 +640,19 @@
     align-items: stretch;
   }
 
-  .onboardingHeaderMeta,
   .onboardingFooterActions {
     justify-content: stretch;
   }
 
-  .onboardingHeaderMeta span,
   .onboardingFooterActions > * {
     flex: 1 1 0;
   }
 
-  .onboardingStepTabs,
   .onboardingThemeGrid.cleaner,
-  .onboardingFeatureGrid.cleaner,
-  .onboardingSummaryGrid.cleaner,
-  .utilityActionRow,
-  .downloadToolGrid {
+.onboardingFeatureGrid.cleaner,
+.onboardingSummaryGrid.cleaner,
+.utilityActionRow,
+.downloadToolGrid {
     grid-template-columns: 1fr;
   }
 
@@ -755,8 +666,7 @@
 }
 
 /* localtify 0.3.9 V301 — lighter first-run compositor path */
-body.localtifyPerfV301 .onboardingV314,
-body.localtifyPerfV301 .onboardingV315{
+body.localtifyPerfV301 .onboardingV315 {
   contain: layout paint style;
 }
 
@@ -769,8 +679,7 @@ body.localtifyPerfV301 .onboardingCoreOrb{
     inset 14px 12px 22px rgba(255, 255, 255, 0.10);
 }
 
-body.localtifyPerfV301 .onboardingV314 :is(button, input),
-body.localtifyPerfV301 .onboardingV315 :is(button, input){
+body.localtifyPerfV301 .onboardingV315 :is(button, input) {
   touch-action: manipulation;
 }
 
@@ -815,9 +724,8 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 
 .onboardingHeader,
 .onboardingProgress,
-.onboardingStepTabs,
 .onboardingBody,
-.onboardingFooter{
+.onboardingFooter {
   position: relative;
   z-index: 3;
 }
@@ -900,11 +808,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 }
 
 
-.onboardingHeaderMeta,
-.onboardingStepTabs{
-  display: none !important;
-}
-
 .onboardingProgress{
   position: relative;
   z-index: 5;
@@ -950,61 +853,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
 .onboardingWelcomeV505 .onboardingLead{
 
   color: rgba(255,255,255,.68);
-}
-
-.onboardingTrustStripV505{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 18px;
-  max-width: 520px;
-}
-
-.onboardingTrustStripV505 span{
-  min-height: 30px;
-  padding: 0 10px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  color: rgba(255,255,255,.72);
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.055);
-  font-size: 11px;
-  font-weight: 850;
-  letter-spacing: -.01em;
-  text-transform: lowercase;
-}
-
-.onboardingMascotBubbleV505{
-  position: relative;
-  margin-top: 14px;
-  max-width: 430px;
-  padding: 12px 14px;
-  border-radius: 16px 16px 16px 6px;
-  color: rgba(255,255,255,.86);
-  background:
-    linear-gradient(180deg, rgba(var(--onboarding-accent-rgb), .10), rgba(255,255,255,.028)),
-    rgba(255,255,255,.025);
-  border: 1px solid rgba(var(--onboarding-accent-rgb), .18);
-  box-shadow:
-    0 12px 26px rgba(0,0,0,.16),
-    inset 0 1px 0 rgba(255,255,255,.04);
-  font-size: 13px;
-  font-weight: 850;
-  line-height: 1.38;
-}
-
-.onboardingMascotBubbleV505::after{
-  content: "";
-  position: absolute;
-  right: -8px;
-  top: 18px;
-  width: 14px;
-  height: 14px;
-  transform: rotate(45deg);
-  background: rgba(255,255,255,.035);
-  border-top: 1px solid rgba(var(--onboarding-accent-rgb), .16);
-  border-right: 1px solid rgba(var(--onboarding-accent-rgb), .16);
 }
 
 
@@ -1085,10 +933,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   }
 
 
-  .onboardingMascotBubbleV505::after{
-    display: none;
-  }
-
   .onboardingMascotPeekWrapV499{
     right: -118px;
     top: 160px;
@@ -1140,10 +984,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   line-height: 1.5;
 }
 
-.onboardingTrustStripV505,
-.onboardingMascotBubbleV505{
-  display: none !important;
-}
 
 .onboardingTrustLineV506{
   max-width: 460px;

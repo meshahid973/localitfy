@@ -779,8 +779,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton,
 .playerBar .volumeIconButton,
 .playerBar .repeatButton,
-.playerBar .playerControlButton,
-.playerBar .transportControls button{
+.playerBar .playerControlButton {
   width: 28px !important;
   height: 28px !important;
   min-width: 28px !important;
@@ -811,9 +810,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .volumeIconButton::before,
 .playerBar .volumeIconButton::after,
 .playerBar .repeatButton::before,
-.playerBar .repeatButton::after,
-.playerBar .transportControls button::before,
-.playerBar .transportControls button::after{
+.playerBar .repeatButton::after {
   content: none !important;
   display: none !important;
 }
@@ -821,8 +818,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton:hover,
 .playerBar .volumeIconButton:hover,
 .playerBar .repeatButton:hover,
-.playerBar .playerControlButton:hover,
-.playerBar .transportControls button:hover{
+.playerBar .playerControlButton:hover {
   color: #ffffff !important;
   background: transparent !important;
   background-image: none !important;
@@ -835,14 +831,12 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton:active,
 .playerBar .volumeIconButton:active,
 .playerBar .repeatButton:active,
-.playerBar .playerControlButton:active,
-.playerBar .transportControls button:active{
+.playerBar .playerControlButton:active {
   transform: translateY(0) scale(0.96) translateZ(0) !important;
 }
 
 .playerBar .circleButton.active,
-.playerBar .repeatButton.active,
-.playerBar .transportControls button.active{
+.playerBar .repeatButton.active {
   color: rgb(var(--accent-rgb)) !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -850,8 +844,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar .circleButton.main,
-.playerBar .playPauseButton,
-.playerBar .transportControls .playButton{
+.playerBar .playPauseButton {
   width: 46px !important;
   height: 46px !important;
   min-width: 46px !important;
@@ -869,8 +862,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar .circleButton.main:hover,
-.playerBar .playPauseButton:hover,
-.playerBar .transportControls .playButton:hover{
+.playerBar .playPauseButton:hover {
   background: color-mix(in oklab, rgb(var(--accent-rgb)) 88%, white 12%) !important;
   color: #ffffff !important;
   box-shadow:
@@ -881,8 +873,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar .circleButton.main:active,
-.playerBar .playPauseButton:active,
-.playerBar .transportControls .playButton:active{
+.playerBar .playPauseButton:active {
   transform: translateY(0) scale(0.96) translateZ(0) !important;
 }
 
@@ -890,8 +881,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton svg,
 .playerBar .volumeIconButton svg,
 .playerBar .repeatButton svg,
-.playerBar .playerControlButton svg,
-.playerBar .transportControls svg{
+.playerBar .playerControlButton svg {
   display: block !important;
   width: 18px !important;
   height: 18px !important;
@@ -915,9 +905,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton.main svg,
 .playerBar .circleButton.main svg *,
 .playerBar .playPauseButton svg,
-.playerBar .playPauseButton svg *,
-.playerBar .transportControls .playButton svg,
-.playerBar .transportControls .playButton svg *{
+.playerBar .playPauseButton svg * {
   width: 19px !important;
   height: 19px !important;
   color: #ffffff !important;
@@ -1112,9 +1100,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton.main svg,
 .playerBar .circleButton.main svg *,
 .playerBar .playPauseButton svg,
-.playerBar .playPauseButton svg *,
-.playerBar .transportControls .playButton svg,
-.playerBar .transportControls .playButton svg *{
+.playerBar .playPauseButton svg * {
   color: #fff !important;
   stroke: #fff !important;
   fill: #fff !important;
@@ -1269,14 +1255,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
     ) !important;
 }
 
-.app[data-custom-theme="true"] .themeColorTile[data-token="progress"],
-.app[data-custom-theme="true"] .themeColorCard[data-token="progress"],
-.app[data-custom-theme="true"] .themeColorButton[data-token="progress"]{
-  background:
-    radial-gradient(circle at 18% 50%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.22), transparent 42%),
-    rgba(var(--progress-rgb, var(--accent-rgb)), 0.08) !important;
-  border-color: rgba(var(--progress-rgb, var(--accent-rgb)), 0.26) !important;
-}
 
 .playerBar .playerLeft,
 .playerBar .playerLeft:hover,
@@ -1311,14 +1289,14 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   filter: none !important;
 }
 
-.playerBar :where(.controlButton,.secondaryControl,.volumeButton,.playerIconButton):not(.primary):not(.playButton):not(.active){
+.playerBar :where(.playerIconButton):not(.primary):not(.playButton):not(.active){
   background: transparent !important;
   background-color: transparent !important;
   box-shadow: none !important;
   border-color: transparent !important;
 }
 
-.playerBar :where(.controlButton,.secondaryControl,.volumeButton,.playerIconButton):not(.primary):not(.playButton):not(.active):hover{
+.playerBar :where(.playerIconButton):not(.primary):not(.playButton):not(.active):hover{
   background: transparent !important;
   background-color: transparent !important;
   box-shadow: none !important;
@@ -1326,72 +1304,15 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   transform: translate3d(0,-1px,0) !important;
 }
 
-.playerBar :where(.playButton,.primary,.primaryControl) svg,
-.playerBar :where(.playButton,.primary,.primaryControl) svg *,
-.playerBar :where(.playButton,.primary,.primaryControl) .playIcon,
-.playerBar :where(.playButton,.primary,.primaryControl) .icon{
+.playerBar :where(.playButton,.primary) svg,
+.playerBar :where(.playButton,.primary) svg *,
+.playerBar :where(.playButton,.primary) .playIcon,
+.playerBar :where(.playButton,.primary) .icon{
   color: #fff !important;
   stroke: #fff !important;
   fill: currentColor !important;
 }
-.controlRow .queueDrawerButton {
-  position: relative;
-}
 
-.controlRow .queueDrawerButton:not(.active) {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-}
-
-.queueButtonBadge {
-  position: absolute;
-  right: -5px;
-  top: -7px;
-  min-width: 15px;
-  height: 15px;
-  padding: 0 4px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: color-mix(in srgb, var(--progress, var(--accent)) 86%, #fff 14%);
-  font-size: 9px;
-  font-weight: 900;
-  line-height: 1;
-  box-shadow: 0 0 14px color-mix(in srgb, var(--progress, var(--accent)) 38%, transparent);
-  pointer-events: none;
-}
-
-.queueDrawerLayer {
-  position: fixed;
-  inset: 26px 22px calc(var(--player-height, 108px) + 18px) 0;
-  z-index: 8700;
-  display: flex;
-  justify-content: flex-end;
-  pointer-events: auto;
-  background: transparent;
-}
-
-.queueDrawer {
-  width: min(430px, calc(100vw - var(--sidebar-width, 250px) - 42px));
-  height: 100%;
-  min-height: 520px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  border: 1px solid color-mix(in srgb, var(--border) 72%, var(--accent) 28%);
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 36%),
-    linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, #050507 8%), color-mix(in srgb, var(--background) 96%, #050507 4%));
-  box-shadow:
-    0 26px 90px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  padding: 18px;
-  overflow: hidden;
-  animation: queueDrawerIn 220ms cubic-bezier(.2, .8, .2, 1);
-}
 
 @keyframes queueDrawerIn {
   from {
@@ -1404,284 +1325,10 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   }
 }
 
-.queueDrawerHeader,
-.queueSectionHeader,
-.queueNowSong,
-.queueDrawerItem,
-.queueItemActions,
-.queueDrawerFooter {
-  display: flex;
-  align-items: center;
-}
-
-.queueDrawerHeader {
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.queueDrawerHeader h2 {
-  margin: 2px 0 2px;
-  color: var(--text);
-  font-size: 31px;
-  letter-spacing: -0.055em;
-  line-height: 0.94;
-}
-
-.queueDrawerHeader span,
-.queueDrawerHeader .eyebrow,
-.queueNowLabel,
-.queueSectionHeader small,
-.queueItemCopy small,
-.queueEmptyState small {
-  color: var(--muted);
-}
-
-.queueCloseButton {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--border) 70%, var(--accent) 30%);
-  background: color-mix(in srgb, var(--surface) 72%, transparent);
-  color: var(--text);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  flex: 0 0 auto;
-  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
-}
-
-.queueCloseButton:hover {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--accent) 62%, var(--border) 38%);
-  background: color-mix(in srgb, var(--surface) 86%, var(--accent) 14%);
-}
-
-.queueNowCard,
-.queueDrawerSection {
-  border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
-  padding: 13px;
-}
-
-.queueNowCard {
-  display: grid;
-  gap: 10px;
-}
-
-.queueNowLabel {
-  text-transform: uppercase;
-  letter-spacing: .16em;
-  font-size: 10px;
-  font-weight: 900;
-}
-
-.queueNowSong {
-  gap: 12px;
-  min-width: 0;
-}
-
-.queueNowSong strong,
-.queueItemCopy strong {
-  display: block;
-  color: var(--text);
-  font-weight: 900;
-  letter-spacing: -0.025em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.queueNowSong small,
-.queueItemCopy small {
-  display: block;
-  margin-top: 2px;
-  font-size: 12px;
-  font-weight: 800;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.queueNowArt,
-.queueItemArt {
-  object-fit: cover;
-  background: color-mix(in srgb, var(--surface) 72%, #000 28%);
-  flex: 0 0 auto;
-}
-
-.queueNowArt {
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
-}
-
-.queueItemArt {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-}
-
-.queueDrawerSection {
-  min-height: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.queueSectionHeader {
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
-}
-
-.queueSectionHeader strong {
-  display: block;
-  color: var(--text);
-  font-size: 15px;
-  font-weight: 900;
-}
-
-.queueSectionHeader small {
-  display: block;
-  margin-top: 2px;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.queueTextButton {
-  border: 1px solid color-mix(in srgb, var(--border) 72%, var(--accent) 28%);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 68%, transparent);
-  color: var(--text);
-  padding: 8px 11px;
-  font-size: 11px;
-  font-weight: 900;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.queueTextButton:disabled {
-  opacity: .42;
-  cursor: not-allowed;
-}
-
-.queueDrawerList {
-  min-height: 0;
-  overflow: auto;
-  display: grid;
-  gap: 8px;
-  padding-right: 2px;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--accent) 42%, transparent) transparent;
-}
-
-.queueDrawerItem {
-  gap: 10px;
-  min-width: 0;
-  border-radius: 17px;
-  border: 1px solid color-mix(in srgb, var(--border) 54%, transparent);
-  background: color-mix(in srgb, var(--background) 72%, var(--surface) 28%);
-  padding: 8px;
-  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
-}
-
-.queueDrawerItem:hover,
-.queueDrawerItem:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 50%, var(--border) 50%);
-  background: color-mix(in srgb, var(--surface) 84%, var(--background) 16%);
-}
-
-.queueDrawerItem.isQueued {
-  cursor: grab;
-}
-
-.queueDrawerItem.isQueued:active {
-  cursor: grabbing;
-}
-
-.queueItemIndex {
-  width: 24px;
-  flex: 0 0 24px;
-  color: color-mix(in srgb, var(--muted) 78%, var(--accent) 22%);
-  font-size: 11px;
-  font-weight: 900;
-  text-align: center;
-  user-select: none;
-}
-
-.queueItemCopy {
-  min-width: 0;
-  flex: 1;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  padding: 0;
-}
-
-.queueItemDuration {
-  flex: 0 0 auto;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.queueItemActions {
-  gap: 5px;
-  opacity: .86;
-}
-
-.queueItemActions button {
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: var(--text);
-  background: transparent;
-  cursor: pointer;
-  transition: color 150ms ease, transform 150ms ease, background-color 150ms ease;
-}
-
-.queueItemActions button:hover {
-  color: #fff;
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  transform: translateY(-1px);
-}
-
-.queueEmptyState {
-  min-height: 180px;
-  display: grid;
-  place-content: center;
-  text-align: center;
-  gap: 4px;
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--background) 58%, transparent);
-}
-
-.queueEmptyState strong {
-  color: var(--text);
-  font-size: 15px;
-}
 
 @media (max-width: 900px) {
-  .queueDrawerLayer {
-    inset: 16px 12px calc(var(--player-height, 108px) + 12px) 12px;
-  }
 
-  .queueDrawer {
-    width: 100%;
-    min-height: 460px;
-  }
 
-  .queueItemDuration {
-    display: none;
-  }
 }
 
 .playerBar {
@@ -1705,7 +1352,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .playerButton,
 .playerBar .circleButton,
 .playerBar .volumeIconButton,
-.playerBar .miniToggleButton,
 .playerBar .playerThumb,
 .playerBar .playerCover {
   rotate: 0deg !important;
@@ -1717,8 +1363,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .playerThumb:hover,
 .playerBar .playerButton:hover,
 .playerBar .circleButton:hover,
-.playerBar .volumeIconButton:hover,
-.playerBar .miniToggleButton:hover {
+.playerBar .volumeIconButton:hover {
   rotate: 0deg !important;
 }
 
@@ -2190,8 +1835,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
     0 10px 28px rgba(var(--accent-rgb),0.18) !important;
 }
 
-.progressTrack,
-.volumeWrap input[type="range"]{
+.volumeWrap input[type="range"] {
   background: rgba(255,255,255,0.13) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
 }
@@ -2485,20 +2129,12 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
   --player-radius-m: 24px;
 }
 
-.playerBar .smallArt,
-.playerBar .queueItemArt{
+.playerBar .smallArt {
   border-radius: var(--player-radius-xs) !important;
 }
 
-.playerBar .queueNowArt,
-.playerBar .albumTrackCoverV318{
+.playerBar .albumTrackCoverV318 {
   border-radius: var(--player-radius-s) !important;
-}
-
-.playerBar .queueDrawer,
-.playerBar .queueNowCard,
-.playerBar .queueDrawerSection{
-  border-radius: var(--player-radius-m) !important;
 }
 
 
@@ -2549,22 +2185,6 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
     0 0 12px rgba(var(--accent-rgb),0.34) !important;
 }
 
-.controlRow .queueButtonBadge,
-.playerBar .queueButtonBadge{
-  right: -6px !important;
-  top: -7px !important;
-  min-width: 17px !important;
-  height: 17px !important;
-  padding: 0 5px !important;
-  border-radius: var(--player-radius-xs, 12px) !important;
-  background: rgb(var(--accent-rgb)) !important;
-  color: #fff !important;
-  font-size: 9px !important;
-  line-height: 1 !important;
-  box-shadow:
-    0 0 0 2px rgba(0,0,0,0.44),
-    0 0 16px rgba(var(--accent-rgb),0.34) !important;
-}
 
 .heroGhost.danger.confirmArmed{
   color: #fff !important;

@@ -100,9 +100,8 @@
 .settingsPage .settingsTwoColumn,
 .settingsPage .settingsGrid.twoCols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .settingsPage .settingsMiniGrid,
-.settingsPage .settingsResetGrid,
-.settingsPage .settingsThemeGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 12px; }
-.settingsPage :is(.settingsField, .themeNameField, .settingsSelectField, .settingsTextFieldV027) { min-width: 0; display: grid; gap: 7px; color: #aabfc9; font-size: 12px; }
+.settingsPage .settingsResetGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 12px; }
+.settingsPage :is(.settingsSelectField, .settingsTextFieldV027) { min-width: 0; display: grid; gap: 7px; color: #aabfc9; font-size: 12px; }
 .settingsPage :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea) {
   min-width: 0; max-width: 100%; min-height: 40px; padding: 9px 12px;
   border: 1px solid rgba(125, 164, 187, .2); border-radius: 9px;
@@ -122,8 +121,7 @@
   display: block; width: 24px; height: 24px; flex: 0 0 24px;
   border-radius: 7px; border: 1px solid rgba(255,255,255,.16);
 }
-.settingsPage .settingsHeaderActionsV027, .settingsPage .settingsActionRow,
-.settingsPage .themeEditorQuickActions, .settingsPage .settingsInlineActions {
+.settingsPage .settingsHeaderActionsV027, .settingsPage .settingsActionRow {
   display: flex; align-items: center; flex-wrap: wrap; gap: 9px;
 }
 .settingsPage .cleanToggleLabel { display: inline-flex; align-items: center; gap: 8px; color: var(--settings-text); font-size: 12px; }
@@ -156,7 +154,7 @@
 .settingsPage .settingsSavedTheme { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .settingsPage .settingsSavedTheme button:first-child { display: flex; gap: 10px; align-items: center; min-width: 0; text-align: left; }
 .settingsPage .settingsSavedTheme button span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.settingsPage :is(.toggleRow, .rangeRow, .settingsControlRow, .settingsSelectRow) {
+.settingsPage :is(.toggleRow, .rangeRow) {
   display: grid; grid-template-columns: minmax(0, 1fr) auto;
   align-items: center; gap: 14px; min-height: 54px;
   border-bottom: 1px solid rgba(125,164,187,.08);
