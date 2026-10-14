@@ -19,11 +19,12 @@ test("legacy compatibility shims stay deleted", () => {
 
 test("App and Discord use canonical feature owners", () => {
   const app = read("src/App.tsx");
-  const discord = read("src/features/discord/useDiscordActivityRuntime.ts");
   assert.match(app, /features\/player\/engine\/htmlAudioEngine/);
   assert.match(app, /features\/settings\/SettingsCategoryContent/);
   assert.doesNotMatch(app, /["']\.\/player\//);
-  assert.doesNotMatch(discord, /localtifyTypes/);
+  assert.doesNotMatch(app, /localtifyTypes/);
+  assert.match(app, /from "\.\/features\/discord"/);
+  assert.equal(fs.existsSync(path.join(root, "src/features/discord/useDiscordActivityRuntime.ts")), false);
 });
 
 test("player morph icon has one implementation and one feature owner", () => {
