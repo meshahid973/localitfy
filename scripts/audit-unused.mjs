@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import ts from "typescript";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -65,13 +66,27 @@ const possible = (file, specifier) => {
 };
 for (const file of codeFiles) {
   const body = sources.get(file);
+  const kind = file.endsWith(".tsx") || file.endsWith(".jsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const ast = ts.createSourceFile(file, body, ts.ScriptTarget.Latest, true, kind);
   const specifiers = new Set();
-  const patterns = [
-    /\b(?:import|export)\s+(?:type\s+)?(?:[^;"']{0,450}?\s+from\s*)?["']([^"']+)["']/g,
-    /\bimport\s*\(\s*["']([^"']+)["']/g,
-    /\brequire\s*\(\s*["']([^"']+)["']/g
-  ];
-  for (const pattern of patterns) for (const match of body.matchAll(pattern)) specifiers.add(match[1]);
+  const add = (node) => {
+    if (node && ts.isStringLiteralLike(node)) specifiers.add(node.text);
+  };
+  const visit = (node) => {
+    if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
+      add(node.moduleSpecifier);
+    } else if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)) {
+      add(node.moduleReference.expression);
+    } else if (ts.isCallExpression(node)) {
+      if (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+          (ts.isIdentifier(node.expression) && node.expression.text === "require")) add(node.arguments[0]);
+    } else if (ts.isNewExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "URL") {
+      // Vite emits Worker(new URL("./library.worker.ts", import.meta.url)).
+      add(node.arguments?.[0]);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(ast);
   const deps = [...specifiers].map((specifier) => possible(file, specifier)).filter(Boolean);
   imports.set(file, deps);
   for (const dep of deps) inbound.get(dep).push(file);
