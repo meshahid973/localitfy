@@ -3899,11 +3899,6 @@ body.localtifyBackgroundMode .ambientSurface,
   letter-spacing: -.005em !important;
   white-space: nowrap !important;
   transform: none !important;
-}
-
-
-.app .updatePrimaryButton,
-.updatePrimaryButton{
   background: color-mix(in oklab, var(--lt-accent, #e86be8) 84%, white 16%) !important;
   border: 1px solid color-mix(in oklab, var(--lt-accent, #e86be8) 72%, white 28%) !important;
   color: #060407 !important;
