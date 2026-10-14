@@ -16,7 +16,7 @@ test("shared shell owns viewport and responsive sidebar behavior only", () => {
 
   assert.equal(shell.includes('import "../../styles/view-shell.css";'), true, "AppShell does not own shared shell CSS");
   assert.equal(main.includes('import "./styles/view-shell.css";'), false, "view-shell CSS should not be centrally owned by main");
-  assert.equal(main.includes('import "./styles/page-foundation.css";'), true, "page foundation is not loaded globally");
+  assert.equal(main.includes('import "./styles/page-foundation.css";'), false, "retired reset stylesheet returned");
   assert.equal(main.includes('import "./features/shell/performance.css";'), true, "performance policy is not loaded globally");
   assert.equal(css.includes(".pageTransition-home"), true, "shared shell lost its Home exclusion boundary");
 
