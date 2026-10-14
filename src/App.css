@@ -94,31 +94,6 @@
 
 }
 
-.editorPreview{
-  min-height: 104px !important;
-  padding: 14px !important;
-  border-radius: 14px !important;
-  background: rgba(255, 255, 255, 0.045) !important;
-}
-
-.editorPreview strong{
-  display: -webkit-box !important;
-  overflow: hidden !important;
-  -webkit-box-orient: vertical !important;
-  line-clamp: 2 !important;
-  -webkit-line-clamp: 2 !important;
-  font-size: 20px !important;
-  line-height: 1.15 !important;
-}
-
-.editor-playlist-tools{
-  display: grid !important;
-  gap: 8px !important;
-  padding: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.075) !important;
-  border-radius: 14px !important;
-  background: rgba(255, 255, 255, 0.032) !important;
-}
 
 .editor-tool-title{
   color: rgba(255, 255, 255, 0.92) !important;
@@ -128,24 +103,6 @@
   text-transform: lowercase !important;
 }
 
-
-.editor-tool-buttons button{
-  min-height: 28px !important;
-  padding: 0 10px !important;
-  border: 1px solid rgba(255, 255, 255, 0.085) !important;
-  border-radius: 999px !important;
-  color: rgba(255, 255, 255, 0.88) !important;
-  background: rgba(255, 255, 255, 0.07) !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), background 150ms ease, border-color 150ms ease !important;
-}
-
-.editor-tool-buttons button:hover{
-  transform: translateY(-1px) !important;
-  border-color: rgba(var(--lt-accent-rgb), 0.28) !important;
-  background: rgba(var(--lt-accent-rgb), 0.13) !important;
-}
 
 .editor-playlist-list button.is-on{
   color: var(--accent-contrast) !important;
@@ -1064,11 +1021,6 @@ html{
 }
 
 
-.toastStack{
-  left: calc(var(--workspace-sidebar-current, 236px) + 22px) !important;
-  width: min(360px, calc(100vw - var(--workspace-sidebar-current, 236px) - 42px)) !important;
-}
-
 .localitfyNoSelect{
   user-select: none !important;
   -webkit-user-select: none !important;
@@ -1206,81 +1158,9 @@ body.isResizingSidebar{
   background-image: none !important;
 }
 
-.app.flatNoGradientUI{
-  background: var(--custom-bg) !important;
-  background-image: none !important;
-  color: var(--custom-text) !important;
-}
-
-.app.flatNoGradientUI .hero{
-  background: var(--custom-surface) !important;
-  background-image: none !important;
-  border-color: var(--custom-border) !important;
-  box-shadow: none !important;
-}
-
-
-.app.flatNoGradientUI .sidebarNav button,
-.app.flatNoGradientUI .navButton,
-.app.flatNoGradientUI .iconAction,
-.app.flatNoGradientUI .pillButton,
-.app.flatNoGradientUI .smallButton,
-.app.flatNoGradientUI .ghostButton,
-.app.flatNoGradientUI .primaryButton,
-.app.flatNoGradientUI .compactButton,
-.app.flatNoGradientUI .searchInput,
-.app.flatNoGradientUI input,
-.app.flatNoGradientUI select,
-.app.flatNoGradientUI textarea{
-  background: var(--flat-button) !important;
-  background-image: none !important;
-  border-color: var(--flat-border) !important;
-  box-shadow: none !important;
-}
-
-.app.flatNoGradientUI .sidebarNav button:hover,
-.app.flatNoGradientUI .navButton:hover,
-.app.flatNoGradientUI .iconAction:hover,
-.app.flatNoGradientUI .pillButton:hover,
-.app.flatNoGradientUI .smallButton:hover,
-.app.flatNoGradientUI .ghostButton:hover,
-.app.flatNoGradientUI .primaryButton:hover,
-.app.flatNoGradientUI .compactButton:hover{
-  background: var(--flat-button-hover) !important;
-  background-image: none !important;
-}
-
-.app.flatNoGradientUI .sidebarNav button.active,
-.app.flatNoGradientUI .navButton.active,
-.app.flatNoGradientUI .songRow.active,
-.app.flatNoGradientUI .themeItem.active,
-.app.flatNoGradientUI .iconAction.liked,
-.app.flatNoGradientUI .primaryButton{
-  background: var(--lt-accent) !important;
-  background-image: none !important;
-  color: #050505 !important;
-  border-color: rgba(var(--lt-accent-rgb), 0.78) !important;
-  box-shadow: none !important;
-}
-
-.app.flatNoGradientUI .heroText{
-  position: relative !important;
-  z-index: 4 !important;
-}
-
-
-.app.flatNoGradientUI.themeSettling *{
-  transition-duration: 1ms !important;
-}
-
-.app.flatNoGradientUI .homeAlbumArt{
-  background-image: none;
-  filter: none;
-}
 
 .cleanToggleLabel{ display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); font-size: 12px; font-weight: 800; text-transform: lowercase; }
 .cleanToggleLabel input{ width: 16px; height: 16px; accent-color: rgb(var(--lt-accent-rgb)); }
-.accentTextInput{ width: 120px; height: 40px; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.055); color: #fff; padding: 0 12px; font: inherit; font-weight: 800; }
 
 
 .whatsNewOverlay{ position: fixed; inset: 0; z-index: 1300; display: grid; place-items: center; padding: 24px;   animation: whatsNewFadeIn .17s ease both; }
@@ -1617,14 +1497,13 @@ body.isResizingSidebar{
 }
 
 .songRow,
-.topRow,
 .iconAction,
 .circleButton:not(.playerBar *),
 .softButton,
 .mainAction,
 .heroMain,
 .heroGhost,
-.dangerButton{
+.dangerButton {
   transition:
     color 180ms ease,
     background-color 180ms ease,
@@ -1774,42 +1653,6 @@ input[type="range"]{
   --shell-sidebar-muted: color-mix(in oklab, var(--lt-muted) 82%, var(--lt-accent) 18%);
 }
 
-.sidebarModeSwitch{
-  min-height: 34px;
-  padding: 4px;
-
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  border: 1px solid color-mix(in oklab, var(--lt-accent) 12%, transparent);
-  border-radius: 13px;
-  background: color-mix(in oklab, var(--lt-accent) 5%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--lt-text) 7%, transparent);
-}
-
-.sidebarModeTab{
-  min-height: 26px;
-  border: 0;
-  border-radius: 9px;
-  color: var(--shell-sidebar-muted);
-  background: transparent;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.045em;
-  text-transform: uppercase;
-  transition:
-    color 180ms ease,
-    background 180ms ease,
-    transform 180ms var(--shell-sidebar-ease),
-    box-shadow 180ms ease;
-}
-
-.sidebarModeTab.active{
-  color: var(--shell-sidebar-text);
-  background: color-mix(in oklab, var(--lt-accent) 14%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--lt-text) 8%, transparent),
-    0 8px 20px color-mix(in oklab, var(--lt-accent) 7%, transparent);
-}
 
 .sidebarModeTab:not(.active):hover{
   color: var(--shell-sidebar-text);
@@ -1843,23 +1686,6 @@ input[type="range"]{
     font-size: 21px;
     font-weight: 700;
   }
-}
-
-.logoIcon{
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  color: var(--lt-accent) !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  font-size: 26px !important;
-  line-height: 1 !important;
-  text-shadow: 0 0 14px color-mix(in oklab, var(--lt-accent) 32%, transparent) !important;
-  transform: none !important;
-  filter: none !important;
 }
 
 
@@ -2008,8 +1834,6 @@ body{
 }
 
 .app .songRow,
-.app .topRow,
-.app .simpleAlbumCard,
 .app .songArt,
 .app .panel,
 .app .hero,
@@ -2019,7 +1843,7 @@ body{
 .app .mainAction,
 .app .softButton,
 .app .heroGhost,
-.app .simpleGhost{
+.app .simpleGhost {
   transition: none !important;
   animation: none !important;
   transform: none !important;
@@ -2070,11 +1894,6 @@ body{
   border-color: color-mix(in oklab, var(--lt-accent) 42%, transparent);
 }
 
-.fullWidth input{
-  color: var(--lt-text);
-  background: color-mix(in oklab, var(--lt-bg) 78%, transparent);
-  border-color: color-mix(in oklab, var(--lt-accent) 18%, rgba(255,255,255,.1));
-}
 
 .circleButton:not(.playerBar *){
   width: var(--control-circle) !important;
@@ -2163,18 +1982,6 @@ body{
   box-shadow: none !important;
 }
 
-.sidebarThemeOption{
-  background: color-mix(in oklab, var(--lt-bg, #000) 78%, var(--surface, rgba(255,255,255,.05)) 22%) !important;
-  background-image: none !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #64f0a4) 14%, var(--lt-border, rgba(255,255,255,.08)) 86%) !important;
-  box-shadow: none !important;
-}
-
-.sidebarThemeOption:hover{
-  background: color-mix(in oklab, var(--lt-accent, #64f0a4) 10%, var(--lt-bg, #000) 90%) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #64f0a4) 34%, transparent) !important;
-  transform: translateY(-1px) !important;
-}
 
 .coverAura{
   pointer-events: none;
@@ -2227,13 +2034,6 @@ body{
   background: transparent !important;
 }
 
-.bottomPlayer,
-.nowPlayingBar{
-  background: var(--theme-player-bg) !important;
-  border-top: 1px solid var(--theme-line) !important;
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--theme-accent) 7%, transparent) !important;
-}
-
 
 .coverAura:hover::before{
 
@@ -2263,12 +2063,6 @@ body{
   color: var(--lt-text, #f7f7f7) !important;
 }
 
-.logoPill{
-  background: color-mix(in oklab, var(--localtify-sidebar-bg) 82%, var(--lt-accent, #ff65df) 8%) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #ff65df) 18%, transparent) !important;
-  box-shadow: none !important;
-}
-
 
 .app::before{
   display: none !important;
@@ -2291,14 +2085,11 @@ body{
 
 button,
 .button,
-.iconButton,
 .circleButton:not(.playerBar *),
 .softButton,
 .heroGhost,
 .mainAction,
-.heroMain,
-.importSongsButton,
-.importButton{
+.heroMain {
   transition: transform 150ms cubic-bezier(.2,.8,.2,1),
     background 150ms ease,
     border-color 150ms ease,
@@ -2308,14 +2099,11 @@ button,
 
 button:hover,
 .button:hover,
-.iconButton:hover,
 .circleButton:hover:not(.playerBar *),
 .softButton:hover,
 .heroGhost:hover,
 .mainAction:hover,
-.heroMain:hover,
-.importSongsButton:hover,
-.importButton:hover{
+.heroMain:hover {
   box-shadow: 0 0 12px color-mix(in oklab, var(--lt-accent, #ff65df) 14%, transparent) !important;
 }
 
@@ -2332,10 +2120,6 @@ button:hover,
   display: none !important;
 }
 
-.app[data-theme] .titlebar{
-  background: color-mix(in srgb, var(--lt-accent, #ff6edb) 5%, #050505) !important;
-  border-color: color-mix(in srgb, var(--lt-accent, #ff6edb) 24%, transparent) !important;
-}
 
 .app[data-theme] .main{
   background:
@@ -2349,30 +2133,6 @@ button:hover,
   color: #ffffff !important;
   stroke: #ffffff !important;
   fill: none !important;
-}
-
-.importButton{
-  min-height: 40px !important;
-  border: 1px solid color-mix(in srgb, var(--lt-accent, #ff6edb) 42%, transparent) !important;
-  border-radius: 14px !important;
-  background: color-mix(in srgb, var(--lt-accent, #ff6edb) 18%, rgba(255, 255, 255, 0.04)) !important;
-  color: #ffffff !important;
-  box-shadow: none !important;
-  text-transform: lowercase !important;
-}
-
-.importButton:hover{
-  transform: translateY(-1px) !important;
-  background: color-mix(in srgb, var(--lt-accent, #ff6edb) 28%, rgba(255, 255, 255, 0.05)) !important;
-}
-
-.rangeInput:focus{
-  outline: none !important;
-}
-
-.rangeInput::-webkit-slider-thumb{
-  outline: none !important;
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--lt-accent, #ff6edb) 22%, transparent) !important;
 }
 
 
@@ -2564,10 +2324,6 @@ html{
   animation-duration: 140ms !important;
 }
 
-.loadingCard{
-  animation-duration: 260ms !important;
-}
-
 
 .editorModal{
   background-image: none !important;
@@ -2586,18 +2342,14 @@ html{
   background-image: none !important;
 }
 
-.homeHeroCard,
 .editorModal,
 .deleteModal,
-.whatsNewCard{
+.whatsNewCard {
   transform-origin: center;
   contain: layout paint style;
 }
 
-.homeHeroCard,
-.songRow,
-.navButton,
-.sidebarAction{
+.songRow {
   transition-timing-function: var(--motion-smooth);
 }
 
@@ -2611,10 +2363,7 @@ html{
 }
 
 .hero,
-.songRow,
-.navButton,
-.sidebarAction,
-.transportButton{
+.songRow {
   transition-timing-function: var(--motion-smooth);
 }
 
@@ -2650,186 +2399,15 @@ html{
   --cover-sync-progress-opacity: 0.42;
 }
 
-.loadingSkeletonScreen{
-  min-height: 100vh;
-  width: 100%;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 22px;
-  padding: 28px;
-  overflow: hidden;
-  color: rgba(255, 255, 255, 0.92);
-  background:
-    radial-gradient(circle at 50% 0%, rgba(var(--lt-accent-rgb, 141, 255, 206), 0.18), transparent 36%),
-    radial-gradient(circle at 20% 70%, rgba(var(--progress-rgb, 141, 255, 206), 0.10), transparent 34%),
-    linear-gradient(180deg, #040407 0%, #08080d 52%, #020204 100%) !important;
-}
-
-.loadingSkeletonScreen::before{
-  display: none !important;
-}
-
-.loadingBrandCard{
-  width: min(460px, calc(100vw - 44px));
-  display: flex !important;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 14px;
-  padding: 16px 18px !important;
-  border-radius: 24px !important;
-  border: 1px solid rgba(255, 255, 255, 0.09) !important;
-  background: rgba(255, 255, 255, 0.045) !important;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35) !important;
-  backdrop-filter: blur(24px) saturate(1.24);
-}
-
-.loadingBrandCard > div:last-child{
-  display: grid;
-  gap: 3px;
-  min-width: 0;
-}
-
-.loadingBrandCard strong{
-  font-size: 15px;
-  letter-spacing: -0.01em;
-  text-transform: none !important;
-}
-
-.loadingBrandCard span{
-  color: rgba(255, 255, 255, 0.50);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.loadingSkeletonShell{
-  width: min(920px, calc(100vw - 44px));
-  display: grid;
-  gap: 14px;
-  padding: 16px;
-  border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.075);
-  background: rgba(255, 255, 255, 0.035);
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.36);
-  backdrop-filter: blur(28px) saturate(1.22);
-}
-
-.loadingSkeletonHero{
-  min-height: 170px;
-  display: grid;
-  grid-template-columns: 138px minmax(0, 1fr);
-  gap: 18px;
-  align-items: center;
-  padding: 18px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.055);
-}
-
-.skeletonCoverBlock{
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(110deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.055));
-  background-size: 230% 100%;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-
-
-  width: 138px;
-  aspect-ratio: 1;
-  border-radius: 24px;
-}
-
-.skeletonCopyBlock{
-  display: grid;
-  gap: 13px;
-}
-
-.skeletonCopyBlock i{
-  display: block;
-  height: 14px;
-  border-radius: 999px;
-}
-
-.skeletonCopyBlock i:nth-child(1){
-  width: min(360px, 86%);
-  height: 22px;
-}
-
-.skeletonCopyBlock i:nth-child(2){
-  width: min(260px, 62%);
-}
-
-.skeletonCopyBlock i:nth-child(3){
-  width: min(190px, 46%);
-}
-
-.loadingSkeletonGrid{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.loadingSkeletonSong{
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: 11px;
-  align-items: center;
-  padding: 11px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.032);
-  border: 1px solid rgba(255, 255, 255, 0.052);
-  animation-delay: var(--stagger, 0ms);
-}
-
-.loadingSkeletonSong span{
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-}
-
-.loadingSkeletonSong div{
-  display: grid;
-  gap: 8px;
-}
-
-.loadingSkeletonSong i{
-  display: block;
-  height: 10px;
-  border-radius: 999px;
-}
-
-.loadingSkeletonSong i:first-child{
-  width: 86%;
-}
-
-.loadingSkeletonSong i:last-child{
-  width: 58%;
-  opacity: 0.72;
-}
 
 @media (max-width: 860px){
-  .loadingSkeletonHero{
-    grid-template-columns: 96px minmax(0, 1fr);
-  }
 
-  .skeletonCoverBlock{
-    width: 96px;
-    border-radius: 20px;
-  }
 
-  .loadingSkeletonGrid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 560px){
-  .loadingSkeletonShell{
-    padding: 12px;
-  }
 
-  .loadingSkeletonGrid{
-    grid-template-columns: 1fr;
-  }
+
 }
 
 
@@ -2844,20 +2422,6 @@ html{
   100%{ opacity: 0; }
 }
 
-.secretLayer.night .secretAura{
-  background:
-    radial-gradient(circle at 26% 20%, rgba(147, 197, 253, 0.16), transparent 34%),
-    radial-gradient(circle at 72% 72%, rgba(217, 70, 239, 0.11), transparent 38%);
-  opacity: .72;
-}
-
-.secretLayer.fast .secretAura{
-  background:
-    repeating-linear-gradient(90deg, rgba(255,255,255,.12) 0 1px, transparent 1px 24px),
-    radial-gradient(circle at 50% 50%, rgba(236, 72, 255, .18), transparent 45%);
-  opacity: .72;
-  animation: localtifyFastSweep 1100ms linear infinite;
-}
 
 @keyframes localtifyFastSweep{
   0%{ transform: translate3d(-18px, 0, 0); opacity: .45; }
@@ -2875,46 +2439,6 @@ html{
   68%{ transform: translate3d(0, 2px, 0) scale(.98); }
 }
 
-.secretDevPanel{
-  position: fixed;
-  right: 22px;
-  top: 84px;
-  z-index: 1600;
-  display: grid;
-  gap: 8px;
-  min-width: 190px;
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--lt-accent) 38%, transparent);
-  background: color-mix(in srgb, var(--surface) 88%, #05020a 12%);
-  box-shadow: 0 16px 46px rgba(0, 0, 0, .34);
-  color: var(--lt-text);
-}
-
-.secretDevPanel strong{
-  font-size: .78rem;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--highlight);
-}
-
-.secretDevPanel span{
-  font-size: .76rem;
-  color: var(--lt-muted);
-}
-
-.secretDevPanel button{
-  border: 1px solid color-mix(in srgb, var(--lt-accent) 34%, transparent);
-  background: color-mix(in srgb, var(--surface2) 88%, transparent);
-  color: var(--lt-text);
-  border-radius: 12px;
-  padding: 8px 10px;
-  cursor: pointer;
-}
-
-.app .secretDevPanel{
-  animation: localtifyDevPanelIn 380ms cubic-bezier(.18,1.18,.34,1) both;
-}
 
 @keyframes localtifyDevPanelIn{
   0%{ opacity: 0; transform: translate3d(10px, -8px, 0) scale(.96); }
@@ -2928,10 +2452,9 @@ html{
 
 .secretLayer.night::before,
 .secretLayer.night::after,
-.secretLayer.night .secretAura,
 .secretLayer.night span,
 .secretLayer.night i,
-.secretLayer.night b{
+.secretLayer.night b {
   display: none !important;
   opacity: 0 !important;
   animation: none !important;
@@ -2954,8 +2477,7 @@ html{
 }
 
 .secretLayer.stars::before,
-.secretLayer.stars::after,
-.secretLayer.stars .secretAura{
+.secretLayer.stars::after {
   display: none !important;
   opacity: 0 !important;
   background: transparent !important;
@@ -3011,28 +2533,12 @@ html{
 }
 
 
-.app .secretLayer .secretAura{
-  position: absolute !important;
-  inset: 0 !important;
-  pointer-events: none !important;
-  opacity: 1 !important;
-  display: block !important;
-}
-
-
 @keyframes localtifyEggToastPop{
   0%{ opacity: 0; transform: translate3d(-50%, -12px, 0) scale(.94); }
   62%{ opacity: 1; transform: translate3d(-50%, 2px, 0) scale(1.025); }
   100%{ opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); }
 }
 
-
-.app .secretLayer.disco .secretAura{
-  background:
-    radial-gradient(circle at 19% 18%, rgba(var(--lt-accent-rgb), .22), transparent 28%),
-    radial-gradient(circle at 82% 24%, rgba(var(--accent-2-rgb), .16), transparent 24%),
-    radial-gradient(circle at 50% 94%, rgba(255,255,255,.08), transparent 30%) !important;
-}
 
 @keyframes localtifyStageSweepFixed{
   0%{ transform: translate3d(-2.4%, 0, 0) skewX(-8deg); }
@@ -3045,8 +2551,7 @@ html{
 }
 
 .app .secretLayer.stars::before,
-.app .secretLayer.stars::after,
-.app .secretLayer.stars .secretAura{
+.app .secretLayer.stars::after {
   display: none !important;
   opacity: 0 !important;
   background: transparent !important;
@@ -3089,10 +2594,6 @@ html{
 }
 
 
-.app .secretLayer.fast .secretAura{
-  background: radial-gradient(circle at 50% 50%, rgba(var(--lt-accent-rgb), .14), transparent 38%) !important;
-}
-
 @keyframes localtifySpeedLinesWorking{
   from{ transform: translate3d(-42px, 0, 0); }
   to{ transform: translate3d(42px, 0, 0); }
@@ -3104,10 +2605,9 @@ html{
 
 .app .secretLayer.night::before,
 .app .secretLayer.night::after,
-.app .secretLayer.night .secretAura,
 .app .secretLayer.night span,
 .app .secretLayer.night i,
-.app .secretLayer.night b{
+.app .secretLayer.night b {
   display: none !important;
   opacity: 0 !important;
   background: transparent !important;
@@ -3137,10 +2637,9 @@ html{
   animation: none !important;
 }
 
-.app .secretLayer .secretAura,
 .app .secretLayer i,
 .app .secretLayer b,
-.app .secretLayer:not(.stars) span:not(.secretRibbon){
+.app .secretLayer:not(.stars) span:not(.secretRibbon) {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
@@ -3334,13 +2833,6 @@ html{
   display: none !important;
 }
 
-.app .secretStar{
-  background: #fff !important;
-  box-shadow:
-    0 0 5px rgba(255,255,255,.82),
-    0 0 12px color-mix(in oklab, var(--theme-progress, var(--lt-accent)) 28%, transparent) !important;
-}
-
 
 @media (max-width: 920px){
 
@@ -3348,95 +2840,66 @@ html{
 }
 
 .app,
-.app::before,
-.mainView,
-.mainView::before,
-.homeView,
-.homeView::before{
+.app::before {
   background-image: none !important;
   background-size: auto !important;
 }
 
-.app::before,
-.mainView::before,
-.homeView::before{
+.app::before {
   opacity: 0 !important;
   display: none !important;
 }
 
 .songRow.active,
 .songRow.playing,
-.songRow.isActive,
 .songCard.active,
 .songCard.playing,
-.songCard.isPlaying{
+.songCard.isPlaying {
   color: #ffffff !important;
   -webkit-text-fill-color: initial !important;
 }
 
 .songRow.active *,
 .songRow.playing *,
-.songRow.isActive *,
 .songCard.active *,
 .songCard.playing *,
-.songCard.isPlaying *{
+.songCard.isPlaying * {
   color: inherit !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 .songRow.active .songTitle,
 .songRow.playing .songTitle,
-.songRow.isActive .songTitle,
 .songCard.active .songTitle,
 .songCard.playing .songTitle,
 .songCard.isPlaying .songTitle,
 .songCard.active h3,
 .songCard.playing h3,
-.songCard.isPlaying h3{
+.songCard.isPlaying h3 {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
 
 .songRow.active .songArtist,
 .songRow.playing .songArtist,
-.songRow.isActive .songArtist,
 .songCard.active .songArtist,
 .songCard.playing .songArtist,
 .songCard.isPlaying .songArtist,
 .songCard.active p,
 .songCard.playing p,
-.songCard.isPlaying p{
+.songCard.isPlaying p {
   color: rgba(255, 255, 255, 0.74) !important;
   -webkit-text-fill-color: rgba(255, 255, 255, 0.74) !important;
 }
 
 button svg,
-.circleButton svg,
-.primaryPlayButton svg,
-.mainPlayButton svg{
+.circleButton svg {
   fill: none !important;
   stroke: currentColor !important;
 }
 
-.primaryPlayButton,
-.primaryPlayButton *,
-.mainPlayButton,
-.mainPlayButton *{
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-}
 
-.themePickerLockNoteV026{
-  margin: 8px 0 0;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-}
-
-.themeGridLockedV026 .themeCard,
-.themeCardLockedV026,
-.settingsThemeSelectPanel select:disabled{
+.settingsThemeSelectPanel select:disabled {
   cursor: not-allowed !important;
   opacity: 0.55 !important;
   filter: grayscale(0.25) !important;
@@ -3448,11 +2911,8 @@ button svg,
 }
 
 .app,
-.mainContent,
-.contentShell,
 .view,
-.homeView,
-.settingsView{
+.settingsView {
   scrollbar-gutter: auto;
 }
 
@@ -3461,15 +2921,8 @@ button svg,
 .coverCard,
 .panel,
 .sectionCard,
-.statCard,
-.sidebarItem,
-.iconButton,
 .circleButton,
-.primaryButton,
-.secondaryButton,
-.themeButton,
-.settingsButton,
-button{
+button {
   backface-visibility: hidden;
   transform-style: flat;
 }
@@ -3477,8 +2930,7 @@ button{
 .app .songCard:hover,
 .app .songRow:hover,
 .app .coverCard:hover,
-.app .sectionCard:hover,
-.app .statCard:hover{
+.app .sectionCard:hover {
   transition-duration: 180ms;
   transition-timing-function: cubic-bezier(.2,.9,.2,1);
 }
@@ -3496,46 +2948,6 @@ button{
   content-visibility: visible;
 }
 
-.compactQuickNav{
-  display: none;
-}
-
-.compactQuickNavButton{
-  min-width: 0;
-  min-height: 34px;
-  border: 1px solid rgba(255,255,255,0.075);
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: rgba(255,255,255,0.72);
-  background: rgba(255,255,255,0.048);
-  font-size: 12px;
-  font-weight: 850;
-  text-transform: lowercase;
-  box-shadow: none;
-}
-
-.compactQuickNavButton:hover{
-  color: #fff;
-  border-color: rgba(var(--lt-accent-rgb),0.24);
-  background: rgba(var(--lt-accent-rgb),0.09);
-  transform: translate3d(0,-1px,0);
-}
-
-.compactQuickNavButton.active{
-  color: #fff;
-  border-color: rgba(var(--lt-accent-rgb),0.42);
-  background: rgba(var(--lt-accent-rgb),0.16);
-  box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb),0.08);
-}
-
-.compactQuickNavButton svg{
-  flex: 0 0 auto;
-  stroke: currentColor !important;
-  fill: none !important;
-}
 
 @media (max-width: 760px){
   .app{
@@ -3576,15 +2988,10 @@ button{
     height: 38px !important;
   }
 
-  .compactQuickNav{
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 7px;
-  }
+
 }
 
-.secretRibbon,
-.secretDevPanel{
+.secretRibbon {
   display: none !important;
 }
 
@@ -3593,23 +3000,11 @@ button{
   contain: paint;
 }
 
-.topRow:hover{
-  transform: translate3d(0, 0, 0) !important;
-}
-
-
-.app.viewSwitching .mainContent,
-.app.viewSwitching .homeShell{
-  transition-duration: 90ms !important;
-  animation-duration: 90ms !important;
-}
 
 .app.viewSwitching .ambientSurface::before,
 .app.viewSwitching .ambientSurface::after,
 .app.viewSwitching .coverAura,
-.app.viewSwitching .heroGlow,
-.app.viewSwitching .albumAura,
-.app.viewSwitching .floatingNote{
+.app.viewSwitching .albumAura {
   animation-play-state: paused !important;
   opacity: .28 !important;
   filter: none !important;
@@ -3650,8 +3045,7 @@ button{
 }
 
 .navLucideIcon,
-.navItemIcon,
-.navIcon{
+.navIcon {
   transform-origin: center;
   transition: transform 260ms cubic-bezier(.22,.9,.28,1), color 220ms ease, opacity 220ms ease, filter 220ms ease;
 
@@ -3680,8 +3074,7 @@ button{
 
 .app,
 .app::before,
-.app::after,
-.homeView{
+.app::after {
   background-image: none !important;
   background-size: auto !important;
 }
@@ -3751,15 +3144,13 @@ button{
   object-fit: contain !important;
 }
 
-.app.viewSwitching .ambientSurface,
-.app.viewSwitching .heroShell{
+.app.viewSwitching .ambientSurface {
   transition-duration: 90ms;
 }
 
 .app.viewSwitching .ambientSurface::before,
 .app.viewSwitching .ambientSurface::after,
-.app.viewSwitching .coverAura,
-.app.viewSwitching .heroGlow{
+.app.viewSwitching .coverAura {
   animation-play-state: paused;
   filter: none;
   opacity: .18;
@@ -3842,13 +3233,7 @@ button{
 
 .app,
 .app::before,
-.app::after,
-.mainView,
-.mainView::before,
-.mainView::after,
-.contentScroller,
-.contentScroller::before,
-.contentScroller::after{
+.app::after {
   background-image: none !important;
 }
 
@@ -3893,9 +3278,7 @@ body.localitfyThemePainting .app .ambientSurface::after{
 }
 
 .app,
-.mainContent,
-.contentScroller,
-.simpleShell{
+.simpleShell {
   --grid-line: transparent !important;
   --app-grid-line: transparent !important;
   --page-line: transparent !important;
@@ -3905,30 +3288,19 @@ body.localitfyThemePainting .app .ambientSurface::after{
 
 .app::before,
 .app::after,
-.mainContent::before,
-.mainContent::after,
-.contentScroller::before,
-.contentScroller::after,
 .simpleShell::before,
-.simpleShell::after{
+.simpleShell::after {
   background-image: none !important;
   background-size: auto !important;
 }
 
 .app,
-.mainView,
-.mainContent,
-.contentScroller,
 .simpleShell,
 .page,
 .homePage,
-.homeView,
 .settingsContent,
-.settingsBody,
-.settingsScroll,
 .settingsPanel,
-.settingsPanelShell,
-.simpleLibraryPanel{
+.simpleLibraryPanel {
   --grid-line: transparent !important;
   --app-grid-line: transparent !important;
   --page-line: transparent !important;
@@ -3936,23 +3308,14 @@ body.localitfyThemePainting .app .ambientSurface::after{
 }
 
 .app,
-.mainView,
-.mainContent,
-.contentScroller,
-.simpleShell{
+.simpleShell {
   background-image: none !important;
 }
 
 .app::before,
 .app::after,
-.mainView::before,
-.mainView::after,
-.mainContent::before,
-.mainContent::after,
-.contentScroller::before,
-.contentScroller::after,
 .simpleShell::before,
-.simpleShell::after{
+.simpleShell::after {
   background-image: none !important;
   background-size: auto !important;
   animation: none !important;
@@ -3962,25 +3325,12 @@ html,
 body,
 #root,
 .app,
-.mainContent,
-.contentScroller,
 .page,
-.pageShell,
 .homePage,
-.homeView,
-.likedView,
 .coversView,
 .settingsView,
 .settingsContent,
-.settingsBody,
-.settingsScroll,
-.settingsShell,
-.settingsWorkspace,
-.settingsMain,
-.settingsStage,
-.settingsCanvas,
-.settingsPanel,
-.settingsPanelShell{
+.settingsPanel {
   --grid-line: transparent !important;
   --app-grid-line: transparent !important;
   --page-line: transparent !important;
@@ -3989,38 +3339,18 @@ body,
 
 .app::before,
 .app::after,
-.mainContent::before,
-.mainContent::after,
-.contentScroller::before,
-.contentScroller::after,
 .page::before,
 .page::after,
-.homeView::before,
-.homeView::after,
 .settingsView::before,
 .settingsView::after,
 .settingsContent::before,
-.settingsContent::after,
-.settingsBody::before,
-.settingsBody::after,
-.settingsShell::before,
-.settingsShell::after,
-.settingsWorkspace::before,
-.settingsWorkspace::after,
-.settingsMain::before,
-.settingsMain::after,
-.settingsStage::before,
-.settingsStage::after,
-.settingsCanvas::before,
-.settingsCanvas::after{
+.settingsContent::after {
   background-image: none !important;
   background-size: auto !important;
   animation: none !important;
 }
 
-.app,
-.mainContent,
-.contentScroller{
+.app {
   background-image:
     radial-gradient(circle at 48% 0%, color-mix(in oklab, var(--lt-accent, #ff4ee8) 8%, transparent) 0%, transparent 34%),
     radial-gradient(circle at 88% 88%, color-mix(in oklab, var(--accent-2, var(--lt-accent, #9d6cff)) 6%, transparent) 0%, transparent 32%),
@@ -4079,20 +3409,13 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote, .secretLayer,
   contain: layout paint style;
 }
 
-.homeAlbums{
-  content-visibility: auto;
-  contain-intrinsic-size: 720px;
-}
 
 .app,
 .app::before,
 .app::after,
-.mainStage,
-.mainStage::before,
-.mainStage::after,
 .ambientSurface,
 .ambientSurface::before,
-.ambientSurface::after{
+.ambientSurface::after {
   background-image: none !important;
   background-size: auto !important;
 }
@@ -4104,42 +3427,12 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote, .secretLayer,
     var(--lt-bg) !important;
 }
 
-.mainStage{
-  background: transparent !important;
-}
 
-.sideNav,
-.sidebarNav{
+.sidebarNav {
   overflow: hidden !important;
   contain: layout paint style;
 }
 
-.sideItem{
-  overflow: hidden !important;
-  contain: paint;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease,
-    opacity 150ms ease !important;
-}
-
-.sideItem::before,
-.sideItem::after,
-.sideItem.active::before,
-.sideItem.active::after{
-  inset: 0 !important;
-  width: auto !important;
-  height: auto !important;
-  transform: none !important;
-  pointer-events: none !important;
-}
-
-.sideItem.active,
-.sideItem[aria-current="page"]{
-
-  border-left-color: rgba(var(--lt-accent-rgb), 0.55) !important;
-}
 
 .app.playerScrubbing .ambientSurface,
 .app.playerScrubbing .ambientSurface::before,
@@ -4155,8 +3448,7 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote, .secretLayer,
 .app.isScrolling .coverCard,
 .app.isScrolling .panel,
 .app.playerScrubbing .playerBar,
-.app.playerScrubbing .progressInput,
-.app.playerScrubbing .volumeSlider{
+.app.playerScrubbing .progressInput {
   transition-duration: 0s !important;
 }
 
@@ -4166,14 +3458,6 @@ body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote, .secretLayer,
   contain-intrinsic-size: 1px 280px;
 }
 
-.sideItem.active,
-.sideItem[aria-current="page"]{
-  border-left-width: 1px !important;
-  border-left-style: solid !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(var(--lt-accent-rgb), 0.30),
-    0 12px 30px rgba(var(--lt-accent-rgb), 0.10) !important;
-}
 
 .loadingScreen,
 .editorModal{
@@ -4186,20 +3470,11 @@ html,
 body,
 #root,
 .app,
-.mainShell,
-.mainArea,
-.mainContent,
-.appContent,
-.contentShell,
-.pageShell,
-.pageSurface,
 .homePage,
-.likedPage,
 .coversPage,
 .panel,
 .hero,
-.heroCard,
-.settingsPanel{
+.settingsPanel {
   background-image: none !important;
 }
 
@@ -4211,20 +3486,6 @@ body::after,
 #root::after,
 .app::before,
 .app::after,
-.mainShell::before,
-.mainShell::after,
-.mainArea::before,
-.mainArea::after,
-.mainContent::before,
-.mainContent::after,
-.appContent::before,
-.appContent::after,
-.contentShell::before,
-.contentShell::after,
-.pageShell::before,
-.pageShell::after,
-.pageSurface::before,
-.pageSurface::after,
 .homePage::before,
 .homePage::after,
 .coversPage::before,
@@ -4233,10 +3494,8 @@ body::after,
 .panel::after,
 .hero::before,
 .hero::after,
-.heroCard::before,
-.heroCard::after,
 .settingsPanel::before,
-.settingsPanel::after{
+.settingsPanel::after {
   background-image: none !important;
   background-size: auto !important;
 }
@@ -4245,10 +3504,7 @@ body::after,
 .coverCard,
 .playlistCard,
 .playlistSongRow,
-.settingCard,
-.panel,
-.heroCard,
-.sidebarItem{
+.panel {
   rotate: 0deg !important;
   transform-style: flat !important;
   perspective: none !important;
@@ -4334,8 +3590,7 @@ body::after,
 
 .app .settingsCategoryButton,
 .app .whatsNewClose,
-.app .updatePrimaryButton,
-.app .updateSecondaryButton{
+.app .updatePrimaryButton {
   transform: translate3d(0,0,0) !important;
   backface-visibility: hidden !important;
   transform-origin: center !important;
@@ -4368,13 +3623,11 @@ body::after,
   border-radius: 999px !important;
 }
 
-.app .pageTransition,
-.app .mainContent{
+.app .pageTransition {
   transform: translate3d(0,0,0);
 }
 
-.app.viewSwitching .mainContent,
-.app.viewSwitching .pageTransition{
+.app.viewSwitching .pageTransition {
   opacity: 1 !important;
   transform: translate3d(0,0,0) !important;
 }
@@ -4389,9 +3642,7 @@ body::after,
   transform: translate3d(0,0,0) !important;
 }
 
-.app .whatsNewCard ul,
-.app .updateCard ul,
-.app .updatePopup ul{
+.app .whatsNewCard ul {
   list-style: none !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -4399,9 +3650,7 @@ body::after,
   gap: 10px !important;
 }
 
-.app .whatsNewCard li,
-.app .updateCard li,
-.app .updatePopup li{
+.app .whatsNewCard li {
   position: relative !important;
   min-height: 42px !important;
   padding: 12px 14px 12px 44px !important;
@@ -4409,9 +3658,7 @@ body::after,
   border-radius: 18px !important;
 }
 
-.app .whatsNewCard li::before,
-.app .updateCard li::before,
-.app .updatePopup li::before{
+.app .whatsNewCard li::before {
   left: 16px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
@@ -4512,16 +3759,10 @@ body.localtifyBackgroundMode .ambientSurface,
 body.localtifyBackgroundMode .app::before,
 body.localtifyBackgroundMode .app::after,
 body.localtifyBackgroundMode .coverAura,
-body.localtifyBackgroundMode .heroGlow,
-body.localtifyBackgroundMode .heroBackground,
-body.localtifyBackgroundMode .nowPlayingAura,
 body.localtifyBackgroundMode .visualizer,
 .app.appBackgrounded .ambientSurface,
 .app.appBackgrounded .coverAura,
-.app.appBackgrounded .heroGlow,
-.app.appBackgrounded .heroBackground,
-.app.appBackgrounded .nowPlayingAura,
-.app.appBackgrounded .visualizer{
+.app.appBackgrounded .visualizer {
   animation-play-state: paused;
 }
 
@@ -4530,11 +3771,9 @@ body.localtifyBackgroundMode .ambientSurface,
   opacity: var(--background-visual-opacity, 0.35);
 }
 
-.homeShelf,
 .settingsSection,
 .settingsCard,
-.songListPanel,
-.recentImportsPanel{
+.songListPanel {
   content-visibility: auto;
   contain-intrinsic-size: 320px;
 }
@@ -4658,42 +3897,6 @@ body.localtifyBackgroundMode .ambientSurface,
   overflow: hidden !important;
 }
 
-.app .updateToastMetaRow,
-.updateToastMetaRow{
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 7px !important;
-  margin: 2px 0 0 !important;
-  flex-wrap: wrap !important;
-}
-
-.app .updateVersionPill,
-.app .updateSafePill,
-.updateVersionPill,
-.updateSafePill{
-  min-height: 23px !important;
-  padding: 0 8px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  border-radius: 999px !important;
-  background: rgba(0,0,0,.18) !important;
-  border: 1px solid rgba(255,255,255,.09) !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 72%, var(--lt-muted, #aaa) 28%) !important;
-  font-size: 10.5px !important;
-  font-weight: 850 !important;
-  letter-spacing: .01em !important;
-  white-space: nowrap !important;
-}
-
-.app .updateSafePill.pending,
-.updateSafePill.pending{
-  color: color-mix(in oklab, var(--warning, #ffbd72) 70%, white 30%) !important;
-}
-
-.app .updateSafePill.ok,
-.updateSafePill.ok{
-  color: color-mix(in oklab, var(--lt-accent, #e86be8) 72%, white 28%) !important;
-}
 
 .app .updateToastActions,
 .updateToastActions{
@@ -4707,9 +3910,7 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 .app .updatePrimaryButton,
-.app .updateGhostButton,
-.updatePrimaryButton,
-.updateGhostButton{
+.updatePrimaryButton {
   height: 31px !important;
   min-height: 31px !important;
   border-radius: 10px !important;
@@ -4721,21 +3922,6 @@ body.localtifyBackgroundMode .ambientSurface,
   transform: none !important;
 }
 
-.app .updateGhostButton,
-.updateGhostButton{
-  background: rgba(255,255,255,.052) !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 72%, var(--lt-muted, #aaa) 28%) !important;
-  box-shadow: none !important;
-}
-
-.app .updateGhostButton:hover,
-.updateGhostButton:hover{
-  transform: none !important;
-  background: rgba(255,255,255,.085) !important;
-  border-color: color-mix(in oklab, var(--lt-accent, #e86be8) 35%, rgba(255,255,255,.16)) !important;
-  color: var(--lt-text, #fff) !important;
-}
 
 .app .updatePrimaryButton,
 .updatePrimaryButton{
@@ -4839,15 +4025,6 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 
-.app .topUpdateRibbon .updateGhostButton:hover,
-.topUpdateRibbon .updateGhostButton:hover{
-
-
-  border-color: color-mix(in oklab, var(--lt-accent, #e962e9) 36%, rgba(255,255,255,.16)) !important;
-
-}
-
-
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
 
@@ -4871,10 +4048,7 @@ body.localtifyBackgroundMode .ambientSurface,
     padding: 0 14px !important;
   }
 
-  .app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta{
-    display: none !important;
-  }
+
 }
 
 @media (max-width: 760px){
@@ -4897,9 +4071,7 @@ body.localtifyBackgroundMode .ambientSurface,
   .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow,
 .app .topUpdateRibbonText p:not(.eyebrow),
-.topUpdateRibbonText p:not(.eyebrow),
-.app .topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateGhostButton{
+.topUpdateRibbonText p:not(.eyebrow) {
     display: none !important;
   }
 }
@@ -4911,24 +4083,6 @@ body.localtifyBackgroundMode .ambientSurface,
 
 }
 
-
-.app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta{
-  grid-column: auto !important;
-  margin: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 6px !important;
-  min-width: max-content !important;
-  flex-wrap: nowrap !important;
-}
-
-
-.app .topUpdateRibbon .updateSafePill.pending,
-.topUpdateRibbon .updateSafePill.pending{
-  color: color-mix(in oklab, var(--lt-accent, #e65adf) 64%, white 36%) !important;
-}
 
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
@@ -4957,19 +4111,14 @@ body.localtifyBackgroundMode .ambientSurface,
     padding: 0 10px !important;
   }
 
-  .app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta{
-    display: none !important;
-  }
+
 }
 
 @media (max-width: 720px){
 
 
   .app .topUpdateRibbonText .eyebrow,
-.topUpdateRibbonText .eyebrow,
-.app .topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateGhostButton{
+.topUpdateRibbonText .eyebrow {
     display: none !important;
   }
 }
@@ -4994,10 +4143,7 @@ body.localtifyBackgroundMode .ambientSurface,
     padding: 0 10px !important;
   }
 
-  .app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta{
-    display: none !important;
-  }
+
 }
 
 @media (max-width: 720px){
@@ -5042,10 +4188,6 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .songList.simpleList.virtualSongViewport{
   height: clamp(260px, calc(100vh - 430px), 560px);
-}
-
-.homeSongList.virtualSongViewport{
-  height: clamp(320px, calc(100vh - 430px), 640px);
 }
 
 
@@ -5547,9 +4689,6 @@ body.localtifyBackgroundMode .ambientSurface,
   animation: screensaverIdlePulse 4.4s ease-in-out infinite;
 }
 
-.staticBackgrounds .screensaverBackdrop,
-.staticBackgrounds .screensaverPanel::before,
-.staticBackgrounds .screensaverIdleText{ animation: none; }
 
 [data-anime-visuals="off"] .screensaverOverlay{ display: none; }
 
@@ -5575,27 +4714,6 @@ body.localtifyBackgroundMode .ambientSurface,
     padding: 28px;
     border-radius: 30px;
   }
-}
-
-.gifVisualModePicker{ margin: 16px 0 4px; display: grid; gap: 8px; }
-.gifVisualModePicker label{
-  color: var(--lt-muted);
-  font-size: 0.76rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.gifVisualModePicker select{
-  width: min(320px, 100%);
-  height: 44px;
-  border-radius: 16px;
-  border: 1px solid color-mix(in srgb, var(--lt-accent) 24%, transparent);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--lt-text);
-  padding: 0 14px;
-  font: inherit;
-  font-weight: 800;
-  outline: none;
 }
 
 
@@ -5629,10 +4747,8 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 
-.app .topUpdateRibbon .updateGhostButton,
 .app .topUpdateRibbon .updateToastClose,
-.topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateToastClose{
+.topUpdateRibbon .updateToastClose {
   transition:
     transform 160ms cubic-bezier(.16,1,.3,1),
     background-color 160ms ease,
@@ -5640,10 +4756,8 @@ body.localtifyBackgroundMode .ambientSurface,
     filter 160ms ease !important;
 }
 
-.app .topUpdateRibbon .updateGhostButton:hover,
 .app .topUpdateRibbon .updateToastClose:hover,
-.topUpdateRibbon .updateGhostButton:hover,
-.topUpdateRibbon .updateToastClose:hover{
+.topUpdateRibbon .updateToastClose:hover {
   transform: translate3d(0,-1px,0) !important;
   background: rgba(255,255,255,.075) !important;
 }
@@ -6155,10 +5269,8 @@ body.localtifyBackgroundMode .ambientSurface,
   -webkit-app-region: no-drag !important;
 }
 
-.app .titleBarUpdateSlot .topUpdateRibbonMeta,
-.titleBarUpdateSlot .topUpdateRibbonMeta,
 .app .titleBarUpdateSlot .topUpdateRibbonActions,
-.titleBarUpdateSlot .topUpdateRibbonActions{
+.titleBarUpdateSlot .topUpdateRibbonActions {
   height: 100% !important;
   min-width: 0 !important;
   display: inline-flex !important;
@@ -6170,34 +5282,11 @@ body.localtifyBackgroundMode .ambientSurface,
   -webkit-app-region: no-drag !important;
 }
 
-.app .titleBarUpdateSlot .topUpdateRibbon .updateVersionPill,
-.app .titleBarUpdateSlot .topUpdateRibbon .updateSafePill,
-.titleBarUpdateSlot .topUpdateRibbon .updateVersionPill,
-.titleBarUpdateSlot .topUpdateRibbon .updateSafePill{
-  height: 19px !important;
-  min-height: 19px !important;
-  padding: 0 8px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 999px !important;
-  color: rgba(255,255,255,.70) !important;
-  background: rgba(255,255,255,.06) !important;
-  border: 1px solid rgba(255,255,255,.08) !important;
-  font-size: 9px !important;
-  line-height: 1 !important;
-  font-weight: 850 !important;
-  white-space: nowrap !important;
-  box-shadow: none !important;
-  pointer-events: none !important;
-}
 
 .app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
-.app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
 .app .titleBarUpdateSlot .topUpdateRibbon .updateToastClose,
 .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
-.titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
-.titleBarUpdateSlot .topUpdateRibbon .updateToastClose{
+.titleBarUpdateSlot .topUpdateRibbon .updateToastClose {
   position: relative !important;
   z-index: 6 !important;
   height: 23px !important;
@@ -6227,10 +5316,8 @@ body.localtifyBackgroundMode .ambientSurface,
   box-shadow: 0 0 14px rgba(var(--lt-accent-rgb, 230,90,223), .18) !important;
 }
 
-.app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
 .app .titleBarUpdateSlot .topUpdateRibbon .updateToastClose,
-.titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
-.titleBarUpdateSlot .topUpdateRibbon .updateToastClose{
+.titleBarUpdateSlot .topUpdateRibbon .updateToastClose {
   color: rgba(255,255,255,.78) !important;
   background: rgba(255,255,255,.055) !important;
   border: 1px solid rgba(255,255,255,.08) !important;
@@ -6238,11 +5325,9 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 .app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton:hover,
-.app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton:hover,
 .app .titleBarUpdateSlot .topUpdateRibbon .updateToastClose:hover,
 .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton:hover,
-.titleBarUpdateSlot .topUpdateRibbon .updateGhostButton:hover,
-.titleBarUpdateSlot .topUpdateRibbon .updateToastClose:hover{
+.titleBarUpdateSlot .topUpdateRibbon .updateToastClose:hover {
   transform: translate3d(0,-1px,0) !important;
   filter: brightness(1.045) !important;
 }
@@ -6290,18 +5375,13 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 }
 
 @media (max-width: 1180px){
-  .app .titleBarUpdateSlot .topUpdateRibbonMeta,
-.titleBarUpdateSlot .topUpdateRibbonMeta{
-    display: none !important;
-  }
+
 }
 
 @media (max-width: 920px){
 
   .app .titleBarUpdateSlot .topUpdateRibbonText .eyebrow,
-.titleBarUpdateSlot .topUpdateRibbonText .eyebrow,
-.app .titleBarUpdateSlot .topUpdateRibbon .updateGhostButton,
-.titleBarUpdateSlot .topUpdateRibbon .updateGhostButton{
+.titleBarUpdateSlot .topUpdateRibbonText .eyebrow {
     display: none !important;
   }
 
@@ -6332,9 +5412,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   }
 }
 
-.app.updateRibbonVisible .mainLayout{
-  padding-top: 0 !important;
-}
 
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
@@ -6441,10 +5518,8 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 }
 
-.app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta,
 .app .topUpdateRibbonActions,
-.topUpdateRibbonActions{
+.topUpdateRibbonActions {
   height: 100% !important;
   margin: 0 !important;
   display: inline-flex !important;
@@ -6456,34 +5531,11 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   flex-wrap: nowrap !important;
 }
 
-.app .topUpdateRibbon .updateVersionPill,
-.app .topUpdateRibbon .updateSafePill,
-.topUpdateRibbon .updateVersionPill,
-.topUpdateRibbon .updateSafePill{
-  height: 20px !important;
-  min-height: 20px !important;
-  padding: 0 7px !important;
-  border-radius: 999px !important;
-  border: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1 !important;
-  margin: 0 !important;
-  background: rgba(255,255,255,0.052) !important;
-  color: color-mix(in oklab, var(--lt-text, #fff) 78%, var(--lt-muted, #aaa) 22%) !important;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.052) !important;
-  font-size: 9.6px !important;
-  font-weight: 820 !important;
-  white-space: nowrap !important;
-}
 
 .app .topUpdateRibbon .updatePrimaryButton,
-.app .topUpdateRibbon .updateGhostButton,
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateToastClose{
+.topUpdateRibbon .updateToastClose {
 
 
   min-width: 0 !important;
@@ -6502,18 +5554,9 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 }
 
-.app .topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateGhostButton{
-  border: 0 !important;
 
-
-}
-
-
-.app .topUpdateRibbon .updateGhostButton:hover,
-.topUpdateRibbon .updateGhostButton:hover,
 .app .topUpdateRibbon .updatePrimaryButton:hover,
-.topUpdateRibbon .updatePrimaryButton:hover{
+.topUpdateRibbon .updatePrimaryButton:hover {
   filter: brightness(1.04) !important;
   transform: none !important;
 }
@@ -6545,18 +5588,13 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     right: 132px !important;
   }
 
-  .app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta{
-    display: none !important;
-  }
+
 }
 
 @media (max-width: 860px){
 
   .app .topUpdateRibbonText .eyebrow,
-.topUpdateRibbonText .eyebrow,
-.app .topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateGhostButton{
+.topUpdateRibbonText .eyebrow {
     display: none !important;
   }
 }
@@ -6603,15 +5641,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 }
 
 
-.app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta,
-.app .topUpdateRibbon .updateVersionPill,
-.app .topUpdateRibbon .updateSafePill,
-.topUpdateRibbon .updateVersionPill,
-.topUpdateRibbon .updateSafePill{
-  display: none !important;
-}
-
 .app .topUpdateRibbonMain,
 .topUpdateRibbonMain{
 
@@ -6643,11 +5672,9 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 }
 
 .app .topUpdateRibbon .updatePrimaryButton,
-.app .topUpdateRibbon .updateGhostButton,
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateToastClose{
+.topUpdateRibbon .updateToastClose {
   height: 21px !important;
   min-height: 21px !important;
   border-radius: 999px !important;
@@ -6668,13 +5695,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   -webkit-app-region: no-drag !important;
 }
 
-.app .topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateGhostButton{
-
-
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.058) !important;
-}
-
 
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
@@ -6682,16 +5702,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 }
 
-.app .topUpdateRibbon .updateGhostButton:hover,
-.topUpdateRibbon .updateGhostButton:hover{
-  transform: translateY(-1px) scale(1.018) !important;
-  color: rgba(255,255,255,0.88) !important;
-  background: rgba(255,255,255,0.090) !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,0.085),
-    0 7px 14px rgba(0,0,0,0.12) !important;
-  filter: none !important;
-}
 
 .app .topUpdateRibbon .updatePrimaryButton:hover,
 .topUpdateRibbon .updatePrimaryButton:hover{
@@ -6710,11 +5720,9 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 }
 
 .app .topUpdateRibbon .updatePrimaryButton:active,
-.app .topUpdateRibbon .updateGhostButton:active,
 .app .topUpdateRibbon .updateToastClose:active,
 .topUpdateRibbon .updatePrimaryButton:active,
-.topUpdateRibbon .updateGhostButton:active,
-.topUpdateRibbon .updateToastClose:active{
+.topUpdateRibbon .updateToastClose:active {
   transform: translateY(0) scale(0.965) !important;
   transition-duration: 70ms !important;
 }
@@ -6756,10 +5764,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     right: 116px !important;
   }
 
-  .app .topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateGhostButton{
-    display: none !important;
-  }
+
 }
 
 .app{
@@ -6938,9 +5943,7 @@ the last imported CSS layer. */
 .app .localtifyStarsLayerC,
 .app .localtifyStarsNebula,
 .app .localtifyStarParticle,
-.app .localtifyStarSweep,
-.app .ambientOrb,
-.app .sideAmbienceOrb{
+.app .localtifyStarSweep {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
@@ -7350,8 +6353,7 @@ body,
 
 /* Fixed sidebar: not transparent, not glass, and content cannot slide underneath it. */
 .sidebar,
-.app .sidebar,
-.app.sidebarHoverShiftEnabled .sidebar{
+.app .sidebar {
   grid-column: 1;
   grid-row: 1 / 3;
   position: relative;
@@ -7397,8 +6399,7 @@ body,
 
 /* Main content starts after the actual sidebar. */
 .content,
-.app .content,
-.app.sidebarHoverShiftEnabled .content{
+.app .content {
   grid-column: 2;
   grid-row: 1;
   min-width: 0;
@@ -7421,13 +6422,7 @@ body,
 
 
 /* Sidebar controls: solid, theme-aware, no blur/glass. */
-.logoWrap{
-  min-height: 54px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  overflow: hidden;
-}
+
 
 .nav{
   display: grid;
@@ -7492,10 +6487,6 @@ body,
   display: none;
 }
 
-.toastStack{
-  left: calc(var(--workspace-sidebar-current, 236px) + 22px);
-  width: min(360px, calc(100vw - var(--workspace-sidebar-current, 236px) - 42px));
-}
 
 /* Release performance: stop repeated entrance animations from repainting the page. */
 .content,
@@ -7529,9 +6520,7 @@ body.isResizingPlayer .app *{
     padding: 0;
   }
 
-  .navText,
-.logoWrap h1,
-.logoWrap p{
+  .navText {
     display: none;
   }
 
@@ -7745,8 +6734,7 @@ body.isResizingPlayer .app *{
 }
 
 .app .modalWrap .editorModal,
-.app .modalWrap .confirmModal,
-.app .modalWrap [class*="Modal"]{
+.app .modalWrap [class*="Modal"] {
   position: relative !important;
   z-index: 1 !important;
 }
@@ -7814,9 +6802,7 @@ body.isResizingPlayer .app *{
 
 
 .app .topUpdateRibbonText .eyebrow,
-.topUpdateRibbonText .eyebrow,
-.app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta{
+.topUpdateRibbonText .eyebrow {
   display: none !important;
 }
 
@@ -7837,12 +6823,10 @@ body.isResizingPlayer .app *{
 
 }
 
-.app .topUpdateRibbon .updateGhostButton,
 .app .topUpdateRibbon .updatePrimaryButton,
 .app .topUpdateRibbon .updateToastClose,
-.topUpdateRibbon .updateGhostButton,
 .topUpdateRibbon .updatePrimaryButton,
-.topUpdateRibbon .updateToastClose{
+.topUpdateRibbon .updateToastClose {
   height: 23px !important;
   min-height: 23px !important;
   padding: 0 10px !important;
@@ -7852,12 +6836,6 @@ body.isResizingPlayer .app *{
   line-height: 1 !important;
   font-weight: 900 !important;
   white-space: nowrap !important;
-}
-
-.app .topUpdateRibbon .updateGhostButton,
-.topUpdateRibbon .updateGhostButton{
-  color: rgba(255,255,255,.70) !important;
-  background: rgba(255,255,255,.052) !important;
 }
 
 
@@ -8977,10 +7955,7 @@ body.isResizingPlayer .app *{
     font-size: 10.5px !important;
   }
 
-  .app .topUpdateRibbon .updateReleaseLinkV486,
-.topUpdateRibbon .updateReleaseLinkV486{
-    display: none !important;
-  }
+
 }
 /* end localtify v486 */
 
@@ -9176,30 +8151,6 @@ body.isResizingPlayer .app *{
   height: 100% !important;
 }
 
-.app .topUpdateRibbonMeta,
-.topUpdateRibbonMeta,
-.app .topUpdateRibbon .updateVersionPill,
-.topUpdateRibbon .updateVersionPill,
-.app .topUpdateRibbon .updateSafePill,
-.topUpdateRibbon .updateSafePill{
-  display: none !important;
-}
-
-.app .topUpdateRibbon .updateReleaseLinkV486,
-.topUpdateRibbon .updateReleaseLinkV486{
-  height: 22px !important;
-  min-height: 22px !important;
-  padding: 0 9px !important;
-  border: 0 !important;
-  border-radius: 999px !important;
-  color: #dffaff !important;
-  background: rgba(255,255,255,.10) !important;
-  box-shadow: none !important;
-  font-size: 10.5px !important;
-  font-weight: 850 !important;
-  text-decoration: underline !important;
-  text-underline-offset: 2px !important;
-}
 
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
@@ -9385,10 +8336,6 @@ body.isResizingPlayer .app *{
   color: rgba(var(--lt-accent-rgb), .95) !important;
 }
 
-.app .topUpdateRibbon .updateReleaseLinkV486,
-.topUpdateRibbon .updateReleaseLinkV486{
-  display: none !important;
-}
 
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
