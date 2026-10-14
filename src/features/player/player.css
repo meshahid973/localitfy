@@ -79,7 +79,6 @@
   width: var(--player-art-size) !important;
   height: var(--player-art-size) !important;
   min-width: var(--player-art-size) !important;
-  border-radius: 12px !important;
   overflow: hidden !important;
 
   transform: translateZ(0) !important;
@@ -225,8 +224,6 @@
 .playerBar .circleButton.active,
 .playerBar .repeatButton.active{
 
-  background: transparent !important;
-  box-shadow: none !important;
   border: 0 !important;
 }
 
@@ -837,10 +834,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 .playerBar .circleButton.active,
 .playerBar .repeatButton.active {
-  color: rgb(var(--accent-rgb)) !important;
   background: transparent !important;
   box-shadow: none !important;
-  filter: drop-shadow(0 0 9px rgba(var(--accent-rgb),0.28)) !important;
 }
 
 .playerBar .circleButton.main,
