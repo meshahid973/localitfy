@@ -2,7 +2,7 @@ name: quality
 
 on:
   push:
-    branches: [main, chore/code-audit]
+    branches: [main]
   pull_request:
 
 permissions:
