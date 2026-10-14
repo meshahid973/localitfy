@@ -25,7 +25,7 @@ const rebuiltPageStyles = [
   "src/features/covers/covers.css", "src/features/downloads/downloads.css",
   "src/features/analytics/analytics.css", "src/features/settings/settings.css"
 ];
-const resetRoots = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339", ".settingsPageV027"];
+const featureRoots = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339", ".settingsPageV027"];
 const resetSources = [
   ["src/features/genres/GenresView.tsx", "genres"], ["src/features/albums/AlbumsView.tsx", "albums"], ["src/features/playlists/PlaylistsView.tsx", "playlists"],
   ["src/features/downloads/DownloadsView.tsx", "downloads"], ["src/features/analytics/AnalyticsView.tsx", "analytics"],
@@ -67,7 +67,7 @@ for (const modulePath of ["library/LibraryView", "artists/ArtistsView", "genres/
 }
 
 const main = read("src/main.tsx");
-for (const specifier of ["@fontsource/space-grotesk/500.css", "@fontsource/space-grotesk/600.css", "@fontsource/space-grotesk/700.css", "./styles/tokens.css", "./styles/themes.css", "./shared/ui/view-ui.css", "./styles/page-foundation.css", "./features/shell/performance.css"]) {
+for (const specifier of ["@fontsource/space-grotesk/500.css", "@fontsource/space-grotesk/600.css", "@fontsource/space-grotesk/700.css", "./styles/tokens.css", "./styles/themes.css", "./shared/ui/view-ui.css", "./features/shell/performance.css"]) {
   if (!main.includes('import "' + specifier + '";')) fail("main.tsx missing global stylesheet " + specifier);
 }
 const mainCssImports = [...main.matchAll(/import\s+["']([^"']+\.css)["']/g)].map((match) => match[1]);
@@ -78,20 +78,12 @@ for (const [file, section] of resetSources) {
   if (!source.includes('data-page-section="' + section + '"')) fail(file + ": missing page owner marker");
   if (source.includes('data-page-state="reset"')) fail(file + ": rebuilt page must not use reset mode");
 }
-const foundation = read("src/styles/page-foundation.css");
-if (!foundation.includes('[data-page-section][data-page-state="reset"]')) fail("page foundation is not reset-state gated");
-if (/\[data-page-section\](?!\[data-page-state="reset"\])/.test(foundation)) fail("page foundation contains an ungated page-section selector");
-for (const rootSelector of resetRoots) {
-  if (!foundation.includes(rootSelector)) fail("page foundation lost structural reset selector " + rootSelector);
-}
-for (const libraryToken of [".libraryPanel", ".libraryQuick", ".libraryMissing", ".libraryFullList", ".libraryCoverCards"]) {
-  if (foundation.includes(libraryToken)) fail("page foundation still owns rebuilt Library token " + libraryToken);
-}
-for (const token of ["linear-gradient(", "radial-gradient("]) if (foundation.includes(token)) fail("visual skin leaked into page foundation: " + token);
+if (exists("src/styles/page-foundation.css")) fail("retired reset stylesheet must remain deleted");
+if (main.includes("page-foundation.css")) fail("renderer still imports retired reset stylesheet");
 
 for (const file of ["src/App.css", "src/features/shell/app-core.css", "src/features/shell/effects.css", "src/styles/themes.css", "src/styles/view-shell.css"]) {
   const source = read(file).replace(/\/\*[\s\S]*?\*\//g, " ");
-  for (const selector of resetRoots) if (source.includes(selector)) fail(file + ": rebuild page selector leaked into global owner: " + selector);
+  for (const selector of featureRoots) if (source.includes(selector)) fail(file + ": rebuild page selector leaked into global owner: " + selector);
   if (file !== "src/styles/view-shell.css" && source.includes(".libraryPage")) fail(file + ": rebuilt Library root leaked into global owner");
 }
 
@@ -99,7 +91,7 @@ const cssBudgets = [
   ["src/App.css", 238 * 1024, 2209], ["src/features/shell/app-core.css", 80 * 1024, 664],
   ["src/features/player/player.css", 75 * 1024, 819], ["src/features/shell/effects.css", 65 * 1024, 662],
   ["src/styles/themes.css", 83 * 1024, 2], ["src/styles/view-shell.css", 20 * 1024, 198],
-  ["src/styles/page-foundation.css", 8 * 1024, 12], ["src/features/home/home.css", 20 * 1024, 11],
+  ["src/features/home/home.css", 20 * 1024, 11],
   ["src/features/library/library.css", 24 * 1024, 95], ["src/features/artists/artists.css", 12 * 1024, 0], ["src/features/genres/genres.css", 4 * 1024, 0]
 ];
 for (const [file, maxBytes, maxImportant] of cssBudgets) {

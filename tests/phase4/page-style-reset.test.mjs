@@ -30,14 +30,7 @@ test("global visual owners cannot reclaim reset page roots", () => {
   }
 });
 
-test("temporary page foundation stays reset-gated, structural, and small", () => {
-  const source = read("src/styles/page-foundation.css");
-  assert.ok(source.includes('[data-page-section][data-page-state="reset"]'));
-  assert.doesNotMatch(source, /\[data-page-section\](?!\[data-page-state="reset"\])/);
-  for (const selector of resetPageRoots) assert.equal(source.includes(selector), true, "structural foundation lost " + selector);
-  for (const libraryToken of [".libraryPanel", ".libraryQuick", ".libraryMissing", ".libraryFullList", ".libraryCoverCards"]) {
-    assert.equal(source.includes(libraryToken), false, "rebuilt Library leaked back into the reset foundation: " + libraryToken);
-  }
-  for (const visualToken of ["linear-gradient(", "radial-gradient("]) assert.equal(source.includes(visualToken), false, "structural foundation gained visual styling: " + visualToken);
-  assert.ok(Buffer.byteLength(source.replace(/\r\n/g, "\n")) < 8 * 1024, "page foundation exceeded its 8 KiB structural budget");
+test("retired reset stylesheet cannot return", () => {
+  assert.equal(fs.existsSync(path.join(root, "src/styles/page-foundation.css")), false);
+  assert.equal(read("src/main.tsx").includes("page-foundation.css"), false);
 });

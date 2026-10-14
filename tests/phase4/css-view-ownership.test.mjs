@@ -16,7 +16,7 @@ test("renderer style manifest stays global-only during page rebuild", () => {
   const main = read("src/main.tsx");
   const cssImports = [...main.matchAll(/^\s*import\s+["']([^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
 
-  for (const specifier of ["./shared/ui/view-ui.css", "./styles/page-foundation.css", "./styles/themes.css", "./features/shell/performance.css"]) {
+  for (const specifier of ["./shared/ui/view-ui.css", "./styles/themes.css", "./features/shell/performance.css"]) {
     assert.equal(cssImports.includes(specifier), true, `${specifier} is missing from the renderer manifest`);
   }
   assert.equal(cssImports.at(-1), "./features/shell/performance.css", "performance.css must remain the final renderer stylesheet");

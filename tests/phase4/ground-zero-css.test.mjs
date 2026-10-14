@@ -43,13 +43,9 @@ test("historical global CSS cannot own feature page class families", () => {
   }
 });
 
-test("ground-zero foundation only applies while reset state is present", () => {
-  const source = read("src/styles/page-foundation.css");
-  assert.ok(source.includes('[data-page-section][data-page-state="reset"]'));
-  assert.doesNotMatch(source, /\[data-page-section\](?!\[data-page-state="reset"\])/);
-  assert.ok(Buffer.byteLength(source.replace(/\r\n/g, "\n")) < 8 * 1024);
-  for (const token of ["linear-gradient(", "radial-gradient("]) assert.equal(source.includes(token), false);
-  for (const token of [".libraryPanel", ".libraryQuick", ".libraryMissing", ".libraryFullList", ".libraryCoverCards"]) assert.equal(source.includes(token), false);
+test("retired reset stylesheet stays deleted and unimported", () => {
+  assert.equal(fs.existsSync(path.join(root, "src/styles/page-foundation.css")), false);
+  assert.equal(read("src/main.tsx").includes("page-foundation.css"), false);
 });
 
 test("legacy root shim and sidebar geometry debt stay removed", () => {

@@ -16,7 +16,6 @@ const sourceBudgets = [
   ["src/features/settings/settings.css", 16 * KiB],
   ["src/features/home/home.css", 20 * KiB],
   ["src/styles/view-shell.css", 20 * KiB],
-  ["src/styles/page-foundation.css", 8 * KiB],
   ["electron/main.cjs", 156 * KiB],
   ["electron/runtime/media-server.cjs", 20 * KiB],
   ["src/features/shell/AppShell.tsx", 24 * KiB]

@@ -10,9 +10,8 @@ import "@fontsource/space-grotesk/700.css";
 import "./styles/tokens.css";
 import "./styles/themes.css";
 
-/* Shared renderer primitives and temporary reset foundation. */
+/* Shared renderer primitives. */
 import "./shared/ui/view-ui.css";
-import "./styles/page-foundation.css";
 
 /* Performance overrides intentionally stay last in the renderer cascade. */
 import "./features/shell/performance.css";

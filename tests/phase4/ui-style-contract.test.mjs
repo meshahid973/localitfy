@@ -20,8 +20,7 @@ test("album and cover styles remain lazy-loaded in their features", () => {
   }
   assert.equal(fs.existsSync(path.join(root, "src/features/library/library.css")), true, "Library should now have a co-located design owner");
   assert.equal(fs.existsSync(path.join(root, "src/features/artists/artists.css")), true, "Artists should have a co-located design owner");
-  assert.equal(fs.existsSync(path.join(root, "src/styles/page-foundation.css")), true, "structural page foundation is missing");
-  assert.equal(main.includes('import "./styles/page-foundation.css";'), true, "renderer is not loading the structural page foundation");
+
 });
 
 test("permanent visual owners remain explicit and co-located", () => {
@@ -61,7 +60,7 @@ test("permanent visual owners remain explicit and co-located", () => {
     assert.equal(shell.includes('import "' + specifier + '";'), true, specifier + " is missing from AppShell ownership");
   }
 
-  for (const specifier of ["./styles/tokens.css", "./styles/themes.css", "./shared/ui/view-ui.css", "./styles/page-foundation.css", "./features/shell/performance.css"]) {
+  for (const specifier of ["./styles/tokens.css", "./styles/themes.css", "./shared/ui/view-ui.css", "./features/shell/performance.css"]) {
     assert.equal(main.includes('import "' + specifier + '";'), true, specifier + " is missing from the global renderer manifest");
   }
 
