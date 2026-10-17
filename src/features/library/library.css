@@ -340,7 +340,7 @@
   align-items: center !important;
   gap: 8px !important;
   border: 1px solid transparent !important;
-  border-radius: 8px !important;
+  border-radius: 9px !important;
   color: var(--lt-muted) !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -482,9 +482,8 @@
 .libraryPage .libraryStat { background: var(--lt-surface); border-color: var(--lt-border); }
 .libraryPage .libraryStat strong { color: var(--lt-text); }
 .libraryPage .libraryTrackSurface.libraryFullListV025 { scrollbar-color: color-mix(in oklab,var(--lt-accent) 28%,transparent) transparent; }
-.libraryPage .songRow { border-radius: 9px !important; }
 .libraryPage .songRow :is(.iconAction,.songButton):focus-visible {
-  outline: 1px solid var(--lt-accent) !important;
+  outline: 1px solid var(--lt-accent);
   outline-offset: 1px;
 }
 .libraryPage .librarySearch:focus-visible,
