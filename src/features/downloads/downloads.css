@@ -38,10 +38,9 @@
   padding: 8px 17px; border: 1px solid transparent; border-radius: 8px;
   background: transparent; color: var(--downloads-muted); font: inherit; font-size: 13px; font-weight: 650; cursor: pointer;
 }
-.downloadsLayoutV031 .downloadTab.active { color: var(--downloads-text); background: var(--downloads-raised); border-color: color-mix(in oklab,var(--downloads-accent) 24%,transparent); }
 .downloadsLayoutV031 .spotifyTabDot { width: 8px; height: 8px; border-radius: 50%; background: #72bf9a; }
 .downloadsLayoutV031 .downloadTextarea {
-  width: min(100%,880px); min-height: 136px; display: block; resize: vertical; padding: 17px 18px;
+  width: min(100%, 920px); min-height: 136px; display: block; resize: vertical; padding: 17px 18px;
   border: 1px solid color-mix(in oklab,var(--downloads-accent) 32%,transparent); border-radius: 12px;
   color: var(--downloads-text); background: var(--lt-bg); font: inherit; font-size: 13px;
   line-height: 1.6; outline: none;
@@ -90,7 +89,7 @@
 .downloadsLayoutV031 .downloadQueuePanel > .panelHead { padding-bottom: 12px; margin: 0; }
 .downloadsLayoutV031 .downloadQueuePanel > .panelHead h3 { font-size: 18px; }
 .downloadsLayoutV031 .downloadQueueHeaderActions > span { font-size: 11px; color: var(--downloads-muted); }
-.downloadsLayoutV031 .downloadQueueItem { min-width: 0; display: grid; gap: 12px; padding: 16px; border: 1px solid var(--downloads-edge); border-radius: 9px; background: var(--downloads-raised); }
+.downloadsLayoutV031 .downloadQueueItem { min-width: 0; display: grid; gap: 12px; padding: 13px 15px; border: 1px solid var(--downloads-edge); border-radius: 9px; background: var(--downloads-raised); }
 .downloadsLayoutV031 .downloadQueueTop { min-width: 0; display: grid; grid-template-columns: 26px minmax(0,1fr) 50px; gap: 12px; align-items: center; }
 .downloadsLayoutV031 .downloadQueueTop > div { min-width: 0; }
 .downloadsLayoutV031 .downloadQueueTop strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
@@ -126,7 +125,6 @@
 .downloadsLayoutV031 .downloadsInputTitle span { color: var(--downloads-muted); font-size: 12px; }
 .downloadsLayoutV031 .downloadPanelV031 > .downloadHeroHead { margin: 0; padding: 0 0 18px; }
 .downloadsLayoutV031 .downloadTabStrip { margin: 0; }
-.downloadsLayoutV031 .downloadTextarea { width: min(100%, 920px); background: var(--lt-bg); }
 .downloadsLayoutV031 .downloadActions { margin-top: 0; }
 .downloadsLayoutV031 .converterBox {
   padding: 16px 20px; background: var(--downloads-surface); border-color: var(--downloads-edge);
@@ -156,8 +154,6 @@
   color: var(--downloads-text);
 }
 .downloadsLayoutV031 .downloadQueuePanel, .downloadsLayoutV031 .downloadResults { max-width: 100%; }
-.downloadsLayoutV031 .downloadQueueItem { padding: 13px 15px; }
-.downloadsLayoutV031 .downloadResult > div { min-width: 0; }
 @media (max-width: 780px) {
   .downloadsLayoutV031 .downloadsInputCard { padding: 16px; }
   .downloadsLayoutV031 .downloadTextarea { min-height: 110px; width: 100%; }
