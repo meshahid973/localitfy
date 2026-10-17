@@ -8332,11 +8332,6 @@ function MainModeApp() {
     spotifyFetchError
   });
   const {
-    mascotState: downloadMascotState,
-    tone: downloadMascotTone,
-    title: downloadMascotTitle,
-    message: downloadMascotMessage,
-    hasFailed: downloadHasFailure,
     failedQueueItems: failedDownloadQueueItems,
     finishedQueueItems: finishedDownloadQueueItems,
     failedResults: failedDownloadResults,
@@ -8626,8 +8621,6 @@ function MainModeApp() {
       settingsCategory
     },
     downloads: {
-      downloadMascotState,
-      downloadMascotTone,
       cancelCurrentDownload,
       changeView,
       clearFailedDownloads,
@@ -8639,9 +8632,6 @@ function MainModeApp() {
       copyDownloadError,
       downloadAudioLinks,
       downloadBusy,
-      downloadHasFailure,
-      downloadMascotMessage,
-      downloadMascotTitle,
       downloadSpotifyTracks,
       downloadStatusLabel,
       downloadText,

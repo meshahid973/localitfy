@@ -3,8 +3,6 @@ import { CheckMiniIcon, ResultStatusIcon } from "../../shared/ui/LocaltifyViewUi
 import { clamp } from "../../shared/utils/format";
 
 export type DownloadsViewProps = {
-  downloadMascotState: any;
-  downloadMascotTone: any;
   cancelCurrentDownload: any;
   changeView: any;
   clearFailedDownloads: any;
@@ -16,9 +14,6 @@ export type DownloadsViewProps = {
   copyDownloadError: any;
   downloadAudioLinks: any;
   downloadBusy: any;
-  downloadHasFailure: any;
-  downloadMascotMessage: any;
-  downloadMascotTitle: any;
   downloadSpotifyTracks: any;
   downloadStatusLabel: any;
   downloadText: any;
