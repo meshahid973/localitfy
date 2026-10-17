@@ -152,3 +152,16 @@ test("Covers keeps interactive tools while replacing fixed blue surfaces", () =>
   assert.match(view, /coverStudioEmptyNotice/);
   assert.doesNotMatch(view, /LocaltifyStateCard/);
 });
+
+
+test("Library, Covers and Spotify review fixes remain in place", () => {
+  const library = read("src/features/library/library.css");
+  const covers = read("src/features/covers/CoverStudio.tsx");
+  const downloads = read("src/features/downloads/downloads.css");
+  assert.match(library, /\.songMeta small \{\s*color: var\(--lt-text\)/);
+  assert.match(library, /\.songInfo \{\s*color: var\(--lt-text\)/);
+  assert.match(library, /\.songRow \{[\s\S]*?color: var\(--lt-text\)/);
+  assert.match(covers, /Fix missing \{missingCoverSongs\.length/);
+  assert.doesNotMatch(covers, /Fix missing \$\{/);
+  assert.match(downloads, /\.downloadsInputCard > :is\(\.spotifyAuthCard,\.spotifyUrlRow,\.spotifyTrackList\) \{ min-width: 0; width: 100%; \}/);
+});

@@ -120,6 +120,7 @@
   padding: 22px; border: 1px solid var(--downloads-edge);
   border-radius: 14px; background: var(--downloads-surface);
 }
+.downloadsLayoutV031 .downloadsInputCard > :is(.spotifyAuthCard,.spotifyUrlRow,.spotifyTrackList) { min-width: 0; width: 100%; }
 .downloadsLayoutV031 .downloadsInputTitle { display: grid; gap: 3px; }
 .downloadsLayoutV031 .downloadsInputTitle strong { color: var(--downloads-text); font-size: 17px; font-weight: 710; }
 .downloadsLayoutV031 .downloadsInputTitle span { color: var(--downloads-muted); font-size: 12px; }
