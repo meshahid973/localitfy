@@ -35,8 +35,38 @@ test("Compact styles cover inputs, focus indicators, and narrower viewports with
   assert.match(skin, /\.toggleRow input\[type="checkbox"\]:checked/);
   assert.match(skin, /\.rangeRow input\[type="range"\]/);
   assert.match(skin, /:focus-visible/);
-  assert.match(skin, /@media \(max-width: 940px\)/);
+  assert.match(skin, /@media \(max-width: 900px\)/);
   assert.match(skin, /@media \(max-width: 480px\)/);
+  assert.match(skin, /settingsAppearanceTopGrid/);
+  assert.match(skin, /settingsDisclosure/);
   assert.match(skin, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(skin, /!important/);
+});
+
+test("Appearance keeps presets, local color editing and sidebar tools behind compact sections", () => {
+  const appearance = read("src/features/settings/categories/AppearanceSettings.tsx");
+  assert.match(appearance, /settingsAppearanceTopGrid/);
+  assert.match(appearance, /settingsPaletteEditor/);
+  assert.match(appearance, /customThemeTokens\.map\(/);
+  assert.match(appearance, /<SidebarTabsSettings /);
+  assert.match(appearance, /settingsSidebarDisclosure/);
+});
+
+test("Home, Library/Liked and shell use active theme tokens", () => {
+  const home = read("src/features/home/home.css");
+  const library = read("src/features/library/library.css");
+  const shell = read("src/styles/view-shell.css");
+  for (const source of [home, library, shell]) {
+    assert.match(source, /var\(--lt-bg\)/);
+    assert.match(source, /var\(--lt-accent\)/);
+    assert.doesNotMatch(source, /#06131a|#79a7c4/);
+  }
+});
+
+test("User feedback remains available manually without automatic nag prompts", () => {
+  const app = read("src/App.tsx");
+  const toast = read("src/features/shell/useAppToast.ts");
+  assert.doesNotMatch(app, /FEEDBACK_PROMPT_DELAY_MS|feedbackPromptBlockersRef/);
+  assert.match(app, /localtify:open-feedback/);
+  assert.match(toast, /kind !== "error"/);
 });

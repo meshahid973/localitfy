@@ -1,6 +1,3 @@
-export const FEEDBACK_PROMPT_SEEN_KEY = "localitfy.feedbackPrompt.seen.v1";
-export const FEEDBACK_PROMPT_DELAY_MS = 40_000;
-export const FEEDBACK_PROMPT_RETRY_DELAY_MS = 15_000;
 export const FEEDBACK_MESSAGE_MAX_LENGTH = 1_500;
 export const LOCALTIFY_041_WHATS_NEW_ITEMS = [
   "0.4.1 is a quick hotfix for the album library importer freezing during big nested-folder scans.",

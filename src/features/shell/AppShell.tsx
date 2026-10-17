@@ -13,7 +13,7 @@ import Onboarding from "../../Onboarding";
 import SongContextMenu from "../library/components/SongContextMenu";
 import SongEditorModal from "../library/components/SongEditorModal";
 import DeleteSongModal from "../library/components/DeleteSongModal";
-import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon, mascotStateForToast } from "../../shared/ui/LocaltifyViewUi";
+import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon } from "../../shared/ui/LocaltifyViewUi";
 import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
 import PlaylistPickerModal from "../playlists/components/PlaylistPickerModal";
 import WhatsNewModal from "../updates/WhatsNewModal";
@@ -209,13 +209,7 @@ export default function AppShell(props: AppShellProps) {
         </div>
       ) : null}
 
-      {appToast ? (
-        <div className={`appToast ${appToast.kind} appToastMascotHostV496`} key={appToast.id} role="status">
-          <MascotStateArt state={mascotStateForToast(appToast.kind)} className="appToastMascotV496" />
-          <span className="appToastDot" />
-          <strong>{appToast.message}</strong>
-        </div>
-      ) : null}
+      {appToast ? <div className="appToast error" key={appToast.id} role="alert">{appToast.message}</div> : null}
 
       {importAnimation.active ? (
         <div className={`importOverlay importPhase-${importAnimation.phase}`} role="status" aria-live="polite">
@@ -354,7 +348,7 @@ export default function AppShell(props: AppShellProps) {
 
                       handleSearchInput(nextValue);
                     }}
-                    placeholder="search songs, try /feedback"
+                    placeholder="Search your music"
                   />
                 </div>
               </div>

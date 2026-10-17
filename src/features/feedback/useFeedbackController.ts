@@ -28,19 +28,7 @@ export type FeedbackConfigStatus = {
 export function useFeedbackController() {
   const [diagnosticsCopied, setDiagnosticsCopied] = useState(false);
   const [performanceStatus, setPerformanceStatus] = useState<LocaltifyPerformanceStatus | null>(null);
-  const feedbackPromptBlockersRef = useRef({
-    onboardingOpen: false,
-    whatsNewOpen: false,
-    editorOpen: false,
-    playlistPickerOpen: false,
-    deleteOpen: false,
-    importBusy: false,
-    downloadBusy: false,
-    spotifyDownloadBusy: false,
-    libraryScanBusy: false
-  });
   const [feedbackPromptOpen, setFeedbackPromptOpen] = useState(false);
-  const [feedbackPromptManualOpen, setFeedbackPromptManualOpen] = useState(false);
   const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategoryId>("bug");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackSendBusy, setFeedbackSendBusy] = useState(false);
@@ -51,9 +39,7 @@ export function useFeedbackController() {
   return {
     diagnosticsCopied, setDiagnosticsCopied,
     performanceStatus, setPerformanceStatus,
-    feedbackPromptBlockersRef,
     feedbackPromptOpen, setFeedbackPromptOpen,
-    feedbackPromptManualOpen, setFeedbackPromptManualOpen,
     feedbackCategory, setFeedbackCategory,
     feedbackMessage, setFeedbackMessage,
     feedbackSendBusy, setFeedbackSendBusy,

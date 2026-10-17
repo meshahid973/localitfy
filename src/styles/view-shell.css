@@ -1,13 +1,13 @@
 /* Shared application shell only. Feature pages own their own visuals. */
 
 .app {
-  --workspace-bg: #06131a;
-  --workspace-sidebar: #07131b;
-  --workspace-sidebar-raised: #0a1820;
-  --workspace-border: rgba(125, 164, 187, .08);
-  --workspace-text: #c8d5dc;
-  --workspace-muted: #7891a0;
-  --workspace-accent: #79a7c4;
+  --workspace-bg: var(--lt-bg);
+  --workspace-sidebar: var(--lt-bg);
+  --workspace-sidebar-raised: var(--lt-surface);
+  --workspace-border: rgba(var(--lt-accent-rgb), .08);
+  --workspace-text: var(--lt-text);
+  --workspace-muted: var(--lt-muted);
+  --workspace-accent: var(--lt-accent);
   --workspace-sidebar-expanded: clamp(224px, var(--sidebar-width, 248px), 280px);
   --workspace-sidebar-current: var(--workspace-sidebar-expanded);
   --workspace-sidebar-rail: 68px;
@@ -31,9 +31,9 @@
   overflow: visible !important;
   display: flex !important;
   flex-direction: column !important;
-  border-right: 1px solid rgba(138, 178, 204, .075) !important;
+  border-right: 1px solid rgba(var(--lt-accent-rgb), .075) !important;
   background:
-    linear-gradient(180deg, rgba(121, 167, 196, .025), transparent 150px),
+    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .025), transparent 150px),
     var(--workspace-sidebar) !important;
   box-shadow: none !important;
   transition: width 180ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease, background-color 180ms ease !important;
@@ -54,7 +54,7 @@
   margin: 0 8px 18px;
   display: flex;
   align-items: center;
-  color: #9eb4bf;
+  color: var(--lt-muted);
   font-size: 10px;
   font-weight: 850;
   letter-spacing: .16em;
@@ -68,7 +68,7 @@
   display: block !important;
   margin: 0 9px 7px !important;
   overflow: hidden;
-  color: #3f5866 !important;
+  color: var(--lt-faint) !important;
   font-size: 7px !important;
   font-weight: 850 !important;
   letter-spacing: .13em !important;
@@ -97,7 +97,7 @@
   overflow: hidden !important;
   border: 1px solid transparent !important;
   border-radius: 9px !important;
-  color: #718895 !important;
+  color: var(--lt-muted) !important;
   background: transparent !important;
   box-shadow: none !important;
   text-align: left !important;
@@ -113,22 +113,22 @@
   bottom: 10px;
   width: 2px;
   border-radius: 99px;
-  background: #79a7c4;
+  background: var(--lt-accent);
   opacity: 0;
   transform: scaleY(.55);
   transition: opacity 130ms ease, transform 130ms ease;
 }
 
 .navItem:hover {
-  color: #b6c7cf !important;
-  border-color: rgba(125, 164, 187, .06) !important;
-  background: rgba(111, 155, 180, .045) !important;
+  color: var(--lt-text) !important;
+  border-color: rgba(var(--lt-accent-rgb), .06) !important;
+  background: rgba(var(--lt-accent-rgb), .045) !important;
 }
 
 .navItem.active {
-  color: #d5e0e5 !important;
-  border-color: rgba(125, 164, 187, .105) !important;
-  background: #0f212a !important;
+  color: var(--lt-text) !important;
+  border-color: rgba(var(--lt-accent-rgb), .105) !important;
+  background: color-mix(in oklab, var(--lt-accent) 10%, var(--lt-surface)) !important;
 }
 
 .navItem.active::after {
@@ -176,7 +176,7 @@
 }
 
 .navText small {
-  color: #465f6d !important;
+  color: var(--lt-muted) !important;
   font-size: 7px !important;
   font-weight: 620 !important;
   line-height: 1.1 !important;
@@ -184,13 +184,13 @@
 
 .navDivider {
   margin: 10px 8px !important;
-  border-color: rgba(137, 177, 204, .055) !important;
+  border-color: rgba(var(--lt-accent-rgb), .055) !important;
 }
 
 .sidebarBottom {
   margin-top: auto !important;
   padding: 12px !important;
-  border-top: 1px solid rgba(137, 177, 204, .055) !important;
+  border-top: 1px solid rgba(var(--lt-accent-rgb), .055) !important;
 }
 
 .importMainAction {
@@ -201,18 +201,18 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  border: 1px solid rgba(121, 167, 196, .15) !important;
+  border: 1px solid rgba(var(--lt-accent-rgb), .15) !important;
   border-radius: 9px !important;
-  color: #a9bdc6 !important;
-  background: rgba(121, 167, 196, .055) !important;
+  color: var(--lt-text) !important;
+  background: rgba(var(--lt-accent-rgb), .055) !important;
   box-shadow: none !important;
   transform: none !important;
 }
 
 .importMainAction:hover {
-  color: #d6e1e6 !important;
-  border-color: rgba(121, 167, 196, .24) !important;
-  background: rgba(121, 167, 196, .095) !important;
+  color: var(--lt-text) !important;
+  border-color: rgba(var(--lt-accent-rgb), .24) !important;
+  background: rgba(var(--lt-accent-rgb), .095) !important;
 }
 
 .importMainAction .buttonLabel {
@@ -343,7 +343,7 @@
   align-items: flex-end !important;
   justify-content: space-between !important;
   gap: 20px !important;
-  border-bottom: 1px solid rgba(135, 177, 202, .08) !important;
+  border-bottom: 1px solid rgba(var(--lt-accent-rgb), .08) !important;
   background: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -359,7 +359,7 @@
 }
 .headerText h2 {
   margin: 0 !important;
-  color: #c9d5dc !important;
+  color: var(--lt-text) !important;
   font-size: clamp(26px, 2vw, 36px) !important;
   font-weight: 680 !important;
   line-height: 1 !important;
@@ -388,12 +388,12 @@
   border-radius: 999px !important;
   outline: 0 !important;
   color: var(--workspace-text) !important;
-  background: #0b1921 !important;
+  background: var(--lt-surface) !important;
   box-shadow: none !important;
   font-size: 9px !important;
 }
 
-.headerBar .search::placeholder { color: #526977 !important; }
+.headerBar .search::placeholder { color: var(--lt-muted) !important; }
 .headerBar .search:focus {
   border-color: rgba(var(--accent-rgb), .28) !important;
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .045) !important;

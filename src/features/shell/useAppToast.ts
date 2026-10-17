@@ -13,6 +13,7 @@ export function useAppToast() {
   const toastTimerRef = useRef<number | null>(null);
 
   const showAppToast = useCallback((message: string, kind: AppToastKind = "info") => {
+    if (kind !== "error") return;
     if (toastTimerRef.current !== null) {
       window.clearTimeout(toastTimerRef.current);
     }
