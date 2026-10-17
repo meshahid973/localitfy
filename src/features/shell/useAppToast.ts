@@ -23,7 +23,7 @@ export function useAppToast() {
     toastTimerRef.current = window.setTimeout(() => {
       setAppToast(null);
       toastTimerRef.current = null;
-    }, kind === "work" ? 1900 : 2600);
+    }, 2600);
   }, []);
 
   useEffect(() => {

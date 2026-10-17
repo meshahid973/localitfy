@@ -7878,13 +7878,11 @@ function MainModeApp() {
       }
 
       feedbackLastSentAtRef.current = Date.now();
-      markFeedbackPromptSeen();
       setFeedbackStatus({ kind: "success", message: "Sent successfully. Thanks, I will review this." });
       setFeedbackMessage("");
 
       window.setTimeout(() => {
         setFeedbackPromptOpen(false);
-        setFeedbackPromptManualOpen(false);
         setFeedbackStatus({ kind: "idle", message: "" });
       }, 1500);
     } catch (error) {
