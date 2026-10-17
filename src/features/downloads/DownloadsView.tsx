@@ -1,5 +1,5 @@
 import "./downloads.css";
-import { CheckMiniIcon, LocaltifyStateCard, MascotHelperBubble, MascotStateArt, ResultStatusIcon } from "../../shared/ui/LocaltifyViewUi";
+import { CheckMiniIcon, ResultStatusIcon } from "../../shared/ui/LocaltifyViewUi";
 import { clamp } from "../../shared/utils/format";
 
 export type DownloadsViewProps = {
@@ -56,8 +56,6 @@ export type DownloadsViewProps = {
 
 export default function DownloadsView(props: DownloadsViewProps) {
   const {
-    downloadMascotState,
-    downloadMascotTone,
     cancelCurrentDownload,
     changeView,
     clearFailedDownloads,
@@ -69,9 +67,6 @@ export default function DownloadsView(props: DownloadsViewProps) {
     copyDownloadError,
     downloadAudioLinks,
     downloadBusy,
-    downloadHasFailure,
-    downloadMascotMessage,
-    downloadMascotTitle,
     downloadSpotifyTracks,
     downloadStatusLabel,
     downloadText,
@@ -115,50 +110,20 @@ export default function DownloadsView(props: DownloadsViewProps) {
                     <div>
                       <p className="eyebrow">downloads</p>
                       <h3>download music</h3>
-                      <p className="softText">Paste a YouTube or Spotify link. Localtify keeps the rest quiet.</p>
                     </div>
 
                     <div className="downloadHeroActions downloadHeroActionsCompactV475">
                       <button className="softButton" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
-                        folder
+                        Open folder
                       </button>
                       <button className="softButton" onClick={() => { changeView("settings", "unknown"); setSettingsCategory("downloads"); }}>
-                        settings
+                        Settings
                       </button>
                     </div>
                   </div>
 
-                  <MascotHelperBubble
-                    state={downloadMascotState}
-                    tone={downloadMascotTone}
-                    eyebrow="download helper"
-                    title={downloadMascotTitle}
-                    message={downloadMascotMessage}
-                    className={downloadHasFailure ? "downloadHelperHeroErrorV512" : ""}
-                    actions={
-                      <>
-                        <button className="softButton mascotDownloadActionV502" type="button" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
-                          open folder
-                        </button>
-                        {failedDownloadQueueItems.length || failedDownloadResults.length ? (
-                          <>
-                            <button className="softButton mascotDownloadActionV502" type="button" onClick={retryFailedDownloads} disabled={downloadBusy || spotifyDownloadBusy}>
-                              retry failed
-                            </button>
-                            <button className="softButton mascotDownloadActionV502" type="button" onClick={() => void copyDownloadError()}>
-                              copy error
-                            </button>
-                          </>
-                        ) : null}
-                        {finishedDownloadQueueItems.length ? (
-                          <button className="softButton mascotDownloadActionV502" type="button" onClick={() => clearFinishedDownloads?.()} disabled={downloadBusy || spotifyDownloadBusy}>
-                            clear finished
-                          </button>
-                        ) : null}
-                      </>
-                    }
-                  />
-
+                  <div className="downloadsInputCard" aria-label="Download source and links">
+                    <div className="downloadsInputTitle"><strong>Add music</strong><span>Paste links to download or import.</span></div>
                   {/* -- Source tabs -------------------------------- */}
                   <div className="downloadTabStrip" role="group" aria-label="Download source">
                     <button
@@ -184,7 +149,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                         aria-label="YouTube URLs"
                          value={downloadText}
                         onChange={(event) => setDownloadText(event.currentTarget.value)}
-                        placeholder={`paste YouTube links here, one per line...\nhttps://youtube.com/watch?v=...\nhttps://youtu.be/...`}
+                        placeholder="Paste YouTube links, one per line"
                       />
 
                       <div className="downloadActions downloadActionsV031">
@@ -390,6 +355,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                     </>
                   )}
 
+                  </div>
                   {/* -- Shared: queue, converter, results ----------- */}
                   {visibleDownloadQueueItems.length ? (
                     <div className="downloadQueuePanel">
@@ -486,38 +452,16 @@ export default function DownloadsView(props: DownloadsViewProps) {
                     </div>
                   ) : null}
 
-                  {!visibleDownloadQueueItems.length && !visibleDownloadResults.length && !downloadBusy && !spotifyDownloadBusy ? (
-                    <LocaltifyStateCard
-                      centered
-                      cute
-                      badge="↓"
-                      tone="info"
-                      eyebrow="downloads"
-                      title="No downloads yet"
-                      message="Paste a link and Localtify will bring the audio home."
-                      detail="YouTube links go in the YouTube tab. Spotify playlists, albums, or tracks go in the Spotify tab."
-                      mascotState="empty"
-                      actions={
-                        <>
-                          <button className="mainAction" type="button" onClick={() => setDownloadsTab("youtube")}>YouTube download</button>
-                          <button className="softButton" type="button" onClick={() => setDownloadsTab("spotify")}>Spotify import</button>
-                          <button className="heroGhost" type="button" onClick={convertLocalMedia}>convert local files</button>
-                        </>
-                      }
-                    />
-                  ) : null}
-
                   <div className="converterBox converterBoxV031">
                     <div>
-                      <strong>convert local files</strong>
-                      <p>Turn local video/audio files into library tracks.</p>
+                      <strong>Convert local files</strong>
+                      <p>Convert audio and video to music files.</p>
                     </div>
 
                     <button className="heroMain" onClick={convertLocalMedia} disabled={convertBusy}>
                       {convertBusy ? "converting..." : "choose files"}
                     </button>
 
-                    {convertBusy ? <MascotStateArt state="loading" className="converterMascotV501" /> : null}
 
                     {convertBusy ? (
                       <div className="converterProgress">

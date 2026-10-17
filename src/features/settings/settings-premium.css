@@ -183,8 +183,61 @@
 .settingsPage.settingsPageV027 .customThemeTokenV027 { gap: 6px 8px; }
 .settingsPage.settingsPageV027 .settingsSidebarDisclosure .sidebarTabsSettings { border: 0; padding: 0; background: transparent; }
 .settingsPage.settingsPageV027 .settingsSidebarDisclosure .sidebarTabsGroups { gap: 12px; }
-.settingsPage.settingsPageV027 :is(.settingsActionButton,.settingsTinyButton,.settingsCategoryButton,.settingsSearchClear,.settingsDisclosure > summary):focus-visible,
-.settingsPage.settingsPageV027 :is(input,select,textarea,button):focus-visible { outline: 2px solid var(--settings-accent); outline-offset: 2px; }
+
+
+/* Scalable, deliberate controls without the global player button treatment. */
+.settingsPage.settingsPageV027 .settingsCategoryContent,
+.settingsPage.settingsPageV027 .settingsCategoryMotion { min-width: 0; }
+.settingsPage.settingsPageV027 .settingsCategoryMotion { animation: none; transform: none; opacity: 1; }
+.settingsPage.settingsPageV027 :is(.rangeRow, .toggleRow) { cursor: default; }
+.settingsPage.settingsPageV027 .rangeRow input[type="range"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  height: 7px;
+  min-height: 7px;
+  padding: 0;
+  margin: 0 2px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--settings-accent) var(--range-progress,0%), var(--settings-edge) var(--range-progress,0%));
+  box-shadow: none;
+  cursor: pointer;
+}
+.settingsPage.settingsPageV027 .rangeRow input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 3px solid var(--settings-surface);
+  background: var(--settings-accent);
+  box-shadow: 0 0 0 1px var(--settings-edge);
+}
+.settingsPage.settingsPageV027 .rangeRow input[type="range"]::-moz-range-thumb {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  border: 3px solid var(--settings-surface);
+  background: var(--settings-accent);
+  box-shadow: 0 0 0 1px var(--settings-edge);
+}
+.settingsPage.settingsPageV027 .rangeRow input[type="range"]:focus { outline: none; }
+.settingsPage.settingsPageV027 .rangeRow input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 2px var(--settings-accent);
+}
+.settingsPage.settingsPageV027 :is(button,select,input,textarea):focus { outline: none; }
+.settingsPage.settingsPageV027 :is(button,select,input:not([type="range"]),textarea):focus-visible {
+  outline: 1px solid var(--settings-accent);
+  outline-offset: 1px;
+}
+.settingsPage.settingsPageV027 :is(.settingsActionButton,.settingsTinyButton,.settingsCategoryButton,.settingsChoicePillV491,
+.customThemePresetButtonV027,.settingsDisclosure summary) {
+  box-shadow: none;
+  text-shadow: none;
+}
+.settingsPage.settingsPageV027 :is(.settingsActionButton,.settingsTinyButton,.settingsCategoryButton,.settingsChoicePillV491,.customThemePresetButtonV027):active:not(:disabled) {
+  transform: scale(.99);
+}
+
 @media (max-width: 1200px) {
   .settingsPage.settingsPageV027 .settingsLayout { grid-template-columns: 205px minmax(0,1fr); gap: 16px; }
   .settingsPage.settingsPageV027 .settingsAppearanceTopGrid { grid-template-columns: 1fr; }

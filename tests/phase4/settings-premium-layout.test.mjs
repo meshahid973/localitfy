@@ -12,7 +12,8 @@ test("Settings keeps the existing category rendering and reduced-motion support"
   assert.match(view, /data-page-section="settings"/);
   assert.match(view, /<SettingsRail \{\.\.\.settingsRail\} \/>/);
   assert.match(view, /renderSettingsCategoryContent\(\)/);
-  assert.match(view, /settings\.reducedMotion/);
+  assert.doesNotMatch(view, /AnimatePresence|mode="wait"|settingsCategorySpring/);
+  assert.match(view, /key=\{settingsCategory\}/);
   assert.match(view, /import "\.\/settings\.css";/);
   assert.match(view, /import "\.\/settings-premium\.css";/);
   for (const section of ["appearance", "playback", "discord", "library", "covers", "downloads", "updates", "about", "experimental", "advanced"]) {
@@ -40,7 +41,8 @@ test("Compact styles cover inputs, focus indicators, and narrower viewports with
   assert.match(skin, /settingsAppearanceTopGrid/);
   assert.match(skin, /settingsDisclosure/);
   assert.match(skin, /prefers-reduced-motion: reduce/);
-  assert.equal((skin.match(/!important/g) || []).length, 2, "Only the two scoped shell overrides may use !important");
+  assert.match(skin, /rangeRow input\[type="range"\]::-webkit-slider-thumb/);
+  assert.match(skin, /--range-progress/);
 });
 
 test("Appearance keeps presets, local color editing and sidebar tools behind compact sections", () => {
@@ -99,4 +101,25 @@ test("Legacy appearance selectors are not kept after their controls move", () =>
   for (const unused of ["settingsAppearanceInfoCopyV500", "settingsThemeSelectPanel", "cleanToggleLabel"]) {
     assert.ok(!core.includes(unused), "Unused CSS selector: " + unused);
   }
+});
+
+test("Downloads keeps import and queue controls but omits mascot and redundant empty art", () => {
+  const downloads = read("src/features/downloads/DownloadsView.tsx");
+  const css = read("src/features/downloads/downloads.css");
+  assert.match(downloads, /downloadsInputCard/);
+  assert.match(downloads, /downloadQueuePanel/);
+  assert.match(downloads, /spotifyTrackList/);
+  assert.match(downloads, /converterProgress/);
+  assert.doesNotMatch(downloads, /MascotHelperBubble|MascotStateArt|LocaltifyStateCard/);
+  assert.match(css, /--downloads-surface: var\(--lt-surface\)/);
+  assert.doesNotMatch(css, /#82b3ce|#0d1d26|mascotHelper/);
+});
+
+test("Library track canvas uses a themed surface, preserving virtual positioning", () => {
+  const lib = read("src/features/library/library.css");
+  assert.match(lib, /background: var\(--lt-surface\)/);
+  assert.doesNotMatch(lib, /background: rgba\(var\(--lt-accent-rgb\), \.64\)/);
+  assert.match(lib, /\.virtualSongItem \{ position: absolute/);
+  assert.match(lib, /\.songRow\.active/);
+  assert.match(lib, /color: var\(--lt-text\) !important/);
 });

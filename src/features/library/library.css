@@ -30,13 +30,12 @@
   width: 100%;
   min-width: 0;
   min-height: 100%;
-  padding: clamp(30px, 3vw, 52px) clamp(24px, 3vw, 58px) clamp(78px, 7vh, 108px);
+  padding: clamp(24px, 2.5vw, 40px) clamp(20px, 2.7vw, 48px) 105px;
   display: grid;
   align-content: start;
-  gap: clamp(24px, 2.2vw, 36px);
+  gap: clamp(18px, 1.8vw, 28px);
   color: var(--library-text);
   background:
-    radial-gradient(circle at 82% -12%, rgba(var(--cover-rgb, 57, 100, 119), .075), transparent 34%),
     var(--lt-bg);
 }
 
@@ -59,8 +58,8 @@
 .libraryEyebrow {
   margin: 0;
   color: var(--lt-accent);
-  font-size: 8px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 750;
   letter-spacing: .11em;
   text-transform: uppercase;
 }
@@ -78,7 +77,7 @@
   max-width: 620px;
   margin: 0;
   color: var(--lt-muted);
-  font-size: clamp(9px, .62vw, 11px);
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.45;
 }
@@ -95,7 +94,7 @@
 .librarySort {
   width: min(390px, 36vw);
   min-width: 190px;
-  height: 38px;
+  height: 42px;
   padding: 0 14px;
   border: 1px solid var(--library-border);
   border-radius: 999px;
@@ -103,7 +102,7 @@
   color: var(--lt-text);
   background: var(--lt-surface);
   font: inherit;
-  font-size: 9px;
+  font-size: 12px;
   transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
 }
 
@@ -125,15 +124,15 @@
 
 .libraryAction,
 .libraryMissingActions button {
-  min-height: 38px;
+  min-height: 42px;
   padding: 0 14px;
   border: 1px solid var(--library-border);
   border-radius: 999px;
   color: var(--lt-muted);
   background: rgba(var(--lt-accent-rgb), .045);
   font: inherit;
-  font-size: 9px;
-  font-weight: 760;
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
   transition: color 130ms ease, border-color 130ms ease, background-color 130ms ease;
 }
@@ -158,13 +157,13 @@
 .libraryStats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .libraryStat {
   min-width: 0;
-  min-height: 82px;
-  padding: 15px 17px;
+  min-height: 74px;
+  padding: 14px 16px;
   display: grid;
   align-content: center;
   gap: 5px;
@@ -175,7 +174,7 @@
 
 .libraryStat strong {
   overflow: hidden;
-  color: #b2c0c8;
+  color: var(--lt-text);
   font-size: clamp(19px, 1.35vw, 26px);
   font-weight: 650;
   line-height: 1;
@@ -185,8 +184,8 @@
 
 .libraryStat span {
   color: var(--lt-muted);
-  font-size: 8px;
-  font-weight: 750;
+  font-size: 10px;
+  font-weight: 700;
   letter-spacing: .06em;
   text-transform: uppercase;
 }
@@ -291,15 +290,15 @@
 .libraryTracksHead p {
   margin: 0;
   color: var(--lt-muted);
-  font-size: 8px;
-  font-weight: 620;
+  font-size: 11px;
+  font-weight: 550;
 }
 
 .libraryCount {
   flex: 0 0 auto;
   color: var(--lt-muted);
-  font-size: 8px;
-  font-weight: 760;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: .06em;
   text-transform: uppercase;
 }
@@ -309,9 +308,9 @@
   min-height: 0;
   padding: 6px;
   overflow: hidden;
-  border: 1px solid rgba(var(--lt-accent-rgb), .075);
-  border-radius: 11px;
-  background: rgba(var(--lt-accent-rgb), .64);
+  border: 1px solid var(--lt-border);
+  border-radius: 12px;
+  background: var(--lt-surface);
 }
 
 .libraryTrackSurface .virtualSongViewport,
@@ -333,7 +332,7 @@
 
 .libraryPage .songRow {
   min-width: 0 !important;
-  min-height: 66px !important;
+  min-height: 64px !important;
   margin: 2px 0 !important;
   padding: 5px 8px !important;
   display: grid !important;
@@ -350,13 +349,13 @@
 }
 
 .libraryPage .songRow:hover {
-  border-color: rgba(var(--lt-accent-rgb), .08) !important;
-  background: rgba(17, 35, 45, .76) !important;
+  border-color: color-mix(in oklab, var(--lt-accent) 17%, transparent) !important;
+  background: var(--lt-surface-raised) !important;
 }
 
 .libraryPage .songRow.active {
-  border-color: rgba(var(--lt-accent-rgb), .18) !important;
-  background: rgba(18, 38, 48, .88) !important;
+  border-color: color-mix(in oklab, var(--lt-accent) 30%, transparent) !important;
+  background: color-mix(in oklab, var(--lt-accent) 11%, var(--lt-surface)) !important;
 }
 
 .libraryPage .songButton {
@@ -374,8 +373,8 @@
 
 .libraryPage .songIndex {
   color: var(--lt-faint) !important;
-  font-size: 8px !important;
-  font-weight: 720 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
   text-align: center !important;
 }
 
@@ -401,21 +400,21 @@
 }
 
 .libraryPage .songMeta strong {
-  color: var(--lt-muted) !important;
-  font-size: 10px !important;
+  color: var(--lt-text) !important;
+  font-size: 13px !important;
   font-weight: 700 !important;
 }
 
 .libraryPage .songMeta small {
   color: var(--lt-muted) !important;
-  font-size: 8px !important;
-  font-weight: 600 !important;
+  font-size: 11px !important;
+  font-weight: 550 !important;
 }
 
 .libraryPage .songInfo {
   color: var(--lt-muted) !important;
-  font-size: 8px !important;
-  font-weight: 650 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
 }
 
 .libraryPage .iconAction {
@@ -457,9 +456,9 @@
 
 .libraryPage .homeAlbumArt,
 .libraryPage .homeAlbumArt .coverImage { border-radius: 8px !important; }
-.libraryPage .homeAlbumMeta strong { color: var(--lt-muted) !important; }
+.libraryPage .homeAlbumMeta strong { color: var(--lt-text) !important; }
 .libraryPage .homeAlbumMeta small,
-.libraryPage .homeAlbumStats { color: #4f6876 !important; }
+.libraryPage .homeAlbumStats { color: var(--lt-muted) !important; }
 
 .libraryEmpty {
   min-height: 300px;
@@ -467,7 +466,7 @@
   place-items: center;
   border: 1px solid rgba(var(--lt-accent-rgb), .07);
   border-radius: 11px;
-  background: rgba(var(--lt-accent-rgb), .45);
+  background: var(--lt-surface);
 }
 
 .libraryEmpty .localtifyStateCardV373 {
@@ -475,6 +474,24 @@
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+}
+
+
+/* Cohesive Library and Liked controls; never tint the full list with an accent alpha. */
+.libraryPage .libraryTopBar { border-bottom-color: var(--lt-border); }
+.libraryPage .libraryStat { background: var(--lt-surface); border-color: var(--lt-border); }
+.libraryPage .libraryStat strong { color: var(--lt-text); }
+.libraryPage .libraryTrackSurface.libraryFullListV025 { scrollbar-color: color-mix(in oklab,var(--lt-accent) 28%,transparent) transparent; }
+.libraryPage .songRow { border-radius: 9px !important; }
+.libraryPage .songRow :is(.iconAction,.songButton):focus-visible {
+  outline: 1px solid var(--lt-accent) !important;
+  outline-offset: 1px;
+}
+.libraryPage .librarySearch:focus-visible,
+.libraryPage .librarySort:focus-visible,
+.libraryPage .libraryAction:focus-visible {
+  outline: 1px solid var(--lt-accent);
+  outline-offset: 2px;
 }
 
 @media (max-width: 1180px) {

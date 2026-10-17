@@ -8623,7 +8623,6 @@ function MainModeApp() {
         onSearchChange: handleSettingsSearchInput,
         onCategoryChange: setSettingsCategory
       },
-      settings,
       settingsCategory
     },
     downloads: {
