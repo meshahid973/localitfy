@@ -1,12 +1,12 @@
 
 /* Settings owns its layout and controls; global overlays are unaffected. */
 .settingsPage {
-  --settings-surface: #0d1b24;
-  --settings-elevated: #12242e;
-  --settings-edge: rgba(136, 178, 201, .13);
-  --settings-muted: #8aa2af;
-  --settings-text: #d6e2e8;
-  --settings-accent: var(--lt-accent, #79a7c4);
+  --settings-surface: var(--lt-surface);
+  --settings-elevated: var(--lt-surface-raised);
+  --settings-edge: var(--lt-border);
+  --settings-muted: var(--lt-muted);
+  --settings-text: var(--lt-text);
+  --settings-accent: var(--lt-accent);
   display: grid;
   align-content: start;
   gap: 22px;
@@ -44,20 +44,20 @@
 .settingsPage .settingsSearchBoxV027 input {
   width: 100%; min-width: 0; min-height: 40px; padding: 9px 12px;
   border: 1px solid var(--settings-edge); border-radius: 9px;
-  color: var(--settings-text); background: #09161e; outline: none; font-size: 13px;
+  color: var(--settings-text); background: var(--lt-bg); outline: none; font-size: 13px;
 }
-.settingsPage input::placeholder, .settingsPage textarea::placeholder { color: #69808e; }
-.settingsPage .settingsSearchHintV027 { margin: 0 1px 2px; color: #7f97a5; font-size: 11px; line-height: 1.5; }
+.settingsPage input::placeholder, .settingsPage textarea::placeholder { color: var(--settings-muted); }
+.settingsPage .settingsSearchHintV027 { margin: 0 1px 2px; color: var(--settings-muted); font-size: 11px; line-height: 1.5; }
 .settingsPage .settingsCategoryButton {
   min-width: 0; width: 100%; min-height: 48px; padding: 9px 10px;
   display: grid; grid-template-columns: 27px minmax(0, 1fr); align-items: center;
   gap: 10px; border: 1px solid transparent; border-radius: 9px;
-  background: transparent; color: #94aab5; text-align: left; font: inherit; cursor: pointer;
+  background: transparent; color: var(--settings-muted); text-align: left; font: inherit; cursor: pointer;
 }
-.settingsPage .settingsCategoryButton:hover { color: var(--settings-text); background: #152833; }
+.settingsPage .settingsCategoryButton:hover { color: var(--settings-text); background: var(--settings-elevated); }
 .settingsPage .settingsCategoryButton[aria-current="page"] {
-  color: var(--settings-text); border-color: rgba(var(--lt-accent-rgb, 121, 167, 196), .24);
-  background: rgba(var(--lt-accent-rgb, 121, 167, 196), .11);
+  color: var(--settings-text); border-color: rgba(var(--lt-accent-rgb), .24);
+  background: rgba(var(--lt-accent-rgb), .11);
 }
 .settingsPage .settingsCategoryIcon { display: grid; place-items: center; color: var(--settings-accent); }
 .settingsPage .settingsCategoryCopy { min-width: 0; display: grid; }
@@ -74,7 +74,7 @@
   gap: 12px; flex-wrap: wrap; padding: 4px 0 12px; border-bottom: 1px solid var(--settings-edge);
 }
 .settingsPage .settingsCategoryHeader h4,
-.settingsPage .settingsContentBlock h2 { margin: 5px 0 0; color: #e2edf0; font-size: clamp(20px, 2vw, 27px); font-weight: 700; letter-spacing: -.035em; }
+.settingsPage .settingsContentBlock h2 { margin: 5px 0 0; color: var(--settings-text); font-size: clamp(20px, 2vw, 27px); font-weight: 700; letter-spacing: -.035em; }
 .settingsPage .settingsCategoryHeader > span { color: var(--settings-muted); font-size: 12px; }
 .settingsPage .settingsPanelCard,
 .settingsPage .settingGroup,
@@ -99,11 +99,11 @@
 .settingsPage .settingsGrid.twoCols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .settingsPage .settingsMiniGrid,
 .settingsPage .settingsResetGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 12px; }
-.settingsPage :is(.settingsSelectField, .settingsTextFieldV027) { min-width: 0; display: grid; gap: 7px; color: #aabfc9; font-size: 12px; }
+.settingsPage :is(.settingsSelectField, .settingsTextFieldV027) { min-width: 0; display: grid; gap: 7px; color: var(--settings-muted); font-size: 12px; }
 .settingsPage :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea) {
   min-width: 0; max-width: 100%; min-height: 40px; padding: 9px 12px;
   border: 1px solid rgba(125, 164, 187, .2); border-radius: 9px;
-  background: #081620; color: #d8e4ea; font: inherit; font-size: 13px; outline: none;
+  background: var(--lt-bg); color: var(--settings-text); font: inherit; font-size: 13px; outline: none;
 }
 .settingsPage select { cursor: pointer; color-scheme: dark; }
 .settingsPage :is(input, select, textarea, button):focus-visible {
@@ -128,13 +128,13 @@
 .settingsPage .settingsChoice, .settingsPage .cleanerOptionV440 {
   min-width: 0; min-height: 62px; display: grid; align-content: center; justify-items: start; gap: 6px;
   padding: 12px; border: 1px solid var(--settings-edge); border-radius: 10px;
-  background: #10212a; color: var(--settings-text); text-align: left; font: inherit; cursor: pointer;
+  background: var(--settings-elevated); color: var(--settings-text); text-align: left; font: inherit; cursor: pointer;
 }
 .settingsPage :is(.customThemePresetButtonV027,.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440) strong { font-size: 12px; line-height: 1.25; }
 .settingsPage :is(.customThemePresetButtonV027,.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440) :is(small,span:not(:first-child)) { color: var(--settings-muted); font-size: 11px; line-height: 1.35; }
 .settingsPage :is(.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440).active {
-  border-color: rgba(var(--lt-accent-rgb, 121,167,196),.46);
-  background: rgba(var(--lt-accent-rgb, 121,167,196),.13);
+  border-color: rgba(var(--lt-accent-rgb),.46);
+  background: rgba(var(--lt-accent-rgb),.13);
 }
 .settingsPage .customThemeTokenGridV027 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px,100%), 1fr)); gap: 12px; }
 .settingsPage .customThemeTokenV027 { display: grid; grid-template-columns: 35px minmax(0,1fr); gap: 7px 10px; align-items: center; min-width: 0; }
@@ -144,7 +144,7 @@
 .settingsPage .customThemeColorPreviewV027 { width: 100%; height: 100%; display: block; border: 1px solid rgba(255,255,255,.18); border-radius: 9px; }
 .settingsPage .customThemeNativeColorInputV027 { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; opacity: 0; cursor: pointer; }
 .settingsPage .settingsSavedThemes { min-width: 0; border-top: 1px solid var(--settings-edge); padding-top: 10px; }
-.settingsPage .settingsSavedThemes summary { cursor: pointer; color: #b5c9d2; font-size: 13px; font-weight: 650; }
+.settingsPage .settingsSavedThemes summary { cursor: pointer; color: var(--settings-text); font-size: 13px; font-weight: 650; }
 .settingsPage .settingsSavedThemesList { display: grid; gap: 7px; padding-top: 12px; }
 .settingsPage .settingsSavedTheme { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .settingsPage .settingsSavedTheme button:first-child { display: flex; gap: 10px; align-items: center; min-width: 0; text-align: left; }
@@ -164,7 +164,7 @@
 }
 .settingsPage .settingsDiagnosticCard, .settingsPage .settingsMiniStatusV491 > span {
   min-width: 0; display: grid; gap: 4px; padding: 13px;
-  border: 1px solid var(--settings-edge); border-radius: 9px; background: #10212a;
+  border: 1px solid var(--settings-edge); border-radius: 9px; background: var(--settings-elevated);
 }
 .settingsPage .settingsDiagnosticCard span, .settingsPage .settingsMiniStatusV491 small { color: var(--settings-muted); font-size: 11px; }
 .settingsPage .settingsDiagnosticCard strong, .settingsPage .settingsMiniStatusV491 strong { overflow-wrap: anywhere; font-size: 14px; }

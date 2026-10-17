@@ -2,9 +2,9 @@
 .app:has(.pageTransition-settings) .headerBar { display: none !important; }
 .app:has(.pageTransition-settings) .content { background: var(--lt-bg) !important; }
 .settingsPage.settingsPageV027 {
-  --settings-surface: color-mix(in oklab, var(--lt-surface) 75%, var(--lt-bg));
-  --settings-elevated: color-mix(in oklab, var(--lt-surface-raised) 75%, var(--lt-bg));
-  --settings-edge: color-mix(in oklab, var(--lt-border) 75%, transparent);
+  --settings-surface: var(--lt-surface);
+  --settings-elevated: var(--lt-surface-raised);
+  --settings-edge: var(--lt-border);
   --settings-muted: var(--lt-muted);
   --settings-text: var(--lt-text);
   --settings-accent: var(--lt-accent);
@@ -54,11 +54,15 @@
 .settingsPageV027 .settingsSearchField { position: relative; display: flex; align-items: center; min-width: 0; }
 .settingsPageV027 .settingsSearchField > svg { position: absolute; left: 9px; color: var(--settings-muted); pointer-events: none; }
 .settingsPage.settingsPageV027 .settingsSearchBoxV027 .settingsSearchField input {
-  width: 100%; min-height: 43px; padding: 10px 34px;
+  appearance: none; -webkit-appearance: none;
+  width: 100%; min-height: 43px; padding: 10px 36px 10px 39px;
   border-radius: 8px; border: 1px solid var(--settings-edge);
   background: var(--lt-bg); color: var(--settings-text); font-size: 13px;
 }
-.settingsPageV027 .settingsSearchField input::-webkit-search-cancel-button { display: none; }
+.settingsPageV027 .settingsSearchField input::-webkit-search-cancel-button,
+.settingsPageV027 .settingsSearchField input::-webkit-search-decoration,
+.settingsPageV027 .settingsSearchField input::-webkit-search-results-button,
+.settingsPageV027 .settingsSearchField input::-webkit-search-results-decoration { display: none; }
 .settingsPageV027 .settingsSearchClear { position: absolute; right: 3px; display: grid; place-items: center; width: 31px; height: 31px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--settings-muted); cursor: pointer; }
 .settingsPageV027 .settingsSearchClear:hover { background: var(--settings-elevated); color: var(--settings-text); }
 .settingsPage.settingsPageV027 .settingsSearchHintV027 { margin: 0 4px; color: var(--settings-muted); font-size: 11px; }
@@ -120,13 +124,14 @@
   appearance: none; position: relative;
   width: 42px; height: 24px; margin: 0;
   border-radius: 999px; border: 1px solid var(--settings-edge);
-  background: var(--settings-elevated); cursor: pointer;
+  background: color-mix(in oklab, var(--settings-text) 25%, var(--settings-elevated)); cursor: pointer;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab,var(--settings-text) 7%,transparent);
 }
 .settingsPageV027 .toggleRow input[type="checkbox"]::before,
 .settingsPageV027 .settingsCompactSwitch input[type="checkbox"]::before {
   content: ""; position: absolute; top: 2px; left: 2px;
   width: 18px; height: 18px; border-radius: 50%;
-  background: var(--settings-muted); transition: transform .16s ease;
+  background: var(--settings-text); transition: transform .16s ease;
 }
 .settingsPage.settingsPageV027 .toggleRow input[type="checkbox"]:checked,
 .settingsPage.settingsPageV027 .settingsCompactSwitch input[type="checkbox"]:checked { background: var(--settings-accent); }
@@ -268,5 +273,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .settingsPage.settingsPageV027 .settingsCategoryButton,
-  .settingsPageV027 .toggleRow input[type="checkbox"]::before { transition: none; }
+  .settingsPageV027 .toggleRow input[type="checkbox"]::before,
+  .settingsPageV027 .settingsCompactSwitch input[type="checkbox"]::before { transition: none; }
 }
