@@ -25,7 +25,7 @@
   --library-border: rgba(var(--lt-accent-rgb), .09);
   --library-border-strong: rgba(var(--lt-accent-rgb), .17);
   --library-text: var(--lt-text);
-  --library-muted: #607987;
+  --library-muted: var(--lt-muted);
   --library-faint: var(--lt-faint);
   width: 100%;
   min-width: 0;

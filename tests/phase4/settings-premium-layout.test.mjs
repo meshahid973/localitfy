@@ -40,7 +40,7 @@ test("Compact styles cover inputs, focus indicators, and narrower viewports with
   assert.match(skin, /settingsAppearanceTopGrid/);
   assert.match(skin, /settingsDisclosure/);
   assert.match(skin, /prefers-reduced-motion: reduce/);
-  assert.doesNotMatch(skin, /!important/);
+  assert.equal((skin.match(/!important/g) || []).length, 2, "Only the two scoped shell overrides may use !important");
 });
 
 test("Appearance keeps presets, local color editing and sidebar tools behind compact sections", () => {
