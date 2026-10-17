@@ -19,7 +19,6 @@ export type DownloadsViewProps = {
   downloadText: any;
   downloadsTab: any;
   failedDownloadQueueItems: any;
-  failedDownloadResults: any;
   fetchSpotifyTracks: any;
   finishedDownloadQueueItems: any;
   handleSpotifyLogin: any;
@@ -67,7 +66,6 @@ export default function DownloadsView(props: DownloadsViewProps) {
     downloadText,
     downloadsTab,
     failedDownloadQueueItems,
-    failedDownloadResults,
     fetchSpotifyTracks,
     finishedDownloadQueueItems,
     handleSpotifyLogin,

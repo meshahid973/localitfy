@@ -8637,7 +8637,6 @@ function MainModeApp() {
       downloadText,
       downloadsTab,
       failedDownloadQueueItems,
-      failedDownloadResults,
       fetchSpotifyTracks,
       finishedDownloadQueueItems,
       handleSpotifyLogin,
