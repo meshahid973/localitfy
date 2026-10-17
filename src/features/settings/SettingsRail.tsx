@@ -41,7 +41,7 @@ export default function SettingsRail({
               <span className="settingsCategoryIcon" aria-hidden="true">
                 <Icon className="settingsLucideIcon" size={19} strokeWidth={2.05} />
               </span>
-              <span className="settingsCategoryCopy"><strong>{tab.label}</strong><span>{tab.description}</span></span>
+              <span className="settingsCategoryCopy"><strong>{tab.label}</strong></span>
             </button>
           );
         }) : <p className="settingsNoSearchResultsV027">No matching section. Try another search.</p>}

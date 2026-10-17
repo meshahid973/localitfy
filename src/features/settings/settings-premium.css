@@ -8,62 +8,64 @@
   --settings-muted: var(--lt-muted);
   --settings-text: var(--lt-text);
   --settings-accent: var(--lt-accent);
-  width: min(100%, 1210px);
+  width: min(100%, 1760px);
   margin: 0 auto;
-  gap: 12px;
-  padding: 17px clamp(14px, 2vw, 26px) 85px;
+  gap: 18px;
+  padding: 24px clamp(18px, 2.1vw, 38px) 90px;
   color: var(--settings-text);
 }
 .settingsPage.settingsPageV027 .settingsPageIntro {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 40px;
-  gap: 10px;
-  padding: 0 0 10px;
+  min-height: 58px;
+  gap: 14px;
+  padding: 0 0 16px;
   border-bottom: 1px solid var(--settings-edge);
 }
 .settingsPageV027 .settingsIntroIdentity { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .settingsPageV027 .settingsIntroMark {
   display: grid; place-items: center;
-  width: 34px; height: 34px; border-radius: 10px;
+  width: 42px; height: 42px; border-radius: 11px;
   border: 1px solid var(--settings-edge);
   background: var(--settings-surface);
   color: var(--settings-accent);
 }
-.settingsPageV027 .settingsIntroTitle h1 { margin: 0; font-size: 20px; line-height: 1.2; letter-spacing: -.035em; color: var(--settings-text); }
-.settingsPageV027 .settingsIntroTitle p { margin: 2px 0 0; color: var(--settings-muted); font-size: 11px; }
-.settingsPageV027 .settingsIntroCurrent { font-size: 11px; color: var(--settings-muted); }
+.settingsPageV027 .settingsIntroTitle h1 { margin: 0; font-size: 26px; line-height: 1.2; letter-spacing: -.035em; color: var(--settings-text); }
+.settingsPageV027 .settingsIntroTitle p { margin: 2px 0 0; color: var(--settings-muted); font-size: 13px; }
+.settingsPageV027 .settingsIntroCurrent { font-size: 12px; color: var(--settings-muted); }
 .settingsPage.settingsPageV027 .settingsLayout {
-  grid-template-columns: 171px minmax(0, 1fr);
-  gap: 17px;
+  grid-template-columns: 226px minmax(0, 1fr);
+  gap: 24px;
   align-items: start;
 }
 .settingsPage.settingsPageV027 .settingsCategoryRail {
   position: sticky; top: 12px; max-height: calc(100vh - 120px);
-  padding: 8px; gap: 5px; overflow-y: auto;
+  padding: 12px; gap: 8px; overflow-y: auto;
   border-radius: 11px; border: 1px solid var(--settings-edge);
   background: var(--settings-surface);
 }
-.settingsPage.settingsPageV027 .settingsSearchBoxV027 { display: grid; gap: 5px; padding: 1px 1px 5px; }
+.settingsPage.settingsPageV027 .settingsSearchBoxV027 { display: grid; gap: 7px; padding: 1px 1px 8px; }
 .settingsPageV027 .settingsSearchBoxV027 > label,
-.settingsPageV027 .settingsNavCaption { color: var(--settings-muted); font-size: 10px; font-weight: 650; letter-spacing: .065em; text-transform: uppercase; }
-.settingsPageV027 .settingsNavCaption { margin: 6px 8px 3px; }
+.settingsPageV027 .settingsNavCaption { color: var(--settings-muted); font-size: 11px; font-weight: 650; letter-spacing: .065em; text-transform: uppercase; }
+.settingsPageV027 .settingsNavCaption { margin: 10px 9px 5px; }
+.settingsPageV027 .settingsNavGroup { display: grid; gap: 3px; min-width: 0; }
+.settingsPageV027 .settingsNavGroup:first-child .settingsNavCaption { margin-top: 3px; }
 .settingsPageV027 .settingsSearchField { position: relative; display: flex; align-items: center; min-width: 0; }
 .settingsPageV027 .settingsSearchField > svg { position: absolute; left: 9px; color: var(--settings-muted); pointer-events: none; }
 .settingsPage.settingsPageV027 .settingsSearchBoxV027 .settingsSearchField input {
-  width: 100%; min-height: 35px; padding: 8px 30px;
+  width: 100%; min-height: 43px; padding: 10px 34px;
   border-radius: 8px; border: 1px solid var(--settings-edge);
-  background: var(--lt-bg); color: var(--settings-text); font-size: 11px;
+  background: var(--lt-bg); color: var(--settings-text); font-size: 13px;
 }
 .settingsPageV027 .settingsSearchField input::-webkit-search-cancel-button { display: none; }
-.settingsPageV027 .settingsSearchClear { position: absolute; right: 3px; display: grid; place-items: center; width: 27px; height: 27px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--settings-muted); cursor: pointer; }
+.settingsPageV027 .settingsSearchClear { position: absolute; right: 3px; display: grid; place-items: center; width: 31px; height: 31px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--settings-muted); cursor: pointer; }
 .settingsPageV027 .settingsSearchClear:hover { background: var(--settings-elevated); color: var(--settings-text); }
 .settingsPage.settingsPageV027 .settingsSearchHintV027 { margin: 0 4px; color: var(--settings-muted); font-size: 11px; }
-.settingsPage.settingsPageV027 .settingsCategoryRail nav { display: grid; gap: 1px; min-width: 0; }
+.settingsPage.settingsPageV027 .settingsCategoryRail nav { display: grid; gap: 5px; min-width: 0; }
 .settingsPage.settingsPageV027 .settingsCategoryButton {
-  display: flex; align-items: center; gap: 9px;
-  width: 100%; min-height: 35px; padding: 7px 8px;
+  display: flex; align-items: center; gap: 11px;
+  width: 100%; min-height: 45px; padding: 9px 10px;
   border: 1px solid transparent; border-radius: 7px;
   background: transparent; color: var(--settings-muted);
   transition: background-color .14s ease, color .14s ease;
@@ -74,103 +76,106 @@
   border-color: color-mix(in oklab, var(--settings-accent) 18%, transparent);
   background: color-mix(in oklab, var(--settings-accent) 9%, var(--settings-surface));
 }
-.settingsPage.settingsPageV027 .settingsCategoryIcon { display: grid; place-items: center; width: 17px; color: var(--settings-muted); }
+.settingsPage.settingsPageV027 .settingsCategoryIcon { display: grid; place-items: center; width: 21px; color: var(--settings-muted); }
 .settingsPage.settingsPageV027 .settingsCategoryButton[aria-current="page"] .settingsCategoryIcon { color: var(--settings-accent); }
-.settingsPageV027 .settingsCategoryIcon svg { width: 16px; height: 16px; }
-.settingsPage.settingsPageV027 .settingsCategoryCopy strong { font-size: 12px; font-weight: 630; }
+.settingsPageV027 .settingsCategoryIcon svg { width: 19px; height: 19px; }
+.settingsPage.settingsPageV027 .settingsCategoryCopy strong { font-size: 14px; font-weight: 640; }
 .settingsPage.settingsPageV027 .settingsCategoryCopy > span { display: none; }
 .settingsPage.settingsPageV027 .settingsCategoryPage,
-.settingsPage.settingsPageV027 .settingsContentBlock { gap: 11px; }
+.settingsPage.settingsPageV027 .settingsContentBlock { gap: 16px; }
 .settingsPage.settingsPageV027 .settingsCategoryHeader {
-  align-items: center; padding: 2px 0 10px; gap: 12px;
+  align-items: center; padding: 4px 0 14px; gap: 14px;
   border-bottom: 1px solid var(--settings-edge);
 }
 .settingsPage.settingsPageV027 .settingsCategoryHeader h4,
-.settingsPage.settingsPageV027 .settingsContentBlock h2 { margin: 2px 0 0; font-size: 20px; font-weight: 720; color: var(--settings-text); line-height: 1.2; }
-.settingsPage.settingsPageV027 .settingsCategoryHeader .eyebrow { margin: 0; color: var(--settings-accent); font-size: 10px; letter-spacing: .08em; }
-.settingsPage.settingsPageV027 .settingsCategoryHeader > span { color: var(--settings-muted); font-size: 11px; }
+.settingsPage.settingsPageV027 .settingsContentBlock h2 { margin: 2px 0 0; font-size: 25px; font-weight: 720; color: var(--settings-text); line-height: 1.2; }
+.settingsPage.settingsPageV027 .settingsCategoryHeader .eyebrow { margin: 0; color: var(--settings-accent); font-size: 12px; letter-spacing: .08em; }
+.settingsPage.settingsPageV027 .settingsCategoryHeader > span { color: var(--settings-muted); font-size: 12px; }
 .settingsPage.settingsPageV027 .settingsPanelCard,
 .settingsPage.settingsPageV027 .settingGroup,
 .settingsPage.settingsPageV027 .settingsCardStack {
-  gap: 10px; padding: 13px 14px;
-  border-radius: 11px; border: 1px solid var(--settings-edge);
+  gap: 15px; padding: 19px 21px;
+  border-radius: 12px; border: 1px solid var(--settings-edge);
   background: var(--settings-surface);
 }
-.settingsPage.settingsPageV027 .settingsPanelHeader { gap: 10px; align-items: center; }
-.settingsPage.settingsPageV027 .settingsPanelHeader > div { gap: 3px; }
-.settingsPage.settingsPageV027 .settingsPanelHeader strong { color: var(--settings-text); font-size: 13px; }
+.settingsPage.settingsPageV027 .settingsPanelHeader { gap: 12px; align-items: center; }
+.settingsPage.settingsPageV027 .settingsPanelHeader > div { gap: 4px; }
+.settingsPage.settingsPageV027 .settingsPanelHeader strong { color: var(--settings-text); font-size: 15px; }
 .settingsPage.settingsPageV027 .settingsPanelHeader span,
-.settingsPage.settingsPageV027 .settingsPanelHeader p { color: var(--settings-muted); font-size: 11px; line-height: 1.4; }
+.settingsPage.settingsPageV027 .settingsPanelHeader p { color: var(--settings-muted); font-size: 12px; line-height: 1.5; }
 .settingsPage.settingsPageV027 .settingsTwoColumn,
-.settingsPage.settingsPageV027 .settingsGrid.twoCols { gap: 11px; }
-.settingsPage.settingsPageV027 .settingsMiniGrid { gap: 8px; }
+.settingsPage.settingsPageV027 .settingsGrid.twoCols { gap: 17px; }
+.settingsPage.settingsPageV027 .settingsMiniGrid { gap: 13px; }
+.settingsPage.settingsPageV027 .settingsAudioEffectsPanel { grid-column: 1 / -1; }
+.settingsPage.settingsPageV027 .settingsAudioEffectsPanel .settingsSelectField { max-width: 540px; }
+.settingsPage.settingsPageV027 .settingsLayoutControls .settingsMiniGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .settingsPage.settingsPageV027 :is(.toggleRow,.rangeRow) {
-  min-height: 44px; padding: 5px 0; gap: 12px;
+  min-height: 57px; padding: 9px 0; gap: 16px;
   border-bottom: 1px solid var(--settings-edge);
 }
 .settingsPage.settingsPageV027 :is(.toggleRow,.rangeRow):last-child { border-bottom-color: transparent; }
-.settingsPage.settingsPageV027 :is(.toggleRow,.rangeRow) strong { color: var(--settings-text); font-size: 12px; }
-.settingsPage.settingsPageV027 :is(.toggleRow,.rangeRow) small { color: var(--settings-muted); font-size: 11px; }
+.settingsPage.settingsPageV027 :is(.toggleRow,.rangeRow) strong { color: var(--settings-text); font-size: 14px; }
+.settingsPage.settingsPageV027 :is(.toggleRow,.rangeRow) small { color: var(--settings-muted); font-size: 12px; }
 .settingsPage.settingsPageV027 .toggleRow input[type="checkbox"],
 .settingsPage.settingsPageV027 .settingsCompactSwitch input[type="checkbox"] {
   appearance: none; position: relative;
-  width: 34px; height: 20px; margin: 0;
+  width: 42px; height: 24px; margin: 0;
   border-radius: 999px; border: 1px solid var(--settings-edge);
   background: var(--settings-elevated); cursor: pointer;
 }
 .settingsPageV027 .toggleRow input[type="checkbox"]::before,
 .settingsPageV027 .settingsCompactSwitch input[type="checkbox"]::before {
   content: ""; position: absolute; top: 2px; left: 2px;
-  width: 14px; height: 14px; border-radius: 50%;
+  width: 18px; height: 18px; border-radius: 50%;
   background: var(--settings-muted); transition: transform .16s ease;
 }
 .settingsPage.settingsPageV027 .toggleRow input[type="checkbox"]:checked,
 .settingsPage.settingsPageV027 .settingsCompactSwitch input[type="checkbox"]:checked { background: var(--settings-accent); }
 .settingsPageV027 .toggleRow input[type="checkbox"]:checked::before,
-.settingsPageV027 .settingsCompactSwitch input[type="checkbox"]:checked::before { background: var(--lt-bg); transform: translateX(14px); }
-.settingsPage.settingsPageV027 .rangeRow input[type="range"] { width: clamp(120px, 15vw, 200px); accent-color: var(--settings-accent); }
+.settingsPageV027 .settingsCompactSwitch input[type="checkbox"]:checked::before { background: var(--lt-bg); transform: translateX(18px); }
+.settingsPage.settingsPageV027 .rangeRow input[type="range"] { width: clamp(180px, 18vw, 300px); accent-color: var(--settings-accent); }
 .settingsPage.settingsPageV027 :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),select,textarea) {
-  min-height: 36px; padding: 7px 10px; border-radius: 8px;
+  min-height: 44px; padding: 9px 12px; border-radius: 9px;
   border-color: var(--settings-edge); background: var(--lt-bg);
-  color: var(--settings-text); font-size: 12px;
+  color: var(--settings-text); font-size: 14px;
 }
 .settingsPage.settingsPageV027 :is(.settingsActionButton,.settingsTinyButton) {
-  min-height: 33px; padding: 7px 10px;
+  min-height: 40px; padding: 9px 13px;
   border: 1px solid var(--settings-edge); border-radius: 8px;
   background: var(--settings-elevated); color: var(--settings-text);
-  font-size: 11px; font-weight: 630; cursor: pointer;
+  font-size: 13px; font-weight: 630; cursor: pointer;
 }
 .settingsPage.settingsPageV027 :is(.settingsActionButton,.settingsTinyButton):hover:not(:disabled) { background: color-mix(in oklab, var(--settings-accent) 11%, var(--settings-elevated)); }
 .settingsPage.settingsPageV027 :is(.settingsActionButton,.settingsTinyButton):disabled { opacity: .45; cursor: not-allowed; }
 .settingsPage.settingsPageV027 .settingsPrimaryAction { border-color: color-mix(in oklab, var(--settings-accent) 24%, transparent); background: color-mix(in oklab, var(--settings-accent) 12%, var(--settings-surface)); }
 .settingsPage.settingsPageV027 :is(.settingsChoicePillV491,.settingsChoice,.customThemePresetButtonV027,.cleanerOptionV440) {
-  min-height: 42px; padding: 8px 10px; gap: 4px;
+  min-height: 50px; padding: 10px 12px; gap: 4px;
   border-radius: 8px; background: var(--settings-elevated); border-color: var(--settings-edge);
   color: var(--settings-text);
 }
 .settingsPage.settingsPageV027 :is(.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440).active { background: color-mix(in oklab, var(--settings-accent) 12%, var(--settings-surface)); border-color: color-mix(in oklab, var(--settings-accent) 32%, transparent); }
 .settingsPage.settingsPageV027 .settingsChoiceRowV491 { gap: 7px; }
-.settingsPage.settingsPageV027 .settingsAppearanceTopGrid { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); align-items: start; gap: 11px; }
+.settingsPage.settingsPageV027 .settingsAppearanceTopGrid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: start; gap: 17px; }
 .settingsPage.settingsPageV027 .settingsAppearanceTopGrid .settingsPanelCard { height: 100%; }
 .settingsPage.settingsPageV027 .settingsThemeSelectedPreview { min-width: 0; gap: 9px; }
 .settingsPage.settingsPageV027 .settingsThemeSelectedPreview small { color: var(--settings-muted); }
 .settingsPage.settingsPageV027 .settingsCompactSwitch { display: flex; align-items: center; gap: 8px; color: var(--settings-muted); font-size: 11px; }
 .settingsPage.settingsPageV027 .customThemePresetRowV027 { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 7px; }
-.settingsPage.settingsPageV027 .customThemePresetButtonV027 { display: flex; flex-direction: column; gap: 5px; min-height: 48px; align-items: start; padding: 9px; }
-.settingsPage.settingsPageV027 .customThemePresetButtonV027 > span:first-child { width: 18px; height: 18px; flex: 0 0 18px; }
-.settingsPage.settingsPageV027 .customThemePresetButtonV027 strong { font-size: 11px; }
+.settingsPage.settingsPageV027 .customThemePresetButtonV027 { display: flex; flex-direction: column; gap: 5px; min-height: 63px; align-items: start; padding: 11px; }
+.settingsPage.settingsPageV027 .customThemePresetButtonV027 > span:first-child { width: 22px; height: 22px; flex: 0 0 22px; }
+.settingsPage.settingsPageV027 .customThemePresetButtonV027 strong { font-size: 12px; }
 .settingsPage.settingsPageV027 .settingsDisclosure { min-width: 0; border: 1px solid var(--settings-edge); border-radius: 10px; background: var(--settings-surface); }
 .settingsPage.settingsPageV027 .settingsPaletteEditor { border: 0; border-top: 1px solid var(--settings-edge); border-radius: 0; background: transparent; }
 .settingsPage.settingsPageV027 .settingsDisclosure > summary {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 12px 14px; cursor: pointer; color: var(--settings-text); font-size: 12px; font-weight: 630; list-style: none;
+  padding: 12px 14px; cursor: pointer; color: var(--settings-text); font-size: 14px; font-weight: 630; list-style: none;
 }
 .settingsPage.settingsPageV027 .settingsPaletteEditor > summary { padding: 9px 0 0; font-size: 11px; color: var(--settings-muted); }
 .settingsPage.settingsPageV027 .settingsDisclosure > summary::-webkit-details-marker { display: none; }
 .settingsPage.settingsPageV027 .settingsDisclosure > summary::after { content: "+"; margin-left: auto; color: var(--settings-accent); font-size: 16px; }
 .settingsPage.settingsPageV027 .settingsDisclosure[open] > summary::after { content: "−"; }
 .settingsPage.settingsPageV027 .settingsDisclosure > summary > span { margin-left: auto; font-size: 10px; font-weight: 450; color: var(--settings-muted); }
-.settingsPage.settingsPageV027 .settingsDisclosureBody { display: grid; gap: 11px; padding: 10px 13px 13px; border-top: 1px solid var(--settings-edge); }
+.settingsPage.settingsPageV027 .settingsDisclosureBody { display: grid; gap: 11px; padding: 13px 16px 16px; border-top: 1px solid var(--settings-edge); }
 .settingsPage.settingsPageV027 .settingsPaletteEditor .settingsDisclosureBody { padding: 11px 0 0; }
 .settingsPage.settingsPageV027 .settingsPaletteSaveRow { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
 .settingsPage.settingsPageV027 .settingsPaletteSaveRow .settingsTextFieldV027 { flex: 1 1 160px; }
@@ -180,22 +185,25 @@
 .settingsPage.settingsPageV027 .settingsSidebarDisclosure .sidebarTabsGroups { gap: 12px; }
 .settingsPage.settingsPageV027 :is(.settingsActionButton,.settingsTinyButton,.settingsCategoryButton,.settingsSearchClear,.settingsDisclosure > summary):focus-visible,
 .settingsPage.settingsPageV027 :is(input,select,textarea,button):focus-visible { outline: 2px solid var(--settings-accent); outline-offset: 2px; }
-@media (max-width: 1050px) {
-  .settingsPage.settingsPageV027 .settingsLayout { grid-template-columns: 154px minmax(0,1fr); gap: 11px; }
+@media (max-width: 1200px) {
+  .settingsPage.settingsPageV027 .settingsLayout { grid-template-columns: 205px minmax(0,1fr); gap: 16px; }
   .settingsPage.settingsPageV027 .settingsAppearanceTopGrid { grid-template-columns: 1fr; }
 }
-@media (max-width: 900px) {
+@media (max-width: 950px) {
   .settingsPage.settingsPageV027 .settingsLayout { grid-template-columns: minmax(0,1fr); }
   .settingsPage.settingsPageV027 .settingsCategoryRail { position: static; max-height: none; }
-  .settingsPage.settingsPageV027 .settingsCategoryRail nav { display: flex; overflow-x: auto; gap: 4px; padding: 2px 0 5px; }
-  .settingsPage.settingsPageV027 .settingsCategoryButton { flex: 0 0 auto; min-width: 106px; width: auto; }
+  .settingsPage.settingsPageV027 .settingsCategoryRail nav { display: flex; overflow-x: auto; gap: 10px; padding: 2px 0 7px; }
+  .settingsPage.settingsPageV027 .settingsNavGroup { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+  .settingsPage.settingsPageV027 .settingsCategoryButton { flex: 0 0 auto; min-width: 120px; width: auto; }
   .settingsPage.settingsPageV027 .settingsNavCaption { display: none; }
+  .settingsPage.settingsPageV027 .settingsLayoutControls .settingsMiniGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .settingsPage.settingsPageV027 .settingsAppearanceTopGrid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media (max-width: 670px) {
   .settingsPage.settingsPageV027 { padding: 14px 12px 86px; }
   .settingsPage.settingsPageV027 .settingsAppearanceTopGrid,
   .settingsPage.settingsPageV027 .settingsTwoColumn { grid-template-columns: minmax(0,1fr); }
+  .settingsPage.settingsPageV027 .settingsLayoutControls .settingsMiniGrid { grid-template-columns: minmax(0, 1fr); }
   .settingsPage.settingsPageV027 .settingsCategoryHeader { align-items: start; }
   .settingsPage.settingsPageV027 .rangeRow { grid-template-columns: 1fr; }
   .settingsPage.settingsPageV027 .rangeRow input[type="range"] { width: 100%; }

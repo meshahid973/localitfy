@@ -25,7 +25,7 @@ export default function SettingsView({
           <span className="settingsIntroMark" aria-hidden="true"><SlidersHorizontal size={18} strokeWidth={1.9} /></span>
           <div className="settingsIntroTitle">
             <h1>Settings</h1>
-            <p>Personalize your listening.</p>
+            <p>Your player, your preferences.</p>
           </div>
         </div>
         <span className="settingsIntroCurrent" aria-label="Current settings section">

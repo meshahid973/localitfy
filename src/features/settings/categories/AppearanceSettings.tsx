@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import SidebarTabsSettings from "./SidebarTabsSettings";
 import type { Settings } from "../settings.types";
 import type { ThemeId } from "../theme.types";
+import { ToggleRow } from "../settings.shared";
 import type { ChoiceOption, CustomThemePresetOption, CustomThemeTokenOption, ThemeOption, UpdateSetting } from "../settings.shared";
 
 const COMPLETE_HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
@@ -161,6 +162,20 @@ export default function AppearanceSettings(props: AppearanceSettingsProps) {
               <strong>{option.label || option.name || option.id}</strong>
             </button>;
           })}
+        </div>
+      </div>
+
+      <div className="settingsPanelCard settingsLayoutControls">
+        <div className="settingsPanelHeader">
+          <div><strong>Layout & motion</strong><span>Customize how the app feels across all screens.</span></div>
+        </div>
+        <div className="settingsMiniGrid">
+          <ToggleRow label="Compact player" help="Use a smaller bottom playback bar." checked={settings.compactPlayer} onChange={(value) => void updateSetting("compactPlayer", value)} />
+          <ToggleRow label="Compact library" help="Fit more songs into each list." checked={settings.denseList} onChange={(value) => void updateSetting("denseList", value)} />
+          <ToggleRow label="Reduce motion" help="Limit animation and transitions." checked={settings.reducedMotion} onChange={(value) => void updateSetting("reducedMotion", value)} />
+          <ToggleRow label="Rounded corners" help="Use softer corners on cards and buttons." checked={settings.softCorners} onChange={(value) => void updateSetting("softCorners", value)} />
+          <ToggleRow label="Animated glow" help="Show ambient player lighting." checked={settings.animatedGlow} onChange={(value) => void updateSetting("animatedGlow", value)} />
+          <ToggleRow label="Cat buddy" help="Show a little cat that follows the cursor." checked={settings.catBuddyEnabled === true} onChange={(value) => void updateSetting("catBuddyEnabled", value)} />
         </div>
       </div>
 

@@ -35,7 +35,7 @@ test("Compact styles cover inputs, focus indicators, and narrower viewports with
   assert.match(skin, /\.toggleRow input\[type="checkbox"\]:checked/);
   assert.match(skin, /\.rangeRow input\[type="range"\]/);
   assert.match(skin, /:focus-visible/);
-  assert.match(skin, /@media \(max-width: 900px\)/);
+  assert.match(skin, /@media \(max-width: 950px\)/);
   assert.match(skin, /@media \(max-width: 480px\)/);
   assert.match(skin, /settingsAppearanceTopGrid/);
   assert.match(skin, /settingsDisclosure/);
@@ -69,4 +69,34 @@ test("User feedback remains available manually without automatic nag prompts", (
   assert.doesNotMatch(app, /FEEDBACK_PROMPT_DELAY_MS|feedbackPromptBlockersRef/);
   assert.match(app, /localtify:open-feedback/);
   assert.match(toast, /kind !== "error"/);
+});
+
+test("Settings use a readable width and grouped navigation", () => {
+  const rail = read("src/features/settings/SettingsRail.tsx");
+  assert.match(skin, /width: min\(100%, 1760px\)/);
+  assert.match(skin, /grid-template-columns: 226px minmax\(0, 1fr\)/);
+  for (const heading of ["Listening", "Your collection", "Application"]) {
+    assert.ok(rail.includes(heading), "Missing settings navigation group: " + heading);
+  }
+  assert.match(rail, /aria-current=\{selected \? "page" : undefined\}/);
+});
+
+test("Each setting lives in its relevant category", () => {
+  const appearance = read("src/features/settings/categories/AppearanceSettings.tsx");
+  const playback = read("src/features/settings/categories/PlaybackSettings.tsx");
+  const advanced = read("src/features/settings/categories/AdvancedSettings.tsx");
+  for (const key of ["compactPlayer", "denseList", "reducedMotion", "softCorners", "animatedGlow", "catBuddyEnabled"]) {
+    assert.match(appearance, new RegExp("updateSetting\\(\"" + key + "\""));
+    assert.doesNotMatch(advanced, new RegExp("updateSetting\\(\"" + key + "\""));
+  }
+  assert.doesNotMatch(playback, /updateSetting\("compactPlayer"/);
+  assert.match(playback, /updateSetting\("crossfadeEnabled"/);
+  assert.match(playback, /updateSetting\("volumeNormalization"/);
+});
+
+test("Legacy appearance selectors are not kept after their controls move", () => {
+  const core = read("src/features/settings/settings.css");
+  for (const unused of ["settingsAppearanceInfoCopyV500", "settingsThemeSelectPanel", "cleanToggleLabel"]) {
+    assert.ok(!core.includes(unused), "Unused CSS selector: " + unused);
+  }
 });
