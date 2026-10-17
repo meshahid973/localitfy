@@ -1321,11 +1321,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 
-@media (max-width: 900px) {
-
-
-}
-
 .playerBar {
   --player-content-y: 7px;
 }
@@ -1622,10 +1617,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   transform: translateX(1px) !important;
 }
 
-.playerBar{
-
-
-}
 
 .playerBar::before{
 

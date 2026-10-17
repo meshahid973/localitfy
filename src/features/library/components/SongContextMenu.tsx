@@ -2,6 +2,7 @@ import { Heart, Pencil, Play, Plus, SkipForward, Trash2 } from "lucide-react";
 import { Cover } from "../../covers/Cover";
 import { prettyMeta, prettyTitle } from "../../search";
 import type { Song, SongContextMenuState } from "../song.types";
+import "./song-context-menu.css";
 
 export type SongContextMenuProps = {
   state: SongContextMenuState | null;

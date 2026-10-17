@@ -769,10 +769,6 @@
   100% { opacity: 1; transform: translate3d(0, var(--hero-title-lift, 0px), 0) scale(1); filter: blur(0); }
 }
 
-@keyframes localitfyCinematicArtistDelay {
-
-  100% { opacity: 1; transform: translate3d(0, -2px, 0); }
-}
 
 @keyframes localitfyCinematicMetaFade {
   0% { opacity: 0; transform: translate3d(0, 6px, 0); }
@@ -857,22 +853,6 @@
   --album-hover-final-ease: cubic-bezier(0.18, 0.92, 0.22, 1);
 }
 
-@keyframes localitfySongTitleIn {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 18px, 0) scale(0.986);
-    filter: blur(9px);
-  }
-  56% {
-    opacity: 1;
-    filter: blur(0);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, var(--hero-title-final-lift), 0) scale(1);
-    filter: blur(0);
-  }
-}
 
 .app .ambientSurface::before{
 
@@ -1169,14 +1149,7 @@ body.isResizingSidebar{
 .whatsNewClose{ position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.05); color: rgba(255,255,255,.7); cursor: pointer; }
 @keyframes whatsNewFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes whatsNewPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@media (max-width: 980px){
-   }
 
-
-@media (max-width: 860px){
-
-
-}
 
 .whatsNewOverlay{
   background: rgba(0, 0, 0, 0.68);
@@ -1351,16 +1324,6 @@ body.isResizingSidebar{
   backdrop-filter: blur(18px) saturate(140%) !important;
 }
 
-
-@media (max-width: 860px){
-
-
-  }
-
-
-@media (max-width: 760px){
-
-  }
 
 .app{
   --shell-panel: rgba(255, 255, 255, 0.045);
@@ -1688,10 +1651,6 @@ input[type="range"]{
   }
 }
 
-
-@media (max-width: 920px){
-
-  }
 
 .app{
   --shell-sidebar-width: var(--sidebar-width-live, var(--sidebar-width, 236px));
@@ -2134,11 +2093,6 @@ button:hover,
 }
 
 
-@supports (content-visibility: auto){
-
-
-}
-
 .app .songRow{
   backface-visibility: hidden;
   contain: layout paint style;
@@ -2395,17 +2349,6 @@ html{
   --cover-sync-player-opacity: 0.34;
   --cover-sync-active-opacity: 0.16;
   --cover-sync-progress-opacity: 0.42;
-}
-
-
-@media (max-width: 860px){
-
-
-}
-
-@media (max-width: 560px){
-
-
 }
 
 
@@ -2829,11 +2772,6 @@ html{
 }
 
 
-@media (max-width: 920px){
-
-
-}
-
 .app,
 .app::before {
   background-image: none !important;
@@ -3005,10 +2943,6 @@ button {
   filter: none !important;
 }
 
-.app,
-.app::before,
-.app::after{
-}
 
 .titleLogoImage,
 .loadingLogoImage,
@@ -3277,11 +3211,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
   background-size: auto !important;
 }
 
-.app::before,
-.app::after,
-.simpleShell::before,
-.simpleShell::after {
-}
 
 .app,
 .simpleShell,
@@ -3339,8 +3268,6 @@ body,
   animation: none !important;
 }
 
-.app {
-}
 
 body.localtifyIdle .app:not(.songDragActive) :where(.floatingNote, .secretLayer, .ambientParticle, .homePulse, .coverSpark, .softOrbit){
   animation-play-state: paused !important;
@@ -3968,13 +3895,6 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 
-.app .topUpdateRibbon,
-.topUpdateRibbon{
-
-
-}
-
-
 .app .topUpdateRibbonText,
 .topUpdateRibbonText{
 
@@ -4051,13 +3971,6 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 
-.app .topUpdateRibbon,
-.topUpdateRibbon{
-
-
-}
-
-
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
   grid-column: auto !important;
@@ -4084,14 +3997,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 
 
-}
-
-@media (max-width: 720px){
-
-
-  .app .topUpdateRibbonText .eyebrow,
-.topUpdateRibbonText .eyebrow {
-  }
 }
 
 
@@ -4727,9 +4632,6 @@ body.localtifyBackgroundMode .ambientSurface,
     filter 160ms ease !important;
 }
 
-.app .topUpdateRibbon .updateToastClose:hover,
-.topUpdateRibbon .updateToastClose:hover {
-}
 
 .app .updateYukariPeek,
 .updateYukariPeek{
@@ -4993,20 +4895,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-@media (max-width: 1320px){
-
-
-}
-
-@media (max-width: 980px){
-
-
-}
-
-@media (max-width: 640px){
-
-
-}
 
 .app{
   --hero-v165-left-pad: clamp(34px, 4vw, 76px);
@@ -5343,9 +5231,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   display: none !important;
 }
 
-@media (max-width: 1180px){
-
-}
 
 @media (max-width: 920px){
 
@@ -5516,11 +5401,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 }
 
 
-.app .topUpdateRibbon .updatePrimaryButton:hover,
-.topUpdateRibbon .updatePrimaryButton:hover {
-}
-
-
 .app .topUpdateRibbonProgress,
 .topUpdateRibbonProgress{
 
@@ -5646,13 +5526,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     color 150ms ease !important;
 
   -webkit-app-region: no-drag !important;
-}
-
-
-.app .topUpdateRibbon .updateToastClose,
-.topUpdateRibbon .updateToastClose{
-
-
 }
 
 
@@ -5932,12 +5805,6 @@ body.localtifyPerfV301 .app{
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   contain: layout style paint;
-}
-
-
-@supports (content-visibility: auto){
-
-
 }
 
 
@@ -6751,11 +6618,6 @@ body.isResizingPlayer .app *{
 .topUpdateRibbonIcon svg{
   width: 13px !important;
   height: 13px !important;
-}
-
-
-.app .topUpdateRibbonText .eyebrow,
-.topUpdateRibbonText .eyebrow {
 }
 
 

@@ -781,8 +781,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   }
 }
 
-@media (max-width: 1120px){
-  }
 
 @media (max-width: 860px){
 
@@ -917,10 +915,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
   min-width: 116px;
 }
 
-@media (max-width: 1120px){
-
-
-  }
 
 @media (max-width: 860px){
   .localitfyOnboardingShell{

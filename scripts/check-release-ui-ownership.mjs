@@ -56,6 +56,21 @@ const requiredOwners = [
 ];
 for (const [file, specifier] of requiredOwners) if (!read(file).includes('import "' + specifier + '";')) fail(file + ": missing co-located CSS owner " + specifier);
 
+
+const menuComponent = "src/features/library/components/SongContextMenu.tsx";
+const menuStyles = "src/features/library/components/song-context-menu.css";
+if (!read(menuComponent).includes('import "./song-context-menu.css";')) {
+  fail(menuComponent + ": missing menu stylesheet import");
+}
+if (!exists(menuStyles)) {
+  fail(menuStyles + ": missing context menu styles");
+} else {
+  const css = read(menuStyles);
+  for (const selector of [".songContextMenuLayer", ".songContextMenu", ".songContextMenuHead", ".songContextMenuCover", ".songContextMenuIcon", ".songContextMenuDivider"]) {
+    if (!css.includes(selector)) fail(menuStyles + ": missing " + selector);
+  }
+}
+
 const library = read("src/features/library/LibraryView.tsx");
 if (!library.includes('data-page-section="library"')) fail("LibraryView lost its page owner marker");
 if (library.includes('data-page-state="reset"')) fail("LibraryView returned to temporary reset mode after redesign started");

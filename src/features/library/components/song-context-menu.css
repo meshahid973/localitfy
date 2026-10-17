@@ -1,0 +1,140 @@
+/* Right-click menus (songs, player bar, sidebar tabs). */
+.songContextMenuLayer{
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  background: transparent;
+}
+
+.songContextMenu{
+  position: fixed;
+  z-index: 11001;
+  width: min(258px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  padding: 9px;
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  border-radius: 18px;
+  color: var(--text);
+  background: linear-gradient(180deg, rgba(20, 20, 20, 0.96), rgba(4, 4, 4, 0.94));
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  backdrop-filter: blur(22px) saturate(130%);
+  animation: songContextMenuIn 150ms ease both;
+}
+
+.sidebarContextMenu{
+  width: min(220px, calc(100vw - 24px));
+}
+
+.songContextMenuHead{
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 5px;
+  padding: 7px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.songContextMenuCover{
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+}
+
+.songContextMenuHead span{
+  min-width: 0;
+}
+
+.songContextMenuHead strong,
+.songContextMenuHead small{
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.songContextMenuHead strong{
+  font-size: 13px;
+  letter-spacing: -0.03em;
+}
+
+.songContextMenuHead small{
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.songContextMenu button{
+  width: 100%;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 11px;
+  color: rgba(255, 255, 255, 0.88);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 820;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.songContextMenu button:hover:not(:disabled),
+.songContextMenu button:focus-visible{
+  color: #fff;
+  background: rgba(var(--accent-rgb), 0.12);
+}
+
+.songContextMenu button:disabled{
+  cursor: default;
+  opacity: 0.42;
+}
+
+.songContextMenu .songContextMenuIcon{
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.92), rgba(var(--accent-rgb), 0.68));
+}
+
+.songContextMenu .songContextMenuIcon svg{
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+}
+
+.songContextMenuDivider{
+  height: 1px;
+  margin: 6px 4px;
+  background: rgba(255, 255, 255, 0.075);
+}
+
+.songContextMenu button.dangerMenuItem{
+  color: rgba(255, 210, 218, 0.92);
+}
+
+.songContextMenu button.dangerMenuItem:hover{
+  background: rgba(255, 78, 108, 0.13);
+}
+
+.songContextMenu button.dangerMenuItem .songContextMenuIcon{
+  background: linear-gradient(180deg, rgba(255, 84, 112, 0.96), rgba(210, 48, 76, 0.88));
+}
+
+@keyframes songContextMenuIn{
+  from{ opacity: 0; transform: translateY(6px) scale(0.98); }
+  to{ opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .songContextMenu{ animation: none; }
+}
