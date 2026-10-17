@@ -16,7 +16,6 @@ export function ToggleRow({ label, help, checked, onChange }: {
       <span className="toggleRowCopy">
         <span className="settingsLabelLine">
           <strong>{label}</strong>
-          {help ? <span className="settingsInfoDot" aria-hidden="true">i</span> : null}
         </span>
         {help ? <small>{help}</small> : null}
       </span>
@@ -54,7 +53,7 @@ export function RangeRow({ label, value, min, max, step, suffix, onChange }: {
   return (
     <label className="rangeRow" title={`${label}: ${shownValue}`}>
       <span className="rangeRowCopy">
-        <span className="settingsLabelLine"><strong>{label}</strong><span className="settingsInfoDot" aria-hidden="true">i</span></span>
+        <span className="settingsLabelLine"><strong>{label}</strong></span>
         <small>{shownValue}</small>
       </span>
       <input

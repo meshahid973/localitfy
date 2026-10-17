@@ -1,4 +1,4 @@
-import type { CSSProperties, ComponentType, Dispatch, SetStateAction } from "react";
+import type { ComponentType, Dispatch, SetStateAction } from "react";
 
 export type CoverMood = "all" | "favorites" | "leastUsed" | "cute" | "space" | "dark" | "cozy" | "energy";
 export type PixelArtAsset = { file: string; label: string; discordKey: string };
@@ -35,7 +35,6 @@ export type CoverStats = {
 };
 
 export type CoverStudioProps = {
-  ambientStyle?: CSSProperties;
   pixelArtBusy: boolean;
   selectedCoverSongs: CoverSong[];
   currentSong: CoverSong | null;

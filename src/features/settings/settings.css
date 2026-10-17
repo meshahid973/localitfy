@@ -157,7 +157,6 @@
 .settingsPage :is(.toggleRow, .rangeRow) :is(.toggleRowCopy, .rangeRowCopy) { display: grid; gap: 4px; min-width: 0; }
 .settingsPage :is(.toggleRow, .rangeRow) strong { font-size: 13px; font-weight: 650; }
 .settingsPage :is(.toggleRow, .rangeRow) small { color: var(--settings-muted); font-size: 11px; line-height: 1.4; }
-.settingsPage .settingsInfoDot { display: none; }
 .settingsPage .rangeRow input[type="range"] { width: clamp(120px, 15vw, 250px); accent-color: var(--settings-accent); cursor: pointer; }
 .settingsPage :is(.settingsActionButton,.settingsTinyButton,.settingsResetButton) { font-size: 12px; }
 .settingsPage .settingsDiagnosticsGrid, .settingsPage .settingsMiniStatusV491 {

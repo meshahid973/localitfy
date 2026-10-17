@@ -8567,7 +8567,6 @@ function MainModeApp() {
       startRenamePlaylist
     },
     covers: {
-      ambientStyle,
       applyCoverAssetToSelection,
       coverGalleryMood,
       coverMoodCounts,

@@ -80,7 +80,6 @@
 .settingsPage.settingsPageV027 .settingsCategoryButton[aria-current="page"] .settingsCategoryIcon { color: var(--settings-accent); }
 .settingsPageV027 .settingsCategoryIcon svg { width: 19px; height: 19px; }
 .settingsPage.settingsPageV027 .settingsCategoryCopy strong { font-size: 14px; font-weight: 640; }
-.settingsPage.settingsPageV027 .settingsCategoryCopy > span { display: none; }
 .settingsPage.settingsPageV027 .settingsCategoryPage,
 .settingsPage.settingsPageV027 .settingsContentBlock { gap: 16px; }
 .settingsPage.settingsPageV027 .settingsCategoryHeader {

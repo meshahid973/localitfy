@@ -123,3 +123,32 @@ test("Library track canvas uses a themed surface, preserving virtual positioning
   assert.match(lib, /\.songRow\.active/);
   assert.match(lib, /color: var\(--lt-text\) !important/);
 });
+
+test("Settings search and switches are readable with reduced-motion support", () => {
+  assert.match(skin, /padding: 10px 36px 10px 39px/);
+  assert.match(skin, /::-webkit-search-decoration/);
+  assert.match(skin, /--settings-surface: var\(--lt-surface\)/);
+  assert.match(skin, /background: var\(--settings-text\); transition: transform/);
+  assert.match(skin, /settingsCompactSwitch input\[type="checkbox"\]::before \{ transition: none/);
+});
+
+test("Library uses an unfilled list with theme-aware hover and active rows", () => {
+  const lib = read("src/features/library/library.css");
+  assert.match(lib, /\.libraryTrackSurface \{[\s\S]*?background: transparent/);
+  assert.match(lib, /\.songRow:hover \{[\s\S]*?background: var\(--lt-surface\)/);
+  assert.match(lib, /\.songRow.active \{[\s\S]*?background: var\(--lt-surface-raised\)/);
+});
+
+test("Covers keeps interactive tools while replacing fixed blue surfaces", () => {
+  const css = read("src/features/covers/covers.css");
+  const studio = read("src/features/covers/CoverStudio.tsx");
+  const view = read("src/features/covers/CoversView.tsx");
+  assert.match(css, /--cover-surface: var\(--lt-surface\)/);
+  assert.match(css, /--cover-text: var\(--lt-text\)/);
+  assert.doesNotMatch(css, /#0d1d26|#112630|#dce8ed/);
+  assert.match(studio, /coverMaintenanceMenu/);
+  assert.match(studio, /VirtualCoverGalleryGrid/);
+  assert.match(studio, /randomizeSelectedCovers/);
+  assert.match(view, /coverStudioEmptyNotice/);
+  assert.doesNotMatch(view, /LocaltifyStateCard/);
+});
