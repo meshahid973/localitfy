@@ -132,3 +132,11 @@ test("Card mode owner respects theme surfaces without stripping effects", () => 
   assert.match(css, /--v321-list-card-shadow: inset 0 1px 0 rgba\(255, 255, 255, 0\.045\)/);
   assert.match(css, /backdrop-filter: blur\(16px\)/);
 });
+
+
+test("soft-corner preference outranks late shell defaults", () => {
+  const shell = read("src/features/shell/app-core.css");
+  assert.match(shell, /\.app\[data-corners="soft"\]\s*\{[^{}]*--radius:\s*16px;[^{}]*--small-radius:\s*12px;/);
+  assert.doesNotMatch(shell, /(?:^|\n)\[data-corners="soft"\]\s*\{/);
+});
+

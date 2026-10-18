@@ -47,22 +47,19 @@ button:disabled{
   --text-2: rgba(244, 244, 238, 0.78);
   --muted: rgba(244, 244, 238, 0.54);
   --faint: rgba(244, 244, 238, 0.32);
-  --surface: rgba(255, 255, 255, 0.035);
   --surface-2: rgba(255, 255, 255, 0.055);
   --surface-3: rgba(255, 255, 255, 0.082);
   --line: rgba(255, 255, 255, 0.075);
   --line-2: rgba(255, 255, 255, 0.13);
   --danger: #ff4f73;
   --warning: #ffb86b;
-  --radius: 12px;
-  --small-radius: 9px;
   --pill: 999px;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.58);
   --shadow-soft: 0 14px 38px rgba(0, 0, 0, 0.34);
   color: var(--text);
 }
 
-[data-corners="soft"]{
+.app[data-corners="soft"]{
   --radius: 16px;
   --small-radius: 12px;
 }

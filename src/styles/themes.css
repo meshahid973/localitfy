@@ -488,8 +488,6 @@
   --text-2: color-mix(in oklab, #f1f5ff 78%, #000);
   --muted: color-mix(in oklab, #f1f5ff 54%, #000);
   --faint: color-mix(in oklab, #f1f5ff 34%, #000);
-  --line: color-mix(in oklab, #60a5fa 18%, #000);
-  --line-2: color-mix(in oklab, #60a5fa 28%, #000);
   --accent: #60a5fa;
   --accent-2: #818cf8;
   --highlight: #bfdbfe;

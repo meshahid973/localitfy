@@ -3,8 +3,6 @@
   --player-control-size: clamp(34px, calc(var(--player-size-used) * 0.36), 40px);
   --player-main-control-size: clamp(42px, calc(var(--player-size-used) * 0.45), 50px);
   --player-art-size: clamp(46px, calc(var(--player-size-used) - 42px), 62px);
-  --player-progress-fill: rgb(var(--accent-rgb));
-  --player-track-base: rgba(255, 255, 255, 0.13);
 
   position: relative !important;
 
@@ -663,11 +661,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar{
-  --player-cover-sync-opacity: var(--cover-sync-player-opacity, 0.52);
   --player-cover-sync-strength: var(--cover-sync-strength, 0.50);
-  --player-cover-sync-tint: var(--cover-sync-player-tint, 0.22);
 
-  --player-center-y: 8px;
 
 
 }
@@ -698,23 +693,17 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 .playerBar[data-cover-sync="subtle"],
 .app[data-cover-sync="subtle"] .playerBar{
-  --player-cover-sync-opacity: 0.36;
   --player-cover-sync-strength: 0.30;
-  --player-cover-sync-tint: 0.14;
 }
 
 .playerBar[data-cover-sync="normal"],
 .app[data-cover-sync="normal"] .playerBar{
-  --player-cover-sync-opacity: 0.52;
   --player-cover-sync-strength: 0.50;
-  --player-cover-sync-tint: 0.22;
 }
 
 .playerBar[data-cover-sync="strong"],
 .app[data-cover-sync="strong"] .playerBar{
-  --player-cover-sync-opacity: 0.66;
   --player-cover-sync-strength: 0.72;
-  --player-cover-sync-tint: 0.30;
 }
 
 .playerBar[data-cover-sync="strong"]::after,

@@ -5038,7 +5038,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
-  --ribbon-h: 30px !important;
 
 
   margin: 0 auto !important;
@@ -6829,8 +6828,6 @@ body.isResizingPlayer .app *{
 .app{
   --panel-calm-bg: rgba(5, 5, 10, .70);
   --panel-calm-bg-strong: rgba(7, 7, 13, .78);
-  --panel-calm-line: rgba(255,255,255,.085);
-  --panel-calm-line-hover: rgba(255,255,255,.13);
   --panel-calm-shadow: 0 12px 32px rgba(0,0,0,.18);
   --panel-calm-shadow-hover: 0 16px 38px rgba(0,0,0,.22);
 }
