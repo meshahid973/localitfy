@@ -1,7 +1,4 @@
-.app[data-theme="stars"],
-.app[data-theme="midnight"],
 .app[data-theme="mono"] {
-  /* These palettes use light surfaces and dark foregrounds. */
   color-scheme: light;
 }
 
