@@ -122,6 +122,7 @@
   --v321-card-bg: color-mix(in srgb, var(--lt-surface) 74%, transparent);
   --v321-card-border: var(--lt-border);
   --v321-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --v321-list-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
   --v321-fast: 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -130,6 +131,7 @@
   --v321-card-bg: color-mix(in srgb, var(--lt-surface) 96%, transparent);
   --v321-card-border: var(--lt-border);
   --v321-card-shadow: none;
+  --v321-list-card-shadow: none;
 }
 
 .app[data-card-background="glassy"]{
@@ -137,6 +139,7 @@
   --v321-card-bg: color-mix(in srgb, var(--lt-surface) 62%, transparent);
   --v321-card-border: var(--lt-border);
   --v321-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 18px 42px rgba(0, 0, 0, 0.22);
+  --v321-list-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
 .app[data-card-background="oledFlat"]{
@@ -144,6 +147,7 @@
   --v321-card-bg: color-mix(in srgb, var(--lt-bg) 98%, var(--lt-surface));
   --v321-card-border: var(--lt-border);
   --v321-card-shadow: none;
+  --v321-list-card-shadow: none;
 }
 
 .app :where(.panel, .settingsPanelCard, .coverTargetPanelCleanOnly){
@@ -167,7 +171,7 @@
 :is(.app[data-card-background="solid"], .app[data-card-background="glassy"], .app[data-card-background="oledFlat"]) :where(.homeAlbumCard, .songRow) {
   background: var(--v321-card-bg) !important;
   border-color: var(--v321-card-border) !important;
-  box-shadow: var(--v321-card-shadow) !important;
+  box-shadow: var(--v321-list-card-shadow) !important;
 }
 
 .app[data-home-banner="dynamic"] .hero.ambientSurface::before,

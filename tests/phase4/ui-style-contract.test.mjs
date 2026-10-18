@@ -129,6 +129,7 @@ test("Card mode owner respects theme surfaces without stripping effects", () => 
     assert.match(body, /--v321-card-border: var\(--lt-border\)/);
   }
   assert.match(css, /:is\(\.app\[data-card-background="solid"\], \.app\[data-card-background="glassy"\], \.app\[data-card-background="oledFlat"\]\) :where\(\.homeAlbumCard, \.songRow\)/);
-  assert.match(css, /box-shadow: var\(--v321-card-shadow\) !important/);
+  assert.match(css, /box-shadow: var\(--v321-list-card-shadow\) !important/);
+  assert.match(css, /--v321-list-card-shadow: inset 0 1px 0 rgba\(255, 255, 255, 0\.045\)/);
   assert.match(css, /backdrop-filter: blur\(16px\)/);
 });
