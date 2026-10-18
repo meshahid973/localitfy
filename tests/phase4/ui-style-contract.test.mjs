@@ -100,3 +100,33 @@ test("sidebar navigation retains keyboard focus and theme contrast", () => {
   assert.match(effects, /\.navItemAnimatedV468\.active \.navText strong\s*\{\s*color: var\(--lt-text\) !important/);
 });
 
+
+
+test("Mono theme has one palette owner and preserves final semantic colors", () => {
+  const themes = read("src/styles/themes.css");
+  const monoBlocks = [...themes.matchAll(/\.app\[data-theme="mono"\]\s*\{([^{}]*)\}/g)];
+  assert.equal(monoBlocks.length, 2, "Mono must not collect historical palette overrides");
+  const palette = monoBlocks.at(-1)[1];
+  for (const rule of [
+    "--bg: #f4f6fb;", "--surface: #ffffff;", "--text: #343a55;",
+    "--lt-bg: var(--bg);", "--lt-surface: var(--surface);",
+    "--lt-accent: var(--accent);", "color-scheme: light;"
+  ]) assert.ok(palette.includes(rule), "Missing final Mono token: " + rule);
+  const declarations = [...palette.matchAll(/(?:^|;)\s*(--[\w-]+|color-scheme)\s*:/g)].map((item) => item[1]);
+  assert.equal(new Set(declarations).size, declarations.length, "Mono must define each token once");
+});
+
+test("Card mode owner respects theme surfaces without stripping effects", () => {
+  const css = read("src/features/shell/effects.css");
+  for (const mode of ["solid", "glassy", "oledFlat"]) {
+    const selector = '.app[data-card-background="' + mode + '"]';
+    const start = css.indexOf(selector + "{");
+    assert.notEqual(start, -1);
+    const body = css.slice(start, css.indexOf("}", start));
+    assert.match(body, /--v321-card-bg: (?:color-mix|var)\(/);
+    assert.match(body, /--v321-card-border: var\(--lt-border\)/);
+  }
+  assert.match(css, /:is\(\.app\[data-card-background="solid"\], \.app\[data-card-background="glassy"\], \.app\[data-card-background="oledFlat"\]\) :where\(\.homeAlbumCard, \.songRow\)/);
+  assert.match(css, /box-shadow: var\(--v321-card-shadow\) !important/);
+  assert.match(css, /backdrop-filter: blur\(16px\)/);
+});

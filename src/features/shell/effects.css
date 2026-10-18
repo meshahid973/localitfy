@@ -117,32 +117,32 @@
 
 /* V321 visual settings owner. Keep this at the end because effects.css is imported last. */
 .app{
-  --v321-panel-bg: rgba(16, 15, 21, 0.72);
-  --v321-panel-border: rgba(255, 255, 255, 0.075);
-  --v321-card-bg: rgba(14, 13, 18, 0.74);
-  --v321-card-border: rgba(255, 255, 255, 0.08);
+  --v321-panel-bg: color-mix(in srgb, var(--lt-surface) 72%, transparent);
+  --v321-panel-border: var(--lt-border);
+  --v321-card-bg: color-mix(in srgb, var(--lt-surface) 74%, transparent);
+  --v321-card-border: var(--lt-border);
   --v321-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
   --v321-fast: 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .app[data-card-background="solid"]{
-  --v321-panel-bg: rgba(18, 17, 23, 0.96);
-  --v321-card-bg: rgba(20, 19, 25, 0.96);
-  --v321-card-border: rgba(255, 255, 255, 0.07);
+  --v321-panel-bg: color-mix(in srgb, var(--lt-surface) 96%, transparent);
+  --v321-card-bg: color-mix(in srgb, var(--lt-surface) 96%, transparent);
+  --v321-card-border: var(--lt-border);
   --v321-card-shadow: none;
 }
 
 .app[data-card-background="glassy"]{
-  --v321-panel-bg: rgba(17, 15, 22, 0.68);
-  --v321-card-bg: rgba(18, 16, 24, 0.62);
-  --v321-card-border: rgba(255, 255, 255, 0.095);
+  --v321-panel-bg: color-mix(in srgb, var(--lt-surface) 68%, transparent);
+  --v321-card-bg: color-mix(in srgb, var(--lt-surface) 62%, transparent);
+  --v321-card-border: var(--lt-border);
   --v321-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 18px 42px rgba(0, 0, 0, 0.22);
 }
 
 .app[data-card-background="oledFlat"]{
-  --v321-panel-bg: rgba(3, 3, 7, 0.98);
-  --v321-card-bg: rgba(4, 4, 9, 0.98);
-  --v321-card-border: rgba(255, 255, 255, 0.055);
+  --v321-panel-bg: color-mix(in srgb, var(--lt-bg) 98%, var(--lt-surface));
+  --v321-card-bg: color-mix(in srgb, var(--lt-bg) 98%, var(--lt-surface));
+  --v321-card-border: var(--lt-border);
   --v321-card-shadow: none;
 }
 
@@ -164,22 +164,10 @@
   -webkit-backdrop-filter: none !important;
 }
 
-.app[data-card-background="solid"] :where( .homeAlbumCard, .songRow){
-  background: rgba(18, 17, 24, 0.96) !important;
-  border-color: rgba(255, 255, 255, 0.07) !important;
-  box-shadow: none !important;
-}
-
-.app[data-card-background="glassy"] :where( .homeAlbumCard, .songRow){
-  background: rgba(19, 17, 25, 0.58) !important;
-  border-color: rgba(255, 255, 255, 0.095) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
-}
-
-.app[data-card-background="oledFlat"] :where( .homeAlbumCard, .songRow){
-  background: rgba(2, 2, 6, 0.98) !important;
-  border-color: rgba(255, 255, 255, 0.052) !important;
-  box-shadow: none !important;
+:is(.app[data-card-background="solid"], .app[data-card-background="glassy"], .app[data-card-background="oledFlat"]) :where(.homeAlbumCard, .songRow) {
+  background: var(--v321-card-bg) !important;
+  border-color: var(--v321-card-border) !important;
+  box-shadow: var(--v321-card-shadow) !important;
 }
 
 .app[data-home-banner="dynamic"] .hero.ambientSurface::before,
