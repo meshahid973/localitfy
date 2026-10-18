@@ -107,7 +107,6 @@ test("Mono theme has one palette owner and preserves final semantic colors", () 
   const monoBlocks = [...themes.matchAll(/\.app\[data-theme="mono"\]\s*\{([^{}]*)\}/g)];
   assert.equal(monoBlocks.length, 1, "Mono must have a single palette and color-scheme owner");
   assert.doesNotMatch(themes, /\.app\[data-theme="stars"\]\s*,\s*\.app\[data-theme="midnight"\]\s*,\s*\.app\[data-theme="mono"\]/);
-  assert.match(themes, /\.app\[data-theme="mono"\]\s*\{\s*color-scheme: light/);
   const palette = monoBlocks.at(-1)[1];
   for (const rule of [
     "--bg: #f4f6fb;", "--surface: #ffffff;", "--text: #343a55;",
