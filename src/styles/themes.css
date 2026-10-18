@@ -1,7 +1,3 @@
-.app[data-theme="mono"] {
-  color-scheme: light;
-}
-
 .app[data-theme="mint"]{
   --bg: #020706;
   --bg-2: #020706;
