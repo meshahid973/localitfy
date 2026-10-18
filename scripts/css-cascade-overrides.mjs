@@ -103,10 +103,14 @@ export function findCascadeShadows(source) {
         for (const entry of props) {
           const key = context + "\u0000" + selector + "\u0000" + entry.property;
           const previous = seen.get(key);
-          if (previous && (!previous.important || entry.important)) {
+          // Deliberate same-rule fallbacks are owned by the property checker.
+          // A later normal declaration cannot replace an earlier !important one.
+          if (previous && previous.ruleStart !== statement && (!previous.important || entry.important)) {
             collisions.push({ selector, property: entry.property, priorLine: previous.line, line: line(statement) });
           }
-          seen.set(key, { line: line(statement), important: entry.important });
+          if (!previous || !previous.important || entry.important) {
+            seen.set(key, { line: line(statement), important: entry.important, ruleStart: statement });
+          }
         }
       }
       cursor = close + 1;
@@ -125,6 +129,8 @@ function selfTest() {
   assert.equal(findCascadeShadows("@keyframes blink { from { opacity: 0 } to { opacity: 1 } }").length, 0);
   assert.equal(findCascadeShadows('.x { content: "a;b"; color: red } .x { color: green }').length, 1);
   assert.equal(findCascadeShadows(".x { color: red } .y { color: blue }").length, 0);
+  assert.equal(findCascadeShadows(".x { color: red; color: blue }").length, 0);
+  assert.equal(findCascadeShadows(".x { color: red !important } .x { color: blue } .x { color: green }").length, 0);
   console.log("[css-cascade] parser self-tests passed");
 }
 
