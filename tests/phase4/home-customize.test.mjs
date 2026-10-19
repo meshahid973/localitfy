@@ -91,3 +91,49 @@ test("Liked, Rediscover and Not played yet pick the right songs", () => {
   assert.deepEqual([...unplayed].sort(), ["fresh-a", "fresh-b"]);
   assert.deepEqual(ids(picks.pickNotPlayedYet(songs, now)), unplayed, "the shuffle holds for the whole day");
 });
+
+
+test("Home selection preserves full-sort order across large libraries and ties", () => {
+  const source = Array.from({ length: 12000 }, (_, index) => song(String(index), {
+    liked: index % 7 === 0,
+    playCount: (index * 13) % 31,
+    lastPlayed: index % 11 === 0 ? undefined : daysAgo(index % 65)
+  }));
+  const playable = (entry) => !!(entry.filePath || entry.url) && entry.fileExists !== false;
+  const parsed = (entry) => Number.isFinite(Date.parse(String(entry.lastPlayed || "")))
+    ? Date.parse(String(entry.lastPlayed || "")) : 0;
+  const reference = {
+    recent: source.filter((entry) => playable(entry) && parsed(entry) > 0)
+      .sort((a,b) => parsed(b) - parsed(a)).slice(0, 10),
+    liked: source.filter((entry) => entry.liked && playable(entry))
+      .sort((a,b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 10),
+    rediscover: source.filter((entry) => playable(entry) && (entry.playCount || 0) >= 3 &&
+      parsed(entry) > 0 && parsed(entry) < now.getTime() - 30 * 86400000)
+      .sort((a,b) => (b.playCount || 0) - (a.playCount || 0) || parsed(a) - parsed(b)).slice(0, 10)
+  };
+  assert.deepEqual(ids(picks.pickRecentlyPlayed(source)), ids(reference.recent));
+  assert.deepEqual(ids(picks.pickLikedSongs(source)), ids(reference.liked));
+  assert.deepEqual(ids(picks.pickRediscover(source, now)), ids(reference.rediscover));
+  assert.deepEqual(ids(picks.pickLikedSongs(source, 1)), ids(reference.liked.slice(0, 1)));
+  assert.deepEqual(ids(picks.pickRecentlyPlayed(source, 0)), []);
+});
+
+test("Home shelf order remains stable for equal timestamps and hashes", () => {
+  const tied = [song("a", {liked: true,playCount: 5,lastPlayed: daysAgo(2)}),
+    song("b", {liked: true,playCount: 5,lastPlayed: daysAgo(2)}),
+    song("c", {liked: true,playCount: 5,lastPlayed: daysAgo(2)})];
+  assert.deepEqual(ids(picks.pickRecentlyPlayed(tied, 2)), ["a","b"]);
+  assert.deepEqual(ids(picks.pickLikedSongs(tied, 2)), ["a","b"]);
+});
+
+test("Customize Home restores focus and moves away from disabled arrows", () => {
+  const panel = read("src/features/home/HomeCustomizePanel.tsx");
+  const home = read("src/features/home/HomeView.tsx");
+  const css = read("src/features/home/home.css");
+  assert.match(panel, /document\.querySelector<HTMLElement>\("\.homeCustomizeButton"\)\?\.focus\(\)/);
+  assert.match(panel, /event\.currentTarget\.nextElementSibling/);
+  assert.match(panel, /event\.currentTarget\.previousElementSibling/);
+  assert.match(home, /lazy\(\(\) => import\("\.\/HomeCustomizePanel"\)\)/);
+  assert.match(css, /max-height: min\(520px, calc\(100dvh - 120px\)\)/);
+});
+

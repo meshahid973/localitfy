@@ -93,6 +93,10 @@
   top: calc(100% + 6px);
   right: 0;
   width: 248px;
+  max-width: calc(100vw - 24px);
+  max-height: min(520px, calc(100dvh - 120px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 10px;
   display: grid;
   gap: 8px;
@@ -108,10 +112,10 @@
 .homeCustomizeList { margin:0; padding:0; list-style:none; display:grid; gap:2px; }
 
 .homeCustomizeRow {
-  min-height: 32px;
+  min-height: 36px;
   padding: 0 4px 0 8px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(3, 26px);
+  grid-template-columns: minmax(0, 1fr) repeat(3, 30px);
   align-items: center;
   gap: 2px;
   border-radius: 8px;
@@ -138,7 +142,7 @@
   transition: color 140ms ease, background-color 140ms ease;
 }
 
-.homeCustomizeRow button { width: 26px; height: 26px; }
+.homeCustomizeRow button { width: 30px; height: 30px; }
 .homeCustomizeRow button.active { color: var(--lt-accent); }
 .homeCustomizeReset { gap:5px; height:24px; padding:0 8px; font-size:10px; font-weight:700; }
 .homeCustomizeLink { justify-content:flex-start; gap:7px; height:30px; padding:0 8px; border-top:1px solid rgba(var(--lt-accent-rgb), 0.08); border-radius:0 0 6px 6px; font-size:10px; font-weight:700; }

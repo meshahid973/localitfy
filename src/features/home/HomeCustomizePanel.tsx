@@ -26,7 +26,9 @@ export default function HomeCustomizePanel({ sectionOrder, hiddenSections, updat
       if (!panelRef.current?.contains(target) && !target?.closest(".homeCustomizeButton")) onClose();
     };
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key !== "Escape") return;
+      document.querySelector<HTMLElement>(".homeCustomizeButton")?.focus();
+      onClose();
     };
     document.addEventListener("pointerdown", closeOnOutsidePointer);
     document.addEventListener("keydown", closeOnEscape);
@@ -59,10 +61,18 @@ export default function HomeCustomizePanel({ sectionOrder, hiddenSections, updat
           return (
             <li key={id} className={`homeCustomizeRow ${isHidden ? "isHidden" : ""}`}>
               <span>{label}</span>
-              <button type="button" disabled={!canMoveHomeSection(sectionOrder, id, -1)} onClick={() => updateHomeLayout({ homeSectionOrder: moveHomeSection(sectionOrder, id, -1) })} aria-label={`move ${label} up`} title="move up">
+              <button type="button" disabled={!canMoveHomeSection(sectionOrder, id, -1)} onClick={(event) => {
+                const next = moveHomeSection(sectionOrder, id, -1);
+                if (!canMoveHomeSection(next, id, -1)) (event.currentTarget.nextElementSibling as HTMLElement | null)?.focus();
+                updateHomeLayout({ homeSectionOrder: next });
+              }} aria-label={`move ${label} up`} title="move up">
                 <ArrowUp size={13} strokeWidth={2.4} aria-hidden="true" />
               </button>
-              <button type="button" disabled={!canMoveHomeSection(sectionOrder, id, 1)} onClick={() => updateHomeLayout({ homeSectionOrder: moveHomeSection(sectionOrder, id, 1) })} aria-label={`move ${label} down`} title="move down">
+              <button type="button" disabled={!canMoveHomeSection(sectionOrder, id, 1)} onClick={(event) => {
+                const next = moveHomeSection(sectionOrder, id, 1);
+                if (!canMoveHomeSection(next, id, 1)) (event.currentTarget.previousElementSibling as HTMLElement | null)?.focus();
+                updateHomeLayout({ homeSectionOrder: next });
+              }} aria-label={`move ${label} down`} title="move down">
                 <ArrowDown size={13} strokeWidth={2.4} aria-hidden="true" />
               </button>
               <button

@@ -1,5 +1,5 @@
 import "./home.css";
-import { Fragment, useCallback, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { Fragment, lazy, Suspense, useCallback, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { Maximize2, Minimize2, Play, Shuffle, SlidersHorizontal } from "lucide-react";
 import { Cover } from "../covers/Cover";
 import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
@@ -7,7 +7,7 @@ import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
 import type { LocalAlbumEntry } from "../albums/album.types";
 import type { Settings } from "../settings/settings.types";
-import HomeCustomizePanel from "./HomeCustomizePanel";
+const HomeCustomizePanel = lazy(() => import("./HomeCustomizePanel"));
 import { visibleHomeSections, type HomeLayoutPatch, type HomeSectionId } from "./homeLayout";
 import { HomeAlbumRail, HomeDailyMixRail, HomeSongRail } from "./HomeShelves";
 import { pickLikedSongs, pickNewAlbums, pickNotPlayedYet, pickRecentlyPlayed, pickRediscover } from "./homeShelfPicks";
@@ -229,6 +229,7 @@ export default function HomeView(props: HomeViewProps) {
           <span>Customize Home</span>
         </button>
         {customizeOpen ? (
+          <Suspense fallback={null}>
           <HomeCustomizePanel
             sectionOrder={settings.homeSectionOrder}
             hiddenSections={settings.homeHiddenSections}
@@ -236,6 +237,7 @@ export default function HomeView(props: HomeViewProps) {
             openCovers={openCoversViewWithCurrentSong}
             onClose={closeCustomize}
           />
+          </Suspense>
         ) : null}
       </header>
 
