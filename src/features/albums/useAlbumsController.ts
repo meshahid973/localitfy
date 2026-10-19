@@ -2,15 +2,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Song } from "../library/song.types";
 import type { LocalAlbumEntry, ManualLocalAlbum } from "./album.types";
 import {
-  MANUAL_LOCAL_ALBUMS_STORAGE_KEY, albumSongSearchMatches, albumTrackIds, buildLocalAlbumEntries, buildManualAlbumEntries,
+  MANUAL_LOCAL_ALBUMS_STORAGE_KEY, albumTrackIds, buildLocalAlbumEntries, buildManualAlbumEntries,
   buildManualAlbumSongIdSet, cleanManualAlbumArtist, cleanManualAlbumTitle, cleanManualAlbumYear, filterAndSortAlbums,
   folderAlbumPathContains, getAlbumYear, isUsefulAlbumName, makeAlbumCoverSong, normalizeAlbumValue, normalizeFolderAlbumPathKey,
-  normalizeManualLocalAlbums, resizeAlbumCoverFile, suggestAlbumArtistFromSongs, uniqueCleanArtistsFromSongs, uniquePlayableSongIds
+  normalizeManualLocalAlbums, pickAlbumDraftSearchResults, resizeAlbumCoverFile, suggestAlbumArtistFromSongs, uniqueCleanArtistsFromSongs, uniquePlayableSongIds
 } from "./album.runtime";
 import { isPlayableSong, saveLibraryOrder } from "../library";
 import { makeLocalId, readLocalJson, writeLocalJson } from "../../shared/storage/localStorage";
 import { getRendererSafeImageUrl } from "../covers/cover.ambient";
-import { prettyMeta, prettyTitle } from "../search";
+import { prettyMeta } from "../search";
 
 export type AlbumsControllerOptions = {
   view: string;
@@ -122,19 +122,9 @@ export function useAlbumsController({
     if (safeCover) return makeAlbumCoverSong(safeCover, albumDraftTitle || "new album", albumDraftArtist || "local album", seedSong);
     return seedSong || null;
   }, [albumDraftArtist, albumDraftCoverUrl, albumDraftSelectedSongs, albumDraftTitle]);
-  const albumDraftSearchResults = useMemo(() => {
-    const selected = new Set(albumDraftSongIds);
-    return songs
-      .filter(isPlayableSong)
-      .filter((song) => albumSongSearchMatches(song, albumDraftSearch))
-      .sort((a, b) => {
-        const selectedA = selected.has(a.id) ? 0 : 1;
-        const selectedB = selected.has(b.id) ? 0 : 1;
-        if (selectedA !== selectedB) return selectedA - selectedB;
-        return prettyTitle(a.title, 20).localeCompare(prettyTitle(b.title, 20));
-      })
-      .slice(0, 80);
-  }, [songs, albumDraftSearch, albumDraftSongIds]);
+  const albumDraftSearchResults = useMemo(() =>
+    albumBuilderOpen ? pickAlbumDraftSearchResults(songs, albumDraftSearch, albumDraftSongIds) : [],
+  [albumBuilderOpen, songs, albumDraftSearch, albumDraftSongIds]);
 
   function scrollAlbumBuilderIntoView() {
     window.requestAnimationFrame(() => {

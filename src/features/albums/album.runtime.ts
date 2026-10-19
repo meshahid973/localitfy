@@ -2,7 +2,7 @@ import type { Song } from "../library/song.types";
 import type { LocalAlbumEntry, ManualLocalAlbum } from "./album.types";
 import { isPlayableSong } from "../library/library.utils";
 import { makeLocalId } from "../../shared/storage/localStorage";
-import { prettyMeta } from "../search/search.utils";
+import { prettyMeta, prettyTitle } from "../search/search.utils";
 import { getCardCoverUrl } from "../covers/Cover";
 import { getRendererSafeImageUrl } from "../covers/cover.ambient";
 
@@ -312,7 +312,12 @@ export function buildManualAlbumEntries(manualAlbums: ManualLocalAlbum[], songsB
 
       if (!albumSongs.length) return null;
 
-      const latestAdded = Math.max(album.updatedAt || 0, ...albumSongs.map(getSongAddedTime));
+      let latestAdded = album.updatedAt || 0;
+      let totalDuration = 0;
+      for (const song of albumSongs) {
+        latestAdded = Math.max(latestAdded, getSongAddedTime(song));
+        totalDuration += Math.max(0, Number(song.duration) || 0);
+      }
 
       const customCoverUrl = getRendererSafeImageUrl(album.coverUrl);
 
@@ -326,7 +331,7 @@ export function buildManualAlbumEntries(manualAlbums: ManualLocalAlbum[], songsB
         coverSong: pickManualAlbumCoverSong(album, albumSongs),
         songs: albumSongs,
         trackCount: albumSongs.length,
-        totalDuration: albumSongs.reduce((total, song) => total + Math.max(0, Number(song.duration) || 0), 0),
+        totalDuration,
         latestAdded,
         source: "manual",
         sourceType: album.sourceType === "folder" ? "folder" : "manual",
@@ -339,6 +344,48 @@ export function buildManualAlbumEntries(manualAlbums: ManualLocalAlbum[], songsB
       } as LocalAlbumEntry & { source: "manual"; sourceType?: "manual" | "folder"; sourcePath?: string; folderCoverPath?: string; importedAt?: number; manualAlbumId: string; createdAt: number; updatedAt: number };
     })
     .filter(Boolean) as LocalAlbumEntry[];
+}
+
+/**
+ * Select only the eighty songs the album editor displays. Selected songs lead,
+ * followed by their cleaned title; stable ties keep the original library order.
+ * Sorting all matching songs was unnecessary on larger libraries.
+ */
+export function pickAlbumDraftSearchResults(
+  songs: readonly Song[],
+  query: string,
+  selectedIds: readonly string[],
+  limit = 80
+): Song[] {
+  const count = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : 0;
+  if (!count) return [];
+  const selected = new Set(selectedIds);
+  type Candidate = { song: Song; selectedRank: number; title: string };
+  const best: Candidate[] = [];
+  const compare = (a: Candidate, b: Candidate) =>
+    a.selectedRank - b.selectedRank || a.title.localeCompare(b.title);
+
+  for (const song of songs) {
+    if (!isPlayableSong(song) || !albumSongSearchMatches(song, query)) continue;
+    const candidate: Candidate = {
+      song,
+      selectedRank: selected.has(song.id) ? 0 : 1,
+      title: prettyTitle(song.title, 20)
+    };
+    if (best.length === count && compare(candidate, best[count - 1]) >= 0) continue;
+
+    // Upper bound insertion maintains stable order for equal song titles.
+    let left = 0;
+    let right = best.length;
+    while (left < right) {
+      const middle = (left + right) >>> 1;
+      if (compare(candidate, best[middle]) >= 0) left = middle + 1;
+      else right = middle;
+    }
+    best.splice(left, 0, candidate);
+    if (best.length > count) best.pop();
+  }
+  return best.map(({ song }) => song);
 }
 
 export function albumSongSearchMatches(song: Song, query: string) {

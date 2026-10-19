@@ -80,18 +80,25 @@ export default function HomeView(props: HomeViewProps) {
 
   const listenNowSongs = homeListenNowSongs.slice(0, 8);
   const newReleaseSongs = (homeFreshShelfSongs.length ? homeFreshShelfSongs : homeListenNowSongs).slice(0, 10);
-  const artistKeys = new Set<string>();
-  const mostListenedSongs = [...homeListenNowSongs, ...homeFreshShelfSongs]
-    .filter((song) => {
-      const key = String(song.artist || "unknown artist").trim().toLowerCase() || "unknown artist";
-      if (artistKeys.has(key)) return false;
-      artistKeys.add(key);
-      return true;
-    })
-    .slice(0, 10);
-
   const visibleSections = visibleHomeSections(settings.homeSectionOrder, settings.homeHiddenSections);
   const showing = (id: HomeSectionId) => visibleSections.includes(id);
+  const showMostListened = showing("mostListened");
+  const mostListenedSongs = useMemo(() => {
+    if (!showMostListened) return [];
+    const artistKeys = new Set<string>();
+    const result: Song[] = [];
+    for (const shelf of [homeListenNowSongs, homeFreshShelfSongs]) {
+      for (const song of shelf) {
+        const key = String(song.artist || "unknown artist").trim().toLowerCase() || "unknown artist";
+        if (artistKeys.has(key)) continue;
+        artistKeys.add(key);
+        result.push(song);
+        if (result.length === 10) return result;
+      }
+    }
+    return result;
+  }, [homeListenNowSongs, homeFreshShelfSongs, showMostListened]);
+
   // Only work out the shelves that are on screen; a hidden shelf costs nothing.
   const showRecent = showing("recentlyPlayed"), showAlbums = showing("newAlbums"), showLiked = showing("likedSongs");
   const showRediscover = showing("rediscover"), showUnplayed = showing("notPlayedYet"), showMixes = showing("dailyMixes");
