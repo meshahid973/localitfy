@@ -66,7 +66,7 @@ const picks = loadCommonJs("src/features/home/homeShelfPicks.ts");
 const now = new Date("2026-10-19T12:00:00");
 const daysAgo = (days) => new Date(now.getTime() - days * 86400000).toISOString();
 const song = (id, extra = {}) => ({ id, title: id, artist: "a", filePath: `/m/${id}.mp3`, playCount: 0, liked: false, dateAdded: daysAgo(100), ...extra });
-const ids = (list) => list.map((entry) => entry.id);
+const ids = (list) => Array.from(list, (entry) => entry.id);
 
 test("Recently played lists played songs newest first and skips missing files", () => {
   const songs = [song("old", { lastPlayed: daysAgo(5) }), song("never"), song("new", { lastPlayed: daysAgo(1) }), song("gone", { lastPlayed: daysAgo(0), fileExists: false })];
