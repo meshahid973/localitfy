@@ -57,7 +57,7 @@ test("batch download lookup preserves Spotify > path > suffix precedence", () =>
   ];
   const lookup = exports.buildDownloadSongLookup(songs);
   for (const result of results) {
-    const expected = result.ok ? referenceMatch(result, songs) : null;
+    const expected = referenceMatch(result, songs);
     assert.equal(exports.findDownloadedSongMatch(result, songs, lookup)?.id || "", expected?.id || "");
     assert.equal(exports.findDownloadedSongMatch(result, songs)?.id || "", expected?.id || "");
   }
