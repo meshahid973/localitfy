@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, SetStateAction } from "react";
 import { GripVertical, ListX, Repeat, Repeat1, X } from "lucide-react";
 import { Cover } from "../../covers/Cover";
@@ -76,8 +76,11 @@ export default function QueuePanel({
     };
   }, [open, onClose]);
 
+  const entries = useMemo(
+    () => open ? buildQueueEntries(queue, songsById) : [],
+    [open, queue, songsById]
+  );
   if (!open) return null;
-  const entries = buildQueueEntries(queue, songsById);
   const removeQueueItem = (index: number) => setQueue((current) => current.filter((_, itemIndex) => itemIndex !== index));
   const clearQueue = () => setQueue([]);
 

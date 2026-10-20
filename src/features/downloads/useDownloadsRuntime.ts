@@ -66,18 +66,40 @@ export function friendlyDownloadError(error: unknown, fallback = "Download faile
   return raw.length > 170 ? `${raw.slice(0, 167)}...` : raw;
 }
 
-export function findDownloadedSongMatch(result: DownloadResult, librarySongs: Song[]) {
+type DownloadSongLookup = {
+  spotifyIds: Map<string, Song>;
+  filePaths: Map<string, Song>;
+};
+
+/** Build the two exact-match indexes once for a batch, preserving first-match order. */
+export function buildDownloadSongLookup(librarySongs: readonly Song[]): DownloadSongLookup {
+  const spotifyIds = new Map<string, Song>();
+  const filePaths = new Map<string, Song>();
+  for (const song of librarySongs) {
+    const spotifyId = String((song as Song & { sourceTrackId?: string }).sourceTrackId || "").trim();
+    const filePath = String(song.filePath || "").trim().toLowerCase();
+    if (spotifyId && !spotifyIds.has(spotifyId)) spotifyIds.set(spotifyId, song);
+    if (filePath && !filePaths.has(filePath)) filePaths.set(filePath, song);
+  }
+  return { spotifyIds, filePaths };
+}
+
+export function findDownloadedSongMatch(result: DownloadResult, librarySongs: Song[], lookup?: DownloadSongLookup) {
   const filePath = String(result.filePath || "").trim().toLowerCase();
   const filename = String(result.filename || "").trim().toLowerCase();
   const spotifyTrackId = String(result.spotifyTrackId || "").trim();
 
   if (spotifyTrackId) {
-    const exactSpotify = librarySongs.find((song) => String((song as Song & { sourceTrackId?: string }).sourceTrackId || "").trim() === spotifyTrackId);
+    const exactSpotify = lookup
+      ? lookup.spotifyIds.get(spotifyTrackId)
+      : librarySongs.find((song) => String((song as Song & { sourceTrackId?: string }).sourceTrackId || "").trim() === spotifyTrackId);
     if (exactSpotify) return exactSpotify;
   }
 
   if (filePath) {
-    const exact = librarySongs.find((song) => String(song.filePath || "").trim().toLowerCase() === filePath);
+    const exact = lookup
+      ? lookup.filePaths.get(filePath)
+      : librarySongs.find((song) => String(song.filePath || "").trim().toLowerCase() === filePath);
     if (exact) return exact;
   }
 
@@ -92,8 +114,10 @@ export function findDownloadedSongMatch(result: DownloadResult, librarySongs: So
 }
 
 export function enrichDownloadResultsWithLibraryMatches(results: DownloadResult[], librarySongs: Song[]) {
+  // All successful results share one index; failed results never require library work.
+  const lookup = results.some((result) => result.ok) ? buildDownloadSongLookup(librarySongs) : undefined;
   return results.map((result) => {
-    const match = result.ok ? findDownloadedSongMatch(result, librarySongs) : null;
+    const match = result.ok ? findDownloadedSongMatch(result, librarySongs, lookup) : null;
     const importedToLibrary = Boolean(match);
     const cleanedError = result.ok ? "" : friendlyDownloadError(result.error || result.url || "Download failed.");
 
