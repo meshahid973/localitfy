@@ -19,8 +19,7 @@ const PRIVILEGED_SCHEMES = Object.freeze([
       secure: true,
       supportFetchAPI: true,
       stream: true,
-      corsEnabled: true,
-      bypassCSP: true
+      corsEnabled: true
     })
   })
 ]);

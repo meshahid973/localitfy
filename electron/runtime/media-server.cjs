@@ -12,8 +12,27 @@ const MEDIA_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 // Keep enough live tokens for sizeable collections so early covers are not
 // evicted while the initial library payload is still being shaped.
 const MEDIA_TOKEN_MAX_ENTRIES = 20000;
+const MEDIA_TOKEN_PRUNE_INTERVAL_MS = 60 * 1000;
+const MEDIA_EXTENSIONS = new Set([".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac", ".opus", ".aiff", ".aif", ".png", ".jpg", ".jpeg", ".webp", ".gif"]);
 
-function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists }) {
+function parseMediaByteRange(rawHeader, total) {
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(String(rawHeader || "").trim());
+  if (!match || (!match[1] && !match[2]) || !Number.isSafeInteger(total) || total <= 0) return null;
+
+  if (!match[1]) {
+    const suffix = Number(match[2]);
+    if (!Number.isSafeInteger(suffix) || suffix <= 0) return null;
+    return { start: Math.max(0, total - suffix), end: total - 1 };
+  }
+
+  const start = Number(match[1]);
+  const requestedEnd = match[2] ? Number(match[2]) : total - 1;
+  if (!Number.isSafeInteger(start) || !Number.isSafeInteger(requestedEnd) || start >= total || start > requestedEnd) return null;
+  return { start, end: Math.min(requestedEnd, total - 1) };
+}
+
+
+function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists, now = Date.now }) {
   if (!protocol || !net) throw new Error("media server runtime requires Electron protocol and net");
   if (typeof getFileInfoCached !== "function" || typeof fileExists !== "function") {
     throw new Error("media server runtime requires file info helpers");
@@ -25,22 +44,7 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
   let mediaServer = null;
   let mediaServerPort = 0;
   let mediaServerReadyPromise = null;
-
-  function encodeMediaFilePath(filePath) {
-    return Buffer.from(String(filePath || ""), "utf8")
-      .toString("base64")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/g, "");
-  }
-
-  function decodeMediaFilePath(encodedPath) {
-    const raw = String(encodedPath || "").trim();
-    if (!raw) return "";
-    const normalized = raw.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-    return Buffer.from(padded, "base64").toString("utf8");
-  }
+  let nextTokenPruneAt = 0;
 
   function safeTextResponse(message, status = 404) {
     return new Response(String(message || "not found"), {
@@ -53,18 +57,20 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
     const ext = path.extname(String(filePath || "")).toLowerCase();
     if (ext === ".mp3") return "audio/mpeg";
     if (ext === ".wav") return "audio/wav";
-    if (ext === ".ogg") return "audio/ogg";
+    if (ext === ".ogg" || ext === ".opus") return "audio/ogg";
     if (ext === ".flac") return "audio/flac";
     if (ext === ".m4a" || ext === ".aac") return "audio/mp4";
+    if (ext === ".aiff" || ext === ".aif") return "audio/aiff";
     if (ext === ".png") return "image/png";
     if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
     if (ext === ".webp") return "image/webp";
     if (ext === ".gif") return "image/gif";
-    if (ext === ".html") return "text/html; charset=utf-8";
-    if (ext === ".js") return "text/javascript; charset=utf-8";
-    if (ext === ".css") return "text/css; charset=utf-8";
-    if (ext === ".json") return "application/json; charset=utf-8";
     return "application/octet-stream";
+  }
+
+  function isAllowedMediaFile(filePath) {
+    return Boolean(filePath && path.isAbsolute(filePath) &&
+      MEDIA_EXTENSIONS.has(path.extname(filePath).toLowerCase()));
   }
 
   function addMediaResponseHeaders(res, filePath) {
@@ -85,66 +91,78 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
   function clearTokens() {
     mediaTokenToPath.clear();
     mediaPathKeyToToken.clear();
+    nextTokenPruneAt = 0;
   }
 
-  function pruneMediaTokens(now = Date.now()) {
-    for (const [token, entry] of mediaTokenToPath) {
-      if (!entry || entry.expiresAt <= now) {
-        mediaTokenToPath.delete(token);
-        if (entry?.pathKey) mediaPathKeyToToken.delete(entry.pathKey);
-      }
+  function dropToken(token, entry = mediaTokenToPath.get(token)) {
+    mediaTokenToPath.delete(token);
+    if (entry?.pathKey && mediaPathKeyToToken.get(entry.pathKey) === token) {
+      mediaPathKeyToToken.delete(entry.pathKey);
     }
+  }
 
-    if (mediaTokenToPath.size <= MEDIA_TOKEN_MAX_ENTRIES) return;
-    const overflow = mediaTokenToPath.size - MEDIA_TOKEN_MAX_ENTRIES;
-    let removed = 0;
-    for (const [token, entry] of mediaTokenToPath) {
-      mediaTokenToPath.delete(token);
-      if (entry?.pathKey) mediaPathKeyToToken.delete(entry.pathKey);
-      removed += 1;
-      if (removed >= overflow) break;
+  function touchToken(token, entry, timestamp) {
+    entry.expiresAt = timestamp + MEDIA_TOKEN_TTL_MS;
+    // Keep frequently used URLs alive when capacity-based eviction is necessary.
+    mediaTokenToPath.delete(token);
+    mediaTokenToPath.set(token, entry);
+  }
+
+  function pruneMediaTokens(timestamp) {
+    if (timestamp >= nextTokenPruneAt) {
+      for (const [token, entry] of mediaTokenToPath) {
+        if (!entry || entry.expiresAt <= timestamp) dropToken(token, entry);
+      }
+      nextTokenPruneAt = timestamp + MEDIA_TOKEN_PRUNE_INTERVAL_MS;
+    }
+    // Removing the oldest entry is O(1), even for 20k+ registered URLs.
+    while (mediaTokenToPath.size > MEDIA_TOKEN_MAX_ENTRIES) {
+      const oldestToken = mediaTokenToPath.keys().next().value;
+      if (!oldestToken) break;
+      dropToken(oldestToken);
     }
   }
 
   function createMediaToken(filePath) {
     const cleanPath = String(filePath || "");
-    if (!cleanPath || !path.isAbsolute(cleanPath)) return null;
+    if (!isAllowedMediaFile(cleanPath)) return null;
 
-    const now = Date.now();
-    pruneMediaTokens(now);
+    const timestamp = now();
+    // The backing resource must exist and be a regular audio/image file.
     const versionInfo = getMediaFileVersion(cleanPath);
-    const pathKey = `${cleanPath}|${versionInfo.version}`;
+    if (versionInfo.version === "missing") return null;
+    const pathKey = cleanPath + "|" + versionInfo.version;
     const existingToken = mediaPathKeyToToken.get(pathKey);
     const existingEntry = existingToken ? mediaTokenToPath.get(existingToken) : null;
 
-    if (existingToken && existingEntry && existingEntry.expiresAt > now) {
-      existingEntry.expiresAt = now + MEDIA_TOKEN_TTL_MS;
+    if (existingToken && existingEntry && existingEntry.expiresAt > timestamp) {
+      touchToken(existingToken, existingEntry, timestamp);
+      pruneMediaTokens(timestamp);
       return { token: existingToken, ...versionInfo };
     }
-
-    if (existingToken) {
-      mediaTokenToPath.delete(existingToken);
-      mediaPathKeyToToken.delete(pathKey);
-    }
+    if (existingToken) dropToken(existingToken, existingEntry);
 
     const token = crypto.randomBytes(18).toString("base64url");
-    mediaTokenToPath.set(token, { filePath: cleanPath, pathKey, expiresAt: now + MEDIA_TOKEN_TTL_MS, ...versionInfo });
+    mediaTokenToPath.set(token, { filePath: cleanPath, pathKey, expiresAt: timestamp + MEDIA_TOKEN_TTL_MS });
     mediaPathKeyToToken.set(pathKey, token);
+    pruneMediaTokens(timestamp);
     return { token, ...versionInfo };
   }
 
   function resolveMediaToken(token) {
     const cleanToken = String(token || "").trim();
-    if (!cleanToken) return null;
     const entry = mediaTokenToPath.get(cleanToken);
     if (!entry) return null;
-    const now = Date.now();
-    if (entry.expiresAt <= now) {
-      mediaTokenToPath.delete(cleanToken);
-      if (entry.pathKey) mediaPathKeyToToken.delete(entry.pathKey);
+    const timestamp = now();
+    if (entry.expiresAt <= timestamp) {
+      dropToken(cleanToken, entry);
       return null;
     }
-    entry.expiresAt = now + MEDIA_TOKEN_TTL_MS;
+    if (!isAllowedMediaFile(entry.filePath)) {
+      dropToken(cleanToken, entry);
+      return null;
+    }
+    touchToken(cleanToken, entry, timestamp);
     return entry.filePath;
   }
 
@@ -177,28 +195,22 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
     const total = stat.size;
     const rangeHeader = String(req.headers.range || "");
     if (rangeHeader) {
-      const match = rangeHeader.match(/bytes=(\d*)-(\d*)/);
-      if (match) {
-        let start = match[1] ? Number(match[1]) : 0;
-        let end = match[2] ? Number(match[2]) : total - 1;
-        if (!Number.isFinite(start) || start < 0) start = 0;
-        if (!Number.isFinite(end) || end >= total) end = total - 1;
-        if (start > end || start >= total) {
-          res.writeHead(416, { "Content-Range": `bytes */${total}` });
-          res.end();
-          return;
-        }
-        res.writeHead(206, {
-          "Content-Range": `bytes ${start}-${end}/${total}`,
-          "Content-Length": end - start + 1
-        });
-        if (req.method === "HEAD") {
-          res.end();
-          return;
-        }
-        fs.createReadStream(filePath, { start, end }).on("error", () => res.destroy()).pipe(res);
+      const range = parseMediaByteRange(rangeHeader, total);
+      if (!range) {
+        res.writeHead(416, { "Content-Range": "bytes */" + total });
+        res.end();
         return;
       }
+      res.writeHead(206, {
+        "Content-Range": "bytes " + range.start + "-" + range.end + "/" + total,
+        "Content-Length": range.end - range.start + 1
+      });
+      if (req.method === "HEAD") {
+        res.end();
+        return;
+      }
+      fs.createReadStream(filePath, range).on("error", () => res.destroy()).pipe(res);
+      return;
     }
 
     res.writeHead(200, { "Content-Length": total });
@@ -276,12 +288,13 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
     protocol.handle(MEDIA_PROTOCOL, async (request) => {
       try {
         const parsed = new URL(request.url);
-        const encodedPath = parsed.hostname === MEDIA_PROTOCOL_HOST
-          ? parsed.pathname.replace(/^\/+/, "")
-          : `${parsed.hostname}${parsed.pathname}`.replace(/^\/+/, "");
-        const filePath = decodeMediaFilePath(encodedPath);
-        if (!filePath || !path.isAbsolute(filePath)) return safeTextResponse("invalid media path", 400);
-        if (!fileExists(filePath)) return safeTextResponse("media file not found", 404);
+        // The renderer may only use opaque tokens minted for a real media file.
+        if (parsed.hostname !== MEDIA_PROTOCOL_HOST || !/^\/[A-Za-z0-9_-]{24}$/.test(parsed.pathname) ||
+            parsed.search || parsed.hash) return safeTextResponse("invalid media token", 404);
+        const filePath = resolveMediaToken(parsed.pathname.slice(1));
+        if (!filePath || !fileExists(filePath)) return safeTextResponse("media token expired or not found", 404);
+        const info = getFileInfoCached(filePath);
+        if (!info.exists || !info.isFile) return safeTextResponse("media file not found", 404);
         return net.fetch(pathToFileURL(filePath).toString());
       } catch (error) {
         console.log("[localtify media protocol error]", error?.message || error);
@@ -290,22 +303,12 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
     });
   }
 
-  function safeProtocolMediaUrl(filePath) {
-    if (!filePath) return "";
-    try {
-      return `${MEDIA_PROTOCOL}://${MEDIA_PROTOCOL_HOST}/${encodeMediaFilePath(filePath)}`;
-    } catch {
-      return "";
-    }
-  }
-
   function safeMediaUrl(filePath) {
-    if (!filePath) return "";
-    const cleanPath = String(filePath);
-    if (!mediaServerPort) return safeProtocolMediaUrl(cleanPath);
-    const tokenInfo = createMediaToken(cleanPath);
-    if (!tokenInfo?.token) return safeProtocolMediaUrl(cleanPath);
-    return `http://${MEDIA_SERVER_HOST}:${mediaServerPort}/media/${encodeURIComponent(tokenInfo.token)}?t=${mediaServerToken}&v=${encodeURIComponent(tokenInfo.version)}`;
+    const tokenInfo = createMediaToken(filePath);
+    if (!tokenInfo) return "";
+    if (!mediaServerPort) return MEDIA_PROTOCOL + "://" + MEDIA_PROTOCOL_HOST + "/" + tokenInfo.token;
+    return "http://" + MEDIA_SERVER_HOST + ":" + mediaServerPort + "/media/" +
+      encodeURIComponent(tokenInfo.token) + "?t=" + mediaServerToken + "&v=" + encodeURIComponent(tokenInfo.version);
   }
 
   return {
@@ -323,5 +326,6 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
 module.exports = {
   MEDIA_TOKEN_MAX_ENTRIES,
   MEDIA_TOKEN_TTL_MS,
+  parseMediaByteRange,
   createMediaServerRuntime
 };

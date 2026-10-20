@@ -537,7 +537,14 @@ function getCoverThumbnailUrl(filePath, options = {}) {
   if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) return "";
   const key = getCoverThumbnailCacheKey(filePath);
   const cached = coverThumbnailUrlCache.get(key);
-  if (cached && fileExists(cached.thumbnailPath)) return cached.url;
+  if (cached && fileExists(cached.thumbnailPath)) {
+    const freshUrl = safeMediaUrl(cached.thumbnailPath);
+    if (freshUrl) {
+      cached.url = freshUrl;
+      return freshUrl;
+    }
+    coverThumbnailUrlCache.delete(key);
+  }
   const thumbnailPath = getCoverThumbnailPath(filePath);
   if (thumbnailPath && fileExists(thumbnailPath)) {
     const url = safeMediaUrl(thumbnailPath);
@@ -1510,14 +1517,16 @@ async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixel
 }
 
 async function importNewAudioFilesFromDirectory(directory, tracks = [], options = {}) {
+  const includeSongs = options.includeSongs !== false;
+  const shapeResult = () => includeSongs ? listSongsShaped() : undefined;
   const audioFiles = listAudioFilesInDirectory(directory, options);
-  if (!audioFiles.length) return { changedCount: 0, importedCount: 0, songs: listSongsShaped(), files: [] };
+  if (!audioFiles.length) return { changedCount: 0, importedCount: 0, songs: shapeResult(), files: [] };
   const existingPaths = new Set(getSongs().map((song) => path.normalize(String(song.filePath || "")).toLowerCase()).filter(Boolean));
   const newFiles = audioFiles.filter((filePath) => {
     const key = path.normalize(String(filePath || "")).toLowerCase();
     return key && !existingPaths.has(key);
   });
-  if (!newFiles.length) return { changedCount: 0, importedCount: 0, songs: listSongsShaped(), files: [] };
+  if (!newFiles.length) return { changedCount: 0, importedCount: 0, songs: shapeResult(), files: [] };
   const pixelArtFiles = getPixelArtFiles();
   const usedCovers = new Set();
   const importedSongs = [];
@@ -1525,7 +1534,7 @@ async function importNewAudioFilesFromDirectory(directory, tracks = [], options 
   const changedCount = insertSongs(importedSongs);
   clearFileInfoCache();
   console.log("[localtify library refresh] imported new audio files from folder", { folder: directory, found: audioFiles.length, newFiles: newFiles.length, changedCount });
-  return { changedCount, importedCount: importedSongs.length, songs: listSongsShaped(), files: newFiles };
+  return { changedCount, importedCount: importedSongs.length, songs: shapeResult(), files: newFiles };
 }
 
 const albumFolderScanCache = new Map();
@@ -2547,19 +2556,17 @@ app.whenReady().then(async () => {
       }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "" });
       const successfulFiles = result.downloads.filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath)).map((item) => item.filePath);
       let changedCount = 0;
-      let afterSongs = listSongsShaped();
       if (autoAdd && successfulFiles.length) {
         const pixelArtFiles = getPixelArtFiles();
         const usedCovers = new Set();
         changedCount = insertSongs(await Promise.all(successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers))));
         clearFileInfoCache();
-        afterSongs = listSongsShaped();
       }
       if (autoAdd) {
-        const refresh = await importNewAudioFilesFromDirectory(downloadFolder);
+        const refresh = await importNewAudioFilesFromDirectory(downloadFolder, [], { includeSongs: false });
         changedCount += refresh.changedCount;
-        afterSongs = refresh.songs;
       }
+      const afterSongs = listSongsShaped();
       console.log(`[localitfy download] downloaded=${successfulFiles.length}, changed=${changedCount}, autoAdd=${autoAdd}`);
       return { ...result, changedCount, songs: afterSongs, autoAdd };
     } catch (error) {
@@ -2692,7 +2699,6 @@ app.whenReady().then(async () => {
         return { item, track };
       }).filter(({ item }) => item?.ok && item.filePath && item.matchOk !== false && fileExists(item.filePath) && isAudioFile(item.filePath));
       let changedCount = 0;
-      let afterSongs = listSongsShaped();
       const importedFilePaths = [];
       const importedSongIds = [];
       const spotifyImportMap = [];
@@ -2717,7 +2723,6 @@ app.whenReady().then(async () => {
           } catch (error) { console.log("[localitfy spotify metadata patch error]", error?.message || error); }
         }
         clearFileInfoCache();
-        afterSongs = listSongsShaped();
       }
       const importMapBySpotifyId = new Map(spotifyImportMap.map((item) => [String(item.spotifyTrackId || "").trim(), item]).filter(([id]) => Boolean(id)));
       const importMapByFilePath = new Map(spotifyImportMap.map((item) => [path.normalize(String(item.filePath || "")).toLowerCase(), item]).filter(([filePath]) => Boolean(filePath)));
@@ -2726,7 +2731,7 @@ app.whenReady().then(async () => {
         return { ...item, importedToLibrary: Boolean(imported), librarySongId: imported?.songId || item.librarySongId || "" };
       });
       for (const item of finalDownloads) if (item?.ok) event.sender.send("spotdl-track-done", item);
-      return { ...result, downloads: finalDownloads, changedCount, songs: afterSongs, downloadFolder, importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean))), spotifyImportedSongIds: Array.from(new Set(importedSongIds.filter(Boolean))), spotifyImportMap, spotifySourceName: payload?.sourceName || options?.sourceName || "", spotifySourceType: payload?.sourceType || options?.sourceType || "" };
+      return { ...result, downloads: finalDownloads, changedCount, songs: listSongsShaped(), downloadFolder, importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean))), spotifyImportedSongIds: Array.from(new Set(importedSongIds.filter(Boolean))), spotifyImportMap, spotifySourceName: payload?.sourceName || options?.sourceName || "", spotifySourceType: payload?.sourceType || options?.sourceType || "" };
     } catch (error) {
       console.log("[localitfy spotify batch download error]", error?.message || error);
       return { downloadFolder: getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder), downloads: [{ ok: false, error: error?.message || "batch download failed" }], changedCount: 0, songs: listSongsShaped(), spotifyImportedSongIds: [], spotifyImportMap: [], importedFilePaths: [] };
