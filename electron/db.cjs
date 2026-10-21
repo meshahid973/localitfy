@@ -1,6 +1,7 @@
 const songAnalysis = require("./db/song-analysis.cjs");
 const dailyMixes = require("./db/daily-mixes.cjs");
 const playEvents = require("./db/play-events.cjs");
+const lyricsSelections = require("./db/lyrics-selections.cjs");
 const Database = require("better-sqlite3");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
@@ -8,7 +9,7 @@ const path = require("node:path");
 const packageMetadata = require("../package.json");
 
 const APP_VERSION = String(packageMetadata?.version || "0.0.0");
-const SCHEMA_VERSION = 17;
+const SCHEMA_VERSION = 18;
 const BACKUP_KEEP_LIMIT = 8;
 
 let db = null;
@@ -626,7 +627,7 @@ function runMigrations(database) {
   createMetaTables(database);
 
   const previousVersion = getStoredSchemaVersion(database);
-  const shouldBackup = previousVersion !== SCHEMA_VERSION || !tableExists(database, "songs") || !tableExists(database, "settings") || !tableExists(database, "playlists") || !tableExists(database, "playlist_songs") || !tableExists(database, "play_events") || !tableExists(database, "song_analysis") || !tableExists(database, "daily_mixes");
+  const shouldBackup = previousVersion !== SCHEMA_VERSION || !tableExists(database, "songs") || !tableExists(database, "settings") || !tableExists(database, "playlists") || !tableExists(database, "playlist_songs") || !tableExists(database, "play_events") || !tableExists(database, "song_analysis") || !tableExists(database, "daily_mixes") || !tableExists(database, "lyrics_selections");
 
   lastMigrationReport = {
     ok: true,
@@ -656,6 +657,7 @@ function runMigrations(database) {
     playEvents.createPlayEventsTable(database);
     songAnalysis.createSongAnalysisTable(database);
     dailyMixes.createDailyMixesTable(database);
+    lyricsSelections.createLyricsSelectionsTable(database);
     lastMigrationReport.addedColumns = [
       ...songMigration.addedColumns,
       ...settingsAdded.map((name) => `settings.${name}`),
@@ -1077,6 +1079,10 @@ function getDatabaseStatus() {
 }
 
 module.exports = {
+  getLyricsSelection: (songId) => lyricsSelections.readLyricsSelection(ensureDb(), songId),
+  saveLyricsSelection: (songId, id, result) => lyricsSelections.saveLyricsSelection(ensureDb(), songId, id, result),
+  saveLyricsOffset: (songId, offsetMs) => lyricsSelections.saveLyricsOffset(ensureDb(), songId, offsetMs),
+  clearLyricsSelection: (songId) => lyricsSelections.clearLyricsSelection(ensureDb(), songId),
   getSongAnalysis: () => songAnalysis.getSongAnalysis(ensureDb()),
   saveSongAnalysis: (record) => songAnalysis.saveSongAnalysis(ensureDb(), record),
   clearSongAnalysis: () => {
