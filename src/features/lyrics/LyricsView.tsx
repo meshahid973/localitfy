@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, RefObject } from "react";
-import { RotateCw, X } from "lucide-react";
+import { RotateCw, X, Search, RotateCcw } from "lucide-react";
 import { Cover } from "../covers/Cover";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
 import type { LyricsResult } from "./lyrics.types";
 import { activeLyricIndex } from "./lyrics.utils";
+import LyricsMatchPanel from "./LyricsMatchPanel";
 import "./lyrics.css";
 
 export type LyricsViewProps = {
@@ -33,9 +34,14 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
   const lineRefs = useRef<Array<HTMLElement | null>>([]);
   const manualScrollUntilRef = useRef(0);
   const [result, setResult] = useState<LyricsResult | null>(null);
+  const [matcherOpen, setMatcherOpen] = useState(false);
+  const [offsetSaving, setOffsetSaving] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [box, setBox] = useState<CSSProperties>({ top: 0, left: 0 });
   const songId = song?.id || "";
+  const currentSongId = useRef(songId);
+  currentSongId.current = songId;
+  useEffect(() => { setMatcherOpen(false); }, [songId]);
 
   const load = useCallback((refresh: boolean) => {
     if (!songId) { setResult(null); return () => undefined; }
@@ -51,6 +57,42 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
   }, [songId]);
 
   useEffect(() => (open ? load(false) : undefined), [open, load]);
+
+  const adoptLyrics = (expectedId: string, next: LyricsResult) => {
+    sessionCache.set(expectedId, next);
+    if (currentSongId.current !== expectedId) return;
+    setResult(next);
+    setMatcherOpen(false);
+    setActiveIndex(-1);
+  };
+
+  const clearMatch = async () => {
+    if (!songId) return;
+    const expected = songId;
+    try {
+      const next = await window.localitfy.clearLyricsMatch({ id: expected });
+      adoptLyrics(expected, next);
+    } catch (error) { console.warn("[localtify lyrics reset]", error); }
+  };
+
+  const shiftLyrics = async (deltaMs: number) => {
+    if (!songId || offsetSaving) return;
+    const expected = songId;
+    const offsetMs = Math.max(-30000, Math.min(30000, (result?.offsetMs || 0) + deltaMs));
+    setOffsetSaving(true);
+    try {
+      const saved = await window.localitfy.setLyricsOffset({ id: expected, offsetMs });
+      if (currentSongId.current === expected) {
+        setResult(previous => {
+          if (!previous) return previous;
+          const next = { ...previous, offsetMs: saved.offsetMs };
+          sessionCache.set(expected, next);
+          return next;
+        });
+      }
+    } catch (error) { console.warn("[localtify lyrics offset]", error); }
+    finally { setOffsetSaving(false); }
+  };
 
   // Follow the content area with an even gap, stopping above the player bar.
   useLayoutEffect(() => {
@@ -82,11 +124,14 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
     if (!open) return;
     viewRef.current?.focus({ preventScroll: true });
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !document.querySelector(".songContextMenuLayer, [role='dialog']:not(.lyricsView)")) onClose();
+      if (event.key === "Escape" && !document.querySelector(".songContextMenuLayer, [role='dialog']:not(.lyricsView)")) {
+        if (matcherOpen) setMatcherOpen(false);
+        else onClose();
+      }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [open, onClose]);
+  }, [open, onClose, matcherOpen]);
 
   const synced = result?.status === "synced" ? result.lines : null;
 
@@ -95,14 +140,14 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
     if (!open || !synced) return;
     let frame = 0;
     const tick = () => {
-      setActiveIndex(activeLyricIndex(synced, getTime() + LEAD_SECONDS));
+      setActiveIndex(activeLyricIndex(synced, getTime() + LEAD_SECONDS - (result?.offsetMs || 0) / 1000));
       if (isPlaying) frame = window.requestAnimationFrame(tick);
     };
     tick();
     // Paused: still pick up seeks from the player bar without spinning every frame.
     const idle = isPlaying ? 0 : window.setInterval(tick, 250);
     return () => { window.cancelAnimationFrame(frame); window.clearInterval(idle); };
-  }, [open, synced, isPlaying, getTime]);
+  }, [open, synced, isPlaying, getTime, result?.offsetMs]);
 
   useEffect(() => {
     if (activeIndex < 0 || Date.now() < manualScrollUntilRef.current) return;
@@ -132,7 +177,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
               key={index}
               ref={(node) => { lineRefs.current[index] = node; }}
               className={`lyricsLine ${state} ${line.text ? "" : "isBreak"}`}
-              onClick={() => { manualScrollUntilRef.current = 0; seekTo(line.time); }}
+              onClick={() => { manualScrollUntilRef.current = 0; seekTo(Math.max(0, line.time + (result?.offsetMs || 0) / 1000)); }}
               aria-current={index === activeIndex ? "true" : undefined}
             >
               {text}
@@ -141,7 +186,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
             <p key={index} className={`lyricsLine ${line.text ? "" : "isBreak"}`}>{line.text || " "}</p>
           );
         })}
-        <p className="lyricsCredit">{result.source === "file" ? "Lyrics from a local .lrc file" : "Lyrics provided by LRCLIB"}</p>
+        <p className="lyricsCredit">{result.manual ? "Manually selected LRCLIB lyrics" : result.source === "file" ? "Lyrics from a local .lrc file" : "Lyrics provided by LRCLIB"}</p>
       </div>
     );
   } else {
@@ -179,12 +224,31 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
             </span>
           </div>
         ) : <span />}
-        <button type="button" className="lyricsIconButton" onClick={onClose} aria-label="close lyrics">
-          <X size={18} strokeWidth={2.4} aria-hidden="true" />
-        </button>
+        <div className="lyricsHeadActions">
+          {song && result?.status === "synced" ? (
+            <div className="lyricsOffsetControls" aria-label="lyrics timing offset">
+              <button type="button" disabled={offsetSaving} aria-label="show lyrics 0.25 seconds earlier" onClick={() => void shiftLyrics(-250)}>−</button>
+              <span>{((result.offsetMs || 0) / 1000).toFixed(2)}s</span>
+              <button type="button" disabled={offsetSaving} aria-label="show lyrics 0.25 seconds later" onClick={() => void shiftLyrics(250)}>+</button>
+            </div>
+          ) : null}
+          {song && result?.manual ? (
+            <button type="button" className="lyricsTextButton" onClick={() => void clearMatch()} aria-label="reset manual lyrics match">
+              <RotateCcw size={14} aria-hidden="true" /> reset match
+            </button>
+          ) : null}
+          {song ? <button type="button" className="lyricsTextButton" onClick={() => setMatcherOpen(value => !value)} aria-expanded={matcherOpen}>
+            <Search size={14} aria-hidden="true" /> {matcherOpen ? "back to lyrics" : "find lyrics"}
+          </button> : null}
+          <button type="button" className="lyricsIconButton" onClick={onClose} aria-label="close lyrics">
+            <X size={18} strokeWidth={2.4} aria-hidden="true" />
+          </button>
+        </div>
       </header>
       <div ref={scrollerRef} className="lyricsScroller" onWheel={holdManualScroll} onTouchMove={holdManualScroll} onKeyDown={(event) => { if (["ArrowUp", "ArrowDown", "PageUp", "PageDown"].includes(event.key)) holdManualScroll(); }}>
-        {body}
+        {matcherOpen && song
+          ? <LyricsMatchPanel key={song.id} songId={song.id} title={song.title} artist={song.artist} onSelected={adoptLyrics} />
+          : body}
       </div>
     </section>
   );
