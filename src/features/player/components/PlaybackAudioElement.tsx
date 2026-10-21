@@ -26,6 +26,9 @@ export type PlaybackAudioElementProps = {
   setStatusText: (message: string) => void;
   resetPlayCountTracker: (outcome?: Exclude<ListeningOutcome, "active">) => unknown;
   handleListeningSeek: () => unknown;
+  handleSeekStart?: () => unknown;
+  handleSeekComplete?: () => unknown;
+  onPlaybackError?: () => unknown;
   stopFade: () => unknown;
   stopCrossfadeAuto?: () => unknown;
   stopProgressLoop: () => unknown;
@@ -37,7 +40,7 @@ export default function PlaybackAudioElement(props: PlaybackAudioElementProps) {
     handleCanPlay, handlePlaying, handleAudioPause, handleAudioTimeUpdate, handleAudioEnded,
     setIsPlaying, saveDuration, tickPlayCountTracker, markSongCompletedForPlayCount, patchSongLocal,
     playNext, setPlayerError, getAudioErrorText, setStatusText, resetPlayCountTracker,
-    handleListeningSeek, stopFade, stopCrossfadeAuto, stopProgressLoop
+    handleListeningSeek, handleSeekStart, handleSeekComplete, onPlaybackError, stopFade, stopCrossfadeAuto, stopProgressLoop
   } = props;
 
   return (
@@ -45,8 +48,8 @@ export default function PlaybackAudioElement(props: PlaybackAudioElementProps) {
       ref={audioRef}
       preload="auto"
       crossOrigin="anonymous"
-      onSeeking={handleListeningSeek}
-      onSeeked={handleListeningSeek}
+      onSeeking={() => { handleSeekStart?.(); handleListeningSeek(); }}
+      onSeeked={() => { handleSeekComplete?.(); handleListeningSeek(); }}
       onCanPlay={handleCanPlay}
       onPlaying={handlePlaying}
       onPlay={() => { pendingPlayRef.current = false; setIsPlaying(true); }}
@@ -70,6 +73,7 @@ export default function PlaybackAudioElement(props: PlaybackAudioElementProps) {
         playNext(true, "auto");
       }}
       onError={() => {
+        onPlaybackError?.();
         const audio = audioRef.current;
         const failedSong = songRef.current || currentSong;
         const failedCacheKey = getSongPlaybackSourceKey(failedSong);

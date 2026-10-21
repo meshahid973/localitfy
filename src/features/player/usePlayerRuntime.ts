@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ListeningHistory } from "./listeningHistory";
 import { AudioEffectRuntime } from "./audio/audioEffectRuntime";
+import { PlaybackTransitionCoordinator } from "./engine/playbackTransitionCoordinator";
 import { HtmlAudioEngine } from "./engine/htmlAudioEngine";
 import type { PlayerController } from "./engine/playerController";
 import type { PlaybackUrlCacheEntry, PlaybackUrlResult, Song } from "../library/song.types";
@@ -14,6 +15,7 @@ export type UsePlayerRuntimeOptions = {
 
 export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playbackTransitionRef = useRef(new PlaybackTransitionCoordinator());
   const listeningHistoryRef = useRef<ListeningHistory | null>(null);
   if (!listeningHistoryRef.current) {
     listeningHistoryRef.current = new ListeningHistory((event) => {
@@ -152,7 +154,7 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   }, []);
 
   return {
-    listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef,
+    listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef, playbackTransitionRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
     crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef,
     fadeIntervalRef, animationFrameRef, progressLoopTimeoutRef, backgroundAudioRepairTimerRef,

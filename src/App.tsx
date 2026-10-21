@@ -212,7 +212,7 @@ function MainModeApp() {
   const songContextAnchorRef = useRef<HTMLElement | null>(null);
 
   const {
-    listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef,
+    listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef, playbackTransitionRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
     crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef, fadeIntervalRef,
     animationFrameRef, progressLoopTimeoutRef, backgroundAudioRepairTimerRef, playerResizeFrameRef,
@@ -3893,6 +3893,7 @@ function MainModeApp() {
   }
 
   function stopCrossfadeAuto() {
+    playbackTransitionRef.current.crossfadeCancelled();
     if (crossfadeIntervalRef.current !== null) {
       window.clearInterval(crossfadeIntervalRef.current);
       crossfadeIntervalRef.current = null;
@@ -4079,6 +4080,7 @@ function MainModeApp() {
       setIsPlaying(true);
       setPlayerError("");
       setStatusText(`crossfading into ${prettyTitle(target.song.title, 5)}`);
+      playbackTransitionRef.current.crossfadeFinished(target.song.id);
 
       const blendMs = 420;
       const blendStart = performance.now();
@@ -4117,6 +4119,7 @@ function MainModeApp() {
       void rememberCurrentSong(target.song.id);
       setIsPlaying(true);
       crossfadeMainPauseGuardRef.current = false;
+      playbackTransitionRef.current.crossfadeFinished(target.song.id);
 
       window.setTimeout(() => {
         try {
@@ -4150,15 +4153,19 @@ function MainModeApp() {
     const target = getAutoTransitionTarget();
     if (!target?.song || target.song.id === current.id) return;
 
+    if (!playbackTransitionRef.current.crossfadeStarted(target.song.id)) return;
     crossfadeAutoStartedRef.current = true;
     crossfadeAutoTargetRef.current = target.song.id;
     crossfadeLastStartAtRef.current = performance.now();
 
+    const version = playbackTransitionRef.current.snapshot().generation;
     const playbackUrl = await resolvePlaybackUrl(target.song);
+    if (!crossfadeAutoStartedRef.current || !playbackTransitionRef.current.isCurrentCrossfade(target.song.id, version)) return;
 
     if (!playbackUrl.ok || !playbackUrl.url || playbackUrl.fileExists === false) {
       crossfadeAutoStartedRef.current = false;
       crossfadeAutoTargetRef.current = "";
+      playbackTransitionRef.current.crossfadeCancelled();
       setCrossfadePreviewSongId("");
       try {
         setAudioElementVolume(audio, getTargetAudioVolume(current));
@@ -4239,6 +4246,7 @@ function MainModeApp() {
         }
       }, 16);
     } catch {
+      playbackTransitionRef.current.crossfadeCancelled();
       crossfadeAutoStartedRef.current = false;
       crossfadeAutoTargetRef.current = "";
       crossfadeMainPauseGuardRef.current = false;
@@ -4285,9 +4293,9 @@ function MainModeApp() {
 
   function handleAudioPause() {
     if (audioRef.current) listeningHistoryRef.current?.pause(audioRef.current);
-    if (crossfadeAutoStartedRef.current || crossfadeMainPauseGuardRef.current || crossfadeHandoffRef.current) {
-      return;
-    }
+    if (!playbackTransitionRef.current.paused(Boolean(
+      crossfadeAutoStartedRef.current || crossfadeMainPauseGuardRef.current || crossfadeHandoffRef.current
+    ))) return;
 
     if (!audioRef.current?.ended) {
       setIsPlaying(false);
@@ -4295,6 +4303,7 @@ function MainModeApp() {
   }
 
   function handleAudioEnded() {
+    if (!playbackTransitionRef.current.ended(Boolean(crossfadeAutoStartedRef.current || crossfadeHandoffRef.current))) return;
     const endedSong = songRef.current || currentSong;
     markSongCompletedForPlayCount(endedSong);
 
@@ -4303,11 +4312,6 @@ function MainModeApp() {
     }
 
     if (repeatMode === "one" && restartCurrentSongForRepeatOne()) {
-      return;
-    }
-
-    if (crossfadeAutoStartedRef.current || crossfadeHandoffRef.current) {
-      // The hidden next audio is already taking over. Do not double-skip.
       return;
     }
 
@@ -4407,7 +4411,9 @@ function MainModeApp() {
       return false;
     }
 
+    const generation = playbackTransitionRef.current.requestPlay(song.id);
     const playbackUrl = await resolvePlaybackUrl(song);
+    if (!playbackTransitionRef.current.isCurrent(generation, song.id)) return false;
 
     if (!playbackUrl.ok || !playbackUrl.url || playbackUrl.fileExists === false) {
       pendingPlayRef.current = false;
@@ -4470,6 +4476,7 @@ function MainModeApp() {
       setIsPlaying(true);
       setPlayerError("");
       setStatusText(`playing ${prettyTitle(song.title, 5)}`);
+      playbackTransitionRef.current.playing();
 
       return true;
     } catch {
@@ -4484,6 +4491,7 @@ function MainModeApp() {
   }
 
   function pauseAudioSmooth() {
+    playbackTransitionRef.current.requestPause();
     const audio = audioRef.current;
     const playerController = ensurePlayerController();
 
@@ -7064,6 +7072,7 @@ function MainModeApp() {
   }
 
   function handleCanPlay() {
+    playbackTransitionRef.current.ready();
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -7073,6 +7082,7 @@ function MainModeApp() {
   }
 
   function handlePlaying() {
+    playbackTransitionRef.current.playing();
     const song = songRef.current || currentSong;
     if (!song) return;
 
@@ -7097,6 +7107,7 @@ function MainModeApp() {
     const duration = durationRef.current || currentDuration || currentSong?.duration || 0;
     if (!audio || duration <= 0) return;
 
+    playbackTransitionRef.current.seekStarted();
     const safePercent = clamp(Number(value), 0, 100);
     const nextTime = (safePercent / 100) * duration;
     const controller = ensurePlayerController();
@@ -7107,6 +7118,7 @@ function MainModeApp() {
     lastProgressStatePaintRef.current = 0;
     syncProgressDom(nextTime, duration, true);
     setCurrentTime(nextTime);
+    playbackTransitionRef.current.seekFinished();
 
     // V341: seeking is temporary only. Next play still starts at 0:00.
   }
@@ -8794,6 +8806,9 @@ function MainModeApp() {
       setStatusText,
       resetPlayCountTracker,
       handleListeningSeek: () => listeningHistoryRef.current?.discontinuity(audioRef.current?.currentTime || 0),
+      handleSeekStart: () => playbackTransitionRef.current.seekStarted(),
+      handleSeekComplete: () => playbackTransitionRef.current.seekFinished(),
+      onPlaybackError: () => playbackTransitionRef.current.failed(),
       stopFade,
       stopCrossfadeAuto,
       stopProgressLoop
