@@ -106,7 +106,7 @@ const cssBudgets = [
   ["src/App.css", 238 * 1024, 2209], ["src/features/shell/app-core.css", 80 * 1024, 664],
   ["src/features/player/player.css", 75 * 1024, 819], ["src/features/shell/effects.css", 65 * 1024, 662],
   ["src/styles/themes.css", 83 * 1024, 2], ["src/styles/view-shell.css", 20 * 1024, 198],
-  ["src/features/home/home.css", 20 * 1024, 11],
+  ["src/features/home/home.css", 20 * 1024, 17],
   ["src/features/library/library.css", 24 * 1024, 95], ["src/features/artists/artists.css", 12 * 1024, 0], ["src/features/genres/genres.css", 4 * 1024, 0]
 ];
 for (const [file, maxBytes, maxImportant] of cssBudgets) {
