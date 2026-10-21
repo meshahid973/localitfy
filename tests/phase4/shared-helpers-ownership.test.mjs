@@ -21,7 +21,7 @@ function load(file, modules = {}) {
 }
 
 test("shared clamp keeps UI values unchanged and media values finite", () => {
-  const { clamp, clampFinite } = load("src/shared/utils/format.ts");
+  const { clamp, clampUpperFirst, clampFinite } = load("src/shared/utils/format.ts");
   for (const [value, lower, upper] of [[0.5, 0, 1], [-3, 0, 5], [14, -2, 7]]) {
     assert.equal(clampFinite(value, lower, upper), clamp(value, lower, upper));
   }
@@ -29,6 +29,9 @@ test("shared clamp keeps UI values unchanged and media values finite", () => {
   assert.equal(clampFinite(Infinity, 0, 1), 0);
   assert.equal(clampFinite(-Infinity, 0.25, 4), 0.25);
   assert.equal(clamp(NaN, 0, 1), NaN, "plain clamp retains previous non-finite behavior");
+  assert.equal(clampUpperFirst(2, 4, 1), 1, "Settings retains upper-first inverted-bound behavior");
+  assert.equal(clampFinite(2, 4, 1), 1, "media retains upper-first inverted-bound behavior");
+  assert.equal(clamp(2, 4, 1), 4, "CatBuddy retains lower-first inverted-bound behavior");
 });
 
 test("playlist insertion and library drag reordering retain distinct edge-case behavior", () => {
