@@ -4,18 +4,18 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { createRequire } from "node:module";
+import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const Database = require("better-sqlite3");
 const selections = require(path.join(root, "electron/db/lyrics-selections.cjs"));
 const { createLyricsService } = require(path.join(root, "electron/lyrics/service.cjs"));
 
 test("manual lyrics and offset persist by stable song ID, preserve each other, and cascade on delete", () => {
-  const db = new Database(":memory:");
+  const db = new DatabaseSync(":memory:");
   try {
-    db.pragma("foreign_keys = ON");
+    db.exec("PRAGMA foreign_keys = ON");
     db.exec("CREATE TABLE songs (id TEXT PRIMARY KEY); INSERT INTO songs(id) VALUES ('song1');");
     selections.createLyricsSelectionsTable(db);
     assert.deepEqual(selections.readLyricsSelection(db, "song1"), { lrclibId: null, result: null, offsetMs: 0 });
