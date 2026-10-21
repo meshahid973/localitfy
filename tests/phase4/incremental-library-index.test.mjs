@@ -4,16 +4,26 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
-import { buildSync } from "esbuild";
+import ts from "typescript";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const target = path.join(root, "src/features/search/incrementalLibraryIndex.ts");
-const { text } = buildSync({ entryPoints: [target], bundle: true, platform: "node", format: "cjs", write: false, logLevel: "silent" }).outputFiles.reduce(
-  (v, f) => ({ text: f.text }), { text: "" }
-);
-const module = { exports: {} };
-new Function("module", "exports", "require", text)(module, module.exports, createRequire(import.meta.url));
-const { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } = module.exports;
+const localRequire = createRequire(import.meta.url);
+const cache = new Map();
+function loadTypescript(file) {
+  const filePath = path.resolve(file);
+  if (cache.has(filePath)) return cache.get(filePath).exports;
+  const module = { exports: {} };
+  cache.set(filePath, module);
+  const compiled = ts.transpileModule(fs.readFileSync(filePath, "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
+  }).outputText;
+  const requireFromSource = (name) =>
+    name.startsWith(".") ? loadTypescript(path.resolve(path.dirname(filePath), name) + ".ts") : localRequire(name);
+  new Function("module", "exports", "require", compiled)(module, module.exports, requireFromSource);
+  return module.exports;
+}
+const { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } =
+  loadTypescript(path.join(root, "src/features/search/incrementalLibraryIndex.ts"));
 const song = (id, artist = "Artist A", album = "Album A") => ({
   id, title: "Song " + id, artist, album, filePath: "/music/" + id + ".mp3", playCount: 0, liked: false
 });
