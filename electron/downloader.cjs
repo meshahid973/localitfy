@@ -43,6 +43,26 @@ function uniquePath(directory, filename) {
   return candidate;
 }
 
+/** Accept only real YouTube video URLs; never forward untrusted option-like text to yt-dlp. */
+function normalizeYouTubeUrl(input) {
+  let parsed;
+  try { parsed = new URL(String(input || "").trim()); } catch { return ""; }
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.port) return "";
+  const host = parsed.hostname.toLowerCase();
+  let videoId = "";
+  if (host === "youtu.be") {
+    const match = /^\/([a-zA-Z0-9_-]{11})\/?$/.exec(parsed.pathname);
+    if (!match) return "";
+    videoId = match[1];
+  } else if (["youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com"].includes(host) && parsed.pathname === "/watch") {
+    videoId = parsed.searchParams.get("v") || "";
+  } else {
+    return "";
+  }
+  if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) return "";
+  return "https://www.youtube.com/watch?v=" + videoId;
+}
+
 function parseUrls(input) {
   if (Array.isArray(input)) return input.map(String).map(u => u.trim()).filter(Boolean);
   return String(input || "").split(/\r?\n/).map(u => u.trim()).filter(Boolean);
@@ -1036,10 +1056,10 @@ async function downloadAudioUrls(input, destinationDirectory, onProgress, option
 
     onProgress?.({ type: "download", status: "queued", id, url, index, total: urls.length, file: "queued track", progress: 0, message: "Queued..." });
 
-    const isYouTube = /youtube\.com\/watch|youtu\.be\//.test(url);
-    const result = isYouTube
-      ? await downloadYouTube(url, destinationDirectory, onProgress, options, job)
-      : { ok: false, url, error: "Only YouTube URLs are supported" };
+    const normalizedUrl = normalizeYouTubeUrl(url);
+    const result = normalizedUrl
+      ? await downloadYouTube(normalizedUrl, destinationDirectory, onProgress, options, job)
+      : { ok: false, url, error: "Only HTTPS YouTube video URLs are supported" };
 
     if (!result.ok) {
       onProgress?.({ type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?" });
@@ -1076,6 +1096,7 @@ async function convertLocalMediaFiles(filePaths, destinationDirectory, options =
 }
 
 module.exports = {
+  normalizeYouTubeUrl,
   initDownloader,
   downloadAudioUrls,
   downloadSpotifyBatch,
