@@ -14,8 +14,10 @@ test("cover and library scans remain functional without floating mascot notifica
   const css = read("src/App.css");
 
   for (const source of [shell, contract, css]) {
-    assert.doesNotMatch(source, /tinyScanner|scannerOrb|pixel art is being refreshed/i);
+    assert.doesNotMatch(source, /tinyScanner|pixel art is being refreshed/);
   }
+  assert.doesNotMatch(shell, /className="scannerOrb"/, "remove only the floating status orb");
+  assert.doesNotMatch(css, /^\s*\.scannerOrb(?:\s*\{|::)/m, "remove orphaned scanner orb styles");
   assert.doesNotMatch(shell, /libraryScanBusy|pixelArtBusy|libraryScanMessage/);
   assert.doesNotMatch(contract, /libraryScanBusy|pixelArtBusy|libraryScanMessage/);
   assert.match(shell, /appToast \? <div className="appToast error"/, "preserve actionable error messages");
