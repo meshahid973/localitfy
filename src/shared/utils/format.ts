@@ -1,7 +1,12 @@
 export function clamp(value: number, min: number, max: number) { return Math.max(min, Math.min(max, value)); }
+/** Preserve upper-bound-first semantics for range controls, including inverted bounds. */
+export function clampUpperFirst(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
 /** Media inputs may be NaN or infinite; always fall back to the lower bound. */
 export function clampFinite(value: number, min: number, max: number) {
-  return Number.isFinite(value) ? clamp(value, min, max) : min;
+  return Number.isFinite(value) ? clampUpperFirst(value, min, max) : min;
 }
 export function collapseSpaces(value: unknown) { return String(value || "").replace(/\s+/g, " ").trim(); }
 export function normalizeUiText(text: string) { return String(text || "").normalize("NFKC").replace(/[\u0300-\u036f]/g, "").replace(/[\u200B-\u200D\uFEFF\u2060\u034F]/g, "").replace(/\p{Cf}/gu, ""); }
