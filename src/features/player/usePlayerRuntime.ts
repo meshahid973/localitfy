@@ -6,7 +6,7 @@ import { HtmlAudioEngine } from "./engine/htmlAudioEngine";
 import type { PlayerController } from "./engine/playerController";
 import type { PlaybackUrlCacheEntry, PlaybackUrlResult, Song } from "../library/song.types";
 import type { QueueHistoryItem, RepeatMode } from "./player.types";
-import { QUEUE_HISTORY_STORAGE_KEY, QUEUE_STORAGE_KEY, REPEAT_PLAYLIST_STORAGE_KEY } from "../library/library.constants";
+import { QUEUE_HISTORY_STORAGE_KEY, QUEUE_STORAGE_KEY, REPEAT_PLAYLIST_STORAGE_KEY, SHUFFLE_STORAGE_KEY, REPEAT_MODE_STORAGE_KEY } from "../library/library.constants";
 import { readLocalJson, writeLocalJson } from "../../shared/storage/localStorage";
 
 export type UsePlayerRuntimeOptions = {
@@ -86,8 +86,11 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const fadeFrameRef = useRef<number | null>(null);
   const [currentId, setCurrentId] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isShuffle, setIsShuffle] = useState(false);
-  const [repeatMode, setRepeatMode] = useState<RepeatMode>("all");
+  const [isShuffle, setIsShuffle] = useState(() => readLocalJson<boolean>(SHUFFLE_STORAGE_KEY, false) === true);
+  const [repeatMode, setRepeatMode] = useState<RepeatMode>(() => {
+    const saved = readLocalJson<RepeatMode>(REPEAT_MODE_STORAGE_KEY, "all");
+    return saved === "all" || saved === "one" || saved === "off" ? saved : "all";
+  });
   const [currentTime, setCurrentTime] = useState(0);
   const [currentDuration, setCurrentDuration] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
@@ -113,6 +116,8 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   useEffect(() => { writeLocalJson(QUEUE_STORAGE_KEY, playQueue); }, [playQueue]);
   useEffect(() => { writeLocalJson(QUEUE_HISTORY_STORAGE_KEY, queueHistory); }, [queueHistory]);
   useEffect(() => { writeLocalJson(REPEAT_PLAYLIST_STORAGE_KEY, repeatPlaylist); }, [repeatPlaylist]);
+  useEffect(() => { writeLocalJson(SHUFFLE_STORAGE_KEY, isShuffle); }, [isShuffle]);
+  useEffect(() => { writeLocalJson(REPEAT_MODE_STORAGE_KEY, repeatMode); }, [repeatMode]);
   useEffect(() => { queueDropHotRef.current = queueDropHot; }, [queueDropHot]);
 
   useEffect(() => {
