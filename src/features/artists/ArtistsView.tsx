@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { ListPlus, Play, Shuffle } from "lucide-react";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
 import { Cover } from "../covers/Cover";
-import { LikeHeartAnimationV443 } from "../library/components/SongRows";
+import { LikeHeartAnimationV443 } from "../../shared/ui/LikeHeartAnimation";
 import type { Song } from "../library/song.types";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { PageHeader } from "../../shared/ui/PageHeader";
