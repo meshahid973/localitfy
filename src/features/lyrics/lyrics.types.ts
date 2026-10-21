@@ -7,4 +7,16 @@ export type LyricsResult = {
   source: "file" | "lrclib" | "none";
   lines: LyricsLine[];
   error?: string;
+  manual?: boolean;
+  offsetMs?: number;
+};
+
+export type LyricsSearchHit = {
+  id: number;
+  title: string;
+  artist: string;
+  album: string;
+  duration: number;
+  synced: boolean;
+  instrumental: boolean;
 };
