@@ -344,18 +344,14 @@
    must not override this view; drag-target markers stay available. */
 .app .libraryPage .songRow:not(.songDragging):not(.songDropTarget) {
   background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  filter: none !important;
 }
 .app .libraryPage .songRow:not(.songDropTarget)::before,
 .app .libraryPage .songRow:not(.songDropTarget)::after {
-  content: none !important;
-  display: none !important;
+  content: none;
+  display: none;
 }
 .app .libraryPage .songRow:hover:not(.songDragging):not(.songDropTarget) {
   background: color-mix(in srgb, var(--lt-text) 4%, transparent) !important;
-  border-color: transparent !important;
 }
 .app .libraryPage .songRow.active:not(.songDragging):not(.songDropTarget) {
   background: color-mix(in srgb, var(--lt-text) 6%, transparent) !important;
@@ -363,9 +359,6 @@
   box-shadow: inset 2px 0 0 var(--lt-accent) !important;
 }
 .app[data-library-row-style="listOnly"] .libraryPage .songRow.active {
-  border-right: 0 !important;
-  border-left: 0 !important;
-  border-radius: 0 !important;
   box-shadow: none !important;
 }
 
