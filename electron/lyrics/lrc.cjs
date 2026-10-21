@@ -36,7 +36,8 @@ function plainLines(source) {
     .filter((line, index, all) => line || (index > 0 && all[index - 1]));
 }
 
-const NOISE = /\s*[([](?:official|lyrics?|lyric video|audio|video|visuali[sz]er|hd|hq|4k|remaster(?:ed)?|explicit|clean|mv|m\/v)[^)\]]*[)\]]/gi;
+const NOISE = /\s*[([](?:official|lyrics?|lyric video|audio|video|visuali[sz]er|hd|hq|4k|remaster(?:ed)?|explicit|clean|mv|m\/v|slowed|sped\s*up|nightcore|daycore|reverb)[^)\]]*[)\]]/gi;
+const EDIT_SUFFIX = /\s*(?:[-–—|]\s*)?(?:slowed(?:\s*(?:\+|\/|and|&)\s*reverb)?|sped\s*up|nightcore|daycore|reverb|extended\s+(?:version|edit)|speed\s*up)(?:\s*\/\s*reverb)?\s*$/i;
 
 function cleanTitle(title) {
   return String(title || "")
@@ -44,6 +45,7 @@ function cleanTitle(title) {
     .replace(/\s*[([](?:feat|ft|with)\.?\s[^)\]]*[)\]]/gi, "")
     .replace(/\s+(?:feat|ft)\.?\s.*$/i, "")
     .replace(/\.(?:mp3|m4a|flac|wav|ogg|opus|aac)$/i, "")
+    .replace(EDIT_SUFFIX, "")
     .replace(/\s+/g, " ")
     .trim();
 }

@@ -45,7 +45,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
     setActiveIndex(-1);
     if (cached) return () => undefined;
     window.localitfy.getLyrics({ id: songId, refresh })
-      .then((next) => { if (!["error", "disabled", "offline"].includes(next.status)) sessionCache.set(songId, next); if (!cancelled) setResult(next); })
+      .then((next) => { if (next.status === "synced" || next.status === "plain" || next.status === "instrumental") sessionCache.set(songId, next); else sessionCache.delete(songId); if (!cancelled) setResult(next); })
       .catch(() => { if (!cancelled) setResult({ status: "error", source: "none", lines: [], error: "lyrics lookup failed" }); });
     return () => { cancelled = true; };
   }, [songId]);

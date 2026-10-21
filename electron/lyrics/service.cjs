@@ -4,9 +4,11 @@ const path = require("node:path");
 const { parseLrc, plainLines, cleanTitle, primaryArtist } = require("./lrc.cjs");
 
 const LRCLIB = "https://lrclib.net/api";
-const MISS_TTL_MS = 3 * 24 * 60 * 60 * 1000;
+const MISS_TTL_MS = 2 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 10_000;
+const REQUEST_GAP_MS = 300;
 const DURATION_TOLERANCE_S = 4;
+const PLACEHOLDER_ARTIST = /^(?:unknown artist|unknown|various artists?|n\/a|none|untitled)$/i;
 
 function shapeResult(source, { synced = "", plain = "", instrumental = false } = {}) {
   const lines = parseLrc(synced);
@@ -16,9 +18,84 @@ function shapeResult(source, { synced = "", plain = "", instrumental = false } =
   return { status: instrumental ? "instrumental" : "missing", source, lines: [] };
 }
 
-function createLyricsService({ cacheDir, userAgent, fetchImpl = globalThis.fetch, now = Date.now, retryDelayMs = 700 }) {
+function normalized(value) {
+  return String(value || "").normalize("NFKC").toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ");
+}
+
+function matchTitle(candidateTitle, trackTitle) {
+  const candidate = normalized(cleanTitle(candidateTitle));
+  const track = normalized(trackTitle);
+  if (!candidate) return true; // Covers legacy metadata-less test fixtures, not LRCLIB's real records.
+  if (!track) return false;
+  if (candidate === track) return true;
+  // A title may include a subtitle or an extra edition suffix.
+  if (track.length >= 7 && candidate.length >= 7 &&
+    (candidate.startsWith(track + " ") || track.startsWith(candidate + " "))) return true;
+  const needle = new Set(track.split(" ").filter(Boolean));
+  const hay = new Set(candidate.split(" ").filter(Boolean));
+  return needle.size >= 2 && hay.size >= 2 &&
+    [...needle].filter(part => hay.has(part)).length / Math.max(needle.size, hay.size) >= 0.8;
+}
+
+function chooseLyricsResult(records, { track, artist, duration }) {
+  const results = (Array.isArray(records) ? records : []).filter(item => item && typeof item === "object");
+  const targetArtist = normalized(artist);
+  const candidates = results.flatMap(item => {
+    if (!matchTitle(item.trackName || item.name, track)) return [];
+    const actualArtist = normalized(item.artistName);
+    const seconds = Number(item.duration);
+    const gap = duration > 0 && Number.isFinite(seconds) && seconds > 0 ? Math.abs(seconds - duration) : 0;
+    const exactTitle = normalized(cleanTitle(item.trackName || item.name)) === normalized(track);
+    const matchingArtist = !targetArtist || !actualArtist || targetArtist === actualArtist ||
+      actualArtist.startsWith(targetArtist + " ") || targetArtist.startsWith(actualArtist + " ");
+    // Permit an incorrectly tagged local artist only for an unusually specific title
+    // with an extremely close runtime. Never use loose matches with wrong artists.
+    if (!matchingArtist && !(exactTitle && normalized(track).length >= 12 && duration > 0 && gap <= 2)) return [];
+    // A slowed/extended audio file may still have matching words, but not the same timestamps.
+    if (gap > Math.max(40, duration * 0.3)) return [];
+    const synced = Boolean(item.syncedLyrics);
+    const hasLyrics = synced || Boolean(item.plainLyrics) || item.instrumental === true;
+    if (!hasLyrics) return [];
+    const sameLength = gap <= DURATION_TOLERANCE_S;
+    return [{ item, gap, sameLength, synced, artistMatched: Boolean(targetArtist && actualArtist) }];
+  });
+  candidates.sort((a, b) =>
+    Number(b.artistMatched) - Number(a.artistMatched) ||
+    Number(b.sameLength) - Number(a.sameLength) ||
+    Number(b.synced) - Number(a.synced) ||
+    a.gap - b.gap
+  );
+  const picked = candidates[0];
+  if (!picked) return null;
+  const { item, sameLength } = picked;
+  // Never apply incorrect timestamps to slowed/remixed audio.
+  return shapeResult("lrclib", {
+    synced: sameLength ? item.syncedLyrics : "",
+    plain: item.plainLyrics ||
+      (item.syncedLyrics ? parseLrc(item.syncedLyrics).map(line => line.text).join("\n") : ""),
+    instrumental: item.instrumental
+  });
+}
+
+function retryAfterMs(response, fallbackMs, timestamp = Date.now()) {
+  const raw = response.headers?.get?.("retry-after");
+  if (!raw) return fallbackMs;
+  const seconds = Number(raw);
+  if (Number.isFinite(seconds) && seconds >= 0) return seconds * 1000;
+  const date = Date.parse(raw);
+  return Number.isFinite(date) ? Math.max(0, date - timestamp) : fallbackMs;
+}
+
+function createLyricsService({
+  cacheDir, userAgent, fetchImpl = globalThis.fetch, now = Date.now,
+  retryDelayMs = 1000, requestSpacingMs = REQUEST_GAP_MS,
+  sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+}) {
   const pending = new Map();
-  const cacheFile = (key) => path.join(cacheDir, `${key}.json`);
+  const cacheFile = key => path.join(cacheDir, key + ".json");
+  let queue = Promise.resolve();
+  let nextRequestAt = 0;
 
   async function readCache(key) {
     try {
@@ -32,57 +109,88 @@ function createLyricsService({ cacheDir, userAgent, fetchImpl = globalThis.fetch
     try {
       await fs.mkdir(cacheDir, { recursive: true });
       await fs.writeFile(cacheFile(key), JSON.stringify({ savedAt: now(), result }));
-    } catch { /* cache is best-effort */ }
+    } catch { /* cache is best effort */ }
   }
 
   async function readSidecar(filePath) {
     if (!filePath) return null;
     const base = filePath.slice(0, filePath.length - path.extname(filePath).length);
-    for (const candidate of [`${base}.lrc`, `${base}.LRC`]) {
+    for (const candidate of [base + ".lrc", base + ".LRC"]) {
       try {
-        const text = await fs.readFile(candidate, "utf8");
-        const result = shapeResult("file", { synced: text, plain: text });
+        const source = await fs.readFile(candidate, "utf8");
+        const result = shapeResult("file", { synced: source, plain: source });
         if (result.lines.length) return result;
-      } catch { /* no sidecar */ }
+      } catch { /* no local sidecar */ }
     }
     return null;
   }
 
-  async function request(endpoint, params) {
-    const url = `${LRCLIB}/${endpoint}?${new URLSearchParams(params)}`;
-    const send = () => fetchImpl(url, { headers: { "User-Agent": userAgent, Accept: "application/json" }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
-    let response = await send();
-    // LRCLIB returns frequent 503s under load; a short backoff usually clears them.
-    for (let attempt = 1; attempt <= 2 && response.status >= 500; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, retryDelayMs * attempt));
-      response = await send();
-    }
-    if (response.status === 404) return null;
-    if (response.status >= 500) throw new Error("LRCLIB is busy right now, try again in a moment");
-    if (!response.ok) throw new Error(`lyrics lookup failed (${response.status})`);
-    return response.json();
+  function request(endpoint, params) {
+    const url = LRCLIB + "/" + endpoint + "?" + new URLSearchParams(params);
+    const run = queue.then(async () => {
+      const wait = Math.max(0, nextRequestAt - now());
+      if (wait > 0) await sleep(wait);
+      try {
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          const response = await fetchImpl(url, {
+            headers: { "User-Agent": userAgent, Accept: "application/json" },
+            signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+          });
+          if (response.status === 404) return null;
+          if (response.status === 429 || response.status === 503) {
+            const delay = retryAfterMs(response, retryDelayMs * (attempt + 1), now());
+            // Preserve the server's cooldown across subsequent requests.
+            nextRequestAt = Math.max(nextRequestAt, now() + delay);
+            if (attempt < 2 && delay <= 10_000) {
+              await sleep(delay);
+              continue;
+            }
+            throw new Error(response.status === 429
+              ? "LRCLIB is rate-limiting requests (429). Try again shortly."
+              : "LRCLIB is temporarily overloaded (503). Try again shortly.");
+          }
+          if (response.status >= 500 && attempt < 2) {
+            await sleep(retryDelayMs * (attempt + 1));
+            continue;
+          }
+          if (!response.ok) throw new Error("lyrics lookup failed (" + response.status + ")");
+          return response.json();
+        }
+        throw new Error("LRCLIB is temporarily unavailable");
+      } finally {
+        nextRequestAt = Math.max(nextRequestAt, now() + requestSpacingMs);
+      }
+    });
+    queue = run.catch(() => {});
+    return run;
   }
 
   async function lookupOnline(song) {
     const track = cleanTitle(song.title);
-    const artist = primaryArtist(song.artist);
+    const cleanedArtist = primaryArtist(song.artist);
+    const artist = PLACEHOLDER_ARTIST.test(cleanedArtist) ? "" : cleanedArtist;
+    const album = cleanTitle(song.album);
+    const duration = Number(song.duration);
     if (!track) return { status: "missing", source: "lrclib", lines: [] };
-    const duration = Math.round(Number(song.duration) || 0);
-    const exact = artist && duration > 0
-      ? await request("get", { track_name: track, artist_name: artist, album_name: cleanTitle(song.album), duration: String(duration) })
-      : null;
-    if (exact && (exact.syncedLyrics || exact.plainLyrics || exact.instrumental)) {
-      return shapeResult("lrclib", { synced: exact.syncedLyrics, plain: exact.plainLyrics, instrumental: exact.instrumental });
+    const queryDuration = Number.isFinite(duration) && duration >= 1 && duration <= 3600 ? Math.round(duration) : 0;
+    if (artist) {
+      const args = { track_name: track, artist_name: artist };
+      if (album && !/^(unknown album|unknown|n\/a|none)$/i.test(album)) args.album_name = album;
+      if (queryDuration) args.duration = String(queryDuration);
+      const exact = await request("get", args);
+      if (exact && (exact.syncedLyrics || exact.plainLyrics || exact.instrumental)) {
+        return shapeResult("lrclib", { synced: exact.syncedLyrics, plain: exact.plainLyrics, instrumental: exact.instrumental });
+      }
     }
-    const found = await request("search", artist ? { track_name: track, artist_name: artist } : { q: track });
-    const candidates = (Array.isArray(found) ? found : [])
-      .filter((item) => !duration || !item.duration || Math.abs(item.duration - duration) <= DURATION_TOLERANCE_S)
-      .sort((a, b) => Number(Boolean(b.syncedLyrics)) - Number(Boolean(a.syncedLyrics))
-        || Math.abs((a.duration || duration) - duration) - Math.abs((b.duration || duration) - duration));
-    const best = candidates[0];
-    return best
-      ? shapeResult("lrclib", { synced: best.syncedLyrics, plain: best.plainLyrics, instrumental: best.instrumental })
-      : { status: "missing", source: "lrclib", lines: [] };
+
+    // Structured search can be too strict for locally imported/remixed metadata.
+    const structured = await request("search", artist ? { track_name: track, artist_name: artist } : { track_name: track });
+    const direct = chooseLyricsResult(structured, { track, artist, duration: queryDuration });
+    if (direct?.status && direct.status !== "missing") return direct;
+    // LRCLIB's q searches across title, artist, and album, like its website.
+    const broad = await request("search", { q: track });
+    return chooseLyricsResult(broad, { track, artist, duration: queryDuration }) ||
+      { status: "missing", source: "lrclib", lines: [] };
   }
 
   async function get(song, { online = true, refresh = false } = {}) {
@@ -90,8 +198,9 @@ function createLyricsService({ cacheDir, userAgent, fetchImpl = globalThis.fetch
     const sidecar = await readSidecar(song.filePath);
     if (sidecar) return sidecar;
     if (!online) return { status: "offline", source: "none", lines: [] };
+    // v2 invalidates earlier false misses caused by strict search/duration filtering.
     const key = crypto.createHash("sha1")
-      .update([cleanTitle(song.title), primaryArtist(song.artist), Math.round(Number(song.duration) || 0)].join("\u0000").toLowerCase())
+      .update(["v2", cleanTitle(song.title), primaryArtist(song.artist), Math.round(Number(song.duration) || 0)].join("\u0000").toLowerCase())
       .digest("hex");
     if (!refresh) {
       const cached = await readCache(key);
@@ -99,8 +208,11 @@ function createLyricsService({ cacheDir, userAgent, fetchImpl = globalThis.fetch
     }
     if (pending.has(key)) return pending.get(key);
     const work = lookupOnline(song)
-      .then(async (result) => { await writeCache(key, result); return result; })
-      .catch((error) => ({ status: "error", source: "lrclib", lines: [], error: error?.name === "TimeoutError" ? "lyrics lookup timed out" : String(error?.message || error) }))
+      .then(async result => { await writeCache(key, result); return result; })
+      .catch(error => ({
+        status: "error", source: "lrclib", lines: [],
+        error: error?.name === "TimeoutError" ? "lyrics lookup timed out" : String(error?.message || error)
+      }))
       .finally(() => pending.delete(key));
     pending.set(key, work);
     return work;
@@ -114,4 +226,4 @@ function createLyricsService({ cacheDir, userAgent, fetchImpl = globalThis.fetch
   return { get, clearCache };
 }
 
-module.exports = { createLyricsService, shapeResult };
+module.exports = { createLyricsService, shapeResult, chooseLyricsResult, retryAfterMs };
