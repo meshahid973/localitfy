@@ -5110,6 +5110,30 @@ function MainModeApp() {
     showAppToast(`preview ready: ${preview.changedCount} fix${preview.changedCount === 1 ? "" : "es"}`, "info");
   }
 
+  async function repairMovedSongsAction() {
+    if (libraryScanBusy) return;
+    setLibraryScanBusy(true);
+    try {
+      const result = await window.localitfy.repairMovedSongs();
+      if (result.canceled) return;
+      if (result.ok && result.changedCount > 0 && Array.isArray(result.songs)) {
+        setSongs(applyLibraryOrder(sanitizeSongList(result.songs)));
+        playbackUrlCacheRef.current.clear();
+        playbackUrlPendingRef.current.clear();
+      }
+      const message = result.message || (result.ok ? "No missing songs relinked." : "Moved-file scan failed.");
+      setLibraryScanMessage(message);
+      setStatusText(message);
+      showAppToast(message, result.ok ? "success" : "error");
+    } catch (error) {
+      console.warn("[localitfy moved-file repair]", error);
+      setLibraryScanMessage("Moved-file scan failed. Your library has not been changed.");
+      showAppToast("Moved-file scan failed", "error");
+    } finally {
+      setLibraryScanBusy(false);
+    }
+  }
+
   function cleanLibraryMetadataAction() {
     openMetadataCleanPreview("all");
   }
@@ -8169,6 +8193,7 @@ function MainModeApp() {
         songs={songs}
         libraryScanBusy={libraryScanBusy}
         cleanLibraryMetadataAction={cleanLibraryMetadataAction}
+        repairMovedSongsAction={repairMovedSongsAction}
         cleanSelectedMetadataAction={cleanSelectedMetadataAction}
         metadataSelectedCount={coverSelectedSongIds.length}
         metadataCleanPreview={metadataCleanPreview}
