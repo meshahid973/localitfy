@@ -18,6 +18,15 @@ function shapeResult(source, { synced = "", plain = "", instrumental = false } =
   return { status: instrumental ? "instrumental" : "missing", source, lines: [] };
 }
 
+function applyLyricsOffset(result, seconds = 0) {
+  const offsetSeconds = Number.isFinite(Number(seconds)) ? Number(seconds) : 0;
+  if (result?.status !== "synced" || !offsetSeconds) return { ...result, offsetSeconds };
+  return {
+    ...result, offsetSeconds,
+    lines: result.lines.map(line => ({ ...line, time: Math.max(0, line.time + offsetSeconds) }))
+  };
+}
+
 function normalized(value) {
   return String(value || "").normalize("NFKC").toLocaleLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ");
@@ -90,7 +99,8 @@ function retryAfterMs(response, fallbackMs, timestamp = Date.now()) {
 function createLyricsService({
   cacheDir, userAgent, fetchImpl = globalThis.fetch, now = Date.now,
   retryDelayMs = 1000, requestSpacingMs = REQUEST_GAP_MS,
-  sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+  sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
+  overrides = null
 }) {
   const pending = new Map();
   const cacheFile = key => path.join(cacheDir, key + ".json");
@@ -195,18 +205,27 @@ function createLyricsService({
 
   async function get(song, { online = true, refresh = false } = {}) {
     if (!song) return { status: "missing", source: "none", lines: [] };
+    const override = overrides?.getOverride?.(song.id) || null;
+    const withOffset = result => applyLyricsOffset(result, override?.offsetSeconds);
+    if (override?.lrclibId && (override.syncedLyrics || override.plainLyrics || override.instrumental)) {
+      return withOffset(shapeResult("manual", {
+        synced: override.syncedLyrics || "",
+        plain: override.plainLyrics || "",
+        instrumental: Boolean(override.instrumental)
+      }));
+    }
     const sidecar = await readSidecar(song.filePath);
-    if (sidecar) return sidecar;
-    if (!online) return { status: "offline", source: "none", lines: [] };
+    if (sidecar) return withOffset(sidecar);
+    if (!online) return withOffset({ status: "offline", source: "none", lines: [] });
     // v2 invalidates earlier false misses caused by strict search/duration filtering.
     const key = crypto.createHash("sha1")
       .update(["v2", cleanTitle(song.title), primaryArtist(song.artist), Math.round(Number(song.duration) || 0)].join("\u0000").toLowerCase())
       .digest("hex");
     if (!refresh) {
       const cached = await readCache(key);
-      if (cached) return cached;
+      if (cached) return withOffset(cached);
     }
-    if (pending.has(key)) return pending.get(key);
+    if (pending.has(key)) return withOffset(await pending.get(key));
     const work = lookupOnline(song)
       .then(async result => { await writeCache(key, result); return result; })
       .catch(error => ({
@@ -215,7 +234,47 @@ function createLyricsService({
       }))
       .finally(() => pending.delete(key));
     pending.set(key, work);
-    return work;
+    return withOffset(await work);
+  }
+
+  async function searchManual(query) {
+    const clean = String(query || "").trim().slice(0, 160);
+    if (clean.length < 2) return [];
+    const records = await request("search", { q: clean });
+    return (Array.isArray(records) ? records : [])
+      .filter(row => Number.isSafeInteger(Number(row?.id)) && Number(row.id) > 0)
+      .slice(0, 20)
+      .map(row => ({
+        id: Number(row.id),
+        title: String(row.trackName || "").slice(0, 180),
+        artist: String(row.artistName || "").slice(0, 180),
+        album: String(row.albumName || "").slice(0, 180),
+        duration: Number(row.duration || 0),
+        synced: Boolean(row.syncedLyrics),
+        instrumental: Boolean(row.instrumental)
+      }));
+  }
+
+  async function selectManual(song, recordId) {
+    if (!song?.id || !overrides?.saveOverride) throw new Error("Manual lyrics storage is unavailable");
+    const id = Number(recordId);
+    if (!Number.isSafeInteger(id) || id <= 0) throw new TypeError("Invalid LRCLIB selection");
+    const record = await request("get/" + id, {});
+    if (!record || Number(record.id) !== id) throw new Error("Could not retrieve the selected lyrics");
+    overrides.saveOverride(song.id, record);
+    return get(song, { online: false });
+  }
+
+  async function setManualOffset(song, offsetSeconds) {
+    if (!song?.id || !overrides?.setOffset) throw new Error("Lyrics offset storage is unavailable");
+    overrides.setOffset(song.id, offsetSeconds);
+    return get(song, { online: true });
+  }
+
+  async function clearManualSelection(song) {
+    if (!song?.id || !overrides?.clearManual) throw new Error("Manual lyrics storage is unavailable");
+    overrides.clearManual(song.id);
+    return get(song, { online: true });
   }
 
   async function clearCache() {
@@ -223,7 +282,7 @@ function createLyricsService({
     return true;
   }
 
-  return { get, clearCache };
+  return { get, clearCache, searchManual, selectManual, setManualOffset, clearManualSelection };
 }
 
 module.exports = { createLyricsService, shapeResult, chooseLyricsResult, retryAfterMs };
