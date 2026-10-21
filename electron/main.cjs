@@ -530,7 +530,7 @@ function createCoverThumbnailSync(filePath) {
 function queueCoverThumbnail(filePath, lowPriority = false) {
   if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) return;
   const thumbnailPath = getCoverThumbnailPath(filePath);
-  if (!thumbnailPath || fileExists(thumbnailPath) || coverThumbnailQueue.has(filePath)) return;
+  if (!thumbnailPath || fileExists(thumbnailPath)) return;
   coverThumbnailQueue.enqueue(filePath, { lowPriority });
 }
 
