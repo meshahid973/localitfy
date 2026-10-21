@@ -14,6 +14,22 @@ export function cleanSongOrderIds(value: unknown, validIds?: Set<string>) { if (
 export function applyLibraryOrder(list: Song[]) { const orderIds = cleanSongOrderIds(readLocalJson<string[]>(LIBRARY_ORDER_STORAGE_KEY, []), new Set(list.map((song) => song.id))); if (!orderIds.length) return list; const songById = new Map(list.map((song) => [song.id, song])); const used = new Set<string>(); const ordered: Song[] = []; orderIds.forEach((id) => { const song = songById.get(id); if (!song || used.has(id)) return; used.add(id); ordered.push(song); }); list.forEach((song) => { if (!used.has(song.id)) ordered.push(song); }); return ordered; }
 export function saveLibraryOrder(list: Song[]) { writeLocalJson(LIBRARY_ORDER_STORAGE_KEY, list.map((song) => song.id)); }
 export function reorderSongList(list: Song[], draggedId: string, targetId: string, side: LibraryDropSide) { if (!draggedId || !targetId || draggedId === targetId) return list; const dragged = list.find((song) => song.id === draggedId); if (!dragged) return list; const next = list.filter((song) => song.id !== draggedId); const target = next.findIndex((song) => song.id === targetId); if (target === -1) return list; next.splice(side === "after" ? target + 1 : target, 0, dragged); return next; }
-export function reorderIdList(list: string[], draggedId: string, targetId: string, side: LibraryDropSide) { if (!draggedId || !targetId || draggedId === targetId) return list; const next = list.filter((id) => id !== draggedId); const target = next.findIndex((id) => id === targetId); if (target === -1) return list; next.splice(side === "after" ? target + 1 : target, 0, draggedId); return next; }
-export function insertIdNearTarget(list: string[], draggedId: string, targetId: string, side: LibraryDropSide) { if (!draggedId || !targetId) return list; const next = list.filter((id) => id !== draggedId); const target = next.findIndex((id) => id === targetId); if (target === -1) return next.includes(draggedId) ? next : [...next, draggedId]; next.splice(side === "after" ? target + 1 : target, 0, draggedId); return next; }
+/** Shared ID placement, with each caller's legacy missing-target behavior preserved. */
+function moveIdNearTarget(list: string[], draggedId: string, targetId: string, side: LibraryDropSide, appendIfMissing: boolean): string[] {
+  const next = list.filter((id) => id !== draggedId);
+  const target = next.indexOf(targetId);
+  if (target < 0) return appendIfMissing ? [...next, draggedId] : list;
+  next.splice(side === "after" ? target + 1 : target, 0, draggedId);
+  return next;
+}
+
+export function reorderIdList(list: string[], draggedId: string, targetId: string, side: LibraryDropSide) {
+  if (!draggedId || !targetId || draggedId === targetId) return list;
+  return moveIdNearTarget(list, draggedId, targetId, side, false);
+}
+
+export function insertIdNearTarget(list: string[], draggedId: string, targetId: string, side: LibraryDropSide) {
+  if (!draggedId || !targetId) return list;
+  return moveIdNearTarget(list, draggedId, targetId, side, true);
+}
 export { makeLocalId, readLocalJson, writeLocalJson };
