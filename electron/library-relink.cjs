@@ -7,7 +7,7 @@ const MAX_SCANNED_FILES = 30000;
 const MAX_SCANNED_DIRECTORIES = 1500;
 
 function normalizedName(value) {
-  return String(value || "").normalize("NFKC").toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, " ").trim();
+  return String(value || "").normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 }
 
 function normalizedPath(value) {
