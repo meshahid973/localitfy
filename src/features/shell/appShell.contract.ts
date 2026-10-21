@@ -52,8 +52,7 @@ export type ShellScreensaverContract = {
 
 export type ShellEffectsContract = {
   secretMode: SecretMode; secretBurst: number; secretToast: string; starParticleStyles: CSSProperties[];
-  appToast: AppToastState; importAnimation: ImportAnimationState; libraryScanBusy: boolean;
-  pixelArtBusy: boolean; libraryScanMessage: string;
+  appToast: AppToastState; importAnimation: ImportAnimationState;
 };
 
 export type ShellOnboardingContract = Omit<OnboardingProps, "appVersion"> & { open: boolean };
