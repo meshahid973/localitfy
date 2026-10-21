@@ -2,6 +2,7 @@ import "./library.css";
 import type { DragEventHandler, ReactNode } from "react";
 import { FileWarning, FolderInput, ListMusic, Shuffle, Trash2 } from "lucide-react";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
+import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { LocaltifyStateCard, MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import type { LibrarySortMode } from "./librarySort";
 import type { Song } from "./song.types";
@@ -68,15 +69,12 @@ export default function LibraryView(props: LibraryViewProps) {
 
   const isLiked = view === "liked";
   const shownLabel = showingMissingFiles ? "missing files" : isLiked ? "tracks" : "all tracks";
-  const sortedByArtist = librarySortMode === "artist";
 
   return (
     <section data-page-section="library" className={`libraryPage ${isLiked ? "libraryPageLiked" : ""}`}>
       <header className="libraryTopBar">
         <div className="libraryHeading">
-          <p className="libraryEyebrow">{isLiked ? "your collection" : "local library"}</p>
           <h1>{isLiked ? "Liked songs" : "Library"}</h1>
-          <p>{isLiked ? "The tracks you keep coming back to." : "Everything on this device, kept local and ready to play."}</p>
         </div>
 
         <div className="libraryTopTools">
@@ -87,15 +85,13 @@ export default function LibraryView(props: LibraryViewProps) {
             placeholder={isLiked ? "search liked songs" : "search your library"}
             aria-label={isLiked ? "search liked songs" : "search library"}
           />
-          <select
+          <ArcDropdownMenu
             className="librarySort"
+            ariaLabel="Sort songs"
             value={librarySortMode}
-            onChange={(event) => setLibrarySortMode(event.currentTarget.value as LibrarySortMode)}
-            aria-label="sort songs"
-          >
-            <option value="library">library order</option>
-            <option value="artist">artist A–Z</option>
-          </select>
+            items={[{ value: "library", label: "library order" }, { value: "artist", label: "artist A–Z" }]}
+            onValueChange={setLibrarySortMode}
+          />
           {!isLiked ? (
             <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
               <ActionLabel icon={Shuffle}>shuffle</ActionLabel>
@@ -105,11 +101,11 @@ export default function LibraryView(props: LibraryViewProps) {
       </header>
 
       {!isLiked ? (
-        <div className="libraryStats" aria-label="library summary">
+        <div className={`libraryStats ${missingFileCount ? "" : "libraryStatsThree"}`} aria-label="library summary">
           <div className="libraryStat"><strong>{songs.length}</strong><span>tracks</span></div>
           <div className="libraryStat"><strong>{libraryAlbumCount}</strong><span>albums</span></div>
           <div className="libraryStat"><strong>{libraryArtistCount}</strong><span>artists</span></div>
-          <div className={`libraryStat ${missingFileCount ? "warning" : ""}`}><strong>{missingFileCount}</strong><span>missing</span></div>
+          {missingFileCount > 0 ? <div className="libraryStat warning"><strong>{missingFileCount}</strong><span>missing</span></div> : null}
         </div>
       ) : null}
 
@@ -141,9 +137,8 @@ export default function LibraryView(props: LibraryViewProps) {
         <div className="libraryTracksHead">
           <div>
             <h2 id="library-tracks-title">{shownLabel}</h2>
-            <p>{showingMissingFiles ? "repair or remove entries that no longer resolve" : sortedByArtist ? "sorted by artist · switch to library order to reorder" : isLiked ? "right-click for more" : "drag to reorder · right-click for more"}</p>
           </div>
-          <span className="libraryCount">{visibleSongs.length} {visibleSongs.length === 1 ? "track" : "tracks"}</span>
+          {(isLiked || showingMissingFiles || query.trim()) ? <span className="libraryCount">{visibleSongs.length} {visibleSongs.length === 1 ? "track" : "tracks"}</span> : null}
         </div>
 
         {visibleSongs.length ? (
@@ -170,8 +165,7 @@ export default function LibraryView(props: LibraryViewProps) {
               tone={showingMissingFiles ? "success" : isLiked || query.trim() ? "info" : "warning"}
               eyebrow={showingMissingFiles ? "file check" : isLiked ? "liked songs" : query.trim() ? "search" : "library"}
               title={showingMissingFiles ? "All files are cozy" : isLiked ? "No liked songs yet" : query.trim() ? "No songs found" : "No songs yet"}
-              message={showingMissingFiles ? "Every song Localtify knows about is available on this PC right now." : isLiked ? "Tap the heart on any song you enjoy and it will show up here." : query.trim() ? "Nothing matched that search. Try a softer title, artist, album, or file name." : "Drop your music here and I’ll keep it cozy."}
-              detail={showingMissingFiles ? "Switch back to all tracks to continue browsing your library." : isLiked ? "This is only your local library. Nothing is uploaded anywhere." : query.trim() ? "Your library is still here, the search just got too specific." : "Import a few songs and Localtify will build your shelves, albums, covers, and playlists from them."}
+               message={showingMissingFiles ? "All your files are available." : isLiked ? "Like a song to save it here." : query.trim() ? "Try a different title or artist." : "Import music to get started."}
               mascotState={showingMissingFiles ? "happy" : query.trim() ? "question" : "empty"}
               actions={showingMissingFiles ? (
                 <button className="softButton" type="button" onClick={() => setLibraryFilterMode?.("all")}>show all tracks</button>
