@@ -79,3 +79,16 @@ test("one thumbnail conversion error cannot permanently stop the queue", () => {
   assert.deepEqual(errors, ["decode"]);
   assert.deepEqual(completed, ["good"]);
 });
+
+test("visible artwork is processed before background warmup and existing jobs can be promoted", () => {
+  const completed = [];
+  const { scheduler, flush } = makeScheduler(file => completed.push(file));
+  scheduler.enqueue("warm-a", { lowPriority: true });
+  scheduler.enqueue("warm-b", { lowPriority: true });
+  scheduler.enqueue("visible-now");
+  scheduler.enqueue("warm-b");
+  flush();
+  flush();
+  flush();
+  assert.deepEqual(completed, ["visible-now", "warm-b", "warm-a"]);
+});
