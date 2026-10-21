@@ -647,7 +647,7 @@ function scheduleCoverThumbnailWarmup() {
       const seen = new Set();
       for (const song of getSongs()) {
         const coverPath = String(song?.coverPath || "").trim();
-        if (!coverPath || seen.has(coverPath)) continue;
+        if (!coverPath || !path.isAbsolute(coverPath) || !isImageFile(coverPath) || !fileExists(coverPath) || seen.has(coverPath)) continue;
         seen.add(coverPath);
         queueCoverThumbnail(coverPath, true);
         if (seen.size >= 120) break;
