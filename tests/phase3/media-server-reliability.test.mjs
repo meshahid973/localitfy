@@ -196,7 +196,7 @@ test("all loopback media responses advertise CORS, including range and missing t
 test("all audio creation paths configure anonymous CORS before setting src", () => {
   const app = fs.readFileSync(path.join(root, "src", "App.tsx"), "utf8");
   const engine = fs.readFileSync(path.join(root, "src", "features", "player", "engine", "htmlAudioEngine.ts"), "utf8");
-  const preloader = app.slice(app.indexOf("function preloadNextAudio"), app.indexOf("function getAutoCrossfadeSeconds"));
+  const preloader = app.slice(app.indexOf("function primeNextAudioCache"), app.indexOf("function getAutoCrossfadeSeconds"));
   assert.match(preloader, /nextAudioRef\.current = new Audio\(\);\s*nextAudioRef\.current\.crossOrigin = "anonymous";\s*nextAudioRef\.current\.preload/);
   assert.match(app, /nextAudio\.crossOrigin = "anonymous";/);
   assert.match(engine, /this\.element\.crossOrigin = "anonymous";/);
