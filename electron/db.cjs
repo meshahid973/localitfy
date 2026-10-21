@@ -709,9 +709,15 @@ function safeAll(database, sql, params = []) {
 
 function getSongs() {
   const database = ensureDb();
-  return safeAll(database, "SELECT * FROM songs ORDER BY dateAdded DESC")
+  const profiling = process.env.LOCALTIFY_PROFILE_DB === "1";
+  const started = profiling ? performance.now() : 0;
+  const songs = safeAll(database, "SELECT * FROM songs ORDER BY dateAdded DESC")
     .map(rowToSong)
     .filter(Boolean);
+  if (profiling) {
+    console.info("[localtify profile] db:getSongs", (performance.now() - started).toFixed(2) + "ms", songs.length + " songs");
+  }
+  return songs;
 }
 
 function getSong(id) {
