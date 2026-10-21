@@ -132,10 +132,7 @@ const CAT_RUN_SPEED = 315;
 const CAT_MAX_DIRECTION_TILT = 78 * Math.PI / 180;
 const SINGLE_CLICK_DELAY_MS = 230;
 
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
-}
-
+import { clamp } from "./shared/utils/format";
 function lerp(from: number, to: number, amount: number) {
   return from + (to - from) * amount;
 }
