@@ -88,9 +88,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   return (
     <section data-page-section="playlists" className="playlistsPage playlistPageV029">
       <PageHeader
-        eyebrow="your mixes"
         title="Playlists"
-        description={`${playlistSummaries.length} playlist${playlistSummaries.length === 1 ? "" : "s"} · drag songs onto a playlist to add them`}
       >
         <form
           className="playlistCreateForm"
