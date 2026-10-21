@@ -171,7 +171,6 @@ import {
 } from "./features/settings/settings.search";
 import {
   getAmbientStyle,
-  getRendererSafeImageUrl,
   getSongAmbientSource,
   pixelArtUrl,
   useCoverAverageStyle
