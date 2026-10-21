@@ -193,10 +193,51 @@ async function resolveSongCover(input = {}) {
   return { coverPath: "", coverSource: "none", coverUpdatedAt: now };
 }
 
+/**
+ * Keep one mutable usage snapshot across a bulk cover assignment operation.
+ * The caller records each successful database update before the next choice.
+ */
+function createLeastUsedCoverAllocator(availableCovers = [], songs = [], random = Math.random) {
+  const covers = [...new Set(availableCovers.filter(Boolean))];
+  const usage = new Map(covers.map(cover => [cover, 0]));
+  for (const song of songs) {
+    if (usage.has(song.coverPath)) usage.set(song.coverPath, usage.get(song.coverPath) + 1);
+  }
+
+  function choose(previousPath = "") {
+    let min = Infinity;
+    let selected = "";
+    let ties = 0;
+    for (const cover of covers) {
+      if (covers.length > 1 && cover === previousPath) continue;
+      const count = usage.get(cover);
+      if (count < min) {
+        min = count;
+        selected = cover;
+        ties = 1;
+      } else if (count === min && random() * ++ties < 1) {
+        selected = cover;
+      }
+    }
+    return selected;
+  }
+
+  function record(previousPath, nextPath) {
+    if (!usage.has(nextPath) || previousPath === nextPath) return;
+    if (usage.has(previousPath)) {
+      usage.set(previousPath, Math.max(0, usage.get(previousPath) - 1));
+    }
+    usage.set(nextPath, usage.get(nextPath) + 1);
+  }
+
+  return { choose, record };
+}
+
 module.exports = {
   initCoverService,
   findFolderCover,
   copyCoverToAppStorage,
   resolveSongCover,
+  createLeastUsedCoverAllocator,
   isImageFile
 };
