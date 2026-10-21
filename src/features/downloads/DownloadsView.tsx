@@ -99,7 +99,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
   return (
 
               <section data-page-section="downloads" className="downloadsLayout downloadsLayoutV031">
-                <PageHeader eyebrow="downloads" title="Downloads" description="Download links or convert local files, then add them to your library.">
+                <PageHeader title="Downloads">
                   <button className="softButton" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
                     Open folder
                   </button>
