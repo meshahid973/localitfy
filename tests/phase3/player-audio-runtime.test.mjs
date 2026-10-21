@@ -45,7 +45,7 @@ test("focus and visibility repairs use the latest playback callback", () => {
 test("slowed plus reverb is a real playback setting instead of dead App state", () => {
   const playbackSettings = read("src/features/settings/categories/PlaybackSettings.tsx");
   const app = read("src/App.tsx");
-  assert.match(playbackSettings, />slowed \+ reverb</);
+  assert.match(playbackSettings, /value: "daycore" as AudioEffectMode, label: "slowed \+ reverb"/);
   assert.match(playbackSettings, /audioReverbAmount/);
   assert.doesNotMatch(app, /function getAudioReverbAmount\(\)\s*\{\s*return 0/);
   assert.doesNotMatch(app, /\(settings as any\)\.audioEffectMode/);
