@@ -260,68 +260,6 @@
   border-color: rgba(255, 91, 119, 0.42);
 }
 
-.tinyScanner{
-  position: fixed;
-  left: calc(var(--workspace-sidebar-current, 236px) + 22px);
-  bottom: 118px;
-  z-index: 110;
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  width: min(360px, calc(100vw - var(--workspace-sidebar-current, 236px) - 42px));
-  padding: 11px 13px;
-  border: 1px solid rgba(var(--lt-accent-rgb, 141, 255, 206), 0.2);
-  border-radius: 18px;
-  background: rgba(11, 12, 14, 0.88);
-  color: var(--lt-text, #fff);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
-  animation: localitfyTinyScannerIn 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  pointer-events: none;
-}
-
-.tinyScanner span:last-child{
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.tinyScanner strong{
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.tinyScanner small{
-  color: var(--lt-muted, rgba(255, 255, 255, 0.62));
-  font-size: 11px;
-  font-weight: 750;
-}
-
-.scannerOrb{
-  position: relative;
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--lt-accent, #8dffce);
-
-  animation: localitfyScannerPulse 960ms ease-in-out infinite;
-}
-
-.scannerOrb::after{
-  content: "";
-  position: absolute;
-  inset: -5px;
-  border-radius: inherit;
-  border: 1px solid rgba(var(--lt-accent-rgb, 141, 255, 206), 0.34);
-  animation: localitfyScannerRing 960ms ease-out infinite;
-}
-
 .coverAura img{
   animation: localitfyCoverFade 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
   transform: translateZ(0);
@@ -335,11 +273,6 @@
     max-width: none;
   }
 
-  .tinyScanner{
-    left: 12px;
-    right: 12px;
-    width: auto;
-  }
 }
 
 .app{
@@ -376,10 +309,6 @@
 .app .appToast{
   transform: translateZ(0);
   backface-visibility: hidden;
-}
-
-.app .tinyScanner{
-  animation: localitfyTinyScannerIn 280ms var(--hero-title-ease) both !important;
 }
 
 @keyframes localitfyCoverSoftPopSafe {
@@ -1471,12 +1400,6 @@ input[type="range"]{
     0 0 26px rgba(var(--lt-accent-rgb), 0.08) !important;
   backdrop-filter: blur(18px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
-}
-
-.scannerOrb{
-  box-shadow:
-    0 0 0 5px rgba(var(--lt-accent-rgb), 0.08),
-    0 0 22px rgba(var(--lt-accent-rgb), 0.42) !important;
 }
 
 .deleteModal{
