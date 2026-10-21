@@ -3027,6 +3027,7 @@ function MainModeApp() {
 
 
   useNativeMediaSession({
+    audioRef,
     song: currentSong,
     isPlaying,
     duration: currentDuration,
