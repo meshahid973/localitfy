@@ -218,12 +218,45 @@ function createLyricsService({
     return work;
   }
 
+  async function searchManual(query) {
+    const text = String(query || "").trim().slice(0, 120);
+    if (text.length < 2) return [];
+    const rows = await request("search", { q: text });
+    return (Array.isArray(rows) ? rows : []).filter(item =>
+      Number.isSafeInteger(item?.id) && item.id > 0 &&
+      (item.syncedLyrics || item.plainLyrics || item.instrumental)
+    ).slice(0, 20).map(item => ({
+      id: item.id,
+      title: String(item.trackName || item.name || "").slice(0, 180),
+      artist: String(item.artistName || "").slice(0, 180),
+      album: String(item.albumName || "").slice(0, 180),
+      duration: Number(item.duration || 0),
+      synced: Boolean(item.syncedLyrics),
+      instrumental: Boolean(item.instrumental)
+    }));
+  }
+
+  async function getManual(id) {
+    if (!Number.isSafeInteger(id) || id <= 0) throw new TypeError("Invalid LRCLIB record ID");
+    const record = await request("get/" + id, {});
+    if (!record || Number(record.id) !== id) throw new Error("Lyrics record is unavailable");
+    const result = shapeResult("lrclib", {
+      synced: record.syncedLyrics,
+      plain: record.plainLyrics,
+      instrumental: record.instrumental
+    });
+    if (!["synced", "plain", "instrumental"].includes(result.status)) {
+      throw new Error("This record has no usable lyrics");
+    }
+    return result;
+  }
+
   async function clearCache() {
     await fs.rm(cacheDir, { recursive: true, force: true });
     return true;
   }
 
-  return { get, clearCache };
+  return { get, searchManual, getManual, clearCache };
 }
 
 module.exports = { createLyricsService, shapeResult, chooseLyricsResult, retryAfterMs };
