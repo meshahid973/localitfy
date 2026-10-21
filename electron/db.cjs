@@ -821,6 +821,27 @@ function insertSongs(songs) {
   return tx(list);
 }
 
+/**
+ * Preserve stable song IDs (and playlist, like, and play-event references) when
+ * only the file location changes. One transaction prevents partial relinks.
+ */
+function relinkSongPaths(items) {
+  const updates = Array.isArray(items) ? items : [];
+  if (!updates.length) return 0;
+  const database = ensureDb();
+  const statement = database.prepare("UPDATE songs SET filePath = ? WHERE id = ? AND filePath = ?");
+  return database.transaction((entries) => {
+    let changed = 0;
+    for (const item of entries) {
+      if (!item?.id || !item?.oldPath || !item?.newPath) throw new Error("invalid relink entry");
+      const result = statement.run(item.newPath, item.id, item.oldPath);
+      if (result.changes !== 1) throw new Error("song location changed during relink: " + item.id);
+      changed += result.changes;
+    }
+    return changed;
+  })(updates);
+}
+
 function patchSong(id, patch) {
   const database = ensureDb();
 
@@ -1073,6 +1094,7 @@ module.exports = {
   getSong,
   insertSongs,
   patchSong,
+  relinkSongPaths,
   deleteSong,
   clearLibrary,
   getSettings,
