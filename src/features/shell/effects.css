@@ -461,83 +461,6 @@ body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(.hero.her
   filter: none !important;
 }
 
-/* localtify 0.3.9 V361 — stable hover sidebar, no runtime CSS.
-   Fixes V360 disappearing sidebar by returning to a real rail width, while
-   removing heavy blur/box-shadow work that made Home lag during hover. */
-.app{
-  --lt-sidebar-closed: 88px;
-  --lt-sidebar-open: 238px;
-  --lt-sidebar-ease: cubic-bezier(.22, 1, .36, 1);
-  --lt-sidebar-fast: cubic-bezier(.16, 1, .3, 1);
-}
-
-/* Normal fixed sidebar stays normal. */
-main.app.app[data-sidebar-behavior="fixed"] > .appShell{
-  grid-template-columns: var(--sidebar-width-live, var(--sidebar-width, 249px)) minmax(0, 1fr) !important;
-  overflow: hidden !important;
-}
-
-main.app.app[data-sidebar-behavior="fixed"] > .appShell > .sidebar{
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  overflow: visible !important;
-  clip-path: none !important;
-}
-
-/* Slim/hover keep the app content stable. The sidebar expands over the content,
-   so Home does not re-layout on every hover frame. */
-main.app.app[data-sidebar-behavior="slim"] > .appShell,
-main.app.app[data-sidebar-behavior="hover"] > .appShell{
-  grid-template-columns: var(--lt-sidebar-closed) minmax(0, 1fr) !important;
-  overflow: visible !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .content,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .content{
-  min-width: 0 !important;
-}
-
-/* Closed rail. Keep it visible. Avoid backdrop-filter here because animating
-   a blurred rail over the Home page was causing stutter. */
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
-  position: relative !important;
-  z-index: 120 !important;
-  width: var(--lt-sidebar-closed) !important;
-  min-width: var(--lt-sidebar-closed) !important;
-  max-width: var(--lt-sidebar-open) !important;
-  overflow: hidden !important;
-  padding-inline: 12px !important;
-  transform: translate3d(0,0,0) !important;
-  transform-origin: left center !important;
-  backface-visibility: hidden !important;
-  contain: paint style !important;
-  will-change: width !important;
-  clip-path: none !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: inset -1px 0 0 rgba(var(--accent-rgb), .12) !important;
-  transition:
-    width 360ms var(--lt-sidebar-ease),
-    min-width 360ms var(--lt-sidebar-ease),
-    max-width 360ms var(--lt-sidebar-ease),
-    border-color 180ms ease,
-    background-color 180ms ease !important;
-}
-
-/* Hover open. No appShell :has() and no grid animation. */
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
-  width: var(--lt-sidebar-open) !important;
-  min-width: var(--lt-sidebar-open) !important;
-  max-width: var(--lt-sidebar-open) !important;
-  box-shadow:
-    14px 0 30px rgba(0,0,0,.18),
-    inset -1px 0 0 rgba(var(--accent-rgb), .16) !important;
-}
-
 /* Disable old pulse/scale/sidebar hover effects. */
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
@@ -1565,22 +1488,11 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
   background: currentColor !important;
   opacity: .42 !important;
 }
-.app .homeAlbumCard,
-.app .songRow{
-  content-visibility: auto;
-  contain-intrinsic-size: 92px 132px;
-}
 .app .homeAlbumCard :is(img, .coverAura),
 .app .songRow :is(img, .coverAura){
   transform: translateZ(0);
   backface-visibility: hidden;
 }
-.app .homeListenGrid{
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 720px;
-  contain: layout paint style;
-}
-.app .homeAlbumCard,
 .app .songRow,
 .app .playlistSongRow{
   content-visibility: auto;
