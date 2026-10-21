@@ -200,3 +200,148 @@
     transition: none;
   }
 }
+
+/* Manual lyrics tools belong exclusively to the lyrics view. */
+.lyricsHeadActions{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+}
+
+.lyricsHeadActions .lyricsTextButton{
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+.lyricsOffsetControls{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .22);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lyricsOffsetControls button{
+  width: 27px;
+  height: 27px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, .14);
+  cursor: pointer;
+}
+
+.lyricsOffsetControls button:disabled,
+.lyricsHeadActions button:disabled{
+  opacity: .45;
+  cursor: default;
+}
+
+.lyricsMatcher{
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 36px clamp(20px, 4vw, 52px) 60px;
+}
+
+.lyricsMatcher h3,
+.lyricsMatcher p{
+  margin: 0;
+}
+
+.lyricsMatcher h3{
+  font-size: clamp(22px, 3vw, 32px);
+  letter-spacing: -.025em;
+}
+
+.lyricsMatcher > p{
+  color: rgba(255, 255, 255, .72);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.lyricsMatcherForm{
+  display: flex;
+  gap: 8px;
+}
+
+.lyricsMatcherForm input{
+  min-width: 0;
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 12px;
+  outline-offset: 2px;
+  background: rgba(0, 0, 0, .32);
+  color: #fff;
+  font: inherit;
+}
+
+.lyricsMatchResults{
+  display: grid;
+  gap: 8px;
+}
+
+.lyricsMatchItem{
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .24);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lyricsMatchItem:hover,
+.lyricsMatchItem:focus-visible{
+  background: rgba(255, 255, 255, .16);
+}
+
+.lyricsMatchItem:disabled{
+  opacity: .55;
+  cursor: default;
+}
+
+.lyricsMatchItem > span{
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.lyricsMatchItem strong,
+.lyricsMatchItem small{
+  overflow-wrap: anywhere;
+}
+
+.lyricsMatchItem small{
+  color: rgba(255, 255, 255, .7);
+  font-size: 12px;
+}
+
+.lyricsMatchMessage{
+  color: rgba(255, 255, 255, .86);
+}
+
+@media (max-width: 700px){
+  .lyricsHead{
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .lyricsHeadActions{
+    width: 100%;
+    justify-content: start;
+  }
+}
