@@ -26,6 +26,30 @@ const rebuiltPageStyles = [
   "src/features/analytics/analytics.css", "src/features/settings/settings.css"
 ];
 const featureRoots = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339", ".settingsPageV027"];
+// Each rebuilt page owns its root selectors. Cross-page styling belongs in
+// explicit shared shell primitives, not in another feature's stylesheet.
+const scopedFeatureStyles = [
+  ["src/features/home/home.css", ".homePage"],
+  ["src/features/library/library.css", ".libraryPage"],
+  ["src/features/albums/albums.css", ".albumsPageV318"],
+  ["src/features/covers/covers.css", ".coverStudioLayout"],
+  ["src/features/downloads/downloads.css", ".downloadsLayoutV031"],
+  ["src/features/playlists/playlists.css", ".playlistsPage"],
+  ["src/features/analytics/analytics.css", ".analyticsStudioV339"],
+  ["src/features/settings/settings.css", ".settingsPageV027"],
+  ["src/features/artists/artists.css", ".artistsPage"],
+  ["src/features/genres/genres.css", ".genresPage"]
+];
+for (const [file, ownedRoot] of scopedFeatureStyles) {
+  if (!exists(file)) { fail(file + ": missing CSS owner"); continue; }
+  const source = read(file).replace(/\/\*[\s\S]*?\*\//g, " ");
+  for (const [, foreignRoot] of scopedFeatureStyles) {
+    if (foreignRoot !== ownedRoot && source.includes(foreignRoot)) {
+      fail(file + ": cross-feature CSS root " + foreignRoot + " belongs to another view");
+    }
+  }
+}
+
 const resetSources = [
   ["src/features/genres/GenresView.tsx", "genres"], ["src/features/albums/AlbumsView.tsx", "albums"], ["src/features/playlists/PlaylistsView.tsx", "playlists"],
   ["src/features/downloads/DownloadsView.tsx", "downloads"], ["src/features/analytics/AnalyticsView.tsx", "analytics"],
