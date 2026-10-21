@@ -1,4 +1,22 @@
 /* Cover studio inherits the selected app theme and keeps virtualization geometry unchanged. */
+
+/* Cover-specific reset previously lived in App.css. */
+.coversView,
+.coversPage {
+  --grid-line: transparent !important;
+  --app-grid-line: transparent !important;
+  --page-line: transparent !important;
+  background-size: auto !important;
+}
+.coversPage {
+  background-image: none !important;
+}
+.coversPage::before,
+.coversPage::after {
+  background-image: none !important;
+  background-size: auto !important;
+}
+
 .coverStudioLayout {
   --cover-edge: var(--lt-border);
   --cover-surface: var(--lt-surface);

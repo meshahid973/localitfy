@@ -1,5 +1,24 @@
 /* Home owns Home content only. Shared shell/sidebar styling lives in styles/view-shell.css. */
 
+/* Former global visual reset scoped to Home. Preserve the winning declarations. */
+.homePage {
+  --grid-line: transparent !important;
+  --app-grid-line: transparent !important;
+  --page-line: transparent !important;
+  background-size: auto !important;
+  background-image: none !important;
+}
+.homePage::before,
+.homePage::after {
+  background-image: none !important;
+  background-size: auto !important;
+}
+.homeSection {
+  contain: layout paint style;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 280px;
+}
+
 .app:has(.pageTransition-home) .content {
   padding: 0 !important;
   overflow-x: hidden !important;

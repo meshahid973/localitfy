@@ -3034,7 +3034,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
 .app,
 .simpleShell,
 .page,
-.homePage,
 .settingsContent,
 .settingsPanel,
 .simpleLibraryPanel {
@@ -3063,8 +3062,6 @@ body,
 #root,
 .app,
 .page,
-.homePage,
-.coversView,
 .settingsView,
 .settingsContent,
 .settingsPanel {
@@ -3130,7 +3127,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
   contain: layout paint style;
 }
 
-.homeSection,
 .panel,
 .settingsPanel,
 .settingsPanelCard{
@@ -3180,7 +3176,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
   transition-duration: 0s !important;
 }
 
-.homeSection,
 .songCard{
   content-visibility: auto;
   contain-intrinsic-size: 1px 280px;
@@ -3198,8 +3193,6 @@ html,
 body,
 #root,
 .app,
-.homePage,
-.coversPage,
 .panel,
 .hero,
 .settingsPanel {
@@ -3214,10 +3207,6 @@ body::after,
 #root::after,
 .app::before,
 .app::after,
-.homePage::before,
-.homePage::after,
-.coversPage::before,
-.coversPage::after,
 .panel::before,
 .panel::after,
 .hero::before,
