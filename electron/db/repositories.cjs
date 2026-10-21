@@ -15,6 +15,12 @@ function createDatabaseRepositories(databaseModule) {
       remove: requireFunction(databaseModule, "deleteSong"),
       clear: requireFunction(databaseModule, "clearLibrary")
     }),
+    lyrics: Object.freeze({
+      get: requireFunction(databaseModule, "getLyricsSelection"),
+      save: requireFunction(databaseModule, "saveLyricsSelection"),
+      setOffset: requireFunction(databaseModule, "saveLyricsOffset"),
+      clear: requireFunction(databaseModule, "clearLyricsSelection")
+    }),
     listening: Object.freeze({
       record: requireFunction(databaseModule, "recordPlayEvent"),
       clear: requireFunction(databaseModule, "clearListeningHistory")
