@@ -4,6 +4,7 @@ const { app, powerMonitor, BrowserWindow, dialog, ipcMain, shell, session, Menu,
 const { createIpcRouter } = require("./ipc/router.cjs");
 const { registerAnalysisIpc, preserveExperimentalSettings } = require("./ipc/analysis.cjs");
 const { registerDiscordIpc } = require("./ipc/discord.cjs");
+const { registerMovedSongRepairIpc } = require("./ipc/library-relink.cjs");
 const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes } = require("./runtime/protocols.cjs");
 const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings, createWindowsStartupRuntime } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
@@ -2464,6 +2465,12 @@ app.whenReady().then(async () => {
     } catch (error) { console.log("[localitfy import error]", error?.stack || error?.message); return listSongsShaped(); }
   });
   ipcRouter.handle("library:repair-missing-metadata", async (_event, payload = {}) => { try { return await repairMissingSongMetadata(payload); } catch (error) { console.log("[localtify metadata repair error]", error?.stack || error?.message || error); return { ok: false, error: error?.message || "metadata repair failed", songs: listSongsShaped() }; } });
+  registerMovedSongRepairIpc(ipcRouter, {
+    dialog, BrowserWindow, getWindow: () => mainWindow,
+    getSongs, fileExists, isAudioFile, readMetadata: readLocalAudioMetadata,
+    backupDatabase, relinkSongPaths: databaseRepositories.songs.relinkPaths,
+    clearFileInfoCache, listSongsShaped
+  });
   ipcRouter.handle("album:scan-folder", async (event, payload = {}) => { try { return await handleAlbumFolderScan(event, payload); } catch (error) { console.log("[localtify album folder scan error]", error?.stack || error?.message || error); return { ok: false, error: error?.message || "album folder scan failed", songs: listSongsShaped(), albums: [] }; } });
   ipcRouter.handle("album:import-folder", async (event, payload = {}) => { try { return await handleAlbumFolderImport(event, payload); } catch (error) { console.log("[localtify album folder import error]", error?.stack || error?.message || error); return { ok: false, error: error?.message || "album folder import failed", songs: listSongsShaped(), albums: [] }; } });
 
