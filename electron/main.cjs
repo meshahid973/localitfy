@@ -527,11 +527,11 @@ function createCoverThumbnailSync(filePath) {
   }
 }
 
-function queueCoverThumbnail(filePath) {
+function queueCoverThumbnail(filePath, lowPriority = false) {
   if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) return;
   const thumbnailPath = getCoverThumbnailPath(filePath);
   if (!thumbnailPath || fileExists(thumbnailPath) || coverThumbnailQueue.has(filePath)) return;
-  coverThumbnailQueue.enqueue(filePath);
+  coverThumbnailQueue.enqueue(filePath, { lowPriority });
 }
 
 function getCoverThumbnailUrl(filePath, options = {}) {
@@ -649,7 +649,7 @@ function scheduleCoverThumbnailWarmup() {
         const coverPath = String(song?.coverPath || "").trim();
         if (!coverPath || seen.has(coverPath)) continue;
         seen.add(coverPath);
-        queueCoverThumbnail(coverPath);
+        queueCoverThumbnail(coverPath, true);
         if (seen.size >= 120) break;
       }
     } catch (error) { console.log("[localtify thumbnail warmup error]", error?.message || error); }
