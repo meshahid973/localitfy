@@ -21,12 +21,13 @@ function collectHandledChannels(source) {
 
 test("every preload invoke channel has a native handler owner", () => {
   const preload = read("electron/preload.cjs");
+  // Discover all owned IPC modules, including newly extracted handlers.
+  const ipcModules = fs.readdirSync(path.join(root, "electron", "ipc"))
+    .filter(name => name.endsWith(".cjs"))
+    .map(name => read("electron/ipc/" + name));
   const nativeSources = [
     read("electron/main.cjs"),
-    read("electron/ipc/router.cjs"),
-    read("electron/ipc/discord.cjs"),
-    read("electron/ipc/analysis.cjs"),
-    read("electron/ipc/lyrics.cjs"),
+    ...ipcModules,
     read("electron/runtime/app-menu.cjs")
   ].join("\n");
 
