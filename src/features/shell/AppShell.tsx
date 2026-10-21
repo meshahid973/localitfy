@@ -66,8 +66,7 @@ export default function AppShell(props: AppShellProps) {
     visualSource: screensaverVisualSource
   } = screensaver;
   const {
-    secretMode, secretBurst, secretToast, starParticleStyles, appToast, importAnimation,
-    libraryScanBusy, pixelArtBusy, libraryScanMessage
+    secretMode, secretBurst, secretToast, starParticleStyles, appToast, importAnimation
   } = effects;
   const { open: onboardingOpen, ...onboardingProps } = onboarding;
   const {
@@ -260,17 +259,6 @@ export default function AppShell(props: AppShellProps) {
               ))}
             </div>
           </div>
-        </div>
-      ) : null}
-
-      {!importAnimation.active && (libraryScanBusy || pixelArtBusy) ? (
-        <div className="tinyScanner tinyScannerMascotHostV496" role="status" aria-live="polite">
-          <MascotStateArt state="loading" className="tinyScannerMascotV496" />
-          <span className="scannerOrb" />
-          <span>
-            <strong>{pixelArtBusy ? "updating covers" : "scanning library"}</strong>
-            <small>{pixelArtBusy ? "pixel art is being refreshed" : libraryScanMessage}</small>
-          </span>
         </div>
       ) : null}
 
