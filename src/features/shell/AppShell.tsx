@@ -11,11 +11,8 @@ import QueuePanel from "../player/components/QueuePanel";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import Onboarding from "../../Onboarding";
 import SongContextMenu from "../library/components/SongContextMenu";
-import SongEditorModal from "../library/components/SongEditorModal";
-import DeleteSongModal from "../library/components/DeleteSongModal";
 import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon } from "../../shared/ui/LocaltifyViewUi";
 import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
-import PlaylistPickerModal from "../playlists/components/PlaylistPickerModal";
 import WhatsNewModal from "../updates/WhatsNewModal";
 import { clamp } from "../../shared/utils/format";
 import { prettyTitle } from "../search";
@@ -32,6 +29,9 @@ import "./effects.css";
 import "../../styles/view-shell.css";
 
 const SimilarSongsDialog = lazy(() => import("../analysis/SimilarSongsDialog"));
+const SongEditorModal = lazy(() => import("../library/components/SongEditorModal"));
+const DeleteSongModal = lazy(() => import("../library/components/DeleteSongModal"));
+const PlaylistPickerModal = lazy(() => import("../playlists/components/PlaylistPickerModal"));
 const LibraryView = lazy(() => import("../library/LibraryView"));
 const ArtistsView = lazy(() => import("../artists/ArtistsView"));
 const GenresView = lazy(() => import("../genres/GenresView"));
@@ -373,11 +373,11 @@ export default function AppShell(props: AppShellProps) {
 
       <WhatsNewModal {...modals.whatsNew} />
 
-      <SongEditorModal {...modals.songEditor} />
+      {modals.songEditor.song ? <Suspense fallback={null}><SongEditorModal {...modals.songEditor} /></Suspense> : null}
 
-      <PlaylistPickerModal {...modals.playlistPicker} />
+      {modals.playlistPicker.song ? <Suspense fallback={null}><PlaylistPickerModal {...modals.playlistPicker} /></Suspense> : null}
 
-      <DeleteSongModal {...modals.deleteSong} />
+      {modals.deleteSong.song ? <Suspense fallback={null}><DeleteSongModal {...modals.deleteSong} /></Suspense> : null}
 
       <PlaybackAudioElement {...playbackAudio} />
     </main>
