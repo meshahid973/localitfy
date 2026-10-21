@@ -14,6 +14,7 @@ const { createWindowTranslucencyRuntime } = require("./runtime/translucency.cjs"
 const { createIconRuntime } = require("./runtime/icons.cjs");
 const { createUpdaterRuntime } = require("./runtime/updater.cjs");
 const { createMediaServerRuntime } = require("./runtime/media-server.cjs");
+const { createThumbnailScheduler } = require("./runtime/thumbnail-scheduler.cjs");
 const { createGenreMetadataBackfill } = require("./runtime/genre-backfill.cjs");
 const { safeImageExtensionFromUrlOrType, bestSpotifyImage, parseSpotifyUrl, shapeSpotifyTrack, decodeHtmlEntities, uniqSpotifyIds } = require("./runtime/spotify-normalize.cjs");
 const { createAppMenuRuntime, createAppCommandSender } = require("./runtime/app-menu.cjs");
@@ -78,7 +79,10 @@ app.on("second-instance", () => {
 const COVER_THUMBNAIL_SIZE = 256;
 const COVER_THUMBNAIL_DIR_NAME = "thumbnails";
 const coverThumbnailUrlCache = new Map();
-const coverThumbnailQueue = new Map();
+const coverThumbnailQueue = createThumbnailScheduler({
+  processFile: createCoverThumbnailSync,
+  onError: (error) => console.log("[localtify thumbnail queue error]", error?.message || error)
+});
 let coverThumbnailWarmStarted = false;
 
 const APP_NAME = "localtify";
@@ -527,11 +531,7 @@ function queueCoverThumbnail(filePath) {
   if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) return;
   const thumbnailPath = getCoverThumbnailPath(filePath);
   if (!thumbnailPath || fileExists(thumbnailPath) || coverThumbnailQueue.has(filePath)) return;
-  const timer = setTimeout(() => {
-    coverThumbnailQueue.delete(filePath);
-    createCoverThumbnailSync(filePath);
-  }, 750 + Math.min(3200, coverThumbnailQueue.size * 120));
-  coverThumbnailQueue.set(filePath, timer);
+  coverThumbnailQueue.enqueue(filePath);
 }
 
 function getCoverThumbnailUrl(filePath, options = {}) {
@@ -591,7 +591,6 @@ function cleanupCoverThumbnailCache() {
   let removed = 0;
   let sizeBytes = 0;
   try {
-    for (const timer of coverThumbnailQueue.values()) { try { clearTimeout(timer); } catch {} }
     coverThumbnailQueue.clear();
     coverThumbnailUrlCache.clear();
     if (dir && fs.existsSync(dir)) {
@@ -644,7 +643,16 @@ function scheduleCoverThumbnailWarmup() {
   if (coverThumbnailWarmStarted) return;
   coverThumbnailWarmStarted = true;
   setTimeout(() => {
-    try { warmCoverThumbnails({ limit: 120 }); } catch (error) { console.log("[localtify thumbnail warmup error]", error?.message || error); }
+    try {
+      const seen = new Set();
+      for (const song of getSongs()) {
+        const coverPath = String(song?.coverPath || "").trim();
+        if (!coverPath || seen.has(coverPath)) continue;
+        seen.add(coverPath);
+        queueCoverThumbnail(coverPath);
+        if (seen.size >= 120) break;
+      }
+    } catch (error) { console.log("[localtify thumbnail warmup error]", error?.message || error); }
   }, 4500);
 }
 
