@@ -166,3 +166,38 @@ test("thumbnail cache refreshes media URLs and downloads shape the library once"
   const spotify = main.slice(main.indexOf('const runSpotifyDownloadBatch ='), main.indexOf('ipcRouter.handle("spotify-download-batch"'));
   assert.equal((spotify.match(/listSongsShaped\(\)/g) || []).length, 2, "one success snapshot and one error fallback");
 });
+
+
+test("all loopback media responses advertise CORS, including range and missing tokens", async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-cors-"));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const music = path.join(dir, "test.mp3");
+  fs.writeFileSync(music, "0123456789");
+  const { runtime } = makeRuntime();
+  t.after(() => runtime.stop());
+  assert.equal(await runtime.start(), true);
+  const url = runtime.safeMediaUrl(music);
+  const missing = url.replace(/\/media\/[^?]+/, "/media/" + "z".repeat(24));
+  for (const [target, options, status] of [
+    [url, {}, 200],
+    [url, { headers: { Range: "bytes=4-5" } }, 206],
+    [url, { headers: { Range: "bytes=99-100" } }, 416],
+    [missing, {}, 404],
+    [url, { method: "OPTIONS" }, 204]
+  ]) {
+    const result = await fetch(target, options);
+    assert.equal(result.status, status);
+    assert.equal(result.headers.get("access-control-allow-origin"), "*");
+    assert.equal(result.headers.get("cross-origin-resource-policy"), "cross-origin");
+    await result.arrayBuffer();
+  }
+});
+
+test("all audio creation paths configure anonymous CORS before setting src", () => {
+  const app = fs.readFileSync(path.join(root, "src", "App.tsx"), "utf8");
+  const engine = fs.readFileSync(path.join(root, "src", "features", "player", "engine", "htmlAudioEngine.ts"), "utf8");
+  const preloader = app.slice(app.indexOf("function preloadNextAudio"), app.indexOf("function getAutoCrossfadeSeconds"));
+  assert.match(preloader, /nextAudioRef\.current = new Audio\(\);\s*nextAudioRef\.current\.crossOrigin = "anonymous";\s*nextAudioRef\.current\.preload/);
+  assert.match(app, /nextAudio\.crossOrigin = "anonymous";/);
+  assert.match(engine, /this\.element\.crossOrigin = "anonymous";/);
+});

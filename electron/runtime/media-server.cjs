@@ -73,10 +73,17 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
       MEDIA_EXTENSIONS.has(path.extname(filePath).toLowerCase()));
   }
 
-  function addMediaResponseHeaders(res, filePath) {
+  function addCorsHeaders(res) {
+    // Bearer tokens protect loopback media. Allow the renderer's separate dev/
+    // packaged origin to read it, including range and error responses.
     res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Range, Content-Type");
+  }
+
+  function addMediaResponseHeaders(res, filePath) {
+    addCorsHeaders(res);
     res.setHeader("Accept-Ranges", "bytes");
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("Content-Type", contentTypeForFile(filePath));
@@ -167,6 +174,7 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
   }
 
   function sendMediaFile(req, res, filePath) {
+    addCorsHeaders(res);
     if (!filePath || !path.isAbsolute(filePath) || !fileExists(filePath)) {
       res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
       res.end("media file not found");
@@ -226,6 +234,7 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
 
     mediaServerReadyPromise = new Promise((resolve) => {
       const server = http.createServer((req, res) => {
+        addCorsHeaders(res);
         try {
           const requestUrl = new URL(req.url || "/", `http://${MEDIA_SERVER_HOST}`);
           if (requestUrl.searchParams.get("t") !== mediaServerToken) {

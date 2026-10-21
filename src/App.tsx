@@ -3861,6 +3861,7 @@ function MainModeApp() {
 
       if (!nextAudioRef.current) {
         nextAudioRef.current = new Audio();
+        nextAudioRef.current.crossOrigin = "anonymous";
         nextAudioRef.current.preload = "auto";
       }
 
@@ -4175,6 +4176,9 @@ function MainModeApp() {
     }
 
     const nextAudio = nextAudioRef.current;
+    // This element may have been created earlier by the preloader. Enforce
+    // CORS before loading any URL or reusing it for a crossfade.
+    nextAudio.crossOrigin = "anonymous";
     const safeVolume = getTargetAudioVolume(target.song);
     const crossfadeMs = getAutoCrossfadeSeconds() * 1000;
     const startVolume = audio.volume || getTargetAudioVolume(current);

@@ -34,6 +34,7 @@ export class HtmlAudioEngine implements PlayerEngine {
 
   constructor(element?: HTMLAudioElement) {
     this.element = element ?? new Audio();
+    this.element.crossOrigin = "anonymous";
     this.element.preload = this.element.preload || "metadata";
 
     for (const event of MEDIA_EVENTS) {
