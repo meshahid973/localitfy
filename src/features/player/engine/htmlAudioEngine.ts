@@ -136,11 +136,10 @@ export class HtmlAudioEngine implements PlayerEngine {
   }
 
   private emit(event: PlayerEngineEvent) {
-    const state = this.getState();
     const eventListeners = this.listeners.get(event);
+    if (!eventListeners?.size) return;
 
-    if (!eventListeners) return;
-
+    const state = this.getState();
     for (const listener of eventListeners) {
       listener(state, event);
     }
