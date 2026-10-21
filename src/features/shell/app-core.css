@@ -2044,16 +2044,6 @@ button{
   font-size: 15px !important;
 }
 
-@media (max-width: 760px){
-.appShell{
-  grid-template-columns: 1fr !important;
-}
-
-.sidebar{
-  display: none !important;
-}
-
-}
 
 .app,
 .appShell,
