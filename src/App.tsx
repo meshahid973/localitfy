@@ -234,6 +234,7 @@ function MainModeApp() {
     queueDropHot, setQueueDropHot, queueDropHotRef
   } = usePlayerRuntime({ defaultVolume: defaultSettings.volume });
 
+  const startupResumePositionRef = useRef<{ songId: string; time: number } | null>(null);
   const saveSettingsSerialRef = useRef(0);
   const sidebarResizeFrameRef = useRef<number | null>(null);
   const bootedRef = useRef(false);
@@ -2872,6 +2873,14 @@ function MainModeApp() {
         nextSongs.some((song) => song.id === nextSettings.lastSongId)
           ? nextSettings.lastSongId
           : nextSongs[0]?.id || "";
+      const initialSong = nextSongs.find((song) => song.id === initialSongId);
+      const savedTime = Number(initialSong?.playbackPosition || 0);
+      startupResumePositionRef.current =
+        nextSettings.rememberLastSong && nextSettings.rememberPlaybackPosition &&
+        initialSong && Number.isFinite(savedTime) && savedTime > 1 &&
+        (!initialSong.duration || savedTime < initialSong.duration - 2)
+          ? { songId: initialSongId, time: savedTime }
+          : null;
 
       setBootStep(4, "warming up the player...");
       await waitForMinimumBoot();
@@ -3408,9 +3417,15 @@ function MainModeApp() {
           syncProgressDom(nextTime, nextDuration, true);
         }
 
-        // V341: Localtify now always starts songs from the beginning.
-        // Do not keep writing resume positions during normal playback.
-        positionSaveRef.current = Date.now();
+        // Store progress without React updates. Only the remembered startup song
+        // resumes; regular song selections still begin at 0:00.
+        const wallClock = Date.now();
+        if (settings.rememberPlaybackPosition && currentSong.id &&
+            nextTime > 1 && wallClock - positionSaveRef.current >= 5000) {
+          positionSaveRef.current = wallClock;
+          void window.localitfy.patchSong(currentSong.id, { playbackPosition: Math.floor(nextTime) })
+            .catch(() => undefined);
+        }
 
         if (!backgroundMode && !busyUi && settings.gaplessPlayback && nextDuration > 0 && nextDuration - nextTime < 20) {
           window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 2200), 900);
@@ -6688,6 +6703,9 @@ function MainModeApp() {
     const targetSong = songsById.get(songId);
     const sameSong = songId === currentId;
     const audio = audioRef.current;
+    if (startupResumePositionRef.current?.songId !== songId) {
+      startupResumePositionRef.current = null;
+    }
 
     if (!sameSong) {
       stopCrossfadeAuto();
@@ -7041,6 +7059,19 @@ function MainModeApp() {
 
     const rounded = Math.floor(duration);
     setCurrentDuration(rounded);
+    const pending = startupResumePositionRef.current;
+    if (pending?.songId === currentSong.id) {
+      startupResumePositionRef.current = null;
+      const seekTo = Math.min(pending.time, Math.max(0, duration - 2));
+      const audio = audioRef.current;
+      if (audio && seekTo > 1) {
+        try {
+          audio.currentTime = seekTo;
+          timeRef.current = seekTo;
+          setCurrentTime(seekTo);
+        } catch { /* Ignore unsupported resume positions. */ }
+      }
+    }
 
     if (rounded !== currentSong.duration) {
       void patchSongLocal(currentSong.id, { duration: rounded });
