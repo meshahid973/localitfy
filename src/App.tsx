@@ -70,7 +70,7 @@ import { Cover } from "./features/covers/Cover";
 import { useCoversController } from "./features/covers";
 import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
 import { useLibraryController } from "./features/library";
-import { splitArtistCredits } from "./features/artists/artistCredits";
+import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
 import { createMetadataCleanPreview } from "./features/library/metadataCleanPreview";
 import {
   buildAlbumIdBySongId, getPlayableUniqueSongIds, getRepeatPreview, getSourceLoopRestart, getSourcePreviousStep, playbackSourceRef,
@@ -157,7 +157,6 @@ import {
   stableSongSourceKey
 } from "./features/library";
 import {
-  buildSongSearchEntryCached,
   heroTitleDensityClass,
   prettyMeta,
   prettyTitle,
@@ -1691,7 +1690,13 @@ function MainModeApp() {
 
   const starParticleStyles = useMemo<CSSProperties[]>(() => [], []);
 
-  const librarySearchIndex = useMemo(() => songs.map((song) => buildSongSearchEntryCached(song)), [songs]);
+  const libraryIndexRef = useRef<ReturnType<typeof reconcileLibraryIndex> | null>(null);
+  const libraryIndex = useMemo(() => {
+    const next = reconcileLibraryIndex(songs, libraryIndexRef.current ?? undefined);
+    libraryIndexRef.current = next;
+    return next;
+  }, [songs]);
+  const librarySearchIndex = libraryIndex.searchEntries;
 
   const filteredSongs = useMemo(() => {
     if (!deferredQuery.trim()) return songs;
@@ -1737,8 +1742,8 @@ function MainModeApp() {
     libraryRenderLimitRef.current = libraryRenderLimit;
   }, [libraryRenderLimit]);
 
-  const songsById = useMemo(() => new Map(songs.map((song) => [song.id, song])), [songs]);
-  const songIndexById = useMemo(() => new Map(songs.map((song, index) => [song.id, index])), [songs]);
+  const songsById = libraryIndex.songsById;
+  const songIndexById = libraryIndex.songIndexById;
   const playableSongs = useMemo(() => songs.filter(isPlayableSong), [songs]);
   const activePlaylist = useMemo(
     () => playlists.find((playlist) => playlist.id === activePlaylistId) ?? null,
@@ -1807,13 +1812,7 @@ function MainModeApp() {
 
   const totalPlays = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_plays");
   const libraryAlbumCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "album_count");
-  const libraryArtistCount = useMemo(() => {
-    const artistNames = new Set<string>();
-    for (const song of songs) {
-      for (const credit of splitArtistCredits(song.artist)) artistNames.add(credit.toLocaleLowerCase());
-    }
-    return artistNames.size;
-  }, [songs]);
+  const libraryArtistCount = libraryIndex.artistCount;
   const totalListenedSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_listened_seconds");
   const totalMinutes = Math.floor(totalListenedSeconds / 60);
   const totalLibrarySeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_library_seconds");
@@ -5085,7 +5084,7 @@ function MainModeApp() {
   function replaceSong(updated: Song | null) {
     if (!updated) return;
 
-    setSongs((oldSongs) => oldSongs.map((song) => (song.id === updated.id ? updated : song)));
+    setSongs((oldSongs) => replaceLibrarySong(oldSongs, updated, songIndexById.get(updated.id)));
 
     if (editorSong?.id === updated.id) {
       setEditorSong(updated);
@@ -5113,7 +5112,7 @@ function MainModeApp() {
       if (cacheKey) playbackUrlCacheRef.current.delete(cacheKey);
     }
 
-    setSongs((oldSongs) => oldSongs.map((song) => (song.id === id ? { ...song, ...patch } : song)));
+    setSongs((oldSongs) => patchLibrarySong(oldSongs, id, patch, songIndexById.get(id)));
 
     try {
       const updated = await window.localitfy.patchSong(id, patch);
@@ -5586,9 +5585,9 @@ function MainModeApp() {
       const successCount = downloads.filter((item) => item.ok).length;
       const failCount = downloads.filter((item) => !item.ok).length;
 
-      // V320: after a successful download, refresh from the real database rows once.
-      // This prevents the old bug where a downloaded file finished but did not appear in Library.
-      if ((successCount > 0 || Number(result.changedCount || 0) > 0) && window.localitfy?.bootstrap) {
+      // Electron already returns the final committed DB snapshot. Only recover via
+      // bootstrap for older/failing bridges that omitted that snapshot entirely.
+      if (!Array.isArray(result.songs) && (successCount > 0 || Number(result.changedCount || 0) > 0) && window.localitfy?.bootstrap) {
         try {
           const refreshed = await window.localitfy.bootstrap();
           const refreshedSongs = applyLibraryOrder(sanitizeSongList(refreshed?.songs || []));
@@ -5792,10 +5791,9 @@ function MainModeApp() {
         const successCount = downloads.filter((d: DownloadResult) => d.ok).length;
         const failCount = downloads.filter((d: DownloadResult) => !d.ok).length;
 
-        // Restart-lite safety: after Spotify downloads, reload the real DB library.
-        // Set the song list once with the final refreshed DB rows to avoid a double
-        // home/library render right after download.
-        if ((successCount > 0 || Number(result.changedCount || 0) > 0) && bridge?.bootstrap) {
+        // The batch response already contains a final committed DB snapshot.
+        // Bootstrap is a recovery path only when an older bridge omits it.
+        if (!Array.isArray(result.songs) && (successCount > 0 || Number(result.changedCount || 0) > 0) && bridge?.bootstrap) {
           try {
             const refreshed = await bridge.bootstrap();
             const refreshedSongs = applyLibraryOrder(sanitizeSongList(refreshed?.songs || []));
