@@ -12,38 +12,49 @@ function createThumbnailScheduler({
   onError = () => {}
 }) {
   if (typeof processFile !== "function") throw new TypeError("processFile is required");
-  const pending = new Set();
+  const visible = new Set();
+  const background = new Set();
+  const size = () => visible.size + background.size;
   let timer = null;
 
   function schedule(delay = delayMs) {
-    if (timer !== null || pending.size === 0) return;
+    if (timer !== null || size() === 0) return;
     timer = setTimer(() => {
       timer = null;
-      const filePath = pending.values().next().value;
+      const filePath = visible.values().next().value ?? background.values().next().value;
       if (filePath === undefined) return;
-      pending.delete(filePath);
+      visible.delete(filePath);
+      background.delete(filePath);
       try { processFile(filePath); } catch (error) { onError(error); }
       schedule();
     }, delay);
   }
 
-  function enqueue(filePath) {
-    if (!filePath || pending.has(filePath) || pending.size >= 500) return false;
-    pending.add(filePath);
+  function enqueue(filePath, { lowPriority = false } = {}) {
+    if (!filePath || visible.has(filePath)) return false;
+    if (background.has(filePath)) {
+      if (lowPriority) return false;
+      background.delete(filePath);
+      visible.add(filePath);
+      return true;
+    }
+    if (size() >= 500) return false;
+    (lowPriority ? background : visible).add(filePath);
     schedule();
     return true;
   }
 
   function clear() {
-    pending.clear();
+    visible.clear();
+    background.clear();
     if (timer !== null) clearTimer(timer);
     timer = null;
   }
 
   return {
     enqueue, clear,
-    has: (filePath) => pending.has(filePath),
-    get size() { return pending.size; }
+    has: (filePath) => visible.has(filePath) || background.has(filePath),
+    get size() { return size(); }
   };
 }
 
