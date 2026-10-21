@@ -6,6 +6,7 @@
   PlayerEngineState,
   PlayerEngineUnsubscribe
 } from "./PlayerEngine";
+import { clampFinite as clamp } from "../../../shared/utils/format";
 
 const MEDIA_EVENTS: readonly PlayerEngineEvent[] = [
   "loadstart",
@@ -20,7 +21,6 @@ const MEDIA_EVENTS: readonly PlayerEngineEvent[] = [
   "error"
 ];
 
-import { clampFinite as clamp } from "../../../shared/utils/format";
 export class HtmlAudioEngine implements PlayerEngine {
   readonly element: HTMLAudioElement;
 
