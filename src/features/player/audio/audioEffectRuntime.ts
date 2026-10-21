@@ -1,4 +1,5 @@
 import type { AudioEffectMode } from "../../settings/settings.types";
+import { clampFinite as clamp } from "../../../shared/utils/format";
 
 export type AudioEffectProfileInput = {
   mode: AudioEffectMode | string | null | undefined;
@@ -18,7 +19,6 @@ export type AudioEffectProfile = {
   lowpassHz: number;
 };
 
-import { clampFinite as clamp } from "../../../shared/utils/format";
 export function normalizeAudioEffectMode(value: unknown): AudioEffectMode {
   const mode = String(value || "normal")
     .trim()
