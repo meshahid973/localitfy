@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 
-import { clamp } from "../../shared/utils/format";
+import { clampUpperFirst as clamp } from "../../shared/utils/format";
 export function ToggleRow({ label, help, checked, onChange }: {
   label: string;
   help?: string;
