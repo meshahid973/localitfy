@@ -7,7 +7,7 @@ import { PlayerPlayPauseMorphIcon } from "../PlayerPlayPauseMorphIcon";
 import { formatTime } from "../../../shared/utils/format";
 import { prettyMeta, prettyTitle } from "../../search/search.utils";
 import { splitArtistCredits } from "../../artists/artistCredits";
-import { LikeHeartAnimationV443 } from "../../library/components/SongRows";
+import { LikeHeartAnimationV443 } from "../../../shared/ui/LikeHeartAnimation";
 import type { Song } from "../../library/song.types";
 import type { Settings } from "../../settings/settings.types";
 import type { CoverColorSyncMode } from "../../settings/theme.types";
