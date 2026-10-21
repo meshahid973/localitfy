@@ -160,7 +160,7 @@ export const SongRowItem = memo(function SongRowItem({
       onDragEnd={onDragEnd}
       onContextMenu={(event) => onOpenSongContextMenu?.(event, song)}
       aria-grabbed={isDragging}
-      title={isMissingFile ? "This song is still in Localtify, but the local audio file is missing." : draggedSongTitle ? `dragging ${draggedSongTitle}` : "drag onto another song to reorder, or drop on the bottom player to play next"}
+      title={isMissingFile ? "Local audio file missing" : draggedSongTitle ? `dragging ${draggedSongTitle}` : undefined}
       style={{ "--stagger": `${Math.min(index, 20) * 18}ms` } as CSSProperties}
     >
       <button className="songButton" onClick={() => onSelectSong(song.id, true)}>
