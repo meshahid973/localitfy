@@ -59,7 +59,8 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
   useEffect(() => (open ? load(false) : undefined), [open, load]);
 
   const adoptLyrics = (expectedId: string, next: LyricsResult) => {
-    sessionCache.set(expectedId, next);
+    if (next.status === "synced" || next.status === "plain" || next.status === "instrumental") sessionCache.set(expectedId, next);
+    else sessionCache.delete(expectedId);
     if (currentSongId.current !== expectedId) return;
     setResult(next);
     setMatcherOpen(false);
