@@ -73,9 +73,19 @@ body.localtifyBackgroundMode .app .playerBar::before {
   -webkit-backdrop-filter: none !important;
 }
 
-/* Respect both the app preference and OS preference without selector fights. */
+/* The renderer performance policy is the sole owner of reduced motion. */
+/* Reduced motion has one selector contract matching AppShell's data-motion-level. */
 .app.reducedMotion *,
-.app[data-motion-level="reduced"] * {
+.app.reducedMotion *::before,
+.app.reducedMotion *::after,
+.app[data-motion-level="reduced"] *,
+.app[data-motion-level="reduced"] *::before,
+.app[data-motion-level="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
   scroll-behavior: auto !important;
 }
 
@@ -84,8 +94,11 @@ body.localtifyBackgroundMode .app .playerBar::before {
   .app *::before,
   .app *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
 }
+

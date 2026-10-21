@@ -1565,22 +1565,11 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
   background: currentColor !important;
   opacity: .42 !important;
 }
-.app .homeAlbumCard,
-.app .songRow{
-  content-visibility: auto;
-  contain-intrinsic-size: 92px 132px;
-}
 .app .homeAlbumCard :is(img, .coverAura),
 .app .songRow :is(img, .coverAura){
   transform: translateZ(0);
   backface-visibility: hidden;
 }
-.app .homeListenGrid{
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 720px;
-  contain: layout paint style;
-}
-.app .homeAlbumCard,
 .app .songRow,
 .app .playlistSongRow{
   content-visibility: auto;
