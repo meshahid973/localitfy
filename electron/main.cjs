@@ -59,7 +59,7 @@ const {
 } = require("./downloader.cjs");
 
 const { readLocalAudioMetadata } = require("./metadata-service.cjs");
-const { findFolderCover, resolveSongCover } = require("./cover-service.cjs");
+const { findFolderCover, resolveSongCover, createLeastUsedCoverAllocator } = require("./cover-service.cjs");
 
 const ipcRouter = createIpcRouter(ipcMain, {
   isTrustedEvent: (event) => isTrustedMainFrameIpcEvent(event, mainWindow)
@@ -1812,9 +1812,12 @@ function buildRandomizeMissingSongCovers() {
   const covers = getPixelArtFiles();
   if (!covers.length) return listSongsShaped();
   const songs = getSongs();
+  const allocator = createLeastUsedCoverAllocator(covers, songs);
   for (const song of songs.filter((song) => !song.coverPath || !fileExists(song.coverPath))) {
-    const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true });
-    if (chosen) patchSong(song.id, { coverPath: chosen });
+    const chosen = allocator.choose(song.coverPath);
+    if (!chosen) continue;
+    const updated = patchSong(song.id, { coverPath: chosen });
+    if (updated?.coverPath === chosen) allocator.record(song.coverPath, chosen);
   }
   return listSongsShaped();
 }
@@ -2376,9 +2379,12 @@ app.whenReady().then(async () => {
     const covers = getPixelArtFiles();
     if (!covers.length) return listSongsShaped();
     const songs = getSongs();
+    const allocator = createLeastUsedCoverAllocator(covers, songs);
     for (const song of songs) {
-      const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
-      if (chosen) patchSong(song.id, { coverPath: chosen });
+      const chosen = allocator.choose(song.coverPath);
+      if (!chosen) continue;
+      const updated = patchSong(song.id, { coverPath: chosen });
+      if (updated?.coverPath === chosen) allocator.record(song.coverPath, chosen);
     }
     return listSongsShaped();
   });
@@ -2389,11 +2395,15 @@ app.whenReady().then(async () => {
     const covers = getPixelArtFiles();
     if (!covers.length) return listSongsShaped();
     const songs = getSongs();
-    for (const id of ids) {
-      const song = songs.find((item) => item.id === id);
+    const allocator = createLeastUsedCoverAllocator(covers, songs);
+    const songsById = new Map(songs.map(song => [song.id, song]));
+    for (const id of new Set(ids)) {
+      const song = songsById.get(id);
       if (!song) continue;
-      const chosen = pickLeastUsedCover(covers, songs, { avoidSelectedCurrent: true, currentPath: song.coverPath });
-      if (chosen) patchSong(id, { coverPath: chosen });
+      const chosen = allocator.choose(song.coverPath);
+      if (!chosen) continue;
+      const updated = patchSong(id, { coverPath: chosen });
+      if (updated?.coverPath === chosen) allocator.record(song.coverPath, chosen);
     }
     return listSongsShaped();
   });
