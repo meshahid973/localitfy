@@ -37,7 +37,9 @@ test("artist sort orders by artist, then album, then title without mutating libr
 
 test("library view exposes the sort and blocks reordering while sorted", () => {
   assert.match(view, /className="librarySort"/);
-  assert.match(view, /<option value="artist">artist A–Z<\/option>/);
+  assert.match(view, /<ArcDropdownMenu/);
+  assert.match(view, /value: "artist", label: "artist A–Z"/);
+  assert.match(view, /onValueChange=\{setLibrarySortMode\}/);
   assert.match(app, /sortLibrarySongs\(unsortedVisibleSongs, librarySortMode\)/);
   assert.match(app, /const libraryOrderLocked = librarySortMode !== "library" && \(view === "library" \|\| view === "liked"\)/);
   for (const handler of ["handleLibraryDragOver", "handleLibraryDrop", "handleLibraryAreaDragOver", "handleLibraryAreaDrop"]) {

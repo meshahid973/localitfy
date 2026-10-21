@@ -176,6 +176,7 @@ export default function AppearanceSettings(props: AppearanceSettingsProps) {
           <ToggleRow label="Rounded corners" help="Use softer corners on cards and buttons." checked={settings.softCorners} onChange={(value) => void updateSetting("softCorners", value)} />
           <ToggleRow label="Animated glow" help="Show ambient player lighting." checked={settings.animatedGlow} onChange={(value) => void updateSetting("animatedGlow", value)} />
           <ToggleRow label="Cat buddy" help="Show a little cat that follows the cursor." checked={settings.catBuddyEnabled === true} onChange={(value) => void updateSetting("catBuddyEnabled", value)} />
+          <ToggleRow label="Idle screensaver" help={`Show the "am waiting.." screen after 5 minutes without playback.`} checked={settings.idleScreensaverEnabled !== false} onChange={(value) => void updateSetting("idleScreensaverEnabled", value)} />
         </div>
       </div>
 

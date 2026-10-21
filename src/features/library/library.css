@@ -50,15 +50,6 @@
   gap: 7px;
 }
 
-.libraryEyebrow {
-  margin: 0;
-  color: var(--lt-accent);
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: .11em;
-  text-transform: uppercase;
-}
-
 .libraryHeading h1 {
   margin: 0;
   color: var(--lt-text);
@@ -66,15 +57,6 @@
   font-weight: 680;
   line-height: .95;
   letter-spacing: -.045em;
-}
-
-.libraryHeading p:last-child {
-  max-width: 620px;
-  margin: 0;
-  color: var(--lt-muted);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.45;
 }
 
 .libraryTopTools {
@@ -85,8 +67,7 @@
   gap: 9px;
 }
 
-.librarySearch,
-.librarySort {
+.librarySearch {
   width: min(390px, 36vw);
   min-width: 190px;
   height: 42px;
@@ -101,17 +82,15 @@
   transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
 }
 
-.librarySort {
-  width: 126px;
-  min-width: 126px;
-  cursor: pointer;
+.libraryPage .libraryTopTools .librarySort {
+  width: 142px;
+  min-width: 142px;
+  flex: 0 0 auto;
 }
 
 .librarySearch::placeholder { color: var(--lt-muted); }
-.librarySearch:hover,
-.librarySort:hover { border-color: rgba(var(--lt-accent-rgb), .14); }
-.librarySearch:focus,
-.librarySort:focus {
+.librarySearch:hover { border-color: rgba(var(--lt-accent-rgb), .14); }
+.librarySearch:focus {
   border-color: rgba(var(--lt-accent-rgb), .34);
   background: var(--lt-surface);
   box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .05);
@@ -143,8 +122,7 @@
 .libraryMissingActions button:disabled { opacity: .38; cursor: not-allowed; }
 .libraryAction:focus-visible,
 .libraryMissingActions button:focus-visible,
-.librarySearch:focus-visible,
-.librarySort:focus-visible {
+.librarySearch:focus-visible {
   outline: 2px solid rgba(var(--lt-accent-rgb), .58);
   outline-offset: 2px;
 }
@@ -154,6 +132,7 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
+.libraryStatsThree { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 .libraryStat {
   min-width: 0;
@@ -282,13 +261,6 @@
   letter-spacing: -.025em;
 }
 
-.libraryTracksHead p {
-  margin: 0;
-  color: var(--lt-muted);
-  font-size: 11px;
-  font-weight: 550;
-}
-
 .libraryCount {
   flex: 0 0 auto;
   color: var(--lt-muted);
@@ -343,14 +315,26 @@
   transition: border-color 120ms ease, background-color 120ms ease !important;
 }
 
-.libraryPage .songRow:hover {
-  border-color: color-mix(in oklab, var(--lt-accent) 17%, transparent) !important;
-  background: var(--lt-surface) !important;
+/* Flat, neutral list feedback. Legacy global ::before/::after hover washes
+   must not override this view; drag-target markers stay available. */
+.app .libraryPage .songRow:not(.songDragging):not(.songDropTarget) {
+  background: transparent !important;
 }
-
-.libraryPage .songRow.active {
-  border-color: color-mix(in oklab, var(--lt-accent) 30%, transparent) !important;
-  background: var(--lt-surface-raised) !important;
+.app .libraryPage .songRow:not(.songDropTarget)::before,
+.app .libraryPage .songRow:not(.songDropTarget)::after {
+  content: none;
+  display: none;
+}
+.app .libraryPage .songRow:hover:not(.songDragging):not(.songDropTarget) {
+  background: color-mix(in srgb, var(--lt-text) 4%, transparent) !important;
+}
+.app .libraryPage .songRow.active:not(.songDragging):not(.songDropTarget) {
+  background: color-mix(in srgb, var(--lt-text) 6%, transparent) !important;
+  border-color: color-mix(in srgb, var(--lt-accent) 18%, transparent) !important;
+  box-shadow: inset 2px 0 0 var(--lt-accent) !important;
+}
+.app[data-library-row-style="listOnly"] .libraryPage .songRow.active {
+  box-shadow: none !important;
 }
 
 .libraryPage .songButton {
@@ -487,7 +471,6 @@
   outline-offset: 1px;
 }
 .libraryPage .librarySearch:focus-visible,
-.libraryPage .librarySort:focus-visible,
 .libraryPage .libraryAction:focus-visible {
   outline: 1px solid var(--lt-accent);
   outline-offset: 2px;
@@ -504,7 +487,7 @@
   .libraryTopBar { align-items: stretch; flex-direction: column; gap: 16px; }
   .libraryTopTools { width: 100%; justify-content: stretch; }
   .librarySearch { width: 100%; min-width: 0; flex: 1 1 auto; }
-  .librarySort { flex: 0 0 126px; }
+  .libraryPage .libraryTopTools .librarySort { flex: 0 0 142px; }
   .libraryStats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .libraryMissingBanner { grid-template-columns: auto minmax(0, 1fr); }
   .libraryMissingActions { grid-column: 1 / -1; justify-content: flex-start; }
@@ -515,7 +498,7 @@
 @media (max-width: 560px) {
   .libraryTopTools { flex-wrap: wrap; }
   .librarySearch { flex-basis: 100%; }
-  .librarySort { flex: 1 1 auto; }
+  .libraryPage .libraryTopTools .librarySort { flex: 1 1 auto; }
   .libraryAction { flex: 1 1 auto; }
   .libraryStats { grid-template-columns: 1fr 1fr; gap: 8px; }
   .libraryStat { min-height: 70px; padding: 12px; }

@@ -22,8 +22,7 @@ export default function SettingsView({
           <span className="settingsIntroMark" aria-hidden="true"><SlidersHorizontal size={18} strokeWidth={1.9} /></span>
           <div className="settingsIntroTitle">
             <h1>Settings</h1>
-            <p>Your player, your preferences.</p>
-          </div>
+            </div>
         </div>
         <span className="settingsIntroCurrent" aria-label="Current settings section">
           {settingsRail.tabs.find((tab) => tab.id === settingsCategory)?.label ?? "Settings"}

@@ -5,13 +5,15 @@ type ScreensaverControllerOptions = {
   isPlaying: boolean;
   animeVisuals: boolean;
   animatedBackgrounds: boolean;
+  idleEnabled: boolean;
 };
 
 export function useScreensaverController({
   currentSongId,
   isPlaying,
   animeVisuals,
-  animatedBackgrounds
+  animatedBackgrounds,
+  idleEnabled
 }: ScreensaverControllerOptions) {
   const [now, setNow] = useState(new Date());
   const [screensaverVisible, setScreensaverVisible] = useState(false);
@@ -28,7 +30,7 @@ export function useScreensaverController({
       }
     };
 
-    const canShowScreensaver = screensaverPreviewActive || (animeVisuals && animatedBackgrounds && !isPlaying);
+    const canShowScreensaver = screensaverPreviewActive || (idleEnabled && animeVisuals && animatedBackgrounds && !isPlaying);
 
     const armScreensaverTimer = () => {
       clearScreensaverTimer();
@@ -74,7 +76,7 @@ export function useScreensaverController({
       window.removeEventListener("wheel", handleUserActivity);
       window.removeEventListener("pointermove", handlePointerMoveActivity);
     };
-  }, [currentSongId, isPlaying, screensaverPreviewActive, screensaverVisible, animeVisuals, animatedBackgrounds]);
+  }, [currentSongId, isPlaying, screensaverPreviewActive, screensaverVisible, animeVisuals, animatedBackgrounds, idleEnabled]);
 
   return {
     now, setNow,
