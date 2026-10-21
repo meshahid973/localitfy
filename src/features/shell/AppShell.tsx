@@ -29,9 +29,6 @@ import "./effects.css";
 import "../../styles/view-shell.css";
 
 const SimilarSongsDialog = lazy(() => import("../analysis/SimilarSongsDialog"));
-const SongEditorModal = lazy(() => import("../library/components/SongEditorModal"));
-const DeleteSongModal = lazy(() => import("../library/components/DeleteSongModal"));
-const PlaylistPickerModal = lazy(() => import("../playlists/components/PlaylistPickerModal"));
 const LibraryView = lazy(() => import("../library/LibraryView"));
 const ArtistsView = lazy(() => import("../artists/ArtistsView"));
 const GenresView = lazy(() => import("../genres/GenresView"));
@@ -41,6 +38,9 @@ const CoversView = lazy(() => import("../covers/CoversView"));
 const AnalyticsView = lazy(() => import("../analytics/AnalyticsView"));
 const SettingsView = lazy(() => import("../settings/SettingsView"));
 const DownloadsView = lazy(() => import("../downloads/DownloadsView"));
+const SongEditorModal = lazy(() => import("../library/components/SongEditorModal"));
+const DeleteSongModal = lazy(() => import("../library/components/DeleteSongModal"));
+const PlaylistPickerModal = lazy(() => import("../playlists/components/PlaylistPickerModal"));
 
 export type { AppShellProps } from "./appShell.contract";
 
