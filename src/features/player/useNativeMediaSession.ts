@@ -6,6 +6,7 @@ import { getRendererSafeImageUrl } from "../covers";
 import { clamp } from "../../shared/utils/format";
 
 export type NativeMediaSessionOptions = {
+  audioRef: MutableRefObject<HTMLAudioElement | null>;
   song: Song | null;
   isPlaying: boolean;
   duration: number;
@@ -21,7 +22,7 @@ export type NativeMediaSessionOptions = {
 
 /** Keeps native Windows/media-key ownership independent of App state layout. */
 export function useNativeMediaSession({
-  song, isPlaying, duration, currentTime, playbackSpeed, timeRef,
+  audioRef, song, isPlaying, duration, currentTime, playbackSpeed, timeRef,
   onPlay, onPause, onStop, onPrevious, onNext
 }: NativeMediaSessionOptions) {
   const actionsRef = useRef({ onPlay, onPause, onStop, onPrevious, onNext });
@@ -30,7 +31,7 @@ export function useNativeMediaSession({
   useEffect(() => {
     if (!("mediaSession" in navigator)) return;
     const seekBy = (seconds: number) => {
-      const audio = document.querySelector<HTMLAudioElement>(".appShell audio");
+      const audio = audioRef.current;
       if (!audio) return;
       const limit = duration || audio.duration || 0;
       audio.currentTime = clamp(audio.currentTime + seconds, 0, limit || Number.MAX_SAFE_INTEGER);
@@ -59,7 +60,7 @@ export function useNativeMediaSession({
       navigator.mediaSession.setActionHandler("seekbackward", () => seekBy(-10));
       navigator.mediaSession.setActionHandler("seekforward", () => seekBy(10));
       navigator.mediaSession.setActionHandler("seekto", details => {
-        const audio = document.querySelector<HTMLAudioElement>(".appShell audio");
+        const audio = audioRef.current;
         if (audio && typeof details.seekTime === "number") audio.currentTime = clamp(details.seekTime, 0, duration || audio.duration || 0);
       });
     } catch {
