@@ -22,6 +22,7 @@ import { createPlayerController } from "./features/player/engine/playerControlle
 import { useNativeMediaSession } from "./features/player/useNativeMediaSession";
 import type { ListeningOutcome } from "./features/player/listeningHistory";
 import { usePlayerRuntime } from "./features/player";
+import { devPerfStart, devPerfEnd, measureDevTime } from "./shared/perf/devPerf";
 import type { PlayerEngineSource } from "./features/player/engine/PlayerEngine";
 import {
   initLocalitfyAnalytics,
@@ -1692,7 +1693,7 @@ function MainModeApp() {
 
   const libraryIndexRef = useRef<ReturnType<typeof reconcileLibraryIndex> | null>(null);
   const libraryIndex = useMemo(() => {
-    const next = reconcileLibraryIndex(songs, libraryIndexRef.current ?? undefined);
+    const next = measureDevTime("library:index", () => reconcileLibraryIndex(songs, libraryIndexRef.current ?? undefined));
     libraryIndexRef.current = next;
     return next;
   }, [songs]);
@@ -2788,8 +2789,10 @@ function MainModeApp() {
       setBootStepIndex((step) => Math.min(step + 1, BOOT_STEPS.length - 1));
     }, 240);
 
+    devPerfStart("bootstrap:ipc");
     window.localitfy.bootstrap().then(async (payload) => {
       if (!mounted) return;
+      devPerfEnd("bootstrap:ipc", `${payload.songs?.length ?? 0} songs`);
 
       setBootStep(0, "loading settings and theme...");
 
@@ -4359,6 +4362,7 @@ function MainModeApp() {
       return false;
     }
 
+    devPerfStart(`playback:${song.id}`);
     const generation = playbackTransitionRef.current.requestPlay(song.id);
     const playbackUrl = await resolvePlaybackUrl(song);
     if (!playbackTransitionRef.current.isCurrent(generation, song.id)) return false;
@@ -7033,6 +7037,7 @@ function MainModeApp() {
     playbackTransitionRef.current.playing();
     const song = songRef.current || currentSong;
     if (!song) return;
+    devPerfEnd(`playback:${song.id}`, "audio playing");
 
     pendingPlayRef.current = false;
     setIsPlaying(true);
