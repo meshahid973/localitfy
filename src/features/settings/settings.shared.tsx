@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
-
+import { clamp } from "../../shared/utils/format";
 export function ToggleRow({ label, help, checked, onChange }: {
   label: string;
   help?: string;
