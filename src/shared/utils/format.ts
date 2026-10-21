@@ -1,4 +1,8 @@
 export function clamp(value: number, min: number, max: number) { return Math.max(min, Math.min(max, value)); }
+/** Media inputs may be NaN or infinite; always fall back to the lower bound. */
+export function clampFinite(value: number, min: number, max: number) {
+  return Number.isFinite(value) ? clamp(value, min, max) : min;
+}
 export function collapseSpaces(value: unknown) { return String(value || "").replace(/\s+/g, " ").trim(); }
 export function normalizeUiText(text: string) { return String(text || "").normalize("NFKC").replace(/[\u0300-\u036f]/g, "").replace(/[\u200B-\u200D\uFEFF\u2060\u034F]/g, "").replace(/\p{Cf}/gu, ""); }
 export function lower(text: string) { return normalizeUiText(text).toLowerCase(); }
