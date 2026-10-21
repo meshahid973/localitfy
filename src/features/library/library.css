@@ -50,15 +50,6 @@
   gap: 7px;
 }
 
-.libraryEyebrow {
-  margin: 0;
-  color: var(--lt-accent);
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: .11em;
-  text-transform: uppercase;
-}
-
 .libraryHeading h1 {
   margin: 0;
   color: var(--lt-text);
