@@ -500,6 +500,7 @@ declare global {
 
       importSongs: () => Promise<Song[]>;
       repairMissingMetadata: (payload?: Record<string, unknown>) => Promise<LocalitfyMetadataRepairResult>;
+      repairMovedSongs: () => Promise<{ ok: boolean; canceled?: boolean; changedCount: number; songs?: Song[]; message?: string; ambiguous?: number; missingCount?: number }>;
       scanAlbumFolder?: (payload?: { mode?: "single" | "library" }) => Promise<LocalitfyAlbumFolderScanResult>;
       importAlbumFolder?: (payload: { scanId: string }) => Promise<LocalitfyAlbumFolderImportResult>;
       clearLibrary: () => Promise<Song[]>;
