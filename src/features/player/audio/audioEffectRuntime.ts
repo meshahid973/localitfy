@@ -18,11 +18,7 @@ export type AudioEffectProfile = {
   lowpassHz: number;
 };
 
-function clamp(value: number, min: number, max: number) {
-  if (!Number.isFinite(value)) return min;
-  return Math.min(max, Math.max(min, value));
-}
-
+import { clampFinite as clamp } from "../../../shared/utils/format";
 export function normalizeAudioEffectMode(value: unknown): AudioEffectMode {
   const mode = String(value || "normal")
     .trim()
