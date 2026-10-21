@@ -20,11 +20,7 @@ const MEDIA_EVENTS: readonly PlayerEngineEvent[] = [
   "error"
 ];
 
-function clamp(value: number, min: number, max: number) {
-  if (!Number.isFinite(value)) return min;
-  return Math.min(max, Math.max(min, value));
-}
-
+import { clampFinite as clamp } from "../../../shared/utils/format";
 export class HtmlAudioEngine implements PlayerEngine {
   readonly element: HTMLAudioElement;
 
