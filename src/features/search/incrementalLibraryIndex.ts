@@ -73,14 +73,18 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
   };
 }
 
+/** Trust the index hint only if it still names this song after sorting/filtering. */
+function resolveSongIndex(songs: readonly Song[], id: string, expectedIndex?: number): number {
+  const index = Number.isInteger(expectedIndex) ? Number(expectedIndex) : -1;
+  return index >= 0 && index < songs.length && songs[index].id === id
+    ? index : songs.findIndex(song => song.id === id);
+}
+
 /** Patch one song while preserving all untouched song object identities. */
 export function patchLibrarySong(
   songs: readonly Song[], id: string, patch: Partial<Song>, expectedIndex?: number
 ): Song[] {
-  let index = Number.isInteger(expectedIndex) ? Number(expectedIndex) : -1;
-  if (index < 0 || index >= songs.length || songs[index].id !== id) {
-    index = songs.findIndex(song => song.id === id);
-  }
+  const index = resolveSongIndex(songs, id, expectedIndex);
   if (index < 0) return songs as Song[];
   const next = songs.slice();
   next[index] = { ...next[index], ...patch };
@@ -90,10 +94,7 @@ export function patchLibrarySong(
 export function replaceLibrarySong(
   songs: readonly Song[], updated: Song, expectedIndex?: number
 ): Song[] {
-  let index = Number.isInteger(expectedIndex) ? Number(expectedIndex) : -1;
-  if (index < 0 || index >= songs.length || songs[index].id !== updated.id) {
-    index = songs.findIndex(song => song.id === updated.id);
-  }
+  const index = resolveSongIndex(songs, updated.id, expectedIndex);
   if (index < 0 || songs[index] === updated) return songs as Song[];
   const next = songs.slice();
   next[index] = updated;
