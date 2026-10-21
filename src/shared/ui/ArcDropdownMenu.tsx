@@ -23,6 +23,7 @@ export type ArcDropdownMenuProps<T extends string> = {
   items: readonly ArcDropdownItem<T>[];
   onValueChange: (value: T) => void;
   className?: string;
+  disabled?: boolean;
 };
 
 const EDGE_GAP = 12;
@@ -31,7 +32,7 @@ const MENU_PADDING = 5;
 const THEME_VARS = ["--lt-text", "--lt-muted", "--lt-accent", "--lt-surface", "--lt-surface-raised", "--lt-border"] as const;
 
 export function ArcDropdownMenu<T extends string>({
-  ariaLabel, value, items, onValueChange, className = ""
+  ariaLabel, value, items, onValueChange, className = "", disabled = false
 }: ArcDropdownMenuProps<T>) {
   const menuId = useId();
   const reducedMotion = useReducedMotion();
@@ -50,8 +51,8 @@ export function ArcDropdownMenu<T extends string>({
     const trigger = triggerRef.current;
     if (!trigger) return;
     const rect = trigger.getBoundingClientRect();
-    const width = Math.min(Math.max(rect.width, 176), Math.max(176, window.innerWidth - EDGE_GAP * 2));
-    const height = items.length * ITEM_HEIGHT + MENU_PADDING * 2;
+    const width = Math.min(Math.max(rect.width, 176), Math.max(0, window.innerWidth - EDGE_GAP * 2));
+    const height = Math.min(items.length * ITEM_HEIGHT + MENU_PADDING * 2, Math.max(100, window.innerHeight - EDGE_GAP * 2));
     const left = Math.max(EDGE_GAP, Math.min(rect.right - width, window.innerWidth - width - EDGE_GAP));
     const below = rect.bottom + 6;
     const top = below + height > window.innerHeight - EDGE_GAP && rect.top - height - 6 >= EDGE_GAP
@@ -77,6 +78,10 @@ export function ArcDropdownMenu<T extends string>({
   }, [open, placeMenu]);
 
   useEffect(() => {
+    if (disabled) setOpen(false);
+  }, [disabled]);
+
+  useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target;
@@ -99,7 +104,7 @@ export function ArcDropdownMenu<T extends string>({
     if (restoreFocus) triggerRef.current?.focus();
   };
   const start = (fromEnd = false) => {
-    if (firstEnabled < 0) return;
+    if (disabled || firstEnabled < 0) return;
     const next = fromEnd ? items.findLastIndex(item => !item.disabled) : selected?.disabled ? firstEnabled : selectedIndex;
     setActiveIndex(next);
     setOpen(true);
@@ -129,7 +134,7 @@ export function ArcDropdownMenu<T extends string>({
     }
   };
   const choose = (item: ArcDropdownItem<T>) => {
-    if (item.disabled) return;
+    if (disabled || item.disabled) return;
     onValueChange(item.value);
     close(true);
   };
@@ -141,6 +146,7 @@ export function ArcDropdownMenu<T extends string>({
         type="button"
         className={"arcDropdownTrigger " + className}
         aria-label={ariaLabel}
+        disabled={disabled}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}

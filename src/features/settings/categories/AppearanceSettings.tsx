@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SidebarTabsSettings from "./SidebarTabsSettings";
+import { ArcDropdownMenu } from "../../../shared/ui/ArcDropdownMenu";
 import type { Settings } from "../settings.types";
 import type { ThemeId } from "../theme.types";
 import { ToggleRow } from "../settings.shared";
@@ -66,14 +67,16 @@ export default function AppearanceSettings(props: AppearanceSettingsProps) {
       <div className="settingsAppearanceTopGrid">
         <div className="settingsPanelCard settingsAppearanceThemeCard">
           <div className="settingsPanelHeader"><div><strong>App theme</strong><span>Applied across Home, Library and Liked songs.</span></div></div>
-          <label className="settingsSelectField">
+          <div className="settingsSelectField">
             <span>Theme preset</span>
-            <select value={settings.theme} disabled={settings.customThemeEnabled}
-              onChange={(event) => void updateSetting("theme", event.currentTarget.value as ThemeId)}
-              aria-label="Choose theme">
-              {props.visibleThemes.map((theme) => <option key={theme.id} value={theme.id}>{theme.name}</option>)}
-            </select>
-          </label>
+            <ArcDropdownMenu
+              ariaLabel="Choose theme"
+              value={settings.theme}
+              disabled={settings.customThemeEnabled}
+              items={props.visibleThemes.map(theme => ({ value: theme.id as ThemeId, label: theme.name }))}
+              onValueChange={theme => void updateSetting("theme", theme)}
+            />
+          </div>
           <div className="settingsThemeSelectedPreview" aria-live="polite">
             <span className="settingsThemeDot" style={{ background: props.themeSwatchColors[props.effectiveTheme] ?? props.themeSwatchColors.mint }} aria-hidden="true" />
             <div><strong>{settings.customThemeEnabled ? "Custom palette" : props.currentTheme.name}</strong>

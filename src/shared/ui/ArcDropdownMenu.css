@@ -76,3 +76,7 @@
 @media (prefers-reduced-motion: reduce) {
   .arcDropdownTrigger, .arcDropdownChevron { transition: none; }
 }
+
+.arcDropdownTrigger:disabled { opacity: .45; cursor: not-allowed; }
+.arcDropdownMenu { max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain; }
+.settingsPage .settingsSelectField .arcDropdownTrigger { width: 100%; min-width: 0; border-radius: 9px; min-height: 40px; }

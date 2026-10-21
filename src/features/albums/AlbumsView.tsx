@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { Check, FolderInput, FolderTree, ListPlus, Pencil, Play, Plus, Shuffle, Trash2, X } from "lucide-react";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
+import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { Cover } from "../covers/Cover";
 import { CheckMiniIcon, EmptyCoverIcon, LocaltifyStateCard, PlusMiniIcon } from "../../shared/ui/LocaltifyViewUi";
@@ -238,12 +239,10 @@ export default function AlbumsView(props: AlbumsViewProps) {
                     placeholder="search albums or artists"
                     aria-label="search albums"
                   />
-                  <select className="albumsSortV318" value={albumSortMode} onChange={(event) => setAlbumSortMode(event.currentTarget.value)} aria-label="sort albums">
-                    <option value="recent">recently added</option>
-                    <option value="title">title</option>
-                    <option value="artist">artist</option>
-                    <option value="year">year</option>
-                  </select>
+                  <ArcDropdownMenu className="albumsSortV318" value={albumSortMode} onValueChange={setAlbumSortMode}
+                     ariaLabel="Sort albums"
+                     items={[{ value: "recent", label: "recently added" }, { value: "title", label: "title" },
+                       { value: "artist", label: "artist" }, { value: "year", label: "year" }]} />
                 </PageHeader>
 
                 <div className="albumsActionBarV318">

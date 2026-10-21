@@ -39,9 +39,9 @@
 .albumsPageV318 input::placeholder { color: var(--lt-faint); }
 .albumsDeleteAllV318 { margin-left: auto; }
 .albumsPageV318 .albumsSortV318 {
-  min-width: 140px; height: 42px; padding: 0 14px; border: 1px solid rgba(var(--lt-accent-rgb), .09);
-  border-radius: 999px; outline: none; color: var(--lt-text); background: var(--lt-surface);
-  font: inherit; font-size: 12px; color-scheme: inherit; cursor: pointer;
+  min-width: 154px;
+  background: var(--lt-surface);
+  border-color: rgba(var(--lt-accent-rgb), .13);
 }
 .albumsGridV318 { min-width: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(180px,100%),1fr)); gap: 15px; align-items: start; }
 .albumCardV318 { min-width: 0; display: grid; align-content: start; gap: 9px; padding: 11px; border: 1px solid var(--albums-border); border-radius: 12px; background: var(--lt-surface); color: var(--albums-text); text-align: left; font: inherit; cursor: pointer; }
