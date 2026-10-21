@@ -555,6 +555,10 @@ declare global {
       clearListeningHistory: () => Promise<AnalysisStatus>;
       recordPlayEvent: (payload: PlayEvent) => Promise<boolean>;
       getLyrics: (payload: { id: string; refresh?: boolean }) => Promise<import("./features/lyrics/lyrics.types").LyricsResult>;
+      searchManualLyrics: (payload: { id: string; query: string }) => Promise<import("./features/lyrics/lyrics.types").ManualLyricsMatch[]>;
+      selectManualLyrics: (payload: { id: string; recordId: number }) => Promise<import("./features/lyrics/lyrics.types").LyricsResult>;
+      setLyricsOffset: (payload: { id: string; offsetSeconds: number }) => Promise<import("./features/lyrics/lyrics.types").LyricsResult>;
+      clearManualLyrics: (payload: { id: string }) => Promise<import("./features/lyrics/lyrics.types").LyricsResult>;
       clearLyricsCache: () => Promise<boolean>;
       patchSong: (id: string, patch: Partial<Song>) => Promise<Song | null>;
       deleteSong: (id: string) => Promise<Song[]>;
