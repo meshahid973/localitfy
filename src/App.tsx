@@ -19,6 +19,7 @@ import {
 import { useProximityMotion } from "./features/shell/useProximityMotion";
 import { HtmlAudioEngine } from "./features/player/engine/htmlAudioEngine";
 import { createPlayerController } from "./features/player/engine/playerController";
+import { useNativeMediaSession } from "./features/player/useNativeMediaSession";
 import type { ListeningOutcome } from "./features/player/listeningHistory";
 import { usePlayerRuntime } from "./features/player";
 import type { PlayerEngineSource } from "./features/player/engine/PlayerEngine";
@@ -3025,72 +3026,19 @@ function MainModeApp() {
   }, [settings.volume, currentId, isPlaying, songs]);
 
 
-  useEffect(() => {
-    if (!("mediaSession" in navigator)) return;
-
-    const seekBy = (seconds: number) => {
-      const audio = audioRef.current;
-      if (!audio) return;
-
-      const duration = currentDuration || audio.duration || 0;
-      audio.currentTime = clamp(audio.currentTime + seconds, 0, duration || Number.MAX_SAFE_INTEGER);
-    };
-
-    try {
-      const mediaArtworkSrc = getRendererSafeImageUrl(currentSong?.coverUrl);
-      const artwork = mediaArtworkSrc
-        ? ([96, 128, 192, 256, 512].map((size) => ({
-            src: mediaArtworkSrc,
-            sizes: `${size}x${size}`,
-            type: "image/png"
-          })) as MediaImage[])
-        : [];
-
-      navigator.mediaSession.metadata = currentSong
-        ? new MediaMetadata({
-            title: currentSong.title || "Unknown song",
-            artist: prettyMeta(currentSong.artist) || "Unknown artist",
-            album: currentSong.album || "localtify",
-            artwork
-          })
-        : null;
-
-      navigator.mediaSession.playbackState = currentSong ? (isPlaying ? "playing" : "paused") : "none";
-      navigator.mediaSession.setActionHandler("play", () => setIsPlaying(true));
-      navigator.mediaSession.setActionHandler("pause", () => setIsPlaying(false));
-      navigator.mediaSession.setActionHandler("stop" as MediaSessionAction, () => stopPlaybackFromNative());
-      navigator.mediaSession.setActionHandler("previoustrack", () => playPrevious());
-      navigator.mediaSession.setActionHandler("nexttrack", () => playNext(true));
-      navigator.mediaSession.setActionHandler("seekbackward", () => seekBy(-10));
-      navigator.mediaSession.setActionHandler("seekforward", () => seekBy(10));
-      navigator.mediaSession.setActionHandler("seekto", (details) => {
-        const audio = audioRef.current;
-        if (audio && typeof details.seekTime === "number") audio.currentTime = clamp(details.seekTime, 0, currentDuration || audio.duration || 0);
-      });
-    } catch {
-      // media session is optional and should never break playback
-    }
-  }, [currentSong?.id, currentSong?.coverUrl, currentSong?.title, currentSong?.artist, currentSong?.album, isPlaying, currentDuration]);
-
-  useEffect(() => {
-    if (!("mediaSession" in navigator) || !currentSong) return;
-
-    try {
-      const canSetPosition = typeof navigator.mediaSession.setPositionState === "function";
-      if (!canSetPosition) return;
-
-      const duration = Math.max(0, Number(currentDuration) || 0);
-      const position = clamp(Number(timeRef.current || currentTime) || 0, 0, duration || Number.MAX_SAFE_INTEGER);
-
-      navigator.mediaSession.setPositionState({
-        duration: duration || Math.max(position, 1),
-        playbackRate: clamp(Number(settings.playbackSpeed) || 1, 0.5, 2),
-        position
-      });
-    } catch {
-      // Windows media progress is optional; never risk playback for it.
-    }
-  }, [currentSong?.id, currentDuration, settings.playbackSpeed]);
+  useNativeMediaSession({
+    song: currentSong,
+    isPlaying,
+    duration: currentDuration,
+    currentTime,
+    playbackSpeed: settings.playbackSpeed,
+    timeRef,
+    onPlay: () => setIsPlaying(true),
+    onPause: () => setIsPlaying(false),
+    onStop: stopPlaybackFromNative,
+    onPrevious: () => playPrevious(),
+    onNext: () => playNext(true)
+  });
 
   useEffect(() => {
     window.localitfy.setMinimizeToTray?.(settings.minimizeToTray).catch(() => undefined);
