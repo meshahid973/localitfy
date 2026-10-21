@@ -11,6 +11,7 @@ function createDatabaseRepositories(databaseModule) {
       get: requireFunction(databaseModule, "getSong"),
       insertMany: requireFunction(databaseModule, "insertSongs"),
       patch: requireFunction(databaseModule, "patchSong"),
+      relinkPaths: requireFunction(databaseModule, "relinkSongPaths"),
       remove: requireFunction(databaseModule, "deleteSong"),
       clear: requireFunction(databaseModule, "clearLibrary")
     }),
