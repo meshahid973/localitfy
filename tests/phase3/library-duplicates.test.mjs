@@ -94,3 +94,14 @@ test("merging folds likes, plays, playlists, history and lyrics into the kept so
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   assert.match(result.stdout, /duplicate-merge.*passed/);
 });
+
+test("multiple duplicate track groups without album metadata are shown as one reviewable set", () => {
+  const songs = ["Alpha", "Beta"].flatMap((title, i) => [
+    song(`/music/0${i + 1} ${title}.mp3`, title, { id: `mp3-${i}`, album: "Local files" }),
+    song(`/music/0${i + 1} ${title}.m4a`, title, { id: `m4a-${i}`, album: "Local files" })
+  ]);
+  const sets = findDuplicates(songs);
+  assert.equal(sets.length, 1);
+  assert.equal(sets[0].groups.length, 2);
+  assert.equal(sets[0].kind, "album", "all affected tracks are shown instead of only the first group");
+});
