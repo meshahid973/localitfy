@@ -64,7 +64,7 @@ export default function DuplicatesDialog({ songs, onClose, onMerged }: Duplicate
       const result = await window.localitfy.mergeDuplicates({ merges, moveToTrash });
       if (!result.ok || !result.songs || !result.merges) { setMessage(result.message || "Could not merge duplicates. Nothing was changed."); return; }
       onMerged({ merges: result.merges, songs: result.songs });
-      const trash = moveToTrash ? ` ${result.trashed} file${result.trashed === 1 ? "" : "s"} moved to the Trash${result.trashFailed ? `, ${result.trashFailed} could not be moved` : ""}.` : "";
+      const trash = moveToTrash ? ` ${result.trashed} file${result.trashed === 1 ? "" : "s"} moved to the Trash${result.trashFailed ? `, ${result.trashFailed} could not be moved` : ""}${result.skippedShared ? `, ${result.skippedShared} shared file path${result.skippedShared === 1 ? "" : "s"} left untouched` : ""}.` : "";
       setMessage(`Removed ${result.removedCount} duplicate${result.removedCount === 1 ? "" : "s"}.${trash}`);
       setSets(null); setAttempt((value) => value + 1);
     } catch {
@@ -89,6 +89,8 @@ export default function DuplicatesDialog({ songs, onClose, onMerged }: Duplicate
       {scanError ? <div className="duplicatesNotice" role="alert"><p>{scanError}</p>
         <button type="button" className="duplicatesAction" onClick={() => setAttempt((value) => value + 1)}><RefreshCw size={15} />Scan again</button></div> : null}
       {sets && !sets.length ? <p className="duplicatesNotice" role="status">No duplicates found.</p> : null}
+      {sets?.some((set) => set.groups.some((group) => group.confidence === "metadata")) ?
+        <p className="duplicatesNotice" role="note">Some matches are based on titles, artists and duration only. Review and select those groups manually before merging.</p> : null}
       {sets?.map((set) => {
         const first = songsById.get(set.groups[0].keepId);
         const choice = choices.get(set.id) || null;
