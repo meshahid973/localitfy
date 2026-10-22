@@ -86,4 +86,4 @@ function createLastfmClient({ apiKey, cacheFile, fetch = globalThis.fetch, now =
   };
 }
 
-module.exports = { createLastfmClient, LastfmError };
+module.exports = { createLastfmClient, LastfmError, API_URL, errorFor };

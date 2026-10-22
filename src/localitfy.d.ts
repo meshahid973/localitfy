@@ -5,6 +5,7 @@ import type { PlayEvent } from "./features/player/listeningHistory";
 import type { Song } from "./features/library/song.types";
 import type { Settings } from "./features/settings/settings.types";
 import type { DiscoverResult } from "./features/discover/discover.types";
+import type { ScrobbleAnswer, ScrobbleService, ScrobbleStatus } from "./features/scrobbling/scrobble.types";
 
 export {};
 
@@ -516,6 +517,14 @@ declare global {
       onWatchedFoldersChange: (callback: (payload: { importedCount: number; libraryChanged: boolean; songs: Song[] }) => void) => () => void;
       /** Music from outside the library, from Last.fm. Off until turned on in Discover. */
       getDiscoveries: (payload?: { refresh?: boolean }) => Promise<DiscoverResult>;
+      /** Scrobbling credentials never leave Electron’s main process. */
+      getScrobbleStatus: () => Promise<ScrobbleStatus>;
+      connectLastfmScrobbling: (payload: { apiKey: string; sharedSecret: string }) => Promise<ScrobbleAnswer>;
+      cancelScrobbleConnect: () => Promise<ScrobbleStatus>;
+      connectListenbrainz: (payload: { token: string }) => Promise<ScrobbleAnswer>;
+      disconnectScrobbling: (service: ScrobbleService) => Promise<ScrobbleStatus>;
+      sendScrobblesNow: () => Promise<ScrobbleAnswer>;
+      sendScrobbleHistory: (service: ScrobbleService) => Promise<ScrobbleAnswer>;
       repairMovedSongs: () => Promise<{ ok: boolean; canceled?: boolean; changedCount: number; songs?: Song[]; message?: string; ambiguous?: number; missingCount?: number }>;
       findDuplicates: () => Promise<{ ok: boolean; sets?: DuplicateSet[]; scanned?: number; analyzed?: number; message?: string }>;
       mergeDuplicates: (payload: { merges: DuplicateMerge[]; moveToTrash?: boolean }) => Promise<{ ok: boolean; removedCount?: number; trashed?: number; trashFailed?: number; skippedShared?: number; merges?: DuplicateMerge[]; songs?: Song[]; message?: string }>;
