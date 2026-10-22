@@ -7,8 +7,14 @@ function startScrobbling(router, { file, getSong, listPlays, safeStorage, shell,
   const secure = safeStorage?.isEncryptionAvailable?.() === true;
   const scrobbler = createScrobbler({
     file, getSong, listPlays,
-    ...(secure ? { encrypt: (text) => `safe:${safeStorage.encryptString(text).toString("base64")}`,
-      decrypt: (text) => (text.startsWith("safe:") ? safeStorage.decryptString(Buffer.from(text.slice(5), "base64")) : text.replace(/^plain:/, "")) } : {}),
+    encrypt: (text) => {
+      if (!secure) throw new Error("Secure credential storage is not available on this device.");
+      return `safe:${safeStorage.encryptString(text).toString("base64")}`;
+    },
+    decrypt: (text) => {
+      if (!secure || !String(text).startsWith("safe:")) throw new Error("Encrypted scrobbling credentials are unavailable. Reconnect securely.");
+      return safeStorage.decryptString(Buffer.from(text.slice(5), "base64"));
+    },
     openUrl: (url) => shell.openExternal(url)
   });
   const answer = async (task) => {
