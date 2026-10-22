@@ -17,7 +17,10 @@ class ScrobbleError extends Error {
 const offline = (service) => new ScrobbleError(`Couldn't reach ${service}. Plays are kept and sent later.`, { retry: true });
 
 function createLastfmService({ apiKey, secret, fetch = globalThis.fetch }) {
-  // https://www.last.fm/api/authspec: md5 of the sorted parameters (minus format) followed by the secret.
+  // Last.fm desktop API mandates MD5 api_sig over sorted parameters + the shared secret.
+  // This is an external protocol constraint, NOT password hashing or encryption.
+  // Credentials are encrypted at rest with Electron safeStorage; requests use HTTPS.
+  // https://www.last.fm/api/desktopauth (section 6, Sign your calls).
   const sign = (params) => crypto.createHash("md5")
     .update(Object.keys(params).sort().map((key) => key + params[key]).join("") + secret, "utf8").digest("hex");
 
