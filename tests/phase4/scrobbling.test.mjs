@@ -73,6 +73,26 @@ test("connecting Last.fm opens the approval page, waits for approval, and stores
   } finally { h.cleanup(); }
 });
 
+test("cancelling Last.fm authorization while approval is loading cannot connect later", async () => {
+  let finishSession;
+  let sessionRequested;
+  const requested = new Promise((resolve) => { sessionRequested = resolve; });
+  const h = harness({ answer: (call) => {
+    if (call.body.method !== "auth.getSession") return undefined;
+    sessionRequested();
+    return new Promise((resolve) => { finishSession = resolve; });
+  } });
+  try {
+    const connecting = h.scrobbler.connectLastfm({ apiKey: KEY, sharedSecret: SECRET });
+    await requested;
+    h.scrobbler.cancelConnect();
+    finishSession({ session: { key: "late-session", name: "late-user" } });
+    await assert.rejects(connecting, /Connecting was cancelled/);
+    assert.equal(h.scrobbler.status().lastfm.connected, false);
+    assert.equal(h.scrobbler.status().connecting, "");
+  } finally { h.cleanup(); }
+});
+
 test("a shared secret from another API account gets a clear error", async () => {
   const h = harness({ answer: () => ({ error: 13, message: "Invalid method signature supplied" }) });
   try {
