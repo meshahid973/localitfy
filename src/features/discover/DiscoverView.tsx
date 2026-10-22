@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Compass, ExternalLink, Plus, RefreshCw, Settings2, UserX } from "lucide-react";
 import { PageHeader } from "../../shared/ui/PageHeader";
+import { splitArtistCredits } from "../artists/artistCredits";
 import type { NotForMeKind } from "../analysis/notForMe";
 import type { SpotifyTrack } from "../downloads/download.types";
 import type { Settings } from "../settings/settings.types";
@@ -32,14 +33,24 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const [showSettings, setShowSettings] = useState(false);
   const [keyDraft, setKeyDraft] = useState(settings.lastfmApiKey || "");
   const [picked, setPicked] = useState<Map<string, DiscoverTrack>>(() => new Map());
+  const requestVersionRef = useRef(0);
 
   const load = useCallback(async (refresh = false) => {
+    const requestVersion = ++requestVersionRef.current;
     setLoading(true);
-    try { setResult(await window.localitfy.getDiscoveries({ refresh })); }
-    catch { setResult({ status: "error", error: "Discover failed. Please try again." }); }
-    finally { setLoading(false); }
+    try {
+      const result = await window.localitfy.getDiscoveries({ refresh });
+      if (requestVersion === requestVersionRef.current) setResult(result);
+    } catch {
+      if (requestVersion === requestVersionRef.current) setResult({ status: "error", error: "Discover failed. Please try again." });
+    } finally {
+      if (requestVersion === requestVersionRef.current) setLoading(false);
+    }
   }, []);
-  useEffect(() => { void load(); }, [load, settings.discoverEnabled, settings.lastfmApiKey]);
+  useEffect(() => {
+    void load();
+    return () => { requestVersionRef.current += 1; };
+  }, [load, settings.discoverEnabled, settings.lastfmApiKey]);
 
   const togglePick = (track: DiscoverTrack) => setPicked((current) => {
     const next = new Map(current);
@@ -47,6 +58,18 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     return next;
   });
   const sendPicked = () => { sendToDownloads([...picked.values()].map(toDownload)); setPicked(new Map()); };
+  const dismissArtist = (name: string) => {
+    notForMe?.toggle("artist", name);
+    const normalized = name.trim().toLocaleLowerCase();
+    const includesArtist = (value: string) => splitArtistCredits(value).some((credit) => credit.toLocaleLowerCase() === normalized);
+    setResult((current) => current?.status === "ready" ? {
+      ...current,
+      artists: current.artists.filter((artist) => !includesArtist(artist.name))
+        .map((artist) => ({ ...artist, topTracks: artist.topTracks.filter((track) => !includesArtist(track.artist)) })),
+      tracks: current.tracks.filter((track) => !includesArtist(track.artist))
+    } : current);
+    setPicked((current) => new Map([...current].filter(([, track]) => !includesArtist(track.artist))));
+  };
 
   async function turnOn() {
     await updateSetting("lastfmApiKey", keyDraft.trim());
@@ -109,7 +132,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
           <header>
             <button type="button" className="discoverName" onClick={() => openLink(artist.url)} title="Open on Last.fm">{artist.name}</button>
             {notForMe ? <button type="button" className="discoverPick" aria-label={`Not for me: ${artist.name}`} title="Not for me"
-              onClick={() => notForMe.toggle("artist", artist.name)}><UserX size={14} /></button> : null}
+              onClick={() => dismissArtist(artist.name)}><UserX size={14} /></button> : null}
           </header>
           <p className="discoverBecause">because you play {listNames(artist.because)}{artist.seedCount > artist.because.length ? ` and ${artist.seedCount - artist.because.length} more` : ""}</p>
           {artist.topTracks.length ? <ul className="discoverTracks">
