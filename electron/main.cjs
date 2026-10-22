@@ -9,7 +9,7 @@ const { startLibraryWatch } = require("./library-watch.cjs");
 let libraryWatcher = null;
 const { registerDuplicateIpc } = require("./ipc/library-duplicates.cjs");
 const { registerDiscoverIpc } = require("./ipc/discover.cjs");
-const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes } = require("./runtime/protocols.cjs");
+const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes, getLocaltifyRendererMimeType } = require("./runtime/protocols.cjs");
 const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings, createWindowsStartupRuntime } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
 const { loadLocaltifyEnv } = require("./runtime/environment.cjs");
@@ -1950,27 +1950,6 @@ function safeRendererProtocolPathname(requestUrl) {
 }
 function getRendererProtocolEntryUrl() { return `${LOCALTIFY_RENDERER_PROTOCOL}://app/index.html`; }
 function isPackagedLinuxAppImageRuntime() { return Boolean(app.isPackaged && process.platform === "linux"); }
-function getLocaltifyRendererMimeType(filePath) {
-  const ext = String(path.extname(filePath || "") || "").toLowerCase();
-  switch (ext) {
-    case ".html": return "text/html; charset=utf-8";
-    case ".js": case ".mjs": return "text/javascript; charset=utf-8";
-    case ".css": return "text/css; charset=utf-8";
-    case ".json": return "application/json; charset=utf-8";
-    case ".svg": return "image/svg+xml";
-    case ".png": return "image/png";
-    case ".jpg": case ".jpeg": return "image/jpeg";
-    case ".gif": return "image/gif";
-    case ".webp": return "image/webp";
-    case ".ico": return "image/x-icon";
-    case ".woff": return "font/woff";
-    case ".woff2": return "font/woff2";
-    case ".mp3": return "audio/mpeg";
-    case ".wav": return "audio/wav";
-    case ".ogg": return "audio/ogg";
-    default: return "application/octet-stream";
-  }
-}
 function readLocaltifyRendererFile(filePath) {
   return new Promise((resolve, reject) => fs.readFile(filePath, (error, data) => error ? reject(error) : resolve(data)));
 }
