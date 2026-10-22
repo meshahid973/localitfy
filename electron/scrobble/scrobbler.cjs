@@ -206,6 +206,8 @@ function createScrobbler({ file, getSong, listPlays = () => [], encrypt = () => 
           await new Promise((resolve) => setTimer(resolve, CONNECT_POLL_MS));
           if (attempt !== connectAttempt) throw new Error("Connecting was cancelled.");
           const session = await api.getSession(token);
+          // Cancellation may happen while the session request is in flight.
+          if (attempt !== connectAttempt) throw new Error("Connecting was cancelled.");
           if (session) {
             signIn("lastfm", { apiKey, secret: encrypt(secret), session: encrypt(session.sessionKey), username: session.username });
             return this.status();
