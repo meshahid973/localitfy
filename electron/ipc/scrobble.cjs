@@ -22,9 +22,13 @@ function startScrobbling(router, { file, getSong, listPlays, safeStorage, shell,
     catch (error) { return { ok: false, error: error?.message || "Something went wrong.", status: scrobbler.status() }; }
   };
   router.handle("scrobble:status", async () => scrobbler.status());
-  router.handle("scrobble:connect-lastfm", (_event, payload = {}) => answer(() => scrobbler.connectLastfm(payload)));
+  router.handle("scrobble:connect-lastfm", (_event, payload = {}) => secure
+    ? answer(() => scrobbler.connectLastfm(payload))
+    : Promise.resolve({ ok: false, error: "Secure credential storage is unavailable on this device.", status: scrobbler.status() }));
   router.handle("scrobble:cancel-connect", async () => { scrobbler.cancelConnect(); return scrobbler.status(); });
-  router.handle("scrobble:connect-listenbrainz", (_event, payload = {}) => answer(() => scrobbler.connectListenbrainz(payload)));
+  router.handle("scrobble:connect-listenbrainz", (_event, payload = {}) => secure
+    ? answer(() => scrobbler.connectListenbrainz(payload))
+    : Promise.resolve({ ok: false, error: "Secure credential storage is unavailable on this device.", status: scrobbler.status() }));
   router.handle("scrobble:disconnect", async (_event, name) => scrobbler.disconnect(name));
   router.handle("scrobble:send-history", (_event, name) => answer(() => scrobbler.sendHistory(name)));
   router.handle("scrobble:send-now", () => answer(async () => { await scrobbler.flush(); return scrobbler.status(); }));
