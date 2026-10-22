@@ -105,7 +105,7 @@ async function discover({ songs, hiddenArtists = [], client, now = Date.now() })
   const favourites = taste.seeds.slice(0, MISSING_SONG_ARTISTS);
   const favouriteTracks = await settleAll(favourites, (seed) => client.topTracks(seed.name, 15));
   const tracks = favouriteTracks.flatMap((list, index) => list
-    .filter((track) => !taste.ownedTracks.has(trackKey(track.artist || favourites[index].name, track.title)))
+    .filter((track) => !hidden({ artist: track.artist || favourites[index].name }) && !taste.ownedTracks.has(trackKey(track.artist || favourites[index].name, track.title)))
     .slice(0, MISSING_SONGS_PER_ARTIST)
     .map((track) => ({ title: track.title, artist: track.artist || favourites[index].name, url: track.url })));
 
@@ -114,7 +114,7 @@ async function discover({ songs, hiddenArtists = [], client, now = Date.now() })
     generatedAt: now,
     seeds: taste.seeds.map((seed) => seed.name),
     artists: rankedArtists.map((artist, index) => ({ name: artist.name, url: artist.url, because: because(artist), seedCount: artist.reasons.length,
-      topTracks: (topTracks[index] || []).filter((track) => !taste.ownedTracks.has(trackKey(track.artist, track.title))) })),
+      topTracks: (topTracks[index] || []).filter((track) => !hidden({ artist: track.artist || artist.name }) && !taste.ownedTracks.has(trackKey(track.artist, track.title))) })),
     tracks
   };
 }
@@ -127,7 +127,7 @@ function withoutOwned(result, { songs, hiddenArtists = [] }) {
   const keep = (artist) => !ownedArtists.has(key(artist)) && !hidden({ artist });
   return { ...result,
     artists: result.artists.filter((artist) => keep(artist.name))
-      .map((artist) => ({ ...artist, topTracks: artist.topTracks.filter((track) => !ownedTracks.has(trackKey(track.artist, track.title))) })),
+      .map((artist) => ({ ...artist, topTracks: artist.topTracks.filter((track) => !hidden({ artist: track.artist || artist.name }) && !ownedTracks.has(trackKey(track.artist, track.title))) })),
     tracks: result.tracks.filter((track) => !ownedTracks.has(trackKey(track.artist, track.title)) && !hidden({ artist: track.artist })) };
 }
 
