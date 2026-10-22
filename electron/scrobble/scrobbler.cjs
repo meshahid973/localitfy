@@ -50,10 +50,16 @@ function createScrobbler({ file, getSong, listPlays = () => [], encrypt = (text)
     return state;
   }
   function save() {
+    const temporary = file + "." + process.pid + ".tmp";
     try {
       fs.mkdirSync(path.dirname(file), { recursive: true });
-      fs.writeFileSync(file, JSON.stringify(load()), { mode: 0o600 });
-    } catch (error) { log("[localtify scrobble] could not save", error?.message); }
+      fs.writeFileSync(temporary, JSON.stringify(load()), { mode: 0o600 });
+      fs.renameSync(temporary, file);
+    } catch (error) {
+      try { fs.unlinkSync(temporary); } catch {}
+      log("[localtify scrobble] could not save", error?.message);
+      throw error;
+    }
   }
 
   function service(name) {
@@ -109,19 +115,19 @@ function createScrobbler({ file, getSong, listPlays = () => [], encrypt = (text)
       if (name === "lastfm") for (const play of state.queue) if (play.startedAt < cutoff) play.pending = play.pending.filter((item) => item !== name);
       const batch = state.queue.filter((play) => play.pending.includes(name)).slice(0, BATCH[name]);
       if (!batch.length) return;
-      let sent = true;
       try {
         if (name === "lastfm") await target.api.scrobble(target.sessionKey, batch);
         else await target.api.scrobble(batch);
       } catch (error) {
         if (error instanceof ScrobbleError && error.signedOut) { signOut(name, error.message); return; }
         state.lastError = error?.message || "Scrobbling failed.";
-        if (error instanceof ScrobbleError && error.retry) { scheduleRetry(); return; }
-        // Anything else won't succeed on a retry, so these plays are dropped for this service.
-        sent = false;
+        // An uncertain failure must not silently discard plays; retry later.
+        scheduleRetry();
+        return;
       }
       for (const play of batch) play.pending = play.pending.filter((item) => item !== name);
-      if (sent) { state.sent = (state.sent || 0) + batch.length; state.lastSentAt = now(); }
+      state.sent = (state.sent || 0) + batch.length;
+      state.lastSentAt = now();
     }
   }
 
@@ -218,6 +224,7 @@ function createScrobbler({ file, getSong, listPlays = () => [], encrypt = (text)
     },
     /** Queues this device's earlier plays for one service, once. */
     async sendHistory(name) {
+      if (!SERVICES.includes(name)) throw new TypeError("Unknown scrobbling service");
       const saved = load()[name];
       if (!saved) throw new Error("Connect first.");
       const queue = state.queue;
