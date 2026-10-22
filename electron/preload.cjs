@@ -12,6 +12,14 @@ contextBridge.exposeInMainWorld("localitfy", {
   clearLibrary: () => ipcRenderer.invoke("library:clear"),
   repairMissingMetadata: (payload) => ipcRenderer.invoke("library:repair-missing-metadata", payload),
   repairMovedSongs: () => ipcRenderer.invoke("library:repair-moved-songs"),
+  getWatchedFolderStatus: () => ipcRenderer.invoke("library:watch-status"),
+  checkWatchedFolders: () => ipcRenderer.invoke("library:watch-check"),
+  chooseWatchedFolder: () => ipcRenderer.invoke("library:watch-choose-folder"),
+  onWatchedFoldersChange: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("library:watched-change", handler);
+    return () => ipcRenderer.removeListener("library:watched-change", handler);
+  },
   findDuplicates: () => ipcRenderer.invoke("library:find-duplicates"),
   mergeDuplicates: (payload) => ipcRenderer.invoke("library:merge-duplicates", payload),
   getDiscoveries: (payload) => ipcRenderer.invoke("discover:get", payload),

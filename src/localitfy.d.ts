@@ -18,6 +18,12 @@ type LocalitfyFeedbackStatus = {
   message?: string;
 };
 
+type LocalitfyWatchedFolderStatus = {
+  scanning: boolean;
+  lastImport: { count: number; at: number } | null;
+  folders: Array<{ folder: string; watching: boolean; error: string; checkedAt: number }>;
+};
+
 declare global {
   type LocalitfyPixelArtItem = {
     name: string;
@@ -503,6 +509,11 @@ declare global {
 
       importSongs: () => Promise<Song[]>;
       repairMissingMetadata: (payload?: Record<string, unknown>) => Promise<LocalitfyMetadataRepairResult>;
+      getWatchedFolderStatus: () => Promise<LocalitfyWatchedFolderStatus>;
+      checkWatchedFolders: () => Promise<LocalitfyWatchedFolderStatus & { importedCount: number }>;
+      chooseWatchedFolder: () => Promise<{ canceled: boolean; folder: string }>;
+      /** New files in watched folders were imported, or a library file went missing or came back. */
+      onWatchedFoldersChange: (callback: (payload: { importedCount: number; libraryChanged: boolean; songs: Song[] }) => void) => () => void;
       /** Music from outside the library, from Last.fm. Off until turned on in Discover. */
       getDiscoveries: (payload?: { refresh?: boolean }) => Promise<DiscoverResult>;
       repairMovedSongs: () => Promise<{ ok: boolean; canceled?: boolean; changedCount: number; songs?: Song[]; message?: string; ambiguous?: number; missingCount?: number }>;

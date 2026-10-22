@@ -96,6 +96,8 @@ export type Settings = {
   downloadAutoAdd: boolean;
   downloadCleanTitle: boolean;
   downloadFolder: string;
+  /** Folders whose new audio files are imported automatically. */
+  watchedFolders: string[];
 };
 
 export type CustomThemeColorKey =

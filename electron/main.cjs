@@ -5,6 +5,8 @@ const { createIpcRouter } = require("./ipc/router.cjs");
 const { registerAnalysisIpc, preserveExperimentalSettings } = require("./ipc/analysis.cjs");
 const { registerDiscordIpc } = require("./ipc/discord.cjs");
 const { registerMovedSongRepairIpc } = require("./ipc/library-relink.cjs");
+const { startLibraryWatch } = require("./library-watch.cjs");
+let libraryWatcher = null;
 const { registerDuplicateIpc } = require("./ipc/library-duplicates.cjs");
 const { registerDiscoverIpc } = require("./ipc/discover.cjs");
 const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes } = require("./runtime/protocols.cjs");
@@ -1466,22 +1468,25 @@ async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixel
 async function importNewAudioFilesFromDirectory(directory, tracks = [], options = {}) {
   const includeSongs = options.includeSongs !== false;
   const shapeResult = () => includeSongs ? listSongsShaped() : undefined;
-  const audioFiles = listAudioFilesInDirectory(directory, options);
-  if (!audioFiles.length) return { changedCount: 0, importedCount: 0, songs: shapeResult(), files: [] };
+  const result = await importNewAudioFiles(listAudioFilesInDirectory(directory, options), tracks);
+  if (result.importedCount) console.log("[localtify library refresh] imported new audio files from folder", { folder: directory, changedCount: result.changedCount });
+  return { ...result, songs: shapeResult() };
+}
+/** Adds the files that are not in the library yet (matched by path). Shared by folder refreshes and watched folders. */
+async function importNewAudioFiles(audioFiles, tracks = []) {
   const existingPaths = new Set(getSongs().map((song) => path.normalize(String(song.filePath || "")).toLowerCase()).filter(Boolean));
   const newFiles = audioFiles.filter((filePath) => {
     const key = path.normalize(String(filePath || "")).toLowerCase();
     return key && !existingPaths.has(key);
   });
-  if (!newFiles.length) return { changedCount: 0, importedCount: 0, songs: shapeResult(), files: [] };
+  if (!newFiles.length) return { changedCount: 0, importedCount: 0, files: [] };
   const pixelArtFiles = getPixelArtFiles();
   const usedCovers = new Set();
   const importedSongs = [];
   for (const filePath of newFiles) importedSongs.push(await makeSongFromFileWithMetadata(filePath, tracks, pixelArtFiles, usedCovers));
   const changedCount = insertSongs(importedSongs);
   clearFileInfoCache();
-  console.log("[localtify library refresh] imported new audio files from folder", { folder: directory, found: audioFiles.length, newFiles: newFiles.length, changedCount });
-  return { changedCount, importedCount: importedSongs.length, songs: shapeResult(), files: newFiles };
+  return { changedCount, importedCount: importedSongs.length, files: newFiles };
 }
 
 const albumFolderScanCache = new Map();
@@ -2477,6 +2482,8 @@ app.whenReady().then(async () => {
     } catch (error) { console.log("[localitfy import error]", error?.stack || error?.message); return listSongsShaped(); }
   });
   ipcRouter.handle("library:repair-missing-metadata", async (_event, payload = {}) => { try { return await repairMissingSongMetadata(payload); } catch (error) { console.log("[localtify metadata repair error]", error?.stack || error?.message || error); return { ok: false, error: error?.message || "metadata repair failed", songs: listSongsShaped() }; } });
+  libraryWatcher = startLibraryWatch(ipcRouter, { dialog, isAudioFile, getSongs, getSettings, listSongsShaped,
+    importFiles: (files) => importNewAudioFiles(files), getWindow: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null) });
   registerDiscoverIpc(ipcRouter, { getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json") });
   registerMovedSongRepairIpc(ipcRouter, {
     dialog, BrowserWindow, getWindow: () => mainWindow,
@@ -2574,6 +2581,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("settings:save", async (_event, settings) => {
     try {
       if (!settings || typeof settings !== "object") return getSettings();
+      if (Array.isArray(settings.watchedFolders)) libraryWatcher?.setFolders(settings.watchedFolders);
       if (Object.prototype.hasOwnProperty.call(settings, "startWithWindows")) setStartWithWindows(Boolean(settings.startWithWindows));
       if (Object.prototype.hasOwnProperty.call(settings, "minimizeToTray")) {
         minimizeToTray = Boolean(settings.minimizeToTray);
@@ -2733,6 +2741,7 @@ app.whenReady().then(async () => {
 
 app.on("before-quit", async () => {
   allowQuit = true;
+  libraryWatcher?.dispose();
   if (serviceRuntime) await serviceRuntime.stop("app-before-quit");
   else {
     try { cleanupNativeWindowsMedia(); } catch {}

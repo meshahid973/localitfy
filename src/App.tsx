@@ -2941,6 +2941,12 @@ function MainModeApp() {
   // Heavy automatic MiSide/joke visual mode was removed in V215.
 
 
+  // Watched folders: new files were imported in the background, or a library file went missing or came back.
+  useEffect(() => window.localitfy.onWatchedFoldersChange(({ importedCount, songs: next }) => {
+    setSongs(applyLibraryOrder(sanitizeSongList(next)));
+    if (importedCount) setStatusText(`added ${importedCount} new song${importedCount === 1 ? "" : "s"} from watched folders`);
+  }), []);
+
   useEffect(() => {
     const off = window.localitfy.onDownloadProgress((payload) => {
       const nextProgress = clamp(Number(payload.progress || 0), 0, 100);
