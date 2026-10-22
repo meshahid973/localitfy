@@ -144,7 +144,7 @@ function findDuplicates(songs, { vectors = new Map(), fileSizes = new Map() } = 
       .map(({ key, folder, album, extension, duplicateName, trackCount, rate, rated }) => ({
         key, folder, album, extension, duplicateName, trackCount, kbps: rated ? Math.round(rate / rated * 8 / 1000) : null }));
     set.groups.sort((a, b) => (byId.get(a.keepId).copy.track ?? 999) - (byId.get(b.keepId).copy.track ?? 999) || (a.id < b.id ? -1 : 1));
-    return { id: copies.map((copy) => copy.key).join("&"), kind: copies.some((copy) => copy.album) && set.groups.length > 1 ? "album" : "track",
+    return { id: copies.map((copy) => copy.key).join("&"), kind: set.groups.length > 1 ? "album" : "track",
       recommendedCopy: copies[0].key, copies, groups: set.groups };
   }).sort((a, b) => b.groups.length - a.groups.length || (a.id < b.id ? -1 : 1));
 }
