@@ -86,7 +86,7 @@ export default function ScrobbleSettings({ lastfmApiKey, saveLastfmApiKey }: Scr
           <input className="scrobbleInput" value={token} onChange={(event) => setToken(event.currentTarget.value)} placeholder="User token"
             aria-label="ListenBrainz user token" spellCheck={false} autoComplete="off" type="password" />
           <button type="button" className="settingsActionButton settingsPrimaryAction" disabled={!token.trim() || busy === "listenbrainz"}
-            onClick={() => void run("listenbrainz", () => window.localitfy.connectListenbrainz({ token })).then(() => setToken(""))}>Connect</button>
+            onClick={() => void run("listenbrainz", () => window.localitfy.connectListenbrainz({ token })).then((ok) => { if (ok) setToken(""); })}>Connect</button>
           <button type="button" className="scrobbleLink" onClick={() => openLink("https://listenbrainz.org/settings/")}>Find it <ExternalLink size={12} /></button>
         </div>
       )}
