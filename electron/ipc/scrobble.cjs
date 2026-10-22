@@ -33,7 +33,7 @@ function startScrobbling(router, { file, getSong, listPlays, safeStorage, shell,
   router.handle("scrobble:send-history", (_event, name) => answer(() => scrobbler.sendHistory(name)));
   router.handle("scrobble:send-now", () => answer(async () => { await scrobbler.flush(); return scrobbler.status(); }));
   // Plays left over from last time go out once launch work has settled.
-  setTimeout(() => void scrobbler.flush(), startDelayMs).unref?.();
+  setTimeout(() => { void scrobbler.flush().catch((error) => console.log("[localtify scrobble] startup retry failed", error?.message || error)); }, startDelayMs).unref?.();
   return scrobbler;
 }
 
