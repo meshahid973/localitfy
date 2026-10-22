@@ -5,7 +5,8 @@ export type DuplicateChoices = Map<string, string>;
 
 /** The copy or song each set keeps by default. */
 export function defaultChoices(sets: readonly DuplicateSet[]): DuplicateChoices {
-  return new Map(sets.map((set) => [set.id, set.kind === "album" ? set.recommendedCopy : set.groups[0].keepId]));
+  return new Map(sets.filter((set) => set.groups.every((group) => group.confidence !== "metadata"))
+    .map((set) => [set.id, set.kind === "album" ? set.recommendedCopy : set.groups[0].keepId]));
 }
 
 /**
