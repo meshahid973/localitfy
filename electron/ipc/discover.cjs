@@ -18,17 +18,23 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, fetch, 
     if (!/^[0-9a-f]{32}$/i.test(apiKey)) return { status: "needs-key" };
     const current = { songs: getSongs(), hiddenArtists: Array.isArray(settings.notForMeArtists) ? settings.notForMeArtists : [] };
     if (payload?.refresh !== true && saved?.apiKey === apiKey && now() - saved.result.generatedAt < RESULT_TTL_MS) return withoutOwned(saved.result, current);
-    running ||= (async () => {
-      const client = createLastfmClient({ apiKey, cacheFile, fetch });
+    if (running?.apiKey === apiKey) return running.promise.then((result) => withoutOwned(result, current));
+    const client = createLastfmClient({ apiKey, cacheFile, fetch });
+    const promise = (async () => {
       try {
         const result = await discover({ ...current, client, now: now() });
-        saved = { apiKey, result };
+        // Requests from a previous API key must never overwrite the latest cached result.
+        if (running?.apiKey === apiKey) saved = { apiKey, result };
         return result;
       } catch (error) {
         return { status: "error", error: error?.message || "Discover failed. Please try again." };
-      } finally { client.flush(); running = null; }
+      } finally {
+        client.flush();
+        if (running?.promise === promise) running = null;
+      }
     })();
-    return running;
+    running = { apiKey, promise };
+    return promise.then((result) => withoutOwned(result, current));
   });
 }
 
