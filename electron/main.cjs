@@ -1,11 +1,13 @@
 /* localtify 0.4.1 V425 cover picker and cache cleanup. */
 /* localtify 0.4.1 V424 — Windows startup white-screen recovery. */
-const { app, powerMonitor, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net } = require("electron");
+const { app, powerMonitor, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net, safeStorage } = require("electron");
 const { createIpcRouter } = require("./ipc/router.cjs");
 const { registerAnalysisIpc, preserveExperimentalSettings } = require("./ipc/analysis.cjs");
 const { registerDiscordIpc } = require("./ipc/discord.cjs");
 const { registerMovedSongRepairIpc } = require("./ipc/library-relink.cjs");
 const { registerDiscoverIpc } = require("./ipc/discover.cjs");
+const { startScrobbling } = require("./ipc/scrobble.cjs");
+let scrobbler = null;
 const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes } = require("./runtime/protocols.cjs");
 const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings, createWindowsStartupRuntime } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
@@ -2476,6 +2478,7 @@ app.whenReady().then(async () => {
     } catch (error) { console.log("[localitfy import error]", error?.stack || error?.message); return listSongsShaped(); }
   });
   ipcRouter.handle("library:repair-missing-metadata", async (_event, payload = {}) => { try { return await repairMissingSongMetadata(payload); } catch (error) { console.log("[localtify metadata repair error]", error?.stack || error?.message || error); return { ok: false, error: error?.message || "metadata repair failed", songs: listSongsShaped() }; } });
+  scrobbler = startScrobbling(ipcRouter, { file: path.join(app.getPath("userData"), "scrobbles.json"), getSong: databaseRepositories.songs.get, listPlays: databaseRepositories.listening.list, safeStorage, shell });
   registerDiscoverIpc(ipcRouter, { getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json") });
   registerMovedSongRepairIpc(ipcRouter, {
     dialog, BrowserWindow, getWindow: () => mainWindow,
@@ -2548,7 +2551,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("download:open-folder", async (_event, folder) => { await shell.openPath(getDownloadDirectory(folder)); return true; });
   registerAnalysisIpc(ipcRouter, { app, powerMonitor, repositories: databaseRepositories, ffmpegPath: ffmpegStatic?.replace("app.asar", "app.asar.unpacked") });
   require("./ipc/lyrics.cjs").registerLyricsIpc(ipcRouter, app, databaseRepositories);
-  ipcRouter.handle("listening:record", (_event, payload) => databaseRepositories.listening.record(payload));
+  ipcRouter.handle("listening:record", (_event, payload) => { scrobbler?.observe(payload); return databaseRepositories.listening.record(payload); });
   ipcRouter.handle("song:patch", async (_event, id, patch) => { const updated = patchSong(id, patch); return updated ? shapeSong(updated) : null; });
   ipcRouter.handle("song:random-cover", async (_event, id) => {
     const covers = getPixelArtFiles();
@@ -2730,6 +2733,7 @@ app.whenReady().then(async () => {
 
 app.on("before-quit", async () => {
   allowQuit = true;
+  scrobbler?.dispose();
   if (serviceRuntime) await serviceRuntime.stop("app-before-quit");
   else {
     try { cleanupNativeWindowsMedia(); } catch {}

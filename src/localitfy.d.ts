@@ -4,6 +4,7 @@ import type { PlayEvent } from "./features/player/listeningHistory";
 import type { Song } from "./features/library/song.types";
 import type { Settings } from "./features/settings/settings.types";
 import type { DiscoverResult } from "./features/discover/discover.types";
+import type { ScrobbleAnswer, ScrobbleService, ScrobbleStatus } from "./features/scrobbling/scrobble.types";
 
 export {};
 
@@ -504,6 +505,15 @@ declare global {
       repairMissingMetadata: (payload?: Record<string, unknown>) => Promise<LocalitfyMetadataRepairResult>;
       /** Music from outside the library, from Last.fm. Off until turned on in Discover. */
       getDiscoveries: (payload?: { refresh?: boolean }) => Promise<DiscoverResult>;
+      /** Scrobbling. Sign-ins stay in the main process; only who is connected comes back. */
+      getScrobbleStatus: () => Promise<ScrobbleStatus>;
+      connectLastfmScrobbling: (payload: { apiKey: string; sharedSecret: string }) => Promise<ScrobbleAnswer>;
+      cancelScrobbleConnect: () => Promise<ScrobbleStatus>;
+      connectListenbrainz: (payload: { token: string }) => Promise<ScrobbleAnswer>;
+      disconnectScrobbling: (service: ScrobbleService) => Promise<ScrobbleStatus>;
+      sendScrobblesNow: () => Promise<ScrobbleAnswer>;
+      /** Queues plays from before the service was connected; Last.fm only takes the last 14 days. */
+      sendScrobbleHistory: (service: ScrobbleService) => Promise<ScrobbleAnswer>;
       repairMovedSongs: () => Promise<{ ok: boolean; canceled?: boolean; changedCount: number; songs?: Song[]; message?: string; ambiguous?: number; missingCount?: number }>;
       scanAlbumFolder?: (payload?: { mode?: "single" | "library" }) => Promise<LocalitfyAlbumFolderScanResult>;
       importAlbumFolder?: (payload: { scanId: string }) => Promise<LocalitfyAlbumFolderImportResult>;

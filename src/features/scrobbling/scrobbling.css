@@ -1,0 +1,53 @@
+/* Settings → Playback → Scrobbling */
+.scrobbleService {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--lt-surface-raised);
+}
+
+.scrobbleServiceHead,
+.scrobbleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.scrobbleServiceHead {
+  justify-content: space-between;
+}
+
+.scrobbleService small {
+  opacity: .66;
+}
+
+.scrobbleInput {
+  flex: 1 1 220px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--lt-border, rgba(255, 255, 255, .14));
+  border-radius: 10px;
+  background: var(--lt-surface);
+  color: var(--lt-text);
+  font: inherit;
+}
+
+.scrobbleLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lt-accent);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.scrobbleService > .settingsActionButton {
+  justify-self: start;
+}

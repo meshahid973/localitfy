@@ -52,4 +52,10 @@ function recordPlayEvent(database, payload) {
   return result.changes > 0;
 }
 
-module.exports = { createPlayEventsTable, normalizePlayEvent, recordPlayEvent };
+/** Plays last updated before `before` and started at or after `since`, oldest first. */
+function listPlayEvents(database, { before = Date.now(), since = 0 } = {}) {
+  return database.prepare("SELECT id, songId, startedAt, msListened FROM play_events WHERE updatedAt < ? AND startedAt >= ? ORDER BY startedAt")
+    .all(before, since);
+}
+
+module.exports = { createPlayEventsTable, normalizePlayEvent, recordPlayEvent, listPlayEvents };
