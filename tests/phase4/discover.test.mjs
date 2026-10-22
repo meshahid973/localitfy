@@ -131,3 +131,31 @@ test("Discover stays off until turned on, needs a valid key, and reuses today's 
   await get();
   assert.ok(requests > used, "and refreshed after half a day");
 });
+
+test("top tracks whose credited artist is hidden are never suggested", async () => {
+  const client = fakeClient({ topTracks: async (name) => [
+    { title: "Blocked song", artist: "Hidden Guest", url: "b" },
+    { title: "Allowed song", artist: name, url: "a" }
+  ] });
+  const result = await discover({ songs, hiddenArtists: ["Hidden Guest"], client, now: NOW });
+  assert.equal(result.status, "ready");
+  assert.ok(result.artists.every((artist) => artist.topTracks.every((track) => track.artist !== "Hidden Guest")));
+  assert.ok(result.tracks.every((track) => track.artist !== "Hidden Guest"));
+  const cached = withoutOwned(
+    { ...result, tracks: [...result.tracks, { title: "Cached hidden", artist: "Hidden Guest" }],
+      artists: result.artists.map((artist) => ({ ...artist, topTracks: [...artist.topTracks, { title: "Cached hidden", artist: "Hidden Guest" }] })) },
+    { songs, hiddenArtists: ["Hidden Guest"] }
+  );
+  assert.ok(cached.artists.every((artist) => artist.topTracks.every((track) => track.artist !== "Hidden Guest")));
+  assert.ok(cached.tracks.every((track) => track.artist !== "Hidden Guest"));
+});
+
+test("Discover UI guards late responses and synchronizes dismissals", () => {
+  const view = fs.readFileSync("src/features/discover/DiscoverView.tsx", "utf8");
+  const ipc = fs.readFileSync("electron/ipc/discover.cjs", "utf8");
+  assert.match(view, /requestVersionRef\.current/);
+  assert.match(view, /const dismissArtist = /);
+  assert.match(view, /setPicked\(\(current\) => new Map/);
+  assert.match(ipc, /running\?\.apiKey === apiKey/);
+  assert.match(ipc, /running\?\.promise === promise/);
+});
