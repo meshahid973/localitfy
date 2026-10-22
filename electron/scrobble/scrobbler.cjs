@@ -102,7 +102,7 @@ function createScrobbler({ file, getSong, listPlays = () => [], encrypt = (text)
     if (retryTimer) return;
     const delay = RETRY_MS[Math.min(retryStep, RETRY_MS.length - 1)];
     retryStep += 1;
-    retryTimer = setTimer(() => { retryTimer = null; void flush(); }, delay);
+    retryTimer = setTimer(() => { retryTimer = null; void flush().catch((error) => log("[localtify scrobble] retry failed", error?.message || error)); }, delay);
     retryTimer?.unref?.();
   }
 
@@ -152,7 +152,7 @@ function createScrobbler({ file, getSong, listPlays = () => [], encrypt = (text)
     queue.push({ ...play, pending });
     trim(queue);
     save();
-    void flush();
+    void flush().catch((error) => log("[localtify scrobble] background send failed", error?.message || error));
   }
 
   function nowPlaying(play) {
