@@ -31,7 +31,7 @@ function playFor(event, song) {
 }
 const thresholdMs = (play) => (play.durationSec ? Math.min(MAX_THRESHOLD_MS, play.durationSec * 500) : MAX_THRESHOLD_MS);
 
-function createScrobbler({ file, getSong, listPlays = () => [], encrypt = (text) => `plain:${text}`, decrypt = (text) => text.replace(/^plain:/, ""),
+function createScrobbler({ file, getSong, listPlays = () => [], encrypt = () => { throw new Error("Secure scrobbling encryption is required"); }, decrypt = () => { throw new Error("Secure scrobbling decryption is required"); },
   fetch = globalThis.fetch, now = Date.now, openUrl = async () => {}, setTimer = setTimeout, clearTimer = clearTimeout, log = console.log }) {
   let state = null;
   const seen = new Map();
