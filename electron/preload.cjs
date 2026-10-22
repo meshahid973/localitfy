@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld("localitfy", {
   clearLibrary: () => ipcRenderer.invoke("library:clear"),
   repairMissingMetadata: (payload) => ipcRenderer.invoke("library:repair-missing-metadata", payload),
   repairMovedSongs: () => ipcRenderer.invoke("library:repair-moved-songs"),
+  findDuplicates: () => ipcRenderer.invoke("library:find-duplicates"),
+  mergeDuplicates: (payload) => ipcRenderer.invoke("library:merge-duplicates", payload),
   getDiscoveries: (payload) => ipcRenderer.invoke("discover:get", payload),
 
   scanAlbumFolder: (payload) => ipcRenderer.invoke("album:scan-folder", payload),

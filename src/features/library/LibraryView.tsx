@@ -1,7 +1,8 @@
 import "./library.css";
-import type { DragEventHandler, ReactNode } from "react";
-import { FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2 } from "lucide-react";
+import { lazy, Suspense, useState, type DragEventHandler, type ReactNode } from "react";
+import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2 } from "lucide-react";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
+import type { DuplicatesMergeResult } from "./duplicates/DuplicatesDialog";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { LocaltifyStateCard, MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
@@ -11,8 +12,11 @@ import type { Playlist } from "../playlists/playlist.types";
 import type { Settings } from "../settings/settings.types";
 import type { View } from "../shell/view.types";
 
+const DuplicatesDialog = lazy(() => import("./duplicates/DuplicatesDialog"));
+
 export type LibraryViewProps = {
   openSimilarSongs: (request: SimilarSeedRequest) => unknown;
+  applyDuplicateMerge: (result: DuplicatesMergeResult) => unknown;
   changeView: (view: View, source?: string) => unknown;
   deleteBusy: boolean;
   handleLibraryAreaDragLeave: DragEventHandler<HTMLDivElement>;
@@ -68,6 +72,7 @@ export default function LibraryView(props: LibraryViewProps) {
     view,
     visibleSongs
   } = props;
+  const [duplicatesOpen, setDuplicatesOpen] = useState(false);
 
   const isLiked = view === "liked";
   const shownLabel = showingMissingFiles ? "missing files" : isLiked ? "tracks" : "all tracks";
@@ -95,9 +100,14 @@ export default function LibraryView(props: LibraryViewProps) {
             onValueChange={setLibrarySortMode}
           />
           {!isLiked ? (
-            <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
-              <ActionLabel icon={Shuffle}>shuffle</ActionLabel>
-            </button>
+            <>
+              <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
+                <ActionLabel icon={Shuffle}>shuffle</ActionLabel>
+              </button>
+              <button className="libraryAction" type="button" onClick={() => setDuplicatesOpen(true)} disabled={songs.length < 2} title="Find songs that are in your library more than once">
+                <ActionLabel icon={Copy}>duplicates</ActionLabel>
+              </button>
+            </>
           ) : (
             <button className="libraryAction" type="button" onClick={() => props.openSimilarSongs({ kind: "liked" })}
               disabled={!songs.some((song) => song.liked)} title="Find songs in your library that sound like your liked songs">
@@ -187,6 +197,9 @@ export default function LibraryView(props: LibraryViewProps) {
           </div>
         )}
       </section>
+      {duplicatesOpen ? <Suspense fallback={null}>
+        <DuplicatesDialog songs={songs} onClose={() => setDuplicatesOpen(false)} onMerged={props.applyDuplicateMerge} />
+      </Suspense> : null}
     </section>
   );
 }

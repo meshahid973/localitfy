@@ -1,0 +1,42 @@
+.duplicatesDialog {
+  width: min(860px, calc(100vw - 32px));
+  max-height: min(820px, calc(100dvh - 40px));
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgba(var(--lt-accent-rgb), .22);
+  border-radius: 20px;
+  background: linear-gradient(var(--lt-surface), var(--lt-surface)), var(--lt-bg-elevated, var(--lt-bg));
+  color: var(--lt-text);
+  box-shadow: 0 28px 96px rgba(0, 0, 0, .55);
+}
+.duplicatesDialog::backdrop { background: rgba(0, 0, 0, .72); }
+.duplicatesContent { display: grid; gap: 14px; padding: 24px; }
+.duplicatesHeader { display: flex; gap: 14px; align-items: center; }
+.duplicatesHeader > div { flex: 1; min-width: 0; }
+.duplicatesHeader h2 { margin: 2px 0 4px; font-size: 24px; }
+.duplicatesHeader p, .duplicatesIntro, .duplicatesHint { margin: 0; color: var(--lt-muted); font-size: 13px; line-height: 1.5; }
+.duplicatesEyebrow { color: var(--lt-accent) !important; font-size: 11px !important; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.duplicatesIcon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; color: var(--lt-accent); background: rgba(var(--lt-accent-rgb), .12); }
+.duplicatesClose, .duplicatesAction { display: inline-flex; align-items: center; gap: 7px; border: 1px solid rgba(var(--lt-accent-rgb), .2); border-radius: 999px; color: var(--lt-text); background: transparent; font: inherit; font-weight: 700; cursor: pointer; }
+.duplicatesClose { justify-content: center; width: 40px; height: 40px; }
+.duplicatesAction { padding: 9px 16px; font-size: 13px; }
+.duplicatesPrimary { border-color: transparent; color: var(--lt-bg); background: var(--lt-accent); }
+.duplicatesAction:disabled { opacity: .5; cursor: default; }
+.duplicatesNotice { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin: 0; padding: 12px 14px; border-radius: 12px; background: rgba(var(--lt-accent-rgb), .07); font-size: 13px; }
+.duplicatesNotice p { margin: 0; }
+.duplicatesSet { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid rgba(var(--lt-accent-rgb), .14); border-radius: 14px; }
+.duplicatesSet[data-skipped="true"] { opacity: .6; }
+.duplicatesInclude, .duplicatesChoice { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.duplicatesInclude input, .duplicatesChoice input { margin-top: 3px; accent-color: var(--lt-accent); }
+.duplicatesInclude span, .duplicatesChoice span { display: grid; gap: 2px; min-width: 0; }
+.duplicatesInclude small, .duplicatesChoice small, .duplicatesTracks small { color: var(--lt-muted); font-size: 12px; }
+.duplicatesChoice strong { overflow-wrap: anywhere; font-size: 13px; }
+.duplicatesChoices { display: grid; gap: 8px; margin: 0; padding: 0 0 0 26px; border: 0; }
+.duplicatesChoices legend { margin-bottom: 6px; padding: 0; color: var(--lt-muted); font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.duplicatesTracks { padding-left: 26px; font-size: 13px; }
+.duplicatesTracks summary { color: var(--lt-accent); font-weight: 700; cursor: pointer; }
+.duplicatesTracks ol { display: grid; gap: 6px; margin: 8px 0 0; padding-left: 18px; }
+.duplicatesTracks li span { display: block; font-weight: 650; }
+.duplicatesHint { padding-left: 26px; font-size: 12px; }
+.duplicatesFooter { display: flex; gap: 16px; align-items: center; justify-content: space-between; padding-top: 6px; }
+.duplicatesDialog :is(button, input):focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 3px; }

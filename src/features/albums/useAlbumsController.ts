@@ -492,6 +492,14 @@ export function useAlbumsController({
     }, 4200);
   }
 
+  /** After duplicates merge, album entries point at the copies that were kept. */
+  function remapAlbumSongs(keptFor: ReadonlyMap<string, string>) {
+    if (!keptFor.size) return;
+    setManualAlbums((albums) => albums.map((album) => album.songIds.some((id) => keptFor.has(id))
+      ? { ...album, songIds: [...new Set(album.songIds.map((id) => keptFor.get(id) || id))], updatedAt: Date.now() }
+      : album));
+  }
+
   async function deleteAllAlbums() {
     const manualCount = manualAlbums.length;
     const metadataCount = metadataAlbums.length;
@@ -542,6 +550,6 @@ export function useAlbumsController({
     scanAlbumFolderImport, cancelAlbumFolderImportPreview, commitAlbumFolderImportPreview,
     openCreateAlbumBuilder, openEditAlbumBuilder, closeAlbumBuilder, toggleAlbumDraftSong,
     openAlbumCoverPicker, handleAlbumCoverFile, clearAlbumDraftCover, saveManualAlbumFromDraft,
-    deleteManualAlbum, deleteSelectedAlbum, deleteAllAlbums
+    deleteManualAlbum, deleteSelectedAlbum, deleteAllAlbums, remapAlbumSongs
   };
 }

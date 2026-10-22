@@ -12,6 +12,7 @@ function createDatabaseRepositories(databaseModule) {
       insertMany: requireFunction(databaseModule, "insertSongs"),
       patch: requireFunction(databaseModule, "patchSong"),
       relinkPaths: requireFunction(databaseModule, "relinkSongPaths"),
+      mergeDuplicates: requireFunction(databaseModule, "mergeDuplicateSongs"),
       remove: requireFunction(databaseModule, "deleteSong"),
       clear: requireFunction(databaseModule, "clearLibrary")
     }),
@@ -28,6 +29,7 @@ function createDatabaseRepositories(databaseModule) {
     }),
     analysis: Object.freeze({
       list: requireFunction(databaseModule, "getSongAnalysis"),
+      profiles: requireFunction(databaseModule, "getAudioProfiles"),
       save: requireFunction(databaseModule, "saveSongAnalysis"),
       clear: requireFunction(databaseModule, "clearSongAnalysis")
     }),

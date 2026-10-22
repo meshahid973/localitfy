@@ -206,6 +206,8 @@ import type { CoverColorSyncMode, SecretMode, SecretTriggerMode, ThemeId } from 
 import type { DiscordArtMode } from "./features/discord/discord.types";
 import type { Playlist, PlaylistSummary } from "./features/playlists/playlist.types";
 import { resolveSimilarSeed, type SimilarSeedRequest } from "./features/analysis/similarSeed";
+import type { DuplicatesMergeResult } from "./features/library/duplicates/DuplicatesDialog";
+import { keptForRemoved, remapSongIds } from "./features/library/duplicates/duplicatePlan";
 import type { View } from "./features/shell/view.types";
 
 const SettingsCategoryContent = lazy(() => import("./features/settings/SettingsCategoryContent"));
@@ -7306,6 +7308,21 @@ function MainModeApp() {
     setDeleteTarget(target);
   }
 
+  /** Duplicates were folded into kept copies in the database; point app state at the kept songs. */
+  function applyDuplicateMerge({ merges, songs: nextSongs }: DuplicatesMergeResult) {
+    const keptFor = keptForRemoved(merges);
+    if (currentId && keptFor.has(currentId)) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+      setCurrentId(keptFor.get(currentId) || "");
+    }
+    setPlayQueue((queue) => remapSongIds(queue, keptFor));
+    setQueueHistory((history) => history.map((item) => keptFor.has(item.songId) ? { ...item, songId: keptFor.get(item.songId)! } : item));
+    setPlaylists((items) => items.map((item) => ({ ...item, songIds: remapSongIds(item.songIds, keptFor) })));
+    albumsController.remapAlbumSongs(keptFor);
+    setSongs(applyLibraryOrder(sanitizeSongList(nextSongs)));
+  }
+
   async function removeSong(songId: string) {
     const target = songs.find((song) => song.id === songId);
     if (!target) return;
@@ -8482,6 +8499,7 @@ function MainModeApp() {
       showingMissingFiles: view === "library" && libraryFilterMode === "missing",
       shuffleLibrarySongsAction,
       openSimilarSongs: setSimilarRequest,
+      applyDuplicateMerge,
       songs,
       view,
       visibleSongs
