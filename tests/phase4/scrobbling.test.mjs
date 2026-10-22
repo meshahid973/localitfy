@@ -51,7 +51,10 @@ const event = (id, songId, msListened, outcome = "active", startedAt = NOW - 300
 
 test("connecting Last.fm opens the approval page, waits for approval, and stores the sign-in encrypted", async () => {
   let approved = false;
-  const h = harness({ answer: (call) => call.body.method === "auth.getSession" && !(approved = !approved) ? { error: 14, message: "not yet" } : undefined });
+  const h = harness({ answer: (call) => {
+    if (call.body.method === "auth.getSession" && !approved) { approved = true; return { error: 14, message: "not yet" }; }
+    return undefined;
+  } });
   try {
     await assert.rejects(h.scrobbler.connectLastfm({ apiKey: "", sharedSecret: SECRET }), /API key is 32/);
     await assert.rejects(h.scrobbler.connectLastfm({ apiKey: KEY, sharedSecret: "short" }), /32 letters/);
@@ -63,6 +66,7 @@ test("connecting Last.fm opens the approval page, waits for approval, and stores
     const call = h.calls.find((item) => item.body.method === "auth.getToken");
     const { api_sig: signature, format, ...signed } = call.body;
     assert.equal(signature, crypto.createHash("md5").update(Object.keys(signed).sort().map((key) => key + signed[key]).join("") + SECRET).digest("hex"));
+    assert.equal(h.calls.filter((call) => call.body.method === "auth.getSession").length, 2, "must poll until approval");
     const saved = fs.readFileSync(h.file, "utf8");
     assert.ok(!saved.includes(SECRET) && !saved.includes("sk-1"), "secrets are never stored in the clear");
     assert.ok(!JSON.stringify(h.scrobbler.status()).includes("sk-1"), "or returned to the renderer");
@@ -166,4 +170,25 @@ test("earlier plays can be sent once per service; Last.fm only gets the last 14 
     const lb = h.calls.filter((call) => call.url.includes("submit-listens"));
     assert.equal(lb.length, 1); assert.equal(lb[0].body.listen_type, "import"); assert.equal(lb[0].body.payload.length, 2);
   } finally { h.cleanup(); }
+});
+
+test("invalid scrobbling service name cannot alter Object.prototype", async () => {
+  const h = harness();
+  try {
+    const before = Object.prototype.historySent;
+    await assert.rejects(h.scrobbler.sendHistory("__proto__"), /Unknown scrobbling service/);
+    assert.equal(Object.prototype.historySent, before);
+    await assert.rejects(h.scrobbler.sendHistory("constructor"), /Unknown scrobbling service/);
+  } finally { h.cleanup(); }
+});
+
+test("scrobble queue writes are atomic and plaintext credentials are never allowed in native IPC", () => {
+  const service = fs.readFileSync("electron/scrobble/scrobbler.cjs", "utf8");
+  const ipc = fs.readFileSync("electron/ipc/scrobble.cjs", "utf8");
+  const view = fs.readFileSync("src/features/scrobbling/ScrobbleSettings.tsx", "utf8");
+  assert.match(service, /fs\.renameSync\(temporary, file\)/);
+  assert.match(service, /fs\.writeFileSync\(temporary, JSON\.stringify\(load\(\)\)/);
+  assert.match(ipc, /Secure credential storage is unavailable/);
+  assert.match(ipc, /if \(!secure\) throw new Error/);
+  assert.match(view, /if \(ok\) setToken\(""\)/);
 });
