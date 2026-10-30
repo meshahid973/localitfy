@@ -117,3 +117,10 @@ test("stale media pause/play events are ignored when current element state disag
   assert.match(app, /handleAudioPause\(\) \{\s*if \(audioRef\.current && !audioRef\.current\.paused\) return;/);
   assert.match(app, /handlePlaying\(\) \{\s*if \(audioRef\.current\?\.paused\) return;/);
 });
+
+test("focus repair does not resurrect audio after a newer pause or track switch", () => {
+  const app = read("src/App.tsx");
+  assert.match(app, /const repairGeneration = playbackTransitionRef\.current\.snapshot\(\)\.generation;/);
+  assert.match(app, /generation !== repairGeneration/);
+  assert.match(app, /phase === "paused"\) audio\.pause\(\)/);
+});

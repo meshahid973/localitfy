@@ -450,14 +450,17 @@ function MainModeApp() {
     const canRepair = reason !== "background-tick" || document.hidden;
     if (!canRepair) return;
 
+    const repairGeneration = playbackTransitionRef.current.snapshot().generation;
     void audio.play()
       .then(() => {
+        if (playbackTransitionRef.current.snapshot().generation !== repairGeneration) {
+          if (playbackTransitionRef.current.snapshot().phase === "paused") audio.pause();
+          return;
+        }
         pendingPlayRef.current = false;
         if (!playingRef.current) setIsPlaying(true);
       })
-      .catch(() => {
-        // Alt-tab/focus repair should never flip the player into a failed state.
-      });
+      .catch(() => undefined);
   }
 
   useAppLifecycleRuntime({
@@ -3841,8 +3844,6 @@ function MainModeApp() {
   }
 
   function getAutoCrossfadeSeconds() {
-    // V342: end-of-song transitions should feel like a real 3 second crossfade.
-    // Existing shorter settings are respected for manual fade-in, but auto-next uses at least 3s.
     return clamp(Math.max(3, Number(settings.crossfadeSeconds || 3)), 3, 6);
   }
 
