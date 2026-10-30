@@ -56,7 +56,7 @@ import {
   useDownloadsRuntime
 } from "./features/downloads/useDownloadsRuntime";
 import { getDownloadPageState } from "./features/downloads/downloadState";
-import { downloadStatusLabel, spotifyTrackStatusLabel } from "./features/downloads/download.selectors";
+import { downloadAudioOptions, downloadStatusLabel, spotifyTrackStatusLabel } from "./features/downloads/download.selectors";
 import "./App.css";
 
 import AppShell from "./features/shell/AppShell";
@@ -5582,13 +5582,7 @@ function MainModeApp() {
     try {
       const result = await window.localitfy.downloadAudioUrls({
         urls,
-        options: {
-          quality: settings.downloadQuality,
-          format: settings.downloadFormat,
-          autoAdd: settings.downloadAutoAdd,
-          cleanTitle: settings.downloadCleanTitle,
-          downloadFolder: settings.downloadFolder
-        }
+        options: { ...downloadAudioOptions(settings), cleanTitle: settings.downloadCleanTitle }
       });
 
       let nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
@@ -5785,10 +5779,7 @@ function MainModeApp() {
         sourceName: spotifySourceName,
         sourceType: spotifySourceType,
         options: {
-          quality: settings.downloadQuality,
-          format: settings.downloadFormat,
-          autoAdd: settings.downloadAutoAdd,
-          downloadFolder: settings.downloadFolder,
+          ...downloadAudioOptions(settings),
           sourceName: spotifySourceName,
           sourceType: spotifySourceType
         }

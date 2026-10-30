@@ -2504,12 +2504,13 @@ app.whenReady().then(async () => {
   ipcRouter.handle("download:audio", async (event, payload) => {
     try {
       const urls = Array.isArray(payload?.urls) ? payload.urls : [payload?.url].filter(Boolean);
+      const { quality, format, cleanTitle, keepOriginal } = payload?.options && typeof payload.options === "object" ? payload.options : {};
       const autoAdd = typeof payload?.autoAdd === "boolean" ? payload.autoAdd : true;
       const downloadFolder = getDownloadDirectory(payload?.folder);
       const result = await downloadAudioUrls(urls, downloadFolder, (progress) => {
         if (!mainWindow || mainWindow.isDestroyed()) return;
         event.sender.send("download:progress", progress);
-      }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "" });
+      }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "", quality, format, cleanTitle, keepOriginal: keepOriginal === true });
       const successfulFiles = result.downloads.filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath)).map((item) => item.filePath);
       let changedCount = 0;
       if (autoAdd && successfulFiles.length) {

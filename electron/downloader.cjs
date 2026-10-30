@@ -108,17 +108,27 @@ function cleanDownloadedTitle(name) {
     .trim() || "audio";
 }
 
-function getBaseArgs(url, outputTemplate, options = {}) {
-  const format = safeDownloadFormat(options.format);
-  const quality = safeDownloadQuality(options.quality);
+// Opus (format 251, ~130-160k, 48 kHz) is YouTube's best free audio stream; AAC 140 is the
+// fallback. Never fall back to "best": that is the muxed 360p video (format 18) whose audio
+// is a low-bitrate 22 kHz AAC track.
+const AUDIO_FORMAT_SELECTOR = "bestaudio[acodec=opus]/bestaudio[ext=m4a]/bestaudio";
 
+function getAudioOutputArgs(options = {}) {
+  // Keep original: yt-dlp only remuxes (webm -> .opus, m4a stays .m4a), no second lossy encode.
+  if (options.keepOriginal === true) return ["--extract-audio", "--audio-format", "best"];
+  return [
+    "--extract-audio",
+    "--audio-format", safeDownloadFormat(options.format),
+    "--audio-quality", safeDownloadQuality(options.quality),
+  ];
+}
+
+function getBaseArgs(url, outputTemplate, options = {}) {
   return [
     url,
     "--output", outputTemplate,
-    "--format", "bestaudio[ext=m4a]/bestaudio[ext=opus]/bestaudio/best",
-    "--extract-audio",
-    "--audio-format", format,
-    "--audio-quality", quality,
+    "--format", AUDIO_FORMAT_SELECTOR,
+    ...getAudioOutputArgs(options),
     "--concurrent-fragments", "16",
     "--buffer-size", "32M",
     "--http-chunk-size", "10M",
@@ -146,14 +156,21 @@ async function buildStrategies(url, outputTemplate, options = {}) {
   const base = getBaseArgs(url, outputTemplate, options);
   const strategies = [];
 
+  // yt-dlp's default clients get the full audio-only format list. The android/ios clients are
+  // now limited to format 18, so they come last and only as a fallback.
   strategies.push({
-    label: "mobile clients",
-    args: withFfmpeg([...base, "--extractor-args", "youtube:player_client=android,ios"])
+    label: "default clients",
+    args: withFfmpeg(base)
   });
 
   strategies.push({
     label: "tv_embedded client",
     args: withFfmpeg([...base, "--extractor-args", "youtube:player_client=tv_embedded"])
+  });
+
+  strategies.push({
+    label: "mobile clients",
+    args: withFfmpeg([...base, "--extractor-args", "youtube:player_client=android,ios"])
   });
 
   const browserCookieSource = getOptInBrowserCookieSource();
@@ -195,7 +212,7 @@ function buildProgressPayload(job, p) {
   const size = formatSize(p?.totalSize);
   const eta = p?.eta ?? null;
   let message = "Downloading audio...";
-  if (percent >= 88) message = `Converting to ${String(job.format || "mp3").toUpperCase()}...`;
+  if (percent >= 88) message = job.keepOriginal ? "Saving original audio..." : `Converting to ${String(job.format || "mp3").toUpperCase()}...`;
   if (speed) message += `  •  ${speed}`;
   if (eta && eta !== "00:00") message += `  •  ETA ${eta}`;
 
@@ -297,7 +314,7 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
     for (const strategy of strategies) {
       try {
         console.log(`[localitfy] trying: ${strategy.label}`);
-        await runYtDlp(ytDlp, strategy.args, onProgress, { ...job, url, file: "track", format });
+        await runYtDlp(ytDlp, strategy.args, onProgress, { ...job, url, file: "track", format, keepOriginal: options.keepOriginal === true });
         console.log(`[localitfy] success: ${strategy.label}`);
         lastError = null;
         break;
@@ -322,6 +339,7 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
     const ext = path.extname(downloaded) || `.${format}`;
     const sourcePath = path.join(destinationDirectory, downloaded);
     const finalPath = uniquePath(destinationDirectory, `${safeTitle}${ext}`);
+    const savedFormat = ext.slice(1).toLowerCase() || format;
     fs.renameSync(sourcePath, finalPath);
 
     onProgress?.({
@@ -339,7 +357,7 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
       message: "Adding to library..."
     });
 
-    return { ok: true, url, filePath: finalPath, filename: path.basename(finalPath), format };
+    return { ok: true, url, filePath: finalPath, filename: path.basename(finalPath), format: savedFormat };
   } catch (error) {
     const message = error?.message || "YouTube download failed";
     return { ok: false, url, error: message };
@@ -1103,5 +1121,6 @@ module.exports = {
   convertLocalMediaFiles,
   convertOneToMp3,
   isSupportedMediaPath,
+  _test: { getBaseArgs, buildStrategies, AUDIO_FORMAT_SELECTOR },
   cancelActiveDownloads
 };

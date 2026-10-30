@@ -95,6 +95,8 @@ export type Settings = {
   startWithWindows: boolean;
   downloadQuality: "best" | "320" | "256" | "192";
   downloadFormat: "mp3" | "flac" | "wav";
+  /** Save YouTube's original audio stream (.opus/.m4a) instead of converting it. */
+  downloadKeepOriginal: boolean;
   downloadAutoAdd: boolean;
   downloadCleanTitle: boolean;
   downloadFolder: string;

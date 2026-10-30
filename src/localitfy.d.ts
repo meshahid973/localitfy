@@ -547,6 +547,7 @@ declare global {
         options?: {
           quality?: string;
           format?: string;
+          keepOriginal?: boolean;
           autoAdd?: boolean;
           cleanTitle?: boolean;
           downloadFolder?: string;

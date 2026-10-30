@@ -1,4 +1,5 @@
 import type { DownloadQueueItem } from "./download.types";
+import type { Settings } from "../settings/settings.types";
 export function failedDownloadItems(items:DownloadQueueItem[]){return items.filter((item)=>item.status==="failed"||item.status==="cancelled");}
 export function activeDownloadItems(items:DownloadQueueItem[]){return items.filter((item)=>["queued","downloading","converting","importing"].includes(item.status));}
 export function finishedDownloadItems(items:DownloadQueueItem[]){return items.filter((item)=>item.status==="done");}
@@ -19,4 +20,9 @@ export function spotifyTrackStatusLabel(track: { downloadStatus?: string; import
   if (track.downloadStatus === "queued") return "queued";
   if (track.downloadStatus === "downloading") return "downloading";
   return selected ? "ready" : "not selected";
+}
+
+/** The audio options every download sends: quality, format, original audio, auto-add and folder. */
+export function downloadAudioOptions(settings: Settings) {
+  return { quality: settings.downloadQuality, format: settings.downloadFormat, keepOriginal: settings.downloadKeepOriginal, autoAdd: settings.downloadAutoAdd, downloadFolder: settings.downloadFolder };
 }
