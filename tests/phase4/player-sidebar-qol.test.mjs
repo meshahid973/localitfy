@@ -103,8 +103,9 @@ test("repeat-all loops the album/artist/genre a queue was started from", () => {
   assert.ok(playNext.indexOf("playQueue.findIndex") < playNext.indexOf("sourceLoopRestart()"));
   assert.match(app, /kind: "source-loop" as const, rest: sourceLoop\.rest/);
   assert.match(app, /target\.kind === "source-loop"\) \{\s*setPlayQueue\(target\.rest\);/);
-  assert.match(app, /playArtistSongs: \(songIds, name\) => playAlbumSongs\(songIds, name, playbackSourceRef\("artist", name\)\)/);
-  assert.match(app, /playGenreSongs: \(songIds, name\) => playAlbumSongs\(songIds, name, playbackSourceRef\("genre", name\)\)/);
+  const shell = read("src/features/shell/useCollectionActions.ts");
+  assert.match(shell, /target\.kind === "artist" \|\| target\.kind === "genre" \? playbackSourceRef\(target\.kind, target\.title\)/);
+  assert.match(app, /collections: \{ playSongs: playAlbumSongs,/);
   // Leaving the context through a normal song pick stops the loop.
   assert.match(app, /else if \(!playbackContext\?\.keepSource && !playbackContext\?\.keepPlaylistContext\) \{\s*setPlaybackSource\(null\);/);
 });
@@ -116,12 +117,14 @@ test("queue panel shows repeat state", () => {
   assert.match(read("src/App.tsx"), /repeatPreview: queuePanelOpen\s*\? getRepeatPreview\(/);
 });
 
-test("albums, artists and genres accept one-shot focus requests from outside the page", () => {
-  const albums = read("src/features/albums/AlbumsView.tsx");
-  const artists = read("src/features/artists/ArtistsView.tsx");
-  assert.match(read("src/features/genres/GenresView.tsx"), /openGenre\(focusGenreRequest\.genreId, null\);\s*onFocusGenreHandled\?\.\(\);/);
-  assert.match(albums, /setSelectedAlbumId\(focusAlbumRequest\.albumId\);\s*setAlbumDetailOpen\(true\);\s*onFocusAlbumHandled\?\.\(\);/);
-  assert.match(artists, /openArtist\(focusArtistRequest\.artistId, null\);\s*onFocusArtistHandled\?\.\(\);/);
+test("the player bar and song menus open album, artist and genre pages", () => {
+  const nav = read("src/features/shell/useNavigationHistory.ts");
+  assert.match(nav, /openAlbumPage: \(albumId: string\) => open\(\{ kind: "album", id: albumId \}\)/);
+  assert.match(nav, /openArtistPage: \(artistName: string\) => open\(\{ kind: "artist", id: artistDetailId\(artistName\) \}\)/);
+  assert.match(nav, /else open\(\{ kind: context\.kind, id:/);
+  const app = read("src/App.tsx");
+  assert.match(app, /goToArtist: nav\.openArtistPage/);
+  assert.match(app, /openArtistPage: nav\.openArtistPage/);
 });
 
 test("song context menu is styled and offers queue and navigation actions", () => {
@@ -135,10 +138,6 @@ test("song context menu is styled and offers queue and navigation actions", () =
 
 test("view action buttons pair an icon with their text", () => {
   for (const file of [
-    "src/features/albums/AlbumsView.tsx",
-    "src/features/artists/ArtistsView.tsx",
-    "src/features/genres/GenresView.tsx",
-    "src/features/playlists/PlaylistsView.tsx",
     "src/features/library/LibraryView.tsx"
   ]) {
     const source = read(file);

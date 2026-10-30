@@ -29,12 +29,16 @@ test("artist search prefers an exact normalized name before partial matches", ()
   assert.match(source, /artist\.name\.toLocaleLowerCase\(\)\.includes\(needle\)/);
 });
 
-test("artist details expose songs, albums, and playback actions", () => {
-  assert.match(source, /artistDetailView === "songs"/);
-  assert.match(source, /artistDetailView === "albums"/);
-  assert.match(source, /playArtistSongs\?\./);
-  assert.match(source, /shuffleArtistSongs\?\./);
-  assert.match(source, /queueArtistSongs\?\./);
+test("artist cards open the artist page, play from their button, and share the collection menu", () => {
+  assert.match(source, /<MediaCard/);
+  assert.match(source, /onOpen=\{\(\) => actions\.openCollection\(target\)\}/);
+  assert.match(source, /onPlay=\{\(\) => actions\.playCollection\(target\)\}/);
+  assert.match(source, /onContextMenu=\{\(event\) => actions\.openCollectionMenu\(event, target\)\}/);
+  assert.doesNotMatch(source, /createPortal/, "no more side drawer");
+  const page = fs.readFileSync("src/features/pages/SongGroupPage.tsx", "utf8");
+  assert.match(page, /actions\.playCollection\(target, \{ shuffle: true \}\)/);
+  assert.match(page, /actions\.queueCollection\(target\)/);
+  assert.match(page, /<AlbumShelf/);
 });
 
 // Exercise the real parser; source-pattern checks alone miss metadata bugs.
@@ -50,10 +54,4 @@ test("artist credits ignore empty separators and keep the first spelling", () =>
   assert.deepEqual(Array.from(split("Aimer; aimer")), ["Aimer"]);
   assert.deepEqual(Array.from(split("Aimer feat. YOASOBI")), ["Aimer", "YOASOBI"]);
   assert.deepEqual(Array.from(split("")), ["unknown artist"]);
-});
-
-test("artist drawer closes before the playlist picker opens", () => {
-  assert.match(source, /closeArtist\(false\);\s+openPlaylistPicker\(song\)/);
-  assert.match(source, /handleDialogKeys/);
-  assert.match(source, /artistTriggerRef/);
 });

@@ -74,6 +74,9 @@ function createAppMenuRuntime({ Menu, shell, appName = "localtify", isDev = fals
             click: command("navigate", { view })
           })),
           { type: "separator" },
+          { label: "Back", accelerator: "Command+[", click: command("back") },
+          { label: "Forward", accelerator: "Command+]", click: command("forward") },
+          { type: "separator" },
           { role: "resetZoom" },
           { role: "zoomIn" },
           { role: "zoomOut" },
@@ -124,7 +127,21 @@ function createAppMenuRuntime({ Menu, shell, appName = "localtify", isDev = fals
     }
   }
 
-  return { update, buildTemplate };
+  /**
+   * OS back/forward for the renderer's page history: macOS trackpad swipes (Electron reports them when
+   * Trackpad › More Gestures › "Swipe between pages" includes three fingers), and the back/forward
+   * app commands Windows and Linux send for mouse side buttons and browser keys.
+   */
+  function attachNavigationGestures(win) {
+    win.on("swipe", (_event, direction) => {
+      if (direction === "right" || direction === "left") sendAppCommand({ type: direction === "right" ? "back" : "forward" });
+    });
+    win.on("app-command", (_event, name) => {
+      if (name === "browser-backward" || name === "browser-forward") sendAppCommand({ type: name === "browser-backward" ? "back" : "forward" });
+    });
+  }
+
+  return { update, buildTemplate, attachNavigationGestures };
 }
 
 /**

@@ -20,14 +20,14 @@
 .albumsPageV318 button { cursor: pointer; }
 .albumsPageV318 button:disabled { cursor: not-allowed; opacity: .45; }
 .albumsPageV318 :is(button,input,select):focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .58); outline-offset: 2px; }
-:is(.albumsPageV318,.albumDetailDrawerV318) :is(.mainAction,.heroGhost,.settingsTinyButton) { min-height: 38px; font-size: 12px; font-weight: 700; }
-.albumsPageV318 :is(.albumDetailPanelV318,.albumBuilderPanelV318,.albumFolderImportPanelV309) {
+ .albumsPageV318 :is(.mainAction,.heroGhost,.settingsTinyButton) { min-height: 38px; font-size: 12px; font-weight: 700; }
+.albumsPageV318 :is(.albumBuilderPanelV318,.albumFolderImportPanelV309) {
   min-width: 0;
   border: 1px solid var(--albums-border);
   border-radius: 15px;
   background: var(--albums-surface);
 }
-.albumDetailPanelV318, .albumBuilderPanelV318, .albumFolderImportPanelV309 { display: grid; align-content: start; gap: 18px; padding: 21px; }
+.albumBuilderPanelV318, .albumFolderImportPanelV309 { display: grid; align-content: start; gap: 18px; padding: 21px; }
 .albumBuilderHeaderV318, .albumFolderImportHeaderV309 {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 13px; min-width: 0;
 }
@@ -55,84 +55,7 @@
 .albumCardMetaV318 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 700; }
 .albumCardMetaV318 em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--albums-muted); font-style: normal; }
 .albumCardMetaV318 b { color: var(--lt-muted); font-size: 11px; font-weight: 600; }
-.albumDetailBackdropV318 {
-  --albums-surface: var(--lt-bg);
-  --albums-elevated: var(--lt-surface-raised);
-  --albums-border: rgba(var(--lt-accent-rgb), .10);
-  --albums-text: var(--lt-text);
-  --albums-muted: var(--lt-muted);
-  position: fixed;
-  inset: 0;
-  z-index: 1600;
-  display: grid;
-  justify-items: end;
-  overflow: hidden;
-  overscroll-behavior: contain;
-  background: rgba(0,0,0,.64);
-  backdrop-filter: blur(9px);
-}
-.albumDetailDrawerV318 {
-  width: min(920px,calc(100vw - 64px));
-  height: 100%;
-  min-width: 0;
-  padding: 28px 24px 110px;
-  display: grid;
-  align-content: start;
-  gap: 18px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border-left: 1px solid rgba(255,255,255,.1);
-  background: var(--albums-surface);
-  color: var(--albums-text);
-  box-shadow: -30px 0 90px rgba(0,0,0,.52);
-}
-.albumDetailDrawerV318 *, .albumDetailDrawerV318 *::before, .albumDetailDrawerV318 *::after { box-sizing: border-box; }
-.albumDetailDrawerV318 button { cursor: pointer; }
-.albumDetailDrawerV318 button:disabled { cursor: not-allowed; opacity: .45; }
 .albumDetailDrawerV318 :is(button,input,select):focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .58); outline-offset: 2px; }
-.albumDetailDrawerV318 .eyebrow { margin: 0 0 8px; color: var(--lt-accent); font-size: 11px; font-weight: 800; letter-spacing: .1em; }
-.albumDetailDrawerV318 h3 { margin: 0; color: var(--lt-text); line-height: 1.2; font-weight: 720; letter-spacing: -.03em; }
-.albumDetailCloseV318 {
-  position: sticky;
-  top: 0;
-  z-index: 4;
-  justify-self: end;
-  width: 38px;
-  height: 38px;
-  margin-bottom: -4px;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(var(--lt-accent-rgb), .15);
-  border-radius: 999px;
-  background: var(--albums-surface);
-  color: var(--lt-text);
-  font: 500 25px/1 system-ui,sans-serif;
-  box-shadow: 0 8px 24px rgba(0,0,0,.24);
-}
-.albumDetailCloseV318:hover { background: var(--lt-surface-raised); color: var(--lt-text); }
-.albumDetailHeroV318 { position: relative; min-width: 0; display: grid; grid-template-columns: 180px minmax(0,1fr); gap: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--albums-border); }
-.albumDetailCoverV318 { display: block; width: 180px; height: 180px; overflow: hidden; border-radius: 12px; background: var(--lt-surface-raised); }
-.albumDetailCoverV318 img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.albumDetailCopyV318 { min-width: 0; align-self: center; }
-.albumDetailCopyV318 h3 { overflow-wrap: anywhere; font-size: clamp(22px,2.1vw,31px); }
-.albumDetailCopyV318 > p:not(.eyebrow) { margin: 8px 0 13px; color: var(--albums-muted); font-size: 13px; }
-.albumMetaPillsV318 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.albumMetaPillsV318 > span { padding: 6px 10px; border: 1px solid var(--albums-border); border-radius: 7px; color: var(--lt-muted); font-size: 11px; }
-.albumActionRowV318 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
-.albumTrackListV318 { min-width: 0; max-height: min(60vh,720px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.albumTrackRowV318 { min-width: 0; min-height: 65px; display: grid; grid-template-columns: minmax(0,1fr) 48px 34px 34px; align-items: center; gap: 10px; border-bottom: 1px solid rgba(var(--lt-accent-rgb), .08); padding: 9px 6px; }
-.albumTrackRowV318:hover { background: var(--lt-surface); }
-.albumTrackRowV318.active { background: rgba(var(--lt-accent-rgb),.1); }
-.albumTrackMainV318 { min-width: 0; display: grid; grid-template-columns: 28px 46px minmax(0,1fr); align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; text-align: left; color: var(--albums-text); font: inherit; cursor: pointer; }
-.albumTrackMainV318 > span:first-child { color: var(--lt-faint); font-size: 11px; font-variant-numeric: tabular-nums; }
-.albumTrackCoverV318,.albumTrackCoverV318 img { width: 46px; height: 46px; border-radius: 7px; object-fit: cover; }
-.albumTrackMainV318 > span:last-child { min-width: 0; display: grid; gap: 4px; }
-.albumTrackMainV318 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--albums-text); font-size: 13px; font-weight: 680; }
-.albumTrackMainV318 small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--albums-muted); font-size: 11px; }
-.albumTrackDurationV318 { color: var(--albums-muted); font-size: 11px; text-align: right; }
-.albumTrackRowV318 .iconAction { width: 33px; height: 33px; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--lt-muted); cursor: pointer; display: grid; place-items: center; }
-.albumTrackRowV318 .iconAction:hover { color: var(--lt-text); }
 .albumFolderImportHeaderV309 > div:first-child { min-width: 0; }
 .albumFolderImportHeaderV309 p:not(.eyebrow) { max-width: 690px; margin: 7px 0 0; color: var(--albums-muted); font-size: 12px; line-height: 1.5; }
 .albumFolderProgressV309 { display: grid; gap: 8px; }
@@ -188,17 +111,7 @@
   .albumBuilderFieldsV318 { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media (max-width: 740px) {
-  .albumDetailPanelV318,.albumBuilderPanelV318,.albumFolderImportPanelV309 { padding: 15px; }
-  .albumDetailHeroV318 { grid-template-columns: 105px minmax(0,1fr); gap: 13px; }
-  .albumDetailCoverV318 { width: 105px; height: 105px; }
+  .albumBuilderPanelV318,.albumFolderImportPanelV309 { padding: 15px; }
   .albumBuilderFieldsV318 { grid-template-columns: 1fr; }
   .albumFolderImportSummaryV309 { grid-template-columns: 1fr; }
-  .albumTrackRowV318 { grid-template-columns: minmax(0,1fr) 32px 32px; gap: 5px; }
-  .albumTrackDurationV318 { display: none; }
-  .albumTrackMainV318 { grid-template-columns: 17px 40px minmax(0,1fr); gap: 7px; }
-  .albumTrackCoverV318,.albumTrackCoverV318 img { width: 40px; height: 40px; }
-  .albumDetailDrawerV318 { width: 100%; padding: 20px 16px 100px; }
-}
-@media (max-width: 430px) {
-  .albumDetailHeroV318 { grid-template-columns: 1fr; }
 }

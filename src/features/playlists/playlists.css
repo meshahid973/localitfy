@@ -18,15 +18,10 @@
 }
 .playlistsPage .eyebrow { margin: 0 0 9px; color: var(--lt-accent); font-size: 11px; letter-spacing: .1em; font-weight: 800; }
 .playlistsPage h3 { margin: 0; color: var(--lt-text); font-size: clamp(18px,1.55vw,24px); font-weight: 700; letter-spacing: -.03em; } .playlistsPage p:not(.eyebrow, .pageHeader p) { color: var(--playlist-muted); font-size: 13px; line-height: 1.5; }
-.playlistsPage .playlistHeroPanel { display: grid; grid-template-columns: minmax(0,1fr) 150px; gap: 18px; align-items: center; }
-.playlistHeroCopy { min-width: 0; align-self: center; }
-.playlistHeroCopy h3 { overflow-wrap: anywhere; font-size: clamp(23px,2vw,30px); }
-.playlistHeroCopy p { margin: 10px 0 0; font-size: 13px; }
-.playlistHeroCollage, .playlistCoverCollage { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); aspect-ratio: 1; gap: 3px; overflow: hidden; background: var(--lt-surface-raised); border-radius: 12px; }
+.playlistCoverCollage { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); aspect-ratio: 1; gap: 3px; overflow: hidden; background: var(--lt-surface-raised); border-radius: 12px; }
 .playlistCoverTile { position: relative; min-width: 0; min-height: 0; display: grid; place-items: center; overflow: hidden; background: var(--lt-surface-raised); }
 .playlistCoverTile > span { color: var(--lt-faint); }
 .playlistCoverTile img, .playlistCoverImage, .playlistCoverImage img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.playlistHeroActions { grid-column: 1/-1; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .playlistsPage :is(.heroMain,.softButton,.mainAction,.settingsTinyButton) { min-height: 38px; font-size: 12px; font-weight: 700; }
 .playlistsPage :is(.heroMain,.softButton,.mainAction,.settingsTinyButton):focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .58); outline-offset: 2px; }
 .playlistsPage button:disabled { cursor: not-allowed; opacity: .48; }
@@ -51,7 +46,6 @@
   color: var(--playlist-text); background: var(--lt-surface); font: inherit; text-align: left; cursor: pointer;
 }
 .playlistShelfCard:hover { border-color: rgba(var(--lt-accent-rgb), .20); background: var(--lt-surface-raised); }
-.playlistShelfCard.active { border-color: rgba(var(--lt-accent-rgb),.48); background: rgba(var(--lt-accent-rgb),.12); }
 .playlistShelfCard.dropTarget { outline: 2px dashed rgba(var(--lt-accent-rgb), .58); outline-offset: -3px; }
 .playlistShelfCard .playlistCoverCollage { width: 66px; height: 66px; border-radius: 8px; }
 .playlistShelfMeta { min-width: 0; display: grid; gap: 6px; }
@@ -105,13 +99,9 @@
   .playlistShelfGrid { grid-template-columns: repeat(auto-fill,minmax(205px,1fr)); }
 }
 @media (max-width: 780px) {
-  .playlistHeroPanel { grid-template-columns: minmax(0,1fr) 110px !important; }
-  .playlistHeroCollage { max-width: 110px; }
   .playlistShelfGrid { grid-template-columns: repeat(auto-fill,minmax(min(185px,100%),1fr)); }
 }
 @media (max-width: 500px) {
-  .playlistHeroPanel { grid-template-columns: 1fr !important; }
-  .playlistHeroPanel .playlistHeroCollage { width: 110px; }
   .playlistTrackRow.virtualPlaylistTrackRow { grid-template-columns: 12px minmax(0,1fr) 29px; gap: 5px; padding-inline: 4px; }
   .playlistTrackDuration { display: none; }
   .playlistTrackMain { grid-template-columns: 16px 40px minmax(0,1fr); gap: 6px; }
@@ -138,4 +128,3 @@
 .smartPlaylistModal small { color: var(--lt-faint); font-size: 12px; }
 .smartPlaylistFooter { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
 .smartPlaylistFooter p { margin: 0; color: var(--lt-muted); font-size: 12px; }
-.playlistHeroCopy .smartPlaylistSummary { margin-top: 6px; color: var(--lt-faint); font-size: 12px; }

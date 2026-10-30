@@ -50,7 +50,7 @@ test("menu views exist in the renderer and are handled there", () => {
   const viewType = fs.readFileSync("src/features/shell/view.types.ts", "utf8");
   for (const [view] of MENU_VIEWS) assert.match(viewType, new RegExp(`"${view}"`), view);
   const hook = fs.readFileSync("src/features/shell/useAppMenuCommands.ts", "utf8");
-  for (const type of ["navigate", "settings", "import-music", "import-album-folder", "new-playlist", "find", "feedback", "check-updates"]) {
+  for (const type of ["navigate", "back", "forward", "settings", "import-music", "import-album-folder", "new-playlist", "find", "feedback", "check-updates"]) {
     assert.match(hook, new RegExp(`case "${type}"`), type);
   }
 });

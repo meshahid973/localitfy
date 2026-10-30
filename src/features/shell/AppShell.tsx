@@ -11,6 +11,9 @@ import QueuePanel from "../player/components/QueuePanel";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import Onboarding from "../../Onboarding";
 import SongContextMenu from "../library/components/SongContextMenu";
+import CollectionContextMenu from "../library/components/CollectionContextMenu";
+import { AppActionsContext, playableIds } from "./appActions";
+import { useCollectionActions } from "./useCollectionActions";
 import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon } from "../../shared/ui/LocaltifyViewUi";
 import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
 import WhatsNewModal from "../updates/WhatsNewModal";
@@ -38,6 +41,10 @@ const LibraryView = lazy(() => import("../library/LibraryView"));
 const ArtistsView = lazy(() => import("../artists/ArtistsView"));
 const GenresView = lazy(() => import("../genres/GenresView"));
 const AlbumsView = lazy(() => import("../albums/AlbumsView"));
+const AlbumPage = lazy(() => import("../pages/AlbumPage"));
+const ArtistPage = lazy(() => import("../pages/SongGroupPage").then((module) => ({ default: module.ArtistPage })));
+const GenrePage = lazy(() => import("../pages/SongGroupPage").then((module) => ({ default: module.GenrePage })));
+const MixPage = lazy(() => import("../pages/MixPage"));
 const PlaylistsView = lazy(() => import("../playlists/PlaylistsView"));
 const CoversView = lazy(() => import("../covers/CoversView"));
 const AnalyticsView = lazy(() => import("../analytics/AnalyticsView"));
@@ -58,7 +65,7 @@ export default function AppShell(props: AppShellProps) {
   const {
     frame, updates, screensaver, effects, onboarding, navigation,
     home, library, artists, genres, albums, playlists, covers, analytics, discover, settingsView, downloads,
-    playerBar, modals, playbackAudio
+    playerBar, modals, playbackAudio, collections
   } = props;
 
   const {
@@ -79,16 +86,23 @@ export default function AppShell(props: AppShellProps) {
   } = effects;
   const { open: onboardingOpen, ...onboardingProps } = onboarding;
   const {
-    effectiveSimpleMode, simpleModeView, view, changeView, importSongs, startSidebarResize,
-    contentRef, updateSidebarLayout, openSidebarSettings
+    effectiveSimpleMode, simpleModeView, view, importSongs, startSidebarResize,
+    contentRef, updateSidebarLayout, openSidebarSettings, history: nav
   } = navigation;
+  const detail = nav.detail;
   const { isSeeking, isVolumeDragging, draggedSongId, isPlaying } = playerBar;
   const { isThreeAm } = home;
   const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
   const [tagSearchAlbum, setTagSearchAlbum] = useState<TagSearchAlbum | null>(null);
   const [albumTracksRequest, setAlbumTracksRequest] = useState<AlbumTracksDialogProps["request"] | null>(null);
   // When a download batch finishes, offer to tag the songs it added.
+  const { actions, collectionMenu, closeCollectionMenu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);
+  const pageProps = { songs: albums.songs, albums: albums.localAlbums, currentId: albums.currentId, isPlaying, toggleLike: albums.toggleLike, openPlaylistPicker: albums.openPlaylistPicker };
   const downloadTagPrompt = useDownloadTagPrompt(settings.musicbrainzTagging === true, Boolean(downloads.downloadBusy || downloads.spotifyDownloadBusy), downloads.spotifyTracks, downloads.visibleDownloadResults);
+
+  function openSimilarSongs(songIds: string[], key: string, title: string) {
+    collections.openSimilar({ kind: "songs", key, title, songIds });
+  }
 
   const homeHeroCoverBrightness = clamp(Number(settings.homeHeroCoverBrightness ?? 1), 0.65, 1.55);
   const homeHeroCoverContrast = clamp(1.02 + (homeHeroCoverBrightness - 1) * 0.08, 0.98, 1.08);
@@ -101,6 +115,7 @@ export default function AppShell(props: AppShellProps) {
 
 
   return (
+    <AppActionsContext.Provider value={actions}>
     <main
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
@@ -159,7 +174,7 @@ export default function AppShell(props: AppShellProps) {
         </div>
       ) : null}
 
-      <TitleBar showWindowButtons={platformId !== "mac"}>
+      <TitleBar showWindowButtons={platformId !== "mac"} history={effectiveSimpleMode ? undefined : nav}>
         <UpdateIsland
           show={showTopUpdateRibbon}
           updatePrompt={updatePrompt}
@@ -289,7 +304,7 @@ export default function AppShell(props: AppShellProps) {
           <aside className="sidebar">
             <SidebarNav
               view={view}
-              changeView={changeView}
+              changeView={nav.go}
               sidebarNavOrder={settings.sidebarNavOrder}
               sidebarHiddenNav={settings.sidebarHiddenNav}
               updateSidebarLayout={updateSidebarLayout}
@@ -354,11 +369,19 @@ export default function AppShell(props: AppShellProps) {
 
               <Suspense fallback={null}>
                 {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}
-                {view === "artists" ? <ArtistsView {...artists} /> : null}
-                {view === "genres" ? <GenresView {...genres} /> : null}
-                {view === "albums" ? <AlbumsView {...albums} goToArtist={modals.songContextMenu.goToArtist} findAlbumOnMusicBrainz={settings.musicbrainzTagging ? setTagSearchAlbum : undefined}
-                  completeAlbum={settings.musicbrainzTagging ? (album) => setAlbumTracksRequest({ songIds: album.songs.map((song) => song.id), label: album.title }) : undefined} /> : null}
-                {view === "playlists" ? <PlaylistsView {...playlists} /> : null}
+                {view === "artists" ? (detail?.kind === "artist"
+                  ? <ArtistPage key={detail.id} id={detail.id} {...pageProps} openSimilar={openSimilarSongs} />
+                  : <ArtistsView {...artists} />) : null}
+                {view === "genres" ? (detail?.kind === "genre"
+                  ? <GenrePage key={detail.id} id={detail.id} {...pageProps} openSimilar={openSimilarSongs} />
+                  : <GenresView {...genres} />) : null}
+                {view === "albums" ? (detail?.kind === "album"
+                  ? <AlbumPage key={detail.id} albumId={detail.id} {...pageProps} setSelectedAlbumId={albums.setSelectedAlbumId}
+                    deleteSelectedAlbum={albums.deleteSelectedAlbum} openEditAlbumBuilder={albums.openEditAlbumBuilder} />
+                  : <AlbumsView {...albums} />) : null}
+                {view === "playlists" ? (detail?.kind === "mix"
+                  ? <MixPage key={detail.id} mixId={detail.id} {...pageProps} savePlaylist={playlists.dailyMixes.savePlaylist} />
+                  : <PlaylistsView {...playlists} detailPlaylistId={detail?.kind === "playlist" ? detail.id : null} />) : null}
                 {view === "covers" ? <CoversView {...covers} /> : null}
                 {view === "analytics" ? <AnalyticsView {...analytics} /> : null}
                 {view === "discover" ? <DiscoverView {...discover} /> : null}
@@ -375,6 +398,13 @@ export default function AppShell(props: AppShellProps) {
       )}
 
       <SongContextMenu {...modals.songContextMenu} findOnMusicBrainz={settings.musicbrainzTagging ? setTagSearchSong : undefined} />
+      <CollectionContextMenu state={collectionMenu} onClose={closeCollectionMenu} open={actions.openCollection} play={actions.playCollection} queue={actions.queueCollection}
+        goToArtist={nav.openArtistPage} findSimilar={(target) => target.playlist
+          ? collections.openSimilar({ kind: "playlist", playlistId: target.playlist.id })
+          : openSimilarSongs(playableIds(target.songs), `${target.kind}:${target.id}`, target.title)}
+        editAlbum={(album) => { nav.go("albums"); albums.openEditAlbumBuilder(album); }}
+        findAlbumOnMusicBrainz={settings.musicbrainzTagging ? setTagSearchAlbum : undefined}
+        completeAlbum={settings.musicbrainzTagging ? (album) => setAlbumTracksRequest({ songIds: album.songs.map((song) => song.id), label: album.title }) : undefined} />
       {tagSearchSong ? <Suspense fallback={null}><TagSearchDialog key={tagSearchSong.id} song={tagSearchSong} onClose={() => setTagSearchSong(null)} /></Suspense> : null}
       {tagSearchAlbum ? <Suspense fallback={null}><AlbumTagSearchDialog album={tagSearchAlbum} onClose={() => setTagSearchAlbum(null)} /></Suspense> : null}
       {downloadTagPrompt.songIds.length ? <Suspense fallback={null}><DownloadTagDialog songIds={downloadTagPrompt.songIds}
@@ -392,5 +422,6 @@ export default function AppShell(props: AppShellProps) {
 
       <PlaybackAudioElement {...playbackAudio} />
     </main>
+    </AppActionsContext.Provider>
   );
 }

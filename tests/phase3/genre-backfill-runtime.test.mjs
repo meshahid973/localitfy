@@ -53,7 +53,7 @@ test("genre backfill skips work after its migration marker is stored", async () 
 test("genres backfill runs on demand instead of blocking normal startup", () => {
   const fs = require("node:fs");
   const main = fs.readFileSync("electron/main.cjs", "utf8");
-  const genres = fs.readFileSync("src/features/genres/GenresView.tsx", "utf8");
+  const genres = fs.readFileSync("src/features/genres/useGenreTaggedSongs.ts", "utf8");
   assert.match(main, /options\?\.includeGenres === true\) await genreMetadataBackfill\.run\(\)/);
   assert.match(genres, /bootstrap\(\{ includeGenres: true \}\)/);
 });

@@ -2161,6 +2161,7 @@ function createWindow() {
   }
   mainWindow.on("closed", () => { clearRendererLoadWatchdog(); mainWindow = null; });
   attachCloseToTray(mainWindow);
+  appMenu.attachNavigationGestures(mainWindow);
 }
 
 const MAIN_WINDOW_DEFAULT_WIDTH = 1380;

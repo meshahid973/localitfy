@@ -15,7 +15,7 @@ test("playlist covers share one component across all three places", () => {
   assert.doesNotMatch(app, /renderPlaylistCollage/);
   assert.doesNotMatch(view, /renderPlaylistCollage/);
   assert.doesNotMatch(picker, /renderPlaylistCollage/);
-  assert.match(view, /<PlaylistCoverCollage songs=\{selectedPlaylistSongs\}/);
+  assert.match(view, /<PlaylistCoverCollage songs=\{detailSongs\}/);
   assert.match(view, /<PlaylistCoverCollage songs=\{previewSongs\}/);
   assert.match(picker, /<PlaylistCoverCollage songs=\{previewSongs\}/);
   assert.match(collage, /Array\.from\(\{ length: 4 \}/);

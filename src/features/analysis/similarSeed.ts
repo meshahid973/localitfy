@@ -5,6 +5,8 @@ import type { Playlist } from "../playlists/playlist.types";
 export type SimilarSeedRequest =
   | { kind: "song"; songId: string }
   | { kind: "playlist"; playlistId: string }
+  /** An album, artist, genre or mix. */
+  | { kind: "songs"; key: string; title: string; songIds: string[] }
   | { kind: "liked" }
   | { kind: "recent" };
 
@@ -36,6 +38,13 @@ export function resolveSimilarSeed(request: SimilarSeedRequest | null, songsById
     if (!liked.length) return null;
     return { kind: "group", key: "liked", title: "More like your liked songs", label: `${liked.length} liked song${liked.length === 1 ? "" : "s"}`,
       songs: liked, query: { songIds: liked.map((song) => song.id), seedKey: "liked" } };
+  }
+  if (request.kind === "songs") {
+    const members = request.songIds.map((id) => songsById.get(id)).filter(playable);
+    if (!members.length) return null;
+    const key = request.key.slice(0, 200);
+    return { kind: "group", key, title: `More like ${request.title}`, label: `${members.length} song${members.length === 1 ? "" : "s"}`, songs: members,
+      query: { songIds: members.map((song) => song.id), seedKey: key } };
   }
   const playlist = playlists.find((item) => item.id === request.playlistId);
   const members = playlist?.songIds.map((id) => songsById.get(id)).filter(playable) || [];

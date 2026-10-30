@@ -87,10 +87,10 @@ test("album editor does not search and sort songs while closed", () => {
 
 test("Home most-listened work is memoized, bounded, and hidden when unused", () => {
   const home = read("src/features/home/HomeView.tsx");
-  assert.match(home, /const mostListenedSongs = useMemo\(\(\) => \{/);
+  assert.match(home, /const mostListenedArtists = useMemo\(\(\) => \{/);
   assert.match(home, /if \(!showMostListened\) return \[\];/);
-  assert.match(home, /if \(result\.length === 10\) return result;/);
-  assert.match(home, /\[homeListenNowSongs, homeFreshShelfSongs, showMostListened\]/);
+  assert.match(home, /if \(picked\.size === 10\) break;/);
+  assert.match(home, /\[homeListenNowSongs, homeFreshShelfSongs, showMostListened, songs\]/);
   const css = read("src/features/home/home.css");
   assert.match(css, /\.homeSection > h3 \{ margin-bottom: 14px; \}/);
   assert.doesNotMatch(css, /\.homeSectionHead > h3 \{ margin:0; \}/);

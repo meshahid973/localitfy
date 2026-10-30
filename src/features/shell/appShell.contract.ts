@@ -28,6 +28,10 @@ import type { SidebarLayoutPatch } from "./SidebarNav";
 import type { ImportAnimationState } from "../library/song.types";
 import type { AppToastState } from "./useAppToast";
 import type { UpdatePromptState } from "../updates/update.types";
+import type { NavigationHistory } from "./useNavigationHistory";
+import type { Playlist } from "../playlists/playlist.types";
+import type { PlaybackSourceRef } from "../player/playbackSource";
+import type { SimilarSeedRequest } from "../analysis/similarSeed";
 
 export type AppShellPlatformInfo = { id: "windows" | "linux" | "mac" | "unknown" | string };
 
@@ -64,6 +68,15 @@ export type ShellNavigationContract = {
   startSidebarResize: (event: ReactPointerEvent<HTMLButtonElement>) => unknown;
   contentRef: RefObject<HTMLElement | null>;
   updateSidebarLayout: (patch: SidebarLayoutPatch) => unknown; openSidebarSettings: () => unknown;
+  history: NavigationHistory;
+};
+
+/** Playback for whole collections, shared by every page through the app actions. */
+export type ShellCollectionsContract = {
+  playSongs: (songIds: string[], label: string, source: PlaybackSourceRef | null, shuffle: boolean, startId?: string) => unknown;
+  queueSongs: (songIds: string[], label: string) => unknown;
+  playPlaylist: (playlist: Playlist, shuffle: boolean) => unknown;
+  openSimilar: (request: SimilarSeedRequest) => unknown;
 };
 
 export type ShellModalContract = {
@@ -77,5 +90,5 @@ export type AppShellProps = {
   home: HomeViewProps; library: LibraryViewProps; artists: ArtistsViewProps; genres: GenresViewProps; albums: AlbumsViewProps; playlists: PlaylistsViewProps;
   covers: CoversViewProps; analytics: AnalyticsViewProps; discover: DiscoverViewProps; settingsView: SettingsViewProps;
   downloads: DownloadsViewProps; playerBar: PlayerBarProps; modals: ShellModalContract;
-  playbackAudio: PlaybackAudioElementProps;
+  playbackAudio: PlaybackAudioElementProps; collections: ShellCollectionsContract;
 };

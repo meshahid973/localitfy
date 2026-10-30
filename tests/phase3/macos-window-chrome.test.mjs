@@ -21,7 +21,7 @@ test("macOS uses native inset window chrome while other platforms keep custom ch
 });
 
 test("macOS does not duplicate the native traffic lights in the renderer", () => {
-  assert.match(shellSource, /<TitleBar showWindowButtons=\{platformId !== "mac"\}>/);
+  assert.match(shellSource, /<TitleBar showWindowButtons=\{platformId !== "mac"\} history=/);
   assert.match(titleBarSource, /showWindowButtons = true/);
   assert.match(titleBarSource, /\{showWindowButtons \? <div className="windowButtons">/);
   assert.match(shellCss, /\.app\[data-platform="mac"\] \.titleDrag\s*\{[^}]*padding-left: 78px;/s);

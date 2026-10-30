@@ -32,20 +32,15 @@ test("genre credits split semicolon tags, ignore blanks, and preserve first spel
   assert.deepEqual(Array.from(split("")), []);
 });
 
-test("genre search prefers exact names and details expose songs, albums, and playback", () => {
+test("genre search prefers exact names and cards open the genre page", () => {
   assert.match(source, /genre\.name\.toLocaleLowerCase\(\) === needle/);
   assert.match(source, /if \(exactMatches\.length\) return exactMatches/);
-  assert.match(source, /detailView === "songs"/);
-  assert.match(source, /detailView === "albums"/);
-  assert.match(source, /playGenreSongs\?\./);
-  assert.match(source, /shuffleGenreSongs\?\./);
-  assert.match(source, /queueGenreSongs\?\./);
-});
-
-test("genre drawer traps focus and closes before the playlist picker opens", () => {
-  assert.match(source, /handleDialogKeys/);
-  assert.match(source, /triggerRef/);
-  assert.match(source, /closeGenre\(false\);\s+openPlaylistPicker\(song\)/);
+  assert.match(source, /actions\.openCollection\(target\)/);
+  assert.match(source, /actions\.playCollection\(target\)/);
+  assert.doesNotMatch(source, /createPortal/, "no more side drawer");
+  const page = fs.readFileSync("src/features/pages/SongGroupPage.tsx", "utf8");
+  assert.match(page, /export function GenrePage/);
+  assert.match(page, /useGenreTaggedSongs\(props\.songs\)/);
 });
 
 test("genre metadata is persisted, imported, and backfilled for existing libraries", () => {

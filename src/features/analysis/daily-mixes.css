@@ -1,32 +1,21 @@
-.dailyMixes { min-width: 0; padding: 22px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
-.dailyMixesHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
-.dailyMixesHeader h3 { margin: 4px 0 8px; font-size: 24px; }
-.dailyMixesHeader p, .dailyMixCard p { margin: 0; color: var(--muted); line-height: 1.5; }
-.dailyMixesEyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; }
-.dailyMixesRefresh { flex-shrink: 0; }
-.dailyMixesGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 16px; align-items: start; }
-.dailyMixCard { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
-.dailyMixCardTop { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.dailyMixCardTop > div:last-child { min-width: 0; }
-.dailyMixCard h4 { margin: 0 0 6px; font-size: 19px; overflow-wrap: anywhere; }
-.dailyMixCard p { font-size: 12px; overflow-wrap: anywhere; }
-.dailyMixCardTop span { display: block; margin-top: 8px; font-size: 11px; color: var(--muted); }
-.dailyMixCover { width: 88px; height: 88px; flex: 0 0 88px; border-radius: 10px; overflow: hidden; }
-.dailyMixActions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 16px; }
-.dailyMixes button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+/* Daily mixes sit in the Playlists page and reuse its panel and playlist card look, a little larger. */
+.dailyMixesHeader { flex-wrap: nowrap; }
+.dailyMixesHeader .dailyMixesIntro { margin: 6px 0 0; font-size: 12px; }
+.dailyMixesRefresh { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; }
+.dailyMixesGrid { grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
+.playlistShelfCard.dailyMixCard { grid-template-columns: 92px minmax(0, 1fr); gap: 13px; padding: 12px; }
+.playlistShelfCard.dailyMixCard .playlistCoverCollage { width: 92px; height: 92px; }
+.dailyMixArtists {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--lt-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
 .dailyMixesFootnote { margin: 16px 0 0; font-size: 11px; line-height: 1.6; color: var(--muted); }
 .dailyMixesNotice { color: var(--muted); line-height: 1.6; }
-.dailyMixPreview { margin-top: 16px; border-top: 1px solid var(--line); }
-.dailyMixSave { display: grid; gap: 8px; padding: 16px 0; font-size: 12px; }
-.dailyMixSave input { min-width: 0; width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); }
-.dailyMixSave > span { color: var(--muted); }
-.dailyMixTracks { list-style: none; margin: 0; padding: 0; max-height: 400px; overflow-y: auto; }
-.dailyMixTracks li { display: flex; align-items: center; gap: 6px; padding: 9px 0; border-top: 1px solid var(--line); }
-.dailyMixTracks li > div { min-width: 0; flex: 1; }
-.dailyMixTracks strong, .dailyMixTracks span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-.dailyMixTracks span { margin-top: 3px; color: var(--muted); }
-.dailyMixTracks li[data-current="true"] strong { color: var(--accent); }
 @media (max-width: 600px) {
-  .dailyMixes { padding: 15px; }
   .dailyMixesHeader { flex-direction: column; }
 }

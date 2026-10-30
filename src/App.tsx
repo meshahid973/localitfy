@@ -82,7 +82,7 @@ import {
 } from "./features/player/playbackSource";
 import type { PlaybackSource, PlaybackSourceRef } from "./features/player/playbackSource";
 import { makeShuffledPlayableSongs } from "./features/player/shuffleSongs";
-import { usePageFocusRequests } from "./features/shell/usePageFocusRequests";
+import { useNavigationHistory } from "./features/shell/useNavigationHistory";
 import { revealSidebarSettingsPanel } from "./features/shell/sidebarLayout";
 import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
@@ -413,7 +413,7 @@ function MainModeApp() {
   const [playButtonBurst, setPlayButtonBurst] = useState(0);
   // Where the current queue was started from, so the player bar can link back to it.
   const [playbackSource, setPlaybackSource] = useState<PlaybackSource | null>(null);
-  const pageFocus = usePageFocusRequests(changeView);
+  const nav = useNavigationHistory(view, changeView, contentRef);
   const [queuePanelOpen, setQueuePanelOpen] = useState(false);
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const arcadeGhostUnlocked = false;
@@ -576,12 +576,6 @@ function MainModeApp() {
 
   useEffect(() => {
     analyticsViewRef.current = view;
-  }, [view]);
-
-  // Every page shares the .content scroller, so a new page would otherwise
-  // open at the previous page's scroll position. Reset before paint.
-  useLayoutEffect(() => {
-    contentRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [view]);
 
   useEffect(() => {
@@ -6126,14 +6120,14 @@ function MainModeApp() {
   const getLyricsTime = useCallback(() => audioRef.current?.currentTime ?? timeRef.current, []);
 
   function goToSongAlbum(song: Song) {
-    pageFocus.goToSongAlbum(song.id, albumIdBySongId, () => setStatusText("no album found for this song"));
+    nav.goToSongAlbum(song.id, albumIdBySongId, () => setStatusText("no album found for this song"));
   }
 
   function revealNowPlaying() {
-    pageFocus.revealNowPlaying(nowPlayingContext, setSelectedPlaylistId);
+    nav.revealNowPlaying(nowPlayingContext);
   }
 
-  function playAlbumSongs(songIds: string[], albumTitle = "album", source: PlaybackSourceRef | null = null, shuffled = false) {
+  function playAlbumSongs(songIds: string[], albumTitle = "album", source: PlaybackSourceRef | null = null, shuffled = false, startId?: string) {
     const ids = getPlayableUniqueSongIds(songIds, songsById);
     if (!ids.length) {
       setStatusText("album has no playable songs");
@@ -6141,9 +6135,10 @@ function MainModeApp() {
     }
 
     const order = shuffled ? makeShuffledPlayableSongs(ids.map((id) => songsById.get(id)).filter(isPlayableSong)).map((song) => song.id) : ids;
+    const start = Math.max(0, order.indexOf(startId!));
     setActivePlaylistId(null);
-    setPlayQueue(order.slice(1));
-    void selectSong(order[0], true, { playlistId: null, source: source ? { ...source, songIds: order } : null });
+    setPlayQueue(order.slice(start + 1));
+    void selectSong(order[start], true, { playlistId: null, source: source ? { ...source, songIds: order } : null });
     setStatusText(`${shuffled ? "shuffling" : "playing"} ${albumTitle}`);
   }
 
@@ -8320,7 +8315,7 @@ function MainModeApp() {
   });
 
   useAppMenuCommands({
-    changeView,
+    changeView, nav,
     openSettings: () => openSettingsPanel(),
     importSongs,
     importAlbumFolder: () => albumsController.scanAlbumFolderImport("single"),
@@ -8447,7 +8442,8 @@ function MainModeApp() {
       startSidebarResize,
       contentRef,
       updateSidebarLayout: (patch) => void updateSettingsPatch(patch),
-      openSidebarSettings
+      openSidebarSettings,
+      history: nav
     },
     home: {
       albums: albumsController.localAlbums,
@@ -8465,10 +8461,9 @@ function MainModeApp() {
       isThreeAm,
       nowPlayingSongMotionClass,
       nowPlayingTransitionKey,
-      openAlbum: pageFocus.openAlbumPage,
       openAnalysisSettings: () => { setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); },
       openCoversViewWithCurrentSong,
-      openDailyMixes: () => changeView("playlists"),
+      openDailyMixes: () => nav.go("playlists"),
       openSimilarSongs: setSimilarRequest,
       playableSongCount: playableSongs.length,
       playerError,
@@ -8511,28 +8506,10 @@ function MainModeApp() {
       visibleSongs
     },
     artists: {
-      currentId,
-      openPlaylistPicker,
-      playArtistSongs: (songIds, name) => playAlbumSongs(songIds, name, playbackSourceRef("artist", name)),
-      queueArtistSongs: queueAlbumSongs,
-      selectSong,
-      shuffleArtistSongs: (songIds, name) => playAlbumSongs(songIds, name, playbackSourceRef("artist", name), true),
-      songs,
-      toggleLike,
-      focusArtistRequest: pageFocus.artistFocusRequest,
-      onFocusArtistHandled: pageFocus.clearArtistFocusRequest
+      songs
     },
     genres: {
-      currentId,
-      openPlaylistPicker,
-      playGenreSongs: (songIds, name) => playAlbumSongs(songIds, name, playbackSourceRef("genre", name)),
-      queueGenreSongs: queueAlbumSongs,
-      selectSong,
-      shuffleGenreSongs: (songIds, name) => playAlbumSongs(songIds, name, playbackSourceRef("genre", name), true),
-      songs,
-      toggleLike,
-      focusGenreRequest: pageFocus.genreFocusRequest,
-      onFocusGenreHandled: pageFocus.clearGenreFocusRequest
+      songs
     },
     albums: {
       ...albumsController,
@@ -8544,13 +8521,10 @@ function MainModeApp() {
       selectSong,
       shuffleAlbumSongs: (songIds: string[], albumTitle?: string) => playAlbumSongs(songIds, albumTitle, selectedAlbumSourceRef, true),
       songs,
-      toggleLike,
-      focusAlbumRequest: pageFocus.albumFocusRequest,
-      onFocusAlbumHandled: pageFocus.clearAlbumFocusRequest
+      toggleLike
     },
     playlists: {
-      dailyMixes: { songs, currentId, playSongs: playAlbumSongs, queueSongs: queueAlbumSongs,
-        selectSong, queueSong, savePlaylist: createPlaylistFromSongs,
+      dailyMixes: { songs, savePlaylist: createPlaylistFromSongs,
         openAnalysisSettings: () => { setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); } },
       activePlaylistId,
       appendPlaylistSongAction,
@@ -8719,7 +8693,7 @@ function MainModeApp() {
       nowPlayingContextLabel: nowPlayingContext.label,
       nowPlayingSongMotionClass,
       nowPlayingTransitionKey,
-      openArtistPage: pageFocus.openArtistPage,
+      openArtistPage: nav.openArtistPage,
       openSongContextMenu,
       playButtonBurst,
       playNext,
@@ -8765,7 +8739,7 @@ function MainModeApp() {
         openPlaylistPicker,
         toggleLike,
         askRemoveSong,
-        goToArtist: pageFocus.openArtistPage,
+        goToArtist: nav.openArtistPage,
         goToAlbum: goToSongAlbum,
         openSimilarSongs: (song: Song) => setSimilarRequest({ kind: "song", songId: song.id }),
         notForMe: settings.experimentalMusicAnalysis ? notForMe : undefined
@@ -8843,6 +8817,7 @@ function MainModeApp() {
         removeSong
       }
     },
+    collections: { playSongs: playAlbumSongs, queueSongs: queueAlbumSongs, playPlaylist, openSimilar: setSimilarRequest },
     playbackAudio: {
       audioRef,
       currentSong: visualCurrentSong,

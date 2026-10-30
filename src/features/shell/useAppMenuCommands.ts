@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { View } from "./view.types";
+import type { NavigationHistory } from "./useNavigationHistory";
 
 const MENU_VIEWS = new Set<View>(["home", "library", "liked", "artists", "genres", "albums", "playlists", "discover", "downloads", "covers", "analytics", "settings"]);
 // Page search fields. Playlists reuses the header input for naming a new playlist, so it has no search.
@@ -7,6 +8,7 @@ const SEARCH_SELECTOR = ".content :is(.librarySearch, .pageHeaderSearch:not(.pla
 
 export type AppMenuActions = {
   changeView: (view: View) => void;
+  nav: Pick<NavigationHistory, "gesture">;
   openSettings: () => void;
   importSongs: () => unknown;
   importAlbumFolder: () => unknown;
@@ -42,6 +44,12 @@ export function useAppMenuCommands(actions: AppMenuActions) {
     switch (command?.type) {
       case "navigate":
         if (MENU_VIEWS.has(command.view as View)) current.changeView(command.view as View);
+        break;
+      case "back":
+        current.nav.gesture(-1);
+        break;
+      case "forward":
+        current.nav.gesture(1);
         break;
       case "settings":
         current.openSettings();

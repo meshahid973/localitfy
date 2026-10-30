@@ -257,7 +257,7 @@ declare global {
   };
 
   type LocalitfyAppMenuCommand = {
-    type: "navigate" | "settings" | "import-music" | "import-album-folder" | "new-playlist" | "select-all" | "find" | "feedback" | "check-updates";
+    type: "navigate" | "back" | "forward" | "settings" | "import-music" | "import-album-folder" | "new-playlist" | "select-all" | "find" | "feedback" | "check-updates";
     view?: string;
   };
 

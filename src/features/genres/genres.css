@@ -23,11 +23,6 @@
   border-radius: 18px;
 }
 
-.genreDrawerCover,
-.genreDrawerCover img {
-  border-radius: 22px;
-}
-
 @media (max-width: 520px) {
   .genresGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

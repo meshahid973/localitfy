@@ -1,0 +1,27 @@
+/* Back/forward buttons beside the logo. The title bar is a window drag region, so they opt out of it. */
+.titleHistoryNav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: auto;
+  margin-left: 12px;
+  -webkit-app-region: no-drag;
+}
+
+.titleHistoryNav button {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--lt-text);
+  background: rgba(255, 255, 255, .07);
+  cursor: pointer;
+  transition: background-color 120ms ease, opacity 120ms ease;
+}
+
+.titleHistoryNav button:hover:not(:disabled) { background: rgba(255, 255, 255, .14); }
+.titleHistoryNav button:disabled { cursor: default; opacity: .35; }
+.titleHistoryNav button:focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .62); outline-offset: 1px; }

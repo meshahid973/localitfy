@@ -1,0 +1,58 @@
+/* Shared collection card behaviour. Pages style the card itself; this owns the cursor, focus and play button. */
+.mediaCard {
+  position: relative;
+  cursor: pointer;
+  font: inherit;
+  user-select: none;
+}
+
+.mediaCard:focus-visible {
+  outline: 2px solid rgba(var(--lt-accent-rgb), .62);
+  outline-offset: 2px;
+}
+
+.mediaCardCover {
+  position: relative;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.mediaCardPlay {
+  position: absolute;
+  right: var(--media-play-inset, 8px);
+  bottom: var(--media-play-inset, 8px);
+  z-index: 2;
+  width: var(--media-play-size, 38px);
+  height: var(--media-play-size, 38px);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #0b0710;
+  background: var(--lt-accent);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .42);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 140ms ease, transform 160ms ease, filter 140ms ease;
+}
+
+.mediaCard:hover .mediaCardPlay,
+.mediaCard:focus-within .mediaCardPlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Small or collage covers: the button sits in the middle instead of the corner. */
+.mediaCardPlayCentered { --media-play-size: 34px; }
+.mediaCardPlayCentered .mediaCardPlay { inset: 0; margin: auto; }
+
+.mediaCardPlay:hover { filter: brightness(1.1); transform: scale(1.06); }
+.mediaCardPlay:focus-visible { opacity: 1; transform: none; outline: 2px solid var(--lt-text); outline-offset: 2px; }
+.mediaCardPlay svg { margin-left: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mediaCardPlay { transition: opacity 80ms linear; transform: none; }
+}

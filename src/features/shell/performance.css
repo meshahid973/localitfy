@@ -12,7 +12,7 @@ body.localtifyPerf .app :is(
   .libraryRow,
   .playlistTrackRow,
   .playlistSongRow,
-  .albumTrackRowV318,
+  .trackRow,
   .spotifyTrackItem,
   .downloadQueueItem
 ) {
@@ -24,7 +24,7 @@ body.localtifyPerf .app :is(
   .libraryRow,
   .playlistTrackRow,
   .playlistSongRow,
-  .albumTrackRowV318,
+  .trackRow,
   .spotifyTrackItem,
   .downloadQueueItem
 ):not(:hover):not(.playing):not(.songDragging):not(.songDropTarget):not(.virtualPlaylistTrackRow) {

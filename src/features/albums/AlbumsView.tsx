@@ -1,18 +1,14 @@
 import "./albums.css";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
-import { createPortal } from "react-dom";
-import { Check, FolderInput, FolderTree, ListPlus, Pencil, Play, Plus, Shuffle, Trash2, X } from "lucide-react";
+import type { CSSProperties } from "react";
+import { Check, FolderInput, FolderTree, Plus, Trash2, X } from "lucide-react";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { Cover } from "../covers/Cover";
 import { CheckMiniIcon, EmptyCoverIcon, LocaltifyStateCard, PlusMiniIcon } from "../../shared/ui/LocaltifyViewUi";
-import { LikeHeartAnimationV443 } from "../../shared/ui/LikeHeartAnimation";
-import { formatTime, toCssUrl } from "../../shared/utils/format";
-import { getSongAmbientSource } from "../covers/cover.ambient";
+import { MediaCard } from "../../shared/ui/MediaCard";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
-import AlbumContextMenu, { type AlbumContextMenuState } from "./AlbumContextMenu";
+import { albumTarget, useAppActions } from "../shell/appActions";
 import type { LocalAlbumEntry } from "./album.types";
 
 export type AlbumsViewProps = {
@@ -78,28 +74,11 @@ export type AlbumsViewProps = {
   toggleAlbumDraftSong: any;
   toggleLike: any;
   visibleAlbums: any;
-  goToArtist?: (artistName: string) => unknown;
-  /** Present while MusicBrainz tagging is on. */
-  findAlbumOnMusicBrainz?: (album: LocalAlbumEntry) => unknown;
-  /** Lists an album's missing songs to download. Present while MusicBrainz tagging is on. */
-  completeAlbum?: (album: LocalAlbumEntry) => unknown;
-  /** Opens an album's drawer from outside the page, e.g. the player bar. */
-  focusAlbumRequest?: { albumId: string; nonce: number } | null;
-  onFocusAlbumHandled?: () => void;
 };
 
 export default function AlbumsView(props: AlbumsViewProps) {
-  const [albumDetailOpen, setAlbumDetailOpen] = useState(false);
-  const albumDetailRef = useRef<HTMLElement | null>(null);
-  const albumTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const [albumMenu, setAlbumMenu] = useState<AlbumContextMenuState | null>(null);
-  const closeAlbumMenu = useCallback(() => setAlbumMenu(null), []);
+  const actions = useAppActions();
   const {
-    focusAlbumRequest,
-    onFocusAlbumHandled,
-    goToArtist,
-    findAlbumOnMusicBrainz,
-    completeAlbum,
     albumBuilderOpen,
     albumBuilderMode,
     albumDeleteConfirmArmed,
@@ -128,126 +107,29 @@ export default function AlbumsView(props: AlbumsViewProps) {
     setAlbumDraftYear,
     setAlbumSearch,
     setAlbumSortMode,
-    setSelectedAlbumId,
     albumBuilderSectionRef,
     albumCoverInputRef,
     cancelAlbumFolderImportPreview,
     clearAlbumDraftCover,
     closeAlbumBuilder,
     commitAlbumFolderImportPreview,
-    currentId,
     currentSong,
     deleteAllAlbums,
     deleteManualAlbum,
-    deleteSelectedAlbum,
     handleAlbumCoverFile,
     localAlbums,
     manualAlbumEntries,
     metadataAlbums,
     openAlbumCoverPicker,
     openCreateAlbumBuilder,
-    openEditAlbumBuilder,
-    openPlaylistPicker,
-    playAlbumSongs,
-    queueAlbumSongs,
     saveManualAlbumFromDraft,
     scanAlbumFolderImport,
-    selectSong,
     selectedAlbum,
-    selectedAlbumIds,
-    selectedAlbumIsFolder,
     selectedAlbumIsManual,
-    shuffleAlbumSongs,
     songs,
     toggleAlbumDraftSong,
-    toggleLike,
     visibleAlbums
   } = props;
-
-  useEffect(() => {
-    if (!albumDetailOpen || !selectedAlbum) return;
-    const dialog = albumDetailRef.current;
-    const previousDocumentOverflow = document.documentElement.style.overflow;
-    const previousBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-    dialog?.querySelector<HTMLButtonElement>(".albumDetailCloseV318")?.focus();
-
-    const handleDialogKeys = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopPropagation();
-        closeAlbumDetail();
-        return;
-      }
-      if (event.key !== "Tab" || !dialog) return;
-      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )).filter((element) => element.getClientRects().length > 0);
-      if (!focusable.length) {
-        event.preventDefault();
-        dialog.focus();
-        return;
-      }
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-      if (event.shiftKey && (active === first || !dialog.contains(active))) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && (active === last || !dialog.contains(active))) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    window.addEventListener("keydown", handleDialogKeys, true);
-    return () => {
-      window.removeEventListener("keydown", handleDialogKeys, true);
-      document.documentElement.style.overflow = previousDocumentOverflow;
-      document.body.style.overflow = previousBodyOverflow;
-    };
-  }, [albumDetailOpen, selectedAlbum?.id]);
-
-  useEffect(() => {
-    if (albumDetailOpen && !selectedAlbum) setAlbumDetailOpen(false);
-  }, [albumDetailOpen, selectedAlbum]);
-
-  useEffect(() => {
-    if (!focusAlbumRequest) return;
-    albumTriggerRef.current = null;
-    setSelectedAlbumId(focusAlbumRequest.albumId);
-    setAlbumDetailOpen(true);
-    onFocusAlbumHandled?.();
-  }, [focusAlbumRequest?.nonce]);
-
-  function closeAlbumDetail(restoreFocus = true) {
-    setAlbumDetailOpen(false);
-    if (!restoreFocus) return;
-    const trigger = albumTriggerRef.current;
-    window.requestAnimationFrame(() => {
-      if (trigger?.isConnected) trigger.focus();
-    });
-  }
-
-  function openAlbumMenu(event: ReactMouseEvent<HTMLButtonElement>, album: LocalAlbumEntry) {
-    event.preventDefault();
-    const menuWidth = 236;
-    const menuHeight = 340;
-    const margin = 12;
-    setAlbumMenu({
-      album,
-      trigger: event.currentTarget,
-      x: Math.min(event.clientX, Math.max(margin, window.innerWidth - menuWidth - margin)),
-      y: Math.min(event.clientY, Math.max(margin, window.innerHeight - menuHeight - margin))
-    });
-  }
-
-  function openAlbumDetail(albumId: string, trigger: HTMLButtonElement) {
-    albumTriggerRef.current = trigger;
-    setSelectedAlbumId(albumId);
-    setAlbumDetailOpen(true);
-  }
 
   return (
 
@@ -353,19 +235,20 @@ export default function AlbumsView(props: AlbumsViewProps) {
                 <section className="albumsShelfPanelV318">
                   {visibleAlbums.length ? (
                     <div className="albumsGridV318">
-                      {visibleAlbums.map((album, index) => {
+                      {visibleAlbums.map((album: LocalAlbumEntry, index: number) => {
                         const isManual = (album as any).source === "manual";
                         return (
-                          <button
+                          <MediaCard
                             key={album.id}
-                            type="button"
-                            className={`albumCardV318 ${albumDetailOpen && selectedAlbum?.id === album.id ? "active" : ""}`}
-                            onClick={(event) => openAlbumDetail(album.id, event.currentTarget)}
-                            onContextMenu={(event) => openAlbumMenu(event, album)}
-                            aria-label={`open ${album.title} album`}
+                            className="albumCardV318"
+                            openLabel={`open ${album.title} album`}
+                            playLabel={`play ${album.title}`}
+                            onOpen={() => actions.openCollection(albumTarget(album))}
+                            onPlay={() => actions.playCollection(albumTarget(album))}
+                            onContextMenu={(event) => actions.openCollectionMenu(event, albumTarget(album))}
                             style={{ "--album-card-delay": `${Math.min(index, 18) * 14}ms` } as CSSProperties}
+                            cover={<Cover song={album.coverSong} className="albumCardCoverV318" />}
                           >
-                            <Cover song={album.coverSong} className="albumCardCoverV318" />
                             <span className="albumCardSheenV318" aria-hidden="true" />
                             <span className="albumCardMetaV318">
                               <small>{isManual ? ((album as any).sourceType === "folder" ? "folder album" : "your album") : "from file tags"}</small>
@@ -373,7 +256,7 @@ export default function AlbumsView(props: AlbumsViewProps) {
                               <em title={album.artist}>{prettyMeta(album.artist)}</em>
                               <b>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.year ? ` ${album.year}` : ""}</b>
                             </span>
-                          </button>
+                          </MediaCard>
                         );
                       })}
                     </div>
@@ -397,77 +280,6 @@ export default function AlbumsView(props: AlbumsViewProps) {
                     </div>
                   )}
                 </section>
-
-                {albumDetailOpen && selectedAlbum ? createPortal(
-                  <div className="albumDetailBackdropV318" onMouseDown={(event) => {
-                    if (event.currentTarget === event.target) closeAlbumDetail();
-                  }}>
-                  <section
-                    ref={albumDetailRef}
-                    className="albumDetailPanelV318 albumDetailDrawerV318"
-                    role="dialog"
-                    aria-modal="true"
-                    tabIndex={-1}
-                    aria-labelledby="album-detail-title"
-                  >
-                    <button className="albumDetailCloseV318" type="button" onClick={() => closeAlbumDetail()} aria-label="close album details">×</button>
-                    <div className="albumDetailHeroV318" style={{ "--album-hero-cover": selectedAlbum.coverSong ? toCssUrl(getSongAmbientSource(selectedAlbum.coverSong)) : "none" } as CSSProperties}>
-                      <Cover song={selectedAlbum.coverSong} className="albumDetailCoverV318" />
-                      <div className="albumDetailCopyV318">
-                        <p className="eyebrow">{selectedAlbumIsFolder ? "folder album" : selectedAlbumIsManual ? "custom album" : "album"}</p>
-                        <h3 id="album-detail-title" title={selectedAlbum.title}>{selectedAlbum.title}</h3>
-                        <p>{selectedAlbum.artist}</p>
-                        <div className="albumMetaPillsV318">
-                          <span>{selectedAlbum.trackCount} track{selectedAlbum.trackCount === 1 ? "" : "s"}</span>
-                          <span>{formatTime(selectedAlbum.totalDuration)}</span>
-                          {selectedAlbum.year ? <span>{selectedAlbum.year}</span> : null}
-                          {selectedAlbumIsFolder && (selectedAlbum as any).sourcePath ? <span title={(selectedAlbum as any).sourcePath}>folder import</span> : null}
-                        </div>
-                        <div className="albumActionRowV318">
-                          <button className="mainAction" type="button" onClick={() => playAlbumSongs?.(selectedAlbumIds, selectedAlbum.title)} disabled={!selectedAlbumIds.length || !playAlbumSongs}><ActionLabel icon={Play}>play</ActionLabel></button>
-                          <button className="heroGhost" type="button" onClick={() => shuffleAlbumSongs?.(selectedAlbumIds, selectedAlbum.title)} disabled={selectedAlbumIds.length < 2 || !shuffleAlbumSongs}><ActionLabel icon={Shuffle}>shuffle</ActionLabel></button>
-                          <button className="heroGhost" type="button" onClick={() => queueAlbumSongs?.(selectedAlbumIds, selectedAlbum.title)} disabled={!selectedAlbumIds.length || !queueAlbumSongs}><ActionLabel icon={ListPlus}>queue</ActionLabel></button>
-                          {selectedAlbumIsManual ? <button className="heroGhost" type="button" onClick={() => {
-                            closeAlbumDetail(false);
-                            openEditAlbumBuilder(selectedAlbum);
-                          }}><ActionLabel icon={Pencil}>edit</ActionLabel></button> : null}
-                          <button className="heroGhost danger" type="button" onClick={() => void deleteSelectedAlbum()} disabled={!selectedAlbumIds.length && !selectedAlbumIsManual}>
-                            <ActionLabel icon={Trash2}>{selectedAlbumIsManual ? "delete album" : "remove tag album"}</ActionLabel>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="albumTrackListV318">
-                      {selectedAlbum.songs.map((song, index) => {
-                        const active = song.id === currentId;
-                        return (
-                          <article key={song.id} className={`albumTrackRowV318 ${active ? "active" : ""}`}>
-                            <button type="button" className="albumTrackMainV318" onClick={() => void selectSong(song.id, true)}>
-                              <span>{String(index + 1).padStart(2, "0")}</span>
-                              <Cover song={song} className="albumTrackCoverV318" />
-                              <span>
-                                <strong title={song.title}>{prettyTitle(song.title, 10)}</strong>
-                                <small>{prettyMeta(song.artist)}</small>
-                              </span>
-                            </button>
-                            <span className="albumTrackDurationV318">{formatTime(song.duration)}</span>
-                            <button className={`iconAction likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`} type="button" onClick={() => toggleLike(song.id)} aria-label={song.liked ? "unlike song" : "like song"} aria-pressed={song.liked}>
-                              <LikeHeartAnimationV443 liked={song.liked} />
-                            </button>
-                            <button className="iconAction" type="button" onClick={() => {
-                              closeAlbumDetail(false);
-                              openPlaylistPicker(song);
-                              window.requestAnimationFrame(() => document.querySelector<HTMLButtonElement>(".playlistPickerModal .closeModalButton")?.focus());
-                            }} aria-label="add to playlist">+</button>
-                          </article>
-                        );
-                      })}
-                    </div>
-                  </section>
-                  </div>,
-                  document.querySelector(".app") || document.body
-                ) : null}
 
                 {albumBuilderOpen ? (
                   <section ref={albumBuilderSectionRef} className="albumBuilderPanelV318 open">
@@ -563,18 +375,6 @@ export default function AlbumsView(props: AlbumsViewProps) {
                   </section>
                 ) : null}
               </section>
-              <AlbumContextMenu
-                state={albumMenu}
-                onClose={closeAlbumMenu}
-                openAlbum={(album, trigger) => openAlbumDetail(album.id, trigger)}
-                playSongs={playAlbumSongs}
-                shuffleSongs={shuffleAlbumSongs}
-                queueSongs={queueAlbumSongs}
-                goToArtist={goToArtist}
-                editAlbum={albumMenu && (albumMenu.album as any).source === "manual" ? openEditAlbumBuilder : undefined}
-                findOnMusicBrainz={findAlbumOnMusicBrainz}
-                completeAlbum={completeAlbum}
-              />
             </>
   );
 }

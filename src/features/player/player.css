@@ -2106,10 +2106,6 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
   border-radius: var(--player-radius-xs) !important;
 }
 
-.playerBar .albumTrackCoverV318 {
-  border-radius: var(--player-radius-s) !important;
-}
-
 
 /* v0.4.1: small player icon polish + safer album delete confirmation */
 .playerBar .circleButton:not(.main) .playerControlIcon,
