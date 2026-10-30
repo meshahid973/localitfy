@@ -48,3 +48,16 @@ test("URL downloads forward audio options and the setting defaults off", () => {
   const constants = fs.readFileSync(path.join(root, "src", "features", "settings", "settings.constants.ts"), "utf8");
   assert.match(constants, /downloadKeepOriginal:false/);
 });
+
+test("keep-original Opus downloads import and play; nested download settings reach the main process", () => {
+  const main = fs.readFileSync(path.join(root, "electron", "main.cjs"), "utf8");
+  const match = main.match(/function isAudioFile\(filePath\) \{([^}]+)\}/);
+  assert.ok(match, "main process audio recognition is present");
+  const isAudioFile = new Function("filePath", match[1]);
+  for (const file of ["song.opus", "song.m4a", "song.aiff", "song.MP3"]) assert.equal(isAudioFile(file), true, file);
+  assert.equal(isAudioFile("archive.zip"), false);
+  assert.match(main, /options\.autoAdd !== false/, "auto-add preference is forwarded");
+  assert.match(main, /payload\?\.folder \?\? options\.downloadFolder/, "download folder preference is forwarded");
+  const downloader = fs.readFileSync(path.join(root, "electron", "downloader.cjs"), "utf8");
+  assert.match(downloader, /"\.opus"/, "the converter recognizes Opus imports");
+});

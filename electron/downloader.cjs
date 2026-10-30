@@ -14,7 +14,7 @@ const activeDownloadProcesses = new Set();
 let activeDownloadCancelled = false;
 
 const MEDIA_EXTENSIONS = new Set([
-  ".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac",
+  ".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac", ".opus", ".aiff", ".aif",
   ".mp4", ".webm", ".mkv", ".mov", ".avi", ".m4v"
 ]);
 

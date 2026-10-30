@@ -733,7 +733,7 @@ async function cacheSpotifyCoverImage(coverUrl, stableKey = "") {
 }
 
 function isAudioFile(filePath) {
-  return /\.(mp3|wav|ogg|flac|m4a|aac)$/i.test(filePath || "");
+  return /\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(filePath || "");
 }
 
 function isImageFile(filePath) {
@@ -1920,7 +1920,7 @@ function analyzeVolumeGain(filePath) {
 }
 
 function openImportDialog(senderWindow) {
-  const dialogOptions = { title: "Import local music files to localtify library", buttonLabel: "Add to Library", properties: ["openFile", "multiSelections"], filters: [{ name: "Audio Files", extensions: ["mp3", "wav", "ogg", "flac", "m4a", "aac"] }] };
+  const dialogOptions = { title: "Import local music files to localtify library", buttonLabel: "Add to Library", properties: ["openFile", "multiSelections"], filters: [{ name: "Audio Files", extensions: ["mp3", "wav", "ogg", "flac", "m4a", "aac", "opus", "aiff", "aif"] }] };
   return senderWindow && !senderWindow.isDestroyed() ? dialog.showOpenDialog(senderWindow, dialogOptions) : dialog.showOpenDialog(dialogOptions);
 }
 
@@ -2504,9 +2504,10 @@ app.whenReady().then(async () => {
   ipcRouter.handle("download:audio", async (event, payload) => {
     try {
       const urls = Array.isArray(payload?.urls) ? payload.urls : [payload?.url].filter(Boolean);
-      const { quality, format, cleanTitle, keepOriginal } = payload?.options && typeof payload.options === "object" ? payload.options : {};
-      const autoAdd = typeof payload?.autoAdd === "boolean" ? payload.autoAdd : true;
-      const downloadFolder = getDownloadDirectory(payload?.folder);
+      const options = payload?.options && typeof payload.options === "object" ? payload.options : {};
+      const { quality, format, cleanTitle, keepOriginal } = options;
+      const autoAdd = typeof payload?.autoAdd === "boolean" ? payload.autoAdd : options.autoAdd !== false;
+      const downloadFolder = getDownloadDirectory(payload?.folder ?? options.downloadFolder);
       const result = await downloadAudioUrls(urls, downloadFolder, (progress) => {
         if (!mainWindow || mainWindow.isDestroyed()) return;
         event.sender.send("download:progress", progress);
