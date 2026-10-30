@@ -165,6 +165,7 @@ chmod +x localtify-0.4.1-x86_64.AppImage
 * Discord Rich Presence
 * privacy controls for Discord activity
 * time-synced lyrics (experimental) from local `.lrc` files or [LRCLIB](https://lrclib.net)
+* MusicBrainz tagging (experimental): find songs without MusicBrainz IDs, review proposed tags and cover art from [MusicBrainz](https://musicbrainz.org), then write them into MP3 and FLAC files
 * media key support
 * tray controls
 * startup option on Windows
@@ -374,6 +375,7 @@ Your songs stay on your computer.
 You do not need an account.
 Discord activity is optional and can be turned off in settings.
 Lyrics are off by default. When turned on, the playing song's title, artist, album and length are sent to LRCLIB to find lyrics, unless online lookup is turned off. A matching `.lrc` file next to a song is used without going online.
+MusicBrainz tagging is off by default and only goes online when you click Look up. It sends each song's title, artist, album and length to MusicBrainz, and downloads front covers from the Cover Art Archive into the app's data folder, so they work offline afterwards. Tags are written only for the songs you select; the original file is moved to the Trash first.
 Browser-cookie access for the downloader is disabled by default and must be explicitly opted into.
 
 Please do not commit private files such as:

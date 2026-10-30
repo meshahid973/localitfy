@@ -1,0 +1,514 @@
+/* Settings → Experimental → MusicBrainz tagging */
+.taggingAudit {
+  display: grid;
+  gap: 8px;
+}
+
+.taggingGroups,
+.taggingProposals {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.taggingGroup {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--lt-surface-raised);
+}
+
+.taggingGroup.active {
+  border-color: rgba(var(--lt-accent-rgb), .45);
+}
+
+.taggingGroupActions,
+.taggingGroupState {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.taggingGroupState {
+  font-size: 13px;
+  opacity: .75;
+}
+
+.taggingGroupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.taggingGroupHeader > span:first-child,
+.taggingProposalText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.taggingGroupHeader > span:first-child :is(strong, small),
+.taggingProposalText :is(strong, small) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taggingGroupHeader > span:first-child small,
+.taggingProposalText small,
+.taggingMissed {
+  opacity: .62;
+}
+
+.taggingProposal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: opacity .15s ease, background-color .15s ease;
+}
+
+.taggingProposal:hover {
+  background: rgba(255, 255, 255, .04);
+}
+
+/* Unticked matches fade back so the ones that will be saved stand out. */
+.taggingProposal.unselected {
+  opacity: .5;
+}
+
+.taggingProposal input {
+  flex: none;
+  accent-color: var(--lt-accent);
+}
+
+.taggingProposal label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.taggingProposal img,
+.taggingNoCover {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--lt-surface, rgba(255, 255, 255, .06));
+}
+
+.taggingProposalText strong small {
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+.taggingScore {
+  flex: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: .8;
+}
+
+.taggingScore.low {
+  color: #ffd27a;
+  opacity: 1;
+}
+
+.taggingMissed {
+  padding: 4px 8px;
+}
+
+.taggingSplitAlbums summary {
+  cursor: pointer;
+}
+
+.taggingStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--lt-surface-raised);
+  font-size: 13px;
+}
+
+.taggingStatus.working {
+  border: 1px solid rgba(var(--lt-accent-rgb), .35);
+}
+
+.taggingSpinner {
+  flex: none;
+  animation: taggingSpin .9s linear infinite;
+}
+
+@keyframes taggingSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taggingSpinner { animation-duration: 2.4s; }
+}
+
+/* Song right-click → find on MusicBrainz */
+.tagSearchDialog {
+  width: min(760px, calc(100vw - 32px));
+  max-height: min(780px, calc(100dvh - 48px));
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgba(163, 193, 198, .25);
+  border-radius: 22px;
+  background: linear-gradient(var(--lt-surface, #111c22), var(--lt-surface, #111c22)), var(--lt-bg, #111c22);
+  color: var(--lt-text, #edf5f4);
+  box-shadow: 0 24px 90px rgba(0, 0, 0, .5);
+}
+
+.tagSearchDialog::backdrop {
+  background: rgba(0, 0, 0, .7);
+}
+
+.tagSearchContent {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
+.tagSearchHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tagSearchCover {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+}
+
+.tagSearchHeading {
+  flex: 1;
+  min-width: 0;
+}
+
+.tagSearchHeading h2 {
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+  font-size: 22px;
+}
+
+.tagSearchHeading p {
+  margin: 0;
+  font-size: 13px;
+  opacity: .72;
+}
+
+.tagSearchHeading .tagSearchEyebrow {
+  color: var(--lt-accent, #8dffce);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+.tagSearchClose {
+  display: grid;
+  flex: none;
+  place-items: center;
+  align-self: flex-start;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .06);
+  color: inherit;
+  cursor: pointer;
+}
+
+.tagSearchForm {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.tagSearchForm label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.tagSearchForm label span {
+  opacity: .7;
+}
+
+.tagSearchForm input {
+  min-width: 0;
+  padding: 9px 11px;
+  border: 1px solid rgba(163, 193, 198, .25);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .04);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+}
+
+.tagSearchButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 1px solid rgba(163, 193, 198, .25);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .04);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tagSearchButton.primary {
+  border-color: transparent;
+  background: var(--lt-accent, #8dffce);
+  color: #071611;
+}
+
+.tagSearchButton:disabled,
+.tagSearchClose:disabled,
+.tagSearchResults button:disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+.tagSearchButton:not(:disabled):hover,
+.tagSearchClose:not(:disabled):hover {
+  filter: brightness(1.18);
+}
+
+.tagSearchDialog :is(button, input):focus-visible {
+  outline: 2px solid var(--lt-accent, #8dffce);
+  outline-offset: 2px;
+}
+
+.tagSearchResults {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tagSearchResults button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 8px;
+  border: 0;
+  border-top: 1px solid rgba(163, 193, 198, .12);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tagSearchResults button:not(:disabled):hover {
+  background: rgba(255, 255, 255, .04);
+}
+
+.tagSearchResultText {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tagSearchResultText :is(strong, small) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tagSearchResultText small {
+  opacity: .62;
+}
+
+.tagSearchResultText strong small {
+  margin-left: 6px;
+  font-weight: 500;
+  opacity: .7;
+}
+
+.tagSearchLength {
+  flex: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: .6;
+}
+
+.tagSearchChosen {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--lt-surface-raised, rgba(255, 255, 255, .05));
+}
+
+.tagSearchChosenRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.tagSearchChosenRow img,
+.tagSearchChosenRow .taggingNoCover {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.tagSearchChosenRow .taggingChanges {
+  white-space: normal;
+}
+
+.tagSearchActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .tagSearchContent { padding: 18px; }
+  .tagSearchForm { grid-template-columns: 1fr; }
+  .tagSearchLength { display: none; }
+}
+
+.tagSearchChosen > strong {
+  overflow-wrap: anywhere;
+}
+
+.tagSearchChosenMeta {
+  margin-left: 6px;
+  font-weight: 500;
+  opacity: .62;
+}
+
+/* Complete album: an album's full track list, with what's already in the library ticked off */
+.albumTracksSummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.albumTracksEditions summary {
+  font-size: 13px;
+  cursor: pointer;
+  opacity: .8;
+}
+
+.albumTracksEditions ul,
+.albumTracksList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.albumTracksEditions ul {
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.albumTracksEditions button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.albumTracksEditions button:not(:disabled):hover {
+  background: rgba(255, 255, 255, .05);
+}
+
+.albumTracksEditions small {
+  opacity: .62;
+}
+
+.albumTracksList label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-top: 1px solid rgba(163, 193, 198, .12);
+  cursor: pointer;
+}
+
+.albumTracksList li.owned label {
+  cursor: default;
+}
+
+.albumTracksList li.owned .tagSearchResultText {
+  opacity: .6;
+}
+
+.albumTracksList input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--lt-accent);
+}
+
+.albumTracksOwned {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+  color: var(--lt-accent, #8dffce);
+}
+
+.albumTracksNumber {
+  flex: none;
+  min-width: 26px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  opacity: .55;
+}
+
+/* Downloads finished → get tags from MusicBrainz? */
+.downloadTagSongs {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0 0 0 18px;
+  font-size: 13px;
+  opacity: .8;
+}

@@ -1,4 +1,4 @@
-import { Disc3, Heart, ListEnd, Pencil, Play, Plus, Radio, SkipForward, ThumbsDown, Trash2, UserRound, UserX } from "lucide-react";
+import { Disc3, Heart, ListEnd, Pencil, Play, Plus, Radio, SkipForward, Tags, ThumbsDown, Trash2, UserRound, UserX } from "lucide-react";
 import { Cover } from "../../covers/Cover";
 import { prettyMeta, prettyTitle } from "../../search";
 import { splitArtistCredits } from "../../artists/artistCredits";
@@ -23,6 +23,8 @@ export type SongContextMenuProps = {
   goToAlbum: (song: Song) => unknown;
   /** Present while music analysis is on, since only recommendations use it. */
   notForMe?: { marks: NotForMeMarks; toggle: (kind: NotForMeKind, value: string) => unknown };
+  /** Present while MusicBrainz tagging is on. */
+  findOnMusicBrainz?: (song: Song) => unknown;
 };
 
 export default function SongContextMenu({
@@ -38,7 +40,8 @@ export default function SongContextMenu({
   askRemoveSong,
   goToArtist,
   goToAlbum,
-  notForMe
+  notForMe,
+  findOnMusicBrainz
 }: SongContextMenuProps) {
   if (!state) return null;
   const song = songsById.get(state.songId);
@@ -108,6 +111,12 @@ export default function SongContextMenu({
         <button type="button" role="menuitem" onClick={() => { onClose(); openEditor(song); }}>
           <span className="songContextMenuIcon"><Pencil size={13} strokeWidth={3} /></span> edit song data
         </button>
+        {findOnMusicBrainz && song.filePath ? (
+          <button type="button" role="menuitem" title="Search MusicBrainz and pick the right release for this song"
+            onClick={() => { onClose(); findOnMusicBrainz(song); }}>
+            <span className="songContextMenuIcon"><Tags size={13} strokeWidth={3} /></span> find on musicbrainz
+          </button>
+        ) : null}
         <button className="dangerMenuItem" type="button" role="menuitem" onClick={() => { onClose(); askRemoveSong(song.id); }}>
           <span className="songContextMenuIcon"><Trash2 size={13} strokeWidth={3} /></span> remove from library
         </button>

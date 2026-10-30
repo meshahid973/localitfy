@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Compass, ExternalLink, Plus, RefreshCw, Settings2, UserX } from "lucide-react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Check, Compass, Disc3, ExternalLink, Plus, RefreshCw, Settings2, UserX } from "lucide-react";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { splitArtistCredits } from "../artists/artistCredits";
 import type { NotForMeKind } from "../analysis/notForMe";
@@ -8,8 +8,10 @@ import type { Settings } from "../settings/settings.types";
 import type { DiscoverResult, DiscoverTrack } from "./discover.types";
 import "./discover.css";
 
+const AlbumTracksDialog = lazy(() => import("../tagging/AlbumTracksDialog"));
+
 export type DiscoverViewProps = {
-  settings: Pick<Settings, "discoverEnabled" | "lastfmApiKey">;
+  settings: Pick<Settings, "discoverEnabled" | "lastfmApiKey" | "musicbrainzTagging">;
   updateSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => unknown;
   /** Opens Downloads with these songs selected, ready to download. */
   sendToDownloads: (tracks: SpotifyTrack[]) => unknown;
@@ -34,6 +36,8 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const [keyDraft, setKeyDraft] = useState(settings.lastfmApiKey || "");
   const [picked, setPicked] = useState<Map<string, DiscoverTrack>>(() => new Map());
   const requestVersionRef = useRef(0);
+  // The song whose whole album is being looked up on MusicBrainz.
+  const [albumOf, setAlbumOf] = useState<DiscoverTrack | null>(null);
 
   const load = useCallback(async (refresh = false) => {
     const requestVersion = ++requestVersionRef.current;
@@ -105,6 +109,10 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     return `Based on ${shown.join(", ")}${more > 0 ? ` and ${more} more artists you play` : ""}.`;
   }, [ready]);
 
+  const albumButton = (track: DiscoverTrack) => settings.musicbrainzTagging
+    ? <button type="button" className="discoverPick" aria-label={`Get the album ${track.title} is from`} title="Get the whole album" onClick={() => setAlbumOf(track)}><Disc3 size={14} /></button>
+    : null;
+
   const pickButton = (track: DiscoverTrack) => {
     const on = picked.has(trackId(track));
     return <button type="button" className={`discoverPick ${on ? "active" : ""}`} aria-pressed={on} aria-label={`${on ? "Unpick" : "Pick"} ${track.title}`} onClick={() => togglePick(track)}>
@@ -136,7 +144,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
           </header>
           <p className="discoverBecause">because you play {listNames(artist.because)}{artist.seedCount > artist.because.length ? ` and ${artist.seedCount - artist.because.length} more` : ""}</p>
           {artist.topTracks.length ? <ul className="discoverTracks">
-            {artist.topTracks.map((track) => <li key={track.title}><span>{track.title}</span>{pickButton(track)}</li>)}
+            {artist.topTracks.map((track) => <li key={track.title}><span>{track.title}</span>{albumButton(track)}{pickButton(track)}</li>)}
           </ul> : null}
         </article>)}
       </div>
@@ -149,6 +157,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         {ready.tracks.map((track) => <li key={trackId(track)}>
           <span className="discoverSongText"><strong>{track.title}</strong><small>{track.artist}</small></span>
           <button type="button" className="discoverPick" aria-label={`Open ${track.title} on Last.fm`} title="Open on Last.fm" onClick={() => openLink(track.url)}><ExternalLink size={14} /></button>
+          {albumButton(track)}
           {pickButton(track)}
         </li>)}
       </ul>
@@ -161,5 +170,8 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       <button type="button" className="softButton" onClick={() => setPicked(new Map())}>Clear</button>
       <button type="button" className="heroMain" onClick={sendPicked}><Plus size={15} /><span>Send to Downloads</span></button>
     </div> : null}
+
+    {albumOf ? <Suspense fallback={null}><AlbumTracksDialog request={{ title: albumOf.title, artist: albumOf.artist, label: albumOf.title }}
+      sendToDownloads={sendToDownloads} onClose={() => setAlbumOf(null)} /></Suspense> : null}
   </section>;
 }

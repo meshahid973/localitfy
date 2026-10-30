@@ -1,6 +1,6 @@
 import "./albums.css";
-import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { Check, FolderInput, FolderTree, ListPlus, Pencil, Play, Plus, Shuffle, Trash2, X } from "lucide-react";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
@@ -12,6 +12,8 @@ import { LikeHeartAnimationV443 } from "../../shared/ui/LikeHeartAnimation";
 import { formatTime, toCssUrl } from "../../shared/utils/format";
 import { getSongAmbientSource } from "../covers/cover.ambient";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
+import AlbumContextMenu, { type AlbumContextMenuState } from "./AlbumContextMenu";
+import type { LocalAlbumEntry } from "./album.types";
 
 export type AlbumsViewProps = {
   albumBuilderOpen: any;
@@ -76,6 +78,11 @@ export type AlbumsViewProps = {
   toggleAlbumDraftSong: any;
   toggleLike: any;
   visibleAlbums: any;
+  goToArtist?: (artistName: string) => unknown;
+  /** Present while MusicBrainz tagging is on. */
+  findAlbumOnMusicBrainz?: (album: LocalAlbumEntry) => unknown;
+  /** Lists an album's missing songs to download. Present while MusicBrainz tagging is on. */
+  completeAlbum?: (album: LocalAlbumEntry) => unknown;
   /** Opens an album's drawer from outside the page, e.g. the player bar. */
   focusAlbumRequest?: { albumId: string; nonce: number } | null;
   onFocusAlbumHandled?: () => void;
@@ -85,9 +92,14 @@ export default function AlbumsView(props: AlbumsViewProps) {
   const [albumDetailOpen, setAlbumDetailOpen] = useState(false);
   const albumDetailRef = useRef<HTMLElement | null>(null);
   const albumTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const [albumMenu, setAlbumMenu] = useState<AlbumContextMenuState | null>(null);
+  const closeAlbumMenu = useCallback(() => setAlbumMenu(null), []);
   const {
     focusAlbumRequest,
     onFocusAlbumHandled,
+    goToArtist,
+    findAlbumOnMusicBrainz,
+    completeAlbum,
     albumBuilderOpen,
     albumBuilderMode,
     albumDeleteConfirmArmed,
@@ -218,6 +230,19 @@ export default function AlbumsView(props: AlbumsViewProps) {
     });
   }
 
+  function openAlbumMenu(event: ReactMouseEvent<HTMLButtonElement>, album: LocalAlbumEntry) {
+    event.preventDefault();
+    const menuWidth = 236;
+    const menuHeight = 340;
+    const margin = 12;
+    setAlbumMenu({
+      album,
+      trigger: event.currentTarget,
+      x: Math.min(event.clientX, Math.max(margin, window.innerWidth - menuWidth - margin)),
+      y: Math.min(event.clientY, Math.max(margin, window.innerHeight - menuHeight - margin))
+    });
+  }
+
   function openAlbumDetail(albumId: string, trigger: HTMLButtonElement) {
     albumTriggerRef.current = trigger;
     setSelectedAlbumId(albumId);
@@ -226,6 +251,7 @@ export default function AlbumsView(props: AlbumsViewProps) {
 
   return (
 
+              <>
               <section data-page-section="albums" className="albumsPageV318">
                 <PageHeader
                   eyebrow="local albums"
@@ -335,6 +361,7 @@ export default function AlbumsView(props: AlbumsViewProps) {
                             type="button"
                             className={`albumCardV318 ${albumDetailOpen && selectedAlbum?.id === album.id ? "active" : ""}`}
                             onClick={(event) => openAlbumDetail(album.id, event.currentTarget)}
+                            onContextMenu={(event) => openAlbumMenu(event, album)}
                             aria-label={`open ${album.title} album`}
                             style={{ "--album-card-delay": `${Math.min(index, 18) * 14}ms` } as CSSProperties}
                           >
@@ -536,6 +563,18 @@ export default function AlbumsView(props: AlbumsViewProps) {
                   </section>
                 ) : null}
               </section>
-            
+              <AlbumContextMenu
+                state={albumMenu}
+                onClose={closeAlbumMenu}
+                openAlbum={(album, trigger) => openAlbumDetail(album.id, trigger)}
+                playSongs={playAlbumSongs}
+                shuffleSongs={shuffleAlbumSongs}
+                queueSongs={queueAlbumSongs}
+                goToArtist={goToArtist}
+                editAlbum={albumMenu && (albumMenu.album as any).source === "manual" ? openEditAlbumBuilder : undefined}
+                findOnMusicBrainz={findAlbumOnMusicBrainz}
+                completeAlbum={completeAlbum}
+              />
+            </>
   );
 }

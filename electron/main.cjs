@@ -2540,6 +2540,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("download:open-folder", async (_event, folder) => { await shell.openPath(getDownloadDirectory(folder)); return true; });
   registerAnalysisIpc(ipcRouter, { app, powerMonitor, repositories: databaseRepositories, ffmpegPath: ffmpegStatic?.replace("app.asar", "app.asar.unpacked") });
   require("./ipc/lyrics.cjs").registerLyricsIpc(ipcRouter, app, databaseRepositories);
+  require("./ipc/tagging.cjs").registerTaggingIpc(ipcRouter, { app, songs: databaseRepositories.songs, getSettings, readLocalAudioMetadata, listSongsShaped, safeMediaUrl, clearFileInfoCache, getWindow: () => mainWindow });
   ipcRouter.handle("listening:record", (_event, payload) => {
     const recorded = databaseRepositories.listening.record(payload);
     if (recorded) { try { scrobbler?.observe(payload); } catch (error) { console.log("[localtify scrobble observation]", error?.message || error); } }

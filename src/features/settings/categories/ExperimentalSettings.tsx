@@ -4,6 +4,7 @@ import type { AnalysisStatus } from "../../analysis/analysis.types";
 import type { Settings } from "../settings.types";
 import type { Song } from "../../library/song.types";
 import NotForMeSettings from "../../analysis/NotForMeSettings";
+import TaggingSettings from "../../tagging/TaggingSettings";
 
 const megabytes = (bytes: number) => `${(bytes / 1_000_000).toFixed(1)} MB`;
 
@@ -110,6 +111,7 @@ export default function ExperimentalSettings({ settings, songs, updateSetting }:
         <button type="button" className="settingsActionButton" disabled={lyricsCacheCleared} onClick={() => void window.localitfy.clearLyricsCache().then(() => { if (mounted.current) setLyricsCacheCleared(true); })}>{lyricsCacheCleared ? "Lyrics cache cleared" : "Clear lyrics cache"}</button>
       </div>
     </div>
+    <TaggingSettings settings={settings} songs={songs} updateSetting={updateSetting} />
     {clearTarget ? <div className="settingsPanelCard" role="group" aria-label="Confirm clearing data"><p>Clear {clearTarget === "history" ? "listening history" : "saved analysis"}? Your music, playlists and existing play counts are kept. Database backups may retain earlier data.</p><div className="settingsActionRow"><button type="button" className="settingsActionButton" disabled={busy} onClick={() => { const target = clearTarget; setClearTarget(null); void run(() => target === "history" ? window.localitfy.clearListeningHistory() : window.localitfy.clearAnalysis(), target === "history" ? "History cleared. Recording resumes with the next playback session." : "Saved analysis cleared."); }}>Clear data</button><button type="button" className="settingsActionButton" onClick={() => setClearTarget(null)}>Keep data</button></div></div> : null}
     {message ? <p role="status">{message}</p> : null}
     {error ? <p role="alert">{error}</p> : null}

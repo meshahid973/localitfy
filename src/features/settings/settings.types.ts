@@ -10,6 +10,8 @@ export type Settings = {
   listeningHistoryEnabled: boolean;
   lyricsEnabled: boolean;
   lyricsOnlineLookup: boolean;
+  musicbrainzTagging: boolean;
+  musicbrainzWriteFiles: boolean;
   theme: ThemeId;
   themePanelCollapsed: boolean;
   customThemeEnabled: boolean;
