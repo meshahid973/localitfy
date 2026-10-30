@@ -104,3 +104,10 @@ test("suspended Web Audio must not intercept audible HTML audio before resuming"
   assert.equal(sourceConnections, 1, "reusing effects does not create another media source");
   runtime.dispose();
 });
+
+test("native pause and stop cancel the secondary audio first", () => {
+  const app = read("src/App.tsx");
+  assert.match(app, /function stopPlaybackFromNative\(\) \{\s*stopCrossfadeAuto\(\);\s*playbackTransitionRef\.current\.requestPause\(\)/);
+  assert.match(app, /function pauseAudioSmooth\(\) \{\s*stopCrossfadeAuto\(\);\s*playbackTransitionRef\.current\.requestPause\(\)/);
+  assert.match(app, /if \(command\.type === "pause"\) \{ stopCrossfadeAuto\(\);/);
+});

@@ -2997,6 +2997,8 @@ function MainModeApp() {
   }, []);
 
   function stopPlaybackFromNative() {
+    stopCrossfadeAuto();
+    playbackTransitionRef.current.requestPause();
     const audio = audioRef.current;
 
     if (audio) {
@@ -3009,7 +3011,6 @@ function MainModeApp() {
     }
 
     pendingPlayRef.current = false;
-    playbackTransitionRef.current.requestPause();
     resetPlayCountTracker();
     setIsPlaying(false);
     setCurrentTime(0);
@@ -3028,7 +3029,7 @@ function MainModeApp() {
 
       if (command.type === "toggle") togglePlay();
       if (command.type === "play") setIsPlaying(true);
-      if (command.type === "pause") { playbackTransitionRef.current.requestPause(); pendingPlayRef.current = false; setIsPlaying(false); }
+      if (command.type === "pause") { stopCrossfadeAuto(); playbackTransitionRef.current.requestPause(); pendingPlayRef.current = false; setIsPlaying(false); }
       if (command.type === "stop") stopPlaybackFromNative();
       if (command.type === "prev") playPrevious();
       if (command.type === "next") playNext(true);
@@ -3055,7 +3056,7 @@ function MainModeApp() {
     playbackSpeed: settings.playbackSpeed,
     timeRef,
     onPlay: () => setIsPlaying(true),
-    onPause: () => { playbackTransitionRef.current.requestPause(); pendingPlayRef.current = false; setIsPlaying(false); },
+    onPause: () => { stopCrossfadeAuto(); playbackTransitionRef.current.requestPause(); pendingPlayRef.current = false; setIsPlaying(false); },
     onStop: stopPlaybackFromNative,
     onPrevious: () => playPrevious(),
     onNext: () => playNext(true)
@@ -4461,12 +4462,12 @@ function MainModeApp() {
   }
 
   function pauseAudioSmooth() {
+    stopCrossfadeAuto();
     playbackTransitionRef.current.requestPause();
     const audio = audioRef.current;
     const playerController = ensurePlayerController();
 
     pendingPlayRef.current = false;
-    stopCrossfadeAuto();
 
     if (!audio) {
       setIsPlaying(false);
@@ -6845,9 +6846,9 @@ function MainModeApp() {
     }
 
     if (isPlaying) {
+      stopCrossfadeAuto();
       playbackTransitionRef.current.requestPause();
       pendingPlayRef.current = false;
-      stopCrossfadeAuto();
       setIsPlaying(false);
       return;
     }

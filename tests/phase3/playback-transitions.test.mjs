@@ -68,3 +68,15 @@ test("pause, track change and errors invalidate outstanding play promises", () =
   assert.equal(m.isCurrent(next, "b"), false);
   assert.equal(m.isCurrent(m.requestPlay("b"), "b"), true);
 });
+
+test("cancel crossfade before pausing so the hidden next track cannot keep playing", () => {
+  const m = new PlaybackTransitionCoordinator();
+  const current = m.requestPlay("a");
+  m.playing();
+  m.crossfadeStarted("b");
+  m.crossfadeCancelled();
+  m.requestPause();
+  assert.equal(m.snapshot().phase, "paused");
+  assert.equal(m.isCurrent(current, "a"), false);
+  assert.equal(m.snapshot().targetId, "");
+});
