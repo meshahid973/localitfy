@@ -11,7 +11,7 @@ const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const electron = (file) => require(path.join(root, "electron", file));
 const { summarizeAudit, createTagAuditor, readMusicBrainzIds } = electron("musicbrainz/audit.cjs");
-const { createMusicBrainzClient } = electron("musicbrainz/client.cjs");
+const { createMusicBrainzClient, fetchCoverArt } = electron("musicbrainz/client.cjs");
 const { similarity, pickRecording, formatGenres, matchReleaseTracks } = electron("musicbrainz/match.cjs");
 const { createTaggingLookup, searchTitle } = electron("musicbrainz/lookup.cjs");
 const { withMusicBrainzUfid, ffmpegArgs, writeMusicBrainzTags } = electron("musicbrainz/tag-writer.cjs");
@@ -116,6 +116,47 @@ test("the client identifies itself, stays at one request per interval and retrie
   assert.ok(calls.every((call) => call.agent === "localtify/test ( x )"));
   assert.equal(new URL(calls[0].url).searchParams.get("query"), 'recording:"Say \\"Hi\\"" AND artist:"Artist"');
   assert.ok(sleeps.some((ms) => ms >= 2000), "backs off after a 503");
+});
+
+test("MusicBrainz requests use a timeout and do not retain an unlimited cache", async () => {
+  let calls = 0;
+  const signals = [];
+  const client = createMusicBrainzClient({ userAgent: "localtify/test", minIntervalMs: 0, maxCacheEntries: 2,
+    fetchImpl: async (_url, options) => {
+      calls++;
+      signals.push(options.signal);
+      return { ok: true, status: 200, json: async () => ({ releases: [] }) };
+    }
+  });
+  await client.searchReleases("Album One", "");
+  await client.searchReleases("Album Two", "");
+  await client.searchReleases("Album Three", "");
+  await client.searchReleases("Album One", "");
+  assert.equal(calls, 4, "oldest cached request was evicted");
+  assert.ok(signals.every((signal) => signal && typeof signal.addEventListener === "function"));
+});
+
+test("cover downloads reject oversized streaming responses before buffering the whole file", async () => {
+  let cancelled = false;
+  let calls = 0;
+  const jpg = new Uint8Array(JPEG);
+  const fetchImpl = async () => {
+    calls++;
+    if (calls === 1) return {
+      ok: true,
+      headers: new Map([["content-type", "image/jpeg"]]),
+      body: { getReader: () => ({
+        read: async () => ({ done: false, value: new Uint8Array(64) }),
+        cancel: async () => { cancelled = true; },
+        releaseLock: () => {}
+      }) }
+    };
+    return { ok: true, headers: new Map([["content-type", "image/jpeg"]]), arrayBuffer: async () => jpg.buffer };
+  };
+  const result = await fetchCoverArt({ releaseId: "one", releaseGroupId: "two", userAgent: "localtify/test", maxBytes: 32, fetchImpl });
+  assert.equal(cancelled, true, "the oversized stream is cancelled");
+  assert.equal(calls, 2, "falls back to another cover instead of buffering oversized input");
+  assert.deepEqual(result.data, JPEG);
 });
 
 function fakeMusicBrainz() {

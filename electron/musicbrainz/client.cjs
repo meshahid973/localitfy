@@ -18,7 +18,7 @@ const phrase = (value) => `"${String(value || "").replace(/[\\"]/g, "\\$&")}"`;
  * MusicBrainz asks clients to identify themselves and stay at one request per second.
  * Requests are queued, so concurrent callers share the limit.
  */
-function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs = 1100, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) {
+function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs = 1100, timeoutMs = 15000, maxCacheEntries = 256, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) {
   let queue = Promise.resolve();
   let lastAt = 0;
   const cache = new Map();
@@ -33,7 +33,7 @@ function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs =
         const wait = lastAt + minIntervalMs - Date.now();
         if (wait > 0) await sleep(wait);
         lastAt = Date.now();
-        const response = await fetchImpl(key, { headers: { "User-Agent": userAgent, Accept: "application/json" } }).catch((error) => { throw unreachable(error); });
+        const response = await fetchImpl(key, { headers: { "User-Agent": userAgent, Accept: "application/json" }, signal: AbortSignal.timeout(timeoutMs) }).catch((error) => { throw unreachable(error); });
         // 503 means the rate limit was hit; back off and retry a couple of times.
         if (response.status === 503 && attempt < 2) { await sleep(2000 * (attempt + 1)); continue; }
         if (!response.ok) throw response.status >= 500 ? unreachable(new Error(String(response.status))) : new Error(`MusicBrainz request failed (${response.status})`);
@@ -42,7 +42,8 @@ function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs =
     });
     queue = run.catch(() => undefined);
     cache.set(key, run);
-    run.catch(() => cache.delete(key));
+    while (cache.size > Math.max(1, maxCacheEntries)) cache.delete(cache.keys().next().value);
+    run.catch(() => { if (cache.get(key) === run) cache.delete(key); });
     return run;
   }
 
@@ -61,11 +62,34 @@ function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs =
 async function fetchCoverArt({ releaseId, releaseGroupId, userAgent, fetchImpl = fetch, maxBytes = 8 * 1024 * 1024 }) {
   const targets = [releaseId && `release/${releaseId}/front-500`, releaseGroupId && `release-group/${releaseGroupId}/front-500`].filter(Boolean);
   for (const target of targets) {
-    const response = await fetchImpl(COVER_ART + target, { headers: { "User-Agent": userAgent } }).catch(() => null);
+    const response = await fetchImpl(COVER_ART + target, { headers: { "User-Agent": userAgent }, signal: AbortSignal.timeout(15000) }).catch(() => null);
     if (!response?.ok) continue;
     const type = String(response.headers.get("content-type") || "");
     if (!/^image\/(jpeg|png)/.test(type)) continue;
-    const data = Buffer.from(await response.arrayBuffer());
+    const length = Number(response.headers.get("content-length") || 0);
+    if (length > maxBytes) { await response.body?.cancel?.().catch(() => undefined); continue; }
+    let data;
+    const reader = response.body?.getReader?.();
+    if (reader) {
+      const chunks = [];
+      let total = 0;
+      let exceeded = false;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          total += value.byteLength;
+          if (total > maxBytes) { exceeded = true; await reader.cancel(); break; }
+          chunks.push(Buffer.from(value));
+        }
+      } catch { exceeded = true; }
+      finally { reader.releaseLock?.(); }
+      if (exceeded) continue;
+      data = Buffer.concat(chunks, total);
+    } else {
+      // Older test doubles do not expose a stream; real fetch responses do.
+      data = Buffer.from(await response.arrayBuffer());
+    }
     if (data.length && data.length <= maxBytes) return { data, ext: type.includes("png") ? ".png" : ".jpg" };
   }
   return null;
