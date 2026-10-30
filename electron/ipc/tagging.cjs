@@ -9,6 +9,10 @@ const { canWriteTags, writeMusicBrainzTags } = require("../musicbrainz/tag-write
 
 const loadParseFile = async (...args) => (await import("music-metadata")).parseFile(...args);
 
+// Security gate: keep file writes disabled until atomic replacement and recovery tests pass.
+// Metadata-only tagging in the SQLite library remains available.
+const MUSICBRAINZ_FILE_WRITES_ENABLED = false;
+
 /**
  * MusicBrainz tagging inside the app: find songs without MusicBrainz IDs, look them up,
  * show the proposed tags, then write the accepted ones into the files and the library.
@@ -110,7 +114,7 @@ function registerTaggingIpc(router, deps) {
 
   router.handle("tagging:apply", async (_event, payload = {}) => {
     requireEnabled();
-    const writeFiles = getSettings()?.musicbrainzWriteFiles !== false;
+    const writeFiles = MUSICBRAINZ_FILE_WRITES_ENABLED && getSettings()?.musicbrainzWriteFiles === true;
     let applied = 0;
     let written = 0;
     const failed = [];
