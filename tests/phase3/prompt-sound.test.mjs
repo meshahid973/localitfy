@@ -73,9 +73,12 @@ test("the prompt model is a separate opt-in download within the size limit", asy
   t.after(() => service.dispose());
   assert.equal((await service.status()).promptModel.name, "text");
   assert.equal(await service.promptModelPath(), null, "unused while analysis is disabled");
+  if (process.platform === "darwin" && process.arch === "x64") {
+    await assert.rejects(service.download("prompt"), /Apple silicon/);
+    return;
+  }
   await assert.rejects(service.download("prompt"), /Enable/);
   settings.experimentalMusicAnalysis = true;
-  if (process.platform === "darwin" && process.arch === "x64") return;
   assert.equal(await service.promptModelPath(), "/models/text");
   await service.download("prompt");
   await service.removeModel("prompt");

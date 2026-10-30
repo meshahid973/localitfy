@@ -140,7 +140,7 @@ test("playlists show recommendations with add buttons and offer a prompt dialog"
   const view = fs.readFileSync("src/features/playlists/PlaylistsView.tsx", "utf8");
   const panel = fs.readFileSync("src/features/playlists/components/PlaylistRecommendations.tsx", "utf8");
   const dialog = fs.readFileSync("src/features/playlists/components/PromptPlaylistDialog.tsx", "utf8");
-  assert.match(view, /!selectedPlaylist\.rules && selectedPlaylistSongs\.length \? \(\s*<PlaylistRecommendations/, "smart and empty playlists have no suggestions");
+  assert.match(view, /!detailPlaylist\.rules && detailSongs\.length > 0 \? \(\s*<PlaylistRecommendations/, "smart and empty playlist detail pages have no suggestions");
   assert.match(view, /lazy\(\(\) => import\("\.\/components\/PromptPlaylistDialog"\)\)/);
   assert.match(panel, /RECOMMENDATION_PAGE/);
   assert.match(panel, /addSongToPlaylist\(playlist\.id, id\)/);
@@ -148,4 +148,14 @@ test("playlists show recommendations with add buttons and offer a prompt dialog"
   assert.match(dialog, /type="checkbox"/, "songs can be picked before saving");
   assert.match(dialog, /savePlaylist\(name \|\| result\.plan\.name, picked\)/);
   assert.match(dialog, /sound \|\| planHasLibraryTerms\(plan\) \?/, "a description alone without the prompt model gives no random songs");
+});
+
+test("similarity suggestions sample large playlist seed sets without exceeding the native limit", () => {
+  const many = Array.from({ length: 6001 }, (_, index) => song(String(index), "Artist"));
+  const ids = [...recommendations.audioRecommendationSeeds(many)];
+  assert.equal(ids.length, recommendations.MAX_AUDIO_RECOMMENDATION_SEEDS);
+  assert.equal(ids[0], "0");
+  assert.ok(Number(ids.at(-1)) > 5990, "the whole playlist is sampled");
+  assert.equal(new Set(ids).size, 2000, "each seed is distinct");
+  assert.deepEqual([...recommendations.audioRecommendationSeeds(many.slice(0, 3))], ["0", "1", "2"]);
 });

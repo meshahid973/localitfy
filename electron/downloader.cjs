@@ -112,6 +112,8 @@ function cleanDownloadedTitle(name) {
 // fallback. Never fall back to "best": that is the muxed 360p video (format 18) whose audio
 // is a low-bitrate 22 kHz AAC track.
 const AUDIO_FORMAT_SELECTOR = "bestaudio[acodec=opus]/bestaudio[ext=m4a]/bestaudio";
+// Preserve only codecs that can be saved unchanged as .opus or .m4a.
+const ORIGINAL_AUDIO_FORMAT_SELECTOR = "bestaudio[acodec=opus]/bestaudio[ext=m4a]";
 
 function getAudioOutputArgs(options = {}) {
   // Keep original: yt-dlp only remuxes (webm -> .opus, m4a stays .m4a), no second lossy encode.
@@ -127,7 +129,7 @@ function getBaseArgs(url, outputTemplate, options = {}) {
   return [
     url,
     "--output", outputTemplate,
-    "--format", AUDIO_FORMAT_SELECTOR,
+    "--format", options.keepOriginal === true ? ORIGINAL_AUDIO_FORMAT_SELECTOR : AUDIO_FORMAT_SELECTOR,
     ...getAudioOutputArgs(options),
     "--concurrent-fragments", "16",
     "--buffer-size", "32M",
@@ -1121,6 +1123,6 @@ module.exports = {
   convertLocalMediaFiles,
   convertOneToMp3,
   isSupportedMediaPath,
-  _test: { getBaseArgs, buildStrategies, AUDIO_FORMAT_SELECTOR },
+  _test: { getBaseArgs, buildStrategies, AUDIO_FORMAT_SELECTOR, ORIGINAL_AUDIO_FORMAT_SELECTOR },
   cancelActiveDownloads
 };

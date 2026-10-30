@@ -4,6 +4,12 @@ import type { Playlist } from "./playlist.types";
 
 /** Songs shown at once under a playlist, as in Spotify's "Recommended songs". */
 export const RECOMMENDATION_PAGE = 10;
+export const MAX_AUDIO_RECOMMENDATION_SEEDS = 2000;
+/** Evenly sample long playlists to stay within the native similarity service's 2,000-seed limit. */
+export function audioRecommendationSeeds(songs: readonly Song[]) {
+  const count = Math.min(songs.length, MAX_AUDIO_RECOMMENDATION_SEEDS);
+  return Array.from({ length: count }, (_, index) => songs[Math.floor(index * songs.length / count)].id);
+}
 const PER_ARTIST = 3;
 
 export const artistKey = (name: string) => name.trim().replace(/\s+/g, " ").toLocaleLowerCase();

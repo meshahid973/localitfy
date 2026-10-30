@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const { _test } = require(path.join(root, "electron", "downloader.cjs"));
-const { getBaseArgs, buildStrategies, AUDIO_FORMAT_SELECTOR } = _test;
+const { getBaseArgs, buildStrategies, AUDIO_FORMAT_SELECTOR, ORIGINAL_AUDIO_FORMAT_SELECTOR } = _test;
 const url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 const argValue = (args, flag) => args[args.indexOf(flag) + 1];
 
@@ -28,6 +28,8 @@ test("converts to the chosen format by default", () => {
 test("keep original remuxes without re-encoding and ignores format and quality", () => {
   const args = getBaseArgs(url, "/tmp/out.%(ext)s", { keepOriginal: true, format: "mp3", quality: "192" });
   assert.equal(argValue(args, "--audio-format"), "best");
+  assert.equal(argValue(args, "--format"), ORIGINAL_AUDIO_FORMAT_SELECTOR, "only preservable Opus or M4A formats are allowed");
+  assert.ok(!ORIGINAL_AUDIO_FORMAT_SELECTOR.endsWith("/bestaudio"), "no unsupported codec fallback");
   assert.ok(!args.includes("--audio-quality"));
 });
 

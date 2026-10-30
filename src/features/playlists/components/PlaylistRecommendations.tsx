@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 import { Cover } from "../../covers/Cover";
 import type { Song } from "../../library/song.types";
 import { prettyMeta, prettyTitle } from "../../search";
 import { formatTime } from "../../../shared/utils/format";
 import type { Playlist } from "../playlist.types";
-import { RECOMMENDATION_PAGE, pickRecommendations, rankScores, relatedSongScores } from "../playlistRecommendations";
+import { RECOMMENDATION_PAGE, audioRecommendationSeeds, pickRecommendations, rankScores, relatedSongScores } from "../playlistRecommendations";
 
 export type PlaylistRecommendationsProps = {
   playlist: Playlist;
@@ -27,19 +27,16 @@ export default function PlaylistRecommendations({ playlist, songs, playlists, cu
   const [seen, setSeen] = useState<ReadonlySet<string>>(() => new Set());
   const [reload, setReload] = useState(0);
   // Adding a recommendation changes the playlist; that should swap in the next song, not recalculate everything.
-  const latest = useRef({ playlist, songsById, songs, playlists, hidden });
-  latest.current = { playlist, songsById, songs, playlists, hidden };
 
   useEffect(() => {
     let cancelled = false;
     setSeen(new Set());
     void (async () => {
-      const { playlist, songsById, songs, playlists, hidden } = latest.current;
       const members = playlist.songIds.map((id) => songsById.get(id)).filter((song): song is Song => !!song && song.fileExists !== false);
       if (!members.length) { setPool({ playlistId: playlist.id, ids: [], bySound: false }); return; }
       let bySound: string[] = [];
       try {
-        const result = await window.localitfy.findSimilarSongs({ songIds: members.map((song) => song.id),
+        const result = await window.localitfy.findSimilarSongs({ songIds: audioRecommendationSeeds(members),
           seedKey: `recommend:${playlist.id}`.slice(0, 200), limit: 50 });
         if (result.status === "ready") bySound = result.matches.map((match) => match.songId);
       } catch { /* Without saved audio analysis, library relationships still give suggestions. */ }
@@ -49,7 +46,7 @@ export default function PlaylistRecommendations({ playlist, songs, playlists, cu
       setPool({ playlistId: playlist.id, ids, bySound: bySound.length >= RECOMMENDATION_PAGE / 2 });
     })();
     return () => { cancelled = true; };
-  }, [playlist.id, reload]);
+  }, [playlist.id, reload, songsById, hidden]);
 
   const current = pool?.playlistId === playlist.id ? pool : null;
   const inPlaylist = useMemo(() => new Set(playlist.songIds), [playlist.songIds]);
