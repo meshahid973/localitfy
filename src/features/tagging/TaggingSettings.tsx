@@ -116,7 +116,7 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
     <div className="settingsPanelHeader"><div><strong>MusicBrainz tagging</strong><span>Looks songs up on MusicBrainz, the open music database, and fills in title, artist, album, genre, track numbers and cover art. You review every change before anything is saved. Lookups send each song’s title, artist, album and length to musicbrainz.org; covers come from the Cover Art Archive and are saved on this device.</span></div></div>
     <fieldset className="experimentalControls">
       <ToggleRow label="Use MusicBrainz tagging" help="Off by default. Only looks songs up when you ask it to." checked={enabled} onChange={(value) => void updateSetting("musicbrainzTagging", value)} />
-      <ToggleRow label="Write tags into music files" help="MP3 and FLAC files get the new tags and cover without re-encoding the audio. The original file goes to the Trash first. When off, only your library is updated." checked={settings.musicbrainzWriteFiles !== false} onChange={(value) => void updateSetting("musicbrainzWriteFiles", value)} />
+      <p className="settingsHintText" role="note">File writing is temporarily disabled for safety. Saving tags updates your Localtify library only; your original music files are left untouched.</p>
     </fieldset>
     <div className="settingsActionRow settingsActionRowCleanV491">
       <button type="button" className="settingsActionButton" disabled={disabled} onClick={() => void checkLibrary()}>{busy === "audit" ? <Spinner /> : <RefreshCw size={14} />} {busy === "audit" ? "Checking tags…" : "Find untagged songs"}</button>

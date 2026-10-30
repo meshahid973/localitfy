@@ -5,11 +5,11 @@ const path = require("node:path");
 
 const DEFAULT_ALBUM = "local files";
 
-/** A song counts as tagged when its file carries a MusicBrainz recording ID (ID3 UFID / Vorbis MUSICBRAINZ_TRACKID). */
+/** A song counts as tagged only when it carries a MusicBrainz recording ID (not a release-track ID). */
 async function readMusicBrainzIds(filePath, parseFile) {
   try {
     const { common = {} } = await parseFile(filePath, { duration: false, skipCovers: true });
-    return { recordingId: String(common.musicbrainz_recordingid || common.musicbrainz_trackid || ""), releaseId: String(common.musicbrainz_albumid || "") };
+    return { recordingId: String(common.musicbrainz_recordingid || ""), releaseId: String(common.musicbrainz_albumid || "") };
   } catch (error) {
     return { recordingId: "", releaseId: "", error: error?.message || "unreadable" };
   }

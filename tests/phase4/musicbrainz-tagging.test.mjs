@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const electron = (file) => require(path.join(root, "electron", file));
-const { summarizeAudit, createTagAuditor } = electron("musicbrainz/audit.cjs");
+const { summarizeAudit, createTagAuditor, readMusicBrainzIds } = electron("musicbrainz/audit.cjs");
 const { createMusicBrainzClient } = electron("musicbrainz/client.cjs");
 const { similarity, pickRecording, formatGenres, matchReleaseTracks } = electron("musicbrainz/match.cjs");
 const { createTaggingLookup, searchTitle } = electron("musicbrainz/lookup.cjs");
@@ -20,6 +20,22 @@ const { parseFile, parseBuffer } = await import("music-metadata");
 
 const tempDir = () => fs.mkdtempSync(path.join(os.tmpdir(), "localtify-tagging-"));
 const JPEG = Buffer.from("ffd8ffe000104a46494600010100000100010000ffd9", "hex");
+
+test("release-track IDs do not count as recording IDs", async () => {
+  const ids = await readMusicBrainzIds("/virtual.mp3", async () => ({ common: { musicbrainz_trackid: "release-track-only" } }));
+  assert.equal(ids.recordingId, "", "a file still needs a real recording ID");
+});
+
+test("album lookup failures fall back to individual track searches", async () => {
+  let recordings = 0;
+  const lookup = createTaggingLookup({ client: {
+    searchReleases: async () => { throw new Error("album lookup rejected"); },
+    searchRecordings: async () => { recordings += 1; return []; }
+  }, coverDir: "/unused", userAgent: "localtify-test", fetchImpl: async () => assert.fail("unexpected network access") });
+  const songs = [{ id: "one", title: "One", album: "Album", artist: "Artist" }, { id: "two", title: "Two", album: "Album", artist: "Artist" }];
+  assert.deepEqual(await lookup.lookupGroup(songs), { proposals: [], missed: ["one", "two"] });
+  assert.equal(recordings, 2);
+});
 
 test("summarizeAudit groups untagged songs by album and singles by artist, and finds split albums", () => {
   const songs = [
@@ -396,13 +412,15 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   assert.equal(songs.get("a").coverSource, "custom");
   assert.equal(songs.get("b").genre, "", "unselected songs are untouched");
   assert.equal(sent[0][0], "library:watched-change");
+  assert.equal(sent[0][1].libraryChanged, true, "tag edits trigger a full library update");
   assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["a"] }), { applied: 0, written: 0, failed: [] }, "a proposal is used once");
 
   assert.deepEqual(await router.invoke("tagging:search", { songId: "b", title: "death rolL", artist: "" }), [], "the fake has no recordings to search");
   const chosen = await router.invoke("tagging:choose", { songId: "b", recordingId: "rec-2", releaseId: "rel-marrow" });
   assert.deepEqual([chosen.songId, chosen.tags.trackNumber, chosen.coverUrl], ["b", 2, "localtify-media://rel-marrow.jpg"]);
   assert.deepEqual((await router.invoke("tagging:pending")).map((proposal) => proposal.songId), [], "a hand-picked match stays with its dialog");
-  assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["b"] }), { applied: 1, written: 0, failed: [] });
+  settings.musicbrainzWriteFiles = true;
+  assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["b"] }), { applied: 1, written: 0, failed: [] }, "backend file-write gate cannot be overridden by settings");
   await assert.rejects(router.invoke("tagging:search", { songId: "missing", title: "x" }), /could not be found/);
 
   const releases = await router.invoke("tagging:search-album", { songIds: ["a", "b"], album: "marroW", artist: "brakence" });

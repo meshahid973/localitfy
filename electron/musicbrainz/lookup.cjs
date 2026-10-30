@@ -97,7 +97,9 @@ function createTaggingLookup({ client, coverDir, userAgent, fetchImpl = fetch })
   /** One album folder (or one artist's singles); songs an album lookup cannot place are looked up alone. */
   async function lookupGroup(songs) {
     const isAlbum = songs.length > 1 && String(songs[0].album || DEFAULT_ALBUM).toLocaleLowerCase() !== DEFAULT_ALBUM;
-    const { proposals, unmatched } = isAlbum ? await lookupAlbum(songs) : { proposals: [], unmatched: songs };
+    // A failed album lookup should not prevent valid single-track matches. Service outages still propagate.
+    const albumMatch = isAlbum ? await lookupAlbum(songs).catch(unreachableOnly) : null;
+    const { proposals, unmatched } = albumMatch || { proposals: [], unmatched: songs };
     const missed = [];
     for (const song of unmatched) {
       const proposal = await lookupSong(song).catch(unreachableOnly);

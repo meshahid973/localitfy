@@ -38,7 +38,7 @@ function registerTaggingIpc(router, deps) {
       songId: proposal.songId, groupKey: song ? albumGroupKey(song) : "", confidence: proposal.confidence, current: proposal.current, tags: proposal.tags,
       coverUrl: proposal.coverPath ? safeMediaUrl(proposal.coverPath) : "",
       musicbrainzUrl: `https://musicbrainz.org/recording/${proposal.ids.recordingId}`,
-      writable: canWriteTags(song?.filePath)
+      writable: MUSICBRAINZ_FILE_WRITES_ENABLED && canWriteTags(song?.filePath)
     };
   };
 
@@ -144,7 +144,7 @@ function registerTaggingIpc(router, deps) {
     clearFileInfoCache?.();
     // Reuses the watched-folders push so the open library updates without a reload.
     const window = getWindow();
-    if (applied && window && !window.isDestroyed()) window.webContents.send("library:watched-change", { importedCount: 0, songs: listSongsShaped() });
+    if (applied && window && !window.isDestroyed()) window.webContents.send("library:watched-change", { importedCount: 0, libraryChanged: true, songs: listSongsShaped() });
     return { applied, written, failed };
   });
 }

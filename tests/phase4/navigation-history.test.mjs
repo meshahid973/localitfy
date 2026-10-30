@@ -128,3 +128,10 @@ test("OS gestures and back/forward commands reach the page history once", () => 
   assert.match(hook, /const onWheel = IS_MAC \? createSwipeDetector\(gesture, scrollsSideways\) : null;/, "trackpad swipes only on macOS");
   assert.match(read("src/features/shell/useAppMenuCommands.ts"), /current\.nav\.gesture\(-1\)/);
 });
+
+test("concurrent navigation retains the current page detail until its view changes", () => {
+  const hook = read("src/features/shell/useNavigationHistory.ts");
+  assert.match(hook, /const committedEntryRef = useRef\(entry\)/);
+  assert.match(hook, /if \(entry\.view === view\) committedEntryRef\.current = entry;/);
+  assert.match(hook, /committedEntryRef\.current\.view === view \? committedEntryRef\.current\.detail : null/);
+});

@@ -28,6 +28,11 @@ export function useNavigationHistory(view: View, changeView: (view: View, source
   const [history, setHistory] = useState<HistoryState>(() => ({ entries: [{ view, detail: null, scrollTop: 0 }], index: 0 }));
   const pendingScrollRef = useRef<number | null>(null);
   const entry = history.entries[history.index];
+  // During a concurrent view transition history can advance before the old page commits away.
+  const committedEntryRef = useRef(entry);
+  useLayoutEffect(() => {
+    if (entry.view === view) committedEntryRef.current = entry;
+  }, [entry, view]);
 
   const push = useCallback((nextView: View, detail: PageDetail | null) => {
     const scrollTop = contentRef.current?.scrollTop ?? 0;
@@ -119,7 +124,8 @@ export function useNavigationHistory(view: View, changeView: (view: View, source
     };
   }, [gesture]);
 
-  const detail = entry.view === view ? entry.detail : null;
+  const detail = entry.view === view ? entry.detail
+    : committedEntryRef.current.view === view ? committedEntryRef.current.detail : null;
   return {
     view,
     detail,
