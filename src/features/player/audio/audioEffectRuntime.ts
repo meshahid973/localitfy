@@ -185,6 +185,12 @@ export class AudioEffectRuntime {
       this.disconnectGraph();
     }
 
+    // Attaching a suspended Web Audio source would mute the HTML audio element.
+    if (this.context.state !== "running") {
+      void this.resume();
+      throw new Error("Audio graph waiting for a running context");
+    }
+
     if (this.element !== audio) {
       this.disconnectGraph();
       this.element = audio;

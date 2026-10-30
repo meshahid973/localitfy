@@ -3009,6 +3009,7 @@ function MainModeApp() {
     }
 
     pendingPlayRef.current = false;
+    playbackTransitionRef.current.requestPause();
     resetPlayCountTracker();
     setIsPlaying(false);
     setCurrentTime(0);
@@ -3027,7 +3028,7 @@ function MainModeApp() {
 
       if (command.type === "toggle") togglePlay();
       if (command.type === "play") setIsPlaying(true);
-      if (command.type === "pause") setIsPlaying(false);
+      if (command.type === "pause") { playbackTransitionRef.current.requestPause(); pendingPlayRef.current = false; setIsPlaying(false); }
       if (command.type === "stop") stopPlaybackFromNative();
       if (command.type === "prev") playPrevious();
       if (command.type === "next") playNext(true);
@@ -3054,7 +3055,7 @@ function MainModeApp() {
     playbackSpeed: settings.playbackSpeed,
     timeRef,
     onPlay: () => setIsPlaying(true),
-    onPause: () => setIsPlaying(false),
+    onPause: () => { playbackTransitionRef.current.requestPause(); pendingPlayRef.current = false; setIsPlaying(false); },
     onStop: stopPlaybackFromNative,
     onPrevious: () => playPrevious(),
     onNext: () => playNext(true)
@@ -3157,8 +3158,6 @@ function MainModeApp() {
 
       nextAudioRef.current?.pause();
       nextAudioRef.current = null;
-      disposeAudioEngine();
-
       window.localitfy.clearDiscordActivity().catch(() => undefined);
     };
   }, []);
@@ -3176,11 +3175,6 @@ function MainModeApp() {
       effectAmount: settings.audioEffectAmount,
       reverbAmount: settings.audioReverbAmount
     };
-  }
-
-  function disposeAudioEngine() {
-    audioEffectRuntimeRef.current?.dispose();
-    audioEffectRuntimeRef.current = null;
   }
 
   function setAudioElementVolume(audio: HTMLAudioElement | null | undefined, volume: number) {
@@ -4187,9 +4181,7 @@ function MainModeApp() {
         const elapsed = performance.now() - startTime;
         const rawProgress = clamp(elapsed / crossfadeMs, 0, 1);
 
-        // V342 curve:
-        // - outgoing track stays full for a tiny moment, then drops faster
-        // - incoming track rises slower and smoother so the transition feels musical
+        // Blend tracks without an abrupt volume spike.
         const outgoingHold = 0.16;
         const outgoingProgress = rawProgress <= outgoingHold
           ? 0
@@ -4266,14 +4258,12 @@ function MainModeApp() {
   }
 
   function handleAudioPause() {
-    if (audioRef.current) listeningHistoryRef.current?.pause(audioRef.current);
+    if (pendingPlayRef.current && ["loading", "ready"].includes(playbackTransitionRef.current.snapshot().phase)) return;
     if (!playbackTransitionRef.current.paused(Boolean(
       crossfadeAutoStartedRef.current || crossfadeMainPauseGuardRef.current || crossfadeHandoffRef.current
     ))) return;
-
-    if (!audioRef.current?.ended) {
-      setIsPlaying(false);
-    }
+    if (audioRef.current) listeningHistoryRef.current?.pause(audioRef.current);
+    if (!audioRef.current?.ended) setIsPlaying(false);
   }
 
   function handleAudioEnded() {
@@ -4433,7 +4423,11 @@ function MainModeApp() {
       pendingPlayRef.current = true;
 
       await (playerController ? playerController.play() : audio.play());
-
+      if (!playbackTransitionRef.current.isCurrent(generation, song.id)) {
+        if (audioRef.current === audio && audio.src === playbackUrl.url
+          && playbackTransitionRef.current.snapshot().phase === "paused") audio.pause();
+        return false;
+      }
       pendingPlayRef.current = false;
 
       if (!continuingCrossfadePlayback && !settings.reducedMotion && settings.crossfadeEnabled && safeVolume > 0) {
@@ -4455,6 +4449,7 @@ function MainModeApp() {
 
       return true;
     } catch {
+      if (!playbackTransitionRef.current.isCurrent(generation, song.id)) return false;
       pendingPlayRef.current = false;
       resetPlayCountTracker("error");
       setIsPlaying(false);
@@ -6758,7 +6753,7 @@ function MainModeApp() {
 
     const shouldKeepPlaylistContext = Boolean(playbackContext?.keepPlaylistContext && activePlaylist?.songIds.includes(targetSong.id));
 
-    // Picking a song outside the queue leaves the album/artist/genre context, so repeat-all stops looping it.
+    // Drop old collection context on standalone selections.
     if (playbackContext && "source" in playbackContext) {
       setPlaybackSource(playbackContext.source ?? null);
     } else if (!playbackContext?.keepSource && !playbackContext?.keepPlaylistContext) {
@@ -6850,6 +6845,8 @@ function MainModeApp() {
     }
 
     if (isPlaying) {
+      playbackTransitionRef.current.requestPause();
+      pendingPlayRef.current = false;
       stopCrossfadeAuto();
       setIsPlaying(false);
       return;
@@ -7099,6 +7096,10 @@ function MainModeApp() {
   }
 
   function handlePlaying() {
+    if (playbackTransitionRef.current.snapshot().phase === "paused") {
+      audioRef.current?.pause();
+      return;
+    }
     playbackTransitionRef.current.playing();
     const song = songRef.current || currentSong;
     if (!song) return;

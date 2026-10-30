@@ -20,7 +20,7 @@ test("play/pause/seeking and generation ownership", () => {
   assert.equal(m.snapshot().phase, "playing");
   m.requestPause();
   assert.equal(m.snapshot().phase, "paused");
-  assert.equal(m.isCurrent(a, "a"), true);
+  assert.equal(m.isCurrent(a, "a"), false, "pausing invalidates a pending play");
   m.requestPlay("b");
   assert.equal(m.isCurrent(a, "a"), false);
   m.failed();
@@ -51,4 +51,20 @@ test("cancelled handoff restores previous phase", () => {
   assert.equal(m.ended(), true);
   m.reset();
   assert.equal(m.snapshot().phase, "idle");
+});
+
+test("pause, track change and errors invalidate outstanding play promises", () => {
+  const m = new PlaybackTransitionCoordinator();
+  const first = m.requestPlay("a");
+  m.requestPause();
+  assert.equal(m.isCurrent(first, "a"), false);
+  const resumed = m.requestPlay("a");
+  assert.notEqual(resumed, first);
+  assert.equal(m.isCurrent(resumed, "a"), true);
+  const next = m.requestPlay("b");
+  assert.equal(m.isCurrent(resumed, "a"), false);
+  assert.equal(m.isCurrent(next, "b"), true);
+  m.failed();
+  assert.equal(m.isCurrent(next, "b"), false);
+  assert.equal(m.isCurrent(m.requestPlay("b"), "b"), true);
 });

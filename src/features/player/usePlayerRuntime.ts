@@ -69,6 +69,7 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const beatFrameRef = useRef<number | null>(null);
   const beatFrameTimerRef = useRef<number | null>(null);
   const audioEffectRuntimeRef = useRef<AudioEffectRuntime | null>(null);
+  const audioEffectMountGenerationRef = useRef(0);
   if (audioEffectRuntimeRef.current === null) {
     audioEffectRuntimeRef.current = new AudioEffectRuntime();
   }
@@ -122,6 +123,7 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
 
   useEffect(() => {
     let retryTimer: number | null = null;
+    const mountGeneration = ++audioEffectMountGenerationRef.current;
 
     const resumeEffects = () => {
       void audioEffectRuntimeRef.current?.resume();
@@ -153,8 +155,12 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
       window.removeEventListener("pointerdown", resumeEffects);
       window.removeEventListener("keydown", resumeEffects);
       document.removeEventListener("visibilitychange", handleVisibility);
-      audioEffectRuntimeRef.current?.dispose();
-      audioEffectRuntimeRef.current = null;
+      // StrictMode replays effects: only dispose if no new mount replaced this one.
+      queueMicrotask(() => {
+        if (audioEffectMountGenerationRef.current !== mountGeneration) return;
+        audioEffectRuntimeRef.current?.dispose();
+        audioEffectRuntimeRef.current = null;
+      });
     };
   }, []);
 

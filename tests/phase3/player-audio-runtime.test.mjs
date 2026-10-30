@@ -50,3 +50,20 @@ test("slowed plus reverb is a real playback setting instead of dead App state", 
   assert.doesNotMatch(app, /function getAudioReverbAmount\(\)\s*\{\s*return 0/);
   assert.doesNotMatch(app, /\(settings as any\)\.audioEffectMode/);
 });
+
+test("Web Audio does not attach a silent suspended graph or close on StrictMode replay", () => {
+  const fx = read("src/features/player/audio/audioEffectRuntime.ts");
+  const hook = read("src/features/player/usePlayerRuntime.ts");
+  const app = read("src/App.tsx");
+  assert.match(fx, /this\.context\.state !== "running"/);
+  assert.match(hook, /audioEffectMountGenerationRef\.current !== mountGeneration/);
+  assert.match(hook, /queueMicrotask\(/);
+  assert.doesNotMatch(app, /function disposeAudioEngine\(/);
+});
+
+test("incoming track ignores stale play and old outgoing pause events", () => {
+  const element = read("src/features/player/components/PlaybackAudioElement.tsx");
+  const app = read("src/App.tsx");
+  assert.match(element, /if \(!pendingPlayRef\.current\) return;/);
+  assert.match(app, /pendingPlayRef\.current && \["loading", "ready"\]/);
+});

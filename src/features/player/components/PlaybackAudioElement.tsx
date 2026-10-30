@@ -52,7 +52,11 @@ export default function PlaybackAudioElement(props: PlaybackAudioElementProps) {
       onSeeked={() => { handleSeekComplete?.(); handleListeningSeek(); }}
       onCanPlay={handleCanPlay}
       onPlaying={handlePlaying}
-      onPlay={() => { pendingPlayRef.current = false; setIsPlaying(true); }}
+      onPlay={() => {
+        if (!pendingPlayRef.current) return;
+        pendingPlayRef.current = false;
+        setIsPlaying(true);
+      }}
       onPause={() => {
         if (typeof handleAudioPause === "function") { handleAudioPause(); return; }
         if (!audioRef.current?.ended) setIsPlaying(false);

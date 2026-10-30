@@ -6,17 +6,28 @@ export class PlaybackTransitionCoordinator {
   private state: PlaybackSnapshot = { phase: "idle", sourceId: "", generation: 0, targetId: "", beforeSeek: "idle", beforeCrossfade: "idle" };
   snapshot(): Readonly<PlaybackSnapshot> { return { ...this.state }; }
   requestPlay(id: string): number {
-    if (this.state.sourceId !== id) { this.state.sourceId = id; this.state.generation++; }
-    if (!this.state.targetId) this.state.phase = "loading";
+    if (this.state.sourceId !== id || ["paused", "ended", "error", "idle"].includes(this.state.phase)) {
+      this.state.sourceId = id;
+      this.state.generation++;
+    }
+    if (!this.state.targetId && this.state.phase !== "playing") this.state.phase = "loading";
     return this.state.generation;
   }
-  isCurrent(generation: number, id: string) { return generation === this.state.generation && id === this.state.sourceId && !this.state.targetId; }
+  isCurrent(generation: number, id: string) {
+    return generation === this.state.generation && id === this.state.sourceId && !this.state.targetId
+      && !["paused", "error", "ended"].includes(this.state.phase);
+  }
   ready() { if (this.state.phase === "loading") this.state.phase = "ready"; }
-  playing() { if (!this.state.targetId) this.state.phase = "playing"; }
-  requestPause() { if (!this.state.targetId) this.state.phase = "paused"; }
+  playing() { if (!this.state.targetId && !["paused", "error"].includes(this.state.phase)) this.state.phase = "playing"; }
+  requestPause() {
+    if (this.state.targetId) return;
+    if (this.state.phase !== "paused") this.state.generation++;
+    this.state.phase = "paused";
+  }
   paused(protectedHandoff = false): boolean {
     if (protectedHandoff || this.state.targetId) return false;
-    this.state.phase = "paused"; return true;
+    this.requestPause();
+    return true;
   }
   seekStarted() {
     if (this.state.phase !== "seeking") this.state.beforeSeek = this.state.phase;
@@ -42,6 +53,6 @@ export class PlaybackTransitionCoordinator {
     if (protectedHandoff || this.state.targetId) return false;
     this.state.phase = "ended"; return true;
   }
-  failed() { this.state.targetId = ""; this.state.phase = "error"; }
+  failed() { this.state.generation++; this.state.targetId = ""; this.state.phase = "error"; }
   reset() { this.state.sourceId = ""; this.state.targetId = ""; this.state.phase = "idle"; this.state.generation++; }
 }
