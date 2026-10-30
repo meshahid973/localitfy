@@ -3,7 +3,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { Readable, Transform } = require("node:stream");
 const { pipeline } = require("node:stream/promises");
-const { MODEL, MODEL_BYTES } = require("./model.cjs");
+const { MODEL } = require("./model.cjs");
 
 function createModelManager(root, { fetchImpl = globalThis.fetch, model = MODEL, inactivityTimeoutMs = 90_000, downloadTimeoutMs = 1_800_000 } = {}) {
   const installedPath = path.join(root, model.id);
@@ -135,6 +135,6 @@ function createModelManager(root, { fetchImpl = globalThis.fetch, model = MODEL,
     } finally { removing = false; }
   }
 
-  return { initialized, status, download, cancel, remove, installedPath, metadata: { ...MODEL, bytes: MODEL_BYTES, files: undefined } };
+  return { initialized, status, download, cancel, remove, installedPath, metadata: { ...model, bytes: totalBytes, files: undefined } };
 }
 module.exports = { createModelManager };

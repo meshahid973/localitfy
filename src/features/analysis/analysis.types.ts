@@ -1,9 +1,14 @@
+export type AnalysisModel = { id: string; name: string; revision: string; source: string; license: string; licenseUrl: string; bytes: number; dimensions: number; sampleRate: number };
+export type ModelDownload = { state: "not-installed" | "downloading" | "ready" | "error"; downloadedBytes: number; totalBytes: number; error: string };
+
 export type AnalysisStatus = {
   supported: boolean;
   enabled: boolean;
   historyEnabled: boolean;
-  model: { id: string; name: string; revision: string; source: string; license: string; licenseUrl: string; bytes: number; dimensions: number; sampleRate: number };
-  download: { state: "not-installed" | "downloading" | "ready" | "error"; downloadedBytes: number; totalBytes: number; error: string };
+  model: AnalysisModel;
+  download: ModelDownload;
+  /** Optional text encoder used to match playlist prompts to saved audio profiles. */
+  promptModel: AnalysisModel & { download: ModelDownload };
   paused: boolean;
   running: boolean;
   scanning: boolean;
@@ -31,3 +36,6 @@ export type DailyMix = { id: string; name: string; songIds: string[] };
 export type DailyMixesResult = {
   day: string; edition: number; generatedAt: number; eligible: number; mixes: DailyMix[];
 };
+
+/** `scores` pairs a song ID with how closely its sound matches the prompt, relative to the rest of the library. */
+export type PromptSoundResult = { status: "ready" | "model-missing" | "no-profiles"; scores: Array<[string, number]> };

@@ -128,3 +128,42 @@
 .smartPlaylistModal small { color: var(--lt-faint); font-size: 12px; }
 .smartPlaylistFooter { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
 .smartPlaylistFooter p { margin: 0; color: var(--lt-muted); font-size: 12px; }
+
+
+/* Recommended songs under a playlist. */
+.playlistRecommendations { display: grid; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--playlist-border); }
+.playlistRecommendationsHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.playlistRecommendationsHead h4 { margin: 0 0 4px; color: var(--lt-text); font-size: 16px; }
+.playlistRecommendationsHead small, .playlistRecommendationsNote { margin: 0; color: var(--playlist-muted); font-size: 12px; }
+:is(.playlistRecommendationsList, .promptPlaylistList) { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.playlistRecommendationRow {
+  display: grid; grid-template-columns: minmax(0,1.4fr) minmax(0,1fr) 44px auto;
+  align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px;
+}
+:is(.playlistRecommendationRow, .promptPlaylistRow):hover { background: var(--lt-surface-raised); }
+:is(.playlistRecommendationRow, .promptPlaylistRow)[data-current="true"] { background: rgba(var(--lt-accent-rgb),.12); }
+:is(.playlistRecommendationMain, .promptPlaylistRow label) {
+  min-width: 0; display: flex; align-items: center; gap: 10px; padding: 0;
+  border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.playlistRecommendationCover { width: 40px; height: 40px; flex-shrink: 0; border-radius: 6px; object-fit: cover; }
+.playlistRecommendationAlbum { overflow: hidden; color: var(--playlist-muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.app .playlistRecommendationAdd { min-height: 30px; padding: 0 12px; font-size: 12px; }
+@media (max-width: 780px) {
+  .playlistRecommendationRow { grid-template-columns: minmax(0,1fr) 44px auto; }
+  .playlistRecommendationAlbum { display: none; }
+}
+
+/* Playlist from a prompt (shares the smart playlist modal frame). */
+.promptPlaylistModal { width: min(720px, calc(100vw - 36px)); }
+.promptPlaylistForm { display: flex; gap: 8px; }
+.promptPlaylistForm input { flex: 1; min-width: 0; }
+.promptPlaylistUnderstood { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.promptPlaylistUnderstood li { padding: 3px 10px; border-radius: 999px; color: var(--lt-accent); background: rgba(var(--lt-accent-rgb), .14); font-size: 12px; font-weight: 650; }
+.promptPlaylistNotice { margin: 0; padding: 12px 14px; border-radius: 12px; color: var(--lt-muted); background: var(--lt-surface-raised); font-size: 12px; line-height: 1.5; }
+.promptPlaylistList { max-height: min(36vh, 360px); overflow-y: auto; }
+.promptPlaylistRow { display: grid; grid-template-columns: minmax(0,1fr) 44px auto; align-items: center; gap: 10px; padding: 5px 8px; border-radius: 8px; }
+.app .promptPlaylistRow input[type="checkbox"] { flex: 0 0 auto; width: 16px; height: 16px; min-height: 0; margin: 0; accent-color: var(--lt-accent); }
+.promptPlaylistActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.promptPlaylistModal .smartPlaylistFooter { align-items: flex-end; flex-wrap: wrap; }
+.promptPlaylistModal .smartPlaylistField { flex: 1; min-width: 200px; }

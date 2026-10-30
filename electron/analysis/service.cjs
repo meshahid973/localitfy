@@ -1,11 +1,18 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { Worker } = require("node:worker_threads");
-const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
+const { MODEL, TEXT_MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { createModelManager } = require("./model-manager.cjs");
 
-function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, modelManager, workerFactory = (file, options) => new Worker(file, options), statFile = fs.promises.stat }) {
+function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, modelManager, textModelManager, workerFactory = (file, options) => new Worker(file, options), statFile = fs.promises.stat }) {
   const manager = modelManager || createModelManager(root);
+  // Optional text encoder for "playlist from a prompt"; audio analysis never needs it.
+  const textManager = textModelManager || createModelManager(root, { model: TEXT_MODEL });
+  const managerFor = (target) => {
+    if (target === undefined || target === null) return manager;
+    if (target === "prompt") return textManager;
+    throw new TypeError("Unknown model");
+  };
   let worker = null;
   let paused = true;
   let running = false;
@@ -48,10 +55,11 @@ function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, m
 
   async function status() {
     await manager.initialized;
+    await textManager.initialized;
     const records = repositories.analysis.list();
     const currentRecords = records.filter((record) => record.modelId === MODEL.id && record.analyzerVersion === ANALYZER_VERSION);
     return { supported, enabled: enabled(), historyEnabled: repositories.settings.get().listeningHistoryEnabled !== false, allowOnBattery: allowOnBattery(),
-      model: manager.metadata, download: manager.status(), paused, running, scanning,
+      model: manager.metadata, download: manager.status(), promptModel: { ...textManager.metadata, download: textManager.status() }, paused, running, scanning,
       queued: queue.length, currentSongId: current?.songId || null, completed, failed,
       analyzed: currentRecords.filter((record) => record.status === "ready").length,
       failures: currentRecords.filter((record) => record.status === "failed").length,
@@ -157,7 +165,7 @@ function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, m
   async function setEnabled(value) {
     if (typeof value !== "boolean") throw new TypeError("Expected a boolean");
     repositories.settings.save({ experimentalMusicAnalysis: value });
-    if (!value) { await stop(); await manager.cancel(); }
+    if (!value) { await stop(); await manager.cancel(); await textManager.cancel(); }
     return status();
   }
   async function setAllowOnBattery(value) {
@@ -175,9 +183,14 @@ function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, m
     status, start,
     pause: async () => { await stop(); return status(); },
     setEnabled, setAllowOnBattery,
-    download: async () => { if (!supported) throw new Error("Music analysis currently requires Apple silicon on macOS"); if (!enabled()) throw new Error("Enable experimental analysis first"); await manager.download(); return status(); },
-    cancelDownload: async () => { await manager.cancel(); return status(); },
-    removeModel: async () => { await stop(); await manager.remove(); return status(); },
+    download: async (target) => { const selected = managerFor(target); if (!supported) throw new Error("Music analysis currently requires Apple silicon on macOS"); if (!enabled()) throw new Error("Enable experimental analysis first"); await selected.download(); return status(); },
+    cancelDownload: async (target) => { await managerFor(target).cancel(); return status(); },
+    removeModel: async (target) => { const selected = managerFor(target); if (selected === manager) await stop(); await selected.remove(); return status(); },
+    /** The installed text encoder, or null when prompts can only use names, genres and listening history. */
+    promptModelPath: async () => {
+      await textManager.initialized;
+      return supported && enabled() && textManager.status().state === "ready" ? textManager.installedPath : null;
+    },
     clearAnalysis: async () => { await stop(); repositories.analysis.clear(); return status(); },
     clearHistory: async () => { repositories.listening.clear(); return status(); },
     setHistoryEnabled: async (value) => {
@@ -189,7 +202,7 @@ function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, m
       disposed = true;
       powerMonitor?.removeListener("suspend", suspend);
       powerMonitor?.removeListener("on-battery", batteryChanged);
-      await stop(); await manager.cancel();
+      await stop(); await manager.cancel(); await textManager.cancel();
     }
   };
 }

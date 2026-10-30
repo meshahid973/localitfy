@@ -1,8 +1,10 @@
 import "./playlists.css";
 import DailyMixesShelf, { type DailyMixesShelfProps } from "../analysis/DailyMixesShelf";
 import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
-import { Check, Copy, Pencil, Plus, Radio, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
+import { Check, Copy, Pencil, Plus, Radio, SlidersHorizontal, Sparkles, Trash2, WandSparkles, X } from "lucide-react";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
+import { notForMeTest, type NotForMeMarks } from "../analysis/notForMe";
+import PlaylistRecommendations from "./components/PlaylistRecommendations";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { LocaltifyStateCard, MetaDividerDot } from "../../shared/ui/LocaltifyViewUi";
@@ -17,6 +19,7 @@ import { playlistTarget, useAppActions } from "../shell/appActions";
 import CollectionHero from "../pages/CollectionHero";
 
 const SmartPlaylistDialog = lazy(() => import("./components/SmartPlaylistDialog"));
+const PromptPlaylistDialog = lazy(() => import("./components/PromptPlaylistDialog"));
 
 export type PlaylistsViewProps = {
   dailyMixes: DailyMixesShelfProps;
@@ -59,6 +62,8 @@ export type PlaylistsViewProps = {
   listeningCounts: ListeningCounts;
   /** The playlist page being shown; null shows every playlist. */
   detailPlaylistId?: string | null;
+  addSongToPlaylist: (playlistId: string, songId: string) => unknown;
+  notForMe: { marks: NotForMeMarks };
 };
 
 export default function PlaylistsView(props: PlaylistsViewProps) {
@@ -98,6 +103,9 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   } = props;
   // undefined: closed; null: creating a new smart playlist.
   const [smartEditing, setSmartEditing] = useState<Playlist | null | undefined>(undefined);
+  const [prompting, setPrompting] = useState(false);
+  const hidden = useMemo(() => notForMeTest(props.notForMe.marks), [props.notForMe.marks]);
+  const playlists = useMemo(() => playlistSummaries.map((summary: { playlist: Playlist }) => summary.playlist), [playlistSummaries]);
   const actions = useAppActions();
   const songsById = useMemo(() => new Map<string, Song>((songs as Song[]).map((song) => [song.id, song])), [songs]);
   const detailId = props.detailPlaylistId || null;
@@ -114,6 +122,14 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
           if (id && !playlistId) actions.nav.open({ kind: "playlist", id });
           return id;
         }} onClose={() => setSmartEditing(undefined)} />
+    </Suspense>
+  ) : null;
+
+  const promptDialog = prompting ? (
+    <Suspense fallback={null}>
+      <PromptPlaylistDialog songs={songs} currentId={currentId} hidden={hidden} playSongs={props.dailyMixes.playSongs}
+        selectSong={props.dailyMixes.selectSong} savePlaylist={props.dailyMixes.savePlaylist}
+        openAnalysisSettings={() => { setPrompting(false); props.dailyMixes.openAnalysisSettings(); }} onClose={() => setPrompting(false)} />
     </Suspense>
   ) : null;
 
@@ -203,8 +219,13 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             onOpenContextMenu={openPlaylistSongContextMenuAction}
             onRemoveSong={removePlaylistSongAction}
           />
+          {!detailPlaylist.rules && detailSongs.length > 0 ? (
+            <PlaylistRecommendations playlist={detailPlaylist} songs={songs as Song[]} playlists={playlists} currentId={currentId} hidden={hidden}
+              addSongToPlaylist={props.addSongToPlaylist} selectSong={props.dailyMixes.selectSong} />
+          ) : null}
         </section>
         {smartDialog}
+        {promptDialog}
       </section>
     );
   }
@@ -233,6 +254,10 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
           <button className="softButton" type="button" onClick={() => setSmartEditing(null)} disabled={!songs.length}
             title="A playlist that fills itself from rules, like liked songs you haven't played lately">
             <ActionLabel icon={Sparkles}>smart playlist</ActionLabel>
+          </button>
+          <button className="softButton" type="button" onClick={() => setPrompting(true)} disabled={!songs.length}
+            title="Describe a playlist, then choose the songs to keep">
+            <ActionLabel icon={WandSparkles}>from a prompt</ActionLabel>
           </button>
         </form>
       </PageHeader>
@@ -297,6 +322,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
 
       </div>
       {smartDialog}
+      {promptDialog}
     </section>
   );
 }

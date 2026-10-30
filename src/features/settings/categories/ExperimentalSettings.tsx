@@ -52,6 +52,7 @@ export default function ExperimentalSettings({ settings, songs, updateSetting }:
   if (!status) return <section className="settingsCategoryPage" aria-label="Experimental features"><h4>Experimental features</h4><p role="status">{error || "Loading experimental features…"}</p></section>;
   const downloading = status.download.state === "downloading";
   const ready = status.download.state === "ready";
+  const promptState = status.promptModel.download.state;
   const active = status.running || status.scanning;
   const batteryBlocked = status.onBattery && !status.allowOnBattery;
 
@@ -80,6 +81,19 @@ export default function ExperimentalSettings({ settings, songs, updateSetting }:
         {downloading ? <><p>Downloading {megabytes(status.download.downloadedBytes)} / {megabytes(status.download.totalBytes)}</p><progress aria-label="Model download" value={status.download.downloadedBytes} max={status.download.totalBytes} /></> : <p>{ready ? "Model installed and verified. Works offline." : "Model not installed."}</p>}
       </div>
       {status.download.error ? <p role="alert">{status.download.error}</p> : null}
+    </div>
+    <div className="settingsPanelCard settingsFocusPanelV491">
+      <div className="settingsPanelHeader"><div><strong>Playlists from a description</strong><span>Optional second download. Lets Playlists → from a prompt match descriptions like “sad piano ballads” to how your analyzed songs sound. Artist, genre and listening words work without it.</span></div></div>
+      <p>{status.promptModel.name} · {megabytes(status.promptModel.bytes)} download</p>
+      <div className="settingsActionRow settingsActionRowCleanV491">
+        {promptState !== "ready" && promptState !== "downloading" ? <button type="button" className="settingsActionButton settingsPrimaryAction" disabled={busy || !status.enabled || !status.supported} onClick={() => void run(() => window.localitfy.downloadAnalysisModel("prompt"))}>Download prompt model · {megabytes(status.promptModel.bytes)}</button> : null}
+        {promptState === "downloading" ? <button type="button" className="settingsActionButton" disabled={busy} onClick={() => void run(() => window.localitfy.cancelAnalysisDownload("prompt"))}>Cancel download</button> : null}
+        {promptState === "ready" ? <button type="button" className="settingsActionButton" disabled={busy} onClick={() => void run(() => window.localitfy.removeAnalysisModel("prompt"), "Prompt model removed.")}>Remove prompt model</button> : null}
+      </div>
+      <div role="status" aria-live="polite">
+        {promptState === "downloading" ? <><p>Downloading {megabytes(status.promptModel.download.downloadedBytes)} / {megabytes(status.promptModel.download.totalBytes)}</p><progress aria-label="Prompt model download" value={status.promptModel.download.downloadedBytes} max={status.promptModel.download.totalBytes} /></> : <p>{promptState === "ready" ? "Prompt model installed and verified. Works offline." : "Prompt model not installed."}</p>}
+      </div>
+      {status.promptModel.download.error ? <p role="alert">{status.promptModel.download.error}</p> : null}
     </div>
     <div className="settingsPanelCard settingsFocusPanelV491">
       <div className="settingsPanelHeader"><div><strong>Library analysis</strong><span>Samples the beginning, middle and end of each track. Runs in a background worker, one song at a time. Battery use is off by default.</span></div></div>

@@ -7,15 +7,19 @@ function registerAnalysisIpc(router, { app, powerMonitor, repositories, ffmpegPa
   const similarity = createSimilarityService({ getDatabasePath: () => repositories.database.status().path });
   router.handle("analysis:similar-songs", (_event, payload) => similarity.find(payload));
   router.handle("analysis:daily-mixes", (_event, payload) => similarity.dailyMixes(payload));
+  router.handle("analysis:prompt-sound", async (_event, payload) => {
+    const modelPath = await get().promptModelPath();
+    return modelPath ? similarity.promptSound(payload, modelPath) : { status: "model-missing", scores: [] };
+  });
   const get = () => (service ||= createAnalysisService({
     root: path.join(app.getPath("userData"), "experimental-models"), ffmpegPath, repositories, powerMonitor
   }));
   router.handle("analysis:status", () => get().status());
   router.handle("analysis:set-battery", (_event, allowed) => get().setAllowOnBattery(allowed));
   router.handle("analysis:set-enabled", (_event, enabled) => get().setEnabled(enabled));
-  router.handle("analysis:download-model", () => get().download());
-  router.handle("analysis:cancel-download", () => get().cancelDownload());
-  router.handle("analysis:remove-model", () => get().removeModel());
+  router.handle("analysis:download-model", (_event, target) => get().download(target));
+  router.handle("analysis:cancel-download", (_event, target) => get().cancelDownload(target));
+  router.handle("analysis:remove-model", (_event, target) => get().removeModel(target));
   router.handle("analysis:start", (_event, options) => get().start({ retry: options?.retry === true }));
   router.handle("analysis:pause", () => get().pause());
   router.handle("analysis:clear", () => get().clearAnalysis());
