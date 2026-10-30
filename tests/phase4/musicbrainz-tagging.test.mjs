@@ -34,7 +34,7 @@ test("album lookup failures fall back to individual track searches", async () =>
   }, coverDir: "/unused", userAgent: "localtify-test", fetchImpl: async () => assert.fail("unexpected network access") });
   const songs = [{ id: "one", title: "One", album: "Album", artist: "Artist" }, { id: "two", title: "Two", album: "Album", artist: "Artist" }];
   assert.deepEqual(await lookup.lookupGroup(songs), { proposals: [], missed: ["one", "two"] });
-  assert.equal(recordings, 2);
+  assert.equal(recordings, 4, "each unmatched title retries without the artist after album lookup fails");
 });
 
 test("summarizeAudit groups untagged songs by album and singles by artist, and finds split albums", () => {
