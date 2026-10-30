@@ -4532,7 +4532,7 @@ function MainModeApp() {
 
     const runSave = () => {
       if (saveSerial !== saveSettingsSerialRef.current) return;
-      window.localitfy.saveSettings(next).catch(() => undefined);
+      window.localitfy.saveSettings(next).catch(() => showAppToast("Could not save settings", "error"));
     };
 
     if (debounce) {
@@ -4548,7 +4548,7 @@ function MainModeApp() {
     }
 
     writeCustomThemeBackupPatch(next);
-    await window.localitfy.saveSettings(next).catch(() => undefined);
+    await window.localitfy.saveSettings(next).catch(() => showAppToast("Could not save settings", "error"));
   }
 
   async function persistSettings(next: Settings, debounce = false, priority: "immediate" | "transition" = "transition") {
@@ -5099,13 +5099,23 @@ function MainModeApp() {
       if (cacheKey) playbackUrlCacheRef.current.delete(cacheKey);
     }
 
+    const previousSong = songsById.get(id);
     setSongs((oldSongs) => patchLibrarySong(oldSongs, id, patch, songIndexById.get(id)));
 
     try {
       const updated = await window.localitfy.patchSong(id, patch);
+      if (!updated) throw new Error("Song was not saved");
       replaceSong(updated);
     } catch {
-      // optimistic update stays
+      if (previousSong) setSongs((current) => current.map((song) => {
+        if (song.id !== id) return song;
+        const rollback: Partial<Song> = {};
+        for (const key of Object.keys(patch) as (keyof Song)[]) {
+          if (Object.is(song[key], patch[key])) (rollback as Record<string, unknown>)[key] = previousSong[key];
+        }
+        return Object.keys(rollback).length ? { ...song, ...rollback } : song;
+      }));
+      showAppToast("Could not save song changes", "error");
     }
   }
 

@@ -979,6 +979,7 @@ function saveSettings(settings) {
     tx(entries);
   } catch (error) {
     lastMigrationReport.errors.push(`settings save failed: ${error?.message || error}`);
+    throw error;
   }
 
   return getSettings();
@@ -1061,6 +1062,7 @@ function savePlaylists(playlists) {
     tx(normalized);
   } catch (error) {
     lastMigrationReport.errors.push(`playlist save failed: ${error?.message || error}`);
+    throw error;
   }
 
   return getPlaylists();
