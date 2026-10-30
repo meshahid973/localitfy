@@ -111,3 +111,9 @@ test("native pause and stop cancel the secondary audio first", () => {
   assert.match(app, /function pauseAudioSmooth\(\) \{\s*stopCrossfadeAuto\(\);\s*playbackTransitionRef\.current\.requestPause\(\)/);
   assert.match(app, /if \(command\.type === "pause"\) \{ stopCrossfadeAuto\(\);/);
 });
+
+test("stale media pause/play events are ignored when current element state disagrees", () => {
+  const app = read("src/App.tsx");
+  assert.match(app, /handleAudioPause\(\) \{\s*if \(audioRef\.current && !audioRef\.current\.paused\) return;/);
+  assert.match(app, /handlePlaying\(\) \{\s*if \(audioRef\.current\?\.paused\) return;/);
+});

@@ -4259,6 +4259,7 @@ function MainModeApp() {
   }
 
   function handleAudioPause() {
+    if (audioRef.current && !audioRef.current.paused) return;
     if (pendingPlayRef.current && ["loading", "ready"].includes(playbackTransitionRef.current.snapshot().phase)) return;
     if (!playbackTransitionRef.current.paused(Boolean(
       crossfadeAutoStartedRef.current || crossfadeMainPauseGuardRef.current || crossfadeHandoffRef.current
@@ -7097,6 +7098,7 @@ function MainModeApp() {
   }
 
   function handlePlaying() {
+    if (audioRef.current?.paused) return;
     if (playbackTransitionRef.current.snapshot().phase === "paused") {
       audioRef.current?.pause();
       return;
