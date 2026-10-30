@@ -78,8 +78,8 @@ export default function PromptPlaylistDialog({ songs, currentId, hidden, playSon
   });
   const notice = !result ? null : result.sound === "model-missing" ? (
     result.ids.length ? `Matching by sound is off, so “${result.plan.sound}” was only used for names and genres.`
-      : "Describing a sound needs the prompt model. You can also name artists or genres, or ask for liked, most played or recently added songs."
-  ) : result.sound === "no-profiles" ? "Matching by sound needs analyzed songs. Analyze your library first."
+      : "Sound matching needs the prompt model. Try an artist or genre."
+  ) : result.sound === "no-profiles" ? "Analyze your library for sound matching."
     : result.sound === "error" ? "Couldn't compare the description with your music. Try again."
     : !result.ids.length ? "Nothing in your library matches that. Try fewer or different words." : null;
 
@@ -90,9 +90,7 @@ export default function PromptPlaylistDialog({ songs, currentId, hidden, playSon
         onClick={(event) => event.stopPropagation()} onKeyDown={(event) => { if (event.key === "Escape") onClose(); }}>
         <div className="modalHead">
           <div>
-            <p className="eyebrow">playlist from a prompt</p>
-            <h3 id="prompt-playlist-title">describe a playlist</h3>
-            <span className="editorHeadSub">Name artists, genres or a mood. Everything is matched on this device.</span>
+            <h3 id="prompt-playlist-title">Describe a playlist</h3>
           </div>
           <button className="closeModalButton" type="button" onClick={onClose} aria-label="Close"><X size={18} strokeWidth={2.4} /></button>
         </div>

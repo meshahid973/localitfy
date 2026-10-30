@@ -193,7 +193,6 @@ export default function QueuePanel({
                 </button>
                 <span className="queuePanelDuration">{formatTime(autoNextSong.duration || 0)}</span>
               </div>
-              <p className="queuePanelHint">nothing queued, so this plays next. right-click a song and pick “add to queue”.</p>
             </>
           ) : (
             <p className="queuePanelEmpty">queue is empty</p>
@@ -202,9 +201,6 @@ export default function QueuePanel({
             <button type="button" className="queuePanelTextButton queuePanelMore" onClick={() => setRenderLimit((limit) => limit + QUEUE_RENDER_STEP)}>
               show {Math.min(QUEUE_RENDER_STEP, entries.length - renderLimit)} more
             </button>
-          ) : null}
-          {repeatMode === "one" && currentSong ? (
-            <p className="queuePanelHint">repeat one is on, so the current song keeps playing. skip or turn repeat off to move on.</p>
           ) : null}
         </section>
 

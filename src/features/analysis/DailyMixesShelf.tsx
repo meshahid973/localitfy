@@ -57,16 +57,15 @@ export default function DailyMixesShelf(props: DailyMixesShelfProps) {
 
   return <section className="panel dailyMixes" aria-labelledby="daily-mixes-title" aria-busy={loading}>
     <div className="panelHead dailyMixesHeader">
-      <div><p className="eyebrow">made from your library</p><h3 id="daily-mixes-title">your daily mixes</h3>
-        <p className="dailyMixesIntro">Familiar sounds, a fresh selection each day. Built on your device from saved audio analysis.</p></div>
+      <div><h3 id="daily-mixes-title">Daily mixes</h3></div>
       <button type="button" className="softButton dailyMixesRefresh" disabled={loading} onClick={() => void load(true)}><RefreshCw size={15} />{loading ? "Building mixes…" : "Refresh mixes"}</button>
     </div>
     {error ? <p className="dailyMixesNotice" role="alert">{error} <button type="button" className="softButton" disabled={loading} onClick={() => void load()}>Retry</button></p> : null}
     {loading && !result ? <p className="dailyMixesNotice" role="status">Finding groups of similar sounds…</p> : null}
-    {result && !result.mixes.length ? <div className="dailyMixesNotice"><p>Analyze at least five playable tracks to make your first mix. More analyzed music gives you more variety.</p><button type="button" className="softButton" onClick={props.openAnalysisSettings}>Open analysis settings</button></div> : null}
+    {result && !result.mixes.length ? <div className="dailyMixesNotice"><p>Analyze five or more tracks to get mixes.</p><button type="button" className="softButton" onClick={props.openAnalysisSettings}>Open analysis settings</button></div> : null}
     {result?.mixes.length ? <>
       <div className="playlistShelfGrid dailyMixesGrid">{result.mixes.map((mix) => <MixCard key={`${result.day}:${result.edition}:${mix.id}`} mix={mix} songsById={songsById} />)}</div>
-      <p className="dailyMixesFootnote">{result.eligible} analyzed tracks available · {result.day} · Up to 25 tracks per mix. Refreshing leaves saved playlists intact.</p>
+      <p className="dailyMixesFootnote">{result.eligible} analyzed tracks · {result.day}</p>
     </> : null}
   </section>;
 }

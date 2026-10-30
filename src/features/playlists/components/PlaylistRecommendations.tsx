@@ -67,12 +67,12 @@ export default function PlaylistRecommendations({ playlist, songs, playlists, cu
       <div className="playlistRecommendationsHead">
         <div>
           <h4 id="playlist-recommendations-title">Recommended songs</h4>
-          <small>{current?.bySound ? "Based on how this playlist sounds" : "Based on the artists, genres and playlists in this one"}</small>
+          <small>{current?.bySound ? "Sound match" : "From your library"}</small>
         </div>
         <button className="settingsTinyButton" type="button" onClick={refresh} disabled={!current}><RefreshCw size={14} /> refresh</button>
       </div>
-      {!current ? <p className="playlistRecommendationsNote" role="status">Finding songs for this playlist…</p> : !visible.length ? (
-        <p className="playlistRecommendationsNote" role="status">That's everything for now. Refresh to look again.</p>
+      {!current ? <p className="playlistRecommendationsNote" role="status">Finding suggestions…</p> : !visible.length ? (
+        <p className="playlistRecommendationsNote" role="status">No more suggestions.</p>
       ) : (
         <ol className="playlistRecommendationsList">
           {visible.map((id) => {

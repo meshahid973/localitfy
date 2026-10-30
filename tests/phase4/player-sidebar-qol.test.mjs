@@ -145,3 +145,15 @@ test("view action buttons pair an icon with their text", () => {
     assert.doesNotMatch(source, />\s*(?:play|shuffle|queue)\s*<\/button>/, file);
   }
 });
+
+test("queue avoids a misleading next-up track during repeat-one and keeps copy concise", () => {
+  const app = read("src/App.tsx");
+  const queue = read("src/features/player/components/QueuePanel.tsx");
+  const mixes = read("src/features/analysis/DailyMixesShelf.tsx");
+  assert.match(app, /repeatMode === "one"\) return null;/);
+  assert.doesNotMatch(queue, /nothing queued, so this plays next/);
+  assert.doesNotMatch(queue, /repeat one is on, so the current song keeps playing/);
+  assert.doesNotMatch(mixes, /Familiar sounds, a fresh selection each day/);
+  assert.match(queue, /aria-label="now playing"/);
+  assert.match(queue, /aria-label="next in queue"/);
+});

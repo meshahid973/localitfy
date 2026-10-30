@@ -3790,7 +3790,7 @@ function MainModeApp() {
   }, [isPlaying, currentSong?.id]);
 
   function getNextPlayableSongForCache() {
-    if (!playableSongs.length || !currentSong) return null;
+    if (!playableSongs.length || !currentSong || repeatMode === "one") return null;
     const queuedSong = playQueue.map((songId) => songsById.get(songId)).find(isPlayableSong) ?? null;
     if (queuedSong) return queuedSong;
 
