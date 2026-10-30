@@ -8545,6 +8545,8 @@ function MainModeApp() {
       openPlaylistSongContextMenuAction,
       playPlaylist,
       openSimilarSongs: setSimilarRequest,
+      playSongs: (ids: string[], label: string) => playAlbumSongs(ids, label),
+      selectSong,
       playlistDragOverPlaylistId,
       playlistSummaries,
       removePlaylist,

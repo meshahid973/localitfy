@@ -159,3 +159,12 @@ test("similarity suggestions sample large playlist seed sets without exceeding t
   assert.equal(new Set(ids).size, 2000, "each seed is distinct");
   assert.deepEqual([...recommendations.audioRecommendationSeeds(many.slice(0, 3))], ["0", "1", "2"]);
 });
+
+test("playlist prompt audio actions are passed from the player, not DailyMixesShelf", () => {
+  const app = fs.readFileSync("src/App.tsx", "utf8");
+  const view = fs.readFileSync("src/features/playlists/PlaylistsView.tsx", "utf8");
+  assert.match(view, /playSongs=\{props\.playSongs\}/);
+  assert.match(view, /selectSong=\{props\.selectSong\}/);
+  assert.doesNotMatch(view, /props\.dailyMixes\.(?:playSongs|selectSong)/);
+  assert.match(app, /playSongs: \(ids: string\[\], label: string\) => playAlbumSongs\(ids, label\)/);
+});

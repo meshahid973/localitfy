@@ -23,6 +23,8 @@ const PromptPlaylistDialog = lazy(() => import("./components/PromptPlaylistDialo
 
 export type PlaylistsViewProps = {
   dailyMixes: DailyMixesShelfProps;
+  playSongs: (ids: string[], label: string) => unknown;
+  selectSong: (id: string, autoplay?: boolean) => unknown;
   activePlaylistId: any;
   appendPlaylistSongAction: any;
   cancelRenamePlaylist: any;
@@ -127,8 +129,8 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
 
   const promptDialog = prompting ? (
     <Suspense fallback={null}>
-      <PromptPlaylistDialog songs={songs} currentId={currentId} hidden={hidden} playSongs={props.dailyMixes.playSongs}
-        selectSong={props.dailyMixes.selectSong} savePlaylist={props.dailyMixes.savePlaylist}
+      <PromptPlaylistDialog songs={songs} currentId={currentId} hidden={hidden} playSongs={props.playSongs}
+        selectSong={props.selectSong} savePlaylist={props.dailyMixes.savePlaylist}
         openAnalysisSettings={() => { setPrompting(false); props.dailyMixes.openAnalysisSettings(); }} onClose={() => setPrompting(false)} />
     </Suspense>
   ) : null;
@@ -221,7 +223,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
           />
           {!detailPlaylist.rules && detailSongs.length > 0 ? (
             <PlaylistRecommendations playlist={detailPlaylist} songs={songs as Song[]} playlists={playlists} currentId={currentId} hidden={hidden}
-              addSongToPlaylist={props.addSongToPlaylist} selectSong={props.dailyMixes.selectSong} />
+              addSongToPlaylist={props.addSongToPlaylist} selectSong={props.selectSong} />
           ) : null}
         </section>
         {smartDialog}
