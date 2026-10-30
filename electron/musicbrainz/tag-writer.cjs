@@ -3,6 +3,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const { randomUUID } = require("node:crypto");
 
 const WRITABLE = new Set([".mp3", ".flac"]);
 const MUSICBRAINZ_OWNER = "http://musicbrainz.org";
@@ -104,16 +105,19 @@ function runFfmpeg(ffmpegPath, args, spawnImpl = spawn) {
 
 /**
  * Writes MusicBrainz tags (and the cover) into an MP3 or FLAC file without re-encoding.
- * The result is verified before the original moves to the Trash, so a failure never loses the file.
+ * Verify first, retain a same-directory original backup, and roll back if replacement fails.
  */
-async function writeMusicBrainzTags({ filePath, tags, ids, cover = "", ffmpegPath, parseFile, trashItem, spawnImpl }) {
+async function writeMusicBrainzTags({ filePath, tags, ids, cover = "", ffmpegPath, parseFile, trashItem, spawnImpl, renameFile = fs.renameSync }) {
   if (!canWriteTags(filePath)) throw new Error("Only MP3 and FLAC files can be tagged");
   const ext = path.extname(filePath);
-  const temp = path.join(path.dirname(filePath), `.${path.basename(filePath, ext)}.localtify-tagging${ext}`);
-  let trashed = false;
+  const dir = path.dirname(filePath);
+  const stem = path.basename(filePath, ext);
+  const nonce = randomUUID();
+  const temp = path.join(dir, `.${stem}.localtify-tagging-${nonce}${ext}`);
+  const backup = path.join(dir, `.${stem}.localtify-original-${nonce}${ext}`);
+  let preserveRecoveryFiles = false;
   try {
     const before = await parseFile(filePath, { duration: true, skipCovers: true });
-    // A file matched to another recording before was matched wrongly.
     const previous = before.common?.musicbrainz_recordingid;
     const clearStale = Boolean(previous && previous !== ids.recordingId);
     await runFfmpeg(ffmpegPath, ffmpegArgs({ input: filePath, output: temp, cover, tags, ids, clearStale }), spawnImpl);
@@ -121,12 +125,36 @@ async function writeMusicBrainzTags({ filePath, tags, ids, cover = "", ffmpegPat
     const after = await parseFile(temp, { duration: true, skipCovers: true });
     if (after.common?.musicbrainz_recordingid !== ids.recordingId || after.common?.title !== tags.title) throw new Error("tags did not verify after writing");
     if (Math.abs(Number(after.format?.duration || 0) - Number(before.format?.duration || 0)) > 1) throw new Error("audio length changed while tagging");
-    await trashItem(filePath);
-    trashed = true;
-    fs.renameSync(temp, filePath);
+
+    // Keep the original in the same directory until the verified replacement occupies its path.
+    renameFile(filePath, backup);
+    try {
+      renameFile(temp, filePath);
+    } catch (installError) {
+      try {
+        renameFile(backup, filePath);
+      } catch (restoreError) {
+        preserveRecoveryFiles = true;
+        throw new Error(`Tagged copy could not be installed and automatic rollback failed. Original is at ${backup}; tagged copy is at ${temp}. Install: ${installError.message}; restore: ${restoreError.message}`, { cause: restoreError });
+      }
+      throw installError;
+    }
+    // The new file is now in place. A Trash error cannot undo that successful install.
+    try {
+      await trashItem(backup);
+    } catch (error) {
+      const backupPath = fs.existsSync(backup) ? backup : "";
+      const warning = `Tags were written, but the original backup ${backupPath ? `remains at ${backupPath}` : "could not be confirmed in Trash"}: ${error?.message || error}`;
+      console.warn("[localtify tagging]", warning);
+      return { backupPath, warning };
+    }
+    return { backupPath: "", warning: "" };
   } finally {
-    // Once the original is in the Trash the tagged copy is the only one left here; never delete it.
-    if (!trashed && fs.existsSync(temp)) fs.rmSync(temp, { force: true });
+    // Never remove the only surviving tagged copy if restoring the original failed.
+    if (!preserveRecoveryFiles && fs.existsSync(temp)) {
+      try { fs.rmSync(temp, { force: true }); }
+      catch (error) { console.warn("[localtify tagging] temp cleanup:", error?.message || error); }
+    }
   }
 }
 

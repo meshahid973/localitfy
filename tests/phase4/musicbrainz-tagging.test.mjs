@@ -352,6 +352,42 @@ test("re-matching a file Picard got wrong clears the wrong match's tags but keep
   }
 });
 
+test("a locked destination rolls back the original after the tagged copy was verified", { skip: !hasFfmpeg && "ffmpeg-static binary not installed" }, async (t) => {
+  const dir = tempDir();
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const file = path.join(dir, "locked.mp3");
+  const generated = spawnSync(ffmpegPath, ["-v", "error", "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-metadata", "title=Before", file]);
+  assert.equal(generated.status, 0);
+  const before = fs.readFileSync(file);
+  const ids = { recordingId: "11111111-2222-3333-4444-555555555555", artistIds: [], albumArtistIds: [] };
+  let trashed = false;
+  await assert.rejects(writeMusicBrainzTags({
+    filePath: file, tags: { title: "After" }, ids, ffmpegPath, parseFile,
+    trashItem: async () => { trashed = true; },
+    renameFile: (source, destination) => {
+      if (source.includes(".localtify-tagging-") && destination === file) throw new Error("simulated Windows lock");
+      fs.renameSync(source, destination);
+    }
+  }), /simulated Windows lock/);
+  assert.deepEqual(fs.readFileSync(file), before, "the original is restored byte for byte");
+  assert.equal(trashed, false, "the original must not reach Trash on installation failure");
+  assert.deepEqual(fs.readdirSync(dir), ["locked.mp3"], "temporary backups are cleaned after rollback");
+});
+
+test("if Trash rejects a backup, the installed file and original backup are both retained", { skip: !hasFfmpeg && "ffmpeg-static binary not installed" }, async (t) => {
+  const dir = tempDir();
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const file = path.join(dir, "keep.mp3");
+  assert.equal(spawnSync(ffmpegPath, ["-v", "error", "-f", "lavfi", "-i", "sine=frequency=440:duration=1", file]).status, 0);
+  const before = fs.readFileSync(file);
+  const ids = { recordingId: "11111111-2222-3333-4444-555555555555", artistIds: [], albumArtistIds: [] };
+  const result = await writeMusicBrainzTags({ filePath: file, tags: { title: "After" }, ids, ffmpegPath, parseFile, trashItem: async () => { throw new Error("Trash unavailable"); } });
+  assert.match(result.warning, /Trash unavailable/);
+  assert.ok(result.backupPath && fs.existsSync(result.backupPath));
+  assert.deepEqual(fs.readFileSync(result.backupPath), before, "backup remains intact");
+  assert.equal((await parseFile(file)).common.title, "After", "new file was installed successfully");
+});
+
 test("a failed write leaves the original untouched and out of the Trash", { skip: !hasFfmpeg && "ffmpeg-static binary not installed" }, async (t) => {
   const dir = tempDir();
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
