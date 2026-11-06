@@ -1,5 +1,5 @@
 import "./pages.css";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Radio } from "lucide-react";
 import { Cover } from "../covers/Cover";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
@@ -11,6 +11,7 @@ import { buildAlbumIdBySongId } from "../player/playbackSource";
 import { artistTarget, genreTarget, playableIds, useAppActions } from "../shell/appActions";
 import type { LocalAlbumEntry } from "../albums/album.types";
 import type { Song } from "../library/song.types";
+import type { ArtistBio } from "../discover/discover.types";
 import CollectionHero from "./CollectionHero";
 import TrackList from "./TrackList";
 import AlbumShelf from "./AlbumShelf";
@@ -113,6 +114,37 @@ function SongGroupBody({ kind, name, members, loading, albums, currentId, isPlay
       </section>
 
       {memberAlbums.length ? <AlbumShelf title={kind === "artist" ? "Albums" : `${name} albums`} albums={memberAlbums} /> : null}
+
+      {kind === "artist" ? <ArtistAbout name={name} /> : null}
+    </section>
+  );
+}
+
+/** The Last.fm biography, shown only once Discover is on. Nothing is shown while it loads or when there is none. */
+function ArtistAbout({ name }: { name: string }) {
+  const [bio, setBio] = useState<ArtistBio | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    let current = true;
+    setBio(null);
+    setExpanded(false);
+    window.localitfy?.getArtistBio?.(name).then((answer) => { if (current) setBio(answer); }).catch(() => undefined);
+    return () => { current = false; };
+  }, [name]);
+
+  if (bio?.status !== "ready") return null;
+  const longer = bio.content.length > bio.summary.length;
+  const paragraphs = (expanded ? bio.content : bio.summary).split(/\n{2,}/);
+  return (
+    <section className="collectionSection artistAbout" aria-label="about">
+      <h2>About</h2>
+      <div className="artistAboutText">
+        {paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+      </div>
+      <p className="artistAboutCredit">
+        {longer ? <button className="collectionTextButton" type="button" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>{expanded ? "show less" : "read more"}</button> : null}
+        <span>Biography from Last.fm · CC BY-SA</span>
+      </p>
     </section>
   );
 }
