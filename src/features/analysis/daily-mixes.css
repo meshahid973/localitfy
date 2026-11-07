@@ -1,6 +1,5 @@
 /* Daily mixes sit in the Playlists page and reuse its panel and playlist card look, a little larger. */
 .dailyMixesHeader { flex-wrap: nowrap; }
-.dailyMixesHeader .dailyMixesIntro { margin: 6px 0 0; font-size: 12px; }
 .dailyMixesRefresh { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; }
 .dailyMixesGrid { grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
 .playlistShelfCard.dailyMixCard { grid-template-columns: 92px minmax(0, 1fr); gap: 13px; padding: 12px; }
