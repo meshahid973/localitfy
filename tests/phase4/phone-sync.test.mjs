@@ -144,3 +144,36 @@ test("server: too many wrong codes lock pairing until a new code is made", async
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("server: paired phones can use the Mac's features, only the listed ones, and finished plays get scrobbled", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-sync-test-"));
+  const library = fakeLibrary(dir);
+  library.repositories.settings = { get: () => ({ lyricsEnabled: true, lastfmApiKey: "secret", theme: "mint" }) };
+  const calls = [];
+  const scrobbled = [];
+  const sync = createSyncServer({
+    repositories: library.repositories, coverPath: () => "", statePath: path.join(dir, "state.json"),
+    callFeature: async (channel, payload) => { calls.push([channel, payload]); return { status: "synced", lines: [] }; },
+    onPlayEvent: (event) => scrobbled.push(event.id)
+  });
+  const port = await sync.start(0);
+  const post = (route, body, token) => fetch(`http://127.0.0.1:${port}${route}`, { method: "POST", headers: token ? { Authorization: `Bearer ${token}` } : {}, body: JSON.stringify(body) });
+  try {
+    assert.equal((await post("/v1/call/lyrics:get", { payload: { id: "a" } })).status, 401, "unpaired phones get nothing");
+    const { code } = sync.newPairingCode();
+    const { token } = await (await post("/v1/pair", { code })).json();
+    assert.deepEqual(await (await post("/v1/call/lyrics:get", { payload: { id: "a" } }, token)).json(), { result: { status: "synced", lines: [] } });
+    assert.equal((await post("/v1/call/library:clear", {}, token)).status, 404, "channels outside the list are refused");
+    assert.deepEqual(calls, [["lyrics:get", { id: "a" }]]);
+
+    const snapshot = await (await fetch(`http://127.0.0.1:${port}/v1/snapshot`, { headers: { Authorization: `Bearer ${token}` } })).json();
+    assert.deepEqual(snapshot.features, { lyricsEnabled: true }, "only feature switches are shared, never keys or other settings");
+
+    const play = (id, outcome) => ({ id, sessionId: "s", songId: "a", startedAt: 1, updatedAt: 2, endedAt: 2, msListened: 40000, outcome, contextType: "library", contextId: null });
+    await post("/v1/changes", { playEvents: [play("done", "ended"), play("still-playing", "active")] }, token);
+    assert.deepEqual(scrobbled, ["done"]);
+  } finally {
+    await sync.stop();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

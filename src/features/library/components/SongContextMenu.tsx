@@ -1,4 +1,5 @@
 import { Disc3, Heart, ListEnd, Pencil, Play, Plus, Radio, SkipForward, Tags, ThumbsDown, Trash2, UserRound, UserX } from "lucide-react";
+import { isAndroidApp } from "../../../app/platform";
 import { Cover } from "../../covers/Cover";
 import { ContextMenuLayer } from "../../../shared/ui/ContextMenuLayer";
 import { prettyMeta, prettyTitle } from "../../search";
@@ -111,9 +112,10 @@ export default function SongContextMenu({
             <span className="songContextMenuIcon"><Tags size={13} strokeWidth={3} /></span> find on musicbrainz
           </button>
         ) : null}
-        <button className="dangerMenuItem" type="button" role="menuitem" onClick={() => { onClose(); askRemoveSong(song.id); }}>
+        {/* The phone mirrors the Mac's library; songs are removed on the Mac. */}
+        {isAndroidApp() ? null : <button className="dangerMenuItem" type="button" role="menuitem" onClick={() => { onClose(); askRemoveSong(song.id); }}>
           <span className="songContextMenuIcon"><Trash2 size={13} strokeWidth={3} /></span> remove from library
-        </button>
+        </button>}
     </ContextMenuLayer>
   );
 }

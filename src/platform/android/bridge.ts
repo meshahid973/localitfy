@@ -46,6 +46,12 @@ export function createAndroidBridge(): Bridge {
   // Android back, innermost first: menus and dialogs close the way Escape closes them on the Mac, then the phone's
   // own sheets (full-screen player, "more"), then the app's history (the hidden title-bar button), then leave the app.
   window.addEventListener("localtifyback", () => {
+    // Native <dialog>s (similar songs, tagging…) close through their cancel event, the one Escape sends.
+    const modal = Array.from(document.querySelectorAll("dialog[open]")).pop();
+    if (modal) {
+      modal.dispatchEvent(new Event("cancel", { cancelable: true }));
+      return;
+    }
     if (document.querySelector(".songContextMenuLayer, [role='menu'], [role='dialog']:not(.phonePlayerSheet):not(.phoneMoreSheet):not(.lyricsView)")) {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       return;

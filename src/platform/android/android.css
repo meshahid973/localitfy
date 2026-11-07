@@ -62,7 +62,9 @@ html.platformAndroid .phoneTab{
   min-width: 0;
   padding: 6px 0 2px;
   border: 0;
-  background: none;
+  outline: 0;
+  background: none !important;
+  box-shadow: none !important;
   color: var(--lt-muted);
 }
 
@@ -109,7 +111,8 @@ html.platformAndroid .phoneSheet{
   width: 100%;
   padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
   border-radius: 28px 28px 0 0;
-  background: var(--lt-surface-raised, #1b1b24);
+  /* Theme surfaces are see-through; sheets sit on the solid page colour so nothing shows through. */
+  background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg, #07070b);
   animation: phoneSheetIn 260ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
@@ -176,6 +179,7 @@ html.platformAndroid .queuePanel{
   max-height: none !important;
   border-radius: 28px 28px 0 0 !important;
   padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg, #07070b) !important;
 }
 
 html.platformAndroid .songContextMenuLayer{
@@ -192,6 +196,7 @@ html.platformAndroid .songContextMenu{
   max-height: 75dvh !important;
   padding: 12px 8px calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
   border-radius: 28px 28px 0 0 !important;
+  background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg, #07070b) !important;
   transform: none !important;
 }
 
