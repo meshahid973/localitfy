@@ -17,6 +17,7 @@ const LyricsView = lazy(() => import("../../lyrics/LyricsView"));
 const MINI_SLOT = 2;
 const SHEET_SLOT = 3;
 const SWIPE_CLOSE_PX = 90;
+const SWIPE_SKIP_PX = 70;
 
 export type PhonePlayerProps = PlayerBarProps & { lyrics: Omit<LyricsViewProps, "anchorRef"> };
 
@@ -31,7 +32,9 @@ export default function PhonePlayer(props: PhonePlayerProps) {
   } = props;
   const [expanded, setExpanded] = useState(false);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const swipeStartRef = useRef<number | null>(null);
+  const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
+  // How far the cover follows a sideways swipe, before it lets go and changes song.
+  const [dragX, setDragX] = useState(0);
   const duration = currentDuration || currentSong?.duration || 0;
 
   // Android back: lyrics first, then the full-screen player.
@@ -63,12 +66,31 @@ export default function PhonePlayer(props: PhonePlayerProps) {
 
   if (!currentSong) return null;
 
-  const swipeStart = (event: ReactTouchEvent) => { swipeStartRef.current = event.touches[0]?.clientY ?? null; };
+  // Down closes the player; on the cover, left plays the next song and right the previous one.
+  const swipeStart = (event: ReactTouchEvent) => {
+    const touch = event.touches[0];
+    swipeStartRef.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+  };
+  const swipeMove = (event: ReactTouchEvent) => {
+    const start = swipeStartRef.current;
+    const touch = event.touches[0];
+    if (!start || !touch) return;
+    const dx = touch.clientX - start.x;
+    setDragX(Math.abs(dx) > Math.abs(touch.clientY - start.y) ? dx : 0);
+  };
   const swipeEnd = (event: ReactTouchEvent) => {
     const start = swipeStartRef.current;
+    const touch = event.changedTouches[0];
     swipeStartRef.current = null;
-    const end = event.changedTouches[0]?.clientY;
-    if (start !== null && end !== undefined && end - start > SWIPE_CLOSE_PX) setExpanded(false);
+    setDragX(0);
+    if (!start || !touch) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (dy > SWIPE_CLOSE_PX && dy > Math.abs(dx)) setExpanded(false);
+    else if (Math.abs(dx) > SWIPE_SKIP_PX && Math.abs(dx) > Math.abs(dy) * 1.5 && event.currentTarget.classList.contains("phonePlayerStage")) {
+      if (dx < 0) playNext(true);
+      else playPrevious();
+    }
   };
 
   const artists = splitArtistCredits(currentSong.artist);
@@ -109,11 +131,15 @@ export default function PhonePlayer(props: PhonePlayerProps) {
             </button>
           </header>
 
-          <div className="phonePlayerStage" ref={stageRef} onTouchStart={lyrics.open ? undefined : swipeStart} onTouchEnd={lyrics.open ? undefined : swipeEnd}>
+          <div className="phonePlayerStage" ref={stageRef} onTouchStart={lyrics.open ? undefined : swipeStart}
+            onTouchMove={lyrics.open ? undefined : swipeMove} onTouchEnd={lyrics.open ? undefined : swipeEnd}>
             {lyrics.open ? (
               <Suspense fallback={null}><LyricsView {...lyrics} anchorRef={stageRef} /></Suspense>
             ) : (
-              <Cover song={currentSong} className="phonePlayerArt" priority="high" />
+              <div className={`phonePlayerArtSlot ${dragX ? "isDragging" : ""}`}
+                style={{ transform: `translateX(${dragX}px) rotate(${dragX / 40}deg)`, opacity: 1 - Math.min(Math.abs(dragX) / 600, 0.4) }}>
+                <Cover song={currentSong} className="phonePlayerArt" priority="high" />
+              </div>
             )}
           </div>
 
@@ -129,7 +155,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
                 ))}
               </small>
             </span>
-            <button type="button" className={`phoneIconButton likeActionV443 ${currentSong.liked ? "liked likeActionActiveV443" : ""}`}
+            <button type="button" className={`phoneIconButton phoneLikeButton iconAction likeActionV443 ${currentSong.liked ? "liked likeActionActiveV443" : ""}`}
               onClick={() => toggleLike(currentSong.id)} aria-label={currentSong.liked ? "unlike song" : "like song"} aria-pressed={Boolean(currentSong.liked)}>
               <LikeHeartAnimationV443 liked={Boolean(currentSong.liked)} />
             </button>
