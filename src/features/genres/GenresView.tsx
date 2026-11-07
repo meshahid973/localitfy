@@ -5,46 +5,25 @@ import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { prettyMeta } from "../search/search.utils";
-import { splitArtistCredits } from "../artists/artistCredits";
+import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
+import { readLocalJson, writeLocalJson } from "../../shared/storage/localStorage";
 import { genreTarget, useAppActions } from "../shell/appActions";
-import { splitGenreCredits } from "./genreCredits";
+import { buildGenres, countGenresByMinTracks, filterAndSortGenres, GENRE_MIN_TRACKS, GENRE_SORT_ITEMS } from "./genreSort";
+import type { GenreMinTracks, GenreSortMode } from "./genreSort";
 import { useGenreTaggedSongs } from "./useGenreTaggedSongs";
 import "../artists/artists.css";
 import "./genres.css";
-
-type GenreEntry = {
-  id: string;
-  name: string;
-  songs: Song[];
-  artistCount: number;
-  coverSong: Song;
-};
 
 export type GenresViewProps = {
   songs: Song[];
 };
 
-function buildGenres(songs: Song[]): GenreEntry[] {
-  const groups = new Map<string, { name: string; songs: Song[] }>();
-  for (const song of songs) {
-    for (const name of splitGenreCredits(song.genre)) {
-      const id = name.toLocaleLowerCase();
-      const group = groups.get(id) || { name, songs: [] };
-      group.songs.push(song);
-      groups.set(id, group);
-    }
-  }
+const SORT_STORAGE_KEY = "localtify:genreSort";
+const MIN_TRACKS_STORAGE_KEY = "localtify:genreMinTracks";
 
-  return [...groups.entries()]
-    .map(([id, group]) => ({
-      id,
-      ...group,
-      artistCount: new Set(
-        group.songs.flatMap((song) => splitArtistCredits(song.artist)).map((name) => name.toLocaleLowerCase())
-      ).size,
-      coverSong: group.songs.find((song) => Boolean(song.coverUrl || song.coverPath || song.coverThumbnailUrl)) || group.songs[0]
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+function readChoice<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
+  const value = readLocalJson<string>(key, fallback);
+  return (allowed as readonly string[]).includes(value) ? value as T : fallback;
 }
 
 /** Every genre in the music tags. Clicking one opens its genre page. */
@@ -54,16 +33,19 @@ export default function GenresView({ songs }: GenresViewProps) {
   const [genreLimit, setGenreLimit] = useState(150);
   const tagged = useGenreTaggedSongs(songs);
   const loadingTags = tagged.loading;
+  const [sortMode, setSortMode] = useState<GenreSortMode>(() => readChoice(SORT_STORAGE_KEY, GENRE_SORT_ITEMS.map((item) => item.value), "tracks"));
+  const [minTracks, setMinTracks] = useState<GenreMinTracks>(() => readChoice(MIN_TRACKS_STORAGE_KEY, GENRE_MIN_TRACKS, "1"));
   const genres = useMemo(() => buildGenres(tagged.songs), [tagged.songs]);
-  const visibleGenres = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase();
-    if (!needle) return genres;
-    const exactMatches = genres.filter((genre) => genre.name.toLocaleLowerCase() === needle);
-    if (exactMatches.length) return exactMatches;
-    return genres.filter((genre) => genre.name.toLocaleLowerCase().includes(needle));
-  }, [genres, query]);
+  const minTrackItems = useMemo(() => {
+    const counts = countGenresByMinTracks(genres);
+    return GENRE_MIN_TRACKS.map((min) => ({ value: min, label: min === "1" ? `all genres (${counts[min]})` : `${min}+ tracks (${counts[min]})` }));
+  }, [genres]);
+  const visibleGenres = useMemo(() => filterAndSortGenres(genres, query, sortMode, minTracks), [genres, query, sortMode, minTracks]);
+  const hiddenBySize = minTracks !== "1" && genres.length > 0;
 
-  useEffect(() => setGenreLimit(150), [query]);
+  useEffect(() => setGenreLimit(150), [query, sortMode, minTracks]);
+  useEffect(() => writeLocalJson(SORT_STORAGE_KEY, sortMode), [sortMode]);
+  useEffect(() => writeLocalJson(MIN_TRACKS_STORAGE_KEY, minTracks), [minTracks]);
 
   return (
     <section data-page-section="genres" className="artistsPage genresPage" aria-label="genres">
@@ -73,7 +55,11 @@ export default function GenresView({ songs }: GenresViewProps) {
         description="Read directly from your music tags. Multi-genre tracks appear in every matching genre."
       >
         <input className="pageHeaderSearch" value={query} onChange={(event) => setQuery(event.currentTarget.value)} placeholder="search genres" aria-label="search genres" />
-        <span className="pageHeaderCount"><strong>{visibleGenres.length}</strong> genre{visibleGenres.length === 1 ? "" : "s"}</span>
+        <ArcDropdownMenu<GenreSortMode> className="genresSort" ariaLabel="Sort genres" value={sortMode} items={GENRE_SORT_ITEMS} onValueChange={setSortMode} />
+        <ArcDropdownMenu<GenreMinTracks> className="genresMinTracks" ariaLabel="Minimum tracks per genre" value={minTracks} items={minTrackItems} onValueChange={setMinTracks} />
+        <span className="pageHeaderCount">
+          <strong>{visibleGenres.length}</strong>{hiddenBySize ? ` of ${genres.length}` : ""} genre{visibleGenres.length === 1 && !hiddenBySize ? "" : "s"}
+        </span>
       </PageHeader>
 
       {visibleGenres.length ? (
@@ -88,7 +74,7 @@ export default function GenresView({ songs }: GenresViewProps) {
                   cover={<Cover song={genre.coverSong} className="artistCardCover genreCardCover" />}>
                   <span>
                     <strong title={genre.name}>{prettyMeta(genre.name)}</strong>
-                    <small>{genre.songs.length} track{genre.songs.length === 1 ? "" : "s"} · {genre.artistCount} artist{genre.artistCount === 1 ? "" : "s"}</small>
+                    <small>{genre.songs.length} track{genre.songs.length === 1 ? "" : "s"} · {genre.artistCount} artist{genre.artistCount === 1 ? "" : "s"}{sortMode === "plays" ? ` · ${genre.playCount} play${genre.playCount === 1 ? "" : "s"}` : ""}</small>
                   </span>
                 </MediaCard>
               );
@@ -104,8 +90,13 @@ export default function GenresView({ songs }: GenresViewProps) {
           tone="info"
           eyebrow="genres"
           title={loadingTags && !query ? "Reading genre tags" : songs.length ? "No genres found" : "No genres yet"}
-          message={loadingTags && !query ? "Checking the genre tags in your local library." : songs.length ? "Try a different genre, or add genre tags to your music files." : "Import songs and Localtify will build this shelf from their genre tags."}
-          actions={query ? <button type="button" className="softButton" onClick={() => setQuery("")}>clear search</button> : undefined}
+          message={loadingTags && !query ? "Checking the genre tags in your local library." : hiddenBySize ? `No genre with ${minTracks}+ tracks matches. Lower the minimum to see smaller genres.` : songs.length ? "Try a different genre, or add genre tags to your music files." : "Import songs and Localtify will build this shelf from their genre tags."}
+          actions={query || hiddenBySize ? (
+            <>
+              {query ? <button type="button" className="softButton" onClick={() => setQuery("")}>clear search</button> : null}
+              {hiddenBySize ? <button type="button" className="softButton" onClick={() => setMinTracks("1")}>show all genres</button> : null}
+            </>
+          ) : undefined}
         />
       )}
 
