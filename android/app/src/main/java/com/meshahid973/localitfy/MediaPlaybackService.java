@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.media.MediaMetadataCompat;
@@ -40,6 +41,8 @@ public class MediaPlaybackService extends Service {
     private Bitmap artwork;
     private boolean foreground = false;
     private boolean noisyRegistered = false;
+    private boolean shuffle = false;
+    private String repeat = "off";
 
     private final BroadcastReceiver noisy = new BroadcastReceiver() {
         @Override
@@ -69,6 +72,10 @@ public class MediaPlaybackService extends Service {
             @Override public void onSkipToPrevious() { LocaltifyNativePlugin.emitMediaAction("previoustrack", -1); }
             @Override public void onStop() { LocaltifyNativePlugin.emitMediaAction("stop", -1); }
             @Override public void onSeekTo(long position) { LocaltifyNativePlugin.emitMediaAction("seekto", position / 1000.0); }
+            // Shuffle and repeat buttons: the app flips its own setting, then reports the new state back.
+            @Override public void onCustomAction(String action, Bundle extras) {
+                if ("shuffle".equals(action) || "repeat".equals(action)) LocaltifyNativePlugin.emitMediaAction(action, -1);
+            }
         });
         Intent open = new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         session.setSessionActivity(PendingIntent.getActivity(this, 0, open, PendingIntent.FLAG_IMMUTABLE));
@@ -91,6 +98,8 @@ public class MediaPlaybackService extends Service {
         long position = Math.round(intent.getDoubleExtra("position", 0) * 1000);
         long duration = Math.round(intent.getDoubleExtra("duration", 0) * 1000);
         float rate = (float) intent.getDoubleExtra("rate", 1);
+        shuffle = intent.getBooleanExtra("shuffle", false);
+        repeat = intent.getStringExtra("repeat") == null ? "off" : intent.getStringExtra("repeat");
 
         String nextArtwork = intent.getStringExtra("artwork");
         if (nextArtwork == null) nextArtwork = "";
@@ -116,7 +125,13 @@ public class MediaPlaybackService extends Service {
                 | PlaybackStateCompat.ACTION_SEEK_TO | PlaybackStateCompat.ACTION_STOP)
             .setState(playing ? PlaybackStateCompat.STATE_PLAYING : "none".equals(state) ? PlaybackStateCompat.STATE_NONE : PlaybackStateCompat.STATE_PAUSED,
                 position, playing ? rate : 0f, SystemClock.elapsedRealtime())
+            // Android 13+ builds the notification and lock screen controls from these, after previous/play/next.
+            .addCustomAction(new PlaybackStateCompat.CustomAction.Builder("shuffle", shuffle ? "Turn shuffle off" : "Turn shuffle on", shuffleIcon()).build())
+            .addCustomAction(new PlaybackStateCompat.CustomAction.Builder("repeat", repeatLabel(), repeatIcon()).build())
             .build());
+        session.setShuffleMode(shuffle ? PlaybackStateCompat.SHUFFLE_MODE_ALL : PlaybackStateCompat.SHUFFLE_MODE_NONE);
+        session.setRepeatMode("one".equals(repeat) ? PlaybackStateCompat.REPEAT_MODE_ONE
+            : "all".equals(repeat) ? PlaybackStateCompat.REPEAT_MODE_ALL : PlaybackStateCompat.REPEAT_MODE_NONE);
 
         if (playing && !noisyRegistered) {
             registerReceiver(noisy, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
@@ -149,6 +164,18 @@ public class MediaPlaybackService extends Service {
         foreground = false;
     }
 
+    private int shuffleIcon() {
+        return shuffle ? R.drawable.ic_media_shuffle_on : R.drawable.ic_media_shuffle;
+    }
+
+    private int repeatIcon() {
+        return "one".equals(repeat) ? R.drawable.ic_media_repeat_one_on : "all".equals(repeat) ? R.drawable.ic_media_repeat_on : R.drawable.ic_media_repeat;
+    }
+
+    private String repeatLabel() {
+        return "off".equals(repeat) ? "Repeat all" : "all".equals(repeat) ? "Repeat one" : "Turn repeat off";
+    }
+
     private PendingIntent control(String action, int code) {
         Intent intent = new Intent(this, MediaPlaybackService.class).setAction(ACTION_CONTROL).putExtra("action", action);
         return PendingIntent.getService(this, code, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
@@ -165,10 +192,13 @@ public class MediaPlaybackService extends Service {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOnlyAlertOnce(true)
             .setOngoing(playing)
+            // Older Android shows these actions; the collapsed view keeps previous, play and next.
+            .addAction(shuffleIcon(), shuffle ? "Turn shuffle off" : "Turn shuffle on", control("shuffle", 5))
             .addAction(android.R.drawable.ic_media_previous, "Previous", control("previoustrack", 1))
             .addAction(playing ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play, playing ? "Pause" : "Play", control(playing ? "pause" : "play", 2))
             .addAction(android.R.drawable.ic_media_next, "Next", control("nexttrack", 3))
-            .setStyle(new MediaStyle().setMediaSession(session.getSessionToken()).setShowActionsInCompactView(0, 1, 2))
+            .addAction(repeatIcon(), repeatLabel(), control("repeat", 6))
+            .setStyle(new MediaStyle().setMediaSession(session.getSessionToken()).setShowActionsInCompactView(1, 2, 3))
             .build();
     }
 

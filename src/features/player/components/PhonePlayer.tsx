@@ -46,6 +46,21 @@ export default function PhonePlayer(props: PhonePlayerProps) {
     return () => window.removeEventListener("localtifyuiback", onBack);
   }, [expanded, lyrics]);
 
+  // The system media controls (notification, lock screen) show and change shuffle and repeat too.
+  const toggleRepeatRef = useRef(toggleRepeat);
+  toggleRepeatRef.current = toggleRepeat;
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("localtifyplayermodes", { detail: { shuffle: isShuffle, repeat: repeatMode } }));
+  }, [isShuffle, repeatMode]);
+  useEffect(() => {
+    const onModeAction = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === "shuffle") setIsShuffle((value) => !value);
+      else toggleRepeatRef.current();
+    };
+    window.addEventListener("localtifymodeaction", onModeAction);
+    return () => window.removeEventListener("localtifymodeaction", onModeAction);
+  }, [setIsShuffle]);
+
   if (!currentSong) return null;
 
   const swipeStart = (event: ReactTouchEvent) => { swipeStartRef.current = event.touches[0]?.clientY ?? null; };

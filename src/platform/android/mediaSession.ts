@@ -13,6 +13,8 @@ export function installMediaSessionBridge(filesDir: string, mediaPrefix: string)
   let playbackState: MediaSessionPlaybackState = "none";
   let lastPlayed: HTMLMediaElement | null = null;
   let timer = 0;
+  // Shuffle and repeat aren't part of the web media session; the phone player reports them with this event.
+  let modes: { shuffle: boolean; repeat: "off" | "one" | "all" } = { shuffle: false, repeat: "off" };
 
   const artworkPath = () => {
     const src = metadata?.artwork?.[0]?.src || "";
@@ -33,7 +35,8 @@ export function installMediaSessionBridge(filesDir: string, mediaPrefix: string)
         state: metadata ? playbackState === "playing" ? "playing" : playbackState === "paused" ? "paused" : "none" : "none",
         position: element ? element.currentTime : 0,
         duration,
-        rate: element?.playbackRate || 1
+        rate: element?.playbackRate || 1,
+        ...modes
       }).catch(() => undefined);
     }, 60);
   };
@@ -93,8 +96,17 @@ export function installMediaSessionBridge(filesDir: string, mediaPrefix: string)
     });
   }
 
+  window.addEventListener("localtifyplayermodes", (event) => {
+    modes = (event as CustomEvent<typeof modes>).detail;
+    push();
+  });
+
   void LocaltifyNative.addListener("mediaAction", ({ action, position }) => {
     const name: MediaAction = action;
+    if (name === "shuffle" || name === "repeat") {
+      window.dispatchEvent(new CustomEvent("localtifymodeaction", { detail: name }));
+      return;
+    }
     const handler = handlers.get(name);
     if (!handler) return;
     handler(name === "seekto" ? { action: "seekto", seekTime: position ?? 0 } : { action: name as MediaSessionAction });

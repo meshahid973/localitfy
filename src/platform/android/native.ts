@@ -1,7 +1,7 @@
 import { registerPlugin } from "@capacitor/core";
 import type { PluginListenerHandle } from "@capacitor/core";
 
-export type MediaAction = "play" | "pause" | "stop" | "nexttrack" | "previoustrack" | "seekto";
+export type MediaAction = "play" | "pause" | "stop" | "nexttrack" | "previoustrack" | "seekto" | "shuffle" | "repeat";
 
 export type MediaUpdate = {
   title: string;
@@ -13,6 +13,8 @@ export type MediaUpdate = {
   position: number;
   duration: number;
   rate: number;
+  shuffle: boolean;
+  repeat: "off" | "one" | "all";
 };
 
 /** Native half of the Android app (android/app/src/main/java/.../LocaltifyNativePlugin.java). */

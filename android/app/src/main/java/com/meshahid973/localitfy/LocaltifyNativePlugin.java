@@ -246,6 +246,8 @@ public class LocaltifyNativePlugin extends Plugin {
         intent.putExtra("position", call.getDouble("position", 0.0));
         intent.putExtra("duration", call.getDouble("duration", 0.0));
         intent.putExtra("rate", call.getDouble("rate", 1.0));
+        intent.putExtra("shuffle", Boolean.TRUE.equals(call.getBoolean("shuffle", false)));
+        intent.putExtra("repeat", call.getString("repeat", "off"));
         String state = call.getString("state", "none");
         try {
             if ("playing".equals(state) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
