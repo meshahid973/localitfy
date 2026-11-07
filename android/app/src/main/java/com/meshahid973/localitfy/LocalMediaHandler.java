@@ -83,18 +83,40 @@ final class LocalMediaHandler {
         }
     }
 
+    /**
+     * The requested byte range of a file. Newer WebViews also apply the range themselves, by skipping the stream to
+     * its start; this stream already begins there, so that first skip is answered without moving (older WebViews
+     * never send it). Skipping twice would run past the end of the song and the seek would hang.
+     */
     private static final class RangeStream extends InputStream {
         private final RandomAccessFile file;
+        private final long start;
         private long remaining;
+        private boolean started = false;
 
         RangeStream(File source, long start, long count) throws IOException {
             file = new RandomAccessFile(source, "r");
             file.seek(start);
+            this.start = start;
             remaining = count;
         }
 
         @Override
+        public long skip(long count) throws IOException {
+            if (!started && start > 0 && count == start) {
+                started = true;
+                return count;
+            }
+            started = true;
+            long skipped = Math.max(0, Math.min(count, remaining));
+            file.seek(file.getFilePointer() + skipped);
+            remaining -= skipped;
+            return skipped;
+        }
+
+        @Override
         public int read() throws IOException {
+            started = true;
             if (remaining <= 0) return -1;
             int value = file.read();
             if (value >= 0) remaining--;
@@ -103,6 +125,7 @@ final class LocalMediaHandler {
 
         @Override
         public int read(byte[] buffer, int offset, int length) throws IOException {
+            started = true;
             if (remaining <= 0) return -1;
             int count = file.read(buffer, offset, (int) Math.min(length, remaining));
             if (count > 0) remaining -= count;
