@@ -1,0 +1,374 @@
+/* Phone player (Android app): a mini player above the tabs and a full-screen player with the cover or lyrics. */
+.phoneIconButton{
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--lt-text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.phoneIconButton:active{
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.phoneIconButton .playerPlayPauseMorphIcon,
+.phoneIconButton svg{
+  width: 24px;
+  height: 24px;
+}
+
+/* Mini player: a rounded card that floats above the tab bar, tinted by the cover. */
+.phoneMiniPlayer{
+  grid-area: player;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  margin: 0 8px 6px;
+  padding: 8px 4px 10px 8px;
+  overflow: hidden;
+  border-radius: 16px;
+  background:
+    linear-gradient(90deg, rgba(var(--cover-rgb, var(--lt-accent-rgb)), 0.32), rgba(var(--cover-rgb, var(--lt-accent-rgb)), 0.14)),
+    var(--lt-surface-raised, #1b1b24);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.phoneMiniArt{
+  flex: none;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.phoneMiniArt img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.phoneMiniMeta{
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 1px;
+}
+
+.phoneMiniMeta strong,
+.phoneMiniMeta small{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.phoneMiniMeta strong{
+  color: var(--lt-text);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.phoneMiniMeta small{
+  color: var(--lt-muted);
+  font-size: 12.5px;
+}
+
+/* A thin progress line along the bottom edge of the card; the app paints --range-progress. */
+.phoneMiniProgress{
+  position: absolute;
+  inset: auto 12px 0;
+  width: auto;
+  height: 3px;
+  margin: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--lt-accent) var(--range-progress, 0%), rgba(255, 255, 255, 0.14) var(--range-progress, 0%));
+  appearance: none;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.phoneMiniProgress::-webkit-slider-thumb{
+  width: 0;
+  height: 0;
+  appearance: none;
+}
+
+/* Full-screen player. */
+.phonePlayerSheet{
+  position: fixed;
+  inset: 0;
+  z-index: 7000;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto;
+  gap: 14px;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 20px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  overflow: hidden;
+  color: #fff;
+  background: #07070b;
+  animation: phonePlayerRise 260ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes phonePlayerRise{
+  from{ transform: translateY(24px); opacity: 0; }
+  to{ transform: none; opacity: 1; }
+}
+
+.phonePlayerBackdrop{
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  filter: blur(60px) saturate(1.4);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.phonePlayerBackdrop::after{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(7, 7, 11, 0.2), rgba(7, 7, 11, 0.85) 70%);
+  content: "";
+}
+
+.phonePlayerBackdropArt,
+.phonePlayerBackdropArt img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.phonePlayerTop{
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+}
+
+.phonePlayerTop .phoneIconButton,
+.phonePlayerSheet .phoneIconButton{
+  color: #fff;
+}
+
+.phonePlayerContext{
+  display: grid;
+  text-align: center;
+  min-width: 0;
+}
+
+.phonePlayerContext small{
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.phonePlayerContext strong{
+  overflow: hidden;
+  font-size: 13.5px;
+  font-weight: 650;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.phonePlayerStage{
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  container-type: size;
+}
+
+.phonePlayerArt{
+  width: min(100%, 100cqh, 420px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.phonePlayerArt img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Lyrics take the cover's place, inside the player rather than over the page. */
+.phonePlayerSheet .lyricsView{
+  z-index: 7001;
+  border-radius: 24px;
+  box-shadow: none;
+}
+
+.phonePlayerSheet .lyricsSong{
+  display: none;
+}
+
+.phonePlayerSheet .lyricsLine{
+  font-size: 24px;
+}
+
+.phonePlayerInfo{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.phonePlayerTitles{
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.phonePlayerTitles strong{
+  overflow: hidden;
+  font-size: 22px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.phonePlayerTitles small{
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 15px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.phonePlayerTitles small button{
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.phonePlayerSeek{
+  display: grid;
+  gap: 4px;
+}
+
+.phonePlayerSeek input[type="range"]{
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+}
+
+.phonePlayerSeek input[type="range"]::-webkit-slider-runnable-track{
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--lt-accent) var(--range-progress, 0%), rgba(255, 255, 255, 0.2) var(--range-progress, 0%));
+}
+
+.phonePlayerSeek input[type="range"]::-webkit-slider-thumb{
+  width: 6px;
+  height: 22px;
+  margin-top: -8px;
+  border-radius: 3px;
+  background: var(--lt-accent);
+  appearance: none;
+}
+
+.phonePlayerTimes{
+  display: flex;
+  justify-content: space-between;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.phonePlayerControls{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.phoneToggle{
+  position: relative;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.phoneToggle.active{
+  color: var(--lt-accent) !important;
+  background: rgba(var(--lt-accent-rgb), 0.16);
+}
+
+.phoneRepeatMark{
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.phoneSkip svg{
+  width: 30px;
+  height: 30px;
+}
+
+/* The play button is the one big, filled control (Material's FAB, in the app's accent). */
+.phonePlayButton{
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  border: 0;
+  border-radius: 28px;
+  background: var(--lt-accent);
+  color: #06100c;
+  box-shadow: 0 10px 28px rgba(var(--lt-accent-rgb), 0.35);
+  transition: border-radius 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.phonePlayButton:active{
+  border-radius: 40px;
+}
+
+.phonePlayButton .playerPlayPauseMorphIcon,
+.phonePlayButton svg{
+  width: 34px;
+  height: 34px;
+}
+
+.phonePlayerTools{
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.phoneChip{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.phoneChip.active{
+  border-color: transparent;
+  background: rgba(var(--lt-accent-rgb), 0.22);
+  color: var(--lt-accent);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .phonePlayerSheet{ animation: none; }
+}

@@ -1,0 +1,44 @@
+/* Settings → Library → Phone sync */
+.phoneSyncPairing {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--lt-accent-soft);
+}
+
+.phoneSyncPairing > span,
+.phoneSyncPairing > small {
+  color: var(--lt-text-muted);
+}
+
+.phoneSyncCode {
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.18em;
+  color: var(--lt-text);
+}
+
+.phoneSyncError {
+  color: #ff8f8f;
+}
+
+.phoneSyncPairForm {
+  display: grid;
+  gap: 10px;
+}
+
+.phoneSyncPairForm label {
+  display: grid;
+  gap: 4px;
+}
+
+.phoneSyncPairForm label > span {
+  color: var(--lt-text-muted);
+  font-size: 12px;
+}
+
+.phoneSyncPairForm button {
+  justify-self: start;
+}

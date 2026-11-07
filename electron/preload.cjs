@@ -20,6 +20,20 @@ contextBridge.exposeInMainWorld("localitfy", {
     ipcRenderer.on("library:watched-change", handler);
     return () => ipcRenderer.removeListener("library:watched-change", handler);
   },
+  getPhoneSyncStatus: () => ipcRenderer.invoke("sync:status"),
+  setPhoneSyncEnabled: (enabled) => ipcRenderer.invoke("sync:set-enabled", enabled),
+  newPhoneSyncCode: () => ipcRenderer.invoke("sync:pairing-code"),
+  forgetPhoneSyncDevice: (id) => ipcRenderer.invoke("sync:forget-device", id),
+  onPhoneSyncStatus: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("sync:status", handler);
+    return () => ipcRenderer.removeListener("sync:status", handler);
+  },
+  onPlaylistsChanged: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("sync:playlists-changed", handler);
+    return () => ipcRenderer.removeListener("sync:playlists-changed", handler);
+  },
   auditMusicBrainzTags: () => ipcRenderer.invoke("tagging:audit"),
   getPendingMusicBrainzTags: () => ipcRenderer.invoke("tagging:pending"),
   lookUpMusicBrainzTags: (songIds) => ipcRenderer.invoke("tagging:lookup", { songIds }),

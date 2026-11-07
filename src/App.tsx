@@ -4288,7 +4288,8 @@ function MainModeApp() {
     const startVolume = clamp(Number(audio.volume) || 0, 0, 1);
     const delta = safeTarget - startVolume;
 
-    if (safeDuration <= 0 || Math.abs(delta) < 0.002) {
+    // No animation frames while hidden
+    if (safeDuration <= 0 || Math.abs(delta) < 0.002 || document.hidden) {
       setAudioElementVolume(audio, safeTarget);
       effectiveVolumeRef.current = safeTarget;
       if (onDone) onDone();

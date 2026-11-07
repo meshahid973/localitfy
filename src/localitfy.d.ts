@@ -19,6 +19,17 @@ type LocalitfyFeedbackStatus = {
   message?: string;
 };
 
+type LocalitfyPhoneSyncStatus = {
+  enabled: boolean;
+  running: boolean;
+  port: number;
+  name: string;
+  addresses: string[];
+  pairing: { code: string; expiresAt: number } | null;
+  devices: Array<{ id: string; name: string; pairedAt: number; lastSyncAt: number }>;
+  error: string;
+};
+
 type LocalitfyWatchedFolderStatus = {
   scanning: boolean;
   lastImport: { count: number; at: number } | null;
@@ -528,6 +539,14 @@ declare global {
       sendScrobblesNow: () => Promise<ScrobbleAnswer>;
       sendScrobbleHistory: (service: ScrobbleService) => Promise<ScrobbleAnswer>;
       repairMovedSongs: () => Promise<{ ok: boolean; canceled?: boolean; changedCount: number; songs?: Song[]; message?: string; ambiguous?: number; missingCount?: number }>;
+      /** Phone sync over the home network (Mac side). */
+      getPhoneSyncStatus: () => Promise<LocalitfyPhoneSyncStatus>;
+      setPhoneSyncEnabled: (enabled: boolean) => Promise<LocalitfyPhoneSyncStatus>;
+      newPhoneSyncCode: () => Promise<LocalitfyPhoneSyncStatus>;
+      forgetPhoneSyncDevice: (id: string) => Promise<LocalitfyPhoneSyncStatus>;
+      onPhoneSyncStatus: (callback: (status: LocalitfyPhoneSyncStatus) => void) => () => void;
+      /** A synced phone changed playlists; replaces the open window's copy. */
+      onPlaylistsChanged: (callback: (playlists: LocalitfyPlaylistRecord[]) => void) => () => void;
       auditMusicBrainzTags: () => Promise<import("./features/tagging/tagging.types").TagAudit>;
       getPendingMusicBrainzTags: () => Promise<import("./features/tagging/tagging.types").TagProposal[]>;
       lookUpMusicBrainzTags: (songIds: string[]) => Promise<import("./features/tagging/tagging.types").TagLookupResult>;

@@ -1,3 +1,4 @@
+import { isAndroidApp } from "../../app/platform";
 import "./library.css";
 import { lazy, Suspense, useState, type DragEventHandler, type ReactNode } from "react";
 import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2 } from "lucide-react";
@@ -104,9 +105,9 @@ export default function LibraryView(props: LibraryViewProps) {
               <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
                 <ActionLabel icon={Shuffle}>shuffle</ActionLabel>
               </button>
-              <button className="libraryAction" type="button" onClick={() => setDuplicatesOpen(true)} disabled={songs.length < 2} title="Find songs that are in your library more than once">
+              {isAndroidApp() ? null : <button className="libraryAction" type="button" onClick={() => setDuplicatesOpen(true)} disabled={songs.length < 2} title="Find songs that are in your library more than once">
                 <ActionLabel icon={Copy}>duplicates</ActionLabel>
-              </button>
+              </button>}
             </>
           ) : (
             <button className="libraryAction" type="button" onClick={() => props.openSimilarSongs({ kind: "liked" })}

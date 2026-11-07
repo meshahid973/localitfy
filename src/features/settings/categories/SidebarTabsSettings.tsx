@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp, Eye, EyeOff } from "lucide-react";
-import { navItems } from "../../shell/navigation.constants";
+import { isAndroidApp } from "../../../app/platform";
+import { MAC_ONLY_VIEWS, navItems } from "../../shell/navigation.constants";
 import { canMoveSidebarItem, moveSidebarItem, normalizeSidebarHidden, resolveSidebarGroups, toggleSidebarItemHidden } from "../../shell/sidebarLayout";
 import type { Settings } from "../settings.types";
 import type { UpdateSetting } from "../settings.shared";
@@ -20,8 +21,10 @@ export default function SidebarTabsSettings({ settings, updateSetting }: Sidebar
     <div className="settingsPanelCard settingsFocusPanelV491 sidebarTabsSettings" id="settings-sidebar-tabs">
       <div className="settingsPanelHeader">
         <div>
-          <strong>Sidebar tabs</strong>
-          <span>Reorder or hide tabs in each section. You can also right-click a tab in the sidebar.</span>
+          <strong>{isAndroidApp() ? "Tabs" : "Sidebar tabs"}</strong>
+          <span>{isAndroidApp()
+            ? "The first four shown pages are the tabs at the bottom; the rest are under more."
+            : "Reorder or hide tabs in each section. You can also right-click a tab in the sidebar."}</span>
         </div>
         <button
           className="settingsTinyButton"
@@ -43,7 +46,7 @@ export default function SidebarTabsSettings({ settings, updateSetting }: Sidebar
             <ol className="sidebarTabsList">
               {group.orderedItems.map((itemId) => {
                 const item = navItems.find((entry) => entry.id === itemId);
-                if (!item) return null;
+                if (!item || (isAndroidApp() && MAC_ONLY_VIEWS.has(itemId))) return null;
                 const Icon = item.icon;
                 const isHidden = hiddenSet.has(itemId);
 

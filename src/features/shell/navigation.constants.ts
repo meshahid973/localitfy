@@ -7,3 +7,6 @@ export const navItems: Array<{ id: View; label: string; hint: string; icon: Luci
 export const sidebarNavGroups: Array<{ id:"library"|"tools"|"app"; label:string; itemIds:View[] }> = [
   { id:"library", label:"library", itemIds:["home","library","liked","artists","genres","albums","playlists","discover"] }, { id:"tools", label:"tools", itemIds:["downloads","covers","analytics"] }, { id:"app", label:"app", itemIds:["settings"] }
 ];
+
+/** Pages the phone app leaves to the Mac (importing, downloading, the cover studio). */
+export const MAC_ONLY_VIEWS = new Set<View>(["downloads", "covers"]);

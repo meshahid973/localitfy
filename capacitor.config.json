@@ -1,0 +1,8 @@
+{
+  "appId": "com.meshahid973.localitfy",
+  "appName": "localtify",
+  "webDir": "dist",
+  "android": {
+    "path": "android"
+  }
+}

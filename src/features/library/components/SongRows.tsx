@@ -1,7 +1,7 @@
 import { memo, useLayoutEffect, useRef, useState } from "react";
 import { LikeHeartAnimationV443 } from "../../../shared/ui/LikeHeartAnimation";
 import type { CSSProperties, DragEvent, MouseEvent as ReactMouseEvent, PointerEvent } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { usePageVirtualizer } from "../../../shared/hooks/usePageVirtualizer";
 import type { Song, LibraryDropSide } from "../song.types";
 import { Cover, getCardCoverCssUrl } from "../../covers/Cover";
 import { MascotStateArt, PlayingBarsIcon } from "../../../shared/ui/LocaltifyViewUi";
@@ -334,10 +334,8 @@ export const VirtualSongRows = memo(function VirtualSongRows({
   onDropSong,
   onDragEnd
 }: VirtualSongRowsProps) {
-  const parentRef = useRef<HTMLDivElement | null>(null);
-  const rowVirtualizer = useVirtualizer({
+  const { listRef, virtualizer: rowVirtualizer, scrollMargin } = usePageVirtualizer<HTMLDivElement>({
     count: list.length,
-    getScrollElement: () => parentRef.current,
     estimateSize: () => 74,
     overscan: 5,
     getItemKey: (index) => list[index]?.id || index
@@ -364,7 +362,7 @@ export const VirtualSongRows = memo(function VirtualSongRows({
 
   return (
     <div
-      ref={parentRef}
+      ref={listRef}
       className={`${className} virtualSongViewport virtualSongRowsViewport`}
       onDragOver={onAreaDragOver}
       onDragLeave={onAreaDragLeave}
@@ -389,7 +387,7 @@ export const VirtualSongRows = memo(function VirtualSongRows({
               ref={rowVirtualizer.measureElement}
               data-index={virtualRow.index}
               className="virtualSongItem"
-              style={{ transform: `translateY(${virtualRow.start}px)` }}
+              style={{ transform: `translateY(${virtualRow.start - scrollMargin}px)` }}
             >
               <SongRowItem
                 song={song}
@@ -458,11 +456,31 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   onDropSong,
   onDragEnd
 }: VirtualHomeSongCardsProps) {
-  const parentRef = useRef<HTMLDivElement | null>(null);
   const [viewportWidth, setViewportWidth] = useState(0);
+  const isSimpleGrid = className.includes("simpleAlbumGrid");
+  const minColumnWidth = isSimpleGrid ? 156 : 168;
+  const gridGap = 14;
+  const columns = Math.max(1, Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap)));
+  const rowCount = Math.max(1, Math.ceil(list.length / columns));
+
+  const { listRef, virtualizer: rowVirtualizer, scrollMargin } = usePageVirtualizer<HTMLDivElement>({
+    count: list.length ? rowCount : 0,
+    estimateSize: () => 256,
+    overscan: 2,
+    getItemKey: (rowIndex) => {
+      const firstSong = list[rowIndex * columns];
+      return firstSong?.id ? `${firstSong.id}-${columns}` : `${rowIndex}-${columns}`;
+    }
+  });
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const hasSongs = list.length > 0;
+  const setGridRef = (element: HTMLDivElement | null) => {
+    gridRef.current = element;
+    listRef(element);
+  };
 
   useLayoutEffect(() => {
-    const element = parentRef.current;
+    const element = gridRef.current;
     if (!element) return;
 
     const updateWidth = () => setViewportWidth(element.clientWidth || 0);
@@ -476,24 +494,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
     const observer = new ResizeObserver(updateWidth);
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
-
-  const isSimpleGrid = className.includes("simpleAlbumGrid");
-  const minColumnWidth = isSimpleGrid ? 156 : 168;
-  const gridGap = 14;
-  const columns = Math.max(1, Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap)));
-  const rowCount = Math.max(1, Math.ceil(list.length / columns));
-
-  const rowVirtualizer = useVirtualizer({
-    count: list.length ? rowCount : 0,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 256,
-    overscan: 2,
-    getItemKey: (rowIndex) => {
-      const firstSong = list[rowIndex * columns];
-      return firstSong?.id ? `${firstSong.id}-${columns}` : `${rowIndex}-${columns}`;
-    }
-  });
+  }, [hasSongs]);
 
   if (!list.length) {
     return (
@@ -513,7 +514,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
 
   return (
     <div
-      ref={parentRef}
+      ref={setGridRef}
       className={`${className} virtualSongViewport virtualHomeGridViewport`}
       onDragOver={onAreaDragOver}
       onDragLeave={onAreaDragLeave}
@@ -536,7 +537,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
               data-index={virtualRow.index}
               className="virtualHomeGridRow"
               style={{
-                transform: `translateY(${virtualRow.start}px)`,
+                transform: `translateY(${virtualRow.start - scrollMargin}px)`,
                 gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`
               }}
             >

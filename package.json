@@ -51,6 +51,8 @@
     "rust:dist:linux": "node scripts/package-rust-release.cjs linux"
   },
   "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/core": "8.6.0",
     "@huggingface/transformers": "4.3.1",
     "better-sqlite3": "^12.5.0",
     "discord-rpc": "^4.0.1",
@@ -62,6 +64,7 @@
   },
   "devDependencies": {
     "@animateicons/react": "^0.3.3",
+    "@capacitor/cli": "8.6.0",
     "@fontsource/space-grotesk": "^5.2.10",
     "@tanstack/react-virtual": "^3.13.25",
     "@types/react": "^19.2.7",

@@ -69,7 +69,7 @@
 .coverStudioSearchInput::placeholder { color: var(--cover-muted); }
 .coverSongTools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .coverStudioLayout .coverSongTools button { min-height: 32px; padding: 6px 9px; font-size: 11px; }
-.coverSongListVirtual { position: relative; width: 100%; min-width: 0; height: min(57vh,640px); min-height: 320px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.coverSongListVirtual { position: relative; width: 100%; min-width: 0; }
 .coverSongVirtualCanvas { position: relative; width: 100%; min-width: 0; }
 .coverStudioLayout .coverSongPickVirtual {
   position: absolute; top: 0; left: 0; width: 100%; min-width: 0;
@@ -99,7 +99,7 @@
 .coverStudioLayout .coverRecentInline button { padding: 2px; min-height: 32px; width: 34px; height: 34px; }
 .coverRecentInline .coverGalleryImageShellCleanOnly { height: 28px; width: 28px; }
 .coverRecentInline .coverGalleryImageShellCleanOnly img { height: 28px; width: 28px; }
-.coverGalleryGridCleanOnly { position: relative; min-width: 0; width: 100%; height: min(65vh,660px); min-height: 310px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: thin; }
+.coverGalleryGridCleanOnly { position: relative; min-width: 0; width: 100%; }
 .coverGalleryVirtualCanvasCleanOnly { position: relative; width: 100%; min-width: 0; }
 .coverGalleryVirtualRowCleanOnly {
   position: absolute; left: 0; top: 0; width: 100%; height: 228px;
@@ -147,7 +147,6 @@
 
 @media (max-width: 1150px) {
   .coverStudioBody { grid-template-columns: 1fr; }
-  .coverSongListVirtual { height: 280px; min-height: 200px; }
 }
 @media (max-width: 700px) {
   .coverSelectedSongsPanel,.coverGalleryPanel { padding: 13px; }

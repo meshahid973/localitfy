@@ -1,3 +1,4 @@
+import { isAndroidApp } from "../../app/platform";
 import "./playlists.css";
 import DailyMixesShelf, { type DailyMixesShelfProps } from "../analysis/DailyMixesShelf";
 import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
@@ -264,7 +265,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
         </form>
       </PageHeader>
 
-      <DailyMixesShelf {...props.dailyMixes} />
+      {isAndroidApp() ? null : <DailyMixesShelf {...props.dailyMixes} />}
       <div className="playlistContentGrid isEmpty">
         <section className="panel playlistShelfPanel">
           <div className="panelHead">
