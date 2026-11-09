@@ -2467,7 +2467,7 @@ app.whenReady().then(async () => {
   libraryWatcher = startLibraryWatch(ipcRouter, { dialog, isAudioFile, getSongs, getSettings, listSongsShaped,
     importFiles: (files) => importNewAudioFiles(files), getWindow: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null) });
   scrobbler = startScrobbling(ipcRouter, { file: path.join(app.getPath("userData"), "scrobbles.json"), getSong: databaseRepositories.songs.get, listPlays: databaseRepositories.listening.list, safeStorage, shell });
-  registerDiscoverIpc(ipcRouter, { getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json") });
+  registerDiscoverIpc(ipcRouter, { getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json"), bioFile: path.join(app.getPath("userData"), "artist-bios.json") });
   registerMovedSongRepairIpc(ipcRouter, {
     dialog, BrowserWindow, getWindow: () => mainWindow,
     getSongs, fileExists, isAudioFile, readMetadata: readLocalAudioMetadata,
