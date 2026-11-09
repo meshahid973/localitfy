@@ -40,7 +40,10 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       }
     })();
     running = { apiKey, promise };
-    return promise.then((res  // Biographies use Discover's existing opt-in. Only validated records enter the disk cache.
+    return promise.then((result) => withoutOwned(result, current));
+  });
+
+  // Biographies use Discover's existing opt-in. Only validated records enter the disk cache.
   let bios = null;
   let bioClient = null;
   const bioRequests = new Map();
@@ -126,8 +129,6 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       const blocked = obsoleteOrDisabled();
       if (blocked) return blocked;
       return stored ? bioAnswer(stored) : { status: "error", error: error?.message || "Couldn't load the biography." };
-    }
-  });| "Couldn't load the biography." };
     }
   });
 }
