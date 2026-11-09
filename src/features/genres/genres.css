@@ -26,3 +26,6 @@
 @media (max-width: 520px) {
   .genresGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+.genresPage .genresSort { width: 150px; min-width: 150px; flex: 0 0 auto; }
+.genresPage .genresMinTracks { width: 170px; min-width: 170px; flex: 0 0 auto; }
