@@ -6,7 +6,7 @@ import test from "node:test";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { createLastfmClient } = require("../../electron/discover/lastfm.cjs");
+const { createLastfmClient, bioText } = require("../../electron/discover/lastfm.cjs");
 const { discover, withoutOwned, titleKey } = require("../../electron/discover/recommend.cjs");
 const { registerDiscoverIpc } = require("../../electron/ipc/discover.cjs");
 const KEY = "0123456789abcdef0123456789abcdef";
@@ -158,4 +158,149 @@ test("Discover UI guards late responses and synchronizes dismissals", () => {
   assert.match(view, /setPicked\(\(current\) => new Map/);
   assert.match(ipc, /running\?\.apiKey === apiKey/);
   assert.match(ipc, /running\?\.promise === promise/);
+});
+
+test("artist biographies become plain text without Last.fm's link and license footer", async () => {
+  assert.equal(bioText("Worked with A,    B."), "Worked with A, B.", "runs of spaces left by removed links collapse");
+  assert.equal(bioText("Tom &amp; Jerry&#39;s band &#8212; formed in 1999.<br><br>Second <b>part</b>. <a href=\"https://www.last.fm/music/X\">Read more on Last.fm</a>. User-contributed text is available under the Creative Commons By-SA License; additional terms may apply."),
+    "Tom & Jerry's band — formed in 1999.\n\nSecond part.");
+  const { fetch, calls } = fakeFetch((params) => params.get("artist") === "Nobody" ? { artist: { name: "Nobody", bio: { summary: " <a href=\"x\">Read more on Last.fm</a>", content: "" } } }
+    : { artist: { name: "Real Name", url: "https://www.last.fm/music/Real+Name", bio: { summary: "Short.", content: "Short.\n\nLonger story." } } });
+  const client = createLastfmClient({ apiKey: KEY, cacheFile: "", fetch, wait: async () => {} });
+  assert.deepEqual(await client.artistInfo("real name"), { name: "Real Name", url: "https://www.last.fm/music/Real+Name", summary: "Short.", content: "Short.\n\nLonger story." });
+  assert.equal(bioText("&lt;script&gt;alert(1)&lt;/script&gt;"), "alert(1)", "encoded markup must never produce active tags");
+  assert.equal(bioText("Collab <a title=\"1 > 0\" href=\"x\">Artist</a>"), "Collab Artist", "quoted angle brackets in attributes do not leak");
+  assert.equal(bioText("2 < 3"), "2 < 3", "ordinary comparison text remains readable");
+  assert.equal(calls[0].method, "artist.getinfo");
+  assert.equal(await client.artistInfo("Nobody"), null, "an empty biography is no biography");
+});
+
+test("artist biographies follow the Discover opt-in, are saved on disk and still show when Last.fm can't be reached", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-bio-"));
+  const bioFile = path.join(dir, "artist-bios.json");
+  const handlers = new Map();
+  const router = { handle: (channel, handler) => handlers.set(channel, handler) };
+  const settings = { discoverEnabled: false, lastfmApiKey: KEY };
+  let requests = 0;
+  let online = true;
+  const fetch = async () => {
+    requests += 1;
+    if (!online) throw new Error("offline");
+    return { ok: true, status: 200, json: async () => ({ artist: { name: "Loved Band", url: "u", bio: { summary: "Hi.", content: "Hi. More." } } }) };
+  };
+  let clock = NOW;
+  try {
+    registerDiscoverIpc(router, { getSongs: () => songs, getSettings: () => settings, cacheFile: "", bioFile, fetch, now: () => clock });
+    const bio = (artist) => handlers.get("discover:artist-bio")({}, { artist });
+    assert.equal((await bio("Loved Band")).status, "off");
+    assert.equal(requests, 0, "nothing is sent before Discover is turned on");
+    settings.discoverEnabled = true;
+    assert.deepEqual(await bio("Loved Band"), { status: "ready", name: "Loved Band", url: "u", summary: "Hi.", content: "Hi. More." });
+    await Promise.all([bio("loved band"), bio("LOVED BAND")]);
+    assert.equal(requests, 1, "a saved biography is reused");
+    assert.ok(JSON.parse(fs.readFileSync(bioFile, "utf8"))["loved band"]);
+
+    online = false;
+    clock += 31 * day;
+    const fresh = new Map();
+    registerDiscoverIpc({ handle: (channel, handler) => fresh.set(channel, handler) }, { getSongs: () => songs, getSettings: () => settings, cacheFile: "", bioFile, fetch, now: () => clock });
+    assert.equal((await fresh.get("discover:artist-bio")({}, { artist: "Loved Band" })).status, "ready", "an old biography beats none while offline");
+    assert.equal((await fresh.get("discover:artist-bio")({}, { artist: "Second Act" })).status, "error");
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+
+test("artist biography cache rejects malformed entries and keeps valid old data across failed atomic writes", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-bio-validation-"));
+  const bioFile = path.join(dir, "artist-bios.json");
+  const legacyBio = { name: "Legacy", url: "u", summary: "Old.", content: "Old biography." };
+  const initial = Object.fromEntries([
+    ["legacy", { at: "bad timestamp", bio: legacyBio }],
+    ["null entry", null], ["array entry", []], ["primitive entry", "bad"],
+    ["malformed bio", { at: NOW, bio: { content: 22 } }],
+    ["__proto__", { at: NOW, bio: { name: "__proto__", url: "u", summary: "Safe.", content: "Safe." } }]
+  ]);
+  fs.writeFileSync(bioFile, JSON.stringify(initial));
+  const originalFile = fs.readFileSync(bioFile, "utf8");
+  const settings = { discoverEnabled: true, lastfmApiKey: KEY };
+  const handlers = new Map();
+  let online = false;
+  const fetch = async (url) => {
+    if (!online) throw new Error("offline");
+    const artist = new URL(url).searchParams.get("artist");
+    return { ok: true, status: 200, json: async () => ({
+      artist: { name: artist, url: "u", bio: { summary: "New.", content: "New biography." } }
+    }) };
+  };
+  try {
+    registerDiscoverIpc({ handle: (channel, handler) => handlers.set(channel, handler) },
+      { getSongs: () => songs, getSettings: () => settings, cacheFile: "", bioFile, fetch, now: () => NOW });
+    const bio = (artist) => handlers.get("discover:artist-bio")({}, { artist });
+    assert.deepEqual(await bio("legacy"), { status: "ready", ...legacyBio },
+      "invalid timestamps must still permit offline fallback");
+    assert.equal((await bio("null entry")).status, "error", "null cache entries must not break the handler");
+    assert.equal((await bio("__proto__")).status, "ready", "unusual artist names must not poison object prototypes");
+    online = true;
+    const originalRename = fs.renameSync;
+    fs.renameSync = (from, to) => {
+      if (to === bioFile) throw new Error("simulated cache rename failure");
+      return originalRename(from, to);
+    };
+    try {
+      assert.equal((await bio("First new artist")).status, "ready");
+    } finally {
+      fs.renameSync = originalRename;
+    }
+    assert.equal(fs.readFileSync(bioFile, "utf8"), originalFile,
+      "failed rename must preserve the original complete cache");
+    assert.deepEqual(fs.readdirSync(dir), ["artist-bios.json"], "failed writes must clean up temporary files");
+
+    assert.equal((await bio("Second new artist")).status, "ready");
+    const saved = JSON.parse(fs.readFileSync(bioFile, "utf8"));
+    assert.equal(saved.legacy.bio.summary, legacyBio.summary);
+    assert.equal(saved["first new artist"].bio.summary, "New.");
+    assert.equal(saved["second new artist"].bio.summary, "New.");
+    assert.ok(Object.hasOwn(saved, "__proto__"), "unusual artist names must persist as ordinary data");
+    for (const bad of ["null entry", "array entry", "primitive entry", "malformed bio"]) {
+      assert.equal(Object.hasOwn(saved, bad), false, bad + " must not be persisted");
+    }
+    assert.deepEqual(fs.readdirSync(dir), ["artist-bios.json"]);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("artist biography requests remain isolated when the API key or Discover setting changes", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-bio-key-"));
+  const bioFile = path.join(dir, "artist-bios.json");
+  const nextKey = "ffffffffffffffffffffffffffffffff";
+  const settings = { discoverEnabled: true, lastfmApiKey: KEY };
+  const handlers = new Map();
+  const responders = new Map();
+  const fetch = (url) => new Promise((resolve) => {
+    responders.set(new URL(url).searchParams.get("api_key"), resolve);
+  });
+  try {
+    registerDiscoverIpc({ handle: (channel, handler) => handlers.set(channel, handler) },
+      { getSongs: () => songs, getSettings: () => settings, cacheFile: "", bioFile, fetch, now: () => NOW });
+    const bio = (artist) => handlers.get("discover:artist-bio")({}, { artist });
+    const oldRequest = bio("Switched Artist");
+    settings.lastfmApiKey = nextKey;
+    const newRequest = bio("Switched Artist");
+    assert.equal(responders.size, 2, "a new API key must not reuse the old key's pending request");
+    const respond = (apiKey, summary) => responders.get(apiKey)({
+      ok: true, status: 200, json: async () => ({
+        artist: { name: "Switched Artist", url: "u", bio: { summary, content: summary } }
+      })
+    });
+    respond(nextKey, "New key biography");
+    assert.equal((await newRequest).summary, "New key biography");
+    respond(KEY, "Obsolete biography");
+    assert.equal((await oldRequest).status, "needs-key");
+    assert.equal(JSON.parse(fs.readFileSync(bioFile, "utf8"))["switched artist"].bio.summary, "New key biography");
+    settings.discoverEnabled = false;
+    assert.equal((await bio("Switched Artist")).status, "off");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

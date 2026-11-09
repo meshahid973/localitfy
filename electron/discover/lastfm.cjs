@@ -1,6 +1,6 @@
 "use strict";
 
-// Minimal Last.fm client for Discover: similar artists and an artist's top tracks. Only artist names
+// Minimal Last.fm client for Discover: similar artists, an artist's top tracks and biography. Only artist names
 // and song titles are sent. Responses are cached on disk for a week and requests are spaced to stay under 5 per second.
 const fs = require("node:fs");
 const path = require("node:path");
@@ -19,6 +19,51 @@ function errorFor(code, message) {
   if (code === 10 || code === 26) return new LastfmError("Last.fm rejected the API key. Check it in Discover settings.", "bad-key");
   if (code === 29) return new LastfmError("Last.fm is rate limiting requests. Please try again in a minute.", "rate-limited");
   return new LastfmError(message || "Last.fm returned an error.", "lastfm");
+}
+
+const ENTITIES = { amp: "&", quot: "\"", apos: "'", lt: "<", gt: ">", nbsp: " " };
+
+/** Last.fm biographies are HTML ending in a "Read more" link and a license line; the page shows its own attribution. */
+/** Extract display text without depending on HTML-tag regular expressions. */
+function stripHtmlTags(value) {
+  let output = "";
+  let inTag = false;
+  let quote = "";
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index];
+    if (!inTag) {
+      if (char === "<" && /[A-Za-z!?\/]/.test(value[index + 1] || "")) {
+        inTag = true;
+      } else {
+        output += char;
+      }
+    } else if (quote) {
+      if (char === quote) quote = "";
+    } else if (char === '"' || char === "'") {
+      quote = char;
+    } else if (char === ">") {
+      inTag = false;
+    }
+  }
+  return output;
+}
+
+/** Convert Last.fm's HTML biography into plain text for React text-node rendering. */
+function bioText(html) {
+  const cleaned = String(html || "")
+    .replace(/<a\b[^>]*>\s*Read more on Last\.fm\s*<\/a>\.?/gi, "")
+    .replace(/User-contributed text is available under the Creative Commons By-SA License;?\s*additional terms may apply\.?/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n\n");
+  const plain = stripHtmlTags(cleaned);
+  const decoded = plain.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, code) => {
+    if (code[0] !== "#") return ENTITIES[code.toLowerCase()] ?? match;
+    const point = code[1] === "x" || code[1] === "X" ? parseInt(code.slice(2), 16) : Number(code.slice(1));
+    return point > 0 && point <= 0x10ffff ? String.fromCodePoint(point) : "";
+  });
+  // Encoded markup is treated as text, never as a tag or executable HTML.
+  return stripHtmlTags(decoded)
+    .replace(/\r\n?/g, "\n").replace(/[ \t]{2,}/g, " ").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function createLastfmClient({ apiKey, cacheFile, fetch = globalThis.fetch, now = Date.now, wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) {
@@ -82,8 +127,15 @@ function createLastfmClient({ apiKey, cacheFile, fetch = globalThis.fetch, now =
       return list(body?.toptracks?.track).map((item) => ({ title: String(item?.name || "").trim(), artist: artistName(item) || artist, url: item?.url || "" }))
         .filter((item) => item.title).slice(0, limit);
     },
+    async artistInfo(artist) {
+      const info = (await call("artist.getinfo", { artist }))?.artist;
+      const summary = bioText(info?.bio?.summary);
+      const content = bioText(info?.bio?.content) || summary;
+      if (!content) return null;
+      return { name: String(info?.name || artist).trim(), url: String(info?.url || ""), summary: summary || content, content };
+    },
     flush: saveCache
   };
 }
 
-module.exports = { createLastfmClient, LastfmError, API_URL, errorFor };
+module.exports = { createLastfmClient, LastfmError, API_URL, errorFor, bioText };

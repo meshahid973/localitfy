@@ -116,6 +116,10 @@
 .collectionSection { min-width: 0; display: grid; gap: 10px; }
 .collectionSection h2 { margin: 0; color: var(--lt-text); font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
 
+.artistAboutText { max-width: 72ch; display: grid; gap: 10px; color: var(--lt-muted); font-size: 13.5px; line-height: 1.6; }
+.artistAboutText p { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+.artistAboutCredit { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--lt-faint); font-size: 11px; }
+
 .trackLink {
   display: inline;
   padding: 0;
