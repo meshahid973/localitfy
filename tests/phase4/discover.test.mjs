@@ -168,6 +168,9 @@ test("artist biographies become plain text without Last.fm's link and license fo
     : { artist: { name: "Real Name", url: "https://www.last.fm/music/Real+Name", bio: { summary: "Short.", content: "Short.\n\nLonger story." } } });
   const client = createLastfmClient({ apiKey: KEY, cacheFile: "", fetch, wait: async () => {} });
   assert.deepEqual(await client.artistInfo("real name"), { name: "Real Name", url: "https://www.last.fm/music/Real+Name", summary: "Short.", content: "Short.\n\nLonger story." });
+  assert.equal(bioText("&lt;script&gt;alert(1)&lt;/script&gt;"), "alert(1)", "encoded markup must never produce active tags");
+  assert.equal(bioText("Collab <a title=\"1 > 0\" href=\"x\">Artist</a>"), "Collab Artist", "quoted angle brackets in attributes do not leak");
+  assert.equal(bioText("2 < 3"), "2 < 3", "ordinary comparison text remains readable");
   assert.equal(calls[0].method, "artist.getinfo");
   assert.equal(await client.artistInfo("Nobody"), null, "an empty biography is no biography");
 });

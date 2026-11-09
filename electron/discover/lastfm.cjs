@@ -24,17 +24,44 @@ function errorFor(code, message) {
 const ENTITIES = { amp: "&", quot: "\"", apos: "'", lt: "<", gt: ">", nbsp: " " };
 
 /** Last.fm biographies are HTML ending in a "Read more" link and a license line; the page shows its own attribution. */
+/** Extract display text without depending on HTML-tag regular expressions. */
+function stripHtmlTags(value) {
+  let output = "";
+  let inTag = false;
+  let quote = "";
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index];
+    if (!inTag) {
+      if (char === "<" && /[A-Za-z!?\/]/.test(value[index + 1] || "")) {
+        inTag = true;
+      } else {
+        output += char;
+      }
+    } else if (quote) {
+      if (char === quote) quote = "";
+    } else if (char === '"' || char === "'") {
+      quote = char;
+    } else if (char === ">") {
+      inTag = false;
+    }
+  }
+  return output;
+}
+
+/** Convert Last.fm's HTML biography into plain text for React text-node rendering. */
 function bioText(html) {
-  return String(html || "")
+  const cleaned = String(html || "")
     .replace(/<a\b[^>]*>\s*Read more on Last\.fm\s*<\/a>\.?/gi, "")
     .replace(/User-contributed text is available under the Creative Commons By-SA License;?\s*additional terms may apply\.?/gi, "")
-    .replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n\n")
-    .replace(/<[^>]*>/g, "")
-    .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, code) => {
-      if (code[0] !== "#") return ENTITIES[code.toLowerCase()] ?? match;
-      const point = code[1] === "x" || code[1] === "X" ? parseInt(code.slice(2), 16) : Number(code.slice(1));
-      return point > 0 && point <= 0x10ffff ? String.fromCodePoint(point) : "";
-    })
+    .replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n\n");
+  const plain = stripHtmlTags(cleaned);
+  const decoded = plain.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, code) => {
+    if (code[0] !== "#") return ENTITIES[code.toLowerCase()] ?? match;
+    const point = code[1] === "x" || code[1] === "X" ? parseInt(code.slice(2), 16) : Number(code.slice(1));
+    return point > 0 && point <= 0x10ffff ? String.fromCodePoint(point) : "";
+  });
+  // Encoded markup is treated as text, never as a tag or executable HTML.
+  return stripHtmlTags(decoded)
     .replace(/\r\n?/g, "\n").replace(/[ \t]{2,}/g, " ").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n")
     .trim();
 }
