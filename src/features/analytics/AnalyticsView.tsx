@@ -1,4 +1,5 @@
 import "./analytics.css";
+import { isAndroidApp } from "../../app/platform";
 import type { CSSProperties } from "react";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { PageHeader } from "../../shared/ui/PageHeader";
@@ -75,7 +76,7 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
           title="Play songs first"
           message="Your monthly and yearly recap appears after Localtify has songs and play history to read."
           detail="Localtify only uses your local library data: play counts, durations, imports, liked songs, and missing-file checks."
-          actions={<button className="mainAction" type="button" onClick={importSongs}>import songs</button>}
+          actions={isAndroidApp() ? null : <button className="mainAction" type="button" onClick={importSongs}>import songs</button>}
         />
       ) : missingFileCount ? (
         <LocaltifyStateCard

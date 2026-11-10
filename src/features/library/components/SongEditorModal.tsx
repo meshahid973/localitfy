@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useModalFocus } from "../../../shared/hooks/useModalFocus";
 import { Heart, HeartOff, ImagePlus, Save, Shuffle, Trash2, X } from "lucide-react";
+import { isAndroidApp } from "../../../app/platform";
 import { Cover } from "../../covers/Cover";
 import { formatTime } from "../../../shared/utils/format";
 import type { Playlist } from "../../playlists/playlist.types";
@@ -47,7 +48,7 @@ export default function SongEditorModal(props: SongEditorModalProps) {
           <div>
             <p className="eyebrow">song details</p>
             <h3 id="song-editor-dialog-title">edit track</h3>
-            <span className="editorHeadSub">change the name, cover, and details for this song.</span>
+            <span className="editorHeadSub">{isAndroidApp() ? "change the name and details for this song." : "change the name, cover, and details for this song."}</span>
           </div>
           <div className="editorHeaderActions">
             <button className="closeModalButton editorCloseButton" type="button" onClick={onClose} aria-label="Close edit track dialog">
@@ -58,14 +59,15 @@ export default function SongEditorModal(props: SongEditorModalProps) {
         <div className="editorGrid editorGridBetter">
           <aside className="editorCoverBlock editorCoverBlockBetter">
             <div className="editorCoverShell"><Cover song={song} className="editorCover" /></div>
-            <div className="editorCoverActions editorCoverActionsBetterV039">
+            {/* Covers come from the Mac on the phone, so they look the same on both. */}
+            {isAndroidApp() ? null : <div className="editorCoverActions editorCoverActionsBetterV039">
               <button className="softButton editorIconButton" disabled={pixelArtBusy} onClick={randomizeCover}>
                 <Shuffle size={15} strokeWidth={2.4} /><span>random pixel art</span>
               </button>
               <button className="softButton editorIconButton" disabled={pixelArtBusy} onClick={pickCover}>
                 <ImagePlus size={15} strokeWidth={2.4} /><span>choose image from pc</span>
               </button>
-            </div>
+            </div>}
             <div className="editorMiniStats" aria-label="song quick stats">
               <span><strong>{formatTime(song.duration || 0)}</strong><small>duration</small></span>
               <span><strong>{song.playCount || 0}</strong><small>plays</small></span>
@@ -95,7 +97,7 @@ export default function SongEditorModal(props: SongEditorModalProps) {
               <button className="softButton editorIconButton" onClick={() => toggleLike(song.id)}>
                 {song.liked ? <HeartOff size={15} strokeWidth={2.4} /> : <Heart size={15} strokeWidth={2.4} />}<span>{song.liked ? "unlike" : "like"}</span>
               </button>
-              <button className="dangerButton editorIconButton" onClick={() => askRemoveSong(song.id)}><Trash2 size={15} strokeWidth={2.4} /><span>remove song</span></button>
+              {isAndroidApp() ? null : <button className="dangerButton editorIconButton" onClick={() => askRemoveSong(song.id)}><Trash2 size={15} strokeWidth={2.4} /><span>remove song</span></button>}
               <button className="heroMain editorIconButton" onClick={saveEditor}><Save size={15} strokeWidth={2.4} /><span>save changes</span></button>
             </div>
           </div>

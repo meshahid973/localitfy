@@ -164,7 +164,11 @@ test("server: paired phones can use the Mac's features, only the listed ones, an
     const { token } = await (await post("/v1/pair", { code })).json();
     assert.deepEqual(await (await post("/v1/call/lyrics:get", { payload: { id: "a" } }, token)).json(), { result: { status: "synced", lines: [] } });
     assert.equal((await post("/v1/call/library:clear", {}, token)).status, 404, "channels outside the list are refused");
-    assert.deepEqual(calls, [["lyrics:get", { id: "a" }]]);
+    // Artist bios and the scrobbling status come from the Mac; scrobbling accounts are only managed there.
+    assert.equal((await post("/v1/call/discover:artist-bio", { payload: { artist: "Gorillaz" } }, token)).status, 200);
+    assert.equal((await post("/v1/call/scrobble:status", { payload: null }, token)).status, 200);
+    assert.equal((await post("/v1/call/scrobble:disconnect", { payload: "lastfm" }, token)).status, 404);
+    assert.deepEqual(calls, [["lyrics:get", { id: "a" }], ["discover:artist-bio", { artist: "Gorillaz" }], ["scrobble:status", null]]);
 
     const snapshot = await (await fetch(`http://127.0.0.1:${port}/v1/snapshot`, { headers: { Authorization: `Bearer ${token}` } })).json();
     assert.deepEqual(snapshot.features, { lyricsEnabled: true }, "only feature switches are shared, never keys or other settings");

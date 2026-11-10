@@ -1,7 +1,9 @@
+import type { ArtistBio } from "../../features/discover/discover.types";
 import type { Song } from "../../features/library/song.types";
 import type { LyricsResult } from "../../features/lyrics/lyrics.types";
 import type { Settings } from "../../features/settings/settings.types";
 import type { PlayEvent } from "../../features/player/listeningHistory";
+import type { ScrobbleStatus } from "../../features/scrobbling/scrobble.types";
 import { phoneLibrary } from "./library";
 import { fromMac, fromMacOrKept } from "./macFeatures";
 import { LocaltifyNative } from "./native";
@@ -99,7 +101,13 @@ export function createAndroidBridge(): Bridge {
     clearLyricsMatch: (payload) => keepLyrics(payload.id, fromMac("lyrics:clear-selection", payload, 15000)),
     setLyricsOffset: (payload) => fromMac("lyrics:set-offset", payload),
     getDiscoveries: (payload) => fromMacOrKept("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
-    getScrobbleStatus: async () => ({
+    getArtistBio: async (artist: string) => {
+      if (phoneLibrary.effectiveSettings().discoverEnabled !== true) return { status: "off" };
+      return fromMacOrKept<ArtistBio>("discover:artist-bio", { artist }, `mac:bio:${artist.trim().toLocaleLowerCase()}`, { status: "none" },
+        (result) => result.status === "ready" || result.status === "none");
+    },
+    // The Mac does the scrobbling: phone plays reach it with each sync and it sends them on.
+    getScrobbleStatus: () => fromMacOrKept<ScrobbleStatus>("scrobble:status", null, "mac:scrobble-status", {
       lastfm: { connected: false, username: "", waiting: 0, history: 0 },
       listenbrainz: { connected: false, username: "", waiting: 0, history: 0 },
       sent: 0, lastSentAt: 0, lastError: "", connecting: ""

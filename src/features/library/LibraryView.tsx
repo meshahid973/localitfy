@@ -183,7 +183,7 @@ export default function LibraryView(props: LibraryViewProps) {
               tone={showingMissingFiles ? "success" : isLiked || query.trim() ? "info" : "warning"}
               eyebrow={showingMissingFiles ? "file check" : isLiked ? "liked songs" : query.trim() ? "search" : "library"}
               title={showingMissingFiles ? "All files are cozy" : isLiked ? "No liked songs yet" : query.trim() ? "No songs found" : "No songs yet"}
-               message={showingMissingFiles ? "All your files are available." : isLiked ? "Like a song to save it here." : query.trim() ? "Try a different title or artist." : "Import music to get started."}
+               message={showingMissingFiles ? "All your files are available." : isLiked ? "Like a song to save it here." : query.trim() ? "Try a different title or artist." : isAndroidApp() ? "Sync with your Mac in Settings → Library to get started." : "Import music to get started."}
               mascotState={showingMissingFiles ? "happy" : query.trim() ? "question" : "empty"}
               actions={showingMissingFiles ? (
                 <button className="softButton" type="button" onClick={() => setLibraryFilterMode?.("all")}>show all tracks</button>
@@ -191,7 +191,7 @@ export default function LibraryView(props: LibraryViewProps) {
                 <button className="softButton" type="button" onClick={() => changeView("library", "empty-liked")}>browse library</button>
               ) : query.trim() ? (
                 <button className="softButton" type="button" onClick={() => handleSearchInput("")}>clear search</button>
-              ) : (
+              ) : isAndroidApp() ? null : (
                 <button className="mainAction" type="button" onClick={importSongs}>import songs</button>
               )}
             />

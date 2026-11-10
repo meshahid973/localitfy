@@ -3,6 +3,10 @@ import type { UpdateSetting } from "../settings.shared";
 import { RangeRow, ToggleRow } from "../settings.shared";
 import { ArcDropdownMenu } from "../../../shared/ui/ArcDropdownMenu";
 import ScrobbleSettings from "../../scrobbling/ScrobbleSettings";
+import { lazy, Suspense } from "react";
+import { isAndroidApp } from "../../../app/platform";
+
+const PhoneScrobbleStatus = lazy(() => import("../../../platform/android/PhoneScrobbleStatus"));
 
 export default function PlaybackSettings({ settings, updateSetting }: { settings: Settings; updateSetting: UpdateSetting }) {
   return <section className="settingsCategoryPage settingsDeclutterPageV491 settingsPlaybackCleanV491" aria-label="Playback settings">
@@ -12,6 +16,8 @@ export default function PlaybackSettings({ settings, updateSetting }: { settings
       <div className="settingsPanelCard settingsFocusPanelV491"><div className="settingsPanelHeader"><div><strong>Listening</strong></div></div><RangeRow label="Playback speed" value={settings.playbackSpeed} min={0.75} max={1.5} step={0.05} suffix="x" onChange={(value) => void updateSetting("playbackSpeed", value)} /><ToggleRow label="Volume normalization" help="Balance track volume." checked={settings.volumeNormalization} onChange={(value) => void updateSetting("volumeNormalization", value)} /><ToggleRow label="Remember position" help="Resume where you stopped." checked={settings.rememberPlaybackPosition} onChange={(value) => void updateSetting("rememberPlaybackPosition", value)} /><ToggleRow label="Song radio" help={settings.experimentalMusicAnalysis ? "Keep playing similar songs when the queue ends." : "Enable music analysis first."} checked={settings.songRadio} onChange={(value) => void updateSetting("songRadio", value)} /></div>
       <div className="settingsPanelCard settingsFocusPanelV491 settingsAudioEffectsPanel"><div className="settingsPanelHeader"><div><strong>Audio effects</strong></div></div><div className="settingsSelectField settingsSelectFieldV491"><span>effect</span><ArcDropdownMenu ariaLabel="Audio effect" value={settings.audioEffectMode} items={[{ value: "normal" as AudioEffectMode, label: "normal" }, { value: "nightcore" as AudioEffectMode, label: "nightcore" }, { value: "daycore" as AudioEffectMode, label: "slowed + reverb" }]} onValueChange={effect => void updateSetting("audioEffectMode", effect)} /></div><RangeRow label="Effect strength" value={settings.audioEffectAmount} min={0} max={100} step={5} suffix="%" onChange={(value) => void updateSetting("audioEffectAmount", value)} />{settings.audioEffectMode === "daycore" ? <RangeRow label="Reverb" value={settings.audioReverbAmount} min={0} max={70} step={5} suffix="%" onChange={(value) => void updateSetting("audioReverbAmount", value)} /> : null}</div>
     </div>
-    <ScrobbleSettings lastfmApiKey={settings.lastfmApiKey} saveLastfmApiKey={(key) => void updateSetting("lastfmApiKey", key)} />
+    {isAndroidApp()
+      ? <Suspense fallback={null}><PhoneScrobbleStatus /></Suspense>
+      : <ScrobbleSettings lastfmApiKey={settings.lastfmApiKey} saveLastfmApiKey={(key) => void updateSetting("lastfmApiKey", key)} />}
   </section>;
 }

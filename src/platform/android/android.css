@@ -205,6 +205,19 @@ html.platformAndroid .songContextMenu button{
   font-size: 15px;
 }
 
+/* Scrobbling is read-only on the phone: each account's state sits under its name. */
+html.platformAndroid .scrobbleServiceHead{
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+html.platformAndroid .scrobbleServiceHead span{
+  color: var(--lt-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
 /* Touch sizes and text the desktop sizes for a mouse. */
 html.platformAndroid button,
 html.platformAndroid input,

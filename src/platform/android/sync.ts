@@ -151,8 +151,9 @@ const PARALLEL_DOWNLOADS = 4;
 
 async function syncFiles() {
   const songs = phoneLibrary.remoteSongs;
+  // Covers follow the Mac's: a new or changed cover is copied, one the Mac no longer has is removed.
   const wanted = songs.filter((song) => phoneLibrary.files[song.id]?.audio !== fileKey(song.file) ||
-    (song.cover && phoneLibrary.files[song.id]?.cover !== fileKey(song.cover)));
+    (song.cover ? phoneLibrary.files[song.id]?.cover !== fileKey(song.cover) : Boolean(phoneLibrary.files[song.id]?.cover)));
   const bytesTotal = wanted.reduce((sum, song) => sum + (phoneLibrary.files[song.id]?.audio === fileKey(song.file) ? 0 : song.file.size), 0);
   let bytesDone = 0;
   let done = 0;
@@ -187,6 +188,10 @@ async function syncFiles() {
       await LocaltifyNative.downloadFile({ id: `${song.id}:cover`, url: `${base}/v1/cover/${encodeURIComponent(song.id)}`, path: phoneLibrary.coverPath(song.id, song.cover.ext), headers });
       if (local.coverExt && local.coverExt !== song.cover.ext) await LocaltifyNative.deleteFile({ path: phoneLibrary.coverPath(song.id, local.coverExt) }).catch(() => undefined);
       Object.assign(local, { cover: fileKey(song.cover), coverExt: song.cover.ext });
+    } else if (!song.cover && local.cover) {
+      if (local.coverExt) await LocaltifyNative.deleteFile({ path: phoneLibrary.coverPath(song.id, local.coverExt) }).catch(() => undefined);
+      delete local.cover;
+      delete local.coverExt;
     }
     phoneLibrary.files[song.id] = local;
     done += 1;
