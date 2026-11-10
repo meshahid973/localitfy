@@ -12,8 +12,10 @@ async function tryScanAudioFiles(root, isAudioFile, limit) {
   if (!getAddon("scanner")) return null;
   // The existing callback may be customised in tests/extensions. Unknown semantics
   // must use JavaScript instead of producing an incomplete native scan.
-  if (!EXTENSIONS.every((ext) => isAudioFile(path.join(root,"probe."+ext))) ||
-      isAudioFile(path.join(root,"probe.notmusic"))) return null;
+  try {
+    if (!EXTENSIONS.every((ext) => isAudioFile(path.join(root,"probe."+ext))) ||
+        isAudioFile(path.join(root,"probe.notmusic"))) return null;
+  } catch (error) { warnOnce("scanner", error); return null; }
   return new Promise((resolve) => {
     let worker;
     try {

@@ -114,7 +114,11 @@ fn visit(
             result.truncated = true;
             return;
         }
-        let name = entry.file_name().to_string_lossy().into_owned();
+        let os_name = entry.file_name();
+        let name = match os_name.to_str() {
+            Some(value) => value.to_owned(),
+            None => { result.truncated = true; return; }
+        };
         if name.starts_with('.') {
             continue;
         }
@@ -131,7 +135,11 @@ fn visit(
                 .map(|ext| extensions.iter().any(|accepted| accepted.eq_ignore_ascii_case(ext)))
                 .unwrap_or(false);
             if allowed {
-                result.files.push(entry.path().to_string_lossy().into_owned());
+                let candidate = entry.path();
+                match candidate.to_str() {
+                    Some(file) => result.files.push(file.to_owned()),
+                    None => { result.truncated = true; return; }
+                }
             }
         }
     }

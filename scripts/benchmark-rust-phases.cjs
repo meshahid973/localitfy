@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const { dot } = require("../electron/analysis/listening-signals.cjs");
+const { tryDotMatrix } = require("../electron/native/compute.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
 const { listAudioFiles } = require("../electron/library-watch.cjs");
@@ -45,10 +46,17 @@ async function run() {
       fs.writeFileSync(path.join(dir,"partial.part"),"x");
     }
     const jobs=[
-      ["similarity dot / 240x512",()=>{let score=0;for(let i=0;i<trackVectors.length;i++)score+=dot(trackVectors[i],trackVectors[(i+1)%trackVectors.length]);return score;}],
+      ["similarity / 240x12x512 scores",()=>{
+        const seeds=trackVectors.slice(0,12);
+        const nativeScores=tryDotMatrix(trackVectors,seeds);
+        if(nativeScores) return nativeScores.reduce((sum,n)=>sum+n,0);
+        let score=0;
+        for(const row of trackVectors)for(const seed of seeds)score+=dot(row,seed);
+        return score;
+      }],
       ["daily mixes / 240 tracks",()=>generateMixes(tracks,"fixed-seed")],
       ["duplicates / 600 entries",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:dupSizes})],
-      ["scanner / 180 entries",()=>listAudioFiles(tmp,(file)=>file.toLowerCase().endsWith(".mp3"))]
+      ["scanner / 180 entries",()=>listAudioFiles(tmp,(file)=>/\\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(file))]
     ];
     for(const [name,fn] of jobs) {
       process.env.LOCALTIFY_RUST_PHASES="";
