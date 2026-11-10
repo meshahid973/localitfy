@@ -205,6 +205,34 @@ html.platformAndroid .songContextMenu button{
   font-size: 15px;
 }
 
+/* The desktop's narrow-window rule swaps the label for a "+" and leaves the icon, which reads "+ +" here. */
+html.platformAndroid .mainAction{
+  padding-inline: 18px !important;
+  font-size: 15px !important;
+}
+
+html.platformAndroid .mainAction::before{
+  content: none;
+}
+
+/* Two album covers per row, like artists and genres. */
+html.platformAndroid .albumsGridV318{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* The phone has four settings pages: show them all as a 2×2 grid instead of a sideways-scrolling rail. */
+html.platformAndroid .settingsPage.settingsPageV027 .settingsCategoryRail nav{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  overflow: visible;
+}
+
+html.platformAndroid .settingsPage.settingsPageV027 .settingsCategoryRail .settingsNavGroup{
+  display: contents;
+}
+
 /* Scrobbling is read-only on the phone: each account's state sits under its name. */
 html.platformAndroid .scrobbleServiceHead{
   flex-direction: column;

@@ -397,6 +397,23 @@
   color: var(--lt-accent);
 }
 
+/* A short landscape viewport needs the cover beside the controls, rather than a zero-height cover row. */
+@media (orientation: landscape) and (max-height: 480px){
+  .phonePlayerSheet{
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-rows: 48px minmax(48px, 1fr) auto 64px 40px;
+    gap: 8px 20px;
+    padding: 8px 20px 12px;
+  }
+  .phonePlayerTop{ grid-column: 1 / -1; }
+  .phonePlayerStage{ grid-column: 1; grid-row: 2 / 6; }
+  .phonePlayerInfo{ grid-column: 2; grid-row: 2; }
+  .phonePlayerSeek{ grid-column: 2; grid-row: 3; }
+  .phonePlayerControls{ grid-column: 2; grid-row: 4; }
+  .phonePlayerTools{ grid-column: 2; grid-row: 5; }
+  .phonePlayButton{ width: 64px; height: 64px; border-radius: 22px; }
+}
+
 @media (prefers-reduced-motion: reduce){
   .phonePlayerSheet{ animation: none; }
 }

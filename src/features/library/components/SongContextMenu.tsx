@@ -79,13 +79,13 @@ export default function SongContextMenu({
         <button type="button" role="menuitem" onClick={() => { onClose(); toggleLike(song.id); }}>
           <span className="songContextMenuIcon"><Heart size={13} strokeWidth={3} /></span> {song.liked ? "remove from liked songs" : "save to liked songs"}
         </button>
-        {notForMe ? (
+        {!isAndroidApp() && notForMe ? (
           <button type="button" role="menuitem" title="Left out of daily mixes, similar songs and song radio"
             onClick={() => { onClose(); notForMe.toggle("song", song.id); }}>
             <span className="songContextMenuIcon"><ThumbsDown size={13} strokeWidth={3} /></span> {notForMe.marks.songs.includes(song.id) ? "undo not for me" : "not for me"}
           </button>
         ) : null}
-        {notForMe && leadArtist ? (
+        {!isAndroidApp() && notForMe && leadArtist ? (
           <button type="button" role="menuitem" title={`${leadArtist} is left out of daily mixes, similar songs and song radio`}
             onClick={() => { onClose(); notForMe.toggle("artist", leadArtist); }}>
             <span className="songContextMenuIcon"><UserX size={13} strokeWidth={3} /></span> {hasArtistMark(notForMe.marks, leadArtist) ? "recommend this artist again" : "don't recommend this artist"}
@@ -102,10 +102,13 @@ export default function SongContextMenu({
             <span className="songContextMenuIcon"><Disc3 size={13} strokeWidth={3} /></span> go to album
           </button>
         ) : null}
+        {/* Song details are edited on the Mac. */}
+        {isAndroidApp() ? null : <>
         <div className="songContextMenuDivider" aria-hidden="true" />
         <button type="button" role="menuitem" onClick={() => { onClose(); openEditor(song); }}>
           <span className="songContextMenuIcon"><Pencil size={13} strokeWidth={3} /></span> edit song data
         </button>
+        </>}
         {findOnMusicBrainz && song.filePath ? (
           <button type="button" role="menuitem" title="Search MusicBrainz and pick the right release for this song"
             onClick={() => { onClose(); findOnMusicBrainz(song); }}>

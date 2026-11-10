@@ -1,5 +1,6 @@
 package com.meshahid973.localitfy;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import androidx.activity.OnBackPressedCallback;
@@ -34,6 +35,8 @@ public class MainActivity extends BridgeActivity {
 
     // The back key reaches the focused WebView before the dispatcher, and the WebView swallows it while a modal
     // <dialog> is open. Send it to the page first, the same way as the back gesture.
+    // Predictive gestures already use the AndroidX callback above; this is only the hardware/three-button fallback.
+    @SuppressLint("GestureBackNavigation")
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {

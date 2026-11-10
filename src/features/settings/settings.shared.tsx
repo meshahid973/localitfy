@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 
 import { clampUpperFirst as clamp } from "../../shared/utils/format";
-export function ToggleRow({ label, help, checked, onChange }: {
+export function ToggleRow({ label, help, checked, onChange, disabled }: {
   label: string;
   help?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
     <label className="toggleRow" title={help || label}>
@@ -16,7 +17,7 @@ export function ToggleRow({ label, help, checked, onChange }: {
         </span>
         {help ? <small>{help}</small> : null}
       </span>
-      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.currentTarget.checked)} />
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={(event) => onChange(event.currentTarget.checked)} />
     </label>
   );
 }

@@ -154,14 +154,13 @@ export default function AlbumsView(props: AlbumsViewProps) {
                        { value: "artist", label: "artist" }, { value: "year", label: "year" }]} />
                 </PageHeader>
 
-                <div className="albumsActionBarV318">
+                {/* Album management (create, import, clear tags) is Mac-only. */}
+                {isAndroidApp() ? null : <div className="albumsActionBarV318">
                   <button className="mainAction" type="button" onClick={() => openCreateAlbumBuilder(currentSong || songs[0] || null)}><ActionLabel icon={Plus}>add album</ActionLabel></button>
-                  {isAndroidApp() ? null : <>
                   <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("single")} disabled={albumFolderImportBusy}><ActionLabel icon={FolderInput}>import album folder</ActionLabel></button>
                   <button className="heroGhost" type="button" onClick={() => void scanAlbumFolderImport("library")} disabled={albumFolderImportBusy}><ActionLabel icon={FolderTree}>import album library</ActionLabel></button>
-                  </>}
                   <button className={`heroGhost danger albumsDeleteAllV318 ${albumDeleteConfirmArmed ? "confirmArmed" : ""}`} type="button" onClick={() => void deleteAllAlbums()} disabled={!manualAlbums.length && !metadataAlbums.length}><ActionLabel icon={Trash2}>{albumDeleteConfirmArmed ? "sure? delete" : "delete all albums"}</ActionLabel></button>
-                </div>
+                </div>}
 
                 {(albumFolderImportBusy || albumFolderImportPreview || albumFolderImportMessage) ? (
                   <section className={`albumFolderImportPanelV309 ${albumFolderImportPreview?.albums?.length ? "hasPreview" : ""}`}>

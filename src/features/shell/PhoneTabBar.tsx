@@ -29,6 +29,19 @@ export default function PhoneTabBar({ view, changeView, sidebarNavOrder, sidebar
     changeView(id, "nav");
   };
 
+  // Tabs are a collapsed section of Appearance settings; open it and bring it into view once the page has rendered.
+  const chooseTabs = () => {
+    setMoreOpen(false);
+    openSidebarSettings();
+    // scrollIntoView doesn't move the page's scroll area in Android's WebView, so scroll it by hand.
+    window.setTimeout(() => {
+      const section = document.querySelector<HTMLDetailsElement>(".settingsSidebarDisclosure");
+      const page = section?.closest(".content");
+      if (section) section.open = true;
+      if (section && page) page.scrollTo({ top: section.getBoundingClientRect().top - page.getBoundingClientRect().top + page.scrollTop - 12, behavior: "smooth" });
+    }, 350);
+  };
+
   // Android back closes the sheet before it leaves the page.
   useEffect(() => {
     if (!moreOpen) return;
@@ -79,7 +92,7 @@ export default function PhoneTabBar({ view, changeView, sidebarNavOrder, sidebar
                 );
               })}
             </div>
-            <button type="button" className="phoneSheetAction" onClick={() => { setMoreOpen(false); openSidebarSettings(); }}>
+            <button type="button" className="phoneSheetAction" onClick={chooseTabs}>
               <SlidersHorizontal size={18} strokeWidth={2.2} aria-hidden="true" />
               <span>Choose tabs</span>
             </button>

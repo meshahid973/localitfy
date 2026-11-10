@@ -123,7 +123,8 @@ public class LocaltifyNativePlugin extends Plugin {
                 if (cancelDownloads) throw new IOException("cancelled");
                 File target = resolve(call.getString("path"));
                 File parent = target.getParentFile();
-                if (parent != null && !parent.isDirectory() && !parent.mkdirs()) throw new IOException("could not create folder");
+                // Another download may create this shared directory between isDirectory() and mkdirs().
+                if (parent != null && !parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory()) throw new IOException("could not create folder");
                 temp = new File(parent, "." + target.getName() + ".part");
                 connection = (HttpURLConnection) new URL(call.getString("url")).openConnection();
                 connection.setConnectTimeout(8000);

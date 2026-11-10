@@ -54,8 +54,17 @@ export function createAndroidBridge(): Bridge {
       modal.dispatchEvent(new Event("cancel", { cancelable: true }));
       return;
     }
-    if (document.querySelector(".songContextMenuLayer, [role='menu'], [role='dialog']:not(.phonePlayerSheet):not(.phoneMoreSheet):not(.lyricsView)")) {
-      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    const overlay = document.querySelector("[role='menu']") ||
+      Array.from(document.querySelectorAll("[role='dialog']:not(.phonePlayerSheet):not(.phoneMoreSheet):not(.lyricsView), .editorModal")).pop();
+    if (overlay) {
+      // Some shared dialogs only expose an explicit close button, without an Escape handler.
+      const close = overlay.matches("[role='menu']") ? null : overlay.querySelector<HTMLButtonElement>(
+        ".closeModalButton, button[aria-label='close queue']"
+      );
+      if (close) { close.click(); return; }
+      // Start inside the overlay: React handles Escape there, while document/window listeners receive it by bubbling.
+      // Dispatching on window skips both React's root and document's song-menu listener.
+      overlay.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
       return;
     }
     if (!window.dispatchEvent(new Event("localtifyuiback", { cancelable: true }))) return;
