@@ -6,7 +6,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { getAddon } = require("../electron/native/backend.cjs");
-const { tryDotMatrix, tryBatchPairDots, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../electron/native/compute.cjs");
+const { tryDotMatrix, tryClusterFromCenters, tryBatchPairDots, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../electron/native/compute.cjs");
 const { markStandardAudioFilter, tryScanAudioFiles } = require("../electron/native/scanner.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
@@ -19,12 +19,12 @@ assert.equal(tryDotMatrix([new Float64Array([1,2])],[new Float64Array([3,4])]),n
 process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,scanner";
 const native = getAddon("similarity");
 if (!native) throw new Error("Native addon is required for this explicit Rust test");
-for(const name of ["dotMatrix", "pairDots", "centerAudioVectors", "decodeNormalizedAudio", "scanAudioFiles"]) {
+for(const name of ["dotMatrix", "pairDots", "centerAudioVectors", "decodeNormalizedAudio", "clusterFromCenters", "scanAudioFiles"]) {
   assert.equal(typeof native[name], "function", "Missing native export: "+name);
 }
 // Guard against a false-positive parity test caused by a silent JS fallback.
 // Count actual NAPI invocations made inside the production integration paths.
-const nativeCalls = { dotMatrix: 0, pairDots: 0, centerAudioVectors: 0, decodeNormalizedAudio: 0 };
+const nativeCalls = { dotMatrix: 0, pairDots: 0, centerAudioVectors: 0, decodeNormalizedAudio: 0, clusterFromCenters: 0 };
 for (const name of Object.keys(nativeCalls)) {
   const original = native[name];
   native[name] = function (...args) {
@@ -77,7 +77,7 @@ const expectedCenter = referenceCenter(centerFixture);
 for(let i=0;i<actualCenter.length;i++) for(let j=0;j<actualCenter[i].length;j++)
   assert.ok(Math.abs(actualCenter[i][j]-expectedCenter[i][j]) <= 1e-10, 
     "centered audio parity changed at "+i+":"+j);
-assert.deepEqual(native.centerAudioVectors(new Float64Array([1,2,1,2]),2),[0,0,0,0],
+assert.deepEqual(Array.from(native.centerAudioVectors(new Float64Array([1,2,1,2]),2)),[0,0,0,0],
   "constant vectors must center to zero");
 assert.throws(()=>native.centerAudioVectors(new Float64Array([NaN,2]),2),
   /non-finite|Invalid/i, "non-finite vectors must be rejected");
@@ -115,13 +115,13 @@ const largeSongs = Array.from({ length: 600 }, (_, index) => ({
   ...songs[index % songs.length], songId: "large-" + String(index).padStart(4, "0")
 }));
 const largeMixesJs = evaluate("", () => generateMixes(largeSongs, "2026-11-10:large"));
-const beforeLargeMixes = nativeCalls.dotMatrix;
+const beforeLargeMixes = nativeCalls.clusterFromCenters;
 const beforeLargeCenters = nativeCalls.centerAudioVectors;
 const largeMixesRust = evaluate("similarity", () => generateMixes(largeSongs, "2026-11-10:large"));
-assert.ok(nativeCalls.centerAudioVectors > beforeLargeCenters, 
+assert.ok(nativeCalls.centerAudioVectors > beforeLargeCenters,
   "large-library mixes must center audio in native Rust");
-assert.ok(nativeCalls.dotMatrix > beforeLargeMixes,
-  "large-library Daily Mixes must actually invoke native dotMatrix");
+assert.ok(nativeCalls.clusterFromCenters > beforeLargeMixes,
+  "large-library Daily Mixes must actually invoke native full Lloyd clustering");
 assert.deepEqual(largeMixesRust, largeMixesJs, "large-library native clustering changed Daily Mixes");
 
 const dupSongs=Array.from({length:100},(_,i)=>{

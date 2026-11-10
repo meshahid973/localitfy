@@ -1,5 +1,5 @@
 const fs = require("node:fs");
-const { tryDotMatrix, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
+const { tryDotMatrix, tryClusterFromCenters, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
 const { createHash } = require("node:crypto");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { readNormalizedVector } = require("./similarity.cjs");
@@ -63,6 +63,8 @@ function seedCenters(points, count, seed) {
 // least by moving, so one outlier can never become its own mix and every mix has enough candidates.
 function cluster(points, count, minimum, seed) {
   const centers = seedCenters(points, count, seed);
+  const nativeCluster = tryClusterFromCenters(points.map((point) => point.feature), centers, minimum);
+  if (nativeCluster) return nativeCluster;
   let assignment = new Int32Array(points.length).fill(-1); let similarity = [];
   for (let pass = 0; pass < 12; pass++) {
     // Small clusters are faster in JavaScript than packing and crossing NAPI.

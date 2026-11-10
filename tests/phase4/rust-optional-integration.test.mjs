@@ -33,3 +33,15 @@ test("Rust native extension is excluded from Git but included in packaged Electr
  assert.ok(pkg.build.files.includes("electron/**/*"));
  assert.match(read(".gitignore"),/electron\/native\/\*\.node/);
 });
+
+test("native full clustering and typed arrays are the sole new large-workload bridge",()=>{
+ const native = read("native/rust-kernels/src/lib.rs");
+ const mix = read("electron/analysis/daily-mixes.cjs");
+ const kernel = read("electron/native/compute.cjs");
+ assert.match(native,/pub fn cluster_from_centers/);
+ assert.match(native,/Result<Float64Array>/);
+ assert.match(native,/Float64Array::new/);
+ assert.match(mix,/tryClusterFromCenters\(points\.map/);
+ assert.match(kernel,/function tryClusterFromCenters\(/);
+ assert.doesNotMatch(kernel,/function tryPairDots\(/);
+});

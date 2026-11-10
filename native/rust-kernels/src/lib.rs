@@ -2,6 +2,7 @@
 //! Keep predictable summation order so JS/audio ranking remains numerically comparable.
 
 use napi::{Error, Result, Status};
+use napi::bindgen_prelude::Float64Array;
 use napi_derive::napi;
 use std::path::Path;
 
@@ -124,8 +125,8 @@ fn center_audio_inner(vectors: &[f64], dim: usize) -> Result<Vec<f64>> {
 }
 
 #[napi]
-pub fn center_audio_vectors(vectors: &[f64], dimensions: u32) -> Result<Vec<f64>> {
-    center_audio_inner(vectors, dimension(dimensions)?)
+pub fn center_audio_vectors(vectors: &[f64], dimensions: u32) -> Result<Float64Array> {
+    Ok(Float64Array::new(center_audio_inner(vectors, dimension(dimensions)?)?))
 }
 
 
@@ -166,8 +167,101 @@ fn decode_normalized_audio_inner(bytes: &[u8], dim: usize) -> Result<Vec<f64>> {
 }
 
 #[napi]
-pub fn decode_normalized_audio(bytes: &[u8], dimensions: u32) -> Result<Vec<f64>> {
-    decode_normalized_audio_inner(bytes, dimension(dimensions)?)
+pub fn decode_normalized_audio(bytes: &[u8], dimensions: u32) -> Result<Float64Array> {
+    Ok(Float64Array::new(decode_normalized_audio_inner(bytes, dimension(dimensions)?)?))
+}
+
+
+/// Run all Lloyd iterations in one Rust call instead of returning a score matrix
+/// across the Node-API bridge on every pass. The seeded centers are supplied by
+/// JS so its deterministic SHA-256 seed choices and existing mix policy remain.
+#[napi(object)]
+pub struct ClusterResult {
+    pub centers: Vec<f64>,
+    pub assignment: Vec<i32>,
+    pub cohesion: f64,
+}
+
+fn cluster_from_centers_inner(points: &[f64], initial: &[f64], dim: usize, minimum: usize) -> Result<ClusterResult> {
+    if points.is_empty() || initial.is_empty() || points.len() % dim != 0 ||
+       initial.len() % dim != 0 || points.len() > 1_500_000 {
+        return Err(invalid("Invalid clustering matrix shape"));
+    }
+    let rows = points.len() / dim;
+    let groups = initial.len() / dim;
+    if rows > 10_000 || groups > 32 || rows.checked_mul(groups).unwrap_or(usize::MAX) > 2_000_000 ||
+       minimum > rows || !points.iter().chain(initial.iter()).all(|value| value.is_finite()) {
+        return Err(invalid("Invalid clustering size or non-finite feature"));
+    }
+    let mut centers = initial.to_vec();
+    let mut assignments = vec![-1_i32; rows];
+    let mut similarity = vec![];
+    for _pass in 0..12 {
+        similarity = dot_matrix_inner(points, &centers, dim)?;
+        let mut next = vec![0_i32; rows];
+        let mut sizes = vec![0_usize; groups];
+        for i in 0..rows {
+            let mut best = 0;
+            for c in 1..groups {
+                if similarity[i * groups + c] > similarity[i * groups + best] { best = c; }
+            }
+            next[i] = best as i32;
+            sizes[best] += 1;
+        }
+        for c in 0..groups {
+            if sizes[c] >= minimum { continue; }
+            let mut movable: Vec<(f64, usize)> = (0..rows)
+                .filter(|&i| next[i] != c as i32)
+                .map(|i| (similarity[i * groups + next[i] as usize] -
+                           similarity[i * groups + c], i))
+                .collect();
+            movable.sort_by(|a, b|
+                a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.1.cmp(&b.1)));
+            for (_, i) in movable {
+                if sizes[c] >= minimum { break; }
+                let previous = next[i] as usize;
+                if sizes[previous] <= minimum { continue; }
+                sizes[previous] -= 1;
+                next[i] = c as i32;
+                sizes[c] += 1;
+            }
+        }
+        let changed = next.iter().zip(assignments.iter()).any(|(a, b)| a != b);
+        assignments = next;
+        if !changed { break; }
+        for c in 0..groups {
+            let mut mean = vec![0.0_f64; dim];
+            let mut members = 0;
+            for i in 0..rows {
+                if assignments[i] == c as i32 {
+                    members += 1;
+                    let offset = i * dim;
+                    for j in 0..dim { mean[j] += points[offset + j]; }
+                }
+            }
+            if members > 0 && dot(&mean, &mean) > 1e-12 {
+                let norm = dot(&mean, &mean).sqrt();
+                if norm > 1e-9 {
+                    for value in &mut mean { *value /= norm; }
+                } else {
+                    mean.fill(0.0);
+                }
+                centers[c * dim..(c + 1) * dim].copy_from_slice(&mean);
+            }
+        }
+    }
+    let mut cohesion = 0.0;
+    for i in 0..rows { cohesion += similarity[i * groups + assignments[i] as usize]; }
+    if !cohesion.is_finite() || !centers.iter().all(|value| value.is_finite()) {
+        return Err(invalid("Invalid clustering result"));
+    }
+    Ok(ClusterResult { centers, assignment: assignments, cohesion })
+}
+
+#[napi]
+pub fn cluster_from_centers(points: &[f64], initial: &[f64], dimensions: u32, minimum: u32) -> Result<ClusterResult> {
+    cluster_from_centers_inner(points, initial, dimension(dimensions)?, minimum as usize)
 }
 
 #[napi(object)]
@@ -301,6 +395,17 @@ mod tests {
         assert!((decoded[3] - 4.0/second).abs() < 1e-12);
         assert!(decode_normalized_audio_inner(&[0u8; 8], 2).is_err());
         assert!(decode_normalized_audio_inner(&[1u8; 7], 2).is_err());
+    }
+
+    #[test]
+    fn lloyd_clustering_preserves_assignments_and_bounds() {
+        let points = [1.0, 0.0, 0.9, 0.1, -1.0, 0.0, -0.9, -0.1];
+        let centers = [1.0, 0.0, -1.0, 0.0];
+        let result = cluster_from_centers_inner(&points, &centers, 2, 1).unwrap();
+        assert_eq!(result.assignment, vec![0, 0, 1, 1]);
+        assert!(result.cohesion > 3.0);
+        assert!(cluster_from_centers_inner(&points, &centers, 3, 1).is_err());
+        assert!(cluster_from_centers_inner(&points, &centers, 2, 10).is_err());
     }
 
     #[test]

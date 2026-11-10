@@ -51,3 +51,9 @@ Rust NAPI-RS is a native addon built per OS/CPU. All phases are **disabled by de
 - The obsolete `tryPairDots` per-bucket bridge was removed. Only the original JS scalar comparison (small workloads/fallback) and the batched native duplicate comparison remain.
 - Native vector batches are limited to 1.5 million scalar values; validation, partial data and errors fail back to JS. No database schema or playback changes.
 - New benchmarks cover 600-track Float32 decode and vector centering; **do not enable Rust by default unless representative real-world library measurements show sustained improvements**. Renderer logic remains React/TypeScript.
+
+## Full native Lloyd clustering and typed-array interchange
+
+- `clusterFromCenters` now runs all 12 bounded Lloyd passes, minimum group-size corrections, convergence checks, center updates and cohesion computation inside Rust after the established JS k-means++ seed selection. This removes repeated per-pass JS scoring/assignment/sort work on native-enabled, sufficiently large libraries; JS remains the tested fallback for absent binaries and small workloads.
+- `centerAudioVectors` and `decodeNormalizedAudio` return **Float64Array**, not Rust `Vec<f64>` converted into a JavaScript object array. Ordinary JS arrays incurred tens of milliseconds of marshaling for 600×512 vectors; typed arrays are required to make the native path feasible. Electron may still copy the underlying allocation, but avoids per-number JS boxing.
+- Keep the user-data/genre policy, playlist ordering, cache transaction and external IPC in JavaScript: this is deliberate. Removing the JS fallback before every distribution has tested native binaries would introduce startup and playback reliability regressions.

@@ -30,6 +30,47 @@ function tryDotMatrix(rows, columns) {
 }
 
 
+
+/** Full Lloyd iteration kernel: one native call for all passes, with safe JS fallback. */
+function tryClusterFromCenters(points, centers, minimum) {
+  const native = getAddon("similarity");
+  if (!native || typeof native.clusterFromCenters !== "function" ||
+      !Array.isArray(points) || !Array.isArray(centers) ||
+      !points.length || !centers.length || centers.length > 32 ||
+      !Number.isSafeInteger(minimum) || minimum < 0 || minimum > points.length) return null;
+  const dim = points[0]?.length;
+  if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16_384 ||
+      points.length > 10_000 || points.length * dim > 1_500_000 ||
+      points.length * centers.length * dim < 1_000_000 ||
+      points.length * centers.length > 2_000_000 ||
+      points.some((vector) => !vector || vector.length !== dim) ||
+      centers.some((vector) => !vector || vector.length !== dim)) return null;
+  try {
+    const packed = new Float64Array(points.length * dim);
+    const packedCenters = new Float64Array(centers.length * dim);
+    points.forEach((vector, index) => packed.set(vector, index * dim));
+    centers.forEach((vector, index) => packedCenters.set(vector, index * dim));
+    const result = native.clusterFromCenters(packed, packedCenters, dim, minimum);
+    if (!result || !Array.isArray(result.centers) || !Array.isArray(result.assignment) ||
+        result.centers.length !== packedCenters.length ||
+        result.assignment.length !== points.length || !Number.isFinite(result.cohesion) ||
+        result.centers.some((n) => !Number.isFinite(n)) ||
+        result.assignment.some((n) => !Number.isSafeInteger(n) || n < 0 || n >= centers.length)) {
+      throw new Error("Invalid native clustering output");
+    }
+    const flat = new Float64Array(result.centers);
+    return {
+      centers: Array.from({ length: centers.length },
+        (_,index) => flat.subarray(index * dim, (index + 1) * dim)),
+      assignment: Int32Array.from(result.assignment),
+      cohesion: result.cohesion
+    };
+  } catch (error) {
+    warnOnce("similarity", error);
+    return null;
+  }
+}
+
 /** Process entire libraries in one Rust call; do not cross NAPI per track. */
 function tryCenterAudioProfiles(vectors) {
   const native = getAddon("similarity");
@@ -43,9 +84,9 @@ function tryCenterAudioProfiles(vectors) {
     const packed = new Float64Array(vectors.length * dim);
     vectors.forEach((row, index) => packed.set(row, index * dim));
     const result = native.centerAudioVectors(packed, dim);
-    if (!Array.isArray(result) || result.length !== packed.length ||
+    if (!(result instanceof Float64Array) || result.length !== packed.length ||
         result.some((value) => !Number.isFinite(value))) throw new Error("Invalid centered vector output");
-    const normalized = new Float64Array(result);
+    const normalized = result;
     const centered = Array.from({ length: vectors.length },
       (_, index) => normalized.subarray(index * dim, (index + 1) * dim));
     // Guard against an incompatible binary without repeating full JS work.
@@ -75,9 +116,9 @@ function tryDecodeNormalizedAudio(buffers, dimensions) {
   try {
     const packed = Buffer.concat(buffers);
     const output = native.decodeNormalizedAudio(packed, dimensions);
-    if (!Array.isArray(output) || output.length !== buffers.length * dimensions ||
+    if (!(output instanceof Float64Array) || output.length !== buffers.length * dimensions ||
         output.some((value) => !Number.isFinite(value))) throw new Error("Invalid decoded audio batch");
-    const values = new Float64Array(output);
+    const values = output;
     const vectors = Array.from({ length: buffers.length },
       (_, index) => values.subarray(index * dimensions, (index + 1) * dimensions));
     // Check a few rows; the full JS reference is checked in native parity tests.
@@ -162,4 +203,4 @@ function tryBatchPairDots(buckets, vectors) {
     return null;
   }
 }
-module.exports = { tryDotMatrix, tryCenterAudioProfiles, tryDecodeNormalizedAudio, tryBatchPairDots };
+module.exports = { tryDotMatrix, tryClusterFromCenters, tryCenterAudioProfiles, tryDecodeNormalizedAudio, tryBatchPairDots };
