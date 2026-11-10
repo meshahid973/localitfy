@@ -1,5 +1,6 @@
 import { Disc3, Heart, ListEnd, Pencil, Play, Plus, Radio, SkipForward, Tags, ThumbsDown, Trash2, UserRound, UserX } from "lucide-react";
 import { Cover } from "../../covers/Cover";
+import { ContextMenuLayer } from "../../../shared/ui/ContextMenuLayer";
 import { prettyMeta, prettyTitle } from "../../search";
 import { splitArtistCredits } from "../../artists/artistCredits";
 import { hasArtistMark, type NotForMeKind, type NotForMeMarks } from "../../analysis/notForMe";
@@ -50,14 +51,7 @@ export default function SongContextMenu({
   const leadArtist = song.artist?.trim() ? artistNames[0] : "";
 
   return (
-    <div className="songContextMenuLayer" onClick={onClose}>
-      <div
-        className="songContextMenu"
-        style={{ left: state.x, top: state.y }}
-        role="menu"
-        aria-label="song actions"
-        onClick={(event) => event.stopPropagation()}
-      >
+    <ContextMenuLayer anchor={state} identity={state.songId} label="song actions" onClose={onClose}>
         <div className="songContextMenuHead">
           <Cover song={song} className="songContextMenuCover" />
           <span>
@@ -120,7 +114,6 @@ export default function SongContextMenu({
         <button className="dangerMenuItem" type="button" role="menuitem" onClick={() => { onClose(); askRemoveSong(song.id); }}>
           <span className="songContextMenuIcon"><Trash2 size={13} strokeWidth={3} /></span> remove from library
         </button>
-      </div>
-    </div>
+    </ContextMenuLayer>
   );
 }
