@@ -18,13 +18,13 @@
 .similarSongsEyebrow { margin: 0; color: var(--lt-accent, #8dffce); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
 .similarSongsSeedTitle { margin: 0; font-size: 13px; overflow-wrap: anywhere; opacity: .75; }
 .similarSongsIntro { margin: 22px 0; line-height: 1.6; font-size: 14px; opacity: .8; }
-.similarSongsClose, .similarSongsIconButton { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; color: inherit; border: 0; border-radius: 9px; background: var(--lt-surface-soft); cursor: pointer; flex-shrink: 0; }
+.similarSongsClose, .similarSongsIconButton { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; color: inherit; border: 0; border-radius: 9px; background: color-mix(in srgb, var(--lt-text) 6%, transparent); cursor: pointer; flex-shrink: 0; }
 .similarSongsClose { align-self: flex-start; }
-.similarSongsAction { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--lt-border); border-radius: 9px; padding: 9px 12px; color: inherit; background: var(--lt-surface-soft); font: inherit; font-size: 12px; cursor: pointer; }
+.similarSongsAction { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--lt-border); border-radius: 9px; padding: 9px 12px; color: inherit; background: color-mix(in srgb, var(--lt-text) 6%, transparent); font: inherit; font-size: 12px; cursor: pointer; }
 .similarSongsPrimary { background: var(--lt-accent); color: var(--accent-contrast, #06100b); border-color: transparent; }
 .similarSongsAction:hover, .similarSongsIconButton:hover, .similarSongsClose:hover { filter: brightness(1.18); }
 .similarSongsDialog button:focus-visible { outline: 2px solid var(--lt-accent, #8dffce); outline-offset: 3px; }
-.similarSongsNotice { padding: 20px; background: var(--lt-surface-soft); border-radius: 12px; line-height: 1.6; }
+.similarSongsNotice { padding: 20px; background: color-mix(in srgb, var(--lt-text) 6%, transparent); border-radius: 12px; line-height: 1.6; }
 .similarSongsToolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
 .similarSongsToolbar > span { font-size: 12px; opacity: .7; }
 .similarSongsToolbar > div { display: flex; gap: 8px; flex-wrap: wrap; }

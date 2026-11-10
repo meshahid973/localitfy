@@ -34,7 +34,7 @@
   margin-bottom: 5px;
   padding: 7px;
   border-radius: 14px;
-  background: var(--lt-surface-soft);
+  background: color-mix(in srgb, var(--lt-text) 7%, transparent);
 }
 
 .songContextMenuCover{
@@ -90,9 +90,9 @@
   background: rgba(var(--accent-rgb), 0.12);
 }
 
-.songContextMenu button:focus-visible{
-  outline: 2px solid var(--lt-accent);
-  outline-offset: -2px;
+.app .songContextMenuLayer .songContextMenu button:focus-visible{
+  outline: 2px solid var(--lt-accent) !important;
+  outline-offset: -2px !important;
 }
 
 .songContextMenu button:disabled{
@@ -124,11 +124,11 @@
 }
 
 .songContextMenu button.dangerMenuItem{
-  color: rgba(255, 210, 218, 0.92);
+  color: var(--lt-danger);
 }
 
 .songContextMenu button.dangerMenuItem:hover{
-  background: rgba(255, 78, 108, 0.13);
+  background: color-mix(in srgb, var(--lt-danger) 13%, transparent);
 }
 
 .songContextMenu button.dangerMenuItem .songContextMenuIcon{

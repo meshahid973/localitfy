@@ -72,7 +72,7 @@
 }
 .arcDropdownOptionLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .arcDropdownOption > svg { flex: none; color: var(--lt-accent, #b767b4); }
-.arcDropdownOption:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: -2px; }
+.arcDropdownOption:focus-visible { outline: 2px solid var(--lt-accent) !important; outline-offset: -2px !important; }
 .arcDropdownOption:disabled { opacity: .4; cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   .arcDropdownTrigger, .arcDropdownChevron { transition: none; }

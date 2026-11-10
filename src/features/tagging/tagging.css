@@ -232,7 +232,7 @@
   padding: 0;
   border: 0;
   border-radius: 9px;
-  background: var(--lt-surface-soft);
+  background: color-mix(in srgb, var(--lt-text) 6%, transparent);
   color: inherit;
   cursor: pointer;
 }
@@ -259,7 +259,7 @@
   padding: 9px 11px;
   border: 1px solid var(--lt-border);
   border-radius: 9px;
-  background: var(--lt-surface-soft);
+  background: color-mix(in srgb, var(--lt-text) 6%, transparent);
   color: inherit;
   font: inherit;
   font-size: 14px;
@@ -273,7 +273,7 @@
   padding: 9px 13px;
   border: 1px solid var(--lt-border);
   border-radius: 9px;
-  background: var(--lt-surface-soft);
+  background: color-mix(in srgb, var(--lt-text) 6%, transparent);
   color: inherit;
   font: inherit;
   font-size: 13px;
@@ -326,7 +326,7 @@
 }
 
 .tagSearchResults button:not(:disabled):hover {
-  background: var(--lt-surface-soft);
+  background: color-mix(in srgb, var(--lt-text) 6%, transparent);
 }
 
 .tagSearchResultText {

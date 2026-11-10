@@ -86,7 +86,7 @@
 }
 
 .queuePanelRow:hover{
-  background: var(--lt-surface-soft);
+  background: color-mix(in srgb, var(--lt-text) 7%, transparent);
 }
 
 .queuePanelRow.isCurrent{
@@ -120,9 +120,9 @@
   cursor: default;
 }
 
-.queuePanelRowMain:focus-visible{
-  outline: 2px solid var(--lt-accent);
-  outline-offset: -2px;
+.app .queuePanel button.queuePanelRowMain:focus-visible{
+  outline: 2px solid var(--lt-accent) !important;
+  outline-offset: -2px !important;
   border-radius: 9px;
 }
 
@@ -196,7 +196,7 @@
 .queuePanelTextButton:hover,
 .queuePanelTextButton:focus-visible{
   color: var(--lt-text);
-  background: var(--lt-surface-raised);
+  background: color-mix(in srgb, var(--lt-text) 8%, transparent);
 }
 
 .queuePanelMore{
