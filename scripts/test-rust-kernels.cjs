@@ -164,7 +164,6 @@ const sizes=new Map(dupSongs.map(s=>[s.id,5000000]));
 const a=evaluate("",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:sizes}));
 const b=evaluate("duplicates",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:sizes}));
 assert.deepEqual(b,a,"duplicate grouping/recommendation changed");
-// The obsolete per-bucket JS/native bridge was removed; only batched pair calls remain.
 
 const isAudioFile=(name)=>/\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(name);
 markStandardAudioFilter(isAudioFile);

@@ -1,7 +1,6 @@
 "use strict";
 
-// Both helpers return null on any unavailable/invalid native result.
-// Callers MUST keep the original JS calculation as their fallback.
+// Rejected native results return null; callers retain the JavaScript calculation.
 const { enabled, getAddon, warnOnce } = require("./backend.cjs");
 
 function tryDotMatrix(rows, columns) {
@@ -90,9 +89,8 @@ function tryCenterAudioProfiles(vectors) {
     vectors.forEach((row, index) => packed.set(row, index * dim));
     native.centerAudioVectorsInPlace(packed, dim);
     if (packed.some((value) => !Number.isFinite(value))) throw new Error("Invalid centered vector output");
-    const normalized = packed;
     const centered = Array.from({ length: vectors.length },
-      (_, index) => normalized.subarray(index * dim, (index + 1) * dim));
+      (_, index) => packed.subarray(index * dim, (index + 1) * dim));
     // Guard against an incompatible binary without repeating full JS work.
     for (const index of new Set([0, Math.floor(vectors.length / 2), vectors.length - 1])) {
       let square = 0;
