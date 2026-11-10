@@ -52,9 +52,9 @@ import {
   enrichDownloadResultsWithLibraryMatches,
   friendlyDownloadError,
   makeQueuedDownloads,
-  parseDownloadUrls,
-  useDownloadsRuntime
-} from "./features/downloads/useDownloadsRuntime";
+  parseDownloadUrls
+} from "./features/downloads/downloadProcessing";
+import { useDownloadsRuntime } from "./features/downloads/useDownloadsRuntime";
 import { getDownloadPageState } from "./features/downloads/downloadState";
 import { downloadAudioOptions, downloadStatusLabel, spotifyTrackStatusLabel } from "./features/downloads/download.selectors";
 import "./App.css";

@@ -6,5 +6,6 @@ export * from "./theme.constants";
 export * from "./theme.utils";
 export * from "./theme.visuals";
 export * from "./customTheme";
+export * from "./themePresetStyle";
 
 export { useSettingsController } from "./useSettingsController";
