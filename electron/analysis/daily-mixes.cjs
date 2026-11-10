@@ -63,7 +63,11 @@ function cluster(points, count, minimum, seed) {
   const centers = seedCenters(points, count, seed);
   let assignment = new Int32Array(points.length).fill(-1); let similarity = [];
   for (let pass = 0; pass < 12; pass++) {
-    const nativeScores = tryDotMatrix(points.map((point) => point.feature), centers);
+    // Small clusters are faster in JavaScript than packing and crossing NAPI.
+    // Let larger libraries amortize the native vector-matrix allocation.
+    const nativeWork = points.length * centers.length * (points[0]?.feature.length || 0);
+    const nativeScores = nativeWork >= 1_000_000
+      ? tryDotMatrix(points.map((point) => point.feature), centers) : null;
     similarity = points.map((point, index) => centers.map((center, centerIndex) =>
       nativeScores ? nativeScores[index * centers.length + centerIndex] : dot(point.feature, center)));
     const next = new Int32Array(points.length); const sizes = new Array(centers.length).fill(0);

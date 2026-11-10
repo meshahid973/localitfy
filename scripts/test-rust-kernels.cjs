@@ -45,6 +45,12 @@ function evaluate(mode,fn) {
 const mixesJs = evaluate("",()=>generateMixes(songs,"2026-11-10:0"));
 const mixesRust = evaluate("similarity",()=>generateMixes(songs,"2026-11-10:0"));
 assert.deepEqual(mixesRust,mixesJs,"Daily Mixes outputs changed");
+const largeSongs = Array.from({ length: 600 }, (_, index) => ({
+  ...songs[index % songs.length], songId: "large-" + String(index).padStart(4, "0")
+}));
+const largeMixesJs = evaluate("", () => generateMixes(largeSongs, "2026-11-10:large"));
+const largeMixesRust = evaluate("similarity", () => generateMixes(largeSongs, "2026-11-10:large"));
+assert.deepEqual(largeMixesRust, largeMixesJs, "large-library native clustering changed Daily Mixes");
 
 const dupSongs=Array.from({length:100},(_,i)=>{
   const k=Math.floor(i/2);

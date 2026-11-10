@@ -31,6 +31,9 @@ const tracks = trackVectors.map((vector,i)=>({
   songId: "track-"+String(i).padStart(4,"0"), artist:"artist-"+(i%37),genre:i%2?"indie; rock":"electronic; ambient",
   filePath:"/music/track-"+i+".mp3",vector,liked:i%13===0,playCount:i%9
 }));
+const bigTracks = Array.from({ length: 600 }, (_, index) => ({
+  ...tracks[index % tracks.length], songId: "large-" + String(index).padStart(4,"0")
+}));
 const dupSongs = Array.from({length:600},(_,i)=>({
   id:"id-"+i,title:"song "+Math.floor(i/2),artist:"artist "+(Math.floor(i/2)%17),album:"album "+(Math.floor(i/2)%8),
   duration:190,filePath:path.join(os.tmpdir(),"localtify-bench",String(i%2),"song "+Math.floor(i/2)+".mp3"),
@@ -63,6 +66,7 @@ async function run() {
         return score;
       }],
       ["daily mixes / 240 tracks",()=>generateMixes(tracks,"fixed-seed")],
+      ["daily mixes / 600 tracks",()=>generateMixes(bigTracks,"fixed-large-seed")],
       ["duplicates / 600 entries",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:dupSizes})],
       ["duplicates / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes})],
       ["scanner / 180 entries",()=>listAudioFiles(tmp,isAudioFile)]
