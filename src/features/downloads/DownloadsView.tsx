@@ -252,12 +252,16 @@ export default function DownloadsView(props: DownloadsViewProps) {
                               const coverUrl = track.coverUrl || track.spotifyCoverUrl || track.albumCoverUrl;
 
                               return (
-                                <button
+                                <div
                                   key={track.id}
                                   className={`spotifyTrackItem spotifyTrackItemV326${selected ? " selected" : ""}${failed ? " failed" : ""}${done ? " done" : ""}`}
-                                  type="button"
-                                  disabled={spotifyDownloadBusy}
-                                  onClick={() => {
+                                >
+                                  <button
+                                    type="button"
+                                    className="spotifyTrackSelect"
+                                    aria-pressed={selected}
+                                    disabled={spotifyDownloadBusy}
+                                    onClick={() => {
                                     setSpotifySelectedIds((prev) => {
                                       const next = new Set(prev);
                                       if (next.has(track.id)) next.delete(track.id);
@@ -283,28 +287,16 @@ export default function DownloadsView(props: DownloadsViewProps) {
                                     {track.downloadMessage ? <small>{track.downloadMessage}</small> : null}
                                     {track.downloadError ? <small className="spotifyTrackError">{track.downloadError}</small> : null}
                                   </div>
-                                  <span className="spotifyTrackCheck" aria-hidden="true">{selected ? <CheckMiniIcon /> : null}</span>
+                                    <span className="spotifyTrackCheck" aria-hidden="true">{selected ? <CheckMiniIcon /> : null}</span>
+                                  </button>
                                   {failed ? (
-                                    <span
-                                      className="spotifyRetryButton"
-                                      role="button"
-                                      tabIndex={0}
-                                      onClick={(event) => {
-                                        event.stopPropagation();
-                                        void retrySpotifyTrack?.(track);
-                                      }}
-                                      onKeyDown={(event) => {
-                                        if (event.key === "Enter" || event.key === " ") {
-                                          event.preventDefault();
-                                          event.stopPropagation();
-                                          void retrySpotifyTrack?.(track);
-                                        }
-                                      }}
-                                    >
+                                    <button type="button" className="spotifyRetryButton"
+                                      disabled={spotifyDownloadBusy || !retrySpotifyTrack}
+                                      onClick={() => void retrySpotifyTrack?.(track)}>
                                       retry
-                                    </span>
+                                    </button>
                                   ) : null}
-                                </button>
+                                </div>
                               );
                             })}
                           </div>

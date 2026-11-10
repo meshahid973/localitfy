@@ -70,10 +70,19 @@
 .downloadsLayoutV031 .spotifySelectActions,.downloadsLayoutV031 .downloadResultsHeadV502 > div { display: flex; gap: 8px; flex-wrap: wrap; }
 .downloadsLayoutV031 .spotifyTrackItems,.downloadsLayoutV031 .downloadQueueList { min-width: 0; max-height: 490px; overflow-y: auto; display: grid; align-content: start; gap: 8px; scrollbar-width: thin; }
 .downloadsLayoutV031 .spotifyTrackItem {
-  min-width: 0; width: 100%; display: grid; grid-template-columns: 54px minmax(0,1fr) 24px;
-  align-items: center; gap: 12px; padding: 10px 12px; text-align: left;
+  min-width: 0; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: 8px; padding: 10px 12px; text-align: left;
   border: 1px solid var(--downloads-edge); border-radius: 9px;
-  color: var(--downloads-text); background: var(--downloads-raised); font: inherit; cursor: pointer;
+  color: var(--downloads-text); background: var(--downloads-raised); font: inherit;
+}
+.downloadsLayoutV031 .spotifyTrackSelect {
+  min-width: 0; width: 100%; min-height: 54px; display: grid; grid-template-columns: 54px minmax(0, 1fr) 24px;
+  align-items: center; gap: 12px; padding: 0; border: 0; border-radius: 7px;
+  color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer;
+}
+.downloadsLayoutV031 .spotifyTrackSelect:disabled { cursor: default; opacity: .65; }
+.app .downloadsLayoutV031 :is(.spotifyTrackSelect, .spotifyRetryButton):focus-visible {
+  outline: 2px solid var(--downloads-accent) !important; outline-offset: 2px !important;
 }
 .downloadsLayoutV031 .spotifyTrackItem:hover { background: color-mix(in oklab,var(--downloads-accent) 9%,var(--downloads-raised)); }
 .downloadsLayoutV031 .spotifyTrackItem.selected { border-color: rgba(var(--lt-accent-rgb,121,167,196),.43); }
@@ -85,7 +94,14 @@
 .downloadsLayoutV031 .spotifyTrackMeta small { color: var(--downloads-muted); font-size: 11px; }
 .downloadsLayoutV031 .spotifySourceBadge,.downloadsLayoutV031 .spotifyTrackStatus { color: var(--downloads-muted); font-size: 10px; }
 .downloadsLayoutV031 .spotifyTrackCheck { display: grid; place-items: center; width: 21px; height: 21px; border: 1px solid var(--downloads-edge); border-radius: 6px; color: var(--downloads-accent); }
-.downloadsLayoutV031 .spotifyRetryButton { padding: 6px; color: #e7b3b5; font-size: 11px; }
+.downloadsLayoutV031 .spotifyRetryButton {
+  flex: none; align-self: center; padding: 7px 10px; border: 1px solid var(--downloads-edge); border-radius: 8px;
+  background: transparent; color: var(--lt-danger); font: inherit; font-size: 11px; cursor: pointer;
+}
+.downloadsLayoutV031 .spotifyRetryButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--lt-danger) 12%, transparent);
+}
+.downloadsLayoutV031 .spotifyRetryButton:disabled { opacity: .55; cursor: default; }
 .downloadsLayoutV031 .downloadQueuePanel > .panelHead { padding-bottom: 12px; margin: 0; }
 .downloadsLayoutV031 .downloadQueuePanel > .panelHead h3 { font-size: 18px; }
 .downloadsLayoutV031 .downloadQueueHeaderActions > span { font-size: 11px; color: var(--downloads-muted); }
@@ -159,7 +175,7 @@
 }
 @media (max-width: 780px) {
   .downloadsLayoutV031 { padding: 16px 14px 95px; }
-  .downloadsLayoutV031 .spotifyTrackItem { grid-template-columns: 42px minmax(0,1fr) 22px; gap: 8px; }
+  .downloadsLayoutV031 .spotifyTrackSelect { grid-template-columns: 42px minmax(0, 1fr) 22px; gap: 8px; min-height: 42px; }
   .downloadsLayoutV031 .spotifyTrackArt,.downloadsLayoutV031 .spotifyTrackArt img { width: 42px; height: 42px; }
   .downloadsLayoutV031 .converterBox { grid-template-columns: 1fr; }
   .downloadsLayoutV031 .downloadResult { grid-template-columns: 25px minmax(0,1fr); }
