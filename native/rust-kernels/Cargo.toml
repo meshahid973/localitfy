@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 napi = { version = "3.16.1", features = ["napi4"] }
-napi-derive = "3.16.1"
+napi-derive = "3.7.0"
 
 [build-dependencies]
 napi-build = "2.6.0"
