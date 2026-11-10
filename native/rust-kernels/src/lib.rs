@@ -89,7 +89,9 @@ pub fn pair_dots(vectors: &[f64], left: &[u32], right: &[u32], dimensions: u32) 
 /// Mirrors listening-signals.cjs libraryMean/centered: row-order mean
 /// accumulation, scalar square summation and the same 1e-9 zero threshold.
 /// The caller retains JS as the opt-out/failure fallback.
-fn center_audio_inner(vectors: &[f64], dim: usize) -> Result<Vec<f64>> {
+// In-place centering avoids allocating a second multi-megabyte matrix.
+// The Node bridge passes a fresh, private Float64Array and never shares it.
+fn center_audio_in_place(vectors: &mut [f64], dim: usize) -> Result<()> {
     if vectors.is_empty() || vectors.len() % dim != 0 || vectors.len() > 1_500_000 {
         return Err(invalid("Invalid centered audio matrix size"));
     }
@@ -99,87 +101,78 @@ fn center_audio_inner(vectors: &[f64], dim: usize) -> Result<Vec<f64>> {
     }
     let mut mean = vec![0.0; dim];
     for row in vectors.chunks_exact(dim) {
-        for i in 0..dim {
-            mean[i] += row[i] / rows as f64;
-        }
+        for i in 0..dim { mean[i] += row[i] / rows as f64; }
     }
-    let mut centered = Vec::with_capacity(vectors.len());
-    for row in vectors.chunks_exact(dim) {
-        let offset = centered.len();
-        let mut magnitude = 0.0;
+    for row in vectors.chunks_exact_mut(dim) {
+        let mut magnitude = 0.0_f64;
         for i in 0..dim {
-            let value = row[i] - mean[i];
-            centered.push(value);
-            magnitude += value * value;
+            row[i] -= mean[i];
+            magnitude += row[i] * row[i];
         }
         let norm = magnitude.sqrt();
         if norm > 1e-9 {
-            for value in &mut centered[offset..] {
-                *value /= norm;
-            }
+            for value in row { *value /= norm; }
         } else {
-            centered[offset..].fill(0.0);
+            row.fill(0.0);
         }
     }
-    Ok(centered)
+    Ok(())
+}
+
+#[cfg(test)]
+fn center_audio_inner(values: &[f64], dim: usize) -> Result<Vec<f64>> {
+    let mut output = values.to_vec();
+    center_audio_in_place(&mut output, dim)?;
+    Ok(output)
 }
 
 #[napi]
 pub fn center_audio_vectors_in_place(mut vectors: Float64Array, dimensions: u32) -> Result<()> {
-    let result = center_audio_inner(&vectors, dimension(dimensions)?)?;
-    // This synchronous call receives a fresh, unshared typed array allocated
-    // by our trusted Node bridge. No JS or Rust alias accesses it while borrowed.
-    unsafe { vectors.as_mut() }.copy_from_slice(&result);
-    Ok(())
+    // The Node bridge owns a newly allocated typed array. This synchronous call
+    // has exclusive access until returning to JavaScript, satisfying NAPI-RS.
+    center_audio_in_place(unsafe { vectors.as_mut() }, dimension(dimensions)?)
 }
 
-
-/// Decode and normalize contiguous little-endian Float32 CLAP vectors.
-/// Mirrors Buffer.readFloatLE + scalar Float64 norm in readNormalizedVector().
-/// A malformed vector rejects the entire batch, so JS can skip only that row.
-fn decode_normalized_audio_inner(bytes: &[u8], dim: usize) -> Result<Vec<f64>> {
+/// Decode contiguous little-endian Float32 CLAP profiles into a *fresh* JS-owned
+/// Float64Array in-place, without creating or copying a Rust return vector.
+fn decode_normalized_audio_into_inner(bytes: &[u8], output: &mut [f64], dim: usize) -> Result<()> {
     let stride = dim.checked_mul(4).ok_or_else(|| invalid("Invalid audio decoder dimensions"))?;
-    if bytes.is_empty() || bytes.len() % stride != 0 || bytes.len() / 4 > 1_500_000 {
+    if bytes.is_empty() || bytes.len() % stride != 0 || bytes.len() / 4 > 1_500_000 ||
+       output.len() != bytes.len() / 4 {
         return Err(invalid("Invalid audio decoder byte length"));
     }
     let count = bytes.len() / stride;
-    if count > 10_000 {
-        return Err(invalid("Audio decoder batch too large"));
-    }
-    let mut result = Vec::with_capacity(count * dim);
-    for row in bytes.chunks_exact(stride) {
-        let offset = result.len();
+    if count > 10_000 { return Err(invalid("Audio decoder batch too large")); }
+    for (row_index, row) in bytes.chunks_exact(stride).enumerate() {
+        let dest = &mut output[row_index * dim..(row_index + 1) * dim];
         let mut square = 0.0_f64;
-        for index in 0..dim {
+        for (index, target) in dest.iter_mut().enumerate() {
             let i = index * 4;
-            let value = f32::from_le_bytes([row[i], row[i + 1], row[i + 2], row[i + 3]]) as f64;
-            if !value.is_finite() {
-                return Err(invalid("Non-finite audio profile value"));
-            }
-            result.push(value);
+            let value = f32::from_le_bytes([row[i], row[i+1], row[i+2], row[i+3]]) as f64;
+            if !value.is_finite() { return Err(invalid("Non-finite audio profile value")); }
+            *target = value;
             square += value * value;
         }
         let norm = square.sqrt();
         if !norm.is_finite() || norm <= 0.0 {
             return Err(invalid("Zero or invalid audio vector norm"));
         }
-        for value in &mut result[offset..] {
-            *value /= norm;
-        }
+        for value in dest { *value /= norm; }
     }
+    Ok(())
+}
+
+#[cfg(test)]
+fn decode_normalized_audio_inner(bytes: &[u8], dim: usize) -> Result<Vec<f64>> {
+    let mut result = vec![0.0; bytes.len() / 4];
+    decode_normalized_audio_into_inner(bytes, &mut result, dim)?;
     Ok(result)
 }
 
 #[napi]
 pub fn decode_normalized_audio_into(bytes: &[u8], mut output: Float64Array, dimensions: u32) -> Result<()> {
-    let result = decode_normalized_audio_inner(bytes, dimension(dimensions)?)?;
-    if output.len() != result.len() {
-        return Err(invalid("Incorrect decode destination size"));
-    }
-    // The Node bridge creates this destination immediately before this
-    // synchronous native call and never shares it with any other thread.
-    unsafe { output.as_mut() }.copy_from_slice(&result);
-    Ok(())
+    // Both arguments are fresh local allocations in a synchronous native call.
+    decode_normalized_audio_into_inner(bytes, unsafe { output.as_mut() }, dimension(dimensions)?)
 }
 
 

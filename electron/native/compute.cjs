@@ -75,10 +75,10 @@ function tryClusterFromCenters(points, centers, minimum) {
 function tryCenterAudioProfiles(vectors) {
   const native = getAddon("similarity");
   if (!native || typeof native.centerAudioVectorsInPlace !== "function" ||
-      !Array.isArray(vectors) || vectors.length < 512 || vectors.length > 10_000) return null;
+      !Array.isArray(vectors) || vectors.length < 1024 || vectors.length > 10_000) return null;
   const dim = vectors[0]?.length;
   if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16_384 ||
-      vectors.length * dim < 262_144 || vectors.length * dim > 1_500_000 ||
+      vectors.length * dim < 524_288 || vectors.length * dim > 1_500_000 ||
       vectors.some((row) => !row || row.length !== dim)) return null;
   try {
     const packed = new Float64Array(vectors.length * dim);

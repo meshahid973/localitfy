@@ -66,7 +66,7 @@ const referenceCenter = (rows) => {
     return values;
   });
 };
-const centerFixture = Array.from({length:600}, (_,index)=>vectors[index % vectors.length]);
+const centerFixture = Array.from({length:1200}, (_,index)=>vectors[index % vectors.length]);
 assert.equal(evaluate("",()=>tryCenterAudioProfiles(centerFixture)),null,
   "centered audio must fall back with Rust disabled");
 const beforeNativeCenter = nativeCalls.centerAudioVectorsInPlace;
@@ -120,8 +120,8 @@ const largeMixesJs = evaluate("", () => generateMixes(largeSongs, "2026-11-10:la
 const beforeLargeMixes = nativeCalls.clusterFromCenters;
 const beforeLargeCenters = nativeCalls.centerAudioVectorsInPlace;
 const largeMixesRust = evaluate("similarity", () => generateMixes(largeSongs, "2026-11-10:large"));
-assert.ok(nativeCalls.centerAudioVectorsInPlace > beforeLargeCenters,
-  "large-library mixes must center audio in native Rust");
+assert.equal(nativeCalls.centerAudioVectorsInPlace, beforeLargeCenters,
+  "600-track mixes should retain the faster JS centering path");
 assert.ok(nativeCalls.clusterFromCenters > beforeLargeMixes,
   "large-library Daily Mixes must actually invoke native full Lloyd clustering");
 assert.deepEqual(largeMixesRust, largeMixesJs, "large-library native clustering changed Daily Mixes");
