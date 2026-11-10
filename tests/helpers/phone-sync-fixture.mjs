@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -24,6 +25,23 @@ export function receiptDatabase(file = ":memory:") {
 
 export function receiptRepository(database) {
   return { applyBatch: (...args) => receipts.applyPhoneSyncBatch(database, ...args) };
+}
+
+/**
+ * A fresh connection per request, like the phone's native client. fetch's keep-alive pool (Node 22) would reuse a
+ * socket to the server the test just restarted and fail instead of reconnecting.
+ */
+function send({ url, method = "GET", headers = {}, body }) {
+  return new Promise((resolve, reject) => {
+    const request = http.request(url, { method, headers, agent: false }, (response) => {
+      let text = "";
+      response.setEncoding("utf8");
+      response.on("data", (chunk) => { text += chunk; });
+      response.on("end", () => resolve({ status: response.statusCode, body: text }));
+    });
+    request.on("error", reject);
+    request.end(body);
+  });
 }
 
 function compile(file, dependencies = {}) {
@@ -92,12 +110,11 @@ export async function syncFixture() {
     downloadFile: async () => ({}), deleteFile: async () => ({}),
     request: async (request) => {
       await hooks.beforeRequest?.(request);
-      const response = await fetch(request.url, { method: request.method, headers: request.headers, body: request.body });
-      const result = { status: response.status, body: await response.text() };
+      const result = await send(request);
       await hooks.afterResponse?.(request, result);
       if (request.url.endsWith("/v1/changes")) {
         const body = JSON.parse(request.body);
-        requests.push({ body, status: response.status });
+        requests.push({ body, status: result.status });
         await hooks.afterChanges?.(body, result);
       }
       return result;
