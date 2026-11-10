@@ -64,7 +64,7 @@ if (compare) {
   process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,scanner,centering,pcm";
   const addon = getAddon("similarity");
   if (!addon) throw new Error("Native benchmark requires a built Rust addon");
-  for (const name of ["dotMatrix", "clusterFromCenters", "pairDots", "decodeNormalizedAudioInto", "centerAudioVectorsInPlace", "pcmSumSquares"]) {
+  for (const name of ["dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "centerAudioVectorsInPlace", "pcmSumSquares"]) {
     const original = addon[name];
     if (typeof original !== "function") throw new Error("Missing Rust export: " + name);
     nativeCalls.set(name, 0);
@@ -111,10 +111,19 @@ async function run() {
         const mean=libraryMean(input);
         return input.map((vector)=>centered(vector,mean));
       },["centerAudioVectorsInPlace"]],
+      ["similarity typed output / 240x12x512",()=>{
+        const seeds=trackVectors.slice(0,12);
+        const scores=tryDotMatrix(trackVectors,seeds);
+        if (scores) return scores.reduce((sum,n)=>sum+n,0);
+        let score=0;
+        for(const row of trackVectors)for(const seed of seeds)score+=dot(row,seed);
+        return score;
+      },["dotMatrixInto"]],
       ["daily mixes / 240 tracks",()=>generateMixes(tracks,"fixed-seed"),[]],
       ["daily mixes / 600 tracks",()=>generateMixes(bigTracks,"fixed-large-seed"),["clusterFromCenters"]],
       ["duplicates / 600 entries",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:dupSizes}),[]],
       ["duplicates / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDots"]],
+      ["duplicates typed output / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDotsInto"]],
       ["scanner / 180 entries",async()=>{
         if (!process.env.LOCALTIFY_RUST_PHASES) return listAudioFiles(tmp,isAudioFile);
         const nativeFiles = await tryScanAudioFiles(tmp,isAudioFile,50_000);
@@ -128,7 +137,8 @@ async function run() {
       const js=await benchmark(fn);
       if(compare) {
         process.env.LOCALTIFY_RUST_PHASES=name.includes("audio centering /")
-          ? "similarity,duplicates,scanner,centering,pcm" : "similarity,duplicates,scanner,pcm";
+          ? "similarity,duplicates,scanner,centering,pcm" :
+            name.includes("typed output") ? "similarity,duplicates,scanner,bridge,pcm" : "similarity,duplicates,scanner,pcm";
         const before = new Map(nativeCalls);
         const rust=await benchmark(fn);
         const invoked = requiredNames?.some(key => key === "scanner" || nativeCalls.get(key) > before.get(key));

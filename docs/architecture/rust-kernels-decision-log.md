@@ -77,3 +77,10 @@ Rust NAPI-RS is a native addon built per OS/CPU. All phases are **disabled by de
 - MusicBrainz release matching now filters out impossible (<0.6) track pairs before sorting, preserving the existing threshold and stable tie-break order.
 - Similarity indexing for very large libraries, fingerprinting, renderer search migration and analytics Rust rewrites remain out of scope until real workloads demonstrate that JS/worker or existing native dependencies are the bottleneck.
 
+## Experimental typed score-output bridge and non-Rust optimizations
+
+- `bridge` is an additional, disabled-by-default gate. When combined with `similarity` or `duplicates`, the existing full-batch scores can be written to fresh JS-owned Float64Arrays. No changes to ranking decisions or user data.
+- Benchmark the `bridge` variant against the legacy Vec-to-JS-array return; do not enable it in production unless the measured end-to-end performance is better. The Rust implementation currently still allocates a temporary Vec, so further tuning may be necessary.
+- Library relinking now evaluates each original file's existence once per operation instead of twice; it remains read-only and preserves ambiguity and truncation controls.
+- Frontend search keeps its cached incremental JS index. A redundant token prefix check was removed without changing matching semantics. Analytics remain in the existing background worker.
+
