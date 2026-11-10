@@ -25,7 +25,7 @@ test("menus use measured dimensions and handle narrow windows rather than stale 
   assert.deepEqual(pos({ x: 300, y: 300 }, { width: 180, height: 150 }, { width: 360, height: 280 }), { left: 168, top: 118 });
   assert.deepEqual(pos({ x: 200, y: 200 }, { width: 250, height: 150 }, { width: 240, height: 180 }), { left: 12, top: 18 });
   const shared = read("src/shared/ui/ContextMenuLayer.tsx");
-  assert.match(shared, /getBoundingClientRect\(\)/);
+  assert.match(shared, /menu\.offsetWidth, height: menu\.offsetHeight/);
   assert.match(shared, /window\.innerWidth, height: window\.innerHeight/);
   assert.match(shared, /window\.addEventListener\("resize", placeMenu\)/);
 });

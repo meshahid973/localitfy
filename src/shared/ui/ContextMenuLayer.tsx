@@ -26,10 +26,10 @@ export function ContextMenuLayer({
   const placeMenu = useCallback(() => {
     const menu = menuRef.current;
     if (!menu || x === undefined || y === undefined) return;
-    const bounds = menu.getBoundingClientRect();
+    // Animation scales the painted box; offset dimensions are its final layout size.
     const { left, top } = clampContextMenuPosition(
       { x, y },
-      { width: bounds.width, height: bounds.height },
+      { width: menu.offsetWidth, height: menu.offsetHeight },
       { width: window.innerWidth, height: window.innerHeight }
     );
     menu.style.left = `${left}px`;
@@ -83,6 +83,7 @@ export function ContextMenuLayer({
     event.preventDefault();
     const current = enabled.indexOf(document.activeElement as HTMLButtonElement);
     const next = event.key === "Home" ? 0 : event.key === "End" ? enabled.length - 1
+      : current < 0 ? (event.key === "ArrowDown" ? 0 : enabled.length - 1)
       : (current + (event.key === "ArrowDown" ? 1 : -1) + enabled.length) % enabled.length;
     enabled[next].focus({ preventScroll: true });
   };
