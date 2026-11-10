@@ -167,7 +167,7 @@
   max-height: min(780px, calc(100dvh - 48px));
   padding: 0;
   overflow: auto;
-  border: 1px solid rgba(163, 193, 198, .25);
+  border: 1px solid var(--lt-border);
   border-radius: 22px;
   background: linear-gradient(var(--lt-surface, #111c22), var(--lt-surface, #111c22)), var(--lt-bg, #111c22);
   color: var(--lt-text, #edf5f4);
@@ -232,7 +232,7 @@
   padding: 0;
   border: 0;
   border-radius: 9px;
-  background: rgba(255, 255, 255, .06);
+  background: var(--lt-surface-soft);
   color: inherit;
   cursor: pointer;
 }
@@ -257,9 +257,9 @@
 .tagSearchForm input {
   min-width: 0;
   padding: 9px 11px;
-  border: 1px solid rgba(163, 193, 198, .25);
+  border: 1px solid var(--lt-border);
   border-radius: 9px;
-  background: rgba(255, 255, 255, .04);
+  background: var(--lt-surface-soft);
   color: inherit;
   font: inherit;
   font-size: 14px;
@@ -271,9 +271,9 @@
   justify-content: center;
   gap: 7px;
   padding: 9px 13px;
-  border: 1px solid rgba(163, 193, 198, .25);
+  border: 1px solid var(--lt-border);
   border-radius: 9px;
-  background: rgba(255, 255, 255, .04);
+  background: var(--lt-surface-soft);
   color: inherit;
   font: inherit;
   font-size: 13px;
@@ -283,7 +283,7 @@
 .tagSearchButton.primary {
   border-color: transparent;
   background: var(--lt-accent, #8dffce);
-  color: #071611;
+  color: var(--accent-contrast, #06100b);
 }
 
 .tagSearchButton:disabled,
@@ -317,7 +317,7 @@
   width: 100%;
   padding: 10px 8px;
   border: 0;
-  border-top: 1px solid rgba(163, 193, 198, .12);
+  border-top: 1px solid var(--lt-border);
   background: none;
   color: inherit;
   font: inherit;
@@ -326,7 +326,7 @@
 }
 
 .tagSearchResults button:not(:disabled):hover {
-  background: rgba(255, 255, 255, .04);
+  background: var(--lt-surface-soft);
 }
 
 .tagSearchResultText {
@@ -466,7 +466,7 @@
   align-items: center;
   gap: 12px;
   padding: 8px;
-  border-top: 1px solid rgba(163, 193, 198, .12);
+  border-top: 1px solid var(--lt-border);
   cursor: pointer;
 }
 

@@ -141,3 +141,34 @@ test("soft-corner preference outranks late shell defaults", () => {
   assert.doesNotMatch(shell, /(?:^|\n)\[data-corners="soft"\]\s*\{/);
 });
 
+
+test("overlay menus use Localtify theme surfaces and expose keyboard focus", () => {
+  const dropdown = read("src/shared/ui/ArcDropdownMenu.css");
+  const context = read("src/features/library/components/song-context-menu.css");
+  const queue = read("src/features/player/components/queue-panel.css");
+
+  assert.match(dropdown, /\.arcDropdownOption:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\)/);
+  assert.match(context, /\.songContextMenu\{[\s\S]*?background: linear-gradient\(var\(--lt-surface\), var\(--lt-surface\)\), var\(--lt-bg\)/);
+  assert.match(context, /\.songContextMenu button:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\)/);
+  assert.match(context, /color: var\(--accent-contrast, #06100b\)/);
+  assert.match(queue, /\.queuePanel\{[\s\S]*?background: linear-gradient\(var\(--lt-surface\), var\(--lt-surface\)\), var\(--lt-bg\)/);
+  assert.match(queue, /\.queuePanelRowMain:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\)/);
+  assert.doesNotMatch(context, /background: linear-gradient\(180deg, rgba\(20, 20, 20/);
+  assert.doesNotMatch(queue, /background: linear-gradient\(180deg, rgba\(20, 20, 24/);
+});
+
+test("Discover, similar tracks and tagging respect the active accent and UI border tokens", () => {
+  const discover = read("src/features/discover/discover.css");
+  const similar = read("src/features/analysis/similar-songs.css");
+  const tagging = read("src/features/tagging/tagging.css");
+
+  assert.match(discover, /\.discoverPick\.active\s*\{[^}]*color: var\(--accent-contrast, #06100b\)/);
+  assert.match(discover, /\.discoverPage :is\(\.discoverKey input, \.discoverLink, \.discoverName, \.discoverPick\):focus-visible\s*\{/);
+  assert.match(similar, /\.similarSongsRow\[data-current="true"\]\s*\{\s*background: rgba\(var\(--lt-accent-rgb\), \.08\)/);
+  assert.match(similar, /\.similarSongsHeader h2\s*\{[^}]*overflow-wrap: anywhere/);
+  assert.match(similar, /\.similarSongsPrimary\s*\{[^}]*color: var\(--accent-contrast, #06100b\)/);
+  assert.match(tagging, /\.tagSearchButton\.primary\s*\{[^}]*color: var\(--accent-contrast, #06100b\)/);
+  assert.match(tagging, /\.tagSearchForm input\s*\{[^}]*border: 1px solid var\(--lt-border\)/);
+  assert.doesNotMatch(similar, /rgba\(141, 255, 206|rgba\(163, 193, 198/);
+  assert.doesNotMatch(tagging, /rgba\(163, 193, 198/);
+});
