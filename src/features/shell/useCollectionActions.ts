@@ -6,8 +6,6 @@ import { playableIds, type AppActions } from "./appActions";
 import type { ShellCollectionsContract } from "./appShell.contract";
 import type { NavigationHistory } from "./useNavigationHistory";
 
-const MENU_WIDTH = 236, MENU_HEIGHT = 380, MENU_MARGIN = 12;
-
 /** The app actions every page shares, plus the state of the collection right-click menu. */
 export function useCollectionActions(nav: NavigationHistory, collections: ShellCollectionsContract,
   openSongMenu: (event: ReactMouseEvent<HTMLElement>, song: Song) => unknown) {
@@ -29,8 +27,8 @@ export function useCollectionActions(nav: NavigationHistory, collections: ShellC
       event.stopPropagation();
       setCollectionMenu({
         target,
-        x: Math.min(event.clientX, Math.max(MENU_MARGIN, window.innerWidth - MENU_WIDTH - MENU_MARGIN)),
-        y: Math.min(event.clientY, Math.max(MENU_MARGIN, window.innerHeight - MENU_HEIGHT - MENU_MARGIN))
+        x: event.clientX,
+        y: event.clientY
       });
     },
     openSongMenu

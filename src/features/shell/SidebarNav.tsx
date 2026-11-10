@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { ArrowDown, ArrowUp, EyeOff, SlidersHorizontal } from "lucide-react";
 import { navItems } from "./navigation.constants";
+import { ContextMenuLayer } from "../../shared/ui/ContextMenuLayer";
 import { canMoveSidebarItem, moveSidebarItem, resolveSidebarGroups, sidebarGroupForView, toggleSidebarItemHidden } from "./sidebarLayout";
 import type { SidebarNavOrder } from "./sidebarLayout";
 import type { View } from "./view.types";
@@ -20,31 +21,14 @@ export type SidebarNavProps = {
 
 type SidebarMenuState = { view: View; x: number; y: number };
 
-const MENU_WIDTH = 220;
-const MENU_HEIGHT = 190;
-
 export default function SidebarNav({ view, changeView, sidebarNavOrder, sidebarHiddenNav, updateSidebarLayout, openSidebarSettings }: SidebarNavProps) {
   const [menu, setMenu] = useState<SidebarMenuState | null>(null);
   const groups = resolveSidebarGroups(sidebarNavOrder, sidebarHiddenNav).filter((group) => group.visibleItems.length);
 
-  useEffect(() => {
-    if (!menu) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenu(null);
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [menu]);
-
   function openMenu(event: ReactMouseEvent<HTMLElement>, itemId: View) {
     if (!sidebarGroupForView(itemId)) return;
     event.preventDefault();
-    const margin = 12;
-    setMenu({
-      view: itemId,
-      x: Math.min(event.clientX, window.innerWidth - MENU_WIDTH - margin),
-      y: Math.min(event.clientY, window.innerHeight - MENU_HEIGHT - margin)
-    });
+    setMenu({ view: itemId, x: event.clientX, y: event.clientY });
   }
 
   function move(itemId: View, delta: -1 | 1) {
@@ -102,14 +86,8 @@ export default function SidebarNav({ view, changeView, sidebarNavOrder, sidebarH
       </div>
 
       {menu && menuItem ? (
-        <div className="songContextMenuLayer" onClick={() => setMenu(null)} onContextMenu={(event) => { event.preventDefault(); setMenu(null); }}>
-          <div
-            className="songContextMenu sidebarContextMenu"
-            style={{ left: menu.x, top: menu.y }}
-            role="menu"
-            aria-label={`${menuItem.label} tab options`}
-            onClick={(event) => event.stopPropagation()}
-          >
+        <ContextMenuLayer anchor={menu} identity={menu.view} className="sidebarContextMenu"
+          label={`${menuItem.label} tab options`} onClose={() => setMenu(null)}>
             <button type="button" role="menuitem" disabled={!canMoveSidebarItem(sidebarNavOrder, sidebarHiddenNav, menu.view, -1)} onClick={() => move(menu.view, -1)}>
               <span className="songContextMenuIcon"><ArrowUp size={13} strokeWidth={3} /></span> move up
             </button>
@@ -126,8 +104,7 @@ export default function SidebarNav({ view, changeView, sidebarNavOrder, sidebarH
             <button type="button" role="menuitem" onClick={() => { setMenu(null); openSidebarSettings(); }}>
               <span className="songContextMenuIcon"><SlidersHorizontal size={13} strokeWidth={3} /></span> customize sidebar
             </button>
-          </div>
-        </div>
+        </ContextMenuLayer>
       ) : null}
     </>
   );

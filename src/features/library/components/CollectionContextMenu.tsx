@@ -1,7 +1,6 @@
-import { useEffect } from "react";
-import { createPortal } from "react-dom";
 import { Disc3, ListEnd, ListMusic, ListPlus, Pencil, Play, Radio, Shuffle, Tags, UserRound } from "lucide-react";
 import { Cover } from "../../covers/Cover";
+import { ContextMenuLayer } from "../../../shared/ui/ContextMenuLayer";
 import { prettyMeta, prettyTitle } from "../../search/search.utils";
 import { splitArtistCredits } from "../../artists/artistCredits";
 import { playableIds, type CollectionTarget, type PlayCollectionOptions } from "../../shell/appActions";
@@ -31,20 +30,6 @@ export type CollectionContextMenuProps = {
 
 /** Right-click menu for an album, artist, genre, playlist or mix; the same look and layer as the song menu. */
 export default function CollectionContextMenu({ state, onClose, open, play, queue, goToArtist, findSimilar, editAlbum, findAlbumOnMusicBrainz, completeAlbum }: CollectionContextMenuProps) {
-  const isOpen = Boolean(state);
-  useEffect(() => {
-    if (!isOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
-    window.addEventListener("resize", onClose);
-    window.addEventListener("scroll", onClose, true);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      window.removeEventListener("resize", onClose);
-      window.removeEventListener("scroll", onClose, true);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [isOpen, onClose]);
-
   if (!state) return null;
   const { target } = state;
   const { album } = target;
@@ -53,10 +38,9 @@ export default function CollectionContextMenu({ state, onClose, open, play, queu
   const editable = album && (album as { source?: string }).source === "manual" ? editAlbum : undefined;
   const run = (action: () => unknown) => () => { onClose(); void action(); };
 
-  // Rendered into the app root: pages are transformed containers, so a fixed menu inside one would not open at the cursor.
-  return createPortal(
-    <div className="songContextMenuLayer" onClick={onClose} onContextMenu={(event) => { event.preventDefault(); onClose(); }}>
-      <div className="songContextMenu" style={{ left: state.x, top: state.y }} role="menu" aria-label={`${target.kind} actions`} onClick={(event) => event.stopPropagation()}>
+  return (
+    <ContextMenuLayer anchor={state} identity={`${target.kind}:${target.id}`}
+      label={`${target.kind} actions`} onClose={onClose}>
         <div className="songContextMenuHead">
           <Cover song={target.coverSong} className="songContextMenuCover" />
           <span>
@@ -97,8 +81,6 @@ export default function CollectionContextMenu({ state, onClose, open, play, queu
           onClick={run(() => findAlbumOnMusicBrainz(album))}>
           <span className="songContextMenuIcon"><Tags size={13} strokeWidth={3} /></span> find on musicbrainz
         </button> : null}
-      </div>
-    </div>,
-    document.querySelector(".app") || document.body
+    </ContextMenuLayer>
   );
 }
