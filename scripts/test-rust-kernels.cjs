@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const { spawnSync } = require("node:child_process");
 const { getAddon } = require("../electron/native/backend.cjs");
 const { tryDotMatrix, tryPairDots, tryBatchPairDots } = require("../electron/native/compute.cjs");
 const { markStandardAudioFilter } = require("../electron/native/scanner.cjs");
@@ -100,7 +101,16 @@ async function main(){
    assert.ok(broadFiles.some((file)=>file.endsWith("third.txt")),
      "a custom filter accepting extra extensions must never lose files");
  } finally {fs.rmSync(folder,{recursive:true,force:true});}
+ const subprocess = spawnSync(process.execPath, ["scripts/verify-rust-worker-exit.cjs"], {
+   cwd: path.resolve(__dirname, ".."),
+   encoding: "utf8",
+   timeout: 7_000,
+   env: { ...process.env, LOCALTIFY_RUST_PHASES: "scanner" }
+ });
+ assert.equal(subprocess.status, 0,
+   "native scanner kept a Node process alive or crashed: " + (subprocess.stderr || subprocess.error || subprocess.stdout));
+ assert.match(subprocess.stdout, /\[rust-worker-exit\] Native scanner answered/);
  process.env.LOCALTIFY_RUST_PHASES="";
- console.log("[rust-parity] Native similarity, Daily Mixes, duplicate pairs/groups and bounded scans match JS");
+ console.log("[rust-parity] Native similarity, Daily Mixes, duplicate pairs/groups, bounded scans and process exit match JS");
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

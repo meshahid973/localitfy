@@ -41,7 +41,6 @@ function ensureWorker() {
   if (worker) return worker;
   try {
     const next = new Worker(path.join(__dirname, "scanner-worker.cjs"));
-    next.unref(); // Must never keep Localtify or a Node test process alive.
     next.on("message", (message) => {
       const job = pending.get(message?.id);
       if (!job) return;
@@ -65,6 +64,9 @@ function ensureWorker() {
     next.on("exit", (code) => {
       if (worker === next) stopWorker(new Error("Native scanner worker exited: " + code));
     });
+    // Attaching message listeners can re-ref the MessagePort on Node/Electron.
+    // Unref LAST: an idle native worker must never prevent application exit.
+    next.unref();
     worker = next;
     return next;
   } catch (error) {
