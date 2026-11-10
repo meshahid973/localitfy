@@ -74,19 +74,18 @@ function tryClusterFromCenters(points, centers, minimum) {
 /** Process entire libraries in one Rust call; do not cross NAPI per track. */
 function tryCenterAudioProfiles(vectors) {
   const native = getAddon("similarity");
-  if (!native || typeof native.centerAudioVectors !== "function" ||
-      !Array.isArray(vectors) || vectors.length < 192 || vectors.length > 10_000) return null;
+  if (!native || typeof native.centerAudioVectorsInPlace !== "function" ||
+      !Array.isArray(vectors) || vectors.length < 512 || vectors.length > 10_000) return null;
   const dim = vectors[0]?.length;
   if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16_384 ||
-      vectors.length * dim < 98_304 || vectors.length * dim > 1_500_000 ||
+      vectors.length * dim < 262_144 || vectors.length * dim > 1_500_000 ||
       vectors.some((row) => !row || row.length !== dim)) return null;
   try {
     const packed = new Float64Array(vectors.length * dim);
     vectors.forEach((row, index) => packed.set(row, index * dim));
-    const result = native.centerAudioVectors(packed, dim);
-    if (!(result instanceof Float64Array) || result.length !== packed.length ||
-        result.some((value) => !Number.isFinite(value))) throw new Error("Invalid centered vector output");
-    const normalized = result;
+    native.centerAudioVectorsInPlace(packed, dim);
+    if (packed.some((value) => !Number.isFinite(value))) throw new Error("Invalid centered vector output");
+    const normalized = packed;
     const centered = Array.from({ length: vectors.length },
       (_, index) => normalized.subarray(index * dim, (index + 1) * dim));
     // Guard against an incompatible binary without repeating full JS work.
@@ -108,17 +107,18 @@ function tryCenterAudioProfiles(vectors) {
 /** Batch CLAP Float32 decode/normalize; never incur a native call per audio record. */
 function tryDecodeNormalizedAudio(buffers, dimensions) {
   const native = getAddon("similarity");
-  if (!native || typeof native.decodeNormalizedAudio !== "function" ||
+  if (!native || typeof native.decodeNormalizedAudioInto !== "function" ||
       !Array.isArray(buffers) || buffers.length < 192 || buffers.length > 10_000 ||
       !Number.isSafeInteger(dimensions) || dimensions < 1 || dimensions > 16_384 ||
       buffers.length * dimensions > 1_500_000 ||
       buffers.some((buffer) => !Buffer.isBuffer(buffer) || buffer.length !== dimensions * 4)) return null;
   try {
     const packed = Buffer.concat(buffers);
-    const output = native.decodeNormalizedAudio(packed, dimensions);
-    if (!(output instanceof Float64Array) || output.length !== buffers.length * dimensions ||
-        output.some((value) => !Number.isFinite(value))) throw new Error("Invalid decoded audio batch");
-    const values = output;
+    // Native fills a fresh JS-owned destination synchronously; avoid the
+    // large Electron typed-array allocation/copy at the return boundary.
+    const values = new Float64Array(buffers.length * dimensions);
+    native.decodeNormalizedAudioInto(packed, values, dimensions);
+    if (values.some((value) => !Number.isFinite(value))) throw new Error("Invalid decoded audio batch");
     const vectors = Array.from({ length: buffers.length },
       (_, index) => values.subarray(index * dimensions, (index + 1) * dimensions));
     // Check a few rows; the full JS reference is checked in native parity tests.

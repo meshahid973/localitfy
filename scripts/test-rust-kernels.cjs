@@ -19,12 +19,12 @@ assert.equal(tryDotMatrix([new Float64Array([1,2])],[new Float64Array([3,4])]),n
 process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,scanner";
 const native = getAddon("similarity");
 if (!native) throw new Error("Native addon is required for this explicit Rust test");
-for(const name of ["dotMatrix", "pairDots", "centerAudioVectors", "decodeNormalizedAudio", "clusterFromCenters", "scanAudioFiles"]) {
+for(const name of ["dotMatrix", "pairDots", "centerAudioVectorsInPlace", "decodeNormalizedAudioInto", "clusterFromCenters", "scanAudioFiles"]) {
   assert.equal(typeof native[name], "function", "Missing native export: "+name);
 }
 // Guard against a false-positive parity test caused by a silent JS fallback.
 // Count actual NAPI invocations made inside the production integration paths.
-const nativeCalls = { dotMatrix: 0, pairDots: 0, centerAudioVectors: 0, decodeNormalizedAudio: 0, clusterFromCenters: 0 };
+const nativeCalls = { dotMatrix: 0, pairDots: 0, centerAudioVectorsInPlace: 0, decodeNormalizedAudioInto: 0, clusterFromCenters: 0 };
 for (const name of Object.keys(nativeCalls)) {
   const original = native[name];
   native[name] = function (...args) {
@@ -66,20 +66,22 @@ const referenceCenter = (rows) => {
     return values;
   });
 };
-const centerFixture = Array.from({length:240}, (_,index)=>vectors[index % vectors.length]);
+const centerFixture = Array.from({length:600}, (_,index)=>vectors[index % vectors.length]);
 assert.equal(evaluate("",()=>tryCenterAudioProfiles(centerFixture)),null,
   "centered audio must fall back with Rust disabled");
-const beforeNativeCenter = nativeCalls.centerAudioVectors;
+const beforeNativeCenter = nativeCalls.centerAudioVectorsInPlace;
 const actualCenter = evaluate("similarity",()=>tryCenterAudioProfiles(centerFixture));
-assert.ok(nativeCalls.centerAudioVectors > beforeNativeCenter && actualCenter?.length === centerFixture.length,
+assert.ok(nativeCalls.centerAudioVectorsInPlace > beforeNativeCenter && actualCenter?.length === centerFixture.length,
   "large audio center operation must invoke native Rust");
 const expectedCenter = referenceCenter(centerFixture);
 for(let i=0;i<actualCenter.length;i++) for(let j=0;j<actualCenter[i].length;j++)
   assert.ok(Math.abs(actualCenter[i][j]-expectedCenter[i][j]) <= 1e-10, 
     "centered audio parity changed at "+i+":"+j);
-assert.deepEqual(Array.from(native.centerAudioVectors(new Float64Array([1,2,1,2]),2)),[0,0,0,0],
+const zeroCentered = new Float64Array([1,2,1,2]);
+native.centerAudioVectorsInPlace(zeroCentered,2);
+assert.deepEqual(Array.from(zeroCentered),[0,0,0,0],
   "constant vectors must center to zero");
-assert.throws(()=>native.centerAudioVectors(new Float64Array([NaN,2]),2),
+assert.throws(()=>native.centerAudioVectorsInPlace(new Float64Array([NaN,2]),2),
   /non-finite|Invalid/i, "non-finite vectors must be rejected");
 
 const rawBuffers=Array.from({length:240},(_,i)=>{
@@ -97,9 +99,9 @@ const baselineDecoded=rawBuffers.map((buffer)=>{
 });
 assert.equal(evaluate("",()=>tryDecodeNormalizedAudio(rawBuffers,512)),null,
   "bulk CLAP decoder must be disabled when Rust is off");
-const beforeNativeDecoder = nativeCalls.decodeNormalizedAudio;
+const beforeNativeDecoder = nativeCalls.decodeNormalizedAudioInto;
 const decoded=evaluate("similarity",()=>tryDecodeNormalizedAudio(rawBuffers,512));
-assert.ok(nativeCalls.decodeNormalizedAudio > beforeNativeDecoder && decoded?.length === 240,
+assert.ok(nativeCalls.decodeNormalizedAudioInto > beforeNativeDecoder && decoded?.length === 240,
   "bulk CLAP decoder must use native Rust");
 for(let i=0;i<decoded.length;i++)for(let j=0;j<512;j++)
   assert.ok(Math.abs(decoded[i][j]-baselineDecoded[i][j])<1e-12,
@@ -116,9 +118,9 @@ const largeSongs = Array.from({ length: 600 }, (_, index) => ({
 }));
 const largeMixesJs = evaluate("", () => generateMixes(largeSongs, "2026-11-10:large"));
 const beforeLargeMixes = nativeCalls.clusterFromCenters;
-const beforeLargeCenters = nativeCalls.centerAudioVectors;
+const beforeLargeCenters = nativeCalls.centerAudioVectorsInPlace;
 const largeMixesRust = evaluate("similarity", () => generateMixes(largeSongs, "2026-11-10:large"));
-assert.ok(nativeCalls.centerAudioVectors > beforeLargeCenters,
+assert.ok(nativeCalls.centerAudioVectorsInPlace > beforeLargeCenters,
   "large-library mixes must center audio in native Rust");
 assert.ok(nativeCalls.clusterFromCenters > beforeLargeMixes,
   "large-library Daily Mixes must actually invoke native full Lloyd clustering");

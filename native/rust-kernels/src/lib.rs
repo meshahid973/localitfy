@@ -125,8 +125,12 @@ fn center_audio_inner(vectors: &[f64], dim: usize) -> Result<Vec<f64>> {
 }
 
 #[napi]
-pub fn center_audio_vectors(vectors: &[f64], dimensions: u32) -> Result<Float64Array> {
-    Ok(Float64Array::new(center_audio_inner(vectors, dimension(dimensions)?)?))
+pub fn center_audio_vectors_in_place(mut vectors: Float64Array, dimensions: u32) -> Result<()> {
+    let result = center_audio_inner(&vectors, dimension(dimensions)?)?;
+    // This synchronous call receives a fresh, unshared typed array allocated
+    // by our trusted Node bridge. No JS or Rust alias accesses it while borrowed.
+    unsafe { vectors.as_mut() }.copy_from_slice(&result);
+    Ok(())
 }
 
 
@@ -167,8 +171,15 @@ fn decode_normalized_audio_inner(bytes: &[u8], dim: usize) -> Result<Vec<f64>> {
 }
 
 #[napi]
-pub fn decode_normalized_audio(bytes: &[u8], dimensions: u32) -> Result<Float64Array> {
-    Ok(Float64Array::new(decode_normalized_audio_inner(bytes, dimension(dimensions)?)?))
+pub fn decode_normalized_audio_into(bytes: &[u8], mut output: Float64Array, dimensions: u32) -> Result<()> {
+    let result = decode_normalized_audio_inner(bytes, dimension(dimensions)?)?;
+    if output.len() != result.len() {
+        return Err(invalid("Incorrect decode destination size"));
+    }
+    // The Node bridge creates this destination immediately before this
+    // synchronous native call and never shares it with any other thread.
+    unsafe { output.as_mut() }.copy_from_slice(&result);
+    Ok(())
 }
 
 

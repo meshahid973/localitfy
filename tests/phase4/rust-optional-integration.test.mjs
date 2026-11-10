@@ -39,8 +39,10 @@ test("native full clustering and typed arrays are the sole new large-workload br
  const mix = read("electron/analysis/daily-mixes.cjs");
  const kernel = read("electron/native/compute.cjs");
  assert.match(native,/pub fn cluster_from_centers/);
- assert.match(native,/Result<Float64Array>/);
- assert.match(native,/Float64Array::new/);
+ assert.match(native,/center_audio_vectors_in_place/);
+ assert.match(native,/decode_normalized_audio_into/);
+ assert.match(native,/unsafe \{ vectors\.as_mut\(\) \}/);
+ assert.match(native,/unsafe \{ output\.as_mut\(\) \}/);
  assert.match(mix,/tryClusterFromCenters\(points\.map/);
  assert.match(kernel,/function tryClusterFromCenters\(/);
  assert.doesNotMatch(kernel,/function tryPairDots\(/);
