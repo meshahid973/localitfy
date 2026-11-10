@@ -2131,12 +2131,6 @@ function MainModeApp() {
     }
   });
 
-  // Kept intentionally disabled: this preview was calculated every render but is not currently rendered.
-  // Re-enable it only when the queue preview UI actually uses this value.
-  const queuePreviewSongs = useMemo(() => [] as Song[], []);
-  void queuePreviewSongs;
-
-
   const discordPreview = useMemo(() => buildDiscordPreview({
     settings,
     song: currentSong,

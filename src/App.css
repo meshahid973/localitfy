@@ -2110,18 +2110,6 @@ html{
   background-image: none !important;
 }
 
-.editorModal,
-.deleteModal,
-.whatsNewCard {
-  transform-origin: center;
-  contain: layout paint style;
-}
-
-.songRow {
-  transition-timing-function: var(--motion-smooth);
-}
-
-
 .hero,
 .editorModal,
 .deleteModal,
