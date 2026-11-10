@@ -7,7 +7,7 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { getAddon } = require("../electron/native/backend.cjs");
 const { tryDotMatrix, tryPairDots, tryBatchPairDots } = require("../electron/native/compute.cjs");
-const { markStandardAudioFilter } = require("../electron/native/scanner.cjs");
+const { markStandardAudioFilter, tryScanAudioFiles } = require("../electron/native/scanner.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
 const { listAudioFiles } = require("../electron/library-watch.cjs");
@@ -90,6 +90,16 @@ async function main(){
      "album/temp.part",".private/secret.mp3","localitfy-bin/private.mp3","spotify-covers/private.mp3"])
      fs.writeFileSync(path.join(folder,entry),"test");
    const pathsJs=await evaluate("",()=>listAudioFiles(folder,isAudioFile));
+   const nativeFiles=await evaluate("scanner",()=>tryScanAudioFiles(folder,isAudioFile,50));
+   assert.ok(nativeFiles !== null, "a marked standard filter must exercise the native scanner");
+   const [nativeConcurrent1, nativeConcurrent2]=await Promise.all([
+     evaluate("scanner",()=>tryScanAudioFiles(folder,isAudioFile,50)),
+     evaluate("scanner",()=>tryScanAudioFiles(folder,isAudioFile,50))
+   ]);
+   assert.deepEqual(nativeConcurrent1?.slice().sort(), nativeFiles.slice().sort(),
+     "concurrent native scan #1 returned mismatched files");
+   assert.deepEqual(nativeConcurrent2?.slice().sort(), nativeFiles.slice().sort(),
+     "concurrent native scan #2 returned mismatched files");
    const pathsRust=await evaluate("scanner",()=>listAudioFiles(folder,isAudioFile));
    assert.deepEqual(pathsRust.slice().sort(),pathsJs.slice().sort(),"scanner misses or adds files");
    assert.equal(pathsRust.length,2);

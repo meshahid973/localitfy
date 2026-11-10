@@ -6,13 +6,15 @@ const os = require("node:os");
 const path = require("node:path");
 const assert = require("node:assert/strict");
 const { listAudioFiles } = require("../electron/library-watch.cjs");
-const { markStandardAudioFilter } = require("../electron/native/scanner.cjs");
+const { markStandardAudioFilter, tryScanAudioFiles } = require("../electron/native/scanner.cjs");
 
 const isAudioFile = markStandardAudioFilter((file) => /\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(file));
 async function main() {
   const folder = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-rust-worker-exit-"));
   try {
     fs.writeFileSync(path.join(folder, "one.mp3"), "test");
+    const nativeFound = await tryScanAudioFiles(folder, isAudioFile, 100);
+    assert.ok(nativeFound !== null, "scanner child must actually execute native code");
     const found = await listAudioFiles(folder, isAudioFile);
     assert.equal(found.length, 1);
     assert.ok(found[0].endsWith("one.mp3"));
