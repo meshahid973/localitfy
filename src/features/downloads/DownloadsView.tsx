@@ -1,52 +1,57 @@
 import "./downloads.css";
+import type { Dispatch, SetStateAction } from "react";
+import type { DownloadQueueItem, DownloadResult, SpotifyTrack } from "./download.types";
+import type { DownloadsTab } from "./useDownloadsRuntime";
+import type { Settings, SettingsCategory } from "../settings/settings.types";
+import type { View } from "../shell/view.types";
 import { CheckMiniIcon, ResultStatusIcon } from "../../shared/ui/LocaltifyViewUi";
 import { clamp } from "../../shared/utils/format";
 import { PageHeader } from "../../shared/ui/PageHeader";
 
 export type DownloadsViewProps = {
-  cancelCurrentDownload: any;
-  changeView: any;
-  clearFailedDownloads: any;
-  clearFinishedDownloads: any;
-  convertBusy: any;
-  convertLocalMedia: any;
-  convertMessage: any;
-  convertProgress: any;
-  copyDownloadError: any;
-  downloadAudioLinks: any;
-  downloadBusy: any;
-  downloadSpotifyTracks: any;
-  downloadStatusLabel: any;
-  downloadText: any;
-  downloadsTab: any;
-  failedDownloadQueueItems: any;
-  fetchSpotifyTracks: any;
-  finishedDownloadQueueItems: any;
-  handleSpotifyLogin: any;
-  handleSpotifyLogout: any;
-  openDownloadedSongInLibrary: any;
-  retryDownload: any;
-  retryFailedDownloads: any;
-  retrySpotifyTrack: any;
-  setDownloadText: any;
-  setDownloadsTab: any;
-  setSettingsCategory: any;
-  setSpotifyFetchError: any;
-  setSpotifySelectedIds: any;
-  setSpotifyTracks: any;
-  setSpotifyUrl: any;
-  settings: any;
-  spotifyDownloadBusy: any;
-  spotifyFetchBusy: any;
-  spotifyFetchError: any;
-  spotifyLoggedIn: any;
-  spotifyLoginBusy: any;
-  spotifySelectedIds: any;
-  spotifyTrackStatusLabel: any;
-  spotifyTracks: any;
-  spotifyUrl: any;
-  visibleDownloadQueueItems: any;
-  visibleDownloadResults: any;
+  cancelCurrentDownload: () => unknown;
+  changeView: (view: View, source?: "nav" | "onboarding" | "settings" | "unknown") => unknown;
+  clearFailedDownloads: () => unknown;
+  clearFinishedDownloads: () => unknown;
+  convertBusy: boolean;
+  convertLocalMedia: () => unknown;
+  convertMessage: string;
+  convertProgress: number;
+  copyDownloadError: (message?: string) => unknown;
+  downloadAudioLinks: (overrideText?: string) => unknown;
+  downloadBusy: boolean;
+  downloadSpotifyTracks: (tracks?: SpotifyTrack[]) => unknown;
+  downloadStatusLabel: (status: string) => string;
+  downloadText: string;
+  downloadsTab: DownloadsTab;
+  failedDownloadQueueItems: DownloadQueueItem[];
+  fetchSpotifyTracks: () => unknown;
+  finishedDownloadQueueItems: DownloadQueueItem[];
+  handleSpotifyLogin: () => unknown;
+  handleSpotifyLogout: () => unknown;
+  openDownloadedSongInLibrary: (item: DownloadResult | DownloadQueueItem) => unknown;
+  retryDownload: (url: string, source: "youtube" | "spotify" | "auto", spotifyTrackId?: string) => unknown;
+  retryFailedDownloads: () => unknown;
+  retrySpotifyTrack: (track: SpotifyTrack) => unknown;
+  setDownloadText: Dispatch<SetStateAction<string>>;
+  setDownloadsTab: Dispatch<SetStateAction<DownloadsTab>>;
+  setSettingsCategory: Dispatch<SetStateAction<SettingsCategory>>;
+  setSpotifyFetchError: Dispatch<SetStateAction<string>>;
+  setSpotifySelectedIds: Dispatch<SetStateAction<Set<string>>>;
+  setSpotifyTracks: Dispatch<SetStateAction<SpotifyTrack[]>>;
+  setSpotifyUrl: Dispatch<SetStateAction<string>>;
+  settings: Settings;
+  spotifyDownloadBusy: boolean;
+  spotifyFetchBusy: boolean;
+  spotifyFetchError: string;
+  spotifyLoggedIn: boolean;
+  spotifyLoginBusy: boolean;
+  spotifySelectedIds: Set<string>;
+  spotifyTrackStatusLabel: (track: SpotifyTrack, selected: boolean) => string;
+  spotifyTracks: SpotifyTrack[];
+  spotifyUrl: string;
+  visibleDownloadQueueItems: DownloadQueueItem[];
+  visibleDownloadResults: DownloadResult[];
 };
 
 export default function DownloadsView(props: DownloadsViewProps) {
@@ -470,7 +475,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                         </div>
                       </div>
 
-                      {visibleDownloadResults.map((item: any, index) => {
+                      {visibleDownloadResults.map((item, index) => {
                         const imported = item.importedToLibrary !== false;
                         const failed = !item.ok;
                         return (
