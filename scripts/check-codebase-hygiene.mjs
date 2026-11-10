@@ -5,7 +5,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const ignoredDirs = new Set([".git", "node_modules", "dist", "release", ".vite"]);
+const ignoredDirs = new Set([".git", "node_modules", "dist", "release", ".vite", "target"]);
 const forbiddenFiles = [
   "src/localtifyConstants.ts",
   "src/localtifyUtils.ts",
