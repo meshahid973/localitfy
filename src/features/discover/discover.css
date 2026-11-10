@@ -173,7 +173,12 @@
 .discoverPick.active {
   border-color: transparent;
   background: var(--lt-accent);
-  color: #111;
+  color: var(--accent-contrast, #06100b);
+}
+
+.app .discoverPage :is(.discoverKey input, .discoverLink, .discoverName, .discoverPick):focus-visible {
+  outline: 2px solid var(--lt-accent) !important;
+  outline-offset: 2px !important;
 }
 
 .discoverTray {

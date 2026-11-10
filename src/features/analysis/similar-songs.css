@@ -3,7 +3,7 @@
   max-height: min(780px, calc(100dvh - 48px));
   padding: 0;
   overflow: auto;
-  border: 1px solid rgba(163, 193, 198, .25);
+  border: 1px solid var(--lt-border);
   border-radius: 22px;
   background: linear-gradient(var(--lt-surface, #111c22), var(--lt-surface, #111c22)), var(--lt-bg, #111c22);
   color: var(--lt-text, #edf5f4);
@@ -14,23 +14,23 @@
 .similarSongsHeader { display: flex; gap: 16px; align-items: center; }
 .similarSongsHeading { flex: 1; min-width: 0; }
 .similarSongsSeedCover { width: 68px; height: 68px; border-radius: 12px; flex-shrink: 0; }
-.similarSongsHeader h2 { margin: 4px 0; font-size: 25px; }
+.similarSongsHeader h2 { margin: 4px 0; font-size: 25px; overflow-wrap: anywhere; }
 .similarSongsEyebrow { margin: 0; color: var(--lt-accent, #8dffce); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
 .similarSongsSeedTitle { margin: 0; font-size: 13px; overflow-wrap: anywhere; opacity: .75; }
 .similarSongsIntro { margin: 22px 0; line-height: 1.6; font-size: 14px; opacity: .8; }
-.similarSongsClose, .similarSongsIconButton { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; color: inherit; border: 0; border-radius: 9px; background: rgba(255, 255, 255, .06); cursor: pointer; flex-shrink: 0; }
+.similarSongsClose, .similarSongsIconButton { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; color: inherit; border: 0; border-radius: 9px; background: color-mix(in srgb, var(--lt-text) 6%, transparent); cursor: pointer; flex-shrink: 0; }
 .similarSongsClose { align-self: flex-start; }
-.similarSongsAction { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid rgba(163, 193, 198, .25); border-radius: 9px; padding: 9px 12px; color: inherit; background: rgba(255, 255, 255, .04); font: inherit; font-size: 12px; cursor: pointer; }
-.similarSongsPrimary { background: var(--lt-accent, #8dffce); color: #071611; border-color: transparent; }
+.similarSongsAction { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--lt-border); border-radius: 9px; padding: 9px 12px; color: inherit; background: color-mix(in srgb, var(--lt-text) 6%, transparent); font: inherit; font-size: 12px; cursor: pointer; }
+.similarSongsPrimary { background: var(--lt-accent); color: var(--accent-contrast, #06100b); border-color: transparent; }
 .similarSongsAction:hover, .similarSongsIconButton:hover, .similarSongsClose:hover { filter: brightness(1.18); }
 .similarSongsDialog button:focus-visible { outline: 2px solid var(--lt-accent, #8dffce); outline-offset: 3px; }
-.similarSongsNotice { padding: 20px; background: rgba(255, 255, 255, .04); border-radius: 12px; line-height: 1.6; }
+.similarSongsNotice { padding: 20px; background: color-mix(in srgb, var(--lt-text) 6%, transparent); border-radius: 12px; line-height: 1.6; }
 .similarSongsToolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
 .similarSongsToolbar > span { font-size: 12px; opacity: .7; }
 .similarSongsToolbar > div { display: flex; gap: 8px; flex-wrap: wrap; }
 .similarSongsList { margin: 0; padding: 0; list-style: none; }
-.similarSongsRow { display: flex; align-items: center; gap: 12px; padding: 10px 6px; border-top: 1px solid rgba(163, 193, 198, .12); }
-.similarSongsRow[data-current="true"] { background: rgba(141, 255, 206, .08); }
+.similarSongsRow { display: flex; align-items: center; gap: 12px; padding: 10px 6px; border-top: 1px solid var(--lt-border); }
+.similarSongsRow[data-current="true"] { background: rgba(var(--lt-accent-rgb), .08); }
 .similarSongsRowCover { width: 42px; height: 42px; border-radius: 8px; flex-shrink: 0; }
 .similarSongsTrack { flex: 1; min-width: 0; }
 .similarSongsTrack strong, .similarSongsTrack span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -38,7 +38,7 @@
 .similarSongsTrack span { margin-top: 4px; font-size: 12px; opacity: .65; }
 .similarSongsTogether { display: inline-block; margin-top: 4px; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 650; color: var(--lt-accent); background: rgba(var(--lt-accent-rgb), .14); }
 .similarSongsDuration { font-size: 12px; opacity: .6; }
-.similarSongsFooter { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(163, 193, 198, .15); }
+.similarSongsFooter { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--lt-border); }
 .similarSongsFooter > span { font-size: 12px; opacity: .65; }
 @media (max-width: 600px) {
   .similarSongsContent { padding: 18px; }

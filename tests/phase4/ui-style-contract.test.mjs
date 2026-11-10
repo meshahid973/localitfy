@@ -141,3 +141,56 @@ test("soft-corner preference outranks late shell defaults", () => {
   assert.doesNotMatch(shell, /(?:^|\n)\[data-corners="soft"\]\s*\{/);
 });
 
+
+test("overlay menus use Localtify theme surfaces and expose keyboard focus", () => {
+  const dropdown = read("src/shared/ui/ArcDropdownMenu.css");
+  const context = read("src/features/library/components/song-context-menu.css");
+  const queue = read("src/features/player/components/queue-panel.css");
+
+  assert.match(dropdown, /\.arcDropdownOption:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important; outline-offset: -2px !important/);
+  assert.match(context, /\.songContextMenu\{[\s\S]*?background: linear-gradient\(var\(--lt-surface\), var\(--lt-surface\)\), var\(--lt-bg\)/);
+  assert.match(context, /\.app \.songContextMenuLayer \.songContextMenu button:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
+  assert.match(context, /color: var\(--accent-contrast, #06100b\)/);
+  assert.match(queue, /\.queuePanel\{[\s\S]*?background: linear-gradient\(var\(--lt-surface\), var\(--lt-surface\)\), var\(--lt-bg\)/);
+  assert.match(queue, /\.app \.queuePanel button\.queuePanelRowMain:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
+  assert.doesNotMatch(context, /background: linear-gradient\(180deg, rgba\(20, 20, 20/);
+  assert.doesNotMatch(queue, /background: linear-gradient\(180deg, rgba\(20, 20, 24/);
+});
+
+test("Discover, similar tracks and tagging respect the active accent and UI border tokens", () => {
+  const discover = read("src/features/discover/discover.css");
+  const similar = read("src/features/analysis/similar-songs.css");
+  const tagging = read("src/features/tagging/tagging.css");
+  const context = read("src/features/library/components/song-context-menu.css");
+  const queue = read("src/features/player/components/queue-panel.css");
+
+  assert.match(discover, /\.discoverPick\.active\s*\{[^}]*color: var\(--accent-contrast, #06100b\)/);
+  assert.match(discover, /\.app \.discoverPage :is\(\.discoverKey input, \.discoverLink, \.discoverName, \.discoverPick\):focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
+  assert.match(similar, /\.similarSongsRow\[data-current="true"\]\s*\{\s*background: rgba\(var\(--lt-accent-rgb\), \.08\)/);
+  assert.match(similar, /\.similarSongsHeader h2\s*\{[^}]*overflow-wrap: anywhere/);
+  assert.match(similar, /\.similarSongsPrimary\s*\{[^}]*color: var\(--accent-contrast, #06100b\)/);
+  assert.match(tagging, /\.tagSearchButton\.primary\s*\{[^}]*color: var\(--accent-contrast, #06100b\)/);
+  assert.match(tagging, /\.tagSearchForm input\s*\{[^}]*border: 1px solid var\(--lt-border\)/);
+  assert.doesNotMatch(similar, /rgba\(141, 255, 206|rgba\(163, 193, 198/);
+  assert.doesNotMatch(tagging, /rgba\(163, 193, 198/);
+  assert.doesNotMatch(similar, /var\(--lt-surface-soft\)/);
+  assert.doesNotMatch(tagging, /var\(--lt-surface-soft\)/);
+  assert.match(context, /\.songContextMenuHead\{[^}]*background: color-mix\(in srgb, var\(--lt-text\) 7%, transparent\)/);
+  assert.match(context, /\.songContextMenu button\.dangerMenuItem\{\s*color: var\(--lt-danger\)/);
+  assert.match(queue, /\.queuePanelRow:hover\{\s*background: color-mix\(in srgb, var\(--lt-text\) 7%, transparent\)/);
+});
+
+test("component focus rules override the app and Linux !important outlines", () => {
+  const globals = read("src/features/shell/app-core.css");
+  const linux = read("src/features/shell/effects.css");
+  const discover = read("src/features/discover/discover.css");
+  const queue = read("src/features/player/components/queue-panel.css");
+  const dropdown = read("src/shared/ui/ArcDropdownMenu.css");
+
+  assert.match(globals, /button:focus-visible\s*\{\s*outline: 0 !important/);
+  assert.match(globals, /\.app :is\(button, a, \[role="button"\]\):focus-visible\s*\{\s*outline:[^}]*!important/);
+  assert.match(linux, /\.app\[data-platform="linux"\] :is\(button, input, textarea, select, \[role="button"\]\):focus-visible\s*\{\s*outline:[^}]*!important/);
+  assert.match(discover, /\.app \.discoverPage [^{]*:focus-visible\s*\{\s*outline:[^}]*!important/);
+  assert.match(queue, /\.app \.queuePanel button\.queuePanelRowMain:focus-visible\s*\{\s*outline:[^}]*!important/);
+  assert.match(dropdown, /\.arcDropdownOption:focus-visible\s*\{\s*outline:[^}]*!important/);
+});

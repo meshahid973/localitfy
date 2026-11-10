@@ -11,7 +11,7 @@
   border: 1px solid rgba(var(--accent-rgb), 0.2);
   border-radius: 18px;
   color: var(--text);
-  background: linear-gradient(180deg, rgba(20, 20, 24, 0.97), rgba(6, 6, 10, 0.96));
+  background: linear-gradient(var(--lt-surface), var(--lt-surface)), var(--lt-bg);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
   backdrop-filter: blur(22px) saturate(130%);
   outline: 0;
@@ -24,7 +24,7 @@
   justify-content: space-between;
   gap: 10px;
   padding: 14px 14px 10px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--lt-border);
 }
 
 .queuePanelHead strong{
@@ -86,7 +86,7 @@
 }
 
 .queuePanelRow:hover{
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--lt-text) 7%, transparent);
 }
 
 .queuePanelRow.isCurrent{
@@ -98,7 +98,7 @@
 }
 
 .queuePanelGrip{
-  color: rgba(255, 255, 255, 0.28);
+  color: var(--lt-faint);
   cursor: grab;
 }
 
@@ -118,6 +118,12 @@
 
 .queuePanelRowStatic{
   cursor: default;
+}
+
+.app .queuePanel button.queuePanelRowMain:focus-visible{
+  outline: 2px solid var(--lt-accent) !important;
+  outline-offset: -2px !important;
+  border-radius: 9px;
 }
 
 .queuePanelCover{
@@ -168,7 +174,7 @@
   gap: 6px;
   border: 0;
   border-radius: 9px;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--lt-muted);
   background: transparent;
   cursor: pointer;
 }
@@ -189,8 +195,8 @@
 .queuePanelIconButton:focus-visible,
 .queuePanelTextButton:hover,
 .queuePanelTextButton:focus-visible{
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--lt-text);
+  background: color-mix(in srgb, var(--lt-text) 8%, transparent);
 }
 
 .queuePanelMore{
@@ -239,7 +245,7 @@
 
 .queuePanelRepeat{
   padding-top: 10px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  border-top: 1px dashed var(--lt-border);
 }
 
 .queuePanelRepeat .queuePanelLabel{

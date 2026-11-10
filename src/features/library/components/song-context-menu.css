@@ -16,7 +16,7 @@
   border: 1px solid rgba(var(--accent-rgb), 0.22);
   border-radius: 18px;
   color: var(--text);
-  background: linear-gradient(180deg, rgba(20, 20, 20, 0.96), rgba(4, 4, 4, 0.94));
+  background: linear-gradient(var(--lt-surface), var(--lt-surface)), var(--lt-bg);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   backdrop-filter: blur(22px) saturate(130%);
   animation: songContextMenuIn 150ms ease both;
@@ -34,7 +34,7 @@
   margin-bottom: 5px;
   padding: 7px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.045);
+  background: color-mix(in srgb, var(--lt-text) 7%, transparent);
 }
 
 .songContextMenuCover{
@@ -75,7 +75,7 @@
   padding: 0 10px;
   border: 0;
   border-radius: 11px;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--lt-text);
   background: transparent;
   font-size: 12px;
   font-weight: 820;
@@ -86,8 +86,13 @@
 
 .songContextMenu button:hover:not(:disabled),
 .songContextMenu button:focus-visible{
-  color: #fff;
+  color: var(--lt-text);
   background: rgba(var(--accent-rgb), 0.12);
+}
+
+.app .songContextMenuLayer .songContextMenu button:focus-visible{
+  outline: 2px solid var(--lt-accent) !important;
+  outline-offset: -2px !important;
 }
 
 .songContextMenu button:disabled{
@@ -102,7 +107,7 @@
   display: inline-grid;
   place-items: center;
   border-radius: 8px;
-  color: #fff;
+  color: var(--accent-contrast, #06100b);
   background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.92), rgba(var(--accent-rgb), 0.68));
 }
 
@@ -115,15 +120,15 @@
 .songContextMenuDivider{
   height: 1px;
   margin: 6px 4px;
-  background: rgba(255, 255, 255, 0.075);
+  background: var(--lt-border);
 }
 
 .songContextMenu button.dangerMenuItem{
-  color: rgba(255, 210, 218, 0.92);
+  color: var(--lt-danger);
 }
 
 .songContextMenu button.dangerMenuItem:hover{
-  background: rgba(255, 78, 108, 0.13);
+  background: color-mix(in srgb, var(--lt-danger) 13%, transparent);
 }
 
 .songContextMenu button.dangerMenuItem .songContextMenuIcon{
