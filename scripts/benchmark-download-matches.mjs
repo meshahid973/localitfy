@@ -4,14 +4,13 @@ import { performance } from "node:perf_hooks";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 
-const source = fs.readFileSync("src/features/downloads/useDownloadsRuntime.ts", "utf8");
+const source = fs.readFileSync("src/features/downloads/downloadProcessing.ts", "utf8");
 const compiled = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
 }).outputText;
 const exports = {};
 runInNewContext(compiled, {
   exports, require: (name) => {
-    if (name === "react") return {};
     throw new Error("Unexpected dependency: " + name);
   }
 });

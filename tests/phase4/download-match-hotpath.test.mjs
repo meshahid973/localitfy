@@ -5,13 +5,12 @@ import ts from "typescript";
 import { runInNewContext } from "node:vm";
 
 const read = (file) => fs.readFileSync(file, "utf8");
-const { outputText } = ts.transpileModule(read("src/features/downloads/useDownloadsRuntime.ts"), {
+const { outputText } = ts.transpileModule(read("src/features/downloads/downloadProcessing.ts"), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
 });
 const exports = {};
 runInNewContext(outputText, {
   exports, require(name) {
-    if (name === "react") return {};
     throw new Error("Unexpected dependency: " + name);
   }
 });
