@@ -40,11 +40,11 @@ export default function SongEditorModal(props: SongEditorModalProps) {
 
   return (
     <div className="modalWrap editorModalWrap" onClick={onClose}>
-      <div className="editorModal editorModalMotion" onClick={(event) => event.stopPropagation()}>
+      <div className="editorModal editorModalMotion" role="dialog" aria-modal="true" aria-labelledby="song-editor-dialog-title" onClick={(event) => event.stopPropagation()}>
         <div className="modalHead editorModalHead">
           <div>
             <p className="eyebrow">song details</p>
-            <h3>edit track</h3>
+            <h3 id="song-editor-dialog-title">edit track</h3>
             <span className="editorHeadSub">change the name, cover, and details for this song.</span>
           </div>
           <div className="editorHeaderActions">
