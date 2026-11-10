@@ -46,7 +46,9 @@
     "audit:dead": "node scripts/audit-unused.mjs --full",
     "rust:build": "node scripts/build-rust-kernels.cjs",
     "rust:test": "node scripts/test-rust-kernels.cjs",
-    "rust:benchmark": "node scripts/benchmark-rust-phases.cjs --compare"
+    "rust:benchmark": "node scripts/benchmark-rust-phases.cjs --compare",
+    "rust:dist": "npm run rust:build && npm run dist",
+    "rust:dist:linux": "npm run rust:build && npm run dist:linux"
   },
   "dependencies": {
     "@huggingface/transformers": "4.3.1",

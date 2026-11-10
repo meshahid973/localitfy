@@ -36,3 +36,10 @@ Rust NAPI-RS is a native addon built per OS/CPU. All phases are **disabled by de
 - Duplicate comparison now groups eligible candidate pairs **across** metadata buckets and crosses NAPI once, only when the amount of vector work is large enough. The original JS fallback handles small, incomplete, invalid or mixed-dimension cases.
 - Scanner now reuses a dedicated Node worker rather than starting a thread for every scan. A bounded pending queue, deadline, explicit trusted standard extension predicate, source-directory containment checks and worker-crash fallback are mandatory; custom predicates always use JS. The worker is unref'd to avoid blocking app exit.
 - Keep JS as default and avoid claiming an automatic win. Performance must be re-measured with real, large libraries before any production switch.
+
+## Reproducibility and release packaging
+
+- `native/rust-kernels/Cargo.lock` pins the complete verified crate graph for the app, including checksums. CI uses `cargo test --locked` and the native release build uses `cargo build --locked`. Direct NAPI crate versions are exact-pinned.
+- To package a Windows installer with the optional native addon: `npm run rust:dist` (requires Rust and the existing Electron installer toolchain). For Linux distributions: `npm run rust:dist:linux`. Ordinary `npm run dist` remains JavaScript-capable and does not require Rust.
+- Small Daily Mixes workloads remain on the scalar JS path even when experimental Rust is enabled. Native comparisons are only considered after 1 million estimated multiply-adds, based on measured small-library regression and larger-fixture tests.
+- Before a production release, validate the generated installer on a real Windows/macOS/Linux desktop. CI packaging and headless Electron smoke are not a substitute for complete visual/audio manual QA.

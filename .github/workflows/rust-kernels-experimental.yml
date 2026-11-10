@@ -47,14 +47,7 @@ jobs:
       - name: Record JavaScript performance baseline (flag off)
         run: node scripts/benchmark-rust-phases.cjs
       - name: Rust unit tests
-        run: cargo test --manifest-path native/rust-kernels/Cargo.toml
-      - name: Emit generated Cargo.lock for reproducible source pinning
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          echo "LOCALTIFY_CARGO_LOCK_BEGIN"
-          cat native/rust-kernels/Cargo.lock
-          echo "LOCALTIFY_CARGO_LOCK_END"
+        run: cargo test --locked --manifest-path native/rust-kernels/Cargo.toml
       - name: Build Node-API addon for this host
         run: npm run rust:build
       - name: Native/JavaScript parity (must load Rust)

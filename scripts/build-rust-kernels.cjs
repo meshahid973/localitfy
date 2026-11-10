@@ -5,7 +5,7 @@ const { spawnSync } = require("node:child_process");
 
 const root = path.resolve(__dirname, "..");
 const crate = path.join(root, "native", "rust-kernels");
-const cargoArgs = ["build", "--manifest-path", path.join(crate, "Cargo.toml"), "--release"];
+const cargoArgs = ["build", "--locked", "--manifest-path", path.join(crate, "Cargo.toml"), "--release"];
 const target = process.env.CARGO_BUILD_TARGET || "";
 if (target) cargoArgs.push("--target", target);
 console.log("[localtify rust] cargo " + cargoArgs.join(" "));
