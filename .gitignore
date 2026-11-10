@@ -68,3 +68,7 @@ a
 analytics/exports/
 analytics/private/
 posthog-export*a
+
+# Optional Rust kernels (platform-specific build artifacts, never commit)
+native/rust-kernels/target/
+electron/native/*.node

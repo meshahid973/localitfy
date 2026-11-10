@@ -1,0 +1,73 @@
+name: rust-kernels-experimental
+
+on:
+  pull_request:
+    paths:
+      - "native/rust-kernels/**"
+      - "electron/native/**"
+      - "electron/analysis/**"
+      - "electron/library-duplicates.cjs"
+      - "electron/library-watch.cjs"
+      - "scripts/build-rust-kernels.cjs"
+      - "scripts/benchmark-rust-phases.cjs"
+      - "scripts/test-rust-kernels.cjs"
+      - "scripts/check-rust-package.cjs"
+      - "tests/phase4/rust-optional-integration.test.mjs"
+      - "package.json"
+      - ".github/workflows/rust-kernels-experimental.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-compare:
+    name: native ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native/rust-kernels
+      - name: Platform
+        run: node -p 'process.platform + "/" + process.arch'
+      - name: Install normal application
+        run: npm ci
+      - name: Record JavaScript performance baseline (flag off)
+        run: node scripts/benchmark-rust-phases.cjs
+      - name: Rust unit tests
+        run: cargo test --manifest-path native/rust-kernels/Cargo.toml
+      - name: Build Node-API addon for this host
+        run: npm run rust:build
+      - name: Native/JavaScript parity (must load Rust)
+        run: npm run rust:test
+      - name: Compare native and JavaScript timings
+        run: npm run rust:benchmark
+      - name: Application validation with native disabled
+        run: npm run check
+        env:
+          LOCALTIFY_RUST_PHASES: ""
+      - name: Build unpacked native application
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            npx electron-builder --win dir --x64 --publish never
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            npx electron-builder --mac dir --publish never
+          else
+            npx electron-builder --linux dir --x64 --publish never
+          fi
+      - name: Verify optional addon is unpacked in packaged application
+        run: node scripts/check-rust-package.cjs

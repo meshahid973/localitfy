@@ -43,7 +43,10 @@
     "release:check": "npm run hardening:check && npm run assets:compress:dry && npm run chunks:audit",
     "css:hygiene": "node scripts/css-hygiene.mjs",
     "bridge:typecheck": "tsc -p tsconfig.bridge.json --pretty false",
-    "audit:dead": "node scripts/audit-unused.mjs --full"
+    "audit:dead": "node scripts/audit-unused.mjs --full",
+    "rust:build": "node scripts/build-rust-kernels.cjs",
+    "rust:test": "node scripts/test-rust-kernels.cjs",
+    "rust:benchmark": "node scripts/benchmark-rust-phases.cjs --compare"
   },
   "dependencies": {
     "@huggingface/transformers": "4.3.1",
@@ -151,7 +154,8 @@
     "asarUnpack": [
       "node_modules/better-sqlite3/**/*",
       "node_modules/ffmpeg-static/**/*",
-      "node_modules/onnxruntime-node/**/*"
+      "node_modules/onnxruntime-node/**/*",
+      "electron/native/*.node"
     ],
     "win": {
       "icon": "build/icon.ico",

@@ -1,6 +1,7 @@
 "use strict";
 
 const path = require("node:path");
+const { tryPairDots } = require("./native/compute.cjs");
 
 // Same recording: matching cleaned title and full artist credits, lengths within this many seconds,
 // and (when both have audio profiles) at least this audio similarity.
@@ -58,10 +59,10 @@ function cosine(a, b) {
   return sum;
 }
 
-function sameRecording(a, b, vectors) {
+function sameRecording(a, b, vectors, audioOverride) {
   const gap = Math.abs((Number(a.duration) || 0) - (Number(b.duration) || 0));
   const va = vectors.get(a.id); const vb = vectors.get(b.id);
-  const audio = va && vb ? cosine(va, vb) : null;
+  const audio = va && vb ? (audioOverride === undefined ? cosine(va, vb) : audioOverride) : null;
   if (Number(a.duration) > 0 && Number(b.duration) > 0 ? gap > MAX_DURATION_GAP : !(audio >= SAME_AUDIO)) return null;
   // Two numbered tracks of the same album folder are different songs (e.g. a song and its featured version).
   if (a.copy.folder === b.copy.folder && a.copy.album === b.copy.album && a.copy.track && b.copy.track && a.copy.track !== b.copy.track) return null;
@@ -90,8 +91,12 @@ function findDuplicates(songs, { vectors = new Map(), fileSizes = new Map() } = 
   for (const track of tracks) if (track.recording) (buckets.get(track.recording) || buckets.set(track.recording, []).get(track.recording)).push(track);
   const songsUnion = unionFind(); const pairs = new Map();
   for (const bucket of buckets.values()) {
+    const nativeScores = tryPairDots(bucket, vectors);
+    let pairIndex = 0;
     for (let i = 0; i < bucket.length; i++) for (let j = i + 1; j < bucket.length; j++) {
-      const match = sameRecording(bucket[i], bucket[j], vectors);
+      const nativeScore = nativeScores ? nativeScores[pairIndex] : undefined;
+      pairIndex += 1;
+      const match = sameRecording(bucket[i], bucket[j], vectors, nativeScore);
       if (!match) continue;
       songsUnion.union(bucket[i].id, bucket[j].id);
       pairs.set(`${bucket[i].id}|${bucket[j].id}`, match);

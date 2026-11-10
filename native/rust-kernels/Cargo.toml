@@ -1,0 +1,21 @@
+[package]
+name = "localtify_rust_kernels"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+publish = false
+description = "Optional, read-only compute and scanning kernels for Localtify Electron"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+napi = { version = "3.16.1", features = ["napi4"] }
+napi-derive = "3.16.1"
+
+[build-dependencies]
+napi-build = "2.6.0"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

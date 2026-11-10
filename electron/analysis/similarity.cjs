@@ -1,4 +1,5 @@
 const fs = require("node:fs");
+const { tryDotMatrix } = require("../native/compute.cjs");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { AUDIO_WEIGHT, GENRE_WEIGHT, dot, genreTags, genreTokens, genreSimilarity, libraryMean, centered, classifyPlay,
   listeningStats, skipRate, notForMe } = require("./listening-signals.cjs");
@@ -168,15 +169,19 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
   const seedProfiles = seeds.map(profile);
   const rankBatch = async (batch) => {
     const validFiles = await Promise.all(batch.map((record) => fileMatches(record, statFile)));
+    const points = batch.map((record, index) => validFiles[index] ? profile(record) : null);
+    const nativeAudio = tryDotMatrix(points.map((point) => point?.audio || seedProfiles[0].audio),
+      seedProfiles.map((seed) => seed.audio));
     for (let index = 0; index < batch.length; index++) {
       if (!validFiles[index]) continue;
       const candidate = batch[index];
       result.compared += 1;
-      const point = profile(candidate);
+      const point = points[index];
       // A group seed scores each candidate by its closest few seeds, so a mixed playlist matches each of its styles.
       let closestSound = -Infinity;
-      const scores = seedProfiles.map((seed) => {
-        const audio = dot(seed.audio, point.audio); const genre = genreSimilarity(seed.genre, point.genre);
+      const scores = seedProfiles.map((seed, seedIndex) => {
+        const audio = nativeAudio ? nativeAudio[index * seedProfiles.length + seedIndex] : dot(seed.audio, point.audio);
+        const genre = genreSimilarity(seed.genre, point.genre);
         closestSound = Math.max(closestSound, audio);
         return AUDIO_WEIGHT * audio + GENRE_WEIGHT * (genre ?? UNKNOWN_GENRE);
       });

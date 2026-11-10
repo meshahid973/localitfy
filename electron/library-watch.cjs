@@ -6,6 +6,7 @@
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const path = require("node:path");
+const { tryScanAudioFiles } = require("./native/scanner.cjs");
 const { registerLibraryWatchIpc } = require("./ipc/library-watch.cjs");
 
 const SETTLE_MS = 2500;
@@ -29,6 +30,8 @@ function cleanWatchedFolders(value) {
 
 /** Audio files under `root`, skipping hidden folders, partial downloads and the app's own download internals. */
 async function listAudioFiles(root, isAudioFile, limit = MAX_FILES) {
+  const nativeFiles = await tryScanAudioFiles(root, isAudioFile, limit);
+  if (nativeFiles !== null) return nativeFiles;
   const files = [];
   const walk = async (dir, depth) => {
     if (files.length >= limit || depth > MAX_DEPTH) return;

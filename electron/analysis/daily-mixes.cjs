@@ -1,4 +1,5 @@
 const fs = require("node:fs");
+const { tryDotMatrix } = require("../native/compute.cjs");
 const { createHash } = require("node:crypto");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { readNormalizedVector } = require("./similarity.cjs");
@@ -62,7 +63,9 @@ function cluster(points, count, minimum, seed) {
   const centers = seedCenters(points, count, seed);
   let assignment = new Int32Array(points.length).fill(-1); let similarity = [];
   for (let pass = 0; pass < 12; pass++) {
-    similarity = points.map((point) => centers.map((center) => dot(point.feature, center)));
+    const nativeScores = tryDotMatrix(points.map((point) => point.feature), centers);
+    similarity = points.map((point, index) => centers.map((center, centerIndex) =>
+      nativeScores ? nativeScores[index * centers.length + centerIndex] : dot(point.feature, center)));
     const next = new Int32Array(points.length); const sizes = new Array(centers.length).fill(0);
     for (let i = 0; i < points.length; i++) {
       let best = 0;
