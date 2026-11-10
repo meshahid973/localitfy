@@ -57,7 +57,9 @@ function ensureWorker() {
         job.resolve(null);
         return;
       }
-      try { job.resolve(message.files.filter(job.isAudioFile)); }
+      // Match Node's path.join() contract even if callers supply mixed separators,
+      // dot-segments, or repeated delimiters. This must happen before filtering.
+      try { job.resolve(message.files.map((file) => path.normalize(file)).filter(job.isAudioFile)); }
       catch (error) { warnOnce("scanner", error); job.resolve(null); }
     });
     next.on("error", (error) => stopWorker(error));

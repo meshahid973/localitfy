@@ -22,6 +22,17 @@ if (!native) throw new Error("Native addon is required for this explicit Rust te
 for(const name of ["dotMatrix", "pairDots", "scanAudioFiles"]) {
   assert.equal(typeof native[name], "function", "Missing native export: "+name);
 }
+// Guard against a false-positive parity test caused by a silent JS fallback.
+// Count actual NAPI invocations made inside the production integration paths.
+const nativeCalls = { dotMatrix: 0, pairDots: 0 };
+for (const name of Object.keys(nativeCalls)) {
+  const original = native[name];
+  native[name] = function (...args) {
+    nativeCalls[name]++;
+    return original.apply(native, args);
+  };
+  assert.notEqual(native[name], original, name + " export is not writable for instrumentation");
+}
 const left = [new Float64Array([1,2,3]), new Float64Array([4,5,6])];
 const right = [new Float64Array([2,0,1]), new Float64Array([-1,3,0])];
 const dotScores = tryDotMatrix(left,right);
@@ -49,7 +60,10 @@ const largeSongs = Array.from({ length: 600 }, (_, index) => ({
   ...songs[index % songs.length], songId: "large-" + String(index).padStart(4, "0")
 }));
 const largeMixesJs = evaluate("", () => generateMixes(largeSongs, "2026-11-10:large"));
+const beforeLargeMixes = nativeCalls.dotMatrix;
 const largeMixesRust = evaluate("similarity", () => generateMixes(largeSongs, "2026-11-10:large"));
+assert.ok(nativeCalls.dotMatrix > beforeLargeMixes,
+  "large-library Daily Mixes must actually invoke native dotMatrix");
 assert.deepEqual(largeMixesRust, largeMixesJs, "large-library native clustering changed Daily Mixes");
 
 const dupSongs=Array.from({length:100},(_,i)=>{
@@ -80,7 +94,10 @@ const nativeBatch = evaluate("duplicates", () => tryBatchPairDots([bulkBucket], 
 assert.ok(Array.isArray(nativeBatch) && nativeBatch.length === 2016,
   "large duplicate bucket must use the native path");
 const bulkJs = evaluate("", () => findDuplicates(bulkBucket, { vectors: dupVectors, fileSizes: sizes }));
+const beforeBulkDuplicates = nativeCalls.pairDots;
 const bulkRust = evaluate("duplicates", () => findDuplicates(bulkBucket, { vectors: dupVectors, fileSizes: sizes }));
+assert.ok(nativeCalls.pairDots > beforeBulkDuplicates,
+  "large duplicate group must actually invoke native pairDots");
 assert.deepEqual(bulkRust, bulkJs, "large native duplicate batch changed group recommendations");
 async function main(){
  const folder=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-rust-parity-"));
@@ -102,6 +119,13 @@ async function main(){
      "concurrent native scan #2 returned mismatched files");
    const pathsRust=await evaluate("scanner",()=>listAudioFiles(folder,isAudioFile));
    assert.deepEqual(pathsRust.slice().sort(),pathsJs.slice().sort(),"scanner misses or adds files");
+   // Raw root paths with dot segments are accepted by the JS scanner because
+   // path.join normalizes every output; native must return identical strings.
+   const awkwardRoot = folder + path.sep + "." + path.sep;
+   const normalizedJs = await evaluate("", () => listAudioFiles(awkwardRoot, isAudioFile));
+   const normalizedNative = await evaluate("scanner", () => tryScanAudioFiles(awkwardRoot, isAudioFile, 50));
+   assert.deepEqual(normalizedNative?.slice().sort(), normalizedJs.slice().sort(),
+     "native scanner paths must match path.join normalization");
    assert.equal(pathsRust.length,2);
    // Repeat work on the same dedicated native worker; compare without assuming OS enumeration order.
    const again=await evaluate("scanner",()=>listAudioFiles(folder,isAudioFile));

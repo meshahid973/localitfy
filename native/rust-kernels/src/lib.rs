@@ -109,7 +109,11 @@ fn visit(
         Ok(entries) => entries,
         Err(_) => return, // Matches the original JS skip-on-unreadable-folder behavior.
     };
-    for entry in entries.flatten() {
+    for entry in entries {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(_) => { result.truncated = true; return; }
+        };
         if result.files.len() >= limit {
             result.truncated = true;
             return;
@@ -124,7 +128,7 @@ fn visit(
         }
         let kind = match entry.file_type() {
             Ok(kind) => kind,
-            Err(_) => continue,
+            Err(_) => { result.truncated = true; return; }
         };
         if kind.is_dir() {
             if depth < 12 && name != "localitfy-bin" && name != "spotify-covers" {
