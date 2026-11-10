@@ -2,7 +2,7 @@
 
 // Both helpers return null on any unavailable/invalid native result.
 // Callers MUST keep the original JS calculation as their fallback.
-const { getAddon, warnOnce } = require("./backend.cjs");
+const { enabled, getAddon, warnOnce } = require("./backend.cjs");
 
 function tryDotMatrix(rows, columns) {
   const native = getAddon("similarity");
@@ -15,9 +15,12 @@ function tryDotMatrix(rows, columns) {
     const packedColumns = new Float64Array(columns.length * dim);
     rows.forEach((row, i) => packedRows.set(row, i * dim));
     columns.forEach((row, i) => packedColumns.set(row, i * dim));
-    const result = native.dotMatrix(packedRows, packedColumns, dim);
-    if (!Array.isArray(result) || result.length !== rows.length * columns.length ||
-      result.some((n) => !Number.isFinite(n))) throw new Error("Invalid dot-matrix output");
+    const into = enabled("bridge") && typeof native.dotMatrixInto === "function";
+    const result = into ? new Float64Array(rows.length * columns.length) : native.dotMatrix(packedRows, packedColumns, dim);
+    if (into) native.dotMatrixInto(packedRows, packedColumns, result, dim);
+    if (!(Array.isArray(result) || result instanceof Float64Array) ||
+        result.length !== rows.length * columns.length ||
+        result.some((n) => !Number.isFinite(n))) throw new Error("Invalid dot-matrix output");
     // Canary a few cells before trusting the native backend. A bad build MUST fail closed.
     for (const idx of [0, result.length - 1]) {
       const i = Math.floor(idx / columns.length), j = idx % columns.length;
@@ -187,8 +190,13 @@ function tryBatchPairDots(buckets, vectors) {
   try {
     const packed = new Float64Array(rows.length * dimensions);
     rows.forEach((vector, i) => packed.set(vector, i * dimensions));
-    const result = native.pairDots(packed, Uint32Array.from(left), Uint32Array.from(right), dimensions);
-    if (!Array.isArray(result) || result.length !== left.length || result.some((n) => !Number.isFinite(n))) {
+    const leftIndices = Uint32Array.from(left);
+    const rightIndices = Uint32Array.from(right);
+    const into = enabled("bridge") && typeof native.pairDotsInto === "function";
+    const result = into ? new Float64Array(left.length) : native.pairDots(packed, leftIndices, rightIndices, dimensions);
+    if (into) native.pairDotsInto(packed, leftIndices, rightIndices, result, dimensions);
+    if (!(Array.isArray(result) || result instanceof Float64Array) ||
+        result.length !== left.length || result.some((n) => !Number.isFinite(n))) {
       throw new Error("Invalid native pair batch");
     }
     for (const index of new Set([0, result.length >>> 1, result.length - 1])) {

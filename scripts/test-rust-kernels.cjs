@@ -20,12 +20,12 @@ assert.equal(tryDotMatrix([new Float64Array([1,2])],[new Float64Array([3,4])]),n
 process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,scanner";
 const native = getAddon("similarity");
 if (!native) throw new Error("Native addon is required for this explicit Rust test");
-for(const name of ["dotMatrix", "pairDots", "centerAudioVectorsInPlace", "decodeNormalizedAudioInto", "clusterFromCenters", "scanAudioFiles", "pcmSumSquares"]) {
+for(const name of ["dotMatrix", "pairDots", "centerAudioVectorsInPlace", "decodeNormalizedAudioInto", "clusterFromCenters", "scanAudioFiles", "pcmSumSquares", "dotMatrixInto", "pairDotsInto"]) {
   assert.equal(typeof native[name], "function", "Missing native export: "+name);
 }
 // Guard against a false-positive parity test caused by a silent JS fallback.
 // Count actual NAPI invocations made inside the production integration paths.
-const nativeCalls = { dotMatrix: 0, pairDots: 0, centerAudioVectorsInPlace: 0, decodeNormalizedAudioInto: 0, clusterFromCenters: 0, pcmSumSquares: 0 };
+const nativeCalls = { dotMatrix: 0, pairDots: 0, centerAudioVectorsInPlace: 0, decodeNormalizedAudioInto: 0, clusterFromCenters: 0, pcmSumSquares: 0, dotMatrixInto: 0, pairDotsInto: 0 };
 for (const name of Object.keys(nativeCalls)) {
   const original = native[name];
   native[name] = function (...args) {
@@ -54,6 +54,10 @@ function evaluate(mode,fn) {
   process.env.LOCALTIFY_RUST_PHASES = mode;
   return fn();
 }
+const matrixIntoBefore = nativeCalls.dotMatrixInto;
+assert.deepEqual(Array.from(evaluate("similarity,bridge",()=>tryDotMatrix(left,right))), [5,5,14,11]);
+assert.ok(nativeCalls.dotMatrixInto > matrixIntoBefore, "typed matrix output must execute Rust");
+
 const pcmBuffer = Buffer.alloc(40_000 * 4);
 pcmBuffer.writeFloatLE(0.75, 0);
 const pcmReference = evaluate("", () => decodePcmChunk(pcmBuffer));
@@ -181,6 +185,10 @@ const bulkRust = evaluate("duplicates", () => findDuplicates(bulkBucket, { vecto
 assert.ok(nativeCalls.pairDots > beforeBulkDuplicates,
   "large duplicate group must actually invoke native pairDots");
 assert.deepEqual(bulkRust, bulkJs, "large native duplicate batch changed group recommendations");
+const beforePairInto = nativeCalls.pairDotsInto;
+const bulkBridge = evaluate("duplicates,bridge", () => findDuplicates(bulkBucket, { vectors: dupVectors, fileSizes: sizes }));
+assert.ok(nativeCalls.pairDotsInto > beforePairInto, "typed duplicate output must execute Rust");
+assert.deepEqual(bulkBridge, bulkJs, "typed duplicate output changed grouping");
 async function main(){
  const folder=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-rust-parity-"));
  try {

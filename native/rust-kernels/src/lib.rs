@@ -54,6 +54,15 @@ pub fn dot_matrix(rows: &[f64], columns: &[f64], dimensions: u32) -> Result<Vec<
     dot_matrix_inner(rows, columns, dimension(dimensions)?)
 }
 
+/// Experimental JS-owned output: avoids NAPI conversion of a score Vec to a JS array.
+#[napi]
+pub fn dot_matrix_into(rows: &[f64], columns: &[f64], mut output: Float64Array, dimensions: u32) -> Result<()> {
+    let values = dot_matrix_inner(rows, columns, dimension(dimensions)?)?;
+    if output.len() != values.len() { return Err(invalid("Wrong dot matrix output size")); }
+    unsafe { output.as_mut() }.copy_from_slice(&values);
+    Ok(())
+}
+
 /// Match candidate pair indexes to vectors packed in row-major order.
 /// Index arrays are Uint32Array values and have equal length.
 fn pair_dots_inner(vectors: &[f64], left: &[u32], right: &[u32], dim: usize) -> Result<Vec<f64>> {
@@ -84,6 +93,15 @@ pub fn pair_dots(vectors: &[f64], left: &[u32], right: &[u32], dimensions: u32) 
     pair_dots_inner(vectors, left, right, dimension(dimensions)?)
 }
 
+
+/// Experimental JS-owned batch output for duplicate comparison.
+#[napi]
+pub fn pair_dots_into(vectors: &[f64], left: &[u32], right: &[u32], mut output: Float64Array, dimensions: u32) -> Result<()> {
+    let values = pair_dots_inner(vectors, left, right, dimension(dimensions)?)?;
+    if output.len() != values.len() { return Err(invalid("Wrong pair output size")); }
+    unsafe { output.as_mut() }.copy_from_slice(&values);
+    Ok(())
+}
 
 /// Validate decoded PCM and compute its energy in one native pass.
 #[napi]
