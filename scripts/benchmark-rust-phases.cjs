@@ -67,17 +67,26 @@ async function run() {
         const seeds=trackVectors.slice(0,12);
         const nativeScores=tryDotMatrix(trackVectors,seeds);
         if(nativeScores) return nativeScores.reduce((sum,n)=>sum+n,0);
+        if (process.env.LOCALTIFY_RUST_PHASES) throw new Error("Native similarity kernel unexpectedly fell back to JavaScript");
         let score=0;
         for(const row of trackVectors)for(const seed of seeds)score+=dot(row,seed);
         return score;
       }],
-      ["CLAP Float32 decoder / 600x512",()=>
-        tryDecodeNormalizedAudio(encodedVectors,512) ||
-        encodedVectors.map((buffer)=>readNormalizedVector(buffer))],
-      ["audio centering / 600x512",()=>{
-        const input=Array.from({length:600},(_,i)=>trackVectors[i%trackVectors.length]);
+      ["CLAP Float32 decoder / 600x512",()=>{
+        const native = tryDecodeNormalizedAudio(encodedVectors,512);
+        if (native) return native;
+        if (process.env.LOCALTIFY_RUST_PHASES) {
+          throw new Error("Native CLAP decoder unexpectedly used JavaScript fallback; refusing misleading timing");
+        }
+        return encodedVectors.map((buffer)=>readNormalizedVector(buffer));
+      }],
+      ["audio centering / 1200x512",()=>{
+        const input=Array.from({length:1200},(_,i)=>trackVectors[i%trackVectors.length]);
         const native=tryCenterAudioProfiles(input);
-        if(native)return native;
+        if(native) return native;
+        if (process.env.LOCALTIFY_RUST_PHASES) {
+          throw new Error("Native audio centering unexpectedly used JavaScript fallback; refusing misleading timing");
+        }
         const mean=libraryMean(input);
         return input.map((vector)=>centered(vector,mean));
       }],
