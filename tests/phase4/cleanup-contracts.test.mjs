@@ -8,8 +8,8 @@ test("App CSS retains canonical motion rules without duplicate overlapping selec
   const source = read("src/App.css");
   assert.match(source, /\.hero,\s*\.editorModal,\s*\.deleteModal,\s*\.whatsNewCard\s*\{\s*transform-origin: center;\s*contain: layout paint style;/);
   assert.match(source, /\.hero,\s*\.songRow\s*\{\s*transition-timing-function: var\(--motion-smooth\);/);
-  assert.doesNotMatch(source, /\.editorModal,\s*\.deleteModal,\s*\.whatsNewCard\s*\{\s*transform-origin: center;/);
-  assert.doesNotMatch(source, /\.songRow\s*\{\s*transition-timing-function: var\(--motion-smooth\);/);
+  assert.equal(source.includes([".whatsNewCard {", "  transform-origin: center;"].join(String.fromCharCode(10))), false);
+  assert.equal(source.split("transition-timing-function: var(--motion-smooth);").length - 1, 1);
 });
 
 test("disabled queue preview no longer consumes a React memo hook", () => {
