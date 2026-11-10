@@ -43,3 +43,11 @@ Rust NAPI-RS is a native addon built per OS/CPU. All phases are **disabled by de
 - To package a Windows installer with the optional native addon: `npm run rust:dist` (requires Rust and the existing Electron installer toolchain). For Linux distributions: `npm run rust:dist:linux`. Ordinary `npm run dist` remains JavaScript-capable and does not require Rust.
 - Small Daily Mixes workloads remain on the scalar JS path even when experimental Rust is enabled. Native comparisons are only considered after 1 million estimated multiply-adds, based on measured small-library regression and larger-fixture tests.
 - Before a production release, validate the generated installer on a real Windows/macOS/Linux desktop. CI packaging and headless Electron smoke are not a substitute for complete visual/audio manual QA.
+
+## Next native hot paths: audio decode and library centering
+
+- `decodeNormalizedAudio` converts an entire contiguous batch of little-endian Float32 CLAP vectors into normalized Float64 vectors in Rust. This replaces the repeated `Buffer.readFloatLE`/square-sum/division loop for large candidate collections, with the existing JS decoder as a precise fallback for missing, malformed or unready vectors. Seed paths and normal small lookups remain in JS.
+- `centerAudioVectors` computes library means, subtracts them, and normalizes every row in one Rust call, replacing repeated JS `libraryMean` + `centered` calls for large recommendation or Daily Mixes libraries. The JS versions remain available to maintain cross-platform fallback and exact behavior.
+- The obsolete `tryPairDots` per-bucket bridge was removed. Only the original JS scalar comparison (small workloads/fallback) and the batched native duplicate comparison remain.
+- Native vector batches are limited to 1.5 million scalar values; validation, partial data and errors fail back to JS. No database schema or playback changes.
+- New benchmarks cover 600-track Float32 decode and vector centering; **do not enable Rust by default unless representative real-world library measurements show sustained improvements**. Renderer logic remains React/TypeScript.

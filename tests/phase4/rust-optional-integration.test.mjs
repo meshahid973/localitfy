@@ -16,6 +16,11 @@ test("Rust remains optional and all three integrations preserve JS fallback code
  assert.match(mix,/nativeScores \? nativeScores\[index \* centers\.length \+ centerIndex\] : dot/);
  assert.match(dup,/audioOverride === undefined \? cosine\(va, vb\) : audioOverride/);
  assert.match(dup,/tryBatchPairDots\(\[\.\.\.buckets\.values\(\)\], vectors\)/);
+ assert.doesNotMatch(read("electron/native/compute.cjs"),/function tryPairDots\(/);
+ assert.match(read("electron/native/compute.cjs"),/tryCenterAudioProfiles/);
+ assert.match(read("electron/native/compute.cjs"),/tryDecodeNormalizedAudio/);
+ assert.match(read("electron/analysis/similarity.cjs"),/tryDecodeNormalizedAudio\(candidateRecords\.map/);
+ assert.match(read("electron/analysis/daily-mixes.cjs"),/tryDecodeNormalizedAudio\(validRecords\.map/);
  assert.match(scan,/if \(nativeFiles !== null\) return nativeFiles/);
  assert.match(scan,/const files = \[\]/);
  assert.match(read("electron/main.cjs"),/markStandardAudioFilter\(isAudioFile\)/);

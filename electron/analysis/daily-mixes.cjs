@@ -1,5 +1,5 @@
 const fs = require("node:fs");
-const { tryDotMatrix } = require("../native/compute.cjs");
+const { tryDotMatrix, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
 const { createHash } = require("node:crypto");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { readNormalizedVector } = require("./similarity.cjs");
@@ -21,12 +21,14 @@ function artist(track) { return String(track.artist || "").trim().toLowerCase();
 // then append genre tags. A feature dot product is AUDIO_WEIGHT * audio cosine + GENRE_WEIGHT * genre cosine.
 function buildFeatures(tracks) {
   const dimensions = tracks[0].vector.length;
-  const mean = libraryMean(tracks.map((track) => track.vector));
+  const vectors = tracks.map((track) => track.vector);
+  const nativeAudio = tryCenterAudioProfiles(vectors);
+  const mean = nativeAudio ? null : libraryMean(vectors);
   const tokens = tracks.map((track) => genreTokens(track.tags));
   const vocabulary = new Map([...new Set(tokens.flatMap((map) => [...map.keys()]))].sort().map((token, index) => [token, index]));
   const audioScale = Math.sqrt(AUDIO_WEIGHT); const genreScale = Math.sqrt(GENRE_WEIGHT);
   return tracks.map((track, index) => {
-    const audio = centered(track.vector, mean);
+    const audio = nativeAudio ? nativeAudio[index] : centered(track.vector, mean);
     const genre = new Float64Array(vocabulary.size);
     for (const [token, weight] of tokens[index]) genre[vocabulary.get(token)] = weight;
     normalize(genre);
@@ -228,18 +230,21 @@ async function getDailyMixes(database, request, { statFile = fs.promises.stat, n
     ORDER BY a.songId`).all(MODEL.id, ANALYZER_VERSION);
   const identity = (rows) => JSON.stringify(rows.map((t) => [t.songId, t.filePath, t.fileSize, t.fileMtime, t.analyzedAt]));
   const originalIdentity = identity(records);
-  const tracks = []; const paths = new Set();
+  const tracks = []; const paths = new Set(); const validRecords = [];
   for (let start = 0; start < records.length; start += 32) {
     const batch = records.slice(start, start + 32);
     const valid = await Promise.all(batch.map(async (record) => {
       try { const stat = await statFile(record.filePath); return stat.isFile() && stat.size === record.fileSize && stat.mtimeMs === record.fileMtime; }
       catch { return false; }
     }));
-    for (let i = 0; i < batch.length; i++) {
-      const record = batch[i]; if (!valid[i] || paths.has(record.filePath)) continue;
-      const vector = readNormalizedVector(record.vector); if (!vector) continue;
-      tracks.push({ ...record, vector }); paths.add(record.filePath);
-    }
+    for (let i = 0; i < batch.length; i++) if (valid[i]) validRecords.push(batch[i]);
+  }
+  const nativeVectors = tryDecodeNormalizedAudio(validRecords.map((record) => record.vector), MODEL.dimensions);
+  for (let i = 0; i < validRecords.length; i++) {
+    const record = validRecords[i]; if (paths.has(record.filePath)) continue;
+    const vector = nativeVectors ? nativeVectors[i] : readNormalizedVector(record.vector);
+    if (!vector) continue;
+    tracks.push({ ...record, vector }); paths.add(record.filePath);
   }
   const fingerprint = createHash("sha256").update(JSON.stringify([GENERATOR_VERSION, MODEL.id, ANALYZER_VERSION,
     tracks.map((t) => [t.songId, t.filePath, t.fileSize, t.fileMtime, t.analyzedAt])])).digest("hex");

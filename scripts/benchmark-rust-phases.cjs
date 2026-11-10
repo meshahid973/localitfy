@@ -4,8 +4,9 @@ const { performance } = require("node:perf_hooks");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
-const { dot } = require("../electron/analysis/listening-signals.cjs");
-const { tryDotMatrix } = require("../electron/native/compute.cjs");
+const { dot, libraryMean, centered } = require("../electron/analysis/listening-signals.cjs");
+const { tryDotMatrix, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../electron/native/compute.cjs");
+const { readNormalizedVector } = require("../electron/analysis/similarity.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
 const { listAudioFiles } = require("../electron/library-watch.cjs");
@@ -23,6 +24,11 @@ async function benchmark(fn, rounds = 3) {
   return median(durations);
 }
 const vectors = Array.from({length:240},(_,i) => Float64Array.from({length:512},(_,j)=>Math.sin(i * .31 + j*.07)));
+const encodedVectors=Array.from({length:600},(_,i)=>{
+  const buffer=Buffer.allocUnsafe(512*4);
+  for(let j=0;j<512;j++)buffer.writeFloatLE(Math.sin(i*.15 + j*.045),j*4);
+  return buffer;
+});
 const trackVectors = vectors.map((v)=>{
   const n=Math.sqrt(dot(v,v));
   return Float64Array.from(v,x=>x/n);
@@ -64,6 +70,16 @@ async function run() {
         let score=0;
         for(const row of trackVectors)for(const seed of seeds)score+=dot(row,seed);
         return score;
+      }],
+      ["CLAP Float32 decoder / 600x512",()=>
+        tryDecodeNormalizedAudio(encodedVectors,512) ||
+        encodedVectors.map((buffer)=>readNormalizedVector(buffer))],
+      ["audio centering / 600x512",()=>{
+        const input=Array.from({length:600},(_,i)=>trackVectors[i%trackVectors.length]);
+        const native=tryCenterAudioProfiles(input);
+        if(native)return native;
+        const mean=libraryMean(input);
+        return input.map((vector)=>centered(vector,mean));
       }],
       ["daily mixes / 240 tracks",()=>generateMixes(tracks,"fixed-seed")],
       ["daily mixes / 600 tracks",()=>generateMixes(bigTracks,"fixed-large-seed")],

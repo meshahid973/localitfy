@@ -29,30 +29,68 @@ function tryDotMatrix(rows, columns) {
   } catch (error) { warnOnce("similarity", error); return null; }
 }
 
-function tryPairDots(bucket, vectors) {
-  const native = getAddon("duplicates");
-  if (!native || typeof native.pairDots !== "function" || bucket.length < 2) return null;
-  const items = bucket.map((item) => vectors.get(item.id));
-  const dim = items[0]?.length;
-  if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16384 ||
-    items.some((v) => !v || v.length !== dim) || bucket.length * (bucket.length - 1) / 2 > 2000000) return null;
+
+/** Process entire libraries in one Rust call; do not cross NAPI per track. */
+function tryCenterAudioProfiles(vectors) {
+  const native = getAddon("similarity");
+  if (!native || typeof native.centerAudioVectors !== "function" ||
+      !Array.isArray(vectors) || vectors.length < 192 || vectors.length > 10_000) return null;
+  const dim = vectors[0]?.length;
+  if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16_384 ||
+      vectors.length * dim < 98_304 || vectors.length * dim > 1_500_000 ||
+      vectors.some((row) => !row || row.length !== dim)) return null;
   try {
-    const packed = new Float64Array(bucket.length * dim);
-    items.forEach((item, i) => packed.set(item, i * dim));
-    const left = [], right = [];
-    for (let i=0; i<bucket.length; i++) for(let j=i+1; j<bucket.length; j++) {
-      left.push(i); right.push(j);
+    const packed = new Float64Array(vectors.length * dim);
+    vectors.forEach((row, index) => packed.set(row, index * dim));
+    const result = native.centerAudioVectors(packed, dim);
+    if (!Array.isArray(result) || result.length !== packed.length ||
+        result.some((value) => !Number.isFinite(value))) throw new Error("Invalid centered vector output");
+    const normalized = new Float64Array(result);
+    const centered = Array.from({ length: vectors.length },
+      (_, index) => normalized.subarray(index * dim, (index + 1) * dim));
+    // Guard against an incompatible binary without repeating full JS work.
+    for (const index of new Set([0, Math.floor(vectors.length / 2), vectors.length - 1])) {
+      let square = 0;
+      for (const value of centered[index]) square += value * value;
+      if (square > 1e-12 && Math.abs(Math.sqrt(square) - 1) > 1e-8) {
+        throw new Error("Native audio normalization parity mismatch");
+      }
     }
-    const result = native.pairDots(packed, Uint32Array.from(left), Uint32Array.from(right), dim);
-    if (!Array.isArray(result) || result.length !== left.length ||
-      result.some((n) => !Number.isFinite(n))) throw new Error("Invalid duplicate-pair output");
-    for(const idx of [0, result.length - 1]) {
-      let expected = 0;
-      for(let k=0; k<dim; k++) expected += items[left[idx]][k] * items[right[idx]][k];
-      if(Math.abs(expected-result[idx]) > 1e-9) throw new Error("Duplicate-pair parity mismatch");
+    return centered;
+  } catch (error) {
+    warnOnce("similarity", error);
+    return null;
+  }
+}
+
+
+/** Batch CLAP Float32 decode/normalize; never incur a native call per audio record. */
+function tryDecodeNormalizedAudio(buffers, dimensions) {
+  const native = getAddon("similarity");
+  if (!native || typeof native.decodeNormalizedAudio !== "function" ||
+      !Array.isArray(buffers) || buffers.length < 192 || buffers.length > 10_000 ||
+      !Number.isSafeInteger(dimensions) || dimensions < 1 || dimensions > 16_384 ||
+      buffers.length * dimensions > 1_500_000 ||
+      buffers.some((buffer) => !Buffer.isBuffer(buffer) || buffer.length !== dimensions * 4)) return null;
+  try {
+    const packed = Buffer.concat(buffers);
+    const output = native.decodeNormalizedAudio(packed, dimensions);
+    if (!Array.isArray(output) || output.length !== buffers.length * dimensions ||
+        output.some((value) => !Number.isFinite(value))) throw new Error("Invalid decoded audio batch");
+    const values = new Float64Array(output);
+    const vectors = Array.from({ length: buffers.length },
+      (_, index) => values.subarray(index * dimensions, (index + 1) * dimensions));
+    // Check a few rows; the full JS reference is checked in native parity tests.
+    for (const index of new Set([0, buffers.length >>> 1, buffers.length - 1])) {
+      let square = 0;
+      for (const value of vectors[index]) square += value * value;
+      if (Math.abs(Math.sqrt(square) - 1) > 1e-8) throw new Error("Decoded audio normalization mismatch");
     }
-    return result;
-  } catch(error) { warnOnce("duplicates", error); return null; }
+    return vectors;
+  } catch (error) {
+    warnOnce("similarity", error);
+    return null;
+  }
 }
 
 /**
@@ -124,4 +162,4 @@ function tryBatchPairDots(buckets, vectors) {
     return null;
   }
 }
-module.exports = { tryDotMatrix, tryPairDots, tryBatchPairDots };
+module.exports = { tryDotMatrix, tryCenterAudioProfiles, tryDecodeNormalizedAudio, tryBatchPairDots };

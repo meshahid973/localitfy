@@ -6,7 +6,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { getAddon } = require("../electron/native/backend.cjs");
-const { tryDotMatrix, tryPairDots, tryBatchPairDots } = require("../electron/native/compute.cjs");
+const { tryDotMatrix, tryBatchPairDots, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../electron/native/compute.cjs");
 const { markStandardAudioFilter, tryScanAudioFiles } = require("../electron/native/scanner.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
@@ -19,12 +19,12 @@ assert.equal(tryDotMatrix([new Float64Array([1,2])],[new Float64Array([3,4])]),n
 process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,scanner";
 const native = getAddon("similarity");
 if (!native) throw new Error("Native addon is required for this explicit Rust test");
-for(const name of ["dotMatrix", "pairDots", "scanAudioFiles"]) {
+for(const name of ["dotMatrix", "pairDots", "centerAudioVectors", "decodeNormalizedAudio", "scanAudioFiles"]) {
   assert.equal(typeof native[name], "function", "Missing native export: "+name);
 }
 // Guard against a false-positive parity test caused by a silent JS fallback.
 // Count actual NAPI invocations made inside the production integration paths.
-const nativeCalls = { dotMatrix: 0, pairDots: 0 };
+const nativeCalls = { dotMatrix: 0, pairDots: 0, centerAudioVectors: 0, decodeNormalizedAudio: 0 };
 for (const name of Object.keys(nativeCalls)) {
   const original = native[name];
   native[name] = function (...args) {
@@ -53,6 +53,61 @@ function evaluate(mode,fn) {
   process.env.LOCALTIFY_RUST_PHASES = mode;
   return fn();
 }
+const referenceCenter = (rows) => {
+  const mean = rows[0].map ? new Float64Array(rows[0].length) : [];
+  for (const row of rows) for (let i = 0; i < mean.length; i++) mean[i] += row[i] / rows.length;
+  return rows.map((row) => {
+    const values = Float64Array.from(row, (value, i) => value - mean[i]);
+    let square = 0;
+    for (const value of values) square += value * value;
+    const norm = Math.sqrt(square);
+    if (norm > 1e-9) for (let i=0;i<values.length;i++) values[i] /= norm;
+    else values.fill(0);
+    return values;
+  });
+};
+const centerFixture = Array.from({length:240}, (_,index)=>vectors[index % vectors.length]);
+assert.equal(evaluate("",()=>tryCenterAudioProfiles(centerFixture)),null,
+  "centered audio must fall back with Rust disabled");
+const beforeNativeCenter = nativeCalls.centerAudioVectors;
+const actualCenter = evaluate("similarity",()=>tryCenterAudioProfiles(centerFixture));
+assert.ok(nativeCalls.centerAudioVectors > beforeNativeCenter && actualCenter?.length === centerFixture.length,
+  "large audio center operation must invoke native Rust");
+const expectedCenter = referenceCenter(centerFixture);
+for(let i=0;i<actualCenter.length;i++) for(let j=0;j<actualCenter[i].length;j++)
+  assert.ok(Math.abs(actualCenter[i][j]-expectedCenter[i][j]) <= 1e-10, 
+    "centered audio parity changed at "+i+":"+j);
+assert.deepEqual(native.centerAudioVectors(new Float64Array([1,2,1,2]),2),[0,0,0,0],
+  "constant vectors must center to zero");
+assert.throws(()=>native.centerAudioVectors(new Float64Array([NaN,2]),2),
+  /non-finite|Invalid/i, "non-finite vectors must be rejected");
+
+const rawBuffers=Array.from({length:240},(_,i)=>{
+  const buffer=Buffer.alloc(512*4);
+  for(let j=0;j<512;j++) buffer.writeFloatLE(Math.sin(i*.15 + j*.045),j*4);
+  return buffer;
+});
+const baselineDecoded=rawBuffers.map((buffer)=>{
+  const output=new Float64Array(512);
+  let square=0;
+  for(let i=0;i<512;i++){const value=buffer.readFloatLE(i*4);output[i]=value;square+=value*value;}
+  const norm=Math.sqrt(square);
+  for(let i=0;i<512;i++)output[i]/=norm;
+  return output;
+});
+assert.equal(evaluate("",()=>tryDecodeNormalizedAudio(rawBuffers,512)),null,
+  "bulk CLAP decoder must be disabled when Rust is off");
+const beforeNativeDecoder = nativeCalls.decodeNormalizedAudio;
+const decoded=evaluate("similarity",()=>tryDecodeNormalizedAudio(rawBuffers,512));
+assert.ok(nativeCalls.decodeNormalizedAudio > beforeNativeDecoder && decoded?.length === 240,
+  "bulk CLAP decoder must use native Rust");
+for(let i=0;i<decoded.length;i++)for(let j=0;j<512;j++)
+  assert.ok(Math.abs(decoded[i][j]-baselineDecoded[i][j])<1e-12,
+    "Float32 CLAP decoder parity changed at "+i+":"+j);
+const badBuffers=rawBuffers.slice();badBuffers[15]=Buffer.alloc(2048);
+assert.equal(evaluate("similarity",()=>tryDecodeNormalizedAudio(badBuffers,512)),null,
+  "zero vector must fall back to per-record JS validation");
+
 const mixesJs = evaluate("",()=>generateMixes(songs,"2026-11-10:0"));
 const mixesRust = evaluate("similarity",()=>generateMixes(songs,"2026-11-10:0"));
 assert.deepEqual(mixesRust,mixesJs,"Daily Mixes outputs changed");
@@ -61,7 +116,10 @@ const largeSongs = Array.from({ length: 600 }, (_, index) => ({
 }));
 const largeMixesJs = evaluate("", () => generateMixes(largeSongs, "2026-11-10:large"));
 const beforeLargeMixes = nativeCalls.dotMatrix;
+const beforeLargeCenters = nativeCalls.centerAudioVectors;
 const largeMixesRust = evaluate("similarity", () => generateMixes(largeSongs, "2026-11-10:large"));
+assert.ok(nativeCalls.centerAudioVectors > beforeLargeCenters, 
+  "large-library mixes must center audio in native Rust");
 assert.ok(nativeCalls.dotMatrix > beforeLargeMixes,
   "large-library Daily Mixes must actually invoke native dotMatrix");
 assert.deepEqual(largeMixesRust, largeMixesJs, "large-library native clustering changed Daily Mixes");
@@ -78,7 +136,7 @@ const sizes=new Map(dupSongs.map(s=>[s.id,5000000]));
 const a=evaluate("",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:sizes}));
 const b=evaluate("duplicates",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:sizes}));
 assert.deepEqual(b,a,"duplicate grouping/recommendation changed");
-assert.ok(Math.abs(tryPairDots(dupSongs.slice(0,2),dupVectors)[0]-1) < 1e-9,"native duplicate pair not selected");
+// The obsolete per-bucket JS/native bridge was removed; only batched pair calls remain.
 
 const isAudioFile=(name)=>/\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(name);
 markStandardAudioFilter(isAudioFile);

@@ -83,6 +83,93 @@ pub fn pair_dots(vectors: &[f64], left: &[u32], right: &[u32], dimensions: u32) 
     pair_dots_inner(vectors, left, right, dimension(dimensions)?)
 }
 
+
+/// Center and normalize all library audio vectors in a *single* native call.
+/// Mirrors listening-signals.cjs libraryMean/centered: row-order mean
+/// accumulation, scalar square summation and the same 1e-9 zero threshold.
+/// The caller retains JS as the opt-out/failure fallback.
+fn center_audio_inner(vectors: &[f64], dim: usize) -> Result<Vec<f64>> {
+    if vectors.is_empty() || vectors.len() % dim != 0 || vectors.len() > 1_500_000 {
+        return Err(invalid("Invalid centered audio matrix size"));
+    }
+    let rows = vectors.len() / dim;
+    if rows > 10_000 || !vectors.iter().all(|value| value.is_finite()) {
+        return Err(invalid("Invalid or non-finite centered audio matrix"));
+    }
+    let mut mean = vec![0.0; dim];
+    for row in vectors.chunks_exact(dim) {
+        for i in 0..dim {
+            mean[i] += row[i] / rows as f64;
+        }
+    }
+    let mut centered = Vec::with_capacity(vectors.len());
+    for row in vectors.chunks_exact(dim) {
+        let offset = centered.len();
+        let mut magnitude = 0.0;
+        for i in 0..dim {
+            let value = row[i] - mean[i];
+            centered.push(value);
+            magnitude += value * value;
+        }
+        let norm = magnitude.sqrt();
+        if norm > 1e-9 {
+            for value in &mut centered[offset..] {
+                *value /= norm;
+            }
+        } else {
+            centered[offset..].fill(0.0);
+        }
+    }
+    Ok(centered)
+}
+
+#[napi]
+pub fn center_audio_vectors(vectors: &[f64], dimensions: u32) -> Result<Vec<f64>> {
+    center_audio_inner(vectors, dimension(dimensions)?)
+}
+
+
+/// Decode and normalize contiguous little-endian Float32 CLAP vectors.
+/// Mirrors Buffer.readFloatLE + scalar Float64 norm in readNormalizedVector().
+/// A malformed vector rejects the entire batch, so JS can skip only that row.
+fn decode_normalized_audio_inner(bytes: &[u8], dim: usize) -> Result<Vec<f64>> {
+    let stride = dim.checked_mul(4).ok_or_else(|| invalid("Invalid audio decoder dimensions"))?;
+    if bytes.is_empty() || bytes.len() % stride != 0 || bytes.len() / 4 > 1_500_000 {
+        return Err(invalid("Invalid audio decoder byte length"));
+    }
+    let count = bytes.len() / stride;
+    if count > 10_000 {
+        return Err(invalid("Audio decoder batch too large"));
+    }
+    let mut result = Vec::with_capacity(count * dim);
+    for row in bytes.chunks_exact(stride) {
+        let offset = result.len();
+        let mut square = 0.0_f64;
+        for index in 0..dim {
+            let i = index * 4;
+            let value = f32::from_le_bytes([row[i], row[i + 1], row[i + 2], row[i + 3]]) as f64;
+            if !value.is_finite() {
+                return Err(invalid("Non-finite audio profile value"));
+            }
+            result.push(value);
+            square += value * value;
+        }
+        let norm = square.sqrt();
+        if !norm.is_finite() || norm <= 0.0 {
+            return Err(invalid("Zero or invalid audio vector norm"));
+        }
+        for value in &mut result[offset..] {
+            *value /= norm;
+        }
+    }
+    Ok(result)
+}
+
+#[napi]
+pub fn decode_normalized_audio(bytes: &[u8], dimensions: u32) -> Result<Vec<f64>> {
+    decode_normalized_audio_inner(bytes, dimension(dimensions)?)
+}
+
 #[napi(object)]
 pub struct ScanResult {
     pub files: Vec<String>,
@@ -180,6 +267,40 @@ mod tests {
         let values = pair_dots_inner(&[1., 0., 0., 1., 0.5, 0.5], &[0, 1], &[2, 2], 2).unwrap();
         assert_eq!(values, vec![0.5, 0.5]);
         assert!(pair_dots_inner(&[1., 0.], &[0], &[1], 2).is_err());
+    }
+
+    #[test]
+    fn center_audio_matches_js_scalar_contract_and_rejects_invalid_rows() {
+        let rows = [1.0, 0.0, 0.0, 1.0, -1.0, 0.0];
+        let actual = center_audio_inner(&rows, 2).unwrap();
+        let mean = [0.0, 1.0 / 3.0];
+        for (index, row) in rows.chunks_exact(2).enumerate() {
+            let mut expected = [row[0] - mean[0], row[1] - mean[1]];
+            let norm = (expected[0] * expected[0] + expected[1] * expected[1]).sqrt();
+            if norm > 1e-9 { expected[0] /= norm; expected[1] /= norm; }
+            for col in 0..2 {
+                assert!((actual[index * 2 + col] - expected[col]).abs() < 1e-12);
+            }
+        }
+        let identical = center_audio_inner(&[1.0, 2.0, 1.0, 2.0], 2).unwrap();
+        assert_eq!(identical, vec![0.0; 4]);
+        assert!(center_audio_inner(&[f64::NAN, 1.0], 2).is_err());
+        assert!(center_audio_inner(&[1.0, 2.0, 3.0], 2).is_err());
+    }
+
+    #[test]
+    fn audio_decoder_matches_float32_scalar_and_rejects_bad_rows() {
+        let input: Vec<u8> = [1.0f32, 2.0, -3.0, 4.0]
+            .iter().flat_map(|value| value.to_le_bytes()).collect();
+        let decoded = decode_normalized_audio_inner(&input, 2).unwrap();
+        let first = 5.0f64.sqrt();
+        let second = 25.0f64.sqrt();
+        assert!((decoded[0] - 1.0/first).abs() < 1e-12);
+        assert!((decoded[1] - 2.0/first).abs() < 1e-12);
+        assert!((decoded[2] + 3.0/second).abs() < 1e-12);
+        assert!((decoded[3] - 4.0/second).abs() < 1e-12);
+        assert!(decode_normalized_audio_inner(&[0u8; 8], 2).is_err());
+        assert!(decode_normalized_audio_inner(&[1u8; 7], 2).is_err());
     }
 
     #[test]
