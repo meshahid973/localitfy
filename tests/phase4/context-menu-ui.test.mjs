@@ -36,6 +36,7 @@ test("song, collection and sidebar context menus share dismissal and keyboard na
     'event.key !== "Escape"', '"ArrowDown"', '"ArrowUp"', '"Home"', '"End"',
     'button[role="menuitem"]:not(:disabled)', 'previousFocus.focus({ preventScroll: true })',
     'window.addEventListener("scroll", onScroll, true)',
+    'previousFocus?.isConnected) previousFocus.focus({ preventScroll: true })',
     'onClick={(event) => event.stopPropagation()}',
     'document.querySelector(".app") || document.body'
   ]) assert.ok(shared.includes(token), `Shared menu must preserve: ${token}`);

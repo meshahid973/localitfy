@@ -74,7 +74,13 @@ export function ContextMenuLayer({
   }, [placeMenu, x, y]);
 
   const handleMenuKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Tab") { onCloseRef.current(); return; }
+    if (event.key === "Tab") {
+      event.preventDefault();
+      const previousFocus = previousFocusRef.current;
+      onCloseRef.current();
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+      return;
+    }
     if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
     const menu = menuRef.current;
     if (!menu) return;

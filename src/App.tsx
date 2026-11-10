@@ -854,25 +854,6 @@ function MainModeApp() {
 
 
   useEffect(() => {
-    if (!songContextMenu) return;
-
-    const closeMenu = () => setSongContextMenu(null);
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeMenu();
-    };
-
-    window.addEventListener("resize", closeMenu);
-    window.addEventListener("scroll", closeMenu, true);
-    document.addEventListener("keydown", closeOnEscape);
-
-    return () => {
-      window.removeEventListener("resize", closeMenu);
-      window.removeEventListener("scroll", closeMenu, true);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [songContextMenu]);
-
-  useEffect(() => {
     return () => {
       if (importOverlayTimerRef.current) {
         window.clearTimeout(importOverlayTimerRef.current);

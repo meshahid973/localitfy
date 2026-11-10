@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useModalFocus } from "../../../shared/hooks/useModalFocus";
 import { Heart, HeartOff, ImagePlus, Save, Shuffle, Trash2, X } from "lucide-react";
 import { Cover } from "../../covers/Cover";
 import { formatTime } from "../../../shared/utils/format";
@@ -26,6 +27,7 @@ export type SongEditorModalProps = {
 
 export default function SongEditorModal(props: SongEditorModalProps) {
   const { song } = props;
+  const dialogRef = useModalFocus(Boolean(song));
   useEffect(() => {
     document.body.classList.toggle("localtifyEditorModalOpen", Boolean(song));
     return () => document.body.classList.remove("localtifyEditorModalOpen");
@@ -40,7 +42,7 @@ export default function SongEditorModal(props: SongEditorModalProps) {
 
   return (
     <div className="modalWrap editorModalWrap" onClick={onClose}>
-      <div className="editorModal editorModalMotion" role="dialog" aria-modal="true" aria-labelledby="song-editor-dialog-title" onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} tabIndex={-1} className="editorModal editorModalMotion" role="dialog" aria-modal="true" aria-labelledby="song-editor-dialog-title" onClick={(event) => event.stopPropagation()}>
         <div className="modalHead editorModalHead">
           <div>
             <p className="eyebrow">song details</p>
