@@ -52,7 +52,8 @@ export default function AndroidSyncSettings() {
         <button type="button" className="settingsActionButton settingsPrimaryAction" disabled={syncing} onClick={() => void syncNow()}>
           <RefreshCw size={14} /> {syncing ? "Syncing…" : "Sync now"}</button>
         <button type="button" className="settingsActionButton settingsGhostAction" disabled={syncing}
-          onClick={() => void forgetMac().then(() => setPaired(false))}>Unpair</button>
+          onClick={() => void forgetMac().then(() => { setPaired(false); setMessage(""); })
+            .catch((error) => setMessage(error instanceof Error ? error.message : "Could not unpair"))}>Unpair</button>
       </div>
       <p className="settingsHintText" role="status" aria-live="polite">
         {syncing ? [progress.message, transfer].filter(Boolean).join(" · ") : last ? `${last.message} · ${ago(last.at)}` : "Not synced yet."}

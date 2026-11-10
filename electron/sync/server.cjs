@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
 
-const PROTOCOL = 1;
+const PROTOCOL = 2;
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
 /** Mac features a paired phone may use while it is on the home network; the phone keeps the answers for offline use. */
 const PHONE_FEATURES = new Set([
@@ -136,6 +136,7 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "Ma
 
   function applyChanges(body) {
     const result = { songs: 0, playlists: 0, playEvents: 0 };
+    const finishedEvents = [];
     const changes = body?.songs && typeof body.songs === "object" ? body.songs : {};
     for (const [id, raw] of Object.entries(changes)) {
       const song = repositories.songs.get(id);
@@ -164,10 +165,9 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "Ma
       if (!repositories.listening.record(event)) continue;
       result.playEvents += 1;
       // Finished phone plays are scrobbled like the Mac's own; an unfinished one comes back once it ends.
-      if (event.outcome !== "active") onPlayEvent(event);
+      if (event.outcome !== "active") finishedEvents.push(event);
     }
-    if (result.songs || result.playlists || result.playEvents) onChanged(result);
-    return result;
+    return { applied: result, finishedEvents };
   }
 
   function send(response, status, body) {
@@ -251,7 +251,14 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "Ma
       return send(response, 200, snapshot());
     }
     if (request.method === "POST" && route === "/v1/changes") {
-      return send(response, 200, { ok: true, applied: applyChanges(await readJson(request)) });
+      const body = await readJson(request);
+      const receipt = repositories.sync.applyBatch(device.id, body.sequence, sha256(JSON.stringify(body)), () => applyChanges(body));
+      // UI refreshes and scrobbling must not escape a rolled-back database transaction or run again on replay.
+      if (!receipt.replayed) {
+        onChanged(receipt.result.applied);
+        for (const event of receipt.result.finishedEvents) onPlayEvent(event);
+      }
+      return send(response, 200, { ok: true, sequence: body.sequence, applied: receipt.result.applied });
     }
     const featureMatch = /^\/v1\/call\/([a-z:-]+)$/.exec(route);
     if (request.method === "POST" && featureMatch && PHONE_FEATURES.has(featureMatch[1]) && callFeature) {

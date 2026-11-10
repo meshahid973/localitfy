@@ -3,6 +3,7 @@ import { LocaltifyNative } from "./native";
 import { fileKey, phoneLibrary, type RemoteSong } from "./library";
 import { fromMacOrKept, markMacReachable } from "./macFeatures";
 import { EDITABLE_SONG_FIELDS, phonePlaylistChanges, phoneSongChanges, type SyncPlaylist, type SyncSongFields } from "./syncMerge";
+import { eventVersion, rebasePlaylists, rebaseSongEdits, type SyncBatch } from "./syncExchange";
 
 export const SYNC_PORT = 47836;
 const STALE_PLAY_MS = 6 * 60 * 60 * 1000;
@@ -85,6 +86,7 @@ async function call<T>(path: string, options: { method?: string; body?: unknown;
 }
 
 export async function pairWithMac(address: string, code: string) {
+  if (phoneLibrary.pendingSync) throw new Error("Finish the pending sync with your paired Mac before changing pairing");
   const base = normalizeMacAddress(address);
   if (!base) throw new Error("Enter the Mac's address, for example 192.168.1.20");
   const hello = await call<{ app?: string; name?: string }>("/v1/hello", { base, token: "" });
@@ -95,6 +97,7 @@ export async function pairWithMac(address: string, code: string) {
 }
 
 export async function forgetMac() {
+  if (phoneLibrary.pendingSync) throw new Error("Finish the pending sync before unpairing so acknowledged edits are not sent twice");
   phoneLibrary.pairing = null;
   await phoneLibrary.save(["pairing"]);
 }
@@ -105,46 +108,66 @@ const baseFields = (song: SyncSongFields): SyncSongFields => {
   return fields;
 };
 
-/** Phone state that a sync must not lose: if it changes while the Mac is applying our edits, merge again. */
-const phoneFingerprint = () => `${phoneLibrary.revision}:${phoneLibrary.pendingEvents.length}`;
-
 let featuresChanged = false;
+
+function requireCurrentProtocol(snapshot: Snapshot) {
+  if (snapshot.protocol !== 2) throw new Error("Update and restart the Mac app before syncing with this Android version");
+}
+
+async function adoptSnapshot(after: Snapshot, sent: Pick<SyncBatch, "sentSongs" | "sentPlaylists" | "playEvents">, sequence?: number) {
+  const songs = rebaseSongEdits(sent.sentSongs, phoneLibrary.phoneSongFields(), after.songs, phoneLibrary.edits);
+  const playlists = rebasePlaylists(sent.sentPlaylists, phoneLibrary.playlists, after.playlists);
+  const versions = new Set(sent.playEvents.map(eventVersion));
+  const laterEvents = phoneLibrary.pendingEvents.some((event) => !versions.has(eventVersion(event)));
+  const removable = new Set(sent.playEvents.filter((event) => event.outcome !== "active" || event.updatedAt < Date.now() - STALE_PLAY_MS).map(eventVersion));
+  phoneLibrary.pendingEvents = phoneLibrary.pendingEvents.filter((event) => !removable.has(eventVersion(event)));
+  phoneLibrary.edits = songs.edits;
+  phoneLibrary.remoteSongs = after.songs;
+  phoneLibrary.playlists = playlists.playlists;
+  phoneLibrary.listeningCounts = after.listeningCounts;
+  featuresChanged = adoptMacFeatures(after.features) || featuresChanged;
+  phoneLibrary.base = { songs: Object.fromEntries(after.songs.map((song) => [song.id, baseFields(song)])), playlists: after.playlists };
+  if (sequence !== undefined && phoneLibrary.pairing) phoneLibrary.pairing = { ...phoneLibrary.pairing, sequence };
+  phoneLibrary.pendingSync = null;
+  const revision = phoneLibrary.revision;
+  // Baseline, acknowledgement, and remaining local edits commit together. A restart sees either the old outbox or all of this.
+  await phoneLibrary.saveSyncCheckpoint();
+  onLibraryChanged();
+  return songs.changed || playlists.changed || laterEvents || revision !== phoneLibrary.revision;
+}
 
 async function exchangeEdits() {
   for (let round = 0; round < 3; round += 1) {
     report({ phase: "connecting", message: `Connecting to ${phoneLibrary.pairing?.name || "your Mac"}…` });
     const before = await call<Snapshot>("/v1/snapshot");
+    requireCurrentProtocol(before);
+    let batch = phoneLibrary.pendingSync;
+    if (!batch) {
+      const sentSongs = phoneLibrary.phoneSongFields().map(baseFields);
+      const sentPlaylists = structuredClone(phoneLibrary.playlists);
+      const songs = phoneSongChanges(new Map(Object.entries(phoneLibrary.base.songs)), sentSongs);
+      const playlists = phonePlaylistChanges(phoneLibrary.base.playlists, before.playlists, sentPlaylists);
+      // Copy exact event versions, including active plays. Never acknowledge a later version that was not sent.
+      const playEvents = structuredClone(phoneLibrary.pendingEvents.slice(0, 20000));
+      if (!Object.keys(songs).length && !playlists.put.length && !playlists.delete.length && !playEvents.length) {
+        if (await adoptSnapshot(before, { sentSongs, sentPlaylists, playEvents })) continue;
+        return;
+      }
+      batch = { sequence: (phoneLibrary.pairing?.sequence || 0) + 1, pairingToken: phoneLibrary.pairing?.token || "", songs, playlists, playEvents, sentSongs, sentPlaylists };
+      phoneLibrary.pendingSync = batch;
+    }
+    if (batch.pairingToken !== phoneLibrary.pairing?.token) throw new Error("This pending sync belongs to another pairing");
+    // Also persist on retry, in case the previous attempt failed before its outbox reached disk.
+    await phoneLibrary.save(["pendingSync", "edits", "playlists", "pendingEvents", "remoteSongs", "base"]);
     report({ phase: "merging", message: "Merging changes…" });
-    const fingerprint = phoneFingerprint();
-    const base = new Map(Object.entries(phoneLibrary.base.songs));
-    const songs = phoneSongChanges(base, phoneLibrary.phoneSongFields());
-    const playlists = phonePlaylistChanges(phoneLibrary.base.playlists, before.playlists, phoneLibrary.playlists);
-    // Unfinished plays go too: the Mac updates them when they end. One cut short by the app being killed never ends.
-    const playEvents = phoneLibrary.pendingEvents;
-    const hasChanges = Object.keys(songs).length || playlists.put.length || playlists.delete.length || playEvents.length;
-    if (hasChanges) await call("/v1/changes", { method: "POST", body: { songs, playlists, playEvents } });
-    const after = hasChanges ? await call<Snapshot>("/v1/snapshot") : before;
-    if (phoneFingerprint() !== fingerprint) continue;
-
-    // Adopt the Mac's merged result. Local-only fields (resume position and the like) stay.
-    const sent = new Set(playEvents.filter((event) => event.outcome !== "active" || event.updatedAt < Date.now() - STALE_PLAY_MS)
-      .map((event) => `${event.id}:${event.updatedAt}`));
-    phoneLibrary.pendingEvents = phoneLibrary.pendingEvents.filter((event) => !sent.has(`${event.id}:${event.updatedAt}`));
-    const synced = new Set<string>([...EDITABLE_SONG_FIELDS, "playCount", "lastPlayed"]);
-    phoneLibrary.edits = Object.fromEntries(Object.entries(phoneLibrary.edits).flatMap(([id, edit]) => {
-      const rest = Object.fromEntries(Object.entries(edit).filter(([key]) => !synced.has(key)));
-      return Object.keys(rest).length ? [[id, rest]] : [];
-    }));
-    phoneLibrary.remoteSongs = after.songs;
-    phoneLibrary.playlists = after.playlists;
-    phoneLibrary.listeningCounts = after.listeningCounts;
-    featuresChanged = adoptMacFeatures(after.features) || featuresChanged;
-    phoneLibrary.base = { songs: Object.fromEntries(after.songs.map((song) => [song.id, baseFields(song)])), playlists: after.playlists };
-    await phoneLibrary.save(["remoteSongs", "playlists", "listeningCounts", "base", "edits", "pendingEvents", "macFeatures"]);
-    onLibraryChanged();
-    return;
+    const { sequence, songs, playlists, playEvents } = batch;
+    const receipt = await call<{ sequence: number }>("/v1/changes", { method: "POST", body: { sequence, songs, playlists, playEvents } });
+    if (receipt.sequence !== sequence) throw new Error("The Mac did not acknowledge this sync batch. Update and restart the Mac app");
+    const after = await call<Snapshot>("/v1/snapshot");
+    requireCurrentProtocol(after);
+    if (!await adoptSnapshot(after, batch, sequence)) return;
   }
-  throw new Error("The library kept changing during sync. Try again");
+  throw new Error("More changes are waiting. Sync again to continue");
 }
 
 const PARALLEL_DOWNLOADS = 4;

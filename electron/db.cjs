@@ -4,6 +4,7 @@ const playEvents = require("./db/play-events.cjs");
 const { listeningStats } = require("./analysis/listening-signals.cjs");
 const lyricsSelections = require("./db/lyrics-selections.cjs");
 const duplicateMerge = require("./db/duplicate-merge.cjs");
+const phoneSync = require("./db/phone-sync.cjs");
 const Database = require("better-sqlite3");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
@@ -11,7 +12,7 @@ const path = require("node:path");
 const packageMetadata = require("../package.json");
 
 const APP_VERSION = String(packageMetadata?.version || "0.0.0");
-const SCHEMA_VERSION = 19;
+const SCHEMA_VERSION = 20;
 const BACKUP_KEEP_LIMIT = 8;
 
 let db = null;
@@ -643,7 +644,7 @@ function runMigrations(database) {
   createMetaTables(database);
 
   const previousVersion = getStoredSchemaVersion(database);
-  const shouldBackup = previousVersion !== SCHEMA_VERSION || !tableExists(database, "songs") || !tableExists(database, "settings") || !tableExists(database, "playlists") || !tableExists(database, "playlist_songs") || !tableExists(database, "play_events") || !tableExists(database, "song_analysis") || !tableExists(database, "daily_mixes") || !tableExists(database, "lyrics_selections");
+  const shouldBackup = previousVersion !== SCHEMA_VERSION || !tableExists(database, "songs") || !tableExists(database, "settings") || !tableExists(database, "playlists") || !tableExists(database, "playlist_songs") || !tableExists(database, "play_events") || !tableExists(database, "song_analysis") || !tableExists(database, "daily_mixes") || !tableExists(database, "lyrics_selections") || !tableExists(database, "phone_sync_receipts");
 
   lastMigrationReport = {
     ok: true,
@@ -674,6 +675,7 @@ function runMigrations(database) {
     songAnalysis.createSongAnalysisTable(database);
     dailyMixes.createDailyMixesTable(database);
     lyricsSelections.createLyricsSelectionsTable(database);
+    phoneSync.createPhoneSyncTable(database);
     lastMigrationReport.addedColumns = [
       ...songMigration.addedColumns,
       ...settingsAdded.map((name) => `settings.${name}`),
@@ -1100,6 +1102,7 @@ function getDatabaseStatus() {
 }
 
 module.exports = {
+  applyPhoneSyncBatch: (deviceId, sequence, digest, apply) => phoneSync.applyPhoneSyncBatch(ensureDb(), deviceId, sequence, digest, apply),
   mergeDuplicateSongs: (merges) => duplicateMerge.mergeDuplicateSongs(ensureDb(), merges),
   getAudioProfiles: (modelId, analyzerVersion) => duplicateMerge.listAudioProfiles(ensureDb(), modelId, analyzerVersion),
   getLyricsSelection: (songId) => lyricsSelections.readLyricsSelection(ensureDb(), songId),

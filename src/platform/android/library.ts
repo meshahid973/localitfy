@@ -4,11 +4,12 @@ import type { PlayEvent } from "../../features/player/listeningHistory";
 import { LocaltifyNative } from "./native";
 import { readValue, writeValues } from "./store";
 import type { SyncPlaylist, SyncSongFields } from "./syncMerge";
+import type { SyncBatch } from "./syncExchange";
 
 export type FileInfo = { size: number; mtimeMs: number; ext: string };
 /** A song as the Mac sends it: library fields plus the versions of its audio and cover files. */
 export type RemoteSong = SyncSongFields & Record<string, unknown> & { file: FileInfo; cover: FileInfo | null };
-export type Pairing = { url: string; token: string; name: string };
+export type Pairing = { url: string; token: string; name: string; sequence?: number };
 export type SyncRecord = { at: number; ok: boolean; message: string };
 
 type LocalFiles = Record<string, { audio?: string; audioExt?: string; cover?: string; coverExt?: string }>;
@@ -16,7 +17,7 @@ type LocalFiles = Record<string, { audio?: string; audioExt?: string; cover?: st
 export const fileKey = (info: FileInfo | null | undefined) => (info ? `${info.size}-${info.mtimeMs}` : "");
 
 /** The phone's copy of the library. Everything persists in IndexedDB; audio and covers live in app storage. */
-class PhoneLibrary {
+export class PhoneLibrary {
   paths = { files: "", mediaPrefix: "https://localhost/_localtify_media_/", deviceName: "Android phone" };
   remoteSongs: RemoteSong[] = [];
   /** Phone-side values of the editable fields, keyed by song ID. */
@@ -31,14 +32,16 @@ class PhoneLibrary {
   files: LocalFiles = {};
   pairing: Pairing | null = null;
   lastSync: SyncRecord | null = null;
+  pendingSync: SyncBatch | null = null;
   /** Bumped by every local edit, so a sync can tell whether the phone changed while it was running. */
   revision = 0;
   private loading: Promise<void> | null = null;
+  private checkpointDirty = false;
 
   load() {
     this.loading ??= (async () => {
       try { this.paths = await LocaltifyNative.getPaths(); } catch { /* keep defaults outside the app */ }
-      const [remoteSongs, edits, base, playlists, settings, macFeatures, pendingEvents, listeningCounts, files, pairing, lastSync] = await Promise.all([
+      const [remoteSongs, edits, base, playlists, settings, macFeatures, pendingEvents, listeningCounts, files, pairing, lastSync, pendingSync] = await Promise.all([
         readValue<RemoteSong[]>("remoteSongs", []),
         readValue<Record<string, Partial<Song>>>("edits", {}),
         readValue("base", this.base),
@@ -50,15 +53,27 @@ class PhoneLibrary {
         readValue<Array<[string, number, number]>>("listeningCounts", []),
         readValue<LocalFiles>("files", {}),
         readValue<Pairing | null>("pairing", null),
-        readValue<SyncRecord | null>("lastSync", null)
+        readValue<SyncRecord | null>("lastSync", null),
+        readValue<SyncBatch | null>("pendingSync", null)
       ]);
-      Object.assign(this, { remoteSongs, edits, base, playlists, settings, macFeatures, pendingEvents, listeningCounts, files, pairing, lastSync });
+      Object.assign(this, { remoteSongs, edits, base, playlists, settings, macFeatures, pendingEvents, listeningCounts, files, pairing, lastSync, pendingSync });
     })();
     return this.loading;
   }
 
-  save(keys: Array<"remoteSongs" | "edits" | "base" | "playlists" | "settings" | "macFeatures" | "pendingEvents" | "listeningCounts" | "files" | "pairing" | "lastSync">) {
-    return writeValues(Object.fromEntries(keys.map((key) => [key, this[key]])));
+  save(keys: Array<"remoteSongs" | "edits" | "base" | "playlists" | "settings" | "macFeatures" | "pendingEvents" | "listeningCounts" | "files" | "pairing" | "lastSync" | "pendingSync">) {
+    const selected = this.checkpointDirty ? [...new Set([...keys, ...this.checkpointKeys])] : keys;
+    return writeValues(Object.fromEntries(selected.map((key) => [key, this[key]])));
+  }
+
+  private readonly checkpointKeys = ["remoteSongs", "playlists", "listeningCounts", "base", "edits", "pendingEvents", "macFeatures", "pairing", "pendingSync"] as const;
+
+  async saveSyncCheckpoint() {
+    // Until this commit succeeds, concurrent edit saves must carry the same baseline/acknowledgement with them.
+    // Otherwise a failed checkpoint followed by a successful edit write could persist edits against an older baseline.
+    this.checkpointDirty = true;
+    await this.save([...this.checkpointKeys]);
+    this.checkpointDirty = false;
   }
 
   effectiveSettings(): Partial<Settings> {
@@ -123,6 +138,7 @@ class PhoneLibrary {
     const index = this.pendingEvents.findIndex((item) => item.id === event.id);
     if (index >= 0) this.pendingEvents[index] = event;
     else this.pendingEvents.push(event);
+    this.revision += 1;
     void this.save(["pendingEvents"]);
     return true;
   }

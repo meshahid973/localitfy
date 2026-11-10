@@ -24,11 +24,13 @@ export async function readValue<T>(key: string, fallback: T): Promise<T> {
 }
 
 export async function writeValues(values: Record<string, unknown>) {
+  // Capture values before yielding; callers can continue editing arrays/objects while IndexedDB opens.
+  const entries = Object.entries(values).map(([key, value]) => [key, structuredClone(value)] as const);
   const db = await open();
   return new Promise<void>((resolve, reject) => {
     const transaction = db.transaction(STORE, "readwrite");
     const store = transaction.objectStore(STORE);
-    for (const [key, value] of Object.entries(values)) store.put(value, key);
+    for (const [key, value] of entries) store.put(value, key);
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
     transaction.onabort = () => reject(transaction.error);

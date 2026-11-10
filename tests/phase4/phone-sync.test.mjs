@@ -6,6 +6,7 @@ import test from "node:test";
 import ts from "typescript";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
+import { receiptDatabase, receiptRepository } from "../helpers/phone-sync-fixture.mjs";
 
 const require = createRequire(import.meta.url);
 const { createSyncServer, isPrivateAddress } = require("../../electron/sync/server.cjs");
@@ -77,6 +78,7 @@ function fakeLibrary(dir) {
     events,
     get playlists() { return playlists; },
     repositories: {
+      sync: receiptRepository(receiptDatabase()),
       songs: { list: () => songs, get: (id) => songs.find((song) => song.id === id) || null, patch: (id, patch) => Object.assign(songs.find((song) => song.id === id), patch) },
       playlists: { get: () => playlists, save: (next) => { playlists = next; } },
       listening: { record: (event) => { events.push(event); return true; }, counts: () => [["a", 1, 0]] }
@@ -111,6 +113,7 @@ test("server: pairing, auth, snapshot, file download and applying phone changes"
 
     const event = { id: "e1", sessionId: "s", songId: "a", startedAt: 1, updatedAt: 2, endedAt: 2, msListened: 1, outcome: "ended", contextType: "library", contextId: null };
     const applied = await (await post("/v1/changes", {
+      sequence: 1,
       songs: { a: { liked: true, playCountDelta: 3, title: 7, filePath: "/etc/passwd" }, missing: { liked: true } },
       playlists: { put: [playlist("p", ["a", "a"], "edited"), playlist("new", [])], delete: [] },
       playEvents: [event]
@@ -174,7 +177,7 @@ test("server: paired phones can use the Mac's features, only the listed ones, an
     assert.deepEqual(snapshot.features, { lyricsEnabled: true }, "only feature switches are shared, never keys or other settings");
 
     const play = (id, outcome) => ({ id, sessionId: "s", songId: "a", startedAt: 1, updatedAt: 2, endedAt: 2, msListened: 40000, outcome, contextType: "library", contextId: null });
-    await post("/v1/changes", { playEvents: [play("done", "ended"), play("still-playing", "active")] }, token);
+    await post("/v1/changes", { sequence: 1, playEvents: [play("done", "ended"), play("still-playing", "active")] }, token);
     assert.deepEqual(scrobbled, ["done"]);
   } finally {
     await sync.stop();
