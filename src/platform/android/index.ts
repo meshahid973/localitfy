@@ -1,3 +1,4 @@
+import { setPairedComputerPlatform } from "../../app/platform";
 import { markOnboardingSeenForThisRelease } from "../../features/onboarding/onboardingRelease";
 import { APP_VERSION, WHATS_NEW_SEEN_KEY } from "../../features/updates/update.constants";
 import { createAndroidBridge } from "./bridge";
@@ -11,6 +12,7 @@ const AUTO_SYNC_AFTER_MS = 10 * 60 * 1000;
 /** Runs before the app renders: the shared renderer then talks to this bridge instead of Electron's preload. */
 export async function installAndroidBridge() {
   await phoneLibrary.load();
+  setPairedComputerPlatform(phoneLibrary.pairing?.platform);
   window.localitfy = createAndroidBridge();
   installMediaSessionBridge(phoneLibrary.paths.files, phoneLibrary.paths.mediaPrefix);
   document.documentElement.classList.add("platformAndroid");

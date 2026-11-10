@@ -113,7 +113,8 @@ export async function syncFixture() {
     const exchange = compile("src/platform/android/syncExchange.ts", { "./syncMerge": merge });
     sync = compile("src/platform/android/sync.ts", {
       "./native": { LocaltifyNative: native }, "./library": library, "./syncMerge": merge, "./syncExchange": exchange,
-      "./macFeatures": { markMacReachable: () => {}, fromMacOrKept: async () => null }
+      "./macFeatures": { markMacReachable: () => {}, fromMacOrKept: async () => null },
+      "../../app/platform": { computerName: () => "Mac", setPairedComputerPlatform: () => {} }
     });
   }
   await restartPhone();

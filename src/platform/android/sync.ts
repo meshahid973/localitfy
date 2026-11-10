@@ -1,4 +1,5 @@
 import type { Settings } from "../../features/settings/settings.types";
+import { computerName, setPairedComputerPlatform } from "../../app/platform";
 import { LocaltifyNative } from "./native";
 import { fileKey, phoneLibrary, type RemoteSong } from "./library";
 import { fromMacOrKept, markMacReachable } from "./macFeatures";
@@ -17,7 +18,7 @@ export type SyncProgress = {
   bytesTotal: number;
 };
 
-type Snapshot = { protocol: number; serverTime: number; features?: Partial<Settings>; songs: RemoteSong[]; playlists: SyncPlaylist[]; listeningCounts: Array<[string, number, number]> };
+type Snapshot = { protocol: number; platform?: string; serverTime: number; features?: Partial<Settings>; songs: RemoteSong[]; playlists: SyncPlaylist[]; listeningCounts: Array<[string, number, number]> };
 
 const listeners = new Set<(progress: SyncProgress) => void>();
 let progress: SyncProgress = { phase: "idle", message: "", done: 0, total: 0, bytesDone: 0, bytesTotal: 0 };
@@ -65,7 +66,7 @@ export function normalizeMacAddress(input: string) {
 
 async function call<T>(path: string, options: { method?: string; body?: unknown; token?: string; base?: string } = {}): Promise<T> {
   const base = options.base || phoneLibrary.pairing?.url;
-  if (!base) throw new Error("This phone is not paired with a Mac yet");
+  if (!base) throw new Error(`This phone is not paired with a ${computerName()} yet`);
   const token = options.token ?? phoneLibrary.pairing?.token;
   let response: { status: number; body: string };
   try {
@@ -77,22 +78,23 @@ async function call<T>(path: string, options: { method?: string; body?: unknown;
       timeoutMs: 60000
     });
   } catch {
-    throw new Error("Could not reach the Mac. Check that both are on the same Wi-Fi and Phone sync is on in the Mac app");
+    throw new Error(`Could not reach your ${computerName()}. Check that both are on the same Wi-Fi and Phone sync is on in localtify there`);
   }
   let parsed: unknown = {};
   try { parsed = response.body ? JSON.parse(response.body) : {}; } catch { /* non-JSON error page */ }
-  if (response.status >= 400) throw new Error((parsed as { error?: string })?.error || `The Mac answered with error ${response.status}`);
+  if (response.status >= 400) throw new Error((parsed as { error?: string })?.error || `Your ${computerName()} answered with error ${response.status}`);
   return parsed as T;
 }
 
 export async function pairWithMac(address: string, code: string) {
-  if (phoneLibrary.pendingSync) throw new Error("Finish the pending sync with your paired Mac before changing pairing");
+  if (phoneLibrary.pendingSync) throw new Error(`Finish the pending sync with your paired ${computerName()} before changing pairing`);
   const base = normalizeMacAddress(address);
-  if (!base) throw new Error("Enter the Mac's address, for example 192.168.1.20");
-  const hello = await call<{ app?: string; name?: string }>("/v1/hello", { base, token: "" });
-  if (hello.app !== "localtify") throw new Error("That address is not a localtify Mac");
+  if (!base) throw new Error(`Enter the ${computerName()}'s address, for example 192.168.1.20`);
+  const hello = await call<{ app?: string; name?: string; platform?: string }>("/v1/hello", { base, token: "" });
+  if (hello.app !== "localtify") throw new Error("That address is not running localtify");
   const result = await call<{ token: string; name: string }>("/v1/pair", { base, token: "", method: "POST", body: { code: code.trim(), deviceName: phoneLibrary.paths.deviceName } });
-  phoneLibrary.pairing = { url: base, token: result.token, name: result.name || hello.name || "Mac" };
+  phoneLibrary.pairing = { url: base, token: result.token, name: result.name || hello.name || "computer", platform: hello.platform };
+  setPairedComputerPlatform(hello.platform);
   await phoneLibrary.save(["pairing"]);
 }
 
@@ -110,8 +112,15 @@ const baseFields = (song: SyncSongFields): SyncSongFields => {
 
 let featuresChanged = false;
 
+/** Pairings made before the computer reported its platform pick it up here. */
+function adoptComputerPlatform(platform: string | undefined) {
+  if (!platform || !phoneLibrary.pairing || phoneLibrary.pairing.platform === platform) return;
+  phoneLibrary.pairing = { ...phoneLibrary.pairing, platform };
+  setPairedComputerPlatform(platform);
+}
+
 function requireCurrentProtocol(snapshot: Snapshot) {
-  if (snapshot.protocol !== 2) throw new Error("Update and restart the Mac app before syncing with this Android version");
+  if (snapshot.protocol !== 2) throw new Error(`Update and restart localtify on your ${computerName()} before syncing with this Android version`);
 }
 
 async function adoptSnapshot(after: Snapshot, sent: Pick<SyncBatch, "sentSongs" | "sentPlaylists" | "playEvents">, sequence?: number) {
@@ -138,9 +147,10 @@ async function adoptSnapshot(after: Snapshot, sent: Pick<SyncBatch, "sentSongs" 
 
 async function exchangeEdits() {
   for (let round = 0; round < 3; round += 1) {
-    report({ phase: "connecting", message: `Connecting to ${phoneLibrary.pairing?.name || "your Mac"}…` });
+    report({ phase: "connecting", message: `Connecting to ${phoneLibrary.pairing?.name || `your ${computerName()}`}…` });
     const before = await call<Snapshot>("/v1/snapshot");
     requireCurrentProtocol(before);
+    adoptComputerPlatform(before.platform);
     let batch = phoneLibrary.pendingSync;
     if (!batch) {
       const sentSongs = phoneLibrary.phoneSongFields().map(baseFields);
@@ -162,7 +172,7 @@ async function exchangeEdits() {
     report({ phase: "merging", message: "Merging changes…" });
     const { sequence, songs, playlists, playEvents } = batch;
     const receipt = await call<{ sequence: number }>("/v1/changes", { method: "POST", body: { sequence, songs, playlists, playEvents } });
-    if (receipt.sequence !== sequence) throw new Error("The Mac did not acknowledge this sync batch. Update and restart the Mac app");
+    if (receipt.sequence !== sequence) throw new Error(`Your ${computerName()} did not acknowledge this sync batch. Update and restart localtify there`);
     const after = await call<Snapshot>("/v1/snapshot");
     requireCurrentProtocol(after);
     if (!await adoptSnapshot(after, batch, sequence)) return;
@@ -261,7 +271,7 @@ async function removeDeletedSongs() {
   let removed = 0;
   for (const [id, local] of Object.entries(phoneLibrary.files)) {
     if (keep.has(id)) continue;
-    report({ phase: "cleaning", message: "Removing songs deleted on the Mac…" });
+    report({ phase: "cleaning", message: `Removing songs deleted on your ${computerName()}…` });
     if (local.audioExt) await LocaltifyNative.deleteFile({ path: phoneLibrary.audioPath(id, local.audioExt) }).catch(() => undefined);
     if (local.coverExt) await LocaltifyNative.deleteFile({ path: phoneLibrary.coverPath(id, local.coverExt) }).catch(() => undefined);
     delete phoneLibrary.files[id];

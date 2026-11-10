@@ -8,7 +8,7 @@ The phone copies songs and covers from the desktop library, then plays them from
 
 - An Android phone running Android 7.0 / API 24 or later, with an up-to-date Android System WebView. API 24 is the configured minimum, not a statement that every supported version has been device-tested.
 - Enough free internal storage for the whole music library and covers. There is currently no selective-sync or SD-card storage picker.
-- The desktop app built from the same version as the phone app. Phone sync has a protocol version: if the phone says to update and restart the Mac app, the desktop build is older than the phone's. The pairing UI currently describes a Mac.
+- The desktop app built from the same version as the phone app. Phone sync has a protocol version: if the phone says to update and restart the Mac app, the desktop build is older than the phone's. The phone calls the computer a Mac or a PC once it has paired.
 - The Mac and phone on the same trusted home network for pairing and sync. Keep the Mac app open and the Mac awake.
 
 To build: Node.js 22+, npm, JDK 21, Android SDK Platform 36, Android SDK Build-Tools 35.0.0 (the default for the current Gradle plugin), and Android SDK Platform-Tools (`adb`). Android Studio can install the SDK components. This branch uses Capacitor 8.6.0, Gradle 8.14.3, and Android Gradle Plugin 8.13.0; use the checked-in Gradle wrapper.

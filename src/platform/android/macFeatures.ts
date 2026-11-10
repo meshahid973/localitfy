@@ -1,3 +1,4 @@
+import { computerName } from "../../app/platform";
 import { phoneLibrary } from "./library";
 import { LocaltifyNative } from "./native";
 import { readValue, writeValues } from "./store";
@@ -31,7 +32,7 @@ export async function callMac<T>(channel: string, payload: unknown, timeoutMs = 
   unreachableUntil = 0;
   let body: { result?: T; error?: string } = {};
   try { body = JSON.parse(response.body || "{}"); } catch { /* non-JSON error page */ }
-  if (response.status >= 400) return { ok: false, error: body.error || `The Mac answered with error ${response.status}` };
+  if (response.status >= 400) return { ok: false, error: body.error || `Your ${computerName()} answered with error ${response.status}` };
   return { ok: true, result: body.result as T };
 }
 
@@ -58,5 +59,5 @@ export async function fromMacOrKept<T>(channel: string, payload: unknown, key: s
 export async function fromMac<T>(channel: string, payload: unknown, timeoutMs?: number): Promise<T> {
   const answer = await callMac<T>(channel, payload, timeoutMs);
   if (answer.ok) return answer.result as T;
-  throw new Error(answer.error || "Connect to the same Wi-Fi as your Mac (with Phone sync on) to use this");
+  throw new Error(answer.error || `Connect to the same Wi-Fi as your ${computerName()} (with Phone sync on) to use this`);
 }

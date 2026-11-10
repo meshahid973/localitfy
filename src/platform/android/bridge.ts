@@ -4,6 +4,7 @@ import type { LyricsResult } from "../../features/lyrics/lyrics.types";
 import type { Settings } from "../../features/settings/settings.types";
 import type { PlayEvent } from "../../features/player/listeningHistory";
 import type { ScrobbleStatus } from "../../features/scrobbling/scrobble.types";
+import { computerName } from "../../app/platform";
 import { phoneLibrary } from "./library";
 import { fromMac, fromMacOrKept } from "./macFeatures";
 import { LocaltifyNative } from "./native";
@@ -14,7 +15,7 @@ import type { SyncPlaylist } from "./syncMerge";
 type Bridge = Window["localitfy"];
 type Listener = (payload: never) => void;
 
-const UNAVAILABLE = "Not available in the Android app. Use the Mac app for this.";
+const unavailable = () => `Not available in the Android app. Use localtify on your ${computerName()} for this.`;
 
 /** Desktop-only calls that return a song list; on the phone they leave the library as it is. */
 const RETURNS_SONGS = new Set(["importSongs", "deleteSong", "clearLibrary", "randomizeAllSongCovers", "randomizeMissingSongCovers", "randomizeSelectedSongCovers", "rescanPixelArt"]);
@@ -135,7 +136,7 @@ export function createAndroidBridge(): Bridge {
       // Desktop-only features answer "not available" instead of throwing, so the shared UI keeps working.
       if (RETURNS_SONGS.has(key)) return async () => phoneLibrary.songs();
       if (RETURNS_LIST.has(key)) return async () => [];
-      return async () => ({ ok: false, error: UNAVAILABLE, message: UNAVAILABLE });
+      return async () => ({ ok: false, error: unavailable(), message: unavailable() });
     }
   });
 }

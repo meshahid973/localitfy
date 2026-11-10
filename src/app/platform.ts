@@ -2,6 +2,21 @@
 export const isAndroidApp = () => typeof window !== "undefined" &&
   (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor?.getPlatform?.() === "android";
 
+/** The phone's paired computer, as its sync server reports it (Node's process.platform). */
+let pairedComputerPlatform = "";
+export const setPairedComputerPlatform = (platform: string | undefined) => { pairedComputerPlatform = platform || ""; };
+
+/**
+ * What to call the desktop computer in text: "Mac", "PC" or "computer". On the phone that is the paired computer
+ * (just "computer" until it has paired); on the desktop, the machine it runs on.
+ */
+export function computerName() {
+  const kind = isAndroidApp()
+    ? ({ darwin: "mac", win32: "windows" } as Record<string, string>)[pairedComputerPlatform] || "other"
+    : getLocaltifyPlatformInfo().id;
+  return kind === "mac" ? "Mac" : kind === "windows" ? "PC" : "computer";
+}
+
 export type LocaltifyPlatformInfo = {
   id: "windows" | "linux" | "mac" | "android" | "unknown";
   label: string;

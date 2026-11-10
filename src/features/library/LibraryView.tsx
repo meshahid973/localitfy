@@ -1,4 +1,4 @@
-import { isAndroidApp } from "../../app/platform";
+import { isAndroidApp, computerName } from "../../app/platform";
 import "./library.css";
 import { lazy, Suspense, useState, type DragEventHandler, type ReactNode } from "react";
 import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2 } from "lucide-react";
@@ -183,7 +183,7 @@ export default function LibraryView(props: LibraryViewProps) {
               tone={showingMissingFiles ? "success" : isLiked || query.trim() ? "info" : "warning"}
               eyebrow={showingMissingFiles ? "file check" : isLiked ? "liked songs" : query.trim() ? "search" : "library"}
               title={showingMissingFiles ? "All files are cozy" : isLiked ? "No liked songs yet" : query.trim() ? "No songs found" : "No songs yet"}
-               message={showingMissingFiles ? "All your files are available." : isLiked ? "Like a song to save it here." : query.trim() ? "Try a different title or artist." : isAndroidApp() ? "Sync with your Mac in Settings → Library to get started." : "Import music to get started."}
+               message={showingMissingFiles ? "All your files are available." : isLiked ? "Like a song to save it here." : query.trim() ? "Try a different title or artist." : isAndroidApp() ? `Sync with your ${computerName()} in Settings → Library to get started.` : "Import music to get started."}
               mascotState={showingMissingFiles ? "happy" : query.trim() ? "question" : "empty"}
               actions={showingMissingFiles ? (
                 <button className="softButton" type="button" onClick={() => setLibraryFilterMode?.("all")}>show all tracks</button>

@@ -1,3 +1,4 @@
+import { computerName } from "../../app/platform";
 import { useEffect, useState } from "react";
 import { RefreshCw, Smartphone } from "lucide-react";
 import { phoneLibrary } from "./library";
@@ -38,6 +39,8 @@ export default function AndroidSyncSettings() {
     finally { setBusy(false); }
   }
 
+  // Re-read on every render: pairing (and the first sync) tells the phone whether it is a Mac or a PC.
+  const computer = computerName();
   const syncing = isSyncing() && progress.phase !== "done" && progress.phase !== "error";
   const last = phoneLibrary.lastSync;
   const transfer = progress.phase === "downloading" && progress.total
@@ -45,7 +48,7 @@ export default function AndroidSyncSettings() {
     : "";
 
   return <div className="settingsPanelCard settingsFocusPanelV491">
-    <div className="settingsPanelHeader"><div><strong>Sync with Mac</strong><span>Copies your whole library from the localtify Mac app over home Wi-Fi and keeps likes, playlists and play counts the same on both. Turn on Phone sync in the Mac app's Settings → Library first.</span></div></div>
+    <div className="settingsPanelHeader"><div><strong>Sync with {computer === "computer" ? "your computer" : computer}</strong><span>Copies your whole library from localtify on your {computer} over home Wi-Fi and keeps likes, playlists and play counts the same on both. Turn on Phone sync in localtify's Settings → Library there first.</span></div></div>
     {paired ? <>
       <p className="settingsHintText">Paired with <strong>{phoneLibrary.pairing?.name}</strong> · {phoneLibrary.pairing?.url.replace(/^https?:\/\//, "")}</p>
       <div className="settingsActionRow settingsActionRowCleanV491">
@@ -60,10 +63,10 @@ export default function AndroidSyncSettings() {
       </p>
       {syncing && progress.phase === "downloading" ? <p className="settingsHintText">Keep the app open until the first sync finishes.</p> : null}
     </> : <form className="phoneSyncPairForm" onSubmit={(event) => { event.preventDefault(); void pair(); }}>
-      <label><span>Mac address</span><input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="192.168.1.20" inputMode="url" autoCapitalize="off" autoCorrect="off" /></label>
+      <label><span>{computer === "computer" ? "Computer" : computer} address</span><input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="192.168.1.20" inputMode="url" autoCapitalize="off" autoCorrect="off" /></label>
       <label><span>Pairing code</span><input value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="6 digits" inputMode="numeric" /></label>
       <button type="submit" className="settingsActionButton settingsPrimaryAction" disabled={busy || !address.trim() || code.length !== 6}><Smartphone size={14} /> {busy ? "Pairing…" : "Pair"}</button>
-      <p className="settingsHintText">The Mac shows its address and a code under Settings → Library → Phone sync → Pair a phone.</p>
+      <p className="settingsHintText">Your computer shows its address and a code in localtify under Settings → Library → Phone sync → Pair a phone.</p>
     </form>}
     {message ? <p className="settingsHintText phoneSyncError" role="alert">{message}</p> : null}
   </div>;

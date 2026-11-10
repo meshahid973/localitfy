@@ -175,6 +175,9 @@ test("server: paired phones can use the Mac's features, only the listed ones, an
 
     const snapshot = await (await fetch(`http://127.0.0.1:${port}/v1/snapshot`, { headers: { Authorization: `Bearer ${token}` } })).json();
     assert.deepEqual(snapshot.features, { lyricsEnabled: true }, "only feature switches are shared, never keys or other settings");
+    // The phone calls the computer a Mac or a PC from this.
+    assert.equal(snapshot.platform, process.platform);
+    assert.equal((await (await fetch(`http://127.0.0.1:${port}/v1/hello`)).json()).platform, process.platform);
 
     const play = (id, outcome) => ({ id, sessionId: "s", songId: "a", startedAt: 1, updatedAt: 2, endedAt: 2, msListened: 40000, outcome, contextType: "library", contextId: null });
     await post("/v1/changes", { sequence: 1, playEvents: [play("done", "ended"), play("still-playing", "active")] }, token);

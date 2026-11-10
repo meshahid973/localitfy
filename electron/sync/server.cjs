@@ -80,7 +80,7 @@ function cleanPlaylist(value) {
  * Phone sync over the home network. The Mac stays the source of truth for files and metadata:
  * the phone pulls a snapshot, merges its own edits against the previous snapshot, then pushes them here.
  */
-function createSyncServer({ repositories, coverPath, statePath, serverName = "Mac", appVersion = "", onChanged = () => {}, callFeature = null, onPlayEvent = () => {}, now = Date.now }) {
+function createSyncServer({ repositories, coverPath, statePath, serverName = "computer", platform = process.platform, appVersion = "", onChanged = () => {}, callFeature = null, onPlayEvent = () => {}, now = Date.now }) {
   let state = readState();
   let server = null;
   let pairing = null;
@@ -126,6 +126,8 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "Ma
     const settings = repositories.settings?.get?.() || {};
     return {
       protocol: PROTOCOL,
+      // So the phone can say "Mac" or "PC"; a pairing made before this was sent learns it at the next sync.
+      platform,
       serverTime: now(),
       features: Object.fromEntries(FEATURE_SETTINGS.filter((key) => settings[key] !== undefined).map((key) => [key, settings[key]])),
       songs,
@@ -216,7 +218,7 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "Ma
     const route = url.pathname;
 
     if (request.method === "GET" && route === "/v1/hello") {
-      return send(response, 200, { app: "localtify", protocol: PROTOCOL, name: serverName, version: appVersion, paired: Boolean(deviceForRequest(request)) });
+      return send(response, 200, { app: "localtify", protocol: PROTOCOL, name: serverName, platform, version: appVersion, paired: Boolean(deviceForRequest(request)) });
     }
     if (request.method === "POST" && route === "/v1/pair") {
       const body = await readJson(request);
@@ -238,7 +240,7 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "Ma
       state.devices.push(device);
       writeState();
       onChanged({ devices: true });
-      return send(response, 200, { token, deviceId: device.id, name: serverName });
+      return send(response, 200, { token, deviceId: device.id, name: serverName, platform });
     }
 
     const device = deviceForRequest(request);

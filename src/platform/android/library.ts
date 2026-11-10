@@ -9,7 +9,8 @@ import type { SyncBatch } from "./syncExchange";
 export type FileInfo = { size: number; mtimeMs: number; ext: string };
 /** A song as the Mac sends it: library fields plus the versions of its audio and cover files. */
 export type RemoteSong = SyncSongFields & Record<string, unknown> & { file: FileInfo; cover: FileInfo | null };
-export type Pairing = { url: string; token: string; name: string; sequence?: number };
+/** `platform` is the computer's process.platform ("darwin", "win32", "linux"), for calling it a Mac or a PC. */
+export type Pairing = { url: string; token: string; name: string; platform?: string; sequence?: number };
 export type SyncRecord = { at: number; ok: boolean; message: string };
 
 type LocalFiles = Record<string, { audio?: string; audioExt?: string; cover?: string; coverExt?: string }>;

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Compass, Disc3, ExternalLink, Plus, RefreshCw, Settings2, UserX } from "lucide-react";
 import { PageHeader } from "../../shared/ui/PageHeader";
-import { isAndroidApp } from "../../app/platform";
+import { isAndroidApp, computerName } from "../../app/platform";
 import { splitArtistCredits } from "../artists/artistCredits";
 import type { NotForMeKind } from "../analysis/notForMe";
 import type { SpotifyTrack } from "../downloads/download.types";
@@ -84,7 +84,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   }
 
   const needsSetup = !result || result.status === "off" || result.status === "needs-key";
-  const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its Last.fm connection in the Mac app, then sync this phone.</p></div> : (
+  const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
       <p>Discover suggests artists and songs you don’t have yet, based on what you play and like. It asks <strong>Last.fm</strong>, sending only the names of your most-played artists and songs. Answers are cached on this device for a week.</p>
       <label className="discoverKey">
@@ -132,7 +132,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     </PageHeader>
 
     {needsSetup || showSettings ? setup : null}
-    {phone && !needsSetup ? <p className="discoverHint">Suggestions come from your paired Mac. Use Discover on the Mac to download songs or change recommendations.</p> : null}
+    {phone && !needsSetup ? <p className="discoverHint">Suggestions come from your paired {computerName()}. Use Discover there to download songs or change recommendations.</p> : null}
     {loading && !ready ? <p className="discoverNotice" role="status">Asking Last.fm about the artists you play… the first time takes a few seconds.</p> : null}
     {result?.status === "error" ? <p className="discoverNotice" role="alert">{result.error} <button type="button" className="softButton" onClick={() => void load(true)}>Retry</button></p> : null}
     {result?.status === "no-taste" ? <p className="discoverNotice">Play or like a few songs first. Discover learns from what you listen to.</p> : null}
