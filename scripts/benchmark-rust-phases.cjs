@@ -10,7 +10,9 @@ const { readNormalizedVector } = require("../electron/analysis/similarity.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
 const { listAudioFiles } = require("../electron/library-watch.cjs");
-const { markStandardAudioFilter } = require("../electron/native/scanner.cjs");
+const { markStandardAudioFilter, tryScanAudioFiles } = require("../electron/native/scanner.cjs");
+const { getAddon } = require("../electron/native/backend.cjs");
+const { decodePcmChunk } = require("../electron/analysis/pcm.cjs");
 
 function median(values) { return [...values].sort((a,b) => a-b)[Math.floor(values.length/2)]; }
 async function benchmark(fn, rounds = 3) {
@@ -29,6 +31,8 @@ const encodedVectors=Array.from({length:600},(_,i)=>{
   for(let j=0;j<512;j++)buffer.writeFloatLE(Math.sin(i*.15 + j*.045),j*4);
   return buffer;
 });
+const pcmBuffer = Buffer.alloc(480_000 * 4);
+for (let i=0; i<480_000; i++) pcmBuffer.writeFloatLE(Math.sin(i * .01), i * 4);
 const trackVectors = vectors.map((v)=>{
   const n=Math.sqrt(dot(v,v));
   return Float64Array.from(v,x=>x/n);
@@ -54,6 +58,23 @@ const isAudioFile=(file)=>/\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(fi
 markStandardAudioFilter(isAudioFile);
 if (!isAudioFile("probe.mp3") || !isAudioFile("probe.aif") || isAudioFile("probe.txt"))
   throw new Error("Scanner baseline extension predicate is invalid");
+const compare = process.argv.includes("--compare");
+const nativeCalls = new Map();
+if (compare) {
+  process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,scanner,centering,pcm";
+  const addon = getAddon("similarity");
+  if (!addon) throw new Error("Native benchmark requires a built Rust addon");
+  for (const name of ["dotMatrix", "clusterFromCenters", "pairDots", "decodeNormalizedAudioInto", "centerAudioVectorsInPlace", "pcmSumSquares"]) {
+    const original = addon[name];
+    if (typeof original !== "function") throw new Error("Missing Rust export: " + name);
+    nativeCalls.set(name, 0);
+    addon[name] = (...args) => {
+      nativeCalls.set(name, nativeCalls.get(name) + 1);
+      return original.apply(addon, args);
+    };
+    if (addon[name] === original) throw new Error("Cannot instrument Rust export " + name);
+  }
+}
 async function run() {
   const tmp=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-rust-baseline-"));
   try {
@@ -71,7 +92,7 @@ async function run() {
         let score=0;
         for(const row of trackVectors)for(const seed of seeds)score+=dot(row,seed);
         return score;
-      }],
+      },["dotMatrix"]],
       ["CLAP Float32 decoder / 600x512",()=>{
         const native = tryDecodeNormalizedAudio(encodedVectors,512);
         if (native) return native;
@@ -79,7 +100,7 @@ async function run() {
           throw new Error("Native CLAP decoder unexpectedly used JavaScript fallback; refusing misleading timing");
         }
         return encodedVectors.map((buffer)=>readNormalizedVector(buffer));
-      }],
+      },["decodeNormalizedAudioInto"]],
       ["audio centering / 1200x512 (experimental opt-in)",()=>{
         const input=Array.from({length:1200},(_,i)=>trackVectors[i%trackVectors.length]);
         const native=tryCenterAudioProfiles(input);
@@ -89,21 +110,31 @@ async function run() {
         }
         const mean=libraryMean(input);
         return input.map((vector)=>centered(vector,mean));
-      }],
-      ["daily mixes / 240 tracks",()=>generateMixes(tracks,"fixed-seed")],
-      ["daily mixes / 600 tracks",()=>generateMixes(bigTracks,"fixed-large-seed")],
-      ["duplicates / 600 entries",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:dupSizes})],
-      ["duplicates / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes})],
-      ["scanner / 180 entries",()=>listAudioFiles(tmp,isAudioFile)]
+      },["centerAudioVectorsInPlace"]],
+      ["daily mixes / 240 tracks",()=>generateMixes(tracks,"fixed-seed"),[]],
+      ["daily mixes / 600 tracks",()=>generateMixes(bigTracks,"fixed-large-seed"),["clusterFromCenters"]],
+      ["duplicates / 600 entries",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:dupSizes}),[]],
+      ["duplicates / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDots"]],
+      ["scanner / 180 entries",async()=>{
+        if (!process.env.LOCALTIFY_RUST_PHASES) return listAudioFiles(tmp,isAudioFile);
+        const nativeFiles = await tryScanAudioFiles(tmp,isAudioFile,50_000);
+        if (nativeFiles === null) throw new Error("Scanner silently fell back");
+        return nativeFiles;
+      },["scanner"]],
+      ["PCM decode + energy / 480k samples",()=>decodePcmChunk(pcmBuffer),["pcmSumSquares"]]
     ];
-    for(const [name,fn] of jobs) {
+    for(const [name,fn,requiredNames] of jobs) {
       process.env.LOCALTIFY_RUST_PHASES="";
       const js=await benchmark(fn);
-      if(process.argv.includes("--compare")){
+      if(compare) {
         process.env.LOCALTIFY_RUST_PHASES=name.includes("audio centering /")
-          ? "similarity,duplicates,scanner,centering" : "similarity,duplicates,scanner";
+          ? "similarity,duplicates,scanner,centering,pcm" : "similarity,duplicates,scanner,pcm";
+        const before = new Map(nativeCalls);
         const rust=await benchmark(fn);
-        console.log("[rust-phases] "+name+": JS "+js.toFixed(2)+" ms; native opt-in "+rust.toFixed(2)+" ms (includes bridge)");
+        const invoked = requiredNames?.some(key => key === "scanner" || nativeCalls.get(key) > before.get(key));
+        if (requiredNames?.length && !invoked) throw new Error("Rust did not execute in benchmark: " + name);
+        const label = requiredNames?.length ? "native opt-in " : "JS fallback (native gate not reached) ";
+        console.log("[rust-phases] "+name+": JS "+js.toFixed(2)+" ms; "+label+rust.toFixed(2)+" ms"+(requiredNames?.length ? " (includes bridge)" : ""));
       } else console.log("[rust-baseline] "+name+": JavaScript median "+js.toFixed(2)+" ms");
     }
   } finally {fs.rmSync(tmp,{recursive:true,force:true});}

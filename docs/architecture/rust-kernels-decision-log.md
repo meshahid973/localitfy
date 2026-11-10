@@ -68,3 +68,12 @@ Rust NAPI-RS is a native addon built per OS/CPU. All phases are **disabled by de
 - Experimental centering requires the additional explicit `LOCALTIFY_RUST_PHASES=similarity,centering` flag. It remains tested and packaged for future optimisation. Default is still JS, and ordinary similarity/CLAP decoding and full native Lloyd clustering remain independently available.
 - The `rust:benchmark` command opts in to `centering` only for the distinctly labeled centering benchmark and fails rather than silently measuring JS fallback as Rust.
 - No JavaScript renderer, database, song deletion or playback code was removed; deleting those modules would destroy the cross-platform fallback or change established user-data semantics.
+
+## Additional opt-in PCM phase and benchmark integrity (2026-11-11)
+
+- FFmpeg remains the decoder. The analysis worker reuses an aligned little-endian PCM Buffer as a Float32Array instead of reading every sample with Buffer.readFloatLE, with a portable fallback when unaligned or big-endian.
+- One validation/energy pass returns the original RMS input. The optional `pcm` NAPI kernel handles at least 32,768 samples and falls back to JS on a missing native addon or invalid output. It is off in ordinary installations.
+- Benchmarks must verify actual native invocations. Small Daily Mixes and two-song duplicate buckets that do not clear native thresholds are labeled as JS fallback, never as Rust speedups. Native scanner timing is required to return a native result.
+- MusicBrainz release matching now filters out impossible (<0.6) track pairs before sorting, preserving the existing threshold and stable tie-break order.
+- Similarity indexing for very large libraries, fingerprinting, renderer search migration and analytics Rust rewrites remain out of scope until real workloads demonstrate that JS/worker or existing native dependencies are the bottleneck.
+
