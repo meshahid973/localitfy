@@ -37,6 +37,9 @@ const dupSongs = Array.from({length:600},(_,i)=>({
 }));
 const dupVectors = new Map(dupSongs.map((song,i)=>[song.id,trackVectors[Math.floor(i/2)%trackVectors.length]]));
 const dupSizes = new Map(dupSongs.map((song)=>[song.id,5000000]));
+const isAudioFile=(file)=>/\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(file);
+if (!isAudioFile("probe.mp3") || !isAudioFile("probe.aif") || isAudioFile("probe.txt"))
+  throw new Error("Scanner baseline extension predicate is invalid");
 async function run() {
   const tmp=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-rust-baseline-"));
   try {
@@ -56,7 +59,7 @@ async function run() {
       }],
       ["daily mixes / 240 tracks",()=>generateMixes(tracks,"fixed-seed")],
       ["duplicates / 600 entries",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:dupSizes})],
-      ["scanner / 180 entries",()=>listAudioFiles(tmp,(file)=>/\\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(file))]
+      ["scanner / 180 entries",()=>listAudioFiles(tmp,isAudioFile)]
     ];
     for(const [name,fn] of jobs) {
       process.env.LOCALTIFY_RUST_PHASES="";
