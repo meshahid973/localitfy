@@ -1,6 +1,7 @@
 const { parentPort, workerData } = require("node:worker_threads");
 const { spawn } = require("node:child_process");
 const { MODEL } = require("./model.cjs");
+const { decodePcmChunk } = require("./pcm.cjs");
 let runtime;
 let activeChild = null;
 
@@ -38,10 +39,8 @@ function decode(filePath, offset) {
       clearTimeout(timeout);
       if (code !== 0 || size < 4 || size > MODEL.sampleRate * 10 * 4) return reject(new Error(stderr || "Audio decode failed or timed out"));
       const buffer = Buffer.concat(chunks);
-      const samples = new Float32Array(buffer.length / 4);
-      for (let i = 0; i < samples.length; i++) samples[i] = buffer.readFloatLE(i * 4);
-      if (!samples.every(Number.isFinite)) return reject(new Error("Decoded audio contains invalid samples"));
-      resolve(samples);
+      try { resolve(decodePcmChunk(buffer)); }
+      catch (error) { reject(error); }
     });
   });
 }
@@ -58,8 +57,8 @@ parentPort.on("message", async (job) => {
     let squareSum = 0;
     let sampleCount = 0;
     for (const offset of offsets) {
-      const samples = await decode(job.filePath, offset);
-      for (const sample of samples) squareSum += sample * sample;
+      const { samples, squareSum: windowSquares } = await decode(job.filePath, offset);
+      squareSum += windowSquares;
       sampleCount += samples.length;
       const inputs = await processor(samples, { sampling_rate: MODEL.sampleRate });
       const { audio_embeds } = await model(inputs);

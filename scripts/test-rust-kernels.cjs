@@ -6,6 +6,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { getAddon } = require("../electron/native/backend.cjs");
+const { decodePcmChunk } = require("../electron/analysis/pcm.cjs");
 const { tryDotMatrix, tryClusterFromCenters, tryBatchPairDots, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../electron/native/compute.cjs");
 const { markStandardAudioFilter, tryScanAudioFiles } = require("../electron/native/scanner.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
@@ -19,12 +20,12 @@ assert.equal(tryDotMatrix([new Float64Array([1,2])],[new Float64Array([3,4])]),n
 process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,scanner";
 const native = getAddon("similarity");
 if (!native) throw new Error("Native addon is required for this explicit Rust test");
-for(const name of ["dotMatrix", "pairDots", "centerAudioVectorsInPlace", "decodeNormalizedAudioInto", "clusterFromCenters", "scanAudioFiles"]) {
+for(const name of ["dotMatrix", "pairDots", "centerAudioVectorsInPlace", "decodeNormalizedAudioInto", "clusterFromCenters", "scanAudioFiles", "pcmSumSquares"]) {
   assert.equal(typeof native[name], "function", "Missing native export: "+name);
 }
 // Guard against a false-positive parity test caused by a silent JS fallback.
 // Count actual NAPI invocations made inside the production integration paths.
-const nativeCalls = { dotMatrix: 0, pairDots: 0, centerAudioVectorsInPlace: 0, decodeNormalizedAudioInto: 0, clusterFromCenters: 0 };
+const nativeCalls = { dotMatrix: 0, pairDots: 0, centerAudioVectorsInPlace: 0, decodeNormalizedAudioInto: 0, clusterFromCenters: 0, pcmSumSquares: 0 };
 for (const name of Object.keys(nativeCalls)) {
   const original = native[name];
   native[name] = function (...args) {
@@ -53,6 +54,14 @@ function evaluate(mode,fn) {
   process.env.LOCALTIFY_RUST_PHASES = mode;
   return fn();
 }
+const pcmBuffer = Buffer.alloc(40_000 * 4);
+pcmBuffer.writeFloatLE(0.75, 0);
+const pcmReference = evaluate("", () => decodePcmChunk(pcmBuffer));
+const beforeNativePcm = nativeCalls.pcmSumSquares;
+const pcmActual = evaluate("pcm", () => decodePcmChunk(pcmBuffer));
+assert.ok(nativeCalls.pcmSumSquares > beforeNativePcm, "PCM phase must execute Rust");
+assert.equal(pcmActual.squareSum, pcmReference.squareSum);
+assert.deepEqual(pcmActual.samples, pcmReference.samples);
 const referenceCenter = (rows) => {
   const mean = rows[0].map ? new Float64Array(rows[0].length) : [];
   for (const row of rows) for (let i = 0; i < mean.length; i++) mean[i] += row[i] / rows.length;

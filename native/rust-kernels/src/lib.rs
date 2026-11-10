@@ -85,6 +85,21 @@ pub fn pair_dots(vectors: &[f64], left: &[u32], right: &[u32], dimensions: u32) 
 }
 
 
+/// Validate decoded PCM and compute its energy in one native pass.
+#[napi]
+pub fn pcm_sum_squares(samples: &[f32]) -> Result<f64> {
+    if samples.is_empty() || samples.len() > 1_000_000 {
+        return Err(invalid("Invalid PCM sample count"));
+    }
+    let mut total = 0.0_f64;
+    for &sample in samples {
+        if !sample.is_finite() { return Err(invalid("Invalid PCM sample")); }
+        let value = sample as f64;
+        total += value * value;
+    }
+    Ok(total)
+}
+
 /// Center and normalize all library audio vectors in a *single* native call.
 /// Mirrors listening-signals.cjs libraryMean/centered: row-order mean
 /// accumulation, scalar square summation and the same 1e-9 zero threshold.
@@ -352,6 +367,13 @@ pub fn scan_audio_files(root: String, limit: u32, extensions: Vec<String>) -> Re
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pcm_energy_matches_js_and_rejects_non_finite() {
+        assert_eq!(pcm_sum_squares(&[0.5, -0.5, 1.0]).unwrap(), 1.5);
+        assert!(pcm_sum_squares(&[f32::NAN]).is_err());
+        assert!(pcm_sum_squares(&[]).is_err());
+    }
 
     #[test]
     fn dot_matrix_matches_scalar_and_row_order() {

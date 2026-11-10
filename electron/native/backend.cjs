@@ -3,7 +3,7 @@
 // This module runs only in trusted Electron/Node processes, never renderer IPC.
 // No native binary is installed or loaded on normal Localtify launches.
 const path = require("node:path");
-const SUPPORTED = new Set(["similarity", "duplicates", "scanner", "centering"]);
+const SUPPORTED = new Set(["similarity", "duplicates", "scanner", "centering", "pcm"]);
 let addon;
 const warnings = new Set();
 
