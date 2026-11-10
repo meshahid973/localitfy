@@ -9,6 +9,7 @@ const { tryDotMatrix } = require("../electron/native/compute.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
 const { listAudioFiles } = require("../electron/library-watch.cjs");
+const { markStandardAudioFilter } = require("../electron/native/scanner.cjs");
 
 function median(values) { return [...values].sort((a,b) => a-b)[Math.floor(values.length/2)]; }
 async function benchmark(fn, rounds = 3) {
@@ -37,7 +38,11 @@ const dupSongs = Array.from({length:600},(_,i)=>({
 }));
 const dupVectors = new Map(dupSongs.map((song,i)=>[song.id,trackVectors[Math.floor(i/2)%trackVectors.length]]));
 const dupSizes = new Map(dupSongs.map((song)=>[song.id,5000000]));
+const manySameRecord = dupSongs.slice(0,64).map((song)=>({
+  ...song, title:"same recording", artist:"shared artist", album:"shared album"
+}));
 const isAudioFile=(file)=>/\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(file);
+markStandardAudioFilter(isAudioFile);
 if (!isAudioFile("probe.mp3") || !isAudioFile("probe.aif") || isAudioFile("probe.txt"))
   throw new Error("Scanner baseline extension predicate is invalid");
 async function run() {
@@ -59,6 +64,7 @@ async function run() {
       }],
       ["daily mixes / 240 tracks",()=>generateMixes(tracks,"fixed-seed")],
       ["duplicates / 600 entries",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:dupSizes})],
+      ["duplicates / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes})],
       ["scanner / 180 entries",()=>listAudioFiles(tmp,isAudioFile)]
     ];
     for(const [name,fn] of jobs) {

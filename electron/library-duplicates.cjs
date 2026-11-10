@@ -1,7 +1,7 @@
 "use strict";
 
 const path = require("node:path");
-const { tryPairDots } = require("./native/compute.cjs");
+const { tryBatchPairDots } = require("./native/compute.cjs");
 
 // Same recording: matching cleaned title and full artist credits, lengths within this many seconds,
 // and (when both have audio profiles) at least this audio similarity.
@@ -90,9 +90,9 @@ function findDuplicates(songs, { vectors = new Map(), fileSizes = new Map() } = 
   const buckets = new Map();
   for (const track of tracks) if (track.recording) (buckets.get(track.recording) || buckets.set(track.recording, []).get(track.recording)).push(track);
   const songsUnion = unionFind(); const pairs = new Map();
+  const nativeScores = tryBatchPairDots([...buckets.values()], vectors);
+  let pairIndex = 0;
   for (const bucket of buckets.values()) {
-    const nativeScores = tryPairDots(bucket, vectors);
-    let pairIndex = 0;
     for (let i = 0; i < bucket.length; i++) for (let j = i + 1; j < bucket.length; j++) {
       const nativeScore = nativeScores ? nativeScores[pairIndex] : undefined;
       pairIndex += 1;

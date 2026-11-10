@@ -15,8 +15,11 @@ test("Rust remains optional and all three integrations preserve JS fallback code
  assert.match(sim,/nativeAudio \? nativeAudio\[index \* seedProfiles\.length \+ seedIndex\] : dot/);
  assert.match(mix,/nativeScores \? nativeScores\[index \* centers\.length \+ centerIndex\] : dot/);
  assert.match(dup,/audioOverride === undefined \? cosine\(va, vb\) : audioOverride/);
+ assert.match(dup,/tryBatchPairDots\(\[\.\.\.buckets\.values\(\)\], vectors\)/);
  assert.match(scan,/if \(nativeFiles !== null\) return nativeFiles/);
  assert.match(scan,/const files = \[\]/);
+ assert.match(read("electron/main.cjs"),/markStandardAudioFilter\(isAudioFile\)/);
+ assert.match(read("electron/native/scanner.cjs"),/next\.unref\(\)/);
 });
 
 test("Rust native extension is excluded from Git but included in packaged Electron app",()=>{

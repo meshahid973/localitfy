@@ -5,7 +5,8 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { getAddon } = require("../electron/native/backend.cjs");
-const { tryDotMatrix, tryPairDots } = require("../electron/native/compute.cjs");
+const { tryDotMatrix, tryPairDots, tryBatchPairDots } = require("../electron/native/compute.cjs");
+const { markStandardAudioFilter } = require("../electron/native/scanner.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
 const { listAudioFiles } = require("../electron/library-watch.cjs");
@@ -59,6 +60,21 @@ assert.deepEqual(b,a,"duplicate grouping/recommendation changed");
 assert.ok(Math.abs(tryPairDots(dupSongs.slice(0,2),dupVectors)[0]-1) < 1e-9,"native duplicate pair not selected");
 
 const isAudioFile=(name)=>/\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(name);
+markStandardAudioFilter(isAudioFile);
+assert.throws(() => markStandardAudioFilter((file) => /\.(mp3|flac|txt)$/i.test(file)),
+  /standard Localtify/, "broader callback must never opt in to native scan");
+
+// Batch a real candidate group so the Rust comparison is exercised once rather than
+// launching a separate native call for each two-song recording.
+const bulkBucket = Array.from({ length: 64 }, (_, i) => ({
+  ...dupSongs[i], title: "same track", artist: "same artist", album: "same album"
+}));
+const nativeBatch = evaluate("duplicates", () => tryBatchPairDots([bulkBucket], dupVectors));
+assert.ok(Array.isArray(nativeBatch) && nativeBatch.length === 2016,
+  "large duplicate bucket must use the native path");
+const bulkJs = evaluate("", () => findDuplicates(bulkBucket, { vectors: dupVectors, fileSizes: sizes }));
+const bulkRust = evaluate("duplicates", () => findDuplicates(bulkBucket, { vectors: dupVectors, fileSizes: sizes }));
+assert.deepEqual(bulkRust, bulkJs, "large native duplicate batch changed group recommendations");
 async function main(){
  const folder=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-rust-parity-"));
  try {
@@ -70,12 +86,19 @@ async function main(){
    const pathsRust=await evaluate("scanner",()=>listAudioFiles(folder,isAudioFile));
    assert.deepEqual(pathsRust.slice().sort(),pathsJs.slice().sort(),"scanner misses or adds files");
    assert.equal(pathsRust.length,2);
+   // Repeat work on the same dedicated native worker; compare without assuming OS enumeration order.
+   const again=await evaluate("scanner",()=>listAudioFiles(folder,isAudioFile));
+   assert.deepEqual(again.slice().sort(),pathsJs.slice().sort(),"reused native scanner changed results");
    const pathsLimited=await evaluate("scanner",()=>listAudioFiles(folder,isAudioFile,1));
    assert.equal(pathsLimited.length,1);
    // A custom acceptance function must be sent through original JS fallback.
    const txtOnly=(name)=>name.endsWith(".txt");
    const files=await evaluate("scanner",()=>listAudioFiles(folder,txtOnly));
    assert.equal(files.length,1);
+   const broad=(name)=>/\.(mp3|txt)$/i.test(name);
+   const broadFiles=await evaluate("scanner",()=>listAudioFiles(folder,broad));
+   assert.ok(broadFiles.some((file)=>file.endsWith("third.txt")),
+     "a custom filter accepting extra extensions must never lose files");
  } finally {fs.rmSync(folder,{recursive:true,force:true});}
  process.env.LOCALTIFY_RUST_PHASES="";
  console.log("[rust-parity] Native similarity, Daily Mixes, duplicate pairs/groups and bounded scans match JS");

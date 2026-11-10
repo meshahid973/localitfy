@@ -29,3 +29,10 @@ Rust NAPI-RS is a native addon built per OS/CPU. All phases are **disabled by de
 ## Benchmark / acceptance
 
 `node scripts/benchmark-rust-phases.cjs` prints timings on the current host for JavaScript production algorithms. `node scripts/test-rust-kernels.cjs` checks JS/native numerical parity and identical duplicate/scan results when an addon is built. `node scripts/benchmark-rust-phases.cjs --compare` times both backends on equivalent fixtures. OS variance makes cross-run timings incomparable; no unsupported performance claim.
+
+## Follow-up: performance-safe consolidation
+
+- The first Windows baseline (from local developer machine) showed similarity 3.55 ms JS vs 2.13 ms Rust, but 240-track mixes 44.43 vs 53.00 ms, 600-song duplicate detection 7.69 vs 12.31 ms, and a 180-file scan 2.07 vs 35.24 ms. These measurements prompted conservative changes; results vary by machine.
+- Duplicate comparison now groups eligible candidate pairs **across** metadata buckets and crosses NAPI once, only when the amount of vector work is large enough. The original JS fallback handles small, incomplete, invalid or mixed-dimension cases.
+- Scanner now reuses a dedicated Node worker rather than starting a thread for every scan. A bounded pending queue, deadline, explicit trusted standard extension predicate, source-directory containment checks and worker-crash fallback are mandatory; custom predicates always use JS. The worker is unref'd to avoid blocking app exit.
+- Keep JS as default and avoid claiming an automatic win. Performance must be re-measured with real, large libraries before any production switch.
