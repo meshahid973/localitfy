@@ -80,7 +80,7 @@ async function run() {
         }
         return encodedVectors.map((buffer)=>readNormalizedVector(buffer));
       }],
-      ["audio centering / 1200x512",()=>{
+      ["audio centering / 1200x512 (experimental opt-in)",()=>{
         const input=Array.from({length:1200},(_,i)=>trackVectors[i%trackVectors.length]);
         const native=tryCenterAudioProfiles(input);
         if(native) return native;
@@ -100,7 +100,8 @@ async function run() {
       process.env.LOCALTIFY_RUST_PHASES="";
       const js=await benchmark(fn);
       if(process.argv.includes("--compare")){
-        process.env.LOCALTIFY_RUST_PHASES="similarity,duplicates,scanner";
+        process.env.LOCALTIFY_RUST_PHASES=name.includes("audio centering /")
+          ? "similarity,duplicates,scanner,centering" : "similarity,duplicates,scanner";
         const rust=await benchmark(fn);
         console.log("[rust-phases] "+name+": JS "+js.toFixed(2)+" ms; native opt-in "+rust.toFixed(2)+" ms (includes bridge)");
       } else console.log("[rust-baseline] "+name+": JavaScript median "+js.toFixed(2)+" ms");

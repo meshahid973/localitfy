@@ -70,7 +70,9 @@ const centerFixture = Array.from({length:1200}, (_,index)=>vectors[index % vecto
 assert.equal(evaluate("",()=>tryCenterAudioProfiles(centerFixture)),null,
   "centered audio must fall back with Rust disabled");
 const beforeNativeCenter = nativeCalls.centerAudioVectorsInPlace;
-const actualCenter = evaluate("similarity",()=>tryCenterAudioProfiles(centerFixture));
+assert.equal(evaluate("similarity",()=>tryCenterAudioProfiles(centerFixture)),null,
+  "similarity-only must not activate slower experimental audio centering");
+const actualCenter = evaluate("centering",()=>tryCenterAudioProfiles(centerFixture));
 assert.ok(nativeCalls.centerAudioVectorsInPlace > beforeNativeCenter && actualCenter?.length === centerFixture.length,
   "large audio center operation must invoke native Rust");
 const expectedCenter = referenceCenter(centerFixture);
@@ -121,10 +123,21 @@ const beforeLargeMixes = nativeCalls.clusterFromCenters;
 const beforeLargeCenters = nativeCalls.centerAudioVectorsInPlace;
 const largeMixesRust = evaluate("similarity", () => generateMixes(largeSongs, "2026-11-10:large"));
 assert.equal(nativeCalls.centerAudioVectorsInPlace, beforeLargeCenters,
-  "600-track mixes should retain the faster JS centering path");
+  "similarity-only must keep the faster JS centering path");
 assert.ok(nativeCalls.clusterFromCenters > beforeLargeMixes,
   "large-library Daily Mixes must actually invoke native full Lloyd clustering");
 assert.deepEqual(largeMixesRust, largeMixesJs, "large-library native clustering changed Daily Mixes");
+
+const hugeSongs = Array.from({length:1200}, (_,index)=>({
+  ...songs[index % songs.length], songId: "huge-" + String(index).padStart(4,"0")
+}));
+const hugeJs = evaluate("",()=>generateMixes(hugeSongs,"2026-11-10:huge"));
+const beforeHugeCenter=nativeCalls.centerAudioVectorsInPlace;
+const hugeNative = evaluate("similarity,centering",()=>generateMixes(hugeSongs,"2026-11-10:huge"));
+assert.ok(nativeCalls.centerAudioVectorsInPlace > beforeHugeCenter,
+  "experimental centering must actually run when explicitly enabled");
+assert.deepEqual(hugeNative,hugeJs,
+  "experimental centering must preserve large Daily Mixes output");
 
 const dupSongs=Array.from({length:100},(_,i)=>{
   const k=Math.floor(i/2);

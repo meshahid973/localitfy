@@ -11,6 +11,8 @@ test("Rust remains optional and all three integrations preserve JS fallback code
  const dup=read("electron/library-duplicates.cjs");
  const scan=read("electron/library-watch.cjs");
  assert.match(backend,/LOCALTIFY_RUST_PHASES/);
+ assert.match(backend,/"centering"/);
+ assert.match(read("electron/native/compute.cjs"),/function tryCenterAudioProfiles\(vectors\) \{[\s\S]*?getAddon\("centering"\)/);
  assert.match(backend,/if \(!enabled\(phase\)\) return null/);
  assert.match(sim,/nativeAudio \? nativeAudio\[index \* seedProfiles\.length \+ seedIndex\] : dot/);
  assert.match(mix,/nativeScores \? nativeScores\[index \* centers\.length \+ centerIndex\] : dot/);

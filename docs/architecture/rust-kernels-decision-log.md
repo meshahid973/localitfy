@@ -61,3 +61,10 @@ Rust NAPI-RS is a native addon built per OS/CPU. All phases are **disabled by de
 - Performance gates are intentionally workload-dependent; the old Rust-returned-Array approach benchmarked drastically slower than JS and was eliminated. The JS fallback is necessary for standard Electron installs without an optional Rust addon.
 
 - Performance follow-up: on Linux, macOS and Windows, JS centering consistently beat the initial native bridge at 600 tracks; native centering now requires at least 1,024 tracks and the Rust routine mutates its private JS destination directly, avoiding a temporary Rust output matrix.
+
+## Performance-safe audio centering gate (November 10, 2026)
+
+- CI benchmarked centering at 1,200×512 on all three supported platforms. The native in-place method remained slower (Windows 9.73 ms versus JS 6.22 ms; Linux 8.55 versus 6.48 ms; macOS 6.00 versus 3.40 ms). It must **not** be activated merely by enabling `similarity`.
+- Experimental centering requires the additional explicit `LOCALTIFY_RUST_PHASES=similarity,centering` flag. It remains tested and packaged for future optimisation. Default is still JS, and ordinary similarity/CLAP decoding and full native Lloyd clustering remain independently available.
+- The `rust:benchmark` command opts in to `centering` only for the distinctly labeled centering benchmark and fails rather than silently measuring JS fallback as Rust.
+- No JavaScript renderer, database, song deletion or playback code was removed; deleting those modules would destroy the cross-platform fallback or change established user-data semantics.

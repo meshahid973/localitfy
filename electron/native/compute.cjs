@@ -73,7 +73,9 @@ function tryClusterFromCenters(points, centers, minimum) {
 
 /** Process entire libraries in one Rust call; do not cross NAPI per track. */
 function tryCenterAudioProfiles(vectors) {
-  const native = getAddon("similarity");
+  // Experimental: 1200-track profiling was slower on all three CI platforms.
+  // Do not penalize the otherwise useful similarity and CLAP decode kernels.
+  const native = getAddon("centering");
   if (!native || typeof native.centerAudioVectorsInPlace !== "function" ||
       !Array.isArray(vectors) || vectors.length < 1024 || vectors.length > 10_000) return null;
   const dim = vectors[0]?.length;
