@@ -937,7 +937,7 @@ body.isResizingSidebar{
   text-rendering: optimizeSpeed;
 }
 
-/* Onboarding styles moved to src/onboarding-first-run.css in V315. */
+
 
 .app{
   -webkit-font-smoothing: antialiased;
@@ -5303,7 +5303,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   --lt-glass-accent-alpha: 0.075;
 }
 
-/* localtify 0.3.9 V359: hover sidebar CSS moved to effects.css,
+/* hover sidebar CSS moved to effects.css,
 the last imported CSS layer. */
 
 .app[data-stars-intensity="off"] .localtifyStarsBackdrop{
@@ -5449,7 +5449,7 @@ the last imported CSS layer. */
   background-color: #050010 !important;
 }
 
-/* localtify 0.3.9 V380 — theme painting lag guard.
+/* theme painting lag guard.
    Color picking now updates CSS variables without forcing expensive animation/filter churn.
    This does NOT disable image blur,
 hero blur,
@@ -5487,7 +5487,7 @@ body.localitfyThemePainting .app{
   45%{ filter: drop-shadow(0 0 10px rgba(var(--lt-accent-rgb), .30)); }
 }
 
-/* V444: no hover movement on quick action buttons + full playlist modal overlay. */
+/* no hover movement on quick action buttons + full playlist modal overlay. */
 .app .iconAction.noActionHoverV444,
 .app .homeAlbumActions .iconAction,
 .app .songRow > .iconAction,
@@ -5568,7 +5568,7 @@ body.localitfyThemePainting .app{
   }
 }
 
-/* V453 RELEASE SIDEBAR/SHELL FIX
+/* RELEASE SIDEBAR/SHELL FIX
    Fixes the "transparent sidebar / content behind sidebar" release blocker.
    One final shell rule-set: fixed sidebar width, opaque themed sidebar, no hover-shift. */
 
@@ -5793,7 +5793,7 @@ body.isResizingPlayer .app *{
   }
 }
 
-/* Discord-style sidebar white pill indicator (V472) */
+/* Discord-style sidebar white pill indicator */
 .app .sidebar,
 .app .sidebar .nav{
   overflow: visible !important;
@@ -5919,9 +5919,8 @@ body.isResizingPlayer .app *{
   }
 }
 
-/* localtify 0.4.0 — theme contrast + sidebar import cleanup.
-   Uses CSS vars from App.tsx so white accents automatically get black text/icons.
-*/
+/* theme contrast + sidebar import cleanup.
+   Uses CSS vars from App.tsx so white accents automatically get black text/icons. */
 .app{
   --accent-contrast: var(--button-text-on-accent, #06100b);
   --accent-contrast-rgb: var(--button-text-on-accent-rgb, 6, 16, 11);
@@ -5982,9 +5981,8 @@ body.isResizingPlayer .app *{
   border-right: 0 !important;
 }
 
-/* localtify 0.4.0 — global modal blur lock.
-   Fixes delete/confirm overlays only blurring the content panel while the sidebar/player stay sharp.
-*/
+/* global modal blur lock.
+   Fixes delete/confirm overlays only blurring the content panel while the sidebar/player stay sharp. */
 
 .app .modalWrap::before{
   content: "" !important;
@@ -6004,14 +6002,12 @@ body.isResizingPlayer .app *{
 }
 
 
-/* localtify 0.4.0 — no glyph UI icons + full app modal overlay.
-   Uses inline SVGs so packaged builds do not depend on font glyph rendering.
-*/
+/* no glyph UI icons + full app modal overlay.
+   Uses inline SVGs so packaged builds do not depend on font glyph rendering. */
 
 
-/* localtify 0.4.0 — titlebar hover colors.
-   Maximize gets orange, close stays red, minimize stays neutral.
-*/
+/* titlebar hover colors.
+   Maximize gets orange, close stays red, minimize stays neutral. */
 
 
 .app .topUpdateRibbonLayer,
@@ -6172,7 +6168,7 @@ body.isResizingPlayer .app *{
   margin-top: 8px;
   margin-bottom: 10px;
 }
-/* end localtify v467 sidebar grouping */
+
 
 .app .sidebarNavGroupsV467{
   gap: 2px !important;
@@ -6310,7 +6306,7 @@ body.isResizingPlayer .app *{
     transform: none !important;
   }
 }
-/* end localtify v468 sidebar selected pill + spacing polish */
+
 
 .app .sidebarBottom{
   border-top-color: rgba(255,255,255,.055) !important;
@@ -6424,7 +6420,7 @@ body.isResizingPlayer .app *{
     display: none !important;
   }
 }
-/* end localtify v469 calm cute import music button */
+
 
 .app{
   color: var(--lt-text, rgba(255,255,255,.92));
@@ -6514,7 +6510,7 @@ body.isResizingPlayer .app *{
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .20), rgba(var(--lt-accent-rgb), .10)),
     rgba(9,8,15,.92) !important;
 }
-/* end localtify v470 readable contrast guard + import button repair */
+
 
 .app{
   --panel-calm-bg: rgba(5, 5, 10, .70);
@@ -6609,7 +6605,7 @@ body.isResizingPlayer .app *{
     transform: translate3d(9px, 1px, 0);
   }
 }
-/* end localtify v482 consolidated app cleanup */
+
 
 .app{
   --panel-calm-line: color-mix(in oklab, rgba(255,255,255,.07) 56%, var(--lt-accent) 44%) !important;
@@ -6675,7 +6671,7 @@ body.isResizingPlayer .app *{
     transform: translate3d(12px, 0, 0);
   }
 }
-/* end localtify v484 */
+
 
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
@@ -6798,7 +6794,7 @@ body.isResizingPlayer .app *{
     display: none !important;
   }
 }
-/* end localtify v485 reference-like update ribbon */
+
 
 .app{
   --outline-calm-v486: color-mix(in oklab, rgba(255,255,255,.055) 78%, var(--lt-accent) 22%) !important;
@@ -6860,7 +6856,7 @@ body.isResizingPlayer .app *{
 
 
 }
-/* end localtify v486 */
+
 
 .app{
   --outline-calm-v487: color-mix(in oklab, rgba(255,255,255,.05) 84%, var(--lt-accent) 16%) !important;
@@ -7063,7 +7059,7 @@ body.isResizingPlayer .app *{
   background: transparent !important;
   color: var(--lt-text) !important;
 }
-/* end localtify v487 */
+
 
 
 .app .topUpdateRibbonLayer,
@@ -7131,7 +7127,7 @@ body.isResizingPlayer .app *{
 .topUpdateRibbon .updateToastClose{
   color: rgba(255,255,255,.58) !important;
 }
-/* end localtify v489 */
+
 
 .app .sidebar,
 .sidebar{
@@ -7181,4 +7177,4 @@ body.isResizingPlayer .app *{
   border-color: transparent !important;
   box-shadow: none !important;
 }
-/* end localtify v495 */
+

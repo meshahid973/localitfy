@@ -1919,10 +1919,9 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   box-shadow: 0 10px 24px rgba(var(--accent-rgb),0.22) !important;
 }
 
-/* localtify 0.4.0 — player control cleanup.
+/* player control cleanup.
    Fixes the visible player outline, removes the volume icon bubble,
-   and makes accent buttons readable on light/dark custom colors.
-*/
+   and makes accent buttons readable on light/dark custom colors. */
 .playerBar{
   --player-main-readable: var(--player-main-button-text, var(--accent-contrast, #06100b));
   --player-progress-fill: rgb(var(--accent-rgb)) !important;
@@ -2014,7 +2013,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 
-/* v0.4.1: smooth play/pause path morph for the main player button */
+/* .4.1: smooth play/pause path morph for the main player button */
 .playerMorphIcon{
   width: 26px !important;
   height: 26px !important;
@@ -2056,7 +2055,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 
-/* v0.4.1: player CSS ownership pass — radius scale + morph icon sizing */
+/* .4.1: player CSS ownership pass — radius scale + morph icon sizing */
 .playerBar{
   --player-radius-xs: 12px;
   --player-radius-s: 16px;
@@ -2068,7 +2067,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 
-/* v0.4.1: small player icon polish + safer album delete confirmation */
+/* .4.1: small player icon polish + safer album delete confirmation */
 .playerBar .circleButton:not(.main) .playerControlIcon,
 .playerBar .circleButton:not(.main) svg,
 .playerBar .volumeIconButton svg,
@@ -2128,7 +2127,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 
-/* v0.4.1 performance ownership: player blur/glow safety */
+/* .4.1 performance ownership: player blur/glow safety */
 .app .playerBar{
   --player-perf-blur: 32px;
   --player-perf-opacity: 0.42;
