@@ -105,7 +105,7 @@ export function detectSettingsPlatform(): Required<PlatformInfoLike> {
     desktopControlsLabel: "Linux desktop controls", desktopControlsHelp: "Tray and media keys work where your Linux desktop environment exposes them.",
     startupSettingLabel: "Linux autostart", startupSettingHelp: "Hidden in this release. Linux autostart will use a proper desktop-entry flow later.",
     linuxInstallNotes: [
-      "AppImage: right click > Properties > Allow executing file as program, or run chmod +x Localtify-0.4.1-x86_64.AppImage.",
+      "AppImage: allow execution in file properties, or run chmod +x localtify-*.AppImage.",
       "If the AppImage does not open, install FUSE/libfuse2 for your distro, then run it again.",
       "RPM: for Fedora, openSUSE, and RHEL-style distros.",
       "DEB: for Ubuntu, Debian, Linux Mint, and related distros."

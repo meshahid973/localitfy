@@ -11,7 +11,7 @@ export default function WhatsNewModal({ open, onClose }: WhatsNewModalProps) {
         <button className="whatsNewClose" type="button" onClick={onClose} aria-label="Close what's new"><X size={18} strokeWidth={2.4} /></button>
         <p className="eyebrow">what's new</p>
         <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-        <p className="whatsNewSubtext">0.4.1 is a fast hotfix focused on the album importer freeze, nested-folder scanning, cover accuracy, and keeping the app responsive after the 0.4.0 release.</p>
+        <p className="whatsNewSubtext">A maintenance-focused release with library, playback, and UI improvements, plus safer packaging for future updates.</p>
         <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
         <button className="heroMain" type="button" onClick={onClose}>got it</button>
       </section>

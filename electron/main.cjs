@@ -1,5 +1,3 @@
-/* localtify 0.4.1 V425 cover picker and cache cleanup. */
-/* localtify 0.4.1 V424 — Windows startup white-screen recovery. */
 const { app, powerMonitor, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net, safeStorage } = require("electron");
 const { createIpcRouter } = require("./ipc/router.cjs");
 const { registerAnalysisIpc, preserveExperimentalSettings } = require("./ipc/analysis.cjs");
