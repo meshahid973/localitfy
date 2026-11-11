@@ -3,8 +3,8 @@ import { useLayoutEffect, useRef } from "react";
 /** Keep keyboard focus inside the topmost modal, including stacked delete confirmations. */
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function useModalFocus(active: boolean) {
-  const dialogRef = useRef<HTMLDivElement>(null);
+export function useModalFocus<T extends HTMLElement = HTMLDivElement>(active: boolean) {
+  const dialogRef = useRef<T>(null);
 
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
