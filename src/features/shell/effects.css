@@ -369,7 +369,8 @@
 }
 
 /* localtify 0.3.9 V305 — keep audio smooth by sleeping expensive paint while the renderer is busy. */
-.app.localtifyInteractionBusy :is(.coverAura::before, .heroAmbiencePulse, .homeAlbumArt::before, .songArt::before, .playerBar::before){
+.app.localtifyInteractionBusy .heroAmbiencePulse,
+.app.localtifyInteractionBusy :is(.coverAura, .homeAlbumArt, .songArt, .playerBar)::before{
   opacity: 0 !important;
   filter: none !important;
   animation: none !important;
@@ -695,7 +696,7 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
 }
 
 /* Explicitly keep these blur/tint systems alive. */
-.app :is(.heroAmbiencePulse, .playerBar::before, .playerBar::after, .coverAura::before, .coverAura::after){
+.app .heroAmbiencePulse{
   backface-visibility: hidden;
   transform: translateZ(0);
 }

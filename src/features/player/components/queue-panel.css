@@ -8,12 +8,11 @@
   max-height: min(560px, calc(100vh - var(--player-size, 108px) - 90px));
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(var(--accent-rgb), 0.2);
-  border-radius: 18px;
-  color: var(--text);
+  border: 1px solid var(--lt-border);
+  border-radius: var(--lt-radius-md);
+  color: var(--lt-text);
   background: linear-gradient(var(--lt-surface), var(--lt-surface)), var(--lt-bg);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-  backdrop-filter: blur(22px) saturate(130%);
   outline: 0;
   animation: queuePanelIn 160ms ease both;
 }
@@ -192,11 +191,17 @@
 }
 
 .queuePanelIconButton:hover,
+.queuePanelTextButton:hover{
+  color: var(--lt-text);
+  background: color-mix(in srgb, var(--lt-text) 8%, transparent);
+}
+
 .queuePanelIconButton:focus-visible,
-.queuePanelTextButton:hover,
 .queuePanelTextButton:focus-visible{
   color: var(--lt-text);
   background: color-mix(in srgb, var(--lt-text) 8%, transparent);
+  outline: 2px solid var(--lt-accent);
+  outline-offset: 2px;
 }
 
 .queuePanelMore{
