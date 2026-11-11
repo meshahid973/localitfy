@@ -6523,25 +6523,7 @@ body.isResizingPlayer .app *{
   --panel-calm-shadow-hover: 0 16px 38px rgba(0,0,0,.22);
 }
 
-/* Header/search consolidated from v471-v473{
-  position: relative !important;
 
-  display: flex !important;
-
-  justify-content: space-between !important;
-  gap: clamp(18px, 3vw, 38px) !important;
-
-
-  isolation: isolate !important;
-  contain: layout paint style !important;
-
-  background:
-    linear-gradient(180deg, rgba(7, 7, 12, .46), rgba(7, 7, 12, .08)),
-    transparent !important;
-  box-shadow: none !important;
-}
-
-/* Calm panel hierarchy, consolidated from v478. */
 .app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon){
 
   background:
@@ -6826,69 +6808,6 @@ body.isResizingPlayer .app *{
 /* Title/search spacing fix */
 
 
-/* Organic stars: the positions drift{
-
-
-  background-image:
-    radial-gradient(circle at 6% 27%, rgba(255,255,255,.95) 0 1.15px, transparent 2px),
-    radial-gradient(circle at 14% 68%, rgba(var(--lt-accent-rgb),.78) 0 1px, transparent 1.85px),
-    radial-gradient(circle at 23% 20%, rgba(255,255,255,.72) 0 .95px, transparent 1.75px),
-    radial-gradient(circle at 35% 56%, rgba(var(--lt-accent-rgb),.68) 0 1px, transparent 1.85px),
-    radial-gradient(circle at 47% 16%, rgba(255,255,255,.86) 0 1.1px, transparent 1.95px),
-    radial-gradient(circle at 58% 72%, rgba(var(--lt-accent-rgb),.70) 0 1px, transparent 1.85px),
-    radial-gradient(circle at 69% 26%, rgba(255,255,255,.76) 0 1px, transparent 1.85px),
-    radial-gradient(circle at 79% 63%, rgba(var(--lt-accent-rgb),.64) 0 .95px, transparent 1.8px),
-    radial-gradient(circle at 91% 31%, rgba(255,255,255,.80) 0 1px, transparent 1.85px),
-    radial-gradient(circle at 96% 70%, rgba(var(--lt-accent-rgb),.52) 0 .85px, transparent 1.7px) !important;
-
-}
-
-@keyframes localtifyHeaderStarsScatterV486{
-  0%{
-    opacity: .36;
-    background-position: 0% 0%, 6% 12%, -4% 8%, 8% -6%, -6% -10%, 4% 10%, -8% 6%, 7% -8%, -5% 4%, 0% 0%;
-    transform: translate3d(0,0,0);
-  }
-  28%{
-    opacity: .88;
-    background-position: 3% -3%, -5% 10%, 8% -6%, -4% 8%, 9% 4%, -8% -5%, 5% 10%, -6% 5%, 6% -7%, -2% 3%;
-    transform: translate3d(1px,-1px,0);
-  }
-  54%{
-    opacity: .48;
-    background-position: -4% 5%, 9% -6%, 3% 10%, -9% 2%, 5% -8%, 7% 7%, -3% -6%, 8% 8%, -7% 2%, 4% -5%;
-    transform: translate3d(-1px,1px,0);
-  }
-  82%{
-    opacity: .96;
-    background-position: 8% -7%, -8% -3%, 10% 3%, 5% 10%, -10% 5%, 2% -9%, 8% -2%, -7% 9%, 3% -8%, -5% 7%;
-    transform: translate3d(2px,0,0);
-  }
-  100%{
-    opacity: .42;
-    background-position: -2% 7%, 4% -8%, -6% -6%, 10% 6%, -4% 9%, 9% -7%, -9% 1%, 5% -10%, -1% 8%, 7% -2%;
-    transform: translate3d(0,-1px,0);
-  }
-}
-
-@keyframes localtifyHeaderStarsScatterSoftV486{
-  0%{
-    opacity: .22;
-    background-position: 0% 0%, -8% 10%, 6% -8%, -10% -4%, 8% 8%, 0% 0%;
-  }
-  45%{
-    opacity: .58;
-    background-position: 10% -6%, 4% 8%, -9% 6%, 8% -10%, -5% 4%, 12% 0%;
-  }
-  100%{
-    opacity: .28;
-    background-position: -7% 6%, 9% -8%, -4% -9%, 6% 10%, 10% -5%, -12% 0%;
-  }
-}
-
-/* Much more visible full-width update ribbon, like a real top app notice. */
-
-
 .app .topUpdateRibbon,
 .topUpdateRibbon{
   pointer-events: auto !important;
@@ -7147,13 +7066,6 @@ body.isResizingPlayer .app *{
 /* end localtify v487 */
 
 
-/* Update ribbon: black, cleaner{
-  min-height: 100px !important;
-  padding: 26px 22px 13px !important;
-  overflow: visible !important;
-}
-
-/* Update notice: black strip, no release link. */
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
   top: 36px !important;
