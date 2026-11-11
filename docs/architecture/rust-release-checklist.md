@@ -42,3 +42,4 @@ Do not merge or publish merely because headless CI passes.
 - `electron-updater` resolves `js-yaml`. Lockfile `js-yaml` was updated from vulnerable `4.3.1` to patched `4.3.2` without changing the dependent package's `^4.1.0` requirement. Verify with fresh `npm ci` and the next audit run.
 - CI now blocks new high or critical **runtime** dependency advisories. The moderate runtime advisory and development-dependency advisories still require explicit triage; do not claim a clean all-dependency audit.
 - The remaining `music-metadata@11.15.0` moderation-level file-parser advisory is addressed by raising the supported `music-metadata` minimum and lockfile to `11.16.1`. Verify an actual zero-advisory runtime audit in the final CI; do not assume the patch succeeded until the audit runs.
+- Native CI builds an opt-in app and a fresh JS-only app on every supported OS; both package variants are checked for correct addon inclusion/exclusion.

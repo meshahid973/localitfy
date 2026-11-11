@@ -45,3 +45,5 @@ jobs:
           fi
       - name: Check bundled runtime
         run: node scripts/check-analysis-native-package.cjs
+      - name: Ensure normal package excludes optional Rust
+        run: node scripts/check-rust-package.cjs --absent

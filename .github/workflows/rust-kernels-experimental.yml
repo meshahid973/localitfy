@@ -77,3 +77,19 @@ jobs:
           fi
       - name: Verify optional addon is unpacked in packaged application
         run: node scripts/check-rust-package.cjs
+      - name: Prepare standard package without native addon
+        run: npm run clean:release
+      - name: Build normal unpacked application
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            npx electron-builder --win dir --x64 --publish never
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            npx electron-builder --mac dir --publish never
+          else
+            npx electron-builder --linux dir --x64 --publish never
+          fi
+      - name: Verify standard package has no Rust addon
+        run: node scripts/check-rust-package.cjs --absent

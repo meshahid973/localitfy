@@ -27,7 +27,21 @@ if (process.platform === "win32" || process.platform === "linux") {
 }
 
 const present = candidates.filter(file => fs.existsSync(file) && fs.statSync(file).size > 0);
-if (!present.length) {
+const expectAbsent = process.argv.includes("--absent");
+const packageExists = process.platform === "darwin"
+  ? candidates.length > 0
+  : candidates.some(file => fs.existsSync(path.join(path.dirname(path.dirname(path.dirname(file))), "app.asar")));
+if (expectAbsent) {
+  if (!packageExists) {
+    console.error("[rust-package] No packaged app found to verify");
+    process.exitCode = 1;
+  } else if (present.length) {
+    console.error("[rust-package] Unexpected native addon in standard package", present);
+    process.exitCode = 1;
+  } else {
+    console.log("[rust-package] standard package excludes the optional addon");
+  }
+} else if (!present.length) {
   console.error("[rust-package] Expected unpacked native addon not found", candidates);
   process.exitCode = 1;
 } else {
