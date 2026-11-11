@@ -9,6 +9,9 @@ on:
       - "package-lock.json"
       - ".github/workflows/analysis-native.yml"
 
+env:
+  ONNXRUNTIME_NODE_INSTALL: skip
+
 permissions:
   contents: read
 

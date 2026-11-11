@@ -18,6 +18,9 @@ on:
       - ".github/workflows/rust-kernels-experimental.yml"
   workflow_dispatch:
 
+env:
+  ONNXRUNTIME_NODE_INSTALL: skip
+
 permissions:
   contents: read
 

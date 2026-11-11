@@ -25,7 +25,7 @@
     "css:unused:check": "node scripts/css-unused-selectors.mjs",
     "css:dedup:fix": "node scripts/css-dedup-fixpoint.mjs",
     "check": "npm run bridge:check && npm run boundaries:check && npm run css:dedup:check && npm test && npm run typecheck && npm run build && npm run db:recovery-test",
-    "clean:release": "node -e \"require('fs').rmSync('release',{recursive:true,force:true})\"",
+    "clean:release": "node scripts/prepare-release.cjs",
     "dist": "npm run clean:release && npm run build && electron-builder --win nsis --x64",
     "publish": "npm run clean:release && npm run build && electron-builder --win nsis --x64 --publish always",
     "dist:linux": "npm run clean:release && npm run build && electron-builder --linux AppImage rpm deb --x64 --publish never",
@@ -47,8 +47,8 @@
     "rust:build": "node scripts/build-rust-kernels.cjs",
     "rust:test": "node scripts/test-rust-kernels.cjs",
     "rust:benchmark": "node scripts/benchmark-rust-phases.cjs --compare",
-    "rust:dist": "npm run rust:build && npm run dist",
-    "rust:dist:linux": "npm run rust:build && npm run dist:linux"
+    "rust:dist": "node scripts/package-rust-release.cjs win",
+    "rust:dist:linux": "node scripts/package-rust-release.cjs linux"
   },
   "dependencies": {
     "@huggingface/transformers": "4.3.1",
