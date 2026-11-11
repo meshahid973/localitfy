@@ -17,7 +17,7 @@ export default function DeleteSongModal({ song, busy, onClose, removeSong }: Del
       <div ref={dialogRef} tabIndex={-1} className="deleteModal cartoonPop" role="alertdialog" aria-modal="true" aria-labelledby="delete-song-dialog-title" aria-describedby="delete-song-dialog-description" onClick={(event) => event.stopPropagation()}>
         <div className="deleteFace">:(</div>
         <p className="deleteTiny">remove from localtify</p>
-        <h3 id="delete-song-dialog-title">do you really wanna delete<span>"{prettyTitle(song.title, 8)}"</span>from localtify?</h3>
+        <h3 id="delete-song-dialog-title">remove <span>"{prettyTitle(song.title, 8)}"</span> from localtify?</h3>
         <p className="deleteSub" id="delete-song-dialog-description">this only removes it from your localtify library.<br />your real music file stays safe on your pc.</p>
         <div className="deleteActions">
           <button className="heroGhost" onClick={onClose} disabled={busy}>no keep it</button>
