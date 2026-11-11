@@ -69,7 +69,7 @@ if (compare) {
   }
 }
 async function run() {
-    const jobs=[
+  const jobs = [
       ["similarity / 240x12x512 scores",()=>{
         const seeds=trackVectors.slice(0,12);
         const nativeScores=tryDotMatrix(trackVectors,seeds);
@@ -102,7 +102,7 @@ async function run() {
       ["duplicates typed output / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDotsInto"]],
       ["PCM decode + energy / 480k samples",()=>decodePcmChunk(pcmBuffer),["pcmSumSquares"]]
     ];
-    for(const [name,fn,requiredNames] of jobs) {
+  for (const [name, fn, requiredNames] of jobs) {
       process.env.LOCALTIFY_RUST_PHASES="";
       const js=await benchmark(fn);
       if(compare) {
@@ -115,6 +115,6 @@ async function run() {
         const label = requiredNames?.length ? "native opt-in " : "JS fallback (native gate not reached) ";
         console.log("[rust-phases] "+name+": JS "+js.toFixed(2)+" ms; "+label+rust.toFixed(2)+" ms"+(requiredNames?.length ? " (includes bridge)" : ""));
       } else console.log("[rust-baseline] "+name+": JavaScript median "+js.toFixed(2)+" ms");
-    }
+  }
 }
 run().catch(e=>{console.error(e);process.exitCode=1;});

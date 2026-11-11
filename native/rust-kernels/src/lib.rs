@@ -334,6 +334,4 @@ mod tests {
         assert!(cluster_from_centers_inner(&points, &centers, 3, 1).is_err());
         assert!(cluster_from_centers_inner(&points, &centers, 2, 10).is_err());
     }
-
-
 }

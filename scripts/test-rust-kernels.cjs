@@ -110,6 +110,7 @@ const largeSongs = Array.from({ length: 600 }, (_, index) => ({
 }));
 const largeMixesJs = evaluate("", () => generateMixes(largeSongs, "2026-11-10:large"));
 const beforeLargeMixes = nativeCalls.clusterFromCenters;
+const largeMixesRust = evaluate("similarity", () => generateMixes(largeSongs, "2026-11-10:large"));
 assert.ok(nativeCalls.clusterFromCenters > beforeLargeMixes,
   "large-library Daily Mixes must actually invoke native full Lloyd clustering");
 assert.deepEqual(largeMixesRust, largeMixesJs, "large-library native clustering changed Daily Mixes");
