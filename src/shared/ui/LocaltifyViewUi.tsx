@@ -179,7 +179,6 @@ export function LocaltifyStateCard({
   actions?: ReactNode;
   centered?: boolean;
   cute?: boolean;
-  badge?: string;
   mascotState?: MascotStateKey;
 }) {
   const resolvedMascotState = mascotState || mascotStateForTone(tone, cute);
@@ -192,7 +191,12 @@ export function LocaltifyStateCard({
               <MascotStateArt state={resolvedMascotState} className="localtifyEmptyMascotV496" />
             </span>
           </div>
-          <p className="localtifyEmptyCaptionV467">my team couldn't find anything here!!</p>
+          <div className="localtifyEmptyCopyV467">
+            <p className="eyebrow">{eyebrow}</p>
+            <strong className="localtifyEmptyCaptionV467">{title}</strong>
+            <span>{message}</span>
+            {detail ? <small>{detail}</small> : null}
+          </div>
           {actions ? <div className="localtifyStateActionsV373 localtifyEmptyActionsV467">{actions}</div> : null}
         </>
       ) : (

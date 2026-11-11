@@ -1,0 +1,53 @@
+/* Theme primitives for status surfaces. Feature-specific geometry stays with the feature. */
+:where(.localtifySurface) {
+  --surface-tone-rgb: var(--lt-accent-rgb);
+  min-width: 0;
+  border: 1px solid var(--lt-border);
+  border-radius: var(--lt-radius-md);
+  color: var(--lt-text);
+  background: var(--lt-surface);
+}
+
+:where(.localtifySurface-accent) {
+  border-color: rgba(var(--surface-tone-rgb), .25);
+}
+
+:where(.localtifySurface-success) {
+  --surface-tone-rgb: 67, 234, 139;
+  border-color: rgba(var(--surface-tone-rgb), .25);
+}
+
+:where(.localtifySurface-warning) {
+  --surface-tone-rgb: 255, 198, 91;
+  border-color: rgba(var(--surface-tone-rgb), .25);
+}
+
+:where(.localtifySurface-danger) {
+  --surface-tone-rgb: 255, 88, 116;
+  border-color: rgba(var(--surface-tone-rgb), .25);
+}
+
+:where(.localtifySurface-elevated) {
+  box-shadow: var(--lt-shadow-low);
+}
+
+:where(.localtifySurface-compact) { padding: 12px; }
+:where(.localtifySurface-normal) { padding: 18px; }
+:where(.localtifySurface-roomy) { padding: 24px; }
+
+:where(.localtifySurfaceHeader),
+:where(.localtifySurfaceActions) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+:where(.localtifySurfaceBody) {
+  min-width: 0;
+}
+
+:where(.localtifySurfaceHeader-compact),
+:where(.localtifySurfaceActions-compact) { gap: 8px; }
+:where(.localtifySurfaceHeader-roomy),
+:where(.localtifySurfaceActions-roomy) { gap: 14px; }

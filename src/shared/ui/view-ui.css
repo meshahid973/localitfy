@@ -131,13 +131,36 @@
   max-height: 230px;
 }
 
-.localtifyEmptyCaptionV467 {
+.localtifyEmptyCopyV467 {
   max-width: 390px;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.localtifyEmptyCopyV467 > .eyebrow {
+  margin: 0;
+}
+
+.localtifyEmptyCaptionV467 {
   margin: 0;
   color: var(--lt-text);
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.3;
+  font-size: 16px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.localtifyEmptyCopyV467 > span {
+  color: var(--lt-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.localtifyEmptyCopyV467 > small {
+  color: var(--lt-faint);
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .localtifyEmptyActionsV467 {
