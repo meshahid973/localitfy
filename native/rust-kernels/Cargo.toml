@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.88"
 publish = false
-description = "Optional, read-only compute and scanning kernels for Localtify Electron"
+description = "Optional, read-only audio compute kernels for Localtify Electron"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

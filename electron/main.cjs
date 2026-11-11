@@ -6,7 +6,6 @@ const { registerAnalysisIpc, preserveExperimentalSettings } = require("./ipc/ana
 const { registerDiscordIpc } = require("./ipc/discord.cjs");
 const { registerMovedSongRepairIpc } = require("./ipc/library-relink.cjs");
 const { startLibraryWatch } = require("./library-watch.cjs");
-const { markStandardAudioFilter } = require("./native/scanner.cjs");
 let libraryWatcher = null;
 const { registerDuplicateIpc } = require("./ipc/library-duplicates.cjs");
 const { registerDiscoverIpc } = require("./ipc/discover.cjs");
@@ -736,7 +735,6 @@ async function cacheSpotifyCoverImage(coverUrl, stableKey = "") {
 function isAudioFile(filePath) {
   return /\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(filePath || "");
 }
-markStandardAudioFilter(isAudioFile);
 
 function isImageFile(filePath) {
   return /\.(png|jpg|jpeg|webp|gif)$/i.test(filePath || "");

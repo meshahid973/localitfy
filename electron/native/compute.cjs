@@ -32,7 +32,6 @@ function tryDotMatrix(rows, columns) {
 }
 
 
-
 /** Full Lloyd iteration kernel: one native call for all passes, with safe JS fallback. */
 function tryClusterFromCenters(points, centers, minimum) {
   const native = getAddon("similarity");
@@ -72,40 +71,6 @@ function tryClusterFromCenters(points, centers, minimum) {
     return null;
   }
 }
-
-/** Process entire libraries in one Rust call; do not cross NAPI per track. */
-function tryCenterAudioProfiles(vectors) {
-  // Experimental: 1200-track profiling was slower on all three CI platforms.
-  // Do not penalize the otherwise useful similarity and CLAP decode kernels.
-  const native = getAddon("centering");
-  if (!native || typeof native.centerAudioVectorsInPlace !== "function" ||
-      !Array.isArray(vectors) || vectors.length < 1024 || vectors.length > 10_000) return null;
-  const dim = vectors[0]?.length;
-  if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16_384 ||
-      vectors.length * dim < 524_288 || vectors.length * dim > 1_500_000 ||
-      vectors.some((row) => !row || row.length !== dim)) return null;
-  try {
-    const packed = new Float64Array(vectors.length * dim);
-    vectors.forEach((row, index) => packed.set(row, index * dim));
-    native.centerAudioVectorsInPlace(packed, dim);
-    if (packed.some((value) => !Number.isFinite(value))) throw new Error("Invalid centered vector output");
-    const centered = Array.from({ length: vectors.length },
-      (_, index) => packed.subarray(index * dim, (index + 1) * dim));
-    // Guard against an incompatible binary without repeating full JS work.
-    for (const index of new Set([0, Math.floor(vectors.length / 2), vectors.length - 1])) {
-      let square = 0;
-      for (const value of centered[index]) square += value * value;
-      if (square > 1e-12 && Math.abs(Math.sqrt(square) - 1) > 1e-8) {
-        throw new Error("Native audio normalization parity mismatch");
-      }
-    }
-    return centered;
-  } catch (error) {
-    warnOnce("similarity", error);
-    return null;
-  }
-}
-
 
 /** Batch CLAP Float32 decode/normalize; never incur a native call per audio record. */
 function tryDecodeNormalizedAudio(buffers, dimensions) {
@@ -211,4 +176,4 @@ function tryBatchPairDots(buckets, vectors) {
     return null;
   }
 }
-module.exports = { tryDotMatrix, tryClusterFromCenters, tryCenterAudioProfiles, tryDecodeNormalizedAudio, tryBatchPairDots };
+module.exports = { tryDotMatrix, tryClusterFromCenters, tryDecodeNormalizedAudio, tryBatchPairDots };

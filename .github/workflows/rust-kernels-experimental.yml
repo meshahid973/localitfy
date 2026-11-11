@@ -11,7 +11,6 @@ on:
       - "scripts/build-rust-kernels.cjs"
       - "scripts/benchmark-rust-phases.cjs"
       - "scripts/test-rust-kernels.cjs"
-      - "scripts/verify-rust-worker-exit.cjs"
       - "scripts/check-rust-package.cjs"
       - "tests/phase4/rust-optional-integration.test.mjs"
       - "package.json"

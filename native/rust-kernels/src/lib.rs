@@ -4,7 +4,6 @@
 use napi::{Error, Result, Status};
 use napi::bindgen_prelude::Float64Array;
 use napi_derive::napi;
-use std::path::Path;
 
 fn invalid(message: &str) -> Error {
     Error::new(Status::InvalidArg, message.to_owned())
@@ -150,54 +149,6 @@ pub fn pcm_sum_squares(samples: &[f32]) -> Result<f64> {
     Ok(total)
 }
 
-/// Center and normalize all library audio vectors in a *single* native call.
-/// Mirrors listening-signals.cjs libraryMean/centered: row-order mean
-/// accumulation, scalar square summation and the same 1e-9 zero threshold.
-/// The caller retains JS as the opt-out/failure fallback.
-// In-place centering avoids allocating a second multi-megabyte matrix.
-// The Node bridge passes a fresh, private Float64Array and never shares it.
-fn center_audio_in_place(vectors: &mut [f64], dim: usize) -> Result<()> {
-    if vectors.is_empty() || vectors.len() % dim != 0 || vectors.len() > 1_500_000 {
-        return Err(invalid("Invalid centered audio matrix size"));
-    }
-    let rows = vectors.len() / dim;
-    if rows > 10_000 || !vectors.iter().all(|value| value.is_finite()) {
-        return Err(invalid("Invalid or non-finite centered audio matrix"));
-    }
-    let mut mean = vec![0.0; dim];
-    for row in vectors.chunks_exact(dim) {
-        for i in 0..dim { mean[i] += row[i] / rows as f64; }
-    }
-    for row in vectors.chunks_exact_mut(dim) {
-        let mut magnitude = 0.0_f64;
-        for i in 0..dim {
-            row[i] -= mean[i];
-            magnitude += row[i] * row[i];
-        }
-        let norm = magnitude.sqrt();
-        if norm > 1e-9 {
-            for value in row { *value /= norm; }
-        } else {
-            row.fill(0.0);
-        }
-    }
-    Ok(())
-}
-
-#[cfg(test)]
-fn center_audio_inner(values: &[f64], dim: usize) -> Result<Vec<f64>> {
-    let mut output = values.to_vec();
-    center_audio_in_place(&mut output, dim)?;
-    Ok(output)
-}
-
-#[napi]
-pub fn center_audio_vectors_in_place(mut vectors: Float64Array, dimensions: u32) -> Result<()> {
-    // The Node bridge owns a newly allocated typed array. This synchronous call
-    // has exclusive access until returning to JavaScript, satisfying NAPI-RS.
-    center_audio_in_place(unsafe { vectors.as_mut() }, dimension(dimensions)?)
-}
-
 /// Decode contiguous little-endian Float32 CLAP profiles into a *fresh* JS-owned
 /// Float64Array in-place, without creating or copying a Rust return vector.
 fn decode_normalized_audio_into_inner(bytes: &[u8], output: &mut [f64], dim: usize) -> Result<()> {
@@ -333,87 +284,6 @@ pub fn cluster_from_centers(points: &[f64], initial: &[f64], dimensions: u32, mi
     cluster_from_centers_inner(points, initial, dimension(dimensions)?, minimum as usize)
 }
 
-#[napi(object)]
-pub struct ScanResult {
-    pub files: Vec<String>,
-    pub truncated: bool,
-}
-
-fn partial_file(name: &str) -> bool {
-    let lower = name.to_ascii_lowercase();
-    [".part", ".tmp", ".download", ".crdownload"]
-        .iter().any(|ext| lower.ends_with(ext))
-}
-
-fn visit(
-    folder: &Path,
-    depth: usize,
-    limit: usize,
-    extensions: &[String],
-    result: &mut ScanResult,
-) {
-    if depth > 12 || result.files.len() >= limit {
-        return;
-    }
-    let entries = match std::fs::read_dir(folder) {
-        Ok(entries) => entries,
-        Err(_) => return, // Matches the original JS skip-on-unreadable-folder behavior.
-    };
-    for entry in entries {
-        let entry = match entry {
-            Ok(entry) => entry,
-            Err(_) => { result.truncated = true; return; }
-        };
-        if result.files.len() >= limit {
-            result.truncated = true;
-            return;
-        }
-        let os_name = entry.file_name();
-        let name = match os_name.to_str() {
-            Some(value) => value.to_owned(),
-            None => { result.truncated = true; return; }
-        };
-        if name.starts_with('.') {
-            continue;
-        }
-        let kind = match entry.file_type() {
-            Ok(kind) => kind,
-            Err(_) => { result.truncated = true; return; }
-        };
-        if kind.is_dir() {
-            if depth < 12 && name != "localitfy-bin" && name != "spotify-covers" {
-                visit(&entry.path(), depth + 1, limit, extensions, result);
-            }
-        } else if kind.is_file() && !partial_file(&name) {
-            let allowed = entry.path().extension().and_then(|s| s.to_str())
-                .map(|ext| extensions.iter().any(|accepted| accepted.eq_ignore_ascii_case(ext)))
-                .unwrap_or(false);
-            if allowed {
-                let candidate = entry.path();
-                match candidate.to_str() {
-                    Some(file) => result.files.push(file.to_owned()),
-                    None => { result.truncated = true; return; }
-                }
-            }
-        }
-    }
-}
-
-#[napi]
-pub fn scan_audio_files(root: String, limit: u32, extensions: Vec<String>) -> Result<ScanResult> {
-    if limit > 50_000 || extensions.len() > 64 ||
-       extensions.iter().any(|ext| ext.is_empty() || ext.len() > 16 ||
-           !ext.as_bytes().iter().all(|c| c.is_ascii_alphanumeric())) {
-        return Err(invalid("Invalid audio scan bounds or extension"));
-    }
-    let mut result = ScanResult { files: Vec::new(), truncated: false };
-    if limit == 0 {
-        return Ok(result);
-    }
-    visit(Path::new(&root), 0, limit as usize, &extensions, &mut result);
-    Ok(result)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -437,25 +307,6 @@ mod tests {
         let values = pair_dots_inner(&[1., 0., 0., 1., 0.5, 0.5], &[0, 1], &[2, 2], 2).unwrap();
         assert_eq!(values, vec![0.5, 0.5]);
         assert!(pair_dots_inner(&[1., 0.], &[0], &[1], 2).is_err());
-    }
-
-    #[test]
-    fn center_audio_matches_js_scalar_contract_and_rejects_invalid_rows() {
-        let rows = [1.0, 0.0, 0.0, 1.0, -1.0, 0.0];
-        let actual = center_audio_inner(&rows, 2).unwrap();
-        let mean = [0.0, 1.0 / 3.0];
-        for (index, row) in rows.chunks_exact(2).enumerate() {
-            let mut expected = [row[0] - mean[0], row[1] - mean[1]];
-            let norm = (expected[0] * expected[0] + expected[1] * expected[1]).sqrt();
-            if norm > 1e-9 { expected[0] /= norm; expected[1] /= norm; }
-            for col in 0..2 {
-                assert!((actual[index * 2 + col] - expected[col]).abs() < 1e-12);
-            }
-        }
-        let identical = center_audio_inner(&[1.0, 2.0, 1.0, 2.0], 2).unwrap();
-        assert_eq!(identical, vec![0.0; 4]);
-        assert!(center_audio_inner(&[f64::NAN, 1.0], 2).is_err());
-        assert!(center_audio_inner(&[1.0, 2.0, 3.0], 2).is_err());
     }
 
     #[test]
@@ -484,17 +335,5 @@ mod tests {
         assert!(cluster_from_centers_inner(&points, &centers, 2, 10).is_err());
     }
 
-    #[test]
-    fn scanner_follows_hidden_partial_depth_and_extension_contract() {
-        let folder = std::env::temp_dir().join(format!("localtify-rust-test-{}",std::process::id()));
-        std::fs::create_dir_all(folder.join("album")).unwrap();
-        std::fs::write(folder.join("album").join("one.mp3"), b"test").unwrap();
-        std::fs::write(folder.join("album").join("two.crdownload"), b"test").unwrap();
-        std::fs::write(folder.join("album").join(".hidden.mp3"), b"test").unwrap();
-        let mut result = ScanResult { files: Vec::new(), truncated: false };
-        visit(&folder,0,100,&["mp3".to_owned()],&mut result);
-        assert_eq!(result.files.len(),1);
-        assert!(result.files[0].ends_with("one.mp3"));
-        let _ = std::fs::remove_dir_all(folder);
-    }
+
 }

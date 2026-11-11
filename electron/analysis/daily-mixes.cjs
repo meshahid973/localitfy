@@ -1,5 +1,5 @@
 const fs = require("node:fs");
-const { tryDotMatrix, tryClusterFromCenters, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
+const { tryDotMatrix, tryClusterFromCenters, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
 const { createHash } = require("node:crypto");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { readNormalizedVector } = require("./similarity.cjs");
@@ -22,13 +22,12 @@ function artist(track) { return String(track.artist || "").trim().toLowerCase();
 function buildFeatures(tracks) {
   const dimensions = tracks[0].vector.length;
   const vectors = tracks.map((track) => track.vector);
-  const nativeAudio = tryCenterAudioProfiles(vectors);
-  const mean = nativeAudio ? null : libraryMean(vectors);
+  const mean = libraryMean(vectors);
   const tokens = tracks.map((track) => genreTokens(track.tags));
   const vocabulary = new Map([...new Set(tokens.flatMap((map) => [...map.keys()]))].sort().map((token, index) => [token, index]));
   const audioScale = Math.sqrt(AUDIO_WEIGHT); const genreScale = Math.sqrt(GENRE_WEIGHT);
   return tracks.map((track, index) => {
-    const audio = nativeAudio ? nativeAudio[index] : centered(track.vector, mean);
+    const audio = centered(track.vector, mean);
     const genre = new Float64Array(vocabulary.size);
     for (const [token, weight] of tokens[index]) genre[vocabulary.get(token)] = weight;
     normalize(genre);

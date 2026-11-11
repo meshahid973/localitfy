@@ -1,16 +1,13 @@
 "use strict";
 
 const { performance } = require("node:perf_hooks");
-const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
-const { dot, libraryMean, centered } = require("../electron/analysis/listening-signals.cjs");
-const { tryDotMatrix, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../electron/native/compute.cjs");
+const { dot } = require("../electron/analysis/listening-signals.cjs");
+const { tryDotMatrix, tryDecodeNormalizedAudio } = require("../electron/native/compute.cjs");
 const { readNormalizedVector } = require("../electron/analysis/similarity.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
-const { listAudioFiles } = require("../electron/library-watch.cjs");
-const { markStandardAudioFilter, tryScanAudioFiles } = require("../electron/native/scanner.cjs");
 const { getAddon } = require("../electron/native/backend.cjs");
 const { decodePcmChunk } = require("../electron/analysis/pcm.cjs");
 
@@ -54,17 +51,13 @@ const dupSizes = new Map(dupSongs.map((song)=>[song.id,5000000]));
 const manySameRecord = dupSongs.slice(0,64).map((song)=>({
   ...song, title:"same recording", artist:"shared artist", album:"shared album"
 }));
-const isAudioFile=(file)=>/\.(mp3|wav|ogg|flac|m4a|aac|opus|aiff|aif)$/i.test(file);
-markStandardAudioFilter(isAudioFile);
-if (!isAudioFile("probe.mp3") || !isAudioFile("probe.aif") || isAudioFile("probe.txt"))
-  throw new Error("Scanner baseline extension predicate is invalid");
 const compare = process.argv.includes("--compare");
 const nativeCalls = new Map();
 if (compare) {
-  process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,scanner,centering,pcm";
+  process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,pcm";
   const addon = getAddon("similarity");
   if (!addon) throw new Error("Native benchmark requires a built Rust addon");
-  for (const name of ["dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "centerAudioVectorsInPlace", "pcmSumSquares"]) {
+  for (const name of ["dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "pcmSumSquares"]) {
     const original = addon[name];
     if (typeof original !== "function") throw new Error("Missing Rust export: " + name);
     nativeCalls.set(name, 0);
@@ -76,13 +69,6 @@ if (compare) {
   }
 }
 async function run() {
-  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-rust-baseline-"));
-  try {
-    for(let i=0;i<6;i++){
-      const dir=path.join(tmp,"album"+i);fs.mkdirSync(dir);
-      for(let j=0;j<30;j++)fs.writeFileSync(path.join(dir,"track"+j+(j%4?".mp3":".txt")),"x");
-      fs.writeFileSync(path.join(dir,"partial.part"),"x");
-    }
     const jobs=[
       ["similarity / 240x12x512 scores",()=>{
         const seeds=trackVectors.slice(0,12);
@@ -101,16 +87,6 @@ async function run() {
         }
         return encodedVectors.map((buffer)=>readNormalizedVector(buffer));
       },["decodeNormalizedAudioInto"]],
-      ["audio centering / 1200x512 (experimental opt-in)",()=>{
-        const input=Array.from({length:1200},(_,i)=>trackVectors[i%trackVectors.length]);
-        const native=tryCenterAudioProfiles(input);
-        if(native) return native;
-        if (process.env.LOCALTIFY_RUST_PHASES) {
-          throw new Error("Native audio centering unexpectedly used JavaScript fallback; refusing misleading timing");
-        }
-        const mean=libraryMean(input);
-        return input.map((vector)=>centered(vector,mean));
-      },["centerAudioVectorsInPlace"]],
       ["similarity typed output / 240x12x512",()=>{
         const seeds=trackVectors.slice(0,12);
         const scores=tryDotMatrix(trackVectors,seeds);
@@ -124,29 +100,21 @@ async function run() {
       ["duplicates / 600 entries",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:dupSizes}),[]],
       ["duplicates / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDots"]],
       ["duplicates typed output / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDotsInto"]],
-      ["scanner / 180 entries",async()=>{
-        if (!process.env.LOCALTIFY_RUST_PHASES) return listAudioFiles(tmp,isAudioFile);
-        const nativeFiles = await tryScanAudioFiles(tmp,isAudioFile,50_000);
-        if (nativeFiles === null) throw new Error("Scanner silently fell back");
-        return nativeFiles;
-      },["scanner"]],
       ["PCM decode + energy / 480k samples",()=>decodePcmChunk(pcmBuffer),["pcmSumSquares"]]
     ];
     for(const [name,fn,requiredNames] of jobs) {
       process.env.LOCALTIFY_RUST_PHASES="";
       const js=await benchmark(fn);
       if(compare) {
-        process.env.LOCALTIFY_RUST_PHASES=name.includes("audio centering /")
-          ? "similarity,duplicates,scanner,centering,pcm" :
-            name.includes("typed output") ? "similarity,duplicates,scanner,bridge,pcm" : "similarity,duplicates,scanner,pcm";
+        process.env.LOCALTIFY_RUST_PHASES = name.includes("typed output")
+          ? "similarity,duplicates,bridge,pcm" : "similarity,duplicates,pcm";
         const before = new Map(nativeCalls);
         const rust=await benchmark(fn);
-        const invoked = requiredNames?.some(key => key === "scanner" || nativeCalls.get(key) > before.get(key));
+        const invoked = requiredNames?.some(key => nativeCalls.get(key) > before.get(key));
         if (requiredNames?.length && !invoked) throw new Error("Rust did not execute in benchmark: " + name);
         const label = requiredNames?.length ? "native opt-in " : "JS fallback (native gate not reached) ";
         console.log("[rust-phases] "+name+": JS "+js.toFixed(2)+" ms; "+label+rust.toFixed(2)+" ms"+(requiredNames?.length ? " (includes bridge)" : ""));
       } else console.log("[rust-baseline] "+name+": JavaScript median "+js.toFixed(2)+" ms");
     }
-  } finally {fs.rmSync(tmp,{recursive:true,force:true});}
 }
 run().catch(e=>{console.error(e);process.exitCode=1;});
