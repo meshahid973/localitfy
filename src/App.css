@@ -938,7 +938,6 @@ body.isResizingSidebar{
 }
 
 
-
 .app{
   -webkit-font-smoothing: antialiased;
 }
@@ -7061,7 +7060,6 @@ body.isResizingPlayer .app *{
 }
 
 
-
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
   top: 36px !important;
@@ -7177,4 +7175,3 @@ body.isResizingPlayer .app *{
   border-color: transparent !important;
   box-shadow: none !important;
 }
-

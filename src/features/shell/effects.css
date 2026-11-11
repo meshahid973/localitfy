@@ -1495,8 +1495,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
 }
 
 
-
-
 /* Preserve keyboard focus visibility without the old rectangular nav background. */
 main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible .navIcon {
   outline: 2px solid var(--lt-accent) !important;
