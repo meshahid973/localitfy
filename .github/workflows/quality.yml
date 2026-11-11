@@ -42,8 +42,8 @@ jobs:
               }
             }
           '
-      - name: Block high and critical runtime dependency advisories
-        run: npm audit --omit=dev --audit-level=high
+      - name: Block moderate, high and critical runtime dependency advisories
+        run: npm audit --omit=dev --audit-level=moderate
       - run: npm run release:check
 
   windows-native-smoke:
