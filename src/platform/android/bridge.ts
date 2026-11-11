@@ -10,6 +10,7 @@ import { fromMac, fromMacOrKept } from "./macFeatures";
 import { LocaltifyNative } from "./native";
 import { writeValues } from "./store";
 import { setLibraryChangedHandler } from "./sync";
+import { onLiveEvent, sendLike, sendLive } from "./live";
 import type { SyncPlaylist } from "./syncMerge";
 
 type Bridge = Window["localitfy"];
@@ -92,7 +93,13 @@ export function createAndroidBridge(): Bridge {
     },
     getPlaylists: async () => phoneLibrary.playlists,
     savePlaylists: async (playlists) => phoneLibrary.savePlaylists(playlists as SyncPlaylist[]),
-    patchSong: async (id: string, patch: Partial<Song>) => phoneLibrary.patchSong(id, patch),
+    patchSong: async (id: string, patch: Partial<Song>) => {
+      const updated = phoneLibrary.patchSong(id, patch);
+      if (updated && typeof patch.liked === "boolean") void sendLike(id, patch.liked);
+      return updated;
+    },
+    liveSend: sendLive,
+    onLiveEvent: onLiveEvent as Bridge["onLiveEvent"],
     recordPlayEvent: async (event: PlayEvent) => phoneLibrary.recordPlayEvent(event),
     getListeningCounts: async () => phoneLibrary.listeningCounts,
     onWatchedFoldersChange: subscribe("songs") as Bridge["onWatchedFoldersChange"],

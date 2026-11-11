@@ -156,6 +156,8 @@ async function exchangeEdits() {
       const sentSongs = phoneLibrary.phoneSongFields().map(baseFields);
       const sentPlaylists = structuredClone(phoneLibrary.playlists);
       const songs = phoneSongChanges(new Map(Object.entries(phoneLibrary.base.songs)), sentSongs);
+      // When each like was tapped, so a newer change on the Mac isn't undone by an older one from here.
+      for (const [id, change] of Object.entries(songs)) if (change.liked !== undefined && phoneLibrary.likeClock[id]) change.likedAt = phoneLibrary.likeClock[id];
       const playlists = phonePlaylistChanges(phoneLibrary.base.playlists, before.playlists, sentPlaylists);
       // Copy exact event versions, including active plays. Never acknowledge a later version that was not sent.
       const playEvents = structuredClone(phoneLibrary.pendingEvents.slice(0, 20000));

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { RefreshCw, Smartphone } from "lucide-react";
 import { phoneLibrary } from "./library";
 import { forgetMac, getSyncProgress, isSyncing, onSyncProgress, pairWithMac, syncNow, type SyncProgress } from "./sync";
+import { getLiveStatus, onLiveEvent, restartLiveConnection } from "./live";
 import "../../features/sync/phone-sync.css";
 
 function formatBytes(bytes: number) {
@@ -27,12 +28,16 @@ export default function AndroidSyncSettings() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const [live, setLive] = useState(getLiveStatus);
+
   useEffect(() => onSyncProgress(setProgress), []);
+  useEffect(() => onLiveEvent((event) => { if (event.type === "connection") setLive(event.status); }), []);
 
   async function pair() {
     setBusy(true); setMessage("");
     try {
       await pairWithMac(address, code);
+      restartLiveConnection();
       setPaired(true); setCode("");
       void syncNow();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Pairing failed"); }
@@ -55,13 +60,20 @@ export default function AndroidSyncSettings() {
         <button type="button" className="settingsActionButton settingsPrimaryAction" disabled={syncing} onClick={() => void syncNow()}>
           <RefreshCw size={14} /> {syncing ? "Syncing…" : "Sync now"}</button>
         <button type="button" className="settingsActionButton settingsGhostAction" disabled={syncing}
-          onClick={() => void forgetMac().then(() => { setPaired(false); setMessage(""); })
+          onClick={() => void forgetMac().then(() => { restartLiveConnection(); setPaired(false); setMessage(""); })
             .catch((error) => setMessage(error instanceof Error ? error.message : "Could not unpair"))}>Unpair</button>
       </div>
       <p className="settingsHintText" role="status" aria-live="polite">
         {syncing ? [progress.message, transfer].filter(Boolean).join(" · ") : last ? `${last.message} · ${ago(last.at)}` : "Not synced yet."}
       </p>
       {syncing && progress.phase === "downloading" ? <p className="settingsHintText">Keep the app open until the first sync finishes.</p> : null}
+      <p className="settingsHintText">{{
+        connected: `Live: connected. Likes, playback and the queue follow along while both apps are open.`,
+        connecting: `Live: connecting to your ${computer}…`,
+        offline: `Live: your ${computer} isn't reachable right now. Changes wait for the next sync.`,
+        unsupported: `Live: update localtify on your ${computer} to see and control playback from here.`,
+        off: "Live: off while the app is in the background."
+      }[live]}</p>
     </> : <form className="phoneSyncPairForm" onSubmit={(event) => { event.preventDefault(); void pair(); }}>
       <label><span>{computer === "computer" ? "Computer" : computer} address</span><input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="192.168.1.20" inputMode="url" autoCapitalize="off" autoCorrect="off" /></label>
       <label><span>Pairing code</span><input value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="6 digits" inputMode="numeric" /></label>

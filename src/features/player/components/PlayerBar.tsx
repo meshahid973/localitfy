@@ -12,6 +12,8 @@ import type { Song } from "../../library/song.types";
 import type { Settings } from "../../settings/settings.types";
 import type { CoverColorSyncMode } from "../../settings/theme.types";
 import type { RepeatMode } from "../player.types";
+import { DevicePicker } from "../../connect/DevicePicker";
+import type { ConnectControls } from "../../connect/usePlaybackConnect";
 
 export type PlayerBarProps = {
   ambientStyle: CSSProperties;
@@ -69,6 +71,8 @@ export type PlayerBarProps = {
   volumeDraft: number;
   volumeDraftRef: MutableRefObject<number>;
   volumeRangeStyle: CSSProperties;
+  /** Devices on the live connection; null when no phone is connected. */
+  connect?: ConnectControls | null;
 };
 
 export default function PlayerBar(props: PlayerBarProps) {
@@ -126,7 +130,8 @@ export default function PlayerBar(props: PlayerBarProps) {
     updateSetting,
     volumeDraft,
     volumeDraftRef,
-    volumeRangeStyle
+    volumeRangeStyle,
+    connect
   } = props;
   return (
           <footer
@@ -169,6 +174,7 @@ export default function PlayerBar(props: PlayerBarProps) {
                       </button>
                     </strong>
                     <p className={`nowPlayingMiniArtistSwap ${nowPlayingSongMotionClass}`}>
+                      {connect?.remoteName ? <span className="connectPlayingOn">on {connect.remoteName} · </span> : null}
                       {splitArtistCredits(currentSong.artist).map((artistName, index) => (
                         <Fragment key={artistName}>
                           {index ? ", " : null}
@@ -264,6 +270,7 @@ export default function PlayerBar(props: PlayerBarProps) {
 
             <div className="playerRight">
               <div className="playerRightTools">
+                {connect ? <DevicePicker controls={connect} variant="bar" /> : null}
                 {lyricsOpen !== undefined ? (
                   <button
                     type="button"

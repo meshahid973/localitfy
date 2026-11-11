@@ -202,6 +202,8 @@ import { resolveSimilarSeed, type SimilarSeedRequest } from "./features/analysis
 import type { DuplicatesMergeResult } from "./features/library/duplicates/DuplicatesDialog";
 import { keptForRemoved, remapSongIds } from "./features/library/duplicates/duplicatePlan";
 import type { View } from "./features/shell/view.types";
+import { usePlaybackConnect } from "./features/connect/usePlaybackConnect";
+import { useDevToolsShortcut } from "./features/shell/useDevToolsShortcut";
 
 const SettingsCategoryContent = lazy(() => import("./features/settings/SettingsCategoryContent"));
 
@@ -1530,45 +1532,7 @@ function MainModeApp() {
 
 
 
-  useEffect(() => {
-    const handleDevToolsShortcut = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey) || !event.shiftKey || event.key.toLowerCase() !== "i") return;
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      const bridge = window.localitfy as typeof window.localitfy & {
-        toggleDevTools?: () => Promise<void> | void;
-        openDevTools?: () => Promise<void> | void;
-        showDevTools?: () => Promise<void> | void;
-      };
-
-      const toggleDevTools = bridge?.toggleDevTools || bridge?.openDevTools || bridge?.showDevTools;
-
-      if (typeof toggleDevTools === "function") {
-        void Promise.resolve(toggleDevTools()).catch(() => showAppToast("DevTools bridge failed", "error"));
-        return;
-      }
-
-      try {
-        const maybeRequire = (window as typeof window & { require?: (name: string) => any }).require;
-        const electron = typeof maybeRequire === "function" ? maybeRequire("electron") : null;
-        const ipcRenderer = electron?.ipcRenderer;
-
-        if (ipcRenderer?.send) {
-          ipcRenderer.send("localitfy:toggle-devtools");
-          return;
-        }
-      } catch {
-        // Production builds with contextIsolation may not expose require. Main/preload can still wire the bridge later.
-      }
-
-      showAppToast("DevTools shortcut needs the main/preload bridge", "error");
-    };
-
-    window.addEventListener("keydown", handleDevToolsShortcut, true);
-    return () => window.removeEventListener("keydown", handleDevToolsShortcut, true);
-  }, []);
+  useDevToolsShortcut(showAppToast);
 
   function openSnakeGame() {
     const gameUrl = new URL("snakegame.html", window.location.href).toString();
@@ -3611,7 +3575,7 @@ function MainModeApp() {
 
   useEffect(() => {
     if (songs.length && playQueue.some((songId) => !songsById.has(songId))) {
-      setPlayQueue((queue) => queue.filter((songId) => isPlayableSong(songsById.get(songId))));
+      setPlayQueue((queue) => queue.filter((songId) => songsById.has(songId)));
     }
   }, [songs.length, songsById, playQueue]);
 
@@ -6069,6 +6033,7 @@ function MainModeApp() {
 
 
   function queueSong(songId: string, next = false) {
+    if (connect.queue([songId], next)) return;
     setPlayQueue((queue) => {
       const cleanedQueue = queue.filter((id) => id !== songId);
       return next ? [songId, ...cleanedQueue] : [...cleanedQueue, songId];
@@ -6111,6 +6076,7 @@ function MainModeApp() {
   }
 
   function queueAlbumSongs(songIds: string[], albumTitle = "album") {
+    if (connect.queue(songIds, false)) return;
     const ids = getPlayableUniqueSongIds(songIds, songsById);
     if (!ids.length) {
       setStatusText("album has no playable songs");
@@ -6677,6 +6643,7 @@ function MainModeApp() {
     shouldPlay = settings.autoplayOnSelect,
     playbackContext?: { playlistId?: string | null; keepPlaylistContext?: boolean; source?: PlaybackSource | null; keepSource?: boolean }
   ) {
+    if (shouldPlay && connect.play(songId)) return;
     const targetSong = songsById.get(songId);
     const sameSong = songId === currentId;
     const audio = audioRef.current;
@@ -6808,6 +6775,7 @@ function MainModeApp() {
   }
 
   function togglePlay() {
+    if (connect.toggle()) return;
     if (!currentSong) {
       if (playableSongs[0]) {
         void selectSong(playableSongs[0].id, true);
@@ -6893,7 +6861,7 @@ function MainModeApp() {
 
   function playNext(forcePlay = true, trigger: "manual" | "auto" = "manual") {
     if (trigger === "manual") stopCrossfadeAuto();
-    if (!playableSongs.length) return;
+    if (!playableSongs.length || (trigger === "manual" && connect.skip(1))) return;
 
     if (trigger === "auto" && repeatMode === "one" && restartCurrentSongForRepeatOne()) {
       return;
@@ -6984,7 +6952,7 @@ function MainModeApp() {
 
   function playPrevious() {
     stopCrossfadeAuto();
-    if (!playableSongs.length) return;
+    if (!playableSongs.length || connect.skip(-1)) return;
 
     const audio = audioRef.current;
 
@@ -8311,6 +8279,13 @@ function MainModeApp() {
     onRefill: (count) => setStatusText(`radio: queued ${count} similar song${count === 1 ? "" : "s"}`)
   });
   const notForMe = useNotForMe({ settings, updateSettingsPatch, songsById, setQueue: setPlayQueue, radioSongIds, announce: setStatusText });
+  const connect = usePlaybackConnect({
+    songsById, currentSong, isPlaying, queue: playQueue, isShuffle, repeatMode, contextLabel: nowPlayingContext.label, rate: settings.playbackSpeed,
+    getTime: () => timeRef.current, getDuration: () => durationRef.current, togglePlay, next: playNext, previous: playPrevious, playQueueItem,
+    seek: (seconds) => handleSeek((seconds / (durationRef.current || 1)) * 100), setQueue: setPlayQueue, setShuffle: setIsShuffle, setRepeat: setRepeatMode,
+    start: (songId, time, play) => { startupResumePositionRef.current = { songId, time }; void selectSong(songId, play, { source: null }); },
+    onLike: (id, liked) => setSongs((all) => all.map((song) => (song.id === id ? { ...song, liked } : song))), toast: showAppToast
+  });
 
   const downloadPageState = getDownloadPageState({
     downloadBusy,
@@ -8649,7 +8624,7 @@ function MainModeApp() {
       visibleDownloadQueueItems,
       visibleDownloadResults
     },
-    playerBar: {
+    playerBar: connect.playerBar({
       ambientStyle,
       commitSeek,
       commitVolume,
@@ -8704,7 +8679,7 @@ function MainModeApp() {
       volumeDraft,
       volumeDraftRef,
       volumeRangeStyle
-    },
+    }),
     modals: {
       songContextMenu: {
         state: songContextMenu,
@@ -8727,7 +8702,7 @@ function MainModeApp() {
         openAnalysisSettings: () => { setSimilarRequest(null); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); },
         selectSong, queueSong, playSongs: playAlbumSongs, queueSongs: queueAlbumSongs
       },
-      queuePanel: {
+      queuePanel: connect.queuePanel({
         open: queuePanelOpen,
         onClose: closeQueuePanel,
         currentSong: visualCurrentSong,
@@ -8744,8 +8719,8 @@ function MainModeApp() {
         playQueueItem,
         selectSong,
         openSongContextMenu
-      },
-      lyrics: {
+      }),
+      lyrics: connect.lyrics({
         open: lyricsOpen && settings.lyricsEnabled,
         onClose: closeLyrics,
         song: visualCurrentSong,
@@ -8753,7 +8728,7 @@ function MainModeApp() {
         getTime: getLyricsTime,
         seekTo: (seconds: number) => handleSeek((seconds / (durationRef.current || currentDuration || currentSong?.duration || 1)) * 100),
         openSettings: () => { setLyricsOpen(false); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); }
-      },
+      }),
       whatsNew: {
         open: Boolean(whatsNewOpen),
         onClose: closeWhatsNew

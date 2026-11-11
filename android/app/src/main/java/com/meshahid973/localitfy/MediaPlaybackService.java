@@ -149,8 +149,14 @@ public class MediaPlaybackService extends Service {
         Notification notification = buildNotification(intent.getStringExtra("title"), intent.getStringExtra("artist"), playing);
         if (playing) {
             int type = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK : 0;
-            ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, type);
-            foreground = true;
+            try {
+                ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, type);
+                foreground = true;
+            } catch (RuntimeException notAllowed) {
+                // Android 12+ may refuse while the app is in the background, e.g. when the computer it is a remote for
+                // starts playing. Show the controls as a plain notification instead of crashing.
+                getSystemService(NotificationManager.class).notify(NOTIFICATION_ID, notification);
+            }
         } else {
             // Paused: keep the controls but let the system reclaim the process if it needs to.
             stopForegroundCompat(false);

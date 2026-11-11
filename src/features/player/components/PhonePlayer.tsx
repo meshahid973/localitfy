@@ -9,6 +9,7 @@ import { splitArtistCredits } from "../../artists/artistCredits";
 import { LikeHeartAnimationV443 } from "../../../shared/ui/LikeHeartAnimation";
 import type { LyricsViewProps } from "../../lyrics/LyricsView";
 import type { PlayerBarProps } from "./PlayerBar";
+import { DevicePicker } from "../../connect/DevicePicker";
 import "./phone-player.css";
 
 const LyricsView = lazy(() => import("../../lyrics/LyricsView"));
@@ -28,7 +29,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
     nowPlayingContextLabel, openArtistPage, openSongContextMenu, playNext, playPrevious, previewSeek, progressDurationLabelRefs,
     progressInputRefs, progressRangeStyle, progressTimeLabelRefs, queueCount, queuePanelOpen, lyricsOpen, toggleLyrics,
     repeatButtonAriaLabel, repeatButtonStateText, repeatMode, setIsShuffle, startSeekPreview, toggleLike, togglePlay,
-    toggleQueuePanel, toggleRepeat, lyrics
+    toggleQueuePanel, toggleRepeat, lyrics, connect
   } = props;
   const [expanded, setExpanded] = useState(false);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -102,7 +103,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
         <Cover song={currentSong} className="phoneMiniArt" priority="high" />
         <span className="phoneMiniMeta">
           <strong>{prettyTitle(currentSong.title, 8)}</strong>
-          <small>{prettyMeta(currentSong.artist)}</small>
+          <small>{connect?.remoteName ? `on ${connect.remoteName} · ` : ""}{prettyMeta(currentSong.artist)}</small>
         </span>
         <button type="button" className="phoneIconButton" onClick={(event) => { event.stopPropagation(); togglePlay(); }} aria-label={isPlaying ? "pause" : "play"}>
           <PlayerPlayPauseMorphIcon playing={isPlaying} />
@@ -200,6 +201,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
           </div>
 
           <div className="phonePlayerTools">
+            {connect ? <DevicePicker controls={connect} variant="chip" /> : null}
             {lyricsOpen !== undefined ? (
               <button type="button" className={`phoneChip ${lyricsOpen ? "active" : ""}`} onClick={toggleLyrics} aria-pressed={lyricsOpen}>
                 <MicVocal size={18} strokeWidth={2.2} aria-hidden="true" /> lyrics

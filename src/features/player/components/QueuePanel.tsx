@@ -30,6 +30,8 @@ export type QueuePanelProps = {
   playQueueItem: (index: number) => unknown;
   selectSong: (songId: string, shouldPlay?: boolean) => unknown;
   openSongContextMenu: (event: ReactMouseEvent<HTMLElement>, song: Song) => unknown;
+  /** Queued songs the player can't play (not copied to the phone yet): greyed out, skipped when their turn comes. */
+  unavailable?: { ids: ReadonlySet<string>; label: string };
 };
 
 const QUEUE_DRAG_TYPE = "text/localtify-queue-index";
@@ -50,7 +52,8 @@ export default function QueuePanel({
   repeatPreview,
   playQueueItem,
   selectSong,
-  openSongContextMenu
+  openSongContextMenu,
+  unavailable
 }: QueuePanelProps) {
   const panelRef = useRef<HTMLElement | null>(null);
   const [renderLimit, setRenderLimit] = useState(QUEUE_RENDER_STEP);
@@ -154,7 +157,7 @@ export default function QueuePanel({
               {entries.slice(0, renderLimit).map(({ song, index }) => (
                 <li
                   key={`${song.id}-${index}`}
-                  className={`queuePanelRow ${dropIndex === index ? "isDropTarget" : ""}`}
+                  className={`queuePanelRow ${dropIndex === index ? "isDropTarget" : ""} ${unavailable?.ids.has(song.id) ? "isUnavailable" : ""}`}
                   draggable
                   onDragStart={(event) => {
                     event.stopPropagation();
@@ -167,11 +170,15 @@ export default function QueuePanel({
                   onContextMenu={(event) => openSongContextMenu(event, song)}
                 >
                   <GripVertical className="queuePanelGrip" size={14} strokeWidth={2.2} aria-hidden="true" />
-                  <button type="button" className="queuePanelRowMain" onClick={() => playQueueItem(index)} title="play now">
+                  <button type="button" className="queuePanelRowMain" onClick={() => playQueueItem(index)} disabled={unavailable?.ids.has(song.id)}
+                    title={unavailable?.ids.has(song.id) ? unavailable.label : "play now"}>
                     <Cover song={song} className="queuePanelCover" />
                     <span className="queuePanelCopy">
                       <strong>{prettyTitle(song.title, 8)}</strong>
-                      <small>{radioSongIds?.has(song.id) ? <span className="queuePanelRadioTag">radio · </span> : null}{prettyMeta(song.artist)}</small>
+                      <small>
+                        {unavailable?.ids.has(song.id) ? <span className="queuePanelRadioTag">{unavailable.label} · </span> : null}
+                        {radioSongIds?.has(song.id) ? <span className="queuePanelRadioTag">radio · </span> : null}{prettyMeta(song.artist)}
+                      </small>
                     </span>
                   </button>
                   <span className="queuePanelDuration">{formatTime(song.duration || 0)}</span>

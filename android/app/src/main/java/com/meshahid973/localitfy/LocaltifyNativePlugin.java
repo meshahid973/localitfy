@@ -1,6 +1,8 @@
 package com.meshahid973.localitfy;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import com.getcapacitor.JSArray;
@@ -9,11 +11,13 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -30,6 +34,19 @@ public class LocaltifyNativePlugin extends Plugin {
     private final ExecutorService downloads = Executors.newFixedThreadPool(4);
     private volatile boolean cancelDownloads = false;
     private WifiManager.WifiLock wifiLock;
+
+    // The live connection: one server-sent-events stream from the computer, read on its own thread so it keeps
+    // going while the page is in the background. It reconnects with a growing pause, and at once on a new network.
+    private static final long[] LIVE_RETRY_MS = {1000, 2000, 5000, 10000, 30000};
+    private final Object liveLock = new Object();
+    private Thread liveThread;
+    private boolean liveWanted = false;
+    private boolean liveRetryNow = false;
+    private String liveUrl = "";
+    private String liveToken = "";
+    private volatile HttpURLConnection liveConnection;
+    private Network liveNetwork;
+    private boolean watchingNetwork = false;
 
     @Override
     public void load() {
@@ -232,6 +249,177 @@ public class LocaltifyNativePlugin extends Plugin {
             if (!on && wifiLock.isHeld()) wifiLock.release();
         }
         call.resolve();
+    }
+
+    @PluginMethod
+    public void liveConnect(PluginCall call) {
+        String url = call.getString("url", "");
+        String token = call.getString("token", "");
+        synchronized (liveLock) {
+            if (!url.equals(liveUrl) || !token.equals(liveToken)) closeLiveConnection();
+            liveUrl = url;
+            liveToken = token;
+            liveWanted = true;
+            wakeLive();
+            if (liveThread == null) {
+                liveThread = new Thread(this::runLive, "localtify-live");
+                liveThread.setDaemon(true);
+                liveThread.start();
+            }
+        }
+        watchNetwork();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void liveDisconnect(PluginCall call) {
+        synchronized (liveLock) {
+            liveWanted = false;
+            closeLiveConnection();
+            wakeLive();
+        }
+        call.resolve();
+    }
+
+    /** Call holding liveLock: ends a backoff pause so the next attempt starts now. */
+    private void wakeLive() {
+        liveRetryNow = true;
+        liveLock.notifyAll();
+    }
+
+    private void closeLiveConnection() {
+        HttpURLConnection connection = liveConnection;
+        liveConnection = null;
+        if (connection != null) connection.disconnect();
+    }
+
+    private void emitLiveStatus(String status) {
+        JSObject data = new JSObject();
+        data.put("status", status);
+        notifyListeners("liveStatus", data);
+    }
+
+    private void runLive() {
+        int failures = 0;
+        while (true) {
+            String url;
+            String token;
+            synchronized (liveLock) {
+                if (!liveWanted) {
+                    liveThread = null;
+                    return;
+                }
+                url = liveUrl;
+                token = liveToken;
+                liveRetryNow = false;
+            }
+            emitLiveStatus("connecting");
+            HttpURLConnection connection = null;
+            int status = 0;
+            try {
+                connection = (HttpURLConnection) new URL(url + "/v1/live").openConnection();
+                liveConnection = connection;
+                connection.setConnectTimeout(5000);
+                // The computer sends a heartbeat every 25 s; a minute of silence means the link is gone.
+                connection.setReadTimeout(60000);
+                connection.setRequestProperty("Authorization", "Bearer " + token);
+                connection.setRequestProperty("Accept", "text/event-stream");
+                status = connection.getResponseCode();
+                if (status == 200) {
+                    failures = 0;
+                    emitLiveStatus("connected");
+                    readLiveEvents(connection.getInputStream(), url, token);
+                }
+            } catch (Exception ignored) {
+                // Unreachable, dropped, or closed for a new address: try again below.
+            } finally {
+                if (connection != null) connection.disconnect();
+                if (liveConnection == connection) liveConnection = null;
+            }
+            synchronized (liveLock) {
+                if (!liveWanted) continue;
+                // 404: a computer from before the live connection. 401: this phone was unpaired there.
+                if ((status == 404 || status == 401) && url.equals(liveUrl) && token.equals(liveToken)) {
+                    liveWanted = false;
+                    emitLiveStatus(status == 404 ? "unsupported" : "unpaired");
+                    continue;
+                }
+                emitLiveStatus("offline");
+                if (!liveRetryNow) {
+                    try {
+                        liveLock.wait(LIVE_RETRY_MS[Math.min(failures, LIVE_RETRY_MS.length - 1)]);
+                    } catch (InterruptedException interrupted) {
+                        liveWanted = false;
+                    }
+                }
+                failures += 1;
+            }
+        }
+    }
+
+    private void readLiveEvents(InputStream stream, String url, String token) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+        StringBuilder data = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.isEmpty()) {
+                if (data.length() == 0) continue;
+                JSObject event = new JSObject();
+                event.put("data", data.toString());
+                notifyListeners("liveEvent", event);
+                data.setLength(0);
+            } else if (line.startsWith(":")) {
+                pongLive(url, token);
+            } else if (line.startsWith("data:")) {
+                if (data.length() > 0) data.append('\n');
+                data.append(line.startsWith("data: ") ? line.substring(6) : line.substring(5));
+            }
+        }
+    }
+
+    /** Answers the computer's heartbeat from here, so it keeps working with the page asleep in the background. */
+    private void pongLive(String url, String token) {
+        requests.execute(() -> {
+            HttpURLConnection connection = null;
+            try {
+                connection = (HttpURLConnection) new URL(url + "/v1/live").openConnection();
+                connection.setRequestMethod("POST");
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                connection.setRequestProperty("Authorization", "Bearer " + token);
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setDoOutput(true);
+                try (OutputStream out = connection.getOutputStream()) {
+                    out.write("{\"type\":\"pong\"}".getBytes(StandardCharsets.UTF_8));
+                }
+                connection.getResponseCode();
+            } catch (Exception ignored) {
+                // A missed pong only matters if the next ones fail too.
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        });
+    }
+
+    /** Wi-Fi back after sleep, or a switch to another network: reconnect now rather than after the backoff. */
+    private void watchNetwork() {
+        synchronized (liveLock) {
+            if (watchingNetwork) return;
+            watchingNetwork = true;
+        }
+        ConnectivityManager manager = getContext().getSystemService(ConnectivityManager.class);
+        if (manager == null) return;
+        manager.registerDefaultNetworkCallback(new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                synchronized (liveLock) {
+                    // The first call reports the network already in use; only a different one makes the old socket stale.
+                    if (liveNetwork != null && !liveNetwork.equals(network)) closeLiveConnection();
+                    liveNetwork = network;
+                    wakeLive();
+                }
+            }
+        });
     }
 
     /** Mirrors navigator.mediaSession into the native session and its foreground service. */
