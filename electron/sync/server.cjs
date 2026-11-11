@@ -2,6 +2,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
+const { createLiveHub, LIVE_VERSION } = require("./live.cjs");
 
 const PROTOCOL = 2;
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
@@ -47,7 +48,10 @@ function cleanText(value) {
   return typeof value === "string" && value.length <= 500 ? value : undefined;
 }
 
-/** Validates one song's phone edits. playCountDelta adds plays made on the phone; it never lowers the Mac's count. */
+/**
+ * Validates one song's phone edits. playCountDelta adds plays made on the phone; it never lowers the Mac's count.
+ * likedAt is when the like was tapped (Mac clock); phones from before the live connection leave it out.
+ */
 function cleanSongChange(change) {
   if (!change || typeof change !== "object") return null;
   const patch = {};
@@ -61,7 +65,8 @@ function cleanSongChange(change) {
   }
   const delta = Number.isSafeInteger(change.playCountDelta) && change.playCountDelta > 0 && change.playCountDelta <= 100000 ? change.playCountDelta : 0;
   const lastPlayed = typeof change.lastPlayed === "string" && !Number.isNaN(Date.parse(change.lastPlayed)) ? change.lastPlayed : null;
-  return { patch, delta, lastPlayed };
+  const likedAt = Number.isSafeInteger(change.likedAt) && change.likedAt > 0 ? change.likedAt : 0;
+  return { patch, delta, lastPlayed, likedAt };
 }
 
 function cleanPlaylist(value) {
@@ -80,8 +85,9 @@ function cleanPlaylist(value) {
  * Phone sync over the home network. The Mac stays the source of truth for files and metadata:
  * the phone pulls a snapshot, merges its own edits against the previous snapshot, then pushes them here.
  */
-function createSyncServer({ repositories, coverPath, statePath, serverName = "computer", platform = process.platform, appVersion = "", onChanged = () => {}, callFeature = null, onPlayEvent = () => {}, now = Date.now }) {
+function createSyncServer({ repositories, coverPath, statePath, serverName = "computer", platform = process.platform, appVersion = "", onChanged = () => {}, callFeature = null, onPlayEvent = () => {}, onLiveEvent = () => {}, liveOptions = {}, now = Date.now }) {
   let state = readState();
+  const live = createLiveHub({ repositories, serverName, now, toComputer: onLiveEvent, ...liveOptions });
   let server = null;
   let pairing = null;
 
@@ -126,6 +132,8 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "co
     const settings = repositories.settings?.get?.() || {};
     return {
       protocol: PROTOCOL,
+      // Phones that know the live connection use it; older ones ignore the field and keep syncing in batches.
+      live: LIVE_VERSION,
       // So the phone can say "Mac" or "PC"; a pairing made before this was sent learns it at the next sync.
       platform,
       serverTime: now(),
@@ -139,15 +147,20 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "co
   function applyChanges(body) {
     const result = { songs: 0, playlists: 0, playEvents: 0 };
     const finishedEvents = [];
+    const likes = [];
     const changes = body?.songs && typeof body.songs === "object" ? body.songs : {};
     for (const [id, raw] of Object.entries(changes)) {
       const song = repositories.songs.get(id);
       const change = cleanSongChange(raw);
       if (!song || !change) continue;
-      const patch = { ...change.patch };
+      const { liked, ...patch } = change.patch;
+      // A like that already arrived live, or was overtaken by a newer tap on another device, changes nothing.
+      // Phones from before the live connection send no time: their edit wins, as it always did.
+      const like = liked === undefined ? null : live.applyLike(id, liked, change.likedAt || undefined);
+      if (like?.applied) likes.push(like);
       if (change.delta) patch.playCount = Math.max(0, Number(song.playCount || 0)) + change.delta;
       if (change.lastPlayed && (!song.lastPlayed || Date.parse(change.lastPlayed) > Date.parse(song.lastPlayed))) patch.lastPlayed = change.lastPlayed;
-      if (Object.keys(patch).length && repositories.songs.patch(id, patch)) result.songs += 1;
+      if (Object.keys(patch).length ? repositories.songs.patch(id, patch) : like?.applied) result.songs += 1;
     }
 
     const put = Array.isArray(body?.playlists?.put) ? body.playlists.put.map(cleanPlaylist).filter(Boolean) : [];
@@ -169,7 +182,7 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "co
       // Finished phone plays are scrobbled like the Mac's own; an unfinished one comes back once it ends.
       if (event.outcome !== "active") finishedEvents.push(event);
     }
-    return { applied: result, finishedEvents };
+    return { applied: result, finishedEvents, likes };
   }
 
   function send(response, status, body) {
@@ -218,7 +231,7 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "co
     const route = url.pathname;
 
     if (request.method === "GET" && route === "/v1/hello") {
-      return send(response, 200, { app: "localtify", protocol: PROTOCOL, name: serverName, platform, version: appVersion, paired: Boolean(deviceForRequest(request)) });
+      return send(response, 200, { app: "localtify", protocol: PROTOCOL, live: LIVE_VERSION, name: serverName, platform, version: appVersion, paired: Boolean(deviceForRequest(request)) });
     }
     if (request.method === "POST" && route === "/v1/pair") {
       const body = await readJson(request);
@@ -259,9 +272,12 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "co
       if (!receipt.replayed) {
         onChanged(receipt.result.applied);
         for (const event of receipt.result.finishedEvents) onPlayEvent(event);
+        for (const like of receipt.result.likes || []) live.announceLike(like, device.id);
       }
       return send(response, 200, { ok: true, sequence: body.sequence, applied: receipt.result.applied });
     }
+    if (request.method === "GET" && route === "/v1/live") return live.open(device, request, response);
+    if (request.method === "POST" && route === "/v1/live") return send(response, 200, live.receive(device.id, await readJson(request)));
     const featureMatch = /^\/v1\/call\/([a-z:-]+)$/.exec(route);
     if (request.method === "POST" && featureMatch && PHONE_FEATURES.has(featureMatch[1]) && callFeature) {
       const body = await readJson(request);
@@ -296,6 +312,7 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "co
 
   function stop() {
     pairing = null;
+    live.closeAll();
     if (!server) return Promise.resolve();
     const closing = server;
     server = null;
@@ -317,8 +334,9 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "co
     get enabled() { return state.enabled; },
     setEnabled(enabled) { state.enabled = enabled === true; writeState(); },
     get devices() { return state.devices.map(({ id, name, pairedAt, lastSyncAt }) => ({ id, name, pairedAt, lastSyncAt })); },
-    forgetDevice(id) { state.devices = state.devices.filter((device) => device.id !== id); writeState(); }
+    forgetDevice(id) { live.disconnect(id); state.devices = state.devices.filter((device) => device.id !== id); writeState(); },
+    live
   };
 }
 
-module.exports = { createSyncServer, isPrivateAddress, cleanSongChange, cleanPlaylist, PROTOCOL, PHONE_FEATURES };
+module.exports = { createSyncServer, isPrivateAddress, cleanSongChange, cleanPlaylist, PROTOCOL, LIVE_VERSION, PHONE_FEATURES };

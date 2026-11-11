@@ -545,6 +545,9 @@ declare global {
       newPhoneSyncCode: () => Promise<LocalitfyPhoneSyncStatus>;
       forgetPhoneSyncDevice: (id: string) => Promise<LocalitfyPhoneSyncStatus>;
       onPhoneSyncStatus: (callback: (status: LocalitfyPhoneSyncStatus) => void) => () => void;
+      /** The live connection with phones on the same network: playback, remote control and likes (see features/connect). */
+      liveSend: (message: import("./features/connect/connect.types").LiveMessage) => Promise<import("./features/connect/connect.types").LiveReply>;
+      onLiveEvent: (callback: (event: import("./features/connect/connect.types").LiveEvent) => void) => () => void;
       /** A synced phone changed playlists; replaces the open window's copy. */
       onPlaylistsChanged: (callback: (playlists: LocalitfyPlaylistRecord[]) => void) => () => void;
       auditMusicBrainzTags: () => Promise<import("./features/tagging/tagging.types").TagAudit>;

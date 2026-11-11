@@ -12,7 +12,7 @@ function localAddresses() {
 }
 
 /** Settings → Phone sync. Off by default; while on, the Mac answers paired phones on the home network. */
-function registerSyncIpc(router, { app, repositories, coverPath, listSongsShaped, getWindow, observePlay = () => {} }) {
+function registerSyncIpc(router, { app, repositories, coverPath, listSongsShaped, shapeSong, getWindow, observePlay = () => {} }) {
   const serverName = os.hostname().replace(/\.local$/, "") || "Mac";
   let advertiser = null;
   let lastError = "";
@@ -27,6 +27,8 @@ function registerSyncIpc(router, { app, repositories, coverPath, listSongsShaped
     appVersion: app.getVersion(),
     statePath: path.join(app.getPath("userData"), "phone-sync.json"),
     callFeature: (channel, payload) => router.invoke(channel, payload),
+    // The live connection: this window is the peer "computer" next to the connected phones.
+    onLiveEvent: (event) => notify("sync:live", event),
     onPlayEvent: (event) => { try { observePlay(event); } catch (error) { console.log("[localtify sync scrobble]", error?.message || error); } },
     onChanged: (change) => {
       if (change.devices) return notify("sync:status", status());
@@ -75,6 +77,14 @@ function registerSyncIpc(router, { app, repositories, coverPath, listSongsShaped
   }
 
   router.handle("sync:status", async () => status());
+  router.handle("sync:live-send", async (_event, message) => sync.live.receive("computer", message));
+  // A like on the computer is stamped so the newest tap wins against a phone's, and reaches connected phones at once.
+  router.handle("song:patch", async (_event, id, patch = {}) => {
+    const { liked, ...rest } = patch || {};
+    if (typeof liked === "boolean") sync.live.announceLike(sync.live.applyLike(id, liked), "computer");
+    const updated = Object.keys(rest).length ? repositories.songs.patch(id, rest) : repositories.songs.get(id);
+    return updated ? shapeSong(updated) : null;
+  });
   router.handle("sync:set-enabled", async (_event, enabled) => setEnabled(enabled === true));
   router.handle("sync:pairing-code", async () => {
     if (!sync.running) await setEnabled(true);

@@ -29,6 +29,12 @@ contextBridge.exposeInMainWorld("localitfy", {
     ipcRenderer.on("sync:status", handler);
     return () => ipcRenderer.removeListener("sync:status", handler);
   },
+  liveSend: (message) => ipcRenderer.invoke("sync:live-send", message),
+  onLiveEvent: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("sync:live", handler);
+    return () => ipcRenderer.removeListener("sync:live", handler);
+  },
   onPlaylistsChanged: (callback) => {
     const handler = (_event, payload) => callback(payload);
     ipcRenderer.on("sync:playlists-changed", handler);
