@@ -7,6 +7,7 @@ import { PageHeader } from "../../shared/ui/PageHeader";
 import { prettyMeta } from "../search/search.utils";
 import { artistTarget, useAppActions } from "../shell/appActions";
 import { splitArtistCredits } from "./artistCredits";
+import "../../shared/ui/collection-layout.css";
 import "./artists.css";
 
 type ArtistEntry = {
@@ -63,7 +64,7 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
   useEffect(() => setArtistLimit(150), [query]);
 
   return (
-    <section data-page-section="artists" className="artistsPage" aria-label="artists">
+    <section data-page-section="artists" className="collectionPage artistsPage" aria-label="artists">
       <PageHeader
         eyebrow="local artists"
         title="Artists"
@@ -81,20 +82,20 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
 
       {visibleArtists.length ? (
         <>
-        <div className="artistsGrid">
+        <div className="collectionGrid artistsGrid">
           {visibleArtists.slice(0, artistLimit).map((artist) => {
             const target = artistTarget(artist.name, artist.songs);
             return (
               <MediaCard
                 key={artist.id}
-                className="artistCard"
+                className="collectionCard artistCard"
                 coverClassName="artistCardCoverWrap"
                 openLabel={`open ${artist.name}`}
                 playLabel={`play ${artist.name}`}
                 onOpen={() => actions.openCollection(target)}
                 onPlay={() => actions.playCollection(target)}
                 onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-                cover={<Cover song={artist.coverSong} className="artistCardCover" />}
+                cover={<Cover song={artist.coverSong} className="collectionCardCover artistCardCover" />}
               >
                 <span>
                   <strong title={artist.name}>{prettyMeta(artist.name)}</strong>

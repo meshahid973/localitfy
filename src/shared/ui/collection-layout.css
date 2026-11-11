@@ -1,0 +1,77 @@
+/* Artists and Genres share the same collection layout without cross-feature CSS imports. */
+.collectionPage {
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+  padding-bottom: 32px;
+}
+
+.collectionGrid {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 13px;
+}
+
+.collectionCard {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 15px 10px;
+  border: 1px solid var(--lt-border);
+  border-radius: var(--lt-radius-md);
+  color: var(--lt-text);
+  background: var(--lt-surface);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+
+.collectionCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--lt-accent-rgb), .26);
+  background: color-mix(in srgb, var(--lt-accent) 5%, var(--lt-surface));
+}
+
+.collectionCardCover,
+.collectionCardCover img {
+  width: min(132px, 100%);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.collectionCard > span {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  gap: 4px;
+}
+
+.collectionCard strong,
+.collectionCard small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collectionCard strong {
+  color: var(--lt-text);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.collectionCard small {
+  color: var(--lt-faint);
+  font-size: 11px;
+}
+
+@media (max-width: 520px) {
+  .collectionGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collectionCard { transition: none; }
+  .collectionCard:hover { transform: none; }
+}

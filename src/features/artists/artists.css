@@ -1,54 +1,10 @@
-.artistsPage {
-  min-width: 0;
-  display: grid;
-  gap: 18px;
-  padding-bottom: 32px;
-}
-
-.artistsGrid {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 13px;
-}
-
-.artistCard {
-  min-width: 0;
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-  padding: 15px 10px;
-  border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 16px;
-  color: var(--text);
-  background: rgba(255, 255, 255, .022);
-  text-align: center;
-  cursor: pointer;
-  transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease;
-}
-
-.artistCard:hover {
-  transform: translateY(-2px);
-  border-color: rgba(var(--accent-rgb), .26);
-  background: rgba(var(--accent-rgb), .05);
-}
-
+/* Artist-specific collection styling. The shared grid/card primitives live in collection-layout.css. */
 .artistCardCover,
 .artistCardCover img {
-  width: min(132px, 100%);
-  aspect-ratio: 1;
-  object-fit: cover;
   border-radius: 50%;
 }
 
-.artistCard > span { min-width: 0; width: 100%; display: grid; gap: 4px; }
-.artistCard strong,
-.artistCard small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.artistCard strong { color: var(--text); font-size: 13px; font-weight: 850; }
-.artistCard small { color: var(--faint); font-size: 11px; }
-
-@media (max-width: 520px) {
-  .artistsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.artistLoadMore {
+  justify-self: center;
+  margin: 8px auto;
 }
-
-.artistLoadMore { justify-self: center; margin: 8px auto; }
