@@ -21,11 +21,27 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Report runtime dependency advisories (advisory until triaged)
+        shell: bash
+        run: |
+          npm audit --omit=dev --json > "$RUNNER_TEMP/localtify-runtime-audit.json" || true
+          node -e '
+            const audit = require(process.env.RUNNER_TEMP + "/localtify-runtime-audit.json");
+            if (!audit.metadata?.vulnerabilities) throw new Error("Could not retrieve dependency audit");
+            console.log("[security-audit] Runtime advisories:", JSON.stringify(audit.metadata.vulnerabilities));
+            for (const [name, item] of Object.entries(audit.vulnerabilities || {})) {
+              if (["critical", "high"].includes(item.severity)) {
+                console.log("[security-audit]", item.severity, name, "via", item.via.map(v => typeof v === "string" ? v : v.name).join(", "));
+              }
+            }
+          '
       - run: npm run release:check
 
   windows-native-smoke:
@@ -33,6 +49,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -51,6 +69,8 @@ jobs:
         working-directory: discord-activity
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v5
         with:
           node-version: 22
