@@ -3,15 +3,20 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const NATIVE_FILENAME = /^localtify_rust_kernels\.(?:win32|linux|darwin)\.(?:x64|arm64)\.node$/;
+const NATIVE_FILENAME = /^localtify_rust_kernels\.[a-z0-9_-]+\.[a-z0-9_-]+\.node$/i;
 
 function prepareRelease(root, includeRust = false) {
-  fs.rmSync(path.join(root, "release"), { recursive: true, force: true });
   const nativeDirectory = path.join(root, "electron", "native");
-  if (includeRust || !fs.existsSync(nativeDirectory)) return;
+  const currentAddon = `localtify_rust_kernels.${process.platform}.${process.arch}.node`;
+  if (includeRust && !fs.existsSync(path.join(nativeDirectory, currentAddon))) {
+    throw new Error("The native release requires a built addon for this OS and architecture");
+  }
+
+  fs.rmSync(path.join(root, "release"), { recursive: true, force: true });
+  if (!fs.existsSync(nativeDirectory)) return;
 
   for (const filename of fs.readdirSync(nativeDirectory)) {
-    if (!NATIVE_FILENAME.test(filename)) continue;
+    if (!NATIVE_FILENAME.test(filename) || (includeRust && filename === currentAddon)) continue;
     fs.rmSync(path.join(nativeDirectory, filename));
   }
 }
