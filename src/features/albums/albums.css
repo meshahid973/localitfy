@@ -73,7 +73,7 @@
 .albumFolderPreviewCopyV309 { min-width: 0; display: grid; align-content: start; gap: 5px; }
 .albumFolderPreviewCopyV309 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
 .albumFolderPreviewCopyV309 small,.albumFolderPreviewCopyV309 em,.albumFolderPreviewCopyV309 b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--albums-muted); font-size: 11px; font-style: normal; font-weight: 500; }
-.albumFolderPreviewCopyV309 ul { margin: 4px 0 0; padding-left: 15px; color: #d0b8a3; font-size: 11px; }
+.albumFolderPreviewCopyV309 ul { margin: 4px 0 0; padding-left: 15px; color: var(--albums-muted); font-size: 11px; }
 .albumFolderEmptyV309 { padding: 15px; border: 1px dashed var(--albums-border); border-radius: 9px; }
 .albumFolderEmptyV309 p { font-size: 12px; color: var(--albums-muted); }
 .albumBuilderHeaderV318 { padding-bottom: 13px; border-bottom: 1px solid var(--albums-border); }

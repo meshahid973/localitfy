@@ -86,7 +86,7 @@
 .playlistTrackText small { overflow: hidden; color: var(--lt-muted); text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
 .playlistTrackDuration { color: var(--playlist-muted); font-size: 11px; font-variant-numeric: tabular-nums; text-align: right; }
 .playlistTrackRow .iconAction { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; background: transparent; border: 0; color: var(--lt-muted); cursor: pointer; }
-.playlistTrackRow .iconAction:hover { color: #eba4ad; }
+.playlistTrackRow .iconAction:hover { color: var(--lt-danger); }
 .playlistEmptyState { min-width: 0; min-height: 260px; display: flex; align-items: center; justify-content: center; gap: 20px; padding: 28px; border: 1px dashed var(--playlist-border); border-radius: 11px; color: var(--playlist-text); }
 .playlistEmptyMascotV496 { max-width: 105px; flex: 0 1 105px; }
 .playlistEmptyMascotV496 img { width: 100%; height: auto; object-fit: contain; }

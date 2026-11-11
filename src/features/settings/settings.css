@@ -114,7 +114,7 @@
 .settingsPage .settingsThemeSelectedPreview small { color: var(--settings-muted); font-size: 11px; }
 .settingsPage .settingsThemeDot, .settingsPage .customThemePresetButtonV027 > span:first-child {
   display: block; width: 24px; height: 24px; flex: 0 0 24px;
-  border-radius: 7px; border: 1px solid rgba(255,255,255,.16);
+  border-radius: 7px; border: 1px solid var(--settings-edge);
 }
 .settingsPage .settingsActionRow {
   display: flex; align-items: center; flex-wrap: wrap; gap: 9px;
@@ -140,7 +140,7 @@
 .settingsPage .customThemeTokenV027 > strong { font-size: 12px; }
 .settingsPage .customThemeHexInputV032 { grid-column: 1 / -1; width: 100%; font-variant-numeric: tabular-nums; }
 .settingsPage .customThemeColorPickerV032 { position: relative; width: 35px; height: 35px; display: block; border-radius: 9px; overflow: hidden; }
-.settingsPage .customThemeColorPreviewV027 { width: 100%; height: 100%; display: block; border: 1px solid rgba(255,255,255,.18); border-radius: 9px; }
+.settingsPage .customThemeColorPreviewV027 { width: 100%; height: 100%; display: block; border: 1px solid var(--settings-edge); border-radius: 9px; }
 .settingsPage .customThemeNativeColorInputV027 { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; opacity: 0; cursor: pointer; }
 .settingsPage .settingsSavedThemes { min-width: 0; border-top: 1px solid var(--settings-edge); padding-top: 10px; }
 .settingsPage .settingsSavedThemes summary { cursor: pointer; color: var(--settings-text); font-size: 13px; font-weight: 650; }
@@ -209,6 +209,6 @@
 .settingsPage .sidebarTabsIcon { color: var(--settings-accent); }
 .settingsPage .sidebarTabsLabel { overflow: hidden; font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .settingsPage .sidebarTabsButton { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 8px; color: var(--settings-text); background: transparent; cursor: pointer; }
-.settingsPage .sidebarTabsButton:hover:not(:disabled), .settingsPage .sidebarTabsButton:focus-visible { background: rgba(255, 255, 255, .07); }
+.settingsPage .sidebarTabsButton:hover:not(:disabled), .settingsPage .sidebarTabsButton:focus-visible { background: var(--settings-elevated); }
 .settingsPage .sidebarTabsButton:disabled { opacity: .3; cursor: default; }
 .settingsPage .sidebarTabsVisibility.active { color: var(--settings-accent); }

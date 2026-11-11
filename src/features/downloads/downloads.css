@@ -57,7 +57,7 @@
 .downloadsLayoutV031 .spotifyAuthDot { height: 10px; width: 10px; border-radius: 50%; background: #70bc96; }
 .downloadsLayoutV031 .spotifyAuthActions,.downloadsLayoutV031 .spotifyUrlRow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .downloadsLayoutV031 .spotifyUrlRow .spotifyUrlInput { min-height: 42px; height: 42px; flex: 1 1 300px; min-width: 0; resize: none; }
-.downloadsLayoutV031 .spotifyError { display: flex; justify-content: space-between; gap: 15px; flex-wrap: wrap; padding: 15px; border: 1px solid rgba(228,125,125,.22); border-radius: 10px; color: #efb5b7; background: rgba(224,98,98,.07); }
+.downloadsLayoutV031 .spotifyError { display: flex; justify-content: space-between; gap: 15px; flex-wrap: wrap; padding: 15px; border: 1px solid color-mix(in srgb, var(--lt-danger) 28%, transparent); border-radius: 10px; color: var(--lt-danger); background: color-mix(in srgb, var(--lt-danger) 8%, var(--downloads-surface)); }
 .downloadsLayoutV031 .spotifyError > div { display: grid; gap: 6px; }
 .downloadsLayoutV031 .spotifyError span { font-size: 12px; }
 .downloadsLayoutV031 .spotifyTrackList,.downloadsLayoutV031 .downloadQueuePanel,.downloadsLayoutV031 .downloadResults,.downloadsLayoutV031 .converterBox {
@@ -113,9 +113,9 @@
 .downloadsLayoutV031 .downloadQueueIndex { color: var(--downloads-muted); font-size: 11px; }
 .downloadsLayoutV031 .downloadQueueTop small { color: var(--downloads-muted); text-align: right; font-size: 12px; }
 .downloadsLayoutV031 .downloadQueueTrack { height: 5px; width: 100%; overflow: hidden; border-radius: 99px; background: var(--downloads-edge); }
-.downloadsLayoutV031 .downloadQueueTrack i { display: block; height: 100%; border-radius: inherit; background: var(--lt-accent,#79a7c4); transition: width .15s ease; }
+.downloadsLayoutV031 .downloadQueueTrack i { display: block; height: 100%; border-radius: inherit; background: var(--downloads-accent); transition: width .15s ease; }
 .downloadsLayoutV031 .downloadQueueMeta { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; color: var(--downloads-muted); font-size: 11px; }
-.downloadsLayoutV031 .downloadQueueMeta :is(.downloadWarnBadgeV338,.downloadErrorBadgeV338) { color: #e7b2a3; overflow-wrap: anywhere; }
+.downloadsLayoutV031 .downloadQueueMeta :is(.downloadWarnBadgeV338,.downloadErrorBadgeV338) { color: var(--lt-danger); overflow-wrap: anywhere; }
 .downloadsLayoutV031 .downloadQueueActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .downloadsLayoutV031 .converterBox { grid-template-columns: minmax(0,1fr) auto; align-items: center; }
 .downloadsLayoutV031 .converterBox > div:first-child { min-width: 0; display: grid; gap: 5px; }
