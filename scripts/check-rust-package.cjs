@@ -30,7 +30,7 @@ const present = candidates.filter(file => fs.existsSync(file) && fs.statSync(fil
 const expectAbsent = process.argv.includes("--absent");
 const packageExists = process.platform === "darwin"
   ? candidates.length > 0
-  : candidates.some(file => fs.existsSync(path.join(path.dirname(path.dirname(path.dirname(file))), "app.asar")));
+  : candidates.some(file => fs.existsSync(path.join(path.dirname(path.dirname(path.dirname(path.dirname(file)))), "app.asar")));
 if (expectAbsent) {
   if (!packageExists) {
     console.error("[rust-package] No packaged app found to verify");
