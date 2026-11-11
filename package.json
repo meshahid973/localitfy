@@ -26,7 +26,7 @@
     "css:dedup:fix": "node scripts/css-dedup-fixpoint.mjs",
     "check": "npm run bridge:check && npm run boundaries:check && npm run css:dedup:check && npm test && npm run typecheck && npm run build && npm run db:recovery-test",
     "clean:release": "node scripts/prepare-release.cjs",
-    "dist": "npm run clean:release && npm run build && electron-builder --win nsis --x64",
+    "dist": "npm run clean:release && npm run build && electron-builder --win nsis --x64 --publish never",
     "publish": "npm run clean:release && npm run build && electron-builder --win nsis --x64 --publish always",
     "dist:linux": "npm run clean:release && npm run build && electron-builder --linux AppImage rpm deb --x64 --publish never",
     "publish:linux": "npm run clean:release && npm run build && electron-builder --linux AppImage rpm deb --x64 --publish always",
