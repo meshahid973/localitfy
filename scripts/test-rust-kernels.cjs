@@ -57,6 +57,20 @@ function evaluate(mode,fn) {
 const matrixIntoBefore = nativeCalls.dotMatrixInto;
 assert.deepEqual(Array.from(evaluate("similarity,bridge",()=>tryDotMatrix(left,right))), [5,5,14,11]);
 assert.ok(nativeCalls.dotMatrixInto > matrixIntoBefore, "typed matrix output must execute Rust");
+const rejectedMatrix = new Float64Array([37, 37, 37, 37]);
+assert.throws(() => native.dotMatrixInto(
+  new Float64Array([1, 2, 3, 4]), new Float64Array([2, 3, 4, 5]),
+  rejectedMatrix, 3
+), /matrix|dimension/i);
+assert.deepEqual(Array.from(rejectedMatrix), [37, 37, 37, 37],
+  "invalid matrix must not partially alter the destination");
+const rejectedPairs = new Float64Array([37, 37]);
+assert.throws(() => native.pairDotsInto(
+  new Float64Array([1, 2, 3, 4]), new Uint32Array([0, 1]),
+  new Uint32Array([1, 99]), rejectedPairs, 2
+), /pair|index/i);
+assert.deepEqual(Array.from(rejectedPairs), [37, 37],
+  "invalid duplicate indexes must not partially alter the destination");
 
 const pcmBuffer = Buffer.alloc(40_000 * 4);
 pcmBuffer.writeFloatLE(0.75, 0);

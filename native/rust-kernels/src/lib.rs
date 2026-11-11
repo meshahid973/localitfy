@@ -54,12 +54,30 @@ pub fn dot_matrix(rows: &[f64], columns: &[f64], dimensions: u32) -> Result<Vec<
     dot_matrix_inner(rows, columns, dimension(dimensions)?)
 }
 
-/// Experimental JS-owned output: avoids NAPI conversion of a score Vec to a JS array.
+/// Write a complete score matrix directly to an exclusive JS-owned buffer.
+/// Validate every input before mutating the caller's destination.
 #[napi]
 pub fn dot_matrix_into(rows: &[f64], columns: &[f64], mut output: Float64Array, dimensions: u32) -> Result<()> {
-    let values = dot_matrix_inner(rows, columns, dimension(dimensions)?)?;
-    if output.len() != values.len() { return Err(invalid("Wrong dot matrix output size")); }
-    unsafe { output.as_mut() }.copy_from_slice(&values);
+    let dim = dimension(dimensions)?;
+    if rows.len() % dim != 0 || columns.len() % dim != 0 {
+        return Err(invalid("Vector matrix size is not a multiple of dimension"));
+    }
+    let row_count = rows.len() / dim;
+    let col_count = columns.len() / dim;
+    if row_count > 50_000 || col_count > 512 ||
+        row_count.checked_mul(col_count).unwrap_or(usize::MAX) > 2_000_000 ||
+        output.len() != row_count * col_count {
+        return Err(invalid("Invalid matrix output shape"));
+    }
+    if !rows.iter().chain(columns.iter()).all(|v| v.is_finite()) {
+        return Err(invalid("Vector contains non-finite values"));
+    }
+    let destination = unsafe { output.as_mut() };
+    for (i, row) in rows.chunks_exact(dim).enumerate() {
+        for (j, column) in columns.chunks_exact(dim).enumerate() {
+            destination[i * col_count + j] = dot(row, column);
+        }
+    }
     Ok(())
 }
 
@@ -94,12 +112,26 @@ pub fn pair_dots(vectors: &[f64], left: &[u32], right: &[u32], dimensions: u32) 
 }
 
 
-/// Experimental JS-owned batch output for duplicate comparison.
+/// Stream validated duplicate scores directly into a JS-owned typed array.
 #[napi]
 pub fn pair_dots_into(vectors: &[f64], left: &[u32], right: &[u32], mut output: Float64Array, dimensions: u32) -> Result<()> {
-    let values = pair_dots_inner(vectors, left, right, dimension(dimensions)?)?;
-    if output.len() != values.len() { return Err(invalid("Wrong pair output size")); }
-    unsafe { output.as_mut() }.copy_from_slice(&values);
+    let dim = dimension(dimensions)?;
+    if vectors.len() % dim != 0 || left.len() != right.len() ||
+        output.len() != left.len() {
+        return Err(invalid("Invalid pair output dimensions"));
+    }
+    let count = vectors.len() / dim;
+    if count > 50_000 || left.len() > 2_000_000 ||
+        !vectors.iter().all(|v| v.is_finite()) ||
+        left.iter().chain(right.iter()).any(|&index| index as usize >= count) {
+        return Err(invalid("Invalid pair index or vector"));
+    }
+    let destination = unsafe { output.as_mut() };
+    for (index, (&a, &b)) in left.iter().zip(right.iter()).enumerate() {
+        let a = a as usize;
+        let b = b as usize;
+        destination[index] = dot(&vectors[a*dim..(a+1)*dim], &vectors[b*dim..(b+1)*dim]);
+    }
     Ok(())
 }
 
