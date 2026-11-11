@@ -38,8 +38,9 @@ Do not merge or publish merely because headless CI passes.
 
 ## Security audit disposition
 
-- The original Windows installation reported 21 npm vulnerabilities including development tooling. The separate Linux runtime-only audit on November 11 found 1 high and 1 moderate, with no critical runtime vulnerabilities.
-- `electron-updater` resolves `js-yaml`. Lockfile `js-yaml` was updated from vulnerable `4.3.1` to patched `4.3.2` without changing the dependent package's `^4.1.0` requirement. Verify with fresh `npm ci` and the next audit run.
-- CI now blocks new high or critical **runtime** dependency advisories. The moderate runtime advisory and development-dependency advisories still require explicit triage; do not claim a clean all-dependency audit.
-- The remaining `music-metadata@11.15.0` moderation-level file-parser advisory is addressed by raising the supported `music-metadata` minimum and lockfile to `11.16.1`. Verify an actual zero-advisory runtime audit in the final CI; do not assume the patch succeeded until the audit runs.
-- Native CI builds an opt-in app and a fresh JS-only app on every supported OS; both package variants are checked for correct addon inclusion/exclusion.
+- The original Windows install showed 21 npm advisories when development tooling was included. This is not the same as the shipped-runtime risk.
+- On November 11, Linux CI initially found two runtime advisories: `js-yaml@4.3.1` (high, via `electron-updater`) and `music-metadata@11.15.0` (moderate). The package lock now uses patched `js-yaml@4.3.2`, while `music-metadata` has a raised minimum and pinned `11.16.1`.
+- The subsequent full runtime-only npm audit returned **zero vulnerabilities** (all severities). CI now blocks any future runtime advisories at **moderate or higher**.
+- The full development-dependency audit and dependency install-script approvals still require separate review; never blanket-approve scripts to suppress warnings.
+- Native CI builds and tests both an explicit Rust package and a JavaScript-only package on every supported operating system. It checks actual addon loading and execution, as well as absence from standard packages.
+- Real installer QA, release signing, Windows SmartScreen behavior, macOS notarization where applicable, and the publishing/update flow remain manual release gates.
