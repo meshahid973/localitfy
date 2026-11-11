@@ -17,10 +17,10 @@
   column-gap: 26px;
   row-gap: 16px;
   padding: 26px 24px 22px;
-  border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 18px;
+  border: 1px solid var(--lt-border);
+  border-radius: var(--lt-radius-md);
   overflow: hidden;
-  background: linear-gradient(160deg, rgba(var(--cover-rgb, var(--lt-accent-rgb)), .34), rgba(var(--cover-rgb, var(--lt-accent-rgb)), .08) 58%, rgba(255, 255, 255, .015));
+  background: linear-gradient(160deg, rgba(var(--cover-rgb, var(--lt-accent-rgb)), .24), rgba(var(--cover-rgb, var(--lt-accent-rgb)), .06) 58%, transparent), var(--lt-surface);
 }
 
 .collectionHeroArt { grid-area: art; min-width: 0; align-self: center; }
@@ -66,7 +66,7 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  color: #0b0710;
+  color: var(--accent-contrast, var(--lt-bg));
   background: var(--lt-accent);
   box-shadow: 0 10px 26px rgba(0, 0, 0, .38);
   cursor: pointer;
@@ -81,14 +81,14 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, .1);
+  border: 1px solid var(--lt-border);
   border-radius: 50%;
   color: var(--lt-muted);
-  background: rgba(0, 0, 0, .18);
+  background: var(--lt-surface-raised);
   cursor: pointer;
   transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
 }
-.collectionIconButton:hover:not(:disabled) { color: var(--lt-text); border-color: rgba(255, 255, 255, .24); background: rgba(255, 255, 255, .06); }
+.collectionIconButton:hover:not(:disabled) { color: var(--lt-text); border-color: var(--lt-border-strong); background: color-mix(in srgb, var(--lt-text) 6%, var(--lt-surface-raised)); }
 
 .collectionTextButton {
   min-height: 34px;
@@ -105,7 +105,7 @@
   font-weight: 700;
   cursor: pointer;
 }
-.collectionTextButton:hover { color: var(--lt-text); border-color: rgba(255, 255, 255, .24); }
+.collectionTextButton:hover { color: var(--lt-text); border-color: var(--lt-border-strong); }
 .collectionTextButton.danger:hover,
 .collectionTextButton.confirmArmed { color: var(--lt-danger); border-color: rgba(255, 107, 138, .45); }
 .collectionShowAll { justify-self: start; margin-top: 4px; }
@@ -147,7 +147,7 @@
 .trackList.withCover .trackRow { --track-columns: 34px 40px minmax(0, 1fr) 34px 48px 34px; }
 .trackList.withAlbum .trackRow { --track-columns: 34px minmax(0, 1.4fr) minmax(0, 1fr) 34px 48px 34px; }
 .trackList.withCover.withAlbum .trackRow { --track-columns: 34px 40px minmax(0, 1.4fr) minmax(0, 1fr) 34px 48px 34px; }
-.trackRow:hover { background: rgba(255, 255, 255, .055); }
+.trackRow:hover { background: color-mix(in srgb, var(--lt-text) 6%, transparent); }
 .trackRow.active { background: rgba(var(--lt-accent-rgb), .1); }
 .trackRow.missing { cursor: default; opacity: .5; }
 
@@ -201,7 +201,7 @@
   color: var(--lt-text);
   transition: background-color 140ms ease;
 }
-.collectionCard:hover { background: rgba(255, 255, 255, .055); }
+.collectionCard:hover { background: color-mix(in srgb, var(--lt-text) 6%, transparent); }
 .collectionCardArt,
 .collectionCardArt img { display: block; width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; }
 .collectionCard strong,
@@ -215,4 +215,15 @@
   .trackList.withCover.withAlbum .trackRow { --track-columns: 34px 40px minmax(0, 1fr) 34px 48px 34px; }
   .trackList:not(.withCover).withAlbum .trackRow { --track-columns: 34px minmax(0, 1fr) 34px 48px 34px; }
   .trackRowAlbum { display: none; }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .trackRow:not(.missing) .trackRowPlayIcon { opacity: 1; }
+  .trackRow:not(.missing) .trackRowNumber { opacity: 0; }
+  .trackRowAdd { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collectionPlayButton, .collectionIconButton { transition: none; }
+  .collectionPlayButton:hover:not(:disabled) { transform: none; }
 }

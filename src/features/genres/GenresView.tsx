@@ -48,7 +48,7 @@ export default function GenresView({ songs }: GenresViewProps) {
   useEffect(() => writeLocalJson(MIN_TRACKS_STORAGE_KEY, minTracks), [minTracks]);
 
   return (
-    <section data-page-section="genres" className="collectionPage genresPage" aria-label="genres">
+    <section data-page-section="genres" className="collectionBrowsePage genresPage" aria-label="genres">
       <PageHeader
         eyebrow="local genres"
         title="Genres"
@@ -64,14 +64,14 @@ export default function GenresView({ songs }: GenresViewProps) {
 
       {visibleGenres.length ? (
         <>
-          <div className="collectionGrid genresGrid">
+          <div className="collectionBrowseGrid genresGrid">
             {visibleGenres.slice(0, genreLimit).map((genre) => {
               const target = genreTarget(genre.name, genre.songs);
               return (
-                <MediaCard key={genre.id} className="collectionCard genreCard" openLabel={`open ${genre.name}`} playLabel={`play ${genre.name}`}
+                <MediaCard key={genre.id} className="collectionBrowseCard genreCard" openLabel={`open ${genre.name}`} playLabel={`play ${genre.name}`}
                   onOpen={() => actions.openCollection(target)} onPlay={() => actions.playCollection(target)}
                   onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-                  cover={<Cover song={genre.coverSong} className="collectionCardCover genreCardCover" />}>
+                  cover={<Cover song={genre.coverSong} className="collectionBrowseCardCover genreCardCover" />}>
                   <span>
                     <strong title={genre.name}>{prettyMeta(genre.name)}</strong>
                     <small>{genre.songs.length} track{genre.songs.length === 1 ? "" : "s"} · {genre.artistCount} artist{genre.artistCount === 1 ? "" : "s"}{sortMode === "plays" ? ` · ${genre.playCount} play${genre.playCount === 1 ? "" : "s"}` : ""}</small>

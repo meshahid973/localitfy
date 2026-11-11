@@ -64,7 +64,7 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
   useEffect(() => setArtistLimit(150), [query]);
 
   return (
-    <section data-page-section="artists" className="collectionPage artistsPage" aria-label="artists">
+    <section data-page-section="artists" className="collectionBrowsePage artistsPage" aria-label="artists">
       <PageHeader
         eyebrow="local artists"
         title="Artists"
@@ -82,20 +82,20 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
 
       {visibleArtists.length ? (
         <>
-        <div className="collectionGrid artistsGrid">
+        <div className="collectionBrowseGrid artistsGrid">
           {visibleArtists.slice(0, artistLimit).map((artist) => {
             const target = artistTarget(artist.name, artist.songs);
             return (
               <MediaCard
                 key={artist.id}
-                className="collectionCard artistCard"
+                className="collectionBrowseCard artistCard"
                 coverClassName="artistCardCoverWrap"
                 openLabel={`open ${artist.name}`}
                 playLabel={`play ${artist.name}`}
                 onOpen={() => actions.openCollection(target)}
                 onPlay={() => actions.playCollection(target)}
                 onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-                cover={<Cover song={artist.coverSong} className="collectionCardCover artistCardCover" />}
+                cover={<Cover song={artist.coverSong} className="collectionBrowseCardCover artistCardCover" />}
               >
                 <span>
                   <strong title={artist.name}>{prettyMeta(artist.name)}</strong>

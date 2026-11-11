@@ -12,9 +12,9 @@ test("Artists and Genres share collection primitives but own their variants", ()
   const genreCss = read("src/features/genres/genres.css");
   for (const view of [artist, genre]) {
     assert.match(view, /import "\.\.\/\.\.\/shared\/ui\/collection-layout\.css";/);
-    assert.match(view, /className="collectionPage/);
-    assert.match(view, /className="collectionGrid/);
-    assert.match(view, /className="collectionCard/);
+    assert.match(view, /className="collectionBrowsePage/);
+    assert.match(view, /className="collectionBrowseGrid/);
+    assert.match(view, /className="collectionBrowseCard/);
   }
   assert.doesNotMatch(genre, /import "\.\.\/artists\/artists\.css"/);
   assert.match(artist, /import "\.\/artists\.css";/);
