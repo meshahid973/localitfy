@@ -35,3 +35,9 @@ npm run rust:benchmark
 6. Keep experimental phases disabled by default. Only enable an individual phase after repeatable gains and manual playback QA.
 
 Do not merge or publish merely because headless CI passes.
+
+## Security audit disposition
+
+- The original Windows installation reported 21 npm vulnerabilities including development tooling. The separate Linux runtime-only audit on November 11 found 1 high and 1 moderate, with no critical runtime vulnerabilities.
+- `electron-updater` resolves `js-yaml`. Lockfile `js-yaml` was updated from vulnerable `4.3.1` to patched `4.3.2` without changing the dependent package's `^4.1.0` requirement. Verify with fresh `npm ci` and the next audit run.
+- CI now blocks new high or critical **runtime** dependency advisories. The moderate runtime advisory and development-dependency advisories still require explicit triage; do not claim a clean all-dependency audit.

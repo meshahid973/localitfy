@@ -37,11 +37,13 @@ jobs:
             if (!audit.metadata?.vulnerabilities) throw new Error("Could not retrieve dependency audit");
             console.log("[security-audit] Runtime advisories:", JSON.stringify(audit.metadata.vulnerabilities));
             for (const [name, item] of Object.entries(audit.vulnerabilities || {})) {
-              if (["critical", "high"].includes(item.severity)) {
+              if (["critical", "high", "moderate"].includes(item.severity)) {
                 console.log("[security-audit]", item.severity, name, "via", item.via.map(v => typeof v === "string" ? v : v.name).join(", "));
               }
             }
           '
+      - name: Block high and critical runtime dependency advisories
+        run: npm audit --omit=dev --audit-level=high
       - run: npm run release:check
 
   windows-native-smoke:
