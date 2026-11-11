@@ -1,4 +1,5 @@
 const fs = require("node:fs");
+const { tryDotMatrix, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { AUDIO_WEIGHT, GENRE_WEIGHT, dot, genreTags, genreTokens, genreSimilarity, libraryMean, centered, classifyPlay,
   listeningStats, skipRate, notForMe } = require("./listening-signals.cjs");
@@ -155,28 +156,38 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
   const stats = listeningStats(database, now);
   const top = Math.min(3, seeds.length);
 
-  const candidates = database.prepare(`
+  const candidateRecords = database.prepare(`
     SELECT s.filePath AS currentFilePath, s.genre, s.artist, a.* FROM song_analysis a JOIN songs s ON s.id = a.songId
     WHERE a.status = 'ready' AND a.modelId = ? AND a.analyzerVersion = ? AND a.filePath = s.filePath
-  `).all(MODEL.id, ANALYZER_VERSION).flatMap((record) => {
-    const vector = readNormalizedVector(record.vector);
+  `).all(MODEL.id, ANALYZER_VERSION);
+  const nativeVectors = tryDecodeNormalizedAudio(candidateRecords.map((record) => record.vector), MODEL.dimensions);
+  const candidates = candidateRecords.flatMap((record, index) => {
+    const vector = nativeVectors ? nativeVectors[index] : readNormalizedVector(record.vector);
     return vector ? [{ ...record, vector }] : [];
   });
   // Same signals as daily mixes: library-centered sound blended with genre tags.
-  const mean = libraryMean([...candidates, ...seeds].map((record) => record.vector));
-  const profile = (record) => ({ audio: centered(record.vector, mean), genre: genreTokens(genreTags(record.genre)) });
+  const allProfiles = [...candidates, ...seeds];
+  const mean = libraryMean(allProfiles.map((record) => record.vector));
+  const profile = (record) => ({
+    audio: centered(record.vector, mean),
+    genre: genreTokens(genreTags(record.genre))
+  });
   const seedProfiles = seeds.map(profile);
   const rankBatch = async (batch) => {
     const validFiles = await Promise.all(batch.map((record) => fileMatches(record, statFile)));
+    const points = batch.map((record, index) => validFiles[index] ? profile(record) : null);
+    const nativeAudio = tryDotMatrix(points.map((point) => point?.audio || seedProfiles[0].audio),
+      seedProfiles.map((seed) => seed.audio));
     for (let index = 0; index < batch.length; index++) {
       if (!validFiles[index]) continue;
       const candidate = batch[index];
       result.compared += 1;
-      const point = profile(candidate);
+      const point = points[index];
       // A group seed scores each candidate by its closest few seeds, so a mixed playlist matches each of its styles.
       let closestSound = -Infinity;
-      const scores = seedProfiles.map((seed) => {
-        const audio = dot(seed.audio, point.audio); const genre = genreSimilarity(seed.genre, point.genre);
+      const scores = seedProfiles.map((seed, seedIndex) => {
+        const audio = nativeAudio ? nativeAudio[index * seedProfiles.length + seedIndex] : dot(seed.audio, point.audio);
+        const genre = genreSimilarity(seed.genre, point.genre);
         closestSound = Math.max(closestSound, audio);
         return AUDIO_WEIGHT * audio + GENRE_WEIGHT * (genre ?? UNKNOWN_GENRE);
       });

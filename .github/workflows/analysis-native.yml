@@ -9,6 +9,9 @@ on:
       - "package-lock.json"
       - ".github/workflows/analysis-native.yml"
 
+env:
+  ONNXRUNTIME_NODE_INSTALL: skip
+
 permissions:
   contents: read
 
@@ -22,6 +25,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -40,3 +45,5 @@ jobs:
           fi
       - name: Check bundled runtime
         run: node scripts/check-analysis-native-package.cjs
+      - name: Ensure normal package excludes optional Rust
+        run: node scripts/check-rust-package.cjs --absent

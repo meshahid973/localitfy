@@ -1,10 +1,3 @@
-/* localtify 0.4.1 V395 playback settings cleanup + faster volume changes. */
-/* localtify 0.4.1 V396 audio engine stability pass. */
-/* localtify 0.4.1 V419 background-audio and settings-save stability. */
-/* localtify 0.4.1 V418 missing-file recovery actions. */
-/* localtify 0.4.1 V425 cover tools + metadata cleaner preview. */
-/* localtify 0.4.1 V417 metadata cleaner stability pass. */
-/* localtify 0.4.1 V415 shuffle queue + context delete. */
 import { lazy, startTransition, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";

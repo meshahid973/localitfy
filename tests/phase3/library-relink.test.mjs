@@ -62,3 +62,25 @@ test("truncated scans fail closed instead of offering partial matches", async t 
   assert.equal(result.truncated, true);
   assert.deepEqual(result.matches, []);
 });
+
+test("relink checks the existence of each known file only once", async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-relink-check-"));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const existing = path.join(dir, "existing.mp3");
+  const moved = path.join(dir, "moved.mp3");
+  fs.writeFileSync(existing, "test");
+  fs.writeFileSync(moved, "test");
+  const songs = [
+    { id: "present", filePath: existing, title: "Existing" },
+    { id: "missing", filePath: path.join(dir, "old", "moved.mp3"), title: "Moved" }
+  ];
+  let checked = 0;
+  const result = await findMovedSongCandidates(dir, songs, {
+    isAudioFile,
+    fileExists: file => { checked++; return fs.existsSync(file); },
+    readMetadata: async () => ({ title: "Moved" })
+  });
+  assert.equal(checked, 2);
+  assert.deepEqual(result.matches.map(entry => entry.id), ["missing"]);
+});
+

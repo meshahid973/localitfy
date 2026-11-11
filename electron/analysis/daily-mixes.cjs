@@ -1,4 +1,5 @@
 const fs = require("node:fs");
+const { tryDotMatrix, tryClusterFromCenters, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
 const { createHash } = require("node:crypto");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { readNormalizedVector } = require("./similarity.cjs");
@@ -20,7 +21,8 @@ function artist(track) { return String(track.artist || "").trim().toLowerCase();
 // then append genre tags. A feature dot product is AUDIO_WEIGHT * audio cosine + GENRE_WEIGHT * genre cosine.
 function buildFeatures(tracks) {
   const dimensions = tracks[0].vector.length;
-  const mean = libraryMean(tracks.map((track) => track.vector));
+  const vectors = tracks.map((track) => track.vector);
+  const mean = libraryMean(vectors);
   const tokens = tracks.map((track) => genreTokens(track.tags));
   const vocabulary = new Map([...new Set(tokens.flatMap((map) => [...map.keys()]))].sort().map((token, index) => [token, index]));
   const audioScale = Math.sqrt(AUDIO_WEIGHT); const genreScale = Math.sqrt(GENRE_WEIGHT);
@@ -60,9 +62,17 @@ function seedCenters(points, count, seed) {
 // least by moving, so one outlier can never become its own mix and every mix has enough candidates.
 function cluster(points, count, minimum, seed) {
   const centers = seedCenters(points, count, seed);
+  const nativeCluster = tryClusterFromCenters(points.map((point) => point.feature), centers, minimum);
+  if (nativeCluster) return nativeCluster;
   let assignment = new Int32Array(points.length).fill(-1); let similarity = [];
   for (let pass = 0; pass < 12; pass++) {
-    similarity = points.map((point) => centers.map((center) => dot(point.feature, center)));
+    // Small clusters are faster in JavaScript than packing and crossing NAPI.
+    // Let larger libraries amortize the native vector-matrix allocation.
+    const nativeWork = points.length * centers.length * (points[0]?.feature.length || 0);
+    const nativeScores = nativeWork >= 1_000_000
+      ? tryDotMatrix(points.map((point) => point.feature), centers) : null;
+    similarity = points.map((point, index) => centers.map((center, centerIndex) =>
+      nativeScores ? nativeScores[index * centers.length + centerIndex] : dot(point.feature, center)));
     const next = new Int32Array(points.length); const sizes = new Array(centers.length).fill(0);
     for (let i = 0; i < points.length; i++) {
       let best = 0;
@@ -221,18 +231,21 @@ async function getDailyMixes(database, request, { statFile = fs.promises.stat, n
     ORDER BY a.songId`).all(MODEL.id, ANALYZER_VERSION);
   const identity = (rows) => JSON.stringify(rows.map((t) => [t.songId, t.filePath, t.fileSize, t.fileMtime, t.analyzedAt]));
   const originalIdentity = identity(records);
-  const tracks = []; const paths = new Set();
+  const tracks = []; const paths = new Set(); const validRecords = [];
   for (let start = 0; start < records.length; start += 32) {
     const batch = records.slice(start, start + 32);
     const valid = await Promise.all(batch.map(async (record) => {
       try { const stat = await statFile(record.filePath); return stat.isFile() && stat.size === record.fileSize && stat.mtimeMs === record.fileMtime; }
       catch { return false; }
     }));
-    for (let i = 0; i < batch.length; i++) {
-      const record = batch[i]; if (!valid[i] || paths.has(record.filePath)) continue;
-      const vector = readNormalizedVector(record.vector); if (!vector) continue;
-      tracks.push({ ...record, vector }); paths.add(record.filePath);
-    }
+    for (let i = 0; i < batch.length; i++) if (valid[i]) validRecords.push(batch[i]);
+  }
+  const nativeVectors = tryDecodeNormalizedAudio(validRecords.map((record) => record.vector), MODEL.dimensions);
+  for (let i = 0; i < validRecords.length; i++) {
+    const record = validRecords[i]; if (paths.has(record.filePath)) continue;
+    const vector = nativeVectors ? nativeVectors[i] : readNormalizedVector(record.vector);
+    if (!vector) continue;
+    tracks.push({ ...record, vector }); paths.add(record.filePath);
   }
   const fingerprint = createHash("sha256").update(JSON.stringify([GENERATOR_VERSION, MODEL.id, ANALYZER_VERSION,
     tracks.map((t) => [t.songId, t.filePath, t.fileSize, t.fileMtime, t.analyzedAt])])).digest("hex");

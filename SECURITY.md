@@ -1,95 +1,20 @@
-# Security Policy
+# Security policy
 
-<p align="center">
-  <strong>Security matters for localtify.</strong>
-</p>
+Security fixes target the latest public localtify release. Update before reporting an issue that may already be resolved.
 
-<p align="center">
-  If you find a security problem, please report it privately so it can be fixed safely.
-</p>
+## Report privately
 
-<p align="center">
-  <img alt="Security reports welcome" src="https://img.shields.io/badge/security-reports%20welcome-8dffce?style=for-the-badge&labelColor=050505">
-  <img alt="Private disclosure" src="https://img.shields.io/badge/private-disclosure-68d8ff?style=for-the-badge&labelColor=050505">
-  <img alt="Latest version supported" src="https://img.shields.io/badge/latest-version%20supported-ffffff?style=for-the-badge&labelColor=050505">
-</p>
+Please **do not open a public issue with exploit details**. Contact:
 
----
+- Email: coderpixelbusiness@gmail.com
+- Discord: `.coderpixel`
 
-## Supported versions
+Include the app version, operating system, reproduction steps, expected versus observed behavior, and relevant logs or screenshots. Do not attach passwords, access tokens, or private audio files.
 
-localtify is still early in development, so security fixes are focused on the newest public release.
+## Security design
 
-| Version   | Support status  |
-| --------- | --------------- |
-| `0.4.1`   | Supported       |
-| `0.4.x`   | Limited support |
-| `< 0.4.0` | Not supported   |
+The Electron renderer uses sandboxing, context isolation, and web security; Node integration and webviews are disabled. Main-process operations use trusted IPC calls from the active application main frame only. Navigation is limited to app-owned origins and development loopback; unexpected browser permissions are denied.
 
-If you are using an older version, please update to the latest release first. The issue may already be fixed in a newer build.
+Local media serving uses bounded, opaque file-access tokens. Model installation verifies hashes and requires user action; downloading from arbitrary renderer-provided URLs is forbidden. Browser-cookie extraction for download tools is opt-in, never silent.
 
----
-
-## Security model
-
-The desktop renderer runs with Electron sandboxing, context isolation, web security, Node integration disabled, webviews disabled, and browser permissions denied by default. Privileged work is exposed only through the preload bridge and the trusted IPC router.
-
-Packaged renderer navigation is restricted to the Localtify-owned `localtify-renderer://app` origin (with the packaged `file://` fallback scoped to the built renderer directory). Development navigation is restricted to the loopback Vite origin. New renderer-created windows are denied.
-
-Local playback URLs are served only from the loopback media runtime using opaque per-file tokens. Downloader browser-cookie extraction is disabled by default; Localtify does not silently dump browser cookies to disk.
-
----
-
-## Reporting a vulnerability
-
-If you find a security issue in localtify, please do not open a public GitHub issue with the full details.
-
-Please report it privately through one of these:
-
-<table>
-  <tr>
-    <td><strong>Discord</strong></td>
-    <td><code>.coderpixel</code></td>
-  </tr>
-  <tr>
-    <td><strong>Email</strong></td>
-    <td><code>coderpixelbusiness@gmail.com</code></td>
-  </tr>
-</table>
-
----
-
-## What to include
-
-Please include as much useful information as you can.
-
-```txt
-localtify version:
-Operating system:
-What happened:
-Steps to reproduce:
-Screenshots or logs:
-Any extra notes:
-```
-
-Good details make the issue much easier to confirm and fix.
-
----
-
-## What happens next
-
-After you report a security issue, I will try to review it as soon as possible.
-
-If the report is accepted, I will work on a fix and include it in a future update.
-
-If the report is not a security issue, it may still be handled as a normal bug report.
-
----
-
-## Please report safely
-
-Please do not publicly share exploit details before a fix is released.
-
-This helps protect users while the issue is being checked and fixed.
-
-Thanks for helping keep localtify safe.
+Security-sensitive changes require the standard test gate, native packaging verification where relevant, and manual review of user-data/IPC behavior. See [Electron security boundaries](docs/architecture/electron-sandbox.md) and [CONTRIBUTING.md](CONTRIBUTING.md).

@@ -5,7 +5,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const ignoredDirs = new Set([".git", "node_modules", "dist", "release", ".vite"]);
+const ignoredDirs = new Set([".git", "node_modules", "dist", "release", ".vite", "target"]);
 const forbiddenFiles = [
   "src/localtifyConstants.ts",
   "src/localtifyUtils.ts",
@@ -71,7 +71,7 @@ if (!fs.existsSync(qualityWorkflow)) {
 }
 const workflowDirectory = path.join(root, ".github", "workflows");
 if (fs.existsSync(workflowDirectory)) {
-  const allowedWorkflows = new Set([".github/workflows/quality.yml", ".github/workflows/analysis-native.yml"]);
+  const allowedWorkflows = new Set([".github/workflows/quality.yml", ".github/workflows/analysis-native.yml", ".github/workflows/rust-kernels-experimental.yml"]);
   const workflowFiles = walk(workflowDirectory).filter((file) => fs.statSync(file).isFile());
   for (const file of workflowFiles) {
     const relative = repoPath(file);

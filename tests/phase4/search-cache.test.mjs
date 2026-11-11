@@ -47,3 +47,12 @@ test("search ranking filters misses without changing stable order", () => {
   ].map((song) => exports.buildSongSearchEntryCached(song));
   assert.deepEqual(Array.from(exports.rankSongsForSearch(entries, "miku"), (song) => song.id), ["1", "3"]);
 });
+
+test("search token substring fallback retains partial-word matches", () => {
+  const entries = [
+    { id: "first", title: "Morning", artist: "Miku", album: "Songs", filePath: "/music/morning.mp3", playCount: 0 },
+    { id: "second", title: "Evening", artist: "Rin", album: "Songs", filePath: "/music/evening.mp3", playCount: 0 }
+  ].map(song => exports.buildSongSearchEntryCached(song));
+  assert.deepEqual(Array.from(exports.rankSongsForSearch(entries, "orn"), song => song.id), ["first"]);
+});
+

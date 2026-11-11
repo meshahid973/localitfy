@@ -130,7 +130,7 @@ function matchReleaseTracks(songs, release) {
     for (const entry of tracks) {
       const recording = entry.track.recording || {};
       const score = 0.7 * Math.max(similarity(song.title, entry.track.title), similarity(song.title, recording.title)) + 0.3 * durationScore(song.durationMs, entry.track.length || recording.length);
-      pairs.push({ song, ...entry, recording, score });
+      if (score >= 0.6) pairs.push({ song, ...entry, recording, score });
     }
   }
   pairs.sort((a, b) => b.score - a.score);
@@ -138,7 +138,7 @@ function matchReleaseTracks(songs, release) {
   const usedTracks = new Set();
   const matches = [];
   for (const pair of pairs) {
-    if (pair.score < 0.6 || usedSongs.has(pair.song.id) || usedTracks.has(pair.track.id)) continue;
+    if (usedSongs.has(pair.song.id) || usedTracks.has(pair.track.id)) continue;
     usedSongs.add(pair.song.id);
     usedTracks.add(pair.track.id);
     matches.push(pair);

@@ -26,8 +26,10 @@ async function findMovedSongCandidates(rootDirectory, songs, {
   maxFiles = MAX_SCANNED_FILES,
   maxDirectories = MAX_SCANNED_DIRECTORIES
 } = {}) {
-  const missing = songs.filter(song => song?.filePath && !fileExists(song.filePath));
-  const usedPaths = new Set(songs.filter(song => song?.filePath && fileExists(song.filePath)).map(song => normalizedPath(song.filePath)));
+  const tracked = songs.filter(song => song?.filePath)
+    .map(song => ({ song, exists: fileExists(song.filePath) }));
+  const missing = tracked.filter(entry => !entry.exists).map(entry => entry.song);
+  const usedPaths = new Set(tracked.filter(entry => entry.exists).map(entry => normalizedPath(entry.song.filePath)));
   const missingByName = new Map();
   for (const song of missing) {
     const key = path.basename(song.filePath).toLocaleLowerCase();
