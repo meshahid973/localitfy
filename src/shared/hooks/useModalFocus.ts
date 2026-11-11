@@ -15,7 +15,12 @@ export function useModalFocus<T extends HTMLElement = HTMLDivElement>(active: bo
     const isTopmost = () => topmostModal() === dialog;
     const focusable = () => Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE))
       .filter((element) => element.getClientRects().length > 0 && !element.closest("[hidden], [inert]"));
-    const focusFirst = () => (focusable()[0] ?? dialog).focus({ preventScroll: true });
+    const focusFirst = () => {
+      // React autoFocus runs before this effect; do not override an already-focused input.
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && active !== dialog && dialog.contains(active)) return;
+      (focusable()[0] ?? dialog).focus({ preventScroll: true });
+    };
 
     if (isTopmost()) focusFirst();
 
