@@ -1,12 +1,6 @@
 /* Settings layout refinements. Base control styles live in settings.css. */
 .app:has(.pageTransition-settings) .content { background: var(--lt-bg) !important; }
 .settingsPage.settingsPageV027 {
-  --settings-surface: var(--lt-surface);
-  --settings-elevated: var(--lt-surface-raised);
-  --settings-edge: var(--lt-border);
-  --settings-muted: var(--lt-muted);
-  --settings-text: var(--lt-text);
-  --settings-accent: var(--lt-accent);
   width: min(100%, 1760px);
   margin: 0 auto;
   gap: 18px;

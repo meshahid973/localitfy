@@ -9,10 +9,10 @@
   justify-content: space-between;
   gap: 10px;
   padding: 0 13px;
-  border: 1px solid var(--lt-border, rgba(255,255,255,.12));
+  border: 1px solid var(--lt-border);
   border-radius: 12px;
-  background: var(--lt-surface, #0c0a14);
-  color: var(--lt-text, #fff);
+  background: var(--lt-surface);
+  color: var(--lt-text);
   font: inherit;
   font-size: 12px;
   font-weight: 650;
@@ -21,10 +21,10 @@
   transition: background-color 140ms ease, border-color 140ms ease;
 }
 @media (hover: hover) and (pointer: fine) {
-  .arcDropdownTrigger:hover { background: var(--lt-surface-raised, #17121e); border-color: var(--lt-accent, #b767b4); }
+  .arcDropdownTrigger:hover { background: var(--lt-surface-raised); border-color: var(--lt-accent); }
 }
-.arcDropdownTrigger[data-state="open"] { border-color: var(--lt-accent, #b767b4); }
-.arcDropdownTrigger:focus-visible { outline: 2px solid var(--lt-accent, #b767b4); outline-offset: 2px; }
+.arcDropdownTrigger[data-state="open"] { border-color: var(--lt-accent); }
+.arcDropdownTrigger:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 2px; }
 .arcDropdownLabel { display: block; min-width: 0; flex: 1; overflow: hidden; }
 .arcDropdownLabel > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .arcDropdownChevron { flex: none; opacity: .75; transition: transform 150ms ease; }
@@ -34,11 +34,11 @@
   z-index: 3000;
   overflow: hidden;
   padding: 5px;
-  border: 1px solid var(--lt-border, rgba(255,255,255,.12));
+  border: 1px solid var(--lt-border);
   border-radius: 12px;
   /* The raised surface is translucent; an opaque base keeps options readable over dialogs and text. */
-  background: linear-gradient(var(--lt-surface-raised, #15101d), var(--lt-surface-raised, #15101d)), var(--lt-bg, #0c0a14);
-  color: var(--lt-text, #fff);
+  background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg);
+  color: var(--lt-text);
   box-shadow: 0 16px 40px rgba(0,0,0,.32);
   font-size: 12px;
   font-weight: 600;
@@ -50,7 +50,7 @@
   left: 5px;
   height: 36px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--lt-text, #fff) 7%, transparent);
+  background: color-mix(in srgb, var(--lt-text) 7%, transparent);
   pointer-events: none;
 }
 .arcDropdownOption {
@@ -71,7 +71,7 @@
   cursor: pointer;
 }
 .arcDropdownOptionLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.arcDropdownOption > svg { flex: none; color: var(--lt-accent, #b767b4); }
+.arcDropdownOption > svg { flex: none; color: var(--lt-accent); }
 .arcDropdownOption:focus-visible { outline: 2px solid var(--lt-accent) !important; outline-offset: -2px !important; }
 .arcDropdownOption:disabled { opacity: .4; cursor: default; }
 @media (prefers-reduced-motion: reduce) {
