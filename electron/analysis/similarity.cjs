@@ -1,5 +1,5 @@
 const fs = require("node:fs");
-const { tryDotMatrix, tryCenterAudioProfiles, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
+const { tryDotMatrix, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { AUDIO_WEIGHT, GENRE_WEIGHT, dot, genreTags, genreTokens, genreSimilarity, libraryMean, centered, classifyPlay,
   listeningStats, skipRate, notForMe } = require("./listening-signals.cjs");
@@ -167,12 +167,9 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
   });
   // Same signals as daily mixes: library-centered sound blended with genre tags.
   const allProfiles = [...candidates, ...seeds];
-  const nativeAudio = tryCenterAudioProfiles(allProfiles.map((record) => record.vector));
-  const mean = nativeAudio ? null : libraryMean(allProfiles.map((record) => record.vector));
-  const centeredByRecord = nativeAudio
-    ? new Map(allProfiles.map((record, index) => [record, nativeAudio[index]])) : null;
+  const mean = libraryMean(allProfiles.map((record) => record.vector));
   const profile = (record) => ({
-    audio: centeredByRecord ? centeredByRecord.get(record) : centered(record.vector, mean),
+    audio: centered(record.vector, mean),
     genre: genreTokens(genreTags(record.genre))
   });
   const seedProfiles = seeds.map(profile);

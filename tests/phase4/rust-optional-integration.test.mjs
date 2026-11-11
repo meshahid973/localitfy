@@ -13,6 +13,9 @@ test("Rust remains optional and preserves JavaScript fallbacks",()=>{
  assert.match(backend,/LOCALTIFY_RUST_PHASES/);
  assert.match(backend,/if \(!enabled\(phase\)\) return null/);
  assert.match(sim,/nativeAudio \? nativeAudio\[index \* seedProfiles\.length \+ seedIndex\] : dot/);
+ assert.doesNotMatch(sim,/tryCenterAudioProfiles/);
+ assert.doesNotMatch(mix,/tryCenterAudioProfiles/);
+ assert.doesNotMatch(backend,/"scanner"|"centering"/);
  assert.match(mix,/nativeScores \? nativeScores\[index \* centers\.length \+ centerIndex\] : dot/);
  assert.match(dup,/audioOverride === undefined \? cosine\(va, vb\) : audioOverride/);
  assert.match(dup,/tryBatchPairDots\(\[\.\.\.buckets\.values\(\)\], vectors\)/);
