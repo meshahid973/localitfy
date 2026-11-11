@@ -2889,28 +2889,6 @@ body,
   border-color: color-mix(in srgb, var(--accent) 28%, rgba(255,255,255,.08)) !important;
 }
 
-/* V309 low-lag guardrails. */
-
-
-/* localtify 0.3.9 V301 — core compositor hints */
-body.localtifyPerfV301{
-  overscroll-behavior: none;
-}
-
-body.localtifyPerfV301 .appShell{
-  contain: layout style paint;
-}
-
-body.localtifyPerfV301 .content{
-  will-change: scroll-position;
-  contain: layout style paint;
-}
-
-body.localtifyPerfV301 .titleBar,
-body.localtifyPerfV301 .sidebar{
-  contain: layout paint style;
-}
-
 /* localtify 0.3.9 V324 — lightweight analytics / recap page.
    Replaces the old heavy local analytics layout with simple recap cards. */
 

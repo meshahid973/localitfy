@@ -666,24 +666,6 @@
   }
 }
 
-/* localtify 0.3.9 V301 — lighter first-run compositor path */
-body.localtifyPerfV301 .onboardingV315 {
-  contain: layout paint style;
-}
-
-body.localtifyPerfV301 .onboardingCoreOrb{
-  filter: saturate(112%) contrast(1.01);
-  box-shadow:
-    0 0 28px rgba(var(--onboarding-accent-rgb), 0.22),
-    0 0 72px rgba(var(--onboarding-accent-rgb), 0.10),
-    inset -18px -20px 32px rgba(0, 0, 0, 0.26),
-    inset 14px 12px 22px rgba(255, 255, 255, 0.10);
-}
-
-body.localtifyPerfV301 .onboardingV315 :is(button, input) {
-  touch-action: manipulation;
-}
-
 /* V463 small onboarding optimization */
 .onboardingV315,
 .localitfyOnboardingShell,
@@ -709,12 +691,6 @@ body.localtifyPerfV301 .onboardingV315 :is(button, input) {
 .onboardingThemeChoice .themeIconSvg{
   pointer-events: none;
   user-select: none;
-}
-
-body.localtifyPerfV301 .onboardingThemeChoice,
-body.localtifyPerfV301 .onboardingFeatureGrid.cleaner > div,
-body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
-  transition-property: border-color, background-color, box-shadow;
 }
 
 /* localtify v499 — onboarding peeking mascot */

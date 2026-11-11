@@ -5449,23 +5449,6 @@ the last imported CSS layer. */
   background-color: #050010 !important;
 }
 
-/* V309 low-lag guardrails. */
-
-
-/* localtify 0.3.9 V301 — renderer performance guardrails
-   Keeps the visual identity,
-but sleeps expensive paint during scroll/drag/heavy views. */
-body.localtifyPerfV301 .app{
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  contain: layout style paint;
-}
-
-
-body.localtifyPerfV301 .app :is(.localtifyStarsBackdrop, .localtifyStarsLayer){
-  display: none !important;
-}
-
 /* localtify 0.3.9 V380 — theme painting lag guard.
    Color picking now updates CSS variables without forcing expensive animation/filter churn.
    This does NOT disable image blur,

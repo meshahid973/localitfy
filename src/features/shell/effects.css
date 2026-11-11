@@ -368,56 +368,6 @@
   display: none !important;
 }
 
-/* localtify 0.3.9 V301 — effects sleep when renderer is busy */
-body.localtifyPerfV301 .app.isScrolling :is(.songRow.playing .songArt.coverAura, .homeAlbumCard.playing .homeAlbumArt.coverAura)::before{
-  opacity: 0 !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-body.localtifyPerfV301 .app.isScrolling :is(.songRow.playing, .playlistSongRow.playing) :is(.songArt, .smallArt, .coverAura){
-  filter: none !important;
-}
-
-body.localtifyPerfV301.localtifyBackgroundMode .app .heroAmbiencePulse,
-body.localtifyPerfV301.localtifyBackgroundMode .app .coverAura::before,
-body.localtifyPerfV301.localtifyBackgroundMode .app .songArt::before,
-body.localtifyPerfV301.localtifyBackgroundMode .app .homeAlbumArt::before,
-body.localtifyPerfV301.localtifyBackgroundMode .app .homeListenCover::before{
-  opacity: 0 !important;
-  animation: none !important;
-  filter: none !important;
-}
-
-/* localtify 0.3.9 V303 — profiler fix: sleep expensive paint while scrolling/audio analyser is busy */
-body.localtifyPerfV303 .app.isScrolling :is(.heroAmbiencePulse, .coverAura::before, .songArt::before, .homeAlbumArt::before, .homeListenCover::before, .playerBar::before){
-  opacity: 0 !important;
-  filter: none !important;
-  animation: none !important;
-  transition: none !important;
-  transform: none !important;
-}
-
-body.localtifyPerfV303 .app.isScrolling :is(.homeAlbumCard, .songRow, .playlistSongRow, .settingsPanelCard){
-  transition-property: background-color, border-color, color, opacity !important;
-  transition-duration: 90ms !important;
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-body.localtifyPerfV303 .app.isScrolling :is( .localtifyStarsLayer, .localtifyStarsBackdrop){
-  animation: none !important;
-  transition: none !important;
-  filter: none !important;
-}
-
-body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::before,
-body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::after{
-  opacity: 0 !important;
-  filter: none !important;
-  transition: none !important;
-}
-
 /* localtify 0.3.9 V305 — keep audio smooth by sleeping expensive paint while the renderer is busy. */
 .app.localtifyInteractionBusy :is(.coverAura::before, .heroAmbiencePulse, .homeAlbumArt::before, .songArt::before, .playerBar::before){
   opacity: 0 !important;
@@ -433,31 +383,6 @@ body.localtifyPerfV303 .app.isScrolling .playerBar[data-cover-sync]::after{
 
 body.localtifyAudioPlaying .app :is(.localtifyProximityActive, [data-proximity-active="true"]){
   transform: none !important;
-  filter: none !important;
-}
-
-/* localtify 0.3.9 V305 — harsher paint suppression while audio plays / scrolling */
-body.localtifyPerfV305 .app.isScrolling :is(.hero.heroPremium, .homeAlbumCard, .songRow, .playlistSongRow, .playerBar){
-  animation: none !important;
-  transition-duration: 0ms !important;
-  transition-delay: 0ms !important;
-  box-shadow: none !important;
-  filter: none !important;
-}
-
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(.coverAura, .coverAura::before, .coverAura::after, .heroAmbiencePulse, .homeAlbumArt::before, .songArt::before, .playerBar::before, .playerBar::after){
-  animation: none !important;
-  filter: none !important;
-}
-
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(.nowPlayingCopySwap, .nowPlayingArtSwap, .simpleHeroArtSwap, .homeAlbumCard, .songRow, .playlistSongRow){
-  transition-duration: 80ms !important;
-  animation-duration: 80ms !important;
-}
-
-body.localtifyPerfV305.localtifyAudioPlaying .app.heroMotionActive :is(.hero.heroPremium.heroLayoutMotion){
-  animation: none !important;
-  transition-duration: 120ms !important;
   filter: none !important;
 }
 
@@ -758,12 +683,6 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
   transition-duration: 90ms !important;
 }
 
-/* Override older V303/V305 performance blocks that killed blur while audio played or while scrolling. */
-body.localtifyPerfV303 .app.isScrolling :is( .playerBar::before, .playerBar::after),
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(.coverAura, .coverAura::before, .coverAura::after, .heroAmbiencePulse, .homeAlbumArt::before, .songArt::before, .playerBar::before, .playerBar::after){
-  filter: revert !important;
-}
-
 /* Keep sidebar hover cheap without deleting card blur. */
 main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :is( .homeAlbumCard){
   transition-property: background-color, border-color, opacity, transform !important;
@@ -806,14 +725,6 @@ main.app.app[data-sidebar-behavior="hover"]:has(> .appShell > .sidebar:hover) :i
 .app.isScrolling :is(.songRow, .playlistSongRow, .homeAlbumCard){
   transition-property: background-color, border-color, opacity, transform !important;
   transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
-}
-
-/* Undo old scroll/audio rules that tried to kill blur-heavy layers. */
-body.localtifyPerfV303 .app.isScrolling :is( .playerBar::before, .playerBar::after),
-body.localtifyPerfV305.localtifyAudioPlaying .app :is(.heroAmbiencePulse, .homeAlbumArt::before, .playerBar::before, .playerBar::after){
-  filter: revert !important;
-  backdrop-filter: revert !important;
-  -webkit-backdrop-filter: revert !important;
 }
 
 /* V468 DISCORD PILL ONLY + REAL ICON MOTION START
