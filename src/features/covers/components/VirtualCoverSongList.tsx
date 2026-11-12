@@ -1,6 +1,6 @@
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import type { ComponentType } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { usePageVirtualizer } from "../../../shared/hooks/usePageVirtualizer";
 import type { CoverSong } from "../cover.types";
 import CoverCuteEmptyState from "./CoverCuteEmptyState";
 
@@ -12,9 +12,8 @@ export default function VirtualCoverSongList({ songs, selectedIds, CoverComponen
   prettyMeta: (text: string) => string;
   toggleCoverSongSelection: (songId: string) => void;
 }) {
-  const parentRef = useRef<HTMLDivElement | null>(null);
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
-  const rowVirtualizer = useVirtualizer({ count: songs.length, getScrollElement: () => parentRef.current, estimateSize: () => 56, overscan: 1, getItemKey: (index) => songs[index]?.id || index });
+  const { listRef: parentRef, virtualizer: rowVirtualizer, scrollMargin } = usePageVirtualizer<HTMLDivElement>({ count: songs.length, estimateSize: () => 56, overscan: 1, getItemKey: (index) => songs[index]?.id || index });
   if (!songs.length) return <div ref={parentRef} className="coverSongList coverSongListVirtual coverSongListClean"><CoverCuteEmptyState /></div>;
-  return <div ref={parentRef} className="coverSongList coverSongListVirtual coverSongListClean"><div className="coverSongVirtualCanvas" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>{rowVirtualizer.getVirtualItems().map((virtualRow) => { const song = songs[virtualRow.index]; if (!song) return null; const selected = selectedSet.has(song.id); return <button key={virtualRow.key} data-index={virtualRow.index} type="button" className={`coverSongPick coverSongPickVirtual ${selected ? "active" : ""}`} onClick={() => toggleCoverSongSelection(song.id)} aria-pressed={selected} title={song.title || "unknown song"} style={{ top: `${virtualRow.start}px` }}><CoverComponent song={song} className="coverSongThumb" /><span><strong>{prettyTitle(String(song.title || "untitled"), 6)}</strong><small>{prettyMeta(String(song.artist || "unknown artist"))}</small></span><em>{selected ? "✓" : "+"}</em></button>; })}</div></div>;
+  return <div ref={parentRef} className="coverSongList coverSongListVirtual coverSongListClean"><div className="coverSongVirtualCanvas" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>{rowVirtualizer.getVirtualItems().map((virtualRow) => { const song = songs[virtualRow.index]; if (!song) return null; const selected = selectedSet.has(song.id); return <button key={virtualRow.key} data-index={virtualRow.index} type="button" className={`coverSongPick coverSongPickVirtual ${selected ? "active" : ""}`} onClick={() => toggleCoverSongSelection(song.id)} aria-pressed={selected} title={song.title || "unknown song"} style={{ top: `${virtualRow.start - scrollMargin}px` }}><CoverComponent song={song} className="coverSongThumb" /><span><strong>{prettyTitle(String(song.title || "untitled"), 6)}</strong><small>{prettyMeta(String(song.artist || "unknown artist"))}</small></span><em>{selected ? "✓" : "+"}</em></button>; })}</div></div>;
 }

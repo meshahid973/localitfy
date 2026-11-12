@@ -1,6 +1,7 @@
 import "./pages.css";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
+import { isAndroidApp } from "../../app/platform";
 import { Cover } from "../covers/Cover";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
@@ -73,6 +74,8 @@ export default function AlbumPage({ albumId, albums, currentId, isPlaying, toggl
         onQueue={() => actions.queueCollection(target)}
         onMore={(event) => actions.openCollectionMenu(event, target)}
       >
+        {/* Albums are managed on the Mac; on the phone a tag change here would rewrite the Mac's library. */}
+        {isAndroidApp() ? null : <>
         {manual ? (
           <button className="collectionIconButton" type="button" aria-label={`edit ${album.title}`} title="Edit album"
             onClick={() => { actions.nav.go("albums"); openEditAlbumBuilder(album); }}>
@@ -89,6 +92,7 @@ export default function AlbumPage({ albumId, albums, currentId, isPlaying, toggl
           <Trash2 size={14} strokeWidth={2.3} aria-hidden="true" />
           <span>{confirmDelete ? "sure? click again" : manual ? "delete album" : "remove album tag"}</span>
         </button>
+        </>}
       </CollectionHero>
 
       <TrackList songs={album.songs} currentId={currentId} isPlaying={isPlaying} showCover={manual}

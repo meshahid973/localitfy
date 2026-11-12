@@ -1,3 +1,4 @@
+import { isAndroidApp, computerName } from "../../app/platform";
 import "./library.css";
 import { lazy, Suspense, useState, type DragEventHandler, type ReactNode } from "react";
 import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2 } from "lucide-react";
@@ -104,9 +105,9 @@ export default function LibraryView(props: LibraryViewProps) {
               <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
                 <ActionLabel icon={Shuffle}>shuffle</ActionLabel>
               </button>
-              <button className="libraryAction" type="button" onClick={() => setDuplicatesOpen(true)} disabled={songs.length < 2} title="Find songs that are in your library more than once">
+              {isAndroidApp() ? null : <button className="libraryAction" type="button" onClick={() => setDuplicatesOpen(true)} disabled={songs.length < 2} title="Find songs that are in your library more than once">
                 <ActionLabel icon={Copy}>duplicates</ActionLabel>
-              </button>
+              </button>}
             </>
           ) : (
             <button className="libraryAction" type="button" onClick={() => props.openSimilarSongs({ kind: "liked" })}
@@ -182,7 +183,7 @@ export default function LibraryView(props: LibraryViewProps) {
               tone={showingMissingFiles ? "success" : isLiked || query.trim() ? "info" : "warning"}
               eyebrow={showingMissingFiles ? "file check" : isLiked ? "liked songs" : query.trim() ? "search" : "library"}
               title={showingMissingFiles ? "All files are cozy" : isLiked ? "No liked songs yet" : query.trim() ? "No songs found" : "No songs yet"}
-               message={showingMissingFiles ? "All your files are available." : isLiked ? "Like a song to save it here." : query.trim() ? "Try a different title or artist." : "Import music to get started."}
+               message={showingMissingFiles ? "All your files are available." : isLiked ? "Like a song to save it here." : query.trim() ? "Try a different title or artist." : isAndroidApp() ? `Sync with your ${computerName()} in Settings → Library to get started.` : "Import music to get started."}
               mascotState={showingMissingFiles ? "happy" : query.trim() ? "question" : "empty"}
               actions={showingMissingFiles ? (
                 <button className="softButton" type="button" onClick={() => setLibraryFilterMode?.("all")}>show all tracks</button>
@@ -190,7 +191,7 @@ export default function LibraryView(props: LibraryViewProps) {
                 <button className="softButton" type="button" onClick={() => changeView("library", "empty-liked")}>browse library</button>
               ) : query.trim() ? (
                 <button className="softButton" type="button" onClick={() => handleSearchInput("")}>clear search</button>
-              ) : (
+              ) : isAndroidApp() ? null : (
                 <button className="mainAction" type="button" onClick={importSongs}>import songs</button>
               )}
             />

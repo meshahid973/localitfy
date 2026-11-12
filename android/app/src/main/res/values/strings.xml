@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">localtify</string>
+    <string name="title_activity_main">localtify</string>
+    <string name="package_name">com.meshahid973.localitfy</string>
+    <string name="custom_url_scheme">com.meshahid973.localitfy</string>
+</resources>

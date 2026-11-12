@@ -94,7 +94,7 @@
 .albumBuilderSearchRowV318 { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 .albumBuilderSearchRowV318 input { min-width: 220px; flex: 1 1 260px; }
 .albumBuilderSearchRowV318 > span { color: var(--albums-muted); font-size: 12px; }
-.albumBuilderSongGridV318 { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(225px,100%),1fr)); gap: 9px; max-height: min(45vh,440px); overflow-y: auto; }
+.albumBuilderSongGridV318 { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(225px,100%),1fr)); gap: 9px; }
 .albumBuilderSongGridV318 button { min-width: 0; display: grid; grid-template-columns: 42px minmax(0,1fr) 20px; align-items: center; gap: 9px; padding: 8px; border: 1px solid var(--albums-border); border-radius: 9px; background: var(--lt-surface); color: var(--albums-text); text-align: left; font: inherit; }
 .albumBuilderSongGridV318 button:hover { background: var(--lt-surface-raised); }
 .albumBuilderSongGridV318 button.selected { border-color: rgba(var(--lt-accent-rgb),.45); }

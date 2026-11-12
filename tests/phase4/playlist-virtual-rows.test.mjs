@@ -5,7 +5,7 @@ import test from "node:test";
 const read = (relative) => fs.readFileSync(relative, "utf8");
 
 test("virtual playlist rows are positioned by their own transform", () => {
-  assert.match(read("src/features/playlists/components/VirtualPlaylistTrackList.tsx"), /"--playlist-row-y": `\$\{virtualRow\.start\}px`/);
+  assert.match(read("src/features/playlists/components/VirtualPlaylistTrackList.tsx"), /"--playlist-row-y": `\$\{virtualRow\.start - scrollMargin\}px`/);
   assert.match(read("src/features/playlists/playlists.css"), /\.playlistTrackRow\.virtualPlaylistTrackRow \{[^}]*position: absolute;[^}]*transform: translateY\(var\(--playlist-row-y,0px\)\);/);
 });
 

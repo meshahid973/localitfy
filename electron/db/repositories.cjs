@@ -6,6 +6,7 @@ function requireFunction(source, name) {
 
 function createDatabaseRepositories(databaseModule) {
   return Object.freeze({
+    sync: Object.freeze({ applyBatch: requireFunction(databaseModule, "applyPhoneSyncBatch") }),
     songs: Object.freeze({
       list: requireFunction(databaseModule, "getSongs"),
       get: requireFunction(databaseModule, "getSong"),

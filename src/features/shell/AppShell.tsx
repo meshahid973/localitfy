@@ -25,6 +25,7 @@ import type { TagSearchAlbum } from "../tagging/AlbumTagSearchDialog";
 import type { AlbumTracksDialogProps } from "../tagging/AlbumTracksDialog";
 import { useDownloadTagPrompt } from "../tagging/useDownloadTagPrompt";
 import SidebarNav from "./SidebarNav";
+import { isAndroidApp } from "../../app/platform";
 import {
   APP_VERSION, defaultUpdatePrompt, updateRibbonChildSpring, updateRibbonEnterSpring
 } from "../updates/update.constants";
@@ -37,6 +38,8 @@ import "../../styles/view-shell.css";
 
 const SimilarSongsDialog = lazy(() => import("../analysis/SimilarSongsDialog"));
 const LyricsView = lazy(() => import("../lyrics/LyricsView"));
+const PhoneTabBar = lazy(() => import("./PhoneTabBar"));
+const PhonePlayer = lazy(() => import("../player/components/PhonePlayer"));
 const LibraryView = lazy(() => import("../library/LibraryView"));
 const ArtistsView = lazy(() => import("../artists/ArtistsView"));
 const GenresView = lazy(() => import("../genres/GenresView"));
@@ -301,7 +304,12 @@ export default function AppShell(props: AppShellProps) {
         simpleModeView
       ) : (
         <div className="appShell">
-          <aside className="sidebar">
+          {isAndroidApp() ? (
+            <Suspense fallback={null}>
+              <PhoneTabBar view={view} changeView={nav.go} sidebarNavOrder={settings.sidebarNavOrder}
+                sidebarHiddenNav={settings.sidebarHiddenNav} openSidebarSettings={openSidebarSettings} />
+            </Suspense>
+          ) : <aside className="sidebar">
             <SidebarNav
               view={view}
               changeView={nav.go}
@@ -327,7 +335,7 @@ export default function AppShell(props: AppShellProps) {
             >
               <span />
             </button>
-          </aside>
+          </aside>}
 
           <section className="content" ref={contentRef}>
             {mascotDebugMode ? (
@@ -391,9 +399,11 @@ export default function AppShell(props: AppShellProps) {
             </div>
           </section>
 
-<PlayerBar {...playerBar} />
+{isAndroidApp()
+            ? <Suspense fallback={null}><PhonePlayer {...playerBar} lyrics={modals.lyrics} /></Suspense>
+            : <PlayerBar {...playerBar} />}
           <QueuePanel {...modals.queuePanel} />
-          {modals.lyrics.open ? <Suspense fallback={null}><LyricsView {...modals.lyrics} anchorRef={contentRef} /></Suspense> : null}
+          {modals.lyrics.open && !isAndroidApp() ? <Suspense fallback={null}><LyricsView {...modals.lyrics} anchorRef={contentRef} /></Suspense> : null}
         </div>
       )}
 

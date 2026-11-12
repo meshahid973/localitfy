@@ -29,6 +29,12 @@ Download a release for your operating system:
 
 Open the installed app and import your music. macOS native binaries are tested in CI, but check [Releases](https://github.com/meshahid973/localitfy/releases) for currently published installers.
 
+### Android (experimental)
+
+The Android companion copies your library from the desktop app over home Wi-Fi for offline playback. It is a development build for now: there is no signed release yet.
+
+See the [Android installation and pairing guide](docs/android.md) for building an APK, installing it on a phone, pairing with your computer, updating, and troubleshooting.
+
 ## Development
 
 Use Node.js 22, npm, and Git.

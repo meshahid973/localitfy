@@ -1,5 +1,24 @@
+/** True inside the Android app, where Capacitor replaces Electron. */
+export const isAndroidApp = () => typeof window !== "undefined" &&
+  (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor?.getPlatform?.() === "android";
+
+/** The phone's paired computer, as its sync server reports it (Node's process.platform). */
+let pairedComputerPlatform = "";
+export const setPairedComputerPlatform = (platform: string | undefined) => { pairedComputerPlatform = platform || ""; };
+
+/**
+ * What to call the desktop computer in text: "Mac", "PC" or "computer". On the phone that is the paired computer
+ * (just "computer" until it has paired); on the desktop, the machine it runs on.
+ */
+export function computerName() {
+  const kind = isAndroidApp()
+    ? ({ darwin: "mac", win32: "windows" } as Record<string, string>)[pairedComputerPlatform] || "other"
+    : getLocaltifyPlatformInfo().id;
+  return kind === "mac" ? "Mac" : kind === "windows" ? "PC" : "computer";
+}
+
 export type LocaltifyPlatformInfo = {
-  id: "windows" | "linux" | "mac" | "unknown";
+  id: "windows" | "linux" | "mac" | "android" | "unknown";
   label: string;
   releaseLabel: string;
   startupSettingSupported: boolean;
@@ -16,6 +35,15 @@ export function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
   const isLinux = /linux|x11|wayland/.test(userAgent) || platform.includes("linux");
   const isMac = /mac os|macintosh|darwin/.test(userAgent) || platform.includes("mac");
   const isWindows = /windows|win32|win64|wow64/.test(userAgent) || platform.includes("win");
+
+  if (isAndroidApp()) return {
+    id: "android", label: "Android", releaseLabel: "Android app", startupSettingSupported: false,
+    desktopControlsLabel: "Phone controls",
+    desktopControlsHelp: "Use the notification, lock screen, headphones or Bluetooth buttons to control playback.",
+    startupSettingLabel: "Start localtify with Android",
+    startupSettingHelp: "Not available on Android.",
+    linuxInstallNotes: []
+  };
 
   if (isLinux) return {
     id: "linux", label: "Linux", releaseLabel: "AppImage / RPM / DEB", startupSettingSupported: false,

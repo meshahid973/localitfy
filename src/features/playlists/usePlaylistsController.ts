@@ -86,6 +86,9 @@ export function usePlaylistsController({
     });
   }, [songs, bootedRef]);
 
+  // A synced phone changed playlists: take the saved list so this window never writes over it.
+  useEffect(() => window.localitfy.onPlaylistsChanged?.((next) => setPlaylists(cleanPlaylistList(next))), []);
+
   useEffect(() => {
     if (!bootedRef.current) return;
     const cleanedPlaylists = cleanPlaylistList(playlists);

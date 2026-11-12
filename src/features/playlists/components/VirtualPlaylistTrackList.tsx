@@ -1,6 +1,6 @@
-import { memo, useCallback, useRef, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import type { CSSProperties, DragEvent, MouseEvent as ReactMouseEvent } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { usePageVirtualizer } from "../../../shared/hooks/usePageVirtualizer";
 import { GripVertical, X } from "lucide-react";
 import type { Song, LibraryDropSide } from "../../library/song.types";
 import { Cover } from "../../covers/Cover";
@@ -51,11 +51,9 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
   onOpenContextMenu,
   onRemoveSong
 }: VirtualPlaylistTrackListProps) {
-  const parentRef = useRef<HTMLDivElement | null>(null);
   const [dropTarget, setDropTarget] = useState<{ songId: string; side: LibraryDropSide } | null>(null);
-  const rowVirtualizer = useVirtualizer({
+  const { listRef, virtualizer: rowVirtualizer, scrollMargin } = usePageVirtualizer<HTMLDivElement>({
     count: list.length,
-    getScrollElement: () => parentRef.current,
     estimateSize: () => 72,
     overscan: 5,
     getItemKey: (index) => `${selectedPlaylistId}-${list[index]?.id || index}`
@@ -102,7 +100,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
   }
 
   return (
-    <div ref={parentRef} className="playlistTrackList virtualPlaylistTrackList" aria-label="playlist songs">
+    <div ref={listRef} className="playlistTrackList virtualPlaylistTrackList" aria-label="playlist songs">
       <div className="virtualPlaylistTrackCanvas" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const song = list[virtualRow.index];
@@ -120,7 +118,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               className={`playlistTrackRow virtualPlaylistTrackRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""}`}
               data-drop-side={isDropTarget ? dropTarget?.side : undefined}
               style={{
-                "--playlist-row-y": `${virtualRow.start}px`,
+                "--playlist-row-y": `${virtualRow.start - scrollMargin}px`,
                 "--playlist-stagger": Math.min(virtualRow.index, 12)
               } as CSSProperties}
               draggable
