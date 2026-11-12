@@ -61,6 +61,7 @@ export function ArcDropdownMenu<T extends string>({
     setPosition({ left, top, width });
   }, [items.length]);
 
+  // Focus only when opening: pointer highlight changes should not steal keyboard focus.
   useLayoutEffect(() => {
     if (!open) return;
     placeMenu();
@@ -73,8 +74,6 @@ export function ArcDropdownMenu<T extends string>({
     }
     const id = window.requestAnimationFrame(() => optionRefs.current[activeIndex]?.focus());
     return () => window.cancelAnimationFrame(id);
-    // Focus only when opening: pointer highlight changes should not steal keyboard focus.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, placeMenu]);
 
   useEffect(() => {

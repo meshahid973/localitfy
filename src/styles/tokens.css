@@ -25,7 +25,6 @@
   --lt-radius-md: 18px;
 
   --lt-shadow-low: 0 10px 30px rgba(0, 0, 0, 0.24);
-  --lt-shadow-mid: 0 18px 50px rgba(0, 0, 0, 0.34);
 
   /* Compatibility aliases used by the existing renderer while features migrate. */
   --bg: var(--lt-bg);

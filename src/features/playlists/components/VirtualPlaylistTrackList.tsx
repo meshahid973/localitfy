@@ -8,7 +8,7 @@ import { MascotStateArt, PlayingBarsIcon } from "../../../shared/ui/LocaltifyVie
 import { formatTime } from "../../../shared/utils/format";
 import { displaySongArtistV444, displaySongTitleV444 } from "../../library/components/SongRows";
 
-export function readPlaylistDraggedSongId(event: DragEvent<HTMLElement>, fallbackSongId = "") {
+function readPlaylistDraggedSongId(event: DragEvent<HTMLElement>, fallbackSongId = "") {
   return (
     event.dataTransfer.getData("text/localitfy-song-id") ||
     event.dataTransfer.getData("text/plain") ||
@@ -16,7 +16,7 @@ export function readPlaylistDraggedSongId(event: DragEvent<HTMLElement>, fallbac
   );
 }
 
-export function getPlaylistDropSide(event: DragEvent<HTMLElement>): LibraryDropSide {
+function getPlaylistDropSide(event: DragEvent<HTMLElement>): LibraryDropSide {
   const rect = event.currentTarget.getBoundingClientRect();
   const centerY = rect.top + rect.height / 2;
   return event.clientY < centerY ? "before" : "after";

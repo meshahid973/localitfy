@@ -1,6 +1,4 @@
-import type { DownloadQueueItem } from "./download.types";
 import type { Settings } from "../settings/settings.types";
-export function clearFinishedDownloads(items:DownloadQueueItem[]){return items.filter((item)=>item.status!=="done");}
 
 export function downloadStatusLabel(status: string) {
   if (status === "done") return "done";

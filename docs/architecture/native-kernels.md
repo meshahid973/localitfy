@@ -39,11 +39,11 @@ Native CI builds Windows, Linux and macOS packages; checks that native packages 
 
 ## Security and release gates
 
-The November 11, 2026 runtime-only npm audit reported **zero advisories** after updating `js-yaml` and `music-metadata`. CI rejects new moderate-or-higher runtime advisories. The full developer-toolchain audit and install-script approvals are separate release checks; blanket install-script approval and automatic `npm audit fix --force` are not acceptable.
+CI reports runtime dependency advisories for triage. Review the current audit results before a release; a full developer-toolchain audit and install-script approvals remain separate checks. Do not use blanket install-script approval or automatic `npm audit fix --force`.
 
 Before merging or publishing, verify CI against the current commit. For a public installer, also test actual desktop playback, seeking, file imports, analysis, recommendations, duplicates, database backup/recovery, updater flow, signing/notarization where applicable, and installation/uninstallation. On Linux, check Wayland/X11, AppImage permissions and downloadable tools; GPU/compositor fallback switches are for troubleshooting only.
 
-Benchmarks are synthetic and vary by host. Your Windows sample showed PCM ~8.65 ms in JS versus ~0.38 ms with Rust for 480k samples. That does not establish an equal real-world end-to-end playback gain. The slower Rust centering and scanner experiments were removed rather than shipped. Keep remaining optional phases disabled until representative libraries show a consistent benefit.
+Benchmarks are synthetic and vary by host. Use `npm run rust:benchmark` for current measurements, and keep optional phases disabled until representative libraries show a consistent benefit.
 
 ## Related documentation
 

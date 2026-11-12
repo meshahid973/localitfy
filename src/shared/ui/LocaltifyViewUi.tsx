@@ -202,35 +202,3 @@ export function LocaltifyStateCard({
     </div>
   );
 }
-
-export function MascotHelperBubble({
-  state = "info",
-  tone = "info",
-  eyebrow,
-  title,
-  message,
-  actions,
-  hideMascot = false,
-  className = ""
-}: {
-  state?: MascotStateKey;
-  tone?: LocaltifyStateCardTone;
-  eyebrow?: string;
-  title: string;
-  message: string;
-  actions?: ReactNode;
-  hideMascot?: boolean;
-  className?: string;
-}) {
-  return (
-    <aside className={`mascotHelperBubbleV501 mascotHelper-${state} ${tone} ${hideMascot ? "noMascotV511" : ""} ${className}`.trim()} role="status">
-      {!hideMascot ? <MascotStateArt state={state} className="mascotHelperArtV501" /> : null}
-      <div className="mascotHelperCopyV501">
-        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-        <strong>{title}</strong>
-        <span>{message}</span>
-      </div>
-      {actions ? <div className="mascotHelperActionsV501">{actions}</div> : null}
-    </aside>
-  );
-}

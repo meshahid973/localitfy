@@ -2,8 +2,6 @@ import { makeLocalId } from "../../shared/storage/localStorage";
 import { cleanSongOrderIds } from "../library/library.utils";
 import type { Playlist } from "./playlist.types";
 import { cleanSmartRules } from "./smartPlaylist";
-export function addSongToPlaylist(playlist: Playlist, songId: string) { return playlist.songIds.includes(songId) ? playlist : { ...playlist, songIds: [...playlist.songIds, songId] }; }
-export function removeSongFromPlaylist(playlist: Playlist, songId: string) { return { ...playlist, songIds: playlist.songIds.filter((id) => id !== songId) }; }
 
 export function cleanPlaylistList(value: unknown, validIds?: Set<string>): Playlist[] {
   if (!Array.isArray(value)) return [];
