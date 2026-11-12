@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, Eye, EyeOff } from "lucide-react";
 import { isAndroidApp } from "../../../app/platform";
-import { MAC_ONLY_VIEWS, navItems } from "../../shell/navigation.constants";
+import { DESKTOP_ONLY_VIEWS, navItems } from "../../shell/navigation.constants";
 import { canMoveSidebarItem, moveSidebarItem, normalizeSidebarHidden, resolveSidebarGroups, toggleSidebarItemHidden } from "../../shell/sidebarLayout";
 import type { Settings } from "../settings.types";
 import type { UpdateSetting } from "../settings.shared";
@@ -46,7 +46,7 @@ export default function SidebarTabsSettings({ settings, updateSetting }: Sidebar
             <ol className="sidebarTabsList">
               {group.orderedItems.map((itemId) => {
                 const item = navItems.find((entry) => entry.id === itemId);
-                if (!item || (isAndroidApp() && MAC_ONLY_VIEWS.has(itemId))) return null;
+                if (!item || (isAndroidApp() && DESKTOP_ONLY_VIEWS.has(itemId))) return null;
                 const Icon = item.icon;
                 const isHidden = hiddenSet.has(itemId);
 

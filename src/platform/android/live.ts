@@ -85,12 +85,24 @@ export async function sendLike(songId: string, liked: boolean) {
   if (reply.ok && typeof reply.liked === "boolean" && typeof reply.changedAt === "number") adoptLike(songId, reply.liked, reply.changedAt);
 }
 
+async function refreshPresence() {
+  const pairing = phoneLibrary.pairing;
+  const reply = await post({ type: "status" });
+  if (presence || status !== "connecting" || !pairing ||
+      pairing.token !== phoneLibrary.pairing?.token || pairing.url !== phoneLibrary.pairing?.url) return;
+  if (reply.ok && typeof reply.serverTime === "number") receive(JSON.stringify({ ...reply, type: "hello" }));
+}
+
 function connect() {
   window.clearTimeout(backgroundTimer);
   const pairing = phoneLibrary.pairing;
   if (!pairing || status === "unsupported") return;
   if (status === "off" || status === "offline") setStatus("connecting");
-  void LocaltifyNative.liveConnect({ url: pairing.url, token: pairing.token }).catch(() => setStatus("offline"));
+  // The native stream can survive a WebView reload, so its original hello may
+  // predate these listeners. Recover presence even when no new stream opens.
+  void LocaltifyNative.liveConnect({ url: pairing.url, token: pairing.token })
+    .then(() => { if (!presence) void refreshPresence(); })
+    .catch(() => setStatus("offline"));
 }
 
 function disconnect() {
@@ -117,11 +129,7 @@ export function installLiveConnection() {
     // "unpaired": the Mac forgot this phone. Batch sync reports that properly; live just stops.
     setStatus(next === "connected" ? (presence ? "connected" : "connecting") : next === "unpaired" ? "off" : next);
     // The stream's first event says who this phone is; ask as well, so a hello that went missing doesn't leave it waiting.
-    if (next === "connected") {
-      void post({ type: "status" }).then((reply) => {
-        if (reply.ok && !presence && reply.serverTime) receive(JSON.stringify({ ...reply, type: "hello" }));
-      });
-    }
+    if (next === "connected" && !presence) void refreshPresence();
   });
   window.addEventListener("localtifyremotemedia", (event) => {
     remotePlaying = Boolean((event as CustomEvent<{ playing?: boolean } | null>).detail?.playing);

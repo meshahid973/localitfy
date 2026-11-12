@@ -9,7 +9,7 @@ export type HomeCustomizePanelProps = {
   sectionOrder: unknown;
   hiddenSections: unknown;
   updateHomeLayout: (patch: HomeLayoutPatch) => unknown;
-  openCovers: () => unknown;
+  openCovers?: () => unknown;
   onClose: () => void;
 };
 
@@ -21,20 +21,30 @@ export default function HomeCustomizePanel({ sectionOrder, hiddenSections, updat
 
   useEffect(() => {
     panelRef.current?.querySelector<HTMLElement>("button:not(:disabled)")?.focus();
+    const isTopmost = () => Array.from(document.querySelectorAll('[role="dialog"], [role="alertdialog"]')).at(-1) === panelRef.current;
     const closeOnOutsidePointer = (event: PointerEvent) => {
       const target = event.target as Element | null;
       if (!panelRef.current?.contains(target) && !target?.closest(".homeCustomizeButton")) onClose();
     };
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
+      if (event.key !== "Escape" || event.defaultPrevented || !isTopmost()) return;
+      event.preventDefault();
+      document.querySelector<HTMLElement>(".homeCustomizeButton")?.focus();
+      onClose();
+    };
+    const closeOnBack = (event: Event) => {
+      if (event.defaultPrevented || !isTopmost()) return;
+      event.preventDefault();
       document.querySelector<HTMLElement>(".homeCustomizeButton")?.focus();
       onClose();
     };
     document.addEventListener("pointerdown", closeOnOutsidePointer);
     document.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("localtifyuiback", closeOnBack);
     return () => {
       document.removeEventListener("pointerdown", closeOnOutsidePointer);
       document.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("localtifyuiback", closeOnBack);
     };
   }, [onClose]);
 
@@ -90,10 +100,10 @@ export default function HomeCustomizePanel({ sectionOrder, hiddenSections, updat
         })}
       </ol>
 
-      <button className="homeCustomizeLink" type="button" onClick={() => { onClose(); void openCovers(); }}>
+      {openCovers ? <button className="homeCustomizeLink" type="button" onClick={() => { onClose(); void openCovers(); }}>
         <Images size={12} strokeWidth={2.2} aria-hidden="true" />
         Change song covers
-      </button>
+      </button> : null}
     </div>
   );
 }

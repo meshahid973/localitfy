@@ -4,5 +4,12 @@
   "webDir": "dist",
   "android": {
     "path": "android"
+  },
+  "plugins": {
+    "SystemBars": {
+      "style": "DARK",
+      "insetsHandling": "css",
+      "initialViewportFitValueHint": "cover"
+    }
   }
 }

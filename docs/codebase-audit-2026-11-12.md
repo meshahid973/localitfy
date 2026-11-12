@@ -69,19 +69,21 @@ requested. See the [focused PR review](reviews/phone-sync-pr-review-2026-11-12.m
 
 ## Validation and limits
 
-`npm run release:check` passed after integration and cleanup: 493 tests,
+`npm run release:check` passed after integration and Android follow-up: 507 tests,
 bridge and TypeScript checks, boundaries, CSS audits,
 production build, database recovery, performance benchmarks, asset dry run and
 chunk audit. `git diff --check origin/main` passed. The current advisory scan
 reports no unreachable renderer modules or unreferenced class-name candidates
-across 307 source files and 48 stylesheets.
+across 308 source files and 48 stylesheets.
 
 Android `assembleDebug lintDebug testDebugUnitTest` passed with JDK 21 and SDK 36.
 The native unit-test task includes template smoke tests; application behavior is
-covered by the Node sync suites and still requires device QA.
+covered by the Node sync suites and still requires real-device QA.
 
-This was a source and automated-check audit. Installed-app visual QA, real music
-libraries, cross-platform manual playback and update testing were not performed.
+The [Android UI follow-up](android-ui-audit-2026-11-12.md) records reproduced
+layout fixes, additional dead native code removal, targeted performance work
+and installed-APK emulator checks with synthetic data. Real music libraries,
+cross-platform manual playback and update testing were not performed.
 PR #133 still lists installed Windows QA as a release gate. The release PR
 remains unmerged; no release was tagged or published. Remote CI must validate
 the newly pushed head independently of these local results.

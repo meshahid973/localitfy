@@ -6,6 +6,7 @@ import { phoneLibrary } from "./library";
 import { installMediaSessionBridge } from "./mediaSession";
 import { isSyncing, onSyncProgress, setFeaturesChangedHandler, syncNow } from "./sync";
 import { installLiveConnection, onLiveEvent, restartLiveConnection } from "./live";
+import { installSystemBarTheme } from "./systemBars";
 import "./android.css";
 
 const AUTO_SYNC_AFTER_MS = 10 * 60 * 1000;
@@ -17,6 +18,7 @@ export async function installAndroidBridge() {
   window.localitfy = createAndroidBridge();
   installMediaSessionBridge(phoneLibrary.paths.files, phoneLibrary.paths.mediaPrefix);
   document.documentElement.classList.add("platformAndroid");
+  installSystemBarTheme();
   // The welcome tour and release notes describe the Mac app; the phone starts from Settings → Library → Sync.
   markOnboardingSeenForThisRelease();
   window.localStorage.setItem(WHATS_NEW_SEEN_KEY, APP_VERSION);

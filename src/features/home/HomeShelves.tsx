@@ -7,6 +7,7 @@ import type { LocalAlbumEntry } from "../albums/album.types";
 import { useHomeDailyMixes } from "./useHomeDailyMixes";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { albumTarget, mixTarget, useAppActions } from "../shell/appActions";
+import { isAndroidApp } from "../../app/platform";
 
 type SectionHeadProps = { id: string; title: string; action?: ReactNode };
 
@@ -137,6 +138,7 @@ export function HomeDailyMixRail({ songsById, openDailyMixes, openAnalysisSettin
   const mixes = result.mixes
     .map((mix) => ({ ...mix, songs: mix.songIds.flatMap((id) => { const song = songsById.get(id); return song && song.fileExists !== false ? [song] : []; }) }))
     .filter((mix) => mix.songs.length);
+  if (isAndroidApp() && !mixes.length) return null;
 
   return (
     <section className="homeSection homeReleasesSection homeMixesSection" aria-labelledby="home-daily-mixes-title">

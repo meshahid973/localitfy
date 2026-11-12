@@ -98,27 +98,29 @@ export class PhoneLibrary {
 
   /** Songs shaped like the Mac's bootstrap payload, pointing at local files. */
   songs(): Song[] {
-    return this.remoteSongs.map((remote) => {
-      const local = this.files[remote.id] || {};
-      const hasAudio = Boolean(local.audio);
-      const cover = local.cover && local.coverExt ? this.coverPath(remote.id, local.coverExt) : "";
-      const coverUrl = cover ? `${this.paths.mediaPrefix}${cover}?v=${local.cover}` : "";
-      const { file: _file, cover: _cover, ...fields } = remote;
-      return {
-        ...(fields as unknown as Song),
-        ...this.edits[remote.id],
-        filePath: hasAudio ? `${this.paths.files}/${this.audioPath(remote.id, local.audioExt || remote.file.ext)}` : "",
-        url: "",
-        fileExists: hasAudio,
-        coverPath: cover ? `${this.paths.files}/${cover}` : "",
-        coverUrl,
-        coverThumbUrl: coverUrl,
-        coverThumbnailUrl: coverUrl,
-        thumbnailUrl: coverUrl,
-        coverFullUrl: coverUrl,
-        fileSizeBytes: remote.file.size
-      } as Song;
-    });
+    return this.remoteSongs.map((remote) => this.toSong(remote));
+  }
+
+  private toSong(remote: RemoteSong): Song {
+    const local = this.files[remote.id] || {};
+    const hasAudio = Boolean(local.audio);
+    const cover = local.cover && local.coverExt ? this.coverPath(remote.id, local.coverExt) : "";
+    const coverUrl = cover ? `${this.paths.mediaPrefix}${cover}?v=${local.cover}` : "";
+    const { file: _file, cover: _cover, ...fields } = remote;
+    return {
+      ...(fields as unknown as Song),
+      ...this.edits[remote.id],
+      filePath: hasAudio ? `${this.paths.files}/${this.audioPath(remote.id, local.audioExt || remote.file.ext)}` : "",
+      url: "",
+      fileExists: hasAudio,
+      coverPath: cover ? `${this.paths.files}/${cover}` : "",
+      coverUrl,
+      coverThumbUrl: coverUrl,
+      coverThumbnailUrl: coverUrl,
+      thumbnailUrl: coverUrl,
+      coverFullUrl: coverUrl,
+      fileSizeBytes: remote.file.size
+    } as Song;
   }
 
   /** Current phone values for merging: Mac fields with phone edits on top. */
@@ -133,7 +135,7 @@ export class PhoneLibrary {
     if (typeof patch.liked === "boolean") this.likeClock[id] = Date.now() + this.clockOffset;
     this.revision += 1;
     void this.save(typeof patch.liked === "boolean" ? ["edits", "likeClock"] : ["edits"]);
-    return this.songs().find((song) => song.id === id) || null;
+    return this.toSong(remote);
   }
 
   /**

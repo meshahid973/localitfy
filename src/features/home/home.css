@@ -470,11 +470,10 @@
 .homeShelfNotice { display:flex; align-items:center; gap:12px; flex-wrap:wrap; color:var(--lt-muted); font-size:9px; }
 
 .homeEmptyState { min-height:150px; display:flex; align-items:center; justify-content:center; gap:14px; color:var(--lt-muted); }
-.homeEmptyMascot { width:72px; height:72px; flex:0 0 auto; }
+.homeEmptyState .homeEmptyMascot { width:72px; height:72px; flex:0 0 auto; }
 .homeEmptyState > div { display:grid; gap:4px; }
 .homeEmptyState strong { color:var(--lt-text); font-size:11px; }
 .homeEmptyState span { color:var(--lt-muted); font-size:9px; }
-.homeNowPlayingLabel { display:none; }
 
 @media (max-width: 1500px) {
   .homeListenGrid { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -530,3 +529,86 @@
   contain-intrinsic-size: 120px 150px;
   contain: layout paint style;
 }
+
+/* Phones use a compact starting point; the persistent mini player owns playback. */
+html.platformAndroid .homePage {
+  min-height: 0;
+  padding: 8px 0 12px;
+  gap: 24px;
+}
+
+html.platformAndroid .homeTopBar {
+  min-height: 44px;
+}
+
+html.platformAndroid .homeCustomizeButton {
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+html.platformAndroid .homeJumpBack {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--lt-border);
+  border-radius: 20px;
+  background: var(--lt-surface);
+}
+
+html.platformAndroid .homeJumpBack:has(.homeJumpArtwork) {
+  grid-template-columns: minmax(0, 1fr) 76px;
+}
+
+html.platformAndroid .homeJumpCopy {
+  width: 100%;
+  padding: 0;
+}
+
+html.platformAndroid .homeJumpEyebrow {
+  margin-bottom: 10px;
+  font-size: 10px;
+}
+
+html.platformAndroid .homeJumpCopy h2 {
+  font-size: 24px;
+  line-height: 1.12;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+html.platformAndroid .homeJumpCopy > p {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+html.platformAndroid .homeJumpArtwork {
+  position: static;
+  width: 76px;
+  opacity: 1;
+  transform: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+html.platformAndroid .homeJumpCover { filter: none; }
+html.platformAndroid .homeJumpActions { margin-top: 16px; flex-wrap: wrap; }
+html.platformAndroid .homeStartButton { min-height: 44px; padding-inline: 16px; font-size: 13px; }
+html.platformAndroid .homeRoundButton { width: 44px; height: 44px; }
+html.platformAndroid .homeListenGrid { gap: 8px; contain-intrinsic-size: 1px 280px; }
+html.platformAndroid .homeListenRow { min-height: 60px; }
+html.platformAndroid .homeListenCopy strong { font-size: 14px; }
+html.platformAndroid .homeListenCopy small { font-size: 12px; }
+html.platformAndroid .homeShelfNotice { font-size: 13px; }
+
+html.platformAndroid .homeCustomizePanel {
+  width: min(336px, calc(100vw - 32px));
+  max-height: calc(100dvh - 220px);
+}
+
+html.platformAndroid .homeCustomizeRow { grid-template-columns: minmax(0, 1fr) repeat(3, 40px); min-height: 44px; }
+html.platformAndroid .homeCustomizeRow button { width: 40px; height: 44px; }
+html.platformAndroid .homeCustomizeRow > span { font-size: 13px; }

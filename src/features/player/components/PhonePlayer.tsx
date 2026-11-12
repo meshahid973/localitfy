@@ -10,6 +10,7 @@ import { LikeHeartAnimationV443 } from "../../../shared/ui/LikeHeartAnimation";
 import type { LyricsViewProps } from "../../lyrics/LyricsView";
 import type { PlayerBarProps } from "./PlayerBar";
 import { DevicePicker } from "../../connect/DevicePicker";
+import { useModalFocus } from "../../../shared/hooks/useModalFocus";
 import "./phone-player.css";
 
 const LyricsView = lazy(() => import("../../lyrics/LyricsView"));
@@ -32,11 +33,27 @@ export default function PhonePlayer(props: PhonePlayerProps) {
     toggleQueuePanel, toggleRepeat, lyrics, connect
   } = props;
   const [expanded, setExpanded] = useState(false);
+  const dialogRef = useModalFocus(expanded);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const artSlotRef = useRef<HTMLDivElement | null>(null);
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
-  // How far the cover follows a sideways swipe, before it lets go and changes song.
-  const [dragX, setDragX] = useState(0);
+  const dragOffsetRef = useRef(0);
+  const dragFrameRef = useRef<number | null>(null);
   const duration = currentDuration || currentSong?.duration || 0;
+
+  const resetDrag = () => {
+    if (dragFrameRef.current !== null) cancelAnimationFrame(dragFrameRef.current);
+    dragFrameRef.current = null;
+    artSlotRef.current?.classList.remove("isDragging");
+    artSlotRef.current?.style.removeProperty("transform");
+    artSlotRef.current?.style.removeProperty("opacity");
+  };
+
+  useEffect(() => resetDrag, [expanded]);
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("localtifyplayersheet", { detail: expanded }));
+    return () => { if (expanded) window.dispatchEvent(new CustomEvent("localtifyplayersheet", { detail: false })); };
+  }, [expanded]);
 
   // Android back: lyrics first, then the full-screen player.
   useEffect(() => {
@@ -69,6 +86,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
 
   // Down closes the player; on the cover, left plays the next song and right the previous one.
   const swipeStart = (event: ReactTouchEvent) => {
+    resetDrag();
     const touch = event.touches[0];
     swipeStartRef.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
   };
@@ -77,13 +95,24 @@ export default function PhonePlayer(props: PhonePlayerProps) {
     const touch = event.touches[0];
     if (!start || !touch) return;
     const dx = touch.clientX - start.x;
-    setDragX(Math.abs(dx) > Math.abs(touch.clientY - start.y) ? dx : 0);
+    dragOffsetRef.current = Math.abs(dx) > Math.abs(touch.clientY - start.y) ? dx : 0;
+    if (dragFrameRef.current !== null) return;
+    // Paint at most once per frame without re-rendering the player and lyrics.
+    dragFrameRef.current = requestAnimationFrame(() => {
+      dragFrameRef.current = null;
+      const slot = artSlotRef.current;
+      if (!slot) return;
+      const offset = dragOffsetRef.current;
+      slot.classList.toggle("isDragging", offset !== 0);
+      slot.style.transform = `translateX(${offset}px) rotate(${offset / 40}deg)`;
+      slot.style.opacity = String(1 - Math.min(Math.abs(offset) / 600, 0.4));
+    });
   };
   const swipeEnd = (event: ReactTouchEvent) => {
     const start = swipeStartRef.current;
     const touch = event.changedTouches[0];
     swipeStartRef.current = null;
-    setDragX(0);
+    resetDrag();
     if (!start || !touch) return;
     const dx = touch.clientX - start.x;
     const dy = touch.clientY - start.y;
@@ -99,7 +128,12 @@ export default function PhonePlayer(props: PhonePlayerProps) {
   return (
     <>
       <div className="phoneMiniPlayer" style={ambientStyle} onClick={() => setExpanded(true)} role="button" tabIndex={0} aria-label="open player"
-        onKeyDown={(event) => { if (event.key === "Enter") setExpanded(true); }}>
+        onKeyDown={(event) => {
+          if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            setExpanded(true);
+          }
+        }}>
         <Cover song={currentSong} className="phoneMiniArt" priority="high" />
         <span className="phoneMiniMeta">
           <strong>{prettyTitle(currentSong.title, 8)}</strong>
@@ -116,7 +150,13 @@ export default function PhonePlayer(props: PhonePlayerProps) {
       </div>
 
       {expanded ? (
-        <div className="phonePlayerSheet" role="dialog" aria-label="now playing" style={ambientStyle}>
+        <div ref={dialogRef} tabIndex={-1} className="phonePlayerSheet" role="dialog" aria-modal="true" aria-label="now playing" style={ambientStyle}
+          onKeyDown={(event) => {
+            if (event.key !== "Escape" || event.defaultPrevented) return;
+            event.preventDefault();
+            if (lyrics.open) lyrics.onClose();
+            else setExpanded(false);
+          }}>
           <div className="phonePlayerBackdrop" aria-hidden="true"><Cover song={currentSong} className="phonePlayerBackdropArt" /></div>
 
           <header className="phonePlayerTop" onTouchStart={swipeStart} onTouchEnd={swipeEnd}>
@@ -133,12 +173,12 @@ export default function PhonePlayer(props: PhonePlayerProps) {
           </header>
 
           <div className="phonePlayerStage" ref={stageRef} onTouchStart={lyrics.open ? undefined : swipeStart}
-            onTouchMove={lyrics.open ? undefined : swipeMove} onTouchEnd={lyrics.open ? undefined : swipeEnd}>
+            onTouchMove={lyrics.open ? undefined : swipeMove} onTouchEnd={lyrics.open ? undefined : swipeEnd}
+            onTouchCancel={() => { swipeStartRef.current = null; resetDrag(); }}>
             {lyrics.open ? (
               <Suspense fallback={null}><LyricsView {...lyrics} anchorRef={stageRef} /></Suspense>
             ) : (
-              <div className={`phonePlayerArtSlot ${dragX ? "isDragging" : ""}`}
-                style={{ transform: `translateX(${dragX}px) rotate(${dragX / 40}deg)`, opacity: 1 - Math.min(Math.abs(dragX) / 600, 0.4) }}>
+              <div ref={artSlotRef} className="phonePlayerArtSlot">
                 <Cover song={currentSong} className="phonePlayerArt" priority="high" />
               </div>
             )}

@@ -22,9 +22,7 @@ export interface LocaltifyNativePlugin {
   getPaths(): Promise<{ files: string; mediaPrefix: string; deviceName: string }>;
   request(options: { url: string; method?: string; headers?: Record<string, string>; body?: string; timeoutMs?: number }): Promise<{ status: number; body: string }>;
   downloadFile(options: { id: string; url: string; path: string; headers?: Record<string, string> }): Promise<{ bytes: number }>;
-  cancelDownloads(): Promise<void>;
   deleteFile(options: { path: string }): Promise<{ deleted: boolean }>;
-  listFiles(options: { path: string }): Promise<{ files: Array<{ name: string; size: number }>; freeBytes: number }>;
   setSyncActive(options: { active: boolean }): Promise<void>;
   moveToBackground(): Promise<void>;
   updateMedia(options: MediaUpdate): Promise<void>;

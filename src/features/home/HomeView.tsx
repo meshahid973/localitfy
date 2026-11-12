@@ -1,6 +1,7 @@
 import "./home.css";
 import { Fragment, lazy, Suspense, useCallback, useMemo, useState, type CSSProperties, type ReactNode } from "react";
-import { Maximize2, Minimize2, Play, Shuffle, SlidersHorizontal } from "lucide-react";
+import { Maximize2, Minimize2, Play, Shuffle, SlidersHorizontal, Smartphone } from "lucide-react";
+import { isAndroidApp } from "../../app/platform";
 import { Cover } from "../covers/Cover";
 import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
@@ -20,7 +21,6 @@ export type HomeViewProps = {
   albums: readonly LocalAlbumEntry[];
   ambientStyle: CSSProperties;
   currentId: string | null;
-  currentNowPlayingLabel: string;
   currentSong: Song | null;
   heroDisplayArtist: string;
   heroDisplayTitle: string;
@@ -52,7 +52,6 @@ export default function HomeView(props: HomeViewProps) {
     albums,
     ambientStyle,
     currentId,
-    currentNowPlayingLabel,
     currentSong,
     heroDisplayArtist,
     heroDisplayTitle,
@@ -79,10 +78,12 @@ export default function HomeView(props: HomeViewProps) {
   } = props;
 
   const actions = useAppActions();
+  const android = isAndroidApp();
+  const needsPhoneSync = android && songs.length === 0;
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const closeCustomize = useCallback(() => setCustomizeOpen(false), []);
 
-  const listenNowSongs = homeListenNowSongs.slice(0, 8);
+  const listenNowSongs = homeListenNowSongs.slice(0, android ? 4 : 8);
   const newReleaseSongs = (homeFreshShelfSongs.length ? homeFreshShelfSongs : homeListenNowSongs).slice(0, 10);
   const visibleSections = visibleHomeSections(settings.homeSectionOrder, settings.homeHiddenSections);
   const showing = (id: HomeSectionId) => visibleSections.includes(id);
@@ -101,9 +102,15 @@ export default function HomeView(props: HomeViewProps) {
       }
       if (picked.size === 10) break;
     }
+    const songsByArtist = new Map([...picked.keys()].map((key) => [key, [] as Song[]]));
+    for (const song of songs) {
+      for (const key of new Set(splitArtistCredits(song.artist).map((credit) => credit.toLocaleLowerCase()))) {
+        songsByArtist.get(key)?.push(song);
+      }
+    }
     return [...picked.entries()].map(([key, { name, song }]) => ({
       key, song,
-      target: artistTarget(name, songs.filter((item) => splitArtistCredits(item.artist).some((credit) => credit.toLocaleLowerCase() === key)))
+      target: artistTarget(name, songsByArtist.get(key) || [])
     }));
   }, [homeListenNowSongs, homeFreshShelfSongs, showMostListened, songs]);
 
@@ -116,11 +123,6 @@ export default function HomeView(props: HomeViewProps) {
   const rediscoverSongs = useMemo(() => (showRediscover ? pickRediscover(songs, new Date()) : []), [showRediscover, songs]);
   const notPlayedSongs = useMemo(() => (showUnplayed ? pickNotPlayedYet(songs, new Date()) : []), [showUnplayed, songs]);
   const songsById = useMemo(() => (showMixes ? new Map(songs.map((song) => [song.id, song])) : new Map<string, Song>()), [showMixes, songs]);
-
-  const homeStyle = {
-    ...ambientStyle,
-    "--home-motion-seed": nowPlayingTransitionKey
-  } as CSSProperties;
 
   const startListening = () => {
     if (currentSong?.id) {
@@ -138,23 +140,23 @@ export default function HomeView(props: HomeViewProps) {
       >
         <div className={`homeJumpCopy nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
           <span className="homeJumpEyebrow">↻ JUMP BACK IN</span>
-          <h2 className={heroTitleClass} title={currentSong?.title || "drop in your music"}>{heroDisplayTitle}</h2>
-          <p>{heroDisplayArtist}</p>
+          <h2 className={heroTitleClass} title={currentSong?.title || (needsPhoneSync ? "Sync your music" : "drop in your music")}>{needsPhoneSync ? "Sync your music" : heroDisplayTitle}</h2>
+          <p>{needsPhoneSync ? "Pair with your computer in Settings → Library." : heroDisplayArtist}</p>
 
           {playerError ? <div className="homeInlineNotice error">{playerError}</div> : null}
           {isThreeAm && settings.volume > 0.8 ? <div className="homeInlineNotice">volume is above 80% · late night ears deserve mercy.</div> : null}
 
           <div className="homeJumpActions">
-            <button className="homeStartButton" type="button" onClick={startListening} disabled={!currentSong && playableSongCount === 0}>
-              <Play size={12} fill="currentColor" strokeWidth={2.3} aria-hidden="true" />
-              <span>Start Listening</span>
+            <button className="homeStartButton" type="button" onClick={needsPhoneSync ? () => actions.nav.go("settings", "nav") : startListening} disabled={!needsPhoneSync && !currentSong && playableSongCount === 0}>
+              {needsPhoneSync ? <Smartphone size={12} aria-hidden="true" /> : <Play size={12} fill="currentColor" strokeWidth={2.3} aria-hidden="true" />}
+              <span>{needsPhoneSync ? "Set up phone sync" : android ? (currentSong ? "Play" : "Shuffle music") : "Start Listening"}</span>
             </button>
-            <button className="homeRoundButton" type="button" onClick={shuffleLibrarySongsAction} disabled={playableSongCount < 2} aria-label="shuffle library" title="Shuffle library">
+            {!needsPhoneSync ? <button className="homeRoundButton" type="button" onClick={shuffleLibrarySongsAction} disabled={playableSongCount < 2} aria-label="shuffle library" title="Shuffle library">
               <Shuffle size={14} strokeWidth={2.2} aria-hidden="true" />
-            </button>
-            <button className="homeRoundButton" type="button" onClick={toggleHeroExpanded} aria-label={settings.heroExpanded ? "use compact hero" : "expand hero"} title={settings.heroExpanded ? "Use compact hero" : "Expand hero"}>
+            </button> : null}
+            {!android ? <button className="homeRoundButton" type="button" onClick={toggleHeroExpanded} aria-label={settings.heroExpanded ? "use compact hero" : "expand hero"} title={settings.heroExpanded ? "Use compact hero" : "Expand hero"}>
               {settings.heroExpanded ? <Minimize2 size={14} strokeWidth={2.1} aria-hidden="true" /> : <Maximize2 size={14} strokeWidth={2.1} aria-hidden="true" />}
-            </button>
+            </button> : null}
           </div>
         </div>
 
@@ -194,7 +196,7 @@ export default function HomeView(props: HomeViewProps) {
         ) : (
           <div className="homeEmptyState">
             <MascotStateArt state="empty" className="homeEmptyMascot" />
-            <div><strong>your home is quiet</strong><span>import music and Localtify will build this page for you.</span></div>
+            <div><strong>your home is quiet</strong><span>{needsPhoneSync ? "Sync your computer's library to listen here, even offline." : "import music and Localtify will build this page for you."}</span></div>
           </div>
         )}
       </section>
@@ -221,7 +223,7 @@ export default function HomeView(props: HomeViewProps) {
       </section>
     ) : null,
     dailyMixes: <HomeDailyMixRail songsById={songsById} openDailyMixes={openDailyMixes} openAnalysisSettings={openAnalysisSettings} />,
-    recentlyPlayed: <HomeSongRail id="recently-played" title="Recently played" songs={recentlyPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="Songs you play will show up here." findSimilar={() => props.openSimilarSongs({ kind: "recent" })} />,
+    recentlyPlayed: <HomeSongRail id="recently-played" title="Recently played" songs={recentlyPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText={android ? undefined : "Songs you play will show up here."} findSimilar={() => props.openSimilarSongs({ kind: "recent" })} />,
     newAlbums: <HomeAlbumRail albums={newAlbums} />,
     newReleases: <HomeSongRail id="releases" title="New Releases" songs={newReleaseSongs} currentId={currentId} selectSong={selectSong} />,
     likedSongs: <HomeSongRail id="liked" title="Liked songs" songs={likedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="Tap the heart on a song to keep it here." />,
@@ -230,13 +232,14 @@ export default function HomeView(props: HomeViewProps) {
   };
 
   return (
-    <div className="homePage" style={homeStyle}>
+    <div className="homePage" style={ambientStyle}>
       <header className="homeTopBar">
         <h1>Home</h1>
         <button
           className={`homeCustomizeButton ${customizeOpen ? "active" : ""}`}
           type="button"
           onClick={() => setCustomizeOpen((open) => !open)}
+          aria-label="Customize Home"
           aria-expanded={customizeOpen}
           aria-controls="home-customize-panel"
         >
@@ -249,20 +252,19 @@ export default function HomeView(props: HomeViewProps) {
             sectionOrder={settings.homeSectionOrder}
             hiddenSections={settings.homeHiddenSections}
             updateHomeLayout={updateHomeLayout}
-            openCovers={openCoversViewWithCurrentSong}
+            openCovers={android ? undefined : openCoversViewWithCurrentSong}
             onClose={closeCustomize}
           />
           </Suspense>
         ) : null}
       </header>
 
-      {visibleSections.length ? visibleSections.map((id) => <Fragment key={id}>{sections[id]}</Fragment>) : (
+      {needsPhoneSync ? sections.jumpBack : visibleSections.length ? visibleSections.map((id) => <Fragment key={id}>{sections[id]}</Fragment>) : (
         <div className="homeEmptyState homeAllHidden">
           <div><strong>every section is hidden</strong><span>use Customize Home to bring some back.</span></div>
         </div>
       )}
 
-      <span className="homeNowPlayingLabel" aria-hidden="true">{currentNowPlayingLabel}</span>
     </div>
   );
 }

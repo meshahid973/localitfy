@@ -8399,7 +8399,6 @@ function MainModeApp() {
       albums: albumsController.localAlbums,
       ambientStyle,
       currentId,
-      currentNowPlayingLabel,
       currentSong: visualCurrentSong,
       heroDisplayArtist,
       heroDisplayTitle,
