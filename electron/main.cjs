@@ -2542,12 +2542,12 @@ app.whenReady().then(async () => {
   registerAnalysisIpc(ipcRouter, { app, powerMonitor, repositories: databaseRepositories, ffmpegPath: ffmpegStatic?.replace("app.asar", "app.asar.unpacked") });
   require("./ipc/lyrics.cjs").registerLyricsIpc(ipcRouter, app, databaseRepositories);
   require("./ipc/tagging.cjs").registerTaggingIpc(ipcRouter, { app, songs: databaseRepositories.songs, getSettings, readLocalAudioMetadata, listSongsShaped, safeMediaUrl, clearFileInfoCache, getWindow: () => mainWindow });
+  require("./ipc/sync.cjs").registerSyncIpc(ipcRouter, { app, repositories: databaseRepositories, coverPath: (s) => getRuntimeCoverPath(s), listSongsShaped, shapeSong, getWindow: () => mainWindow, observePlay: (e) => scrobbler?.observe(e) });
   ipcRouter.handle("listening:record", (_event, payload) => {
     const recorded = databaseRepositories.listening.record(payload);
     if (recorded) { try { scrobbler?.observe(payload); } catch (error) { console.log("[localtify scrobble observation]", error?.message || error); } }
     return recorded;
   });
-  ipcRouter.handle("song:patch", async (_event, id, patch) => { const updated = patchSong(id, patch); return updated ? shapeSong(updated) : null; });
   ipcRouter.handle("song:random-cover", async (_event, id) => {
     const covers = getPixelArtFiles();
     const song = getSongs().find((item) => item.id === id);

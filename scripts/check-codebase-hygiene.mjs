@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ignoredDirs = new Set([".git", "node_modules", "dist", "release", ".vite", "target"]);
+// Android build output and the web bundle Capacitor copies into the app; all gitignored.
+const ignoredPaths = new Set(["android/.gradle", "android/build", "android/app/build", "android/capacitor-cordova-android-plugins", "android/app/src/main/assets/public"]);
 const forbiddenFiles = [
   "src/localtifyConstants.ts",
   "src/localtifyUtils.ts",
@@ -26,7 +28,11 @@ const forbiddenFiles = [
 ];
 
 const allowedExactDuplicateGroups = [
-  new Set(["build/icon.png", "src/assets/logo.png"])
+  new Set(["build/icon.png", "src/assets/logo.png"]),
+  // Android expects the same adaptive icon under both launcher names, and same-size legacy icons for both.
+  new Set(["android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml", "android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"]),
+  ...["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"].map((density) =>
+    new Set([`android/app/src/main/res/mipmap-${density}/ic_launcher.png`, `android/app/src/main/res/mipmap-${density}/ic_launcher_round.png`]))
 ];
 
 const textExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".css", ".md", ".json", ".html"]);
@@ -46,6 +52,7 @@ function walk(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     if (entry.isDirectory() && ignoredDirs.has(entry.name)) continue;
     const absolute = path.join(directory, entry.name);
+    if (entry.isDirectory() && ignoredPaths.has(repoPath(absolute))) continue;
     if (entry.isDirectory()) out.push(...walk(absolute));
     else if (entry.isFile()) out.push(absolute);
   }

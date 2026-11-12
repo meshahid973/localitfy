@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Repeat one: the repeat-one glyph cut out of a filled circle (Material icon shapes, Apache 2.0). Shown in the system media controls. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M12,1A11,11 0,1 1,12,23A11,11 0,1 1,12,1zM 8.3,8.3 h 7.4 v 2.22 l 2.96,-2.96 l -2.96,-2.96 v 2.22 H 6.82 v 4.44 h 1.48 V 8.3 z M 15.7,15.7 H 8.3 v -2.22 l -2.96,2.96 l 2.96,2.96 v -2.22 h 8.88 v -4.44 h -1.48 V 15.7 z M 12.74,14.22 V 9.78 h -0.74 l -1.48,0.74 v 0.74 h 1.11 v 2.96 H 12.74 z" />
+</vector>

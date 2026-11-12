@@ -58,11 +58,7 @@
 .playlistManageActions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .playlistRenameForm { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .playlistRenameForm input { min-width: 160px; }
-.playlistTrackList.virtualPlaylistTrackList {
-  position: relative; width: 100%; min-width: 0; height: min(58vh,650px); min-height: 300px;
-  overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
-  scrollbar-width: thin; scrollbar-color: var(--lt-surface-raised) transparent;
-}
+.playlistTrackList.virtualPlaylistTrackList { position: relative; width: 100%; min-width: 0; }
 .virtualPlaylistTrackCanvas { position: relative; min-width: 0; width: 100%; }
 .playlistTrackRow.virtualPlaylistTrackRow {
   position: absolute; top: 0; left: 0; width: 100%; min-width: 0; min-height: 70px;

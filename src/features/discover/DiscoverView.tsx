@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Compass, Disc3, ExternalLink, Plus, RefreshCw, Settings2, UserX } from "lucide-react";
 import { PageHeader } from "../../shared/ui/PageHeader";
+import { isAndroidApp, computerName } from "../../app/platform";
 import { splitArtistCredits } from "../artists/artistCredits";
 import type { NotForMeKind } from "../analysis/notForMe";
 import type { SpotifyTrack } from "../downloads/download.types";
@@ -30,6 +31,7 @@ const listNames = (names: string[]) => names.length < 2 ? names.join("") : `${na
 const openLink = (url: string) => { if (url) void window.localitfy.openExternal?.(url); };
 
 export default function DiscoverView({ settings, updateSetting, sendToDownloads, notForMe }: DiscoverViewProps) {
+  const phone = isAndroidApp();
   const [result, setResult] = useState<DiscoverResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -82,7 +84,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   }
 
   const needsSetup = !result || result.status === "off" || result.status === "needs-key";
-  const setup = (
+  const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
       <p>Discover suggests artists and songs you don’t have yet, based on what you play and like. It asks <strong>Last.fm</strong>, sending only the names of your most-played artists and songs. Answers are cached on this device for a week.</p>
       <label className="discoverKey">
@@ -109,11 +111,12 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     return `Based on ${shown.join(", ")}${more > 0 ? ` and ${more} more artists you play` : ""}.`;
   }, [ready]);
 
-  const albumButton = (track: DiscoverTrack) => settings.musicbrainzTagging
+  const albumButton = (track: DiscoverTrack) => !phone && settings.musicbrainzTagging
     ? <button type="button" className="discoverPick" aria-label={`Get the album ${track.title} is from`} title="Get the whole album" onClick={() => setAlbumOf(track)}><Disc3 size={14} /></button>
     : null;
 
   const pickButton = (track: DiscoverTrack) => {
+    if (phone) return null;
     const on = picked.has(trackId(track));
     return <button type="button" className={`discoverPick ${on ? "active" : ""}`} aria-pressed={on} aria-label={`${on ? "Unpick" : "Pick"} ${track.title}`} onClick={() => togglePick(track)}>
       {on ? <Check size={14} /> : <Plus size={14} />}
@@ -124,11 +127,12 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     <PageHeader eyebrow="outside your library" title="Discover" description={ready ? seedsLine : "New artists and songs, picked from what you already play."}>
       {!needsSetup ? <>
         <button type="button" className="softButton" disabled={loading} onClick={() => void load(true)}><RefreshCw size={15} /> {loading ? "Finding music…" : "Refresh"}</button>
-        <button type="button" className="softButton" aria-expanded={showSettings} onClick={() => setShowSettings((open) => !open)}><Settings2 size={15} /> Settings</button>
+        {phone ? null : <button type="button" className="softButton" aria-expanded={showSettings} onClick={() => setShowSettings((open) => !open)}><Settings2 size={15} /> Settings</button>}
       </> : null}
     </PageHeader>
 
     {needsSetup || showSettings ? setup : null}
+    {phone && !needsSetup ? <p className="discoverHint">Suggestions come from your paired {computerName()}. Use Discover there to download songs or change recommendations.</p> : null}
     {loading && !ready ? <p className="discoverNotice" role="status">Asking Last.fm about the artists you play… the first time takes a few seconds.</p> : null}
     {result?.status === "error" ? <p className="discoverNotice" role="alert">{result.error} <button type="button" className="softButton" onClick={() => void load(true)}>Retry</button></p> : null}
     {result?.status === "no-taste" ? <p className="discoverNotice">Play or like a few songs first. Discover learns from what you listen to.</p> : null}
@@ -139,7 +143,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         {ready.artists.map((artist) => <article key={artist.name} className="discoverArtist">
           <header>
             <button type="button" className="discoverName" onClick={() => openLink(artist.url)} title="Open on Last.fm">{artist.name}</button>
-            {notForMe ? <button type="button" className="discoverPick" aria-label={`Not for me: ${artist.name}`} title="Not for me"
+            {!phone && notForMe ? <button type="button" className="discoverPick" aria-label={`Not for me: ${artist.name}`} title="Not for me"
               onClick={() => dismissArtist(artist.name)}><UserX size={14} /></button> : null}
           </header>
           <p className="discoverBecause">because you play {listNames(artist.because)}{artist.seedCount > artist.because.length ? ` and ${artist.seedCount - artist.because.length} more` : ""}</p>

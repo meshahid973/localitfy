@@ -1,4 +1,5 @@
 import "./playlists.css";
+import { isAndroidApp } from "../../app/platform";
 import DailyMixesShelf, { type DailyMixesShelfProps } from "../analysis/DailyMixesShelf";
 import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Check, Copy, Pencil, Plus, Radio, SlidersHorizontal, Sparkles, Trash2, WandSparkles, X } from "lucide-react";
@@ -313,7 +314,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
                   }}>
                     create playlist
                   </button>
-                ) : (
+                ) : isAndroidApp() ? null : (
                   <button className="mainAction" type="button" onClick={importSongs}>import songs</button>
                 )}
               />

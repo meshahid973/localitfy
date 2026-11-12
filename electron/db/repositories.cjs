@@ -6,6 +6,11 @@ function requireFunction(source, name) {
 
 function createDatabaseRepositories(databaseModule) {
   return Object.freeze({
+    sync: Object.freeze({
+      applyBatch: requireFunction(databaseModule, "applyPhoneSyncBatch"),
+      likeClock: requireFunction(databaseModule, "readLikeClock"),
+      setLikeClock: requireFunction(databaseModule, "writeLikeClock")
+    }),
     songs: Object.freeze({
       list: requireFunction(databaseModule, "getSongs"),
       get: requireFunction(databaseModule, "getSong"),

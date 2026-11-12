@@ -1,0 +1,89 @@
+/* "Play on" device picker: in the player bar's right tools, and as a chip in the phone player. */
+.connectPicker{
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.playerBar .connectButton.isRemote,
+.playerBar .connectPlayingOn{
+  color: rgb(var(--accent-rgb));
+}
+
+.connectButton.isOffline{
+  opacity: 0.55;
+}
+
+.connectMenu{
+  position: fixed;
+  z-index: 9001;
+  width: 260px;
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border-radius: 16px;
+  color: var(--text);
+  background: linear-gradient(180deg, rgba(20, 20, 24, 0.97), rgba(6, 6, 10, 0.96));
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(22px) saturate(130%);
+}
+
+.connectMenu-chip{
+  transform: translateX(-50%);
+  width: min(300px, calc(100vw - 32px));
+}
+
+.connectMenuTitle{
+  padding: 2px 8px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.connectMenuItem{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 10px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.connectMenuItem:hover,
+.connectMenuItem:focus-visible{
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.connectMenuItem span{
+  display: grid;
+  min-width: 0;
+}
+
+.connectMenuItem strong{
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.connectMenuItem small{
+  font-size: 12px;
+  color: rgb(var(--accent-rgb));
+}
+
+.connectMenuItem.isCurrent{
+  color: rgb(var(--accent-rgb));
+}
+
+.connectMenuStatus{
+  margin: 6px 8px 2px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.6);
+}

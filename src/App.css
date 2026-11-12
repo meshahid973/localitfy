@@ -3321,24 +3321,13 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .virtualSongViewport{
   position: relative !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain !important;
-  contain: layout paint style !important;
-
-  scrollbar-gutter: stable both-edges;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible !important;
+  contain: layout style !important;
 }
 
 .songList.virtualSongViewport{
   display: block !important;
-  height: clamp(320px, calc(100vh - 380px), 680px);
-  min-height: 260px;
   padding: 2px 8px 14px 2px !important;
-}
-
-.songList.simpleList.virtualSongViewport{
-  height: clamp(260px, calc(100vh - 430px), 560px);
 }
 
 

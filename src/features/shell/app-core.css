@@ -494,10 +494,7 @@ input[type="range"]{
 }
 
 .fullList{
-  max-height: calc(100vh - 190px);
-  overflow: auto;
   padding-right: 4px;
-  padding-bottom: 130px;
 }
 
 

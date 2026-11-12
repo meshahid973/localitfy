@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shuffle on: the shuffle glyph cut out of a filled circle (Material icon shapes, Apache 2.0). Shown in the system media controls. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M12,1A11,11 0,1 1,12,23A11,11 0,1 1,12,1zM 10.957,9.906 L 7.123,6.08 L 6.08,7.123 l 3.826,3.826 L 10.957,9.906 z M 13.85,6.08 l 1.51,1.51 L 6.08,16.877 L 7.123,17.92 L 16.41,8.64 L 17.92,10.15 V 6.08 H 13.85 z M 14.094,13.043 l -1.043,1.043 l 2.316,2.316 L 13.85,17.92 H 17.92 v -4.07 l -1.51,1.51 L 14.094,13.043 z" />
+</vector>

@@ -68,7 +68,7 @@
 .downloadsLayoutV031 .spotifyTrackListHead,.downloadsLayoutV031 .downloadResultsHeadV502 { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
 .downloadsLayoutV031 .spotifyTrackListHead strong,.downloadsLayoutV031 .downloadResultsHeadV502 strong { font-size: 15px; }
 .downloadsLayoutV031 .spotifySelectActions,.downloadsLayoutV031 .downloadResultsHeadV502 > div { display: flex; gap: 8px; flex-wrap: wrap; }
-.downloadsLayoutV031 .spotifyTrackItems,.downloadsLayoutV031 .downloadQueueList { min-width: 0; max-height: 490px; overflow-y: auto; display: grid; align-content: start; gap: 8px; scrollbar-width: thin; }
+.downloadsLayoutV031 .spotifyTrackItems,.downloadsLayoutV031 .downloadQueueList { min-width: 0; display: grid; align-content: start; gap: 8px; }
 .downloadsLayoutV031 .spotifyTrackItem {
   min-width: 0; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto;
   align-items: center; gap: 8px; padding: 10px 12px; text-align: left;
