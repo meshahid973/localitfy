@@ -246,10 +246,6 @@
   stroke: #ffffff !important;
 }
 
-.playerBar .circleButton.main .playIcon{
-  transform: translateX(1px) !important;
-}
-
 .playButtonBurst{
   animation: localtifyPlayButtonBurst 360ms cubic-bezier(0.18, 0.9, 0.2, 1.2) both !important;
 }
@@ -866,11 +862,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   stroke: #ffffff !important;
   fill: #ffffff !important;
   fill-opacity: 1 !important;
-}
-
-.playerBar .circleButton.main .playIcon,
-.playerBar .playPauseButton .playIcon{
-  transform: translateX(1px) !important;
 }
 
 
@@ -1529,10 +1520,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .controlRow > .circleButton.main > .playerControlIcon,
 .playerBar .controlRow > .circleButton.main > svg{
   transform: none !important;
-}
-
-.playerBar .controlRow > .circleButton.main > .playIcon{
-  transform: translateX(1px) !important;
 }
 
 

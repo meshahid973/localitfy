@@ -76,22 +76,6 @@
 
 }
 
-
-.editor-tool-title{
-  color: rgba(255, 255, 255, 0.92) !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.015em !important;
-  text-transform: lowercase !important;
-}
-
-
-.editor-playlist-list button.is-on{
-  color: var(--accent-contrast) !important;
-  border-color: transparent !important;
-  background: var(--lt-accent) !important;
-}
-
 .editorActions{
   align-items: center !important;
   justify-content: flex-end !important;
@@ -1207,12 +1191,6 @@ input[type="range"]{
     rgba(5, 5, 6, 0.96) !important;
 }
 
-.loadingLogo{
-  box-shadow:
-    0 0 0 9px rgba(var(--lt-accent-rgb), 0.095),
-    0 20px 48px rgba(var(--lt-accent-rgb), 0.17) !important;
-}
-
 ::-webkit-scrollbar-track{
   background: rgba(0, 0, 0, 0.48) !important;
 }
@@ -1288,19 +1266,6 @@ input[type="range"]{
 
 body{
   font-family: var(--font-body) !important;
-}
-
-
-.loadingLogo{
-  color: #071008 !important;
-  background: linear-gradient(135deg, var(--lt-accent), color-mix(in oklab, var(--lt-accent) 72%, #ffffff)) !important;
-}
-
-.loadingLogo svg{
-  display: block !important;
-  width: 1em !important;
-  height: 1em !important;
-  stroke: currentColor !important;
 }
 
 .navIcon{
@@ -1460,11 +1425,6 @@ body{
   background: linear-gradient(135deg, var(--lt-accent), var(--highlight, var(--accent-2))) !important;
   color: #050505 !important;
   border-color: color-mix(in oklab, var(--lt-accent) 65%, white 10%) !important;
-}
-
-
-.playIcon{
-  transform: translateX(1px);
 }
 
 .app{
@@ -2513,8 +2473,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
 .app,
 .simpleShell,
 .page,
-.settingsContent,
-.settingsPanel,
 .simpleLibraryPanel {
   background-size: auto !important;
 }
@@ -2538,9 +2496,7 @@ body,
 #root,
 .app,
 .page,
-.settingsView,
-.settingsContent,
-.settingsPanel {
+.settingsView {
   background-size: auto !important;
 }
 
@@ -2549,9 +2505,7 @@ body,
 .page::before,
 .page::after,
 .settingsView::before,
-.settingsView::after,
-.settingsContent::before,
-.settingsContent::after {
+.settingsView::after {
   background-image: none !important;
   background-size: auto !important;
   animation: none !important;
@@ -2601,7 +2555,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
 }
 
 .panel,
-.settingsPanel,
 .settingsPanelCard{
   contain: layout paint style;
 }
@@ -2667,8 +2620,7 @@ body,
 #root,
 .app,
 .panel,
-.hero,
-.settingsPanel {
+.hero {
   background-image: none !important;
 }
 
@@ -2683,9 +2635,7 @@ body::after,
 .panel::before,
 .panel::after,
 .hero::before,
-.hero::after,
-.settingsPanel::before,
-.settingsPanel::after {
+.hero::after {
   background-image: none !important;
   background-size: auto !important;
 }
@@ -5290,12 +5240,12 @@ body.isResizingPlayer .app *{
   --accent-contrast: var(--button-text-on-accent, #06100b);
 }
 
-.app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *), .settingsActionButton.isPrimary, .settingsTinyButton.isPrimary, .editor-playlist-list button.is-on){
+.app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *), .settingsActionButton.isPrimary, .settingsTinyButton.isPrimary){
   color: var(--accent-contrast) !important;
   text-shadow: none !important;
 }
 
-.app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *), .settingsActionButton.isPrimary, .settingsTinyButton.isPrimary, .editor-playlist-list button.is-on) :is(svg, .buttonInlineIcon){
+.app :is(.mainAction, .heroMain, .circleButton.main:not(.playerBar *), .settingsActionButton.isPrimary, .settingsTinyButton.isPrimary) :is(svg, .buttonInlineIcon){
   color: currentColor !important;
   stroke: currentColor !important;
   fill: none;

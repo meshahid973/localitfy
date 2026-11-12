@@ -628,17 +628,6 @@ input[type="range"]{
   background-size: 42px 42px;
 }
 
-.loadingLogo{
-  width: 72px;
-  height: 72px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  color: #06100b;
-  background: var(--accent);
-  font-size: 34px;
-}
-
 
 [data-notes="off"] .eq{
   display: none;

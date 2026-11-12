@@ -1292,30 +1292,6 @@ function getPixelArtFiles(options = {}) {
   }
 }
 
-function listPixelPacksDetailed() {
-  const root = getPixelArtDirectory();
-  if (!root || !fs.existsSync(root)) return [];
-  const packs = [];
-  try {
-    const items = fs.readdirSync(root, { withFileTypes: true });
-    for (const entry of items) {
-      if (!entry.isDirectory()) continue;
-      const packPath = path.join(root, entry.name);
-      const count = fs.readdirSync(packPath).map((name) => path.join(packPath, name)).filter(fileExists).filter(isImageFile).length;
-      packs.push({ name: entry.name, path: packPath, count, active: false });
-    }
-  } catch (error) { console.log("[localitfy pixel packs error]", error?.message || error); }
-  return packs;
-}
-
-function getPixelArtFilesFromPack(packName = "default") {
-  const root = getPixelArtDirectory();
-  if (!root || !fs.existsSync(root)) return [];
-  const packPath = packName && packName !== "default" ? path.join(root, packName) : root;
-  if (!fs.existsSync(packPath)) return getPixelArtFiles();
-  try { return fs.readdirSync(packPath).map((name) => path.join(packPath, name)).filter(fileExists).filter(isImageFile); } catch { return []; }
-}
-
 function listPixelCoversDetailed() {
   const songs = getSongs();
   const usage = new Map();
@@ -2199,14 +2175,6 @@ function repairMainWindowBounds(win, options = {}) {
 
 function cleanFeedbackText(value, maxLength = 1500) {
   return String(value || "").replace(/\r\n/g, "\n").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "").trim().slice(0, maxLength);
-}
-function getPackagedEnvCandidatePaths() {
-  const safePath = (...parts) => { try { return path.join(...parts.filter(Boolean)); } catch { return ""; } };
-  let cwd = ""; try { cwd = process.cwd(); } catch {}
-  let resourcePath = ""; try { resourcePath = process.resourcesPath || ""; } catch {}
-  let executableDir = ""; try { executableDir = process.execPath ? path.dirname(process.execPath) : ""; } catch {}
-  let userDataPath = ""; try { userDataPath = typeof app.getPath === "function" ? app.getPath("userData") : ""; } catch {}
-  return [safePath(cwd, ".env"), safePath(cwd, ".env.production"), safePath(executableDir, ".env"), safePath(executableDir, ".env.production"), safePath(resourcePath, ".env"), safePath(resourcePath, ".env.production"), safePath(resourcePath, "app", ".env"), safePath(resourcePath, "app.asar.unpacked", ".env"), safePath(userDataPath, ".env"), safePath(userDataPath, ".env.production")].filter(Boolean);
 }
 function getFeedbackWebhookInfo() {
   const keys = ["LOCALTIFY_FEEDBACK_WEBHOOK_URL", "LOCALITFY_FEEDBACK_WEBHOOK_URL", "VITE_LOCALTIFY_FEEDBACK_WEBHOOK_URL", "VITE_LOCALITFY_FEEDBACK_WEBHOOK_URL", "FEEDBACK_WEBHOOK_URL"];

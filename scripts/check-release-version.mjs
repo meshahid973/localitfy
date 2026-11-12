@@ -27,7 +27,8 @@ function checkReleaseVersion() {
     "package-lock.json version": lock.version,
     "package-lock.json root package version": lock.packages?.[""]?.version,
     "renderer version": literalVersion("src/features/updates/update.constants.ts", "APP_VERSION"),
-    "Discord Activity version": literalVersion("discord-activity/src/main.ts", "APP_VERSION")
+    "Discord Activity version": literalVersion("discord-activity/src/main.ts", "APP_VERSION"),
+    "Android package version": read("android/app/build.gradle").match(/\bversionName\s+["']([^"']+)["']/)?.[1] || null
   });
   for (const file of [
     "src/features/updates/WhatsNewModal.tsx",

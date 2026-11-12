@@ -4,7 +4,10 @@ Reviewed [#127](https://github.com/meshahid973/localitfy/pull/127) at
 `a837364ddbd772637750b80a011b29ba6466e2fc` and the additional changes in
 [#134](https://github.com/meshahid973/localitfy/pull/134) at
 `ec93a743aef2b543b629c8f5665d36ca39fd19a5` against #127.
-The release branch does not include either feature.
+The findings below describe those original heads. Both PRs were subsequently
+merged into main and incorporated into the 0.5.0 release branch. The major cache
+deletion issue was fixed in `85f6ff5` with two recovery regression tests before
+merging. The lower-severity stale-handoff finding remains unchanged, as requested.
 
 ## [P1] Missing desktop media is treated as a phone-side deletion
 
@@ -64,5 +67,8 @@ between `handoff` and `took`.
 This was a focused source and Node test review of sync/connection correctness.
 Android APK compilation, emulator/device playback, background/Doze behavior,
 and a full review of every changed renderer/layout file were not performed.
-Review findings are recorded here; no review comments were posted to the
-contributor's PRs, and neither PR was merged.
+Those limits apply to the initial focused review. Subsequent integration checks
+built and linted Android successfully; 456 desktop tests passed before #127's
+merge and 469 before #134's merge. Current release-branch integration passes
+493 desktop tests and Android build/lint tasks. Real-device and installed-app
+manual QA remain separate.

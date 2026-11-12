@@ -52,14 +52,6 @@ function isImageFile(filePath) {
   return IMAGE_EXTENSIONS.has(path.extname(String(filePath || "")).toLowerCase());
 }
 
-function normalizePathKey(filePath) {
-  try {
-    return path.normalize(String(filePath || "")).toLowerCase();
-  } catch {
-    return String(filePath || "").toLowerCase();
-  }
-}
-
 function getFolderFromInput(inputPath) {
   const clean = String(inputPath || "").trim();
   if (!clean) return "";

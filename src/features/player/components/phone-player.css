@@ -17,7 +17,6 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
-.phoneIconButton .playerPlayPauseMorphIcon,
 .phoneIconButton svg{
   width: 24px;
   height: 24px;
@@ -365,7 +364,6 @@
   border-radius: 40px;
 }
 
-.phonePlayButton .playerPlayPauseMorphIcon,
 .phonePlayButton svg{
   width: 34px;
   height: 34px;

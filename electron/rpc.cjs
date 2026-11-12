@@ -255,7 +255,6 @@ function pickNextUniqueDiscordAsset(seed = "", avoidKey = "") {
   if (fallback) dynamicUsedAssets.add(fallback);
   return fallback || DEFAULT_LOGO_ASSET;
 }
-function pickSafeFallback(seed = "", avoidKey = "") { return pickNextUniqueDiscordAsset(seed, avoidKey || lastImageKey); }
 function getSongIdentity(payload) {
   return cleanSpaces(payload?.songId || payload?.id || `${payload?.title || ""}|${payload?.artist || ""}|${payload?.album || ""}|${payload?.duration || ""}`);
 }
