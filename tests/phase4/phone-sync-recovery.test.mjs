@@ -14,6 +14,55 @@ const play = (outcome = "active") => {
     endedAt: outcome === "active" ? null : updatedAt, msListened: 40000, outcome, contextType: "library", contextId: null };
 };
 
+test("unavailable desktop audio preserves the phone cache and pending edits until the drive returns", async () => {
+  const f = await syncFixture();
+  try {
+    const sourcePath = f.repositories.songs.get("a").filePath;
+    const cached = plain(f.phone.files);
+    f.phone.patchSong("a", { liked: true, playCount: 3 });
+    f.repositories.songs.patch("a", { filePath: `${sourcePath}.unavailable` });
+    await f.sync.syncNow();
+    assert.equal(f.sync.getSyncProgress().phase, "error");
+    assert.match(f.sync.getSyncProgress().message, /Desktop audio files are unavailable/);
+    assert.deepEqual(plain(f.phone.files), cached);
+    assert.equal(f.phone.songs().length, 1);
+    assert.equal(f.phone.songs()[0].liked, true);
+    assert.equal(f.requests.length, 0);
+    await f.restartPhone();
+    assert.deepEqual(plain(f.phone.files), cached);
+    assert.equal(f.phone.songs()[0].playCount, 3);
+    f.repositories.songs.patch("a", { filePath: sourcePath });
+    await f.sync.syncNow();
+    assert.equal(f.sync.getSyncProgress().phase, "done");
+    assert.equal(f.repositories.songs.get("a").liked, true);
+    assert.equal(f.repositories.songs.get("a").playCount, 3);
+    assert.deepEqual(plain(f.phone.files), cached);
+  } finally { await f.close(); }
+});
+
+test("audio disappearing after a batch preserves its receipt and cache without repeating phone plays", async () => {
+  const f = await syncFixture();
+  try {
+    const sourcePath = f.repositories.songs.get("a").filePath;
+    const cached = plain(f.phone.files);
+    f.phone.patchSong("a", { playCount: 4 });
+    f.hooks.afterChanges = once(() => f.repositories.songs.patch("a", { filePath: `${sourcePath}.unavailable` }));
+    await f.sync.syncNow();
+    assert.equal(f.sync.getSyncProgress().phase, "error");
+    assert.deepEqual(plain(f.phone.files), cached);
+    assert.ok(f.phone.pendingSync);
+    assert.equal(f.repositories.songs.get("a").playCount, 4);
+    await f.restartPhone();
+    f.repositories.songs.patch("a", { filePath: sourcePath });
+    await f.sync.syncNow();
+    assert.equal(f.sync.getSyncProgress().phase, "done");
+    assert.equal(f.repositories.songs.get("a").playCount, 4);
+    assert.deepEqual(plain(f.phone.files), cached);
+    assert.equal(f.phone.pendingSync, null);
+    assert.deepEqual(f.requests.map(({ body }) => body.sequence), [1, 1]);
+  } finally { await f.close(); }
+});
+
 test("sync receipts roll changes back with a failed batch and reject stale or altered retries", () => {
   const database = receiptDatabase();
   try {
