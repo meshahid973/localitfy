@@ -72,3 +72,8 @@ posthog-export*a
 # Optional Rust kernels (platform-specific build artifacts, never commit)
 native/rust-kernels/target/
 electron/native/*.node
+
+# Android release signing material stays outside the repository.
+*.jks
+*.keystore
+*.p12

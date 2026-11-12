@@ -1,6 +1,8 @@
 # Android installation and pairing
 
-The Android companion is experimental. There is no Android release or signed distribution pipeline yet, so the instructions below build and install a debug APK.
+The Android companion is experimental. Download the release-signed APK from [GitHub Releases](https://github.com/meshahid973/localitfy/releases), or follow the developer instructions below to build a debug APK.
+
+Release and debug APKs use different signing keys. To move from a debug build to an official release, first sync pending phone changes back to the computer and preserve anything you need, then uninstall the debug build before installing the release APK. Uninstalling erases its local data. Official release APKs share a dedicated signing key so later official updates can preserve app data.
 
 The phone copies songs and covers from the desktop library, then plays them from app storage without needing the Mac. Likes, playlists, play counts, and listening events are exchanged during sync. Song details, albums, covers, downloads, imports, MusicBrainz tagging, scrobbling accounts, and library maintenance are managed on the desktop; the phone shows the desktop's covers and metadata after each sync. Lyrics, artist biographies, Discover, and audio recommendations use the paired Mac when reachable and keep previously fetched results for offline use. They do not provide new online results independently of the Mac.
 

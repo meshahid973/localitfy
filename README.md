@@ -31,7 +31,7 @@ Open the installed app and import your music. macOS native binaries are tested i
 
 ### Android (experimental)
 
-The Android companion copies your library from the desktop app over home Wi-Fi for offline playback. It is a development build for now: there is no signed release yet.
+The experimental Android companion copies your library from the desktop app over home Wi-Fi for offline playback. Download the release-signed APK from [Releases](https://github.com/meshahid973/localitfy/releases).
 
 See the [Android installation and pairing guide](docs/android.md) for building an APK, installing it on a phone, pairing with your computer, updating, and troubleshooting.
 

@@ -1,0 +1,167 @@
+name: publish-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Version tag matching package.json
+        required: true
+        default: v0.5.0
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  ONNXRUNTIME_NODE_INSTALL: skip
+  RELEASE_TAG: ${{ inputs.tag }}
+
+concurrency:
+  group: publish-release
+  cancel-in-progress: false
+
+jobs:
+  desktop:
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: node -e "if (process.env.RELEASE_TAG !== 'v' + require('./package.json').version) process.exit(1)"
+      - run: npm ci
+      - name: Install Linux package tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+      - name: Build desktop packages
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            npm run dist
+          else
+            npm run dist:linux
+          fi
+      - run: node scripts/check-release-artifacts.cjs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ runner.os }}
+          compression-level: 0
+          if-no-files-found: error
+          path: |
+            release/*.exe
+            release/*.exe.blockmap
+            release/*.AppImage
+            release/*.deb
+            release/*.rpm
+            release/latest.yml
+            release/latest-linux.yml
+
+  android:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      LOCALTIFY_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.LOCALTIFY_ANDROID_KEYSTORE_PASSWORD }}
+      LOCALTIFY_ANDROID_KEY_ALIAS: localtify
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: node -e "if (process.env.RELEASE_TAG !== 'v' + require('./package.json').version) process.exit(1)"
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync android
+      - name: Prepare Android SDK and signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.LOCALTIFY_ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64"
+          test -n "$LOCALTIFY_ANDROID_KEYSTORE_PASSWORD"
+          signing_path="$RUNNER_TEMP/localtify-release.p12"
+          printf 'LOCALTIFY_ANDROID_KEYSTORE_PATH=%s\n' "$signing_path" >> "$GITHUB_ENV"
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$signing_path"
+          sdkmanager "platforms;android-36" "build-tools;35.0.0"
+      - name: Build signed release APK
+        run: bash android/gradlew -p android assembleRelease lintRelease testReleaseUnitTest
+      - name: Verify APK identity and signature
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          apk=android/app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$apk"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$apk" > "$RUNNER_TEMP/apk-badging.txt"
+          grep -F "package: name='com.meshahid973.localitfy'" "$RUNNER_TEMP/apk-badging.txt"
+          grep -F "versionName='$version'" "$RUNNER_TEMP/apk-badging.txt"
+          if grep -q '^application-debuggable' "$RUNNER_TEMP/apk-badging.txt"; then
+            echo 'Refusing a debuggable release APK'
+            exit 1
+          fi
+          mkdir release-apk
+          cp "$apk" "release-apk/localtify-$version-android.apk"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-Android
+          compression-level: 0
+          if-no-files-found: error
+          path: release-apk/*.apk
+      - name: Remove temporary signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/localtify-release.p12"
+
+  publish:
+    needs: [desktop, android]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: release-assets
+      - name: Verify complete release and generate checksums
+        run: |
+          node -e "if (process.env.RELEASE_TAG !== 'v' + require('./package.json').version) process.exit(1)"
+          node scripts/prepare-release-assets.cjs release-assets
+      - name: Publish verified assets
+        run: |
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            echo 'This release already exists; refusing to replace it'
+            exit 1
+          fi
+          if gh api "repos/$GH_REPO/git/ref/tags/$RELEASE_TAG" > /dev/null 2>&1; then
+            echo 'This tag already exists; refusing to attach packages to an unverified tag'
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" --draft --target "$GITHUB_SHA" --title "Localtify ${RELEASE_TAG#v}" --notes-file .github/release-notes.md
+          gh release upload "$RELEASE_TAG" release-assets/*
+          gh release edit "$RELEASE_TAG" --draft=false --latest

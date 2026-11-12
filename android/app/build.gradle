@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+def releaseKeystorePath = System.getenv('LOCALTIFY_ANDROID_KEYSTORE_PATH')
+
 android {
     namespace = "com.meshahid973.localitfy"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +18,20 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (releaseKeystorePath) {
+            release {
+                storeFile file(releaseKeystorePath)
+                storeType 'PKCS12'
+                storePassword System.getenv('LOCALTIFY_ANDROID_KEYSTORE_PASSWORD')
+                keyAlias(System.getenv('LOCALTIFY_ANDROID_KEY_ALIAS') ?: 'localtify')
+                keyPassword(System.getenv('LOCALTIFY_ANDROID_KEY_PASSWORD') ?: System.getenv('LOCALTIFY_ANDROID_KEYSTORE_PASSWORD'))
+            }
+        }
+    }
     buildTypes {
         release {
+            if (releaseKeystorePath) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
