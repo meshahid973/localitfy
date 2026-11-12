@@ -118,7 +118,9 @@ function createSyncServer({ repositories, coverPath, statePath, serverName = "co
   function snapshot() {
     const songs = repositories.songs.list().flatMap((song) => {
       const file = fileInfo(song.filePath);
-      if (!file) return [];
+      // Phones treat a missing snapshot entry as deletion. Do not send a partial
+      // library when a drive is disconnected or a source file cannot be read.
+      if (!file) throw new Error("Desktop audio files are unavailable. Reconnect the drive or relink missing songs before syncing. Cached phone files are unchanged.");
       const shaped = {};
       for (const field of SONG_FIELDS) if (song[field] !== undefined) shaped[field] = song[field];
       return [{ ...shaped, file, cover: fileInfo(coverPath(song)) }];
