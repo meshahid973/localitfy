@@ -2,9 +2,6 @@
 
 /* Former global visual reset scoped to Home. Preserve the winning declarations. */
 .homePage {
-  --grid-line: transparent !important;
-  --app-grid-line: transparent !important;
-  --page-line: transparent !important;
   background-size: auto !important;
   background-image: none !important;
 }

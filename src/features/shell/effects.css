@@ -1444,7 +1444,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
 /* Linux desktop polish without reducing blur */
 .app[data-platform="linux"]{
   --linux-titlebar-height-v483: 39px;
-  --linux-scrollbar-size-v483: 11px;
 }
 
 .app[data-platform="linux"] .titleBar{

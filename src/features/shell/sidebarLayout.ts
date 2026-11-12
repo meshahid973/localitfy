@@ -5,8 +5,6 @@ export type SidebarGroupId = (typeof sidebarNavGroups)[number]["id"];
 export type CustomizableSidebarGroupId = Exclude<SidebarGroupId, "app">;
 export type SidebarNavOrder = Partial<Record<CustomizableSidebarGroupId, string[]>>;
 
-export const customizableSidebarGroupIds: CustomizableSidebarGroupId[] = ["library", "tools"];
-
 export type ResolvedSidebarGroup = {
   id: SidebarGroupId;
   label: string;

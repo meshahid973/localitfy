@@ -12,9 +12,7 @@
   --motion-instant: 80ms;
   --motion-fast: 150ms;
   --motion-normal: 220ms;
-  --motion-slow: 360ms;
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --motion-pop: cubic-bezier(0.2, 0.95, 0.18, 1.12);
 }
 
@@ -113,11 +111,6 @@ button:disabled:active {
   animation: localtifyArtIn 360ms var(--motion-pop) both;
 }
 
-/* Hero expand/compact keeps one owner and no duplicate V140/V142 keyframes. */
-
-
-/* Cards use transitions only. No blanket entry animation for virtualized content. */
-
 
 /* Playlist virtual rows own their Y transform in playlists.css; never override it here. */
 .app .playlistTrackRow.virtualPlaylistTrackRow,
@@ -128,8 +121,6 @@ button:disabled:active {
     box-shadow 170ms ease,
     opacity 140ms ease;
 }
-
-/* Dragging promotes only the rows currently involved in the interaction. */
 
 
 .localitfyDragPreview {
@@ -205,25 +196,9 @@ body.localitfySongDragging .app .coverAura::before {
   to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-@keyframes localtifyItemIn {
-  from { opacity: 0; transform: translate3d(0, 6px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-
 @keyframes localtifyToastIn {
   from { opacity: 0; transform: translate3d(0, -7px, 0) scale(0.98); }
   to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyScanLine {
-  0% { opacity: 0; transform: translateX(-110%); }
-  12%, 88% { opacity: 1; }
-  100% { opacity: 0; transform: translateX(110%); }
-}
-
-@keyframes localtifySkeletonShimmer {
-  0% { background-position: 130% 0; }
-  100% { background-position: -130% 0; }
 }
 
 @keyframes localtifyCopyIn {
@@ -237,29 +212,9 @@ body.localitfySongDragging .app .coverAura::before {
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-@keyframes localtifyHeroExpand {
-  from { opacity: 0.97; transform: translate3d(0, 5px, 0) scale(0.996); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyHeroCompact {
-  from { opacity: 0.98; transform: translate3d(0, -4px, 0) scale(1.003); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyShelfIn {
-  from { opacity: 0; transform: translate3d(0, -5px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-
 @keyframes localtifyDragPreviewIn {
   from { opacity: 0; transform: translate3d(0, 4px, 0) scale(0.96); }
   to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes localtifyDropSettle {
-  0% { opacity: 0.9; }
-  100% { opacity: 1; }
 }
 
 @keyframes localtifyIconSettle {

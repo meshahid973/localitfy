@@ -1,5 +1,4 @@
 .onboardingV315 {
-  --panel-bg: rgba(10, 10, 14, 0.94);
   --panel-edge: rgba(255, 255, 255, 0.075);
   --panel-soft: rgba(255, 255, 255, 0.04);
   --copy-strong: rgba(255, 255, 255, 0.96);
@@ -665,8 +664,6 @@
     font-size: clamp(44px, 9vw, 62px);
   }
 }
-
-/* V463 small onboarding optimization */
 .onboardingV315,
 .localitfyOnboardingShell,
 .onboardingBody{
@@ -693,7 +690,7 @@
   user-select: none;
 }
 
-/* localtify v499 — onboarding peeking mascot */
+/* Peeking mascot. */
 .localitfyOnboardingShell{
   isolation: isolate;
 
@@ -772,9 +769,6 @@
     display: none;
   }
 }
-/* end localtify v499 */
-
-/* localtify v505 — onboarding first impression cleanup */
 .localitfyOnboardingShell{
 
 
@@ -915,9 +909,6 @@
     content: "";
   }
 }
-/* end localtify v505 */
-
-/* localtify v506 — onboarding layout fix after first impression test */
 .localitfyOnboardingShell{
   width: min(1120px, calc(100vw - 180px));
   min-height: 600px;
@@ -1075,7 +1066,6 @@
     display: none;
   }
 }
-/* end localtify v506 */
 
 /* Keep step content clear of the peeking mascot while it is visible. */
 @media (min-width: 861px){

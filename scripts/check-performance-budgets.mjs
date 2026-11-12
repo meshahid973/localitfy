@@ -29,7 +29,9 @@ function checkFile(relativePath, maxBytes) {
     failures.push(`${relativePath}: missing`);
     return;
   }
-  const bytes = fs.statSync(absolute).size;
+  // Git may check source out with CRLF on Windows. Measure the same source
+  // content on every platform; generated asset budgets still use disk bytes.
+  const bytes = Buffer.byteLength(fs.readFileSync(absolute, "utf8").replace(/\r\n/g, "\n"), "utf8");
   console.log(`[performance] ${relativePath}: ${(bytes / KiB).toFixed(1)} KiB / ${(maxBytes / KiB).toFixed(1)} KiB`);
   if (bytes > maxBytes) failures.push(`${relativePath}: ${bytes} > ${maxBytes} bytes`);
 }

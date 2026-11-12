@@ -35,25 +35,10 @@ export function MascotStateArt({
   );
 }
 
-export function mascotStateForToast(kind?: string): MascotStateKey {
-  if (kind === "success") return "happy";
-  if (kind === "error") return "error";
-  if (kind === "work") return "loading";
-  return "info";
-}
-
 export function WindowMinimizeIcon() {
   return (
     <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" focusable="false">
       <path d="M2.25 6.25h7.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-export function WindowMaximizeIcon() {
-  return (
-    <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" focusable="false">
-      <rect x="2.2" y="2.2" width="7.6" height="7.6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.45" />
     </svg>
   );
 }

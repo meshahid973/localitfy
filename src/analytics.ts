@@ -666,10 +666,6 @@ export function initLocalitfyAnalytics(input?: InitInput): boolean {
   }
 }
 
-export function identifyLocaltifyInstall(properties: AnalyticsProperties = {}): void {
-  identifyInstall(properties);
-}
-
 export function captureLocaltifyEvent(
   eventName: string,
   properties: AnalyticsProperties = {},
@@ -753,28 +749,8 @@ export function trackAppView(
   captureLocaltifyEvent("app_screen_viewed", extra, { throttleMs: 250 });
 }
 
-export function trackNavigationClicked(sectionOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(sectionOrProperties)
-    ? sectionOrProperties
-    : { section: cleanScreenName(sectionOrProperties), source: "sidebar" };
-
-  captureLocaltifyEvent("navigation_clicked", properties);
-}
-
 export function trackLibrarySnapshot(properties: AnalyticsProperties = {}): void {
   captureLocaltifyEvent("library_snapshot", properties, { throttleMs: 60_000 });
-}
-
-export function trackLibraryLoaded(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("library_loaded", properties);
-}
-
-export function trackLibrarySizeChanged(songCount: number, albumCount?: number, artistCount?: number): void {
-  captureLocaltifyEvent("library_size_changed", {
-    song_count: Math.max(0, Math.floor(cleanNumber(songCount))),
-    album_count: albumCount != null ? Math.max(0, Math.floor(cleanNumber(albumCount))) : null,
-    artist_count: artistCount != null ? Math.max(0, Math.floor(cleanNumber(artistCount))) : null
-  });
 }
 
 export function trackLibraryViewChanged(
@@ -788,138 +764,12 @@ export function trackLibraryViewChanged(
   captureLocaltifyEvent("library_view_changed", properties);
 }
 
-export function trackLibrarySortChanged(sortOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(sortOrProperties)
-    ? sortOrProperties
-    : { mode: cleanString(sortOrProperties, "unknown") };
-
-  captureLocaltifyEvent("library_sort_changed", properties);
-}
-
-export function trackLibraryFilterChanged(filterOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(filterOrProperties)
-    ? filterOrProperties
-    : { mode: cleanString(filterOrProperties, "unknown") };
-
-  captureLocaltifyEvent("library_filter_changed", properties, { throttleMs: 2_000 });
-}
-
-export function trackLibraryScrollDepth(percentOrProperties?: number | AnalyticsProperties): void {
-  const properties = isPlainObject(percentOrProperties)
-    ? percentOrProperties
-    : { scroll_percent: Math.max(0, Math.min(100, Math.round(cleanNumber(percentOrProperties, 0)))) };
-
-  captureLocaltifyEvent("library_scroll_depth", properties, { throttleMs: 10_000 });
-}
-
-export function trackPlaybackStarted(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("playback_started", properties);
-}
-
-export function trackPlaybackPaused(positionSeconds?: number, properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("playback_paused", {
-    position_seconds: positionSeconds != null ? Math.max(0, Math.round(cleanNumber(positionSeconds))) : null,
-    ...properties
-  });
-}
-
-export function trackPlaybackSkipped(
-  directionOrProperties?: "next" | "prev" | AnalyticsProperties,
-  properties: AnalyticsProperties = {}
-): void {
-  const extra = isPlainObject(directionOrProperties)
-    ? directionOrProperties
-    : { direction: cleanString(directionOrProperties, "next"), ...properties };
-
-  captureLocaltifyEvent("playback_skipped", extra);
-}
-
-export function trackPlaybackCompleted(durationSeconds?: number, properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("playback_completed", {
-    duration_seconds: durationSeconds != null ? Math.max(0, Math.round(cleanNumber(durationSeconds))) : null,
-    ...properties
-  });
-}
-
-export function trackPlayerControlUsed(controlOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(controlOrProperties)
-    ? controlOrProperties
-    : { control: cleanString(controlOrProperties, "unknown") };
-
-  captureLocaltifyEvent("player_control_used", properties, { throttleMs: 100 });
-}
-
-export function trackPlayerModeChanged(modeOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(modeOrProperties)
-    ? modeOrProperties
-    : { mode: cleanString(modeOrProperties, "unknown") };
-
-  captureLocaltifyEvent("player_mode_changed", properties);
-}
-
-export function trackShuffleModeChanged(enabled: boolean): void {
-  captureLocaltifyEvent("shuffle_mode_changed", { enabled: cleanBoolean(enabled) });
-}
-
-export function trackRepeatModeChanged(mode: "none" | "one" | "all" | string): void {
-  captureLocaltifyEvent("repeat_mode_changed", { repeat_mode: cleanString(mode) });
-}
-
-export function trackVolumeChanged(volumePercent: number, properties: AnalyticsProperties = {}): void {
-  const bucket = Math.max(0, Math.min(100, Math.round(cleanNumber(volumePercent, 50) / 10) * 10));
-  captureLocaltifyEvent("volume_changed", { volume_bucket: bucket, ...properties }, { throttleMs: 5_000 });
-}
-
-export function trackSeekUsed(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("seek_used", properties, { throttleMs: 2_000 });
-}
-
-export function trackQueueModified(actionOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(actionOrProperties)
-    ? actionOrProperties
-    : { action: cleanString(actionOrProperties, "unknown") };
-
-  captureLocaltifyEvent("queue_modified", properties);
-}
-
-export function trackSongLikedToggled(likedOrProperties?: boolean | AnalyticsProperties): void {
-  const properties = isPlainObject(likedOrProperties)
-    ? likedOrProperties
-    : { is_liked: cleanBoolean(likedOrProperties) };
-
-  captureLocaltifyEvent("song_liked_toggled", properties);
-}
-
-export function trackSongActionUsed(actionOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(actionOrProperties)
-    ? actionOrProperties
-    : { action: cleanString(actionOrProperties, "unknown") };
-
-  captureLocaltifyEvent("song_action_used", properties);
-}
-
 export function trackSongsImported(countOrProperties?: number | AnalyticsProperties, source = "unknown"): void {
   const properties = isPlainObject(countOrProperties)
     ? countOrProperties
     : { count: Math.max(0, Math.floor(cleanNumber(countOrProperties, 0))), source: cleanString(source, "unknown") };
 
   captureLocaltifyEvent("songs_imported", properties);
-}
-
-export function trackImportStarted(sourceOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(sourceOrProperties)
-    ? sourceOrProperties
-    : { source: cleanString(sourceOrProperties, "unknown") };
-
-  captureLocaltifyEvent("import_started", properties);
-}
-
-export function trackImportStep(stepOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(stepOrProperties)
-    ? stepOrProperties
-    : { flow_step: cleanString(stepOrProperties, "unknown") };
-
-  captureLocaltifyEvent("import_step", properties, { throttleMs: 500 });
 }
 
 export function trackImportFailed(reasonOrProperties?: string | AnalyticsProperties, source = "unknown"): void {
@@ -938,75 +788,12 @@ export function trackDownloadsOpened(sourceOrProperties?: string | AnalyticsProp
   captureLocaltifyEvent("downloads_opened", properties);
 }
 
-export function trackDownloadStarted(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("download_started", properties);
-}
-
-export function trackDownloadCompleted(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("download_completed", properties);
-}
-
-export function trackDownloadFailed(reasonOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(reasonOrProperties)
-    ? reasonOrProperties
-    : { reason: cleanString(reasonOrProperties, "unknown") };
-
-  captureLocaltifyEvent("download_failed", properties);
-}
-
-export function trackSearchPerformed(resultCount?: number, properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent(
-    "search_performed",
-    {
-      result_count: resultCount != null ? Math.max(0, Math.floor(cleanNumber(resultCount))) : null,
-      ...properties
-    },
-    { throttleMs: 3_000 }
-  );
-}
-
-export function trackSearchResultSelected(resultTypeOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(resultTypeOrProperties)
-    ? resultTypeOrProperties
-    : { result_type: cleanString(resultTypeOrProperties, "unknown") };
-
-  captureLocaltifyEvent("search_result_selected", properties);
-}
-
-export function trackPlaylistCreated(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("playlist_created", properties);
-}
-
-export function trackPlaylistOpened(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("playlist_opened", properties);
-}
-
-export function trackPlaylistModified(actionOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(actionOrProperties)
-    ? actionOrProperties
-    : { action: cleanString(actionOrProperties, "unknown") };
-
-  captureLocaltifyEvent("playlist_modified", properties);
-}
-
 export function trackSettingsOpened(sourceOrProperties?: string | AnalyticsProperties): void {
   const properties = isPlainObject(sourceOrProperties)
     ? sourceOrProperties
     : { source: cleanString(sourceOrProperties, "unknown") };
 
   captureLocaltifyEvent("settings_opened", properties);
-}
-
-export function trackSettingsAnalytics(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("settings_changed", properties);
-}
-
-export function trackSettingChanged(settingOrProperties?: string | AnalyticsProperties, value?: AnalyticsValue): void {
-  const properties = isPlainObject(settingOrProperties)
-    ? settingOrProperties
-    : { setting: cleanString(settingOrProperties, "unknown"), value: value ?? null };
-
-  captureLocaltifyEvent("setting_changed", properties);
 }
 
 export function trackThemeChanged(themeOrProperties?: string | AnalyticsProperties, customThemeEnabled = false): void {
@@ -1017,56 +804,12 @@ export function trackThemeChanged(themeOrProperties?: string | AnalyticsProperti
   captureLocaltifyEvent("theme_changed", properties);
 }
 
-export function trackThemeEditorOpened(sourceOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(sourceOrProperties)
-    ? sourceOrProperties
-    : { source: cleanString(sourceOrProperties, "settings") };
-
-  captureLocaltifyEvent("theme_editor_opened", properties);
-}
-
-export function trackThemeEditorChanged(fieldOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(fieldOrProperties)
-    ? fieldOrProperties
-    : { field: cleanString(fieldOrProperties, "unknown") };
-
-  captureLocaltifyEvent("theme_editor_changed", properties, { throttleMs: 2_000 });
-}
-
-export function trackLanguageChanged(locale: string): void {
-  captureLocaltifyEvent("language_changed", { locale: cleanString(locale) });
-}
-
-export function trackVisualEffectChanged(effectOrProperties?: string | AnalyticsProperties, enabled = false): void {
-  const properties = isPlainObject(effectOrProperties)
-    ? effectOrProperties
-    : { feature: cleanString(effectOrProperties, "unknown"), enabled: cleanBoolean(enabled) };
-
-  captureLocaltifyEvent("visual_effect_changed", properties);
-}
-
-export function trackHotkeyUsed(actionOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(actionOrProperties)
-    ? actionOrProperties
-    : { action: cleanString(actionOrProperties, "unknown") };
-
-  captureLocaltifyEvent("hotkey_used", properties, { throttleMs: 300 });
-}
-
 export function trackDiscordToggled(enabledOrProperties?: boolean | AnalyticsProperties): void {
   const properties = isPlainObject(enabledOrProperties)
     ? enabledOrProperties
     : { enabled: cleanBoolean(enabledOrProperties) };
 
   captureLocaltifyEvent("discord_toggled", properties);
-}
-
-export function trackDiscordStatus(statusOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(statusOrProperties)
-    ? statusOrProperties
-    : { status: cleanString(statusOrProperties, "unknown") };
-
-  captureLocaltifyEvent("discord_status", properties, { throttleMs: 10_000 });
 }
 
 export function trackUpdatePopupSeen(
@@ -1085,14 +828,6 @@ export function trackUpdatePopupSeen(
   captureLocaltifyEvent("update_popup_seen", properties);
 }
 
-export function trackUpdateInstalled(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("update_installed", properties);
-}
-
-export function trackUpdateDismissed(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("update_dismissed", properties);
-}
-
 export function trackOnboardingCompleted(sourceOrProperties?: string | AnalyticsProperties, songCount = 0): void {
   const properties = isPlainObject(sourceOrProperties)
     ? sourceOrProperties
@@ -1109,88 +844,6 @@ export function trackOnboardingSkipped(sourceOrProperties?: string | AnalyticsPr
   captureLocaltifyEvent("onboarding_skipped", properties);
 }
 
-export function trackOnboardingStepViewed(stepOrProperties?: string | number | AnalyticsProperties): void {
-  const properties = isPlainObject(stepOrProperties)
-    ? stepOrProperties
-    : { step: typeof stepOrProperties === "number" ? stepOrProperties : cleanString(stepOrProperties, "unknown") };
-
-  captureLocaltifyEvent("onboarding_step_viewed", properties);
-}
-
-export function trackCoverStudioOpened(sourceOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(sourceOrProperties)
-    ? sourceOrProperties
-    : { source: cleanString(sourceOrProperties, "unknown") };
-
-  captureLocaltifyEvent("cover_studio_opened", properties);
-}
-
-export function trackCoverChanged(sourceOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(sourceOrProperties)
-    ? sourceOrProperties
-    : { source: cleanString(sourceOrProperties, "unknown") };
-
-  captureLocaltifyEvent("cover_changed", properties);
-}
-
-export function trackCoverRandomized(countOrProperties?: number | AnalyticsProperties): void {
-  const properties = isPlainObject(countOrProperties)
-    ? countOrProperties
-    : { count: Math.max(0, Math.floor(cleanNumber(countOrProperties, 0))) };
-
-  captureLocaltifyEvent("cover_randomized", properties);
-}
-
-export function trackCoverLoadFailed(reasonOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(reasonOrProperties)
-    ? reasonOrProperties
-    : { reason: cleanString(reasonOrProperties, "unknown") };
-
-  captureLocaltifyEvent("cover_load_failed", properties, { throttleMs: 10_000 });
-}
-
-export function trackPixelCoverCache(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("pixel_cover_cache", properties, { throttleMs: 5_000 });
-}
-
-export function trackModalOpened(modalOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(modalOrProperties)
-    ? modalOrProperties
-    : { section: cleanString(modalOrProperties, "unknown") };
-
-  captureLocaltifyEvent("modal_opened", properties);
-}
-
-export function trackModalClosed(modalOrProperties?: string | AnalyticsProperties): void {
-  const properties = isPlainObject(modalOrProperties)
-    ? modalOrProperties
-    : { section: cleanString(modalOrProperties, "unknown") };
-
-  captureLocaltifyEvent("modal_closed", properties);
-}
-
-export function trackPerformanceMetric(nameOrProperties?: string | AnalyticsProperties, valueMs?: number): void {
-  const properties = isPlainObject(nameOrProperties)
-    ? nameOrProperties
-    : {
-        metric: cleanString(nameOrProperties, "unknown"),
-        duration_ms: valueMs != null ? Math.max(0, Math.round(cleanNumber(valueMs))) : null
-      };
-
-  captureLocaltifyEvent("performance_metric", properties, { throttleMs: 2_000 });
-}
-
-export function trackStartupTiming(stageOrProperties?: string | AnalyticsProperties, valueMs?: number): void {
-  const properties = isPlainObject(stageOrProperties)
-    ? stageOrProperties
-    : {
-        flow_step: cleanString(stageOrProperties, "unknown"),
-        duration_ms: valueMs != null ? Math.max(0, Math.round(cleanNumber(valueMs))) : null
-      };
-
-  captureLocaltifyEvent("startup_timing", properties);
-}
-
 export function trackError(
   categoryOrProperties?: string | AnalyticsProperties,
   message?: string,
@@ -1205,26 +858,6 @@ export function trackError(
       };
 
   captureLocaltifyEvent("app_error", extra);
-}
-
-export function trackCrashRecovery(properties: AnalyticsProperties = {}): void {
-  captureLocaltifyEvent("crash_recovery", properties);
-}
-
-export function trackFeatureDiscovered(featureOrProperties?: string | AnalyticsProperties, source = "unknown"): void {
-  const properties = isPlainObject(featureOrProperties)
-    ? featureOrProperties
-    : { feature: cleanString(featureOrProperties, "unknown"), source: cleanString(source, "unknown") };
-
-  captureLocaltifyEvent("feature_discovered", properties);
-}
-
-export function trackFeatureUsed(featureOrProperties?: string | AnalyticsProperties, properties: AnalyticsProperties = {}): void {
-  const extra = isPlainObject(featureOrProperties)
-    ? featureOrProperties
-    : { feature: cleanString(featureOrProperties, "unknown"), ...properties };
-
-  captureLocaltifyEvent("feature_used", extra);
 }
 
 
@@ -1270,24 +903,4 @@ export function trackAcquisitionSource(properties: AnalyticsProperties = {}): vo
     }),
     { throttleMs: 60 * 60_000 }
   );
-}
-
-
-export function resetLocaltifyAnalyticsIdentity(): void {
-  try {
-    posthog.reset();
-  } catch {
-    // ignored
-  }
-
-  cachedInstallId = createId("lt_install");
-  cachedSessionId = createId("lt_session");
-  safeStorageSet(INSTALL_ID_KEY, cachedInstallId);
-  safeStorageSet(SESSION_ID_KEY, cachedSessionId);
-  safeStorageSet(FIRST_SEEN_KEY, new Date().toISOString());
-  safeStorageSet(LAST_ACTIVE_DAY_KEY, "");
-  safeStorageSet(LAST_APP_VERSION_KEY, appVersion);
-  safeStorageSet(FIRST_APP_VERSION_KEY, appVersion);
-
-  identifyInstall();
 }

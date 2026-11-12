@@ -14,8 +14,6 @@ export type LocalAlbumEntry = {
   latestAdded: number;
 };
 
-export type AlbumSortMode = "recent" | "title" | "artist" | "year";
-
 export type ManualLocalAlbum = {
   id: string;
   title: string;

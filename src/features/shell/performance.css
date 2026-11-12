@@ -33,13 +33,8 @@ body.localtifyPerf .app :is(
   backface-visibility: visible !important;
 }
 
-/* Scrolling is the hottest paint path. Keep geometry and text, pause decoration. */
 
-
-/* Large translucent panes are much more expensive than thumbnail paint. */
-
-
-/* Keep actual cover thumbnails sharp; sleep only large decorative blur layers. */
+/* Pause decorative paint while scrolling. */
 
 
 body.localtifyPerf .app.isScrolling .hero.ambientSurface::before,
@@ -50,8 +45,6 @@ body.localtifyPerf .app.isScrolling .playerBar::after {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-
-/* Input-critical states get the same cheap-paint policy. */
 
 
 /* A hidden/background window should spend essentially nothing on decoration. */
