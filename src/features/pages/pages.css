@@ -9,6 +9,7 @@
 
 .collectionHero {
   position: relative;
+  isolation: isolate;
   min-width: 0;
   display: grid;
   grid-template-columns: clamp(132px, 17vw, 220px) minmax(0, 1fr);
@@ -20,7 +21,7 @@
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-radius-md);
   overflow: hidden;
-  background: linear-gradient(160deg, rgba(var(--cover-rgb, var(--lt-accent-rgb)), .24), rgba(var(--cover-rgb, var(--lt-accent-rgb)), .06) 58%, transparent), var(--lt-surface);
+  background: var(--lt-surface);
 }
 
 .collectionHeroArt { grid-area: art; min-width: 0; align-self: center; }

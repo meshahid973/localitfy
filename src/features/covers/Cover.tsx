@@ -16,7 +16,6 @@ export function getFullCoverUrl(song?: Song | null) {
   return getRendererSafeImageUrl(song?.coverFullUrl || song?.coverUrl || song?.coverPath || "");
 }
 
-
 export function getCardCoverCssUrl(song?: Song | null) {
   const coverUrl = getCardCoverUrl(song);
   if (!coverUrl) return "none";
@@ -52,7 +51,7 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
 
   useEffect(() => {
     setFailedSources({});
-  }, [song?.id, song?.coverUrl, song?.coverThumbUrl, song?.coverThumbnailUrl, song?.thumbnailUrl, song?.coverPath]);
+  }, [song?.id, song?.coverFullUrl, song?.coverUrl, song?.coverThumbUrl, song?.coverThumbnailUrl, song?.thumbnailUrl, song?.coverPath]);
 
   return (
     <div

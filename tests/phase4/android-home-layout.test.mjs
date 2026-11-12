@@ -23,6 +23,7 @@ function home(android, songs, hidden = []) {
     "./home.css": {},
     "../../app/platform": { isAndroidApp: () => android },
     "../covers/Cover": { Cover: () => null },
+    "../covers/ArtworkBackdrop": { ArtworkBackdrop: () => null },
     "../../shared/ui/LocaltifyViewUi": { MascotStateArt: () => null },
     "../search/search.utils": { prettyMeta: String, prettyTitle: String },
     "./homeLayout": layout,

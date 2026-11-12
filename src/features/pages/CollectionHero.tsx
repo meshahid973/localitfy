@@ -1,13 +1,12 @@
-import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { ListEnd, MoreHorizontal, Play, Shuffle } from "lucide-react";
-import { getSongAmbientSource, useCoverAverageStyle } from "../covers/cover.ambient";
+import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import type { Song } from "../library/song.types";
 
 export type CollectionHeroProps = {
   eyebrow: string;
   title: string;
   cover: ReactNode;
-  /** Tints the page from the cover, like the player does. */
   coverSong: Song | null;
   round?: boolean;
   /** Artist links, owner, rule summary… */
@@ -24,9 +23,9 @@ export type CollectionHeroProps = {
 
 /** Top of every album, artist, genre, playlist and mix page: artwork, title, then play · shuffle · queue · more. */
 export default function CollectionHero({ eyebrow, title, cover, coverSong, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children }: CollectionHeroProps) {
-  const tint = useCoverAverageStyle(getSongAmbientSource(coverSong), Boolean(coverSong));
   return (
-    <header className={`collectionHero ${round ? "isRound" : ""}`} style={tint as CSSProperties}>
+    <header className={`collectionHero ${round ? "isRound" : ""}`}>
+      <ArtworkBackdrop song={coverSong} />
       <div className="collectionHeroArt">{cover}</div>
       <div className="collectionHeroCopy">
         <span className="collectionHeroEyebrow">{eyebrow}</span>

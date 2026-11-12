@@ -21,7 +21,8 @@ test("collection browsing classes cannot collide with album and artist detail pa
 
 test("detail collection surfaces adapt to light themes and touch devices", () => {
   const css = read("src/features/pages/pages.css");
-  assert.match(css, /background: linear-gradient\([\s\S]*?\), var\(--lt-surface\);/);
+  assert.match(css, /\.collectionHero\s*\{[^}]*background: var\(--lt-surface\);/);
+  assert.match(read("src/features/covers/artwork-backdrop.css"), /color-mix\(in srgb, var\(--lt-surface\)/);
   assert.match(css, /color: var\(--accent-contrast, var\(--lt-bg\)\)/);
   assert.match(css, /\.collectionIconButton:hover:not\(:disabled\)[^{}]*\{[^}]*var\(--lt-border-strong\)/);
   assert.match(css, /@media \(hover: none\), \(pointer: coarse\)/);

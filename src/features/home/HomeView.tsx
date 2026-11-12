@@ -3,6 +3,7 @@ import { Fragment, lazy, Suspense, useCallback, useMemo, useState, type CSSPrope
 import { Maximize2, Minimize2, Play, Shuffle, SlidersHorizontal, Smartphone } from "lucide-react";
 import { isAndroidApp } from "../../app/platform";
 import { Cover } from "../covers/Cover";
+import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
@@ -160,11 +161,7 @@ export default function HomeView(props: HomeViewProps) {
           </div>
         </div>
 
-        {currentSong ? (
-          <div className="homeJumpArtwork" aria-hidden="true">
-            <Cover song={currentSong} className="homeJumpCover" priority="high" />
-          </div>
-        ) : null}
+        <ArtworkBackdrop song={currentSong} />
       </section>
     ),
     listenNow: (

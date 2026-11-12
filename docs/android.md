@@ -114,3 +114,7 @@ cd android
 ```
 
 The existing GitHub quality workflow does not build Android. Native unit tests in the generated project are template smoke tests; the sync tests (including interrupted and repeated syncs) run in the Node suite. Before a release, check on a real phone: first sync and an interrupted transfer, changes made during a sync, native Back from menus, dialogs and the player, and media playback from the notification and headphones. For the live connection: like on each side, control playback both ways, move playback in both directions, edit the queue on each side, then turn Wi-Fi off and on again. The live tests are in `tests/phase4/phone-live.test.mjs`.
+
+## Known live-connection limitation
+
+A delayed playback handoff acknowledgement can supersede a newer device's playback session. If playback unexpectedly switches devices, select the intended device again. Transfer identity and acknowledgement ordering still need hardening before treating handoff as release-ready.

@@ -324,3 +324,32 @@ html.platformAndroid input:not([type="range"]):not([type="checkbox"]):not([type=
   html.platformAndroid .phoneSheetLayer,
   html.platformAndroid .phoneSheet{ animation: none; }
 }
+
+html.platformAndroid .collectionHero {
+  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-areas: "art copy" "actions actions";
+  column-gap: 14px;
+}
+
+html.platformAndroid .collectionHeroCopy h1 { font-size: 24px; line-height: 1.12; }
+html.platformAndroid .collectionHeroActions { gap: 8px; }
+html.platformAndroid .collectionHeroActions > button { width: 44px; min-width: 44px; height: 44px; }
+
+html.platformAndroid .trackRow {
+  grid-template-columns: 44px minmax(0, 1fr) 44px 44px;
+  gap: 6px;
+  min-height: 60px;
+  padding: 6px 0;
+}
+
+html.platformAndroid .trackRowIndex,
+html.platformAndroid .trackRowCover { grid-area: 1 / 1; width: 44px; height: 44px; }
+html.platformAndroid .trackRowCover img { width: 44px; height: 44px; }
+html.platformAndroid .trackRowIndex { z-index: 1; color: #fff; background: rgba(0, 0, 0, .35); }
+html.platformAndroid .trackRowPlayIcon { color: #fff; }
+html.platformAndroid .trackRowTitle { grid-area: 1 / 2; }
+html.platformAndroid .trackRowTitle strong { font-size: 14px; }
+html.platformAndroid .trackRow > .iconAction { grid-area: 1 / 3; width: 44px; height: 44px; }
+html.platformAndroid .trackRow > .trackRowAdd { grid-column: 4; }
+html.platformAndroid .trackRowAlbum,
+html.platformAndroid .trackRowDuration { display: none; }
