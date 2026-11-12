@@ -14,9 +14,7 @@
 }
 
 .connectMenu{
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 10px);
+  position: fixed;
   z-index: 9001;
   width: 260px;
   display: grid;
@@ -30,9 +28,7 @@
   backdrop-filter: blur(22px) saturate(130%);
 }
 
-.connectPicker-chip .connectMenu{
-  right: auto;
-  left: 50%;
+.connectMenu-chip{
   transform: translateX(-50%);
   width: min(300px, calc(100vw - 32px));
 }

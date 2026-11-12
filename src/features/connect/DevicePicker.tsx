@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { Laptop, MonitorSmartphone, Smartphone } from "lucide-react";
 import { computerName } from "../../app/platform";
 import type { ConnectControls } from "./usePlaybackConnect";
@@ -14,16 +15,38 @@ function connectionText(status: ConnectControls["status"]) {
 /** "Play on": lists this device and the connected ones, and moves playback to the one picked. */
 export function DevicePicker({ controls, variant }: { controls: ConnectControls; variant: "bar" | "chip" }) {
   const [open, setOpen] = useState(false);
+  const [place, setPlace] = useState<CSSProperties>({});
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
     const close = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
     };
     window.addEventListener("pointerdown", close, true);
     return () => window.removeEventListener("pointerdown", close, true);
   }, [open]);
+
+  // The player bar clips its contents, so the menu is drawn in the app layer, just above the button.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const placeMenu = () => {
+      const button = rootRef.current?.getBoundingClientRect();
+      const layer = (document.querySelector(".app") || document.body).getBoundingClientRect();
+      if (!button) return;
+      const bottom = layer.bottom - button.top + 10;
+      // Half the chip menu's width (min(300px, 100vw - 32px)) plus a 16px margin keeps it on screen.
+      const half = Math.min(150, window.innerWidth / 2 - 16) + 16;
+      setPlace(variant === "bar"
+        ? { right: Math.max(8, layer.right - button.right), bottom }
+        : { left: Math.min(Math.max(button.left + button.width / 2 - layer.left, half), layer.width - half), bottom });
+    };
+    placeMenu();
+    window.addEventListener("resize", placeMenu);
+    return () => window.removeEventListener("resize", placeMenu);
+  }, [open, variant]);
 
   const playingOn = controls.active || controls.self;
   const status = connectionText(controls.status);
@@ -43,8 +66,8 @@ export function DevicePicker({ controls, variant }: { controls: ConnectControls;
         <MonitorSmartphone className="playerControlIcon" size={17} strokeWidth={2.2} aria-hidden="true" />
         {variant === "chip" ? <span>{controls.remoteName ? `on ${controls.remoteName}` : "devices"}</span> : null}
       </button>
-      {open ? (
-        <div className="connectMenu" role="menu" aria-label="play on"
+      {open ? createPortal(
+        <div className={`connectMenu connectMenu-${variant}`} role="menu" aria-label="play on" ref={menuRef} style={place}
           onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); setOpen(false); } }}>
           <strong className="connectMenuTitle">play on</strong>
           {controls.peers.map((peer) => {
@@ -62,7 +85,8 @@ export function DevicePicker({ controls, variant }: { controls: ConnectControls;
             );
           })}
           {status ? <p className="connectMenuStatus">{status}</p> : null}
-        </div>
+        </div>,
+        document.querySelector(".app") || document.body
       ) : null}
     </div>
   );
