@@ -50,11 +50,20 @@ const playable = (song: Song | undefined): song is Song => !!song && song.fileEx
  */
 export function relatedSongScores(seeds: readonly Song[], songs: readonly Song[], playlists: readonly Playlist[] = []) {
   const seedIds = new Set(seeds.map((song) => song.id));
+  const artistKeysByName = new Map<string, string[]>();
+  const artistKeysFor = (song: Song) => {
+    let keys = artistKeysByName.get(song.artist);
+    if (!keys) {
+      keys = songArtistKeys(song);
+      artistKeysByName.set(song.artist, keys);
+    }
+    return keys;
+  };
   const artists = new Map<string, number>();
   const albums = new Map<string, number>();
   const genre = new Map<string, number>();
   for (const song of seeds) {
-    const keys = songArtistKeys(song);
+    const keys = artistKeysFor(song);
     for (const key of keys) artists.set(key, (artists.get(key) || 0) + 1 / keys.length);
     const album = `${artistKey(song.album || "")}\u0000${keys[0] || ""}`;
     albums.set(album, (albums.get(album) || 0) + 1);
@@ -71,11 +80,17 @@ export function relatedSongScores(seeds: readonly Song[], songs: readonly Song[]
   }
   const count = Math.max(1, seeds.length);
   const scores = new Map<string, number>();
+  const genreMatches = new Map<string, number>();
   for (const song of songs) {
     if (seedIds.has(song.id) || !playable(song)) continue;
-    const keys = songArtistKeys(song);
+    const keys = artistKeysFor(song);
     const artist = Math.min(1, Math.max(0, ...keys.map((key) => (artists.get(key) || 0) / count)) * 3);
-    const genreMatch = cosine(genre, genreTokens(song.genre));
+    const genreKey = String(song.genre || "");
+    let genreMatch = genreMatches.get(genreKey);
+    if (genreMatch === undefined) {
+      genreMatch = cosine(genre, genreTokens(genreKey));
+      genreMatches.set(genreKey, genreMatch);
+    }
     const album = (albums.get(`${artistKey(song.album || "")}\u0000${keys[0] || ""}`) || 0) / count;
     const shared = Math.min(1, together.get(song.id) || 0);
     if (!artist && genreMatch < .25 && !shared) continue;

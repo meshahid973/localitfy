@@ -49,10 +49,14 @@ export function buildSongSearchEntry(song:Song):SongSearchEntry{const raw=stripA
 // Song state updates replace objects rather than mutating them. Cache by identity
 // so liking one track does not renormalize every unchanged track in the library.
 const songSearchEntryCache = new WeakMap<Song, SongSearchEntry>();
-export function buildSongSearchEntryCached(song: Song): SongSearchEntry {
+export function buildSongSearchEntryCached(song: Song, previous?: SongSearchEntry): SongSearchEntry {
   const cached = songSearchEntryCache.get(song);
   if (cached) return cached;
-  const entry = buildSongSearchEntry(song);
+  const entry = previous && previous.song.title === song.title && previous.song.artist === song.artist &&
+    previous.song.album === song.album && previous.song.filePath === song.filePath &&
+    previous.song.url === song.url && previous.song.liked === song.liked
+    ? { ...previous, song }
+    : buildSongSearchEntry(song);
   songSearchEntryCache.set(song, entry);
   return entry;
 }
