@@ -70,7 +70,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
-    "concurrently": "^9.2.1",
+    "concurrently": "^9.2.5",
     "electron": "^41.5.0",
     "electron-builder": "^26.8.1",
     "fast-average-color": "^9.5.2",
@@ -81,7 +81,7 @@
     "react-dom": "^19.2.3",
     "sharp": "^0.35.3",
     "typescript": "^5.9.3",
-    "vite": "^8.0.10",
+    "vite": "^8.3.8",
     "wait-on": "^9.0.10"
   },
   "build": {
