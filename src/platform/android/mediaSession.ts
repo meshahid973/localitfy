@@ -1,6 +1,11 @@
 import { LocaltifyNative, type MediaAction } from "./native";
 
 type Handler = (details: MediaSessionActionDetails) => void;
+/** What usePlaybackConnect reports while another device plays (event "localtifyremotemedia"). */
+type RemoteMedia = {
+  title: string; artist: string; album: string; artworkUrl: string; device: string;
+  playing: boolean; positionMs: number; durationMs: number; shuffle: boolean; repeat: "off" | "one" | "all";
+};
 
 /**
  * The renderer already describes playback through navigator.mediaSession (as it does for macOS and Windows).
@@ -15,9 +20,11 @@ export function installMediaSessionBridge(filesDir: string, mediaPrefix: string)
   let timer = 0;
   // Shuffle and repeat aren't part of the web media session; the phone player reports them with this event.
   let modes: { shuffle: boolean; repeat: "off" | "one" | "all" } = { shuffle: false, repeat: "off" };
+  // While the phone is a remote for the Mac, the notification shows and controls what plays there instead.
+  let remote: RemoteMedia | null = null;
 
-  const artworkPath = () => {
-    const src = metadata?.artwork?.[0]?.src || "";
+  const artworkPath = (url?: string) => {
+    const src = url ?? metadata?.artwork?.[0]?.src ?? "";
     if (!src.startsWith(mediaPrefix)) return "";
     return `${filesDir}/${decodeURIComponent(src.slice(mediaPrefix.length).split("?")[0])}`;
   };
@@ -25,6 +32,14 @@ export function installMediaSessionBridge(filesDir: string, mediaPrefix: string)
   const push = () => {
     window.clearTimeout(timer);
     timer = window.setTimeout(() => {
+      if (remote) {
+        void LocaltifyNative.updateMedia({
+          title: remote.title, artist: remote.device ? `${remote.artist} · on ${remote.device}` : remote.artist, album: remote.album,
+          artwork: artworkPath(remote.artworkUrl), state: remote.playing ? "playing" : "paused",
+          position: remote.positionMs / 1000, duration: remote.durationMs / 1000, rate: 1, shuffle: remote.shuffle, repeat: remote.repeat
+        }).catch(() => undefined);
+        return;
+      }
       const element = lastPlayed;
       const duration = element && Number.isFinite(element.duration) ? element.duration : 0;
       void LocaltifyNative.updateMedia({
@@ -96,6 +111,13 @@ export function installMediaSessionBridge(filesDir: string, mediaPrefix: string)
     });
   }
 
+  window.addEventListener("localtifyremotemedia", (event) => {
+    const next = (event as CustomEvent<RemoteMedia | null>).detail;
+    // Back to this phone's own playback: show it again, or nothing if nothing was loaded here.
+    remote = next;
+    push();
+  });
+
   window.addEventListener("localtifyplayermodes", (event) => {
     modes = (event as CustomEvent<typeof modes>).detail;
     push();
@@ -103,6 +125,10 @@ export function installMediaSessionBridge(filesDir: string, mediaPrefix: string)
 
   void LocaltifyNative.addListener("mediaAction", ({ action, position }) => {
     const name: MediaAction = action;
+    if (remote) {
+      window.dispatchEvent(new CustomEvent("localtifyremoteaction", { detail: { action: name === "stop" ? "pause" : name, position } }));
+      return;
+    }
     if (name === "shuffle" || name === "repeat") {
       window.dispatchEvent(new CustomEvent("localtifymodeaction", { detail: name }));
       return;

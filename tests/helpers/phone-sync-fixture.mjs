@@ -31,7 +31,7 @@ export function receiptRepository(database) {
  * A fresh connection per request, like the phone's native client. fetch's keep-alive pool (Node 22) would reuse a
  * socket to the server the test just restarted and fail instead of reconnecting.
  */
-function send({ url, method = "GET", headers = {}, body }) {
+export function send({ url, method = "GET", headers = {}, body }) {
   return new Promise((resolve, reject) => {
     const request = http.request(url, { method, headers, agent: false }, (response) => {
       let text = "";
@@ -41,6 +41,51 @@ function send({ url, method = "GET", headers = {}, body }) {
     });
     request.on("error", reject);
     request.end(body);
+  });
+}
+
+/**
+ * Reads the live event stream (GET /v1/live) on its own connection, like the phone's native reader.
+ * `next(type)` waits for the next event of that type; `close()` destroys the socket so the server sees the phone go.
+ */
+export function openLiveStream(url, token) {
+  return new Promise((resolve, reject) => {
+    const events = [];
+    const waiting = [];
+    const request = http.request(`${url}/v1/live`, { headers: token ? { Authorization: `Bearer ${token}` } : {}, agent: false }, (response) => {
+      let buffer = "";
+      response.setEncoding("utf8");
+      response.on("data", (chunk) => {
+        buffer += chunk;
+        let end;
+        while ((end = buffer.indexOf("\n\n")) >= 0) {
+          const block = buffer.slice(0, end);
+          buffer = buffer.slice(end + 2);
+          const data = block.split("\n").filter((line) => line.startsWith("data: ")).map((line) => line.slice(6)).join("\n");
+          if (!data) continue;
+          const event = JSON.parse(data);
+          const index = waiting.findIndex((item) => item.type === event.type);
+          if (index >= 0) waiting.splice(index, 1)[0].resolve(event);
+          else events.push(event);
+        }
+      });
+      resolve({
+        status: response.statusCode,
+        events,
+        next(type, timeoutMs = 2000) {
+          const index = events.findIndex((event) => event.type === type);
+          if (index >= 0) return Promise.resolve(events.splice(index, 1)[0]);
+          return new Promise((done, fail) => {
+            const item = { type, resolve: (event) => { clearTimeout(timer); done(event); } };
+            const timer = setTimeout(() => { waiting.splice(waiting.indexOf(item), 1); fail(new Error(`no ${type} event`)); }, timeoutMs);
+            waiting.push(item);
+          });
+        },
+        close() { request.destroy(); }
+      });
+    });
+    request.on("error", reject);
+    request.end();
   });
 }
 
@@ -57,7 +102,7 @@ function compile(file, dependencies = {}) {
 }
 
 /** Real sync HTTP server + durable SQLite receipts/events, with the real phone modules and a persisted KV transport double. */
-export async function syncFixture() {
+export async function syncFixture({ liveOptions } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-sync-races-"));
   const file = path.join(dir, "song.mp3");
   fs.writeFileSync(file, "audio");
@@ -78,13 +123,21 @@ export async function syncFixture() {
       save: (value) => database.prepare("UPDATE fixture_playlists SET value=?").run(JSON.stringify(value))
     },
     listening: { record: (event) => events.recordPlayEvent(database, event), counts: () => [] },
-    sync: { applyBatch: (...args) => receipts.applyPhoneSyncBatch(database, ...args) }
+    sync: {
+      applyBatch: (...args) => receipts.applyPhoneSyncBatch(database, ...args),
+      likeClock: (id) => receipts.readLikeClock(database, id),
+      setLikeClock: (id, at) => receipts.writeLikeClock(database, id, at)
+    }
   };
   let server;
   let port;
   const scrobbled = [];
+  const computerEvents = [];
   async function startServer() {
-    server = createSyncServer({ repositories, coverPath: () => "", statePath: path.join(dir, "state.json"), onPlayEvent: (event) => scrobbled.push(event) });
+    server = createSyncServer({
+      repositories, coverPath: () => "", statePath: path.join(dir, "state.json"), onPlayEvent: (event) => scrobbled.push(event),
+      onLiveEvent: (event) => computerEvents.push(event), liveOptions
+    });
     port = await server.start(port || 0);
   }
   await startServer();
@@ -138,7 +191,8 @@ export async function syncFixture() {
   await sync.pairWithMac(`127.0.0.1:${port}`, server.newPairingCode().code);
   await sync.syncNow();
   return {
-    get phone() { return phone; }, get sync() { return sync; }, repositories, requests, hooks, persisted, scrobbled,
+    get phone() { return phone; }, get sync() { return sync; }, get server() { return server; }, get url() { return `http://127.0.0.1:${port}`; },
+    repositories, requests, hooks, persisted, scrobbled, computerEvents,
     restartPhone,
     async restartServer() {
       await server.stop(); database.close(); database = receiptDatabase(path.join(dir, "mac.sqlite")); await startServer();

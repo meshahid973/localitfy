@@ -28,8 +28,13 @@ export interface LocaltifyNativePlugin {
   setSyncActive(options: { active: boolean }): Promise<void>;
   moveToBackground(): Promise<void>;
   updateMedia(options: MediaUpdate): Promise<void>;
+  /** Opens (or keeps) the live event stream from the Mac; reconnects on its own until liveDisconnect. */
+  liveConnect(options: { url: string; token: string }): Promise<void>;
+  liveDisconnect(): Promise<void>;
   addListener(event: "mediaAction", listener: (data: { action: MediaAction; position?: number }) => void): Promise<PluginListenerHandle>;
   addListener(event: "downloadProgress", listener: (data: { id: string; received: number; total: number }) => void): Promise<PluginListenerHandle>;
+  addListener(event: "liveEvent", listener: (data: { data: string }) => void): Promise<PluginListenerHandle>;
+  addListener(event: "liveStatus", listener: (data: { status: "connecting" | "connected" | "offline" | "unsupported" | "unpaired" }) => void): Promise<PluginListenerHandle>;
 }
 
 export const LocaltifyNative = registerPlugin<LocaltifyNativePlugin>("LocaltifyNative");

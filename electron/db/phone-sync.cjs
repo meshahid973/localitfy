@@ -1,8 +1,21 @@
-/** One durable receipt per paired phone. Changes and their receipt commit in the same SQLite transaction. */
+/**
+ * One durable receipt per paired phone. Changes and their receipt commit in the same SQLite transaction.
+ * phone_like_clock keeps when each song's like last changed (Mac clock), so the newest tap wins on either device.
+ */
 function createPhoneSyncTable(database) {
   database.exec(`CREATE TABLE IF NOT EXISTS phone_sync_receipts (
     deviceId TEXT PRIMARY KEY, sequence INTEGER NOT NULL, digest TEXT NOT NULL, result TEXT NOT NULL
   )`);
+  database.exec("CREATE TABLE IF NOT EXISTS phone_like_clock (songId TEXT PRIMARY KEY, changedAt INTEGER NOT NULL)");
+}
+
+function readLikeClock(database, songId) {
+  return Number(database.prepare("SELECT changedAt FROM phone_like_clock WHERE songId = ?").get(songId)?.changedAt || 0);
+}
+
+function writeLikeClock(database, songId, changedAt) {
+  database.prepare(`INSERT INTO phone_like_clock (songId, changedAt) VALUES (?, ?)
+    ON CONFLICT(songId) DO UPDATE SET changedAt = excluded.changedAt`).run(songId, Math.round(changedAt));
 }
 
 function applyPhoneSyncBatch(database, deviceId, sequence, digest, apply) {
@@ -21,4 +34,4 @@ function applyPhoneSyncBatch(database, deviceId, sequence, digest, apply) {
   })();
 }
 
-module.exports = { createPhoneSyncTable, applyPhoneSyncBatch };
+module.exports = { createPhoneSyncTable, applyPhoneSyncBatch, readLikeClock, writeLikeClock };

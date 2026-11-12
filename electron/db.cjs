@@ -12,7 +12,7 @@ const path = require("node:path");
 const packageMetadata = require("../package.json");
 
 const APP_VERSION = String(packageMetadata?.version || "0.0.0");
-const SCHEMA_VERSION = 20;
+const SCHEMA_VERSION = 21;
 const BACKUP_KEEP_LIMIT = 8;
 
 let db = null;
@@ -644,7 +644,7 @@ function runMigrations(database) {
   createMetaTables(database);
 
   const previousVersion = getStoredSchemaVersion(database);
-  const shouldBackup = previousVersion !== SCHEMA_VERSION || !tableExists(database, "songs") || !tableExists(database, "settings") || !tableExists(database, "playlists") || !tableExists(database, "playlist_songs") || !tableExists(database, "play_events") || !tableExists(database, "song_analysis") || !tableExists(database, "daily_mixes") || !tableExists(database, "lyrics_selections") || !tableExists(database, "phone_sync_receipts");
+  const shouldBackup = previousVersion !== SCHEMA_VERSION || !tableExists(database, "songs") || !tableExists(database, "settings") || !tableExists(database, "playlists") || !tableExists(database, "playlist_songs") || !tableExists(database, "play_events") || !tableExists(database, "song_analysis") || !tableExists(database, "daily_mixes") || !tableExists(database, "lyrics_selections") || !tableExists(database, "phone_sync_receipts") || !tableExists(database, "phone_like_clock");
 
   lastMigrationReport = {
     ok: true,
@@ -1103,6 +1103,8 @@ function getDatabaseStatus() {
 
 module.exports = {
   applyPhoneSyncBatch: (deviceId, sequence, digest, apply) => phoneSync.applyPhoneSyncBatch(ensureDb(), deviceId, sequence, digest, apply),
+  readLikeClock: (songId) => phoneSync.readLikeClock(ensureDb(), songId),
+  writeLikeClock: (songId, changedAt) => phoneSync.writeLikeClock(ensureDb(), songId, changedAt),
   mergeDuplicateSongs: (merges) => duplicateMerge.mergeDuplicateSongs(ensureDb(), merges),
   getAudioProfiles: (modelId, analyzerVersion) => duplicateMerge.listAudioProfiles(ensureDb(), modelId, analyzerVersion),
   getLyricsSelection: (songId) => lyricsSelections.readLyricsSelection(ensureDb(), songId),

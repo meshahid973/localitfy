@@ -2,7 +2,7 @@
  * Three-way merge for phone sync. `base` is what both sides agreed on at the last sync, `mac` is the Mac now
  * and `phone` is this phone now. Only the phone's own edits are pushed; the Mac applies them and the phone
  * then adopts the Mac's result. When both sides changed the same thing, the phone's edit wins, except that
- * play counts add up and an edited playlist is kept over a deleted one.
+ * play counts add up, an edited playlist is kept over a deleted one, and the newer like or unlike wins.
  */
 
 export const EDITABLE_SONG_FIELDS = ["liked", "title", "artist", "album", "genre", "volumeGain", "customVolume"] as const;
@@ -21,7 +21,8 @@ export type SyncSongFields = {
   lastPlayed?: string | null;
 };
 
-export type SongChange = Partial<Pick<SyncSongFields, EditableField>> & { playCountDelta?: number; lastPlayed?: string };
+/** likedAt: when the like was tapped, on the Mac's clock, so the newest tap on either device wins. */
+export type SongChange = Partial<Pick<SyncSongFields, EditableField>> & { playCountDelta?: number; lastPlayed?: string; likedAt?: number };
 
 export type SyncPlaylist = { id: string; name: string; songIds: string[]; createdAt: number; rules?: unknown };
 

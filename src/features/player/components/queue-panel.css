@@ -93,6 +93,11 @@
   background: rgba(var(--accent-rgb), 0.1);
 }
 
+.queuePanelRow.isUnavailable .queuePanelRowMain{
+  opacity: .45;
+  cursor: default;
+}
+
 .queuePanelRow.isDropTarget{
   box-shadow: inset 0 2px 0 rgb(var(--accent-rgb));
 }

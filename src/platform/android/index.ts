@@ -4,7 +4,8 @@ import { APP_VERSION, WHATS_NEW_SEEN_KEY } from "../../features/updates/update.c
 import { createAndroidBridge } from "./bridge";
 import { phoneLibrary } from "./library";
 import { installMediaSessionBridge } from "./mediaSession";
-import { isSyncing, setFeaturesChangedHandler, syncNow } from "./sync";
+import { isSyncing, onSyncProgress, setFeaturesChangedHandler, syncNow } from "./sync";
+import { installLiveConnection, onLiveEvent, restartLiveConnection } from "./live";
 import "./android.css";
 
 const AUTO_SYNC_AFTER_MS = 10 * 60 * 1000;
@@ -33,6 +34,20 @@ export async function installAndroidBridge() {
     void syncNow();
   };
   window.setTimeout(autoSync, 4000);
+
+  // The live connection (likes, playback, remote control) runs alongside; a finished sync may have just paired.
+  installLiveConnection();
+  onSyncProgress((next) => {
+    if (next.phase === "done") restartLiveConnection();
+  });
+  // Back in reach after being away: send what changed meanwhile (likes, plays) instead of waiting for the next sync.
+  let wasOffline = false;
+  onLiveEvent((event) => {
+    if (event.type !== "connection") return;
+    if (event.status === "offline") wasOffline = true;
+    if (event.status === "connected" && wasOffline && !isSyncing()) void syncNow();
+    if (event.status === "connected") wasOffline = false;
+  });
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") autoSync();
   });
