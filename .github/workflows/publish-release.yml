@@ -70,7 +70,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
-      LOCALTIFY_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.LOCALTIFY_ANDROID_KEYSTORE_PASSWORD }}
       LOCALTIFY_ANDROID_KEY_ALIAS: localtify
     steps:
       - uses: actions/checkout@v5
@@ -84,6 +83,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          packages: ''
+          log-accepted-android-sdk-licenses: false
       - run: node -e "if (process.env.RELEASE_TAG !== 'v' + require('./package.json').version) process.exit(1)"
       - run: npm ci
       - run: npm run build
@@ -91,6 +94,7 @@ jobs:
       - name: Prepare Android SDK and signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.LOCALTIFY_ANDROID_KEYSTORE_BASE64 }}
+          LOCALTIFY_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.LOCALTIFY_ANDROID_KEYSTORE_PASSWORD }}
         run: |
           test -n "$KEYSTORE_BASE64"
           test -n "$LOCALTIFY_ANDROID_KEYSTORE_PASSWORD"
@@ -100,6 +104,8 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$signing_path"
           sdkmanager "platforms;android-36" "build-tools;35.0.0"
       - name: Build signed release APK
+        env:
+          LOCALTIFY_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.LOCALTIFY_ANDROID_KEYSTORE_PASSWORD }}
         run: bash android/gradlew -p android assembleRelease lintRelease testReleaseUnitTest
       - name: Verify APK identity and signature
         run: |
