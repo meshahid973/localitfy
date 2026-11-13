@@ -30,7 +30,7 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  color: #0b0710;
+  color: var(--accent-contrast, var(--lt-bg));
   background: var(--lt-accent);
   box-shadow: 0 8px 22px rgba(0, 0, 0, .42);
   cursor: pointer;
@@ -55,4 +55,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .mediaCardPlay { transition: opacity 80ms linear; transform: none; }
+}
+
+/* Coarse pointers have no hover; keep collection playback discoverable. */
+@media (hover: none), (pointer: coarse) {
+  .mediaCardPlay { opacity: 1; transform: none; }
 }

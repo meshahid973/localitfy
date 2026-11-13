@@ -35,25 +35,10 @@ export function MascotStateArt({
   );
 }
 
-export function mascotStateForToast(kind?: string): MascotStateKey {
-  if (kind === "success") return "happy";
-  if (kind === "error") return "error";
-  if (kind === "work") return "loading";
-  return "info";
-}
-
 export function WindowMinimizeIcon() {
   return (
     <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" focusable="false">
       <path d="M2.25 6.25h7.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-export function WindowMaximizeIcon() {
-  return (
-    <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" focusable="false">
-      <rect x="2.2" y="2.2" width="7.6" height="7.6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.45" />
     </svg>
   );
 }
@@ -179,7 +164,6 @@ export function LocaltifyStateCard({
   actions?: ReactNode;
   centered?: boolean;
   cute?: boolean;
-  badge?: string;
   mascotState?: MascotStateKey;
 }) {
   const resolvedMascotState = mascotState || mascotStateForTone(tone, cute);
@@ -192,7 +176,12 @@ export function LocaltifyStateCard({
               <MascotStateArt state={resolvedMascotState} className="localtifyEmptyMascotV496" />
             </span>
           </div>
-          <p className="localtifyEmptyCaptionV467">my team couldn't find anything here!!</p>
+          <div className="localtifyEmptyCopyV467">
+            <p className="eyebrow">{eyebrow}</p>
+            <strong className="localtifyEmptyCaptionV467">{title}</strong>
+            <span>{message}</span>
+            {detail ? <small>{detail}</small> : null}
+          </div>
           {actions ? <div className="localtifyStateActionsV373 localtifyEmptyActionsV467">{actions}</div> : null}
         </>
       ) : (
@@ -211,37 +200,5 @@ export function LocaltifyStateCard({
         </>
       )}
     </div>
-  );
-}
-
-export function MascotHelperBubble({
-  state = "info",
-  tone = "info",
-  eyebrow,
-  title,
-  message,
-  actions,
-  hideMascot = false,
-  className = ""
-}: {
-  state?: MascotStateKey;
-  tone?: LocaltifyStateCardTone;
-  eyebrow?: string;
-  title: string;
-  message: string;
-  actions?: ReactNode;
-  hideMascot?: boolean;
-  className?: string;
-}) {
-  return (
-    <aside className={`mascotHelperBubbleV501 mascotHelper-${state} ${tone} ${hideMascot ? "noMascotV511" : ""} ${className}`.trim()} role="status">
-      {!hideMascot ? <MascotStateArt state={state} className="mascotHelperArtV501" /> : null}
-      <div className="mascotHelperCopyV501">
-        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-        <strong>{title}</strong>
-        <span>{message}</span>
-      </div>
-      {actions ? <div className="mascotHelperActionsV501">{actions}</div> : null}
-    </aside>
   );
 }

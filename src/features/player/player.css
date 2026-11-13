@@ -246,10 +246,6 @@
   stroke: #ffffff !important;
 }
 
-.playerBar .circleButton.main .playIcon{
-  transform: translateX(1px) !important;
-}
-
 .playButtonBurst{
   animation: localtifyPlayButtonBurst 360ms cubic-bezier(0.18, 0.9, 0.2, 1.2) both !important;
 }
@@ -660,12 +656,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   }
 }
 
-.playerBar{
-  --player-cover-sync-strength: var(--cover-sync-strength, 0.50);
-
-
-}
-
 .playerBar .playerCenter{
 
   gap: 6px !important;
@@ -680,29 +670,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
-}
-
-
-.playerBar[data-cover-sync="off"],
-.app[data-cover-sync="off"] .playerBar{
-
-  --player-cover-sync-strength: 0;
-
-}
-
-.playerBar[data-cover-sync="subtle"],
-.app[data-cover-sync="subtle"] .playerBar{
-  --player-cover-sync-strength: 0.30;
-}
-
-.playerBar[data-cover-sync="normal"],
-.app[data-cover-sync="normal"] .playerBar{
-  --player-cover-sync-strength: 0.50;
-}
-
-.playerBar[data-cover-sync="strong"],
-.app[data-cover-sync="strong"] .playerBar{
-  --player-cover-sync-strength: 0.72;
 }
 
 .playerBar[data-cover-sync="strong"]::after,
@@ -897,11 +864,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   fill-opacity: 1 !important;
 }
 
-.playerBar .circleButton.main .playIcon,
-.playerBar .playPauseButton .playIcon{
-  transform: translateX(1px) !important;
-}
-
 
 .playerBar .progressRow{
   width: min(700px, 100%) !important;
@@ -943,8 +905,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar{
   --player-center-y: 11px;
   --player-side-y: 5px;
-  --player-cover-sync-opacity: var(--cover-sync-player-opacity, 0.54);
-  --player-cover-sync-tint: var(--cover-sync-player-tint, 0.20);
 
 
   transition:
@@ -1048,30 +1008,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
     0 0 0 1px rgba(var(--accent-rgb), 0.14) inset !important;
 }
 
-.playerBar[data-cover-sync="subtle"],
-.app[data-cover-sync="subtle"] .playerBar{
-  --player-cover-sync-opacity: 0.38;
-  --player-cover-sync-tint: 0.12;
-}
-
-.playerBar[data-cover-sync="normal"],
-.app[data-cover-sync="normal"] .playerBar{
-  --player-cover-sync-opacity: 0.54;
-  --player-cover-sync-tint: 0.20;
-}
-
-.playerBar[data-cover-sync="strong"],
-.app[data-cover-sync="strong"] .playerBar{
-  --player-cover-sync-opacity: 0.68;
-  --player-cover-sync-tint: 0.28;
-}
-
-.playerBar[data-cover-sync="off"],
-.app[data-cover-sync="off"] .playerBar{
-  --player-cover-sync-opacity: 0;
-  --player-cover-sync-tint: 0;
-}
-
 .playerBar[data-cover-sync="off"]::before,
 .app[data-cover-sync="off"] .playerBar::before,
 .playerBar[data-ambient="false"]::before,
@@ -1113,10 +1049,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 .app[data-cover-sync="off"] .playerBar,
 .playerBar[data-cover-sync="off"]{
-  --player-cover-sync-opacity: 0.46 !important;
-  --player-cover-sync-tint: 0.24 !important;
   --player-progress-fallback-opacity: 0.50;
-  --player-progress-fallback-tint: 0.22;
   --player-track-base: rgba(255, 255, 255, 0.16) !important;
   background:
     radial-gradient(circle at 50% -38%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.22), transparent 45%),
@@ -1253,8 +1186,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   transform: translate3d(0,0,0) scale(1) !important;
   filter: none !important;
   box-shadow:
-    0 0 0 1px rgba(var(--player-accent-rgb), .2),
-    0 18px 42px rgba(var(--player-accent-rgb), var(--player-ambience-opacity, .18)) !important;
+    0 0 0 1px rgba(var(--progress-rgb, var(--accent-rgb)), .2),
+    0 18px 42px rgba(var(--progress-rgb, var(--accent-rgb)), var(--player-ambience-opacity, .18)) !important;
 }
 
 .playerBar .smallArt::before,
@@ -1294,18 +1227,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   color: #fff !important;
   stroke: #fff !important;
   fill: currentColor !important;
-}
-
-
-@keyframes queueDrawerIn {
-  from {
-    opacity: 0;
-    transform: translateX(22px) scale(.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
 }
 
 
@@ -1599,10 +1520,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .controlRow > .circleButton.main > .playerControlIcon,
 .playerBar .controlRow > .circleButton.main > svg{
   transform: none !important;
-}
-
-.playerBar .controlRow > .circleButton.main > .playIcon{
-  transform: translateX(1px) !important;
 }
 
 
@@ -1919,49 +1836,9 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   box-shadow: 0 10px 24px rgba(var(--accent-rgb),0.22) !important;
 }
 
-/* localtify 0.3.9 V301 — smoother player paint path */
-body.localtifyPerfV301 .playerBar{
-  contain: layout paint style !important;
-  transform: translateZ(0) !important;
-  backface-visibility: hidden !important;
-}
-
-body.localtifyPerfV301 .playerBar :is(
-  .playerLeft,
-  .playerCenter,
-  .playerRight,
-  .controlRow,
-  .progressRow,
-  .volumeWrap
-){
-  will-change: auto !important;
-  backface-visibility: hidden !important;
-}
-
-body.localtifyPerfV301 .playerBar :is(button, input, .circleButton, .playerButton, .volumeIconButton){
-  touch-action: manipulation !important;
-}
-
-body.localtifyPerfV301 .app.isScrolling .playerBar::before,
-body.localtifyPerfV301.localtifyBackgroundMode .playerBar::before{
-  opacity: 0.08 !important;
-  filter: blur(14px) saturate(1.08) brightness(0.72) !important;
-  transform: translateZ(0) scale(1.02) !important;
-}
-
-body.localtifyPerfV301 .app.isScrolling .playerBar:hover::before{
-  opacity: 0.12 !important;
-  filter: blur(16px) saturate(1.1) brightness(0.74) !important;
-}
-
-body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
-  will-change: auto !important;
-}
-
-/* localtify 0.4.0 — player control cleanup.
+/* player control cleanup.
    Fixes the visible player outline, removes the volume icon bubble,
-   and makes accent buttons readable on light/dark custom colors.
-*/
+   and makes accent buttons readable on light/dark custom colors. */
 .playerBar{
   --player-main-readable: var(--player-main-button-text, var(--accent-contrast, #06100b));
   --player-progress-fill: rgb(var(--accent-rgb)) !important;
@@ -2053,7 +1930,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 }
 
 
-/* v0.4.1: smooth play/pause path morph for the main player button */
+/* Play/pause path morph for the main player button. */
 .playerMorphIcon{
   width: 26px !important;
   height: 26px !important;
@@ -2095,11 +1972,9 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 }
 
 
-/* v0.4.1: player CSS ownership pass — radius scale + morph icon sizing */
+/* Player artwork radius. */
 .playerBar{
   --player-radius-xs: 12px;
-  --player-radius-s: 16px;
-  --player-radius-m: 24px;
 }
 
 .playerBar .smallArt {
@@ -2107,7 +1982,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 }
 
 
-/* v0.4.1: small player icon polish + safer album delete confirmation */
+/* Player control icon sizing. */
 .playerBar .circleButton:not(.main) .playerControlIcon,
 .playerBar .circleButton:not(.main) svg,
 .playerBar .volumeIconButton svg,
@@ -2167,7 +2042,7 @@ body.localtifyPerfV301 .playerBar .progressRow input[type="range"]{
 }
 
 
-/* v0.4.1 performance ownership: player blur/glow safety */
+/* Pause expensive player decoration during interaction. */
 .app .playerBar{
   --player-perf-blur: 32px;
   --player-perf-opacity: 0.42;

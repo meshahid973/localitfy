@@ -68,7 +68,7 @@ export default function SidebarNav({ view, changeView, sidebarNavOrder, sidebarH
                     <span className="navDiscordPillV468" aria-hidden="true" />
                     <span className={`navIcon navIcon-${item.id}`} aria-hidden="true">
                       <span className="navIconMotionV468">
-                        <Icon className="navLucideIcon" size={22} strokeWidth={2.75} fill="none" />
+                        <Icon className="navLucideIcon" size={20} strokeWidth={2} fill="none" />
                       </span>
                     </span>
                     <span className="navText">

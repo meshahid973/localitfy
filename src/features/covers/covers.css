@@ -3,9 +3,6 @@
 /* Cover-specific reset previously lived in App.css. */
 .coversView,
 .coversPage {
-  --grid-line: transparent !important;
-  --app-grid-line: transparent !important;
-  --page-line: transparent !important;
   background-size: auto !important;
 }
 .coversPage {
@@ -123,7 +120,27 @@
 .coverStudioLayout .coverEmptyState { min-height: 190px; width: 100%; padding: 20px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px; }
 .coverStudioLayout .coverEmptyImageShellV466 { max-width: 115px; max-height: 115px; overflow: hidden; }
 .coverStudioLayout .coverEmptyImageShellV466 img { max-width: 115px; max-height: 115px; object-fit: contain; }
-.coverStudioLayout .coverEmptyCaptionV467 { font-size: 12px; color: var(--cover-muted); text-align: center; }
+.coverStudioLayout .coverEmptyCopyV500 {
+  min-width: 0;
+  max-width: 280px;
+  display: grid;
+  gap: 5px;
+  text-align: center;
+}
+
+.coverStudioLayout .coverEmptyCaptionV467 {
+  color: var(--cover-text);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.coverStudioLayout .coverEmptyDetailV500 {
+  margin: 0;
+  color: var(--cover-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
 .coverStudioLayout .coverPreviewEmpty { display: grid; place-items: center; border-radius: 7px; background: var(--cover-raised); color: var(--cover-muted); }
 
 /* Cover tools stay available without filling the hero with maintenance actions. */

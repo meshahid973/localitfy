@@ -267,7 +267,6 @@ export default function AlbumsView(props: AlbumsViewProps) {
                       <LocaltifyStateCard
                         centered
                         cute
-                        badge="▣"
                         tone="info"
                         eyebrow="albums"
                         title="No albums yet"

@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const https = require("node:https");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const { version: localtifyVersion } = require("../../package.json");
 
 const YTDLP_VERSION = "2026.08.19";
 // yt-dlp_macos is a universal binary, so Apple silicon and Intel Macs share it.
@@ -53,7 +54,7 @@ function downloadHttpsToFile(urlString, targetPath, redirectLimit = 6) {
 
     const request = https.get(parsed, {
       headers: {
-        "User-Agent": "localtify-yt-dlp-manager/0.4.1",
+        "User-Agent": `localtify-yt-dlp-manager/${localtifyVersion}`,
         "Accept": "application/octet-stream"
       }
     }, (response) => {

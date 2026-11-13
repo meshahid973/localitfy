@@ -1,7 +1,5 @@
 .onboardingV315 {
-  --panel-bg: rgba(10, 10, 14, 0.94);
   --panel-edge: rgba(255, 255, 255, 0.075);
-  --panel-soft: rgba(255, 255, 255, 0.04);
   --copy-strong: rgba(255, 255, 255, 0.96);
   --copy-muted: rgba(255, 255, 255, 0.62);
   --copy-dim: rgba(255, 255, 255, 0.42);
@@ -665,26 +663,6 @@
     font-size: clamp(44px, 9vw, 62px);
   }
 }
-
-/* localtify 0.3.9 V301 — lighter first-run compositor path */
-body.localtifyPerfV301 .onboardingV315 {
-  contain: layout paint style;
-}
-
-body.localtifyPerfV301 .onboardingCoreOrb{
-  filter: saturate(112%) contrast(1.01);
-  box-shadow:
-    0 0 28px rgba(var(--onboarding-accent-rgb), 0.22),
-    0 0 72px rgba(var(--onboarding-accent-rgb), 0.10),
-    inset -18px -20px 32px rgba(0, 0, 0, 0.26),
-    inset 14px 12px 22px rgba(255, 255, 255, 0.10);
-}
-
-body.localtifyPerfV301 .onboardingV315 :is(button, input) {
-  touch-action: manipulation;
-}
-
-/* V463 small onboarding optimization */
 .onboardingV315,
 .localitfyOnboardingShell,
 .onboardingBody{
@@ -711,13 +689,7 @@ body.localtifyPerfV301 .onboardingV315 :is(button, input) {
   user-select: none;
 }
 
-body.localtifyPerfV301 .onboardingThemeChoice,
-body.localtifyPerfV301 .onboardingFeatureGrid.cleaner > div,
-body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
-  transition-property: border-color, background-color, box-shadow;
-}
-
-/* localtify v499 — onboarding peeking mascot */
+/* Peeking mascot. */
 .localitfyOnboardingShell{
   isolation: isolate;
 
@@ -796,9 +768,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
     display: none;
   }
 }
-/* end localtify v499 */
-
-/* localtify v505 — onboarding first impression cleanup */
 .localitfyOnboardingShell{
 
 
@@ -939,9 +908,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
     content: "";
   }
 }
-/* end localtify v505 */
-
-/* localtify v506 — onboarding layout fix after first impression test */
 .localitfyOnboardingShell{
   width: min(1120px, calc(100vw - 180px));
   min-height: 600px;
@@ -1099,7 +1065,6 @@ body.localtifyPerfV301 .onboardingSummaryGrid.cleaner > div{
     display: none;
   }
 }
-/* end localtify v506 */
 
 /* Keep step content clear of the peeking mascot while it is visible. */
 @media (min-width: 861px){

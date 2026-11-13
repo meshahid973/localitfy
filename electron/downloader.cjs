@@ -492,16 +492,6 @@ function getSpotifyTrackUrl(track = {}) {
   return trackId ? `https://open.spotify.com/track/${trackId}` : explicit;
 }
 
-function buildSpotifySearchQuery(track = {}) {
-  const title = String(track.title || track.name || "unknown track").trim();
-  const artist = String(track.artist || track.artists || "").trim();
-  const isrc = String(track.isrc || "").trim();
-
-  if (isrc) return `${artist ? `${artist} ` : ""}${title} ${isrc} official audio`.trim();
-  if (artist) return `${artist} - ${title} official audio`;
-  return `${title} official audio`;
-}
-
 function buildSpotifySearchQueries(track = {}) {
   const title = String(track.title || track.name || "unknown track").trim();
   const artist = String(track.artist || track.artists || "").trim();

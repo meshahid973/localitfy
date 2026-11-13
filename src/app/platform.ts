@@ -52,7 +52,7 @@ export function getLocaltifyPlatformInfo(): LocaltifyPlatformInfo {
     startupSettingLabel: "Start localtify with Linux",
     startupSettingHelp: "Linux autostart will be added later through a proper desktop-entry flow.",
     linuxInstallNotes: [
-      "AppImage: chmod +x localtify-0.4.1-x86_64.AppImage, then run it directly.",
+      "AppImage: mark the downloaded file executable (chmod +x localtify-*.AppImage), then open it.",
       "RPM: for Fedora, openSUSE, and RHEL-style distros.",
       "DEB: for Ubuntu, Debian, Linux Mint, and related distros."
     ]

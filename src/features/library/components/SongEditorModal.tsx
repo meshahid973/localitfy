@@ -76,7 +76,7 @@ export default function SongEditorModal(props: SongEditorModalProps) {
               <div className="editorSectionTitle"><strong>metadata</strong><span>what shows inside the app</span></div>
               <div className="editorLabelGrid">
                 <label><span>title</span><input value={editTitle} onChange={(event) => setEditTitle(event.currentTarget.value)} /></label>
-                <label><span>artist</span><input value={editArtist} onChange={(event) => setEditArtist(event.currentTarget.value)} placeholder="coderpixel / artist name" /></label>
+                <label><span>artist</span><input value={editArtist} onChange={(event) => setEditArtist(event.currentTarget.value)} placeholder="artist name" /></label>
                 <label><span>album</span><input value={editAlbum} onChange={(event) => setEditAlbum(event.currentTarget.value)} /></label>
               </div>
             </section>

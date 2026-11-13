@@ -1,16 +1,8 @@
 export const FEEDBACK_MESSAGE_MAX_LENGTH = 1_500;
-export const LOCALTIFY_041_WHATS_NEW_ITEMS = [
-  "0.4.1 is a quick hotfix for the album library importer freezing during big nested-folder scans.",
-  "Bulk album scanning now treats nested folders safer, so artist folders do not steal covers from child album folders.",
-  "Album import progress is throttled more carefully so the app stays responsive during large imports.",
-  "Linux AppImage startup and update-check noise from the 0.4.0 release path were cleaned up.",
-  "Small release cleanup: version text, Linux install copy, and old development comments were tidied."
-] as const;
-
 export const FEEDBACK_PROMPT_COPY = {
-  title: "Thanks for using localtify!",
-  body: "really it has been amazing for users like you to keep using the app which make me want to update the app even more, why did this popup come? Well as you may know or may also have experienced localtify has few here and there visual or ui bugs in the app and that probably has made you angry. or maybe you really want a feature to be added.",
-  footer: "Which is why below me theres a message box where you can send bug reports and suggestions. and I will be actively reviewing them! (also you can type feeback in search bar)"
+  title: "Help make localtify better",
+  body: "Found a bug, a confusing screen, or something that could work better? Share what happened and what you expected, or suggest a feature you would like to see.",
+  footer: "Send your feedback below. You can also type feedback in the search bar to open this form again."
 } as const;
 
 export const FEEDBACK_CATEGORY_OPTIONS = [

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { LayoutGrid, SlidersHorizontal } from "lucide-react";
-import { MAC_ONLY_VIEWS, navItems } from "./navigation.constants";
+import { DESKTOP_ONLY_VIEWS, navItems } from "./navigation.constants";
 import { resolveSidebarGroups } from "./sidebarLayout";
 import type { SidebarNavOrder } from "./sidebarLayout";
 import type { View } from "./view.types";
+import { useModalFocus } from "../../shared/hooks/useModalFocus";
 
 const TAB_COUNT = 4;
 
@@ -18,10 +19,11 @@ export type PhoneTabBarProps = {
 /** The phone's bottom navigation: the first four pages from the tab settings, then "more" for the rest. */
 export default function PhoneTabBar({ view, changeView, sidebarNavOrder, sidebarHiddenNav, openSidebarSettings }: PhoneTabBarProps) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const dialogRef = useModalFocus(moreOpen);
   const pages = resolveSidebarGroups(sidebarNavOrder, sidebarHiddenNav)
     .filter((group) => group.customizable)
     .flatMap((group) => group.visibleItems)
-    .filter((id) => !MAC_ONLY_VIEWS.has(id));
+    .filter((id) => !DESKTOP_ONLY_VIEWS.has(id));
   const tabs = pages.slice(0, TAB_COUNT);
   const more: View[] = [...pages.slice(TAB_COUNT), "settings"];
   const go = (id: View) => {
@@ -77,7 +79,10 @@ export default function PhoneTabBar({ view, changeView, sidebarNavOrder, sidebar
 
       {moreOpen ? (
         <div className="phoneSheetLayer" onClick={() => setMoreOpen(false)}>
-          <div className="phoneSheet phoneMoreSheet" role="dialog" aria-label="more pages" onClick={(event) => event.stopPropagation()}>
+          <div ref={dialogRef} tabIndex={-1} className="phoneSheet phoneMoreSheet" role="dialog" aria-modal="true" aria-label="more pages"
+            onClick={(event) => event.stopPropagation()} onKeyDown={(event) => {
+              if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setMoreOpen(false); }
+            }}>
             <span className="phoneSheetHandle" aria-hidden="true" />
             <div className="phoneMoreGrid">
               {more.map((id) => {

@@ -1,10 +1,5 @@
-/*
- * Phone layout for the Android app. Loaded only there (after the shared CSS), scoped to html.platformAndroid.
- * The shell is: the page (the one scroll area), the mini player, then the tab bar. Material-style surfaces,
- * shapes and touch sizes, in the app's own colours and type.
- * Shell rules use `main.app.app:is([data-sidebar-behavior], .app) > .appShell` to outrank the desktop's
- * sidebar-behaviour rules, and placements are !important like the desktop's own.
- */
+/* Android owns page scrolling, the mini player and bottom tabs.
+   Shell selectors outrank the desktop sidebar layout. */
 html.platformAndroid,
 html.platformAndroid body{
   background: var(--lt-bg, #000);
@@ -14,6 +9,7 @@ html.platformAndroid body{
 
 html.platformAndroid .app{
   height: 100dvh !important;
+  border-radius: 0 !important;
 }
 
 /* No window to manage: title bar, resize handles and the idle screensaver go. */
@@ -31,6 +27,7 @@ html.platformAndroid main.app.app:is([data-sidebar-behavior], .app) > .appShell{
   padding: 0 !important;
   gap: 0 !important;
   contain: none;
+  border-radius: 0 !important;
 }
 
 html.platformAndroid main.app.app:is([data-sidebar-behavior], .app) > .appShell > .content{
@@ -38,7 +35,7 @@ html.platformAndroid main.app.app:is([data-sidebar-behavior], .app) > .appShell 
   width: auto !important;
   min-width: 0 !important;
   margin: 0 !important;
-  padding: calc(env(safe-area-inset-top, 0px) + 8px) 16px 24px !important;
+  padding: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 8px) max(16px, var(--safe-area-inset-right, env(safe-area-inset-right, 0px))) 24px max(16px, var(--safe-area-inset-left, env(safe-area-inset-left, 0px))) !important;
   border: 0 !important;
   border-radius: 0 !important;
   overflow-x: hidden !important;
@@ -51,7 +48,7 @@ html.platformAndroid .phoneTabBar{
   display: grid;
   grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
-  padding: 6px 4px calc(env(safe-area-inset-bottom, 0px) + 10px);
+  padding: 6px 4px calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 10px);
   background: color-mix(in srgb, var(--lt-surface, #111118) 86%, rgb(var(--lt-accent-rgb)) 4%);
 }
 
@@ -109,7 +106,10 @@ html.platformAndroid .phoneSheetLayer{
 
 html.platformAndroid .phoneSheet{
   width: 100%;
-  padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
+  max-height: calc(100dvh - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - 12px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 16px calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 18px);
   border-radius: 28px 28px 0 0;
   /* Theme surfaces are see-through; sheets sit on the solid page colour so nothing shows through. */
   background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg, #07070b);
@@ -178,7 +178,7 @@ html.platformAndroid .queuePanel{
   height: min(78dvh, 720px) !important;
   max-height: none !important;
   border-radius: 28px 28px 0 0 !important;
-  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) !important;
   background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg, #07070b) !important;
 }
 
@@ -194,7 +194,7 @@ html.platformAndroid .songContextMenu{
   width: 100% !important;
   max-width: none !important;
   max-height: 75dvh !important;
-  padding: 12px 8px calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+  padding: 12px 8px calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px) !important;
   border-radius: 28px 28px 0 0 !important;
   background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg, #07070b) !important;
   transform: none !important;
@@ -246,6 +246,69 @@ html.platformAndroid .scrobbleServiceHead span{
   font-weight: 500;
 }
 
+html.platformAndroid .homeEmptyState{
+  flex-direction: column;
+  padding: 20px 0;
+  text-align: center;
+}
+
+html.platformAndroid .homeEmptyState > div{
+  min-width: 0;
+}
+
+html.platformAndroid .homeEmptyState strong{
+  font-size: 16px;
+}
+
+html.platformAndroid .homeEmptyState span{
+  font-size: 14px;
+}
+
+html.platformAndroid .libraryStatsThree{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+html.platformAndroid .libraryStat{
+  min-height: 62px;
+  padding: 10px;
+}
+
+html.platformAndroid .smartPlaylistModal{
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 16px;
+}
+
+html.platformAndroid .smartPlaylistModal > *,
+html.platformAndroid .smartPlaylistModal .smartPlaylistField{
+  min-width: 0;
+}
+
+html.platformAndroid .promptPlaylistForm,
+html.platformAndroid .smartPlaylistFooter{
+  flex-direction: column;
+  align-items: stretch;
+}
+
+html.platformAndroid .smartPlaylistRule{
+  grid-template-columns: minmax(0, 1fr);
+}
+
+html.platformAndroid .smartPlaylistPresets button{
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
+}
+
+html.platformAndroid .smartPlaylistModal .modalHead > div{
+  min-width: 0;
+}
+
+html.platformAndroid :is(.phoneTab, .phoneMoreItem, .phoneIconButton, .phoneChip):focus-visible{
+  outline: 2px solid var(--lt-accent);
+  outline-offset: 2px;
+}
+
 /* Touch sizes and text the desktop sizes for a mouse. */
 html.platformAndroid button,
 html.platformAndroid input,
@@ -261,3 +324,32 @@ html.platformAndroid input:not([type="range"]):not([type="checkbox"]):not([type=
   html.platformAndroid .phoneSheetLayer,
   html.platformAndroid .phoneSheet{ animation: none; }
 }
+
+html.platformAndroid .collectionHero {
+  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-areas: "art copy" "actions actions";
+  column-gap: 14px;
+}
+
+html.platformAndroid .collectionHeroCopy h1 { font-size: 24px; line-height: 1.12; }
+html.platformAndroid .collectionHeroActions { gap: 8px; }
+html.platformAndroid .collectionHeroActions > button { width: 44px; min-width: 44px; height: 44px; }
+
+html.platformAndroid .trackRow {
+  grid-template-columns: 44px minmax(0, 1fr) 44px 44px;
+  gap: 6px;
+  min-height: 60px;
+  padding: 6px 0;
+}
+
+html.platformAndroid .trackRowIndex,
+html.platformAndroid .trackRowCover { grid-area: 1 / 1; width: 44px; height: 44px; }
+html.platformAndroid .trackRowCover img { width: 44px; height: 44px; }
+html.platformAndroid .trackRowIndex { z-index: 1; color: #fff; background: rgba(0, 0, 0, .35); }
+html.platformAndroid .trackRowPlayIcon { color: #fff; }
+html.platformAndroid .trackRowTitle { grid-area: 1 / 2; }
+html.platformAndroid .trackRowTitle strong { font-size: 14px; }
+html.platformAndroid .trackRow > .iconAction { grid-area: 1 / 3; width: 44px; height: 44px; }
+html.platformAndroid .trackRow > .trackRowAdd { grid-column: 4; }
+html.platformAndroid .trackRowAlbum,
+html.platformAndroid .trackRowDuration { display: none; }

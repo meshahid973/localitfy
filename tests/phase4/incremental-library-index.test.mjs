@@ -66,3 +66,27 @@ test("download and Spotify refresh use final result snapshots before bootstrap f
   assert.match(app, /if \(!Array\.isArray\(result\.songs\) && \(successCount > 0 \|\| Number\(result\.changedCount \|\| 0\) > 0\) && bridge\?\.bootstrap\)/);
   assert.match(app, /reconcileLibraryIndex\(songs, libraryIndexRef\.current/);
 });
+
+
+test("incremental edits, reorderings and deletions match a fresh library rebuild", () => {
+  const { buildSongSearchEntry } = loadTypescript(path.join(root, "src/features/search/search.utils.ts"));
+  let songs = Array.from({ length: 150 }, (_, i) => song(String(i), `Artist ${i % 9} feat. Guest ${i % 3}`, `Album ${i % 11}`));
+  let current = reconcileLibraryIndex(songs);
+  const first = current;
+  const originalCounts = [...first.artistOccurrences];
+  const sorted = map => [...map].sort(([a], [b]) => a.localeCompare(b));
+  for (let round = 0; round < 30; round++) {
+    songs = songs.slice(1).reverse();
+    songs[round % songs.length] = { ...songs[round % songs.length], playCount: round + 1, liked: round % 2 === 0 };
+    songs[(round + 7) % songs.length] = { ...songs[(round + 7) % songs.length], title: `Renamed ${round}`, artist: `New ${round % 4}`, album: round % 2 ? "" : "Changed" };
+    songs.push(song(`added-${round}`, "Guest 1; New 2", "Added"));
+    const next = reconcileLibraryIndex(songs, current);
+    const fresh = reconcileLibraryIndex(songs);
+    assert.deepEqual(sorted(next.artistOccurrences), sorted(fresh.artistOccurrences));
+    assert.deepEqual(sorted(next.albumOccurrences), sorted(fresh.albumOccurrences));
+    assert.deepEqual([...next.songIndexById], [...fresh.songIndexById]);
+    assert.deepEqual(next.searchEntries, songs.map(buildSongSearchEntry));
+    assert.deepEqual([...first.artistOccurrences], originalCounts, "older snapshots remain unchanged");
+    current = next;
+  }
+});

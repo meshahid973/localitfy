@@ -97,4 +97,26 @@ originalIndex.map((song) => search.buildSongSearchEntryCached(song));
 const coldSearchMs = bench(() => originalIndex.map((song) => search.buildSongSearchEntry(song)), 3);
 const warmSearchMs = bench(() => originalIndex.map((song) => search.buildSongSearchEntryCached(song)), 3);
 console.log("[hotpaths] 10k unchanged search entries old/new:", coldSearchMs.toFixed(2), "/", warmSearchMs.toFixed(2), "ms");
+const credits = loadTs("src/features/artists/artistCredits.ts");
+const libraryIndex = loadTs("src/features/search/incrementalLibraryIndex.ts", {
+  "../artists/artistCredits": credits, "./search.utils": search
+});
+const recommendations = loadTs("src/features/playlists/playlistRecommendations.ts", {
+  "../artists/artistCredits": credits
+});
+const largeLibrary = Array.from({ length: 50000 }, (_, index) => ({
+  ...originalIndex[index % originalIndex.length], id: String(index),
+  genre: ["ambient; electronic", "dance-pop", "jazz / blues", "classical", "rock"][index % 5]
+}));
+const initialIndex = libraryIndex.reconcileLibraryIndex(largeLibrary);
+const oneUpdate = largeLibrary.slice();
+oneUpdate[25000] = { ...oneUpdate[25000], playCount: 60 };
+const nextIndex = libraryIndex.reconcileLibraryIndex(oneUpdate, initialIndex);
+assert.equal(nextIndex.searchEntries[25000].song, oneUpdate[25000]);
+assert.equal(nextIndex.searchEntries[25000].tokens, initialIndex.searchEntries[25000].tokens);
+const updateMs = bench(() => libraryIndex.reconcileLibraryIndex(oneUpdate, initialIndex));
+const seeds = largeLibrary.slice(0, 500);
+const recommendationMs = bench(() => recommendations.relatedSongScores(seeds, largeLibrary), 3);
+console.log("[hotpaths] 50k-library single playback update:", updateMs.toFixed(2), "ms");
+console.log("[hotpaths] 50k-song recommendations / 500 seeds:", recommendationMs.toFixed(2), "ms");
 console.log("[hotpaths] old/new outputs match; timings are machine-dependent, not UI latency measurements");

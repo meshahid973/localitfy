@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { Laptop, MonitorSmartphone, Smartphone } from "lucide-react";
 import { computerName } from "../../app/platform";
@@ -15,6 +15,7 @@ function connectionText(status: ConnectControls["status"]) {
 /** "Play on": lists this device and the connected ones, and moves playback to the one picked. */
 export function DevicePicker({ controls, variant }: { controls: ConnectControls; variant: "bar" | "chip" }) {
   const [open, setOpen] = useState(false);
+  const menuId = useId();
   const [place, setPlace] = useState<CSSProperties>({});
   const rootRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -36,12 +37,17 @@ export function DevicePicker({ controls, variant }: { controls: ConnectControls;
       const button = rootRef.current?.getBoundingClientRect();
       const layer = (document.querySelector(".app") || document.body).getBoundingClientRect();
       if (!button) return;
-      const bottom = layer.bottom - button.top + 10;
+      const insets = getComputedStyle(document.documentElement);
+      const safeTop = Math.max(layer.top, Number.parseFloat(insets.getPropertyValue("--safe-area-inset-top")) || 0);
+      const safeBottom = Math.min(layer.bottom, window.innerHeight - (Number.parseFloat(insets.getPropertyValue("--safe-area-inset-bottom")) || 0));
+      const maxHeight = Math.max(0, safeBottom - safeTop - 16);
+      const menuHeight = Math.min(menuRef.current?.scrollHeight || 0, maxHeight);
+      const bottom = Math.min(Math.max(layer.bottom - button.top + 10, layer.bottom - safeBottom + 8), layer.bottom - safeTop - menuHeight - 8);
       // Half the chip menu's width (min(300px, 100vw - 32px)) plus a 16px margin keeps it on screen.
       const half = Math.min(150, window.innerWidth / 2 - 16) + 16;
       setPlace(variant === "bar"
-        ? { right: Math.max(8, layer.right - button.right), bottom }
-        : { left: Math.min(Math.max(button.left + button.width / 2 - layer.left, half), layer.width - half), bottom });
+        ? { right: Math.max(8, layer.right - button.right), bottom, maxHeight }
+        : { left: Math.min(Math.max(button.left + button.width / 2 - layer.left, half), layer.width - half), bottom, maxHeight });
     };
     placeMenu();
     window.addEventListener("resize", placeMenu);
@@ -60,6 +66,7 @@ export function DevicePicker({ controls, variant }: { controls: ConnectControls;
         onClick={(event) => { event.stopPropagation(); setOpen((value) => !value); }}
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
         aria-label={title}
         title={title}
       >
@@ -67,7 +74,7 @@ export function DevicePicker({ controls, variant }: { controls: ConnectControls;
         {variant === "chip" ? <span>{controls.remoteName ? `on ${controls.remoteName}` : "devices"}</span> : null}
       </button>
       {open ? createPortal(
-        <div className={`connectMenu connectMenu-${variant}`} role="menu" aria-label="play on" ref={menuRef} style={place}
+        <div id={menuId} className={`connectMenu connectMenu-${variant}`} role="menu" aria-label="play on" ref={menuRef} style={place}
           onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); setOpen(false); } }}>
           <strong className="connectMenuTitle">play on</strong>
           {controls.peers.map((peer) => {

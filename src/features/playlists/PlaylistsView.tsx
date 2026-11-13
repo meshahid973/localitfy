@@ -303,7 +303,6 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
               <LocaltifyStateCard
                 centered
                 cute
-                badge="♫"
                 tone={songs.length ? "info" : "warning"}
                 eyebrow="playlists"
                 title="No playlists yet"

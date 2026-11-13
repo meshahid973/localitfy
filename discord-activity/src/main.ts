@@ -1,7 +1,7 @@
 import "./style.css";
 
 const CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID || "1499896817138012271";
-const APP_VERSION = "0.4.1";
+const APP_VERSION = "0.5.0";
 
 const LOCALITFY_WEBSITE = "https://localtify.com";
 const LOCALITFY_GITHUB = "https://github.com/meshahid973/localitfy";

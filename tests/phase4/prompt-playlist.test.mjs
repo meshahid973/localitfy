@@ -168,3 +168,32 @@ test("playlist prompt audio actions are passed from the player, not DailyMixesSh
   assert.doesNotMatch(view, /props\.dailyMixes\.(?:playSongs|selectSong)/);
   assert.match(app, /playSongs: \(ids: string\[\], label: string\) => playAlbumSongs\(ids, label\)/);
 });
+
+
+test("recommendations normalize shared artist credits once per scoring request", () => {
+  let calls = 0;
+  const optimized = compile("src/features/playlists/playlistRecommendations.ts", { artistCredits: {
+    splitArtistCredits(value) { calls++; return credits.splitArtistCredits(value); }
+  } });
+  const candidates = Array.from({ length: 100 }, (_, i) => song(`candidate-${i}`, i % 2 ? "Other" : "Seed", "Jazz"));
+  const seeds = [song("seed", "Seed", "Jazz")];
+  const first = optimized.relatedSongScores(seeds, candidates);
+  assert.equal(calls, 2);
+  assert.equal(first.size, 100);
+  const second = optimized.relatedSongScores([song("seed", "Other", "Jazz")], candidates);
+  assert.equal(calls, 4, "artist metadata is scoped to each request");
+  assert.ok(first.get("candidate-0") > second.get("candidate-0"));
+  assert.ok(first.get("candidate-1") < second.get("candidate-1"));
+});
+
+test("cached zero genre matches preserve artist suggestions and refresh with changed seeds", () => {
+  const candidates = [song("unrelated", "Other", "Blues"), song("artist", "Seed", "Blues"), song("genre", "Other", "Jazz")];
+  const first = recommendations.relatedSongScores([song("seed", "Seed", "Jazz")], candidates);
+  assert.equal(first.has("unrelated"), false);
+  assert.ok(Math.abs(first.get("artist") - 1.2) < 1e-12);
+  assert.equal(first.get("genre"), 1);
+  const next = recommendations.relatedSongScores([song("seed", "Seed", "Blues")], candidates);
+  assert.equal(next.has("genre"), false);
+  assert.equal(next.get("unrelated"), 1);
+  assert.ok(next.get("artist") > first.get("artist"));
+});

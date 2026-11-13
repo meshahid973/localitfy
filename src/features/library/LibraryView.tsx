@@ -179,7 +179,6 @@ export default function LibraryView(props: LibraryViewProps) {
             <LocaltifyStateCard
               centered={!isLiked}
               cute={!isLiked}
-              badge={showingMissingFiles ? "✓" : isLiked ? "♡" : query.trim() ? "⌕" : "♪"}
               tone={showingMissingFiles ? "success" : isLiked || query.trim() ? "info" : "warning"}
               eyebrow={showingMissingFiles ? "file check" : isLiked ? "liked songs" : query.trim() ? "search" : "library"}
               title={showingMissingFiles ? "All files are cozy" : isLiked ? "No liked songs yet" : query.trim() ? "No songs found" : "No songs yet"}

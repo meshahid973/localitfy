@@ -1,18 +1,11 @@
-/* Localtify shared design-token foundation.
-   Phase 2 expands semantic names without changing existing compatibility aliases. */
+/* Shared design tokens and renderer compatibility aliases. */
 :root{
   --lt-bg: #080712;
-  --lt-bg-soft: #100b18;
   --lt-bg-elevated: #100b18;
 
   --lt-surface: rgba(18, 15, 28, 0.86);
   --lt-surface-soft: rgba(255, 255, 255, 0.045);
   --lt-surface-raised: rgba(255, 255, 255, 0.075);
-  --lt-surface-1: var(--lt-surface-soft);
-  --lt-surface-2: var(--lt-surface);
-  --lt-surface-3: var(--lt-surface-raised);
-  --lt-glass-bg: rgba(18, 15, 28, 0.68);
-  --lt-glass-border: rgba(255, 255, 255, 0.10);
 
   --lt-text: #f7f3ff;
   --lt-text-muted: rgba(247, 243, 255, 0.62);
@@ -26,21 +19,12 @@
   --lt-accent: #ee6be8;
   --lt-accent-rgb: 238, 107, 232;
   --lt-accent-soft: rgba(var(--lt-accent-rgb), 0.14);
-  --lt-accent-glow: rgba(var(--lt-accent-rgb), 0.28);
   --lt-danger: #ff6b8a;
 
   --lt-radius-sm: 12px;
   --lt-radius-md: 18px;
-  --lt-radius-lg: 26px;
-  --lt-radius-pill: 999px;
 
   --lt-shadow-low: 0 10px 30px rgba(0, 0, 0, 0.24);
-  --lt-shadow-mid: 0 18px 50px rgba(0, 0, 0, 0.34);
-  --lt-shadow-high: 0 28px 80px rgba(0, 0, 0, 0.46);
-  --lt-shadow-soft: var(--lt-shadow-mid);
-
-  --lt-blur-soft: 12px;
-  --lt-blur-strong: 24px;
 
   /* Compatibility aliases used by the existing renderer while features migrate. */
   --bg: var(--lt-bg);
@@ -51,5 +35,4 @@
   --accent: var(--lt-accent);
   --accent-rgb: var(--lt-accent-rgb);
   --danger: var(--lt-danger);
-  --border: var(--lt-border);
 }

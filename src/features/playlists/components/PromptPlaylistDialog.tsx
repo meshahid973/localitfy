@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useModalFocus } from "../../../shared/hooks/useModalFocus";
 import { Play, RefreshCw, Save, WandSparkles, X } from "lucide-react";
 import { Cover } from "../../covers/Cover";
 import type { Song } from "../../library/song.types";
@@ -24,6 +25,7 @@ type SoundState = "used" | "model-missing" | "no-profiles" | "error" | null;
 type Result = { plan: PromptPlan; ids: string[]; sound: SoundState };
 
 export default function PromptPlaylistDialog({ songs, currentId, hidden, playSongs, selectSong, savePlaylist, openAnalysisSettings, onClose }: PromptPlaylistDialogProps) {
+  const dialogRef = useModalFocus(true);
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
@@ -86,8 +88,8 @@ export default function PromptPlaylistDialog({ songs, currentId, hidden, playSon
   // Portaled to the app root: the playlists page is a transformed container, which would trap a fixed overlay.
   return createPortal(
     <div className="modalWrap smartPlaylistWrap" onClick={onClose}>
-      <div className="smartPlaylistModal promptPlaylistModal" role="dialog" aria-modal="true" aria-labelledby="prompt-playlist-title"
-        onClick={(event) => event.stopPropagation()} onKeyDown={(event) => { if (event.key === "Escape") onClose(); }}>
+      <div ref={dialogRef} tabIndex={-1} className="smartPlaylistModal promptPlaylistModal" role="dialog" aria-modal="true" aria-labelledby="prompt-playlist-title"
+        onClick={(event) => event.stopPropagation()} onKeyDown={(event) => { if (event.key === "Escape" && !event.defaultPrevented) onClose(); }}>
         <div className="modalHead">
           <div>
             <h3 id="prompt-playlist-title">Describe a playlist</h3>

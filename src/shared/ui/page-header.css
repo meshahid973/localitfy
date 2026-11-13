@@ -58,7 +58,7 @@
   min-width: 190px;
   height: 42px;
   padding: 0 14px;
-  border: 1px solid rgba(var(--lt-accent-rgb), .09);
+  border: 1px solid var(--lt-border);
   border-radius: 999px;
   outline: none;
   color: var(--lt-text);
@@ -69,10 +69,11 @@
 }
 
 .pageHeaderSearch::placeholder { color: var(--lt-muted); }
-.pageHeaderSearch:hover { border-color: rgba(var(--lt-accent-rgb), .14); }
-.pageHeaderSearch:focus {
-  border-color: rgba(var(--lt-accent-rgb), .34);
-  box-shadow: 0 0 0 3px rgba(var(--lt-accent-rgb), .05);
+.pageHeaderSearch:hover { border-color: rgba(var(--lt-accent-rgb), .24); }
+.pageHeaderSearch:focus-visible {
+  border-color: var(--lt-accent);
+  outline: 2px solid var(--lt-accent);
+  outline-offset: 2px;
 }
 
 .pageHeaderCount {

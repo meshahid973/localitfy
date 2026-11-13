@@ -5,7 +5,6 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -32,7 +31,6 @@ public class LocaltifyNativePlugin extends Plugin {
     private final ExecutorService requests = Executors.newFixedThreadPool(2);
     // A few files at once: one stream at a time leaves most of a Wi-Fi link idle.
     private final ExecutorService downloads = Executors.newFixedThreadPool(4);
-    private volatile boolean cancelDownloads = false;
     private WifiManager.WifiLock wifiLock;
 
     // The live connection: one server-sent-events stream from the computer, read on its own thread so it keeps
@@ -132,12 +130,10 @@ public class LocaltifyNativePlugin extends Plugin {
     /** Streams one file to app storage (temp file, then rename) so a failed transfer never replaces a good copy. */
     @PluginMethod
     public void downloadFile(PluginCall call) {
-        cancelDownloads = false;
         downloads.execute(() -> {
             HttpURLConnection connection = null;
             File temp = null;
             try {
-                if (cancelDownloads) throw new IOException("cancelled");
                 File target = resolve(call.getString("path"));
                 File parent = target.getParentFile();
                 // Another download may create this shared directory between isDirectory() and mkdirs().
@@ -157,7 +153,6 @@ public class LocaltifyNativePlugin extends Plugin {
                     byte[] chunk = new byte[65536];
                     int read;
                     while ((read = in.read(chunk)) != -1) {
-                        if (cancelDownloads) throw new IOException("cancelled");
                         out.write(chunk, 0, read);
                         received += read;
                         long now = System.currentTimeMillis();
@@ -187,42 +182,11 @@ public class LocaltifyNativePlugin extends Plugin {
     }
 
     @PluginMethod
-    public void cancelDownloads(PluginCall call) {
-        cancelDownloads = true;
-        call.resolve();
-    }
-
-    @PluginMethod
     public void deleteFile(PluginCall call) {
         try {
             File file = resolve(call.getString("path"));
             JSObject result = new JSObject();
             result.put("deleted", file.isFile() && file.delete());
-            call.resolve(result);
-        } catch (IOException error) {
-            call.reject(error.getMessage());
-        }
-    }
-
-    @PluginMethod
-    public void listFiles(PluginCall call) {
-        try {
-            File folder = resolve(call.getString("path"));
-            JSArray files = new JSArray();
-            File[] entries = folder.listFiles();
-            if (entries != null) {
-                for (File entry : entries) {
-                    if (!entry.isFile() || entry.getName().startsWith(".")) continue;
-                    JSObject item = new JSObject();
-                    item.put("name", entry.getName());
-                    item.put("size", entry.length());
-                    files.put(item);
-                }
-            }
-            JSObject result = new JSObject();
-            result.put("files", files);
-            JSObject space = new JSObject();
-            result.put("freeBytes", getContext().getFilesDir().getUsableSpace());
             call.resolve(result);
         } catch (IOException error) {
             call.reject(error.getMessage());

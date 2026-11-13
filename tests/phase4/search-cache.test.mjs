@@ -56,3 +56,30 @@ test("search token substring fallback retains partial-word matches", () => {
   assert.deepEqual(Array.from(exports.rankSongsForSearch(entries, "orn"), song => song.id), ["first"]);
 });
 
+
+
+test("playback updates reuse normalized text while ranking the latest song state", () => {
+  const song = { id: "progress", title: "night mix", artist: "A", album: "B", filePath: "/night.flac", playCount: 0 };
+  const first = exports.buildSongSearchEntryCached(song);
+  const updated = { ...song, playCount: 60, playbackPosition: 45, genre: "Jazz" };
+  const next = exports.buildSongSearchEntryCached(updated, first);
+  assert.equal(next.tokens, first.tokens);
+  assert.equal(next.song, updated);
+  assert.equal(first.song, song);
+  assert.equal(exports.buildSongSearchEntryCached(updated), next);
+  const rival = exports.buildSongSearchEntryCached({ ...song, id: "rival", playCount: 20 });
+  assert.deepEqual(Array.from(exports.rankSongsForSearch([rival, next], "night"), item => item.id), ["progress", "rival"]);
+});
+
+test("every searchable metadata field invalidates reused normalized text", () => {
+  const song = { id: "metadata", title: "Night", artist: "Artist", album: "Album", filePath: "", url: "/night.flac", liked: false };
+  const first = exports.buildSongSearchEntryCached(song);
+  for (const patch of [{ title: "Day" }, { artist: "Other" }, { album: "New" }, { filePath: "/new.flac" }, { url: "/other.flac" }, { liked: true }]) {
+    const updated = { ...song, ...patch };
+    const next = exports.buildSongSearchEntryCached(updated, first);
+    assert.notEqual(next.tokens, first.tokens);
+    assert.deepEqual(next, exports.buildSongSearchEntry(updated));
+  }
+  assert.equal(first.song, song);
+  assert.equal(first.haystack.includes("liked"), false);
+});

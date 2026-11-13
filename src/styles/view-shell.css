@@ -4,10 +4,6 @@
   --workspace-bg: var(--lt-bg);
   --workspace-sidebar: var(--lt-bg);
   --workspace-sidebar-raised: var(--lt-surface);
-  --workspace-border: rgba(var(--lt-accent-rgb), .08);
-  --workspace-text: var(--lt-text);
-  --workspace-muted: var(--lt-muted);
-  --workspace-accent: var(--lt-accent);
   --workspace-sidebar-expanded: clamp(224px, var(--sidebar-width, 248px), 280px);
   --workspace-sidebar-current: var(--workspace-sidebar-expanded);
   --workspace-sidebar-rail: 68px;
@@ -18,9 +14,7 @@
   --workspace-sidebar-current: var(--workspace-sidebar-rail);
 }
 
-/* localtify 0.3.9 V361 — stable hover sidebar, no runtime CSS.
-   Fixes V360 disappearing sidebar by returning to a real rail width, while
-   removing heavy blur/box-shadow work that made Home lag during hover. */
+/* Reserve a stable sidebar rail while the hover panel expands. */
 .app{
   --lt-sidebar-closed: 88px;
   --lt-sidebar-open: 238px;

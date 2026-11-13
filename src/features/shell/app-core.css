@@ -52,10 +52,8 @@ button:disabled{
   --line: rgba(255, 255, 255, 0.075);
   --line-2: rgba(255, 255, 255, 0.13);
   --danger: #ff4f73;
-  --warning: #ffb86b;
   --pill: 999px;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.58);
-  --shadow-soft: 0 14px 38px rgba(0, 0, 0, 0.34);
   color: var(--text);
 }
 
@@ -630,17 +628,6 @@ input[type="range"]{
   background-size: 42px 42px;
 }
 
-.loadingLogo{
-  width: 72px;
-  height: 72px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  color: #06100b;
-  background: var(--accent);
-  font-size: 34px;
-}
-
 
 [data-notes="off"] .eq{
   display: none;
@@ -803,16 +790,7 @@ input[type="range"]{
   --radius: 16px;
   --small-radius: 10px;
   --surface: rgba(255, 255, 255, 0.045);
-  --surface-hover: rgba(255, 255, 255, 0.075);
-  --surface-press: rgba(255, 255, 255, 0.1);
-  --hairline: rgba(255, 255, 255, 0.075);
-  --hairline-strong: rgba(255, 255, 255, 0.14);
-  --grid-line: rgba(255, 255, 255, 0.022);
-  --focus-ring: rgba(var(--accent-rgb), 0.18);
-  --cover-glow: rgba(var(--accent-rgb), 0.18);
   --motion-fast: 120ms;
-  --motion-med: 190ms;
-  --motion-slow: 420ms;
 
 
   background-image: none;
@@ -1169,11 +1147,6 @@ input[type="range"]::-webkit-slider-thumb{
   100% { opacity: 0; transform: translate3d(var(--dx, 26px), -120px, 0) scale(1.08); }
 }
 
-@keyframes secretBassPulse {
-  0%, 100% { filter: none; }
-  50% { filter: saturate(1.14) brightness(1.08); }
-}
-
 @keyframes vinylSpin {
   to { transform: rotate(1turn); }
 }
@@ -1377,11 +1350,6 @@ button:active,
   to { background-position: -80px 120px; }
 }
 
-@keyframes localitfyVinylSpin {
-  from { transform: scale(1.1); }
-  to { transform: scale(1.1); }
-}
-
 
 button:hover{
   transform: translateY(-1px) !important;
@@ -1389,36 +1357,6 @@ button:hover{
 
 button:active{
   transform: translateY(0) scale(.985) !important;
-}
-
-@keyframes localitfyLibraryDrop {
-  from {
-    opacity: .86;
-    transform: translateY(-10px) scaleY(.985);
-    filter: blur(1.5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scaleY(1);
-    filter: none;
-  }
-}
-
-:root{
-  --oled-black: #000;
-  --oled-panel: #050505;
-  --oled-panel-2: #080808;
-  --oled-line: rgba(255, 255, 255, 0.075);
-  --oled-line-strong: rgba(255, 255, 255, 0.14);
-  --oled-muted: rgba(255, 255, 255, 0.55);
-  --oled-soft: rgba(255, 255, 255, 0.045);
-  --oled-soft-hover: rgba(255, 255, 255, 0.085);
-}
-
-@keyframes localitfyShelfDrop {
-  from { opacity: 0; transform: translateY(-10px); filter: blur(2px); }
-  to { opacity: 1; transform: translateY(0); filter: none; }
 }
 
 
@@ -1438,17 +1376,6 @@ button:active{
   to { opacity: 1; transform: translateX(0); }
 }
 
-
-@keyframes shelfDrop {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes albumGridIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 body.isResizingPlayer{
   cursor: ns-resize !important;
   user-select: none !important;
@@ -1466,15 +1393,6 @@ body.isResizingPlayer{
 }
 
 .app{
-  --v003-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --v003-oled: #000;
-  --v003-panel: #050505;
-  --v003-panel-2: #090909;
-  --v003-panel-3: #0d0d0d;
-  --v003-line: rgba(255, 255, 255, 0.085);
-  --v003-line-2: rgba(255, 255, 255, 0.145);
-  --v003-text-soft: rgba(255, 255, 255, 0.68);
-  --v003-text-faint: rgba(255, 255, 255, 0.44);
 
 
   contain: layout style paint;
@@ -1709,19 +1627,6 @@ body.isResizingPlayer{
   to { opacity: 1; }
 }
 
-@keyframes updateCardIn {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.975);
-    filter: blur(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
-}
-
 @keyframes updateShine {
   from { transform: translateX(-110%); }
   to { transform: translateX(110%); }
@@ -1738,58 +1643,8 @@ body.isResizingPlayer{
 }
 }
 
-.app{
-  --ambient-smooth-ease: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 [data-ambient="off"] .ambientSurface::before{
   animation: none !important;
-}
-
-@keyframes localitfySmoothHeroGlow {
-  0% {
-    opacity: 0.24;
-    background-position: 54% 46%;
-    transform: scale(1.16) translate3d(0.4%, -0.4%, 0);
-  }
-
-  100% {
-    opacity: 0.31;
-    background-position: 62% 40%;
-    transform: scale(1.2) translate3d(2.1%, -1.4%, 0);
-  }
-}
-
-.app{
-  --expand-smooth-ease: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes localitfyLibraryExpandSmooth {
-  from {
-    opacity: 0.94;
-    transform: translateY(-8px) scaleY(0.988);
-    filter: blur(0.7px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scaleY(1);
-    filter: blur(0);
-  }
-}
-
-@keyframes localitfyShelfDropSmooth {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scaleY(0.96);
-    filter: blur(2px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scaleY(1);
-    filter: blur(0);
-  }
 }
 
 .app{
@@ -1869,53 +1724,6 @@ button:focus-visible{
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.22) !important;
 }
 
-@keyframes nowPlayingFadeSlide {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 14px, 0) scale(0.992);
-    filter: blur(10px);
-  }
-  55% {
-    opacity: 1;
-    filter: blur(0);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-    filter: blur(0);
-  }
-}
-
-@keyframes nowPlayingMiniSlide {
-  0% {
-    opacity: 0;
-    transform: translate3d(10px, 0, 0);
-    filter: blur(7px);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-    filter: blur(0);
-  }
-}
-
-@keyframes nowPlayingArtPop {
-  0% {
-    opacity: 0;
-    transform: translate3d(18px, 0, 0) scale(0.965);
-    filter: blur(12px) saturate(0.92);
-  }
-  65% {
-    opacity: 1;
-    filter: blur(0) saturate(1.06);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1) rotate(0);
-    filter: blur(0) saturate(1);
-  }
-}
-
 .ambientSurface{
   position: relative;
   isolation: isolate;
@@ -1969,35 +1777,6 @@ button{
     box-shadow 190ms ease !important;
 }
 
-
-:root{
-  --song-change-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --soft-hover-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-@keyframes localitfySongCopyIn {
-  0% { opacity: 0; transform: translate3d(0, 18px, 0); filter: blur(8px); }
-  55% { opacity: 1; filter: blur(0); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
-}
-
-@keyframes localitfySongTitleIn {
-  0% { opacity: 0; transform: translate3d(0, 22px, 0) scale(0.985); filter: blur(10px); }
-  58% { opacity: 1; filter: blur(0); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
-}
-
-@keyframes localitfySongDetailIn {
-  0% { opacity: 0; transform: translate3d(0, 10px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-
-@keyframes localitfyCoverIn {
-  0% { opacity: 0; transform: translate3d(18px, 8px, 0) scale(0.96); filter: blur(8px) saturate(0.85); }
-  60% { opacity: 1; filter: blur(0) saturate(1.04); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0) saturate(1); }
-}
-
 .circleButton:not(.playerBar *){
 
 
@@ -2046,9 +1825,6 @@ button{
 .appShell,
 .content,
 .simpleShell{
-  --grid-line: transparent !important;
-  --app-grid-line: transparent !important;
-  --page-line: transparent !important;
   background-image: none !important;
   background-size: auto !important;
 }
@@ -2513,11 +2289,6 @@ body,
   background: rgba(255, 82, 82, 0.92) !important;
 }
 
-@keyframes localtifyUpdateCardIn{
-  from{ opacity: 0; transform: translateY(14px) scale(0.98); }
-  to{ opacity: 1; transform: translateY(0) scale(1); }
-}
-
 @media (max-width: 640px){
   .updateToastLayer{
     padding: 14px !important;
@@ -2766,9 +2537,7 @@ body,
 
 .app{
   --button-radius: 15px;
-  --button-radius-sm: 999px;
   --button-height: 42px;
-  --button-height-sm: 32px;
   --button-border: rgba(255,255,255,.09);
   --button-bg: rgba(255,255,255,.045);
   --button-bg-hover: rgba(255,255,255,.07);
@@ -2886,33 +2655,11 @@ body,
   border-color: color-mix(in srgb, var(--accent) 28%, rgba(255,255,255,.08)) !important;
 }
 
-/* V309 low-lag guardrails. */
-
-
-/* localtify 0.3.9 V301 — core compositor hints */
-body.localtifyPerfV301{
-  overscroll-behavior: none;
-}
-
-body.localtifyPerfV301 .appShell{
-  contain: layout style paint;
-}
-
-body.localtifyPerfV301 .content{
-  will-change: scroll-position;
-  contain: layout style paint;
-}
-
-body.localtifyPerfV301 .titleBar,
-body.localtifyPerfV301 .sidebar{
-  contain: layout paint style;
-}
-
-/* localtify 0.3.9 V324 — lightweight analytics / recap page.
+/* lightweight analytics / recap page.
    Replaces the old heavy local analytics layout with simple recap cards. */
 
 
-/* V471 DISCORD SIDEBAR PILL START
+/* DISCORD SIDEBAR PILL START
    Discord-style left white pill using only CSS pseudo-elements.
    Sidebar/nav ownership stays in app-core.css. */
 .sidebar,
@@ -2989,4 +2736,3 @@ body.localtifyPerfV301 .sidebar{
     transition: none !important;
   }
 }
-/* V471 DISCORD SIDEBAR PILL END */

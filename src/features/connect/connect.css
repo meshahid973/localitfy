@@ -20,12 +20,14 @@
   display: grid;
   gap: 2px;
   padding: 10px;
-  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border: 1px solid var(--lt-border);
   border-radius: 16px;
-  color: var(--text);
-  background: linear-gradient(180deg, rgba(20, 20, 24, 0.97), rgba(6, 6, 10, 0.96));
+  color: var(--lt-text);
+  background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg);
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(22px) saturate(130%);
+  max-width: calc(100vw - 16px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
 }
 
 .connectMenu-chip{
@@ -37,7 +39,7 @@
   padding: 2px 8px 6px;
   font-size: 12px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--lt-muted);
 }
 
 .connectMenuItem{
@@ -56,11 +58,12 @@
 
 .connectMenuItem:hover,
 .connectMenuItem:focus-visible{
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--lt-surface-raised);
 }
 
 .connectMenuItem span{
   display: grid;
+  flex: 1;
   min-width: 0;
 }
 
@@ -85,5 +88,5 @@
   margin: 6px 8px 2px;
   font-size: 12px;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--lt-muted);
 }

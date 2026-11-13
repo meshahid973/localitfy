@@ -127,7 +127,7 @@ test("Library track canvas uses a themed surface, preserving virtual positioning
 test("Settings search and switches are readable with reduced-motion support", () => {
   assert.match(skin, /padding: 10px 36px 10px 39px/);
   assert.match(skin, /::-webkit-search-decoration/);
-  assert.match(skin, /--settings-surface: var\(--lt-surface\)/);
+  assert.match(read("src/features/settings/settings.css"), /--settings-surface: var\(--lt-surface\)/);
   assert.match(skin, /background: var\(--settings-text\); transition: transform/);
   assert.match(skin, /settingsCompactSwitch input\[type="checkbox"\]::before \{ transition: none/);
 });

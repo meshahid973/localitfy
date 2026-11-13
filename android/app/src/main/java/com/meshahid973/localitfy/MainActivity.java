@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.EdgeToEdge;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -15,6 +16,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(LocaltifyNativePlugin.class);
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         final LocalMediaHandler media = new LocalMediaHandler(getFilesDir());
         // Capacitor's own file server ignores the start of Range requests, which breaks seeking.
         bridge.setWebViewClient(new BridgeWebViewClient(bridge) {

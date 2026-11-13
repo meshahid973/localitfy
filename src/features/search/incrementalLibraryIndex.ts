@@ -37,7 +37,6 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
   const songsById = new Map<string, Song>();
   const songIndexById = new Map<string, number>();
   const searchEntries: SongSearchEntry[] = [];
-  const oldSearchById = new Map(previous?.searchEntries.map(entry => [entry.song.id, entry]) || []);
   const artistOccurrences = new Map(previous?.artistOccurrences || []);
   const albumOccurrences = new Map(previous?.albumOccurrences || []);
 
@@ -45,15 +44,16 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
     songsById.set(song.id, song);
     songIndexById.set(song.id, index);
     const oldSong = previous?.songsById.get(song.id);
-    const oldEntry = oldSearchById.get(song.id);
+    const oldIndex = previous?.songIndexById.get(song.id);
+    const oldEntry = oldIndex === undefined ? undefined : previous?.searchEntries[oldIndex];
     const unchanged = oldSong === song && oldEntry?.song === song;
-    searchEntries.push(unchanged ? oldEntry : buildSongSearchEntryCached(song));
-    if (!unchanged) {
-      if (oldSong) {
-        for (const key of artistKeys(oldSong)) count(artistOccurrences, key, -1);
-        count(albumOccurrences, albumKey(oldSong), -1);
-      }
+    searchEntries.push(unchanged ? oldEntry : buildSongSearchEntryCached(song, oldEntry));
+    if (!oldSong || oldSong.artist !== song.artist) {
+      if (oldSong) for (const key of artistKeys(oldSong)) count(artistOccurrences, key, -1);
       for (const key of artistKeys(song)) count(artistOccurrences, key, 1);
+    }
+    if (!oldSong || oldSong.album !== song.album) {
+      if (oldSong) count(albumOccurrences, albumKey(oldSong), -1);
       count(albumOccurrences, albumKey(song), 1);
     }
   }

@@ -199,7 +199,7 @@ export function usePlaybackConnect(local: LocalPlayer) {
   const adoptPresence = (presence: LivePresence, hello: boolean) => {
     offsetRef.current = presence.serverTime - Date.now();
     const self = presence.self || liveRef.current.self;
-    update({ self, peers: presence.peers, session: presence.session, state: presence.state?.from === presence.session.active ? presence.state : null });
+    update({ status: "connected", self, peers: presence.peers, session: presence.session, state: presence.state?.from === presence.session.active ? presence.state : null });
     const { active } = presence.session;
     if (active !== self) finishHandoff(false);
     if (!localRef.current.isPlaying || active === self || presence.peers.length < 2) return;
