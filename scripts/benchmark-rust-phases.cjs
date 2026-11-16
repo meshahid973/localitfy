@@ -30,6 +30,8 @@ const encodedVectors=Array.from({length:600},(_,i)=>{
 });
 const pcmBuffer = Buffer.alloc(480_000 * 4);
 for (let i=0; i<480_000; i++) pcmBuffer.writeFloatLE(Math.sin(i * .01), i * 4);
+const unalignedPcm = Buffer.allocUnsafeSlow(pcmBuffer.length + 1).subarray(1);
+pcmBuffer.copy(unalignedPcm);
 const trackVectors = vectors.map((v)=>{
   const n=Math.sqrt(dot(v,v));
   return Float64Array.from(v,x=>x/n);
@@ -57,7 +59,7 @@ if (compare) {
   process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,pcm";
   const addon = getAddon("similarity");
   if (!addon) throw new Error("Native benchmark requires a built Rust addon");
-  for (const name of ["rankSimilarityBatch", "dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "pcmSumSquares"]) {
+  for (const name of ["rankSimilarityBatch", "dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "pcmSumSquares", "pcmDecodeInto"]) {
     const original = addon[name];
     if (typeof original !== "function") throw new Error("Missing Rust export: " + name);
     nativeCalls.set(name, 0);
@@ -120,7 +122,8 @@ async function run() {
       ["duplicates / 600 entries",()=>findDuplicates(dupSongs,{vectors:dupVectors,fileSizes:dupSizes}),[]],
       ["duplicates / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDots"]],
       ["duplicates typed output / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDotsInto"]],
-      ["PCM decode + energy / 480k samples",()=>decodePcmChunk(pcmBuffer),["pcmSumSquares"]]
+      ["PCM decode + energy / 480k samples",()=>decodePcmChunk(pcmBuffer),["pcmSumSquares"]],
+      ["unaligned PCM decode + energy / 480k samples",()=>decodePcmChunk(unalignedPcm),["pcmDecodeInto"]]
     ];
   for (const [name, fn, requiredNames] of jobs) {
       process.env.LOCALTIFY_RUST_PHASES="";

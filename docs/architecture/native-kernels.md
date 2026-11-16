@@ -6,12 +6,13 @@ Localtify's JavaScript implementation remains the production default. The NAPI-R
 
 | Phase | Purpose | Release status |
 | --- | --- | --- |
-| `pcm` | Validate FFmpeg Float32 samples and compute RMS energy | Strong synthetic improvement; real-audio QA required |
+| `pcm` | Decode unaligned FFmpeg Float32 buffers and compute RMS energy | Strong synthetic improvement; real-audio QA required |
 | `similarity` | Batched cosine/dot scores and full Daily Mixes clustering | Mixed results; workload-gated |
+| `ranking` | Fused group recommendation scoring and top-three selection | Explicit experiment only; slower than optimized JavaScript on CI |
 | `bridge` | JS-owned typed-array score output (with similarity/duplicates) | Opt-in; platform-dependent |
 | `duplicates` | Large candidate-pair dot-score batches | Often slower on smaller buckets |
 
-Enable experiments only through the trusted environment variable `LOCALTIFY_RUST_PHASES`, for example `pcm` or `similarity,bridge`. Unavailable binaries, rejected input, and native errors fall back to JavaScript. No phase is automatically enabled merely because a native package was installed.
+Enable experiments only through the trusted environment variable `LOCALTIFY_RUST_PHASES`, for example `pcm` or `similarity,bridge`. Unavailable binaries, rejected input, and native errors fall back to JavaScript. No phase is automatically enabled merely because a native package was installed. The slower ranking experiment requires the explicit `ranking` token; neither `similarity` nor `all` enables it.
 
 ## Limits and compatibility
 
@@ -39,7 +40,7 @@ Native CI builds Windows, Linux and macOS packages; checks that native packages 
 
 ## Security and release gates
 
-CI reports runtime dependency advisories for triage. Review the current audit results before a release; a full developer-toolchain audit and install-script approvals remain separate checks. Do not use blanket install-script approval or automatic `npm audit fix --force`.
+CI blocks moderate, high and critical production dependency advisories, and checks Electron separately because it ships as the desktop runtime despite its devDependency classification. The full audit is retained for build-tool triage. Review remaining findings and install-script approvals before release. Do not use blanket install-script approval or automatic `npm audit fix --force`.
 
 Before merging or publishing, verify CI against the current commit. For a public installer, also test actual desktop playback, seeking, file imports, analysis, recommendations, duplicates, database backup/recovery, updater flow, signing/notarization where applicable, and installation/uninstallation. On Linux, check Wayland/X11, AppImage permissions and downloadable tools; GPU/compositor fallback switches are for troubleshooting only.
 

@@ -28,13 +28,6 @@ test("all finished pages are outside temporary reset mode", () => {
   }
 });
 
-test("Library is no longer a ground-zero page", () => {
-  const source = read("src/features/library/LibraryView.tsx");
-  assert.ok(source.includes('data-page-section="library"'));
-  assert.equal(source.includes('data-page-state="reset"'), false);
-  assert.ok(source.includes('import "./library.css";'));
-});
-
 test("historical global CSS cannot own feature page class families", () => {
   for (const relative of megaFiles) {
     const source = read(relative).replace(/\/\*[\s\S]*?\*\//g, " ");
@@ -53,17 +46,4 @@ test("legacy root shim and sidebar geometry debt stay removed", () => {
   assert.ok(read("src/App.tsx").includes('from "./features/shell/useProximityMotion"'));
   const appCss = read("src/App.css");
   for (const token of ["var(--sidebar-width-release)", "var(--sidebar-width-used)", "var(--sidebar-width, 249px)", "88px 218px", '[data-sidebar-behavior="hover"]', '[data-sidebar-behavior="slim"]']) assert.equal(appCss.includes(token), false, token);
-});
-test("redesigned pages use their own styles without reset mode", () => {
-  for (const [path, section] of [
-    ["src/features/settings/SettingsView.tsx", "settings"],
-    ["src/features/playlists/PlaylistsView.tsx", "playlists"],
-    ["src/features/downloads/DownloadsView.tsx", "downloads"],
-    ["src/features/analytics/AnalyticsView.tsx", "analytics"]
-  ]) {
-    const source = read(path);
-    assert.ok(source.includes('data-page-section="' + section + '"'), path);
-    assert.ok(!source.includes('data-page-state="reset"'), path);
-    assert.ok(source.includes('import "./' + section + '.css";'), path);
-  }
 });

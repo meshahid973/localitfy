@@ -50,7 +50,7 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
   const style = hasCover ? ({ "--cover-art-url": toCssUrl(coverSrc), "--cover-url": toCssUrl(coverSrc) } as CSSProperties) : undefined;
 
   useEffect(() => {
-    setFailedSources({});
+    setFailedSources(previous => Object.keys(previous).length ? {} : previous);
   }, [song?.id, song?.coverFullUrl, song?.coverUrl, song?.coverThumbUrl, song?.coverThumbnailUrl, song?.thumbnailUrl, song?.coverPath]);
 
   return (

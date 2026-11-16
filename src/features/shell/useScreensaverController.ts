@@ -89,7 +89,6 @@ export function useScreensaverController({
     isThreeAm,
     screensaverVisible, setScreensaverVisible,
     screensaverPreviewActive, setScreensaverPreviewActive,
-    screensaverTimerRef,
     screensaverPreviewTimerRef,
     screensaverIgnoreActivityUntilRef
   };

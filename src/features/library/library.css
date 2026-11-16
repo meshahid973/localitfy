@@ -449,7 +449,6 @@
   box-shadow: none !important;
 }
 
-
 /* Cohesive Library and Liked controls; never tint the full list with an accent alpha. */
 .libraryPage .libraryTopBar { border-bottom-color: var(--lt-border); }
 .libraryPage .libraryStat { background: var(--lt-surface); border-color: var(--lt-border); }
@@ -487,8 +486,10 @@
 @media (max-width: 560px) {
   .libraryTopTools { flex-wrap: wrap; }
   .librarySearch { flex-basis: 100%; }
-  .libraryPage .libraryTopTools .librarySort { flex: 1 1 auto; }
-  .libraryAction { flex: 1 1 auto; }
+  .libraryPage .libraryTopTools .librarySort,
+  .libraryAction{
+  flex: 1 1 auto;
+  }
   .libraryStats { grid-template-columns: 1fr 1fr; gap: 8px; }
   .libraryStat { min-height: 70px; padding: 12px; }
   .libraryTrackSurface { padding: 3px; }

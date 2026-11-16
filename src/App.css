@@ -13,9 +13,7 @@
 
 .editorModal{
 
-
   padding: 20px !important;
-
 
 }
 
@@ -88,7 +86,6 @@
   padding: 0 16px !important;
 }
 
-
 .hero{
   min-height: clamp(250px, 30vh, 350px) !important;
   grid-template-columns: minmax(0, 1fr) minmax(150px, 214px) !important;
@@ -104,7 +101,6 @@
   z-index: 85 !important;
   pointer-events: none !important;
   overflow: hidden !important;
-
 
 }
 
@@ -129,7 +125,6 @@
   transform: translateZ(0);
   backface-visibility: hidden;
 }
-
 
 .songRow{
   animation: localitfyRowIn 250ms var(--ease-smooth) both;
@@ -218,7 +213,6 @@
   animation-delay: 0ms !important;
 }
 
-
 .app .circleButton.main:not(.playerBar *){
   box-shadow:
     0 0 0 0 rgba(var(--lt-accent-rgb), 0),
@@ -289,7 +283,6 @@
 .importPanelHead{
   position: relative;
   z-index: 2;
-
 
   display: grid;
   gap: 7px;
@@ -405,7 +398,6 @@
   min-height: 0 !important;
   height: auto !important;
   border-radius: 18px !important;
-
 
   box-shadow:
     0 14px 34px rgba(0, 0, 0, 0.34),
@@ -531,7 +523,6 @@
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-
 .app .ambientSurface::before{
 
   filter: blur(42px) saturate(1.12) brightness(0.92);
@@ -552,7 +543,6 @@
     background 520ms ease,
     transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 
 .localitfyDragPreview{
   position: fixed;
@@ -602,7 +592,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 
-
   font-size: 12px;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -617,7 +606,6 @@
 .app.themeSettling .active{
   transition-duration: 420ms !important;
 }
-
 
 .songRow.songDragging{
   opacity: 0.52 !important;
@@ -638,7 +626,6 @@
 html{
   scroll-behavior: smooth;
 }
-
 
 .app .ambientSurface::before{
   opacity: 0.14;
@@ -671,7 +658,6 @@ html{
   backface-visibility: hidden;
   transform: translateZ(0);
 }
-
 
 .localitfyNoSelect{
   user-select: none !important;
@@ -740,18 +726,15 @@ body.localitfySongDragging .songRow{
   height: 3px;
 }
 
-
 body.isResizingSidebar .ambientSurface::before{
   animation: none !important;
   transition: none !important;
   filter: none !important;
 }
 
-
 body.isResizingSidebar{
   text-rendering: optimizeSpeed;
 }
-
 
 .app{
   -webkit-font-smoothing: antialiased;
@@ -782,14 +765,12 @@ body.isResizingSidebar{
   transition-duration: 90ms !important;
 }
 
-
 .whatsNewOverlay{ position: fixed; inset: 0; z-index: 1300; display: grid; place-items: center; padding: 24px;   animation: whatsNewFadeIn .17s ease both; }
 .whatsNewCard{ position: relative;       animation: whatsNewPop .21s cubic-bezier(.16,1,.3,1) both; }
 .whatsNewCard h3{  color: #fff;   }
 .whatsNewClose{ position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.05); color: rgba(255,255,255,.7); cursor: pointer; }
 @keyframes whatsNewFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes whatsNewPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
 
 .whatsNewOverlay{
   background: rgba(0, 0, 0, 0.68);
@@ -892,7 +873,6 @@ body.isResizingSidebar{
   border-radius: 13px;
 }
 
-
 .editorModal{
   width: min(940px, calc(100vw - 72px)) !important;
   max-height: min(82vh, 730px) !important;
@@ -914,7 +894,6 @@ body.isResizingSidebar{
   background: rgba(0, 0, 0, 0.22) !important;
 }
 
-
 .editorGridBetter{
   min-height: 0 !important;
   overflow: auto !important;
@@ -923,7 +902,6 @@ body.isResizingSidebar{
   grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) !important;
   gap: 22px !important;
 }
-
 
 .editorMiniStats{
   display: grid;
@@ -939,16 +917,13 @@ body.isResizingSidebar{
   background: rgba(255, 255, 255, 0.04);
 }
 
-
 .editorFieldsBetter{
   min-width: 0 !important;
   display: grid !important;
   gap: 14px !important;
 }
 
-
 .editorActionsBetter{
-
 
   z-index: 2 !important;
   display: flex !important;
@@ -964,12 +939,10 @@ body.isResizingSidebar{
   backdrop-filter: blur(18px) saturate(140%) !important;
 }
 
-
 .app{
   --shell-border: rgba(255, 255, 255, 0.095);
   --shell-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 
 .panel{
   border-color: var(--shell-border) !important;
@@ -981,7 +954,6 @@ body.isResizingSidebar{
     0 18px 48px rgba(0, 0, 0, 0.18) !important;
   backdrop-filter: blur(18px) saturate(135%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(135%) !important;
-
 
   transition:
     border-color 220ms ease,
@@ -1005,9 +977,7 @@ body.isResizingSidebar{
   text-shadow: 0 0 18px rgba(var(--lt-accent-rgb), 0.18) !important;
 }
 
-
 .ambientSurface::before{
-
 
   transform: scale(1.12) !important;
   transition:
@@ -1029,7 +999,6 @@ body.isResizingSidebar{
 
 .ambientSurface:hover{
 
-
   transform: translate3d(0, -1px, 0) !important;
 }
 
@@ -1050,7 +1019,6 @@ body.isResizingSidebar{
 
 .coverAura::before{
 
-
   transform: scale(0.92) !important;
   transition:
     opacity 260ms ease,
@@ -1063,7 +1031,6 @@ body.isResizingSidebar{
 }
 
 .coverAura:hover::before{
-
 
   filter: blur(22px) saturate(1.42) contrast(1.05) !important;
 }
@@ -1095,7 +1062,6 @@ body.isResizingSidebar{
     box-shadow 180ms ease,
     transform 180ms var(--shell-ease) !important;
 }
-
 
 .songRow.active{
   background:
@@ -1204,7 +1170,6 @@ input[type="range"]{
   background: rgba(var(--lt-accent-rgb), 0.34) !important;
 }
 
-
 .mainAction{
   min-height: 50px !important;
   margin-top: 2px;
@@ -1215,9 +1180,7 @@ input[type="range"]{
     0 14px 30px color-mix(in oklab, var(--lt-accent) 13%, transparent) !important;
 }
 
-
 @media (max-width: 920px){
-
 
   .mainAction{
     min-height: 46px !important;
@@ -1232,18 +1195,14 @@ input[type="range"]{
   }
 }
 
-
 .app{
   --shell-sidebar-width: var(--sidebar-width-live, var(--sidebar-width, 236px));
   --shell-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-
 .navIcon{
 
-
   background-image: none !important;
-
 
   font-size: 23px !important;
   line-height: 1 !important;
@@ -1260,7 +1219,6 @@ input[type="range"]{
 
 :root{
 
-
   font-family: var(--font-body) !important;
 }
 
@@ -1276,12 +1234,10 @@ body{
   place-items: center !important;
   color: color-mix(in oklab, var(--lt-accent) 72%, var(--lt-text)) !important;
 
-
   border-radius: 0 !important;
 
   filter: drop-shadow(0 0 6px rgba(var(--lt-accent-rgb), 0.16));
 }
-
 
 .iconTextButton{
   display: inline-flex !important;
@@ -1305,11 +1261,9 @@ body{
 .app{
   font-family: var(--font-body) !important;
 
-
   font-weight: 720;
   letter-spacing: -0.018em;
 }
-
 
 .app .songRow{
   max-width: 100% !important;
@@ -1321,7 +1275,6 @@ body{
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
   filter: none !important;
 }
-
 
 .app .songRow.active{
   background: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 7%, rgba(0,0,0,.48)) !important;
@@ -1349,7 +1302,6 @@ body{
 
 .app .navIcon{
 
-
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -1360,7 +1312,6 @@ body{
 
 .app .navLucideIcon{
   display: block !important;
-
 
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
@@ -1379,7 +1330,6 @@ body{
   --control-circle-main: 48px;
 }
 
-
 .softButton{
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--lt-accent) 22%, rgba(255,255,255,.08));
@@ -1391,7 +1341,6 @@ body{
   background: color-mix(in oklab, var(--lt-accent) 12%, transparent);
   border-color: color-mix(in oklab, var(--lt-accent) 42%, transparent);
 }
-
 
 .circleButton:not(.playerBar *){
   width: var(--control-circle) !important;
@@ -1432,7 +1381,6 @@ body{
   --sidebar-line: color-mix(in oklab, var(--lt-accent, #64f0a4) 18%, var(--lt-border, rgba(255,255,255,.08)) 82%);
 }
 
-
 [data-orb]{
   display: none !important;
   opacity: 0 !important;
@@ -1470,7 +1418,6 @@ body{
   box-shadow: none !important;
 }
 
-
 .coverAura{
   pointer-events: none;
 }
@@ -1488,11 +1435,9 @@ body{
   --theme-bg: var(--lt-bg, #050506);
 }
 
-
 .shell{
   background: transparent !important;
 }
-
 
 .coverAura:hover::before{
 
@@ -1507,17 +1452,14 @@ body{
   --localtify-line-soft: color-mix(in oklab, var(--lt-accent, #ff65df) 12%, rgba(255,255,255,.045));
 }
 
-
 body{
   color: var(--lt-text, #f7f7f7) !important;
 }
 
 .app{
 
-
   color: var(--lt-text, #f7f7f7) !important;
 }
-
 
 .app::before{
 
@@ -1573,7 +1515,6 @@ button:hover,
   display: none !important;
 }
 
-
 .app[data-theme] .main{
   background:
     linear-gradient(180deg,
@@ -1587,7 +1528,6 @@ button:hover,
   stroke: #ffffff !important;
   fill: none !important;
 }
-
 
 .app .songRow{
   backface-visibility: hidden;
@@ -1603,14 +1543,12 @@ button:hover,
   .app .songList .songRow{
     content-visibility: auto;
 
-
     contain-intrinsic-size: 68px;
   }
 
   .app.denseList .songList .songRow{
     contain-intrinsic-size: 54px;
   }
-
 
 }
 
@@ -1630,17 +1568,14 @@ body.localitfyThemePainting .app *{
   transition-duration: 80ms !important;
 }
 
-
 .navMain{
   flex: 0 0 auto;
 }
 
 .navDivider{
 
-
   margin: 9px auto 11px;
   flex: 0 0 auto;
-
 
 }
 
@@ -1653,7 +1588,6 @@ body.localitfyThemePainting .app *{
 }
 
 .navIcon{
-
 
   display: grid;
   place-items: center;
@@ -1689,7 +1623,6 @@ body.localitfyThemePainting .app *{
   width: 25px !important;
   height: 25px !important;
 
-
   filter: drop-shadow(0 0 10px rgba(var(--lt-accent-rgb), 0.10));
 }
 
@@ -1702,7 +1635,6 @@ body.localitfyThemePainting .app *{
   -webkit-mask-image: none !important;
   mask-image: none !important;
   opacity: 1 !important;
-
 
   margin-top: 18px !important;
   margin-bottom: 18px !important;
@@ -1762,7 +1694,6 @@ html{
   background-size: auto !important;
 }
 
-
 .app{
 
   background-repeat: no-repeat !important;
@@ -1771,7 +1702,6 @@ html{
 .loadingScreen{
   animation-duration: 140ms !important;
 }
-
 
 .editorModal{
   background-image: none !important;
@@ -1798,7 +1728,6 @@ html{
 .songRow {
   transition-timing-function: var(--motion-smooth);
 }
-
 
 .app::before{
   background: none !important;
@@ -1885,15 +1814,11 @@ html{
   }
 }
 
-
 .app .secretLayer{
-
 
   transform: none !important;
 
-
 }
-
 
 @keyframes localtifyEggToastPop{
   0%{ opacity: 0; transform: translate3d(-50%, -12px, 0) scale(.94); }
@@ -1958,7 +1883,6 @@ html{
 
 .app .secretLayer{
   position: fixed !important;
-
 
   background: transparent !important;
   opacity: 1 !important;
@@ -2158,7 +2082,6 @@ html{
   display: none !important;
 }
 
-
 .app,
 .app::before {
   background-image: none !important;
@@ -2261,13 +2184,11 @@ button {
   content-visibility: visible;
 }
 
-
 @media (max-width: 760px){
   .app{
     --player-size-used: var(--player-size-live, var(--player-size, 92px));
     --sidebar-width-used: 0px;
   }
-
 
 }
 
@@ -2280,7 +2201,6 @@ button {
   contain: paint;
 }
 
-
 .app.viewSwitching .ambientSurface::before,
 .app.viewSwitching .ambientSurface::after,
 .app.viewSwitching .coverAura,
@@ -2289,7 +2209,6 @@ button {
   opacity: .28 !important;
   filter: none !important;
 }
-
 
 .titleLogoImage,
 .loadingLogoImage,
@@ -2300,7 +2219,6 @@ button {
 }
 
 .titleLogoImage{
-
 
   border-radius: 5px;
   filter: drop-shadow(0 0 9px rgba(var(--lt-accent-rgb), .38));
@@ -2469,7 +2387,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
   background-size: auto !important;
 }
 
-
 .app,
 .simpleShell,
 .page,
@@ -2510,7 +2427,6 @@ body,
   background-size: auto !important;
   animation: none !important;
 }
-
 
 body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
   animation-play-state: paused !important;
@@ -2559,7 +2475,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
   contain: layout paint style;
 }
 
-
 .app,
 .app::before,
 .app::after,
@@ -2577,12 +2492,10 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
     var(--lt-bg) !important;
 }
 
-
 .sidebarNav {
   overflow: hidden !important;
   contain: layout paint style;
 }
-
 
 .app.playerScrubbing .ambientSurface,
 .app.playerScrubbing .ambientSurface::before,
@@ -2606,7 +2519,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
   content-visibility: auto;
   contain-intrinsic-size: 1px 280px;
 }
-
 
 .loadingScreen,
 .editorModal{
@@ -3034,7 +2946,6 @@ body.localtifyBackgroundMode .ambientSurface,
   overflow: hidden !important;
 }
 
-
 .app .updateToastActions,
 .updateToastActions{
   grid-column: 1 / -1 !important;
@@ -3125,16 +3036,12 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .app .topUpdateRibbonText,
 .topUpdateRibbonText{
 
-
   grid-template-columns: auto minmax(0, auto) minmax(0, 1fr) !important;
 
-
 }
-
 
 .app .topUpdateRibbonText p:not(.eyebrow),
 .topUpdateRibbonText p:not(.eyebrow){
@@ -3149,13 +3056,10 @@ body.localtifyBackgroundMode .ambientSurface,
   white-space: nowrap !important;
 }
 
-
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
 
-
   position: static !important;
-
 
 }
 
@@ -3166,7 +3070,6 @@ body.localtifyBackgroundMode .ambientSurface,
     gap: 10px !important;
     padding: 0 14px !important;
   }
-
 
 }
 
@@ -3195,22 +3098,17 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
   grid-column: auto !important;
   min-width: max-content !important;
 
-
 }
-
 
 .app .topUpdateRibbonProgress,
 .topUpdateRibbonProgress{
 
-
   grid-column: auto !important;
-
 
 }
 
@@ -3221,9 +3119,7 @@ body.localtifyBackgroundMode .ambientSurface,
     padding: 0 10px !important;
   }
 
-
 }
-
 
 .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow,
@@ -3235,7 +3131,6 @@ body.localtifyBackgroundMode .ambientSurface,
   line-height: 1 !important;
 }
 
-
 @media (max-width: 980px){
   .app .topUpdateRibbon,
 .topUpdateRibbon{
@@ -3243,7 +3138,6 @@ body.localtifyBackgroundMode .ambientSurface,
     column-gap: 8px !important;
     padding: 0 10px !important;
   }
-
 
 }
 
@@ -3280,7 +3174,6 @@ body.localtifyBackgroundMode .ambientSurface,
   padding: 2px 8px 14px 2px !important;
 }
 
-
 .virtualSongCanvas{
   position: relative;
   width: 100%;
@@ -3316,7 +3209,6 @@ body.localtifyBackgroundMode .ambientSurface,
   box-sizing: border-box;
   contain: layout paint style;
 }
-
 
 .virtualSongViewport::-webkit-scrollbar{
   width: 8px;
@@ -3775,7 +3667,6 @@ body.localtifyBackgroundMode .ambientSurface,
   animation: screensaverIdlePulse 4.4s ease-in-out infinite;
 }
 
-
 [data-anime-visuals="off"] .screensaverOverlay{ display: none; }
 
 @keyframes screensaverBackdropDrift {
@@ -3802,7 +3693,6 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-
 .app .topUpdateRibbon,
 .topUpdateRibbon{
 
@@ -3812,17 +3702,14 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .topUpdateRibbon::after,
 .topUpdateRibbon::after{
 
-
   inset: 0 -22% 0 auto !important;
   z-index: 0 !important;
 
   pointer-events: none !important;
 
-
   transform: translate3d(-145%,0,0) skewX(-18deg) !important;
   animation: updateRibbonSheenV159 4.8s cubic-bezier(.16,1,.3,1) infinite !important;
 }
-
 
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
@@ -3832,7 +3719,6 @@ body.localtifyBackgroundMode .ambientSurface,
     box-shadow 170ms ease !important;
 }
 
-
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose {
   transition:
@@ -3841,7 +3727,6 @@ body.localtifyBackgroundMode .ambientSurface,
     box-shadow 160ms ease,
     filter 160ms ease !important;
 }
-
 
 .app .updateYukariPeek,
 .updateYukariPeek{
@@ -4196,7 +4081,6 @@ body.localtifyBackgroundMode .ambientSurface,
   -webkit-app-region: no-drag !important;
 }
 
-
 .app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
 .app .titleBarUpdateSlot .topUpdateRibbon .updateToastClose,
 .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
@@ -4288,7 +4172,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   display: none !important;
 }
 
-
 @media (max-width: 920px){
 
   .app .titleBarUpdateSlot .topUpdateRibbonText .eyebrow,
@@ -4323,10 +4206,8 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   }
 }
 
-
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
-
 
   margin: 0 !important;
 
@@ -4341,12 +4222,9 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .app .topUpdateRibbon,
 .topUpdateRibbon{
 
-
   margin: 0 auto !important;
 
-
   outline: 0 !important;
-
 
   -webkit-app-region: no-drag !important;
 }
@@ -4354,9 +4232,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .app .topUpdateRibbon::before,
 .topUpdateRibbon::before{
 
-
   border-radius: inherit !important;
-
 
   z-index: 0 !important;
 }
@@ -4367,14 +4243,11 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   z-index: 1 !important;
 }
 
-
 .app .topUpdateRibbonIcon,
 .topUpdateRibbonIcon{
 
-
   align-self: center !important;
   justify-self: center !important;
-
 
   font-size: 10.5px !important;
   font-weight: 950 !important;
@@ -4386,7 +4259,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .topUpdateRibbonText{
 
   height: 100% !important;
-
 
   transform: none !important;
 }
@@ -4407,9 +4279,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .app .topUpdateRibbonText h3,
 .topUpdateRibbonText h3{
 
-
   max-width: 100% !important;
-
 
   transform: none !important;
 }
@@ -4422,9 +4292,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .app .topUpdateRibbonRight,
 .topUpdateRibbonRight{
 
-
   grid-auto-flow: column !important;
-
 
 }
 
@@ -4436,30 +4304,24 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   flex-wrap: nowrap !important;
 }
 
-
 .app .topUpdateRibbon .updatePrimaryButton,
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updateToastClose {
 
-
   min-width: 0 !important;
-
 
   display: inline-grid !important;
   place-items: center !important;
   align-self: center !important;
   margin: 0 !important;
 
-
   box-shadow: none !important;
 
 }
 
-
 .app .topUpdateRibbonProgress,
 .topUpdateRibbonProgress{
-
 
   margin: 0 !important;
 
@@ -4482,7 +4344,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     left: 118px !important;
     right: 132px !important;
   }
-
 
 }
 
@@ -4515,9 +4376,7 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
 
-
   max-height: 28px !important;
-
 
 }
 
@@ -4527,14 +4386,11 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
   max-width: 100% !important;
 
-
   column-gap: 8px !important;
 
   border-color: rgba(var(--lt-accent-rgb, 230,90,223), 0.20) !important;
 
-
 }
-
 
 .app .topUpdateRibbonMain,
 .topUpdateRibbonMain{
@@ -4542,26 +4398,16 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   column-gap: 7px !important;
 }
 
-
 .app .topUpdateRibbonText .eyebrow,
 .topUpdateRibbonText .eyebrow{
   font-size: 9px !important;
   letter-spacing: .105em !important;
 }
 
-
 .app .topUpdateRibbonRight,
-.topUpdateRibbonRight{
-
-
-  pointer-events: auto !important;
-  -webkit-app-region: no-drag !important;
-}
-
+.topUpdateRibbonRight,
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
-
-
   pointer-events: auto !important;
   -webkit-app-region: no-drag !important;
 }
@@ -4584,7 +4430,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   -webkit-app-region: no-drag !important;
 }
 
-
 .app .topUpdateRibbon .updatePrimaryButton:hover,
 .topUpdateRibbon .updatePrimaryButton:hover{
   transform: translateY(-1px) scale(1.022) !important;
@@ -4596,7 +4441,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 .app .topUpdateRibbon .updateToastClose:hover,
 .topUpdateRibbon .updateToastClose:hover{
-
 
   filter: none !important;
 }
@@ -4611,7 +4455,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 
 .app .topUpdateRibbonProgress,
 .topUpdateRibbonProgress{
-
 
   opacity: .78 !important;
 }
@@ -4635,7 +4478,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
     left: 62px !important;
     right: 116px !important;
   }
-
 
 }
 
@@ -4705,11 +4547,7 @@ the last imported CSS layer. */
   filter: none !important;
 }
 
-.app[data-app-backgrounded="on"] .localtifyStarsLayer{
-  animation-play-state: paused !important;
-
-}
-
+.app[data-app-backgrounded="on"] .localtifyStarsLayer,
 .app.themeSettling .localtifyStarsLayer,
 .app.viewSwitching .localtifyStarsLayer{
   animation-play-state: paused !important;
@@ -4724,7 +4562,6 @@ the last imported CSS layer. */
   from{ transform: translate3d(0,0,0); }
   to{ transform: translate3d(112px,-74px,0); }
 }
-
 
 .app .playerBar > :where(.playerLeft, .playerCenter, .playerRight, .controlRow, .progressRow, .volumeWrap){
   contain: layout style !important;
@@ -4745,7 +4582,6 @@ the last imported CSS layer. */
   box-shadow: inherit !important;
   background-image: inherit !important;
 }
-
 
 .app .secretLayer.stars,
 .app .secretLayer.stars .secretRibbon,
@@ -4796,9 +4632,7 @@ body.localitfyThemePainting .app{
   contain: paint style !important;
 }
 
-
 /* Keep blur layers alive during theme painting. Old performance patches sometimes killed these. */
-
 
 /* Do not run expensive hover/lift work while dragging a color picker. */
 
@@ -4828,11 +4662,7 @@ body.localitfyThemePainting .app{
 .app .homeAlbumActions .iconAction:active,
 .app .songRow > .iconAction:active,
 .app .playlistAddAction:active,
-.app .likeActionV443:active{
-  transform: none !important;
-  filter: none !important;
-}
-
+.app .likeActionV443:active,
 .app .iconAction.likeActionV443:not(.liked):not(.likeActionActiveV443):hover .likeHeartShellV443,
 .app .iconAction.likeActionV443:hover .likeHeartShellV443,
 .app .playlistAddAction:hover{
@@ -4997,12 +4827,9 @@ body,
   overflow-anchor: none;
 }
 
-
 /* Disable the broken sidebar hover mode for 0.3.9 release. */
 
-
 /* Sidebar controls: solid, theme-aware, no blur/glass. */
-
 
 .nav{
   display: grid;
@@ -5029,7 +4856,6 @@ body,
   -webkit-backdrop-filter: none;
   transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
 }
-
 
 .navText strong,
 .navText span{
@@ -5066,7 +4892,6 @@ body,
 .sidebarResizeHandle{
   display: none;
 }
-
 
 /* Release performance: stop repeated entrance animations from repainting the page. */
 .content,
@@ -5170,7 +4995,6 @@ body.isResizingPlayer .app *{
 
   background-color: transparent !important;
   background-image: none !important;
-
 
 }
 
@@ -5286,7 +5110,6 @@ body.isResizingPlayer .app *{
   white-space: nowrap !important;
 }
 
-
 .app .playerBar,
 .app .playerBar::before,
 .app .playerBar::after{
@@ -5314,18 +5137,14 @@ body.isResizingPlayer .app *{
   z-index: 1 !important;
 }
 
-
 /* no glyph UI icons + full app modal overlay.
    Uses inline SVGs so packaged builds do not depend on font glyph rendering. */
-
 
 /* titlebar hover colors.
    Maximize gets orange, close stays red, minimize stays neutral. */
 
-
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
-
 
   align-items: flex-start !important;
   justify-content: center !important;
@@ -5333,10 +5152,8 @@ body.isResizingPlayer .app *{
 
 }
 
-
 .app .topUpdateRibbon,
 .topUpdateRibbon{
-
 
   animation: localtifyTopIslandInV454 420ms cubic-bezier(.16,1,.3,1) both !important;
 }
@@ -5350,19 +5167,15 @@ body.isResizingPlayer .app *{
 .app .topUpdateRibbonMain,
 .topUpdateRibbonMain{
 
-
   grid-template-columns: 24px minmax(0, 1fr) !important;
-
 
 }
 
 .app .topUpdateRibbonIcon,
 .topUpdateRibbonIcon{
 
-
   display: grid !important;
   place-items: center !important;
-
 
   animation: none !important;
 }
@@ -5373,21 +5186,11 @@ body.isResizingPlayer .app *{
   height: 13px !important;
 }
 
-
 .app .topUpdateRibbonRight,
-.topUpdateRibbonRight{
-
-
-  justify-content: flex-end !important;
-
-}
-
+.topUpdateRibbonRight,
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
-
-
   justify-content: flex-end !important;
-
 }
 
 .app .topUpdateRibbon .updatePrimaryButton,
@@ -5405,16 +5208,13 @@ body.isResizingPlayer .app *{
   white-space: nowrap !important;
 }
 
-
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
-
 
   padding: 0 !important;
   margin-left: 2px !important;
   display: grid !important;
   place-items: center !important;
-
 
 }
 
@@ -5481,7 +5281,6 @@ body.isResizingPlayer .app *{
   margin-top: 8px;
   margin-bottom: 10px;
 }
-
 
 .app .sidebarNavGroupsV467{
   gap: 2px !important;
@@ -5620,7 +5419,6 @@ body.isResizingPlayer .app *{
   }
 }
 
-
 .app .sidebarBottom{
   border-top-color: rgba(255,255,255,.055) !important;
   gap: 10px !important;
@@ -5636,7 +5434,6 @@ body.isResizingPlayer .app *{
   border: 1px solid rgba(var(--lt-accent-rgb), .26) !important;
   border-radius: 999px !important;
   color: var(--lt-text) !important;
-
 
   transform: translate3d(0,0,0) scale(1) !important;
   transition:
@@ -5689,13 +5486,11 @@ body.isResizingPlayer .app *{
   z-index: 1;
   font-size: 12px !important;
 
-
 }
 
 .app .mainAction.importMainAction.iconTextButton:hover,
 .app .mainAction.importMainAction.iconTextButton:focus-visible{
   color: var(--lt-text) !important;
-
 
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.05),
@@ -5733,7 +5528,6 @@ body.isResizingPlayer .app *{
     display: none !important;
   }
 }
-
 
 .app{
   color: var(--lt-text, rgba(255,255,255,.92));
@@ -5824,14 +5618,12 @@ body.isResizingPlayer .app *{
     rgba(9,8,15,.92) !important;
 }
 
-
 .app{
   --panel-calm-bg: rgba(5, 5, 10, .70);
   --panel-calm-bg-strong: rgba(7, 7, 13, .78);
   --panel-calm-shadow: 0 12px 32px rgba(0,0,0,.18);
   --panel-calm-shadow-hover: 0 16px 38px rgba(0,0,0,.22);
 }
-
 
 .app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon){
 
@@ -5878,12 +5670,10 @@ body.isResizingPlayer .app *{
   border-color: rgba(255, 90, 126, .25) !important;
 }
 
-
 .app :is(.content, .pageTransition, .songList){
   overscroll-behavior: contain;
   contain: layout style;
 }
-
 
 .app{
   --panel-calm-outline-soft: color-mix(in oklab, rgba(255,255,255,.055) 62%, var(--lt-accent) 38%) !important;
@@ -5901,23 +5691,18 @@ body.isResizingPlayer .app *{
 
 /* Lighter, prettier header stars: twinkle + drift with theme accent. */
 
-
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
 
   inset: 36px 0 auto 0 !important;
 
-
 }
-
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
 
-
   border-top: 1px solid color-mix(in oklab, var(--lt-accent) 30%, transparent) !important;
   border-bottom: 1px solid color-mix(in oklab, var(--lt-accent) 44%, rgba(255,255,255,.06)) !important;
-
 
 }
 
@@ -5943,22 +5728,17 @@ body.isResizingPlayer .app *{
   opacity: .75 !important;
 }
 
-
 .app .topUpdateRibbonIcon,
 .topUpdateRibbonIcon{
-
 
   margin: 0 !important;
 
   border-radius: 4px !important;
 
-
 }
-
 
 .app .topUpdateRibbonText h3,
 .topUpdateRibbonText h3{
-
 
   text-transform: none !important;
 }
@@ -5972,10 +5752,8 @@ body.isResizingPlayer .app *{
   gap: 8px !important;
 }
 
-
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
-
 
   line-height: 1 !important;
   text-transform: lowercase !important;
@@ -5984,9 +5762,7 @@ body.isResizingPlayer .app *{
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updateToastClose{
 
-
   border-radius: 6px !important;
-
 
 }
 
@@ -6017,7 +5793,6 @@ body.isResizingPlayer .app *{
     padding: 0 8px !important;
   }
 
-
   .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
     display: none !important;
@@ -6025,7 +5800,6 @@ body.isResizingPlayer .app *{
 }
 
 /* Title/search spacing fix */
-
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
@@ -6058,7 +5832,6 @@ body.isResizingPlayer .app *{
   overflow: hidden !important;
 }
 
-
 .app .topUpdateRibbonActions,
 .topUpdateRibbonActions{
   display: inline-flex !important;
@@ -6067,9 +5840,7 @@ body.isResizingPlayer .app *{
   height: 100% !important;
 }
 
-
 /* Reduce outline noise: only active/important areas should look outlined. */
-
 
 @media (max-width: 760px){
   .app .topUpdateRibbonText h3,
@@ -6077,9 +5848,7 @@ body.isResizingPlayer .app *{
     font-size: 10.5px !important;
   }
 
-
 }
-
 
 .app{
   --outline-calm-v487: color-mix(in oklab, rgba(255,255,255,.05) 84%, var(--lt-accent) 16%) !important;
@@ -6102,7 +5871,6 @@ body.isResizingPlayer .app *{
   bottom: auto !important;
   width: 100vw !important;
 
-
   display: block !important;
   pointer-events: none !important;
 }
@@ -6120,12 +5888,10 @@ body.isResizingPlayer .app *{
   position: relative !important;
   width: 100vw !important;
 
-
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) auto !important;
   align-items: center !important;
   gap: 12px !important;
-
 
   overflow: hidden !important;
 }
@@ -6169,7 +5935,6 @@ body.isResizingPlayer .app *{
   margin: 0 !important;
   min-width: 0 !important;
 
-
   line-height: 1 !important;
   font-weight: 900 !important;
   letter-spacing: .01em !important;
@@ -6188,14 +5953,11 @@ body.isResizingPlayer .app *{
   height: 100% !important;
 }
 
-
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
 
-
   padding: 0 11px !important;
   border-radius: 999px !important;
-
 
   font-size: 10.5px !important;
   font-weight: 950 !important;
@@ -6239,7 +6001,6 @@ body.isResizingPlayer .app *{
   background: transparent !important;
   color: var(--lt-text) !important;
 }
-
 
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
@@ -6291,7 +6052,6 @@ body.isResizingPlayer .app *{
   color: rgba(var(--lt-accent-rgb), .95) !important;
 }
 
-
 .app .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updatePrimaryButton{
   height: 23px !important;
@@ -6307,7 +6067,6 @@ body.isResizingPlayer .app *{
   color: rgba(255,255,255,.58) !important;
 }
 
-
 .app .sidebar,
 .sidebar{
   outline: 0 !important;
@@ -6316,7 +6075,6 @@ body.isResizingPlayer .app *{
   border-right: 0 !important;
   box-shadow: none !important;
 }
-
 
 .app .content,
 .content{

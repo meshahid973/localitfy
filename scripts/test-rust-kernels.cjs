@@ -16,12 +16,12 @@ assert.equal(tryDotMatrix([new Float64Array([1,2])],[new Float64Array([3,4])]),n
 process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates";
 const native = getAddon("similarity");
 if (!native) throw new Error("Native addon is required for this explicit Rust test");
-for(const name of ["dotMatrix", "pairDots", "decodeNormalizedAudioInto", "clusterFromCenters", "pcmSumSquares", "dotMatrixInto", "pairDotsInto"]) {
+for(const name of ["dotMatrix", "pairDots", "decodeNormalizedAudioInto", "clusterFromCenters", "pcmSumSquares", "pcmDecodeInto", "dotMatrixInto", "pairDotsInto"]) {
   assert.equal(typeof native[name], "function", "Missing native export: "+name);
 }
 // Guard against a false-positive parity test caused by a silent JS fallback.
 // Count actual NAPI invocations made inside the production integration paths.
-const nativeCalls = { dotMatrix: 0, pairDots: 0, decodeNormalizedAudioInto: 0, clusterFromCenters: 0, pcmSumSquares: 0, dotMatrixInto: 0, pairDotsInto: 0 };
+const nativeCalls = { dotMatrix: 0, pairDots: 0, decodeNormalizedAudioInto: 0, clusterFromCenters: 0, pcmSumSquares: 0, pcmDecodeInto: 0, dotMatrixInto: 0, pairDotsInto: 0 };
 for (const name of Object.keys(nativeCalls)) {
   const original = native[name];
   native[name] = function (...args) {
@@ -76,6 +76,19 @@ const pcmActual = evaluate("pcm", () => decodePcmChunk(pcmBuffer));
 assert.ok(nativeCalls.pcmSumSquares > beforeNativePcm, "PCM phase must execute Rust");
 assert.equal(pcmActual.squareSum, pcmReference.squareSum);
 assert.deepEqual(pcmActual.samples, pcmReference.samples);
+const unalignedPcm = Buffer.allocUnsafeSlow(pcmBuffer.length + 1).subarray(1);
+pcmBuffer.copy(unalignedPcm);
+const unalignedReference = evaluate("", () => decodePcmChunk(unalignedPcm));
+const beforeUnaligned = nativeCalls.pcmDecodeInto;
+const unalignedActual = evaluate("pcm", () => decodePcmChunk(unalignedPcm));
+assert.ok(nativeCalls.pcmDecodeInto > beforeUnaligned, "unaligned PCM must execute the new Rust kernel");
+assert.deepEqual(unalignedActual.samples, unalignedReference.samples);
+assert.equal(unalignedActual.squareSum, unalignedReference.squareSum);
+const invalidPcm = Buffer.alloc(8);
+invalidPcm.writeFloatLE(NaN, 4);
+const rejectedPcm = new Float32Array([37, 37]);
+assert.throws(() => native.pcmDecodeInto(invalidPcm, rejectedPcm), /PCM/i);
+assert.deepEqual(Array.from(rejectedPcm), [37, 37]);
 const rawBuffers=Array.from({length:240},(_,i)=>{
   const buffer=Buffer.alloc(512*4);
   for(let j=0;j<512;j++) buffer.writeFloatLE(Math.sin(i*.15 + j*.045),j*4);
