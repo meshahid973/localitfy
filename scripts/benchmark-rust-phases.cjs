@@ -9,7 +9,7 @@ const { readNormalizedVector } = require("../electron/analysis/similarity.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
 const { getAddon } = require("../electron/native/backend.cjs");
-const { decodePcmChunk } = require("../electron/analysis/pcm.cjs");
+const { decodePcmChunk, buildPcmWaveform } = require("../electron/analysis/pcm.cjs");
 
 function median(values) { return [...values].sort((a,b) => a-b)[Math.floor(values.length/2)]; }
 async function benchmark(fn, rounds = 3) {
@@ -60,7 +60,7 @@ if (compare) {
   process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,pcm";
   const addon = getAddon("similarity");
   if (!addon) throw new Error("Native benchmark requires a built Rust addon");
-  for (const name of ["decodeNormalizedAudioRowsInto", "rankSimilarityBatch", "dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "pcmSumSquares", "pcmDecodeInto"]) {
+  for (const name of ["pcmWaveformInto", "decodeNormalizedAudioRowsInto", "rankSimilarityBatch", "dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "pcmSumSquares", "pcmDecodeInto"]) {
     const original = addon[name];
     if (typeof original !== "function") throw new Error("Missing Rust export: " + name);
     nativeCalls.set(name, 0);
@@ -125,6 +125,7 @@ async function run() {
       ["duplicates / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDots"]],
       ["duplicates typed output / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDotsInto"]],
       ["PCM decode + energy / 480k samples",()=>decodePcmChunk(pcmBuffer),["pcmSumSquares"]],
+      ["PCM waveform / 480k samples",()=>buildPcmWaveform(new Float32Array(pcmBuffer.buffer,pcmBuffer.byteOffset,480000),256),["pcmWaveformInto"]],
       ["unaligned PCM decode + energy / 480k samples",()=>decodePcmChunk(unalignedPcm),["pcmDecodeInto"]]
     ];
   for (const [name, fn, requiredNames] of jobs) {

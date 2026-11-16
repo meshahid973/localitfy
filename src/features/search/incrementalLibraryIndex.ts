@@ -37,8 +37,18 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
   const songsById = new Map<string, Song>();
   const songIndexById = new Map<string, number>();
   const searchEntries: SongSearchEntry[] = [];
-  const artistOccurrences = new Map(previous?.artistOccurrences || []);
-  const albumOccurrences = new Map(previous?.albumOccurrences || []);
+  // Preserve immutable facet snapshots when only playback/likes/title change.
+  // Copy on the first actual artist/album change, not on every library update.
+  let artistOccurrences = previous?.artistOccurrences || new Map<string, number>();
+  let albumOccurrences = previous?.albumOccurrences || new Map<string, number>();
+  const artistWrite = () => {
+    if (previous && artistOccurrences === previous.artistOccurrences) artistOccurrences = new Map(artistOccurrences);
+    return artistOccurrences;
+  };
+  const albumWrite = () => {
+    if (previous && albumOccurrences === previous.albumOccurrences) albumOccurrences = new Map(albumOccurrences);
+    return albumOccurrences;
+  };
 
   for (const [index, song] of songs.entries()) {
     songsById.set(song.id, song);
@@ -49,20 +59,20 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
     const unchanged = oldSong === song && oldEntry?.song === song;
     searchEntries.push(unchanged ? oldEntry : buildSongSearchEntryCached(song, oldEntry));
     if (!oldSong || oldSong.artist !== song.artist) {
-      if (oldSong) for (const key of artistKeys(oldSong)) count(artistOccurrences, key, -1);
-      for (const key of artistKeys(song)) count(artistOccurrences, key, 1);
+      if (oldSong) for (const key of artistKeys(oldSong)) count(artistWrite(), key, -1);
+      for (const key of artistKeys(song)) count(artistWrite(), key, 1);
     }
     if (!oldSong || oldSong.album !== song.album) {
-      if (oldSong) count(albumOccurrences, albumKey(oldSong), -1);
-      count(albumOccurrences, albumKey(song), 1);
+      if (oldSong) count(albumWrite(), albumKey(oldSong), -1);
+      count(albumWrite(), albumKey(song), 1);
     }
   }
 
   if (previous) {
     for (const [id, oldSong] of previous.songsById) {
       if (songsById.has(id)) continue;
-      for (const key of artistKeys(oldSong)) count(artistOccurrences, key, -1);
-      count(albumOccurrences, albumKey(oldSong), -1);
+      for (const key of artistKeys(oldSong)) count(artistWrite(), key, -1);
+      count(albumWrite(), albumKey(oldSong), -1);
     }
   }
 

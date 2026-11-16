@@ -44,4 +44,33 @@ function decodePcmChunk(buffer) {
   return { samples, squareSum };
 }
 
-module.exports = { decodePcmChunk };
+/** Read-only waveform for explicitly requested decoded PCM, not background work.
+ * Return interleaved peak/RMS pairs; preserve a scalar reference on every host.
+ */
+function buildPcmWaveform(samples, bins = 256) {
+  if (!(samples instanceof Float32Array) || !samples.length || samples.length > 1_000_000 ||
+      !Number.isSafeInteger(bins) || bins < 1 || bins > 2048 || bins > samples.length) {
+    throw new Error("Invalid PCM waveform input");
+  }
+  const output = new Float64Array(bins * 2);
+  const native = samples.length >= 32_768 ? getAddon("pcm") : null;
+  if (native && typeof native.pcmWaveformInto === "function") {
+    try {
+      native.pcmWaveformInto(samples, output, bins);
+      if (output.some(v => !Number.isFinite(v) || v < 0)) throw new Error("Invalid native PCM waveform");
+      return output;
+    } catch (error) { warnOnce("pcm", error); }
+  }
+  for (let i=0; i<bins; i++) {
+    const start = Math.floor(i*samples.length/bins), end = Math.floor((i+1)*samples.length/bins);
+    let peak = 0, square = 0;
+    for (let j=start; j<end; j++) {
+      const value = samples[j];
+      if (!Number.isFinite(value)) throw new Error("Invalid PCM waveform sample");
+      peak = Math.max(peak, Math.abs(value)); square += value*value;
+    }
+    output[i*2] = peak; output[i*2+1] = Math.sqrt(square/(end-start));
+  }
+  return output;
+}
+module.exports = { decodePcmChunk, buildPcmWaveform };

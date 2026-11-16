@@ -160,11 +160,7 @@
   height: var(--player-control-size) !important;
   min-width: var(--player-control-size) !important;
   min-height: var(--player-control-size) !important;
-  padding: 0 !important;
-  display: inline-grid !important;
-  place-items: center !important;
   position: relative !important;
-  border-radius: 999px !important;
 
   color: rgba(255,255,255,0.92) !important;
 
@@ -198,15 +194,10 @@
   min-width: var(--player-main-control-size) !important;
   min-height: var(--player-main-control-size) !important;
 
-  border: 0 !important;
-  border-radius: 999px !important;
-
 }
 
 .playerBar .circleButton.main:hover{
   transform: translate3d(0, -1px, 0) scale(1.07) !important;
-  background: rgb(var(--accent-rgb)) !important;
-  color: #ffffff !important;
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.14) inset,
     0 0 34px rgba(var(--accent-rgb),0.34),
@@ -217,19 +208,6 @@
 .playerBar .repeatButton.active{
 
   border: 0 !important;
-}
-
-.playerBar .playerControlIcon,
-.playerBar .circleButton svg,
-.playerBar .volumeIconButton svg,
-.playerBar .repeatButton svg{
-  width: 18px !important;
-  height: 18px !important;
-  display: block !important;
-  color: currentColor !important;
-  stroke: currentColor !important;
-  fill: none !important;
-  pointer-events: none !important;
 }
 
 .playerBar .circleButton.main .playerControlIcon,
@@ -1327,7 +1305,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .volumeWrap input[type="range"]{
 
   border: 0 !important;
-  outline: 0 !important;
 
   accent-color: var(--accent) !important;
 

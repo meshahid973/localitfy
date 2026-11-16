@@ -211,6 +211,32 @@ pub fn decode_normalized_audio_rows_into(bytes: &[u8], mut output: Float64Array,
     Ok(invalid_rows)
 }
 
+/// Peak and RMS pairs for evenly spaced PCM bins. No audio I/O, no persistent state.
+#[napi]
+pub fn pcm_waveform_into(samples: &[f32], mut output: Float64Array, bins: u32) -> Result<()> {
+    let count = samples.len();
+    let bins = bins as usize;
+    if count == 0 || count > 1_000_000 || bins == 0 || bins > 2048 || bins > count ||
+        output.len() != bins * 2 || !samples.iter().all(|v| v.is_finite()) {
+        return Err(invalid("Invalid PCM waveform input"));
+    }
+    let out = unsafe { output.as_mut() };
+    for i in 0..bins {
+        let start = i * count / bins;
+        let end = (i + 1) * count / bins;
+        let mut peak = 0.0_f64;
+        let mut square = 0.0_f64;
+        for &sample in &samples[start..end] {
+            let value = sample as f64;
+            peak = peak.max(value.abs());
+            square += value * value;
+        }
+        out[i * 2] = peak;
+        out[i * 2 + 1] = (square / (end - start) as f64).sqrt();
+    }
+    Ok(())
+}
+
 /// Decode contiguous little-endian Float32 CLAP profiles into a *fresh* JS-owned
 /// Float64Array in-place, without creating or copying a Rust return vector.
 fn decode_normalized_audio_into_inner(bytes: &[u8], output: &mut [f64], dim: usize) -> Result<()> {

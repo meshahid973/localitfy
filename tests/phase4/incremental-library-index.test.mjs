@@ -90,3 +90,16 @@ test("incremental edits, reorderings and deletions match a fresh library rebuild
     current = next;
   }
 });
+
+test("playback-only edits share facet snapshots, while metadata edits copy only affected maps", () => {
+  const a=song("a"), b=song("b","Artist B","Album B");
+  const first=reconcileLibraryIndex([a,b]);
+  const second=reconcileLibraryIndex([{...a,playCount:2},b],first);
+  assert.equal(second.artistOccurrences,first.artistOccurrences);
+  assert.equal(second.albumOccurrences,first.albumOccurrences);
+  const third=reconcileLibraryIndex([second.songsById.get("a"),{...b,artist:"Artist A"}],second);
+  assert.notEqual(third.artistOccurrences,second.artistOccurrences);
+  assert.equal(third.albumOccurrences,second.albumOccurrences);
+  assert.equal(first.artistCount,2);
+  assert.equal(third.artistCount,1);
+});
