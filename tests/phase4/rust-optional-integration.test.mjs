@@ -21,8 +21,10 @@ test("Rust remains optional and preserves JavaScript fallbacks",()=>{
  assert.match(dup,/tryBatchPairDots\(\[\.\.\.buckets\.values\(\)\], vectors\)/);
  assert.doesNotMatch(read("electron/native/compute.cjs"),/function tryPairDots\(/);
  assert.match(read("electron/native/compute.cjs"),/tryDecodeNormalizedAudio/);
- assert.match(read("electron/analysis/similarity.cjs"),/tryDecodeNormalizedAudio\(candidateRecords\.map/);
- assert.match(read("electron/analysis/daily-mixes.cjs"),/tryDecodeNormalizedAudio\(validRecords\.map/);
+ assert.match(read("electron/native/compute.cjs"),/return buffers\.map\(scalar\)/);
+ assert.match(read("electron/native/compute.cjs"),/decodeNormalizedAudioRowsInto/);
+ assert.match(read("electron/analysis/similarity.cjs"),/decodeAudioVectors\(candidateRecords\.map/);
+ assert.match(read("electron/analysis/daily-mixes.cjs"),/decodeAudioVectors\(validRecords\.map/);
  assert.match(scan,/const files = \[\]/);
 });
 
@@ -33,7 +35,7 @@ test("Rust native extension is excluded from Git but included in packaged Electr
  assert.match(read(".gitignore"),/electron\/native\/\*\.node/);
 });
 
-test("native full clustering and typed arrays are the sole new large-workload bridge",()=>{
+test("native full clustering and typed arrays preserve bounded large-workload bridges",()=>{
  const native = read("native/rust-kernels/src/lib.rs");
  const mix = read("electron/analysis/daily-mixes.cjs");
  const kernel = read("electron/native/compute.cjs");

@@ -1,5 +1,5 @@
 const fs = require("node:fs");
-const { tryDotMatrix, tryClusterFromCenters, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
+const { tryDotMatrix, tryClusterFromCenters, decodeAudioVectors } = require("../native/compute.cjs");
 const { createHash } = require("node:crypto");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { readNormalizedVector } = require("./similarity.cjs");
@@ -240,10 +240,10 @@ async function getDailyMixes(database, request, { statFile = fs.promises.stat, n
     }));
     for (let i = 0; i < batch.length; i++) if (valid[i]) validRecords.push(batch[i]);
   }
-  const nativeVectors = tryDecodeNormalizedAudio(validRecords.map((record) => record.vector), MODEL.dimensions);
+  const decodedVectors = decodeAudioVectors(validRecords.map((record) => record.vector), MODEL.dimensions, readNormalizedVector);
   for (let i = 0; i < validRecords.length; i++) {
     const record = validRecords[i]; if (paths.has(record.filePath)) continue;
-    const vector = nativeVectors ? nativeVectors[i] : readNormalizedVector(record.vector);
+    const vector = decodedVectors[i];
     if (!vector) continue;
     tracks.push({ ...record, vector }); paths.add(record.filePath);
   }

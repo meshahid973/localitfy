@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const os = require("node:os");
 const path = require("node:path");
 const { getAddon } = require("../electron/native/backend.cjs");
-const { decodePcmChunk } = require("../electron/analysis/pcm.cjs");
+const { decodePcmChunk, buildPcmWaveform } = require("../electron/analysis/pcm.cjs");
 const { tryDotMatrix, tryClusterFromCenters, tryBatchPairDots, tryDecodeNormalizedAudio } = require("../electron/native/compute.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
@@ -114,6 +114,30 @@ for(let i=0;i<decoded.length;i++)for(let j=0;j<512;j++)
 const badBuffers=rawBuffers.slice();badBuffers[15]=Buffer.alloc(2048);
 assert.equal(evaluate("similarity",()=>tryDecodeNormalizedAudio(badBuffers,512)),null,
   "zero vector must fall back to per-record JS validation");
+const { decodeAudioVectors } = require("../electron/native/compute.cjs");
+const { readNormalizedVector } = require("../electron/analysis/similarity.cjs");
+const many = Array.from({length:3300}, (_, i) => rawBuffers[i % rawBuffers.length]);
+many[2] = Buffer.alloc(1);
+many[1300] = Buffer.alloc(2048);
+many[2300] = Buffer.alloc(2048); many[2300].writeFloatLE(NaN, 0);
+let calls = 0;
+const originalRows = native.decodeNormalizedAudioRowsInto;
+native.decodeNormalizedAudioRowsInto = (...args) => { calls++; return originalRows.apply(native,args); };
+const bulkExpected = evaluate("", () => decodeAudioVectors(many,512,readNormalizedVector));
+const bulkActual = evaluate("similarity", () => decodeAudioVectors(many,512,readNormalizedVector));
+assert.ok(calls >= 3, "large libraries must actually execute multiple native batches");
+assert.equal(bulkActual.length, bulkExpected.length);
+for (let i=0; i<many.length; i++) {
+  if (!bulkExpected[i]) assert.equal(bulkActual[i],null);
+  else for(let j=0;j<512;j++) assert.ok(Math.abs(bulkActual[i][j]-bulkExpected[i][j])<1e-12);
+}
+const workspace = {};
+const firstMatrix = evaluate("similarity,bridge", () => tryDotMatrix(left,right,workspace));
+const snapshot = Array.from(firstMatrix);
+const storage = workspace.rows;
+evaluate("similarity,bridge", () => tryDotMatrix(right,left,workspace));
+assert.equal(workspace.rows, storage);
+assert.deepEqual(Array.from(firstMatrix),snapshot,"returned result cannot alias reused scratch");
 
 const mixesJs = evaluate("",()=>generateMixes(songs,"2026-11-10:0"));
 const mixesRust = evaluate("similarity",()=>generateMixes(songs,"2026-11-10:0"));
@@ -178,5 +202,18 @@ for (let i = 0; i < rankRows.length; i++) {
   assert.ok(Math.abs(nativeRanks[i*2+1] - average) < 1e-12);
 }
 assert.throws(() => native.rankSimilarityBatch(new Float64Array([1,2]), new Float64Array([1,2]), new Float64Array([NaN]), 2, .6, .4), /similarity/i);
+const sampleWave = Float32Array.from({length:40_001},(_,i)=>Math.sin(i*.03));
+const waveExpected = evaluate("",()=>buildPcmWaveform(sampleWave,257));
+const waveOriginal = native.pcmWaveformInto;
+let waveCalls = 0;
+native.pcmWaveformInto=(...args)=>{waveCalls++;return waveOriginal.apply(native,args);};
+const waveActual=evaluate("pcm",()=>buildPcmWaveform(sampleWave,257));
+assert.ok(waveCalls>0,"large waveform must invoke Rust");
+for(let i=0;i<waveActual.length;i++)assert.ok(Math.abs(waveActual[i]-waveExpected[i])<1e-12);
+assert.deepEqual(Array.from(evaluate("",()=>buildPcmWaveform(new Float32Array([-1,0,2,0]),2))),[1,Math.sqrt(.5),2,Math.sqrt(2)]);
+assert.throws(()=>buildPcmWaveform(new Float32Array([NaN,1]),1),/waveform/i);
+const waveInvalid=new Float64Array([37,37]);
+assert.throws(()=>native.pcmWaveformInto(new Float32Array([NaN,1]),waveInvalid,1),/waveform/i);
+assert.deepEqual(Array.from(waveInvalid),[37,37]);
 process.env.LOCALTIFY_RUST_PHASES = "";
 console.log("[rust-parity] Native similarity, Daily Mixes, duplicate batches, and PCM match JS");

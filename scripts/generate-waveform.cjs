@@ -1,0 +1,15 @@
+"use strict";
+const fs=require("node:fs"),path=require("node:path"),{spawnSync}=require("node:child_process");
+const {decodePcmChunk,buildPcmWaveform}=require("../electron/analysis/pcm.cjs");
+const input=process.argv[2];
+if(!input)throw Error("Usage: node scripts/generate-waveform.cjs LOCAL_AUDIO_FILE [bins]");
+const target=path.resolve(input);
+if(!fs.statSync(target).isFile())throw Error("Expected a regular local audio file");
+const ffmpeg=require("ffmpeg-static");
+if(!ffmpeg)throw Error("FFmpeg executable not available");
+const decoded=spawnSync(ffmpeg,["-nostdin","-v","error","-protocol_whitelist","file,pipe","-i",target,"-t","120","-vn","-ac","1","-ar","8000","-f","f32le","pipe:1"],{windowsHide:true,timeout:30000,maxBuffer:4*1024*1024});
+if(decoded.error||decoded.status!==0)throw Error("Waveform decode failed: "+(decoded.error?.message||decoded.stderr?.toString()||"unknown error"));
+const {samples}=decodePcmChunk(decoded.stdout);
+const bins=process.argv[3]===undefined?Math.min(256,samples.length):Number(process.argv[3]);
+const values=buildPcmWaveform(samples,bins);
+console.log(JSON.stringify({sampleRate:8000,durationSeconds:samples.length/8000,bins,peakRmsPairs:Array.from(values)}));

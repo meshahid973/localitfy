@@ -36,7 +36,11 @@ jobs:
           done
           node -e 'const fs=require("fs");for(const n of [1000,10000,50000]){const a=JSON.parse(fs.readFileSync("qa-artifacts/baseline-"+n+".json"));const b=JSON.parse(fs.readFileSync("qa-artifacts/current-"+n+".json"));for(let i=0;i<a.trials.length;i++)if(a.trials[i].digest!==b.trials[i].digest)throw Error("Output divergence: "+n+" "+a.trials[i].label);}'
       - name: Actual Electron desktop renderer and audio smoke
-        run: xvfb-run -a npx electron scripts/ci-desktop-regression.cjs
+        shell: bash
+        run: |
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+          xvfb-run -a npx electron scripts/ci-desktop-regression.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -75,10 +79,21 @@ jobs:
           sudo chmod 666 /dev/kvm
           sdkmanager "emulator" "system-images;android-35;google_apis;x86_64"
           echo no | avdmanager create avd -n localtify-ci -k "system-images;android-35;google_apis;x86_64" --force
-          emulator -avd localtify-ci -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot > qa-android/emulator.log 2>&1 &
-          trap 'adb emu kill || true' EXIT
-          timeout 180 adb wait-for-device
-          timeout 180 bash -c 'until [[ "$(adb shell getprop sys.boot_completed | tr -d "\r")" == "1" ]]; do sleep 5; done'
+          EMULATOR="$ANDROID_SDK_ROOT/emulator/emulator"
+          test -x "$EMULATOR"
+          "$EMULATOR" -accel-check
+          "$EMULATOR" -avd localtify-ci -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot > qa-android/emulator.log 2>&1 &
+          emulator_pid=$!
+          trap 'adb emu kill || true; kill "$emulator_pid" 2>/dev/null || true; tail -n 100 qa-android/emulator.log || true' EXIT
+          for attempt in $(seq 1 90); do
+            if ! kill -0 "$emulator_pid" 2>/dev/null; then
+              echo "Emulator exited unexpectedly"
+              exit 1
+            fi
+            if [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == "1" ]]; then break; fi
+            sleep 5
+          done
+          test "$(adb shell getprop sys.boot_completed | tr -d "\r")" = "1"
           adb shell wm size 720x1600
           adb shell wm density 320
           adb install -r android/app/build/outputs/apk/debug/app-debug.apk
