@@ -58,6 +58,8 @@ jobs:
             ${{ runner.temp }}/localtify-runtime-audit.json
             ${{ runner.temp }}/localtify-full-audit.json
           if-no-files-found: warn
+      - name: Verify full dependency audit
+        run: npm audit --audit-level=moderate
       - run: npm run release:check
 
   windows-native-smoke:
