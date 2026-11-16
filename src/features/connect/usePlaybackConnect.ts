@@ -87,6 +87,8 @@ export function usePlaybackConnect(local: LocalPlayer) {
   const handoffRef = useRef<{ resume: boolean; timer: number; id: string } | null>(null);
   const handoffVersionRef = useRef(0);
   const incomingRef = useRef<string | null>(null);
+  const pendingSongCommandRef = useRef<number | null>(null);
+  const connectionGenerationRef = useRef(0);
   const seekingRef = useRef(false);
   // Set while this hook drives the app's player, so the app's remote-control redirects (toggle, play…) stay out of it.
   const drivingRef = useRef(false);
@@ -200,9 +202,14 @@ export function usePlaybackConnect(local: LocalPlayer) {
 
   const adoptPresence = (presence: LivePresence, hello: boolean) => {
     if (!hello && presence.session.epoch < liveRef.current.session.epoch) return;
-    if (hello) { incomingRef.current = null; finishHandoff(false); }
+    if (hello) {
+      connectionGenerationRef.current += 1;
+      incomingRef.current = null;
+      finishHandoff(false);
+    }
+    const previousVersion = handoffVersionRef.current;
     handoffVersionRef.current = presence.handoffVersion || 0;
-    if (handoffVersionRef.current === 2) void send({ type: "handoff-ready" });
+    if (handoffVersionRef.current === 2 && (hello || previousVersion !== 2)) void send({ type: "handoff-ready" });
     offsetRef.current = presence.serverTime - Date.now();
     const self = presence.self || liveRef.current.self;
     update({ status: "connected", self, peers: presence.peers, session: presence.session, state: presence.state?.from === presence.session.active ? presence.state : null });
@@ -223,7 +230,7 @@ export function usePlaybackConnect(local: LocalPlayer) {
         adoptPresence(event, event.type === "hello");
         break;
       case "connection":
-        if (event.status !== "connected") { incomingRef.current = null; handoffVersionRef.current = 0; finishHandoff(false); }
+        if (event.status !== "connected") { connectionGenerationRef.current += 1; incomingRef.current = null; handoffVersionRef.current = 0; finishHandoff(false); }
         update(event.status === "connected" ? { status: event.status } : { status: event.status, peers: [], session: EMPTY_SESSION, state: null });
         break;
       case "state":
@@ -308,7 +315,15 @@ export function usePlaybackConnect(local: LocalPlayer) {
     void bridge.liveSend({ type: "status" }).then((reply) => {
       if (active && !receivedPresence && reply?.ok && reply.peers && reply.session) adoptPresence(reply as LivePresence, false);
     }).catch(() => undefined);
-    return () => { active = false; off(); incomingRef.current = null; finishHandoff(false); };
+    return () => {
+      active = false;
+      off();
+      connectionGenerationRef.current += 1;
+      if (pendingSongCommandRef.current !== null) window.clearTimeout(pendingSongCommandRef.current);
+      pendingSongCommandRef.current = null;
+      incomingRef.current = null;
+      finishHandoff(false);
+    };
   }, []);
 
   // Pressing play makes this device the player; the one playing before pauses.
@@ -445,8 +460,14 @@ export function usePlaybackConnect(local: LocalPlayer) {
     play(songId: string) {
       if (!redirect()) return false;
       const before = localRef.current.queue;
-      // Let the app commit the queue it set together with the song (album, playlist) before reading it.
-      window.setTimeout(() => {
+      const requestedSession = liveRef.current.session;
+      const generation = connectionGenerationRef.current;
+      // Read the committed queue, but never forward an old selection to a replacement player.
+      if (pendingSongCommandRef.current !== null) window.clearTimeout(pendingSongCommandRef.current);
+      pendingSongCommandRef.current = window.setTimeout(() => {
+        pendingSongCommandRef.current = null;
+        const session = liveRef.current.session;
+        if (generation !== connectionGenerationRef.current || session.epoch !== requestedSession.epoch || session.active !== requestedSession.active || !remoteActive()) return;
         const after = localRef.current.queue;
         command({ action: "play-song", songId, replaceQueue: after !== before, queue: after });
       }, 50);
