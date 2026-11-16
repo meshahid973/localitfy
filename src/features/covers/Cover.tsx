@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Song } from "../library/song.types";
 import { getRendererSafeImageUrl } from "./cover.ambient";
@@ -22,7 +22,7 @@ export function getCardCoverCssUrl(song?: Song | null) {
   return `url("${coverUrl.replace(/["\\]/g, "\\$&")}")`;
 }
 
-export const Cover = memo(function Cover({ song, className, priority = "auto" }: { song: Song | null; className: string; priority?: CoverImagePriority }) {
+export function Cover({ song, className, priority = "auto" }: { song: Song | null; className: string; priority?: CoverImagePriority }) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
   // Readiness is tied to the URL that actually loaded. A song update that keeps the same URL must not
   // hide the image again: the mounted <img> would never fire another load event.
@@ -82,4 +82,4 @@ export const Cover = memo(function Cover({ song, className, priority = "auto" }:
       ) : null}
     </div>
   );
-});
+}

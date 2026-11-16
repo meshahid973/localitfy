@@ -86,9 +86,17 @@ async function run() {
         if(native) return native;
         if(process.env.LOCALTIFY_RUST_PHASES) throw new Error("Native group rank unexpectedly fell back");
         return rows.flatMap((row,i)=>{
-          const audio=seeds.map(seed=>dot(row,seed));
-          const scores=audio.map((value,j)=>.6*value+.4*genre(i,j)).sort((a,b)=>b-a);
-          return [Math.max(...audio),scores.slice(0,3).reduce((sum,score)=>sum+score/3,0)];
+          let closest=-Infinity;
+          const scores=[];
+          for(let j=0;j<seeds.length;j++) {
+            const audio=dot(row,seeds[j]);
+            closest=Math.max(closest,audio);
+            const value=.6*audio+.4*genre(i,j);
+            let at=scores.length;
+            while(at>0&&value>scores[at-1])at--;
+            if(at<3){scores.splice(at,0,value);if(scores.length>3)scores.pop();}
+          }
+          return [closest,scores.reduce((sum,score)=>sum+score/3,0)];
         });
       },["rankSimilarityBatch"]],
       ["CLAP Float32 decoder / 600x512",()=>{
