@@ -130,7 +130,7 @@ export default function LibraryView(props: LibraryViewProps) {
           <MascotStateArt state="warning" className="libraryMissingMascot" />
           <div className="libraryMissingCopy">
             <strong>{libraryMissingLabel}</strong>
-            <span>These entries are still saved in Localtify, but their audio files are not on this PC.</span>
+            <span>{isAndroidApp() ? "These entries are saved, but their audio files are not on this phone." : `These entries are saved, but their audio files are not on this ${computerName()}.`}</span>
           </div>
           <div className="libraryMissingActions">
             <button type="button" className={showingMissingFiles ? "active" : ""} onClick={() => setLibraryFilterMode?.("missing")}><ActionLabel icon={FileWarning}>show missing</ActionLabel></button>
