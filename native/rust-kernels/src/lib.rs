@@ -284,6 +284,48 @@ pub fn cluster_from_centers(points: &[f64], initial: &[f64], dimensions: u32, mi
     cluster_from_centers_inner(points, initial, dimension(dimensions)?, minimum as usize)
 }
 
+/// Fused group recommendation scoring: row-major genre similarities plus audio
+/// vectors. Return [closest_audio, top_three_weighted_mean] for each candidate.
+/// No database or policy mutations; history penalties stay in the caller.
+#[napi]
+pub fn rank_similarity_batch(rows: &[f64], seeds: &[f64], genre: &[f64], dimensions: u32,
+    audio_weight: f64, genre_weight: f64) -> Result<Vec<f64>> {
+    let dim = dimension(dimensions)?;
+    if rows.is_empty() || seeds.is_empty() || rows.len() % dim != 0 || seeds.len() % dim != 0 {
+        return Err(invalid("Invalid similarity batch dimensions"));
+    }
+    let count = rows.len() / dim;
+    let seed_count = seeds.len() / dim;
+    if count > 128 || seed_count > 50 || rows.len() + seeds.len() > 1_500_000 ||
+        genre.len() != count * seed_count || !audio_weight.is_finite() || !genre_weight.is_finite() ||
+        !rows.iter().chain(seeds.iter()).chain(genre.iter()).all(|v| v.is_finite()) {
+        return Err(invalid("Invalid similarity batch inputs"));
+    }
+    let top = seed_count.min(3);
+    let mut output = Vec::with_capacity(count * 2);
+    for (row_index, row) in rows.chunks_exact(dim).enumerate() {
+        let mut closest = f64::NEG_INFINITY;
+        let mut scores = [f64::NEG_INFINITY; 3];
+        for (index, seed) in seeds.chunks_exact(dim).enumerate() {
+            let audio = dot(row, seed);
+            let score = audio_weight * audio + genre_weight * genre[row_index * seed_count + index];
+            if !audio.is_finite() || !score.is_finite() {
+                return Err(invalid("Non-finite similarity score"));
+            }
+            closest = closest.max(audio);
+            let mut value = score;
+            for old in scores.iter_mut().take(top) {
+                if value > *old { std::mem::swap(old, &mut value); }
+            }
+        }
+        let mut average = 0.0;
+        for score in scores.iter().take(top) { average += *score / top as f64; }
+        if !average.is_finite() { return Err(invalid("Non-finite similarity average")); }
+        output.extend([closest, average]);
+    }
+    Ok(output)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

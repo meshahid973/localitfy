@@ -176,4 +176,39 @@ function tryBatchPairDots(buckets, vectors) {
     return null;
   }
 }
-module.exports = { tryDotMatrix, tryClusterFromCenters, tryDecodeNormalizedAudio, tryBatchPairDots };
+/** Avoid materializing a full audio-score matrix or sorting each candidate in JS. */
+function tryRankSimilarity(rows, seeds, genreFor, audioWeight, genreWeight) {
+  if (!rows.length || rows.length > 128 || !seeds.length || seeds.length > 50) return null;
+  const dim = rows[0]?.length;
+  if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16_384 ||
+      rows.length * seeds.length * dim < 262_144 || (rows.length + seeds.length) * dim > 1_500_000 ||
+      rows.some(row => row.length !== dim) || seeds.some(seed => seed.length !== dim)) return null;
+  const native = getAddon("similarity");
+  if (!native || typeof native.rankSimilarityBatch !== "function") return null;
+  try {
+    const packed = new Float64Array(rows.length * dim);
+    const packedSeeds = new Float64Array(seeds.length * dim);
+    const genre = new Float64Array(rows.length * seeds.length);
+    rows.forEach((row, i) => packed.set(row, i * dim));
+    seeds.forEach((seed, i) => packedSeeds.set(seed, i * dim));
+    for (let i = 0; i < rows.length; i++) for (let j = 0; j < seeds.length; j++) genre[i * seeds.length + j] = genreFor(i, j);
+    const result = native.rankSimilarityBatch(packed, packedSeeds, genre, dim, audioWeight, genreWeight);
+    if (!(Array.isArray(result) || result instanceof Float64Array) ||
+        result.length !== rows.length * 2 || result.some(value => !Number.isFinite(value))) throw new Error("Invalid native similarity ranks");
+    for (const i of new Set([0, rows.length - 1])) {
+      let closest = -Infinity;
+      const scores = [];
+      for (let j = 0; j < seeds.length; j++) {
+        let audio = 0;
+        for (let k = 0; k < dim; k++) audio += rows[i][k] * seeds[j][k];
+        closest = Math.max(closest, audio);
+        scores.push(audioWeight * audio + genreWeight * genre[i * seeds.length + j]);
+      }
+      const top = Math.min(3, scores.length);
+      const average = scores.sort((a, b) => b - a).slice(0, top).reduce((sum, score) => sum + score / top, 0);
+      if (Math.abs(result[i * 2] - closest) > 1e-9 || Math.abs(result[i * 2 + 1] - average) > 1e-9) throw new Error("Native similarity rank parity mismatch");
+    }
+    return result;
+  } catch (error) { warnOnce("similarity", error); return null; }
+}
+module.exports = { tryDotMatrix, tryClusterFromCenters, tryDecodeNormalizedAudio, tryBatchPairDots, tryRankSimilarity };

@@ -1,5 +1,5 @@
 const fs = require("node:fs");
-const { tryDotMatrix, tryDecodeNormalizedAudio } = require("../native/compute.cjs");
+const { tryDotMatrix, tryDecodeNormalizedAudio, tryRankSimilarity } = require("../native/compute.cjs");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { AUDIO_WEIGHT, GENRE_WEIGHT, dot, genreTags, genreTokens, genreSimilarity, libraryMean, centered, classifyPlay,
   listeningStats, skipRate, notForMe } = require("./listening-signals.cjs");
@@ -177,17 +177,20 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
   const rankBatch = async (batch) => {
     const validFiles = await Promise.all(batch.map((record) => fileMatches(record, statFile)));
     const points = batch.map((record, index) => validFiles[index] ? profile(record) : null);
-    const nativeAudio = tryDotMatrix(points.map((point) => point?.audio || seedProfiles[0].audio),
-      seedAudio);
+    const audioRows = points.map((point) => point?.audio || seedAudio[0]);
+    const nativeRanks = tryRankSimilarity(audioRows, seedAudio,
+      (i, j) => (points[i] ? genreSimilarity(seedProfiles[j].genre, points[i].genre) : null) ?? UNKNOWN_GENRE,
+      AUDIO_WEIGHT, GENRE_WEIGHT);
+    const nativeAudio = nativeRanks ? null : tryDotMatrix(audioRows, seedAudio);
     for (let index = 0; index < batch.length; index++) {
       if (!validFiles[index]) continue;
       const candidate = batch[index];
       result.compared += 1;
       const point = points[index];
       // A group seed scores each candidate by its closest few seeds, so a mixed playlist matches each of its styles.
-      let closestSound = -Infinity;
+      let closestSound = nativeRanks ? nativeRanks[index * 2] : -Infinity;
       const scores = [];
-      for (let seedIndex = 0; seedIndex < seedProfiles.length; seedIndex++) {
+      if (!nativeRanks) for (let seedIndex = 0; seedIndex < seedProfiles.length; seedIndex++) {
         const seed = seedProfiles[seedIndex];
         const audio = nativeAudio ? nativeAudio[index * seedProfiles.length + seedIndex] : dot(seed.audio, point.audio);
         const genre = genreSimilarity(seed.genre, point.genre);
@@ -200,8 +203,8 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
       }
       // Tags alone never make a match: the sound has to resemble at least one seed.
       if (closestSound <= 0) continue;
-      let score = 0;
-      for (let i = 0; i < top; i++) score += scores[i] / top;
+      let score = nativeRanks ? nativeRanks[index * 2 + 1] : 0;
+      if (!nativeRanks) for (let i = 0; i < top; i++) score += scores[i] / top;
       score -= SKIP_PENALTY * skipRate(stats.get(candidate.songId));
       // Unrelated or opposed profiles are not useful suggestions. Scores are not probabilities.
       if (score <= 0) continue;
