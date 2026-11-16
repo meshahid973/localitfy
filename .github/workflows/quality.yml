@@ -28,7 +28,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Report runtime dependency advisories (advisory until triaged)
+      - name: Report production dependency advisories
         shell: bash
         run: |
           npm audit --omit=dev --json > "$RUNNER_TEMP/localtify-runtime-audit.json" || true
@@ -44,6 +44,20 @@ jobs:
           '
       - name: Block moderate, high and critical runtime dependency advisories
         run: npm audit --omit=dev --audit-level=moderate
+      - name: Audit shipped Electron and report build-tool advisories
+        shell: bash
+        run: |
+          npm audit --json > "$RUNNER_TEMP/localtify-full-audit.json" || true
+          node scripts/check-shipped-runtime-audit.mjs "$RUNNER_TEMP/localtify-full-audit.json"
+      - name: Preserve full dependency audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit
+          path: |
+            ${{ runner.temp }}/localtify-runtime-audit.json
+            ${{ runner.temp }}/localtify-full-audit.json
+          if-no-files-found: warn
       - run: npm run release:check
 
   windows-native-smoke:

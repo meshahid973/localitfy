@@ -42,6 +42,28 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.phoneMiniOpen{
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.phoneMiniPlayer > .phoneIconButton{
+  position: relative;
+  z-index: 2;
+}
+
+.phoneMiniOpen:focus-visible{
+  outline: 2px solid var(--lt-accent);
+  outline-offset: -3px;
+}
+
 .phoneMiniArt{
   flex: none;
   width: 44px;
@@ -84,6 +106,7 @@
 /* A thin progress line along the bottom edge of the card; the app paints --range-progress. */
 .phoneMiniProgress{
   position: absolute;
+  z-index: 3;
   inset: auto 12px 0;
   width: auto;
   height: 3px;
@@ -321,6 +344,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-width: 0;
+  gap: 2px;
+}
+
+.phonePlayerControls > .phoneIconButton{
+  flex-shrink: 1;
+  min-width: 44px;
+}
+
+.phoneIconButton:focus-visible,
+.phonePlayButton:focus-visible,
+.phoneChip:focus-visible,
+.phonePlayerSeek input:focus-visible{
+  outline: 2px solid var(--lt-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 350px){
+  .phonePlayerSheet{
+    padding-inline: max(12px, var(--safe-area-inset-left, env(safe-area-inset-left, 0px))) max(12px, var(--safe-area-inset-right, env(safe-area-inset-right, 0px)));
+  }
+  .phonePlayButton{ width: 64px; height: 64px; }
 }
 
 .phoneToggle{
@@ -434,4 +479,6 @@
 
 @media (prefers-reduced-motion: reduce){
   .phonePlayerSheet{ animation: none; }
+  .phonePlayerArtSlot,
+  .phonePlayButton{ transition: none; }
 }

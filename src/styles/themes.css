@@ -258,7 +258,6 @@
   --lt-danger: var(--danger, #ff6b8a);
 }
 
-
 .app[data-theme="rose"]{
   --bg: #0b0306;
   --bg-2: #0b0306;
@@ -1906,26 +1905,17 @@
 
 /* proper contrast light mode + reference-inspired theme polish */
 
-
-.app[data-theme="midnight"]{
-  --line: color-mix(in oklab, var(--accent) 20%, #000);
-  --line-2: color-mix(in oklab, var(--accent) 34%, #000);
-}
-
+.app[data-theme="midnight"],
 .app[data-theme="stars"]{
   --line: color-mix(in oklab, var(--accent) 20%, #000);
   --line-2: color-mix(in oklab, var(--accent) 34%, #000);
 }
 
-
 /* light mode visibility and contrast final pass */
-
 
 /* light mode final contrast */
 
-
 /* light mode shell/select contrast */
-
 
 /* final light mode variables */
 .app[data-theme="mono"] {

@@ -39,7 +39,7 @@ Native CI builds Windows, Linux and macOS packages; checks that native packages 
 
 ## Security and release gates
 
-CI reports runtime dependency advisories for triage. Review the current audit results before a release; a full developer-toolchain audit and install-script approvals remain separate checks. Do not use blanket install-script approval or automatic `npm audit fix --force`.
+CI blocks moderate, high and critical production dependency advisories, and checks Electron separately because it ships as the desktop runtime despite its devDependency classification. The full audit is retained for build-tool triage. Review remaining findings and install-script approvals before release. Do not use blanket install-script approval or automatic `npm audit fix --force`.
 
 Before merging or publishing, verify CI against the current commit. For a public installer, also test actual desktop playback, seeking, file imports, analysis, recommendations, duplicates, database backup/recovery, updater flow, signing/notarization where applicable, and installation/uninstallation. On Linux, check Wayland/X11, AppImage permissions and downloadable tools; GPU/compositor fallback switches are for troubleshooting only.
 

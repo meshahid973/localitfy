@@ -127,22 +127,17 @@ export default function PhonePlayer(props: PhonePlayerProps) {
 
   return (
     <>
-      <div className="phoneMiniPlayer" style={ambientStyle} onClick={() => setExpanded(true)} role="button" tabIndex={0} aria-label="open player"
-        onKeyDown={(event) => {
-          if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
-            event.preventDefault();
-            setExpanded(true);
-          }
-        }}>
+      <div className="phoneMiniPlayer" style={ambientStyle}>
+        <button type="button" className="phoneMiniOpen" aria-label={`open player: ${currentSong.title}`} aria-haspopup="dialog" aria-expanded={expanded} onClick={() => setExpanded(true)} />
         <Cover song={currentSong} className="phoneMiniArt" priority="high" />
         <span className="phoneMiniMeta">
           <strong>{prettyTitle(currentSong.title, 8)}</strong>
           <small>{connect?.remoteName ? `on ${connect.remoteName} · ` : ""}{prettyMeta(currentSong.artist)}</small>
         </span>
-        <button type="button" className="phoneIconButton" onClick={(event) => { event.stopPropagation(); togglePlay(); }} aria-label={isPlaying ? "pause" : "play"}>
+        <button type="button" className="phoneIconButton" onClick={togglePlay} aria-label={isPlaying ? "pause" : "play"}>
           <PlayerPlayPauseMorphIcon playing={isPlaying} />
         </button>
-        <button type="button" className="phoneIconButton" onClick={(event) => { event.stopPropagation(); playNext(true); }} aria-label="next song">
+        <button type="button" className="phoneIconButton" onClick={() => playNext(true)} aria-label="next song">
           <SkipForward size={22} strokeWidth={2.2} aria-hidden="true" />
         </button>
         <input ref={(node) => { progressInputRefs.current[MINI_SLOT] = node; }} className="phoneMiniProgress" type="range" min="0" max="100" step="0.1"
@@ -247,7 +242,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
                 <MicVocal size={18} strokeWidth={2.2} aria-hidden="true" /> lyrics
               </button>
             ) : null}
-            <button type="button" className={`phoneChip ${queuePanelOpen ? "active" : ""}`} onClick={toggleQueuePanel} aria-pressed={queuePanelOpen}>
+            <button type="button" className={`phoneChip ${queuePanelOpen ? "active" : ""}`} onClick={toggleQueuePanel} aria-pressed={queuePanelOpen} aria-haspopup="dialog">
               <ListMusic size={18} strokeWidth={2.2} aria-hidden="true" /> up next{queueCount ? ` · ${queueCount}` : ""}
             </button>
           </div>

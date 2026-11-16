@@ -9,7 +9,6 @@ import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { LocaltifyStateCard, MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import type { LibrarySortMode } from "./librarySort";
 import type { Song } from "./song.types";
-import type { Playlist } from "../playlists/playlist.types";
 import type { Settings } from "../settings/settings.types";
 import type { View } from "../shell/view.types";
 
@@ -31,7 +30,6 @@ export type LibraryViewProps = {
   librarySortMode: LibrarySortMode;
   missingFileCount: number;
   now: unknown;
-  playlists: Playlist[];
   query: string;
   removeMissingSongs: () => Promise<unknown> | unknown;
   renderHomeSongCards: (songs: Song[], className?: string) => ReactNode;
@@ -132,7 +130,7 @@ export default function LibraryView(props: LibraryViewProps) {
           <MascotStateArt state="warning" className="libraryMissingMascot" />
           <div className="libraryMissingCopy">
             <strong>{libraryMissingLabel}</strong>
-            <span>These entries are still saved in Localtify, but their audio files are not on this PC.</span>
+            <span>{isAndroidApp() ? "These entries are saved, but their audio files are not on this phone." : `These entries are saved, but their audio files are not on this ${computerName()}.`}</span>
           </div>
           <div className="libraryMissingActions">
             <button type="button" className={showingMissingFiles ? "active" : ""} onClick={() => setLibraryFilterMode?.("missing")}><ActionLabel icon={FileWarning}>show missing</ActionLabel></button>

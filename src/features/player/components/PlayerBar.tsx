@@ -210,19 +210,21 @@ export default function PlayerBar(props: PlayerBarProps) {
             <div className="playerCenter">
               <div className="controlRow">
                 <button
+                  type="button"
                   className={isShuffle ? "circleButton active" : "circleButton"}
                   onClick={() => setIsShuffle((value) => !value)}
                   aria-label={isShuffle ? "turn shuffle off" : "turn shuffle on"}
+                  aria-pressed={isShuffle}
                 >
                   <Shuffle className="playerControlIcon" size={15} strokeWidth={2.15} aria-hidden="true" />
                 </button>
-                <button className="circleButton" onClick={playPrevious} aria-label="previous song">
+                <button type="button" className="circleButton" onClick={playPrevious} aria-label="previous song">
                   <SkipBack className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />
                 </button>
-                <button className={`circleButton main ${playButtonBurst ? `playButtonBurst playButtonBurst${playButtonBurst % 2}` : ""}`} onClick={togglePlay} aria-label={isPlaying ? "pause" : "play"}>
+                <button type="button" className={`circleButton main ${playButtonBurst ? `playButtonBurst playButtonBurst${playButtonBurst % 2}` : ""}`} onClick={togglePlay} aria-label={isPlaying ? "pause" : "play"}>
                   <PlayerPlayPauseMorphIcon playing={isPlaying} />
                 </button>
-                <button className="circleButton" onClick={() => playNext(true)} aria-label="next song">
+                <button type="button" className="circleButton" onClick={() => playNext(true)} aria-label="next song">
                   <SkipForward className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />
                 </button>
                 <button
