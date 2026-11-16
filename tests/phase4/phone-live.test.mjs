@@ -245,6 +245,44 @@ test("playback: legacy or superseded transfers cannot claim a session", async ()
   }
 });
 
+test("playback: expired and reconnected recipients cannot acknowledge a transfer", async () => {
+  let now = Date.now();
+  const fixture = await syncFixture({ liveOptions: { now: () => now } });
+  try {
+    let stream = await openLiveStream(fixture.url, fixture.phone.pairing.token);
+    const { self: phone } = await stream.next("hello");
+    const { live } = fixture.server;
+    live.receive("computer", { type: "claim" });
+    live.receive("computer", { type: "handoff-ready" });
+    await post(fixture, { type: "handoff-ready" });
+    const begin = async () => {
+      assert.equal((await post(fixture, { type: "transfer", to: phone })).ok, true);
+      const give = fixture.computerEvents.at(-1);
+      assert.equal(live.receive("computer", { type: "handoff", transferId: give.transferId, to: phone, requester: phone, handoff: { songId: "a" } }).ok, true);
+      await stream.next("take");
+      return give.transferId;
+    };
+    const expired = await begin();
+    now += 6001;
+    assert.equal((await post(fixture, { type: "took", transferId: expired })).ok, false);
+    assert.equal(live.session.active, "computer");
+    const previous = await begin();
+    const oldStream = stream;
+    stream = await openLiveStream(fixture.url, fixture.phone.pairing.token);
+    await stream.next("hello");
+    oldStream.close();
+    await post(fixture, { type: "handoff-ready" });
+    assert.equal((await post(fixture, { type: "took", transferId: previous })).ok, false);
+    assert.equal(live.session.active, "computer");
+    const fresh = await begin();
+    assert.equal((await post(fixture, { type: "took", transferId: fresh })).ok, true);
+    assert.equal(live.session.active, phone);
+    stream.close();
+  } finally {
+    await fixture.close();
+  }
+});
+
 test("playback: a player that drops off keeps its place for a while, then the session lets go", async () => {
   const fixture = await syncFixture({ liveOptions: { graceMs: 80 } });
   try {
