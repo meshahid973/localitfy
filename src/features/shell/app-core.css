@@ -26,7 +26,6 @@ html{
 button{
   font: inherit;
 
-
   cursor: pointer;
 }
 
@@ -64,7 +63,6 @@ button:disabled{
 
 .app{
 
-
   transition: background-color 320ms cubic-bezier(0.16, 1, 0.3, 1), background 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -76,7 +74,6 @@ button:disabled{
   user-select: none;
   -webkit-app-region: drag;
 
-
 }
 
 .titleDrag{
@@ -85,7 +82,6 @@ button:disabled{
   display: flex;
   align-items: center;
   gap: 9px;
-
 
   font-weight: 760;
 }
@@ -139,14 +135,12 @@ button:disabled{
   height: calc(100vh - 38px);
 }
 
-
 .sidebar{
   grid-row: 1 / 3;
   min-height: 0;
 
   display: flex;
   flex-direction: column;
-
 
   border-right: 1px solid var(--line);
 
@@ -161,11 +155,9 @@ button:disabled{
   background-size: auto;
 }
 
-
 .navItem{
   height: 39px;
   padding: 0 12px;
-
 
   color: var(--muted);
 
@@ -177,12 +169,10 @@ button:disabled{
     transform 120ms ease;
 }
 
-
 .panel{
   min-width: 0;
   padding: 16px;
 }
-
 
 .panel h3{
   margin: 5px 0 0;
@@ -205,14 +195,12 @@ button:disabled{
 
 .hero{
 
-
   display: grid;
 
   gap: 24px;
   align-items: center;
   border-color: rgba(var(--accent-rgb), 0.16);
 }
-
 
 .ambientSurface > *{
   position: relative;
@@ -288,7 +276,6 @@ button:disabled{
 
   border: 1px solid transparent;
 
-
 }
 
 .songRow::before{
@@ -301,15 +288,12 @@ button:disabled{
   transition: opacity 120ms ease;
 }
 
-
 .songRow:hover::before{
   opacity: 1;
 }
 
-
 .songButton{
   position: relative;
-
 
   min-width: 0;
   border: 0;
@@ -335,7 +319,6 @@ button:disabled{
   background: var(--accent);
   transition: transform 120ms ease,
     filter 120ms ease;
-
 
   width: 42px;
   height: 42px;
@@ -404,7 +387,6 @@ button:disabled{
   margin-top: 12px;
 }
 
-
 input[type="range"]{
   width: 100%;
   accent-color: var(--accent);
@@ -420,7 +402,6 @@ input[type="range"]{
   background-size: 38px 38px;
   box-shadow: var(--shadow);
 
-
   width: min(760px, calc(100vw - 40px));
 }
 
@@ -434,13 +415,11 @@ input[type="range"]{
   color-scheme: inherit;
 }
 
-
 .editorActions{
   display: flex;
   flex-wrap: wrap;
 
   margin-top: 14px;
-
 
   justify-content: flex-end;
 }
@@ -496,7 +475,6 @@ input[type="range"]{
 .fullList{
   padding-right: 4px;
 }
-
 
 .dangerButton{
   min-height: 38px;
@@ -628,7 +606,6 @@ input[type="range"]{
   background-size: 42px 42px;
 }
 
-
 [data-notes="off"] .eq{
   display: none;
 }
@@ -648,13 +625,11 @@ input[type="range"]{
   height: 10px;
 }
 
-
 ::-webkit-scrollbar-thumb{
   background: rgba(255, 255, 255, 0.13);
   border: 3px solid rgba(0, 0, 0, 0.45);
   border-radius: var(--pill);
 }
-
 
 @media (max-width: 1180px){
 
@@ -702,14 +677,12 @@ input[type="range"]{
     0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-
 .coverAura > img{
   position: relative;
   z-index: 1;
   width: 100%;
   height: 100%;
   border-radius: inherit;
-
 
   display: block;
   object-fit: cover;
@@ -739,7 +712,6 @@ input[type="range"]{
   text-transform: uppercase;
   opacity: 0.78;
 }
-
 
 .circleButton.main:not(.playerBar *){
   position: relative;
@@ -775,7 +747,6 @@ input[type="range"]{
   transform: translate3d(0, -1px, 0);
 }
 
-
 .editorModal{
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.012)),
     rgba(0, 0, 0, 0.86);
@@ -791,7 +762,6 @@ input[type="range"]{
   --small-radius: 10px;
   --surface: rgba(255, 255, 255, 0.045);
   --motion-fast: 120ms;
-
 
   background-image: none;
 
@@ -810,7 +780,6 @@ input[type="range"]{
   color: rgba(255, 255, 255, 0.62);
 }
 
-
 .sidebar{
   padding: 16px 12px;
   gap: 14px;
@@ -818,9 +787,7 @@ input[type="range"]{
   backdrop-filter: blur(18px) saturate(120%);
 }
 
-
 .hero{
-
 
   border-inline: 0;
 
@@ -830,7 +797,6 @@ input[type="range"]{
 .hero::before{
   border-radius: 0;
 }
-
 
 .badge{
   color: var(--accent);
@@ -859,11 +825,9 @@ input[type="range"]{
   opacity: 1;
 }
 
-
 .songButton{
   z-index: 2;
 }
-
 
 input[type="range"]::-webkit-slider-runnable-track{
   height: 4px;
@@ -874,22 +838,17 @@ input[type="range"]::-webkit-slider-thumb{
   margin-top: -5px;
 }
 
-
 .secretRibbon{
 
-
   transform: translateX(-50%);
-
 
 }
 
 .secretLayer span{
 
-
   border-radius: 999px;
   background: var(--accent);
   box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.45);
-
 
 }
 
@@ -923,7 +882,6 @@ input[type="range"]::-webkit-slider-thumb{
   100% { opacity: 0; transform: translate(-50%, -10px) scale(0.98); }
 }
 
-
 @media (max-width: 1180px){
 
 .secretLayer{
@@ -953,7 +911,6 @@ input[type="range"]::-webkit-slider-thumb{
     var(--panel);
 }
 
-
 .hero .badge{
   display: none !important;
 }
@@ -961,7 +918,6 @@ input[type="range"]::-webkit-slider-thumb{
 .songRow{
   border-radius: 9px;
 }
-
 
 .circleButton:not(.playerBar *),
 .iconAction{
@@ -981,13 +937,11 @@ input[type="range"]::-webkit-slider-thumb{
 }
 }
 
-
 @media (hover: hover){
 .songRow:hover{
   filter: brightness(1.045);
 }
 }
-
 
 .secretRibbon{
   position: absolute;
@@ -1156,7 +1110,6 @@ input[type="range"]::-webkit-slider-thumb{
   content: none !important;
 }
 
-
 button:active,
 .songRow:active,
 .iconAction:active,
@@ -1181,7 +1134,6 @@ button:active,
   background-size: cover !important;
   background-position: center !important;
 
-
   pointer-events: none !important;
 }
 
@@ -1202,7 +1154,6 @@ button:active,
 }
 
 .secretLayer{
-
 
   opacity: 0;
   animation: secretEventIn 2400ms cubic-bezier(.2,.9,.2,1) forwards;
@@ -1231,7 +1182,6 @@ button:active,
   animation: secretEventIn 2600ms cubic-bezier(.2,.9,.2,1) forwards, discoShift 320ms steps(2,end) infinite;
 }
 
-
 @keyframes secretEventIn {
   0% { opacity: 0; transform: scale(1.02); }
   12% { opacity: 1; transform: scale(1); }
@@ -1240,7 +1190,6 @@ button:active,
 }
 
 @keyframes discoShift { 50% { filter: hue-saturate(1.3); } }
-
 
 .secretLayer.cute{
   background: repeating-linear-gradient(90deg,
@@ -1254,7 +1203,6 @@ button:active,
   content: "secret event / ";
   color: var(--accent);
 }
-
 
 .secretLayer{
   position: fixed !important;
@@ -1350,7 +1298,6 @@ button:active,
   to { background-position: -80px 120px; }
 }
 
-
 button:hover{
   transform: translateY(-1px) !important;
 }
@@ -1359,10 +1306,8 @@ button:active{
   transform: translateY(0) scale(.985) !important;
 }
 
-
 .content{
   scroll-behavior: smooth;
-
 
 }
 
@@ -1394,7 +1339,6 @@ body.isResizingPlayer{
 
 .app{
 
-
   contain: layout style paint;
 }
 
@@ -1424,11 +1368,9 @@ body.isResizingPlayer{
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 10px) !important;
 }
 
-
 [data-ambient="off"] .ambientSurface::after{
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.58)) !important;
 }
-
 
 .appShell{
 
@@ -1509,7 +1451,6 @@ body.isResizingPlayer{
   transition: none !important;
 }
 
-
 .animatedGlow .ambientSurface::before{
   animation: localitfyAmbientFloat 8s ease-in-out infinite;
 }
@@ -1534,14 +1475,12 @@ body.isResizingPlayer{
   display: grid;
   place-items: center;
 
-
   animation: updateLayerIn 180ms ease both;
   -webkit-app-region: no-drag;
 }
 
 .updateToastCard{
   position: relative;
-
 
 }
 
@@ -1558,9 +1497,7 @@ body.isResizingPlayer{
 .updateToastClose{
   position: absolute;
 
-
   z-index: 2;
-
 
   cursor: pointer;
 
@@ -1574,11 +1511,9 @@ body.isResizingPlayer{
 
 .updateToastIcon{
 
-
   margin-bottom: 16px;
 
   border: 1px solid rgba(var(--accent-rgb), 0.28);
-
 
 }
 
@@ -1586,27 +1521,22 @@ body.isResizingPlayer{
 
   color: #fff;
 
-
 }
 
 .updateToastText p:not(.eyebrow){
 
   margin: 0;
 
-
 }
 
 .updateProgressTrack{
   width: 100%;
 
-
   border: 1px solid rgba(255, 255, 255, 0.07);
 
 }
 
-
 .updateToastActions .softButton{
-
 
   text-transform: lowercase;
 }
@@ -1660,7 +1590,6 @@ body.isResizingPlayer{
   font-weight: 700 !important;
 }
 
-
 :root{
   --font-localitfy: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 }
@@ -1674,12 +1603,10 @@ body.isResizingPlayer{
   padding-bottom: 18px !important;
 }
 
-
 .hero.ambientSurface:hover::after{
   opacity: 0.26 !important;
   transform: translate3d(18px, 10px, 0) scale(1.08) !important;
 }
-
 
 .app{
   -webkit-font-smoothing: antialiased;
@@ -1700,7 +1627,6 @@ body.isResizingPlayer{
     box-shadow 190ms ease !important;
 }
 
-
 .songRow.active{
   animation: activeRowGlow 2.4s ease-in-out infinite;
 }
@@ -1709,7 +1635,6 @@ body.isResizingPlayer{
   0%, 100% { box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.05); }
   50% { box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.22), 0 0 28px rgba(var(--accent-rgb), 0.08); }
 }
-
 
 input[type="range"]{
   transition: filter 170ms ease, opacity 170ms ease !important;
@@ -1779,16 +1704,13 @@ button{
 
 .circleButton:not(.playerBar *){
 
-
   font-size: 15px;
 }
-
 
 .app{
   --player-size: 108px;
   --sidebar-width: 249px;
 }
-
 
 .content{
   padding-bottom: calc(var(--player-size, 108px) + 48px) !important;
@@ -1808,7 +1730,6 @@ button{
   line-height: 1 !important;
 }
 
-
 .circleButton.main:not(.playerBar *){
   width: 46px !important;
   height: 46px !important;
@@ -1819,7 +1740,6 @@ button{
   box-shadow: 0 10px 28px rgba(var(--accent-rgb), 0.22) !important;
   font-size: 15px !important;
 }
-
 
 .app,
 .appShell,
@@ -1836,23 +1756,16 @@ button{
 .content::before,
 .content::after,
 .simpleShell::before,
-.simpleShell::after{
-  background-image: none !important;
-  background-size: auto !important;
-}
-
+.simpleShell::after,
 .app,
 .content,
 .loadingScreen,
 .editorModal,
-.app::before,
-.content::before,
 .loadingScreen::before,
 .editorModal::before{
   background-image: none !important;
   background-size: auto !important;
 }
-
 
 .app,
 .app .content,
@@ -2067,9 +1980,7 @@ body,
   overflow: hidden !important;
 }
 
-
 .appShell{
-
 
   height: calc(100vh - 36px) !important;
 
@@ -2091,9 +2002,7 @@ body,
   grid-column: 2 !important;
   grid-row: 1 !important;
 
-
   min-height: 0 !important;
-
 
   overscroll-behavior: contain !important;
 
@@ -2181,14 +2090,12 @@ body,
   background: transparent !important;
 }
 
-
 .updateToastCard{
 
   display: grid !important;
   grid-template-columns: 58px minmax(0, 1fr) !important;
   gap: 14px !important;
   padding: 18px !important;
-
 
 }
 
@@ -2207,7 +2114,6 @@ body,
   height: 34px !important;
 
   color: rgba(255, 255, 255, 0.76) !important;
-
 
   transition: transform 160ms ease, background-color 160ms ease, color 160ms ease !important;
 }
@@ -2241,12 +2147,10 @@ body,
 
   font-size: 24px !important;
 
-
 }
 
 .updateToastText p:not(.eyebrow){
   max-width: 38rem !important;
-
 
 }
 
@@ -2255,29 +2159,24 @@ body,
 
   margin: 2px 0 0 !important;
 
-
 }
 
 .updateProgressTrack span{
 
   display: block !important;
 
-
 }
 
 .updateToastActions{
   grid-column: 1 / -1 !important;
 
-
 }
 
 .updatePrimaryButton{
 
-
   cursor: pointer;
 
 }
-
 
 .updatePrimaryButton:hover{
   filter: brightness(1.04);
@@ -2312,12 +2211,10 @@ body,
   }
 }
 
-
 .updateToastText h3{
   margin: 2px 0 7px !important;
 
 }
-
 
 .whatsNewOverlay{
   padding: 18px !important;
@@ -2345,7 +2242,6 @@ body,
   line-height: 1.52 !important;
 }
 
-
 .whatsNewCard li{
 
   border-radius: 16px !important;
@@ -2366,7 +2262,6 @@ body,
   font-weight: 900 !important;
   box-shadow: 0 14px 32px rgba(var(--accent-rgb), 0.18) !important;
 }
-
 
 .updateToastCard{
 
@@ -2412,7 +2307,6 @@ body,
 
 .updateToastActions{
   display: flex !important;
-
 
   margin-top: 20px !important;
 }
@@ -2468,7 +2362,6 @@ body,
 }
 
 .updateToastLayer{
-
 
   padding: clamp(18px, 4vw, 42px) !important;
   background: rgba(0, 0, 0, 0.58) !important;
@@ -2533,7 +2426,6 @@ body,
 .updateToastCard.updateNagStage-3 .updatePrimaryButton{
   min-width: 116px !important;
 }
-
 
 .app{
   --button-radius: 15px;
@@ -2657,7 +2549,6 @@ body,
 
 /* lightweight analytics / recap page.
    Replaces the old heavy local analytics layout with simple recap cards. */
-
 
 /* DISCORD SIDEBAR PILL START
    Discord-style left white pill using only CSS pseudo-elements.

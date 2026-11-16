@@ -477,7 +477,6 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
   .content { padding: 18px 14px 34px !important; }
 }
 
-
 /* The rail stays visible at tablet/mobile widths in every sidebar mode.
    Match the high-specificity desktop state rules above so breakpoints do not
    depend on stylesheet import order. */
