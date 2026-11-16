@@ -2,7 +2,7 @@
 //! Keep predictable summation order so JS/audio ranking remains numerically comparable.
 
 use napi::{Error, Result, Status};
-use napi::bindgen_prelude::Float64Array;
+use napi::bindgen_prelude::{Float32Array, Float64Array};
 use napi_derive::napi;
 
 fn invalid(message: &str) -> Error {
@@ -132,6 +132,30 @@ pub fn pair_dots_into(vectors: &[f64], left: &[u32], right: &[u32], mut output: 
         destination[index] = dot(&vectors[a*dim..(a+1)*dim], &vectors[b*dim..(b+1)*dim]);
     }
     Ok(())
+}
+
+/// Decode unaligned FFmpeg little-endian PCM without per-sample JavaScript calls.
+/// The caller supplies a fresh exclusive output array. Reject invalid samples
+/// before writing to the output, and keep summation order identical to JS.
+#[napi]
+pub fn pcm_decode_into(bytes: &[u8], mut output: Float32Array) -> Result<f64> {
+    if bytes.is_empty() || bytes.len() % 4 != 0 || bytes.len() / 4 > 1_000_000 ||
+        output.len() != bytes.len() / 4 {
+        return Err(invalid("Invalid PCM output dimensions"));
+    }
+    let decode = |chunk: &[u8]| f32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]);
+    if !bytes.chunks_exact(4).all(|chunk| decode(chunk).is_finite()) {
+        return Err(invalid("Invalid PCM sample"));
+    }
+    let destination = unsafe { output.as_mut() };
+    let mut total = 0.0_f64;
+    for (i, chunk) in bytes.chunks_exact(4).enumerate() {
+        let sample = decode(chunk);
+        destination[i] = sample;
+        let value = sample as f64;
+        total += value * value;
+    }
+    Ok(total)
 }
 
 /// Validate decoded PCM and compute its energy in one native pass.
