@@ -23,6 +23,15 @@ if (!files.length) {
   process.exit(1);
 }
 
+// Electron 42 can download its executable lazily on first require. Resolve it
+// once before starting parallel test workers, which must not race extraction.
+const electronReady = spawnSync(process.execPath, ["-e", "const fs = require('node:fs'); const binary = require('electron'); if (typeof binary !== 'string' || !fs.existsSync(binary)) throw new Error('Electron executable missing');"], {
+  cwd: root,
+  stdio: "inherit",
+  env: process.env
+});
+if (electronReady.status !== 0) process.exit(electronReady.status ?? 1);
+
 const result = spawnSync(process.execPath, ["--test", ...files], {
   cwd: root,
   stdio: "inherit",
