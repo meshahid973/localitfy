@@ -3188,6 +3188,18 @@ function MainModeApp() {
       if (song.fileExists === false && !options.force) return { ok: false, fileExists: false, error: "file marked missing" };
 
       const now = Date.now();
+      const pending = playbackUrlPendingRef.current;
+      const forceKey = `${sourceKey}:force`;
+      const normalKey = `${sourceKey}:normal`;
+      const pendingKey = options.force ? forceKey : normalKey;
+      const forced = pending.get(forceKey);
+      if (forced) return forced;
+      if (options.force) {
+        pending.delete(normalKey);
+        playbackUrlCacheRef.current.delete(sourceKey);
+      }
+      const existingPending = pending.get(pendingKey);
+      if (existingPending) return existingPending;
       const cached = playbackUrlCacheRef.current.get(sourceKey);
 
       if (!options.force && cached?.url && cached.fileExists && now - cached.checkedAt < PLAYBACK_URL_CACHE_TTL_MS) {
@@ -3213,11 +3225,8 @@ function MainModeApp() {
         return { ok: false, filePath, fileExists: undefined, error: "playback resolver unavailable" };
       }
 
-      const pendingKey = `${sourceKey}:${options.force ? "force" : "normal"}`;
-      const existingPending = playbackUrlPendingRef.current.get(pendingKey);
-      if (existingPending) return existingPending;
-
-      const request = Promise.resolve(
+      const staleResult = (): PlaybackUrlResult => ({ ok: false, filePath, error: "playback source changed" });
+      const request: Promise<PlaybackUrlResult> = Promise.resolve().then(() =>
         resolver({
           songId: song.id,
           filePath,
@@ -3226,6 +3235,7 @@ function MainModeApp() {
         })
       )
         .then((result: any): PlaybackUrlResult => {
+          if (pending.get(pendingKey) !== request) return staleResult();
           const fileExists =
             typeof result?.fileExists === "boolean"
               ? result.fileExists
@@ -3257,7 +3267,7 @@ function MainModeApp() {
 
           playbackUrlCacheRef.current.delete(sourceKey);
 
-          if (fileExists === false && song.id) {
+          if ((result?.fileExists === false || result?.exists === false) && song.id) {
             setSongs((oldSongs) =>
               oldSongs.map((item) => (item.id === song.id ? { ...item, fileExists: false, url: "" } : item))
             );
@@ -3273,6 +3283,7 @@ function MainModeApp() {
           };
         })
         .catch((error: unknown): PlaybackUrlResult => {
+          if (pending.get(pendingKey) !== request) return staleResult();
           playbackUrlCacheRef.current.delete(sourceKey);
           return {
             ok: false,
@@ -3282,10 +3293,10 @@ function MainModeApp() {
           };
         })
         .finally(() => {
-          playbackUrlPendingRef.current.delete(pendingKey);
-        }) as Promise<PlaybackUrlResult>;
+          if (pending.get(pendingKey) === request) pending.delete(pendingKey);
+        });
 
-      playbackUrlPendingRef.current.set(pendingKey, request);
+      pending.set(pendingKey, request);
       return request;
     },
     []
@@ -5027,7 +5038,11 @@ function MainModeApp() {
     if (Object.prototype.hasOwnProperty.call(patch, "filePath") || Object.prototype.hasOwnProperty.call(patch, "url")) {
       const cachedSong = songsById.get(id);
       const cacheKey = getSongPlaybackSourceKey(cachedSong);
-      if (cacheKey) playbackUrlCacheRef.current.delete(cacheKey);
+      if (cacheKey) {
+        playbackUrlCacheRef.current.delete(cacheKey);
+        playbackUrlPendingRef.current.delete(`${cacheKey}:normal`);
+        playbackUrlPendingRef.current.delete(`${cacheKey}:force`);
+      }
     }
 
     const previousSong = songsById.get(id);
