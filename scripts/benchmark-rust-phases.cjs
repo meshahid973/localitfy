@@ -4,12 +4,12 @@ const { performance } = require("node:perf_hooks");
 const path = require("node:path");
 const os = require("node:os");
 const { dot } = require("../electron/analysis/listening-signals.cjs");
-const { tryDotMatrix, tryDecodeNormalizedAudio, tryRankSimilarity } = require("../electron/native/compute.cjs");
+const { tryDotMatrix, tryDecodeNormalizedAudio, tryRankSimilarity, decodeAudioVectors } = require("../electron/native/compute.cjs");
 const { readNormalizedVector } = require("../electron/analysis/similarity.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
 const { getAddon } = require("../electron/native/backend.cjs");
-const { decodePcmChunk } = require("../electron/analysis/pcm.cjs");
+const { decodePcmChunk, buildPcmWaveform } = require("../electron/analysis/pcm.cjs");
 
 function median(values) { return [...values].sort((a,b) => a-b)[Math.floor(values.length/2)]; }
 async function benchmark(fn, rounds = 3) {
@@ -28,6 +28,7 @@ const encodedVectors=Array.from({length:600},(_,i)=>{
   for(let j=0;j<512;j++)buffer.writeFloatLE(Math.sin(i*.15 + j*.045),j*4);
   return buffer;
 });
+const largeEncodedVectors=Array.from({length:3300},(_,i)=>encodedVectors[i%encodedVectors.length]);
 const pcmBuffer = Buffer.alloc(480_000 * 4);
 for (let i=0; i<480_000; i++) pcmBuffer.writeFloatLE(Math.sin(i * .01), i * 4);
 const unalignedPcm = Buffer.allocUnsafeSlow(pcmBuffer.length + 1).subarray(1);
@@ -59,7 +60,7 @@ if (compare) {
   process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,pcm";
   const addon = getAddon("similarity");
   if (!addon) throw new Error("Native benchmark requires a built Rust addon");
-  for (const name of ["rankSimilarityBatch", "dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "pcmSumSquares", "pcmDecodeInto"]) {
+  for (const name of ["pcmWaveformInto", "decodeNormalizedAudioRowsInto", "rankSimilarityBatch", "dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "pcmSumSquares", "pcmDecodeInto"]) {
     const original = addon[name];
     if (typeof original !== "function") throw new Error("Missing Rust export: " + name);
     nativeCalls.set(name, 0);
@@ -101,6 +102,7 @@ async function run() {
           return [closest,scores.reduce((sum,score)=>sum+score/3,0)];
         });
       },["rankSimilarityBatch"]],
+      ["large-library CLAP decode / 3300x512",()=>decodeAudioVectors(largeEncodedVectors,512,readNormalizedVector),["decodeNormalizedAudioRowsInto"]],
       ["CLAP Float32 decoder / 600x512",()=>{
         const native = tryDecodeNormalizedAudio(encodedVectors,512);
         if (native) return native;
@@ -123,6 +125,7 @@ async function run() {
       ["duplicates / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDots"]],
       ["duplicates typed output / 64-way bucket",()=>findDuplicates(manySameRecord,{vectors:dupVectors,fileSizes:dupSizes}),["pairDotsInto"]],
       ["PCM decode + energy / 480k samples",()=>decodePcmChunk(pcmBuffer),["pcmSumSquares"]],
+      ["PCM waveform / 480k samples",()=>buildPcmWaveform(new Float32Array(pcmBuffer.buffer,pcmBuffer.byteOffset,480000),256),["pcmWaveformInto"]],
       ["unaligned PCM decode + energy / 480k samples",()=>decodePcmChunk(unalignedPcm),["pcmDecodeInto"]]
     ];
   for (const [name, fn, requiredNames] of jobs) {

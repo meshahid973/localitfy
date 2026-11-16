@@ -5,17 +5,29 @@ const { enabled, getAddon, warnOnce } = require("./backend.cjs");
 // Limit temporary packed input to 64 MiB per native call. Larger inputs use the existing JS path.
 const MAX_PACKED_VALUES = 8_388_608;
 
-function tryDotMatrix(rows, columns) {
+// Scratch buffers belong to one synchronous recommendation job. Never return
+// a view of these buffers; the next batch may overwrite their contents.
+function packRows(rows, dim, workspace, key) {
+  const length = rows.length * dim;
+  let packed = workspace?.[key];
+  if (!packed || packed.length < length) {
+    packed = new Float64Array(length);
+    if (workspace && length <= 524_288) workspace[key] = packed;
+  }
+  const view = packed.subarray(0, length);
+  rows.forEach((row, i) => view.set(row, i * dim));
+  return view;
+}
+
+function tryDotMatrix(rows, columns, workspace) {
   const native = getAddon("similarity");
   if (!native || typeof native.dotMatrix !== "function" || !rows.length || !columns.length) return null;
   const dim = rows[0]?.length;
   if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16384 || rows.length * columns.length > 2000000 || (rows.length + columns.length) * dim > MAX_PACKED_VALUES) return null;
   if (rows.some((v) => !v || v.length !== dim) || columns.some((v) => !v || v.length !== dim)) return null;
   try {
-    const packedRows = new Float64Array(rows.length * dim);
-    const packedColumns = new Float64Array(columns.length * dim);
-    rows.forEach((row, i) => packedRows.set(row, i * dim));
-    columns.forEach((row, i) => packedColumns.set(row, i * dim));
+    const packedRows = packRows(rows, dim, workspace, "rows");
+    const packedColumns = packRows(columns, dim, workspace, "columns");
     const into = enabled("bridge") && typeof native.dotMatrixInto === "function";
     const result = into ? new Float64Array(rows.length * columns.length) : native.dotMatrix(packedRows, packedColumns, dim);
     if (into) native.dotMatrixInto(packedRows, packedColumns, result, dim);
@@ -102,6 +114,54 @@ function tryDecodeNormalizedAudio(buffers, dimensions) {
     warnOnce("similarity", error);
     return null;
   }
+}
+
+/** Decode arbitrary library sizes in bounded batches; isolate malformed rows.
+ * Output owns its storage. Scratch input is local and released with the job.
+ * The scalar reference is also used on missing/older addons and rejected batches.
+ */
+function decodeAudioVectors(buffers, dimensions, scalar) {
+  if (!Array.isArray(buffers) || !Number.isSafeInteger(dimensions) || dimensions < 1 || dimensions > 16_384) return [];
+  const native = getAddon("similarity");
+  if (!native || typeof native.decodeNormalizedAudioRowsInto !== "function" || buffers.length < 192) return buffers.map(scalar);
+  const batchSize = Math.min(1024, Math.floor(1_500_000 / dimensions));
+  if (batchSize < 192) return buffers.map(scalar);
+  const stride = dimensions * 4;
+  const scratch = Buffer.alloc(Math.min(batchSize, buffers.length) * stride);
+  const output = new Array(buffers.length);
+  for (let start = 0; start < buffers.length; start += batchSize) {
+    const count = Math.min(batchSize, buffers.length - start);
+    if (count < 192) {
+      for (let i = 0; i < count; i++) output[start + i] = scalar(buffers[start + i]);
+      continue;
+    }
+    try {
+      for (let i = 0; i < count; i++) {
+        const row = buffers[start + i];
+        if (Buffer.isBuffer(row) && row.length === stride) row.copy(scratch, i * stride);
+        else scratch.fill(0, i * stride, (i + 1) * stride);
+      }
+      const values = new Float64Array(count * dimensions);
+      const invalid = native.decodeNormalizedAudioRowsInto(scratch.subarray(0, count * stride), values, dimensions);
+      if (!Array.isArray(invalid) || invalid.some(i => !Number.isInteger(i) || i < 0 || i >= count) ||
+          new Set(invalid).size !== invalid.length || values.some(v => !Number.isFinite(v))) throw new Error("Invalid native audio row result");
+      const rejected = new Set(invalid);
+      // Verify one valid row against the scalar reference, including normalization.
+      const first = Array.from({ length: count }, (_, i) => i).find(i => !rejected.has(i));
+      if (first !== undefined) {
+        const expected = scalar(buffers[start + first]);
+        if (!expected || expected.length !== dimensions ||
+            expected.some((v, j) => Math.abs(v - values[first * dimensions + j]) > 1e-12)) throw new Error("Native audio row parity mismatch");
+      }
+      for (let i = 0; i < count; i++) {
+        output[start + i] = rejected.has(i) ? scalar(buffers[start + i]) : values.subarray(i * dimensions, (i + 1) * dimensions);
+      }
+    } catch (error) {
+      warnOnce("similarity", error);
+      for (let i = 0; i < count; i++) output[start + i] = scalar(buffers[start + i]);
+    }
+  }
+  return output;
 }
 
 /**
@@ -217,4 +277,4 @@ function tryRankSimilarity(rows, seeds, genreFor, audioWeight, genreWeight) {
     return result;
   } catch (error) { warnOnce("similarity", error); return null; }
 }
-module.exports = { tryDotMatrix, tryClusterFromCenters, tryDecodeNormalizedAudio, tryBatchPairDots, tryRankSimilarity };
+module.exports = { tryDotMatrix, tryClusterFromCenters, tryDecodeNormalizedAudio, tryBatchPairDots, tryRankSimilarity, decodeAudioVectors };
