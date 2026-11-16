@@ -44,6 +44,7 @@
 
 .phoneMiniOpen{
   position: absolute;
+  z-index: 1;
   inset: 0;
   width: 100%;
   padding: 0;
@@ -55,6 +56,7 @@
 
 .phoneMiniPlayer > .phoneIconButton{
   position: relative;
+  z-index: 2;
 }
 
 .phoneMiniOpen:focus-visible{
@@ -104,6 +106,7 @@
 /* A thin progress line along the bottom edge of the card; the app paints --range-progress. */
 .phoneMiniProgress{
   position: absolute;
+  z-index: 3;
   inset: auto 12px 0;
   width: auto;
   height: 3px;
@@ -359,7 +362,7 @@
 }
 
 @media (max-width: 350px){
-  .phonePlayerSheet:not(:fullscreen){
+  .phonePlayerSheet{
     padding-inline: max(12px, var(--safe-area-inset-left, env(safe-area-inset-left, 0px))) max(12px, var(--safe-area-inset-right, env(safe-area-inset-right, 0px)));
   }
   .phonePlayButton{ width: 64px; height: 64px; }
