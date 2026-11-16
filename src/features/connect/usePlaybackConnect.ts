@@ -9,7 +9,7 @@ import { isPlayableSong } from "../library/library.utils";
 import { computerName, isAndroidApp } from "../../app/platform";
 import { clamp, formatTime } from "../../shared/utils/format";
 import { addToQueue, livePositionMs, mergeQueueEdit, nextRepeatMode } from "./liveSession";
-import type { LiveCommand, LiveConnectionStatus, LiveEvent, LiveMessage, LivePeer, LivePresence, LiveState } from "./connect.types";
+import type { LiveCommand, LiveConnectionStatus, LiveEvent, LiveMessage, LivePeer, LivePresence, LiveReply, LiveState } from "./connect.types";
 
 /** The active player re-sends its state this often while playing, and whenever it drifts from what remotes assume. */
 const STATE_EVERY_MS = 15 * 1000;
@@ -101,7 +101,7 @@ export function usePlaybackConnect(local: LocalPlayer) {
     setLive(liveRef.current);
   };
   const serverNow = () => Date.now() + offsetRef.current;
-  const send = (message: LiveMessage) => window.localitfy?.liveSend?.(message).catch(() => ({ ok: false, error: "" })) ?? Promise.resolve({ ok: false });
+  const send = (message: LiveMessage): Promise<LiveReply> => window.localitfy?.liveSend?.(message).catch(() => ({ ok: false, error: "" })) ?? Promise.resolve({ ok: false });
   const peerName = (id: string) => liveRef.current.peers.find((peer) => peer.id === id)?.name || "";
   const label = (peer: LivePeer) => peer.id === liveRef.current.self
     ? `this ${peer.kind === "computer" ? computerName() : "phone"}`
