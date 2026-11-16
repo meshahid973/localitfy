@@ -34,7 +34,8 @@ export function useLibraryController() {
   const libraryDropPullRef = useRef(0);
   const libraryDropVisualSongIdRef = useRef("");
   const libraryDropVisualSideRef = useRef<LibraryDropSide>("after");
-  const librarySongElementRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const [librarySongElements] = useState(() => new Map<string, HTMLElement>());
+  const librarySongElementRefs = useRef(librarySongElements);
   const pointerLibraryDragRef = useRef<{
     songId: string;
     originIndex: number;

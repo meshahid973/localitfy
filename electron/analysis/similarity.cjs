@@ -173,11 +173,12 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
     genre: genreTokens(genreTags(record.genre))
   });
   const seedProfiles = seeds.map(profile);
+  const seedAudio = seedProfiles.map((seed) => seed.audio);
   const rankBatch = async (batch) => {
     const validFiles = await Promise.all(batch.map((record) => fileMatches(record, statFile)));
     const points = batch.map((record, index) => validFiles[index] ? profile(record) : null);
     const nativeAudio = tryDotMatrix(points.map((point) => point?.audio || seedProfiles[0].audio),
-      seedProfiles.map((seed) => seed.audio));
+      seedAudio);
     for (let index = 0; index < batch.length; index++) {
       if (!validFiles[index]) continue;
       const candidate = batch[index];
@@ -185,15 +186,20 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
       const point = points[index];
       // A group seed scores each candidate by its closest few seeds, so a mixed playlist matches each of its styles.
       let closestSound = -Infinity;
-      const scores = seedProfiles.map((seed, seedIndex) => {
+      const scores = [];
+      for (let seedIndex = 0; seedIndex < seedProfiles.length; seedIndex++) {
+        const seed = seedProfiles[seedIndex];
         const audio = nativeAudio ? nativeAudio[index * seedProfiles.length + seedIndex] : dot(seed.audio, point.audio);
         const genre = genreSimilarity(seed.genre, point.genre);
         closestSound = Math.max(closestSound, audio);
-        return AUDIO_WEIGHT * audio + GENRE_WEIGHT * (genre ?? UNKNOWN_GENRE);
-      });
+        const value = AUDIO_WEIGHT * audio + GENRE_WEIGHT * (genre ?? UNKNOWN_GENRE);
+        // Only the largest three scores contribute; retain their descending order.
+        let at = scores.length;
+        while (at > 0 && value > scores[at - 1]) at--;
+        if (at < top) { scores.splice(at, 0, value); if (scores.length > top) scores.pop(); }
+      }
       // Tags alone never make a match: the sound has to resemble at least one seed.
       if (closestSound <= 0) continue;
-      scores.sort((a, b) => b - a);
       let score = 0;
       for (let i = 0; i < top; i++) score += scores[i] / top;
       score -= SKIP_PENALTY * skipRate(stats.get(candidate.songId));

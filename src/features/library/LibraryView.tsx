@@ -30,7 +30,6 @@ export type LibraryViewProps = {
   libraryMissingLabel: string;
   librarySortMode: LibrarySortMode;
   missingFileCount: number;
-  now: unknown;
   playlists: Playlist[];
   query: string;
   removeMissingSongs: () => Promise<unknown> | unknown;
