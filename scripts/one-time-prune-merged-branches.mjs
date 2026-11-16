@@ -373,7 +373,7 @@ const allowlist=[
     "pr": 118
   }
 ];
-const api=(endpoint)=>JSON.parse(execFileSync("gh",["api",endpoint],{encoding:"utf8"}));
+const api=(endpoint)=>JSON.parse(execFileSync("gh",["api",endpoint],{encoding:"utf8",maxBuffer:32*1024*1024}));
 const pages=(name)=>{const out=[];for(let i=1;i<=10;i++){const page=api("repos/"+repo+"/"+name+(name.includes("?")?"&":"?")+"per_page=100&page="+i);out.push(...page);if(page.length<100)return out;}throw Error("Incomplete branch/PR inventory");};
 const open=pages("pulls?state=open");
 const used=new Set(open.flatMap(p=>[p.head.ref,p.base.ref]));
