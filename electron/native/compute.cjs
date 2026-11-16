@@ -183,7 +183,10 @@ function tryRankSimilarity(rows, seeds, genreFor, audioWeight, genreWeight) {
   if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16_384 ||
       rows.length * seeds.length * dim < 262_144 || (rows.length + seeds.length) * dim > 1_500_000 ||
       rows.some(row => row.length !== dim) || seeds.some(seed => seed.length !== dim)) return null;
-  const native = getAddon("similarity");
+  // CI benchmarks currently favor JS. Require an explicit ranking experiment.
+  const phases = String(process.env.LOCALTIFY_RUST_PHASES || "").toLowerCase().split(/[\s,;]+/);
+  if (!phases.includes("ranking")) return null;
+  const native = getAddon("ranking");
   if (!native || typeof native.rankSimilarityBatch !== "function") return null;
   try {
     const packed = new Float64Array(rows.length * dim);

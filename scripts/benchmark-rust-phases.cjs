@@ -127,7 +127,7 @@ async function run() {
       const js=await benchmark(fn);
       if(compare) {
         process.env.LOCALTIFY_RUST_PHASES = name.includes("typed output")
-          ? "similarity,duplicates,bridge,pcm" : "similarity,duplicates,pcm";
+          ? "similarity,duplicates,bridge,pcm" : name.includes("group recommendation") ? "ranking" : "similarity,duplicates,pcm";
         const before = new Map(nativeCalls);
         const rust=await benchmark(fn);
         const invoked = requiredNames?.some(key => nativeCalls.get(key) > before.get(key));

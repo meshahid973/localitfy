@@ -154,7 +154,9 @@ assert.equal(evaluate("", () => tryRankSimilarity(rankRows, rankSeeds, genreAt, 
 const rankOriginal = native.rankSimilarityBatch;
 let rankCalls = 0;
 native.rankSimilarityBatch = (...args) => { rankCalls++; return rankOriginal.apply(native, args); };
-const nativeRanks = evaluate("similarity", () => tryRankSimilarity(rankRows, rankSeeds, genreAt, .6, .4));
+assert.equal(evaluate("similarity", () => tryRankSimilarity(rankRows, rankSeeds, genreAt, .6, .4)), null, "ranking must not slow existing similarity opt-in");
+assert.equal(evaluate("all", () => tryRankSimilarity(rankRows, rankSeeds, genreAt, .6, .4)), null, "slower ranking kernel requires explicit experiment");
+const nativeRanks = evaluate("ranking", () => tryRankSimilarity(rankRows, rankSeeds, genreAt, .6, .4));
 assert.ok(rankCalls > 0 && nativeRanks?.length === rankRows.length * 2);
 for (let i = 0; i < rankRows.length; i++) {
   const audio = rankSeeds.map(seed => rankRows[i].reduce((sum, value, k) => sum + value * seed[k], 0));
