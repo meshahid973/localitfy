@@ -215,6 +215,36 @@ test("playback: moving playback asks the player for a handoff and hands it to th
   }
 });
 
+test("playback: legacy or superseded transfers cannot claim a session", async () => {
+  const fixture = await syncFixture();
+  try {
+    const stream = await openLiveStream(fixture.url, fixture.phone.pairing.token);
+    const { self: phone } = await stream.next("hello");
+    const { live } = fixture.server;
+    live.receive("computer", { type: "claim" });
+    const epoch = live.session.epoch;
+    assert.equal((await post(fixture, { type: "transfer", to: phone })).ok, false);
+    live.receive("computer", { type: "handoff-ready" });
+    await post(fixture, { type: "handoff-ready" });
+    await post(fixture, { type: "transfer", to: phone });
+    const first = fixture.computerEvents.at(-1);
+    await post(fixture, { type: "transfer", to: phone });
+    const second = fixture.computerEvents.at(-1);
+    assert.notEqual(second.transferId, first.transferId);
+    const handoff = { type: "handoff", to: phone, requester: phone, handoff: { songId: "a" } };
+    assert.equal(live.receive("computer", { ...handoff, transferId: first.transferId }).ok, false);
+    assert.equal(live.receive("computer", { ...handoff, transferId: second.transferId }).ok, true);
+    assert.equal(live.receive("computer", { type: "took", transferId: second.transferId }).ok, false);
+    assert.equal((await post(fixture, { type: "took", transferId: first.transferId })).ok, false);
+    assert.equal((await post(fixture, { type: "took", transferId: second.transferId })).ok, true);
+    assert.equal(live.session.active, phone);
+    assert.equal(live.receive("computer", { type: "command", action: "pause", epoch }).ok, false);
+    stream.close();
+  } finally {
+    await fixture.close();
+  }
+});
+
 test("playback: a player that drops off keeps its place for a while, then the session lets go", async () => {
   const fixture = await syncFixture({ liveOptions: { graceMs: 80 } });
   try {

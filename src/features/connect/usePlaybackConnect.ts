@@ -200,6 +200,7 @@ export function usePlaybackConnect(local: LocalPlayer) {
 
   const adoptPresence = (presence: LivePresence, hello: boolean) => {
     if (!hello && presence.session.epoch < liveRef.current.session.epoch) return;
+    if (hello) { incomingRef.current = null; finishHandoff(false); }
     handoffVersionRef.current = presence.handoffVersion || 0;
     if (handoffVersionRef.current === 2) void send({ type: "handoff-ready" });
     offsetRef.current = presence.serverTime - Date.now();
@@ -297,11 +298,17 @@ export function usePlaybackConnect(local: LocalPlayer) {
   useEffect(() => {
     const bridge = window.localitfy;
     if (!bridge?.onLiveEvent || !bridge.liveSend) return;
-    const off = bridge.onLiveEvent((event) => handlers.current(event));
+    let active = true;
+    let receivedPresence = false;
+    const off = bridge.onLiveEvent((event) => {
+      if (!active) return;
+      if (event.type === "hello" || event.type === "presence" || event.type === "connection") receivedPresence = true;
+      handlers.current(event);
+    });
     void bridge.liveSend({ type: "status" }).then((reply) => {
-      if (reply?.ok && reply.peers && reply.session) adoptPresence(reply as LivePresence, false);
+      if (active && !receivedPresence && reply?.ok && reply.peers && reply.session) adoptPresence(reply as LivePresence, false);
     }).catch(() => undefined);
-    return () => { off(); incomingRef.current = null; finishHandoff(false); };
+    return () => { active = false; off(); incomingRef.current = null; finishHandoff(false); };
   }, []);
 
   // Pressing play makes this device the player; the one playing before pauses.
