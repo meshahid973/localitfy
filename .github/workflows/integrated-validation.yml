@@ -40,6 +40,11 @@ jobs:
         run: |
           sudo chown root:root node_modules/electron/dist/chrome-sandbox
           sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+          # Hosted Linux runners have no physical sound card. Use a real PulseAudio null sink.
+          command -v pulseaudio >/dev/null || sudo apt-get install -y pulseaudio
+          pulseaudio --start
+          pactl load-module module-null-sink sink_name=localtify_ci
+          pactl set-default-sink localtify_ci
           xvfb-run -a npx electron scripts/ci-desktop-regression.cjs
       - uses: actions/upload-artifact@v4
         if: always()
@@ -78,9 +83,16 @@ jobs:
           mkdir -p qa-android
           sudo chmod 666 /dev/kvm
           sdkmanager "emulator" "system-images;android-35;google_apis;x86_64"
-          echo no | avdmanager create avd -n localtify-ci -k "system-images;android-35;google_apis;x86_64" --force
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/localtify-avds"
+          mkdir -p "$ANDROID_AVD_HOME"
+          AVD="$ANDROID_AVD_HOME/localtify-ci.avd"
+          printf 'no\n' | avdmanager create avd -n localtify-ci -k "system-images;android-35;google_apis;x86_64" -p "$AVD" --force
+          test -s "$AVD/config.ini"
+          # avdmanager and emulator can resolve their default homes differently on hosted runners.
+          printf 'avd.ini.encoding=UTF-8\npath=%s\ntarget=android-35\n' "$AVD" > "$ANDROID_AVD_HOME/localtify-ci.ini"
           EMULATOR="$ANDROID_SDK_ROOT/emulator/emulator"
           test -x "$EMULATOR"
+          "$EMULATOR" -list-avds | grep -Fx localtify-ci
           "$EMULATOR" -accel-check
           "$EMULATOR" -avd localtify-ci -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot > qa-android/emulator.log 2>&1 &
           emulator_pid=$!

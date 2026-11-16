@@ -57,9 +57,9 @@ server.listen(5173,async()=>{
     await screenshot(win,"desktop-home");
     const idle=await metrics("desktop idle");
     // Exercise actual rendered library navigation and playback.
-    const clicked=await win.webContents.executeJavaScript("(()=>{const b=[...document.querySelectorAll('.sidebar button')].find(x=>x.textContent.trim().toLowerCase()==='library'||x.getAttribute('aria-label')?.toLowerCase()==='library');if(!b)return false;b.click();return true})()");
+    const clicked=await win.webContents.executeJavaScript("(()=>{const b=document.querySelector('.sidebar [data-nav-id=library]');if(!b)return false;b.click();return true})()");
     assert.ok(clicked,"library navigation missing");
-    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.songButton') || !!document.querySelector('.homeAlbumPlayZone')").catch(()=>false),"library tracks");
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.sidebar [data-nav-id=library].active') && (!!document.querySelector('.songButton') || !!document.querySelector('.homeAlbumPlayZone'))").catch(()=>false),"library tracks");
     await screenshot(win,"desktop-library");
     await win.webContents.executeJavaScript("(document.querySelector('.songButton')||document.querySelector('.homeAlbumPlayZone')).click()");
     await until(()=>win.webContents.executeJavaScript("[...document.querySelectorAll('audio')].some(a=>!a.paused&&a.currentTime>0)").catch(()=>false),"audio playing");
@@ -68,5 +68,13 @@ server.listen(5173,async()=>{
     const result={startupMs,metrics:[idle,playing],platform:process.platform,fixtureSongs:songs.length};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);
-  }catch(error){console.error(error);clearTimeout(watchdog);server.close();app.exit(1);}
+  }catch(error){
+    console.error(error);
+    const win=BrowserWindow.getAllWindows().find(w=>!w.isDestroyed());
+    if(win) {
+      try { await screenshot(win,"desktop-failure"); } catch {}
+      try { console.log("[desktop-qa state]",await win.webContents.executeJavaScript("JSON.stringify({title:document.title,headings:[...document.querySelectorAll('h1,h2')].map(e=>e.textContent),audio:[...document.querySelectorAll('audio')].map(a=>({paused:a.paused,currentTime:a.currentTime,readyState:a.readyState,error:a.error?.message}))})")); } catch {}
+    }
+    clearTimeout(watchdog);server.close();app.exit(1);
+  }
 });
