@@ -27,6 +27,16 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # Temporary candidate resolution; remove after the generated lockfile is committed.
+      - name: Resolve patched Electron candidate
+        run: npm install --save-dev --save-exact electron@42.11.16 --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Upload candidate lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-candidate-lockfile
+          path: |
+            package.json
+            package-lock.json
       - run: npm ci
       - name: Report production dependency advisories
         shell: bash
