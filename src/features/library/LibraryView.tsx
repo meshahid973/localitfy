@@ -9,7 +9,6 @@ import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { LocaltifyStateCard, MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import type { LibrarySortMode } from "./librarySort";
 import type { Song } from "./song.types";
-import type { Playlist } from "../playlists/playlist.types";
 import type { Settings } from "../settings/settings.types";
 import type { View } from "../shell/view.types";
 
@@ -31,7 +30,6 @@ export type LibraryViewProps = {
   librarySortMode: LibrarySortMode;
   missingFileCount: number;
   now: unknown;
-  playlists: Playlist[];
   query: string;
   removeMissingSongs: () => Promise<unknown> | unknown;
   renderHomeSongCards: (songs: Song[], className?: string) => ReactNode;

@@ -2299,8 +2299,6 @@ function MainModeApp() {
     void audioEffectRuntimeRef.current?.resume();
 
     let lastPaint = 0;
-    let hiddenResetDone = false;
-    let busyResetDone = false;
 
     const scheduleBeatTick = (delayMs: number) => {
       if (beatFrameTimerRef.current !== null) {
@@ -2314,21 +2312,12 @@ function MainModeApp() {
     };
 
     const tick = (now: number) => {
-      const runtimeBusy = false;
-
-      if (document.hidden || runtimeBusy) {
-        if (!hiddenResetDone || !busyResetDone) {
-          resetBeatVariables();
-        }
-        hiddenResetDone = document.hidden;
-        busyResetDone = runtimeBusy;
+      if (document.hidden) {
+        resetBeatVariables();
         lastPaint = now;
-        scheduleBeatTick(document.hidden ? 900 : 520);
+        scheduleBeatTick(900);
         return;
       }
-
-      hiddenResetDone = false;
-      busyResetDone = false;
 
       const frameBudgetMs = view === "home" ? 520 : 760;
 
@@ -8438,7 +8427,6 @@ function MainModeApp() {
       librarySortMode,
       missingFileCount: effectiveMissingFileCount,
       now,
-      playlists,
       query,
       removeMissingSongs,
       renderHomeSongCards,
