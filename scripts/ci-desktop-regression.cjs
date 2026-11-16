@@ -7,8 +7,8 @@ const dir=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-ci-visual-"));
 const output=path.resolve(process.env.LOCALTIFY_QA_OUTPUT||"qa-artifacts");
 fs.mkdirSync(output,{recursive:true});
 app.setPath("appData",dir);
+fs.mkdirSync(path.join(dir,"localitfy"),{recursive:true});
 app.setPath("userData",path.join(dir,"localitfy"));
-fs.mkdirSync(app.getPath("userData"),{recursive:true});
 const root=path.resolve(__dirname,"..");
 function wav(name){
   const samples=48000*20,buf=Buffer.alloc(44+samples*2);
@@ -20,7 +20,7 @@ function wav(name){
 }
 const songs=Array.from({length:12},(_,i)=>({id:"qa-"+i,title:"test track "+i,artist:"test artist",album:"test album",genre:"ambient",filePath:wav("qa-"+i),duration:20,dateAdded:"2026-01-01T00:00:00Z",playCount:0,liked:i===0}));
 const seed=spawnSync(process.execPath,["-e",
-  "const db=require(process.argv[1]);db.initDatabase(process.argv[2]);const songs=JSON.parse(process.argv[3]);db.insertSongs(songs);db.savePlaylists([{id:'qa-playlist',name:'qa playlist',songIds:songs.map(s=>s.id),createdAt:Date.now()}]);db.saveSettings({startWithWindows:false,idleScreensaverEnabled:false,discordRpcEnabled:false,reduceMotion:true});",
+  "const db=require(process.argv[1]);db.initDatabase(process.argv[2]);const songs=JSON.parse(process.argv[3]);db.insertSongs(songs);db.savePlaylists([{id:'qa-playlist',name:'qa playlist',songIds:songs.map(s=>s.id),createdAt:Date.now()}]);db.saveSettings({startWithWindows:false,idleScreensaverEnabled:false,discordRpcEnabled:false,reducedMotion:true});",
   path.join(root,"electron/db.cjs"),path.join(app.getPath("userData"),"localitfy.sqlite"),JSON.stringify(songs)],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1"},encoding:"utf8"});
 if(seed.status!==0)throw Error("Synthetic database seed failed: "+seed.stderr);
 const dist=path.join(root,"dist"),mime={".html":"text/html",".js":"text/javascript",".css":"text/css",".png":"image/png",".jpg":"image/jpeg",".gif":"image/gif",".webp":"image/webp",".svg":"image/svg+xml",".woff2":"font/woff2",".woff":"font/woff"};
