@@ -5,8 +5,13 @@ import { PLAYBACK_URL_CACHE_TTL_MS } from "../library/library.constants";
 export class PlaybackUrlCache {
   private entries = new Map<string, PlaybackUrlCacheEntry>();
 
-  constructor(private readonly maxEntries = 512, private readonly now = Date.now) {
+  private readonly maxEntries: number;
+  private readonly now: () => number;
+
+  constructor(maxEntries = 512, now = Date.now) {
     if (!Number.isInteger(maxEntries) || maxEntries < 1) throw new RangeError("Invalid playback URL cache capacity");
+    this.maxEntries = maxEntries;
+    this.now = now;
   }
 
   get size() { return this.entries.size; }

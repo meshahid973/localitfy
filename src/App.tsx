@@ -3241,7 +3241,7 @@ function MainModeApp() {
               ? result.fileExists
               : typeof result?.exists === "boolean"
                 ? result.exists
-                : Boolean(result?.ok);
+                : result?.ok ? true : undefined;
 
           if (result?.ok && result?.url && fileExists !== false) {
             const entry: PlaybackUrlCacheEntry = {
