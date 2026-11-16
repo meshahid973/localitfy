@@ -1,5 +1,5 @@
 const fs = require("node:fs");
-const { tryDotMatrix, tryDecodeNormalizedAudio, tryRankSimilarity } = require("../native/compute.cjs");
+const { tryDotMatrix, decodeAudioVectors, tryRankSimilarity } = require("../native/compute.cjs");
 const { MODEL, ANALYZER_VERSION } = require("./model.cjs");
 const { AUDIO_WEIGHT, GENRE_WEIGHT, dot, genreTags, genreTokens, genreSimilarity, libraryMean, centered, classifyPlay,
   listeningStats, skipRate, notForMe } = require("./listening-signals.cjs");
@@ -160,9 +160,9 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
     SELECT s.filePath AS currentFilePath, s.genre, s.artist, a.* FROM song_analysis a JOIN songs s ON s.id = a.songId
     WHERE a.status = 'ready' AND a.modelId = ? AND a.analyzerVersion = ? AND a.filePath = s.filePath
   `).all(MODEL.id, ANALYZER_VERSION);
-  const nativeVectors = tryDecodeNormalizedAudio(candidateRecords.map((record) => record.vector), MODEL.dimensions);
+  const decodedVectors = decodeAudioVectors(candidateRecords.map((record) => record.vector), MODEL.dimensions, readNormalizedVector);
   const candidates = candidateRecords.flatMap((record, index) => {
-    const vector = nativeVectors ? nativeVectors[index] : readNormalizedVector(record.vector);
+    const vector = decodedVectors[index];
     return vector ? [{ ...record, vector }] : [];
   });
   // Same signals as daily mixes: library-centered sound blended with genre tags.
@@ -174,6 +174,7 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
   });
   const seedProfiles = seeds.map(profile);
   const seedAudio = seedProfiles.map((seed) => seed.audio);
+  const workspace = {};
   const rankBatch = async (batch) => {
     const validFiles = await Promise.all(batch.map((record) => fileMatches(record, statFile)));
     const points = batch.map((record, index) => validFiles[index] ? profile(record) : null);
@@ -181,7 +182,7 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
     const nativeRanks = tryRankSimilarity(audioRows, seedAudio,
       (i, j) => (points[i] ? genreSimilarity(seedProfiles[j].genre, points[i].genre) : null) ?? UNKNOWN_GENRE,
       AUDIO_WEIGHT, GENRE_WEIGHT);
-    const nativeAudio = nativeRanks ? null : tryDotMatrix(audioRows, seedAudio);
+    const nativeAudio = nativeRanks ? null : tryDotMatrix(audioRows, seedAudio, workspace);
     for (let index = 0; index < batch.length; index++) {
       if (!validFiles[index]) continue;
       const candidate = batch[index];
@@ -211,9 +212,19 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
       const together = coPlay.get(candidate.songId) || 0;
       const match = { songId: candidate.songId, score: Math.min(1, score + Math.min(CO_PLAY_BOOST, .03 * Math.log1p(together))) };
       if (together) match.playedTogether = true;
-      result.matches.push(match);
-      result.matches.sort((a, b) => b.score - a.score || (a.songId < b.songId ? -1 : a.songId > b.songId ? 1 : 0));
-      if (result.matches.length > limit) result.matches.pop();
+      // Keep only the best limit entries, using exactly the original tie order.
+      let lo = 0, hi = result.matches.length;
+      while (lo < hi) {
+        const mid = (lo + hi) >>> 1;
+        const other = result.matches[mid];
+        const order = other.score - match.score || (other.songId < match.songId ? -1 : other.songId > match.songId ? 1 : 0);
+        if (order <= 0) lo = mid + 1;
+        else hi = mid;
+      }
+      if (lo < limit) {
+        result.matches.splice(lo, 0, match);
+        if (result.matches.length > limit) result.matches.pop();
+      }
     }
   };
   let batch = [];

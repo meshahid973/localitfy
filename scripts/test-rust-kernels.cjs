@@ -114,6 +114,30 @@ for(let i=0;i<decoded.length;i++)for(let j=0;j<512;j++)
 const badBuffers=rawBuffers.slice();badBuffers[15]=Buffer.alloc(2048);
 assert.equal(evaluate("similarity",()=>tryDecodeNormalizedAudio(badBuffers,512)),null,
   "zero vector must fall back to per-record JS validation");
+const { decodeAudioVectors } = require("../electron/native/compute.cjs");
+const { readNormalizedVector } = require("../electron/analysis/similarity.cjs");
+const many = Array.from({length:3300}, (_, i) => rawBuffers[i % rawBuffers.length]);
+many[2] = Buffer.alloc(1);
+many[1300] = Buffer.alloc(2048);
+many[2300] = Buffer.alloc(2048); many[2300].writeFloatLE(NaN, 0);
+let calls = 0;
+const originalRows = native.decodeNormalizedAudioRowsInto;
+native.decodeNormalizedAudioRowsInto = (...args) => { calls++; return originalRows.apply(native,args); };
+const bulkExpected = evaluate("", () => decodeAudioVectors(many,512,readNormalizedVector));
+const bulkActual = evaluate("similarity", () => decodeAudioVectors(many,512,readNormalizedVector));
+assert.ok(calls >= 3, "large libraries must actually execute multiple native batches");
+assert.equal(bulkActual.length, bulkExpected.length);
+for (let i=0; i<many.length; i++) {
+  if (!bulkExpected[i]) assert.equal(bulkActual[i],null);
+  else for(let j=0;j<512;j++) assert.ok(Math.abs(bulkActual[i][j]-bulkExpected[i][j])<1e-12);
+}
+const workspace = {};
+const firstMatrix = evaluate("similarity,bridge", () => tryDotMatrix(left,right,workspace));
+const snapshot = Array.from(firstMatrix);
+const storage = workspace.rows;
+evaluate("similarity,bridge", () => tryDotMatrix(right,left,workspace));
+assert.equal(workspace.rows, storage);
+assert.deepEqual(Array.from(firstMatrix),snapshot,"returned result cannot alias reused scratch");
 
 const mixesJs = evaluate("",()=>generateMixes(songs,"2026-11-10:0"));
 const mixesRust = evaluate("similarity",()=>generateMixes(songs,"2026-11-10:0"));

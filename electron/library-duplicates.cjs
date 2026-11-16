@@ -62,7 +62,9 @@ function cosine(a, b) {
 function sameRecording(a, b, vectors, audioOverride) {
   const gap = Math.abs((Number(a.duration) || 0) - (Number(b.duration) || 0));
   const va = vectors.get(a.id); const vb = vectors.get(b.id);
-  const audio = va && vb ? (audioOverride === undefined ? cosine(va, vb) : audioOverride) : null;
+  // Native roundoff near a decision boundary must never change duplicate confidence.
+  const boundary = typeof audioOverride === "number" && (Math.abs(audioOverride - MIN_AUDIO_MATCH) <= 1e-9 || Math.abs(audioOverride - SAME_AUDIO) <= 1e-9);
+  const audio = va && vb ? (audioOverride === undefined || boundary ? cosine(va, vb) : audioOverride) : null;
   if (Number(a.duration) > 0 && Number(b.duration) > 0 ? gap > MAX_DURATION_GAP : !(audio >= SAME_AUDIO)) return null;
   // Two numbered tracks of the same album folder are different songs (e.g. a song and its featured version).
   if (a.copy.folder === b.copy.folder && a.copy.album === b.copy.album && a.copy.track && b.copy.track && a.copy.track !== b.copy.track) return null;
