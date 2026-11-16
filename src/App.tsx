@@ -363,7 +363,7 @@ function MainModeApp() {
     showAppToast
   });
   const {
-    now, setNow,
+    isThreeAm,
     screensaverVisible, setScreensaverVisible,
     screensaverPreviewActive, setScreensaverPreviewActive,
     screensaverPreviewTimerRef,
@@ -413,7 +413,6 @@ function MainModeApp() {
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const arcadeGhostUnlocked = false;
 
-  const isThreeAm = now.getHours() === 3;
 
   useBodyRuntimeClasses({
     isAppBackgrounded,
@@ -2400,10 +2399,6 @@ function MainModeApp() {
     };
   }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, settings.playbackSpeed, settings.audioEffectMode, settings.audioEffectAmount, settings.audioReverbAmount, view, settingsCategory, isViewSwitching, isSeeking, isVolumeDragging]);
 
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
 
   function resetPlayCountTracker(outcome: Exclude<ListeningOutcome, "active"> = "interrupted") {
     listeningHistoryRef.current?.finish(outcome);
@@ -8441,7 +8436,6 @@ function MainModeApp() {
       libraryMissingLabel: `${effectiveMissingFileCount || missingSongs.length} missing file${(effectiveMissingFileCount || missingSongs.length) === 1 ? "" : "s"}`,
       librarySortMode,
       missingFileCount: effectiveMissingFileCount,
-      now,
       query,
       removeMissingSongs,
       renderHomeSongCards,

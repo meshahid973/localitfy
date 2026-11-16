@@ -15,7 +15,14 @@ export function useScreensaverController({
   animatedBackgrounds,
   idleEnabled
 }: ScreensaverControllerOptions) {
-  const [now, setNow] = useState(new Date());
+  // Only the late-night boolean is consumed by the shell. Do not render the entire app each minute.
+  const [isThreeAm, setIsThreeAm] = useState(() => new Date().getHours() === 3);
+  useEffect(() => {
+    const update = () => setIsThreeAm(new Date().getHours() === 3);
+    const timer = window.setInterval(update, 60_000);
+    document.addEventListener("visibilitychange", update);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", update); };
+  }, []);
   const [screensaverVisible, setScreensaverVisible] = useState(false);
   const [screensaverPreviewActive, setScreensaverPreviewActive] = useState(false);
   const screensaverTimerRef = useRef<number | null>(null);
@@ -79,7 +86,7 @@ export function useScreensaverController({
   }, [currentSongId, isPlaying, screensaverPreviewActive, screensaverVisible, animeVisuals, animatedBackgrounds, idleEnabled]);
 
   return {
-    now, setNow,
+    isThreeAm,
     screensaverVisible, setScreensaverVisible,
     screensaverPreviewActive, setScreensaverPreviewActive,
     screensaverPreviewTimerRef,

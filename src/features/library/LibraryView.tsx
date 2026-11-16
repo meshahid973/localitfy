@@ -29,7 +29,6 @@ export type LibraryViewProps = {
   libraryMissingLabel: string;
   librarySortMode: LibrarySortMode;
   missingFileCount: number;
-  now: unknown;
   query: string;
   removeMissingSongs: () => Promise<unknown> | unknown;
   renderHomeSongCards: (songs: Song[], className?: string) => ReactNode;

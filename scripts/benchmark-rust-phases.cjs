@@ -4,7 +4,7 @@ const { performance } = require("node:perf_hooks");
 const path = require("node:path");
 const os = require("node:os");
 const { dot } = require("../electron/analysis/listening-signals.cjs");
-const { tryDotMatrix, tryDecodeNormalizedAudio } = require("../electron/native/compute.cjs");
+const { tryDotMatrix, tryDecodeNormalizedAudio, tryRankSimilarity } = require("../electron/native/compute.cjs");
 const { readNormalizedVector } = require("../electron/analysis/similarity.cjs");
 const { generateMixes } = require("../electron/analysis/daily-mixes.cjs");
 const { findDuplicates } = require("../electron/library-duplicates.cjs");
@@ -59,7 +59,7 @@ if (compare) {
   process.env.LOCALTIFY_RUST_PHASES = "similarity,duplicates,pcm";
   const addon = getAddon("similarity");
   if (!addon) throw new Error("Native benchmark requires a built Rust addon");
-  for (const name of ["dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "pcmSumSquares", "pcmDecodeInto"]) {
+  for (const name of ["rankSimilarityBatch", "dotMatrix", "dotMatrixInto", "clusterFromCenters", "pairDots", "pairDotsInto", "decodeNormalizedAudioInto", "pcmSumSquares", "pcmDecodeInto"]) {
     const original = addon[name];
     if (typeof original !== "function") throw new Error("Missing Rust export: " + name);
     nativeCalls.set(name, 0);
@@ -81,6 +81,26 @@ async function run() {
         for(const row of trackVectors)for(const seed of seeds)score+=dot(row,seed);
         return score;
       },["dotMatrix"]],
+      ["group recommendation ranks / 32x20x512",()=>{
+        const rows=trackVectors.slice(0,32), seeds=trackVectors.slice(32,52);
+        const genre=(i,j)=>(i+j)%5/4;
+        const native=tryRankSimilarity(rows,seeds,genre,.6,.4);
+        if(native) return native;
+        if(process.env.LOCALTIFY_RUST_PHASES) throw new Error("Native group rank unexpectedly fell back");
+        return rows.flatMap((row,i)=>{
+          let closest=-Infinity;
+          const scores=[];
+          for(let j=0;j<seeds.length;j++) {
+            const audio=dot(row,seeds[j]);
+            closest=Math.max(closest,audio);
+            const value=.6*audio+.4*genre(i,j);
+            let at=scores.length;
+            while(at>0&&value>scores[at-1])at--;
+            if(at<3){scores.splice(at,0,value);if(scores.length>3)scores.pop();}
+          }
+          return [closest,scores.reduce((sum,score)=>sum+score/3,0)];
+        });
+      },["rankSimilarityBatch"]],
       ["CLAP Float32 decoder / 600x512",()=>{
         const native = tryDecodeNormalizedAudio(encodedVectors,512);
         if (native) return native;
@@ -110,7 +130,7 @@ async function run() {
       const js=await benchmark(fn);
       if(compare) {
         process.env.LOCALTIFY_RUST_PHASES = name.includes("typed output")
-          ? "similarity,duplicates,bridge,pcm" : "similarity,duplicates,pcm";
+          ? "similarity,duplicates,bridge,pcm" : name.includes("group recommendation") ? "ranking" : "similarity,duplicates,pcm";
         const before = new Map(nativeCalls);
         const rust=await benchmark(fn);
         const invoked = requiredNames?.some(key => nativeCalls.get(key) > before.get(key));

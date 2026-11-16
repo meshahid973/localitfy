@@ -6,12 +6,13 @@ Localtify's JavaScript implementation remains the production default. The NAPI-R
 
 | Phase | Purpose | Release status |
 | --- | --- | --- |
-| `pcm` | Validate FFmpeg Float32 samples and compute RMS energy | Strong synthetic improvement; real-audio QA required |
+| `pcm` | Decode unaligned FFmpeg Float32 buffers and compute RMS energy | Strong synthetic improvement; real-audio QA required |
 | `similarity` | Batched cosine/dot scores and full Daily Mixes clustering | Mixed results; workload-gated |
+| `ranking` | Fused group recommendation scoring and top-three selection | Explicit experiment only; slower than optimized JavaScript on CI |
 | `bridge` | JS-owned typed-array score output (with similarity/duplicates) | Opt-in; platform-dependent |
 | `duplicates` | Large candidate-pair dot-score batches | Often slower on smaller buckets |
 
-Enable experiments only through the trusted environment variable `LOCALTIFY_RUST_PHASES`, for example `pcm` or `similarity,bridge`. Unavailable binaries, rejected input, and native errors fall back to JavaScript. No phase is automatically enabled merely because a native package was installed.
+Enable experiments only through the trusted environment variable `LOCALTIFY_RUST_PHASES`, for example `pcm` or `similarity,bridge`. Unavailable binaries, rejected input, and native errors fall back to JavaScript. No phase is automatically enabled merely because a native package was installed. The slower ranking experiment requires the explicit `ranking` token; neither `similarity` nor `all` enables it.
 
 ## Limits and compatibility
 

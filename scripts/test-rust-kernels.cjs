@@ -159,5 +159,24 @@ const beforePairInto = nativeCalls.pairDotsInto;
 const bulkBridge = evaluate("duplicates,bridge", () => findDuplicates(bulkBucket, { vectors: dupVectors, fileSizes: sizes }));
 assert.ok(nativeCalls.pairDotsInto > beforePairInto, "typed duplicate output must execute Rust");
 assert.deepEqual(bulkBridge, bulkJs, "typed duplicate output changed grouping");
+// Exercise the new opt-in fused kernel with the same row/seed limits as production.
+const { tryRankSimilarity } = require("../electron/native/compute.cjs");
+const rankRows = vectors.slice(0, 32), rankSeeds = vectors.slice(32, 52);
+const genreAt = (i, j) => (i + j) % 5 / 4;
+assert.equal(evaluate("", () => tryRankSimilarity(rankRows, rankSeeds, genreAt, .6, .4)), null);
+const rankOriginal = native.rankSimilarityBatch;
+let rankCalls = 0;
+native.rankSimilarityBatch = (...args) => { rankCalls++; return rankOriginal.apply(native, args); };
+assert.equal(evaluate("similarity", () => tryRankSimilarity(rankRows, rankSeeds, genreAt, .6, .4)), null, "ranking must not slow existing similarity opt-in");
+assert.equal(evaluate("all", () => tryRankSimilarity(rankRows, rankSeeds, genreAt, .6, .4)), null, "slower ranking kernel requires explicit experiment");
+const nativeRanks = evaluate("ranking", () => tryRankSimilarity(rankRows, rankSeeds, genreAt, .6, .4));
+assert.ok(rankCalls > 0 && nativeRanks?.length === rankRows.length * 2);
+for (let i = 0; i < rankRows.length; i++) {
+  const audio = rankSeeds.map(seed => rankRows[i].reduce((sum, value, k) => sum + value * seed[k], 0));
+  const average = audio.map((value, j) => .6 * value + .4 * genreAt(i, j)).sort((a,b) => b-a).slice(0,3).reduce((sum,score) => sum + score/3, 0);
+  assert.ok(Math.abs(nativeRanks[i*2] - Math.max(...audio)) < 1e-12);
+  assert.ok(Math.abs(nativeRanks[i*2+1] - average) < 1e-12);
+}
+assert.throws(() => native.rankSimilarityBatch(new Float64Array([1,2]), new Float64Array([1,2]), new Float64Array([NaN]), 2, .6, .4), /similarity/i);
 process.env.LOCALTIFY_RUST_PHASES = "";
 console.log("[rust-parity] Native similarity, Daily Mixes, duplicate batches, and PCM match JS");
