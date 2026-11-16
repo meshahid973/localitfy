@@ -82,7 +82,6 @@ export function useScreensaverController({
     now, setNow,
     screensaverVisible, setScreensaverVisible,
     screensaverPreviewActive, setScreensaverPreviewActive,
-    screensaverTimerRef,
     screensaverPreviewTimerRef,
     screensaverIgnoreActivityUntilRef
   };

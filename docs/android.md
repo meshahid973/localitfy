@@ -4,14 +4,14 @@ The Android companion is experimental. Download the release-signed APK from [Git
 
 Release and debug APKs use different signing keys. To move from a debug build to an official release, first sync pending phone changes back to the computer and preserve anything you need, then uninstall the debug build before installing the release APK. Uninstalling erases its local data. Official release APKs share a dedicated signing key so later official updates can preserve app data.
 
-The phone copies songs and covers from the desktop library, then plays them from app storage without needing the Mac. Likes, playlists, play counts, and listening events are exchanged during sync. Song details, albums, covers, downloads, imports, MusicBrainz tagging, scrobbling accounts, and library maintenance are managed on the desktop; the phone shows the desktop's covers and metadata after each sync. Lyrics, artist biographies, Discover, and audio recommendations use the paired Mac when reachable and keep previously fetched results for offline use. They do not provide new online results independently of the Mac.
+The phone copies music and artwork for offline playback and syncs likes, playlists, play counts and listening events. Imports, metadata editing, scrobbling accounts and library maintenance remain desktop tools. Lyrics, artist biographies, Discover and recommendations use the paired computer and cache previously fetched results for offline use.
 
 ## Requirements
 
 - An Android phone running Android 7.0 / API 24 or later, with an up-to-date Android System WebView. API 24 is the configured minimum, not a statement that every supported version has been device-tested.
 - Enough free internal storage for the whole music library and covers. There is currently no selective-sync or SD-card storage picker.
 - The desktop app built from the same version as the phone app. Phone sync has a protocol version: if the phone says to update and restart the Mac app, the desktop build is older than the phone's. The phone calls the computer a Mac or a PC once it has paired.
-- The Mac and phone on the same trusted home network for pairing and sync. Keep the Mac app open and the Mac awake.
+- The computer and phone on the same trusted home network. Keep the desktop app open and the computer awake during sync.
 
 To build: Node.js 22+, npm, JDK 21, Android SDK Platform 36, Android SDK Build-Tools 35.0.0 (the default for the current Gradle plugin), and Android SDK Platform-Tools (`adb`). Android Studio can install the SDK components. This branch uses Capacitor 8.6.0, Gradle 8.14.3, and Android Gradle Plugin 8.13.0; use the checked-in Gradle wrapper.
 
