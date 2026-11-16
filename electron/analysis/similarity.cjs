@@ -217,7 +217,7 @@ async function findSimilarSongs(database, payload, { statFile = fs.promises.stat
       while (lo < hi) {
         const mid = (lo + hi) >>> 1;
         const other = result.matches[mid];
-        const order = other.score - match.score || (other.songId < match.songId ? -1 : other.songId > match.songId ? 1 : 0);
+        const order = match.score - other.score || (other.songId < match.songId ? -1 : other.songId > match.songId ? 1 : 0);
         if (order <= 0) lo = mid + 1;
         else hi = mid;
       }
