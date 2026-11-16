@@ -1,4 +1,6 @@
+const { randomUUID } = require("node:crypto");
 const LIVE_VERSION = 1;
+const HANDOFF_TIMEOUT_MS = 6000;
 const COMPUTER = "computer";
 const HEARTBEAT_MS = 25 * 1000;
 /** A phone answers every heartbeat; one silent for this many in a row has gone (Wi-Fi off, out of the house). */
@@ -65,13 +67,15 @@ function createLiveHub({ repositories, serverName = "computer", now = Date.now, 
   let lastState = null;
   let graceTimer = null;
   let heartbeat = null;
+  let transfer = null;
+  const capable = new Set();
 
   const online = (id) => id === COMPUTER || phones.has(id);
   const peers = () => [
     { id: COMPUTER, name: serverName, kind: "computer" },
     ...[...phones].map(([id, phone]) => ({ id, name: phone.name, kind: "phone" }))
   ];
-  const presence = () => ({ type: "presence", peers: peers(), session: { ...session, online: !session.active || online(session.active) }, state: lastState, serverTime: now() });
+  const presence = () => ({ type: "presence", peers: peers(), session: { ...session, online: !session.active || online(session.active) }, state: lastState, serverTime: now(), handoffVersion: 2 });
 
   function deliver(id, event) {
     if (id === COMPUTER) return toComputer(event);
@@ -82,6 +86,20 @@ function createLiveHub({ repositories, serverName = "computer", now = Date.now, 
   function broadcast(event, except = "") {
     if (except !== COMPUTER) deliver(COMPUTER, event);
     for (const id of phones.keys()) if (id !== except) deliver(id, event);
+  }
+
+  function cancelTransfer(message, retainedGiver = "") {
+    const pending = transfer;
+    transfer = null;
+    if (!pending) return;
+    clearTimeout(pending.timer);
+    for (const id of new Set([pending.giver, pending.to, pending.requester])) {
+      if (id && id !== retainedGiver) deliver(id, { type: "take-failed", by: pending.to, transferId: pending.id, message });
+    }
+  }
+
+  function validTransfer(message) {
+    return transfer && message.transferId === transfer.id && transfer.epoch === session.epoch && now() < transfer.expires;
   }
 
   function claim(id) {
@@ -127,10 +145,22 @@ function createLiveHub({ repositories, serverName = "computer", now = Date.now, 
         announceLike(result, from);
         return { ok: true, ...result };
       }
+      case "handoff-ready":
+        capable.add(from);
+        return { ok: true };
       case "claim":
-      case "took":
+        if (session.active !== from) {
+          claim(from);
+          cancelTransfer("Playback ownership changed");
+        }
+        return { ok: true, session };
+      case "took": {
+        if (!validTransfer(message) || transfer.to !== from || transfer.stage !== "take") return { ok: false, error: "Transfer expired or replaced", session };
+        clearTimeout(transfer.timer);
+        transfer = null;
         claim(from);
         return { ok: true, session };
+      }
       case "state": {
         if (from !== session.active || number(message.epoch) !== session.epoch) return { ok: false, session };
         lastState = { ...cleanState(message), from };
@@ -140,6 +170,7 @@ function createLiveHub({ repositories, serverName = "computer", now = Date.now, 
       case "command": {
         const command = cleanCommand(message);
         if (!command) return { ok: false, error: "unknown command" };
+        if (message.epoch !== session.epoch) return { ok: false, error: "Playback session changed", session };
         if (!session.active || !online(session.active)) return { ok: false, error: "nothing is playing on another device" };
         if (session.active === from) return { ok: false, error: "this device is the player" };
         deliver(session.active, { type: "command", from, ...command });
@@ -149,21 +180,28 @@ function createLiveHub({ repositories, serverName = "computer", now = Date.now, 
         const to = text(message.to, 200);
         if (!online(to)) return { ok: false, error: "that device is not connected" };
         if (session.active === to) return { ok: true };
-        if (session.active && online(session.active)) deliver(session.active, { type: "give", to, requester: from });
-        // Nobody is playing (or the player dropped off): start from the last thing it reported.
-        else deliver(to, { type: "take", requester: from, giver: "", handoff: lastState });
+        const giver = session.active && online(session.active) ? session.active : "";
+        if (!capable.has(from) || !capable.has(to) || (giver && !capable.has(giver))) return { ok: false, error: "Update both devices to move playback safely" };
+        // Keep the original giver paused while a replacement targets another device.
+        cancelTransfer("Playback transfer replaced", transfer?.giver === giver ? giver : "");
+        const id = randomUUID();
+        const timer = setTimeout(() => { if (transfer?.id === id) cancelTransfer("Playback transfer timed out"); }, HANDOFF_TIMEOUT_MS);
+        timer.unref?.();
+        transfer = { id, giver, to, requester: from, epoch: session.epoch, stage: giver ? "give" : "take", expires: now() + HANDOFF_TIMEOUT_MS, timer };
+        if (giver) deliver(giver, { type: "give", to, requester: from, transferId: id });
+        else deliver(to, { type: "take", requester: from, giver: "", handoff: lastState, transferId: id });
         return { ok: true };
       }
       case "handoff": {
-        const to = text(message.to, 200);
-        if (!online(to) || from !== session.active) return { ok: false, error: "that device is not connected" };
+        if (!validTransfer(message) || transfer.stage !== "give" || from !== transfer.giver || from !== session.active || message.to !== transfer.to || message.requester !== transfer.requester) return { ok: false, error: "Transfer expired or replaced" };
         const handoff = message.handoff && typeof message.handoff === "object" ? cleanState(message.handoff) : null;
-        deliver(to, { type: "take", requester: text(message.requester, 200), giver: from, handoff });
+        transfer.stage = "take";
+        deliver(transfer.to, { type: "take", requester: transfer.requester, giver: from, handoff, transferId: transfer.id });
         return { ok: true };
       }
       case "take-failed": {
-        const event = { type: "take-failed", by: from, message: text(message.message) };
-        for (const id of new Set([text(message.giver, 200), text(message.requester, 200)])) if (id && id !== from) deliver(id, event);
+        if (!validTransfer(message) || ![transfer.giver, transfer.to].includes(from)) return { ok: false, error: "Transfer expired or replaced" };
+        cancelTransfer(text(message.message) || "Playback transfer failed");
         return { ok: true };
       }
       case "notice":
@@ -190,6 +228,8 @@ function createLiveHub({ repositories, serverName = "computer", now = Date.now, 
   function dropped(id, response) {
     if (phones.get(id)?.response !== response) return;
     phones.delete(id);
+    capable.delete(id);
+    if (transfer && [transfer.giver, transfer.to, transfer.requester].includes(id)) cancelTransfer("Playback device disconnected");
     if (!phones.size) { clearInterval(heartbeat); heartbeat = null; }
     if (session.active === id) {
       clearTimeout(graceTimer);
@@ -206,7 +246,11 @@ function createLiveHub({ repositories, serverName = "computer", now = Date.now, 
 
   /** GET /v1/live: one stream per phone; a newer connection from the same phone replaces the old one. */
   function open(device, request, response) {
-    phones.get(device.id)?.response.end();
+    if (phones.has(device.id)) {
+      capable.delete(device.id);
+      if (transfer && [transfer.giver, transfer.to, transfer.requester].includes(device.id)) cancelTransfer("Playback device reconnected");
+      phones.get(device.id)?.response.end();
+    }
     response.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-store", Connection: "keep-alive" });
     request.socket.setNoDelay?.(true);
     request.socket.setKeepAlive?.(true, 15000);
@@ -228,6 +272,8 @@ function createLiveHub({ repositories, serverName = "computer", now = Date.now, 
   }
 
   function closeAll() {
+    cancelTransfer("Playback connection closed");
+    capable.clear();
     for (const id of [...phones.keys()]) disconnect(id);
     clearTimeout(graceTimer);
     session = { active: "", epoch: session.epoch + 1 };

@@ -9,7 +9,7 @@ import { isPlayableSong } from "../library/library.utils";
 import { computerName, isAndroidApp } from "../../app/platform";
 import { clamp, formatTime } from "../../shared/utils/format";
 import { addToQueue, livePositionMs, mergeQueueEdit, nextRepeatMode } from "./liveSession";
-import type { LiveCommand, LiveConnectionStatus, LiveEvent, LiveMessage, LivePeer, LivePresence, LiveState } from "./connect.types";
+import type { LiveCommand, LiveConnectionStatus, LiveEvent, LiveMessage, LivePeer, LivePresence, LiveReply, LiveState } from "./connect.types";
 
 /** The active player re-sends its state this often while playing, and whenever it drifts from what remotes assume. */
 const STATE_EVERY_MS = 15 * 1000;
@@ -84,7 +84,11 @@ export function usePlaybackConnect(local: LocalPlayer) {
   const offsetRef = useRef(0);
   const queueRevRef = useRef(0);
   const publishedRef = useRef<{ state: LiveState; sentAt: number } | null>(null);
-  const handoffRef = useRef<{ resume: boolean; timer: number } | null>(null);
+  const handoffRef = useRef<{ resume: boolean; timer: number; id: string } | null>(null);
+  const handoffVersionRef = useRef(0);
+  const incomingRef = useRef<string | null>(null);
+  const pendingSongCommandRef = useRef<number | null>(null);
+  const connectionGenerationRef = useRef(0);
   const seekingRef = useRef(false);
   // Set while this hook drives the app's player, so the app's remote-control redirects (toggle, play…) stay out of it.
   const drivingRef = useRef(false);
@@ -99,7 +103,7 @@ export function usePlaybackConnect(local: LocalPlayer) {
     setLive(liveRef.current);
   };
   const serverNow = () => Date.now() + offsetRef.current;
-  const send = (message: LiveMessage) => window.localitfy?.liveSend?.(message).catch(() => ({ ok: false, error: "" })) ?? Promise.resolve({ ok: false });
+  const send = (message: LiveMessage): Promise<LiveReply> => window.localitfy?.liveSend?.(message).catch(() => ({ ok: false, error: "" })) ?? Promise.resolve({ ok: false });
   const peerName = (id: string) => liveRef.current.peers.find((peer) => peer.id === id)?.name || "";
   const label = (peer: LivePeer) => peer.id === liveRef.current.self
     ? `this ${peer.kind === "computer" ? computerName() : "phone"}`
@@ -164,7 +168,7 @@ export function usePlaybackConnect(local: LocalPlayer) {
 
   const applyCommand = (command: LiveCommand & { from: string }) => {
     const player = localRef.current;
-    if (command.epoch && command.epoch !== liveRef.current.session.epoch) return;
+    if (command.epoch !== liveRef.current.session.epoch) return;
     switch (command.action) {
       case "play": if (!player.isPlaying) player.togglePlay(); break;
       case "pause": pauseLocal(); break;
@@ -197,6 +201,15 @@ export function usePlaybackConnect(local: LocalPlayer) {
   };
 
   const adoptPresence = (presence: LivePresence, hello: boolean) => {
+    if (!hello && presence.session.epoch < liveRef.current.session.epoch) return;
+    if (hello) {
+      connectionGenerationRef.current += 1;
+      incomingRef.current = null;
+      finishHandoff(false);
+    }
+    const previousVersion = handoffVersionRef.current;
+    handoffVersionRef.current = presence.handoffVersion || 0;
+    if (handoffVersionRef.current === 2 && (hello || previousVersion !== 2)) void send({ type: "handoff-ready" });
     offsetRef.current = presence.serverTime - Date.now();
     const self = presence.self || liveRef.current.self;
     update({ status: "connected", self, peers: presence.peers, session: presence.session, state: presence.state?.from === presence.session.active ? presence.state : null });
@@ -217,54 +230,68 @@ export function usePlaybackConnect(local: LocalPlayer) {
         adoptPresence(event, event.type === "hello");
         break;
       case "connection":
+        if (event.status !== "connected") { connectionGenerationRef.current += 1; incomingRef.current = null; handoffVersionRef.current = 0; finishHandoff(false); }
         update(event.status === "connected" ? { status: event.status } : { status: event.status, peers: [], session: EMPTY_SESSION, state: null });
         break;
       case "state":
-        if (event.state.from === liveRef.current.session.active && event.state.from !== liveRef.current.self) update({ state: event.state });
+        if (event.state.epoch === liveRef.current.session.epoch && event.state.from === liveRef.current.session.active && event.state.from !== liveRef.current.self) update({ state: event.state });
         break;
       case "command":
         if (liveRef.current.session.active === liveRef.current.self) drive(() => applyCommand(event));
         break;
       case "give": {
+        const id = event.transferId;
+        if (!id || liveRef.current.session.active !== liveRef.current.self) break;
         const handoff = buildState();
         if (!handoff) {
-          void send({ type: "take-failed", giver: "", requester: event.requester, message: "Nothing is playing" });
+          void send({ type: "take-failed", giver: "", requester: event.requester, transferId: id, message: "Nothing is playing" });
           break;
         }
-        void send({ type: "handoff", to: event.to, requester: event.requester, handoff });
+        const resume = handoffRef.current?.resume || player.isPlaying;
         finishHandoff(false);
         handoffRef.current = {
-          resume: player.isPlaying,
+          id, resume,
           timer: window.setTimeout(() => {
-            if (!handoffRef.current) return;
-            player.toast(`Couldn't move playback to ${peerName(event.to) || "that device"}`, "error");
-            finishHandoff(true);
-          }, HANDOFF_TIMEOUT_MS)
+            if (handoffRef.current?.id !== id) return;
+            void send({ type: "take-failed", giver: liveRef.current.self, requester: event.requester, transferId: id, message: "Playback transfer timed out" }).then((reply) => {
+              if (handoffRef.current?.id === id) finishHandoff(reply.ok && liveRef.current.session.active === liveRef.current.self);
+            });
+          }, HANDOFF_TIMEOUT_MS + 500)
         };
         pauseLocal();
+        void send({ type: "handoff", to: event.to, requester: event.requester, handoff: { ...handoff, playing: resume }, transferId: id }).then((reply) => {
+          if (!reply.ok && handoffRef.current?.id === id) finishHandoff(liveRef.current.session.active === liveRef.current.self);
+        });
         break;
       }
       case "take": {
+        const id = event.transferId;
+        if (!id) break;
         const handoff = event.handoff;
         const song = handoff ? player.songsById.get(handoff.songId) : undefined;
-        const refuse = (message: string) => void send({ type: "take-failed", giver: event.giver, requester: event.requester, message });
+        const refuse = (message: string) => void send({ type: "take-failed", giver: event.giver, requester: event.requester, message, transferId: id });
         if (!handoff?.songId) { refuse("Nothing is playing"); break; }
-        // The song playing has to be here. Queued songs that aren't stay in the queue, greyed out, and are skipped.
         if (!isPlayableSong(song)) {
-          // Shown on whichever device asked, so it names the phone rather than "this phone".
           refuse(android ? `"${handoff.title}" isn't copied to the phone yet. Sync the phone to copy it` : `"${handoff.title}" isn't on the ${computerName()}`);
           break;
         }
-        void send({ type: "took" });
-        player.setQueue(handoff.queue);
-        player.setShuffle(handoff.shuffle);
-        player.setRepeat(handoff.repeat);
-        startLocally(song.id, livePositionMs(handoff, serverNow()) / 1000, handoff.playing);
+        incomingRef.current = id;
+        void send({ type: "took", transferId: id }).then((reply) => {
+          if (incomingRef.current !== id) return;
+          incomingRef.current = null;
+          if (!reply.ok || !reply.session || reply.session.active !== liveRef.current.self || liveRef.current.session.epoch > reply.session.epoch) return;
+          const current = localRef.current;
+          current.setQueue(handoff.queue);
+          current.setShuffle(handoff.shuffle);
+          current.setRepeat(handoff.repeat);
+          startLocally(song.id, livePositionMs(handoff, serverNow()) / 1000, handoff.playing);
+        });
         break;
       }
       case "take-failed":
+        if (event.transferId === incomingRef.current) incomingRef.current = null;
+        if (event.transferId && handoffRef.current?.id === event.transferId) finishHandoff(liveRef.current.session.active === liveRef.current.self);
         player.toast(event.message || "Couldn't move playback", "error");
-        finishHandoff(true);
         break;
       case "like":
         player.onLike(event.songId, event.liked);
@@ -278,11 +305,25 @@ export function usePlaybackConnect(local: LocalPlayer) {
   useEffect(() => {
     const bridge = window.localitfy;
     if (!bridge?.onLiveEvent || !bridge.liveSend) return;
-    const off = bridge.onLiveEvent((event) => handlers.current(event));
+    let active = true;
+    let receivedPresence = false;
+    const off = bridge.onLiveEvent((event) => {
+      if (!active) return;
+      if (event.type === "hello" || event.type === "presence" || event.type === "connection") receivedPresence = true;
+      handlers.current(event);
+    });
     void bridge.liveSend({ type: "status" }).then((reply) => {
-      if (reply?.ok && reply.peers && reply.session) adoptPresence(reply as LivePresence, false);
+      if (active && !receivedPresence && reply?.ok && reply.peers && reply.session) adoptPresence(reply as LivePresence, false);
     }).catch(() => undefined);
-    return off;
+    return () => {
+      active = false;
+      off();
+      connectionGenerationRef.current += 1;
+      if (pendingSongCommandRef.current !== null) window.clearTimeout(pendingSongCommandRef.current);
+      pendingSongCommandRef.current = null;
+      incomingRef.current = null;
+      finishHandoff(false);
+    };
   }, []);
 
   // Pressing play makes this device the player; the one playing before pauses.
@@ -375,6 +416,7 @@ export function usePlaybackConnect(local: LocalPlayer) {
   const transfer = (id: string) => {
     const { session, self } = liveRef.current;
     if (id === session.active) return;
+    if (handoffVersionRef.current !== 2) { localRef.current.toast("Update both devices to move playback safely", "error"); return; }
     // Nothing is playing anywhere yet: this device's song is the one to move.
     if (!session.active || !liveRef.current.peers.some((peer) => peer.id === session.active)) {
       if (localRef.current.currentSong && id !== self) void send({ type: "claim" }).then(() => send({ type: "transfer", to: id }));
@@ -418,8 +460,14 @@ export function usePlaybackConnect(local: LocalPlayer) {
     play(songId: string) {
       if (!redirect()) return false;
       const before = localRef.current.queue;
-      // Let the app commit the queue it set together with the song (album, playlist) before reading it.
-      window.setTimeout(() => {
+      const requestedSession = liveRef.current.session;
+      const generation = connectionGenerationRef.current;
+      // Read the committed queue, but never forward an old selection to a replacement player.
+      if (pendingSongCommandRef.current !== null) window.clearTimeout(pendingSongCommandRef.current);
+      pendingSongCommandRef.current = window.setTimeout(() => {
+        pendingSongCommandRef.current = null;
+        const session = liveRef.current.session;
+        if (generation !== connectionGenerationRef.current || session.epoch !== requestedSession.epoch || session.active !== requestedSession.active || !remoteActive()) return;
         const after = localRef.current.queue;
         command({ action: "play-song", songId, replaceQueue: after !== before, queue: after });
       }, 50);
