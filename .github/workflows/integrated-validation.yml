@@ -1,0 +1,97 @@
+name: integrated-validation
+on:
+  pull_request:
+    paths:
+      - "scripts/benchmark-library-workloads.mjs"
+      - "scripts/ci-desktop-regression.cjs"
+      - ".github/workflows/integrated-validation.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  ONNXRUNTIME_NODE_INSTALL: skip
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run release:check
+      - name: Compare current production library modules with pre-optimization 0.5.0
+        shell: bash
+        run: |
+          mkdir -p qa-artifacts
+          git worktree add --detach "$RUNNER_TEMP/localtify-baseline" 8f5c3a7af7f23d95fc5e2494aa9d95413498cf13
+          for n in 1000 10000 50000; do
+            node --expose-gc scripts/benchmark-library-workloads.mjs "$RUNNER_TEMP/localtify-baseline" "$n" | tee "qa-artifacts/baseline-$n.json"
+            node --expose-gc scripts/benchmark-library-workloads.mjs . "$n" | tee "qa-artifacts/current-$n.json"
+          done
+          node -e 'const fs=require("fs");for(const n of [1000,10000,50000]){const a=JSON.parse(fs.readFileSync("qa-artifacts/baseline-"+n+".json"));const b=JSON.parse(fs.readFileSync("qa-artifacts/current-"+n+".json"));for(let i=0;i<a.trials.length;i++)if(a.trials[i].digest!==b.trials[i].digest)throw Error("Output divergence: "+n+" "+a.trials[i].label);}'
+      - name: Actual Electron desktop renderer and audio smoke
+        run: xvfb-run -a npx electron scripts/ci-desktop-regression.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integrated-desktop-and-benchmarks
+          path: qa-artifacts/
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd
+        with:
+          log-accepted-android-sdk-licenses: false
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync android
+      - name: Build debug APK and run Android checks
+        shell: bash
+        run: |
+          sdkmanager "platforms;android-36" "build-tools;35.0.0"
+          bash android/gradlew -p android assembleDebug lintDebug testDebugUnitTest
+      - name: Android emulator visual smoke (not physical-device QA)
+        shell: bash
+        run: |
+          mkdir -p qa-android
+          sudo chmod 666 /dev/kvm
+          sdkmanager "emulator" "system-images;android-35;google_apis;x86_64"
+          echo no | avdmanager create avd -n localtify-ci -k "system-images;android-35;google_apis;x86_64" --force
+          emulator -avd localtify-ci -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot > qa-android/emulator.log 2>&1 &
+          trap 'adb emu kill || true' EXIT
+          timeout 180 adb wait-for-device
+          timeout 180 bash -c 'until [[ "$(adb shell getprop sys.boot_completed | tr -d "\r")" == "1" ]]; do sleep 5; done'
+          adb shell wm size 720x1600
+          adb shell wm density 320
+          adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+          adb shell am start -W -n com.meshahid973.localitfy/.MainActivity
+          sleep 20
+          adb shell uiautomator dump /sdcard/localtify-ui.xml
+          adb pull /sdcard/localtify-ui.xml qa-android/ui.xml
+          adb exec-out screencap -p > qa-android/home.png
+          adb logcat -d -t 1500 > qa-android/logcat.txt
+          test -s qa-android/home.png
+          grep -q 'com.meshahid973.localitfy' qa-android/ui.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-emulator-visual
+          path: qa-android/
