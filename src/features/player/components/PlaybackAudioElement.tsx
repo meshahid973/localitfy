@@ -8,7 +8,7 @@ export type PlaybackAudioElementProps = {
   currentSong: Song | null;
   songRef: MutableRefObject<Song | null>;
   pendingPlayRef: MutableRefObject<boolean>;
-  playbackUrlCacheRef: MutableRefObject<Map<string, unknown>>;
+  playbackUrlCacheRef: MutableRefObject<{ delete(key: string): boolean }>;
   timeRef: MutableRefObject<number>;
   handleCanPlay: () => unknown;
   handlePlaying: () => unknown;

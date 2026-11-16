@@ -9,12 +9,23 @@ function decodePcmChunk(buffer) {
     throw new Error("Invalid decoded PCM buffer");
   }
   const count = buffer.length / 4;
+  const native = getAddon("pcm");
+  const aligned = IS_LITTLE_ENDIAN && buffer.byteOffset % 4 === 0;
+  // Unaligned data previously required a JS readFloatLE and a JS/native energy pass.
+  // Keep the aligned zero-copy fast path, and use one native call otherwise.
+  if (!aligned && count >= 32_768 && count <= 1_000_000 && native && typeof native.pcmDecodeInto === "function") {
+    try {
+      const samples = new Float32Array(count);
+      const squareSum = native.pcmDecodeInto(buffer, samples);
+      if (!Number.isFinite(squareSum) || squareSum < 0) throw new Error("Invalid PCM energy");
+      return { samples, squareSum };
+    } catch (error) { warnOnce("pcm", error); }
+  }
   // FFmpeg emits little-endian f32. Reuse its backing memory when safe.
-  const samples = IS_LITTLE_ENDIAN && buffer.byteOffset % 4 === 0
+  const samples = aligned
     ? new Float32Array(buffer.buffer, buffer.byteOffset, count)
     : Float32Array.from({ length: count }, (_, i) => buffer.readFloatLE(i * 4));
 
-  const native = getAddon("pcm");
   if (count >= 32_768 && native && typeof native.pcmSumSquares === "function") {
     try {
       const squareSum = native.pcmSumSquares(samples);

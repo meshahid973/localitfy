@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { ListeningHistory } from "./listeningHistory";
 import { AudioEffectRuntime } from "./audio/audioEffectRuntime";
 import { PlaybackTransitionCoordinator } from "./engine/playbackTransitionCoordinator";
+import { PlaybackUrlCache } from "./playbackUrlCache";
 import { HtmlAudioEngine } from "./engine/htmlAudioEngine";
 import type { PlayerController } from "./engine/playerController";
-import type { PlaybackUrlCacheEntry, PlaybackUrlResult, Song } from "../library/song.types";
+import type { PlaybackUrlResult, Song } from "../library/song.types";
 import type { QueueHistoryItem, RepeatMode } from "./player.types";
 import { QUEUE_HISTORY_STORAGE_KEY, QUEUE_STORAGE_KEY, REPEAT_PLAYLIST_STORAGE_KEY, SHUFFLE_STORAGE_KEY, REPEAT_MODE_STORAGE_KEY } from "../library/library.constants";
 import { readLocalJson, writeLocalJson } from "../../shared/storage/localStorage";
@@ -15,7 +16,8 @@ export type UsePlayerRuntimeOptions = {
 
 export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const playbackTransitionRef = useRef(new PlaybackTransitionCoordinator());
+  const [playbackTransition] = useState(() => new PlaybackTransitionCoordinator());
+  const playbackTransitionRef = useRef(playbackTransition);
   const listeningHistoryRef = useRef<ListeningHistory | null>(null);
   if (!listeningHistoryRef.current) {
     listeningHistoryRef.current = new ListeningHistory((event) => {
@@ -54,8 +56,10 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const sleepTimerRef = useRef<number | null>(null);
   const positionSaveRef = useRef(0);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
-  const playbackUrlCacheRef = useRef<Map<string, PlaybackUrlCacheEntry>>(new Map());
-  const playbackUrlPendingRef = useRef<Map<string, Promise<PlaybackUrlResult>>>(new Map());
+  const [playbackUrlCache] = useState(() => new PlaybackUrlCache());
+  const [playbackUrlPending] = useState(() => new Map<string, Promise<PlaybackUrlResult>>());
+  const playbackUrlCacheRef = useRef(playbackUrlCache);
+  const playbackUrlPendingRef = useRef(playbackUrlPending);
   const lastQueueHistoryRef = useRef("");
   const songRef = useRef<Song | null>(null);
   const timeRef = useRef(0);

@@ -2,12 +2,14 @@
 
 // Rejected native results return null; callers retain the JavaScript calculation.
 const { enabled, getAddon, warnOnce } = require("./backend.cjs");
+// Limit temporary packed input to 64 MiB per native call. Larger inputs use the existing JS path.
+const MAX_PACKED_VALUES = 8_388_608;
 
 function tryDotMatrix(rows, columns) {
   const native = getAddon("similarity");
   if (!native || typeof native.dotMatrix !== "function" || !rows.length || !columns.length) return null;
   const dim = rows[0]?.length;
-  if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16384 || rows.length * columns.length > 2000000) return null;
+  if (!Number.isSafeInteger(dim) || dim < 1 || dim > 16384 || rows.length * columns.length > 2000000 || (rows.length + columns.length) * dim > MAX_PACKED_VALUES) return null;
   if (rows.some((v) => !v || v.length !== dim) || columns.some((v) => !v || v.length !== dim)) return null;
   try {
     const packedRows = new Float64Array(rows.length * dim);
@@ -122,13 +124,14 @@ function tryBatchPairDots(buckets, vectors) {
   const locations = [];
   let dimensions = 0;
   let position = 0;
+  let exceedsBudget = false;
 
   const rowIndex = (song, vector) => {
     if (rowOf.has(song.id)) return rowOf.get(song.id);
     if (!dimensions) dimensions = vector.length;
     if (vector.length !== dimensions || dimensions > 16_384) return -1;
     const index = rows.length;
-    if (index >= 50_000) return -1;
+    if (index >= 50_000 || (index + 1) * dimensions > MAX_PACKED_VALUES) { exceedsBudget = true; return -1; }
     rows.push(vector);
     rowOf.set(song.id, index);
     return index;
@@ -148,7 +151,7 @@ function tryBatchPairDots(buckets, vectors) {
       position++;
     }
   }
-  if (left.length < 1024 || left.length * dimensions < 524_288) return null;
+  if (exceedsBudget || left.length < 1024 || left.length * dimensions < 524_288) return null;
 
   try {
     const packed = new Float64Array(rows.length * dimensions);
