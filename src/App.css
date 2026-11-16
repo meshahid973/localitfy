@@ -123,7 +123,6 @@
 
 .panel{
   transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
 .songRow{
@@ -1690,8 +1689,6 @@ body.localitfyThemePainting .app *{
 
 html{
   background: var(--app-bg-solid, var(--lt-bg, #050505)) !important;
-  background-image: none !important;
-  background-size: auto !important;
 }
 
 .app{
@@ -2380,11 +2377,6 @@ body.localitfyThemePainting .app .coverAura::before,
 body.localitfyThemePainting .app .ambientSurface::after{
   opacity: .46 !important;
   filter: blur(28px) saturate(1.08) !important;
-}
-
-.app,
-.simpleShell {
-  background-size: auto !important;
 }
 
 .app,
@@ -3128,7 +3120,6 @@ body.localtifyBackgroundMode .ambientSurface,
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   transform: none !important;
-  line-height: 1 !important;
 }
 
 @media (max-width: 980px){
@@ -4316,8 +4307,6 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
   align-self: center !important;
   margin: 0 !important;
 
-  box-shadow: none !important;
-
 }
 
 .app .topUpdateRibbonProgress,
@@ -4998,11 +4987,6 @@ body.isResizingPlayer .app *{
 
 }
 
-.app .sidebar .navItem.active .navIcon,
-.app .sidebar .navItem.active .navText strong{
-  color: var(--lt-text) !important;
-}
-
 .app .sidebar .navItem.active .navText small{
   color: var(--lt-muted) !important;
 }
@@ -5197,10 +5181,8 @@ body.isResizingPlayer .app *{
 .app .topUpdateRibbon .updateToastClose,
 .topUpdateRibbon .updatePrimaryButton,
 .topUpdateRibbon .updateToastClose {
-  height: 23px !important;
   min-height: 23px !important;
   padding: 0 10px !important;
-  border: 0 !important;
   border-radius: 999px !important;
   font-size: 10px !important;
   line-height: 1 !important;
@@ -5745,11 +5727,7 @@ body.isResizingPlayer .app *{
 
 .app .topUpdateRibbonRight,
 .topUpdateRibbonRight{
-  height: 100% !important;
   min-width: max-content !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
 }
 
 .app .topUpdateRibbon .updatePrimaryButton,
@@ -5803,19 +5781,10 @@ body.isResizingPlayer .app *{
 
 .app .topUpdateRibbon,
 .topUpdateRibbon{
-  pointer-events: auto !important;
-  position: relative !important;
-  width: 100vw !important;
   height: 35px !important;
   min-height: 35px !important;
   max-height: 35px !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: 12px !important;
   padding: 0 13px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
   background:
     linear-gradient(90deg,
       rgba(var(--lt-accent-rgb), .23),
@@ -5829,15 +5798,6 @@ body.isResizingPlayer .app *{
     inset 0 -1px 0 rgba(255,255,255,.10) !important;
   backdrop-filter: blur(10px) saturate(128%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(128%) !important;
-  overflow: hidden !important;
-}
-
-.app .topUpdateRibbonActions,
-.topUpdateRibbonActions{
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  height: 100% !important;
 }
 
 /* Reduce outline noise: only active/important areas should look outlined. */

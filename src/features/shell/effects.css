@@ -314,7 +314,6 @@
   grid-template-columns: 34px minmax(0, 1fr) !important;
 }
 
-
 .app[data-player-background="flat"] .playerBar{
   background: rgba(8, 8, 12, 0.94) !important;
   border-color: rgba(255,255,255,0.06) !important;
@@ -663,7 +662,6 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
    Permanent composite targets + worker-backed reductions.
    Important: this does NOT remove image blur, cover tint, hero blur, or player blur. */
 
-
 .app :is( .homeAlbumCard, .playlistCard){
   contain: layout paint style;
   transform: translateZ(0);
@@ -967,7 +965,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
   }
 }
 
-
 /* Linux desktop polish.
    Goal: fewer compositor problems on KDE/GNOME, clearer titlebar buttons,
    better scrollbars, and lower GPU/CPU usage while keeping the app cute. */
@@ -979,19 +976,15 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
 
 .app[data-platform="linux"] .titleBar{
 
-
   background: rgba(0, 0, 0, 0.96) !important;
   border-bottom: 1px solid rgba(255,255,255,0.105) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-
 .app[data-platform="linux"] .windowButtons button{
 
-
   background: transparent !important;
-
 
 }
 
@@ -1270,16 +1263,11 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
 
 .app .windowButtons button{
 
-
   -webkit-font-smoothing: antialiased !important;
 }
 
 .app .windowButtons button svg{
-  display: block !important;
 
-
-  pointer-events: none !important;
-  color: currentColor !important;
   transform: translateZ(0) !important;
 }
 
@@ -1339,13 +1327,11 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
   opacity: .95 !important;
 }
 
-
 .localtifyStateIconV373,
 .updateToastIcon{
   display: grid !important;
   place-items: center !important;
 }
-
 
 .localtifyStateIconV373 svg,
 .updateToastIcon svg{
@@ -1382,7 +1368,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
 
 /* missing library actions + playlist dark polish.
    Missing files are clearly red, and playlist panels no longer get a separate bright grey wash. */
-
 
 .metaDividerDot{
   display: inline-block !important;
@@ -1492,7 +1477,6 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navLucideIcon :is(path
 .app[data-platform="linux"] :is(input, textarea, button, select){
   font-family: inherit;
 }
-
 
 /* Preserve keyboard focus visibility without the old rectangular nav background. */
 main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible .navIcon {
