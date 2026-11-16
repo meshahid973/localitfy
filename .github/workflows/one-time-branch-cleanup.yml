@@ -1,0 +1,24 @@
+name: one-time merged branch cleanup
+on:
+  pull_request:
+    types: [opened]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  clean:
+    if: github.repository == 'meshahid973/localitfy' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'maintenance/prune-merged-branches-20261116' && github.event.pull_request.base.ref == 'main' && github.actor == 'meshahid973'
+    permissions:
+      contents: write
+      pull-requests: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify merged branch tips and delete with atomic leases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: node scripts/one-time-prune-merged-branches.mjs
