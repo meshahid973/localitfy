@@ -83,3 +83,40 @@ test("every searchable metadata field invalidates reused normalized text", () =>
   assert.equal(first.song, song);
   assert.equal(first.haystack.includes("liked"), false);
 });
+
+test("selective search prefilter agrees with complete ranking for multilingual, partial and multi-term queries", () => {
+  const songs = Array.from({length: 800}, (_, i) => ({
+    id: String(i), title: ["Míkú Midnight (Official Audio)", "夜明け", "Daydream", "Café mix", "Álbum remix"][i%5]+ " "+i,
+    artist: ["Rin", "Hatsune Miku", "Élan", "A-B", "アーティスト"][i%5],
+    album: "Album "+i%13, filePath: "/Music/Disc-"+i%9+"/track_"+i+".flac", liked: i%7===0, playCount:i%61
+  }));
+  const entries = songs.map(exports.buildSongSearchEntry);
+  for (const query of ["miku", "mor", "mid", "cafe", "night 1", "liked album", "a-b", "夜明け", "flac", "disc 2", "unknown", "official audio", "rin 1 2", ""]) {
+    const prepared = exports.prepareSearchQuery(query);
+    const expected = !prepared.clean ? songs : entries.map((entry,index)=>({entry,index,score:exports.scoreSongSearch(entry,prepared)}))
+      .filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.index-b.index).map(x=>x.entry.song);
+    assert.deepEqual(Array.from(exports.rankSongsForSearch(entries,query),song=>song.id),expected.map(song=>song.id));
+  }
+});
+test("metadata preview keeps original repair semantics without allocating unchanged rows", () => {
+  const previewSource=fs.readFileSync("src/features/library/metadataCleanPreview.ts","utf8");
+  const compiled=ts.transpileModule(previewSource,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+  const previewExports={};
+  runInNewContext(compiled,{exports:previewExports,require(name){if(name==="../search")return exports;throw Error(name);}});
+  const songs=[{id:"a",title:"Artist - Track (official audio)",artist:"unknown artist",album:"unknown album",filePath:"/Artist - Track.mp3"},
+    {id:"b",title:"clean title",artist:"artist",album:"album",filePath:"/clean title.flac"},
+    {id:"c",title:"Night (copy)",artist:"Élan",album:"HQ",filePath:"/Night.flac"}];
+  for(const [ids,scope] of [[[],"all"],[["a"],"selected"],[[],"selected"],[["nonexistent"],"selected"]]){
+    const targets=scope==="selected"&&ids.length?songs.filter(s=>ids.includes(s.id)):songs;
+    const expected=targets.flatMap(song=>{
+      const repair=exports.getMetadataRepairPatch(song),patch={};
+      for(const field of ["title","artist","album"])if(typeof repair[field]==="string"&&repair[field]!==song[field])patch[field]=repair[field];
+      return Object.keys(patch).length?[{id:song.id,patch}]:[];
+    });
+    const result=previewExports.createMetadataCleanPreview(songs,ids,scope);
+    assert.equal(result.totalCount,targets.length);
+    assert.equal(result.changedCount,expected.length);
+    assert.deepEqual(JSON.parse(JSON.stringify(result.items.map(({id,patch})=>({id,patch})))),expected);
+    for(const field of ["title","artist","album"])assert.equal(result[field+"FixCount"],expected.filter(x=>Object.hasOwn(x.patch,field)).length);
+  }
+});
