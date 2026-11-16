@@ -55,15 +55,15 @@ export type LiveCommand = {
 /** "unsupported": the paired computer runs a localtify from before the live connection; batch sync still works. */
 export type LiveConnectionStatus = "off" | "connecting" | "connected" | "offline" | "unsupported";
 
-export type LivePresence = { self?: string; peers: LivePeer[]; session: LiveSession; state: LiveState | null; serverTime: number; version?: number };
+export type LivePresence = { self?: string; peers: LivePeer[]; session: LiveSession; state: LiveState | null; serverTime: number; version?: number; handoffVersion?: number };
 
 export type LiveEvent =
   | ({ type: "hello" | "presence" } & LivePresence)
   | { type: "state"; state: LiveState }
   | ({ type: "command"; from: string } & LiveCommand)
-  | { type: "give"; to: string; requester: string }
-  | { type: "take"; requester: string; giver: string; handoff: LiveState | null }
-  | { type: "take-failed"; by: string; message: string }
+  | { type: "give"; to: string; requester: string; transferId?: string }
+  | { type: "take"; requester: string; giver: string; handoff: LiveState | null; transferId?: string }
+  | { type: "take-failed"; by: string; message: string; transferId?: string }
   | { type: "like"; songId: string; liked: boolean; changedAt: number }
   | { type: "notice"; from: string; message: string }
   /** Only on the phone: the state of its connection to the computer. */
@@ -71,12 +71,13 @@ export type LiveEvent =
 
 export type LiveMessage =
   | { type: "status" }
-  | { type: "claim" | "took" }
+  | { type: "claim" | "handoff-ready" }
+  | { type: "took"; transferId: string }
   | ({ type: "state" } & LiveState)
   | ({ type: "command" } & LiveCommand)
   | { type: "transfer"; to: string }
-  | { type: "handoff"; to: string; requester: string; handoff: LiveState }
-  | { type: "take-failed"; giver: string; requester: string; message: string }
+  | { type: "handoff"; to: string; requester: string; handoff: LiveState; transferId: string }
+  | { type: "take-failed"; giver: string; requester: string; message: string; transferId: string }
   | { type: "notice"; to: string; message: string }
   | { type: "like"; songId: string; liked: boolean; changedAt?: number };
 
