@@ -219,5 +219,13 @@
     ],
     "compression": "maximum",
     "afterPack": "scripts/prune-analysis-runtime.cjs"
+  },
+  "overrides": {
+    "@electron/universal": {
+      "minimatch": "11.0.5"
+    },
+    "app-builder-lib": {
+      "minimatch": "11.0.5"
+    }
   }
 }
