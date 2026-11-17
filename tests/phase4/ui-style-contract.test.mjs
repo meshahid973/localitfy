@@ -82,7 +82,7 @@ test("removed global header selectors stay out of active CSS owners", () => {
 test("theme controls and library layout follow their owners", () => {
   const app = read("src/App.css");
   const themes = read("src/styles/themes.css");
-  assert.match(read("src/shared/ui/controls.css"), /background-color: var\(--lt-surface\) !important/);
+  assert.match(read("src/shared/ui/controls.css"), /background-color: var\(--lt-surface-soft\) !important/);
   assert.equal(app.includes("--sidebar-line-soft"), false);
   assert.match(themes, /\.app\[data-theme="light"\][\s\S]*?color-scheme: light/);
   assert.match(read("src/features/settings/settings.css"), /\.settingsPage select \{ cursor: pointer; color-scheme: inherit/);
@@ -142,10 +142,10 @@ test("overlay menus use Localtify theme surfaces and expose keyboard focus", () 
   const queue = read("src/features/player/components/queue-panel.css");
 
   assert.match(dropdown, /\.arcDropdownOption:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important; outline-offset: -2px !important/);
-  assert.match(context, /\.songContextMenu\{[\s\S]*?background: linear-gradient\(var\(--lt-surface\), var\(--lt-surface\)\), var\(--lt-bg\)/);
+  assert.match(context, /\.songContextMenu\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-bg-elevated\) 94%, transparent\)/);
   assert.match(context, /\.app \.songContextMenuLayer \.songContextMenu button:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
   assert.match(context, /color: var\(--accent-contrast, #06100b\)/);
-  assert.match(queue, /\.queuePanel\{[\s\S]*?background: linear-gradient\(var\(--lt-surface\), var\(--lt-surface\)\), var\(--lt-bg\)/);
+  assert.match(queue, /\.queuePanel\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-bg-elevated\) 96%, transparent\)/);
   assert.match(queue, /\.app \.queuePanel button\.queuePanelRowMain:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
   assert.doesNotMatch(context, /background: linear-gradient\(180deg, rgba\(20, 20, 20/);
   assert.doesNotMatch(queue, /background: linear-gradient\(180deg, rgba\(20, 20, 24/);

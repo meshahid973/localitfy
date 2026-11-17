@@ -11,7 +11,8 @@
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-radius-md);
   color: var(--lt-text);
-  background: linear-gradient(var(--lt-surface), var(--lt-surface)), var(--lt-bg);
+  background: color-mix(in srgb, var(--lt-bg-elevated) 96%, transparent);
+  backdrop-filter: blur(12px);
   box-shadow: var(--lt-shadow-menu);
   outline: 0;
   animation: queuePanelIn var(--lt-duration-fast) var(--lt-ease-out) both;
