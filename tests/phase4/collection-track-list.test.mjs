@@ -20,10 +20,10 @@ function fixture(count){
   '../../shared/utils/format':{formatTime:()=> '2:00'},
   '../search/search.utils':{prettyTitle:String,prettyMeta:String},
   '../artists/artistCredits':{splitArtistCredits:()=>['Artist']},
-  '../shell/appActions':{useAppActions:()=>({nav:{openArtistPage:name=>calls.push(['artist',name]),openAlbumPage:id=>calls.push(['album',id])},openSongMenu:(e,song)=>calls.push(['menu',song.id])})}
+  '../shell/appActions':{useAppActions:()=>({nav:{openArtistPage:name=>calls.push(['artist',name])},openSongMenu:(e,song)=>calls.push(['menu',song.id])})}
  };
  const exports={};runInNewContext(output,{exports,require:n=>dependencies[n]??require(n)});
- const tree=exports.default({songs,currentId:'track-0',isPlaying:true,albumIdOf:()=> 'album-1',playFrom:id=>calls.push(['play',id]),toggleLike:id=>calls.push(['like',id]),openPlaylistPicker:song=>calls.push(['playlist',song.id])});
+ const tree=exports.default({songs,currentId:'track-0',isPlaying:true,playFrom:id=>calls.push(['play',id]),toggleLike:id=>calls.push(['like',id]),openPlaylistPicker:song=>calls.push(['playlist',song.id])});
  const flatten=node=>!node||typeof node!=='object'?[]:[node,...[node.props?.children].flat(Infinity).flatMap(flatten)];
  return {songs,calls,options,nodes:flatten(tree)};
 }
@@ -37,8 +37,8 @@ test('short collections keep all rows, missing files cannot play, and actions ke
  const event={stopPropagation(){}};
  nodes.find(n=>n.props?.['aria-label']==='unlike song').props.onClick(event);assert.deepEqual(calls.pop(),['like','track-0']);
  nodes.find(n=>n.props?.['aria-label']==='add to playlist').props.onClick(event);assert.deepEqual(calls.pop(),['playlist','track-0']);
+ assert.equal(nodes.some(n=>n.props?.className==='trackRowAlbum'),false);
  const artist=nodes.find(n=>n.props?.className==='trackLink'&&n.props.children==='Artist');artist.props.onClick(event);assert.deepEqual(calls.pop(),['artist','Artist']);
- const album=nodes.find(n=>n.props?.className==='trackLink'&&n.props.children==='Album');album.props.onClick(event);assert.deepEqual(calls.pop(),['album','album-1']);
 });
 test('large collections render the virtual window with original positions, identities and playback targets',()=>{
  const {nodes,calls,options}=fixture(10000);assert.equal(options[0].count,10000);assert.equal(options[0].getItemKey(9999),'track-9999');
@@ -60,13 +60,12 @@ function mixState(state) {
   '../search/search.utils':{},
   '../playlists/components/PlaylistCoverCollage':{},
   '../home/useHomeDailyMixes':{useHomeDailyMixes:()=>state},
-  '../player/playbackSource':{buildAlbumIdBySongId:()=>new Map()},
   '../shell/appActions':{useAppActions:()=>({nav:{go(){}}})},
   '../covers/ArtworkBackdrop':{ArtworkBackdrop:()=>null},
   './CollectionHero':{}, './TrackList':{}
  };
  const exports={};runInNewContext(output,{exports,require:n=>dependencies[n]??require(n)});
- return renderToStaticMarkup(React.createElement(exports.default,{mixId:'mix',songs:[],albums:[]}));
+ return renderToStaticMarkup(React.createElement(exports.default,{mixId:'mix',songs:[]}));
 }
 test('pending, failed and refreshed mixes expose distinct states and recovery',()=>{
  const pending=mixState({result:null,failed:false});assert.match(pending,/aria-busy="true"/);assert.match(pending,/Loading your mix/);assert.doesNotMatch(pending,/refreshed|see today/);

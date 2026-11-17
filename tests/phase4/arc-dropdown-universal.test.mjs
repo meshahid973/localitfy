@@ -8,14 +8,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".
 const read = file => fs.readFileSync(path.join(root, file), "utf8");
 
 test("all user-facing selects use the Arc menu", () => {
-  for (const file of ["src/features/library/LibraryView.tsx", "src/features/albums/AlbumsView.tsx",
+  for (const file of ["src/features/library/LibraryView.tsx", 
     "src/features/settings/categories/PlaybackSettings.tsx"]) {
     const src = read(file);
     assert.match(src, /<ArcDropdownMenu\b/, file);
     assert.doesNotMatch(src, /<select\b/i, file);
     assert.doesNotMatch(src, /<option\b/i, file);
   }
-  assert.match(read("src/features/albums/AlbumsView.tsx"), /onValueChange=\{setAlbumSortMode\}/);
   assert.match(read("src/features/settings/categories/AppearanceSettings.tsx"), /aria-pressed/);
   assert.match(read("src/features/settings/categories/PlaybackSettings.tsx"), /updateSetting\("audioEffectMode", effect\)/);
 });

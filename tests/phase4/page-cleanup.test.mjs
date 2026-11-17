@@ -22,14 +22,12 @@ test("cover maintenance actions are connected to the existing controller", () =>
 
 test("unused props are no longer passed through view contracts", () => {
   const downloads = read("src/features/downloads/DownloadsView.tsx");
-  const albums = read("src/features/albums/AlbumsView.tsx");
   const analytics = read("src/features/analytics/AnalyticsView.tsx");
   const covers = read("src/features/covers/CoversView.tsx");
   const playlist = read("src/features/playlists/PlaylistsView.tsx");
   for (const field of ["downloadResults", "playlists", "progress", "ready"]) {
     assert.doesNotMatch(downloads.split("export default function")[0], new RegExp("^  " + field + ": any;", "m"));
   }
-  assert.doesNotMatch(albums.split("export default function")[0], /^  ready: any;/m);
   assert.doesNotMatch(analytics.split("export default function")[0], /^  ready: boolean;/m);
   assert.doesNotMatch(covers, /now: unknown|togglePixelCoverFavorite/);
   assert.doesNotMatch(playlist.split("export default function")[0], /^  (?:selectedPlaylistId|playlists): any;/m);

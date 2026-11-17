@@ -519,8 +519,6 @@ test("songs and albums get a find on musicbrainz menu item only while tagging is
   assert.match(shell, /findOnMusicBrainz=\{settings\.musicbrainzTagging \? setTagSearchSong : undefined\}/);
   assert.match(shell, /findAlbumOnMusicBrainz=\{settings\.musicbrainzTagging \? setTagSearchAlbum : undefined\}/);
   assert.match(shell, /<CollectionContextMenu/);
-  const albums = fs.readFileSync(path.join(root, "src", "features", "albums", "AlbumsView.tsx"), "utf8");
-  assert.match(albums, /onContextMenu=\{\(event\) => actions\.openCollectionMenu\(event, albumTarget\(album\)\)\}/);
 });
 
 test("downloads offer tagging once per finished batch, only for the songs that batch added", async () => {

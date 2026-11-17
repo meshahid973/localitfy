@@ -17,7 +17,7 @@ function loadCommonJs(relative) {
 
 const layout = loadCommonJs("src/features/home/homeLayout.ts");
 const plain = (value) => JSON.parse(JSON.stringify(value));
-const defaults = ["jumpBack", "listenNow", "dailyMixes", "recentlyPlayed", "mostListened", "newAlbums", "newReleases", "likedSongs", "rediscover", "notPlayedYet"];
+const defaults = ["jumpBack", "listenNow", "dailyMixes", "recentlyPlayed", "mostListened", "newReleases", "likedSongs", "rediscover", "notPlayedYet"];
 const defaultHidden = ["likedSongs", "rediscover", "notPlayedYet"];
 const defaultVisible = defaults.filter((id) => !defaultHidden.includes(id));
 
@@ -31,7 +31,7 @@ test("Home shows the default sections in order until customized", () => {
 });
 
 test("saved order wins, unknown ids are dropped and new sections are appended", () => {
-  assert.deepEqual(plain(layout.resolveHomeSectionOrder(["newReleases", "bogus", "listenNow", "newReleases"])), ["newReleases", "listenNow", "jumpBack", "dailyMixes", "recentlyPlayed", "mostListened", "newAlbums", "likedSongs", "rediscover", "notPlayedYet"]);
+  assert.deepEqual(plain(layout.resolveHomeSectionOrder(["newReleases", "newAlbums", "bogus", "listenNow", "newReleases"])), ["newReleases", "listenNow", "jumpBack", "dailyMixes", "recentlyPlayed", "mostListened", "likedSongs", "rediscover", "notPlayedYet"]);
   assert.deepEqual(plain(layout.normalizeHomeHidden("listenNow")), []);
   assert.deepEqual(plain(layout.normalizeHomeHidden(["listenNow", "bogus", "listenNow"])), ["listenNow"]);
 });
@@ -73,11 +73,6 @@ test("Recently played lists played songs newest first and skips missing files", 
   assert.deepEqual(ids(picks.pickRecentlyPlayed(songs)), ["new", "old"]);
 });
 
-test("New albums puts the newest additions first", () => {
-  const album = (id, latestAdded, songs = [song(id)]) => ({ id, title: id, artist: "a", songs, trackCount: songs.length, latestAdded });
-  const albums = [album("older", 10), album("newest", 30), album("missing", 50, [song("x", { fileExists: false })]), album("middle", 20)];
-  assert.deepEqual(ids(picks.pickNewAlbums(albums)), ["newest", "middle", "older"]);
-});
 
 test("Liked, Rediscover and Not played yet pick the right songs", () => {
   const songs = [

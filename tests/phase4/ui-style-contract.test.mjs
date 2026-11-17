@@ -8,11 +8,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
 const rebuiltStyles = [
-  "src/features/albums/albums.css",
   "src/features/covers/covers.css"
 ];
 
-test("album and cover styles remain lazy-loaded in their features", () => {
+test("cover styles remain lazy-loaded in their features", () => {
   const main = read("src/main.tsx");
   for (const file of rebuiltStyles) {
     assert.equal(fs.existsSync(path.join(root, file)), true, file + " should exist");
@@ -32,7 +31,6 @@ test("permanent visual owners remain explicit and co-located", () => {
   const genres = read("src/features/genres/GenresView.tsx");
   const player = read("src/features/player/components/PlayerBar.tsx");
   const settingsView = read("src/features/settings/SettingsView.tsx");
-  const albumsView = read("src/features/albums/AlbumsView.tsx");
   const coversView = read("src/features/covers/CoversView.tsx");
   const playlists = read("src/features/playlists/PlaylistsView.tsx");
   const downloads = read("src/features/downloads/DownloadsView.tsx");
@@ -49,7 +47,6 @@ test("permanent visual owners remain explicit and co-located", () => {
   assert.ok(fs.existsSync(path.join(root, "src/features/genres/genres.css")));
   assert.equal(player.includes('import "../player.css";'), true, "PlayerBar must own player CSS");
   assert.equal(settingsView.includes('import "./settings.css";'), true, "SettingsView must own settings CSS");
-  assert.ok(albumsView.includes('import "./albums.css";'), "Albums must own its stylesheet");
   assert.ok(coversView.includes('import "./covers.css";'), "Covers must own its stylesheet");
   for (const [source, name] of [[playlists, "playlists"], [downloads, "downloads"], [analytics, "analytics"]]) {
     assert.ok(source.includes('import "./' + name + '.css";'), name + " needs a local stylesheet");
@@ -86,8 +83,6 @@ test("theme controls and library layout follow their owners", () => {
   assert.equal(app.includes("--sidebar-line-soft"), false);
   assert.match(themes, /\.app\[data-theme="light"\][\s\S]*?color-scheme: light/);
   assert.match(read("src/features/settings/settings.css"), /\.settingsPage select \{ cursor: pointer; color-scheme: inherit/);
-  assert.match(read("src/features/albums/AlbumsView.tsx"), /<ArcDropdownMenu className="albumsSortV318"/);
-  assert.match(read("src/features/albums/albums.css"), /\.albumsPageV318 \.albumsSortV318 \{/);
   assert.match(read("src/features/library/library.css"), /padding: 0 0 var\(--lt-space-5\)/);
   assert.match(read("src/features/settings/settings.css"), /padding: 26px 0 100px/);
   assert.match(read("src/features/settings/settings-premium.css"), /padding: var\(--lt-space-5\) 0/);
@@ -304,12 +299,10 @@ test("Settings controls retain theme-driven borders and hover surfaces", () => {
   assert.doesNotMatch(css, /background: rgba\(255,\s*255,\s*255,\s*\.07\)/);
 });
 
-test("playlist and album hints use semantic tokens, not fixed dark-theme paints", () => {
+test("playlist hints use semantic tokens, not fixed dark-theme paints", () => {
   const playlists = read("src/features/playlists/playlists.css");
-  const albums = read("src/features/albums/albums.css");
   assert.match(playlists, /\.playlistTrackRow \.iconAction:hover \{ color: var\(--lt-danger\)/);
-  assert.match(albums, /\.albumFolderPreviewCopyV309 ul \{[^}]*color: var\(--albums-muted\)/);
-  assert.doesNotMatch(playlists + albums, /#eba4ad|#d0b8a3/);
+  assert.doesNotMatch(playlists, /#eba4ad|#d0b8a3/);
 });
 
 test("download errors, progress and warnings follow Localtify tokens", () => {
@@ -326,4 +319,14 @@ test("lyrics and portal menus use theme-aware foreground and surfaces", () => {
   assert.match(lyrics, /\.lyricsView\{[^}]*color: var\(--lt-text\);[^}]*background: var\(--lt-bg-elevated\)/);
   assert.doesNotMatch(lyrics, /color: #fff;/);
   assert.match(read("src/shared/ui/ArcDropdownMenu.tsx"), /"--lt-bg-elevated"/);
+});
+
+
+test("retired local album feature is absent; album metadata and liked songs stay accessible", () => {
+  assert.equal(fs.existsSync(path.join(root, "src/features/albums/AlbumsView.tsx")), false);
+  assert.equal(fs.existsSync(path.join(root, "src/features/albums/useAlbumsController.ts")), false);
+  const nav = read("src/features/shell/navigation.constants.ts");
+  assert.doesNotMatch(nav, /id:"(?:albums|liked)"/);
+  assert.match(read("src/features/library/LibraryView.tsx"), /title: "Liked"/);
+  assert.doesNotMatch(read("src/features/home/homeLayout.ts"), /newAlbums/);
 });

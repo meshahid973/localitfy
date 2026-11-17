@@ -110,7 +110,7 @@ test("shared artwork palette follows the existing ambient preference and backgro
   assert.match(player, /\.playerBar\[data-ambient\] \{\s*background: transparent !important/);
   assert.match(workspace, /--workspace-sidebar: color-mix\(in srgb, var\(--lt-text\) 5%, transparent\)/);
   assert.match(player, /\.playerBar\[data-ambient\]:hover::before \{\s*display: none !important/);
-  for (const file of ["AlbumPage", "SongGroupPage", "MixPage"]) assert.match(read("src/features/pages/" + file + ".tsx"), /<ArtworkBackdrop song=/);
+  for (const file of ["SongGroupPage", "MixPage"]) assert.match(read("src/features/pages/" + file + ".tsx"), /<ArtworkBackdrop song=/);
 });
 
 test("collection browsing prioritizes artwork and retains contextual drag targets", () => {
@@ -142,4 +142,16 @@ test("ambience transitions are bounded and respect reduced motion", () => {
   assert.match(css, /transition: opacity 360ms/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(read("src/styles/view-shell.css"), /@property --workspace-cover-color/);
+});
+
+
+test("Home most-listened work is memoized, bounded, and hidden when unused", () => {
+  const home = read("src/features/home/HomeView.tsx");
+  assert.match(home, /const mostListenedArtists = useMemo\(\(\) => \{/);
+  assert.match(home, /if \(!showMostListened\) return \[\];/);
+  assert.match(home, /if \(picked\.size === 10\) break;/);
+  assert.match(home, /\[homeListenNowSongs, homeFreshShelfSongs, showMostListened, songs\]/);
+  const css = read("src/features/home/home.css");
+  assert.match(css, /\.homeSection > h3 \{ margin-bottom: 14px; \}/);
+  assert.doesNotMatch(css, /\.homeSectionHead > h3 \{ margin:0; \}/);
 });
