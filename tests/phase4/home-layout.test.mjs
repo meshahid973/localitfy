@@ -85,7 +85,8 @@ test("Home shelves size against available content width and deduplicate mix artw
   const source = read("src/features/home/HomeView.tsx") + read("src/features/home/HomeShelves.tsx");
   const css = read("src/features/home/home.css");
   assert.match(source, /data-count=\{listenNowSongs.length\}/);
-  assert.match(css, /@container \(max-width: 850px\)/);
+  assert.match(css, /\.homeListenGrid \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(css, /@container \(max-width: 460px\)/);
   assert.match(css, /\.homeMixRail \{ grid-auto-columns:/);
   assert.match(source, /pickHomeMixArtwork\(mix.songs\)/);
   assert.match(source, /className="homeReleaseCover" preferThumbnail/);

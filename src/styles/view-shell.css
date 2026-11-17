@@ -12,6 +12,7 @@
 }
 
 .app {
+  --workspace-cover-color: var(--lt-bg);
   --workspace-cover-strength: 26%;
   --workspace-mood: color-mix(in srgb, var(--workspace-cover-color) var(--workspace-cover-strength), var(--lt-bg));
   --workspace-bg: radial-gradient(ellipse at 42% 0%, var(--workspace-mood), var(--lt-bg) 76%);
