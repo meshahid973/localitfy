@@ -48,7 +48,7 @@
   filter: none !important;
 }
 
-.app :is(.dangerButton, .danger, .resetButton){
+.app :is(.dangerButton, .danger){
   min-height: var(--lt-control-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -63,7 +63,7 @@
   box-shadow: none !important;
 }
 
-.app :is(.dangerButton, .danger, .resetButton):hover:not(:disabled){
+.app :is(.dangerButton, .danger):hover:not(:disabled){
   border-color: var(--lt-danger) !important;
   background: color-mix(in srgb, var(--lt-danger) 12%, transparent) !important;
   color: var(--lt-danger) !important;

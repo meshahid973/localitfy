@@ -17,13 +17,7 @@
   border-bottom: 0;
 }
 .settingsPageV027 .settingsIntroIdentity { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.settingsPageV027 .settingsIntroMark {
-  display: grid; place-items: center;
-  width: 42px; height: 42px; border-radius: 11px;
-  border: 1px solid var(--settings-edge);
-  background: var(--settings-surface);
-  color: var(--settings-accent);
-}
+
 .settingsPageV027 .settingsIntroTitle h1 { margin: 0; font-size: 26px; line-height: 1.2; letter-spacing: -.035em; color: var(--settings-text); }
 .settingsPageV027 .settingsIntroTitle p { margin: 2px 0 0; color: var(--settings-muted); font-size: 13px; }
 .settingsPageV027 .settingsIntroCurrent { font-size: 12px; color: var(--settings-muted); }
@@ -112,24 +106,20 @@
 .settingsPage.settingsPageV027 :is(.toggleRow,.rangeRow):last-child { border-bottom-color: transparent; }
 .settingsPage.settingsPageV027 :is(.toggleRow,.rangeRow) strong { color: var(--settings-text); font-size: 14px; }
 .settingsPage.settingsPageV027 :is(.toggleRow,.rangeRow) small { color: var(--settings-muted); font-size: 12px; }
-.settingsPage.settingsPageV027 .toggleRow input[type="checkbox"],
-.settingsPage.settingsPageV027 .settingsCompactSwitch input[type="checkbox"] {
+.settingsPage.settingsPageV027 .toggleRow input[type="checkbox"] {
   appearance: none; position: relative;
   width: 42px; height: 24px; margin: 0;
   border-radius: 999px; border: 1px solid var(--settings-edge);
   background: color-mix(in oklab, var(--settings-text) 25%, var(--settings-elevated)); cursor: pointer;
   box-shadow: inset 0 0 0 1px color-mix(in oklab,var(--settings-text) 7%,transparent);
 }
-.settingsPageV027 .toggleRow input[type="checkbox"]::before,
-.settingsPageV027 .settingsCompactSwitch input[type="checkbox"]::before {
+.settingsPageV027 .toggleRow input[type="checkbox"]::before {
   content: ""; position: absolute; top: 2px; left: 2px;
   width: 18px; height: 18px; border-radius: 50%;
   background: var(--settings-text); transition: transform .16s ease;
 }
-.settingsPage.settingsPageV027 .toggleRow input[type="checkbox"]:checked,
-.settingsPage.settingsPageV027 .settingsCompactSwitch input[type="checkbox"]:checked { background: var(--settings-accent); }
-.settingsPageV027 .toggleRow input[type="checkbox"]:checked::before,
-.settingsPageV027 .settingsCompactSwitch input[type="checkbox"]:checked::before { background: var(--lt-bg); transform: translateX(18px); }
+.settingsPage.settingsPageV027 .toggleRow input[type="checkbox"]:checked { background: var(--settings-accent); }
+.settingsPageV027 .toggleRow input[type="checkbox"]:checked::before { background: var(--lt-bg); transform: translateX(18px); }
 .settingsPage.settingsPageV027 .rangeRow input[type="range"] { width: clamp(180px, 18vw, 300px); accent-color: var(--settings-accent); }
 .settingsPage.settingsPageV027 :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="search"]),select,textarea) {
   min-height: 44px; padding: 9px 12px; border-radius: 9px;
@@ -153,10 +143,6 @@
 .settingsPage.settingsPageV027 :is(.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440).active { background: color-mix(in oklab, var(--settings-accent) 12%, var(--settings-surface)); border-color: color-mix(in oklab, var(--settings-accent) 32%, transparent); }
 .settingsPage.settingsPageV027 .settingsChoiceRowV491 { gap: 7px; }
 
-
-
-
-.settingsPage.settingsPageV027 .settingsCompactSwitch { display: flex; align-items: center; gap: 8px; color: var(--settings-muted); font-size: 11px; }
 
 
 
@@ -264,9 +250,8 @@
   .settingsPage.settingsPageV027 .metadataCleanerPreviewItemV425 { grid-template-columns: minmax(0,1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .settingsPage.settingsPageV027 .settingsCategoryButton,
-  .settingsPageV027 .toggleRow input[type="checkbox"]::before,
-  .settingsPageV027 .settingsCompactSwitch input[type="checkbox"]::before { transition: none; }
+.settingsPage.settingsPageV027 .settingsCategoryButton,
+.settingsPageV027 .toggleRow input[type="checkbox"]::before { transition: none; }
 }
 
 /* Advanced owns its reset and feedback UI; shared panels stay theme-neutral. */

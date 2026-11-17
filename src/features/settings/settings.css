@@ -98,7 +98,7 @@
 .settingsPage .settingsGrid.twoCols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .settingsPage .settingsMiniGrid,
 .settingsPage .settingsResetGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 12px; }
-.settingsPage :is(.settingsSelectField, .settingsTextFieldV027) { min-width: 0; display: grid; gap: 7px; color: var(--settings-muted); font-size: 12px; }
+.settingsPage .settingsSelectField { min-width: 0; display: grid; gap: 7px; color: var(--settings-muted); font-size: 12px; }
 .settingsPage :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="search"]), select, textarea) {
   min-width: 0; max-width: 100%; min-height: 40px; padding: 9px 12px;
   border: 1px solid var(--settings-edge); border-radius: 9px;

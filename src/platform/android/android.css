@@ -264,10 +264,6 @@ html.platformAndroid .homeEmptyState span{
   font-size: 14px;
 }
 
-html.platformAndroid .libraryStat{
-  min-height: 0;
-  padding: 0;
-}
 
 html.platformAndroid .smartPlaylistModal{
   min-width: 0;

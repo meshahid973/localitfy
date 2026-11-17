@@ -393,8 +393,6 @@
   box-shadow: none !important;
 }
 
-/* Cohesive Library and Liked controls; never tint the full list with an accent alpha. */
-.libraryPage .libraryStat strong { color: var(--lt-text); }
 .libraryPage .libraryTrackSurface.libraryFullListV025 { scrollbar-color: color-mix(in oklab,var(--lt-accent) 28%,transparent) transparent; }
 .libraryPage .songRow :is(.iconAction,.songButton):focus-visible {
   outline: 1px solid var(--lt-accent);

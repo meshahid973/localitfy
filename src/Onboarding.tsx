@@ -1,7 +1,8 @@
 import "./features/onboarding/onboarding.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { Circle, Cloud, Heart, Leaf, Moon, Square } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
+import { normalizeThemeId } from "./features/settings/theme.utils";
 
 const ONBOARDING_AUDIO_SRC = new URL("./assets/onboarding.mp3", import.meta.url).href;
 const LOCALTIFY_LOGO_SRC = new URL("./assets/logo.png", import.meta.url).href;
@@ -19,7 +20,7 @@ type ThemeChoice = {
   note: string;
   color: string;
   bg: string;
-  icon: typeof Leaf;
+  icon: typeof Moon;
 };
 
 type StepMeta = {
@@ -43,12 +44,8 @@ export type OnboardingProps = {
 };
 
 const THEME_CHOICES: ThemeChoice[] = [
-  { id: "mint", name: "mint", note: "fresh black and green", color: "#8dffce", bg: "#06110d", icon: Leaf },
-  { id: "mono", name: "mono", note: "clean black and white", color: "#f4f4f5", bg: "#09090b", icon: Circle },
-  { id: "berry", name: "berry", note: "pink purple night", color: "#ff72d2", bg: "#160717", icon: Heart },
-  { id: "midnight", name: "midnight", note: "blue OLED calm", color: "#7dd3fc", bg: "#050b18", icon: Moon },
-  { id: "terminal", name: "terminal", note: "green console focus", color: "#46ff96", bg: "#020b06", icon: Square },
-  { id: "softSky", name: "soft sky", note: "blue silver glow", color: "#93c5fd", bg: "#060b16", icon: Cloud }
+  { id: "dark", name: "Dark", note: "Black and charcoal", color: "#7696ff", bg: "#000000", icon: Moon },
+  { id: "light", name: "Light", note: "Clean neutral surfaces", color: "#3659c5", bg: "#f5f5f7", icon: Sun }
 ];
 
 const STEPS: StepMeta[] = [
@@ -61,10 +58,6 @@ const STEPS: StepMeta[] = [
 
 const SUPPORTED_FILES = ["mp3", "flac", "wav", "ogg", "m4a", "aac"];
 
-function normalizeThemeId(themeId: string | undefined) {
-  if (!themeId || themeId === "oled" || themeId === "custom") return "mint";
-  return themeId;
-}
 
 function hexToRgbString(hex: string) {
   const value = hex.replace("#", "").trim();
@@ -73,7 +66,7 @@ function hexToRgbString(hex: string) {
     : value.padEnd(6, "0").slice(0, 6);
 
   const intValue = Number.parseInt(safe, 16);
-  if (Number.isNaN(intValue)) return "141, 255, 206";
+  if (Number.isNaN(intValue)) return "118, 150, 255";
 
   const r = (intValue >> 16) & 255;
   const g = (intValue >> 8) & 255;
@@ -87,7 +80,7 @@ function clampStep(step: number) {
 
 export default function Onboarding({
   songsCount,
-  currentTheme = "mint",
+  currentTheme = "dark",
   discordEnabled = false,
   onChooseTheme,
   onSetDiscordEnabled,
