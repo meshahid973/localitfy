@@ -41,7 +41,7 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
   const fallbackSrc = runtimePixelArtImageUrl(fallbackAsset);
   const backupFallbackSrc = runtimePixelArtImageUrl(backupFallbackAsset);
 
-  const sourceCandidates = [directCover, savedCoverSrc, fallbackSrc, backupFallbackSrc]
+  const sourceCandidates = [directCover, preferThumbnail ? getFullCoverUrl(song) : "", savedCoverSrc, fallbackSrc, backupFallbackSrc]
     .map((source) => source.trim())
     .filter(Boolean);
   const coverSrc = sourceCandidates.find((source) => !failedSources[source]) || "";
