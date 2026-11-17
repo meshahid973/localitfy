@@ -16,8 +16,8 @@
   --lt-border: rgba(255, 255, 255, 0.10);
   --lt-border-strong: rgba(255, 255, 255, 0.18);
 
-  --lt-accent: #7696ff;
-  --lt-accent-rgb: 118, 150, 255;
+  --lt-accent: #ffffff;
+  --lt-accent-rgb: 255, 255, 255;
   --lt-accent-soft: rgba(var(--lt-accent-rgb), 0.14);
   --lt-danger: #ff6b8a;
 

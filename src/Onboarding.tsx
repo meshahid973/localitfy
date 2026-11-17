@@ -44,8 +44,8 @@ export type OnboardingProps = {
 };
 
 const THEME_CHOICES: ThemeChoice[] = [
-  { id: "dark", name: "Dark", note: "Black and charcoal", color: "#7696ff", bg: "#000000", icon: Moon },
-  { id: "light", name: "Light", note: "Clean neutral surfaces", color: "#3659c5", bg: "#f5f5f7", icon: Sun }
+  { id: "dark", name: "Dark", note: "Black and charcoal", color: "#ffffff", bg: "#000000", icon: Moon },
+  { id: "light", name: "Light", note: "Clean neutral surfaces", color: "#18181b", bg: "#f5f5f7", icon: Sun }
 ];
 
 const STEPS: StepMeta[] = [

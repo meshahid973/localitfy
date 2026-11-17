@@ -47,9 +47,9 @@ test("the two palettes share semantic tokens and migrate retired IDs", () => {
   assert.deepEqual(Object.keys(theme.THEME_PRESET_COLORS).sort(), ["dark", "light"]);
   const dark = plain("dark"), light = plain("light");
   assert.equal(dark["--bg"], "#000000");
-  assert.equal(dark["--accent"], "#7696ff");
+  assert.equal(dark["--accent"], "#ffffff");
   assert.equal(light["--bg"], "#f5f5f7");
-  assert.equal(light["--accent"], "#3659c5");
+  assert.equal(light["--accent"], "#18181b");
   assert.deepEqual(Object.keys(dark).sort(), Object.keys(light).sort());
   for (const id of ["mint", "stars", "berry", "oled", "custom", "invalid-theme", undefined]) assert.deepEqual(plain(id), dark);
   assert.deepEqual(plain("mono"), light);

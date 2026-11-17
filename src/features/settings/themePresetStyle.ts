@@ -12,8 +12,8 @@ export type ThemeVisualPalette = {
   progress?: string;
 };
 export const THEME_PRESET_COLORS: Record<"dark" | "light", ThemeVisualPalette> = {
-  dark: { background: "#000000", surface: "#151518", text: "#ffffff", accent: "#7696ff", accent2: "#a6b8ff", highlight: "#ffffff" },
-  light: { background: "#f5f5f7", surface: "#ffffff", text: "#18181b", accent: "#3659c5", accent2: "#526da8", highlight: "#18181b" }
+  dark: { background: "#000000", surface: "#151518", text: "#ffffff", accent: "#ffffff", accent2: "#d4d4d8", highlight: "#ffffff" },
+  light: { background: "#f5f5f7", surface: "#ffffff", text: "#18181b", accent: "#18181b", accent2: "#52525b", highlight: "#18181b" }
 };
 
 export function makeThemePresetStyle(themeId: ThemeId): CSSProperties {

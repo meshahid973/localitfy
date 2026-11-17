@@ -214,8 +214,8 @@
 .playerBar .circleButton.main svg{
   width: 22px !important;
   height: 22px !important;
-  color: #ffffff !important;
-  stroke: #ffffff !important;
+  color: var(--button-text-on-accent) !important;
+  stroke: var(--button-text-on-accent) !important;
 }
 
 .playButtonBurst{
@@ -763,7 +763,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   border-radius: 999px !important;
   background: rgb(var(--accent-rgb)) !important;
   background-image: none !important;
-  color: #ffffff !important;
+  color: var(--button-text-on-accent) !important;
   box-shadow:
     0 8px 22px rgba(var(--accent-rgb),0.20),
     0 0 0 1px rgba(255,255,255,0.13) inset,
@@ -774,7 +774,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton.main:hover,
 .playerBar .playPauseButton:hover {
   background: color-mix(in oklab, rgb(var(--accent-rgb)) 88%, white 12%) !important;
-  color: #ffffff !important;
+  color: var(--button-text-on-accent) !important;
   box-shadow:
     0 10px 28px rgba(var(--accent-rgb),0.28),
     0 0 0 1px rgba(255,255,255,0.16) inset,
@@ -817,9 +817,9 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .playPauseButton svg * {
   width: 19px !important;
   height: 19px !important;
-  color: #ffffff !important;
-  stroke: #ffffff !important;
-  fill: #ffffff !important;
+  color: var(--button-text-on-accent) !important;
+  stroke: var(--button-text-on-accent) !important;
+  fill: var(--button-text-on-accent) !important;
   fill-opacity: 1 !important;
 }
 
@@ -974,9 +974,9 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton.main svg *,
 .playerBar .playPauseButton svg,
 .playerBar .playPauseButton svg * {
-  color: #fff !important;
-  stroke: #fff !important;
-  fill: #fff !important;
+  color: var(--button-text-on-accent) !important;
+  stroke: var(--button-text-on-accent) !important;
+  fill: var(--button-text-on-accent) !important;
   fill-opacity: 1 !important;
 }
 
@@ -1004,7 +1004,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .app[data-cover-sync="off"] .playerBar,
 .playerBar[data-cover-sync="off"]{
   --player-progress-fallback-opacity: 0.50;
-  --player-track-base: rgba(255, 255, 255, 0.16) !important;
+  --player-track-base: var(--lt-border-strong) !important;
   background:
     radial-gradient(circle at 50% -38%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.22), transparent 45%),
     radial-gradient(circle at 18% 48%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.16), transparent 34%),
@@ -1589,7 +1589,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar{
-  --player-track-base: rgba(255,255,255,0.18);
+  --player-track-base: var(--lt-border-strong);
   border-top: 1px solid rgba(255,255,255,0.105) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.050), rgba(255,255,255,0.012) 34%, rgba(255,255,255,0.004)),
@@ -1647,7 +1647,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .volumeWrap input[type="range"] {
-  background: rgba(255,255,255,0.13) !important;
+  background: var(--lt-border-strong) !important;
 }
 
 .app[data-player-background="coverBlur"] .playerBar{
@@ -1755,7 +1755,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
    Fixes the visible player outline, removes the volume icon bubble,
    and makes accent buttons readable on light/dark custom colors. */
 .playerBar{
-  --player-main-readable: var(--player-main-button-text, var(--accent-contrast, #06100b));
+  --player-main-readable: var(--button-text-on-accent);
   --player-progress-fill: rgb(var(--accent-rgb)) !important;
   border-top-color: transparent !important;
   outline: 0 !important;
@@ -1789,7 +1789,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   color: currentColor !important;
   stroke: currentColor !important;
   fill: currentColor !important;
-  fill-opacity: 0.08 !important;
+  fill-opacity: 1 !important;
 }
 
 /* The volume icon should be just an icon, not a second pill/bubble. */
@@ -1867,7 +1867,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton.main .playerMorphIcon,
 .playerBar .playPauseButton .playerMorphIcon,
 .simpleControls .circleButton.main .playerMorphIcon{
-  color: #ffffff !important;
+  color: var(--button-text-on-accent) !important;
 }
 
 .playerBar .circleButton.main .playerMorphIcon{
@@ -1933,7 +1933,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   padding: 0 4px !important;
   border-radius: var(--player-radius-xs, 12px) !important;
   background: rgb(var(--accent-rgb)) !important;
-  color: #fff !important;
+  color: var(--button-text-on-accent) !important;
   font-size: 8px !important;
   font-weight: 950 !important;
   box-shadow:

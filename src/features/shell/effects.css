@@ -544,7 +544,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAc
   width: 18px !important;
   height: 18px !important;
   margin: 0 !important;
-  color: var(--button-text-on-accent) !important;
+  color: var(--lt-text) !important;
   opacity: 1 !important;
   flex: 0 0 auto !important;
 }

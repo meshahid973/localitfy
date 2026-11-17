@@ -13,18 +13,18 @@
 
 .app {
   --workspace-cover-color: var(--lt-bg);
-  --workspace-cover-strength: 26%;
+  --workspace-cover-strength: 16%;
   --workspace-mood: color-mix(in srgb, var(--workspace-cover-color) var(--workspace-cover-strength), var(--lt-bg));
-  --workspace-bg: radial-gradient(ellipse at 42% 0%, var(--workspace-mood), var(--lt-bg) 76%);
-  --workspace-sidebar: color-mix(in srgb, var(--lt-text) 7%, var(--workspace-mood));
+  --workspace-bg: radial-gradient(ellipse at 42% 0%, var(--workspace-mood), var(--lt-bg) 76%), var(--lt-bg);
+  --workspace-sidebar: color-mix(in srgb, var(--lt-text) 5%, transparent);
   --workspace-sidebar-raised: var(--lt-surface);
   --workspace-sidebar-expanded: clamp(224px, var(--sidebar-width, 248px), 280px);
   --workspace-sidebar-current: var(--workspace-sidebar-expanded);
   --workspace-sidebar-rail: var(--lt-sidebar-closed);
 }
 
-.app[data-cover-sync="subtle"] { --workspace-cover-strength: 12%; }
-.app[data-cover-sync="strong"] { --workspace-cover-strength: 42%; }
+.app[data-cover-sync="subtle"] { --workspace-cover-strength: 8%; }
+.app[data-cover-sync="strong"] { --workspace-cover-strength: 24%; }
 .app[data-cover-sync="off"],
 .app[data-app-backgrounded="on"] { --workspace-cover-strength: 0%; }
 .app[data-sidebar-behavior="slim"],
@@ -528,8 +528,8 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 
 /* Keep the icon-only rail compact without clipping accessible navigation buttons. */
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar {
-  border-radius: var(--lt-radius-md) !important;
-  padding-inline: 4px !important;
+  border-radius: var(--lt-radius-sm) !important;
+  padding: 6px 4px !important;
   box-shadow: none !important;
   will-change: auto !important;
 }
@@ -545,7 +545,7 @@ main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem {
   padding: 0 !important;
   grid-template-columns: 1fr !important;
   justify-items: center !important;
-  border-radius: var(--lt-radius-sm) !important;
+  border-radius: var(--lt-radius-item) !important;
 }
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText {
   display: none !important;

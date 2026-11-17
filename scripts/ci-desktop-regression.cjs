@@ -62,7 +62,20 @@ server.listen(5173,async()=>{
         const style=el=>getComputedStyle(el);
         const rect=el=>el.getBoundingClientRect();
         const buttons=[...sidebar.querySelectorAll('.navItem')].filter(el=>rect(el).width>0);
+        const rgba=color=>{
+          const canvas=document.createElement('canvas'); canvas.width=canvas.height=1;
+          const ctx=canvas.getContext('2d'); ctx.fillStyle=color; ctx.fillRect(0,0,1,1);
+          return [...ctx.getImageData(0,0,1,1).data];
+        };
+        const play=app.querySelector('.playerBar .circleButton.main');
+        const playIcon=play?.querySelector('svg');
+        const homePlay=app.querySelector('.homeStartButton');
         return {
+          theme:app.dataset.theme,
+          rail:rgba(style(sidebar).backgroundColor),
+          play:play?rgba(style(play).backgroundColor):null,
+          playIcon:playIcon?rgba(style(playIcon).color):null,
+          homePlay:homePlay?rgba(style(homePlay).backgroundColor):null,
           mode:app.dataset.sidebarBehavior,
           width:rect(sidebar).width,
           title:style(app.querySelector('.titleBar')).backgroundColor,
@@ -72,6 +85,12 @@ server.listen(5173,async()=>{
       })()`);
       assert.equal(chrome.mode,"slim");
       assert.ok(chrome.width>=48&&chrome.width<=88&&!chrome.clipped,"compact sidebar must contain its buttons: "+JSON.stringify(chrome));
+      assert.ok(chrome.rail[3]>0&&chrome.rail[3]<=26,"sidebar must be a subtle translucent surface: "+JSON.stringify(chrome));
+      const fill=chrome.theme==="light"?[24,24,27,255]:[255,255,255,255];
+      const ink=chrome.theme==="light"?[255,255,255,255]:[0,0,0,255];
+      assert.deepEqual(chrome.play,fill,"main playback button follows the active monochrome theme");
+      assert.deepEqual(chrome.playIcon,ink,"playback glyph contrasts with its button");
+      if(chrome.homePlay)assert.deepEqual(chrome.homePlay,fill,"Home primary button follows the theme");
       assert.equal(chrome.title,"rgba(0, 0, 0, 0)","title bar must be transparent");
       assert.equal(chrome.player,"rgba(0, 0, 0, 0)","ambient player bar must be transparent");
     }

@@ -1485,11 +1485,7 @@ button:hover,
 }
 
 .app[data-theme]{
-  background:
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--lt-accent, #ff6edb) 10%, var(--lt-bg, #050505)) 0%,
-      color-mix(in srgb, var(--lt-accent, #ff6edb) 5%, var(--lt-bg, #050505)) 34%,
-      var(--lt-bg, #050505) 100%) !important;
+  background: var(--workspace-bg, var(--lt-bg)) !important;
 }
 
 .app[data-theme]::before{
@@ -2460,9 +2456,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
   background-size: auto !important;
 }
 
-.app{
-  background: var(--workspace-bg, var(--lt-bg)) !important;
-}
 
 .sidebarNav {
   overflow: hidden !important;
@@ -5753,8 +5746,8 @@ body.isResizingPlayer .app *{
 .topUpdateRibbon .updatePrimaryButton{
   height: 23px !important;
   min-height: 23px !important;
-  color: #06100d !important;
-  background: color-mix(in oklab, var(--lt-accent) 82%, #ffffff 18%) !important;
+  color: var(--button-text-on-accent) !important;
+  background: var(--lt-accent) !important;
   border: 0 !important;
   box-shadow: none !important;
 }
