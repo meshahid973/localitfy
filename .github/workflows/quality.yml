@@ -82,6 +82,18 @@ jobs:
       - name: Electron runtime smoke
         timeout-minutes: 1
         run: npx electron scripts/ci-electron-smoke.cjs
+      - name: Rendered desktop layout and playback regression
+        timeout-minutes: 4
+        env:
+          LOCALTIFY_QA_OUTPUT: ${{ runner.temp }}/localtify-desktop-qa
+        run: npx electron scripts/ci-desktop-regression.cjs
+      - name: Preserve desktop screenshots and metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-rendered-qa
+          path: ${{ runner.temp }}/localtify-desktop-qa
+          if-no-files-found: warn
 
   discord-activity:
     runs-on: ubuntu-latest
