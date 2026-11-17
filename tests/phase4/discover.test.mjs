@@ -354,5 +354,31 @@ test("Discover permits opt-in with a blank key and sends explicit catalog search
   assert.match(view, /disabled=\{Boolean\(keyDraft.trim\(\)\) && !API_KEY.test/);
   assert.match(view, /getDiscoveries\(\{ catalog: \{ kind: catalogKind, term \} \}\)/);
   assert.match(view, /catalogRequestRef.current/);
-  assert.match(android, /payload\?\.catalog \? fromMac<DiscoverResult>/);
+  assert.match(android, /payload\?\.catalog \|\| payload\?\.artwork\) \? fromMac<DiscoverResult>/);
+});
+
+test("artwork uses validated releases and rejects ambiguous tracks", async () => {
+  const { catalogArtwork, matchRecordingArtwork, createArtworkLookup } = require("../../electron/discover/artwork.cjs");
+  const id = "12345678-1234-1234-1234-123456789abc";
+  const item = { title:"Track",length:123000,"artist-credit":[{name:"Artist"}],releases:[{id,status:"Official"}] };
+  assert.equal(catalogArtwork("recording",item).coverUrl,"https://coverartarchive.org/release/"+id+"/front-250");
+  assert.equal(catalogArtwork("album",{id}).coverUrl,"https://coverartarchive.org/release-group/"+id+"/front-250");
+  assert.deepEqual(matchRecordingArtwork([item],"Other","Artist"),{});
+  assert.deepEqual(matchRecordingArtwork([item,item],"Track","Artist"),{});
+  assert.equal(catalogArtwork("recording",{releases:[{id:"bad"}]}).coverUrl,undefined);
+  let calls=0;
+  const lookup=createArtworkLookup({searchRecordings:async()=>{calls++;return [item];}});
+  const [a,b]=await Promise.all([lookup("Track","Artist"),lookup("track","artist")]);
+  assert.deepEqual(a,b); assert.equal(a.durationMs,123000);
+  await lookup("Track","Artist"); assert.equal(calls,1);
+});
+test("artwork lookup respects opt-in", async () => {
+  const handlers=new Map(), settings={discoverEnabled:false};
+  let calls=0,finish;
+  registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)},{getSongs:()=>[],getSettings:()=>settings,musicBrainzClient:{searchRecordings:()=>{calls++;return new Promise(resolve=>{finish=resolve;});}}});
+  const request=()=>handlers.get("discover:get")({}, {artwork:{title:"Track",artist:"Artist"}});
+  assert.equal((await request()).status,"off"); assert.equal(calls,0);
+  settings.discoverEnabled=true; const pending=request(); await Promise.resolve();
+  settings.discoverEnabled=false; finish([]);
+  assert.equal((await pending).status,"off");
 });

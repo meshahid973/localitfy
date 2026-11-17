@@ -5,6 +5,7 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { createLastfmClient } = require("../discover/lastfm.cjs");
 const { discover, withoutOwned } = require("../discover/recommend.cjs");
+const { catalogArtwork, createArtworkLookup } = require("../discover/artwork.cjs");
 
 const RESULT_TTL_MS = 12 * 60 * 60 * 1000;
 // Biographies rarely change. Old ones are still shown while offline or when Last.fm fails.
@@ -29,7 +30,7 @@ function normalizeCatalog(kind, items) {
       ? [cleanText(item.disambiguation), cleanText(item.country)].filter(Boolean).join(" · ")
       : [artist, cleanText(item["first-release-date"])].filter(Boolean).join(" · ");
     seen.add(item.id.toLowerCase());
-    result.push({ id: item.id, title, artist, subtitle, url: "https://musicbrainz.org/" + endpoint + "/" + item.id });
+    result.push({ id: item.id, title, artist, subtitle, url: "https://musicbrainz.org/" + endpoint + "/" + item.id, ...catalogArtwork(kind, item) });
   }
   return result;
 }
@@ -39,9 +40,19 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
   let saved = null;
   let running = null;
   let catalogRunning = null;
+  const lookupArtwork = createArtworkLookup(musicBrainzClient, now);
   router.handle("discover:get", async (_event, payload = {}) => {
     const settings = getSettings();
     if (settings.discoverEnabled !== true) return { status: "off" };
+    if (payload?.artwork !== undefined) {
+      const { title, artist } = payload.artwork || {};
+      if (typeof title !== "string" || typeof artist !== "string" || !title.trim() || !artist.trim() || title.length > 300 || artist.length > 300)
+        return { status: "error", error: "Invalid artwork lookup." };
+      try {
+        const artwork = await lookupArtwork(title.trim(), artist.trim());
+        return getSettings().discoverEnabled === true ? { status: "artwork", ...artwork } : { status: "off" };
+      } catch { return { status: "error", error: "Artwork unavailable." }; }
+    }
     if (payload?.catalog !== undefined) {
       const query = payload.catalog;
       const kind = query?.kind;

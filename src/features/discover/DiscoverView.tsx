@@ -7,6 +7,7 @@ import type { NotForMeKind } from "../analysis/notForMe";
 import type { SpotifyTrack } from "../downloads/download.types";
 import type { Settings } from "../settings/settings.types";
 import type { CatalogKind, DiscoverResult, DiscoverTrack } from "./discover.types";
+import { DiscoverCover } from "./DiscoverArtwork";
 import "./discover.css";
 
 const AlbumTracksDialog = lazy(() => import("../tagging/AlbumTracksDialog"));
@@ -26,7 +27,7 @@ function trackId(track: DiscoverTrack) {
   for (const char of `${track.artist}|${track.title}`.toLocaleLowerCase()) hash = Math.imul(hash ^ char.codePointAt(0)!, 16777619);
   return `lastfm-${(hash >>> 0).toString(36)}`;
 }
-const toDownload = (track: DiscoverTrack): SpotifyTrack => ({ id: trackId(track), title: track.title, artist: track.artist, providerUrl: track.url });
+const toDownload = (track: DiscoverTrack): SpotifyTrack => ({ id: trackId(track), title: track.title, artist: track.artist, providerUrl: track.url, coverUrl: track.coverUrl, durationMs: track.durationMs });
 const listNames = (names: string[]) => names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 const openLink = (url: string) => { if (url) void window.localitfy.openExternal?.(url); };
 
@@ -154,8 +155,18 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     </button>;
   };
 
+  const recommendedTracks = useMemo(() => {
+    const seen = new Set<string>();
+    return (ready?.artists.flatMap(artist => artist.topTracks) ?? []).filter(track => {
+      const id = trackId(track);
+      if (seen.has(id)) return false;
+      seen.add(id); return true;
+    });
+  }, [ready]);
+  const duration = (ms?: number) => ms ? Math.floor(ms / 60000) + ":" + String(Math.floor(ms / 1000) % 60).padStart(2, "0") : "";
+
   return <section className="discoverPage" aria-busy={loading}>
-    <PageHeader eyebrow="outside your library" title="Discover" description={ready && seedsLine ? seedsLine : "Explore music outside your library."}>
+    <PageHeader title="Discover" description={ready && seedsLine ? seedsLine : undefined}>
       {!needsSetup ? <>
         {ready || result?.status === "error" ? <button type="button" className="softButton" disabled={loading} onClick={() => void load(true)}><RefreshCw size={15} /> {loading ? "Finding music…" : "Refresh"}</button> : null}
         {phone ? null : <button type="button" className="softButton" aria-expanded={showSettings} onClick={() => setShowSettings((open) => !open)}><Settings2 size={15} /> Settings</button>}
@@ -172,13 +183,14 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         <input type="search" aria-label="Search public music catalog" placeholder="Search MusicBrainz" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); }} />
         <button className="heroMain" type="submit" disabled={catalogLoading || catalogTerm.trim().length < 2}><Search size={15} /><span>{catalogLoading ? "Searching…" : "Search"}</span></button>
       </form>
-      <p className="discoverBecause">Public metadata from MusicBrainz. Audio playback remains local.</p>
+      <p className="discoverBecause">MusicBrainz catalog · Local playback only</p>
       {catalogLoading ? <p role="status">Searching public catalog…</p> : null}
       {catalog?.status === "error" ? <p role="alert">{catalog.error}</p> : null}
-      {catalog?.status === "catalog" ? catalog.items.length ? <ul className="discoverSongList">
+      {catalog?.status === "catalog" ? catalog.items.length ? <ul className={catalog.kind === "album" ? "discoverShelf discoverCatalogShelf" : "discoverSongList"} aria-label="Search results" tabIndex={catalog.kind === "album" ? 0 : undefined}>
         {catalog.items.map(item => <li key={item.id}>
+          <DiscoverCover title={item.title} artist={item.artist} artwork={item} person={catalog.kind === "artist"} />
           <span className="discoverSongText"><strong>{item.title}</strong><small>{item.subtitle}</small></span>
-          {catalog.kind === "recording" ? albumButton({ title: item.title, artist: item.artist, url: item.url }) : null}
+          {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{albumButton(item)}{pickButton(item)}</> : null}
           <button type="button" className="discoverPick" aria-label={"Open " + item.title + " on MusicBrainz"} title="Open on MusicBrainz" onClick={() => openLink(item.url)}><ExternalLink size={14} /></button>
         </li>)}
       </ul> : <p role="status">No matching music found.</p> : null}
@@ -189,35 +201,44 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     {result?.status === "error" ? <p className="discoverNotice" role="alert">{result.error} <button type="button" className="softButton" onClick={() => void load(true)}>Retry</button></p> : null}
     {result?.status === "no-taste" ? <p className="discoverNotice">Play or like a few songs first. Discover learns from what you listen to.</p> : null}
 
-    {ready?.artists.length ? <>
-      <h2 className="discoverHeading">Artists you might like</h2>
-      <div className="discoverArtists">
-        {ready.artists.map((artist) => <article key={artist.name} className="discoverArtist">
-          <header>
-            <button type="button" className="discoverName" onClick={() => openLink(artist.url)} title="Open on Last.fm">{artist.name}</button>
-            {!phone && notForMe ? <button type="button" className="discoverPick" aria-label={`Not for me: ${artist.name}`} title="Not for me"
-              onClick={() => dismissArtist(artist.name)}><UserX size={14} /></button> : null}
-          </header>
-          <p className="discoverBecause">because you play {listNames(artist.because)}{artist.seedCount > artist.because.length ? ` and ${artist.seedCount - artist.because.length} more` : ""}</p>
-          {artist.topTracks.length ? <ul className="discoverTracks">
-            {artist.topTracks.map((track) => <li key={track.title}><span>{track.title}</span>{albumButton(track)}{pickButton(track)}</li>)}
-          </ul> : null}
-        </article>)}
-      </div>
-    </> : null}
-
-    {ready?.tracks.length ? <>
-      <h2 className="discoverHeading">Popular songs you don’t have yet</h2>
-      <p className="discoverBecause">From the artists you play most.</p>
+    {recommendedTracks.length ? <section className="discoverSection" aria-labelledby="discover-recommended">
+      <h2 id="discover-recommended" className="discoverHeading">Recommended songs</h2>
       <ul className="discoverSongList">
-        {ready.tracks.map((track) => <li key={trackId(track)}>
-          <span className="discoverSongText"><strong>{track.title}</strong><small>{track.artist}</small></span>
-          <button type="button" className="discoverPick" aria-label={`Open ${track.title} on Last.fm`} title="Open on Last.fm" onClick={() => openLink(track.url)}><ExternalLink size={14} /></button>
-          {albumButton(track)}
-          {pickButton(track)}
+        {recommendedTracks.map(track => <li key={trackId(track)}>
+          <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />
+          <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(track.url)} title={track.title}>{track.title}</button><small>{track.artist}</small></span>
+          {albumButton(track)}{pickButton(track)}
         </li>)}
       </ul>
-    </> : null}
+    </section> : null}
+
+    {ready?.tracks.length ? <section className="discoverSection" aria-labelledby="discover-popular">
+      <h2 id="discover-popular" className="discoverHeading">Popular songs you don't have yet</h2>
+      <ul className="discoverShelf" tabIndex={0} aria-label="Popular songs">
+        {ready.tracks.map(track => <li key={trackId(track)}>
+          <div className="discoverShelfArt">
+            <button type="button" className="discoverArtLink" onClick={() => openLink(track.url)} aria-label={`Open ${track.title} on Last.fm`}>
+              <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />
+            </button>
+            <div className="discoverShelfActions">{albumButton(track)}{pickButton(track)}</div>
+          </div>
+          <span className="discoverSongText"><strong title={track.title}>{track.title}</strong><small>{track.artist}</small></span>
+        </li>)}
+      </ul>
+    </section> : null}
+
+    {ready?.artists.length ? <section className="discoverSection" aria-labelledby="discover-artists">
+      <h2 id="discover-artists" className="discoverHeading">Artists you might like</h2>
+      <ul className="discoverSongList">
+        {ready.artists.map(artist => <li key={artist.name}>
+          <DiscoverCover title={artist.name} artist="" person />
+          <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(artist.url)} title={artist.name}>{artist.name}</button>
+            <small title={listNames(artist.because)}>Because you play {listNames(artist.because)}{artist.seedCount > artist.because.length ? ` and ${artist.seedCount - artist.because.length} more` : ""}</small>
+          </span>
+          {!phone && notForMe ? <button type="button" className="discoverPick" aria-label={`Not for me: ${artist.name}`} title="Not for me" onClick={() => dismissArtist(artist.name)}><UserX size={16} /></button> : null}
+        </li>)}
+      </ul>
+    </section> : null>
 
     {ready && !ready.artists.length && !ready.tracks.length ? <p className="discoverNotice">Nothing new to suggest right now. Try again after listening to more music.</p> : null}
 

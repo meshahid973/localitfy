@@ -117,7 +117,7 @@ export function createAndroidBridge(): Bridge {
     selectLyricsMatch: (payload) => keepLyrics(payload.id, fromMac("lyrics:select-match", payload, 15000)),
     clearLyricsMatch: (payload) => keepLyrics(payload.id, fromMac("lyrics:clear-selection", payload, 15000)),
     setLyricsOffset: (payload) => fromMac("lyrics:set-offset", payload),
-    getDiscoveries: (payload) => payload?.catalog ? fromMac<DiscoverResult>("discover:get", payload, 60000) : fromMacOrKept<DiscoverResult>("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
+    getDiscoveries: (payload) => (payload?.catalog || payload?.artwork) ? fromMac<DiscoverResult>("discover:get", payload, 60000) : fromMacOrKept<DiscoverResult>("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
     getArtistBio: async (artist: string) => {
       if (phoneLibrary.effectiveSettings().discoverEnabled !== true) return { status: "off" };
       return fromMacOrKept<ArtistBio>("discover:artist-bio", { artist }, `mac:bio:${artist.trim().toLocaleLowerCase()}`, { status: "none" },
