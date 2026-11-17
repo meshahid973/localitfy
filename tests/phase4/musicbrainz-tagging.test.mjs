@@ -556,3 +556,22 @@ test("main registers tagging IPC and Experimental settings shows the panel", () 
   assert.match(fs.readFileSync(path.join(root, "electron", "main.cjs"), "utf8"), /registerTaggingIpc\(ipcRouter/);
   assert.match(fs.readFileSync(path.join(root, "src", "features", "settings", "categories", "ExperimentalSettings.tsx"), "utf8"), /<TaggingSettings /);
 });
+
+test("public catalog searches use escaped MusicBrainz queries and the shared cache", async () => {
+  const { createMusicBrainzClient } = electron("musicbrainz/client.cjs");
+  const calls = [];
+  const client = createMusicBrainzClient({ userAgent: "localtify-test", minIntervalMs: 0, fetchImpl: async (url, options) => {
+    calls.push({ url: new URL(url), agent: options.headers["User-Agent"] });
+    return { ok: true, status: 200, json: async () => ({ recordings: [{ id: "r" }], artists: [{ id: "a" }], "release-groups": [{ id: "g" }] }) };
+  } });
+  assert.deepEqual(await client.searchCatalog("recording", 'Say "Hi"'), [{ id: "r" }]);
+  assert.deepEqual(await client.searchCatalog("artist", "Artist"), [{ id: "a" }]);
+  assert.deepEqual(await client.searchCatalog("album", "Album"), [{ id: "g" }]);
+  await client.searchCatalog("album", "Album");
+  assert.equal(calls.length, 3);
+  assert.equal(calls[0].url.hostname, "musicbrainz.org");
+  assert.ok(calls[0].url.searchParams.get("query").includes('Say \\"Hi\\"'));
+  assert.equal(calls[2].url.pathname, "/ws/2/release-group");
+  assert.equal(calls[0].agent, "localtify-test");
+  assert.throws(() => client.searchCatalog("invalid", "Album"), /Unsupported/);
+});

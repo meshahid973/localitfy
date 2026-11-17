@@ -526,7 +526,7 @@ declare global {
       chooseWatchedFolder: () => Promise<{ canceled: boolean; folder: string }>;
       /** New files in watched folders were imported, or a library file went missing or came back. */
       onWatchedFoldersChange: (callback: (payload: { importedCount: number; libraryChanged: boolean; songs: Song[] }) => void) => () => void;
-      /** Music from outside the library, from Last.fm. Off until turned on in Discover. */
+      /** Public catalog and optional personalized suggestions. Off until turned on in Discover. */
       getDiscoveries: (payload?: { refresh?: boolean; catalog?: { kind: CatalogKind; term: string } }) => Promise<DiscoverResult>;
       /** The artist page biography, under the same opt-in as Discover. Saved on this device. */
       getArtistBio?: (artist: string) => Promise<ArtistBio>;
