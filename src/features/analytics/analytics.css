@@ -1,7 +1,7 @@
 
 /* Analytics is a quiet recap, not an unstyled statistics dump. */
 .analyticsStudioV339 {
-  --recap-surface: var(--lt-surface);
+  --recap-surface: var(--lt-surface-soft);
   --recap-edge: var(--lt-border);
   --recap-text: var(--lt-text);
   --recap-muted: var(--lt-muted);
@@ -11,18 +11,18 @@
 .analyticsStudioV339 *, .analyticsStudioV339 *::before { box-sizing: border-box; }
 .analyticsStudioV339 .eyebrow { margin: 0 0 8px; color: var(--lt-accent); font-size: 11px; letter-spacing: .12em; }
 .analyticsHeroMeterV339 { display: grid; grid-template-columns: repeat(3,minmax(85px,1fr)); gap: 10px; flex: 0 1 350px; min-width: min(350px,100%); }
-.analyticsHeroMeterV339 > span { min-width: 0; display: grid; gap: 6px; padding: 12px 15px; border: 1px solid var(--recap-edge); border-radius: 10px; background: var(--lt-surface); }
+.analyticsHeroMeterV339 > span { min-width: 0; display: grid; gap: 6px; padding: 12px 15px; border: 1px solid transparent; border-radius: var(--lt-radius-item); background: var(--recap-surface); }
 .analyticsHeroMeterV339 strong { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--recap-text); font-size: 18px; font-weight: 700; }
 .analyticsHeroMeterV339 small { color: var(--recap-muted); font-size: 11px; }
 .analyticsRecapGridV339 { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
-.analyticsRecapCardV339 { position: relative; min-width: 0; min-height: 148px; overflow: hidden; display: flex; flex-direction: column; gap: var(--lt-space-2); padding: var(--lt-space-4); border: 1px solid var(--recap-edge); border-radius: var(--lt-radius-sm); background: var(--recap-surface); }
-.analyticsRecapCardV339 > span, .analyticsSnapshotCardV339 > span { color: var(--lt-accent); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.analyticsRecapCardV339 { position: relative; min-width: 0; min-height: 148px; overflow: hidden; display: flex; flex-direction: column; gap: var(--lt-space-2); padding: var(--lt-space-4); border: 1px solid transparent; border-radius: var(--lt-radius-sm); background: var(--recap-surface); }
+.analyticsRecapCardV339 > span, .analyticsSnapshotCardV339 > span { color: var(--lt-muted); font-size: var(--lt-text-sm); font-weight: 500; }
 .analyticsRecapCardV339 > strong { min-width: 0; margin-top: 8px; overflow-wrap: anywhere; color: var(--lt-text); font-size: clamp(26px, 2.2vw, 39px); line-height: 1.12; letter-spacing: -.045em; font-weight: 710; }
 .analyticsRecapCardV339 > small { color: var(--lt-muted); font-size: 12px; line-height: 1.5; }
 .analyticsRecapCardV339 > em { margin-top: auto; color: var(--recap-muted); font-size: 11px; line-height: 1.45; font-style: normal; }
 .analyticsRecapCardV339 > i { position: absolute; height: 3px; left: 0; bottom: 0; width: var(--recap-progress, 0%); background: var(--lt-accent); opacity: .8; }
 .analyticsSnapshotV339 { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
-.analyticsSnapshotCardV339 { min-width: 0; min-height: 108px; padding: 18px; display: flex; flex-direction: column; gap: 7px; border: 1px solid var(--recap-edge); border-radius: 11px; background: var(--lt-surface-soft); }
+.analyticsSnapshotCardV339 { min-width: 0; min-height: 108px; padding: 18px; display: flex; flex-direction: column; gap: 7px; border: 1px solid transparent; border-radius: 11px; background: var(--lt-surface-soft); }
 .analyticsSnapshotCardV339 strong { overflow-wrap: anywhere; font-size: 20px; color: var(--lt-text); font-weight: 700; }
 .analyticsSnapshotCardV339 small { margin-top: auto; color: var(--recap-muted); font-size: 11px; line-height: 1.4; }
 .analyticsMiniBoardV339 { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; border-top: 1px solid var(--recap-edge); padding-top: 21px; }
@@ -30,7 +30,7 @@
 .analyticsMiniCardV339 > span { color: var(--lt-muted); font-size: 11px; letter-spacing: .05em; font-weight: 700; }
 .analyticsMiniCardV339 strong { color: var(--lt-text); font-size: 18px; font-weight: 650; overflow-wrap: anywhere; }
 .analyticsMiniCardV339 small { color: var(--recap-muted); font-size: 12px; }
-.analyticsSharePanelV339 { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; margin-top: 8px; padding: 20px 22px; border: 1px solid var(--recap-edge); border-radius: 12px; background: var(--recap-surface); }
+.analyticsSharePanelV339 { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; margin-top: 8px; padding: 20px 22px; border: 1px solid transparent; border-radius: 12px; background: var(--recap-surface); }
 .analyticsSharePanelV339 > div { min-width: 0; flex: 1 1 280px; }
 .analyticsSharePanelV339 h3 { margin: 0 0 8px; color: var(--recap-text); font-size: 17px; }
 .analyticsSharePanelV339 p:last-child { max-width: 680px; margin: 0; color: var(--recap-muted); font-size: 12px; line-height: 1.6; }

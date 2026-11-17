@@ -20,8 +20,9 @@ function wav(name){
   const target=path.join(dir,name+".wav");fs.writeFileSync(target,buf);return target;
 }
 const songs=Array.from({length:12},(_,i)=>({id:"qa-"+i,title:"test track "+i,artist:"test artist "+(i%8),album:"test album "+Math.floor(i/4),genre:"ambient",filePath:wav("qa-"+i),duration:20,dateAdded:"2026-01-01T00:00:00Z",playCount:12-i,lastPlayed:"2026-11-16T00:00:00Z",liked:i===0}));
+for (const song of songs) fs.writeFileSync(song.filePath.replace(/\.wav$/, ".lrc"), "[00:00.00]Local lyric fixture\n[00:05.00]Second lyric line\n");
 const seed=spawnSync(process.execPath,["-e",
-  "const db=require(process.argv[1]);db.initDatabase(process.argv[2]);const songs=JSON.parse(process.argv[3]);db.insertSongs(songs);db.savePlaylists([{id:'qa-playlist',name:'qa playlist',songIds:songs.map(s=>s.id),createdAt:Date.now()}]);db.saveSettings({startWithWindows:false,idleScreensaverEnabled:false,discordRpcEnabled:false,reducedMotion:false,coverColorSyncMode:'strong',homeBannerType:'dynamic',showAmbientGradient:true,playerBackgroundStyle:'coverBlur',homeHiddenSections:['dailyMixes','likedSongs','rediscover','notPlayedYet']});",
+  "const db=require(process.argv[1]);db.initDatabase(process.argv[2]);const songs=JSON.parse(process.argv[3]);db.insertSongs(songs);db.savePlaylists([{id:'qa-playlist',name:'qa playlist',songIds:songs.map(s=>s.id),createdAt:Date.now()}]);db.saveSettings({startWithWindows:false,idleScreensaverEnabled:false,discordRpcEnabled:false,reducedMotion:false,discoverEnabled:true,lyricsEnabled:true,lyricsOnlineLookup:false,coverColorSyncMode:'strong',homeBannerType:'dynamic',showAmbientGradient:true,playerBackgroundStyle:'coverBlur',homeHiddenSections:['dailyMixes','likedSongs','rediscover','notPlayedYet']});",
   path.join(root,"electron/db.cjs"),path.join(app.getPath("userData"),"localitfy.sqlite"),JSON.stringify(songs)],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1"},encoding:"utf8"});
 if(seed.status!==0)throw Error("Synthetic database seed failed: "+seed.stderr);
 const dist=path.join(root,"dist"),mime={".html":"text/html",".js":"text/javascript",".css":"text/css",".png":"image/png",".jpg":"image/jpeg",".gif":"image/gif",".webp":"image/webp",".svg":"image/svg+xml",".woff2":"font/woff2",".woff":"font/woff"};
@@ -40,7 +41,7 @@ async function metrics(label){
   const readings=[];for(let i=0;i<5;i++){await sleep(1000);const m=app.getAppMetrics();readings.push({workingSetMiB:m.reduce((s,p)=>s+(p.memory?.workingSetSize||0),0)/1024,cpuPercent:m.reduce((s,p)=>s+(p.cpu?.percentCPUUsage||0),0),processes:m.length});}
   return{label,readings};
 }
-const watchdog=setTimeout(()=>{console.error("Integrated visual smoke timed out");server.close();app.exit(1);},180000);
+const watchdog=setTimeout(()=>{console.error("Integrated visual smoke timed out");server.close();app.exit(1);},210000);
 server.listen(5173,async()=>{
   try{
     const started=Date.now();
@@ -163,6 +164,23 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=discover]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.discoverPage') && !document.querySelector('.appCrashBoundary')").catch(()=>false),"Discover "+mode);
       await screenshot(win,"discover-"+mode);
+      for (const width of [1280,860]) {
+        win.setSize(width,800);
+        await until(()=>win.webContents.executeJavaScript("window.innerWidth").then(actual=>actual===width),"viewport "+width,5000);
+        for (const view of ["home","library","liked","artists","genres","albums","playlists","discover","downloads","covers","analytics","settings"]) {
+          await win.webContents.executeJavaScript(`document.querySelector('.sidebar [data-nav-id="${view}"]').click()`);
+          await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!document.querySelector('.appCrashBoundary')})()`).catch(()=>false),view+" "+mode+" "+width);
+          const geometry=await win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return {width:page.clientWidth,scroll:page.scrollWidth}})()`);
+          assert.ok(geometry.width>0&&geometry.scroll<=geometry.width+3,"page overflow "+view+" "+mode+" "+JSON.stringify(geometry));
+          await screenshot(win,view+"-"+mode+"-"+width);
+        }
+        await win.webContents.executeJavaScript("document.querySelector('.playerLyricsButton').click()");
+        await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.lyricsView')&&!document.querySelector('.appCrashBoundary')").catch(()=>false),"lyrics "+mode+" "+width);
+        await screenshot(win,"lyrics-"+mode+"-"+width);
+        await win.webContents.executeJavaScript("document.querySelector('.lyricsView button[aria-label=\"close lyrics\"]').click()");
+        await until(()=>win.webContents.executeJavaScript("!document.querySelector('.lyricsView')").catch(()=>false),"close lyrics");
+      }
+      win.setSize(1280,800);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
       await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"appearance navigation");
     }

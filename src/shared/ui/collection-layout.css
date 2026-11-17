@@ -17,7 +17,7 @@
   min-width: 0;
   display: grid;
   justify-items: stretch;
-  gap: 10px;
+  gap: var(--lt-space-2);
   padding: var(--lt-space-2);
   border: 0;
   border-radius: var(--lt-control-radius);

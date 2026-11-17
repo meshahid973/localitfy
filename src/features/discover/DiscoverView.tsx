@@ -8,6 +8,7 @@ import type { SpotifyTrack } from "../downloads/download.types";
 import type { Settings } from "../settings/settings.types";
 import type { CatalogKind, DiscoverResult, DiscoverTrack } from "./discover.types";
 import { DiscoverCover } from "./DiscoverArtwork";
+import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import "./discover.css";
 
 const AlbumTracksDialog = lazy(() => import("../tagging/AlbumTracksDialog"));
@@ -180,9 +181,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     {settings.discoverEnabled ? <section className="discoverCatalog" aria-labelledby="discover-catalog-title">
       <h2 id="discover-catalog-title" className="discoverHeading">Explore music</h2>
       <form className="discoverSearch" onSubmit={event => { event.preventDefault(); void searchCatalog(); }}>
-        <select aria-label="Search category" value={catalogKind} disabled={catalogLoading} onChange={event => { setCatalogKind(event.currentTarget.value as CatalogKind); setCatalog(null); }}>
-          <option value="recording">Songs</option><option value="artist">Artists</option><option value="album">Albums</option>
-        </select>
+        <ArcDropdownMenu<CatalogKind> ariaLabel="Search category" value={catalogKind} disabled={catalogLoading} items={[{ value: "recording", label: "Songs" }, { value: "artist", label: "Artists" }, { value: "album", label: "Albums" }]} onValueChange={value => { setCatalogKind(value); setCatalog(null); }} />
         <input type="search" aria-label="Search public music catalog" placeholder="Search MusicBrainz" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); }} />
         <button className="heroMain" type="submit" disabled={catalogLoading || catalogTerm.trim().length < 2}><Search size={15} /><span>{catalogLoading ? "Searching…" : "Search"}</span></button>
       </form>

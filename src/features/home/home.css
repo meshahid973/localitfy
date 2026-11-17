@@ -366,8 +366,8 @@
 }
 
 .homeListenGrid > .homeListenRow:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.homeListenRow:hover { border-color: rgba(var(--lt-accent-rgb),.15); background:var(--lt-surface-raised); }
-.homeListenRow.active { border-color: rgba(var(--lt-accent-rgb),.26); background:color-mix(in oklab, var(--lt-accent) 9%, var(--lt-surface-soft)); }
+.homeListenRow:hover { background:var(--lt-surface-raised); }
+.homeListenRow.active { background:color-mix(in srgb, var(--lt-text) 10%, transparent); }
 
 .homeListenCover,
 .homeListenCover .coverImage {

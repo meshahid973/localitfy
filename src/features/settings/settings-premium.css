@@ -1,5 +1,4 @@
 /* Settings layout refinements. Base control styles live in settings.css. */
-.app:has(.pageTransition-settings) .content { background: var(--lt-bg) !important; }
 .settingsPage.settingsPageV027 {
   width: min(100%, 1120px);
   margin: 0 auto;
@@ -44,7 +43,7 @@
   appearance: none; -webkit-appearance: none;
   width: 100%; min-height: 43px; padding: 10px 36px 10px 39px;
   border-radius: 8px; border: 1px solid var(--settings-edge);
-  background: var(--lt-bg); color: var(--settings-text); font-size: 13px;
+  background: var(--lt-surface-soft); color: var(--settings-text); font-size: 13px;
 }
 .settingsPageV027 .settingsSearchField input::-webkit-search-cancel-button,
 .settingsPageV027 .settingsSearchField input::-webkit-search-decoration,
