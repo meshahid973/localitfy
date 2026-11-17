@@ -64,3 +64,18 @@ export function useCoverAverageStyle(source: string, enabled: boolean) {
   // No stale tint between a track change and its artwork-color result.
   return coverSource && sample?.source === coverSource ? sample.style : EMPTY_COVER_STYLE;
 }
+
+/** Retain the outgoing tint while a new thumbnail is sampled or the view changes.
+ * A failed sample eventually restores the theme. No polling or animation loop.
+ */
+export function useWorkspaceCoverColor(style: CSSProperties, songId: string | undefined, enabled: boolean) {
+  const color = (style as CoverAverageStyle)["--cover-average"];
+  const [visible, setVisible] = useState<string>();
+  useEffect(() => {
+    if (!enabled || !songId) { setVisible(undefined); return; }
+    if (color) { setVisible(color); return; }
+    const timeout = window.setTimeout(() => setVisible(undefined), 2000);
+    return () => window.clearTimeout(timeout);
+  }, [enabled, songId, color]);
+  return enabled && songId ? visible : undefined;
+}

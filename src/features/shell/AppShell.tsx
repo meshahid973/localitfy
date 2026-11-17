@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { FolderPlus } from "lucide-react";
@@ -7,6 +7,7 @@ import TitleBar from "./TitleBar";
 import HomeView from "../home/HomeView";
 import { Cover } from "../covers/Cover";
 import { ArtworkAmbientContext } from "../covers/ArtworkBackdrop";
+import { useWorkspaceCoverColor } from "../covers/cover.ambient";
 import PlayerSurfaces from "../player/components/PlayerSurfaces";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import Onboarding from "../../Onboarding";
@@ -93,18 +94,7 @@ export default function AppShell(props: AppShellProps) {
   const detail = nav.detail;
   const { isSeeking, isVolumeDragging, draggedSongId, isPlaying } = playerBar;
   const { isThreeAm } = home;
-  const coverColor = (home.ambientStyle as CSSProperties & { "--cover-average"?: string })["--cover-average"];
-  const [workspaceCoverColor, setWorkspaceCoverColor] = useState<string>();
-  useEffect(() => {
-    if (!effectiveAmbient || !home.currentSong) setWorkspaceCoverColor(undefined);
-    else if (coverColor) setWorkspaceCoverColor(coverColor);
-    else {
-      // Wait for asynchronously sampled art, then fall back to the theme if
-      // the image cannot be sampled rather than retaining an unrelated tint.
-      const timeout = window.setTimeout(() => setWorkspaceCoverColor(undefined), 2000);
-      return () => window.clearTimeout(timeout);
-    }
-  }, [effectiveAmbient, home.currentSong?.id, coverColor]);
+  const workspaceCoverColor = useWorkspaceCoverColor(home.ambientStyle, home.currentSong?.id, effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded);
   const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
   const [tagSearchAlbum, setTagSearchAlbum] = useState<TagSearchAlbum | null>(null);
   const [albumTracksRequest, setAlbumTracksRequest] = useState<AlbumTracksDialogProps["request"] | null>(null);
@@ -148,7 +138,7 @@ export default function AppShell(props: AppShellProps) {
           ...themePresetStyle,
           ...animatedThemeVisualStyle,
           ...customThemeStyle,
-          "--workspace-cover-color": effectiveAmbient && !isAppBackgrounded && home.currentSong ? workspaceCoverColor : undefined
+          "--workspace-cover-color": workspaceCoverColor
         } as CSSProperties
       }
       data-platform={platformId}
