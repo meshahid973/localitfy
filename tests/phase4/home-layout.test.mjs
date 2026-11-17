@@ -135,6 +135,7 @@ test("ambience transitions are bounded and respect reduced motion", () => {
   const css = read("src/features/covers/artwork-backdrop.css");
   assert.match(backdrop, /pending \? \[displayed, \{ key, song \}\] : \[outgoing, displayed\]/);
   assert.match(backdrop, /onLoadCapture/);
+  assert.match(backdrop, /pending \? layer.key !== key : layer.key === key/);
   assert.match(backdrop, /window.clearTimeout\(timer\)/);
   assert.match(css, /transition: opacity 360ms/);
   assert.match(css, /prefers-reduced-motion: reduce/);

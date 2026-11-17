@@ -46,7 +46,7 @@ function CrossfadeArtwork({ song }: { song: Song }) {
     <div className="artworkBackdrop" aria-hidden="true">
       {layers.map((layer) => layer ? (
         <div key={layer.key} className="artworkBackdropLayer"
-          data-visible={layer.key !== key || !pending ? "true" : "false"}
+          data-visible={(pending ? layer.key !== key : layer.key === key) ? "true" : "false"}
           ref={layer.key === key ? incomingRef : undefined}
           onLoadCapture={layer.key === key ? reveal : undefined}>
           <Cover song={layer.song} className="artworkBackdropCover" priority="high" preferThumbnail />
