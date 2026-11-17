@@ -370,7 +370,7 @@ export default function AppShell(props: AppShellProps) {
               className={`pageTransition pageTransition-${view}`}
               data-view={view}
             >
-              {view === "home" ? <HomeView {...home} /> : null}
+              {view === "home" ? <HomeView {...home} artworkAmbient={effectiveAmbient && !isAppBackgrounded} /> : null}
 
               <Suspense fallback={null}>
                 {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}

@@ -98,3 +98,18 @@ export function pickNotPlayedYet(songs: readonly Song[], now: Date, limit = 10):
     ? { value: song, primary: -hash(`${day}:${song.id}`), secondary: 0 }
     : null);
 }
+
+/** Keep one image per distinct cover, in mix order, without changing its songs. */
+export function pickHomeMixArtwork(songs: readonly Song[]): Song[] {
+  const seen = new Set<string>();
+  const artwork: Song[] = [];
+  for (const song of songs) {
+    const source = song.coverThumbUrl || song.coverThumbnailUrl || song.thumbnailUrl || song.coverUrl || song.coverPath || song.coverFullUrl;
+    const key = source ? "cover:" + source : "song:" + song.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    artwork.push(song);
+    if (artwork.length === 4) break;
+  }
+  return artwork;
+}

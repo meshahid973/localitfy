@@ -70,3 +70,23 @@ test("Home fills the content pane while the shell owns sidebar geometry", () => 
   assert.ok(Buffer.byteLength(css) < 20 * 1024, "Home CSS exceeded its 20 KiB ownership budget");
   assert.ok(Buffer.byteLength(workspace) < 20 * 1024, "shared shell CSS exceeded its 20 KiB ownership budget");
 });
+
+test("Home uses sharp cover art with optional ambient rendering", () => {
+  const source = read("src/features/home/HomeView.tsx");
+  const css = read("src/features/home/home.css");
+  const shell = read("src/features/shell/AppShell.tsx");
+  assert.match(source, /showAtmosphere \? <ArtworkBackdrop song=\{currentSong\}/);
+  assert.match(source, /className="homeFeatureCover" priority="high" preferThumbnail=/);
+  assert.match(shell, /artworkAmbient=\{effectiveAmbient && !isAppBackgrounded\}/);
+  assert.match(css, /\.homePage > \.homeAtmosphere/);
+  assert.doesNotMatch(css, /min-height: clamp\(230px|repeat\(10,minmax/);
+});
+test("Home shelves size against available content width and deduplicate mix artwork", () => {
+  const source = read("src/features/home/HomeView.tsx") + read("src/features/home/HomeShelves.tsx");
+  const css = read("src/features/home/home.css");
+  assert.match(source, /data-count=\{listenNowSongs.length\}/);
+  assert.match(css, /@container \(max-width: 850px\)/);
+  assert.match(css, /\.homeMixRail \{ grid-auto-columns:/);
+  assert.match(source, /pickHomeMixArtwork\(mix.songs\)/);
+  assert.match(source, /className="homeReleaseCover" preferThumbnail/);
+});

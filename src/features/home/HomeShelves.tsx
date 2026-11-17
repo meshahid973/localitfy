@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { Play, Radio } from "lucide-react";
 import { Cover } from "../covers/Cover";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
@@ -6,6 +6,7 @@ import type { Song } from "../library/song.types";
 import type { LocalAlbumEntry } from "../albums/album.types";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { useHomeDailyMixes } from "./useHomeDailyMixes";
+import { pickHomeMixArtwork } from "./homeShelfPicks";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { albumTarget, mixTarget, useAppActions } from "../shell/appActions";
 import { isAndroidApp } from "../../app/platform";
@@ -82,7 +83,7 @@ export function HomeSongRail({ id, title, songs, currentId, selectSong, playSong
             onOpen={() => selectSong(song.id, true)}
             onPlay={() => selectSong(song.id, true)}
             onContextMenu={(event) => void openSongMenu(event, song)}
-            cover={<span className="homeReleaseCoverWrap"><Cover song={song} className="homeReleaseCover" /></span>}
+            cover={<span className="homeReleaseCoverWrap"><Cover song={song} className="homeReleaseCover" preferThumbnail /></span>}
           >
             <span className="homeReleaseCopy">
               <strong>{prettyTitle(song.title, 5)}</strong>
@@ -112,7 +113,7 @@ export function HomeAlbumRail({ albums }: AlbumRailProps) {
             <MediaCard key={album.id} className="homeReleaseCard" openLabel={`open ${album.title}`} playLabel={`play ${album.title}`}
               onOpen={() => actions.openCollection(target)} onPlay={() => actions.playCollection(target)}
               onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-              cover={<span className="homeReleaseCoverWrap">{cover ? <Cover song={cover} className="homeReleaseCover" /> : null}</span>}>
+              cover={<span className="homeReleaseCoverWrap">{cover ? <Cover song={cover} className="homeReleaseCover" preferThumbnail /> : null}</span>}>
               <span className="homeReleaseCopy">
                 <strong>{prettyTitle(album.title, 5)}</strong>
                 <small>{prettyMeta(album.albumArtist || album.artist)} · {album.trackCount} track{album.trackCount === 1 ? "" : "s"}</small>
@@ -135,6 +136,9 @@ type DailyMixRailProps = {
 export function HomeDailyMixRail({ songsById, openDailyMixes, openAnalysisSettings }: DailyMixRailProps) {
   const actions = useAppActions();
   const { result, failed } = useHomeDailyMixes();
+  const mixes = useMemo(() => (result?.mixes ?? [])
+    .map((mix) => ({ ...mix, songs: mix.songIds.flatMap((id) => { const song = songsById.get(id); return song && song.fileExists !== false ? [song] : []; }) }))
+    .filter((mix) => mix.songs.length), [result, songsById]);
   if (!result) return <section className="homeSection homeReleasesSection homeMixesSection" aria-labelledby="home-daily-mixes-title">
     <HomeSectionHead id="home-daily-mixes-title" title="Daily mixes" />
     <div role="status" aria-atomic="true">
@@ -142,9 +146,6 @@ export function HomeDailyMixRail({ songsById, openDailyMixes, openAnalysisSettin
     </div>
     {failed ? <div className="homeShelfNotice"><button className="softButton" type="button" onClick={openDailyMixes}>Open mixes</button></div> : null}
   </section>;
-  const mixes = result.mixes
-    .map((mix) => ({ ...mix, songs: mix.songIds.flatMap((id) => { const song = songsById.get(id); return song && song.fileExists !== false ? [song] : []; }) }))
-    .filter((mix) => mix.songs.length);
   if (isAndroidApp() && !mixes.length) return null;
 
   return (
@@ -155,15 +156,16 @@ export function HomeDailyMixRail({ songsById, openDailyMixes, openAnalysisSettin
         action={mixes.length ? <button className="homeSectionAction" type="button" onClick={() => void openDailyMixes()}>See all</button> : null}
       />
       {mixes.length ? (
-        <div className="homeReleaseRail">
+        <div className="homeReleaseRail homeMixRail">
           {mixes.map((mix) => {
             const artists = [...new Set(mix.songs.map((song) => song.artist).filter(Boolean))];
             const target = mixTarget(mix, mix.songs);
+            const artwork = pickHomeMixArtwork(mix.songs);
             return (
               <MediaCard key={mix.id} className="homeReleaseCard" openLabel={`open ${mix.name}`} playLabel={`play ${mix.name}`}
                 onOpen={() => actions.openCollection(target)} onPlay={() => actions.playCollection(target)}
                 onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-                cover={<span className="homeReleaseCoverWrap homeMixCollage">{mix.songs.slice(0, 4).map((song) => <Cover key={song.id} song={song} className="homeReleaseCover" />)}</span>}>
+                cover={<span className="homeReleaseCoverWrap homeMixCollage" data-count={artwork.length}>{artwork.map((song) => <Cover key={song.id} song={song} className="homeReleaseCover" preferThumbnail />)}</span>}>
                 <span className="homeReleaseCopy">
                   <strong>{mix.name}</strong>
                   <small>{artists.slice(0, 2).map((artist) => prettyMeta(artist)).join(", ") || `${mix.songs.length} tracks`}</small>

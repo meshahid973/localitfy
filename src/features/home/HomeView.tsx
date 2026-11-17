@@ -21,6 +21,7 @@ import { pickLikedSongs, pickNewAlbums, pickNotPlayedYet, pickRecentlyPlayed, pi
 export type HomeViewProps = {
   albums: readonly LocalAlbumEntry[];
   ambientStyle: CSSProperties;
+  artworkAmbient?: boolean;
   currentId: string | null;
   currentSong: Song | null;
   heroDisplayArtist: string;
@@ -52,6 +53,7 @@ export default function HomeView(props: HomeViewProps) {
   const {
     albums,
     ambientStyle,
+    artworkAmbient = true,
     currentId,
     currentSong,
     heroDisplayArtist,
@@ -81,6 +83,7 @@ export default function HomeView(props: HomeViewProps) {
   const actions = useAppActions();
   const android = isAndroidApp();
   const needsPhoneSync = android && songs.length === 0;
+  const showAtmosphere = artworkAmbient && Boolean(currentSong);
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const closeCustomize = useCallback(() => setCustomizeOpen(false), []);
 
@@ -139,7 +142,12 @@ export default function HomeView(props: HomeViewProps) {
         className={`homeJumpBack ${settings.heroExpanded ? "expanded" : "compact"} ${heroMotionClass}`}
         aria-label="jump back in"
       >
+        {showAtmosphere ? <ArtworkBackdrop song={currentSong} /> : null}
+        {currentSong ? <div className="homeFeatureArt" aria-hidden="true">
+          <Cover key={currentSong.id} song={currentSong} className="homeFeatureCover" priority="high" preferThumbnail={!settings.heroExpanded || android} />
+        </div> : null}
         <div className={`homeJumpCopy nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
+          {currentSong ? <span className="homeFeatureLabel">Jump back in</span> : null}
           <h2 className={heroTitleClass} title={currentSong?.title || (needsPhoneSync ? "Sync your music" : "drop in your music")}>{needsPhoneSync ? "Sync your music" : heroDisplayTitle}</h2>
           <p>{needsPhoneSync ? "Pair with your computer in Settings → Library." : heroDisplayArtist}</p>
 
@@ -149,7 +157,7 @@ export default function HomeView(props: HomeViewProps) {
           <div className="homeJumpActions">
             <button className="homeStartButton" type="button" onClick={needsPhoneSync ? () => actions.nav.go("settings", "nav") : startListening} disabled={!needsPhoneSync && !currentSong && playableSongCount === 0}>
               {needsPhoneSync ? <Smartphone size={12} aria-hidden="true" /> : <Play size={12} fill="currentColor" strokeWidth={2.3} aria-hidden="true" />}
-              <span>{needsPhoneSync ? "Set up phone sync" : android ? (currentSong ? "Play" : "Shuffle music") : "Start Listening"}</span>
+              <span>{needsPhoneSync ? "Set up phone sync" : android ? (currentSong ? "Play" : "Shuffle music") : currentSong ? "Play track" : "Start Listening"}</span>
             </button>
             {!needsPhoneSync ? <button className="homeRoundButton" type="button" onClick={shuffleLibrarySongsAction} disabled={playableSongCount < 2} aria-label="shuffle library" title="Shuffle library">
               <Shuffle size={14} strokeWidth={2.2} aria-hidden="true" />
@@ -160,14 +168,13 @@ export default function HomeView(props: HomeViewProps) {
           </div>
         </div>
 
-        <ArtworkBackdrop song={currentSong} />
       </section>
     ),
     listenNow: (
       <section className="homeSection homeListenSection" aria-labelledby="home-listen-title">
         <h3 id="home-listen-title">Listen now</h3>
         {listenNowSongs.length ? (
-          <div className="homeListenGrid">
+          <div className="homeListenGrid" data-count={listenNowSongs.length}>
             {listenNowSongs.map((song) => {
               const active = song.id === currentId;
               return (
@@ -179,7 +186,7 @@ export default function HomeView(props: HomeViewProps) {
                   onContextMenu={(event) => void actions.openSongMenu(event, song)}
                   title={`play ${song.title}`}
                 >
-                  <Cover song={song} className="homeListenCover" />
+                  <Cover song={song} className="homeListenCover" preferThumbnail />
                   <span className="homeListenCopy">
                     <strong>{prettyTitle(song.title, 6)}</strong>
                     <small>{prettyMeta(song.artist)}</small>
@@ -210,7 +217,7 @@ export default function HomeView(props: HomeViewProps) {
               onOpen={() => actions.openCollection(target)}
               onPlay={() => actions.playCollection(target)}
               onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-              cover={<span className="homeArtistCoverWrap"><Cover song={song} className="homeArtistCover" /></span>}
+              cover={<span className="homeArtistCoverWrap"><Cover song={song} className="homeArtistCover" preferThumbnail /></span>}
             >
               <strong>{prettyMeta(target.title)}</strong>
             </MediaCard>
@@ -229,6 +236,7 @@ export default function HomeView(props: HomeViewProps) {
 
   return (
     <div className="homePage" style={ambientStyle}>
+      {showAtmosphere ? <div className="homeAtmosphere" aria-hidden="true" /> : null}
       <header className="homeTopBar">
         <h1>Home</h1>
         <button
