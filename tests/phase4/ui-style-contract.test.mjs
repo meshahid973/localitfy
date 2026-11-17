@@ -188,3 +188,142 @@ test("shared focus remains visible and component insets override the app and Lin
   assert.match(queue, /\.app \.queuePanel button\.queuePanelRowMain:focus-visible\s*\{\s*outline:[^}]*!important/);
   assert.match(dropdown, /\.arcDropdownOption:focus-visible\s*\{\s*outline:[^}]*!important/);
 });
+
+
+test("Cover virtual rows keep fixed positions when hovered and gallery items fit their slots", () => {
+  const css = read("src/features/covers/covers.css");
+  const songs = read("src/features/covers/components/VirtualCoverSongList.tsx");
+  const gallery = read("src/features/covers/components/VirtualCoverGalleryGrid.tsx");
+  assert.match(songs, /style=\{\{ top: \`\$\{virtualRow\.start - scrollMargin\}px\` \}\}/);
+  assert.match(gallery, /style=\{\{ top: \`\$\{virtualRow\.start - scrollMargin\}px\`/);
+  assert.doesNotMatch(songs + gallery, /translate3d\(0, var\(--cover-/);
+  assert.match(css, /height: 228px/);
+  assert.match(gallery, /estimateSize: \(\) => 228/);
+  assert.match(css, /coverSongPickVirtual[\s\S]*?transform: none !important/);
+  assert.match(gallery, /Math\.max\(1, Math\.floor/);
+  assert.match(gallery, /if \(!entries\.length\) return <div ref=\{parentRef\}/);
+  assert.match(songs, /if \(!songs\.length\) return <div ref=\{parentRef\}/);
+  assert.match(songs, /aria-pressed=\{selected\}/);
+});
+
+
+test("Artists and Genres share collection primitives but own their variants", () => {
+  const artist = read("src/features/artists/ArtistsView.tsx");
+  const genre = read("src/features/genres/GenresView.tsx");
+  const shared = read("src/shared/ui/collection-layout.css");
+  const artistCss = read("src/features/artists/artists.css");
+  const genreCss = read("src/features/genres/genres.css");
+  for (const view of [artist, genre]) {
+    assert.match(view, /import "\.\.\/\.\.\/shared\/ui\/collection-layout\.css";/);
+    assert.match(view, /className="collectionBrowsePage/);
+    assert.match(view, /className="collectionBrowseGrid/);
+    assert.match(view, /className="collectionBrowseCard/);
+  }
+  assert.doesNotMatch(genre, /import "\.\.\/artists\/artists\.css"/);
+  assert.match(artist, /import "\.\/artists\.css";/);
+  assert.match(genre, /import "\.\/genres\.css";/);
+  assert.match(shared, /background: transparent/);
+  assert.match(shared, /color: var\(--lt-text\)/);
+  assert.match(shared, /@media \(max-width: 520px\)/);
+  assert.match(artistCss, /\.artistCardCover/);
+  assert.match(genreCss, /\.genreCardCover/);
+  assert.doesNotMatch(artistCss, /\.artistsGrid/);
+  assert.doesNotMatch(genreCss, /\.artistsPage/);
+});
+
+
+const resetPageSelectors = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout", ".downloadsLayoutV031", ".analyticsStudioV339", ".settingsPageV027"];
+
+test("shared shell owns viewport and responsive sidebar behavior only", () => {
+  const main = read("src/main.tsx");
+  const shell = read("src/features/shell/AppShell.tsx");
+  const css = read("src/styles/view-shell.css");
+
+  assert.equal(shell.includes('import "../../styles/view-shell.css";'), true, "AppShell does not own shared shell CSS");
+  assert.equal(main.includes('import "./styles/view-shell.css";'), false, "view-shell CSS should not be centrally owned by main");
+  assert.equal(main.includes('import "./styles/page-foundation.css";'), false, "retired reset stylesheet returned");
+  assert.equal(main.includes('import "./features/shell/performance.css";'), true, "performance policy is not loaded globally");
+  assert.equal(css.includes(".pageTransition-home"), true, "shared shell lost its Home exclusion boundary");
+
+  for (const marker of [
+    "--workspace-sidebar-expanded",
+    "--workspace-sidebar-current",
+    "--workspace-sidebar-rail: var(--lt-sidebar-closed)",
+    "--lt-sidebar-closed: 72px",
+    "grid-template-columns: var(--workspace-sidebar-current)",
+    '[data-sidebar-behavior="slim"]',
+    '[data-sidebar-behavior="hover"]',
+    ":focus-within",
+    'content: "LOCALTIFY"'
+  ]) {
+    assert.equal(css.includes(marker), true, "sidebar behavior guard is missing " + marker);
+  }
+
+  assert.equal(css.includes("--workspace-max"), false, "retired centered workspace cap returned");
+});
+
+test("shared shell no longer owns feature page designs", () => {
+  const css = read("src/styles/view-shell.css");
+  for (const selector of resetPageSelectors) assert.equal(css.includes(selector), false, "shared shell still styles reset page selector " + selector);
+  assert.equal(css.includes(".libraryPage"), false, "Library design leaked into the shell owner");
+  assert.ok(Buffer.byteLength(css.replace(/\r\n/g, "\n")) < 20 * 1024, "shared shell exceeded its 20 KiB budget");
+});
+
+
+test("shared empty/error cards use theme surfaces rather than hard-coded dark paint", () => {
+  const css = read("src/shared/ui/view-ui.css");
+  assert.match(css, /background:\s*linear-gradient\([\s\S]*?\),\s*var\(--lt-surface\)/);
+  assert.match(css, /--state-rgb: 255, 88, 116/);
+  assert.match(css, /--state-rgb: 67, 234, 139/);
+  assert.doesNotMatch(css, /rgba\(8,\s*8,\s*13/);
+  assert.doesNotMatch(css, /backdrop-filter/);
+});
+
+test("media play overlay remains visible on touch and focusable on keyboard", () => {
+  const css = read("src/shared/ui/media-card.css");
+  assert.match(css, /@media \(hover: none\), \(pointer: coarse\)/);
+  assert.match(css, /\.mediaCardPlay:focus-visible/);
+  assert.match(css, /color: var\(--accent-contrast, var\(--lt-bg\)\)/);
+});
+
+test("page search, settings controls and sidebar use the shared token and icon system", () => {
+  const page = read("src/shared/ui/page-header.css");
+  const settings = read("src/features/settings/settings-premium.css");
+  const sidebar = read("src/features/shell/SidebarNav.tsx");
+  assert.match(page, /\.pageHeaderSearch:focus-visible/);
+  assert.match(page, /outline: 2px solid var\(--lt-accent\)/);
+  assert.doesNotMatch(settings.slice(settings.indexOf(".settingsPage.settingsPageV027 {"),settings.indexOf("}",settings.indexOf(".settingsPage.settingsPageV027 {"))), /--settings-text:/);
+  assert.match(sidebar, /className="navLucideIcon" size=\{20\} strokeWidth=\{2\}/);
+});
+
+
+test("Settings controls retain theme-driven borders and hover surfaces", () => {
+  const css = read("src/features/settings/settings.css");
+  assert.match(css, /\.sidebarTabsButton:hover:not\(:disabled\)[\s\S]*?background: var\(--settings-elevated\);/);
+  assert.doesNotMatch(css, /rgba\(255,\s*255,\s*255,\s*\.(?:16|18)\)/);
+  assert.doesNotMatch(css, /background: rgba\(255,\s*255,\s*255,\s*\.07\)/);
+});
+
+test("playlist and album hints use semantic tokens, not fixed dark-theme paints", () => {
+  const playlists = read("src/features/playlists/playlists.css");
+  const albums = read("src/features/albums/albums.css");
+  assert.match(playlists, /\.playlistTrackRow \.iconAction:hover \{ color: var\(--lt-danger\)/);
+  assert.match(albums, /\.albumFolderPreviewCopyV309 ul \{[^}]*color: var\(--albums-muted\)/);
+  assert.doesNotMatch(playlists + albums, /#eba4ad|#d0b8a3/);
+});
+
+test("download errors, progress and warnings follow Localtify tokens", () => {
+  const css = read("src/features/downloads/downloads.css");
+  assert.match(css, /border: 1px solid color-mix\(in srgb, var\(--lt-danger\) 28%, transparent\)/);
+  assert.match(css, /background: color-mix\(in srgb, var\(--lt-danger\) 8%, var\(--downloads-surface\)\)/);
+  assert.match(css, /background: var\(--downloads-accent\)/);
+  assert.doesNotMatch(css, /#efb5b7|#e7b2a3|#79a7c4/);
+});
+
+
+test("lyrics and portal menus use theme-aware foreground and surfaces", () => {
+  const lyrics = read("src/features/lyrics/lyrics.css");
+  assert.match(lyrics, /\.lyricsView\{[^}]*color: var\(--lt-text\);[^}]*background: var\(--lt-bg-elevated\)/);
+  assert.doesNotMatch(lyrics, /color: #fff;/);
+  assert.match(read("src/shared/ui/ArcDropdownMenu.tsx"), /"--lt-bg-elevated"/);
+});
