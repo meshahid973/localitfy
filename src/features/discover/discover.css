@@ -200,3 +200,8 @@
 .discoverSearch :is(input, select) { min-width: 0; min-height: var(--lt-control-height); padding: 0 var(--lt-space-3); border: 1px solid var(--lt-border); border-radius: var(--lt-radius-item); background: var(--lt-surface-soft); color: var(--lt-text); font: inherit; }
 .discoverSearch input { flex: 1 1 200px; }
 .discoverSearch :is(input, select):focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 2px; }
+
+.discoverOptional { color: var(--lt-muted); font-size: var(--lt-text-base); }
+.discoverOptional > summary { padding: var(--lt-space-2) 0; cursor: pointer; color: var(--lt-text); }
+.discoverOptional[open] > .discoverKey { margin-block: var(--lt-space-2); }
+.discoverOptional > summary:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 2px; }

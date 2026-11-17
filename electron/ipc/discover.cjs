@@ -20,7 +20,7 @@ function normalizeCatalog(kind, items) {
   const seen = new Set();
   const result = [];
   for (const item of Array.isArray(items) ? items.slice(0, 25) : []) {
-    if (!item || typeof item.id !== "string" || !MBID.test(item.id) || seen.has(item.id)) continue;
+    if (!item || typeof item.id !== "string" || !MBID.test(item.id) || seen.has(item.id.toLowerCase())) continue;
     const title = cleanText(kind === "artist" ? item.name : item.title);
     if (!title) continue;
     const artist = Array.isArray(item["artist-credit"]) ? item["artist-credit"].slice(0, 12)
@@ -28,7 +28,7 @@ function normalizeCatalog(kind, items) {
     const subtitle = kind === "artist"
       ? [cleanText(item.disambiguation), cleanText(item.country)].filter(Boolean).join(" · ")
       : [artist, cleanText(item["first-release-date"])].filter(Boolean).join(" · ");
-    seen.add(item.id);
+    seen.add(item.id.toLowerCase());
     result.push({ id: item.id, title, artist, subtitle, url: "https://musicbrainz.org/" + endpoint + "/" + item.id });
   }
   return result;
@@ -53,7 +53,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       if (catalogRunning && catalogRunning.key !== key)
         return { status: "error", error: "Another catalog search is in progress. Try again when it finishes." };
       if (!catalogRunning) {
-        const promise = Promise.resolve().then(() => musicBrainzClient.searchCatalog(kind, term))
+        const promise = Promise.resolve().then(() => getSettings().discoverEnabled === true ? musicBrainzClient.searchCatalog(kind, term) : [])
           .then(items => normalizeCatalog(kind, items))
           .finally(() => { if (catalogRunning?.promise === promise) catalogRunning = null; });
         catalogRunning = { key, promise };

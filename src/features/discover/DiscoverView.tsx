@@ -115,6 +115,8 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its optional Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
       <p>Search the public MusicBrainz catalog without an account or key. Only your search text is sent. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library.</p>
+      <details className="discoverOptional" open={Boolean(keyDraft) || undefined}>
+      <summary>Optional Last.fm recommendations</summary>
       <label className="discoverKey">
         <span>Last.fm API key (optional)</span>
         <input value={keyDraft} onChange={(event) => setKeyDraft(event.currentTarget.value)} placeholder="32 letters and numbers" spellCheck={false} autoComplete="off" />
@@ -122,16 +124,17 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       <p className="discoverHint">Keys are free. You need a Last.fm account, which is separate from Google; if you’re not signed in to Last.fm, it asks you to first and then opens the form. Paste the “API key” it shows here, not the shared secret.
         {" "}<button type="button" className="discoverLink" onClick={() => openLink("https://www.last.fm/api/account/create")}>Get a key <ExternalLink size={12} /></button>
         {" · "}<button type="button" className="discoverLink" onClick={() => openLink("https://www.last.fm/join?next=/api/account/create")}>No account? Sign up <ExternalLink size={12} /></button></p>
+      </details>
       <div className="discoverActions">
         <button type="button" className="heroMain" disabled={Boolean(keyDraft.trim()) && !API_KEY.test(keyDraft.trim())} onClick={() => void turnOn()}>
-          <Compass size={15} /><span>{settings.discoverEnabled ? "Save settings" : "Turn on Discover"}</span>
+          <Compass size={15} /><span>{settings.discoverEnabled ? "Save settings" : "Enable public discovery"}</span>
         </button>
         {settings.discoverEnabled ? <button type="button" className="softButton" onClick={() => { catalogRequestRef.current += 1; setCatalog(null); setCatalogLoading(false); void updateSetting("discoverEnabled", false); }}>Turn off Discover</button> : null}
       </div>
     </div>
   );
 
-  const ready = result?.status === "ready" ? result : null;
+  const ready = settings.discoverEnabled && result?.status === "ready" ? result : null;
   const seedsLine = useMemo(() => {
     if (!ready?.seeds.length) return "";
     const shown = ready.seeds.slice(0, 3);
