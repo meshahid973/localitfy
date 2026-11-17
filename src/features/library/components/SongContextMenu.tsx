@@ -1,4 +1,4 @@
-import { Disc3, Heart, ListEnd, Pencil, Play, Plus, Radio, SkipForward, Tags, ThumbsDown, Trash2, UserRound, UserX } from "lucide-react";
+import { Heart, ListEnd, Pencil, Play, Plus, Radio, SkipForward, Tags, ThumbsDown, Trash2, UserRound, UserX } from "lucide-react";
 import { isAndroidApp } from "../../../app/platform";
 import { Cover } from "../../covers/Cover";
 import { ContextMenuLayer } from "../../../shared/ui/ContextMenuLayer";
@@ -22,7 +22,6 @@ export type SongContextMenuProps = {
   toggleLike: (songId: string) => unknown;
   askRemoveSong: (songId: string) => unknown;
   goToArtist: (artistName: string) => unknown;
-  goToAlbum: (song: Song) => unknown;
   /** Present while music analysis is on, since only recommendations use it. */
   notForMe?: { marks: NotForMeMarks; toggle: (kind: NotForMeKind, value: string) => unknown };
   /** Present while MusicBrainz tagging is on. */
@@ -41,7 +40,6 @@ export default function SongContextMenu({
   toggleLike,
   askRemoveSong,
   goToArtist,
-  goToAlbum,
   notForMe,
   findOnMusicBrainz
 }: SongContextMenuProps) {
@@ -97,11 +95,6 @@ export default function SongContextMenu({
             <span className="songContextMenuIcon"><UserRound size={13} strokeWidth={3} /></span> go to {artistNames.length > 1 ? prettyMeta(artistName) : "artist"}
           </button>
         ))}
-        {song.album?.trim() ? (
-          <button type="button" role="menuitem" onClick={() => { onClose(); goToAlbum(song); }}>
-            <span className="songContextMenuIcon"><Disc3 size={13} strokeWidth={3} /></span> go to album
-          </button>
-        ) : null}
         {/* Song details are edited on the Mac. */}
         {isAndroidApp() ? null : <>
         <div className="songContextMenuDivider" aria-hidden="true" />

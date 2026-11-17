@@ -3,12 +3,11 @@ import { Play, Radio } from "lucide-react";
 import { Cover } from "../covers/Cover";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
-import type { LocalAlbumEntry } from "../albums/album.types";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { useHomeDailyMixes } from "./useHomeDailyMixes";
 import { pickHomeMixArtwork } from "./homeShelfPicks";
 import { MediaCard } from "../../shared/ui/MediaCard";
-import { albumTarget, mixTarget, useAppActions } from "../shell/appActions";
+import { mixTarget, useAppActions } from "../shell/appActions";
 import { isAndroidApp } from "../../app/platform";
 
 type SectionHeadProps = { id: string; title: string; action?: ReactNode };
@@ -91,36 +90,6 @@ export function HomeSongRail({ id, title, songs, currentId, selectSong, playSong
             </span>
           </MediaCard>
         ))}
-      </div>
-    </section>
-  );
-}
-
-type AlbumRailProps = { albums: readonly LocalAlbumEntry[] };
-
-/** Newest albums. Clicking one opens its album page; the round button plays it. */
-export function HomeAlbumRail({ albums }: AlbumRailProps) {
-  const actions = useAppActions();
-  if (!albums.length) return null;
-  return (
-    <section className="homeSection homeReleasesSection homeAlbumsSection" aria-labelledby="home-new-albums-title">
-      <HomeSectionHead id="home-new-albums-title" title="New albums" />
-      <div className="homeReleaseRail" tabIndex={0} role="region" aria-labelledby="home-new-albums-title">
-        {albums.map((album) => {
-          const cover = album.coverSong ?? album.songs[0] ?? null;
-          const target = albumTarget(album);
-          return (
-            <MediaCard key={album.id} className="homeReleaseCard" openLabel={`open ${album.title}`} playLabel={`play ${album.title}`}
-              onOpen={() => actions.openCollection(target)} onPlay={() => actions.playCollection(target)}
-              onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-              cover={<span className="homeReleaseCoverWrap">{cover ? <Cover song={cover} className="homeReleaseCover" preferThumbnail /> : null}</span>}>
-              <span className="homeReleaseCopy">
-                <strong>{prettyTitle(album.title, 5)}</strong>
-                <small>{prettyMeta(album.albumArtist || album.artist)} · {album.trackCount} track{album.trackCount === 1 ? "" : "s"}</small>
-              </span>
-            </MediaCard>
-          );
-        })}
       </div>
     </section>
   );

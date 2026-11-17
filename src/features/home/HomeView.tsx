@@ -7,19 +7,17 @@ import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
-import type { LocalAlbumEntry } from "../albums/album.types";
 import type { Settings } from "../settings/settings.types";
 const HomeCustomizePanel = lazy(() => import("./HomeCustomizePanel"));
 import { visibleHomeSections, type HomeLayoutPatch, type HomeSectionId } from "./homeLayout";
-import { HomeAlbumRail, HomeDailyMixRail, HomeSongRail } from "./HomeShelves";
+import { HomeDailyMixRail, HomeSongRail } from "./HomeShelves";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { splitArtistCredits } from "../artists/artistCredits";
 import { artistTarget, useAppActions } from "../shell/appActions";
-import { pickLikedSongs, pickNewAlbums, pickNotPlayedYet, pickRecentlyPlayed, pickRediscover } from "./homeShelfPicks";
+import { pickLikedSongs, pickNotPlayedYet, pickRecentlyPlayed, pickRediscover } from "./homeShelfPicks";
 
 export type HomeViewProps = {
-  albums: readonly LocalAlbumEntry[];
   ambientStyle: CSSProperties;
   artworkAmbient?: boolean;
   bannerType?: Settings["homeBannerType"];
@@ -52,7 +50,6 @@ export type HomeViewProps = {
 
 export default function HomeView(props: HomeViewProps) {
   const {
-    albums,
     ambientStyle,
     artworkAmbient = true,
     bannerType = "dynamic",
@@ -121,10 +118,9 @@ export default function HomeView(props: HomeViewProps) {
   }, [homeListenNowSongs, homeFreshShelfSongs, showMostListened, songs]);
 
   // Only work out the shelves that are on screen; a hidden shelf costs nothing.
-  const showRecent = showing("recentlyPlayed"), showAlbums = showing("newAlbums"), showLiked = showing("likedSongs");
+  const showRecent = showing("recentlyPlayed"), showLiked = showing("likedSongs");
   const showRediscover = showing("rediscover"), showUnplayed = showing("notPlayedYet"), showMixes = showing("dailyMixes");
   const recentlyPlayedSongs = useMemo(() => (showRecent ? pickRecentlyPlayed(songs) : []), [showRecent, songs]);
-  const newAlbums = useMemo(() => (showAlbums ? pickNewAlbums(albums) : []), [showAlbums, albums]);
   const likedSongs = useMemo(() => (showLiked ? pickLikedSongs(songs) : []), [showLiked, songs]);
   const rediscoverSongs = useMemo(() => (showRediscover ? pickRediscover(songs, new Date()) : []), [showRediscover, songs]);
   const notPlayedSongs = useMemo(() => (showUnplayed ? pickNotPlayedYet(songs, new Date()) : []), [showUnplayed, songs]);
@@ -228,7 +224,6 @@ export default function HomeView(props: HomeViewProps) {
     ) : null,
     dailyMixes: <HomeDailyMixRail songsById={songsById} openDailyMixes={openDailyMixes} openAnalysisSettings={openAnalysisSettings} />,
     recentlyPlayed: <HomeSongRail id="recently-played" title="Recently played" songs={recentlyPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText={android ? undefined : "Songs you play will show up here."} findSimilar={() => props.openSimilarSongs({ kind: "recent" })} />,
-    newAlbums: <HomeAlbumRail albums={newAlbums} />,
     newReleases: <HomeSongRail id="releases" title="New Releases" songs={newReleaseSongs} currentId={currentId} selectSong={selectSong} />,
     likedSongs: <HomeSongRail id="liked" title="Liked songs" songs={likedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="Tap the heart on a song to keep it here." />,
     rediscover: <HomeSongRail id="rediscover" title="Rediscover" songs={rediscoverSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="Songs you played a lot but not in the last month will come back here." />,

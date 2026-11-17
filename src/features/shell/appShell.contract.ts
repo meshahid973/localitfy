@@ -3,7 +3,6 @@ import type { HomeViewProps } from "../home/HomeView";
 import type { LibraryViewProps } from "../library/LibraryView";
 import type { ArtistsViewProps } from "../artists/ArtistsView";
 import type { GenresViewProps } from "../genres/GenresView";
-import type { AlbumsViewProps } from "../albums/AlbumsView";
 import type { PlaylistsViewProps } from "../playlists/PlaylistsView";
 import type { CoversViewProps } from "../covers/CoversView";
 import type { AnalyticsViewProps } from "../analytics/AnalyticsView";
@@ -87,7 +86,7 @@ export type ShellModalContract = {
 export type AppShellProps = {
   frame: ShellFrameContract; updates: ShellUpdateContract; screensaver: ShellScreensaverContract;
   effects: ShellEffectsContract; onboarding: ShellOnboardingContract; navigation: ShellNavigationContract;
-  home: HomeViewProps; library: LibraryViewProps; artists: ArtistsViewProps; genres: GenresViewProps; albums: AlbumsViewProps; playlists: PlaylistsViewProps;
+  home: HomeViewProps; library: LibraryViewProps; artists: ArtistsViewProps; genres: GenresViewProps; playlists: PlaylistsViewProps;
   covers: CoversViewProps; analytics: AnalyticsViewProps; discover: DiscoverViewProps; settingsView: SettingsViewProps;
   downloads: DownloadsViewProps; playerBar: PlayerBarProps; modals: ShellModalContract;
   playbackAudio: PlaybackAudioElementProps; collections: ShellCollectionsContract;

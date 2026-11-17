@@ -11,7 +11,6 @@ export type AppMenuActions = {
   nav: Pick<NavigationHistory, "gesture">;
   openSettings: () => void;
   importSongs: () => unknown;
-  importAlbumFolder?: () => unknown;
   openFeedback: () => void;
   checkForUpdates: () => unknown;
 };

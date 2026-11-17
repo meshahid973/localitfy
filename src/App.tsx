@@ -59,7 +59,6 @@ import { useScreensaverController } from "./features/shell/useScreensaverControl
 import { useDiagnosticsInfo } from "./features/shell/useDiagnosticsInfo";
 import { useFeedbackController } from "./features/feedback";
 import { usePlaylistsController } from "./features/playlists";
-import { useAlbumsController } from "./features/albums/useAlbumsController";
 import { useAppMenuCommands } from "./features/shell/useAppMenuCommands";
 import { updateStatusLabel, useUpdatesController } from "./features/updates";
 import { useSettingsController } from "./features/settings";
@@ -71,7 +70,7 @@ import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderB
 import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
 import { createMetadataCleanPreview } from "./features/library/metadataCleanPreview";
 import {
-  buildAlbumIdBySongId, getPlayableUniqueSongIds, getRepeatPreview, getSourceLoopRestart, getSourcePreviousStep, playbackSourceRef,
+  getPlayableUniqueSongIds, getRepeatPreview, getSourceLoopRestart, getSourcePreviousStep,
   repeatButtonTitleFor, resolveNowPlayingContext
 } from "./features/player/playbackSource";
 import type { PlaybackSource, PlaybackSourceRef } from "./features/player/playbackSource";
@@ -508,6 +507,8 @@ function MainModeApp() {
 
   function changeView(nextView: View, source: "nav" | "onboarding" | "settings" | "unknown" = "nav") {
     setLyricsOpen(false);
+    // Compatibility for stale links from older versions; Albums no longer has a route.
+    if (nextView === "albums") nextView = "library";
     if (view === nextView) return;
 
     if (viewSwitchTimerRef.current !== null) {
@@ -5535,10 +5536,6 @@ function MainModeApp() {
   const closeLyrics = useCallback(() => setLyricsOpen(false), []);
   const getLyricsTime = useCallback(() => audioRef.current?.currentTime ?? timeRef.current, []);
 
-  function goToSongAlbum(song: Song) {
-    nav.goToSongAlbum(song.id, albumIdBySongId, () => setStatusText("no album found for this song"));
-  }
-
   function revealNowPlaying() {
     nav.revealNowPlaying(nowPlayingContext);
   }
@@ -6746,7 +6743,6 @@ function MainModeApp() {
     setPlayQueue((queue) => remapSongIds(queue, keptFor));
     setQueueHistory((history) => history.map((item) => keptFor.has(item.songId) ? { ...item, songId: keptFor.get(item.songId)! } : item));
     setPlaylists((items) => items.map((item) => ({ ...item, songIds: remapSongIds(item.songIds, keptFor) })));
-    albumsController.remapAlbumSongs(keptFor);
     setSongs(applyLibraryOrder(sanitizeSongList(nextSongs)));
   }
 
@@ -7712,31 +7708,15 @@ function MainModeApp() {
     updatePrompt.status !== "latest" &&
     updatePrompt.status !== "dev";
 
-  const albumsController = useAlbumsController({
-    view,
-    reducedMotion: settings.reducedMotion,
-    songs,
-    songsById,
-    setSongs,
-    setLibraryScanBusy,
-    setLibraryScanMessage,
-    setStatusText,
-    patchSongLocal
-  });
-
   useAppMenuCommands({
     changeView, nav,
     openSettings: () => openSettingsPanel(),
     importSongs,
-    importAlbumFolder: () => albumsController.scanAlbumFolderImport("single"),
     openFeedback: openFeedbackPrompt,
     checkForUpdates: () => { openSettingsPanel("updates"); return manualUpdateCheck(); }
   });
 
-  const selectedAlbum = albumsController.selectedAlbum;
-  const selectedAlbumSourceRef = selectedAlbum ? playbackSourceRef("album", selectedAlbum.title, selectedAlbum.id) : null;
-  const albumIdBySongId = useMemo(() => buildAlbumIdBySongId(albumsController.localAlbums), [albumsController.localAlbums]);
-  const nowPlayingContext = resolveNowPlayingContext(currentSong, activePlaylist, playbackSource, albumsController.localAlbums, albumIdBySongId);
+  const nowPlayingContext = resolveNowPlayingContext(currentSong, activePlaylist, playbackSource, [], new Map());
   const queuePanelAutoNextSong = queuePanelOpen && !playQueue.length && !isShuffle ? getNextPlayableSongForCache() : null;
   // Repeat and shuffle already decide what plays forever, so radio only fills in when playback would run out.
   const songRadioEnabled = settings.songRadio && settings.experimentalMusicAnalysis && repeatMode === "off" && !repeatPlaylist && !isShuffle;
@@ -7860,7 +7840,6 @@ function MainModeApp() {
       history: nav
     },
     home: {
-      albums: albumsController.localAlbums,
       ambientStyle,
       currentId,
       currentSong: visualCurrentSong,
@@ -7922,18 +7901,6 @@ function MainModeApp() {
     },
     genres: {
       songs
-    },
-    albums: {
-      ...albumsController,
-      currentId,
-      currentSong: visualCurrentSong,
-      openPlaylistPicker,
-      playAlbumSongs: (songIds: string[], albumTitle?: string) => playAlbumSongs(songIds, albumTitle, selectedAlbumSourceRef),
-      queueAlbumSongs,
-      selectSong,
-      shuffleAlbumSongs: (songIds: string[], albumTitle?: string) => playAlbumSongs(songIds, albumTitle, selectedAlbumSourceRef, true),
-      songs,
-      toggleLike
     },
     playlists: {
       dailyMixes: { songs, savePlaylist: createPlaylistFromSongs,
@@ -8154,7 +8121,6 @@ function MainModeApp() {
         toggleLike,
         askRemoveSong,
         goToArtist: nav.openArtistPage,
-        goToAlbum: goToSongAlbum,
         openSimilarSongs: (song: Song) => setSimilarRequest({ kind: "song", songId: song.id }),
         notForMe: settings.experimentalMusicAnalysis ? notForMe : undefined
       },

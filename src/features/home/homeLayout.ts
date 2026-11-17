@@ -4,7 +4,6 @@ export const homeSections = [
   { id: "dailyMixes", label: "Daily mixes" },
   { id: "recentlyPlayed", label: "Recently played" },
   { id: "mostListened", label: "Most listened" },
-  { id: "newAlbums", label: "New albums" },
   { id: "newReleases", label: "New releases" },
   { id: "likedSongs", label: "Liked songs" },
   { id: "rediscover", label: "Rediscover" },
