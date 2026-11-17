@@ -66,7 +66,6 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
   return (
     <section data-page-section="artists" className="collectionBrowsePage artistsPage" aria-label="artists">
       <PageHeader
-        eyebrow="local artists"
         title="Artists"
         description="Every artist in your song tags. Semicolon and “feat.” credits are listed individually."
       >

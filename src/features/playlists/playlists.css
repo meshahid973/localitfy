@@ -11,11 +11,6 @@
   color: var(--playlist-text);
 }
 .playlistsPage *, .playlistsPage *::before, .playlistsPage *::after { box-sizing: border-box; }
-.playlistsPage .panel {
-  min-width: 0; padding: 20px; border: 1px solid var(--playlist-border) !important;
-  border-radius: 14px; background: var(--playlist-surface) !important;
-  box-shadow: none !important;
-}
 .playlistsPage .eyebrow { margin: 0 0 9px; color: var(--lt-accent); font-size: 11px; letter-spacing: .1em; font-weight: 800; }
 .playlistsPage h3 { margin: 0; color: var(--lt-text); font-size: clamp(18px,1.55vw,24px); font-weight: 700; letter-spacing: -.03em; } .playlistsPage p:not(.eyebrow, .pageHeader p) { color: var(--playlist-muted); font-size: 13px; line-height: 1.5; }
 .playlistCoverCollage { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); aspect-ratio: 1; gap: 3px; overflow: hidden; background: var(--lt-surface-raised); border-radius: 12px; }
@@ -41,9 +36,9 @@
 .playlistShelfGrid { min-width: 0; display: grid; grid-template-columns: repeat(auto-fill,minmax(min(205px,100%),1fr)); gap: 12px; }
 .playlistShelfCard {
   min-width: 0; position: relative; display: grid; grid-template-columns: 66px minmax(0,1fr);
-  align-items: center; gap: 11px; padding: 10px;
-  border: 1px solid var(--playlist-border); border-radius: 11px;
-  color: var(--playlist-text); background: var(--lt-surface); font: inherit; text-align: left; cursor: pointer;
+  align-items: center; gap: var(--lt-space-3); padding: var(--lt-space-2);
+  border: 1px solid transparent; border-radius: var(--lt-control-radius);
+  color: var(--playlist-text); background: transparent; font: inherit; text-align: left; cursor: pointer;
 }
 .playlistShelfCard:hover { border-color: rgba(var(--lt-accent-rgb), .20); background: var(--lt-surface-raised); }
 .playlistShelfCard.dropTarget { outline: 2px dashed rgba(var(--lt-accent-rgb), .58); outline-offset: -3px; }

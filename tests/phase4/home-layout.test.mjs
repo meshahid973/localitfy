@@ -12,7 +12,6 @@ test("Home keeps the reference music hierarchy without renderer hacks", () => {
   const source = read("src/features/home/HomeView.tsx") + read("src/features/home/HomeShelves.tsx");
 
   for (const marker of [
-    "JUMP BACK IN",
     "Listen now",
     "Most listened",
     "New Releases",

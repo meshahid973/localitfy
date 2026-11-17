@@ -5,6 +5,7 @@ import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2 } fro
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
 import type { DuplicatesMergeResult } from "./duplicates/DuplicatesDialog";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
+import { PageHeader } from "../../shared/ui/PageHeader";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { LocaltifyStateCard, MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import type { LibrarySortMode } from "./librarySort";
@@ -77,46 +78,40 @@ export default function LibraryView(props: LibraryViewProps) {
 
   return (
     <section data-page-section="library" className={`libraryPage ${isLiked ? "libraryPageLiked" : ""}`}>
-      <header className="libraryTopBar">
-        <div className="libraryHeading">
-          <h1>{isLiked ? "Liked songs" : "Library"}</h1>
-        </div>
-
-        <div className="libraryTopTools">
-          <input
-            className="librarySearch"
-            value={query}
-            onChange={(event) => handleSearchInput(event.currentTarget.value)}
-            placeholder={isLiked ? "search liked songs" : "search your library"}
-            aria-label={isLiked ? "search liked songs" : "search library"}
-          />
-          <ArcDropdownMenu
-            className="librarySort"
-            ariaLabel="Sort songs"
-            value={librarySortMode}
-            items={[{ value: "library", label: "library order" }, { value: "artist", label: "artist A–Z" }]}
-            onValueChange={setLibrarySortMode}
-          />
-          {!isLiked ? (
-            <>
-              <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
-                <ActionLabel icon={Shuffle}>shuffle</ActionLabel>
-              </button>
-              {isAndroidApp() ? null : <button className="libraryAction" type="button" onClick={() => setDuplicatesOpen(true)} disabled={songs.length < 2} title="Find songs that are in your library more than once">
-                <ActionLabel icon={Copy}>duplicates</ActionLabel>
-              </button>}
-            </>
-          ) : (
-            <button className="libraryAction" type="button" onClick={() => props.openSimilarSongs({ kind: "liked" })}
-              disabled={!songs.some((song) => song.liked)} title="Find songs in your library that sound like your liked songs">
-              <ActionLabel icon={Radio}>more like these</ActionLabel>
+      <PageHeader title={isLiked ? "Liked songs" : "Library"}>
+        <input
+          className="pageHeaderSearch librarySearch"
+          value={query}
+          onChange={(event) => handleSearchInput(event.currentTarget.value)}
+          placeholder={isLiked ? "search liked songs" : "search your library"}
+          aria-label={isLiked ? "search liked songs" : "search library"}
+        />
+        <ArcDropdownMenu
+          className="librarySort"
+          ariaLabel="Sort songs"
+          value={librarySortMode}
+          items={[{ value: "library", label: "library order" }, { value: "artist", label: "artist A–Z" }]}
+          onValueChange={setLibrarySortMode}
+        />
+        {!isLiked ? (
+          <>
+            <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
+              <ActionLabel icon={Shuffle}>shuffle</ActionLabel>
             </button>
-          )}
-        </div>
-      </header>
+            {isAndroidApp() ? null : <button className="libraryAction" type="button" onClick={() => setDuplicatesOpen(true)} disabled={songs.length < 2} title="Find songs that are in your library more than once">
+              <ActionLabel icon={Copy}>duplicates</ActionLabel>
+            </button>}
+          </>
+        ) : (
+          <button className="libraryAction" type="button" onClick={() => props.openSimilarSongs({ kind: "liked" })}
+            disabled={!songs.some((song) => song.liked)} title="Find songs in your library that sound like your liked songs">
+            <ActionLabel icon={Radio}>more like these</ActionLabel>
+          </button>
+        )}
+      </PageHeader>
 
       {!isLiked ? (
-        <div className={`libraryStats ${missingFileCount ? "" : "libraryStatsThree"}`} aria-label="library summary">
+        <div className="libraryStats" aria-label="library summary">
           <div className="libraryStat"><strong>{songs.length}</strong><span>tracks</span></div>
           <div className="libraryStat"><strong>{libraryAlbumCount}</strong><span>albums</span></div>
           <div className="libraryStat"><strong>{libraryArtistCount}</strong><span>artists</span></div>

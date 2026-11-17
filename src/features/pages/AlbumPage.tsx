@@ -60,7 +60,7 @@ export default function AlbumPage({ albumId, albums, currentId, isPlaying, toggl
   return (
     <section data-page-section="album" className="collectionPage albumPage" aria-label={`${album.title} album`}>
       <CollectionHero
-        eyebrow={folder ? "folder album" : manual ? "your album" : "album"}
+        typeLabel={folder ? "folder album" : manual ? "your album" : "album"}
         title={album.title}
         cover={<Cover song={album.coverSong} className="collectionHeroCover" priority="high" />}
         coverSong={album.coverSong}

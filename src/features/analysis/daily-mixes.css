@@ -1,8 +1,8 @@
-/* Daily mixes sit in the Playlists page and reuse its panel and playlist card look, a little larger. */
+/* Daily mixes reuse playlist artwork and spacing without a nested panel. */
 .dailyMixesHeader { flex-wrap: nowrap; }
 .dailyMixesRefresh { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; }
 .dailyMixesGrid { grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
-.playlistShelfCard.dailyMixCard { grid-template-columns: 92px minmax(0, 1fr); gap: 13px; padding: 12px; }
+.playlistShelfCard.dailyMixCard { grid-template-columns: 92px minmax(0, 1fr); gap: var(--lt-space-3); padding: var(--lt-space-2); }
 .playlistShelfCard.dailyMixCard .playlistCoverCollage { width: 92px; height: 92px; }
 .dailyMixArtists {
   overflow: hidden;

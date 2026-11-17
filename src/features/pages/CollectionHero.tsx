@@ -4,7 +4,7 @@ import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import type { Song } from "../library/song.types";
 
 export type CollectionHeroProps = {
-  eyebrow: string;
+  typeLabel: string;
   title: string;
   cover: ReactNode;
   coverSong: Song | null;
@@ -22,16 +22,15 @@ export type CollectionHeroProps = {
 };
 
 /** Top of every album, artist, genre, playlist and mix page: artwork, title, then play · shuffle · queue · more. */
-export default function CollectionHero({ eyebrow, title, cover, coverSong, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children }: CollectionHeroProps) {
+export default function CollectionHero({ typeLabel, title, cover, coverSong, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children }: CollectionHeroProps) {
   return (
     <header className={`collectionHero ${round ? "isRound" : ""}`}>
       <ArtworkBackdrop song={coverSong} />
       <div className="collectionHeroArt">{cover}</div>
       <div className="collectionHeroCopy">
-        <span className="collectionHeroEyebrow">{eyebrow}</span>
         <h1 title={title}>{title}</h1>
         {byline ? <div className="collectionHeroByline">{byline}</div> : null}
-        <p className="collectionHeroStats">{stats}</p>
+        <p className="collectionHeroStats">{typeLabel} · {stats}</p>
       </div>
       <div className="collectionHeroActions">
         <button className="collectionPlayButton" type="button" onClick={() => void onPlay()} disabled={!playable} aria-label={`play ${title}`} title="Play">

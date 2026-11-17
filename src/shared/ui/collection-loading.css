@@ -1,0 +1,8 @@
+.collectionLoading { min-width: 0; display: grid; gap: var(--lt-space-4); }
+.collectionLoading p { margin: 0; color: var(--lt-muted); font-size: var(--lt-text-base); }
+.collectionLoadingItems { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: var(--lt-space-4); }
+.collectionLoadingItem { display: flex; align-items: center; gap: var(--lt-space-3); }
+.collectionLoadingItem > span { flex: 0 0 48px; height: 48px; border-radius: var(--lt-radius-item); background: var(--lt-surface-raised); }
+.collectionLoadingItem > div { flex: 1; display: grid; gap: var(--lt-space-2); }
+.collectionLoadingItem i { display: block; width: 75%; height: 10px; border-radius: 4px; background: var(--lt-surface-raised); }
+.collectionLoadingItem i:last-child { width: 50%; }
