@@ -18,7 +18,7 @@ export function useModalFocus<T extends HTMLElement = HTMLDivElement>(active: bo
     const scopes = () => [dialog, ...(allowContextMenu ? Array.from(document.querySelectorAll<HTMLElement>(".songContextMenuLayer [role=menu]")) : []), ...Array.from(dialog.querySelectorAll<HTMLElement>('[aria-controls]'))
       .flatMap((control) => (control.getAttribute("aria-controls") || "").split(/\s+/))
       .map((id) => document.getElementById(id))
-      .filter((element): element is HTMLElement => element instanceof HTMLElement && element.getAttribute("role") === "menu" && !dialog.contains(element))];
+      .filter((element): element is HTMLElement => element instanceof HTMLElement && (element.getAttribute("role") === "menu" || (element.id === "localtify-play-queue" && element.getAttribute("role") === "dialog")) && !dialog.contains(element))];
     const contains = (target: Node | null) => scopes().some((scope) => scope.contains(target));
     const focusable = () => scopes().flatMap((scope) => Array.from(scope.querySelectorAll<HTMLElement>(FOCUSABLE)))
       .filter((element) => element.getClientRects().length > 0 && !element.closest("[hidden], [inert]"));

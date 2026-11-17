@@ -155,7 +155,7 @@
   height: 60px;
   border-radius: 50%;
   background: var(--lt-accent);
-  color: #101512;
+  color: var(--accent-contrast, #07110b);
 }
 .immersivePlay svg{ width: 28px; height: 28px; }
 .immersivePlayer :is(button,input):focus-visible{

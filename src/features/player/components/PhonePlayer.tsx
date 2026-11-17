@@ -33,13 +33,19 @@ export default function PhonePlayer(props: PhonePlayerProps) {
     toggleQueuePanel, toggleRepeat, lyrics, connect
   } = props;
   const [expanded, setExpanded] = useState(false);
-  const dialogRef = useModalFocus(expanded);
+  const dialogRef = useModalFocus(expanded && Boolean(currentSong), true);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const artSlotRef = useRef<HTMLDivElement | null>(null);
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const dragOffsetRef = useRef(0);
   const dragFrameRef = useRef<number | null>(null);
   const duration = currentDuration || currentSong?.duration || 0;
+
+  function closePlayer() {
+    if (queuePanelOpen) toggleQueuePanel();
+    if (lyrics.open) lyrics.onClose();
+    setExpanded(false);
+  }
 
   const resetDrag = () => {
     if (dragFrameRef.current !== null) cancelAnimationFrame(dragFrameRef.current);
@@ -51,6 +57,9 @@ export default function PhonePlayer(props: PhonePlayerProps) {
 
   useEffect(() => resetDrag, [expanded]);
   useEffect(() => {
+    if (!currentSong && expanded) closePlayer();
+  }, [currentSong, expanded, queuePanelOpen, lyrics]);
+  useEffect(() => {
     window.dispatchEvent(new CustomEvent("localtifyplayersheet", { detail: expanded }));
     return () => { if (expanded) window.dispatchEvent(new CustomEvent("localtifyplayersheet", { detail: false })); };
   }, [expanded]);
@@ -60,12 +69,13 @@ export default function PhonePlayer(props: PhonePlayerProps) {
     if (!expanded) return;
     const onBack = (event: Event) => {
       event.preventDefault();
-      if (lyrics.open) lyrics.onClose();
-      else setExpanded(false);
+      if (queuePanelOpen) toggleQueuePanel();
+      else if (lyrics.open) lyrics.onClose();
+      else closePlayer();
     };
     window.addEventListener("localtifyuiback", onBack);
     return () => window.removeEventListener("localtifyuiback", onBack);
-  }, [expanded, lyrics]);
+  }, [expanded, lyrics, queuePanelOpen, toggleQueuePanel]);
 
   // The system media controls (notification, lock screen) show and change shuffle and repeat too.
   const toggleRepeatRef = useRef(toggleRepeat);
@@ -116,7 +126,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
     if (!start || !touch) return;
     const dx = touch.clientX - start.x;
     const dy = touch.clientY - start.y;
-    if (dy > SWIPE_CLOSE_PX && dy > Math.abs(dx)) setExpanded(false);
+    if (dy > SWIPE_CLOSE_PX && dy > Math.abs(dx)) closePlayer();
     else if (Math.abs(dx) > SWIPE_SKIP_PX && Math.abs(dx) > Math.abs(dy) * 1.5 && event.currentTarget.classList.contains("phonePlayerStage")) {
       if (dx < 0) playNext(true);
       else playPrevious();
@@ -127,7 +137,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
 
   return (
     <>
-      <div className="phoneMiniPlayer" style={ambientStyle}>
+      <div className="phoneMiniPlayer" style={ambientStyle} inert={expanded || undefined}>
         <button type="button" className="phoneMiniOpen" aria-label={`open player: ${currentSong.title}`} aria-haspopup="dialog" aria-expanded={expanded} onClick={() => setExpanded(true)} />
         <Cover song={currentSong} className="phoneMiniArt" priority="high" preferThumbnail />
         <span className="phoneMiniMeta">
@@ -140,7 +150,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
         <button type="button" className="phoneIconButton" onClick={() => playNext(true)} aria-label="next song">
           <SkipForward size={22} strokeWidth={2.2} aria-hidden="true" />
         </button>
-        <input ref={(node) => { progressInputRefs.current[MINI_SLOT] = node; }} className="phoneMiniProgress" type="range" min="0" max="100" step="0.1"
+        <input ref={(node) => { progressInputRefs.current[MINI_SLOT] = expanded ? null : node; }} key={String(expanded)} className="phoneMiniProgress" type="range" min="0" max="100" step="0.1"
           defaultValue={displayedProgress} tabIndex={-1} aria-hidden="true" disabled />
       </div>
 
@@ -149,15 +159,16 @@ export default function PhonePlayer(props: PhonePlayerProps) {
           onKeyDown={(event) => {
             if (event.key !== "Escape" || event.defaultPrevented) return;
             event.preventDefault();
-            if (lyrics.open) lyrics.onClose();
-            else setExpanded(false);
+            if (queuePanelOpen) toggleQueuePanel();
+            else if (lyrics.open) lyrics.onClose();
+            else closePlayer();
           }}>
           {props.backgroundStyle !== "flat" && props.backgroundStyle !== "oledBlack" && props.effectiveAmbient && !props.backgrounded ? (
             <div className="phonePlayerBackdrop" aria-hidden="true"><Cover song={currentSong} className="phonePlayerBackdropArt" preferThumbnail /></div>
           ) : null}
 
           <header className="phonePlayerTop" onTouchStart={swipeStart} onTouchEnd={swipeEnd}>
-            <button type="button" className="phoneIconButton" onClick={() => setExpanded(false)} aria-label="close player">
+            <button type="button" className="phoneIconButton" onClick={closePlayer} aria-label="close player">
               <ChevronDown size={26} strokeWidth={2.2} aria-hidden="true" />
             </button>
             <span className="phonePlayerContext">
@@ -188,7 +199,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
                 {artists.map((name, index) => (
                   <Fragment key={name}>
                     {index ? ", " : null}
-                    <button type="button" onClick={() => { setExpanded(false); openArtistPage(name); }}>{prettyMeta(name)}</button>
+                    <button type="button" onClick={() => { closePlayer(); openArtistPage(name); }}>{prettyMeta(name)}</button>
                   </Fragment>
                 ))}
               </small>

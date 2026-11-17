@@ -41,3 +41,14 @@ test("immersive assets load on demand and hidden desktop controls stop receiving
   assert.match(immersive, /const ListeningArtwork = memo\(Cover\)/);
   assert.match(immersive, /const ListeningBackdrop = memo\(ArtworkBackdrop\)/);
 });
+
+test("cover color results cannot tint a different track and Android closes its overlays", () => {
+  const ambient = read("src/features/covers/cover.ambient.ts");
+  const phone = read(dir + "PhonePlayer.tsx");
+  const focus = read("src/shared/hooks/useModalFocus.ts");
+  assert.match(ambient, /sample\?\.source === coverSource \? sample\.style : EMPTY_COVER_STYLE/);
+  assert.match(ambient, /cancelled \|\| requestIdRef\.current !== requestId/);
+  assert.match(phone, /if \(queuePanelOpen\) toggleQueuePanel\(\)/);
+  assert.match(phone, /progressInputRefs\.current\[MINI_SLOT\] = expanded \? null : node/);
+  assert.match(focus, /element\.id === "localtify-play-queue"/);
+});

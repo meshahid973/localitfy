@@ -163,6 +163,10 @@
   content: "";
 }
 
+.phonePlayerBackdropArt::before{
+  content: none;
+}
+
 .phonePlayerBackdropArt,
 .phonePlayerBackdropArt img{
   width: 100%;
