@@ -86,7 +86,7 @@ server.listen(5173,async()=>{
       assert.ok(state.atmosphere&&Math.abs(state.page.x-state.atmosphere.x)<=3&&Math.abs(state.page.right-state.atmosphere.right)<=3,"ambient image should reach Home boundaries: "+JSON.stringify(state));
       assert.ok(state.hidden,"artwork shelves should not expose scrollbars");
       if(state.rail&&state.rail.scrollWidth>state.rail.width+10){
-        const moved=await win.webContents.executeJavaScript("(()=>{const rail=document.querySelector('.homeReleaseRail');rail.scrollLeft=80;return rail.scrollLeft>0})()");
+        const moved=await win.webContents.executeJavaScript("(()=>{const rail=document.querySelector('.homeReleaseRail');rail.scrollTo({left:Math.min(rail.scrollWidth-rail.clientWidth,180),behavior:'instant'});return rail.scrollLeft>0})()");
         assert.ok(moved,"hidden scrollbars must not prevent horizontal scrolling");
       }
       await win.webContents.executeJavaScript("document.querySelector('.homeFeatureCover').scrollIntoView({block:'start'})");

@@ -123,7 +123,7 @@ import {
   defaultSettings,
   settingsCategoryTabs
 } from "./features/settings/settings.constants";
-import { THEME_SWATCH_COLORS, themes } from "./features/settings/theme.constants";
+import { themes } from "./features/settings/theme.constants";
 import { APP_VERSION } from "./features/updates/update.constants";
 import {
   DISCORD_ASSET_KEYS,

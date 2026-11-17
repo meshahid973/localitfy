@@ -445,14 +445,11 @@
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
-  scroll-snap-type: x proximity;
   scroll-padding-inline: 3px;
 }
 .homeArtistRail::-webkit-scrollbar,
 .homeReleaseRail::-webkit-scrollbar { display: none; }
 .homeArtistRail:focus-visible, .homeReleaseRail:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: -2px; }
-.homeArtistCard,
-.homeReleaseCard { scroll-snap-align: start; }
 .homeMixRail { grid-auto-columns: clamp(172px, 23cqi, 280px); }
 @container (min-width: 800px) {
   .homeMixRail { grid-auto-columns: minmax(280px, 1fr); }

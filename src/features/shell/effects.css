@@ -23,7 +23,7 @@
   display: block;
 }
 
-.app :is( .orb, .localtifyStarsBackdrop, .localtifyStarsLayer, .localtifyStarParticle, .localtifyStarsNebula, .localtifyStarSweep){
+.app :is( .orb){
   display: none !important;
   opacity: 0 !important;
   background: none !important;
@@ -32,16 +32,6 @@
   pointer-events: none !important;
 }
 
-.app[data-theme="stars"],
-.app[data-theme="stars"] .content,
-.app[data-theme="stars"] .appShell,
-.app[data-theme="stars"]::before,
-.app[data-theme="stars"]::after,
-.app[data-theme="stars"] .content::before,
-.app[data-theme="stars"] .content::after{
-  background-image: none !important;
-  animation: none !important;
-}
 
 .songRow.active::before,
 .songRow.active::after{

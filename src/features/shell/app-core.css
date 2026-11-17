@@ -91,15 +91,22 @@ button:disabled{
 }
 
 .windowButtons{
-  height: 100%;
+  height: 34px;
   display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 2px;
+  margin-inline-end: var(--lt-space-3);
+  background: var(--lt-surface-soft);
+  border-radius: var(--lt-radius-sm);
   -webkit-app-region: no-drag;
 }
 
 .windowButtons button{
-  width: 46px;
-  height: 100%;
+  width: 34px;
+  height: 30px;
   border: 0;
+  border-radius: var(--lt-radius-item);
   color: var(--lt-muted);
   background: transparent;
   transition: background-color var(--lt-duration-fast) ease,
@@ -107,8 +114,8 @@ button:disabled{
 }
 
 .windowButtons button:hover{
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--lt-text);
+  background: var(--lt-surface-raised);
 }
 
 .windowButtons .closeWin:hover{
@@ -119,8 +126,8 @@ button:disabled{
 /* macOS keeps its native traffic lights. Leave room for them instead of
    drawing a second set of Windows-style controls in the renderer. */
 .app[data-platform="mac"] .titleBar{
-  height: 38px;
-  min-height: 38px;
+  height: 48px;
+  min-height: 48px;
 }
 
 .app[data-platform="mac"] .titleDrag{
@@ -132,7 +139,7 @@ button:disabled{
 }
 
 .app[data-platform="mac"] .appShell{
-  height: calc(100vh - 38px);
+  height: calc(100vh - 48px);
 }
 
 .sidebar{
@@ -762,16 +769,15 @@ button:disabled{
 }
 
 .titleBar{
-  height: 34px;
-  background: rgba(0, 0, 0, 0.86) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.055) !important;
-  backdrop-filter: blur(14px) saturate(115%);
+  height: 48px;
+  background: var(--workspace-sidebar, var(--lt-bg)) !important;
+  border-bottom: 0 !important;
 }
 
 .titleDrag{
-  font-size: 11px;
-  letter-spacing: 0;
-  color: rgba(255, 255, 255, 0.62);
+  font-size: 14px;
+  letter-spacing: -.02em;
+  color: var(--lt-text);
 }
 
 .sidebar{
@@ -1949,7 +1955,7 @@ body,
 
 .appShell{
 
-  height: calc(100vh - 36px) !important;
+  height: calc(100vh - 48px) !important;
 
   min-height: 0 !important;
 
@@ -2485,3 +2491,7 @@ body,
     transition: none !important;
   }
 }
+
+.titleBar.miniTitleBar { height: 34px; }
+.titleBar.miniTitleBar .windowButtons { margin-inline-end: var(--lt-space-1); }
+.windowButtons button:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: -2px; }

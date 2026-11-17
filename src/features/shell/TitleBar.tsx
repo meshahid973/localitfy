@@ -29,6 +29,9 @@ export default function TitleBar({
         <span>localtify</span>
       </div>
 
+      <div className="titleBarSpacer" onDoubleClick={handleTitleDoubleClick} aria-hidden="true" />
+      {!mini && children ? <div className="titleBarUpdateSlot" aria-label="Localtify update notice">{children}</div> : null}
+
       {!mini && history ? (
         <nav className="titleHistoryNav" aria-label="history">
           <button type="button" onClick={history.back} disabled={!history.canGoBack} aria-label="Go back" title={`Go back (${mac ? "⌘[" : "Alt+←"})`}>
@@ -38,12 +41,6 @@ export default function TitleBar({
             <ChevronRight size={17} strokeWidth={2.4} aria-hidden="true" />
           </button>
         </nav>
-      ) : null}
-
-      {!mini && children ? (
-        <div className="titleBarUpdateSlot" aria-label="localtify update notice">
-          {children}
-        </div>
       ) : null}
 
       {showWindowButtons ? <div className="windowButtons">

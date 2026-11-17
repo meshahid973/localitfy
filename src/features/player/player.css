@@ -518,18 +518,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   transition: none !important;
 }
 
-[data-theme="oled"] .playerBar,
-.app[data-theme="oled"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.012)),
-    rgba(0, 0, 0, 0.92) !important;
-}
 
-[data-theme="oled"] .playerBar::before,
-.app[data-theme="oled"] .playerBar::before{
-  opacity: 0.16 !important;
-  filter: blur(32px) saturate(1.15) brightness(0.68) !important;
-}
 
 .app.viewSwitching .playerBar::before,
 .app.viewSwitching .playerBar::after{
@@ -1498,10 +1487,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 }
 
-.app[data-theme="stars"] .playerBar{
-  border-top-color: rgba(215, 213, 255, 0.18) !important;
-
-}
 
 @media (max-width: 900px){
   .playerBar{
@@ -1535,20 +1520,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px, #000 72%, transparent 100%) !important;
 }
 
-.app[data-theme="stars"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(215, 213, 255, 0.024), rgba(143, 220, 255, 0.010)),
-    rgba(2, 2, 10, 0.94) !important;
-}
 
-.app[data-theme="stars"] .playerBar::before{
-  opacity: .16 !important;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(215, 213, 255, 0.12), transparent 54%),
-    radial-gradient(circle at 20% 48%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.12), transparent 36%),
-    radial-gradient(circle at 76% 32%, rgba(143, 220, 255, 0.09), transparent 44%),
-    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-}
 
 @media (max-width: 900px){
   .appShell{

@@ -1,7 +1,7 @@
 import { isAndroidApp, computerName } from "../../app/platform";
 import "./library.css";
 import { lazy, Suspense, useState, type DragEventHandler, type ReactNode } from "react";
-import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2 } from "lucide-react";
+import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2, Grid2X2, List, Heart, Disc3, Users } from "lucide-react";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
 import type { DuplicatesMergeResult } from "./duplicates/DuplicatesDialog";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
@@ -36,6 +36,7 @@ export type LibraryViewProps = {
   renderSongRows: (songs: Song[], className?: string) => ReactNode;
   setLibraryFilterMode?: (mode: "all" | "missing") => unknown;
   setLibrarySortMode: (mode: LibrarySortMode) => unknown;
+  setLibraryRowStyle: (style: Settings["libraryRowStyle"]) => unknown;
   settings: Pick<Settings, "libraryRowStyle">;
   showingMissingFiles: boolean;
   shuffleLibrarySongsAction: () => unknown;
@@ -74,11 +75,15 @@ export default function LibraryView(props: LibraryViewProps) {
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
 
   const isLiked = view === "liked";
+  const grid = settings.libraryRowStyle === "coverCards";
   const shownLabel = showingMissingFiles ? "missing files" : isLiked ? "tracks" : "all tracks";
 
   return (
     <section data-page-section="library" className={`libraryPage ${isLiked ? "libraryPageLiked" : ""}`}>
       <PageHeader title={isLiked ? "Liked songs" : "Library"}>
+        <nav className="libraryNavigation" aria-label="Library collections">
+          {([{ id: "library", title: "Songs" }, { id: "liked", title: "Liked" }, { id: "playlists", title: "Playlists" }, { id: "albums", title: "Albums" }, { id: "artists", title: "Artists" }] as const).map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id, "library-navigation")}>{item.title}</button>)}
+        </nav>
         <input
           className="pageHeaderSearch librarySearch"
           value={query}
@@ -93,6 +98,10 @@ export default function LibraryView(props: LibraryViewProps) {
           items={[{ value: "library", label: "library order" }, { value: "artist", label: "artist A–Z" }]}
           onValueChange={setLibrarySortMode}
         />
+        <div className="libraryViewMode" role="group" aria-label="Library layout">
+          <button type="button" aria-pressed={grid} title="Grid view" aria-label="Grid view" onClick={() => props.setLibraryRowStyle("coverCards")}><Grid2X2 size={16}/></button>
+          <button type="button" aria-pressed={!grid} title="List view" aria-label="List view" onClick={() => props.setLibraryRowStyle("comfyRows")}><List size={18}/></button>
+        </div>
         {!isLiked ? (
           <>
             <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
@@ -110,13 +119,12 @@ export default function LibraryView(props: LibraryViewProps) {
         )}
       </PageHeader>
 
-      {!isLiked ? (
-        <div className="libraryStats" aria-label="library summary">
-          <div className="libraryStat"><strong>{songs.length}</strong><span>tracks</span></div>
-          <div className="libraryStat"><strong>{libraryAlbumCount}</strong><span>albums</span></div>
-          <div className="libraryStat"><strong>{libraryArtistCount}</strong><span>artists</span></div>
-          {missingFileCount > 0 ? <div className="libraryStat warning"><strong>{missingFileCount}</strong><span>missing</span></div> : null}
-        </div>
+      {!isLiked && !query.trim() && !showingMissingFiles ? (
+        <nav className="libraryCollectionShortcuts" aria-label="Your collections">
+          <button type="button" onClick={() => changeView("liked", "library-collection")}><span className="libraryCollectionArtwork" data-kind="liked"><Heart size={36} fill="currentColor" /></span><strong>Liked songs</strong><small>{songs.filter(song => song.liked).length} songs</small></button>
+          <button type="button" onClick={() => changeView("albums", "library-collection")}><span className="libraryCollectionArtwork" data-kind="albums"><Disc3 size={36}/></span><strong>Albums</strong><small>{libraryAlbumCount} albums</small></button>
+          <button type="button" onClick={() => changeView("artists", "library-collection")}><span className="libraryCollectionArtwork" data-kind="artists"><Users size={36}/></span><strong>Artists</strong><small>{libraryArtistCount} artists</small></button>
+        </nav>
       ) : null}
 
       {!isLiked && missingFileCount > 0 ? (
@@ -148,11 +156,11 @@ export default function LibraryView(props: LibraryViewProps) {
           <div>
             <h2 id="library-tracks-title">{shownLabel}</h2>
           </div>
-          {(isLiked || showingMissingFiles || query.trim()) ? <span className="libraryCount">{visibleSongs.length} {visibleSongs.length === 1 ? "track" : "tracks"}</span> : null}
+          <span className="libraryCount">{visibleSongs.length} {visibleSongs.length === 1 ? "track" : "tracks"}</span>
         </div>
 
         {visibleSongs.length ? (
-          settings.libraryRowStyle === "coverCards" ? (
+          grid ? (
             <div className="libraryTrackSurface libraryCoverCards">
               {renderHomeSongCards(visibleSongs, "libraryCoverCardsGridV321")}
             </div>

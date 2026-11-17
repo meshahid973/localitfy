@@ -108,46 +108,42 @@
 .settingsPage :is(input, select, textarea, button):focus-visible {
   outline: 2px solid var(--settings-accent); outline-offset: 2px;
 }
-.settingsPage .settingsThemeSelectedPreview { display: flex; align-items: center; gap: 11px; min-width: 190px; }
-.settingsPage .settingsThemeSelectedPreview > div { display: grid; gap: 3px; }
-.settingsPage .settingsThemeSelectedPreview strong { font-size: 13px; }
-.settingsPage .settingsThemeSelectedPreview small { color: var(--settings-muted); font-size: 11px; }
-.settingsPage .settingsThemeDot, .settingsPage .customThemePresetButtonV027 > span:first-child {
-  display: block; width: 24px; height: 24px; flex: 0 0 24px;
-  border-radius: 7px; border: 1px solid var(--settings-edge);
-}
+
+
+
+
+
 .settingsPage .settingsActionRow {
   display: flex; align-items: center; flex-wrap: wrap; gap: 9px;
 }
 .settingsPage :is(input[type="checkbox"], input[type="radio"]) { accent-color: var(--settings-accent); width: 16px; height: 16px; }
-.settingsPage .customThemePresetRowV027,
 .settingsPage .settingsChoiceRowV491,
 .settingsPage .optionGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(145px, 100%), 1fr)); gap: 9px; }
-.settingsPage .customThemePresetButtonV027, .settingsPage .settingsChoicePillV491,
+.settingsPage .settingsChoicePillV491,
 .settingsPage .settingsChoice, .settingsPage .cleanerOptionV440 {
   min-width: 0; min-height: 62px; display: grid; align-content: center; justify-items: start; gap: 6px;
   padding: 12px; border: 1px solid var(--settings-edge); border-radius: 10px;
   background: var(--settings-elevated); color: var(--settings-text); text-align: left; font: inherit; cursor: pointer;
 }
-.settingsPage :is(.customThemePresetButtonV027,.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440) strong { font-size: 12px; line-height: 1.25; }
-.settingsPage :is(.customThemePresetButtonV027,.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440) :is(small,span:not(:first-child)) { color: var(--settings-muted); font-size: 11px; line-height: 1.35; }
+.settingsPage :is(.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440) strong { font-size: 12px; line-height: 1.25; }
+.settingsPage :is(.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440) :is(small,span:not(:first-child)) { color: var(--settings-muted); font-size: 11px; line-height: 1.35; }
 .settingsPage :is(.settingsChoicePillV491,.settingsChoice,.cleanerOptionV440).active {
   border-color: rgba(var(--lt-accent-rgb),.46);
   background: rgba(var(--lt-accent-rgb),.13);
 }
-.settingsPage .customThemeTokenGridV027 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px,100%), 1fr)); gap: 12px; }
-.settingsPage .customThemeTokenV027 { display: grid; grid-template-columns: 35px minmax(0,1fr); gap: 7px 10px; align-items: center; min-width: 0; }
-.settingsPage .customThemeTokenV027 > strong { font-size: 12px; }
-.settingsPage .customThemeHexInputV032 { grid-column: 1 / -1; width: 100%; font-variant-numeric: tabular-nums; }
-.settingsPage .customThemeColorPickerV032 { position: relative; width: 35px; height: 35px; display: block; border-radius: 9px; overflow: hidden; }
-.settingsPage .customThemeColorPreviewV027 { width: 100%; height: 100%; display: block; border: 1px solid var(--settings-edge); border-radius: 9px; }
-.settingsPage .customThemeNativeColorInputV027 { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; opacity: 0; cursor: pointer; }
-.settingsPage .settingsSavedThemes { min-width: 0; border-top: 1px solid var(--settings-edge); padding-top: 10px; }
-.settingsPage .settingsSavedThemes summary { cursor: pointer; color: var(--settings-text); font-size: 13px; font-weight: 650; }
-.settingsPage .settingsSavedThemesList { display: grid; gap: 7px; padding-top: 12px; }
-.settingsPage .settingsSavedTheme { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.settingsPage .settingsSavedTheme button:first-child { display: flex; gap: 10px; align-items: center; min-width: 0; text-align: left; }
-.settingsPage .settingsSavedTheme button span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+
+
+
+
+
+
+
+
+
+
+
 .settingsPage :is(.toggleRow, .rangeRow) {
   display: grid; grid-template-columns: minmax(0, 1fr) auto;
   align-items: center; gap: 14px; min-height: 54px;
