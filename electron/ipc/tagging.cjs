@@ -26,7 +26,7 @@ function registerTaggingIpc(router, deps) {
   const userAgent = `localtify/${app.getVersion()} ( https://github.com/meshahid973/localitfy )`;
   const fetchImpl = deps.fetchImpl || fetch;
   const auditor = createTagAuditor({ parseFile });
-  const lookup = createTaggingLookup({ client: createMusicBrainzClient({ userAgent, fetchImpl, ...deps.clientOptions }), coverDir: path.join(app.getPath("userData"), "musicbrainz-covers"), userAgent, fetchImpl });
+  const lookup = createTaggingLookup({ client: deps.musicBrainzClient || createMusicBrainzClient({ userAgent, fetchImpl, ...deps.clientOptions }), coverDir: path.join(app.getPath("userData"), "musicbrainz-covers"), userAgent, fetchImpl });
   // Proposals stay in the main process; the renderer only ever sends song IDs back.
   const proposals = new Map();
   const requireEnabled = () => { if (getSettings()?.musicbrainzTagging !== true) throw new Error("Turn on MusicBrainz tagging first"); };

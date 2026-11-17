@@ -4,7 +4,7 @@ import type { DuplicateMerge, DuplicateSet } from "./features/library/duplicates
 import type { PlayEvent } from "./features/player/listeningHistory";
 import type { Song } from "./features/library/song.types";
 import type { Settings } from "./features/settings/settings.types";
-import type { ArtistBio, DiscoverResult } from "./features/discover/discover.types";
+import type { ArtistBio, CatalogKind, DiscoverResult } from "./features/discover/discover.types";
 import type { ScrobbleAnswer, ScrobbleService, ScrobbleStatus } from "./features/scrobbling/scrobble.types";
 
 export {};
@@ -527,7 +527,7 @@ declare global {
       /** New files in watched folders were imported, or a library file went missing or came back. */
       onWatchedFoldersChange: (callback: (payload: { importedCount: number; libraryChanged: boolean; songs: Song[] }) => void) => () => void;
       /** Music from outside the library, from Last.fm. Off until turned on in Discover. */
-      getDiscoveries: (payload?: { refresh?: boolean }) => Promise<DiscoverResult>;
+      getDiscoveries: (payload?: { refresh?: boolean; catalog?: { kind: CatalogKind; term: string } }) => Promise<DiscoverResult>;
       /** The artist page biography, under the same opt-in as Discover. Saved on this device. */
       getArtistBio?: (artist: string) => Promise<ArtistBio>;
       /** Scrobbling credentials never leave Electron’s main process. */

@@ -2433,7 +2433,8 @@ app.whenReady().then(async () => {
   libraryWatcher = startLibraryWatch(ipcRouter, { dialog, isAudioFile, getSongs, getSettings, listSongsShaped,
     importFiles: (files) => importNewAudioFiles(files), getWindow: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null) });
   scrobbler = startScrobbling(ipcRouter, { file: path.join(app.getPath("userData"), "scrobbles.json"), getSong: databaseRepositories.songs.get, listPlays: databaseRepositories.listening.list, safeStorage, shell });
-  registerDiscoverIpc(ipcRouter, { getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json"), bioFile: path.join(app.getPath("userData"), "artist-bios.json") });
+  const musicBrainzClient = require("./musicbrainz/client.cjs").createMusicBrainzClient({ userAgent: `localtify/${app.getVersion()} ( https://github.com/meshahid973/localitfy )` });
+  registerDiscoverIpc(ipcRouter, { musicBrainzClient, getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json"), bioFile: path.join(app.getPath("userData"), "artist-bios.json") });
   registerMovedSongRepairIpc(ipcRouter, {
     dialog, BrowserWindow, getWindow: () => mainWindow,
     getSongs, fileExists, isAudioFile, readMetadata: readLocalAudioMetadata,
@@ -2509,7 +2510,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("download:open-folder", async (_event, folder) => { await shell.openPath(getDownloadDirectory(folder)); return true; });
   registerAnalysisIpc(ipcRouter, { app, powerMonitor, repositories: databaseRepositories, ffmpegPath: ffmpegStatic?.replace("app.asar", "app.asar.unpacked") });
   require("./ipc/lyrics.cjs").registerLyricsIpc(ipcRouter, app, databaseRepositories);
-  require("./ipc/tagging.cjs").registerTaggingIpc(ipcRouter, { app, songs: databaseRepositories.songs, getSettings, readLocalAudioMetadata, listSongsShaped, safeMediaUrl, clearFileInfoCache, getWindow: () => mainWindow });
+  require("./ipc/tagging.cjs").registerTaggingIpc(ipcRouter, { app, musicBrainzClient, songs: databaseRepositories.songs, getSettings, readLocalAudioMetadata, listSongsShaped, safeMediaUrl, clearFileInfoCache, getWindow: () => mainWindow });
   require("./ipc/sync.cjs").registerSyncIpc(ipcRouter, { app, repositories: databaseRepositories, coverPath: (s) => getRuntimeCoverPath(s), listSongsShaped, shapeSong, getWindow: () => mainWindow, observePlay: (e) => scrobbler?.observe(e) });
   ipcRouter.handle("listening:record", (_event, payload) => {
     const recorded = databaseRepositories.listening.record(payload);

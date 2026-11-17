@@ -1,4 +1,4 @@
-import type { ArtistBio } from "../../features/discover/discover.types";
+import type { ArtistBio, DiscoverResult } from "../../features/discover/discover.types";
 import type { Song } from "../../features/library/song.types";
 import type { LyricsResult } from "../../features/lyrics/lyrics.types";
 import type { Settings } from "../../features/settings/settings.types";
@@ -117,7 +117,7 @@ export function createAndroidBridge(): Bridge {
     selectLyricsMatch: (payload) => keepLyrics(payload.id, fromMac("lyrics:select-match", payload, 15000)),
     clearLyricsMatch: (payload) => keepLyrics(payload.id, fromMac("lyrics:clear-selection", payload, 15000)),
     setLyricsOffset: (payload) => fromMac("lyrics:set-offset", payload),
-    getDiscoveries: (payload) => fromMacOrKept("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
+    getDiscoveries: (payload) => payload?.catalog ? fromMac<DiscoverResult>("discover:get", payload, 60000) : fromMacOrKept("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
     getArtistBio: async (artist: string) => {
       if (phoneLibrary.effectiveSettings().discoverEnabled !== true) return { status: "off" };
       return fromMacOrKept<ArtistBio>("discover:artist-bio", { artist }, `mac:bio:${artist.trim().toLocaleLowerCase()}`, { status: "none" },

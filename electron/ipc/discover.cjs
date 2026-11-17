@@ -13,13 +13,60 @@ const BIO_MAX_ENTRIES = 3000;
 // A build can ship a key through the environment; one entered in Discover settings always wins.
 const apiKeyFor = (settings) => String(settings.lastfmApiKey || process.env.LOCALTIFY_LASTFM_API_KEY || "").trim();
 
-/** Discover is off until it's turned on, and needs a Last.fm API key. Results are kept for half a day. */
-function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, now = Date.now }) {
+const MBID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const cleanText = (value) => typeof value === "string" ? value.trim().slice(0, 300) : "";
+function normalizeCatalog(kind, items) {
+  const endpoint = kind === "album" ? "release-group" : kind;
+  const seen = new Set();
+  const result = [];
+  for (const item of Array.isArray(items) ? items.slice(0, 25) : []) {
+    if (!item || typeof item.id !== "string" || !MBID.test(item.id) || seen.has(item.id)) continue;
+    const title = cleanText(kind === "artist" ? item.name : item.title);
+    if (!title) continue;
+    const artist = Array.isArray(item["artist-credit"]) ? item["artist-credit"].slice(0, 12)
+      .map(credit => cleanText(credit?.name || credit?.artist?.name)).filter(Boolean).join(", ").slice(0, 300) : "";
+    const subtitle = kind === "artist"
+      ? [cleanText(item.disambiguation), cleanText(item.country)].filter(Boolean).join(" · ")
+      : [artist, cleanText(item["first-release-date"])].filter(Boolean).join(" · ");
+    seen.add(item.id);
+    result.push({ id: item.id, title, artist, subtitle, url: "https://musicbrainz.org/" + endpoint + "/" + item.id });
+  }
+  return result;
+}
+
+/** Public catalog needs only opt-in; Last.fm personalized results require a valid key. */
+function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, now = Date.now }) {
   let saved = null;
   let running = null;
+  let catalogRunning = null;
   router.handle("discover:get", async (_event, payload = {}) => {
     const settings = getSettings();
     if (settings.discoverEnabled !== true) return { status: "off" };
+    if (payload?.catalog !== undefined) {
+      const query = payload.catalog;
+      const kind = query?.kind;
+      const term = typeof query?.term === "string" ? query.term.trim() : "";
+      if (!["recording", "artist", "album"].includes(kind) || term.length < 2 || term.length > 160)
+        return { status: "error", error: "Enter a search of 2–160 characters." };
+      if (!musicBrainzClient) return { status: "error", error: "Public catalog is unavailable. Update the desktop application." };
+      const key = JSON.stringify([kind, term.toLowerCase()]);
+      if (catalogRunning && catalogRunning.key !== key)
+        return { status: "error", error: "Another catalog search is in progress. Try again when it finishes." };
+      if (!catalogRunning) {
+        const promise = Promise.resolve().then(() => musicBrainzClient.searchCatalog(kind, term))
+          .then(items => normalizeCatalog(kind, items))
+          .finally(() => { if (catalogRunning?.promise === promise) catalogRunning = null; });
+        catalogRunning = { key, promise };
+      }
+      try {
+        const items = await catalogRunning.promise;
+        return getSettings().discoverEnabled === true ? { status: "catalog", kind, items } : { status: "off" };
+      } catch {
+        return getSettings().discoverEnabled === true
+          ? { status: "error", error: "Could not search MusicBrainz. Check your connection and try again." }
+          : { status: "off" };
+      }
+    }
     const apiKey = apiKeyFor(settings);
     if (!/^[0-9a-f]{32}$/i.test(apiKey)) return { status: "needs-key" };
     const current = { songs: getSongs(), hiddenArtists: Array.isArray(settings.notForMeArtists) ? settings.notForMeArtists : [] };

@@ -304,3 +304,46 @@ test("artist biography requests remain isolated when the API key or Discover set
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("public catalog search requires opt-in but never a Last.fm key", async () => {
+  const handlers = new Map();
+  const settings = { discoverEnabled: false, lastfmApiKey: "" };
+  const id = "12345678-1234-1234-1234-123456789abc";
+  const calls = [];
+  const client = { searchCatalog: async (kind, term) => {
+    calls.push([kind, term]);
+    return [{ id, title: "Track", name: "Artist", "artist-credit": [{ name: "Artist" }], url: "javascript:bad" }, { id, title: "Duplicate" }, { id: "invalid", title: "Unsafe" }];
+  } };
+  registerDiscoverIpc({ handle: (channel, handler) => handlers.set(channel, handler) }, { getSongs: () => songs, getSettings: () => settings, musicBrainzClient: client });
+  const search = (kind, term) => handlers.get("discover:get")({}, { catalog: { kind, term } });
+  assert.equal((await search("recording", "Track")).status, "off");
+  assert.equal(calls.length, 0);
+  settings.discoverEnabled = true;
+  assert.equal((await search("invalid", "Track")).status, "error");
+  assert.equal((await search("album", "a")).status, "error");
+  assert.equal((await search("artist", "x".repeat(161))).status, "error");
+  for (const [kind, endpoint] of [["recording", "recording"], ["artist", "artist"], ["album", "release-group"]]) {
+    const result = await search(kind, " Track ");
+    assert.equal(result.status, "catalog");
+    assert.equal(result.items.length, 1);
+    assert.equal(result.items[0].url, "https://musicbrainz.org/" + endpoint + "/" + id);
+  }
+  assert.deepEqual(calls, [["recording", "Track"], ["artist", "Track"], ["album", "Track"]]);
+});
+test("catalog searches share an in-flight request and drop responses after opt-out", async () => {
+  const handlers = new Map();
+  const settings = { discoverEnabled: true };
+  let release;
+  let calls = 0;
+  const musicBrainzClient = { searchCatalog: () => { calls++; return new Promise(resolve => { release = resolve; }); } };
+  registerDiscoverIpc({ handle: (channel, handler) => handlers.set(channel, handler) }, { getSongs: () => [], getSettings: () => settings, musicBrainzClient });
+  const search = term => handlers.get("discover:get")({}, { catalog: { kind: "recording", term } });
+  const first = search("Track");
+  const second = search("track");
+  assert.equal((await search("Other")).status, "error");
+  assert.equal(calls, 1);
+  settings.discoverEnabled = false;
+  release([]);
+  assert.equal((await first).status, "off");
+  assert.equal((await second).status, "off");
+});

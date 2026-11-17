@@ -48,6 +48,17 @@ function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs =
   }
 
   return {
+    searchCatalog: (kind, text) => {
+      const fields = { recording: "recording", artist: "artist", album: "releasegroup" };
+      const field = Object.hasOwn(fields, kind) ? fields[kind] : null;
+      if (!field) throw new Error("Unsupported catalog search.");
+      const endpoint = kind === "album" ? "release-group" : kind;
+      const query = kind === "artist" ? "artist:" + phrase(text) : "(" + field + ":" + phrase(text) + " OR artist:" + phrase(text) + ")";
+      return request(endpoint, { query, limit: "25" }).then(body => {
+        const items = body[endpoint + "s"];
+        return Array.isArray(items) ? items : [];
+      });
+    },
     searchRecordings: (title, artist) => request("recording", { query: `recording:${phrase(title)}${artist ? ` AND artist:${phrase(artist)}` : ""}`, limit: "25" }).then((body) => body.recordings || []),
     searchReleases: (album, artist) => request("release", { query: `release:${phrase(album)}${artist ? ` AND artist:${phrase(artist)}` : ""}`, limit: "15" }).then((body) => body.releases || []),
     // Every edition of an album (standard, deluxe, regional…), with track counts.

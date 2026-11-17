@@ -1,6 +1,9 @@
 export type DiscoverTrack = { title: string; artist: string; url: string };
 export type DiscoverArtist = { name: string; url: string; because: string[]; seedCount: number; topTracks: DiscoverTrack[] };
+export type CatalogKind = "recording" | "artist" | "album";
+export type CatalogItem = { id: string; title: string; artist: string; subtitle: string; url: string };
 export type DiscoverResult =
+  | { status: "catalog"; kind: CatalogKind; items: CatalogItem[] }
   | { status: "ready" | "no-taste"; generatedAt: number; seeds: string[]; artists: DiscoverArtist[]; tracks: DiscoverTrack[] }
   | { status: "off" | "needs-key" }
   | { status: "error"; error: string };
