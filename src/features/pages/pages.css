@@ -12,14 +12,14 @@
   isolation: isolate;
   min-width: 0;
   display: grid;
-  grid-template-columns: clamp(132px, 17vw, 220px) minmax(0, 1fr);
+  grid-template-columns: 180px minmax(0, 1fr);
   grid-template-areas: "art copy" "art actions";
   align-items: end;
-  column-gap: 26px;
+  column-gap: var(--lt-space-5);
   row-gap: 16px;
-  padding: 26px 24px 22px;
-  border: 1px solid var(--lt-border);
-  border-radius: var(--lt-radius-md);
+  padding: var(--lt-space-5);
+  border: 0;
+  border-radius: var(--lt-control-radius);
   overflow: hidden;
   background: var(--lt-surface);
 }
@@ -41,7 +41,6 @@
 .collectionHeroCover :is(.playlistCoverImage, .playlistCoverImage img) { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 .collectionHeroCopy { grid-area: copy; min-width: 0; display: grid; gap: 8px; }
-.collectionHeroEyebrow { display: block; margin: 0; color: var(--lt-text); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; opacity: .82; }
 .collectionHeroCopy h1 {
   margin: 0;
   overflow: hidden;
@@ -49,10 +48,10 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   color: var(--lt-text);
-  font-size: clamp(28px, 4.4vw, 64px);
+  font-size: var(--lt-text-collection);
   font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: -.04em;
+  line-height: 1.12;
+  letter-spacing: -.03em;
   overflow-wrap: anywhere;
 }
 .collectionHeroByline { min-width: 0; color: var(--lt-text); font-size: 14px; font-weight: 700; }
@@ -60,8 +59,8 @@
 
 .collectionHeroActions { grid-area: actions; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .collectionPlayButton {
-  width: 54px;
-  height: 54px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -69,7 +68,7 @@
   border-radius: 50%;
   color: var(--accent-contrast, var(--lt-bg));
   background: var(--lt-accent);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, .38);
+  box-shadow: none;
   cursor: pointer;
   transition: transform 140ms ease, filter 140ms ease;
 }
@@ -77,8 +76,8 @@
 .collectionPlayButton:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.08); }
 
 .collectionIconButton {
-  width: 40px;
-  height: 40px;
+  width: var(--lt-control-height);
+  height: var(--lt-control-height);
   display: grid;
   place-items: center;
   padding: 0;
@@ -92,13 +91,13 @@
 .collectionIconButton:hover:not(:disabled) { color: var(--lt-text); border-color: var(--lt-border-strong); background: color-mix(in srgb, var(--lt-text) 6%, var(--lt-surface-raised)); }
 
 .collectionTextButton {
-  min-height: 34px;
+  min-height: var(--lt-control-height);
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 0 13px;
-  border: 1px solid rgba(255, 255, 255, .1);
-  border-radius: 999px;
+  border: 1px solid var(--lt-border);
+  border-radius: var(--lt-control-radius);
   color: var(--lt-muted);
   background: transparent;
   font: inherit;
@@ -133,28 +132,30 @@
 .trackLink:hover { color: var(--lt-text); text-decoration: underline; }
 
 .trackList { min-width: 0; display: grid; }
+.trackListCanvas { position: relative; min-width: 0; }
+.trackVirtualRow { position: absolute; left: 0; width: 100%; }
 .trackRow {
-  --track-columns: 34px minmax(0, 1fr) 34px 48px 34px;
+  --track-columns: var(--lt-control-height) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height);
   min-width: 0;
-  min-height: 54px;
+  min-height: 64px;
   display: grid;
   grid-template-columns: var(--track-columns);
   align-items: center;
-  gap: 10px;
-  padding: 5px 8px;
+  gap: var(--lt-space-2);
+  padding: var(--lt-space-2);
   border-radius: 8px;
   cursor: pointer;
 }
-.trackList.withCover .trackRow { --track-columns: 34px 40px minmax(0, 1fr) 34px 48px 34px; }
-.trackList.withAlbum .trackRow { --track-columns: 34px minmax(0, 1.4fr) minmax(0, 1fr) 34px 48px 34px; }
-.trackList.withCover.withAlbum .trackRow { --track-columns: 34px 40px minmax(0, 1.4fr) minmax(0, 1fr) 34px 48px 34px; }
+.trackList.withCover .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
+.trackList.withAlbum .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1.4fr) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
+.trackList.withCover.withAlbum .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1.4fr) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
 .trackRow:hover { background: color-mix(in srgb, var(--lt-text) 6%, transparent); }
 .trackRow.active { background: rgba(var(--lt-accent-rgb), .1); }
 .trackRow.missing { cursor: default; opacity: .5; }
 
 .trackRowIndex {
-  width: 30px;
-  height: 30px;
+  width: var(--lt-control-height);
+  height: var(--lt-control-height);
   display: grid;
   place-items: center;
   padding: 0;
@@ -187,6 +188,7 @@
 .trackRowTitle small,
 .trackRowAlbum { color: var(--lt-muted); font-size: 12px; }
 .trackRowDuration { color: var(--lt-muted); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.app .collectionPage .trackRow > .iconAction { border-color: transparent !important; background: transparent !important; box-shadow: none !important; }
 .trackRowAdd { opacity: 0; }
 .trackRow:hover .trackRowAdd,
 .trackRowAdd:focus-visible { opacity: 1; }
@@ -211,10 +213,11 @@
 .collectionCard small { color: var(--lt-muted); font-size: 12px; }
 
 @media (max-width: 760px) {
-  .collectionHero { grid-template-columns: 110px minmax(0, 1fr); column-gap: 16px; padding: 18px 16px; }
+  .collectionHero { grid-template-columns: 100px minmax(0, 1fr); column-gap: 16px; padding: 18px 16px; }
   .trackList.withAlbum .trackRow,
-  .trackList.withCover.withAlbum .trackRow { --track-columns: 34px 40px minmax(0, 1fr) 34px 48px 34px; }
-  .trackList:not(.withCover).withAlbum .trackRow { --track-columns: 34px minmax(0, 1fr) 34px 48px 34px; }
+  .trackList.withCover.withAlbum .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
+  .trackList:not(.withCover).withAlbum .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
+  .collectionHeroCopy h1 { font-size: 26px; }
   .trackRowAlbum { display: none; }
 }
 

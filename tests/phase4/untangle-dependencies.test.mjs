@@ -27,7 +27,7 @@ function loadThemePresetStyle() {
       throw new Error("Pure preset code must not import persistence or runtime modules: " + specifier);
     }
   });
-  return theme;
+  return { ...theme, accentTextColor: utilities.accentTextColor };
 }
 
 test("theme preset builder stays separate from localStorage and the public settings barrel preserves exports", () => {
@@ -48,7 +48,7 @@ test("all 38 existing preset palettes emit stable CSS token values", () => {
   const mint = JSON.parse(JSON.stringify(theme.makeThemePresetStyle("mint")));
   const mono = JSON.parse(JSON.stringify(theme.makeThemePresetStyle("mono")));
   const stars = JSON.parse(JSON.stringify(theme.makeThemePresetStyle("stars")));
-  assert.equal(Object.keys(mint).length, 37);
+  assert.equal(Object.keys(mint).length, 38);
   assert.equal(mint["--bg"], "#020706");
   assert.equal(mint["--accent"], "#8dffce");
   assert.equal(mint["--accent-rgb"], "141, 255, 206");
@@ -61,7 +61,7 @@ test("all 38 existing preset palettes emit stable CSS token values", () => {
   assert.deepEqual(JSON.parse(JSON.stringify(theme.makeThemePresetStyle("invalid-theme"))), mint);
   for (const id of Object.keys(palettes)) {
     const tokens = JSON.parse(JSON.stringify(theme.makeThemePresetStyle(id)));
-    assert.equal(Object.keys(tokens).length, 37, id);
+    assert.equal(Object.keys(tokens).length, 38, id);
     assert.equal(tokens["--accent"], palettes[id].accent, id);
     assert.equal(tokens["--progress"], palettes[id].progress ?? palettes[id].accent, id);
     assert.equal(tokens["--theme-highlight"], palettes[id].highlight, id);
@@ -89,4 +89,28 @@ test("download processing stays React-independent while keeping all established 
   assert.match(tests, /downloadProcessing\.ts/);
   assert.doesNotMatch(benchmark, /if \(name === "react"\)/);
   assert.doesNotMatch(tests, /if \(name === "react"\)/);
+});
+
+test("accent labels meet WCAG AA for presets and a custom RGB color grid", () => {
+  const theme = loadThemePresetStyle();
+  const luminance = (hex) => {
+    const channels = hex.match(/[a-f0-9]{2}/gi).map(v => parseInt(v, 16) / 255);
+    const rgb = channels.map(c => c < .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4);
+    return rgb.reduce((sum, c, i) => sum + c * [.2126, .7152, .0722][i], 0);
+  };
+  const assertContrast = (background, foreground) => {
+    const values = [luminance(background), luminance(foreground)].sort((a, b) => b - a);
+    assert.ok((values[0] + .05) / (values[1] + .05) >= 4.5, `${background} / ${foreground}`);
+  };
+  for (const id of Object.keys(theme.THEME_PRESET_COLORS)) {
+    const tokens = theme.makeThemePresetStyle(id);
+    assertContrast(tokens["--accent"], tokens["--button-text-on-accent"]);
+  }
+  for (let r = 0; r <= 255; r += 17) for (let g = 0; g <= 255; g += 17) for (let b = 0; b <= 255; b += 17) {
+    const color = "#" + [r, g, b].map(c => c.toString(16).padStart(2, "0")).join("");
+    assertContrast(color, theme.accentTextColor(color));
+  }
+  assert.equal(theme.accentTextColor("#000"), "#ffffff");
+  assert.equal(theme.accentTextColor("#fff"), "#000000");
+  assert.equal(theme.accentTextColor("invalid"), theme.accentTextColor("#8dffce"));
 });

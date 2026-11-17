@@ -82,7 +82,7 @@ function SongGroupBody({ kind, name, members, loading, albums, currentId, isPlay
   return (
     <section data-page-section={kind} className="collectionPage songGroupPage" aria-label={`${name} ${kind}`}>
       <CollectionHero
-        eyebrow={kind}
+        typeLabel={kind}
         title={name}
         round={kind === "artist"}
         cover={<Cover song={target.coverSong} className="collectionHeroCover" priority="high" />}

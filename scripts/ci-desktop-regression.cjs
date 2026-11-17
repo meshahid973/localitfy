@@ -10,6 +10,7 @@ app.setPath("appData",dir);
 fs.mkdirSync(path.join(dir,"localitfy"),{recursive:true});
 app.setPath("userData",path.join(dir,"localitfy"));
 const root=path.resolve(__dirname,"..");
+const version=JSON.parse(fs.readFileSync(path.join(root,"package.json"),"utf8")).version;
 function wav(name){
   const samples=48000*20,buf=Buffer.alloc(44+samples*2);
   buf.write("RIFF",0);buf.writeUInt32LE(buf.length-8,4);buf.write("WAVEfmt ",8);buf.writeUInt32LE(16,16);
@@ -49,7 +50,7 @@ server.listen(5173,async()=>{
     session.defaultSession.webRequest.onBeforeRequest((details,callback)=>callback({cancel:/^https?:/i.test(details.url)&&!/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::|\/)/i.test(details.url)}));
     const win=await until(()=>BrowserWindow.getAllWindows().find(w=>!w.isDestroyed()&&w.webContents.getURL().includes("localhost:5173")),"desktop window");
     await until(()=>win.webContents.executeJavaScript("document.readyState === 'complete' && !!document.querySelector('#root')").catch(()=>false),"document ready");
-    await win.webContents.executeJavaScript("localStorage.setItem('localitfy.onboarding.v1','done');localStorage.setItem('localitfy.onboarding.release-showcase.0.5.0','done');localStorage.setItem('localitfy.whatsNewSeenVersion','0.5.0')");
+    await win.webContents.executeJavaScript(`localStorage.setItem('localitfy.onboarding.v1','done');localStorage.setItem('localitfy.onboarding.release-showcase.' + ${JSON.stringify(version)},'done');localStorage.setItem('localitfy.whatsNewSeenVersion',${JSON.stringify(version)})`);
     win.webContents.reload();
     await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && !!document.querySelector('.appShell')").catch(()=>false),"desktop shell");
     const startupMs=Date.now()-started;
@@ -64,6 +65,8 @@ server.listen(5173,async()=>{
     await win.webContents.executeJavaScript("(document.querySelector('.songButton')||document.querySelector('.homeAlbumPlayZone')).click()");
     await until(()=>win.webContents.executeJavaScript("[...document.querySelectorAll('audio')].some(a=>!a.paused&&a.currentTime>0)").catch(()=>false),"audio playing");
     await screenshot(win,"desktop-playing");
+    assert.equal(await win.webContents.executeJavaScript("typeof window.localitfy.onWatchedFoldersChange"), "function", "current preload exposes watched-folder events");
+    assert.equal(await win.webContents.executeJavaScript("document.querySelector(\".app\")?.dataset.appVersion"), version, "renderer version matches package");
     const playing=await metrics("desktop playback");
     const result={startupMs,metrics:[idle,playing],platform:process.platform,fixtureSongs:songs.length};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));

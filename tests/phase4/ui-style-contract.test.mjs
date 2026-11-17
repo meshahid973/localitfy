@@ -82,13 +82,13 @@ test("removed global header selectors stay out of active CSS owners", () => {
 test("theme controls and library layout follow their owners", () => {
   const app = read("src/App.css");
   const themes = read("src/styles/themes.css");
-  assert.match(app, /background-color: var\(--lt-surface\) !important/);
+  assert.match(read("src/shared/ui/controls.css"), /background-color: var\(--lt-surface\) !important/);
   assert.equal(app.includes("--sidebar-line-soft"), false);
   assert.match(themes, /\.app\[data-theme="mono"\][\s\S]*?color-scheme: light/);
   assert.match(read("src/features/settings/settings.css"), /\.settingsPage select \{ cursor: pointer; color-scheme: inherit/);
   assert.match(read("src/features/albums/AlbumsView.tsx"), /<ArcDropdownMenu className="albumsSortV318"/);
   assert.match(read("src/features/albums/albums.css"), /\.albumsPageV318 \.albumsSortV318 \{/);
-  assert.match(read("src/features/library/library.css"), /padding: clamp\(24px, 2\.5vw, 40px\) 0 105px/);
+  assert.match(read("src/features/library/library.css"), /padding: 0 0 105px/);
   assert.match(read("src/features/settings/settings.css"), /padding: 26px 0 100px/);
   assert.match(read("src/features/settings/settings-premium.css"), /padding: 24px 0 90px/);
 });
@@ -180,15 +180,15 @@ test("Discover, similar tracks and tagging respect the active accent and UI bord
   assert.match(queue, /\.queuePanelRow:hover\{\s*background: color-mix\(in srgb, var\(--lt-text\) 7%, transparent\)/);
 });
 
-test("component focus rules override the app and Linux !important outlines", () => {
+test("shared focus remains visible and component insets override the app and Linux outlines", () => {
   const globals = read("src/features/shell/app-core.css");
   const linux = read("src/features/shell/effects.css");
   const discover = read("src/features/discover/discover.css");
   const queue = read("src/features/player/components/queue-panel.css");
   const dropdown = read("src/shared/ui/ArcDropdownMenu.css");
 
-  assert.match(globals, /button:focus-visible\s*\{\s*outline: 0 !important/);
-  assert.match(globals, /\.app :is\(button, a, \[role="button"\]\):focus-visible\s*\{\s*outline:[^}]*!important/);
+  assert.doesNotMatch(globals, /button:focus-visible\s*\{\s*outline: 0 !important/);
+  assert.match(read("src/shared/ui/controls.css"), /\.app :is\(button, a, input, textarea, select, \[role="button"\]\):focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
   assert.match(linux, /\.app\[data-platform="linux"\] :is\(button, input, textarea, select, \[role="button"\]\):focus-visible\s*\{\s*outline:[^}]*!important/);
   assert.match(discover, /\.app \.discoverPage [^{]*:focus-visible\s*\{\s*outline:[^}]*!important/);
   assert.match(queue, /\.app \.queuePanel button\.queuePanelRowMain:focus-visible\s*\{\s*outline:[^}]*!important/);

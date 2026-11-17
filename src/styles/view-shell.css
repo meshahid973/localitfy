@@ -104,9 +104,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
   display: flex !important;
   flex-direction: column !important;
   border-right: 1px solid rgba(var(--lt-accent-rgb), .075) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .025), transparent 150px),
-    var(--workspace-sidebar) !important;
+  background: var(--workspace-sidebar) !important;
   box-shadow: none !important;
   transition: width 180ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease, background-color 180ms ease !important;
 }
@@ -114,7 +112,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 .sidebarNavGroupsV467 {
   width: 100%;
   min-height: 0;
-  padding: 18px 12px 14px !important;
+  padding: var(--lt-space-3) var(--lt-space-3) var(--lt-space-2) !important;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: none;
@@ -123,7 +121,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 .sidebarNavGroupsV467::before {
   content: "LOCALTIFY";
   height: 32px;
-  margin: 0 8px 18px;
+  margin: 0 8px 10px;
   display: flex;
   align-items: center;
   color: var(--lt-muted);
@@ -141,8 +139,8 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
   margin: 0 9px 7px !important;
   overflow: hidden;
   color: var(--lt-faint) !important;
-  font-size: 7px !important;
-  font-weight: 850 !important;
+  font-size: 10px !important;
+  font-weight: 650 !important;
   letter-spacing: .13em !important;
   text-overflow: ellipsis;
   text-transform: uppercase !important;
@@ -159,7 +157,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
   position: relative !important;
   width: 100% !important;
   min-width: 0 !important;
-  min-height: 46px !important;
+  min-height: var(--lt-control-height) !important;
   height: auto !important;
   padding: 6px 9px !important;
   display: grid !important;
@@ -168,7 +166,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
   gap: 9px !important;
   overflow: hidden !important;
   border: 1px solid transparent !important;
-  border-radius: 9px !important;
+  border-radius: var(--lt-radius-item) !important;
   color: var(--lt-muted) !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -242,16 +240,13 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 
 .navText strong {
   color: inherit !important;
-  font-size: 10px !important;
-  font-weight: 730 !important;
+  font-size: var(--lt-text-base) !important;
+  font-weight: 650 !important;
   line-height: 1.05 !important;
 }
 
 .navText small {
-  color: var(--lt-muted) !important;
-  font-size: 7px !important;
-  font-weight: 620 !important;
-  line-height: 1.1 !important;
+  display: none !important;
 }
 
 .navDivider {
@@ -289,8 +284,8 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 
 .importMainAction .buttonLabel {
   display: inline !important;
-  font-size: 9px !important;
-  font-weight: 760 !important;
+  font-size: var(--lt-text-sm) !important;
+  font-weight: 650 !important;
 }
 
 .sidebarResizeHandle {

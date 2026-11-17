@@ -19,7 +19,7 @@ test("Artists and Genres share collection primitives but own their variants", ()
   assert.doesNotMatch(genre, /import "\.\.\/artists\/artists\.css"/);
   assert.match(artist, /import "\.\/artists\.css";/);
   assert.match(genre, /import "\.\/genres\.css";/);
-  assert.match(shared, /background: var\(--lt-surface\)/);
+  assert.match(shared, /background: transparent/);
   assert.match(shared, /color: var\(--lt-text\)/);
   assert.match(shared, /@media \(max-width: 520px\)/);
   assert.match(artistCss, /\.artistCardCover/);

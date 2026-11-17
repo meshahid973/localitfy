@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { FolderPlus, RefreshCw, X } from "lucide-react";
 import type { Settings } from "../settings/settings.types";
+import { supportsWatchedFolders, subscribeWatchedFoldersChange } from "./watchedFolderBridge";
 import "./watched-folders.css";
 
 type WatchedFolderStatus = Awaited<ReturnType<typeof window.localitfy.getWatchedFolderStatus>>;
@@ -23,14 +24,19 @@ export default function WatchedFoldersSettings({ settings, updateSetting }: Watc
   const [checking, setChecking] = useState(false);
   const [message, setMessage] = useState("");
 
-  const refresh = useCallback(() => { void window.localitfy.getWatchedFolderStatus().then(setStatus).catch(() => undefined); }, []);
+  const supported = supportsWatchedFolders(window.localitfy);
+  const refresh = useCallback(() => {
+    if (!supportsWatchedFolders(window.localitfy)) return;
+    void window.localitfy.getWatchedFolderStatus().then(setStatus).catch(() => undefined);
+  }, []);
   useEffect(() => {
+    if (!supported) return;
     refresh();
-    const stop = window.localitfy.onWatchedFoldersChange(refresh);
+    const stop = subscribeWatchedFoldersChange(window.localitfy, refresh);
     // A newly added folder gets its first check in the background; keep the status line current meanwhile.
     const timer = window.setInterval(refresh, 3000);
-    return () => { stop(); window.clearInterval(timer); };
-  }, [refresh]);
+    return () => { stop?.(); window.clearInterval(timer); };
+  }, [refresh, supported]);
 
   async function addFolder() {
     const picked = await window.localitfy.chooseWatchedFolder();
@@ -50,6 +56,10 @@ export default function WatchedFoldersSettings({ settings, updateSetting }: Watc
     } catch { setMessage("Could not check the folders. Please retry."); }
     finally { setChecking(false); }
   }
+
+  if (!supported) return <div className="settingsPanelCard settingsFocusPanelV491">
+    <div className="settingsPanelHeader"><div><strong>Watched folders</strong><span>Restart Localtify with the latest desktop version to use watched folders.</span></div></div>
+  </div>;
 
   const byFolder = new Map((status?.folders || []).map((entry) => [folderKey(entry.folder), entry]));
   return <div className="settingsPanelCard settingsFocusPanelV491">

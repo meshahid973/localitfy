@@ -29,7 +29,7 @@ export default function WhatsNewModal({ open, onClose }: WhatsNewModalProps) {
         <button className="whatsNewClose" type="button" onClick={onClose} aria-label="Close what's new"><X size={18} strokeWidth={2.4} /></button>
         <p className="eyebrow">what's new</p>
         <h3 id="whatsNewTitle">localtify {APP_VERSION}</h3>
-        <p className="whatsNewSubtext">A maintenance-focused release with library, playback, and UI improvements, plus safer packaging for future updates.</p>
+        <p className="whatsNewSubtext">A more focused listening experience, cleaner navigation, and improved artwork and playback reliability.</p>
         <ul>{whatsNewItems.map((item) => <li key={item}>{item}</li>)}</ul>
         <button className="heroMain" type="button" onClick={onClose}>got it</button>
       </section>

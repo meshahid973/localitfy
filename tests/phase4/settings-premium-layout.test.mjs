@@ -115,9 +115,9 @@ test("Downloads keeps import and queue controls but omits mascot and redundant e
   assert.doesNotMatch(css, /#82b3ce|#0d1d26|mascotHelper/);
 });
 
-test("Library track canvas uses a themed surface, preserving virtual positioning", () => {
+test("Library track canvas stays unboxed, preserving theme text and virtual positioning", () => {
   const lib = read("src/features/library/library.css");
-  assert.match(lib, /background: var\(--lt-surface\)/);
+  assert.match(lib, /\.libraryTrackSurface \{[^}]*background: transparent/);
   assert.doesNotMatch(lib, /background: rgba\(var\(--lt-accent-rgb\), \.64\)/);
   assert.match(lib, /\.virtualSongItem \{ position: absolute/);
   assert.match(lib, /\.songRow\.active/);
@@ -172,7 +172,7 @@ test("Library and Liked use the shared content gutter and meaningful empty state
   const library = read("src/features/library/library.css");
   const view = read("src/features/library/LibraryView.tsx");
   assert.doesNotMatch(library, /\.app:has\(\.libraryPage\) \.content \{\s*padding: 0 !important/);
-  assert.match(library, /\.libraryPage \{[\s\S]*?padding: clamp\(24px, 2\.5vw, 40px\) 0 105px/);
+  assert.match(library, /\.libraryPage \{[\s\S]*?padding: 0 0 105px/);
   assert.match(view, /cute=\{!isLiked\}/);
   assert.match(view, /centered=\{!isLiked\}/);
 });

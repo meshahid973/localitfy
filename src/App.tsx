@@ -67,6 +67,7 @@ import { Cover } from "./features/covers/Cover";
 import { useCoversController } from "./features/covers";
 import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
 import { useLibraryController } from "./features/library";
+import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderBridge";
 import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
 import { createMetadataCleanPreview } from "./features/library/metadataCleanPreview";
 import {
@@ -172,6 +173,7 @@ import {
   useCoverAverageStyle
 } from "./features/covers";
 import {
+  accentTextColor,
   buildAnimatedThemeVisualStyle,
   getCustomThemeColorPatch,
   hexToRgbString,
@@ -1077,8 +1079,9 @@ function MainModeApp() {
       "--surface-3": hexToRgbaString(customThemeSurface, "#151528", 0.48),
       "--text": customThemeText,
       "--text-2": hexToRgbaString(customThemeText, "#f5f3ff", 0.78),
-      "--muted": hexToRgbaString(customThemeText, "#f5f3ff", 0.52),
+      "--muted": hexToRgbaString(customThemeText, "#f5f3ff", 0.70),
       "--accent": customThemeColor,
+      "--button-text-on-accent": accentTextColor(customThemeColor),
       "--accent-2": customThemeColor2,
       "--highlight": customThemeHighlight,
       "--progress": customThemeProgress,
@@ -1257,8 +1260,9 @@ function MainModeApp() {
       "--surface-3": hexToRgbaString(previewSurface, "#151528", 0.48),
       "--text": previewText,
       "--text-2": hexToRgbaString(previewText, "#f5f3ff", 0.78),
-      "--muted": hexToRgbaString(previewText, "#f5f3ff", 0.52),
+      "--muted": hexToRgbaString(previewText, "#f5f3ff", 0.70),
       "--accent": previewColor,
+      "--button-text-on-accent": accentTextColor(previewColor),
       "--accent-2": previewColor2,
       "--highlight": previewHighlight,
       "--progress": previewProgress,
@@ -2855,7 +2859,7 @@ function MainModeApp() {
 
 
   // Watched folders: new files were imported in the background, or a library file went missing or came back.
-  useEffect(() => window.localitfy.onWatchedFoldersChange(({ importedCount, songs: next }) => {
+  useEffect(() => subscribeWatchedFoldersChange(window.localitfy, ({ importedCount, songs: next }) => {
     setSongs(applyLibraryOrder(sanitizeSongList(next)));
     if (importedCount) setStatusText(`added ${importedCount} new song${importedCount === 1 ? "" : "s"} from watched folders`);
   }), []);

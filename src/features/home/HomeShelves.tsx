@@ -4,6 +4,7 @@ import { Cover } from "../covers/Cover";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
 import type { LocalAlbumEntry } from "../albums/album.types";
+import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { useHomeDailyMixes } from "./useHomeDailyMixes";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { albumTarget, mixTarget, useAppActions } from "../shell/appActions";
@@ -134,7 +135,13 @@ type DailyMixRailProps = {
 export function HomeDailyMixRail({ songsById, openDailyMixes, openAnalysisSettings }: DailyMixRailProps) {
   const actions = useAppActions();
   const { result, failed } = useHomeDailyMixes();
-  if (failed || !result) return null;
+  if (!result) return <section className="homeSection homeReleasesSection homeMixesSection" aria-labelledby="home-daily-mixes-title">
+    <HomeSectionHead id="home-daily-mixes-title" title="Daily mixes" />
+    <div role="status" aria-atomic="true">
+      {failed ? <div className="homeShelfNotice">Could not load daily mixes.</div> : <CollectionLoading label="Loading daily mixes…" announce={false} />}
+    </div>
+    {failed ? <div className="homeShelfNotice"><button className="softButton" type="button" onClick={openDailyMixes}>Open mixes</button></div> : null}
+  </section>;
   const mixes = result.mixes
     .map((mix) => ({ ...mix, songs: mix.songIds.flatMap((id) => { const song = songsById.get(id); return song && song.fileExists !== false ? [song] : []; }) }))
     .filter((mix) => mix.songs.length);

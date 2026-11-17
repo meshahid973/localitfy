@@ -21,10 +21,10 @@
   gap: 2px;
   padding: 10px;
   border: 1px solid var(--lt-border);
-  border-radius: 16px;
+  border-radius: var(--lt-control-radius);
   color: var(--lt-text);
   background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--lt-shadow-menu);
   max-width: calc(100vw - 16px);
   max-height: calc(100dvh - 32px);
   overflow-y: auto;
@@ -49,7 +49,7 @@
   min-height: 44px;
   padding: 6px 10px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--lt-radius-item);
   color: inherit;
   background: transparent;
   text-align: left;

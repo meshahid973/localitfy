@@ -149,7 +149,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
     return (
       <section data-page-section="playlists" className="playlistsPage playlistPageV029 playlistDetailPage">
         <CollectionHero
-          eyebrow={detailPlaylist.rules ? "smart playlist" : "playlist"}
+          typeLabel={detailPlaylist.rules ? "smart playlist" : "playlist"}
           title={detailPlaylist.name}
           cover={<PlaylistCoverCollage songs={detailSongs} className="collectionHeroCover playlistCoverCollage" />}
           coverSong={target.coverSong}
@@ -172,10 +172,9 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
           ) : null}
         </CollectionHero>
 
-        <section className="panel playlistTracksPanel">
+        <section className="playlistTracksPanel">
           <div className="panelHead playlistTracksHead">
             <div className="playlistTracksTitleBlock">
-              <p className="eyebrow">songs</p>
               {renamingPlaylistId === detailPlaylist.id ? (
                 <form
                   className="playlistRenameForm"
@@ -197,7 +196,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
                   <button className="settingsTinyButton" type="button" onClick={cancelRenamePlaylist}><ActionLabel icon={X}>cancel</ActionLabel></button>
                 </form>
               ) : (
-                <h3>{detailPlaylist.name}</h3>
+                <h3>Tracks</h3>
               )}
             </div>
 
@@ -267,10 +266,9 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
 
       <DailyMixesShelf {...props.dailyMixes} />
       <div className="playlistContentGrid isEmpty">
-        <section className="panel playlistShelfPanel">
+        <section className="playlistShelfPanel">
           <div className="panelHead">
             <div>
-              <p className="eyebrow">saved</p>
               <h3>your playlists</h3>
             </div>
           </div>

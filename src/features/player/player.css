@@ -105,7 +105,7 @@
   min-width: 0 !important;
   overflow: hidden !important;
   display: block !important;
-  color: rgba(255,255,255,0.95) !important;
+  color: var(--lt-text) !important;
   font-size: 13.5px !important;
   line-height: 1.12 !important;
   font-weight: 820 !important;
@@ -118,7 +118,7 @@
   min-width: 0 !important;
   margin: 0 !important;
   overflow: hidden !important;
-  color: rgba(255,255,255,0.52) !important;
+  color: var(--lt-muted) !important;
   font-size: 11.5px !important;
   line-height: 1.2 !important;
   white-space: nowrap !important;
@@ -1782,7 +1782,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 .playerBar .controlRow > .circleButton.main{
   background: rgb(var(--accent-rgb)) !important;
-  box-shadow: 0 10px 24px rgba(var(--accent-rgb),0.22) !important;
+  box-shadow: none !important;
 }
 
 /* player control cleanup.
@@ -1858,13 +1858,13 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .volumeIconButton :is(svg, .playerControlIcon){
   display: block !important;
   margin: 0 !important;
-  color: rgba(255,255,255,.78) !important;
+  color: var(--lt-muted) !important;
   stroke: currentColor !important;
   fill: none !important;
 }
 
 .playerBar .volumeIconButton:hover :is(svg, .playerControlIcon){
-  color: rgba(255,255,255,.96) !important;
+  color: var(--lt-text) !important;
 }
 
 .playerBar .progressRow input[type="range"],
@@ -1874,8 +1874,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 .playerBar .progressRow input[type="range"]:focus-visible,
 .playerBar .volumeWrap input[type="range"]:focus-visible{
-  filter: brightness(1.1) !important;
-  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .18) !important;
+  outline: 2px solid var(--lt-accent) !important;
+  outline-offset: 2px !important;
 }
 
 /* Play/pause path morph for the main player button. */
@@ -1990,7 +1990,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .app .playerBar{
   --player-perf-blur: 32px;
   --player-perf-opacity: 0.42;
-  --player-perf-hover-opacity: 0.50;
+  --player-perf-hover-opacity: 0.42;
   --player-perf-saturate: 1.42;
   --player-perf-brightness: 1.00;
   backdrop-filter: blur(14px) saturate(1.08) !important;
@@ -2139,7 +2139,7 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
   padding: 0;
   border: 0;
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--lt-muted);
   background: transparent;
   cursor: pointer;
   transition: color 140ms ease, background-color 140ms ease;
@@ -2147,8 +2147,8 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 
 .playerBar .playerQueueButton:hover,
 .playerBar .playerQueueButton:focus-visible{
-  color: #fff;
-  background: rgba(255, 255, 255, 0.07);
+  color: var(--lt-text);
+  background: color-mix(in srgb, var(--lt-text) 7%, transparent);
 }
 
 .playerBar .playerQueueButton.active{
@@ -2163,7 +2163,7 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
   height: 16px;
   padding: 0 4px;
   border-radius: 999px;
-  color: #07110b;
+  color: var(--accent-contrast, #07110b);
   background: rgb(var(--accent-rgb));
   font-size: 9.5px;
   font-weight: 900;

@@ -1,6 +1,6 @@
 import { isAndroidApp } from "../../app/platform";
+import "../../shared/ui/collection-layout.css";
 import "./albums.css";
-import type { CSSProperties } from "react";
 import { Check, FolderInput, FolderTree, Plus, Trash2, X } from "lucide-react";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
@@ -137,7 +137,6 @@ export default function AlbumsView(props: AlbumsViewProps) {
               <>
               <section data-page-section="albums" className="albumsPageV318">
                 <PageHeader
-                  eyebrow="local albums"
                   title="Albums"
                   description={`${localAlbums.length} album${localAlbums.length === 1 ? "" : "s"} · ${manualAlbumEntries.length} made by you · ${metadataAlbums.length} from tags`}
                 >
@@ -236,27 +235,26 @@ export default function AlbumsView(props: AlbumsViewProps) {
 
                 <section className="albumsShelfPanelV318">
                   {visibleAlbums.length ? (
-                    <div className="albumsGridV318">
-                      {visibleAlbums.map((album: LocalAlbumEntry, index: number) => {
+                    <div className="collectionBrowseGrid albumsGridV318">
+                      {visibleAlbums.map((album: LocalAlbumEntry) => {
                         const isManual = (album as any).source === "manual";
+                        const sourceLabel = isManual ? ((album as any).sourceType === "folder" ? "folder album" : "your album") : "from file tags";
+                        const summary = `${album.trackCount} track${album.trackCount === 1 ? "" : "s"}${album.year ? ` · ${album.year}` : ""} · ${sourceLabel}`;
                         return (
                           <MediaCard
                             key={album.id}
-                            className="albumCardV318"
+                            className="collectionBrowseCard albumCardV318"
                             openLabel={`open ${album.title} album`}
                             playLabel={`play ${album.title}`}
                             onOpen={() => actions.openCollection(albumTarget(album))}
                             onPlay={() => actions.playCollection(albumTarget(album))}
                             onContextMenu={(event) => actions.openCollectionMenu(event, albumTarget(album))}
-                            style={{ "--album-card-delay": `${Math.min(index, 18) * 14}ms` } as CSSProperties}
                             cover={<Cover song={album.coverSong} className="albumCardCoverV318" />}
                           >
-                            <span className="albumCardSheenV318" aria-hidden="true" />
                             <span className="albumCardMetaV318">
-                              <small>{isManual ? ((album as any).sourceType === "folder" ? "folder album" : "your album") : "from file tags"}</small>
                               <strong title={album.title}>{prettyTitle(album.title, 6)}</strong>
                               <em title={album.artist}>{prettyMeta(album.artist)}</em>
-                              <b>{album.trackCount} track{album.trackCount === 1 ? "" : "s"}{album.year ? ` ${album.year}` : ""}</b>
+                              <b title={summary}>{summary}</b>
                             </span>
                           </MediaCard>
                         );
