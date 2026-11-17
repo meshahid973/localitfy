@@ -6,8 +6,7 @@ import UpdateIsland from "../../app/UpdateIsland";
 import TitleBar from "./TitleBar";
 import HomeView from "../home/HomeView";
 import { Cover } from "../covers/Cover";
-import PlayerBar from "../player/components/PlayerBar";
-import QueuePanel from "../player/components/QueuePanel";
+import PlayerSurfaces from "../player/components/PlayerSurfaces";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import Onboarding from "../../Onboarding";
 import SongContextMenu from "../library/components/SongContextMenu";
@@ -37,9 +36,7 @@ import "./effects.css";
 import "../../styles/view-shell.css";
 
 const SimilarSongsDialog = lazy(() => import("../analysis/SimilarSongsDialog"));
-const LyricsView = lazy(() => import("../lyrics/LyricsView"));
 const PhoneTabBar = lazy(() => import("./PhoneTabBar"));
-const PhonePlayer = lazy(() => import("../player/components/PhonePlayer"));
 const LibraryView = lazy(() => import("../library/LibraryView"));
 const ArtistsView = lazy(() => import("../artists/ArtistsView"));
 const GenresView = lazy(() => import("../genres/GenresView"));
@@ -399,11 +396,8 @@ export default function AppShell(props: AppShellProps) {
             </div>
           </section>
 
-{isAndroidApp()
-            ? <Suspense fallback={null}><PhonePlayer {...playerBar} lyrics={modals.lyrics} /></Suspense>
-            : <PlayerBar {...playerBar} />}
-          <QueuePanel {...modals.queuePanel} />
-          {modals.lyrics.open && !isAndroidApp() ? <Suspense fallback={null}><LyricsView {...modals.lyrics} anchorRef={contentRef} /></Suspense> : null}
+          <PlayerSurfaces player={playerBar} queue={modals.queuePanel} lyrics={modals.lyrics}
+            contentRef={contentRef} backgroundStyle={settings.playerBackgroundStyle || "coverBlur"} backgrounded={isAppBackgrounded} />
         </div>
       )}
 

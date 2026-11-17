@@ -3,7 +3,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 /** Keep keyboard focus inside the topmost modal, including stacked delete confirmations. */
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function useModalFocus<T extends HTMLElement = HTMLDivElement>(active: boolean) {
+export function useModalFocus<T extends HTMLElement = HTMLDivElement>(active: boolean, allowContextMenu = false) {
   const dialogRef = useRef<T>(null);
   // Capture during the opening render, before React commits child autoFocus.
   const previouslyFocused = useMemo(() => active && typeof document !== "undefined" ? document.activeElement : null, [active]);
@@ -15,10 +15,10 @@ export function useModalFocus<T extends HTMLElement = HTMLDivElement>(active: bo
     const topmostModal = () => Array.from(document.querySelectorAll<HTMLElement>('[aria-modal="true"]')).at(-1);
     const isTopmost = () => topmostModal() === dialog;
     // A modal's device menu is portaled outside its clipped surface.
-    const scopes = () => [dialog, ...Array.from(dialog.querySelectorAll<HTMLElement>('[aria-controls]'))
+    const scopes = () => [dialog, ...(allowContextMenu ? Array.from(document.querySelectorAll<HTMLElement>(".songContextMenuLayer [role=menu]")) : []), ...Array.from(dialog.querySelectorAll<HTMLElement>('[aria-controls]'))
       .flatMap((control) => (control.getAttribute("aria-controls") || "").split(/\s+/))
       .map((id) => document.getElementById(id))
-      .filter((element): element is HTMLElement => element instanceof HTMLElement && element.getAttribute("role") === "menu" && !dialog.contains(element))];
+      .filter((element): element is HTMLElement => element instanceof HTMLElement && (element.getAttribute("role") === "menu" || (element.id === "localtify-play-queue" && element.getAttribute("role") === "dialog")) && !dialog.contains(element))];
     const contains = (target: Node | null) => scopes().some((scope) => scope.contains(target));
     const focusable = () => scopes().flatMap((scope) => Array.from(scope.querySelectorAll<HTMLElement>(FOCUSABLE)))
       .filter((element) => element.getClientRects().length > 0 && !element.closest("[hidden], [inert]"));
@@ -71,7 +71,7 @@ export function useModalFocus<T extends HTMLElement = HTMLDivElement>(active: bo
           .find((button) => !dialog.contains(button) && button.getClientRects().length > 0)?.focus({ preventScroll: true });
       }
     };
-  }, [active, previouslyFocused]);
+  }, [active, previouslyFocused, allowContextMenu]);
 
   return dialogRef;
 }

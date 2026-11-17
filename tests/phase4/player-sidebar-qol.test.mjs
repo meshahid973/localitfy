@@ -80,7 +80,8 @@ test("player bar links the song, artist, like state, context menu and queue", ()
   assert.match(bar, /onClick=\{\(\) => toggleLike\(currentSong\.id\)\}/);
   assert.match(bar, /openSongContextMenu\(event, currentSong\)/);
   assert.match(bar, /className=\{`playerQueueButton/);
-  assert.match(read("src/features/shell/AppShell.tsx"), /<QueuePanel \{\.\.\.modals\.queuePanel\} \/>/);
+  assert.match(read("src/features/shell/AppShell.tsx"), /<PlayerSurfaces player=\{playerBar\} queue=\{modals\.queuePanel\}/);
+  assert.match(read("src/features/player/components/PlayerSurfaces.tsx"), /<QueuePanel \{\.\.\.queue\} \/>/);
 });
 
 test("now-playing context prefers the playlist, then the started source, then the song's album", () => {

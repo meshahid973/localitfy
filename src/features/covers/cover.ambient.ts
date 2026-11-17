@@ -34,4 +34,33 @@ function rememberCoverStyle(source: string, style: CoverAverageStyle) {
 }
 const fastAverageColor=typeof window!=="undefined"?new FastAverageColor():null;
 export function buildCoverAverageStyle(hex:string):CoverAverageStyle{const safe=normalizeHexColor(hex,"#8dffce"),rgb=hexToRgbString(safe,"#8dffce");return{"--cover-rgb":rgb,"--player-ambient-rgb":rgb,"--active-cover-rgb":rgb,"--cover-average":safe} as CoverAverageStyle;}
-export function useCoverAverageStyle(source:string,enabled:boolean){const[style,setStyle]=useState<CoverAverageStyle>(EMPTY_COVER_STYLE),requestIdRef=useRef(0);useEffect(()=>{const coverSource=String(source||"").trim();if(!enabled||!coverSource||!fastAverageColor){setStyle(EMPTY_COVER_STYLE);return;}const cached=cachedCoverStyle(coverSource);if(cached){setStyle(cached);return;}let cancelled=false;const requestId=++requestIdRef.current;const timer=window.setTimeout(()=>{fastAverageColor.getColorAsync(coverSource,{algorithm:"sqrt",mode:"precision"}).then((color)=>{if(cancelled||requestIdRef.current!==requestId)return;const next=buildCoverAverageStyle(color.hex);rememberCoverStyle(coverSource,next);setStyle(next);}).catch(()=>{if(!cancelled&&requestIdRef.current===requestId)setStyle(EMPTY_COVER_STYLE);});},80);return()=>{cancelled=true;window.clearTimeout(timer);};},[enabled,source]);return style;}
+export function useCoverAverageStyle(source: string, enabled: boolean) {
+  const coverSource = enabled ? String(source || "").trim() : "";
+  const [sample, setSample] = useState<{ source: string; style: CoverAverageStyle } | null>(null);
+  const requestIdRef = useRef(0);
+
+  useEffect(() => {
+    const requestId = ++requestIdRef.current;
+    if (!coverSource || !fastAverageColor) return;
+    const cached = cachedCoverStyle(coverSource);
+    if (cached) {
+      setSample({ source: coverSource, style: cached });
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      fastAverageColor.getColorAsync(coverSource, { algorithm: "sqrt", mode: "precision" }).then(color => {
+        if (cancelled || requestIdRef.current !== requestId) return;
+        const next = buildCoverAverageStyle(color.hex);
+        rememberCoverStyle(coverSource, next);
+        setSample({ source: coverSource, style: next });
+      }).catch(() => {
+        if (!cancelled && requestIdRef.current === requestId) setSample(null);
+      });
+    }, 80);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [coverSource]);
+
+  // No stale tint between a track change and its artwork-color result.
+  return coverSource && sample?.source === coverSource ? sample.style : EMPTY_COVER_STYLE;
+}

@@ -86,7 +86,9 @@ export default function QueuePanel({
     const closeOnOutsidePointer = (event: PointerEvent) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
-      if (panelRef.current?.contains(target) || target.closest("[data-queue-trigger], .playerQueueButton, .songContextMenuLayer, .modalBackdrop, [role='dialog']")) return;
+      if (panelRef.current?.contains(target) || target.closest("[data-queue-trigger], .playerQueueButton, .songContextMenuLayer, .modalBackdrop")) return;
+      const dialog = target.closest("[role='dialog']");
+      if (dialog && !dialog.contains(panelRef.current)) return;
       closeRef.current();
     };
     window.addEventListener("keydown", closeOnEscape);

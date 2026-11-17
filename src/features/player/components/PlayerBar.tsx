@@ -73,6 +73,8 @@ export type PlayerBarProps = {
   volumeRangeStyle: CSSProperties;
   /** Devices on the live connection; null when no phone is connected. */
   connect?: ConnectControls | null;
+  openImmersive?: () => void;
+  immersiveOpen?: boolean;
 };
 
 export default function PlayerBar(props: PlayerBarProps) {
@@ -138,6 +140,8 @@ export default function PlayerBar(props: PlayerBarProps) {
             className={`playerBar ambientSurface ${isPlaying ? "playerPlaying" : "playerIdle"} ${draggedSongId ? "songDragActive" : ""} ${queueDropHot ? "queueDropHot" : ""}`}
             style={ambientStyle}
             aria-label="Music playback"
+            inert={props.immersiveOpen || undefined}
+            data-immersive-hidden={props.immersiveOpen ? "true" : undefined}
             data-ambient={effectiveAmbient ? "true" : "false"}
             data-cover-sync={effectiveCoverColorSyncMode}
             onDragOver={handlePlayerDragOver}
@@ -162,9 +166,17 @@ export default function PlayerBar(props: PlayerBarProps) {
                 if (currentSong) openSongContextMenu(event, currentSong);
               }}
             >
-              <div className={`playerArtSwap nowPlayingPlayerArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-                <Cover song={currentSong} className="smallArt" priority="high" />
-              </div>
+              {currentSong && props.openImmersive ? (
+                <button type="button" className={`playerArtSwap nowPlayingPlayerArtSwap immersiveEntry ${nowPlayingSongMotionClass}`}
+                  data-song-motion-key={nowPlayingTransitionKey} onClick={props.openImmersive}
+                  aria-label="Open immersive player" aria-haspopup="dialog" aria-expanded={Boolean(props.immersiveOpen)} title="Open immersive player">
+                  <Cover song={currentSong} className="smallArt" priority="high" preferThumbnail />
+                </button>
+              ) : (
+                <div className={`playerArtSwap nowPlayingPlayerArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
+                  <Cover song={currentSong} className="smallArt" priority="high" preferThumbnail />
+                </div>
+              )}
 
               <div className={`playerMeta nowPlayingMiniCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
                 {currentSong ? (
@@ -242,10 +254,10 @@ export default function PlayerBar(props: PlayerBarProps) {
                 </button>
               </div>
 
-              <div className="progressRow progressResetSweep" key={`progress-${nowPlayingTransitionKey}`}>
-                <span ref={(node) => { progressTimeLabelRefs.current[1] = node; }}>{formatTime(displayedTime)}</span>
+              <div className="progressRow progressResetSweep" key={`progress-${nowPlayingTransitionKey}-${Boolean(props.immersiveOpen)}`}>
+                <span ref={(node) => { progressTimeLabelRefs.current[1] = props.immersiveOpen ? null : node; }}>{formatTime(displayedTime)}</span>
                 <input
-                  ref={(node) => { progressInputRefs.current[1] = node; }}
+                  ref={(node) => { progressInputRefs.current[1] = props.immersiveOpen ? null : node; }}
                   type="range"
                   min="0"
                   max="100"
@@ -267,7 +279,7 @@ export default function PlayerBar(props: PlayerBarProps) {
                   onKeyUp={(event) => commitSeek(event.currentTarget.value)}
                   onBlur={(event) => isSeeking && commitSeek(event.currentTarget.value)}
                 />
-                <span ref={(node) => { progressDurationLabelRefs.current[1] = node; }}>{formatTime(currentDuration || currentSong?.duration || 0)}</span>
+                <span ref={(node) => { progressDurationLabelRefs.current[1] = props.immersiveOpen ? null : node; }}>{formatTime(currentDuration || currentSong?.duration || 0)}</span>
               </div>
             </div>
 
