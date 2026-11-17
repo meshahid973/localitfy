@@ -12,6 +12,7 @@ import { artistTarget, genreTarget, playableIds, useAppActions } from "../shell/
 import type { LocalAlbumEntry } from "../albums/album.types";
 import type { Song } from "../library/song.types";
 import type { ArtistBio } from "../discover/discover.types";
+import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import CollectionHero from "./CollectionHero";
 import TrackList from "./TrackList";
 import AlbumShelf from "./AlbumShelf";
@@ -81,6 +82,7 @@ function SongGroupBody({ kind, name, members, loading, albums, currentId, isPlay
 
   return (
     <section data-page-section={kind} className="collectionPage songGroupPage" aria-label={`${name} ${kind}`}>
+      <ArtworkBackdrop song={target.coverSong} />
       <CollectionHero
         typeLabel={kind}
         title={name}

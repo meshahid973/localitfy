@@ -10,6 +10,7 @@ import { splitArtistCredits } from "../artists/artistCredits";
 import { albumTarget, playableIds, useAppActions } from "../shell/appActions";
 import type { LocalAlbumEntry } from "../albums/album.types";
 import type { Song } from "../library/song.types";
+import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import CollectionHero from "./CollectionHero";
 import TrackList from "./TrackList";
 import AlbumShelf from "./AlbumShelf";
@@ -59,6 +60,7 @@ export default function AlbumPage({ albumId, albums, currentId, isPlaying, toggl
 
   return (
     <section data-page-section="album" className="collectionPage albumPage" aria-label={`${album.title} album`}>
+      <ArtworkBackdrop song={album.coverSong} />
       <CollectionHero
         typeLabel={folder ? "folder album" : manual ? "your album" : "album"}
         title={album.title}

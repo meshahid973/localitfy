@@ -2,7 +2,7 @@
 
 .app:has(.libraryPage) .content {
   overflow-x: hidden !important;
-  background: var(--lt-bg) !important;
+  background: var(--workspace-bg, var(--lt-bg)) !important;
 }
 
 .app:has(.libraryPage) .pageTransition {
@@ -24,8 +24,7 @@
   align-content: start;
   gap: clamp(18px, 1.8vw, 28px);
   color: var(--library-text);
-  background:
-    var(--lt-bg);
+  background: transparent;
 }
 
 .libraryPage .pageHeaderTools { flex: 1 1 480px; }

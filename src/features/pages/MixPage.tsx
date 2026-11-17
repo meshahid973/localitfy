@@ -11,6 +11,7 @@ import { buildAlbumIdBySongId } from "../player/playbackSource";
 import { mixTarget, playableIds, useAppActions } from "../shell/appActions";
 import type { LocalAlbumEntry } from "../albums/album.types";
 import type { Song } from "../library/song.types";
+import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import CollectionHero from "./CollectionHero";
 import TrackList from "./TrackList";
 
@@ -59,6 +60,7 @@ export default function MixPage({ mixId, songs, albums, currentId, isPlaying, to
 
   return (
     <section data-page-section="mix" className="collectionPage mixPage" aria-label={mix.name}>
+      <ArtworkBackdrop song={target.coverSong} />
       <CollectionHero
         typeLabel="daily mix"
         title={mix.name}

@@ -75,7 +75,7 @@ test("Home uses sharp cover art with optional ambient rendering", () => {
   const source = read("src/features/home/HomeView.tsx");
   const css = read("src/features/home/home.css");
   const shell = read("src/features/shell/AppShell.tsx");
-  assert.match(source, /showAtmosphere \? <ArtworkBackdrop song=\{currentSong\}/);
+  assert.match(source, /showAtmosphere \? <div className="homeAtmosphere"[^>]*><ArtworkBackdrop song=\{currentSong\}/);
   assert.match(source, /className="homeFeatureCover" priority="high" preferThumbnail=/);
   assert.match(shell, /artworkAmbient=\{effectiveAmbient && !isAppBackgrounded\}/);
   assert.match(css, /\.homePage > \.homeAtmosphere/);
@@ -89,4 +89,11 @@ test("Home shelves size against available content width and deduplicate mix artw
   assert.match(css, /\.homeMixRail \{ grid-auto-columns:/);
   assert.match(source, /pickHomeMixArtwork\(mix.songs\)/);
   assert.match(source, /className="homeReleaseCover" preferThumbnail/);
+});
+
+test("wide Home aligns adjacent sections without rearranging persisted order", () => {
+  const css = read("src/features/home/home.css");
+  assert.match(css, /\.homeJumpBack:has\(\+ \.homeListenSection\)/);
+  assert.match(css, /\.homeJumpBack \+ \.homeListenSection/);
+  assert.match(css, /\.homeMixRail \.homeReleaseCard/);
 });

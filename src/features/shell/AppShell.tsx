@@ -6,6 +6,7 @@ import UpdateIsland from "../../app/UpdateIsland";
 import TitleBar from "./TitleBar";
 import HomeView from "../home/HomeView";
 import { Cover } from "../covers/Cover";
+import { ArtworkAmbientContext } from "../covers/ArtworkBackdrop";
 import PlayerSurfaces from "../player/components/PlayerSurfaces";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import Onboarding from "../../Onboarding";
@@ -116,6 +117,7 @@ export default function AppShell(props: AppShellProps) {
 
   return (
     <AppActionsContext.Provider value={actions}>
+    <ArtworkAmbientContext.Provider value={effectiveAmbient && !isAppBackgrounded}>
     <main
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
@@ -133,7 +135,8 @@ export default function AppShell(props: AppShellProps) {
           "--home-hero-cover-glow-brightness": String(homeHeroCoverGlowBrightness),
           ...themePresetStyle,
           ...animatedThemeVisualStyle,
-          ...customThemeStyle
+          ...customThemeStyle,
+          "--workspace-cover-color": effectiveAmbient && !isAppBackgrounded ? (home.ambientStyle as CSSProperties & { "--cover-average"?: string })["--cover-average"] : undefined
         } as CSSProperties
       }
       data-platform={platformId}
@@ -370,7 +373,7 @@ export default function AppShell(props: AppShellProps) {
               className={`pageTransition pageTransition-${view}`}
               data-view={view}
             >
-              {view === "home" ? <HomeView {...home} artworkAmbient={effectiveAmbient && !isAppBackgrounded} /> : null}
+              {view === "home" ? <HomeView {...home} artworkAmbient={effectiveAmbient && !isAppBackgrounded} bannerType={settings.homeBannerType} /> : null}
 
               <Suspense fallback={null}>
                 {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}
@@ -426,6 +429,7 @@ export default function AppShell(props: AppShellProps) {
 
       <PlaybackAudioElement {...playbackAudio} />
     </main>
+    </ArtworkAmbientContext.Provider>
     </AppActionsContext.Provider>
   );
 }

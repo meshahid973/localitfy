@@ -1,5 +1,7 @@
 /* Album, artist, genre, playlist and mix pages share one layout. */
 .collectionPage {
+  position: relative;
+  isolation: isolate;
   min-width: 0;
   display: grid;
   align-content: start;
@@ -12,16 +14,14 @@
   isolation: isolate;
   min-width: 0;
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
+  grid-template-columns: 168px minmax(0, 1fr);
   grid-template-areas: "art copy" "art actions";
   align-items: end;
   column-gap: var(--lt-space-5);
   row-gap: 16px;
-  padding: var(--lt-space-5);
+  padding: var(--lt-space-2) 0;
   border: 0;
-  border-radius: var(--lt-control-radius);
-  overflow: hidden;
-  background: var(--lt-surface);
+  background: transparent;
 }
 
 .collectionHeroArt { grid-area: art; min-width: 0; align-self: center; }
@@ -59,13 +59,13 @@
 
 .collectionHeroActions { grid-area: actions; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .collectionPlayButton {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  padding: 0;
+  min-height: var(--lt-control-height);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lt-space-2);
+  padding: 0 var(--lt-space-4);
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--lt-radius-item);
   color: var(--accent-contrast, var(--lt-bg));
   background: var(--lt-accent);
   box-shadow: none;
@@ -81,8 +81,8 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid var(--lt-border);
-  border-radius: 50%;
+  border: 1px solid transparent;
+  border-radius: var(--lt-radius-item);
   color: var(--lt-muted);
   background: var(--lt-surface-raised);
   cursor: pointer;
@@ -131,7 +131,7 @@
 }
 .trackLink:hover { color: var(--lt-text); text-decoration: underline; }
 
-.trackList { min-width: 0; display: grid; }
+.trackList { min-width: 0; display: grid; background: var(--lt-surface-soft); border-radius: var(--lt-radius-sm); }
 .trackListCanvas { position: relative; min-width: 0; }
 .trackVirtualRow { position: absolute; left: 0; width: 100%; }
 .trackRow {
@@ -183,7 +183,7 @@
 .trackRowTitle strong,
 .trackRowTitle small,
 .trackRowAlbum { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.trackRowTitle strong { color: var(--lt-text); font-size: 13px; font-weight: 650; }
+.trackRowTitle strong { color: var(--lt-text); font-size: 14px; font-weight: 550; }
 .trackRow.active .trackRowTitle strong { color: var(--lt-accent); }
 .trackRowTitle small,
 .trackRowAlbum { color: var(--lt-muted); font-size: 12px; }
@@ -230,4 +230,12 @@
 @media (prefers-reduced-motion: reduce) {
   .collectionPlayButton, .collectionIconButton { transition: none; }
   .collectionPlayButton:hover:not(:disabled) { transform: none; }
+}
+
+.playlistDetailPage { position: relative; isolation: isolate; }
+.collectionPage > .artworkBackdrop,
+.playlistDetailPage > .artworkBackdrop {
+  inset: 0 0 auto;
+  height: min(640px, 80vh);
+  mask-image: linear-gradient(#000 0%, #000 28%, transparent 100%);
 }

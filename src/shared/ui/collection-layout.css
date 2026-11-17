@@ -9,7 +9,7 @@
 .collectionBrowseGrid {
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr));
   gap: var(--lt-space-4);
 }
 
@@ -56,13 +56,13 @@
 
 .collectionBrowseCard strong {
   color: var(--lt-text);
-  font-size: 13px;
-  font-weight: 650;
+  font-size: 14px;
+  font-weight: 550;
 }
 
 .collectionBrowseCard small {
   color: var(--lt-muted);
-  font-size: 11px;
+  font-size: var(--lt-text-base);
 }
 
 @media (max-width: 520px) {

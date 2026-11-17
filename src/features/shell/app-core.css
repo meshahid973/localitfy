@@ -1750,9 +1750,7 @@ button{
 }
 
 .app .content{
-  background:
-    radial-gradient(circle at 72% 6%, rgba(var(--accent-rgb), 0.035), transparent 28%),
-    rgba(0, 0, 0, 0.02) !important;
+  background: var(--workspace-bg, var(--lt-bg)) !important;
   scroll-behavior: auto !important;
   contain: paint !important;
 }

@@ -22,6 +22,7 @@ export type HomeViewProps = {
   albums: readonly LocalAlbumEntry[];
   ambientStyle: CSSProperties;
   artworkAmbient?: boolean;
+  bannerType?: Settings["homeBannerType"];
   currentId: string | null;
   currentSong: Song | null;
   heroDisplayArtist: string;
@@ -54,6 +55,7 @@ export default function HomeView(props: HomeViewProps) {
     albums,
     ambientStyle,
     artworkAmbient = true,
+    bannerType = "dynamic",
     currentId,
     currentSong,
     heroDisplayArtist,
@@ -83,7 +85,7 @@ export default function HomeView(props: HomeViewProps) {
   const actions = useAppActions();
   const android = isAndroidApp();
   const needsPhoneSync = android && songs.length === 0;
-  const showAtmosphere = artworkAmbient && Boolean(currentSong);
+  const showAtmosphere = artworkAmbient && Boolean(currentSong) && (bannerType === "dynamic" || bannerType === "albumCover");
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const closeCustomize = useCallback(() => setCustomizeOpen(false), []);
 
@@ -142,7 +144,6 @@ export default function HomeView(props: HomeViewProps) {
         className={`homeJumpBack ${settings.heroExpanded ? "expanded" : "compact"} ${heroMotionClass}`}
         aria-label="jump back in"
       >
-        {showAtmosphere ? <ArtworkBackdrop song={currentSong} /> : null}
         {currentSong ? <div className="homeFeatureArt" aria-hidden="true">
           <Cover key={currentSong.id} song={currentSong} className="homeFeatureCover" priority="high" preferThumbnail={!settings.heroExpanded || android} />
         </div> : null}
@@ -236,7 +237,7 @@ export default function HomeView(props: HomeViewProps) {
 
   return (
     <div className="homePage" style={ambientStyle}>
-      {showAtmosphere ? <div className="homeAtmosphere" aria-hidden="true" /> : null}
+      {showAtmosphere ? <div className="homeAtmosphere" aria-hidden="true"><ArtworkBackdrop song={currentSong} /></div> : null}
       <header className="homeTopBar">
         <h1>Home</h1>
         <button

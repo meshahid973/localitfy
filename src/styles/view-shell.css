@@ -1,14 +1,20 @@
 /* Shared application shell only. Feature pages own their own visuals. */
 
 .app {
-  --workspace-bg: var(--lt-bg);
-  --workspace-sidebar: var(--lt-bg);
+  --workspace-cover-strength: 30%;
+  --workspace-mood: color-mix(in srgb, var(--workspace-cover-color, var(--lt-bg)) var(--workspace-cover-strength), var(--lt-bg));
+  --workspace-bg: radial-gradient(ellipse at 42% 0%, var(--workspace-mood), var(--lt-bg) 76%);
+  --workspace-sidebar: color-mix(in srgb, var(--workspace-mood) 38%, var(--lt-bg));
   --workspace-sidebar-raised: var(--lt-surface);
   --workspace-sidebar-expanded: clamp(224px, var(--sidebar-width, 248px), 280px);
   --workspace-sidebar-current: var(--workspace-sidebar-expanded);
   --workspace-sidebar-rail: 68px;
 }
 
+.app[data-cover-sync="subtle"] { --workspace-cover-strength: 12%; }
+.app[data-cover-sync="strong"] { --workspace-cover-strength: 42%; }
+.app[data-cover-sync="off"],
+.app[data-app-backgrounded="on"] { --workspace-cover-strength: 0%; }
 .app[data-sidebar-behavior="slim"],
 .app[data-sidebar-behavior="hover"] {
   --workspace-sidebar-current: var(--workspace-sidebar-rail);
@@ -103,7 +109,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
   overflow: visible !important;
   display: flex !important;
   flex-direction: column !important;
-  border-right: 1px solid rgba(var(--lt-accent-rgb), .075) !important;
+  border-right: 1px solid transparent !important;
   background: var(--workspace-sidebar) !important;
   box-shadow: none !important;
   transition: width 180ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease, background-color 180ms ease !important;
@@ -197,8 +203,8 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 
 .navItem.active {
   color: var(--lt-text) !important;
-  border-color: rgba(var(--lt-accent-rgb), .105) !important;
-  background: color-mix(in oklab, var(--lt-accent) 10%, var(--lt-surface)) !important;
+  border-color: transparent !important;
+  background: var(--lt-surface-raised) !important;
 }
 
 .navItem.active::after {
@@ -241,8 +247,8 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 .navText strong {
   color: inherit !important;
   font-size: var(--lt-text-base) !important;
-  font-weight: 650 !important;
-  line-height: 1.05 !important;
+  font-weight: 550 !important;
+  line-height: 1.25 !important;
 }
 
 .navText small {
