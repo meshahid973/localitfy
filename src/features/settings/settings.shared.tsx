@@ -57,6 +57,8 @@ export function RangeRow({ label, value, min, max, step, suffix, onChange }: {
       </span>
       <input
         type="range"
+        aria-label={label}
+        aria-valuetext={shownValue}
         min={min}
         max={max}
         step={step}

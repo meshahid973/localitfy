@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { ThemeId } from "./theme.types";
-import { hexToRgbString, hexToRgbaString } from "./theme.utils";
+import { accentTextColor, hexToRgbString, hexToRgbaString } from "./theme.utils";
 
 export type ThemeVisualPalette = {
   accent: string;
@@ -74,6 +74,7 @@ export function makeThemePresetStyle(themeId: ThemeId): CSSProperties {
     "--line":hexToRgbaString(p.accent,"#8dffce",.18),
     "--line-2":hexToRgbaString(p.accent,"#8dffce",.28),
     "--accent":p.accent,
+    "--button-text-on-accent":accentTextColor(p.accent),
     "--accent-2":p.accent2,
     "--highlight":p.highlight,
     "--progress":progress,

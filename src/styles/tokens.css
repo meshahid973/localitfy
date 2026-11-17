@@ -24,6 +24,24 @@
   --lt-radius-sm: 12px;
   --lt-radius-md: 18px;
 
+  --lt-space-1: 4px;
+  --lt-space-2: 8px;
+  --lt-space-3: 12px;
+  --lt-space-4: 16px;
+  --lt-space-5: 24px;
+  --lt-text-sm: 12px;
+  --lt-text-base: 13px;
+  --lt-text-title: 20px;
+  --lt-leading: 1.4;
+  --lt-control-height: 42px;
+  --lt-control-radius: 12px;
+  --lt-menu-item-height: 36px;
+  --lt-radius-item: 8px;
+  --lt-duration-fast: 120ms;
+  --lt-duration-normal: 180ms;
+  --lt-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --lt-shadow-menu: 0 12px 32px rgba(0, 0, 0, .28);
+
   --lt-shadow-low: 0 10px 30px rgba(0, 0, 0, 0.24);
 
   /* Compatibility aliases used by the existing renderer while features migrate. */
@@ -35,4 +53,11 @@
   --accent: var(--lt-accent);
   --accent-rgb: var(--lt-accent-rgb);
   --danger: var(--lt-danger);
+}
+
+@media (pointer: coarse) {
+  :root {
+    --lt-control-height: 44px;
+    --lt-menu-item-height: 44px;
+  }
 }

@@ -172,6 +172,7 @@ import {
   useCoverAverageStyle
 } from "./features/covers";
 import {
+  accentTextColor,
   buildAnimatedThemeVisualStyle,
   getCustomThemeColorPatch,
   hexToRgbString,
@@ -1079,6 +1080,7 @@ function MainModeApp() {
       "--text-2": hexToRgbaString(customThemeText, "#f5f3ff", 0.78),
       "--muted": hexToRgbaString(customThemeText, "#f5f3ff", 0.52),
       "--accent": customThemeColor,
+      "--button-text-on-accent": accentTextColor(customThemeColor),
       "--accent-2": customThemeColor2,
       "--highlight": customThemeHighlight,
       "--progress": customThemeProgress,
@@ -1259,6 +1261,7 @@ function MainModeApp() {
       "--text-2": hexToRgbaString(previewText, "#f5f3ff", 0.78),
       "--muted": hexToRgbaString(previewText, "#f5f3ff", 0.52),
       "--accent": previewColor,
+      "--button-text-on-accent": accentTextColor(previewColor),
       "--accent-2": previewColor2,
       "--highlight": previewHighlight,
       "--progress": previewProgress,

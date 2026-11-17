@@ -387,12 +387,6 @@ button:disabled{
   margin-top: 12px;
 }
 
-input[type="range"]{
-  width: 100%;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
 .editorModal{
   width: min(980px, calc(100vw - 40px));
   max-height: calc(100vh - 78px);
@@ -827,15 +821,6 @@ input[type="range"]{
 
 .songButton{
   z-index: 2;
-}
-
-input[type="range"]::-webkit-slider-runnable-track{
-  height: 4px;
-  border-radius: 999px;
-}
-
-input[type="range"]::-webkit-slider-thumb{
-  margin-top: -5px;
 }
 
 .secretRibbon{
@@ -1636,19 +1621,6 @@ body.isResizingPlayer{
   50% { box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.22), 0 0 28px rgba(var(--accent-rgb), 0.08); }
 }
 
-input[type="range"]{
-  transition: filter 170ms ease, opacity 170ms ease !important;
-}
-
-input[type="range"]:hover{
-  filter: brightness(1.13);
-}
-
-button:focus-visible{
-  outline: 0 !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.22) !important;
-}
-
 .ambientSurface{
   position: relative;
   isolation: isolate;
@@ -2424,115 +2396,6 @@ body,
 
 .updateToastCard.updateNagStage-3 .updatePrimaryButton{
   min-width: 116px !important;
-}
-
-.app{
-  --button-radius: 15px;
-  --button-height: 42px;
-  --button-border: rgba(255,255,255,.09);
-  --button-bg: rgba(255,255,255,.045);
-  --button-bg-hover: rgba(255,255,255,.07);
-  --button-shadow: 0 14px 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.055);
-}
-
-.app :is(.mainAction, .heroMain, .simpleAction, .updatePrimaryButton, .settingsActionButton.primary){
-  min-height: var(--button-height) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 9px !important;
-  padding: 0 16px !important;
-  border-radius: var(--button-radius) !important;
-  border: 1px solid color-mix(in srgb, var(--accent) 52%, rgba(255,255,255,.12)) !important;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), .95), rgba(var(--accent-rgb), .72)) !important;
-  color: #07070a !important;
-  font-weight: 900 !important;
-  letter-spacing: -.01em !important;
-  text-decoration: none !important;
-  box-shadow: 0 14px 34px rgba(var(--accent-rgb), .16), inset 0 1px 0 rgba(255,255,255,.18) !important;
-  cursor: pointer !important;
-}
-
-.app :is(.softButton, .heroGhost, .simpleGhost, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):not(.main){
-  min-height: var(--button-height) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  padding: 0 14px !important;
-  border-radius: var(--button-radius) !important;
-  border: 1px solid var(--button-border) !important;
-  background: var(--button-bg) !important;
-  color: rgba(255,255,255,.88) !important;
-  font-weight: 850 !important;
-  text-decoration: none !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
-  cursor: pointer !important;
-}
-
-.app :is(.mainAction, .heroMain, .simpleAction, .updatePrimaryButton, .settingsActionButton.primary):hover{
-  border-color: color-mix(in srgb, var(--accent) 66%, rgba(255,255,255,.18)) !important;
-  box-shadow: 0 16px 36px rgba(var(--accent-rgb), .2), inset 0 1px 0 rgba(255,255,255,.2) !important;
-  filter: none !important;
-}
-
-.app :is(.softButton, .heroGhost, .simpleGhost, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):not(.main):hover{
-  border-color: color-mix(in srgb, var(--accent) 32%, rgba(255,255,255,.14)) !important;
-  background: var(--button-bg-hover) !important;
-  color: rgba(255,255,255,.96) !important;
-  box-shadow: var(--button-shadow) !important;
-  filter: none !important;
-}
-
-.app :is(.dangerButton, .danger, .resetButton){
-  min-height: var(--button-height) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  padding: 0 14px !important;
-  border-radius: var(--button-radius) !important;
-  border: 1px solid rgba(255,92,122,.28) !important;
-  background: rgba(255,68,104,.08) !important;
-  color: #ffb4c2 !important;
-  font-weight: 900 !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
-}
-
-.app :is(.dangerButton, .danger, .resetButton):hover{
-  border-color: rgba(255,92,122,.4) !important;
-  background: rgba(255,68,104,.12) !important;
-  color: #ffd2dc !important;
-  filter: none !important;
-}
-
-.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose),
-.app :is(.circleButton):not(.playerBar *){
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px !important;
-  min-height: 38px !important;
-  padding: 0 !important;
-  display: inline-grid !important;
-  place-items: center !important;
-  border-radius: 14px !important;
-  border: 1px solid rgba(255,255,255,.085) !important;
-  background: rgba(255,255,255,.045) !important;
-  color: rgba(255,255,255,.86) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
-}
-
-.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose):hover,
-.app :is(.circleButton):not(.playerBar *):hover{
-  border-color: color-mix(in srgb, var(--accent) 30%, rgba(255,255,255,.12)) !important;
-  background: rgba(255,255,255,.07) !important;
-  color: rgba(255,255,255,.96) !important;
-  box-shadow: 0 12px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.055) !important;
-}
-
-.app :is(button, a, [role="button"]):focus-visible{
-  outline: 2px solid rgba(var(--accent-rgb), .58) !important;
-  outline-offset: 3px !important;
 }
 
 .app .sidebar .nav .navItem{

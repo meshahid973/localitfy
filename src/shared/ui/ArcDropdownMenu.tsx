@@ -27,7 +27,6 @@ export type ArcDropdownMenuProps<T extends string> = {
 };
 
 const EDGE_GAP = 12;
-const ITEM_HEIGHT = 36;
 const MENU_PADDING = 5;
 const THEME_VARS = ["--lt-text", "--lt-muted", "--lt-accent", "--lt-surface", "--lt-surface-raised", "--lt-border", "--lt-bg"] as const;
 
@@ -35,7 +34,10 @@ export function ArcDropdownMenu<T extends string>({
   ariaLabel, value, items, onValueChange, className = "", disabled = false
 }: ArcDropdownMenuProps<T>) {
   const menuId = useId();
-  const reducedMotion = useReducedMotion();
+  const systemReducedMotion = useReducedMotion();
+  const [appReducedMotion, setAppReducedMotion] = useState(false);
+  const reducedMotion = systemReducedMotion || appReducedMotion;
+  const [itemHeight, setItemHeight] = useState(36);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -50,9 +52,11 @@ export function ArcDropdownMenu<T extends string>({
   const placeMenu = useCallback(() => {
     const trigger = triggerRef.current;
     if (!trigger) return;
+    const rowHeight = Number.parseFloat(getComputedStyle(trigger).getPropertyValue("--lt-menu-item-height")) || 36;
+    setItemHeight(rowHeight);
     const rect = trigger.getBoundingClientRect();
     const width = Math.min(Math.max(rect.width, 176), Math.max(0, window.innerWidth - EDGE_GAP * 2));
-    const height = Math.min(items.length * ITEM_HEIGHT + MENU_PADDING * 2, Math.max(100, window.innerHeight - EDGE_GAP * 2));
+    const height = Math.min(items.length * rowHeight + MENU_PADDING * 2, Math.max(100, window.innerHeight - EDGE_GAP * 2));
     const left = Math.max(EDGE_GAP, Math.min(rect.right - width, window.innerWidth - width - EDGE_GAP));
     const below = rect.bottom + 6;
     const top = below + height > window.innerHeight - EDGE_GAP && rect.top - height - 6 >= EDGE_GAP
@@ -60,6 +64,17 @@ export function ArcDropdownMenu<T extends string>({
       : Math.max(EDGE_GAP, Math.min(below, window.innerHeight - height - EDGE_GAP));
     setPosition({ left, top, width });
   }, [items.length]);
+
+  // The menu is portaled outside .app, so CSS alone cannot apply its motion preference.
+  useEffect(() => {
+    const root = triggerRef.current?.closest<HTMLElement>(".app");
+    if (!root) return;
+    const sync = () => setAppReducedMotion(root.classList.contains("reducedMotion") || root.dataset.motionLevel === "reduced");
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ["class", "data-motion-level"] });
+    return () => observer.disconnect();
+  }, []);
 
   // Focus only when opening: pointer highlight changes should not steal keyboard focus.
   useLayoutEffect(() => {
@@ -72,8 +87,7 @@ export function ArcDropdownMenu<T extends string>({
       for (const key of THEME_VARS) copied[key] = computed.getPropertyValue(key).trim();
       setThemeStyle(copied as CSSProperties);
     }
-    const id = window.requestAnimationFrame(() => optionRefs.current[activeIndex]?.focus());
-    return () => window.cancelAnimationFrame(id);
+    optionRefs.current[activeIndex]?.focus();
   }, [open, placeMenu]);
 
   useEffect(() => {
@@ -122,7 +136,7 @@ export function ArcDropdownMenu<T extends string>({
   };
   const onMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape") { event.preventDefault(); close(true); }
-    else if (event.key === "Tab") close();
+    else if (event.key === "Tab") close(true);
     else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       move(event.key === "ArrowDown" ? 1 : -1);
@@ -183,14 +197,14 @@ export function ArcDropdownMenu<T extends string>({
               initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -5, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -3, scale: 0.985 }}
-              transition={{ duration: reducedMotion ? 0.05 : 0.14, ease: "easeOut" }}
+              transition={{ duration: reducedMotion ? 0 : 0.14, ease: "easeOut" }}
               onKeyDown={onMenuKeyDown}
             >
               <motion.span
                 className="arcDropdownHighlight"
                 aria-hidden="true"
-                animate={{ y: activeIndex * ITEM_HEIGHT, opacity: 1 }}
-                transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 580, damping: 40, mass: 0.65 }}
+                animate={{ y: activeIndex * itemHeight, opacity: 1 }}
+                transition={{ duration: reducedMotion ? 0 : 0.12, ease: "easeOut" }}
               />
               {items.map((item, index) => (
                 <button
