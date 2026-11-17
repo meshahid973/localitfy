@@ -84,13 +84,13 @@ test("theme controls and library layout follow their owners", () => {
   const themes = read("src/styles/themes.css");
   assert.match(read("src/shared/ui/controls.css"), /background-color: var\(--lt-surface\) !important/);
   assert.equal(app.includes("--sidebar-line-soft"), false);
-  assert.match(themes, /\.app\[data-theme="mono"\][\s\S]*?color-scheme: light/);
+  assert.match(themes, /\.app\[data-theme="light"\][\s\S]*?color-scheme: light/);
   assert.match(read("src/features/settings/settings.css"), /\.settingsPage select \{ cursor: pointer; color-scheme: inherit/);
   assert.match(read("src/features/albums/AlbumsView.tsx"), /<ArcDropdownMenu className="albumsSortV318"/);
   assert.match(read("src/features/albums/albums.css"), /\.albumsPageV318 \.albumsSortV318 \{/);
-  assert.match(read("src/features/library/library.css"), /padding: 0 0 105px/);
+  assert.match(read("src/features/library/library.css"), /padding: 0 0 var\(--lt-space-5\)/);
   assert.match(read("src/features/settings/settings.css"), /padding: 26px 0 100px/);
-  assert.match(read("src/features/settings/settings-premium.css"), /padding: 24px 0 90px/);
+  assert.match(read("src/features/settings/settings-premium.css"), /padding: var\(--lt-space-5\) 0/);
 });
 
 test("sidebar navigation retains keyboard focus and theme contrast", () => {
@@ -103,19 +103,13 @@ test("sidebar navigation retains keyboard focus and theme contrast", () => {
 
 
 
-test("Mono theme has one palette owner and preserves final semantic colors", () => {
-  const themes = read("src/styles/themes.css");
-  const monoBlocks = [...themes.matchAll(/\.app\[data-theme="mono"\]\s*\{([^{}]*)\}/g)];
-  assert.equal(monoBlocks.length, 1, "Mono must have a single palette and color-scheme owner");
-  assert.doesNotMatch(themes, /\.app\[data-theme="stars"\]\s*,\s*\.app\[data-theme="midnight"\]\s*,\s*\.app\[data-theme="mono"\]/);
-  const palette = monoBlocks.at(-1)[1];
-  for (const rule of [
-    "--bg: #f4f6fb;", "--surface: #ffffff;", "--text: #343a55;",
-    "--lt-bg: var(--bg);", "--lt-surface: var(--surface);",
-    "--lt-accent: var(--accent);", "color-scheme: light;"
-  ]) assert.ok(palette.includes(rule), "Missing final Mono token: " + rule);
-  const declarations = [...palette.matchAll(/(?:^|;)\s*(--[\w-]+|color-scheme)\s*:/g)].map((item) => item[1]);
-  assert.equal(new Set(declarations).size, declarations.length, "Mono must define each token once");
+test("appearance has only light and dark mode and shared semantic aliases", () => {
+  const css = read("src/styles/themes.css");
+  const app = read("src/App.css");
+  assert.match(css, /color-scheme: dark/);
+  assert.match(css, /color-scheme: light/);
+  assert.doesNotMatch(css + app, /data-theme="(?:mono|mint|stars|berry|oled)"/);
+  for (const token of ["--lt-bg", "--lt-surface", "--lt-text", "--lt-accent"]) assert.ok(css.includes(token));
 });
 
 test("Card mode owner respects theme surfaces without stripping effects", () => {

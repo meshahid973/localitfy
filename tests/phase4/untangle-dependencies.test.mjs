@@ -41,30 +41,23 @@ test("theme preset builder stays separate from localStorage and the public setti
   assert.match(barrel, /export \* from "\.\/customTheme"/);
 });
 
-test("all 38 existing preset palettes emit stable CSS token values", () => {
+test("the two palettes share semantic tokens and migrate retired IDs", () => {
   const theme = loadThemePresetStyle();
-  const palettes = JSON.parse(JSON.stringify(theme.THEME_PRESET_COLORS));
-  assert.equal(Object.keys(palettes).length, 38);
-  const mint = JSON.parse(JSON.stringify(theme.makeThemePresetStyle("mint")));
-  const mono = JSON.parse(JSON.stringify(theme.makeThemePresetStyle("mono")));
-  const stars = JSON.parse(JSON.stringify(theme.makeThemePresetStyle("stars")));
-  assert.equal(Object.keys(mint).length, 38);
-  assert.equal(mint["--bg"], "#020706");
-  assert.equal(mint["--accent"], "#8dffce");
-  assert.equal(mint["--accent-rgb"], "141, 255, 206");
-  assert.equal(mint["--accent-soft"], "rgba(141, 255, 206, 0.14)");
-  assert.equal(mint["--theme-card-glass"], "rgba(141, 255, 206, 0.045)");
-  assert.equal(mono["--bg"], "#030303");
-  assert.equal(mono["--accent"], "#f4f4f5");
-  assert.equal(stars["--bg"], "#050610");
-  assert.equal(stars["--accent"], "#d7d5ff");
-  assert.deepEqual(JSON.parse(JSON.stringify(theme.makeThemePresetStyle("invalid-theme"))), mint);
-  for (const id of Object.keys(palettes)) {
-    const tokens = JSON.parse(JSON.stringify(theme.makeThemePresetStyle(id)));
-    assert.equal(Object.keys(tokens).length, 38, id);
-    assert.equal(tokens["--accent"], palettes[id].accent, id);
-    assert.equal(tokens["--progress"], palettes[id].progress ?? palettes[id].accent, id);
-    assert.equal(tokens["--theme-highlight"], palettes[id].highlight, id);
+  const plain = id => JSON.parse(JSON.stringify(theme.makeThemePresetStyle(id)));
+  assert.deepEqual(Object.keys(theme.THEME_PRESET_COLORS).sort(), ["dark", "light"]);
+  const dark = plain("dark"), light = plain("light");
+  assert.equal(dark["--bg"], "#000000");
+  assert.equal(dark["--accent"], "#7696ff");
+  assert.equal(light["--bg"], "#f5f5f7");
+  assert.equal(light["--accent"], "#3659c5");
+  assert.deepEqual(Object.keys(dark).sort(), Object.keys(light).sort());
+  for (const id of ["mint", "stars", "berry", "oled", "custom", "invalid-theme", undefined]) assert.deepEqual(plain(id), dark);
+  assert.deepEqual(plain("mono"), light);
+  for (const id of ["dark", "light"]) {
+    const palette = theme.THEME_PRESET_COLORS[id], tokens = plain(id);
+    assert.equal(tokens["--accent"], palette.accent);
+    assert.equal(tokens["--progress"], palette.progress ?? palette.accent);
+    assert.equal(tokens["--theme-highlight"], palette.highlight);
   }
 });
 

@@ -38,18 +38,19 @@ test("Compact styles cover inputs, focus indicators, and narrower viewports with
   assert.match(skin, /:focus-visible/);
   assert.match(skin, /@media \(max-width: 950px\)/);
   assert.match(skin, /@media \(max-width: 480px\)/);
-  assert.match(skin, /settingsAppearanceTopGrid/);
+  assert.match(skin, /settingsModeGrid/);
   assert.match(skin, /settingsDisclosure/);
   assert.match(skin, /prefers-reduced-motion: reduce/);
   assert.match(skin, /rangeRow input\[type="range"\]::-webkit-slider-thumb/);
   assert.match(skin, /--range-progress/);
 });
 
-test("Appearance keeps presets, local color editing and sidebar tools behind compact sections", () => {
+test("Appearance provides two accessible modes and sidebar tools", () => {
   const appearance = read("src/features/settings/categories/AppearanceSettings.tsx");
-  assert.match(appearance, /settingsAppearanceTopGrid/);
-  assert.match(appearance, /settingsPaletteEditor/);
-  assert.match(appearance, /customThemeTokens\.map\(/);
+  assert.match(appearance, /settingsModeGrid/);
+  assert.doesNotMatch(appearance, /settingsPaletteEditor|customThemeTokens/);
+  assert.match(appearance, /aria-pressed/);
+  assert.match(appearance, /updateSetting\("theme", mode\)/);
   assert.match(appearance, /<SidebarTabsSettings /);
   assert.match(appearance, /settingsSidebarDisclosure/);
 });
@@ -75,7 +76,7 @@ test("User feedback remains available manually without automatic nag prompts", (
 
 test("Settings use a readable width and grouped navigation", () => {
   const rail = read("src/features/settings/SettingsRail.tsx");
-  assert.match(skin, /width: min\(100%, 1760px\)/);
+  assert.match(skin, /width: min\(100%, 1120px\)/);
   assert.match(skin, /grid-template-columns: 226px minmax\(0, 1fr\)/);
   for (const heading of ["Listening", "Your collection", "Application"]) {
     assert.ok(rail.includes(heading), "Missing settings navigation group: " + heading);
@@ -129,7 +130,7 @@ test("Settings search and switches are readable with reduced-motion support", ()
   assert.match(skin, /::-webkit-search-decoration/);
   assert.match(read("src/features/settings/settings.css"), /--settings-surface: var\(--lt-surface\)/);
   assert.match(skin, /background: var\(--settings-text\); transition: transform/);
-  assert.match(skin, /settingsCompactSwitch input\[type="checkbox"\]::before \{ transition: none/);
+  assert.match(skin, /toggleRow input\[type="checkbox"\]::before \{ transition: none/);
 });
 
 test("Library uses an unfilled list with theme-aware hover and active rows", () => {
@@ -172,7 +173,7 @@ test("Library and Liked use the shared content gutter and meaningful empty state
   const library = read("src/features/library/library.css");
   const view = read("src/features/library/LibraryView.tsx");
   assert.doesNotMatch(library, /\.app:has\(\.libraryPage\) \.content \{\s*padding: 0 !important/);
-  assert.match(library, /\.libraryPage \{[\s\S]*?padding: 0 0 105px/);
+  assert.match(library, /\.libraryPage \{[\s\S]*?padding: 0 0 var\(--lt-space-5\)/);
   assert.match(view, /cute=\{!isLiked\}/);
   assert.match(view, /centered=\{!isLiked\}/);
 });
