@@ -1,23 +1,23 @@
 /* Shared design tokens and renderer compatibility aliases. */
 :root{
-  --lt-bg: #080712;
-  --lt-bg-elevated: #100b18;
+  --lt-bg: #000000;
+  --lt-bg-elevated: #111214;
 
-  --lt-surface: rgba(18, 15, 28, 0.86);
+  --lt-surface: #151518;
   --lt-surface-soft: rgba(255, 255, 255, 0.045);
   --lt-surface-raised: rgba(255, 255, 255, 0.075);
 
-  --lt-text: #f7f3ff;
-  --lt-text-muted: rgba(247, 243, 255, 0.62);
-  --lt-text-faint: rgba(247, 243, 255, 0.38);
+  --lt-text: #ffffff;
+  --lt-text-muted: #b5b5bd;
+  --lt-text-faint: #94949e;
   --lt-muted: var(--lt-text-muted);
   --lt-faint: var(--lt-text-faint);
 
   --lt-border: rgba(255, 255, 255, 0.10);
   --lt-border-strong: rgba(255, 255, 255, 0.18);
 
-  --lt-accent: #ee6be8;
-  --lt-accent-rgb: 238, 107, 232;
+  --lt-accent: #7696ff;
+  --lt-accent-rgb: 118, 150, 255;
   --lt-accent-soft: rgba(var(--lt-accent-rgb), 0.14);
   --lt-danger: #ff6b8a;
 

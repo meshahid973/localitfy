@@ -100,13 +100,11 @@ import {
   shouldOpenOnboardingForThisRelease
 } from "./features/onboarding/onboardingRelease";
 import {
-  restoreCustomThemeAfterUpdate,
-  writeCustomThemeBackupPatch
+  restoreCustomThemeAfterUpdate
 } from "./features/settings/customThemePersistence";
 import {
   BOOT_MIN_VISIBLE_MS,
   BOOT_STEPS,
-  CUSTOM_THEME_COMMIT_DELAY_MS,
   INITIAL_LIBRARY_RENDER_LIMIT,
   LIBRARY_RENDER_BATCH_SIZE,
   START_WITH_WINDOWS_DEFAULT_KEY,
@@ -126,7 +124,6 @@ import {
   settingsCategoryTabs
 } from "./features/settings/settings.constants";
 import { THEME_SWATCH_COLORS, themes } from "./features/settings/theme.constants";
-import { BUILT_IN_CUSTOM_THEME_PRESETS } from "./features/settings/customTheme";
 import { APP_VERSION } from "./features/updates/update.constants";
 import {
   DISCORD_ASSET_KEYS,
@@ -173,16 +170,9 @@ import {
   useCoverAverageStyle
 } from "./features/covers";
 import {
-  accentTextColor,
-  getCustomThemeColorPatch,
-  hexToRgbString,
-  hexToRgbaString,
-  makeCustomThemeColors,
   makeThemePresetStyle,
   normalizeCoverColorSyncMode,
-  normalizeHexColor,
-  normalizeThemeId,
-  writeSavedCustomThemePresets
+  normalizeThemeId
 } from "./features/settings";
 import { buildDiscordPreview, buildDiscordSongSearchUrl } from "./features/discord";
 import { cleanPlaylistList } from "./features/playlists";
@@ -195,7 +185,7 @@ import type {
 } from "./features/library/song.types";
 import { getLibraryDropSideInfoForElement, getLibraryDropSideForElement, getLibraryDropSide, getLibraryDropElement } from "./features/library/dragGeometry";
 import type { DownloadQueueItem, DownloadResult, SpotifyTrack } from "./features/downloads/download.types";
-import type { Settings, SettingsCategory, CustomThemeColorKey, CustomThemePreset } from "./features/settings/settings.types";
+import type { Settings, SettingsCategory } from "./features/settings/settings.types";
 import type { CoverColorSyncMode, SecretMode, SecretTriggerMode, ThemeId } from "./features/settings/theme.types";
 import type { DiscordArtMode } from "./features/discord/discord.types";
 import type { Playlist, PlaylistSummary } from "./features/playlists/playlist.types";
@@ -278,20 +268,11 @@ function MainModeApp() {
     settings, setSettings, settingsRef,
     settingsCategory, setSettingsCategory,
     settingsSearch, setSettingsSearch, deferredSettingsSearch,
-    customThemeName, setCustomThemeName,
-    setCustomThemeHexDrafts,
-    savedCustomThemes, setSavedCustomThemes,
     themeSettling,
     themeMotionReady, setThemeMotionReady,
     saveSettingsTimerRef,
     themeSettlingTimerRef,
-    customThemeCommitTimerRef,
-    customThemeQuietCommitTimerRef,
-    customThemeQuietPatchRef,
-    customThemePreviewFrameRef,
     themePaintIdleTimerRef,
-    customThemeLivePatchRef,
-    pendingCustomThemePreviewPatchRef,
     themeSettlingRef
   } = useSettingsController({
     initialSettings: () => applyVisualCustomizationDefaults(defaultSettings as Settings)
@@ -857,25 +838,6 @@ function MainModeApp() {
         window.clearTimeout(themeSettlingTimerRef.current);
       }
 
-      if (customThemeCommitTimerRef.current !== null) {
-        window.clearTimeout(customThemeCommitTimerRef.current);
-        customThemeCommitTimerRef.current = null;
-      }
-
-      if (customThemeQuietCommitTimerRef.current !== null) {
-        window.clearTimeout(customThemeQuietCommitTimerRef.current);
-        customThemeQuietCommitTimerRef.current = null;
-      }
-      customThemeQuietPatchRef.current = {};
-
-      if (customThemePreviewFrameRef.current !== null) {
-        window.cancelAnimationFrame(customThemePreviewFrameRef.current);
-        customThemePreviewFrameRef.current = null;
-      }
-
-      customThemeLivePatchRef.current = {};
-      pendingCustomThemePreviewPatchRef.current = {};
-
       if (themePaintIdleTimerRef.current !== null) {
         window.clearTimeout(themePaintIdleTimerRef.current);
         themePaintIdleTimerRef.current = null;
@@ -931,11 +893,8 @@ function MainModeApp() {
 
   const effectiveSimpleMode = false;
   const effectiveTheme = normalizeThemeId(settings.theme);
-  const visibleThemes = themes;
   const currentTheme = themes.find(theme => theme.id === effectiveTheme) ?? themes[1];
   const themePresetStyle = useMemo<CSSProperties>(() => makeThemePresetStyle(effectiveTheme), [effectiveTheme]);
-  const animatedThemeVisualStyle = useMemo<CSSProperties>(() => ({}), []);
-  const showStarBackdrop = false;
   useEffect(() => { setThemeMotionReady(true); }, [setThemeMotionReady]);
 
   const shouldSuspendProximityMotion = false;
@@ -1025,106 +984,7 @@ function MainModeApp() {
   const effectiveCoverColorSyncMode: CoverColorSyncMode = selectedCoverColorSyncMode;
   const effectiveAmbient = !isViewSwitching && effectiveCoverColorSyncMode !== "off";
   const effectiveNotes = !isViewSwitching && (settings.showFloatingNotes || isThreeAm);
-  const customThemeColor = normalizeHexColor(settings.customThemeColor, "#8dffce");
-  const customThemeColor2 = normalizeHexColor(settings.customThemeColor2, customThemeColor);
-  const customThemeBackground = normalizeHexColor(settings.customThemeBackground, "#050517");
-  const customThemeSurface = normalizeHexColor(settings.customThemeSurface, "#151528");
-  const customThemeText = normalizeHexColor(settings.customThemeText, "#f5f3ff");
-  const customThemeHighlight = normalizeHexColor(settings.customThemeHighlight, "#c084fc");
-  const customThemeProgress = normalizeHexColor(settings.customThemeProgress, customThemeColor);
-  const customThemeStyle = useMemo<CSSProperties>(() => ({}), []);
-
-  const customThemeTokens = useMemo(
-    () =>
-      [
-        { label: "App background", key: "customThemeBackground", value: customThemeBackground, help: "main app color" },
-        { label: "Card color", key: "customThemeSurface", value: customThemeSurface, help: "boxes and panels" },
-        { label: "Button color", key: "customThemeColor", value: customThemeColor, help: "buttons and glow" },
-        { label: "Text color", key: "customThemeText", value: customThemeText, help: "words and labels" }
-      ] as Array<{ label: string; key: CustomThemeColorKey; value: string; help: string }>,
-    [
-      customThemeBackground,
-      customThemeSurface,
-      customThemeColor,
-      customThemeText
-    ]
-  );
-
-  function clearPendingCustomThemeCommit() {
-    if (customThemeCommitTimerRef.current !== null) {
-      window.clearTimeout(customThemeCommitTimerRef.current);
-      customThemeCommitTimerRef.current = null;
-    }
-
-    if (customThemeQuietCommitTimerRef.current !== null) {
-      window.clearTimeout(customThemeQuietCommitTimerRef.current);
-      customThemeQuietCommitTimerRef.current = null;
-    }
-
-    customThemeQuietPatchRef.current = {};
-  }
-
-  function markCustomThemePaintBusy(duration = 520) {
-    document.body.classList.add("localitfyThemePainting");
-
-    if (themePaintIdleTimerRef.current !== null) {
-      window.clearTimeout(themePaintIdleTimerRef.current);
-    }
-
-    themePaintIdleTimerRef.current = window.setTimeout(() => {
-      document.body.classList.remove("localitfyThemePainting");
-      themePaintIdleTimerRef.current = null;
-    }, duration);
-  }
-
-  function clearCustomThemePreviewStyles() {
-    if (customThemePreviewFrameRef.current !== null) {
-      window.cancelAnimationFrame(customThemePreviewFrameRef.current);
-      customThemePreviewFrameRef.current = null;
-    }
-
-    pendingCustomThemePreviewPatchRef.current = {};
-
-    const target = appRootRef.current;
-    if (!target) return;
-
-    [
-      "--bg",
-      "--bg-2",
-      "--bg-3",
-      "--panel",
-      "--surface",
-      "--surface-2",
-      "--surface-3",
-      "--text",
-      "--text-2",
-      "--muted",
-      "--accent",
-      "--accent-2",
-      "--highlight",
-      "--progress",
-      "--accent-rgb",
-      "--accent-2-rgb",
-      "--highlight-rgb",
-      "--progress-rgb",
-      "--accent-soft",
-      "--accent-line",
-      "--theme-accent",
-      "--theme-accent-2",
-      "--theme-highlight",
-      "--theme-progress",
-      "--theme-card-glass",
-      "--theme-card-border",
-      "--theme-hover-glass",
-      "--theme-hover-border",
-      "--card-rgb"
-    ].forEach((name) => target.style.removeProperty(name));
-  }
-
-  function beginFastThemePaint(previewColor?: string) {
-    if (previewColor) {
-      commitCustomThemePreview(previewColor, 0);
-    }
+  function beginFastThemePaint() {
 
     document.body.classList.add("localitfyThemePainting");
 
@@ -1152,270 +1012,6 @@ function MainModeApp() {
       themeSettlingRef.current = false;
       themeSettlingTimerRef.current = null;
     }, 180);
-  }
-
-  function applyCustomThemePreviewPatch(patch: Partial<Settings>) {
-    const target = appRootRef.current;
-    if (!target) return;
-
-    const livePatch = {
-      ...customThemeLivePatchRef.current,
-      ...patch
-    };
-
-    const previewColor = normalizeHexColor(String(livePatch.customThemeColor ?? settings.customThemeColor), "#8dffce");
-    const previewColor2 = normalizeHexColor(String(livePatch.customThemeColor2 ?? settings.customThemeColor2), previewColor);
-    const previewBackground = normalizeHexColor(String(livePatch.customThemeBackground ?? settings.customThemeBackground), "#050517");
-    const previewSurface = normalizeHexColor(String(livePatch.customThemeSurface ?? settings.customThemeSurface), "#151528");
-    const previewText = normalizeHexColor(String(livePatch.customThemeText ?? settings.customThemeText), "#f5f3ff");
-    const previewHighlight = normalizeHexColor(String(livePatch.customThemeHighlight ?? settings.customThemeHighlight), "#c084fc");
-    const previewProgress = normalizeHexColor(String(livePatch.customThemeProgress ?? settings.customThemeProgress), previewColor);
-
-    const vars: Record<string, string> = {
-      "--bg": previewBackground,
-      "--bg-2": previewBackground,
-      "--bg-3": previewSurface,
-      "--panel": hexToRgbaString(previewSurface, "#151528", 0.42),
-      "--surface": hexToRgbaString(previewSurface, "#151528", 0.22),
-      "--surface-2": hexToRgbaString(previewSurface, "#151528", 0.32),
-      "--surface-3": hexToRgbaString(previewSurface, "#151528", 0.48),
-      "--text": previewText,
-      "--text-2": hexToRgbaString(previewText, "#f5f3ff", 0.78),
-      "--muted": hexToRgbaString(previewText, "#f5f3ff", 0.70),
-      "--accent": previewColor,
-      "--button-text-on-accent": accentTextColor(previewColor),
-      "--accent-2": previewColor2,
-      "--highlight": previewHighlight,
-      "--progress": previewProgress,
-      "--accent-rgb": hexToRgbString(previewColor, "#8dffce"),
-      "--accent-2-rgb": hexToRgbString(previewColor2, "#8ecbff"),
-      "--highlight-rgb": hexToRgbString(previewHighlight, "#c084fc"),
-      "--progress-rgb": hexToRgbString(previewProgress, "#8dffce"),
-      "--accent-soft": hexToRgbaString(previewColor, "#8dffce", 0.14),
-      "--accent-line": hexToRgbaString(previewColor, "#8dffce", 0.34),
-      "--theme-accent": previewColor,
-      "--theme-accent-2": previewColor2,
-      "--theme-highlight": previewHighlight,
-      "--theme-progress": previewProgress,
-      "--theme-card-glass": hexToRgbaString(previewColor, "#8dffce", 0.045),
-      "--theme-card-border": hexToRgbaString(previewColor, "#8dffce", 0.16),
-      "--theme-hover-glass": hexToRgbaString(previewColor, "#8dffce", 0.09),
-      "--theme-hover-border": hexToRgbaString(previewColor, "#8dffce", 0.32),
-      "--card-rgb": hexToRgbString(previewColor, "#8dffce")
-    };
-
-    Object.entries(vars).forEach(([name, value]) => target.style.setProperty(name, value));
-  }
-
-  function queueCustomThemePreviewPatch(patch: Partial<Settings>) {
-    pendingCustomThemePreviewPatchRef.current = {
-      ...pendingCustomThemePreviewPatchRef.current,
-      ...patch
-    };
-
-    if (customThemePreviewFrameRef.current !== null) return;
-
-    customThemePreviewFrameRef.current = window.requestAnimationFrame(() => {
-      const nextPatch = pendingCustomThemePreviewPatchRef.current;
-      pendingCustomThemePreviewPatchRef.current = {};
-      customThemePreviewFrameRef.current = null;
-      applyCustomThemePreviewPatch(nextPatch);
-    });
-  }
-
-  function stageCustomThemePatch(patch: Partial<Settings>, delay = CUSTOM_THEME_COMMIT_DELAY_MS) {
-    customThemeLivePatchRef.current = {
-      ...customThemeLivePatchRef.current,
-      ...patch,
-      customThemeEnabled: true
-    };
-
-    markCustomThemePaintBusy(delay + 520);
-    queueCustomThemePreviewPatch(customThemeLivePatchRef.current);
-    clearPendingCustomThemeCommit();
-
-    customThemeCommitTimerRef.current = window.setTimeout(() => {
-      const commitPatch = {
-        ...customThemeLivePatchRef.current,
-        customThemeEnabled: true
-      };
-
-      customThemeCommitTimerRef.current = null;
-      customThemeLivePatchRef.current = {};
-
-      startTransition(() => {
-        setSettings((old) => {
-          const next: Settings = {
-            ...old,
-            ...commitPatch
-          };
-
-          settingsRef.current = next;
-
-          if (bootedRef.current) {
-            void saveSettingsSafely(next, false);
-          }
-
-          return next;
-        });
-      });
-    }, delay);
-  }
-
-  function queueQuietCustomThemeColorPatch(patch: Partial<Settings>, delay = 620) {
-    const livePatch = {
-      ...customThemeLivePatchRef.current,
-      ...patch,
-      customThemeEnabled: true
-    };
-
-    customThemeQuietPatchRef.current = {
-      ...customThemeQuietPatchRef.current,
-      ...patch,
-      customThemeEnabled: true
-    };
-
-    customThemeLivePatchRef.current = livePatch;
-
-    // Live preview is DOM-only and rAF-throttled. No React state, no settings
-    // remount, no fade replay while the picker is being dragged.
-    queueCustomThemePreviewPatch(livePatch);
-    document.body.classList.add("localitfyThemePainting");
-
-    if (themePaintIdleTimerRef.current !== null) {
-      window.clearTimeout(themePaintIdleTimerRef.current);
-    }
-
-    themePaintIdleTimerRef.current = window.setTimeout(() => {
-      document.body.classList.remove("localitfyThemePainting");
-      themePaintIdleTimerRef.current = null;
-    }, 160);
-
-    if (customThemeQuietCommitTimerRef.current !== null) {
-      window.clearTimeout(customThemeQuietCommitTimerRef.current);
-    }
-
-    customThemeQuietCommitTimerRef.current = window.setTimeout(() => {
-      const commitPatch = {
-        ...customThemeQuietPatchRef.current,
-        customThemeEnabled: true
-      };
-
-      customThemeQuietCommitTimerRef.current = null;
-      customThemeQuietPatchRef.current = {};
-      customThemeLivePatchRef.current = {};
-
-      startTransition(() => {
-        setSettings((old) => {
-          const next: Settings = {
-            ...old,
-            ...commitPatch
-          };
-
-          settingsRef.current = next;
-
-          if (bootedRef.current) {
-            void saveSettingsSafely(next, false);
-          }
-
-          return next;
-        });
-      });
-    }, delay);
-  }
-
-  function getCustomThemeFallbackColor(key: CustomThemeColorKey) {
-    const fallbackByKey: Record<CustomThemeColorKey, string> = {
-      customThemeColor: "#8dffce",
-      customThemeColor2: customThemeColor,
-      customThemeBackground: "#050517",
-      customThemeSurface: "#151528",
-      customThemeText: "#f5f3ff",
-      customThemeHighlight: "#c084fc",
-      customThemeProgress: customThemeColor
-    };
-
-    return fallbackByKey[key];
-  }
-
-  function stageCustomThemeColor(key: CustomThemeColorKey, value: string) {
-    const safeColor = normalizeHexColor(value, getCustomThemeFallbackColor(key));
-    queueQuietCustomThemeColorPatch({ [key]: safeColor } as Partial<Settings>);
-  }
-
-  function commitCustomThemeHexDraft(key: CustomThemeColorKey, value: string, fallback: string) {
-    const safeColor = normalizeHexColor(value, fallback);
-    setCustomThemeHexDrafts((old) => {
-      const next = { ...old };
-      delete next[key];
-      return next;
-    });
-    stageCustomThemeColor(key, safeColor);
-  }
-
-  function commitCustomThemePreview(color: string, delay = CUSTOM_THEME_COMMIT_DELAY_MS) {
-    const safeColor = normalizeHexColor(color, "#8dffce");
-    stageCustomThemePatch(
-      {
-        customThemeColor: safeColor,
-        customThemeColor2: safeColor,
-        customThemeHighlight: safeColor,
-        customThemeProgress: safeColor
-      },
-      delay
-    );
-  }
-
-  function applyCustomThemePreset(preset: CustomThemePreset) {
-    setCustomThemeHexDrafts({});
-    setCustomThemeName(preset.name || "My Custom Theme");
-    stageCustomThemePatch(preset.colors, 0);
-  }
-
-  function resetCustomThemePalette() {
-    clearPendingCustomThemeCommit();
-    clearCustomThemePreviewStyles();
-    setCustomThemeName("My Custom Theme");
-    void updateSettingsPatch(
-      {
-        customThemeEnabled: false,
-        ...makeCustomThemeColors()
-      },
-      false
-    );
-  }
-
-  function saveCurrentCustomThemePreset() {
-    const presetName = collapseSpaces(customThemeName) || "My Custom Theme";
-    const colors = getCustomThemeColorPatch({
-      ...settings,
-      ...customThemeLivePatchRef.current
-    });
-
-    const preset: CustomThemePreset = {
-      id: makeLocalId("theme"),
-      name: presetName.slice(0, 40),
-      note: "saved custom theme",
-      colors,
-      custom: true,
-      createdAt: Date.now()
-    };
-
-    setSavedCustomThemes((old) => {
-      const next = [preset, ...old.filter((item) => item.name.toLowerCase() !== preset.name.toLowerCase())].slice(0, 18);
-      writeSavedCustomThemePresets(next);
-      return next;
-    });
-
-    stageCustomThemePatch(colors, 0);
-  }
-
-  function removeSavedCustomThemePreset(id: string) {
-    setSavedCustomThemes((old) => {
-      const next = old.filter((preset) => preset.id !== id);
-      writeSavedCustomThemePresets(next);
-      return next;
-    });
   }
 
   function clearSongDragPreview() {
@@ -1545,7 +1141,7 @@ function MainModeApp() {
       }
 
       saveSettingsTimerRef.current = window.setTimeout(() => {
-        writeCustomThemeBackupPatch(nextSettings);
+
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
         saveSettingsTimerRef.current = null;
       }, 360);
@@ -4398,7 +3994,6 @@ function MainModeApp() {
       return;
     }
 
-    writeCustomThemeBackupPatch(next);
     await window.localitfy.saveSettings(next).catch(() => showAppToast("Could not save settings", "error"));
   }
 
@@ -4464,8 +4059,6 @@ function MainModeApp() {
     if (key === "theme") {
       next.theme = normalizeThemeId(value);
       next.customThemeEnabled = false;
-      clearPendingCustomThemeCommit();
-      clearCustomThemePreviewStyles();
       kickThemeSettle();
     }
 
@@ -4480,23 +4073,7 @@ function MainModeApp() {
       kickThemeSettle();
     }
 
-    if (
-      key === "customThemeEnabled" ||
-      key === "customThemeColor" ||
-      key === "customThemeColor2" ||
-      key === "customThemeBackground" ||
-      key === "customThemeSurface" ||
-      key === "customThemeText" ||
-      key === "customThemeHighlight" ||
-      key === "customThemeProgress"
-    ) {
-      if (key === "customThemeEnabled" && value === false) {
-        clearPendingCustomThemeCommit();
-        clearCustomThemePreviewStyles();
-      }
-
-      kickThemeSettle();
-    }
+    if (String(key).startsWith("customTheme")) next.customThemeEnabled = false;
 
     if (
       key === "homeBannerType" ||
@@ -4552,33 +4129,16 @@ function MainModeApp() {
     if (patch.theme) {
       next.theme = normalizeThemeId(patch.theme);
       next.customThemeEnabled = false;
-      clearPendingCustomThemeCommit();
-      clearCustomThemePreviewStyles();
     }
 
-    if (patch.customThemeEnabled === false) {
-      clearPendingCustomThemeCommit();
-      clearCustomThemePreviewStyles();
-    }
 
     if (Object.prototype.hasOwnProperty.call(patch, "animatedBackgrounds") || Object.prototype.hasOwnProperty.call(patch, "animeVisuals")) {
       next.animatedBackgrounds = true;
       next.animeVisuals = true;
     }
 
-    if (
-      patch.theme ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeEnabled") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeColor") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeColor2") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeBackground") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeSurface") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeText") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeHighlight") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeProgress")
-    ) {
-      kickThemeSettle();
-    }
+    next.customThemeEnabled = false;
+    if (patch.theme) kickThemeSettle();
 
     const patchKeys = Object.keys(patch || {});
     const priority = patchKeys.some((key) => isImmediateSettingsKey(key)) ? "immediate" : "transition";
@@ -4718,7 +4278,7 @@ function MainModeApp() {
       setSettings(nextSettings);
 
       if (bootedRef.current) {
-        writeCustomThemeBackupPatch(nextSettings);
+
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
       }
 
@@ -8092,23 +7652,8 @@ function MainModeApp() {
           <SettingsCategoryContent
           settingsCategory={settingsCategory}
         setSettingsCategory={(value: string) => setSettingsCategory(value as SettingsCategory)}
-        currentTheme={currentTheme}
         settings={settings}
         updateSetting={updateSetting}
-        visibleThemes={visibleThemes}
-        THEME_SWATCH_COLORS={THEME_SWATCH_COLORS}
-        effectiveTheme={effectiveTheme}
-        resetCustomThemePalette={resetCustomThemePalette}
-        saveCurrentCustomThemePreset={saveCurrentCustomThemePreset}
-        customThemeName={customThemeName}
-        setCustomThemeName={setCustomThemeName}
-        savedCustomThemes={savedCustomThemes}
-        removeSavedCustomThemePreset={removeSavedCustomThemePreset}
-        BUILT_IN_CUSTOM_THEME_PRESETS={BUILT_IN_CUSTOM_THEME_PRESETS}
-        applyCustomThemePreset={applyCustomThemePreset}
-        customThemeTokens={customThemeTokens}
-        commitCustomThemeHexDraft={commitCustomThemeHexDraft}
-        previewCustomThemeColor={stageCustomThemeColor}
         coverColorSyncOptions={coverColorSyncOptions}
         selectedCoverColorSyncMode={selectedCoverColorSyncMode}
         updateCoverColorSyncMode={updateCoverColorSyncMode}
@@ -8262,15 +7807,12 @@ function MainModeApp() {
       scrollBusyRef,
       themeSettling,
       themePresetStyle,
-      animatedThemeVisualStyle,
-      customThemeStyle,
       effectiveTheme,
       effectiveAmbient,
       effectiveCoverColorSyncMode,
       effectiveNotes,
       statusText,
-      draggedSongTitle,
-      showStarBackdrop
+      draggedSongTitle
     },
     updates: {
       updatePrompt,
@@ -8367,6 +7909,7 @@ function MainModeApp() {
       renderSongRows,
       setLibraryFilterMode,
       setLibrarySortMode,
+      setLibraryRowStyle: (style) => void updateSetting("libraryRowStyle", style),
       settings,
       showingMissingFiles: view === "library" && libraryFilterMode === "missing",
       shuffleLibrarySongsAction,

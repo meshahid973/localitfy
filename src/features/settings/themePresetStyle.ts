@@ -52,21 +52,21 @@ export function makeThemePresetStyle(themeId: ThemeId): CSSProperties {
     "--accent-2-rgb":accent2Rgb,
     "--highlight-rgb":highlightRgb,
     "--progress-rgb":progressRgb,
-    "--accent-soft":hexToRgbaString(p.accent,"#8dffce",.14),
-    "--accent-line":hexToRgbaString(p.accent,"#8dffce",.34),
+    "--accent-soft":hexToRgbaString(p.accent,p.accent,.14),
+    "--accent-line":hexToRgbaString(p.accent,p.accent,.34),
     "--theme-accent":p.accent,
     "--theme-accent-2":p.accent2,
     "--theme-highlight":p.highlight,
     "--theme-progress":progress,
-    "--theme-card-glass":hexToRgbaString(p.accent,"#8dffce",.045),
-    "--theme-card-border":hexToRgbaString(p.accent,"#8dffce",.16),
-    "--theme-hover-glass":hexToRgbaString(p.accent,"#8dffce",.09),
-    "--theme-hover-border":hexToRgbaString(p.accent,"#8dffce",.32),
+    "--theme-card-glass":hexToRgbaString(p.accent,p.accent,.045),
+    "--theme-card-border":hexToRgbaString(p.accent,p.accent,.16),
+    "--theme-hover-glass":hexToRgbaString(p.accent,p.accent,.09),
+    "--theme-hover-border":hexToRgbaString(p.accent,p.accent,.32),
     "--card-rgb":accentRgb,
     "--localtify-sidebar-bg":hexToRgbaString(p.background,"#050505",.98),
     "--localtify-sidebar-bg-2":hexToRgbaString(p.surface,"#111111",.72),
     "--localtify-panel-bg":hexToRgbaString(p.surface,"#111111",.52),
     "--localtify-panel-bg-2":hexToRgbaString(p.background,"#050505",.74),
-    "--localtify-line-soft":hexToRgbaString(p.accent,"#8dffce",.16)
+    "--localtify-line-soft":hexToRgbaString(p.accent,p.accent,.16)
   } as CSSProperties;
 }
