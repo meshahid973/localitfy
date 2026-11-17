@@ -31,9 +31,9 @@
   box-shadow: var(--lt-shadow-low);
 }
 
-:where(.localtifySurface-compact) { padding: 12px; }
-:where(.localtifySurface-normal) { padding: 18px; }
-:where(.localtifySurface-roomy) { padding: 24px; }
+:where(.localtifySurface-compact) { padding: var(--lt-space-3); }
+:where(.localtifySurface-normal) { padding: var(--lt-space-4); }
+:where(.localtifySurface-roomy) { padding: var(--lt-space-5); }
 
 :where(.localtifySurfaceHeader),
 :where(.localtifySurfaceActions) {
@@ -48,6 +48,6 @@
 }
 
 :where(.localtifySurfaceHeader-compact),
-:where(.localtifySurfaceActions-compact) { gap: 8px; }
+:where(.localtifySurfaceActions-compact) { gap: var(--lt-space-2); }
 :where(.localtifySurfaceHeader-roomy),
 :where(.localtifySurfaceActions-roomy) { gap: 14px; }

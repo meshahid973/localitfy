@@ -13,6 +13,7 @@ import "./styles/themes.css";
 
 /* Shared renderer primitives. */
 import "./shared/ui/view-ui.css";
+import "./shared/ui/controls.css";
 
 /* Performance overrides intentionally stay last in the renderer cascade. */
 import "./features/shell/performance.css";

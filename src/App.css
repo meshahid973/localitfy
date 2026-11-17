@@ -27,28 +27,15 @@
 
 .modalHead h3{
   margin: 4px 0 0 !important;
-  font-size: clamp(34px, 4.4vw, 52px) !important;
-  line-height: 0.88 !important;
-  letter-spacing: -0.075em !important;
+  font-size: var(--lt-text-title) !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
 }
 
 .closeModalButton{
-  width: 44px !important;
-  height: 44px !important;
   flex: 0 0 auto !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 14px !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
   font-size: 26px !important;
   line-height: 1 !important;
-  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background 160ms ease, border-color 160ms ease !important;
-}
-
-.closeModalButton:hover{
-  transform: translateY(-1px) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .editorGrid{
@@ -1113,10 +1100,6 @@ body.isResizingSidebar{
     0 0 0 7px rgba(var(--lt-accent-rgb), 0.10),
     0 18px 46px rgba(var(--lt-accent-rgb), 0.23),
     inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
-}
-
-input[type="range"]{
-  accent-color: var(--lt-accent) !important;
 }
 
 .editorFields input{
@@ -5533,16 +5516,6 @@ body.isResizingPlayer .app *{
   color: color-mix(in srgb, var(--text) 48%, transparent);
 }
 
-.app :is(input:not(:where([type="checkbox"], [type="radio"], [type="range"])), textarea){
-  color: color-mix(in srgb, var(--text) 88%, transparent) !important;
-  border-color: var(--lt-border) !important;
-  background-color: var(--lt-surface) !important;
-}
-
-.app :is(input, textarea)::placeholder{
-  color: color-mix(in srgb, var(--text) 46%, transparent) !important;
-}
-
 /* Repair import music button contrast: no black text, no muddy label. */
 .app .mainAction.importMainAction.iconTextButton,
 .app .mainAction.importMainAction.iconTextButton:hover,
@@ -5635,13 +5608,6 @@ body.isResizingPlayer .app *{
   background:
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .070), rgba(255,255,255,.014)),
     rgba(6, 6, 11, .76) !important;
-}
-
-/* Tiny bug sweep: disabled/readability/hover intensity/mobile. */
-.app :is(button, input, textarea, select):disabled{
-  opacity: .56 !important;
-  cursor: not-allowed !important;
-  filter: saturate(.78) !important;
 }
 
 .app :is(.warning, .warn, .notImported, .failed, .bad):not(.playerBar){

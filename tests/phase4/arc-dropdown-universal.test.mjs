@@ -26,7 +26,7 @@ test("Arc dropdown respects disabled settings and long option lists", () => {
   assert.match(ui, /disabled\?: boolean/);
   assert.match(ui, /disabled=\{disabled\}/);
   assert.match(ui, /if \(disabled \|\| firstEnabled < 0\)/);
-  assert.match(ui, /Math\.min\(items\.length \* ITEM_HEIGHT/);
+  assert.match(ui, /Math\.min\(items\.length \* rowHeight/);
   assert.match(css, /max-height: calc\(100vh - 24px\)/);
   assert.match(css, /\.settingsPage \.settingsSelectField \.arcDropdownTrigger/);
   assert.match(ui, /"ArrowDown"/);
