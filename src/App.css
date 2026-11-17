@@ -5398,7 +5398,6 @@ body.isResizingPlayer .app *{
   overflow: hidden !important;
   border: 1px solid var(--lt-border) !important;
   border-radius: var(--lt-control-radius) !important;
-  color: var(--lt-text) !important;
   transform: none !important;
   transition: background-color var(--lt-duration-fast) ease, border-color var(--lt-duration-fast) ease !important;
 }
