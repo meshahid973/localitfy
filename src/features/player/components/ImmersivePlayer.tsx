@@ -1,4 +1,4 @@
-import { Fragment, lazy, Suspense, useRef, useState } from "react";
+import { Fragment, lazy, memo, Suspense, useRef, useState } from "react";
 import { Eye, EyeOff, Heart, ListMusic, Minimize2, MicVocal, Repeat2, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { Cover } from "../../covers/Cover";
 import { ArtworkBackdrop } from "../../covers/ArtworkBackdrop";
@@ -17,6 +17,8 @@ import type { QueuePanelProps } from "./QueuePanel";
 const LyricsView = lazy(() => import("../../lyrics/LyricsView"));
 // Slots 0–3 belong to Home, the regular desktop bar and both phone surfaces.
 const IMMERSIVE_SLOT = 4;
+const ListeningArtwork = memo(Cover);
+const ListeningBackdrop = memo(ArtworkBackdrop);
 
 type Props = {
   player: PlayerBarProps;
@@ -65,7 +67,7 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
       else if (lyrics.open) closeLyrics();
       else onClose();
     }}>
-    {showBackdrop ? <ArtworkBackdrop song={song} /> : null}
+    {showBackdrop ? <ListeningBackdrop song={song} /> : null}
     <header className="immersiveTop">
       <button type="button" className="immersiveIcon" aria-label="Close immersive player" title="Exit immersive player (Esc)" onClick={onClose}><Minimize2 size={20} aria-hidden="true" /></button>
       <div className="immersiveContext"><small>Now playing</small><strong>{nowPlayingContextLabel || "Your library"}</strong></div>
@@ -76,7 +78,7 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
     <div className="immersiveStage" ref={stage}>
       {lyrics.open ? <Suspense fallback={<span role="status">Loading lyrics…</span>}>
         <LyricsView {...lyrics} anchorRef={stage} embedded onClose={closeLyrics} openSettings={() => { onClose(); lyrics.openSettings(); }} />
-      </Suspense> : <Cover song={song} className="immersiveArtwork" priority="high" />}
+      </Suspense> : <ListeningArtwork song={song} className="immersiveArtwork" priority="high" />}
     </div>
 
     <div className="immersiveBottom">
@@ -133,7 +135,7 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
             onBlur={event => { if (isVolumeDragging) commitVolume(event.currentTarget.value); }} />
         </div>
         <div className="immersiveActions">
-          {connect ? <DevicePicker controls={connect} variant="bar" /> : null}
+          {connect && !minimal ? <DevicePicker controls={connect} variant="bar" /> : null}
           {lyricsOpen !== undefined ? <button ref={lyricsTrigger} type="button" className="immersiveIcon" aria-label="Lyrics" aria-pressed={lyricsOpen} onClick={toggleLyrics}><MicVocal size={20} aria-hidden="true" /></button> : null}
           <button ref={queueTrigger} type="button" className="immersiveIcon" data-queue-trigger aria-label="Play queue"
             aria-expanded={queuePanelOpen} aria-controls={queuePanelOpen ? "localtify-play-queue" : undefined} aria-haspopup="dialog" onClick={toggleQueuePanel}><ListMusic size={20} aria-hidden="true" /></button>

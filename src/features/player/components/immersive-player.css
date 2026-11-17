@@ -10,6 +10,16 @@
   outline-offset: -2px;
   border-radius: var(--lt-radius-item);
 }
+.playerBar[data-immersive-hidden="true"]{
+  visibility: hidden;
+}
+.immersiveLoading{
+  position: fixed;
+  inset: 0;
+  z-index: 7000;
+  color: var(--lt-text);
+  background: var(--lt-bg);
+}
 .immersivePlayer{
   position: fixed;
   inset: 0;
@@ -68,6 +78,9 @@
   overflow: hidden;
   border-radius: var(--lt-radius-sm);
   box-shadow: var(--lt-shadow-menu);
+}
+.immersivePlayer :is(.immersiveArtwork, .artworkBackdropCover)::before{
+  content: none;
 }
 .immersiveArtwork img{
   width: 100%;
@@ -142,7 +155,7 @@
   height: 60px;
   border-radius: 50%;
   background: var(--lt-accent);
-  color: var(--button-text-on-accent);
+  color: #101512;
 }
 .immersivePlay svg{ width: 28px; height: 28px; }
 .immersivePlayer :is(button,input):focus-visible{

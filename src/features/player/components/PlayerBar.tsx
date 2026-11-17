@@ -141,6 +141,7 @@ export default function PlayerBar(props: PlayerBarProps) {
             style={ambientStyle}
             aria-label="Music playback"
             inert={props.immersiveOpen || undefined}
+            data-immersive-hidden={props.immersiveOpen ? "true" : undefined}
             data-ambient={effectiveAmbient ? "true" : "false"}
             data-cover-sync={effectiveCoverColorSyncMode}
             onDragOver={handlePlayerDragOver}
@@ -253,10 +254,10 @@ export default function PlayerBar(props: PlayerBarProps) {
                 </button>
               </div>
 
-              <div className="progressRow progressResetSweep" key={`progress-${nowPlayingTransitionKey}`}>
-                <span ref={(node) => { progressTimeLabelRefs.current[1] = node; }}>{formatTime(displayedTime)}</span>
+              <div className="progressRow progressResetSweep" key={`progress-${nowPlayingTransitionKey}-${Boolean(props.immersiveOpen)}`}>
+                <span ref={(node) => { progressTimeLabelRefs.current[1] = props.immersiveOpen ? null : node; }}>{formatTime(displayedTime)}</span>
                 <input
-                  ref={(node) => { progressInputRefs.current[1] = node; }}
+                  ref={(node) => { progressInputRefs.current[1] = props.immersiveOpen ? null : node; }}
                   type="range"
                   min="0"
                   max="100"
@@ -278,7 +279,7 @@ export default function PlayerBar(props: PlayerBarProps) {
                   onKeyUp={(event) => commitSeek(event.currentTarget.value)}
                   onBlur={(event) => isSeeking && commitSeek(event.currentTarget.value)}
                 />
-                <span ref={(node) => { progressDurationLabelRefs.current[1] = node; }}>{formatTime(currentDuration || currentSong?.duration || 0)}</span>
+                <span ref={(node) => { progressDurationLabelRefs.current[1] = props.immersiveOpen ? null : node; }}>{formatTime(currentDuration || currentSong?.duration || 0)}</span>
               </div>
             </div>
 

@@ -16,7 +16,7 @@ test("immersive player is presentation-only with a separate progress slot", () =
 });
 test("immersive and normal queue rendering are mutually exclusive", () => {
   const surface = read(dir + "PlayerSurfaces.tsx");
-  assert.match(surface, /immersive && player\.currentSong \? <ImmersivePlayer/);
+  assert.match(surface, /immersive && player\.currentSong \? <Suspense/);
   assert.match(surface, /: <>\s*<QueuePanel \{\.\.\.queue\}/);
   assert.match(read(dir + "ImmersivePlayer.tsx"), /<QueuePanel \{\.\.\.queue\}/);
   assert.match(read(dir + "PlayerBar.tsx"), /inert=\{props\.immersiveOpen \|\| undefined\}/);
@@ -27,4 +27,17 @@ test("artwork follows background preferences and avoids backgrounded image work"
   assert.match(read(dir + "PhonePlayer.tsx"), /phonePlayerBackdropArt" preferThumbnail/);
   assert.match(read(dir + "immersive-player.css"), /\[data-background="oledBlack"\]/);
   assert.match(read("src/features/lyrics/LyricsView.tsx"), /if \(!open \|\| embedded\) return/);
+});
+
+test("immersive assets load on demand and hidden desktop controls stop receiving progress writes", () => {
+  const surface = read(dir + "PlayerSurfaces.tsx");
+  const bar = read(dir + "PlayerBar.tsx");
+  const immersive = read(dir + "ImmersivePlayer.tsx");
+  assert.match(surface, /const ImmersivePlayer = lazy\(\(\) => import\("\.\/ImmersivePlayer"\)\)/);
+  assert.match(surface, /restoreFocus\.current = true/);
+  for (const ref of ["progressInputRefs", "progressTimeLabelRefs", "progressDurationLabelRefs"]) {
+    assert.ok(bar.includes(ref + ".current[1] = props.immersiveOpen ? null : node;"));
+  }
+  assert.match(immersive, /const ListeningArtwork = memo\(Cover\)/);
+  assert.match(immersive, /const ListeningBackdrop = memo\(ArtworkBackdrop\)/);
 });
