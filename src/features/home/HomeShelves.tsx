@@ -4,6 +4,7 @@ import { Cover } from "../covers/Cover";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
 import type { LocalAlbumEntry } from "../albums/album.types";
+import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { useHomeDailyMixes } from "./useHomeDailyMixes";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { albumTarget, mixTarget, useAppActions } from "../shell/appActions";
@@ -134,7 +135,9 @@ type DailyMixRailProps = {
 export function HomeDailyMixRail({ songsById, openDailyMixes, openAnalysisSettings }: DailyMixRailProps) {
   const actions = useAppActions();
   const { result, failed } = useHomeDailyMixes();
-  if (failed || !result) return null;
+  if (!result) return <section className="homeSection homeReleasesSection homeMixesSection" aria-label="Daily mixes" aria-busy={!failed}>
+    {failed ? <div className="homeShelfNotice"><span>Could not load daily mixes.</span><button className="softButton" type="button" onClick={openDailyMixes}>Open mixes</button></div> : <CollectionLoading label="Loading daily mixes…" />}
+  </section>;
   const mixes = result.mixes
     .map((mix) => ({ ...mix, songs: mix.songIds.flatMap((id) => { const song = songsById.get(id); return song && song.fileExists !== false ? [song] : []; }) }))
     .filter((mix) => mix.songs.length);

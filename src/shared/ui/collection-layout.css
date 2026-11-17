@@ -9,37 +9,35 @@
 .collectionBrowseGrid {
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 13px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--lt-space-4);
 }
 
 .collectionBrowseCard {
   min-width: 0;
   display: grid;
-  justify-items: center;
+  justify-items: stretch;
   gap: 10px;
-  padding: 15px 10px;
-  border: 1px solid var(--lt-border);
-  border-radius: var(--lt-radius-md);
+  padding: var(--lt-space-2);
+  border: 0;
+  border-radius: var(--lt-control-radius);
   color: var(--lt-text);
-  background: var(--lt-surface);
-  text-align: center;
+  background: transparent;
+  text-align: left;
   cursor: pointer;
-  transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease;
+  transition: background-color var(--lt-duration-fast) ease;
 }
 
 .collectionBrowseCard:hover {
-  transform: translateY(-2px);
-  border-color: rgba(var(--lt-accent-rgb), .26);
-  background: color-mix(in srgb, var(--lt-accent) 5%, var(--lt-surface));
+  background: color-mix(in srgb, var(--lt-text) 5%, transparent);
 }
 
 .collectionBrowseCardCover,
 .collectionBrowseCardCover img {
-  width: min(132px, 100%);
+  width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 50%;
+  border-radius: var(--lt-radius-item);
 }
 
 .collectionBrowseCard > span {
@@ -59,11 +57,11 @@
 .collectionBrowseCard strong {
   color: var(--lt-text);
   font-size: 13px;
-  font-weight: 850;
+  font-weight: 650;
 }
 
 .collectionBrowseCard small {
-  color: var(--lt-faint);
+  color: var(--lt-muted);
   font-size: 11px;
 }
 
@@ -73,5 +71,4 @@
 
 @media (prefers-reduced-motion: reduce) {
   .collectionBrowseCard { transition: none; }
-  .collectionBrowseCard:hover { transform: none; }
 }

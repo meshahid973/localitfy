@@ -1,6 +1,7 @@
 import "./pages.css";
 import { useMemo } from "react";
 import { Save } from "lucide-react";
+import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
 import { prettyMeta } from "../search/search.utils";
@@ -33,12 +34,20 @@ export default function MixPage({ mixId, songs, albums, currentId, isPlaying, to
   const mix = result?.mixes.find((item) => item.id === mixId) || null;
   const members = useMemo(() => mix?.songIds.flatMap((id) => songsById.get(id) ?? []) ?? [], [mix, songsById]);
 
+  if (!mix && !result && !failed) {
+    return (
+      <section data-page-section="mix" className="collectionPage" aria-busy="true">
+        <CollectionLoading label="Loading your mix…" />
+      </section>
+    );
+  }
+
   if (!mix) {
     return (
       <section data-page-section="mix" className="collectionPage">
-        <LocaltifyStateCard centered tone="info" eyebrow="daily mix" title={result || failed ? "This mix has been refreshed" : "Loading your mix"}
-          message={result || failed ? "Daily mixes change every day. Today's mixes are in Playlists." : "Getting today's mixes."}
-          actions={result || failed ? <button className="softButton" type="button" onClick={() => actions.nav.go("playlists")}>see today's mixes</button> : undefined} />
+        <LocaltifyStateCard centered tone="info" eyebrow="daily mix" title={failed ? "Could not load this mix" : "This mix has been refreshed"}
+          message={failed ? "Try again from today's mixes in Playlists." : "Daily mixes change every day. Today's mixes are in Playlists."}
+          actions={<button className="softButton" type="button" onClick={() => actions.nav.go("playlists")}>see today's mixes</button>} />
       </section>
     );
   }
@@ -51,7 +60,7 @@ export default function MixPage({ mixId, songs, albums, currentId, isPlaying, to
   return (
     <section data-page-section="mix" className="collectionPage mixPage" aria-label={mix.name}>
       <CollectionHero
-        eyebrow="daily mix"
+        typeLabel="daily mix"
         title={mix.name}
         cover={<PlaylistCoverCollage songs={members} className="collectionHeroCover playlistCoverCollage" />}
         coverSong={target.coverSong}

@@ -33,3 +33,15 @@ Opaque accent buttons use `--button-text-on-accent`, calculated from relative lu
 Reuse native buttons and inputs, give icon actions an accessible name, and keep native `title` hints for existing tooltips. A custom tooltip dependency is unnecessary for this foundation. Preserve dialog focus traps and context-menu focus restoration. A visible outline is required for keyboard navigation; menu rows use an inset outline to avoid clipping.
 
 Keep menu surfaces opaque and readable; do not add backdrop blur behind an already opaque panel. Preserve existing bounded dialog/album-art blur. Animate small transforms and opacity; respect OS and app reduced-motion preferences. Do not add page entrance animations or raise performance budgets for decorative effects.
+
+## Collection pages
+
+Custom palettes derive secondary copy at 70% foreground opacity so light backgrounds retain readable metadata.
+
+Browse pages share `PageHeader` search/actions, the 28px `--lt-text-page` heading, and artwork-led `collectionBrowseGrid` / `collectionBrowseCard` primitives. Artist artwork stays round; albums stay square. Keep active/drop feedback on the existing `MediaCard` instead of adding framed containers.
+
+Album, artist, genre, playlist and mix details reuse `CollectionHero` with a 32px `--lt-text-collection` title. Collection type and statistics sit below the title. Page-specific management actions retain their existing handlers and Android restrictions.
+
+`TrackList` uses the existing `usePageVirtualizer` above 80 tracks, measures real row heights and preserves original collection indices and song IDs. Keep positioning on its wrapper (`trackVirtualRow`), outside row hover/performance transforms. Short collections render directly. Library and playlist virtualizers retain their own geometry and drag/drop behavior.
+
+`CollectionLoading` provides a static, accessible status and stable placeholders for pending mixes. Empty and failed states keep their recovery actions; do not substitute an empty result for a pending request.

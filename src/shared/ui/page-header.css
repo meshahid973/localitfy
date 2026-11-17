@@ -1,11 +1,11 @@
-/* Shared page header. Mirrors .libraryTopBar so every view opens the same way. */
+/* Shared browse title, search and action layout. */
 .pageHeader {
   min-width: 0;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px 24px;
+  gap: var(--lt-space-4) var(--lt-space-5);
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(var(--lt-accent-rgb), .08);
 }
@@ -29,17 +29,17 @@
 .pageHeaderHeading h1 {
   margin: 0;
   color: var(--lt-text);
-  font-size: clamp(25px, 1.7vw, 34px);
+  font-size: var(--lt-text-page);
   font-weight: 680;
   line-height: 1.08;
-  letter-spacing: -.045em;
+  letter-spacing: -.03em;
 }
 
 .pageHeaderDescription {
   max-width: 620px;
   margin: 0;
   color: var(--lt-muted);
-  font-size: 12px;
+  font-size: var(--lt-text-sm);
   font-weight: 600;
   line-height: 1.45;
 }
@@ -55,16 +55,16 @@
 
 .pageHeaderSearch {
   width: min(360px, 34vw);
-  min-width: 190px;
-  height: 42px;
+  min-width: min(190px, 100%);
+  height: var(--lt-control-height);
   padding: 0 14px;
   border: 1px solid var(--lt-border);
-  border-radius: 999px;
+  border-radius: var(--lt-control-radius);
   outline: none;
   color: var(--lt-text);
   background: var(--lt-surface);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--lt-text-sm);
   transition: border-color 140ms ease, box-shadow 140ms ease;
 }
 
@@ -80,8 +80,7 @@
   color: var(--lt-muted);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 

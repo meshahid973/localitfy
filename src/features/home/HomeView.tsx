@@ -140,7 +140,6 @@ export default function HomeView(props: HomeViewProps) {
         aria-label="jump back in"
       >
         <div className={`homeJumpCopy nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-          <span className="homeJumpEyebrow">↻ JUMP BACK IN</span>
           <h2 className={heroTitleClass} title={currentSong?.title || (needsPhoneSync ? "Sync your music" : "drop in your music")}>{needsPhoneSync ? "Sync your music" : heroDisplayTitle}</h2>
           <p>{needsPhoneSync ? "Pair with your computer in Settings → Library." : heroDisplayArtist}</p>
 
