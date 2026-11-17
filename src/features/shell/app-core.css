@@ -100,10 +100,10 @@ button:disabled{
   width: 46px;
   height: 100%;
   border: 0;
-  color: var(--muted);
-  background: #000;
-  transition: background 120ms ease,
-    color 120ms ease;
+  color: var(--lt-muted);
+  background: transparent;
+  transition: background-color var(--lt-duration-fast) ease,
+    color var(--lt-duration-fast) ease;
 }
 
 .windowButtons button:hover{

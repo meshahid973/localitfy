@@ -62,6 +62,7 @@ export default function SidebarNav({ view, changeView, sidebarNavOrder, sidebarH
                     data-nav-group={group.id}
                     onClick={() => changeView(item.id, "nav")}
                     onContextMenu={(event) => openMenu(event, item.id)}
+                    title={item.label}
                     aria-label={`open ${item.label}`}
                     aria-current={view === item.id ? "page" : undefined}
                   >
@@ -73,7 +74,6 @@ export default function SidebarNav({ view, changeView, sidebarNavOrder, sidebarH
                     </span>
                     <span className="navText">
                       <strong>{item.label}</strong>
-                      <small>{item.hint}</small>
                     </span>
                   </button>
                 );
