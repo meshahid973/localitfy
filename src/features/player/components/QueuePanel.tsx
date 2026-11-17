@@ -70,11 +70,15 @@ export default function QueuePanel({
     if (!open) return;
     setRenderLimit(QUEUE_RENDER_STEP);
     setDropIndex(null);
-    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    openerRef.current = document.activeElement instanceof HTMLElement && document.activeElement.hasAttribute("data-queue-trigger")
+      ? document.activeElement
+      : document.querySelector<HTMLElement>('[data-queue-trigger][aria-expanded="true"]');
     panelRef.current?.focus({ preventScroll: true });
 
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || document.querySelector(".songContextMenuLayer")) return;
+      if (event.key !== "Escape" || event.defaultPrevented || document.querySelector(".songContextMenuLayer")) return;
+      const dialog = event.target instanceof Element ? event.target.closest('[role="dialog"]') : null;
+      if (dialog && dialog !== panelRef.current) return;
       event.preventDefault();
       closeRef.current();
       if (openerRef.current?.isConnected) openerRef.current.focus({ preventScroll: true });
@@ -82,7 +86,7 @@ export default function QueuePanel({
     const closeOnOutsidePointer = (event: PointerEvent) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
-      if (panelRef.current?.contains(target) || target.closest(".playerQueueButton, .songContextMenuLayer, .modalBackdrop, [role='dialog']")) return;
+      if (panelRef.current?.contains(target) || target.closest("[data-queue-trigger], .playerQueueButton, .songContextMenuLayer, .modalBackdrop, [role='dialog']")) return;
       closeRef.current();
     };
     window.addEventListener("keydown", closeOnEscape);

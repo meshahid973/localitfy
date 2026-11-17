@@ -292,6 +292,7 @@ export default function PlayerBar(props: PlayerBarProps) {
                   onClick={toggleQueuePanel}
                   aria-label={queuePanelOpen ? "hide queue" : "show queue"}
                   aria-pressed={queuePanelOpen}
+                  data-queue-trigger
                   aria-expanded={queuePanelOpen}
                   aria-controls={queuePanelOpen ? "localtify-play-queue" : undefined}
                   aria-haspopup="dialog"

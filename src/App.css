@@ -5261,10 +5261,10 @@ body.isResizingPlayer .app *{
 
 .app .sidebarGroupLabelV467{
   margin: 0 0 2px 13px !important;
-  color: color-mix(in srgb, var(--text) 36%, transparent) !important;
-  font-size: 8.5px !important;
-  font-weight: 1000 !important;
-  letter-spacing: .19em !important;
+  color: var(--lt-muted) !important;
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  letter-spacing: .08em !important;
   line-height: 1 !important;
   text-transform: uppercase !important;
 }
@@ -5391,94 +5391,31 @@ body.isResizingPlayer .app *{
 
 .app .mainAction.importMainAction.iconTextButton{
   position: relative !important;
-  min-height: 43px !important;
+  min-height: var(--lt-control-height) !important;
   width: 100% !important;
   justify-content: center !important;
-  gap: 9px !important;
+  gap: 8px !important;
   overflow: hidden !important;
-  border: 1px solid rgba(var(--lt-accent-rgb), .26) !important;
-  border-radius: 999px !important;
+  border: 1px solid var(--lt-border) !important;
+  border-radius: var(--lt-control-radius) !important;
   color: var(--lt-text) !important;
-
-  transform: translate3d(0,0,0) scale(1) !important;
-  transition:
-    transform 170ms cubic-bezier(.16, 1, .3, 1),
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease,
-    color 160ms ease !important;
+  transform: none !important;
+  transition: background-color var(--lt-duration-fast) ease, border-color var(--lt-duration-fast) ease !important;
 }
 
-.app .mainAction.importMainAction.iconTextButton::before{
-  content: "";
-  position: absolute;
-  inset: 1px;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 22% 18%, rgba(255,255,255,.13), transparent 34%),
-    linear-gradient(90deg, transparent, rgba(var(--lt-accent-rgb), .08), transparent);
-  opacity: .62;
-}
-
+.app .mainAction.importMainAction.iconTextButton::before,
 .app .mainAction.importMainAction.iconTextButton::after{
-  content: "✦";
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  pointer-events: none;
-
-  font-size: 12px;
-  font-weight: 1000;
-  opacity: 0;
-  transform: translate3d(-5px,-50%,0) scale(.74) rotate(-10deg);
-  transition:
-    opacity 150ms ease,
-    transform 190ms cubic-bezier(.16, 1, .3, 1);
+  content: none !important;
+  display: none !important;
 }
 
 .app .mainAction.importMainAction.iconTextButton .buttonInlineIcon{
-  position: relative;
-  z-index: 1;
   width: 17px !important;
   height: 17px !important;
-  transform: translate3d(0,0,0) scale(1) !important;
-  transition: transform 170ms cubic-bezier(.16, 1, .3, 1) !important;
 }
 
 .app .mainAction.importMainAction.iconTextButton .buttonLabel{
-  position: relative;
-  z-index: 1;
-  font-size: 12px !important;
-
-}
-
-.app .mainAction.importMainAction.iconTextButton:hover,
-.app .mainAction.importMainAction.iconTextButton:focus-visible{
-  color: var(--lt-text) !important;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 10px 22px rgba(0,0,0,.20) !important;
-  transform: translate3d(2px,0,0) scale(1) !important;
-}
-
-.app .mainAction.importMainAction.iconTextButton:hover::after,
-.app .mainAction.importMainAction.iconTextButton:focus-visible::after{
-  opacity: .92;
-  transform: translate3d(0,-50%,0) scale(1) rotate(0deg);
-}
-
-.app .mainAction.importMainAction.iconTextButton:hover .buttonInlineIcon,
-.app .mainAction.importMainAction.iconTextButton:focus-visible .buttonInlineIcon{
-  transform: translate3d(0,0,0) scale(1.04) !important;
-}
-
-.app .mainAction.importMainAction.iconTextButton:active{
-  transform: translate3d(2px,1px,0) scale(.985) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 5px 12px rgba(0,0,0,.18) !important;
+  font-size: var(--lt-text-sm) !important;
 }
 
 @media (max-width: 860px){
@@ -5516,61 +5453,24 @@ body.isResizingPlayer .app *{
   color: color-mix(in srgb, var(--text) 48%, transparent);
 }
 
-/* Repair import music button contrast: no black text, no muddy label. */
-.app .mainAction.importMainAction.iconTextButton,
-.app .mainAction.importMainAction.iconTextButton:hover,
-.app .mainAction.importMainAction.iconTextButton:focus-visible,
-.app .mainAction.importMainAction.iconTextButton:active{
-  color: rgba(255,255,255,.94) !important;
-  text-shadow: 0 1px 0 rgba(0,0,0,.28) !important;
-}
-
+/* Import remains visible on every palette without a second glossy skin. */
 .app .mainAction.importMainAction.iconTextButton{
-  border-color: rgba(var(--lt-accent-rgb), .34) !important;
-  background:
-    radial-gradient(circle at 24% 18%, rgba(255,255,255,.13), transparent 34%),
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .22), rgba(var(--lt-accent-rgb), .105)),
-    rgba(11,10,18,.86) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.075),
-    0 8px 18px rgba(0,0,0,.20) !important;
-}
-
-.app .mainAction.importMainAction.iconTextButton .buttonInlineIcon,
-.app .mainAction.importMainAction.iconTextButton .buttonLabel,
-.app .mainAction.importMainAction.iconTextButton svg,
-.app .mainAction.importMainAction.iconTextButton path{
-  color: rgba(255,255,255,.94) !important;
-  stroke: currentColor !important;
-  opacity: 1 !important;
-  filter: none !important;
-}
-
-.app .mainAction.importMainAction.iconTextButton .buttonLabel{
-  font-weight: 950 !important;
-  letter-spacing: -.012em !important;
+  background: color-mix(in srgb, var(--lt-text) 5%, transparent) !important;
+  border-color: var(--lt-border) !important;
+  color: var(--lt-text) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
 }
 
 .app .mainAction.importMainAction.iconTextButton:hover,
 .app .mainAction.importMainAction.iconTextButton:focus-visible{
-  border-color: rgba(var(--lt-accent-rgb), .48) !important;
-  background:
-    radial-gradient(circle at 24% 18%, rgba(255,255,255,.16), transparent 34%),
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .285), rgba(var(--lt-accent-rgb), .135)),
-    rgba(13,12,22,.90) !important;
+  background: color-mix(in srgb, var(--lt-text) 9%, transparent) !important;
+  border-color: var(--lt-border-strong) !important;
+  color: var(--lt-text) !important;
 }
 
-/* keep the sparkle readable, but small */
-.app .mainAction.importMainAction.iconTextButton::after{
-  color: rgba(255,255,255,.92) !important;
-  text-shadow: 0 0 10px rgba(var(--lt-accent-rgb), .28);
-}
-
-/* Active press stays physical, not flashy. */
-.app .mainAction.importMainAction.iconTextButton:active{
-  background:
-    linear-gradient(180deg, rgba(var(--lt-accent-rgb), .20), rgba(var(--lt-accent-rgb), .10)),
-    rgba(9,8,15,.92) !important;
+.app .mainAction.importMainAction.iconTextButton .buttonLabel{
+  font-weight: 650 !important;
 }
 
 .app{
@@ -6014,8 +5914,8 @@ body.isResizingPlayer .app *{
   outline: 0 !important;
 }
 
-.app .sidebar :is(.navItem, .navIcon, .sidebarGroupLabelV467, .mainAction),
-.sidebar :is(.navItem, .navIcon, .sidebarGroupLabelV467, .mainAction){
+.app .sidebar :is(.navItem, .navIcon, .sidebarGroupLabelV467),
+.sidebar :is(.navItem, .navIcon, .sidebarGroupLabelV467){
   outline: 0 !important;
   box-shadow: none !important;
 }
