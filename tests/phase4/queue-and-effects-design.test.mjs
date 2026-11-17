@@ -16,7 +16,9 @@ test("queue and history controls use Localtify theme tokens and keyboard focus",
   assert.match(queue, /border-radius: var\(--lt-radius-md\)/);
   assert.doesNotMatch(queue, /backdrop-filter: blur\(22px\)/);
   assert.match(queue, /\.queuePanelIconButton:focus-visible,[\s\S]*?outline: 2px solid var\(--lt-accent\)/);
-  assert.match(history, /background: var\(--lt-surface-raised\)/);
+  assert.match(history, /background: var\(--lt-surface-soft\)/);
+  assert.match(history, /\.titleHistoryNav button:focus-visible/);
+  assert.match(history, /-webkit-app-region: no-drag/);
   assert.match(history, /color-mix\(in srgb, var\(--lt-text\) 10%, var\(--lt-surface-raised\)\)/);
 });
 

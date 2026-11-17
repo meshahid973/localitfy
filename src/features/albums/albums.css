@@ -3,12 +3,12 @@
 .albumsPageV318 {
   --albums-surface: var(--lt-surface);
   --albums-elevated: var(--lt-surface-raised);
-  --albums-border: rgba(var(--lt-accent-rgb), .10);
+  --albums-border: var(--lt-border);
   --albums-text: var(--lt-text);
   --albums-muted: var(--lt-muted);
   width: 100%;
   min-width: 0;
-  padding: 0 0 104px;
+  padding: 0 0 var(--lt-space-5);
   display: grid;
   align-content: start;
   gap: 22px;
@@ -24,7 +24,7 @@
 .albumsPageV318 :is(.albumBuilderPanelV318,.albumFolderImportPanelV309) {
   min-width: 0;
   border: 1px solid var(--albums-border);
-  border-radius: 15px;
+  border-radius: var(--lt-radius-sm);
   background: var(--albums-surface);
 }
 .albumBuilderPanelV318, .albumFolderImportPanelV309 { display: grid; align-content: start; gap: 18px; padding: 21px; }

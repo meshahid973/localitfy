@@ -2,12 +2,12 @@
 /* Playlists page: compact shelf, useful track area, and predictable drop targets. */
 .playlistsPage {
   --playlist-surface: var(--lt-surface);
-  --playlist-border: rgba(var(--lt-accent-rgb), .09);
+  --playlist-border: var(--lt-border);
   --playlist-text: var(--lt-text);
   --playlist-muted: var(--lt-muted);
   width: 100%; min-width: 0;
-  display: grid; align-content: start; gap: 22px;
-  padding: 0 0 100px;
+  display: grid; align-content: start; gap: var(--lt-space-5);
+  padding: 0 0 var(--lt-space-5);
   color: var(--playlist-text);
 }
 .playlistsPage *, .playlistsPage *::before, .playlistsPage *::after { box-sizing: border-box; }

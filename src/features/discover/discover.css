@@ -1,13 +1,13 @@
 .discoverPage {
   display: grid;
   gap: 18px;
-  padding-bottom: 96px;
+  padding-bottom: var(--lt-space-5);
 }
 
 .discoverSetup,
 .discoverArtist {
   border: 1px solid var(--lt-border, rgba(255, 255, 255, .1));
-  border-radius: 18px;
+  border-radius: var(--lt-radius-sm);
   background: var(--lt-surface);
 }
 
@@ -45,8 +45,8 @@
 .discoverHint,
 .discoverBecause,
 .discoverSongText small {
-  opacity: .66;
-  font-size: 13px;
+  color: var(--lt-muted);
+  font-size: var(--lt-text-base);
 }
 
 .discoverLink {

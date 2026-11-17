@@ -23,7 +23,7 @@
   width: 100%; min-width: 0;
   display: grid; align-content: start;
   gap: 13px;
-  padding: 0 0 100px;
+  padding: 0 0 var(--lt-space-5);
   color: var(--cover-text);
 }
 .coverStudioLayout *, .coverStudioLayout *::before, .coverStudioLayout *::after { box-sizing: border-box; }
@@ -44,7 +44,7 @@
 }
 .coverStudioHeroActions button:not(.heroMain):hover,.coverStudioLayout .coverSongTools button:hover,
 .coverStudioLayout .coverMoodTabs button:hover,.coverStudioLayout .coverGalleryToolbar button:hover {
-  border-color: color-mix(in oklab, var(--lt-accent) 22%,var(--cover-edge)); background: color-mix(in oklab, var(--lt-accent) 9%, var(--cover-raised)); color: var(--cover-text);
+  border-color: var(--lt-border-strong); background: color-mix(in oklab, var(--lt-text) 6%, var(--cover-raised)); color: var(--cover-text);
 }
 .coverStudioEmptyNotice {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
