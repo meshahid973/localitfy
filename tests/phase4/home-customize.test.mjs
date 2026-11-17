@@ -137,3 +137,18 @@ test("Customize Home restores focus and moves away from disabled arrows", () => 
   assert.match(css, /max-height: min\(520px, calc\(100dvh - 120px\)\)/);
 });
 
+
+test("Daily mix artwork is distinct, ordered, and limited to four covers", () => {
+  const tracks = [
+    song("first", { coverThumbUrl: "/shared.webp" }),
+    song("second", { coverThumbUrl: "/shared.webp" }),
+    song("fallback"),
+    song("third", { coverUrl: "/third.png" }),
+    song("fourth", { coverPath: "/fourth.png" }),
+    song("fifth", { coverUrl: "/fifth.png" })
+  ];
+  assert.deepEqual(ids(picks.pickHomeMixArtwork(tracks)), ["first", "fallback", "third", "fourth"]);
+  assert.deepEqual(ids(picks.pickHomeMixArtwork([])), []);
+  assert.deepEqual(ids(picks.pickHomeMixArtwork([tracks[0], tracks[1]])), ["first"]);
+  assert.equal(tracks.length, 6);
+});

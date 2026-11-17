@@ -343,7 +343,7 @@
   gap: var(--lt-space-2) var(--lt-space-3);
 }
 
-.homeListenGrid:is([data-count="2"], [data-count="4"]) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.homeListenGrid:is([data-count="2"], [data-count="4"], [data-count="8"]) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .homeListenGrid[data-count="1"] { grid-template-columns: minmax(0, 420px); }
 .homeListenRow {
   position: relative;
@@ -437,7 +437,7 @@
   grid-auto-flow: column;
   grid-auto-columns: clamp(136px, 16cqi, 208px);
   gap:clamp(10px,.9vw,16px);
-  padding: 4px 2px 10px;
+  padding: 4px 4px 10px;
 }
 .homeArtistRail,
 .homeReleaseRail {
@@ -491,6 +491,12 @@
 .homeEmptyState strong { color:var(--lt-text); font-size:11px; }
 .homeEmptyState span { color:var(--lt-muted); font-size:12px; }
 
+@container (min-width: 851px) {
+  .homeListenGrid:is([data-count="5"], [data-count="7"]) { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .homeListenGrid:is([data-count="5"], [data-count="7"]) > .homeListenRow { grid-column: span 2; }
+  .homeListenGrid[data-count="5"] > .homeListenRow:nth-child(n+4),
+  .homeListenGrid[data-count="7"] > .homeListenRow:nth-child(n+4) { grid-column: span 3; }
+}
 @container (min-width: 1100px) {
   .homeListenGrid[data-count="8"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
